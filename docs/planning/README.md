@@ -83,6 +83,8 @@ Additional technical decisions (clean-break format encoding, Avalonia MVVM toolk
   version bump.
 - Scientific behaviour is specified in prose and tests before implementation. When the original behaviour
   is ambiguous, document the chosen interpretation in the step page.
+- Every step page has a **Documentation** section naming the pages to write at that point. “Documentation
+  written” is part of every acceptance checklist.
 - No production feature is added directly to the Avalonia app if it belongs in a library; the app is a
   consumer of the same public API as the CLI.
 - The Rust solver never reads project JSON. Its only input is the compiled simulation package plus CLI

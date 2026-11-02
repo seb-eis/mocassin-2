@@ -191,6 +191,16 @@ impl MmcEngine<'_> {
 - [ ] Same seed produces identical trajectories.
 - [ ] No allocations in the cycle loop.
 - [ ] Acceptance rate and energy trace are physically sensible across temperatures.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document MMC:
+
+- `docs/physics/mmc.md` — proposal/acceptance, detailed balance, equilibrium break, no time advance.
+- `docs/user-guide/running.md` — MMC settings, break tolerance, energy trace.
+- `docs/development/solver-architecture.md` — MMC engine and shared energy/state code.
+- `docs/troubleshooting/errors.md` — non-convergence and break-check issues.
 
 ## Tests
 

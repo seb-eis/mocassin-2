@@ -160,6 +160,16 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 - [ ] The combined documentation site artifact is attached and its links/API subpaths verify.
 - [ ] The release links to the migration guide and citation block.
 - [ ] Licence/attribution/citation are present in the app and artifacts.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document release and installation:
+
+- `docs/development/release.md` — versioning, signing, SBOM/provenance, release checklist.
+- `docs/getting-started/installation.md` — platform archives, first run, uninstall/upgrade.
+- `docs/reference/file-layout.md` — installed layout, solver binary, docs artifact.
+- Release notes and artifact manifest — version/SHA, checksums, docs site archive, citation.
 
 ## Tests
 

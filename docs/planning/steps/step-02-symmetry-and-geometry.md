@@ -192,6 +192,16 @@ public readonly record struct Vector4I(int A, int B, int C, int P);
 - [ ] The triclinic cell test produces the correct C vector and angles.
 - [ ] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
 - [ ] A 20×20×20 cell's position expansion completes in under 1 second.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the symmetry and geometry foundation:
+
+- `docs/physics/symmetry.md` — space groups, exact operations, cell geometry, P1 expansion, canonical position order.
+- `docs/development/compilation-pipeline.md` — the symmetry stage and its inputs/outputs.
+- `docs/glossary/notation.md` — fractional/Cartesian coordinates and `Vector4I`.
+- `docs/reference/project-format.md` — space-group/cell/site fields and the data-version contract.
 
 ## Tests
 

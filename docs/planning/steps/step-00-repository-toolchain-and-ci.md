@@ -151,6 +151,17 @@ mocassin/
 - [ ] `zensical build --strict` succeeds and the skeleton contains every required top-level section.
 - [ ] The docs CI job is green and `docs/planning/` is absent from the built site.
 - [ ] The repository contains no copied original source files.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the repository and contributor workflow:
+
+- `README.md` — project purpose, prerequisites, build/test/docs commands.
+- `docs/development/contributing.md` — branch rules, step workflow, review gates, docs-as-code.
+- `docs/reference/file-layout.md` — repository layout, generated artifacts, `docs/planning` exclusion.
+- `docs/index.md` and the Zensical nav — the documentation skeleton itself, navigation, and placeholders.
+- `docs/api/index.md` — the future API landing page and subpath convention.
 
 ## Tests
 

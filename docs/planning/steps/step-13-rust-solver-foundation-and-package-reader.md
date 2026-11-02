@@ -194,6 +194,16 @@ pub enum PackageError {
 - [ ] Loading a ceria job takes < 100 ms.
 - [ ] The reader never opens the database writable.
 - [ ] Fuzzing finds no panic/OOM on malformed input.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the Rust solver foundation:
+
+- `docs/development/solver-architecture.md` — crates, package reader, data-oriented model, RNG streams.
+- `docs/reference/msl-format.md` — the Rust reader’s validation and decoding contract.
+- `docs/reference/cli.md` — `mocassin-sim` arguments, `--dry-run`, exit codes.
+- `docs/development/testing-and-parity.md` — contract fixtures and fuzzing.
 
 ## Tests
 

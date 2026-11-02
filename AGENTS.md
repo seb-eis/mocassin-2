@@ -203,12 +203,14 @@ The 31 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 
 1. Choose the lowest-numbered unblocked step unless the owner assigns another.
 2. Check its **Depends on** line; do not start before dependencies are done.
-3. Read the step’s **Original reference**, **Design**, **Acceptance criteria**, **Tests**, and **Risks**.
+3. Read the step’s **Original reference**, **Design**, **Acceptance criteria**, **Documentation**, **Tests**, and
+   **Risks**.
 4. Create an `agent/*` branch as described in section 3, e.g. `agent/step-03-particle-structure`.
 5. Implement only that step’s scope. Resist adding later-phase features.
 6. Add the tests named in the step, plus tests for every bug you find.
 7. Update the step page:
-   - mark tasks/acceptance criteria as done;
+   - complete its **Documentation** section and write/update the named pages;
+   - mark tasks/acceptance criteria (including “Documentation written”) as done;
    - record deviations and decisions;
    - link the implementation/PR/commit.
 8. Update the parity matrix status in `appendix-b-parity-matrix.md`.

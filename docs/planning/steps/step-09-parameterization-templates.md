@@ -177,6 +177,16 @@ When the model signature changes:
 - [ ] Site energy overrides apply and can be reset.
 - [ ] Missing/zero values produce warnings, not silent success.
 - [ ] Template JSON is canonical and round-trips.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document parameterization:
+
+- `docs/user-guide/parameterization.md` — template creation, energies, frequencies, chiral mirroring, rebase.
+- `docs/reference/project-format.md` — template fields, stable IDs, model signature.
+- `docs/development/compilation-pipeline.md` — signature/rebase flow and completeness checks.
+- `docs/troubleshooting/errors.md` — stale/incompatible templates and missing values.
 
 ## Tests
 

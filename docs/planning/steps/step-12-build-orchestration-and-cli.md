@@ -177,6 +177,16 @@ It prints a diagnosis table and exits 0 if healthy, 1 otherwise.
 - [ ] `--json` output validates against a schema and contains the exit code.
 - [ ] `doctor` reports a healthy environment on CI.
 - [ ] The CLI can build 10⁴ jobs without the GUI.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the build CLI:
+
+- `docs/reference/cli.md` — `new`, `validate`, `compile`, `build`, `inspect`, `verify`, `doctor`, exit codes.
+- `docs/getting-started/quickstart.md` and `docs/getting-started/first-project.md` — first commands and package.
+- `docs/user-guide/building.md` — build templates, partial jobs, cancellation, output.
+- `docs/troubleshooting/errors.md` — CLI/build failures and recovery.
 
 ## Tests
 

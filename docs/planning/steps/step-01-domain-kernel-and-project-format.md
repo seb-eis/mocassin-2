@@ -196,6 +196,16 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 - [ ] A failed save (simulated I/O error) leaves the original file intact.
 - [ ] A lock file prevents concurrent edits and recovers from a stale lock.
 - [ ] The JSON Schema validates all fixtures.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the persisted project model:
+
+- `docs/reference/project-format.md` — JSON envelope, IDs, units, canonicalization, migrations, atomic save.
+- `docs/development/architecture.md` — immutable domain kernel and dependency direction.
+- `docs/development/design-decisions.md` — stable IDs, units, diagnostics, one project per file.
+- `docs/glossary/notation.md` — ID/unit conventions introduced here.
 
 ## Tests
 

@@ -176,6 +176,16 @@ mocassin export <project.msl> --query ... --format csv|json|parquet -o file
 - [ ] Same package/command produces identical CSV/JSON.
 - [ ] Large job sets stream within memory budget.
 - [ ] Zero-field/empty groups are excluded with a reported reason.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document analysis and reporting:
+
+- `docs/user-guide/results.md` — analyses, grouping, fits, plots, reports.
+- `docs/physics/transport.md` — Arrhenius/Nernst–Einstein/Haven definitions used by the fits.
+- `docs/examples/` — plot/report examples with downloadable data.
+- `docs/reference/cli.md` — `analyze`, `plot`, `report`, `export`.
 
 ## Tests
 

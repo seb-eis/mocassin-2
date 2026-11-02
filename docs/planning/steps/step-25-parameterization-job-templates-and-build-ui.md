@@ -175,6 +175,16 @@ frequencies, define parameter sweeps, preview job counts, build a package, and s
 - [ ] Progress/cancel/error paths behave correctly.
 - [ ] The build summary matches `mocassin inspect`.
 - [ ] Undo/redo works across template edits.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document parameterization/job/build UI:
+
+- `docs/user-guide/parameterization.md`, `job-templates.md`, `building.md` — template, sweep, build, verify UI.
+- `docs/reference/project-format.md` — template fields/signatures shown by the UI.
+- `docs/development/ui-architecture.md` — build pipeline integration, progress/cancel, deploy.
+- `docs/troubleshooting/errors.md` — stale signatures, impossible dopings, build failures.
 
 ## Tests
 

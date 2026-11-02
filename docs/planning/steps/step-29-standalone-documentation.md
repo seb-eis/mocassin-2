@@ -335,6 +335,17 @@ buildability.
 - [ ] `docs/planning/` is not published.
 - [ ] The Docs CI job has remained green throughout implementation and the release artifact contains the
   complete site.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, complete the cross-cutting and final documentation:
+
+- `docs/index.md` and `docs/api/index.md` — final landing/navigation/API entry points.
+- `docs/physics/overview.md` and `docs/physics/units-constants.md` — physics synthesis and conventions.
+- `docs/development/architecture.md`, `design-decisions.md` — final architecture synthesis and ADR links.
+- `docs/migration/`, `docs/glossary/`, `docs/examples/publications.md` — migration, notation, citations.
+- Audit every page written by Steps 01–28; fill gaps, refresh screenshots, run tutorials, publish the site.
 
 ## Tests
 

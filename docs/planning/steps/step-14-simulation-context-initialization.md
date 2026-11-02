@@ -212,6 +212,16 @@ impl SimulationContext {
 - [ ] A context initializes in < 100 ms for a 10×10×10 ceria job.
 - [ ] Peak memory is reported and within budget.
 - [ ] No allocation occurs in the per-cycle loop (verified by a counting allocator).
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document simulation context initialization:
+
+- `docs/development/solver-architecture.md` — lattice/environment arenas, links, pools, jump status, goals.
+- `docs/physics/energies.md` — initial lattice energy and energy-background lookup.
+- `docs/performance/benchmarks.md` — initialization time/memory budgets.
+- `docs/troubleshooting/errors.md` — zero-mobile/zero-direction and context failures.
 
 ## Tests
 

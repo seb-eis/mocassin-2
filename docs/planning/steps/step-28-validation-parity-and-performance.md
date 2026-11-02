@@ -183,6 +183,16 @@ Expand step 15–18 tests into a release suite:
 - [ ] Fuzzing and negative tests are clean.
 - [ ] Three-OS CI is green.
 - [ ] Scientific review sign-off is recorded.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document validation/parity/performance results:
+
+- `docs/development/testing-and-parity.md` — reference systems, tolerances, reproducible parity protocol.
+- `docs/performance/benchmarks.md`, `profiling.md` — benchmark methodology and results.
+- `docs/troubleshooting/performance.md` — diagnosing slow jobs/builds.
+- `docs/examples/` — validated example outputs and reference observables.
 
 ## Tests
 

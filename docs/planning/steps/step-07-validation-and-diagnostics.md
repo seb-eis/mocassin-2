@@ -172,6 +172,16 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 - [ ] Exit codes match the contract.
 - [ ] Validation of the ceria sample completes in < 200 ms.
 - [ ] The GUI can navigate from every diagnostic to its object (verified in step 23–24).
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document validation and diagnostics:
+
+- `docs/reference/diagnostics.md` — complete diagnostic catalog, severities, paths, hints.
+- `docs/troubleshooting/errors.md` — common validation failures and fixes.
+- `docs/development/testing-and-parity.md` — validation pipeline, per-code tests, determinism.
+- `docs/user-guide/` — inline validation/help behavior for the affected editors.
 
 ## Tests
 

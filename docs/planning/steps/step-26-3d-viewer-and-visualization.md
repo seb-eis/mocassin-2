@@ -200,6 +200,16 @@ If macOS fails, switch to Veldrid/Metal; the scene layer stays unchanged.
 - [ ] 10⁵ atoms render at ≥ 30 FPS on the reference integrated GPU.
 - [ ] Screenshot export produces the expected image on all OSes.
 - [ ] Renderer failure falls back gracefully.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the 3D viewer:
+
+- `docs/user-guide/visualization.md` — camera, picking, selections, styles, overlays, export.
+- `docs/tutorials/ceria-kmc.md` — screenshots and inspection steps.
+- `docs/development/ui-architecture.md` — renderer abstraction, scene builders, picking, performance.
+- `docs/troubleshooting/installation.md` — GPU/OpenGL fallback and renderer diagnostics.
 
 ## Tests
 
