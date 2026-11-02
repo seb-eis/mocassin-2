@@ -21,7 +21,8 @@ read efficiently by .NET and optionally by Rust/Python. Requirements:
 
 ### Simulation package (`.msl`)
 
-- SQLite database with `schema_info`, `models`, `jobs`, and `results` tables.
+- Immutable SQLite database with `schema_info`, `models`, `lattices`, and `jobs` tables. Results live in a
+  separate `.msr` store (ADR 0011).
 - Compiled model payloads are **Zstd-compressed MessagePack maps** with snake_case keys.
 - Per-job payloads (settings, seed, optimizers) and content-addressed lattices are Zstd+MessagePack.
 - Common compiled models are stored once per `model_signature` and referenced by jobs.
@@ -34,7 +35,7 @@ read efficiently by .NET and optionally by Rust/Python. Requirements:
 - Top-level map with `format = "mocassin.mcs"` and `formatVersion = 1`.
 - `lattice` is a MessagePack `bin`; numeric payloads use native MessagePack arrays.
 - KMC trackers, mobile mapping, and jump histograms are optional fields; MMC omits them.
-- SHA-256 integrity is stored in `results.run_state_sha256` in the `.msl`; the state itself has no checksum.
+- SHA-256 integrity is stored in `results.run_state_sha256` in the `.msr`; the state itself has no checksum.
 - The schema is specified in [`02-data-contracts.md`](../02-data-contracts.md) and covered by cross-language
   fixtures.
 
@@ -53,7 +54,7 @@ read efficiently by .NET and optionally by Rust/Python. Requirements:
 - Two schema definitions to maintain; mitigated by contract fixtures and a shared schema document.
 - MessagePack schema drift is possible; mitigated by explicit version fields and strict readers.
 - Large arrays deserialize into memory; acceptable for the documented < 4 GiB workload.
-- No built-in checksum; rely on the `.msl` SHA-256 and file-system integrity.
+- No built-in checksum; rely on the `.msr` SHA-256 and file-system integrity.
 
 ## Alternatives considered
 

@@ -64,7 +64,7 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 | 17 | MMC engine and equilibrium breaking | 15 | 2–4 pw |
 | 18 | Trackers, histograms, statistics, `.mcs` writer | 16, 17 | 3–5 pw |
 | 19 | Production CLI, HPC helpers, extension ABI | 18 | 2–4 pw |
-| 20 | `.mcs` reader and evaluation API | 18, 11 | 2–4 pw |
+| 20 | `.mcs` reader, `.msr` collection, evaluation API | 18, 11 | 2–4 pw |
 | 21 | Analysis queries, plots, exports | 20 | 2–3 pw |
 | 22 | Python `.mcs` reader, basic evaluations, pytest, mkdocstrings | 18, 20 | 2–3 pw |
 | 23 | Avalonia shell, project lifecycle, undo/redo | 01 | 3–5 pw |
@@ -93,8 +93,8 @@ integration, documentation, and release hardening. A single developer should exp
 | **M5 — First package** | 12 | `.msl` with one job and a JSON manifest |
 | **M6 — First KMC run** | 16 | Job completes; energy/acceptance counters look sane |
 | **M7 — First MMC run** | 17 | MMC equilibrates a small system; energy trace converges |
-| **M8 — Results loop** | 20 | `.mcs` read back; particle counts, MSD, conductivity evaluated |
-| **M9 — Python API** | 22 | Read `.mcs` files and run basic multi-file evaluations from Python |
+| **M8 — Results loop** | 20 | `.mcs` collected into `.msr`; particle counts, origin-based MSD, per-species conductivity evaluated |
+| **M9 — Python API** | 22 | Read `.mcs`/`.msr` files and run basic multi-file evaluations from Python |
 | **M10 — MVP GUI** | 26 | Create → validate → parameterize → build → run → collect in Avalonia |
 | **M11 — Visualization** | 27 | 3D cell/sites/transitions/clusters/overlays with picking |
 | **M12 — Feature parity** | 28 | Every parity-matrix item implemented or explicitly deferred |
@@ -111,8 +111,8 @@ Steps 00→01→02→03→04→05→06→07→08→09→10→11→12, then suppo
 
 ### Track B — Solver (Rust)
 
-Starts after step 11 freezes the package contract. Can begin earlier with a mock package generated from a
-fixture. Steps 13→14→15→16→17→18→19, then 29.
+Starts after step 11 freezes the package contract. Can begin earlier with a checked-in fixture package
+produced by the real writer. Steps 13→14→15→16→17→18→19, then 29.
 
 ### Track C — UI (Avalonia)
 
@@ -128,8 +128,11 @@ site with the release.
 
 ### Integration points
 
-- **Contract review after step 11.** .NET and Rust teams sign off on the `.msl` schema and fixture.
-- **Contract review after step 18.** .NET and Rust teams sign off on the `.mcs` MessagePack schema and fixture.
+- **Contract review after step 11.** .NET and Rust owners sign off on the immutable `.msl` schema and fixture.
+- **Contract review after step 18.** .NET and Rust owners sign off on the `.mcs` MessagePack schema and fixture;
+  Python joins the review when the analysis API lands (step 22).
+- **Contract review after step 20.** .NET, Rust, and Python owners sign off on the `.msr` schema, package
+  binding, and collection lifecycle.
 - **Weekly cross-track build.** A script builds the ceria project, runs one KMC and one MMC job, collects,
   evaluates, and compares against the previous week's observables.
 

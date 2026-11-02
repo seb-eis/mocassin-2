@@ -174,7 +174,7 @@ public interface IStructureQuery
 - [ ] Implement `Particle`, `ParticleSet`, and the implicit void/empty objects.
 - [ ] Implement `StructureModel`, `SpaceGroupRef`, `CellParameters`, `CellSite`, `CellDummyPosition`.
 - [ ] Implement crystal-system normalization and validation.
-- [ ] Implement `StructurePreview` using the symmetry engine.
+- [ ] Implement `StructurePreview` in `Mocassin.Symmetry` using the symmetry engine (not in Core).
 - [ ] Implement P1 overlap detection.
 - [ ] Implement `IParticleQuery` and `IStructureQuery` over the project snapshot.
 - [ ] Implement editor operations for particles, sets, cell parameters, sites, and dummies.

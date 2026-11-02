@@ -102,10 +102,40 @@ C = (c cos β, c (cos α − cos β cos γ) / sin γ,
 ### 4. Coordinate types and encoding
 
 ```csharp
+// Mocassin.Core.Geometry
 public readonly record struct Fractional3(double A, double B, double C);
 public readonly record struct Cartesian3(double X, double Y, double Z);
 public readonly record struct Vector4I(int A, int B, int C, int P);
 ```
+
+The primitive coordinate types live in **`Mocassin.Core.Geometry`** so the domain model can use them without
+making Core depend on Symmetry. The space-group catalog, encoder, and symmetry algorithms remain in
+`Mocassin.Symmetry`.
+
+#### Generic math strategy
+
+Modern C# generic math is useful for the arithmetic kernels, but a vector is not a scalar number. Do **not**
+constrain `Fractional3`, `Cartesian3`, or `Vector4I` themselves to `INumber<T>`: `INumber<T>` implies scalar
+comparison, parsing, formatting, and numeric semantics that do not apply to a coordinate vector.
+
+Use this split instead:
+
+- **Public types stay semantic and non-generic.** `Fractional3` and `Cartesian3` are distinct
+  `readonly record struct` types with `double` components. They preserve coordinate-space type safety and
+  make unit/coordinate mistakes visible at compile time.
+- **Keep `Vector4I` separate.** Its `P` component is a position index, not a spatial coordinate. It is an
+  encoding type, not a generic vector.
+- **Share arithmetic through an internal generic kernel**, e.g.
+  `internal readonly record struct Vector3<T>(T X, T Y, T Z) where T : unmanaged, INumber<T>`, or a static
+  `VectorMath<T>` helper. Public wrappers delegate to it for add/subtract/scale/dot/cross/length.
+- **Do not use `System.Numerics.Vector3` for geometry.** It is single-precision `float`; scientific
+  coordinates, distances, and symmetry checks require `double`.
+- **Generic math is an implementation detail, not a public format or API contract.** Persisted fields remain
+  `double`/`int` arrays.
+
+This avoids duplicating arithmetic while retaining readable, unit-aware public APIs. If the project later
+needs `float` or `decimal` geometry variants, the internal kernel can be instantiated for them; the public
+scientific model remains `double`-based.
 
 - `Fractional3.TrimToUnitCell()` maps to `[0,1)` with a boundary policy that rounds values within `1e-10` of
   an integer to that integer.
@@ -174,7 +204,10 @@ public readonly record struct Vector4I(int A, int B, int C, int P);
 - [ ] Implement `SymmetryOperation` with integer composition/inverse/closure.
 - [ ] Implement `SpaceGroupSetting`, `SpaceGroupCatalog`, and lookup APIs.
 - [ ] Implement crystal-system constraints and the corrected cell-vector transform.
-- [ ] Implement `Fractional3`, `Cartesian3`, `Vector4I`, and the encoder.
+- [ ] Add `Fractional3`, `Cartesian3`, and `Vector4I` to `Mocassin.Core.Geometry`; implement the encoder in
+  `Mocassin.Symmetry`.
+- [ ] Implement a shared generic `Vector3<T>`/`VectorMath<T>` arithmetic kernel constrained to
+  `unmanaged, INumber<T>`; public semantic wrappers delegate to it.
 - [ ] Implement canonical P1 expansion and position ordering.
 - [ ] Implement stabilizer/point-group/permutation reduction.
 - [ ] Implement radial sampling and periodic geometry helpers.
@@ -207,11 +240,14 @@ At this point, document the symmetry and geometry foundation:
 
 | Test | Assertion |
 | --- | --- |
+| Orbit property | Random start points stay in the computed orbit; orbit contents are independent of input order |
+| Group-law property | Random operation triples compose associatively and every operation has an inverse |
 | Catalog integrity | 230 groups, 274 settings, expected operation counts |
 | Group laws | Identity, inverse, closure, determinant ±1 for all settings |
 | Orbit sizes | General and special positions match known multiplicities |
 | Canonical order | Shuffled sites/operations produce the same `P` assignment |
 | Coordinate round-trip | Fractional ↔ `Vector4I` ↔ fractional for random points |
+| Generic math | `Vector3<double>` arithmetic matches the semantic wrappers |
 | Cell geometry | Seven systems, including the triclinic regression |
 | Pair reduction | Reduced set equals brute-force orbit for random pairs |
 | Cluster reduction | Unique permutations equal brute-force canonicalization |

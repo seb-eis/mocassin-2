@@ -29,7 +29,7 @@ steps.
 | --- | --- |
 | `mocassin-types` | Serde structs for compiled model, job payload, lattice payload; newtypes; unit constants |
 | `mocassin-msl` | `rusqlite` reader, schema/version checks, payload decode, invariant validation |
-| `mocassin-rng` | BLAKE3 seed derivation, ChaCha12 streams, bounded draws, doubles in `[0,1)` |
+| `mocassin-rng` | SHA-256 seed derivation, ChaCha12 streams, bounded draws, doubles in `[0,1)` |
 | `mocassin-solver` | Placeholder API (context/energy/KMC/MMC added in later steps) |
 | `mocassin-state` | MessagePack state schema/types and writer/reader (implemented in step 18) |
 | `mocassin-cli` | `mocassin-sim` argument parsing, logging, dry-run, error mapping |
@@ -94,7 +94,7 @@ impl Package {
 - Read `schema_info`; require `format_version` in the supported range and `application_id` match.
 - Query `jobs` by id; join `models` and `lattices`; decode Zstd+MessagePack.
 - Verify:
-  - payload signatures match the stored `signature`;
+  - payload signatures match the stored `signature` by re-encoding the ADR 0010 canonical projection;
   - `lattice.len() == a*b*c*position_count`;
   - every particle index < particle count;
   - every position index < position count;
@@ -189,7 +189,7 @@ pub enum PackageError {
 
 - [ ] Create `mocassin-types` with all package structs and newtypes.
 - [ ] Create `mocassin-msl` with schema/version checks, payload decode, and validation.
-- [ ] Create `mocassin-rng` with BLAKE3 derivation, ChaCha12, bounded draws, and golden tests.
+- [ ] Create `mocassin-rng` with SHA-256 derivation, ChaCha12, bounded draws, and golden tests.
 - [ ] Implement `mocassin-sim` CLI parsing, logging, exit codes, and `--dry-run`.
 - [ ] Implement the data-oriented base structures (lattice, positions, environments, pools).
 - [ ] Add a fixture package from step 11 and a Rust integration test.
@@ -221,6 +221,8 @@ At this point, document the Rust solver foundation:
 
 | Test | Assertion |
 | --- | --- |
+| Reader property | Random valid `.msl` payloads round-trip; random truncations/mutations fail without panic |
+| Acceptance | A real ceria package built by .NET opens and yields the expected dry-run summary |
 | Schema | Version/application id checks |
 | Decode | MessagePack/Zstd round-trip |
 | Validation | Bad indices, lengths, signatures |
@@ -234,7 +236,7 @@ At this point, document the Rust solver foundation:
 
 | Risk | Mitigation |
 | --- | --- |
-| Contract drift with .NET | Shared fixtures and canonical JSON comparison |
+| Contract drift with .NET | Shared fixtures, canonical projection vectors, and canonical JSON comparison |
 | Malicious/corrupt packages | Bounds checks, allocation caps, fuzzing |
 | RNG changes break reproducibility | Freeze golden vectors; version the derivation |
 | Struct layout confusion | Serde maps, not raw layout; MessagePack schema, no native endianness |

@@ -35,7 +35,7 @@ scientific semantics and used to generate reference data, but they are not a com
 **Positive**
 
 - No reflection-based serializers, no `$type`/`$ref` graphs, no CLR type names in data.
-- Stable, documented contracts that can be tested across .NET and Rust.
+- Stable, documented contracts that can be tested across .NET, Rust, and Python.
 - Safe, bounds-checked parsing; no unaligned native struct access.
 - Freedom to choose compact, compressible encodings and to evolve schemas.
 

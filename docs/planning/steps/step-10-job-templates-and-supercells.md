@@ -87,6 +87,7 @@ public sealed record JobDescriptor(
     ImmutableArray<SelectionOptimizer> Optimizers,
     byte[] Seed);
 
+// Serialized DTO lives in Mocassin.Contracts; produced by this step.
 public sealed record InitialLattice(
     int SizeA, int SizeB, int SizeC,
     int PositionCount,
@@ -102,7 +103,7 @@ public sealed record InitialLattice(
 - Seed derivation:
 
 ```text
-seed = BLAKE3(
+seed = SHA-256(
   "mocassin/job/v1" ||
   master_seed ||
   "job" ||
@@ -112,13 +113,13 @@ seed = BLAKE3(
 ```
 
 - `master_seed` is the collection seed if provided, else the simulation seed, else the project
-  `masterSeed`. If absent, derive it from `BLAKE3("mocassin/project-seed/v1" || projectId)` and store it.
-- `lattice_request_hash` is a BLAKE3 hash of the canonical **structure/particle/doping subset** (not the
+  `masterSeed`. If absent, derive it from `SHA-256("mocassin/project-seed/v1" || projectId)` and store it.
+- `lattice_request_hash` is a SHA-256 hash of the canonical **structure/particle/doping subset** (not the
   full model signature, which also covers transitions/encodings), the space-group catalog data version,
   supercell `A/B/C`, and ordered doping fractions. It deliberately excludes transitions, parameterization values, and simulation settings, so
   changing energies, temperature, or MCSP does not change the lattice for the same job coordinates.
 - Lattice generation uses a separate domain-separated seed:
-  `BLAKE3("mocassin/lattice/v1" || seed || lattice_request_hash)`.
+  `SHA-256("mocassin/lattice/v1" || seed || lattice_request_hash)`.
 - The same job descriptor always produces the same lattice.
 
 ### 3. Supercell generation
@@ -253,6 +254,9 @@ At this point, document job templates and supercells:
 
 | Test | Assertion |
 | --- | --- |
+| Sampling property | Random valid requests never exceed available candidates and stay deterministic per seed |
+| Doping property | Random dopings keep applied counts within requested bounds and preserve charge neutrality or fail |
+| Job acceptance | Job descriptors and lattices expand, write, and read back through the real writer/reader |
 | Expansion | Job counts/IDs/names match template order |
 | Inheritance | Base/config/job overrides resolve correctly |
 | Seeds | Deterministic and domain-separated |
@@ -272,7 +276,7 @@ At this point, document job templates and supercells:
 | Multiple dopings interact unpredictably | Validate source occupation at each step; preview sequence |
 | Non-deterministic sampling | Sorted candidate lists + fixed RNG stream |
 | Memory for huge lattices | Build jobs lazily; stream package writing (step 11) |
-| Seed collisions/duplicates | BLAKE3 domain separation and job indices |
+| Seed collisions/duplicates | SHA-256 domain separation and job indices |
 
 ## Done when
 

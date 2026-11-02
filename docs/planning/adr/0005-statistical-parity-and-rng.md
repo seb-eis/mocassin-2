@@ -21,7 +21,7 @@ trajectories.
 ## Decision
 
 - Use **ChaCha12** (RustCrypto `rand_chacha`) as the solver PRNG, seeded from a 256-bit value.
-- Derive each job seed deterministically with **BLAKE3** over
+- Derive each job seed deterministically with **SHA-256** over
   `(master_seed, collection_index, config_index, job_index, purpose)`.
 - Use separate streams for lattice generation and simulation, so changing simulation settings does not
   change the generated lattice.
@@ -64,5 +64,5 @@ seeds, and sample sizes are stored in `tests/reference/README.md`.
   differ and is excluded from determinism comparisons.
 - Cross-platform: same seed ⇒ identical trajectory unless the platform's floating-point behavior differs;
   the CI checks statistical equivalence rather than byte equality.
-- Package builds are deterministic: same project + same builder version ⇒ byte-identical `.msl` model
-  payloads (SQLite page layout may differ; payload hashes must match).
+- Package builds are deterministic: same project + same builder version ⇒ identical canonical projections and
+  signatures (SQLite page layout and Zstd bytes may differ; signatures must match).

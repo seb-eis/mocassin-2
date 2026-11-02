@@ -148,7 +148,7 @@ solution. The inventory is maintained in
 
 ### 6.4 Evaluation and analysis
 
-- Read `.mcs` state files and `.msl` result tables.
+- Read `.mcs` state files and `.msr` result tables.
 - Particle counts/densities, lattice metadata.
 - Ensemble and transition mobility/conductivity.
 - Displacement, mean square displacement, diffusion coefficients.
@@ -175,7 +175,7 @@ solution. The inventory is maintained in
 - `mocassin` CLI for validation, package building, collection, evaluation, and export.
 - `mocassin-sim` solver CLI with job ranges and deterministic seeds.
 - SLURM/PBS-friendly job templates and a process-per-job runner.
-- Result collector that writes into `.msl` atomically.
+- Result collector that writes a separate `.msr` store atomically; `.msl` stays immutable.
 - Exit codes and machine-readable JSON logs.
 
 ## 7. Quality attributes
@@ -185,9 +185,9 @@ solution. The inventory is maintained in
 | Correctness | Physics tests, statistical parity on reference systems, no silent model corrections |
 | Performance | Solver within 20 % of original C per core; package build ≥ 1 job/s on a laptop for small models |
 | Scalability | 20×20×20 lattice, 63 particles, 10⁴ jobs per package, 10⁸ cycles per job |
-| Reliability | Atomic writes, resumable collection, crash-safe job status, no corrupt `.msl` |
+| Reliability | Atomic writes, resumable collection, crash-safe job status, no corrupt `.msl`/`.msr` |
 | Portability | Windows 10/11, Ubuntu 22.04+/Fedora, macOS 13+ (arm64/x64) |
-| Maintainability | Layered libraries, no UI logic in domain, ≥ 70 % line coverage on core libraries |
+| Maintainability | Layered libraries, no UI logic in domain, critical-path and property-test coverage of core libraries; line coverage is a diagnostic, not a gate |
 | Usability | All validation errors navigable; build/run cancellable; no blocking UI |
 | Documentation | Zensical site covers user guide, physics, developer architecture, tutorials, reference, and generated APIs |
 | Security | Untrusted project/package parsing is bounded and fuzzed; extensions opt-in |

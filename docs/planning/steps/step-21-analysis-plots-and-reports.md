@@ -52,10 +52,10 @@ public sealed record AnalysisPoint(
 | Arrhenius conductivity | 1000/T (1/K) | log10(σT) (S/m·K) | Linear fit; activation energy `Ea = -slope * k_B * ln(10) * 1000` depending on axis convention |
 | Arrhenius diffusion | 1000/T | log10(D) | Tracer or σ; activation energy |
 | Conductivity vs doping | doping fraction | σ | At fixed T |
-| Mobility vs T | T | u | Per particle/transition |
-| MSD summary | particle | MSD | Final-state only; no time series |
+| Mobility vs T | T | u_s, u_total | Per species/transition and total |
+| MSD summary | particle | MSD | Origin-based cumulative; no time series |
 | Jump barrier histogram | E (eV) | count/rate | Per particle/transition |
-| Correlation/Haven | T | H_R | `D_tracer/D_sigma` |
+| Correlation/Haven | T | H_s, H_total | `D_tracer,s / D_σ,s` per species and total |
 | Transition contributions | transition | σ contribution | Stacked/grouped |
 | MMC energy | T | mean energy | Equilibrium |
 
@@ -105,14 +105,14 @@ public sealed record ArrheniusFit(
 ### 5. Reports
 
 ```text
-mocassin report <project.msl> --template <name> -o report/
+mocassin report <project.msl> [--results <file.msr>] --template <name> -o report/
 ```
 
 - A report is a directory containing:
   - `report.md` (or HTML) with metadata, method, tables, figures;
   - `figures/*.png|svg`;
   - `data/*.csv`;
-  - `manifest.json` with versions, filters, package hash, solver version, seeds.
+  - `manifest.json` with versions, filters, package/results hashes, solver version, seeds.
 - Built-in templates:
   - `conductivity` — Arrhenius, doping series, transition contributions;
   - `diffusion` — D vs T, Haven ratio, MSD summary;
@@ -126,17 +126,18 @@ mocassin report <project.msl> --template <name> -o report/
 ### 6. CLI
 
 ```text
-mocassin analyze <project.msl> --analysis arrhenius-conductivity
+mocassin analyze <project.msl> [--results <file.msr>] --analysis arrhenius-conductivity
                   [--where ...] [--group-by ...] [-o series.csv] [--json]
-mocassin plot <project.msl> --analysis ... --spec plot.json -o figure.png|svg
-mocassin report <project.msl> --template conductivity -o report/
-mocassin export <project.msl> --query ... --format csv|json|parquet -o file
+mocassin plot <project.msl> [--results <file.msr>] --analysis ... --spec plot.json -o figure.png|svg
+mocassin report <project.msl> [--results <file.msr>] --template conductivity -o report/
+mocassin export <project.msl> [--results <file.msr>] --query ... --format csv|json|parquet -o file
 ```
 
 - `--where` supports a safe filter expression (kind, collection, config, temperature range, field range,
   status, particle, transition).
 - `--group-by` accepts a comma-separated list of stable keys.
 - `--json` emits the series/fit objects.
+- All analysis commands require a matching `.msr`; the default is `<package>.msr`.
 - `--format parquet` is optional; if the dependency is too heavy, ship CSV/JSON only and add Parquet later.
 - All commands support `--jobs`, `--parallel`, and cancellation.
 

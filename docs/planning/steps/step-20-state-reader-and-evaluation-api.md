@@ -2,14 +2,15 @@
 
 **Phase:** E. Results  
 **Depends on:** 18, 11
-**Delivers:** A safe `.mcs` reader, transactional result collection into `.msl`, job querying, and the public
-evaluation API for transport, displacement, diffusion, correlation, coordination, and jump statistics.
+**Delivers:** A safe `.mcs` reader, transactional result collection into the `.msr` sidecar, job querying,
+and the public evaluation API for transport, displacement, diffusion, correlation, coordination, and jump
+statistics.
 
 ## Goal
 
 Turn solver output into trustworthy scientific data. Users must be able to load a subset of jobs, evaluate
 standard quantities with documented units and formulas, and export results without loading entire databases
-into memory.
+into memory. The immutable `.msl` package and the mutable `.msr` results store are opened together (ADR 0011).
 
 ## Original reference
 
@@ -31,7 +32,10 @@ into memory.
 ```csharp
 public sealed class ResultPackage : IAsyncDisposable
 {
-    public static Task<ResultPackage> OpenReadOnlyAsync(string path, CancellationToken ct);
+    public static Task<ResultPackage> OpenAsync(
+        string packagePath, string resultsPath, CancellationToken ct);
+    public PackageInfo Package { get; }
+    public ResultsInfo Results { get; }
     public IAsyncEnumerable<JobInfo> QueryJobsAsync(JobQuery query, CancellationToken ct);
     public Task<JobContext> LoadJobAsync(int jobId, CancellationToken ct);
     public Task<ParameterizedModel> LoadModelAsync(string signature, CancellationToken ct);
@@ -39,7 +43,11 @@ public sealed class ResultPackage : IAsyncDisposable
 ```
 
 - Use `Microsoft.Data.Sqlite` directly, not EF Core.
-- Open read-only (`Mode=ReadOnly`, `Cache=Private`).
+- Open `.msl` read-only (`Mode=ReadOnly`, `Cache=Private`); require no `-wal`/`-shm` files.
+- Open `.msr` read-only for evaluation; `resultsPath` defaults to `<package>.msr`.
+- Validate `results.schema_info.package_signature` (SHA-256 of the exact `.msl` bytes) and
+  `package_format_version` against the package.
+- Query job metadata from `.msl` and result rows from `.msr`; join by `job_id` in memory or via `ATTACH`.
 - Query metadata columns first; load blobs only for selected jobs.
 - `JobQuery` filters on kind, collection/config, temperature range, field range, status, MCSP, and job ID.
 - Project only `length(run_state)` for list views; load the blob on demand.
@@ -73,7 +81,7 @@ public sealed class McsReader : IDisposable
 - The `lattice` field is a MessagePack `bin`; trackers are arrays of `[f64;3]`; counters/histograms are arrays.
 - Missing optional fields (especially KMC fields in MMC states) are treated as empty.
 - Unknown fields are ignored; unknown `format`/version is rejected.
-- Verify the `.msl` `run_state_sha256` before deserializing when the state came from a package result.
+- Verify the `.msr` `run_state_sha256` before deserializing when the state came from a collected result.
 - No memory mapping, pinned arrays, native structs, or section table. The documented workload is < 4 GiB, so
   in-memory deserialization is acceptable; stream if profiling shows a need.
 
@@ -91,10 +99,13 @@ public sealed class JobContext : IAsyncDisposable
 }
 ```
 
-- `ParameterizedModel` comes from the package's `models` payload (not the project JSON).
+- `ParameterizedModel` is the `Mocassin.Contracts` DTO decoded from the package's `models` payload (not the
+  project JSON); `Mocassin.Results` does not depend on `Mocassin.Packages`.
+- `PrimaryState`/`PreRunState` come from `.msr`; a missing or mismatched results store is an error.
 - `LatticeGeometry` wraps cell vectors, P1 positions, position count, and linear index mapping.
 - The evaluation layer shares the compiled model across jobs with the same signature.
-- `JobContext` validates that the state's model signature/lattice size match the job.
+- `JobContext` validates that the state's model signature/lattice size match the job and that `.msr` belongs
+  to the package.
 
 ### 4. Evaluation API
 
@@ -120,34 +131,48 @@ public abstract class JobEvaluation<TResult>
 - `EnsembleMetaEvaluation`: density `= count / volume` in 1/m³.
 - Fix the original `A+B+C` bug: unit-cell count is `A*B*C`.
 
+#### Species and ensembles
+
+- Define a tracked ensemble `s` explicitly: a mobile species, a global tracker, or a user-selected group.
+- `N_s` is the number of particles in that ensemble, not the total lattice particle count. Voids and
+  immobile particles are excluded unless requested.
+- Report per-species values and a total; never silently merge species (ADR 0012).
+
 #### Displacement and MSD
 
 - Global trackers are per `(transition, particle)`; sum over transitions for the particle total.
 - Convert fractional → Cartesian (Å) → meters.
 - `EnsembleDisplacement`:
-  - `VectorR = Σ d` (sum of vectors);
-  - `RadialR = Σ |d|` (sum of lengths, not length of sum);
-  - `MeanVector = VectorR / N`, `MeanRadial = RadialR / N`.
+  - `VectorR_s = Σ d_i` (sum of vectors);
+  - `RadialR_s = Σ |d_i|` (sum of lengths, not length of sum);
+  - `MeanVector_s = VectorR_s / N_s`, `MeanRadial_s = RadialR_s / N_s`.
 - `SquaredDisplacementEvaluation`:
-  - `VectorR2 = Σ (dx², dy², dz²)`;
-  - `RadialR2 = Σ (dx²+dy²+dz²)`;
-  - means divide by `N`.
-- `DiffusionEvaluation`:
+  - `VectorR2_s = Σ (dx², dy², dz²)`;
+  - `RadialR2_s = Σ (dx²+dy²+dz²)`;
+  - means divide by `N_s`.
+- `DiffusionEvaluation` uses **origin-based cumulative MSD**:
+  - `MSD_s(t) = (1/N_s) Σ_i |r_i(t) - r_i(0)|²`;
   - `D_x = MSD_x / (2t)`, `D_y`, `D_z`;
-  - `D_r = MSD_r / (6t)`.
+  - `D_total = MSD_total / (6t)`.
+- If `t = 0`, the result is `n/a`. A time-lagged MSD is a separate future evaluation.
 - Mobile trackers give per-particle displacement and current position; use for MSD/correlation.
 
 #### Mobility and conductivity
 
 - `ê` = normalized Cartesian field direction; `|E|` = field modulus in V/m; `t` = simulated time.
-- `u = (MeanR · ê) / (|E| t)` in m²/(V·s).
-- `σ = u * z * n * e` in S/m, with `z` the charge number and `n` the particle density.
-- `σ_norm = u * n * e` (normalized to z=1).
-- `D_sigma = σ * k_B_SI * T / (n * (z*e)²)` in m²/s (Nernst–Einstein).
-- `D_tracer` from MSD; Haven ratio `H_R = D_tracer / D_sigma`.
-- If `|E| = 0` or `z = 0` (void/vacancy), transport values are `null`/`n/a`, never `Infinity`/`NaN`.
-- Vacancies are excluded from ionic mobility/conductivity by default; they may be reported separately as
-  non-charge-carrying species.
+- For each charge-carrying species `s`:
+  - `u_s = (MeanR_s · ê) / (|E| t)` in m²/(V·s);
+  - `σ_s = u_s * z_s * n_s * e` in S/m;
+  - `D_σ,s = σ_s * k_B_SI * T / (n_s * (z_s*e)²)` in m²/s;
+  - `H_s = D_tracer,s / D_σ,s`.
+- Total conductivity for independent migration is `σ_total = Σ_s σ_s`.
+- `D_σ,total = σ_total * k_B_SI * T / Σ_s(n_s * (z_s*e)²)`.
+- `σ_norm` is reported per species and as a total normalized to `z=1`.
+- `D_tracer` comes from the same origin-based MSD.
+- If `|E| = 0`, `t = 0`, or `z_s = 0`, the affected value is `null`/`n/a`, never `Infinity`/`NaN`.
+- Vacancies and neutral particles are excluded from charge transport but may be reported separately.
+- Polarons and other charge-carrying defects are species with their own charge, density, and tracker
+  ensemble.
 - Transition mobility uses a single global tracker to isolate a transition's contribution.
 
 #### Correlation and Onsager
@@ -197,7 +222,8 @@ public abstract class JobEvaluation<TResult>
 
 #### MMCFE free energy
 
-- Parse the new MMCFE log format (step 19), not the legacy `mmcfelog.db`.
+- Parse the new `mmcfe.db` format (step 19, contract in `02-data-contracts.md` §5.4), not the legacy
+  `mmcfelog.db`.
 - Implement the Wang–Landau/Valleau–Card chain with explicit per-cell normalization.
 - Unit-cell count is `A*B*C`, not `A+B+C`.
 - Expose `F(T)`, `U(T)`, `S(T)`, per-defect variants, and SEM over samples.
@@ -205,31 +231,37 @@ public abstract class JobEvaluation<TResult>
 
 ### 5. Collection
 
-`mocassin collect <project.msl> --dir <root>`:
+`mocassin collect <package.msl> [--results <file.msr>] [--external-states] --dir <root>`:
 
-1. Query all job IDs and expected folders (`Job%05d`).
+1. Open `.msl` read-only and validate the schema/version; query all job IDs and expected folders
+   (`Job%05d`).
 2. For each folder:
    - read `solver.json` (exit code, abort reason, state paths);
    - read `run.mcs`/`prerun.mcs` if present;
    - read `stdout.log`/`stderr.log`;
    - validate the MessagePack state schema/signature and lattice size;
    - compute SHA-256.
-3. Update `results` in a transaction (batch ~100 rows), idempotently:
+3. Open or create `.msr` (default `<package>.msr`) under an exclusive `.msr.lock`; verify
+   `package_signature`.
+4. Upsert `results` in a transaction (batch ~100 rows), idempotently:
    - status, exit code, timestamps, wall time, stdout, blobs, hashes, error message.
-4. Skip unchanged results unless `--force`.
-5. Report counts: collected, skipped, missing, invalid, failed.
-6. Never delete job folders.
+5. Skip unchanged results unless `--force`.
+6. Report counts: collected, skipped, missing, invalid, failed.
+7. Commit, fsync the database, release the lock, and leave `.msl` untouched.
+8. Never delete job folders; `mocassin clean` is the explicit removal path.
 
 - `--jobs` limits collection.
 - `--dry-run` validates without writing.
+- `--external-states` stores large `.mcs` files next to `.msr` and records relative paths/hashes; the default
+  embeds states up to 1 GiB. External files are written atomically before the `.msr` transaction commits.
 - `--json` emits a summary.
 - The collector is implemented in .NET, not Python, so it shares the MCS reader/validation.
 
 ### 6. Evaluation CLI
 
 ```text
-mocassin evaluate <project.msl> --query <name> [--where <expr>] [-o <file>]
-                  [--format csv|json|parquet] [--jobs <range>] [--parallel <n>]
+mocassin evaluate <project.msl> [--results <file.msr>] --query <name> [--where <expr>]
+                  [-o <file>] [--format csv|json|parquet] [--jobs <range>] [--parallel <n>]
 ```
 
 Queries:
@@ -250,25 +282,30 @@ Queries:
 
 ## Implementation tasks
 
-- [ ] Implement `ResultPackage` with Microsoft.Data.Sqlite and async queries.
+- [ ] Implement `ResultPackage` with Microsoft.Data.Sqlite, opening `.msl` and `.msr` together.
 - [ ] Implement the MessagePack `McsReader` with schema validation and SHA-256 checks.
 - [ ] Implement `JobContext`, model cache, and lattice geometry.
 - [ ] Implement `JobEvaluation<T>` with bounded parallelism/cancellation.
 - [ ] Implement all evaluation classes and formulas.
-- [ ] Implement `mocassin collect` with transactional/idempotent updates.
+- [ ] Implement `mocassin collect` writing `.msr` with transactional/idempotent updates, package binding, and
+  the embedded/external state spill rules.
 - [ ] Implement `mocassin evaluate` and CSV/JSON export.
-- [ ] Fix the known formula/unit issues (D_sigma, A*B*C, symmetric correlation).
-- [ ] Add golden result fixtures and analytic tests.
+- [ ] Fix the known formula/unit issues (`D_σ`, `A*B*C`, symmetric correlation, per-species totals).
+- [ ] Add golden result fixtures, `.msr` fixtures, and analytic tests.
+- [ ] Implement origin-based MSD and per-species/total transport (ADR 0012).
 - [ ] Document units and formulas.
 
 ## Acceptance criteria
 
 - [ ] A collected ceria job can be queried and evaluated by ID/metadata.
 - [ ] Particle counts, MSD, D, mobility, conductivity, and correlation match analytic/hand calculations.
-- [ ] `D_sigma` is dimensionally correct and consistent with `σ = n q² D/(k_B T)`.
+- [ ] `D_σ` is dimensionally correct and consistent with `σ = n q² D/(k_B T)`.
+- [ ] Per-species and total transport values are reported separately; `N_s` is the tracked ensemble size.
+- [ ] MSD is origin-based and documented as cumulative displacement from the initial state.
 - [ ] Zero-field jobs return `n/a` transport values, not NaN/Inf.
 - [ ] Correlation/Onsager matrices are symmetric.
-- [ ] `collect` is idempotent and validates states before writing.
+- [ ] `collect` is idempotent, validates states before writing, and writes `.msr`, never `.msl`.
+- [ ] A `.msr` from a different package is rejected.
 - [ ] Corrupt/truncated states are rejected with job context.
 - [ ] Evaluation of 1,000 jobs streams without loading all blobs.
 - [ ] CLI CSV/JSON output includes units and metadata.
@@ -280,6 +317,8 @@ At this point, document results and evaluation:
 
 - `docs/user-guide/results.md` — collecting, querying, evaluating, exporting results.
 - `docs/reference/mcs-format.md` — reader validation and the MessagePack contract.
+- `docs/reference/msr-format.md` — results store schema, package binding, and collection lifecycle.
+- `docs/physics/transport.md` — origin-based MSD, per-species totals, and Haven ratio definitions.
 - `docs/physics/tracking.md` and `docs/physics/transport.md` — formulas, units, assumptions.
 - `docs/reference/cli.md` — `collect` and `evaluate`.
 - `docs/development/testing-and-parity.md` — golden result fixtures and formula tests.
@@ -288,6 +327,9 @@ At this point, document results and evaluation:
 
 | Test | Assertion |
 | --- | --- |
+| Formula property | MSD/diffusion/mobility/conductivity identities hold on random walks and random arrays |
+| Shared vectors | .NET and Python evaluation agree on the manifest formula vectors |
+| Acceptance | Real solver `.mcs` files produce the expected evaluation summaries |
 | MCS reader | MessagePack schema/version/lengths; corrupt files rejected |
 | Counts | Lattice counts per particle |
 | MSD/D | Analytic random walk |
@@ -296,7 +338,10 @@ At this point, document results and evaluation:
 | Static tracking | Velocity for a known displacement |
 | Jump stats | Bins, under/overflow, accepted vs attempts |
 | Coordination | Known shells/distances |
-| Collect | Idempotent, transactional, invalid states skipped |
+| Collect | Idempotent, transactional, invalid states skipped; writes `.msr` only |
+| Results binding | `.msr` with wrong package signature/version is rejected |
+| Species transport | Per-species and total conductivity/Haven values match hand calculations |
+| Origin MSD | Tracker displacement from the initial state matches the analytic random walk |
 | Streaming | Memory bounded for many jobs |
 
 ## Risks and mitigations

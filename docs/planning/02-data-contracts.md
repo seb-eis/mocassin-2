@@ -22,6 +22,65 @@ solver, and external tooling. Contracts are versioned and covered by golden and 
   `RuleIndex`) during compilation. These indices are **not** stable across model edits; they are valid only
   inside one compiled package and are recorded with the model signature.
 
+### 1.1 Contract manifest and generated checks
+
+The field/type/version descriptions in this document are backed by a machine-readable manifest:
+
+```text
+contracts/manifest.json
+contracts/generated/…
+tools/contracts/…
+```
+
+- The manifest is the single source for field names, types, required/optional flags, format versions, and
+  section identifiers across project JSON, `.msl`, `.msr`, `.mcs`, `solver.json`, job folders, JSONL events,
+  and `mmcfe.db`.
+- `tools/contracts` validates the manifest and generates:
+  - JSON Schema fragments used by documentation and validation tests;
+  - canonical signature-projection layouts (ADR 0010);
+  - language-neutral fixture descriptors and expected canonical JSON summaries;
+  - version/enum/event constants for the C#, Rust, and Python implementations.
+- C#, Rust, and Python DTOs may remain hand-written; generated checks detect drift between them and the
+  manifest.
+- CI fails if generated files are stale or if a DTO/validator disagrees with the manifest.
+- A manifest change requires a version bump and updated fixtures, exactly like a schema change.
+
+### 1.2 Hash policy
+
+Use one hash algorithm across the plan: **SHA-256**.
+
+| Use | Algorithm | Why |
+| --- | --- | --- |
+| Project/compiled/parameterized model signatures | **SHA-256** | Stable 256-bit content identity; BCL-native in .NET and ubiquitous in Rust/Python |
+| Job/lattice seed derivation and lattice request hashes | **SHA-256** | Deterministic domain-separated derivation; inputs are small, so no specialized hash is needed |
+| `.mcs` result blob integrity (`run_state_sha256` in `.msr`) | **SHA-256** | Same algorithm; standard verification tooling |
+| Release artifact checksums / SBOM digests | **SHA-256** | Ubiquitous verification tooling |
+
+- SHA-256 is **not** used as a security boundary for simulation seeds; it provides deterministic, well-distributed
+  derivation from a master seed.
+- Never use `string.GetHashCode()` for persisted identity, seeds, or compatibility checks.
+- Do not introduce a second hash algorithm without an ADR and a format version bump.
+
+### 1.3 Canonical signature projection
+
+Signatures are cryptographic identities of logical content, not of the stored MessagePack payload. The
+canonical projection is defined by ADR 0010 and `contracts/manifest.json`:
+
+- **Structs become MessagePack arrays** in manifest field order. Dynamic maps use sorted UTF-8 keys.
+- **Integers are fixed-width:** `uint64` for non-negative values, `int64` for signed values.
+- **Floats are `float64`.** Normalize `-0.0` to `+0.0`; reject NaN/Inf in required numeric fields.
+- **Strings are UTF-8 bytes as stored.** Byte arrays use `bin`.
+- **Every field is present.** Absent optional values are `nil`; defaults are not omitted.
+- **No compression, timestamps, runner metadata, file names, or SQLite layout** is included.
+- **Domain separation** is applied before hashing:
+  - `SHA-256("mocassin/model-signature/v1" || 0x00 || projection)`
+  - `SHA-256("mocassin/parameterization-signature/v1" || 0x00 || projection)`
+  - `SHA-256("mocassin/lattice-signature/v1" || 0x00 || projection)`
+
+The stored `.msl` payload may remain a compressed MessagePack map. Readers decode it, re-encode the canonical
+projection, and compare the digest. The manifest is the source for projection field order and types; a change
+to either is a format-breaking change.
+
 ## 2. Project file (`.mocprj`, JSON)
 
 ### 2.1 Envelope
@@ -51,6 +110,19 @@ solver, and external tooling. Contracts are versioned and covered by golden and 
 - Unknown properties are rejected by default (`JsonUnmappedMemberHandling.Disallow`) to catch typos; schema
   evolution adds properties explicitly and bumps the version when semantics change.
 - The file is written atomically (temp file + rename).
+
+**Canonical project hash.** `ProjectHasher` does not hash the pretty-printed file. It hashes a canonical JSON
+projection:
+
+- UTF-8 without BOM, no insignificant whitespace, `\n` only where a separator is required;
+- object keys in schema order (manifest order), not hash-map order;
+- non-semantic arrays sorted by `id`;
+- numbers in invariant, shortest round-trip form; no NaN/Inf; normalize `-0.0` to `0.0`;
+- timestamps normalized to UTC `Z` with fixed fractional digits;
+- unknown fields excluded (they are rejected by the reader anyway).
+
+The hash is used for dirty tracking and cache keys, not as a cross-language model signature. Model,
+parameterization, and lattice signatures use the MessagePack projection (section 1.3 and ADR 0010).
 
 ### 2.2 Model
 
@@ -272,7 +344,7 @@ configurations are preferred.
 {
   "id": "…",
   "name": "Ceria parameters",
-  "modelSignature": "blake3:…",
+  "modelSignature": "sha256:…",
   "createdUtc": "…",
   "stablePairSets": [
     {
@@ -309,7 +381,7 @@ configurations are preferred.
 }
 ```
 
-- `modelSignature` is a BLAKE3 hash of the canonical compiled model (structure, transitions, environments,
+- `modelSignature` is a SHA-256 hash of the canonical compiled model (structure, transitions, environments,
   interaction geometry, indices). A parameterization whose signature does not match the current model cannot
   be used to build jobs; the GUI offers "rebase" and shows which sets changed.
 - Rule IDs are stable strings derived from the rule's state triplet and direction, so recompilation can match
@@ -380,14 +452,14 @@ IDs instead of a template.
 
 ### 3.1 Purpose
 
-The `.msl` file is the compiled artifact consumed by the Rust solver and the result database consumed by the
-evaluation API. It is not the editable project. Rebuilding is expected after model or parameterization
-changes.
+The `.msl` file is the immutable compiled artifact consumed by the Rust solver and the evaluation API. It is
+not the editable project and it does not contain results. Rebuilding is expected after model or
+parameterization changes; collected results live in the separate `.msr` store (section 3.6).
 
 ### 3.2 Schema (version 1)
 
 ```sql
-PRAGMA journal_mode = WAL;
+PRAGMA journal_mode = DELETE;            -- published package; build may use WAL temporarily
 PRAGMA foreign_keys = ON;
 
 CREATE TABLE schema_info (
@@ -400,14 +472,14 @@ CREATE TABLE schema_info (
 
 CREATE TABLE models (
     model_id       INTEGER PRIMARY KEY,
-    signature      TEXT    NOT NULL UNIQUE,   -- BLAKE3 of the parameterized model
+    signature      TEXT    NOT NULL UNIQUE,   -- SHA-256 canonical projection (ADR 0010)
     format_version INTEGER NOT NULL,
     payload        BLOB    NOT NULL            -- Zstd(MessagePack(ParameterizedModel))
 );
 
 CREATE TABLE lattices (
     lattice_id     INTEGER PRIMARY KEY,
-    signature      TEXT    NOT NULL UNIQUE,   -- blake3 of the initial lattice
+    signature      TEXT    NOT NULL UNIQUE,   -- SHA-256 canonical projection (ADR 0010)
     format_version INTEGER NOT NULL,
     payload        BLOB    NOT NULL            -- Zstd(MessagePack(InitialLattice))
 );
@@ -444,51 +516,17 @@ CREATE TABLE jobs (
 CREATE INDEX ix_jobs_temperature ON jobs(temperature_k);
 CREATE INDEX ix_jobs_collection  ON jobs(collection_name, config_name);
 
-CREATE TABLE results (
-    job_id             INTEGER PRIMARY KEY REFERENCES jobs(job_id) ON DELETE CASCADE,
-    status             TEXT NOT NULL CHECK (status IN
-                         ('pending','running','completed','failed','cancelled','aborted')),
-    exit_code          INTEGER,
-    started_utc        TEXT,
-    completed_utc      TEXT,
-    wall_time_s        REAL,
-    stdout             TEXT,
-    run_state          BLOB,                   -- MessagePack .mcs
-    prerun_state       BLOB,                   -- MessagePack .mcs, KMC only
-    run_state_sha256   TEXT,
-    prerun_state_sha256 TEXT,
-    error_message      TEXT
-);
-
-CREATE VIEW job_metadata AS
-SELECT j.job_id,
-       j.collection_name,
-       j.config_name,
-       j.collection_index,
-       j.config_index,
-       j.job_index,
-       j.kind,
-       j.temperature_k,
-       j.electric_field_vm,
-       j.target_mcsp,
-       j.pre_run_mcsp,
-       j.lattice_a, j.lattice_b, j.lattice_c,
-       j.doping_info,
-       r.status,
-       r.exit_code
-FROM jobs j
-LEFT JOIN results r USING (job_id);
 ```
 
 Rules:
 
 - `job_id` is a deterministic 1-based integer assigned at build time in template order
   (collection index, config index, job index) and never reused within a package.
-- Result rows are inserted as `pending` at build time.
-- `run_state`/`prerun_state` are written inside a transaction by `mocassin collect`; the hash is checked
-  against the file.
+- The published package has no `results` table. Results live in `.msr` (section 3.6).
 - The database uses `application_id`/`user_version` pragmas in addition to `schema_info` for tooling.
-- The solver opens the database read-only (`SQLITE_OPEN_READONLY`) and never writes results.
+- The solver opens the package read-only (`SQLITE_OPEN_READONLY`) and never writes it.
+- `schema_info` includes `format_version`, `app_version`, `created_utc`, `project_id`, `generator`, and
+  `job_selection`.
 
 ### 3.3 Compiled model payload
 
@@ -497,7 +535,7 @@ MessagePack map with snake_case keys. Top-level:
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `format_version` | u32 | Payload version |
-| `signature` | string | BLAKE3 of canonical parameterized model (geometry + energy/frequency values) |
+| `signature` | string | SHA-256 of canonical parameterized model (geometry + energy/frequency values) |
 | `particle` | object | `charges`, `symbols`, `is_vacancy`, count; index 0 is void |
 | `structure` | object | cell vectors, P1 positions, site definitions, environments, interaction range |
 | `energy` | object | pair tables, cluster tables, defect background |
@@ -585,6 +623,86 @@ The solver derives the site-energy background from the compiled model's `[positi
 over the supercell. Per-job background overrides are not part of version 1; a future extension can add a
 sparse `background_overrides` map without changing the base layout.
 
+### 3.5 Publication and read-only guarantees
+
+The `.msl` is immutable after a successful build:
+
+1. Build in a temporary file in the target directory. WAL may be used during the build.
+2. Run `PRAGMA wal_checkpoint(TRUNCATE)`, switch to `PRAGMA journal_mode=DELETE`, and close the database.
+3. `fsync` the file, then atomically rename it to the final `.msl` path.
+4. Never modify the published file. `collect` writes `.msr`; it does not update `.msl`.
+
+A published `.msl` must be readable without `-wal` or `-shm` files. This makes it safe on read-only media and
+shared HPC filesystems. The solver and evaluation readers open it with
+`SQLITE_OPEN_READONLY`, `query_only=ON`, and `foreign_keys=ON`. Readers must not rely on WAL semantics.
+
+### 3.6 Results store (`.msr`, SQLite)
+
+Results are stored separately so the package remains immutable and the solver never contends with a result
+writer (ADR 0011). The default path is `<package>.msr`; `--results` overrides it.
+
+```sql
+PRAGMA journal_mode = DELETE;
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE schema_info (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+-- rows: ('format_version','1'), ('app_version','x.y.z'), ('created_utc','…'),
+--       ('last_collected_utc','…'), ('generator','mocassin .NET x.y.z'),
+--       ('package_signature','sha256 of exact .msl bytes'), ('package_format_version','1')
+
+CREATE TABLE results (
+    job_id              INTEGER PRIMARY KEY,
+    status              TEXT NOT NULL CHECK (status IN
+                          ('pending','running','completed','failed','cancelled','aborted')),
+    exit_code           INTEGER,
+    started_utc         TEXT,
+    completed_utc       TEXT,
+    wall_time_s         REAL,
+    stdout              TEXT,
+    run_state_storage   TEXT NOT NULL DEFAULT 'embedded'
+                          CHECK (run_state_storage IN ('embedded','external')),
+    run_state           BLOB,                   -- exact run.mcs bytes when embedded
+    run_state_path      TEXT,                   -- relative path when external
+    prerun_state_storage TEXT NOT NULL DEFAULT 'embedded'
+                          CHECK (prerun_state_storage IN ('embedded','external')),
+    prerun_state        BLOB,                   -- exact prerun.mcs bytes when embedded
+    prerun_state_path   TEXT,                   -- relative path when external
+    run_state_sha256    TEXT,
+    prerun_state_sha256 TEXT,
+    error_message       TEXT,
+    updated_utc         TEXT NOT NULL
+);
+
+CREATE INDEX ix_results_status ON results(status);
+```
+
+Rules:
+
+- `job_id` matches the immutable `.msl` job id.
+- `run_state`/`prerun_state` store the exact `.mcs` bytes when `*_storage = 'embedded'`; the SHA-256 is over
+  those bytes.
+- SQLite builds have a default maximum blob length of about 1 GiB. `collect` embeds states up to a
+  configurable cap (default 1 GiB) and stores larger states as external files referenced by the relative
+  `*_path`, with the same SHA-256. `--external-states` forces external storage.
+- `.msr` and its external state files travel together; `verify` checks that every external path stays inside
+  the `.msr` directory and that the hash matches. This is state spill, not the deferred external-results mode.
+- External state files are written atomically before the `.msr` transaction commits. Orphan files are ignored
+  and can be removed by `mocassin clean`.
+- `schema_info.package_signature` is the SHA-256 of the exact `.msl` file bytes; `package_format_version` is
+  the package major version. A mismatch is an error, not a warning. Rebuilding a package invalidates old
+  results, even if the logical model is unchanged.
+- `collect` takes an exclusive `.msr.lock`, writes in a transaction, fsyncs, and closes. Concurrent collectors
+  are rejected. Readers open read-only and see a consistent snapshot.
+- New stores are written to a temporary file and atomically renamed. Updating an existing store is a
+  transaction; a failed collection leaves the previous state intact.
+- `evaluate` and the result readers join `.msl` jobs with `.msr` results (via `ATTACH` or two queries). The
+  results store does not duplicate job metadata.
+- `.msr` is local/shared-storage-friendly but requires working POSIX locking for collection. Do not run
+  multiple collectors against the same file over a network filesystem.
+
 ## 4. Result state file (`.mcs`, MessagePack, version 1)
 
 ### 4.1 Design
@@ -601,7 +719,7 @@ alignment scheme, or checksum trailer.
 - **No compression by default.** MessagePack is already compact; transport/storage compression is an external
   concern and must not change the document format.
 - **No embedded checksum.** The collector computes SHA-256 of the file and stores it in
-  `results.run_state_sha256` in the `.msl`. A corrupted file is rejected by the package collector/reader.
+  `results.run_state_sha256` in the `.msr`. A corrupted file is rejected by the collector/reader.
 - **Size assumption:** the document is expected to stay below 4 GiB. MessagePack `bin`/array lengths are
   32-bit, so this is also the practical format limit. The solver rejects an encoded state above a configurable
   cap (default 3.5 GiB) with an actionable error rather than producing a truncated file.
@@ -609,7 +727,7 @@ alignment scheme, or checksum trailer.
   `jumpStatistics`). `prerun.mcs` uses the same schema with `metadata.phase = "prerun"`.
 - The metadata is intentionally self-contained for the Python reader: cell vectors, particle charges/symbols,
   temperature, and field are sufficient for basic displacement/diffusion/mobility/conductivity evaluations
-  without opening the `.msl`.
+  without opening the `.msl` or `.msr`.
 
 **Interoperability rules**
 
@@ -674,7 +792,7 @@ alignment scheme, or checksum trailer.
 | `rngAlgorithm` | string | `"chacha12-v1"` (versioned with the state format) |
 | `rngState` | bin | Opaque, versioned PRNG state needed for exact resume; length/algorithm documented in Step 13 |
 | `abortReason` | string | `running`, `prerun`, `completed`, `equilibrium`, `timeLimit`, `rateLimit`, `cancelled`, `error` |
-| `seedHash` | string | BLAKE3 hash of the job seed (not the raw seed) |
+| `seedHash` | string | SHA-256 hash of the job seed (not the raw seed) |
 | `units` | map | `{ "energy": "eV", "time": "s", "length": "angstrom", "tracker": "fractional" }` |
 | `runner` | map | Optional `{ "os", "arch", "rustVersion" }` |
 
@@ -743,7 +861,7 @@ A reader must:
 10. Ignore unknown fields; reject duplicate map keys where the decoder exposes them.
 11. Reject an encoded document above the configured size cap.
 
-The `.msl` collector verifies `run_state_sha256` before storing or evaluating a state.
+The collector and `.msr` readers verify `run_state_sha256` before storing or evaluating a state.
 
 ### 4.6 Contract testing
 
@@ -765,45 +883,173 @@ mocassin build <project.mocprj> -o <project.msl> [--template <id>]
                 [--jobs <range>] [--parallel <n>] [--force] [--json]
 mocassin simulate <project.msl> --jobs <range> [--io <dir>] [--solver <path>]
                   [--parallel <n>] [--json]
-mocassin collect <project.msl> [--dir <dir>] [--json]
-mocassin evaluate <project.msl> --query <name> [--where <expr>] [-o <file>]
-                  [--format csv|json|parquet]
+mocassin collect <project.msl> [--dir <dir>] [--results <file.msr>]
+                 [--external-states] [--json]
+mocassin evaluate <project.msl> [--results <file.msr>] --query <name> [--where <expr>]
+                  [-o <file>] [--format csv|json|parquet]
 mocassin export <project.mocprj> -o <dir> [--format json|csv] [--json]
+mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
+               [--older-than <days>] [--dry-run] [--json]
 mocassin doctor [--json]
 ```
 
 - `<range>` accepts `1-100`, `1,3,5`, and mixed forms.
 - `--json` prints a single JSON object to stdout; human progress goes to stderr.
 - `build` refuses to overwrite an existing `.msl` unless `--force`; writes atomically.
-- `simulate` launches `mocassin-sim` per job, captures stdout/stderr, and writes status rows.
-- `collect` reads `Job%05d/run.mcs`, `prerun.mcs`, and `stdout.log`, validates them, and updates results.
+- `simulate` launches `mocassin-sim` per job and captures stdout/stderr. It does not modify the `.msl`.
+- `collect` reads `Job%05d/solver.json`, `run.mcs`, `prerun.mcs`, and logs, validates them, and writes the
+  `.msr` results store. The default is `<package>.msr`; `--results` overrides it.
+- `evaluate` requires a `.msr` store (or an explicit `--results` path) in addition to the package.
+- `collect --external-states` stores large `.mcs` files next to `.msr` with relative paths/hashes.
+- `clean` removes job folders and/or result rows only with an explicit selection and confirmation; `--dry-run`
+  reports what would be removed.
 
 ### 5.2 `mocassin-sim` (Rust)
 
 ```text
 mocassin-sim --db <project.msl> --job <id> --io <dir>
              [--stdout <file>] [--seed <hex32>] [--threads <n>]
-             [--extension <path>] [--jump-log-max-ev <f64>]
+             [--extension <path>] [--no-extensions] [--jump-log-max-ev <f64>]
              [--log-level <error|warn|info|debug|trace>]
              [--log-format human|json] [--dry-run] [--version]
 ```
 
 - `--io` is created if missing. The solver writes `run.mcs` (and `prerun.mcs` for KMC) there.
 - `--stdout` redirects the human statistics dump; otherwise it goes to stdout.
-- The solver never writes to the `.msl`; `collect` does.
+- The solver never writes to the `.msl` or `.msr`; `collect` writes the `.msr`.
 - Exit codes are defined in [`01-target-architecture.md`](01-target-architecture.md#73-error-handling-and-exit-codes).
 
-### 5.3 Machine-readable events
+### 5.3 Job folder and `solver.json`
 
-Both CLIs support JSON Lines progress events on stderr when `--json`/`--log-format json` is active:
+The solver writes one folder per job:
 
-```json
-{"event":"build.progress","completed":120,"total":1000,"current":"T773/x001/2"}
-{"event":"sim.progress","job":42,"mcs":1200000,"target":2000000,"rate":7.4e6}
-{"event":"sim.finished","job":42,"exitCode":0,"abortReason":"COMPLETED","wallTimeS":12.4}
+```text
+Job%05d/
+├── run.mcs               # final/main state; required on success
+├── prerun.mcs            # KMC pre-run state; optional
+├── stdout.log            # human-readable statistics dump; optional
+├── stderr.log            # structured logs and errors; optional
+├── solver.json           # machine-readable summary; required on completion/failure
+└── mmcfe.db              # optional MMCFE log database
 ```
 
-The GUI consumes these events for progress bars and live charts.
+The naming is similar to the original layout so existing scripts can be adapted, but the contents are **not**
+legacy-compatible. No legacy file is read or written.
+
+`solver.json` is a JSON object with `format = "mocassin.solver"` and `formatVersion = 1`:
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `format` | string | yes | `"mocassin.solver"` |
+| `formatVersion` | uint32 | yes | `1` |
+| `jobId` | uint32 | yes | Package job id |
+| `exitCode` | int32 | yes | Solver exit code |
+| `abortReason` | string | yes | Same vocabulary as `.mcs` `metadata.abortReason` |
+| `wallTimeS` | f64 | yes | Wall-clock run time |
+| `simulatedTimeS` | f64 | yes | KMC time; 0 for MMC |
+| `state` | map | yes | `{ "run": "run.mcs", "prerun": "prerun.mcs" | null }`, relative paths |
+| `seedHash` | string | yes | SHA-256 of the job seed, not the seed |
+| `counters` | map | no | `cycles`, `mcs`, `success`, `rejected`, `blocked` |
+| `error` | string? | no | Human-readable failure message |
+| `createdUtc` | string | yes | ISO-8601 UTC timestamp |
+
+- The solver writes `solver.json` atomically: temp file in the job folder, flush/fsync, rename.
+- On a hard crash, `solver.json` may be absent. `collect` synthesizes a failed result from the process exit
+  code and the log files.
+- `state` paths are relative to the job folder and must not contain `..`.
+- Unknown fields are ignored by readers; a future major version is rejected.
+
+### 5.4 MMCFE log database (`mmcfe.db`)
+
+MMCFE runs write a resumable SQLite database in the job folder. It is not the legacy `mmcfelog.db`.
+
+```sql
+PRAGMA journal_mode = DELETE;
+PRAGMA foreign_keys = ON;
+
+CREATE TABLE schema_info (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+-- rows: ('format_version','1'), ('app_version','x.y.z'), ('generator','mocassin-sim x.y.z')
+
+CREATE TABLE mmcfe_runs (
+    run_id          INTEGER PRIMARY KEY,
+    job_id          INTEGER NOT NULL,
+    variant         TEXT NOT NULL DEFAULT 'total',  -- total or a defect/species key
+    alpha_count     INTEGER NOT NULL,
+    alpha_min       REAL NOT NULL,
+    alpha_max       REAL NOT NULL,
+    cycles_per_alpha INTEGER NOT NULL,
+    relax_cycles    INTEGER NOT NULL,
+    seed_hash       TEXT NOT NULL,
+    status          TEXT NOT NULL CHECK (status IN ('running','completed','failed','cancelled')),
+    started_utc     TEXT NOT NULL,
+    completed_utc   TEXT,
+    error_message   TEXT,
+    UNIQUE (job_id, variant)
+);
+
+CREATE TABLE mmcfe_alpha (
+    run_id          INTEGER NOT NULL REFERENCES mmcfe_runs(run_id),
+    alpha_index     INTEGER NOT NULL,
+    alpha           REAL NOT NULL,
+    cycles          INTEGER NOT NULL,
+    accepted        INTEGER NOT NULL,
+    energy_min_ev   REAL NOT NULL,
+    energy_max_ev   REAL NOT NULL,
+    bin_count       INTEGER NOT NULL,
+    histogram       BLOB NOT NULL,          -- MessagePack u64[]
+    log_dos         BLOB NOT NULL,          -- MessagePack f64[]
+    underflow       INTEGER NOT NULL,
+    overflow        INTEGER NOT NULL,
+    updated_utc     TEXT NOT NULL,
+    PRIMARY KEY (run_id, alpha_index)
+);
+
+CREATE TABLE mmcfe_resume (
+    run_id          INTEGER PRIMARY KEY REFERENCES mmcfe_runs(run_id),
+    state           BLOB NOT NULL,          -- MessagePack resume payload
+    state_sha256    TEXT NOT NULL,
+    updated_utc     TEXT NOT NULL
+);
+```
+
+- `variant` identifies the total or a per-defect/species free-energy curve; it is unique per `(job_id, variant)`.
+- `histogram` and `log_dos` are MessagePack arrays of `u64`/`f64`; `bin_count` must match their lengths.
+- `mmcfe_resume` stores the solver-owned resume payload, not a `.mcs` file.
+- The database is written by one solver process per job folder; resume updates are transactional.
+- `collect` and the evaluation API accept the current and previous major schema version (ADR 0013).
+
+### 5.5 Machine-readable events
+
+Both CLIs support JSON Lines progress events on stderr when `--json`/`--log-format json` is active. Every
+event is one JSON object on one line with `schemaVersion = 1` and a stable `event` name:
+
+```json
+{"schemaVersion":1,"event":"build.progress","completed":120,"total":1000,"current":"T773/x001/2"}
+{"schemaVersion":1,"event":"sim.progress","jobId":42,"mcs":1200000,"target":2000000,"rate":7.4e6}
+{"schemaVersion":1,"event":"sim.finished","jobId":42,"exitCode":0,"abortReason":"completed","wallTimeS":12.4}
+```
+
+| Event | Required fields | Meaning |
+| --- | --- | --- |
+| `build.started` | `total` | Build began |
+| `build.progress` | `completed`, `total` | Build progress |
+| `build.finished` | `exitCode`, `wallTimeS` | Build ended |
+| `sim.started` | `jobId` | Solver job began |
+| `sim.progress` | `jobId`, `mcs`, `target` | Solver progress; `rate` optional |
+| `sim.finished` | `jobId`, `exitCode`, `abortReason`, `wallTimeS` | Solver job ended |
+| `collect.started` | `total` | Collection began |
+| `collect.progress` | `completed`, `total`, `jobId` | Collection progress |
+| `collect.finished` | `collected`, `skipped`, `failed` | Collection ended |
+| `diagnostic` | `code`, `severity`, `message` | Structured diagnostic; `path` optional |
+| `log` | `level`, `message` | Human log forwarded as JSON |
+
+- Consumers ignore unknown events and unknown fields.
+- Ordering is guaranteed within one stream; `jobId` is present for per-job events.
+- stdout remains reserved for the human statistics dump or a single final JSON object.
+- Event names and fields are part of the contract manifest and are covered by cross-language tests.
 
 ## 6. Contract testing
 
@@ -812,4 +1058,12 @@ The GUI consumes these events for progress bars and live charts.
   representation and compare.
 - `tests/contracts/state-v1.mcs` is a MessagePack document written by Rust and read by .NET and Python; each
   reader emits a canonical JSON summary of metadata, counters, tracker counts, and histogram totals.
-- A schema-change PR must update the fixture, the version field, this document, and the relevant ADR.
+- `tests/contracts/signature-vectors.json` contains canonical projection bytes and expected SHA-256 digests
+  for the model, parameterization, and lattice types.
+- `tests/contracts/package-v1.msl` and `package-v1.msr` are produced by the real writers and read by all
+  readers; previous-major fixtures are retained for the compatibility window.
+- `tests/contracts/job-folder/` contains a real solver job folder with `solver.json`, `run.mcs`, `prerun.mcs`,
+  logs, and an optional `mmcfe.db`; .NET and Python parse them.
+- `tests/contracts/events-v1.jsonl` is accepted by the GUI event parser and the CLI schema validator.
+- A schema-change PR must update the fixture, the version field, this document, the contract manifest, and the
+  relevant ADR.

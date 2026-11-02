@@ -100,6 +100,7 @@ public sealed record CompiledModel(
 - `GlobalTrackerIndex`: (collection, particle) in ascending indices.
 - `StaticTrackerIndex`: (position, particle) per cell, in ascending position/particle order.
 - All indices are dense from 0; no gaps; no reuse across compilations.
+- Freeze post-compilation lookup maps as `FrozenDictionary`/`FrozenSet`; never mutate compiled arrays after signing.
 - The model signature includes the indexing rules and all geometry; any change invalidates parameterizations.
 
 ### 4. Pair interaction compilation
@@ -224,9 +225,11 @@ For MMC:
 
 ### 9. Signature and caching
 
-- `ModelSignature = BLAKE3(canonical compiled model without parameterization values, including the
-  space-group catalog data version)`.
-- `ParameterizationSignature = BLAKE3(ModelSignature + canonical energy/frequency values)`.
+- `ModelSignature = SHA-256("mocassin/model-signature/v1" || 0x00 || canonical MessagePack projection)` over
+  the compiled model without parameterization values, including the space-group catalog data version
+  (ADR 0010).
+- `ParameterizationSignature = SHA-256("mocassin/parameterization-signature/v1" || 0x00 || projection)` over
+  the model signature plus canonical energy/frequency values.
 - The compiler caches stage results keyed by content hashes:
   - structure hash → P1 expansion;
   - energy model hash + structure hash → pair/cluster geometry;
@@ -289,6 +292,8 @@ At this point, document the compiler:
 
 | Test | Assertion |
 | --- | --- |
+| Rule property | Random valid models conserve mass/charge and produce unique, index-valid rules |
+| Cache property | Editing one domain rebuilds only dependent stages and keeps unrelated signatures stable |
 | P1 positions | Match step 02 encoder for all samples |
 | Pair sets | Counts/distances/multiplicities match brute force |
 | Chirality | Known chiral pairs linked; achiral pairs symmetric |

@@ -45,7 +45,7 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 | `mocassin-<ver>-osx-x64.tar.gz` | Same |
 | Optional `.deb`/`.rpm`/AppImage | Desktop integration for Linux |
 | Optional `.dmg`/`.pkg` | macOS app distribution |
-| NuGet packages | `Mocassin.Core`, `.Symmetry`, `.Compilation`, `.Packages`, `.Results`, `.Cli` |
+| NuGet packages | `Mocassin.Core`, `.Symmetry`, `.Compilation`, `.Contracts`, `.Packages`, `.Results`, `.Cli` |
 | Python package | `mocassin-analysis` wheel + sdist (import package `mocassin`) |
 | `mocassin-sim` standalone | Solver only, for HPC nodes |
 | Docker image (optional) | CLI + solver for CI/HPC containers |
@@ -125,11 +125,12 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 ### 7. Support and maintenance
 
 - Supported platforms: Windows 10/11 x64, Ubuntu 22.04+/Fedora, macOS 13+ (arm64/x64).
-- Supported package format: current major; older formats rejected with a clear message.
+- Supported formats: `.msl`/`.msr` current and previous major; `.mcs` current major (ADR 0013).
 - Security policy and issue templates.
 - A `doctor` command and crash-log instructions.
 - Deprecation policy: one minor release of warning before removal.
-- A roadmap for deferred items (remote deploy, Parquet, advanced 3D effects, localization, append builds).
+- A roadmap for deferred items in [`05-open-decisions.md`](../05-open-decisions.md) (remote deploy, Parquet,
+  advanced 3D effects, localization, append builds).
 
 ### 8. Post-release validation
 
@@ -182,8 +183,8 @@ At this point, document release and installation:
 | Version | `--version` fields correct |
 | Archive | Extract/run on each OS |
 | NuGet | Clean-project install and evaluation |
-| Python package | Wheel/sdist build, clean install, fixture read |
-| Smoke | Ceria tutorial end-to-end |
+| Python package | Wheel/sdist build, clean install, `.mcs`/`.msr` fixture read |
+| Smoke | Ceria tutorial end-to-end, including `.msr` collection and evaluation |
 | Checksums | Match published values |
 | Docs | Combined site artifact, link check, API subpaths |
 | Signing | Signature/notarization if enabled |

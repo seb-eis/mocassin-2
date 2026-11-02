@@ -120,7 +120,7 @@ addressed in the new architecture. It is a navigation aid, not a line-by-line po
 | Pair/group energy editing | 09/25 | Virtualized grids, bulk edit |
 | Attempt frequency editing | 09/25 | Default 1e13 Hz |
 | Chiral mirroring | 09/25 | Single storage |
-| Model hash compatibility | 09 | BLAKE3, stable across processes |
+| Model hash compatibility | 09 | SHA-256, stable across processes |
 | Template migration/rebase | 09/25 | Diff + report; no silent reuse |
 | Site energy overrides in template | 09 | New capability |
 | Job collections/configurations | 10 | Inheritance, overrides |
@@ -131,7 +131,7 @@ addressed in the new architecture. It is a navigation aid, not a line-by-line po
 | Create/append package builds | 11/25 | Create/overwrite; append is not a v1 feature |
 | 99,999-job cap | 11 | Removed; warning at 10k |
 | Build progress/cancel/log | 12/25 | Shared event stream |
-| Metadata table | 11/25 | `job_metadata` view |
+| Metadata table | 11/20 | Job metadata query joined with `.msr` results |
 
 ## 5. Solver inventory
 
@@ -201,7 +201,7 @@ addressed in the new architecture. It is a navigation aid, not a line-by-line po
 | --- | --- | --- |
 | `.mocprj` SQLite + JSON.NET graph | Versioned JSON project | Clean break, stable IDs, no CLR types |
 | `.msl` EF Core + native blobs | SQLite + MessagePack/Zstd | Cross-language, versioned, safe |
-| `.mcs` raw buffer | MessagePack state document | Safe, versioned, bounded, documented; SHA-256 in `.msl` |
+| `.mcs` raw buffer | MessagePack state document | Safe, versioned, bounded, documented; SHA-256 in `.msr` |
 | PCG32 exact trajectories | ChaCha12 statistical parity | Portable, maintainable, validated by observables |
 | WPF/SharpDX/Win64 | Avalonia/Silk.NET cross-platform | Required portability |
 | MSI installer | archives/packages | Cross-platform release |

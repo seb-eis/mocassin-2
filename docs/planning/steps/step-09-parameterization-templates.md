@@ -102,8 +102,11 @@ ParameterizationResult ParameterizationService.Apply(
   - frequency finite and > 0 (practical range 1e-3..1e18 Hz);
   - chiral partners receive the same value (or a single value is stored once).
 - Produces a `ParameterizedModel` ready for job encoding:
-  `record ParameterizedModel(CompiledModel Model, string Signature, EnergyTables Energies, RuleFrequencies Frequencies)`.
-  Its `Signature` is the **parameterization signature** (compiled-model signature + canonical values).
+  `record ParameterizedModel(CompiledModel Model, string Signature, EnergyTables Energies, RuleFrequencies Frequencies)`
+  in `Mocassin.Contracts`; `Mocassin.Compilation` stays parameterization-free and `Mocassin.Packages`
+  applies the template.
+  Its `Signature` is the **parameterization signature** (compiled-model signature + canonical values) using
+  the ADR 0010 MessagePack projection.
 - Never mutates the template or model.
 
 ### 5. Rebase and migration

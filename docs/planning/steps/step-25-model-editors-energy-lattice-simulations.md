@@ -192,6 +192,7 @@ At this point, document the energy/lattice/simulation editors:
 
 | Test | Assertion |
 | --- | --- |
+| Preview acceptance | Preview counts match the real compiler on the sample projects |
 | Environments | Cutoff/filter edits, validation, preview counts |
 | Filters | Add/remove/duplicate, radial diagram data |
 | Clusters | Offset add/remove/pick, ring/duplicate |

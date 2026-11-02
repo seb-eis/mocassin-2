@@ -131,7 +131,7 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
   groups, linkers, doping priority, job configs).
 - Enums are serialized as camelCase strings, not numbers.
 - `ProjectCanonicalizer.ToCanonicalJson(project)` produces a stable byte sequence for hashing and tests.
-- `ProjectHasher.Compute(project)` returns a BLAKE3 hash of the canonical model section, used for dirty
+- `ProjectHasher.Compute(project)` returns a SHA-256 hash of the canonical model section, used for dirty
   tracking and as the basis for the compiled-model signature. It is distinct from the compiled-model
   signature in Step 09.
 
@@ -144,7 +144,9 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
   version that supports them.
 - The first release starts at `schemaVersion = 1`; the framework exists from day one.
 
-### 7. Persistence
+### 7. Persistence (`Mocassin.Packages.Projects`)
+
+`ProjectStore` lives in `Mocassin.Packages`, not `Mocassin.Core`, so the domain kernel remains I/O-free.
 
 - `ProjectStore.LoadAsync(path, ct)` reads, validates UTF-8, parses, migrates, and validates references.
 - `ProjectStore.SaveAsync(project, path, ct)`:
@@ -180,7 +182,7 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 - [ ] Implement `Diagnostic`, `DiagnosticBag`, and `ModelPath`.
 - [ ] Implement the `Project` envelope and metadata records.
 - [ ] Implement `JsonSerializerContext` and canonical serialization.
-- [ ] Implement `ProjectStore` with atomic save, lock file, and autosave.
+- [ ] Implement `ProjectStore` in `Mocassin.Packages.Projects` with atomic save, lock file, and autosave.
 - [ ] Implement the migration pipeline and a no-op v1 migration.
 - [ ] Implement `ProjectEditor`, `ProjectDocument`, and `ProjectChange`.
 - [ ] Add sample projects: blank and ceria skeleton.

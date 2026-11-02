@@ -129,7 +129,8 @@ frequencies, define parameter sweeps, preview job counts, build a package, and s
 - On success:
   - package path, size, job count, duration;
   - "open folder", "inspect", "verify", "copy summary";
-  - results table (job ID, collection/config, kind, temperature, lattice, doping).
+  - job table (job ID, collection/config, kind, temperature, lattice, doping); collected results live in the
+    `.msr` view, not the package.
 - On failure:
   - failed stage, diagnostic list, log export;
   - no partial package left.
@@ -191,6 +192,7 @@ At this point, document parameterization/job/build UI:
 
 | Test | Assertion |
 | --- | --- |
+| Build acceptance | A real GUI build produces the same package content as the CLI for the sample projects |
 | Template create | Sets/rules match compiled model |
 | Signature | Current/stale/incompatible states |
 | Rebase | Diff/report and strategy application |

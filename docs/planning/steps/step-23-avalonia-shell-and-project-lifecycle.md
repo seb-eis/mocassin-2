@@ -116,16 +116,23 @@ public sealed class App : Application
 - `Ctrl+Z`/`Ctrl+Y` (and platform equivalents).
 - Undo/redo updates the project hash, dirty state, validation, and 3D scene.
 - Bulk operations (create from template, duplicate, paste, renumber) are single changes.
-- The stack is bounded (e.g. 200 entries) and cleared on save? No — keep across save; mark the save point.
+- The stack is bounded (e.g. 200 entries) and kept across saves; the save point is marked so undo can cross it.
 
 ### 6. Settings
 
 - `Mocassin.Settings.json` in the platform app-data directory.
+- The file has `format = "mocassin.settings"` and `schemaVersion = 1`; new readers migrate older versions and
+  ignore unknown fields. A future major version is rejected without overwriting the file.
 - Fields: theme (light/dark/system), accent, culture, recent files, autosave interval, solver path, package
-  output directory, log level, max parallel builds/runs, 3D quality, default units.
+  output directory, results directory, log level, max parallel builds/runs, 3D quality, default units,
+  accessibility options, update-check policy (offline only).
+- App-data layout: `settings.json`, `logs/`, `recovery/`, `cache/`, `scripts/`. The exact paths are documented
+  and never mixed with project or package files.
 - Paths use `Environment.SpecialFolder`/`Path.Combine`; no Windows separators.
 - Settings validation with fallback to defaults and a log entry.
-- A settings dialog with reset-to-defaults and "open config folder".
+- Retention defaults: logs 14 days or 100 MB (whichever first), recovery files 7 days; projects, packages,
+  results, and job folders are never auto-deleted.
+- A settings dialog with reset-to-defaults, "open config folder", and "clear cache/logs".
 
 ### 7. Dialogs and notifications
 
@@ -165,9 +172,12 @@ public sealed class App : Application
 ### 10. Headless testing
 
 - `Mocassin.App.Tests` uses Avalonia headless.
-- Test view-model commands, navigation, dirty tracking, undo/redo, settings, and dialogs via fakes.
+- Test view-model commands, navigation, dirty tracking, undo/redo, and settings against real project documents;
+  fake only the dialog/picker and clock boundaries. Assert observable project state, not collaborator calls.
 - Screenshot tests for the shell in light/dark/high-contrast.
-- Accessibility tree assertions for key controls.
+- Accessibility tree assertions for key controls. Target **WCAG 2.2 AA**: keyboard access, focus order,
+  contrast, scalable text, names/roles, and no color-only information.
+- Manual screen-reader checks with NVDA (Windows), Orca (Linux), and VoiceOver (macOS) in the release checklist.
 
 ## Implementation tasks
 
@@ -207,13 +217,15 @@ At this point, document installation and the GUI shell:
 
 | Test | Assertion |
 | --- | --- |
+| Real-object commands | Lifecycle commands run against real project documents; only dialogs/picker/clock are faked |
+| Acceptance | New → edit → save → reopen through the real store yields the same project state |
 | Startup | DI resolves, shell renders |
 | Project lifecycle | New/open/save/close/reopen |
 | Dirty/autosave | Prompt and recovery |
 | Undo/redo | Multi-step edits |
 | Navigation | Open/reuse/close tabs, history |
-| Settings | Persist/validate/defaults |
-| Dialogs | Fake service interactions |
+| Settings | Persist/validate/defaults; schema version/migration; unknown fields ignored |
+| Dialogs | Justified fake dialog/picker boundary; commands assert observable project state |
 | Accessibility | Names/roles on key controls |
 | Screenshots | Light/dark/high-contrast baselines |
 

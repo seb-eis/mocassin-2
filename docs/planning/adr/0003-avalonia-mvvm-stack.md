@@ -34,7 +34,8 @@ Use:
 
 - One UI codebase for all target platforms.
 - Source-generated MVVM reduces boilerplate and is trimming/AOT friendly.
-- Services are mockable; view models are testable headlessly.
+- Boundary services (dialogs, process launcher, clock) are replaceable; view models are testable headlessly
+  against real project documents and domain objects.
 - Modern async/cancellation and logging are first-class.
 
 **Negative**

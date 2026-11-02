@@ -224,6 +224,8 @@ At this point, document the energy engine:
 
 | Test | Assertion |
 | --- | --- |
+| Energy property | Incremental deltas equal full recomputation for random accepted/rejected transitions |
+| Acceptance | Real ceria rules reproduce golden pair/cluster/site contributions |
 | Pair delta | Two-particle swap energy |
 | Cluster delta | 3-body occupation change |
 | Site energy | Barrier shift |

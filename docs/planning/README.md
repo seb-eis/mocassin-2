@@ -15,16 +15,18 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
    out of scope, and the decisions that constrain the design.
 2. [`01-target-architecture.md`](01-target-architecture.md) — repository layout, project boundaries,
    runtime architecture, and technology choices.
-3. [`02-data-contracts.md`](02-data-contracts.md) — project JSON, simulation package (`.msl`), binary
-   state (`.mcs`), and CLI contracts shared by .NET and Rust.
-4. [`03-quality-strategy.md`](03-quality-strategy.md) — unit/property/golden/statistical testing, CI,
-   determinism, and performance targets.
+3. [`02-data-contracts.md`](02-data-contracts.md) — project JSON, immutable package (`.msl`), results
+   store (`.msr`), binary state (`.mcs`), job-folder/event contracts, and CLI contracts shared by .NET,
+   Rust, and Python.
+4. [`03-quality-strategy.md`](03-quality-strategy.md) — testing-trophy strategy, mock/fake policy,
+   property/contract/statistical testing, CI, determinism, and performance targets.
 5. [`04-roadmap.md`](04-roadmap.md) — phases, milestones, dependency graph, estimates, and parallel work.
-6. Step pages [`steps/`](steps/) — the implementation sequence.
-7. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
+6. [`05-open-decisions.md`](05-open-decisions.md) — resolved, gated, deferred, and still-open decisions.
+7. Step pages [`steps/`](steps/) — the implementation sequence.
+8. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
    solution and its mapping to new modules.
-8. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
-9. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
+9. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
+10. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
 
 ## Decisions already made
 
@@ -35,9 +37,11 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
 | Solver numerical parity | **Statistical parity.** Same physics, validated within statistical error; new deterministic RNG; not bit-exact trajectories. |
 | GUI direction | **Redesign, preserve concepts.** Keep the scientific workflow and model semantics; modernize navigation, editors, validation, and visualization. |
 | Licence | **MIT** for the new reimplementation; the original project remains GPL-3.0-or-later. |
+| Package/results | **Immutable `.msl` package + separate `.msr` results store.** No results table in `.msl`; no WAL dependence for published packages. |
 
 Additional technical decisions (clean-break format encoding, Avalonia MVVM toolkit, Rust solver boundary,
-3D renderer) are recorded as ADRs in [`adr/`](adr/).
+canonical signatures, format lifetime, 3D renderer) are recorded as ADRs in [`adr/`](adr/). Open and deferred
+items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
 
 ## Step index
 
@@ -63,9 +67,9 @@ Additional technical decisions (clean-break format encoding, Avalonia MVVM toolk
 | D. Solver | [17](steps/step-17-mmc-engine.md) | Metropolis MMC and equilibrium breaking |
 | D. Solver | [18](steps/step-18-tracking-statistics-and-state-writer.md) | Trackers, histograms, statistics, `.mcs` writer |
 | D. Solver | [19](steps/step-19-solver-cli-hpc-and-extensions.md) | Production CLI, HPC helpers, extension ABI |
-| E. Results | [20](steps/step-20-state-reader-and-evaluation-api.md) | `.mcs` reader and evaluation API |
+| E. Results | [20](steps/step-20-state-reader-and-evaluation-api.md) | `.mcs` reader, `.msr` collection, evaluation API |
 | E. Results | [21](steps/step-21-analysis-plots-and-reports.md) | Analysis queries, plots, CSV/JSON reports |
-| E. Results | [22](steps/step-22-python-analysis-api.md) | Python `.mcs` reader, basic evaluations, pytest, mkdocstrings |
+| E. Results | [22](steps/step-22-python-analysis-api.md) | Python `.mcs`/`.msr` reader, basic evaluations, pytest, mkdocstrings |
 | F. GUI | [23](steps/step-23-avalonia-shell-and-project-lifecycle.md) | Avalonia shell, navigation, project lifecycle, undo/redo |
 | F. GUI | [24](steps/step-24-model-editors-particle-structure-transitions.md) | Particle, structure, and transition editors |
 | F. GUI | [25](steps/step-25-model-editors-energy-lattice-simulations.md) | Energy, lattice, and simulation editors |

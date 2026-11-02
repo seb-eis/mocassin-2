@@ -20,9 +20,10 @@ Target stack:
 | Desktop GUI | Avalonia UI + CommunityToolkit.Mvvm, cross-platform |
 | Solver | Rust (`mocassin-sim`) |
 | Project format | Versioned UTF-8 JSON (`.mocprj`) |
-| Simulation package | SQLite (`.msl`) with versioned MessagePack/Zstd payloads |
+| Simulation package | Immutable SQLite (`.msl`) with versioned MessagePack/Zstd payloads |
+| Results store | SQLite (`.msr`) with collected states/hashes, bound to the package |
 | Result state | MessagePack document (`.mcs`) |
-| Python analysis API | `mocassin-analysis` package, read-only `.mcs` reader, NumPy, pytest |
+| Python analysis API | `mocassin-analysis` package, read-only `.mcs`/`.msr` reader, NumPy, pytest |
 | Documentation | Zensical + DocFX + rustdoc + mkdocstrings |
 | Charts | LiveCharts2 (`LiveChartsCore.SkiaSharpView.Avalonia`) |
 
@@ -36,14 +37,22 @@ Before changing anything, read these in order:
 3. [`docs/planning/01-target-architecture.md`](docs/planning/01-target-architecture.md) — repository layout,
    project boundaries, runtime architecture.
 4. [`docs/planning/02-data-contracts.md`](docs/planning/02-data-contracts.md) — the canonical project/package/
-   state/CLI contracts.
+   results/state/job-folder/event contracts.
 5. [`docs/planning/03-quality-strategy.md`](docs/planning/03-quality-strategy.md) — test and parity strategy.
 6. [`docs/planning/04-roadmap.md`](docs/planning/04-roadmap.md) — phases, dependencies, milestones.
-7. The step page you intend to work on, plus its dependencies.
-8. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-9. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md)
+7. [`docs/planning/05-open-decisions.md`](docs/planning/05-open-decisions.md) — resolved, gated, deferred, and
+   still-open decisions.
+8. The step page you intend to work on, plus its dependencies.
+9. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+10. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+   [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
+   [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
+   [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
+   [`docs/planning/adr/0012-transport-and-msd-definitions.md`](docs/planning/adr/0012-transport-and-msd-definitions.md),
+   [`docs/planning/adr/0013-format-compatibility-and-api-versioning.md`](docs/planning/adr/0013-format-compatibility-and-api-versioning.md),
+   [`docs/planning/adr/0014-extension-abi-and-trust-boundary.md`](docs/planning/adr/0014-extension-abi-and-trust-boundary.md),
    and [`docs/planning/steps/step-30-standalone-documentation.md`](docs/planning/steps/step-30-standalone-documentation.md)
-   — documentation toolchain and content requirements.
+   — documentation toolchain, contract/format, and extension decisions.
 
 The plan is the source of truth. If code and plan disagree, stop and reconcile them rather than silently
 following one.
@@ -85,9 +94,9 @@ explicit new ADR and owner approval.
    original source code, documentation, or database content into MIT-licensed files. See `NOTICE.md` and
    [ADR 0007](docs/planning/adr/0007-mit-license.md).
 3. **Rust solver process boundary.** The solver consumes only the compiled `.msl` package and CLI arguments.
-   It never reads project JSON and never writes `.msl`. .NET never calls solver code in-process for production
+   It never reads project JSON and never writes `.msl`/`.msr`. .NET never calls solver code in-process for production
    runs.
-4. **Statistical parity, not bit-exact trajectories.** Use ChaCha12 and BLAKE3-derived seeds. Do not reintroduce
+4. **Statistical parity, not bit-exact trajectories.** Use ChaCha12 and SHA-256-derived seeds. Do not reintroduce
    PCG32 trajectory compatibility.
 5. **Avalonia redesign, not a WPF port.** Preserve scientific concepts and workflows; do not port WPF controls,
    service-locator patterns, or `System.Windows.*` types.
@@ -129,8 +138,9 @@ mocassin/
 ├── src/dotnet/             # target: .NET solution
 ├── src/rust/               # target: Rust workspace
 ├── src/python/             # target: `mocassin-analysis` read-only .mcs reader
+├── contracts/              # target: manifest.json + generated contract checks
 ├── samples/                # target: ceria, barium zirconate, vehicle, interstitialcy
-├── tests/contracts/        # target: cross-language .msl/.mcs fixtures
+├── tests/contracts/        # target: cross-language .msl/.msr/.mcs fixtures
 ├── tests/reference/        # target: statistical parity fixtures/reports
 └── tools/hpc/              # target: SLURM/PBS helpers
 ```
@@ -138,9 +148,9 @@ mocassin/
 Target .NET dependency direction:
 
 ```text
-Core <- Symmetry <- Compilation <- Packages <- Cli
-                                  └──► Results
-App -> App.ViewModels -> Packages/Results
+Core <- Symmetry <- Compilation <- Contracts <- Packages <- Cli
+                                         └──► Results
+App -> App.ViewModels -> Contracts/Packages/Results
 App -> App.Views -> App.ViewModels
 App -> Rendering
 ```
@@ -157,10 +167,17 @@ mocassin-extension
 
 Rules:
 
-- `Mocassin.Core` has no SQLite, Avalonia, EF Core, or UI dependency.
+- `Mocassin.Core` has no file I/O, SQLite, Avalonia, EF Core, or UI dependency. Project persistence lives in
+  `Mocassin.Packages.Projects`.
 - `Mocassin.Compilation` is pure and has no I/O.
-- `Mocassin.Packages` owns project JSON, supercells, and `.msl`.
-- `Mocassin.Results` owns `.mcs` reading and evaluation, not simulation.
+- `Mocassin.Contracts` owns versioned package/results/state DTOs, job-folder/solver/event contracts, and
+  schema constants; it must not depend on `Mocassin.Packages` or `Mocassin.Results`.
+- `Mocassin.Packages` owns project JSON, supercells, and immutable `.msl` writing; it depends on
+  `Mocassin.Contracts`.
+- `Mocassin.Results` owns `.msl`/`.msr`/`.mcs` reading, collection, and evaluation, not simulation or package
+  writing. It depends on `Mocassin.Contracts`, not `Mocassin.Packages`.
+- `contracts/manifest.json` is the single source for package/results/state/job-folder/event field names, types,
+  and versions; generated checks and fixtures must be current.
 - View models never reference views or controls.
 - Scientific algorithms never live in view models or views.
 - The Rust solver core is a library first; the CLI is a thin wrapper.
@@ -188,7 +205,7 @@ dotnet run --project src/dotnet/Mocassin.Cli -- validate samples/ceria/ceria.moc
 dotnet run --project src/dotnet/Mocassin.Cli -- build samples/ceria/ceria.mocprj -o /tmp/ceria.msl
 cargo run --manifest-path src/rust/Cargo.toml -p mocassin-cli -- \
   --db /tmp/ceria.msl --job 1 --io /tmp/Job00001
-dotnet run --project src/dotnet/Mocassin.Cli -- collect /tmp/ceria.msl --dir /tmp
+dotnet run --project src/dotnet/Mocassin.Cli -- collect /tmp/ceria.msl --dir /tmp --results /tmp/ceria.msr
 
 # Python analysis API (once the package exists)
 python -m pytest src/python/tests
@@ -206,7 +223,8 @@ Quality gates for any change:
 - No new compiler/clippy warnings; warnings are errors.
 - `dotnet format` and `cargo fmt --check` clean.
 - Tests added/updated for the change.
-- Contract fixtures updated if a format changed.
+- Contract fixtures, canonical signature vectors, and previous-major compatibility fixtures updated if a format
+  changed.
 - Performance benchmarks run if the change touches a hot path.
 - Step page, parity matrix, and relevant documentation pages updated.
 - Documentation builds strictly and API docs have no missing public items.
@@ -243,9 +261,14 @@ pass.
 - Use typed IDs (`ParticleId`, `CellSiteId`, …) in the model; dense integer indices only in compiled data.
 - Use explicit unit types (`LengthAngstrom`, `EnergyEv`, `TemperatureKelvin`, …); no bare `double` at API
   boundaries where units matter.
+- Use generic math (`INumber<T>`) for internal numeric/vector kernels, not to collapse semantic public types.
+  Keep `Fractional3`, `Cartesian3`, and `Vector4I` distinct; do not replace them with `Vector3<double>`.
 - Use `Diagnostic`/`DiagnosticBag` for user errors; exceptions for programmer errors, I/O, and contract
   violations.
 - Use `System.Text.Json` with source-generated contexts. No Newtonsoft.Json in new code.
+- Prefer `FrozenDictionary`/`FrozenSet` for compiled lookup maps, `TimeProvider` for time, `System.Threading.Lock`
+  for mutual exclusion, `TensorPrimitives` for large numeric reductions, and `[GeneratedRegex]`/`SearchValues`
+  for parsing. Do not introduce SIMD/generic-math complexity without a measured need.
 - No EF Core for `.msl`; use `Microsoft.Data.Sqlite` with explicit SQL.
 - Async all the way; accept `CancellationToken`; no sync-over-async.
 - `Microsoft.Extensions.*` for DI, configuration, logging. No service locator in view models.
@@ -310,8 +333,9 @@ The most important invariants:
   `dt = dof * K_norm / (nu_max * selectable_count)`. Start-unstable advances state but not time/MCS;
   end-unstable advances time but not state.
 - **MMC:** Metropolis acceptance, no time advance, partner cell selected uniformly over the supercell.
-- **Nernst–Einstein:** `D_sigma = sigma * k_B * T / (n * q^2)`, `q = z e`. The legacy `u * z * kT` formula is
-  wrong; do not reintroduce it.
+- **Nernst–Einstein:** compute per species `D_σ,s = σ_s * k_B * T / (n_s * (z_s e)^2)` and define the total
+  with `Σ n_s (z_s e)^2`. Use tracked-ensemble counts, not total particles. The legacy `u * z * kT` formula is
+  wrong; do not reintroduce it. Report per-species and total values (ADR 0012).
 - **Unit cells:** `A*B*C`, never `A+B+C`.
 - **Tracking:** global per `(transition, particle)`, mobile per particle, static per `(cell, position,
   particle)`. Displacements are fractional until output conversion.
@@ -322,35 +346,63 @@ interpretation, and encode it in a test. Do not copy GPL code.
 
 ## 11. Data and format rules
 
-- `docs/planning/02-data-contracts.md` is the source of truth for field names, versions, and layouts.
+- `docs/planning/02-data-contracts.md` is the human-readable contract; `contracts/manifest.json` is the
+  machine-readable source for field names, types, versions, and generated checks.
 - Any format change requires:
   1. an ADR or explicit decision note;
   2. a version bump (`schemaVersion`, `format_version`, or `.mcs` version);
   3. updated contract fixtures in `tests/contracts/`;
   4. cross-language round-trip tests (.NET writer ↔ Rust reader; Rust writer ↔ .NET reader);
-  5. updated docs.
+  5. canonical signature-projection vectors for signed types;
+  6. current + previous major fixtures for `.msl`/`.msr`; current-only for `.mcs`;
+  7. updated docs.
 - Never “fix” a format by silently reinterpreting existing fields.
 - Write files atomically (temp file + fsync + rename). Never truncate a valid file on failure.
 - Treat project/package/state input as untrusted: bound counts, validate indices, reject NaN/Inf where invalid,
   cap allocations, fuzz parsers.
-- `.msl`: one shared compiled model per signature, content-addressed lattices, deterministic job IDs, pending
-  result rows.
+- `.msl`: one shared compiled model per signature, content-addressed lattices, deterministic job IDs, **no
+  results table**. It is immutable after publication and requires no `-wal`/`-shm` files.
+- `.msr`: the results store; one collector at a time, bound to the package signature, current + previous major
+  read support.
 - `.mcs`: MessagePack map with `format = "mocassin.mcs"` and `formatVersion`; `lattice` as `bin`; optional
-  KMC tracker/histogram fields. No custom header/section table/CRC. Integrity comes from the `.msl` SHA-256;
+  KMC tracker/histogram fields. No custom header/section table/CRC. Integrity comes from the `.msr` SHA-256;
   enforce the < 4 GiB size assumption.
+- Model/parameterization/lattice signatures use the canonical MessagePack projection (ADR 0010), not the
+  stored compressed bytes.
+- `.msl`/`.msr` support current + previous major; `.mcs` is current-major only (ADR 0013).
+- Job folders and `solver.json` are contracts: `run.mcs`, `prerun.mcs`, `stdout.log`, `stderr.log`,
+  `solver.json`, optional `mmcfe.db`. Do not invent undocumented files or paths.
 
 ## 12. Testing expectations
 
-- Unit tests for pure functions and formulas.
-- Property-based tests for geometry, symmetry, permutation reduction, supercells, and state round-trips.
-- Golden tests for compiled models, `.msl` payloads, `.mcs` documents, and CLI output.
-- Contract tests across .NET and Rust for every format.
+Follow the testing trophy in
+[`docs/planning/03-quality-strategy.md`](docs/planning/03-quality-strategy.md): invest most effort in contract/
+acceptance, property, and toy-integration tests; keep unit tests for exact formulas and boundaries.
+
+- **Prefer real objects and real data.** Use actual domain objects, real temp directories, real SQLite files,
+  and `.msl`/`.msr`/`.mcs` files produced by the real writers. Use generated toy data for breadth.
+- **“No mocks/fakes” means “mocks/fakes only where they are truly needed and beneficial.”** Test doubles are
+  allowed at true process/OS/UI/network/time boundaries and for failure injection. They are not allowed for
+  domain objects, compilers, symmetry, energy/evaluation code, package writers/readers, or SQLite.
+- Do not assert private call counts or collaborator interactions; assert observable state, files, diagnostics,
+  exit codes, or public API results.
+- Property-based tests for geometry, symmetry, permutation reduction, compilation, supercells, package/state
+  round-trips, and evaluation formulas.
+- Golden tests for compiled models, `.msl` payloads, `.msr` stores, `.mcs` documents, job folders, and CLI output,
+  generated by the real
+  writers and checked for freshness in CI.
+- Contract tests across .NET, Rust, and Python for every format, backed by `contracts/manifest.json`.
 - Statistical tests for physics: detailed balance, residence time, MSD/diffusion, conductivity, field sign,
   conservation.
 - Statistical parity against reference observables on ceria, barium zirconate, and a complex mechanism.
-- UI view-model tests and Avalonia headless/screenshot tests.
-- Fuzz project JSON, `.msl`, `.mcs` MessagePack documents, and extension config parsers.
-- Run `pytest` for the Python reader/aggregation package and cross-check fixtures against .NET/Rust.
+- UI view-model tests use real project documents; only dialogs, pickers, the solver launcher, and time are
+  faked. Avalonia headless/screenshot tests cover rendering and accessibility.
+- Fuzz project JSON, `.msl`, `.msr`, `.mcs` MessagePack documents, job-folder/event inputs, and extension config
+  parsers.
+- Run `pytest` for the Python reader/aggregation package and cross-check fixtures against .NET and Rust.
+- Declare each test’s tier (PR-fast, PR-medium, nightly, release). PR-fast tests must not depend on nightly
+  assets.
+- Coverage is a diagnostic, not a gate; do not add call-count tests to raise a percentage.
 
 A bug fix without a regression test is incomplete. A scientific change without a physics/parity test is
 incomplete.
@@ -372,13 +424,17 @@ incomplete.
 - Do not copy original GPL code or data into the MIT codebase.
 - Do not use ScottPlot; use LiveCharts2.
 - Do not introduce EF Core, Newtonsoft.Json, WPF, `System.Windows.*`, or a service locator.
-- Do not let Rust read project JSON or write `.msl`.
+- Do not let Rust read project JSON or write `.msl`/`.msr`.
 - Do not use raw native structs/images, unaligned `Unsafe.AsRef`, or pinned whole-file buffers.
 - Do not introduce a custom `.mcs` header/section table/CRC; use the MessagePack schema.
-- Do not use PCG32/`string.GetHashCode()` for reproducibility; use ChaCha12/BLAKE3.
+- Do not modify a published `.msl`; collect into `.msr` and rebuild for new packages.
+- Do not use PCG32/`string.GetHashCode()` for reproducibility; use ChaCha12/SHA-256 for seeds and content
+  signatures, and SHA-256 for `.mcs`/release integrity. Do not add a second hash algorithm without an ADR.
 - Do not change canonical P1 order, energy conventions, or time-step formulas without an ADR and tests.
 - Do not use `A+B+C` for unit-cell counts.
 - Do not put scientific logic in view models.
+- Do not make `Mocassin.Results` depend on `Mocassin.Packages`; use `Mocassin.Contracts`.
+- Do not hand-edit generated contract artifacts; update `contracts/manifest.json` and regenerate.
 - Do not hand-write API reference pages; generate them with DocFX/rustdoc.
 - Do not publish `docs/planning/` as part of the standalone site.
 - Do not optimize before correctness is proven by tests.
@@ -407,6 +463,8 @@ from the original and the plan’s “Original reference” sections.
 
 - [ ] The step’s acceptance criteria are met.
 - [ ] Unit/property/golden/contract tests pass.
+- [ ] Critical interfaces have an acceptance test using real objects/files.
+- [ ] Any test double is justified by a process/OS/UI/network/time boundary or failure injection.
 - [ ] No new warnings; formatters and linters clean.
 - [ ] Format versions/fixtures updated if applicable.
 - [ ] Step page updated with outcome and deviations.

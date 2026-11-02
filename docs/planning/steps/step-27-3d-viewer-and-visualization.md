@@ -159,8 +159,9 @@ public sealed class SceneNode
 ### 8. Accessibility and fallbacks
 
 - 2D projection fallback for machines without a usable GPU/OpenGL context.
-- Keyboard-only camera controls and selection.
-- High-contrast colors; colorblind-safe palette.
+- Keyboard-only camera controls and selection; focus order and names/roles for scene controls.
+- High-contrast colors; colorblind-safe palette; never use color alone to encode state.
+- A textual scene summary (counts, selection, visible categories) for screen-reader users.
 - A "renderer unavailable" banner with a link to diagnostics.
 
 ### 9. Spike gate

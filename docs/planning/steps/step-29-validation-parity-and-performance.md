@@ -37,7 +37,7 @@ Each fixture includes:
 
 - project JSON (new format);
 - parameterization with documented values;
-- package (or a build recipe);
+- package (or a build recipe) and its `.msr` results;
 - expected observables with sample size/uncertainty;
 - the original solver version/commit/flags used for reference values (where applicable).
 
@@ -62,8 +62,8 @@ For each reference system:
 
 - The original C solver is used only to generate reference data; it is not a runtime dependency.
 - If a discrepancy is found, bisect with a per-cycle trace and a minimal system before changing physics.
-- Document any intentional deviation (e.g. attempt histograms, corrected D_sigma) and validate the new
-  quantity independently.
+- Document any intentional deviation (e.g. attempt histograms, per-species transport, origin-based MSD) and
+  validate the new quantity independently.
 
 ### 3. Physics test suite
 
@@ -76,7 +76,8 @@ Expand step 15–18 tests into a release suite:
 - pair/cluster/site energy hand calculations;
 - mass/charge conservation per accepted step;
 - tracker/MSD/diffusion analytic;
-- conductivity/Nernst–Einstein consistency;
+- conductivity/Nernst–Einstein consistency, per species and total;
+- origin-based MSD normalization uses the tracked ensemble count;
 - restart/resume equivalence;
 - determinism (same seed → same state) on each platform.
 
@@ -94,6 +95,10 @@ Expand step 15–18 tests into a release suite:
 | CLI evaluate 10³ jobs | < 1 min |
 
 - Criterion benches in `src/rust/benches/`; BenchmarkDotNet for .NET compilation/serialization.
+- Store baselines per runner class in `tests/reference/bench/baselines.json`; compare only within the same
+  class (OS, CPU class, runtime version).
+- When no baseline exists, use a same-machine A/B run and a noise floor before applying the 10 % gate. Never
+  compare absolute timings across different machines.
 - Profile with `perf`/Instruments/Windows Performance Analyzer; record flamegraphs.
 - Optimize only after correctness; keep a performance log per release.
 - Regressions > 10 % block release unless an ADR accepts the trade-off.
@@ -103,8 +108,14 @@ Expand step 15–18 tests into a release suite:
 - Fuzz:
   - project JSON parser (SharpFuzz);
   - `.msl` reader (cargo-fuzz): truncated/oversized blobs, bad indices, bad Zstd, schema versions;
-  - `.mcs` reader: malformed MessagePack, wrong types, oversized arrays, invalid indices, unsupported versions;
-  - extension config parser.
+  - `.mcs` reader (cargo-fuzz): malformed MessagePack, wrong types, oversized arrays, invalid indices,
+    unsupported versions;
+  - extension config parser (cargo-fuzz);
+  - `.msr` reader (SharpFuzz/Hypothesis): package-binding mismatch, corrupt blobs, missing rows, wrong hashes;
+  - job-folder/`solver.json`, event stream, and MMCFE log parsers (SharpFuzz/Hypothesis).
+- Canonical signature vectors pass for C# and Rust; previous-major `.msl`/`.msr` fixtures still read.
+- Security cases: path traversal, symlinks, zip-slip, decompression bombs, malicious SQLite pages, and
+  extension panic/exception containment.
 - Allocation caps and timeouts for parsers.
 - Property tests for geometry, supercells, rule generation, and state round-trip.
 - Negative tests for every diagnostic/error code.
@@ -126,11 +137,12 @@ Expand step 15–18 tests into a release suite:
 
 ### 7. Security and data safety
 
-- Treat project/package/state as untrusted.
-- Validate all counts before allocation; cap job/model sizes.
+- Treat project/package/results/state/job-folder/event input as untrusted.
+- Validate all counts before allocation; cap job/model sizes and Zstd decompression.
 - Atomic writes everywhere; no overwriting a valid file on failure.
-- Path traversal prevention in collect/deploy/extension paths.
-- Extensions opt-in; document the trust boundary.
+- Path traversal, symlink, and zip-slip prevention in collect/deploy/import/extension paths.
+- Extensions opt-in; document the trust boundary, panic containment, and `--no-extensions`.
+- `.msr` must match the package signature; reject mismatches.
 - Dependency audit (`cargo deny`, NuGet audit) and licence check.
 - No telemetry/network calls by default.
 
@@ -180,8 +192,10 @@ Expand step 15–18 tests into a release suite:
 - [ ] Analytic tests pass exactly/within tolerance.
 - [ ] Performance is within 20 % of C per core on the reference hardware.
 - [ ] 10⁴-job build and 10³-job evaluation meet budgets.
+- [ ] Manifest-generated contract checks are current and all three readers agree.
 - [ ] Fuzzing and negative tests are clean.
-- [ ] Three-OS CI is green.
+- [ ] Three-OS CI is green; WCAG 2.2 AA and manual screen-reader checks pass.
+- [ ] Current + previous major `.msl`/`.msr` fixtures read successfully; `.mcs` rejects old major versions.
 - [ ] Scientific review sign-off is recorded.
 - [ ] Documentation written
 
@@ -198,15 +212,21 @@ At this point, document validation/parity/performance results:
 
 | Test | Assertion |
 | --- | --- |
+| Acceptance audit | Every critical interface in the quality strategy has a real-object acceptance test |
+| Test-double audit | Remaining fakes are limited to process/UI/time/failure-injection boundaries |
 | Parity | Mean/σ/D/histograms within tolerance |
 | Arrhenius | Prefactor/Ea match reference |
 | Determinism | Same seed → same state per platform |
 | Cross-platform | Statistical equivalence |
 | Python reader | `pytest` fixture parity with .NET/Rust |
+| Contract manifest | Generated schemas/constants current; DTO drift check passes |
+| Signature vectors | C# and Rust reproduce canonical projection digests |
+| Results store | `.msr` package binding, hash verification, previous-major fixture |
+| Job contracts | `solver.json`, events, and `mmcfe.db` fixtures parse in .NET/Python |
+| Security | Path traversal, symlink, zip-slip, decompression, and extension failure cases |
 | Fuzz | No panic/OOM |
 | Performance | Benchmarks within targets |
 | Locale/path | Non-ASCII/read-only/long paths |
-| Security | Malformed inputs rejected safely |
 
 ## Risks and mitigations
 

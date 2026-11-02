@@ -29,7 +29,7 @@ optional custom routines. The default path must be safe; extensions are explicit
 mocassin-sim --db <project.msl> --job <id> --io <dir>
              [--stdout <file>] [--seed <hex32>]
              [--threads <n>] [--jump-log-max-ev <f64>]
-             [--extension <path>] [--extension-config <json>]
+             [--extension <path>] [--extension-config <json>] [--no-extensions]
              [--log-level <error|warn|info|debug|trace>]
              [--log-format human|json] [--log-file <path>]
              [--dry-run] [--validate-only] [--no-state]
@@ -56,16 +56,28 @@ mocassin-sim batch --db <project.msl> --jobs <range|file>
 ### 2. Job folders and I/O
 
 - Default folder: `<io-root>/Job%05d` if `--io-root` is given; otherwise `--io` is used verbatim.
-- Files:
+- Files (contract: `02-data-contracts.md` §5.3):
   - `run.mcs` — final/main MessagePack state;
   - `prerun.mcs` — KMC pre-run MessagePack state;
   - `stdout.log` — statistics dump (if `--stdout` or default log routing);
   - `stderr.log` — structured/human errors and progress;
-  - `solver.json` — machine-readable summary (exit code, abort reason, wall time, state paths, counters).
+  - `solver.json` — machine-readable summary (format/version, exit code, abort reason, wall time, state paths,
+    counters);
+  - `mmcfe.db` — optional MMCFE log database (contract: `02-data-contracts.md` §5.4).
 - Writes are atomic (temp + rename) and never leave a partially written `.mcs`.
 - On resume, existing `run.mcs`/`prerun.mcs` are loaded from the same folder.
 - `--stdout` redirects the human statistics dump; structured logs always go to stderr/log file.
-- The solver never writes to `.msl`.
+- The solver never writes to `.msl` or `.msr`.
+
+### 2.1 Data lifecycle
+
+- The solver never deletes job folders, logs, or state files.
+- `mocassin clean` is the explicit removal path; it requires a selection, prints a dry-run by default, and
+  asks for confirmation before deleting job folders or `.msr` rows.
+- Before a long run, the queue/CLI checks free space and warns at 90 % usage; it does not delete anything
+  automatically.
+- Temporary files are cleaned on failure. Autosave/recovery and log retention follow the Step 23 defaults.
+- `.msr` archives and job folders are user data; no background cleanup runs in the GUI or CLI.
 
 ### 3. Exit codes and signals
 
@@ -121,7 +133,8 @@ Provide `tools/hpc/`:
   - no MPI inside the solver.
 - `collect` is provided by the .NET CLI (step 20), not a Python script, so collection is validated and
   transactional.
-- Job folder contract is identical to the original `Job%05d` layout so existing scripts can be adapted.
+- Job folder naming follows the original `Job%05d` layout so existing scripts can be adapted, but the files
+  use the new contracts; no legacy file is read or written.
 
 ### 6. Extension ABI
 
@@ -131,45 +144,61 @@ Extensions are optional native libraries loaded only when explicitly requested.
 // mocassin_extension.h
 #define MOCASSIN_EXTENSION_ABI_VERSION 1
 
-typedef struct MocassinExtensionHost MocassinExtensionHost;
+typedef struct MocassinExtensionHostV1 MocassinExtensionHostV1;
 
 typedef struct MocassinExtensionV1 {
     uint32_t abi_version;
     const char* name;
     const char* version;
 
-    int32_t (*initialize)(MocassinExtensionHost* host, const uint8_t* config, size_t config_len);
-    int32_t (*before_cycle)(MocassinExtensionHost* host);
-    int32_t (*after_cycle)(MocassinExtensionHost* host);
-    int32_t (*finalize)(MocassinExtensionHost* host);
+    int32_t (*initialize)(MocassinExtensionHostV1* host, const uint8_t* config, size_t config_len);
+    int32_t (*before_cycle)(MocassinExtensionHostV1* host);
+    int32_t (*after_cycle)(MocassinExtensionHostV1* host);
+    int32_t (*finalize)(MocassinExtensionHostV1* host);
 } MocassinExtensionV1;
 
-const MocassinExtensionV1* mocassin_extension_entry(void);
+#if defined(_WIN32)
+#define MOCASSIN_EXPORT __declspec(dllexport)
+#else
+#define MOCASSIN_EXPORT __attribute__((visibility("default")))
+#endif
+
+MOCASSIN_EXPORT const MocassinExtensionV1* mocassin_extension_entry(void);
 ```
 
-Host callbacks (versioned function table):
+The host callback table is versioned and append-only. Its first field is `size`, so newer hosts can add
+callbacks without breaking older extensions:
 
-- read job/model metadata (temperature, kind, lattice size, particle count);
-- read/write a position's particle;
-- read environment/lattice energy;
-- request a state save;
-- log a message at a level.
+```c
+typedef struct MocassinExtensionHostV1 {
+    uint32_t size;                    // sizeof(MocassinExtensionHostV1)
+    uint32_t abi_version;
+    /* read job/model metadata, positions, energies, logging, state-save requests */
+} MocassinExtensionHostV1;
+```
 
-Rules:
+Rules (ADR 0014):
 
+- C ABI, `extern "C"`, `#[repr(C)]`; the only exported symbol is `mocassin_extension_entry`.
+- Required function pointers are non-null; optional callbacks may be null.
+- Strings are UTF-8, NUL-terminated, and valid only for the call. The host copies anything it retains.
+- Extension config is bounded UTF-8 JSON. The host owns the buffer during `initialize`; the extension must not
+  retain it.
+- Extensions must not unwind across the ABI. Rust extensions catch panics; C++ extensions catch exceptions.
+- Hooks run on the solver thread. An extension that spawns threads must join them before returning.
 - The host validates `abi_version` and refuses incompatible extensions.
 - Extensions run in-process; this is a trust boundary. The CLI requires `--extension` and the GUI shows a
-  warning.
+  warning. `--no-extensions` guarantees a pure run.
 - An extension error aborts the job with exit `17` and a diagnostic; the state is saved if possible.
-- Extension configuration is JSON (`--extension-config`), size-bounded. Structured `extensions` stored in the
-  job payload are applied by default; `--extension-config` adds/overrides them for ad-hoc runs.
+- The loader accepts regular files with the platform extension suffix only; no path traversal or world-writable
+  locations.
 - A Rust `Extension` trait mirrors the ABI for built-in extensions.
 - MMCFE is implemented as a built-in extension (or a reference `cdylib`) using the same hooks:
   - simulated-annealing MMC with an alpha schedule;
   - energy histogram logging;
-  - resumable log database (new schema, not the legacy `mmcfelog.db`);
+  - resumable `mmcfe.db` (schema in `02-data-contracts.md` §5.4, not legacy `mmcfelog.db`);
   - progress/ETA lines.
-- No extension can change the package or other jobs.
+- No extension can change the package, results store, or other jobs.
 
 ### 7. Logging and diagnostics
 
@@ -198,7 +227,8 @@ Rules:
 - [ ] Implement graceful signal handling and exit codes.
 - [ ] Implement `batch` with worker pool, progress, and failure policy.
 - [ ] Add SLURM/PBS scripts and a submit helper.
-- [ ] Implement the extension ABI header, host table, loader, and Rust trait.
+- [ ] Implement the extension ABI header, versioned host table, panic/exception containment, loader, and Rust
+  trait.
 - [ ] Implement MMCFE as a built-in extension/reference.
 - [ ] Add CLI integration tests, signal tests, and an extension sample.
 - [ ] Document HPC usage and the extension ABI.
@@ -211,7 +241,7 @@ Rules:
 - [ ] `batch --jobs 1-10 --parallel 4` runs all jobs with independent seeds.
 - [ ] The SLURM array script runs the ceria sample on a scheduler test harness.
 - [ ] A sample extension loads, logs, and modifies a position; an incompatible ABI is rejected.
-- [ ] MMCFE runs an annealing schedule and produces resumable output.
+- [ ] MMCFE runs an annealing schedule and produces a resumable `mmcfe.db` matching the contract.
 - [ ] Logs are structured and contain job/model identifiers.
 - [ ] No job can write outside its I/O directory (path validation).
 - [ ] Documentation written
@@ -243,7 +273,7 @@ At this point, document the production solver interface:
 
 | Risk | Mitigation |
 | --- | --- |
-| Extension crashes/UB | Trust boundary warning, ABI versioning, isolate in a future subprocess option |
+| Extension crashes/UB | Trust boundary warning, ABI versioning, panic/exception containment, future subprocess option |
 | HPC script drift | Test generated scripts; keep them thin wrappers |
 | Signal handling races | Finish block, write state, then exit; second signal force-exits |
 | Batch oversubscription | Default parallelism = CPU count; explicit `--parallel` |

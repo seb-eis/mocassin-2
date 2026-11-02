@@ -250,6 +250,8 @@ At this point, document KMC:
 
 | Test | Assertion |
 | --- | --- |
+| KMC property | Any accepted sequence preserves mass/charge and never yields negative time |
+| Acceptance | A real package runs a short KMC job within the analytic toy selection/time bounds |
 | Residence time | Matches `1/(ν exp(-ΔE/kT))` |
 | Selection | Uniform over directions; pool updates |
 | Outcomes | Forced barriers produce each outcome |

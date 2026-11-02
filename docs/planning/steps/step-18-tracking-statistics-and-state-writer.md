@@ -109,32 +109,34 @@ At each statistics dump (and at the end), compute per particle and per global tr
 
 ```text
 t = simulated_time_s
-N = current particle count
-R_vec = Σ tracker displacements (fractional -> Cartesian, meters)
-R2_vec = Σ component-wise |d|²
-R2_scalar = Σ |d|²
+N_s = tracked ensemble count (species/global tracker, not total particles)
+R_vec_s = Σ tracker displacements in s (fractional -> Cartesian, meters)
+R2_vec_s = Σ component-wise |d|²
+R2_scalar_s = Σ |d|²
 
-MeanR = R_vec / N
-MeanR2 = R2_vec / N
-D_x = MeanR2_x / (2t)
-D_y = MeanR2_y / (2t)
-D_z = MeanR2_z / (2t)
-D_r = (MeanR2_x + MeanR2_y + MeanR2_z) / (6t)
+MeanR_s = R_vec_s / N_s
+MeanR2_s = R2_vec_s / N_s
+D_x,s = MeanR2_x,s / (2t)
+D_y,s = MeanR2_y,s / (2t)
+D_z,s = MeanR2_z,s / (2t)
+D_total,s = (MeanR2_x,s + MeanR2_y,s + MeanR2_z,s) / (6t)
 
-u_field = (MeanR · ê) / (|E| t)          // m²/(V·s)
-σ = u_field * z * n * e                  // S/m
-σ_norm = u_field * n * e                 // z=1
-D_sigma = σ * k_B_SI * T / (n * (z*e)^2) // m²/s
-MigrationRate = MCS / (t * N)            // Hz
+u_field,s = (MeanR_s · ê) / (|E| t)          // m²/(V·s)
+σ_s = u_field,s * z_s * n_s * e              // S/m
+D_σ,s = σ_s * k_B_SI * T / (n_s * (z_s*e)^2) // m²/s
+MigrationRate_s = MCS_s / (t * N_s)          // Hz
+σ_total = Σ_s σ_s
 ```
 
-- `ê` is the normalized Cartesian field direction; if `|E| = 0` or `z = 0`, transport quantities are `n/a`
-  (not NaN). Vacancies are not charge carriers and are excluded from ionic transport summaries.
-- `z` is the particle charge number; `e` is the elementary charge.
-- `n` is the particle density `N / V` with `V` in m³.
-- `D_sigma` is the Nernst–Einstein diffusion coefficient; `D_tracer` is the MSD-based value. The Haven ratio
-  is `D_tracer / D_sigma`.
-- `D_total` uses the 3D MSD with denominator 6.
+- `N_s` is the number of particles in the tracked ensemble, not the total lattice particle count. `MCS_s` is
+  the corresponding step count.
+- `ê` is the normalized Cartesian field direction; if `|E| = 0`, `t = 0`, or `z_s = 0`, transport quantities
+  are `n/a` (not NaN). Vacancies and neutral particles are not charge carriers.
+- `z_s` is the species charge number; `e` is the elementary charge.
+- `n_s` is the species number density `N_s / V` with `V` in m³.
+- `D_σ,s` is the per-species Nernst–Einstein coefficient; `D_tracer,s` is the origin-based MSD value. The
+  Haven ratio is `H_s = D_tracer,s / D_σ,s`.
+- Report per-species and total values; do not silently merge species (ADR 0012).
 - Correlation/Onsager coefficients are computed by the evaluation API from mobile trackers (step 20); the
   solver writes the raw trackers.
 - Do not emit `inf`/`NaN` for zero field or zero time; use `Option<f64>`/`n/a`.
@@ -210,8 +212,8 @@ particlePositions: [ u32 ]        // optional diagnostics
 3. Flush/fsync, verify the size cap, then atomically rename to `run.mcs` or `prerun.mcs`.
 4. Keep the previous file as a `.bak` if configured; never leave a partial `.mcs`.
 5. `NoSaving` skips the write but still prints statistics.
-6. The collector computes the SHA-256 and stores it in `results.run_state_sha256`; the state itself has no
-   checksum.
+6. The collector computes the SHA-256 and stores it in `results.run_state_sha256` in `.msr`; the state itself
+   has no checksum.
 
 ### 7. Reader for resume
 
@@ -228,7 +230,7 @@ particlePositions: [ u32 ]        // optional diagnostics
 - Trackers/histograms are updated in a fixed order; counters use `u64`.
 - The writer uses a fixed field/array order. MessagePack is deterministic for the same writer/version/platform;
   byte-identical output across C# and Rust is not required.
-- Integrity is provided by the `.msl` SHA-256, not by a state-file container checksum.
+- Integrity is provided by the `.msr` SHA-256, not by a state-file container checksum.
 - A malformed/truncated MessagePack document is rejected by the decoder; a semantically invalid document is
   rejected by schema validation.
 - Golden fixtures freeze the canonical JSON summary and counters for a small run.
@@ -245,11 +247,12 @@ particlePositions: [ u32 ]        // optional diagnostics
 - [ ] Implement energy samples and abort reason metadata.
 - [ ] Implement `--jump-log-max-ev`, `NoSaving`, `NoJumpLogging`.
 - [ ] Add golden state fixtures and round-trip tests.
-- [ ] Add tracker/statistics analytic tests.
+- [ ] Add tracker/statistics analytic tests, including per-species totals and origin-based MSD.
 
 ## Acceptance criteria
 
-- [ ] A single-particle random walk produces the expected MSD, D, and tracker displacements.
+- [ ] A single-particle random walk produces the expected origin-based MSD, D, and tracker displacements.
+- [ ] Per-species and total transport values use the tracked ensemble count, not total particles.
 - [ ] Global trackers separate transition contributions correctly.
 - [ ] Static trackers reproduce per-position flow for a simple lattice.
 - [ ] Mobile trackers follow particle identity across a 3-site migration.
@@ -267,6 +270,7 @@ At this point, document tracking and state:
 
 - `docs/physics/tracking.md` — global/mobile/static trackers, MSD, diffusion, correlations.
 - `docs/reference/mcs-format.md` — MessagePack schema, metadata, counters, histograms, size/integrity.
+- `docs/reference/msr-format.md` — how collected state hashes are stored and verified.
 - `docs/user-guide/results.md` — what the state file enables.
 - `docs/development/solver-architecture.md` — tracker updates and resume behavior.
 
@@ -274,12 +278,16 @@ At this point, document tracking and state:
 
 | Test | Assertion |
 | --- | --- |
+| Tracker property | Random accepted transitions keep displacement/MSD identities and particle identities consistent |
+| State acceptance | Real KMC/MMC runs write `.mcs` files that the .NET and Python readers parse identically |
 | Trackers | Known displacement sums |
 | Order code | Particle identity transfer |
 | MSD/D | Analytic 1D/3D random walk |
 | Conductivity | Nernst–Einstein consistency |
 | Histograms | Bin edges, under/overflow |
 | State round-trip | Writer → reader → identical fields |
+| Species transport | Per-species and total conductivity/Haven values match hand calculations |
+| Origin MSD | Tracker displacement from the initial state matches the analytic random walk |
 | Resume | Mid-run continuation |
 | Corruption | Bad MessagePack/version/array length rejected |
 | Compatibility | Unknown fields ignored; unknown format version rejected |
@@ -292,7 +300,7 @@ At this point, document tracking and state:
 | --- | --- |
 | Tracking semantics ambiguity | Document per-tracker update rules; analytic tests |
 | Histogram semantics differ from original | Document attempt vs. accepted; expose both |
-| State format bugs | Golden fixtures, `.msl` SHA-256, fuzz reader |
+| State format bugs | Golden fixtures, `.msr` SHA-256, fuzz reader |
 | Large state files | Stream serialization, 3.5 GiB cap, external compression |
 | Resume mismatch | Signature/lattice checks; reject incompatible state |
 

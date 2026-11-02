@@ -39,9 +39,10 @@ mocassin build <project.mocprj> -o <project.msl>
 mocassin inspect <project.msl> [--json]
 mocassin verify <project.msl> [--json]
 mocassin simulate ...        # step 19/27
-mocassin collect ...         # step 20
-mocassin evaluate ...        # step 21
+mocassin collect ...         # step 20, writes .msr
+mocassin evaluate ...        # step 21, reads .msl + .msr
 mocassin export ...          # step 21
+mocassin clean ...           # step 28
 mocassin doctor [--json]
 ```
 
@@ -51,7 +52,10 @@ mocassin doctor [--json]
   selected IDs are written. This keeps IDs stable across partial builds.
 - `--parallel` controls compilation/lattice generation concurrency; package writes are serialized.
 - `--force` allows overwriting an existing package; without it, an existing file is an error.
-- `--json` emits a single JSON result object; progress events go to stderr as JSON Lines.
+- `--json` emits a single JSON result object; progress events go to stderr as JSON Lines using the event
+  catalog in `02-data-contracts.md`.
+- `collect` and `evaluate` accept `--results <file.msr>`; the default is `<package>.msr`.
+- `build`/`inspect`/`verify` never modify an existing `.msl`; `--force` replaces it atomically.
 
 ### 2. Build pipeline
 
@@ -161,7 +165,7 @@ It prints a diagnosis table and exits 0 if healthy, 1 otherwise.
 - [ ] Implement argument parsing (`System.CommandLine` or a small hand-written parser) with help/completions.
 - [ ] Implement the build pipeline and event stream.
 - [ ] Implement `new`, `validate`, `compile`, `build`, `inspect`, `verify`, `doctor`.
-- [ ] Implement error/exit-code mapping and JSON output.
+- [ ] Implement error/exit-code mapping, JSON output/events, and `clean --dry-run`.
 - [ ] Implement progress, ETA, throttling, and quiet mode.
 - [ ] Implement build-template selection and partial jobs.
 - [ ] Implement `--dry-run` preview.
@@ -199,6 +203,7 @@ At this point, document the build CLI:
 | Errors | Exit codes for each failure class |
 | JSON | Schema and machine-readable progress |
 | Doctor | Healthy/unhealthy scenarios |
+| Clean | `--dry-run` lists only; no deletion without confirmation; `.msl` untouched |
 | Templates | Auto-select, ambiguous, override |
 | Performance | Build throughput and memory |
 

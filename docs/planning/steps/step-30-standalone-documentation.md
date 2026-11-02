@@ -106,7 +106,9 @@ docs/
 │   ├── cli.md
 │   ├── project-format.md
 │   ├── msl-format.md
+│   ├── msr-format.md
 │   ├── mcs-format.md
+│   ├── job-folder.md
 │   ├── diagnostics.md
 │   ├── file-layout.md
 │   └── extension-abi.md

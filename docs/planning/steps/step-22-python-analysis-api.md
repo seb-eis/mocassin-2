@@ -2,7 +2,7 @@
 
 **Phase:** E. Results  
 **Depends on:** 18, 20
-**Delivers:** A small, read-only Python package for `.mcs` files with basic multi-file evaluations, pytest
+**Delivers:** A small, read-only Python package for `.mcs`/`.msr` files with basic multi-file evaluations, pytest
 coverage, and mkdocstrings-generated API docs inside the Zensical site.
 
 ## Goal
@@ -34,6 +34,7 @@ src/python/
 ├── mocassin/
 │   ├── __init__.py
 │   ├── mcs.py            # McsFile, McsMetadata, read_mcs, read_mcs_many
+│   ├── msr.py            # MsrFile, result rows, read_msr, read_msr_many
 │   ├── evaluate.py       # single-file helpers
 │   ├── aggregate.py      # McsSet, grouping, multi-file summaries
 │   └── py.typed
@@ -48,7 +49,7 @@ src/python/
 - Distribution name: `mocassin-analysis` (avoids a likely PyPI name collision; confirm availability at release).
 - Python 3.11+.
 - Runtime dependencies: `msgpack`, `numpy`.
-- Dev/test dependencies: `pytest`, `pytest-cov`, `mkdocstrings[python]`.
+- Dev/test dependencies: `pytest`, `pytest-cov`, `hypothesis`, `mkdocstrings[python]`.
 - Type hints throughout; ship `py.typed`.
 - No plotting dependency; return NumPy arrays so users can use matplotlib/plotly themselves.
 
@@ -57,7 +58,7 @@ src/python/
 ```python
 from pathlib import Path
 import numpy as np
-from mocassin import read_mcs, read_mcs_many
+from mocassin import read_mcs, read_mcs_many, read_msr, read_msr_many
 
 mcs = read_mcs("Job00001/run.mcs")
 mcs.metadata.model_signature
@@ -72,6 +73,10 @@ mcs.jump_statistics
 mcs.energy_samples
 
 files = read_mcs_many(sorted(Path("runs").glob("Job*/run.mcs")))
+
+store = read_msr("ceria.msr")
+store.results                 # status/exit code/timestamps per job
+store.read_mcs(42)            # run.mcs bytes for job 42, parsed as McsFile
 ```
 
 - `McsFile` is a frozen dataclass with:
@@ -83,13 +88,19 @@ files = read_mcs_many(sorted(Path("runs").glob("Job*/run.mcs")))
   - `mobile_mapping`: `np.ndarray` (`uint32`)
   - `jump_statistics`: tuple of `McsJumpStatistics`
   - `energy_samples`: tuple of `McsEnergySample`
+- `MsrFile` is a frozen dataclass with `path`, `schema_info`, `results` (job id, status, exit code, timestamps,
+  blob sizes/hashes), and `read_mcs(job_id, phase="run")`.
 - Read-only: no writer, no mutation helpers.
-- Validate `format == "mocassin.mcs"`, `formatVersion`, metadata, lattice length, particle indices, tracker
-  counts, histogram shapes, finite values, and the size cap.
+- Validate `format == "mocassin.mcs"`/`.msr`, version, metadata, lattice length, particle indices, tracker
+  counts, histogram shapes, finite values, package binding, and the size cap.
+- `.msr` support is read-only and validates `package_signature`/`package_format_version` when a package path is
+  supplied.
 - Unknown fields are ignored; unsupported `format`/version raises a typed exception
   (`McsFormatError`, `McsVersionError`, `McsDataError`).
 - Use `msgpack.unpackb(..., raw=False, strict_map_key=False)` and convert to NumPy arrays once. Do not parse
   values lazily in hot loops.
+- Field names, format versions, and required fields come from generated constants derived from
+  `contracts/manifest.json`; do not hand-copy them into the Python package.
 
 ### 3. Single-file helpers
 
@@ -109,9 +120,11 @@ hist = evaluate.jump_barrier_histogram(mcs, tracker=0)
 Rules:
 
 - Convert fractional tracker displacements to Cartesian using `metadata.cell_vectors_angstrom`, then to metres.
-- Diffusion: `D_x = MSD_x/(2t)`, `D_r = MSD_r/(6t)`.
+- Diffusion uses origin-based cumulative MSD: `D_x = MSD_x/(2t)`, `D_total = MSD_total/(6t)`. `N_s` is the
+  tracked ensemble size, not the total particle count.
 - Mobility/conductivity: use `temperature_k`, `electric_field_vm`, `electric_field_direction`, particle
-  charge, and density. Return `None`/`nan` for zero field or `z == 0`; exclude vacancies from ionic transport.
+  charge, and species density. Return per-species and total values (ADR 0012). Return `None`/`nan` for zero
+  field, zero time, or `z == 0`; exclude vacancies and neutral particles from charge transport.
 - Particle counts include void (index 0); helpers that need charge carriers filter void/vacancies.
 - Jump histograms return bin edges/centres and counts; under/overflow are separately exposed.
 - No hidden unit conversions: all outputs are SI except energies in eV and lattice coordinates in Å, matching
@@ -186,11 +199,12 @@ runs.to_records()  # list[dict] for pandas/CSV
 
 - [ ] Create `src/python/pyproject.toml`, package skeleton, `py.typed`, and README.
 - [ ] Implement `McsFile`, metadata, counters, and `read_mcs`/`read_mcs_many`.
+- [ ] Implement `MsrFile`, result metadata, and `read_msr`/`read_msr_many` (read-only).
 - [ ] Implement schema validation and typed exceptions.
 - [ ] Implement single-file helpers (`particle_counts`, displacement/MSD/diffusion, mobility/conductivity,
   jump histograms).
 - [ ] Implement `McsSet` filtering/grouping/aggregation and `to_records`.
-- [ ] Add pytest fixtures and cross-language reader tests.
+- [ ] Add pytest fixtures for `.mcs`/`.msr` and cross-language reader tests using manifest-generated constants.
 - [ ] Add CI jobs for Python 3.11–3.13, wheel build, and pytest.
 - [ ] Add `docs/api/python/index.md` with mkdocstrings directives and Zensical config.
 - [ ] Add user-guide/tutorial examples.
@@ -200,8 +214,10 @@ runs.to_records()  # list[dict] for pandas/CSV
 
 - [ ] `read_mcs` reads KMC and MMC fixtures and returns the expected metadata, lattice, counters, trackers, and
   histograms.
+- [ ] `read_msr` reads results/status metadata and extracts `.mcs` blobs with package binding checks.
 - [ ] The Python reader matches the .NET reader on the same fixture.
-- [ ] Single-file helpers match hand calculations and .NET evaluation values within tolerance.
+- [ ] Single-file helpers match hand calculations and .NET evaluation values within tolerance, including
+  per-species/total transport and origin-based MSD.
 - [ ] Multi-file filtering/grouping/aggregation works and reports excluded files.
 - [ ] Zero-field and `z == 0` cases return `None`/`nan`, never `Infinity`/`NaN` silently.
 - [ ] Malformed/unsupported files raise typed errors with path and field context.
@@ -218,16 +234,21 @@ At this point, document the Python reader and basic evaluations:
 - `docs/user-guide/results.md` — Python quickstart, reading a job, units, examples.
 - `docs/tutorials/result-analysis.md` — multi-file workflow with NumPy/matplotlib.
 - `docs/reference/mcs-format.md` — Python-visible schema, metadata, and size limits.
+- `docs/reference/msr-format.md` — Python-visible results store and package binding.
 - `docs/development/testing-and-parity.md` — cross-language fixture tests and Python CI.
 - `docs/api/index.md` — link the Python API alongside .NET and Rust.
 
 ## Tests
 
+Tests use real `.mcs` files produced by the Rust solver and generated toy documents; the reader is never
+mocked.
+
 | Test | Assertion |
 | --- | --- |
 | Reader | Metadata/lattice/counters/trackers/histograms |
 | Cross-language | Python vs .NET canonical summary |
-| Single-file | Counts, displacement, MSD, diffusion, mobility |
+| Single-file | Counts, displacement, MSD, diffusion, per-species/total mobility |
+| Results store | `.msr` metadata, blob extraction, package binding |
 | Multi-file | Filter/group/aggregate; excluded counts |
 | Edge cases | Zero field, z=0, empty set, MMC |
 | Errors | Bad type/version/size/index |
@@ -238,7 +259,7 @@ At this point, document the Python reader and basic evaluations:
 
 | Risk | Mitigation |
 | --- | --- |
-| Schema drift between Rust/.NET/Python | One fixture set; cross-language tests in CI |
+| Schema drift between Rust/.NET/Python | One fixture set; cross-language tests in CI; manifest checks for `.msr` |
 | NumPy memory for many files | Read-only arrays, bounded multi-file APIs, document memory use |
 | Scope creep into a full stats package | Keep first release to read + basic aggregation; defer advanced fits |
 | PyPI name collision | Use `mocassin-analysis` distribution; confirm at release |
@@ -246,6 +267,6 @@ At this point, document the Python reader and basic evaluations:
 
 ## Done when
 
-A scientist can `pip install mocassin-analysis`, read one or many `.mcs` files, compute particle counts,
-displacement/MSD/diffusion, mobility/conductivity, and jump histograms, and browse generated Python API docs in
-the same Zensical site as the rest of MOCASSIN.
+A scientist can `pip install mocassin-analysis`, read one or many `.mcs` files and `.msr` stores, compute
+particle counts, origin-based displacement/MSD/diffusion, per-species and total mobility/conductivity, and jump
+histograms, and browse generated Python API docs in the same Zensical site as the rest of MOCASSIN.

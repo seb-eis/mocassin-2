@@ -203,6 +203,7 @@ At this point, document the model editors:
 
 | Test | Assertion |
 | --- | --- |
+| Editor acceptance | Real project documents and `ProjectEditor` operations drive CRUD/undo; the domain is not mocked |
 | Particle CRUD | Add/edit/delete/duplicate, void rules |
 | Sets | Drag/drop order, default badge, empty error |
 | Space group | Search/settings/change preview |

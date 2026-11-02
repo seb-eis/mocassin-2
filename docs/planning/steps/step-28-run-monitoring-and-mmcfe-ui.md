@@ -52,8 +52,9 @@ public sealed record RunRequest(
 
 ### 2. Live monitoring
 
-- Parse solver JSONL events from stderr (step 19):
-  - job id, stage, MCS/target, rate, ETA, energy, normalization, abort reason.
+- Parse solver JSONL events from stderr (step 19/contracts):
+  - `schemaVersion`, event name, job id, stage, MCS/target, rate, ETA, energy, normalization, abort reason.
+  - Unknown events/fields are ignored; a future event schema major is rejected.
 - Per-job view:
   - progress bar, MCS/cycles, simulated time, rate, ETA, lattice energy, norm factor;
   - per-particle counters and transport values;
@@ -74,7 +75,7 @@ public sealed record RunRequest(
 ### 3. Result collection
 
 - `Collect` action calls the step-20 collector for selected jobs/all.
-- Validates state files and updates the `.msl`.
+- Validates state files and writes the `.msr` results store; the `.msl` is never modified.
 - Shows collected/skipped/invalid/failed counts and a link to Problems.
 - Idempotent; safe to run while other jobs are still running (only completed folders).
 - After collection, enable analysis actions.
@@ -118,26 +119,28 @@ public sealed record RunRequest(
 
 **Import/analysis**
 
-- Read the new MMCFE log format (step 19/20), not legacy `mmcfelog.db`.
+- Read the new `mmcfe.db` format (step 19/20), not legacy `mmcfelog.db`.
 - Build `mmcfe.raw`/`mmcfe.eval` datasets (or in-memory + SQLite) with progress.
 - Plot `F(T)`, `U(T)`, `S(T)`, per-defect values, and SEM.
 - Compare multiple runs/alpha schedules.
 - Export CSV/JSON/plots.
-- Optional zip/archive and folder cleanup are explicit actions with confirmation.
+- Optional zip/archive and folder cleanup are explicit actions with confirmation. No automatic deletion of
+  job folders, `.msr` rows, or results.
 
 ### 6. Lattice recycle tool
 
-- Select a source job/result lattice and a target job/package.
+- Select a source job/result lattice and a target build template.
 - Validate compatibility:
   - same model signature/lattice size;
   - same particle set/occupations;
   - same site definitions.
-- Import the final lattice as the target's initial lattice:
-  - update the target job's `lattices` row (or create a new lattice row with a new signature);
-  - invalidate results for the target job;
-  - report counts and checksums.
+- Import the final lattice as an **initial-lattice override** for a new build:
+  - `.msl` is immutable, so never patch the target package;
+  - build a new package (or a new job set) whose initial lattice comes from the selected `.mcs` state;
+  - record the source package/job/hash in the new package metadata and report it;
+  - invalidate no existing results; the new package gets its own `.msr`.
 - Preview the imported lattice (counts, charge, differences).
-- Undo is not possible after writing; require confirmation and keep a backup.
+- Require confirmation and keep the previous package; the recycle operation is additive.
 
 ### 7. Notifications and logs
 
@@ -165,17 +168,19 @@ public sealed record RunRequest(
 - [ ] Implement MMCFE configuration, run, import, and plots.
 - [ ] Implement the lattice recycle tool.
 - [ ] Implement notifications, log viewer, and orphan cleanup.
-- [ ] Add headless tests with a fake solver process.
+- [ ] Add headless tests with a fake solver process at the process boundary (exit codes, signals, JSONL events).
 
 ## Acceptance criteria
 
-- [ ] A local KMC/MMC job can be launched, monitored, cancelled, resumed, and collected from the GUI.
+- [ ] A local KMC/MMC job can be launched, monitored, cancelled, resumed, and collected into `.msr` from the
+  GUI.
 - [ ] Progress, ETA, energy, and rate update correctly from solver events.
 - [ ] Aggregate status is accurate for 100+ jobs.
 - [ ] Collection is idempotent and reports invalid states.
 - [ ] Arrhenius/jump/MMC dashboards render from collected results.
 - [ ] MMCFE can be configured, run, resumed, imported, and plotted.
-- [ ] Lattice recycle validates compatibility and updates the target package.
+- [ ] Lattice recycle validates compatibility and builds a new package with the imported initial lattice;
+  it never mutates an existing `.msl`.
 - [ ] App exit cleans up child processes; orphans are detected next start.
 - [ ] No UI freezes during long runs.
 - [ ] Documentation written
@@ -197,7 +202,9 @@ At this point, document run monitoring and MMCFE:
 | Event parsing | JSONL → state/progress |
 | Monitoring | Per-job/aggregate accuracy |
 | Charts | Downsampling and bounded history |
-| Collection | Idempotent/invalid handling |
+| Collection | Idempotent/invalid handling; writes `.msr`, never `.msl` |
+| Results binding | `.msr` with a different package signature is rejected |
+| Event schema | Unknown events/fields ignored; future major rejected |
 | Dashboard | Filters and series values |
 | MMCFE | Config/run/resume/import/plot |
 | Recycle | Compatibility and package update |
@@ -211,7 +218,7 @@ At this point, document run monitoring and MMCFE:
 | Process/UI coupling | Queue service + event channel; fake solver in tests |
 | Many jobs overwhelm UI | Bounded channels, throttling, virtualization |
 | MMCFE formula complexity | Shared analysis module + analytic tests |
-| Data loss on recycle | Compatibility checks, backup, confirmation |
+| Package mutation on recycle | Recycle is additive: build a new package; never patch an existing `.msl` |
 | Cross-platform signals | Use the solver's graceful signal handling; test per OS |
 
 ## Done when

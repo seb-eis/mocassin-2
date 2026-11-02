@@ -102,7 +102,7 @@ Status legend:
 | Pair/group energy editing | Y | Planned | 09/26 | |
 | Attempt frequency editing | Y | Planned | 09/26 | |
 | Chiral mirroring | Y | Planned | 09/26 | |
-| Stable model signature | Y | Improvement | 09 | BLAKE3 |
+| Stable model signature | Y | Improvement | 09 | SHA-256 |
 | Template rebase/migration | Y | Planned | 09/26 | Diff + report |
 | Site energy overrides in template | N | Improvement | 09 | Original limitation removed |
 | Job collections/configs | Y | Planned | 10 | |
@@ -150,24 +150,25 @@ Status legend:
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
 | `.mcs` reader | Y | Planned | 20 | MessagePack |
+| `.msr` results store | Y | Planned | 20 | Separate from immutable `.msl` |
 | Job query/metadata | Y | Planned | 20 | |
 | Model context from package | Y | Planned | 20 | |
 | Particle counts/meta | Y | Planned | 20 | |
-| Displacement/MSD/diffusion | Y | Planned | 20 | |
-| Mobility/conductivity | Y | Planned | 20 | Correct Nernst–Einstein |
+| Displacement/MSD/diffusion | Y | Planned | 20 | Origin-based MSD; tracked-ensemble normalization |
+| Mobility/conductivity | Y | Planned | 20 | Per-species + total; corrected Nernst–Einstein |
 | Transition-resolved mobility | Y | Planned | 20 | |
 | Correlation/Onsager | Y | Planned | 20 | Symmetric |
 | Static tracking/flow | Y | Planned | 20 | |
 | Coordination analysis | Y | Planned | 20 | Sorted |
 | Jump statistics | Y | Planned | 20 | |
 | MMCFE evaluation | Y | Planned | 20/28 | |
-| Result collection | Y | Planned | 20 | Transactional |
+| Result collection | Y | Planned | 20 | Transactional `.msr` write; `.msl` untouched |
 | CSV/JSON export | Y | Planned | 21 | |
 | Parquet export | N | Deferred | post-1.0 | Optional |
 | Plots/Arrhenius fits | N | Improvement | 21/28 | |
 | Reports | N | Improvement | 21 | |
-| Python `.mcs` reader | Y | Planned | 22 | Read-only MessagePack reader |
-| Python basic evaluations | Y | Planned | 22 | Counts, MSD/diffusion, mobility/conductivity, histograms |
+| Python `.mcs`/`.msr` reader | Y | Planned | 22 | Read-only MessagePack/SQLite readers |
+| Python basic evaluations | Y | Planned | 22 | Counts, origin-based MSD, per-species mobility/conductivity, histograms |
 | Python multi-file aggregation | Y | Planned | 22 | Filter/group/mean over `McsSet` |
 | Python package (pytest) | Y | Planned | 22 | `mocassin-analysis`, Python 3.11–3.13 |
 | Python API docs (mkdocstrings) | Y | Planned | 30 | `/api/python/` |
@@ -229,7 +230,7 @@ Status legend:
 | User guide + physics | Y | Planned | 30 | Required content |
 | Developer architecture guide | Y | Planned | 30 | Code structure/design choices |
 | Tutorials | Y | Planned | 30 | Ceria, BaZrO3, vehicle, HPC, analysis |
-| CLI + format reference | Y | Planned | 30 | CLI, project/.msl/.mcs, diagnostics |
+| CLI + format reference | Y | Planned | 30 | CLI, project/.msl/.msr/.mcs, job folder, diagnostics |
 | Troubleshooting + FAQ | Y | Planned | 30 | |
 | Performance + HPC guide | Y | Planned | 30 | |
 | Contributing + dev workflow | Y | Planned | 30 | |
@@ -251,17 +252,17 @@ Status legend:
 | Tolerance-based sorted sets/hash inconsistency | Exact rational geometry; no tolerant hashing | 02 |
 | `Vector4I.P` order dependent on DB/tolerance | Canonical position order contract | 02 |
 | `PcgRandom32` seed swap/NextBytes/NextDouble bugs | New ChaCha12 RNG + tests | 13 |
-| Randomized `string.GetHashCode` model hash | BLAKE3 canonical model hash | 09 |
+| Randomized `string.GetHashCode` model hash | SHA-256 canonical model hash | 09 |
 | Non-deterministic/shared lattice RNG | Per-job domain-separated seeds | 10 |
 | Unstable lattice positions left uninitialized | Explicit void initialization | 10 |
 | Optimizer mask inverted/double-applied | Correct single application + tests | 10 |
 | Base lattice config discarded in configs | Explicit inheritance model | 10 |
 | MMC frequency NaN | MMC rules carry no frequency; schema separates kinds | 11 |
-| Raw `.mcs` with no header/checksum | MessagePack with `format`/`formatVersion`; SHA-256 in `.msl` | 18 |
+| Raw `.mcs` with no header/checksum | MessagePack with `format`/`formatVersion`; SHA-256 in `.msr` | 18 |
 | Unsafe unaligned/pinned `.mcs` reads | Managed MessagePack reader; no pinned buffers | 20 |
 | Eager result blob loading | Metadata-first streaming queries | 20 |
 | `A+B+C` unit-cell bug | `A*B*C` with tests | 20 |
-| `D_eff` charge-factor ambiguity | Re-derived Nernst–Einstein | 20 |
+| `D_eff` charge-factor ambiguity | Per-species and total Nernst–Einstein definitions | 20 |
 | Asymmetric correlation matrix | Full symmetric matrix | 20 |
 | MMC zero-energy break check aborts immediately | Guard below 1e-12 eV; normal behavior unchanged | 17 |
 | Reflection/service-locator model layer | Immutable domain + explicit compiler | 01/08 |

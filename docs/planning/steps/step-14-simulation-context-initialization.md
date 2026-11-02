@@ -227,6 +227,8 @@ At this point, document simulation context initialization:
 
 | Test | Assertion |
 | --- | --- |
+| Context property | Random lattices round-trip indices and keep link/pool invariants after optimizer removal |
+| Acceptance | A real package initializes a context whose energies match a full recomputation |
 | Lattice indexing | Round-trip `(a,b,c,p)` ↔ linear index |
 | Initial energy | Hand-computed pair/cluster/site system |
 | Links | Neighbor set matches brute force |

@@ -211,6 +211,8 @@ At this point, document MMC:
 
 | Test | Assertion |
 | --- | --- |
+| MMC property | Detailed balance holds across random two-state energy gaps and temperatures |
+| Acceptance | A real ceria MMC run reaches the expected energy distribution on a small system |
 | Boltzmann ratio | Two-state occupation vs. `exp(-ΔE/kT)` |
 | Detailed balance | Forward/reverse transition rates |
 | Ground state | Low-temperature convergence |

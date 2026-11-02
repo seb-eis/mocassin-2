@@ -6,8 +6,9 @@
    serialized, validated, diffed, and compiled without a UI or database.
 2. **Compilation is an explicit pipeline.** User model → validated model → compiled model → simulation
    package. Each stage has typed inputs/outputs, diagnostics, and cacheable content hashes.
-3. **One contract, two languages.** .NET writes the simulation package; Rust reads it. No Rust code reads
-   project JSON and no .NET code participates in the Monte Carlo loop.
+3. **One contract, three languages.** .NET writes packages and reads results; Rust reads packages and writes
+   state; Python reads state for analysis. No Rust code reads project JSON and no .NET code participates in
+   the Monte Carlo loop.
 4. **UI is a consumer.** The Avalonia app uses the same public APIs as the CLI. No scientific logic lives in
    view models.
 5. **Data-oriented solver.** The Rust solver uses flat arrays, dense integer IDs, and precomputed tables.
@@ -47,18 +48,19 @@ mocassin/
 │   └── planning/                    # excluded from the published site
 ├── src/
 │   ├── dotnet/
-│   │   ├── Mocassin.sln
-│   │   ├── Mocassin.Core/           # domain model, IDs, units, diagnostics, project aggregate
-│   │   ├── Mocassin.Symmetry/       # space groups, geometry, coordinate encoding
+│   │   ├── Mocassin.slnx
+│   │   ├── Mocassin.Core/           # domain model, IDs, units, primitive geometry, diagnostics
+│   │   ├── Mocassin.Symmetry/       # space groups, cell geometry, encoding, symmetry algorithms
 │   │   ├── Mocassin.Compilation/    # P1 extension, environments, rules, compiled model
-│   │   ├── Mocassin.Packages/       # templates, supercells, package encoding, .msl reader/writer
-│   │   ├── Mocassin.Results/        # .mcs reader, evaluation API, exporters
+│   │   ├── Mocassin.Contracts/      # package/state DTOs, schema versions, contract manifest reader
+│   │   ├── Mocassin.Packages/       # project persistence, templates, supercells, package encoding, .msl writer
+│   │   ├── Mocassin.Results/        # .msl/.msr/.mcs readers, collection, evaluation
 │   │   ├── Mocassin.Cli/            # `mocassin` headless CLI
 │   │   ├── Mocassin.App/            # Avalonia application shell
 │   │   ├── Mocassin.App.ViewModels/
 │   │   ├── Mocassin.App.Views/
 │   │   ├── Mocassin.Rendering/      # 3D abstraction + Avalonia host
-│   │   └── Mocassin.Tests.*/        # unit/integration/property/golden tests
+│   │   └── Mocassin.*.Tests/        # unit/integration/property/golden tests
 │   ├── python/
 │   │   ├── pyproject.toml           # `mocassin-analysis` package
 │   │   ├── mocassin/                # read-only .mcs reader + basic evaluations
@@ -79,9 +81,13 @@ mocassin/
 │   ├── barium-zirconate/
 │   └── vehicle-demo/
 ├── tests/
-│   ├── contracts/                   # cross-language .msl/.mcs fixtures
+│   ├── contracts/                   # cross-language .msl/.msr/.mcs fixtures
 │   └── reference/                   # reference observables for statistical parity
+├── contracts/
+│   ├── manifest.json                # single source for format fields/types/versions
+│   └── generated/                   # generated schemas/checks/docs fragments
 └── tools/
+    ├── contracts/                   # manifest validator/generator
     ├── format/                      # schema generation and validation
     ├── docfx/                       # DocFX configuration for the .NET API
     ├── docs/                        # Zensical/DocFX/rustdoc build and serve scripts
@@ -97,13 +103,16 @@ Mocassin.Symmetry
    ▲
 Mocassin.Compilation
    ▲
-Mocassin.Packages ──────► Mocassin.Results
-   ▲                         ▲
-Mocassin.Cli ────────────────┘
-   ▲
-Mocassin.App ──► Mocassin.App.ViewModels ──► Mocassin.App.Views
-                     │
-                     └──► Mocassin.Rendering
+Mocassin.Contracts
+   ▲             ▲
+Mocassin.Packages  Mocassin.Results
+   ▲             ▲
+   └──── Mocassin.Cli ────┘
+             ▲
+Mocassin.App ──► Mocassin.App.Views ──► Mocassin.App.ViewModels
+     │                                      │
+     │                                      └──► Contracts/Packages/Results
+     └──► Mocassin.Rendering
 ```
 
 Rules:
@@ -111,22 +120,26 @@ Rules:
 - `Core` has no dependency on SQLite, Avalonia, or EF Core. Only BCL.
 - `Symmetry` may depend on `Core` and a SQLite/JSON data source for space groups.
 - `Compilation` depends on `Core` + `Symmetry`; it has no I/O and no UI.
-- `Packages` depends on `Compilation`; it owns project serialization, templates, supercells, and `.msl`.
-- `Results` depends on `Core` + `Packages` (for model context restoration from package metadata) and owns
-  `.mcs` reading and evaluation.
+- `Contracts` depends on `Compilation`; it owns versioned package/state DTOs and schema constants and does not
+  depend on `Packages` or `Results`.
+- `Packages` depends on `Compilation` + `Contracts`; it owns project serialization, templates, supercells, and
+  `.msl` writing.
+- `Results` depends on `Core` + `Contracts` (not `Packages`) and owns `.msl`/`.msr`/`.mcs` reading and evaluation.
 - `Cli` depends on `Packages` + `Results`; it may launch the Rust solver.
-- `App` depends on view models only; view models depend on public library APIs, never on views.
+- `App` is the composition root and references views, view models, and rendering. Views reference view models;
+  view models depend on public library APIs and never reference views or controls.
 - `Rendering` is independent of the project model; it consumes render primitives.
 
 ### 3.1 Responsibilities
 
 | Project | Owns | Must not own |
 | --- | --- | --- |
-| `Mocassin.Core` | IDs, units, model objects, project aggregate, diagnostics, validation contracts, undo/redo primitives | File I/O, SQL, UI, solver data |
-| `Mocassin.Symmetry` | Space-group catalog, operations, cell geometry, fractional/Cartesian/4D encoding, orbit and permutation reduction | Model semantics |
-| `Mocassin.Compilation` | P1 extension, environment sampling, interaction discovery, transition rule generation, index assignment, compiled model | Job templates, supercells |
-| `Mocassin.Packages` | Project JSON, parameterization evaluation, job templates, supercell/doping generation, package encoding, `.msl` | Solver execution, UI |
-| `Mocassin.Results` | `.mcs` parsing, evaluation queries, derived quantities, exporters | Simulation execution |
+| `Mocassin.Core` | IDs, units, primitive geometry (`Fractional3`, `Cartesian3`, `Vector4I`), model objects, project aggregate, diagnostics, validation contracts, undo/redo primitives | File I/O, SQL, UI, solver data |
+| `Mocassin.Symmetry` | Space-group catalog, exact operations, cell geometry transforms, unit-cell encoding, orbit/permutation reduction, structure preview | Model semantics, persistence |
+| `Mocassin.Compilation` | P1 extension, environment sampling, interaction discovery, transition rule generation, index assignment, compiled model | Job templates, supercells, parameterization values, I/O |
+| `Mocassin.Contracts` | Package/results/state DTOs (`ParameterizedModel`, job/lattice payloads, `.mcs` document types, job-folder/solver/event contracts), schema versions, manifest reader | Build logic, SQL, UI, solver execution |
+| `Mocassin.Packages` | Project JSON persistence, parameterization application, job templates, supercell/doping generation, package encoding, immutable `.msl` writing | Solver execution, UI, `.msl`/`.msr` reading |
+| `Mocassin.Results` | `.msl`/`.msr`/`.mcs` parsing, result collection, evaluation queries, derived quantities, exporters | Simulation execution, package building/writing |
 | `Mocassin.Cli` | Command parsing, orchestration, process launch, progress/logging | Scientific algorithms |
 | `Mocassin.App*` | Presentation, commands, navigation, dialogs | Scientific algorithms |
 | `Mocassin.Rendering` | GPU abstraction, scene graph, picking, camera, overlays | Model validation |
@@ -169,15 +182,15 @@ Validated model  ──► diagnostics ──► GUI / CLI
 Compiled model + parameterization + job template
         │  expand jobs, generate supercells
         ▼
-Simulation package (.msl, SQLite)
+Simulation package (.msl, immutable SQLite)
         │  job id + CLI args
         ▼
-Rust solver (mocassin-sim) ──► stdout/progress + run.mcs/prerun.mcs
-        │  collect
+Rust solver (mocassin-sim) ──► job folder: run.mcs/prerun.mcs, solver.json, logs
+        │  collect (reads job folders)
         ▼
-Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
+Results store (.msr, SQLite) ──► .NET evaluation API ──► tables/plots/CSV/JSON
         │
-        └──► run.mcs/prerun.mcs ──► Python `mocassin` API ──► NumPy arrays / basic evaluations
+        └──► run.mcs/prerun.mcs and .msr ──► Python `mocassin` API ──► NumPy arrays / evaluations
 ```
 
 ### 5.1 Process model
@@ -188,12 +201,14 @@ Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
   memory reclamation between jobs, and natural HPC scheduling.
 - The GUI may run multiple solver processes (local run queue) with a configurable concurrency.
 - The CLI may launch a range of jobs sequentially or with a worker pool.
-- Results are collected by reading job directories and writing to `.msl` in a transaction.
+- `.msl` is immutable and never written after build; solver and readers open it read-only.
+- Results are collected by reading job folders and writing to `.msr` in a transaction. One collector owns a
+  results store at a time.
 
 ### 5.2 Determinism and seeds
 
 - A project has an optional master seed. Each job derives a stable 256-bit seed from
-  `(master_seed, purpose, collection_index, config_index, job_index)` using a documented hash (BLAKE3).
+  `(master_seed, purpose, collection_index, config_index, job_index)` using a documented hash (SHA-256).
 - The solver uses ChaCha12 (or a later documented PRNG) seeded from that value, with separate streams for
   lattice generation and simulation.
 - Supercell generation uses its own deterministic stream, so changing simulation settings does not change
@@ -201,6 +216,21 @@ Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
 - Same package + same solver version + same platform must reproduce the same state content (excluding
   timestamp/runner metadata). Cross-platform results must agree statistically; the test suite checks both
   properties.
+
+### 5.3 Concurrency and threading
+
+| Area | Policy |
+| --- | --- |
+| UI thread | View-model property changes and command state updates happen on the UI thread. Background work returns through the dispatcher; no blocking waits in commands. |
+| Build | Bounded `Parallel.ForEachAsync`/worker pool; immutable inputs; per-stage caches are thread-safe; cancellation stops scheduling new work. |
+| Solver | One process per job. Monte Carlo trajectories are sequential; job-level parallelism only. The GUI run queue caps concurrent processes. |
+| Project files | One writer per project via `.mocprj.lock`; readers use an immutable snapshot; autosave is atomic. |
+| `.msl` | Immutable after publication; any number of readers and solver processes may open it read-only. |
+| `.msr` | Single collector via `.msr.lock`; readers use read-only snapshots; collection is transactional. |
+| SQLite | Explicit `busy_timeout` and retry policy; no WAL dependence for published `.msl`; `.msr` uses `journal_mode=DELETE`. |
+| Logging | Thread-safe sinks; no UI-thread blocking; bounded channels for progress events. |
+
+The detailed file-sharing rules are in ADR 0011.
 
 ## 6. Technology choices
 
@@ -211,10 +241,11 @@ Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
 | MVVM | CommunityToolkit.Mvvm | Source-generated observable properties/commands, minimal ceremony |
 | DI/hosting | Microsoft.Extensions.* | Standard configuration, logging, DI, lifetime management |
 | JSON | System.Text.Json | Built-in, source-generated contexts, trimming/AOT friendly |
-| SQLite (.NET) | Microsoft.Data.Sqlite | Lightweight, no EF Core required for `.msl` |
-| SQLite (Rust) | `rusqlite` with `bundled` | Reproducible builds, no system dependency |
+| SQLite (.NET) | Microsoft.Data.Sqlite | Lightweight, no EF Core required for `.msl`/`.msr` |
+| SQLite (Rust) | `rusqlite` with `bundled` | Reproducible builds, no system dependency; reads `.msl` and `mmcfe.db` |
 | Package encoding | MessagePack + Zstd | Compact, schema-friendly, fast; shared conceptually with Rust |
 | State encoding | MessagePack | Same ecosystem as package payloads; no custom container; < 4 GiB workload |
+| Contract source | `contracts/manifest.json` + generator | One field/type/version source for C#, Rust, Python, docs, and fixtures |
 | Rust serialization | `serde` + `rmp-serde` | Matches package and state schema |
 | Rust CLI | `clap` | Ergonomic, shell completions, validation |
 | Rust errors | `thiserror` | Typed errors at crate boundaries |
@@ -232,6 +263,36 @@ Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
 | Testing (.NET) | xUnit + FluentAssertions + FsCheck | Standard, property-based geometry tests |
 | Testing (Rust) | built-in + `proptest` + `criterion` + `insta` | Unit, property, benchmarks, snapshots |
 | CI | GitHub Actions matrix | Windows/Linux/macOS, .NET 10, stable Rust |
+
+### 6.1 Modern .NET/C# usage
+
+Use modern features where they remove real duplication, allocations, or ambiguity; keep public scientific
+types explicit.
+
+| Feature | Where it fits | Why |
+| --- | --- | --- |
+| `readonly record struct`, `required`, `init` | IDs, units, DTOs, immutable model records | Value semantics, non-null initialization, less boilerplate |
+| Generic math (`INumber<T>`, `IFloatingPointIeee754<T>`) | Internal vector/matrix kernels, numeric helpers | Shared arithmetic without collapsing semantic public coordinate types |
+| `FrozenDictionary` / `FrozenSet` | Compiled particle/site/rule index maps, lookup tables | Fast immutable lookups after compilation |
+| `System.Numerics.Tensors` (`TensorPrimitives`) | MSD, displacement, correlation, and array reductions in Results | Vectorized reductions without hand-written SIMD |
+| `System.Threading.Lock` | Shared caches, session state, package-writer coordination | Cheaper, clearer mutual exclusion than `lock(object)` |
+| `TimeProvider` | Build/run timestamps, tests, deterministic clock injection | Avoid static `DateTime.UtcNow`; make time testable |
+| `Parallel.ForEachAsync` / `Channel<T>` | Job expansion, build stages, progress pipelines | Bounded parallelism and backpressure without thread-blocking |
+| `SearchValues<T>` / `[GeneratedRegex]` | Space-group literal parsing, connector strings, filter expressions | Allocation-light parsing with compile-time regexes |
+| `SHA256.HashData` / `IncrementalHash` | Result integrity, package verification, manifests | Standard hashing without custom checksum code |
+| `LoggerMessage` / `Meter` / `ActivitySource` | Build, solver orchestration, evaluation | Structured, low-overhead logs and metrics |
+| `CollectionsMarshal.AsSpan` / `MemoryMarshal` | Tight loops over compiled arrays after profiling | Avoid copies; keep `Span` scoped to synchronous code |
+| `BitOperations` | Particle masks and bitmask validation | Correct 64-bit operations and popcounts |
+| `PublishAot` / single-file publish | CLI and helper tools, if dependencies allow | Smaller, faster-starting tools; not a requirement for the GUI |
+
+**Do not use**
+
+- `INumber<T>` on coordinate vectors; vectors are not scalar numbers.
+- `System.Numerics.Vector3` for geometry; it is `float`, not `double`.
+- `dynamic`, reflection-based dispatch, or service locators in new code.
+- `Span<T>`/`ref struct` across `await` boundaries.
+- `record` types with mutable collection properties; use `ImmutableArray`/frozen collections.
+- SIMD or generic math complexity before profiling shows a need.
 
 ## 7. Cross-cutting concerns
 
@@ -270,33 +331,55 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
   `13` numerical failure, `14` aborted by limit, `15` cancelled, `16` I/O error.
 - The GUI surfaces the same codes and a human-readable abort reason.
 
-### 7.4 Logging
+### 7.4 Logging and observability
 
 - .NET: `Microsoft.Extensions.Logging` with console + rolling file sinks; structured properties include
   project id, build id, job id.
 - Rust: `tracing` with human and JSON formats; `--log-level`, `--log-file`.
 - Solver stdout is reserved for the human-readable statistics dump; structured events go to stderr/JSON.
+- The JSONL event catalog in `02-data-contracts.md` §5.5 is versioned. Consumers ignore unknown events and
+  fields; a future event schema major is rejected.
+- Logs are local only. Default retention is 14 days or 100 MB (whichever first); projects, packages, results,
+  and job folders are never auto-deleted.
+- Log records must not contain credentials or full remote-deploy secrets. Paths may be logged; user names and
+  hostnames are optional and can be redacted.
+- Metrics (`Meter`/`ActivitySource`) are local diagnostics, not telemetry; no remote exporter is enabled by
+  default.
 
 ### 7.5 Security and robustness
 
-- Treat project/package/state input as untrusted: bound counts, validate indices, reject NaN/Inf where
-  invalid, cap allocations, and fuzz parsers.
-- No arbitrary code execution from project files.
-- Extensions are loaded only when explicitly requested (`--extension path`), with a documented ABI and a
-  warning in the GUI.
-- Atomic file writes: write to a temporary file in the same directory, fsync, rename. `.msl` writes use a
-  transaction and a schema/version check.
+**Threat model.** Project, package, state, event, and log files are untrusted input. Extensions are untrusted
+native code running in-process. The solver process and the remote-deploy transport are additional trust
+boundaries. There is no server component and no remote telemetry.
+
+- Bound counts, validate every index/length, reject NaN/Inf where invalid, cap allocations, and fuzz all
+  parsers.
+- No arbitrary code execution from project/package/state files.
+- Extensions are loaded only when explicitly requested (`--extension path`), with the ADR 0014 ABI, panic
+  containment, a GUI warning, and a `--no-extensions` option.
+- Reject path traversal, symlinks, and zip-slip in job-folder, import, and deploy paths before writing.
+- Bound Zstd decompression and MessagePack array/map sizes; reject decompression bombs before allocation.
+- Open SQLite inputs read-only and validate schema/version before trusting page content.
+- Remote-deploy credentials come from an agent/key store and are never written to a project or log.
+- Atomic file writes: write to a temporary file in the same directory, fsync, rename. `.msl` and `.msr`
+  writes use a transaction and a schema/version check.
+- Residual risk: an in-process extension can crash or compromise the solver. This is accepted for v1 and
+  documented for users.
 
 ### 7.6 Versioning
 
 | Artifact | Version field | Compatibility rule |
 | --- | --- | --- |
-| Project JSON | `schemaVersion` integer | New reader accepts older minor versions via migrations; rejects newer major |
-| `.msl` package | `format_version` + `app_version` | Solver accepts the exact supported range; refuses unknown |
+| Project JSON | `schemaVersion` integer | New reader accepts older versions via in-memory migrations; rejects newer major |
+| `.msl` package | `format_version` + `app_version` | Immutable; reader supports current and previous major (ADR 0013) |
+| `.msr` results | `format_version` + package signature | Reader supports current and previous major; bound to one package |
 | Compiled payload | `format_version` | Tied to `.msl`; independent of project schema |
-| `.mcs` state | `format` + `formatVersion` | Reader supports the current version; rejects unknown `format`/version |
-| CLI JSON | `schemaVersion` | Additive changes only within a major version |
-| Python package | `__version__` | Aligned with the package/state format; wheel published per release |
+| `.mcs` state | `format` + `formatVersion` | Current major only; old states require the release that wrote them |
+| `solver.json` | `format` + `formatVersion` | Current and previous major |
+| MMCFE log DB | `format_version` | Current and previous major |
+| CLI JSON/events | `schemaVersion` | Additive changes only within a major version |
+| .NET libraries | NuGet SemVer | No breaking public API within a major; `ApiCompat` gate |
+| Python package | `__version__` + declared format range | New format major requires a package major; wheel per release |
 
 ## 8. Architecture decision records
 
@@ -309,4 +392,10 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
 | [0005](adr/0005-statistical-parity-and-rng.md) | Statistical parity and deterministic RNG policy |
 | [0006](adr/0006-3d-rendering.md) | 3D renderer abstraction and backend choice |
 | [0007](adr/0007-mit-license.md) | MIT license for the reimplementation; original GPL attribution |
-| [0008](adr/0008-standalone-documentation-toolchain.md) | Zensical narrative docs; DocFX/rustdoc APIs under one site |
+| [0008](adr/0008-standalone-documentation-toolchain.md) | Zensical narrative docs; DocFX/rustdoc/Python APIs under one site |
+| [0009](adr/0009-contract-manifest-and-contracts-library.md) | Shared contract manifest and `Mocassin.Contracts` |
+| [0010](adr/0010-canonical-messagepack-signatures.md) | Canonical MessagePack projection for signatures |
+| [0011](adr/0011-immutable-package-and-results-store.md) | Immutable `.msl` package and separate `.msr` results store |
+| [0012](adr/0012-transport-and-msd-definitions.md) | Origin-based MSD and per-species transport definitions |
+| [0013](adr/0013-format-compatibility-and-api-versioning.md) | Format compatibility and public API versioning |
+| [0014](adr/0014-extension-abi-and-trust-boundary.md) | Extension ABI and in-process trust boundary |

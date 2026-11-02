@@ -36,6 +36,7 @@ src/rust/             Rust workspace: solver, model/package reader, RNG, tracker
 src/python/           `mocassin-analysis`: read-only .mcs reader + basic Python evaluations
 samples/              Small example projects and reference inputs
 tests/                Cross-language integration and statistical validation assets
+contracts/            Machine-readable package/state contract manifest + generated checks
 zensical.toml         Zensical site configuration (target)
 ```
 

@@ -55,6 +55,9 @@ mocassin/
 │   ├── api/
 │   │   └── index.md
 │   └── planning/                # internal, excluded from the site
+├── contracts/
+│   ├── manifest.json            # format fields/types/versions
+│   └── generated/
 ├── src/dotnet/
 ├── src/rust/
 ├── src/python/
@@ -82,13 +85,16 @@ mocassin/
   - `Deterministic=true`, `ContinuousIntegrationBuild` when `CI=true`;
   - `GenerateDocumentationFile=true` for libraries.
 - [ ] Create `Directory.Packages.props` with central versions for Avalonia, CommunityToolkit.Mvvm,
-  Microsoft.Extensions.*, Microsoft.Data.Sqlite, MessagePack, ZstdSharp, xUnit, FsCheck, FluentAssertions,
+  Microsoft.Extensions.*, Microsoft.Data.Sqlite, MessagePack, ZstdSharp,
+  xUnit, FsCheck, FluentAssertions, System.Numerics.Tensors, Microsoft.CodeAnalysis.PublicApiAnalyzers,
+  Microsoft.DotNet.ApiCompat,
   LiveCharts2, Silk.NET, Serilog.
 - [ ] Create the solution with empty projects:
-  `Mocassin.Core`, `Mocassin.Symmetry`, `Mocassin.Compilation`, `Mocassin.Packages`, `Mocassin.Results`,
-  `Mocassin.Cli`, `Mocassin.App`, `Mocassin.App.ViewModels`, `Mocassin.App.Views`, `Mocassin.Rendering`.
+  `Mocassin.Core`, `Mocassin.Symmetry`, `Mocassin.Compilation`, `Mocassin.Contracts`,
+  `Mocassin.Packages`, `Mocassin.Results`, `Mocassin.Cli`, `Mocassin.App`, `Mocassin.App.ViewModels`,
+  `Mocassin.App.Views`, `Mocassin.Rendering`.
 - [ ] Add test projects: `Mocassin.Core.Tests`, `Mocassin.Symmetry.Tests`, `Mocassin.Compilation.Tests`,
-  `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, `Mocassin.App.Tests`.
+  `Mocassin.Contracts.Tests`, `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, `Mocassin.App.Tests`.
 - [ ] Add a smoke test in each test project so `dotnet test` is meaningful from day one.
 - [ ] Add `dotnet format` and a `.editorconfig` with C# style, naming, and analyzer severities.
 
@@ -98,7 +104,7 @@ mocassin/
 - [ ] Create crates: `mocassin-types`, `mocassin-msl`, `mocassin-rng`, `mocassin-solver`, `mocassin-state`,
   `mocassin-extension`, `mocassin-cli`.
 - [ ] Add workspace dependencies: `serde`, `serde_bytes`, `rmp-serde`, `zstd`, `rusqlite` (bundled), `clap`, `thiserror`,
-  `tracing`, `tracing-subscriber`, `rand`, `rand_chacha`, `blake3`, `crc32fast`, `bytemuck`, `memmap2`,
+  `tracing`, `tracing-subscriber`, `rand`, `rand_chacha`, `sha2`, `crc32fast`, `bytemuck`, `memmap2`,
   `rayon` (where justified), `proptest`, `criterion`, `insta`.
 - [ ] Add `rustfmt.toml` and `clippy.toml`; deny warnings in CI.
 - [ ] Add a smoke test and a `--version` CLI stub.
@@ -121,7 +127,12 @@ mocassin/
 
 - [ ] Create `tests/contracts/` and `tests/reference/` with README placeholders.
 - [ ] Add `samples/blank/` and `samples/ceria/` directories with README placeholders.
-- [ ] Add the eight ADRs from `docs/planning/adr/`.
+- [ ] Add the fourteen ADRs from `docs/planning/adr/`.
+- [ ] Create `contracts/manifest.json` and `tools/contracts/` with a generator/validator for project/package/
+  results/state/job-folder/event/MMCFE field descriptions, canonical signature projection layouts, JSON Schema
+  fragments, fixture descriptors, and version constants.
+- [ ] Add a CI step that regenerates contract artifacts and fails on drift.
+- [ ] Add public-API baseline files and an `ApiCompat` CI check for published .NET libraries.
 - [ ] Create the Zensical project skeleton:
   - `zensical.toml` with `docs_dir = "docs"`, `site_dir = "site"`, `exclude_docs = "planning/"`, site
     metadata, repo link, and nav;
@@ -158,6 +169,8 @@ mocassin/
 - [ ] `README.md` describes prerequisites and the exact build/test/docs commands.
 - [ ] `zensical build --strict` succeeds and the skeleton contains every required top-level section.
 - [ ] The docs CI job is green and `docs/planning/` is absent from the built site.
+- [ ] `contracts/manifest.json` exists, generated checks are current, and the CI drift check passes.
+- [ ] Canonical signature-projection vectors and the public-API baseline check are in place.
 - [ ] The repository contains no copied original source files.
 - [ ] Documentation written
 
@@ -168,6 +181,8 @@ At this point, document the repository and contributor workflow:
 - `README.md` — project purpose, prerequisites, build/test/docs commands.
 - `docs/development/contributing.md` — branch rules, step workflow, review gates, docs-as-code.
 - `docs/reference/file-layout.md` — repository layout, generated artifacts, `docs/planning` exclusion.
+- `docs/development/testing-and-parity.md` — testing trophy, mock/fake policy, fixtures, and tiers, seeded from
+  `03-quality-strategy.md`.
 - `docs/index.md` and the Zensical nav — the documentation skeleton itself, navigation, and placeholders.
 - `docs/api/index.md` — the future API landing page and subpath convention.
 
@@ -182,6 +197,7 @@ At this point, document the repository and contributor workflow:
 | Format check | Both formatters report no changes |
 | Docs skeleton | Strict Zensical build; required nav sections present; planning excluded |
 | Docs CI | Docs job installs pinned requirements and builds strictly |
+| Contracts | Manifest generates current schemas/checks; drift check passes |
 | Python CI | Python 3.11–3.13 install, pytest, wheel build |
 
 ## Risks and mitigations

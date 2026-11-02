@@ -24,7 +24,8 @@ also usable as a Rust library for tests and future embedding, but the supported 
 process plus package contract.
 
 The .NET model builder is the only producer of `.msl`; Rust never reads project JSON. The solver writes
-per-job state files and stdout; a separate `mocassin collect` command writes results back into `.msl`.
+per-job state files and stdout; a separate `mocassin collect` command writes results into the `.msr`
+sidecar. The `.msl` package is immutable.
 
 ## Consequences
 
@@ -54,6 +55,6 @@ per-job state files and stdout; a separate `mocassin collect` command writes res
 ## Rules
 
 - The `.msl` format is versioned; the solver refuses incompatible versions.
-- The solver never writes to `.msl`.
+- The solver never writes to `.msl` or `.msr`.
 - The solver's stdout is the human statistics dump; structured logs go to stderr.
 - Any future in-process embedding must go through a new ADR and a stable FFI layer.
