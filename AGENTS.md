@@ -63,6 +63,10 @@ These rules override convenience. If you are unsure, stop and ask the user.
 - All commits for the task must be on the `agent/*` branch.
 - **No merging with `main` or `master` is allowed until the user explicitly allows it.** This includes local
   merges, fast-forward merges, PR merges, rebases that rewrite shared history, and force-pushes.
+- **Agent branches must be integrated with a squash merge** (`git merge --squash` or the equivalent PR squash
+  option), not a merge commit, unless the user explicitly requests another strategy.
+- A squash merge must produce one clear commit on `main`/`master` that summarizes the branch’s changes and
+  references the completed step or task.
 - Do not push the branch or open a pull request unless the user asks. Pushing the feature branch is allowed
   only when requested.
 - Do not delete another contributor's branch or rewrite shared history.
@@ -380,6 +384,7 @@ incomplete.
 - Do not optimize before correctness is proven by tests.
 - Do not mark a step/parity item “done” without passing acceptance criteria.
 - Do not work directly on `main` or `master`; always create an `agent/*` branch first.
+- Do not integrate an agent branch with a merge commit; use a squash merge.
 - Do not merge into `main` or `master` without explicit user permission.
 - Do not modify `/workspace/mocassin-original` if it is present. It is a read-only reference clone.
 
