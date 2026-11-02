@@ -118,7 +118,7 @@ Starts after step 01 with the shell and project lifecycle (22). Consumes step 03
 ### Integration points
 
 - **Contract review after step 11.** .NET and Rust teams sign off on the `.msl` schema and fixture.
-- **Contract review after step 18.** .NET and Rust teams sign off on the `.mcs` layout and fixture.
+- **Contract review after step 18.** .NET and Rust teams sign off on the `.mcs` MessagePack schema and fixture.
 - **Weekly cross-track build.** A script builds the ceria project, runs one KMC and one MMC job, collects,
   evaluates, and compares against the previous week's observables.
 

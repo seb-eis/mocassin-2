@@ -83,7 +83,7 @@ mocassin/
 - [ ] Create a workspace `src/rust/Cargo.toml` with resolver 2 and shared `[workspace.package]` metadata.
 - [ ] Create crates: `mocassin-types`, `mocassin-msl`, `mocassin-rng`, `mocassin-solver`, `mocassin-state`,
   `mocassin-extension`, `mocassin-cli`.
-- [ ] Add workspace dependencies: `serde`, `rmp-serde`, `zstd`, `rusqlite` (bundled), `clap`, `thiserror`,
+- [ ] Add workspace dependencies: `serde`, `serde_bytes`, `rmp-serde`, `zstd`, `rusqlite` (bundled), `clap`, `thiserror`,
   `tracing`, `tracing-subscriber`, `rand`, `rand_chacha`, `blake3`, `crc32fast`, `bytemuck`, `memmap2`,
   `rayon` (where justified), `proptest`, `criterion`, `insta`.
 - [ ] Add `rustfmt.toml` and `clippy.toml`; deny warnings in CI.

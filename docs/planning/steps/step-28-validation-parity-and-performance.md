@@ -103,7 +103,7 @@ Expand step 15–18 tests into a release suite:
 - Fuzz:
   - project JSON parser (SharpFuzz);
   - `.msl` reader (cargo-fuzz): truncated/oversized blobs, bad indices, bad Zstd, schema versions;
-  - `.mcs` reader: bad CRC/offsets/counts/versions;
+  - `.mcs` reader: malformed MessagePack, wrong types, oversized arrays, invalid indices, unsupported versions;
   - extension config parser.
 - Allocation caps and timeouts for parsers.
 - Property tests for geometry, supercells, rule generation, and state round-trip.

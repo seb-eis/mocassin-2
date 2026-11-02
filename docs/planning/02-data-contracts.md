@@ -440,8 +440,8 @@ CREATE TABLE results (
     completed_utc      TEXT,
     wall_time_s        REAL,
     stdout             TEXT,
-    run_state          BLOB,                   -- .mcs
-    prerun_state       BLOB,                   -- .mcs, KMC only
+    run_state          BLOB,                   -- MessagePack .mcs
+    prerun_state       BLOB,                   -- MessagePack .mcs, KMC only
     run_state_sha256   TEXT,
     prerun_state_sha256 TEXT,
     error_message      TEXT
@@ -570,79 +570,154 @@ The solver derives the site-energy background from the compiled model's `[positi
 over the supercell. Per-job background overrides are not part of version 1; a future extension can add a
 sparse `background_overrides` map without changing the base layout.
 
-## 4. Binary state file (`.mcs`, version 1)
+## 4. Result state file (`.mcs`, MessagePack, version 1)
 
 ### 4.1 Design
 
-- Little-endian, fixed-width, no language-specific padding.
-- A header and section table allow forward-compatible readers to skip unknown sections.
-- Arrays are contiguous and 8-byte aligned; readers can create zero-copy spans.
-- Optional Zstd compression is a section flag, not an envelope; default is uncompressed for mmap-friendly
-  local analysis.
-- CRC32C covers each section and the header.
+The `.mcs` file is a **single MessagePack document** encoded with `MessagePack-CSharp` in .NET and
+`rmp-serde` in Rust. It is not a custom binary container: there is no hand-written header, section table,
+alignment scheme, or checksum trailer.
 
-### 4.2 Header (64 bytes)
+- **Top-level value is a map** with stable camelCase string keys. Readers ignore unknown fields for forward
+  compatibility and validate every field they use.
+- **`format` + `formatVersion`** identify the document. The current values are `"mocassin.mcs"` and `1`.
+- **The lattice is a MessagePack `bin`** (`byte[]` in .NET, `serde_bytes`/`Vec<u8>` in Rust). All other numeric
+  payloads are native MessagePack arrays (`uint64`, `float64`, etc.).
+- **No compression by default.** MessagePack is already compact; transport/storage compression is an external
+  concern and must not change the document format.
+- **No embedded checksum.** The collector computes SHA-256 of the file and stores it in
+  `results.run_state_sha256` in the `.msl`. A corrupted file is rejected by the package collector/reader.
+- **Size assumption:** the document is expected to stay below 4 GiB. MessagePack `bin`/array lengths are
+  32-bit, so this is also the practical format limit. The solver rejects an encoded state above a configurable
+  cap (default 3.5 GiB) with an actionable error rather than producing a truncated file.
+- **MMC** omits KMC-only fields (`globalTrackers`, `mobileTrackers`, `staticTrackers`, `mobileMapping`,
+  `jumpStatistics`). `prerun.mcs` uses the same schema with `metadata.phase = "prerun"`.
 
-| Offset | Size | Field |
+**Interoperability rules**
+
+- Objects are encoded as MessagePack **maps with string keys**, not positional arrays. In Rust, use
+  `rmp_serde::Serializer::new().with_struct_map()` and `#[serde(rename_all = "camelCase")]`; in .NET, use
+  `[MessagePackObject]` with string `[Key("...")]` names or an equivalent generated resolver.
+- `lattice` must be a MessagePack `bin` (`byte[]` / `serde_bytes::ByteBuf`), not an array of integers.
+- A tracker vector is a 3-element array `[x, y, z]` of `float64`, in that order.
+- `format`/`formatVersion` are regular map fields; there is no separate binary header.
+- Readers must ignore unknown map keys and reject unsupported `format`/`formatVersion` values.
+
+### 4.2 Top-level map
+
+| Key | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `format` | string | yes | `"mocassin.mcs"` |
+| `formatVersion` | uint32 | yes | `1` |
+| `metadata` | map | yes | See 4.3 |
+| `lattice` | bin | yes | Particle index per linearized position, `A*B*C*P` bytes |
+| `counters` | array of maps | yes | One entry per particle index; see 4.4 |
+| `globalTrackers` | array of `[f64;3]` | KMC | Fractional displacement per global tracker |
+| `mobileTrackers` | array of `[f64;3]` | KMC | Fractional displacement per mobile particle |
+| `staticTrackers` | array of `[f64;3]` | KMC | Fractional displacement per static tracker |
+| `mobileMapping` | array of uint32 | KMC | Position index for each mobile tracker |
+| `jumpStatistics` | array of maps | KMC | Jump histograms per global tracker; see 4.4 |
+| `energySamples` | array of maps | no | MMC energy trace / KMC sample series |
+| `particlePositions` | array of uint32 | no | Optional diagnostic positions of mobile particles |
+
+### 4.3 `metadata` map
+
+| Key | Type | Meaning |
 | --- | --- | --- |
-| 0 | 4 | magic `MCS2` |
-| 4 | 2 | `version` (u16) = 1 |
-| 6 | 2 | `header_size` (u16) = 64 |
-| 8 | 4 | `flags` (u32) |
-| 12 | 4 | `section_count` (u32) |
-| 16 | 8 | `cycle_count` (u64) |
-| 24 | 8 | `simulated_time_s` (f64) |
-| 32 | 8 | `target_mcsp` (u64) |
-| 40 | 8 | `job_id` (u64) |
-| 48 | 4 | `header_crc32c` (u32) |
-| 52 | 4 | reserved (u32) = 0 |
-| 56 | 8 | `file_size` (u64) |
+| `solverVersion` | string | `mocassin-sim` version |
+| `modelSignature` | string | Compiled model signature from the `.msl` |
+| `jobId` | uint32 | Package job id |
+| `kind` | string | `"kmc"` or `"mmc"` |
+| `phase` | string | `"run"` or `"prerun"` |
+| `createdUtc` | string | ISO-8601 UTC timestamp |
+| `latticeSize` | `[uint32;3]` | Supercell `A,B,C` |
+| `positionCount` | uint32 | P1 positions per unit cell (`P`) |
+| `particleCount` | uint32 | Number of particle indices including void |
+| `trackerCounts` | map | `{ "global": u32, "mobile": u32, "static": u32 }` |
+| `cycleCount` | uint64 | All simulation cycles/attempts |
+| `mcsCount` | uint64 | Successful Monte Carlo steps |
+| `targetMcsp` | uint64 | Target successful steps per mobile particle |
+| `simulatedTimeS` | f64 | Simulated KMC time in seconds; 0 for MMC |
+| `normalizationFactor` | f64 | `K_norm`; 1 for MMC |
+| `rawMaxJumpProbability` | f64 | Observed raw maximum; 0 for MMC |
+| `latticeEnergyEv` | f64 | Current total lattice energy in eV |
+| `flags` | uint64 | Solver state flags |
+| `abortReason` | string | `running`, `prerun`, `completed`, `equilibrium`, `timeLimit`, `rateLimit`, `cancelled`, `error` |
+| `seedHash` | string | BLAKE3 hash of the job seed (not the raw seed) |
+| `units` | map | `{ "energy": "eV", "time": "s", "length": "angstrom", "tracker": "fractional" }` |
+| `runner` | map | Optional `{ "os", "arch", "rustVersion" }` |
 
-### 4.3 Section table
+### 4.4 Counters, histograms, and energy samples
 
-Immediately after the header, `section_count` entries of 40 bytes:
+**Counter entry** (array index = particle index):
 
-| Offset | Size | Field |
+| Key | Type | Meaning |
 | --- | --- | --- |
-| 0 | 4 | `section_id` (u32) |
-| 4 | 4 | `element_type` (u32): 0=u8, 1=u32, 2=u64, 3=f64, 4=utf8 JSON, 5=raw |
-| 8 | 8 | `offset` (u64) |
-| 16 | 8 | `length_bytes` (u64) |
-| 24 | 8 | `count` (u64) |
-| 32 | 4 | `flags` (u32): bit 0 = Zstd, bit 1 = optional |
-| 36 | 4 | `crc32c` (u32) of the stored bytes |
+| `particleIndex` | uint32 | Redundant but makes the document self-describing |
+| `skip` | uint64 | Frequency-precheck skips |
+| `success` | uint64 | Accepted state advances |
+| `rejected` | uint64 | Statistically rejected attempts |
+| `blocked` | uint64 | No matching rule / blocked site |
+| `startUnstable` | uint64 | S0-unstable outcomes |
+| `endUnstable` | uint64 | S2-unstable outcomes |
 
-Section payloads start after the table, aligned to 8 bytes. Unknown section IDs are skipped. A reader must
-reject duplicate IDs, out-of-range offsets, and counts that exceed the file size.
+**Jump statistics entry** (one per global tracker):
 
-### 4.4 Sections
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `globalTrackerIndex` | uint32 | Index into `globalTrackers` |
+| `particleIndex` | uint32 | Tracked particle |
+| `transitionIndex` | uint32 | Compiled transition index |
+| `acceptedCount` | uint64 | Accepted jumps for this tracker |
+| `edge` | histogram | Raw `Σ E_i(S1)` |
+| `positiveConfiguration` | histogram | Positive `ΔE_conf` |
+| `negativeConfiguration` | histogram | `|ΔE_conf|` for negative values |
+| `total` | histogram | Total barrier including field |
 
-| ID | Name | Element | Shape | Contents |
-| --- | --- | --- | --- | --- |
-| 1 | `metadata` | JSON | 1 | Solver version, package signature, job metadata, abort reason, flags |
-| 2 | `lattice` | u8 | `n_positions` | Final particle index per linearized position |
-| 3 | `cycle_counters` | u64 | `n_particles × 8` | Attempts, successes, skips, rejected, blocked, S0-unstable, S2-unstable, accepted |
-| 4 | `global_trackers` | f64 | `n_global × 3` | Displacement vector per particle/transition tracker |
-| 5 | `mobile_trackers` | f64 | `n_mobile × 3` | Displacement vector per mobile particle |
-| 6 | `static_trackers` | f64 | `n_static × 3` | Displacement vector per position/particle tracker |
-| 7 | `mobile_mapping` | u32 | `n_mobile` | Position index for each mobile tracker |
-| 8 | `jump_histograms` | u64 | `n_global × 4 × 1000 + 2` | Four barrier histograms plus under/overflow counters per global tracker |
-| 9 | `energy_samples` | f64 | `n_samples` | Optional MMC energy trace / KMC sample series |
-| 10 | `particle_positions` | u32 | `n_mobile` | Initial position index for mobile particles (diagnostics) |
+**Histogram**:
 
-The exact counter field order and histogram layout are frozen in step 18 and verified against the reader in
-step 20. Both sides share a single generated constants file (`tests/contracts/mcs-sections.json`).
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `minEv` | f64 | Inclusive lower edge |
+| `maxEv` | f64 | Exclusive upper edge |
+| `bins` | array of uint64 | Bin counts; length is the bin count (default 1000) |
+| `underflow` | uint64 | Values below `minEv` |
+| `overflow` | uint64 | Values at/above `maxEv` |
+
+**Energy sample**:
+
+| Key | Type | Meaning |
+| --- | --- | --- |
+| `mcs` | uint64 | MCS at which the sample was taken |
+| `latticeEnergyEv` | f64 | Lattice energy |
+| `acceptedDeltaEv` | f64 | Mean accepted energy change in the window |
 
 ### 4.5 Validation
 
 A reader must:
 
-1. Check magic, version, header size, and CRC.
-2. Check `file_size` against the actual file length.
-3. Validate every section offset/length/count and element type.
-4. Validate that `lattice` length equals the job's `a*b*c*position_count`.
-5. Validate tracker counts against the job's simulation metadata.
-6. Reject NaN/Inf in fields where they are not meaningful (e.g. lattice positions).
+1. Check `format == "mocassin.mcs"` and `formatVersion` is supported.
+2. Validate required metadata fields and reject missing/ill-typed values.
+3. Validate `lattice.length == latticeSize[0] * latticeSize[1] * latticeSize[2] * positionCount`.
+4. Validate every lattice particle index is `< particleCount`.
+5. Validate `globalTrackers`, `mobileTrackers`, `staticTrackers`, and `mobileMapping` lengths against
+   `metadata.trackerCounts`; validate every mapping value is a valid lattice position.
+6. Validate `jumpStatistics.globalTrackerIndex` values are unique and in range; validate histogram
+   `bins.Length`, `minEv < maxEv`, and finite numeric values.
+7. Require KMC fields for `kind == "kmc"`; require them to be absent/empty for `kind == "mmc"`.
+8. Reject NaN/Inf where the schema requires a finite value (energies, times, factors).
+9. Ignore unknown fields; reject duplicate map keys where the decoder exposes them.
+10. Reject an encoded document above the configured size cap.
+
+The `.msl` collector verifies `run_state_sha256` before storing or evaluating a state.
+
+### 4.6 Contract testing
+
+- `tests/contracts/state-v1.mcs` is written by Rust and read by .NET; the reader emits a canonical JSON
+  summary of metadata, counters, tracker counts, and histogram totals.
+- A .NET fixture writer may also emit the same schema for reader tests.
+- A future `formatVersion` is rejected with a clear error; additive fields are ignored.
+- Fuzzing covers malformed MessagePack, wrong types, oversized arrays, invalid indices, and version mismatches.
 
 ## 5. CLI contracts
 
@@ -701,6 +776,6 @@ The GUI consumes these events for progress bars and live charts.
 - `tests/contracts/project-minimal.mocprj` and `project-ceria.mocprj` are canonical fixtures.
 - `tests/contracts/model-v1.msgpack.zst` is written by .NET and read by Rust; both dump a canonical JSON
   representation and compare.
-- `tests/contracts/state-v1.mcs` is written by Rust and read by .NET; the reader dumps section metadata and
-  a checksum.
+- `tests/contracts/state-v1.mcs` is a MessagePack document written by Rust and read by .NET; the reader
+  emits a canonical JSON summary of metadata, counters, tracker counts, and histogram totals.
 - A schema-change PR must update the fixture, the version field, this document, and the relevant ADR.

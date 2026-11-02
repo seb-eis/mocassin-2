@@ -14,7 +14,7 @@ developed by Sebastian Eisele and Steffen Neitzel-Grieshammer at Forschungszentr
 | Model building system | C# / .NET 10, platform-portable class libraries and CLI |
 | Desktop GUI | C# / Avalonia UI, MVVM, cross-platform (Windows, Linux, macOS) |
 | Solver | Rust, native cross-platform binaries |
-| Shared contracts | Versioned JSON project files, SQLite simulation packages, documented binary state files |
+| Shared contracts | Versioned JSON project files, SQLite simulation packages, MessagePack state files |
 
 ## Goals
 

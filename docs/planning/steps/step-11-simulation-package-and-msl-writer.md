@@ -18,7 +18,7 @@ thousands of jobs and safe against partial/corrupt output.
 - Large arrays are raw native structs (`Array_t`) in blobs; jobs reference shared model rows by integer IDs.
 - The builder creates the DB, adds rows, saves changes, and embeds the project XML and build template XML.
 - Hard limit: 99,999 jobs per package.
-- Results are stored as raw `.mcs` blobs in `JobResultData`.
+- Results are stored as MessagePack `.mcs` blobs in `JobResultData`.
 - Journal mode is WAL during build, then switched to DELETE; `vacuum` is run on save.
 
 The new format keeps SQLite (great for a single-file, transactional artifact) but uses a small, explicit,

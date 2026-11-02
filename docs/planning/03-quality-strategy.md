@@ -127,10 +127,10 @@ solver with the same binary, platform, package, and seed.
 - **Project JSON**: .NET writes fixtures; a JSON Schema validator checks them in CI.
 - **Compiled model**: .NET writes `.msl`; Rust reads it, validates invariants, and emits canonical JSON;
   compare with the .NET canonical JSON.
-- **State file**: Rust writes `.mcs` for a synthetic small run; .NET reads it and emits a canonical JSON
-  summary; compare with the Rust-side summary.
-- **Version rejection**: each reader must reject a fixture with a future major version and a corrupted
-  section with a clear error.
+- **State file**: Rust writes a MessagePack `.mcs` for a synthetic small run; .NET reads it and emits a
+  canonical JSON summary; compare with the Rust-side summary and the schema version.
+- **Version rejection**: each reader must reject a fixture with a future major version and a malformed/
+  truncated MessagePack document with a clear error.
 - **Fuzzing**: `cargo-fuzz` on the `.msl` and `.mcs` readers; SharpFuzz on the project JSON reader.
   Crashes and OOMs are release blockers.
 
