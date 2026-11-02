@@ -1,0 +1,11 @@
+* text=auto eol=lf
+*.sln text eol=crlf
+*.cs text eol=lf
+*.rs text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+*.png binary
+*.jpg binary
+*.pdf binary
+*.mcs binary
+*.msl binary
