@@ -43,7 +43,29 @@ Before changing anything, read these in order:
 The plan is the source of truth. If code and plan disagree, stop and reconcile them rather than silently
 following one.
 
-## 3. Non-negotiable decisions
+## 3. Branch and merge rules (mandatory)
+
+These rules override convenience. If you are unsure, stop and ask the user.
+
+- **Never work on `main` or `master`.** Do not edit files, commit, rebase, force-push, or run generated
+  changes there.
+- Before making any change, create a dedicated branch from the current main branch:
+  - feature work: `agent/<feature>` (e.g. `agent/particle-editor`)
+  - bug fixes: `agent/fix-<short-description>` (e.g. `agent/fix-kmc-timestep`)
+  - use lowercase kebab-case and keep the name short and specific.
+- If the working tree is on `main`/`master`, stop and create a branch first. If there are uncommitted
+  changes, move them to the new branch with `git switch -c agent/<name>`; never commit them on main.
+- All commits for the task must be on the `agent/*` branch.
+- **No merging with `main` or `master` is allowed until the user explicitly allows it.** This includes local
+  merges, fast-forward merges, PR merges, rebases that rewrite shared history, and force-pushes.
+- Do not push the branch or open a pull request unless the user asks. Pushing the feature branch is allowed
+  only when requested.
+- Do not delete another contributor's branch or rewrite shared history.
+- When the task is finished, report the branch name, commit hash(es), test results, and ask for explicit
+  permission before any merge.
+- If the user authorizes a merge, follow their instruction exactly; otherwise leave the branch unmerged.
+
+## 4. Non-negotiable decisions
 
 These are recorded decisions (see [`docs/planning/adr/`](docs/planning/adr/)). Do not reverse them without an
 explicit new ADR and owner approval.
@@ -66,7 +88,7 @@ explicit new ADR and owner approval.
 8. **No silent scientific corrections.** If the original behaviour is ambiguous or wrong, document the chosen
    interpretation in the step page and add a test. Do not “fix” physics without evidence.
 
-## 4. Repository layout
+## 5. Repository layout
 
 Current repository:
 
@@ -117,7 +139,7 @@ Rules:
 - Scientific algorithms never live in view models or views.
 - The Rust solver core is a library first; the CLI is a thin wrapper.
 
-## 5. Build and test commands
+## 6. Build and test commands
 
 These commands become valid as the corresponding projects are created. Do not run them expecting success
 today.
@@ -152,14 +174,14 @@ Quality gates for any change:
 - Performance benchmarks run if the change touches a hot path.
 - Step page and parity matrix updated.
 
-## 6. Working on a step
+## 7. Working on a step
 
 The 30 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as work packages, not suggestions.
 
 1. Choose the lowest-numbered unblocked step unless the owner assigns another.
 2. Check its **Depends on** line; do not start before dependencies are done.
 3. Read the step’s **Original reference**, **Design**, **Acceptance criteria**, **Tests**, and **Risks**.
-4. Create a branch/commit scope named after the step, e.g. `step-03-particle-structure`.
+4. Create an `agent/*` branch as described in section 3, e.g. `agent/step-03-particle-structure`.
 5. Implement only that step’s scope. Resist adding later-phase features.
 6. Add the tests named in the step, plus tests for every bug you find.
 7. Update the step page:
@@ -173,7 +195,7 @@ The 30 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 A step is not done because the code compiles. Its acceptance criteria, tests, docs, and parity entries must
 pass.
 
-## 7. Coding conventions
+## 8. Coding conventions
 
 ### .NET
 
@@ -204,7 +226,7 @@ pass.
 - Particle masks are `u64`; never `1 << id` on a 32-bit integer.
 - Use little-endian explicit writes for `.mcs`; do not depend on native struct layout.
 
-## 8. Scientific invariants
+## 9. Scientific invariants
 
 Read [`docs/planning/02-data-contracts.md`](docs/planning/02-data-contracts.md) and the relevant step pages.
 The most important invariants:
@@ -231,7 +253,7 @@ The most important invariants:
 When the original behaviour is ambiguous, inspect the original source as a **reference only**, document the
 interpretation, and encode it in a test. Do not copy GPL code.
 
-## 9. Data and format rules
+## 10. Data and format rules
 
 - `docs/planning/02-data-contracts.md` is the source of truth for field names, versions, and layouts.
 - Any format change requires:
@@ -248,7 +270,7 @@ interpretation, and encode it in a test. Do not copy GPL code.
   result rows.
 - `.mcs`: magic `MCS2`, section table, 64-bit offsets, CRC32C, optional Zstd. Do not add native padding.
 
-## 10. Testing expectations
+## 11. Testing expectations
 
 - Unit tests for pure functions and formulas.
 - Property-based tests for geometry, symmetry, permutation reduction, supercells, and state round-trips.
@@ -263,7 +285,7 @@ interpretation, and encode it in a test. Do not copy GPL code.
 A bug fix without a regression test is incomplete. A scientific change without a physics/parity test is
 incomplete.
 
-## 11. Licensing rules
+## 12. Licensing rules
 
 - New source files: `SPDX-License-Identifier: MIT`.
 - Do not copy original MOCASSIN source, documentation text, or database content into MIT files.
@@ -274,7 +296,7 @@ incomplete.
 - Dependencies must be MIT-compatible. GPL/AGPL dependencies require explicit review.
 - Keep the original authors’ citation guidance in the README/NOTICE.
 
-## 12. What not to do
+## 13. What not to do
 
 - Do not add legacy `.mocprj`/`.msl`/`.mcs` import/export.
 - Do not copy original GPL code or data into the MIT codebase.
@@ -288,9 +310,11 @@ incomplete.
 - Do not put scientific logic in view models.
 - Do not optimize before correctness is proven by tests.
 - Do not mark a step/parity item “done” without passing acceptance criteria.
+- Do not work directly on `main` or `master`; always create an `agent/*` branch first.
+- Do not merge into `main` or `master` without explicit user permission.
 - Do not modify `/workspace/mocassin-original` if it is present. It is a read-only reference clone.
 
-## 13. Useful references in the original repository
+## 14. Useful references in the original repository
 
 If `/workspace/mocassin-original` is available, these are the most useful starting points. Read, do not copy.
 
@@ -305,7 +329,7 @@ If `/workspace/mocassin-original` is available, these are the most useful starti
 The analysis notes used to create this plan are not part of the repository. If they are unavailable, re-derive
 from the original and the plan’s “Original reference” sections.
 
-## 14. Definition of done for a change
+## 15. Definition of done for a change
 
 - [ ] The step’s acceptance criteria are met.
 - [ ] Unit/property/golden/contract tests pass.
