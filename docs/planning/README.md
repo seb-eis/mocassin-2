@@ -65,15 +65,16 @@ Additional technical decisions (clean-break format encoding, Avalonia MVVM toolk
 | D. Solver | [19](steps/step-19-solver-cli-hpc-and-extensions.md) | Production CLI, HPC helpers, extension ABI |
 | E. Results | [20](steps/step-20-state-reader-and-evaluation-api.md) | `.mcs` reader and evaluation API |
 | E. Results | [21](steps/step-21-analysis-plots-and-reports.md) | Analysis queries, plots, CSV/JSON reports |
-| F. GUI | [22](steps/step-22-avalonia-shell-and-project-lifecycle.md) | Avalonia shell, navigation, project lifecycle, undo/redo |
-| F. GUI | [23](steps/step-23-model-editors-particle-structure-transitions.md) | Particle, structure, and transition editors |
-| F. GUI | [24](steps/step-24-model-editors-energy-lattice-simulations.md) | Energy, lattice, and simulation editors |
-| F. GUI | [25](steps/step-25-parameterization-job-templates-and-build-ui.md) | Parameterization, job templates, build/deploy UI |
-| F. GUI | [26](steps/step-26-3d-viewer-and-visualization.md) | Cross-platform 3D viewer and overlays |
-| F. GUI | [27](steps/step-27-run-monitoring-and-mmcfe-ui.md) | Live run monitoring, charts, MMCFE workflow |
-| G. Release | [28](steps/step-28-validation-parity-and-performance.md) | Statistical parity, performance, fuzzing, hardening |
-| G. Release | [29](steps/step-29-standalone-documentation.md) | Documentation completion: coverage, cross-cutting pages, DocFX + rustdoc APIs, publish |
-| G. Release | [30](steps/step-30-packaging-and-release.md) | Packaging, docs artifact, samples, release engineering |
+| E. Results | [22](steps/step-22-python-analysis-api.md) | Python `.mcs` reader, basic evaluations, pytest, mkdocstrings |
+| F. GUI | [23](steps/step-23-avalonia-shell-and-project-lifecycle.md) | Avalonia shell, navigation, project lifecycle, undo/redo |
+| F. GUI | [24](steps/step-24-model-editors-particle-structure-transitions.md) | Particle, structure, and transition editors |
+| F. GUI | [25](steps/step-25-model-editors-energy-lattice-simulations.md) | Energy, lattice, and simulation editors |
+| F. GUI | [26](steps/step-26-parameterization-job-templates-and-build-ui.md) | Parameterization, job templates, build/deploy UI |
+| F. GUI | [27](steps/step-27-3d-viewer-and-visualization.md) | Cross-platform 3D viewer and overlays |
+| F. GUI | [28](steps/step-28-run-monitoring-and-mmcfe-ui.md) | Live run monitoring, charts, MMCFE workflow |
+| G. Release | [29](steps/step-29-validation-parity-and-performance.md) | Statistical parity, performance, fuzzing, hardening |
+| G. Release | [30](steps/step-30-standalone-documentation.md) | Documentation completion: coverage, cross-cutting pages, DocFX + rustdoc APIs, Python API docs, publish |
+| G. Release | [31](steps/step-31-packaging-and-release.md) | Packaging, docs artifact, Python package, samples, release engineering |
 
 ## Working conventions
 
@@ -90,8 +91,9 @@ Additional technical decisions (clean-break format encoding, Avalonia MVVM toolk
 - The Rust solver never reads project JSON. Its only input is the compiled simulation package plus CLI
   arguments, so it can be developed and tested independently.
 - Standalone documentation is built with Zensical; .NET and Rust API references are generated with DocFX and
-  rustdoc into `/api/dotnet/` and `/api/rust/`. Step 00 creates the skeleton, every feature step writes its
-  pages, Step 29 completes the site, and Step 30 packages it. `docs/planning/` is excluded from publication.
+  rustdoc into `/api/dotnet/` and `/api/rust/`, and the Python API is rendered by mkdocstrings at
+  `/api/python/`. Step 00 creates the skeleton, every feature step writes its
+  pages, Step 30 completes the site, and Step 31 packages it. `docs/planning/` is excluded from publication.
 
 ## Status
 

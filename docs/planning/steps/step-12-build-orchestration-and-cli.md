@@ -1,7 +1,7 @@
 # Step 12 — Build Orchestration and `mocassin` CLI
 
 **Phase:** C. Compilation  
-**Depends on:** 10, 11  
+**Depends on:** 10, 11
 **Delivers:** A headless CLI that loads a project, validates, compiles, parameterizes, expands jobs, writes a
 package, reports progress, and supports cancellation and partial builds.
 

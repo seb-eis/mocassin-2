@@ -22,6 +22,8 @@ Target stack:
 | Project format | Versioned UTF-8 JSON (`.mocprj`) |
 | Simulation package | SQLite (`.msl`) with versioned MessagePack/Zstd payloads |
 | Result state | MessagePack document (`.mcs`) |
+| Python analysis API | `mocassin-analysis` package, read-only `.mcs` reader, NumPy, pytest |
+| Documentation | Zensical + DocFX + rustdoc + mkdocstrings |
 | Charts | LiveCharts2 (`LiveChartsCore.SkiaSharpView.Avalonia`) |
 
 ## 2. Read this first
@@ -40,7 +42,7 @@ Before changing anything, read these in order:
 7. The step page you intend to work on, plus its dependencies.
 8. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
 9. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md)
-   and [`docs/planning/steps/step-29-standalone-documentation.md`](docs/planning/steps/step-29-standalone-documentation.md)
+   and [`docs/planning/steps/step-30-standalone-documentation.md`](docs/planning/steps/step-30-standalone-documentation.md)
    — documentation toolchain and content requirements.
 
 The plan is the source of truth. If code and plan disagree, stop and reconcile them rather than silently
@@ -91,7 +93,10 @@ explicit new ADR and owner approval.
 8. **No silent scientific corrections.** If the original behaviour is ambiguous or wrong, document the chosen
    interpretation in the step page and add a test. Do not “fix” physics without evidence.
 9. **Documentation toolchain.** Narrative docs use Zensical; .NET API uses DocFX; Rust API uses rustdoc;
-   publish one site with `/api/dotnet/` and `/api/rust/`. `docs/planning/` is not published.
+   Python API uses mkdocstrings; publish one site with `/api/dotnet/`, `/api/rust/`, and `/api/python/`.
+   `docs/planning/` is not published.
+10. **Python API is read-only and minimal.** `mocassin-analysis` reads `.mcs` files and provides basic
+    multi-file helpers; it does not write simulations or duplicate the full .NET evaluation framework.
 
 ## 5. Repository layout
 
@@ -105,7 +110,7 @@ mocassin/
 ├── NOTICE.md               # original GPL attribution + MIT boundary
 ├── zensical.toml           # target: Zensical site config
 ├── docs/                   # target: published narrative docs (Zensical)
-│   ├── planning/           # internal plan, 31 step pages, ADRs, appendices
+│   ├── planning/           # internal plan, 32 step pages, ADRs, appendices
 │   ├── user-guide/
 │   ├── physics/
 │   ├── tutorials/
@@ -119,6 +124,7 @@ mocassin/
 │   └── api/                # landing + placeholders; generated API copied to site/api at build
 ├── src/dotnet/             # target: .NET solution
 ├── src/rust/               # target: Rust workspace
+├── src/python/             # target: `mocassin-analysis` read-only .mcs reader
 ├── samples/                # target: ceria, barium zirconate, vehicle, interstitialcy
 ├── tests/contracts/        # target: cross-language .msl/.mcs fixtures
 ├── tests/reference/        # target: statistical parity fixtures/reports
@@ -180,6 +186,10 @@ cargo run --manifest-path src/rust/Cargo.toml -p mocassin-cli -- \
   --db /tmp/ceria.msl --job 1 --io /tmp/Job00001
 dotnet run --project src/dotnet/Mocassin.Cli -- collect /tmp/ceria.msl --dir /tmp
 
+# Python analysis API (once the package exists)
+python -m pytest src/python/tests
+python -m build src/python
+
 # Documentation (once the Zensical/DocFX setup exists)
 zensical build --strict
 dotnet tool restore
@@ -199,7 +209,7 @@ Quality gates for any change:
 
 ## 7. Working on a step
 
-The 31 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as work packages, not suggestions.
+The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as work packages, not suggestions.
 
 1. Choose the lowest-numbered unblocked step unless the owner assigns another.
 2. Check its **Depends on** line; do not start before dependencies are done.
@@ -258,14 +268,16 @@ pass.
   the published site via `exclude_docs`.
 - **API references are generated, not hand-written:**
   - .NET via **DocFX** under `/api/dotnet/`;
-  - Rust via **rustdoc** (`cargo doc`) under `/api/rust/`.
-- One published site: Zensical owns `/`, API outputs are copied into `site/api/dotnet` and `site/api/rust`.
+  - Rust via **rustdoc** (`cargo doc`) under `/api/rust/`;
+  - Python via **mkdocstrings** under `/api/python/`.
+- One published site: Zensical owns `/`, DocFX/rustdoc outputs are copied into `site/api/dotnet` and
+  `site/api/rust`; Python API docs are rendered natively at `/api/python/`.
 - Required site sections: user guide, physics explanation, developer architecture guide, tutorials, CLI and
   format reference, troubleshooting/FAQ, performance/HPC, contributing, migration/clean-break, glossary/
   notation/units, examples/publications, and the API landing page.
 - **Docs-as-code:** Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Every
-  feature step updates its documentation pages and keeps the strict build green. Step 29 completes coverage
-  and cross-cutting content; Step 30 packages the site with the release.
+  feature step updates its documentation pages and keeps the strict build green. Step 30 completes coverage
+  and cross-cutting content; Step 31 packages the site with the release.
 - Docs quality gates:
   - `zensical build --strict` (no broken links/anchors);
   - DocFX build with no missing public API docs;
@@ -332,6 +344,7 @@ interpretation, and encode it in a test. Do not copy GPL code.
 - Statistical parity against reference observables on ceria, barium zirconate, and a complex mechanism.
 - UI view-model tests and Avalonia headless/screenshot tests.
 - Fuzz project JSON, `.msl`, `.mcs` MessagePack documents, and extension config parsers.
+- Run `pytest` for the Python reader/aggregation package and cross-check fixtures against .NET/Rust.
 
 A bug fix without a regression test is incomplete. A scientific change without a physics/parity test is
 incomplete.

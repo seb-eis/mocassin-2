@@ -1,7 +1,7 @@
-# Step 25 — Parameterization, Job Templates, and Build UI
+# Step 26 — Parameterization, Job Templates, and Build UI
 
 **Phase:** F. GUI  
-**Depends on:** 24, 09–12  
+**Depends on:** 25, 09–12
 **Delivers:** The numerical parameterization workspace, job-template editor, build-template selection, package
 build/deploy UI, progress/cancellation, and result summary.
 
@@ -51,7 +51,7 @@ frequencies, define parameter sweeps, preview job counts, build a package, and s
   - symmetry-equivalent rows shown together;
   - filters and bulk fill.
 - **Site energy overrides:**
-  - matrix like step 24, with "override" badges and "reset to model".
+  - matrix like step 25, with "override" badges and "reset to model".
 - **Transition rule frequencies:**
   - grouped by transition;
   - columns: rule ID, S0/S1/S2, direction, frequency (Hz), flags, dependent count;

@@ -1,7 +1,7 @@
 # Step 10 — Job Templates and Supercell Generation
 
 **Phase:** C. Compilation  
-**Depends on:** 06, 08, 09  
+**Depends on:** 06, 08, 09
 **Delivers:** Job template collections/configurations, deterministic job expansion, and doping-aware supercell
 generation with charge compensation.
 

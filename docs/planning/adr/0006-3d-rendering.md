@@ -25,7 +25,7 @@ support selection synchronized with the project tree.
   - CPU ray picking against spheres/cylinders (or an ID-color pass) for selection.
 - Keep the scene layer independent so a **Veldrid** or **Metal/Vulkan** backend can be added if macOS OpenGL
   performance or deprecation becomes a blocker.
-- A two-week spike at the start of step 26 validates:
+- A two-week spike at the start of step 27 validates:
   - Avalonia + Silk.NET OpenGL integration on all three OSes,
   - 10⁵ instanced spheres at target FPS,
   - picking latency < 50 ms,

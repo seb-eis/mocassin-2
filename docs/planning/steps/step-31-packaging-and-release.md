@@ -1,9 +1,9 @@
-# Step 30 — Packaging and Release
+# Step 31 — Packaging and Release
 
 **Phase:** G. Release and documentation  
-**Depends on:** 28, 29  
-**Delivers:** Reproducible cross-platform binaries, NuGet packages, installable archives/packages, the
-combined documentation artifact, samples, and a signed release process.
+**Depends on:** 22, 29, 30
+**Delivers:** Reproducible cross-platform binaries, NuGet and Python packages, installable archives/packages,
+the combined documentation artifact, samples, and a signed release process.
 
 ## Goal
 
@@ -46,6 +46,7 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 | Optional `.deb`/`.rpm`/AppImage | Desktop integration for Linux |
 | Optional `.dmg`/`.pkg` | macOS app distribution |
 | NuGet packages | `Mocassin.Core`, `.Symmetry`, `.Compilation`, `.Packages`, `.Results`, `.Cli` |
+| Python package | `mocassin-analysis` wheel + sdist (import package `mocassin`) |
 | `mocassin-sim` standalone | Solver only, for HPC nodes |
 | Docker image (optional) | CLI + solver for CI/HPC containers |
 
@@ -91,12 +92,13 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 
 ### 5. Documentation artifact
 
-- The standalone documentation site is produced by Step 29 (`zensical build --strict`, DocFX, rustdoc).
+- The standalone documentation site is produced by Step 30 (`zensical build --strict`, DocFX, rustdoc,
+  mkdocstrings).
 - The release build must consume that exact `site/` artifact, not rebuild ad-hoc Markdown.
 - Package the site as `mocassin-docs-<version>.zip` and attach it to the release; optionally deploy it to
   GitHub Pages or another static host.
-- Verify that the combined site contains narrative pages at `/`, .NET API at `/api/dotnet/`, and Rust API at
-  `/api/rust/`.
+- Verify that the combined site contains narrative pages at `/`, .NET API at `/api/dotnet/`, Rust API at
+  `/api/rust/`, and Python API at `/api/python/`.
 - Verify the release notes link to the installed docs, the migration guide, and the citation block.
 - **README** remains the short entry point: what it is, install, five-minute ceria tutorial, links to the site.
 - **Citation/licence** — MIT, NOTICE with the original GPL project attribution, and the original paper citation.
@@ -104,7 +106,7 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 ### 6. Release process
 
 1. Freeze features; update versions/changelog.
-2. Run the full release checklist (steps 28–29 gates).
+2. Run the full release checklist (steps 29–30 gates).
 3. Build artifacts on each OS in a clean environment.
 4. Generate checksums (SHA-256), SBOM (CycloneDX), and provenance (SLSA-style).
 5. Sign binaries/packages where possible.
@@ -144,7 +146,8 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 - [ ] Produce self-contained app/CLI/solver archives.
 - [ ] Add optional MSIX/desktop/dmg packaging.
 - [ ] Configure NuGet packaging, symbols, and SourceLink.
-- [ ] Package the Step 29 documentation site and include it in the release artifacts.
+- [ ] Package the Step 30 documentation site and include it in the release artifacts.
+- [ ] Build and publish the `mocassin-analysis` wheel/sdist and verify a clean install.
 - [ ] Add checksums, SBOM, and provenance generation.
 - [ ] Implement signing/notarization where credentials exist.
 - [ ] Create the release workflow and checklist.
@@ -155,6 +158,7 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 - [ ] A clean machine can extract an archive and run the ceria tutorial.
 - [ ] All artifacts report the correct version/SHA and pass the smoke test.
 - [ ] `dotnet add package Mocassin.Results` works without manual path setup.
+- [ ] `pip install mocassin-analysis` works and can read a release fixture `.mcs`.
 - [ ] `mocassin-sim` runs standalone on an HPC node.
 - [ ] Checksums/SBOM/provenance are attached to the release.
 - [ ] The combined documentation site artifact is attached and its links/API subpaths verify.
@@ -178,6 +182,7 @@ At this point, document release and installation:
 | Version | `--version` fields correct |
 | Archive | Extract/run on each OS |
 | NuGet | Clean-project install and evaluation |
+| Python package | Wheel/sdist build, clean install, fixture read |
 | Smoke | Ceria tutorial end-to-end |
 | Checksums | Match published values |
 | Docs | Combined site artifact, link check, API subpaths |
@@ -191,11 +196,12 @@ At this point, document release and installation:
 | Platform packaging quirks | Test artifacts on clean VMs; document prerequisites |
 | macOS notarization delays | Start early; provide unsigned fallback instructions |
 | NuGet path/resource issues | Embedded catalog; clean-project test |
-| Documentation drift | Docs built/tested in Step 29 and consumed as an artifact |
+| PyPI/name/distribution issues | Use `mocassin-analysis`; attach wheel/sdist if unavailable |
+| Documentation drift | Docs built/tested in Step 30 and consumed as an artifact |
 | Supply-chain risk | Checksums, SBOM, pinned dependencies, signed tags |
 
 ## Done when
 
 A new user can install the application on any supported OS, follow the published docs to reproduce the ceria
-workflow, and evaluate results; the release is signed/checksummed and ships with the combined documentation
-site.
+workflow, and evaluate results from .NET or Python; the release is signed/checksummed and ships with the
+combined documentation site and Python package.

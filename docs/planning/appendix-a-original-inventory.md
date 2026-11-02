@@ -30,15 +30,16 @@ addressed in the new architecture. It is a navigation aid, not a line-by-line po
 | `Mocassin.Model` | `Mocassin.Core` (immutable model) | 01–06 | Definition only; no mutable manager/cache/event graph |
 | `Mocassin.Model.Translator` | `Mocassin.Compilation` + `Mocassin.Packages` | 08–11 | Pure compiler, new package format |
 | `Mocassin.UI.Data` | `Mocassin.Core.Project` | 01 | New JSON project format; no SQLite/JSON.NET graph |
-| `Mocassin.UI.GUI` | `Mocassin.App*` + `Mocassin.Rendering` | 22–27 | Avalonia, new MVVM stack and information architecture |
+| `Mocassin.UI.GUI` | `Mocassin.App*` + `Mocassin.Rendering` | 23–28 | Avalonia, new MVVM stack and information architecture |
 | `Mocassin.Tools.Evaluation` | `Mocassin.Results` | 20–21 | New streaming API and corrected formulas |
 | `Mocassin.Tools.UAccess` | `Mocassin.Results` | 20 | Safe MessagePack reader; no pinned whole-file buffers |
-| `Mocassin.UI.Installer` | packaging/release | 30 | Cross-platform archives/packages instead of MSI |
-| `docs/userguide-md`, `docs/old-guide` | `docs/` Zensical site | 00/29 | Skeleton in Step 00; rewritten user guide, physics, tutorials, developer guide, reference completed in Step 29; legacy docs not copied |
+| `Mocassin.UI.Installer` | packaging/release | 31 | Cross-platform archives/packages instead of MSI |
+| `docs/userguide-md`, `docs/old-guide` | `docs/` Zensical site | 00/30 | Skeleton in Step 00; rewritten user guide, physics, tutorials, developer guide, reference completed in Step 30; legacy docs not copied |
+| New Python analysis | `src/python/` (`mocassin-analysis`) | 22 | Read-only `.mcs` reader, multi-file helpers, pytest, mkdocstrings |
 | `Mocassin.Simulator` (C) | `mocassin-sim` (Rust) | 13–19 | Process-per-job, new package reader, statistical parity |
 | `Mocassin.Utility` (C) | `mocassin` CLI | 12/19 | Fold useful utilities into the new CLIs |
 | Python HPC scripts | `tools/hpc` + `mocassin collect` | 19–20 | Thin SLURM/PBS wrappers; validated collection |
-| MMCFE extension | built-in extension / `mocassin-extension` | 19/27 | New ABI and log format; legacy `mmcfelog.db` not read |
+| MMCFE extension | built-in extension / `mocassin-extension` | 19/28 | New ABI and log format; legacy `mmcfelog.db` not read |
 
 ## 3. Model domain inventory
 

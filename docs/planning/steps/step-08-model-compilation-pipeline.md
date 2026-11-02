@@ -1,7 +1,7 @@
 # Step 08 — Model Compilation Pipeline
 
 **Phase:** C. Compilation  
-**Depends on:** 02–07  
+**Depends on:** 02–07
 **Delivers:** A pure, staged compiler that turns the validated model into a P1-extended, symmetry-reduced,
 densely indexed `CompiledModel` with environments, pair/cluster interactions, transition rules, and simulation
 encoding.

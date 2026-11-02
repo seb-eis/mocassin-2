@@ -1,7 +1,7 @@
 # Step 02 — Symmetry and Geometry
 
 **Phase:** A. Foundations  
-**Depends on:** 01  
+**Depends on:** 01
 **Delivers:** A validated space-group catalog, exact symmetry operations, coordinate systems, P1 expansion,
 orbit/permutation reduction, and periodic geometry kernels.
 

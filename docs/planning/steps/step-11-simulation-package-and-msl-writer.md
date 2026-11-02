@@ -1,7 +1,7 @@
 # Step 11 — Simulation Package and `.msl` Writer
 
 **Phase:** C. Compilation  
-**Depends on:** 08, 09, 10  
+**Depends on:** 08, 09, 10
 **Delivers:** A versioned SQLite simulation package with content-addressed compiled models and lattices,
 version checks, atomic writes, and inspection tools.
 

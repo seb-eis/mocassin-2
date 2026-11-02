@@ -156,6 +156,7 @@ solution. The inventory is maintained in
 - Ensemble correlations/Onsager coefficients.
 - Coordination analysis and jump statistics.
 - Export to CSV/JSON and plot-ready series.
+- A minimal read-only Python API for `.mcs` files with basic multi-file evaluations.
 - Batch evaluation across job sets with filtering.
 
 ### 6.5 Desktop GUI
@@ -204,7 +205,9 @@ solution. The inventory is maintained in
 6. A 10⁴-job package can be built, deployed to SLURM, run, collected, and evaluated without manual SQL.
 7. A new contributor can build and test the repository using only the README and `docs/`.
 8. The standalone Zensical site covers the user guide, physics, developer architecture, tutorials, CLI/format
-   reference, and generated .NET/Rust API references, with strict link validation.
+   reference, and generated .NET/Rust/Python API references, with strict link validation.
+9. A scientist can install the Python package, read `.mcs` files, and compute basic multi-file evaluations
+   without the .NET API or GUI.
 
 ## 9. Major risks and mitigations
 
@@ -213,7 +216,7 @@ solution. The inventory is maintained in
 | Scientific semantics are subtle and underdocumented | Wrong results that look plausible | Derive behaviour from source + docs; encode invariants in tests; statistical parity suite |
 | Symmetry reduction is complex | Invalid P1 data or missed interactions | Property tests against brute-force expansion; golden tests for all 230 groups |
 | Rust rewrite diverges from C | Non-comparable results | Reference observables, per-module validation, side-by-side runs |
-| 3D viewer scope expands | Delays GUI | Renderer spike in step 26; start with instanced spheres/bonds and picking; defer advanced shading |
+| 3D viewer scope expands | Delays GUI | Renderer spike in step 27; start with instanced spheres/bonds and picking; defer advanced shading |
 | Format churn | Wasted migration work | Freeze contracts early; schema versions; golden round-trip tests |
 | Performance regressions | Unusable large jobs | Benchmarks from step 13; profile before optimizing; data-oriented layout |
 | Single-developer bandwidth | Long schedule | Parallel tracks (model, solver, UI) with contract-first boundaries; MVP milestones |

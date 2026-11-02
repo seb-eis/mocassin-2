@@ -1,7 +1,7 @@
 # Step 17 — Metropolis Monte Carlo Engine
 
 **Phase:** D. Solver  
-**Depends on:** 15  
+**Depends on:** 15
 **Delivers:** A Metropolis MMC engine with two-site exchanges, equilibrium break detection, time-independent
 state evolution, and shared outcome/statistics infrastructure.
 

@@ -1,7 +1,7 @@
-# Step 23 — Particle, Structure, and Transition Editors
+# Step 24 — Particle, Structure, and Transition Editors
 
 **Phase:** F. GUI  
-**Depends on:** 22, 03, 04  
+**Depends on:** 23, 03, 04
 **Delivers:** Production editors for particles/sets, crystal structure/sites, and the full transition model,
 with live validation, previews, and undo/redo.
 
@@ -98,7 +98,7 @@ public abstract class ModelEditorViewModel<TModel> : ObservableValidator
 - Add site: choose stability and particle set; coordinate fields accept fractions/expressions.
 - P1 preview panel:
   - list of expanded positions with fractional/Cartesian coordinates and symmetry operation;
-  - 2D projection or mini 3D preview (full 3D in step 26);
+  - 2D projection or mini 3D preview (full 3D in step 27);
   - overlap warnings highlighted.
 - Dummy positions tab: visual-only points, add/edit/remove, distinct styling.
 - Site deletion shows dependents (transitions, environments, clusters, dopings) and offers cascade removal

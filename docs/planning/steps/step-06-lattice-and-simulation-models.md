@@ -1,7 +1,7 @@
 # Step 06 — Lattice and Simulation Models
 
 **Phase:** B. Model definition  
-**Depends on:** 03, 04  
+**Depends on:** 03, 04
 **Delivers:** Occupation exchanges, ordered dopings, and MMC/KMC simulation definitions with defaults and
 validation.
 

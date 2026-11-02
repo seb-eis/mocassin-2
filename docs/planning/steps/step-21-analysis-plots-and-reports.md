@@ -1,7 +1,7 @@
 # Step 21 — Analysis, Plots, and Reports
 
 **Phase:** E. Results  
-**Depends on:** 20  
+**Depends on:** 20
 **Delivers:** Aggregation across job sets, Arrhenius and transport fits, plot-ready series, headless
 PNG/SVG/CSV/JSON/Parquet exports, and reproducible analysis reports.
 
@@ -187,6 +187,7 @@ At this point, document analysis and reporting:
 - `docs/user-guide/results.md` — analyses, grouping, fits, plots, reports.
 - `docs/physics/transport.md` — Arrhenius/Nernst–Einstein/Haven definitions used by the fits.
 - `docs/examples/` — plot/report examples with downloadable data.
+- `docs/tutorials/result-analysis.md` — shared .NET/CLI/Python analysis walkthrough.
 - `docs/reference/cli.md` — `analyze`, `plot`, `report`, `export`.
 
 ## Tests

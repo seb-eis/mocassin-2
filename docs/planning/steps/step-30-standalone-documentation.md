@@ -1,9 +1,9 @@
-# Step 29 — Standalone Documentation Completion and Publishing
+# Step 30 — Standalone Documentation Completion and Publishing
 
 **Phase:** G. Release and documentation  
-**Depends on:** 19, 21, 27  
+**Depends on:** 19, 21, 22, 28
 **Delivers:** The completed, audited, and published standalone documentation site built with Zensical, plus
-generated .NET (DocFX) and Rust (rustdoc) API references under one site.
+generated .NET (DocFX), Rust (rustdoc), and Python (mkdocstrings) API references under one site.
 
 ## Goal
 
@@ -31,10 +31,10 @@ this step completes cross-cutting content, audits coverage, integrates the final
 | --- | --- |
 | Step 00 | Create the Zensical skeleton, navigation, placeholder pages, build scripts, Docs CI job, and API stubs |
 | Every feature step (01–28) | Write/update the user-guide, physics, developer, reference, or tutorial pages for that feature; keep the strict docs build green |
-| Step 29 (this step) | Audit coverage, write cross-cutting pages, integrate final DocFX/rustdoc, polish, screenshot, validate tutorials, publish |
-| Step 30 | Package the completed `site/` artifact with the release |
+| Step 30 (this step) | Audit coverage, write cross-cutting pages, integrate final DocFX/rustdoc/mkdocstrings, polish, screenshot, validate tutorials, publish |
+| Step 31 | Package the completed `site/` artifact with the release |
 
-Step 29 therefore owns completion and quality, not first authoring. If a feature page is missing, fix it here
+Step 30 therefore owns completion and quality, not first authoring. If a feature page is missing, fix it here
 and add a note to the originating step.
 
 ### 1. Toolchain
@@ -44,12 +44,14 @@ and add a note to the originating step.
 | Narrative docs (home, user guide, physics, tutorials, developer guide, reference) | **Zensical** | Modern MkDocs-compatible static site generator, good authoring/navigation/search, Markdown-first |
 | .NET API reference | **DocFX** | Native XML-doc/assembly metadata, .NET navigation, cross-references, modern .NET support |
 | Rust API reference | **rustdoc** (`cargo doc`) | Canonical Rust documentation, doc tests, intra-doc links, no duplicate schema |
+| Python API reference | **mkdocstrings** | Native Zensical integration, docstring/type-hint rendering, no separate site |
 | Search/navigation | Zensical for narrative; DocFX/rustdoc retained for API sections | Avoids fragile reimplementation of language-specific API navigation |
 | Diagrams | Mermaid or Zensical-compatible Markdown diagrams | Versionable in text |
 | Math | Zensical/KaTeX-compatible math | Physics equations |
 
 - **One published site, separate build outputs.** Zensical owns the root. DocFX is copied to
-  `/api/dotnet/`, rustdoc to `/api/rust/`. `docs/api/index.md` is the API landing page.
+  `/api/dotnet/`, rustdoc to `/api/rust/`, and the Python API is rendered by mkdocstrings at `/api/python/`.
+  `docs/api/index.md` is the API landing page.
 - **Versioning/PDF/offline** are deferred; the first release publishes the current version only. The build
   layout leaves room for versioned subpaths later.
 - **Planning is not published.** `docs/planning/` remains in the repository but is excluded from Zensical via
@@ -143,9 +145,10 @@ docs/
 │   ├── notation.md
 │   └── units.md
 ├── api/
-│   ├── index.md               # links to /api/dotnet and /api/rust
+│   ├── index.md               # links to /api/dotnet, /api/rust, /api/python
 │   ├── dotnet/index.md        # placeholder; replaced by DocFX output in site/api/dotnet
-│   └── rust/index.md          # placeholder; replaced by rustdoc output in site/api/rust
+│   ├── rust/index.md          # placeholder; replaced by rustdoc output in site/api/rust
+│   └── python/index.md        # mkdocstrings directives; rendered by Zensical
 └── planning/                  # excluded from the published site
 
 tools/docfx/docfx.json         # DocFX configuration for the .NET API
@@ -235,6 +238,13 @@ These sections are mandatory for the first release:
 - Copy `target/doc/` to `site/api/rust/`.
 - Keep crate-level docs linking to the narrative architecture/physics pages.
 
+**Python**
+
+- `docs/api/python/index.md` uses mkdocstrings directives (`::: mocassin`, `::: mocassin.evaluate`, etc.).
+- The docs build installs the Python package in editable mode so docstrings/type hints resolve.
+- Zensical renders `/api/python/` natively; no copied HTML.
+- Missing docstrings or import failures fail the docs build.
+
 **Cross-links**
 
 - `docs/api/index.md` links to both API trees.
@@ -258,6 +268,8 @@ dotnet docfx tools/docfx/docfx.json -o artifacts/docfx
 # Rust API
 cargo doc --workspace --no-deps --target-dir target/doc
 
+# Python docs are rendered by Zensical/mkdocstrings during the narrative build.
+
 # combine (placeholders live at site/api/dotnet/index.html and site/api/rust/index.html)
 mkdir -p site/api/dotnet site/api/rust
 cp -r artifacts/docfx/. site/api/dotnet/
@@ -266,6 +278,7 @@ cp -r target/doc/. site/api/rust/
 
 - The Step 00 `tools/docs/build-docs.sh`/`.ps1` scripts are extended here to build and copy DocFX/rustdoc.
 - `tools/docs/serve.sh` (from Step 00) runs `zensical serve` for authoring.
+- The Python package is installed in the docs environment before `zensical build`.
 - The Step 00 Docs CI job already builds Zensical strictly; this step adds the DocFX/rustdoc jobs and final
   combined artifact checks.
 - Publish the `site/` artifact on release tags. If GitHub Pages is available, deploy there; otherwise attach
@@ -280,19 +293,20 @@ Documentation is written alongside the feature, not at the end:
 
 | Content | Written by | Finalized by |
 | --- | --- | --- |
-| Installation/quickstart/first project | 22, 25 | 29 |
-| User guide (model domains) | 03–06, 23–24 | 29 |
-| User guide (build/run/results/MMCFE) | 12, 25, 27 | 29 |
-| CLI reference | 12, 19 | 29 |
-| Project/.msl/.mcs/extension formats | 01, 11, 18, 19 | 29 |
-| Diagnostics | 07 | 29 |
-| Physics/units/formulas | 15–18, 20 | 29 |
-| Developer architecture | 00–02, 08, 13–21, 28 | 29 |
-| Tutorials | 25, 27, 28 | 29 |
-| Performance/HPC | 19, 28 | 29 |
-| Migration/clean-break | 00, 29 | 29 |
-| Examples/publications | 28, 29 | 29 |
-| API reference landing/links | 29 | 29 |
+| Installation/quickstart/first project | 23, 26 | 30 |
+| User guide (model domains) | 03–06, 24–25 | 30 |
+| User guide (build/run/results/MMCFE) | 12, 26, 28 | 30 |
+| CLI reference | 12, 19 | 30 |
+| Project/.msl/.mcs/extension formats | 01, 11, 18, 19 | 30 |
+| Diagnostics | 07 | 30 |
+| Physics/units/formulas | 15–18, 20 | 30 |
+| Developer architecture | 00–02, 08, 13–21, 29 | 30 |
+| Tutorials | 26, 28, 29 | 30 |
+| Performance/HPC | 19, 29 | 30 |
+| Migration/clean-break | 00, 30 | 30 |
+| Examples/publications | 29, 30 | 30 |
+| Python API | 22 | 30 |
+| API reference landing/links | 22, 30 | 30 |
 
 Each step’s “Done when” includes updating its docs page. This step verifies completeness, consistency, and
 buildability.
@@ -316,11 +330,11 @@ buildability.
   placeholders.
 - [ ] Write/complete cross-cutting pages: physics overview and conventions, architecture synthesis, migration
   guide, glossary/notation/units, examples/publications, and tutorial introductions.
-- [ ] Integrate the final DocFX and rustdoc outputs into `/api/dotnet/` and `/api/rust/`; complete the API
-  landing page and cross-links.
+- [ ] Integrate the final DocFX and rustdoc outputs into `/api/dotnet/` and `/api/rust/`, and replace the Python
+  placeholder with mkdocstrings directives for `/api/python/`; complete the API landing page and cross-links.
 - [ ] Add/refresh screenshots, diagrams, and alt text for every GUI screen.
 - [ ] Run every tutorial against `samples/` and fix commands, expected output, and troubleshooting notes.
-- [ ] Validate the full site with `zensical build --strict`, DocFX, and `cargo doc`.
+- [ ] Validate the full site with `zensical build --strict`, DocFX, `cargo doc`, and mkdocstrings.
 - [ ] Add a docs review checklist and ownership/coverage map.
 - [ ] Publish the `site/` artifact on release; optionally deploy to Pages.
 - [ ] Record any deferred docs items in the parity matrix.
@@ -330,7 +344,9 @@ buildability.
 - [ ] `zensical build --strict` succeeds with no broken links/anchors.
 - [ ] DocFX builds the .NET API with no missing-doc errors for public APIs.
 - [ ] `cargo doc --workspace --no-deps` builds the Rust API with no warnings.
-- [ ] The combined site serves narrative pages at `/` and API docs at `/api/dotnet/` and `/api/rust/`.
+- [ ] mkdocstrings renders the Python API at `/api/python/` with no import/docstring failures.
+- [ ] The combined site serves narrative pages at `/` and API docs at `/api/dotnet/`, `/api/rust/`, and
+  `/api/python/`.
 - [ ] All required and selected sections exist and are reachable from the navigation.
 - [ ] No placeholder/TODO pages remain except the API landing placeholders, which are replaced by generated
   output at build time; every narrative navigation entry has real content.
@@ -360,6 +376,7 @@ At this point, complete the cross-cutting and final documentation:
 | Zensical build | Strict mode, no broken links/anchors |
 | DocFX | API metadata/build; public docs coverage |
 | rustdoc | `cargo doc`; missing-docs deny |
+| mkdocstrings | Python import/docstring rendering under /api/python/ |
 | Navigation | Every required page reachable |
 | Tutorials | Commands run against samples |
 | Cross-links | Narrative ↔ API links resolve |
@@ -375,7 +392,7 @@ At this point, complete the cross-cutting and final documentation:
 | Docs drift from code | Docs-as-code per step; CI build/link checks; tutorial smoke tests |
 | Zensical is 0.x | Pin the version; keep content standard Markdown/MkDocs-compatible |
 | DocFX/rustdoc navigation mismatch | Keep narrative navigation authoritative; API landing page; cross-links |
-| API docs missing comments | Treat missing XML docs/rustdoc as errors in CI |
+| API docs missing comments | Treat missing XML docs/rustdoc/Python docstrings as errors in CI |
 | Large site/build time | Cache dependencies; build API docs only when source changes |
 | Screenshot churn | Automate screenshots where possible; review per release |
 

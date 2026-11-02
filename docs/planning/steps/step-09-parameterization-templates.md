@@ -1,7 +1,7 @@
 # Step 09 — Parameterization Templates
 
 **Phase:** C. Compilation  
-**Depends on:** 08  
+**Depends on:** 08
 **Delivers:** Versioned parameterization templates that quantify a compiled model, with stable identities,
 signature compatibility, rebase/migration, and completeness checks.
 

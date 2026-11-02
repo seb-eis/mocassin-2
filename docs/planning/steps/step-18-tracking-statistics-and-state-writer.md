@@ -1,7 +1,7 @@
 # Step 18 — Tracking, Statistics, and State Writer
 
 **Phase:** D. Solver  
-**Depends on:** 16, 17  
+**Depends on:** 16, 17
 **Delivers:** Global/static/mobile movement tracking, jump histograms, statistics dumps, derived transport
 quantities, and the versioned MessagePack state writer/reader.
 
@@ -193,8 +193,9 @@ particlePositions: [ u32 ]        // optional diagnostics
 ```
 
 - `metadata` contains the solver version, model signature, job id, kind/phase, lattice size, P1 position count,
-  particle count, tracker counts, cycle/MCS counts, simulated time, normalization, lattice energy, flags,
-  abort reason, seed hash, units, and optional runner information.
+  particle count, tracker counts, cell vectors, particle charges/symbols/vacancy flags, temperature, electric
+  field, cycle/MCS counts, simulated time, normalization, lattice energy, flags, abort reason, seed hash, units,
+  and optional runner information. This makes the state self-contained for Python analysis.
 - The lattice is a MessagePack `bin`; numeric arrays use native MessagePack types.
 - MMC omits all KMC-only fields. `prerun.mcs` uses the same schema with `metadata.phase = "prerun"`.
 - There is no custom header, section table, alignment, or CRC. `format`/`formatVersion` are ordinary map fields.

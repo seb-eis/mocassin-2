@@ -1,7 +1,7 @@
 # Step 01 — Domain Kernel and Project Format
 
 **Phase:** A. Foundations  
-**Depends on:** 00  
+**Depends on:** 00
 **Delivers:** The immutable domain kernel, stable IDs, units, diagnostics, and the versioned JSON project file
 with canonical serialization and migrations.
 
@@ -161,7 +161,7 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 
 - The kernel is immutable. `ProjectEditor` applies a mutation to a copy and returns a new `Project`.
 - `ProjectDocument` holds the current project, the last saved project, and an undo/redo stack of
-  `ProjectChange` records (step 22 wires it to the UI).
+  `ProjectChange` records (step 23 wires it to the UI).
 - Edits are validated before commit; a failed edit leaves the document unchanged and returns diagnostics.
 - Bulk operations (create from template, duplicate, paste) are single undoable changes.
 
