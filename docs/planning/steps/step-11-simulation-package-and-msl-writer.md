@@ -61,10 +61,13 @@ Why content-addressed tables:
 ```csharp
 public interface ISimulationPackageWriter : IAsyncDisposable
 {
-    Task WriteModelAsync(CompiledModel model, CancellationToken ct);
+    Task WriteModelAsync(ParameterizedModel model, CancellationToken ct);
     Task WriteJobAsync(JobPackage job, CancellationToken ct);
     Task CompleteAsync(CancellationToken ct);
 }
+
+// JobPackage = Step 10 JobDescriptor + generated InitialLattice.
+public sealed record JobPackage(JobDescriptor Descriptor, InitialLattice Lattice);
 ```
 
 Flow:
@@ -87,12 +90,13 @@ pull-based iterator.
 ### 4. Payload encoding
 
 - MessagePack maps with snake_case keys, Zstd level 3 (fast) or 9 (`--compact`).
-- The model payload is the canonical `CompiledModel` from step 08.
+- The model payload is the canonical `ParameterizedModel` from step 09 (compiled geometry/rules plus energy
+  and frequency values, with the parameterization signature).
 - The lattice payload is `{format_version, lattice_size, position_count, lattice}`.
 - The job payload is the full `JobDescriptor`/settings (including optimizers) plus the model/simulation index.
 - The writer verifies round-trip decoding of every payload before insert (debug builds) or computes the
   canonical hash and compares it.
-- Payloads are deterministic: same compiled model → identical bytes → same signature.
+- Payloads are deterministic: same parameterized model → identical bytes → same signature.
 
 ### 5. Metadata columns
 

@@ -45,7 +45,7 @@ dominated by setup.
 
 ```rust
 pub struct SimulationContext {
-    pub model: Arc<CompiledModel>,
+    pub model: Arc<ParameterizedModel>,
     pub job: JobPackage,
     pub lattice: Lattice,
     pub cells: CellCounts,

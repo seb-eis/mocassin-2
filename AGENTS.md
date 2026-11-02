@@ -116,7 +116,7 @@ mocassin/
 │   ├── migration/
 │   ├── examples/
 │   ├── glossary/
-│   └── api/                # API landing page; generated API copied to site/api at build
+│   └── api/                # landing + placeholders; generated API copied to site/api at build
 ├── src/dotnet/             # target: .NET solution
 ├── src/rust/               # target: Rust workspace
 ├── samples/                # target: ceria, barium zirconate, vehicle, interstitialcy

@@ -45,7 +45,7 @@ pub struct JumpDirectionId(u32);
 pub struct RuleId(u32);
 pub struct StateCode(u64);
 
-pub struct CompiledModel {
+pub struct ParameterizedModel {
     pub format_version: u32,
     pub signature: String,
     pub particles: ParticleTable,
@@ -58,7 +58,7 @@ pub struct CompiledModel {
 pub struct JobPackage {
     pub job_id: u32,
     pub kind: SimulationKind,
-    pub model: Arc<CompiledModel>,
+    pub model: Arc<ParameterizedModel>,
     pub lattice: InitialLattice,
     pub settings: JobSettings,
     pub seed: [u8; 32],
@@ -66,8 +66,10 @@ pub struct JobPackage {
 }
 ```
 
-- Serde uses explicit `#[serde(rename = "...")]` or `rename_all = "snake_case"`, and
-  `#[serde(deny_unknown_fields)]` on contract structs.
+- Serde uses explicit `#[serde(rename = "...")]` and `#[serde(default)]` for optional fields.
+  `.msl` package payloads use snake_case keys; `.mcs` state documents use camelCase keys (see the data
+  contracts). Do **not** use `deny_unknown_fields` on forward-compatible payloads; readers ignore unknown
+  keys as required by the data contract.
 - Integers use the smallest type that proves the limit (particle `u8`, position `u32`, counts `u64`).
 - State codes are `u64` with byte accessors; never a signed `i64`.
 - Paths are `[i32; 4]` or a compact `[JumpStep; 8]`; movement vectors are `[f64; 3]`.
@@ -82,7 +84,7 @@ impl Package {
     pub fn open_readonly(path: &Path) -> Result<Self>;
     pub fn schema_version(&self) -> Result<u32>;
     pub fn job_ids(&self) -> Result<Vec<u32>>;
-    pub fn load_model(&self, model_id: i64) -> Result<Arc<CompiledModel>>;
+    pub fn load_model(&self, model_id: i64) -> Result<Arc<ParameterizedModel>>;
     pub fn load_job(&self, job_id: u32) -> Result<JobPackage>;
     pub fn find_job_ids(&self, selector: &JobSelector) -> Result<Vec<u32>>;
 }
@@ -108,15 +110,22 @@ impl Package {
 ### 4. RNG
 
 ```rust
-pub fn derive_job_seed(master: &[u8; 32], collection: u32, config: u32, job: u32) -> [u8; 32];
-pub fn derive_lattice_seed(job_seed: &[u8; 32], lattice_hash: &[u8; 32]) -> [u8; 32];
+pub fn derive_job_seed(master: &[u8; 32], purpose: &[u8], collection: u32, config: u32, job: u32) -> [u8; 32];
+pub fn derive_lattice_seed(job_seed: &[u8; 32], lattice_request_hash: &[u8; 32]) -> [u8; 32];
 
 pub struct Rng {
     inner: ChaCha12Rng,
 }
 
+/// Opaque, versioned state for exact resume. `mocassin-rng` owns the byte
+/// layout; do not serialize a third-party RNG's private layout directly.
+/// The `.mcs` metadata stores `rngAlgorithm = "chacha12-v1"` and this blob.
+pub struct RngStateV1(Vec<u8>);
+
 impl Rng {
     pub fn from_seed(seed: [u8; 32]) -> Self;
+    pub fn from_state(state: &RngStateV1) -> Result<Self, RngStateError>;
+    pub fn export_state(&self) -> RngStateV1;
     pub fn next_u32(&mut self) -> u32;
     pub fn next_bounded(&mut self, upper: u32) -> u32; // Lemire, unbiased
     pub fn next_f64(&mut self) -> f64;                // [0,1)
@@ -124,6 +133,9 @@ impl Rng {
 }
 ```
 
+- `Rng::export_state()`/`from_state()` are the only supported resume path; the state writer and reader must
+  round-trip `RngStateV1` exactly. Implement a thin serializable ChaCha12 wrapper rather than depending on a
+  third-party RNG’s private layout.
 - `next_bounded` uses Lemire's multiply-and-reject method, not modulo.
 - `next_f64` uses 53 random bits / 2⁵³.
 - Separate streams: lattice generation, simulation, extensions.

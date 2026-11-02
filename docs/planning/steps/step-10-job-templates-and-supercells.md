@@ -86,10 +86,17 @@ public sealed record JobDescriptor(
     ImmutableArray<DopingValue> Dopings,
     ImmutableArray<SelectionOptimizer> Optimizers,
     byte[] Seed);
+
+public sealed record InitialLattice(
+    int SizeA, int SizeB, int SizeC,
+    int PositionCount,
+    byte[] Particles,
+    string DopingInfo);
 ```
 
 - Expand collections in order, configs in order, duplicates in ascending `JobIndex`.
 - `JobId` is 1-based and deterministic; it is the solver's `--job` argument.
+- Step 11 wraps a `JobDescriptor` plus its generated `InitialLattice` into a `JobPackage` for writing.
 - `JobIndex` is the duplicate index within a config (0-based).
 - Effective settings are resolved with explicit inheritance and validated.
 - Seed derivation:
@@ -98,15 +105,20 @@ public sealed record JobDescriptor(
 seed = BLAKE3(
   "mocassin/job/v1" ||
   master_seed ||
+  "job" ||
   collection_index_u32 ||
   config_index_u32 ||
   job_index_u32)
 ```
 
-- `master_seed` is the collection seed if provided, else the simulation seed, else the project seed. If none
-  exists, the project gets a generated seed at creation time and stores it.
+- `master_seed` is the collection seed if provided, else the simulation seed, else the project
+  `masterSeed`. If absent, derive it from `BLAKE3("mocassin/project-seed/v1" || projectId)` and store it.
+- `lattice_request_hash` is a BLAKE3 hash of the canonical **structure/particle/doping subset** (not the
+  full model signature, which also covers transitions/encodings), the space-group catalog data version,
+  supercell `A/B/C`, and ordered doping fractions. It deliberately excludes transitions, parameterization values, and simulation settings, so
+  changing energies, temperature, or MCSP does not change the lattice for the same job coordinates.
 - Lattice generation uses a separate domain-separated seed:
-  `BLAKE3("mocassin/lattice/v1" || seed || lattice_hash)`.
+  `BLAKE3("mocassin/lattice/v1" || seed || lattice_request_hash)`.
 - The same job descriptor always produces the same lattice.
 
 ### 3. Supercell generation

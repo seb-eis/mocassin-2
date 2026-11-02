@@ -128,7 +128,8 @@ D_sigma = σ * k_B_SI * T / (n * (z*e)^2) // m²/s
 MigrationRate = MCS / (t * N)            // Hz
 ```
 
-- `ê` is the normalized Cartesian field direction; if `|E| = 0`, transport quantities are `n/a` (not NaN).
+- `ê` is the normalized Cartesian field direction; if `|E| = 0` or `z = 0`, transport quantities are `n/a`
+  (not NaN). Vacancies are not charge carriers and are excluded from ionic transport summaries.
 - `z` is the particle charge number; `e` is the elementary charge.
 - `n` is the particle density `N / V` with `V` in m³.
 - `D_sigma` is the Nernst–Einstein diffusion coefficient; `D_tracer` is the MSD-based value. The Haven ratio
@@ -253,7 +254,8 @@ particlePositions: [ u32 ]        // optional diagnostics
 - [ ] Mobile trackers follow particle identity across a 3-site migration.
 - [ ] Histograms bin values correctly, including under/overflow.
 - [ ] MessagePack state files round-trip through the reader and pass semantic validation.
-- [ ] Resume from a mid-run state continues identically.
+- [ ] Resume restores lattice, counters, trackers, histograms, RNG state, `K_fix`/`K_norm`/`RawMax`, goals, and
+  time, and continues identically.
 - [ ] Corrupt/truncated state files are rejected.
 - [ ] Statistics output contains no NaN/Inf for zero-field MMC/KMC cases.
 - [ ] Documentation written

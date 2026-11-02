@@ -87,22 +87,26 @@ public sealed record TransitionChain(
 
 Pattern rules:
 
-| Pattern | Positions | Linkers | Reverse generated |
-| --- | ---: | --- | --- |
-| `Metropolis2` | 2 | `D` | Yes |
-| `Migration3` | 3 | `D,D` | Yes |
-| `Interstitialcy5` | 5 | `D,D,D,D` | No |
-| `Interstitialcy7` | 7 | `D,D,D,D,D,D` | No |
-| `Vehicle5` | 5 | `D,S,S,D` | No |
-| `Vehicle6` | 6 | `D,D,S,D,D` | No |
-| `Custom` | 2–8 | valid `D/S` sequence | Explicit |
+| Pattern | Positions | Linkers | Stability sequence | Reverse generated |
+| --- | ---: | --- | --- | --- |
+| `Metropolis2` | 2 | `D` | S, S | Yes |
+| `Migration3` | 3 | `D,D` | S, U, S | Yes |
+| `Interstitialcy5` | 5 | `D,D,D,D` | S, U, S, U, S | No |
+| `Interstitialcy7` | 7 | `D,D,D,D,D,D` | S, U, S, U, S, U, S | No |
+| `Vehicle5` | 5 | `D,S,S,D` | S, S, U, S, S | No |
+| `Vehicle6` | 6 | `D,D,S,D,D` | S, U, S, S, U, S | No |
+| `Custom` | 2–8 | valid `D/S` sequence | inferred from reference path | Explicit |
+
+(S = stable, U = unstable.)
 
 - `Custom` exists to preserve the original's regex-validated connector strings without hard-coding only the
-  six common patterns. It must satisfy:
+  six common patterns. Its stability roles are inferred from the reference path and must satisfy:
   - length = positions − 1;
   - a 2-position chain is Metropolis and uses `D`;
+  - endpoints are stable;
   - a kinetic chain has at least one unstable position and no two consecutive unstable positions;
-  - static linkers only connect groups that share a position in the reference geometry.
+  - every unstable position uses a `[D,∅]` chain group; every stable position uses a `[D,A]` group;
+  - static linkers must connect positions that exist in the reference geometry.
 - `GeneratesReverse` is true only for `Metropolis2` and `Migration3`. Complex mechanisms never generate an
   inverse automatically; the user must define the reverse mechanism explicitly if needed.
 - Chain groups are ordered and semantically meaningful.
@@ -127,11 +131,9 @@ public sealed record MetropolisTransition(
 
 - `ReferencePath` length equals the chain position count.
 - The path is expressed in unit-cell fractional coordinates and may leave `[0,1)`.
-- The path's stability sequence must match the chain's position roles:
-  - endpoints stable;
-  - intermediates unstable for kinetic transitions;
-  - the 5-site vehicle's middle position may be a stable or unstable site depending on the mechanism, but the
-    compiled rule generation validates the exact occupation pattern.
+- The path's stability sequence must match the pattern’s **Stability sequence** in the table above.
+  In particular, vehicles are not simple `S,U,S` migrations: `Vehicle5` is `S,S,U,S,S` and `Vehicle6` is
+  `S,U,S,S,U,S`.
 - The path must not form a ring (first point != last point) and must not contain consecutive unstable
   positions for simple mechanisms.
 - Metropolis transitions use exactly two reference sites. `SiteA == SiteB` means an exchange within one
@@ -204,7 +206,8 @@ public sealed record MetropolisTransition(
 - [ ] Ceria oxygen migration can be defined as a 3-site chain with `[O,V_O]`, `[O,∅]`, `[O,V_O]` and a
   stable-unstable-stable path.
 - [ ] A 2-site MMC exchange `[A,B]` can be defined and previewed.
-- [ ] A 5-site vehicle with `[A,V_A]`, `[B,V_B]`, `[AB,∅]` groups and a `D,S,S,D` chain validates.
+- [ ] A 5-site vehicle with five chain groups (`[A,V_A]`, `[A,V_A]`, `[AB,∅]`, `[B,V_B]`, `[B,V_B]`),
+  a `D,S,S,D` chain, and an `S,S,U,S,S` reference path validates.
 - [ ] Invalid paths (unstable endpoint, consecutive unstable, ring) are rejected with precise diagnostics.
 - [ ] Complex transitions warn when no reverse is defined.
 - [ ] The preview enumerates the expected symmetry-equivalent paths.

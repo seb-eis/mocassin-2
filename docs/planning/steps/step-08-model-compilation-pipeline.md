@@ -152,12 +152,15 @@ For each transition:
    - donor particles are the primary start options;
    - acceptor particles may be start options for reverse/dependent rules;
    - the void particle is allowed only where the position is empty in that state.
-3. Build the S0 occupation code by placing one start particle per group at the corresponding path position.
-4. Build S2 by applying the state change (donor -> acceptor) at each group.
+3. Build the S0 occupation code:
+   - stable path positions receive one start particle from their group;
+   - unstable path positions are **void** in S0, and their group must be a `[D,∅]` pair.
+4. Build S2 by applying the state change at each group; unstable path positions remain **void** in S2.
 5. Build S1:
-   - stable positions are void;
+   - stable positions are **void**;
    - unstable positions are occupied by the group's transition species (the donor or a designated
-     pseudoparticle).
+     pseudoparticle);
+   - MMC has no S1.
 6. Apply conservation:
    - mass: the multiset of particle symbols must be preserved (void ignored);
    - charge: the total charge of S0 must equal S2 within tolerance;
@@ -221,7 +224,8 @@ For MMC:
 
 ### 9. Signature and caching
 
-- `ModelSignature = BLAKE3(canonical compiled model without parameterization values)`.
+- `ModelSignature = BLAKE3(canonical compiled model without parameterization values, including the
+  space-group catalog data version)`.
 - `ParameterizationSignature = BLAKE3(ModelSignature + canonical energy/frequency values)`.
 - The compiler caches stage results keyed by content hashes:
   - structure hash → P1 expansion;
@@ -264,6 +268,7 @@ Compilation errors are distinct from validation errors; e.g. "rule ambiguity", "
 - [ ] A 2-site MMC model compiles forward and inverse rules.
 - [ ] A 3-site migration compiles forward and inverse (including chiral) rules.
 - [ ] A 5-site vehicle compiles unidirectional rules only.
+- [ ] Rule generation enforces unstable positions void in S0/S2 and stable positions void in S1.
 - [ ] Mass and charge conservation reject invalid combinations and report counts.
 - [ ] Rule ambiguity is detected and reported.
 - [ ] Compilation is deterministic: same project → byte-identical canonical compiled model.
@@ -288,7 +293,7 @@ At this point, document the compiler:
 | Pair sets | Counts/distances/multiplicities match brute force |
 | Chirality | Known chiral pairs linked; achiral pairs symmetric |
 | Clusters | Unique permutations match brute-force canonicalization |
-| Rules | State triplets, conservation, inverse/dependent counts |
+| Rules | State triplets, stability roles, conservation, inverse/dependent counts |
 | Vehicle | Unidirectional only; no inverse generation |
 | Encoding | Jump count/mapping/tracker tables consistent |
 | Determinism | Byte-identical compiled model across runs/OSes |

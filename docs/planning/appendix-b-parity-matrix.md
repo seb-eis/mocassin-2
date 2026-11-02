@@ -256,5 +256,6 @@ Status legend:
 | `A+B+C` unit-cell bug | `A*B*C` with tests | 20 |
 | `D_eff` charge-factor ambiguity | Re-derived Nernst–Einstein | 20 |
 | Asymmetric correlation matrix | Full symmetric matrix | 20 |
+| MMC zero-energy break check aborts immediately | Guard below 1e-12 eV; normal behavior unchanged | 17 |
 | Reflection/service-locator model layer | Immutable domain + explicit compiler | 01/08 |
 | No undo/redo, no run monitor, no charts | Added | 22/27 |

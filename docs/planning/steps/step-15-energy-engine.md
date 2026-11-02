@@ -89,9 +89,13 @@ barrier_backward = (s1 - s2) - field
 
 - The state codes are packed particle IDs in path order; decode with bounds checks.
 - For MMC, S1 is unused; `s0` and `s2` are the two-site energies.
-- Field factors are precomputed:
-  - `direction.field_projection = 0.5 * EvToKt * |E| * (Δx · ê)` or an equivalent geometry factor;
-  - `rule.field_factor` encodes the charge/direction sign.
+- Field factors are precomputed in kT units:
+  - `direction.field_projection = 0.5 * (|E| / kT) * (Δx_path · ê)`, where `Δx_path` is the
+    Cartesian displacement of the transition path and `ê` is the unit field direction;
+  - `rule.field_factor` encodes the net charge projection/sign for that rule; the compiler computes it from
+    the path occupation change (Step 08);
+  - `field = -(direction.field_projection * rule.field_factor)`.
+  For a single charge `q` moving by `Δx`, this reduces to the familiar `-0.5 q E·Δx / kT`.
   - The product must have the same sign convention as the original; tests pin a known case.
 - `direction` and `rule` field factors are `f64`; zero field yields zero.
 

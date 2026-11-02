@@ -43,7 +43,7 @@ mocassin/
 │   ├── migration/
 │   ├── examples/
 │   ├── glossary/
-│   ├── api/                         # API landing page; generated API HTML is copied to site/api at build
+│   ├── api/                         # landing + placeholder pages; generated API HTML copied to site/api at build
 │   └── planning/                    # excluded from the published site
 ├── src/
 │   ├── dotnet/
@@ -80,6 +80,7 @@ mocassin/
 └── tools/
     ├── format/                      # schema generation and validation
     ├── docfx/                       # DocFX configuration for the .NET API
+    ├── docs/                        # Zensical/DocFX/rustdoc build and serve scripts
     └── hpc/                         # SLURM/PBS templates and wrappers
 ```
 
@@ -186,13 +187,14 @@ Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
 ### 5.2 Determinism and seeds
 
 - A project has an optional master seed. Each job derives a stable 256-bit seed from
-  `(master_seed, collection_index, config_index, job_index)` using a documented hash (BLAKE3).
+  `(master_seed, purpose, collection_index, config_index, job_index)` using a documented hash (BLAKE3).
 - The solver uses ChaCha12 (or a later documented PRNG) seeded from that value, with separate streams for
   lattice generation and simulation.
 - Supercell generation uses its own deterministic stream, so changing simulation settings does not change
   the generated lattice for the same job coordinates.
-- Same package + same solver version + same platform must reproduce the same `.mcs`. Cross-platform results
-  must agree statistically; the test suite checks both properties.
+- Same package + same solver version + same platform must reproduce the same state content (excluding
+  timestamp/runner metadata). Cross-platform results must agree statistically; the test suite checks both
+  properties.
 
 ## 6. Technology choices
 

@@ -41,8 +41,8 @@ public sealed record Project(
 - One `.mocprj` file contains one project. The application's "workspace" is the set of open project files and
   recent files, not a multi-project database.
 - All collections are `ImmutableArray<T>` in the kernel; editing produces a new `Project` value.
-- `ProjectMetadata` holds `ProjectId` (UUIDv7), name, description, created/modified timestamps, and optional
-  author/notes.
+- `ProjectMetadata` holds `ProjectId` (UUIDv7), `MasterSeed` (32-byte hex; generated at creation if absent),
+  name, description, created/modified timestamps, and optional author/notes.
 - `ViewSettings` holds camera, render box, visibility flags, and per-object style. It is UI state but belongs
   to the project so a shared project opens with the same view.
 
@@ -131,8 +131,9 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
   groups, linkers, doping priority, job configs).
 - Enums are serialized as camelCase strings, not numbers.
 - `ProjectCanonicalizer.ToCanonicalJson(project)` produces a stable byte sequence for hashing and tests.
-- `ProjectHasher.Compute(project)` returns a BLAKE3/SHA-256 hash of the canonical model section only, used by
-  parameterization compatibility.
+- `ProjectHasher.Compute(project)` returns a BLAKE3 hash of the canonical model section, used for dirty
+  tracking and as the basis for the compiled-model signature. It is distinct from the compiled-model
+  signature in Step 09.
 
 ### 6. Migrations
 

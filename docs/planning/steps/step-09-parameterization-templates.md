@@ -47,7 +47,9 @@ public sealed record ParameterizationTemplate(
     ImmutableArray<TransitionRuleSet> TransitionRuleSets);
 ```
 
-- `ModelSignature` is the compiled model signature from step 08.
+- `ModelSignature` is the **compiled-model signature** from step 08 (geometry/rules only). It is distinct from
+  the **parameterization signature** (compiled model + energy/frequency values), which becomes the `.msl`
+  model signature and the `.mcs` `metadata.modelSignature`.
 - Sets are sorted by their stable interaction/rule IDs for canonical serialization.
 - A template may be incomplete; missing values default to 0 eV or 1e13 Hz, and the build warns.
 - Multiple templates may target the same model; the build chooses one explicitly.
@@ -81,19 +83,27 @@ ParameterizationTemplate ParameterizationFactory.Create(
 ### 4. Applying a template
 
 ```csharp
+public sealed record ParameterizationResult(
+    ParameterizedModel Model,
+    ImmutableArray<Diagnostic> Diagnostics);
+
 ParameterizationResult ParameterizationService.Apply(
     CompiledModel model,
     ParameterizationTemplate template);
 ```
 
-- Verifies `template.ModelSignature == model.ModelSignature`; otherwise returns a signature mismatch
+- The returned `Model.Signature` becomes the `.msl` model signature and the `.mcs`
+  `metadata.modelSignature`; it distinguishes packages that share geometry but use different values.
+- Verifies `template.ModelSignature == model.Signature`; otherwise returns a signature mismatch
   diagnostic with a diff summary.
 - Maps each set/rule by ID; unknown IDs are warnings (the model changed); missing required sets default.
 - Validates values:
   - energy finite and within −100..100 eV;
   - frequency finite and > 0 (practical range 1e-3..1e18 Hz);
   - chiral partners receive the same value (or a single value is stored once).
-- Produces a `ParameterizedModel` ready for job encoding.
+- Produces a `ParameterizedModel` ready for job encoding:
+  `record ParameterizedModel(CompiledModel Model, string Signature, EnergyTables Energies, RuleFrequencies Frequencies)`.
+  Its `Signature` is the **parameterization signature** (compiled-model signature + canonical values).
 - Never mutates the template or model.
 
 ### 5. Rebase and migration

@@ -42,8 +42,9 @@ mocassin-sim batch --db <project.msl> --jobs <range|file>
 
 - `--job` runs exactly one job (HPC-friendly).
 - `--jobs` accepts `1-100`, `1,3,5`, `1-10,15,20-30`, or `@jobs.txt`.
-- `batch` runs jobs in worker threads/processes; each job gets its own folder and solver context. Default
-  `parallel = min(CPU count, jobs)`.
+- `batch` is a solver-only convenience for workstations; it runs jobs in worker threads/processes, each with
+  its own folder and solver context. Default `parallel = min(CPU count, jobs)`. The .NET `mocassin simulate`
+  command (Step 27) is the higher-level orchestrator that adds package/status/UI integration.
 - `--threads` controls initialization/analysis parallelism within one job; the Monte Carlo trajectory is
   single-threaded and deterministic. Document this explicitly.
 - `--seed` overrides the package seed for debugging; it is recorded in the state metadata and logs.
@@ -160,7 +161,8 @@ Rules:
 - Extensions run in-process; this is a trust boundary. The CLI requires `--extension` and the GUI shows a
   warning.
 - An extension error aborts the job with exit `17` and a diagnostic; the state is saved if possible.
-- Extension configuration is JSON (`--extension-config`), size-bounded.
+- Extension configuration is JSON (`--extension-config`), size-bounded. Structured `extensions` stored in the
+  job payload are applied by default; `--extension-config` adds/overrides them for ad-hoc runs.
 - A Rust `Extension` trait mirrors the ABI for built-in extensions.
 - MMCFE is implemented as a built-in extension (or a reference `cdylib`) using the same hooks:
   - simulated-annealing MMC with an alpha schedule;

@@ -109,8 +109,8 @@ mocassin/
 - [ ] Steps: checkout, setup .NET 10, setup Rust stable, cache NuGet/Cargo/SQLite, restore, build,
   `dotnet test`, `cargo test`, `dotnet format --verify-no-changes`, `cargo fmt --check`, `cargo clippy`.
 - [ ] Upload test results and coverage artifacts.
-- [ ] Add the docs job: install pinned Zensical requirements, run `zensical build --strict`, and enable
-  DocFX/rustdoc steps as their projects appear.
+- [ ] Add the docs job: setup Python, install pinned Zensical requirements, run `zensical build --strict`,
+  and enable DocFX/rustdoc steps as their projects appear.
 - [ ] Add a scheduled nightly workflow for longer tests and fuzzing (can start as a placeholder).
 - [ ] Add a dependency/licence check and a "no secrets" check.
 
@@ -125,13 +125,16 @@ mocassin/
   - `docs/index.md` and placeholder pages for every required top-level section:
     getting-started, user-guide, physics, tutorials, reference, development, performance, troubleshooting,
     migration, examples, glossary, and api;
-  - `docs/api/index.md` linking to the future `/api/dotnet/` and `/api/rust/` pages.
-- [ ] Add `docs/requirements.txt` (or `pyproject.toml`) pinning Zensical and Markdown extensions.
+  - `docs/api/index.md` linking to `/api/dotnet/` and `/api/rust/`;
+  - placeholder `docs/api/dotnet/index.md` and `docs/api/rust/index.md` pages so strict link validation passes
+    before the generated API outputs exist. Build scripts copy the generated DocFX/rustdoc output over the
+    placeholders in `site/api/...`.
+- [ ] Add `tools/docs/requirements.txt` (or a root `pyproject.toml`) pinning Zensical and Markdown extensions.
 - [ ] Add `.config/dotnet-tools.json` with a pinned DocFX tool. Rust API docs use `cargo doc` directly.
 - [ ] Add docs build scripts:
-  - `docs/build-docs.sh` and `docs/build-docs.ps1`: build Zensical strictly; build DocFX/rustdoc when the
+  - `tools/docs/build-docs.sh` and `tools/docs/build-docs.ps1`: build Zensical strictly; build DocFX/rustdoc when the
     corresponding projects/crates exist; copy API output into `site/api/...`;
-  - `docs/serve.sh` / `docs/serve.ps1`: local preview.
+  - `tools/docs/serve.sh` / `tools/docs/serve.ps1`: local preview.
 - [ ] Add a `docs` CI job that installs the pinned requirements and runs `zensical build --strict`.
   DocFX/rustdoc steps are enabled as soon as their projects exist; they are not deferred to Step 29.
 - [ ] Add `docs/CONTRIBUTING.md` or a README section explaining docs-as-code: every feature step updates its

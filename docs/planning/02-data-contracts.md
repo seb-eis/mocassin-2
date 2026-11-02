@@ -31,6 +31,7 @@ solver, and external tooling. Contracts are versioned and covered by golden and 
   "$schema": "https://mocassin.dev/schemas/project-v1.json",
   "schemaVersion": 1,
   "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e6f",
+  "masterSeed": "9f2c…64-hex-chars…",
   "name": "Ceria",
   "createdUtc": "2026-11-02T12:00:00Z",
   "modifiedUtc": "2026-11-02T12:30:00Z",
@@ -43,6 +44,8 @@ solver, and external tooling. Contracts are versioned and covered by golden and 
 ```
 
 - UTF-8, no BOM, 2-space indentation, `\n` line endings.
+- `masterSeed` is a 32-byte hex value generated at project creation; it seeds job/lattice derivation and is
+  part of the project metadata.
 - `schemaVersion` is an integer. Readers accept `1..current`; migrations are pure functions in
   `Mocassin.Core.Project.ProjectMigrations`.
 - Unknown properties are rejected by default (`JsonUnmappedMemberHandling.Disallow`) to catch typos; schema
@@ -249,7 +252,8 @@ solver, and external tooling. Contracts are versioned and covered by golden and 
       "electricFieldDirection": [1.0, 0.0, 0.0],
       "normalizationEnergyEv": null,
       "maxAttemptFrequencyHz": null,
-      "executionFlags": ["NoJumpLogging"]
+      "executionFlags": ["NoJumpLogging"],
+      "instruction": null
     }
   }
 ]
@@ -259,6 +263,8 @@ MMC uses `metropolisTransitionIds` and settings `breakTolerance`, `breakSampleLe
 `breakSampleIntervalMcsp`, `resultSampleMcsp`.
 
 Common execution flags: `NoSaving`, `NoJumpLogging`, `UseFastExp`, `Deterministic`.
+`instruction` is an optional advanced/legacy free-text extension instruction; structured `extensions` in job
+configurations are preferred.
 
 ### 2.3 Parameterization templates
 
@@ -336,7 +342,10 @@ Common execution flags: `NoSaving`, `NoJumpLogging`, `UseFastExp`, `Deterministi
           "name": "x001",
           "overrides": {},
           "lattice": { "a": 10, "b": 10, "c": 10 },
-          "dopings": [{ "dopingId": "…", "fraction": 0.01 }]
+          "dopings": [{ "dopingId": "…", "fraction": 0.01 }],
+          "extensions": [
+            { "id": "mmcfe", "config": { "alphaCount": 50, "relaxCycles": 20000000 } }
+          ]
         }
       ]
     }
@@ -348,6 +357,9 @@ Common execution flags: `NoSaving`, `NoJumpLogging`, `UseFastExp`, `Deterministi
   mean "set to zero"; use the numeric value for that.
 - `jobCountPerConfig` creates duplicate jobs with different derived seeds.
 - Selection optimizers exclude a particle at a reference site from the KMC starting-point pool.
+- `extensions` are structured, versioned configuration objects for optional solver routines (e.g. MMCFE);
+  they inherit/override like other settings. A raw `instruction` string remains available for advanced/legacy
+  workflows but is not the preferred configuration path.
 
 ### 2.5 Build templates
 
@@ -383,13 +395,14 @@ CREATE TABLE schema_info (
     value TEXT NOT NULL
 );
 -- rows: ('format_version','1'), ('app_version','x.y.z'), ('created_utc','…'),
---       ('project_id','…'), ('generator','mocassin .NET x.y.z')
+--       ('project_id','…'), ('generator','mocassin .NET x.y.z'),
+--       ('job_selection','all' | '1-100,250')
 
 CREATE TABLE models (
     model_id       INTEGER PRIMARY KEY,
-    signature      TEXT    NOT NULL UNIQUE,   -- blake3:…
+    signature      TEXT    NOT NULL UNIQUE,   -- BLAKE3 of the parameterized model
     format_version INTEGER NOT NULL,
-    payload        BLOB    NOT NULL            -- Zstd(MessagePack(CompiledModel))
+    payload        BLOB    NOT NULL            -- Zstd(MessagePack(ParameterizedModel))
 );
 
 CREATE TABLE lattices (
@@ -484,7 +497,7 @@ MessagePack map with snake_case keys. Top-level:
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `format_version` | u32 | Payload version |
-| `signature` | string | BLAKE3 of canonical model |
+| `signature` | string | BLAKE3 of canonical parameterized model (geometry + energy/frequency values) |
 | `particle` | object | `charges`, `symbols`, `is_vacancy`, count; index 0 is void |
 | `structure` | object | cell vectors, P1 positions, site definitions, environments, interaction range |
 | `energy` | object | pair tables, cluster tables, defect background |
@@ -518,7 +531,7 @@ MessagePack map with snake_case keys. Top-level:
 | --- | --- | --- |
 | `jump_collections` | array | `{object_id, mobile_particle_mask:u64, rule_ids:[u32], direction_ids:[u32]}` |
 | `jump_directions` | array | `{object_id, position_id, collection_id, path:[i32;4], movement:[[f64;3]], field_factor, length}` |
-| `jump_rules` | array | `{rule_id, state0:u64, state1:u64, state2:u64, frequency_factor, field_factor, static_correction, tracker_order:[u8;7]}` |
+| `jump_rules` | array | `{rule_id, state0:u64, state1:u64, state2:u64, frequency_factor, field_factor, static_correction, tracker_order:[u8;8]}` |
 | `jump_count` | array | `[position][particle] -> u32` |
 | `jump_mapping` | array | `[position][particle][relative] -> direction index` |
 | `static_tracker_mapping` | array | `[position][particle] -> tracker offset` |
@@ -554,6 +567,8 @@ Exact array lengths and invariants are validated by `mocassin-msl` before the so
 | `max_attempt_frequency_hz` | f64? | |
 | `flags` | u32 | |
 | `selection_optimizers` | array | `{position_id:u32, particle_id:u8}` |
+| `extensions` | array | `{id: string, config: map}` for optional solver routines |
+| `instruction` | string? | Advanced/legacy free-text instruction |
 | `doping_info` | string | Human-readable `[index@value]` summary |
 
 The lattice itself is stored once in the `lattices` table and referenced by the job:
@@ -599,7 +614,8 @@ alignment scheme, or checksum trailer.
   `rmp_serde::Serializer::new().with_struct_map()` and `#[serde(rename_all = "camelCase")]`; in .NET, use
   `[MessagePackObject]` with string `[Key("...")]` names or an equivalent generated resolver.
 - `lattice` must be a MessagePack `bin` (`byte[]` / `serde_bytes::ByteBuf`), not an array of integers.
-- A tracker vector is a 3-element array `[x, y, z]` of `float64`, in that order.
+- A tracker vector is a 3-element array `[x, y, z]` of `float64`, in that order. In .NET this is `McsVector3`
+  with a custom MessagePack formatter; in Rust it is `[f64; 3]`.
 - `format`/`formatVersion` are regular map fields; there is no separate binary header.
 - Readers must ignore unknown map keys and reject unsupported `format`/`formatVersion` values.
 
@@ -625,7 +641,7 @@ alignment scheme, or checksum trailer.
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `solverVersion` | string | `mocassin-sim` version |
-| `modelSignature` | string | Compiled model signature from the `.msl` |
+| `modelSignature` | string | Parameterized model signature from the `.msl` (geometry + values) |
 | `jobId` | uint32 | Package job id |
 | `kind` | string | `"kmc"` or `"mmc"` |
 | `phase` | string | `"run"` or `"prerun"` |
@@ -639,9 +655,14 @@ alignment scheme, or checksum trailer.
 | `targetMcsp` | uint64 | Target successful steps per mobile particle |
 | `simulatedTimeS` | f64 | Simulated KMC time in seconds; 0 for MMC |
 | `normalizationFactor` | f64 | `K_norm`; 1 for MMC |
+| `fixedNormalizationFactor` | f64 | `K_fix`; 1 when no fixed normalization is used |
 | `rawMaxJumpProbability` | f64 | Observed raw maximum; 0 for MMC |
+| `prerunGoal` | uint64 | Pre-run target cycles; 0 for MMC |
+| `totalGoal` | uint64 | Main-run target cycles; 0 for MMC |
 | `latticeEnergyEv` | f64 | Current total lattice energy in eV |
 | `flags` | uint64 | Solver state flags |
+| `rngAlgorithm` | string | `"chacha12-v1"` (versioned with the state format) |
+| `rngState` | bin | Opaque, versioned PRNG state needed for exact resume; length/algorithm documented in Step 13 |
 | `abortReason` | string | `running`, `prerun`, `completed`, `equilibrium`, `timeLimit`, `rateLimit`, `cancelled`, `error` |
 | `seedHash` | string | BLAKE3 hash of the job seed (not the raw seed) |
 | `units` | map | `{ "energy": "eV", "time": "s", "length": "angstrom", "tracker": "fractional" }` |
