@@ -135,7 +135,7 @@ Status legend:
 | Global/mobile/static trackers | Y | Planned | 18 | |
 | Jump histograms | Y | Planned | 18 | Attempt + accepted |
 | Statistics/stdout | Y | Planned | 18 | Documented units |
-| State save/resume | Y | Planned | 18 | `MCS2` |
+| State save/resume | Y | Planned | 18 | MessagePack |
 | `.mcs` compatibility (legacy) | N | Out of scope | — | ADR 0001 |
 | PCG32 bit-exact trajectories | N | Out of scope | — | ADR 0005 |
 | Statistical parity | Y | Planned | 28 | Reference systems |
@@ -149,7 +149,7 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| `.mcs` reader | Y | Planned | 20 | `MCS2` |
+| `.mcs` reader | Y | Planned | 20 | MessagePack |
 | Job query/metadata | Y | Planned | 20 | |
 | Model context from package | Y | Planned | 20 | |
 | Particle counts/meta | Y | Planned | 20 | |
@@ -237,8 +237,8 @@ Status legend:
 | Optimizer mask inverted/double-applied | Correct single application + tests | 10 |
 | Base lattice config discarded in configs | Explicit inheritance model | 10 |
 | MMC frequency NaN | MMC rules carry no frequency; schema separates kinds | 11 |
-| Raw `.mcs` with no header/checksum | `MCS2` sectioned format | 18 |
-| Unsafe unaligned/pinned `.mcs` reads | Safe memory-mapped reader | 20 |
+| Raw `.mcs` with no header/checksum | MessagePack with `format`/`formatVersion`; SHA-256 in `.msl` | 18 |
+| Unsafe unaligned/pinned `.mcs` reads | Managed MessagePack reader; no pinned buffers | 20 |
 | Eager result blob loading | Metadata-first streaming queries | 20 |
 | `A+B+C` unit-cell bug | `A*B*C` with tests | 20 |
 | `D_eff` charge-factor ambiguity | Re-derived Nernst–Einstein | 20 |

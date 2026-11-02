@@ -32,7 +32,7 @@ addressed in the new architecture. It is a navigation aid, not a line-by-line po
 | `Mocassin.UI.Data` | `Mocassin.Core.Project` | 01 | New JSON project format; no SQLite/JSON.NET graph |
 | `Mocassin.UI.GUI` | `Mocassin.App*` + `Mocassin.Rendering` | 22–27 | Avalonia, new MVVM stack and information architecture |
 | `Mocassin.Tools.Evaluation` | `Mocassin.Results` | 20–21 | New streaming API and corrected formulas |
-| `Mocassin.Tools.UAccess` | `Mocassin.Results` | 20 | Safe `MCS2` reader; no pinned whole-file buffers |
+| `Mocassin.Tools.UAccess` | `Mocassin.Results` | 20 | Safe MessagePack reader; no pinned whole-file buffers |
 | `Mocassin.UI.Installer` | packaging/release | 29 | Cross-platform archives/packages instead of MSI |
 | `Mocassin.Simulator` (C) | `mocassin-sim` (Rust) | 13–19 | Process-per-job, new package reader, statistical parity |
 | `Mocassin.Utility` (C) | `mocassin` CLI | 12/19 | Fold useful utilities into the new CLIs |
@@ -145,7 +145,7 @@ addressed in the new architecture. It is a navigation aid, not a line-by-line po
 | Global/mobile/static trackers | 18 | |
 | Jump histograms | 18 | Attempt + accepted semantics |
 | Statistics/stdout | 18 | Compatible spirit, documented units |
-| `.mcs` state | 18 | New `MCS2` format |
+| `.mcs` state | 18 | New MessagePack format |
 | Resume | 16/18 | Signature-checked |
 | Extensions/MMCFE | 19 | New ABI, opt-in |
 | HPC scripts | 19 | SLURM/PBS, batch runner |
@@ -156,7 +156,7 @@ addressed in the new architecture. It is a navigation aid, not a line-by-line po
 | Original feature | New step | Notes |
 | --- | --- | --- |
 | `MslEvaluationContext` | 20 | `ResultPackage`, read-only SQLite |
-| `JobContext` + `McsReader` | 20 | Safe `MCS2` reader |
+| `JobContext` + `McsReader` | 20 | Safe MessagePack reader |
 | Particle count/meta | 20 | |
 | Global/mobile/static tracking | 20 | |
 | Displacement/MSD/diffusion | 20 | Correct units |
@@ -199,7 +199,7 @@ addressed in the new architecture. It is a navigation aid, not a line-by-line po
 | --- | --- | --- |
 | `.mocprj` SQLite + JSON.NET graph | Versioned JSON project | Clean break, stable IDs, no CLR types |
 | `.msl` EF Core + native blobs | SQLite + MessagePack/Zstd | Cross-language, versioned, safe |
-| `.mcs` raw buffer | `MCS2` sectioned binary | Safe, checksummed, 64-bit, documented |
+| `.mcs` raw buffer | MessagePack state document | Safe, versioned, bounded, documented; SHA-256 in `.msl` |
 | PCG32 exact trajectories | ChaCha12 statistical parity | Portable, maintainable, validated by observables |
 | WPF/SharpDX/Win64 | Avalonia/Silk.NET cross-platform | Required portability |
 | MSI installer | archives/packages | Cross-platform release |

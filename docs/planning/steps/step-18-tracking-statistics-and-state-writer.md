@@ -3,7 +3,7 @@
 **Phase:** D. Solver  
 **Depends on:** 16, 17  
 **Delivers:** Global/static/mobile movement tracking, jump histograms, statistics dumps, derived transport
-quantities, and the versioned `MCS2` state writer/reader.
+quantities, and the versioned MessagePack state writer/reader.
 
 ## Goal
 
@@ -168,63 +168,69 @@ document the new units and the attempt-histogram semantics.
 - Machine-readable structured events go to stderr (JSON Lines) when enabled; stdout remains the statistics
   dump.
 
-### 5. `MCS2` writer
+### 5. MessagePack state schema
 
-Layout defined in [`02-data-contracts.md`](../02-data-contracts.md):
+The complete schema is defined in
+[`02-data-contracts.md`](../02-data-contracts.md#4-result-state-file-mcs-messagepack-version-1). The writer
+serializes a single `McsState` value with `rmp-serde` (Rust) or `MessagePack-CSharp` (.NET).
 
-- 64-byte header, 40-byte section entries, 8-byte alignment, CRC32C per section.
-- Sections:
-  1. metadata JSON (solver version, model signature, job id, flags, abort reason, units);
-  2. lattice (u8 per position);
-  3. cycle counters (per particle);
-  4. global trackers (3×f64 per tracker);
-  5. mobile trackers (3×f64);
-  6. static trackers (3×f64);
-  7. mobile mapping (u32);
-  8. jump histograms (4×1000 u64 + under/overflow);
-  9. energy samples (MCS, lattice energy, mean ΔE);
-  10. particle positions (optional diagnostics).
-- Writer:
-  1. write a placeholder header/table;
-  2. append sections with 8-byte alignment, computing CRC32C incrementally;
-  3. back-patch header/table and write the footer/file size;
-  4. fsync and atomically rename; keep a `.bak` of the previous state.
-- MMC writes only metadata, lattice, counters, and energy samples; absent sections are omitted, not `-1`.
-- `NoSaving` skips state writes but still prints statistics.
-- State size is bounded; use u64 counts and checked arithmetic.
-- The writer must not allocate large temporary buffers; stream sections.
+Top-level map:
 
-### 6. `MCS2` reader (for resume)
+```text
+format: "mocassin.mcs"
+formatVersion: 1
+metadata: { ... }
+lattice: bin                      // u8 per linearized position
+counters: [ { particleIndex, skip, success, rejected, blocked, startUnstable, endUnstable } ]
+globalTrackers: [ [f64;3] ]       // KMC only
+mobileTrackers: [ [f64;3] ]       // KMC only
+staticTrackers: [ [f64;3] ]       // KMC only
+mobileMapping: [ u32 ]            // KMC only
+jumpStatistics: [ { ... } ]       // KMC only
+energySamples: [ { mcs, latticeEnergyEv, acceptedDeltaEv } ]
+particlePositions: [ u32 ]        // optional diagnostics
+```
 
-- Validate magic/version/header size/CRC/file size.
-- Validate section offsets/lengths/counts and alignment.
-- Load only the sections needed for resume (lattice, counters, trackers, histograms, meta).
+- `metadata` contains the solver version, model signature, job id, kind/phase, lattice size, P1 position count,
+  particle count, tracker counts, cycle/MCS counts, simulated time, normalization, lattice energy, flags,
+  abort reason, seed hash, units, and optional runner information.
+- The lattice is a MessagePack `bin`; numeric arrays use native MessagePack types.
+- MMC omits all KMC-only fields. `prerun.mcs` uses the same schema with `metadata.phase = "prerun"`.
+- There is no custom header, section table, alignment, or CRC. `format`/`formatVersion` are ordinary map fields.
+- The document is expected to stay below 4 GiB. The writer checks the encoded size against a configurable cap
+  (default 3.5 GiB) and fails with an actionable error instead of truncating.
+
+### 6. Writer
+
+1. Build the `McsState` from the context, trackers, counters, and histograms.
+2. Serialize directly to a temp file in the target directory using `rmp_serde::Serializer` /
+   `MessagePackSerializer.Serialize(stream, state)`.
+3. Flush/fsync, verify the size cap, then atomically rename to `run.mcs` or `prerun.mcs`.
+4. Keep the previous file as a `.bak` if configured; never leave a partial `.mcs`.
+5. `NoSaving` skips the write but still prints statistics.
+6. The collector computes the SHA-256 and stores it in `results.run_state_sha256`; the state itself has no
+   checksum.
+
+### 7. Reader for resume
+
+- Deserialize with `rmp_serde::from_read` / `MessagePackSerializer.Deserialize<McsState>`.
+- Validate `format`, `formatVersion`, metadata, lattice length, particle indices, tracker counts, mobile
+  mapping, histogram bin counts, and finite numeric values.
 - Verify the model signature and lattice size match the job.
-- Reject NaN/Inf where invalid; reject duplicate section IDs.
+- Ignore unknown fields for forward compatibility; reject unknown `format` or unsupported `formatVersion`.
+- Load the full document into memory for resume; the documented workload is bounded below 4 GiB.
 - Provide a `StateReader` that can also be used by the .NET reader tests.
 
-### 7. Resume and abort reasons
+### 8. Determinism and integrity
 
-- Persist:
-  - lattice;
-  - counters;
-  - trackers and mobile mapping;
-  - histograms;
-  - RNG state;
-  - `simulated_time`, `K_norm`, `RawMax`, `K_fix`;
-  - state flags (pre-run/main, completed, aborted);
-  - abort reason.
-- On resume, restore all of the above and continue from the next cycle.
-- A completed state is detected by the completed flag and target MCSP; exit with `AlreadyCompleted`.
-- Abort reasons: `Completed`, `EquilibriumReached`, `TimeLimit`, `RateLimit`, `Cancelled`, `NumericalError`,
-  `UserAbort`, `AlreadyCompleted`.
-
-### 8. Determinism and checksums
-
-- Trackers/histograms are updated in a fixed order.
-- Counters use `u64`; no overflow in practical runs.
-- CRC32C covers section bytes; a corrupted state is rejected, not silently loaded.
-- Golden state fixtures freeze the section layout and counters for a small run.
+- Trackers/histograms are updated in a fixed order; counters use `u64`.
+- The writer uses a fixed field/array order. MessagePack is deterministic for the same writer/version/platform;
+  byte-identical output across C# and Rust is not required.
+- Integrity is provided by the `.msl` SHA-256, not by a state-file container checksum.
+- A malformed/truncated MessagePack document is rejected by the decoder; a semantically invalid document is
+  rejected by schema validation.
+- Golden fixtures freeze the canonical JSON summary and counters for a small run.
+- The size cap and lattice bounds are checked before writing.
 
 ## Implementation tasks
 
@@ -232,8 +238,8 @@ Layout defined in [`02-data-contracts.md`](../02-data-contracts.md):
 - [ ] Implement tracker order code transfer.
 - [ ] Implement jump histograms and attempt/accepted counters.
 - [ ] Implement statistics computation and stdout formatting.
-- [ ] Implement the `MCS2` writer with header/section/CRC/atomic rename.
-- [ ] Implement the `MCS2` reader for resume.
+- [ ] Implement the MessagePack `McsState` writer with atomic rename and size checks.
+- [ ] Implement the MessagePack `McsState` reader for resume.
 - [ ] Implement energy samples and abort reason metadata.
 - [ ] Implement `--jump-log-max-ev`, `NoSaving`, `NoJumpLogging`.
 - [ ] Add golden state fixtures and round-trip tests.
@@ -246,7 +252,7 @@ Layout defined in [`02-data-contracts.md`](../02-data-contracts.md):
 - [ ] Static trackers reproduce per-position flow for a simple lattice.
 - [ ] Mobile trackers follow particle identity across a 3-site migration.
 - [ ] Histograms bin values correctly, including under/overflow.
-- [ ] `MCS2` files pass CRC and round-trip through the reader.
+- [ ] MessagePack state files round-trip through the reader and pass semantic validation.
 - [ ] Resume from a mid-run state continues identically.
 - [ ] Corrupt/truncated state files are rejected.
 - [ ] Statistics output contains no NaN/Inf for zero-field MMC/KMC cases.
@@ -262,8 +268,9 @@ Layout defined in [`02-data-contracts.md`](../02-data-contracts.md):
 | Histograms | Bin edges, under/overflow |
 | State round-trip | Writer → reader → identical fields |
 | Resume | Mid-run continuation |
-| Corruption | Bad CRC/offset/version rejected |
-| MMC state | Reduced sections |
+| Corruption | Bad MessagePack/version/array length rejected |
+| Compatibility | Unknown fields ignored; unknown format version rejected |
+| MMC state | KMC-only fields absent/empty |
 | Output | Parseable statistics lines |
 
 ## Risks and mitigations
@@ -272,11 +279,11 @@ Layout defined in [`02-data-contracts.md`](../02-data-contracts.md):
 | --- | --- |
 | Tracking semantics ambiguity | Document per-tracker update rules; analytic tests |
 | Histogram semantics differ from original | Document attempt vs. accepted; expose both |
-| State format bugs | Golden fixtures, CRC, fuzz reader |
-| Large state files | Stream sections, optional compression, no full-buffer copy |
+| State format bugs | Golden fixtures, `.msl` SHA-256, fuzz reader |
+| Large state files | Stream serialization, 3.5 GiB cap, external compression |
 | Resume mismatch | Signature/lattice checks; reject incompatible state |
 
 ## Done when
 
 Every accepted transition updates the correct trackers, statistics are physically meaningful, and state files
-are self-describing, checksummed, resumable, and readable by .NET.
+are self-describing, versioned, resumable, and readable by .NET.

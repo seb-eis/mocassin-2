@@ -54,7 +54,7 @@ mocassin/
 │       │   ├── mocassin-msl/        # SQLite package reader
 │       │   ├── mocassin-rng/        # deterministic RNG streams
 │       │   ├── mocassin-solver/     # context, energy, KMC, MMC, tracking
-│       │   ├── mocassin-state/      # .mcs writer
+│       │   ├── mocassin-state/      # MessagePack .mcs writer/reader
 │       │   ├── mocassin-extension/  # extension ABI and MMCFE-compatible hooks
 │       │   └── mocassin-cli/        # `mocassin-sim`
 │       └── benches/
@@ -132,7 +132,7 @@ mocassin-solver ──► mocassin-state
 | `mocassin-msl` | Read `.msl` SQLite, verify schema version and model signature, decode model/job payloads |
 | `mocassin-rng` | Deterministic, platform-independent RNG streams; seed derivation per job |
 | `mocassin-solver` | Simulation context, energy engine, KMC, MMC, trackers, statistics |
-| `mocassin-state` | Binary `.mcs` writer with section table and checksums |
+| `mocassin-state` | MessagePack `.mcs` schema, writer, and reader |
 | `mocassin-extension` | Stable extension trait plus C ABI for optional custom routines |
 | `mocassin-cli` | `mocassin-sim` argument parsing, logging, signal handling, exit codes |
 
@@ -193,8 +193,8 @@ Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
 | SQLite (.NET) | Microsoft.Data.Sqlite | Lightweight, no EF Core required for `.msl` |
 | SQLite (Rust) | `rusqlite` with `bundled` | Reproducible builds, no system dependency |
 | Package encoding | MessagePack + Zstd | Compact, schema-friendly, fast; shared conceptually with Rust |
-| State encoding | Custom little-endian binary | Zero-copy arrays, documented, stable, no framework coupling |
-| Rust serialization | `serde` + `rmp-serde` | Matches package schema |
+| State encoding | MessagePack | Same ecosystem as package payloads; no custom container; < 4 GiB workload |
+| Rust serialization | `serde` + `rmp-serde` | Matches package and state schema |
 | Rust CLI | `clap` | Ergonomic, shell completions, validation |
 | Rust errors | `thiserror` | Typed errors at crate boundaries |
 | Rust logging | `tracing` + `tracing-subscriber` | Structured logs, JSON output option |
@@ -267,7 +267,7 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
 | Project JSON | `schemaVersion` integer | New reader accepts older minor versions via migrations; rejects newer major |
 | `.msl` package | `format_version` + `app_version` | Solver accepts the exact supported range; refuses unknown |
 | Compiled payload | `format_version` | Tied to `.msl`; independent of project schema |
-| `.mcs` state | magic + `version` | Reader supports the current and previous version; rejects unknown |
+| `.mcs` state | `format` + `formatVersion` | Reader supports the current version; rejects unknown `format`/version |
 | CLI JSON | `schemaVersion` | Additive changes only within a major version |
 
 ## 8. Architecture decision records
@@ -277,7 +277,7 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
 | [0001](adr/0001-clean-break-file-formats.md) | Clean-break, versioned file formats |
 | [0002](adr/0002-rust-solver-boundary.md) | Rust solver consumes only compiled packages |
 | [0003](adr/0003-avalonia-mvvm-stack.md) | Avalonia + CommunityToolkit.Mvvm + MS.Extensions |
-| [0004](adr/0004-package-and-state-encoding.md) | MessagePack/Zstd package, custom binary state |
+| [0004](adr/0004-package-and-state-encoding.md) | MessagePack/Zstd package, MessagePack state |
 | [0005](adr/0005-statistical-parity-and-rng.md) | Statistical parity and deterministic RNG policy |
 | [0006](adr/0006-3d-rendering.md) | 3D renderer abstraction and backend choice |
 | [0007](adr/0007-mit-license.md) | MIT license for the reimplementation; original GPL attribution |

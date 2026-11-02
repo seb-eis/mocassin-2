@@ -21,7 +21,7 @@ Target stack:
 | Solver | Rust (`mocassin-sim`) |
 | Project format | Versioned UTF-8 JSON (`.mocprj`) |
 | Simulation package | SQLite (`.msl`) with versioned MessagePack/Zstd payloads |
-| Result state | `MCS2` self-describing binary (`.mcs`) |
+| Result state | MessagePack document (`.mcs`) |
 | Charts | LiveCharts2 (`LiveChartsCore.SkiaSharpView.Avalonia`) |
 
 ## 2. Read this first
@@ -224,7 +224,8 @@ pass.
 - All randomness comes from the injected `Rng`; never use `thread_rng` or time-based seeds.
 - Energies are `f64`; never `f32`.
 - Particle masks are `u64`; never `1 << id` on a 32-bit integer.
-- Use little-endian explicit writes for `.mcs`; do not depend on native struct layout.
+- Use MessagePack (`MessagePack-CSharp` / `rmp-serde`) for `.mcs`; do not introduce a custom binary header,
+  section table, alignment scheme, or native struct layout.
 
 ## 9. Scientific invariants
 
@@ -268,19 +269,21 @@ interpretation, and encode it in a test. Do not copy GPL code.
   cap allocations, fuzz parsers.
 - `.msl`: one shared compiled model per signature, content-addressed lattices, deterministic job IDs, pending
   result rows.
-- `.mcs`: magic `MCS2`, section table, 64-bit offsets, CRC32C, optional Zstd. Do not add native padding.
+- `.mcs`: MessagePack map with `format = "mocassin.mcs"` and `formatVersion`; `lattice` as `bin`; optional
+  KMC tracker/histogram fields. No custom header/section table/CRC. Integrity comes from the `.msl` SHA-256;
+  enforce the < 4 GiB size assumption.
 
 ## 11. Testing expectations
 
 - Unit tests for pure functions and formulas.
 - Property-based tests for geometry, symmetry, permutation reduction, supercells, and state round-trips.
-- Golden tests for compiled models, `.msl` payloads, `.mcs` sections, and CLI output.
+- Golden tests for compiled models, `.msl` payloads, `.mcs` documents, and CLI output.
 - Contract tests across .NET and Rust for every format.
 - Statistical tests for physics: detailed balance, residence time, MSD/diffusion, conductivity, field sign,
   conservation.
 - Statistical parity against reference observables on ceria, barium zirconate, and a complex mechanism.
 - UI view-model tests and Avalonia headless/screenshot tests.
-- Fuzz project JSON, `.msl`, `.mcs`, and extension config parsers.
+- Fuzz project JSON, `.msl`, `.mcs` MessagePack documents, and extension config parsers.
 
 A bug fix without a regression test is incomplete. A scientific change without a physics/parity test is
 incomplete.
@@ -304,6 +307,7 @@ incomplete.
 - Do not introduce EF Core, Newtonsoft.Json, WPF, `System.Windows.*`, or a service locator.
 - Do not let Rust read project JSON or write `.msl`.
 - Do not use raw native structs/images, unaligned `Unsafe.AsRef`, or pinned whole-file buffers.
+- Do not introduce a custom `.mcs` header/section table/CRC; use the MessagePack schema.
 - Do not use PCG32/`string.GetHashCode()` for reproducibility; use ChaCha12/BLAKE3.
 - Do not change canonical P1 order, energy conventions, or time-step formulas without an ADR and tests.
 - Do not use `A+B+C` for unit-cell counts.

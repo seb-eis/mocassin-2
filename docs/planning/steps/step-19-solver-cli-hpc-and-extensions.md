@@ -56,8 +56,8 @@ mocassin-sim batch --db <project.msl> --jobs <range|file>
 
 - Default folder: `<io-root>/Job%05d` if `--io-root` is given; otherwise `--io` is used verbatim.
 - Files:
-  - `run.mcs` — final/main state;
-  - `prerun.mcs` — KMC pre-run state;
+  - `run.mcs` — final/main MessagePack state;
+  - `prerun.mcs` — KMC pre-run MessagePack state;
   - `stdout.log` — statistics dump (if `--stdout` or default log routing);
   - `stderr.log` — structured/human errors and progress;
   - `solver.json` — machine-readable summary (exit code, abort reason, wall time, state paths, counters).

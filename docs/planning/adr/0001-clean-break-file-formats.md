@@ -25,7 +25,7 @@ or writers for the legacy formats.
 
 - Project: UTF-8 JSON with `schemaVersion` and stable string IDs.
 - Package: SQLite with a small normalized schema and versioned MessagePack/Zstd payloads.
-- State: self-describing binary container with magic, version, section table, 64-bit offsets, and CRCs.
+- State: a MessagePack document with `format`/`formatVersion` and explicit typed fields.
 
 Existing users must recreate projects in the new application. The original formats may be studied for
 scientific semantics and used to generate reference data, but they are not a compatibility target.

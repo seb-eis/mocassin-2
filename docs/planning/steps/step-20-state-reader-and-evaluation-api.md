@@ -52,28 +52,29 @@ public sealed class ResultPackage : IAsyncDisposable
 public sealed class McsReader : IDisposable
 {
     public static McsReader Open(string path);
-    public static McsReader FromMemory(ReadOnlyMemory<byte> bytes);
-    public McsHeader Header { get; }
-    public McsMetadata Metadata { get; }
-    public ReadOnlySpan<byte> Lattice { get; }
-    public ReadOnlySpan<McsCycleCounter> Counters { get; }
-    public ReadOnlySpan<McsVector3> GlobalTrackers { get; }
-    public ReadOnlySpan<McsVector3> MobileTrackers { get; }
-    public ReadOnlySpan<McsVector3> StaticTrackers { get; }
-    public ReadOnlySpan<uint> MobileMapping { get; }
-    public ReadOnlySpan<McsJumpStatistics> JumpStatistics { get; }
-    public ReadOnlySpan<McsEnergySample> EnergySamples { get; }
+    public static McsReader FromBytes(ReadOnlyMemory<byte> bytes);
+    public McsDocument State { get; }
+    public McsMetadata Metadata => State.Metadata;
+    public ReadOnlyMemory<byte> Lattice => State.Lattice;
+    public IReadOnlyList<McsCycleCounter> Counters => State.Counters;
+    public IReadOnlyList<McsVector3> GlobalTrackers => State.GlobalTrackers;
+    public IReadOnlyList<McsVector3> MobileTrackers => State.MobileTrackers;
+    public IReadOnlyList<McsVector3> StaticTrackers => State.StaticTrackers;
+    public IReadOnlyList<uint> MobileMapping => State.MobileMapping;
+    public IReadOnlyList<McsJumpStatistics> JumpStatistics => State.JumpStatistics;
+    public IReadOnlyList<McsEnergySample> EnergySamples => State.EnergySamples;
 }
 ```
 
-- Validate magic, version, header size, file size, CRC, section offsets/lengths/counts/alignment.
-- Use `MemoryMappedFile` or `RandomAccess.Read` with pooled buffers; expose `ReadOnlySpan` only within a
-  scoped synchronous call. Do not pin a managed array for the reader lifetime.
-- Copy small headers/metadata into owned structs; large arrays remain memory-mapped/pooled and are consumed by
-  evaluations that complete before disposal.
-- Sections are optional; absent sections return empty spans.
-- Verify lattice length against `a*b*c*position_count` from the job metadata.
-- Reject duplicate section IDs and overlapping sections.
+- Deserialize the whole document with `MessagePackSerializer.Deserialize<McsDocument>(stream, options)`.
+- Validate `format == "mocassin.mcs"`, `formatVersion`, metadata, lattice length, particle indices, tracker
+  counts, mobile mapping, histogram bins, and finite numeric values.
+- The `lattice` field is a MessagePack `bin`; trackers are arrays of `[f64;3]`; counters/histograms are arrays.
+- Missing optional fields (especially KMC fields in MMC states) are treated as empty.
+- Unknown fields are ignored; unknown `format`/version is rejected.
+- Verify the `.msl` `run_state_sha256` before deserializing when the state came from a package result.
+- No memory mapping, pinned arrays, native structs, or section table. The documented workload is < 4 GiB, so
+  in-memory deserialization is acceptable; stream if profiling shows a need.
 
 ### 3. Job and model context
 
@@ -208,7 +209,7 @@ public abstract class JobEvaluation<TResult>
    - read `solver.json` (exit code, abort reason, state paths);
    - read `run.mcs`/`prerun.mcs` if present;
    - read `stdout.log`/`stderr.log`;
-   - validate MCS header/CRC/signature and lattice size;
+   - validate the MessagePack state schema/signature and lattice size;
    - compute SHA-256.
 3. Update `results` in a transaction (batch ~100 rows), idempotently:
    - status, exit code, timestamps, wall time, stdout, blobs, hashes, error message.
@@ -247,7 +248,7 @@ Queries:
 ## Implementation tasks
 
 - [ ] Implement `ResultPackage` with Microsoft.Data.Sqlite and async queries.
-- [ ] Implement the `MCS2` reader with validation and memory-mapped sections.
+- [ ] Implement the MessagePack `McsReader` with schema validation and SHA-256 checks.
 - [ ] Implement `JobContext`, model cache, and lattice geometry.
 - [ ] Implement `JobEvaluation<T>` with bounded parallelism/cancellation.
 - [ ] Implement all evaluation classes and formulas.
@@ -273,7 +274,7 @@ Queries:
 
 | Test | Assertion |
 | --- | --- |
-| MCS reader | Header/sections/CRC; corrupt files rejected |
+| MCS reader | MessagePack schema/version/lengths; corrupt files rejected |
 | Counts | Lattice counts per particle |
 | MSD/D | Analytic random walk |
 | Mobility/σ | Nernst–Einstein consistency |
@@ -289,8 +290,8 @@ Queries:
 | Risk | Mitigation |
 | --- | --- |
 | Formula/unit errors | One `Physics` module, dimensional tests, golden values |
-| Large blobs | Metadata-first queries, on-demand loading, memory mapping |
-| Reader lifetime bugs | Scoped spans, `IDisposable`, no pinned arrays |
+| Large blobs | Metadata-first queries, on-demand loading, bounded in-memory state |
+| Reader lifetime bugs | Owned arrays, no pinned buffers, deterministic disposal |
 | Attempt vs accepted semantics | Expose both, document |
 | Collection races | Transactions, hashes, idempotent updates |
 

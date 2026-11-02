@@ -23,7 +23,7 @@ MOCASSIN is a fixed-lattice Markov-chain Monte Carlo suite for crystalline solid
 - **Parameterization** — numerical energies and attempt frequencies for the compiled model.
 - **Job templates** — collections/configurations that expand into thousands of simulation jobs.
 - **Simulation package** — compiled, indexed data consumed by the solver.
-- **Results** — binary state, statistics, trackers, histograms, and evaluation API.
+- **Results** — MessagePack state, statistics, trackers, histograms, and evaluation API.
 - **Desktop GUI** — the primary authoring, validation, build, run, and analysis environment.
 
 ## 3. Decisions and constraints

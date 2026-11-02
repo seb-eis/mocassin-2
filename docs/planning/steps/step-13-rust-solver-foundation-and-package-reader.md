@@ -31,7 +31,7 @@ steps.
 | `mocassin-msl` | `rusqlite` reader, schema/version checks, payload decode, invariant validation |
 | `mocassin-rng` | BLAKE3 seed derivation, ChaCha12 streams, bounded draws, doubles in `[0,1)` |
 | `mocassin-solver` | Placeholder API (context/energy/KMC/MMC added in later steps) |
-| `mocassin-state` | Placeholder writer (implemented in step 18) |
+| `mocassin-state` | MessagePack state schema/types and writer/reader (implemented in step 18) |
 | `mocassin-cli` | `mocassin-sim` argument parsing, logging, dry-run, error mapping |
 
 ### 2. Typed model
@@ -215,7 +215,7 @@ pub enum PackageError {
 | Contract drift with .NET | Shared fixtures and canonical JSON comparison |
 | Malicious/corrupt packages | Bounds checks, allocation caps, fuzzing |
 | RNG changes break reproducibility | Freeze golden vectors; version the derivation |
-| Struct layout confusion | Serde maps, not raw layout; explicit endianness for state |
+| Struct layout confusion | Serde maps, not raw layout; MessagePack schema, no native endianness |
 | SQLite build issues | `rusqlite` bundled feature; CI cache |
 
 ## Done when
