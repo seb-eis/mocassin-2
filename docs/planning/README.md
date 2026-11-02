@@ -72,7 +72,8 @@ Additional technical decisions (clean-break format encoding, Avalonia MVVM toolk
 | F. GUI | [26](steps/step-26-3d-viewer-and-visualization.md) | Cross-platform 3D viewer and overlays |
 | F. GUI | [27](steps/step-27-run-monitoring-and-mmcfe-ui.md) | Live run monitoring, charts, MMCFE workflow |
 | G. Release | [28](steps/step-28-validation-parity-and-performance.md) | Statistical parity, performance, fuzzing, hardening |
-| G. Release | [29](steps/step-29-packaging-documentation-and-release.md) | Packaging, docs, samples, release engineering |
+| G. Release | [29](steps/step-29-standalone-documentation.md) | Zensical docs site, physics/architecture/tutorials, DocFX + rustdoc APIs |
+| G. Release | [30](steps/step-30-packaging-and-release.md) | Packaging, docs artifact, samples, release engineering |
 
 ## Working conventions
 
@@ -86,6 +87,8 @@ Additional technical decisions (clean-break format encoding, Avalonia MVVM toolk
   consumer of the same public API as the CLI.
 - The Rust solver never reads project JSON. Its only input is the compiled simulation package plus CLI
   arguments, so it can be developed and tested independently.
+- Standalone documentation is built with Zensical; .NET and Rust API references are generated with DocFX and
+  rustdoc into `/api/dotnet/` and `/api/rust/`. `docs/planning/` is internal and excluded from publication.
 
 ## Status
 

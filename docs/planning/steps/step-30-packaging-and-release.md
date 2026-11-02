@@ -1,9 +1,9 @@
-# Step 29 — Packaging, Documentation, and Release
+# Step 30 — Packaging and Release
 
-**Phase:** G. Release  
-**Depends on:** 28  
-**Delivers:** Reproducible cross-platform binaries, NuGet packages, installable archives/packages, complete
-documentation and samples, and a signed release process.
+**Phase:** G. Release and documentation  
+**Depends on:** 28, 29  
+**Delivers:** Reproducible cross-platform binaries, NuGet packages, installable archives/packages, the
+combined documentation artifact, samples, and a signed release process.
 
 ## Goal
 
@@ -89,36 +89,22 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 - Symbols package (`.snupkg`) and deterministic builds.
 - A `Mocassin.Csx`/scripting helper is optional; the CLI is preferred.
 
-### 5. Documentation
+### 5. Documentation artifact
 
-- **README** — what it is, install, 5-minute ceria tutorial, links.
-- **User guide** — rewritten chapters:
-  - installation and first project;
-  - model concepts (particles, structure, transitions, energy, lattice, simulations);
-  - parameterization and job templates;
-  - building/running/collecting;
-  - evaluation and plots;
-  - 3D viewer;
-  - MMCFE;
-  - HPC workflows;
-  - troubleshooting.
-- **Reference**:
-  - CLI commands/exit codes;
-  - project/package/state formats;
-  - diagnostics catalog;
-  - physics formulas/units/conventions;
-  - extension ABI.
-- **Migration note** — clean break: no legacy import; how to recreate a project from the old UI; what changes
-  in results.
-- **Samples** — ceria (KMC/MMC), barium zirconate, vehicle, interstitialcy; each with a README and expected
-  outputs.
-- **Developer docs** — architecture, build, testing, release, ADRs.
+- The standalone documentation site is produced by Step 29 (`zensical build --strict`, DocFX, rustdoc).
+- The release build must consume that exact `site/` artifact, not rebuild ad-hoc Markdown.
+- Package the site as `mocassin-docs-<version>.zip` and attach it to the release; optionally deploy it to
+  GitHub Pages or another static host.
+- Verify that the combined site contains narrative pages at `/`, .NET API at `/api/dotnet/`, and Rust API at
+  `/api/rust/`.
+- Verify the release notes link to the installed docs, the migration guide, and the citation block.
+- **README** remains the short entry point: what it is, install, five-minute ceria tutorial, links to the site.
 - **Citation/licence** — MIT, NOTICE with the original GPL project attribution, and the original paper citation.
 
 ### 6. Release process
 
 1. Freeze features; update versions/changelog.
-2. Run the full release checklist (step 28 gates).
+2. Run the full release checklist (steps 28–29 gates).
 3. Build artifacts on each OS in a clean environment.
 4. Generate checksums (SHA-256), SBOM (CycloneDX), and provenance (SLSA-style).
 5. Sign binaries/packages where possible.
@@ -158,7 +144,7 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 - [ ] Produce self-contained app/CLI/solver archives.
 - [ ] Add optional MSIX/desktop/dmg packaging.
 - [ ] Configure NuGet packaging, symbols, and SourceLink.
-- [ ] Write the user guide, reference, migration note, and samples.
+- [ ] Package the Step 29 documentation site and include it in the release artifacts.
 - [ ] Add checksums, SBOM, and provenance generation.
 - [ ] Implement signing/notarization where credentials exist.
 - [ ] Create the release workflow and checklist.
@@ -171,8 +157,8 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 - [ ] `dotnet add package Mocassin.Results` works without manual path setup.
 - [ ] `mocassin-sim` runs standalone on an HPC node.
 - [ ] Checksums/SBOM/provenance are attached to the release.
-- [ ] Docs cover install, workflow, formats, diagnostics, and physics.
-- [ ] The migration note clearly states the clean-break policy.
+- [ ] The combined documentation site artifact is attached and its links/API subpaths verify.
+- [ ] The release links to the migration guide and citation block.
 - [ ] Licence/attribution/citation are present in the app and artifacts.
 
 ## Tests
@@ -184,7 +170,7 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 | NuGet | Clean-project install and evaluation |
 | Smoke | Ceria tutorial end-to-end |
 | Checksums | Match published values |
-| Docs | Link checker/sample validation |
+| Docs | Combined site artifact, link check, API subpaths |
 | Signing | Signature/notarization if enabled |
 | SBOM | Valid CycloneDX |
 
@@ -195,10 +181,11 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 | Platform packaging quirks | Test artifacts on clean VMs; document prerequisites |
 | macOS notarization delays | Start early; provide unsigned fallback instructions |
 | NuGet path/resource issues | Embedded catalog; clean-project test |
-| Documentation drift | Docs built/tested in CI; samples validated |
+| Documentation drift | Docs built/tested in Step 29 and consumed as an artifact |
 | Supply-chain risk | Checksums, SBOM, pinned dependencies, signed tags |
 
 ## Done when
 
-A new user can install the application on any supported OS, follow the docs to reproduce the ceria workflow,
-and evaluate results; the release is signed/checksummed and fully documented.
+A new user can install the application on any supported OS, follow the published docs to reproduce the ceria
+workflow, and evaluate results; the release is signed/checksummed and ships with the combined documentation
+site.

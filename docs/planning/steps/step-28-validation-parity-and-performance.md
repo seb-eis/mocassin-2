@@ -136,9 +136,9 @@ Expand step 15–18 tests into a release suite:
 
 ### 8. Documentation and scientific review
 
-- `docs/reference/physics.md` — formulas, units, conventions, deviations.
-- `docs/reference/formats/` — project/package/state schemas.
-- `docs/user-guide/` — rewritten chapters matching the new UI.
+- `docs/physics/` — formulas, units, conventions, deviations.
+- `docs/reference/` — project/package/state schemas, CLI, diagnostics.
+- `docs/user-guide/` and `docs/tutorials/` — rewritten chapters and worked examples matching the new UI.
 - `tests/reference/README.md` — how to reproduce parity runs.
 - A scientific reviewer checks:
   - energy conventions;

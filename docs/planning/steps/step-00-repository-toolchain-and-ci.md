@@ -103,7 +103,12 @@ mocassin/
 
 - [ ] Create `tests/contracts/` and `tests/reference/` with README placeholders.
 - [ ] Add `samples/blank/` and `samples/ceria/` directories with README placeholders.
-- [ ] Add the seven ADRs from `docs/planning/adr/`.
+- [ ] Add the eight ADRs from `docs/planning/adr/`.
+- [ ] Add a `docs/zensical.toml` skeleton with `docs_dir = "docs"`, `site_dir = "site"`, and
+  `exclude_docs = "planning/"`.
+- [ ] Add `docs/requirements.txt` (or `pyproject.toml`) pinning Zensical.
+- [ ] Add `.config/dotnet-tools.json` with a pinned DocFX tool. Rust API docs use `cargo doc` directly.
+- [ ] Add a `docs/` build-script placeholder; the full Zensical/DocFX/rustdoc pipeline is Step 29.
 - [ ] Add a `CONTRIBUTING.md` with build, test, style, and review expectations.
 - [ ] Add issue/PR templates that ask for the affected step and parity-matrix item.
 

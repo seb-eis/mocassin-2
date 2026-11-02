@@ -29,10 +29,22 @@ mocassin/
 ├── Directory.Build.props            # shared .NET settings (nullable, analyzers, deterministic build)
 ├── Directory.Packages.props         # central NuGet versions
 ├── global.json                      # pins .NET SDK 10.x
+├── zensical.toml                    # Zensical site config (docs_dir = "docs")
 ├── docs/
-│   ├── planning/
+│   ├── index.md
+│   ├── getting-started/
 │   ├── user-guide/
-│   └── reference/                   # generated API and format docs
+│   ├── physics/
+│   ├── tutorials/
+│   ├── reference/                   # CLI, formats, diagnostics, extension ABI
+│   ├── development/                 # architecture, code structure, design decisions
+│   ├── performance/
+│   ├── troubleshooting/
+│   ├── migration/
+│   ├── examples/
+│   ├── glossary/
+│   ├── api/                         # API landing page; generated API HTML is copied to site/api at build
+│   └── planning/                    # excluded from the published site
 ├── src/
 │   ├── dotnet/
 │   │   ├── Mocassin.sln
@@ -67,6 +79,7 @@ mocassin/
 │   └── reference/                   # reference observables for statistical parity
 └── tools/
     ├── format/                      # schema generation and validation
+    ├── docfx/                       # DocFX configuration for the .NET API
     └── hpc/                         # SLURM/PBS templates and wrappers
 ```
 
@@ -201,6 +214,10 @@ Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
 | Rust parallelism | `rayon` for build/analysis helpers; process-per-job for MC | MC chains are sequential; job-level parallelism is the right granularity |
 | Rust RNG | `rand_chacha` | Reproducible, high-quality, portable |
 | Charts | LiveCharts2 (`LiveChartsCore.SkiaSharpView.Avalonia`) | Scientific plotting, cross-platform, SkiaSharp rendering/export |
+| Narrative docs | Zensical | Markdown-first, MkDocs-compatible, navigation/search, strict link validation |
+| .NET API docs | DocFX | XML-doc/assembly metadata, .NET navigation and cross-references |
+| Rust API docs | rustdoc (`cargo doc`) | Canonical Rust docs, intra-doc links, doc tests |
+| Docs validation | Zensical `--strict`, DocFX, rustdoc | Broken links and missing public API docs block CI |
 | 3D | Silk.NET + Avalonia native host (spike), abstraction layer | Cross-platform GPU, control over instancing/picking; fallback to OpenGL control |
 | Testing (.NET) | xUnit + FluentAssertions + FsCheck | Standard, property-based geometry tests |
 | Testing (Rust) | built-in + `proptest` + `criterion` + `insta` | Unit, property, benchmarks, snapshots |
@@ -281,3 +298,4 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
 | [0005](adr/0005-statistical-parity-and-rng.md) | Statistical parity and deterministic RNG policy |
 | [0006](adr/0006-3d-rendering.md) | 3D renderer abstraction and backend choice |
 | [0007](adr/0007-mit-license.md) | MIT license for the reimplementation; original GPL attribution |
+| [0008](adr/0008-standalone-documentation-toolchain.md) | Zensical narrative docs; DocFX/rustdoc APIs under one site |

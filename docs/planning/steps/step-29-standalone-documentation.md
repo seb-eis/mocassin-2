@@ -1,0 +1,350 @@
+# Step 29 — Standalone Documentation Site
+
+**Phase:** G. Release and documentation  
+**Depends on:** 19, 21, 27  
+**Delivers:** A published, versioned standalone documentation site built with Zensical, plus generated .NET
+(DocFX) and Rust (rustdoc) API references under one site.
+
+## Goal
+
+Give users, scientists, and developers one coherent documentation site that explains how to install and use
+MOCASSIN, the physics behind it, the architecture of the codebase, and how to extend and contribute. The site
+must be buildable locally and in CI, with no hand-maintained duplication of API reference pages.
+
+## Original reference
+
+- Original docs: `docs/userguide-md/` (user guide/API prose), `docs/old-guide/` (PDF/DOCX), build scripts
+  using Pandoc/KaTeX, and a release-time HTML bundle.
+- The original documentation mixed user guide, API examples, and build instructions; there was no separate
+  developer architecture guide, tutorial track, CLI/format reference, or unified API reference.
+- The API guide was prose with C#/F# snippets, not generated from source.
+- The documentation build was part of a Windows PowerShell release pipeline.
+
+## Design
+
+### 1. Toolchain
+
+| Content | Tool | Reason |
+| --- | --- | --- |
+| Narrative docs (home, user guide, physics, tutorials, developer guide, reference) | **Zensical** | Modern MkDocs-compatible static site generator, good authoring/navigation/search, Markdown-first |
+| .NET API reference | **DocFX** | Native XML-doc/assembly metadata, .NET navigation, cross-references, modern .NET support |
+| Rust API reference | **rustdoc** (`cargo doc`) | Canonical Rust documentation, doc tests, intra-doc links, no duplicate schema |
+| Search/navigation | Zensical for narrative; DocFX/rustdoc retained for API sections | Avoids fragile reimplementation of language-specific API navigation |
+| Diagrams | Mermaid or Zensical-compatible Markdown diagrams | Versionable in text |
+| Math | Zensical/KaTeX-compatible math | Physics equations |
+
+- **One published site, separate build outputs.** Zensical owns the root. DocFX is copied to
+  `/api/dotnet/`, rustdoc to `/api/rust/`. `docs/api/index.md` is the API landing page.
+- **Versioning/PDF/offline** are deferred; the first release publishes the current version only. The build
+  layout leaves room for versioned subpaths later.
+- **Planning is not published.** `docs/planning/` remains in the repository but is excluded from Zensical via
+  `exclude_docs`.
+- **Docs-as-code.** Every feature step writes or updates its documentation. This step assembles, edits, and
+  validates; it does not invent feature docs at the end.
+
+### 2. Repository layout
+
+```text
+zensical.toml                  # project config: docs_dir = "docs", site_dir = "site"
+docs/
+├── index.md                   # landing page
+├── getting-started/
+│   ├── installation.md
+│   ├── quickstart.md
+│   └── first-project.md
+├── user-guide/
+│   ├── projects.md
+│   ├── particles.md
+│   ├── structure.md
+│   ├── transitions.md
+│   ├── energy.md
+│   ├── lattice.md
+│   ├── simulations.md
+│   ├── parameterization.md
+│   ├── job-templates.md
+│   ├── building.md
+│   ├── running.md
+│   ├── results.md
+│   ├── visualization.md
+│   └── mmcfe.md
+├── physics/
+│   ├── overview.md
+│   ├── monte-carlo.md
+│   ├── kmc.md
+│   ├── mmc.md
+│   ├── energies.md
+│   ├── symmetry.md
+│   ├── transport.md
+│   ├── tracking.md
+│   └── units-constants.md
+├── tutorials/
+│   ├── ceria-kmc.md
+│   ├── ceria-mmc.md
+│   ├── barium-zirconate.md
+│   ├── vehicle-mechanism.md
+│   ├── parameter-sweep.md
+│   ├── hpc-campaign.md
+│   └── result-analysis.md
+├── reference/
+│   ├── cli.md
+│   ├── project-format.md
+│   ├── msl-format.md
+│   ├── mcs-format.md
+│   ├── diagnostics.md
+│   ├── file-layout.md
+│   └── extension-abi.md
+├── development/
+│   ├── architecture.md
+│   ├── code-structure.md
+│   ├── design-decisions.md
+│   ├── compilation-pipeline.md
+│   ├── solver-architecture.md
+│   ├── ui-architecture.md
+│   ├── testing-and-parity.md
+│   ├── contributing.md
+│   └── release.md
+├── performance/
+│   ├── benchmarks.md
+│   ├── hpc.md
+│   ├── profiling.md
+│   └── large-campaigns.md
+├── troubleshooting/
+│   ├── faq.md
+│   ├── errors.md
+│   ├── installation.md
+│   └── performance.md
+├── migration/
+│   ├── clean-break.md
+│   ├── recreating-projects.md
+│   └── result-differences.md
+├── examples/
+│   ├── index.md
+│   ├── ceria.md
+│   ├── barium-zirconate.md
+│   ├── vehicle.md
+│   └── publications.md
+├── glossary/
+│   ├── index.md
+│   ├── notation.md
+│   └── units.md
+├── api/
+│   └── index.md               # links to the generated /api/dotnet and /api/rust pages
+└── planning/                  # excluded from the published site
+
+tools/docfx/docfx.json         # DocFX configuration for the .NET API
+```
+
+### 3. Required content
+
+These sections are mandatory for the first release:
+
+1. **Getting started**
+   - installation for Windows/Linux/macOS;
+   - prerequisites (.NET, solver, GPU);
+   - quickstart with the ceria sample;
+   - first project, first package, first run, first result.
+2. **User guide**
+   - project lifecycle;
+   - particles/sets, structure/sites, transitions, energy, lattice/doping, simulations;
+   - parameterization and job templates;
+   - building, running, collecting, visualizing, MMCFE;
+   - every screen has a task-oriented page and a screenshot.
+3. **Physics**
+   - fixed-lattice Monte Carlo and the MMC/KMC distinction;
+   - transition-state theory, detailed balance, acceptance;
+   - KMC normalization, time step, selection;
+   - pair/cluster/site energy model and the transition-state energy;
+   - space-group symmetry, P1 expansion, and why positions are fixed;
+   - transport: mobility, conductivity, Nernst–Einstein, Haven ratio;
+   - tracking: global/mobile/static, MSD, diffusion, correlations;
+   - units, constants, sign conventions, and known approximations.
+4. **Tutorials**
+   - ceria KMC;
+   - ceria MMC;
+   - Y-doped BaZrO₃ hydration/transport;
+   - vehicle/interstitialcy mechanism;
+   - temperature/doping parameter sweep;
+   - HPC campaign;
+   - result analysis and plots.
+5. **CLI + formats reference**
+   - `mocassin` and `mocassin-sim` commands, options, exit codes, JSON events;
+   - project JSON, `.msl`, `.mcs` MessagePack schema, extension ABI;
+   - diagnostics catalog and file-layout contract.
+6. **Developer architecture guide**
+   - repository/module structure;
+   - dependency rules and data flow;
+   - design decisions (link to ADRs);
+   - compiler pipeline, solver architecture, Avalonia MVVM/rendering, result evaluation;
+   - testing, parity, fuzzing, and release process;
+   - how to add a model domain, a transition mechanism, an evaluation, or a UI editor.
+7. **Performance + HPC guide**
+   - benchmark methodology;
+   - memory/parallelism model;
+   - SLURM/PBS workflows;
+   - large-campaign layout and collection;
+   - profiling and troubleshooting slow jobs.
+8. **Troubleshooting + FAQ**
+   - installation, GPU/OpenGL, solver aborts, validation errors, package corruption, broken links.
+9. **Migration + clean-break guide**
+   - no legacy import;
+   - how to recreate a legacy `.mocprj` in the new format;
+   - expected result differences (MessagePack state, attempt histograms, corrected formulas);
+   - citation/attribution.
+10. **Glossary, notation, units**
+    - symbols, indices, unit conventions, Kröger–Vink notation, acronyms.
+11. **Examples + publications**
+    - downloadable sample projects;
+    - command transcripts;
+    - reference publications and citation guidance.
+12. **API reference**
+    - .NET via DocFX;
+    - Rust via rustdoc;
+    - landing page, cross-links to guides, and a "how to read the API docs" note.
+
+### 4. API reference build
+
+**.NET**
+
+- `tools/docfx/docfx.json` configures metadata from `src/dotnet/`.
+- Build with the pinned `docfx` .NET tool (`dotnet tool restore` + `dotnet docfx`).
+- Enable XML documentation generation for all public libraries (already required by the build).
+- Treat missing XML docs on public APIs as warnings/errors in CI.
+- Copy the DocFX output to `site/api/dotnet/`.
+
+**Rust**
+
+- `cargo doc --workspace --no-deps --target-dir target/doc`.
+- Enable `#![deny(missing_docs)]` on public crates.
+- Copy `target/doc/` to `site/api/rust/`.
+- Keep crate-level docs linking to the narrative architecture/physics pages.
+
+**Cross-links**
+
+- `docs/api/index.md` links to both API trees.
+- Narrative pages link to stable API paths (`/api/dotnet/...`, `/api/rust/...`).
+- API landing pages include a "back to guide" link.
+- Cross-links are checked by the site link checker; API-internal links are checked by DocFX/rustdoc.
+- Unified search across narrative + API is deferred; each generated API keeps its own search.
+
+### 5. Build and publication
+
+Scripts:
+
+```bash
+# narrative + combined site
+zensical build --strict
+
+# .NET API
+dotnet tool restore
+dotnet docfx tools/docfx/docfx.json -o artifacts/docfx
+
+# Rust API
+cargo doc --workspace --no-deps --target-dir target/doc
+
+# combine
+cp -r artifacts/docfx site/api/dotnet
+cp -r target/doc site/api/rust
+```
+
+- `docs/build-docs.sh` and `docs/build-docs.ps1` wrap the above for CI and local use.
+- `docs/serve.sh` runs `zensical serve` for authoring.
+- CI builds the full site on every PR; strict mode fails on broken links/anchors.
+- Publish the `site/` artifact on release tags. If GitHub Pages is available, deploy there; otherwise attach
+  the site archive to the release.
+- Do not commit generated API HTML or `site/`.
+- A `docs/requirements.txt` (or `pyproject.toml`) pins Zensical and any Markdown extensions.
+
+### 6. Content ownership
+
+Documentation is written alongside the feature, not at the end:
+
+| Content | Primary step |
+| --- | --- |
+| Installation/quickstart/first project | 22, 25 |
+| User guide (model domains) | 03–06, 23–24 |
+| User guide (build/run/results/MMCFE) | 12, 25, 27 |
+| CLI reference | 12, 19 |
+| Project/.msl/.mcs/extension formats | 01, 11, 18, 19 |
+| Diagnostics | 07 |
+| Physics/units/formulas | 15–18, 20 |
+| Developer architecture | 00–02, 08, 13–21, 28 |
+| Tutorials | 25, 27, 28 |
+| Performance/HPC | 19, 28 |
+| Migration/clean-break | 00, 29 |
+| Examples/publications | 28, 29 |
+| API reference landing/links | 29 |
+
+Each step’s “Done when” includes updating its docs page. This step verifies completeness, consistency, and
+buildability.
+
+### 7. Documentation quality rules
+
+- Every page starts with a one-sentence purpose and intended audience.
+- Every command is copy-pasteable and uses placeholders consistently.
+- Every tutorial has prerequisites, steps, expected output, and troubleshooting.
+- Physics pages state assumptions, units, and sign conventions; equations are testable against the code.
+- Architecture pages link to ADRs and step pages rather than duplicating decisions.
+- Screenshots use the current UI and include alt text.
+- No dead links, no orphan pages, no placeholder "TODO" in a release build.
+- API docs are generated from source; do not hand-maintain duplicate API pages.
+- `docs/planning/` is internal and excluded from the site.
+- English first; localization is deferred.
+
+## Implementation tasks
+
+- [ ] Add `zensical.toml`, `docs/index.md`, and the navigation structure.
+- [ ] Add `docs/requirements.txt`/tool manifest and pin Zensical/DocFX.
+- [ ] Exclude `docs/planning/` from the site.
+- [ ] Write the required content sections and tutorials.
+- [ ] Add `tools/docfx/docfx.json` and XML-doc checks.
+- [ ] Add rustdoc build and missing-docs checks.
+- [ ] Add the combined build scripts and API landing page.
+- [ ] Add link/anchor validation and tutorial smoke tests to CI.
+- [ ] Add screenshots/diagrams with alt text.
+- [ ] Publish the site artifact on release; optionally deploy to Pages.
+- [ ] Add a docs review checklist and ownership map.
+
+## Acceptance criteria
+
+- [ ] `zensical build --strict` succeeds with no broken links/anchors.
+- [ ] DocFX builds the .NET API with no missing-doc errors for public APIs.
+- [ ] `cargo doc --workspace --no-deps` builds the Rust API with no warnings.
+- [ ] The combined site serves narrative pages at `/` and API docs at `/api/dotnet/` and `/api/rust/`.
+- [ ] All required and selected sections exist and are reachable from the navigation.
+- [ ] The ceria tutorial can be completed using only the docs and samples.
+- [ ] Every public GUI screen has a user-guide page and screenshot.
+- [ ] Physics pages match the implemented formulas and units tests.
+- [ ] Migration/clean-break and glossary pages are present.
+- [ ] `docs/planning/` is not published.
+- [ ] CI builds the site on every PR and publishes the artifact on release.
+
+## Tests
+
+| Test | Assertion |
+| --- | --- |
+| Zensical build | Strict mode, no broken links/anchors |
+| DocFX | API metadata/build; public docs coverage |
+| rustdoc | `cargo doc`; missing-docs deny |
+| Navigation | Every required page reachable |
+| Tutorials | Commands run against samples |
+| Cross-links | Narrative ↔ API links resolve |
+| Screenshots | Present and current |
+| Search | Narrative search returns key pages |
+| Exclusions | Planning pages absent from `site/` |
+| Artifact | Release contains the combined site |
+
+## Risks and mitigations
+
+| Risk | Mitigation |
+| --- | --- |
+| Docs drift from code | Docs-as-code per step; CI build/link checks; tutorial smoke tests |
+| Zensical is 0.x | Pin the version; keep content standard Markdown/MkDocs-compatible |
+| DocFX/rustdoc navigation mismatch | Keep narrative navigation authoritative; API landing page; cross-links |
+| API docs missing comments | Treat missing XML docs/rustdoc as errors in CI |
+| Large site/build time | Cache dependencies; build API docs only when source changes |
+| Screenshot churn | Automate screenshots where possible; review per release |
+
+## Done when
+
+A new user can install MOCASSIN, complete the ceria tutorial, understand the physics well enough to trust the
+results, and a developer can navigate the architecture and API references from one published site.

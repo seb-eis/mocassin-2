@@ -39,6 +39,9 @@ Before changing anything, read these in order:
 6. [`docs/planning/04-roadmap.md`](docs/planning/04-roadmap.md) — phases, dependencies, milestones.
 7. The step page you intend to work on, plus its dependencies.
 8. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+9. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md)
+   and [`docs/planning/steps/step-29-standalone-documentation.md`](docs/planning/steps/step-29-standalone-documentation.md)
+   — documentation toolchain and content requirements.
 
 The plan is the source of truth. If code and plan disagree, stop and reconcile them rather than silently
 following one.
@@ -87,6 +90,8 @@ explicit new ADR and owner approval.
    and HPC polish. Do not build later-phase features while a blocking earlier step is unfinished.
 8. **No silent scientific corrections.** If the original behaviour is ambiguous or wrong, document the chosen
    interpretation in the step page and add a test. Do not “fix” physics without evidence.
+9. **Documentation toolchain.** Narrative docs use Zensical; .NET API uses DocFX; Rust API uses rustdoc;
+   publish one site with `/api/dotnet/` and `/api/rust/`. `docs/planning/` is not published.
 
 ## 5. Repository layout
 
@@ -98,9 +103,20 @@ mocassin/
 ├── README.md
 ├── LICENSE                 # MIT
 ├── NOTICE.md               # original GPL attribution + MIT boundary
-├── docs/planning/          # the plan, 30 step pages, ADRs, appendices
-├── docs/user-guide/        # target: rewritten user guide
-├── docs/reference/         # target: formats, diagnostics, physics reference
+├── zensical.toml           # target: Zensical site config
+├── docs/                   # target: published narrative docs (Zensical)
+│   ├── planning/           # internal plan, 31 step pages, ADRs, appendices
+│   ├── user-guide/
+│   ├── physics/
+│   ├── tutorials/
+│   ├── reference/          # CLI, formats, diagnostics, extension ABI
+│   ├── development/        # architecture, code structure, design decisions
+│   ├── performance/
+│   ├── troubleshooting/
+│   ├── migration/
+│   ├── examples/
+│   ├── glossary/
+│   └── api/                # API landing page; generated API copied to site/api at build
 ├── src/dotnet/             # target: .NET solution
 ├── src/rust/               # target: Rust workspace
 ├── samples/                # target: ceria, barium zirconate, vehicle, interstitialcy
@@ -163,6 +179,12 @@ dotnet run --project src/dotnet/Mocassin.Cli -- build samples/ceria/ceria.mocprj
 cargo run --manifest-path src/rust/Cargo.toml -p mocassin-cli -- \
   --db /tmp/ceria.msl --job 1 --io /tmp/Job00001
 dotnet run --project src/dotnet/Mocassin.Cli -- collect /tmp/ceria.msl --dir /tmp
+
+# Documentation (once the Zensical/DocFX setup exists)
+zensical build --strict
+dotnet tool restore
+dotnet docfx tools/docfx/docfx.json -o artifacts/docfx
+cargo doc --workspace --no-deps --target-dir target/doc
 ```
 
 Quality gates for any change:
@@ -172,11 +194,12 @@ Quality gates for any change:
 - Tests added/updated for the change.
 - Contract fixtures updated if a format changed.
 - Performance benchmarks run if the change touches a hot path.
-- Step page and parity matrix updated.
+- Step page, parity matrix, and relevant documentation pages updated.
+- Documentation builds strictly and API docs have no missing public items.
 
 ## 7. Working on a step
 
-The 30 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as work packages, not suggestions.
+The 31 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as work packages, not suggestions.
 
 1. Choose the lowest-numbered unblocked step unless the owner assigns another.
 2. Check its **Depends on** line; do not start before dependencies are done.
@@ -227,7 +250,29 @@ pass.
 - Use MessagePack (`MessagePack-CSharp` / `rmp-serde`) for `.mcs`; do not introduce a custom binary header,
   section table, alignment scheme, or native struct layout.
 
-## 9. Scientific invariants
+## 9. Documentation conventions
+
+- **Narrative docs use Zensical.** Content lives in `docs/`; `docs/planning/` is internal and excluded from
+  the published site via `exclude_docs`.
+- **API references are generated, not hand-written:**
+  - .NET via **DocFX** under `/api/dotnet/`;
+  - Rust via **rustdoc** (`cargo doc`) under `/api/rust/`.
+- One published site: Zensical owns `/`, API outputs are copied into `site/api/dotnet` and `site/api/rust`.
+- Required site sections: user guide, physics explanation, developer architecture guide, tutorials, CLI and
+  format reference, troubleshooting/FAQ, performance/HPC, contributing, migration/clean-break, glossary/
+  notation/units, examples/publications, and the API landing page.
+- **Docs-as-code:** every feature step updates its documentation page. Step 29 assembles and validates; Step
+  30 packages the site with the release.
+- Docs quality gates:
+  - `zensical build --strict` (no broken links/anchors);
+  - DocFX build with no missing public API docs;
+  - `cargo doc --workspace --no-deps` with missing-docs denied;
+  - tutorial commands executed against `samples/`;
+  - generated HTML and `site/` never committed.
+- Do not duplicate API reference content in Markdown; link to the generated API pages instead.
+- In-app help links point to stable documentation anchors.
+
+## 10. Scientific invariants
 
 Read [`docs/planning/02-data-contracts.md`](docs/planning/02-data-contracts.md) and the relevant step pages.
 The most important invariants:
@@ -254,7 +299,7 @@ The most important invariants:
 When the original behaviour is ambiguous, inspect the original source as a **reference only**, document the
 interpretation, and encode it in a test. Do not copy GPL code.
 
-## 10. Data and format rules
+## 11. Data and format rules
 
 - `docs/planning/02-data-contracts.md` is the source of truth for field names, versions, and layouts.
 - Any format change requires:
@@ -273,7 +318,7 @@ interpretation, and encode it in a test. Do not copy GPL code.
   KMC tracker/histogram fields. No custom header/section table/CRC. Integrity comes from the `.msl` SHA-256;
   enforce the < 4 GiB size assumption.
 
-## 11. Testing expectations
+## 12. Testing expectations
 
 - Unit tests for pure functions and formulas.
 - Property-based tests for geometry, symmetry, permutation reduction, supercells, and state round-trips.
@@ -288,7 +333,7 @@ interpretation, and encode it in a test. Do not copy GPL code.
 A bug fix without a regression test is incomplete. A scientific change without a physics/parity test is
 incomplete.
 
-## 12. Licensing rules
+## 13. Licensing rules
 
 - New source files: `SPDX-License-Identifier: MIT`.
 - Do not copy original MOCASSIN source, documentation text, or database content into MIT files.
@@ -299,7 +344,7 @@ incomplete.
 - Dependencies must be MIT-compatible. GPL/AGPL dependencies require explicit review.
 - Keep the original authors’ citation guidance in the README/NOTICE.
 
-## 13. What not to do
+## 14. What not to do
 
 - Do not add legacy `.mocprj`/`.msl`/`.mcs` import/export.
 - Do not copy original GPL code or data into the MIT codebase.
@@ -312,13 +357,15 @@ incomplete.
 - Do not change canonical P1 order, energy conventions, or time-step formulas without an ADR and tests.
 - Do not use `A+B+C` for unit-cell counts.
 - Do not put scientific logic in view models.
+- Do not hand-write API reference pages; generate them with DocFX/rustdoc.
+- Do not publish `docs/planning/` as part of the standalone site.
 - Do not optimize before correctness is proven by tests.
 - Do not mark a step/parity item “done” without passing acceptance criteria.
 - Do not work directly on `main` or `master`; always create an `agent/*` branch first.
 - Do not merge into `main` or `master` without explicit user permission.
 - Do not modify `/workspace/mocassin-original` if it is present. It is a read-only reference clone.
 
-## 14. Useful references in the original repository
+## 15. Useful references in the original repository
 
 If `/workspace/mocassin-original` is available, these are the most useful starting points. Read, do not copy.
 
@@ -333,7 +380,7 @@ If `/workspace/mocassin-original` is available, these are the most useful starti
 The analysis notes used to create this plan are not part of the repository. If they are unavailable, re-derive
 from the original and the plan’s “Original reference” sections.
 
-## 15. Definition of done for a change
+## 16. Definition of done for a change
 
 - [ ] The step’s acceptance criteria are met.
 - [ ] Unit/property/golden/contract tests pass.
