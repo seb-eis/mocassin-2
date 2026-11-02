@@ -128,6 +128,10 @@ impl MmcEngine<'_> {
   - otherwise start a new window.
 - The original's exact check compared `|LatticeEnergy * AbortTolerance| >= |CurrentSum|`; preserve the
   inequality and document the sign convention.
+- **Zero-energy guard:** if `|lattice_energy_ev|` is below a small floor (default `1e-12 eV`, configurable),
+  skip the break check for that window and log a one-time warning. Otherwise a zero-energy lattice would
+  declare equilibrium immediately. This is a deliberate, documented deviation from the original edge case;
+  normal non-zero-energy behavior is unchanged.
 - `break_sample_interval` controls how often the check runs; if zero, check every window.
 - Emit an `EnergySample` (MCS, lattice energy, mean accepted ΔE) for the result state/plots.
 - Break check must not allocate per cycle; use a fixed ring buffer sized at initialization.
@@ -187,6 +191,7 @@ impl MmcEngine<'_> {
 - [ ] A small Ising-like lattice reaches the known ground state at low temperature.
 - [ ] Detailed balance holds for random pair exchanges.
 - [ ] The break check stops a converging system at the configured tolerance.
+- [ ] A zero/near-zero lattice energy does not cause an immediate false equilibrium; the guard logs a warning.
 - [ ] MMC state files contain lattice + counters only; no time/trackers.
 - [ ] Same seed produces identical trajectories.
 - [ ] No allocations in the cycle loop.
@@ -209,7 +214,7 @@ At this point, document MMC:
 | Boltzmann ratio | Two-state occupation vs. `exp(-ΔE/kT)` |
 | Detailed balance | Forward/reverse transition rates |
 | Ground state | Low-temperature convergence |
-| Break check | Stops at tolerance; no false positives on a flat landscape |
+| Break check | Stops at tolerance; zero-energy guard prevents immediate abort; no false positives on a flat landscape |
 | Energy conservation | Lattice energy equals full recomputation |
 | State file | MMC layout and offsets |
 | Determinism | Identical trace for a seed |

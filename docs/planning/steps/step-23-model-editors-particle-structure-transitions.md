@@ -107,7 +107,7 @@ public abstract class ModelEditorViewModel<TModel> : ObservableValidator
 
 **Structure summary**
 
-- P1 position count, stable/unstable counts, cell volume, density estimate, orbit table.
+- P1 position count, stable/unstable counts, cell volume, particle-number density (`count/volume`), orbit table.
 - Performance warning if the P1 count is large.
 
 ### 4. Transition editor

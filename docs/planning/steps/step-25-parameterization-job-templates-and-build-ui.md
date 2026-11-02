@@ -171,7 +171,8 @@ frequencies, define parameter sweeps, preview job counts, build a package, and s
 - [ ] Chiral pair values mirror and conflicts are flagged.
 - [ ] Bulk fill/import/export work and validate.
 - [ ] A KMC job template with a doping sweep previews correct job counts and charge balance.
-- [ ] Building from the GUI produces a package identical (content hashes) to the CLI for the same inputs.
+- [ ] Building from the GUI produces the same model/lattice/job payload hashes as the CLI for the same inputs
+  (SQLite page layout may differ).
 - [ ] Progress/cancel/error paths behave correctly.
 - [ ] The build summary matches `mocassin inspect`.
 - [ ] Undo/redo works across template edits.
@@ -197,7 +198,7 @@ At this point, document parameterization/job/build UI:
 | Frequencies | Edit/scale/distribution |
 | Job templates | Collections/configs/overrides/optimizers |
 | Doping preview | Requested vs. applied/charge |
-| Build | GUI vs. CLI content hash equality |
+| Build | GUI vs. CLI model/lattice/job payload hash equality |
 | Cancel/error | No partial package |
 | Deploy | Local path/scripts; remote if implemented |
 

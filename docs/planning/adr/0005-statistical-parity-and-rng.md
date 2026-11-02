@@ -59,7 +59,9 @@ seeds, and sample sizes are stored in `tests/reference/README.md`.
 
 ## Determinism guarantees
 
-- Same package + same solver binary + same platform + same seed ⇒ identical `.mcs`.
+- Same package + same solver binary + same platform + same seed ⇒ identical state content (lattice,
+  counters, trackers, histograms, RNG state, time, flags). File metadata such as `createdUtc`/`runner` may
+  differ and is excluded from determinism comparisons.
 - Cross-platform: same seed ⇒ identical trajectory unless the platform's floating-point behavior differs;
   the CI checks statistical equivalence rather than byte equality.
 - Package builds are deterministic: same project + same builder version ⇒ byte-identical `.msl` model

@@ -143,7 +143,9 @@ docs/
 │   ├── notation.md
 │   └── units.md
 ├── api/
-│   └── index.md               # links to the generated /api/dotnet and /api/rust pages
+│   ├── index.md               # links to /api/dotnet and /api/rust
+│   ├── dotnet/index.md        # placeholder; replaced by DocFX output in site/api/dotnet
+│   └── rust/index.md          # placeholder; replaced by rustdoc output in site/api/rust
 └── planning/                  # excluded from the published site
 
 tools/docfx/docfx.json         # DocFX configuration for the .NET API
@@ -256,19 +258,21 @@ dotnet docfx tools/docfx/docfx.json -o artifacts/docfx
 # Rust API
 cargo doc --workspace --no-deps --target-dir target/doc
 
-# combine
-cp -r artifacts/docfx site/api/dotnet
-cp -r target/doc site/api/rust
+# combine (placeholders live at site/api/dotnet/index.html and site/api/rust/index.html)
+mkdir -p site/api/dotnet site/api/rust
+cp -r artifacts/docfx/. site/api/dotnet/
+cp -r target/doc/. site/api/rust/
 ```
 
-- The Step 00 `docs/build-docs.sh`/`.ps1` scripts are extended here to build and copy DocFX/rustdoc.
-- `docs/serve.sh` (from Step 00) runs `zensical serve` for authoring.
+- The Step 00 `tools/docs/build-docs.sh`/`.ps1` scripts are extended here to build and copy DocFX/rustdoc.
+- `tools/docs/serve.sh` (from Step 00) runs `zensical serve` for authoring.
 - The Step 00 Docs CI job already builds Zensical strictly; this step adds the DocFX/rustdoc jobs and final
   combined artifact checks.
 - Publish the `site/` artifact on release tags. If GitHub Pages is available, deploy there; otherwise attach
   the site archive to the release.
-- Do not commit generated API HTML or `site/`.
-- A `docs/requirements.txt` (or `pyproject.toml`) pins Zensical and any Markdown extensions.
+- Do not commit generated API HTML or `site/`. The API placeholders keep the narrative build strict-clean;
+  run the final link check again after copying generated API output over them.
+- A `tools/docs/requirements.txt` (or a root `pyproject.toml`) pins Zensical and any Markdown extensions.
 
 ### 6. Content ownership
 
@@ -328,6 +332,8 @@ buildability.
 - [ ] `cargo doc --workspace --no-deps` builds the Rust API with no warnings.
 - [ ] The combined site serves narrative pages at `/` and API docs at `/api/dotnet/` and `/api/rust/`.
 - [ ] All required and selected sections exist and are reachable from the navigation.
+- [ ] No placeholder/TODO pages remain except the API landing placeholders, which are replaced by generated
+  output at build time; every narrative navigation entry has real content.
 - [ ] The ceria tutorial can be completed using only the docs and samples.
 - [ ] Every public GUI screen has a user-guide page and screenshot.
 - [ ] Physics pages match the implemented formulas and units tests.

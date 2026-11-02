@@ -34,7 +34,7 @@ public sealed class ResultPackage : IAsyncDisposable
     public static Task<ResultPackage> OpenReadOnlyAsync(string path, CancellationToken ct);
     public IAsyncEnumerable<JobInfo> QueryJobsAsync(JobQuery query, CancellationToken ct);
     public Task<JobContext> LoadJobAsync(int jobId, CancellationToken ct);
-    public Task<CompiledModel> LoadModelAsync(string signature, CancellationToken ct);
+    public Task<ParameterizedModel> LoadModelAsync(string signature, CancellationToken ct);
 }
 ```
 
@@ -82,7 +82,7 @@ public sealed class McsReader : IDisposable
 public sealed class JobContext : IAsyncDisposable
 {
     public JobInfo Info { get; }
-    public CompiledModel Model { get; }
+    public ParameterizedModel Model { get; }
     public McsReader PrimaryState { get; }
     public McsReader? PreRunState { get; }
     public SimulationModel Simulation { get; }
@@ -90,7 +90,7 @@ public sealed class JobContext : IAsyncDisposable
 }
 ```
 
-- `CompiledModel` comes from the package's `models` payload (not the project JSON).
+- `ParameterizedModel` comes from the package's `models` payload (not the project JSON).
 - `LatticeGeometry` wraps cell vectors, P1 positions, position count, and linear index mapping.
 - The evaluation layer shares the compiled model across jobs with the same signature.
 - `JobContext` validates that the state's model signature/lattice size match the job.
@@ -144,7 +144,9 @@ public abstract class JobEvaluation<TResult>
 - `σ_norm = u * n * e` (normalized to z=1).
 - `D_sigma = σ * k_B_SI * T / (n * (z*e)²)` in m²/s (Nernst–Einstein).
 - `D_tracer` from MSD; Haven ratio `H_R = D_tracer / D_sigma`.
-- If `|E| = 0`, transport values are `null`/`n/a`, never `Infinity`/`NaN`.
+- If `|E| = 0` or `z = 0` (void/vacancy), transport values are `null`/`n/a`, never `Infinity`/`NaN`.
+- Vacancies are excluded from ionic mobility/conductivity by default; they may be reported separately as
+  non-charge-carrying species.
 - Transition mobility uses a single global tracker to isolate a transition's contribution.
 
 #### Correlation and Onsager

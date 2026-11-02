@@ -75,6 +75,8 @@ inside Zensical would be fragile and duplicative.
 - Public .NET APIs require XML docs; public Rust items require doc comments.
 - CI builds the combined site on every PR; broken links or missing API docs block merge.
 - `docs/planning/` is never published.
+- `docs/api/dotnet/index.md` and `docs/api/rust/index.md` are placeholders that keep strict narrative builds
+  valid; generated API HTML replaces them under `site/api/...` during the combined build.
 - Generated API HTML and `site/` are gitignored.
 - Step 00 creates the site skeleton, navigation, build scripts, and Docs CI job. Every feature step updates its
   pages; Step 29 validates completeness and cross-cutting content; Step 30 packages the site artifact.

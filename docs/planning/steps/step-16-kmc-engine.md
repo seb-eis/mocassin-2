@@ -209,7 +209,8 @@ impl KmcEngine<'_> {
 - No other RNG calls in the cycle.
 - Pool iteration order and link order are deterministic.
 - Floating-point operation order is fixed; avoid FMA contraction.
-- Same package/binary/platform/seed → identical `.mcs` and counters.
+- Same package/binary/platform/seed → identical state content (lattice, counters, trackers, RNG, time);
+  provenance timestamps may differ.
 
 ## Implementation tasks
 

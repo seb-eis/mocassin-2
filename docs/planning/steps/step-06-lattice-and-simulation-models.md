@@ -120,8 +120,8 @@ public sealed record MetropolisSimulation(
   frequencies while preserving ratios.
 - `RngSeed` is optional; empty means derive from the project/job seed.
 - `Flags` include `NoSaving`, `NoJumpLogging`, `UseFastExp`, `Deterministic`.
-- `Instruction` is an extension/routine instruction (MMCFE); the structured MMCFE configuration is preferred
-  in the new UI (step 27), but the string is preserved for scripted jobs.
+- `Instruction` is an extension/routine instruction (MMCFE); the structured `extensions` configuration is a
+  job-template override (Steps 10/27) and is preferred, but the string is preserved for advanced/legacy jobs.
 - Defaults (matching the original user experience):
   - temperature 1000 K;
   - target MCSP 1000;

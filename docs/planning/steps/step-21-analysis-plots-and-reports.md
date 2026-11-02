@@ -60,6 +60,8 @@ public sealed record AnalysisPoint(
 | MMC energy | T | mean energy | Equilibrium |
 
 - Each analysis defines its filters, grouping, aggregation, and fit model.
+- Log-scale fits (Arrhenius) exclude non-positive conductivity/diffusion values and report how many points
+  were excluded and why.
 - Grouping keys are explicit and stable (collection, config, particle, transition).
 - Duplicate jobs are averaged; standard error = `std/√n`.
 - Missing/zero-field data are excluded with a reason, not silently dropped.

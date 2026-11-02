@@ -114,7 +114,7 @@ Expand step 15–18 tests into a release suite:
 
 - CI matrix: Windows 11, Ubuntu 24.04, macOS 14/15 (arm64 + x64 where available).
 - Same package + seed:
-  - identical `.mcs` on the same platform/build;
+  - identical state content (excluding timestamp/runner metadata) on the same platform/build;
   - statistical equivalence across platforms.
 - Floating-point checks: no fast-math/FMA contraction that changes results; document compiler flags.
 - Path/encoding/locale tests:
