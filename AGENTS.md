@@ -275,6 +275,8 @@ pass.
 - Required site sections: user guide, physics explanation, developer architecture guide, tutorials, CLI and
   format reference, troubleshooting/FAQ, performance/HPC, contributing, migration/clean-break, glossary/
   notation/units, examples/publications, and the API landing page.
+- **Diagrams use Mermaid fenced blocks** with the `mermaid` language tag, enabled through Zensical SuperFences
+  custom fences.
 - **Docs-as-code:** Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Every
   feature step updates its documentation pages and keeps the strict build green. Step 30 completes coverage
   and cross-cutting content; Step 31 packages the site with the release.

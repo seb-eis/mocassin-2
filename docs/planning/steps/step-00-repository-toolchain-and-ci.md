@@ -125,6 +125,7 @@ mocassin/
 - [ ] Create the Zensical project skeleton:
   - `zensical.toml` with `docs_dir = "docs"`, `site_dir = "site"`, `exclude_docs = "planning/"`, site
     metadata, repo link, and nav;
+  - Mermaid support via Zensical SuperFences custom fences;
   - `docs/index.md` and placeholder pages for every required top-level section:
     getting-started, user-guide, physics, tutorials, reference, development, performance, troubleshooting,
     migration, examples, glossary, and api;
