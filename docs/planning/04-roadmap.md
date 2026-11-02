@@ -2,7 +2,7 @@
 
 ## 1. Shape of the plan
 
-The work is organised into seven phases and 31 steps. Each step is a shippable increment with a concrete
+The work is organised into seven phases and 32 steps. Each step is a shippable increment with a concrete
 outcome, acceptance criteria, and tests. Steps are ordered by dependency, not by org chart. The critical path
 runs through the model compiler and the solver; the GUI has a parallel track once the project format and
 compiled model exist.
@@ -14,15 +14,15 @@ A Foundations        B Model              C Compilation          D Solver
                                                              └──────────► 13 ──► 14 ──► 15 ──► 16 ──► 17 ──► 18
                                                                                                          │
 E Results                                                                                                ▼
-21 ◄── 20 ◄────────────────────────────────────────────────────────────────────────────────────────────── 19
+22 ◄── 21 ◄── 20 ◄────────────────────────────────────────────────────────────────────────────────────── 19
 
 F GUI
-22 ──► 23 ──► 24 ──► 25 ──► 26 ──► 27
+23 ──► 24 ──► 25 ──► 26 ──► 27 ──► 28
        │           │
        └───────────┴────────────► (can start after 01, consume 08/09/10/11/20 as they land)
 
 G Release and documentation
-28 ──► 29 ──► 30
+29 ──► 30 ──► 31
 ```
 
 ## 2. Phase overview
@@ -33,9 +33,9 @@ G Release and documentation
 | B. Model definition | 03–07 | All user model domains and validation | The ceria model can be authored and validated headlessly |
 | C. Compilation and build | 08–12 | Compiled model, templates, supercells, `.msl` | A valid `.msl` with N jobs is produced from a project |
 | D. Solver | 13–19 | Rust KMC/MMC, tracking, state, CLI | A job runs to completion and writes a valid `.mcs` |
-| E. Results | 20–21 | Reader, evaluation, analysis | Results can be evaluated and exported |
-| F. GUI | 22–27 | Full Avalonia application | A user can complete the whole workflow in the GUI |
-| G. Release and documentation | 28–30 | Parity, documentation, packaging | Release gates pass, the docs site builds, and artifacts ship |
+| E. Results | 20–22 | Reader, evaluation, analysis, Python API | Results can be evaluated from .NET and Python |
+| F. GUI | 23–28 | Full Avalonia application | A user can complete the whole workflow in the GUI |
+| G. Release and documentation | 29–31 | Parity, documentation, packaging | Release gates pass, the docs site builds, and artifacts ship |
 
 ## 3. Step estimates and dependencies
 
@@ -66,19 +66,20 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 | 19 | Production CLI, HPC helpers, extension ABI | 18 | 2–4 pw |
 | 20 | `.mcs` reader and evaluation API | 18, 11 | 2–4 pw |
 | 21 | Analysis queries, plots, exports | 20 | 2–3 pw |
-| 22 | Avalonia shell, project lifecycle, undo/redo | 01 | 3–5 pw |
-| 23 | Particle, structure, transition editors | 22, 03, 04 | 4–6 pw |
-| 24 | Energy, lattice, simulation editors | 23, 05, 06 | 3–5 pw |
-| 25 | Parameterization, job templates, build/deploy UI | 24, 09–12 | 4–6 pw |
-| 26 | 3D viewer and visualization | 23, 03–05 | 4–6 pw |
-| 27 | Run monitoring, charts, MMCFE UI | 25, 19–21 | 3–5 pw |
-| 28 | Statistical parity, performance, fuzzing, hardening | 16–21 | 3–5 pw |
-| 29 | Documentation completion: coverage, cross-cutting pages, APIs, tutorials, publish | 19, 21, 27 | 3–5 pw |
-| 30 | Packaging, docs artifact, samples, release | 28, 29 | 2–4 pw |
+| 22 | Python `.mcs` reader, basic evaluations, pytest, mkdocstrings | 18, 20 | 2–3 pw |
+| 23 | Avalonia shell, project lifecycle, undo/redo | 01 | 3–5 pw |
+| 24 | Particle, structure, transition editors | 23, 03, 04 | 4–6 pw |
+| 25 | Energy, lattice, simulation editors | 24, 05, 06 | 3–5 pw |
+| 26 | Parameterization, job templates, build/deploy UI | 25, 09–12 | 4–6 pw |
+| 27 | 3D viewer and visualization | 24, 03–05 | 4–6 pw |
+| 28 | Run monitoring, charts, MMCFE UI | 26, 19–21 | 3–5 pw |
+| 29 | Statistical parity, performance, fuzzing, hardening | 16–22 | 3–5 pw |
+| 30 | Documentation completion: coverage, cross-cutting pages, APIs, tutorials, publish | 19, 21, 22, 28 | 3–5 pw |
+| 31 | Packaging, docs artifact, Python package, samples, release | 22, 29, 30 | 2–4 pw |
 
-**Total:** roughly 79–121 person-weeks (about 1.5–2.3 person-years). With three experienced developers working
-in parallel on model/compiler, solver, and UI, the calendar estimate is **10–13 months** including integration,
-documentation, and release hardening. A single developer should expect **19–25 months**.
+**Total:** roughly 81–124 person-weeks (about 1.6–2.4 person-years). With three experienced developers working
+in parallel on model/compiler, solver, UI, and documentation, the calendar estimate is **10–13 months** including
+integration, documentation, and release hardening. A single developer should expect **20–26 months**.
 
 ## 4. Milestones
 
@@ -93,11 +94,12 @@ documentation, and release hardening. A single developer should expect **19–25
 | **M6 — First KMC run** | 16 | Job completes; energy/acceptance counters look sane |
 | **M7 — First MMC run** | 17 | MMC equilibrates a small system; energy trace converges |
 | **M8 — Results loop** | 20 | `.mcs` read back; particle counts, MSD, conductivity evaluated |
-| **M9 — MVP GUI** | 25 | Create → validate → parameterize → build → run → collect in Avalonia |
-| **M10 — Visualization** | 26 | 3D cell/sites/transitions/clusters/overlays with picking |
-| **M11 — Feature parity** | 27 | Every parity-matrix item implemented or explicitly deferred |
-| **M12 — Documentation** | 29 | Completed Zensical site with guides, physics, tutorials, and API subpaths |
-| **M13 — Release** | 30 | Statistical parity, performance, packaged binaries, documentation artifact |
+| **M9 — Python API** | 22 | Read `.mcs` files and run basic multi-file evaluations from Python |
+| **M10 — MVP GUI** | 26 | Create → validate → parameterize → build → run → collect in Avalonia |
+| **M11 — Visualization** | 27 | 3D cell/sites/transitions/clusters/overlays with picking |
+| **M12 — Feature parity** | 28 | Every parity-matrix item implemented or explicitly deferred |
+| **M13 — Documentation** | 30 | Completed Zensical site with guides, physics, tutorials, APIs including Python |
+| **M14 — Release** | 31 | Statistical parity, performance, packaged binaries, documentation artifact, Python package |
 
 ## 5. Parallel work plan
 
@@ -110,19 +112,19 @@ Steps 00→01→02→03→04→05→06→07→08→09→10→11→12, then suppo
 ### Track B — Solver (Rust)
 
 Starts after step 11 freezes the package contract. Can begin earlier with a mock package generated from a
-fixture. Steps 13→14→15→16→17→18→19, then 28.
+fixture. Steps 13→14→15→16→17→18→19, then 29.
 
 ### Track C — UI (Avalonia)
 
-Starts after step 01 with the shell and project lifecycle (22). Consumes step 03/04/05/06 APIs as they land
-(23–24), then 09–12 for 25, then 20–21 for 27. Step 26 (3D) starts after 23 and runs in parallel.
+Starts after step 01 with the shell and project lifecycle (23). Consumes step 03/04/05/06 APIs as they land
+(24–25), then 09–12 for 26, then 20–21 for 28. Step 27 (3D) starts after 24 and runs in parallel.
 
 ### Track D — Documentation
 
 Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Each feature step writes
-its pages as it lands and keeps the strict build green; step 29 completes cross-cutting content, integrates
-the final DocFX/rustdoc outputs, and publishes after steps 19/21/27. Step 30 packages the site with the
-release.
+its pages as it lands and keeps the strict build green; step 30 completes cross-cutting content, integrates
+the final DocFX/rustdoc/mkdocstrings outputs, and publishes after steps 19/21/22/28. Step 31 packages the
+site with the release.
 
 ### Integration points
 
@@ -133,7 +135,8 @@ release.
 
 ## 6. Critical path and schedule risks
 
-Critical path: **01 → 02 → 03 → 04 → 05 → 08 → 09 → 10 → 11 → 13 → 14 → 15 → 16 → 18 → 20 → 28 → 29 → 30**.
+Critical path: **01 → 02 → 03 → 04 → 05 → 08 → 09 → 10 → 11 → 13 → 14 → 15 → 16 → 18 → 20 → 21 → 22 → 30 → 31**.
+Parity (29) runs in parallel and feeds the release gate.
 
 The highest-schedule-risk items are:
 
@@ -141,10 +144,12 @@ The highest-schedule-risk items are:
    Mitigation: start with the ceria model and brute-force oracles; add vehicle/interstitialcy later.
 2. **Step 16 (KMC)** — correctness of normalization, time step, and selection semantics. Mitigation: small
    analytic systems and per-cycle trace comparisons.
-3. **Step 26 (3D)** — renderer scope. Mitigation: spike in week 1 of the step; fall back to a simpler
+3. **Step 27 (3D)** — renderer scope. Mitigation: spike in week 1 of the step; fall back to a simpler
    instanced renderer if the backend integration is unstable.
-4. **Step 28 (parity)** — statistical validation can reveal deep issues late. Mitigation: run parity checks
+4. **Step 29 (parity)** — statistical validation can reveal deep issues late. Mitigation: run parity checks
    continuously from step 16, not only at the end.
+5. **Step 22 (Python API)** — schema drift between the Rust writer, .NET reader, and Python reader. Mitigation:
+   one shared fixture set and cross-language tests from the first implementation.
 
 ## 7. Definition of done for every step
 

@@ -1,7 +1,7 @@
 # Step 04 — Transition Model
 
 **Phase:** B. Model definition  
-**Depends on:** 03  
+**Depends on:** 03
 **Delivers:** State changes, state-change groups, abstract chains, and KMC/MMC transitions bound to reference
 geometry, with validation of transition semantics.
 

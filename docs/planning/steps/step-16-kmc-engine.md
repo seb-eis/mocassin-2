@@ -1,7 +1,7 @@
 # Step 16 — Kinetic Monte Carlo Engine
 
 **Phase:** D. Solver  
-**Depends on:** 15  
+**Depends on:** 15
 **Delivers:** A rejection KMC engine with direction selection, rule lookup, normalization pre-run, time
 evolution, all cycle outcomes, abort conditions, and deterministic seeding.
 

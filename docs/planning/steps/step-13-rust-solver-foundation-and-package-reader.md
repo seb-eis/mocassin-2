@@ -1,7 +1,7 @@
 # Step 13 — Rust Solver Foundation and Package Reader
 
 **Phase:** D. Solver  
-**Depends on:** 11  
+**Depends on:** 11
 **Delivers:** A Rust workspace with typed package structures, a validated `.msl` reader, deterministic RNG,
 CLI scaffolding, structured logging, and a dry-run job inspector.
 

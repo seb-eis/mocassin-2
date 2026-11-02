@@ -14,7 +14,8 @@ The content spans three languages/ecosystems:
 
 - narrative Markdown (guides, tutorials, physics, architecture);
 - C#/.NET API reference;
-- Rust API reference.
+- Rust API reference;
+- Python analysis API reference.
 
 Zensical is the chosen general documentation framework. It is Markdown-first, MkDocs-compatible, has good
 navigation/search, and supports `exclude_docs` and strict link validation. Its `mkdocstrings` integration is
@@ -29,10 +30,12 @@ inside Zensical would be fragile and duplicative.
   - Strict mode is used in CI (`zensical build --strict`).
 - **DocFX** generates the .NET API reference from XML documentation and assemblies.
 - **rustdoc** (`cargo doc`) generates the Rust API reference from doc comments.
+- **mkdocstrings** renders the Python API natively inside Zensical from docstrings/type hints.
 - **One published site with API subpaths:**
   - narrative docs at `/`;
   - .NET API at `/api/dotnet/`;
   - Rust API at `/api/rust/`;
+  - Python API at `/api/python/` (mkdocstrings, rendered by Zensical);
   - `docs/api/index.md` is the landing page.
 - **Build order:** Zensical build first, then copy DocFX and rustdoc outputs into `site/api/dotnet` and
   `site/api/rust`. Generated API HTML is not committed.
@@ -56,10 +59,11 @@ inside Zensical would be fragile and duplicative.
 
 **Negative**
 
-- Three build tools and a combine step.
+- Three build paths and a combine step (DocFX, rustdoc, mkdocstrings-in-Zensical).
 - Navigation/search are not fully unified.
 - Zensical is still on a 0.x release line; pin the version and keep content standard Markdown.
-- DocFX and rustdoc styling differ from Zensical; the API landing page must set expectations.
+- DocFX and rustdoc styling differ from Zensical; the API landing page must set expectations. Python docs
+  inherit Zensical styling through mkdocstrings.
 
 ## Alternatives considered
 
@@ -79,4 +83,4 @@ inside Zensical would be fragile and duplicative.
   valid; generated API HTML replaces them under `site/api/...` during the combined build.
 - Generated API HTML and `site/` are gitignored.
 - Step 00 creates the site skeleton, navigation, build scripts, and Docs CI job. Every feature step updates its
-  pages; Step 29 validates completeness and cross-cutting content; Step 30 packages the site artifact.
+  pages; Step 30 validates completeness and cross-cutting content; Step 31 packages the site artifact.

@@ -1,7 +1,7 @@
 # Step 03 — Particle and Structure Models
 
 **Phase:** B. Model definition  
-**Depends on:** 02  
+**Depends on:** 02
 **Delivers:** Particle, particle-set, space-group, cell-parameter, cell-site, and dummy-position models with
 validation and a stable public API.
 

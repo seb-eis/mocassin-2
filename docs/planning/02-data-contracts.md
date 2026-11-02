@@ -607,6 +607,9 @@ alignment scheme, or checksum trailer.
   cap (default 3.5 GiB) with an actionable error rather than producing a truncated file.
 - **MMC** omits KMC-only fields (`globalTrackers`, `mobileTrackers`, `staticTrackers`, `mobileMapping`,
   `jumpStatistics`). `prerun.mcs` uses the same schema with `metadata.phase = "prerun"`.
+- The metadata is intentionally self-contained for the Python reader: cell vectors, particle charges/symbols,
+  temperature, and field are sufficient for basic displacement/diffusion/mobility/conductivity evaluations
+  without opening the `.msl`.
 
 **Interoperability rules**
 
@@ -649,6 +652,13 @@ alignment scheme, or checksum trailer.
 | `latticeSize` | `[uint32;3]` | Supercell `A,B,C` |
 | `positionCount` | uint32 | P1 positions per unit cell (`P`) |
 | `particleCount` | uint32 | Number of particle indices including void |
+| `cellVectorsAngstrom` | `[[f64;3];3]` | Cartesian `a/b/c` cell vectors for fractional ↔ Cartesian conversion |
+| `particleCharges` | `[f64]` | Charge number per particle index (including void at 0) |
+| `particleSymbols` | `[string]` | Human-readable symbol per particle index |
+| `particleVacancyFlags` | `[bool]` | Vacancy flag per particle index |
+| `temperatureK` | f64 | Simulation temperature |
+| `electricFieldVm` | f64 | Field modulus in V/m; 0 if none |
+| `electricFieldDirection` | `[f64;3]` | Normalized Cartesian field direction; `[0,0,0]` if none |
 | `trackerCounts` | map | `{ "global": u32, "mobile": u32, "static": u32 }` |
 | `cycleCount` | uint64 | All simulation cycles/attempts |
 | `mcsCount` | uint64 | Successful Monte Carlo steps |
@@ -721,21 +731,24 @@ A reader must:
 2. Validate required metadata fields and reject missing/ill-typed values.
 3. Validate `lattice.length == latticeSize[0] * latticeSize[1] * latticeSize[2] * positionCount`.
 4. Validate every lattice particle index is `< particleCount`.
-5. Validate `globalTrackers`, `mobileTrackers`, `staticTrackers`, and `mobileMapping` lengths against
+5. Validate `cellVectorsAngstrom` is 3×3 and non-singular; validate `particleCharges`, `particleSymbols`, and
+   `particleVacancyFlags` each have length `particleCount`; validate `electricFieldDirection` is normalized when
+   the field modulus is non-zero.
+6. Validate `globalTrackers`, `mobileTrackers`, `staticTrackers`, and `mobileMapping` lengths against
    `metadata.trackerCounts`; validate every mapping value is a valid lattice position.
-6. Validate `jumpStatistics.globalTrackerIndex` values are unique and in range; validate histogram
+7. Validate `jumpStatistics.globalTrackerIndex` values are unique and in range; validate histogram
    `bins.Length`, `minEv < maxEv`, and finite numeric values.
-7. Require KMC fields for `kind == "kmc"`; require them to be absent/empty for `kind == "mmc"`.
-8. Reject NaN/Inf where the schema requires a finite value (energies, times, factors).
-9. Ignore unknown fields; reject duplicate map keys where the decoder exposes them.
-10. Reject an encoded document above the configured size cap.
+8. Require KMC fields for `kind == "kmc"`; require them to be absent/empty for `kind == "mmc"`.
+9. Reject NaN/Inf where the schema requires a finite value (energies, times, factors).
+10. Ignore unknown fields; reject duplicate map keys where the decoder exposes them.
+11. Reject an encoded document above the configured size cap.
 
 The `.msl` collector verifies `run_state_sha256` before storing or evaluating a state.
 
 ### 4.6 Contract testing
 
-- `tests/contracts/state-v1.mcs` is written by Rust and read by .NET; the reader emits a canonical JSON
-  summary of metadata, counters, tracker counts, and histogram totals.
+- `tests/contracts/state-v1.mcs` is written by Rust and read by .NET and Python; each reader emits a canonical
+  JSON summary of metadata, counters, tracker counts, and histogram totals.
 - A .NET fixture writer may also emit the same schema for reader tests.
 - A future `formatVersion` is rejected with a clear error; additive fields are ignored.
 - Fuzzing covers malformed MessagePack, wrong types, oversized arrays, invalid indices, and version mismatches.
@@ -797,6 +810,6 @@ The GUI consumes these events for progress bars and live charts.
 - `tests/contracts/project-minimal.mocprj` and `project-ceria.mocprj` are canonical fixtures.
 - `tests/contracts/model-v1.msgpack.zst` is written by .NET and read by Rust; both dump a canonical JSON
   representation and compare.
-- `tests/contracts/state-v1.mcs` is a MessagePack document written by Rust and read by .NET; the reader
-  emits a canonical JSON summary of metadata, counters, tracker counts, and histogram totals.
+- `tests/contracts/state-v1.mcs` is a MessagePack document written by Rust and read by .NET and Python; each
+  reader emits a canonical JSON summary of metadata, counters, tracker counts, and histogram totals.
 - A schema-change PR must update the fixture, the version field, this document, and the relevant ADR.

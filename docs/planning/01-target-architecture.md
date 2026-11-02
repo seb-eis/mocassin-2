@@ -43,7 +43,7 @@ mocassin/
 │   ├── migration/
 │   ├── examples/
 │   ├── glossary/
-│   ├── api/                         # landing + placeholder pages; generated API HTML copied to site/api at build
+│   ├── api/                         # landing + placeholders; DocFX/rustdoc/mkdocstrings output
 │   └── planning/                    # excluded from the published site
 ├── src/
 │   ├── dotnet/
@@ -59,6 +59,10 @@ mocassin/
 │   │   ├── Mocassin.App.Views/
 │   │   ├── Mocassin.Rendering/      # 3D abstraction + Avalonia host
 │   │   └── Mocassin.Tests.*/        # unit/integration/property/golden tests
+│   ├── python/
+│   │   ├── pyproject.toml           # `mocassin-analysis` package
+│   │   ├── mocassin/                # read-only .mcs reader + basic evaluations
+│   │   └── tests/                   # pytest
 │   └── rust/
 │       ├── Cargo.toml               # workspace
 │       ├── crates/
@@ -172,11 +176,13 @@ Rust solver (mocassin-sim) ──► stdout/progress + run.mcs/prerun.mcs
         │  collect
         ▼
 Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
+        │
+        └──► run.mcs/prerun.mcs ──► Python `mocassin` API ──► NumPy arrays / basic evaluations
 ```
 
 ### 5.1 Process model
 
-- The GUI and CLI run in .NET.
+- The GUI and CLI run in .NET; the Python analysis API runs in its own Python process.
 - A build is in-process and parallelised across jobs (bounded by CPU count).
 - A simulation is a separate `mocassin-sim` process. This gives isolation, simple cancellation, clean
   memory reclamation between jobs, and natural HPC scheduling.
@@ -219,7 +225,9 @@ Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
 | Narrative docs | Zensical | Markdown-first, MkDocs-compatible, navigation/search, strict link validation |
 | .NET API docs | DocFX | XML-doc/assembly metadata, .NET navigation and cross-references |
 | Rust API docs | rustdoc (`cargo doc`) | Canonical Rust docs, intra-doc links, doc tests |
-| Docs validation | Zensical `--strict`, DocFX, rustdoc | Broken links and missing public API docs block CI |
+| Python API docs | mkdocstrings | Native Zensical integration, docstrings/type hints, no separate site |
+| Python tests | pytest | Standard scientific Python test framework |
+| Docs validation | Zensical `--strict`, DocFX, rustdoc, mkdocstrings | Broken links and missing API docs/docstrings block CI |
 | 3D | Silk.NET + Avalonia native host (spike), abstraction layer | Cross-platform GPU, control over instancing/picking; fallback to OpenGL control |
 | Testing (.NET) | xUnit + FluentAssertions + FsCheck | Standard, property-based geometry tests |
 | Testing (Rust) | built-in + `proptest` + `criterion` + `insta` | Unit, property, benchmarks, snapshots |
@@ -288,6 +296,7 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
 | Compiled payload | `format_version` | Tied to `.msl`; independent of project schema |
 | `.mcs` state | `format` + `formatVersion` | Reader supports the current version; rejects unknown `format`/version |
 | CLI JSON | `schemaVersion` | Additive changes only within a major version |
+| Python package | `__version__` | Aligned with the package/state format; wheel published per release |
 
 ## 8. Architecture decision records
 

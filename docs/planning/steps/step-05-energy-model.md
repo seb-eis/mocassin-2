@@ -1,7 +1,7 @@
 # Step 05 — Energy Model
 
 **Phase:** B. Model definition  
-**Depends on:** 03, 04  
+**Depends on:** 03, 04
 **Delivers:** Stable/unstable interaction environments, cutoff filters, multi-body clusters, and site energies,
 with validation and cost previews.
 

@@ -1,7 +1,7 @@
-# Step 27 — Run Monitoring, Analysis UI, and MMCFE
+# Step 28 — Run Monitoring, Analysis UI, and MMCFE
 
 **Phase:** F. GUI  
-**Depends on:** 25, 19–21  
+**Depends on:** 26, 19–21
 **Delivers:** A run queue that launches and monitors `mocassin-sim`, live progress/statistics/charts, result
 collection, analysis dashboards, the MMCFE workflow, and the lattice-recycle tool.
 

@@ -1,7 +1,7 @@
 # Step 14 — Simulation Context Initialization
 
 **Phase:** D. Solver  
-**Depends on:** 13  
+**Depends on:** 13
 **Delivers:** A fully initialized simulation context: lattice, environment states, neighbor links, energy
 lookup tables, selection pools, jump-status caches, counters, goals, and tracker state.
 

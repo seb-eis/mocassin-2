@@ -1,7 +1,7 @@
 # Step 19 — Solver CLI, HPC Workflows, and Extensions
 
 **Phase:** D. Solver  
-**Depends on:** 18  
+**Depends on:** 18
 **Delivers:** A production `mocassin-sim` CLI, batch/worker execution, SLURM/PBS-friendly scripts, graceful
 signals, deterministic seeds, and a versioned extension ABI (including MMCFE parity).
 
@@ -44,7 +44,7 @@ mocassin-sim batch --db <project.msl> --jobs <range|file>
 - `--jobs` accepts `1-100`, `1,3,5`, `1-10,15,20-30`, or `@jobs.txt`.
 - `batch` is a solver-only convenience for workstations; it runs jobs in worker threads/processes, each with
   its own folder and solver context. Default `parallel = min(CPU count, jobs)`. The .NET `mocassin simulate`
-  command (Step 27) is the higher-level orchestrator that adds package/status/UI integration.
+  command (Step 28) is the higher-level orchestrator that adds package/status/UI integration.
 - `--threads` controls initialization/analysis parallelism within one job; the Monte Carlo trajectory is
   single-threaded and deterministic. Document this explicitly.
 - `--seed` overrides the package seed for debugging; it is recorded in the state metadata and logs.

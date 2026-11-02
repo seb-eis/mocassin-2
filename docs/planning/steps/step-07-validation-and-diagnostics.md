@@ -1,7 +1,7 @@
 # Step 07 — Validation, Diagnostics, and Model Statistics
 
 **Phase:** B. Model definition  
-**Depends on:** 03, 04, 05, 06  
+**Depends on:** 03, 04, 05, 06
 **Delivers:** A cross-domain validation pipeline, a stable diagnostic catalog, model statistics, and the
 headless `mocassin validate` command.
 
@@ -143,7 +143,7 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 - Human output is a readable table with file/object context and a final summary.
 - Validation of the ceria sample must complete in < 200 ms on a laptop.
 
-### 7. GUI integration (contract for step 22–24)
+### 7. GUI integration (contract for steps 24–25)
 
 - The validator panel shows a filterable table: severity, code, message, object, property.
 - Double-click navigates to the object editor and selects the property.
@@ -171,7 +171,7 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 - [ ] `mocassin validate --json` output validates against a JSON schema.
 - [ ] Exit codes match the contract.
 - [ ] Validation of the ceria sample completes in < 200 ms.
-- [ ] The GUI can navigate from every diagnostic to its object (verified in step 23–24).
+- [ ] The GUI can navigate from every diagnostic to its object (verified in steps 24–25).
 - [ ] Documentation written
 
 ## Documentation

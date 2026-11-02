@@ -1,7 +1,7 @@
-# Step 26 — 3D Viewer and Visualization
+# Step 27 — 3D Viewer and Visualization
 
 **Phase:** F. GUI  
-**Depends on:** 23, 03–05  
+**Depends on:** 24, 03–05
 **Delivers:** A cross-platform 3D viewer for the cell, atoms, transitions, pairs, clusters, and
 parameterization overlays, with camera controls, picking, selection sync, styles, and image export.
 

@@ -1,7 +1,7 @@
 # Step 15 — Energy Engine
 
 **Phase:** D. Solver  
-**Depends on:** 14  
+**Depends on:** 14
 **Delivers:** The transition energy calculator: S0/S1/S2, pair/cluster deltas, electric-field terms,
 state application, and lattice-energy bookkeeping.
 

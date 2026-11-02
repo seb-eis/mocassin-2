@@ -1,7 +1,7 @@
 # Step 00 — Repository, Toolchain, and CI
 
 **Phase:** A. Foundations  
-**Depends on:** —  
+**Depends on:** —
 **Delivers:** A reproducible monorepo skeleton with .NET 10, Rust, CI on three operating systems, the
 decision records that constrain later steps, and the initial standalone documentation site skeleton.
 
@@ -57,6 +57,7 @@ mocassin/
 │   └── planning/                # internal, excluded from the site
 ├── src/dotnet/
 ├── src/rust/
+├── src/python/
 ├── samples/
 ├── tests/
 └── tools/
@@ -109,8 +110,10 @@ mocassin/
 - [ ] Steps: checkout, setup .NET 10, setup Rust stable, cache NuGet/Cargo/SQLite, restore, build,
   `dotnet test`, `cargo test`, `dotnet format --verify-no-changes`, `cargo fmt --check`, `cargo clippy`.
 - [ ] Upload test results and coverage artifacts.
-- [ ] Add the docs job: setup Python, install pinned Zensical requirements, run `zensical build --strict`,
-  and enable DocFX/rustdoc steps as their projects appear.
+- [ ] Add the docs job: setup Python, install pinned Zensical requirements and the Python package in editable
+  mode, run `zensical build --strict`, and enable DocFX/rustdoc steps as their projects appear.
+- [ ] Add the Python job: Python 3.11–3.13, install `src/python` with test extras, run `pytest`, and build the
+  wheel/sdist.
 - [ ] Add a scheduled nightly workflow for longer tests and fuzzing (can start as a placeholder).
 - [ ] Add a dependency/licence check and a "no secrets" check.
 
@@ -126,17 +129,18 @@ mocassin/
     getting-started, user-guide, physics, tutorials, reference, development, performance, troubleshooting,
     migration, examples, glossary, and api;
   - `docs/api/index.md` linking to `/api/dotnet/` and `/api/rust/`;
-  - placeholder `docs/api/dotnet/index.md` and `docs/api/rust/index.md` pages so strict link validation passes
-    before the generated API outputs exist. Build scripts copy the generated DocFX/rustdoc output over the
-    placeholders in `site/api/...`.
-- [ ] Add `tools/docs/requirements.txt` (or a root `pyproject.toml`) pinning Zensical and Markdown extensions.
+  - placeholder `docs/api/dotnet/index.md`, `docs/api/rust/index.md`, and `docs/api/python/index.md` pages so
+    strict link validation passes before the generated API outputs exist. DocFX/rustdoc output is copied over
+    the first two in `site/api/...`; Step 22 replaces the Python placeholder with mkdocstrings directives.
+- [ ] Add `tools/docs/requirements.txt` (or a root `pyproject.toml`) pinning Zensical, Markdown extensions, and
+  `mkdocstrings[python]`.
 - [ ] Add `.config/dotnet-tools.json` with a pinned DocFX tool. Rust API docs use `cargo doc` directly.
 - [ ] Add docs build scripts:
   - `tools/docs/build-docs.sh` and `tools/docs/build-docs.ps1`: build Zensical strictly; build DocFX/rustdoc when the
     corresponding projects/crates exist; copy API output into `site/api/...`;
   - `tools/docs/serve.sh` / `tools/docs/serve.ps1`: local preview.
 - [ ] Add a `docs` CI job that installs the pinned requirements and runs `zensical build --strict`.
-  DocFX/rustdoc steps are enabled as soon as their projects exist; they are not deferred to Step 29.
+  DocFX/rustdoc steps are enabled as soon as their projects exist; they are not deferred to Step 30.
 - [ ] Add `docs/CONTRIBUTING.md` or a README section explaining docs-as-code: every feature step updates its
   pages, and the docs build must stay green.
 - [ ] Add `site/`, `docs/api/dotnet/`, `docs/api/rust/`, and generated DocFX/rustdoc output to `.gitignore`.
@@ -177,6 +181,7 @@ At this point, document the repository and contributor workflow:
 | Format check | Both formatters report no changes |
 | Docs skeleton | Strict Zensical build; required nav sections present; planning excluded |
 | Docs CI | Docs job installs pinned requirements and builds strictly |
+| Python CI | Python 3.11–3.13 install, pytest, wheel build |
 
 ## Risks and mitigations
 

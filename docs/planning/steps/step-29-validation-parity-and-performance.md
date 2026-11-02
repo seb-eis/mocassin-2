@@ -1,7 +1,7 @@
-# Step 28 — Validation, Statistical Parity, Performance, and Hardening
+# Step 29 — Validation, Statistical Parity, Performance, and Hardening
 
 **Phase:** G. Release  
-**Depends on:** 16–21  
+**Depends on:** 16–22
 **Delivers:** A validated release candidate: statistical parity with the original solver, performance within
 targets, fuzzed/robust parsers, and a documented scientific validation suite.
 
@@ -202,6 +202,7 @@ At this point, document validation/parity/performance results:
 | Arrhenius | Prefactor/Ea match reference |
 | Determinism | Same seed → same state per platform |
 | Cross-platform | Statistical equivalence |
+| Python reader | `pytest` fixture parity with .NET/Rust |
 | Fuzz | No panic/OOM |
 | Performance | Benchmarks within targets |
 | Locale/path | Non-ASCII/read-only/long paths |

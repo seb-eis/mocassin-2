@@ -1,7 +1,7 @@
 # Step 20 — State Reader, Result Collection, and Evaluation API
 
 **Phase:** E. Results  
-**Depends on:** 18, 11  
+**Depends on:** 18, 11
 **Delivers:** A safe `.mcs` reader, transactional result collection into `.msl`, job querying, and the public
 evaluation API for transport, displacement, diffusion, correlation, coordination, and jump statistics.
 
@@ -67,8 +67,9 @@ public sealed class McsReader : IDisposable
 ```
 
 - Deserialize the whole document with `MessagePackSerializer.Deserialize<McsDocument>(stream, options)`.
-- Validate `format == "mocassin.mcs"`, `formatVersion`, metadata, lattice length, particle indices, tracker
-  counts, mobile mapping, histogram bins, and finite numeric values.
+- Validate `format == "mocassin.mcs"`, `formatVersion`, metadata (including cell vectors, particle
+  charges/symbols/vacancy flags, temperature, and field), lattice length, particle indices, tracker counts,
+  mobile mapping, histogram bins, and finite numeric values.
 - The `lattice` field is a MessagePack `bin`; trackers are arrays of `[f64;3]`; counters/histograms are arrays.
 - Missing optional fields (especially KMC fields in MMC states) are treated as empty.
 - Unknown fields are ignored; unknown `format`/version is rejected.

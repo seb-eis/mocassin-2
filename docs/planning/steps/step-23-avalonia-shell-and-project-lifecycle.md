@@ -1,7 +1,7 @@
-# Step 22 — Avalonia Shell and Project Lifecycle
+# Step 23 — Avalonia Shell and Project Lifecycle
 
 **Phase:** F. GUI  
-**Depends on:** 01  
+**Depends on:** 01
 **Delivers:** The Avalonia application shell, dependency injection, navigation, document tabs, project
 open/save/close, dirty tracking, undo/redo, settings, logging, and crash recovery.
 
@@ -43,7 +43,7 @@ public sealed class App : Application
   - `IProjectSessionService` — open projects, active project, recent files, save/close.
   - `IProjectStore` — load/save/lock (step 01).
   - `IBuildService` — build orchestration (step 12).
-  - `ISimulationService` — launch/monitor solver (step 27).
+  - `ISimulationService` — launch/monitor solver (step 28).
   - `IDialogService` — message boxes, confirmations, progress dialogs.
   - `IStorageService` — file/folder pickers via Avalonia `IStorageProvider`.
   - `ISettingsService` — app settings (theme, culture, paths, solver path, autosave).

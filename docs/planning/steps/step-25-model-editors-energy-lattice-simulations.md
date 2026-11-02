@@ -1,7 +1,7 @@
-# Step 24 — Energy, Lattice, and Simulation Editors
+# Step 25 — Energy, Lattice, and Simulation Editors
 
 **Phase:** F. GUI  
-**Depends on:** 23, 05, 06  
+**Depends on:** 24, 05, 06
 **Delivers:** Editors for interaction environments, clusters, site energies, doping/lattice definitions, and
 MMC/KMC simulations, with cost previews and live validation.
 
@@ -151,7 +151,7 @@ model, so they must show costs, geometric relationships, and the effect of chang
 - Cost previews are shared with the compiler (step 08) and job builder (step 10).
 - Validation errors are inline and in the Problems panel.
 - The inspector shows summary/statistics for the selected object.
-- "Show in 3D" actions open the viewer with the object highlighted (step 26).
+- "Show in 3D" actions open the viewer with the object highlighted (step 27).
 
 ## Implementation tasks
 

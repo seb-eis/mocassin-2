@@ -23,6 +23,7 @@
 | Integration | Build → simulate → collect → evaluate on a tiny system | CLI + Rust + SQLite | Every PR (short) / nightly (long) |
 | Statistical | Reference systems vs known observables | Custom harness + CSV/JSON comparison | Nightly and release |
 | Performance | Solver throughput, build speed, memory | Criterion, BenchmarkDotNet | Weekly and release |
+| Python API | `.mcs` reader, helpers, aggregation | pytest | Every PR |
 | UI | View-model commands, validation, navigation | xUnit + Avalonia headless | Every PR |
 | End-to-end | GUI workflows on each OS | Avalonia headless + screenshot tests | Nightly |
 
@@ -127,8 +128,8 @@ solver with the same binary, platform, package, and seed.
 - **Project JSON**: .NET writes fixtures; a JSON Schema validator checks them in CI.
 - **Compiled model**: .NET writes `.msl`; Rust reads it, validates invariants, and emits canonical JSON;
   compare with the .NET canonical JSON.
-- **State file**: Rust writes a MessagePack `.mcs` for a synthetic small run; .NET reads it and emits a
-  canonical JSON summary; compare with the Rust-side summary and the schema version.
+- **State file**: Rust writes a MessagePack `.mcs` for a synthetic small run; .NET and Python read it and emit
+  canonical JSON summaries; compare all three with the schema version.
 - **Version rejection**: each reader must reject a fixture with a future major version and a malformed/
   truncated MessagePack document with a clear error.
 - **Fuzzing**: `cargo-fuzz` on the `.msl` and `.mcs` readers; SharpFuzz on the project JSON reader.
@@ -153,12 +154,13 @@ solver with the same binary, platform, package, and seed.
 4. `cargo fmt --check`
 5. `cargo clippy -- -D warnings`
 6. `cargo test`
-7. Contract fixture round-trips
-8. Avalonia headless UI tests
-9. License/header check and dependency audit
+7. Python `pytest`, wheel build, and clean-install check
+8. Contract fixture round-trips
+9. Avalonia headless UI tests
+10. License/header check and dependency audit
 
-Matrix: `ubuntu-latest`, `windows-latest`, `macos-latest`; .NET 10 SDK; stable Rust. Cache NuGet, Cargo, and
-the SQLite build.
+Matrix: `ubuntu-latest`, `windows-latest`, `macos-latest`; .NET 10 SDK; stable Rust; Python 3.11–3.13.
+Cache NuGet, Cargo, pip, and the SQLite build.
 
 ### Nightly
 
@@ -223,14 +225,15 @@ Benchmarks:
 - **API references** are generated, not hand-written:
   - .NET via **DocFX** under `/api/dotnet/`;
   - Rust via **rustdoc** (`cargo doc`) under `/api/rust/`;
-  - `docs/api/index.md` is the landing page and cross-links to both.
+  - Python via **mkdocstrings** under `/api/python/`;
+  - `docs/api/index.md` is the landing page and cross-links to all three.
 - **One published site.** Zensical owns the root; API outputs are copied into `site/api/dotnet` and
   `site/api/rust` after the Zensical build.
-- **Strict builds.** `zensical build --strict` fails on broken links/anchors; DocFX and rustdoc fail on
-  missing public API docs. CI builds the combined site on every PR.
+- **Strict builds.** `zensical build --strict` fails on broken links/anchors; DocFX, rustdoc, and mkdocstrings
+  fail on missing public API docs/docstrings/import errors. CI builds the combined site on every PR.
 - **Docs-as-code.** Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Every
-  feature step updates its pages and keeps the strict build green. Step 29 completes coverage, cross-cutting
-  content, and API integration; Step 30 packages the site artifact with the release.
+  feature step updates its pages and keeps the strict build green. Step 30 completes coverage, cross-cutting
+  content, and API integration; Step 31 packages the site artifact with the release.
 - **Tutorials are executable.** CI runs the documented commands against `samples/` and validates expected
   outputs.
 - Each step page is updated to `Done` with links to the PRs and any deviations.
@@ -249,4 +252,5 @@ A release is blocked if any of the following is true:
 - A performance benchmark regresses by more than 10 % without an accepted ADR.
 - A GUI workflow in the release checklist fails.
 - Licence/attribution files are missing.
-- The Zensical/DocFX/rustdoc documentation build fails or has broken links.
+- The Zensical/DocFX/rustdoc/mkdocstrings documentation build fails or has broken links.
+- The Python package fails to build/install, or its pytest suite fails.
