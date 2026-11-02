@@ -8,99 +8,79 @@ runs through the model compiler and the solver; the GUI has a parallel track onc
 compiled model exist.
 
 ```mermaid
-flowchart TB
-    subgraph A["A. Foundations"]
-        direction LR
-        s00["00<br/>Repo, CI, docs skeleton"] --> s01["01<br/>Domain kernel<br/>project JSON"] --> s02["02<br/>Symmetry, geometry"]
-    end
+gantt
+    title MOCASSIN reimplementation - illustrative 3-developer timeline
+    dateFormat YYYY-MM-DD
+    axisFormat %b %d
+    excludes weekends
+    todayMarker off
 
-    subgraph B["B. Model definition"]
-        direction LR
-        s03["03<br/>Particles, structure"] --> s04["04<br/>Transitions"]
-        s03 --> s05["05<br/>Energy"]
-        s04 --> s05
-        s04 --> s06["06<br/>Lattice, simulations"]
-        s05 --> s07["07<br/>Validation, diagnostics"]
-        s06 --> s07
-    end
+    section A. Foundations
+    Step 00 Repository CI docs       :s00, 2026-11-09, 2w
+    Step 01 Domain kernel project    :s01, after s00, 3w
+    Step 02 Symmetry geometry        :s02, after s01, 4w
+    M0 skeleton                      :milestone, m0, after s00, 0d
+    M2 symmetry proven               :milestone, m2, after s02, 0d
 
-    subgraph C["C. Compilation and build"]
-        direction LR
-        s08["08<br/>Compilation pipeline"] --> s09["09<br/>Parameterization"]
-        s09 --> s10["10<br/>Job templates, supercells"]
-        s10 --> s11["11<br/>Package, .msl writer"]
-        s11 --> s12["12<br/>Build CLI"]
-    end
+    section B. Model and compiler
+    Step 03 Particles structure      :s03, after s02, 3w
+    Step 04 Transitions              :s04, after s03, 4w
+    Step 05 Energy model             :s05, after s04, 3w
+    Step 06 Lattice simulations      :s06, after s04, 2w
+    Step 07 Validation diagnostics   :s07, after s05, 2w
+    Step 08 Compilation pipeline     :s08, after s07, 5w
+    Step 09 Parameterization         :s09, after s08, 2w
+    Step 10 Job templates supercells :s10, after s09, 3w
+    Step 11 Package msl writer       :s11, after s10, 3w
+    Step 12 Build CLI                :s12, after s11, 2w
+    M3 model authored                :milestone, m3, after s07, 0d
+    M4 model compiled                :milestone, m4, after s08, 0d
+    M5 first package                 :milestone, m5, after s12, 0d
 
-    subgraph D["D. Solver"]
-        direction LR
-        s13["13<br/>Rust foundation, .msl reader"] --> s14["14<br/>Context initialization"]
-        s14 --> s15["15<br/>Energy engine"]
-        s15 --> s16["16<br/>KMC engine"]
-        s15 --> s17["17<br/>MMC engine"]
-        s16 --> s18["18<br/>Tracking, state writer"]
-        s17 --> s18
-        s18 --> s19["19<br/>Solver CLI, HPC, extensions"]
-    end
+    section D. Solver
+    Step 13 Rust foundation reader   :s13, after s11, 3w
+    Step 14 Context initialization   :s14, after s13, 3w
+    Step 15 Energy engine            :s15, after s14, 4w
+    Step 16 KMC engine               :s16, after s15, 5w
+    Step 17 MMC engine               :s17, after s15, 3w
+    Step 18 Tracking state writer    :s18, after s16, 4w
+    Step 19 Solver CLI HPC extensions:s19, after s18, 3w
+    M6 first KMC run                 :milestone, m6, after s16, 0d
+    M7 first MMC run                 :milestone, m7, after s17, 0d
 
-    subgraph E["E. Results"]
-        direction LR
-        s20["20<br/>.mcs reader, evaluation API"] --> s21["21<br/>Analysis, plots, reports"]
-        s20 --> s22["22<br/>Python analysis API"]
-    end
+    section E. Results
+    Step 20 mcs reader eval API      :s20, after s18, 3w
+    Step 21 Analysis plots reports   :s21, after s20, 3w
+    Step 22 Python analysis API      :s22, after s20, 3w
+    M8 results loop                  :milestone, m8, after s20, 0d
+    M9 Python API                    :milestone, m9, after s22, 0d
 
-    subgraph F["F. GUI"]
-        direction LR
-        s23["23<br/>Avalonia shell"] --> s24["24<br/>Particle/structure/<br/>transition editors"]
-        s24 --> s25["25<br/>Energy/lattice/<br/>simulation editors"]
-        s25 --> s26["26<br/>Parameterization,<br/>job/build UI"]
-        s24 --> s27["27<br/>3D viewer"]
-        s26 --> s28["28<br/>Run monitoring,<br/>MMCFE UI"]
-    end
+    section F. GUI
+    Step 23 Avalonia shell           :s23, after s01, 4w
+    Step 24 Model editors            :s24, after s04, 5w
+    Step 25 Energy lattice sim UI    :s25, after s24, 4w
+    Step 26 Parameterization build UI:s26, after s12, 4w
+    Step 27 3D viewer                :s27, after s24, 5w
+    Step 28 Run monitoring MMCFE UI  :s28, after s26, 4w
+    M10 MVP GUI                      :milestone, m10, after s26, 0d
+    M11 visualization                :milestone, m11, after s27, 0d
+    M12 feature parity               :milestone, m12, after s28, 0d
 
-    subgraph G["G. Release and documentation"]
-        direction LR
-        s29["29<br/>Validation, parity,<br/>performance"] --> s30["30<br/>Documentation<br/>completion"]
-        s30 --> s31["31<br/>Packaging,<br/>release"]
-    end
-
-    s02 --> s03
-    s07 --> s08
-    s11 --> s13
-    s11 --> s20
-    s18 --> s20
-    s18 --> s22
-    s01 --> s23
-    s03 --> s24
-    s04 --> s24
-    s05 --> s25
-    s06 --> s25
-    s09 --> s26
-    s10 --> s26
-    s11 --> s26
-    s12 --> s26
-    s03 --> s27
-    s04 --> s27
-    s05 --> s27
-    s24 --> s27
-    s26 --> s28
-    s19 --> s28
-    s20 --> s28
-    s21 --> s28
-    s16 -.-> s29
-    s22 --> s29
-    s19 --> s30
-    s21 --> s30
-    s22 --> s30
-    s28 --> s30
-    s22 --> s31
-    s29 --> s31
-    s30 --> s31
+    section G. Validation and release
+    Step 29 Validation parity perf   :s29, after s22, 4w
+    Step 30 Documentation completion :s30, after s28, 4w
+    Step 31 Packaging release        :s31, after s30, 3w
+    M13 documentation                :milestone, m13, after s30, 0d
+    M14 release                      :milestone, m14, after s31, 0d
 ```
 
-Edges show direct dependencies. Steps 22 (Python API) and 29 (validation) can run in parallel with the GUI
-track; parity 29 consumes the solver/results steps 16–22, and the release step 31 consumes the documentation,
-parity, and Python package outputs.
+This is an **illustrative three-developer schedule**, not a fixed commitment. Durations are rounded from the
+person-week estimates and the `after` links encode the main dependencies. A single developer should expect a
+substantially longer calendar schedule; see the estimate table below.
+
+
+Milestones mark the first step that demonstrates the outcome (for example, M5 after the first `.msl` package).
+The detailed dependency table below remains authoritative; the Gantt is a communication view.
 
 
 ## 2. Phase overview
