@@ -54,7 +54,7 @@ mocassin/
 ### Repository
 
 - [ ] Create the directory structure and placeholder projects/crates.
-- [ ] Copy the GPL-3.0 text to `LICENSE`; add `NOTICE.md` with original authorship and citation.
+- [ ] Write the MIT license to `LICENSE`; add `NOTICE.md` with original authorship, the GPL/MIT boundary, and citation guidance.
 - [ ] Add `.gitattributes` for LF normalization, binary formats, and generated files.
 - [ ] Add `.gitignore` for .NET, Rust, IDEs, build outputs, and simulation artifacts.
 - [ ] Add `README.md` with prerequisites, build/test commands, and a link to the plan.
@@ -69,7 +69,7 @@ mocassin/
   - `GenerateDocumentationFile=true` for libraries.
 - [ ] Create `Directory.Packages.props` with central versions for Avalonia, CommunityToolkit.Mvvm,
   Microsoft.Extensions.*, Microsoft.Data.Sqlite, MessagePack, ZstdSharp, xUnit, FsCheck, FluentAssertions,
-  ScottPlot, Silk.NET, Serilog.
+  LiveCharts2, Silk.NET, Serilog.
 - [ ] Create the solution with empty projects:
   `Mocassin.Core`, `Mocassin.Symmetry`, `Mocassin.Compilation`, `Mocassin.Packages`, `Mocassin.Results`,
   `Mocassin.Cli`, `Mocassin.App`, `Mocassin.App.ViewModels`, `Mocassin.App.Views`, `Mocassin.Rendering`.
@@ -103,7 +103,7 @@ mocassin/
 
 - [ ] Create `tests/contracts/` and `tests/reference/` with README placeholders.
 - [ ] Add `samples/blank/` and `samples/ceria/` directories with README placeholders.
-- [ ] Add the six ADRs from `docs/planning/adr/`.
+- [ ] Add the seven ADRs from `docs/planning/adr/`.
 - [ ] Add a `CONTRIBUTING.md` with build, test, style, and review expectations.
 - [ ] Add issue/PR templates that ask for the affected step and parity-matrix item.
 
@@ -124,7 +124,7 @@ mocassin/
 | .NET smoke | A trivial library test passes in each test project |
 | Rust smoke | A workspace test and CLI `--version` pass |
 | CI matrix | All three OS jobs complete |
-| Licence check | `LICENSE` is GPL-3.0 and `NOTICE.md` names the original project |
+| Licence check | `LICENSE` is MIT and `NOTICE.md` records the original GPL project and attribution |
 | Format check | Both formatters report no changes |
 
 ## Risks and mitigations

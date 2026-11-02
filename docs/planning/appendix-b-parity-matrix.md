@@ -219,7 +219,7 @@ Status legend:
 | Performance benchmarks | Y | Planned | 28 | |
 | Fuzzing | Y | Planned | 13/28 | |
 | Documentation/user guide | Y | Planned | 29 | |
-| GPL-3.0-or-later + notices | Y | Planned | 00 | |
+| MIT + original GPL attribution/notices | Y | Planned | 00 | |
 | Legacy file migration | N | Out of scope | — | Owner decision |
 
 ## 10. Known original defects fixed by the plan

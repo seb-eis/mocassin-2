@@ -41,10 +41,10 @@ Start at [`docs/planning/README.md`](docs/planning/README.md) for the roadmap an
 
 ## Lineage, licence, and citation
 
-This project is a derivative work of
-[`seb-eis/mocassin`](https://github.com/seb-eis/mocassin), distributed under the GNU General Public
-License v3 or later. The original copyright remains with Forschungszentrum Jülich GmbH and the original
-authors. See [`LICENSE`](LICENSE) and [`NOTICE.md`](NOTICE.md).
+This project is an independent reimplementation of
+[`seb-eis/mocassin`](https://github.com/seb-eis/mocassin). The new code and documentation are licensed
+under the **MIT License**; the original project remains under GPL-3.0-or-later and is attributed in
+[`NOTICE.md`](NOTICE.md). See [`LICENSE`](LICENSE) for the new license.
 
 If you use MOCASSIN in scientific work, the original authors request that you cite:
 

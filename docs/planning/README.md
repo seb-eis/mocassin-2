@@ -34,7 +34,7 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
 | Delivery scope | **Phased full parity.** A usable KMC/MMC core and model editors first; 3D viewer, MMCFE, advanced evaluation and HPC tooling follow. |
 | Solver numerical parity | **Statistical parity.** Same physics, validated within statistical error; new deterministic RNG; not bit-exact trajectories. |
 | GUI direction | **Redesign, preserve concepts.** Keep the scientific workflow and model semantics; modernize navigation, editors, validation, and visualization. |
-| Licence | **GPL-3.0-or-later**, matching the original. |
+| Licence | **MIT** for the new reimplementation; the original project remains GPL-3.0-or-later. |
 
 Additional technical decisions (clean-break format encoding, Avalonia MVVM toolkit, Rust solver boundary,
 3D renderer) are recorded as ADRs in [`adr/`](adr/).

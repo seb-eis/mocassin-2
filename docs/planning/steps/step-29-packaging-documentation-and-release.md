@@ -113,7 +113,7 @@ ceria sample, build a package, run a job, and analyze results using only the doc
 - **Samples** — ceria (KMC/MMC), barium zirconate, vehicle, interstitialcy; each with a README and expected
   outputs.
 - **Developer docs** — architecture, build, testing, release, ADRs.
-- **Citation/licence** — GPL-3.0-or-later, NOTICE, original paper citation.
+- **Citation/licence** — MIT, NOTICE with the original GPL project attribution, and the original paper citation.
 
 ### 6. Release process
 

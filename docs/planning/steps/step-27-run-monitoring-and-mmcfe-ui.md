@@ -62,7 +62,7 @@ public sealed record RunRequest(
 - Aggregate view:
   - jobs by status, throughput, failures;
   - queue progress and estimated completion.
-- Charts:
+- Charts (LiveCharts2):
   - MCS vs wall time;
   - rate vs time;
   - lattice energy (MMC) vs MCS;

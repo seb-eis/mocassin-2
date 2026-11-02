@@ -25,7 +25,7 @@ Use:
 - **Explicit constructor injection**; no service locator in view models.
 - **Avalonia.Controls.DataGrid** for tabular editors, with explicit Add/Remove commands instead of WPF's
   implicit new-row behavior.
-- **ScottPlot** (Avalonia) for scientific charts.
+- **LiveCharts2** (`LiveChartsCore.SkiaSharpView.Avalonia`) for scientific charts, with SkiaSharp for headless rendering/export.
 - **Silk.NET.OpenGL** behind a renderer abstraction for 3D (see ADR 0006).
 
 ## Consequences

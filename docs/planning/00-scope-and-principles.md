@@ -36,7 +36,7 @@ MOCASSIN is a fixed-lattice Markov-chain Monte Carlo suite for crystalline solid
 | Delivery | Phased full parity | Core KMC/MMC and editors first; viewer, MMCFE, advanced analytics and HPC later. |
 | Numerical parity | Statistical parity | New deterministic RNG; validate observables within statistical error, not identical trajectories. |
 | GUI | Redesign, preserve concepts | New information architecture and editors; do not port WPF screens one-to-one. |
-| Licence | GPL-3.0-or-later | Derivative work; keep copyright notice and citation guidance. |
+| Licence | MIT | New code and docs are MIT; the original project remains GPL-3.0-or-later and is attributed in NOTICE. |
 
 ### 3.2 Technical constraints
 

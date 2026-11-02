@@ -200,7 +200,7 @@ Results in .msl ──► .NET evaluation API ──► tables/plots/CSV/JSON
 | Rust logging | `tracing` + `tracing-subscriber` | Structured logs, JSON output option |
 | Rust parallelism | `rayon` for build/analysis helpers; process-per-job for MC | MC chains are sequential; job-level parallelism is the right granularity |
 | Rust RNG | `rand_chacha` | Reproducible, high-quality, portable |
-| Charts | ScottPlot (Avalonia) | Scientific plotting, cross-platform, export |
+| Charts | LiveCharts2 (`LiveChartsCore.SkiaSharpView.Avalonia`) | Scientific plotting, cross-platform, SkiaSharp rendering/export |
 | 3D | Silk.NET + Avalonia native host (spike), abstraction layer | Cross-platform GPU, control over instancing/picking; fallback to OpenGL control |
 | Testing (.NET) | xUnit + FluentAssertions + FsCheck | Standard, property-based geometry tests |
 | Testing (Rust) | built-in + `proptest` + `criterion` + `insta` | Unit, property, benchmarks, snapshots |
@@ -280,3 +280,4 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
 | [0004](adr/0004-package-and-state-encoding.md) | MessagePack/Zstd package, custom binary state |
 | [0005](adr/0005-statistical-parity-and-rng.md) | Statistical parity and deterministic RNG policy |
 | [0006](adr/0006-3d-rendering.md) | 3D renderer abstraction and backend choice |
+| [0007](adr/0007-mit-license.md) | MIT license for the reimplementation; original GPL attribution |

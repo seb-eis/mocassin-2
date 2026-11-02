@@ -90,7 +90,7 @@ public sealed record ArrheniusFit(
 
 ### 4. Plot rendering
 
-- Use ScottPlot (SkiaSharp) for headless PNG/SVG and for the Avalonia charts in step 27.
+- Use LiveCharts2 (`LiveChartsCore.SkiaSharpView.Avalonia`) for interactive charts and its SkiaSharp rendering for headless PNG/SVG export (falling back to PNG + CSV if a vector backend is unavailable).
 - `IPlotRenderer` abstraction so tests can assert on data without pixels.
 - Default style:
   - white background, black axes, colorblind-friendly palette;
@@ -160,7 +160,7 @@ mocassin export <project.msl> --query ... --format csv|json|parquet -o file
 - [ ] Implement `AnalysisSeries`, `AnalysisPoint`, grouping/aggregation.
 - [ ] Implement the built-in analyses and filters.
 - [ ] Implement linear/weighted fits and Arrhenius conversion.
-- [ ] Implement `IPlotRenderer` with ScottPlot PNG/SVG.
+- [ ] Implement `IPlotRenderer` with LiveCharts2/SkiaSharp PNG/SVG output.
 - [ ] Implement CSV/JSON (and optional Parquet) exporters.
 - [ ] Implement the Markdown/HTML report builder and templates.
 - [ ] Implement `mocassin analyze`, `plot`, `report`, `export`.
