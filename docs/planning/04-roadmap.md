@@ -7,23 +7,101 @@ outcome, acceptance criteria, and tests. Steps are ordered by dependency, not by
 runs through the model compiler and the solver; the GUI has a parallel track once the project format and
 compiled model exist.
 
-```text
-A Foundations        B Model              C Compilation          D Solver
-00 ──► 01 ──► 02 ──► 03 ──► 04 ──► 05 ──► 06 ──► 07 ──► 08 ──► 09 ──► 10 ──► 11 ──► 12
-                                                             │                       │
-                                                             └──────────► 13 ──► 14 ──► 15 ──► 16 ──► 17 ──► 18
-                                                                                                         │
-E Results                                                                                                ▼
-22 ◄── 21 ◄── 20 ◄────────────────────────────────────────────────────────────────────────────────────── 19
+```mermaid
+flowchart TB
+    subgraph A["A. Foundations"]
+        direction LR
+        s00["00<br/>Repo, CI, docs skeleton"] --> s01["01<br/>Domain kernel<br/>project JSON"] --> s02["02<br/>Symmetry, geometry"]
+    end
 
-F GUI
-23 ──► 24 ──► 25 ──► 26 ──► 27 ──► 28
-       │           │
-       └───────────┴────────────► (can start after 01, consume 08/09/10/11/20 as they land)
+    subgraph B["B. Model definition"]
+        direction LR
+        s03["03<br/>Particles, structure"] --> s04["04<br/>Transitions"]
+        s03 --> s05["05<br/>Energy"]
+        s04 --> s05
+        s04 --> s06["06<br/>Lattice, simulations"]
+        s05 --> s07["07<br/>Validation, diagnostics"]
+        s06 --> s07
+    end
 
-G Release and documentation
-29 ──► 30 ──► 31
+    subgraph C["C. Compilation and build"]
+        direction LR
+        s08["08<br/>Compilation pipeline"] --> s09["09<br/>Parameterization"]
+        s09 --> s10["10<br/>Job templates, supercells"]
+        s10 --> s11["11<br/>Package, .msl writer"]
+        s11 --> s12["12<br/>Build CLI"]
+    end
+
+    subgraph D["D. Solver"]
+        direction LR
+        s13["13<br/>Rust foundation, .msl reader"] --> s14["14<br/>Context initialization"]
+        s14 --> s15["15<br/>Energy engine"]
+        s15 --> s16["16<br/>KMC engine"]
+        s15 --> s17["17<br/>MMC engine"]
+        s16 --> s18["18<br/>Tracking, state writer"]
+        s17 --> s18
+        s18 --> s19["19<br/>Solver CLI, HPC, extensions"]
+    end
+
+    subgraph E["E. Results"]
+        direction LR
+        s20["20<br/>.mcs reader, evaluation API"] --> s21["21<br/>Analysis, plots, reports"]
+        s20 --> s22["22<br/>Python analysis API"]
+    end
+
+    subgraph F["F. GUI"]
+        direction LR
+        s23["23<br/>Avalonia shell"] --> s24["24<br/>Particle/structure/<br/>transition editors"]
+        s24 --> s25["25<br/>Energy/lattice/<br/>simulation editors"]
+        s25 --> s26["26<br/>Parameterization,<br/>job/build UI"]
+        s24 --> s27["27<br/>3D viewer"]
+        s26 --> s28["28<br/>Run monitoring,<br/>MMCFE UI"]
+    end
+
+    subgraph G["G. Release and documentation"]
+        direction LR
+        s29["29<br/>Validation, parity,<br/>performance"] --> s30["30<br/>Documentation<br/>completion"]
+        s30 --> s31["31<br/>Packaging,<br/>release"]
+    end
+
+    s02 --> s03
+    s07 --> s08
+    s11 --> s13
+    s11 --> s20
+    s18 --> s20
+    s18 --> s22
+    s01 --> s23
+    s03 --> s24
+    s04 --> s24
+    s05 --> s25
+    s06 --> s25
+    s09 --> s26
+    s10 --> s26
+    s11 --> s26
+    s12 --> s26
+    s03 --> s27
+    s04 --> s27
+    s05 --> s27
+    s24 --> s27
+    s26 --> s28
+    s19 --> s28
+    s20 --> s28
+    s21 --> s28
+    s16 -.-> s29
+    s22 --> s29
+    s19 --> s30
+    s21 --> s30
+    s22 --> s30
+    s28 --> s30
+    s22 --> s31
+    s29 --> s31
+    s30 --> s31
 ```
+
+Edges show direct dependencies. Steps 22 (Python API) and 29 (validation) can run in parallel with the GUI
+track; parity 29 consumes the solver/results steps 16–22, and the release step 31 consumes the documentation,
+parity, and Python package outputs.
+
 
 ## 2. Phase overview
 

@@ -27,7 +27,8 @@ inside Zensical would be fragile and duplicative.
 - **Zensical** owns the narrative documentation site.
   - `docs_dir = "docs"`, `site_dir = "site"`.
   - `docs/planning/` is excluded via `exclude_docs`.
-  - Strict mode is used in CI (`zensical build --strict`).
+  - Mermaid diagrams use Zensical’s native SuperFences custom-fence configuration.
+- Strict mode is used in CI (`zensical build --strict`).
 - **DocFX** generates the .NET API reference from XML documentation and assemblies.
 - **rustdoc** (`cargo doc`) generates the Rust API reference from doc comments.
 - **mkdocstrings** renders the Python API natively inside Zensical from docstrings/type hints.

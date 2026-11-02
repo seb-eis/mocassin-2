@@ -46,7 +46,7 @@ and add a note to the originating step.
 | Rust API reference | **rustdoc** (`cargo doc`) | Canonical Rust documentation, doc tests, intra-doc links, no duplicate schema |
 | Python API reference | **mkdocstrings** | Native Zensical integration, docstring/type-hint rendering, no separate site |
 | Search/navigation | Zensical for narrative; DocFX/rustdoc retained for API sections | Avoids fragile reimplementation of language-specific API navigation |
-| Diagrams | Mermaid or Zensical-compatible Markdown diagrams | Versionable in text |
+| Diagrams | Mermaid via Zensical SuperFences | Native Zensical support, versionable in text, theme-aware |
 | Math | Zensical/KaTeX-compatible math | Physics equations |
 
 - **One published site, separate build outputs.** Zensical owns the root. DocFX is copied to
