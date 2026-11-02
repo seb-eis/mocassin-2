@@ -174,6 +174,16 @@ If the package exceeds a configurable size, the builder warns and suggests:
 - [ ] `mocassin inspect` and `verify` report accurate information.
 - [ ] 10⁴ small jobs build within the time/size budget.
 - [ ] No EF Core or native structs are used.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the simulation package:
+
+- `docs/reference/msl-format.md` — SQLite schema, content-addressed models/lattices, job payloads, versioning.
+- `docs/reference/file-layout.md` — package location, result rows, atomic-write behavior.
+- `docs/user-guide/building.md` — what a package contains and how to inspect/verify it.
+- `docs/development/architecture.md` — `Mocassin.Packages` responsibilities and boundaries.
 
 ## Tests
 

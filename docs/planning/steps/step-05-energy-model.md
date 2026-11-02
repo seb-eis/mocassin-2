@@ -180,6 +180,16 @@ The preview uses the same sampling code as compilation (step 08) but does not al
 - [ ] Duplicate/ring/out-of-range clusters are rejected with paths.
 - [ ] The cost preview reports pair and permutation counts consistent with step 08.
 - [ ] Chiral pair partners are detected and cannot receive independent energies.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the energy model:
+
+- `docs/user-guide/energy.md` — environments, filters, clusters, site energies, cost limits.
+- `docs/physics/energies.md` — pair/cluster/site contributions and the environment cutoff.
+- `docs/development/compilation-pipeline.md` — environment sampling and derived pair/cluster preview.
+- `docs/troubleshooting/errors.md` — oversized clusters/permutations and how to fix them.
 
 ## Tests
 

@@ -15,6 +15,7 @@ developed by Sebastian Eisele and Steffen Neitzel-Grieshammer at Forschungszentr
 | Desktop GUI | C# / Avalonia UI, MVVM, cross-platform (Windows, Linux, macOS) |
 | Solver | Rust, native cross-platform binaries |
 | Shared contracts | Versioned JSON project files, SQLite simulation packages, MessagePack state files |
+| Documentation | Zensical narrative site + DocFX (.NET API) + rustdoc (Rust API) |
 
 ## Goals
 
@@ -28,16 +29,20 @@ developed by Sebastian Eisele and Steffen Neitzel-Grieshammer at Forschungszentr
 ## Repository layout (target)
 
 ```text
-docs/planning/        Reimplementation plan, architecture, data contracts, step pages, ADRs
+docs/                 Standalone Zensical site; docs/planning/ is excluded from publication
 src/dotnet/           .NET solution: core model, symmetry, compilation, jobs, results, CLI, Avalonia app
 src/rust/             Rust workspace: solver, model/package reader, RNG, trackers, state writer, CLI
 samples/              Small example projects and reference inputs
 tests/                Cross-language integration and statistical validation assets
+zensical.toml         Zensical site configuration (target)
 ```
 
 ## Documentation
 
-Start at [`docs/planning/README.md`](docs/planning/README.md) for the roadmap and reading order.
+Start at [`docs/planning/README.md`](docs/planning/README.md) for the roadmap and reading order. The
+standalone user/developer documentation site is set up in
+[`step 00`](docs/planning/steps/step-00-repository-toolchain-and-ci.md) and completed in
+[`step 29`](docs/planning/steps/step-29-standalone-documentation.md).
 
 ## Lineage, licence, and citation
 

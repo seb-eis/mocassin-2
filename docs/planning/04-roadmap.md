@@ -2,7 +2,7 @@
 
 ## 1. Shape of the plan
 
-The work is organised into seven phases and 30 steps. Each step is a shippable increment with a concrete
+The work is organised into seven phases and 31 steps. Each step is a shippable increment with a concrete
 outcome, acceptance criteria, and tests. Steps are ordered by dependency, not by org chart. The critical path
 runs through the model compiler and the solver; the GUI has a parallel track once the project format and
 compiled model exist.
@@ -21,8 +21,8 @@ F GUI
        │           │
        └───────────┴────────────► (can start after 01, consume 08/09/10/11/20 as they land)
 
-G Release
-28 ──► 29
+G Release and documentation
+28 ──► 29 ──► 30
 ```
 
 ## 2. Phase overview
@@ -35,7 +35,7 @@ G Release
 | D. Solver | 13–19 | Rust KMC/MMC, tracking, state, CLI | A job runs to completion and writes a valid `.mcs` |
 | E. Results | 20–21 | Reader, evaluation, analysis | Results can be evaluated and exported |
 | F. GUI | 22–27 | Full Avalonia application | A user can complete the whole workflow in the GUI |
-| G. Release | 28–29 | Parity, performance, packaging | Release gates pass on all platforms |
+| G. Release and documentation | 28–30 | Parity, documentation, packaging | Release gates pass, the docs site builds, and artifacts ship |
 
 ## 3. Step estimates and dependencies
 
@@ -44,7 +44,7 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 
 | Step | Outcome | Depends on | Estimate |
 | --- | --- | --- | --- |
-| 00 | Repository, solution/workspace, CI, ADRs, fixtures | — | 1–2 pw |
+| 00 | Repository, solution/workspace, CI, ADRs, docs skeleton, fixtures | — | 2–3 pw |
 | 01 | Domain kernel, IDs, diagnostics, project JSON v1 | 00 | 2–4 pw |
 | 02 | Space groups, geometry, coordinate encoding, orbit reduction | 01 | 3–5 pw |
 | 03 | Particle and structure models | 02 | 2–4 pw |
@@ -73,17 +73,18 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 | 26 | 3D viewer and visualization | 23, 03–05 | 4–6 pw |
 | 27 | Run monitoring, charts, MMCFE UI | 25, 19–21 | 3–5 pw |
 | 28 | Statistical parity, performance, fuzzing, hardening | 16–21 | 3–5 pw |
-| 29 | Packaging, docs, samples, release | 28 | 2–4 pw |
+| 29 | Documentation completion: coverage, cross-cutting pages, APIs, tutorials, publish | 19, 21, 27 | 3–5 pw |
+| 30 | Packaging, docs artifact, samples, release | 28, 29 | 2–4 pw |
 
-**Total:** roughly 75–115 person-weeks (about 1.5–2.2 person-years). With three experienced developers working
-in parallel on model/compiler, solver, and UI, the calendar estimate is **9–12 months** including integration
-and release hardening. A single developer should expect **18–24 months**.
+**Total:** roughly 79–121 person-weeks (about 1.5–2.3 person-years). With three experienced developers working
+in parallel on model/compiler, solver, and UI, the calendar estimate is **10–13 months** including integration,
+documentation, and release hardening. A single developer should expect **19–25 months**.
 
 ## 4. Milestones
 
 | Milestone | After step | Demonstrable result |
 | --- | --- | --- |
-| **M0 — Skeleton builds** | 00 | `dotnet build`, `cargo test`, CI green on three OSes |
+| **M0 — Skeleton builds** | 00 | `dotnet build`, `cargo test`, strict Zensical build, CI green on three OSes |
 | **M1 — Project round-trip** | 01 | Create/open/save a project; stable canonical JSON |
 | **M2 — Symmetry proven** | 02 | All 230 groups/settings validate; P1 expansion matches brute force |
 | **M3 — Model authored** | 07 | Ceria model built via API/CLI and validated with zero errors |
@@ -95,11 +96,12 @@ and release hardening. A single developer should expect **18–24 months**.
 | **M9 — MVP GUI** | 25 | Create → validate → parameterize → build → run → collect in Avalonia |
 | **M10 — Visualization** | 26 | 3D cell/sites/transitions/clusters/overlays with picking |
 | **M11 — Feature parity** | 27 | Every parity-matrix item implemented or explicitly deferred |
-| **M12 — Release** | 29 | Statistical parity, performance, packaged binaries, docs |
+| **M12 — Documentation** | 29 | Completed Zensical site with guides, physics, tutorials, and API subpaths |
+| **M13 — Release** | 30 | Statistical parity, performance, packaged binaries, documentation artifact |
 
 ## 5. Parallel work plan
 
-Assuming three developers:
+Assuming three core developers plus documentation ownership (shared or dedicated):
 
 ### Track A — Model and compilation (.NET)
 
@@ -115,6 +117,13 @@ fixture. Steps 13→14→15→16→17→18→19, then 28.
 Starts after step 01 with the shell and project lifecycle (22). Consumes step 03/04/05/06 APIs as they land
 (23–24), then 09–12 for 25, then 20–21 for 27. Step 26 (3D) starts after 23 and runs in parallel.
 
+### Track D — Documentation
+
+Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Each feature step writes
+its pages as it lands and keeps the strict build green; step 29 completes cross-cutting content, integrates
+the final DocFX/rustdoc outputs, and publishes after steps 19/21/27. Step 30 packages the site with the
+release.
+
 ### Integration points
 
 - **Contract review after step 11.** .NET and Rust teams sign off on the `.msl` schema and fixture.
@@ -124,7 +133,7 @@ Starts after step 01 with the shell and project lifecycle (22). Consumes step 03
 
 ## 6. Critical path and schedule risks
 
-Critical path: **01 → 02 → 03 → 04 → 05 → 08 → 09 → 10 → 11 → 13 → 14 → 15 → 16 → 18 → 20 → 28 → 29**.
+Critical path: **01 → 02 → 03 → 04 → 05 → 08 → 09 → 10 → 11 → 13 → 14 → 15 → 16 → 18 → 20 → 28 → 29 → 30**.
 
 The highest-schedule-risk items are:
 

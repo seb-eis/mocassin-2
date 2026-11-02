@@ -177,6 +177,16 @@ model, so they must show costs, geometric relationships, and the effect of chang
 - [ ] KMC/MMC simulations can be created with all settings and transitions.
 - [ ] Zero-field/modulus mismatch and missing transitions are caught inline.
 - [ ] Undo/redo works across all edits.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the energy/lattice/simulation editors:
+
+- `docs/user-guide/energy.md`, `lattice.md`, `simulations.md` — editor workflows, cost previews, doping preview.
+- `docs/physics/energies.md` — how UI previews map to the energy model.
+- `docs/development/ui-architecture.md` — list/detail editors, dependency invalidation.
+- `docs/tutorials/ceria-kmc.md` — parameterization/simulation setup in the GUI.
 
 ## Tests
 

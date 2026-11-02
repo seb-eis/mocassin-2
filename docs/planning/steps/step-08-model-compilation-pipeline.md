@@ -269,6 +269,16 @@ Compilation errors are distinct from validation errors; e.g. "rule ambiguity", "
 - [ ] Compilation is deterministic: same project → byte-identical canonical compiled model.
 - [ ] Stage caches invalidate correctly after edits.
 - [ ] Ceria compilation is < 1 s; a 10k-position model is < 30 s.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the compiler:
+
+- `docs/development/compilation-pipeline.md` — stages, P1 expansion, pair/cluster reduction, rule generation, encoding.
+- `docs/physics/energies.md` and `docs/physics/symmetry.md` — the scientific rules the compiler applies.
+- `docs/development/architecture.md` — compiled model boundaries and deterministic indexing.
+- `docs/glossary/notation.md` — compiled indices, state codes, rule IDs.
 
 ## Tests
 

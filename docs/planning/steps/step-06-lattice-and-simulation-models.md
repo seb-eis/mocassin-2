@@ -195,6 +195,16 @@ public sealed record MetropolisSimulation(
 - [ ] Doping priorities are unique and applied in ascending order.
 - [ ] A KMC simulation cannot select an MMC transition.
 - [ ] All original simulation settings are represented and validated.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document lattice/doping and simulation definitions:
+
+- `docs/user-guide/lattice.md` — occupation exchanges, ordered dopings, charge compensation.
+- `docs/user-guide/simulations.md` — MMC/KMC settings, defaults, transition assignment.
+- `docs/reference/project-format.md` — doping/simulation JSON fields and validation rules.
+- `docs/development/compilation-pipeline.md` — how these definitions feed compilation.
 
 ## Tests
 

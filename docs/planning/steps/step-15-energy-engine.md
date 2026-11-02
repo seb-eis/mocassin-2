@@ -205,6 +205,16 @@ When a position changes from particle `old` to `new`:
 - [ ] Incremental lattice energy equals a full recomputation after every accepted step (debug).
 - [ ] Fast-exp is off by default and bounded when on.
 - [ ] No allocations in the energy hot path.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the energy engine:
+
+- `docs/physics/energies.md` — S0/S1/S2, pair/cluster/site deltas, field terms, 0.5 convention.
+- `docs/physics/units-constants.md` — eV/kT, field factors, sign conventions.
+- `docs/development/solver-architecture.md` — energy-engine API and delta propagation.
+- `docs/development/testing-and-parity.md` — hand-computed and dynamic/static equivalence tests.
 
 ## Tests
 

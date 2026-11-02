@@ -188,6 +188,7 @@ solution. The inventory is maintained in
 | Portability | Windows 10/11, Ubuntu 22.04+/Fedora, macOS 13+ (arm64/x64) |
 | Maintainability | Layered libraries, no UI logic in domain, ≥ 70 % line coverage on core libraries |
 | Usability | All validation errors navigable; build/run cancellable; no blocking UI |
+| Documentation | Zensical site covers user guide, physics, developer architecture, tutorials, reference, and generated APIs |
 | Security | Untrusted project/package parsing is bounded and fuzzed; extensions opt-in |
 | Accessibility | Keyboard navigation, scalable UI, high-contrast theme, screen-reader labels |
 
@@ -202,6 +203,8 @@ solution. The inventory is maintained in
    values, with selection synchronized to the project tree.
 6. A 10⁴-job package can be built, deployed to SLURM, run, collected, and evaluated without manual SQL.
 7. A new contributor can build and test the repository using only the README and `docs/`.
+8. The standalone Zensical site covers the user guide, physics, developer architecture, tutorials, CLI/format
+   reference, and generated .NET/Rust API references, with strict link validation.
 
 ## 9. Major risks and mitigations
 

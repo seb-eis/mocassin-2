@@ -212,6 +212,16 @@ Rules:
 - [ ] MMCFE runs an annealing schedule and produces resumable output.
 - [ ] Logs are structured and contain job/model identifiers.
 - [ ] No job can write outside its I/O directory (path validation).
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the production solver interface:
+
+- `docs/reference/cli.md` — `mocassin-sim`, batch mode, signals, exit codes.
+- `docs/performance/hpc.md` — SLURM/PBS scripts, job folders, process-per-job, collection.
+- `docs/reference/extension-abi.md` — extension ABI, config, trust boundary, MMCFE hooks.
+- `docs/troubleshooting/errors.md` — signal/cancel/extension failures.
 
 ## Tests
 

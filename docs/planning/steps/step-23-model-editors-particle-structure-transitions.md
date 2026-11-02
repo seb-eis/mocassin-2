@@ -188,6 +188,16 @@ Tabs or a master-detail tree:
 - [ ] Every diagnostic navigates to the offending field.
 - [ ] Undo/redo works across all edits.
 - [ ] Large grids/previews remain responsive.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the model editors:
+
+- `docs/user-guide/particles.md`, `structure.md`, `transitions.md` — editor workflows, previews, validation.
+- `docs/tutorials/ceria-kmc.md` — first use of the structure/transition editors.
+- `docs/development/ui-architecture.md` — editor framework, reference pickers, undo/redo.
+- `docs/troubleshooting/errors.md` — editor validation failures.
 
 ## Tests
 

@@ -269,6 +269,17 @@ Queries:
 - [ ] Corrupt/truncated states are rejected with job context.
 - [ ] Evaluation of 1,000 jobs streams without loading all blobs.
 - [ ] CLI CSV/JSON output includes units and metadata.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document results and evaluation:
+
+- `docs/user-guide/results.md` — collecting, querying, evaluating, exporting results.
+- `docs/reference/mcs-format.md` — reader validation and the MessagePack contract.
+- `docs/physics/tracking.md` and `docs/physics/transport.md` — formulas, units, assumptions.
+- `docs/reference/cli.md` — `collect` and `evaluate`.
+- `docs/development/testing-and-parity.md` — golden result fixtures and formula tests.
 
 ## Tests
 

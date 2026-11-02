@@ -234,6 +234,16 @@ impl KmcEngine<'_> {
 - [ ] Resume from `prerun.mcs` continues correctly.
 - [ ] Same seed produces identical counters and state across runs.
 - [ ] No allocations in the cycle loop.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document KMC:
+
+- `docs/physics/kmc.md` — selection, acceptance, normalization, time step, all cycle outcomes.
+- `docs/user-guide/running.md` — KMC pre-run, MCSP, field, abort conditions.
+- `docs/development/solver-architecture.md` — KMC engine state machine and RNG draw order.
+- `docs/troubleshooting/errors.md` — KMC aborts, unstable events, low rates.
 
 ## Tests
 

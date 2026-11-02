@@ -178,6 +178,16 @@ public sealed record RunRequest(
 - [ ] Lattice recycle validates compatibility and updates the target package.
 - [ ] App exit cleans up child processes; orphans are detected next start.
 - [ ] No UI freezes during long runs.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document run monitoring and MMCFE:
+
+- `docs/user-guide/results.md`, `visualization.md`, `mmcfe.md` — run queue, live charts, collection, MMCFE.
+- `docs/tutorials/result-analysis.md` — end-to-end monitoring/analysis workflow.
+- `docs/performance/hpc.md` — local vs scheduler runs.
+- `docs/troubleshooting/errors.md` — aborts, orphan processes, collection failures.
 
 ## Tests
 

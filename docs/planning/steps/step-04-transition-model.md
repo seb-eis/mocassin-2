@@ -208,6 +208,16 @@ public sealed record MetropolisTransition(
 - [ ] Invalid paths (unstable endpoint, consecutive unstable, ring) are rejected with precise diagnostics.
 - [ ] Complex transitions warn when no reverse is defined.
 - [ ] The preview enumerates the expected symmetry-equivalent paths.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document the transition model:
+
+- `docs/user-guide/transitions.md` — state changes, groups, chains, pattern/linker rules, KMC/MMC paths.
+- `docs/physics/monte-carlo.md` and `docs/physics/kmc.md` — transition mechanisms and state triplets.
+- `docs/physics/mmc.md` — two-site exchange semantics.
+- `docs/development/compilation-pipeline.md` — transition inputs and the deferred rule-generation stage.
 
 ## Tests
 

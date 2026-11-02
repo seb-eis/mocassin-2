@@ -256,6 +256,16 @@ particlePositions: [ u32 ]        // optional diagnostics
 - [ ] Resume from a mid-run state continues identically.
 - [ ] Corrupt/truncated state files are rejected.
 - [ ] Statistics output contains no NaN/Inf for zero-field MMC/KMC cases.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document tracking and state:
+
+- `docs/physics/tracking.md` — global/mobile/static trackers, MSD, diffusion, correlations.
+- `docs/reference/mcs-format.md` — MessagePack schema, metadata, counters, histograms, size/integrity.
+- `docs/user-guide/results.md` — what the state file enables.
+- `docs/development/solver-architecture.md` — tracker updates and resume behavior.
 
 ## Tests
 

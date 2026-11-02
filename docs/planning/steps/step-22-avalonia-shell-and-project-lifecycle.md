@@ -192,6 +192,16 @@ public sealed class App : Application
 - [ ] Keyboard-only navigation can reach every primary action.
 - [ ] No unhandled exception kills the process silently.
 - [ ] Headless tests pass on all three OSes.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document installation and the GUI shell:
+
+- `docs/getting-started/installation.md`, `quickstart.md`, `first-project.md` — install and first workflow.
+- `docs/user-guide/projects.md` — project lifecycle, workspace, undo/redo, settings, recovery.
+- `docs/development/ui-architecture.md` — Avalonia composition, MVVM, navigation, documents.
+- `docs/troubleshooting/installation.md` — platform/startup issues.
 
 ## Tests
 

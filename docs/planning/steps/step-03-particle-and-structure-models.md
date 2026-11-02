@@ -190,6 +190,16 @@ public interface IStructureQuery
 - [ ] Crystal-system constraints are enforced without silently overwriting user input.
 - [ ] The structure preview is deterministic and cached by content hash.
 - [ ] All diagnostics are reachable from the CLI and UI.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document particles and crystal structure:
+
+- `docs/user-guide/particles.md` — particles, particle sets, void/default semantics, limits.
+- `docs/user-guide/structure.md` — space group, cell parameters, sites, stability, dummies.
+- `docs/physics/symmetry.md` — site orbits, P1 preview, and why positions are fixed.
+- `docs/development/architecture.md` — particle/structure domain APIs and editor operations.
 
 ## Tests
 

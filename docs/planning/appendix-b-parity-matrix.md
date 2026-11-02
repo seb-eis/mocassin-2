@@ -206,19 +206,32 @@ Status legend:
 | .NET 10 | Y | Planned | 00 | |
 | Avalonia cross-platform | Y | Planned | 22 | |
 | Rust solver | Y | Planned | 13 | |
-| Windows support | Y | Planned | 29 | |
-| Linux support | Y | Planned | 29 | |
-| macOS support | Y | Planned | 29 | |
+| Windows support | Y | Planned | 30 | |
+| Linux support | Y | Planned | 30 | |
+| macOS support | Y | Planned | 30 | |
 | 64-bit x86_64 | Y | Planned | 00 | |
-| arm64 | N | Improvement | 29 | Target for Apple Silicon/Linux |
-| Windows MSI installer | N | Replaced | 29 | Archives/packages |
-| NuGet evaluation package | Y | Planned | 20/29 | Public API |
+| arm64 | N | Improvement | 30 | Target for Apple Silicon/Linux |
+| Windows MSI installer | N | Replaced | 30 | Archives/packages |
+| NuGet evaluation package | Y | Planned | 20/30 | Public API |
 | CI on three OSes | Y | Planned | 00 | |
 | Unit/property/contract tests | Y | Planned | 03 | |
 | Statistical parity suite | Y | Planned | 28 | |
 | Performance benchmarks | Y | Planned | 28 | |
 | Fuzzing | Y | Planned | 13/28 | |
-| Documentation/user guide | Y | Planned | 29 | |
+| Docs skeleton + build/CI | Y | Planned | 00 | Zensical, nav, build scripts, planning excluded |
+| Standalone docs completion (Zensical) | Y | Planned | 29 | Cross-cutting content, audit, publish |
+| User guide + physics | Y | Planned | 29 | Required content |
+| Developer architecture guide | Y | Planned | 29 | Code structure/design choices |
+| Tutorials | Y | Planned | 29 | Ceria, BaZrO3, vehicle, HPC, analysis |
+| CLI + format reference | Y | Planned | 29 | CLI, project/.msl/.mcs, diagnostics |
+| Troubleshooting + FAQ | Y | Planned | 29 | |
+| Performance + HPC guide | Y | Planned | 29 | |
+| Contributing + dev workflow | Y | Planned | 29 | |
+| Migration + clean-break guide | Y | Planned | 29 | |
+| Glossary, notation, units | Y | Planned | 29 | |
+| Examples + publications | Y | Planned | 29 | |
+| .NET API reference (DocFX) | Y | Planned | 29 | `/api/dotnet/` |
+| Rust API reference (rustdoc) | Y | Planned | 29 | `/api/rust/` |
 | MIT + original GPL attribution/notices | Y | Planned | 00 | |
 | Legacy file migration | N | Out of scope | — | Owner decision |
 

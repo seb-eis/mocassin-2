@@ -211,11 +211,32 @@ Benchmarks:
 
 ## 9. Documentation
 
-- `docs/user-guide/` mirrors the original chapter structure but is rewritten for the new UI.
-- `docs/reference/` contains generated API docs and the data-format reference.
+- **Narrative documentation** uses **Zensical** with `docs_dir = "docs"`. `docs/planning/` is excluded from
+  the published site via `exclude_docs`.
+- Required standalone sections:
+  - user guide (including installation, model building, building/running, results, visualization, MMCFE);
+  - physics explanation (MMC/KMC, energies, symmetry, transport, tracking, units);
+  - developer architecture guide (code structure, design choices, data flow, testing, release);
+  - tutorials (ceria KMC/MMC, BaZrO₃, vehicle, parameter sweep, HPC, analysis);
+  - CLI + formats reference, diagnostics, troubleshooting/FAQ, performance/HPC, contributing, migration,
+    glossary/notation/units, examples/publications.
+- **API references** are generated, not hand-written:
+  - .NET via **DocFX** under `/api/dotnet/`;
+  - Rust via **rustdoc** (`cargo doc`) under `/api/rust/`;
+  - `docs/api/index.md` is the landing page and cross-links to both.
+- **One published site.** Zensical owns the root; API outputs are copied into `site/api/dotnet` and
+  `site/api/rust` after the Zensical build.
+- **Strict builds.** `zensical build --strict` fails on broken links/anchors; DocFX and rustdoc fail on
+  missing public API docs. CI builds the combined site on every PR.
+- **Docs-as-code.** Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Every
+  feature step updates its pages and keeps the strict build green. Step 29 completes coverage, cross-cutting
+  content, and API integration; Step 30 packages the site artifact with the release.
+- **Tutorials are executable.** CI runs the documented commands against `samples/` and validates expected
+  outputs.
 - Each step page is updated to `Done` with links to the PRs and any deviations.
 - ADRs record decisions that affect formats, public APIs, or scientific semantics.
 - In-app help links point to stable documentation anchors.
+- Planning docs remain internal; they are not part of the published user/developer site.
 
 ## 10. Release gates
 
@@ -228,3 +249,4 @@ A release is blocked if any of the following is true:
 - A performance benchmark regresses by more than 10 % without an accepted ADR.
 - A GUI workflow in the release checklist fails.
 - Licence/attribution files are missing.
+- The Zensical/DocFX/rustdoc documentation build fails or has broken links.

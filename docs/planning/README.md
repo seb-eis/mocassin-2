@@ -43,7 +43,7 @@ Additional technical decisions (clean-break format encoding, Avalonia MVVM toolk
 
 | Phase | Step | Outcome |
 | --- | --- | --- |
-| A. Foundations | [00](steps/step-00-repository-toolchain-and-ci.md) | Repository, solution/workspace, CI, ADRs, sample fixtures |
+| A. Foundations | [00](steps/step-00-repository-toolchain-and-ci.md) | Repository, solution/workspace, CI, ADRs, docs skeleton, sample fixtures |
 | A. Foundations | [01](steps/step-01-domain-kernel-and-project-format.md) | Domain kernel, IDs, diagnostics, versioned project JSON |
 | A. Foundations | [02](steps/step-02-symmetry-and-geometry.md) | Space groups, coordinate systems, symmetry reduction |
 | B. Model | [03](steps/step-03-particle-and-structure-models.md) | Particle and crystal-structure models |
@@ -72,7 +72,8 @@ Additional technical decisions (clean-break format encoding, Avalonia MVVM toolk
 | F. GUI | [26](steps/step-26-3d-viewer-and-visualization.md) | Cross-platform 3D viewer and overlays |
 | F. GUI | [27](steps/step-27-run-monitoring-and-mmcfe-ui.md) | Live run monitoring, charts, MMCFE workflow |
 | G. Release | [28](steps/step-28-validation-parity-and-performance.md) | Statistical parity, performance, fuzzing, hardening |
-| G. Release | [29](steps/step-29-packaging-documentation-and-release.md) | Packaging, docs, samples, release engineering |
+| G. Release | [29](steps/step-29-standalone-documentation.md) | Documentation completion: coverage, cross-cutting pages, DocFX + rustdoc APIs, publish |
+| G. Release | [30](steps/step-30-packaging-and-release.md) | Packaging, docs artifact, samples, release engineering |
 
 ## Working conventions
 
@@ -82,10 +83,15 @@ Additional technical decisions (clean-break format encoding, Avalonia MVVM toolk
   version bump.
 - Scientific behaviour is specified in prose and tests before implementation. When the original behaviour
   is ambiguous, document the chosen interpretation in the step page.
+- Every step page has a **Documentation** section naming the pages to write at that point. “Documentation
+  written” is part of every acceptance checklist.
 - No production feature is added directly to the Avalonia app if it belongs in a library; the app is a
   consumer of the same public API as the CLI.
 - The Rust solver never reads project JSON. Its only input is the compiled simulation package plus CLI
   arguments, so it can be developed and tested independently.
+- Standalone documentation is built with Zensical; .NET and Rust API references are generated with DocFX and
+  rustdoc into `/api/dotnet/` and `/api/rust/`. Step 00 creates the skeleton, every feature step writes its
+  pages, Step 29 completes the site, and Step 30 packages it. `docs/planning/` is excluded from publication.
 
 ## Status
 

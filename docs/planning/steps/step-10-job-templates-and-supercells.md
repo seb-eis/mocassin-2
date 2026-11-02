@@ -226,6 +226,16 @@ public sealed record DopingApplication(
 - [ ] Same job descriptor + seed produces an identical lattice across runs and OSes.
 - [ ] Changing a simulation-only setting does not change the lattice for the same job.
 - [ ] Optimizers remove only start options, not lattice particles.
+- [ ] Documentation written
+
+## Documentation
+
+At this point, document job templates and supercells:
+
+- `docs/user-guide/job-templates.md` — collections/configs, inheritance, duplicates, optimizers.
+- `docs/user-guide/lattice.md` — doping preview and effective fractions.
+- `docs/reference/project-format.md` — job-template JSON and seed derivation.
+- `docs/development/compilation-pipeline.md` — supercell generation, truncation, charge compensation.
 
 ## Tests
 
