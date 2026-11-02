@@ -7,81 +7,23 @@ outcome, acceptance criteria, and tests. Steps are ordered by dependency, not by
 runs through the model compiler and the solver; the GUI has a parallel track once the project format and
 compiled model exist.
 
-```mermaid
-gantt
-    title MOCASSIN reimplementation - illustrative 3-developer timeline
-    dateFormat YYYY-MM-DD
-    axisFormat %b %d
-    excludes weekends
-    todayMarker off
+```text
+A Foundations        B Model              C Compilation          D Solver
+00 ──► 01 ──► 02 ──► 03 ──► 04 ──► 05 ──► 06 ──► 07 ──► 08 ──► 09 ──► 10 ──► 11 ──► 12
+                                                             │                       │
+                                                             └──────────► 13 ──► 14 ──► 15 ──► 16 ──► 17 ──► 18
+                                                                                                         │
+E Results                                                                                                ▼
+22 ◄── 21 ◄── 20 ◄────────────────────────────────────────────────────────────────────────────────────── 19
 
-    section A. Foundations
-    Step 00 Repository CI docs       :s00, 2026-11-09, 2w
-    Step 01 Domain kernel project    :s01, after s00, 3w
-    Step 02 Symmetry geometry        :s02, after s01, 4w
-    M0 skeleton                      :milestone, m0, after s00, 0d
-    M2 symmetry proven               :milestone, m2, after s02, 0d
+F GUI
+23 ──► 24 ──► 25 ──► 26 ──► 27 ──► 28
+       │           │
+       └───────────┴────────────► (can start after 01, consume 08/09/10/11/20 as they land)
 
-    section B. Model and compiler
-    Step 03 Particles structure      :s03, after s02, 3w
-    Step 04 Transitions              :s04, after s03, 4w
-    Step 05 Energy model             :s05, after s04, 3w
-    Step 06 Lattice simulations      :s06, after s04, 2w
-    Step 07 Validation diagnostics   :s07, after s05, 2w
-    Step 08 Compilation pipeline     :s08, after s07, 5w
-    Step 09 Parameterization         :s09, after s08, 2w
-    Step 10 Job templates supercells :s10, after s09, 3w
-    Step 11 Package msl writer       :s11, after s10, 3w
-    Step 12 Build CLI                :s12, after s11, 2w
-    M3 model authored                :milestone, m3, after s07, 0d
-    M4 model compiled                :milestone, m4, after s08, 0d
-    M5 first package                 :milestone, m5, after s12, 0d
-
-    section D. Solver
-    Step 13 Rust foundation reader   :s13, after s11, 3w
-    Step 14 Context initialization   :s14, after s13, 3w
-    Step 15 Energy engine            :s15, after s14, 4w
-    Step 16 KMC engine               :s16, after s15, 5w
-    Step 17 MMC engine               :s17, after s15, 3w
-    Step 18 Tracking state writer    :s18, after s16, 4w
-    Step 19 Solver CLI HPC extensions:s19, after s18, 3w
-    M6 first KMC run                 :milestone, m6, after s16, 0d
-    M7 first MMC run                 :milestone, m7, after s17, 0d
-
-    section E. Results
-    Step 20 mcs reader eval API      :s20, after s18, 3w
-    Step 21 Analysis plots reports   :s21, after s20, 3w
-    Step 22 Python analysis API      :s22, after s20, 3w
-    M8 results loop                  :milestone, m8, after s20, 0d
-    M9 Python API                    :milestone, m9, after s22, 0d
-
-    section F. GUI
-    Step 23 Avalonia shell           :s23, after s01, 4w
-    Step 24 Model editors            :s24, after s04, 5w
-    Step 25 Energy lattice sim UI    :s25, after s24, 4w
-    Step 26 Parameterization build UI:s26, after s12, 4w
-    Step 27 3D viewer                :s27, after s24, 5w
-    Step 28 Run monitoring MMCFE UI  :s28, after s26, 4w
-    M10 MVP GUI                      :milestone, m10, after s26, 0d
-    M11 visualization                :milestone, m11, after s27, 0d
-    M12 feature parity               :milestone, m12, after s28, 0d
-
-    section G. Validation and release
-    Step 29 Validation parity perf   :s29, after s22, 4w
-    Step 30 Documentation completion :s30, after s28, 4w
-    Step 31 Packaging release        :s31, after s30, 3w
-    M13 documentation                :milestone, m13, after s30, 0d
-    M14 release                      :milestone, m14, after s31, 0d
+G Release and documentation
+29 ──► 30 ──► 31
 ```
-
-This is an **illustrative three-developer schedule**, not a fixed commitment. Durations are rounded from the
-person-week estimates and the `after` links encode the main dependencies. A single developer should expect a
-substantially longer calendar schedule; see the estimate table below.
-
-
-Milestones mark the first step that demonstrates the outcome (for example, M5 after the first `.msl` package).
-The detailed dependency table below remains authoritative; the Gantt is a communication view.
-
 
 ## 2. Phase overview
 
