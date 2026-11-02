@@ -2,14 +2,14 @@
 
 **Phase:** A. Foundations  
 **Depends on:** —  
-**Delivers:** A reproducible monorepo skeleton with .NET 10, Rust, CI on three operating systems, and the
-decision records that constrain later steps.
+**Delivers:** A reproducible monorepo skeleton with .NET 10, Rust, CI on three operating systems, the
+decision records that constrain later steps, and the initial standalone documentation site skeleton.
 
 ## Goal
 
-Create the repository, build infrastructure, and quality gates before scientific code is written. A new
-contributor should be able to clone, build, and run the test suites on Windows, Linux, and macOS with one
-documented command per stack.
+Create the repository, build infrastructure, documentation skeleton, and quality gates before scientific code
+is written. A new contributor should be able to clone, build, test, and serve the docs on Windows, Linux, and
+macOS with one documented command per stack.
 
 ## Original reference
 
@@ -38,10 +38,23 @@ mocassin/
 ├── README.md
 ├── LICENSE
 ├── NOTICE.md
+├── zensical.toml                # docs_dir = "docs", site_dir = "site", exclude_docs = "planning/"
 ├── docs/
-│   ├── planning/
+│   ├── index.md
+│   ├── getting-started/
 │   ├── user-guide/
-│   └── reference/
+│   ├── physics/
+│   ├── tutorials/
+│   ├── reference/
+│   ├── development/
+│   ├── performance/
+│   ├── troubleshooting/
+│   ├── migration/
+│   ├── examples/
+│   ├── glossary/
+│   ├── api/
+│   │   └── index.md
+│   └── planning/                # internal, excluded from the site
 ├── src/dotnet/
 ├── src/rust/
 ├── samples/
@@ -96,21 +109,36 @@ mocassin/
 - [ ] Steps: checkout, setup .NET 10, setup Rust stable, cache NuGet/Cargo/SQLite, restore, build,
   `dotnet test`, `cargo test`, `dotnet format --verify-no-changes`, `cargo fmt --check`, `cargo clippy`.
 - [ ] Upload test results and coverage artifacts.
+- [ ] Add the docs job: install pinned Zensical requirements, run `zensical build --strict`, and enable
+  DocFX/rustdoc steps as their projects appear.
 - [ ] Add a scheduled nightly workflow for longer tests and fuzzing (can start as a placeholder).
 - [ ] Add a dependency/licence check and a "no secrets" check.
 
-### Fixtures and documentation
+### Fixtures and documentation skeleton
 
 - [ ] Create `tests/contracts/` and `tests/reference/` with README placeholders.
 - [ ] Add `samples/blank/` and `samples/ceria/` directories with README placeholders.
 - [ ] Add the eight ADRs from `docs/planning/adr/`.
-- [ ] Add a `docs/zensical.toml` skeleton with `docs_dir = "docs"`, `site_dir = "site"`, and
-  `exclude_docs = "planning/"`.
-- [ ] Add `docs/requirements.txt` (or `pyproject.toml`) pinning Zensical.
+- [ ] Create the Zensical project skeleton:
+  - `zensical.toml` with `docs_dir = "docs"`, `site_dir = "site"`, `exclude_docs = "planning/"`, site
+    metadata, repo link, and nav;
+  - `docs/index.md` and placeholder pages for every required top-level section:
+    getting-started, user-guide, physics, tutorials, reference, development, performance, troubleshooting,
+    migration, examples, glossary, and api;
+  - `docs/api/index.md` linking to the future `/api/dotnet/` and `/api/rust/` pages.
+- [ ] Add `docs/requirements.txt` (or `pyproject.toml`) pinning Zensical and Markdown extensions.
 - [ ] Add `.config/dotnet-tools.json` with a pinned DocFX tool. Rust API docs use `cargo doc` directly.
-- [ ] Add a `docs/` build-script placeholder; the full Zensical/DocFX/rustdoc pipeline is Step 29.
-- [ ] Add a `CONTRIBUTING.md` with build, test, style, and review expectations.
-- [ ] Add issue/PR templates that ask for the affected step and parity-matrix item.
+- [ ] Add docs build scripts:
+  - `docs/build-docs.sh` and `docs/build-docs.ps1`: build Zensical strictly; build DocFX/rustdoc when the
+    corresponding projects/crates exist; copy API output into `site/api/...`;
+  - `docs/serve.sh` / `docs/serve.ps1`: local preview.
+- [ ] Add a `docs` CI job that installs the pinned requirements and runs `zensical build --strict`.
+  DocFX/rustdoc steps are enabled as soon as their projects exist; they are not deferred to Step 29.
+- [ ] Add `docs/CONTRIBUTING.md` or a README section explaining docs-as-code: every feature step updates its
+  pages, and the docs build must stay green.
+- [ ] Add `site/`, `docs/api/dotnet/`, `docs/api/rust/`, and generated DocFX/rustdoc output to `.gitignore`.
+- [ ] Add a `CONTRIBUTING.md` with build, test, style, docs, and review expectations.
+- [ ] Add issue/PR templates that ask for the affected step, parity-matrix item, and documentation update.
 
 ## Acceptance criteria
 
@@ -119,7 +147,9 @@ mocassin/
 - [ ] `cargo build --workspace` and `cargo test --workspace` succeed on all three OSes.
 - [ ] `dotnet format --verify-no-changes`, `cargo fmt --check`, and `cargo clippy -- -D warnings` pass.
 - [ ] CI is green on the initial commit and on a pull request.
-- [ ] `README.md` describes prerequisites and the exact build/test commands.
+- [ ] `README.md` describes prerequisites and the exact build/test/docs commands.
+- [ ] `zensical build --strict` succeeds and the skeleton contains every required top-level section.
+- [ ] The docs CI job is green and `docs/planning/` is absent from the built site.
 - [ ] The repository contains no copied original source files.
 
 ## Tests
@@ -131,6 +161,8 @@ mocassin/
 | CI matrix | All three OS jobs complete |
 | Licence check | `LICENSE` is MIT and `NOTICE.md` records the original GPL project and attribution |
 | Format check | Both formatters report no changes |
+| Docs skeleton | Strict Zensical build; required nav sections present; planning excluded |
+| Docs CI | Docs job installs pinned requirements and builds strictly |
 
 ## Risks and mitigations
 
@@ -143,5 +175,5 @@ mocassin/
 
 ## Done when
 
-The repository builds and tests on Windows, Linux, and macOS, the ADRs are present, and the first pull request
-passes all quality gates.
+The repository builds and tests on Windows, Linux, and macOS, the ADRs and documentation skeleton are present,
+the strict docs build is green, and the first pull request passes all quality gates.

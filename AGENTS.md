@@ -261,8 +261,9 @@ pass.
 - Required site sections: user guide, physics explanation, developer architecture guide, tutorials, CLI and
   format reference, troubleshooting/FAQ, performance/HPC, contributing, migration/clean-break, glossary/
   notation/units, examples/publications, and the API landing page.
-- **Docs-as-code:** every feature step updates its documentation page. Step 29 assembles and validates; Step
-  30 packages the site with the release.
+- **Docs-as-code:** Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Every
+  feature step updates its documentation pages and keeps the strict build green. Step 29 completes coverage
+  and cross-cutting content; Step 30 packages the site with the release.
 - Docs quality gates:
   - `zensical build --strict` (no broken links/anchors);
   - DocFX build with no missing public API docs;

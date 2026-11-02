@@ -40,8 +40,9 @@ zensical.toml         Zensical site configuration (target)
 ## Documentation
 
 Start at [`docs/planning/README.md`](docs/planning/README.md) for the roadmap and reading order. The
-standalone user/developer documentation site is planned in
-[`docs/planning/steps/step-29-standalone-documentation.md`](docs/planning/steps/step-29-standalone-documentation.md).
+standalone user/developer documentation site is set up in
+[`step 00`](docs/planning/steps/step-00-repository-toolchain-and-ci.md) and completed in
+[`step 29`](docs/planning/steps/step-29-standalone-documentation.md).
 
 ## Lineage, licence, and citation
 

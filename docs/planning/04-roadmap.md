@@ -44,7 +44,7 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 
 | Step | Outcome | Depends on | Estimate |
 | --- | --- | --- | --- |
-| 00 | Repository, solution/workspace, CI, ADRs, fixtures | — | 1–2 pw |
+| 00 | Repository, solution/workspace, CI, ADRs, docs skeleton, fixtures | — | 2–3 pw |
 | 01 | Domain kernel, IDs, diagnostics, project JSON v1 | 00 | 2–4 pw |
 | 02 | Space groups, geometry, coordinate encoding, orbit reduction | 01 | 3–5 pw |
 | 03 | Particle and structure models | 02 | 2–4 pw |
@@ -73,7 +73,7 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 | 26 | 3D viewer and visualization | 23, 03–05 | 4–6 pw |
 | 27 | Run monitoring, charts, MMCFE UI | 25, 19–21 | 3–5 pw |
 | 28 | Statistical parity, performance, fuzzing, hardening | 16–21 | 3–5 pw |
-| 29 | Standalone documentation site (Zensical, DocFX, rustdoc), tutorials | 19, 21, 27 | 4–6 pw |
+| 29 | Documentation completion: coverage, cross-cutting pages, APIs, tutorials, publish | 19, 21, 27 | 3–5 pw |
 | 30 | Packaging, docs artifact, samples, release | 28, 29 | 2–4 pw |
 
 **Total:** roughly 79–121 person-weeks (about 1.5–2.3 person-years). With three experienced developers working
@@ -84,7 +84,7 @@ documentation, and release hardening. A single developer should expect **19–25
 
 | Milestone | After step | Demonstrable result |
 | --- | --- | --- |
-| **M0 — Skeleton builds** | 00 | `dotnet build`, `cargo test`, CI green on three OSes |
+| **M0 — Skeleton builds** | 00 | `dotnet build`, `cargo test`, strict Zensical build, CI green on three OSes |
 | **M1 — Project round-trip** | 01 | Create/open/save a project; stable canonical JSON |
 | **M2 — Symmetry proven** | 02 | All 230 groups/settings validate; P1 expansion matches brute force |
 | **M3 — Model authored** | 07 | Ceria model built via API/CLI and validated with zero errors |
@@ -96,7 +96,7 @@ documentation, and release hardening. A single developer should expect **19–25
 | **M9 — MVP GUI** | 25 | Create → validate → parameterize → build → run → collect in Avalonia |
 | **M10 — Visualization** | 26 | 3D cell/sites/transitions/clusters/overlays with picking |
 | **M11 — Feature parity** | 27 | Every parity-matrix item implemented or explicitly deferred |
-| **M12 — Documentation** | 29 | Zensical site with guides, physics, tutorials, and API subpaths builds |
+| **M12 — Documentation** | 29 | Completed Zensical site with guides, physics, tutorials, and API subpaths |
 | **M13 — Release** | 30 | Statistical parity, performance, packaged binaries, documentation artifact |
 
 ## 5. Parallel work plan
@@ -119,9 +119,10 @@ Starts after step 01 with the shell and project lifecycle (22). Consumes step 03
 
 ### Track D — Documentation
 
-Starts after step 01 with the Zensical skeleton and navigation. Each feature step writes its page as it lands;
-step 29 assembles the user guide, physics, tutorials, developer guide, reference, and API subpaths after
-steps 19/21/27. Step 30 packages the site with the release.
+Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Each feature step writes
+its pages as it lands and keeps the strict build green; step 29 completes cross-cutting content, integrates
+the final DocFX/rustdoc outputs, and publishes after steps 19/21/27. Step 30 packages the site with the
+release.
 
 ### Integration points
 

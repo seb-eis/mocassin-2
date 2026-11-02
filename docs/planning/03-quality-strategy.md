@@ -228,8 +228,9 @@ Benchmarks:
   `site/api/rust` after the Zensical build.
 - **Strict builds.** `zensical build --strict` fails on broken links/anchors; DocFX and rustdoc fail on
   missing public API docs. CI builds the combined site on every PR.
-- **Docs-as-code.** Every feature step updates its page. Step 29 assembles and validates; Step 30 packages the
-  site artifact with the release.
+- **Docs-as-code.** Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Every
+  feature step updates its pages and keeps the strict build green. Step 29 completes coverage, cross-cutting
+  content, and API integration; Step 30 packages the site artifact with the release.
 - **Tutorials are executable.** CI runs the documented commands against `samples/` and validates expected
   outputs.
 - Each step page is updated to `Done` with links to the PRs and any deviations.

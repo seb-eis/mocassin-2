@@ -34,7 +34,7 @@ addressed in the new architecture. It is a navigation aid, not a line-by-line po
 | `Mocassin.Tools.Evaluation` | `Mocassin.Results` | 20–21 | New streaming API and corrected formulas |
 | `Mocassin.Tools.UAccess` | `Mocassin.Results` | 20 | Safe MessagePack reader; no pinned whole-file buffers |
 | `Mocassin.UI.Installer` | packaging/release | 30 | Cross-platform archives/packages instead of MSI |
-| `docs/userguide-md`, `docs/old-guide` | `docs/` Zensical site | 29 | Rewritten user guide, physics, tutorials, developer guide, reference; legacy docs not copied |
+| `docs/userguide-md`, `docs/old-guide` | `docs/` Zensical site | 00/29 | Skeleton in Step 00; rewritten user guide, physics, tutorials, developer guide, reference completed in Step 29; legacy docs not copied |
 | `Mocassin.Simulator` (C) | `mocassin-sim` (Rust) | 13–19 | Process-per-job, new package reader, statistical parity |
 | `Mocassin.Utility` (C) | `mocassin` CLI | 12/19 | Fold useful utilities into the new CLIs |
 | Python HPC scripts | `tools/hpc` + `mocassin collect` | 19–20 | Thin SLURM/PBS wrappers; validated collection |

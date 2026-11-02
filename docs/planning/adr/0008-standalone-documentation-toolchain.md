@@ -76,5 +76,5 @@ inside Zensical would be fragile and duplicative.
 - CI builds the combined site on every PR; broken links or missing API docs block merge.
 - `docs/planning/` is never published.
 - Generated API HTML and `site/` are gitignored.
-- Every feature step updates its documentation page; Step 29 validates completeness and Step 30 packages the
-  site artifact.
+- Step 00 creates the site skeleton, navigation, build scripts, and Docs CI job. Every feature step updates its
+  pages; Step 29 validates completeness and cross-cutting content; Step 30 packages the site artifact.

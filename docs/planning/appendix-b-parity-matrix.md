@@ -218,7 +218,8 @@ Status legend:
 | Statistical parity suite | Y | Planned | 28 | |
 | Performance benchmarks | Y | Planned | 28 | |
 | Fuzzing | Y | Planned | 13/28 | |
-| Standalone docs site (Zensical) | Y | Planned | 29 | `docs/`, planning excluded |
+| Docs skeleton + build/CI | Y | Planned | 00 | Zensical, nav, build scripts, planning excluded |
+| Standalone docs completion (Zensical) | Y | Planned | 29 | Cross-cutting content, audit, publish |
 | User guide + physics | Y | Planned | 29 | Required content |
 | Developer architecture guide | Y | Planned | 29 | Code structure/design choices |
 | Tutorials | Y | Planned | 29 | Ceria, BaZrO3, vehicle, HPC, analysis |

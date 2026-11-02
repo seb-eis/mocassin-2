@@ -1,15 +1,18 @@
-# Step 29 — Standalone Documentation Site
+# Step 29 — Standalone Documentation Completion and Publishing
 
 **Phase:** G. Release and documentation  
 **Depends on:** 19, 21, 27  
-**Delivers:** A published, versioned standalone documentation site built with Zensical, plus generated .NET
-(DocFX) and Rust (rustdoc) API references under one site.
+**Delivers:** The completed, audited, and published standalone documentation site built with Zensical, plus
+generated .NET (DocFX) and Rust (rustdoc) API references under one site.
 
 ## Goal
 
 Give users, scientists, and developers one coherent documentation site that explains how to install and use
 MOCASSIN, the physics behind it, the architecture of the codebase, and how to extend and contribute. The site
 must be buildable locally and in CI, with no hand-maintained duplication of API reference pages.
+
+The site is **not written at the end**. Step 00 creates the skeleton, every feature step writes its pages, and
+this step completes cross-cutting content, audits coverage, integrates the final APIs, and publishes the site.
 
 ## Original reference
 
@@ -21,6 +24,18 @@ must be buildable locally and in CI, with no hand-maintained duplication of API 
 - The documentation build was part of a Windows PowerShell release pipeline.
 
 ## Design
+
+### Documentation is written incrementally
+
+| Stage | Responsibility |
+| --- | --- |
+| Step 00 | Create the Zensical skeleton, navigation, placeholder pages, build scripts, Docs CI job, and API stubs |
+| Every feature step (01–28) | Write/update the user-guide, physics, developer, reference, or tutorial pages for that feature; keep the strict docs build green |
+| Step 29 (this step) | Audit coverage, write cross-cutting pages, integrate final DocFX/rustdoc, polish, screenshot, validate tutorials, publish |
+| Step 30 | Package the completed `site/` artifact with the release |
+
+Step 29 therefore owns completion and quality, not first authoring. If a feature page is missing, fix it here
+and add a note to the originating step.
 
 ### 1. Toolchain
 
@@ -246,9 +261,10 @@ cp -r artifacts/docfx site/api/dotnet
 cp -r target/doc site/api/rust
 ```
 
-- `docs/build-docs.sh` and `docs/build-docs.ps1` wrap the above for CI and local use.
-- `docs/serve.sh` runs `zensical serve` for authoring.
-- CI builds the full site on every PR; strict mode fails on broken links/anchors.
+- The Step 00 `docs/build-docs.sh`/`.ps1` scripts are extended here to build and copy DocFX/rustdoc.
+- `docs/serve.sh` (from Step 00) runs `zensical serve` for authoring.
+- The Step 00 Docs CI job already builds Zensical strictly; this step adds the DocFX/rustdoc jobs and final
+  combined artifact checks.
 - Publish the `site/` artifact on release tags. If GitHub Pages is available, deploy there; otherwise attach
   the site archive to the release.
 - Do not commit generated API HTML or `site/`.
@@ -258,21 +274,21 @@ cp -r target/doc site/api/rust
 
 Documentation is written alongside the feature, not at the end:
 
-| Content | Primary step |
-| --- | --- |
-| Installation/quickstart/first project | 22, 25 |
-| User guide (model domains) | 03–06, 23–24 |
-| User guide (build/run/results/MMCFE) | 12, 25, 27 |
-| CLI reference | 12, 19 |
-| Project/.msl/.mcs/extension formats | 01, 11, 18, 19 |
-| Diagnostics | 07 |
-| Physics/units/formulas | 15–18, 20 |
-| Developer architecture | 00–02, 08, 13–21, 28 |
-| Tutorials | 25, 27, 28 |
-| Performance/HPC | 19, 28 |
-| Migration/clean-break | 00, 29 |
-| Examples/publications | 28, 29 |
-| API reference landing/links | 29 |
+| Content | Written by | Finalized by |
+| --- | --- | --- |
+| Installation/quickstart/first project | 22, 25 | 29 |
+| User guide (model domains) | 03–06, 23–24 | 29 |
+| User guide (build/run/results/MMCFE) | 12, 25, 27 | 29 |
+| CLI reference | 12, 19 | 29 |
+| Project/.msl/.mcs/extension formats | 01, 11, 18, 19 | 29 |
+| Diagnostics | 07 | 29 |
+| Physics/units/formulas | 15–18, 20 | 29 |
+| Developer architecture | 00–02, 08, 13–21, 28 | 29 |
+| Tutorials | 25, 27, 28 | 29 |
+| Performance/HPC | 19, 28 | 29 |
+| Migration/clean-break | 00, 29 | 29 |
+| Examples/publications | 28, 29 | 29 |
+| API reference landing/links | 29 | 29 |
 
 Each step’s “Done when” includes updating its docs page. This step verifies completeness, consistency, and
 buildability.
@@ -292,17 +308,18 @@ buildability.
 
 ## Implementation tasks
 
-- [ ] Add `zensical.toml`, `docs/index.md`, and the navigation structure.
-- [ ] Add `docs/requirements.txt`/tool manifest and pin Zensical/DocFX.
-- [ ] Exclude `docs/planning/` from the site.
-- [ ] Write the required content sections and tutorials.
-- [ ] Add `tools/docfx/docfx.json` and XML-doc checks.
-- [ ] Add rustdoc build and missing-docs checks.
-- [ ] Add the combined build scripts and API landing page.
-- [ ] Add link/anchor validation and tutorial smoke tests to CI.
-- [ ] Add screenshots/diagrams with alt text.
-- [ ] Publish the site artifact on release; optionally deploy to Pages.
-- [ ] Add a docs review checklist and ownership map.
+- [ ] Audit every required page against the Step 00 skeleton and the feature-step docs; fill gaps and remove
+  placeholders.
+- [ ] Write/complete cross-cutting pages: physics overview and conventions, architecture synthesis, migration
+  guide, glossary/notation/units, examples/publications, and tutorial introductions.
+- [ ] Integrate the final DocFX and rustdoc outputs into `/api/dotnet/` and `/api/rust/`; complete the API
+  landing page and cross-links.
+- [ ] Add/refresh screenshots, diagrams, and alt text for every GUI screen.
+- [ ] Run every tutorial against `samples/` and fix commands, expected output, and troubleshooting notes.
+- [ ] Validate the full site with `zensical build --strict`, DocFX, and `cargo doc`.
+- [ ] Add a docs review checklist and ownership/coverage map.
+- [ ] Publish the `site/` artifact on release; optionally deploy to Pages.
+- [ ] Record any deferred docs items in the parity matrix.
 
 ## Acceptance criteria
 
@@ -316,7 +333,8 @@ buildability.
 - [ ] Physics pages match the implemented formulas and units tests.
 - [ ] Migration/clean-break and glossary pages are present.
 - [ ] `docs/planning/` is not published.
-- [ ] CI builds the site on every PR and publishes the artifact on release.
+- [ ] The Docs CI job has remained green throughout implementation and the release artifact contains the
+  complete site.
 
 ## Tests
 
