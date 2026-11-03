@@ -53,7 +53,7 @@ jobs:
       - name: Test with coverage
         run: >
           dotnet test Mocassin.slnx -c Release --no-build
-          --logger "trx;LogFileName=test-results.trx"
+          --logger trx
           --collect:"XPlat Code Coverage"
           --results-directory artifacts/test-results
 
