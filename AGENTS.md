@@ -44,10 +44,12 @@ Before changing anything, read these in order:
    still-open decisions.
 8. [`docs/planning/06-toolchain-requirements.md`](docs/planning/06-toolchain-requirements.md) — required and
    optional tools by language and development phase.
-9. [`docs/planning/status.md`](docs/planning/status.md) — step and feature status dashboard.
-10. The step page you intend to work on, plus its dependencies.
-11. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-12. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+9. [`docs/planning/07-reference-build.md`](docs/planning/07-reference-build.md) — verified original
+   solver/model-builder build and reference-data recipe.
+10. [`docs/planning/status.md`](docs/planning/status.md) — step and feature status dashboard.
+11. The step page you intend to work on, plus its dependencies.
+12. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+13. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),

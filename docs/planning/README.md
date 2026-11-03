@@ -24,12 +24,14 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
 6. [`05-open-decisions.md`](05-open-decisions.md) — resolved, gated, deferred, and still-open decisions.
 7. [`06-toolchain-requirements.md`](06-toolchain-requirements.md) — required/optional tools by language and
    development phase, for the dedicated MOCASSIN image.
-8. [`status.md`](status.md) — at-a-glance step and feature status dashboard.
-9. Step pages [`steps/`](steps/) — the implementation sequence, detailed checklists, and feature logs.
-10. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
+8. [`07-reference-build.md`](07-reference-build.md) — verified recipe for building the original solver and
+   model builder and generating reference data.
+9. [`status.md`](status.md) — at-a-glance step and feature status dashboard.
+10. Step pages [`steps/`](steps/) — the implementation sequence, detailed checklists, and feature logs.
+11. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
    solution and its mapping to new modules.
-11. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
-12. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
+12. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
+13. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
 
 ## Decisions already made
 

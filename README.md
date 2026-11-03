@@ -37,6 +37,7 @@ src/python/           `mocassin-analysis`: read-only .mcs/.msr reader + basic Py
 samples/              Small example projects and reference inputs
 tests/                Cross-language integration and statistical validation assets
 contracts/            Machine-readable package/results/state contract manifest + generated checks
+tools/reference/      Scripts for building the original solver/model builder and generating reference data
 zensical.toml         Zensical site configuration (target)
 ```
 
