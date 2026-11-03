@@ -5,6 +5,18 @@
 **Delivers:** A validated release candidate: statistical parity with the original solver, performance within
 targets, fuzzed/robust parsers, and a documented scientific validation suite.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Prove that the reimplementation is scientifically faithful and production-ready. This step is not a final

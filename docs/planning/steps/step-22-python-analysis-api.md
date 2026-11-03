@@ -5,6 +5,18 @@
 **Delivers:** A small, read-only Python package for `.mcs`/`.msr` files with basic multi-file evaluations, pytest
 coverage, and mkdocstrings-generated API docs inside the Zensical site.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Let scientists use Python for routine post-processing without the .NET API or GUI. The package must read the

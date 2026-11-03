@@ -5,6 +5,18 @@
 **Delivers:** A production `mocassin-sim` CLI, batch/worker execution, SLURM/PBS-friendly scripts, graceful
 signals, deterministic seeds, and a versioned extension ABI (including MMCFE parity).
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Make the solver usable on a laptop and on HPC systems, with predictable exit codes, logs, job folders, and

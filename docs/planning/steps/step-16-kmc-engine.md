@@ -5,6 +5,18 @@
 **Delivers:** A rejection KMC engine with direction selection, rule lookup, normalization pre-run, time
 evolution, all cycle outcomes, abort conditions, and deterministic seeding.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Implement the time-dependent solver that reproduces the original KMC physics: select a possible event, compute

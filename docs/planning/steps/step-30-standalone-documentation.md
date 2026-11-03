@@ -5,6 +5,18 @@
 **Delivers:** The completed, audited, and published standalone documentation site built with Zensical, plus
 generated .NET (DocFX), Rust (rustdoc), and Python (mkdocstrings) API references under one site.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Give users, scientists, and developers one coherent documentation site that explains how to install and use

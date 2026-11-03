@@ -5,6 +5,18 @@
 **Delivers:** A Rust workspace with typed package structures, a validated `.msl` reader, deterministic RNG,
 CLI scaffolding, structured logging, and a dry-run job inspector.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Establish the solver foundation without Monte Carlo physics. The solver must load a simulation package,

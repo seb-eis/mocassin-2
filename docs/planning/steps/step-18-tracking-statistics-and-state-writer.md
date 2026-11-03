@@ -5,6 +5,18 @@
 **Delivers:** Global/static/mobile movement tracking, jump histograms, statistics dumps, derived transport
 quantities, and the versioned MessagePack state writer/reader.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Record enough information to evaluate conductivity, mobility, diffusion, correlations, local flow, and jump

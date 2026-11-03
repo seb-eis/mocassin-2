@@ -44,9 +44,10 @@ Before changing anything, read these in order:
    still-open decisions.
 8. [`docs/planning/06-toolchain-requirements.md`](docs/planning/06-toolchain-requirements.md) — required and
    optional tools by language and development phase.
-9. The step page you intend to work on, plus its dependencies.
-10. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-11. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+9. [`docs/planning/status.md`](docs/planning/status.md) — step and feature status dashboard.
+10. The step page you intend to work on, plus its dependencies.
+11. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+12. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
@@ -355,6 +356,24 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 
 A step is not done because the code compiles. Its acceptance criteria, tests, docs, and parity entries must
 pass.
+
+### 7.1 Status tracking
+
+Each step page starts with an **Implementation status** block: status, step branch, step CI, main merge, and a
+feature log. The top-level [`docs/planning/status.md`](docs/planning/status.md) dashboard is the at-a-glance
+roll-up.
+
+Update status as follows:
+
+- **Step start:** after the feature list is approved, set the step to `In progress` and record the step branch.
+- **Each feature:** update its feature row and the step-page checkboxes in the feature branch. Mark it
+  `Awaiting approval` before asking for approval.
+- **After squash and step CI:** the next feature or closeout feature records the squash commit and CI result.
+- **Step completion:** the closeout feature records `Done`, the step CI result, and the main merge reference.
+- **Parity:** keep `appendix-b-parity-matrix.md` as the feature-level completeness source.
+
+Do not create duplicate per-step checklist files. The step page is the detailed checklist; `status.md` is the
+roll-up. Avoid status-only commits that trigger an extra step-branch CI run.
 
 ## 8. Coding conventions
 

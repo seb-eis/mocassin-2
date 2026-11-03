@@ -5,6 +5,18 @@
 **Delivers:** Reproducible cross-platform binaries, NuGet and Python packages, installable archives/packages,
 the combined documentation artifact, samples, and a signed release process.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Ship a usable product, not just a passing build. A new user must be able to download, install, create the

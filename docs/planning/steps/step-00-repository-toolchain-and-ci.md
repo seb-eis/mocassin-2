@@ -5,6 +5,18 @@
 **Delivers:** A reproducible monorepo skeleton with .NET 10, Rust, CI on three operating systems, the
 decision records that constrain later steps, and the initial standalone documentation site skeleton.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Create the repository, build infrastructure, documentation skeleton, and quality gates before scientific code

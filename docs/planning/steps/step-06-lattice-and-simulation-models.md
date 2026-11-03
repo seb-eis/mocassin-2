@@ -5,6 +5,18 @@
 **Delivers:** Occupation exchanges, ordered dopings, and MMC/KMC simulation definitions with defaults and
 validation.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Complete the user-authored model: describe how supercells are doped and which transitions/settings define each

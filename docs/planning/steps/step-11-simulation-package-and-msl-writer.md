@@ -5,6 +5,18 @@
 **Delivers:** A versioned SQLite simulation package with content-addressed compiled models and lattices,
 version checks, atomic writes, and inspection tools.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Write the complete, reproducible input for the Rust solver: one immutable file containing shared compiled

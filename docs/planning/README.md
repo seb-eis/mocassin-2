@@ -23,12 +23,13 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
 5. [`04-roadmap.md`](04-roadmap.md) — phases, milestones, dependency graph, estimates, and parallel work.
 6. [`05-open-decisions.md`](05-open-decisions.md) — resolved, gated, deferred, and still-open decisions.
 7. [`06-toolchain-requirements.md`](06-toolchain-requirements.md) — required/optional tools by language and
-   development phase, for the standard image or a `mocassin` variant.
-8. Step pages [`steps/`](steps/) — the implementation sequence.
-9. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
+   development phase, for the dedicated MOCASSIN image.
+8. [`status.md`](status.md) — at-a-glance step and feature status dashboard.
+9. Step pages [`steps/`](steps/) — the implementation sequence, detailed checklists, and feature logs.
+10. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
    solution and its mapping to new modules.
-10. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
-11. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
+11. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
+12. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
 
 ## Decisions already made
 

@@ -5,6 +5,18 @@
 **Delivers:** The numerical parameterization workspace, job-template editor, build-template selection, package
 build/deploy UI, progress/cancellation, and result summary.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Close the loop from model to simulation package in the GUI. Users must be able to quantify interactions and

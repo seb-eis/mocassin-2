@@ -5,6 +5,18 @@
 **Delivers:** Particle, particle-set, space-group, cell-parameter, cell-site, and dummy-position models with
 validation and a stable public API.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Implement the first two model domains and their invariants. A user must be able to define species, allowed

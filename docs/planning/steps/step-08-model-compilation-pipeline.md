@@ -6,6 +6,18 @@
 densely indexed `CompiledModel` with environments, pair/cluster interactions, transition rules, and simulation
 encoding.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 This is the scientific heart of the model builder. The compiler must be deterministic, explainable, and
