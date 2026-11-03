@@ -36,6 +36,9 @@ decision records that constrain later steps, and the initial standalone document
   (`.NET`: `Mocassin.Core.CoreModule`; `Rust`: `mocassin-types`). `/api/dotnet/` and `/api/rust/` are
   generated redirects for directory URLs and tool-internal links. Zensical instant navigation is disabled so
   generated API pages load as normal full-page navigations.
+- Step-branch CI uses Ubuntu + Windows only. The full Ubuntu + Windows + macOS matrix runs on `main` after the
+  step merge. This keeps the per-squash validation responsive while still gating the completed step on all
+  three operating systems.
 
 ## Goal
 
@@ -156,9 +159,9 @@ mocassin/
 ### CI
 
 - [x] GitHub Actions workflow triggered by pushes to `main` and integration branches matching `step/*`, with
-  a matrix: `ubuntu-latest`, `windows-latest`, `macos-latest`. Exclude `step/*/*` so feature branches are
-  validated locally and do not consume CI runs. Pull-request CI is not enabled by default; add it if PRs are
-  introduced later.
+  `ubuntu-latest` + `windows-latest` on step branches and `macos-latest` added on `main`. Exclude `step/*/*`
+  so feature branches are validated locally and do not consume CI runs. Pull-request CI is not enabled by
+  default; add it if PRs are introduced later.
 - [x] Steps: checkout, setup .NET 10, setup Rust stable, cache NuGet/Cargo/SQLite, restore, build,
   `dotnet test`, `cargo test`, `dotnet format --verify-no-changes`, `cargo fmt --check`, `cargo clippy`.
 - [x] Upload test results and coverage artifacts.

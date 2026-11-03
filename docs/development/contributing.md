@@ -89,12 +89,15 @@ CI runs on pushes to `main` and integration branches matching `step/*`. GitHub's
 feature branches and nested `step/*/*` branches are not triggered. Pull-request CI is not enabled until the
 project adopts pull requests.
 
+Step branches run Ubuntu and Windows to keep squash validation responsive. The full matrix, including macOS,
+runs on `main` after the step merge.
+
 The workflow has these jobs:
 
 | Job | What it checks |
 | --- | --- |
-| `.NET` | Restore, Release build, tests with TRX/coverage, `dotnet format` |
-| `Rust` | `cargo fmt`, `clippy -D warnings`, tests, Release build |
+| `.NET` | Ubuntu + Windows on step branches, plus macOS on `main`; restore, Release build, tests with TRX/coverage, `dotnet format` |
+| `Rust` | Ubuntu + Windows on step branches, plus macOS on `main`; `cargo fmt`, `clippy -D warnings`, tests, Release build |
 | `Python` | Editable install on 3.11–3.13, pytest with JUnit/coverage, wheel/sdist |
 | `Contracts and policy` | Manifest drift, SPDX headers, secret scan, `cargo deny` |
 | `Public API compatibility` | ApiCompat against the checked-in baseline assemblies |
