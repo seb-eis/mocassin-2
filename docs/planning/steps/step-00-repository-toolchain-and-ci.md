@@ -16,18 +16,25 @@ decision records that constrain later steps, and the initial standalone document
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `repo-skeleton` | `feature/step-00-foundation/repo-skeleton` | Awaiting approval | Structure/link/YAML checks; no build gates yet | — | — |
-| `docs-site` | `feature/step-00-foundation/docs-site` | Awaiting approval | `zensical build --strict` passes; planning excluded; tool restore passes | — | — |
-| `dotnet-solution` | `feature/step-00-foundation/dotnet-solution` | Awaiting approval | restore/build/test/format pass; 7 smoke tests | — | — |
-| `rust-workspace` | `feature/step-00-foundation/rust-workspace` | Awaiting approval | fmt/clippy/test/build/deny pass; `--version` verified | — | — |
-| `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Awaiting approval | pytest 3/3; wheel/sdist build; wheel import checked | — | — |
+| `repo-skeleton` | `feature/step-00-foundation/repo-skeleton` | Squashed | Structure/link/YAML checks; no build gates yet | No workflow yet | `0062d54` |
+| `docs-site` | `feature/step-00-foundation/docs-site` | Squashed | `zensical build --strict` passes; planning excluded; tool restore passes | No workflow yet | `5fe29a7` |
+| `dotnet-solution` | `feature/step-00-foundation/dotnet-solution` | Squashed | restore/build/test/format pass; 7 smoke tests | No workflow yet | `00f3940` |
+| `rust-workspace` | `feature/step-00-foundation/rust-workspace` | Squashed | fmt/clippy/test/build/deny pass; `--version` verified | No workflow yet | `0569a27` |
+| `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Squashed | pytest 3/3; wheel/sdist build; wheel import checked | No workflow yet | `2784462` |
+| `fix-docs-api-links` | `feature/step-00-foundation/fix-docs-api-links` | Awaiting approval | strict docs build; direct API links; redirects verified over HTTP | — | — |
 | `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Planned | — | — | — |
 | `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Planned | — | — | — |
 | `closeout` | `feature/step-00-foundation/closeout` | Planned | — | — | — |
 
-**Deviation:** feature branches use the `feature/step-<NN>-<slug>/<feature>` prefix. Git cannot store both a
-step branch (`step/00-foundation`) and a nested feature branch (`step/00-foundation/<feature>`) because of the
-directory/file ref conflict. `AGENTS.md` and the agent workflow were corrected before implementation.
+**Deviations:**
+
+- Feature branches use the `feature/step-<NN>-<slug>/<feature>` prefix. Git cannot store both a step branch
+  (`step/00-foundation`) and a nested feature branch (`step/00-foundation/<feature>`) because of the
+  directory/file ref conflict. `AGENTS.md` and the agent workflow were corrected before implementation.
+- The published API navigation links directly to the first content page of each generated reference
+  (`.NET`: `Mocassin.Core.CoreModule`; `Rust`: `mocassin-types`). `/api/dotnet/` and `/api/rust/` are
+  generated redirects for directory URLs and tool-internal links. Zensical instant navigation is disabled so
+  generated API pages load as normal full-page navigations.
 
 ## Goal
 

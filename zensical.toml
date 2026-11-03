@@ -45,8 +45,8 @@ nav = [
   { "Glossary" = "glossary/index.md" },
   { "API" = [
       { "Overview" = "api/index.md" },
-      { ".NET API" = "api/dotnet/index.md" },
-      { "Rust API" = "api/rust/index.md" },
+      { ".NET API" = "api/dotnet/api/Mocassin.Core.CoreModule.html" },
+      { "Rust API" = "api/rust/mocassin_types/index.html" },
       { "Python API" = "api/python/index.md" },
     ] },
 ]
@@ -62,8 +62,6 @@ features = [
   "content.tooltips",
   "navigation.footer",
   "navigation.indexes",
-  "navigation.instant",
-  "navigation.instant.prefetch",
   "navigation.path",
   "navigation.sections",
   "navigation.top",

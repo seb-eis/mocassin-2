@@ -29,6 +29,17 @@ if ((Test-Path "Mocassin.slnx") -and (Test-Path "tools/docfx/docfx.json") -and
     New-Item -ItemType Directory -Force "site/api" | Out-Null
     if (Test-Path "site/api/dotnet") { Remove-Item -Recurse -Force "site/api/dotnet" }
     Copy-Item -Recurse "artifacts/docfx" "site/api/dotnet"
+
+    # DocFX has no root index page. Redirect the directory URL and its internal
+    # "../index.html" links to the first content page.
+    $redirect = @"
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta http-equiv="refresh" content="0; url=api/Mocassin.Core.CoreModule.html">
+<title>MOCASSIN .NET API</title></head>
+<body><p><a href="api/Mocassin.Core.CoreModule.html">Open the MOCASSIN .NET API</a></p></body></html>
+"@
+    Set-Content -Path "site/api/dotnet/index.html" -Value $redirect -Encoding utf8
 }
 else {
     Write-Host "==> DocFX skipped (solution or tools/docfx/docfx.json not present yet)"
@@ -44,26 +55,16 @@ if ((Test-Path "src/rust/Cargo.toml") -and (Get-Command cargo -ErrorAction Silen
     if (Test-Path "site/api/rust") { Remove-Item -Recurse -Force "site/api/rust" }
     Copy-Item -Recurse "target/doc" "site/api/rust"
 
-    # cargo doc has no workspace landing page, so generate a small crate index.
-    $crateLinks = Get-ChildItem -Directory "target/doc" |
-        Where-Object {
-            $_.Name -notin @("src", "static.files") -and
-            (Test-Path (Join-Path $_.FullName "index.html"))
-        } |
-        ForEach-Object { '<li><a href="{0}/index.html">{0}</a></li>' -f $_.Name }
-
-    $html = @"
+    # cargo doc has no workspace landing page. Redirect the directory URL and
+    # rustdoc's internal "../index.html" links to the first crate page.
+    $redirect = @"
 <!doctype html>
 <html lang="en"><head><meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>MOCASSIN Rust API</title></head><body>
-<h1>MOCASSIN Rust API</h1>
-<ul>
-$($crateLinks -join "`n")
-</ul>
-</body></html>
+<meta http-equiv="refresh" content="0; url=mocassin_types/index.html">
+<title>MOCASSIN Rust API</title></head>
+<body><p><a href="mocassin_types/index.html">Open the MOCASSIN Rust API</a></p></body></html>
 "@
-    Set-Content -Path "site/api/rust/index.html" -Value $html -Encoding utf8
+    Set-Content -Path "site/api/rust/index.html" -Value $redirect -Encoding utf8
 }
 else {
     Write-Host "==> rustdoc skipped (Rust workspace not present yet)"
