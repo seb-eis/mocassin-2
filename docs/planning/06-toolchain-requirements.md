@@ -81,7 +81,8 @@ Required for Avalonia, screenshot tests, and the 3D viewer. Included in
 | MessagePack, ZstdSharp, Microsoft.Data.Sqlite | Project-local | Steps 11, 18, 20 | NuGet packages. |
 | xUnit, FsCheck, FluentAssertions | Project-local | Steps 00+ | Test packages. |
 | `System.Numerics.Tensors` | Project-local | Step 20 | Vectorized evaluations. |
-| `Microsoft.CodeAnalysis.PublicApiAnalyzers`, `Microsoft.DotNet.ApiCompat` | Project-local | Steps 00, 31 | Public API baseline gate. |
+| `Microsoft.CodeAnalysis.PublicApiAnalyzers` | Project-local | Steps 00, 31 | Public API analyzer package. |
+| `Microsoft.DotNet.ApiCompat.Tool` | Required | Steps 00, 31 | Dotnet tool for the public-API compatibility gate; declare it in `.config/dotnet-tools.json`. |
 | Serilog | Project-local | Steps 23–28 | Application logging. |
 
 **Note:** `dotnet tool install --global` writes shims to `~/.dotnet/tools`. The MOCASSIN image adds that

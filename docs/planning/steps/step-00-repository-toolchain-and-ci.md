@@ -110,7 +110,6 @@ mocassin/
 - [ ] Create `Directory.Packages.props` with central versions for Avalonia, CommunityToolkit.Mvvm,
   Microsoft.Extensions.*, Microsoft.Data.Sqlite, MessagePack, ZstdSharp,
   xUnit, FsCheck, FluentAssertions, System.Numerics.Tensors, Microsoft.CodeAnalysis.PublicApiAnalyzers,
-  Microsoft.DotNet.ApiCompat,
   LiveCharts2, Silk.NET, Serilog.
 - [ ] Create the solution with empty projects:
   `Mocassin.Core`, `Mocassin.Symmetry`, `Mocassin.Compilation`, `Mocassin.Contracts`,
@@ -176,7 +175,8 @@ mocassin/
     the first two in `site/api/...`; Step 22 replaces the Python placeholder with mkdocstrings directives.
 - [ ] Add `tools/docs/requirements.txt` (or a root `pyproject.toml`) pinning Zensical, Markdown extensions, and
   `mkdocstrings[python]`.
-- [ ] Add `.config/dotnet-tools.json` with a pinned DocFX tool. Rust API docs use `cargo doc` directly.
+- [ ] Add `.config/dotnet-tools.json` with pinned DocFX and `Microsoft.DotNet.ApiCompat.Tool` entries. Rust API
+  docs use `cargo doc` directly.
 - [ ] Add docs build scripts:
   - `tools/docs/build-docs.sh` and `tools/docs/build-docs.ps1`: build Zensical strictly; build DocFX/rustdoc when the
     corresponding projects/crates exist; copy API output into `site/api/...`;

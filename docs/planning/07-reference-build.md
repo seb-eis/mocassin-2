@@ -36,8 +36,12 @@ The MOCASSIN development image provides everything:
 ### Verified command
 
 ```sh
-cp -a /workspace/mocassin-original /tmp/opencode/mocassin-reference
-cd /tmp/opencode/mocassin-reference/src/McSolver
+WORK=/tmp/opencode/mocassin-reference
+SRC="$WORK/original"
+mkdir -p "$WORK"
+rsync -a --exclude '.git' /workspace/mocassin-original/ "$SRC/"
+
+cd "$SRC/src/McSolver"
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
   -DCMAKE_C_FLAGS="-Wno-error=incompatible-pointer-types"
 cmake --build ./build --config Release -j"$(nproc)"
@@ -86,11 +90,13 @@ Without the required `-dbPath`, `-jobId`, and `-ioPath`, it exits with the expec
 Build the non-GUI chain through `Mocassin.Tools.Evaluation`:
 
 ```sh
-cd /tmp/opencode/mocassin-reference/src/ModelBuilder
+cd "$SRC/src/ModelBuilder"
 dotnet build Mocassin.Tools.Evaluation/Mocassin.Tools.Evaluation.csproj -c Release
 ```
 
 Or use [`tools/reference/build-model-builder.sh`](../../tools/reference/build-model-builder.sh).
+
+The commands below assume the same `WORK` and `SRC` variables as the solver section.
 
 ### Required compatibility patches
 
@@ -111,17 +117,19 @@ In the **work copy only**, update:
 | `SQLitePCLRaw.bundle_e_sqlite3` | `2.0.4` | `2.1.2` |
 
 ```sh
-find /tmp/opencode/mocassin-reference/src/ModelBuilder -name '*.csproj' -print0 \
+find "$SRC/src/ModelBuilder" -name '*.csproj' -print0 \
   | xargs -0 sed -i \
       -e 's/Version="3.1.6"/Version="3.1.32"/g' \
       -e 's/SQLitePCLRaw.bundle_e_sqlite3" Version="2.0.4"/SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.2"/g'
-find /tmp/opencode/mocassin-reference/src/ModelBuilder -type d \( -name bin -o -name obj \) -prune -exec rm -rf {} +
+find "$SRC/src/ModelBuilder" -type d \( -name bin -o -name obj \) -prune -exec rm -rf {} +
 ```
 
 The source code itself is unchanged. The original projects emit `NU1903` warnings for old
 `Newtonsoft.Json`/SQLite packages; those are acceptable only for isolated reference-data generation.
 
 ### Expected outputs
+
+Paths are relative to `$SRC`.
 
 ```text
 src/ModelBuilder/ICon.Framework.Shared/bin/Release/netstandard2.0/Mocassin.Framework.dll
@@ -157,12 +165,15 @@ SELECT ProjectJson FROM MocassinProjectGraphs LIMIT 1;
 
 ### Verified command
 
+Run from the MOCASSIN repository root, with `WORK`/`SRC` from the sections above.
+
 ```sh
 sqlite3 -noheader /workspace/mocassin-original/docs/project-examples/User-Guide-Project.mocprj \
   "SELECT ProjectJson FROM MocassinProjectGraphs LIMIT 1;" \
   > /tmp/opencode/Ceria.project.json
 
-dotnet run --project tools/reference/Mocassin.ReferenceHarness -c Release -- \
+dotnet run --project tools/reference/Mocassin.ReferenceHarness -c Release \
+  -p:ReferenceRoot="$SRC" -- \
   /tmp/opencode/Ceria.project.json \
   /tmp/opencode/User-Guide-Project.msl
 ```
@@ -190,7 +201,7 @@ The generated `.msl` uses the original schema and contains 3 jobs.
 
 ```sh
 mkdir -p /tmp/opencode/refrun
-cd /tmp/opencode/mocassin-reference/src/McSolver
+cd "$SRC/src/McSolver"
 ./build/Mocassin.Simulator \
   -dbPath /tmp/opencode/User-Guide-Project.msl \
   -jobId 1 \
