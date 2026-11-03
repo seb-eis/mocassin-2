@@ -68,7 +68,7 @@ dotnet test Mocassin.slnx -c Release
 dotnet format Mocassin.slnx --verify-no-changes
 
 # Rust
-cargo fmt --manifest-path src/rust/Cargo.toml --check
+cargo fmt --manifest-path src/rust/Cargo.toml --all --check
 cargo clippy --manifest-path src/rust/Cargo.toml --workspace -- -D warnings
 cargo test --manifest-path src/rust/Cargo.toml --workspace
 cargo build --manifest-path src/rust/Cargo.toml --workspace --release

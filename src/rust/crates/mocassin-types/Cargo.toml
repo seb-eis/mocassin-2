@@ -1,0 +1,18 @@
+[package]
+name = "mocassin-types"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "Shared serde types for compiled MOCASSIN packages and state metadata"
+publish = false
+
+[lints]
+workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_bytes.workspace = true

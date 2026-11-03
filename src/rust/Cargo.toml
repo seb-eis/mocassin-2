@@ -1,0 +1,49 @@
+[workspace]
+resolver = "2"
+members = ["crates/*"]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.99.1"
+license = "MIT"
+authors = ["MOCASSIN reimplementation contributors"]
+repository = "https://github.com/seb-eis/mocassin-2"
+homepage = "https://github.com/seb-eis/mocassin-2"
+description = "Modern cross-platform reimplementation of the MOCASSIN fixed-lattice MMC/KMC suite"
+
+[workspace.dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+serde_bytes = "0.11.19"
+rmp-serde = "1.3.1"
+zstd = "0.14.3"
+rusqlite = { version = "0.41.1", features = ["bundled"] }
+clap = { version = "4.6.7", features = ["derive"] }
+thiserror = "2.0.21"
+tracing = "0.1.44"
+tracing-subscriber = { version = "0.3.23", features = ["env-filter", "json"] }
+rand = "0.10.3"
+rand_chacha = "0.10.0"
+sha2 = "0.11.1"
+crc32fast = "1.5.4"
+bytemuck = { version = "1.25.2", features = ["derive"] }
+memmap2 = "0.9.12"
+rayon = "1.12.0"
+proptest = "1.12.0"
+criterion = "0.8.2"
+insta = "1.49.0"
+
+mocassin-types = { path = "crates/mocassin-types", version = "0.1.0" }
+mocassin-msl = { path = "crates/mocassin-msl", version = "0.1.0" }
+mocassin-rng = { path = "crates/mocassin-rng", version = "0.1.0" }
+mocassin-solver = { path = "crates/mocassin-solver", version = "0.1.0" }
+mocassin-state = { path = "crates/mocassin-state", version = "0.1.0" }
+mocassin-extension = { path = "crates/mocassin-extension", version = "0.1.0" }
+mocassin-cli = { path = "crates/mocassin-cli", version = "0.1.0" }
+
+[workspace.lints.rust]
+missing_docs = "deny"
+unsafe_op_in_unsafe_fn = "forbid"
+
+[workspace.lints.clippy]
+all = "warn"

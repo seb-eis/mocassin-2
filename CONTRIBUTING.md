@@ -35,7 +35,7 @@ dotnet build Mocassin.slnx -c Release
 dotnet test Mocassin.slnx -c Release
 
 # Rust
-cargo fmt --manifest-path src/rust/Cargo.toml --check
+cargo fmt --manifest-path src/rust/Cargo.toml --all --check
 cargo clippy --manifest-path src/rust/Cargo.toml --workspace -- -D warnings
 cargo test --manifest-path src/rust/Cargo.toml --workspace
 

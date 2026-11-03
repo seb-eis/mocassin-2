@@ -1,0 +1,27 @@
+[package]
+name = "mocassin-cli"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+homepage.workspace = true
+description = "mocassin-sim command-line interface for the MOCASSIN solver"
+publish = false
+
+[[bin]]
+name = "mocassin-sim"
+path = "src/main.rs"
+
+[lints]
+workspace = true
+
+[dependencies]
+mocassin-solver.workspace = true
+mocassin-msl.workspace = true
+mocassin-types.workspace = true
+clap.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true

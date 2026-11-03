@@ -31,10 +31,29 @@ fi
 
 if [[ -f src/rust/Cargo.toml ]] && command -v cargo >/dev/null 2>&1; then
   echo "==> rustdoc"
-  cargo doc --manifest-path src/rust/Cargo.toml --workspace --no-deps --target-dir target/doc
+  rm -rf target/doc
+  cargo doc --manifest-path src/rust/Cargo.toml --workspace --no-deps --target-dir target
   mkdir -p site/api
   rm -rf site/api/rust
   cp -R target/doc site/api/rust
+
+  # cargo doc has no workspace landing page, so generate a small crate index.
+  {
+    printf '<!doctype html>\n<html lang="en"><head><meta charset="utf-8">\n'
+    printf '<meta name="viewport" content="width=device-width, initial-scale=1">\n'
+    printf '<title>MOCASSIN Rust API</title></head><body>\n'
+    printf '<h1>MOCASSIN Rust API</h1>\n<ul>\n'
+    for crate_dir in target/doc/*/; do
+      crate_name="$(basename "$crate_dir")"
+      case "$crate_name" in
+        src|static.files) continue ;;
+      esac
+      if [[ -f "$crate_dir/index.html" ]]; then
+        printf '<li><a href="%s/index.html">%s</a></li>\n' "$crate_name" "$crate_name"
+      fi
+    done
+    printf '</ul>\n</body></html>\n'
+  } > site/api/rust/index.html
 else
   echo "==> rustdoc skipped (Rust workspace not present yet)"
 fi

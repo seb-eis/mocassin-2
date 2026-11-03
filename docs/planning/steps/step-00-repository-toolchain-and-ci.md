@@ -19,7 +19,7 @@ decision records that constrain later steps, and the initial standalone document
 | `repo-skeleton` | `feature/step-00-foundation/repo-skeleton` | Awaiting approval | Structure/link/YAML checks; no build gates yet | — | — |
 | `docs-site` | `feature/step-00-foundation/docs-site` | Awaiting approval | `zensical build --strict` passes; planning excluded; tool restore passes | — | — |
 | `dotnet-solution` | `feature/step-00-foundation/dotnet-solution` | Awaiting approval | restore/build/test/format pass; 7 smoke tests | — | — |
-| `rust-workspace` | `feature/step-00-foundation/rust-workspace` | Planned | — | — | — |
+| `rust-workspace` | `feature/step-00-foundation/rust-workspace` | Awaiting approval | fmt/clippy/test/build/deny pass; `--version` verified | — | — |
 | `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Planned | — | — | — |
 | `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Planned | — | — | — |
 | `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Planned | — | — | — |
@@ -134,15 +134,16 @@ mocassin/
 
 ### Rust
 
-- [ ] Create a workspace `src/rust/Cargo.toml` with resolver 2 and shared `[workspace.package]` metadata.
-- [ ] Create crates: `mocassin-types`, `mocassin-msl`, `mocassin-rng`, `mocassin-solver`, `mocassin-state`,
+- [x] Create a workspace `src/rust/Cargo.toml` with resolver 2 and shared `[workspace.package]` metadata.
+- [x] Create crates: `mocassin-types`, `mocassin-msl`, `mocassin-rng`, `mocassin-solver`, `mocassin-state`,
   `mocassin-extension`, `mocassin-cli`.
-- [ ] Add workspace dependencies: `serde`, `serde_bytes`, `rmp-serde`, `zstd`, `rusqlite` (bundled), `clap`, `thiserror`,
+- [x] Add workspace dependencies: `serde`, `serde_bytes`, `rmp-serde`, `zstd`, `rusqlite` (bundled), `clap`, `thiserror`,
   `tracing`, `tracing-subscriber`, `rand`, `rand_chacha`, `sha2`, `crc32fast`, `bytemuck`, `memmap2`,
   `rayon` (where justified), `proptest`, `criterion`, `insta`.
-- [ ] Add `rustfmt.toml` and `clippy.toml`; deny warnings in CI.
-- [ ] Add a smoke test and a `--version` CLI stub.
-- [ ] Add `cargo deny` (or `cargo audit`) configuration for licence and vulnerability checks.
+- [x] Add `rustfmt.toml` and `clippy.toml`; clippy runs with `-D warnings` locally and in CI (CI wiring is in
+  `ci-workflows`).
+- [x] Add a smoke test and a `--version` CLI stub.
+- [x] Add `cargo deny` (or `cargo audit`) configuration for licence and vulnerability checks.
 
 ### CI
 
