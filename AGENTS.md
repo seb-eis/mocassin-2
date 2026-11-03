@@ -96,9 +96,12 @@ These rules override convenience. If you are unsure, stop and ask the user.
 4. All work commits for that feature belong on the feature branch.
 5. Push every feature branch to `origin` when it is created. Push the step branch after each approved
    feature squash.
-6. The feature branch must be green in CI before approval. If CI is unavailable, run the equivalent local
-   gates and report the exact commands.
-5. If `main` moves while a step is active, merge `main` into the step branch. Do not rebase a shared step
+6. Feature branches are validated **locally**; they do not trigger CI by default. Run the relevant local
+   gates and report the exact commands and results.
+7. CI runs on `main` and on integration branches matching `step/*` (for example `step/00-foundation`). It does
+   not run on feature branches such as `step/00-foundation/dotnet-skeleton`; the GitHub Actions branch filter
+   must exclude `step/*/*`.
+8. If `main` moves while a step is active, merge `main` into the step branch. Do not rebase a shared step
    branch or rewrite its history.
 
 ### 3.3 Feature integration
@@ -106,7 +109,8 @@ These rules override convenience. If you are unsure, stop and ask the user.
 - A feature branch is integrated into its step branch **only with a squash merge**.
 - **Stop and ask the user for explicit approval before every feature squash merge.** Report:
   - feature branch name and commit hash(es);
-  - CI result or the exact local test commands/results;
+  - exact local test commands/results;
+  - the expected step-branch CI run after the squash;
   - a short summary of the diff;
   - any known limitations or follow-up work.
 - Feature integration uses local squash merges after chat approval. Do not open a pull request unless the
@@ -120,6 +124,8 @@ These rules override convenience. If you are unsure, stop and ask the user.
   git branch -D step/00-foundation/dotnet-skeleton
   git push origin --delete step/00-foundation/dotnet-skeleton
   ```
+- The push of the step branch triggers CI. Do not start the next feature until that run is green. If it fails,
+  fix it through another feature or `step/00-foundation/fix-<short-description>` branch and squash it.
 - Never merge a feature branch directly into `main`.
 - Do not commit feature work directly to the step branch. The step branch receives only squash commits,
   merges from `main`, and explicitly approved closeout changes.
@@ -544,6 +550,7 @@ incomplete.
 - Do not merge a feature branch directly into `main`; merge it into its step branch.
 - Do not merge a step branch into `main` without explicit user permission and a `--no-ff` merge.
 - Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
+- Do not add CI triggers for feature branches; use local gates and run CI after squashing into the step branch.
 - Do not modify `/workspace/mocassin-original` if it is present. It is a read-only reference clone.
 
 ## 15. Useful references in the original repository

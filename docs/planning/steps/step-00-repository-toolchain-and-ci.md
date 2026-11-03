@@ -123,9 +123,10 @@ mocassin/
 
 ### CI
 
-- [ ] GitHub Actions workflow triggered by pushes to `main` and `step/**`, plus pull requests, with a matrix:
-  `ubuntu-latest`, `windows-latest`, `macos-latest`. The `step/**` pattern covers both step and feature
-  branches.
+- [ ] GitHub Actions workflow triggered by pushes to `main` and integration branches matching `step/*`, with
+  a matrix: `ubuntu-latest`, `windows-latest`, `macos-latest`. Exclude `step/*/*` so feature branches are
+  validated locally and do not consume CI runs. Pull-request CI is not enabled by default; add it if PRs are
+  introduced later.
 - [ ] Steps: checkout, setup .NET 10, setup Rust stable, cache NuGet/Cargo/SQLite, restore, build,
   `dotnet test`, `cargo test`, `dotnet format --verify-no-changes`, `cargo fmt --check`, `cargo clippy`.
 - [ ] Upload test results and coverage artifacts.
@@ -185,7 +186,7 @@ mocassin/
 - [ ] `dotnet test` runs and passes the smoke tests.
 - [ ] `cargo build --workspace` and `cargo test --workspace` succeed on all three OSes.
 - [ ] `dotnet format --verify-no-changes`, `cargo fmt --check`, and `cargo clippy -- -D warnings` pass.
-- [ ] CI is green on the initial commit and on a pull request.
+- [ ] CI is green on the initial `main` push and on a `step/*` integration-branch push.
 - [ ] `README.md` describes prerequisites and the exact build/test/docs commands.
 - [ ] `zensical build --strict` succeeds and the skeleton contains every required top-level section.
 - [ ] The docs CI job is green and `docs/planning/` is absent from the built site.
