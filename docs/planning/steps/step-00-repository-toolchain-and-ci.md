@@ -20,7 +20,7 @@ decision records that constrain later steps, and the initial standalone document
 | `docs-site` | `feature/step-00-foundation/docs-site` | Awaiting approval | `zensical build --strict` passes; planning excluded; tool restore passes | — | — |
 | `dotnet-solution` | `feature/step-00-foundation/dotnet-solution` | Awaiting approval | restore/build/test/format pass; 7 smoke tests | — | — |
 | `rust-workspace` | `feature/step-00-foundation/rust-workspace` | Awaiting approval | fmt/clippy/test/build/deny pass; `--version` verified | — | — |
-| `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Planned | — | — | — |
+| `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Awaiting approval | pytest 3/3; wheel/sdist build; wheel import checked | — | — |
 | `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Planned | — | — | — |
 | `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Planned | — | — | — |
 | `closeout` | `feature/step-00-foundation/closeout` | Planned | — | — | — |
@@ -157,7 +157,7 @@ mocassin/
 - [ ] Add the docs job: setup Python, install pinned Zensical requirements, install the Python package in
   editable mode when `src/python/pyproject.toml` exists (from Step 22), run `zensical build --strict`, and
   enable DocFX/rustdoc steps as their projects appear.
-- [ ] Add a minimal `src/python` placeholder package (`pyproject.toml`, import package, smoke test) so the
+- [x] Add a minimal `src/python` placeholder package (`pyproject.toml`, import package, smoke test) so the
   Python CI job is meaningful from day one. Step 22 replaces the placeholder with the real reader.
 - [ ] Add the Python job: Python 3.11–3.13, install `src/python` with test extras, run `pytest`, and build the
   wheel/sdist.

@@ -1,0 +1,51 @@
+# SPDX-License-Identifier: MIT
+
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mocassin-analysis"
+version = "0.1.0"
+description = "Read-only analysis API for MOCASSIN state and results files"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [
+  { name = "MOCASSIN reimplementation contributors" },
+]
+keywords = ["mocassin", "monte-carlo", "materials-science", "solid-state-ionics"]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Science/Research",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Topic :: Scientific/Engineering :: Physics",
+]
+dependencies = []
+
+[project.optional-dependencies]
+test = [
+  "pytest==9.2.0",
+  "pytest-cov==7.1.0",
+  "hypothesis==6.170.14",
+]
+
+[project.urls]
+Repository = "https://github.com/seb-eis/mocassin-2"
+Documentation = "https://github.com/seb-eis/mocassin-2/tree/main/docs"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["mocassin*"]
+
+[tool.setuptools.package-data]
+mocassin = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "-ra"
