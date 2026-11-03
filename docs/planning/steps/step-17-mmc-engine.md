@@ -11,6 +11,7 @@ state evolution, and shared outcome/statistics infrastructure.
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
+- **Step tag:** —
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

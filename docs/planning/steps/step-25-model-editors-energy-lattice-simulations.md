@@ -11,6 +11,7 @@ MMC/KMC simulations, with cost previews and live validation.
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
+- **Step tag:** —
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

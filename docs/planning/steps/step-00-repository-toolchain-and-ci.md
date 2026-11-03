@@ -11,6 +11,7 @@ decision records that constrain later steps, and the initial standalone document
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
+- **Step tag:** —
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
