@@ -7,11 +7,11 @@ decision records that constrain later steps, and the initial standalone document
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** Awaiting approval
 - **Step branch:** `step/00-foundation`
-- **Step CI:** —
-- **Main merge:** —
-- **Step tag:** —
+- **Step CI:** [`41730146454`](https://github.com/seb-eis/mocassin-2/actions/runs/41730146454) — green (Ubuntu + Windows)
+- **Main merge:** Pending approval
+- **Step tag:** Pending main merge
 - **Last updated:** 2026-11-03
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -22,10 +22,13 @@ decision records that constrain later steps, and the initial standalone document
 | `rust-workspace` | `feature/step-00-foundation/rust-workspace` | Squashed | fmt/clippy/test/build/deny pass; `--version` verified | No workflow yet | `0569a27` |
 | `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Squashed | pytest 3/3; wheel/sdist build; wheel import checked | No workflow yet | `2784462` |
 | `fix-docs-api-links` | `feature/step-00-foundation/fix-docs-api-links` | Squashed | strict docs build; direct API links; redirects verified over HTTP | No workflow yet | `e420a9f` |
-| `fix-spdx-headers` | `feature/step-00-foundation/fix-spdx-headers` | Awaiting approval | header check 27/27; .NET and Rust gates re-run | — | — |
-| `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Awaiting approval | generator/validator and drift check pass; 17 artifacts | — | — |
-| `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Awaiting approval | YAML parse; local matrix commands; coverage; ApiCompat; policy checks | — | — |
-| `closeout` | `feature/step-00-foundation/closeout` | Planned | — | — | — |
+| `fix-spdx-headers` | `feature/step-00-foundation/fix-spdx-headers` | Squashed | header check 27/27; .NET and Rust gates re-run | No workflow yet | `f9aa262` |
+| `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Squashed | generator/validator and drift check pass; 17 artifacts | No workflow yet | `7f8a7b7` |
+| `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Squashed | YAML parse; local matrix commands; coverage; ApiCompat; policy checks | `41725017402` (failed ApiCompat, fixed below) | `8e7ce7c` |
+| `fix-api-compat-tool-restore` | `feature/step-00-foundation/fix-api-compat-tool-restore` | Squashed | `dotnet tool restore` before ApiCompat | [`41727653557`](https://github.com/seb-eis/mocassin-2/actions/runs/41727653557) — green (incl. macOS) | `e968b0f` |
+| `fix-ci-log-warnings` | `feature/step-00-foundation/fix-ci-log-warnings` | Squashed | unique TRX files; clean `cargo-deny` | Superseded by platform-matrix change | `a62d701` |
+| `fix-ci-platform-matrix` | `feature/step-00-foundation/fix-ci-platform-matrix` | Squashed | step branches Ubuntu + Windows; macOS on `main` | [`41730146454`](https://github.com/seb-eis/mocassin-2/actions/runs/41730146454) — green | `f518222` |
+| `closeout` | `feature/step-00-foundation/closeout` | Awaiting approval | full local acceptance run | — | — |
 
 **Deviations:**
 
@@ -205,7 +208,7 @@ mocassin/
   - `tools/docs/build-docs.sh` and `tools/docs/build-docs.ps1`: build Zensical strictly; build DocFX/rustdoc when the
     corresponding projects/crates exist; copy API output into `site/api/...`;
   - `tools/docs/serve.sh` / `tools/docs/serve.ps1`: local preview.
-- [ ] Add a `docs` CI job that installs the pinned requirements and runs `zensical build --strict`.
+- [x] Add a `docs` CI job that installs the pinned requirements and runs `zensical build --strict`.
   DocFX/rustdoc steps are enabled as soon as their projects exist; they are not deferred to Step 30.
 - [x] Add `docs/CONTRIBUTING.md` or a README section explaining docs-as-code: every feature step updates its
   pages, and the docs build must stay green.
@@ -218,20 +221,46 @@ mocassin/
 
 ## Acceptance criteria
 
-- [ ] `dotnet build -c Release` succeeds from a clean clone on all three OSes.
-- [ ] `dotnet test` runs and passes the smoke tests.
-- [ ] `cargo build --workspace` and `cargo test --workspace` succeed on all three OSes.
-- [ ] `dotnet format --verify-no-changes`, `cargo fmt --check`, and `cargo clippy -- -D warnings` pass.
-- [ ] CI is green on the initial `main` push and on a `step/*` integration-branch push.
-- [ ] `README.md` describes prerequisites and the exact build/test/docs commands.
-- [ ] `zensical build --strict` succeeds and the skeleton contains every required top-level section.
-- [ ] The docs CI job is green and `docs/planning/` is absent from the built site.
-- [ ] `contracts/manifest.json` exists, generated checks are current, and the CI drift check passes.
-- [ ] The manifest defines the canonical signature-projection layouts and the generator emits the initial
+- [x] `dotnet build -c Release` succeeds from a clean clone on all three OSes.
+- [x] `dotnet test` runs and passes the smoke tests.
+- [x] `cargo build --workspace` and `cargo test --workspace` succeed on all three OSes.
+- [x] `dotnet format --verify-no-changes`, `cargo fmt --check`, and `cargo clippy -- -D warnings` pass.
+- [x] CI is green on a `step/*` integration-branch push: run `41730146454` (Ubuntu + Windows).
+- [ ] CI is green on the initial `main` push after the step merge (full Ubuntu + Windows + macOS matrix).
+- [x] `README.md` describes prerequisites and the exact build/test/docs commands.
+- [x] `zensical build --strict` succeeds and the skeleton contains every required top-level section.
+- [x] The docs CI job is green and `docs/planning/` is absent from the built site.
+- [x] `contracts/manifest.json` exists, generated checks are current, and the CI drift check passes.
+- [x] The manifest defines the canonical signature-projection layouts and the generator emits the initial
   fixture/vector scaffolding; signed-type vectors are added with the types in Steps 08/09/11.
-- [ ] Public-API baseline files and the `ApiCompat` CI check are in place.
-- [ ] The repository contains no copied original source files.
-- [ ] Documentation written
+- [x] Public-API baseline files and the `ApiCompat` CI check are in place.
+- [x] The repository contains no copied original source files.
+- [x] Documentation written
+
+## Verification evidence
+
+Local acceptance run on the step branch:
+
+```text
+dotnet restore/build/test/format ................ pass
+cargo fmt/clippy/test/build ..................... pass
+python pytest/build ............................. pass
+contract drift / SPDX / secret scan ............. pass
+ApiCompat baseline .............................. pass
+zensical build --strict ......................... pass
+tools/docs/build-docs.sh (DocFX + rustdoc) ...... pass
+```
+
+CI evidence:
+
+- `41727653557` — full Ubuntu + Windows + macOS matrix, green (before the macOS-on-main policy change).
+- `41730146454` — final step-branch Ubuntu + Windows matrix, green.
+- `41725017402` — first CI run; failed only because ApiCompat needed `dotnet tool restore`; fixed in
+  `e968b0f`.
+- The full macOS matrix runs again on `main` after the step merge.
+
+No parity-matrix row applies to infrastructure-only Step 00 work; feature completeness remains tracked by the
+step page and status dashboard.
 
 ## Documentation
 

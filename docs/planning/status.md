@@ -34,7 +34,7 @@ remain in each step page; each step page also has a feature log.
 
 | Step | Title | Phase | Status | Step branch | Current feature | Step CI | Main merge | Step tag |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | In progress | `step/00-foundation` | `repo-skeleton` | — | — | — |
+| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Awaiting approval | `step/00-foundation` | `closeout` | `41730146454` green | — | — |
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Not started | — | — | — | — | — |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Not started | — | — | — | — | — |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Not started | — | — | — | — | — |
@@ -71,7 +71,7 @@ remain in each step page; each step page also has a feature log.
 
 | Step | Step branch | Current feature | Feature branch | Status |
 | --- | --- | --- | --- | --- |
-| 00 | `step/00-foundation` | `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Awaiting approval |
+| 00 | `step/00-foundation` | `closeout` | `feature/step-00-foundation/closeout` | Awaiting approval |
 
 ## Notes
 
