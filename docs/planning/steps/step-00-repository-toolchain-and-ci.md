@@ -123,7 +123,9 @@ mocassin/
 
 ### CI
 
-- [ ] GitHub Actions workflow with a matrix: `ubuntu-latest`, `windows-latest`, `macos-latest`.
+- [ ] GitHub Actions workflow triggered by pushes to `main` and `step/**`, plus pull requests, with a matrix:
+  `ubuntu-latest`, `windows-latest`, `macos-latest`. The `step/**` pattern covers both step and feature
+  branches.
 - [ ] Steps: checkout, setup .NET 10, setup Rust stable, cache NuGet/Cargo/SQLite, restore, build,
   `dotnet test`, `cargo test`, `dotnet format --verify-no-changes`, `cargo fmt --check`, `cargo clippy`.
 - [ ] Upload test results and coverage artifacts.

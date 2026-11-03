@@ -73,23 +73,31 @@ These rules override convenience. If you are unsure, stop and ask the user.
   - Bug fixes inside a step: `step/<NN>-<slug>/fix-<short-description>`.
 - Use lowercase kebab-case. Keep the feature name short and specific.
 - One step is active at a time unless the user explicitly starts parallel work.
+- At the start of a step, propose the complete feature-branch list for that step and ask the user to approve
+  it once. Individual features still require approval before their squash merge.
+- Short-lived maintenance branches that are not part of a step use `fix/<slug>` or `docs/<slug>` from
+  `main`; they are merged into `main` with `--no-ff` after approval.
 
 ### 3.2 Starting work
 
-1. Create the step branch from current `main`:
+1. Propose the feature-branch list and get one approval for the step breakdown.
+2. Create the step branch from current `main`:
    ```sh
    git switch main
    git pull --ff-only
    git switch -c step/00-foundation
+   git push -u origin step/00-foundation
    ```
-2. Create each feature branch from the step branch:
+3. Create each feature branch from the step branch:
    ```sh
    git switch step/00-foundation
    git switch -c step/00-foundation/dotnet-skeleton
    ```
-3. All work commits for that feature belong on the feature branch.
-4. Push every feature branch to `origin` when it is created. Push the step branch after each approved
+4. All work commits for that feature belong on the feature branch.
+5. Push every feature branch to `origin` when it is created. Push the step branch after each approved
    feature squash.
+6. The feature branch must be green in CI before approval. If CI is unavailable, run the equivalent local
+   gates and report the exact commands.
 5. If `main` moves while a step is active, merge `main` into the step branch. Do not rebase a shared step
    branch or rewrite its history.
 
@@ -98,9 +106,11 @@ These rules override convenience. If you are unsure, stop and ask the user.
 - A feature branch is integrated into its step branch **only with a squash merge**.
 - **Stop and ask the user for explicit approval before every feature squash merge.** Report:
   - feature branch name and commit hash(es);
-  - tests and quality gates run;
+  - CI result or the exact local test commands/results;
   - a short summary of the diff;
   - any known limitations or follow-up work.
+- Feature integration uses local squash merges after chat approval. Do not open a pull request unless the
+  user asks for one.
 - After approval:
   ```sh
   git switch step/00-foundation
@@ -113,6 +123,7 @@ These rules override convenience. If you are unsure, stop and ask the user.
 - Never merge a feature branch directly into `main`.
 - Do not commit feature work directly to the step branch. The step branch receives only squash commits,
   merges from `main`, and explicitly approved closeout changes.
+- If the user rejects or abandons a feature, delete its local and remote branch after confirmation.
 
 ### 3.4 Step completion
 
@@ -133,7 +144,25 @@ These rules override convenience. If you are unsure, stop and ask the user.
 5. Delete the step branch locally and remotely after the merge.
 6. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
 
-### 3.5 General rules
+### 3.5 Out-of-step changes
+
+Urgent fixes and planning/documentation corrections that are not part of the active step use a short-lived
+maintenance branch from `main`:
+
+```sh
+git switch main
+git pull --ff-only
+git switch -c fix/<short-description>    # or docs/<short-description>
+```
+
+After implementation and tests:
+
+1. Push the branch and report the result.
+2. Ask for explicit approval.
+3. Merge into `main` with `--no-ff`, push, and delete the branch locally and remotely.
+4. Merge the updated `main` into the active step branch before continuing step work.
+
+### 3.6 General rules
 
 - Do not push to `main` without explicit permission for that push.
 - Do not force-push, rewrite published history, or delete another contributor's branch.
@@ -302,7 +331,8 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 2. Check its **Depends on** line; do not start before dependencies are done.
 3. Read the step’s **Original reference**, **Design**, **Acceptance criteria**, **Documentation**, **Tests**, and
    **Risks**.
-4. Create the step branch if it does not exist, then create a feature branch as described in section 3.
+4. Propose the feature-branch list for the step and get one approval. Then create/push the step branch if it
+   does not exist, and create the feature branch as described in section 3.
 5. Implement only that feature’s scope. Resist adding later-phase features to the same branch.
 6. Add the tests named in the step, plus tests for every bug you find.
 7. Update the step page and documentation as part of the feature, or in the final closeout feature:
