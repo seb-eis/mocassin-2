@@ -11,6 +11,7 @@ CLI scaffolding, structured logging, and a dry-run job inspector.
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
+- **Step tag:** —
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

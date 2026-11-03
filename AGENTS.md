@@ -149,6 +149,8 @@ These rules override convenience. If you are unsure, stop and ask the user.
    git pull --ff-only
    git merge --no-ff step/00-foundation -m "step-00: repository, toolchain, and CI"
    git push origin main
+   git tag -a step-00 -m "step-00: repository, toolchain, and CI"
+   git push origin step-00
    ```
 5. Delete the step branch locally and remotely after the merge.
 6. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
@@ -179,6 +181,43 @@ After implementation and tests:
 - When a task or feature is finished, report the branch name, commit hash(es), test results, and ask for
   the required approval before any merge.
 - If the user authorizes a merge, follow their instruction exactly; otherwise leave the branch unmerged.
+
+### 3.7 Git tags
+
+Tags are immutable checkpoints for completed steps, roadmap milestones, and releases. They do not replace the
+mutable status dashboard.
+
+| Tag | Created when | Points to |
+| --- | --- | --- |
+| `step-<NN>` | A step is merged into `main` | The step's `--no-ff` merge commit |
+| `milestone-m<N>` | A roadmap milestone is reached | The commit that satisfies the milestone |
+| `v<major>.<minor>.<patch>` | A release or release candidate is published | The release commit |
+
+Rules:
+
+- Tag only commits already on `main`.
+- Create tags only after the corresponding step/milestone/release approval. Tag creation and push are part of
+  that approval; never create or push a tag without it.
+- Use annotated tags (`git tag -a`). Sign with `-s` when a signing key is configured.
+- Never move or delete a published tag. Use a suffixed tag such as `step-00.1` for a follow-up checkpoint.
+- Do not create tags automatically in CI, and do not tag feature branches or step branches.
+- Step and milestone tags are internal history markers, not package versions. Release builds may use
+  `git describe --tags --match 'v*'` for versioning.
+
+Tag message template:
+
+```text
+step-00: repository, toolchain, and CI
+
+merge: <merge-commit-sha>
+date: <ISO-8601 UTC>
+ci: <run-url-or-id>
+features: <comma-separated feature names>
+status: docs/planning/status.md#step-00
+```
+
+Milestone tags use the same fields with `milestone-m0` and the milestone name. Release tags are created only
+after the Step 31 release gates pass.
 
 ## 4. Non-negotiable decisions
 
@@ -361,9 +400,9 @@ pass.
 
 ### 7.1 Status tracking
 
-Each step page starts with an **Implementation status** block: status, step branch, step CI, main merge, and a
-feature log. The top-level [`docs/planning/status.md`](docs/planning/status.md) dashboard is the at-a-glance
-roll-up.
+Each step page starts with an **Implementation status** block: status, step branch, step CI, main merge,
+step tag, and a feature log. The top-level [`docs/planning/status.md`](docs/planning/status.md) dashboard is
+the at-a-glance roll-up.
 
 Update status as follows:
 
@@ -372,6 +411,8 @@ Update status as follows:
   `Awaiting approval` before asking for approval.
 - **After squash and step CI:** the next feature or closeout feature records the squash commit and CI result.
 - **Step completion:** the closeout feature records `Done`, the step CI result, and the main merge reference.
+  After the approved merge, create and push the annotated `step-NN` tag.
+- **Milestones:** create the matching `milestone-mN` tag when the milestone is reached.
 - **Parity:** keep `appendix-b-parity-matrix.md` as the feature-level completeness source.
 
 Do not create duplicate per-step checklist files. The step page is the detailed checklist; `status.md` is the

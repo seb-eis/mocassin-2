@@ -11,6 +11,7 @@ build/deploy UI, progress/cancellation, and result summary.
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
+- **Step tag:** —
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

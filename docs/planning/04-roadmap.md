@@ -83,23 +83,26 @@ integration, documentation, and release hardening. A single developer should exp
 
 ## 4. Milestones
 
-| Milestone | After step | Demonstrable result |
-| --- | --- | --- |
-| **M0 — Skeleton builds** | 00 | `dotnet build`, `cargo test`, strict Zensical build, CI green on three OSes |
-| **M1 — Project round-trip** | 01 | Create/open/save a project; stable canonical JSON |
-| **M2 — Symmetry proven** | 02 | All 230 groups/settings validate; P1 expansion matches brute force |
-| **M3 — Model authored** | 07 | Ceria model built via API/CLI and validated with zero errors |
-| **M4 — Model compiled** | 08 | Compiled model report: positions, pairs, clusters, rules, indices |
-| **M5 — First package** | 12 | `.msl` with one job and a JSON manifest |
-| **M6 — First KMC run** | 16 | Job completes; energy/acceptance counters look sane |
-| **M7 — First MMC run** | 17 | MMC equilibrates a small system; energy trace converges |
-| **M8 — Results loop** | 20 | `.mcs` collected into `.msr`; particle counts, origin-based MSD, per-species conductivity evaluated |
-| **M9 — Python API** | 22 | Read `.mcs`/`.msr` files and run basic multi-file evaluations from Python |
-| **M10 — MVP GUI** | 26 | Create → validate → parameterize → build → run → collect in Avalonia |
-| **M11 — Visualization** | 27 | 3D cell/sites/transitions/clusters/overlays with picking |
-| **M12 — Feature parity** | 28 | Every parity-matrix item implemented or explicitly deferred |
-| **M13 — Documentation** | 30 | Completed Zensical site with guides, physics, tutorials, APIs including Python |
-| **M14 — Release** | 31 | Statistical parity, performance, packaged binaries, documentation artifact, Python package |
+| Milestone | Tag | After step | Demonstrable result |
+| --- | --- | --- | --- |
+| **M0 — Skeleton builds** | `milestone-m0` | 00 | `dotnet build`, `cargo test`, strict Zensical build, CI green on three OSes |
+| **M1 — Project round-trip** | `milestone-m1` | 01 | Create/open/save a project; stable canonical JSON |
+| **M2 — Symmetry proven** | `milestone-m2` | 02 | All 230 groups/settings validate; P1 expansion matches brute force |
+| **M3 — Model authored** | `milestone-m3` | 07 | Ceria model built via API/CLI and validated with zero errors |
+| **M4 — Model compiled** | `milestone-m4` | 08 | Compiled model report: positions, pairs, clusters, rules, indices |
+| **M5 — First package** | `milestone-m5` | 12 | `.msl` with one job and a JSON manifest |
+| **M6 — First KMC run** | `milestone-m6` | 16 | Job completes; energy/acceptance counters look sane |
+| **M7 — First MMC run** | `milestone-m7` | 17 | MMC equilibrates a small system; energy trace converges |
+| **M8 — Results loop** | `milestone-m8` | 20 | `.mcs` collected into `.msr`; particle counts, origin-based MSD, per-species conductivity evaluated |
+| **M9 — Python API** | `milestone-m9` | 22 | Read `.mcs`/`.msr` files and run basic multi-file evaluations from Python |
+| **M10 — MVP GUI** | `milestone-m10` | 26 | Create → validate → parameterize → build → run → collect in Avalonia |
+| **M11 — Visualization** | `milestone-m11` | 27 | 3D cell/sites/transitions/clusters/overlays with picking |
+| **M12 — Feature parity** | `milestone-m12` | 28 | Every parity-matrix item implemented or explicitly deferred |
+| **M13 — Documentation** | `milestone-m13` | 30 | Completed Zensical site with guides, physics, tutorials, APIs including Python |
+| **M14 — Release** | `milestone-m14` | 31 | Statistical parity, performance, packaged binaries, documentation artifact, Python package |
+
+Tags in the table are created on the commit that satisfies the milestone, after the milestone is accepted.
+See [`AGENTS.md`](../../AGENTS.md) section 3.7 for tag rules.
 
 ## 5. Parallel work plan
 
