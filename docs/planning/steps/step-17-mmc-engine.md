@@ -5,6 +5,18 @@
 **Delivers:** A Metropolis MMC engine with two-site exchanges, equilibrium break detection, time-independent
 state evolution, and shared outcome/statistics infrastructure.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Implement the equilibrium sampler used for defect distributions, annealing, and initial states. It must obey

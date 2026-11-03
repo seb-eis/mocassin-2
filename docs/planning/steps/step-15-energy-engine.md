@@ -5,6 +5,18 @@
 **Delivers:** The transition energy calculator: S0/S1/S2, pair/cluster deltas, electric-field terms,
 state application, and lattice-energy bookkeeping.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Compute the energy change of a proposed transition exactly and efficiently, with a clear unit convention and

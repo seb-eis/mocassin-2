@@ -5,6 +5,18 @@
 **Delivers:** Production editors for particles/sets, crystal structure/sites, and the full transition model,
 with live validation, previews, and undo/redo.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Give users a productive way to author the first half of the model. The editors must make symmetry and

@@ -5,6 +5,18 @@
 **Delivers:** A fully initialized simulation context: lattice, environment states, neighbor links, energy
 lookup tables, selection pools, jump-status caches, counters, goals, and tracker state.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Transform the validated package into the data structures the Monte Carlo loop needs, once, before the first

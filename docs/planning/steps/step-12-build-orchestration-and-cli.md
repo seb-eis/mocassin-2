@@ -5,6 +5,18 @@
 **Delivers:** A headless CLI that loads a project, validates, compiles, parameterizes, expands jobs, writes a
 package, reports progress, and supports cancellation and partial builds.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Make the entire model-building pipeline usable without the GUI. This de-risks the Avalonia work, enables

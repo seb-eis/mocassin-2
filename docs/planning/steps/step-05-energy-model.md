@@ -5,6 +5,18 @@
 **Delivers:** Stable/unstable interaction environments, cutoff filters, multi-body clusters, and site energies,
 with validation and cost previews.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Let a user define the interaction model that the compiler will sample into pair and cluster tables. The

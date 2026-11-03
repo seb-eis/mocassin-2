@@ -5,6 +5,18 @@
 **Delivers:** Aggregation across job sets, Arrhenius and transport fits, plot-ready series, headless
 PNG/SVG/CSV/JSON/Parquet exports, and reproducible analysis reports.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Move from raw per-job evaluations to scientific insight: compare temperatures/dopings, fit activation

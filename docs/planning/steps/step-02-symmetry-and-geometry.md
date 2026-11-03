@@ -5,6 +5,18 @@
 **Delivers:** A validated space-group catalog, exact symmetry operations, coordinate systems, P1 expansion,
 orbit/permutation reduction, and periodic geometry kernels.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Provide the mathematical foundation for every model domain. The implementation must be exact where

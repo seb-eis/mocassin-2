@@ -6,6 +6,18 @@
 and the public evaluation API for transport, displacement, diffusion, correlation, coordination, and jump
 statistics.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Turn solver output into trustworthy scientific data. Users must be able to load a subset of jobs, evaluate

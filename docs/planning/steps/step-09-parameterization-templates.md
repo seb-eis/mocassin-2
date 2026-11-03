@@ -5,6 +5,18 @@
 **Delivers:** Versioned parameterization templates that quantify a compiled model, with stable identities,
 signature compatibility, rebase/migration, and completeness checks.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Separate model definition (geometry and semantics) from numerical values (interaction energies and attempt

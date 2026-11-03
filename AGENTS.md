@@ -44,9 +44,10 @@ Before changing anything, read these in order:
    still-open decisions.
 8. [`docs/planning/06-toolchain-requirements.md`](docs/planning/06-toolchain-requirements.md) — required and
    optional tools by language and development phase.
-9. The step page you intend to work on, plus its dependencies.
-10. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-11. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+9. [`docs/planning/status.md`](docs/planning/status.md) — step and feature status dashboard.
+10. The step page you intend to work on, plus its dependencies.
+11. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+12. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
@@ -63,26 +64,118 @@ following one.
 
 These rules override convenience. If you are unsure, stop and ask the user.
 
-- **Never work on `main` or `master`.** Do not edit files, commit, rebase, force-push, or run generated
-  changes there.
-- Before making any change, create a dedicated branch from the current main branch:
-  - feature work: `agent/<feature>` (e.g. `agent/particle-editor`)
-  - bug fixes: `agent/fix-<short-description>` (e.g. `agent/fix-kmc-timestep`)
-  - use lowercase kebab-case and keep the name short and specific.
-- If the working tree is on `main`/`master`, stop and create a branch first. If there are uncommitted
-  changes, move them to the new branch with `git switch -c agent/<name>`; never commit them on main.
-- All commits for the task must be on the `agent/*` branch.
-- **No merging with `main` or `master` is allowed until the user explicitly allows it.** This includes local
-  merges, fast-forward merges, PR merges, rebases that rewrite shared history, and force-pushes.
-- **Agent branches must be integrated with a squash merge** (`git merge --squash` or the equivalent PR squash
-  option), not a merge commit, unless the user explicitly requests another strategy.
-- A squash merge must produce one clear commit on `main`/`master` that summarizes the branch’s changes and
-  references the completed step or task.
-- Do not push the branch or open a pull request unless the user asks. Pushing the feature branch is allowed
-  only when requested.
-- Do not delete another contributor's branch or rewrite shared history.
-- When the task is finished, report the branch name, commit hash(es), test results, and ask for explicit
-  permission before any merge.
+### 3.1 Branch model
+
+- `main` is the integration/release branch. Never commit feature work directly to it.
+- Create **one step branch** per roadmap step:
+  - `step/<NN>-<slug>`, e.g. `step/00-foundation`.
+- Create **one feature branch per deliverable** from the step branch:
+  - `step/<NN>-<slug>/<feature>`, e.g. `step/00-foundation/dotnet-skeleton`.
+  - Bug fixes inside a step: `step/<NN>-<slug>/fix-<short-description>`.
+- Use lowercase kebab-case. Keep the feature name short and specific.
+- One step is active at a time unless the user explicitly starts parallel work.
+- At the start of a step, propose the complete feature-branch list for that step and ask the user to approve
+  it once. Individual features still require approval before their squash merge.
+- Short-lived maintenance branches that are not part of a step use `fix/<slug>` or `docs/<slug>` from
+  `main`; they are merged into `main` with `--no-ff` after approval.
+
+### 3.2 Starting work
+
+1. Propose the feature-branch list and get one approval for the step breakdown.
+2. Create the step branch from current `main`:
+   ```sh
+   git switch main
+   git pull --ff-only
+   git switch -c step/00-foundation
+   git push -u origin step/00-foundation
+   ```
+3. Create each feature branch from the step branch:
+   ```sh
+   git switch step/00-foundation
+   git switch -c step/00-foundation/dotnet-skeleton
+   ```
+4. All work commits for that feature belong on the feature branch.
+5. Push every feature branch to `origin` when it is created. Push the step branch after each approved
+   feature squash.
+6. Feature branches are validated **locally**; they do not trigger CI by default. Run the relevant local
+   gates and report the exact commands and results.
+7. CI runs on `main` and on integration branches matching `step/*` (for example `step/00-foundation`). It does
+   not run on feature branches such as `step/00-foundation/dotnet-skeleton`; the GitHub Actions branch filter
+   must exclude `step/*/*`.
+8. If `main` moves while a step is active, merge `main` into the step branch. Do not rebase a shared step
+   branch or rewrite its history.
+
+### 3.3 Feature integration
+
+- A feature branch is integrated into its step branch **only with a squash merge**.
+- **Stop and ask the user for explicit approval before every feature squash merge.** Report:
+  - feature branch name and commit hash(es);
+  - exact local test commands/results;
+  - the expected step-branch CI run after the squash;
+  - a short summary of the diff;
+  - any known limitations or follow-up work.
+- Feature integration uses local squash merges after chat approval. Do not open a pull request unless the
+  user asks for one.
+- After approval:
+  ```sh
+  git switch step/00-foundation
+  git merge --squash step/00-foundation/dotnet-skeleton
+  git commit -m "step-00: add .NET solution skeleton"
+  git push origin step/00-foundation
+  git branch -D step/00-foundation/dotnet-skeleton
+  git push origin --delete step/00-foundation/dotnet-skeleton
+  ```
+- The push of the step branch triggers CI. Do not start the next feature until that run is green. If it fails,
+  fix it through another feature or `step/00-foundation/fix-<short-description>` branch and squash it.
+- Never merge a feature branch directly into `main`.
+- Do not commit feature work directly to the step branch. The step branch receives only squash commits,
+  merges from `main`, and explicitly approved closeout changes.
+- If the user rejects or abandons a feature, delete its local and remote branch after confirmation.
+
+### 3.4 Step completion
+
+1. Use a final closeout feature branch for:
+   - step page status, deviations, and links;
+   - parity-matrix updates;
+   - documentation updates;
+   - any final acceptance fixes.
+2. Run the step's full acceptance criteria and quality gates on the step branch.
+3. **Stop and ask for explicit permission before merging the step into `main`.**
+4. After approval:
+   ```sh
+   git switch main
+   git pull --ff-only
+   git merge --no-ff step/00-foundation -m "step-00: repository, toolchain, and CI"
+   git push origin main
+   ```
+5. Delete the step branch locally and remotely after the merge.
+6. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
+
+### 3.5 Out-of-step changes
+
+Urgent fixes and planning/documentation corrections that are not part of the active step use a short-lived
+maintenance branch from `main`:
+
+```sh
+git switch main
+git pull --ff-only
+git switch -c fix/<short-description>    # or docs/<short-description>
+```
+
+After implementation and tests:
+
+1. Push the branch and report the result.
+2. Ask for explicit approval.
+3. Merge into `main` with `--no-ff`, push, and delete the branch locally and remotely.
+4. Merge the updated `main` into the active step branch before continuing step work.
+
+### 3.6 General rules
+
+- Do not push to `main` without explicit permission for that push.
+- Do not force-push, rewrite published history, or delete another contributor's branch.
+- Do not open a pull request unless the user asks.
+- When a task or feature is finished, report the branch name, commit hash(es), test results, and ask for
+  the required approval before any merge.
 - If the user authorizes a merge, follow their instruction exactly; otherwise leave the branch unmerged.
 
 ## 4. Non-negotiable decisions
@@ -245,10 +338,11 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 2. Check its **Depends on** line; do not start before dependencies are done.
 3. Read the step’s **Original reference**, **Design**, **Acceptance criteria**, **Documentation**, **Tests**, and
    **Risks**.
-4. Create an `agent/*` branch as described in section 3, e.g. `agent/step-03-particle-structure`.
-5. Implement only that step’s scope. Resist adding later-phase features.
+4. Propose the feature-branch list for the step and get one approval. Then create/push the step branch if it
+   does not exist, and create the feature branch as described in section 3.
+5. Implement only that feature’s scope. Resist adding later-phase features to the same branch.
 6. Add the tests named in the step, plus tests for every bug you find.
-7. Update the step page:
+7. Update the step page and documentation as part of the feature, or in the final closeout feature:
    - complete its **Documentation** section and write/update the named pages;
    - mark tasks/acceptance criteria (including “Documentation written”) as done;
    - record deviations and decisions;
@@ -256,9 +350,30 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 8. Update the parity matrix status in `appendix-b-parity-matrix.md`.
 9. Run the quality gates.
 10. Commit with an imperative message, e.g. `model: add particle and particle-set validation`.
+11. Push the feature branch, report the result, and ask for approval before the squash merge into the step
+    branch.
+12. After approval, squash-merge, push the step branch, and delete the feature branch locally and remotely.
 
 A step is not done because the code compiles. Its acceptance criteria, tests, docs, and parity entries must
 pass.
+
+### 7.1 Status tracking
+
+Each step page starts with an **Implementation status** block: status, step branch, step CI, main merge, and a
+feature log. The top-level [`docs/planning/status.md`](docs/planning/status.md) dashboard is the at-a-glance
+roll-up.
+
+Update status as follows:
+
+- **Step start:** after the feature list is approved, set the step to `In progress` and record the step branch.
+- **Each feature:** update its feature row and the step-page checkboxes in the feature branch. Mark it
+  `Awaiting approval` before asking for approval.
+- **After squash and step CI:** the next feature or closeout feature records the squash commit and CI result.
+- **Step completion:** the closeout feature records `Done`, the step CI result, and the main merge reference.
+- **Parity:** keep `appendix-b-parity-matrix.md` as the feature-level completeness source.
+
+Do not create duplicate per-step checklist files. The step page is the detailed checklist; `status.md` is the
+roll-up. Avoid status-only commits that trigger an extra step-branch CI run.
 
 ## 8. Coding conventions
 
@@ -449,9 +564,12 @@ incomplete.
 - Do not publish `docs/planning/` as part of the standalone site.
 - Do not optimize before correctness is proven by tests.
 - Do not mark a step/parity item “done” without passing acceptance criteria.
-- Do not work directly on `main` or `master`; always create an `agent/*` branch first.
-- Do not integrate an agent branch with a merge commit; use a squash merge.
-- Do not merge into `main` or `master` without explicit user permission.
+- Do not work directly on `main` or `master`; always create a step branch and a feature branch.
+- Do not commit feature work directly to a step branch; use a feature branch and squash merge.
+- Do not merge a feature branch directly into `main`; merge it into its step branch.
+- Do not merge a step branch into `main` without explicit user permission and a `--no-ff` merge.
+- Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
+- Do not add CI triggers for feature branches; use local gates and run CI after squashing into the step branch.
 - Do not modify `/workspace/mocassin-original` if it is present. It is a read-only reference clone.
 
 ## 15. Useful references in the original repository

@@ -5,6 +5,18 @@
 **Delivers:** State changes, state-change groups, abstract chains, and KMC/MMC transitions bound to reference
 geometry, with validation of transition semantics.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Let a user describe every supported transport mechanism abstractly, bind it to symmetry-reduced reference

@@ -5,6 +5,18 @@
 **Delivers:** A run queue that launches and monitors `mocassin-sim`, live progress/statistics/charts, result
 collection, analysis dashboards, the MMCFE workflow, and the lattice-recycle tool.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Let users run simulations and understand the results without leaving the application. Long HPC jobs remain

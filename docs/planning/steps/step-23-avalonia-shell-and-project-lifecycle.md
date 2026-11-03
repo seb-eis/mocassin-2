@@ -5,6 +5,18 @@
 **Delivers:** The Avalonia application shell, dependency injection, navigation, document tabs, project
 open/save/close, dirty tracking, undo/redo, settings, logging, and crash recovery.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Build the application frame that every editor plugs into. It must feel like a modern scientific IDE: a project

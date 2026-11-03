@@ -5,6 +5,18 @@
 **Delivers:** Editors for interaction environments, clusters, site energies, doping/lattice definitions, and
 MMC/KMC simulations, with cost previews and live validation.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Complete the model-authoring GUI. These editors deal with the most expensive and least intuitive parts of the

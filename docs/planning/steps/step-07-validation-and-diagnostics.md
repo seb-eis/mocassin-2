@@ -5,6 +5,18 @@
 **Delivers:** A cross-domain validation pipeline, a stable diagnostic catalog, model statistics, and the
 headless `mocassin validate` command.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Give users a single, trustworthy answer to "is this model valid, and if not, what exactly is wrong?" before

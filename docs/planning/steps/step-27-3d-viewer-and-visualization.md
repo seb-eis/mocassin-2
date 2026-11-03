@@ -5,6 +5,18 @@
 **Delivers:** A cross-platform 3D viewer for the cell, atoms, transitions, pairs, clusters, and
 parameterization overlays, with camera controls, picking, selection sync, styles, and image export.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Make the model spatially understandable. The viewer must render the idealized crystal and its symmetry

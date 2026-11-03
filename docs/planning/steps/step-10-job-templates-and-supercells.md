@@ -5,6 +5,18 @@
 **Delivers:** Job template collections/configurations, deterministic job expansion, and doping-aware supercell
 generation with charge compensation.
 
+## Implementation status
+
+- **Status:** Not started
+- **Step branch:** —
+- **Step CI:** —
+- **Main merge:** —
+- **Last updated:** —
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Goal
 
 Turn one parameterized model into a reproducible set of simulation jobs and initial lattices. A user must be
