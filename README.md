@@ -4,7 +4,7 @@ A modern, cross-platform reimplementation of **MOCASSIN** (*Monte Carlo for Soli
 Markov-chain Monte Carlo suite for defect thermodynamics and transport in crystalline solids originally
 developed by Sebastian Eisele and Steffen Neitzel-Grieshammer at Forschungszentrum Jülich / RWTH Aachen.
 
-> **Status: planning complete.** This repository contains the accepted reimplementation plan. Production
+> **Status: development ready.** The reimplementation plan and agent workflow are accepted. Production
 > implementation starts at Step 00.
 
 ## Target stack
@@ -43,7 +43,8 @@ zensical.toml         Zensical site configuration (target)
 
 ## Documentation
 
-Start at [`docs/planning/README.md`](docs/planning/README.md) for the roadmap and reading order. The
+Start at [`docs/planning/README.md`](docs/planning/README.md) for the roadmap and reading order. The agent
+workflow playbook is [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md). The
 standalone user/developer documentation site is set up in
 [`step 00`](docs/planning/steps/step-00-repository-toolchain-and-ci.md) and completed in
 [`step 30`](docs/planning/steps/step-30-standalone-documentation.md).
