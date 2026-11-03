@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>Mocassin.App</RootNamespace>
+    <AssemblyName>Mocassin.App</AssemblyName>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Mocassin.App.ViewModels/Mocassin.App.ViewModels.csproj" />
+    <ProjectReference Include="../Mocassin.App.Views/Mocassin.App.Views.csproj" />
+    <ProjectReference Include="../Mocassin.Contracts/Mocassin.Contracts.csproj" />
+    <ProjectReference Include="../Mocassin.Packages/Mocassin.Packages.csproj" />
+    <ProjectReference Include="../Mocassin.Results/Mocassin.Results.csproj" />
+    <ProjectReference Include="../Mocassin.Rendering/Mocassin.Rendering.csproj" />
+  </ItemGroup>
+</Project>

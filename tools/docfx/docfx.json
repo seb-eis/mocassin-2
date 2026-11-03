@@ -9,6 +9,8 @@
           ],
           "exclude": [
             "**/*.Tests.dll",
+            "**/Mocassin.App.dll",
+            "**/Mocassin.Cli.dll",
             "**/obj/**"
           ]
         }

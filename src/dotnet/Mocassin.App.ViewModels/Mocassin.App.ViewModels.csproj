@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>Mocassin.App.ViewModels</RootNamespace>
+    <AssemblyName>Mocassin.App.ViewModels</AssemblyName>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
+    <AdditionalFiles Include="PublicAPI.Shipped.txt" />
+    <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../Mocassin.Contracts/Mocassin.Contracts.csproj" />
+    <ProjectReference Include="../Mocassin.Packages/Mocassin.Packages.csproj" />
+    <ProjectReference Include="../Mocassin.Results/Mocassin.Results.csproj" />
+  </ItemGroup>
+</Project>

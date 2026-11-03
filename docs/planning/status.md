@@ -71,7 +71,7 @@ remain in each step page; each step page also has a feature log.
 
 | Step | Step branch | Current feature | Feature branch | Status |
 | --- | --- | --- | --- | --- |
-| 00 | `step/00-foundation` | `docs-site` | `feature/step-00-foundation/docs-site` | Awaiting approval |
+| 00 | `step/00-foundation` | `dotnet-solution` | `feature/step-00-foundation/dotnet-solution` | Awaiting approval |
 
 ## Notes
 

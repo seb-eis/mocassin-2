@@ -18,7 +18,7 @@ decision records that constrain later steps, and the initial standalone document
 | --- | --- | --- | --- | --- | --- |
 | `repo-skeleton` | `feature/step-00-foundation/repo-skeleton` | Awaiting approval | Structure/link/YAML checks; no build gates yet | — | — |
 | `docs-site` | `feature/step-00-foundation/docs-site` | Awaiting approval | `zensical build --strict` passes; planning excluded; tool restore passes | — | — |
-| `dotnet-solution` | `feature/step-00-foundation/dotnet-solution` | Planned | — | — | — |
+| `dotnet-solution` | `feature/step-00-foundation/dotnet-solution` | Awaiting approval | restore/build/test/format pass; 7 smoke tests | — | — |
 | `rust-workspace` | `feature/step-00-foundation/rust-workspace` | Planned | — | — | — |
 | `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Planned | — | — | — |
 | `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Planned | — | — | — |
@@ -113,24 +113,24 @@ mocassin/
 
 ### .NET
 
-- [ ] Pin the SDK in `global.json` (`10.0.x`, `rollForward: latestFeature`).
-- [ ] Create `Directory.Build.props`:
+- [x] Pin the SDK in `global.json` (`10.0.x`, `rollForward: latestFeature`).
+- [x] Create `Directory.Build.props`:
   - `TargetFramework=net10.0`, `LangVersion=latest`, `Nullable=enable`, `ImplicitUsings=enable`;
   - `TreatWarningsAsErrors=true`, `EnableNETAnalyzers=true`, `AnalysisLevel=latest-recommended`;
   - `Deterministic=true`, `ContinuousIntegrationBuild` when `CI=true`;
   - `GenerateDocumentationFile=true` for libraries.
-- [ ] Create `Directory.Packages.props` with central versions for Avalonia, CommunityToolkit.Mvvm,
+- [x] Create `Directory.Packages.props` with central versions for Avalonia, CommunityToolkit.Mvvm,
   Microsoft.Extensions.*, Microsoft.Data.Sqlite, MessagePack, ZstdSharp,
   xUnit, FsCheck, FluentAssertions, System.Numerics.Tensors, Microsoft.CodeAnalysis.PublicApiAnalyzers,
   LiveCharts2, Silk.NET, Serilog.
-- [ ] Create the solution with empty projects:
+- [x] Create the solution with empty projects:
   `Mocassin.Core`, `Mocassin.Symmetry`, `Mocassin.Compilation`, `Mocassin.Contracts`,
   `Mocassin.Packages`, `Mocassin.Results`, `Mocassin.Cli`, `Mocassin.App`, `Mocassin.App.ViewModels`,
   `Mocassin.App.Views`, `Mocassin.Rendering`.
-- [ ] Add test projects: `Mocassin.Core.Tests`, `Mocassin.Symmetry.Tests`, `Mocassin.Compilation.Tests`,
+- [x] Add test projects: `Mocassin.Core.Tests`, `Mocassin.Symmetry.Tests`, `Mocassin.Compilation.Tests`,
   `Mocassin.Contracts.Tests`, `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, `Mocassin.App.Tests`.
-- [ ] Add a smoke test in each test project so `dotnet test` is meaningful from day one.
-- [ ] Add `dotnet format` and a `.editorconfig` with C# style, naming, and analyzer severities.
+- [x] Add a smoke test in each test project so `dotnet test` is meaningful from day one.
+- [x] Add `dotnet format` and a `.editorconfig` with C# style, naming, and analyzer severities.
 
 ### Rust
 
