@@ -24,7 +24,7 @@ decision records that constrain later steps, and the initial standalone document
 | `fix-docs-api-links` | `feature/step-00-foundation/fix-docs-api-links` | Squashed | strict docs build; direct API links; redirects verified over HTTP | No workflow yet | `e420a9f` |
 | `fix-spdx-headers` | `feature/step-00-foundation/fix-spdx-headers` | Awaiting approval | header check 27/27; .NET and Rust gates re-run | — | — |
 | `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Awaiting approval | generator/validator and drift check pass; 17 artifacts | — | — |
-| `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Planned | — | — | — |
+| `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Awaiting approval | YAML parse; local matrix commands; coverage; ApiCompat; policy checks | — | — |
 | `closeout` | `feature/step-00-foundation/closeout` | Planned | — | — | — |
 
 **Deviations:**
@@ -155,22 +155,22 @@ mocassin/
 
 ### CI
 
-- [ ] GitHub Actions workflow triggered by pushes to `main` and integration branches matching `step/*`, with
+- [x] GitHub Actions workflow triggered by pushes to `main` and integration branches matching `step/*`, with
   a matrix: `ubuntu-latest`, `windows-latest`, `macos-latest`. Exclude `step/*/*` so feature branches are
   validated locally and do not consume CI runs. Pull-request CI is not enabled by default; add it if PRs are
   introduced later.
-- [ ] Steps: checkout, setup .NET 10, setup Rust stable, cache NuGet/Cargo/SQLite, restore, build,
+- [x] Steps: checkout, setup .NET 10, setup Rust stable, cache NuGet/Cargo/SQLite, restore, build,
   `dotnet test`, `cargo test`, `dotnet format --verify-no-changes`, `cargo fmt --check`, `cargo clippy`.
-- [ ] Upload test results and coverage artifacts.
-- [ ] Add the docs job: setup Python, install pinned Zensical requirements, install the Python package in
+- [x] Upload test results and coverage artifacts.
+- [x] Add the docs job: setup Python, install pinned Zensical requirements, install the Python package in
   editable mode when `src/python/pyproject.toml` exists (from Step 22), run `zensical build --strict`, and
   enable DocFX/rustdoc steps as their projects appear.
 - [x] Add a minimal `src/python` placeholder package (`pyproject.toml`, import package, smoke test) so the
   Python CI job is meaningful from day one. Step 22 replaces the placeholder with the real reader.
-- [ ] Add the Python job: Python 3.11–3.13, install `src/python` with test extras, run `pytest`, and build the
+- [x] Add the Python job: Python 3.11–3.13, install `src/python` with test extras, run `pytest`, and build the
   wheel/sdist.
-- [ ] Add a scheduled nightly workflow for longer tests and fuzzing (can start as a placeholder).
-- [ ] Add a dependency/licence check and a "no secrets" check.
+- [x] Add a scheduled nightly workflow for longer tests and fuzzing (can start as a placeholder).
+- [x] Add a dependency/licence check and a "no secrets" check.
 
 ### Fixtures and documentation skeleton
 
@@ -181,8 +181,8 @@ mocassin/
 - [x] Create `contracts/manifest.json` and `tools/contracts/` with a generator/validator for project/package/
   results/state/job-folder/event/MMCFE field descriptions, canonical signature projection layouts, JSON Schema
   fragments, fixture descriptors, and version constants.
-- [ ] Add a CI step that regenerates contract artifacts and fails on drift.
-- [ ] Add public-API baseline files and an `ApiCompat` CI check for published .NET libraries.
+- [x] Add a CI step that regenerates contract artifacts and fails on drift.
+- [x] Add public-API baseline files and an `ApiCompat` CI check for published .NET libraries.
 - [x] Create the Zensical project skeleton:
   - `zensical.toml` with `docs_dir = "docs"`, `site_dir = "site"`, `exclude_docs = "planning/"`, site
     metadata, repo link, and nav;

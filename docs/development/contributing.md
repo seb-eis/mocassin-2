@@ -75,13 +75,34 @@ python -m build src/python
 
 python tools/contracts/generate.py --check
 python tools/check-license-headers.py
+python tools/check-no-secrets.py
+./tools/check-api-compat.sh
 zensical build --strict
 ```
 
 Feature branches are validated locally; CI runs on `main` and `step/*` integration branches only. Report the
 commands and their results, including the exit status.
 
-## 5. Tests
+## 5. Continuous integration
+
+CI runs on pushes to `main` and integration branches matching `step/*`. GitHub's `*` does not match `/`, so
+feature branches and nested `step/*/*` branches are not triggered. Pull-request CI is not enabled until the
+project adopts pull requests.
+
+The workflow has these jobs:
+
+| Job | What it checks |
+| --- | --- |
+| `.NET` | Restore, Release build, tests with TRX/coverage, `dotnet format` |
+| `Rust` | `cargo fmt`, `clippy -D warnings`, tests, Release build |
+| `Python` | Editable install on 3.11–3.13, pytest with JUnit/coverage, wheel/sdist |
+| `Contracts and policy` | Manifest drift, SPDX headers, secret scan, `cargo deny` |
+| `Public API compatibility` | ApiCompat against the checked-in baseline assemblies |
+| `Documentation` | Strict Zensical build plus DocFX and rustdoc output |
+
+The scheduled `Nightly` workflow is a placeholder for parity, fuzzing, benchmarks, and screenshot suites.
+
+## 6. Tests
 
 Follow the testing trophy in
 [`docs/planning/03-quality-strategy.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/03-quality-strategy.md):
@@ -93,7 +114,7 @@ Follow the testing trophy in
 - every bug fix gets a regression test; every scientific change gets a physics/parity test;
 - declare the test tier (`PR-fast`, `PR-medium`, `nightly`, `release`).
 
-## 6. Documentation as code
+## 7. Documentation as code
 
 - Narrative documentation is in `docs/` and built with Zensical; `docs/planning/` is internal and excluded
   from the published site.
@@ -103,7 +124,7 @@ Follow the testing trophy in
   feature, not as a separate status-only commit.
 - Use Mermaid fenced blocks for diagrams.
 
-## 7. Licensing and dependencies
+## 8. Licensing and dependencies
 
 - New files use `SPDX-License-Identifier: MIT`.
 - Do not copy original MOCASSIN source, documentation, or database content into MIT files.
@@ -112,7 +133,7 @@ Follow the testing trophy in
 - New dependencies require a justification, a pinned version, and a licence check. GPL/AGPL dependencies need
   explicit review.
 
-## 8. Evidence and approvals
+## 9. Evidence and approvals
 
 A feature is ready for approval only with the report template from
 [`agent-workflow.md`](agent-workflow.md) §5. Do not approve from prose alone. If the working tree is on

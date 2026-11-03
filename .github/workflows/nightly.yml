@@ -1,0 +1,25 @@
+name: Nightly
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nightly
+  cancel-in-progress: false
+
+jobs:
+  placeholder:
+    name: Nightly placeholder
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Report pending nightly suites
+        run: |
+          echo "Long-running statistical parity, fuzzing, benchmark, and screenshot suites"
+          echo "are enabled as the corresponding solver, results, and GUI steps land."

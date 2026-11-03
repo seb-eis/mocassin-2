@@ -1,0 +1,235 @@
+name: CI
+
+# CI runs on main and step integration branches. GitHub's `*` does not match
+# `/`, so `step/*` matches `step/00-foundation` but not feature branches such as
+# `step/00-foundation/...` or `feature/step-00-foundation/...`.
+# Pull-request CI is intentionally not enabled until the project adopts PRs.
+on:
+  push:
+    branches:
+      - main
+      - "step/*"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+  CARGO_TERM_COLOR: always
+  RUST_BACKTRACE: "1"
+
+jobs:
+  dotnet:
+    name: .NET (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
+
+      - name: Restore
+        run: dotnet restore Mocassin.slnx
+
+      - name: Build
+        run: dotnet build Mocassin.slnx -c Release --no-restore
+
+      - name: Test with coverage
+        run: >
+          dotnet test Mocassin.slnx -c Release --no-build
+          --logger "trx;LogFileName=test-results.trx"
+          --collect:"XPlat Code Coverage"
+          --results-directory artifacts/test-results
+
+      - name: Format
+        run: dotnet format Mocassin.slnx --verify-no-changes --no-restore
+
+      - name: Upload test results and coverage
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: dotnet-test-results-${{ matrix.os }}
+          path: |
+            artifacts/test-results/**/*.trx
+            artifacts/test-results/**/coverage.cobertura.xml
+          if-no-files-found: ignore
+
+  rust:
+    name: Rust (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: dtolnay/rust-toolchain@1.99.1
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src/rust
+
+      - name: Format
+        run: cargo fmt --manifest-path src/rust/Cargo.toml --all --check
+
+      - name: Clippy
+        run: cargo clippy --manifest-path src/rust/Cargo.toml --workspace --all-targets -- -D warnings
+
+      - name: Test
+        run: cargo test --manifest-path src/rust/Cargo.toml --workspace
+
+      - name: Release build
+        run: cargo build --manifest-path src/rust/Cargo.toml --workspace --release
+
+  python:
+    name: Python (${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          cache-dependency-path: src/python/pyproject.toml
+
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -e "src/python[test]" build
+
+      - name: Test with coverage
+        run: |
+          mkdir -p artifacts
+          python -m pytest src/python/tests \
+            --junitxml=artifacts/pytest-${{ matrix.python-version }}.xml \
+            --cov=mocassin \
+            --cov-report=xml:artifacts/coverage-python-${{ matrix.python-version }}.xml
+
+      - name: Build wheel and sdist
+        run: python -m build src/python
+
+      - name: Upload test results and distributions
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: python-${{ matrix.python-version }}
+          path: |
+            artifacts/pytest-*.xml
+            artifacts/coverage-python-*.xml
+            src/python/dist/*
+          if-no-files-found: ignore
+
+  contracts:
+    name: Contracts and policy
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: Contract drift
+        run: python tools/contracts/generate.py --check
+
+      - name: Licence headers
+        run: python tools/check-license-headers.py
+
+      - name: Secret scan
+        run: python tools/check-no-secrets.py
+
+      - name: Rust dependency policy
+        uses: EmbarkStudios/cargo-deny-action@v2
+        with:
+          manifest-path: src/rust/Cargo.toml
+          command: check
+
+  api-compat:
+    name: Public API compatibility
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
+
+      - name: Restore
+        run: dotnet restore Mocassin.slnx
+
+      - name: Build
+        run: dotnet build Mocassin.slnx -c Release --no-restore
+
+      - name: Compare against baseline
+        run: ./tools/check-api-compat.sh
+
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
+
+      - uses: dtolnay/rust-toolchain@1.99.1
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: tools/docs/requirements.txt
+
+      - name: Install documentation tools
+        run: |
+          python -m pip install -r tools/docs/requirements.txt
+          python -m pip install -e src/python
+
+      - name: Restore and build .NET assemblies
+        run: |
+          dotnet restore Mocassin.slnx
+          dotnet build Mocassin.slnx -c Release --no-restore
+          dotnet tool restore
+
+      - name: Build combined site
+        run: ./tools/docs/build-docs.sh
+
+      - name: Upload documentation site
+        uses: actions/upload-artifact@v7
+        with:
+          name: documentation-site
+          path: site
+          if-no-files-found: error
