@@ -9,6 +9,8 @@ This directory is the working plan for rebuilding MOCASSIN on a modern, cross-pl
 The plan is deliberately split into small, independently reviewable steps. Each step page states the
 original behaviour to preserve, the target design, concrete tasks, acceptance criteria, tests, and risks.
 
+> **Planning checkpoint:** the accepted planning state is tagged `planning-complete`.
+
 ## Reading order
 
 1. [`00-scope-and-principles.md`](00-scope-and-principles.md) — what is being rebuilt, what is explicitly

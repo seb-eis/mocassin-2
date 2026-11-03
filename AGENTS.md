@@ -189,6 +189,7 @@ mutable status dashboard.
 
 | Tag | Created when | Points to |
 | --- | --- | --- |
+| `planning-complete` | The implementation plan is accepted and frozen | The final planning commit on `main` |
 | `step-<NN>` | A step is merged into `main` | The step's `--no-ff` merge commit |
 | `milestone-m<N>` | A roadmap milestone is reached | The commit that satisfies the milestone |
 | `v<major>.<minor>.<patch>` | A release or release candidate is published | The release commit |
