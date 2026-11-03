@@ -47,9 +47,11 @@ Before changing anything, read these in order:
 9. [`docs/planning/07-reference-build.md`](docs/planning/07-reference-build.md) — verified original
    solver/model-builder build and reference-data recipe.
 10. [`docs/planning/status.md`](docs/planning/status.md) — step and feature status dashboard.
-11. The step page you intend to work on, plus its dependencies.
-12. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-13. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+11. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
+    evidence playbook for coding agents.
+12. The step page you intend to work on, plus its dependencies.
+13. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+14. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
@@ -190,6 +192,7 @@ mutable status dashboard.
 | Tag | Created when | Points to |
 | --- | --- | --- |
 | `planning-complete` | The implementation plan is accepted and frozen | The final planning commit on `main` |
+| `development-ready` | Development workflow and agent playbook are accepted | The final development-readiness commit on `main` |
 | `step-<NN>` | A step is merged into `main` | The step's `--no-ff` merge commit |
 | `milestone-m<N>` | A roadmap milestone is reached | The commit that satisfies the milestone |
 | `v<major>.<minor>.<patch>` | A release or release candidate is published | The release commit |
@@ -417,7 +420,9 @@ Update status as follows:
 - **Parity:** keep `appendix-b-parity-matrix.md` as the feature-level completeness source.
 
 Do not create duplicate per-step checklist files. The step page is the detailed checklist; `status.md` is the
-roll-up. Avoid status-only commits that trigger an extra step-branch CI run.
+roll-up. Avoid status-only commits that trigger an extra step-branch CI run. See
+[`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) for context handoff, prompt,
+approval-report, and diff-review templates.
 
 ## 8. Coding conventions
 

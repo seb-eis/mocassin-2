@@ -9,7 +9,8 @@ This directory is the working plan for rebuilding MOCASSIN on a modern, cross-pl
 The plan is deliberately split into small, independently reviewable steps. Each step page states the
 original behaviour to preserve, the target design, concrete tasks, acceptance criteria, tests, and risks.
 
-> **Planning checkpoint:** the accepted planning state is tagged `planning-complete`.
+> **Planning checkpoint:** the accepted planning state is tagged `planning-complete`. The development
+> readiness checkpoint is tagged `development-ready`.
 
 ## Reading order
 
