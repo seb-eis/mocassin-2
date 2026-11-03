@@ -24,6 +24,7 @@ mocassin/
 | `artifacts/docfx/` | DocFX | No |
 | `target/doc/` | `cargo doc` | No |
 | `contracts/generated/` | `tools/contracts/generate.py` | Yes; regenerate, never hand-edit |
+| `tests/contracts/api-baseline/net10.0/` | `tools/update-api-baseline.sh` | Yes; refresh after an intentional public API change |
 | `tests/contracts/**/*.mcs`, `*.msl`, `*.msr`, `*.log`, `Job*/` | Real writers | Yes; explicit `.gitignore` exceptions |
 
 ## Planning docs

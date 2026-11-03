@@ -9,7 +9,7 @@ decision records that constrain later steps, and the initial standalone document
 
 - **Status:** Awaiting approval
 - **Step branch:** `step/00-foundation`
-- **Step CI:** [`41730146454`](https://github.com/seb-eis/mocassin-2/actions/runs/41730146454) — green (Ubuntu + Windows)
+- **Step CI:** [`41731068135`](https://github.com/seb-eis/mocassin-2/actions/runs/41731068135) — green (Ubuntu + Windows)
 - **Main merge:** Pending approval
 - **Step tag:** Pending main merge
 - **Last updated:** 2026-11-03
@@ -28,7 +28,8 @@ decision records that constrain later steps, and the initial standalone document
 | `fix-api-compat-tool-restore` | `feature/step-00-foundation/fix-api-compat-tool-restore` | Squashed | `dotnet tool restore` before ApiCompat | [`41727653557`](https://github.com/seb-eis/mocassin-2/actions/runs/41727653557) — green (incl. macOS) | `e968b0f` |
 | `fix-ci-log-warnings` | `feature/step-00-foundation/fix-ci-log-warnings` | Squashed | unique TRX files; clean `cargo-deny` | Superseded by platform-matrix change | `a62d701` |
 | `fix-ci-platform-matrix` | `feature/step-00-foundation/fix-ci-platform-matrix` | Squashed | step branches Ubuntu + Windows; macOS on `main` | [`41730146454`](https://github.com/seb-eis/mocassin-2/actions/runs/41730146454) — green | `f518222` |
-| `closeout` | `feature/step-00-foundation/closeout` | Awaiting approval | full local acceptance run | — | — |
+| `closeout` | `feature/step-00-foundation/closeout` | Squashed | full local acceptance run | [`41731068135`](https://github.com/seb-eis/mocassin-2/actions/runs/41731068135) — green | `399dcca` |
+| `fix-closeout-audit` | `feature/step-00-foundation/fix-closeout-audit` | Awaiting approval | stale status cleanup, link audit, ignore check | — | — |
 
 **Deviations:**
 
@@ -225,7 +226,7 @@ mocassin/
 - [x] `dotnet test` runs and passes the smoke tests.
 - [x] `cargo build --workspace` and `cargo test --workspace` succeed on all three OSes.
 - [x] `dotnet format --verify-no-changes`, `cargo fmt --check`, and `cargo clippy -- -D warnings` pass.
-- [x] CI is green on a `step/*` integration-branch push: run `41730146454` (Ubuntu + Windows).
+- [x] CI is green on a `step/*` integration-branch push: run `41731068135` (Ubuntu + Windows).
 - [ ] CI is green on the initial `main` push after the step merge (full Ubuntu + Windows + macOS matrix).
 - [x] `README.md` describes prerequisites and the exact build/test/docs commands.
 - [x] `zensical build --strict` succeeds and the skeleton contains every required top-level section.
@@ -254,7 +255,7 @@ tools/docs/build-docs.sh (DocFX + rustdoc) ...... pass
 CI evidence:
 
 - `41727653557` — full Ubuntu + Windows + macOS matrix, green (before the macOS-on-main policy change).
-- `41730146454` — final step-branch Ubuntu + Windows matrix, green.
+- `41731068135` — final step-branch Ubuntu + Windows matrix, green.
 - `41725017402` — first CI run; failed only because ApiCompat needed `dotnet tool restore`; fixed in
   `e968b0f`.
 - The full macOS matrix runs again on `main` after the step merge.

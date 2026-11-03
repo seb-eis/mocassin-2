@@ -34,7 +34,7 @@ remain in each step page; each step page also has a feature log.
 
 | Step | Title | Phase | Status | Step branch | Current feature | Step CI | Main merge | Step tag |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Awaiting approval | `step/00-foundation` | `closeout` | `41730146454` green | — | — |
+| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Awaiting approval | `step/00-foundation` | — | [`41731068135`](https://github.com/seb-eis/mocassin-2/actions/runs/41731068135) green | — | — |
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Not started | — | — | — | — | — |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Not started | — | — | — | — | — |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Not started | — | — | — | — | — |
@@ -71,11 +71,12 @@ remain in each step page; each step page also has a feature log.
 
 | Step | Step branch | Current feature | Feature branch | Status |
 | --- | --- | --- | --- | --- |
-| 00 | `step/00-foundation` | `closeout` | `feature/step-00-foundation/closeout` | Awaiting approval |
+| 00 | `step/00-foundation` | — | — | Awaiting main-merge approval |
 
 ## Notes
 
 - Feature rows live in each step page under **Implementation status**.
+- Step 00 is complete and awaiting owner approval for the final `--no-ff` merge into `main`.
 - A step is not `Done` until its acceptance criteria, tests, documentation, and parity entries pass.
 - Status updates should ride in feature branches or the closeout feature; avoid status-only commits that
   trigger an extra step-branch CI run.

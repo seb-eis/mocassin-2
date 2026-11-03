@@ -2,7 +2,7 @@ name: CI
 
 # CI runs on main and step integration branches. GitHub's `*` does not match
 # `/`, so `step/*` matches `step/00-foundation` but not feature branches such as
-# `step/00-foundation/...` or `feature/step-00-foundation/...`.
+# `feature/step-00-foundation/...`.
 # Step branches use the fast Ubuntu + Windows matrix. The full matrix, including
 # macOS, runs on main after the step merge to keep squash validation responsive.
 # Pull-request CI is intentionally not enabled until the project adopts PRs.
