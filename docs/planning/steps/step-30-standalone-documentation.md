@@ -248,7 +248,7 @@ These sections are mandatory for the first release:
 
 **Rust**
 
-- `cargo doc --workspace --no-deps --target-dir target/doc`.
+- `cargo doc --manifest-path src/rust/Cargo.toml --workspace --no-deps`.
 - Enable `#![deny(missing_docs)]` on public crates.
 - Copy `target/doc/` to `site/api/rust/`.
 - Keep crate-level docs linking to the narrative architecture/physics pages.
@@ -281,7 +281,7 @@ dotnet tool restore
 dotnet docfx tools/docfx/docfx.json -o artifacts/docfx
 
 # Rust API
-cargo doc --workspace --no-deps --target-dir target/doc
+cargo doc --manifest-path src/rust/Cargo.toml --workspace --no-deps
 
 # Python docs are rendered by Zensical/mkdocstrings during the narrative build.
 

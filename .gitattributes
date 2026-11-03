@@ -2,14 +2,27 @@
 *.sln text eol=crlf
 *.slnx text eol=lf
 *.cs text eol=lf
+*.csproj text eol=lf
+*.props text eol=lf
+*.targets text eol=lf
 *.rs text eol=lf
 *.py text eol=lf
 *.md text eol=lf
 *.json text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.sh text eol=lf
+*.ps1 text eol=crlf
 *.png binary
 *.jpg binary
 *.pdf binary
+*.dll binary
 *.mcs binary
 *.msl binary
 *.msr binary
 *.zst binary
+*.msgpack binary
+*.db binary
+*.sqlite binary
+*.sqlite3 binary

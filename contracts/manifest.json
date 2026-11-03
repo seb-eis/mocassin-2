@@ -1,0 +1,334 @@
+{
+  "manifestVersion": 1,
+  "project": "MOCASSIN",
+  "description": "Machine-readable contract manifest for MOCASSIN project, package, results, state, job-folder, event, and MMCFE formats.",
+  "status": "skeleton",
+  "notes": "Step 00 establishes the manifest envelope, field/type descriptions, canonical signature layouts, and generator scaffolding. Later steps extend the field lists as the corresponding formats are implemented; every change requires a format version bump and updated fixtures.",
+  "formats": {
+    "project": {
+      "id": "project",
+      "title": "Project JSON",
+      "fileExtension": ".mocprj",
+      "encoding": "utf-8-json",
+      "schemaVersion": 1,
+      "unknownFields": "reject",
+      "fields": [
+        { "name": "$schema", "type": "string", "required": false, "notes": "Optional JSON Schema URI." },
+        { "name": "schemaVersion", "type": "uint64", "required": true },
+        { "name": "projectId", "type": "string", "required": true, "notes": "RFC 4122 UUID." },
+        { "name": "masterSeed", "type": "string", "required": true, "notes": "32-byte lowercase hex seed." },
+        { "name": "name", "type": "string", "required": true },
+        { "name": "createdUtc", "type": "string", "required": true, "notes": "ISO-8601 UTC timestamp." },
+        { "name": "modifiedUtc", "type": "string", "required": true, "notes": "ISO-8601 UTC timestamp." },
+        { "name": "model", "type": "object", "required": true },
+        { "name": "parameterizations", "type": "array", "required": true, "items": "object" },
+        { "name": "jobTemplates", "type": "array", "required": true, "items": "object" },
+        { "name": "buildTemplates", "type": "array", "required": true, "items": "object" },
+        { "name": "viewSettings", "type": "map", "required": true }
+      ]
+    },
+    "package": {
+      "id": "package",
+      "title": "Simulation package",
+      "fileExtension": ".msl",
+      "encoding": "sqlite",
+      "formatVersion": 1,
+      "unknownFields": "reject",
+      "tables": {
+        "schema_info": {
+          "fields": [
+            { "name": "key", "type": "string", "required": true },
+            { "name": "value", "type": "string", "required": true }
+          ]
+        },
+        "models": {
+          "fields": [
+            { "name": "model_id", "type": "int64", "required": true },
+            { "name": "signature", "type": "string", "required": true },
+            { "name": "format_version", "type": "uint64", "required": true },
+            { "name": "payload", "type": "bin", "required": true }
+          ]
+        },
+        "lattices": {
+          "fields": [
+            { "name": "lattice_id", "type": "int64", "required": true },
+            { "name": "signature", "type": "string", "required": true },
+            { "name": "format_version", "type": "uint64", "required": true },
+            { "name": "payload", "type": "bin", "required": true }
+          ]
+        },
+        "jobs": {
+          "fields": [
+            { "name": "job_id", "type": "int64", "required": true },
+            { "name": "model_id", "type": "int64", "required": true },
+            { "name": "lattice_id", "type": "int64", "required": true },
+            { "name": "kind", "type": "string", "required": true },
+            { "name": "collection_name", "type": "string", "required": true },
+            { "name": "config_name", "type": "string", "required": true },
+            { "name": "collection_index", "type": "uint64", "required": true },
+            { "name": "config_index", "type": "uint64", "required": true },
+            { "name": "job_index", "type": "uint64", "required": true },
+            { "name": "temperature_k", "type": "float64", "required": true },
+            { "name": "electric_field_vm", "type": "float64", "required": true },
+            { "name": "target_mcsp", "type": "uint64", "required": true },
+            { "name": "pre_run_mcsp", "type": "uint64", "required": true },
+            { "name": "time_limit_s", "type": "int64", "required": false },
+            { "name": "min_success_rate", "type": "float64", "required": false },
+            { "name": "norm_factor", "type": "float64", "required": false },
+            { "name": "base_frequency_hz", "type": "float64", "required": false },
+            { "name": "lattice_a", "type": "uint64", "required": true },
+            { "name": "lattice_b", "type": "uint64", "required": true },
+            { "name": "lattice_c", "type": "uint64", "required": true },
+            { "name": "doping_info", "type": "string", "required": true },
+            { "name": "flags", "type": "uint64", "required": true },
+            { "name": "seed", "type": "bin", "required": true, "length": 32 },
+            { "name": "payload", "type": "bin", "required": true },
+            { "name": "created_utc", "type": "string", "required": true }
+          ]
+        }
+      }
+    },
+    "results": {
+      "id": "results",
+      "title": "Results store",
+      "fileExtension": ".msr",
+      "encoding": "sqlite",
+      "formatVersion": 1,
+      "unknownFields": "reject",
+      "tables": {
+        "schema_info": {
+          "fields": [
+            { "name": "key", "type": "string", "required": true },
+            { "name": "value", "type": "string", "required": true }
+          ]
+        },
+        "results": {
+          "fields": [
+            { "name": "job_id", "type": "int64", "required": true },
+            { "name": "status", "type": "string", "required": true },
+            { "name": "exit_code", "type": "int64", "required": false },
+            { "name": "started_utc", "type": "string", "required": false },
+            { "name": "completed_utc", "type": "string", "required": false },
+            { "name": "wall_time_s", "type": "float64", "required": false },
+            { "name": "stdout", "type": "string", "required": false },
+            { "name": "run_state_storage", "type": "string", "required": true },
+            { "name": "run_state", "type": "bin", "required": false },
+            { "name": "run_state_path", "type": "string", "required": false },
+            { "name": "prerun_state_storage", "type": "string", "required": true },
+            { "name": "prerun_state", "type": "bin", "required": false },
+            { "name": "prerun_state_path", "type": "string", "required": false },
+            { "name": "run_state_sha256", "type": "string", "required": false },
+            { "name": "prerun_state_sha256", "type": "string", "required": false },
+            { "name": "error_message", "type": "string", "required": false },
+            { "name": "updated_utc", "type": "string", "required": true }
+          ]
+        }
+      }
+    },
+    "state": {
+      "id": "state",
+      "title": "Result state document",
+      "fileExtension": ".mcs",
+      "encoding": "messagepack",
+      "format": "mocassin.mcs",
+      "formatVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        { "name": "format", "type": "string", "required": true },
+        { "name": "formatVersion", "type": "uint64", "required": true },
+        { "name": "metadata", "type": "map", "required": true },
+        { "name": "lattice", "type": "bin", "required": true },
+        { "name": "counters", "type": "array", "required": true, "items": "map" },
+        { "name": "globalTrackers", "type": "array", "required": false, "items": "array" },
+        { "name": "mobileTrackers", "type": "array", "required": false, "items": "array" },
+        { "name": "staticTrackers", "type": "array", "required": false, "items": "array" },
+        { "name": "mobileMapping", "type": "array", "required": false, "items": "uint64" },
+        { "name": "jumpStatistics", "type": "array", "required": false, "items": "map" },
+        { "name": "energySamples", "type": "array", "required": false, "items": "map" },
+        { "name": "particlePositions", "type": "array", "required": false, "items": "uint64" }
+      ]
+    },
+    "solver": {
+      "id": "solver",
+      "title": "Solver job summary",
+      "fileName": "solver.json",
+      "encoding": "utf-8-json",
+      "format": "mocassin.solver",
+      "formatVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        { "name": "format", "type": "string", "required": true },
+        { "name": "formatVersion", "type": "uint64", "required": true },
+        { "name": "jobId", "type": "uint64", "required": true },
+        { "name": "exitCode", "type": "int64", "required": true },
+        { "name": "abortReason", "type": "string", "required": true },
+        { "name": "wallTimeS", "type": "float64", "required": true },
+        { "name": "simulatedTimeS", "type": "float64", "required": true },
+        { "name": "state", "type": "map", "required": true },
+        { "name": "seedHash", "type": "string", "required": true },
+        { "name": "counters", "type": "map", "required": false },
+        { "name": "error", "type": "string", "required": false },
+        { "name": "createdUtc", "type": "string", "required": true }
+      ]
+    },
+    "jobFolder": {
+      "id": "jobFolder",
+      "title": "Solver job folder",
+      "encoding": "directory",
+      "formatVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        { "name": "run.mcs", "type": "string", "required": true, "notes": "Relative path to the final state." },
+        { "name": "prerun.mcs", "type": "string", "required": false, "notes": "Relative path to the KMC pre-run state." },
+        { "name": "stdout.log", "type": "string", "required": false },
+        { "name": "stderr.log", "type": "string", "required": false },
+        { "name": "solver.json", "type": "string", "required": true },
+        { "name": "mmcfe.db", "type": "string", "required": false }
+      ]
+    },
+    "events": {
+      "id": "events",
+      "title": "Machine-readable event stream",
+      "encoding": "jsonl",
+      "schemaVersion": 1,
+      "unknownFields": "ignore",
+      "events": [
+        { "name": "build.started", "requiredFields": ["total"] },
+        { "name": "build.progress", "requiredFields": ["completed", "total"] },
+        { "name": "build.finished", "requiredFields": ["exitCode", "wallTimeS"] },
+        { "name": "sim.started", "requiredFields": ["jobId"] },
+        { "name": "sim.progress", "requiredFields": ["jobId", "mcs", "target"] },
+        { "name": "sim.finished", "requiredFields": ["jobId", "exitCode", "abortReason", "wallTimeS"] },
+        { "name": "collect.started", "requiredFields": ["total"] },
+        { "name": "collect.progress", "requiredFields": ["completed", "total", "jobId"] },
+        { "name": "collect.finished", "requiredFields": ["collected", "skipped", "failed"] },
+        { "name": "diagnostic", "requiredFields": ["code", "severity", "message"] },
+        { "name": "log", "requiredFields": ["level", "message"] }
+      ]
+    },
+    "mmcfe": {
+      "id": "mmcfe",
+      "title": "MMCFE log database",
+      "fileExtension": ".db",
+      "encoding": "sqlite",
+      "formatVersion": 1,
+      "unknownFields": "reject",
+      "tables": {
+        "schema_info": {
+          "fields": [
+            { "name": "key", "type": "string", "required": true },
+            { "name": "value", "type": "string", "required": true }
+          ]
+        },
+        "mmcfe_runs": {
+          "fields": [
+            { "name": "run_id", "type": "int64", "required": true },
+            { "name": "job_id", "type": "int64", "required": true },
+            { "name": "variant", "type": "string", "required": true },
+            { "name": "alpha_count", "type": "int64", "required": true },
+            { "name": "alpha_min", "type": "float64", "required": true },
+            { "name": "alpha_max", "type": "float64", "required": true },
+            { "name": "cycles_per_alpha", "type": "int64", "required": true },
+            { "name": "relax_cycles", "type": "int64", "required": true },
+            { "name": "seed_hash", "type": "string", "required": true },
+            { "name": "status", "type": "string", "required": true },
+            { "name": "started_utc", "type": "string", "required": true },
+            { "name": "completed_utc", "type": "string", "required": false },
+            { "name": "error_message", "type": "string", "required": false }
+          ]
+        },
+        "mmcfe_alpha": {
+          "fields": [
+            { "name": "run_id", "type": "int64", "required": true },
+            { "name": "alpha_index", "type": "int64", "required": true },
+            { "name": "alpha", "type": "float64", "required": true },
+            { "name": "cycles", "type": "int64", "required": true },
+            { "name": "accepted", "type": "int64", "required": true },
+            { "name": "energy_min_ev", "type": "float64", "required": true },
+            { "name": "energy_max_ev", "type": "float64", "required": true },
+            { "name": "bin_count", "type": "int64", "required": true },
+            { "name": "histogram", "type": "bin", "required": true },
+            { "name": "log_dos", "type": "bin", "required": true },
+            { "name": "underflow", "type": "int64", "required": true },
+            { "name": "overflow", "type": "int64", "required": true },
+            { "name": "updated_utc", "type": "string", "required": true }
+          ]
+        },
+        "mmcfe_resume": {
+          "fields": [
+            { "name": "run_id", "type": "int64", "required": true },
+            { "name": "state", "type": "bin", "required": true },
+            { "name": "state_sha256", "type": "string", "required": true },
+            { "name": "updated_utc", "type": "string", "required": true }
+          ]
+        }
+      }
+    }
+  },
+  "signatures": {
+    "model": {
+      "id": "model",
+      "domainPrefix": "mocassin/model-signature/v1",
+      "projectionType": "ModelSignatureV1",
+      "status": "skeleton",
+      "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 08.",
+      "fields": [
+        { "name": "formatVersion", "type": "uint64", "required": true },
+        { "name": "structure", "type": "bin", "required": true },
+        { "name": "energy", "type": "bin", "required": true },
+        { "name": "transitions", "type": "bin", "required": true },
+        { "name": "simulations", "type": "bin", "required": true }
+      ]
+    },
+    "parameterization": {
+      "id": "parameterization",
+      "domainPrefix": "mocassin/parameterization-signature/v1",
+      "projectionType": "ParameterizationSignatureV1",
+      "status": "skeleton",
+      "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 09.",
+      "fields": [
+        { "name": "formatVersion", "type": "uint64", "required": true },
+        { "name": "modelSignature", "type": "string", "required": true },
+        { "name": "stablePairs", "type": "bin", "required": true },
+        { "name": "unstablePairs", "type": "bin", "required": true },
+        { "name": "groupSets", "type": "bin", "required": true },
+        { "name": "siteEnergies", "type": "bin", "required": true },
+        { "name": "transitionRules", "type": "bin", "required": true }
+      ]
+    },
+    "lattice": {
+      "id": "lattice",
+      "domainPrefix": "mocassin/lattice-signature/v1",
+      "projectionType": "LatticeSignatureV1",
+      "status": "skeleton",
+      "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 11.",
+      "fields": [
+        { "name": "formatVersion", "type": "uint64", "required": true },
+        { "name": "modelSignature", "type": "string", "required": true },
+        { "name": "latticeSize", "type": "array", "items": "uint64", "length": 3, "required": true },
+        { "name": "positionCount", "type": "uint64", "required": true },
+        { "name": "particles", "type": "bin", "required": true },
+        { "name": "dopingInfo", "type": "string", "required": true }
+      ]
+    }
+  },
+  "fixtures": {
+    "signatureVectors": {
+      "path": "tests/contracts/signature-vectors.json",
+      "format": "mocassin.signature-vectors",
+      "formatVersion": 1,
+      "status": "scaffold",
+      "notes": "Signed-type vectors are added with Steps 08, 09, and 11."
+    },
+    "items": [
+      { "id": "project-minimal", "path": "tests/contracts/project-minimal.mocprj", "kind": "project", "status": "planned", "step": "01" },
+      { "id": "project-ceria", "path": "tests/contracts/project-ceria.mocprj", "kind": "project", "status": "planned", "step": "01" },
+      { "id": "model-v1", "path": "tests/contracts/model-v1.msgpack.zst", "kind": "compiled-model", "status": "planned", "step": "08" },
+      { "id": "package-v1", "path": "tests/contracts/package-v1.msl", "kind": "package", "status": "planned", "step": "11" },
+      { "id": "state-v1", "path": "tests/contracts/state-v1.mcs", "kind": "state", "status": "planned", "step": "18" },
+      { "id": "results-v1", "path": "tests/contracts/package-v1.msr", "kind": "results", "status": "planned", "step": "20" },
+      { "id": "job-folder", "path": "tests/contracts/job-folder", "kind": "job-folder", "status": "planned", "step": "18" },
+      { "id": "events-v1", "path": "tests/contracts/events-v1.jsonl", "kind": "events", "status": "planned", "step": "19" }
+    ]
+  }
+}

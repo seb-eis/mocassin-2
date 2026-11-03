@@ -1,0 +1,23 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/dotnet/">
+    <Project Path="src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj" />
+    <Project Path="src/dotnet/Mocassin.App.ViewModels/Mocassin.App.ViewModels.csproj" />
+    <Project Path="src/dotnet/Mocassin.App.Views/Mocassin.App.Views.csproj" />
+    <Project Path="src/dotnet/Mocassin.App/Mocassin.App.csproj" />
+    <Project Path="src/dotnet/Mocassin.Cli/Mocassin.Cli.csproj" />
+    <Project Path="src/dotnet/Mocassin.Compilation.Tests/Mocassin.Compilation.Tests.csproj" />
+    <Project Path="src/dotnet/Mocassin.Compilation/Mocassin.Compilation.csproj" />
+    <Project Path="src/dotnet/Mocassin.Contracts.Tests/Mocassin.Contracts.Tests.csproj" />
+    <Project Path="src/dotnet/Mocassin.Contracts/Mocassin.Contracts.csproj" />
+    <Project Path="src/dotnet/Mocassin.Core.Tests/Mocassin.Core.Tests.csproj" />
+    <Project Path="src/dotnet/Mocassin.Core/Mocassin.Core.csproj" />
+    <Project Path="src/dotnet/Mocassin.Packages.Tests/Mocassin.Packages.Tests.csproj" />
+    <Project Path="src/dotnet/Mocassin.Packages/Mocassin.Packages.csproj" />
+    <Project Path="src/dotnet/Mocassin.Rendering/Mocassin.Rendering.csproj" />
+    <Project Path="src/dotnet/Mocassin.Results.Tests/Mocassin.Results.Tests.csproj" />
+    <Project Path="src/dotnet/Mocassin.Results/Mocassin.Results.csproj" />
+    <Project Path="src/dotnet/Mocassin.Symmetry.Tests/Mocassin.Symmetry.Tests.csproj" />
+    <Project Path="src/dotnet/Mocassin.Symmetry/Mocassin.Symmetry.csproj" />
+  </Folder>
+</Solution>

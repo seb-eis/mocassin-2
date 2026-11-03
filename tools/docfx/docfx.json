@@ -1,0 +1,44 @@
+{
+  "metadata": [
+    {
+      "src": [
+        {
+          "src": "../../src/dotnet",
+          "files": [
+            "**/bin/Release/net10.0/Mocassin.*.dll"
+          ],
+          "exclude": [
+            "**/*.Tests.dll",
+            "**/Mocassin.App.dll",
+            "**/Mocassin.Cli.dll",
+            "**/obj/**"
+          ]
+        }
+      ],
+      "dest": "../../artifacts/docfx/api",
+      "properties": {
+        "TargetFramework": "net10.0"
+      }
+    }
+  ],
+  "build": {
+    "content": [
+      {
+        "files": [
+          "api/*.yml"
+        ],
+        "src": "../../artifacts/docfx"
+      }
+    ],
+    "dest": "../../artifacts/docfx",
+    "globalMetadata": {
+      "_appTitle": "MOCASSIN .NET API",
+      "_appFooter": "MOCASSIN reimplementation contributors"
+    },
+    "template": [
+      "default",
+      "modern"
+    ],
+    "overwrite": []
+  }
+}

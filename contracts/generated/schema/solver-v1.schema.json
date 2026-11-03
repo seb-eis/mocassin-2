@@ -1,0 +1,60 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/solver-v1.json",
+  "title": "Solver job summary",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "format": {
+      "type": "string"
+    },
+    "formatVersion": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "jobId": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "exitCode": {
+      "type": "integer"
+    },
+    "abortReason": {
+      "type": "string"
+    },
+    "wallTimeS": {
+      "type": "number"
+    },
+    "simulatedTimeS": {
+      "type": "number"
+    },
+    "state": {
+      "type": "object"
+    },
+    "seedHash": {
+      "type": "string"
+    },
+    "counters": {
+      "type": "object"
+    },
+    "error": {
+      "type": "string"
+    },
+    "createdUtc": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "format",
+    "formatVersion",
+    "jobId",
+    "exitCode",
+    "abortReason",
+    "wallTimeS",
+    "simulatedTimeS",
+    "state",
+    "seedHash",
+    "createdUtc"
+  ]
+}

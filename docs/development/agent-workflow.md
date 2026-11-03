@@ -1,7 +1,8 @@
 # Working with Coding Agents
 
 This page is the practical playbook for guiding coding agents on MOCASSIN. The mandatory rules live in
-[`AGENTS.md`](../../AGENTS.md); if this page and `AGENTS.md` disagree, `AGENTS.md` wins.
+[`AGENTS.md`](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md); if this page and `AGENTS.md`
+disagree, `AGENTS.md` wins.
 
 Use this page to prepare work, review agent output, and keep contexts small enough to stay reliable.
 
@@ -15,9 +16,9 @@ Use this page to prepare work, review agent output, and keep contexts small enou
 
 The repository is the memory, not the conversation. At the start of a step, read:
 
-1. [`AGENTS.md`](../../AGENTS.md)
-2. [`docs/planning/README.md`](../planning/README.md)
-3. [`docs/planning/status.md`](../planning/status.md)
+1. [`AGENTS.md`](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md)
+2. [`docs/planning/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/README.md)
+3. [`docs/planning/status.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/status.md)
 4. The step page and its dependencies
 5. Relevant ADRs, data contracts, and reference docs
 
@@ -69,7 +70,7 @@ Use this as the basis for each feature request:
 ```text
 Step: 00 — Repository, Toolchain, and CI
 Feature: .NET solution skeleton
-Branch: step/00-foundation/dotnet-skeleton
+Branch: feature/step-00-foundation/dotnet-skeleton
 Base: step/00-foundation, with current main merged in
 
 Read:
@@ -114,7 +115,7 @@ Approval requested for:
 Review the diff itself:
 
 ```sh
-git diff step/00-foundation...step/00-foundation/<feature>
+git diff step/00-foundation...feature/step-00-foundation/<feature>
 ```
 
 Do not approve from prose alone.
@@ -135,7 +136,7 @@ Do not approve from prose alone.
 ## 7. Testing expectations
 
 Follow the testing trophy in
-[`docs/planning/03-quality-strategy.md`](../planning/03-quality-strategy.md):
+[`docs/planning/03-quality-strategy.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/03-quality-strategy.md):
 
 - highest effort on contract/acceptance, property, and toy-integration tests;
 - real objects, real files, and real writers where practical;
@@ -177,7 +178,8 @@ After a step is approved and merged:
 - never move or delete a published tag;
 - use `step-NN.1` for a follow-up checkpoint.
 
-See [`AGENTS.md`](../../AGENTS.md) section 3.7 for the normative rules.
+See [`AGENTS.md`](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) section 3.7 for the normative
+rules.
 
 ## 10. CI policy
 
@@ -193,7 +195,7 @@ regression that local gates cannot.
 
 When generating reference data:
 
-- use [`docs/planning/07-reference-build.md`](../planning/07-reference-build.md);
+- use [`docs/planning/07-reference-build.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/07-reference-build.md);
 - keep `/workspace/mocassin-original` read-only;
 - record the original commit, compiler, package pins, seeds, and hashes;
 - treat the original as an oracle, not as source to copy.

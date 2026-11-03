@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/events-v1.json",
+  "title": "Machine-readable event stream",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "event": {
+      "type": "string",
+      "enum": [
+        "build.started",
+        "build.progress",
+        "build.finished",
+        "sim.started",
+        "sim.progress",
+        "sim.finished",
+        "collect.started",
+        "collect.progress",
+        "collect.finished",
+        "diagnostic",
+        "log"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "event"
+  ],
+  "x-event-required-fields": {
+    "build.started": [
+      "total"
+    ],
+    "build.progress": [
+      "completed",
+      "total"
+    ],
+    "build.finished": [
+      "exitCode",
+      "wallTimeS"
+    ],
+    "sim.started": [
+      "jobId"
+    ],
+    "sim.progress": [
+      "jobId",
+      "mcs",
+      "target"
+    ],
+    "sim.finished": [
+      "jobId",
+      "exitCode",
+      "abortReason",
+      "wallTimeS"
+    ],
+    "collect.started": [
+      "total"
+    ],
+    "collect.progress": [
+      "completed",
+      "total",
+      "jobId"
+    ],
+    "collect.finished": [
+      "collected",
+      "skipped",
+      "failed"
+    ],
+    "diagnostic": [
+      "code",
+      "severity",
+      "message"
+    ],
+    "log": [
+      "level",
+      "message"
+    ]
+  }
+}

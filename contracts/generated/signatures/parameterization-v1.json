@@ -1,0 +1,47 @@
+{
+  "manifestVersion": 1,
+  "id": "parameterization",
+  "domainPrefix": "mocassin/parameterization-signature/v1",
+  "domainSeparator": "0x00",
+  "hash": "sha256",
+  "projectionType": "ParameterizationSignatureV1",
+  "status": "skeleton",
+  "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 09.",
+  "fields": [
+    {
+      "name": "formatVersion",
+      "type": "uint64",
+      "required": true
+    },
+    {
+      "name": "modelSignature",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "stablePairs",
+      "type": "bin",
+      "required": true
+    },
+    {
+      "name": "unstablePairs",
+      "type": "bin",
+      "required": true
+    },
+    {
+      "name": "groupSets",
+      "type": "bin",
+      "required": true
+    },
+    {
+      "name": "siteEnergies",
+      "type": "bin",
+      "required": true
+    },
+    {
+      "name": "transitionRules",
+      "type": "bin",
+      "required": true
+    }
+  ]
+}

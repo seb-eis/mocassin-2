@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/results-v1.json",
+  "title": "Results store",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_info": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "results": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "integer"
+        },
+        "status": {
+          "type": "string"
+        },
+        "exit_code": {
+          "type": "integer"
+        },
+        "started_utc": {
+          "type": "string"
+        },
+        "completed_utc": {
+          "type": "string"
+        },
+        "wall_time_s": {
+          "type": "number"
+        },
+        "stdout": {
+          "type": "string"
+        },
+        "run_state_storage": {
+          "type": "string"
+        },
+        "run_state": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "run_state_path": {
+          "type": "string"
+        },
+        "prerun_state_storage": {
+          "type": "string"
+        },
+        "prerun_state": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "prerun_state_path": {
+          "type": "string"
+        },
+        "run_state_sha256": {
+          "type": "string"
+        },
+        "prerun_state_sha256": {
+          "type": "string"
+        },
+        "error_message": {
+          "type": "string"
+        },
+        "updated_utc": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "status",
+        "run_state_storage",
+        "prerun_state_storage",
+        "updated_utc"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_info",
+    "results"
+  ]
+}

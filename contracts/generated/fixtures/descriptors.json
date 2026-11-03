@@ -1,0 +1,68 @@
+{
+  "manifestVersion": 1,
+  "signatureVectors": {
+    "path": "tests/contracts/signature-vectors.json",
+    "format": "mocassin.signature-vectors",
+    "formatVersion": 1,
+    "status": "scaffold",
+    "notes": "Signed-type vectors are added with Steps 08, 09, and 11."
+  },
+  "fixtures": [
+    {
+      "id": "project-minimal",
+      "path": "tests/contracts/project-minimal.mocprj",
+      "kind": "project",
+      "status": "planned",
+      "step": "01"
+    },
+    {
+      "id": "project-ceria",
+      "path": "tests/contracts/project-ceria.mocprj",
+      "kind": "project",
+      "status": "planned",
+      "step": "01"
+    },
+    {
+      "id": "model-v1",
+      "path": "tests/contracts/model-v1.msgpack.zst",
+      "kind": "compiled-model",
+      "status": "planned",
+      "step": "08"
+    },
+    {
+      "id": "package-v1",
+      "path": "tests/contracts/package-v1.msl",
+      "kind": "package",
+      "status": "planned",
+      "step": "11"
+    },
+    {
+      "id": "state-v1",
+      "path": "tests/contracts/state-v1.mcs",
+      "kind": "state",
+      "status": "planned",
+      "step": "18"
+    },
+    {
+      "id": "results-v1",
+      "path": "tests/contracts/package-v1.msr",
+      "kind": "results",
+      "status": "planned",
+      "step": "20"
+    },
+    {
+      "id": "job-folder",
+      "path": "tests/contracts/job-folder",
+      "kind": "job-folder",
+      "status": "planned",
+      "step": "18"
+    },
+    {
+      "id": "events-v1",
+      "path": "tests/contracts/events-v1.jsonl",
+      "kind": "events",
+      "status": "planned",
+      "step": "19"
+    }
+  ]
+}
