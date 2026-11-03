@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 //! Placeholder for deterministic RNG stream derivation.
 //!
 //! This crate is a Step 00 placeholder. Its public surface is replaced by the real implementation in a

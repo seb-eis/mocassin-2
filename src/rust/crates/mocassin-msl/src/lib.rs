@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 //! Placeholder for the .msl package reader.
 //!
 //! This crate is a Step 00 placeholder. Its public surface is replaced by the real implementation in a

@@ -77,7 +77,8 @@ cargo build --manifest-path src/rust/Cargo.toml --workspace --release
 python -m pytest src/python/tests
 python -m build src/python
 
-# Contract manifest drift check
+# Licence headers and contract manifest drift
+python tools/check-license-headers.py
 python tools/contracts/generate.py --check
 
 # Documentation (narrative site, then generated APIs where available)

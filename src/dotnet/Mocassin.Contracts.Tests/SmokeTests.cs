@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 namespace Mocassin.Contracts.Tests;
 
 /// <summary>

@@ -43,8 +43,9 @@ cargo test --manifest-path src/rust/Cargo.toml --workspace
 python -m pytest src/python/tests
 python -m build src/python
 
-# Contracts and docs
+# Contracts, licence headers, and docs
 python tools/contracts/generate.py --check
+python tools/check-license-headers.py
 zensical build --strict
 ```
 

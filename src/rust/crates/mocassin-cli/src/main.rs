@@ -1,3 +1,5 @@
+// SPDX-License-Identifier: MIT
+
 //! `mocassin-sim` command-line entry point.
 //!
 //! Step 00 provides the argument-parser and `--version` stub. The production CLI is implemented in Step 19.
