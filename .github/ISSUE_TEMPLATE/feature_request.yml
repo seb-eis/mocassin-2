@@ -1,0 +1,65 @@
+name: Feature request
+description: Propose a capability, parity item, or improvement.
+title: "feature: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        The plan is the source of truth. Proposals that add scope must identify the affected step, the
+        parity-matrix item, and whether an ADR or format change is required.
+  - type: input
+    id: step
+    attributes:
+      label: Affected roadmap step
+      placeholder: "Step 00 — Repository, Toolchain, and CI"
+    validations:
+      required: true
+  - type: input
+    id: parity
+    attributes:
+      label: Parity-matrix item or improvement
+      description: Link the parity item, or explain why this is an improvement over the original.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user or scientific workflow is blocked or painful today?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe the intended behaviour, API/format impact, and alternatives considered.
+    validations:
+      required: true
+  - type: dropdown
+    id: adr
+    attributes:
+      label: Does this require an ADR or format version bump?
+      options:
+        - "No"
+        - "Yes — architecture decision"
+        - "Yes — format/schema change"
+        - "Unsure"
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance evidence
+      description: What command, test, file, or observable result proves this works?
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues and the plan for prior art.
+          required: true
+        - label: This proposal does not reintroduce legacy format compatibility.
+          required: true
+        - label: I have identified the documentation pages that would change.
+          required: false

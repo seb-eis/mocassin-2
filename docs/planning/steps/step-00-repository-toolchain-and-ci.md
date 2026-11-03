@@ -7,16 +7,27 @@ decision records that constrain later steps, and the initial standalone document
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
+- **Status:** In progress
+- **Step branch:** `step/00-foundation`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
-- **Last updated:** —
+- **Last updated:** 2026-11-03
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `repo-skeleton` | `feature/step-00-foundation/repo-skeleton` | Awaiting approval | Structure/link/YAML checks; no build gates yet | — | — |
+| `docs-site` | `feature/step-00-foundation/docs-site` | Planned | — | — | — |
+| `dotnet-solution` | `feature/step-00-foundation/dotnet-solution` | Planned | — | — | — |
+| `rust-workspace` | `feature/step-00-foundation/rust-workspace` | Planned | — | — | — |
+| `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Planned | — | — | — |
+| `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Planned | — | — | — |
+| `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Planned | — | — | — |
+| `closeout` | `feature/step-00-foundation/closeout` | Planned | — | — | — |
+
+**Deviation:** feature branches use the `feature/step-<NN>-<slug>/<feature>` prefix. Git cannot store both a
+step branch (`step/00-foundation`) and a nested feature branch (`step/00-foundation/<feature>`) because of the
+directory/file ref conflict. `AGENTS.md` and the agent workflow were corrected before implementation.
 
 ## Goal
 
@@ -91,14 +102,14 @@ mocassin/
 
 ### Repository
 
-- [ ] Create the missing directory structure and placeholder projects/crates (`src/`, `samples/`, `tests/`,
+- [x] Create the missing directory structure and placeholder projects/crates (`src/`, `samples/`, `tests/`,
   `tools/`, `contracts/`).
-- [ ] Verify the existing `LICENSE` is MIT and `NOTICE.md` records the original authorship, the GPL/MIT
+- [x] Verify the existing `LICENSE` is MIT and `NOTICE.md` records the original authorship, the GPL/MIT
   boundary, and citation guidance.
-- [ ] Verify/update the existing `.gitattributes` for LF normalization, binary formats, and generated files.
-- [ ] Update the existing `.gitignore` for .NET, Rust, IDEs, build outputs, simulation artifacts, and the
+- [x] Verify/update the existing `.gitattributes` for LF normalization, binary formats, and generated files.
+- [x] Update the existing `.gitignore` for .NET, Rust, IDEs, build outputs, simulation artifacts, and the
   contract-fixture exceptions.
-- [ ] Update `README.md` with prerequisites, exact build/test/docs commands, and a link to the plan.
+- [x] Update `README.md` with prerequisites, exact build/test/docs commands, and a link to the plan.
 
 ### .NET
 

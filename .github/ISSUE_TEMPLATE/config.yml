@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Reimplementation plan
+    url: https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/README.md
+    about: Read the roadmap, contracts, and step pages before opening an issue.
+  - name: Agent and contributor workflow
+    url: https://github.com/seb-eis/mocassin-2/blob/main/docs/development/agent-workflow.md
+    about: Branch, review, evidence, and approval rules for changes.

@@ -1,0 +1,73 @@
+name: Bug report
+description: Report a defect in the reimplementation, tooling, formats, or documentation.
+title: "bug: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for reporting a defect. Do not include secrets, private project files, or copied GPL
+        source code. For security-sensitive reports, contact the maintainers privately instead.
+  - type: input
+    id: step
+    attributes:
+      label: Affected roadmap step
+      description: The step number or page where the defect belongs.
+      placeholder: "Step 00 — Repository, Toolchain, and CI"
+    validations:
+      required: true
+  - type: input
+    id: parity
+    attributes:
+      label: Parity-matrix item (if applicable)
+      description: Link or name the relevant item from docs/planning/appendix-b-parity-matrix.md.
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What is wrong, and why does it matter?
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Exact commands, project/package/state files, inputs, and seeds. Keep fixtures minimal.
+      placeholder: |
+        1. Run `...`
+        2. Open `...`
+        3. Observe `...`
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behaviour
+      description: Include exit codes, diagnostics, stack traces, and relevant log lines.
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: OS, architecture, .NET/Rust/Python versions, and commit or tag.
+      placeholder: "Ubuntu 24.04 x86_64; .NET 10.0.403; Rust 1.99.1; commit abc1234"
+    validations:
+      required: true
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Checklist
+      options:
+        - label: I have searched existing issues for a duplicate.
+          required: true
+        - label: This report contains no secrets or copied GPL source/data.
+          required: true
+        - label: The documentation may need an update for this issue.
+          required: false

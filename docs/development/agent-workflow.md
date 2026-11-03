@@ -69,7 +69,7 @@ Use this as the basis for each feature request:
 ```text
 Step: 00 — Repository, Toolchain, and CI
 Feature: .NET solution skeleton
-Branch: step/00-foundation/dotnet-skeleton
+Branch: feature/step-00-foundation/dotnet-skeleton
 Base: step/00-foundation, with current main merged in
 
 Read:
@@ -114,7 +114,7 @@ Approval requested for:
 Review the diff itself:
 
 ```sh
-git diff step/00-foundation...step/00-foundation/<feature>
+git diff step/00-foundation...feature/step-00-foundation/<feature>
 ```
 
 Do not approve from prose alone.

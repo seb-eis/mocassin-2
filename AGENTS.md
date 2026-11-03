@@ -74,8 +74,10 @@ These rules override convenience. If you are unsure, stop and ask the user.
 - Create **one step branch** per roadmap step:
   - `step/<NN>-<slug>`, e.g. `step/00-foundation`.
 - Create **one feature branch per deliverable** from the step branch:
-  - `step/<NN>-<slug>/<feature>`, e.g. `step/00-foundation/dotnet-skeleton`.
-  - Bug fixes inside a step: `step/<NN>-<slug>/fix-<short-description>`.
+  - `feature/step-<NN>-<slug>/<feature>`, e.g. `feature/step-00-foundation/dotnet-skeleton`.
+  - Bug fixes inside a step: `feature/step-<NN>-<slug>/fix-<short-description>`.
+  - Rationale: Git cannot store `step/00-foundation` and `step/00-foundation/<feature>` at the same time
+    (directory/file ref conflict). The `feature/` prefix keeps the step grouping without that conflict.
 - Use lowercase kebab-case. Keep the feature name short and specific.
 - One step is active at a time unless the user explicitly starts parallel work.
 - At the start of a step, propose the complete feature-branch list for that step and ask the user to approve
@@ -96,7 +98,7 @@ These rules override convenience. If you are unsure, stop and ask the user.
 3. Create each feature branch from the step branch:
    ```sh
    git switch step/00-foundation
-   git switch -c step/00-foundation/dotnet-skeleton
+   git switch -c feature/step-00-foundation/dotnet-skeleton
    ```
 4. All work commits for that feature belong on the feature branch.
 5. Push every feature branch to `origin` when it is created. Push the step branch after each approved
@@ -104,8 +106,8 @@ These rules override convenience. If you are unsure, stop and ask the user.
 6. Feature branches are validated **locally**; they do not trigger CI by default. Run the relevant local
    gates and report the exact commands and results.
 7. CI runs on `main` and on integration branches matching `step/*` (for example `step/00-foundation`). It does
-   not run on feature branches such as `step/00-foundation/dotnet-skeleton`; the GitHub Actions branch filter
-   must exclude `step/*/*`.
+   not run on feature branches such as `feature/step-00-foundation/dotnet-skeleton`; the GitHub Actions branch
+   filter must exclude `feature/*` and `step/*/*`.
 8. If `main` moves while a step is active, merge `main` into the step branch. Do not rebase a shared step
    branch or rewrite its history.
 
@@ -123,14 +125,14 @@ These rules override convenience. If you are unsure, stop and ask the user.
 - After approval:
   ```sh
   git switch step/00-foundation
-  git merge --squash step/00-foundation/dotnet-skeleton
+  git merge --squash feature/step-00-foundation/dotnet-skeleton
   git commit -m "step-00: add .NET solution skeleton"
   git push origin step/00-foundation
-  git branch -D step/00-foundation/dotnet-skeleton
-  git push origin --delete step/00-foundation/dotnet-skeleton
+  git branch -D feature/step-00-foundation/dotnet-skeleton
+  git push origin --delete feature/step-00-foundation/dotnet-skeleton
   ```
 - The push of the step branch triggers CI. Do not start the next feature until that run is green. If it fails,
-  fix it through another feature or `step/00-foundation/fix-<short-description>` branch and squash it.
+  fix it through another feature or `feature/step-00-foundation/fix-<short-description>` branch and squash it.
 - Never merge a feature branch directly into `main`.
 - Do not commit feature work directly to the step branch. The step branch receives only squash commits,
   merges from `main`, and explicitly approved closeout changes.
