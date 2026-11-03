@@ -7,11 +7,11 @@ decision records that constrain later steps, and the initial standalone document
 
 ## Implementation status
 
-- **Status:** Awaiting approval
-- **Step branch:** `step/00-foundation`
+- **Status:** Done
+- **Step branch:** `step/00-foundation` (merged and deleted)
 - **Step CI:** [run history](https://github.com/seb-eis/mocassin-2/actions?query=branch%3Astep%2F00-foundation) — green (Ubuntu + Windows)
-- **Main merge:** Pending approval
-- **Step tag:** Pending main merge
+- **Main merge:** `47a9a90` — `--no-ff` merge; full main CI [`41733064540`](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) green (Ubuntu + Windows + macOS)
+- **Step tag:** `step-00` pushed
 - **Last updated:** 2026-11-03
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -227,7 +227,8 @@ mocassin/
 - [x] `cargo build --workspace` and `cargo test --workspace` succeed on all three OSes.
 - [x] `dotnet format --verify-no-changes`, `cargo fmt --check`, and `cargo clippy -- -D warnings` pass.
 - [x] CI is green on `step/*` integration-branch pushes (Ubuntu + Windows); see the step-branch run history.
-- [ ] CI is green on the initial `main` push after the step merge (full Ubuntu + Windows + macOS matrix).
+- [x] CI is green on the initial `main` push after the step merge (full Ubuntu + Windows + macOS matrix):
+  run `41733064540`.
 - [x] `README.md` describes prerequisites and the exact build/test/docs commands.
 - [x] `zensical build --strict` succeeds and the skeleton contains every required top-level section.
 - [x] The docs CI job is green and `docs/planning/` is absent from the built site.
@@ -260,7 +261,8 @@ CI evidence:
   `e968b0f`.
 - Subsequent docs-only closeout/audit commits are validated by the same fast matrix in the step-branch run
   history.
-- The full macOS matrix runs again on `main` after the step merge.
+- `41733064540` — full Ubuntu + Windows + macOS main matrix after the `--no-ff` merge, green.
+- `step-00` is tagged on merge commit `47a9a90`.
 
 No parity-matrix row applies to infrastructure-only Step 00 work; feature completeness remains tracked by the
 step page and status dashboard.

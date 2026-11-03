@@ -4,8 +4,8 @@ MOCASSIN (*Monte Carlo for Solid State Ionics*) is a fixed-lattice MMC/KMC suite
 crystalline solids. This site documents the modern, cross-platform reimplementation.
 
 !!! note "Status"
-    The project is at Step 00: repository, toolchain, and documentation skeleton. Scientific features arrive
-    in later steps. Commands that depend on unfinished components are marked in each section.
+    The project has completed Step 00: repository, toolchain, and documentation skeleton. Scientific features
+    arrive in later steps. Commands that depend on unfinished components are marked in each section.
 
 ## Start here
 
