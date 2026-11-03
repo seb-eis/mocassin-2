@@ -1,8 +1,9 @@
 # Contributing and Review Workflow
 
 This page is the developer-facing contributor guide. The normative branch, approval, and merge rules are in
-[`AGENTS.md`](../../AGENTS.md); the short repository guide is [`CONTRIBUTING.md`](../../CONTRIBUTING.md). If
-these disagree, `AGENTS.md` wins.
+[`AGENTS.md`](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md); the short repository guide is
+[`CONTRIBUTING.md`](https://github.com/seb-eis/mocassin-2/blob/main/CONTRIBUTING.md). If these disagree,
+`AGENTS.md` wins.
 
 ## 1. Branches
 
@@ -81,7 +82,8 @@ commands and their results, including the exit status.
 
 ## 5. Tests
 
-Follow the testing trophy in [`../planning/03-quality-strategy.md`](../planning/03-quality-strategy.md):
+Follow the testing trophy in
+[`docs/planning/03-quality-strategy.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/03-quality-strategy.md):
 
 - most effort on contract/acceptance, property, and toy-integration tests;
 - real objects, real files, real databases, and real writers;
@@ -104,7 +106,8 @@ Follow the testing trophy in [`../planning/03-quality-strategy.md`](../planning/
 
 - New files use `SPDX-License-Identifier: MIT`.
 - Do not copy original MOCASSIN source, documentation, or database content into MIT files.
-- The original project is GPL-3.0-or-later and is attributed in [`NOTICE.md`](../../NOTICE.md).
+- The original project is GPL-3.0-or-later and is attributed in
+  [`NOTICE.md`](https://github.com/seb-eis/mocassin-2/blob/main/NOTICE.md).
 - New dependencies require a justification, a pinned version, and a licence check. GPL/AGPL dependencies need
   explicit review.
 

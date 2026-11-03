@@ -17,7 +17,7 @@ decision records that constrain later steps, and the initial standalone document
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | `repo-skeleton` | `feature/step-00-foundation/repo-skeleton` | Awaiting approval | Structure/link/YAML checks; no build gates yet | — | — |
-| `docs-site` | `feature/step-00-foundation/docs-site` | Planned | — | — | — |
+| `docs-site` | `feature/step-00-foundation/docs-site` | Awaiting approval | `zensical build --strict` passes; planning excluded; tool restore passes | — | — |
 | `dotnet-solution` | `feature/step-00-foundation/dotnet-solution` | Planned | — | — | — |
 | `rust-workspace` | `feature/step-00-foundation/rust-workspace` | Planned | — | — | — |
 | `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Planned | — | — | — |
@@ -165,16 +165,16 @@ mocassin/
 
 ### Fixtures and documentation skeleton
 
-- [ ] Create `tests/contracts/` and `tests/reference/` with README placeholders.
-- [ ] Add `samples/blank/` and `samples/ceria/` directories with README placeholders.
-- [ ] Review the fourteen ADRs already present in `docs/planning/adr/` and keep them in sync; do not recreate
+- [x] Create `tests/contracts/` and `tests/reference/` with README placeholders.
+- [x] Add `samples/blank/` and `samples/ceria/` directories with README placeholders.
+- [x] Review the fourteen ADRs already present in `docs/planning/adr/` and keep them in sync; do not recreate
   or renumber them.
 - [ ] Create `contracts/manifest.json` and `tools/contracts/` with a generator/validator for project/package/
   results/state/job-folder/event/MMCFE field descriptions, canonical signature projection layouts, JSON Schema
   fragments, fixture descriptors, and version constants.
 - [ ] Add a CI step that regenerates contract artifacts and fails on drift.
 - [ ] Add public-API baseline files and an `ApiCompat` CI check for published .NET libraries.
-- [ ] Create the Zensical project skeleton:
+- [x] Create the Zensical project skeleton:
   - `zensical.toml` with `docs_dir = "docs"`, `site_dir = "site"`, `exclude_docs = "planning/"`, site
     metadata, repo link, and nav;
   - Mermaid support via Zensical SuperFences custom fences;
@@ -185,24 +185,24 @@ mocassin/
   - placeholder `docs/api/dotnet/index.md`, `docs/api/rust/index.md`, and `docs/api/python/index.md` pages so
     strict link validation passes before the generated API outputs exist. DocFX/rustdoc output is copied over
     the first two in `site/api/...`; Step 22 replaces the Python placeholder with mkdocstrings directives.
-- [ ] Add `tools/docs/requirements.txt` (or a root `pyproject.toml`) pinning Zensical, Markdown extensions, and
+- [x] Add `tools/docs/requirements.txt` (or a root `pyproject.toml`) pinning Zensical, Markdown extensions, and
   `mkdocstrings[python]`.
-- [ ] Add `.config/dotnet-tools.json` with pinned DocFX and `Microsoft.DotNet.ApiCompat.Tool` entries. Rust API
+- [x] Add `.config/dotnet-tools.json` with pinned DocFX and `Microsoft.DotNet.ApiCompat.Tool` entries. Rust API
   docs use `cargo doc` directly.
-- [ ] Add docs build scripts:
+- [x] Add docs build scripts:
   - `tools/docs/build-docs.sh` and `tools/docs/build-docs.ps1`: build Zensical strictly; build DocFX/rustdoc when the
     corresponding projects/crates exist; copy API output into `site/api/...`;
   - `tools/docs/serve.sh` / `tools/docs/serve.ps1`: local preview.
 - [ ] Add a `docs` CI job that installs the pinned requirements and runs `zensical build --strict`.
   DocFX/rustdoc steps are enabled as soon as their projects exist; they are not deferred to Step 30.
-- [ ] Add `docs/CONTRIBUTING.md` or a README section explaining docs-as-code: every feature step updates its
+- [x] Add `docs/CONTRIBUTING.md` or a README section explaining docs-as-code: every feature step updates its
   pages, and the docs build must stay green.
-- [ ] Add `site/`, `artifacts/docfx/`, and `target/doc/` to `.gitignore`. Keep the placeholder
+- [x] Add `site/`, `artifacts/docfx/`, and `target/doc/` to `.gitignore`. Keep the placeholder
   `docs/api/*/index.md` pages tracked; generated API output is copied to `site/api/`.
-- [ ] Add contract-fixture exceptions to `.gitignore` so `tests/contracts/**/*.mcs`, `*.msl`, `*.msr`, logs, and
+- [x] Add contract-fixture exceptions to `.gitignore` so `tests/contracts/**/*.mcs`, `*.msl`, `*.msr`, logs, and
   `Job*/` fixtures are not excluded by the simulation-artifact patterns.
-- [ ] Add a `CONTRIBUTING.md` with build, test, style, docs, and review expectations.
-- [ ] Add issue/PR templates that ask for the affected step, parity-matrix item, and documentation update.
+- [x] Add a `CONTRIBUTING.md` with build, test, style, docs, and review expectations.
+- [x] Add issue/PR templates that ask for the affected step, parity-matrix item, and documentation update.
 
 ## Acceptance criteria
 

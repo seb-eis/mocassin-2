@@ -1,0 +1,116 @@
+# Zensical configuration for the public MOCASSIN documentation site.
+#
+# Narrative docs live in docs/. The internal plan in docs/planning/ is
+# excluded from publication. Generated API output is copied into
+# site/api/dotnet and site/api/rust by tools/docs/build-docs.*.
+
+[project]
+docs_dir = "docs"
+site_dir = "site"
+site_url = "https://seb-eis.github.io/mocassin-2/"
+site_name = "MOCASSIN"
+site_description = "Modern cross-platform reimplementation of the MOCASSIN fixed-lattice MMC/KMC suite."
+site_author = "MOCASSIN reimplementation contributors"
+
+copyright = "Copyright &copy; 2026 MOCASSIN reimplementation contributors. MIT licensed."
+
+repo_url = "https://github.com/seb-eis/mocassin-2"
+repo_name = "seb-eis/mocassin-2"
+edit_uri = "edit/main/docs/"
+
+exclude_docs = """
+planning/
+"""
+
+nav = [
+  { "Home" = "index.md" },
+  { "Getting started" = "getting-started/index.md" },
+  { "User guide" = "user-guide/index.md" },
+  { "Physics" = "physics/index.md" },
+  { "Tutorials" = "tutorials/index.md" },
+  { "Reference" = [
+      { "Overview" = "reference/index.md" },
+      { "Repository and file layout" = "reference/file-layout.md" },
+    ] },
+  { "Development" = [
+      { "Overview" = "development/index.md" },
+      { "Contributing" = "development/contributing.md" },
+      { "Agent workflow" = "development/agent-workflow.md" },
+      { "Testing and parity" = "development/testing-and-parity.md" },
+    ] },
+  { "Performance and HPC" = "performance/index.md" },
+  { "Troubleshooting" = "troubleshooting/index.md" },
+  { "Migration" = "migration/index.md" },
+  { "Examples" = "examples/index.md" },
+  { "Glossary" = "glossary/index.md" },
+  { "API" = [
+      { "Overview" = "api/index.md" },
+      { ".NET API" = "api/dotnet/index.md" },
+      { "Rust API" = "api/rust/index.md" },
+      { "Python API" = "api/python/index.md" },
+    ] },
+]
+
+[project.theme]
+language = "en"
+features = [
+  "content.code.annotate",
+  "content.code.copy",
+  "content.code.select",
+  "content.footnote.tooltips",
+  "content.tabs.link",
+  "content.tooltips",
+  "navigation.footer",
+  "navigation.indexes",
+  "navigation.instant",
+  "navigation.instant.prefetch",
+  "navigation.path",
+  "navigation.sections",
+  "navigation.top",
+  "navigation.tracking",
+  "search.highlight",
+]
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme)"
+toggle.icon = "lucide/sun-moon"
+toggle.name = "Switch to light mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: light)"
+scheme = "default"
+toggle.icon = "lucide/sun"
+toggle.name = "Switch to dark mode"
+
+[[project.theme.palette]]
+media = "(prefers-color-scheme: dark)"
+scheme = "slate"
+toggle.icon = "lucide/moon"
+toggle.name = "Switch to system preference"
+
+[project.markdown_extensions]
+admonition = {}
+attr_list = {}
+def_list = {}
+footnotes = {}
+md_in_html = {}
+toc.permalink = true
+pymdownx.arithmatex.generic = true
+pymdownx.betterem = {}
+pymdownx.caret = {}
+pymdownx.details = {}
+pymdownx.highlight.anchor_linenums = true
+pymdownx.highlight.line_spans = "__span"
+pymdownx.highlight.pygments_lang_class = true
+pymdownx.inlinehilite = {}
+pymdownx.keys = {}
+pymdownx.magiclink = {}
+pymdownx.mark = {}
+pymdownx.smartsymbols = {}
+pymdownx.superfences.custom_fences = [
+  { name = "mermaid", class = "mermaid", format = "pymdownx.superfences.fence_code_format" },
+]
+pymdownx.tabbed.alternate_style = true
+pymdownx.tabbed.combine_header_slug = true
+pymdownx.tasklist.custom_checkbox = true
+pymdownx.tilde = {}
