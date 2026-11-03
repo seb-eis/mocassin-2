@@ -30,6 +30,7 @@ mocassin/
 ├── Directory.Build.props            # shared .NET settings (nullable, analyzers, deterministic build)
 ├── Directory.Packages.props         # central NuGet versions
 ├── global.json                      # pins .NET SDK 10.x
+├── Mocassin.slnx                    # root solution over src/dotnet projects
 ├── zensical.toml                    # Zensical site config (docs_dir = "docs")
 ├── docs/
 │   ├── index.md
@@ -48,7 +49,6 @@ mocassin/
 │   └── planning/                    # excluded from the published site
 ├── src/
 │   ├── dotnet/
-│   │   ├── Mocassin.slnx
 │   │   ├── Mocassin.Core/           # domain model, IDs, units, primitive geometry, diagnostics
 │   │   ├── Mocassin.Symmetry/       # space groups, cell geometry, encoding, symmetry algorithms
 │   │   ├── Mocassin.Compilation/    # P1 extension, environments, rules, compiled model
