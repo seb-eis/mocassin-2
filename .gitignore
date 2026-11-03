@@ -12,6 +12,21 @@ artifacts/
 target/
 **/*.rs.bk
 
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+dist/
+build/
+
 # Build/package outputs
 publish/
 *.msi
@@ -22,8 +37,23 @@ publish/
 # Generated simulation artifacts
 *.mcs
 *.msl
+*.msr
 *.log
 Job[0-9][0-9][0-9][0-9][0-9]/
+*.mocprj.lock
+*.mocprj.autosave
+*.msr.lock
+*.msl.tmp-*
+*.msr.tmp-*
+
+# Contract fixtures are versioned and must be committed despite the
+# simulation-artifact patterns above.
+!tests/contracts/**/*.mcs
+!tests/contracts/**/*.msl
+!tests/contracts/**/*.msr
+!tests/contracts/**/*.log
+!tests/contracts/**/Job[0-9][0-9][0-9][0-9][0-9]/
+!tests/contracts/**/Job[0-9][0-9][0-9][0-9][0-9]/**
 
 # OS / editor
 .DS_Store
@@ -36,7 +66,5 @@ Thumbs.db
 
 # Generated documentation site and API outputs
 site/
-docs/api/dotnet/
-docs/api/rust/
 artifacts/docfx/
 target/doc/

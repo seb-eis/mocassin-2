@@ -14,8 +14,8 @@ developed by Sebastian Eisele and Steffen Neitzel-Grieshammer at Forschungszentr
 | Model building system | C# / .NET 10, platform-portable class libraries and CLI |
 | Desktop GUI | C# / Avalonia UI, MVVM, cross-platform (Windows, Linux, macOS) |
 | Solver | Rust, native cross-platform binaries |
-| Shared contracts | Versioned JSON project files, SQLite simulation packages, MessagePack state files |
-| Python analysis | `mocassin-analysis` read-only `.mcs` reader + basic NumPy evaluations, pytest |
+| Shared contracts | Versioned JSON project files, immutable SQLite packages, SQLite results stores, MessagePack state files |
+| Python analysis | `mocassin-analysis` read-only `.mcs`/`.msr` reader + basic NumPy evaluations, pytest |
 | Documentation | Zensical narrative site + DocFX (.NET API) + rustdoc (Rust API) + mkdocstrings (Python API) |
 
 ## Goals
@@ -33,10 +33,10 @@ developed by Sebastian Eisele and Steffen Neitzel-Grieshammer at Forschungszentr
 docs/                 Standalone Zensical site; docs/planning/ is excluded from publication
 src/dotnet/           .NET solution: core model, symmetry, compilation, jobs, results, CLI, Avalonia app
 src/rust/             Rust workspace: solver, model/package reader, RNG, trackers, state writer, CLI
-src/python/           `mocassin-analysis`: read-only .mcs reader + basic Python evaluations
+src/python/           `mocassin-analysis`: read-only .mcs/.msr reader + basic Python evaluations
 samples/              Small example projects and reference inputs
 tests/                Cross-language integration and statistical validation assets
-contracts/            Machine-readable package/state contract manifest + generated checks
+contracts/            Machine-readable package/results/state contract manifest + generated checks
 zensical.toml         Zensical site configuration (target)
 ```
 

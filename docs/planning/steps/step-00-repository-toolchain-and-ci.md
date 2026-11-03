@@ -11,6 +11,14 @@ Create the repository, build infrastructure, documentation skeleton, and quality
 is written. A new contributor should be able to clone, build, test, and serve the docs on Windows, Linux, and
 macOS with one documented command per stack.
 
+The planning documents, ADRs, licence, and contribution rules already exist in the repository. This step
+creates the missing build/code/docs skeleton and keeps those files in sync; do not recreate or replace them.
+
+The local development image is [`docs/opencode/mocassin.containerfile`](../../opencode/mocassin.containerfile).
+It depends only on the `opencode:base` image from
+[`seb-eis/opencode-container`](https://github.com/seb-eis/opencode-container) and does not modify that
+repository. The same toolchain can be installed directly for development without opencode.
+
 ## Original reference
 
 - Original repository: `seb-eis/mocassin`, archived 2022-12-13.
@@ -70,11 +78,14 @@ mocassin/
 
 ### Repository
 
-- [ ] Create the directory structure and placeholder projects/crates.
-- [ ] Write the MIT license to `LICENSE`; add `NOTICE.md` with original authorship, the GPL/MIT boundary, and citation guidance.
-- [ ] Add `.gitattributes` for LF normalization, binary formats, and generated files.
-- [ ] Add `.gitignore` for .NET, Rust, IDEs, build outputs, and simulation artifacts.
-- [ ] Add `README.md` with prerequisites, build/test commands, and a link to the plan.
+- [ ] Create the missing directory structure and placeholder projects/crates (`src/`, `samples/`, `tests/`,
+  `tools/`, `contracts/`).
+- [ ] Verify the existing `LICENSE` is MIT and `NOTICE.md` records the original authorship, the GPL/MIT
+  boundary, and citation guidance.
+- [ ] Verify/update the existing `.gitattributes` for LF normalization, binary formats, and generated files.
+- [ ] Update the existing `.gitignore` for .NET, Rust, IDEs, build outputs, simulation artifacts, and the
+  contract-fixture exceptions.
+- [ ] Update `README.md` with prerequisites, exact build/test/docs commands, and a link to the plan.
 
 ### .NET
 
@@ -116,8 +127,11 @@ mocassin/
 - [ ] Steps: checkout, setup .NET 10, setup Rust stable, cache NuGet/Cargo/SQLite, restore, build,
   `dotnet test`, `cargo test`, `dotnet format --verify-no-changes`, `cargo fmt --check`, `cargo clippy`.
 - [ ] Upload test results and coverage artifacts.
-- [ ] Add the docs job: setup Python, install pinned Zensical requirements and the Python package in editable
-  mode, run `zensical build --strict`, and enable DocFX/rustdoc steps as their projects appear.
+- [ ] Add the docs job: setup Python, install pinned Zensical requirements, install the Python package in
+  editable mode when `src/python/pyproject.toml` exists (from Step 22), run `zensical build --strict`, and
+  enable DocFX/rustdoc steps as their projects appear.
+- [ ] Add a minimal `src/python` placeholder package (`pyproject.toml`, import package, smoke test) so the
+  Python CI job is meaningful from day one. Step 22 replaces the placeholder with the real reader.
 - [ ] Add the Python job: Python 3.11–3.13, install `src/python` with test extras, run `pytest`, and build the
   wheel/sdist.
 - [ ] Add a scheduled nightly workflow for longer tests and fuzzing (can start as a placeholder).
@@ -127,7 +141,8 @@ mocassin/
 
 - [ ] Create `tests/contracts/` and `tests/reference/` with README placeholders.
 - [ ] Add `samples/blank/` and `samples/ceria/` directories with README placeholders.
-- [ ] Add the fourteen ADRs from `docs/planning/adr/`.
+- [ ] Review the fourteen ADRs already present in `docs/planning/adr/` and keep them in sync; do not recreate
+  or renumber them.
 - [ ] Create `contracts/manifest.json` and `tools/contracts/` with a generator/validator for project/package/
   results/state/job-folder/event/MMCFE field descriptions, canonical signature projection layouts, JSON Schema
   fragments, fixture descriptors, and version constants.
@@ -155,7 +170,10 @@ mocassin/
   DocFX/rustdoc steps are enabled as soon as their projects exist; they are not deferred to Step 30.
 - [ ] Add `docs/CONTRIBUTING.md` or a README section explaining docs-as-code: every feature step updates its
   pages, and the docs build must stay green.
-- [ ] Add `site/`, `docs/api/dotnet/`, `docs/api/rust/`, and generated DocFX/rustdoc output to `.gitignore`.
+- [ ] Add `site/`, `artifacts/docfx/`, and `target/doc/` to `.gitignore`. Keep the placeholder
+  `docs/api/*/index.md` pages tracked; generated API output is copied to `site/api/`.
+- [ ] Add contract-fixture exceptions to `.gitignore` so `tests/contracts/**/*.mcs`, `*.msl`, `*.msr`, logs, and
+  `Job*/` fixtures are not excluded by the simulation-artifact patterns.
 - [ ] Add a `CONTRIBUTING.md` with build, test, style, docs, and review expectations.
 - [ ] Add issue/PR templates that ask for the affected step, parity-matrix item, and documentation update.
 
@@ -170,7 +188,9 @@ mocassin/
 - [ ] `zensical build --strict` succeeds and the skeleton contains every required top-level section.
 - [ ] The docs CI job is green and `docs/planning/` is absent from the built site.
 - [ ] `contracts/manifest.json` exists, generated checks are current, and the CI drift check passes.
-- [ ] Canonical signature-projection vectors and the public-API baseline check are in place.
+- [ ] The manifest defines the canonical signature-projection layouts and the generator emits the initial
+  fixture/vector scaffolding; signed-type vectors are added with the types in Steps 08/09/11.
+- [ ] Public-API baseline files and the `ApiCompat` CI check are in place.
 - [ ] The repository contains no copied original source files.
 - [ ] Documentation written
 

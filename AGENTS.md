@@ -42,9 +42,11 @@ Before changing anything, read these in order:
 6. [`docs/planning/04-roadmap.md`](docs/planning/04-roadmap.md) — phases, dependencies, milestones.
 7. [`docs/planning/05-open-decisions.md`](docs/planning/05-open-decisions.md) — resolved, gated, deferred, and
    still-open decisions.
-8. The step page you intend to work on, plus its dependencies.
-9. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-10. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+8. [`docs/planning/06-toolchain-requirements.md`](docs/planning/06-toolchain-requirements.md) — required and
+   optional tools by language and development phase.
+9. The step page you intend to work on, plus its dependencies.
+10. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+11. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
@@ -183,6 +185,12 @@ Rules:
 - The Rust solver core is a library first; the CLI is a thin wrapper.
 
 ## 6. Build and test commands
+
+The dedicated local development image is
+[`docs/opencode/mocassin.containerfile`](docs/opencode/mocassin.containerfile). It depends only on the
+`opencode:base` image from
+[`seb-eis/opencode-container`](https://github.com/seb-eis/opencode-container) and does not modify that
+repository. The same tools can also be installed directly for development without opencode.
 
 These commands become valid as the corresponding projects are created. Do not run them expecting success
 today.
@@ -356,6 +364,8 @@ interpretation, and encode it in a test. Do not copy GPL code.
   5. canonical signature-projection vectors for signed types;
   6. current + previous major fixtures for `.msl`/`.msr`; current-only for `.mcs`;
   7. updated docs.
+- Keep `tests/contracts/**` fixtures tracked. The `.gitignore` exceptions for `.mcs`/`.msl`/`.msr`/logs and
+  `Job*/` folders are required; do not remove them.
 - Never “fix” a format by silently reinterpreting existing fields.
 - Write files atomically (temp file + fsync + rename). Never truncate a valid file on failure.
 - Treat project/package/state input as untrusted: bound counts, validate indices, reject NaN/Inf where invalid,
