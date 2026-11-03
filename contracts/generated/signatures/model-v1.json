@@ -1,0 +1,37 @@
+{
+  "manifestVersion": 1,
+  "id": "model",
+  "domainPrefix": "mocassin/model-signature/v1",
+  "domainSeparator": "0x00",
+  "hash": "sha256",
+  "projectionType": "ModelSignatureV1",
+  "status": "skeleton",
+  "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 08.",
+  "fields": [
+    {
+      "name": "formatVersion",
+      "type": "uint64",
+      "required": true
+    },
+    {
+      "name": "structure",
+      "type": "bin",
+      "required": true
+    },
+    {
+      "name": "energy",
+      "type": "bin",
+      "required": true
+    },
+    {
+      "name": "transitions",
+      "type": "bin",
+      "required": true
+    },
+    {
+      "name": "simulations",
+      "type": "bin",
+      "required": true
+    }
+  ]
+}

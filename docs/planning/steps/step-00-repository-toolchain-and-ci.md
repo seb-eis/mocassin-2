@@ -23,7 +23,7 @@ decision records that constrain later steps, and the initial standalone document
 | `python-skeleton` | `feature/step-00-foundation/python-skeleton` | Squashed | pytest 3/3; wheel/sdist build; wheel import checked | No workflow yet | `2784462` |
 | `fix-docs-api-links` | `feature/step-00-foundation/fix-docs-api-links` | Squashed | strict docs build; direct API links; redirects verified over HTTP | No workflow yet | `e420a9f` |
 | `fix-spdx-headers` | `feature/step-00-foundation/fix-spdx-headers` | Awaiting approval | header check 27/27; .NET and Rust gates re-run | — | — |
-| `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Planned | — | — | — |
+| `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Awaiting approval | generator/validator and drift check pass; 17 artifacts | — | — |
 | `ci-workflows` | `feature/step-00-foundation/ci-workflows` | Planned | — | — | — |
 | `closeout` | `feature/step-00-foundation/closeout` | Planned | — | — | — |
 
@@ -178,7 +178,7 @@ mocassin/
 - [x] Add `samples/blank/` and `samples/ceria/` directories with README placeholders.
 - [x] Review the fourteen ADRs already present in `docs/planning/adr/` and keep them in sync; do not recreate
   or renumber them.
-- [ ] Create `contracts/manifest.json` and `tools/contracts/` with a generator/validator for project/package/
+- [x] Create `contracts/manifest.json` and `tools/contracts/` with a generator/validator for project/package/
   results/state/job-folder/event/MMCFE field descriptions, canonical signature projection layouts, JSON Schema
   fragments, fixture descriptors, and version constants.
 - [ ] Add a CI step that regenerates contract artifacts and fails on drift.

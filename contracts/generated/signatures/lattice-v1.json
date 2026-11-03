@@ -1,0 +1,44 @@
+{
+  "manifestVersion": 1,
+  "id": "lattice",
+  "domainPrefix": "mocassin/lattice-signature/v1",
+  "domainSeparator": "0x00",
+  "hash": "sha256",
+  "projectionType": "LatticeSignatureV1",
+  "status": "skeleton",
+  "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 11.",
+  "fields": [
+    {
+      "name": "formatVersion",
+      "type": "uint64",
+      "required": true
+    },
+    {
+      "name": "modelSignature",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "latticeSize",
+      "type": "array",
+      "items": "uint64",
+      "length": 3,
+      "required": true
+    },
+    {
+      "name": "positionCount",
+      "type": "uint64",
+      "required": true
+    },
+    {
+      "name": "particles",
+      "type": "bin",
+      "required": true
+    },
+    {
+      "name": "dopingInfo",
+      "type": "string",
+      "required": true
+    }
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/jobFolder-v1.json",
+  "title": "Solver job folder",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "run.mcs": {
+      "type": "string"
+    },
+    "prerun.mcs": {
+      "type": "string"
+    },
+    "stdout.log": {
+      "type": "string"
+    },
+    "stderr.log": {
+      "type": "string"
+    },
+    "solver.json": {
+      "type": "string"
+    },
+    "mmcfe.db": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "run.mcs",
+    "solver.json"
+  ]
+}

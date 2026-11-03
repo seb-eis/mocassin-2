@@ -1,0 +1,69 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/project-v1.json",
+  "title": "Project JSON",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schemaVersion": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "projectId": {
+      "type": "string"
+    },
+    "masterSeed": {
+      "type": "string"
+    },
+    "name": {
+      "type": "string"
+    },
+    "createdUtc": {
+      "type": "string"
+    },
+    "modifiedUtc": {
+      "type": "string"
+    },
+    "model": {
+      "type": "object"
+    },
+    "parameterizations": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "jobTemplates": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "buildTemplates": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "viewSettings": {
+      "type": "object"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "projectId",
+    "masterSeed",
+    "name",
+    "createdUtc",
+    "modifiedUtc",
+    "model",
+    "parameterizations",
+    "jobTemplates",
+    "buildTemplates",
+    "viewSettings"
+  ]
+}

@@ -71,7 +71,7 @@ remain in each step page; each step page also has a feature log.
 
 | Step | Step branch | Current feature | Feature branch | Status |
 | --- | --- | --- | --- | --- |
-| 00 | `step/00-foundation` | `fix-spdx-headers` | `feature/step-00-foundation/fix-spdx-headers` | Awaiting approval |
+| 00 | `step/00-foundation` | `contracts-manifest` | `feature/step-00-foundation/contracts-manifest` | Awaiting approval |
 
 ## Notes
 

@@ -4,6 +4,13 @@
 types, versions, and canonical signature-projection layouts. Generated artifacts live under `generated/` and
 are produced by [`tools/contracts`](../tools/contracts/README.md).
 
+Commands:
+
+```sh
+python tools/contracts/generate.py
+python tools/contracts/generate.py --check
+```
+
 Rules:
 
 - update the manifest, not the generated artifacts;

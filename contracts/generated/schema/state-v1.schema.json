@@ -1,0 +1,90 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/state-v1.json",
+  "title": "Result state document",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "format": {
+      "type": "string"
+    },
+    "formatVersion": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "metadata": {
+      "type": "object"
+    },
+    "lattice": {
+      "type": "string",
+      "contentEncoding": "base64"
+    },
+    "counters": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "globalTrackers": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      }
+    },
+    "mobileTrackers": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      }
+    },
+    "staticTrackers": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "type": "object"
+        }
+      }
+    },
+    "mobileMapping": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    },
+    "jumpStatistics": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "energySamples": {
+      "type": "array",
+      "items": {
+        "type": "object"
+      }
+    },
+    "particlePositions": {
+      "type": "array",
+      "items": {
+        "type": "integer",
+        "minimum": 0
+      }
+    }
+  },
+  "required": [
+    "format",
+    "formatVersion",
+    "metadata",
+    "lattice",
+    "counters"
+  ]
+}

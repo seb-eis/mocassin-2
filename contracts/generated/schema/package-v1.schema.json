@@ -1,0 +1,199 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/package-v1.json",
+  "title": "Simulation package",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_info": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "models": {
+      "type": "object",
+      "properties": {
+        "model_id": {
+          "type": "integer"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "format_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64"
+        }
+      },
+      "required": [
+        "model_id",
+        "signature",
+        "format_version",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "lattices": {
+      "type": "object",
+      "properties": {
+        "lattice_id": {
+          "type": "integer"
+        },
+        "signature": {
+          "type": "string"
+        },
+        "format_version": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64"
+        }
+      },
+      "required": [
+        "lattice_id",
+        "signature",
+        "format_version",
+        "payload"
+      ],
+      "additionalProperties": false
+    },
+    "jobs": {
+      "type": "object",
+      "properties": {
+        "job_id": {
+          "type": "integer"
+        },
+        "model_id": {
+          "type": "integer"
+        },
+        "lattice_id": {
+          "type": "integer"
+        },
+        "kind": {
+          "type": "string"
+        },
+        "collection_name": {
+          "type": "string"
+        },
+        "config_name": {
+          "type": "string"
+        },
+        "collection_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "config_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "job_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "temperature_k": {
+          "type": "number"
+        },
+        "electric_field_vm": {
+          "type": "number"
+        },
+        "target_mcsp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pre_run_mcsp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_limit_s": {
+          "type": "integer"
+        },
+        "min_success_rate": {
+          "type": "number"
+        },
+        "norm_factor": {
+          "type": "number"
+        },
+        "base_frequency_hz": {
+          "type": "number"
+        },
+        "lattice_a": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lattice_b": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lattice_c": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "doping_info": {
+          "type": "string"
+        },
+        "flags": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "seed": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "payload": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "created_utc": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id",
+        "model_id",
+        "lattice_id",
+        "kind",
+        "collection_name",
+        "config_name",
+        "collection_index",
+        "config_index",
+        "job_index",
+        "temperature_k",
+        "electric_field_vm",
+        "target_mcsp",
+        "pre_run_mcsp",
+        "lattice_a",
+        "lattice_b",
+        "lattice_c",
+        "doping_info",
+        "flags",
+        "seed",
+        "payload",
+        "created_utc"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_info",
+    "models",
+    "lattices",
+    "jobs"
+  ]
+}

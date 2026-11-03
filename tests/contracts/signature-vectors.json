@@ -1,0 +1,7 @@
+{
+  "format": "mocassin.signature-vectors",
+  "formatVersion": 1,
+  "status": "scaffold",
+  "notes": "Signed-type vectors are added with Steps 08, 09, and 11.",
+  "vectors": []
+}

@@ -1,0 +1,177 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/mmcfe-v1.json",
+  "title": "MMCFE log database",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "schema_info": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "key",
+        "value"
+      ],
+      "additionalProperties": false
+    },
+    "mmcfe_runs": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "integer"
+        },
+        "job_id": {
+          "type": "integer"
+        },
+        "variant": {
+          "type": "string"
+        },
+        "alpha_count": {
+          "type": "integer"
+        },
+        "alpha_min": {
+          "type": "number"
+        },
+        "alpha_max": {
+          "type": "number"
+        },
+        "cycles_per_alpha": {
+          "type": "integer"
+        },
+        "relax_cycles": {
+          "type": "integer"
+        },
+        "seed_hash": {
+          "type": "string"
+        },
+        "status": {
+          "type": "string"
+        },
+        "started_utc": {
+          "type": "string"
+        },
+        "completed_utc": {
+          "type": "string"
+        },
+        "error_message": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "job_id",
+        "variant",
+        "alpha_count",
+        "alpha_min",
+        "alpha_max",
+        "cycles_per_alpha",
+        "relax_cycles",
+        "seed_hash",
+        "status",
+        "started_utc"
+      ],
+      "additionalProperties": false
+    },
+    "mmcfe_alpha": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "integer"
+        },
+        "alpha_index": {
+          "type": "integer"
+        },
+        "alpha": {
+          "type": "number"
+        },
+        "cycles": {
+          "type": "integer"
+        },
+        "accepted": {
+          "type": "integer"
+        },
+        "energy_min_ev": {
+          "type": "number"
+        },
+        "energy_max_ev": {
+          "type": "number"
+        },
+        "bin_count": {
+          "type": "integer"
+        },
+        "histogram": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "log_dos": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "underflow": {
+          "type": "integer"
+        },
+        "overflow": {
+          "type": "integer"
+        },
+        "updated_utc": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "alpha_index",
+        "alpha",
+        "cycles",
+        "accepted",
+        "energy_min_ev",
+        "energy_max_ev",
+        "bin_count",
+        "histogram",
+        "log_dos",
+        "underflow",
+        "overflow",
+        "updated_utc"
+      ],
+      "additionalProperties": false
+    },
+    "mmcfe_resume": {
+      "type": "object",
+      "properties": {
+        "run_id": {
+          "type": "integer"
+        },
+        "state": {
+          "type": "string",
+          "contentEncoding": "base64"
+        },
+        "state_sha256": {
+          "type": "string"
+        },
+        "updated_utc": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "run_id",
+        "state",
+        "state_sha256",
+        "updated_utc"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_info",
+    "mmcfe_runs",
+    "mmcfe_alpha",
+    "mmcfe_resume"
+  ]
+}
