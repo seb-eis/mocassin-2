@@ -22,7 +22,7 @@
 #
 # Then build this image from the MOCASSIN repository root:
 #
-#   podman build -f docs/opencode/mocassin.containerfile -t mocassin:dev .
+#   podman build -f docs/opencode/mocassin.containerfile -t opencode:mocassin .
 #
 # The image installs the full development toolchain because opencode:base
 # provides Node and the common toolbox, but not .NET, Rust, Python, GUI
@@ -148,6 +148,13 @@ RUN python3 -m venv "$HOME/.venvs/mocassin" \
 # Rust validation, coverage, fuzzing, and profiling
 # helpers. cargo-binstall prefers prebuilt binaries and
 # falls back to cargo install when needed.
+#
+# On Linux, fuzz builds must use a glibc target:
+#   cargo +nightly fuzz build --target x86_64-unknown-linux-gnu
+# The cargo-fuzz default musl target is incompatible with ASAN.
+#
+# perf is installed but needs PERFMON/host sysctl access. In the
+# default opencode container, use Valgrind/Callgrind instead.
 # --------------------------------------------------
 RUN cargo install cargo-binstall --version 1.26.2 --locked \
     && install_tool() { \

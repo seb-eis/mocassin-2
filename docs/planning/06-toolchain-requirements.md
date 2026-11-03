@@ -63,7 +63,7 @@ Required for Avalonia, screenshot tests, and the 3D viewer. Included in
 
 | Tool | Status | Needed for | Notes |
 | --- | --- | --- | --- |
-| `linux-perf` | Required | Step 29 | Solver/CPU profiling and flamegraphs. May be restricted by container capabilities. |
+| `linux-perf` | Required | Step 29 | Solver/CPU profiling and flamegraphs. In the default opencode container, `perf` is installed but blocked by `perf_event_paranoid=3` and `cap-drop=ALL`; use Valgrind/Callgrind or grant `PERFMON` explicitly. |
 | `valgrind` | Optional | Steps 13–19 | Native memory diagnostics; Miri is preferred for Rust. |
 | `clang`, `lld`, `llvm` | Optional | Steps 19, 29, 31 | Fuzzing/AOT/NativeAOT only; defer until the AOT decision or fuzz setup needs it. |
 | `libssl-dev`, `zlib1g-dev` | Recommended | Steps 29, 31 | Cargo tool builds and NativeAOT prerequisites. |
@@ -96,7 +96,7 @@ directory to `PATH`.
 | `cargo-deny` 0.20.2 | Required | Steps 00, 29 | License/advisory/dependency policy. |
 | `cargo-llvm-cov` 0.9.1 | Recommended | Step 29 | Rust coverage; needs `llvm-tools-preview`. |
 | `llvm-tools-preview` | Recommended | Step 29 | Install via `rustup component add`. |
-| `cargo-fuzz` 0.13.2 | Required | Steps 13, 29 | Fuzz `.msl`/`.mcs`/extension-config readers. |
+| `cargo-fuzz` 0.13.2 | Required | Steps 13, 29 | Fuzz `.msl`/`.mcs`/extension-config readers. On Linux, use `--target x86_64-unknown-linux-gnu`; the default musl target is incompatible with ASAN. |
 | Nightly Rust toolchain | Required | Steps 13, 29 | `cargo-fuzz` needs nightly; use `--profile minimal`. |
 | `miri`, `rust-src` | Recommended | Step 29 | Unsafe-code validation; nightly components. |
 | `cargo-insta` 1.49.0 | Optional | Steps 18–20 | Snapshot review; `insta` crate tests run without the CLI. |
@@ -174,10 +174,10 @@ make base
 
 # In the MOCASSIN repository:
 cd /path/to/mocassin
-podman build -f docs/opencode/mocassin.containerfile -t mocassin:dev .
+podman build -f docs/opencode/mocassin.containerfile -t opencode:mocassin .
 ```
 
-The resulting `mocassin:dev` image is the base for the MOCASSIN coding agent. The same requirements can be
+The resulting `opencode:mocassin` image is the base for the MOCASSIN coding agent. The same requirements can be
 installed directly on a workstation or another container if opencode is not used.
 
 | Tier | Contents | Approx. addition over `opencode:base` (opencode-container) |
@@ -195,7 +195,7 @@ Step 31 so the image does not carry unreviewed signing/SBOM dependencies during 
 
 ## 9. Verification checklist
 
-Run these inside the built `mocassin:dev` image:
+Run these inside the built `opencode:mocassin` image:
 
 ```sh
 dotnet --version
