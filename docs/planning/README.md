@@ -112,6 +112,7 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
 | Area | Status |
 | --- | --- |
 | Planning | Complete (v1 draft) |
+| Repository and toolchain | Complete (Step 00) |
 | .NET model builder | Not started |
 | Rust solver | Not started |
 | Avalonia GUI | Not started |
