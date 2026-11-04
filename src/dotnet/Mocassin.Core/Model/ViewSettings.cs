@@ -418,14 +418,21 @@ public sealed class StyleValueJsonConverter : JsonConverter<StyleValue>
     /// <inheritdoc />
     public override StyleValue Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        return reader.TokenType switch
+        try
         {
-            JsonTokenType.String => StyleValue.FromString(reader.GetString()!),
-            JsonTokenType.Number => StyleValue.FromNumber(reader.GetDouble()),
-            JsonTokenType.True => StyleValue.FromBoolean(true),
-            JsonTokenType.False => StyleValue.FromBoolean(false),
-            _ => throw new JsonException("Style values must be strings, numbers, or booleans."),
-        };
+            return reader.TokenType switch
+            {
+                JsonTokenType.String => StyleValue.FromString(reader.GetString()!),
+                JsonTokenType.Number => StyleValue.FromNumber(reader.GetDouble()),
+                JsonTokenType.True => StyleValue.FromBoolean(true),
+                JsonTokenType.False => StyleValue.FromBoolean(false),
+                _ => throw new JsonException("Style values must be strings, numbers, or booleans."),
+            };
+        }
+        catch (ArgumentOutOfRangeException exception)
+        {
+            throw new JsonException("Style numbers must be finite.", exception);
+        }
     }
 
     /// <inheritdoc />

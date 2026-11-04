@@ -7,12 +7,12 @@ with canonical serialization and migrations.
 
 ## Implementation status
 
-- **Status:** Awaiting approval
+- **Status:** In progress
 - **Step branch:** `step/01-domain-kernel`
 - **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41924977588) (Ubuntu + Windows, post-fix)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `45d5a4b`
+- **Audit:** Re-audit required — `fix-reaudit-minors` in progress
 - **Last updated:** 2026-11-04
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -25,6 +25,7 @@ with canonical serialization and migrations.
 | `fixtures-schema` | `feature/step-01-domain-kernel/fixtures-schema` | Squashed | Core tests 126/126 including schema/FsCheck; full solution tests pass; `dotnet format --verify-no-changes` passes | `41910849133` — green | `c2fa8f4` |
 | `closeout` | `feature/step-01-domain-kernel/closeout` | Squashed | Full acceptance run; docs strict build; contract drift check | `41915254710` — green (rebased) | `10d1bfc` |
 | `fix-audit-findings` | `feature/step-01-domain-kernel/fix-audit-findings` | Squashed | 169 tests; format clean; strict docs; DocFX 0 warnings; licence/vulnerability, contract, SPDX, secret gates pass | `41924977588` — green | `45d5a4b` |
+| `fix-reaudit-minors` | `feature/step-01-domain-kernel/fix-reaudit-minors` | Awaiting approval | 171 tests; format clean; strict docs; DocFX 0 warnings; licence/vulnerability, contract, SPDX, secret, ApiCompat gates pass | — | — |
 
 **Deviations:**
 

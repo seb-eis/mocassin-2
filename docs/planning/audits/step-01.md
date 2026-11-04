@@ -66,7 +66,19 @@ carries `[skip ci]`; it does not change the audited commit.
 
 ## Evidence
 
-Commands run on the rebased audited commit (`1d1ad57`):
+Original audit at `1d1ad57`:
+
+```text
+dotnet test Mocassin.slnx -c Release ................ pass (147 total)
+dotnet format Mocassin.slnx --verify-no-changes ..... pass
+zensical build --strict ............................. pass
+tools/docs/build-docs.sh ............................ pass
+python tools/contracts/generate.py --check .......... current (17 files)
+```
+
+CI: [41915254710](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710) — green on Ubuntu + Windows.
+
+Re-audit at `45d5a4b`:
 
 ```text
 dotnet test Mocassin.slnx -c Release ................ pass (169 total)
@@ -80,16 +92,14 @@ python tools/check-license-headers.py ............... pass (71 source files)
 python tools/check-no-secrets.py .................... pass (312 tracked text files)
 ```
 
-Original audit CI: [41915254710](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710) — green on
-Ubuntu + Windows. Re-audit CI: [41924977588](https://github.com/seb-eis/mocassin-2/actions/runs/41924977588) —
-green on Ubuntu + Windows at `45d5a4b`.
+CI: [41924977588](https://github.com/seb-eis/mocassin-2/actions/runs/41924977588) — green on Ubuntu + Windows.
 
 ## Known notes for the auditor
 
 - Step 01 was rebased onto `main` after the independent audit policy landed. The audited commit contains the
   rebased feature commits plus the audit-structure integration.
 - Feature squash hashes in the step page are the rebased hashes. Their per-feature CI run IDs refer to the
-  original pre-rebase squashes; the final rebased branch is verified by CI run `41915254710`.
+  original pre-rebase squashes; the final rebased branch is verified by CI run `41924977588`.
 - `docs/development/agent-workflow.md` was changed to link to the audit policy on GitHub instead of the
   excluded `docs/planning/` tree. This keeps `zensical build --strict` green; it is a documentation-only
   policy-integration fix.
@@ -103,6 +113,11 @@ green on Ubuntu + Windows at `45d5a4b`.
 - Fixes applied on `feature/step-01-domain-kernel/fix-audit-findings`, squash-merged as `45d5a4b`. All
   blockers/majors and actionable minors are addressed; parent-directory fsync and the size-cap TOCTOU window
   remain accepted notes.
+- `ProjectStore.SaveAsync` expects a validated project. Callers must check `ProjectLoadResult.IsSuccess` or run
+  `ProjectValidator` before saving; a structural save-time guard remains a documented follow-up.
+- Migration-cycle and non-monotonic `ToVersion` guards remain future hardening.
+- The M3 OSMF EULA acceptance is recorded in both `NOTICE.md` and this audit request; it reflects the owner
+  decision for free, non-revenue, test-only use.
 
 ## Findings
 
@@ -124,6 +139,8 @@ green on Ubuntu + Windows at `45d5a4b`.
 | **Note** | Lock timeout could reclaim a live same-host lock. | `ProjectStore.IsStale`. | Fixed: live same-host processes are never reclaimed by timeout alone; regression test added. |
 | **Note** | `AtomicProjectFileWriter` does not fsync the parent directory. | `AtomicProjectFileWriter`. | Accepted: target-file fsync and atomic rename are implemented; parent-directory fsync is a documented follow-up. |
 | **Note** | `LoadFromPathAsync` has a size-cap TOCTOU window. | `ProjectStore.LoadFromPathAsync`. | Accepted: bounded by the configured cap and platform file-size checks; a streaming cap remains a follow-up. |
+| **Minor** | Public `ProjectJson.Deserialize` overloads leaked `ArgumentNullException`/`ArgumentOutOfRangeException` for malformed project data. | Re-audit report. | Fixed: converter wraps malformed-data exceptions as `JsonException`; style-number conversion also throws `JsonException`; both overloads tested. |
+| **Minor** | Re-audit evidence heading referred to the original audited commit while listing fix-branch evidence. | Re-audit report. | Fixed: evidence split into original audit at `1d1ad57` (147 tests) and re-audit at `45d5a4b` (169 tests), with their respective CI runs. |
 
 Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills this section only.
 

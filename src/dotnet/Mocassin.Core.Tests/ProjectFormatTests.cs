@@ -286,6 +286,29 @@ public sealed class ProjectFormatTests
     }
 
     [Fact]
+    public void PublicDeserializeWrapsMissingCameraAsJsonException()
+    {
+        var root = JsonNode.Parse(ProjectJson.Serialize(CreateProject()))!.AsObject();
+        root["viewSettings"]!.AsObject().Remove("camera");
+        var json = root.ToJsonString();
+
+        Assert.Throws<JsonException>(() => ProjectJson.Deserialize(json));
+        Assert.Throws<JsonException>(() => ProjectJson.Deserialize(Encoding.UTF8.GetBytes(json)));
+    }
+
+    [Fact]
+    public void PublicDeserializeWrapsNonFiniteStyleValueAsJsonException()
+    {
+        var json = ProjectJson.Serialize(CreateProject()).Replace(
+            "\"customKey\": \"kept\"",
+            "\"customKey\": 1e400",
+            StringComparison.Ordinal);
+
+        Assert.Throws<JsonException>(() => ProjectJson.Deserialize(json));
+        Assert.Throws<JsonException>(() => ProjectJson.Deserialize(Encoding.UTF8.GetBytes(json)));
+    }
+
+    [Fact]
     public void MissingOptionalViewFieldsUseDocumentedDefaults()
     {
         var root = JsonNode.Parse(ProjectJson.Serialize(CreateProject()))!.AsObject();

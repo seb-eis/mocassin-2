@@ -117,6 +117,22 @@ public sealed class ProjectJsonConverter : JsonConverter<Project>
     /// <inheritdoc />
     public override Project Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
+        try
+        {
+            return ReadCore(ref reader);
+        }
+        catch (JsonException)
+        {
+            throw;
+        }
+        catch (Exception exception) when (exception is ArgumentException or NullReferenceException or FormatException or InvalidOperationException)
+        {
+            throw new JsonException("Project JSON does not match the project schema.", exception);
+        }
+    }
+
+    private static Project ReadCore(ref Utf8JsonReader reader)
+    {
         var dto = JsonSerializer.Deserialize<ProjectDto>(ref reader, ProjectJson.DtoOptions)
             ?? throw new JsonException("Project JSON did not contain an object.");
 
