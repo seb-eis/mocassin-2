@@ -12,8 +12,8 @@ decision records that constrain later steps, and the initial standalone document
 - **Step CI:** [run history](https://github.com/seb-eis/mocassin-2/actions?query=branch%3Astep%2F00-foundation) — green (Ubuntu + Windows)
 - **Main merge:** `47a9a90` — `--no-ff` merge; full main CI [`41733064540`](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) green (Ubuntu + Windows + macOS)
 - **Step tag:** `step-00` pushed
-- **Audit:** Ready for audit
-- **Last updated:** 2026-11-03
+- **Audit:** Passed
+- **Last updated:** 2026-11-04
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -30,7 +30,7 @@ decision records that constrain later steps, and the initial standalone document
 | `fix-ci-log-warnings` | `feature/step-00-foundation/fix-ci-log-warnings` | Squashed | unique TRX files; clean `cargo-deny` | Superseded by platform-matrix change | `a62d701` |
 | `fix-ci-platform-matrix` | `feature/step-00-foundation/fix-ci-platform-matrix` | Squashed | step branches Ubuntu + Windows; macOS on `main` | [`41730146454`](https://github.com/seb-eis/mocassin-2/actions/runs/41730146454) — green | `f518222` |
 | `closeout` | `feature/step-00-foundation/closeout` | Squashed | full local acceptance run | [`41731068135`](https://github.com/seb-eis/mocassin-2/actions/runs/41731068135) — green | `399dcca` |
-| `fix-closeout-audit` | `feature/step-00-foundation/fix-closeout-audit` | Awaiting approval | stale status cleanup, link audit, ignore check | — | — |
+| `fix-closeout-audit` | `feature/step-00-foundation/fix-closeout-audit` | Superseded | stale status cleanup, link audit, ignore check | — | `0f3252e`, `4f86f8d` |
 
 **Deviations:**
 
