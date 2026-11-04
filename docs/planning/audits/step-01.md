@@ -6,19 +6,19 @@
 | --- | --- |
 | Step | 01 — Domain Kernel and Project Format |
 | Request owner | Step agent |
-| Audit status | **Fixes required** |
-| Audited commit | `1d1ad57` |
+| Audit status | **Re-audit required** |
+| Audited commit | `45d5a4b` |
 | Step branch | `step/01-domain-kernel` |
 | Step tag | — |
-| CI run | [41915254710 — green](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710) |
+| CI run | [41924977588 — green](https://github.com/seb-eis/mocassin-2/actions/runs/41924977588) |
 | Audit date | 2026-11-04 |
-| Auditor | Independent audit context (result received 2026-11-04) |
+| Auditor | Pending fresh read-only re-audit context |
 
 Step page: [`Step 01 — Domain Kernel and Project Format`](../steps/step-01-domain-kernel-and-project-format.md)
 
-The audit result was received on 2026-11-04. Fixes are being applied on
-`feature/step-01-domain-kernel/fix-audit-findings`; this record will be updated to **Re-audit required** with
-the new audited commit and CI run after the fix squash.
+The original audit returned **Fixes required** on 2026-11-04. The fixes were squash-merged as `45d5a4b`;
+this request is now **Re-audit required**. The commit that updates this request is documentation-only and
+carries `[skip ci]`; it does not change the audited commit.
 
 ## Step summary
 
@@ -81,7 +81,8 @@ python tools/check-no-secrets.py .................... pass (312 tracked text fil
 ```
 
 Original audit CI: [41915254710](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710) — green on
-Ubuntu + Windows. The re-audit CI run will be recorded after the fix squash.
+Ubuntu + Windows. Re-audit CI: [41924977588](https://github.com/seb-eis/mocassin-2/actions/runs/41924977588) —
+green on Ubuntu + Windows at `45d5a4b`.
 
 ## Known notes for the auditor
 
@@ -99,6 +100,9 @@ Ubuntu + Windows. The re-audit CI run will be recorded after the fix squash.
 - The JSON Schema currently describes only the Step 01 project shape.
 - DocFX reports duplicate-member warnings but zero errors. Strict Zensical and rustdoc builds pass.
 - No main merge or `step-01` tag has been created.
+- Fixes applied on `feature/step-01-domain-kernel/fix-audit-findings`, squash-merged as `45d5a4b`. All
+  blockers/majors and actionable minors are addressed; parent-directory fsync and the size-cap TOCTOU window
+  remain accepted notes.
 
 ## Findings
 
@@ -132,4 +136,4 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills 
 - [ ] Waived
 
 Follow-up owner: Step 01 agent
-Follow-up issue/step: `feature/step-01-domain-kernel/fix-audit-findings`
+Follow-up issue/step: re-audit at `45d5a4b`
