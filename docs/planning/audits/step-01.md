@@ -6,20 +6,20 @@
 | --- | --- |
 | Step | 01 — Domain Kernel and Project Format |
 | Request owner | Step agent |
-| Audit status | **Re-audit required** |
+| Audit status | **Passed** |
 | Audited commit | `05c41ab` |
 | Step branch | `step/01-domain-kernel` |
-| Step tag | — |
+| Step tag | `step-01` (annotated tag on the merge commit) |
 | CI run | [41927992251 — green](https://github.com/seb-eis/mocassin-2/actions/runs/41927992251) |
 | Audit date | 2026-11-04 |
-| Auditor | Pending fresh read-only re-audit context |
+| Auditor | Fresh read-only re-audit context |
 
 Step page: [`Step 01 — Domain Kernel and Project Format`](../steps/step-01-domain-kernel-and-project-format.md)
 
 The original audit returned **Fixes required** on 2026-11-04. The main fixes were squash-merged as `45d5a4b`;
-the two re-audit minors were fixed and squash-merged as `05c41ab`. This request is now **Re-audit required**.
-The commit that updates this request is documentation-only and carries `[skip ci]`; it does not change the
-audited commit.
+the two re-audit minors were fixed and squash-merged as `05c41ab`. The independent re-audit passed with notes,
+and the owner approved the step-to-main merge on 2026-11-04. The commit that updates this request is
+documentation-only and carries `[skip ci]`; it does not change the audited commit.
 
 ## Step summary
 
@@ -111,8 +111,10 @@ The previous fix squash `45d5a4b` was verified by CI `41924977588`.
   `ProjectEditor`/`ProjectDocument`.
 - Autosave scheduling is exposed by `ProjectDocument`; the UI timer belongs to Step 23.
 - The JSON Schema currently describes only the Step 01 project shape.
-- DocFX reports duplicate-member warnings but zero errors. Strict Zensical and rustdoc builds pass.
-- No main merge or `step-01` tag has been created.
+- DocFX builds with zero warnings and zero errors (`--warningsAsErrors`). Strict Zensical and rustdoc builds
+  pass.
+- No main merge or `step-01` tag existed at the audited commit. The owner approved the step-to-main merge on
+  2026-11-04.
 - Fixes applied on `feature/step-01-domain-kernel/fix-audit-findings`, squash-merged as `45d5a4b`. All
   blockers/majors and actionable minors are addressed; parent-directory fsync and the size-cap TOCTOU window
   remain accepted notes.
@@ -130,7 +132,7 @@ The previous fix squash `45d5a4b` was verified by CI `41924977588`.
 | **Blocker** | B2 — non-finite `ObjectStyle.Scale` loaded and crashed on save; save/autosave serialization could throw. | `scale: 1e400` reproduction. | Fixed: converter rejects non-finite scale; validator checks scale; save/autosave convert serialization failures to `PROJ030`/`PROJ033`; tests added. |
 | **Major** | M1 — canonical JSON did not normalize `-0.0` in vector arrays. | Camera/render-box vectors produced different canonical bytes and hashes. | Fixed: canonical double-array converter and unit serialization normalization; canonical/hash equality tests added. |
 | **Major** | M2 — schema and loader disagreed on required nested view fields and numeric enum strings. | Missing `objectStyles`, `projection`, `renderBox.visible`, and object-style defaults; `"projection": "1"` accepted. | Fixed: optional fields/defaults aligned in manifest, schema, loader, and docs; numeric enum strings rejected; schema/loader tests added. |
-| **Major** | M3 — `JsonSchema.Net`/`JsonPointer.Net`/`Json.More.Net` carry OSMFEULA binary-release terms. | NuGet nuspec `requireLicenseAcceptance`/`OSMFEULA.txt`. | Accepted by owner for this free, non-revenue, test-only use; recorded in `NOTICE.md`; exact-version NuGet licence gate and vulnerability audit added to CI. |
+| **Major (owner-waived)** | M3 — `JsonSchema.Net`/`JsonPointer.Net`/`Json.More.Net` carry OSMFEULA binary-release terms. | NuGet nuspec `requireLicenseAcceptance`/`OSMFEULA.txt`. | Closed as an owner-accepted exception for this free, non-revenue, test-only use; recorded in `NOTICE.md`; exact-version NuGet licence gate and vulnerability audit added to CI. |
 | **Minor** | Blank README claimed the placeholder CLI validates projects. | `samples/blank/README.md`. | Fixed: README now states validation arrives with Step 12. |
 | **Minor** | Hash documentation disagreed about dirty tracking. | `docs/reference/project-format.md`, `docs/development/design-decisions.md`. | Fixed: `ComputeDocument` is documented as the dirty-tracking hash; `Compute` is the model hash. |
 | **Minor** | Root README and manifest still described Step 00/skeleton status. | `README.md`, `contracts/manifest.json`. | Fixed: status/notes now describe Step 01. |
@@ -143,17 +145,19 @@ The previous fix squash `45d5a4b` was verified by CI `41924977588`.
 | **Note** | `AtomicProjectFileWriter` does not fsync the parent directory. | `AtomicProjectFileWriter`. | Accepted: target-file fsync and atomic rename are implemented; parent-directory fsync is a documented follow-up. |
 | **Note** | `LoadFromPathAsync` has a size-cap TOCTOU window. | `ProjectStore.LoadFromPathAsync`. | Accepted: bounded by the configured cap and platform file-size checks; a streaming cap remains a follow-up. |
 | **Minor** | Public `ProjectJson.Deserialize` overloads leaked `ArgumentNullException`/`ArgumentOutOfRangeException` for malformed project data. | Re-audit report. | Fixed: converter wraps malformed-data exceptions as `JsonException`; style-number conversion also throws `JsonException`; both overloads tested. |
-| **Minor** | Re-audit evidence heading referred to the original audited commit while listing fix-branch evidence. | Re-audit report. | Fixed: evidence split into original audit at `1d1ad57` (147 tests) and re-audit at `45d5a4b` (169 tests), with their respective CI runs. |
+| **Minor** | Re-audit evidence heading referred to the original audited commit while listing fix-branch evidence. | Re-audit report. | Fixed: evidence split into original audit at `1d1ad57` (147 tests; CI `41915254710`), main fix at `45d5a4b` (169 tests; CI `41924977588`), and re-audit at `05c41ab` (171 tests; CI `41927992251`). |
 
 Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills this section only.
 
 ## Verdict
 
 - [ ] Passed
-- [ ] Passed with notes
-- [x] Fixes required
+- [x] Passed with notes
+- [ ] Fixes required
 - [ ] Re-audit required
 - [ ] Waived
 
-Follow-up owner: Step 01 agent
-Follow-up issue/step: re-audit at `05c41ab`
+Follow-up owner: Step 01 agent / human owner
+Follow-up issue/step: none — passed with notes; step-to-main merge approved 2026-11-04. The remaining notes
+(parent-directory fsync, size-cap TOCTOU, save-time structural guard, migration-cycle guards, and the
+owner-waived M3 dependency exception) are documented follow-ups, not merge blockers.

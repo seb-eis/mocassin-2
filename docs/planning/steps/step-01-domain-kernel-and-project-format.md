@@ -12,7 +12,7 @@ with canonical serialization and migrations.
 - **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41927992251) (Ubuntu + Windows, post-re-audit-minors)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `05c41ab`
+- **Audit:** Passed with notes at `05c41ab`
 - **Last updated:** 2026-11-04
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
