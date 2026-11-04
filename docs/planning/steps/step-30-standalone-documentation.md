@@ -12,6 +12,7 @@ generated .NET (DocFX), Rust (rustdoc), and Python (mkdocstrings) API references
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
+- **Audit:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

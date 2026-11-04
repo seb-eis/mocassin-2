@@ -47,11 +47,13 @@ Before changing anything, read these in order:
 9. [`docs/planning/07-reference-build.md`](docs/planning/07-reference-build.md) — verified original
    solver/model-builder build and reference-data recipe.
 10. [`docs/planning/status.md`](docs/planning/status.md) — step and feature status dashboard.
-11. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
+11. [`docs/planning/audits/README.md`](docs/planning/audits/README.md) — independent step-audit process and
+    approval gate.
+12. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
     evidence playbook for coding agents.
-12. The step page you intend to work on, plus its dependencies.
-13. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-14. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+13. The step page you intend to work on, plus its dependencies.
+14. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+15. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
@@ -146,8 +148,9 @@ These rules override convenience. If you are unsure, stop and ask the user.
    - documentation updates;
    - any final acceptance fixes.
 2. Run the step's full acceptance criteria and quality gates on the step branch.
-3. **Stop and ask for explicit permission before merging the step into `main`.**
-4. After approval:
+3. Complete the independent audit in section 3.8. The step branch must be frozen at the audited commit.
+4. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
+5. After approval:
    ```sh
    git switch main
    git pull --ff-only
@@ -156,8 +159,8 @@ These rules override convenience. If you are unsure, stop and ask the user.
    git tag -a step-00 -m "step-00: repository, toolchain, and CI"
    git push origin step-00
    ```
-5. Delete the step branch locally and remotely after the merge.
-6. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
+6. Delete the step branch locally and remotely after the merge.
+7. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
 
 ### 3.5 Out-of-step changes
 
@@ -224,6 +227,33 @@ status: docs/planning/status.md#step-00
 
 Milestone tags use the same fields with `milestone-m0` and the milestone name. Release tags are created only
 after the Step 31 release gates pass.
+
+### 3.8 Step audit gate
+
+The step agent's self-check is not an independent audit. Before a step is merged into `main`, a fresh
+read-only audit context must review the frozen step branch.
+
+1. The step agent finishes all features and the closeout feature, updates the step page, status dashboard,
+   parity matrix, and feature log, and gets step-branch CI green.
+2. The step agent creates or updates `docs/planning/audits/step-NN.md` using
+   [`docs/planning/audits/step-audit-template.md`](docs/planning/audits/step-audit-template.md), records the
+   exact audited commit and CI run, and sets the status to `Ready for audit`.
+3. The step branch is frozen. Do not add commits while the audit is running.
+4. A fresh audit agent reads `AGENTS.md`, the step page, the audit request, the status dashboard, and relevant
+   ADRs/contracts, then runs the required builds/tests and reviews the diff. The auditor is read-only and must
+   not modify the repository.
+5. The auditor records findings and a verdict in the audit request. If fixes are needed, the step agent fixes
+   them on a new feature branch, squash-merges into the step branch, pushes, waits for CI, and updates the
+   audit request to `Re-audit required`.
+6. The fresh auditor re-audits the new commit. The same auditor may continue if it remained read-only;
+   otherwise start a fresh audit context.
+7. Only a `Passed` audit permits the step-to-main approval request. The audit result is evidence, not merge
+   authorization; the human owner still approves the merge.
+8. After merge, tag `step-NN`, record the result, and delete the step branch.
+
+Audit status values and finding severities are defined in
+[`docs/planning/audits/README.md`](docs/planning/audits/README.md). Audit reports are planning records and are
+excluded from the published site.
 
 ## 4. Non-negotiable decisions
 
@@ -400,9 +430,13 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 11. Push the feature branch, report the result, and ask for approval before the squash merge into the step
     branch.
 12. After approval, squash-merge, push the step branch, and delete the feature branch locally and remotely.
+13. After all features and the closeout feature, update `docs/planning/audits/step-NN.md`, freeze the step
+    branch, and request the independent audit described in section 3.8.
+14. Only after a passed audit, ask for permission to merge the step into `main`, then merge with `--no-ff`,
+    tag `step-NN`, push, and delete the step branch.
 
-A step is not done because the code compiles. Its acceptance criteria, tests, docs, and parity entries must
-pass.
+A step is not done because the code compiles. Its acceptance criteria, tests, docs, parity entries, and audit
+must pass.
 
 ### 7.1 Status tracking
 

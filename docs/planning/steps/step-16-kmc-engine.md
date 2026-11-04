@@ -12,6 +12,7 @@ evolution, all cycle outcomes, abort conditions, and deterministic seeding.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
+- **Audit:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

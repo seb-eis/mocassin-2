@@ -12,6 +12,7 @@ coverage, and mkdocstrings-generated API docs inside the Zensical site.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
+- **Audit:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

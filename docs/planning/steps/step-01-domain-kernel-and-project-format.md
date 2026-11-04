@@ -12,6 +12,7 @@ with canonical serialization and migrations.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
+- **Audit:** Not requested — step in progress
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
