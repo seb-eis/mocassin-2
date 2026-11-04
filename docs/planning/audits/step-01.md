@@ -7,18 +7,19 @@
 | Step | 01 — Domain Kernel and Project Format |
 | Request owner | Step agent |
 | Audit status | **Re-audit required** |
-| Audited commit | `45d5a4b` |
+| Audited commit | `05c41ab` |
 | Step branch | `step/01-domain-kernel` |
 | Step tag | — |
-| CI run | [41924977588 — green](https://github.com/seb-eis/mocassin-2/actions/runs/41924977588) |
+| CI run | [41927992251 — green](https://github.com/seb-eis/mocassin-2/actions/runs/41927992251) |
 | Audit date | 2026-11-04 |
 | Auditor | Pending fresh read-only re-audit context |
 
 Step page: [`Step 01 — Domain Kernel and Project Format`](../steps/step-01-domain-kernel-and-project-format.md)
 
-The original audit returned **Fixes required** on 2026-11-04. The fixes were squash-merged as `45d5a4b`;
-this request is now **Re-audit required**. The commit that updates this request is documentation-only and
-carries `[skip ci]`; it does not change the audited commit.
+The original audit returned **Fixes required** on 2026-11-04. The main fixes were squash-merged as `45d5a4b`;
+the two re-audit minors were fixed and squash-merged as `05c41ab`. This request is now **Re-audit required**.
+The commit that updates this request is documentation-only and carries `[skip ci]`; it does not change the
+audited commit.
 
 ## Step summary
 
@@ -78,28 +79,30 @@ python tools/contracts/generate.py --check .......... current (17 files)
 
 CI: [41915254710](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710) — green on Ubuntu + Windows.
 
-Re-audit at `45d5a4b`:
+Re-audit at `05c41ab`:
 
 ```text
-dotnet test Mocassin.slnx -c Release ................ pass (169 total)
+dotnet test Mocassin.slnx -c Release ................ pass (171 total)
 dotnet format Mocassin.slnx --verify-no-changes ..... pass
+tools/check-api-compat.sh ........................... pass (all assemblies)
 zensical build --strict ............................. pass
 tools/docs/build-docs.sh ............................ pass (DocFX 0 warnings, 0 errors)
 python tools/contracts/generate.py --check .......... current (17 files)
 python tools/contracts/check_nuget_licenses.py ...... pass (21 packages; OSMFEULA exceptions recorded)
 dotnet list ... package --vulnerable ................ no vulnerable packages
 python tools/check-license-headers.py ............... pass (71 source files)
-python tools/check-no-secrets.py .................... pass (312 tracked text files)
+python tools/check-no-secrets.py .................... pass (315 tracked text files)
 ```
 
-CI: [41924977588](https://github.com/seb-eis/mocassin-2/actions/runs/41924977588) — green on Ubuntu + Windows.
+CI: [41927992251](https://github.com/seb-eis/mocassin-2/actions/runs/41927992251) — green on Ubuntu + Windows.
+The previous fix squash `45d5a4b` was verified by CI `41924977588`.
 
 ## Known notes for the auditor
 
 - Step 01 was rebased onto `main` after the independent audit policy landed. The audited commit contains the
   rebased feature commits plus the audit-structure integration.
 - Feature squash hashes in the step page are the rebased hashes. Their per-feature CI run IDs refer to the
-  original pre-rebase squashes; the final rebased branch is verified by CI run `41924977588`.
+  original pre-rebase squashes; the final rebased branch is verified by CI run `41927992251`.
 - `docs/development/agent-workflow.md` was changed to link to the audit policy on GitHub instead of the
   excluded `docs/planning/` tree. This keeps `zensical build --strict` green; it is a documentation-only
   policy-integration fix.
@@ -153,4 +156,4 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills 
 - [ ] Waived
 
 Follow-up owner: Step 01 agent
-Follow-up issue/step: re-audit at `45d5a4b`
+Follow-up issue/step: re-audit at `05c41ab`
