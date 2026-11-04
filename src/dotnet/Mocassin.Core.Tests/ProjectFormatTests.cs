@@ -232,6 +232,125 @@ public sealed class ProjectFormatTests
     }
 
     [Fact]
+    public void NegativeZeroInViewVectorsProducesIdenticalCanonicalBytesAndHash()
+    {
+        var project = CreateProject();
+        var positive = project with
+        {
+            ViewSettings = new ViewSettings(
+                new CameraSettings(
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    [0.0, 0.0, 0.0],
+                    CameraProjection.Perspective,
+                    45.0,
+                    0.1,
+                    1000.0),
+                new RenderBoxSettings([0.0, 0.0, 0.0], [0.0, 0.0, 0.0], true),
+                null,
+                []),
+        };
+        var negative = project with
+        {
+            ViewSettings = new ViewSettings(
+                new CameraSettings(
+                    [-0.0, -0.0, -0.0],
+                    [-0.0, -0.0, -0.0],
+                    [-0.0, -0.0, -0.0],
+                    CameraProjection.Perspective,
+                    45.0,
+                    0.1,
+                    1000.0),
+                new RenderBoxSettings([-0.0, -0.0, -0.0], [-0.0, -0.0, -0.0], true),
+                null,
+                []),
+        };
+
+        var positiveJson = ProjectCanonicalizer.ToCanonicalJson(positive);
+        var negativeJson = ProjectCanonicalizer.ToCanonicalJson(negative);
+
+        Assert.Equal(positiveJson, negativeJson);
+        Assert.Equal(ProjectHasher.ComputeDocument(positive), ProjectHasher.ComputeDocument(negative));
+        Assert.DoesNotContain("[-0", negativeJson, StringComparison.Ordinal);
+        Assert.DoesNotContain(",-0", negativeJson, StringComparison.Ordinal);
+        Assert.DoesNotContain(":-0", negativeJson, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void NumericEnumStringsAreRejected()
+    {
+        var root = JsonNode.Parse(ProjectJson.Serialize(CreateProject()))!.AsObject();
+        root["viewSettings"]!["camera"]!["projection"] = "1";
+
+        Assert.Throws<JsonException>(() => ProjectJson.Deserialize(root.ToJsonString()));
+    }
+
+    [Fact]
+    public void MissingOptionalViewFieldsUseDocumentedDefaults()
+    {
+        var root = JsonNode.Parse(ProjectJson.Serialize(CreateProject()))!.AsObject();
+        var view = root["viewSettings"]!.AsObject();
+        view["camera"]!.AsObject().Remove("projection");
+        view["renderBox"]!.AsObject().Remove("visible");
+        view["objectStyles"] = new JsonArray(
+            new JsonObject
+            {
+                ["objectId"] = projectId.ToString("D"),
+            });
+
+        var loaded = ProjectJson.Deserialize(root.ToJsonString());
+        var style = loaded.ViewSettings.ObjectStyles.Single();
+
+        Assert.Equal(CameraProjection.Perspective, loaded.ViewSettings.Camera.Projection);
+        Assert.False(loaded.ViewSettings.RenderBox.Visible);
+        Assert.False(style.Visible);
+        Assert.Equal(1.0, style.Scale);
+        Assert.False(style.Wireframe);
+    }
+
+    [Fact]
+    public void ValidatorRejectsNonFiniteStyleScale()
+    {
+        var project = CreateProject();
+        var style = new ObjectStyle(
+            project.ViewSettings.ObjectStyles.Single().ObjectId,
+            true,
+            "#ffffff",
+            "standard",
+            "high",
+            double.PositiveInfinity,
+            false,
+            []);
+        var invalid = project with
+        {
+            ViewSettings = new ViewSettings(
+                project.ViewSettings.Camera,
+                project.ViewSettings.RenderBox,
+                project.ViewSettings.Background,
+                [style]),
+        };
+
+        var diagnostics = ProjectValidator.Validate(invalid);
+
+        Assert.Contains(
+            diagnostics,
+            static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.InvalidViewSettings &&
+                diagnostic.Path?.Property == "scale");
+    }
+
+    [Fact]
+    public void DuplicateIdProducesOneDiagnostic()
+    {
+        var project = CreateProject();
+        var duplicate = project.JobTemplates.Single() with { Name = "Duplicate" };
+        var invalid = project with { JobTemplates = [.. project.JobTemplates, duplicate] };
+
+        var diagnostics = ProjectValidator.Validate(invalid);
+
+        Assert.Single(diagnostics.Where(static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.DuplicateId));
+    }
+
+    [Fact]
     public void AdditionalStyleKeysSurviveRoundTrip()
     {
         var project = CreateProject();

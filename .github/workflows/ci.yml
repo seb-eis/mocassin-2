@@ -207,6 +207,21 @@ jobs:
       - name: Build
         run: dotnet build Mocassin.slnx -c Release --no-restore
 
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.13"
+
+      - name: NuGet licence policy
+        run: python tools/contracts/check_nuget_licenses.py
+
+      - name: NuGet vulnerability audit
+        run: |
+          output=$(dotnet list Mocassin.slnx package --vulnerable --include-transitive)
+          echo "$output"
+          if grep -q "has the following vulnerable packages" <<< "$output"; then
+            exit 1
+          fi
+
       - name: Restore local tools
         run: dotnet tool restore
 

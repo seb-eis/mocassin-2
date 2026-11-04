@@ -3,6 +3,7 @@
 using System.Globalization;
 using System.Text;
 using System.Text.Json.Nodes;
+using FsCheck.Xunit;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
@@ -261,6 +262,181 @@ public sealed class ProjectStoreTests
         Assert.False(result.IsSuccess);
         Assert.Null(result.Project);
         Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.InvalidDocument);
+    }
+
+    [Theory]
+    [InlineData("duplicate-name")]
+    [InlineData("duplicate-schema-version")]
+    [InlineData("missing-camera")]
+    [InlineData("missing-render-box")]
+    [InlineData("null-parameterization")]
+    [InlineData("null-job-template")]
+    [InlineData("null-build-template")]
+    [InlineData("null-object-style")]
+    [InlineData("non-finite-style-scale")]
+    [InlineData("non-finite-additional-style")]
+    public async Task LoadNeverThrowsForMalformedStructures(string mutation)
+    {
+        using var directory = new TempDirectory();
+        var path = directory.File("malformed.mocprj");
+        await File.WriteAllTextAsync(path, MutateFixture(mutation));
+
+        var result = await new ProjectStore(new FixedTimeProvider(now)).LoadAsync(path);
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.InvalidDocument);
+    }
+
+    [Property(MaxTest = 30)]
+    public bool StructuredMutationsNeverEscapeAsExceptions(int seed)
+    {
+        using var directory = new TempDirectory();
+        var path = directory.File("fuzz.mocprj");
+        var mutations = new[]
+        {
+            "duplicate-name",
+            "duplicate-schema-version",
+            "missing-camera",
+            "missing-render-box",
+            "null-parameterization",
+            "null-object-style",
+            "non-finite-style-scale",
+            "non-finite-additional-style",
+        };
+        var mutation = mutations[(int)((uint)seed % (uint)mutations.Length)];
+        File.WriteAllText(path, MutateFixture(mutation));
+
+        var result = new ProjectStore(new FixedTimeProvider(now)).LoadAsync(path).GetAwaiter().GetResult();
+
+        return !result.IsSuccess &&
+            result.Diagnostics.Any(static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.InvalidDocument);
+    }
+
+    [Fact]
+    public async Task SaveReturnsDiagnosticForNonFiniteStyleScale()
+    {
+        using var directory = new TempDirectory();
+        var path = directory.File("ceria.mocprj");
+        var store = new ProjectStore(new FixedTimeProvider(now));
+        Assert.True((await store.SaveAsync(CreateProject(), path)).IsSuccess);
+        var original = await File.ReadAllBytesAsync(path);
+        var invalid = CreateProjectWithStyleScale(double.PositiveInfinity);
+
+        var result = await store.SaveAsync(invalid, path);
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.SaveFailed);
+        Assert.Equal(original, await File.ReadAllBytesAsync(path));
+    }
+
+    [Fact]
+    public async Task AutosaveReturnsDiagnosticForNonFiniteStyleScale()
+    {
+        using var directory = new TempDirectory();
+        var path = directory.File("ceria.mocprj");
+        var store = new ProjectStore(new FixedTimeProvider(now));
+
+        var result = await store.WriteAutosaveAsync(
+            CreateProjectWithStyleScale(double.PositiveInfinity),
+            path);
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.AutosaveFailed);
+        Assert.False(File.Exists(ProjectStore.GetAutosavePath(path)));
+    }
+
+    [Fact]
+    public async Task LiveSameHostLockIsNotReclaimedByTimeoutAlone()
+    {
+        using var directory = new TempDirectory();
+        var path = directory.File("ceria.mocprj");
+        var lockPath = ProjectStore.GetLockPath(path);
+        var timestamp = (now - TimeSpan.FromHours(1)).ToString("O", CultureInfo.InvariantCulture);
+        await File.WriteAllTextAsync(
+            lockPath,
+            $$"""{"pid":{{Environment.ProcessId}},"host":"{{Environment.MachineName}}","token":"live","acquiredUtc":"{{timestamp}}"}""");
+
+        var result = await new ProjectStore(new FixedTimeProvider(now)).AcquireLockAsync(path);
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.LockHeld);
+        File.Delete(lockPath);
+    }
+
+    private static string MutateFixture(string mutation)
+    {
+        var text = File.ReadAllText(FindRepositoryFile("tests/contracts/project-minimal.mocprj"));
+        return mutation switch
+        {
+            "duplicate-name" => text.Replace(
+                "\"name\": \"Blank\"",
+                "\"name\": \"Blank\",\n  \"name\": \"Duplicate\"",
+                StringComparison.Ordinal),
+            "duplicate-schema-version" => text.Replace(
+                "\"schemaVersion\": 1",
+                "\"schemaVersion\": 1,\n  \"schemaVersion\": 1",
+                StringComparison.Ordinal),
+            "missing-camera" => MutateJson(text, static root => root["viewSettings"]!.AsObject().Remove("camera")),
+            "missing-render-box" => MutateJson(text, static root => root["viewSettings"]!.AsObject().Remove("renderBox")),
+            "null-parameterization" => MutateJson(text, static root => root["parameterizations"] = JsonNode.Parse("[null]")),
+            "null-job-template" => MutateJson(text, static root => root["jobTemplates"] = JsonNode.Parse("[null]")),
+            "null-build-template" => MutateJson(text, static root => root["buildTemplates"] = JsonNode.Parse("[null]")),
+            "null-object-style" => MutateJson(
+                text,
+                static root => root["viewSettings"]!["objectStyles"] = JsonNode.Parse("[null]")),
+            "non-finite-style-scale" => text.Replace(
+                "\"objectStyles\": []",
+                """
+                "objectStyles": [
+                  {
+                    "objectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e61",
+                    "scale": 1e400
+                  }
+                ]
+                """,
+                StringComparison.Ordinal),
+            "non-finite-additional-style" => text.Replace(
+                "\"objectStyles\": []",
+                """
+                "objectStyles": [
+                  {
+                    "objectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e61",
+                    "weird": 1e400
+                  }
+                ]
+                """,
+                StringComparison.Ordinal),
+            _ => throw new ArgumentOutOfRangeException(nameof(mutation), mutation, "Unknown mutation."),
+        };
+    }
+
+    private static string MutateJson(string text, Action<JsonObject> mutation)
+    {
+        var root = JsonNode.Parse(text)!.AsObject();
+        mutation(root);
+        return root.ToJsonString();
+    }
+
+    private static ProjectModel CreateProjectWithStyleScale(double scale)
+    {
+        var project = CreateProject();
+        var style = new ObjectStyle(
+            Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e6f"),
+            true,
+            "#ffffff",
+            "standard",
+            "high",
+            scale,
+            false,
+            []);
+        return project with
+        {
+            ViewSettings = new ViewSettings(
+                project.ViewSettings.Camera,
+                project.ViewSettings.RenderBox,
+                null,
+                [style]),
+        };
     }
 
     private static string FindRepositoryFile(string relativePath)

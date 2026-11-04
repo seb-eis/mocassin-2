@@ -2,6 +2,7 @@
 
 using System.Collections.Immutable;
 using Mocassin.Core.Diagnostics;
+using Mocassin.Core.Model;
 
 namespace Mocassin.Core.Project;
 
@@ -61,20 +62,32 @@ public static class ProjectValidator
 
     private static void ValidateTemplates(Project project, DiagnosticBag bag)
     {
+        var parameterizations = project.Parameterizations;
+        var jobTemplates = project.JobTemplates;
+        var buildTemplates = project.BuildTemplates;
+
+        AddNullElementDiagnostic(parameterizations, "parameterization", bag);
+        AddNullElementDiagnostic(jobTemplates, "jobTemplate", bag);
+        AddNullElementDiagnostic(buildTemplates, "buildTemplate", bag);
+
+        var validParameterizations = parameterizations.Where(static item => item is not null);
+        var validJobTemplates = jobTemplates.Where(static item => item is not null);
+        var validBuildTemplates = buildTemplates.Where(static item => item is not null);
+
         var parameterizationIds = CollectIds(
-            project.Parameterizations.Select(static item => item.Id.Value),
+            validParameterizations.Select(static item => item.Id.Value),
             "parameterization",
             bag);
         var jobTemplateIds = CollectIds(
-            project.JobTemplates.Select(static item => item.Id.Value),
+            validJobTemplates.Select(static item => item.Id.Value),
             "jobTemplate",
             bag);
         var buildTemplateIds = CollectIds(
-            project.BuildTemplates.Select(static item => item.Id.Value),
+            validBuildTemplates.Select(static item => item.Id.Value),
             "buildTemplate",
             bag);
 
-        foreach (var template in project.Parameterizations)
+        foreach (var template in validParameterizations)
         {
             if (string.IsNullOrWhiteSpace(template.Name))
             {
@@ -93,7 +106,7 @@ public static class ProjectValidator
             }
         }
 
-        foreach (var template in project.JobTemplates)
+        foreach (var template in validJobTemplates)
         {
             if (string.IsNullOrWhiteSpace(template.Name))
             {
@@ -104,7 +117,7 @@ public static class ProjectValidator
             }
         }
 
-        foreach (var template in project.BuildTemplates)
+        foreach (var template in validBuildTemplates)
         {
             if (string.IsNullOrWhiteSpace(template.Name))
             {
@@ -144,9 +157,21 @@ public static class ProjectValidator
     private static void ValidateReferences(Project project, DiagnosticBag bag)
     {
         var all = new Dictionary<Guid, string>();
-        AddDomain(all, project.Parameterizations.Select(static item => item.Id.Value), "parameterization", bag);
-        AddDomain(all, project.JobTemplates.Select(static item => item.Id.Value), "jobTemplate", bag);
-        AddDomain(all, project.BuildTemplates.Select(static item => item.Id.Value), "buildTemplate", bag);
+        AddDomain(
+            all,
+            project.Parameterizations.Where(static item => item is not null).Select(static item => item.Id.Value),
+            "parameterization",
+            bag);
+        AddDomain(
+            all,
+            project.JobTemplates.Where(static item => item is not null).Select(static item => item.Id.Value),
+            "jobTemplate",
+            bag);
+        AddDomain(
+            all,
+            project.BuildTemplates.Where(static item => item is not null).Select(static item => item.Id.Value),
+            "buildTemplate",
+            bag);
     }
 
     private static void ValidateViewSettings(Project project, DiagnosticBag bag)
@@ -186,8 +211,10 @@ public static class ProjectValidator
                 new ModelPath("project", project.Metadata.ProjectId, "viewSettings.camera.farPlane")));
         }
 
+        AddNullElementDiagnostic(view.ObjectStyles, "objectStyle", bag);
+
         var styleIds = new HashSet<Guid>();
-        foreach (var style in view.ObjectStyles)
+        foreach (var style in view.ObjectStyles.Where(static item => item is not null))
         {
             if (!styleIds.Add(style.ObjectId))
             {
@@ -197,10 +224,27 @@ public static class ProjectValidator
                     new ModelPath("objectStyle", style.ObjectId)));
             }
 
+            if (!double.IsFinite(style.Scale))
+            {
+                bag.Add(Error(
+                    ProjectDiagnosticCodes.InvalidViewSettings,
+                    "Object style scale must be finite.",
+                    new ModelPath("objectStyle", style.ObjectId, "scale")));
+            }
+
             var stylePath = new ModelPath("objectStyle", style.ObjectId, "additionalProperties");
             var keys = new HashSet<string>(StringComparer.Ordinal);
             foreach (var property in style.AdditionalProperties)
             {
+                if (property is null)
+                {
+                    bag.Add(Error(
+                        ProjectDiagnosticCodes.InvalidDocument,
+                        "Object style additional properties contain a null element.",
+                        stylePath));
+                    continue;
+                }
+
                 if (!keys.Add(property.Key))
                 {
                     bag.Add(Error(
@@ -208,7 +252,27 @@ public static class ProjectValidator
                         $"Additional style property '{property.Key}' is defined more than once.",
                         stylePath));
                 }
+
+                if (property.Value.Kind == StyleValueKind.Number && !double.IsFinite(property.Value.NumberValue))
+                {
+                    bag.Add(Error(
+                        ProjectDiagnosticCodes.InvalidViewSettings,
+                        $"Additional style property '{property.Key}' must be finite.",
+                        stylePath));
+                }
             }
+        }
+    }
+
+    private static void AddNullElementDiagnostic<T>(ImmutableArray<T> values, string domain, DiagnosticBag bag)
+        where T : class
+    {
+        if (values.Any(static item => item is null))
+        {
+            bag.Add(Error(
+                ProjectDiagnosticCodes.InvalidDocument,
+                $"{domain} array contains a null element.",
+                new ModelPath(domain, Guid.Empty)));
         }
     }
 
@@ -254,10 +318,14 @@ public static class ProjectValidator
         {
             if (all.TryGetValue(id, out var existing))
             {
-                bag.Add(Error(
-                    ProjectDiagnosticCodes.DuplicateId,
-                    $"Identifier {id:D} is used in both {existing} and {domain}.",
-                    new ModelPath(domain, id)));
+                if (!string.Equals(existing, domain, StringComparison.Ordinal))
+                {
+                    bag.Add(Error(
+                        ProjectDiagnosticCodes.DuplicateId,
+                        $"Identifier {id:D} is used in both {existing} and {domain}.",
+                        new ModelPath(domain, id)));
+                }
+
                 continue;
             }
 

@@ -218,6 +218,8 @@ Mocassin.Core.Model.CameraSettings.Position.get -> System.Collections.Immutable.
 Mocassin.Core.Model.CameraSettings.Projection.get -> Mocassin.Core.Model.CameraProjection
 Mocassin.Core.Model.CameraSettings.Target.get -> System.Collections.Immutable.ImmutableArray<double>
 Mocassin.Core.Model.CameraSettings.Up.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Core.Model.CanonicalDoubleArrayJsonConverter
+Mocassin.Core.Model.CanonicalDoubleArrayJsonConverter.CanonicalDoubleArrayJsonConverter() -> void
 Mocassin.Core.Model.CanonicalDoubleJsonConverter
 Mocassin.Core.Model.CanonicalDoubleJsonConverter.CanonicalDoubleJsonConverter() -> void
 Mocassin.Core.Model.JobTemplate
@@ -483,6 +485,8 @@ override Mocassin.Core.Model.CamelCaseEnumJsonConverter<TEnum>.Write(System.Text
 override Mocassin.Core.Model.CameraSettings.Equals(object? obj) -> bool
 override Mocassin.Core.Model.CameraSettings.GetHashCode() -> int
 override Mocassin.Core.Model.CameraSettings.ToString() -> string!
+override Mocassin.Core.Model.CanonicalDoubleArrayJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> System.Collections.Immutable.ImmutableArray<double>
+override Mocassin.Core.Model.CanonicalDoubleArrayJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, System.Collections.Immutable.ImmutableArray<double> value, System.Text.Json.JsonSerializerOptions! options) -> void
 override Mocassin.Core.Model.CanonicalDoubleJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> double
 override Mocassin.Core.Model.CanonicalDoubleJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, double value, System.Text.Json.JsonSerializerOptions! options) -> void
 override Mocassin.Core.Model.JobTemplate.Equals(object? obj) -> bool

@@ -115,6 +115,11 @@ format decision.
 Known style keys are `visible`, `color`, `material`, `quality`, `scale`, and `wireframe`. Additional
 primitive keys are preserved on round-trip but are not interpreted by the current renderer.
 
+`camera` and `renderBox` are required. `camera.projection`, `renderBox.visible`, `objectStyles`, and the
+object-style `visible`, `scale`, and `wireframe` fields are optional. Their defaults are `perspective`, `false`,
+an empty array, `false`, `1.0`, and `false` respectively. Missing required camera/render-box objects are
+rejected as invalid documents.
+
 ## Canonical JSON
 
 `ProjectCanonicalizer.ToCanonicalJson(project)` produces the stable form used for hashing and golden tests:
@@ -130,9 +135,10 @@ primitive keys are preserved on round-trip but are not interpreted by the curren
 - optional null properties omitted.
 
 `ProjectHasher.Compute(project)` hashes the canonical **model section** and is the Step 01 model-content
-identity used for dirty tracking and as the basis for the compiled-model signature. It is not the compiled
-model signature from Step 08. `ProjectHasher.ComputeDocument(project)` hashes the complete canonical project
-document, including metadata and view settings. Both use SHA-256 and return lowercase hexadecimal.
+identity used as the basis for the compiled-model signature. It is not the compiled model signature from
+Step 08. `ProjectHasher.ComputeDocument(project)` hashes the complete canonical project document, including
+metadata and view settings, and is what `ProjectDocument` uses for dirty tracking. Both use SHA-256 and return
+lowercase hexadecimal.
 
 ## Migrations
 

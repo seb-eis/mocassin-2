@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
+using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -59,16 +60,19 @@ public sealed record CameraSettings
     /// <summary>
     /// Gets the camera position as an x/y/z array.
     /// </summary>
+    [JsonConverter(typeof(CanonicalDoubleArrayJsonConverter))]
     public ImmutableArray<double> Position { get; }
 
     /// <summary>
     /// Gets the look-at target as an x/y/z array.
     /// </summary>
+    [JsonConverter(typeof(CanonicalDoubleArrayJsonConverter))]
     public ImmutableArray<double> Target { get; }
 
     /// <summary>
     /// Gets the up vector as an x/y/z array.
     /// </summary>
+    [JsonConverter(typeof(CanonicalDoubleArrayJsonConverter))]
     public ImmutableArray<double> Up { get; }
 
     /// <summary>
@@ -116,11 +120,13 @@ public sealed record RenderBoxSettings
     /// <summary>
     /// Gets the minimum corner as an x/y/z array.
     /// </summary>
+    [JsonConverter(typeof(CanonicalDoubleArrayJsonConverter))]
     public ImmutableArray<double> Min { get; }
 
     /// <summary>
     /// Gets the maximum corner as an x/y/z array.
     /// </summary>
+    [JsonConverter(typeof(CanonicalDoubleArrayJsonConverter))]
     public ImmutableArray<double> Max { get; }
 
     /// <summary>
@@ -385,7 +391,10 @@ public sealed class CamelCaseEnumJsonConverter<TEnum> : JsonConverter<TEnum>
         }
 
         var text = reader.GetString();
-        if (!Enum.TryParse<TEnum>(text, ignoreCase: true, out var value) || !Enum.IsDefined(value))
+        if (string.IsNullOrWhiteSpace(text) ||
+            int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out _) ||
+            !Enum.TryParse<TEnum>(text, ignoreCase: true, out var value) ||
+            !Enum.IsDefined(value))
         {
             throw new JsonException($"'{text}' is not a valid {typeof(TEnum).Name} value.");
         }
@@ -495,6 +504,11 @@ public sealed class ObjectStyleJsonConverter : JsonConverter<ObjectStyle>
                     break;
                 case "scale":
                     scale = property.Value.GetDouble();
+                    if (!double.IsFinite(scale))
+                    {
+                        throw new JsonException("Object style 'scale' must be finite.");
+                    }
+
                     break;
                 case "wireframe":
                     wireframe = property.Value.GetBoolean();
@@ -579,6 +593,59 @@ public sealed class ObjectStyleJsonConverter : JsonConverter<ObjectStyle>
             default:
                 throw new JsonException($"Unsupported style value kind '{value.Kind}'.");
         }
+    }
+}
+
+/// <summary>
+/// Serializes a fixed number of doubles and normalizes negative zero to positive zero.
+/// </summary>
+public sealed class CanonicalDoubleArrayJsonConverter : JsonConverter<ImmutableArray<double>>
+{
+    /// <inheritdoc />
+    public override ImmutableArray<double> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.StartArray)
+        {
+            throw new JsonException("Vector values must be JSON arrays of numbers.");
+        }
+
+        var values = ImmutableArray.CreateBuilder<double>();
+        while (reader.Read())
+        {
+            if (reader.TokenType == JsonTokenType.EndArray)
+            {
+                return values.ToImmutable();
+            }
+
+            if (reader.TokenType != JsonTokenType.Number)
+            {
+                throw new JsonException("Vector values must be JSON numbers.");
+            }
+
+            var value = reader.GetDouble();
+            if (!double.IsFinite(value))
+            {
+                throw new JsonException("Vector values must be finite.");
+            }
+
+            values.Add(value == 0.0 ? 0.0 : value);
+        }
+
+        throw new JsonException("Unexpected end of a vector array.");
+    }
+
+    /// <inheritdoc />
+    public override void Write(Utf8JsonWriter writer, ImmutableArray<double> value, JsonSerializerOptions options)
+    {
+        ArgumentNullException.ThrowIfNull(writer);
+
+        writer.WriteStartArray();
+        foreach (var item in value)
+        {
+            writer.WriteNumberValue(item == 0.0 ? 0.0 : item);
+        }
+
+        writer.WriteEndArray();
     }
 }
 

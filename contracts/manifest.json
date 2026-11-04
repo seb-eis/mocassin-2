@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "project": "MOCASSIN",
   "description": "Machine-readable contract manifest for MOCASSIN project, package, results, state, job-folder, event, and MMCFE formats.",
-  "status": "skeleton",
-  "notes": "Step 00 establishes the manifest envelope, field/type descriptions, canonical signature layouts, and generator scaffolding. Later steps extend the field lists as the corresponding formats are implemented; every change requires a format version bump and updated fixtures.",
+  "status": "step-01",
+  "notes": "Step 01 defines the project envelope, typed IDs, units, diagnostics, canonical JSON, migrations, persistence, and the generated project schema. Model, transition, energy, lattice, and simulation fields are extended by later steps; every format change requires a version bump and updated fixtures.",
   "formats": {
     "project": {
       "id": "project",
@@ -193,11 +193,12 @@
                 {
                   "name": "projection",
                   "type": "string",
-                  "required": true,
+                  "required": false,
                   "enum": [
                     "perspective",
                     "orthographic"
-                  ]
+                  ],
+                  "notes": "Optional; defaults to perspective."
                 },
                 {
                   "name": "fieldOfViewDegrees",
@@ -239,7 +240,8 @@
                 {
                   "name": "visible",
                   "type": "bool",
-                  "required": true
+                  "required": false,
+                  "notes": "Optional; defaults to false."
                 }
               ]
             },
@@ -251,7 +253,7 @@
             {
               "name": "objectStyles",
               "type": "array",
-              "required": true,
+              "required": false,
               "items": "object",
               "itemAdditionalProperties": "primitive",
               "itemFields": [
@@ -263,7 +265,8 @@
                 {
                   "name": "visible",
                   "type": "bool",
-                  "required": true
+                  "required": false,
+                  "notes": "Optional; defaults to false."
                 },
                 {
                   "name": "color",
@@ -283,14 +286,17 @@
                 {
                   "name": "scale",
                   "type": "float64",
-                  "required": true
+                  "required": false,
+                  "notes": "Optional; defaults to 1.0."
                 },
                 {
                   "name": "wireframe",
                   "type": "bool",
-                  "required": true
+                  "required": false,
+                  "notes": "Optional; defaults to false."
                 }
-              ]
+              ],
+              "notes": "Optional; defaults to an empty array."
             }
           ]
         }

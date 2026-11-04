@@ -169,7 +169,6 @@
             "position",
             "target",
             "up",
-            "projection",
             "fieldOfViewDegrees",
             "nearPlane",
             "farPlane"
@@ -201,8 +200,7 @@
           },
           "required": [
             "min",
-            "max",
-            "visible"
+            "max"
           ],
           "additionalProperties": false
         },
@@ -237,10 +235,7 @@
               }
             },
             "required": [
-              "objectId",
-              "visible",
-              "scale",
-              "wireframe"
+              "objectId"
             ],
             "additionalProperties": {
               "type": [
@@ -254,8 +249,7 @@
       },
       "required": [
         "camera",
-        "renderBox",
-        "objectStyles"
+        "renderBox"
       ],
       "additionalProperties": false
     }

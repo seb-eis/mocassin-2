@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Json.Schema;
 using Mocassin.Core.Project;
 
@@ -44,6 +45,35 @@ public sealed class ProjectSchemaTests
         Assert.Equal(
             File.ReadAllBytes(RepositoryPaths.Combine(samplePath.Split('/'))),
             File.ReadAllBytes(RepositoryPaths.Combine(fixturePath.Split('/'))));
+    }
+
+    [Fact]
+    public void SchemaAcceptsOptionalViewFieldsMissing()
+    {
+        var root = JsonNode.Parse(
+            File.ReadAllText(RepositoryPaths.Combine(fixturePaths[0].Split('/'))))!.AsObject();
+        var view = root["viewSettings"]!.AsObject();
+        view["camera"]!.AsObject().Remove("projection");
+        view["renderBox"]!.AsObject().Remove("visible");
+        view.Remove("objectStyles");
+
+        using var document = JsonDocument.Parse(root.ToJsonString());
+        var result = projectSchema.Evaluate(document.RootElement);
+
+        Assert.True(result.IsValid, result.ToString());
+    }
+
+    [Fact]
+    public void SchemaRejectsNumericProjectionString()
+    {
+        var root = JsonNode.Parse(
+            File.ReadAllText(RepositoryPaths.Combine(fixturePaths[0].Split('/'))))!.AsObject();
+        root["viewSettings"]!["camera"]!["projection"] = "1";
+
+        using var document = JsonDocument.Parse(root.ToJsonString());
+        var result = projectSchema.Evaluate(document.RootElement);
+
+        Assert.False(result.IsValid);
     }
 
     [Fact]

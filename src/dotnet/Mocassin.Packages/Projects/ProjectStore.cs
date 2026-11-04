@@ -121,7 +121,18 @@ public sealed class ProjectStore
 
         var fullPath = GetFullPath(path);
         var savedProject = project.WithModifiedUtc(timeProvider.GetUtcNow());
-        var bytes = ProjectJson.SerializeToUtf8Bytes(savedProject, indented: true);
+        byte[] bytes;
+        try
+        {
+            bytes = ProjectJson.SerializeToUtf8Bytes(savedProject, indented: true);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException and not OutOfMemoryException)
+        {
+            diagnostics.Add(Error(
+                ProjectDiagnosticCodes.SaveFailed,
+                $"Could not serialize project '{fullPath}': {exception.Message}"));
+            return new ProjectSaveResult(null, diagnostics.Sorted);
+        }
 
         try
         {
@@ -162,7 +173,18 @@ public sealed class ProjectStore
         }
 
         var autosavePath = GetAutosavePath(projectPath);
-        var bytes = ProjectJson.SerializeToUtf8Bytes(project, indented: true);
+        byte[] bytes;
+        try
+        {
+            bytes = ProjectJson.SerializeToUtf8Bytes(project, indented: true);
+        }
+        catch (Exception exception) when (exception is not OperationCanceledException and not OutOfMemoryException)
+        {
+            diagnostics.Add(Error(
+                ProjectDiagnosticCodes.AutosaveFailed,
+                $"Could not serialize autosave '{autosavePath}': {exception.Message}"));
+            return new ProjectSaveResult(null, diagnostics.Sorted);
+        }
 
         try
         {
@@ -328,6 +350,26 @@ public sealed class ProjectStore
 
     private static ProjectLoadResult LoadBytes(byte[] bytes, string path)
     {
+        try
+        {
+            return LoadBytesCore(bytes, path);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
+        }
+        catch (Exception exception) when (exception is not OutOfMemoryException)
+        {
+            var diagnostics = new DiagnosticBag();
+            diagnostics.Add(Error(
+                ProjectDiagnosticCodes.InvalidDocument,
+                $"Project file '{path}' could not be loaded: {exception.Message}"));
+            return new ProjectLoadResult(null, diagnostics.Sorted);
+        }
+    }
+
+    private static ProjectLoadResult LoadBytesCore(byte[] bytes, string path)
+    {
         var diagnostics = new DiagnosticBag();
 
         if (bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF)
@@ -418,11 +460,14 @@ public sealed class ProjectStore
 
     private bool IsStale(LockFileContent content, DateTimeOffset now)
     {
-        if (string.Equals(content.Host, Environment.MachineName, StringComparison.OrdinalIgnoreCase) &&
-            content.ProcessId != Environment.ProcessId &&
-            !IsProcessRunning(content.ProcessId))
+        if (string.Equals(content.Host, Environment.MachineName, StringComparison.OrdinalIgnoreCase))
         {
-            return true;
+            if (content.ProcessId == Environment.ProcessId)
+            {
+                return false;
+            }
+
+            return !IsProcessRunning(content.ProcessId);
         }
 
         return now - content.AcquiredUtc > options.StaleLockTimeout;

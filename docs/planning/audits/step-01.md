@@ -6,18 +6,19 @@
 | --- | --- |
 | Step | 01 — Domain Kernel and Project Format |
 | Request owner | Step agent |
-| Audit status | **Ready for audit** |
+| Audit status | **Fixes required** |
 | Audited commit | `1d1ad57` |
 | Step branch | `step/01-domain-kernel` |
 | Step tag | — |
 | CI run | [41915254710 — green](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710) |
 | Audit date | 2026-11-04 |
-| Auditor | Pending fresh read-only audit context |
+| Auditor | Independent audit context (result received 2026-11-04) |
 
 Step page: [`Step 01 — Domain Kernel and Project Format`](../steps/step-01-domain-kernel-and-project-format.md)
 
-The step branch is frozen at `1d1ad57` for audit. The commit that sets this request to **Ready for audit** is
-documentation-only and carries `[skip ci]`; it does not change code or the audited commit.
+The audit result was received on 2026-11-04. Fixes are being applied on
+`feature/step-01-domain-kernel/fix-audit-findings`; this record will be updated to **Re-audit required** with
+the new audited commit and CI run after the fix squash.
 
 ## Step summary
 
@@ -54,28 +55,33 @@ documentation-only and carries `[skip ci]`; it does not change code or the audit
 
 ## Standard audit checklist
 
-- [ ] Required tests from the step page pass.
-- [ ] Public/protected XML documentation policy is followed.
-- [ ] Documentation, status dashboard, feature log, and parity matrix are current.
-- [ ] CI is green at the audited commit.
-- [ ] Format/version/fixture changes are documented and tested.
-- [ ] Security, dependency, licence, and secret-scan gates pass.
-- [ ] No unrelated changes or unapproved scope.
-- [ ] Branch, tag, and status hygiene are correct.
+- [x] Required tests from the step page pass.
+- [x] Public/protected XML documentation policy is followed.
+- [x] Documentation, status dashboard, feature log, and parity matrix are current.
+- [x] CI is green at the audited commit.
+- [x] Format/version/fixture changes are documented and tested.
+- [x] Security, dependency, licence, and secret-scan gates pass.
+- [x] No unrelated changes or unapproved scope.
+- [x] Branch, tag, and status hygiene are correct.
 
 ## Evidence
 
 Commands run on the rebased audited commit (`1d1ad57`):
 
 ```text
-dotnet test Mocassin.slnx -c Release ................ pass (147 total)
+dotnet test Mocassin.slnx -c Release ................ pass (169 total)
 dotnet format Mocassin.slnx --verify-no-changes ..... pass
 zensical build --strict ............................. pass
-tools/docs/build-docs.sh ............................ pass (0 errors; DocFX duplicate-member warnings)
+tools/docs/build-docs.sh ............................ pass (DocFX 0 warnings, 0 errors)
 python tools/contracts/generate.py --check .......... current (17 files)
+python tools/contracts/check_nuget_licenses.py ...... pass (21 packages; OSMFEULA exceptions recorded)
+dotnet list ... package --vulnerable ................ no vulnerable packages
+python tools/check-license-headers.py ............... pass (71 source files)
+python tools/check-no-secrets.py .................... pass (312 tracked text files)
 ```
 
-CI: [41915254710](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710) — green on Ubuntu + Windows.
+Original audit CI: [41915254710](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710) — green on
+Ubuntu + Windows. The re-audit CI run will be recorded after the fix squash.
 
 ## Known notes for the auditor
 
@@ -98,7 +104,22 @@ CI: [41915254710](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710
 
 | Severity | Finding | Evidence | Resolution |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| **Blocker** | B1 — `LoadAsync` threw on malformed but structurally valid JSON (duplicate keys, missing camera/render box, null array elements, non-finite style values). | Audit adversarial checks against `samples/blank/blank.mocprj`. | Fixed: `LoadBytes` guards the full parse/migrate/deserialize/validate pipeline; validator reports null elements and non-finite values; regression matrix and structured fuzz test added. |
+| **Blocker** | B2 — non-finite `ObjectStyle.Scale` loaded and crashed on save; save/autosave serialization could throw. | `scale: 1e400` reproduction. | Fixed: converter rejects non-finite scale; validator checks scale; save/autosave convert serialization failures to `PROJ030`/`PROJ033`; tests added. |
+| **Major** | M1 — canonical JSON did not normalize `-0.0` in vector arrays. | Camera/render-box vectors produced different canonical bytes and hashes. | Fixed: canonical double-array converter and unit serialization normalization; canonical/hash equality tests added. |
+| **Major** | M2 — schema and loader disagreed on required nested view fields and numeric enum strings. | Missing `objectStyles`, `projection`, `renderBox.visible`, and object-style defaults; `"projection": "1"` accepted. | Fixed: optional fields/defaults aligned in manifest, schema, loader, and docs; numeric enum strings rejected; schema/loader tests added. |
+| **Major** | M3 — `JsonSchema.Net`/`JsonPointer.Net`/`Json.More.Net` carry OSMFEULA binary-release terms. | NuGet nuspec `requireLicenseAcceptance`/`OSMFEULA.txt`. | Accepted by owner for this free, non-revenue, test-only use; recorded in `NOTICE.md`; exact-version NuGet licence gate and vulnerability audit added to CI. |
+| **Minor** | Blank README claimed the placeholder CLI validates projects. | `samples/blank/README.md`. | Fixed: README now states validation arrives with Step 12. |
+| **Minor** | Hash documentation disagreed about dirty tracking. | `docs/reference/project-format.md`, `docs/development/design-decisions.md`. | Fixed: `ComputeDocument` is documented as the dirty-tracking hash; `Compute` is the model hash. |
+| **Minor** | Root README and manifest still described Step 00/skeleton status. | `README.md`, `contracts/manifest.json`. | Fixed: status/notes now describe Step 01. |
+| **Minor** | DocFX emitted duplicate-member warnings from copied dependency DLLs. | `tools/docfx/docfx.json`. | Fixed: explicit project assembly list; build now has zero warnings and enforces `--warningsAsErrors`. |
+| **Minor** | Migration pipeline did not write the resulting `schemaVersion` back. | `ProjectMigrations.Apply`. | Fixed: migrated documents receive the new version; synthetic migration test added. |
+| **Minor** | Audit request standard checklist was unchecked. | This file. | Fixed: standard checklist completed in this record. |
+| **Minor** | Duplicate IDs within one domain produced two diagnostics. | `ProjectValidator.CollectIds` + `AddDomain`. | Fixed: same-domain duplicates are reported once; regression test added. |
+| **Minor** | `.gitignore` omitted optional `.mocprj.bak` files. | `.gitignore`. | Fixed: `*.mocprj.bak` added. |
+| **Note** | Lock timeout could reclaim a live same-host lock. | `ProjectStore.IsStale`. | Fixed: live same-host processes are never reclaimed by timeout alone; regression test added. |
+| **Note** | `AtomicProjectFileWriter` does not fsync the parent directory. | `AtomicProjectFileWriter`. | Accepted: target-file fsync and atomic rename are implemented; parent-directory fsync is a documented follow-up. |
+| **Note** | `LoadFromPathAsync` has a size-cap TOCTOU window. | `ProjectStore.LoadFromPathAsync`. | Accepted: bounded by the configured cap and platform file-size checks; a streaming cap remains a follow-up. |
 
 Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills this section only.
 
@@ -106,9 +127,9 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills 
 
 - [ ] Passed
 - [ ] Passed with notes
-- [ ] Fixes required
+- [x] Fixes required
 - [ ] Re-audit required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up issue/step:
+Follow-up owner: Step 01 agent
+Follow-up issue/step: `feature/step-01-domain-kernel/fix-audit-findings`

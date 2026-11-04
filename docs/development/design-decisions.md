@@ -55,9 +55,10 @@ normalizes timestamps to UTC with seven fractional digits and `-0.0` to `0.0`.
 
 Two SHA-256 hashes are exposed:
 
-- `ProjectHasher.Compute` hashes the canonical **model section** for dirty tracking and as the basis for the
-  compiled-model signature;
-- `ProjectHasher.ComputeDocument` hashes the complete canonical document.
+- `ProjectHasher.Compute` hashes the canonical **model section** as the basis for the compiled-model
+  signature;
+- `ProjectHasher.ComputeDocument` hashes the complete canonical document and is used by `ProjectDocument` for
+  dirty tracking.
 
 They are deliberately distinct. The compiled-model signature in Step 08 is a different value again, based on
 the canonical MessagePack projection (ADR 0010).

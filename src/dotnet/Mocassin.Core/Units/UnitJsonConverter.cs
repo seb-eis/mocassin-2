@@ -33,6 +33,6 @@ public sealed class UnitJsonConverter<TUnit> : JsonConverter<TUnit>
     public override void Write(Utf8JsonWriter writer, TUnit value, JsonSerializerOptions options)
     {
         ArgumentNullException.ThrowIfNull(writer);
-        writer.WriteNumberValue(value.Value);
+        writer.WriteNumberValue(value.Value == 0.0 ? 0.0 : value.Value);
     }
 }

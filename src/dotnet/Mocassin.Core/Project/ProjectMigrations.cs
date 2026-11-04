@@ -61,7 +61,13 @@ public static class ProjectMigrations
     /// <param name="document">The project JSON document.</param>
     /// <param name="fromVersion">The schema version declared by the document.</param>
     /// <returns>The migration result.</returns>
-    public static ProjectMigrationResult Apply(JsonNode document, int fromVersion)
+    public static ProjectMigrationResult Apply(JsonNode document, int fromVersion) =>
+        Apply(document, fromVersion, All);
+
+    internal static ProjectMigrationResult Apply(
+        JsonNode document,
+        int fromVersion,
+        ImmutableArray<IProjectMigration> migrations)
     {
         ArgumentNullException.ThrowIfNull(document);
 
@@ -84,7 +90,7 @@ public static class ProjectMigrations
         var version = fromVersion;
         while (version < CurrentVersion)
         {
-            var migration = All.FirstOrDefault(candidate => candidate.FromVersion == version);
+            var migration = migrations.FirstOrDefault(candidate => candidate.FromVersion == version);
             if (migration is null)
             {
                 return new ProjectMigrationResult(
@@ -101,6 +107,10 @@ public static class ProjectMigrations
 
             current = migration.Apply(current);
             version = migration.ToVersion;
+            if (current is JsonObject migratedObject)
+            {
+                migratedObject["schemaVersion"] = version;
+            }
         }
 
         return new ProjectMigrationResult(current, version, []);
