@@ -17,7 +17,8 @@ with canonical serialization and migrations.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | `core-kernel` | `feature/step-01-domain-kernel/core-kernel` | Squashed | Core tests 90/90; full solution tests pass; `dotnet format --verify-no-changes` passes | `41903504097` — green | `5f662f5` |
-| `project-format` | `feature/step-01-domain-kernel/project-format` | Awaiting approval | Core tests 106/106; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `project-format` | `feature/step-01-domain-kernel/project-format` | Squashed | Core tests 106/106; full solution tests pass; `dotnet format --verify-no-changes` passes | `41906159043` — Windows newline failure; fixed below | `a36f878` |
+| `fix-windows-newline` | `feature/step-01-domain-kernel/fix-windows-newline` | Awaiting approval | Full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 

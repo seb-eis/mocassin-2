@@ -85,6 +85,7 @@ public static class ProjectJson
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = writeIndented,
+            NewLine = "\n",
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.Strict,
             UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
@@ -99,6 +100,7 @@ public static class ProjectJson
         {
             PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
             WriteIndented = false,
+            NewLine = "\n",
             DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
             NumberHandling = JsonNumberHandling.Strict,
             UnmappedMemberHandling = JsonUnmappedMemberHandling.Disallow,
