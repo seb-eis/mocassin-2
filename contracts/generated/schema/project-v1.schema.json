@@ -22,6 +22,15 @@
     "name": {
       "type": "string"
     },
+    "description": {
+      "type": "string"
+    },
+    "author": {
+      "type": "string"
+    },
+    "notes": {
+      "type": "string"
+    },
     "createdUtc": {
       "type": "string"
     },
@@ -29,28 +38,226 @@
       "type": "string"
     },
     "model": {
-      "type": "object"
+      "type": "object",
+      "additionalProperties": false
     },
     "parameterizations": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "modelSignature": {
+            "type": "string"
+          },
+          "createdUtc": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "modelSignature",
+          "createdUtc"
+        ],
+        "additionalProperties": false
       }
     },
     "jobTemplates": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ],
+        "additionalProperties": false
       }
     },
     "buildTemplates": {
       "type": "array",
       "items": {
-        "type": "object"
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "jobTemplateId": {
+            "type": "string"
+          },
+          "parameterizationId": {
+            "type": "string"
+          },
+          "outputName": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "jobTemplateId",
+          "parameterizationId",
+          "outputName"
+        ],
+        "additionalProperties": false
       }
     },
     "viewSettings": {
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "camera": {
+          "type": "object",
+          "properties": {
+            "position": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "target": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "up": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "projection": {
+              "type": "string",
+              "enum": [
+                "perspective",
+                "orthographic"
+              ]
+            },
+            "fieldOfViewDegrees": {
+              "type": "number"
+            },
+            "nearPlane": {
+              "type": "number"
+            },
+            "farPlane": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "position",
+            "target",
+            "up",
+            "projection",
+            "fieldOfViewDegrees",
+            "nearPlane",
+            "farPlane"
+          ],
+          "additionalProperties": false
+        },
+        "renderBox": {
+          "type": "object",
+          "properties": {
+            "min": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "max": {
+              "type": "array",
+              "items": {
+                "type": "number"
+              },
+              "minItems": 3,
+              "maxItems": 3
+            },
+            "visible": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "min",
+            "max",
+            "visible"
+          ],
+          "additionalProperties": false
+        },
+        "background": {
+          "type": "string"
+        },
+        "objectStyles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "objectId": {
+                "type": "string"
+              },
+              "visible": {
+                "type": "boolean"
+              },
+              "color": {
+                "type": "string"
+              },
+              "material": {
+                "type": "string"
+              },
+              "quality": {
+                "type": "string"
+              },
+              "scale": {
+                "type": "number"
+              },
+              "wireframe": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "objectId",
+              "visible",
+              "scale",
+              "wireframe"
+            ],
+            "additionalProperties": {
+              "type": [
+                "string",
+                "number",
+                "boolean"
+              ]
+            }
+          }
+        }
+      },
+      "required": [
+        "camera",
+        "renderBox",
+        "objectStyles"
+      ],
+      "additionalProperties": false
     }
   },
   "required": [

@@ -1,10 +1,12 @@
 # Blank sample
 
-Placeholder for a minimal valid project created by the current project-format implementation. The real
-`blank.mocprj` fixture is added in Step 01, when the project schema and writer exist.
-
-Expected use:
+`blank.mocprj` is the minimal valid Step 01 project: project metadata, an empty model, and default view
+settings. It is produced by the real project writer and is also mirrored as
+`tests/contracts/project-minimal.mocprj`.
 
 ```sh
 dotnet run --project src/dotnet/Mocassin.Cli -- validate samples/blank/blank.mocprj
 ```
+
+The model body, templates, and build workflow are added by later steps. The sample is intentionally
+valid with an empty model so it can be used as a round-trip and schema fixture from day one.

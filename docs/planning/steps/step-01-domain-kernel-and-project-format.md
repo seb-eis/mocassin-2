@@ -9,7 +9,7 @@ with canonical serialization and migrations.
 
 - **Status:** In progress
 - **Step branch:** `step/01-domain-kernel`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41908647123) (Ubuntu + Windows)
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41909638134) (Ubuntu + Windows)
 - **Main merge:** —
 - **Step tag:** —
 - **Last updated:** 2026-11-04
@@ -20,7 +20,8 @@ with canonical serialization and migrations.
 | `project-format` | `feature/step-01-domain-kernel/project-format` | Squashed | Core tests 106/106; full solution tests pass; `dotnet format --verify-no-changes` passes | `41906159043` — Windows newline failure; fixed below | `a36f878` |
 | `fix-windows-newline` | `feature/step-01-domain-kernel/fix-windows-newline` | Squashed | Full solution tests pass; `dotnet format --verify-no-changes` passes | `41906919521` — green | `f8e9320` |
 | `project-store` | `feature/step-01-domain-kernel/project-store` | Squashed | Packages tests 15/15; full solution tests pass; `dotnet format --verify-no-changes` passes | `41908647123` — green | `aab18af` |
-| `editing` | `feature/step-01-domain-kernel/editing` | Awaiting approval | Core tests 115/115; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `editing` | `feature/step-01-domain-kernel/editing` | Squashed | Core tests 115/115; full solution tests pass; `dotnet format --verify-no-changes` passes | `41909638134` — green | `1eaa1fe` |
+| `fixtures-schema` | `feature/step-01-domain-kernel/fixtures-schema` | Awaiting approval | Core tests 126/126 including schema/FsCheck; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
@@ -202,8 +203,8 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 - [x] Implement `ProjectStore` in `Mocassin.Packages.Projects` with atomic save, lock file, and autosave.
 - [x] Implement the migration pipeline and a no-op v1 migration.
 - [x] Implement `ProjectEditor`, `ProjectDocument`, and `ProjectChange`.
-- [ ] Add sample projects: blank and ceria skeleton.
-- [ ] Add a JSON Schema file generated from the C# types (or maintained by hand and validated in tests).
+- [x] Add sample projects: blank and ceria skeleton.
+- [x] Add a JSON Schema file generated from the C# types (or maintained by hand and validated in tests).
 - [ ] Document the format in `docs/reference/project-format.md`.
 
 ## Acceptance criteria

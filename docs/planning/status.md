@@ -38,7 +38,7 @@ remain in each step page; each step page also has a feature log.
 | Step | Title | Phase | Status | Step branch | Current feature | Step CI | Main merge | Step tag |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` |
-| 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | In progress | `step/01-domain-kernel` | `editing` | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41908647123) (Ubuntu + Windows) | — | — |
+| 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | In progress | `step/01-domain-kernel` | `fixtures-schema` | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41909638134) (Ubuntu + Windows) | — | — |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Not started | — | — | — | — | — |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Not started | — | — | — | — | — |
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Not started | — | — | — | — | — |
@@ -72,7 +72,7 @@ remain in each step page; each step page also has a feature log.
 
 ## Active work
 
-Step 01 is active on `step/01-domain-kernel`; `editing` is awaiting squash approval.
+Step 01 is active on `step/01-domain-kernel`; `fixtures-schema` is awaiting squash approval.
 
 ## Notes
 
