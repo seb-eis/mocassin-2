@@ -7,17 +7,35 @@ with canonical serialization and migrations.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
-- **Step CI:** —
+- **Status:** Awaiting approval
+- **Step branch:** `step/01-domain-kernel`
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41927992251) (Ubuntu + Windows, post-re-audit-minors)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested — step in progress
-- **Last updated:** —
+- **Audit:** Passed with notes at `05c41ab`
+- **Last updated:** 2026-11-04
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `core-kernel` | `feature/step-01-domain-kernel/core-kernel` | Squashed | Core tests 90/90; full solution tests pass; `dotnet format --verify-no-changes` passes | `41903504097` — green | `90b4497` |
+| `project-format` | `feature/step-01-domain-kernel/project-format` | Squashed | Core tests 106/106; full solution tests pass; `dotnet format --verify-no-changes` passes | `41906159043` — Windows newline failure; fixed below | `b2282af` |
+| `fix-windows-newline` | `feature/step-01-domain-kernel/fix-windows-newline` | Squashed | Full solution tests pass; `dotnet format --verify-no-changes` passes | `41906919521` — green | `4717e66` |
+| `project-store` | `feature/step-01-domain-kernel/project-store` | Squashed | Packages tests 15/15; full solution tests pass; `dotnet format --verify-no-changes` passes | `41908647123` — green | `e766d52` |
+| `editing` | `feature/step-01-domain-kernel/editing` | Squashed | Core tests 115/115; full solution tests pass; `dotnet format --verify-no-changes` passes | `41909638134` — green | `1a15c83` |
+| `fixtures-schema` | `feature/step-01-domain-kernel/fixtures-schema` | Squashed | Core tests 126/126 including schema/FsCheck; full solution tests pass; `dotnet format --verify-no-changes` passes | `41910849133` — green | `c2fa8f4` |
+| `closeout` | `feature/step-01-domain-kernel/closeout` | Squashed | Full acceptance run; docs strict build; contract drift check | `41915254710` — green (rebased) | `10d1bfc` |
+| `fix-audit-findings` | `feature/step-01-domain-kernel/fix-audit-findings` | Squashed | 169 tests; format clean; strict docs; DocFX 0 warnings; licence/vulnerability, contract, SPDX, secret gates pass | `41924977588` — green | `45d5a4b` |
+| `fix-reaudit-minors` | `feature/step-01-domain-kernel/fix-reaudit-minors` | Squashed | 171 tests; format clean; strict docs; DocFX 0 warnings; licence/vulnerability, contract, SPDX, secret, ApiCompat gates pass | `41927992251` — green | `05c41ab` |
+
+**Deviations:**
+
+- The step branch was rebased onto `main` after the independent audit policy landed. Feature squash hashes
+  above are the rebased commits; the recorded feature CI run IDs are from the original pre-rebase squashes.
+  The final rebased step branch is verified by the Step CI run recorded above.
+- The audit-policy documentation link in `docs/development/agent-workflow.md` was changed to a GitHub URL so
+  the strict published-docs build does not link to the excluded `docs/planning/` tree.
+- The independent Step 01 audit returned `Fixes required`; the audit-fix branch addresses the parser,
+  canonical-number, schema/loader, dependency-licence, and minor findings before re-audit.
 
 ## Goal
 
@@ -190,30 +208,30 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 
 ## Implementation tasks
 
-- [ ] Create `Mocassin.Core` namespaces: `Ids`, `Units`, `Diagnostics`, `Model`, `Project`, `Editing`.
-- [ ] Implement the ID structs, JSON converters, and a UUIDv7 generator.
-- [ ] Implement the unit structs and their JSON converters.
-- [ ] Implement `Diagnostic`, `DiagnosticBag`, and `ModelPath`.
-- [ ] Implement the `Project` envelope and metadata records.
-- [ ] Implement `JsonSerializerContext` and canonical serialization.
-- [ ] Implement `ProjectStore` in `Mocassin.Packages.Projects` with atomic save, lock file, and autosave.
-- [ ] Implement the migration pipeline and a no-op v1 migration.
-- [ ] Implement `ProjectEditor`, `ProjectDocument`, and `ProjectChange`.
-- [ ] Add sample projects: blank and ceria skeleton.
-- [ ] Add a JSON Schema file generated from the C# types (or maintained by hand and validated in tests).
-- [ ] Document the format in `docs/reference/project-format.md`.
+- [x] Create `Mocassin.Core` namespaces: `Ids`, `Units`, `Diagnostics`, `Model`, `Project`, `Editing`.
+- [x] Implement the ID structs, JSON converters, and a UUIDv7 generator.
+- [x] Implement the unit structs and their JSON converters.
+- [x] Implement `Diagnostic`, `DiagnosticBag`, and `ModelPath`.
+- [x] Implement the `Project` envelope and metadata records.
+- [x] Implement `JsonSerializerContext` and canonical serialization.
+- [x] Implement `ProjectStore` in `Mocassin.Packages.Projects` with atomic save, lock file, and autosave.
+- [x] Implement the migration pipeline and a no-op v1 migration.
+- [x] Implement `ProjectEditor`, `ProjectDocument`, and `ProjectChange`.
+- [x] Add sample projects: blank and ceria skeleton.
+- [x] Add a JSON Schema file generated from the C# types (or maintained by hand and validated in tests).
+- [x] Document the format in `docs/reference/project-format.md`.
 
 ## Acceptance criteria
 
-- [ ] A `Project` round-trips through JSON with no loss for all sample projects.
-- [ ] Canonical serialization is byte-identical after reordering collections.
-- [ ] Invalid references (unknown IDs, wrong domain IDs) produce diagnostics with paths.
-- [ ] A future `schemaVersion` is rejected with a clear message.
-- [ ] A v1 fixture loads and saves without changes.
-- [ ] A failed save (simulated I/O error) leaves the original file intact.
-- [ ] A lock file prevents concurrent edits and recovers from a stale lock.
-- [ ] The JSON Schema validates all fixtures.
-- [ ] Documentation written
+- [x] A `Project` round-trips through JSON with no loss for all sample projects.
+- [x] Canonical serialization is byte-identical after reordering collections.
+- [x] Invalid references (unknown IDs, wrong domain IDs) produce diagnostics with paths.
+- [x] A future `schemaVersion` is rejected with a clear message.
+- [x] A v1 fixture loads and saves without changes.
+- [x] A failed save (simulated I/O error) leaves the original file intact.
+- [x] A lock file prevents concurrent edits and recovers from a stale lock.
+- [x] The JSON Schema validates all fixtures.
+- [x] Documentation written
 
 ## Documentation
 

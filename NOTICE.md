@@ -23,6 +23,18 @@ The space-group catalog is generated from an authoritative crystallographic sour
 original SQLite database. If that decision changes, the provenance and licence of the data must be reviewed
 before distribution.
 
+## Third-party dependencies
+
+NuGet dependencies are checked by `tools/contracts/check_nuget_licenses.py` and the CI licence/vulnerability
+gate. The project policy allows MIT-compatible licences; any exception is recorded here.
+
+The test project uses `JsonSchema.Net 9.6.0`, `JsonPointer.Net 7.0.4`, and `Json.More.Net 3.0.1`. Their source
+is MIT-licensed. The NuGet binary releases carry the Open Source Maintenance Fee EULA (`OSMFEULA.txt`): the fee
+applies only to revenue-generating users with annual gross revenue of at least US$10,000. This free,
+non-commercial project uses the packages only for test validation and does not redistribute them. The exact
+versions are pinned in the licence gate; changing them requires a new licence review. If the project becomes
+revenue-generating or starts distributing these binaries, this decision must be revisited.
+
 ## Citation
 
 If you publish scientific work using this software, please cite the original MOCASSIN release paper:

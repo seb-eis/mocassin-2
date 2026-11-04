@@ -5,12 +5,17 @@
         {
           "src": "../../src/dotnet",
           "files": [
-            "**/bin/Release/net10.0/Mocassin.*.dll"
+            "Mocassin.Core/bin/Release/net10.0/Mocassin.Core.dll",
+            "Mocassin.Symmetry/bin/Release/net10.0/Mocassin.Symmetry.dll",
+            "Mocassin.Compilation/bin/Release/net10.0/Mocassin.Compilation.dll",
+            "Mocassin.Contracts/bin/Release/net10.0/Mocassin.Contracts.dll",
+            "Mocassin.Packages/bin/Release/net10.0/Mocassin.Packages.dll",
+            "Mocassin.Results/bin/Release/net10.0/Mocassin.Results.dll",
+            "Mocassin.App.ViewModels/bin/Release/net10.0/Mocassin.App.ViewModels.dll",
+            "Mocassin.App.Views/bin/Release/net10.0/Mocassin.App.Views.dll",
+            "Mocassin.Rendering/bin/Release/net10.0/Mocassin.Rendering.dll"
           ],
           "exclude": [
-            "**/*.Tests.dll",
-            "**/Mocassin.App.dll",
-            "**/Mocassin.Cli.dll",
             "**/obj/**"
           ]
         }

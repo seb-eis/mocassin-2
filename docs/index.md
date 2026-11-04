@@ -4,8 +4,9 @@ MOCASSIN (*Monte Carlo for Solid State Ionics*) is a fixed-lattice MMC/KMC suite
 crystalline solids. This site documents the modern, cross-platform reimplementation.
 
 !!! note "Status"
-    The project has completed Step 00: repository, toolchain, and documentation skeleton. Scientific features
-    arrive in later steps. Commands that depend on unfinished components are marked in each section.
+    The project has completed Step 00 and is closing out Step 01: the immutable domain kernel and the versioned
+    `.mocprj` project format. Scientific model domains, the solver, and the GUI arrive in later steps. Commands
+    that depend on unfinished components are marked in each section.
 
 ## Start here
 
@@ -13,7 +14,8 @@ crystalline solids. This site documents the modern, cross-platform reimplementat
 - [User guide](user-guide/index.md) — the model-building, build, run, and analysis workflow.
 - [Physics](physics/index.md) — MMC/KMC, symmetry, energies, transport, and tracking.
 - [Tutorials](tutorials/index.md) — worked examples.
-- [Reference](reference/index.md) — CLI, file formats, and repository layout.
+- [Reference](reference/index.md) — CLI, file formats (including the [project format](reference/project-format.md)),
+  and repository layout.
 - [Development](development/index.md) — architecture, contributing, testing, and the agent workflow.
 - [API](api/index.md) — generated .NET, Rust, and Python reference documentation.
 

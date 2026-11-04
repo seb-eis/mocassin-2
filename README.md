@@ -4,8 +4,9 @@ A modern, cross-platform reimplementation of **MOCASSIN** (*Monte Carlo for Soli
 Markov-chain Monte Carlo suite for defect thermodynamics and transport in crystalline solids originally
 developed by Sebastian Eisele and Steffen Neitzel-Grieshammer at Forschungszentrum Jülich / RWTH Aachen.
 
-> **Status: Step 00 complete.** The repository, solution/workspace, CI, contracts, and documentation skeleton
-> are in place. Scientific code starts at Step 01.
+> **Status: Step 01 complete; awaiting step-to-main merge.** The repository, toolchain, immutable domain
+> kernel, versioned `.mocprj` format, schema, persistence, and editing primitives are in place. The independent
+> audit passed with notes; Step 02 starts after the merge.
 
 ## Target stack
 

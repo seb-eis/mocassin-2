@@ -90,25 +90,60 @@ def load_manifest() -> dict[str, Any]:
     return manifest
 
 
+def validate_additional_properties(value: Any, context: str) -> None:
+    """Validate an additionalProperties policy."""
+    require(
+        value is True or value is False or value == "primitive",
+        f"{context}: additionalProperties must be true, false, or 'primitive'",
+    )
+
+
 def validate_field(field: dict[str, Any], context: str) -> None:
-    """Validate one field descriptor."""
+    """Validate one field descriptor, including nested object and array-item fields."""
     require(isinstance(field, dict), f"{context}: field must be an object")
     name = field.get("name")
     require(isinstance(name, str) and name, f"{context}: field name must be a non-empty string")
     field_type = field.get("type")
     require(field_type in VALID_FIELD_TYPES, f"{context}.{name}: unsupported type {field_type!r}")
     require(isinstance(field.get("required"), bool), f"{context}.{name}: required must be a boolean")
+
+    if "enum" in field:
+        values = field["enum"]
+        require(isinstance(values, list) and values, f"{context}.{name}: enum must be a non-empty array")
+        require(
+            all(isinstance(value, (str, int, float, bool)) for value in values),
+            f"{context}.{name}: enum values must be JSON primitives",
+        )
+
+    if "fields" in field:
+        require(field_type == "object", f"{context}.{name}: fields are only valid for object types")
+        validate_fields(field["fields"], f"{context}.{name}.fields", allow_empty=True)
+
+    if "additionalProperties" in field:
+        require(
+            field_type in {"object", "map"},
+            f"{context}.{name}: additionalProperties is only valid for object/map types",
+        )
+        validate_additional_properties(field["additionalProperties"], f"{context}.{name}")
+
     if field_type == "array":
         item_type = field.get("items", "object")
         require(item_type in VALID_FIELD_TYPES, f"{context}.{name}: unsupported item type {item_type!r}")
         if "length" in field:
             length = field["length"]
             require(isinstance(length, int) and length > 0, f"{context}.{name}: length must be positive")
+        if "itemFields" in field:
+            require(item_type == "object", f"{context}.{name}: itemFields require object items")
+            validate_fields(field["itemFields"], f"{context}.{name}.itemFields", allow_empty=True)
+        if "itemAdditionalProperties" in field:
+            require(item_type == "object", f"{context}.{name}: itemAdditionalProperties requires object items")
+            validate_additional_properties(field["itemAdditionalProperties"], f"{context}.{name}.itemAdditionalProperties")
 
 
-def validate_fields(fields: list[dict[str, Any]], context: str) -> None:
+def validate_fields(fields: list[dict[str, Any]], context: str, allow_empty: bool = False) -> None:
     """Validate a field list and reject duplicate names."""
-    require(isinstance(fields, list) and fields, f"{context}: fields must be a non-empty array")
+    require(isinstance(fields, list), f"{context}: fields must be an array")
+    require(allow_empty or fields, f"{context}: fields must be a non-empty array")
     names: set[str] = set()
     for field in fields:
         validate_field(field, context)
@@ -201,35 +236,75 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
         require(isinstance(item.get("path"), str) and item["path"], f"fixtures.items.{fixture_id}: path required")
 
 
+def additional_properties_schema(value: Any) -> Any:
+    """Map an additionalProperties policy to a JSON Schema value."""
+    if value == "primitive":
+        return {"type": ["string", "number", "boolean"]}
+    return value
+
+
+def with_enum(schema: dict[str, Any], field: dict[str, Any]) -> dict[str, Any]:
+    """Apply an optional enum constraint to a schema fragment."""
+    if "enum" in field:
+        schema["enum"] = field["enum"]
+    return schema
+
+
 def json_schema_type(field: dict[str, Any]) -> dict[str, Any]:
     """Map a manifest field descriptor to a JSON Schema fragment."""
     field_type = field["type"]
     if field_type == "uint64":
-        return {"type": "integer", "minimum": 0}
+        return with_enum({"type": "integer", "minimum": 0}, field)
     if field_type == "int64":
-        return {"type": "integer"}
+        return with_enum({"type": "integer"}, field)
     if field_type == "float64":
-        return {"type": "number"}
+        return with_enum({"type": "number"}, field)
     if field_type == "bool":
-        return {"type": "boolean"}
+        return with_enum({"type": "boolean"}, field)
     if field_type == "bin":
-        return {"type": "string", "contentEncoding": "base64"}
+        return with_enum({"type": "string", "contentEncoding": "base64"}, field)
     if field_type == "map":
-        return {"type": "object"}
+        schema = {"type": "object"}
+        if "additionalProperties" in field:
+            schema["additionalProperties"] = additional_properties_schema(field["additionalProperties"])
+        return with_enum(schema, field)
     if field_type == "object":
-        return {"type": "object"}
+        schema: dict[str, Any] = {"type": "object"}
+        if "fields" in field:
+            properties, required = field_properties(field["fields"])
+            schema["properties"] = properties
+            schema["required"] = required
+        if "additionalProperties" in field:
+            schema["additionalProperties"] = additional_properties_schema(field["additionalProperties"])
+        return with_enum(schema, field)
     if field_type == "nil":
         return {"type": "null"}
     if field_type == "array":
-        schema: dict[str, Any] = {
+        item_type = field.get("items", "object")
+        if "itemFields" in field:
+            item_properties, item_required = field_properties(field["itemFields"])
+            item_schema: dict[str, Any] = {
+                "type": "object",
+                "properties": item_properties,
+                "required": item_required,
+            }
+            if "itemAdditionalProperties" in field:
+                item_schema["additionalProperties"] = additional_properties_schema(
+                    field["itemAdditionalProperties"]
+                )
+            else:
+                item_schema["additionalProperties"] = False
+        else:
+            item_schema = json_schema_type({"type": item_type, "required": False})
+        schema = {
             "type": "array",
-            "items": json_schema_type({"type": field.get("items", "object"), "required": False}),
+            "items": item_schema,
         }
         if "length" in field:
             schema["minItems"] = field["length"]
             schema["maxItems"] = field["length"]
-        return schema
-    return {"type": "string"}
+        return with_enum(schema, field)
+    return with_enum({"type": "string"}, field)
 
 
 def field_properties(fields: list[dict[str, Any]]) -> tuple[dict[str, Any], list[str]]:

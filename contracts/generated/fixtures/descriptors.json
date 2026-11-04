@@ -12,14 +12,14 @@
       "id": "project-minimal",
       "path": "tests/contracts/project-minimal.mocprj",
       "kind": "project",
-      "status": "planned",
+      "status": "current",
       "step": "01"
     },
     {
       "id": "project-ceria",
       "path": "tests/contracts/project-ceria.mocprj",
       "kind": "project",
-      "status": "planned",
+      "status": "current",
       "step": "01"
     },
     {

@@ -12,6 +12,9 @@ python tools/contracts/generate.py
 
 # Fail when generated artifacts or the signature-vector scaffold are missing/stale
 python tools/contracts/generate.py --check
+
+# Check restored NuGet package licences against the project allow-list
+python tools/contracts/check_nuget_licenses.py
 ```
 
 The generator uses the Python standard library only in Step 00. Add a dependency only with a justification

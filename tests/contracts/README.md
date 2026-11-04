@@ -3,7 +3,8 @@
 Versioned cross-language fixtures for the formats defined in
 [`docs/planning/02-data-contracts.md`](../../docs/planning/02-data-contracts.md):
 
-- `project-*.mocprj` — canonical project JSON;
+- `project-*.mocprj` — canonical project JSON written by the Step 01 project writer
+  (`ProjectJson.SerializeToUtf8Bytes`); mirrored by the `samples/blank` and `samples/ceria` files;
 - `model-*.msgpack.zst` — compiled model payloads written by .NET and read by Rust;
 - `package-*.msl`, `package-*.msr` — package/results stores written by the real writers;
 - `state-*.mcs` — state documents written by Rust and read by .NET/Python;

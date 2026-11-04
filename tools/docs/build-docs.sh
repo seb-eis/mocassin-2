@@ -21,7 +21,7 @@ if [[ -f Mocassin.slnx && -f tools/docfx/docfx.json ]] && command -v dotnet >/de
   echo "==> DocFX"
   dotnet tool restore
   rm -rf artifacts/docfx
-  dotnet docfx tools/docfx/docfx.json -o artifacts/docfx
+  dotnet docfx tools/docfx/docfx.json -o artifacts/docfx --warningsAsErrors
   mkdir -p site/api
   rm -rf site/api/dotnet
   cp -R artifacts/docfx site/api/dotnet
