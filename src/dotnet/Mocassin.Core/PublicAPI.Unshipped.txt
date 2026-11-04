@@ -148,6 +148,186 @@ Mocassin.Core.Ids.TransitionChainId.Value.init -> void
 Mocassin.Core.Ids.TypedIdJsonConverter<TId>
 Mocassin.Core.Ids.TypedIdJsonConverter<TId>.TypedIdJsonConverter() -> void
 Mocassin.Core.Ids.Uuid7
+Mocassin.Core.Model.BuildTemplate
+Mocassin.Core.Model.BuildTemplate.<Clone>$() -> Mocassin.Core.Model.BuildTemplate!
+Mocassin.Core.Model.BuildTemplate.BuildTemplate(Mocassin.Core.Ids.BuildTemplateId Id, string! Name, Mocassin.Core.Ids.JobTemplateId JobTemplateId, Mocassin.Core.Ids.ParameterizationId ParameterizationId, string! OutputName) -> void
+Mocassin.Core.Model.BuildTemplate.Deconstruct(out Mocassin.Core.Ids.BuildTemplateId Id, out string! Name, out Mocassin.Core.Ids.JobTemplateId JobTemplateId, out Mocassin.Core.Ids.ParameterizationId ParameterizationId, out string! OutputName) -> void
+Mocassin.Core.Model.BuildTemplate.Equals(Mocassin.Core.Model.BuildTemplate? other) -> bool
+Mocassin.Core.Model.BuildTemplate.Id.get -> Mocassin.Core.Ids.BuildTemplateId
+Mocassin.Core.Model.BuildTemplate.Id.init -> void
+Mocassin.Core.Model.BuildTemplate.JobTemplateId.get -> Mocassin.Core.Ids.JobTemplateId
+Mocassin.Core.Model.BuildTemplate.JobTemplateId.init -> void
+Mocassin.Core.Model.BuildTemplate.Name.get -> string!
+Mocassin.Core.Model.BuildTemplate.Name.init -> void
+Mocassin.Core.Model.BuildTemplate.OutputName.get -> string!
+Mocassin.Core.Model.BuildTemplate.OutputName.init -> void
+Mocassin.Core.Model.BuildTemplate.ParameterizationId.get -> Mocassin.Core.Ids.ParameterizationId
+Mocassin.Core.Model.BuildTemplate.ParameterizationId.init -> void
+Mocassin.Core.Model.CamelCaseEnumJsonConverter<TEnum>
+Mocassin.Core.Model.CamelCaseEnumJsonConverter<TEnum>.CamelCaseEnumJsonConverter() -> void
+Mocassin.Core.Model.CameraProjection
+Mocassin.Core.Model.CameraProjection.Orthographic = 1 -> Mocassin.Core.Model.CameraProjection
+Mocassin.Core.Model.CameraProjection.Perspective = 0 -> Mocassin.Core.Model.CameraProjection
+Mocassin.Core.Model.CameraSettings
+Mocassin.Core.Model.CameraSettings.<Clone>$() -> Mocassin.Core.Model.CameraSettings!
+Mocassin.Core.Model.CameraSettings.CameraSettings(System.Collections.Immutable.ImmutableArray<double> position, System.Collections.Immutable.ImmutableArray<double> target, System.Collections.Immutable.ImmutableArray<double> up, Mocassin.Core.Model.CameraProjection projection, double fieldOfViewDegrees, double nearPlane, double farPlane) -> void
+Mocassin.Core.Model.CameraSettings.Equals(Mocassin.Core.Model.CameraSettings? other) -> bool
+Mocassin.Core.Model.CameraSettings.FarPlane.get -> double
+Mocassin.Core.Model.CameraSettings.FieldOfViewDegrees.get -> double
+Mocassin.Core.Model.CameraSettings.NearPlane.get -> double
+Mocassin.Core.Model.CameraSettings.Position.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Core.Model.CameraSettings.Projection.get -> Mocassin.Core.Model.CameraProjection
+Mocassin.Core.Model.CameraSettings.Target.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Core.Model.CameraSettings.Up.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Core.Model.CanonicalDoubleJsonConverter
+Mocassin.Core.Model.CanonicalDoubleJsonConverter.CanonicalDoubleJsonConverter() -> void
+Mocassin.Core.Model.JobTemplate
+Mocassin.Core.Model.JobTemplate.<Clone>$() -> Mocassin.Core.Model.JobTemplate!
+Mocassin.Core.Model.JobTemplate.Deconstruct(out Mocassin.Core.Ids.JobTemplateId Id, out string! Name) -> void
+Mocassin.Core.Model.JobTemplate.Equals(Mocassin.Core.Model.JobTemplate? other) -> bool
+Mocassin.Core.Model.JobTemplate.Id.get -> Mocassin.Core.Ids.JobTemplateId
+Mocassin.Core.Model.JobTemplate.Id.init -> void
+Mocassin.Core.Model.JobTemplate.JobTemplate(Mocassin.Core.Ids.JobTemplateId Id, string! Name) -> void
+Mocassin.Core.Model.JobTemplate.Name.get -> string!
+Mocassin.Core.Model.JobTemplate.Name.init -> void
+Mocassin.Core.Model.ModelDefinition
+Mocassin.Core.Model.ModelDefinition.<Clone>$() -> Mocassin.Core.Model.ModelDefinition!
+Mocassin.Core.Model.ModelDefinition.Equals(Mocassin.Core.Model.ModelDefinition? other) -> bool
+Mocassin.Core.Model.ModelDefinition.ModelDefinition() -> void
+Mocassin.Core.Model.ObjectStyle
+Mocassin.Core.Model.ObjectStyle.<Clone>$() -> Mocassin.Core.Model.ObjectStyle!
+Mocassin.Core.Model.ObjectStyle.AdditionalProperties.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.StyleProperty!>
+Mocassin.Core.Model.ObjectStyle.Color.get -> string?
+Mocassin.Core.Model.ObjectStyle.Equals(Mocassin.Core.Model.ObjectStyle? other) -> bool
+Mocassin.Core.Model.ObjectStyle.Material.get -> string?
+Mocassin.Core.Model.ObjectStyle.ObjectId.get -> System.Guid
+Mocassin.Core.Model.ObjectStyle.ObjectStyle(System.Guid objectId, bool visible, string? color, string? material, string? quality, double scale, bool wireframe, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.StyleProperty!> additionalProperties) -> void
+Mocassin.Core.Model.ObjectStyle.Quality.get -> string?
+Mocassin.Core.Model.ObjectStyle.Scale.get -> double
+Mocassin.Core.Model.ObjectStyle.Visible.get -> bool
+Mocassin.Core.Model.ObjectStyle.Wireframe.get -> bool
+Mocassin.Core.Model.ObjectStyleJsonConverter
+Mocassin.Core.Model.ObjectStyleJsonConverter.ObjectStyleJsonConverter() -> void
+Mocassin.Core.Model.ParameterizationTemplate
+Mocassin.Core.Model.ParameterizationTemplate.<Clone>$() -> Mocassin.Core.Model.ParameterizationTemplate!
+Mocassin.Core.Model.ParameterizationTemplate.CreatedUtc.get -> System.DateTimeOffset
+Mocassin.Core.Model.ParameterizationTemplate.CreatedUtc.init -> void
+Mocassin.Core.Model.ParameterizationTemplate.Deconstruct(out Mocassin.Core.Ids.ParameterizationId Id, out string! Name, out string! ModelSignature, out System.DateTimeOffset CreatedUtc) -> void
+Mocassin.Core.Model.ParameterizationTemplate.Equals(Mocassin.Core.Model.ParameterizationTemplate? other) -> bool
+Mocassin.Core.Model.ParameterizationTemplate.Id.get -> Mocassin.Core.Ids.ParameterizationId
+Mocassin.Core.Model.ParameterizationTemplate.Id.init -> void
+Mocassin.Core.Model.ParameterizationTemplate.ModelSignature.get -> string!
+Mocassin.Core.Model.ParameterizationTemplate.ModelSignature.init -> void
+Mocassin.Core.Model.ParameterizationTemplate.Name.get -> string!
+Mocassin.Core.Model.ParameterizationTemplate.Name.init -> void
+Mocassin.Core.Model.ParameterizationTemplate.ParameterizationTemplate(Mocassin.Core.Ids.ParameterizationId Id, string! Name, string! ModelSignature, System.DateTimeOffset CreatedUtc) -> void
+Mocassin.Core.Model.RenderBoxSettings
+Mocassin.Core.Model.RenderBoxSettings.<Clone>$() -> Mocassin.Core.Model.RenderBoxSettings!
+Mocassin.Core.Model.RenderBoxSettings.Equals(Mocassin.Core.Model.RenderBoxSettings? other) -> bool
+Mocassin.Core.Model.RenderBoxSettings.Max.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Core.Model.RenderBoxSettings.Min.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Core.Model.RenderBoxSettings.RenderBoxSettings(System.Collections.Immutable.ImmutableArray<double> min, System.Collections.Immutable.ImmutableArray<double> max, bool visible) -> void
+Mocassin.Core.Model.RenderBoxSettings.Visible.get -> bool
+Mocassin.Core.Model.StyleProperty
+Mocassin.Core.Model.StyleProperty.<Clone>$() -> Mocassin.Core.Model.StyleProperty!
+Mocassin.Core.Model.StyleProperty.Deconstruct(out string! Key, out Mocassin.Core.Model.StyleValue Value) -> void
+Mocassin.Core.Model.StyleProperty.Equals(Mocassin.Core.Model.StyleProperty? other) -> bool
+Mocassin.Core.Model.StyleProperty.Key.get -> string!
+Mocassin.Core.Model.StyleProperty.Key.init -> void
+Mocassin.Core.Model.StyleProperty.StyleProperty(string! Key, Mocassin.Core.Model.StyleValue Value) -> void
+Mocassin.Core.Model.StyleProperty.Value.get -> Mocassin.Core.Model.StyleValue
+Mocassin.Core.Model.StyleProperty.Value.init -> void
+Mocassin.Core.Model.StyleValue
+Mocassin.Core.Model.StyleValue.BooleanValue.get -> bool
+Mocassin.Core.Model.StyleValue.Equals(Mocassin.Core.Model.StyleValue other) -> bool
+Mocassin.Core.Model.StyleValue.Kind.get -> Mocassin.Core.Model.StyleValueKind
+Mocassin.Core.Model.StyleValue.NumberValue.get -> double
+Mocassin.Core.Model.StyleValue.StringValue.get -> string?
+Mocassin.Core.Model.StyleValue.StyleValue() -> void
+Mocassin.Core.Model.StyleValueJsonConverter
+Mocassin.Core.Model.StyleValueJsonConverter.StyleValueJsonConverter() -> void
+Mocassin.Core.Model.StyleValueKind
+Mocassin.Core.Model.StyleValueKind.Boolean = 2 -> Mocassin.Core.Model.StyleValueKind
+Mocassin.Core.Model.StyleValueKind.Number = 1 -> Mocassin.Core.Model.StyleValueKind
+Mocassin.Core.Model.StyleValueKind.String = 0 -> Mocassin.Core.Model.StyleValueKind
+Mocassin.Core.Model.ViewSettings
+Mocassin.Core.Model.ViewSettings.<Clone>$() -> Mocassin.Core.Model.ViewSettings!
+Mocassin.Core.Model.ViewSettings.Background.get -> string?
+Mocassin.Core.Model.ViewSettings.Camera.get -> Mocassin.Core.Model.CameraSettings!
+Mocassin.Core.Model.ViewSettings.Equals(Mocassin.Core.Model.ViewSettings? other) -> bool
+Mocassin.Core.Model.ViewSettings.ObjectStyles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ObjectStyle!>
+Mocassin.Core.Model.ViewSettings.RenderBox.get -> Mocassin.Core.Model.RenderBoxSettings!
+Mocassin.Core.Model.ViewSettings.ViewSettings(Mocassin.Core.Model.CameraSettings! camera, Mocassin.Core.Model.RenderBoxSettings! renderBox, string? background, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ObjectStyle!> objectStyles) -> void
+Mocassin.Core.Project.IProjectMigration
+Mocassin.Core.Project.IProjectMigration.Apply(System.Text.Json.Nodes.JsonNode! document) -> System.Text.Json.Nodes.JsonNode!
+Mocassin.Core.Project.IProjectMigration.FromVersion.get -> int
+Mocassin.Core.Project.IProjectMigration.ToVersion.get -> int
+Mocassin.Core.Project.Project
+Mocassin.Core.Project.Project.<Clone>$() -> Mocassin.Core.Project.Project!
+Mocassin.Core.Project.Project.BuildTemplates.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.BuildTemplate!>
+Mocassin.Core.Project.Project.BuildTemplates.init -> void
+Mocassin.Core.Project.Project.Equals(Mocassin.Core.Project.Project? other) -> bool
+Mocassin.Core.Project.Project.JobTemplates.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.JobTemplate!>
+Mocassin.Core.Project.Project.JobTemplates.init -> void
+Mocassin.Core.Project.Project.Metadata.get -> Mocassin.Core.Project.ProjectMetadata!
+Mocassin.Core.Project.Project.Metadata.init -> void
+Mocassin.Core.Project.Project.Model.get -> Mocassin.Core.Model.ModelDefinition!
+Mocassin.Core.Project.Project.Model.init -> void
+Mocassin.Core.Project.Project.Parameterizations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ParameterizationTemplate!>
+Mocassin.Core.Project.Project.Parameterizations.init -> void
+Mocassin.Core.Project.Project.Project(string? schema, int schemaVersion, Mocassin.Core.Project.ProjectMetadata! metadata, Mocassin.Core.Model.ModelDefinition! model, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ParameterizationTemplate!> parameterizations, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.JobTemplate!> jobTemplates, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.BuildTemplate!> buildTemplates, Mocassin.Core.Model.ViewSettings! viewSettings) -> void
+Mocassin.Core.Project.Project.Schema.get -> string?
+Mocassin.Core.Project.Project.Schema.init -> void
+Mocassin.Core.Project.Project.SchemaVersion.get -> int
+Mocassin.Core.Project.Project.SchemaVersion.init -> void
+Mocassin.Core.Project.Project.ViewSettings.get -> Mocassin.Core.Model.ViewSettings!
+Mocassin.Core.Project.Project.ViewSettings.init -> void
+Mocassin.Core.Project.Project.WithModifiedUtc(System.DateTimeOffset modifiedUtc) -> Mocassin.Core.Project.Project!
+Mocassin.Core.Project.ProjectCanonicalizer
+Mocassin.Core.Project.ProjectDiagnosticCodes
+Mocassin.Core.Project.ProjectHasher
+Mocassin.Core.Project.ProjectJson
+Mocassin.Core.Project.ProjectJsonConverter
+Mocassin.Core.Project.ProjectJsonConverter.ProjectJsonConverter() -> void
+Mocassin.Core.Project.ProjectMetadata
+Mocassin.Core.Project.ProjectMetadata.<Clone>$() -> Mocassin.Core.Project.ProjectMetadata!
+Mocassin.Core.Project.ProjectMetadata.Author.get -> string?
+Mocassin.Core.Project.ProjectMetadata.Author.init -> void
+Mocassin.Core.Project.ProjectMetadata.CreatedUtc.get -> System.DateTimeOffset
+Mocassin.Core.Project.ProjectMetadata.CreatedUtc.init -> void
+Mocassin.Core.Project.ProjectMetadata.Deconstruct(out System.Guid ProjectId, out string! MasterSeed, out string! Name, out string? Description, out System.DateTimeOffset CreatedUtc, out System.DateTimeOffset ModifiedUtc, out string? Author, out string? Notes) -> void
+Mocassin.Core.Project.ProjectMetadata.Description.get -> string?
+Mocassin.Core.Project.ProjectMetadata.Description.init -> void
+Mocassin.Core.Project.ProjectMetadata.Equals(Mocassin.Core.Project.ProjectMetadata? other) -> bool
+Mocassin.Core.Project.ProjectMetadata.FormatProjectId() -> string!
+Mocassin.Core.Project.ProjectMetadata.MasterSeed.get -> string!
+Mocassin.Core.Project.ProjectMetadata.MasterSeed.init -> void
+Mocassin.Core.Project.ProjectMetadata.ModifiedUtc.get -> System.DateTimeOffset
+Mocassin.Core.Project.ProjectMetadata.ModifiedUtc.init -> void
+Mocassin.Core.Project.ProjectMetadata.Name.get -> string!
+Mocassin.Core.Project.ProjectMetadata.Name.init -> void
+Mocassin.Core.Project.ProjectMetadata.Notes.get -> string?
+Mocassin.Core.Project.ProjectMetadata.Notes.init -> void
+Mocassin.Core.Project.ProjectMetadata.ProjectId.get -> System.Guid
+Mocassin.Core.Project.ProjectMetadata.ProjectId.init -> void
+Mocassin.Core.Project.ProjectMetadata.ProjectMetadata(System.Guid ProjectId, string! MasterSeed, string! Name, string? Description, System.DateTimeOffset CreatedUtc, System.DateTimeOffset ModifiedUtc, string? Author = null, string? Notes = null) -> void
+Mocassin.Core.Project.ProjectMetadata.WithModifiedUtc(System.DateTimeOffset modifiedUtc) -> Mocassin.Core.Project.ProjectMetadata!
+Mocassin.Core.Project.ProjectMigrationResult
+Mocassin.Core.Project.ProjectMigrationResult.<Clone>$() -> Mocassin.Core.Project.ProjectMigrationResult!
+Mocassin.Core.Project.ProjectMigrationResult.Deconstruct(out System.Text.Json.Nodes.JsonNode! Document, out int Version, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Core.Project.ProjectMigrationResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Core.Project.ProjectMigrationResult.Diagnostics.init -> void
+Mocassin.Core.Project.ProjectMigrationResult.Document.get -> System.Text.Json.Nodes.JsonNode!
+Mocassin.Core.Project.ProjectMigrationResult.Document.init -> void
+Mocassin.Core.Project.ProjectMigrationResult.Equals(Mocassin.Core.Project.ProjectMigrationResult? other) -> bool
+Mocassin.Core.Project.ProjectMigrationResult.ProjectMigrationResult(System.Text.Json.Nodes.JsonNode! Document, int Version, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Core.Project.ProjectMigrationResult.Version.get -> int
+Mocassin.Core.Project.ProjectMigrationResult.Version.init -> void
+Mocassin.Core.Project.ProjectMigrations
+Mocassin.Core.Project.ProjectSchema
+Mocassin.Core.Project.ProjectValidator
+Mocassin.Core.Project.UtcDateTimeOffsetJsonConverter
+Mocassin.Core.Project.UtcDateTimeOffsetJsonConverter.UtcDateTimeOffsetJsonConverter() -> void
 Mocassin.Core.Units.AngleDegrees
 Mocassin.Core.Units.AngleDegrees.AngleDegrees() -> void
 Mocassin.Core.Units.AngleDegrees.AngleDegrees(double value) -> void
@@ -194,6 +374,20 @@ Mocassin.Core.Units.TimeSeconds.TimeSeconds(double value) -> void
 Mocassin.Core.Units.TimeSeconds.Value.get -> double
 Mocassin.Core.Units.UnitJsonConverter<TUnit>
 Mocassin.Core.Units.UnitJsonConverter<TUnit>.UnitJsonConverter() -> void
+const Mocassin.Core.Project.ProjectDiagnosticCodes.AutosaveFailed = "PROJ033" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.DuplicateId = "PROJ003" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.FutureSchemaVersion = "PROJ001" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.InvalidDocument = "PROJ002" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.InvalidMetadata = "PROJ020" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.InvalidViewSettings = "PROJ021" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.LockHeld = "PROJ031" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.SaveFailed = "PROJ030" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.StaleLockRecovered = "PROJ032" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.UnknownReference = "PROJ010" -> string!
+const Mocassin.Core.Project.ProjectDiagnosticCodes.WrongDomainReference = "PROJ011" -> string!
+const Mocassin.Core.Project.ProjectMigrations.CurrentVersion = 1 -> int
+const Mocassin.Core.Project.ProjectSchema.CurrentVersion = 1 -> int
+const Mocassin.Core.Project.ProjectSchema.SchemaUri = "https://mocassin.dev/schemas/project-v1.json" -> string!
 const Mocassin.Core.Units.AngleDegrees.Maximum = 360 -> double
 const Mocassin.Core.Units.AngleDegrees.Minimum = 0 -> double
 const Mocassin.Core.Units.ChargeElementary.Maximum = 1000 -> double
@@ -236,6 +430,55 @@ override Mocassin.Core.Ids.TransitionChainId.GetHashCode() -> int
 override Mocassin.Core.Ids.TransitionChainId.ToString() -> string!
 override Mocassin.Core.Ids.TypedIdJsonConverter<TId>.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> TId
 override Mocassin.Core.Ids.TypedIdJsonConverter<TId>.Write(System.Text.Json.Utf8JsonWriter! writer, TId value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Model.BuildTemplate.Equals(object? obj) -> bool
+override Mocassin.Core.Model.BuildTemplate.GetHashCode() -> int
+override Mocassin.Core.Model.BuildTemplate.ToString() -> string!
+override Mocassin.Core.Model.CamelCaseEnumJsonConverter<TEnum>.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> TEnum
+override Mocassin.Core.Model.CamelCaseEnumJsonConverter<TEnum>.Write(System.Text.Json.Utf8JsonWriter! writer, TEnum value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Model.CameraSettings.Equals(object? obj) -> bool
+override Mocassin.Core.Model.CameraSettings.GetHashCode() -> int
+override Mocassin.Core.Model.CameraSettings.ToString() -> string!
+override Mocassin.Core.Model.CanonicalDoubleJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> double
+override Mocassin.Core.Model.CanonicalDoubleJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, double value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Model.JobTemplate.Equals(object? obj) -> bool
+override Mocassin.Core.Model.JobTemplate.GetHashCode() -> int
+override Mocassin.Core.Model.JobTemplate.ToString() -> string!
+override Mocassin.Core.Model.ModelDefinition.Equals(object? obj) -> bool
+override Mocassin.Core.Model.ModelDefinition.GetHashCode() -> int
+override Mocassin.Core.Model.ModelDefinition.ToString() -> string!
+override Mocassin.Core.Model.ObjectStyle.Equals(object? obj) -> bool
+override Mocassin.Core.Model.ObjectStyle.GetHashCode() -> int
+override Mocassin.Core.Model.ObjectStyle.ToString() -> string!
+override Mocassin.Core.Model.ObjectStyleJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.ObjectStyle!
+override Mocassin.Core.Model.ObjectStyleJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.ObjectStyle! value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Model.ParameterizationTemplate.Equals(object? obj) -> bool
+override Mocassin.Core.Model.ParameterizationTemplate.GetHashCode() -> int
+override Mocassin.Core.Model.ParameterizationTemplate.ToString() -> string!
+override Mocassin.Core.Model.RenderBoxSettings.Equals(object? obj) -> bool
+override Mocassin.Core.Model.RenderBoxSettings.GetHashCode() -> int
+override Mocassin.Core.Model.RenderBoxSettings.ToString() -> string!
+override Mocassin.Core.Model.StyleProperty.Equals(object? obj) -> bool
+override Mocassin.Core.Model.StyleProperty.GetHashCode() -> int
+override Mocassin.Core.Model.StyleProperty.ToString() -> string!
+override Mocassin.Core.Model.StyleValue.GetHashCode() -> int
+override Mocassin.Core.Model.StyleValueJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.StyleValue
+override Mocassin.Core.Model.StyleValueJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.StyleValue value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Model.ViewSettings.Equals(object? obj) -> bool
+override Mocassin.Core.Model.ViewSettings.GetHashCode() -> int
+override Mocassin.Core.Model.ViewSettings.ToString() -> string!
+override Mocassin.Core.Project.Project.Equals(object? obj) -> bool
+override Mocassin.Core.Project.Project.GetHashCode() -> int
+override Mocassin.Core.Project.Project.ToString() -> string!
+override Mocassin.Core.Project.ProjectJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Project.Project!
+override Mocassin.Core.Project.ProjectJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Project.Project! value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Project.ProjectMetadata.Equals(object? obj) -> bool
+override Mocassin.Core.Project.ProjectMetadata.GetHashCode() -> int
+override Mocassin.Core.Project.ProjectMetadata.ToString() -> string!
+override Mocassin.Core.Project.ProjectMigrationResult.Equals(object? obj) -> bool
+override Mocassin.Core.Project.ProjectMigrationResult.GetHashCode() -> int
+override Mocassin.Core.Project.ProjectMigrationResult.ToString() -> string!
+override Mocassin.Core.Project.UtcDateTimeOffsetJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> System.DateTimeOffset
+override Mocassin.Core.Project.UtcDateTimeOffsetJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, System.DateTimeOffset value, System.Text.Json.JsonSerializerOptions! options) -> void
 override Mocassin.Core.Units.AngleDegrees.GetHashCode() -> int
 override Mocassin.Core.Units.AngleDegrees.ToString() -> string!
 override Mocassin.Core.Units.ChargeElementary.GetHashCode() -> int
@@ -322,6 +565,51 @@ static Mocassin.Core.Ids.TransitionChainId.operator !=(Mocassin.Core.Ids.Transit
 static Mocassin.Core.Ids.TransitionChainId.operator ==(Mocassin.Core.Ids.TransitionChainId left, Mocassin.Core.Ids.TransitionChainId right) -> bool
 static Mocassin.Core.Ids.Uuid7.NewGuid() -> System.Guid
 static Mocassin.Core.Ids.Uuid7.NewGuid(System.DateTimeOffset timestamp) -> System.Guid
+static Mocassin.Core.Model.BuildTemplate.operator !=(Mocassin.Core.Model.BuildTemplate? left, Mocassin.Core.Model.BuildTemplate? right) -> bool
+static Mocassin.Core.Model.BuildTemplate.operator ==(Mocassin.Core.Model.BuildTemplate? left, Mocassin.Core.Model.BuildTemplate? right) -> bool
+static Mocassin.Core.Model.CameraSettings.operator !=(Mocassin.Core.Model.CameraSettings? left, Mocassin.Core.Model.CameraSettings? right) -> bool
+static Mocassin.Core.Model.CameraSettings.operator ==(Mocassin.Core.Model.CameraSettings? left, Mocassin.Core.Model.CameraSettings? right) -> bool
+static Mocassin.Core.Model.JobTemplate.operator !=(Mocassin.Core.Model.JobTemplate? left, Mocassin.Core.Model.JobTemplate? right) -> bool
+static Mocassin.Core.Model.JobTemplate.operator ==(Mocassin.Core.Model.JobTemplate? left, Mocassin.Core.Model.JobTemplate? right) -> bool
+static Mocassin.Core.Model.ModelDefinition.operator !=(Mocassin.Core.Model.ModelDefinition? left, Mocassin.Core.Model.ModelDefinition? right) -> bool
+static Mocassin.Core.Model.ModelDefinition.operator ==(Mocassin.Core.Model.ModelDefinition? left, Mocassin.Core.Model.ModelDefinition? right) -> bool
+static Mocassin.Core.Model.ObjectStyle.operator !=(Mocassin.Core.Model.ObjectStyle? left, Mocassin.Core.Model.ObjectStyle? right) -> bool
+static Mocassin.Core.Model.ObjectStyle.operator ==(Mocassin.Core.Model.ObjectStyle? left, Mocassin.Core.Model.ObjectStyle? right) -> bool
+static Mocassin.Core.Model.ParameterizationTemplate.operator !=(Mocassin.Core.Model.ParameterizationTemplate? left, Mocassin.Core.Model.ParameterizationTemplate? right) -> bool
+static Mocassin.Core.Model.ParameterizationTemplate.operator ==(Mocassin.Core.Model.ParameterizationTemplate? left, Mocassin.Core.Model.ParameterizationTemplate? right) -> bool
+static Mocassin.Core.Model.RenderBoxSettings.operator !=(Mocassin.Core.Model.RenderBoxSettings? left, Mocassin.Core.Model.RenderBoxSettings? right) -> bool
+static Mocassin.Core.Model.RenderBoxSettings.operator ==(Mocassin.Core.Model.RenderBoxSettings? left, Mocassin.Core.Model.RenderBoxSettings? right) -> bool
+static Mocassin.Core.Model.StyleProperty.operator !=(Mocassin.Core.Model.StyleProperty? left, Mocassin.Core.Model.StyleProperty? right) -> bool
+static Mocassin.Core.Model.StyleProperty.operator ==(Mocassin.Core.Model.StyleProperty? left, Mocassin.Core.Model.StyleProperty? right) -> bool
+static Mocassin.Core.Model.StyleValue.FromBoolean(bool value) -> Mocassin.Core.Model.StyleValue
+static Mocassin.Core.Model.StyleValue.FromNumber(double value) -> Mocassin.Core.Model.StyleValue
+static Mocassin.Core.Model.StyleValue.FromString(string! value) -> Mocassin.Core.Model.StyleValue
+static Mocassin.Core.Model.StyleValue.operator !=(Mocassin.Core.Model.StyleValue left, Mocassin.Core.Model.StyleValue right) -> bool
+static Mocassin.Core.Model.StyleValue.operator ==(Mocassin.Core.Model.StyleValue left, Mocassin.Core.Model.StyleValue right) -> bool
+static Mocassin.Core.Model.ViewSettings.Default.get -> Mocassin.Core.Model.ViewSettings!
+static Mocassin.Core.Model.ViewSettings.operator !=(Mocassin.Core.Model.ViewSettings? left, Mocassin.Core.Model.ViewSettings? right) -> bool
+static Mocassin.Core.Model.ViewSettings.operator ==(Mocassin.Core.Model.ViewSettings? left, Mocassin.Core.Model.ViewSettings? right) -> bool
+static Mocassin.Core.Project.Project.operator !=(Mocassin.Core.Project.Project? left, Mocassin.Core.Project.Project? right) -> bool
+static Mocassin.Core.Project.Project.operator ==(Mocassin.Core.Project.Project? left, Mocassin.Core.Project.Project? right) -> bool
+static Mocassin.Core.Project.ProjectCanonicalizer.ToCanonicalJson(Mocassin.Core.Project.Project! project) -> string!
+static Mocassin.Core.Project.ProjectCanonicalizer.ToCanonicalUtf8(Mocassin.Core.Project.Project! project) -> byte[]!
+static Mocassin.Core.Project.ProjectHasher.Compute(Mocassin.Core.Project.Project! project) -> string!
+static Mocassin.Core.Project.ProjectHasher.ComputeDocument(Mocassin.Core.Project.Project! project) -> string!
+static Mocassin.Core.Project.ProjectJson.CanonicalOptions.get -> System.Text.Json.JsonSerializerOptions!
+static Mocassin.Core.Project.ProjectJson.Deserialize(System.ReadOnlySpan<byte> utf8Json) -> Mocassin.Core.Project.Project!
+static Mocassin.Core.Project.ProjectJson.Deserialize(string! json) -> Mocassin.Core.Project.Project!
+static Mocassin.Core.Project.ProjectJson.FileOptions.get -> System.Text.Json.JsonSerializerOptions!
+static Mocassin.Core.Project.ProjectJson.Serialize(Mocassin.Core.Project.Project! project, bool indented = true) -> string!
+static Mocassin.Core.Project.ProjectJson.SerializeToUtf8Bytes(Mocassin.Core.Project.Project! project, bool indented = true) -> byte[]!
+static Mocassin.Core.Project.ProjectMetadata.CreateMasterSeed() -> string!
+static Mocassin.Core.Project.ProjectMetadata.IsValidMasterSeed(string? value) -> bool
+static Mocassin.Core.Project.ProjectMetadata.operator !=(Mocassin.Core.Project.ProjectMetadata? left, Mocassin.Core.Project.ProjectMetadata? right) -> bool
+static Mocassin.Core.Project.ProjectMetadata.operator ==(Mocassin.Core.Project.ProjectMetadata? left, Mocassin.Core.Project.ProjectMetadata? right) -> bool
+static Mocassin.Core.Project.ProjectMigrationResult.operator !=(Mocassin.Core.Project.ProjectMigrationResult? left, Mocassin.Core.Project.ProjectMigrationResult? right) -> bool
+static Mocassin.Core.Project.ProjectMigrationResult.operator ==(Mocassin.Core.Project.ProjectMigrationResult? left, Mocassin.Core.Project.ProjectMigrationResult? right) -> bool
+static Mocassin.Core.Project.ProjectMigrations.All.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Project.IProjectMigration!>
+static Mocassin.Core.Project.ProjectMigrations.Apply(System.Text.Json.Nodes.JsonNode! document, int fromVersion) -> Mocassin.Core.Project.ProjectMigrationResult!
+static Mocassin.Core.Project.ProjectValidator.Validate(Mocassin.Core.Project.Project! project) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
 static Mocassin.Core.Units.AngleDegrees.Create(double value) -> Mocassin.Core.Units.AngleDegrees
 static Mocassin.Core.Units.AngleDegrees.IsValid(double value) -> bool
 static Mocassin.Core.Units.AngleDegrees.TryCreate(double value, out Mocassin.Core.Units.AngleDegrees result) -> bool
@@ -377,6 +665,8 @@ static Mocassin.Core.Units.TimeSeconds.operator ==(Mocassin.Core.Units.TimeSecon
 ~override Mocassin.Core.Ids.StateChangeGroupId.Equals(object obj) -> bool
 ~override Mocassin.Core.Ids.StateChangeId.Equals(object obj) -> bool
 ~override Mocassin.Core.Ids.TransitionChainId.Equals(object obj) -> bool
+~override Mocassin.Core.Model.StyleValue.Equals(object obj) -> bool
+~override Mocassin.Core.Model.StyleValue.ToString() -> string
 ~override Mocassin.Core.Units.AngleDegrees.Equals(object obj) -> bool
 ~override Mocassin.Core.Units.ChargeElementary.Equals(object obj) -> bool
 ~override Mocassin.Core.Units.ElectricFieldVm.Equals(object obj) -> bool

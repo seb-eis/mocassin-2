@@ -16,7 +16,8 @@ with canonical serialization and migrations.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `core-kernel` | `feature/step-01-domain-kernel/core-kernel` | Awaiting approval | Core tests 90/90; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `core-kernel` | `feature/step-01-domain-kernel/core-kernel` | Squashed | Core tests 90/90; full solution tests pass; `dotnet format --verify-no-changes` passes | `41903504097` — green | `5f662f5` |
+| `project-format` | `feature/step-01-domain-kernel/project-format` | Awaiting approval | Core tests 106/106; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
@@ -190,13 +191,13 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 ## Implementation tasks
 
 - [ ] Create `Mocassin.Core` namespaces: `Ids`, `Units`, `Diagnostics`, `Model`, `Project`, `Editing`.
-- [ ] Implement the ID structs, JSON converters, and a UUIDv7 generator.
-- [ ] Implement the unit structs and their JSON converters.
-- [ ] Implement `Diagnostic`, `DiagnosticBag`, and `ModelPath`.
-- [ ] Implement the `Project` envelope and metadata records.
-- [ ] Implement `JsonSerializerContext` and canonical serialization.
+- [x] Implement the ID structs, JSON converters, and a UUIDv7 generator.
+- [x] Implement the unit structs and their JSON converters.
+- [x] Implement `Diagnostic`, `DiagnosticBag`, and `ModelPath`.
+- [x] Implement the `Project` envelope and metadata records.
+- [x] Implement `JsonSerializerContext` and canonical serialization.
 - [ ] Implement `ProjectStore` in `Mocassin.Packages.Projects` with atomic save, lock file, and autosave.
-- [ ] Implement the migration pipeline and a no-op v1 migration.
+- [x] Implement the migration pipeline and a no-op v1 migration.
 - [ ] Implement `ProjectEditor`, `ProjectDocument`, and `ProjectChange`.
 - [ ] Add sample projects: blank and ceria skeleton.
 - [ ] Add a JSON Schema file generated from the C# types (or maintained by hand and validated in tests).
