@@ -12,6 +12,7 @@ collection, analysis dashboards, the MMCFE workflow, and the lattice-recycle too
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
+- **Audit:** —
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

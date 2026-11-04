@@ -12,6 +12,7 @@ headless `mocassin validate` command.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
+- **Audit:** —
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

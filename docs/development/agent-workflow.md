@@ -217,13 +217,33 @@ Reject or stop on:
 - rewriting shared history or force-pushing;
 - copying GPL code or data into the MIT implementation.
 
-## 13. Review gates
+## 13. Step completion audit
+
+The step agent's self-check is not the independent audit.
+
+Before merging a completed step:
+
+1. Finish the closeout feature and get step-branch CI green.
+2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, CI run, scope, and known
+   limitations; set its status to `Ready for audit`.
+3. Freeze the step branch.
+4. Let a fresh read-only audit agent review it. The auditor must not modify the repository.
+5. If findings require fixes, the step agent fixes them on a new feature branch, squash-merges into the step
+   branch, pushes, waits for CI, and marks the audit `Re-audit required`.
+6. Re-audit the new commit. Only a `Passed` audit permits the step-to-main approval request.
+7. The human owner still approves the merge and tag.
+
+Use [`docs/planning/audits/README.md`](../planning/audits/README.md) for status values, severities, and the
+report format. Audit reports are durable planning records; do not rely on chat history.
+
+## 14. Review gates
 
 | Gate | Approval |
 | --- | --- |
 | Step feature list | Once, at step start |
 | Each feature squash | Before every squash into the step branch |
-| Step-to-main merge | Before the `--no-ff` merge |
+| Step completion audit | Fresh read-only audit after the step is frozen |
+| Step-to-main merge | Before the `--no-ff` merge, only after a passed audit |
 | Tag creation/push | Included in the step/milestone/release approval |
 | Release | After Step 31 gates |
 

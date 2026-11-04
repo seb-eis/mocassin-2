@@ -12,6 +12,7 @@ orbit/permutation reduction, and periodic geometry kernels.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
+- **Audit:** —
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
