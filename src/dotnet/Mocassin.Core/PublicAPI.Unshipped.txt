@@ -36,6 +36,45 @@ Mocassin.Core.Diagnostics.ModelPath.ObjectId.get -> System.Guid
 Mocassin.Core.Diagnostics.ModelPath.ObjectId.init -> void
 Mocassin.Core.Diagnostics.ModelPath.Property.get -> string?
 Mocassin.Core.Diagnostics.ModelPath.Property.init -> void
+Mocassin.Core.Editing.ProjectChange
+Mocassin.Core.Editing.ProjectChange.<Clone>$() -> Mocassin.Core.Editing.ProjectChange!
+Mocassin.Core.Editing.ProjectChange.After.get -> Mocassin.Core.Project.Project!
+Mocassin.Core.Editing.ProjectChange.After.init -> void
+Mocassin.Core.Editing.ProjectChange.Before.get -> Mocassin.Core.Project.Project!
+Mocassin.Core.Editing.ProjectChange.Before.init -> void
+Mocassin.Core.Editing.ProjectChange.Deconstruct(out string! Description, out Mocassin.Core.Project.Project! Before, out Mocassin.Core.Project.Project! After) -> void
+Mocassin.Core.Editing.ProjectChange.Description.get -> string!
+Mocassin.Core.Editing.ProjectChange.Description.init -> void
+Mocassin.Core.Editing.ProjectChange.Equals(Mocassin.Core.Editing.ProjectChange? other) -> bool
+Mocassin.Core.Editing.ProjectChange.ProjectChange(string! Description, Mocassin.Core.Project.Project! Before, Mocassin.Core.Project.Project! After) -> void
+Mocassin.Core.Editing.ProjectDocument
+Mocassin.Core.Editing.ProjectDocument.Apply(string! description, System.Func<Mocassin.Core.Project.Project!, Mocassin.Core.Project.Project!>! mutation) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectDocument.CanRedo.get -> bool
+Mocassin.Core.Editing.ProjectDocument.CanUndo.get -> bool
+Mocassin.Core.Editing.ProjectDocument.IsAutosaveDue(System.DateTimeOffset now, System.TimeSpan interval) -> bool
+Mocassin.Core.Editing.ProjectDocument.IsDirty.get -> bool
+Mocassin.Core.Editing.ProjectDocument.LastAutosaveUtc.get -> System.DateTimeOffset?
+Mocassin.Core.Editing.ProjectDocument.LastSavedProject.get -> Mocassin.Core.Project.Project!
+Mocassin.Core.Editing.ProjectDocument.MarkAutosaved(System.DateTimeOffset now) -> void
+Mocassin.Core.Editing.ProjectDocument.MarkSaved() -> void
+Mocassin.Core.Editing.ProjectDocument.MarkSaved(Mocassin.Core.Project.Project! savedProject) -> void
+Mocassin.Core.Editing.ProjectDocument.Project.get -> Mocassin.Core.Project.Project!
+Mocassin.Core.Editing.ProjectDocument.ProjectDocument(Mocassin.Core.Project.Project! project, Mocassin.Core.Editing.ProjectEditor? editor = null) -> void
+Mocassin.Core.Editing.ProjectDocument.Redo() -> bool
+Mocassin.Core.Editing.ProjectDocument.RedoStack.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Editing.ProjectChange!>
+Mocassin.Core.Editing.ProjectDocument.Undo() -> bool
+Mocassin.Core.Editing.ProjectDocument.UndoStack.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Editing.ProjectChange!>
+Mocassin.Core.Editing.ProjectEditResult
+Mocassin.Core.Editing.ProjectEditResult.<Clone>$() -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditResult.Change.get -> Mocassin.Core.Editing.ProjectChange?
+Mocassin.Core.Editing.ProjectEditResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Core.Editing.ProjectEditResult.Equals(Mocassin.Core.Editing.ProjectEditResult? other) -> bool
+Mocassin.Core.Editing.ProjectEditResult.IsSuccess.get -> bool
+Mocassin.Core.Editing.ProjectEditResult.Project.get -> Mocassin.Core.Project.Project!
+Mocassin.Core.Editing.ProjectEditResult.ProjectEditResult(Mocassin.Core.Project.Project! project, Mocassin.Core.Editing.ProjectChange? change, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> void
+Mocassin.Core.Editing.ProjectEditor
+Mocassin.Core.Editing.ProjectEditor.Apply(Mocassin.Core.Project.Project! project, string! description, System.Func<Mocassin.Core.Project.Project!, Mocassin.Core.Project.Project!>! mutation) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.ProjectEditor(System.Func<Mocassin.Core.Project.Project!, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>>? validator = null) -> void
 Mocassin.Core.Ids.BuildTemplateId
 Mocassin.Core.Ids.BuildTemplateId.BuildTemplateId() -> void
 Mocassin.Core.Ids.BuildTemplateId.BuildTemplateId(System.Guid Value) -> void
@@ -398,6 +437,12 @@ override Mocassin.Core.Diagnostics.Diagnostic.ToString() -> string!
 override Mocassin.Core.Diagnostics.ModelPath.Equals(object? obj) -> bool
 override Mocassin.Core.Diagnostics.ModelPath.GetHashCode() -> int
 override Mocassin.Core.Diagnostics.ModelPath.ToString() -> string!
+override Mocassin.Core.Editing.ProjectChange.Equals(object? obj) -> bool
+override Mocassin.Core.Editing.ProjectChange.GetHashCode() -> int
+override Mocassin.Core.Editing.ProjectChange.ToString() -> string!
+override Mocassin.Core.Editing.ProjectEditResult.Equals(object? obj) -> bool
+override Mocassin.Core.Editing.ProjectEditResult.GetHashCode() -> int
+override Mocassin.Core.Editing.ProjectEditResult.ToString() -> string!
 override Mocassin.Core.Ids.BuildTemplateId.GetHashCode() -> int
 override Mocassin.Core.Ids.BuildTemplateId.ToString() -> string!
 override Mocassin.Core.Ids.CellSiteId.GetHashCode() -> int
@@ -501,6 +546,10 @@ static Mocassin.Core.Diagnostics.Diagnostic.operator !=(Mocassin.Core.Diagnostic
 static Mocassin.Core.Diagnostics.Diagnostic.operator ==(Mocassin.Core.Diagnostics.Diagnostic? left, Mocassin.Core.Diagnostics.Diagnostic? right) -> bool
 static Mocassin.Core.Diagnostics.ModelPath.operator !=(Mocassin.Core.Diagnostics.ModelPath? left, Mocassin.Core.Diagnostics.ModelPath? right) -> bool
 static Mocassin.Core.Diagnostics.ModelPath.operator ==(Mocassin.Core.Diagnostics.ModelPath? left, Mocassin.Core.Diagnostics.ModelPath? right) -> bool
+static Mocassin.Core.Editing.ProjectChange.operator !=(Mocassin.Core.Editing.ProjectChange? left, Mocassin.Core.Editing.ProjectChange? right) -> bool
+static Mocassin.Core.Editing.ProjectChange.operator ==(Mocassin.Core.Editing.ProjectChange? left, Mocassin.Core.Editing.ProjectChange? right) -> bool
+static Mocassin.Core.Editing.ProjectEditResult.operator !=(Mocassin.Core.Editing.ProjectEditResult? left, Mocassin.Core.Editing.ProjectEditResult? right) -> bool
+static Mocassin.Core.Editing.ProjectEditResult.operator ==(Mocassin.Core.Editing.ProjectEditResult? left, Mocassin.Core.Editing.ProjectEditResult? right) -> bool
 static Mocassin.Core.Ids.BuildTemplateId.Create(System.Guid value) -> Mocassin.Core.Ids.BuildTemplateId
 static Mocassin.Core.Ids.BuildTemplateId.New() -> Mocassin.Core.Ids.BuildTemplateId
 static Mocassin.Core.Ids.BuildTemplateId.operator !=(Mocassin.Core.Ids.BuildTemplateId left, Mocassin.Core.Ids.BuildTemplateId right) -> bool

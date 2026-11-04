@@ -9,7 +9,7 @@ with canonical serialization and migrations.
 
 - **Status:** In progress
 - **Step branch:** `step/01-domain-kernel`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41906919521) (Ubuntu + Windows)
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41908647123) (Ubuntu + Windows)
 - **Main merge:** —
 - **Step tag:** —
 - **Last updated:** 2026-11-04
@@ -19,7 +19,8 @@ with canonical serialization and migrations.
 | `core-kernel` | `feature/step-01-domain-kernel/core-kernel` | Squashed | Core tests 90/90; full solution tests pass; `dotnet format --verify-no-changes` passes | `41903504097` — green | `5f662f5` |
 | `project-format` | `feature/step-01-domain-kernel/project-format` | Squashed | Core tests 106/106; full solution tests pass; `dotnet format --verify-no-changes` passes | `41906159043` — Windows newline failure; fixed below | `a36f878` |
 | `fix-windows-newline` | `feature/step-01-domain-kernel/fix-windows-newline` | Squashed | Full solution tests pass; `dotnet format --verify-no-changes` passes | `41906919521` — green | `f8e9320` |
-| `project-store` | `feature/step-01-domain-kernel/project-store` | Awaiting approval | Packages tests 15/15; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `project-store` | `feature/step-01-domain-kernel/project-store` | Squashed | Packages tests 15/15; full solution tests pass; `dotnet format --verify-no-changes` passes | `41908647123` — green | `aab18af` |
+| `editing` | `feature/step-01-domain-kernel/editing` | Awaiting approval | Core tests 115/115; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
@@ -192,7 +193,7 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 
 ## Implementation tasks
 
-- [ ] Create `Mocassin.Core` namespaces: `Ids`, `Units`, `Diagnostics`, `Model`, `Project`, `Editing`.
+- [x] Create `Mocassin.Core` namespaces: `Ids`, `Units`, `Diagnostics`, `Model`, `Project`, `Editing`.
 - [x] Implement the ID structs, JSON converters, and a UUIDv7 generator.
 - [x] Implement the unit structs and their JSON converters.
 - [x] Implement `Diagnostic`, `DiagnosticBag`, and `ModelPath`.
@@ -200,7 +201,7 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 - [x] Implement `JsonSerializerContext` and canonical serialization.
 - [x] Implement `ProjectStore` in `Mocassin.Packages.Projects` with atomic save, lock file, and autosave.
 - [x] Implement the migration pipeline and a no-op v1 migration.
-- [ ] Implement `ProjectEditor`, `ProjectDocument`, and `ProjectChange`.
+- [x] Implement `ProjectEditor`, `ProjectDocument`, and `ProjectChange`.
 - [ ] Add sample projects: blank and ceria skeleton.
 - [ ] Add a JSON Schema file generated from the C# types (or maintained by hand and validated in tests).
 - [ ] Document the format in `docs/reference/project-format.md`.
