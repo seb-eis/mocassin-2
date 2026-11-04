@@ -114,7 +114,7 @@ The previous fix squash `45d5a4b` was verified by CI `41924977588`.
 - DocFX builds with zero warnings and zero errors (`--warningsAsErrors`). Strict Zensical and rustdoc builds
   pass.
 - No main merge or `step-01` tag existed at the audited commit. The owner approved the step-to-main merge on
-  2026-11-04.
+  2026-11-04; Step 01 was merged as `7b4a994`, tagged `step-01`, and the main CI `41929788253` is green.
 - Fixes applied on `feature/step-01-domain-kernel/fix-audit-findings`, squash-merged as `45d5a4b`. All
   blockers/majors and actionable minors are addressed; parent-directory fsync and the size-cap TOCTOU window
   remain accepted notes.

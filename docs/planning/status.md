@@ -40,7 +40,7 @@ The `Step audit` column uses the audit statuses defined in [`audits/README.md`](
 | Step | Title | Phase | Status | Step branch | Current feature | Step CI | Main merge | Step tag | Step audit |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Passed |
-| 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Awaiting approval | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41927992251) (Ubuntu + Windows) | — | — | Passed with notes at `05c41ab` |
+| 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Done | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) (main: Ubuntu + Windows + macOS) | `7b4a994` | `step-01` | Passed with notes at `05c41ab` |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Not started | — | — | — | — | — | Not requested |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested |
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested |
@@ -74,12 +74,13 @@ The `Step audit` column uses the audit statuses defined in [`audits/README.md`](
 
 ## Active work
 
-Step 01 re-audit passed with notes at `05c41ab`; the owner approved the step-to-main merge on 2026-11-04. The step branch is frozen while the merge is completed.
+No step is active. Step 01 is complete: merge `7b4a994`, tag `step-01`, and main CI `41929788253` green on Ubuntu + Windows + macOS. Step 02 is the next unblocked step.
 
 ## Notes
 
 - Feature rows live in each step page under **Implementation status**.
 - Step 00 is complete: merge `47a9a90`, tag `step-00`, full main CI `41733064540` green.
+- Step 01 is complete: merge `7b4a994`, tag `step-01`, full main CI `41929788253` green.
 - A step is not `Done` until its acceptance criteria, tests, documentation, and parity entries pass.
 - Status updates should ride in feature branches or the closeout feature; avoid status-only commits that
   trigger an extra step-branch CI run.

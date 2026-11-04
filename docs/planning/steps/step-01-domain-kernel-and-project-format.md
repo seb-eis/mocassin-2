@@ -7,11 +7,11 @@ with canonical serialization and migrations.
 
 ## Implementation status
 
-- **Status:** Awaiting approval
-- **Step branch:** `step/01-domain-kernel`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41927992251) (Ubuntu + Windows, post-re-audit-minors)
-- **Main merge:** —
-- **Step tag:** —
+- **Status:** Done
+- **Step branch:** `step/01-domain-kernel` (merged and deleted)
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41927992251) (Ubuntu + Windows, post-re-audit-minors); main CI [`41929788253`](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) green (Ubuntu + Windows + macOS)
+- **Main merge:** `7b4a994` — `--no-ff` merge
+- **Step tag:** `step-01` pushed
 - **Audit:** Passed with notes at `05c41ab`
 - **Last updated:** 2026-11-04
 
