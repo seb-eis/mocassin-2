@@ -9,10 +9,10 @@ with canonical serialization and migrations.
 
 - **Status:** Awaiting approval
 - **Step branch:** `step/01-domain-kernel`
-- **Step CI:** pending rebased CI
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41915254710) (Ubuntu + Windows)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested — audit request pending
+- **Audit:** Ready for audit at `1d1ad57`
 - **Last updated:** 2026-11-04
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -23,7 +23,7 @@ with canonical serialization and migrations.
 | `project-store` | `feature/step-01-domain-kernel/project-store` | Squashed | Packages tests 15/15; full solution tests pass; `dotnet format --verify-no-changes` passes | `41908647123` — green | `e766d52` |
 | `editing` | `feature/step-01-domain-kernel/editing` | Squashed | Core tests 115/115; full solution tests pass; `dotnet format --verify-no-changes` passes | `41909638134` — green | `1a15c83` |
 | `fixtures-schema` | `feature/step-01-domain-kernel/fixtures-schema` | Squashed | Core tests 126/126 including schema/FsCheck; full solution tests pass; `dotnet format --verify-no-changes` passes | `41910849133` — green | `c2fa8f4` |
-| `closeout` | `feature/step-01-domain-kernel/closeout` | Squashed | Full acceptance run; docs strict build; contract drift check | pending rebased CI | `10d1bfc` |
+| `closeout` | `feature/step-01-domain-kernel/closeout` | Squashed | Full acceptance run; docs strict build; contract drift check | `41915254710` — green (rebased) | `10d1bfc` |
 
 **Deviations:**
 
