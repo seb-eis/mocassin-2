@@ -7,17 +7,16 @@ with canonical serialization and migrations.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
+- **Status:** In progress
+- **Step branch:** `step/01-domain-kernel`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested — step in progress
-- **Last updated:** —
+- **Last updated:** 2026-11-04
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `core-kernel` | `feature/step-01-domain-kernel/core-kernel` | Awaiting approval | Core tests 90/90; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
