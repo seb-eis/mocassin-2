@@ -39,7 +39,7 @@ The `Step audit` column uses the audit statuses defined in [`audits/README.md`](
 
 | Step | Title | Phase | Status | Step branch | Current feature | Step CI | Main merge | Step tag | Step audit |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Ready for audit |
+| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Passed |
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Not started | — | — | — | — | — | Not requested — step in progress |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Not started | — | — | — | — | — | Not requested |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested |
