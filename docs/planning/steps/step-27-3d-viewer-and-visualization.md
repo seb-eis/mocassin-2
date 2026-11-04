@@ -12,7 +12,7 @@ parameterization overlays, with camera controls, picking, selection sync, styles
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** —
+- **Audit:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

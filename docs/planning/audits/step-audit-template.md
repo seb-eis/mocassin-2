@@ -1,10 +1,11 @@
-# Step Audit Template
+# Step NN Audit Request
 
 ## Request
 
 | Field | Value |
 | --- | --- |
-| Step | 00 — Repository, Toolchain, and CI |
+| Step | NN — Step title |
+| Request owner | Step agent |
 | Audit status | Not requested |
 | Audited commit | — |
 | Step branch | — |
@@ -13,17 +14,33 @@
 | Audit date | — |
 | Auditor | — |
 
-## Scope
+Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
 
-- [ ] Step page acceptance criteria
-- [ ] Required tests and property/contract tests
-- [ ] Public/protected XML documentation
-- [ ] Documentation pages and generated API links
-- [ ] Status dashboard, step page, and parity matrix
-- [ ] CI configuration and result
-- [ ] Format/version/fixture changes
-- [ ] Security, dependency, licence, and secret-scan gates
-- [ ] Branch, tag, and scope hygiene
+## Step summary
+
+| Field | Value |
+| --- | --- |
+| Phase | — |
+| Depends on | — |
+| Delivers | — |
+
+## Step-specific acceptance checklist
+
+Copy the acceptance criteria from the step page, preserving their wording:
+
+- [ ] Acceptance criterion 1
+- [ ] Acceptance criterion 2
+
+## Standard audit checklist
+
+- [ ] Required tests from the step page pass.
+- [ ] Public/protected XML documentation policy is followed.
+- [ ] Documentation, status dashboard, feature log, and parity matrix are current.
+- [ ] CI is green at the audited commit.
+- [ ] Format/version/fixture changes are documented and tested.
+- [ ] Security, dependency, licence, and secret-scan gates pass.
+- [ ] No unrelated changes or unapproved scope.
+- [ ] Branch, tag, and status hygiene are correct.
 
 ## Evidence
 
@@ -33,13 +50,17 @@ Commands run:
 
 ```
 
+## Known notes for the auditor
+
+- Record known limitations, accepted deviations, or areas needing extra attention.
+
 ## Findings
 
 | Severity | Finding | Evidence | Resolution |
 | --- | --- | --- | --- |
 | — | — | — | — |
 
-Severity values: **Blocker**, **Major**, **Minor**, **Note**.
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills this section only.
 
 ## Verdict
 

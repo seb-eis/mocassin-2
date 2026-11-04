@@ -8,11 +8,13 @@ a fresh, read-only audit context decides whether the step is ready for approval.
 
 | Role | Responsibility |
 | --- | --- |
-| Step agent | Implement, self-check, fix findings, update status/docs/parity |
-| Audit agent | Independent read-only review; no repository modifications |
+| Step agent | Implement, self-check, create/update the audit request, fix findings, update status/docs/parity |
+| Audit agent | Independent review of the frozen commit; records findings and verdict only |
 | Human owner | Approve fixes, merge, and tag |
 
-The audit agent must not edit the repository. If it starts fixing code, it becomes an implementer and a new
+The audit request, its scope, and its acceptance checklist are owned by the step agent. The audit agent may
+write only the `Findings` and `Verdict` sections of that request; it must not change code, configuration,
+tests, scope, status, or the step branch. If it starts fixing code, it becomes an implementer and a new
 auditor is required for the final pass.
 
 ## 2. Audit status values
@@ -45,7 +47,9 @@ auditor is required for the final pass.
    - `docs/planning/status.md`
    - relevant ADRs, contracts, and quality strategy
 6. The auditor runs the required builds/tests and reviews the diff and artifacts.
-7. The auditor writes findings and a verdict into the audit request.
+7. The auditor records findings and a verdict in the audit request's `Findings` and `Verdict` sections,
+   without changing its scope, code, or step branch. The step agent or human owner commits the completed
+   record; that documentation-only commit does not invalidate the audit.
 8. If fixes are required:
    - the step agent fixes them on a new feature branch;
    - squash-merges into the step branch;
@@ -94,5 +98,10 @@ docs/planning/audits/step-01.md
 ...
 ```
 
-Use [`step-audit-template.md`](step-audit-template.md) as the starting point. The audit request is the
-durable handoff between the step agent and the audit agent; do not rely on chat history.
+Use [`step-audit-template.md`](step-audit-template.md) as the starting point. All 32 files are pre-seeded so
+that every step has an audit entry before implementation. The step agent owns its entry and updates the
+request fields, scope, and acceptance checklist as the step progresses. The auditor only completes the
+findings and verdict.
+
+The audit request is the durable handoff between the step agent and the audit agent; do not rely on chat
+history.

@@ -12,7 +12,7 @@ with validation and cost previews.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** —
+- **Audit:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

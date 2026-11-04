@@ -12,7 +12,7 @@ signals, deterministic seeds, and a versioned extension ABI (including MMCFE par
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** —
+- **Audit:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
