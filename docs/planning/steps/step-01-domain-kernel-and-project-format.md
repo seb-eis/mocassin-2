@@ -9,20 +9,29 @@ with canonical serialization and migrations.
 
 - **Status:** Awaiting approval
 - **Step branch:** `step/01-domain-kernel`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41910849133) (Ubuntu + Windows)
+- **Step CI:** pending rebased CI
 - **Main merge:** —
 - **Step tag:** —
+- **Audit:** Not requested — audit request pending
 - **Last updated:** 2026-11-04
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `core-kernel` | `feature/step-01-domain-kernel/core-kernel` | Squashed | Core tests 90/90; full solution tests pass; `dotnet format --verify-no-changes` passes | `41903504097` — green | `5f662f5` |
-| `project-format` | `feature/step-01-domain-kernel/project-format` | Squashed | Core tests 106/106; full solution tests pass; `dotnet format --verify-no-changes` passes | `41906159043` — Windows newline failure; fixed below | `a36f878` |
-| `fix-windows-newline` | `feature/step-01-domain-kernel/fix-windows-newline` | Squashed | Full solution tests pass; `dotnet format --verify-no-changes` passes | `41906919521` — green | `f8e9320` |
-| `project-store` | `feature/step-01-domain-kernel/project-store` | Squashed | Packages tests 15/15; full solution tests pass; `dotnet format --verify-no-changes` passes | `41908647123` — green | `aab18af` |
-| `editing` | `feature/step-01-domain-kernel/editing` | Squashed | Core tests 115/115; full solution tests pass; `dotnet format --verify-no-changes` passes | `41909638134` — green | `1eaa1fe` |
-| `fixtures-schema` | `feature/step-01-domain-kernel/fixtures-schema` | Squashed | Core tests 126/126 including schema/FsCheck; full solution tests pass; `dotnet format --verify-no-changes` passes | `41910849133` — green | `caa2500` |
-| `closeout` | `feature/step-01-domain-kernel/closeout` | Awaiting approval | Full acceptance run; docs strict build; contract drift check | — | — |
+| `core-kernel` | `feature/step-01-domain-kernel/core-kernel` | Squashed | Core tests 90/90; full solution tests pass; `dotnet format --verify-no-changes` passes | `41903504097` — green | `90b4497` |
+| `project-format` | `feature/step-01-domain-kernel/project-format` | Squashed | Core tests 106/106; full solution tests pass; `dotnet format --verify-no-changes` passes | `41906159043` — Windows newline failure; fixed below | `b2282af` |
+| `fix-windows-newline` | `feature/step-01-domain-kernel/fix-windows-newline` | Squashed | Full solution tests pass; `dotnet format --verify-no-changes` passes | `41906919521` — green | `4717e66` |
+| `project-store` | `feature/step-01-domain-kernel/project-store` | Squashed | Packages tests 15/15; full solution tests pass; `dotnet format --verify-no-changes` passes | `41908647123` — green | `e766d52` |
+| `editing` | `feature/step-01-domain-kernel/editing` | Squashed | Core tests 115/115; full solution tests pass; `dotnet format --verify-no-changes` passes | `41909638134` — green | `1a15c83` |
+| `fixtures-schema` | `feature/step-01-domain-kernel/fixtures-schema` | Squashed | Core tests 126/126 including schema/FsCheck; full solution tests pass; `dotnet format --verify-no-changes` passes | `41910849133` — green | `c2fa8f4` |
+| `closeout` | `feature/step-01-domain-kernel/closeout` | Squashed | Full acceptance run; docs strict build; contract drift check | pending rebased CI | `10d1bfc` |
+
+**Deviations:**
+
+- The step branch was rebased onto `main` after the independent audit policy landed. Feature squash hashes
+  above are the rebased commits; the recorded feature CI run IDs are from the original pre-rebase squashes.
+  The final rebased step branch is verified by the Step CI run recorded above.
+- The audit-policy documentation link in `docs/development/agent-workflow.md` was changed to a GitHub URL so
+  the strict published-docs build does not link to the excluded `docs/planning/` tree.
 
 ## Goal
 

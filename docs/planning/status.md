@@ -35,44 +35,46 @@ remain in each step page; each step page also has a feature log.
 
 ## Dashboard
 
-| Step | Title | Phase | Status | Step branch | Current feature | Step CI | Main merge | Step tag |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` |
-| 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Awaiting approval | `step/01-domain-kernel` | `closeout` | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41910849133) (Ubuntu + Windows) | — | — |
-| 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Not started | — | — | — | — | — |
-| 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Not started | — | — | — | — | — |
-| 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Not started | — | — | — | — | — |
-| 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — |
-| 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Not started | — | — | — | — | — |
-| 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — |
-| 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Not started | — | — | — | — | — |
-| 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Not started | — | — | — | — | — |
-| 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Not started | — | — | — | — | — |
-| 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Not started | — | — | — | — | — |
-| 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Not started | — | — | — | — | — |
-| 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Not started | — | — | — | — | — |
-| 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Not started | — | — | — | — | — |
-| 15 | [Energy Engine](steps/step-15-energy-engine.md) | D. Solver | Not started | — | — | — | — | — |
-| 16 | [Kinetic Monte Carlo Engine](steps/step-16-kmc-engine.md) | D. Solver | Not started | — | — | — | — | — |
-| 17 | [Metropolis Monte Carlo Engine](steps/step-17-mmc-engine.md) | D. Solver | Not started | — | — | — | — | — |
-| 18 | [Tracking, Statistics, and State Writer](steps/step-18-tracking-statistics-and-state-writer.md) | D. Solver | Not started | — | — | — | — | — |
-| 19 | [Solver CLI, HPC Workflows, and Extensions](steps/step-19-solver-cli-hpc-and-extensions.md) | D. Solver | Not started | — | — | — | — | — |
-| 20 | [State Reader, Result Collection, and Evaluation API](steps/step-20-state-reader-and-evaluation-api.md) | E. Results | Not started | — | — | — | — | — |
-| 21 | [Analysis, Plots, and Reports](steps/step-21-analysis-plots-and-reports.md) | E. Results | Not started | — | — | — | — | — |
-| 22 | [Python Analysis API](steps/step-22-python-analysis-api.md) | E. Results | Not started | — | — | — | — | — |
-| 23 | [Avalonia Shell and Project Lifecycle](steps/step-23-avalonia-shell-and-project-lifecycle.md) | F. GUI | Not started | — | — | — | — | — |
-| 24 | [Particle, Structure, and Transition Editors](steps/step-24-model-editors-particle-structure-transitions.md) | F. GUI | Not started | — | — | — | — | — |
-| 25 | [Energy, Lattice, and Simulation Editors](steps/step-25-model-editors-energy-lattice-simulations.md) | F. GUI | Not started | — | — | — | — | — |
-| 26 | [Parameterization, Job Templates, and Build UI](steps/step-26-parameterization-job-templates-and-build-ui.md) | F. GUI | Not started | — | — | — | — | — |
-| 27 | [3D Viewer and Visualization](steps/step-27-3d-viewer-and-visualization.md) | F. GUI | Not started | — | — | — | — | — |
-| 28 | [Run Monitoring, Analysis UI, and MMCFE](steps/step-28-run-monitoring-and-mmcfe-ui.md) | F. GUI | Not started | — | — | — | — | — |
-| 29 | [Validation, Statistical Parity, Performance, and Hardening](steps/step-29-validation-parity-and-performance.md) | G. Release | Not started | — | — | — | — | — |
-| 30 | [Standalone Documentation Completion and Publishing](steps/step-30-standalone-documentation.md) | G. Release and documentation | Not started | — | — | — | — | — |
-| 31 | [Packaging and Release](steps/step-31-packaging-and-release.md) | G. Release and documentation | Not started | — | — | — | — | — |
+The `Step audit` column uses the audit statuses defined in [`audits/README.md`](audits/README.md).
+
+| Step | Title | Phase | Status | Step branch | Current feature | Step CI | Main merge | Step tag | Step audit |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Ready for audit |
+| 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Awaiting approval | `step/01-domain-kernel` | `audit` | pending rebased CI | — | — | Not requested — audit request pending |
+| 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Not started | — | — | — | — | — | Not requested |
+| 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested |
+| 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested |
+| 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested |
+| 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested |
+| 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — | Not requested |
+| 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Not started | — | — | — | — | — | Not requested |
+| 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Not started | — | — | — | — | — | Not requested |
+| 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Not started | — | — | — | — | — | Not requested |
+| 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Not started | — | — | — | — | — | Not requested |
+| 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Not started | — | — | — | — | — | Not requested |
+| 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Not started | — | — | — | — | — | Not requested |
+| 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Not started | — | — | — | — | — | Not requested |
+| 15 | [Energy Engine](steps/step-15-energy-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested |
+| 16 | [Kinetic Monte Carlo Engine](steps/step-16-kmc-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested |
+| 17 | [Metropolis Monte Carlo Engine](steps/step-17-mmc-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested |
+| 18 | [Tracking, Statistics, and State Writer](steps/step-18-tracking-statistics-and-state-writer.md) | D. Solver | Not started | — | — | — | — | — | Not requested |
+| 19 | [Solver CLI, HPC Workflows, and Extensions](steps/step-19-solver-cli-hpc-and-extensions.md) | D. Solver | Not started | — | — | — | — | — | Not requested |
+| 20 | [State Reader, Result Collection, and Evaluation API](steps/step-20-state-reader-and-evaluation-api.md) | E. Results | Not started | — | — | — | — | — | Not requested |
+| 21 | [Analysis, Plots, and Reports](steps/step-21-analysis-plots-and-reports.md) | E. Results | Not started | — | — | — | — | — | Not requested |
+| 22 | [Python Analysis API](steps/step-22-python-analysis-api.md) | E. Results | Not started | — | — | — | — | — | Not requested |
+| 23 | [Avalonia Shell and Project Lifecycle](steps/step-23-avalonia-shell-and-project-lifecycle.md) | F. GUI | Not started | — | — | — | — | — | Not requested |
+| 24 | [Particle, Structure, and Transition Editors](steps/step-24-model-editors-particle-structure-transitions.md) | F. GUI | Not started | — | — | — | — | — | Not requested |
+| 25 | [Energy, Lattice, and Simulation Editors](steps/step-25-model-editors-energy-lattice-simulations.md) | F. GUI | Not started | — | — | — | — | — | Not requested |
+| 26 | [Parameterization, Job Templates, and Build UI](steps/step-26-parameterization-job-templates-and-build-ui.md) | F. GUI | Not started | — | — | — | — | — | Not requested |
+| 27 | [3D Viewer and Visualization](steps/step-27-3d-viewer-and-visualization.md) | F. GUI | Not started | — | — | — | — | — | Not requested |
+| 28 | [Run Monitoring, Analysis UI, and MMCFE](steps/step-28-run-monitoring-and-mmcfe-ui.md) | F. GUI | Not started | — | — | — | — | — | Not requested |
+| 29 | [Validation, Statistical Parity, Performance, and Hardening](steps/step-29-validation-parity-and-performance.md) | G. Release | Not started | — | — | — | — | — | Not requested |
+| 30 | [Standalone Documentation Completion and Publishing](steps/step-30-standalone-documentation.md) | G. Release and documentation | Not started | — | — | — | — | — | Not requested |
+| 31 | [Packaging and Release](steps/step-31-packaging-and-release.md) | G. Release and documentation | Not started | — | — | — | — | — | Not requested |
 
 ## Active work
 
-Step 01 is active on `step/01-domain-kernel`; `closeout` is awaiting squash and step-merge approval.
+Step 01 features and closeout are complete on the rebased step branch. The independent audit request is prepared in the next documentation commit.
 
 ## Notes
 

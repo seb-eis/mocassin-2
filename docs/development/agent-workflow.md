@@ -233,7 +233,7 @@ Before merging a completed step:
 6. Re-audit the new commit. Only a `Passed` audit permits the step-to-main approval request.
 7. The human owner still approves the merge and tag.
 
-Use [`docs/planning/audits/README.md`](../planning/audits/README.md) for status values, severities, and the
+Use [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/audits/README.md) for status values, severities, and the
 report format. Audit reports are durable planning records; do not rely on chat history.
 
 ## 14. Review gates
