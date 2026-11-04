@@ -20,6 +20,10 @@
 | **State change** | A donor/acceptor particle replacement on one position. |
 | **Chain** | An ordered sequence of state-change groups with dynamic/static linkers. |
 
+## Notation
+
+- [Notation, identifiers, and units](notation.md) — typed IDs, UUID conventions, units, seeds, diagnostics.
+
 ## Units
 
 | Quantity | Unit |

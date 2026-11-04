@@ -14,16 +14,16 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Create new project | Y | Planned | 01/23 | Blank + ceria templates |
-| Open/save/close project | Y | Planned | 01/23 | Atomic writes, lock file |
+| Create new project | Y | Planned | 01/23 | Blank + ceria skeletons in 01; creation UI in 23 |
+| Open/save/close project | Y | Planned | 01/23 | Atomic writes, lock, autosave store in 01; lifecycle UI in 23 |
 | Recent files | N | Improvement | 23 | Workspace model |
 | Multiple projects per file | N | Replaced | 23 | One project per file; workspace of open files |
 | Duplicate/delete project in a library | N | Replaced | 23 | File-level duplicate/delete; no DB library |
-| Autosave/recovery | N | Improvement | 23 | `.autosave` recovery |
-| Dirty tracking/unsaved prompt | Y | Planned | 23 | Hash-based |
-| Undo/redo | N | Improvement | 23 | Per-project stacks |
-| Project schema versioning/migration | Y | Planned | 01 | `schemaVersion` + migrations |
-| Stable project hash | Y | Improvement | 01/09 | Fixes randomized `GetHashCode` |
+| Autosave/recovery | N | Improvement | 01/23 | `.autosave` store in 01; timer/recovery prompt in 23 |
+| Dirty tracking/unsaved prompt | Y | Planned | 01/23 | Document hash and dirty state in 01; prompt in 23 |
+| Undo/redo | N | Improvement | 01/23 | Core stacks in 01; UI in 23 |
+| Project schema versioning/migration | Y | Planned | 01 | v1 pipeline implemented; migration fixtures added per version |
+| Stable project hash | Y | Improvement | 01/09 | Model and document SHA-256 in 01; compiled signature in 09 |
 | Legacy `.mocprj` read/write | N | Out of scope | — | ADR 0001 |
 | Project data viewer (JSON/XML) | N | Replaced | 23 | JSON view/debug export |
 

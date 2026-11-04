@@ -27,11 +27,14 @@ The detailed architecture is in the internal plan; the repository layout is summ
 
 ## Guides
 
+- [Architecture](architecture.md) — immutable domain kernel, dependency direction, project store/edit split.
+- [Design decisions](design-decisions.md) — stable IDs, explicit units, canonical hashing, locking, and schema ownership.
 - [Contributing](contributing.md) — branches, review gates, local quality gates, tests, and docs-as-code.
 - [Agent workflow](agent-workflow.md) — context handoff, prompts, evidence reports, and diff review.
 - [Testing and parity](testing-and-parity.md) — testing trophy, mocks/fakes policy, fixtures, and test tiers.
 
 ## Current phase
 
-Step 00 creates the build/test/docs skeleton. Scientific libraries, the solver, and the GUI are added in
-later steps. Do not treat placeholder pages as implemented features.
+Step 00 created the build/test/docs skeleton. Step 01 adds the immutable project kernel and `.mocprj` format.
+Scientific model domains, the solver, and the GUI are added in later steps. Do not treat placeholder pages as
+implemented features.

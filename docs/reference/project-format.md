@@ -1,0 +1,201 @@
+# Project Format (`.mocprj`)
+
+A MOCASSIN project is a single UTF-8 JSON document with the `.mocprj` extension. The format is versioned by
+`schemaVersion`; the current version is `1`. There is no reader or writer for the original MOCASSIN project
+format.
+
+The machine-readable source for field names, types, and versions is
+[`contracts/manifest.json`](https://github.com/seb-eis/mocassin-2/blob/main/contracts/manifest.json). The
+generated JSON Schema is
+[`contracts/generated/schema/project-v1.schema.json`](https://github.com/seb-eis/mocassin-2/blob/main/contracts/generated/schema/project-v1.schema.json).
+
+## Envelope
+
+```json
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e61",
+  "masterSeed": "bbbb…64-hex-chars…",
+  "name": "Ceria",
+  "description": "Reduced-ceria skeleton project.",
+  "createdUtc": "2026-11-04T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-04T12:00:00.0000000Z",
+  "model": {},
+  "parameterizations": [],
+  "jobTemplates": [],
+  "buildTemplates": [],
+  "viewSettings": {}
+}
+```
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `$schema` | no | Optional JSON Schema URI. |
+| `schemaVersion` | yes | Project schema version. New files write `1`. |
+| `projectId` | yes | RFC 4122 UUID string; identifies the project independently of its path. |
+| `masterSeed` | yes | 32-byte lowercase hexadecimal seed used for deterministic job/lattice derivation. |
+| `name` | yes | User-visible project name. |
+| `description` | no | Optional description. |
+| `author` | no | Optional author. |
+| `notes` | no | Optional free-text notes. |
+| `createdUtc` | yes | ISO-8601 UTC creation timestamp. |
+| `modifiedUtc` | yes | ISO-8601 UTC last-modified timestamp. |
+| `model` | yes | Scientific model body. It is an empty object in Step 01 and is extended by Steps 03–06. |
+| `parameterizations` | yes | Parameterization templates. Step 01 stores identity and model signature only. |
+| `jobTemplates` | yes | Job templates. Step 01 stores identity and name only. |
+| `buildTemplates` | yes | Build recipes binding a job template to a parameterization. |
+| `viewSettings` | yes | Camera, render box, and per-object style state. |
+
+The file is written with two-space indentation and LF line endings, without a byte-order mark. Reads reject
+a byte-order mark, invalid UTF-8, unknown properties, and a `schemaVersion` newer than the application supports.
+
+## Identity
+
+All user-created objects use strongly typed UUID identifiers. New objects use UUIDv7 so creation order is
+sortable. References are typed IDs, never array positions. A `ParticleSetId` cannot be substituted for a
+`CellSiteId` at the C# API boundary.
+
+The JSON representation is a lowercase hyphenated UUID string:
+
+```json
+{ "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e61" }
+```
+
+The implicit void particle and empty particle set use fixed, reserved identifiers. They are not serialized as
+ordinary model objects. Dense compiled indices (`ParticleIndex`, `PositionIndex`, `RuleIndex`, …) never appear
+in the project file; they belong to the compiled package.
+
+Arrays are sorted by `id` when serialized unless their order is semantic. Semantic orders in later sections
+include state-change group order, chain linkers, doping priority, reference path positions, and job
+configuration order.
+
+## Units
+
+Units are part of the API and schema, not an implicit convention:
+
+| Type | JSON unit | Example field |
+| --- | --- | --- |
+| `LengthAngstrom` | ångström | cell lengths, cutoffs, distances |
+| `EnergyEv` | electronvolt | interaction and site energies |
+| `TemperatureKelvin` | kelvin | simulation temperature |
+| `ChargeElementary` | elementary charge | particle charge |
+| `TimeSeconds` | second | simulation time |
+| `FrequencyHz` | hertz | attempt frequency |
+| `ElectricFieldVm` | volt per metre | field magnitude |
+| `AngleDegrees` | degree | cell angles |
+
+The unit value structs validate finiteness and their allowed range at construction. JSON stores the plain
+number; the property name or schema description carries the unit. There are no implicit conversions between
+unit types.
+
+## Model and templates in Step 01
+
+Step 01 deliberately establishes the project envelope before the scientific model domains. Consequently:
+
+- `model` is an empty JSON object;
+- a parameterization template has `id`, `name`, `modelSignature`, and `createdUtc`;
+- a job template has `id` and `name`;
+- a build template has `id`, `name`, `jobTemplateId`, `parameterizationId`, and `outputName`.
+
+Steps 03–06 extend `model` with particles, structure, transitions, energy, lattice, and simulations. Steps 09
+and 10 extend the template records. Any semantic change to a released schema requires a migration and a
+format decision.
+
+## View settings
+
+`viewSettings` is persisted with the project so a shared project opens with the same view:
+
+- `camera`: `position`, `target`, `up` (three-number arrays), `projection` (`perspective` or `orthographic`),
+  `fieldOfViewDegrees`, `nearPlane`, and `farPlane`;
+- `renderBox`: `min`, `max`, and `visible`;
+- `background`: optional background key;
+- `objectStyles`: an array of per-object styles keyed by stable object ID.
+
+Known style keys are `visible`, `color`, `material`, `quality`, `scale`, and `wireframe`. Additional
+primitive keys are preserved on round-trip but are not interpreted by the current renderer.
+
+## Canonical JSON
+
+`ProjectCanonicalizer.ToCanonicalJson(project)` produces the stable form used for hashing and golden tests:
+
+- UTF-8 without a byte-order mark;
+- no insignificant whitespace, LF-only separators;
+- object keys in schema order;
+- non-semantic arrays sorted by stable ID;
+- invariant shortest round-trip numbers;
+- `-0.0` normalized to `0.0`;
+- timestamps normalized to UTC with seven fractional digits and a `Z` suffix;
+- enums written as camelCase strings;
+- optional null properties omitted.
+
+`ProjectHasher.Compute(project)` hashes the canonical **model section** and is the Step 01 model-content
+identity used for dirty tracking and as the basis for the compiled-model signature. It is not the compiled
+model signature from Step 08. `ProjectHasher.ComputeDocument(project)` hashes the complete canonical project
+document, including metadata and view settings. Both use SHA-256 and return lowercase hexadecimal.
+
+## Migrations
+
+`ProjectMigrations` applies pure `IProjectMigration` transformations in order until the document reaches the
+current schema version. A migration must be deterministic and is covered by a fixture from the old version.
+
+The version-1 release has no predecessor, so the migration list is empty and the v1 pipeline is a no-op.
+Documents newer than the current version are rejected with `PROJ001` and an actionable message. Documents
+that need an unavailable migration are rejected with `PROJ002`.
+
+## Validation and diagnostics
+
+`ProjectValidator.Validate(project)` returns diagnostics in stable severity/code/path order. Validation never
+throws for user data. The Step 01 project codes are:
+
+| Code | Meaning |
+| --- | --- |
+| `PROJ001` | Document schema version is newer than this application supports. |
+| `PROJ002` | Document is malformed, unreadable, or cannot be migrated. |
+| `PROJ003` | Two objects in one domain share an identifier. |
+| `PROJ010` | A reference points to an identifier that does not exist. |
+| `PROJ011` | A reference points to an identifier in a different domain. |
+| `PROJ020` | Project or template metadata is missing or invalid. |
+| `PROJ021` | View settings are invalid or incomplete. |
+| `PROJ030` | A save failed; the previous file was left intact. |
+| `PROJ031` | Another session holds the editing lock. |
+| `PROJ032` | A stale lock was reclaimed. |
+| `PROJ033` | An autosave write failed. |
+
+The full diagnostic catalogue is completed in Step 07.
+
+## Persistence
+
+`Mocassin.Packages.Projects.ProjectStore` owns all file I/O; `Mocassin.Core` has no file, SQL, or UI
+dependency.
+
+- `LoadAsync` reads UTF-8, checks the size cap, parses, migrates, deserializes, and validates references.
+  Validation errors still return the loaded project so callers can inspect it.
+- `SaveAsync` updates `modifiedUtc`, writes to a temporary file in the target directory, flushes to disk, and
+  atomically replaces the target. A failed save never truncates the existing file. Optional `.bak` copies are
+  supported.
+- `AcquireLockAsync` creates `<project>.mocprj.lock` with PID, host, token, and acquisition time. A same-host
+  dead PID or a lock older than the configured timeout is reclaimed; an active lock returns `PROJ031`.
+- `WriteAutosaveAsync` writes `<project>.mocprj.autosave` atomically. `LoadAutosaveAsync` reads it, and
+  `DeleteAutosave` removes it after recovery. Autosave does not update the project's modified timestamp.
+- Lock and autosave files are ignored by Git.
+
+The application layer decides when to autosave. `ProjectDocument` exposes `IsAutosaveDue` and
+`MarkAutosaved`; the UI timer belongs to Step 23.
+
+## Editing
+
+`ProjectEditor` applies one pure mutation to an immutable `Project`, validates the candidate, and commits it
+only when there are no errors. `ProjectChange` stores before/after snapshots so a bulk edit is one undo step.
+`ProjectDocument` owns the current and last-saved snapshots, undo/redo stacks, dirty tracking, and autosave
+timing. It is I/O-free; the application saves through `ProjectStore` and calls `MarkSaved`.
+
+## Fixtures and samples
+
+The real writer produces these Step 01 fixtures:
+
+- `samples/blank/blank.mocprj` and `tests/contracts/project-minimal.mocprj` — minimal valid project;
+- `samples/ceria/ceria.mocprj` and `tests/contracts/project-ceria.mocprj` — ceria skeleton.
+
+Tests validate both the generated JSON Schema and canonical round-trips. Property tests exercise arbitrary
+JSON bytes to ensure the parser fails only with a structured JSON error.

@@ -232,6 +232,26 @@ public sealed class ProjectStoreTests
     }
 
     [Fact]
+    public async Task ContractFixtureLoadsSavesAndReloadsWithoutDataLoss()
+    {
+        using var directory = new TempDirectory();
+        var store = new ProjectStore(new FixedTimeProvider(now));
+        var fixturePath = FindRepositoryFile("tests/contracts/project-minimal.mocprj");
+        var loaded = await store.LoadAsync(fixturePath);
+        var outputPath = directory.File("project-minimal.mocprj");
+
+        var saved = await store.SaveAsync(loaded.Project!, outputPath);
+        var reloaded = await store.LoadAsync(outputPath);
+
+        Assert.True(loaded.IsSuccess);
+        Assert.True(saved.IsSuccess);
+        Assert.True(reloaded.IsSuccess);
+        Assert.Equal(
+            ProjectCanonicalizer.ToCanonicalJson(loaded.Project!),
+            ProjectCanonicalizer.ToCanonicalJson(reloaded.Project!));
+    }
+
+    [Fact]
     public async Task MissingFileReturnsDiagnostic()
     {
         using var directory = new TempDirectory();
@@ -241,6 +261,22 @@ public sealed class ProjectStoreTests
         Assert.False(result.IsSuccess);
         Assert.Null(result.Project);
         Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.InvalidDocument);
+    }
+
+    private static string FindRepositoryFile(string relativePath)
+    {
+        var directory = new DirectoryInfo(AppContext.BaseDirectory);
+        while (directory is not null)
+        {
+            if (File.Exists(Path.Combine(directory.FullName, "Mocassin.slnx")))
+            {
+                return Path.Combine(directory.FullName, relativePath);
+            }
+
+            directory = directory.Parent;
+        }
+
+        throw new InvalidOperationException("Could not locate the repository root.");
     }
 
     private static ProjectModel CreateProject(string name = "Ceria")

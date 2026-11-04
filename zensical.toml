@@ -31,9 +31,12 @@ nav = [
   { "Reference" = [
       { "Overview" = "reference/index.md" },
       { "Repository and file layout" = "reference/file-layout.md" },
+      { "Project format" = "reference/project-format.md" },
     ] },
   { "Development" = [
       { "Overview" = "development/index.md" },
+      { "Architecture" = "development/architecture.md" },
+      { "Design decisions" = "development/design-decisions.md" },
       { "Contributing" = "development/contributing.md" },
       { "Agent workflow" = "development/agent-workflow.md" },
       { "Testing and parity" = "development/testing-and-parity.md" },
@@ -42,7 +45,10 @@ nav = [
   { "Troubleshooting" = "troubleshooting/index.md" },
   { "Migration" = "migration/index.md" },
   { "Examples" = "examples/index.md" },
-  { "Glossary" = "glossary/index.md" },
+  { "Glossary" = [
+      { "Overview" = "glossary/index.md" },
+      { "Notation and units" = "glossary/notation.md" },
+    ] },
   { "API" = [
       { "Overview" = "api/index.md" },
       { ".NET API" = "api/dotnet/api/Mocassin.Core.CoreModule.html" },

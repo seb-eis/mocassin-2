@@ -7,9 +7,9 @@ with canonical serialization and migrations.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** Awaiting approval
 - **Step branch:** `step/01-domain-kernel`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41909638134) (Ubuntu + Windows)
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41910849133) (Ubuntu + Windows)
 - **Main merge:** —
 - **Step tag:** —
 - **Last updated:** 2026-11-04
@@ -21,7 +21,8 @@ with canonical serialization and migrations.
 | `fix-windows-newline` | `feature/step-01-domain-kernel/fix-windows-newline` | Squashed | Full solution tests pass; `dotnet format --verify-no-changes` passes | `41906919521` — green | `f8e9320` |
 | `project-store` | `feature/step-01-domain-kernel/project-store` | Squashed | Packages tests 15/15; full solution tests pass; `dotnet format --verify-no-changes` passes | `41908647123` — green | `aab18af` |
 | `editing` | `feature/step-01-domain-kernel/editing` | Squashed | Core tests 115/115; full solution tests pass; `dotnet format --verify-no-changes` passes | `41909638134` — green | `1eaa1fe` |
-| `fixtures-schema` | `feature/step-01-domain-kernel/fixtures-schema` | Awaiting approval | Core tests 126/126 including schema/FsCheck; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `fixtures-schema` | `feature/step-01-domain-kernel/fixtures-schema` | Squashed | Core tests 126/126 including schema/FsCheck; full solution tests pass; `dotnet format --verify-no-changes` passes | `41910849133` — green | `caa2500` |
+| `closeout` | `feature/step-01-domain-kernel/closeout` | Awaiting approval | Full acceptance run; docs strict build; contract drift check | — | — |
 
 ## Goal
 
@@ -205,19 +206,19 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 - [x] Implement `ProjectEditor`, `ProjectDocument`, and `ProjectChange`.
 - [x] Add sample projects: blank and ceria skeleton.
 - [x] Add a JSON Schema file generated from the C# types (or maintained by hand and validated in tests).
-- [ ] Document the format in `docs/reference/project-format.md`.
+- [x] Document the format in `docs/reference/project-format.md`.
 
 ## Acceptance criteria
 
-- [ ] A `Project` round-trips through JSON with no loss for all sample projects.
-- [ ] Canonical serialization is byte-identical after reordering collections.
-- [ ] Invalid references (unknown IDs, wrong domain IDs) produce diagnostics with paths.
-- [ ] A future `schemaVersion` is rejected with a clear message.
-- [ ] A v1 fixture loads and saves without changes.
-- [ ] A failed save (simulated I/O error) leaves the original file intact.
-- [ ] A lock file prevents concurrent edits and recovers from a stale lock.
-- [ ] The JSON Schema validates all fixtures.
-- [ ] Documentation written
+- [x] A `Project` round-trips through JSON with no loss for all sample projects.
+- [x] Canonical serialization is byte-identical after reordering collections.
+- [x] Invalid references (unknown IDs, wrong domain IDs) produce diagnostics with paths.
+- [x] A future `schemaVersion` is rejected with a clear message.
+- [x] A v1 fixture loads and saves without changes.
+- [x] A failed save (simulated I/O error) leaves the original file intact.
+- [x] A lock file prevents concurrent edits and recovers from a stale lock.
+- [x] The JSON Schema validates all fixtures.
+- [x] Documentation written
 
 ## Documentation
 
