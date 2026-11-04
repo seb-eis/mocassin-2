@@ -1,1 +1,73 @@
 #nullable enable
+Mocassin.Packages.Projects.ProjectFileLock
+Mocassin.Packages.Projects.ProjectFileLock.AcquiredUtc.get -> System.DateTimeOffset
+Mocassin.Packages.Projects.ProjectFileLock.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Projects.ProjectFileLock.Dispose() -> void
+Mocassin.Packages.Projects.ProjectFileLock.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Mocassin.Packages.Projects.ProjectFileLock.IsDisposed.get -> bool
+Mocassin.Packages.Projects.ProjectFileLock.Path.get -> string!
+Mocassin.Packages.Projects.ProjectLoadResult
+Mocassin.Packages.Projects.ProjectLoadResult.<Clone>$() -> Mocassin.Packages.Projects.ProjectLoadResult!
+Mocassin.Packages.Projects.ProjectLoadResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Projects.ProjectLoadResult.Equals(Mocassin.Packages.Projects.ProjectLoadResult? other) -> bool
+Mocassin.Packages.Projects.ProjectLoadResult.IsSuccess.get -> bool
+Mocassin.Packages.Projects.ProjectLoadResult.Project.get -> Mocassin.Core.Project.Project?
+Mocassin.Packages.Projects.ProjectLoadResult.ProjectLoadResult(Mocassin.Core.Project.Project? project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> void
+Mocassin.Packages.Projects.ProjectLockResult
+Mocassin.Packages.Projects.ProjectLockResult.<Clone>$() -> Mocassin.Packages.Projects.ProjectLockResult!
+Mocassin.Packages.Projects.ProjectLockResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Projects.ProjectLockResult.Equals(Mocassin.Packages.Projects.ProjectLockResult? other) -> bool
+Mocassin.Packages.Projects.ProjectLockResult.IsSuccess.get -> bool
+Mocassin.Packages.Projects.ProjectLockResult.Lock.get -> Mocassin.Packages.Projects.ProjectFileLock?
+Mocassin.Packages.Projects.ProjectLockResult.ProjectLockResult(Mocassin.Packages.Projects.ProjectFileLock? lockHandle, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> void
+Mocassin.Packages.Projects.ProjectSaveResult
+Mocassin.Packages.Projects.ProjectSaveResult.<Clone>$() -> Mocassin.Packages.Projects.ProjectSaveResult!
+Mocassin.Packages.Projects.ProjectSaveResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Projects.ProjectSaveResult.Equals(Mocassin.Packages.Projects.ProjectSaveResult? other) -> bool
+Mocassin.Packages.Projects.ProjectSaveResult.IsSuccess.get -> bool
+Mocassin.Packages.Projects.ProjectSaveResult.ProjectSaveResult(Mocassin.Core.Project.Project? savedProject, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> void
+Mocassin.Packages.Projects.ProjectSaveResult.SavedProject.get -> Mocassin.Core.Project.Project?
+Mocassin.Packages.Projects.ProjectStore
+Mocassin.Packages.Projects.ProjectStore.AcquireLockAsync(string! projectPath, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.Projects.ProjectLockResult!>!
+Mocassin.Packages.Projects.ProjectStore.LoadAsync(string! path, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.Projects.ProjectLoadResult!>!
+Mocassin.Packages.Projects.ProjectStore.LoadAutosaveAsync(string! projectPath, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.Projects.ProjectLoadResult!>!
+Mocassin.Packages.Projects.ProjectStore.Options.get -> Mocassin.Packages.Projects.ProjectStoreOptions!
+Mocassin.Packages.Projects.ProjectStore.ProjectStore(System.TimeProvider? timeProvider = null, Mocassin.Packages.Projects.ProjectStoreOptions? options = null) -> void
+Mocassin.Packages.Projects.ProjectStore.SaveAsync(Mocassin.Core.Project.Project! project, string! path, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.Projects.ProjectSaveResult!>!
+Mocassin.Packages.Projects.ProjectStore.WriteAutosaveAsync(Mocassin.Core.Project.Project! project, string! projectPath, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.Projects.ProjectSaveResult!>!
+Mocassin.Packages.Projects.ProjectStoreOptions
+Mocassin.Packages.Projects.ProjectStoreOptions.<Clone>$() -> Mocassin.Packages.Projects.ProjectStoreOptions!
+Mocassin.Packages.Projects.ProjectStoreOptions.AutosaveInterval.get -> System.TimeSpan
+Mocassin.Packages.Projects.ProjectStoreOptions.AutosaveInterval.init -> void
+Mocassin.Packages.Projects.ProjectStoreOptions.CreateBackup.get -> bool
+Mocassin.Packages.Projects.ProjectStoreOptions.CreateBackup.init -> void
+Mocassin.Packages.Projects.ProjectStoreOptions.Equals(Mocassin.Packages.Projects.ProjectStoreOptions? other) -> bool
+Mocassin.Packages.Projects.ProjectStoreOptions.MaxDocumentBytes.get -> long
+Mocassin.Packages.Projects.ProjectStoreOptions.MaxDocumentBytes.init -> void
+Mocassin.Packages.Projects.ProjectStoreOptions.ProjectStoreOptions() -> void
+Mocassin.Packages.Projects.ProjectStoreOptions.StaleLockTimeout.get -> System.TimeSpan
+Mocassin.Packages.Projects.ProjectStoreOptions.StaleLockTimeout.init -> void
+override Mocassin.Packages.Projects.ProjectLoadResult.Equals(object? obj) -> bool
+override Mocassin.Packages.Projects.ProjectLoadResult.GetHashCode() -> int
+override Mocassin.Packages.Projects.ProjectLoadResult.ToString() -> string!
+override Mocassin.Packages.Projects.ProjectLockResult.Equals(object? obj) -> bool
+override Mocassin.Packages.Projects.ProjectLockResult.GetHashCode() -> int
+override Mocassin.Packages.Projects.ProjectLockResult.ToString() -> string!
+override Mocassin.Packages.Projects.ProjectSaveResult.Equals(object? obj) -> bool
+override Mocassin.Packages.Projects.ProjectSaveResult.GetHashCode() -> int
+override Mocassin.Packages.Projects.ProjectSaveResult.ToString() -> string!
+override Mocassin.Packages.Projects.ProjectStoreOptions.Equals(object? obj) -> bool
+override Mocassin.Packages.Projects.ProjectStoreOptions.GetHashCode() -> int
+override Mocassin.Packages.Projects.ProjectStoreOptions.ToString() -> string!
+static Mocassin.Packages.Projects.ProjectLoadResult.operator !=(Mocassin.Packages.Projects.ProjectLoadResult? left, Mocassin.Packages.Projects.ProjectLoadResult? right) -> bool
+static Mocassin.Packages.Projects.ProjectLoadResult.operator ==(Mocassin.Packages.Projects.ProjectLoadResult? left, Mocassin.Packages.Projects.ProjectLoadResult? right) -> bool
+static Mocassin.Packages.Projects.ProjectLockResult.operator !=(Mocassin.Packages.Projects.ProjectLockResult? left, Mocassin.Packages.Projects.ProjectLockResult? right) -> bool
+static Mocassin.Packages.Projects.ProjectLockResult.operator ==(Mocassin.Packages.Projects.ProjectLockResult? left, Mocassin.Packages.Projects.ProjectLockResult? right) -> bool
+static Mocassin.Packages.Projects.ProjectSaveResult.operator !=(Mocassin.Packages.Projects.ProjectSaveResult? left, Mocassin.Packages.Projects.ProjectSaveResult? right) -> bool
+static Mocassin.Packages.Projects.ProjectSaveResult.operator ==(Mocassin.Packages.Projects.ProjectSaveResult? left, Mocassin.Packages.Projects.ProjectSaveResult? right) -> bool
+static Mocassin.Packages.Projects.ProjectStore.DeleteAutosave(string! projectPath) -> bool
+static Mocassin.Packages.Projects.ProjectStore.GetAutosavePath(string! projectPath) -> string!
+static Mocassin.Packages.Projects.ProjectStore.GetBackupPath(string! projectPath) -> string!
+static Mocassin.Packages.Projects.ProjectStore.GetLockPath(string! projectPath) -> string!
+static Mocassin.Packages.Projects.ProjectStoreOptions.operator !=(Mocassin.Packages.Projects.ProjectStoreOptions? left, Mocassin.Packages.Projects.ProjectStoreOptions? right) -> bool
+static Mocassin.Packages.Projects.ProjectStoreOptions.operator ==(Mocassin.Packages.Projects.ProjectStoreOptions? left, Mocassin.Packages.Projects.ProjectStoreOptions? right) -> bool

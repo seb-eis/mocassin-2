@@ -15,5 +15,6 @@
   <ItemGroup>
     <ProjectReference Include="../Mocassin.Compilation/Mocassin.Compilation.csproj" />
     <ProjectReference Include="../Mocassin.Contracts/Mocassin.Contracts.csproj" />
+    <ProjectReference Include="../Mocassin.Core/Mocassin.Core.csproj" />
   </ItemGroup>
 </Project>

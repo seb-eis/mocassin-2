@@ -9,7 +9,7 @@ with canonical serialization and migrations.
 
 - **Status:** In progress
 - **Step branch:** `step/01-domain-kernel`
-- **Step CI:** —
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/41906919521) (Ubuntu + Windows)
 - **Main merge:** —
 - **Step tag:** —
 - **Last updated:** 2026-11-04
@@ -18,7 +18,8 @@ with canonical serialization and migrations.
 | --- | --- | --- | --- | --- | --- |
 | `core-kernel` | `feature/step-01-domain-kernel/core-kernel` | Squashed | Core tests 90/90; full solution tests pass; `dotnet format --verify-no-changes` passes | `41903504097` — green | `5f662f5` |
 | `project-format` | `feature/step-01-domain-kernel/project-format` | Squashed | Core tests 106/106; full solution tests pass; `dotnet format --verify-no-changes` passes | `41906159043` — Windows newline failure; fixed below | `a36f878` |
-| `fix-windows-newline` | `feature/step-01-domain-kernel/fix-windows-newline` | Awaiting approval | Full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `fix-windows-newline` | `feature/step-01-domain-kernel/fix-windows-newline` | Squashed | Full solution tests pass; `dotnet format --verify-no-changes` passes | `41906919521` — green | `f8e9320` |
+| `project-store` | `feature/step-01-domain-kernel/project-store` | Awaiting approval | Packages tests 15/15; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
@@ -197,7 +198,7 @@ public sealed record ModelPath(string Domain, Guid ObjectId, string? Property = 
 - [x] Implement `Diagnostic`, `DiagnosticBag`, and `ModelPath`.
 - [x] Implement the `Project` envelope and metadata records.
 - [x] Implement `JsonSerializerContext` and canonical serialization.
-- [ ] Implement `ProjectStore` in `Mocassin.Packages.Projects` with atomic save, lock file, and autosave.
+- [x] Implement `ProjectStore` in `Mocassin.Packages.Projects` with atomic save, lock file, and autosave.
 - [x] Implement the migration pipeline and a no-op v1 migration.
 - [ ] Implement `ProjectEditor`, `ProjectDocument`, and `ProjectChange`.
 - [ ] Add sample projects: blank and ceria skeleton.
