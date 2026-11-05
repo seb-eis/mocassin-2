@@ -135,6 +135,9 @@ public sealed record StructurePreview(
 a Core `StructureModel`; the Core model never holds a preview or a resolved catalog setting.
 
 - `PositionList` is the canonical P1 expansion from step 02.
+- `PositionList` is in ascending canonical `P` order. `ExpandedSite` exposes the P index and its `Vector4I`
+  encoding; `Encoder` owns the fractional ↔ `Vector4I` mapping and the linear-index check.
+- The preview rejects a structure whose total supercell product `A*B*C*P` exceeds the signed 32-bit index cap.
 - It is cached by a content hash of the structure model and invalidated on edit.
 - The UI shows the orbit size, multiplicity, fractional/Cartesian coordinates, and stability for each site.
 - The preview is not the compiled model; step 08 produces the authoritative compiled structure.
@@ -267,6 +270,8 @@ At this point, document particles and crystal structure:
 | Site overlap | Same orbit, special positions, near-boundary cases, and exact grid equality |
 | Preview | Orbit sizes and Cartesian positions match hand calculations |
 | Determinism | Same structure yields identical preview bytes/hash |
+| P order | Preview positions are in canonical P order; shuffling input does not change P |
+| Index cap | A supercell product above `int.MaxValue` is rejected |
 | Editing | Add/update/remove site produces a valid new project or diagnostics |
 | Assembly boundary | `Mocassin.Core` has no reference to `Mocassin.Symmetry`; preview and catalog validation compose over Core models |
 | Space-group reference | `(number, axis, origin)` round-trips; HM/Hall are derived; unknown combinations produce `STR001` |
@@ -281,6 +286,7 @@ At this point, document particles and crystal structure:
 | Particle symbol semantics are implicit | Document and validate; show mass-conservation groups in the editor |
 | Preview diverges from compiled model | Compile from the same symmetry engine and compare in step 08 tests |
 | Redundant setting fields drift | Persist only `(number, axis, origin)`; derive HM/Hall/system from the catalog |
+| P-index drift | Golden P-order tests, shuffle invariance, and the exact grid contract |
 
 ## Done when
 

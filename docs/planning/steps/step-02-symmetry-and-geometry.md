@@ -253,16 +253,25 @@ scientific model remains `double`-based.
 - `Fractional3.TrimToUnitCell()` maps to `[0,1)` with a boundary policy that rounds values within `1e-10` of
   an integer to that integer. This boundary snap is a user-input convenience applied before grid conversion;
   it is not the deduplication criterion.
-- `Vector4I` encodes `(cell offset A,B,C, P1 position index P)`.
-- Linear index is row-major with `P` fastest:
-  `index = P + C*Pcount + B*Pcount*Ccount + A*Pcount*Ccount*Bcount`.
-- `UnitCellVectorEncoder` maps fractional ↔ `Vector4I` and owns the canonical P1 position list.
+- `Vector4I(cellA, cellB, cellC, P)` encodes an integer cell offset and the per-cell canonical P1 position
+  index. `P` is in `[0, Pcount)`; base P1 positions use `(0, 0, 0, P)`.
+- The linear index is row-major with `P` fastest:
+  `index = P + cellC*Pcount + cellB*Pcount*Ccount + cellA*Pcount*Ccount*Bcount`.
+- The linear index is a signed 32-bit `int`. The total lattice position count
+  `Acount * Bcount * Ccount * Pcount` is computed in 64-bit arithmetic and must not exceed `int.MaxValue`
+  (2,147,483,647). A larger lattice is rejected with a hard diagnostic; it is never wrapped or truncated.
+- Negative cell offsets are relative-path coordinates. They are not linear indices; convert them to an
+  explicit in-supercell offset before linearizing.
+- `UnitCellVectorEncoder` maps fractional ↔ `Vector4I`, owns the canonical P1 position list, validates `P` and
+  cell-offset bounds, and is immutable and thread-safe.
 - **Canonical position order** (contract for compiled packages):
   1. expand every reference site to its P1 orbit;
   2. trim to `[0,1)`;
   3. deduplicate by exact grid coordinates;
-  4. sort lexicographically by `(A, B, C)`;
-  5. tie-break by the reference site's stable ID, then by orbit member index.
+  4. sort ascending by fractional `(fa, fb, fc)`, with `fa` most significant;
+  5. assign `P = 0..Pcount-1` in that order.
+- Exact ties should not occur after deduplication and overlap rejection. If one occurs, order by the reference
+  site's stable ID, then by orbit member index; this is a defensive determinism rule, not a normal path.
 
 #### Exact fractional grid
 
@@ -395,7 +404,10 @@ At this point, document the symmetry and geometry foundation:
 | Group laws | Identity, inverse, closure, determinant ±1 for all settings |
 | Orbit sizes | General and special positions match known multiplicities |
 | Canonical order | Shuffled sites/operations produce the same `P` assignment |
-| Coordinate round-trip | Fractional ↔ `Vector4I` ↔ fractional for random points |
+| P1 golden indices | Ceria, barium zirconate, and the vehicle/interstitialcy sample freeze the expected P order |
+| Coordinate round-trip | Fractional ↔ `Vector4I` ↔ fractional for base positions and neighbor images, including negative offsets |
+| Linear index | Small-supercell index round-trip; total exactly `int.MaxValue` is accepted by the arithmetic check |
+| Index limit | A total of `int.MaxValue + 1` and out-of-range offsets are rejected; no wrap or truncation |
 | Generic math | `Vector3<double>` arithmetic matches the semantic wrappers |
 | Cell geometry | Seven systems, both trigonal axis descriptions, unique-axis A/B/C, volume, and right-handedness |
 | Cell validity | Angles outside 0..180°, non-positive Gram determinant, and near-degenerate cells are rejected |
@@ -428,6 +440,8 @@ At this point, document the symmetry and geometry foundation:
 | Large orbit/permutation counts | Bound counts, warn in validation, use pruning and parallelism |
 | Grid precision or overflow | Fixed denominator `24×10^12`, `long` components, bounds tests, and a documented 12-digit limit |
 | Grid/canonical-order drift | Version the grid with the catalog; golden P-index tests on all platforms |
+| Linear-index overflow | `int` index, 64-bit total count, `int.MaxValue` hard cap, and boundary tests |
+| Relative-offset misuse | Negative offsets are relative-path coordinates, not linear indices; explicit conversion and bounds checks |
 
 ## Done when
 

@@ -558,13 +558,21 @@ MessagePack map with snake_case keys. Top-level:
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `cell_vectors_ang` | `[[f64;3];3]` | Cartesian a/b/c vectors in Å |
-| `positions` | array | `{vector4:[i32;4], site_index:u32, stable:bool, particle_ids:u8[]}` in P1 order |
+| `positions` | array | `{vector4:[i32;4], site_index:u32, stable:bool, particle_ids:u8[]}` in ascending `P` order; `vector4` is `[cellA, cellB, cellC, P]`, with base positions `[0,0,0,P]` |
 | `position_count` | u32 | Length of `positions` |
 | `site_count` | u32 | Number of user reference sites |
 | `environments` | array | Per position: `selection_particle_mask:u64`, pair interactions, cluster interactions, `update_particle_ids` |
 | `interaction_range` | `[i32;4]` | MMC interaction cube |
 | `static_trackers_per_cell` | u32 | |
 | `global_tracker_count` | u32 | |
+
+- `position_count = Pcount`.
+- `site_index` identifies the reference site; it is not the P index.
+- The linear index is
+  `P + cellC*Pcount + cellB*Pcount*Ccount + cellA*Pcount*Ccount*Bcount`.
+- The index is a signed 32-bit integer. The total `Acount*Bcount*Ccount*Pcount` is validated in 64-bit and
+  must not exceed `2,147,483,647`; larger lattices are rejected before allocation.
+- Negative cell offsets are relative-path coordinates and are not linearized directly.
 
 `energy` fields:
 
