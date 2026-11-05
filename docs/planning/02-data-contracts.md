@@ -174,7 +174,7 @@ parameterization, and lattice signatures use the MessagePack projection (section
 
 ```json
 {
-  "spaceGroup": { "number": 225, "setting": "origin-choice-1", "hallSymbol": "F -4 2 3" },
+  "spaceGroup": { "number": 225, "axis": "none", "origin": "none" },
   "cell": { "a": 5.41, "b": 5.41, "c": 5.41, "alpha": 90.0, "beta": 90.0, "gamma": 90.0 },
   "sites": [
     {
@@ -190,7 +190,14 @@ parameterization, and lattice signatures use the MessagePack projection (section
 
 - Lengths in Å; angles in degrees.
 - `fractional` components are in `[0, 1)` for the reference position.
-- `setting` selects the space-group setting (origin choice, unique axis) when more than one exists.
+- `number` is the International Tables space-group number, 1..230.
+- `axis` identifies the unique axis or the hexagonal/rhombohedral description; `origin` identifies the origin
+  choice. Both are explicit and use `none` when the setting has no such choice.
+- `axis` values are `none`, `uniqueAxisA`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, and `rhombohedral`.
+  `origin` values are `none`, `originChoice1`, and `originChoice2`.
+- The catalog resolves `(number, axis, origin)` to the Hermann–Mauguin symbol, Hall symbol, crystal system, and
+  operations. These derived values are never persisted in the project.
+- The default structure is P1: `{ "number": 1, "axis": "none", "origin": "none" }`.
 - Stable sites may define interactions and host particles; unstable sites are transition states.
 
 #### Transitions

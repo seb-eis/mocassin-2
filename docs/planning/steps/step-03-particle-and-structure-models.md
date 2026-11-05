@@ -80,8 +80,7 @@ public sealed record StructureModel(
 public sealed record SpaceGroupRef(
     int Number,
     AxisSetting Axis,
-    OriginChoice Origin,
-    string HermannMauguin);
+    OriginChoice Origin);
 
 public sealed record CellParameters(
     LengthAngstrom A, LengthAngstrom B, LengthAngstrom C,
@@ -109,8 +108,9 @@ not reference `Mocassin.Symmetry`.
   within `1e-10` of a boundary.
 - Stable sites require a particle set. Unstable sites also require a set (the transition-state occupation
   options), but their default occupation is void.
-- The space group is selected from the catalog by number/axis/origin; the display string is derived, not
-  independently editable.
+- The space group is selected from the catalog by `(number, axis, origin)`. The Hermann–Mauguin symbol, Hall
+  symbol, crystal system, operations, and data version are derived from the catalog and are not stored in the
+  project.
 - Cell parameters are normalized according to the crystal system before validation. The UI locks dependent
   fields; the API rejects inconsistent values rather than silently overwriting them.
 - Dummy positions are visual helpers, may coincide with sites, and are excluded from all simulation
@@ -148,7 +148,7 @@ a Core `StructureModel`; the Core model never holds a preview or a resolved cata
 | `PAR005` | Error | Particle set empty or contains void |
 | `PAR006` | Error | Particle set references unknown/deprecated particle |
 | `PAR007` | Error | More than 100 particle sets |
-| `STR001` | Error | Space-group number outside 1..230 or setting not found |
+| `STR001` | Error | Space-group number outside 1..230 or `(number, axis, origin)` not found |
 | `STR002` | Error | Cell length outside 0.1..1000 Å |
 | `STR003` | Error | Cell angles violate the crystal-system constraints |
 | `STR004` | Error | Reference site outside `[0,1)` after trim |
@@ -165,6 +165,8 @@ graph and primitive types: `STR004`, `STR005`, `STR006`, `STR010`, and `STR011`.
 that require the catalog, cell geometry, or P1 expansion: `STR001`, `STR002`, `STR003`, `STR007`, `STR008`,
 and `STR009`. A composed validator runs both and returns one stable, sorted list.
 
+- An unknown `axis` or `origin` enum string is malformed JSON (`PROJ002`), not a valid but unsupported setting.
+- `STR001` reports the allowed axis/origin combinations for the number when the catalog can list them.
 - Site-overlap detection uses exact rational coordinates after P1 expansion; no tolerance-based hash sets.
 - Duplicate detection compares the full orbit, not only the seed position.
 - A site whose orbit overlaps another site is an error because it makes particle assignment ambiguous.
@@ -260,6 +262,7 @@ At this point, document particles and crystal structure:
 | Determinism | Same structure yields identical preview bytes/hash |
 | Editing | Add/update/remove site produces a valid new project or diagnostics |
 | Assembly boundary | `Mocassin.Core` has no reference to `Mocassin.Symmetry`; preview and catalog validation compose over Core models |
+| Space-group reference | `(number, axis, origin)` round-trips; HM/Hall are derived; unknown combinations produce `STR001` |
 
 ## Risks and mitigations
 
@@ -269,6 +272,7 @@ At this point, document particles and crystal structure:
 | Crystal-system coupling confuses users | UI locks dependent fields and explains constraints |
 | Particle symbol semantics are implicit | Document and validate; show mass-conservation groups in the editor |
 | Preview diverges from compiled model | Compile from the same symmetry engine and compare in step 08 tests |
+| Redundant setting fields drift | Persist only `(number, axis, origin)`; derive HM/Hall/system from the catalog |
 
 ## Done when
 

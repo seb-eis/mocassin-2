@@ -166,6 +166,8 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
 ### 9.1 Core and project format
 
 - JSON round-trip: model → JSON → model is identity for all fixtures.
+- Space-group identity: `(number, axis, origin)` round-trips unchanged; Hermann–Mauguin, Hall, system, and
+  operations are derived from the catalog and never serialized in the project.
 - Canonicalization: object order changes do not change serialized bytes.
 - Migration tests: each schema version has a fixture and an expected migrated model.
 - Validation tests: real invalid project fixtures trigger each public diagnostic code with the expected
