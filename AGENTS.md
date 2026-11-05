@@ -626,6 +626,8 @@ incomplete.
 - The space-group catalog must be generated from spglib, pinned to an exact release and commit, not from the
   original SQLite database. Record the source, version, checksum, and BSD-3-Clause attribution in `NOTICE.md`
   and the generated catalog provenance. If that changes, review provenance and licensing first.
+- The generated space-group catalog is committed and embedded; normal builds must not require spglib, Python,
+  or network access. Regeneration uses the pinned dev-only tool.
 - Dependencies must be MIT-compatible. GPL/AGPL dependencies require explicit review.
 - Keep the original authors’ citation guidance in the README/NOTICE.
 

@@ -68,12 +68,16 @@ reference the catalog assembly.
 - **Source:** spglib, pinned to an exact release and commit. spglib is BSD-3-Clause and distributes the
   space-group database. International Tables is a scientific reference, not a copied data source. The original
   MOCASSIN SQLite database is GPL-3.0-or-later and is never copied; it is only a local cross-check.
-- The catalog is validated at startup and by tests:
-  - identity present,
-  - determinant of the linear part is ±1,
-  - every operation has an inverse in the group,
-  - closure under composition modulo lattice translations,
-  - translations normalized to `[0, 1)`.
+- Startup validation is cheap and fail-fast:
+  - the embedded checksum and schema version match;
+  - 230 group numbers and 274 settings are present;
+  - identity is present, every determinant is ±1, and every translation is normalized to `[0, 1)`.
+- Test/CI validation is exhaustive:
+  - every operation has an inverse in the group;
+  - closure under composition modulo lattice translations;
+  - group-law and orbit property tests;
+  - golden counts for all 230 groups and 274 settings.
+- A full startup validation may be enabled in Debug builds only.
 - Group 47 is corrected from spglib; the regression test expects the full `Pmmm` operation set (8 operations,
   identity and inversion present, no degenerate row) rather than the original 4-operation set.
 - The catalog exposes lookup by number + axis + origin, by Hall symbol, and by Hermann–Mauguin symbol. A
@@ -98,10 +102,39 @@ The compatibility catalog contains exactly 274 settings:
   field and a project-format decision.
 - `AxisSetting.UniqueA` remains in the enum for future extension but is not populated by the 274
   compatibility catalog.
-- The generated catalog records `DataVersion = spglib-<version>/catalog-1` and a SHA-256 checksum of the
-  canonical catalog bytes.
+- `DataVersion = spglib-<version>/catalog-1`; `catalog-1` is the generator/schema version and is bumped when
+  the selection rule, encoding, or schema changes.
+- The SHA-256 checksum covers the canonical settings payload, not the whole file and not a timestamp. The
+  committed JSON may be pretty-printed for review; the checksum is computed over the canonical form.
+- The loader recomputes the checksum at startup and treats a mismatch as a build/installation error.
 - The original database may be used locally to confirm the expected count and setting-name categories. It is
   not a CI dependency, is not copied, and is not used to generate catalog data.
+
+#### Generation and packaging
+
+- The generated catalog is committed; normal .NET builds do not run Python, spglib, or any data download.
+- Layout:
+  - `src/dotnet/Mocassin.Symmetry/Data/space-groups.json` — committed, reviewable catalog;
+  - `src/dotnet/Mocassin.Symmetry/Data/space-groups.sha256` — checksum of the canonical settings payload;
+  - `src/dotnet/Mocassin.Symmetry/Data/README.md` — provenance, selection rule, regeneration command, and
+    known deviations;
+  - `tools/symmetry/generate_space_groups.py` — dev-only generator;
+  - `tools/symmetry/requirements.txt` — pinned `spglib==<version>`.
+- The JSON is UTF-8 without BOM, LF-only, deterministic, and contains no timestamps. The root metadata is
+  `schemaVersion`, `dataVersion`, `source`, `sourceVersion`, `selection`, and `settings`.
+- Settings are sorted by `(number, axis, origin)`. Keys use schema order. Rational translations are encoded
+  as `[numerator, denominator]`. The committed file may be pretty-printed; the checksum uses the canonical
+  payload.
+- The generator asserts 230 group numbers, 274 settings, the 186/48/26/14 category split, no duplicate
+  `(number, axis, origin)`, determinant ±1, normalized translations, and group 47's 8-operation `Pmmm` set.
+- The catalog DTOs are internal to `Mocassin.Symmetry`. Use a `System.Text.Json` source-generated
+  `JsonSerializerContext` so trimming/AOT remains viable and the DTOs do not become public API.
+- CI drift check: the existing Contracts and policy job installs the pinned requirements and runs
+  `python tools/symmetry/generate_space_groups.py --check`. The check regenerates the canonical payload in
+  memory and fails if the committed settings or checksum differ.
+- The compiled package records `space_group_data_version` and `space_group_data_sha256` in its metadata. The
+  project file stores only the setting identity; it does not persist the catalog version. The compiled-payload
+  fields are added when Step 08/11 define that payload.
 
 ### 2. Exact symmetry operations
 
@@ -265,8 +298,11 @@ scientific model remains `double`-based.
 - [ ] Document the space-group data version and index-order contract.
 - [ ] Keep the assembly boundary: shared persisted vocabulary in `Mocassin.Core`, catalog and algorithms in
   `Mocassin.Symmetry`, and no Core reference to Symmetry.
-- [ ] Commit the generated catalog with a `Data/README.md` recording the pinned spglib version/commit, the
-  generation command, the 274-setting selection rule, and the SHA-256 checksum.
+- [ ] Commit `Data/space-groups.json`, `Data/space-groups.sha256`, and `Data/README.md`; embed the data and wire
+  the embedded-resource loader.
+- [ ] Add `tools/symmetry/generate_space_groups.py` and `requirements.txt`, and run the drift check in the
+  Contracts and policy CI job.
+- [ ] Use a source-generated JSON serializer context for the internal catalog DTOs.
 
 ## Acceptance criteria
 
@@ -289,6 +325,7 @@ At this point, document the symmetry and geometry foundation:
 - `docs/development/compilation-pipeline.md` — the symmetry stage and its inputs/outputs.
 - `docs/glossary/notation.md` — fractional/Cartesian coordinates and `Vector4I`.
 - `docs/reference/project-format.md` — space-group/cell/site fields and the data-version contract.
+- `docs/development/architecture.md` — catalog generation, embedding, and drift-check boundary.
 
 ## Tests
 
@@ -308,12 +345,15 @@ At this point, document the symmetry and geometry foundation:
 | Radial search | Distances match brute-force enumeration of neighboring cells |
 | Thread safety | Parallel expansion produces identical results |
 | Assembly boundary | `Mocassin.Core` does not reference `Mocassin.Symmetry`; persisted symmetry vocabulary is in Core |
+| Catalog checksum | Startup rejects a corrupted catalog or wrong schema version |
+| Catalog drift | Generator `--check` reproduces the committed settings and checksum |
 
 ## Risks and mitigations
 
 | Risk | Mitigation |
 | --- | --- |
-| Space-group data errors | Cross-check two authoritative sources; validate group laws; freeze a checksum |
+| Space-group data errors | spglib source, committed checksum, group-law tests, and independent multiplicity checks |
+| Catalog source/version drift | Pinned spglib, committed data, CI `--check`, and a provenance review for every pin change |
 | Exact arithmetic performance | Use small fixed-size structs and integer ops; convert to double only at boundaries |
 | Canonical order changes later | Treat as a format contract; version the catalog and add golden tests |
 | Tolerance bugs | Use exact/rational comparisons for discrete symmetry; reserve tolerances for geometry |

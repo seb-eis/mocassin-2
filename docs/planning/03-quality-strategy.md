@@ -190,6 +190,8 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
 - Catalog provenance: catalog and multiplicity tests use checked-in expected data generated from the pinned
   spglib catalog. The original MOCASSIN database is not a CI dependency; it may be used locally only to
   confirm the 274-setting count and known defects.
+- Catalog integrity: startup checks the checksum, schema version, counts, identity, determinants, and
+  normalized translations; full inverse/closure and group-law tests run in CI.
 
 ### 9.3 Compilation
 
@@ -321,7 +323,7 @@ Contract tests use files produced by the real writers and never share reader/wri
 5. `cargo clippy -- -D warnings`
 6. `cargo test`
 7. Python `pytest`, wheel build, and clean-install check
-8. Contract fixture round-trips and manifest drift check
+8. Contract fixture round-trips, manifest drift, and space-group catalog drift check
 9. Avalonia headless UI tests
 10. License/header check and dependency audit
 

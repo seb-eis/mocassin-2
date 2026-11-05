@@ -121,7 +121,8 @@ Rules:
 - `Core` must not reference `Symmetry`. Persisted symmetry vocabulary (`AxisSetting`, `OriginChoice`,
   `CrystalSystem`) lives in `Core`; the catalog, resolved settings, previews, and catalog-dependent
   validation are `Symmetry` services that accept Core model types.
-- `Symmetry` may depend on `Core` and a SQLite/JSON data source for space groups.
+- `Symmetry` may depend on `Core` and the committed, embedded space-group JSON catalog. It must not require
+  a runtime database or a build-time Python/spglib dependency.
 - `Compilation` depends on `Core` + `Symmetry`; it has no I/O and no UI.
 - `Contracts` depends on `Compilation`; it owns versioned package/state DTOs and schema constants and does not
   depend on `Packages` or `Results`.
