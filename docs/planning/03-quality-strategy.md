@@ -187,6 +187,9 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
 - Distance tests: minimum-image distances match a brute-force search over neighboring cells.
 - Permutation reduction: for random pair/cluster geometries, the reduced set is a complete and
   non-redundant representation of the orbit.
+- Catalog provenance: catalog and multiplicity tests use checked-in expected data generated from the pinned
+  spglib catalog. The original MOCASSIN database is not a CI dependency; it may be used locally only to
+  confirm the 274-setting count and known defects.
 
 ### 9.3 Compilation
 

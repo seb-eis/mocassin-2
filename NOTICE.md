@@ -25,6 +25,21 @@ before distribution.
 
 ## Third-party dependencies
 
+### Space-group catalog
+
+The embedded space-group catalog is generated from spglib, pinned to the exact release and commit recorded in
+the generated catalog provenance (`src/dotnet/Mocassin.Symmetry/Data/README.md`). spglib is distributed under
+the BSD-3-Clause licence.
+
+Source: https://github.com/spglib/spglib
+
+Citation: A. Togo, K. Shinohara, and I. Tanaka, “Spglib: a software library for crystal symmetry search”,
+Sci. Technol. Adv. Mater. Methods 4, 2384822 (2024).
+
+The generated catalog remains subject to the spglib BSD-3-Clause attribution requirements; it is not
+relicensed as MIT. The original MOCASSIN SQLite database is not used as a source and is not copied. The
+spglib database acknowledges Yusuke Seto’s crystallographic database.
+
 NuGet dependencies are checked by `tools/contracts/check_nuget_licenses.py` and the CI licence/vulnerability
 gate. The project policy allows MIT-compatible licences; any exception is recorded here.
 

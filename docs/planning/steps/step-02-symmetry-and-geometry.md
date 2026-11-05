@@ -39,8 +39,8 @@ sample interaction environments.
   - tolerance comparers are used in sorted dictionaries/binary searches, which can break transitivity;
   - `Vector4I.P` assignment depends on DB operation order and tolerance dedup, making indices fragile.
 
-The new implementation keeps the crystallographic data but fixes the schema, uses exact integer operations,
-and defines a canonical position order.
+The new implementation uses the same crystallographic definitions but regenerates the catalog from spglib,
+fixes the schema, uses exact integer operations, and defines a canonical position order.
 
 ## Design
 
@@ -62,19 +62,46 @@ public sealed record SpaceGroupSetting(
 and `SymmetryOperation` are Symmetry types. The catalog assembly may reference Core, but Core must not
 reference the catalog assembly.
 
-- The catalog is an **embedded immutable resource** generated at build time (JSON or a compact binary), not a
-  runtime SQLite database.
-- Data source: a vetted crystallographic dataset (International Tables / spglib). The original 274 settings
-  are used as a cross-check and to preserve the setting names users expect. All 230 groups must be present;
-  missing settings are a build error.
+- The catalog is an **embedded immutable resource** generated from a pinned source (JSON or a compact binary),
+  not a runtime SQLite database. The generated data is committed with its checksum and provenance; normal
+  builds do not require the source database or a Python toolchain.
+- **Source:** spglib, pinned to an exact release and commit. spglib is BSD-3-Clause and distributes the
+  space-group database. International Tables is a scientific reference, not a copied data source. The original
+  MOCASSIN SQLite database is GPL-3.0-or-later and is never copied; it is only a local cross-check.
 - The catalog is validated at startup and by tests:
   - identity present,
   - determinant of the linear part is ±1,
   - every operation has an inverse in the group,
   - closure under composition modulo lattice translations,
   - translations normalized to `[0, 1)`.
-- Group 47 is corrected from the authoritative source; a regression test asserts the corrected operations.
-- The catalog exposes lookup by number + axis + origin, by Hall symbol, and by Hermann–Mauguin symbol.
+- Group 47 is corrected from spglib; the regression test expects the full `Pmmm` operation set (8 operations,
+  identity and inversion present, no degenerate row) rather than the original 4-operation set.
+- The catalog exposes lookup by number + axis + origin, by Hall symbol, and by Hermann–Mauguin symbol. A
+  Hermann–Mauguin lookup may return multiple settings; callers must disambiguate with axis/origin.
+
+#### 274-setting selection
+
+The compatibility catalog contains exactly 274 settings:
+
+| Category | spglib selection | Count |
+| --- | --- | ---: |
+| Standard setting | `choice = ""` for the 186 groups with a single standard setting | 186 |
+| Origin choices | `choice = "1"` and `"2"` for the 24 groups with two origins | 48 |
+| Monoclinic unique axis B/C | `choice = "b1"` and `"c1"` for the 13 monoclinic groups | 26 |
+| Rhombohedral axes | `choice = "H"` and `"R"` for the 7 rhombohedral groups | 14 |
+| **Total** | | **274** |
+
+- Apply the category by group type so each group contributes exactly one category. The generator asserts
+  186 + 48 + 26 + 14 = 274 and that all 230 group numbers are present.
+- Do not include unique axis A, monoclinic cell choices 2/3, orthorhombic axis permutations, or other
+  non-standard settings in v1. They are a documented extension; adding them requires a `CellChoice`/`Choice`
+  field and a project-format decision.
+- `AxisSetting.UniqueA` remains in the enum for future extension but is not populated by the 274
+  compatibility catalog.
+- The generated catalog records `DataVersion = spglib-<version>/catalog-1` and a SHA-256 checksum of the
+  canonical catalog bytes.
+- The original database may be used locally to confirm the expected count and setting-name categories. It is
+  not a CI dependency, is not copied, and is not used to generate catalog data.
 
 ### 2. Exact symmetry operations
 
@@ -238,12 +265,14 @@ scientific model remains `double`-based.
 - [ ] Document the space-group data version and index-order contract.
 - [ ] Keep the assembly boundary: shared persisted vocabulary in `Mocassin.Core`, catalog and algorithms in
   `Mocassin.Symmetry`, and no Core reference to Symmetry.
+- [ ] Commit the generated catalog with a `Data/README.md` recording the pinned spglib version/commit, the
+  generation command, the 274-setting selection rule, and the SHA-256 checksum.
 
 ## Acceptance criteria
 
 - [ ] All 230 international groups and 274 settings load.
 - [ ] Every setting passes identity, inverse, closure, determinant, and translation-normalization checks.
-- [ ] Group 47 is valid and matches the authoritative setting.
+- [ ] Group 47 is valid and matches spglib’s `Pmmm` setting.
 - [ ] General-position multiplicities match the International Tables for every setting.
 - [ ] P1 expansion of every sample site matches a brute-force expansion.
 - [ ] The canonical position order is stable across runs, OSes, and input ordering.
