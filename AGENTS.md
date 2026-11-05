@@ -240,20 +240,30 @@ read-only audit context must review the frozen step branch.
    exact audited commit and CI run, and sets the status to `Ready for audit`.
 3. The step branch is frozen. Do not add commits while the audit is running.
 4. A fresh audit agent reads `AGENTS.md`, the step page, the audit request, the status dashboard, and relevant
-   ADRs/contracts, then runs the required builds/tests and reviews the diff. The auditor is read-only and must
-   not modify the repository.
-5. The auditor records findings and a verdict in the audit request. If fixes are needed, the step agent fixes
-   them on a new feature branch, squash-merges into the step branch, pushes, waits for CI, and updates the
-   audit request to `Re-audit required`.
-6. The fresh auditor re-audits the new commit. The same auditor may continue if it remained read-only;
-   otherwise start a fresh audit context.
-7. Only a `Passed` audit permits the step-to-main approval request. The audit result is evidence, not merge
+   ADRs/contracts, then runs the required builds/tests and reviews the diff. The auditor is read-only: it must
+   not edit tracked files, commit, push, or change the step branch.
+5. The auditor writes its report to the gitignored handoff file
+   `.tmp/audit/step-NN-rN-<short-sha>-audit.md` (or `...-reaudit.md`) and reports the path and verdict. The
+   report uses the audit template and records the audited commit, CI run, commands run, findings, verdict, and
+   follow-up.
+6. The step agent or a neutral scribe transcribes the auditor's findings and verdict verbatim into
+   `docs/planning/audits/step-NN.md`, adds the audit metadata, and commits the documentation-only record. The
+   auditor must not commit or approve it.
+7. If fixes are needed, the step agent reads the handoff, fixes the findings on a new feature branch,
+   squash-merges into the step branch, pushes, waits for CI, and updates the audit request to
+   `Re-audit required`.
+8. The fresh auditor re-audits the new commit and writes a new handoff report. The same auditor may continue if
+   it remained read-only; otherwise start a fresh audit context. Keep the earlier report in the durable audit
+   history.
+9. Only a `Passed` audit permits the step-to-main approval request. The audit result is evidence, not merge
    authorization; the human owner still approves the merge.
-8. After merge, tag `step-NN`, record the result, and delete the step branch.
+10. After merge, tag `step-NN`, record the result, and delete the step branch.
+11. Delete the handoff file only after the durable audit record is committed.
 
 Audit status values and finding severities are defined in
 [`docs/planning/audits/README.md`](docs/planning/audits/README.md). Audit reports are planning records and are
-excluded from the published site.
+excluded from the published site. Raw auditor handoff files are temporary and gitignored; they are not planning
+records.
 
 ## 4. Non-negotiable decisions
 
