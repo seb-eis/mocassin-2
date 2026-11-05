@@ -188,7 +188,10 @@ parameterization, and lattice signatures use the MessagePack projection (section
 }
 ```
 
-- Lengths in Å; angles in degrees.
+- Lengths are in Å and must be in `0.1..1000`; angles are in degrees and must satisfy
+  `0 < α, β, γ < 180°` and a positive Gram determinant.
+- Crystal-system constraints apply: equal lengths/angles, 90°/120° requirements, unique-axis mapping, and
+  rhombohedral `0 < α < 120°`. Inconsistent values are rejected; they are never silently normalized.
 - `fractional` components are in `[0, 1)` for the reference position. The canonical P1 order uses the exact
   `24 × 10^12` fractional grid defined in Step 02; the stored decimal remains the user-facing value.
 - `number` is the International Tables space-group number, 1..230.
