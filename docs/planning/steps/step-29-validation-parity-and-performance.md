@@ -13,6 +13,7 @@ targets, fuzzed/robust parsers, and a documented scientific validation suite.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
+- **Design review:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

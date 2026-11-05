@@ -13,6 +13,7 @@ validation and a stable public API.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
+- **Design review:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
