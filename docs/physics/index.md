@@ -23,8 +23,9 @@ Transport output uses SI units.
 ## Symmetry
 
 The user defines the model in a space-group setting. Compilation expands it to a deterministic P1 position
-order, generates symmetry-reduced interaction and rule sets, and assigns dense indices for the solver. Exact
-rational operations are required; tolerance-based deduplication must not reorder positions.
+order, generates symmetry-reduced interaction and rule sets, and assigns dense indices for the solver. The
+discrete symmetry path uses exact integer operations on a `24 × 10^12` fractional grid; tolerance-based
+deduplication is never used to order positions.
 
 ## Tracking and transport
 

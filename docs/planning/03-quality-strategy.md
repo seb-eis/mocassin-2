@@ -168,6 +168,8 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
 - JSON round-trip: model → JSON → model is identity for all fixtures.
 - Space-group identity: `(number, axis, origin)` round-trips unchanged; Hermann–Mauguin, Hall, system, and
   operations are derived from the catalog and never serialized in the project.
+- Coordinate grid: P1 expansion, deduplication, and sorting use the exact `24 × 10^12` fractional grid; no
+  tolerance comparer participates in the discrete symmetry path.
 - Canonicalization: object order changes do not change serialized bytes.
 - Migration tests: each schema version has a fixture and an expected migrated model.
 - Validation tests: real invalid project fixtures trigger each public diagnostic code with the expected
@@ -194,6 +196,8 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
   confirm the 274-setting count and known defects.
 - Catalog integrity: startup checks the checksum, schema version, counts, identity, determinants, and
   normalized translations; full inverse/closure and group-law tests run in CI.
+- Grid closure: applying every catalog operation to random grid points yields grid points; grid conversion is
+  deterministic across OSes.
 
 ### 9.3 Compilation
 

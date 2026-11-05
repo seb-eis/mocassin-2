@@ -35,6 +35,15 @@ Rules:
 - JSON stores a plain number; the field name or schema description carries the unit.
 - Unit-cell counts are `A*B*C`, never `A+B+C`.
 
+## Fractional coordinates
+
+- The project stores fractional coordinates as decimal numbers.
+- Symmetry expands and orders positions on an internal exact grid with denominator `24 × 10^12`.
+- The grid exactly represents any input decimal with up to 12 fractional digits and is closed under all
+  crystallographic operations.
+- Inputs with more than 12 fractional digits are rounded to the nearest grid point and may produce a warning.
+- Fractional coordinates are converted to Cartesian coordinates only at the geometry boundary.
+
 ## Time and seeds
 
 - `createdUtc` and `modifiedUtc` are ISO-8601 UTC timestamps.
