@@ -1,5 +1,9 @@
 # Step NN Audit Request
 
+> Auditor handoff: the auditor may complete this template in
+> `.tmp/audit/step-NN-rN-<short-sha>-audit.md` instead of editing the tracked request. The step agent or
+> scribe transcribes the findings and verdict verbatim into `step-NN.md`.
+
 ## Request
 
 | Field | Value |
@@ -60,7 +64,8 @@ Commands run:
 | --- | --- | --- | --- |
 | — | — | — | — |
 
-Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills this section only.
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills this section in the handoff
+report; the step agent or scribe copies it verbatim into the durable request and adds resolutions.
 
 ## Verdict
 

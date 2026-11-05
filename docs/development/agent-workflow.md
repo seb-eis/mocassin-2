@@ -227,14 +227,22 @@ Before merging a completed step:
 2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, CI run, scope, and known
    limitations; set its status to `Ready for audit`.
 3. Freeze the step branch.
-4. Let a fresh read-only audit agent review it. The auditor must not modify the repository.
-5. If findings require fixes, the step agent fixes them on a new feature branch, squash-merges into the step
-   branch, pushes, waits for CI, and marks the audit `Re-audit required`.
-6. Re-audit the new commit. Only a `Passed` audit permits the step-to-main approval request.
-7. The human owner still approves the merge and tag.
+4. Let a fresh read-only audit agent review it. The auditor must not edit tracked files, commit, push, or change
+   the step branch.
+5. The auditor writes its report to `.tmp/audit/step-NN-rN-<short-sha>-audit.md` (or `...-reaudit.md`) and
+   reports the path and verdict.
+6. The step agent or a neutral scribe transcribes the findings and verdict verbatim into
+   `docs/planning/audits/step-NN.md`, adds the audit metadata, and commits the documentation-only record.
+7. If findings require fixes, the step agent reads the handoff, fixes them on a new feature branch,
+   squash-merges into the step branch, pushes, waits for CI, and marks the audit `Re-audit required`.
+8. Re-audit the new commit and write a new handoff report. Only a `Passed` audit permits the step-to-main
+   approval request.
+9. The human owner still approves the merge and tag.
+10. Delete the handoff file only after the durable audit record is committed.
 
 Use [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/audits/README.md)
-for status values, severities, and the report format. Audit reports are durable planning records; do not rely on chat history.
+for status values, severities, and the report format. Audit reports are durable planning records; the raw
+auditor handoff is temporary and gitignored. Do not rely on chat history.
 
 ## 14. Review gates
 
