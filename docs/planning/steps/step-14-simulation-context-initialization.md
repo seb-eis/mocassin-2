@@ -13,6 +13,7 @@ lookup tables, selection pools, jump-status caches, counters, goals, and tracker
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
+- **Design review:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

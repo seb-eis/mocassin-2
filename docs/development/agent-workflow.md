@@ -56,6 +56,7 @@ Before implementation:
 
 - [ ] The step is the lowest unblocked step, or the owner assigned it.
 - [ ] Dependencies are complete.
+- [ ] The pre-implementation design review is `Ready for implementation`.
 - [ ] The step page, acceptance criteria, tests, and risks were read.
 - [ ] A complete feature-branch list was proposed and approved once.
 - [ ] The step branch was created from current `main`.
@@ -217,7 +218,30 @@ Reject or stop on:
 - rewriting shared history or force-pushing;
 - copying GPL code or data into the MIT implementation.
 
-## 13. Step completion audit
+## 13. Pre-implementation design review
+
+Before a step starts, a fresh planning auditor checks the design out of context.
+
+1. The planning agent and step agent finish the step's design decisions and update the step page, contracts,
+   architecture, quality strategy, open decisions, parity matrix, and related docs.
+2. Freeze the docs at a commit and create or update `docs/planning/reviews/step-NN.md`; set the status to
+   `Ready for review` and record the reviewed commit.
+3. A fresh planning auditor, with no implementation context, reviews the step page and all cross-step
+   contracts. The auditor is read-only: no tracked edits, commits, pushes, or branch changes.
+4. The auditor writes its report to `.tmp/review/step-NN-rN-<short-sha>-design-review.md` (or
+   `...-re-review.md`).
+5. The step agent or a neutral scribe transcribes the findings and verdict verbatim into the review record
+   and commits the documentation-only record.
+6. If changes are required, update the design docs and re-review the new commit.
+7. Only `Ready for implementation` permits the human owner to approve the start. Create the step branch from
+   the reviewed `main` commit.
+8. Step 00 and Step 01 are `Waived — process introduced after completion`.
+9. The post-implementation audit in section 14 remains mandatory.
+
+Use [`docs/planning/reviews/README.md`](../planning/reviews/README.md) for statuses, severities, and the
+report format. The raw planning-auditor handoff is temporary and gitignored.
+
+## 14. Step completion audit
 
 The step agent's self-check is not the independent audit.
 
@@ -244,12 +268,13 @@ Use [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blo
 for status values, severities, and the report format. Audit reports are durable planning records; the raw
 auditor handoff is temporary and gitignored. Do not rely on chat history.
 
-## 14. Review gates
+## 15. Review gates
 
 | Gate | Approval |
 | --- | --- |
 | Step feature list | Once, at step start |
 | Each feature squash | Before every squash into the step branch |
+| Pre-implementation design review | Fresh planning auditor after the design docs are frozen, before implementation |
 | Step completion audit | Fresh read-only audit after the step is frozen |
 | Step-to-main merge | Before the `--no-ff` merge, only after a passed audit |
 | Tag creation/push | Included in the step/milestone/release approval |

@@ -13,6 +13,7 @@ with canonical serialization and migrations.
 - **Main merge:** `7b4a994` — `--no-ff` merge
 - **Step tag:** `step-01` pushed
 - **Audit:** Passed with notes at `05c41ab`
+- **Design review:** Waived — process introduced after completion
 - **Last updated:** 2026-11-04
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
