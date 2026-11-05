@@ -62,6 +62,10 @@ public sealed record SpaceGroupSetting(
 and `SymmetryOperation` are Symmetry types. The catalog assembly may reference Core, but Core must not
 reference the catalog assembly.
 
+The project persists a `SpaceGroupRef(number, axis, origin)`. `SpaceGroupSetting` is the resolved catalog
+value used by previews and compilation; its Hermann–Mauguin symbol, Hall symbol, crystal system, operations,
+and data version are not persisted in the project.
+
 - The catalog is an **embedded immutable resource** generated from a pinned source (JSON or a compact binary),
   not a runtime SQLite database. The generated data is committed with its checksum and provenance; normal
   builds do not require the source database or a Python toolchain.
@@ -347,6 +351,7 @@ At this point, document the symmetry and geometry foundation:
 | Assembly boundary | `Mocassin.Core` does not reference `Mocassin.Symmetry`; persisted symmetry vocabulary is in Core |
 | Catalog checksum | Startup rejects a corrupted catalog or wrong schema version |
 | Catalog drift | Generator `--check` reproduces the committed settings and checksum |
+| Setting identity | `(number, axis, origin)` resolves to the same setting after a project round-trip; derived HM/Hall are not persisted |
 
 ## Risks and mitigations
 
@@ -354,6 +359,7 @@ At this point, document the symmetry and geometry foundation:
 | --- | --- |
 | Space-group data errors | spglib source, committed checksum, group-law tests, and independent multiplicity checks |
 | Catalog source/version drift | Pinned spglib, committed data, CI `--check`, and a provenance review for every pin change |
+| Ambiguous setting identity | Persist structured `(number, axis, origin)`; derive HM/Hall from the catalog |
 | Exact arithmetic performance | Use small fixed-size structs and integer ops; convert to double only at boundaries |
 | Canonical order changes later | Treat as a format contract; version the catalog and add golden tests |
 | Tolerance bugs | Use exact/rational comparisons for discrete symmetry; reserve tolerances for geometry |

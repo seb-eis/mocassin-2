@@ -26,6 +26,7 @@ decision will be made.
 | Project persistence | `ProjectStore` in `Mocassin.Packages`, not `Core` | [Step 01](steps/step-01-domain-kernel-and-project-format.md) |
 | Primitive geometry | `Fractional3`/`Cartesian3`/`Vector4I` in `Core.Geometry`; generic kernel internally | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Space-group catalog | spglib as the sole source; 274-setting compatibility subset; committed canonical JSON, dev-only generator, CI drift check, checksum, and BSD-3-Clause attribution | [Step 02](steps/step-02-symmetry-and-geometry.md) |
+| Space-group reference | Project stores structured `{number, axis, origin}`; HM/Hall/system/operations are catalog-derived | [Step 02](steps/step-02-symmetry-and-geometry.md) / [Step 03](steps/step-03-particle-and-structure-models.md) |
 | Cross-process job contract | Job folder, `solver.json`, JSONL events, `mmcfe.db` | [`02-data-contracts.md`](02-data-contracts.md) §5 |
 | Large state spill | Embed `.mcs` up to 1 GiB; larger states are external files referenced by `.msr` | ADR 0011 / data contracts §3.6 |
 | MMCFE log | SQLite `mmcfe.db` with a versioned, resumable schema | [`02-data-contracts.md`](02-data-contracts.md) §5.4 |
