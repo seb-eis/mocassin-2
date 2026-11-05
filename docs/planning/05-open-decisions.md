@@ -28,6 +28,7 @@ decision will be made.
 | Space-group catalog | spglib as the sole source; 274-setting compatibility subset; committed canonical JSON, dev-only generator, CI drift check, checksum, and BSD-3-Clause attribution | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Space-group reference | Project stores structured `{number, axis, origin}`; HM/Hall/system/operations are catalog-derived | [Step 02](steps/step-02-symmetry-and-geometry.md) / [Step 03](steps/step-03-particle-and-structure-models.md) |
 | Coordinate grid | Public `Fractional3` stays `double`; Symmetry uses an internal exact `24 × 10^12` grid for P1 expansion, deduplication, and ordering | [Step 02](steps/step-02-symmetry-and-geometry.md) |
+| Cell geometry | Strict `0<α,β,γ<180°` plus positive Gram determinant; determinant-based cell vectors; named tolerances; reject inconsistent values | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Cross-process job contract | Job folder, `solver.json`, JSONL events, `mmcfe.db` | [`02-data-contracts.md`](02-data-contracts.md) §5 |
 | Large state spill | Embed `.mcs` up to 1 GiB; larger states are external files referenced by `.msr` | ADR 0011 / data contracts §3.6 |
 | MMCFE log | SQLite `mmcfe.db` with a versioned, resumable schema | [`02-data-contracts.md`](02-data-contracts.md) §5.4 |

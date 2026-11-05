@@ -198,6 +198,8 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
   normalized translations; full inverse/closure and group-law tests run in CI.
 - Grid closure: applying every catalog operation to random grid points yields grid points; grid conversion is
   deterministic across OSes.
+- Cell geometry: all seven systems, unique-axis mapping, near-degenerate rejection, positive volume,
+  right-handed vectors, and the triclinic regression fixture.
 
 ### 9.3 Compilation
 

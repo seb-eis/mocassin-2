@@ -44,6 +44,16 @@ Rules:
 - Inputs with more than 12 fractional digits are rounded to the nearest grid point and may produce a warning.
 - Fractional coordinates are converted to Cartesian coordinates only at the geometry boundary.
 
+## Cell geometry
+
+- Cell lengths are in ångström and must be in `0.1..1000 Å`.
+- Cell angles are in degrees and must satisfy `0 < α, β, γ < 180°` and a positive Gram determinant.
+- Crystal-system constraints fix equal lengths/angles, 90°/120° values, the monoclinic unique axis, and the
+  rhombohedral angle range.
+- Cell vectors use the standard right-handed convention: a along x, b in the xy-plane, and c with a positive
+  z-component.
+- Inconsistent parameters are rejected; the model never silently normalizes user input.
+
 ## Time and seeds
 
 - `createdUtc` and `modifiedUtc` are ISO-8601 UTC timestamps.

@@ -113,8 +113,8 @@ not reference `Mocassin.Symmetry`.
   project.
 - Reference positions remain `Fractional3` doubles in the project; Symmetry converts them to the exact
   `24 × 10^12` grid for P1 expansion, overlap detection, and canonical ordering.
-- Cell parameters are normalized according to the crystal system before validation. The UI locks dependent
-  fields; the API rejects inconsistent values rather than silently overwriting them.
+- Cell parameters are validated against the crystal system. The UI may lock dependent fields as a convenience,
+  but the API rejects inconsistent values with `STR003`; it never silently overwrites user input.
 - Dummy positions are visual helpers, may coincide with sites, and are excluded from all simulation
   compilation.
 
@@ -152,7 +152,7 @@ a Core `StructureModel`; the Core model never holds a preview or a resolved cata
 | `PAR007` | Error | More than 100 particle sets |
 | `STR001` | Error | Space-group number outside 1..230 or `(number, axis, origin)` not found |
 | `STR002` | Error | Cell length outside 0.1..1000 Å |
-| `STR003` | Error | Cell angles violate the crystal-system constraints |
+| `STR003` | Error | Cell angles are outside 0..180°, the Gram determinant is not positive, or the crystal-system constraints fail |
 | `STR004` | Error | Reference site outside `[0,1)` after trim |
 | `STR005` | Error | Site name empty or duplicate |
 | `STR006` | Error | Stable/unstable site has no particle set |
@@ -251,6 +251,8 @@ At this point, document particles and crystal structure:
 - `docs/physics/symmetry.md` — site orbits, P1 preview, and why positions are fixed.
 - `docs/development/architecture.md` — particle/structure domain APIs, editor operations, and the
   Core/Symmetry preview and validation boundary.
+- `docs/reference/project-format.md` — cell parameter constraints, `STR002`/`STR003`, and canonical cell rules
+  (added with the structure section).
 
 ## Tests
 
@@ -259,7 +261,9 @@ At this point, document particles and crystal structure:
 | Particle limits | 63 custom particles accepted; 64 rejected |
 | Void handling | Void cannot be added to a set; void index is 0 |
 | Symbol/charge | Mass symbol preserved; charge validated |
-| Crystal systems | Valid/invalid parameter sets for all seven systems |
+| Crystal systems | Valid/invalid sets for all seven systems, both trigonal axis descriptions, and unique-axis A/B/C |
+| Cell determinant | Near-degenerate cells are rejected; valid cells have `det G > 0` and positive volume |
+| Cell vectors | Triclinic regression, hexagonal γ=120°, rhombohedral α=60°, and right-handedness |
 | Site overlap | Same orbit, special positions, near-boundary cases, and exact grid equality |
 | Preview | Orbit sizes and Cartesian positions match hand calculations |
 | Determinism | Same structure yields identical preview bytes/hash |
@@ -272,7 +276,8 @@ At this point, document particles and crystal structure:
 | Risk | Mitigation |
 | --- | --- |
 | Site overlap detection is expensive for large cells | Exact grid orbit dedup and early exit; cache by structure hash |
-| Crystal-system coupling confuses users | UI locks dependent fields and explains constraints |
+| Crystal-system coupling confuses users | UI locks dependent fields and explains constraints; API rejects inconsistent values |
+| Cell-parameter tolerance drift | Named, unit-specific tolerances and boundary tests |
 | Particle symbol semantics are implicit | Document and validate; show mass-conservation groups in the editor |
 | Preview diverges from compiled model | Compile from the same symmetry engine and compare in step 08 tests |
 | Redundant setting fields drift | Persist only `(number, axis, origin)`; derive HM/Hall/system from the catalog |

@@ -162,26 +162,50 @@ public readonly record struct SymmetryOperation(
 
 ### 3. Crystal systems and cell parameters
 
-- Seven systems with the same constraints as the original:
-  - triclinic: no fixed angles;
-  - monoclinic: one non-90° angle depending on unique axis;
-  - orthorhombic: all 90°;
-  - tetragonal: a=b, all 90°;
-  - trigonal/hexagonal: a=b, α=β=90°, γ=120° (hexagonal axes) or a=b=c, α=β=γ (rhombohedral axes);
-  - cubic: a=b=c, all 90°.
-- Valid angles satisfy the four strict triangle inequalities.
-- Length range 0.1–1000 Å (warning at the original bounds).
-- **Correct cell-vector formula**:
+- Seven crystal systems:
+  - triclinic: no fixed lengths or angles;
+  - monoclinic: unique axis A/B/C maps to α/β/γ; the other two angles are 90°;
+  - orthorhombic: α=β=γ=90°;
+  - tetragonal: a=b; α=β=γ=90°;
+  - trigonal, hexagonal axes: a=b; α=β=90°; γ=120°;
+  - trigonal, rhombohedral axes: a=b=c; α=β=γ; 0<α<120°;
+  - hexagonal: a=b; α=β=90°; γ=120°;
+  - cubic: a=b=c; α=β=γ=90°.
+- General angle validity:
+  - 0 < α, β, γ < 180°;
+  - the Gram determinant is strictly positive:
+    `det G = 1 − cos²α − cos²β − cos²γ + 2 cosα cosβ cosγ > 0`;
+  - the equivalent spherical triangle inequalities are
+    `α+β+γ < 360°`, `α+β > γ`, `α+γ > β`, and `β+γ > α`;
+  - near-degenerate cells below `CellDeterminantTolerance` are rejected.
+- Length limits: 0.1–1000 Å. Values outside are `STR002` errors; there is no separate warning band in v1.
+- **Correct, numerically stable cell-vector formula**:
 
 ```text
+det G = 1 − cos²α − cos²β − cos²γ + 2 cosα cosβ cosγ
+
 A = (a, 0, 0)
 B = (b cos γ, b sin γ, 0)
-C = (c cos β, c (cos α − cos β cos γ) / sin γ,
-     sqrt(c² − Cx² − Cy²))
+C = (c cos β,
+     c (cos α − cos β cos γ) / sin γ,
+     c sqrt(det G) / sin γ)
 ```
 
-- Test against known cells for all seven systems, including a triclinic cell where the original formula fails.
-- Keep parameter validation tolerance (1e-3) separate from geometric equality (1e-6) and trim tolerance (1e-10).
+- Validate `det G > 0` before taking the square root. The positive z-component makes the cell right-handed.
+- Volume is `a b c sqrt(det G)`.
+- The `Cy` term keeps the factor `c`; that is the original defect.
+- Tolerances are named, unit-specific constants:
+  - `CellLengthTolerance = 1e-3 Å` for a/b/c equality and length checks;
+  - `CellAngleTolerance = 1e-3°` for 90°/120° checks and rhombohedral equality;
+  - `CellDeterminantTolerance = 1e-12` for the near-degenerate cutoff;
+  - `GeometricEqualityTolerance = 1e-6 Å` for Cartesian distance/vector equality;
+  - `FractionalTrimTolerance = 1e-10` for boundary snapping before exact grid conversion.
+- Cell-parameter inconsistency is rejected with `STR003`; the API never silently overwrites user input. The
+  UI may lock dependent fields as an editor convenience.
+- Test all seven systems, both trigonal axis descriptions, unique-axis A/B/C, near-degenerate rejection,
+  volume, right-handedness, and fractional ↔ Cartesian round-trips.
+- Triclinic regression fixture: `a=5 Å`, `b=6 Å`, `c=7 Å`, `α=80°`, `β=85°`, `γ=95°`; compare the vectors
+  and volume against an independent determinant calculation.
 
 ### 4. Coordinate types and encoding
 
@@ -357,7 +381,8 @@ At this point, document the symmetry and geometry foundation:
   grid, P1 expansion, and canonical position order.
 - `docs/development/compilation-pipeline.md` — the symmetry stage, its exact grid, and its inputs/outputs.
 - `docs/glossary/notation.md` — fractional/Cartesian coordinates, the exact fractional grid, and `Vector4I`.
-- `docs/reference/project-format.md` — space-group/cell/site fields and the data-version contract.
+- `docs/reference/project-format.md` — space-group/cell/site fields, cell validity constraints, and the
+  data-version contract.
 - `docs/development/architecture.md` — catalog generation, embedding, and drift-check boundary.
 
 ## Tests
@@ -372,7 +397,9 @@ At this point, document the symmetry and geometry foundation:
 | Canonical order | Shuffled sites/operations produce the same `P` assignment |
 | Coordinate round-trip | Fractional ↔ `Vector4I` ↔ fractional for random points |
 | Generic math | `Vector3<double>` arithmetic matches the semantic wrappers |
-| Cell geometry | Seven systems, including the triclinic regression |
+| Cell geometry | Seven systems, both trigonal axis descriptions, unique-axis A/B/C, volume, and right-handedness |
+| Cell validity | Angles outside 0..180°, non-positive Gram determinant, and near-degenerate cells are rejected |
+| Triclinic regression | `a=5`, `b=6`, `c=7`, `α=80°`, `β=85°`, `γ=95°` matches independent vectors and volume |
 | Pair reduction | Reduced set equals brute-force orbit for random pairs |
 | Cluster reduction | Unique permutations equal brute-force canonicalization |
 | Radial search | Distances match brute-force enumeration of neighboring cells |
@@ -395,7 +422,9 @@ At this point, document the symmetry and geometry foundation:
 | Ambiguous setting identity | Persist structured `(number, axis, origin)`; derive HM/Hall from the catalog |
 | Exact arithmetic performance | Use small fixed-size structs and integer ops; convert to double only at boundaries |
 | Canonical order changes later | Treat as a format contract; version the catalog and add golden tests |
-| Tolerance bugs | Use exact/rational comparisons for discrete symmetry; reserve tolerances for geometry |
+| Tolerance bugs | Use exact grid comparisons for discrete symmetry; use named, unit-specific tolerances for continuous geometry |
+| Cell-parameter tolerance drift | Named constants, boundary tests, and no silent normalization |
+| Near-degenerate cells | Positive Gram-determinant check and explicit `STR003` rejection |
 | Large orbit/permutation counts | Bound counts, warn in validation, use pruning and parallelism |
 | Grid precision or overflow | Fixed denominator `24×10^12`, `long` components, bounds tests, and a documented 12-digit limit |
 | Grid/canonical-order drift | Version the grid with the catalog; golden P-index tests on all platforms |
