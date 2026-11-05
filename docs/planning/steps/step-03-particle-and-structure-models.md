@@ -100,6 +100,10 @@ public sealed record CellDummyPosition(
     Fractional3 Fractional);
 ```
 
+All types in this block live in `Mocassin.Core`. `SpaceGroupRef` is the persisted reference; the resolved
+`SpaceGroupSetting`, `StructurePreview`, and catalog-dependent validation are Symmetry services, so Core does
+not reference `Mocassin.Symmetry`.
+
 - `SiteStability` is `Stable` or `Unstable`.
 - Reference positions must be in `[0,1)` at definition time; they are trimmed with a clear diagnostic if
   within `1e-10` of a boundary.
@@ -124,6 +128,9 @@ public sealed record StructurePreview(
     double CellVolumeAngstrom3,
     ImmutableArray<SiteOrbitInfo> Orbits);
 ```
+
+`StructurePreview` and `UnitCellVectorEncoder` are Symmetry types. A Symmetry service builds the preview from
+a Core `StructureModel`; the Core model never holds a preview or a resolved catalog setting.
 
 - `PositionList` is the canonical P1 expansion from step 02.
 - It is cached by a content hash of the structure model and invalidated on edit.
@@ -153,6 +160,11 @@ public sealed record StructurePreview(
 | `STR010` | Error | Dummy position references invalid coordinates |
 | `STR011` | Warning | Site cannot be occupied by any particle |
 
+Diagnostic ownership follows the assembly boundary. Core emits diagnostics that depend only on the project
+graph and primitive types: `STR004`, `STR005`, `STR006`, `STR010`, and `STR011`. Symmetry emits diagnostics
+that require the catalog, cell geometry, or P1 expansion: `STR001`, `STR002`, `STR003`, `STR007`, `STR008`,
+and `STR009`. A composed validator runs both and returns one stable, sorted list.
+
 - Site-overlap detection uses exact rational coordinates after P1 expansion; no tolerance-based hash sets.
 - Duplicate detection compares the full orbit, not only the seed position.
 - A site whose orbit overlaps another site is an error because it makes particle assignment ambiguous.
@@ -172,13 +184,30 @@ public interface IParticleQuery
 public interface IStructureQuery
 {
     StructureModel Structure { get; }
-    SpaceGroupSetting SpaceGroup { get; }
-    StructurePreview Preview { get; }
     CellSite? Find(CellSiteId id);
+}
+
+// Mocassin.Symmetry
+public interface IStructurePreviewService
+{
+    SpaceGroupSetting Resolve(SpaceGroupRef reference);
+    StructurePreview CreatePreview(StructureModel structure);
+}
+
+public interface IStructureValidator
+{
+    ImmutableArray<Diagnostic> Validate(StructureModel structure);
 }
 ```
 
-- Query interfaces are implemented by the immutable `Project` snapshot, not by mutable managers.
+- Core query interfaces are implemented by the immutable `Project` snapshot, not by mutable managers.
+- `IStructureQuery` exposes only Core model types.
+- `IStructurePreviewService` and `IStructureValidator` are Symmetry services. They accept a Core
+  `StructureModel`, resolve `SpaceGroupRef` through the catalog, and return a preview or diagnostics.
+- The CLI, UI, and compiler compose the Core query with the Symmetry services; Core never references
+  `Mocassin.Symmetry`.
+- A composed validator in the composition layer (`Mocassin.Packages` or `Mocassin.Cli`) runs
+  `ProjectValidator` and `IStructureValidator` and merges their diagnostics.
 - The UI and compiler consume these interfaces.
 - Mutations go through `ProjectEditor` methods such as `AddParticle`, `UpdateParticle`, `AddCellSite`, which
   return a new project and diagnostics.
@@ -188,8 +217,10 @@ public interface IStructureQuery
 - [ ] Implement `Particle`, `ParticleSet`, and the implicit void/empty objects.
 - [ ] Implement `StructureModel`, `SpaceGroupRef`, `CellParameters`, `CellSite`, `CellDummyPosition`.
 - [ ] Implement crystal-system normalization and validation.
-- [ ] Implement `StructurePreview` in `Mocassin.Symmetry` using the symmetry engine (not in Core).
-- [ ] Implement P1 overlap detection.
+- [ ] Implement `StructurePreview` and `UnitCellVectorEncoder` in `Mocassin.Symmetry` using the symmetry
+  engine (not in Core).
+- [ ] Implement `StructurePreviewService` and `StructureValidator` in `Mocassin.Symmetry`.
+- [ ] Implement P1 overlap detection in the Symmetry validator.
 - [ ] Implement `IParticleQuery` and `IStructureQuery` over the project snapshot.
 - [ ] Implement editor operations for particles, sets, cell parameters, sites, and dummies.
 - [ ] Add sample definitions for ceria and barium zirconate.
@@ -213,7 +244,8 @@ At this point, document particles and crystal structure:
 - `docs/user-guide/particles.md` — particles, particle sets, void/default semantics, limits.
 - `docs/user-guide/structure.md` — space group, cell parameters, sites, stability, dummies.
 - `docs/physics/symmetry.md` — site orbits, P1 preview, and why positions are fixed.
-- `docs/development/architecture.md` — particle/structure domain APIs and editor operations.
+- `docs/development/architecture.md` — particle/structure domain APIs, editor operations, and the
+  Core/Symmetry preview and validation boundary.
 
 ## Tests
 
@@ -227,6 +259,7 @@ At this point, document particles and crystal structure:
 | Preview | Orbit sizes and Cartesian positions match hand calculations |
 | Determinism | Same structure yields identical preview bytes/hash |
 | Editing | Add/update/remove site produces a valid new project or diagnostics |
+| Assembly boundary | `Mocassin.Core` has no reference to `Mocassin.Symmetry`; preview and catalog validation compose over Core models |
 
 ## Risks and mitigations
 

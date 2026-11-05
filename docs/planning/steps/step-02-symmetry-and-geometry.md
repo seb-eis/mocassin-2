@@ -58,6 +58,10 @@ public sealed record SpaceGroupSetting(
     string DataVersion);
 ```
 
+`AxisSetting`, `OriginChoice`, and `CrystalSystem` are persisted Core vocabulary types. `SpaceGroupSetting`
+and `SymmetryOperation` are Symmetry types. The catalog assembly may reference Core, but Core must not
+reference the catalog assembly.
+
 - The catalog is an **embedded immutable resource** generated at build time (JSON or a compact binary), not a
   runtime SQLite database.
 - Data source: a vetted crystallographic dataset (International Tables / spglib). The original 274 settings
@@ -123,8 +127,13 @@ public readonly record struct Vector4I(int A, int B, int C, int P);
 ```
 
 The primitive coordinate types live in **`Mocassin.Core.Geometry`** so the domain model can use them without
-making Core depend on Symmetry. The space-group catalog, encoder, and symmetry algorithms remain in
-`Mocassin.Symmetry`.
+making Core depend on Symmetry. The persisted symmetry vocabulary (`AxisSetting`, `OriginChoice`, and
+`CrystalSystem`) also lives in Core because `SpaceGroupRef` and `CellParameters` are part of the project model.
+`SpaceGroupSetting`, `SymmetryOperation`, the space-group catalog, the unit-cell encoder, and the symmetry
+algorithms remain in `Mocassin.Symmetry`.
+
+Core must never reference `Mocassin.Symmetry`. Catalog-dependent previews and validation are Symmetry
+services that accept Core model types and return Symmetry or diagnostic results.
 
 #### Generic math strategy
 
@@ -227,6 +236,8 @@ scientific model remains `double`-based.
 - [ ] Implement radial sampling and periodic geometry helpers.
 - [ ] Add golden tests for all 230 groups/274 settings.
 - [ ] Document the space-group data version and index-order contract.
+- [ ] Keep the assembly boundary: shared persisted vocabulary in `Mocassin.Core`, catalog and algorithms in
+  `Mocassin.Symmetry`, and no Core reference to Symmetry.
 
 ## Acceptance criteria
 
@@ -267,6 +278,7 @@ At this point, document the symmetry and geometry foundation:
 | Cluster reduction | Unique permutations equal brute-force canonicalization |
 | Radial search | Distances match brute-force enumeration of neighboring cells |
 | Thread safety | Parallel expansion produces identical results |
+| Assembly boundary | `Mocassin.Core` does not reference `Mocassin.Symmetry`; persisted symmetry vocabulary is in Core |
 
 ## Risks and mitigations
 
