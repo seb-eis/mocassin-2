@@ -150,7 +150,9 @@ public readonly record struct SymmetryOperation(
 
 - Use integer arithmetic for composition, inversion, and closure.
 - Denominator 24 covers all crystallographic translations (1/2, 1/3, 1/4, 1/6).
-- Conversion to `double` happens only at the geometry boundary.
+- Apply operations to `GridFractional3`; because the grid denominator is a multiple of 24, every result
+  remains on the grid.
+- Conversion to `double` happens only at the geometry boundary; the discrete path stays on `GridFractional3`.
 - Provide:
   - `Transform(Fractional3)`,
   - `Compose(other)`, `Inverse()`, `Determinant`, `FlipsOrientation`,
@@ -225,7 +227,8 @@ needs `float` or `decimal` geometry variants, the internal kernel can be instant
 scientific model remains `double`-based.
 
 - `Fractional3.TrimToUnitCell()` maps to `[0,1)` with a boundary policy that rounds values within `1e-10` of
-  an integer to that integer.
+  an integer to that integer. This boundary snap is a user-input convenience applied before grid conversion;
+  it is not the deduplication criterion.
 - `Vector4I` encodes `(cell offset A,B,C, P1 position index P)`.
 - Linear index is row-major with `P` fastest:
   `index = P + C*Pcount + B*Pcount*Ccount + A*Pcount*Ccount*Bcount`.
@@ -233,9 +236,34 @@ scientific model remains `double`-based.
 - **Canonical position order** (contract for compiled packages):
   1. expand every reference site to its P1 orbit;
   2. trim to `[0,1)`;
-  3. deduplicate by exact rational coordinates;
+  3. deduplicate by exact grid coordinates;
   4. sort lexicographically by `(A, B, C)`;
   5. tie-break by the reference site's stable ID, then by orbit member index.
+
+#### Exact fractional grid
+
+The discrete symmetry path does not use binary floating point. `Mocassin.Symmetry` converts each
+`Fractional3` to an internal `GridFractional3` with three `long` components scaled by
+`D = 24 × 10^12 = 24,000,000,000,000`.
+
+- `24` is divisible by every crystallographic translation denominator in the catalog: 2, 3, 4, 6, 8, 12,
+  and 24.
+- `10^12` preserves any input decimal with up to 12 fractional digits exactly.
+- An integer rotation matrix and a translation `m/24` applied to a grid point produce another grid point:
+  `R·x + t` is exactly closed on the grid.
+- Conversion uses the canonical shortest round-trip decimal representation of the `double`, parsed with
+  invariant culture and `decimal`, scaled by `D`, and rounded with a documented midpoint rule. Do not multiply
+  the binary `double` directly, because that is platform-sensitive near grid boundaries.
+- `-0.0` is normalized to `0.0`.
+- Values with more than 12 fractional digits are rounded to the nearest grid point. A warning diagnostic
+  (assigned in Step 07) is emitted when the difference exceeds half a grid step.
+- Orbit expansion, trimming, deduplication, sorting, `Vector4I` encoding, and site-overlap detection use the
+  grid. Cartesian positions, distances, cell vectors, and radial search remain `double`.
+- The public and persisted `Fractional3` remains `double`-based; `GridFractional3` is internal to
+  `Mocassin.Symmetry`. The project format does not change.
+- The grid denominator and conversion rule are part of the canonical position-order contract. Changing either
+  requires a catalog/canonical-order version bump and updated golden P-index tests.
+
 - The ordering is independent of input collection order and operation order. Golden tests freeze the P index
   for every reference site in the sample models.
 - `Vector4I` decoding validates `P` against the position count; compiled data is bounds-checked on load.
@@ -325,9 +353,10 @@ scientific model remains `double`-based.
 
 At this point, document the symmetry and geometry foundation:
 
-- `docs/physics/symmetry.md` — space groups, exact operations, cell geometry, P1 expansion, canonical position order.
-- `docs/development/compilation-pipeline.md` — the symmetry stage and its inputs/outputs.
-- `docs/glossary/notation.md` — fractional/Cartesian coordinates and `Vector4I`.
+- `docs/physics/symmetry.md` — space groups, exact operations, cell geometry, the `24 × 10^12` fractional
+  grid, P1 expansion, and canonical position order.
+- `docs/development/compilation-pipeline.md` — the symmetry stage, its exact grid, and its inputs/outputs.
+- `docs/glossary/notation.md` — fractional/Cartesian coordinates, the exact fractional grid, and `Vector4I`.
 - `docs/reference/project-format.md` — space-group/cell/site fields and the data-version contract.
 - `docs/development/architecture.md` — catalog generation, embedding, and drift-check boundary.
 
@@ -352,6 +381,10 @@ At this point, document the symmetry and geometry foundation:
 | Catalog checksum | Startup rejects a corrupted catalog or wrong schema version |
 | Catalog drift | Generator `--check` reproduces the committed settings and checksum |
 | Setting identity | `(number, axis, origin)` resolves to the same setting after a project round-trip; derived HM/Hall are not persisted |
+| Grid conversion | 0, 0.25, 0.1, 0.123456789012, -0.0, and values outside [0,1) map to the expected grid integers |
+| Grid closure | Applying every catalog operation to random grid points produces grid points |
+| Grid dedup | Distinct grid points stay distinct; equivalent decimals dedup; no tolerance comparer is used |
+| Grid precision | Inputs with more than 12 fractional digits round deterministically and warn |
 
 ## Risks and mitigations
 
@@ -364,6 +397,8 @@ At this point, document the symmetry and geometry foundation:
 | Canonical order changes later | Treat as a format contract; version the catalog and add golden tests |
 | Tolerance bugs | Use exact/rational comparisons for discrete symmetry; reserve tolerances for geometry |
 | Large orbit/permutation counts | Bound counts, warn in validation, use pruning and parallelism |
+| Grid precision or overflow | Fixed denominator `24×10^12`, `long` components, bounds tests, and a documented 12-digit limit |
+| Grid/canonical-order drift | Version the grid with the catalog; golden P-index tests on all platforms |
 
 ## Done when
 

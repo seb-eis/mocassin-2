@@ -111,6 +111,8 @@ not reference `Mocassin.Symmetry`.
 - The space group is selected from the catalog by `(number, axis, origin)`. The Hermann–Mauguin symbol, Hall
   symbol, crystal system, operations, and data version are derived from the catalog and are not stored in the
   project.
+- Reference positions remain `Fractional3` doubles in the project; Symmetry converts them to the exact
+  `24 × 10^12` grid for P1 expansion, overlap detection, and canonical ordering.
 - Cell parameters are normalized according to the crystal system before validation. The UI locks dependent
   fields; the API rejects inconsistent values rather than silently overwriting them.
 - Dummy positions are visual helpers, may coincide with sites, and are excluded from all simulation
@@ -167,7 +169,8 @@ and `STR009`. A composed validator runs both and returns one stable, sorted list
 
 - An unknown `axis` or `origin` enum string is malformed JSON (`PROJ002`), not a valid but unsupported setting.
 - `STR001` reports the allowed axis/origin combinations for the number when the catalog can list them.
-- Site-overlap detection uses exact rational coordinates after P1 expansion; no tolerance-based hash sets.
+- Site-overlap detection uses exact grid coordinates after P1 expansion; no tolerance-based hash sets. The
+  grid is the `24 × 10^12` fractional grid defined in Step 02.
 - Duplicate detection compares the full orbit, not only the seed position.
 - A site whose orbit overlaps another site is an error because it makes particle assignment ambiguous.
 - Structure validation also computes statistics used by step 07: orbit sizes, total positions, site counts.
@@ -257,7 +260,7 @@ At this point, document particles and crystal structure:
 | Void handling | Void cannot be added to a set; void index is 0 |
 | Symbol/charge | Mass symbol preserved; charge validated |
 | Crystal systems | Valid/invalid parameter sets for all seven systems |
-| Site overlap | Same orbit, special positions, and near-boundary cases |
+| Site overlap | Same orbit, special positions, near-boundary cases, and exact grid equality |
 | Preview | Orbit sizes and Cartesian positions match hand calculations |
 | Determinism | Same structure yields identical preview bytes/hash |
 | Editing | Add/update/remove site produces a valid new project or diagnostics |
@@ -268,7 +271,7 @@ At this point, document particles and crystal structure:
 
 | Risk | Mitigation |
 | --- | --- |
-| Site overlap detection is expensive for large cells | Exact orbit dedup and early exit; cache by structure hash |
+| Site overlap detection is expensive for large cells | Exact grid orbit dedup and early exit; cache by structure hash |
 | Crystal-system coupling confuses users | UI locks dependent fields and explains constraints |
 | Particle symbol semantics are implicit | Document and validate; show mass-conservation groups in the editor |
 | Preview diverges from compiled model | Compile from the same symmetry engine and compare in step 08 tests |

@@ -189,7 +189,8 @@ parameterization, and lattice signatures use the MessagePack projection (section
 ```
 
 - Lengths in Å; angles in degrees.
-- `fractional` components are in `[0, 1)` for the reference position.
+- `fractional` components are in `[0, 1)` for the reference position. The canonical P1 order uses the exact
+  `24 × 10^12` fractional grid defined in Step 02; the stored decimal remains the user-facing value.
 - `number` is the International Tables space-group number, 1..230.
 - `axis` identifies the unique axis or the hexagonal/rhombohedral description; `origin` identifies the origin
   choice. Both are explicit and use `none` when the setting has no such choice.
