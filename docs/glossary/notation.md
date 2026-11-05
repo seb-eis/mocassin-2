@@ -54,6 +54,16 @@ Rules:
   z-component.
 - Inconsistent parameters are rejected; the model never silently normalizes user input.
 
+## P1 positions
+
+- P1 positions are sorted by exact fractional-grid coordinates; `P` is the per-cell index in `[0, Pcount)`.
+- `Vector4I(cellA, cellB, cellC, P)` combines a cell offset with the per-cell P index.
+- The linear lattice index is
+  `P + cellC*Pcount + cellB*Pcount*Ccount + cellA*Pcount*Ccount*Bcount`.
+- The index is a signed 32-bit integer; the total lattice position count is checked in 64-bit and must not
+  exceed `2,147,483,647`.
+- Negative cell offsets are relative-path coordinates, not linear indices.
+
 ## Time and seeds
 
 - `createdUtc` and `modifiedUtc` are ISO-8601 UTC timestamps.

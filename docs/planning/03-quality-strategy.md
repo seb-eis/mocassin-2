@@ -200,6 +200,8 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
   deterministic across OSes.
 - Cell geometry: all seven systems, unique-axis mapping, near-degenerate rejection, positive volume,
   right-handed vectors, and the triclinic regression fixture.
+- P1 contract: golden P indices, shuffle invariance, `Vector4I` round-trip for base and neighbor positions, and
+  the signed 32-bit linear-index cap with a 64-bit total-count check.
 
 ### 9.3 Compilation
 
