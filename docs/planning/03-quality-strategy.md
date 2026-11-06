@@ -107,7 +107,7 @@ Property tests are required for the following, using brute-force or analytic ora
 
 | Area | Properties |
 | --- | --- |
-| Symmetry / geometry | Group laws; stabilizer chain; induced permutations; orbit membership and closure; canonical order independent of input order; coordinate round-trips; minimum-image distance equals brute force; pair/cluster reduction is complete and non-redundant; chiral orbit linking |
+| Symmetry / geometry | Group laws; stabilizer chain; induced permutations; orbit membership and closure; canonical order independent of input order; coordinate round-trips; minimum-image distance equals brute force; radial-search completeness; distance-bucket stability; pair/cluster reduction is complete and non-redundant; chiral orbit linking |
 | Compilation | Mass/charge conservation per rule; valid indices; rule uniqueness; deterministic byte-identical output; P1 counts match brute-force expansion; every interaction has a table entry |
 | Parameterization | Signature stability; apply → serialize → reload identity; rebase never silently changes unmatched values; chiral mirroring is consistent |
 | Supercells / doping | Requested vs applied counts; never exceeds available particles; charge neutrality or explicit failure; order dependence is deterministic; same seed → same lattice |
@@ -208,6 +208,10 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
   path-orbit check.
 - Cluster reduction: the canonical tuple is independent of input order; the expansion map covers every
   equivalent tuple exactly once; 6-bit codes round-trip for 63 particles and 9 sites.
+- Periodic geometry: `GetMinimumImage` equals brute force for skewed triclinic cells; `RadialSearch` matches
+  brute-force enumeration; cutoff-boundary candidates are included with the 1 fm margin; equivalent pairs share
+  a distance bucket.
+- Memory: only base P1 Cartesian positions are precomputed; no dense `A×B×C×P` Cartesian array is allocated.
 
 ### 9.3 Compilation
 

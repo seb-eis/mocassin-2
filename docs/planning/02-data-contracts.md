@@ -587,6 +587,9 @@ MessagePack map with snake_case keys. Top-level:
 - Chiral partners share one `object_id` and one energy table.
 - Cluster occupation codes use 6 bits per site, site 0 in the least significant bits, up to 9 sites; unused
   high bits are zero. Codes are canonical under the induced site-permutation group.
+- Pair shells use the `1 fm` distance bucket. Candidate enumeration uses a `cutoff + 1 fm` margin and includes
+  shells with `bucket <= cutoffBucket`.
+- Minimum-image and radial-search results always carry the cell offset; no implicit wrapping is allowed.
 
 `transitions` fields:
 
