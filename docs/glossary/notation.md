@@ -96,6 +96,14 @@ A **chiral partner** is the representative of the inverse orbit when the inverse
   up to the cutoff bucket with a 1 fm margin.
 - Negative cell offsets remain explicit; no implicit wrapping.
 
+## Symmetry contract
+
+- `SymmetryContractVersion = "symmetry-1"` covers the fractional grid, canonical P order, pair-shell order,
+  `1 fm` bucket, cluster canonicalization, and reduction semantics.
+- The compiled payload records it with the catalog data version and checksum; changing a covered rule bumps
+  the version.
+- In-memory caches are scoped per compilation. Persisted IDs use SHA-256, never `string.GetHashCode()`.
+
 ## Time and seeds
 
 - `createdUtc` and `modifiedUtc` are ISO-8601 UTC timestamps.

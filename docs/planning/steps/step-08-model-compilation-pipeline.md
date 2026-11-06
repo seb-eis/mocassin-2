@@ -86,6 +86,9 @@ independent, but the output order is fixed.
 public sealed record CompiledModel(
     int FormatVersion,
     string ModelSignature,
+    string SymmetryContractVersion,
+    string SpaceGroupDataVersion,
+    string SpaceGroupDataSha256,
     CompiledParticleModel Particles,
     CompiledStructureModel Structure,
     CompiledEnergyModel Energy,
@@ -98,6 +101,9 @@ public sealed record CompiledModel(
 - `Energy`: pair tables, cluster tables, defect/site background.
 - `Transitions`: jump collections, directions, rules, jump count/mapping, tracker mapping.
 - `Simulations`: kind, active collections, default settings, tracker models.
+- `SymmetryContractVersion`, `SpaceGroupDataVersion`, and `SpaceGroupDataSha256` record the algorithms and
+  catalog used to produce the model. They are part of the canonical compiled projection used for the model
+  signature.
 - The serialized form is defined in [`02-data-contracts.md`](../02-data-contracts.md).
 
 ### 3. Indexing rules
@@ -249,8 +255,8 @@ For MMC:
 ### 9. Signature and caching
 
 - `ModelSignature = SHA-256("mocassin/model-signature/v1" || 0x00 || canonical MessagePack projection)` over
-  the compiled model without parameterization values, including the space-group catalog data version
-  (ADR 0010).
+  the compiled model without parameterization values, including the space-group catalog data version,
+  catalog checksum, and symmetry contract version (ADR 0010).
 - `ParameterizationSignature = SHA-256("mocassin/parameterization-signature/v1" || 0x00 || projection)` over
   the model signature plus canonical energy/frequency values.
 - The compiler caches stage results keyed by content hashes:
@@ -320,6 +326,7 @@ At this point, document the compiler:
 | P1 positions | Match step 02 encoder for all samples |
 | Pair sets | Counts/distances/multiplicities match brute force |
 | Pair bucketing | Symmetry-equivalent pairs share a bucket; cutoff-boundary pairs are included with the 1 fm margin |
+| Contract metadata | Symmetry and catalog versions are present and included in the model signature |
 | Chirality | Known chiral pairs linked; achiral pairs symmetric |
 | Clusters | Unique permutations match brute-force canonicalization |
 | Rules | State triplets, stability roles, conservation, inverse/dependent counts |
