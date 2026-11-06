@@ -471,13 +471,108 @@ reduced/Niggli basis can be added later as an optimization.
 - `GetCellVolume`, `ToCartesian`, `ToFractional`, and `GetDistance` remain available; `GetDistance` is the
   direct, non-minimum-image distance unless the caller uses `GetMinimumImage`.
 
-### 7. Caching and thread safety
+### 7. Caching, determinism, contracts, and performance
 
-- `SpaceGroupCatalog` is immutable and thread-safe.
-- Orbit and point-group results are cached in a `ConcurrentDictionary` keyed by
-  `(settingId, siteId, geometryHash)`.
-- No mutable global loaded group; the setting is passed explicitly.
-- Compilation may expand positions in parallel; all caches are concurrent and deterministic.
+#### 7.1 Cache scope and keys
+
+- `SpaceGroupCatalog` is immutable and may be shared process-wide.
+- All other caches are scoped to a symmetry service or compilation instance; they are not static and are
+  released with the compilation.
+- Use immutable record keys with deterministic value equality for in-memory caches.
+- Use SHA-256 of canonical bytes for persisted geometry IDs and cross-run hashes. Never use
+  `string.GetHashCode()` for persisted or cross-run identity.
+- Cache keys:
+
+| Cache | Key |
+| --- | --- |
+| Cell geometry | `cellParametersHash` |
+| Orbit / stabilizer | `(catalogDataVersion, settingKey, gridCenter)` |
+| Point group | `(catalogDataVersion, settingKey, centerP, orderedSiteSequenceHash)` |
+| Pair shells | `(catalogDataVersion, settingKey, centerP, cutoffBucket, cellParametersHash)` |
+| Cluster reduction | `(catalogDataVersion, settingKey, centerP, clusterOffsetsHash, allowedOccupationHash)` |
+| Canonical P1 order | `(catalogDataVersion, symmetryContractVersion, structureHash)` |
+
+- Bound cache size per compilation. A limit breach is a diagnostic or a bounded failure, never an OOM.
+
+#### 7.2 Determinism under parallelism
+
+- Parallelize only independent orbit, pair, and cluster work; each task uses local buffers.
+- Merge and sort results canonically before assigning IDs or storing them.
+- Do not use parallel floating-point reductions.
+- Cache insertion order must not affect results.
+- Final outputs are sorted by the documented canonical keys.
+- Golden tests run on Linux and Windows on step branches; macOS runs them on `main`.
+
+#### 7.3 Symmetry contract version
+
+- `SymmetryContractVersion = "symmetry-1"` covers:
+  - the `24 × 10^12` fractional grid;
+  - canonical P1 ordering and tie-break;
+  - pair-shell ordering and the `1 fm` bucket;
+  - cluster canonicalization and 6-bit occupation codes;
+  - the stabilizer and reduction semantics.
+- The compiled payload records:
+  - `symmetry_contract_version`;
+  - `space_group_data_version`;
+  - `space_group_data_sha256`.
+- Changing any covered rule bumps `SymmetryContractVersion` and updates golden fixtures and signatures.
+- The project file does not store the contract version.
+
+#### 7.4 Test oracles and tiers
+
+- Brute-force oracles:
+  - orbit membership and closure;
+  - stabilizer and induced-permutation group laws;
+  - pair shells from explicit image enumeration;
+  - cluster canonicalization from explicit tuple permutations;
+  - minimum image and radial search from explicit cell scans.
+- Golden fixtures:
+  - ceria;
+  - barium zirconate;
+  - vehicle/interstitialcy sample;
+  - freeze P indices, pair shells, chiral links, cluster codes, and linear indices.
+- PR-fast:
+  - all 274 catalog group-law checks;
+  - golden samples;
+  - property subsets;
+  - encoder and minimum-image tests.
+  Target under 10 minutes.
+- PR-medium:
+  - more random property cases;
+  - cross-language fixtures;
+  - full reduction suites.
+- Nightly/release:
+  - full random property suites;
+  - 20×20×20 stress;
+  - benchmark regression;
+  - macOS golden run;
+  - memory profile.
+- Property-test failures print the seed and canonical geometry hash.
+
+#### 7.5 Performance and memory
+
+- Define the 20×20×20 benchmark concretely: cell, P count, site count, runner class, and baseline.
+- Target: P1 expansion under 1 second on the defined CI runner class.
+- Pair and cluster reductions use the documented complexity bounds and early pruning.
+- Only base P1 Cartesian positions are precomputed. Do not allocate a dense `A×B×C×P` Cartesian array.
+- BenchmarkDotNet runs on release candidates; a 10% regression fails unless accepted by ADR.
+- Record the benchmark environment and raw results in `tests/reference/bench/`.
+
+#### 7.6 Public/internal API boundary
+
+- Public: `SpaceGroupCatalog`, `SpaceGroupSetting`, `SymmetryOperation`, `PointGroup`, `CellGeometry`,
+  `UnitCellVectorEncoder`, `MinimumImageResult`, `NeighborImage`, and the pair/cluster reduction result types.
+- Internal: `GridFractional3`, JSON DTOs, cache keys, hashing helpers, and reduction scratch types.
+- All public/protected members have XML documentation.
+- ApiCompat baselines are updated for intentional public API changes.
+
+#### 7.7 Error handling and limits
+
+- A corrupt or missing catalog is a build/installation error, not a user diagnostic.
+- Invalid user cell, setting, or site data produces structured diagnostics (`STR001`, `STR003`, etc.).
+- Limits: 9 cluster sites, 63 particles, 10,000 P1 positions, and the signed 32-bit linear index.
+- Exceeding a reduction or cache limit produces a diagnostic or a bounded failure, never an overflow or OOM.
+- Diagnostics are sorted deterministically by severity, code, and path.
 
 ## Implementation tasks
 
@@ -501,6 +596,9 @@ reduced/Niggli basis can be added later as an optimization.
 - [ ] Add `tools/symmetry/generate_space_groups.py` and `requirements.txt`, and run the drift check in the
   Contracts and policy CI job.
 - [ ] Use a source-generated JSON serializer context for the internal catalog DTOs.
+- [ ] Implement per-compilation caches, deterministic hashing, and `SymmetryContractVersion`.
+- [ ] Add the 20×20×20 benchmark fixture and golden reduction/contract tests.
+- [ ] Record the symmetry contract and catalog versions in the compiled payload.
 
 ## Acceptance criteria
 
@@ -512,7 +610,11 @@ reduced/Niggli basis can be added later as an optimization.
 - [ ] The canonical position order is stable across runs, OSes, and input ordering.
 - [ ] The triclinic cell test produces the correct C vector and angles.
 - [ ] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
-- [ ] A 20×20×20 cell's position expansion completes in under 1 second.
+- [ ] A 20×20×20 cell's position expansion meets the benchmark target on the defined CI runner class.
+- [ ] The compiled payload records `symmetry_contract_version`, `space_group_data_version`, and
+  `space_group_data_sha256`.
+- [ ] Cross-OS golden P indices, pair shells, and cluster codes match.
+- [ ] Cache scope and parallel-determinism tests pass.
 - [ ] Documentation written
 
 ## Documentation
@@ -526,7 +628,8 @@ At this point, document the symmetry and geometry foundation:
 - `docs/glossary/notation.md` — fractional/Cartesian coordinates, the exact fractional grid, and `Vector4I`.
 - `docs/reference/project-format.md` — space-group/cell/site fields, cell validity constraints, and the
   data-version contract.
-- `docs/development/architecture.md` — catalog generation, embedding, and drift-check boundary.
+- `docs/development/architecture.md` — catalog generation, embedding, drift checks, cache scope, and contract
+  versioning.
 
 ## Tests
 
@@ -556,6 +659,10 @@ At this point, document the symmetry and geometry foundation:
 | Image multiplicity | Multiple images of the same P index remain distinct and correctly offset |
 | Distance buckets | Symmetry-equivalent pairs share a bucket; cutoff-boundary candidates are included with the 1 fm margin |
 | Box queries | `GetPositionsInBox` half-open boundaries and periodic duplicates are deterministic |
+| Cache scope | Per-compilation caches do not leak across structures; keys include cell, cutoff, and contract version |
+| Determinism | Parallel expansion and reduction equal sequential canonical output |
+| Contract version | Changing a covered rule bumps `symmetry-1` and invalidates golden signatures |
+| Benchmark | 20×20×20 expansion meets the target on the defined runner class |
 | Thread safety | Parallel expansion produces identical results |
 | Assembly boundary | `Mocassin.Core` does not reference `Mocassin.Symmetry`; persisted symmetry vocabulary is in Core |
 | Catalog checksum | Startup rejects a corrupted catalog or wrong schema version |
@@ -588,6 +695,10 @@ At this point, document the symmetry and geometry foundation:
 | Distance-bucket boundary drift | Fixed 1 fm bucket, symmetric rounding, and a 1 fm search margin |
 | Dense Cartesian memory | Base P1 positions only; no `A×B×C×P` Cartesian allocation |
 | Tolerance confusion | Named constants with units and documented scopes |
+| Cache growth | Per-compilation scope, bounded entries, and explicit limits |
+| Hash instability | SHA-256 for persisted IDs; no `string.GetHashCode()` |
+| Contract drift | `SymmetryContractVersion`, golden fixtures, and versioned compiled payload |
+| API leakage | Internal DTOs/cache types; public API baseline and XML docs |
 
 ## Done when
 

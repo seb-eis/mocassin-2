@@ -547,11 +547,17 @@ MessagePack map with snake_case keys. Top-level:
 | --- | --- | --- |
 | `format_version` | u32 | Payload version |
 | `signature` | string | SHA-256 of canonical parameterized model (geometry + energy/frequency values) |
+| `symmetry_contract_version` | string | Symmetry contract version, e.g. `symmetry-1` |
+| `space_group_data_version` | string | Catalog data version, e.g. `spglib-2.8.0/catalog-1` |
+| `space_group_data_sha256` | string | SHA-256 of the canonical catalog payload |
 | `particle` | object | `charges`, `symbols`, `is_vacancy`, count; index 0 is void |
 | `structure` | object | cell vectors, P1 positions, site definitions, environments, interaction range |
 | `energy` | object | pair tables, cluster tables, defect background |
 | `transitions` | object | jump collections, directions, rules, mapping tables |
 | `simulations` | array | simulation encodings (active collections, settings defaults, trackers) |
+
+- The model-signature projection includes the symmetry contract version and the catalog data version and
+  checksum, so a rule or catalog change invalidates parameterizations.
 
 `structure` fields:
 

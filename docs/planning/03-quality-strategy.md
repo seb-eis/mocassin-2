@@ -161,6 +161,9 @@ Coverage is a diagnostic, not the headline target.
 
 Tests must declare their tier. A PR-fast test may not depend on a nightly-only asset.
 
+The Step 02 catalog/group-law and golden symmetry tests are PR-fast. The 20×20×20 expansion and full random
+reduction suites are nightly/release.
+
 ## 9. Domain test strategy
 
 ### 9.1 Core and project format
@@ -212,6 +215,10 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
   brute-force enumeration; cutoff-boundary candidates are included with the 1 fm margin; equivalent pairs share
   a distance bucket.
 - Memory: only base P1 Cartesian positions are precomputed; no dense `A×B×C×P` Cartesian array is allocated.
+- Cache determinism: per-compilation caches, content keys, and parallel output equal sequential canonical
+  output.
+- Contract version: `symmetry-1` covers the grid, canonical order, pair-shell order, cluster codes, and
+  reduction semantics; changing it invalidates golden signatures.
 
 ### 9.3 Compilation
 
@@ -380,11 +387,13 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | GUI cold start | < 2 s |
 | Open/save typical project | < 500 ms |
 | 3D viewport (10⁵ atoms) | ≥ 30 FPS on integrated GPU |
+| P1 expansion (20×20×20, defined fixture) | < 1 s on the defined CI runner class |
 
 Benchmarks:
 
 - `benches/energy.rs`, `benches/kmc.rs`, `benches/mmc.rs`, `benches/context.rs` with Criterion.
 - `Mocassin.Benchmarks` with BenchmarkDotNet for compilation, serialization, and `.msl` writes.
+- `Mocassin.Benchmarks` includes the Step 02 P1 expansion and reduction fixture.
 - A reproducible benchmark package in `tests/reference/bench/` with fixed seeds and inputs.
 - Baselines are stored per runner class (OS, CPU class, .NET/Rust version) in
   `tests/reference/bench/baselines.json`; comparisons use the same class only.
