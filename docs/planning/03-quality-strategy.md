@@ -107,7 +107,7 @@ Property tests are required for the following, using brute-force or analytic ora
 
 | Area | Properties |
 | --- | --- |
-| Symmetry / geometry | Group laws; orbit membership and closure; canonical order independent of input order; coordinate round-trips; minimum-image distance equals brute force; pair/cluster reduction is complete and non-redundant |
+| Symmetry / geometry | Group laws; stabilizer chain; induced permutations; orbit membership and closure; canonical order independent of input order; coordinate round-trips; minimum-image distance equals brute force; pair/cluster reduction is complete and non-redundant; chiral orbit linking |
 | Compilation | Mass/charge conservation per rule; valid indices; rule uniqueness; deterministic byte-identical output; P1 counts match brute-force expansion; every interaction has a table entry |
 | Parameterization | Signature stability; apply → serialize → reload identity; rebase never silently changes unmatched values; chiral mirroring is consistent |
 | Supercells / doping | Requested vs applied counts; never exceeds available particles; charge neutrality or explicit failure; order dependence is deterministic; same seed → same lattice |
@@ -202,6 +202,12 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
   right-handed vectors, and the triclinic regression fixture.
 - P1 contract: golden P indices, shuffle invariance, `Vector4I` round-trip for base and neighbor positions, and
   the signed 32-bit linear-index cap with a 64-bit total-count check.
+- Stabilizer chain: `Gseq ⊆ Gset ⊆ G0`, `Gseq` is normal in `Gset`, and `P ≅ Gset/Gseq` is a group.
+- Orbit counts: `|G0·S| = |G0|/|Gseq|` for ordered sequences and `|G0·{S}| = |G0|/|Gset|` for unordered sets.
+- Pair reduction: reduced shells equal brute-force `G0` orbits; chiral linking matches an independent
+  path-orbit check.
+- Cluster reduction: the canonical tuple is independent of input order; the expansion map covers every
+  equivalent tuple exactly once; 6-bit codes round-trip for 63 particles and 9 sites.
 
 ### 9.3 Compilation
 

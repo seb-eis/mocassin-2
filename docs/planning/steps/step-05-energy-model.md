@@ -92,7 +92,8 @@ public sealed record Cluster(
 - No two offsets may be identical after periodic trimming.
 - The cluster must not contain a ring; each surrounding position must be reachable from the center without
   revisiting a position.
-- The cluster is symmetry-expanded as an entity; permutations related by the site stabilizer share one energy.
+- The cluster is symmetry-expanded as an entity; permutations related by the induced permutation group `P` share
+  one energy.
 - A cluster only contributes to the energy of its center site. To model the same cluster from another
   surrounding position, define another cluster with that position as center.
 
@@ -122,9 +123,10 @@ Pair interactions are discovered by the compiler:
 - Sample all stable-stable pairs within the stable cutoff.
 - Sample all unstable-stable pairs for each unstable environment.
 - Apply filters.
-- Reduce by the site stabilizer.
-- Detect chiral pairs: the inverse direction is not symmetry-equivalent to the forward direction. Chiral
-  partners share one energy table; the parameterization editor mirrors values.
+- Reduce by the center stabilizer `G0`.
+- Detect chiral pairs: the inverse direction is not in the same `G0` orbit. Chiral partners share one energy
+  table; the parameterization editor mirrors values. This is an orbit relationship, not physical chirality;
+  in P1 every directed pair is its own orbit.
 - Assign stable IDs derived from the two site IDs, the periodic offset, and a canonical geometry hash. The IDs
   survive recompilation as long as the geometry is unchanged.
 - The model layer exposes a preview with counts and distances; the compiled interaction sets are produced in
