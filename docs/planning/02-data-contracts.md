@@ -582,6 +582,12 @@ MessagePack map with snake_case keys. Top-level:
 | `cluster_tables` | array | `{object_id, occupation_codes:[u64], energies:[f64], particle_table_mapping:[u8; n_particles]}` |
 | `defect_background` | array | `[position][particle]` site energy in eV |
 
+- Pair tables are in canonical shell order. The compiled structure environments carry each shell's geometry ID,
+  distance bucket, representative offset, equivalent-offset count, and optional chiral partner index.
+- Chiral partners share one `object_id` and one energy table.
+- Cluster occupation codes use 6 bits per site, site 0 in the least significant bits, up to 9 sites; unused
+  high bits are zero. Codes are canonical under the induced site-permutation group.
+
 `transitions` fields:
 
 | Key | Type | Meaning |

@@ -64,6 +64,27 @@ Rules:
   exceed `2,147,483,647`.
 - Negative cell offsets are relative-path coordinates, not linear indices.
 
+## Symmetry reduction
+
+For a center site `c` and ordered site sequence `S = (s0, ..., sN-1)`:
+
+- `G0` — center stabilizer: operations that map `c` to itself modulo lattice translation.
+- `Gset` — setwise stabilizer: operations in `G0` that map the unordered set `{S}` onto itself.
+- `Gseq` — pointwise stabilizer: operations in `G0` that fix every `si` individually.
+- `P ≅ Gset / Gseq` — induced permutation group on the site indices.
+
+`Gseq` is normal in `Gset`, and `Gseq ⊆ Gset ⊆ G0`.
+
+Legacy names from the original implementation map as follows:
+
+- `OrderPreservingUniqueSequenceOperations` = a transversal of `G0 / Gseq`.
+- `OrderIgnoringUniqueSequenceOperations` = a transversal of `G0 / Gset`.
+- `OrderIgnoringSelfProjectionOperations` = `Gset`.
+- `SelfProjectionOrders` = the induced site permutations in `P`.
+
+A **chiral partner** is the representative of the inverse orbit when the inverse direction is not in the same
+`G0` orbit. This is an orbit relationship, not physical chirality; in P1 every directed pair is its own orbit.
+
 ## Time and seeds
 
 - `createdUtc` and `modifiedUtc` are ISO-8601 UTC timestamps.

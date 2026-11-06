@@ -37,7 +37,8 @@ serialized into a simulation package; it performs no I/O and has no UI dependenc
 - The translator assigned dense `ModelId` indices and encoded arrays for the C solver.
 - Key algorithms:
   - `SpaceGroupService.GetUnitCellP1PositionExtension` / path extension;
-  - `PairInteractionFinder` (radial search, distance buckets, site-stabilizer reduction, chiral partners);
+  - `PairInteractionFinder` (radial search, distance buckets, center-stabilizer `G0` reduction, chiral
+    partners);
   - `GeometryGroupAnalyzer` / `PointOperationGroup.GetUniquePermutations`;
   - `TransitionRuleGenerator` (donor/acceptor permutation, inverse/dependent rules, conservation);
   - energy table expansion and jump/mapping/tracker tables.
@@ -63,7 +64,7 @@ Stages:
    volume, and site orbits.
 3. **Environments** — sample periodic images within each cutoff, apply filters, bucket by distance, and
    produce pair interaction geometry.
-4. **Pair reduction** — reduce candidates by the site stabilizer, assign stable geometry IDs, detect chiral
+4. **Pair reduction** — reduce candidates by the center stabilizer `G0`, assign stable geometry IDs, detect chiral
    partners, and build pair interaction sets.
 5. **Clusters** — expand cluster geometry, compute the point group, enumerate/canonicalize occupation
    permutations, and build cluster interaction sets.
@@ -125,21 +126,25 @@ public sealed record CompiledModel(
   - apply filters;
   - bucket by integer femtometre distance;
   - assign a candidate geometry.
-- Reduce candidates by the center site's stabilizer:
-  - take the first unassigned candidate;
-  - mark all stabilizer images as equivalent;
+- Reduce candidates by the center stabilizer `G0`:
+  - sort by `(distanceBucket, targetP, cellA, cellB, cellC)`;
+  - take the first unassigned candidate as the shell representative;
+  - mark every candidate in the same distance bucket and the same `G0` orbit as equivalent;
   - assign a new `PairInteractionId`.
 - Build a symmetric pair set for stable-stable interactions; ensure `A-B` and `B-A` map to one table unless
   chiral.
 - Chirality:
   - compute the inverse geometry `B-A` with the opposite periodic offset;
-  - if the inverse is not in the forward orbit, the pair is chiral;
+  - if the inverse is not in the same `G0` orbit, the pair is chiral;
   - link both directions to one energy table and one parameterization set;
-  - the compiled model records the chiral partner index.
+  - the compiled model records the chiral partner index;
+  - this is an orbit relationship, not physical chirality; in P1 both directions are separate orbits.
 - Unstable-stable pairs are compiled per unstable environment and are asymmetric by nature.
 - Each pair set carries:
   - `CenterSiteIndex`, `PartnerSiteIndex`;
   - reference offset vector and distance;
+  - `DistanceBucketFm`;
+  - `ChiralPartnerId` (or none);
   - multiplicity (`EquivalentModels` count);
   - allowed particle permutations and the particle-table mapping.
 - Pair energy tables are `n_particles × n_particles` in eV; entries not valid for the site pair are zero and
@@ -148,14 +153,16 @@ public sealed record CompiledModel(
 ### 5. Cluster compilation
 
 - Expand the cluster geometry by the space group.
-- For each unique geometry, build the point group at the center.
-- Enumerate occupation states from the surrounding particle sets (and center particle set).
-- Canonicalize under the self-projection orders; keep one representative and record all equivalent
-  permutations.
+- For each unique geometry, build the `PointGroup` at the center: `G0`, `Gset`, `Gseq`, and `P`.
+- Enumerate allowed occupation states from the center and surrounding particle sets.
+- Canonicalize under `P`; keep the lexicographically smallest tuple in site order and record every equivalent
+  tuple/permutation in the expansion map.
 - Build a cluster table:
-  - occupation codes (packed particle indices, 8 bytes for up to 8 surrounding positions);
+  - occupation codes: 6 bits per site, site 0 in the least significant bits, up to 9 sites (54 bits), unused
+    high bits zero;
   - particle-table mapping for the center particle;
   - energy values (default 0, parameterized later).
+- Preserve chiral distinctions; do not merge mirror tuples unless the mirror permutation is in `P`.
 - Clusters only contribute to the center site; this is documented in the energy engine.
 - Cluster tables are indexed by a canonical order (center site, geometry hash, occupation code).
 

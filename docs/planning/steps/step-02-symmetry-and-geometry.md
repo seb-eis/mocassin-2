@@ -302,31 +302,82 @@ The discrete symmetry path does not use binary floating point. `Mocassin.Symmetr
   for every reference site in the sample models.
 - `Vector4I` decoding validates `P` against the position count; compiled data is bounds-checked on load.
 
-### 5. Orbit and point-group algorithms
+### 5. Orbit, stabilizer, and reduction algorithms
+
+#### Group terms
+
+For a center site `c` and an ordered site sequence `S = (s0, ..., sN-1)`:
+
+- `G0` is the **center stabilizer**: operations that map `c` to itself modulo lattice translation.
+- `Gset` is the **setwise stabilizer**: operations in `G0` that map the unordered set `{S}` onto itself.
+- `Gseq` is the **pointwise stabilizer**: operations in `G0` that fix every `si` individually.
+- `Gseq` is normal in `Gset`, and `Gseq ⊆ Gset ⊆ G0`.
+- `P ≅ Gset / Gseq` is the **induced permutation group** on the site indices. Its elements are the **induced
+  site permutations**.
+
+The old implementation names map as follows:
+
+- `OrderPreservingUniqueSequenceOperations` = a transversal of `G0 / Gseq` (one operation per distinct ordered
+  sequence).
+- `OrderIgnoringUniqueSequenceOperations` = a transversal of `G0 / Gset` (one operation per distinct unordered
+  set).
+- `OrderIgnoringSelfProjectionOperations` = `Gset`.
+- `SelfProjectionOrders` = the induced site permutations in `P`.
+
+Use the standard terms in code and documentation. Keep the old names only in the glossary as parity aliases.
+
+```csharp
+public sealed record PointGroup(
+    ImmutableArray<SymmetryOperation> CenterStabilizer,    // G0
+    ImmutableArray<SymmetryOperation> SetwiseStabilizer,   // Gset
+    ImmutableArray<SymmetryOperation> PointwiseStabilizer, // Gseq
+    ImmutableArray<SitePermutation> InducedPermutations);  // P
+```
+
+`SitePermutation` is an immutable index mapping; the identity is `[0..N-1]`.
+
+#### Orbit expansion
 
 - `ExpandOrbit(SpaceGroupSetting, Fractional3) -> ImmutableArray<Fractional3>`:
-  apply every operation, trim, deduplicate exactly, sort canonically.
+  apply every operation, trim, deduplicate on the exact grid, sort canonically.
 - `GetStabilizer(setting, site) -> ImmutableArray<SymmetryOperation>`:
-  operations that map the site to itself modulo lattice translation.
+  return `G0`.
 - `GetPointGroup(setting, center, geometry) -> PointGroup`:
-  - stabilizer operations,
-  - unique sequence images under the stabilizer,
-  - order-preserving vs order-ignoring sets,
-  - self-projection orders.
-- Pair reduction:
-  - enumerate periodic images within the cutoff;
-  - group by exact distance bucket (integer femtometres or a documented tolerance);
-  - for the first unassigned candidate, apply the site stabilizer and mark all equivalent candidates;
-  - the representative carries the distance and geometry;
-  - detect chiral partners (the inverse direction is not in the orbit) and link them.
-- Cluster/group reduction:
-  - build the point group for the center + surrounding geometry;
-  - enumerate occupation permutations;
-  - canonicalize under the self-projection orders;
-  - produce unique occupation states and the expansion map back to all equivalent states.
+  return `G0`, `Gset`, `Gseq`, and `P` for the ordered geometry sequence. Expose:
+  - the ordered orbit `G0·S`, with `|G0·S| = |G0| / |Gseq|`;
+  - the set orbit `G0·{S}`, with `|G0·{S}| = |G0| / |Gset|`;
+  - the induced site permutations `P`.
+
+#### Pair reduction
+
+- Enumerate periodic images within the cutoff; exclude zero-distance self-images.
+- Compute the distance and convert it to an integer femtometre bucket.
+- Sort candidates deterministically by `(distanceBucket, targetP, cellA, cellB, cellC)`.
+- Take the first unassigned candidate as the shell representative.
+- Apply `G0`; mark every candidate in the same distance bucket and the same `G0` orbit as assigned.
+- The shell records its representative, distance, and equivalent-offset list.
+- Chirality: compute the inverse vector `-d`. If the inverse is not in the same `G0` orbit, the shell is
+  chiral; find the representative of the inverse orbit and link the two shells as chiral partners.
+  - This is an orbit relationship, not physical chirality. In P1, every directed pair is its own chiral orbit
+    and both directions must be represented.
+- Pair shells are cached by `(settingId, centerP, cutoff, cellParametersHash)`.
+
+#### Cluster reduction
+
+- Build `G0`, `Gset`, `Gseq`, and `P` for the center and ordered cluster sequence.
+- Enumerate allowed occupation tuples from the per-site particle sets; prune empty or duplicate occupations
+  according to the model rules.
+- Compute each tuple's orbit under `P`; choose the lexicographically smallest tuple in site order as the
+  canonical representative.
+- Store the canonical tuple, its occupation code, and the expansion map to every equivalent tuple/permutation.
+- Encode the tuple as a `ulong`: 6 bits per site, site 0 in the least significant bits, up to 9 sites (54 bits),
+  unused high bits zero.
+- Preserve chiral distinctions; do not merge mirror tuples unless the mirror permutation is in `P`.
+- Cluster results are cached by `(settingId, centerP, clusterOffsetsHash, allowedOccupationHash)`.
+
 - Use integer particle masks (`ulong`) for occupation sets; never `1 << id` on a 32-bit `int`.
-- Complexity targets: orbit expansion `O(|G| log |G|)`; pair reduction `O(C · |G|)` after distance bucketing;
-  cluster reduction `O(P · |G|)` where `P` is the raw permutation count, with early pruning for large groups.
+- Complexity targets: orbit expansion `O(|G| log |G|)`; pair reduction `O(C · |G0|)` after distance bucketing;
+  cluster reduction `O(T · |P|)` where `T` is the number of allowed occupation tuples, with early pruning.
 
 ### 6. Periodic geometry
 
@@ -413,8 +464,10 @@ At this point, document the symmetry and geometry foundation:
 | Cell geometry | Seven systems, both trigonal axis descriptions, unique-axis A/B/C, volume, and right-handedness |
 | Cell validity | Angles outside 0..180°, non-positive Gram determinant, and near-degenerate cells are rejected |
 | Triclinic regression | `a=5`, `b=6`, `c=7`, `α=80°`, `β=85°`, `γ=95°` matches independent vectors and volume |
-| Pair reduction | Reduced set equals brute-force orbit for random pairs |
-| Cluster reduction | Unique permutations equal brute-force canonicalization |
+| Pair reduction | Reduced shells equal brute-force `G0` orbits for random pairs |
+| Chiral pairs | Forward/inverse shell linking matches an independent path-orbit check |
+| Cluster reduction | Canonical tuples are independent of input order and the expansion map covers every equivalent state once |
+| Occupation codes | 6-bit codes round-trip for 63 particles and 9 sites |
 | Radial search | Distances match brute-force enumeration of neighboring cells |
 | Thread safety | Parallel expansion produces identical results |
 | Assembly boundary | `Mocassin.Core` does not reference `Mocassin.Symmetry`; persisted symmetry vocabulary is in Core |
@@ -443,6 +496,7 @@ At this point, document the symmetry and geometry foundation:
 | Grid/canonical-order drift | Version the grid with the catalog; golden P-index tests on all platforms |
 | Linear-index overflow | `int` index, 64-bit total count, `int.MaxValue` hard cap, and boundary tests |
 | Relative-offset misuse | Negative offsets are relative-path coordinates, not linear indices; explicit conversion and bounds checks |
+| Chirality/orbit ambiguity | Standard group terms, exact orbit tests, and explicit orbit-vs-physical-chirality documentation |
 
 ## Done when
 
