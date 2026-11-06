@@ -31,6 +31,7 @@ decision will be made.
 | Cell geometry | Strict `0<α,β,γ<180°` plus positive Gram determinant; determinant-based cell vectors; named tolerances; reject inconsistent values | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | P1 order and index | Canonical ascending grid order; `Vector4I(cellA,cellB,cellC,P)`; signed 32-bit linear index with 64-bit total-count check | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Symmetry reduction | Center, setwise, and pointwise stabilizers; induced site-permutation group; canonical pair shells; 6-bit cluster occupation codes | [Step 02](steps/step-02-symmetry-and-geometry.md) / [Step 08](steps/step-08-model-compilation-pipeline.md) |
+| Periodic geometry | Base-P1 precomputation, metric-tensor distances, separate minimum-image/radial-search APIs, plane-distance bounding boxes, 1 fm buckets | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Cross-process job contract | Job folder, `solver.json`, JSONL events, `mmcfe.db` | [`02-data-contracts.md`](02-data-contracts.md) §5 |
 | Large state spill | Embed `.mcs` up to 1 GiB; larger states are external files referenced by `.msr` | ADR 0011 / data contracts §3.6 |
 | MMCFE log | SQLite `mmcfe.db` with a versioned, resumable schema | [`02-data-contracts.md`](02-data-contracts.md) §5.4 |

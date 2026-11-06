@@ -381,14 +381,95 @@ public sealed record PointGroup(
 
 ### 6. Periodic geometry
 
-- `RadialSearch(center, cutoff)` enumerates unit-cell images whose Cartesian distance is within the cutoff.
-  Use a bounding box derived from the cell vectors; do not scan an arbitrary number of cells.
-- Precompute Cartesian positions for all P1 positions and cell offsets used by a job.
-- Distance equality uses a documented tolerance (e.g. 1e-5 Å) but distance *bucketing* uses integer
-  femtometres to avoid non-transitive comparers.
-- Minimum-image handling is explicit: callers receive the image offset; no implicit wrapping that loses
-  information.
-- Provide `GetPositionsInBox`, `GetCellVolume`, `ToCartesian`, `ToFractional`, and `GetDistance`.
+#### Cell precomputation
+
+- Precompute the cell matrix `M` with columns `a, b, c`, its inverse `M⁻¹`, the metric tensor `G = MᵀM`, and
+  the volume `V = a·(b×c)`.
+- Precompute only the base P1 Cartesian positions (`Pcount` values). Do not allocate a dense `A×B×C×P`
+  Cartesian array.
+- A neighbor at cell offset `(cellA, cellB, cellC)` is
+  `baseCartesian[P] + cellA·a + cellB·b + cellC·c`.
+- Fractional-to-Cartesian: `x = M·f`; Cartesian-to-fractional: `f = M⁻¹·x`.
+- Distance for fractional difference `df`: `d² = dfᵀ G df`.
+
+#### Minimum image and radial search
+
+```csharp
+public readonly record struct MinimumImageResult(
+    Vector4I Offset,
+    double DistanceAngstrom,
+    int DistanceBucketFm);
+
+public readonly record struct NeighborImage(
+    Vector4I Offset,
+    double DistanceAngstrom,
+    int DistanceBucketFm);
+
+public MinimumImageResult GetMinimumImage(Vector4I center, Vector4I target);
+public ImmutableArray<NeighborImage> RadialSearch(Vector4I center, double cutoffAngstrom);
+```
+
+- `GetMinimumImage` returns exactly one shortest periodic image and always carries its offset.
+- `RadialSearch` returns every image within the cutoff, including multiple images of the same `P` index.
+- Neither API wraps implicitly; callers always receive the image offset.
+
+#### Bounding box
+
+Use the interplanar spacings:
+
+```text
+d_a = V / |b × c|
+d_b = V / |c × a|
+d_c = V / |a × b|
+```
+
+For search radius `r`, enumerate:
+
+```text
+|cellA| ≤ ceil(r / d_a) + 1
+|cellB| ≤ ceil(r / d_b) + 1
+|cellC| ≤ ceil(r / d_c) + 1
+```
+
+The extra cell covers the center’s position inside its cell and cutoff-boundary candidates. For minimum image,
+use a safe covering-radius bound:
+
+```text
+R_cover ≤ 0.5 · (|a| + |b| + |c|)
+```
+
+Enumerate that box and choose the shortest image. Test against brute force for highly skewed triclinic cells; a
+reduced/Niggli basis can be added later as an optimization.
+
+#### Distance buckets and tolerances
+
+- `PairDistanceBucket = 1 fm = 1e-5 Å`.
+- `bucket = round(distance / 1 fm)` with `MidpointRounding.AwayFromZero`.
+- Pair and cluster reduction compare integer buckets, not raw doubles.
+- Enumerate with a `cutoff + 1 fm` margin and include `bucket <= cutoffBucket`.
+- The exact `24 × 10^12` grid remains the fractional deduplication mechanism; no tolerance comparer is used in
+  sorted dictionaries or hash sets.
+- Named tolerances:
+
+| Constant | Value | Use |
+| --- | --- | --- |
+| `PairDistanceBucket` | `1 fm = 1e-5 Å` | Discrete pair/cluster distance shells |
+| `DistanceEqualityTolerance` | `1e-5 Å` | Continuous distance predicates outside the reduction |
+| `VectorEqualityTolerance` | `1e-6 Å` | Cartesian vector/position equality |
+| `FractionalTrimTolerance` | `1e-10` | Boundary snapping before exact grid conversion |
+| `CellLengthTolerance` | `1e-3 Å` | Cell length equality |
+| `CellAngleTolerance` | `1e-3°` | Cell angle equality |
+| `CellDeterminantTolerance` | `1e-12` | Near-degenerate cell cutoff |
+
+#### Tie-breaking and box queries
+
+- If two minimum-image candidates share the shortest bucket, choose the smallest
+  `(cellA, cellB, cellC)` lexicographically, then the smallest `P`.
+- `GetPositionsInBox(min, max)` uses a half-open Cartesian box `min ≤ x < max`; periodic duplicates are returned
+  with their offsets; boundary points belong to exactly one image; results are sorted by
+  `(P, cellA, cellB, cellC)`.
+- `GetCellVolume`, `ToCartesian`, `ToFractional`, and `GetDistance` remain available; `GetDistance` is the
+  direct, non-minimum-image distance unless the caller uses `GetMinimumImage`.
 
 ### 7. Caching and thread safety
 
@@ -439,8 +520,9 @@ public sealed record PointGroup(
 At this point, document the symmetry and geometry foundation:
 
 - `docs/physics/symmetry.md` — space groups, exact operations, cell geometry, the `24 × 10^12` fractional
-  grid, P1 expansion, and canonical position order.
-- `docs/development/compilation-pipeline.md` — the symmetry stage, its exact grid, and its inputs/outputs.
+  grid, P1 expansion, canonical position order, minimum-image policy, and radial search.
+- `docs/development/compilation-pipeline.md` — the symmetry stage, its exact grid, pair/cluster bucketing,
+  cutoff margins, and inputs/outputs.
 - `docs/glossary/notation.md` — fractional/Cartesian coordinates, the exact fractional grid, and `Vector4I`.
 - `docs/reference/project-format.md` — space-group/cell/site fields, cell validity constraints, and the
   data-version contract.
@@ -468,7 +550,12 @@ At this point, document the symmetry and geometry foundation:
 | Chiral pairs | Forward/inverse shell linking matches an independent path-orbit check |
 | Cluster reduction | Canonical tuples are independent of input order and the expansion map covers every equivalent state once |
 | Occupation codes | 6-bit codes round-trip for 63 particles and 9 sites |
-| Radial search | Distances match brute-force enumeration of neighboring cells |
+| Minimum image | `GetMinimumImage` equals brute force over a large offset range for random triclinic cells |
+| Radial search | `RadialSearch` equals brute-force enumeration and includes all images within the cutoff |
+| Bounding box | The plane-distance box never misses an image at the cutoff |
+| Image multiplicity | Multiple images of the same P index remain distinct and correctly offset |
+| Distance buckets | Symmetry-equivalent pairs share a bucket; cutoff-boundary candidates are included with the 1 fm margin |
+| Box queries | `GetPositionsInBox` half-open boundaries and periodic duplicates are deterministic |
 | Thread safety | Parallel expansion produces identical results |
 | Assembly boundary | `Mocassin.Core` does not reference `Mocassin.Symmetry`; persisted symmetry vocabulary is in Core |
 | Catalog checksum | Startup rejects a corrupted catalog or wrong schema version |
@@ -497,6 +584,10 @@ At this point, document the symmetry and geometry foundation:
 | Linear-index overflow | `int` index, 64-bit total count, `int.MaxValue` hard cap, and boundary tests |
 | Relative-offset misuse | Negative offsets are relative-path coordinates, not linear indices; explicit conversion and bounds checks |
 | Chirality/orbit ambiguity | Standard group terms, exact orbit tests, and explicit orbit-vs-physical-chirality documentation |
+| Skewed-cell minimum image | Plane-distance bounding box, covering-radius bound, and brute-force tests |
+| Distance-bucket boundary drift | Fixed 1 fm bucket, symmetric rounding, and a 1 fm search margin |
+| Dense Cartesian memory | Base P1 positions only; no `A×B×C×P` Cartesian allocation |
+| Tolerance confusion | Named constants with units and documented scopes |
 
 ## Done when
 

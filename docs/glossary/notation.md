@@ -85,6 +85,17 @@ Legacy names from the original implementation map as follows:
 A **chiral partner** is the representative of the inverse orbit when the inverse direction is not in the same
 `G0` orbit. This is an orbit relationship, not physical chirality; in P1 every directed pair is its own orbit.
 
+## Periodic geometry
+
+- The cell matrix `M` has columns a, b, c; `G = MᵀM` is the metric tensor.
+- `GetMinimumImage` returns the shortest periodic image and its offset; `RadialSearch` returns every image
+  within the cutoff.
+- The search box uses the interplanar spacings `d_a = V/|b×c|`, `d_b = V/|c×a|`, and `d_c = V/|a×b|`.
+- Distances use `d² = dfᵀGdf`.
+- Pair and cluster distance buckets are integer femtometres (`1 fm = 1e-5 Å`); the cutoff includes candidates
+  up to the cutoff bucket with a 1 fm margin.
+- Negative cell offsets remain explicit; no implicit wrapping.
+
 ## Time and seeds
 
 - `createdUtc` and `modifiedUtc` are ISO-8601 UTC timestamps.

@@ -122,9 +122,10 @@ public sealed record CompiledModel(
 ### 4. Pair interaction compilation
 
 - For each stable site (center) and each periodic image within the cutoff:
+  - use the Step 02 `RadialSearch` and minimum-image policy;
   - compute distance and partner position;
   - apply filters;
-  - bucket by integer femtometre distance;
+  - bucket by the `1 fm` distance bucket with the cutoff `+ 1 fm` margin;
   - assign a candidate geometry.
 - Reduce candidates by the center stabilizer `G0`:
   - sort by `(distanceBucket, targetP, cellA, cellB, cellC)`;
@@ -318,6 +319,7 @@ At this point, document the compiler:
 | Cache property | Editing one domain rebuilds only dependent stages and keeps unrelated signatures stable |
 | P1 positions | Match step 02 encoder for all samples |
 | Pair sets | Counts/distances/multiplicities match brute force |
+| Pair bucketing | Symmetry-equivalent pairs share a bucket; cutoff-boundary pairs are included with the 1 fm margin |
 | Chirality | Known chiral pairs linked; achiral pairs symmetric |
 | Clusters | Unique permutations match brute-force canonicalization |
 | Rules | State triplets, stability roles, conservation, inverse/dependent counts |
