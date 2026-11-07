@@ -28,9 +28,9 @@ independent data source and licensing boundary are recorded in `NOTICE.md`.
 
 A symmetry operation is
 
-```text
-x ↦ R·x + t
-```
+$$
+x \mapsto R x + t
+$$
 
 where `R` is a signed 3×3 integer matrix and `t` is an exact rational translation with denominator 24.
 Composition, inversion, determinant, and group closure use integer arithmetic. Every catalog operation has
@@ -47,9 +47,9 @@ The public coordinate types remain `double`-based:
 
 Discrete symmetry work uses an internal `GridFractional3` scaled by
 
-```text
-D = 24 × 10^12 = 24,000,000,000,000.
-```
+$$
+D = 24 \times 10^{12} = 24{,}000{,}000{,}000{,}000
+$$
 
 The factor 24 is divisible by every crystallographic translation denominator in the catalog (2, 3, 4, 6, 8,
 12, and 24). `10^12` preserves any decimal input with up to 12 fractional digits exactly. An integer rotation
@@ -64,27 +64,34 @@ Conversion rules:
 - normalize `-0.0` to `0.0`;
 - signal a warning when the input required rounding (more than 12 fractional digits).
 
-`Fractional3.TrimToUnitCell()` snaps components within `1e-10` of an integer and maps into `[0, 1)`. That snap
+`Fractional3.TrimToUnitCell()` snaps components within `1e-10` of an integer and maps into \([0,1)\). That snap
 is a user-input convenience applied before grid conversion; it is not the deduplication criterion.
 
 ## Cell geometry
 
 Cell lengths must be in `0.1..1000 Å`; angles must be strictly between `0°` and `180°`. The Gram determinant
 
-```text
-det G = 1 − cos²α − cos²β − cos²γ + 2 cosα cosβ cosγ
-```
+$$
+\det G = 1 - \cos^2\alpha - \cos^2\beta - \cos^2\gamma
+         + 2\cos\alpha\cos\beta\cos\gamma
+$$
 
 must be positive and above `1e-12`. The cell matrix condition number `||M||∞ · ||M⁻¹||∞` is bounded by
 `1e12` as a defensive guard.
 
 The standard right-handed cell vectors are
 
-```text
-A = (a, 0, 0)
-B = (b cos γ, b sin γ, 0)
-C = (c cos β, c (cos α − cos β cos γ) / sin γ, c sqrt(det G) / sin γ)
-```
+$$
+\begin{aligned}
+A &= (a, 0, 0) \\
+B &= (b\cos\gamma,\; b\sin\gamma,\; 0) \\
+C &= \left(
+       c\cos\beta,\;
+       \frac{c(\cos\alpha - \cos\beta\cos\gamma)}{\sin\gamma},\;
+       \frac{c\sqrt{\det G}}{\sin\gamma}
+     \right)
+\end{aligned}
+$$
 
 The `c` factor in the C y-component is required; omitting it is the legacy bug. Volume is
 `a b c sqrt(det G)`, and `C` always has a positive z-component.
@@ -99,16 +106,19 @@ model never silently normalizes user input.
 The canonical order is a format contract:
 
 1. expand every reference site to its P1 orbit;
-2. trim to `[0, 1)`;
+2. trim to \([0,1)\);
 3. deduplicate by exact grid coordinates;
 4. sort ascending by fractional `(a, b, c)`, with `a` most significant;
 5. assign `P = 0..Pcount-1` in that order.
 
 `Vector4I` encodes `(cellA, cellB, cellC, P)`. The linear index is row-major with P fastest:
 
-```text
-index = P + cellC*Pcount + cellB*Pcount*Ccount + cellA*Pcount*Ccount*Bcount
-```
+$$
+\text{index} = P
+  + \text{cellC}\cdot P_{\text{count}}
+  + \text{cellB}\cdot P_{\text{count}}C_{\text{count}}
+  + \text{cellA}\cdot P_{\text{count}}C_{\text{count}}B_{\text{count}}
+$$
 
 The total lattice count is computed in 64-bit arithmetic, capped at `int.MaxValue`, and never wrapped.
 Negative cell offsets are relative-path coordinates; convert them with `ToSupercellOffset` before
@@ -118,18 +128,18 @@ linearization.
 
 For a center site `c` and ordered site sequence `S = (s0, …, sN−1)`:
 
-- `G0` — center stabilizer: operations that map `c` to itself modulo lattice translation;
-- `Gset` — setwise stabilizer: operations in `G0` that map the unordered set onto itself;
-- `Gseq` — pointwise stabilizer: operations in `G0` that fix every `si` individually;
-- `P ≅ Gset / Gseq` — induced site permutations.
+- \(G_0\) — center stabilizer: operations that map `c` to itself modulo lattice translation;
+- \(G_{\text{set}}\) — setwise stabilizer: operations in `G0` that map the unordered set onto itself;
+- \(G_{\text{seq}}\) — pointwise stabilizer: operations in `G0` that fix every `si` individually;
+- \(P \cong G_{\text{set}} / G_{\text{seq}}\) — induced site permutations.
 
-`Gseq ⊆ Gset ⊆ G0`. The ordered orbit has `|G0|/|Gseq|` sequences; the set orbit has `|G0|/|Gset|` sets.
+\(G_{\text{seq}} \subseteq G_{\text{set}} \subseteq G_0\). The ordered orbit has \(|G_0|/|G_{\text{seq}}|\) sequences; the set orbit has \(|G_0|/|G_{\text{set}}|\) sets.
 
 ## Pair shells
 
 Periodic images within a cutoff are grouped into distance shells:
 
-- distance bucket `1 fm = 1e-5 Å`, rounded symmetrically;
+- distance bucket \(1\ \text{fm} = 10^{-5}\ \text{Å}\), rounded symmetrically;
 - candidates sorted by `(distanceBucket, targetP, cellA, cellB, cellC)`;
 - the first unassigned candidate is the shell representative;
 - applying `G0` marks every candidate in the same bucket and orbit as equivalent;
@@ -146,23 +156,23 @@ canonicalized under the induced permutation group; the lexicographically smalles
 representative. Occupation tuples are encoded as `ulong` with six bits per site, site 0 in the least
 significant bits:
 
-```text
-code = Σ particleIndex(site) << (6 × site)
-```
+$$
+\text{code} = \sum_{i=0}^{N-1} \text{particleIndex}(s_i)\,2^{6i}
+$$
 
 The expansion map stores every equivalent tuple code and the permutation that produced it. Mirror tuples are
 merged only when the mirror permutation is in `P`.
 
 ## Periodic geometry
 
-The cell matrix has columns `A`, `B`, `C`; the metric tensor is `G = MᵀM`. Distances use `d² = dfᵀGdf`.
+The cell matrix has columns `A`, `B`, `C`; the metric tensor is \(G = M^{T}M\). Distances use \(d^2 = df^{T}G\,df\).
 
 - `GetMinimumImage` returns exactly one shortest image and its offset; ties choose the smallest
   `(cellA, cellB, cellC)`, then P.
 - `RadialSearch` returns every image within the cutoff, excluding only the zero-offset self image.
 - `GetPositionsInBox` is half-open: `min` is inclusive and `max` is exclusive; distinct offsets remain
   distinct.
-- Search boxes use the interplanar spacings `d_a = V/|b×c|`, `d_b = V/|c×a|`, and `d_c = V/|a×b|`, plus one
+- Search boxes use the interplanar spacings \(d_a = V/|b\times c|\), \(d_b = V/|c\times a|\), and \(d_c = V/|a\times b|\), plus one
   extra cell.
 
 ## Reproducibility contract

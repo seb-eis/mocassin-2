@@ -41,6 +41,10 @@ The generated catalog remains subject to the spglib BSD-3-Clause attribution req
 relicensed as MIT. The original MOCASSIN SQLite database is not used as a source and is not copied. The
 spglib database acknowledges Yusuke Seto’s crystallographic database.
 
+KaTeX 0.19.1 (https://katex.org/) is used by the documentation site for math rendering. It is distributed
+under the MIT licence. The assets are loaded from the pinned unpkg CDN; the version is pinned in
+`zensical.toml`.
+
 NuGet dependencies are checked by `tools/contracts/check_nuget_licenses.py` and the CI licence/vulnerability
 gate. The project policy allows MIT-compatible licences; any exception is recorded here.
 
