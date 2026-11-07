@@ -13,8 +13,8 @@ orbit/permutation reduction, and periodic geometry kernels.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required
-- **Last updated:** 2026-11-06
+- **Design review:** Ready with notes
+- **Last updated:** 2026-11-07
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
