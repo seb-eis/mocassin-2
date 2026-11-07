@@ -1,1 +1,77 @@
 #nullable enable
+Mocassin.Symmetry.Int3x3
+Mocassin.Symmetry.Int3x3.Deconstruct(out int M11, out int M12, out int M13, out int M21, out int M22, out int M23, out int M31, out int M32, out int M33) -> void
+Mocassin.Symmetry.Int3x3.Determinant.get -> int
+Mocassin.Symmetry.Int3x3.Equals(Mocassin.Symmetry.Int3x3 other) -> bool
+Mocassin.Symmetry.Int3x3.FlipsOrientation.get -> bool
+Mocassin.Symmetry.Int3x3.Int3x3() -> void
+Mocassin.Symmetry.Int3x3.Int3x3(int M11, int M12, int M13, int M21, int M22, int M23, int M31, int M32, int M33) -> void
+Mocassin.Symmetry.Int3x3.Inverse() -> Mocassin.Symmetry.Int3x3
+Mocassin.Symmetry.Int3x3.M11.get -> int
+Mocassin.Symmetry.Int3x3.M11.init -> void
+Mocassin.Symmetry.Int3x3.M12.get -> int
+Mocassin.Symmetry.Int3x3.M12.init -> void
+Mocassin.Symmetry.Int3x3.M13.get -> int
+Mocassin.Symmetry.Int3x3.M13.init -> void
+Mocassin.Symmetry.Int3x3.M21.get -> int
+Mocassin.Symmetry.Int3x3.M21.init -> void
+Mocassin.Symmetry.Int3x3.M22.get -> int
+Mocassin.Symmetry.Int3x3.M22.init -> void
+Mocassin.Symmetry.Int3x3.M23.get -> int
+Mocassin.Symmetry.Int3x3.M23.init -> void
+Mocassin.Symmetry.Int3x3.M31.get -> int
+Mocassin.Symmetry.Int3x3.M31.init -> void
+Mocassin.Symmetry.Int3x3.M32.get -> int
+Mocassin.Symmetry.Int3x3.M32.init -> void
+Mocassin.Symmetry.Int3x3.M33.get -> int
+Mocassin.Symmetry.Int3x3.M33.init -> void
+Mocassin.Symmetry.Int3x3.Transform(Mocassin.Symmetry.Rational3 translation) -> Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.Int3x3.Transform(int x, int y, int z) -> (int X, int Y, int Z)
+Mocassin.Symmetry.Int3x3.Transform(long x, long y, long z) -> (long X, long Y, long Z)
+Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.Rational3.A.get -> int
+Mocassin.Symmetry.Rational3.Add(Mocassin.Symmetry.Rational3 other) -> Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.Rational3.B.get -> int
+Mocassin.Symmetry.Rational3.C.get -> int
+Mocassin.Symmetry.Rational3.Equals(Mocassin.Symmetry.Rational3 other) -> bool
+Mocassin.Symmetry.Rational3.IsZero.get -> bool
+Mocassin.Symmetry.Rational3.Negate() -> Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.Rational3.Rational3() -> void
+Mocassin.Symmetry.Rational3.Rational3(int a, int b, int c) -> void
+Mocassin.Symmetry.Rational3.ToFractional3() -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.SymmetryOperation
+Mocassin.Symmetry.SymmetryOperation.Compose(Mocassin.Symmetry.SymmetryOperation other) -> Mocassin.Symmetry.SymmetryOperation
+Mocassin.Symmetry.SymmetryOperation.Deconstruct(out Mocassin.Symmetry.Int3x3 Linear, out Mocassin.Symmetry.Rational3 Translation) -> void
+Mocassin.Symmetry.SymmetryOperation.Determinant.get -> int
+Mocassin.Symmetry.SymmetryOperation.Equals(Mocassin.Symmetry.SymmetryOperation other) -> bool
+Mocassin.Symmetry.SymmetryOperation.FlipsOrientation.get -> bool
+Mocassin.Symmetry.SymmetryOperation.Inverse() -> Mocassin.Symmetry.SymmetryOperation
+Mocassin.Symmetry.SymmetryOperation.Linear.get -> Mocassin.Symmetry.Int3x3
+Mocassin.Symmetry.SymmetryOperation.Linear.init -> void
+Mocassin.Symmetry.SymmetryOperation.NormalizeTranslation() -> Mocassin.Symmetry.SymmetryOperation
+Mocassin.Symmetry.SymmetryOperation.SymmetryOperation() -> void
+Mocassin.Symmetry.SymmetryOperation.SymmetryOperation(Mocassin.Symmetry.Int3x3 Linear, Mocassin.Symmetry.Rational3 Translation) -> void
+Mocassin.Symmetry.SymmetryOperation.ToAffineMatrix() -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Symmetry.SymmetryOperation.Transform(Mocassin.Core.Geometry.Fractional3 point) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.SymmetryOperation.Translation.get -> Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.SymmetryOperation.Translation.init -> void
+const Mocassin.Symmetry.Rational3.Denominator = 24 -> int
+override Mocassin.Symmetry.Int3x3.GetHashCode() -> int
+override Mocassin.Symmetry.Int3x3.ToString() -> string!
+override Mocassin.Symmetry.Rational3.GetHashCode() -> int
+override Mocassin.Symmetry.Rational3.ToString() -> string!
+override Mocassin.Symmetry.SymmetryOperation.GetHashCode() -> int
+override Mocassin.Symmetry.SymmetryOperation.ToString() -> string!
+static Mocassin.Symmetry.Int3x3.Identity.get -> Mocassin.Symmetry.Int3x3
+static Mocassin.Symmetry.Int3x3.operator !=(Mocassin.Symmetry.Int3x3 left, Mocassin.Symmetry.Int3x3 right) -> bool
+static Mocassin.Symmetry.Int3x3.operator *(Mocassin.Symmetry.Int3x3 left, Mocassin.Symmetry.Int3x3 right) -> Mocassin.Symmetry.Int3x3
+static Mocassin.Symmetry.Int3x3.operator ==(Mocassin.Symmetry.Int3x3 left, Mocassin.Symmetry.Int3x3 right) -> bool
+static Mocassin.Symmetry.Rational3.Zero.get -> Mocassin.Symmetry.Rational3
+static Mocassin.Symmetry.Rational3.operator !=(Mocassin.Symmetry.Rational3 left, Mocassin.Symmetry.Rational3 right) -> bool
+static Mocassin.Symmetry.Rational3.operator ==(Mocassin.Symmetry.Rational3 left, Mocassin.Symmetry.Rational3 right) -> bool
+static Mocassin.Symmetry.SymmetryOperation.Identity.get -> Mocassin.Symmetry.SymmetryOperation
+static Mocassin.Symmetry.SymmetryOperation.operator !=(Mocassin.Symmetry.SymmetryOperation left, Mocassin.Symmetry.SymmetryOperation right) -> bool
+static Mocassin.Symmetry.SymmetryOperation.operator ==(Mocassin.Symmetry.SymmetryOperation left, Mocassin.Symmetry.SymmetryOperation right) -> bool
+~override Mocassin.Symmetry.Int3x3.Equals(object obj) -> bool
+~override Mocassin.Symmetry.Rational3.Equals(object obj) -> bool
+~override Mocassin.Symmetry.SymmetryOperation.Equals(object obj) -> bool

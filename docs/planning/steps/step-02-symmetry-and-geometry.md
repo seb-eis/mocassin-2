@@ -18,7 +18,8 @@ orbit/permutation reduction, and periodic geometry kernels.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `core-geometry` | `feature/step-02-symmetry-and-geometry/core-geometry` | Awaiting approval | Core tests 158/158; `dotnet format --verify-no-changes` passes | — | — |
+| `core-geometry` | `feature/step-02-symmetry-and-geometry/core-geometry` | Squashed | Core tests 158/158; `dotnet format --verify-no-changes` passes | [`42395501397`](https://github.com/seb-eis/mocassin-2/actions/runs/42395501397) — green | `e6f5e1d` |
+| `exact-grid` | `feature/step-02-symmetry-and-geometry/exact-grid` | Awaiting approval | Symmetry tests 34/34; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
@@ -628,12 +629,12 @@ reduced/Niggli basis can be added later as an optimization.
 ## Implementation tasks
 
 - [ ] Add the space-group data source and a build-time generator for the embedded catalog.
-- [ ] Implement `SymmetryOperation` with integer composition/inverse/closure.
+- [x] Implement `SymmetryOperation` with integer composition/inverse/closure.
 - [ ] Implement `SpaceGroupSetting`, `SpaceGroupCatalog`, and lookup APIs.
 - [ ] Implement crystal-system constraints and the corrected cell-vector transform.
 - [ ] Add `Fractional3`, `Cartesian3`, and `Vector4I` to `Mocassin.Core.Geometry`; implement the encoder in
   `Mocassin.Symmetry`.
-- [ ] Implement a shared generic `Vector3<T>`/`VectorMath<T>` arithmetic kernel constrained to
+- [x] Implement a shared generic `Vector3<T>`/`VectorMath<T>` arithmetic kernel constrained to
   `unmanaged, INumber<T>`; public semantic wrappers delegate to it.
 - [ ] Implement canonical P1 expansion and position ordering.
 - [ ] Implement stabilizer/point-group/permutation reduction.
