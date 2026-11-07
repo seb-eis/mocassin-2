@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-02-amend-2` |
 | Parent step | 02 — Symmetry and Geometry |
-| Status | Re-review required |
+| Status | Ready with notes |
 | Branch | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` |
 | Design review | `docs/planning/reviews/step-02-amend-2.md` |
 | Parent audit | `docs/planning/audits/step-02.md` |
@@ -92,7 +92,8 @@ document$.subscribe(({ body }) => {
 });
 ```
 
-This hooks KaTeX into Zensical's instant navigation, matching the official Zensical KaTeX example.
+This hooks KaTeX into Zensical's instant navigation. It matches the official Zensical KaTeX example except
+that the single-dollar delimiter is deliberately omitted.
 
 ### Math markup
 
@@ -258,6 +259,16 @@ None. This amendment changes documentation assets and site configuration only.
 - Squash commit: —
 - Parent audit request updated: —
 - Combined frozen commit: —
+
+## Verification evidence
+
+- Build: `zensical build --strict` at the amendment commit — result and command.
+- Rendered page: `site/physics/symmetry/index.html` — six converted formulas, fractions, roots, subscripts, and
+  aligned equations; screenshot path.
+- Navigation: instant navigation from another page re-renders KaTeX.
+- Accessibility: KaTeX output includes MathML or an equivalent accessible representation.
+- Asset source: pinned CDN URL or vendored path; HTTP status or local file path.
+- Evidence owner: step implementor; record the command output and screenshot path here before closeout.
 
 ## Audit
 

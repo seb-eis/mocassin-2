@@ -24,7 +24,7 @@ decision will be made.
 | Extension boundary | C ABI, panic containment, opt-in in-process loading, versioned host table | [ADR 0014](adr/0014-extension-abi-and-trust-boundary.md) |
 | Contract manifest | `contracts/manifest.json` plus generated checks/fixtures | [ADR 0009](adr/0009-contract-manifest-and-contracts-library.md) |
 | Project persistence | `ProjectStore` in `Mocassin.Packages`, not `Core` | [Step 01](steps/step-01-domain-kernel-and-project-format.md) |
-| Primitive geometry | `Fractional3`/`Cartesian3`/`Vector4I` in `Core.Geometry`; generic kernel internally | [Step 02](steps/step-02-symmetry-and-geometry.md) |
+| Primitive geometry | `Fractional3`/`Cartesian3`/`Vector4I` in `Core.Geometry`; public generic `Vector3<T>`/`Vector4<T>`/`Matrix3<T>`/`Matrix4<T>`; `Int3x3` for exact integer symmetry | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Space-group catalog | spglib as the sole source; 274-setting compatibility subset; committed canonical JSON, dev-only generator, CI drift check, checksum, and BSD-3-Clause attribution | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Space-group reference | Project stores structured `{number, axis, origin}`; HM/Hall/system/operations are catalog-derived | [Step 02](steps/step-02-symmetry-and-geometry.md) / [Step 03](steps/step-03-particle-and-structure-models.md) |
 | Coordinate grid | Public `Fractional3` stays `double`; Symmetry uses an internal exact `24 × 10^12` grid for P1 expansion, deduplication, and ordering | [Step 02](steps/step-02-symmetry-and-geometry.md) |

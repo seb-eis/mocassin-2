@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-02-amend-1` |
 | Parent step | 02 — Symmetry and Geometry |
-| Status | Re-review required |
+| Status | Ready with notes |
 | Branch | `feature/step-02-symmetry-and-geometry/amend-1-public-math` |
 | Design review | `docs/planning/reviews/step-02-amend-1.md` |
 | Parent audit | `docs/planning/audits/step-02.md` |
@@ -172,8 +172,12 @@ semantics are not part of this type.
 
 `Vector4<T>`/`Matrix4<T>` are retained because the planned homogeneous/authoring layer (Step 23/24) and the
 rendering transforms (Step 27) need a public 4×4 math type. Adding them now keeps the public math API coherent
-and avoids a second public-math amendment. They are independently tested for construction, multiplication,
-determinant, inverse, transform, and condition number; they are not required by `CellGeometry`.
+and avoids a second public-math amendment. They are independently tested for construction, multiplication, determinant, inverse, transform, and
+condition number; they are not required by `CellGeometry`.
+
+These consumer references are provisional. The Step 23/24/27 design reviews must confirm the 4×4 consumer or
+defer the 4D types; if they do not need it, `Vector4<T>`/`Matrix4<T>` can be removed in a later amendment without
+changing the 3×3/`CellGeometry` contract.
 
 #### Singular and conditioning contract
 
@@ -256,7 +260,6 @@ the documented tolerances.
 - [ ] Matrix/vector property tests pass for `double` and `float`.
 - [ ] `Matrix4<T>` construction, `FromRows`, `FromColumns`, `Transform`, and `ConditionNumber` are tested.
 - [ ] The matrix benchmark records `Allocated = 0` and the expected inlining result.
-- [ ] The matrix benchmark and inlining check show no unexpected allocation or call overhead.
 - [ ] `Int3x3` and exact symmetry arithmetic are unchanged.
 - [ ] No project, package, results, or state format changes.
 
@@ -303,7 +306,7 @@ the documented tolerances.
 | Generic constraint confusion | Document `IFloatingPointIeee754<T>` for matrices (excludes `decimal`) and `INumber<T>` for vectors; keep `Int3x3` for exact integers |
 | Row/column convention errors | Explicit convention, `FromRows`/`FromColumns` tests, cell matrix test |
 | 4×4 inverse complexity | Property tests against an independent reference; singular-matrix tests; keep the planned Step 23/24/27 consumers explicit |
-| Struct copy/performance | Benchmark and disassembly check; use `AggressiveInlining`; keep matrix types small |
+| Struct copy/performance | Benchmark and disassembly check; limit `AggressiveInlining` to measured hot paths; keep matrix types small |
 | Behavior change in cell geometry | Reuse the existing golden tests and compare within documented tolerances |
 
 ## Dependencies
