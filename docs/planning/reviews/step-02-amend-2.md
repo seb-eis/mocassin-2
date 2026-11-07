@@ -13,11 +13,11 @@
 | Step | 02 — Symmetry and Geometry |
 | Amendment | `step-02-amend-2` — Documentation Math Rendering with KaTeX |
 | Request owner | Step agent |
-| Design review status | Ready for review |
+| Design review status | Changes required |
 | Reviewed commit | `bd4876314ed962da64c49ea747d7e3e4ed2e7552` (`bd48763`) |
 | Docs branch | `main` |
 | Review date | 2026-11-07 |
-| Reviewer | — |
+| Reviewer | Independent planning auditor |
 
 Parent step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-geometry.md)
 
@@ -75,6 +75,8 @@ Files reviewed:
 - `docs/physics/symmetry.md`
 - `docs/development/compilation-pipeline.md`
 - `docs/reference/file-layout.md`
+- `docs/planning/reviews/step-02.md`
+- `docs/planning/audits/step-02.md`
 - `zensical.toml`
 - `NOTICE.md`
 - `tools/docs/requirements.txt`
@@ -82,8 +84,28 @@ Files reviewed:
 Commands run:
 
 ```text
-
+git status --short
+git log --oneline -8 main
+git show main:docs/planning/amendments/step-02-amend-2-docs-math.md
+git diff main HEAD -- docs/planning/amendments
+git diff main HEAD -- zensical.toml
+grep -n "^```text" docs/physics/symmetry.md
+zensical build --strict
+curl -sS -o /dev/null -w "%{http_code}\n" https://unpkg.com/katex@0.19.1/dist/katex.min.js
 ```
+
+Results: the working tree was clean; the two review records are on `main` (`ce6a563`) and absent
+from the closeout branch. `zensical build --strict` failed with one issue:
+`docs/development/agent-workflow.md:308` links to `../planning/amendments/step-amendment-template.md`,
+which `exclude_docs` removes. `docs/physics/symmetry.md` has six fenced `text` blocks at lines 31, 50,
+74, 83, 109, and 149. The pinned KaTeX asset URL returned `200`. The Zensical 0.0.74 bundle exposes
+`document$` as the `DOMContentLoaded`/instant-navigation observable used by the official KaTeX example.
+
+A scratch checkout under `/tmp/opencode` (not committed) applied the plan's `zensical.toml` keys,
+`docs/javascripts/katex.js`, and all six formula conversions, and replaced the broken planning link with the
+GitHub URL already used for the other planning links. `zensical build --strict` then reported
+`No issues found`; the built symmetry page referenced `katex.min.css`, `katex.min.js`, and
+`javascripts/katex.js`, and contained six `class="arithmatex"` blocks.
 
 ## Known notes for the reviewer
 
@@ -108,7 +130,10 @@ Commands run:
 
 | Severity | Finding | Evidence |
 | --- | --- | --- |
-| — | — | — |
+| **Major** | **A2-1 — The strict docs build is already red, so the primary acceptance criterion cannot pass as written.** `zensical build --strict` fails with one issue: `docs/development/agent-workflow.md:308` links to `../planning/amendments/step-amendment-template.md`, which `exclude_docs` removes. The plan requires the strict build to succeed and the formulas to be converted, but its scope does not include fixing this link. | `docs/planning/amendments/step-02-amend-2-docs-math.md:38-43, 197, 207-214`; command output `Warning: page does not exist [development/agent-workflow.md:308:60] ... 1 issue found`; `zensical.toml` has `exclude_docs = "planning/"`. A scratch checkout with the link replaced by the GitHub URL and the plan applied produced `No issues found` and six `arithmatex` blocks. Required: add the one-line link fix to the amendment scope or resolve it separately before review. |
+| **Minor** | **A2-2 — The TOML snippet repeats `[project]`.** The existing `zensical.toml` already has a `[project]` table at line 7; appending the plan’s snippet literally would create a duplicate table and invalid TOML. | `docs/planning/amendments/step-02-amend-2-docs-math.md:60-68`; `zensical.toml:7`. Required: say “add these keys under the existing `[project]` table” or show only the keys. |
+| **Minor** | **A2-3 — Parent review/audit links and branch state are not handled.** The amendment process requires the parent review record to link to the amendment review and the parent audit request to list amendment IDs; the Documentation checklist says only “Amendment page and index updated” and Integration says “Parent audit request updated: —”. The closeout branch still shows the amendment as `Planned` and lacks the review records, which are on `main`. | `docs/planning/amendments/README.md:69-87`; `docs/planning/amendments/step-02-amend-2-docs-math.md:216-223, 241-248`; `docs/planning/reviews/step-02.md` has no amendment link; `docs/planning/audits/step-02.md` has no amendment list; `git diff main HEAD` shows closeout status `Planned` versus main `Design review`. Required: add both links/updates and synchronize the parent step branch before implementation. |
+| **Note** | **A2-4 — CDN, delimiter, and manual-check risks are documented but not fully bounded.** The plan pins `0.19.1` and documents a vendored fallback, but leaves the CDN decision open; the global `$...$` delimiter can render prose or currency pairs; the navigation, accessibility, and visual checks are manual with no concrete evidence format. | `docs/planning/amendments/step-02-amend-2-docs-math.md:55-75, 98-104, 205-214, 225-233`; the official Zensical KaTeX example matches the initializer; the scratch build produced six `arithmatex` blocks. Required: record the CDN/vendored choice in `NOTICE.md`, consider limiting `$...$` to prose that needs it or documenting the risk, and specify the exact page and expected rendered elements for the manual checks. |
 
 Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
 verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
@@ -118,12 +143,22 @@ the auditor's findings, evidence, or verdict.
 
 - [ ] Ready for implementation
 - [ ] Ready with notes
-- [ ] Changes required
+- [x] Changes required
 - [ ] Re-review required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up step:
+**Changes required.** One major finding remains: the strict docs build is already red because
+`docs/development/agent-workflow.md:308` links into the excluded planning tree, so the amendment’s primary
+acceptance criterion cannot pass until that link is fixed (A2-1). The duplicate `[project]` snippet and the
+missing parent review/audit links are minor corrections; the CDN, delimiter, and manual-check items are notes.
+The KaTeX design itself is sound and was verified in a scratch checkout.
+
+Follow-up owner: Planner / step agent
+
+Follow-up step: Add the `agent-workflow.md` link fix to the amendment scope (use the GitHub URL form already
+used for the other planning links), fix the duplicate `[project]` wording, add the parent review/audit links,
+record the CDN/vendored decision and the manual visual/navigation evidence, synchronize the parent step branch,
+and request a fresh re-review.
 
 ## Resolution status
 
