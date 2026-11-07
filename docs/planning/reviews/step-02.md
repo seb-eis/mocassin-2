@@ -10,18 +10,25 @@
 | --- | --- |
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
-| Design review status | Changes required |
-| Reviewed commit | `dd1d103a4e74da71cfb50d4165b39f5eddc20754` (`dd1d103`) |
+| Design review status | Re-review required |
+| Reviewed commit | `b698496d4098064a232016e4d6784167cf1374d9` (`b698496`) |
 | Docs branch | `docs/step-02-design-review` |
-| Review date | 2026-11-06 |
-| Reviewer | Independent planning auditor |
-| Report | `.tmp/review/step-02-r1-dd1d103-design-review.md` |
+| Review date | 2026-11-07 |
+| Reviewer | — |
+| Report | `.tmp/review/step-02-r2-b698496-design-review.md` |
 
 Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-geometry.md)
 
-The design is frozen at `dd1d103`. The later commit `848c9a7` adds only
-`docs/planning/reviews/step-02.md` (the review request metadata) and does not change the design; that was
-verified with `git show --stat 848c9a7`.
+The original design was frozen at `dd1d103`. Round 2 is frozen at `b698496`, which includes the review fixes.
+The later commit `848c9a7` adds only `docs/planning/reviews/step-02.md` (the review request metadata) and does
+not change the design; that was verified with `git show --stat 848c9a7`.
+
+### Review rounds
+
+| Round | Status | Reviewed commit | Date | Report |
+| --- | --- | --- | --- | --- |
+| 1 | Changes required | `dd1d103` | 2026-11-06 | `.tmp/review/step-02-r1-dd1d103-design-review.md` |
+| 2 | Re-review required | `b698496` | 2026-11-07 | `.tmp/review/step-02-r2-b698496-design-review.md` |
 
 ## Step summary
 
@@ -154,23 +161,38 @@ planning-only and no Step 02 implementation exists.
 | Risks and mitigations are realistic | Yes; the risk table is comprehensive. The catalog-version migration risk (M4) is missing. |
 | No hidden scope, stale placeholders, or unowned decisions | The sample dependency (M2) is hidden scope; the benchmark definition (M3) and spglib pin (n1) are unowned placeholders. |
 
+## Fix round 1
+
+Date: 2026-11-07
+
+| Commit | Scope |
+| --- | --- |
+| `558ab2f` | Step 02 page, status, quality strategy, glossary |
+| `4cb7e86` | Data contract, Step 03, Step 08, open decisions |
+| `ddf49c6` | Unique-axis wording cleanup |
+| `b698496` | Integration head for re-review |
+
+Summary: corrected the monoclinic selection rule; moved full sample golden models to Step 03/08 and added
+Step 02-local fixtures; defined the concrete `P1Expansion20Cubed` benchmark; added project symmetry metadata
+and `PROJ034`; aligned enum wire names and removed the per-setting `DataVersion`; reserved and rejected
+`uniqueAxisA`; standardized the canonical pair order; fixed grid input, version-bump, trim, cache-key,
+box-boundary, condition-limit, and public-type details.
+
 ## Resolution status
 
-No design fixes have been applied yet. The step agent and planning agent must update the design and set this
-record to `Re-review required` before requesting a fresh review.
-
-| Finding | Status | Owner |
+| Finding | Status | Resolution |
 | --- | --- | --- |
-| M1 | Open — correct the monoclinic selection rule and add the per-group assertions | Step agent / planning agent |
-| M2 | Open — define Step 02-local fixtures or move sample-based criteria to later steps | Step agent / planning agent |
-| M3 | Open — record the concrete benchmark fixture, runner class, baseline, and command | Step agent / planning agent |
-| M4 | Open — define the project-level catalog/contract mismatch policy and test | Step agent / planning agent |
-| M5 | Open — align enum wire names or specify explicit JSON mapping and tests | Step agent |
-| M6 | Open — define one canonical pair-table/interaction order across Step 02, Step 08, and the data contract | Step agent / planning agent |
-| M7 | Open — remove or deliberately support `uniqueAxisA`, and align the Step 03 tests | Step agent / planning agent |
-| m1–m6, m8, m9 | Open or explicitly accepted before re-review | Step agent |
-| m7 | Resolved by this record — status set to `Changes required` in the step page and dashboard | Scribe |
-| n1–n7 | Notes and follow-up; no start block | Step agent |
+| M1 | Fixed — awaiting re-review | Corrected monoclinic selection in `558ab2f`; asserts 26 settings and two per group. |
+| M2 | Fixed — awaiting re-review | Step 02-local synthetic fixtures; full sample goldens moved to Step 03/08. |
+| M3 | Fixed — awaiting re-review | Concrete `P1Expansion20Cubed` fixture, runner, baseline, and command. |
+| M4 | Fixed — awaiting re-review | Optional project `symmetry` metadata and `PROJ034`; tests added in Step 03. |
+| M5 | Fixed — awaiting re-review | Enum names aligned to wire strings; per-setting `DataVersion` removed. |
+| M6 | Fixed — awaiting re-review | Canonical pair order `(distanceBucket, targetP, cellA, cellB, cellC)` in Step 02/08/data contract. |
+| M7 | Fixed — awaiting re-review | `uniqueAxisA` reserved and rejected in v1; B/C tests aligned. |
+| m1, m2, m3, m5, m6, m7, m8 | Fixed — awaiting re-review | Addressed in `558ab2f` / `4cb7e86`; m7 in `ddf49c6`. |
+| m4 | Deferred to Step 05 design review | Cluster ring definition is a Step 05 concern. |
+| m9 | Deferred to Step 03 design review | Step 03 JSON details remain Step 03 work. |
+| n1–n7 | Addressed or documented | spglib 2.8.0 pin, operation sort, `DataVersion` removal, public types, condition limit, trim note, box rule. |
 
 ## Verdict
 
@@ -189,3 +211,14 @@ Follow-up owner: Step agent / planning agent
 
 Follow-up step: Update the Step 02 design (and the affected data-contract/Step 03/Step 05/Step 08 text), set the
 review record to `Re-review required`, and request a fresh re-review of the new commit.
+
+## Re-review verdict
+
+- [ ] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+Follow-up owner:
+Follow-up step:
