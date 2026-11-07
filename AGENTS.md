@@ -89,6 +89,9 @@ These rules override convenience. If you are unsure, stop and ask the user.
 
 ### 3.2 Starting work
 
+Before the first numbered item, complete the pre-implementation design review in section 3.8 and obtain a
+`Ready for implementation` verdict. Do not create the step branch or write implementation code before that.
+
 1. Propose the feature-branch list and get one approval for the step breakdown.
 2. Create the step branch from current `main`:
    ```sh
@@ -148,7 +151,7 @@ These rules override convenience. If you are unsure, stop and ask the user.
    - documentation updates;
    - any final acceptance fixes.
 2. Run the step's full acceptance criteria and quality gates on the step branch.
-3. Complete the independent audit in section 3.8. The step branch must be frozen at the audited commit.
+3. Complete the independent audit in section 3.9. The step branch must be frozen at the audited commit.
 4. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
 5. After approval:
    ```sh
@@ -228,7 +231,39 @@ status: docs/planning/status.md#step-00
 Milestone tags use the same fields with `milestone-m0` and the milestone name. Release tags are created only
 after the Step 31 release gates pass.
 
-### 3.8 Step audit gate
+### 3.8 Pre-implementation design review
+
+Every new step must pass an independent design review before the step branch is created or implementation
+starts. This gate is separate from the post-implementation audit in section 3.9.
+
+1. The planning agent and step agent finish the step's design decisions and update the step page, data
+   contracts, architecture, quality strategy, open decisions, parity matrix, and related docs.
+2. The docs are frozen at a specific commit and the step agent creates or updates
+   `docs/planning/reviews/step-NN.md` using
+   [`docs/planning/reviews/step-design-review-template.md`](docs/planning/reviews/step-design-review-template.md).
+   Set the design-review status to `Ready for review` and record the reviewed commit.
+3. A fresh planning auditor with no implementation context reads the step page, design decisions, dependency
+   contracts, architecture, data contracts, ADRs, quality strategy, open decisions, parity matrix, licensing
+   records, and audit plan. The auditor must not edit tracked files, commit, push, or change any branch.
+4. The auditor writes its report to the gitignored handoff file
+   `.tmp/review/step-NN-rN-<short-sha>-design-review.md` (or `...-re-review.md`) and reports the path and
+   verdict.
+5. The step agent or a neutral scribe transcribes the findings and verdict verbatim into
+   `docs/planning/reviews/step-NN.md` and commits the documentation-only record.
+6. If the verdict is `Changes required`, the planning agent/scribe updates the design docs, the step agent
+   marks the review `Re-review required`, and a fresh planning auditor re-reviews the new commit.
+7. Only a `Ready for implementation` verdict permits the human owner to approve starting the step. The step
+   branch is then created from the reviewed `main` commit.
+8. Step 00 and Step 01 are recorded as `Waived — process introduced after completion`; no retrospective
+   review is required.
+9. The post-implementation audit in section 3.9 remains mandatory.
+
+Design-review statuses and finding severities are defined in
+[`docs/planning/reviews/README.md`](docs/planning/reviews/README.md). Design-review records are planning
+records and are excluded from the published site. Raw planning-auditor handoff files are temporary and
+gitignored; they are not planning records.
+
+### 3.9 Step audit gate
 
 The step agent's self-check is not an independent audit. Before a step is merged into `main`, a fresh
 read-only audit context must review the frozen step branch.
@@ -240,20 +275,30 @@ read-only audit context must review the frozen step branch.
    exact audited commit and CI run, and sets the status to `Ready for audit`.
 3. The step branch is frozen. Do not add commits while the audit is running.
 4. A fresh audit agent reads `AGENTS.md`, the step page, the audit request, the status dashboard, and relevant
-   ADRs/contracts, then runs the required builds/tests and reviews the diff. The auditor is read-only and must
-   not modify the repository.
-5. The auditor records findings and a verdict in the audit request. If fixes are needed, the step agent fixes
-   them on a new feature branch, squash-merges into the step branch, pushes, waits for CI, and updates the
-   audit request to `Re-audit required`.
-6. The fresh auditor re-audits the new commit. The same auditor may continue if it remained read-only;
-   otherwise start a fresh audit context.
-7. Only a `Passed` audit permits the step-to-main approval request. The audit result is evidence, not merge
+   ADRs/contracts, then runs the required builds/tests and reviews the diff. The auditor is read-only: it must
+   not edit tracked files, commit, push, or change the step branch.
+5. The auditor writes its report to the gitignored handoff file
+   `.tmp/audit/step-NN-rN-<short-sha>-audit.md` (or `...-reaudit.md`) and reports the path and verdict. The
+   report uses the audit template and records the audited commit, CI run, commands run, findings, verdict, and
+   follow-up.
+6. The step agent or a neutral scribe transcribes the auditor's findings and verdict verbatim into
+   `docs/planning/audits/step-NN.md`, adds the audit metadata, and commits the documentation-only record. The
+   auditor must not commit or approve it.
+7. If fixes are needed, the step agent reads the handoff, fixes the findings on a new feature branch,
+   squash-merges into the step branch, pushes, waits for CI, and updates the audit request to
+   `Re-audit required`.
+8. The fresh auditor re-audits the new commit and writes a new handoff report. The same auditor may continue if
+   it remained read-only; otherwise start a fresh audit context. Keep the earlier report in the durable audit
+   history.
+9. Only a `Passed` audit permits the step-to-main approval request. The audit result is evidence, not merge
    authorization; the human owner still approves the merge.
-8. After merge, tag `step-NN`, record the result, and delete the step branch.
+10. After merge, tag `step-NN`, record the result, and delete the step branch.
+11. Delete the handoff file only after the durable audit record is committed.
 
 Audit status values and finding severities are defined in
 [`docs/planning/audits/README.md`](docs/planning/audits/README.md). Audit reports are planning records and are
-excluded from the published site.
+excluded from the published site. Raw auditor handoff files are temporary and gitignored; they are not planning
+records.
 
 ## 4. Non-negotiable decisions
 
@@ -431,7 +476,7 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
     branch.
 12. After approval, squash-merge, push the step branch, and delete the feature branch locally and remotely.
 13. After all features and the closeout feature, update `docs/planning/audits/step-NN.md`, freeze the step
-    branch, and request the independent audit described in section 3.8.
+    branch, and request the independent audit described in section 3.9.
 14. Only after a passed audit, ask for permission to merge the step into `main`, then merge with `--no-ff`,
     tag `step-NN`, push, and delete the step branch.
 
@@ -623,8 +668,11 @@ incomplete.
 - Do not copy original MOCASSIN source, documentation text, or database content into MIT files.
 - Any GPL-derived file must be isolated, marked `SPDX-License-Identifier: GPL-3.0-or-later`, and documented in
   `NOTICE.md`.
-- The space-group catalog must come from an authoritative source (International Tables/spglib), not the
-  original SQLite database. If that changes, review provenance and licensing first.
+- The space-group catalog must be generated from spglib, pinned to an exact release and commit, not from the
+  original SQLite database. Record the source, version, checksum, and BSD-3-Clause attribution in `NOTICE.md`
+  and the generated catalog provenance. If that changes, review provenance and licensing first.
+- The generated space-group catalog is committed and embedded; normal builds must not require spglib, Python,
+  or network access. Regeneration uses the pinned dev-only tool.
 - Dependencies must be MIT-compatible. GPL/AGPL dependencies require explicit review.
 - Keep the original authors’ citation guidance in the README/NOTICE.
 

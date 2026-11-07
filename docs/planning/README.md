@@ -30,12 +30,13 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
 8. [`07-reference-build.md`](07-reference-build.md) — verified recipe for building the original solver and
    model builder and generating reference data.
 9. [`status.md`](status.md) — at-a-glance step and feature status dashboard.
-10. [`audits/README.md`](audits/README.md) — independent step-audit process, findings, and approval gate.
-11. Step pages [`steps/`](steps/) — the implementation sequence, detailed checklists, and feature logs.
-12. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
-   solution and its mapping to new modules.
-13. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
-13. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
+10. [`audits/README.md`](audits/README.md) — post-implementation step-audit process and approval gate.
+11. [`reviews/README.md`](reviews/README.md) — pre-implementation design-review process and start gate.
+12. Step pages [`steps/`](steps/) — the implementation sequence, detailed checklists, and feature logs.
+13. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
+    solution and its mapping to new modules.
+14. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
+15. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
 
 ## Decisions already made
 

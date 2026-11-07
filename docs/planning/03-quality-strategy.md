@@ -107,7 +107,7 @@ Property tests are required for the following, using brute-force or analytic ora
 
 | Area | Properties |
 | --- | --- |
-| Symmetry / geometry | Group laws; orbit membership and closure; canonical order independent of input order; coordinate round-trips; minimum-image distance equals brute force; pair/cluster reduction is complete and non-redundant |
+| Symmetry / geometry | Group laws; stabilizer chain; induced permutations; orbit membership and closure; canonical order independent of input order; coordinate round-trips; minimum-image distance equals brute force; radial-search completeness; distance-bucket stability; pair/cluster reduction is complete and non-redundant; chiral orbit linking |
 | Compilation | Mass/charge conservation per rule; valid indices; rule uniqueness; deterministic byte-identical output; P1 counts match brute-force expansion; every interaction has a table entry |
 | Parameterization | Signature stability; apply → serialize → reload identity; rebase never silently changes unmatched values; chiral mirroring is consistent |
 | Supercells / doping | Requested vs applied counts; never exceeds available particles; charge neutrality or explicit failure; order dependence is deterministic; same seed → same lattice |
@@ -161,11 +161,20 @@ Coverage is a diagnostic, not the headline target.
 
 Tests must declare their tier. A PR-fast test may not depend on a nightly-only asset.
 
+The Step 02 catalog/group-law and golden symmetry tests are PR-fast. The 20×20×20 expansion and full random
+reduction suites are nightly/release.
+
 ## 9. Domain test strategy
 
 ### 9.1 Core and project format
 
 - JSON round-trip: model → JSON → model is identity for all fixtures.
+- Space-group identity: `(number, axis, origin)` round-trips unchanged; Hermann–Mauguin, Hall, system, and
+  operations are derived from the catalog and never serialized in the project.
+- Symmetry metadata: matching project metadata loads silently; a catalog or contract mismatch emits `PROJ034`;
+  missing metadata is accepted without rewriting the project.
+- Coordinate grid: P1 expansion, deduplication, and sorting use the exact `24 × 10^12` fractional grid; no
+  tolerance comparer participates in the discrete symmetry path.
 - Canonicalization: object order changes do not change serialized bytes.
 - Migration tests: each schema version has a fixture and an expected migrated model.
 - Validation tests: real invalid project fixtures trigger each public diagnostic code with the expected
@@ -187,6 +196,31 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
 - Distance tests: minimum-image distances match a brute-force search over neighboring cells.
 - Permutation reduction: for random pair/cluster geometries, the reduced set is a complete and
   non-redundant representation of the orbit.
+- Catalog provenance: catalog and multiplicity tests use checked-in expected data generated from the pinned
+  spglib catalog. The original MOCASSIN database is not a CI dependency; it may be used locally only to
+  confirm the 274-setting count and known defects.
+- Catalog integrity: startup checks the checksum, schema version, counts, identity, determinants, and
+  normalized translations; full inverse/closure and group-law tests run in CI.
+- Grid closure: applying every catalog operation to random grid points yields grid points; grid conversion is
+  deterministic across OSes.
+- Cell geometry: all seven systems, unique-axis mapping, near-degenerate rejection, positive volume,
+  right-handed vectors, and the triclinic regression fixture.
+- P1 contract: golden P indices, shuffle invariance, `Vector4I` round-trip for base and neighbor positions, and
+  the signed 32-bit linear-index cap with a 64-bit total-count check.
+- Stabilizer chain: `Gseq ⊆ Gset ⊆ G0`, `Gseq` is normal in `Gset`, and `P ≅ Gset/Gseq` is a group.
+- Orbit counts: `|G0·S| = |G0|/|Gseq|` for ordered sequences and `|G0·{S}| = |G0|/|Gset|` for unordered sets.
+- Pair reduction: reduced shells equal brute-force `G0` orbits; chiral linking matches an independent
+  path-orbit check.
+- Cluster reduction: the canonical tuple is independent of input order; the expansion map covers every
+  equivalent tuple exactly once; 6-bit codes round-trip for 63 particles and 9 sites.
+- Periodic geometry: `GetMinimumImage` equals brute force for skewed triclinic cells; `RadialSearch` matches
+  brute-force enumeration; cutoff-boundary candidates are included with the 1 fm margin; equivalent pairs share
+  a distance bucket.
+- Memory: only base P1 Cartesian positions are precomputed; no dense `A×B×C×P` Cartesian array is allocated.
+- Cache determinism: per-compilation caches, content keys, and parallel output equal sequential canonical
+  output.
+- Contract version: `symmetry-1` covers the grid, canonical order, pair-shell order, cluster codes, and
+  reduction semantics; changing it invalidates golden signatures.
 
 ### 9.3 Compilation
 
@@ -318,11 +352,12 @@ Contract tests use files produced by the real writers and never share reader/wri
 5. `cargo clippy -- -D warnings`
 6. `cargo test`
 7. Python `pytest`, wheel build, and clean-install check
-8. Contract fixture round-trips and manifest drift check
+8. Contract fixture round-trips, manifest drift, and space-group catalog drift check
 9. Avalonia headless UI tests
 10. License/header check and dependency audit
 
-Matrix: `ubuntu-latest`, `windows-latest`, `macos-latest`; .NET 10 SDK; stable Rust; Python 3.11–3.13.
+Matrix: `ubuntu-latest` and `windows-latest` on step branches; macOS on `main`, nightly, or manual. .NET 10 SDK;
+stable Rust; Python 3.11–3.13.
 Cache NuGet, Cargo, pip, and the SQLite build.
 
 ### Nightly
@@ -355,11 +390,13 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | GUI cold start | < 2 s |
 | Open/save typical project | < 500 ms |
 | 3D viewport (10⁵ atoms) | ≥ 30 FPS on integrated GPU |
+| P1 expansion (64 P1 positions, 20×20×20 = 512,000 positions) | < 1 s mean on `ubuntu-latest`, .NET 10 Release |
 
 Benchmarks:
 
 - `benches/energy.rs`, `benches/kmc.rs`, `benches/mmc.rs`, `benches/context.rs` with Criterion.
 - `Mocassin.Benchmarks` with BenchmarkDotNet for compilation, serialization, and `.msl` writes.
+- `Mocassin.Benchmarks` includes the Step 02 P1 expansion and reduction fixture.
 - A reproducible benchmark package in `tests/reference/bench/` with fixed seeds and inputs.
 - Baselines are stored per runner class (OS, CPU class, .NET/Rust version) in
   `tests/reference/bench/baselines.json`; comparisons use the same class only.

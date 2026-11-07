@@ -13,6 +13,7 @@ open/save/close, dirty tracking, undo/redo, settings, logging, and crash recover
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
+- **Design review:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

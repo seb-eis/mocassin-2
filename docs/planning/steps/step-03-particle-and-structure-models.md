@@ -13,6 +13,7 @@ validation and a stable public API.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
+- **Design review:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -80,8 +81,7 @@ public sealed record StructureModel(
 public sealed record SpaceGroupRef(
     int Number,
     AxisSetting Axis,
-    OriginChoice Origin,
-    string HermannMauguin);
+    OriginChoice Origin);
 
 public sealed record CellParameters(
     LengthAngstrom A, LengthAngstrom B, LengthAngstrom C,
@@ -100,15 +100,22 @@ public sealed record CellDummyPosition(
     Fractional3 Fractional);
 ```
 
+All types in this block live in `Mocassin.Core`. `SpaceGroupRef` is the persisted reference; the resolved
+`SpaceGroupSetting`, `StructurePreview`, and catalog-dependent validation are Symmetry services, so Core does
+not reference `Mocassin.Symmetry`.
+
 - `SiteStability` is `Stable` or `Unstable`.
 - Reference positions must be in `[0,1)` at definition time; they are trimmed with a clear diagnostic if
   within `1e-10` of a boundary.
 - Stable sites require a particle set. Unstable sites also require a set (the transition-state occupation
   options), but their default occupation is void.
-- The space group is selected from the catalog by number/axis/origin; the display string is derived, not
-  independently editable.
-- Cell parameters are normalized according to the crystal system before validation. The UI locks dependent
-  fields; the API rejects inconsistent values rather than silently overwriting them.
+- The space group is selected from the catalog by `(number, axis, origin)`. The Hermann–Mauguin symbol, Hall
+  symbol, crystal system, operations, and data version are derived from the catalog and are not stored in the
+  project.
+- Reference positions remain `Fractional3` doubles in the project; Symmetry converts them to the exact
+  `24 × 10^12` grid for P1 expansion, overlap detection, and canonical ordering.
+- Cell parameters are validated against the crystal system. The UI may lock dependent fields as a convenience,
+  but the API rejects inconsistent values with `STR003`; it never silently overwrites user input.
 - Dummy positions are visual helpers, may coincide with sites, and are excluded from all simulation
   compilation.
 
@@ -125,7 +132,13 @@ public sealed record StructurePreview(
     ImmutableArray<SiteOrbitInfo> Orbits);
 ```
 
+`StructurePreview` and `UnitCellVectorEncoder` are Symmetry types. A Symmetry service builds the preview from
+a Core `StructureModel`; the Core model never holds a preview or a resolved catalog setting.
+
 - `PositionList` is the canonical P1 expansion from step 02.
+- `PositionList` is in ascending canonical `P` order. `ExpandedSite` exposes the P index and its `Vector4I`
+  encoding; `Encoder` owns the fractional ↔ `Vector4I` mapping and the linear-index check.
+- The preview rejects a structure whose total supercell product `A*B*C*P` exceeds the signed 32-bit index cap.
 - It is cached by a content hash of the structure model and invalidated on edit.
 - The UI shows the orbit size, multiplicity, fractional/Cartesian coordinates, and stability for each site.
 - The preview is not the compiled model; step 08 produces the authoritative compiled structure.
@@ -141,9 +154,9 @@ public sealed record StructurePreview(
 | `PAR005` | Error | Particle set empty or contains void |
 | `PAR006` | Error | Particle set references unknown/deprecated particle |
 | `PAR007` | Error | More than 100 particle sets |
-| `STR001` | Error | Space-group number outside 1..230 or setting not found |
+| `STR001` | Error | Space-group number outside 1..230 or `(number, axis, origin)` not found |
 | `STR002` | Error | Cell length outside 0.1..1000 Å |
-| `STR003` | Error | Cell angles violate the crystal-system constraints |
+| `STR003` | Error | Cell angles are outside 0..180°, the Gram determinant is not positive, the condition number exceeds `1e12`, or the crystal-system constraints fail |
 | `STR004` | Error | Reference site outside `[0,1)` after trim |
 | `STR005` | Error | Site name empty or duplicate |
 | `STR006` | Error | Stable/unstable site has no particle set |
@@ -152,8 +165,22 @@ public sealed record StructurePreview(
 | `STR009` | Warning | Total P1 positions exceed the performance budget |
 | `STR010` | Error | Dummy position references invalid coordinates |
 | `STR011` | Warning | Site cannot be occupied by any particle |
+| `PROJ034` | Warning | Project symmetry metadata differs from the embedded catalog/contract versions |
 
-- Site-overlap detection uses exact rational coordinates after P1 expansion; no tolerance-based hash sets.
+- `PROJ034` is a project-level warning finalized in Step 07. It does not block loading; the compiled payload
+  records the authoritative versions.
+
+Diagnostic ownership follows the assembly boundary. Core emits diagnostics that depend only on the project
+graph and primitive types: `STR004`, `STR005`, `STR006`, `STR010`, and `STR011`. Symmetry emits diagnostics
+that require the catalog, cell geometry, or P1 expansion: `STR001`, `STR002`, `STR003`, `STR007`, `STR008`,
+and `STR009`. A composed validator runs both and returns one stable, sorted list.
+
+- An unknown `axis` or `origin` enum string is malformed JSON (`PROJ002`), not a valid but unsupported setting.
+- `uniqueAxisA` is a known reserved enum value: the parser accepts it, and the validator rejects it with
+  `STR001`. It is not treated as malformed JSON.
+- `STR001` reports the allowed axis/origin combinations for the number when the catalog can list them.
+- Site-overlap detection uses exact grid coordinates after P1 expansion; no tolerance-based hash sets. The
+  grid is the `24 × 10^12` fractional grid defined in Step 02.
 - Duplicate detection compares the full orbit, not only the seed position.
 - A site whose orbit overlaps another site is an error because it makes particle assignment ambiguous.
 - Structure validation also computes statistics used by step 07: orbit sizes, total positions, site counts.
@@ -172,13 +199,30 @@ public interface IParticleQuery
 public interface IStructureQuery
 {
     StructureModel Structure { get; }
-    SpaceGroupSetting SpaceGroup { get; }
-    StructurePreview Preview { get; }
     CellSite? Find(CellSiteId id);
+}
+
+// Mocassin.Symmetry
+public interface IStructurePreviewService
+{
+    SpaceGroupSetting Resolve(SpaceGroupRef reference);
+    StructurePreview CreatePreview(StructureModel structure);
+}
+
+public interface IStructureValidator
+{
+    ImmutableArray<Diagnostic> Validate(StructureModel structure);
 }
 ```
 
-- Query interfaces are implemented by the immutable `Project` snapshot, not by mutable managers.
+- Core query interfaces are implemented by the immutable `Project` snapshot, not by mutable managers.
+- `IStructureQuery` exposes only Core model types.
+- `IStructurePreviewService` and `IStructureValidator` are Symmetry services. They accept a Core
+  `StructureModel`, resolve `SpaceGroupRef` through the catalog, and return a preview or diagnostics.
+- The CLI, UI, and compiler compose the Core query with the Symmetry services; Core never references
+  `Mocassin.Symmetry`.
+- A composed validator in the composition layer (`Mocassin.Packages` or `Mocassin.Cli`) runs
+  `ProjectValidator` and `IStructureValidator` and merges their diagnostics.
 - The UI and compiler consume these interfaces.
 - Mutations go through `ProjectEditor` methods such as `AddParticle`, `UpdateParticle`, `AddCellSite`, which
   return a new project and diagnostics.
@@ -188,12 +232,15 @@ public interface IStructureQuery
 - [ ] Implement `Particle`, `ParticleSet`, and the implicit void/empty objects.
 - [ ] Implement `StructureModel`, `SpaceGroupRef`, `CellParameters`, `CellSite`, `CellDummyPosition`.
 - [ ] Implement crystal-system normalization and validation.
-- [ ] Implement `StructurePreview` in `Mocassin.Symmetry` using the symmetry engine (not in Core).
-- [ ] Implement P1 overlap detection.
+- [ ] Implement `StructurePreview` and `UnitCellVectorEncoder` in `Mocassin.Symmetry` using the symmetry
+  engine (not in Core).
+- [ ] Implement `StructurePreviewService` and `StructureValidator` in `Mocassin.Symmetry`.
+- [ ] Implement P1 overlap detection in the Symmetry validator.
 - [ ] Implement `IParticleQuery` and `IStructureQuery` over the project snapshot.
 - [ ] Implement editor operations for particles, sets, cell parameters, sites, and dummies.
 - [ ] Add sample definitions for ceria and barium zirconate.
 - [ ] Add diagnostics and help text for every code.
+- [ ] Add project fixtures with and without the optional `symmetry` metadata and test `PROJ034`.
 
 ## Acceptance criteria
 
@@ -213,7 +260,10 @@ At this point, document particles and crystal structure:
 - `docs/user-guide/particles.md` — particles, particle sets, void/default semantics, limits.
 - `docs/user-guide/structure.md` — space group, cell parameters, sites, stability, dummies.
 - `docs/physics/symmetry.md` — site orbits, P1 preview, and why positions are fixed.
-- `docs/development/architecture.md` — particle/structure domain APIs and editor operations.
+- `docs/development/architecture.md` — particle/structure domain APIs, editor operations, and the
+  Core/Symmetry preview and validation boundary.
+- `docs/reference/project-format.md` — cell parameter constraints, `STR002`/`STR003`, and canonical cell rules
+  (added with the structure section).
 
 ## Tests
 
@@ -222,20 +272,32 @@ At this point, document particles and crystal structure:
 | Particle limits | 63 custom particles accepted; 64 rejected |
 | Void handling | Void cannot be added to a set; void index is 0 |
 | Symbol/charge | Mass symbol preserved; charge validated |
-| Crystal systems | Valid/invalid parameter sets for all seven systems |
-| Site overlap | Same orbit, special positions, and near-boundary cases |
+| Crystal systems | Valid/invalid sets for all seven systems, both trigonal axis descriptions, and unique-axis B/C; `uniqueAxisA` is rejected |
+| Cell determinant | Near-degenerate and ill-conditioned cells are rejected; valid cells have `det G > 0` and positive volume |
+| Cell vectors | Triclinic regression, hexagonal γ=120°, rhombohedral α=60°, and right-handedness |
+| Site overlap | Same orbit, special positions, near-boundary cases, and exact grid equality |
 | Preview | Orbit sizes and Cartesian positions match hand calculations |
 | Determinism | Same structure yields identical preview bytes/hash |
+| P order | Preview positions are in canonical P order; shuffling input does not change P |
+| Index cap | A supercell product above `int.MaxValue` is rejected |
 | Editing | Add/update/remove site produces a valid new project or diagnostics |
+| Assembly boundary | `Mocassin.Core` has no reference to `Mocassin.Symmetry`; preview and catalog validation compose over Core models |
+| Space-group reference | `(number, axis, origin)` round-trips for every supported enum value; HM/Hall are derived; unknown combinations produce `STR001`; reserved `uniqueAxisA` is rejected |
+| Symmetry metadata | Matching versions load silently; mismatched catalog/contract emits `PROJ034`; fixtures with and without the optional field load |
+| Sample P order | Ceria and barium zirconate preview P indices are stable and match the Step 02 conventions |
 
 ## Risks and mitigations
 
 | Risk | Mitigation |
 | --- | --- |
-| Site overlap detection is expensive for large cells | Exact orbit dedup and early exit; cache by structure hash |
-| Crystal-system coupling confuses users | UI locks dependent fields and explains constraints |
+| Site overlap detection is expensive for large cells | Exact grid orbit dedup and early exit; cache by structure hash |
+| Crystal-system coupling confuses users | UI locks dependent fields and explains constraints; API rejects inconsistent values |
+| Cell-parameter tolerance drift | Named, unit-specific tolerances and boundary tests |
 | Particle symbol semantics are implicit | Document and validate; show mass-conservation groups in the editor |
 | Preview diverges from compiled model | Compile from the same symmetry engine and compare in step 08 tests |
+| Redundant setting fields drift | Persist only `(number, axis, origin)`; derive HM/Hall/system from the catalog |
+| P-index drift | Golden P-order tests, shuffle invariance, and the exact grid contract |
+| Catalog/contract mismatch | `PROJ034` warning, no automatic rewrite, and the compiled payload records the actual versions |
 
 ## Done when
 

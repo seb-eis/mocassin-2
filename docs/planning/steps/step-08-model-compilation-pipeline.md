@@ -14,6 +14,7 @@ encoding.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
+- **Design review:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -36,7 +37,8 @@ serialized into a simulation package; it performs no I/O and has no UI dependenc
 - The translator assigned dense `ModelId` indices and encoded arrays for the C solver.
 - Key algorithms:
   - `SpaceGroupService.GetUnitCellP1PositionExtension` / path extension;
-  - `PairInteractionFinder` (radial search, distance buckets, site-stabilizer reduction, chiral partners);
+  - `PairInteractionFinder` (radial search, distance buckets, center-stabilizer `G0` reduction, chiral
+    partners);
   - `GeometryGroupAnalyzer` / `PointOperationGroup.GetUniquePermutations`;
   - `TransitionRuleGenerator` (donor/acceptor permutation, inverse/dependent rules, conservation);
   - energy table expansion and jump/mapping/tracker tables.
@@ -62,7 +64,7 @@ Stages:
    volume, and site orbits.
 3. **Environments** — sample periodic images within each cutoff, apply filters, bucket by distance, and
    produce pair interaction geometry.
-4. **Pair reduction** — reduce candidates by the site stabilizer, assign stable geometry IDs, detect chiral
+4. **Pair reduction** — reduce candidates by the center stabilizer `G0`, assign stable geometry IDs, detect chiral
    partners, and build pair interaction sets.
 5. **Clusters** — expand cluster geometry, compute the point group, enumerate/canonicalize occupation
    permutations, and build cluster interaction sets.
@@ -84,6 +86,9 @@ independent, but the output order is fixed.
 public sealed record CompiledModel(
     int FormatVersion,
     string ModelSignature,
+    string SymmetryContractVersion,
+    string SpaceGroupDataVersion,
+    string SpaceGroupDataSha256,
     CompiledParticleModel Particles,
     CompiledStructureModel Structure,
     CompiledEnergyModel Energy,
@@ -96,6 +101,9 @@ public sealed record CompiledModel(
 - `Energy`: pair tables, cluster tables, defect/site background.
 - `Transitions`: jump collections, directions, rules, jump count/mapping, tracker mapping.
 - `Simulations`: kind, active collections, default settings, tracker models.
+- `SymmetryContractVersion`, `SpaceGroupDataVersion`, and `SpaceGroupDataSha256` record the algorithms and
+  catalog used to produce the model. They are part of the canonical compiled projection used for the model
+  signature.
 - The serialized form is defined in [`02-data-contracts.md`](../02-data-contracts.md).
 
 ### 3. Indexing rules
@@ -105,7 +113,8 @@ public sealed record CompiledModel(
   break allows a canonical rule.
 - `PositionIndex`: canonical P1 order from step 02.
 - `SiteIndex`: reference sites sorted by `CellSiteId`; used for environment definitions.
-- `PairInteractionIndex`: stable geometry ID hash order, then distance, then site indices.
+- `PairInteractionIndex`: canonical shell order `(distanceBucket, targetP, cellA, cellB, cellC)`, then site
+  indices. Stable geometry IDs are content hashes used for parameterization matching, not table ordering.
 - `ClusterIndex`: cluster ID order.
 - `TransitionIndex`: transitions sorted by ID within kind.
 - `JumpCollectionIndex`: one per KMC transition, in transition index order.
@@ -120,25 +129,30 @@ public sealed record CompiledModel(
 ### 4. Pair interaction compilation
 
 - For each stable site (center) and each periodic image within the cutoff:
+  - use the Step 02 `RadialSearch` and minimum-image policy;
   - compute distance and partner position;
   - apply filters;
-  - bucket by integer femtometre distance;
+  - bucket by the `1 fm` distance bucket with the cutoff `+ 1 fm` margin;
   - assign a candidate geometry.
-- Reduce candidates by the center site's stabilizer:
-  - take the first unassigned candidate;
-  - mark all stabilizer images as equivalent;
+- Reduce candidates by the center stabilizer `G0`:
+  - sort by `(distanceBucket, targetP, cellA, cellB, cellC)`;
+  - take the first unassigned candidate as the shell representative;
+  - mark every candidate in the same distance bucket and the same `G0` orbit as equivalent;
   - assign a new `PairInteractionId`.
 - Build a symmetric pair set for stable-stable interactions; ensure `A-B` and `B-A` map to one table unless
   chiral.
 - Chirality:
   - compute the inverse geometry `B-A` with the opposite periodic offset;
-  - if the inverse is not in the forward orbit, the pair is chiral;
+  - if the inverse is not in the same `G0` orbit, the pair is chiral;
   - link both directions to one energy table and one parameterization set;
-  - the compiled model records the chiral partner index.
+  - the compiled model records the chiral partner index;
+  - this is an orbit relationship, not physical chirality; in P1 both directions are separate orbits.
 - Unstable-stable pairs are compiled per unstable environment and are asymmetric by nature.
 - Each pair set carries:
   - `CenterSiteIndex`, `PartnerSiteIndex`;
   - reference offset vector and distance;
+  - `DistanceBucketFm`;
+  - `ChiralPartnerId` (or none);
   - multiplicity (`EquivalentModels` count);
   - allowed particle permutations and the particle-table mapping.
 - Pair energy tables are `n_particles × n_particles` in eV; entries not valid for the site pair are zero and
@@ -147,14 +161,16 @@ public sealed record CompiledModel(
 ### 5. Cluster compilation
 
 - Expand the cluster geometry by the space group.
-- For each unique geometry, build the point group at the center.
-- Enumerate occupation states from the surrounding particle sets (and center particle set).
-- Canonicalize under the self-projection orders; keep one representative and record all equivalent
-  permutations.
+- For each unique geometry, build the `PointGroup` at the center: `G0`, `Gset`, `Gseq`, and `P`.
+- Enumerate allowed occupation states from the center and surrounding particle sets.
+- Canonicalize under `P`; keep the lexicographically smallest tuple in site order and record every equivalent
+  tuple/permutation in the expansion map.
 - Build a cluster table:
-  - occupation codes (packed particle indices, 8 bytes for up to 8 surrounding positions);
+  - occupation codes: 6 bits per site, site 0 in the least significant bits, up to 9 sites (54 bits), unused
+    high bits zero;
   - particle-table mapping for the center particle;
   - energy values (default 0, parameterized later).
+- Preserve chiral distinctions; do not merge mirror tuples unless the mirror permutation is in `P`.
 - Clusters only contribute to the center site; this is documented in the energy engine.
 - Cluster tables are indexed by a canonical order (center site, geometry hash, occupation code).
 
@@ -240,8 +256,8 @@ For MMC:
 ### 9. Signature and caching
 
 - `ModelSignature = SHA-256("mocassin/model-signature/v1" || 0x00 || canonical MessagePack projection)` over
-  the compiled model without parameterization values, including the space-group catalog data version
-  (ADR 0010).
+  the compiled model without parameterization values, including the space-group catalog data version,
+  catalog checksum, and symmetry contract version (ADR 0010).
 - `ParameterizationSignature = SHA-256("mocassin/parameterization-signature/v1" || 0x00 || projection)` over
   the model signature plus canonical energy/frequency values.
 - The compiler caches stage results keyed by content hashes:
@@ -310,6 +326,9 @@ At this point, document the compiler:
 | Cache property | Editing one domain rebuilds only dependent stages and keeps unrelated signatures stable |
 | P1 positions | Match step 02 encoder for all samples |
 | Pair sets | Counts/distances/multiplicities match brute force |
+| Pair bucketing | Symmetry-equivalent pairs share a bucket; cutoff-boundary pairs are included with the 1 fm margin |
+| Pair order | Pair tables follow the canonical shell order and are stable across recompilation |
+| Contract metadata | Symmetry and catalog versions are present and included in the model signature |
 | Chirality | Known chiral pairs linked; achiral pairs symmetric |
 | Clusters | Unique permutations match brute-force canonicalization |
 | Rules | State triplets, stability roles, conservation, inverse/dependent counts |

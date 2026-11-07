@@ -94,6 +94,11 @@ to either is a format-breaking change.
   "name": "Ceria",
   "createdUtc": "2026-11-02T12:00:00Z",
   "modifiedUtc": "2026-11-02T12:30:00Z",
+  "symmetry": {
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "…",
+    "symmetryContractVersion": "symmetry-1"
+  },
   "model": { "...": "section 2.2" },
   "parameterizations": [],
   "jobTemplates": [],
@@ -105,6 +110,12 @@ to either is a format-breaking change.
 - UTF-8, no BOM, 2-space indentation, `\n` line endings.
 - `masterSeed` is a 32-byte hex value generated at project creation; it seeds job/lattice derivation and is
   part of the project metadata.
+- `symmetry` is optional advisory metadata written by the application: the embedded catalog data version,
+  catalog checksum, and symmetry contract version. Missing metadata is accepted. If present and any value
+  differs from the embedded values, the loader emits `PROJ034` warning and does not rewrite the project; the
+  compiled payload records the authoritative build versions.
+- `symmetry` is an additive optional v1 field; `schemaVersion` remains `1` while the model shape is pre-release.
+  Step 03 adds fixtures with and without the field.
 - `schemaVersion` is an integer. Readers accept `1..current`; migrations are pure functions in
   `Mocassin.Core.Project.ProjectMigrations`.
 - Unknown properties are rejected by default (`JsonUnmappedMemberHandling.Disallow`) to catch typos; schema
@@ -119,7 +130,8 @@ projection:
 - non-semantic arrays sorted by `id`;
 - numbers in invariant, shortest round-trip form; no NaN/Inf; normalize `-0.0` to `0.0`;
 - timestamps normalized to UTC `Z` with fixed fractional digits;
-- unknown fields excluded (they are rejected by the reader anyway).
+- unknown fields excluded (they are rejected by the reader anyway);
+- `symmetry` is envelope metadata: it is included in the document hash, not the model hash.
 
 The hash is used for dirty tracking and cache keys, not as a cross-language model signature. Model,
 parameterization, and lattice signatures use the MessagePack projection (section 1.3 and ADR 0010).
@@ -174,7 +186,7 @@ parameterization, and lattice signatures use the MessagePack projection (section
 
 ```json
 {
-  "spaceGroup": { "number": 225, "setting": "origin-choice-1", "hallSymbol": "F -4 2 3" },
+  "spaceGroup": { "number": 225, "axis": "none", "origin": "none" },
   "cell": { "a": 5.41, "b": 5.41, "c": 5.41, "alpha": 90.0, "beta": 90.0, "gamma": 90.0 },
   "sites": [
     {
@@ -188,9 +200,23 @@ parameterization, and lattice signatures use the MessagePack projection (section
 }
 ```
 
-- Lengths in Å; angles in degrees.
-- `fractional` components are in `[0, 1)` for the reference position.
-- `setting` selects the space-group setting (origin choice, unique axis) when more than one exists.
+- Lengths are in Å and must be in `0.1..1000`; angles are in degrees and must satisfy
+  `0 < α, β, γ < 180°` and a positive Gram determinant.
+- Crystal-system constraints apply: equal lengths/angles, 90°/120° requirements, unique-axis mapping, and
+  rhombohedral `0 < α < 120°`. Inconsistent values are rejected; they are never silently normalized.
+- The cell-matrix condition number `||M||∞ · ||M⁻¹||∞` must not exceed `1e12`; otherwise `STR003`.
+- `fractional` components are in `[0, 1)` for the reference position. The canonical P1 order uses the exact
+  `24 × 10^12` fractional grid defined in Step 02; the stored decimal remains the user-facing value.
+- `number` is the International Tables space-group number, 1..230.
+- `axis` identifies the unique axis or the hexagonal/rhombohedral description; `origin` identifies the origin
+  choice. Both are explicit and use `none` when the setting has no such choice.
+- `axis` values are `none`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, and `rhombohedral`. `uniqueAxisA` is
+  reserved: the JSON parser accepts the enum value, and the catalog validator rejects it with `STR001` in v1.
+  The generated schema/manifest marks it reserved, not supported. `origin` values are `none`, `originChoice1`,
+  and `originChoice2`.
+- The catalog resolves `(number, axis, origin)` to the Hermann–Mauguin symbol, Hall symbol, crystal system, and
+  operations. These derived values are never persisted in the project.
+- The default structure is P1: `{ "number": 1, "axis": "none", "origin": "none" }`.
 - Stable sites may define interactions and host particles; unstable sites are transition states.
 
 #### Transitions
@@ -536,24 +562,38 @@ MessagePack map with snake_case keys. Top-level:
 | --- | --- | --- |
 | `format_version` | u32 | Payload version |
 | `signature` | string | SHA-256 of canonical parameterized model (geometry + energy/frequency values) |
+| `symmetry_contract_version` | string | Symmetry contract version, e.g. `symmetry-1` |
+| `space_group_data_version` | string | Catalog data version, e.g. `spglib-2.8.0/catalog-1` |
+| `space_group_data_sha256` | string | SHA-256 of the canonical catalog payload |
 | `particle` | object | `charges`, `symbols`, `is_vacancy`, count; index 0 is void |
 | `structure` | object | cell vectors, P1 positions, site definitions, environments, interaction range |
 | `energy` | object | pair tables, cluster tables, defect background |
 | `transitions` | object | jump collections, directions, rules, mapping tables |
 | `simulations` | array | simulation encodings (active collections, settings defaults, trackers) |
 
+- The model-signature projection includes the symmetry contract version and the catalog data version and
+  checksum, so a rule or catalog change invalidates parameterizations.
+
 `structure` fields:
 
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `cell_vectors_ang` | `[[f64;3];3]` | Cartesian a/b/c vectors in Å |
-| `positions` | array | `{vector4:[i32;4], site_index:u32, stable:bool, particle_ids:u8[]}` in P1 order |
+| `positions` | array | `{vector4:[i32;4], site_index:u32, stable:bool, particle_ids:u8[]}` in ascending `P` order; `vector4` is `[cellA, cellB, cellC, P]`, with base positions `[0,0,0,P]` |
 | `position_count` | u32 | Length of `positions` |
 | `site_count` | u32 | Number of user reference sites |
 | `environments` | array | Per position: `selection_particle_mask:u64`, pair interactions, cluster interactions, `update_particle_ids` |
 | `interaction_range` | `[i32;4]` | MMC interaction cube |
 | `static_trackers_per_cell` | u32 | |
 | `global_tracker_count` | u32 | |
+
+- `position_count = Pcount`.
+- `site_index` identifies the reference site; it is not the P index.
+- The linear index is
+  `P + cellC*Pcount + cellB*Pcount*Ccount + cellA*Pcount*Ccount*Bcount`.
+- The index is a signed 32-bit integer. The total `Acount*Bcount*Ccount*Pcount` is validated in 64-bit and
+  must not exceed `2,147,483,647`; larger lattices are rejected before allocation.
+- Negative cell offsets are relative-path coordinates and are not linearized directly.
 
 `energy` fields:
 
@@ -562,6 +602,17 @@ MessagePack map with snake_case keys. Top-level:
 | `pair_tables` | array | `{object_id, energies:[f64; n_particles*n_particles]}` |
 | `cluster_tables` | array | `{object_id, occupation_codes:[u64], energies:[f64], particle_table_mapping:[u8; n_particles]}` |
 | `defect_background` | array | `[position][particle]` site energy in eV |
+
+- Pair tables are in canonical shell order: `(distanceBucket, targetP, cellA, cellB, cellC)`, then site
+  indices. The stable geometry ID is a content hash used for parameterization matching, not table order. The
+  compiled structure environments carry each shell's geometry ID, distance bucket, representative offset,
+  equivalent-offset count, and optional chiral partner index.
+- Chiral partners share one `object_id` and one energy table.
+- Cluster occupation codes use 6 bits per site, site 0 in the least significant bits, up to 9 sites; unused
+  high bits are zero. Codes are canonical under the induced site-permutation group.
+- Pair shells use the `1 fm` distance bucket. Candidate enumeration uses a `cutoff + 1 fm` margin and includes
+  shells with `bucket <= cutoffBucket`.
+- Minimum-image and radial-search results always carry the cell offset; no implicit wrapping is allowed.
 
 `transitions` fields:
 
