@@ -35,8 +35,8 @@ not change the design; that was verified with `git show --stat 848c9a7`.
 
 | Amendment | Review record | Status |
 | --- | --- | --- |
-| `step-02-amend-1` — public generic math | [`step-02-amend-1.md`](step-02-amend-1.md) | Ready with notes |
-| `step-02-amend-2` — KaTeX documentation math | [`step-02-amend-2.md`](step-02-amend-2.md) | Ready with notes |
+| `step-02-amend-1` — public generic math | [`step-02-amend-1.md`](step-02-amend-1.md) | Ready for implementation |
+| `step-02-amend-2` — KaTeX documentation math | [`step-02-amend-2.md`](step-02-amend-2.md) | Ready for implementation |
 
 The parent audit covers these amendments at the combined frozen commit.
 

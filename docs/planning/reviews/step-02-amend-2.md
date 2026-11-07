@@ -13,7 +13,7 @@
 | Step | 02 — Symmetry and Geometry |
 | Amendment | `step-02-amend-2` — Documentation Math Rendering with KaTeX |
 | Request owner | Step agent |
-| Design review status | Ready with notes |
+| Design review status | Ready for implementation |
 | Reviewed commit | `aad0835be9a0f0534e58a29392b64bf6aac2d588` (`aad0835`) |
 | Docs branch | `main` |
 | Review date | 2026-11-07 |
@@ -168,8 +168,6 @@ and request a fresh re-review.
 | A2-2 | Fixed — TOML snippet now says to add keys under the existing `[project]` table | Planner | `aad0835` |
 | A2-3 | Fixed — parent review/audit links and branch-sync prerequisite added | Planner | `aad0835` |
 | A2-4 | Fixed — pinned CDN choice, `$` delimiter disabled, manual evidence specified | Planner | `aad0835` |
-| A2-5 | Fixed — verification-evidence section added to the amendment page | Planner | `25931de` |
-| A2-6 | Fixed — initializer wording now states the `$` delimiter is deliberately omitted | Planner | `25931de` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -256,3 +254,17 @@ Follow-up owner: Planner / implementor
 
 Follow-up step: Implementation may proceed after the human owner accepts these notes; add the manual visual
 evidence slot and clarify the “matching the official example” wording.
+
+## Resolution status (round 2)
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| A2-5 | Fixed — verification-evidence section added to the amendment page | Planner | `25931de` |
+| A2-6 | Fixed — initializer wording now states the `$` delimiter is deliberately omitted | Planner | `25931de` |
+
+## Human owner acceptance
+
+Date: 2026-11-07
+
+The human owner accepted the **Ready with notes** verdict and all re-review notes. The amendment is ready for
+implementation and must be integrated before the Step 02 audit freeze.
