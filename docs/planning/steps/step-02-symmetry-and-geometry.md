@@ -25,7 +25,8 @@ orbit/permutation reduction, and periodic geometry kernels.
 | `p1-encoder` | `feature/step-02-symmetry-and-geometry/p1-encoder` | Squashed | Symmetry tests 87/87; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42405555283`](https://github.com/seb-eis/mocassin-2/actions/runs/42405555283) — green | `45c248d` |
 | `periodic-geometry` | `feature/step-02-symmetry-and-geometry/periodic-geometry` | Squashed | Symmetry tests 95/95; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42416609921`](https://github.com/seb-eis/mocassin-2/actions/runs/42416609921) — green | `9e5ebf7` |
 | `orbit-reduction` | `feature/step-02-symmetry-and-geometry/orbit-reduction` | Squashed | Symmetry tests 108/108; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42418281190`](https://github.com/seb-eis/mocassin-2/actions/runs/42418281190) — green | `a9ea5ae` |
-| `contracts-caches-benchmarks` | `feature/step-02-symmetry-and-geometry/contracts-caches-benchmarks` | Awaiting approval | Symmetry tests 116/116; benchmark `P1Expansion20Cubed` 965.3 µs (target < 1 s); full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `contracts-caches-benchmarks` | `feature/step-02-symmetry-and-geometry/contracts-caches-benchmarks` | Squashed | Symmetry tests 116/116; benchmark `P1Expansion20Cubed` 965.3 µs (target < 1 s); full solution tests pass; `dotnet format --verify-no-changes` passes | [`42419100983`](https://github.com/seb-eis/mocassin-2/actions/runs/42419100983) — licence gate failed; fixed below | `4aaeedd` |
+| `fix-benchmark-licenses` | `feature/step-02-symmetry-and-geometry/fix-benchmark-licenses` | Awaiting approval | NuGet licence gate 44 packages; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 

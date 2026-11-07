@@ -44,6 +44,12 @@ spglib database acknowledges Yusuke Seto’s crystallographic database.
 NuGet dependencies are checked by `tools/contracts/check_nuget_licenses.py` and the CI licence/vulnerability
 gate. The project policy allows MIT-compatible licences; any exception is recorded here.
 
+`BenchmarkDotNet 0.15.8` and its `BenchmarkDotNet.Annotations 0.15.8` package are MIT-licensed and are used
+only for the symmetry performance benchmark. Their transitive `CommandLineParser 2.9.1` and
+`Microsoft.DotNet.PlatformAbstractions 3.1.6` packages are also MIT-licensed; both ship the licence as a file
+instead of an SPDX expression, and the exact versions are pinned in the licence gate for explicit review on
+change.
+
 The test project uses `JsonSchema.Net 9.6.0`, `JsonPointer.Net 7.0.4`, and `Json.More.Net 3.0.1`. Their source
 is MIT-licensed. The NuGet binary releases carry the Open Source Maintenance Fee EULA (`OSMFEULA.txt`): the fee
 applies only to revenue-generating users with annual gross revenue of at least US$10,000. This free,
