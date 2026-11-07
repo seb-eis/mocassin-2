@@ -31,6 +31,15 @@ not change the design; that was verified with `git show --stat 848c9a7`.
 | 1 | Changes required | `dd1d103` | 2026-11-06 | `.tmp/review/step-02-r1-dd1d103-design-review.md` |
 | 2 | Ready with notes | `b698496` | 2026-11-07 | `.tmp/review/step-02-r2-b698496-design-review.md` |
 
+## Step 02 amendments
+
+| Amendment | Review record | Status |
+| --- | --- | --- |
+| `step-02-amend-1` — public generic math | [`step-02-amend-1.md`](step-02-amend-1.md) | Re-review required |
+| `step-02-amend-2` — KaTeX documentation math | [`step-02-amend-2.md`](step-02-amend-2.md) | Re-review required |
+
+The parent audit covers these amendments at the combined frozen commit.
+
 ## Step summary
 
 | Field | Value |

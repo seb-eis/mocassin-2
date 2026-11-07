@@ -41,6 +41,8 @@ Do not use an amendment for:
 | **Proposed** | The change is recorded but not planned. |
 | **Planned** | The amendment plan page is complete and ready for design review. |
 | **Design review** | A fresh planning auditor is reviewing the amendment delta. |
+| **Changes required** | The design review found blocking or material issues. |
+| **Re-review required** | The design was updated and needs another review. |
 | **Ready for implementation** | The amendment design is accepted. |
 | **In progress** | The amendment is being implemented. |
 | **Integrated** | The amendment is squash-merged into the parent step branch. |
