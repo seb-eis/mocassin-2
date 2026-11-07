@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-02-amend-2` |
 | Parent step | 02 — Symmetry and Geometry |
-| Status | Planned |
+| Status | Ready for implementation |
 | Branch | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` |
 | Design review | `docs/planning/reviews/step-02-amend-2.md` |
 | Parent audit | `docs/planning/audits/step-02.md` |
@@ -27,7 +27,7 @@ Zensical already enables `pymdownx.arithmatex.generic`. The missing pieces are:
 
 - KaTeX CSS/JS assets;
 - a small initializer that renders after Zensical's instant navigation;
-- converting the Step 02 formulas from fenced `text` blocks to `$$...$$` / `$...$`;
+- converting the Step 02 formulas from fenced `text` blocks to `$$...$$` / `\(...\)`;
 - a documentation convention so future docs do not regress.
 
 This is a documentation and site-configuration change. It does not change code, public APIs, formats, or
@@ -39,7 +39,9 @@ scientific behavior.
 - Add pinned KaTeX assets to `zensical.toml` via `extra_javascript` and `extra_css`.
 - Convert the published Step 02 math in `docs/physics/symmetry.md` to KaTeX-compatible markup.
 - Add the math authoring convention to `AGENTS.md` and `docs/development/contributing.md`.
-- Add KaTeX attribution to `NOTICE.md`.
+- Add KaTeX attribution and the pinned CDN source to `NOTICE.md`.
+- Fix the existing `docs/development/agent-workflow.md` link to the amendment template so the strict docs
+  build is green before the math change.
 - Verify the strict Zensical build and the rendered page.
 
 ## Non-goals
@@ -54,10 +56,10 @@ scientific behavior.
 
 ### KaTeX configuration
 
-Use the pinned KaTeX release `0.19.1` from the Zensical-documented integration. Add to `zensical.toml`:
+Use the pinned KaTeX release `0.19.1` from the Zensical-documented integration. Add these keys under the
+existing `[project]` table in `zensical.toml`; do not add a second `[project]` table:
 
 ```toml
-[project]
 extra_javascript = [
   "javascripts/katex.js",
   "https://unpkg.com/katex@0.19.1/dist/katex.min.js",
@@ -83,7 +85,6 @@ document$.subscribe(({ body }) => {
   renderMathInElement(body, {
     delimiters: [
       { left: "$$", right: "$$", display: true },
-      { left: "$", right: "$", display: false },
       { left: "\\(", right: "\\)", display: false },
       { left: "\\[", right: "\\]", display: true },
     ],
@@ -91,15 +92,19 @@ document$.subscribe(({ body }) => {
 });
 ```
 
-This hooks KaTeX into Zensical's instant navigation, matching the official Zensical KaTeX example.
+This hooks KaTeX into Zensical's instant navigation. It matches the official Zensical KaTeX example except
+that the single-dollar delimiter is deliberately omitted.
 
 ### Math markup
 
 Use:
 
 - `$$ ... $$` for display math;
-- `$ ... $` or `\( ... \)` for inline math;
+- `\( ... \)` for inline math;
 - `\begin{aligned} ... \end{aligned}` inside `$$` for aligned equations.
+
+Do not enable the single-dollar `$ ... $` delimiter. It can silently match prose or currency pairs; use
+`\( ... \)` for inline math instead.
 
 Do not use fenced `text` blocks for formulas.
 
@@ -155,8 +160,8 @@ $$
 $$
 ```
 
-Use inline math for symbols such as `$G_0$`, `$G_{\text{set}}$`, `$G_{\text{seq}}$`, `$P$`, `$1\ \text{fm}$`,
-and `$[0,1)$` where it improves readability. Do not convert ordinary prose into math.
+Use inline math for symbols such as `\(G_0\)`, `\(G_{\text{set}}\)`, `\(G_{\text{seq}}\)`, `\(P\)`,
+`\(1\ \text{fm}\)`, and `\([0,1)\)` where it improves readability. Do not convert ordinary prose into math.
 
 Audit the published docs for other fenced `text` blocks that contain formulas. Leave structural diagrams,
 file trees, and command transcripts in `text` blocks.
@@ -166,7 +171,7 @@ file trees, and command transcripts in `text` blocks.
 Add to `AGENTS.md` §9 and `docs/development/contributing.md`:
 
 - use `$$...$$` for display math;
-- use `$...$` or `\(...\)` for inline math;
+- use `\(...\)` for inline math;
 - never use fenced `text` blocks for formulas;
 - preview the rendered page before closing a documentation change.
 
@@ -188,30 +193,32 @@ None. This amendment changes documentation assets and site configuration only.
 ## Temporary implementation and migration
 
 - The current `docs/physics/symmetry.md` fenced `text` formulas are temporary.
-- The amendment replaces them with `$$`/`$` markup.
+- The amendment replaces them with `$$`/`\(...\)` markup.
 - Planning docs remain unchanged; they are excluded from the published site.
 - No migration or compatibility shim is required.
 
 ## Acceptance criteria
 
-- [ ] `zensical build --strict` succeeds.
+- [ ] `zensical build --strict` succeeds, including the fixed amendment-template link.
 - [ ] The built symmetry page references `katex.min.css`, `katex.min.js`, and `javascripts/katex.js`.
 - [ ] The published Step 02 formulas render as math, not monospace boxes.
 - [ ] No fenced `text` math blocks remain in `docs/physics/symmetry.md`.
 - [ ] KaTeX is pinned to `0.19.1` and attributed in `NOTICE.md`.
 - [ ] The math authoring convention is recorded in `AGENTS.md` and the contributing guide.
+- [ ] The single-dollar delimiter is not enabled; inline math uses `\(...\)`.
 - [ ] No code, public API, data-contract, or scientific-behavior changes.
 
 ## Tests
 
 | Test | Assertion |
 | --- | --- |
-| Docs build | `zensical build --strict` passes |
+| Docs build | `zensical build --strict` passes, including the fixed amendment-template link |
+| Delimiter scope | Only `$$`, `\(...\)`, and `\[...\]` are configured; `$...$` is not enabled |
 | Asset references | Built HTML contains the KaTeX CSS/JS and initializer references |
 | Formula conversion | No fenced `text` math blocks remain in the published Step 02 docs |
 | Navigation | KaTeX renders after Zensical instant navigation |
 | Accessibility | KaTeX output includes MathML or an equivalent accessible representation |
-| Manual visual check | The symmetry page renders fractions, roots, subscripts, and aligned equations correctly |
+| Manual visual check | `<site>/physics/symmetry/index.html` renders the six converted formulas, fractions, roots, subscripts, and aligned equations; record the command and a screenshot path in the amendment page |
 
 ## Documentation
 
@@ -219,18 +226,22 @@ None. This amendment changes documentation assets and site configuration only.
 - [ ] `zensical.toml` updated.
 - [ ] `docs/javascripts/katex.js` added.
 - [ ] `AGENTS.md` and `docs/development/contributing.md` updated.
-- [ ] `NOTICE.md` updated.
+- [ ] `docs/development/agent-workflow.md` amendment-template link fixed to the GitHub URL.
+- [ ] `NOTICE.md` updated with the KaTeX MIT attribution and the pinned CDN source.
+- [ ] `docs/planning/reviews/step-02.md` links to this amendment review.
+- [ ] `docs/planning/audits/step-02.md` lists the amendment ID and combined commit.
 - [ ] Amendment page and index updated.
 
 ## Risks and mitigations
 
 | Risk | Mitigation |
 | --- | --- |
-| CDN availability or privacy concern | Pin `0.19.1`; vendor the same assets locally if required |
+| CDN availability or privacy concern | Pin `0.19.1`; record the CDN source in `NOTICE.md`; vendor the same assets locally if required |
 | KaTeX syntax differs from MathJax | Use KaTeX-supported commands; build and visually check each converted formula |
 | Instant navigation does not re-render math | Use the `document$.subscribe` initializer from the Zensical example |
 | Accessibility regression | Keep KaTeX's MathML/accessible output; check the rendered page |
 | New docs regress to `text` boxes | Add the authoring convention and a docs review checklist item |
+| Single-dollar delimiter matches prose | Do not enable `$...$`; use `\(...\)` for inline math |
 
 ## Dependencies
 
@@ -242,10 +253,22 @@ None. This amendment changes documentation assets and site configuration only.
 
 - Branch: `feature/step-02-symmetry-and-geometry/amend-2-docs-math`
 - Parent step branch: `step/02-symmetry-and-geometry`
+- Parent branch synchronized with `main` before implementation: —
+- Parent review linked: —
 - Approval: normal feature approval; design review before implementation
 - Squash commit: —
 - Parent audit request updated: —
 - Combined frozen commit: —
+
+## Verification evidence
+
+- Build: `zensical build --strict` at the amendment commit — result and command.
+- Rendered page: `site/physics/symmetry/index.html` — six converted formulas, fractions, roots, subscripts, and
+  aligned equations; screenshot path.
+- Navigation: instant navigation from another page re-renders KaTeX.
+- Accessibility: KaTeX output includes MathML or an equivalent accessible representation.
+- Asset source: pinned CDN URL or vendored path; HTTP status or local file path.
+- Evidence owner: step implementor; record the command output and screenshot path here before closeout.
 
 ## Audit
 

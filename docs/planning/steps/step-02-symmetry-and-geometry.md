@@ -274,28 +274,26 @@ services that accept Core model types and return Symmetry or diagnostic results.
 
 #### Generic math strategy
 
-Modern C# generic math is useful for the arithmetic kernels, but a vector is not a scalar number. Do **not**
-constrain `Fractional3`, `Cartesian3`, or `Vector4I` themselves to `INumber<T>`: `INumber<T>` implies scalar
-comparison, parsing, formatting, and numeric semantics that do not apply to a coordinate vector.
+`Fractional3`, `Cartesian3`, and `Vector4I` remain semantic, non-generic coordinate types. Do **not**
+constrain them to `INumber<T>`: their components have coordinate/index meaning, not scalar-number semantics.
 
-Use this split instead:
+The public generic math primitives are separate:
 
-- **Public types stay semantic and non-generic.** `Fractional3` and `Cartesian3` are distinct
-  `readonly record struct` types with `double` components. They preserve coordinate-space type safety and
-  make unit/coordinate mistakes visible at compile time.
-- **Keep `Vector4I` separate.** Its `P` component is a position index, not a spatial coordinate. It is an
-  encoding type, not a generic vector.
-- **Share arithmetic through an internal generic kernel**, e.g.
-  `internal readonly record struct Vector3<T>(T X, T Y, T Z) where T : unmanaged, INumber<T>`, or a static
-  `VectorMath<T>` helper. Public wrappers delegate to it for add/subtract/scale/dot/cross/length.
-- **Do not use `System.Numerics.Vector3` for geometry.** It is single-precision `float`; scientific
-  coordinates, distances, and symmetry checks require `double`.
-- **Generic math is an implementation detail, not a public format or API contract.** Persisted fields remain
-  `double`/`int` arrays.
+- `Vector3<T>` and `Vector4<T>` are public vector math types constrained to `unmanaged, INumber<T>`.
+- `Matrix3<T>` and `Matrix4<T>` are public row-based matrix types constrained to
+  `unmanaged, IFloatingPointIeee754<T>`; exact integer matrices remain `Int3x3` in `Mocassin.Symmetry`.
+- `Fractional3`, `Cartesian3`, and `Vector4I` keep their semantic public identity and delegate arithmetic to
+  the public generic primitives where useful.
+- `Vector4I` remains an encoding type; it is not a homogeneous coordinate vector.
+- Persisted fields remain `double`/`int`; generic math is not a persistence format.
+- `CellGeometry` uses `Matrix3<double>` and exposes its `Matrix`/`Inverse`; no array-based matrix storage.
 
-This avoids duplicating arithmetic while retaining readable, unit-aware public APIs. If the project later
-needs `float` or `decimal` geometry variants, the internal kernel can be instantiated for them; the public
-scientific model remains `double`-based.
+This supersedes the earlier “internal generic kernel only” rule; see
+[`step-02-amend-1`](../amendments/step-02-amend-1-public-math.md). `decimal` matrices are not part of
+`IFloatingPointIeee754<T>`; exact integer 3×3 matrices use `Int3x3`.
+
+If the project later needs `float` rendering math, the same public primitives can be instantiated for `float`;
+the scientific model remains `double`-based.
 
 - `Fractional3.TrimToUnitCell()` maps to `[0,1)` with a boundary policy that rounds values within `1e-10` of
   an integer to that integer. This boundary snap is a user-input convenience applied before grid conversion;
@@ -621,7 +619,8 @@ reduced/Niggli basis can be added later as an optimization.
 
 #### 7.6 Public/internal API boundary
 
-- Public: `SpaceGroupCatalog`, `SpaceGroupSetting`, `SymmetryOperation`, `PointGroup`, `SitePermutation`,
+- Public: `Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, `Matrix4<T>`, `SpaceGroupCatalog`,
+  `SpaceGroupSetting`, `SymmetryOperation`, `PointGroup`, `SitePermutation`,
   `ExpandedSite`, `SiteOrbitInfo`, `CellGeometry`, `UnitCellVectorEncoder`, `MinimumImageResult`,
   `NeighborImage`, and the pair/cluster reduction result types.
 - Internal: `GridFractional3`, JSON DTOs, cache keys, hashing helpers, and reduction scratch types.
@@ -644,8 +643,9 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] Implement crystal-system constraints and the corrected cell-vector transform.
 - [x] Add `Fractional3`, `Cartesian3`, and `Vector4I` to `Mocassin.Core.Geometry`; implement the encoder in
   `Mocassin.Symmetry`.
-- [x] Implement a shared generic `Vector3<T>`/`VectorMath<T>` arithmetic kernel constrained to
-  `unmanaged, INumber<T>`; public semantic wrappers delegate to it.
+- [ ] Implement public generic `Vector3<T>`/`Vector4<T>` and row-based `Matrix3<T>`/`Matrix4<T>`
+  (`IFloatingPointIeee754<T>` for matrices); keep `Int3x3` as the exact integer specialization and migrate
+  `CellGeometry` to `Matrix3<double>` (amendment 1).
 - [x] Implement canonical P1 expansion and position ordering.
 - [x] Implement stabilizer/point-group/permutation reduction.
 - [x] Implement radial sampling and periodic geometry helpers.

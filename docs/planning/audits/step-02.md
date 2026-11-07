@@ -14,6 +14,20 @@
 | Audit date | — |
 | Auditor | — |
 
+## Step 02 amendments
+
+The Step 02 audit covers the parent step plus these integrated amendments at the combined frozen commit:
+
+- `step-02-amend-1` — public generic math — plan
+  [`step-02-amend-1-public-math.md`](../amendments/step-02-amend-1-public-math.md), review
+  [`step-02-amend-1.md`](../reviews/step-02-amend-1.md).
+- `step-02-amend-2` — KaTeX documentation math — plan
+  [`step-02-amend-2-docs-math.md`](../amendments/step-02-amend-2-docs-math.md), review
+  [`step-02-amend-2.md`](../reviews/step-02-amend-2.md).
+
+Combined audit commit: pending. The human owner accepted the amendment notes; both amendments are
+`Ready for implementation` and must be integrated before this audit freezes.
+
 ## Step summary
 
 | Field | Value |

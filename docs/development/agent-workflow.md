@@ -305,7 +305,7 @@ A design change that emerges during implementation uses a planned amendment, not
 step.
 
 1. Record it as `step-NN-amend-M` from
-   [`docs/planning/amendments/step-amendment-template.md`](../planning/amendments/step-amendment-template.md).
+   [`docs/planning/amendments/step-amendment-template.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/amendments/step-amendment-template.md).
 2. Keep the parent step active and integrate the amendment before the parent audit freeze.
 3. Run a focused design review under section 13; record it in
    `docs/planning/reviews/step-NN-amend-M.md`.

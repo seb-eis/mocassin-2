@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-02-amend-1` |
 | Parent step | 02 — Symmetry and Geometry |
-| Status | Planned |
+| Status | Ready for implementation |
 | Branch | `feature/step-02-symmetry-and-geometry/amend-1-public-math` |
 | Design review | `docs/planning/reviews/step-02-amend-1.md` |
 | Parent audit | `docs/planning/audits/step-02.md` |
@@ -50,8 +50,8 @@ migrates `CellGeometry` to `Matrix3<double>`.
 - No homogeneous path semantics in this amendment. `Vector4<T>`/`Matrix4<T>` are general math primitives;
   the UX `PathCoordinate` decision remains separate.
 - No change to `Int3x3` or the exact integer symmetry operations.
-- No integer or `decimal` matrix inverse. Floating-point matrices use `IFloatingPoint<T>`; exact integer
-  matrices remain `Int3x3`.
+- No integer or `decimal` matrix inverse. Floating-point matrices use `IFloatingPointIeee754<T>`, which excludes
+  `decimal`; exact integer matrices remain `Int3x3`.
 - No rendering, Avalonia, or UX integration.
 - No changes to the project, package, results, or state formats.
 
@@ -63,8 +63,8 @@ migrates `CellGeometry` to `Matrix3<double>`.
 | --- | --- | --- |
 | `Vector3<T>` | `T : unmanaged, INumber<T>` | General numeric vector arithmetic; no division-by-`T` requirement beyond `INumber<T>` |
 | `Vector4<T>` | `T : unmanaged, INumber<T>` | General numeric vector arithmetic and matrix rows |
-| `Matrix3<T>` | `T : unmanaged, IFloatingPoint<T>` | Determinant/inverse require floating-point division |
-| `Matrix4<T>` | `T : unmanaged, IFloatingPoint<T>` | Determinant/inverse require floating-point division |
+| `Matrix3<T>` | `T : unmanaged, IFloatingPointIeee754<T>` | Determinant/inverse require floating-point division |
+| `Matrix4<T>` | `T : unmanaged, IFloatingPointIeee754<T>` | Determinant/inverse require floating-point division |
 | `Int3x3` | exact `int` specialization in `Mocassin.Symmetry` | Exact crystallographic group laws and `±1` inverse |
 
 `double` is the scientific geometry type. `float`/`Half` may be used by future rendering code; `decimal` and
@@ -112,7 +112,7 @@ public readonly record struct Matrix3<T>(
     Vector3<T> Row0,
     Vector3<T> Row1,
     Vector3<T> Row2)
-    where T : unmanaged, IFloatingPoint<T>
+    where T : unmanaged, IFloatingPointIeee754<T>
 ```
 
 Required API:
@@ -150,7 +150,7 @@ public readonly record struct Matrix4<T>(
     Vector4<T> Row1,
     Vector4<T> Row2,
     Vector4<T> Row3)
-    where T : unmanaged, IFloatingPoint<T>
+    where T : unmanaged, IFloatingPointIeee754<T>
 ```
 
 Required API mirrors `Matrix3<T>`:
@@ -167,6 +167,26 @@ Required API mirrors `Matrix3<T>`:
 Use cofactor expansion or a documented Gaussian-elimination implementation. The general inverse is required;
 an affine-specialized inverse can be added later if profiling justifies it. Homogeneous point/direction
 semantics are not part of this type.
+
+#### Consumer justification for 4×4
+
+`Vector4<T>`/`Matrix4<T>` are retained because the planned homogeneous/authoring layer (Step 23/24) and the
+rendering transforms (Step 27) need a public 4×4 math type. Adding them now keeps the public math API coherent
+and avoids a second public-math amendment. They are independently tested for construction, multiplication, determinant, inverse, transform, and
+condition number; they are not required by `CellGeometry`.
+
+These consumer references are provisional. The Step 23/24/27 design reviews must confirm the 4×4 consumer or
+defer the 4D types; if they do not need it, `Vector4<T>`/`Matrix4<T>` can be removed in a later amendment without
+changing the 3×3/`CellGeometry` contract.
+
+#### Singular and conditioning contract
+
+- `Matrix3<T>.Inverse` and `Matrix4<T>.Inverse` throw `InvalidOperationException` when the determinant is zero.
+- `ConditionNumber` is defined only for an invertible matrix; it throws for a singular matrix.
+- `Inverse` does not apply a tolerance. `CellGeometry` owns the near-zero determinant and condition-number
+  validation before it computes or relies on the inverse.
+- `AggressiveInlining` is limited to small hot accessors and transforms. Do not force-inline `Inverse` or the
+  4×4 paths without benchmark evidence.
 
 ### `CellGeometry` migration
 
@@ -198,12 +218,16 @@ the documented tolerances.
 
 ### Performance and inlining
 
-- Mark public vector/matrix operators and hot methods `AggressiveInlining`.
+- Mark small public vector/matrix operators, accessors, and transforms `AggressiveInlining`; do not force-inline
+  `Inverse` or the 4×4 paths without benchmark evidence.
 - Avoid arrays inside matrix types.
 - Use value types; `Matrix3<double>` is 72 bytes and `Matrix4<double>` is 128 bytes.
-- Add a BenchmarkDotNet case for `Matrix3<double>.Transform` and `Matrix3<double>.Inverse`.
-- Add a `DOTNET_JitDisasm` or `DisassemblyDiagnoser` check to confirm matrix-vector transforms inline and do
-  not allocate.
+- Add `MatrixMathBenchmarks` in `Mocassin.Benchmarks` with `MemoryDiagnoser` and `DisassemblyDiagnoser` for
+  `Matrix3<double>.Transform` and `Matrix3<double>.Inverse`.
+- Acceptance: the transform benchmark reports `Allocated = 0`, and the disassembly contains no unexpected call
+  to `Matrix3.Transform`, `Vector3<T>` operators, or the generic kernel.
+- Record the benchmark class, environment, and raw result in `tests/reference/bench/baselines.json` and link
+  the result from this amendment page.
 - Do not use `Unsafe.As` or layout punning.
 
 ## API and contract impact
@@ -211,7 +235,10 @@ the documented tolerances.
 - New public types and members in `Mocassin.Core.Geometry`.
 - `Vector3<T>` changes from internal to public: additive, no breaking change.
 - `CellGeometry.Matrix` and `CellGeometry.Inverse` become public read-only properties.
-- `PublicAPI.Unshipped.txt`, XML documentation, and the API baseline assembly must be updated.
+- `src/dotnet/Mocassin.Core/PublicAPI.Unshipped.txt`,
+  `src/dotnet/Mocassin.Symmetry/PublicAPI.Unshipped.txt`, XML documentation, and both API baseline assemblies
+  (`tests/contracts/api-baseline/net10.0/Mocassin.Core.dll` and
+  `tests/contracts/api-baseline/net10.0/Mocassin.Symmetry.dll`) must be updated.
 - No project/package/results/state format changes.
 
 ## Temporary implementation and migration
@@ -224,14 +251,15 @@ the documented tolerances.
 ## Acceptance criteria
 
 - [ ] `Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, and `Matrix4<T>` are public in `Mocassin.Core.Geometry`.
-- [ ] Every public member has XML documentation and appears in the public API baseline.
+- [ ] Every public member has XML documentation and appears in both public API baselines.
 - [ ] `Matrix3<T>` and `Matrix4<T>` are row-based and document the `M * v` convention.
 - [ ] `Matrix3<T>.FromColumns` builds the cell matrix correctly.
 - [ ] `Matrix3<T>.Inverse` and `Matrix4<T>.Inverse` satisfy `M * M⁻¹ = I` for random invertible matrices.
 - [ ] `CellGeometry` contains no `double[]` matrix/inverse field.
 - [ ] Existing cell-geometry behavior and golden values are unchanged.
 - [ ] Matrix/vector property tests pass for `double` and `float`.
-- [ ] The matrix benchmark and inlining check show no unexpected allocation or call overhead.
+- [ ] `Matrix4<T>` construction, `FromRows`, `FromColumns`, `Transform`, and `ConditionNumber` are tested.
+- [ ] The matrix benchmark records `Allocated = 0` and the expected inlining result.
 - [ ] `Int3x3` and exact symmetry arithmetic are unchanged.
 - [ ] No project, package, results, or state format changes.
 
@@ -247,6 +275,8 @@ the documented tolerances.
 | Inverse 4×4 | `M * M⁻¹ = I` for random invertible matrices; singular throws |
 | Transform | `M * v` matches row-dot reference |
 | Row/column convention | `FromColumns(a,b,c)` transforms the standard basis to the columns |
+| Matrix4 construction | `FromRows`/`FromColumns` and `Transform(Vector4<T>)` match a component reference |
+| Singular/condition | Singular inverse and condition-number usage throw; `CellGeometry` rejects before use |
 | Cell matrix | `CellGeometry.Matrix` columns equal `A`, `B`, `C` |
 | Cell round-trip | `ToCartesian`/`ToFractional` round-trip within tolerance |
 | Cell condition | `Matrix.ConditionNumber` equals the existing condition number |
@@ -255,10 +285,17 @@ the documented tolerances.
 
 ## Documentation
 
-- [ ] `docs/development/design-decisions.md` — public generic math and `IFloatingPoint<T>` matrix constraint.
+- [ ] `docs/development/design-decisions.md` — public generic math and `IFloatingPointIeee754<T>` matrix constraint.
 - [ ] `docs/development/architecture.md` — `Core.Geometry` owns the generic math primitives.
 - [ ] `docs/planning/05-open-decisions.md` — resolved decision row.
-- [ ] XML documentation and API baseline.
+- [ ] `docs/planning/steps/step-02-symmetry-and-geometry.md` — supersede the internal-kernel rule and update the
+  public API boundary and implementation tasks.
+- [ ] `docs/planning/01-target-architecture.md` — public vector/matrix math in `Core.Geometry`.
+- [ ] `src/dotnet/Mocassin.Core/PublicAPI.Unshipped.txt` and
+  `src/dotnet/Mocassin.Symmetry/PublicAPI.Unshipped.txt`.
+- [ ] Both API baseline assemblies.
+- [ ] `docs/planning/reviews/step-02.md` links to this amendment review.
+- [ ] `docs/planning/audits/step-02.md` lists the amendment ID and combined commit.
 - [ ] Amendment page/index and parent audit request.
 
 ## Risks and mitigations
@@ -266,10 +303,10 @@ the documented tolerances.
 | Risk | Mitigation |
 | --- | --- |
 | Public API surface expansion | Design review, XML docs, API baseline, and a focused public API list |
-| Generic constraint confusion | Document `IFloatingPoint<T>` for matrices and `INumber<T>` for vectors; keep `Int3x3` for exact integers |
+| Generic constraint confusion | Document `IFloatingPointIeee754<T>` for matrices (excludes `decimal`) and `INumber<T>` for vectors; keep `Int3x3` for exact integers |
 | Row/column convention errors | Explicit convention, `FromRows`/`FromColumns` tests, cell matrix test |
-| 4×4 inverse complexity | Property tests against an independent reference; singular-matrix tests |
-| Struct copy/performance | Benchmark and disassembly check; use `AggressiveInlining`; keep matrix types small |
+| 4×4 inverse complexity | Property tests against an independent reference; singular-matrix tests; keep the planned Step 23/24/27 consumers explicit |
+| Struct copy/performance | Benchmark and disassembly check; limit `AggressiveInlining` to measured hot paths; keep matrix types small |
 | Behavior change in cell geometry | Reuse the existing golden tests and compare within documented tolerances |
 
 ## Dependencies
@@ -283,6 +320,8 @@ the documented tolerances.
 
 - Branch: `feature/step-02-symmetry-and-geometry/amend-1-public-math`
 - Parent step branch: `step/02-symmetry-and-geometry`
+- Parent branch synchronized with `main` before implementation: —
+- Parent review linked: —
 - Approval: normal feature approval; design review before implementation
 - Squash commit: —
 - Parent audit request updated: —
