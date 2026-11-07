@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-02-amend-2` |
 | Parent step | 02 — Symmetry and Geometry |
-| Status | Planned |
+| Status | Design review |
 | Branch | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` |
 | Design review | `docs/planning/reviews/step-02-amend-2.md` |
 | Parent audit | `docs/planning/audits/step-02.md` |
