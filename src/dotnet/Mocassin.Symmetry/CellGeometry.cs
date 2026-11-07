@@ -2,6 +2,7 @@
 
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Numerics;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Model;
@@ -25,7 +26,6 @@ namespace Mocassin.Symmetry;
 /// </remarks>
 public sealed class CellGeometry
 {
-    private readonly double[] inverse;
     private readonly double g00;
     private readonly double g01;
     private readonly double g02;
@@ -33,63 +33,19 @@ public sealed class CellGeometry
     private readonly double g12;
     private readonly double g22;
 
-    private CellGeometry(CellParameters parameters, Cartesian3 a, Cartesian3 b, Cartesian3 c, double determinantG)
+    private CellGeometry(CellParameters parameters, Cartesian3 a, Cartesian3 b, Cartesian3 c)
     {
         Parameters = parameters;
         A = a;
         B = b;
         C = c;
-        VolumeAngstrom3 = parameters.A.Value * parameters.B.Value * parameters.C.Value * Math.Sqrt(determinantG);
-
-        var m00 = a.X;
-        var m01 = b.X;
-        var m02 = c.X;
-        var m10 = a.Y;
-        var m11 = b.Y;
-        var m12 = c.Y;
-        var m20 = a.Z;
-        var m21 = b.Z;
-        var m22 = c.Z;
-
-        var determinant =
-            (m00 * ((m11 * m22) - (m12 * m21)))
-            - (m01 * ((m10 * m22) - (m12 * m20)))
-            + (m02 * ((m10 * m21) - (m11 * m20)));
-
-        var c00 = (m11 * m22) - (m12 * m21);
-        var c01 = -((m10 * m22) - (m12 * m20));
-        var c02 = (m10 * m21) - (m11 * m20);
-        var c10 = -((m01 * m22) - (m02 * m21));
-        var c11 = (m00 * m22) - (m02 * m20);
-        var c12 = -((m00 * m21) - (m01 * m20));
-        var c20 = (m01 * m12) - (m02 * m11);
-        var c21 = -((m00 * m12) - (m02 * m10));
-        var c22 = (m00 * m11) - (m01 * m10);
-
-        inverse =
-        [
-            c00 / determinant,
-            c10 / determinant,
-            c20 / determinant,
-            c01 / determinant,
-            c11 / determinant,
-            c21 / determinant,
-            c02 / determinant,
-            c12 / determinant,
-            c22 / determinant,
-        ];
-
-        var matrixNorm = Math.Max(
-            Math.Abs(m00) + Math.Abs(m01) + Math.Abs(m02),
-            Math.Max(
-                Math.Abs(m10) + Math.Abs(m11) + Math.Abs(m12),
-                Math.Abs(m20) + Math.Abs(m21) + Math.Abs(m22)));
-        var inverseNorm = Math.Max(
-            Math.Abs(inverse[0]) + Math.Abs(inverse[1]) + Math.Abs(inverse[2]),
-            Math.Max(
-                Math.Abs(inverse[3]) + Math.Abs(inverse[4]) + Math.Abs(inverse[5]),
-                Math.Abs(inverse[6]) + Math.Abs(inverse[7]) + Math.Abs(inverse[8])));
-        ConditionNumber = matrixNorm * inverseNorm;
+        Matrix = Matrix3<double>.FromColumns(
+            new Vector3<double>(a.X, a.Y, a.Z),
+            new Vector3<double>(b.X, b.Y, b.Z),
+            new Vector3<double>(c.X, c.Y, c.Z));
+        Inverse = Matrix.Inverse();
+        VolumeAngstrom3 = Math.Abs(Matrix.Determinant);
+        ConditionNumber = Matrix.ConditionNumber;
 
         g00 = a.Dot(a);
         g01 = a.Dot(b);
@@ -118,6 +74,16 @@ public sealed class CellGeometry
     /// Gets the third cell vector (column c).
     /// </summary>
     public Cartesian3 C { get; }
+
+    /// <summary>
+    /// Gets the cell matrix with <see cref="A"/>, <see cref="B"/>, and <see cref="C"/> as columns.
+    /// </summary>
+    public Matrix3<double> Matrix { get; }
+
+    /// <summary>
+    /// Gets the inverse cell matrix.
+    /// </summary>
+    public Matrix3<double> Inverse { get; }
 
     /// <summary>
     /// Gets the cell volume in cubic ångström.
@@ -182,19 +148,22 @@ public sealed class CellGeometry
     /// </summary>
     /// <param name="fractional">The fractional coordinate.</param>
     /// <returns>The Cartesian point in ångström.</returns>
-    public Cartesian3 ToCartesian(Fractional3 fractional) =>
-        (A * fractional.A) + (B * fractional.B) + (C * fractional.C);
+    public Cartesian3 ToCartesian(Fractional3 fractional)
+    {
+        var transformed = Matrix.Transform(new Vector3<double>(fractional.A, fractional.B, fractional.C));
+        return new Cartesian3(transformed.X, transformed.Y, transformed.Z);
+    }
 
     /// <summary>
     /// Converts a Cartesian point to a fractional coordinate.
     /// </summary>
     /// <param name="cartesian">The Cartesian point in ångström.</param>
     /// <returns>The fractional coordinate.</returns>
-    public Fractional3 ToFractional(Cartesian3 cartesian) =>
-        new(
-            (inverse[0] * cartesian.X) + (inverse[1] * cartesian.Y) + (inverse[2] * cartesian.Z),
-            (inverse[3] * cartesian.X) + (inverse[4] * cartesian.Y) + (inverse[5] * cartesian.Z),
-            (inverse[6] * cartesian.X) + (inverse[7] * cartesian.Y) + (inverse[8] * cartesian.Z));
+    public Fractional3 ToFractional(Cartesian3 cartesian)
+    {
+        var transformed = Inverse.Transform(new Vector3<double>(cartesian.X, cartesian.Y, cartesian.Z));
+        return new Fractional3(transformed.X, transformed.Y, transformed.Z);
+    }
 
     /// <summary>
     /// Computes the direct, non-minimum-image distance between two fractional coordinates.
@@ -289,7 +258,7 @@ public sealed class CellGeometry
             c * (cosAlpha - (cosBeta * cosGamma)) / sinGamma,
             c * Math.Sqrt(determinantG) / sinGamma);
 
-        var candidate = new CellGeometry(parameters, vectorA, vectorB, vectorC, determinantG);
+        var candidate = new CellGeometry(parameters, vectorA, vectorB, vectorC);
         if (!IsConditionWithinLimit(candidate.ConditionNumber))
         {
             bag.Add(new Diagnostic(

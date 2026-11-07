@@ -643,7 +643,7 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] Implement crystal-system constraints and the corrected cell-vector transform.
 - [x] Add `Fractional3`, `Cartesian3`, and `Vector4I` to `Mocassin.Core.Geometry`; implement the encoder in
   `Mocassin.Symmetry`.
-- [ ] Implement public generic `Vector3<T>`/`Vector4<T>` and row-based `Matrix3<T>`/`Matrix4<T>`
+- [x] Implement public generic `Vector3<T>`/`Vector4<T>` and row-based `Matrix3<T>`/`Matrix4<T>`
   (`IFloatingPointIeee754<T>` for matrices); keep `Int3x3` as the exact integer specialization and migrate
   `CellGeometry` to `Matrix3<double>` (amendment 1).
 - [x] Implement canonical P1 expansion and position ordering.

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Symmetry;
@@ -17,7 +18,7 @@ public static class Program
     /// Runs the symmetry benchmarks.
     /// </summary>
     /// <param name="args">BenchmarkDotNet arguments.</param>
-    public static void Main(string[] args) => BenchmarkRunner.Run<SymmetryBenchmarks>(args: args);
+    public static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
 }
 
 /// <summary>
@@ -91,4 +92,42 @@ public class SymmetryBenchmarks
         checksum = sum;
         return sum;
     }
+}
+
+/// <summary>
+/// Matrix arithmetic benchmarks for the public generic math layer.
+/// </summary>
+[MemoryDiagnoser]
+[DisassemblyDiagnoser(maxDepth: 2)]
+public class MatrixMathBenchmarks
+{
+    private Matrix3<double> matrix;
+    private Vector3<double> vector;
+
+    /// <summary>
+    /// Builds the fixed matrix fixture.
+    /// </summary>
+    [GlobalSetup]
+    public void Setup()
+    {
+        matrix = Matrix3<double>.FromRows(
+            new Vector3<double>(2.0, 0.5, 0.25),
+            new Vector3<double>(-0.5, 3.0, 0.75),
+            new Vector3<double>(0.25, -0.75, 4.0));
+        vector = new Vector3<double>(0.5, -1.0, 2.0);
+    }
+
+    /// <summary>
+    /// Transforms one vector.
+    /// </summary>
+    /// <returns>The transformed vector.</returns>
+    [Benchmark]
+    public Vector3<double> Matrix3Transform() => matrix.Transform(vector);
+
+    /// <summary>
+    /// Inverts the matrix.
+    /// </summary>
+    /// <returns>The inverse matrix.</returns>
+    [Benchmark]
+    public Matrix3<double> Matrix3Inverse() => matrix.Inverse();
 }

@@ -364,3 +364,5 @@ override Mocassin.Symmetry.SymmetryVersionInfo.ToString() -> string!
 static Mocassin.Symmetry.SymmetryVersionInfo.FromCatalog(Mocassin.Symmetry.SpaceGroupCatalog! catalog) -> Mocassin.Symmetry.SymmetryVersionInfo!
 static Mocassin.Symmetry.SymmetryVersionInfo.operator !=(Mocassin.Symmetry.SymmetryVersionInfo? left, Mocassin.Symmetry.SymmetryVersionInfo? right) -> bool
 static Mocassin.Symmetry.SymmetryVersionInfo.operator ==(Mocassin.Symmetry.SymmetryVersionInfo? left, Mocassin.Symmetry.SymmetryVersionInfo? right) -> bool
+Mocassin.Symmetry.CellGeometry.Inverse.get -> Mocassin.Core.Geometry.Matrix3<double>
+Mocassin.Symmetry.CellGeometry.Matrix.get -> Mocassin.Core.Geometry.Matrix3<double>

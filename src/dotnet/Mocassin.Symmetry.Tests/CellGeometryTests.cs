@@ -51,6 +51,26 @@ public sealed class CellGeometryTests
     }
 
     [Fact]
+    public void CellMatrixColumnsAndInverseMatchTheGeometry()
+    {
+        var parameters = Parameters(5.0, 6.0, 7.0, 80.0, 85.0, 95.0);
+        Assert.True(CellGeometry.TryCreate(parameters, out var geometry, out _));
+        Assert.NotNull(geometry);
+
+        Assert.Equal(new Vector3<double>(geometry.A.X, geometry.A.Y, geometry.A.Z), geometry.Matrix.Column0);
+        Assert.Equal(new Vector3<double>(geometry.B.X, geometry.B.Y, geometry.B.Z), geometry.Matrix.Column1);
+        Assert.Equal(new Vector3<double>(geometry.C.X, geometry.C.Y, geometry.C.Z), geometry.Matrix.Column2);
+        Assert.Equal(Math.Abs(geometry.Matrix.Determinant), geometry.VolumeAngstrom3, 10);
+        Assert.Equal(geometry.Matrix.ConditionNumber, geometry.ConditionNumber, 12);
+
+        var vector = new Vector3<double>(0.25, -0.5, 1.25);
+        var roundTripped = geometry.Inverse.Transform(geometry.Matrix.Transform(vector));
+        Assert.Equal(vector.X, roundTripped.X, 12);
+        Assert.Equal(vector.Y, roundTripped.Y, 12);
+        Assert.Equal(vector.Z, roundTripped.Z, 12);
+    }
+
+    [Fact]
     public void AllSevenCrystalSystemsValidate()
     {
         AssertValid(Parameters(5.0, 6.0, 7.0, 80.0, 85.0, 95.0), CrystalSystem.Triclinic, AxisSetting.None);

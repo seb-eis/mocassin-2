@@ -22,5 +22,18 @@
     "environment": "local container, AMD Ryzen 7 7840U, .NET SDK 10.0.403, Release, DefaultJob",
     "meanMicroseconds": 965.3,
     "targetMet": true
+  },
+  "matrixMath": {
+    "command": "dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks -- --filter \"*Matrix3*\"",
+    "environment": "local container, AMD Ryzen 7 7840U, .NET SDK 10.0.403, Release, DefaultJob",
+    "matrix3Transform": {
+      "meanNanoseconds": 0.8989,
+      "allocatedBytes": 0,
+      "disassembly": "fully inlined; no call to Matrix3.Transform, Vector3<T> operators, or the generic kernel"
+    },
+    "matrix3Inverse": {
+      "meanNanoseconds": 5.2202,
+      "allocatedBytes": 0
+    }
   }
 }

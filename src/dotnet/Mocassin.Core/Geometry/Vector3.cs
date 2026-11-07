@@ -7,21 +7,33 @@ using System.Runtime.CompilerServices;
 namespace Mocassin.Core.Geometry;
 
 /// <summary>
-/// Internal generic three-component arithmetic kernel shared by the semantic coordinate types.
+/// A generic three-component vector.
 /// </summary>
 /// <typeparam name="T">The numeric component type.</typeparam>
 /// <remarks>
-/// This type exists so the public <see cref="Fractional3"/> and <see cref="Cartesian3"/> wrappers do not
-/// duplicate add/subtract/scale/dot/cross arithmetic. It is not a public coordinate type: the semantic
-/// wrappers keep fractional and Cartesian spaces distinct at compile time.
+/// The semantic <see cref="Fractional3"/> and <see cref="Cartesian3"/> wrappers keep coordinate spaces
+/// distinct at compile time and delegate their arithmetic to this type. Use this generic type for reusable
+/// numeric kernels, matrices, and transforms; use the semantic wrappers for scientific coordinates.
 /// </remarks>
-internal readonly record struct Vector3<T>(T X, T Y, T Z)
+[System.Diagnostics.CodeAnalysis.SuppressMessage(
+    "Design",
+    "CA1000:Do not declare static members on generic types",
+    Justification = "Generic math primitives require static operators, identity values, and factories.")]
+public readonly record struct Vector3<T>(T X, T Y, T Z)
     where T : unmanaged, INumber<T>
 {
     /// <summary>
     /// Gets the zero vector.
     /// </summary>
     public static Vector3<T> Zero => new(T.Zero, T.Zero, T.Zero);
+
+    /// <summary>
+    /// Computes the dot product with another vector.
+    /// </summary>
+    /// <param name="other">The other vector.</param>
+    /// <returns>The dot product.</returns>
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public T Dot(Vector3<T> other) => Dot(this, other);
 
     /// <summary>
     /// Gets the sum of the squared components.
