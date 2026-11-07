@@ -41,6 +41,8 @@ Do not use an amendment for:
 | **Proposed** | The change is recorded but not planned. |
 | **Planned** | The amendment plan page is complete and ready for design review. |
 | **Design review** | A fresh planning auditor is reviewing the amendment delta. |
+| **Changes required** | The design review found blocking or material issues. |
+| **Re-review required** | The design was updated and needs another review. |
 | **Ready for implementation** | The amendment design is accepted. |
 | **In progress** | The amendment is being implemented. |
 | **Integrated** | The amendment is squash-merged into the parent step branch. |
@@ -100,8 +102,8 @@ If the parent step is already merged or tagged:
 
 | Amendment | Parent step | Status | Branch | Design review | Parent audit / tag |
 | --- | --- | --- | --- | --- | --- |
-| `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Design review** | — | [Ready for review](../reviews/step-02-amend-1.md) | — |
-| `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Design review** | — | [Ready for review](../reviews/step-02-amend-2.md) | — |
+| `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Re-review required** | — | [Re-review](../reviews/step-02-amend-1.md) | — |
+| `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Re-review required** | — | [Re-review](../reviews/step-02-amend-2.md) | — |
 
 `step-02-amend-1` covers the public generic math layer (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`,
 `Matrix4<T>`) and the replacement of the temporary `CellGeometry` array-based inverse. See

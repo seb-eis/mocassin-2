@@ -276,7 +276,7 @@ types explicit.
 | Feature | Where it fits | Why |
 | --- | --- | --- |
 | `readonly record struct`, `required`, `init` | IDs, units, DTOs, immutable model records | Value semantics, non-null initialization, less boilerplate |
-| Generic math (`INumber<T>`, `IFloatingPointIeee754<T>`) | Internal vector/matrix kernels, numeric helpers | Shared arithmetic without collapsing semantic public coordinate types |
+| Generic math (`INumber<T>`, `IFloatingPointIeee754<T>`) | Public vector/matrix math (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, `Matrix4<T>`), internal numeric helpers | Shared arithmetic without collapsing semantic public coordinate types; floating-point matrices exclude `decimal`; exact integer 3×3 remains `Int3x3` |
 | `FrozenDictionary` / `FrozenSet` | Compiled particle/site/rule index maps, lookup tables | Fast immutable lookups after compilation |
 | `System.Numerics.Tensors` (`TensorPrimitives`) | MSD, displacement, correlation, and array reductions in Results | Vectorized reductions without hand-written SIMD |
 | `System.Threading.Lock` | Shared caches, session state, package-writer coordination | Cheaper, clearer mutual exclusion than `lock(object)` |

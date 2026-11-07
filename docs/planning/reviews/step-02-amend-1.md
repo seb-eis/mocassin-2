@@ -13,8 +13,8 @@
 | Step | 02 — Symmetry and Geometry |
 | Amendment | `step-02-amend-1` — Public Generic Math Types |
 | Request owner | Step agent |
-| Design review status | Changes required |
-| Reviewed commit | `bd4876314ed962da64c49ea747d7e3e4ed2e7552` (`bd48763`) |
+| Design review status | Re-review required |
+| Reviewed commit | `aad0835be9a0f0534e58a29392b64bf6aac2d588` (`aad0835`) |
 | Docs branch | `main` |
 | Review date | 2026-11-07 |
 | Reviewer | Independent planning auditor |
@@ -169,7 +169,12 @@ a fresh re-review.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| A1-1 | Fixed — Step 02 generic-math rule and target architecture superseded | Planner | `aad0835` |
+| A1-2 | Fixed — matrices use `IFloatingPointIeee754<T>`; `decimal` excluded | Planner | `aad0835` |
+| A1-3 | Fixed — 4×4 consumer justification and tests added | Planner | `aad0835` |
+| A1-4 | Fixed — both API baselines and benchmark/disassembly evidence defined | Planner | `aad0835` |
+| A1-5 | Fixed — parent review/audit links and branch-sync prerequisite added | Planner | `aad0835` |
+| A1-6 | Fixed — singular/condition-number contract and inlining limits documented | Planner | `aad0835` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
