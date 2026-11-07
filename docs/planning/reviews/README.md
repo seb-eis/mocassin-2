@@ -13,14 +13,16 @@ does not review implementation code, because none exists yet.
 
 | Role | Responsibility |
 | --- | --- |
-| Planning agent | Facilitate decisions, write the review request, update design docs |
-| Step agent | Own the step page and review record, fix design findings |
-| Planning auditor | Fresh, read-only, out-of-context design review; writes a gitignored report only |
-| Scribe | Transcribe findings and verdict verbatim; apply approved documentation edits |
+| Planning agent (planner) | Facilitate decisions, write the review request, update design docs directly |
+| Step agent (implementor) | Own the step page and review record request, fix design findings, add resolutions |
+| Planning auditor (reviewer) | Fresh, out-of-context design review; writes evidence, findings, and verdict directly into the review record |
 | Human owner | Approve the verdict and the start of implementation |
 
-The planning auditor must not be the agent that authored the decisions or will implement the step. It must not
-edit tracked files, commit, push, or change a branch.
+The planning auditor must not be the agent that authored the decisions or will implement the step. It may edit
+only the review record's reviewer-owned metadata, evidence, findings, and verdict. It must not edit design docs,
+the step page, status dashboard, parity matrix, request scope, checklists, resolutions, code, tests, or
+configuration. The auditor writes directly into `docs/planning/reviews/step-NN.md`; there is no handoff file
+and no transcription step.
 
 ## 3. Status values
 
@@ -37,7 +39,8 @@ edit tracked files, commit, push, or change a branch.
 ## 4. Required sequence
 
 1. The planning agent and step agent finish the step's design decisions and update the step page, data
-   contracts, architecture, quality strategy, open decisions, parity matrix, and related docs.
+   contracts, architecture, quality strategy, open decisions, parity matrix, and related docs. They apply those
+   edits directly.
 2. The docs are frozen at a specific commit.
 3. The step agent creates or updates `docs/planning/reviews/step-NN.md` from the template:
    - status: `Ready for review`
@@ -45,19 +48,19 @@ edit tracked files, commit, push, or change a branch.
    - design decisions and scope
    - known limitations
 4. A fresh planning auditor reads the step page, decisions, dependency contracts, architecture, data
-   contracts, ADRs, quality strategy, open decisions, parity matrix, licensing records, and audit plan.
-5. The planning auditor writes a report to the gitignored handoff file
-   `.tmp/review/step-NN-rN-<short-sha>-design-review.md` (or `...-re-review.md`). The report records the
-   reviewed commit, files reviewed, findings, verdict, and follow-up. The auditor does not commit, push, or
-   edit tracked files.
-6. The step agent or a neutral scribe transcribes the findings and verdict verbatim into
-   `docs/planning/reviews/step-NN.md`, adds the metadata, and commits the documentation-only record. The
-   planning auditor must not commit or approve it.
-7. If the verdict is `Changes required`, the planning agent/scribe updates the design docs, the step agent
-   marks the review `Re-review required`, and a fresh planning auditor re-reviews the new commit.
-8. On `Ready for implementation`, the human owner approves the start. The step branch is created from the
+   contracts, ADRs, quality strategy, open decisions, parity matrix, licensing records, and audit plan. The
+   auditor must not have authored or implemented the design.
+5. The planning auditor writes the evidence, findings, and verdict directly into
+   `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
+   `[skip ci]`. The reviewed commit is the parent of the record commit. The auditor does not merge, tag, push
+   `main`, or change any other file. If the auditor cannot commit, it writes the record and the step agent
+   commits it unchanged.
+6. If the verdict is `Changes required`, the planning agent and step agent update the design docs directly, the
+   step agent adds the resolutions and marks the review `Re-review required`, and a fresh planning auditor
+   re-reviews the new commit. The new round is appended; earlier rounds are not overwritten.
+7. On `Ready for implementation`, the human owner approves the start. The step branch is created from the
    reviewed `main` commit.
-9. The post-implementation audit in `docs/planning/audits/` remains mandatory and separate.
+8. The post-implementation audit in `docs/planning/audits/` remains mandatory and separate.
 
 ## 5. What the review must cover
 
@@ -89,15 +92,24 @@ edit tracked files, commit, push, or change a branch.
 - **Re-review required** — docs were updated after a `Changes required` verdict.
 - **Waived** — the human owner records why no review is required.
 
-## 8. Handoff files
+## 8. Reviewer write scope
 
-- Directory: `.tmp/review/` (gitignored). If the repository is read-only, use `/tmp/opencode/review/`.
-- Naming: `step-NN-rN-<short-sha>-design-review.md`; use `...-re-review.md` for a re-review.
-- The planning auditor writes only this report and normal read-only commands.
-- The implementor and step agent read the report but do not edit it.
-- The scribe or step agent transcribes findings and verdict verbatim and commits the durable record.
-- Delete the handoff only after the durable record is committed.
-- The planning auditor must not commit or approve its own report.
+- The reviewer may edit only `docs/planning/reviews/step-NN.md`.
+- Within that file, the reviewer may edit its own metadata (`Reviewer`, `Review date`, `Design review status`),
+  the `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
+- The reviewer must not edit the request scope, checklists, known limitations, or resolutions owned by the
+  step agent, and must not edit any other file.
+- The reviewer may commit that one file with a documentation-only message and `[skip ci]`; it must not merge,
+  tag, push `main`, or delete branches. If it cannot commit, it writes the record and the step agent commits it
+  unchanged.
+- The implementor adds resolutions and status updates after the record commit without altering the reviewer's
+  findings, evidence, or verdict. That resolution/status commit is documentation-only and does not invalidate
+  the review; the reviewed commit remains the parent of the reviewer's record commit.
+- The record keeps each round: `### Review round 1`, `### Re-review round 2`, etc. Never overwrite an earlier
+  round.
+- A record commit that touches any other file is invalid; the verdict must be re-run by a fresh reviewer.
+- Historical records keep the role names in force when they were written; do not rewrite them.
+- The planning auditor must not approve its own report. The human owner approves the start.
 
 ## 9. Review record files
 

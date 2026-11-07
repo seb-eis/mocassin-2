@@ -96,6 +96,8 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
   acceptance criteria and tests must pass.
 - Contracts in [`02-data-contracts.md`](02-data-contracts.md) change only through an ADR and a schema
   version bump.
+- Independent reviewers write their evidence, findings, and verdict directly into the durable review or audit
+  record; there is no scribe and no transcription step.
 - Scientific behaviour is specified in prose and tests before implementation. When the original behaviour
   is ambiguous, document the chosen interpretation in the step page.
 - Every step page has a **Documentation** section naming the pages to write at that point. “Documentation

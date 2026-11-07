@@ -25,9 +25,11 @@ remain in each step page; each step page also has a feature log.
 - **Step completion:** the closeout feature records `Done`, the step CI result, and the main merge reference.
   It also updates `docs/planning/audits/step-NN.md` and sets the audit status to `Ready for audit`.
   After a passed audit and merge, create and push the annotated `step-NN` tag as part of the same approval.
-- **Audit:** a fresh read-only audit agent reviews the frozen step branch. See
+- **Audit:** a fresh out-of-context audit agent reviews the frozen step branch and writes its evidence,
+  findings, and verdict directly into `docs/planning/audits/step-NN.md`. See
   [`audits/README.md`](audits/README.md).
-- **Design review:** before implementation, a fresh planning auditor reviews the frozen design docs. See
+- **Design review:** before implementation, a fresh planning auditor reviews the frozen design docs and writes
+  its evidence, findings, and verdict directly into `docs/planning/reviews/step-NN.md`. See
   [`reviews/README.md`](reviews/README.md).
 - **Milestones:** when a roadmap milestone is reached, create the matching `milestone-mN` tag on the
   milestone commit.

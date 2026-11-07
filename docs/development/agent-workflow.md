@@ -31,6 +31,12 @@ git describe --tags
 git status --short
 ```
 
+### Agent roles and write scopes
+
+The normative matrix is in [`AGENTS.md`](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) §3.8.
+In short: the planner and implementor edit their own artifacts directly; the reviewer may edit only its
+assigned review or audit record; the human owner approves gates. There is no scribe and no transcription step.
+
 ## 2. Context handoff card
 
 At a context boundary, record this in the step page or status discussion:
@@ -216,30 +222,37 @@ Reject or stop on:
 - direct commits to `main` or the step branch;
 - moving/deleting published tags;
 - rewriting shared history or force-pushing;
-- copying GPL code or data into the MIT implementation.
+- copying GPL code or data into the MIT implementation;
+- a scribe transcription step or a reviewer editing anything outside its assigned record;
+- a review/audit record commit that touches code, tests, configuration, status, or design docs.
 
 ## 13. Pre-implementation design review
 
 Before a step starts, a fresh planning auditor checks the design out of context.
 
 1. The planning agent and step agent finish the step's design decisions and update the step page, contracts,
-   architecture, quality strategy, open decisions, parity matrix, and related docs.
+   architecture, quality strategy, open decisions, parity matrix, and related docs. They apply those edits
+   directly.
 2. Freeze the docs at a commit and create or update `docs/planning/reviews/step-NN.md`; set the status to
    `Ready for review` and record the reviewed commit.
 3. A fresh planning auditor, with no implementation context, reviews the step page and all cross-step
-   contracts. The auditor is read-only: no tracked edits, commits, pushes, or branch changes.
-4. The auditor writes its report to `.tmp/review/step-NN-rN-<short-sha>-design-review.md` (or
-   `...-re-review.md`).
-5. The step agent or a neutral scribe transcribes the findings and verdict verbatim into the review record
-   and commits the documentation-only record.
-6. If changes are required, update the design docs and re-review the new commit.
+   contracts. The auditor must not have authored or implemented the design.
+4. The auditor writes the evidence, findings, and verdict directly into
+   `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
+   `[skip ci]`. The reviewed commit is the parent of the record commit. It does not merge, tag, push `main`,
+   or change any other file. If it cannot commit, it writes the record and the step agent commits it unchanged.
+5. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, evidence,
+   findings, and verdict.
+6. If changes are required, the planning agent and step agent update the design docs directly, add the
+   resolutions, and mark the review `Re-review required`. A fresh planning auditor re-reviews the new commit.
 7. Only `Ready for implementation` permits the human owner to approve the start. Create the step branch from
    the reviewed `main` commit.
 8. Step 00 and Step 01 are `Waived — process introduced after completion`.
 9. The post-implementation audit in section 14 remains mandatory.
 
-Use [`docs/planning/reviews/README.md`](../planning/reviews/README.md) for statuses, severities, and the
-report format. The raw planning-auditor handoff is temporary and gitignored.
+Use [`docs/planning/reviews/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/reviews/README.md)
+for statuses, severities, and the record format. The review record is the durable record and the reviewer
+writes into it directly.
 
 ## 14. Step completion audit
 
@@ -250,23 +263,23 @@ Before merging a completed step:
 1. Finish the closeout feature and get step-branch CI green.
 2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, CI run, scope, and known
    limitations; set its status to `Ready for audit`.
-3. Freeze the step branch.
-4. Let a fresh read-only audit agent review it. The auditor must not edit tracked files, commit, push, or change
-   the step branch.
-5. The auditor writes its report to `.tmp/audit/step-NN-rN-<short-sha>-audit.md` (or `...-reaudit.md`) and
-   reports the path and verdict.
-6. The step agent or a neutral scribe transcribes the findings and verdict verbatim into
-   `docs/planning/audits/step-NN.md`, adds the audit metadata, and commits the documentation-only record.
-7. If findings require fixes, the step agent reads the handoff, fixes them on a new feature branch,
+3. Freeze the step branch at the audited commit.
+4. Let a fresh out-of-context audit agent review it. The auditor must not have implemented the step.
+5. The auditor writes the evidence, findings, and verdict directly into
+   `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
+   `[skip ci]`. The audited commit is the parent of the record commit. It does not merge, tag, push `main`,
+   or change any other file. If it cannot commit, it writes the record and the step agent commits it unchanged.
+6. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, evidence,
+   findings, and verdict.
+7. If findings require fixes, the step agent adds the resolutions, fixes them on a new feature branch,
    squash-merges into the step branch, pushes, waits for CI, and marks the audit `Re-audit required`.
-8. Re-audit the new commit and write a new handoff report. Only a `Passed` audit permits the step-to-main
+8. Re-audit the new commit and append a new round to the record. Only a `Passed` audit permits the step-to-main
    approval request.
 9. The human owner still approves the merge and tag.
-10. Delete the handoff file only after the durable audit record is committed.
 
 Use [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/audits/README.md)
-for status values, severities, and the report format. Audit reports are durable planning records; the raw
-auditor handoff is temporary and gitignored. Do not rely on chat history.
+for status values, severities, and the record format. The audit record is the durable record and the auditor
+writes into it directly.
 
 ## 15. Review gates
 
@@ -275,7 +288,8 @@ auditor handoff is temporary and gitignored. Do not rely on chat history.
 | Step feature list | Once, at step start |
 | Each feature squash | Before every squash into the step branch |
 | Pre-implementation design review | Fresh planning auditor after the design docs are frozen, before implementation |
-| Step completion audit | Fresh read-only audit after the step is frozen |
+| Step completion audit | Fresh out-of-context audit after the step is frozen |
+| Reviewer record commit | Documentation-only; the record file is the only changed file |
 | Step-to-main merge | Before the `--no-ff` merge, only after a passed audit |
 | Tag creation/push | Included in the step/milestone/release approval |
 | Release | After Step 31 gates |

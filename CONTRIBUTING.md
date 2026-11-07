@@ -109,6 +109,9 @@ Approval requested for:
 Do not approve from prose alone. Review the diff against the step branch, check scope and non-goals, and
 confirm that generated contract artifacts came from the generator rather than being hand-edited.
 
+- Independent reviewers write findings and verdict directly into the review or audit record and commit only
+  that file. Do not use a separate scribe or transcription step.
+
 ## 8. Licensing
 
 - New files use `SPDX-License-Identifier: MIT`.

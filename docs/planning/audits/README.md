@@ -2,21 +2,22 @@
 
 This directory records the independent audit gate between finishing a step and merging it into `main`.
 Audits are separate from the step agent's self-checks: the implementer may test and review its own work, but
-a fresh, read-only audit context decides whether the step is ready for approval.
+a fresh, out-of-context audit context decides whether the step is ready for approval.
 
 ## 1. Roles
 
 | Role | Responsibility |
 | --- | --- |
-| Step agent | Implement, self-check, create/update the audit request, fix findings, update status/docs/parity |
-| Audit agent | Independent review of the frozen commit; writes a gitignored audit report only |
+| Step agent (implementor) | Implement, self-check, create/update the audit record's request fields, fix findings, add resolutions, update status/docs/parity |
+| Audit agent (reviewer) | Independent review of the frozen commit; writes evidence, findings, and verdict directly into the audit record |
 | Human owner | Approve fixes, merge, and tag |
 
-The audit request, its scope, and its acceptance checklist are owned by the step agent. The audit agent must
-not change code, configuration, tests, scope, status, the step branch, or the tracked audit request. It writes
-a report to a gitignored handoff file; the step agent or a neutral scribe transcribes the findings and verdict
-into the durable audit request. If the auditor starts fixing code, it becomes an implementer and a new auditor
-is required for the final pass.
+The audit request, its scope, and its acceptance checklist are owned by the step agent. The audit agent may
+edit only the audit record's reviewer-owned metadata, evidence, findings, and verdict. It must not change code,
+configuration, tests, scope, checklists, resolutions, status dashboard, step page, parity matrix, or the step
+branch. If the auditor starts fixing code, it becomes an implementer and a new auditor is required for the final
+pass. The reviewer writes directly into `docs/planning/audits/step-NN.md`; there is no handoff file and no
+transcription step.
 
 ## 2. Audit status values
 
@@ -40,7 +41,8 @@ is required for the final pass.
    - CI run
    - scope and acceptance criteria
    - known limitations
-4. The step branch is frozen. Do not add commits while the audit is running.
+4. The step branch is frozen at the audited commit. Only the reviewer's record commit and the step agent's
+   resolution/status commit may follow; neither may change code, tests, configuration, or the reviewer's text.
 5. A fresh audit agent reads:
    - `AGENTS.md`
    - the step page
@@ -48,24 +50,22 @@ is required for the final pass.
    - `docs/planning/status.md`
    - relevant ADRs, contracts, and quality strategy
 6. The auditor runs the required builds/tests and reviews the diff and artifacts.
-7. The auditor writes a report to the gitignored handoff file
-   `.tmp/audit/step-NN-rN-<short-sha>-audit.md` (or `...-reaudit.md` for a re-audit). The report uses the
-   audit template and records the audited commit, CI run, commands run, findings, verdict, and follow-up.
-   The auditor does not commit, push, or edit tracked files.
-8. The step agent or a neutral scribe transcribes the auditor's findings and verdict verbatim into
-   `docs/planning/audits/step-NN.md`, adds the audit metadata, and commits the documentation-only record.
-   The auditor must not be the person who commits or approves it.
-9. If fixes are required:
-   - the step agent reads the handoff report and fixes the findings on a new feature branch;
+7. The auditor writes the evidence, findings, and verdict directly into
+   `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
+   `[skip ci]`. The audited commit is the parent of the record commit. The auditor does not merge, tag, push
+   `main`, or change any other file. If the auditor cannot commit, it writes the record and the step agent
+   commits it unchanged.
+8. If fixes are required:
+   - the step agent adds the resolutions to the record;
+   - the step agent fixes the findings on a new feature branch;
    - squash-merges into the step branch;
    - pushes and waits for CI;
-   - updates the audit request to `Re-audit required` with the new commit.
-10. The auditor re-audits the new commit and writes a new handoff report. The same auditor may continue if it
-    remained read-only; otherwise start a fresh audit context. Keep the earlier report in the durable audit
-    request history.
-11. On `Passed`, the human owner gives merge approval.
-12. Merge the step branch into `main` with `--no-ff`, tag `step-NN`, push, and delete the step branch.
-13. Delete the handoff file only after the durable audit record is committed.
+   - updates the audit record to `Re-audit required` with the new commit.
+9. The auditor re-audits the new commit and appends a new round to the record. The same auditor may continue if
+   it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every earlier round
+   in the record.
+10. On `Passed`, the human owner gives merge approval.
+11. Merge the step branch into `main` with `--no-ff`, tag `step-NN`, push, and delete the step branch.
 
 ## 4. What the audit must cover
 
@@ -106,23 +106,25 @@ docs/planning/audits/step-01.md
 ```
 
 Use [`step-audit-template.md`](step-audit-template.md) as the starting point. All 32 files are pre-seeded so
-that every step has an audit entry before implementation. The step agent owns its entry and updates the
-request fields, scope, and acceptance checklist as the step progresses. The auditor completes the findings
-and verdict in the handoff report.
+that every step has an audit entry before implementation. The step agent owns the request fields, scope,
+checklists, and resolutions. The auditor writes the evidence, findings, and verdict directly into this file.
 
-The audit request is the durable record. The auditor's raw report lives in the gitignored `.tmp/audit/`
-handoff directory; the step agent or scribe transcribes it into this file. Do not rely on chat history, and do
-not commit the handoff file.
+The audit record is the durable record. Do not rely on chat history, and do not use a separate handoff file.
 
-## 8. Audit handoff files
+## 8. Reviewer write scope
 
-- Directory: `.tmp/audit/` (gitignored). If the repository is read-only, use `/tmp/opencode/audit/`.
-- Naming: `step-NN-rN-<short-sha>-audit.md`; use `...-reaudit.md` for a re-audit.
-- The auditor writes only this report and normal build/test artifacts.
-- The implementor reads the report but does not edit it.
-- The scribe or step agent transcribes findings and verdict verbatim, adds metadata and resolutions, and
-  commits the durable record.
-- The durable request keeps each round: `### Audit round 1`, `### Re-audit round 2`, etc. Never overwrite an
-  earlier round.
-- Delete the handoff only after the durable record is committed.
-- The auditor must not commit or approve its own report.
+- The reviewer may edit only `docs/planning/audits/step-NN.md`.
+- Within that file, the reviewer may edit its own metadata (`Auditor`, `Audit date`, `Audit status`), the
+  `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
+- The reviewer must not edit the request scope, checklists, known notes, or resolutions owned by the step
+  agent, and must not edit any other file.
+- The reviewer may commit that one file with a documentation-only message and `[skip ci]`; it must not merge,
+  tag, push `main`, or delete branches. If it cannot commit, it writes the record and the step agent commits it
+  unchanged.
+- The implementor adds resolutions and status updates after the record commit without altering the reviewer's
+  findings, evidence, or verdict. That resolution/status commit is documentation-only and does not invalidate
+  the audit; the audited commit remains the parent of the reviewer's record commit.
+- The record keeps each round: `### Audit round 1`, `### Re-audit round 2`, etc. Never overwrite an earlier
+  round.
+- A record commit that touches any other file is invalid; the verdict must be re-run by a fresh reviewer.
+- The auditor must not approve its own report. The human owner approves the merge and tag.
