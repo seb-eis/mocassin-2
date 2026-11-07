@@ -100,12 +100,12 @@ If the parent step is already merged or tagged:
 
 | Amendment | Parent step | Status | Branch | Design review | Parent audit / tag |
 | --- | --- | --- | --- | --- | --- |
-| `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Proposed** | — | — | — |
+| `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Planned** | — | — | — |
 | `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Planned** | — | — | — |
 
 `step-02-amend-1` covers the public generic math layer (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`,
-`Matrix4<T>`) and the replacement of the temporary `CellGeometry` array-based inverse. Its plan page will be
-created after the Step 02 implementor finishes the planned features.
+`Matrix4<T>`) and the replacement of the temporary `CellGeometry` array-based inverse. See
+[`step-02-amend-1-public-math.md`](step-02-amend-1-public-math.md).
 
 `step-02-amend-2` enables KaTeX math rendering for the published documentation and replaces the Step 02
 monospace formula blocks. See [`step-02-amend-2-docs-math.md`](step-02-amend-2-docs-math.md).
