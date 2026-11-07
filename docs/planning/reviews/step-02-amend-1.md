@@ -13,11 +13,11 @@
 | Step | 02 — Symmetry and Geometry |
 | Amendment | `step-02-amend-1` — Public Generic Math Types |
 | Request owner | Step agent |
-| Design review status | Ready for review |
+| Design review status | Changes required |
 | Reviewed commit | `bd4876314ed962da64c49ea747d7e3e4ed2e7552` (`bd48763`) |
 | Docs branch | `main` |
 | Review date | 2026-11-07 |
-| Reviewer | — |
+| Reviewer | Independent planning auditor |
 
 Parent step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-geometry.md)
 
@@ -74,6 +74,7 @@ Files reviewed:
 - `docs/planning/03-quality-strategy.md`
 - `docs/planning/05-open-decisions.md`
 - `docs/development/design-decisions.md`
+- `docs/development/architecture.md`
 - `docs/development/agent-workflow.md`
 - `src/dotnet/Mocassin.Core/Geometry/Vector3.cs`
 - `src/dotnet/Mocassin.Core/Geometry/Vector4I.cs`
@@ -81,14 +82,33 @@ Files reviewed:
 - `src/dotnet/Mocassin.Core/Geometry/Fractional3.cs`
 - `src/dotnet/Mocassin.Symmetry/Int3x3.cs`
 - `src/dotnet/Mocassin.Symmetry/CellGeometry.cs`
+- `src/dotnet/Mocassin.Core.Tests/GeometryTests.cs`
+- `src/dotnet/Mocassin.Symmetry.Tests/CellGeometryTests.cs`
 - `src/dotnet/Mocassin.Core/PublicAPI.Unshipped.txt`
 - `src/dotnet/Mocassin.Symmetry/PublicAPI.Unshipped.txt`
 
 Commands run:
 
 ```text
-
+git status --short
+git log --oneline -8 main
+git show main:docs/planning/amendments/step-02-amend-1-public-math.md
+git diff main HEAD -- docs/planning/amendments
+git diff --stat main HEAD
+git ls-tree -r --name-only main -- docs/planning/reviews
+grep -n "Generic math is an implementation detail\|internal readonly record struct Vector3\|Public types stay semantic" docs/planning/steps/step-02-symmetry-and-geometry.md
+grep -n "Generic math" docs/planning/01-target-architecture.md
+sed -n '1,120p' src/dotnet/Mocassin.Core/Geometry/Vector3.cs
+sed -n '1,120p' src/dotnet/Mocassin.Symmetry/CellGeometry.cs
+dotnet test src/dotnet/Mocassin.Symmetry.Tests/Mocassin.Symmetry.Tests.csproj -c Release --filter "FullyQualifiedName~CellGeometryTests" --nologo
+dotnet test src/dotnet/Mocassin.Core.Tests/Mocassin.Core.Tests.csproj -c Release --filter "FullyQualifiedName~GeometryTests" --nologo
 ```
+
+Results: the working tree was clean; the two review records are on `main` (`ce6a563`) and absent
+from the closeout branch; `CellGeometryTests` passed 14/14 and `GeometryTests` passed 22/22. A
+scratch .NET check under `/tmp/opencode` confirmed that `decimal` implements
+`IFloatingPoint<decimal>` (`True`). No build or test of the amendment was run because the amendment is
+planned, not implemented.
 
 ## Known notes for the reviewer
 
@@ -112,7 +132,12 @@ Commands run:
 
 | Severity | Finding | Evidence |
 | --- | --- | --- |
-| — | — | — |
+| **Major** | **A1-1 — The amendment changes a frozen design decision without superseding it.** The frozen Step 02 design says public types remain semantic and non-generic, the generic kernel is `internal`, and “Generic math is an implementation detail, not a public format or API contract.” The target architecture lists generic math under “Internal vector/matrix kernels”. The amendment makes `Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, and `Matrix4<T>` public and exposes `CellGeometry.Matrix`/`Inverse`, but its Documentation checklist updates only `docs/development/design-decisions.md`, `docs/development/architecture.md`, and `docs/planning/05-open-decisions.md`. | `docs/planning/steps/step-02-symmetry-and-geometry.md:295-305`; `docs/planning/01-target-architecture.md:279`; `docs/planning/amendments/step-02-amend-1-public-math.md:40-46, 256-262`. Required: explicitly supersede the old statement and update the Step 02 page (generic math strategy, public/internal API boundary, implementation tasks) and `01-target-architecture.md`; add both to the Documentation checklist. |
+| **Major** | **A1-2 — `IFloatingPoint<T>` admits `decimal`, contradicting the plan’s non-goal.** The plan says “No integer or `decimal` matrix inverse” and “decimal and integer matrices are not part of this API”, but the matrix constraints are `T : unmanaged, IFloatingPoint<T>`. `decimal` implements `IFloatingPoint<decimal>` in .NET 10, so `Matrix3<decimal>` and `Matrix4<decimal>` would compile. | `docs/planning/amendments/step-02-amend-1-public-math.md:53-54, 66-71`; scratch .NET 10 check: `typeof(decimal).GetInterfaces()` contains `IFloatingPoint<>` (`True`); `docs/planning/01-target-architecture.md:279` already names `IFloatingPointIeee754<T>`. Required: use `IFloatingPointIeee754<T>` for matrices or explicitly document and test decimal matrix support; do not leave the constraint and non-goal contradictory. |
+| **Minor** | **A1-3 — 4×4 is not justified by a concrete Step 02 consumer.** `CellGeometry` needs only `Matrix3<double>`; `Vector4<T>`/`Matrix4<T>` add public API for later rendering, UX, and extension use without a named near-term consumer. | `docs/planning/amendments/step-02-amend-1-public-math.md:40-43, 50-51, 84-104, 130-160`; `src/dotnet/Mocassin.Symmetry/CellGeometry.cs` uses only 3×3 math. Required: cite a specific near-term consumer or defer the 4D types; if kept, add explicit `Matrix4` `FromRows`, `FromColumns`, `Transform`, and `ConditionNumber` tests. |
+| **Minor** | **A1-4 — API-baseline and performance evidence are underspecified.** The Documentation checklist says “API baseline” without naming both `Mocassin.Core` and `Mocassin.Symmetry`; `DOTNET_JitDisasm` is a JIT environment variable, not a check; the benchmark/inlining acceptance has no threshold or recording location. | `docs/planning/amendments/step-02-amend-1-public-math.md:44, 227, 234, 242-254, 258-262`; both `src/dotnet/Mocassin.Core/PublicAPI.Unshipped.txt` and `src/dotnet/Mocassin.Symmetry/PublicAPI.Unshipped.txt` exist. Required: name both baselines, use `DisassemblyDiagnoser` or a benchmark assertion, and define the measurable no-allocation/no-unexpected-call criterion and where the evidence is recorded. |
+| **Minor** | **A1-5 — Parent review/audit links and branch state are not handled.** The amendment process requires the parent review record to link to the amendment review and the parent audit request to list amendment IDs; neither is in the Documentation checklist. The current closeout branch still shows the amendment as `Planned` and lacks the review records, which are on `main`. | `docs/planning/amendments/README.md:69-87`; `docs/planning/reviews/step-02.md` has no amendment link; `docs/planning/audits/step-02.md` has no amendment list; `git diff main HEAD` shows closeout status `Planned` versus main `Design review`. Required: add both links/updates and synchronize the parent step branch before implementation. |
+| **Note** | **A1-6 — Clarify singular-matrix and inlining behavior.** `Inverse` throws on a zero determinant and `CellGeometry` relies on `CellDeterminantTolerance`/`CellConditionLimit`; the plan does not state what `ConditionNumber` does for a singular matrix or whether `Inverse` uses a tolerance. `AggressiveInlining` on `Matrix3<T>.Inverse` may increase code size and should be reserved for measured hot paths. | `docs/planning/amendments/step-02-amend-1-public-math.md:150-180, 220-224`; `src/dotnet/Mocassin.Symmetry/CellGeometry.cs` computes `ConditionNumber` after a successful inverse and rejects via `IsConditionWithinLimit`. Required: document the singular/condition-number contract and limit `AggressiveInlining` to measured hot methods. |
 
 Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
 verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
@@ -122,12 +147,23 @@ the auditor's findings, evidence, or verdict.
 
 - [ ] Ready for implementation
 - [ ] Ready with notes
-- [ ] Changes required
+- [x] Changes required
 - [ ] Re-review required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up step:
+**Changes required.** Two major findings remain: the amendment changes the frozen internal-generic-math
+decision without superseding the Step 02 page and target architecture (A1-1), and the matrix constraint admits
+`decimal` despite the plan’s non-goal (A1-2). The 4×4 scope, API-baseline/performance evidence, and parent
+review/audit links are minor corrections. No blocker was found; the core design is sound and the current cell
+geometry tests pass.
+
+Follow-up owner: Planner / step agent
+
+Follow-up step: Update the amendment plan and affected design docs (Step 02 page and
+`01-target-architecture.md`), replace `IFloatingPoint<T>` with `IFloatingPointIeee754<T>` or explicitly support
+and test `decimal`, justify or defer `Vector4<T>`/`Matrix4<T>`, name both API baselines, define the
+benchmark/inlining evidence, add the parent review/audit links, synchronize the parent step branch, and request
+a fresh re-review.
 
 ## Resolution status
 
