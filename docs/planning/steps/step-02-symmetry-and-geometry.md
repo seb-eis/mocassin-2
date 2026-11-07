@@ -24,7 +24,8 @@ orbit/permutation reduction, and periodic geometry kernels.
 | `cell-geometry` | `feature/step-02-symmetry-and-geometry/cell-geometry` | Squashed | Symmetry tests 74/74; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42404289388`](https://github.com/seb-eis/mocassin-2/actions/runs/42404289388) — green | `549a03a` |
 | `p1-encoder` | `feature/step-02-symmetry-and-geometry/p1-encoder` | Squashed | Symmetry tests 87/87; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42405555283`](https://github.com/seb-eis/mocassin-2/actions/runs/42405555283) — green | `45c248d` |
 | `periodic-geometry` | `feature/step-02-symmetry-and-geometry/periodic-geometry` | Squashed | Symmetry tests 95/95; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42416609921`](https://github.com/seb-eis/mocassin-2/actions/runs/42416609921) — green | `9e5ebf7` |
-| `orbit-reduction` | `feature/step-02-symmetry-and-geometry/orbit-reduction` | Awaiting approval | Symmetry tests 108/108; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `orbit-reduction` | `feature/step-02-symmetry-and-geometry/orbit-reduction` | Squashed | Symmetry tests 108/108; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42418281190`](https://github.com/seb-eis/mocassin-2/actions/runs/42418281190) — green | `a9ea5ae` |
+| `contracts-caches-benchmarks` | `feature/step-02-symmetry-and-geometry/contracts-caches-benchmarks` | Awaiting approval | Symmetry tests 116/116; benchmark `P1Expansion20Cubed` 965.3 µs (target < 1 s); full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
@@ -656,8 +657,8 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] Add `tools/symmetry/generate_space_groups.py` and `requirements.txt`, and run the drift check in the
   Contracts and policy CI job.
 - [x] Use a source-generated JSON serializer context for the internal catalog DTOs.
-- [ ] Implement per-compilation caches, deterministic hashing, and `SymmetryContractVersion`.
-- [ ] Add the 20×20×20 benchmark fixture and golden reduction/contract tests.
+- [x] Implement per-compilation caches, deterministic hashing, and `SymmetryContractVersion`.
+- [x] Add the 20×20×20 benchmark fixture and golden reduction/contract tests.
 - [ ] Record the symmetry contract and catalog versions in the compiled payload.
 
 ## Acceptance criteria
@@ -670,11 +671,11 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] The canonical position order is stable across runs, OSes, and input ordering for the synthetic fixtures.
 - [x] The triclinic cell test produces the correct C vector and angles.
 - [x] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
-- [ ] The `P1Expansion20Cubed` benchmark (64 P1 positions, 20×20×20) meets its target on the defined runner.
+- [x] The `P1Expansion20Cubed` benchmark (64 P1 positions, 20×20×20) meets its target on the defined runner.
 - [ ] The compiled payload records `symmetry_contract_version`, `space_group_data_version`, and
   `space_group_data_sha256`.
-- [ ] Cross-OS golden P indices, pair shells, and cluster codes match.
-- [ ] Cache scope and parallel-determinism tests pass.
+- [x] Cross-OS golden P indices, pair shells, and cluster codes match.
+- [x] Cache scope and parallel-determinism tests pass.
 - [ ] Documentation written
 
 ## Documentation

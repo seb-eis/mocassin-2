@@ -344,3 +344,23 @@ static Mocassin.Symmetry.PairReductionResult.operator !=(Mocassin.Symmetry.PairR
 static Mocassin.Symmetry.PairReductionResult.operator ==(Mocassin.Symmetry.PairReductionResult? left, Mocassin.Symmetry.PairReductionResult? right) -> bool
 static Mocassin.Symmetry.PairShell.operator !=(Mocassin.Symmetry.PairShell? left, Mocassin.Symmetry.PairShell? right) -> bool
 static Mocassin.Symmetry.PairShell.operator ==(Mocassin.Symmetry.PairShell? left, Mocassin.Symmetry.PairShell? right) -> bool
+Mocassin.Symmetry.SymmetryContract
+Mocassin.Symmetry.SymmetryVersionInfo
+Mocassin.Symmetry.SymmetryVersionInfo.<Clone>$() -> Mocassin.Symmetry.SymmetryVersionInfo!
+Mocassin.Symmetry.SymmetryVersionInfo.Deconstruct(out string! SymmetryContractVersion, out string! SpaceGroupDataVersion, out string! SpaceGroupDataSha256) -> void
+Mocassin.Symmetry.SymmetryVersionInfo.Equals(Mocassin.Symmetry.SymmetryVersionInfo? other) -> bool
+Mocassin.Symmetry.SymmetryVersionInfo.SpaceGroupDataSha256.get -> string!
+Mocassin.Symmetry.SymmetryVersionInfo.SpaceGroupDataSha256.init -> void
+Mocassin.Symmetry.SymmetryVersionInfo.SpaceGroupDataVersion.get -> string!
+Mocassin.Symmetry.SymmetryVersionInfo.SpaceGroupDataVersion.init -> void
+Mocassin.Symmetry.SymmetryVersionInfo.SymmetryContractVersion.get -> string!
+Mocassin.Symmetry.SymmetryVersionInfo.SymmetryContractVersion.init -> void
+Mocassin.Symmetry.SymmetryVersionInfo.SymmetryVersionInfo(string! SymmetryContractVersion, string! SpaceGroupDataVersion, string! SpaceGroupDataSha256) -> void
+const Mocassin.Symmetry.SymmetryContract.FractionalGridDenominator = 24000000000000 -> long
+const Mocassin.Symmetry.SymmetryContract.Version = "symmetry-1" -> string!
+override Mocassin.Symmetry.SymmetryVersionInfo.Equals(object? obj) -> bool
+override Mocassin.Symmetry.SymmetryVersionInfo.GetHashCode() -> int
+override Mocassin.Symmetry.SymmetryVersionInfo.ToString() -> string!
+static Mocassin.Symmetry.SymmetryVersionInfo.FromCatalog(Mocassin.Symmetry.SpaceGroupCatalog! catalog) -> Mocassin.Symmetry.SymmetryVersionInfo!
+static Mocassin.Symmetry.SymmetryVersionInfo.operator !=(Mocassin.Symmetry.SymmetryVersionInfo? left, Mocassin.Symmetry.SymmetryVersionInfo? right) -> bool
+static Mocassin.Symmetry.SymmetryVersionInfo.operator ==(Mocassin.Symmetry.SymmetryVersionInfo? left, Mocassin.Symmetry.SymmetryVersionInfo? right) -> bool

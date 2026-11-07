@@ -1,0 +1,26 @@
+{
+  "runnerClass": "linux-x64-github-ubuntu-latest-dotnet10",
+  "benchmark": "Mocassin.Benchmarks.P1Expansion20Cubed",
+  "command": "dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks -- --filter \"*P1Expansion20Cubed*\"",
+  "fixture": {
+    "cell": "cubic",
+    "cellLengthAngstrom": 5.41,
+    "p1Positions": 64,
+    "supercell": [
+      20,
+      20,
+      20
+    ],
+    "expandedPositions": 512000
+  },
+  "limits": {
+    "meanSeconds": 1.0,
+    "regressionFraction": 0.1
+  },
+  "recorded": {
+    "date": "2026-11-07",
+    "environment": "local container, AMD Ryzen 7 7840U, .NET SDK 10.0.403, Release, DefaultJob",
+    "meanMicroseconds": 965.3,
+    "targetMet": true
+  }
+}

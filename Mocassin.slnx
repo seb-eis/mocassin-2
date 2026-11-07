@@ -2,6 +2,7 @@
   <Folder Name="/src/" />
   <Folder Name="/src/dotnet/">
     <Project Path="src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj" />
+    <Project Path="src/dotnet/Mocassin.Benchmarks/Mocassin.Benchmarks.csproj" />
     <Project Path="src/dotnet/Mocassin.App.ViewModels/Mocassin.App.ViewModels.csproj" />
     <Project Path="src/dotnet/Mocassin.App.Views/Mocassin.App.Views.csproj" />
     <Project Path="src/dotnet/Mocassin.App/Mocassin.App.csproj" />
