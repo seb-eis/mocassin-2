@@ -168,6 +168,8 @@ and request a fresh re-review.
 | A2-2 | Fixed — TOML snippet now says to add keys under the existing `[project]` table | Planner | `aad0835` |
 | A2-3 | Fixed — parent review/audit links and branch-sync prerequisite added | Planner | `aad0835` |
 | A2-4 | Fixed — pinned CDN choice, `$` delimiter disabled, manual evidence specified | Planner | `aad0835` |
+| A2-5 | Fixed — verification-evidence section added to the amendment page | Planner | `25931de` |
+| A2-6 | Fixed — initializer wording now states the `$` delimiter is deliberately omitted | Planner | `25931de` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
