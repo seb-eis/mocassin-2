@@ -76,7 +76,8 @@ public enum OriginChoice
 ```
 
 The enum member names are chosen so the default camelCase serializer emits the contract strings
-`none`, `uniqueAxisA/B/C`, `hexagonal`, `rhombohedral`, `originChoice1`, and `originChoice2`.
+`none`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, `rhombohedral`, `originChoice1`, and `originChoice2`.
+`uniqueAxisA` is a reserved enum value only and is rejected by the v1 project validator.
 The catalog-level `dataVersion` is stored in the catalog root and compiled payload; it is not repeated per
 setting.
 
@@ -195,7 +196,8 @@ public readonly record struct SymmetryOperation(
 
 - Seven crystal systems:
   - triclinic: no fixed lengths or angles;
-  - monoclinic: unique axis A/B/C maps to α/β/γ; the other two angles are 90°;
+  - monoclinic: unique axis B/C maps to β/γ; the other two angles are 90°. Unique axis A is reserved for a
+    future catalog extension and is rejected in v1;
   - orthorhombic: α=β=γ=90°;
   - tetragonal: a=b; α=β=γ=90°;
   - trigonal, hexagonal axes: a=b; α=β=90°; γ=120°;
@@ -235,8 +237,8 @@ C = (c cos β,
   `STR003`, even when `det G` is above the determinant cutoff.
 - Cell-parameter inconsistency is rejected with `STR003`; the API never silently overwrites user input. The
   UI may lock dependent fields as an editor convenience.
-- Test all seven systems, both trigonal axis descriptions, unique-axis A/B/C, near-degenerate rejection,
-  volume, right-handedness, and fractional ↔ Cartesian round-trips.
+- Test all seven systems, both trigonal axis descriptions, unique-axis B/C, near-degenerate rejection, volume,
+  right-handedness, and fractional ↔ Cartesian round-trips.
 - Triclinic regression fixture: `a=5 Å`, `b=6 Å`, `c=7 Å`, `α=80°`, `β=85°`, `γ=95°`; compare the vectors
   and volume against an independent determinant calculation.
 
@@ -694,7 +696,7 @@ At this point, document the symmetry and geometry foundation:
 | Linear index | Small-supercell index round-trip; total exactly `int.MaxValue` is accepted by the arithmetic check |
 | Index limit | A total of `int.MaxValue + 1` and out-of-range offsets are rejected; no wrap or truncation |
 | Generic math | `Vector3<double>` arithmetic matches the semantic wrappers |
-| Cell geometry | Seven systems, both trigonal axis descriptions, unique-axis A/B/C, volume, and right-handedness |
+| Cell geometry | Seven systems, both trigonal axis descriptions, unique-axis B/C, volume, and right-handedness |
 | Cell validity | Angles outside 0..180°, non-positive Gram determinant, and near-degenerate cells are rejected |
 | Triclinic regression | `a=5`, `b=6`, `c=7`, `α=80°`, `β=85°`, `γ=95°` matches independent vectors and volume |
 | Pair reduction | Reduced shells equal brute-force `G0` orbits for random pairs |
