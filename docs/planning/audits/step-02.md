@@ -25,7 +25,7 @@ The Step 02 audit covers the parent step plus these integrated amendments at the
   [`step-02-amend-2-docs-math.md`](../amendments/step-02-amend-2-docs-math.md), review
   [`step-02-amend-2.md`](../reviews/step-02-amend-2.md).
 
-Combined audit commit: pending. Amendment records remain `Changes required` until their fixes are
+Combined audit commit: pending. Amendment records are `Re-review required` until the fixes are
 re-reviewed and accepted.
 
 ## Step summary
