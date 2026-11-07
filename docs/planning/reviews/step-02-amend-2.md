@@ -13,8 +13,8 @@
 | Step | 02 — Symmetry and Geometry |
 | Amendment | `step-02-amend-2` — Documentation Math Rendering with KaTeX |
 | Request owner | Step agent |
-| Design review status | Changes required |
-| Reviewed commit | `bd4876314ed962da64c49ea747d7e3e4ed2e7552` (`bd48763`) |
+| Design review status | Re-review required |
+| Reviewed commit | `aad0835be9a0f0534e58a29392b64bf6aac2d588` (`aad0835`) |
 | Docs branch | `main` |
 | Review date | 2026-11-07 |
 | Reviewer | Independent planning auditor |
@@ -164,7 +164,10 @@ and request a fresh re-review.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| A2-1 | Fixed — `agent-workflow.md` amendment-template link now uses GitHub URL and is in scope | Planner | `aad0835` |
+| A2-2 | Fixed — TOML snippet now says to add keys under the existing `[project]` table | Planner | `aad0835` |
+| A2-3 | Fixed — parent review/audit links and branch-sync prerequisite added | Planner | `aad0835` |
+| A2-4 | Fixed — pinned CDN choice, `$` delimiter disabled, manual evidence specified | Planner | `aad0835` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
