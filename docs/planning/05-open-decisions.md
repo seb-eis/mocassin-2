@@ -33,6 +33,9 @@ decision will be made.
 | Symmetry reduction | Center, setwise, and pointwise stabilizers; induced site-permutation group; canonical pair shells; 6-bit cluster occupation codes | [Step 02](steps/step-02-symmetry-and-geometry.md) / [Step 08](steps/step-08-model-compilation-pipeline.md) |
 | Periodic geometry | Base-P1 precomputation, metric-tensor distances, separate minimum-image/radial-search APIs, plane-distance bounding boxes, 1 fm buckets | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Symmetry contract and caches | `symmetry-1`; per-compilation caches; SHA-256 persisted IDs; brute-force/golden test tiers; base-P1 memory | [Step 02](steps/step-02-symmetry-and-geometry.md) |
+| Project symmetry metadata | Optional project-level catalog/contract metadata; mismatch warns `PROJ034`; compiled payload is authoritative | [Step 02](steps/step-02-symmetry-and-geometry.md) / [Step 03](steps/step-03-particle-and-structure-models.md) |
+| Pair ordering | Canonical shell order `(distanceBucket, targetP, cellA, cellB, cellC)`; stable IDs are content hashes, not ordering | [Step 02](steps/step-02-symmetry-and-geometry.md) / [Step 08](steps/step-08-model-compilation-pipeline.md) |
+| Cell conditioning | `CellConditionLimit = 1e12` in addition to the Gram determinant cutoff | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Cross-process job contract | Job folder, `solver.json`, JSONL events, `mmcfe.db` | [`02-data-contracts.md`](02-data-contracts.md) §5 |
 | Large state spill | Embed `.mcs` up to 1 GiB; larger states are external files referenced by `.msr` | ADR 0011 / data contracts §3.6 |
 | MMCFE log | SQLite `mmcfe.db` with a versioned, resumable schema | [`02-data-contracts.md`](02-data-contracts.md) §5.4 |

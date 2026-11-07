@@ -165,6 +165,10 @@ a Core `StructureModel`; the Core model never holds a preview or a resolved cata
 | `STR009` | Warning | Total P1 positions exceed the performance budget |
 | `STR010` | Error | Dummy position references invalid coordinates |
 | `STR011` | Warning | Site cannot be occupied by any particle |
+| `PROJ034` | Warning | Project symmetry metadata differs from the embedded catalog/contract versions |
+
+- `PROJ034` is a project-level warning finalized in Step 07. It does not block loading; the compiled payload
+  records the authoritative versions.
 
 Diagnostic ownership follows the assembly boundary. Core emits diagnostics that depend only on the project
 graph and primitive types: `STR004`, `STR005`, `STR006`, `STR010`, and `STR011`. Symmetry emits diagnostics
@@ -265,7 +269,7 @@ At this point, document particles and crystal structure:
 | Particle limits | 63 custom particles accepted; 64 rejected |
 | Void handling | Void cannot be added to a set; void index is 0 |
 | Symbol/charge | Mass symbol preserved; charge validated |
-| Crystal systems | Valid/invalid sets for all seven systems, both trigonal axis descriptions, and unique-axis A/B/C |
+| Crystal systems | Valid/invalid sets for all seven systems, both trigonal axis descriptions, and unique-axis B/C; `uniqueAxisA` is rejected |
 | Cell determinant | Near-degenerate cells are rejected; valid cells have `det G > 0` and positive volume |
 | Cell vectors | Triclinic regression, hexagonal γ=120°, rhombohedral α=60°, and right-handedness |
 | Site overlap | Same orbit, special positions, near-boundary cases, and exact grid equality |
@@ -275,7 +279,9 @@ At this point, document particles and crystal structure:
 | Index cap | A supercell product above `int.MaxValue` is rejected |
 | Editing | Add/update/remove site produces a valid new project or diagnostics |
 | Assembly boundary | `Mocassin.Core` has no reference to `Mocassin.Symmetry`; preview and catalog validation compose over Core models |
-| Space-group reference | `(number, axis, origin)` round-trips; HM/Hall are derived; unknown combinations produce `STR001` |
+| Space-group reference | `(number, axis, origin)` round-trips for every enum value; HM/Hall are derived; unknown combinations produce `STR001`; `uniqueAxisA` is rejected |
+| Symmetry metadata | Matching versions load silently; mismatched catalog/contract emits `PROJ034`; missing metadata is accepted |
+| Sample P order | Ceria and barium zirconate preview P indices are stable and match the Step 02 conventions |
 
 ## Risks and mitigations
 
@@ -288,6 +294,7 @@ At this point, document particles and crystal structure:
 | Preview diverges from compiled model | Compile from the same symmetry engine and compare in step 08 tests |
 | Redundant setting fields drift | Persist only `(number, axis, origin)`; derive HM/Hall/system from the catalog |
 | P-index drift | Golden P-order tests, shuffle invariance, and the exact grid contract |
+| Catalog/contract mismatch | `PROJ034` warning, no automatic rewrite, and the compiled payload records the actual versions |
 
 ## Done when
 

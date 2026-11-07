@@ -94,6 +94,11 @@ to either is a format-breaking change.
   "name": "Ceria",
   "createdUtc": "2026-11-02T12:00:00Z",
   "modifiedUtc": "2026-11-02T12:30:00Z",
+  "symmetry": {
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "…",
+    "symmetryContractVersion": "symmetry-1"
+  },
   "model": { "...": "section 2.2" },
   "parameterizations": [],
   "jobTemplates": [],
@@ -105,6 +110,10 @@ to either is a format-breaking change.
 - UTF-8, no BOM, 2-space indentation, `\n` line endings.
 - `masterSeed` is a 32-byte hex value generated at project creation; it seeds job/lattice derivation and is
   part of the project metadata.
+- `symmetry` is optional advisory metadata written by the application: the embedded catalog data version,
+  catalog checksum, and symmetry contract version. Missing metadata is accepted. If present and any value
+  differs from the embedded values, the loader emits `PROJ034` warning and does not rewrite the project; the
+  compiled payload records the authoritative build versions.
 - `schemaVersion` is an integer. Readers accept `1..current`; migrations are pure functions in
   `Mocassin.Core.Project.ProjectMigrations`.
 - Unknown properties are rejected by default (`JsonUnmappedMemberHandling.Disallow`) to catch typos; schema
@@ -119,7 +128,8 @@ projection:
 - non-semantic arrays sorted by `id`;
 - numbers in invariant, shortest round-trip form; no NaN/Inf; normalize `-0.0` to `0.0`;
 - timestamps normalized to UTC `Z` with fixed fractional digits;
-- unknown fields excluded (they are rejected by the reader anyway).
+- unknown fields excluded (they are rejected by the reader anyway);
+- `symmetry` is envelope metadata: it is included in the document hash, not the model hash.
 
 The hash is used for dirty tracking and cache keys, not as a cross-language model signature. Model,
 parameterization, and lattice signatures use the MessagePack projection (section 1.3 and ADR 0010).
@@ -197,8 +207,9 @@ parameterization, and lattice signatures use the MessagePack projection (section
 - `number` is the International Tables space-group number, 1..230.
 - `axis` identifies the unique axis or the hexagonal/rhombohedral description; `origin` identifies the origin
   choice. Both are explicit and use `none` when the setting has no such choice.
-- `axis` values are `none`, `uniqueAxisA`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, and `rhombohedral`.
-  `origin` values are `none`, `originChoice1`, and `originChoice2`.
+- `axis` values are `none`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, and `rhombohedral`. `uniqueAxisA` is
+  reserved for a future catalog extension and is rejected with `STR001` in v1. `origin` values are `none`,
+  `originChoice1`, and `originChoice2`.
 - The catalog resolves `(number, axis, origin)` to the Hermann–Mauguin symbol, Hall symbol, crystal system, and
   operations. These derived values are never persisted in the project.
 - The default structure is P1: `{ "number": 1, "axis": "none", "origin": "none" }`.
@@ -588,8 +599,10 @@ MessagePack map with snake_case keys. Top-level:
 | `cluster_tables` | array | `{object_id, occupation_codes:[u64], energies:[f64], particle_table_mapping:[u8; n_particles]}` |
 | `defect_background` | array | `[position][particle]` site energy in eV |
 
-- Pair tables are in canonical shell order. The compiled structure environments carry each shell's geometry ID,
-  distance bucket, representative offset, equivalent-offset count, and optional chiral partner index.
+- Pair tables are in canonical shell order: `(distanceBucket, targetP, cellA, cellB, cellC)`, then site
+  indices. The stable geometry ID is a content hash used for parameterization matching, not table order. The
+  compiled structure environments carry each shell's geometry ID, distance bucket, representative offset,
+  equivalent-offset count, and optional chiral partner index.
 - Chiral partners share one `object_id` and one energy table.
 - Cluster occupation codes use 6 bits per site, site 0 in the least significant bits, up to 9 sites; unused
   high bits are zero. Codes are canonical under the induced site-permutation group.
