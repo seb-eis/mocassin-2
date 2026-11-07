@@ -1,0 +1,107 @@
+# Step Amendments
+
+Amendments capture design changes that emerge during implementation without reopening a frozen step. They are
+planned, reviewed, integrated into the parent step branch, and audited as part of the parent step.
+
+Amendments are not a way to bypass the design review or audit gates. They are a way to keep a late design
+change explicit, reviewable, and integrated before the parent step is frozen.
+
+## 1. When to use an amendment
+
+Use an amendment when implementation reveals:
+
+- a public API or contract change that was not in the frozen design;
+- a cross-step interface or format change;
+- a design decision that is expensive to reverse;
+- a temporary implementation that should be replaced before the parent step is complete.
+
+Do not use an amendment for:
+
+- ordinary bug fixes;
+- small refactors that fit the existing design;
+- unrelated scope;
+- changes to a step that is already merged or tagged, unless the post-merge fallback in §7 applies.
+
+## 2. Naming
+
+| Item | Convention |
+| --- | --- |
+| Amendment ID | `step-NN-amend-M` |
+| Plan page | `docs/planning/amendments/step-NN-amend-M-<slug>.md` |
+| Design review record | `docs/planning/reviews/step-NN-amend-M.md` |
+| Feature branch | `feature/step-NN-<step-slug>/amend-M-<slug>` |
+| Large-amendment branch | `step/NN-amend-M-<slug>` with normal feature branches below it |
+| Parent audit | `docs/planning/audits/step-NN.md` |
+| Tag | The parent `step-NN` tag on the combined merged commit |
+
+## 3. Status values
+
+| Status | Meaning |
+| --- | --- |
+| **Proposed** | The change is recorded but not planned. |
+| **Planned** | The amendment plan page is complete and ready for design review. |
+| **Design review** | A fresh planning auditor is reviewing the amendment delta. |
+| **Ready for implementation** | The amendment design is accepted. |
+| **In progress** | The amendment is being implemented. |
+| **Integrated** | The amendment is squash-merged into the parent step branch. |
+| **Audited** | The parent audit passed at the combined commit. |
+| **Merged** | The parent step was merged and tagged. |
+| **Waived** | The human owner explicitly accepted that no amendment review is required. |
+
+## 4. Required sequence
+
+1. Record the amendment while the parent step is still active and before its audit freeze.
+2. Create the plan page from [`step-amendment-template.md`](step-amendment-template.md).
+3. Run a focused pre-implementation design review under the normal design-review process. Record it in
+   `docs/planning/reviews/step-NN-amend-M.md` and link it from the parent design review record.
+4. Implement on the amendment feature branch from the parent step branch. Run the normal local gates.
+5. Get approval and squash-merge the amendment into the parent step branch before the parent audit freeze.
+6. Update the parent step page, amendment page, audit request, and design review record with the combined
+   commit.
+7. Freeze the combined step branch. The parent audit covers the parent step and every integrated amendment at
+   that commit. Do not create a separate audit record or tag for an integrated amendment.
+8. On a passed audit, merge the parent step and create the `step-NN` tag on the combined commit. Mark the
+   amendment `Merged`.
+
+If the parent audit is already running, do not add commits. Stop the audit, integrate the amendment, and
+restart the audit at the new frozen commit.
+
+## 5. Design review
+
+- The amendment uses the same statuses, severity, verdict, and reviewer write scope as
+  [`docs/planning/reviews/README.md`](../reviews/README.md).
+- The review scope is the amendment delta and its impact on the parent step, not a full re-review of the
+  parent design.
+- The parent review record links to the amendment review record.
+- The review record is the only file the reviewer may commit.
+- A small amendment may be `Waived` only by explicit human-owner approval, with the rationale recorded in the
+  amendment page.
+
+## 6. Integration and audit
+
+- The amendment is integrated into the parent step branch using the normal feature approval and squash rules.
+- The parent audit request lists the amendment IDs, the combined commit, and any temporary implementation that
+  the amendment replaces.
+- The auditor reviews the entire solution: parent step plus integrated amendments.
+- There is one audit verdict, one merge, and one `step-NN` tag for the combined state.
+- The amendment page links to the parent audit record; no separate amendment audit file is created.
+
+## 7. Post-merge fallback
+
+If the parent step is already merged or tagged:
+
+- do not move or delete the existing `step-NN` tag;
+- use a short-lived maintenance branch from `main`;
+- audit the amendment separately;
+- create a new tag such as `step-NN.1` or `step-NN-amend-M` only with explicit human-owner approval;
+- record the amendment as a post-step change in the amendment page.
+
+## 8. Amendment index
+
+| Amendment | Parent step | Status | Branch | Design review | Parent audit / tag |
+| --- | --- | --- | --- | --- | --- |
+| `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Proposed** | — | — | — |
+
+The Step 02 amendment is proposed for the public generic math layer (`Vector3<T>`, `Vector4<T>`,
+`Matrix3<T>`, `Matrix4<T>`) and the replacement of the temporary `CellGeometry` array-based inverse. Its plan
+page will be created after the Step 02 implementor finishes the planned features.

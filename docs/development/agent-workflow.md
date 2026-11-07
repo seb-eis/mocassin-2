@@ -288,10 +288,34 @@ writes into it directly.
 | Step feature list | Once, at step start |
 | Each feature squash | Before every squash into the step branch |
 | Pre-implementation design review | Fresh planning auditor after the design docs are frozen, before implementation |
-| Step completion audit | Fresh out-of-context audit after the step is frozen |
+| Amendment design review | Focused fresh planning auditor before amendment implementation |
+| Amendment integration | Before the parent step audit freeze |
+| Step completion audit | Fresh out-of-context audit after the step is frozen; includes integrated amendments |
+| Post-merge amendment | Separate maintenance audit and a new tag with owner approval |
 | Reviewer record commit | Documentation-only; the record file is the only changed file |
 | Step-to-main merge | Before the `--no-ff` merge, only after a passed audit |
 | Tag creation/push | Included in the step/milestone/release approval |
 | Release | After Step 31 gates |
 
 The goal is not to slow the agent down. It is to keep every merge explainable, reproducible, and reversible.
+
+## 16. Step amendments
+
+A design change that emerges during implementation uses a planned amendment, not a direct edit to a frozen
+step.
+
+1. Record it as `step-NN-amend-M` from
+   [`docs/planning/amendments/step-amendment-template.md`](../planning/amendments/step-amendment-template.md).
+2. Keep the parent step active and integrate the amendment before the parent audit freeze.
+3. Run a focused design review under section 13; record it in
+   `docs/planning/reviews/step-NN-amend-M.md`.
+4. Implement on `feature/step-NN-<step-slug>/amend-M-<slug>` from the parent step branch and integrate it with
+   the normal feature approval and squash rules.
+5. Update the parent step page, amendment page, audit request, and review record with the combined commit.
+6. The parent audit under section 14 reviews the entire solution, including integrated amendments. Do not run a
+   separate audit or create a separate tag for an integrated amendment.
+7. If the parent step is already merged, use a maintenance branch, audit the amendment separately, and create a
+   new tag only with explicit owner approval.
+
+Use [`docs/planning/amendments/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/amendments/README.md)
+for statuses, naming, integration, and the post-merge fallback.

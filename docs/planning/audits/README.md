@@ -130,3 +130,13 @@ The audit record is the durable record. Do not rely on chat history, and do not 
   round.
 - A record commit that touches any other file is invalid; the verdict must be re-run by a fresh reviewer.
 - The auditor must not approve its own report. The human owner approves the merge and tag.
+
+## 9. Step amendments
+
+- An amendment integrated before the parent audit freeze is audited as part of the parent step at the combined
+  commit. The audit request lists the amendment IDs and the combined commit; no separate audit record or tag is
+  created.
+- A post-merge amendment needs its own maintenance audit and a new tag with owner approval. Never move or
+  delete the existing `step-NN` tag.
+- The amendment page links to the parent audit record. The auditor still edits only the audit record and
+  commits only that file.
