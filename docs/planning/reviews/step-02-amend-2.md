@@ -13,7 +13,7 @@
 | Step | 02 — Symmetry and Geometry |
 | Amendment | `step-02-amend-2` — Documentation Math Rendering with KaTeX |
 | Request owner | Step agent |
-| Design review status | Re-review required |
+| Design review status | Ready with notes |
 | Reviewed commit | `aad0835be9a0f0534e58a29392b64bf6aac2d588` (`aad0835`) |
 | Docs branch | `main` |
 | Review date | 2026-11-07 |
@@ -171,3 +171,86 @@ and request a fresh re-review.
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
+
+## Re-review round 2
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Amendment | `step-02-amend-2` — Documentation Math Rendering with KaTeX |
+| Request owner | Step agent |
+| Design review status | Ready with notes |
+| Reviewed commit | `aad0835be9a0f0534e58a29392b64bf6aac2d588` (`aad0835`) |
+| Delta reviewed | `bd48763..aad0835` |
+| Docs branch | `main` |
+| Review date | 2026-11-07 |
+| Reviewer | Independent planning auditor (fresh re-review) |
+
+### Round-1 finding verification
+
+| Finding | Status | Verification |
+| --- | --- | --- |
+| **A2-1** — strict docs build red | **Fixed** | `docs/development/agent-workflow.md:308` now uses the GitHub URL for the amendment template. `zensical build --strict` at `aad0835` reports `No issues found`. |
+| **A2-2** — duplicate `[project]` | **Fixed** | `docs/planning/amendments/step-02-amend-2-docs-math.md:59-68` now says to add the keys under the existing `[project]` table and does not repeat the table header. |
+| **A2-3** — parent review/audit links and branch sync | **Fixed** | `docs/planning/reviews/step-02.md:34-41` links both amendment reviews; `docs/planning/audits/step-02.md:17-27` lists both; the plan's Integration records the parent branch-sync and review-link prerequisites. The index, plan pages, and audit status are aligned at `Re-review required` in `01a485d`. |
+| **A2-4** — CDN, delimiter, and manual evidence | **Fixed** | The plan records the pinned CDN source for `NOTICE.md`, removes the `$` delimiter in favour of `\(...\)`, adds a delimiter-scope test, and names `<site>/physics/symmetry/index.html` for the manual visual check. |
+
+### Re-review evidence
+
+Files reviewed:
+
+- `docs/planning/amendments/step-02-amend-2-docs-math.md`
+- `docs/planning/steps/step-02-symmetry-and-geometry.md`
+- `docs/development/agent-workflow.md`
+- `docs/development/contributing.md`
+- `docs/physics/symmetry.md`
+- `docs/planning/reviews/step-02.md`
+- `docs/planning/audits/step-02.md`
+- `docs/planning/amendments/README.md`
+- `zensical.toml`
+- `NOTICE.md`
+- `tools/docs/requirements.txt`
+
+Commands run:
+
+```text
+git diff --stat bd48763 aad0835
+git diff bd48763 aad0835 -- docs/planning/amendments/step-02-amend-2-docs-math.md \
+  docs/development/agent-workflow.md docs/planning/reviews/step-02.md docs/planning/audits/step-02.md
+git show 01a485d:docs/planning/reviews/step-02-amend-2.md
+git show aad0835:zensical.toml
+grep -n "^```text" docs/physics/symmetry.md
+git worktree add --detach /tmp/opencode/mocassin-rereview aad0835
+zensical build --strict
+```
+
+Results: the design delta is documentation-only; `docs/physics/symmetry.md` still has six fenced `text`
+formula blocks because the amendment is not implemented yet. `zensical build --strict` at `aad0835` reported
+`No issues found`; the pinned KaTeX 0.19.1 asset URL remains reachable. The plan is internally consistent on
+the `[project]` keys and the three configured delimiters.
+
+### Re-review findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **A2-5 — The manual visual check has no evidence slot.** The plan asks the implementor to record the command and a screenshot path in the amendment page, but the amendment page has no evidence/verification section. Add a short verification section or record the evidence in the amendment page's integration/audit section. | `step-02-amend-2-docs-math.md:205-214, 216-229`; the amendment page currently ends with its Audit section. |
+| **Note** | **A2-6 — “Matching the official Zensical KaTeX example” is slightly inaccurate.** The plan intentionally removes the single-dollar delimiter, while the official example includes it. State that the initializer matches the example except for the removed `$` delimiter. | `step-02-amend-2-docs-math.md:79-105`; the official Zensical KaTeX example includes `{ left: "$", right: "$", display: false }`. |
+
+### Re-review verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+**Ready with notes.** The four round-1 findings are fixed: the strict docs build is green at `aad0835`, the
+TOML wording is correct, the parent review/audit links and statuses are in place, and the CDN/single-dollar/
+manual-evidence decisions are recorded. The remaining items are one minor evidence-slot addition and one wording
+clarification; no blocker or major finding remains.
+
+Follow-up owner: Planner / implementor
+
+Follow-up step: Implementation may proceed after the human owner accepts these notes; add the manual visual
+evidence slot and clarify the “matching the official example” wording.
