@@ -41,8 +41,10 @@ transcription step.
    - CI run
    - scope and acceptance criteria
    - known limitations
-4. The step branch is frozen at the audited commit. Only the reviewer's record commit and the step agent's
-   resolution/status commit may follow; neither may change code, tests, configuration, or the reviewer's text.
+4. The step branch is frozen at the audited commit. After a passing audit, only the reviewer's record commit
+   and the step agent's resolution/status commit may follow; neither may change code, tests, configuration, or
+   the reviewer's text. If fixes are needed, the step agent uses a new feature branch and the new commit is
+   re-audited.
 5. A fresh audit agent reads:
    - `AGENTS.md`
    - the step page

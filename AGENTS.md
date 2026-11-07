@@ -152,8 +152,9 @@ Before the first numbered item, complete the pre-implementation design review in
    - documentation updates;
    - any final acceptance fixes.
 2. Run the step's full acceptance criteria and quality gates on the step branch.
-3. Complete the independent audit in section 3.10. The step branch must be frozen at the audited commit; the
-   auditor's record commit and the step agent's resolution/status commit are the only permitted later commits.
+3. Complete the independent audit in section 3.10. The step branch must be frozen at the audited commit; after
+   a passing audit, the auditor's record commit and the step agent's resolution/status commit are the only
+   permitted later commits.
 4. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
 5. After approval:
    ```sh
@@ -313,9 +314,10 @@ out-of-context audit context must review the frozen step branch.
 2. The step agent creates or updates `docs/planning/audits/step-NN.md` using
    [`docs/planning/audits/step-audit-template.md`](docs/planning/audits/step-audit-template.md), records the
    exact audited commit and CI run, and sets the status to `Ready for audit`.
-3. The step branch is frozen at the audited commit. Two documentation-only commits may follow: the auditor's
-   record commit and the step agent's resolution/status commit. Neither may change code, tests, configuration,
-   or the auditor's text.
+3. The step branch is frozen at the audited commit. After a passing audit, two documentation-only commits may
+   follow: the auditor's record commit and the step agent's resolution/status commit. Neither may change code,
+   tests, configuration, or the auditor's text. If fixes are needed, the step agent uses a new feature branch
+   and the new commit is re-audited.
 4. A fresh audit agent reads `AGENTS.md`, the step page, the audit record, the status dashboard, and relevant
    ADRs/contracts, then runs the required builds/tests and reviews the diff. The auditor must not have
    implemented the step.
