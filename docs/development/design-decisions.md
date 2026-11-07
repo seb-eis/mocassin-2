@@ -25,9 +25,10 @@ adding units, but it has significant costs here:
 - the project/package/state JSON schemas deliberately carry human-readable units in field names;
 - a generic quantity would cross the Rust/Python boundary as a plain `f64` anyway.
 
-Explicit semantic types keep the public API readable and prevent energy/temperature/length mix-ups. Generic
-math remains available for internal vector and numeric kernels (Step 02), and conversion helpers can be added
-where a solver or analysis boundary genuinely needs SI values.
+Explicit semantic types keep the public API readable and prevent energy/temperature/length mix-ups. Public
+generic vector/matrix math (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, and `Matrix4<T>`, introduced by Step 02
+amendment 1) remains separate from the semantic coordinate wrappers, and conversion helpers can be added where a
+solver or analysis boundary genuinely needs SI values.
 
 ## One project per file
 

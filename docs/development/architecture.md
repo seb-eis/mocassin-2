@@ -24,6 +24,7 @@ persistence and depends on `Core`; the kernel never calls the store.
 | Namespace | Responsibility |
 | --- | --- |
 | `Mocassin.Core.Ids` | Strongly typed UUID identifiers, UUIDv7 generation, reserved IDs, JSON converters. |
+| `Mocassin.Core.Geometry` | Semantic coordinate wrappers, public generic vector/matrix math (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, `Matrix4<T>`), trim policy. |
 | `Mocassin.Core.Units` | Unit value structs, range/finiteness validation, JSON converters. |
 | `Mocassin.Core.Diagnostics` | `Diagnostic`, `DiagnosticSeverity`, `ModelPath`, and stable-sorting `DiagnosticBag`. |
 | `Mocassin.Core.Model` | Model envelope placeholder, template identities, view settings. Steps 03–10 extend it. |

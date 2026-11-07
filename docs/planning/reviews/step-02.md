@@ -35,8 +35,8 @@ not change the design; that was verified with `git show --stat 848c9a7`.
 
 | Amendment | Review record | Status |
 | --- | --- | --- |
-| `step-02-amend-1` — public generic math | [`step-02-amend-1.md`](step-02-amend-1.md) | Re-review required |
-| `step-02-amend-2` — KaTeX documentation math | [`step-02-amend-2.md`](step-02-amend-2.md) | Re-review required |
+| `step-02-amend-1` — public generic math | [`step-02-amend-1.md`](step-02-amend-1.md) | Ready with notes |
+| `step-02-amend-2` — KaTeX documentation math | [`step-02-amend-2.md`](step-02-amend-2.md) | Ready with notes |
 
 The parent audit covers these amendments at the combined frozen commit.
 
@@ -230,7 +230,7 @@ review record to `Re-review required`, and request a fresh re-review of the new 
 | --- | --- |
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
-| Design review status | Re-review required |
+| Design review status | Ready with notes |
 | Reviewed commit | `b698496d4098064a232016e4d6784167cf1374d9` (`b698496`) |
 | Docs branch | `docs/step-02-design-review` |
 | Review date | 2026-11-07 |
