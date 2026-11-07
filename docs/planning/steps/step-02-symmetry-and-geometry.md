@@ -19,7 +19,8 @@ orbit/permutation reduction, and periodic geometry kernels.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | `core-geometry` | `feature/step-02-symmetry-and-geometry/core-geometry` | Squashed | Core tests 158/158; `dotnet format --verify-no-changes` passes | [`42395501397`](https://github.com/seb-eis/mocassin-2/actions/runs/42395501397) — green | `e6f5e1d` |
-| `exact-grid` | `feature/step-02-symmetry-and-geometry/exact-grid` | Awaiting approval | Symmetry tests 34/34; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `exact-grid` | `feature/step-02-symmetry-and-geometry/exact-grid` | Squashed | Symmetry tests 34/34; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42396745263`](https://github.com/seb-eis/mocassin-2/actions/runs/42396745263) — green | `04e3213` |
+| `space-group-catalog` | `feature/step-02-symmetry-and-geometry/space-group-catalog` | Awaiting approval | Symmetry tests 60/60; generator `--check` current; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
@@ -138,7 +139,8 @@ The compatibility catalog contains exactly 274 settings:
 - `DataVersion = spglib-2.8.0/catalog-1`; `catalog-1` is the generator/schema version and is bumped when the
   selection rule, encoding, or schema changes.
 - The SHA-256 checksum covers the canonical settings payload, not the whole file and not a timestamp. The
-  committed JSON may be pretty-printed for review; the checksum is computed over the canonical form.
+  committed JSON is compact because it is machine-consumed and hashed, not hand-reviewed; the checksum is
+  computed over the canonical settings payload.
 - The loader recomputes the checksum at startup and treats a mismatch as a build/installation error.
 - The original database may be used locally to confirm the expected count and setting-name categories. It is
   not a CI dependency, is not copied, and is not used to generate catalog data.
@@ -147,17 +149,19 @@ The compatibility catalog contains exactly 274 settings:
 
 - The generated catalog is committed; normal .NET builds do not run Python, spglib, or any data download.
 - Layout:
-  - `src/dotnet/Mocassin.Symmetry/Data/space-groups.json` — committed, reviewable catalog;
+  - `src/dotnet/Mocassin.Symmetry/Data/space-groups.json` — committed catalog using the compact positional
+    encoding;
   - `src/dotnet/Mocassin.Symmetry/Data/space-groups.sha256` — checksum of the canonical settings payload;
   - `src/dotnet/Mocassin.Symmetry/Data/README.md` — provenance, selection rule, regeneration command, and
     known deviations;
   - `tools/symmetry/generate_space_groups.py` — dev-only generator;
   - `tools/symmetry/requirements.txt` — pinned `spglib==2.8.0`.
-- The JSON is UTF-8 without BOM, LF-only, deterministic, and contains no timestamps. The root metadata is
-  `schemaVersion`, `dataVersion`, `source`, `sourceVersion`, `selection`, and `settings`.
-- Settings are sorted by `(number, axis, origin)`. Keys use schema order. Rational translations are encoded
-  as `[numerator, denominator]`. The committed file may be pretty-printed; the checksum uses the canonical
-  payload.
+- The JSON is UTF-8 without BOM, LF-only, deterministic compact JSON, and contains no timestamps. The root
+  metadata is `schemaVersion`, `dataVersion`, `source`, `sourceVersion`, `selection`, and `settings`.
+- Settings are sorted by `(number, axis, origin)`. Each setting is the positional array
+  `[number, hermannMauguin, hallSymbol, crystalSystem, axis, origin, operations]`; each operation is
+  `[a11, a12, a13, a21, a22, a23, a31, a32, a33, tA, tB, tC]`. Translation numerators are exact over the
+  fixed denominator 24 and normalized to `[0, 24)`. The checksum uses the canonical settings payload.
 - Operations within a setting are sorted canonically by linear matrix row-major (`a11..a33`), then by the
   three normalized translation numerators (denominator 24). This fixes the checksum across spglib iteration
   order.
@@ -628,9 +632,9 @@ reduced/Niggli basis can be added later as an optimization.
 
 ## Implementation tasks
 
-- [ ] Add the space-group data source and a build-time generator for the embedded catalog.
+- [x] Add the space-group data source and a build-time generator for the embedded catalog.
 - [x] Implement `SymmetryOperation` with integer composition/inverse/closure.
-- [ ] Implement `SpaceGroupSetting`, `SpaceGroupCatalog`, and lookup APIs.
+- [x] Implement `SpaceGroupSetting`, `SpaceGroupCatalog`, and lookup APIs.
 - [ ] Implement crystal-system constraints and the corrected cell-vector transform.
 - [ ] Add `Fractional3`, `Cartesian3`, and `Vector4I` to `Mocassin.Core.Geometry`; implement the encoder in
   `Mocassin.Symmetry`.
@@ -639,25 +643,25 @@ reduced/Niggli basis can be added later as an optimization.
 - [ ] Implement canonical P1 expansion and position ordering.
 - [ ] Implement stabilizer/point-group/permutation reduction.
 - [ ] Implement radial sampling and periodic geometry helpers.
-- [ ] Add golden tests for all 230 groups/274 settings.
+- [x] Add golden tests for all 230 groups/274 settings.
 - [ ] Document the space-group data version and index-order contract.
 - [ ] Keep the assembly boundary: shared persisted vocabulary in `Mocassin.Core`, catalog and algorithms in
   `Mocassin.Symmetry`, and no Core reference to Symmetry.
-- [ ] Commit `Data/space-groups.json`, `Data/space-groups.sha256`, and `Data/README.md`; embed the data and wire
+- [x] Commit `Data/space-groups.json`, `Data/space-groups.sha256`, and `Data/README.md`; embed the data and wire
   the embedded-resource loader.
-- [ ] Add `tools/symmetry/generate_space_groups.py` and `requirements.txt`, and run the drift check in the
+- [x] Add `tools/symmetry/generate_space_groups.py` and `requirements.txt`, and run the drift check in the
   Contracts and policy CI job.
-- [ ] Use a source-generated JSON serializer context for the internal catalog DTOs.
+- [x] Use a source-generated JSON serializer context for the internal catalog DTOs.
 - [ ] Implement per-compilation caches, deterministic hashing, and `SymmetryContractVersion`.
 - [ ] Add the 20×20×20 benchmark fixture and golden reduction/contract tests.
 - [ ] Record the symmetry contract and catalog versions in the compiled payload.
 
 ## Acceptance criteria
 
-- [ ] All 230 international groups and 274 settings load.
-- [ ] Every setting passes identity, inverse, closure, determinant, and translation-normalization checks.
-- [ ] Group 47 is valid and matches spglib’s `Pmmm` setting.
-- [ ] General-position multiplicities match the International Tables for every setting.
+- [x] All 230 international groups and 274 settings load.
+- [x] Every setting passes identity, inverse, closure, determinant, and translation-normalization checks.
+- [x] Group 47 is valid and matches spglib’s `Pmmm` setting.
+- [x] General-position multiplicities match the International Tables for every setting.
 - [ ] P1 expansion of every Step 02 synthetic fixture site matches a brute-force expansion.
 - [ ] The canonical position order is stable across runs, OSes, and input ordering for the synthetic fixtures.
 - [ ] The triclinic cell test produces the correct C vector and angles.

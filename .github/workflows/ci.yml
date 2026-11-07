@@ -175,6 +175,12 @@ jobs:
       - name: Contract drift
         run: python tools/contracts/generate.py --check
 
+      - name: Install symmetry generator tools
+        run: python -m pip install -r tools/symmetry/requirements.txt
+
+      - name: Space-group catalog drift
+        run: python tools/symmetry/generate_space_groups.py --check
+
       - name: Licence headers
         run: python tools/check-license-headers.py
 

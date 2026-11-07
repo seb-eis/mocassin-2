@@ -27,9 +27,10 @@ before distribution.
 
 ### Space-group catalog
 
-The embedded space-group catalog is generated from spglib, pinned to the exact release and commit recorded in
-the generated catalog provenance (`src/dotnet/Mocassin.Symmetry/Data/README.md`). spglib is distributed under
-the BSD-3-Clause licence.
+The embedded space-group catalog is generated from spglib, pinned to release `2.8.0`
+(commit `3ebd8ac3318793932baeee90b44f453a7c35b5b4`). The exact release and commit are recorded in the
+generated catalog provenance (`src/dotnet/Mocassin.Symmetry/Data/README.md`). spglib is distributed under the
+BSD-3-Clause licence.
 
 Source: https://github.com/spglib/spglib
 

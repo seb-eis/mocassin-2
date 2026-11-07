@@ -75,3 +75,35 @@ static Mocassin.Symmetry.SymmetryOperation.operator ==(Mocassin.Symmetry.Symmetr
 ~override Mocassin.Symmetry.Int3x3.Equals(object obj) -> bool
 ~override Mocassin.Symmetry.Rational3.Equals(object obj) -> bool
 ~override Mocassin.Symmetry.SymmetryOperation.Equals(object obj) -> bool
+Mocassin.Symmetry.SpaceGroupCatalog
+Mocassin.Symmetry.SpaceGroupCatalog.DataSha256.get -> string!
+Mocassin.Symmetry.SpaceGroupCatalog.DataVersion.get -> string!
+Mocassin.Symmetry.SpaceGroupCatalog.GetByHallSymbol(string! hallSymbol) -> Mocassin.Symmetry.SpaceGroupSetting?
+Mocassin.Symmetry.SpaceGroupCatalog.GetByHermannMauguin(string! hermannMauguin) -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SpaceGroupSetting!>
+Mocassin.Symmetry.SpaceGroupCatalog.GetSetting(int number, Mocassin.Core.Symmetry.AxisSetting axis, Mocassin.Core.Symmetry.OriginChoice origin) -> Mocassin.Symmetry.SpaceGroupSetting?
+Mocassin.Symmetry.SpaceGroupCatalog.Settings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SpaceGroupSetting!>
+Mocassin.Symmetry.SpaceGroupSetting
+Mocassin.Symmetry.SpaceGroupSetting.<Clone>$() -> Mocassin.Symmetry.SpaceGroupSetting!
+Mocassin.Symmetry.SpaceGroupSetting.Axis.get -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Symmetry.SpaceGroupSetting.Axis.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.CrystalSystem.get -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Symmetry.SpaceGroupSetting.CrystalSystem.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.Deconstruct(out int Number, out string! HermannMauguin, out string! HallSymbol, out Mocassin.Core.Symmetry.CrystalSystem CrystalSystem, out Mocassin.Core.Symmetry.AxisSetting Axis, out Mocassin.Core.Symmetry.OriginChoice Origin, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> Operations) -> void
+Mocassin.Symmetry.SpaceGroupSetting.Equals(Mocassin.Symmetry.SpaceGroupSetting? other) -> bool
+Mocassin.Symmetry.SpaceGroupSetting.HallSymbol.get -> string!
+Mocassin.Symmetry.SpaceGroupSetting.HallSymbol.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.HermannMauguin.get -> string!
+Mocassin.Symmetry.SpaceGroupSetting.HermannMauguin.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.Number.get -> int
+Mocassin.Symmetry.SpaceGroupSetting.Number.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.Operations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation>
+Mocassin.Symmetry.SpaceGroupSetting.Operations.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.Origin.get -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Symmetry.SpaceGroupSetting.Origin.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.SpaceGroupSetting(int Number, string! HermannMauguin, string! HallSymbol, Mocassin.Core.Symmetry.CrystalSystem CrystalSystem, Mocassin.Core.Symmetry.AxisSetting Axis, Mocassin.Core.Symmetry.OriginChoice Origin, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> Operations) -> void
+override Mocassin.Symmetry.SpaceGroupSetting.Equals(object? obj) -> bool
+override Mocassin.Symmetry.SpaceGroupSetting.GetHashCode() -> int
+override Mocassin.Symmetry.SpaceGroupSetting.ToString() -> string!
+static Mocassin.Symmetry.SpaceGroupCatalog.Default.get -> Mocassin.Symmetry.SpaceGroupCatalog!
+static Mocassin.Symmetry.SpaceGroupSetting.operator !=(Mocassin.Symmetry.SpaceGroupSetting? left, Mocassin.Symmetry.SpaceGroupSetting? right) -> bool
+static Mocassin.Symmetry.SpaceGroupSetting.operator ==(Mocassin.Symmetry.SpaceGroupSetting? left, Mocassin.Symmetry.SpaceGroupSetting? right) -> bool

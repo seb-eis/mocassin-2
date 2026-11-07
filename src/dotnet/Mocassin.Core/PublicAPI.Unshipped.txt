@@ -810,3 +810,22 @@ static Mocassin.Core.Geometry.Vector4I.operator ==(Mocassin.Core.Geometry.Vector
 ~override Mocassin.Core.Geometry.Cartesian3.Equals(object obj) -> bool
 ~override Mocassin.Core.Geometry.Fractional3.Equals(object obj) -> bool
 ~override Mocassin.Core.Geometry.Vector4I.Equals(object obj) -> bool
+Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.Hexagonal = 4 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.None = 0 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.Rhombohedral = 5 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.UniqueAxisA = 1 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.UniqueAxisB = 2 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.UniqueAxisC = 3 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Cubic = 6 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Hexagonal = 5 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Monoclinic = 1 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Orthorhombic = 2 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Tetragonal = 3 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Triclinic = 0 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Trigonal = 4 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Symmetry.OriginChoice.None = 0 -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Symmetry.OriginChoice.OriginChoice1 = 1 -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Symmetry.OriginChoice.OriginChoice2 = 2 -> Mocassin.Core.Symmetry.OriginChoice

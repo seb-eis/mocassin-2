@@ -1,0 +1,4 @@
+# SPDX-License-Identifier: MIT
+# Development-only dependencies for the space-group catalog generator.
+# Normal .NET builds consume the committed catalog and never install these.
+spglib==2.8.0

@@ -15,4 +15,9 @@
   <ItemGroup>
     <ProjectReference Include="../Mocassin.Core/Mocassin.Core.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Data/space-groups.json" LogicalName="Mocassin.Symmetry.Data.space-groups.json" />
+    <EmbeddedResource Include="Data/space-groups.sha256" LogicalName="Mocassin.Symmetry.Data.space-groups.sha256" />
+  </ItemGroup>
 </Project>
