@@ -53,15 +53,36 @@ public sealed record SpaceGroupSetting(
     string HermannMauguin,
     string HallSymbol,
     CrystalSystem System,
-    AxisSetting Axis,              // None, UniqueA/B/C, Hexagonal, Rhombohedral
-    OriginChoice Origin,           // None, One, Two
-    ImmutableArray<SymmetryOperation> Operations,
-    string DataVersion);
+    AxisSetting Axis,              // None, UniqueAxisA/B/C, Hexagonal, Rhombohedral
+    OriginChoice Origin,           // None, OriginChoice1, OriginChoice2
+    ImmutableArray<SymmetryOperation> Operations);
+
+public enum AxisSetting
+{
+    None,
+    UniqueAxisA,
+    UniqueAxisB,
+    UniqueAxisC,
+    Hexagonal,
+    Rhombohedral,
+}
+
+public enum OriginChoice
+{
+    None,
+    OriginChoice1,
+    OriginChoice2,
+}
 ```
 
-`AxisSetting`, `OriginChoice`, and `CrystalSystem` are persisted Core vocabulary types. `SpaceGroupSetting`
-and `SymmetryOperation` are Symmetry types. The catalog assembly may reference Core, but Core must not
-reference the catalog assembly.
+The enum member names are chosen so the default camelCase serializer emits the contract strings
+`none`, `uniqueAxisA/B/C`, `hexagonal`, `rhombohedral`, `originChoice1`, and `originChoice2`.
+The catalog-level `dataVersion` is stored in the catalog root and compiled payload; it is not repeated per
+setting.
+
+`AxisSetting` and `OriginChoice` are persisted Core vocabulary types. `CrystalSystem` is Core vocabulary but
+catalog-derived and never serialized. `SpaceGroupSetting` and `SymmetryOperation` are Symmetry types. The
+catalog assembly may reference Core, but Core must not reference the catalog assembly.
 
 The project persists a `SpaceGroupRef(number, axis, origin)`. `SpaceGroupSetting` is the resolved catalog
 value used by previews and compilation; its Hermann–Mauguin symbol, Hall symbol, crystal system, operations,
@@ -73,6 +94,8 @@ and data version are not persisted in the project.
 - **Source:** spglib, pinned to an exact release and commit. spglib is BSD-3-Clause and distributes the
   space-group database. International Tables is a scientific reference, not a copied data source. The original
   MOCASSIN SQLite database is GPL-3.0-or-later and is never copied; it is only a local cross-check.
+- The v1 pin is `spglib==2.8.0`; the exact commit is recorded in `Data/README.md` at generation and asserted
+  by the generator.
 - Startup validation is cheap and fail-fast:
   - the embedded checksum and schema version match;
   - 230 group numbers and 274 settings are present;
@@ -96,19 +119,22 @@ The compatibility catalog contains exactly 274 settings:
 | --- | --- | ---: |
 | Standard setting | `choice = ""` for the 186 groups with a single standard setting | 186 |
 | Origin choices | `choice = "1"` and `"2"` for the 24 groups with two origins | 48 |
-| Monoclinic unique axis B/C | `choice = "b1"` and `"c1"` for the 13 monoclinic groups | 26 |
+| Monoclinic unique axis B/C | `choice = "b"` or `"b1"` for unique axis B, and `"c"` or `"c1"` for unique axis C, for the 13 monoclinic groups | 26 |
 | Rhombohedral axes | `choice = "H"` and `"R"` for the 7 rhombohedral groups | 14 |
 | **Total** | | **274** |
 
 - Apply the category by group type so each group contributes exactly one category. The generator asserts
   186 + 48 + 26 + 14 = 274 and that all 230 group numbers are present.
+- Primitive monoclinic groups 3, 4, 6, 10, and 11 use `b`/`c`; cell-choice groups 5, 7–9, and 12–15 use
+  `b1`/`c1`. The generator asserts exactly 26 monoclinic settings and two selected settings per monoclinic
+  group.
 - Do not include unique axis A, monoclinic cell choices 2/3, orthorhombic axis permutations, or other
   non-standard settings in v1. They are a documented extension; adding them requires a `CellChoice`/`Choice`
   field and a project-format decision.
-- `AxisSetting.UniqueA` remains in the enum for future extension but is not populated by the 274
-  compatibility catalog.
-- `DataVersion = spglib-<version>/catalog-1`; `catalog-1` is the generator/schema version and is bumped when
-  the selection rule, encoding, or schema changes.
+- `AxisSetting.UniqueAxisA` remains in the enum for future extension but is not populated by the 274
+  compatibility catalog. The v1 project validator rejects `uniqueAxisA` with `STR001`.
+- `DataVersion = spglib-2.8.0/catalog-1`; `catalog-1` is the generator/schema version and is bumped when the
+  selection rule, encoding, or schema changes.
 - The SHA-256 checksum covers the canonical settings payload, not the whole file and not a timestamp. The
   committed JSON may be pretty-printed for review; the checksum is computed over the canonical form.
 - The loader recomputes the checksum at startup and treats a mismatch as a build/installation error.
@@ -124,12 +150,15 @@ The compatibility catalog contains exactly 274 settings:
   - `src/dotnet/Mocassin.Symmetry/Data/README.md` — provenance, selection rule, regeneration command, and
     known deviations;
   - `tools/symmetry/generate_space_groups.py` — dev-only generator;
-  - `tools/symmetry/requirements.txt` — pinned `spglib==<version>`.
+  - `tools/symmetry/requirements.txt` — pinned `spglib==2.8.0`.
 - The JSON is UTF-8 without BOM, LF-only, deterministic, and contains no timestamps. The root metadata is
   `schemaVersion`, `dataVersion`, `source`, `sourceVersion`, `selection`, and `settings`.
 - Settings are sorted by `(number, axis, origin)`. Keys use schema order. Rational translations are encoded
   as `[numerator, denominator]`. The committed file may be pretty-printed; the checksum uses the canonical
   payload.
+- Operations within a setting are sorted canonically by linear matrix row-major (`a11..a33`), then by the
+  three normalized translation numerators (denominator 24). This fixes the checksum across spglib iteration
+  order.
 - The generator asserts 230 group numbers, 274 settings, the 186/48/26/14 category split, no duplicate
   `(number, axis, origin)`, determinant ±1, normalized translations, and group 47's 8-operation `Pmmm` set.
 - The catalog DTOs are internal to `Mocassin.Symmetry`. Use a `System.Text.Json` source-generated
@@ -137,9 +166,10 @@ The compatibility catalog contains exactly 274 settings:
 - CI drift check: the existing Contracts and policy job installs the pinned requirements and runs
   `python tools/symmetry/generate_space_groups.py --check`. The check regenerates the canonical payload in
   memory and fails if the committed settings or checksum differ.
-- The compiled package records `space_group_data_version` and `space_group_data_sha256` in its metadata. The
-  project file stores only the setting identity; it does not persist the catalog version. The compiled-payload
-  fields are added when Step 08/11 define that payload.
+- The compiled package records `space_group_data_version`, `space_group_data_sha256`, and
+  `symmetry_contract_version` in its metadata. The project envelope may also carry optional advisory metadata
+  (`spaceGroupDataVersion`, `spaceGroupDataSha256`, `symmetryContractVersion`); a mismatch with the embedded
+  values emits `PROJ034` warning. The compiled payload remains the authoritative build record.
 
 ### 2. Exact symmetry operations
 
@@ -201,6 +231,8 @@ C = (c cos β,
   - `CellDeterminantTolerance = 1e-12` for the near-degenerate cutoff;
   - `GeometricEqualityTolerance = 1e-6 Å` for Cartesian distance/vector equality;
   - `FractionalTrimTolerance = 1e-10` for boundary snapping before exact grid conversion.
+- `CellConditionLimit = 1e12`; a cell whose condition number `||M||∞ · ||M⁻¹||∞` exceeds it is rejected with
+  `STR003`, even when `det G` is above the determinant cutoff.
 - Cell-parameter inconsistency is rejected with `STR003`; the API never silently overwrites user input. The
   UI may lock dependent fields as an editor convenience.
 - Test all seven systems, both trigonal axis descriptions, unique-axis A/B/C, near-degenerate rejection,
@@ -218,8 +250,9 @@ public readonly record struct Vector4I(int A, int B, int C, int P);
 ```
 
 The primitive coordinate types live in **`Mocassin.Core.Geometry`** so the domain model can use them without
-making Core depend on Symmetry. The persisted symmetry vocabulary (`AxisSetting`, `OriginChoice`, and
-`CrystalSystem`) also lives in Core because `SpaceGroupRef` and `CellParameters` are part of the project model.
+making Core depend on Symmetry. `AxisSetting` and `OriginChoice` are persisted vocabulary; `CrystalSystem` is
+catalog-derived vocabulary. They also live in Core because `SpaceGroupRef` and `CellParameters` are part of the
+project model.
 `SpaceGroupSetting`, `SymmetryOperation`, the space-group catalog, the unit-cell encoder, and the symmetry
 algorithms remain in `Mocassin.Symmetry`.
 
@@ -253,7 +286,8 @@ scientific model remains `double`-based.
 
 - `Fractional3.TrimToUnitCell()` maps to `[0,1)` with a boundary policy that rounds values within `1e-10` of
   an integer to that integer. This boundary snap is a user-input convenience applied before grid conversion;
-  it is not the deduplication criterion.
+  it is not the deduplication criterion and may move a point by many grid steps. Near-boundary P-order and
+  overlap tests are required.
 - `Vector4I(cellA, cellB, cellC, P)` encodes an integer cell offset and the per-cell canonical P1 position
   index. `P` is in `[0, Pcount)`; base P1 positions use `(0, 0, 0, P)`.
 - The linear index is row-major with `P` fastest:
@@ -286,8 +320,12 @@ The discrete symmetry path does not use binary floating point. `Mocassin.Symmetr
 - An integer rotation matrix and a translation `m/24` applied to a grid point produce another grid point:
   `R·x + t` is exactly closed on the grid.
 - Conversion uses the canonical shortest round-trip decimal representation of the `double`, parsed with
-  invariant culture and `decimal`, scaled by `D`, and rounded with a documented midpoint rule. Do not multiply
-  the binary `double` directly, because that is platform-sensitive near grid boundaries.
+  invariant culture and `decimal`, scaled by `D`, and rounded with `MidpointRounding.AwayFromZero`. Do not
+  multiply the binary `double` directly, because that is platform-sensitive near grid boundaries.
+- Non-finite `Fractional3` components (`NaN`, `+Inf`, `-Inf`) are rejected with a structured validation
+  diagnostic; they are never converted.
+- A finite magnitude below half a grid step (`0.5 / D`) underflows to zero. Values below `decimal`'s
+  representable range are therefore zero, not an error.
 - `-0.0` is normalized to `0.0`.
 - Values with more than 12 fractional digits are rounded to the nearest grid point. A warning diagnostic
   (assigned in Step 07) is emitted when the difference exceeds half a grid step.
@@ -296,7 +334,8 @@ The discrete symmetry path does not use binary floating point. `Mocassin.Symmetr
 - The public and persisted `Fractional3` remains `double`-based; `GridFractional3` is internal to
   `Mocassin.Symmetry`. The project format does not change.
 - The grid denominator and conversion rule are part of the canonical position-order contract. Changing either
-  requires a catalog/canonical-order version bump and updated golden P-index tests.
+  bumps `SymmetryContractVersion` (not `catalog-N`) and updates golden P-index tests and signatures.
+  `catalog-N` changes only when the catalog payload, selection, or encoding changes.
 
 - The ordering is independent of input collection order and operation order. Golden tests freeze the P index
   for every reference site in the sample models.
@@ -360,7 +399,8 @@ public sealed record PointGroup(
   chiral; find the representative of the inverse orbit and link the two shells as chiral partners.
   - This is an orbit relationship, not physical chirality. In P1, every directed pair is its own chiral orbit
     and both directions must be represented.
-- Pair shells are cached by `(settingId, centerP, cutoff, cellParametersHash)`.
+- Pair shells are cached by `(catalogDataVersion, settingKey, centerP, cutoffBucket, cellParametersHash)`.
+- The pair-shell order `(distanceBucket, targetP, cellA, cellB, cellC)` is the canonical pair-table order.
 
 #### Cluster reduction
 
@@ -373,7 +413,8 @@ public sealed record PointGroup(
 - Encode the tuple as a `ulong`: 6 bits per site, site 0 in the least significant bits, up to 9 sites (54 bits),
   unused high bits zero.
 - Preserve chiral distinctions; do not merge mirror tuples unless the mirror permutation is in `P`.
-- Cluster results are cached by `(settingId, centerP, clusterOffsetsHash, allowedOccupationHash)`.
+- Cluster results are cached by
+  `(catalogDataVersion, settingKey, centerP, clusterOffsetsHash, allowedOccupationHash)`.
 
 - Use integer particle masks (`ulong`) for occupation sets; never `1 << id` on a 32-bit `int`.
 - Complexity targets: orbit expansion `O(|G| log |G|)`; pair reduction `O(C · |G0|)` after distance bucketing;
@@ -455,7 +496,7 @@ reduced/Niggli basis can be added later as an optimization.
 | --- | --- | --- |
 | `PairDistanceBucket` | `1 fm = 1e-5 Å` | Discrete pair/cluster distance shells |
 | `DistanceEqualityTolerance` | `1e-5 Å` | Continuous distance predicates outside the reduction |
-| `VectorEqualityTolerance` | `1e-6 Å` | Cartesian vector/position equality |
+| `GeometricEqualityTolerance` | `1e-6 Å` | Cartesian distance/vector equality |
 | `FractionalTrimTolerance` | `1e-10` | Boundary snapping before exact grid conversion |
 | `CellLengthTolerance` | `1e-3 Å` | Cell length equality |
 | `CellAngleTolerance` | `1e-3°` | Cell angle equality |
@@ -465,9 +506,9 @@ reduced/Niggli basis can be added later as an optimization.
 
 - If two minimum-image candidates share the shortest bucket, choose the smallest
   `(cellA, cellB, cellC)` lexicographically, then the smallest `P`.
-- `GetPositionsInBox(min, max)` uses a half-open Cartesian box `min ≤ x < max`; periodic duplicates are returned
-  with their offsets; boundary points belong to exactly one image; results are sorted by
-  `(P, cellA, cellB, cellC)`.
+- `GetPositionsInBox(min, max)` uses a half-open Cartesian box: a point equal to `min` on an axis is included;
+  a point equal to `max` is excluded. Each periodic image is filtered independently; duplicates with different
+  offsets remain distinct and results are sorted by `(P, cellA, cellB, cellC)`.
 - `GetCellVolume`, `ToCartesian`, `ToFractional`, and `GetDistance` remain available; `GetDistance` is the
   direct, non-minimum-image distance unless the caller uses `GetMinimumImage`.
 
@@ -516,7 +557,8 @@ reduced/Niggli basis can be added later as an optimization.
   - `space_group_data_version`;
   - `space_group_data_sha256`.
 - Changing any covered rule bumps `SymmetryContractVersion` and updates golden fixtures and signatures.
-- The project file does not store the contract version.
+- The project envelope may carry `symmetryContractVersion` as advisory metadata; the compiled payload records
+  the authoritative build version. A mismatch emits `PROJ034` warning.
 
 #### 7.4 Test oracles and tiers
 
@@ -527,10 +569,10 @@ reduced/Niggli basis can be added later as an optimization.
   - cluster canonicalization from explicit tuple permutations;
   - minimum image and radial search from explicit cell scans.
 - Golden fixtures:
-  - ceria;
-  - barium zirconate;
-  - vehicle/interstitialcy sample;
-  - freeze P indices, pair shells, chiral links, cluster codes, and linear indices.
+  - Step 02-local synthetic structures: P1 triclinic, P2 unique axis B, P2 unique axis C, Pmmm general and
+    special positions, Fm-3m special positions, and R-3m hexagonal general position;
+  - freeze P indices, pair shells, chiral links, cluster codes, and linear indices for those fixtures;
+  - full ceria, barium zirconate, and vehicle/interstitialcy golden models belong to Step 03/08.
 - PR-fast:
   - all 274 catalog group-law checks;
   - golden samples;
@@ -551,8 +593,13 @@ reduced/Niggli basis can be added later as an optimization.
 
 #### 7.5 Performance and memory
 
-- Define the 20×20×20 benchmark concretely: cell, P count, site count, runner class, and baseline.
-- Target: P1 expansion under 1 second on the defined CI runner class.
+- Benchmark fixture: 64 deterministic P1 positions in a cubic `a=5.41 Å` cell, expanded to `20×20×20` =
+  512,000 `Vector4I` positions.
+- Runner class: GitHub-hosted `ubuntu-latest`, 4 vCPU, .NET 10 Release.
+- Benchmark: BenchmarkDotNet `P1Expansion20Cubed` in `Mocassin.Benchmarks`.
+- Target: mean under 1 second; baseline in `tests/reference/bench/baselines.json` under the
+  `linux-x64-github-ubuntu-latest-dotnet10` class.
+- Command: `dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks -- --filter "*P1Expansion20Cubed*"`.
 - Pair and cluster reductions use the documented complexity bounds and early pruning.
 - Only base P1 Cartesian positions are precomputed. Do not allocate a dense `A×B×C×P` Cartesian array.
 - BenchmarkDotNet runs on release candidates; a 10% regression fails unless accepted by ADR.
@@ -560,8 +607,9 @@ reduced/Niggli basis can be added later as an optimization.
 
 #### 7.6 Public/internal API boundary
 
-- Public: `SpaceGroupCatalog`, `SpaceGroupSetting`, `SymmetryOperation`, `PointGroup`, `CellGeometry`,
-  `UnitCellVectorEncoder`, `MinimumImageResult`, `NeighborImage`, and the pair/cluster reduction result types.
+- Public: `SpaceGroupCatalog`, `SpaceGroupSetting`, `SymmetryOperation`, `PointGroup`, `SitePermutation`,
+  `ExpandedSite`, `SiteOrbitInfo`, `CellGeometry`, `UnitCellVectorEncoder`, `MinimumImageResult`,
+  `NeighborImage`, and the pair/cluster reduction result types.
 - Internal: `GridFractional3`, JSON DTOs, cache keys, hashing helpers, and reduction scratch types.
 - All public/protected members have XML documentation.
 - ApiCompat baselines are updated for intentional public API changes.
@@ -606,11 +654,11 @@ reduced/Niggli basis can be added later as an optimization.
 - [ ] Every setting passes identity, inverse, closure, determinant, and translation-normalization checks.
 - [ ] Group 47 is valid and matches spglib’s `Pmmm` setting.
 - [ ] General-position multiplicities match the International Tables for every setting.
-- [ ] P1 expansion of every sample site matches a brute-force expansion.
-- [ ] The canonical position order is stable across runs, OSes, and input ordering.
+- [ ] P1 expansion of every Step 02 synthetic fixture site matches a brute-force expansion.
+- [ ] The canonical position order is stable across runs, OSes, and input ordering for the synthetic fixtures.
 - [ ] The triclinic cell test produces the correct C vector and angles.
 - [ ] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
-- [ ] A 20×20×20 cell's position expansion meets the benchmark target on the defined CI runner class.
+- [ ] The `P1Expansion20Cubed` benchmark (64 P1 positions, 20×20×20) meets its target on the defined runner.
 - [ ] The compiled payload records `symmetry_contract_version`, `space_group_data_version`, and
   `space_group_data_sha256`.
 - [ ] Cross-OS golden P indices, pair shells, and cluster codes match.
@@ -641,7 +689,7 @@ At this point, document the symmetry and geometry foundation:
 | Group laws | Identity, inverse, closure, determinant ±1 for all settings |
 | Orbit sizes | General and special positions match known multiplicities |
 | Canonical order | Shuffled sites/operations produce the same `P` assignment |
-| P1 golden indices | Ceria, barium zirconate, and the vehicle/interstitialcy sample freeze the expected P order |
+| P1 golden indices | Step 02 synthetic fixtures freeze the expected P order |
 | Coordinate round-trip | Fractional ↔ `Vector4I` ↔ fractional for base positions and neighbor images, including negative offsets |
 | Linear index | Small-supercell index round-trip; total exactly `int.MaxValue` is accepted by the arithmetic check |
 | Index limit | A total of `int.MaxValue + 1` and out-of-range offsets are rejected; no wrap or truncation |
@@ -659,10 +707,14 @@ At this point, document the symmetry and geometry foundation:
 | Image multiplicity | Multiple images of the same P index remain distinct and correctly offset |
 | Distance buckets | Symmetry-equivalent pairs share a bucket; cutoff-boundary candidates are included with the 1 fm margin |
 | Box queries | `GetPositionsInBox` half-open boundaries and periodic duplicates are deterministic |
+| Grid invalid input | `NaN`, `+Inf`, and `-Inf` are rejected; subnormal values underflow to zero |
+| Boundary trimming | Near-boundary inputs snap deterministically and do not merge distinct positions |
+| Cell conditioning | Highly skewed cells above `CellConditionLimit` are rejected even with positive `det G` |
+| Box boundaries | `min` is inclusive and `max` is exclusive; periodic duplicates remain distinct |
 | Cache scope | Per-compilation caches do not leak across structures; keys include cell, cutoff, and contract version |
 | Determinism | Parallel expansion and reduction equal sequential canonical output |
 | Contract version | Changing a covered rule bumps `symmetry-1` and invalidates golden signatures |
-| Benchmark | 20×20×20 expansion meets the target on the defined runner class |
+| Benchmark | 64 P1 positions × 20×20×20 meets the `P1Expansion20Cubed` target on the defined runner class |
 | Thread safety | Parallel expansion produces identical results |
 | Assembly boundary | `Mocassin.Core` does not reference `Mocassin.Symmetry`; persisted symmetry vocabulary is in Core |
 | Catalog checksum | Startup rejects a corrupted catalog or wrong schema version |
@@ -699,6 +751,10 @@ At this point, document the symmetry and geometry foundation:
 | Hash instability | SHA-256 for persisted IDs; no `string.GetHashCode()` |
 | Contract drift | `SymmetryContractVersion`, golden fixtures, and versioned compiled payload |
 | API leakage | Internal DTOs/cache types; public API baseline and XML docs |
+| Cell conditioning | `CellConditionLimit` and a high-condition triclinic stress test |
+| Grid invalid input | Non-finite rejection, underflow-to-zero rule, and explicit tests |
+| Boundary trimming | Near-boundary P-order and overlap tests |
+| Box boundary ambiguity | Half-open inclusion tests and distinct-offset duplicates |
 
 ## Done when
 
