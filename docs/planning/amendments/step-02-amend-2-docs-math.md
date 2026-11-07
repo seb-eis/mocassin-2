@@ -6,12 +6,12 @@
 | --- | --- |
 | Amendment ID | `step-02-amend-2` |
 | Parent step | 02 — Symmetry and Geometry |
-| Status | In progress |
+| Status | Integrated |
 | Branch | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` |
 | Design review | `docs/planning/reviews/step-02-amend-2.md` |
 | Parent audit | `docs/planning/audits/step-02.md` |
-| Integration commit | — |
-| Combined audit commit | pending |
+| Integration commit | `d6eac6f` |
+| Combined audit commit | `d6eac6f` |
 | Tag | `step-02` |
 | Date | 2026-11-07 |
 | Owner | Planner |
@@ -253,12 +253,12 @@ None. This amendment changes documentation assets and site configuration only.
 
 - Branch: `feature/step-02-symmetry-and-geometry/amend-2-docs-math`
 - Parent step branch: `step/02-symmetry-and-geometry`
-- Parent branch synchronized with `main` before implementation: —
-- Parent review linked: —
+- Parent branch synchronized with `main` before implementation: `d2efe6a`
+- Parent review linked: `docs/planning/reviews/step-02.md`
 - Approval: normal feature approval; design review before implementation
-- Squash commit: —
-- Parent audit request updated: —
-- Combined frozen commit: —
+- Squash commit: `d6eac6f`
+- Parent audit request updated: `d6eac6f`
+- Combined frozen commit: `d6eac6f`
 
 ## Verification evidence
 
@@ -275,7 +275,7 @@ None. This amendment changes documentation assets and site configuration only.
 ## Audit
 
 - Parent audit record: `docs/planning/audits/step-02.md`
-- Audit verdict: —
+- Audit verdict: pending
 - Merge commit: —
 - Tag: `step-02`
 - Post-merge fallback required: no

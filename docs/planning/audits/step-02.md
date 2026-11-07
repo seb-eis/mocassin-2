@@ -6,13 +6,13 @@
 | --- | --- |
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
-| Audit status | Not requested |
-| Audited commit | — |
-| Step branch | — |
+| Audit status | Ready for audit |
+| Audited commit | `d6eac6f` (combined solution; docs-only freeze commit follows) |
+| Step branch | `step/02-symmetry-and-geometry` |
 | Step tag | — |
-| CI run | — |
-| Audit date | — |
-| Auditor | — |
+| CI run | [42427151237](https://github.com/seb-eis/mocassin-2/actions/runs/42427151237) — green at `d6eac6f` |
+| Audit date | 2026-11-07 |
+| Auditor | Fresh out-of-context auditor (to be assigned) |
 
 ## Step 02 amendments
 
@@ -25,8 +25,7 @@ The Step 02 audit covers the parent step plus these integrated amendments at the
   [`step-02-amend-2-docs-math.md`](../amendments/step-02-amend-2-docs-math.md), review
   [`step-02-amend-2.md`](../reviews/step-02-amend-2.md).
 
-Combined audit commit: pending. The human owner accepted the amendment notes; both amendments are
-`Ready for implementation` and must be integrated before this audit freezes.
+Combined audit commit: `d6eac6f`. Both amendments are integrated; the human owner accepted the amendment notes.
 
 ## Step summary
 
@@ -40,21 +39,21 @@ Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-g
 
 ## Step-specific acceptance checklist
 
-- [ ] All 230 international groups and 274 settings load.
-- [ ] Every setting passes identity, inverse, closure, determinant, and translation-normalization checks.
-- [ ] Group 47 is valid and matches the authoritative spglib `Pmmm` setting.
-- [ ] General-position multiplicities match the International Tables for every setting.
-- [ ] P1 expansion of every Step 02 synthetic fixture site matches a brute-force expansion.
-- [ ] The canonical position order is stable across runs, OSes, and input ordering.
-- [ ] The triclinic cell test produces the correct C vector and angles.
-- [ ] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
-- [ ] The `P1Expansion20Cubed` fixture (64 P1 positions, 20×20×20) meets its under-1-second target.
-- [ ] Documentation written
+- [x] All 230 international groups and 274 settings load.
+- [x] Every setting passes identity, inverse, closure, determinant, and translation-normalization checks.
+- [x] Group 47 is valid and matches the authoritative spglib `Pmmm` setting.
+- [x] General-position multiplicities match the International Tables for every setting.
+- [x] P1 expansion of every Step 02 synthetic fixture site matches a brute-force expansion.
+- [x] The canonical position order is stable across runs, OSes, and input ordering.
+- [x] The triclinic cell test produces the correct C vector and angles.
+- [x] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
+- [x] The `P1Expansion20Cubed` fixture (64 P1 positions, 20×20×20) meets its under-1-second target.
+- [x] Documentation written
 
 ## Known notes for the auditor
 
-- The step branch contains the closeout squash plus a documentation-only audit-request commit; the audited
-  commit and CI run are recorded there.
+- The audited solution is `d6eac6f`; a documentation-only audit-request/status commit follows it. The CI run
+  above is for the solution commit.
 - `periodic-geometry` was implemented before `orbit-reduction` because pair reduction consumes radial search.
   The approved feature set is unchanged.
 - The catalog uses a compact positional JSON encoding rather than the reviewed keyed/pretty form, at the human
@@ -66,17 +65,20 @@ Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-g
 - The benchmark was recorded locally at 965.3 µs mean on the development container; the declared runner class
   is `linux-x64-github-ubuntu-latest-dotnet10`.
 - `SymmetryCache` is internal for now; caches are scoped per compilation and bounded at 4096 entries.
+- Amendment 1 (`cd796b0`) adds public `Vector3<T>`/`Vector4<T>`/`Matrix3<T>`/`Matrix4<T>` and migrates
+  `CellGeometry` to `Matrix3<double>`.
+- Amendment 2 (`d6eac6f`) adds KaTeX 0.19.1 rendering and converts the published symmetry formulas.
 
 ## Standard audit checklist
 
-- [ ] Required tests from the step page pass.
-- [ ] Public/protected XML documentation policy is followed.
-- [ ] Documentation, status dashboard, feature log, and parity matrix are current.
-- [ ] CI is green at the audited commit.
-- [ ] Format/version/fixture changes are documented and tested.
-- [ ] Security, dependency, licence, and secret-scan gates pass.
-- [ ] No unrelated changes or unapproved scope.
-- [ ] Branch, tag, and status hygiene are correct.
+- [x] Required tests from the step page pass.
+- [x] Public/protected XML documentation policy is followed.
+- [x] Documentation, status dashboard, feature log, and parity matrix are current.
+- [x] CI is green at the audited commit.
+- [x] Format/version/fixture changes are documented and tested.
+- [x] Security, dependency, licence, and secret-scan gates pass.
+- [x] No unrelated changes or unapproved scope.
+- [x] Branch, tag, and status hygiene are correct.
 
 ## Evidence
 

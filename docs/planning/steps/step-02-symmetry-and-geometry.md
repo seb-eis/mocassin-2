@@ -9,10 +9,10 @@ orbit/permutation reduction, and periodic geometry kernels.
 
 - **Status:** In progress
 - **Step branch:** `step/02-symmetry-and-geometry`
-- **Step CI:** —
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42427151237) at `d6eac6f` (Ubuntu + Windows + policy/docs jobs)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Ready for audit at `d6eac6f`
 - **Design review:** Ready with notes — accepted by the human owner on 2026-11-07
 - **Last updated:** 2026-11-07
 
@@ -27,7 +27,9 @@ orbit/permutation reduction, and periodic geometry kernels.
 | `orbit-reduction` | `feature/step-02-symmetry-and-geometry/orbit-reduction` | Squashed | Symmetry tests 108/108; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42418281190`](https://github.com/seb-eis/mocassin-2/actions/runs/42418281190) — green | `a9ea5ae` |
 | `contracts-caches-benchmarks` | `feature/step-02-symmetry-and-geometry/contracts-caches-benchmarks` | Squashed | Symmetry tests 116/116; benchmark `P1Expansion20Cubed` 965.3 µs (target < 1 s); full solution tests pass; `dotnet format --verify-no-changes` passes | [`42419100983`](https://github.com/seb-eis/mocassin-2/actions/runs/42419100983) — licence gate failed; fixed below | `4aaeedd` |
 | `fix-benchmark-licenses` | `feature/step-02-symmetry-and-geometry/fix-benchmark-licenses` | Squashed | NuGet licence gate 44 packages; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42419605889`](https://github.com/seb-eis/mocassin-2/actions/runs/42419605889) — green | `a3be35a` |
-| `closeout` | `feature/step-02-symmetry-and-geometry/closeout` | Awaiting approval | Full solution tests; strict docs and combined docs build; `dotnet format`; API compat, benchmark, NuGet licence/vulnerability, contract drift, SPDX, secret gates | — | — |
+| `closeout` | `feature/step-02-symmetry-and-geometry/closeout` | Squashed | Full solution tests; strict docs and combined docs build; `dotnet format`; API compat, benchmark, NuGet licence/vulnerability, contract drift, SPDX, secret gates | [`42426516882`](https://github.com/seb-eis/mocassin-2/actions/runs/42426516882) — green | `d2efe6a` |
+| `amend-1-public-math` | `feature/step-02-symmetry-and-geometry/amend-1-public-math` | Squashed | Core 167/167; Symmetry 117/117; matrix benchmark 0.90 ns transform / 5.22 ns inverse, 0 allocations; API baselines updated | [`42426221778`](https://github.com/seb-eis/mocassin-2/actions/runs/42426221778) — green | `cd796b0` |
+| `amend-2-docs-math` | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | Squashed | Strict docs and combined docs build; 21 rendered KaTeX elements with MathML; screenshot `/tmp/opencode/step-02-symmetry.png` | [`42427151237`](https://github.com/seb-eis/mocassin-2/actions/runs/42427151237) — green | `d6eac6f` |
 
 **Deviations and notes:**
 
@@ -39,6 +41,9 @@ orbit/permutation reduction, and periodic geometry kernels.
   realizable cells stay below `1e12`. The limit predicate is unit-tested directly.
 - The symmetry version record is ready, but writing it into the compiled `.msl` metadata belongs to Step 11.
 - ApiCompat baseline refresh now uses reference assemblies, keeping the checked-in binaries small.
+- Amendment 1 adds the public generic math layer and migrates `CellGeometry` to `Matrix3<double>`.
+- Amendment 2 adds KaTeX 0.19.1 rendering and converts the published symmetry formulas.
+- Combined audited solution commit: `d6eac6f`.
 
 ## Goal
 
