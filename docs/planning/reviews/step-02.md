@@ -341,14 +341,14 @@ implementation exists.
 
 | Finding | Status | Owner |
 | --- | --- | --- |
-| r1 | Open — update the architecture table's `CrystalSystem` wording | Step agent / planning agent |
-| r2 | Open — define the reserved-value parser/validator path and adjust test wording | Step agent / planning agent |
-| r3 | Open — add `CellConditionLimit` to the data contract and Step 03 `STR003` | Step agent / planning agent |
-| r4 | Resolved by this record — Step 02 `Last updated` set to 2026-11-07 | Scribe |
-| r5 | Note — confirm additive project-schema v1 handling and fixtures; owner acceptance pending | Planner / human owner |
-| r6 | Note — add site-index order to the Step 02 pair-order statement | Planner |
-| r7 | Note — record the exact spglib commit at generation and assert it | Planner |
-| r8 | Note — add `PROJ034` to the diagnostic catalogue summary | Planner |
+| r1 | Fixed — `d4d2b42` | Architecture wording separates persisted vocabulary from catalog-derived `CrystalSystem`. |
+| r2 | Fixed — `d4d2b42` | Parser accepts reserved `uniqueAxisA`; validator rejects with `STR001`; supported-enum test wording fixed. |
+| r3 | Fixed — `d4d2b42` | `CellConditionLimit` added to the data contract and Step 03 `STR003`. |
+| r4 | Resolved — 2026-11-07 | Step 02 `Last updated` updated. |
+| r5 | Accepted — additive v1 | Optional `symmetry` metadata is an additive v1 field; fixtures added to Step 03. |
+| r6 | Fixed — `d4d2b42` | Step 02 pair order now includes center/partner site indices. |
+| r7 | Confirmed | Exact spglib commit recorded at generation; generator asserts the 2.8.0 pin. |
+| r8 | Fixed — `d4d2b42` | Glossary diagnostic summary includes `PROJ034`. |
 
 ### Re-review verdict
 
@@ -369,3 +369,13 @@ acceptance of the notes).
 
 Follow-up step: Apply `r1`–`r4` and `r5`–`r8` in the Step 02/03 docs, record the human owner’s acceptance, and
 start Step 02 under the normal branch and feature-approval rules.
+
+## Human owner acceptance
+
+Date: 2026-11-07
+
+The human owner accepted the **Ready with notes** verdict and the remaining r5–r8 notes. Minor fixes r1–r3,
+r5, r6, and r8 were applied in `d4d2b42`; r4 was resolved earlier; r7 is confirmed by the `Data/README.md`
+and generator task.
+
+The design review gate is complete. Step 02 may proceed under the normal branch and feature-approval rules.
