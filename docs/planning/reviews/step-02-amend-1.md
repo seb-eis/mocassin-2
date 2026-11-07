@@ -13,7 +13,7 @@
 | Step | 02 — Symmetry and Geometry |
 | Amendment | `step-02-amend-1` — Public Generic Math Types |
 | Request owner | Step agent |
-| Design review status | Ready with notes |
+| Design review status | Ready for implementation |
 | Reviewed commit | `aad0835be9a0f0534e58a29392b64bf6aac2d588` (`aad0835`) |
 | Docs branch | `main` |
 | Review date | 2026-11-07 |
@@ -175,9 +175,6 @@ a fresh re-review.
 | A1-4 | Fixed — both API baselines and benchmark/disassembly evidence defined | Planner | `aad0835` |
 | A1-5 | Fixed — parent review/audit links and branch-sync prerequisite added | Planner | `aad0835` |
 | A1-6 | Fixed — singular/condition-number contract and inlining limits documented | Planner | `aad0835` |
-| A1-7 | Fixed — design-decisions, open-decisions, and architecture now describe public generic math | Planner | `25931de` |
-| A1-8 | Documented — 4×4 consumer references are provisional; Step 23/24/27 reviews confirm or defer | Planner | `25931de` |
-| A1-9 | Fixed — risk wording aligned and duplicate acceptance item removed | Planner | `25931de` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -264,3 +261,18 @@ Follow-up owner: Planner / implementor
 
 Follow-up step: Implementation may proceed after the human owner accepts these notes; update the three
 secondary docs and align the risk/acceptance wording in the implementation or closeout.
+
+## Resolution status (round 2)
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| A1-7 | Fixed — design-decisions, open-decisions, and architecture now describe public generic math | Planner | `25931de` |
+| A1-8 | Documented — 4×4 consumer references are provisional; Step 23/24/27 reviews confirm or defer | Planner | `25931de` |
+| A1-9 | Fixed — risk wording aligned and duplicate acceptance item removed | Planner | `25931de` |
+
+## Human owner acceptance
+
+Date: 2026-11-07
+
+The human owner accepted the **Ready with notes** verdict and all re-review notes. The amendment is ready for
+implementation and must be integrated before the Step 02 audit freeze.

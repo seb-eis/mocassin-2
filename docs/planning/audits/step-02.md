@@ -25,8 +25,8 @@ The Step 02 audit covers the parent step plus these integrated amendments at the
   [`step-02-amend-2-docs-math.md`](../amendments/step-02-amend-2-docs-math.md), review
   [`step-02-amend-2.md`](../reviews/step-02-amend-2.md).
 
-Combined audit commit: pending. Amendment records are `Ready with notes`; the notes were resolved and implementation may proceed after
-owner acceptance.
+Combined audit commit: pending. The human owner accepted the amendment notes; both amendments are
+`Ready for implementation` and must be integrated before this audit freezes.
 
 ## Step summary
 
