@@ -121,3 +121,61 @@ Mocassin.Symmetry.CellGeometry.VolumeAngstrom3.get -> double
 static Mocassin.Symmetry.CellGeometry.TryCreate(Mocassin.Core.Model.CellParameters! parameters, Mocassin.Core.Symmetry.CrystalSystem crystalSystem, Mocassin.Core.Symmetry.AxisSetting axis, out Mocassin.Symmetry.CellGeometry? geometry, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
 static Mocassin.Symmetry.CellGeometry.TryCreate(Mocassin.Core.Model.CellParameters! parameters, Mocassin.Symmetry.SpaceGroupSetting! setting, out Mocassin.Symmetry.CellGeometry? geometry, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
 static Mocassin.Symmetry.CellGeometry.TryCreate(Mocassin.Core.Model.CellParameters! parameters, out Mocassin.Symmetry.CellGeometry? geometry, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+Mocassin.Symmetry.ExpandedSite
+Mocassin.Symmetry.ExpandedSite.<Clone>$() -> Mocassin.Symmetry.ExpandedSite!
+Mocassin.Symmetry.ExpandedSite.Deconstruct(out int P, out Mocassin.Core.Geometry.Vector4I Encoding, out Mocassin.Core.Geometry.Fractional3 Fractional, out int ReferenceSiteIndex, out int OrbitMemberIndex) -> void
+Mocassin.Symmetry.ExpandedSite.Encoding.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.ExpandedSite.Encoding.init -> void
+Mocassin.Symmetry.ExpandedSite.Equals(Mocassin.Symmetry.ExpandedSite? other) -> bool
+Mocassin.Symmetry.ExpandedSite.ExpandedSite(int P, Mocassin.Core.Geometry.Vector4I Encoding, Mocassin.Core.Geometry.Fractional3 Fractional, int ReferenceSiteIndex, int OrbitMemberIndex) -> void
+Mocassin.Symmetry.ExpandedSite.Fractional.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.ExpandedSite.Fractional.init -> void
+Mocassin.Symmetry.ExpandedSite.OrbitMemberIndex.get -> int
+Mocassin.Symmetry.ExpandedSite.OrbitMemberIndex.init -> void
+Mocassin.Symmetry.ExpandedSite.P.get -> int
+Mocassin.Symmetry.ExpandedSite.P.init -> void
+Mocassin.Symmetry.ExpandedSite.ReferenceSiteIndex.get -> int
+Mocassin.Symmetry.ExpandedSite.ReferenceSiteIndex.init -> void
+Mocassin.Symmetry.SiteOrbitInfo
+Mocassin.Symmetry.SiteOrbitInfo.<Clone>$() -> Mocassin.Symmetry.SiteOrbitInfo!
+Mocassin.Symmetry.SiteOrbitInfo.Deconstruct(out int ReferenceSiteIndex, out Mocassin.Core.Geometry.Fractional3 Representative, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> Positions, out System.Collections.Immutable.ImmutableArray<int> PositionIndices) -> void
+Mocassin.Symmetry.SiteOrbitInfo.Equals(Mocassin.Symmetry.SiteOrbitInfo? other) -> bool
+Mocassin.Symmetry.SiteOrbitInfo.Multiplicity.get -> int
+Mocassin.Symmetry.SiteOrbitInfo.PositionIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Symmetry.SiteOrbitInfo.PositionIndices.init -> void
+Mocassin.Symmetry.SiteOrbitInfo.Positions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+Mocassin.Symmetry.SiteOrbitInfo.Positions.init -> void
+Mocassin.Symmetry.SiteOrbitInfo.ReferenceSiteIndex.get -> int
+Mocassin.Symmetry.SiteOrbitInfo.ReferenceSiteIndex.init -> void
+Mocassin.Symmetry.SiteOrbitInfo.Representative.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.SiteOrbitInfo.Representative.init -> void
+Mocassin.Symmetry.SiteOrbitInfo.SiteOrbitInfo(int ReferenceSiteIndex, Mocassin.Core.Geometry.Fractional3 Representative, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> Positions, System.Collections.Immutable.ImmutableArray<int> PositionIndices) -> void
+Mocassin.Symmetry.SpaceGroupOperations
+Mocassin.Symmetry.UnitCellVectorEncoder
+Mocassin.Symmetry.UnitCellVectorEncoder.Decode(Mocassin.Core.Geometry.Vector4I position) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.UnitCellVectorEncoder.DecodeLinearIndex(int linearIndex, int cellCountA, int cellCountB, int cellCountC) -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.UnitCellVectorEncoder.Encode(Mocassin.Core.Geometry.Fractional3 fractional) -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.UnitCellVectorEncoder.ExpandedSites.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.ExpandedSite!>
+Mocassin.Symmetry.UnitCellVectorEncoder.GetLinearIndex(Mocassin.Core.Geometry.Vector4I position, int cellCountA, int cellCountB, int cellCountC) -> int
+Mocassin.Symmetry.UnitCellVectorEncoder.GetPosition(int p) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.UnitCellVectorEncoder.Orbits.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SiteOrbitInfo!>
+Mocassin.Symmetry.UnitCellVectorEncoder.PositionCount.get -> int
+Mocassin.Symmetry.UnitCellVectorEncoder.Positions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+Mocassin.Symmetry.UnitCellVectorEncoder.Setting.get -> Mocassin.Symmetry.SpaceGroupSetting!
+Mocassin.Symmetry.UnitCellVectorEncoder.ToSupercellOffset(Mocassin.Core.Geometry.Vector4I relative, int cellCountA, int cellCountB, int cellCountC) -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.UnitCellVectorEncoder.TryIndexOf(Mocassin.Core.Geometry.Fractional3 fractional, out int p) -> bool
+const Mocassin.Symmetry.UnitCellVectorEncoder.MaxP1Positions = 10000 -> int
+override Mocassin.Symmetry.ExpandedSite.Equals(object? obj) -> bool
+override Mocassin.Symmetry.ExpandedSite.GetHashCode() -> int
+override Mocassin.Symmetry.ExpandedSite.ToString() -> string!
+override Mocassin.Symmetry.SiteOrbitInfo.Equals(object? obj) -> bool
+override Mocassin.Symmetry.SiteOrbitInfo.GetHashCode() -> int
+override Mocassin.Symmetry.SiteOrbitInfo.ToString() -> string!
+static Mocassin.Symmetry.ExpandedSite.operator !=(Mocassin.Symmetry.ExpandedSite? left, Mocassin.Symmetry.ExpandedSite? right) -> bool
+static Mocassin.Symmetry.ExpandedSite.operator ==(Mocassin.Symmetry.ExpandedSite? left, Mocassin.Symmetry.ExpandedSite? right) -> bool
+static Mocassin.Symmetry.SiteOrbitInfo.operator !=(Mocassin.Symmetry.SiteOrbitInfo? left, Mocassin.Symmetry.SiteOrbitInfo? right) -> bool
+static Mocassin.Symmetry.SiteOrbitInfo.operator ==(Mocassin.Symmetry.SiteOrbitInfo? left, Mocassin.Symmetry.SiteOrbitInfo? right) -> bool
+static Mocassin.Symmetry.SpaceGroupOperations.ExpandOrbit(Mocassin.Symmetry.SpaceGroupSetting! setting, Mocassin.Core.Geometry.Fractional3 site) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+static Mocassin.Symmetry.UnitCellVectorEncoder.GetLatticePositionCount(int cellCountA, int cellCountB, int cellCountC, int positionCount) -> long
+static Mocassin.Symmetry.UnitCellVectorEncoder.IsLatticeSizeSupported(int cellCountA, int cellCountB, int cellCountC, int positionCount) -> bool
+static Mocassin.Symmetry.UnitCellVectorEncoder.TryCreate(Mocassin.Symmetry.SpaceGroupSetting! setting, System.Collections.Generic.IEnumerable<Mocassin.Core.Geometry.Fractional3>! referencePositions, out Mocassin.Symmetry.UnitCellVectorEncoder? encoder, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool

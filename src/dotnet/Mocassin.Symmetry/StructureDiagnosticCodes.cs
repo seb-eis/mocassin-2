@@ -20,4 +20,14 @@ internal static class StructureDiagnosticCodes
     /// Cell angles, determinant, conditioning, or crystal-system constraints are invalid.
     /// </summary>
     public const string CellGeometry = "STR003";
+
+    /// <summary>
+    /// Two reference sites expand to the same P1 orbit position.
+    /// </summary>
+    public const string SiteOrbitOverlap = "STR007";
+
+    /// <summary>
+    /// The total P1 position count exceeds the performance budget.
+    /// </summary>
+    public const string P1PositionBudgetExceeded = "STR009";
 }
