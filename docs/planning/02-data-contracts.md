@@ -114,6 +114,8 @@ to either is a format-breaking change.
   catalog checksum, and symmetry contract version. Missing metadata is accepted. If present and any value
   differs from the embedded values, the loader emits `PROJ034` warning and does not rewrite the project; the
   compiled payload records the authoritative build versions.
+- `symmetry` is an additive optional v1 field; `schemaVersion` remains `1` while the model shape is pre-release.
+  Step 03 adds fixtures with and without the field.
 - `schemaVersion` is an integer. Readers accept `1..current`; migrations are pure functions in
   `Mocassin.Core.Project.ProjectMigrations`.
 - Unknown properties are rejected by default (`JsonUnmappedMemberHandling.Disallow`) to catch typos; schema
@@ -202,14 +204,16 @@ parameterization, and lattice signatures use the MessagePack projection (section
   `0 < α, β, γ < 180°` and a positive Gram determinant.
 - Crystal-system constraints apply: equal lengths/angles, 90°/120° requirements, unique-axis mapping, and
   rhombohedral `0 < α < 120°`. Inconsistent values are rejected; they are never silently normalized.
+- The cell-matrix condition number `||M||∞ · ||M⁻¹||∞` must not exceed `1e12`; otherwise `STR003`.
 - `fractional` components are in `[0, 1)` for the reference position. The canonical P1 order uses the exact
   `24 × 10^12` fractional grid defined in Step 02; the stored decimal remains the user-facing value.
 - `number` is the International Tables space-group number, 1..230.
 - `axis` identifies the unique axis or the hexagonal/rhombohedral description; `origin` identifies the origin
   choice. Both are explicit and use `none` when the setting has no such choice.
 - `axis` values are `none`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, and `rhombohedral`. `uniqueAxisA` is
-  reserved for a future catalog extension and is rejected with `STR001` in v1. `origin` values are `none`,
-  `originChoice1`, and `originChoice2`.
+  reserved: the JSON parser accepts the enum value, and the catalog validator rejects it with `STR001` in v1.
+  The generated schema/manifest marks it reserved, not supported. `origin` values are `none`, `originChoice1`,
+  and `originChoice2`.
 - The catalog resolves `(number, axis, origin)` to the Hermann–Mauguin symbol, Hall symbol, crystal system, and
   operations. These derived values are never persisted in the project.
 - The default structure is P1: `{ "number": 1, "axis": "none", "origin": "none" }`.

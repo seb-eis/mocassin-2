@@ -118,9 +118,9 @@ Mocassin.App ──► Mocassin.App.Views ──► Mocassin.App.ViewModels
 Rules:
 
 - `Core` has no dependency on SQLite, Avalonia, or EF Core. Only BCL.
-- `Core` must not reference `Symmetry`. Persisted symmetry vocabulary (`AxisSetting`, `OriginChoice`,
-  `CrystalSystem`) lives in `Core`; the catalog, resolved settings, previews, and catalog-dependent
-  validation are `Symmetry` services that accept Core model types.
+- `Core` must not reference `Symmetry`. Persisted vocabulary (`AxisSetting`, `OriginChoice`) and the
+  catalog-derived `CrystalSystem` live in `Core`; the catalog, resolved settings, previews, and
+  catalog-dependent validation are `Symmetry` services that accept Core model types.
 - `Symmetry` may depend on `Core` and the committed, embedded space-group JSON catalog. It must not require
   a runtime database or a build-time Python/spglib dependency.
 - `Compilation` depends on `Core` + `Symmetry`; it has no I/O and no UI.
@@ -138,7 +138,7 @@ Rules:
 
 | Project | Owns | Must not own |
 | --- | --- | --- |
-| `Mocassin.Core` | IDs, units, primitive geometry (`Fractional3`, `Cartesian3`, `Vector4I`), persisted symmetry vocabulary (`AxisSetting`, `OriginChoice`, `CrystalSystem`), model objects (`SpaceGroupRef`, `CellParameters`, `CellSite`, `StructureModel`), project aggregate, diagnostics, validation contracts, undo/redo primitives | File I/O, SQL, UI, solver data, catalog-dependent preview/validation |
+| `Mocassin.Core` | IDs, units, primitive geometry (`Fractional3`, `Cartesian3`, `Vector4I`), persisted symmetry vocabulary (`AxisSetting`, `OriginChoice`), catalog-derived `CrystalSystem`, model objects (`SpaceGroupRef`, `CellParameters`, `CellSite`, `StructureModel`), project aggregate, diagnostics, validation contracts, undo/redo primitives | File I/O, SQL, UI, solver data, catalog-dependent preview/validation |
 | `Mocassin.Symmetry` | Space-group catalog, `SpaceGroupSetting`, `SymmetryOperation`, exact operations, cell geometry transforms, unit-cell encoding, orbit/permutation reduction, structure preview, catalog-dependent structure validation | Model semantics, persistence, Core model ownership |
 | `Mocassin.Compilation` | P1 extension, environment sampling, interaction discovery, transition rule generation, index assignment, compiled model | Job templates, supercells, parameterization values, I/O |
 | `Mocassin.Contracts` | Package/results/state DTOs (`ParameterizedModel`, job/lattice payloads, `.mcs` document types, job-folder/solver/event contracts), schema versions, manifest reader | Build logic, SQL, UI, solver execution |

@@ -402,7 +402,8 @@ public sealed record PointGroup(
   - This is an orbit relationship, not physical chirality. In P1, every directed pair is its own chiral orbit
     and both directions must be represented.
 - Pair shells are cached by `(catalogDataVersion, settingKey, centerP, cutoffBucket, cellParametersHash)`.
-- The pair-shell order `(distanceBucket, targetP, cellA, cellB, cellC)` is the canonical pair-table order.
+- The pair-shell order `(distanceBucket, targetP, cellA, cellB, cellC)`, then center/partner site indices, is
+  the canonical pair-table order.
 
 #### Cluster reduction
 

@@ -156,7 +156,7 @@ a Core `StructureModel`; the Core model never holds a preview or a resolved cata
 | `PAR007` | Error | More than 100 particle sets |
 | `STR001` | Error | Space-group number outside 1..230 or `(number, axis, origin)` not found |
 | `STR002` | Error | Cell length outside 0.1..1000 Å |
-| `STR003` | Error | Cell angles are outside 0..180°, the Gram determinant is not positive, or the crystal-system constraints fail |
+| `STR003` | Error | Cell angles are outside 0..180°, the Gram determinant is not positive, the condition number exceeds `1e12`, or the crystal-system constraints fail |
 | `STR004` | Error | Reference site outside `[0,1)` after trim |
 | `STR005` | Error | Site name empty or duplicate |
 | `STR006` | Error | Stable/unstable site has no particle set |
@@ -176,6 +176,8 @@ that require the catalog, cell geometry, or P1 expansion: `STR001`, `STR002`, `S
 and `STR009`. A composed validator runs both and returns one stable, sorted list.
 
 - An unknown `axis` or `origin` enum string is malformed JSON (`PROJ002`), not a valid but unsupported setting.
+- `uniqueAxisA` is a known reserved enum value: the parser accepts it, and the validator rejects it with
+  `STR001`. It is not treated as malformed JSON.
 - `STR001` reports the allowed axis/origin combinations for the number when the catalog can list them.
 - Site-overlap detection uses exact grid coordinates after P1 expansion; no tolerance-based hash sets. The
   grid is the `24 × 10^12` fractional grid defined in Step 02.
@@ -238,6 +240,7 @@ public interface IStructureValidator
 - [ ] Implement editor operations for particles, sets, cell parameters, sites, and dummies.
 - [ ] Add sample definitions for ceria and barium zirconate.
 - [ ] Add diagnostics and help text for every code.
+- [ ] Add project fixtures with and without the optional `symmetry` metadata and test `PROJ034`.
 
 ## Acceptance criteria
 
@@ -270,7 +273,7 @@ At this point, document particles and crystal structure:
 | Void handling | Void cannot be added to a set; void index is 0 |
 | Symbol/charge | Mass symbol preserved; charge validated |
 | Crystal systems | Valid/invalid sets for all seven systems, both trigonal axis descriptions, and unique-axis B/C; `uniqueAxisA` is rejected |
-| Cell determinant | Near-degenerate cells are rejected; valid cells have `det G > 0` and positive volume |
+| Cell determinant | Near-degenerate and ill-conditioned cells are rejected; valid cells have `det G > 0` and positive volume |
 | Cell vectors | Triclinic regression, hexagonal γ=120°, rhombohedral α=60°, and right-handedness |
 | Site overlap | Same orbit, special positions, near-boundary cases, and exact grid equality |
 | Preview | Orbit sizes and Cartesian positions match hand calculations |
@@ -279,8 +282,8 @@ At this point, document particles and crystal structure:
 | Index cap | A supercell product above `int.MaxValue` is rejected |
 | Editing | Add/update/remove site produces a valid new project or diagnostics |
 | Assembly boundary | `Mocassin.Core` has no reference to `Mocassin.Symmetry`; preview and catalog validation compose over Core models |
-| Space-group reference | `(number, axis, origin)` round-trips for every enum value; HM/Hall are derived; unknown combinations produce `STR001`; `uniqueAxisA` is rejected |
-| Symmetry metadata | Matching versions load silently; mismatched catalog/contract emits `PROJ034`; missing metadata is accepted |
+| Space-group reference | `(number, axis, origin)` round-trips for every supported enum value; HM/Hall are derived; unknown combinations produce `STR001`; reserved `uniqueAxisA` is rejected |
+| Symmetry metadata | Matching versions load silently; mismatched catalog/contract emits `PROJ034`; fixtures with and without the optional field load |
 | Sample P order | Ceria and barium zirconate preview P indices are stable and match the Step 02 conventions |
 
 ## Risks and mitigations
