@@ -113,7 +113,8 @@ public sealed record CompiledModel(
   break allows a canonical rule.
 - `PositionIndex`: canonical P1 order from step 02.
 - `SiteIndex`: reference sites sorted by `CellSiteId`; used for environment definitions.
-- `PairInteractionIndex`: stable geometry ID hash order, then distance, then site indices.
+- `PairInteractionIndex`: canonical shell order `(distanceBucket, targetP, cellA, cellB, cellC)`, then site
+  indices. Stable geometry IDs are content hashes used for parameterization matching, not table ordering.
 - `ClusterIndex`: cluster ID order.
 - `TransitionIndex`: transitions sorted by ID within kind.
 - `JumpCollectionIndex`: one per KMC transition, in transition index order.
@@ -326,6 +327,7 @@ At this point, document the compiler:
 | P1 positions | Match step 02 encoder for all samples |
 | Pair sets | Counts/distances/multiplicities match brute force |
 | Pair bucketing | Symmetry-equivalent pairs share a bucket; cutoff-boundary pairs are included with the 1 fm margin |
+| Pair order | Pair tables follow the canonical shell order and are stable across recompilation |
 | Contract metadata | Symmetry and catalog versions are present and included in the model signature |
 | Chirality | Known chiral pairs linked; achiral pairs symmetric |
 | Clusters | Unique permutations match brute-force canonicalization |
