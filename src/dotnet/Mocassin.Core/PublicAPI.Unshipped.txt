@@ -857,3 +857,4 @@ override Mocassin.Core.Model.CellParameters.GetHashCode() -> int
 override Mocassin.Core.Model.CellParameters.ToString() -> string!
 static Mocassin.Core.Model.CellParameters.operator !=(Mocassin.Core.Model.CellParameters? left, Mocassin.Core.Model.CellParameters? right) -> bool
 static Mocassin.Core.Model.CellParameters.operator ==(Mocassin.Core.Model.CellParameters? left, Mocassin.Core.Model.CellParameters? right) -> bool
+const Mocassin.Core.Geometry.GeometryTolerances.PairDistanceBucket = 1E-05 -> double

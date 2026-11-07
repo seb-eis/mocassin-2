@@ -22,7 +22,8 @@ orbit/permutation reduction, and periodic geometry kernels.
 | `exact-grid` | `feature/step-02-symmetry-and-geometry/exact-grid` | Squashed | Symmetry tests 34/34; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42396745263`](https://github.com/seb-eis/mocassin-2/actions/runs/42396745263) — green | `04e3213` |
 | `space-group-catalog` | `feature/step-02-symmetry-and-geometry/space-group-catalog` | Squashed | Symmetry tests 60/60; generator `--check` current; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42399290576`](https://github.com/seb-eis/mocassin-2/actions/runs/42399290576) — green | `24f1b12` |
 | `cell-geometry` | `feature/step-02-symmetry-and-geometry/cell-geometry` | Squashed | Symmetry tests 74/74; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42404289388`](https://github.com/seb-eis/mocassin-2/actions/runs/42404289388) — green | `549a03a` |
-| `p1-encoder` | `feature/step-02-symmetry-and-geometry/p1-encoder` | Awaiting approval | Symmetry tests 87/87; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `p1-encoder` | `feature/step-02-symmetry-and-geometry/p1-encoder` | Squashed | Symmetry tests 87/87; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42405555283`](https://github.com/seb-eis/mocassin-2/actions/runs/42405555283) — green | `45c248d` |
+| `periodic-geometry` | `feature/step-02-symmetry-and-geometry/periodic-geometry` | Awaiting approval | Symmetry tests 95/95; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
@@ -644,7 +645,7 @@ reduced/Niggli basis can be added later as an optimization.
   `unmanaged, INumber<T>`; public semantic wrappers delegate to it.
 - [x] Implement canonical P1 expansion and position ordering.
 - [ ] Implement stabilizer/point-group/permutation reduction.
-- [ ] Implement radial sampling and periodic geometry helpers.
+- [x] Implement radial sampling and periodic geometry helpers.
 - [x] Add golden tests for all 230 groups/274 settings.
 - [ ] Document the space-group data version and index-order contract.
 - [ ] Keep the assembly boundary: shared persisted vocabulary in `Mocassin.Core`, catalog and algorithms in

@@ -54,4 +54,9 @@ public static class GeometryTolerances
     /// bound; it is a defensive guard for future extensions and extreme inputs.
     /// </remarks>
     public const double CellConditionLimit = 1e12;
+
+    /// <summary>
+    /// Discrete distance bucket for pair and cluster reduction, in ångström (1 fm).
+    /// </summary>
+    public const double PairDistanceBucket = 1e-5;
 }

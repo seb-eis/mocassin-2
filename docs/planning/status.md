@@ -46,7 +46,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Passed | Waived — introduced after completion |
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Done | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) (main: Ubuntu + Windows + macOS) | `7b4a994` | `step-01` | Passed with notes at `05c41ab` | Waived — introduced after completion |
-| 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | In progress | `step/02-symmetry-and-geometry` | `p1-encoder` | — | — | — | Not requested | Ready with notes — accepted |
+| 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | In progress | `step/02-symmetry-and-geometry` | `periodic-geometry` | — | — | — | Not requested | Ready with notes — accepted |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -80,7 +80,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 ## Active work
 
 Step 02 — Symmetry and Geometry is active on `step/02-symmetry-and-geometry`. The approved feature list has
-nine features; `p1-encoder` is the current feature. Step 01 is complete: merge `7b4a994`, tag `step-01`, and
+nine features; `periodic-geometry` is the current feature. Step 01 is complete: merge `7b4a994`, tag `step-01`, and
 main CI `41929788253` green on Ubuntu + Windows + macOS.
 
 ## Notes

@@ -179,3 +179,42 @@ static Mocassin.Symmetry.SpaceGroupOperations.ExpandOrbit(Mocassin.Symmetry.Spac
 static Mocassin.Symmetry.UnitCellVectorEncoder.GetLatticePositionCount(int cellCountA, int cellCountB, int cellCountC, int positionCount) -> long
 static Mocassin.Symmetry.UnitCellVectorEncoder.IsLatticeSizeSupported(int cellCountA, int cellCountB, int cellCountC, int positionCount) -> bool
 static Mocassin.Symmetry.UnitCellVectorEncoder.TryCreate(Mocassin.Symmetry.SpaceGroupSetting! setting, System.Collections.Generic.IEnumerable<Mocassin.Core.Geometry.Fractional3>! referencePositions, out Mocassin.Symmetry.UnitCellVectorEncoder? encoder, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+Mocassin.Symmetry.MinimumImageResult
+Mocassin.Symmetry.MinimumImageResult.Deconstruct(out Mocassin.Core.Geometry.Vector4I Offset, out double DistanceAngstrom, out int DistanceBucketFm) -> void
+Mocassin.Symmetry.MinimumImageResult.DistanceAngstrom.get -> double
+Mocassin.Symmetry.MinimumImageResult.DistanceAngstrom.init -> void
+Mocassin.Symmetry.MinimumImageResult.DistanceBucketFm.get -> int
+Mocassin.Symmetry.MinimumImageResult.DistanceBucketFm.init -> void
+Mocassin.Symmetry.MinimumImageResult.Equals(Mocassin.Symmetry.MinimumImageResult other) -> bool
+Mocassin.Symmetry.MinimumImageResult.MinimumImageResult() -> void
+Mocassin.Symmetry.MinimumImageResult.MinimumImageResult(Mocassin.Core.Geometry.Vector4I Offset, double DistanceAngstrom, int DistanceBucketFm) -> void
+Mocassin.Symmetry.MinimumImageResult.Offset.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.MinimumImageResult.Offset.init -> void
+Mocassin.Symmetry.NeighborImage
+Mocassin.Symmetry.NeighborImage.Deconstruct(out Mocassin.Core.Geometry.Vector4I Offset, out double DistanceAngstrom, out int DistanceBucketFm) -> void
+Mocassin.Symmetry.NeighborImage.DistanceAngstrom.get -> double
+Mocassin.Symmetry.NeighborImage.DistanceAngstrom.init -> void
+Mocassin.Symmetry.NeighborImage.DistanceBucketFm.get -> int
+Mocassin.Symmetry.NeighborImage.DistanceBucketFm.init -> void
+Mocassin.Symmetry.NeighborImage.Equals(Mocassin.Symmetry.NeighborImage other) -> bool
+Mocassin.Symmetry.NeighborImage.NeighborImage() -> void
+Mocassin.Symmetry.NeighborImage.NeighborImage(Mocassin.Core.Geometry.Vector4I Offset, double DistanceAngstrom, int DistanceBucketFm) -> void
+Mocassin.Symmetry.NeighborImage.Offset.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.NeighborImage.Offset.init -> void
+Mocassin.Symmetry.PeriodicGeometry
+Mocassin.Symmetry.PeriodicGeometry.Cell.get -> Mocassin.Symmetry.CellGeometry!
+Mocassin.Symmetry.PeriodicGeometry.Encoder.get -> Mocassin.Symmetry.UnitCellVectorEncoder!
+Mocassin.Symmetry.PeriodicGeometry.GetMinimumImage(Mocassin.Core.Geometry.Vector4I center, Mocassin.Core.Geometry.Vector4I target) -> Mocassin.Symmetry.MinimumImageResult
+Mocassin.Symmetry.PeriodicGeometry.GetPositionsInBox(Mocassin.Core.Geometry.Cartesian3 min, Mocassin.Core.Geometry.Cartesian3 max) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I>
+Mocassin.Symmetry.PeriodicGeometry.PeriodicGeometry(Mocassin.Symmetry.CellGeometry! cell, Mocassin.Symmetry.UnitCellVectorEncoder! encoder) -> void
+Mocassin.Symmetry.PeriodicGeometry.RadialSearch(Mocassin.Core.Geometry.Vector4I center, double cutoffAngstrom) -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.NeighborImage>
+override Mocassin.Symmetry.MinimumImageResult.GetHashCode() -> int
+override Mocassin.Symmetry.NeighborImage.GetHashCode() -> int
+static Mocassin.Symmetry.MinimumImageResult.operator !=(Mocassin.Symmetry.MinimumImageResult left, Mocassin.Symmetry.MinimumImageResult right) -> bool
+static Mocassin.Symmetry.MinimumImageResult.operator ==(Mocassin.Symmetry.MinimumImageResult left, Mocassin.Symmetry.MinimumImageResult right) -> bool
+static Mocassin.Symmetry.NeighborImage.operator !=(Mocassin.Symmetry.NeighborImage left, Mocassin.Symmetry.NeighborImage right) -> bool
+static Mocassin.Symmetry.NeighborImage.operator ==(Mocassin.Symmetry.NeighborImage left, Mocassin.Symmetry.NeighborImage right) -> bool
+~override Mocassin.Symmetry.MinimumImageResult.Equals(object obj) -> bool
+~override Mocassin.Symmetry.MinimumImageResult.ToString() -> string
+~override Mocassin.Symmetry.NeighborImage.Equals(object obj) -> bool
+~override Mocassin.Symmetry.NeighborImage.ToString() -> string
