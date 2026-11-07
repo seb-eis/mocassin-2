@@ -829,3 +829,31 @@ Mocassin.Core.Symmetry.OriginChoice
 Mocassin.Core.Symmetry.OriginChoice.None = 0 -> Mocassin.Core.Symmetry.OriginChoice
 Mocassin.Core.Symmetry.OriginChoice.OriginChoice1 = 1 -> Mocassin.Core.Symmetry.OriginChoice
 Mocassin.Core.Symmetry.OriginChoice.OriginChoice2 = 2 -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Model.CellParameters
+Mocassin.Core.Model.CellParameters.<Clone>$() -> Mocassin.Core.Model.CellParameters!
+Mocassin.Core.Model.CellParameters.A.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.CellParameters.A.init -> void
+Mocassin.Core.Model.CellParameters.Alpha.get -> Mocassin.Core.Units.AngleDegrees
+Mocassin.Core.Model.CellParameters.Alpha.init -> void
+Mocassin.Core.Model.CellParameters.B.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.CellParameters.B.init -> void
+Mocassin.Core.Model.CellParameters.Beta.get -> Mocassin.Core.Units.AngleDegrees
+Mocassin.Core.Model.CellParameters.Beta.init -> void
+Mocassin.Core.Model.CellParameters.C.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.CellParameters.C.init -> void
+Mocassin.Core.Model.CellParameters.CellParameters(Mocassin.Core.Units.LengthAngstrom A, Mocassin.Core.Units.LengthAngstrom B, Mocassin.Core.Units.LengthAngstrom C, Mocassin.Core.Units.AngleDegrees Alpha, Mocassin.Core.Units.AngleDegrees Beta, Mocassin.Core.Units.AngleDegrees Gamma) -> void
+Mocassin.Core.Model.CellParameters.Deconstruct(out Mocassin.Core.Units.LengthAngstrom A, out Mocassin.Core.Units.LengthAngstrom B, out Mocassin.Core.Units.LengthAngstrom C, out Mocassin.Core.Units.AngleDegrees Alpha, out Mocassin.Core.Units.AngleDegrees Beta, out Mocassin.Core.Units.AngleDegrees Gamma) -> void
+Mocassin.Core.Model.CellParameters.Equals(Mocassin.Core.Model.CellParameters? other) -> bool
+Mocassin.Core.Model.CellParameters.Gamma.get -> Mocassin.Core.Units.AngleDegrees
+Mocassin.Core.Model.CellParameters.Gamma.init -> void
+const Mocassin.Core.Geometry.GeometryTolerances.CellAngleTolerance = 0.001 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.CellConditionLimit = 1000000000000 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.CellDeterminantTolerance = 1E-12 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.CellLengthTolerance = 0.001 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.DistanceEqualityTolerance = 1E-05 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.GeometricEqualityTolerance = 1E-06 -> double
+override Mocassin.Core.Model.CellParameters.Equals(object? obj) -> bool
+override Mocassin.Core.Model.CellParameters.GetHashCode() -> int
+override Mocassin.Core.Model.CellParameters.ToString() -> string!
+static Mocassin.Core.Model.CellParameters.operator !=(Mocassin.Core.Model.CellParameters? left, Mocassin.Core.Model.CellParameters? right) -> bool
+static Mocassin.Core.Model.CellParameters.operator ==(Mocassin.Core.Model.CellParameters? left, Mocassin.Core.Model.CellParameters? right) -> bool

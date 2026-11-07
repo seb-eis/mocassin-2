@@ -107,3 +107,17 @@ override Mocassin.Symmetry.SpaceGroupSetting.ToString() -> string!
 static Mocassin.Symmetry.SpaceGroupCatalog.Default.get -> Mocassin.Symmetry.SpaceGroupCatalog!
 static Mocassin.Symmetry.SpaceGroupSetting.operator !=(Mocassin.Symmetry.SpaceGroupSetting? left, Mocassin.Symmetry.SpaceGroupSetting? right) -> bool
 static Mocassin.Symmetry.SpaceGroupSetting.operator ==(Mocassin.Symmetry.SpaceGroupSetting? left, Mocassin.Symmetry.SpaceGroupSetting? right) -> bool
+Mocassin.Symmetry.CellGeometry
+Mocassin.Symmetry.CellGeometry.A.get -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Symmetry.CellGeometry.B.get -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Symmetry.CellGeometry.C.get -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Symmetry.CellGeometry.ConditionNumber.get -> double
+Mocassin.Symmetry.CellGeometry.GetCellVolume() -> double
+Mocassin.Symmetry.CellGeometry.GetDistance(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> double
+Mocassin.Symmetry.CellGeometry.Parameters.get -> Mocassin.Core.Model.CellParameters!
+Mocassin.Symmetry.CellGeometry.ToCartesian(Mocassin.Core.Geometry.Fractional3 fractional) -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Symmetry.CellGeometry.ToFractional(Mocassin.Core.Geometry.Cartesian3 cartesian) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.CellGeometry.VolumeAngstrom3.get -> double
+static Mocassin.Symmetry.CellGeometry.TryCreate(Mocassin.Core.Model.CellParameters! parameters, Mocassin.Core.Symmetry.CrystalSystem crystalSystem, Mocassin.Core.Symmetry.AxisSetting axis, out Mocassin.Symmetry.CellGeometry? geometry, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+static Mocassin.Symmetry.CellGeometry.TryCreate(Mocassin.Core.Model.CellParameters! parameters, Mocassin.Symmetry.SpaceGroupSetting! setting, out Mocassin.Symmetry.CellGeometry? geometry, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+static Mocassin.Symmetry.CellGeometry.TryCreate(Mocassin.Core.Model.CellParameters! parameters, out Mocassin.Symmetry.CellGeometry? geometry, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool

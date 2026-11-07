@@ -20,7 +20,8 @@ orbit/permutation reduction, and periodic geometry kernels.
 | --- | --- | --- | --- | --- | --- |
 | `core-geometry` | `feature/step-02-symmetry-and-geometry/core-geometry` | Squashed | Core tests 158/158; `dotnet format --verify-no-changes` passes | [`42395501397`](https://github.com/seb-eis/mocassin-2/actions/runs/42395501397) — green | `e6f5e1d` |
 | `exact-grid` | `feature/step-02-symmetry-and-geometry/exact-grid` | Squashed | Symmetry tests 34/34; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42396745263`](https://github.com/seb-eis/mocassin-2/actions/runs/42396745263) — green | `04e3213` |
-| `space-group-catalog` | `feature/step-02-symmetry-and-geometry/space-group-catalog` | Awaiting approval | Symmetry tests 60/60; generator `--check` current; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `space-group-catalog` | `feature/step-02-symmetry-and-geometry/space-group-catalog` | Squashed | Symmetry tests 60/60; generator `--check` current; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42399290576`](https://github.com/seb-eis/mocassin-2/actions/runs/42399290576) — green | `24f1b12` |
+| `cell-geometry` | `feature/step-02-symmetry-and-geometry/cell-geometry` | Awaiting approval | Symmetry tests 74/74; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
@@ -635,7 +636,7 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] Add the space-group data source and a build-time generator for the embedded catalog.
 - [x] Implement `SymmetryOperation` with integer composition/inverse/closure.
 - [x] Implement `SpaceGroupSetting`, `SpaceGroupCatalog`, and lookup APIs.
-- [ ] Implement crystal-system constraints and the corrected cell-vector transform.
+- [x] Implement crystal-system constraints and the corrected cell-vector transform.
 - [ ] Add `Fractional3`, `Cartesian3`, and `Vector4I` to `Mocassin.Core.Geometry`; implement the encoder in
   `Mocassin.Symmetry`.
 - [x] Implement a shared generic `Vector3<T>`/`VectorMath<T>` arithmetic kernel constrained to
@@ -664,7 +665,7 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] General-position multiplicities match the International Tables for every setting.
 - [ ] P1 expansion of every Step 02 synthetic fixture site matches a brute-force expansion.
 - [ ] The canonical position order is stable across runs, OSes, and input ordering for the synthetic fixtures.
-- [ ] The triclinic cell test produces the correct C vector and angles.
+- [x] The triclinic cell test produces the correct C vector and angles.
 - [ ] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
 - [ ] The `P1Expansion20Cubed` benchmark (64 P1 positions, 20×20×20) meets its target on the defined runner.
 - [ ] The compiled payload records `symmetry_contract_version`, `space_group_data_version`, and
