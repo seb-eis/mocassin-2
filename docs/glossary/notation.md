@@ -43,6 +43,8 @@ Rules:
   crystallographic operations.
 - Inputs with more than 12 fractional digits are rounded to the nearest grid point and may produce a warning.
 - Fractional coordinates are converted to Cartesian coordinates only at the geometry boundary.
+- Grid conversion uses `MidpointRounding.AwayFromZero`; non-finite values are rejected; finite magnitudes below
+  half a grid step underflow to zero.
 
 ## Cell geometry
 
@@ -53,6 +55,7 @@ Rules:
 - Cell vectors use the standard right-handed convention: a along x, b in the xy-plane, and c with a positive
   z-component.
 - Inconsistent parameters are rejected; the model never silently normalizes user input.
+- `CellConditionLimit = 1e12` rejects ill-conditioned cells even when the Gram determinant is positive.
 
 ## P1 positions
 
@@ -95,6 +98,7 @@ A **chiral partner** is the representative of the inverse orbit when the inverse
 - Pair and cluster distance buckets are integer femtometres (`1 fm = 1e-5 Å`); the cutoff includes candidates
   up to the cutoff bucket with a 1 fm margin.
 - Negative cell offsets remain explicit; no implicit wrapping.
+- `GetPositionsInBox` is half-open: `min` is inclusive and `max` is exclusive.
 
 ## Symmetry contract
 
@@ -103,6 +107,9 @@ A **chiral partner** is the representative of the inverse orbit when the inverse
 - The compiled payload records it with the catalog data version and checksum; changing a covered rule bumps
   the version.
 - In-memory caches are scoped per compilation. Persisted IDs use SHA-256, never `string.GetHashCode()`.
+- The project envelope may carry optional `spaceGroupDataVersion`, `spaceGroupDataSha256`, and
+  `symmetryContractVersion`; a mismatch warns `PROJ034`. The compiled payload records the authoritative
+  versions.
 
 ## Time and seeds
 
@@ -131,6 +138,8 @@ Step 01 defines `PROJ001`–`PROJ033`; the complete catalogue is finalized in St
 
 - Property names use camelCase.
 - Enums use camelCase strings (`"perspective"`, `"orthographic"`).
+- Space-group enums use `none`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, `rhombohedral`, and `originChoice1`,
+  `originChoice2`. `uniqueAxisA` is reserved for a future catalog extension and is rejected in v1.
 - Unknown properties are rejected at the project envelope and known nested objects; the per-object style map
   explicitly permits additional primitive keys.
 - JSON is UTF-8, LF-only, without a byte-order mark.

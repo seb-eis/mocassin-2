@@ -171,6 +171,8 @@ reduction suites are nightly/release.
 - JSON round-trip: model → JSON → model is identity for all fixtures.
 - Space-group identity: `(number, axis, origin)` round-trips unchanged; Hermann–Mauguin, Hall, system, and
   operations are derived from the catalog and never serialized in the project.
+- Symmetry metadata: matching project metadata loads silently; a catalog or contract mismatch emits `PROJ034`;
+  missing metadata is accepted without rewriting the project.
 - Coordinate grid: P1 expansion, deduplication, and sorting use the exact `24 × 10^12` fractional grid; no
   tolerance comparer participates in the discrete symmetry path.
 - Canonicalization: object order changes do not change serialized bytes.
@@ -354,7 +356,8 @@ Contract tests use files produced by the real writers and never share reader/wri
 9. Avalonia headless UI tests
 10. License/header check and dependency audit
 
-Matrix: `ubuntu-latest`, `windows-latest`, `macos-latest`; .NET 10 SDK; stable Rust; Python 3.11–3.13.
+Matrix: `ubuntu-latest` and `windows-latest` on step branches; macOS on `main`, nightly, or manual. .NET 10 SDK;
+stable Rust; Python 3.11–3.13.
 Cache NuGet, Cargo, pip, and the SQLite build.
 
 ### Nightly
@@ -387,7 +390,7 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | GUI cold start | < 2 s |
 | Open/save typical project | < 500 ms |
 | 3D viewport (10⁵ atoms) | ≥ 30 FPS on integrated GPU |
-| P1 expansion (20×20×20, defined fixture) | < 1 s on the defined CI runner class |
+| P1 expansion (64 P1 positions, 20×20×20 = 512,000 positions) | < 1 s mean on `ubuntu-latest`, .NET 10 Release |
 
 Benchmarks:
 
