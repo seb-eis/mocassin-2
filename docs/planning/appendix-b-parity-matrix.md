@@ -36,15 +36,15 @@ Status legend:
 | 63 custom particle limit | Y | Planned | 03 | Enforced |
 | Particle sets with first-as-default | Y | Planned | 03 | |
 | Drag-and-drop set membership | Y | Planned | 24 | + keyboard |
-| Space group selection (274 settings) | Y | Planned | 02/24 | New catalog |
+| Space group selection (274 settings) | Y | Planned | 02/24 | Catalog, lookup, and validation engine in 02; selection UI in 24 |
 | Space-group operation display | Y | Planned | 24 | |
-| Cell parameters + crystal-system locks | Y | Planned | 02/03/24 | Corrected transform |
+| Cell parameters + crystal-system locks | Y | Planned | 02/03/24 | Corrected transform, validation, and tolerances in 02; model/UI in 03/24 |
 | Stable/unstable sites | Y | Planned | 03 | |
-| P1 expansion preview | Y | Planned | 03/24 | Canonical order |
+| P1 expansion preview | Y | Planned | 03/24 | Encoder and canonical order in 02; preview UI in 03/24 |
 | Site overlap validation | Y | Planned | 03 | Exact |
 | Dummy position editor | Y | Planned | 24 | Visual only |
-| Correct triclinic/rhombohedral cell vectors | Y | Improvement | 02 | Fixes original bug |
-| Valid group 47 data | Y | Improvement | 02 | Fixes corrupt setting |
+| Correct triclinic/rhombohedral cell vectors | Y | Improvement | 02 | Implemented in 02; fixes original bug |
+| Valid group 47 data | Y | Improvement | 02 | Implemented in 02; fixes corrupt setting |
 | Multiple site definitions per orbit | Y | Planned | 03 | With overlap diagnostics |
 
 ## 3. Transitions
@@ -76,7 +76,7 @@ Status legend:
 | Hollow-sphere filters | Y | Planned | 05/25 | |
 | Per-unstable-site environments | Y | Planned | 05/25 | |
 | Auto-sampled pair interactions | Y | Planned | 08 | |
-| Chiral pair linking | Y | Planned | 05/08/09 | |
+| Chiral pair linking | Y | Planned | 05/08/09 | Shell chiral linking in 02; interaction binding in 05/08/09 |
 | Group/cluster interactions (up to 9 positions) | Y | Planned | 05/08 | |
 | Site/defect energies | Y | Planned | 05 | |
 | Cost/permutation limits | Y | Planned | 05/07 | |

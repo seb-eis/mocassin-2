@@ -34,7 +34,7 @@ Combined audit commit: pending. The human owner accepted the amendment notes; bo
 | --- | --- |
 | Phase | A. Foundations |
 | Depends on | 01 |
-| Delivers | A validated space-group catalog, exact symmetry operations, coordinate systems, P1 expansion, orbit/permutation reduction, and periodic geometry kernels. |
+| Delivers | A validated space-group catalog, exact symmetry operations, coordinate systems, P1 expansion, orbit/permutation reduction, periodic geometry, version records, caches, and the expansion benchmark. |
 
 Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-geometry.md)
 
@@ -42,14 +42,30 @@ Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-g
 
 - [ ] All 230 international groups and 274 settings load.
 - [ ] Every setting passes identity, inverse, closure, determinant, and translation-normalization checks.
-- [ ] Group 47 is valid and matches the authoritative setting.
+- [ ] Group 47 is valid and matches the authoritative spglib `Pmmm` setting.
 - [ ] General-position multiplicities match the International Tables for every setting.
-- [ ] P1 expansion of every sample site matches a brute-force expansion.
+- [ ] P1 expansion of every Step 02 synthetic fixture site matches a brute-force expansion.
 - [ ] The canonical position order is stable across runs, OSes, and input ordering.
 - [ ] The triclinic cell test produces the correct C vector and angles.
 - [ ] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
-- [ ] A 20×20×20 cell's position expansion completes in under 1 second.
+- [ ] The `P1Expansion20Cubed` fixture (64 P1 positions, 20×20×20) meets its under-1-second target.
 - [ ] Documentation written
+
+## Known notes for the auditor
+
+- The step branch contains the closeout squash plus a documentation-only audit-request commit; the audited
+  commit and CI run are recorded there.
+- `periodic-geometry` was implemented before `orbit-reduction` because pair reduction consumes radial search.
+  The approved feature set is unchanged.
+- The catalog uses a compact positional JSON encoding rather than the reviewed keyed/pretty form, at the human
+  owner's request. The file is ~171 KB; the checksum covers the canonical settings payload.
+- `CellConditionLimit = 1e12` is defensive; within the v1 length range and positive-determinant cutoff,
+  realizable cells stay below it. The predicate is unit-tested directly.
+- The `SymmetryVersionInfo` record is ready, but writing it into the compiled `.msl` payload belongs to Step 11;
+  the corresponding Step 02 acceptance item is intentionally unchecked.
+- The benchmark was recorded locally at 965.3 µs mean on the development container; the declared runner class
+  is `linux-x64-github-ubuntu-latest-dotnet10`.
+- `SymmetryCache` is internal for now; caches are scoped per compilation and bounded at 4096 entries.
 
 ## Standard audit checklist
 

@@ -89,6 +89,40 @@ The unit value structs validate finiteness and their allowed range at constructi
 number; the property name or schema description carries the unit. There are no implicit conversions between
 unit types.
 
+## Structure and symmetry (Step 02 vocabulary; Step 03 fields)
+
+Step 02 supplies the catalog, cell validation, and coordinate vocabulary. The structure section of the
+project schema ships with Step 03; the shape below is the contract it will use.
+
+```json
+{
+  "structure": {
+    "spaceGroup": { "number": 225, "axis": "none", "origin": "none" },
+    "cell": { "a": 5.41, "b": 5.41, "c": 5.41, "alpha": 90.0, "beta": 90.0, "gamma": 90.0 },
+    "sites": [],
+    "dummyPositions": []
+  }
+}
+```
+
+- `spaceGroup` persists only `(number, axis, origin)`. The Hermann–Mauguin symbol, Hall symbol, crystal
+  system, operations, and catalog data version are resolved from the embedded catalog.
+- `axis` is one of `none`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, or `rhombohedral`. `uniqueAxisA` is
+  reserved for a future catalog extension and is rejected by the v1 validator with `STR001`.
+- `origin` is `none`, `originChoice1`, or `originChoice2`.
+- Cell lengths are in ångström and must be in `0.1..1000 Å` (`STR002`). Angles are in degrees and must be
+  strictly between `0°` and `180°`; the Gram determinant must be positive and above `1e-12`; the cell-matrix
+  condition number must not exceed `1e12`; crystal-system constraints must hold (`STR003`).
+- Reference positions are fractional decimals; Symmetry trims them with `FractionalTrimTolerance = 1e-10` and
+  converts them to the exact `24 × 10^12` grid for P1 expansion. The JSON remains `double`-based.
+- The optional envelope `symmetry` metadata carries `spaceGroupDataVersion`, `spaceGroupDataSha256`, and
+  `symmetryContractVersion`. A mismatch with the embedded values warns `PROJ034`; the compiled payload is
+  authoritative.
+
+The catalog is embedded, not stored in the project. The data version is `spglib-2.8.0/catalog-1`; see
+[Compilation Pipeline](../development/compilation-pipeline.md) and
+[Symmetry and Geometry](../physics/symmetry.md) for the exact rules.
+
 ## Model and templates in Step 01
 
 Step 01 deliberately establishes the project envelope before the scientific model domains. Consequently:

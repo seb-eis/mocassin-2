@@ -26,7 +26,19 @@ orbit/permutation reduction, and periodic geometry kernels.
 | `periodic-geometry` | `feature/step-02-symmetry-and-geometry/periodic-geometry` | Squashed | Symmetry tests 95/95; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42416609921`](https://github.com/seb-eis/mocassin-2/actions/runs/42416609921) — green | `9e5ebf7` |
 | `orbit-reduction` | `feature/step-02-symmetry-and-geometry/orbit-reduction` | Squashed | Symmetry tests 108/108; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42418281190`](https://github.com/seb-eis/mocassin-2/actions/runs/42418281190) — green | `a9ea5ae` |
 | `contracts-caches-benchmarks` | `feature/step-02-symmetry-and-geometry/contracts-caches-benchmarks` | Squashed | Symmetry tests 116/116; benchmark `P1Expansion20Cubed` 965.3 µs (target < 1 s); full solution tests pass; `dotnet format --verify-no-changes` passes | [`42419100983`](https://github.com/seb-eis/mocassin-2/actions/runs/42419100983) — licence gate failed; fixed below | `4aaeedd` |
-| `fix-benchmark-licenses` | `feature/step-02-symmetry-and-geometry/fix-benchmark-licenses` | Awaiting approval | NuGet licence gate 44 packages; full solution tests pass; `dotnet format --verify-no-changes` passes | — | — |
+| `fix-benchmark-licenses` | `feature/step-02-symmetry-and-geometry/fix-benchmark-licenses` | Squashed | NuGet licence gate 44 packages; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42419605889`](https://github.com/seb-eis/mocassin-2/actions/runs/42419605889) — green | `a3be35a` |
+| `closeout` | `feature/step-02-symmetry-and-geometry/closeout` | Awaiting approval | Full solution tests; strict docs and combined docs build; `dotnet format`; API compat, benchmark, NuGet licence/vulnerability, contract drift, SPDX, secret gates | — | — |
+
+**Deviations and notes:**
+
+- `periodic-geometry` was implemented before `orbit-reduction` because pair reduction consumes
+  radial search. The approved feature set is unchanged.
+- The catalog uses a compact positional JSON encoding instead of the reviewed keyed/pretty form; the human
+  owner requested a dense machine-facing representation. `Data/README.md` documents the schema.
+- The `CellConditionLimit` guard is defensive: within the v1 length range and positive-determinant cutoff,
+  realizable cells stay below `1e12`. The limit predicate is unit-tested directly.
+- The symmetry version record is ready, but writing it into the compiled `.msl` metadata belongs to Step 11.
+- ApiCompat baseline refresh now uses reference assemblies, keeping the checked-in binaries small.
 
 ## Goal
 
@@ -660,7 +672,8 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] Use a source-generated JSON serializer context for the internal catalog DTOs.
 - [x] Implement per-compilation caches, deterministic hashing, and `SymmetryContractVersion`.
 - [x] Add the 20×20×20 benchmark fixture and golden reduction/contract tests.
-- [ ] Record the symmetry contract and catalog versions in the compiled payload.
+- [ ] Record the symmetry contract and catalog versions in the compiled payload (version record ready;
+  `.msl` payload writing is Step 11).
 
 ## Acceptance criteria
 
@@ -674,10 +687,10 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
 - [x] The `P1Expansion20Cubed` benchmark (64 P1 positions, 20×20×20) meets its target on the defined runner.
 - [ ] The compiled payload records `symmetry_contract_version`, `space_group_data_version`, and
-  `space_group_data_sha256`.
+  `space_group_data_sha256` (helper ready; actual `.msl` writing is Step 11).
 - [x] Cross-OS golden P indices, pair shells, and cluster codes match.
 - [x] Cache scope and parallel-determinism tests pass.
-- [ ] Documentation written
+- [x] Documentation written
 
 ## Documentation
 
