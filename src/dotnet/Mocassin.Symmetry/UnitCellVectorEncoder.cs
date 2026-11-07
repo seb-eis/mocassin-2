@@ -408,6 +408,14 @@ public sealed class UnitCellVectorEncoder
         int positionCount) =>
         GetLatticePositionCount(cellCountA, cellCountB, cellCountC, positionCount) <= int.MaxValue;
 
+    /// <summary>
+    /// Finds the canonical P index for an exact grid position.
+    /// </summary>
+    /// <param name="grid">The exact grid position.</param>
+    /// <param name="p">The matching index when found.</param>
+    /// <returns><see langword="true"/> when the grid position is canonical.</returns>
+    internal bool TryGetPositionIndex(GridFractional3 grid, out int p) => indexByGrid.TryGetValue(grid, out p);
+
     private void ValidateP(int p)
     {
         if (p < 0 || p >= PositionCount)
