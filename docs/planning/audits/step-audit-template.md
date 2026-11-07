@@ -1,8 +1,10 @@
 # Step NN Audit Request
 
-> Auditor handoff: the auditor may complete this template in
-> `.tmp/audit/step-NN-rN-<short-sha>-audit.md` instead of editing the tracked request. The step agent or
-> scribe transcribes the findings and verdict verbatim into `step-NN.md`.
+> Reviewer: write the evidence, findings, and verdict directly into
+> `docs/planning/audits/step-NN.md`. You may edit only your own metadata (`Auditor`, `Audit date`, `Audit
+> status`), the `Evidence`, `Findings`, and `Verdict` sections, and commit only that file with a
+> documentation-only message and `[skip ci]`. Do not edit the request scope, checklists, resolutions, code,
+> tests, configuration, status dashboard, step page, or any other file.
 
 ## Request
 
@@ -60,12 +62,13 @@ Commands run:
 
 ## Findings
 
-| Severity | Finding | Evidence | Resolution |
-| --- | --- | --- | --- |
-| — | — | — | — |
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| — | — | — |
 
-Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor fills this section in the handoff
-report; the step agent or scribe copies it verbatim into the durable request and adds resolutions.
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor writes the findings and verdict
+directly. The step agent adds resolutions in the separate `Resolution status` section without altering the
+auditor's findings, evidence, or verdict.
 
 ## Verdict
 
@@ -77,3 +80,12 @@ report; the step agent or scribe copies it verbatim into the durable request and
 
 Follow-up owner:
 Follow-up issue/step:
+
+## Resolution status
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| — | — | — | — |
+
+The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
+verdict.

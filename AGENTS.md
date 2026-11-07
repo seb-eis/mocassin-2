@@ -49,11 +49,12 @@ Before changing anything, read these in order:
 10. [`docs/planning/status.md`](docs/planning/status.md) — step and feature status dashboard.
 11. [`docs/planning/audits/README.md`](docs/planning/audits/README.md) — independent step-audit process and
     approval gate.
-12. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
+12. [`docs/planning/reviews/README.md`](docs/planning/reviews/README.md) — design-review process and start gate.
+13. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
     evidence playbook for coding agents.
-13. The step page you intend to work on, plus its dependencies.
-14. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-15. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+14. The step page you intend to work on, plus its dependencies.
+15. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+16. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
@@ -89,7 +90,7 @@ These rules override convenience. If you are unsure, stop and ask the user.
 
 ### 3.2 Starting work
 
-Before the first numbered item, complete the pre-implementation design review in section 3.8 and obtain a
+Before the first numbered item, complete the pre-implementation design review in section 3.9 and obtain a
 `Ready for implementation` verdict. Do not create the step branch or write implementation code before that.
 
 1. Propose the feature-branch list and get one approval for the step breakdown.
@@ -151,7 +152,8 @@ Before the first numbered item, complete the pre-implementation design review in
    - documentation updates;
    - any final acceptance fixes.
 2. Run the step's full acceptance criteria and quality gates on the step branch.
-3. Complete the independent audit in section 3.9. The step branch must be frozen at the audited commit.
+3. Complete the independent audit in section 3.10. The step branch must be frozen at the audited commit; the
+   auditor's record commit and the step agent's resolution/status commit are the only permitted later commits.
 4. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
 5. After approval:
    ```sh
@@ -231,74 +233,112 @@ status: docs/planning/status.md#step-00
 Milestone tags use the same fields with `milestone-m0` and the milestone name. Release tags are created only
 after the Step 31 release gates pass.
 
-### 3.8 Pre-implementation design review
+### 3.8 Agent roles and write scopes
+
+The workflow has four roles. Each role edits only the artifacts it owns. There is no scribe and no
+transcription step.
+
+| Role | May edit | May commit | Must not edit |
+| --- | --- | --- | --- |
+| Planner (planning agent) | Design and planning docs; the review record's request, scope, checklists, and resolutions | Documentation-only commits on the design branch | Code, tests, configuration, audit or design verdicts, step status, merges, tags |
+| Implementor (step agent) | Code, tests, configuration, contracts, step page, status dashboard, parity matrix; the audit/review record's request, scope, checklists, and resolutions | Feature-branch commits; documentation-only record and status commits | The reviewer's findings, evidence, or verdict text; merges and tags without approval |
+| Reviewer (planning auditor or audit agent) | Only the assigned review or audit record: its own metadata, evidence, findings, and verdict | At most one documentation-only record commit per round, with `[skip ci]` | Everything else, including code, tests, configuration, design docs, step page, status dashboard, parity matrix, request scope, checklists, resolutions, merges, tags, and pushes to `main` |
+| Human owner | Approve gates, merges, and tags | — | — |
+
+Reviewer rules:
+
+- A reviewer must be a fresh context that did not author or implement the reviewed work.
+- The reviewer writes findings and verdict directly into the durable record. No handoff file, transcription,
+  or scribe is used.
+- The reviewer appends a new round and must not alter earlier rounds or reviewer-authored text.
+- The reviewer records the exact commands, results, and files behind the verdict in the record's `Evidence`
+  section, so the human owner can spot-check it.
+- The reviewer must not fix findings. If it edits code, tests, configuration, or design docs, it becomes an
+  implementor and a fresh reviewer is required.
+- The reviewer's record commit must touch exactly one file: the review or audit record. The reviewed or audited
+  commit is the parent of that commit. A record commit that touches any other file is invalid, and the verdict
+  must be re-run by a fresh reviewer.
+- The implementor may add resolutions and update status after the record commit, but must not change the
+  reviewer's findings, evidence, or verdict. Resolutions belong in a separate section or table.
+- The reviewer does not merge, tag, push `main`, or delete branches. The human owner still approves the merge.
+- The reviewer works in a writable worktree of the branch under review. If no writable checkout is available,
+  it writes the record and the step agent commits it unchanged.
+- The record commit uses a documentation-only message such as
+  `docs: record step-NN audit Passed [skip ci]`.
+- Optional scratch notes may live under `.tmp/`. They are not gate artifacts and are never committed.
+
+### 3.9 Pre-implementation design review
 
 Every new step must pass an independent design review before the step branch is created or implementation
-starts. This gate is separate from the post-implementation audit in section 3.9.
+starts. This gate is separate from the post-implementation audit in section 3.10.
 
 1. The planning agent and step agent finish the step's design decisions and update the step page, data
-   contracts, architecture, quality strategy, open decisions, parity matrix, and related docs.
+   contracts, architecture, quality strategy, open decisions, parity matrix, and related docs. They apply those
+   edits directly.
 2. The docs are frozen at a specific commit and the step agent creates or updates
    `docs/planning/reviews/step-NN.md` using
    [`docs/planning/reviews/step-design-review-template.md`](docs/planning/reviews/step-design-review-template.md).
    Set the design-review status to `Ready for review` and record the reviewed commit.
 3. A fresh planning auditor with no implementation context reads the step page, design decisions, dependency
    contracts, architecture, data contracts, ADRs, quality strategy, open decisions, parity matrix, licensing
-   records, and audit plan. The auditor must not edit tracked files, commit, push, or change any branch.
-4. The auditor writes its report to the gitignored handoff file
-   `.tmp/review/step-NN-rN-<short-sha>-design-review.md` (or `...-re-review.md`) and reports the path and
-   verdict.
-5. The step agent or a neutral scribe transcribes the findings and verdict verbatim into
-   `docs/planning/reviews/step-NN.md` and commits the documentation-only record.
-6. If the verdict is `Changes required`, the planning agent/scribe updates the design docs, the step agent
-   marks the review `Re-review required`, and a fresh planning auditor re-reviews the new commit.
+   records, and audit plan. The auditor must not have authored or implemented the design.
+4. The auditor writes the evidence, findings, and verdict directly into
+   `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
+   `[skip ci]`. The reviewed commit is the parent of the record commit. The auditor does not merge, tag, push
+   `main`, or change any other file. If the auditor cannot commit, it writes the record and the step agent
+   commits it unchanged.
+5. The auditor's write scope is defined in section 3.8. It may edit only its own metadata, evidence, findings,
+   and verdict. It must not edit the request scope, checklists, resolutions, design docs, step page, status
+   dashboard, parity matrix, code, tests, or configuration.
+6. If the verdict is `Changes required`, the planning agent and step agent update the design docs directly, the
+   step agent adds the resolutions and marks the review `Re-review required`, and a fresh planning auditor
+   re-reviews the new commit. The new round is appended; earlier rounds are not overwritten.
 7. Only a `Ready for implementation` verdict permits the human owner to approve starting the step. The step
    branch is then created from the reviewed `main` commit.
 8. Step 00 and Step 01 are recorded as `Waived — process introduced after completion`; no retrospective
    review is required.
-9. The post-implementation audit in section 3.9 remains mandatory.
+9. The post-implementation audit in section 3.10 remains mandatory.
 
 Design-review statuses and finding severities are defined in
 [`docs/planning/reviews/README.md`](docs/planning/reviews/README.md). Design-review records are planning
-records and are excluded from the published site. Raw planning-auditor handoff files are temporary and
-gitignored; they are not planning records.
+records and are excluded from the published site.
 
-### 3.9 Step audit gate
+### 3.10 Step audit gate
 
-The step agent's self-check is not an independent audit. Before a step is merged into `main`, a fresh
-read-only audit context must review the frozen step branch.
+The step agent's self-check is not an independent audit. Before a step is merged into `main`, a fresh,
+out-of-context audit context must review the frozen step branch.
 
 1. The step agent finishes all features and the closeout feature, updates the step page, status dashboard,
    parity matrix, and feature log, and gets step-branch CI green.
 2. The step agent creates or updates `docs/planning/audits/step-NN.md` using
    [`docs/planning/audits/step-audit-template.md`](docs/planning/audits/step-audit-template.md), records the
    exact audited commit and CI run, and sets the status to `Ready for audit`.
-3. The step branch is frozen. Do not add commits while the audit is running.
-4. A fresh audit agent reads `AGENTS.md`, the step page, the audit request, the status dashboard, and relevant
-   ADRs/contracts, then runs the required builds/tests and reviews the diff. The auditor is read-only: it must
-   not edit tracked files, commit, push, or change the step branch.
-5. The auditor writes its report to the gitignored handoff file
-   `.tmp/audit/step-NN-rN-<short-sha>-audit.md` (or `...-reaudit.md`) and reports the path and verdict. The
-   report uses the audit template and records the audited commit, CI run, commands run, findings, verdict, and
-   follow-up.
-6. The step agent or a neutral scribe transcribes the auditor's findings and verdict verbatim into
-   `docs/planning/audits/step-NN.md`, adds the audit metadata, and commits the documentation-only record. The
-   auditor must not commit or approve it.
-7. If fixes are needed, the step agent reads the handoff, fixes the findings on a new feature branch,
-   squash-merges into the step branch, pushes, waits for CI, and updates the audit request to
-   `Re-audit required`.
-8. The fresh auditor re-audits the new commit and writes a new handoff report. The same auditor may continue if
-   it remained read-only; otherwise start a fresh audit context. Keep the earlier report in the durable audit
-   history.
+3. The step branch is frozen at the audited commit. Two documentation-only commits may follow: the auditor's
+   record commit and the step agent's resolution/status commit. Neither may change code, tests, configuration,
+   or the auditor's text.
+4. A fresh audit agent reads `AGENTS.md`, the step page, the audit record, the status dashboard, and relevant
+   ADRs/contracts, then runs the required builds/tests and reviews the diff. The auditor must not have
+   implemented the step.
+5. The auditor writes the evidence, findings, and verdict directly into
+   `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
+   `[skip ci]`. The audited commit is the parent of the record commit. The auditor does not merge, tag, push
+   `main`, or change any other file. If the auditor cannot commit, it writes the record and the step agent
+   commits it unchanged.
+6. The auditor's write scope is defined in section 3.8. It may edit only its own metadata, evidence, findings,
+   and verdict. It must not edit the scope, checklists, resolutions, code, tests, configuration, step page,
+   status dashboard, or parity matrix.
+7. If fixes are needed, the step agent adds the resolutions, fixes the findings on a new feature branch,
+   squash-merges into the step branch, pushes, waits for CI, and sets the audit status to `Re-audit required`.
+8. The fresh auditor re-audits the new commit and appends a new round to the record. The same auditor may
+   continue if it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every
+   earlier round in the record.
 9. Only a `Passed` audit permits the step-to-main approval request. The audit result is evidence, not merge
    authorization; the human owner still approves the merge.
 10. After merge, tag `step-NN`, record the result, and delete the step branch.
-11. Delete the handoff file only after the durable audit record is committed.
 
 Audit status values and finding severities are defined in
 [`docs/planning/audits/README.md`](docs/planning/audits/README.md). Audit reports are planning records and are
-excluded from the published site. Raw auditor handoff files are temporary and gitignored; they are not planning
-records.
+excluded from the published site.
 
 ## 4. Non-negotiable decisions
 
@@ -476,7 +516,7 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
     branch.
 12. After approval, squash-merge, push the step branch, and delete the feature branch locally and remotely.
 13. After all features and the closeout feature, update `docs/planning/audits/step-NN.md`, freeze the step
-    branch, and request the independent audit described in section 3.9.
+    branch, and request the independent audit described in section 3.10.
 14. Only after a passed audit, ask for permission to merge the step into `main`, then merge with `--no-ff`,
     tag `step-NN`, push, and delete the step branch.
 
