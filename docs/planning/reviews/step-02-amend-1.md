@@ -13,7 +13,7 @@
 | Step | 02 — Symmetry and Geometry |
 | Amendment | `step-02-amend-1` — Public Generic Math Types |
 | Request owner | Step agent |
-| Design review status | Re-review required |
+| Design review status | Ready with notes |
 | Reviewed commit | `aad0835be9a0f0534e58a29392b64bf6aac2d588` (`aad0835`) |
 | Docs branch | `main` |
 | Review date | 2026-11-07 |
@@ -178,3 +178,86 @@ a fresh re-review.
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
+
+## Re-review round 2
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Amendment | `step-02-amend-1` — Public Generic Math Types |
+| Request owner | Step agent |
+| Design review status | Ready with notes |
+| Reviewed commit | `aad0835be9a0f0534e58a29392b64bf6aac2d588` (`aad0835`) |
+| Delta reviewed | `bd48763..aad0835` |
+| Docs branch | `main` |
+| Review date | 2026-11-07 |
+| Reviewer | Independent planning auditor (fresh re-review) |
+
+### Round-1 finding verification
+
+| Finding | Status | Verification |
+| --- | --- | --- |
+| **A1-1** — frozen design not superseded | **Fixed in the core design docs** | `docs/planning/steps/step-02-symmetry-and-geometry.md:264-284` now defines public `Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, and `Matrix4<T>`, says it supersedes the internal-kernel rule, and updates the public API boundary and implementation task. `docs/planning/01-target-architecture.md:279` now lists public vector/matrix math. |
+| **A1-2** — `IFloatingPoint<T>` admits `decimal` | **Fixed** | `docs/planning/amendments/step-02-amend-1-public-math.md:53-54, 66-67, 115, 153` uses `IFloatingPointIeee754<T>`; the Step 02 page agrees at `:272-273`. A scratch .NET 10 check reports `double=True`, `float=True`, `Half=True`, `decimal=False`. |
+| **A1-3** — 4×4 not justified | **Fixed** | `step-02-amend-1-public-math.md:171-181` adds the Step 23/24/27 consumer justification and explicit `Matrix4` construction, `FromRows`, `FromColumns`, `Transform`, and `ConditionNumber` tests. |
+| **A1-4** — API baseline/performance evidence | **Fixed** | `step-02-amend-1-public-math.md:231-237` names both `PublicAPI.Unshipped.txt` files and both baseline assemblies; `:217-223` defines `MatrixMathBenchmarks`, `MemoryDiagnoser`/`DisassemblyDiagnoser`, `Allocated = 0`, and `baselines.json`. |
+| **A1-5** — parent review/audit links and branch sync | **Fixed** | `docs/planning/reviews/step-02.md:34-41` links both amendment reviews; `docs/planning/audits/step-02.md:17-27` lists both; the plan's Integration records the parent branch-sync and review-link prerequisites. |
+| **A1-6** — singular/condition-number and inlining contract | **Fixed** | `step-02-amend-1-public-math.md:182-188` defines `Inverse`/`ConditionNumber` behavior and limits `AggressiveInlining`; the tests add a singular/condition row. |
+
+### Re-review evidence
+
+Files reviewed:
+
+- `docs/planning/amendments/step-02-amend-1-public-math.md`
+- `docs/planning/steps/step-02-symmetry-and-geometry.md`
+- `docs/planning/01-target-architecture.md`
+- `docs/development/design-decisions.md`
+- `docs/development/architecture.md`
+- `docs/planning/05-open-decisions.md`
+- `docs/planning/reviews/step-02.md`
+- `docs/planning/audits/step-02.md`
+- `docs/planning/amendments/README.md`
+- `src/dotnet/Mocassin.Core/Geometry/Vector3.cs`
+- `src/dotnet/Mocassin.Symmetry/CellGeometry.cs`
+
+Commands run:
+
+```text
+git diff --stat bd48763 aad0835
+git diff bd48763 aad0835 -- docs/planning/amendments/step-02-amend-1-public-math.md \
+  docs/planning/steps/step-02-symmetry-and-geometry.md docs/planning/01-target-architecture.md
+git diff bd48763 aad0835 -- docs/planning/reviews/step-02.md docs/planning/audits/step-02.md \
+  docs/planning/amendments/README.md
+git show 01a485d:docs/planning/reviews/step-02-amend-1.md
+# scratch .NET 10 check of IFloatingPointIeee754<T> for double, float, Half, decimal
+```
+
+Results: the design delta is documentation-only; no amendment implementation exists yet. The scratch
+constraint check returned `double=True`, `float=True`, `Half=True`, `decimal=False`.
+
+### Re-review findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **A1-7 — Three Documentation-checklist docs still describe generic math as internal.** The plan's Documentation list includes `docs/development/design-decisions.md`, `docs/development/architecture.md`, and `docs/planning/05-open-decisions.md`, but `design-decisions.md:29` still says “internal vector and numeric kernels”, `05-open-decisions.md:27` still says “generic kernel internally”, and `architecture.md:32` still says “generic arithmetic kernel”. The core Step 02 page and target architecture are fixed, so this is a documentation-consistency item for implementation. | `docs/planning/amendments/step-02-amend-1-public-math.md:284-300`; the three files above. Required: update the three rows/passages when the amendment is implemented. |
+| **Note** | **A1-8 — The 4×4 consumer references are future-facing.** The plan cites Step 23/24/27, but those step pages do not yet define a homogeneous/authoring or rendering `Matrix4<T>` consumer. Keep the references in sync or defer the 4D types if the future design changes. | `step-02-amend-1-public-math.md:171-181`; `docs/planning/steps/step-23-avalonia-shell-and-project-lifecycle.md`, `step-24-model-editors-particle-structure-transitions.md`, and `step-27-3d-viewer-and-visualization.md` do not currently name a `Matrix4<T>` consumer. |
+| **Note** | **A1-9 — Minor wording and duplication.** The risks table still says “use AggressiveInlining” broadly while the performance section limits it to small hot paths; the acceptance list retains both the specific benchmark bullet and the older “no unexpected allocation or call overhead” bullet. | `step-02-amend-1-public-math.md:217-223, 247-263, 306`. Required: align the wording and remove the duplicate acceptance item. |
+
+### Re-review verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+**Ready with notes.** All six round-1 findings are substantively addressed. A1-1 is fixed in the Step 02
+page and target architecture; three secondary documentation passages still use the old “internal” wording and
+should be updated with the implementation. The 4×4 consumer references and the AggressiveInlining/duplicate
+acceptance wording are notes for the implementor. No blocker or major finding remains.
+
+Follow-up owner: Planner / implementor
+
+Follow-up step: Implementation may proceed after the human owner accepts these notes; update the three
+secondary docs and align the risk/acceptance wording in the implementation or closeout.
