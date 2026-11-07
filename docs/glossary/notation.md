@@ -132,7 +132,8 @@ Diagnostic codes are stable uppercase strings with a domain prefix and three dig
 | `JOB` | Job templates and supercells |
 | `PRM` | Parameterization |
 
-Step 01 defines `PROJ001`–`PROJ033`; the complete catalogue is finalized in Step 07.
+Step 01 defines `PROJ001`–`PROJ033`; Step 03 adds `PROJ034` for project symmetry-metadata mismatch. The
+complete catalogue is finalized in Step 07.
 
 ## JSON notation
 
