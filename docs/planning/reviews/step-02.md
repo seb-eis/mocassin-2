@@ -1,7 +1,8 @@
 # Step 02 Design Review
 
-> Durable review record. The planning auditor's findings and verdict are transcribed verbatim from
-> `.tmp/review/step-02-r1-dd1d103-design-review.md`; the handoff was deleted after this record was
+> Durable review record. The planning auditor's findings and verdicts are transcribed verbatim from
+> `.tmp/review/step-02-r1-dd1d103-design-review.md` and
+> `.tmp/review/step-02-r2-b698496-design-review.md`; both handoffs were deleted after this record was
 > committed.
 
 ## Request
@@ -10,11 +11,11 @@
 | --- | --- |
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
-| Design review status | Re-review required |
+| Design review status | Ready with notes |
 | Reviewed commit | `b698496d4098064a232016e4d6784167cf1374d9` (`b698496`) |
 | Docs branch | `docs/step-02-design-review` |
 | Review date | 2026-11-07 |
-| Reviewer | — |
+| Reviewer | Independent planning auditor |
 | Report | `.tmp/review/step-02-r2-b698496-design-review.md` |
 
 Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-geometry.md)
@@ -28,7 +29,7 @@ not change the design; that was verified with `git show --stat 848c9a7`.
 | Round | Status | Reviewed commit | Date | Report |
 | --- | --- | --- | --- | --- |
 | 1 | Changes required | `dd1d103` | 2026-11-06 | `.tmp/review/step-02-r1-dd1d103-design-review.md` |
-| 2 | Re-review required | `b698496` | 2026-11-07 | `.tmp/review/step-02-r2-b698496-design-review.md` |
+| 2 | Ready with notes | `b698496` | 2026-11-07 | `.tmp/review/step-02-r2-b698496-design-review.md` |
 
 ## Step summary
 
@@ -212,13 +213,159 @@ Follow-up owner: Step agent / planning agent
 Follow-up step: Update the Step 02 design (and the affected data-contract/Step 03/Step 05/Step 08 text), set the
 review record to `Re-review required`, and request a fresh re-review of the new commit.
 
-## Re-review verdict
+## Re-review round 2
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Step | 02 — Symmetry and Geometry |
+| Request owner | Step agent |
+| Design review status | Re-review required |
+| Reviewed commit | `b698496d4098064a232016e4d6784167cf1374d9` (`b698496`) |
+| Docs branch | `docs/step-02-design-review` |
+| Review date | 2026-11-07 |
+| Reviewer | Independent planning auditor |
+| Report | `.tmp/review/step-02-r2-b698496-design-review.md` |
+
+Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-geometry.md)
+
+The design content is frozen at `b698496`. `HEAD` is `ad8d36e`; the only later changes are
+`docs/planning/reviews/step-02.md` (the fix-round record), `docs/planning/status.md`, and the Step 02
+design-review status line, all metadata. Verified with `git diff --stat b698496 HEAD`.
+
+### Step summary
+
+| Field | Value |
+| --- | --- |
+| Phase | A. Foundations |
+| Depends on | 01 — Domain Kernel and Project Format |
+| Delivers | Validated space-group catalog, exact symmetry operations, coordinate systems, P1 expansion, orbit/permutation reduction, and periodic geometry kernels |
+
+### Round-1 finding verification
+
+| Finding | Status | Verification |
+| --- | --- | --- |
+| **M1** — monoclinic selection rule | **Fixed** | Step 02 now selects `b` or `b1` for unique axis B and `c` or `c1` for unique axis C; it explicitly lists primitive groups 3, 4, 6, 10, and 11 as using `b`/`c`, and cell-choice groups 5, 7–9, and 12–15 as using `b1`/`c1`. The generator asserts 26 monoclinic settings and two per group. This matches the spglib `spg_database.c` evidence from round 1. |
+| **M2** — sample-based goldens | **Fixed** | Step 02 now uses Step 02-local synthetic fixtures (P1 triclinic, P2 unique-axis B/C, Pmmm general/special, Fm-3m special, R-3m hexagonal general) for P-order/pair/cluster goldens; full ceria/BZO/vehicle goldens are explicitly moved to Step 03/08. Acceptance and test tables now say “synthetic fixture”. Step 03 adds the ceria/BZO sample P-order test; Step 08 owns the compiled sample goldens. |
+| **M3** — 20×20×20 benchmark | **Fixed** | Step 02 §7.5 now records: 64 deterministic P1 positions in a cubic `a=5.41 Å` cell, `20×20×20 = 512,000` positions, `ubuntu-latest` 4 vCPU/.NET 10 Release, BenchmarkDotNet `P1Expansion20Cubed`, mean < 1 s, baseline class `linux-x64-github-ubuntu-latest-dotnet10`, and the exact command. The quality-strategy target and the acceptance/test rows are aligned. |
+| **M4** — project catalog/contract mismatch | **Fixed** | The project envelope now supports optional `symmetry` metadata (`spaceGroupDataVersion`, `spaceGroupDataSha256`, `symmetryContractVersion`); a mismatch with the embedded values emits `PROJ034` and does not rewrite the project; the compiled payload remains authoritative. Step 03, quality strategy, glossary, and open decisions define the matching/missing/mismatch behavior. See `r5` for the remaining schema-versioning note. |
+| **M5** — enum wire names | **Fixed** | `AxisSetting` now uses `None, UniqueAxisA, UniqueAxisB, UniqueAxisC, Hexagonal, Rhombohedral`; `OriginChoice` uses `None, OriginChoice1, OriginChoice2`, so the default camelCase serializer emits the contract strings. The per-setting `DataVersion` was removed; the catalog root and compiled payload carry it. Data contract, glossary, and Step 02 agree. |
+| **M6** — pair order | **Fixed** | Step 02, Step 08, and the data contract now use the same canonical shell order `(distanceBucket, targetP, cellA, cellB, cellC)`, then site indices. Stable geometry IDs are explicitly content hashes for parameterization matching, not table ordering. Step 08 adds a pair-order test. See `r6` for a small completeness note in Step 02. |
+| **M7** — `uniqueAxisA` scope | **Fixed** | `uniqueAxisA` is reserved in the enum and rejected in v1 with `STR001`; the data contract’s `axis` values exclude it; Step 03 tests were changed from unique-axis A/B/C to B/C with an explicit A rejection. See `r2` for a remaining parser/test wording ambiguity. |
+
+**All seven majors are substantively fixed. No blocker or major finding remains.**
+
+### Design decisions reviewed (round 2)
+
+- [x] Core/Symmetry boundary and ownership of symmetry types — fixed in Step 02; one stale architecture wording remains (`r1`).
+- [x] Catalog provenance, licensing, and the 274-setting compatibility subset — fixed; the release is pinned to spglib 2.8.0 and the exact commit is recorded at generation (`r7` is a note).
+- [x] Catalog generation, packaging, versioning, and checksum contract — fixed; operation ordering and `dataVersion` placement are now explicit.
+- [x] Structured space-group reference and project-format mapping — fixed; `uniqueAxisA` is reserved/rejected; one wording ambiguity remains (`r2`).
+- [x] Exact fractional grid and rational deduplication — fixed; midpoint rounding, non-finite rejection, underflow, trim, and boundary tests are defined.
+- [x] Cell geometry validation and the corrected cell-vector formula — fixed; `CellConditionLimit` was added, but it is not yet mirrored in the data contract/Step 03 `STR003` text (`r3`).
+- [x] Canonical P1 order, `Vector4I` encoding, and linear index — fixed; the synthetic goldens and benchmark fixture are now concrete.
+- [x] Orbit, stabilizer, pair, and cluster reduction semantics — fixed; pair order is canonical; the Step 05 cluster-ring issue remains deferred to Step 05 (as agreed in round 1).
+- [x] Periodic geometry, minimum image, and tolerance policy — fixed; one 1e-6 Å tolerance name, half-open box rule, and tests.
+- [x] Caching, determinism, symmetry contract versioning, performance, and test oracles — fixed; cache keys, `symmetry-N`/`catalog-N` bump rules, benchmark, and status are aligned.
+- [x] Documentation, status, parity, and audit updates — status now says `Re-review required`; the step-page `Last updated` date is stale (`r4`).
+
+### Dependency and interface checks (round 2)
+
+- [x] Step 01 is `Done` and its project-format contracts are stable — still true; the optional project `symmetry` metadata is an additive envelope property (`r5`).
+- [x] Inputs, outputs, types, and formats are defined for Step 03 and downstream steps — yes; the previous enum/format contradiction is resolved. The Step 03 `uniqueAxisA` test wording (`r2`) and the missing condition-limit text (`r3`) remain minor.
+- [x] Versioning and migration behavior is defined for the catalog and symmetry contract — yes: optional project metadata, `PROJ034`, compiled payload authoritative; the project-schema versioning note is `r5`.
+- [x] No unresolved cross-step interface question remains — the majors are resolved; the residual items are editorial/schema-fixture notes, not blocking interface questions.
+
+### Re-review evidence
+
+Files reviewed:
+
+- `AGENTS.md` (§3.8, §3.9)
+- `docs/planning/reviews/README.md`
+- `docs/planning/reviews/step-design-review-template.md`
+- `docs/planning/reviews/step-02.md` (round 1 findings, fix round, resolution status, re-review request)
+- `docs/planning/steps/step-02-symmetry-and-geometry.md` (fixed design)
+- `docs/planning/steps/step-03-particle-and-structure-models.md`
+- `docs/planning/steps/step-05-energy-model.md`
+- `docs/planning/steps/step-08-model-compilation-pipeline.md`
+- `docs/planning/01-target-architecture.md`
+- `docs/planning/02-data-contracts.md`
+- `docs/planning/03-quality-strategy.md`
+- `docs/planning/05-open-decisions.md`
+- `docs/planning/status.md`
+- `docs/glossary/notation.md`
+- `NOTICE.md`
+- `docs/planning/audits/step-02.md`
+- `.tmp/review/step-02-r2-b698496-request.md`
+
+Commands run (read-only):
+
+```text
+git status --porcelain=v1
+git log --oneline -8
+git log --oneline dd1d103..b698496
+git diff --stat dd1d103 b698496
+git diff --stat b698496 HEAD
+git diff dd1d103 b698496 -- docs/planning/steps/step-02-symmetry-and-geometry.md
+git diff dd1d103 b698496 -- docs/planning/02-data-contracts.md \
+  docs/planning/steps/step-03-particle-and-structure-models.md \
+  docs/planning/steps/step-08-model-compilation-pipeline.md
+git diff dd1d103 b698496 -- docs/planning/03-quality-strategy.md \
+  docs/glossary/notation.md docs/planning/05-open-decisions.md
+git diff b698496 HEAD -- docs/planning/steps/step-02-symmetry-and-geometry.md docs/planning/status.md
+grep -n "CellConditionLimit|condition number" <docs>
+grep -n "CrystalSystem|persisted symmetry vocabulary" <docs>
+grep -n "uniqueAxisA|unique axis A|every enum value|STR001|PROJ002" <docs>
+grep -n "Pair tables are in canonical|PairInteractionIndex|pair-shell order" <docs>
+```
+
+The round-1 spglib `src/spg_database.c` verification was reused for M1; the fixed rule now matches the
+`b`/`c` vs `b1`/`c1` split. No build or test commands were run: the repository is planning-only and no Step 02
+implementation exists.
+
+### Re-review findings
+
+| Severity | Finding | Evidence | Resolution |
+| --- | --- | --- | --- |
+| **Minor** | **r1 — The architecture table still calls `CrystalSystem` “persisted symmetry vocabulary”.** Step 02 and the data contract now correctly describe it as catalog-derived and never serialized, but `01-target-architecture.md` was not updated in the fix round. | `01-target-architecture.md` lines 121–122 and 141; Step 02 lines 84–86 and 255; `02-data-contracts.md` line 213. | Change the architecture wording to “persisted vocabulary (`AxisSetting`, `OriginChoice`); `CrystalSystem` is catalog-derived vocabulary”. Documentation-only. |
+| **Minor** | **r2 — The `uniqueAxisA` parser/validator path and one Step 03 test wording remain ambiguous.** The data contract excludes `uniqueAxisA` from the allowed `axis` values but says it is rejected with `STR001`; Step 03 says an *unknown* enum string is `PROJ002`; the Step 03 test says `(number, axis, origin)` “round-trips for every enum value” and also says `uniqueAxisA` is rejected. It is not clear whether the parser accepts the reserved enum member and the validator emits `STR001`, or the schema/parser rejects it as `PROJ002`. | `02-data-contracts.md` lines 210–211; Step 03 lines 178, 272, 282; Step 02 lines 80 and 136; glossary line 142. | State one path explicitly. Recommended: the JSON parser accepts the reserved `uniqueAxisA` enum value and the validator emits `STR001`; the manifest/schema marks it reserved rather than silently listing it as supported. Change the test wording to “every supported enum value” and keep a separate `uniqueAxisA` rejection test. |
+| **Minor** | **r3 — `CellConditionLimit` is missing from the data-contract cell constraints and the Step 03 `STR003` description.** The fix defines `CellConditionLimit = 1e12` and a test in Step 02 and the glossary, but the canonical project-format contract and the Step 03 diagnostic table do not mention the condition-number rejection. A cell that violates the condition limit would be rejected with `STR003`, but the contract text only lists angles, Gram determinant, and crystal-system constraints. | Step 02 line 236; glossary line 58; `02-data-contracts.md` lines 201–204; Step 03 `STR003` line 159. | Add the condition-number limit to the data-contract cell constraints and to the `STR003` row (and a Step 03 test/acceptance item). Documentation-only. |
+| **Minor** | **r4 — The Step 02 `Last updated` date is stale.** The status fields were updated to `Re-review required`, but the date still says 2026-11-06 while the fix and re-review are dated 2026-11-07. | Step 02 line 17; review record fix-round date 2026-11-07. | Update `Last updated` to 2026-11-07 (or the final status-change date). |
+| **Note** | **r5 — The optional project `symmetry` metadata is a new envelope property on the already-completed project schema v1.** The data contract makes it optional and advisory, included in the document hash but not the model hash; the compiled payload is authoritative. Because Step 01’s v1 reader rejects unknown properties, the manifest/generated schema and fixture coverage should make clear whether this is an additive v1 change or requires a schema-version bump/reader tolerance for older builds. | `02-data-contracts.md` lines 97–116 and 132; Step 01 project schema `schemaVersion: 1`; Step 03 `PROJ034` row. | Confirm the manifest/generated project schema includes `symmetry`, add a project fixture with and without it, and state whether `schemaVersion` remains 1 or is bumped. No design change needed if this is an intentional additive v1 field. |
+| **Note** | **r6 — Step 02 states the shell key but not the pair-table outer site-pair order.** Step 08 and the data contract say “canonical shell order …, then site indices”; Step 02 only says the shell order is the canonical pair-table order. | Step 02 line 405; Step 08 line 116; `02-data-contracts.md` line 602. | Add “then center/partner site indices” to Step 02 or explicitly reference the Step 08/data-contract ordering. Documentation-only. |
+| **Note** | **r7 — The exact spglib commit is recorded at generation, not in the frozen design.** The release is now pinned to `spglib==2.8.0`, and the step says the exact commit is recorded in `Data/README.md` and asserted by the generator; `NOTICE.md` repeats that policy. | Step 02 lines 95–97 and 151; `NOTICE.md` lines 30–32. | Ensure `Data/README.md` records the exact commit and the generator `--check` asserts the 2.8.0 pin. No design change required. |
+| **Note** | **r8 — The diagnostic catalogue reference does not mention `PROJ034`.** Step 03 adds `PROJ034`, and the data-contract/glossary describe the warning, but the glossary’s diagnostic summary still says Step 01 defines `PROJ001`–`PROJ033` and the catalogue is finalized in Step 07. | Step 03 lines 168–171; glossary lines 138–139. | Mention `PROJ034` (project loader) in the diagnostic catalogue summary and the Step 07 finalization list. Documentation-only. |
+
+### Resolution status (round 2)
+
+| Finding | Status | Owner |
+| --- | --- | --- |
+| r1 | Open — update the architecture table's `CrystalSystem` wording | Step agent / planning agent |
+| r2 | Open — define the reserved-value parser/validator path and adjust test wording | Step agent / planning agent |
+| r3 | Open — add `CellConditionLimit` to the data contract and Step 03 `STR003` | Step agent / planning agent |
+| r4 | Resolved by this record — Step 02 `Last updated` set to 2026-11-07 | Scribe |
+| r5 | Note — confirm additive project-schema v1 handling and fixtures; owner acceptance pending | Planner / human owner |
+| r6 | Note — add site-index order to the Step 02 pair-order statement | Planner |
+| r7 | Note — record the exact spglib commit at generation and assert it | Planner |
+| r8 | Note — add `PROJ034` to the diagnostic catalogue summary | Planner |
+
+### Re-review verdict
 
 - [ ] Ready for implementation
-- [ ] Ready with notes
+- [x] Ready with notes
 - [ ] Changes required
 - [ ] Re-review required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up step:
+**Ready with notes.** No blockers or major findings remain; all seven round-1 majors are fixed. The remaining
+items are four minor documentation/test-wording issues (`r1`–`r4`) and four notes (`r5`–`r8`). The human owner
+should explicitly accept these notes; the step may then proceed after the usual step-start approvals. The
+minor items should be applied in the Step 02/03 documentation or the closeout feature; they do not require a
+new design round.
+
+Follow-up owner: Step agent / planning agent (documentation-only corrections) and human owner (explicit
+acceptance of the notes).
+
+Follow-up step: Apply `r1`–`r4` and `r5`–`r8` in the Step 02/03 docs, record the human owner’s acceptance, and
+start Step 02 under the normal branch and feature-approval rules.
