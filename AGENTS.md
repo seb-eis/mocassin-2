@@ -50,11 +50,13 @@ Before changing anything, read these in order:
 11. [`docs/planning/audits/README.md`](docs/planning/audits/README.md) — independent step-audit process and
     approval gate.
 12. [`docs/planning/reviews/README.md`](docs/planning/reviews/README.md) — design-review process and start gate.
-13. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
+13. [`docs/planning/amendments/README.md`](docs/planning/amendments/README.md) — amendment process for design
+    changes that emerge during implementation.
+14. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
     evidence playbook for coding agents.
-14. The step page you intend to work on, plus its dependencies.
-15. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-16. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+15. The step page you intend to work on, plus its dependencies.
+16. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+17. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
@@ -152,11 +154,13 @@ Before the first numbered item, complete the pre-implementation design review in
    - documentation updates;
    - any final acceptance fixes.
 2. Run the step's full acceptance criteria and quality gates on the step branch.
-3. Complete the independent audit in section 3.10. The step branch must be frozen at the audited commit; after
+3. If an emergent design change is required, integrate a step amendment (section 3.11) before the audit freeze.
+   The audit then covers the combined solution.
+4. Complete the independent audit in section 3.10. The step branch must be frozen at the audited commit; after
    a passing audit, the auditor's record commit and the step agent's resolution/status commit are the only
    permitted later commits.
-4. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
-5. After approval:
+5. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
+6. After approval:
    ```sh
    git switch main
    git pull --ff-only
@@ -165,8 +169,8 @@ Before the first numbered item, complete the pre-implementation design review in
    git tag -a step-00 -m "step-00: repository, toolchain, and CI"
    git push origin step-00
    ```
-6. Delete the step branch locally and remotely after the merge.
-7. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
+7. Delete the step branch locally and remotely after the merge.
+8. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
 
 ### 3.5 Out-of-step changes
 
@@ -338,9 +342,36 @@ out-of-context audit context must review the frozen step branch.
    authorization; the human owner still approves the merge.
 10. After merge, tag `step-NN`, record the result, and delete the step branch.
 
+The audited solution includes every amendment integrated before the freeze. A post-merge amendment needs its
+own audit and tag under section 3.11 and must never move the existing `step-NN` tag.
+
 Audit status values and finding severities are defined in
 [`docs/planning/audits/README.md`](docs/planning/audits/README.md). Audit reports are planning records and are
 excluded from the published site.
+
+### 3.11 Step amendments
+
+An amendment captures a design change that emerges during implementation without reopening a frozen step. It
+is planned, reviewed, integrated into the parent step branch, and audited as part of the parent step.
+
+1. Record it as `step-NN-amend-M` using
+   [`docs/planning/amendments/step-amendment-template.md`](docs/planning/amendments/step-amendment-template.md).
+2. Keep the parent step active. Do not add the amendment to a frozen or already-audited step branch.
+3. Run a focused design review under section 3.9 and record it in
+   `docs/planning/reviews/step-NN-amend-M.md`. The parent review record links to it.
+4. Implement on `feature/step-NN-<step-slug>/amend-M-<slug>` from the parent step branch. A large amendment may
+   use `step/NN-amend-M-<slug>` with the normal feature rules.
+5. Integrate the amendment into the parent step branch before the parent audit freeze, using the normal
+   feature approval and squash process.
+6. Update the parent step page, amendment page, audit request, and design review record with the combined
+   commit.
+7. Freeze the combined step branch. The audit in section 3.10 covers the parent step and every integrated
+   amendment at that commit. Do not create a separate audit record or tag for an integrated amendment.
+8. If the parent step is already merged or tagged, do not move the tag. Use a maintenance branch from `main`,
+   audit the amendment separately, and create a new tag such as `step-NN.1` only with owner approval.
+
+Amendment statuses and the amendment index are in
+[`docs/planning/amendments/README.md`](docs/planning/amendments/README.md).
 
 ## 4. Non-negotiable decisions
 

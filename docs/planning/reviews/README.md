@@ -125,3 +125,13 @@ review is performed.
 
 The review record keeps each round: `### Review round 1`, `### Re-review round 2`, etc. Never overwrite an
 earlier round.
+
+## 10. Step amendment reviews
+
+- Amendment reviews use the same statuses, severity, verdict, and reviewer write scope as a normal design
+  review.
+- Record: `docs/planning/reviews/step-NN-amend-M.md`.
+- Scope: the amendment delta and its impact on the parent step, not a full re-review of the parent design.
+- The parent review record links to the amendment review record.
+- The reviewer still edits only the review record and commits only that file.
+- The parent audit covers the combined solution; an integrated amendment does not get a separate audit or tag.
