@@ -728,3 +728,85 @@ static Mocassin.Core.Units.TimeSeconds.operator ==(Mocassin.Core.Units.TimeSecon
 ~override Mocassin.Core.Units.LengthAngstrom.Equals(object obj) -> bool
 ~override Mocassin.Core.Units.TemperatureKelvin.Equals(object obj) -> bool
 ~override Mocassin.Core.Units.TimeSeconds.Equals(object obj) -> bool
+Mocassin.Core.Geometry.Cartesian3
+Mocassin.Core.Geometry.Cartesian3.Cartesian3() -> void
+Mocassin.Core.Geometry.Cartesian3.Cartesian3(double X, double Y, double Z) -> void
+Mocassin.Core.Geometry.Cartesian3.Cross(Mocassin.Core.Geometry.Cartesian3 other) -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Core.Geometry.Cartesian3.Deconstruct(out double X, out double Y, out double Z) -> void
+Mocassin.Core.Geometry.Cartesian3.DistanceTo(Mocassin.Core.Geometry.Cartesian3 other) -> double
+Mocassin.Core.Geometry.Cartesian3.Dot(Mocassin.Core.Geometry.Cartesian3 other) -> double
+Mocassin.Core.Geometry.Cartesian3.Equals(Mocassin.Core.Geometry.Cartesian3 other) -> bool
+Mocassin.Core.Geometry.Cartesian3.IsFinite.get -> bool
+Mocassin.Core.Geometry.Cartesian3.Length.get -> double
+Mocassin.Core.Geometry.Cartesian3.LengthSquared.get -> double
+Mocassin.Core.Geometry.Cartesian3.X.get -> double
+Mocassin.Core.Geometry.Cartesian3.X.init -> void
+Mocassin.Core.Geometry.Cartesian3.Y.get -> double
+Mocassin.Core.Geometry.Cartesian3.Y.init -> void
+Mocassin.Core.Geometry.Cartesian3.Z.get -> double
+Mocassin.Core.Geometry.Cartesian3.Z.init -> void
+Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Geometry.Fractional3.A.get -> double
+Mocassin.Core.Geometry.Fractional3.A.init -> void
+Mocassin.Core.Geometry.Fractional3.B.get -> double
+Mocassin.Core.Geometry.Fractional3.B.init -> void
+Mocassin.Core.Geometry.Fractional3.C.get -> double
+Mocassin.Core.Geometry.Fractional3.C.init -> void
+Mocassin.Core.Geometry.Fractional3.Cross(Mocassin.Core.Geometry.Fractional3 other) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Geometry.Fractional3.Deconstruct(out double A, out double B, out double C) -> void
+Mocassin.Core.Geometry.Fractional3.Dot(Mocassin.Core.Geometry.Fractional3 other) -> double
+Mocassin.Core.Geometry.Fractional3.Equals(Mocassin.Core.Geometry.Fractional3 other) -> bool
+Mocassin.Core.Geometry.Fractional3.Fractional3() -> void
+Mocassin.Core.Geometry.Fractional3.Fractional3(double A, double B, double C) -> void
+Mocassin.Core.Geometry.Fractional3.IsFinite.get -> bool
+Mocassin.Core.Geometry.Fractional3.Length.get -> double
+Mocassin.Core.Geometry.Fractional3.LengthSquared.get -> double
+Mocassin.Core.Geometry.Fractional3.TrimToUnitCell() -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Geometry.GeometryTolerances
+Mocassin.Core.Geometry.Vector4I
+Mocassin.Core.Geometry.Vector4I.A.get -> int
+Mocassin.Core.Geometry.Vector4I.A.init -> void
+Mocassin.Core.Geometry.Vector4I.B.get -> int
+Mocassin.Core.Geometry.Vector4I.B.init -> void
+Mocassin.Core.Geometry.Vector4I.C.get -> int
+Mocassin.Core.Geometry.Vector4I.C.init -> void
+Mocassin.Core.Geometry.Vector4I.Deconstruct(out int A, out int B, out int C, out int P) -> void
+Mocassin.Core.Geometry.Vector4I.Equals(Mocassin.Core.Geometry.Vector4I other) -> bool
+Mocassin.Core.Geometry.Vector4I.P.get -> int
+Mocassin.Core.Geometry.Vector4I.P.init -> void
+Mocassin.Core.Geometry.Vector4I.Vector4I() -> void
+Mocassin.Core.Geometry.Vector4I.Vector4I(int A, int B, int C, int P) -> void
+const Mocassin.Core.Geometry.GeometryTolerances.FractionalTrimTolerance = 1E-10 -> double
+override Mocassin.Core.Geometry.Cartesian3.GetHashCode() -> int
+override Mocassin.Core.Geometry.Cartesian3.ToString() -> string!
+override Mocassin.Core.Geometry.Fractional3.GetHashCode() -> int
+override Mocassin.Core.Geometry.Fractional3.ToString() -> string!
+override Mocassin.Core.Geometry.Vector4I.GetHashCode() -> int
+override Mocassin.Core.Geometry.Vector4I.ToString() -> string!
+static Mocassin.Core.Geometry.Cartesian3.Zero.get -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator !=(Mocassin.Core.Geometry.Cartesian3 left, Mocassin.Core.Geometry.Cartesian3 right) -> bool
+static Mocassin.Core.Geometry.Cartesian3.operator *(Mocassin.Core.Geometry.Cartesian3 value, double factor) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator *(double factor, Mocassin.Core.Geometry.Cartesian3 value) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator +(Mocassin.Core.Geometry.Cartesian3 left, Mocassin.Core.Geometry.Cartesian3 right) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator -(Mocassin.Core.Geometry.Cartesian3 left, Mocassin.Core.Geometry.Cartesian3 right) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator -(Mocassin.Core.Geometry.Cartesian3 value) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator /(Mocassin.Core.Geometry.Cartesian3 value, double divisor) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator ==(Mocassin.Core.Geometry.Cartesian3 left, Mocassin.Core.Geometry.Cartesian3 right) -> bool
+static Mocassin.Core.Geometry.Fractional3.Zero.get -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator !=(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> bool
+static Mocassin.Core.Geometry.Fractional3.operator *(Mocassin.Core.Geometry.Fractional3 value, double factor) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator *(double factor, Mocassin.Core.Geometry.Fractional3 value) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator +(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator -(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator -(Mocassin.Core.Geometry.Fractional3 value) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator /(Mocassin.Core.Geometry.Fractional3 value, double divisor) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator ==(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> bool
+static Mocassin.Core.Geometry.Vector4I.Zero.get -> Mocassin.Core.Geometry.Vector4I
+static Mocassin.Core.Geometry.Vector4I.operator !=(Mocassin.Core.Geometry.Vector4I left, Mocassin.Core.Geometry.Vector4I right) -> bool
+static Mocassin.Core.Geometry.Vector4I.operator +(Mocassin.Core.Geometry.Vector4I left, Mocassin.Core.Geometry.Vector4I right) -> Mocassin.Core.Geometry.Vector4I
+static Mocassin.Core.Geometry.Vector4I.operator -(Mocassin.Core.Geometry.Vector4I left, Mocassin.Core.Geometry.Vector4I right) -> Mocassin.Core.Geometry.Vector4I
+static Mocassin.Core.Geometry.Vector4I.operator -(Mocassin.Core.Geometry.Vector4I value) -> Mocassin.Core.Geometry.Vector4I
+static Mocassin.Core.Geometry.Vector4I.operator ==(Mocassin.Core.Geometry.Vector4I left, Mocassin.Core.Geometry.Vector4I right) -> bool
+~override Mocassin.Core.Geometry.Cartesian3.Equals(object obj) -> bool
+~override Mocassin.Core.Geometry.Fractional3.Equals(object obj) -> bool
+~override Mocassin.Core.Geometry.Vector4I.Equals(object obj) -> bool

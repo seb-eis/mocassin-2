@@ -7,18 +7,18 @@ orbit/permutation reduction, and periodic geometry kernels.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
+- **Status:** In progress
+- **Step branch:** `step/02-symmetry-and-geometry`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready with notes
+- **Design review:** Ready with notes — accepted by the human owner on 2026-11-07
 - **Last updated:** 2026-11-07
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `core-geometry` | `feature/step-02-symmetry-and-geometry/core-geometry` | Awaiting approval | Core tests 158/158; `dotnet format --verify-no-changes` passes | — | — |
 
 ## Goal
 
