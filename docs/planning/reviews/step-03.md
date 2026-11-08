@@ -14,7 +14,7 @@
 | Step | 03 — Particle and Structure Models |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Ready with notes |
+| Design review status | Ready with notes — accepted |
 | Reviewed commit | `1beb8da8751d3df55865e9f4a592b20ca17d33a1` (`1beb8da`) |
 | Docs branch | `docs/step-03-design-fixes` |
 | Review date | 2026-11-08 |
@@ -202,12 +202,16 @@ Findings and resolutions:
 ## Human approval
 
 - [ ] Accepted: Ready for implementation
-- [ ] Accepted: Ready with notes
+- [x] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-08
+
+The human owner accepted the `Ready with notes` verdict at design commit `3096aa8` and the round-2 note
+resolutions in `a299046`, and authorized the Step 03 start gate. The complete feature-branch list still
+requires its own approval before the step branch is created.
 
 ## Resolution status
 
