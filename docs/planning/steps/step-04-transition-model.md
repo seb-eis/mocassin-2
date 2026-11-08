@@ -13,8 +13,8 @@ geometry, with validation of transition semantics.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Not requested
-- **Last updated:** —
+- **Design review:** [Ready for review](../reviews/step-04.md)
+- **Last updated:** 2026-11-08
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -50,7 +50,40 @@ geometry, and validate that the definition is physically meaningful before rule 
 
 ## Design
 
-### 1. State changes
+### 1. Model composition and persistence
+
+`ModelDefinition` gains the flat transition sections alongside the Step 03 particle and structure sections:
+
+```csharp
+public sealed record ModelDefinition
+{
+    ImmutableArray<Particle> Particles { get; init; }
+    ImmutableArray<ParticleSet> ParticleSets { get; init; }
+    StructureModel Structure { get; init; }
+
+    ImmutableArray<StateChange> StateChanges { get; init; }
+    ImmutableArray<StateChangeGroup> StateChangeGroups { get; init; }
+    ImmutableArray<TransitionChain> Chains { get; init; }
+    ImmutableArray<KineticTransition> KineticTransitions { get; init; }
+    ImmutableArray<MetropolisTransition> MetropolisTransitions { get; init; }
+}
+```
+
+- The model stays flat on disk: `model.stateChanges`, `model.stateChangeGroups`, `model.chains`,
+  `model.kineticTransitions`, and `model.metropolisTransitions`.
+- `ModelDefinitionJsonConverter`, `ProjectJsonContext`, `ProjectSchema`, and `ProjectValidator` are extended
+  for the new sections.
+- `TransitionPattern` and `TransitionLinker` serialize as camelCase strings (`metropolis2`, `migration3`,
+  `dynamic`, `static`, …).
+- Semantic array order:
+  - `StateChangeGroup.StateChangeIds` — group role order;
+  - `TransitionChain.GroupIds` and `TransitionChain.Linkers` — position order;
+  - `KineticTransition.ReferencePath` — position order.
+  All other collections are sorted by `id` when serialized.
+- The project `schemaVersion` remains 1 because the transition sections are additive.
+- `TransitionPreview` is derived data and is never persisted.
+
+### 2. State changes
 
 ```csharp
 public sealed record StateChange(
@@ -75,7 +108,7 @@ public sealed record StateChangeGroup(
 - A state change with donor == acceptor is rejected (no-op).
 - A state change where the acceptor is void and the donor is void is rejected.
 
-### 2. Chains
+### 3. Chains
 
 ```csharp
 public enum TransitionPattern
@@ -127,7 +160,7 @@ Pattern rules:
 - Chain groups are ordered and semantically meaningful.
 - A chain may reference a group more than once (e.g. the same `[A,V]` group at both ends).
 
-### 3. KMC transitions
+### 4. KMC transitions
 
 ```csharp
 public sealed record KineticTransition(
@@ -156,7 +189,7 @@ public sealed record MetropolisTransition(
 - A transition name is unique within its kind.
 - A transition may be referenced by multiple simulations.
 
-### 4. Symmetry extension
+### 5. Symmetry extension
 
 - The model stores one reference path/site pair; step 08 generates all symmetry-equivalent paths and rules.
 - The preview API (`TransitionPreview`) shows:
@@ -166,7 +199,7 @@ public sealed record MetropolisTransition(
   - the number of expected rules before conservation filtering.
 - Preview is advisory; the compiled model is authoritative.
 
-### 5. Validation rules
+### 6. Validation rules
 
 | Code | Severity | Rule |
 | --- | --- | --- |
@@ -195,7 +228,7 @@ public sealed record MetropolisTransition(
   known. Step 04 only checks definition-level consistency.
 - The validator reports the exact position index and group index for path errors.
 
-### 6. Editing operations
+### 7. Editing operations
 
 - Add/update/remove state change, group, chain, kinetic transition, metropolis transition.
 - Removing an object that is referenced by another object produces a diagnostic and a list of dependents;
@@ -203,18 +236,124 @@ public sealed record MetropolisTransition(
 - Duplicating a chain/transition creates new IDs and keeps references consistent.
 - "Make group from selected state changes" is a UI convenience backed by a single editor operation.
 
+### 8. Public API
+
+```csharp
+// Mocassin.Core
+public interface ITransitionQuery
+{
+    ImmutableArray<StateChange> StateChanges { get; }
+    ImmutableArray<StateChangeGroup> StateChangeGroups { get; }
+    ImmutableArray<TransitionChain> Chains { get; }
+    ImmutableArray<KineticTransition> KineticTransitions { get; }
+    ImmutableArray<MetropolisTransition> MetropolisTransitions { get; }
+
+    StateChange? Find(StateChangeId id);
+    StateChangeGroup? Find(StateChangeGroupId id);
+    TransitionChain? Find(TransitionChainId id);
+    KineticTransition? Find(KineticTransitionId id);
+    MetropolisTransition? Find(MetropolisTransitionId id);
+}
+
+// Mocassin.Symmetry
+public sealed record TransitionPreview(
+    TransitionChain Chain,
+    ImmutableArray<Fractional3> ReferencePath,
+    ImmutableArray<ImmutableArray<Fractional3>> ExpandedPaths,
+    ImmutableArray<ImmutableArray<int>> StateChangeMatrices,
+    int ExpectedRuleCount);
+
+public interface ITransitionPreviewService
+{
+    TransitionPreview CreatePreview(
+        KineticTransition transition,
+        StructureModel structure,
+        int cellCountA,
+        int cellCountB,
+        int cellCountC);
+
+    TransitionPreview CreatePreview(
+        MetropolisTransition transition,
+        StructureModel structure,
+        int cellCountA,
+        int cellCountB,
+        int cellCountC);
+}
+```
+
+- `ITransitionQuery` is implemented by the immutable `Project` snapshot.
+- `ITransitionPreviewService` lives in `Mocassin.Symmetry`; Core never references Symmetry.
+- The preview is advisory; the compiled model is authoritative in Step 08.
+- `StateChangeMatrices` are the per-position donor/acceptor matrices used by rule generation.
+
+## Code layout
+
+The new code follows the structure policy: PascalCase domain folders, namespaces that match folders, no new
+root-level files, and no folder above 20 direct files.
+
+```text
+Mocassin.Core/
+  Model/
+    ModelDefinition.cs                  # add transition sections
+    ModelDefinitionJsonConverter.cs     # read/write the new sections
+    Transitions/
+      StateChange.cs
+      StateChangeGroup.cs
+      TransitionPattern.cs
+      TransitionLinker.cs
+      TransitionChain.cs
+      KineticTransition.cs
+      MetropolisTransition.cs
+      ITransitionQuery.cs
+      TransitionModelValidator.cs
+  Diagnostics/
+    TransitionDiagnosticCodes.cs        # TRN001-TRN020
+  Editing/
+    ProjectEditor.cs                    # add transition editing operations
+  Project/
+    ProjectJsonContext.cs
+    ProjectSchema.cs
+    ProjectValidator.cs
+
+Mocassin.Symmetry/
+  Transitions/
+    TransitionPreview.cs
+    TransitionPreviewService.cs
+    ITransitionPreviewService.cs
+```
+
+Tests mirror the source concept:
+
+- `Mocassin.Core.Tests/Transitions/StateChangeTests.cs`
+- `Mocassin.Core.Tests/Transitions/TransitionChainTests.cs`
+- `Mocassin.Core.Tests/Transitions/TransitionValidationTests.cs`
+- `Mocassin.Core.Tests/Transitions/TransitionModelTests.cs`
+- `Mocassin.Symmetry.Tests/Transitions/TransitionPreviewTests.cs`
+
+Samples live under `samples/transitions/`. The new user-guide and physics pages are added to `zensical.toml`
+navigation in the same step.
+
 ## Implementation tasks
 
+- [ ] Extend `ModelDefinition` with the flat transition sections; update `ModelDefinitionJsonConverter`,
+  `ProjectJsonContext`, `ProjectSchema`, and `ProjectValidator`.
 - [ ] Implement `StateChange`, `StateChangeGroup`, `TransitionChain`, `KineticTransition`,
   `MetropolisTransition`.
 - [ ] Implement pattern/linker validation, including `Custom`.
 - [ ] Implement path/stability validation.
-- [ ] Implement transition preview using the symmetry engine.
+- [ ] Implement `ITransitionQuery` and `ITransitionPreviewService`.
+- [ ] Implement transition preview using the symmetry engine and the requested `(A, B, C)` cell counts.
 - [ ] Implement reference and duplicate-name validation.
 - [ ] Implement editor operations and dependent-removal diagnostics.
+- [ ] Add the Core transition diagnostic codes and help text.
+- [ ] Update `contracts/manifest.json` with the transition sections; regenerate the project schema and add
+  fixtures with and without transition data. The project `schemaVersion` remains 1 because the fields are
+  additive.
+- [ ] Add XML docs, update `PublicAPI.Unshipped.txt`, and refresh the ApiCompat baseline for every new public
+  type and member.
 - [ ] Add ceria KMC (oxygen migration), ceria MMC (O/V exchange), and polaron-hop samples.
 - [ ] Add a 5-site vehicle and a 5-site interstitialcy sample.
-- [ ] Add diagnostics/help text.
+- [ ] Add the new user-guide and physics pages to `zensical.toml` navigation.
 
 ## Acceptance criteria
 
@@ -226,6 +365,10 @@ public sealed record MetropolisTransition(
 - [ ] Invalid paths (unstable endpoint, consecutive unstable, ring) are rejected with precise diagnostics.
 - [ ] Complex transitions warn when no reverse is defined.
 - [ ] The preview enumerates the expected symmetry-equivalent paths.
+- [ ] The transition sections round-trip through the project JSON context; semantic arrays preserve order.
+- [ ] The generated project schema accepts the transition sections, and fixtures cover empty and populated
+  models.
+- [ ] Public API files and the ApiCompat baseline are current.
 - [ ] Documentation written
 
 ## Documentation
@@ -236,6 +379,9 @@ At this point, document the transition model:
 - `docs/physics/monte-carlo.md` and `docs/physics/kmc.md` — transition mechanisms and state triplets.
 - `docs/physics/mmc.md` — two-site exchange semantics.
 - `docs/development/compilation-pipeline.md` — transition inputs and the deferred rule-generation stage.
+- `docs/reference/project-format.md` — transition sections, field names, semantic ordering, and constraints.
+
+Add the new user-guide and physics pages to `zensical.toml` navigation in the same step.
 
 ## Tests
 
@@ -249,6 +395,9 @@ At this point, document the transition model:
 | Metropolis | Same-site and different-site exchanges |
 | Preview | Symmetry-expanded path count matches brute force |
 | Editing | Remove/duplicate keeps references valid |
+| Model envelope | Empty, transition-only, and combined models round-trip through the project JSON context |
+| Schema | Generated project schema accepts the transition sections and rejects unknown fields |
+| Semantic order | Group IDs, linker order, and reference path order survive serialization unchanged |
 | Samples | Ceria and vehicle fixtures validate |
 
 ## Risks and mitigations
