@@ -14,7 +14,7 @@
 | Step | 03 — Particle and Structure Models |
 | Request owner | Step agent |
 | Audit initiated by | Step agent |
-| Audit status | Re-audit required |
+| Audit status | Passed with notes |
 | Audited commit | `b6a97ec` |
 | Step branch | `step/03-particle-and-structure-models` |
 | Step tag | — |
@@ -72,17 +72,17 @@ reviewer-authored findings, evidence, and verdict are preserved unchanged below.
 
 ## Standard audit checklist
 
-- [x] Required tests from the step page pass. — the committed suite is green; F1 and F4 record missing coverage.
+- [x] Required tests from the step page pass. — the committed suite is green; F1 and F4 record missing coverage. — round 2: F1/F4 coverage added; Core 266/266, Symmetry 153/153, Packages 41/41, Architecture 1/1, support 1/1 each, 0 failed/skipped.
 - [x] Public/protected XML documentation policy is followed. — DocFX builds with 0 warnings.
-- [ ] Documentation, status dashboard, feature log, and parity matrix are current. — F3 records status/step-page drift.
-- [x] Closeout CI is green at the audited commit. — run `42511003132` completed/success at `5a06d67`.
+- [x] Documentation, status dashboard, feature log, and parity matrix are current. — F3 records status/step-page drift; round 2: F3 corrected at `b6a97ec`/`2bdacd2`, and the Step 03 parity rows and feature log are current.
+- [x] Closeout CI is green at the audited commit. — run `42511003132` completed/success at `5a06d67`. — round 2: run `42514332091` completed/success at `b6a97ec`.
 - [x] Windows/macOS runs are recorded, or their absence is accepted because the step has no platform-specific
       code. — not run; no platform-specific code in Step 03, accepted under §3.13.
 - [x] Format/version/fixture changes are documented and tested. — additive v1 fields; manifest/schema/fixtures current.
 - [x] Security, dependency, licence, and secret-scan gates pass. — licence, vulnerability, SPDX, secret, and cargo-deny gates pass.
 - [x] Code structure policy passes; no new root-level or catch-all folders. — Architecture test 1/1.
 - [x] No unrelated changes or unapproved scope. — diff is limited to Step 03 code, tests, contracts, samples, and docs.
-- [x] Branch, tag, and status hygiene are correct. — no `step-03` tag; branch at `3ed0436`; F3 records status drift.
+- [x] Branch, tag, and status hygiene are correct. — no `step-03` tag; branch at `3ed0436`; F3 records status drift. — round 2: branch head `2bdacd2` is documentation-only on the `b6a97ec` tree; no `step-03` tag.
 
 ## Evidence
 
@@ -207,6 +207,178 @@ against `main`, the Core/Symmetry/Packages implementation and tests, the contrac
 samples, and the benchmark evidence. I did not rely on an implementor summary and did not modify any file
 other than this record.
 
+### Re-audit round 2 evidence
+
+**Independence and preservation.** I am a separate fresh, independent, out-of-context audit agent from the
+round-1 auditor. I did not author or implement Step 03 and have no shared conversation with the implementor,
+planner, or round-1 auditor. Round 1's reviewer-authored evidence, findings, and verdict above are preserved
+unchanged; the round-2 evidence, findings, and verdict are appended, not substituted.
+
+**Frozen revision and tree identity (`b6a97ec` → `2bdacd2`).**
+
+```text
+git status --porcelain=v1
+(no output; clean working tree)
+
+git branch --show-current
+step/03-particle-and-structure-models
+
+git rev-parse HEAD
+2bdacd29a511d76ab5e6bf9653adbab18def12f3
+
+git rev-parse b6a97ec
+b6a97ecce67c561c0eca60a751fe37a14fa3e024
+
+git log -3 --format='%H %s'
+2bdacd29a511d76ab5e6bf9653adbab18def12f3 docs: record step-03 audit fixes and request re-audit [skip ci]
+b6a97ecce67c561c0eca60a751fe37a14fa3e024 step-03: resolve audit findings
+b9ae1f63e87b8820740494e4b8bf478ddf28fec2 docs: record step-03 audit Fixes required [skip ci]
+
+git diff --name-status b6a97ec..2bdacd2
+M docs/planning/audits/step-03.md
+M docs/planning/status.md
+M docs/planning/steps/step-03-particle-and-structure-models.md
+
+git diff --stat b6a97ec..2bdacd2 -- . ':(exclude)docs/planning'
+(no output)
+
+git diff --stat b6a97ec..2bdacd2 -- src tests contracts tools samples .github
+(no output)
+
+git diff --check b6a97ec..2bdacd2
+exit 0
+```
+
+The code, tests, configuration, contracts, samples, and workflow tree at `2bdacd2` is identical to
+`b6a97ec`; the only differences are the audit record, the status dashboard, and the step page. The audited
+code tree is therefore `b6a97ec`, reached through the documentation-only re-audit request `2bdacd2`.
+
+**Full diff and complete step history.** `git log --oneline main..b6a97ec` shows nine Step 03 squash commits:
+`3974596`, `dd642d6`, `7c4e748`, `67e39e1`, `8a75bc6`, `18940a1`, `9039b6f`, `5a06d67`, and the fix squash
+`b6a97ec`, plus the two documentation-only audit-request/record commits `3ed0436` and `b9ae1f6`; `2bdacd2`
+is the re-audit request on top. The accepted design merge is `6bffcf2`. `git diff --stat main..b6a97ec` is
+108 files, 8710 insertions(+),
+176 deletions(-): Core particle/structure models, editing, validation, project/envelope hashing; Symmetry
+preview/validator/encoder/cache; Packages composition; contract manifest/schema/fixtures; samples; benchmarks
+and baselines; public API and API baseline; user/development/reference docs. There are no Rust, Python,
+workflow, or unrelated project changes. `git diff --stat b9ae1f6..b6a97ec` is 13 files, 250 insertions(+),
+31 deletions(-), all tied to F1–F6 and their documentation. `git diff --check main..b6a97ec` exits 0.
+`git tag --list` contains `development-ready`, `planning-complete`, `step-00`, `step-01`, `step-02` and no
+`step-03`.
+
+**Round-1 finding verification.**
+
+| Finding | Round-2 status | Independent evidence |
+| --- | --- | --- |
+| **F1 (Major)** — non-finite dummy throws in `TryCreatePreview` | **Verified fixed** | `StructurePreviewService.TryCreatePreview` now normalizes dummy positions, rejects non-finite dummies with `STR010`, and returns `null` before computing the structure hash. The new `NonFiniteDummyCoordinateReturnsDiagnosticsAndDoesNotThrow` test passes. A scratch probe supplied `Fractional3(double.NaN, 0, 0)` and produced `preview=null diagnostics=[STR010]` with no exception. A non-finite site control produced `preview=null diagnostics=[SYM001]` with no exception. `LengthAngstrom`/`AngleDegrees` reject non-finite values at construction, so the remaining hash inputs cannot be non-finite through the public unit types. |
+| **F2 (Minor)** — default `ParticleIds` throws instead of `PAR005` | **Verified fixed** | `ParticleSet.ParticleIds` now normalizes through a backing field on both construction and `init`, and `ParticleModelValidator.ValidateSetMembers` also guards `IsDefault`. The probe produced `IsDefault=False Length=0`, Core `[PAR005]`, and composed `[PAR005]` with no exception. `DefaultParticleIdsThroughWithExpressionNormalizeToEmpty` and `SetWithDefaultParticleIdsThroughWithExpressionProducesPar005` pass. |
+| **F3 (Minor)** — documentation/status drift | **Verified fixed** | The step page now lists Core ownership as `PAR001`, `PAR002`, `PAR005`–`PAR012` and records `PAR004` as emitted by `ProjectValidationService`; the `ST008` typo is corrected; the deviations list records the `PAR004` split; the project-format `model` row describes the Step 03 sections; and the status dashboard Active work text and Step 03 row describe the audit state. `ProjectValidationService.cs:151` emits `PAR004`; the probe shows Core `[]` and composed `[PAR004]`. |
+| **F4 (Minor)** — missing random model round-trip property | **Verified fixed** | `Mocassin.Core.Tests/Model/ModelPropertyTests.cs` adds `RandomParticleAndStructureModelsRoundTripCanonically` (100 cases) covering random particles, sets, sites, stabilities, and dummies; it asserts canonical JSON equality and structure-hash equality after a round-trip. The targeted run passed in 145 ms. |
+| **F5 (Minor)** — BZO benchmark fixture omitted H | **Verified fixed** | The benchmark fixture now includes the stable H interstitial at `(0.734, 0.5, 0)` and expects 17 P1 positions with orbits `[1, 1, 3, 12]`; `baselines.json` and the raw result were regenerated consistently. The sample BZO probe expands to `P1=17 orbits=[1, 1, 3, 12]` with the last position `(0.734, 0.5, 0)`. The benchmark `--job Dry` run exited 0 and `GlobalSetup` validated both fixtures. |
+| **F6 (Note)** — runner-class evidence label | **Accepted note remains** | `structurePreview.evidenceStatus` in `baselines.json` now says the evidence is local-container evidence and the declared GitHub runner class is re-verified through the manual Benchmark CI job; the raw result repeats the qualification. The recorded means (16.460 µs and 9.976 µs) remain far below the 100 ms target. No merge block. |
+
+**Local gates.** `./tools/verify.sh all` exited 0. Observed results:
+
+```text
+dotnet build Mocassin.slnx -c Release --no-restore
+Build succeeded. 0 Warning(s), 0 Error(s).
+
+dotnet test Mocassin.slnx -c Release --no-build
+Core 266/266; Symmetry 153/153; Packages 41/41; Architecture 1/1;
+Contracts/Compilation/Results/App 1/1 each; Failed: 0, Skipped: 0.
+
+dotnet format Mocassin.slnx --verify-no-changes --no-restore
+exit 0
+
+NuGet licence policy OK; no vulnerable packages
+ApiCompat: 9 assemblies compatible with the checked-in baseline
+Rust: cargo fmt, clippy (all targets, -D warnings), and workspace tests pass
+Python: pytest 3/3 and package build pass
+Docs: zensical build --strict "No issues found"; DocFX 0 warnings / 0 errors; rustdoc built
+Contracts: artifacts current (17 files); catalog current (274 settings, sha256 1f3bf67d...)
+SPDX headers present in 176 source files; no secret patterns in 467 tracked text files
+cargo-deny: advisories ok, bans ok, licenses ok, sources ok
+```
+
+**Targeted re-audit probe.** A scratch console project at `/tmp/opencode/reaudit-r2` (not committed) loaded
+the real samples and fixtures through `ProjectJson.Deserialize` and `ProjectValidationService.Validate`:
+
+```text
+ceria: []
+bzo: []
+project-structure: []
+project-symmetry: []
+project-symmetry-partial: []
+project-symmetry-mismatch: [PROJ034, PROJ034, PROJ034]
+
+F1 dummy NaN: preview=null diagnostics=[STR010]
+F1 site +Inf: preview=null diagnostics=[SYM001]
+F1 dummy NaN + site +Inf: preview=null diagnostics=[STR010]
+
+F2 with-default: ParticleIds.IsDefault=False, Length=0; core [PAR005]; composed [PAR005]
+
+F5 BZO: P1=17, orbits=[1, 1, 3, 12], last=(0.734, 0.5, 0)
+
+shuffle: ProjectHasher.Compute equal=True; ComputeStructure equal=True
+structure name edit changes structure hash: True
+PAR004: core [], composed [PAR004]
+
+"model": {} -> particles=0, sets=0, structure='New Structure', sites=0
+ModelDefinition.Empty equal=True; canonical round-trip=True
+```
+
+**Benchmark fixture and baseline.** `dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks --
+--filter "*StructurePreview*" --job Dry` exited 0. `GlobalSetup` validated ceria at 36 P1 positions with
+orbits `[4, 8, 24]` and barium zirconate at 17 P1 positions with orbits `[1, 1, 3, 12]`. The cold-start Dry
+means were 617.1 µs (ceria, 36.63 KB) and 716.6 µs (BZO, 25.2 KB). The committed baseline is the warmed
+DefaultJob evidence (16.460 µs / 9.976 µs), which is internally consistent with the raw result and the
+recorded fixture counts.
+
+**Closeout CI.** GitHub API query for run `42514332091`:
+
+```text
+RUN CI completed success b6a97ecce67c561c0eca60a751fe37a14fa3e024 step/03-particle-and-structure-models workflow_dispatch
+JOB Detect changes completed success
+JOB Public API compatibility completed success
+JOB Contracts and policy completed success
+JOB .NET (ubuntu-latest) completed success
+JOB Python (${{ matrix.python-version }}) completed skipped
+JOB Rust (${{ matrix.os }}) completed skipped
+```
+
+The Rust/Python skips are path-filtered and correct: Step 03 changes no Rust or Python files. A query for
+`head_sha=2bdacd2` returned no workflow runs, as expected for the `[skip ci]` documentation-only commit.
+Platform CI was not run; Step 03 has no platform-specific code (no P/Invoke, interop, RID-specific packages,
+path/case/locking logic, GUI, or Rust platform code), so the absence is accepted under `AGENTS.md` §3.13.
+
+**Standard checklist re-verification (round 2).**
+
+| Standard checklist item | Round-2 result |
+| --- | --- |
+| Required tests from the step page pass | Pass — full suite green; F1/F4 regression coverage added |
+| Public/protected XML documentation policy | Pass — DocFX 0 warnings / 0 errors |
+| Documentation, status dashboard, feature log, parity matrix | Pass — F3 corrected; Step 03 section-2 parity rows and feature log current |
+| Closeout CI green at the audited commit | Pass — `42514332091` success at `b6a97ec` |
+| Windows/macOS runs recorded or absence accepted | Pass — not run; no platform-specific code, accepted under §3.13 |
+| Format/version/fixture changes documented and tested | Pass — additive v1 fields; manifest/schema/fixtures current; 17 contract artifacts |
+| Security, dependency, licence, secret-scan gates | Pass — licence/vulnerability, ApiCompat, SPDX 176, secrets 467, cargo-deny all pass |
+| Code structure policy | Pass — Architecture 1/1 |
+| No unrelated changes or unapproved scope | Pass — fix commit limited to F1–F6 and docs; full step diff limited to the step |
+| Branch, tag, and status hygiene | Pass — branch `step/03-particle-and-structure-models`; no `step-03` tag; docs-only head |
+
+**Inspection (round 2).** I read `AGENTS.md` §§3.8, 3.10, 3.12, and 12, the audit README, the round-1 record,
+the re-audit request and resolutions, the step page, `status.md`, the Step 03 design review record, the data
+contracts, the project-format/architecture/symmetry/design-decision docs, the parity matrix, the quality
+strategy and relevant ADR context. I reviewed the full `main..b6a97ec` diff, the `b9ae1f6..b6a97ec` fix commit,
+the new regression/property tests, the benchmark fixtures/baseline/raw result, the contract fixtures/schema,
+the samples, and the CI evidence. I did not rely on an implementor summary and did not modify any file other
+than this record.
+
+**Observation (non-finding).** The cross-cutting section 9 row in `appendix-b-parity-matrix.md` for
+`Unit/property/contract tests` still says `Planned | 03`; it predates Step 03, is outside the Step 03 parity
+task (which covered the section-2 rows), and is a project-wide quality row for later steps. It does not
+affect this verdict.
+
 ## Known notes for the auditor
 
 - The frozen audit commit is the squashed closeout commit on
@@ -247,6 +419,20 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor writes
 directly. The step agent adds resolutions in the separate `Resolution status` section without altering the
 auditor's findings, evidence, or verdict.
 
+### Re-audit round 2 findings
+
+F1–F5 are verified closed. F6 remains an accepted Note. I identified no new Blocker, Major, or Minor
+finding at `b6a97ec`.
+
+| Finding | Original severity | Round-2 status | Verification |
+| --- | --- | --- | --- |
+| F1 — non-finite dummy preview throw | Major | **Closed — fixed** | `STR010` + `null` preview; regression test passes |
+| F2 — default `ParticleIds` validation throw | Minor | **Closed — fixed** | Normalization + validator guard; `PAR005`; two tests pass |
+| F3 — documentation/status drift | Minor | **Closed — fixed** | Step page, status dashboard, project-format, and `PAR004` ownership corrected |
+| F4 — missing random model round-trip property | Minor | **Closed — fixed** | `ModelPropertyTests` property passes (100 cases) |
+| F5 — BZO benchmark fixture omitted H | Minor | **Closed — fixed** | 17 P1 / `[1,1,3,12]`; baseline/raw/sample consistent; Dry run validates |
+| F6 — runner-class evidence label | Note | **Accepted note remains** | `evidenceStatus` records local-container evidence and manual re-verification; target met by a wide margin |
+
 ## Verdict
 
 - [ ] Passed
@@ -270,6 +456,36 @@ Follow-up issue/step: Fix F1 on a new feature branch and add a regression test f
 position; address or record acceptance for F2–F5; update the status/step-page/benchmark evidence; then set
 the audit record to `Re-audit required` and request a fresh audit of the new commit. Do not merge
 `step/03-particle-and-structure-models` into `main` until a passing audit is recorded.
+
+### Re-audit round 2 verdict
+
+- [ ] Passed
+- [x] Passed with notes
+- [ ] Fixes required
+- [ ] Re-audit required
+- [ ] Waived
+
+**Passed with notes.** The audited code tree is `b6a97ec`; `2bdacd2` is a documentation-only re-audit
+request whose code, test, configuration, contract, sample, and workflow tree is identical. The full Step 03
+diff and the nine-commit step history were reviewed, not only the fix commit. `./tools/verify.sh all` passes;
+the .NET solution builds with 0 warnings, the test suites are green (Core 266/266, Symmetry 153/153, Packages
+41/41, Architecture 1/1, support 1/1 each), and the documentation, DocFX, rustdoc, contract, catalogue,
+licence, vulnerability, secret, ApiCompat, structure, cargo-deny, Rust, and Python gates pass. The closeout
+CI run `42514332091` is green at `b6a97ec`; no CI run was created for the `[skip ci]` docs commit `2bdacd2`.
+
+The round-1 Major finding F1 is closed: a non-finite dummy position now returns `STR010` and no preview, and
+the regression test passes. F2–F5 are closed with targeted regression/property coverage and regenerated
+benchmark evidence. F6 remains an accepted Note: the baseline is explicitly labelled local-container
+evidence with the runner class re-verified through the manual Benchmark CI job, and the measured means are
+far below the 100 ms target. I found no new Blocker, Major, or Minor finding.
+
+Residual risk: F6's runner-class evidence is still local-container evidence until the manual benchmark job
+runs on a release candidate; the target margin is very large, so the risk is low. Step 03 has no
+platform-specific code, so Windows/macOS CI remains not run under the Ubuntu-only policy.
+
+Gate statement: no Blocker or Major finding remains unclosed. The only remaining item is the accepted Note
+F6. Follow-up owner: step agent / implementor for the resolution and approval-summary commit; human owner for
+the final verdict, merge, and tag approval.
 
 ## Resolution status
 
