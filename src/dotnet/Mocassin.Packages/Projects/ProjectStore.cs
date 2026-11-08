@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
@@ -18,6 +19,7 @@ public sealed class ProjectStore
     private readonly TimeProvider timeProvider;
     private readonly ProjectStoreOptions options;
     private readonly IProjectFileWriter fileWriter;
+    private readonly Func<Project, ImmutableArray<Diagnostic>> validator;
 
     /// <summary>
     /// Initializes a project store.
@@ -29,11 +31,34 @@ public sealed class ProjectStore
     {
     }
 
+    /// <summary>
+    /// Initializes a project store with the default composed validator.
+    /// </summary>
+    /// <param name="timeProvider">The time provider.</param>
+    /// <param name="options">The store configuration.</param>
+    /// <param name="fileWriter">The atomic file writer.</param>
     internal ProjectStore(TimeProvider timeProvider, ProjectStoreOptions options, IProjectFileWriter fileWriter)
+        : this(timeProvider, options, fileWriter, ProjectValidationService.Validate)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a project store with an explicit project validator.
+    /// </summary>
+    /// <param name="timeProvider">The time provider.</param>
+    /// <param name="options">The store configuration.</param>
+    /// <param name="fileWriter">The atomic file writer.</param>
+    /// <param name="validator">The validator used after loading.</param>
+    internal ProjectStore(
+        TimeProvider timeProvider,
+        ProjectStoreOptions options,
+        IProjectFileWriter fileWriter,
+        Func<Project, ImmutableArray<Diagnostic>> validator)
     {
         this.timeProvider = timeProvider ?? throw new ArgumentNullException(nameof(timeProvider));
         this.options = options ?? throw new ArgumentNullException(nameof(options));
         this.fileWriter = fileWriter ?? throw new ArgumentNullException(nameof(fileWriter));
+        this.validator = validator ?? throw new ArgumentNullException(nameof(validator));
 
         if (this.options.MaxDocumentBytes <= 0)
         {
@@ -347,7 +372,7 @@ public sealed class ProjectStore
         }
     }
 
-    private static ProjectLoadResult LoadBytes(byte[] bytes, string path)
+    private ProjectLoadResult LoadBytes(byte[] bytes, string path)
     {
         try
         {
@@ -367,7 +392,7 @@ public sealed class ProjectStore
         }
     }
 
-    private static ProjectLoadResult LoadBytesCore(byte[] bytes, string path)
+    private ProjectLoadResult LoadBytesCore(byte[] bytes, string path)
     {
         var diagnostics = new DiagnosticBag();
 
@@ -434,7 +459,7 @@ public sealed class ProjectStore
             return new ProjectLoadResult(null, diagnostics.Sorted);
         }
 
-        diagnostics.AddRange(ProjectValidator.Validate(project));
+        diagnostics.AddRange(validator(project));
         return new ProjectLoadResult(project, diagnostics.Sorted);
     }
 

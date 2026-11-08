@@ -18,6 +18,11 @@ public static class ParticleDiagnosticCodes
     public const string ParticleLimitExceeded = "PAR002";
 
     /// <summary>
+    /// A vacancy and its default occupation are both charged.
+    /// </summary>
+    public const string ChargedVacancy = "PAR004";
+
+    /// <summary>
     /// A particle set is empty or contains the implicit void particle.
     /// </summary>
     public const string InvalidSetMembers = "PAR005";

@@ -1238,3 +1238,4 @@ Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.ParticleSetId id) -> Mocass
 Mocassin.Core.Project.Project.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!>
 Mocassin.Core.Project.Project.Structure.get -> Mocassin.Core.Model.Structure.StructureModel!
 Mocassin.Core.Project.Project.VoidParticle.get -> Mocassin.Core.Model.Particles.Particle!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.ChargedVacancy = "PAR004" -> string!
