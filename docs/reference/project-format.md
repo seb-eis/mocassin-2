@@ -89,16 +89,34 @@ The unit value structs validate finiteness and their allowed range at constructi
 number; the property name or schema description carries the unit. There are no implicit conversions between
 unit types.
 
-## Structure and symmetry (Step 02 vocabulary; Step 03 fields)
+## Particles, structure, and symmetry (Step 03 fields)
 
-Step 02 supplies the catalog, cell validation, and coordinate vocabulary. The structure section of the
-project schema ships with Step 03; the shape below is the contract it will use. Step 03 must update
+Step 02 supplies the catalog, cell validation, and coordinate vocabulary. The particle and structure sections
+of the project schema ship with Step 03; the shapes below are the contract they will use. Step 03 must update
 `contracts/manifest.json` and regenerate the project schema before the fields are accepted; until then the
-generated v1 schema does not contain them.
+generated v1 schema does not contain them. A missing `particles`, `particleSets`, or `structure` property loads
+as the empty/default model, so a Step 01 `"model": {}` document remains valid.
 
 ```json
 {
+  "particles": [
+    {
+      "id": "…",
+      "name": "O2-",
+      "symbol": "O",
+      "charge": -2.0,
+      "isVacancy": false
+    }
+  ],
+  "particleSets": [
+    {
+      "id": "…",
+      "name": "Oxygen site",
+      "particleIds": ["…"]
+    }
+  ],
   "structure": {
+    "name": "Ceria",
     "spaceGroup": { "number": 225, "axis": "none", "origin": "none" },
     "cell": { "a": 5.41, "b": 5.41, "c": 5.41, "alpha": 90.0, "beta": 90.0, "gamma": 90.0 },
     "sites": [],
@@ -107,29 +125,42 @@ generated v1 schema does not contain them.
 }
 ```
 
+- The implicit void particle and empty particle set use reserved IDs, are not serialized as ordinary objects,
+  and must not be reused by authored objects. `isVoid` is computed and never appears in JSON.
+- `particleIds` order is semantic: the first particle is the default occupation of a stable site.
+  `particles`, `particleSets`, `sites`, and `dummyPositions` sort by `id` in canonical JSON.
+- The recommended particle-symbol pattern is `^[A-Z][A-Za-z0-9+\-()]{0,10}$`; a mismatch is `PAR008` warning.
+- `structure.name` is required in the model and defaults to `New Structure` for a new project; an empty or
+  whitespace-only value is `STR013`.
 - `spaceGroup` persists only `(number, axis, origin)`. The Hermann–Mauguin symbol, Hall symbol, crystal
   system, operations, and catalog data version are resolved from the embedded catalog.
 - `axis` is one of `none`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, or `rhombohedral`. `uniqueAxisA` is
   reserved for a future catalog extension and is rejected by the v1 validator with `STR001`.
 - `origin` is `none`, `originChoice1`, or `originChoice2`.
+- `fractional` is a three-number array `[a, b, c]`. `axis`, `origin`, and `stability` are camelCase strings.
 - Cell lengths are in ångström and must be in `0.1..1000 Å` (`STR002`). Angles are in degrees and must be
   strictly between `0°` and `180°`; the Gram determinant must be positive and above `1e-12`; the cell-matrix
   condition number must not exceed `1e12`; crystal-system constraints must hold (`STR003`).
-- Reference positions are fractional decimals; Symmetry trims them with `FractionalTrimTolerance = 1e-10` and
-  converts them to the exact `24 × 10^12` grid for P1 expansion. The JSON remains `double`-based.
+- A structure may define at most 1000 reference sites (`STR012`). Reference positions must be inside `[0,1)`
+  before trimming; values within `FractionalTrimTolerance = 1e-10` of a boundary snap, values beyond it are
+  `STR004` error. Positions then convert to the exact `24 × 10^12` grid for P1 expansion. The JSON remains
+  `double`-based.
+- More than 10,000 total P1 positions is `STR009` warning; the hard v1 limit is the signed 32-bit linear-index
+  cap. This deliberately relaxes the original hard 10,000 limit.
 - The optional envelope `symmetry` metadata carries `spaceGroupDataVersion`, `spaceGroupDataSha256`, and
-  `symmetryContractVersion`. A mismatch with the embedded values warns `PROJ034`; the compiled payload is
-  authoritative.
+  `symmetryContractVersion`. `Mocassin.Packages.Projects.ProjectValidationService` compares it with the
+  embedded values and warns `PROJ034` on a mismatch; the compiled payload is authoritative.
 
 The catalog is embedded, not stored in the project. The data version is `spglib-2.8.0/catalog-1`; see
 [Compilation Pipeline](../development/compilation-pipeline.md) and
 [Symmetry and Geometry](../physics/symmetry.md) for the exact rules.
 
-## Model and templates in Step 01
+## Model and templates in Step 01 (historical)
 
-Step 01 deliberately establishes the project envelope before the scientific model domains. Consequently:
+Step 01 deliberately establishes the project envelope before the scientific model domains. At that
+checkpoint the model body was an empty object; the particle and structure sections above are added by Step 03.
+The template records are still the Step 01 shape:
 
-- `model` is an empty JSON object;
 - a parameterization template has `id`, `name`, `modelSignature`, and `createdUtc`;
 - a job template has `id` and `name`;
 - a build template has `id`, `name`, `jobTemplateId`, `parameterizationId`, and `outputName`.
@@ -203,8 +234,10 @@ throws for user data. The Step 01 project codes are:
 | `PROJ031` | Another session holds the editing lock. |
 | `PROJ032` | A stale lock was reclaimed. |
 | `PROJ033` | An autosave write failed. |
+| `PROJ034` | Project symmetry metadata differs from the embedded catalog/contract versions (warning). |
 
-The full diagnostic catalogue is completed in Step 07.
+Step 03 adds the `PAR001`–`PAR009` particle codes and the `STR001`–`STR013` structure codes; their
+user-facing catalogue and help anchors are completed in Step 07.
 
 ## Persistence
 
