@@ -87,6 +87,7 @@ The planner, implementor, or human owner may spawn a reviewer. The spawner must 
 - Test strategy, property tests, golden fixtures, performance targets, and CI gates are defined.
 - Documentation, status dashboard, parity matrix, and post-implementation audit updates are planned.
 - Licensing, provenance, and dependency issues are resolved.
+- Code layout and namespace plan follow `docs/development/code-structure.md`.
 - Risks and mitigations are realistic.
 - No hidden scope, stale placeholders, or unowned decisions.
 

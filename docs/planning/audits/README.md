@@ -101,6 +101,7 @@ See [`AGENTS.md` §3.13](../../../AGENTS.md) and [`docs/planning/ci-policy.md`](
 - CI configuration and actual CI result.
 - Format/version changes, fixtures, and migration behavior.
 - Security, dependency, licence, and secret-scan gates.
+- Code structure and folder ownership; the structure test passes.
 - No unrelated changes, stale placeholders, or unapproved scope.
 - Branch, merge, tag, and status hygiene.
 

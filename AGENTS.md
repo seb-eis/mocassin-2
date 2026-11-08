@@ -674,6 +674,25 @@ approval-report, and diff-review templates.
 
 ## 8. Coding conventions
 
+### Code structure
+
+- The project root is a lobby, not a home. Source projects keep only entry points and project metadata at the
+  root (`AssemblyInfo.cs`, `GlobalUsings.cs`, `<Project>Module.cs`, `Program.cs`, framework app files, and
+  `PublicAPI.*.txt`). Everything else lives in a domain folder.
+- Group by domain concept, not by type kind. No `Utils/`, `Helpers/`, `Common/`, `Shared/`, `Misc/`,
+  `Models/`, `Interfaces/`, `Implementations/`, `Abstractions/`, or `Extensions/` folders. `Internal/` is
+  allowed only inside a named concept folder.
+- Limits: at most 20 direct `.cs` files per folder, folder depth 4, and 800 lines per file. Subfolders reset
+  the file count.
+- File names match the primary type or a permitted concept file (`*Dtos.cs`, `*Ids.cs`, `*Values.cs`,
+  `*Templates.cs`, `*Extensions.cs`, and the other suffixes in `tools/structure-policy.json`).
+- Files use the namespace that matches their folder. Step 02's `Mocassin.Symmetry` namespaces were aligned in a
+  post-step maintenance update; there is no namespace baseline.
+- Test projects may keep up to 20 files at the root; new tests still belong in the folder matching the code
+  under test once folders exist.
+- The policy is enforced by `Mocassin.Architecture.Tests` and `tools/verify.sh structure`. See
+  [`docs/development/code-structure.md`](docs/development/code-structure.md) for the full rules and examples.
+
 ### .NET
 
 - .NET 10, nullable enabled, implicit usings, warnings as errors.
@@ -904,6 +923,7 @@ from the original and the plan’s “Original reference” sections.
 - [ ] Performance benchmark run for hot-path changes.
 - [ ] Commit message is imperative and scoped.
 - [ ] The change can be explained in terms of the plan, not just the code.
+- [ ] Code follows the structure policy in section 8; `tools/verify.sh structure` passes.
 - [ ] Any approval request includes the cumulative approval report in section 3.12: every round, every finding
       and resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Major gate statement.
 - [ ] The CI cost policy in section 3.13 is followed: local validation, one closeout run, one main run, no

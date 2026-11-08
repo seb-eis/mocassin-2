@@ -3,7 +3,7 @@
 using System.Collections.Immutable;
 using Mocassin.Core.Geometry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Geometry;
 
 /// <summary>
 /// Describes the canonical P1 orbit of one reference site.

@@ -107,7 +107,7 @@ jobs:
 
           while IFS= read -r file; do
             case "$file" in
-              src/dotnet/*|tests/*|*.slnx|global.json|Directory.Build.*|Directory.Packages.props|NuGet.config|.config/dotnet-tools.json)
+              src/dotnet/*|tests/*|*.slnx|global.json|.editorconfig|Directory.Build.*|Directory.Packages.props|NuGet.config|.config/dotnet-tools.json|tools/structure-policy.json)
                 dotnet=true ;;
               src/rust/*|Cargo.toml|Cargo.lock|rust-toolchain*|deny.toml|.cargo/*)
                 rust=true ;;

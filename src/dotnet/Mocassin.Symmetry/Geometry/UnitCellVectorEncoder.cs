@@ -5,8 +5,10 @@ using System.Collections.Immutable;
 using System.Globalization;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Geometry;
+using Mocassin.Symmetry.SpaceGroups;
 
-namespace Mocassin.Symmetry;
+using Mocassin.Symmetry.Diagnostics;
+namespace Mocassin.Symmetry.Geometry;
 
 /// <summary>
 /// Maps exact fractional coordinates, canonical P1 positions, and <see cref="Vector4I"/> encodings.

@@ -2,7 +2,7 @@
 
 using System.Text.Json.Serialization;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.SpaceGroups;
 
 /// <summary>
 /// Source-generated JSON context for the internal catalog DTOs.

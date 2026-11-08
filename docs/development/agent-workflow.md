@@ -89,6 +89,12 @@ Read:
 Scope:
 - ...
 
+Directory plan:
+- New folders:
+- New files:
+- Moved files:
+- New namespaces:
+
 Non-goals:
 - ...
 
@@ -124,6 +130,7 @@ Diff summary:
 Tests/commands:
 CI:
 Docs build:
+Structure check:
 Docs/status updated:
 Gate statement (no Blocker/Major remains, or the exact exceptions being waived):
 Approval requested for:
@@ -302,8 +309,8 @@ The step agent's self-check is not the independent audit.
 
 Before merging a completed step:
 
-1. Finish the closeout feature, run `./tools/verify.sh all`, and dispatch the single closeout CI run on the
-   step branch (Ubuntu, path-filtered).
+1. Finish the closeout feature, run `./tools/verify.sh all` (including the code-structure test), and dispatch
+   the single closeout CI run on the step branch (Ubuntu, path-filtered).
 2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, closeout CI run, scope,
    and known limitations; set its status to `Ready for audit`.
 3. Freeze the step branch at the audited commit.

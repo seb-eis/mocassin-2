@@ -2,7 +2,7 @@
 
 using Mocassin.Core.Geometry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Geometry;
 
 /// <summary>
 /// One periodic image found by a radial search.

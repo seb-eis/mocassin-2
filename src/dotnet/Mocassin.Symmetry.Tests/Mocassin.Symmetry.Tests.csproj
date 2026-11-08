@@ -21,6 +21,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="Mocassin.Symmetry.Caching" />
+    <Using Include="Mocassin.Symmetry.Contracts" />
+    <Using Include="Mocassin.Symmetry.Diagnostics" />
+    <Using Include="Mocassin.Symmetry.Geometry" />
+    <Using Include="Mocassin.Symmetry.Reduction" />
+    <Using Include="Mocassin.Symmetry.SpaceGroups" />
     <Using Include="Xunit" />
   </ItemGroup>
 

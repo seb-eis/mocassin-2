@@ -15,6 +15,7 @@ Usage: tools/verify.sh [mode]
 Modes:
   all        Run every check below (default; use before closeout)
   dotnet     Restore, build, test, and format the .NET solution
+  structure  Run only the code-structure policy test
   rust       Format, clippy, and test the Rust workspace
   python     Test and build the Python package
   docs       Strict documentation build, DocFX, and Rust docs
@@ -31,6 +32,11 @@ run_dotnet() {
   dotnet build Mocassin.slnx -c Release --no-restore
   dotnet test Mocassin.slnx -c Release --no-build
   dotnet format Mocassin.slnx --verify-no-changes --no-restore
+}
+
+run_structure() {
+  echo "== Structure =="
+  dotnet test src/dotnet/Mocassin.Architecture.Tests/Mocassin.Architecture.Tests.csproj -c Release
 }
 
 run_rust() {
@@ -79,6 +85,7 @@ case "$mode" in
     run_contracts
     ;;
   dotnet) run_dotnet ;;
+  structure) run_structure ;;
   rust) run_rust ;;
   python) run_python ;;
   docs) run_docs ;;

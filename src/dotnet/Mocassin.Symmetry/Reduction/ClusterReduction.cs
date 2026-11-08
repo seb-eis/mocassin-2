@@ -3,8 +3,9 @@
 using System.Collections.Immutable;
 using System.Globalization;
 using Mocassin.Core.Geometry;
+using Mocassin.Symmetry.SpaceGroups;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Reduction;
 
 /// <summary>
 /// One equivalent occupation tuple in a cluster's expansion map.

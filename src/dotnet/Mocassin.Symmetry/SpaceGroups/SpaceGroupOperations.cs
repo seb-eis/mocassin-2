@@ -2,8 +2,10 @@
 
 using System.Collections.Immutable;
 using Mocassin.Core.Geometry;
+using Mocassin.Symmetry.Geometry;
+using Mocassin.Symmetry.Reduction;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.SpaceGroups;
 
 /// <summary>
 /// Exact orbit operations on a resolved space-group setting.

@@ -4,7 +4,7 @@ using System.Collections.Frozen;
 using System.Collections.Immutable;
 using Mocassin.Core.Symmetry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.SpaceGroups;
 
 /// <summary>
 /// An immutable, process-wide space-group catalog.

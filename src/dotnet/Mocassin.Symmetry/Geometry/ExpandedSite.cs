@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-using System.Collections.Immutable;
 using Mocassin.Core.Geometry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Geometry;
 
 /// <summary>
 /// One canonical P1 position produced by symmetry expansion.

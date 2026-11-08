@@ -12,9 +12,9 @@ orbit/permutation reduction, and periodic geometry kernels.
 - **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) at `09a3317`; [main CI green](https://github.com/seb-eis/mocassin-2/actions/runs/42478570935) at `dbf5691`
 - **Main merge:** `dbf5691` — `--no-ff` merge
 - **Step tag:** `step-02` pushed
-- **Audit:** Passed with notes at `6341b56` (layout-only refactor re-audited)
+- **Audit:** Passed with notes at `6341b56` (layout-only refactor re-audited); post-development namespace notice appended 2026-11-08
 - **Design review:** Ready with notes — accepted by the human owner on 2026-11-07
-- **Last updated:** 2026-11-07
+- **Last updated:** 2026-11-08
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -47,8 +47,15 @@ orbit/permutation reduction, and periodic geometry kernels.
 - Amendment 1 adds the public generic math layer and migrates `CellGeometry` to `Matrix3<double>`.
 - Amendment 2 adds KaTeX 0.19.1 rendering and converts the published symmetry formulas.
 - Combined audited solution commit: `d6eac6f`; audit-fix solution: `cfc419f`; final CI-policy sync: `09a3317`.
-- The Symmetry assembly was reorganized into logical folders after the passed audit; namespaces and behavior
-  are unchanged, but the audit must cover the new commit.
+- The Symmetry assembly was reorganized into logical folders after the passed audit. The folder-only move
+  initially kept the parent namespace; a later post-development maintenance update aligned the namespaces with
+  the folders (see below). Behavior is unchanged.
+- **Post-development maintenance update (2026-11-08):** the `Mocassin.Symmetry` namespaces were aligned with
+  their folders — `Caching`, `Contracts`, `Diagnostics`, `Geometry`, `Reduction`, and `SpaceGroups`. This is an
+  intentional public API break accepted by the human owner because the project has no external consumers yet.
+  Behavior, catalog data, formats, and compiled payloads are unchanged. The `step-02` tag remains at `dbf5691`;
+  the change is a post-step maintenance update on `fix/code-structure-policy`, merged to `main` separately. See
+  `docs/development/code-structure.md`.
 
 ## Goal
 

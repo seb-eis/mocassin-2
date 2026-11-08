@@ -1,0 +1,64 @@
+{
+  "sourceRootFilePatterns": [
+    "AssemblyInfo.cs",
+    "GlobalUsings.cs",
+    "Usings.cs",
+    "*Module.cs",
+    "Program.cs",
+    "App.axaml.cs",
+    "ViewLocator.cs"
+  ],
+  "testRootFilePatterns": [
+    "AssemblyInfo.cs",
+    "GlobalUsings.cs",
+    "Usings.cs",
+    "RepositoryPaths.cs",
+    "TestSupport.cs",
+    "*Tests.cs"
+  ],
+  "noNamespaceFiles": [
+    "AssemblyInfo.cs",
+    "GlobalUsings.cs",
+    "Usings.cs",
+    "Program.cs"
+  ],
+  "noTypeFiles": [
+    "AssemblyInfo.cs",
+    "GlobalUsings.cs",
+    "Usings.cs",
+    "Program.cs"
+  ],
+  "forbiddenFolders": [
+    "Utils",
+    "Utilities",
+    "Helpers",
+    "Common",
+    "Shared",
+    "Misc",
+    "Models",
+    "Interfaces",
+    "Implementations",
+    "Abstractions",
+    "Extensions"
+  ],
+  "nestedOnlyFolders": [
+    "Internal"
+  ],
+  "allowedMultiTypeSuffixes": [
+    "Dtos",
+    "Ids",
+    "Values",
+    "Templates",
+    "Extensions",
+    "Options",
+    "Constants",
+    "Events",
+    "Results",
+    "Tests"
+  ],
+  "testRootFileLimit": 20,
+  "maxFilesPerFolder": 20,
+  "maxDepth": 4,
+  "maxFileLines": 800,
+  "allowedFolders": {}
+}

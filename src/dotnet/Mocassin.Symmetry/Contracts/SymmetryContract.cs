@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Contracts;
 
 /// <summary>
 /// Version constants that define the symmetry contract recorded in compiled packages.

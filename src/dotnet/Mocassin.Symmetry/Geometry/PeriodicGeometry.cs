@@ -1,10 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
-using System.Globalization;
 using Mocassin.Core.Geometry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Geometry;
 
 /// <summary>
 /// Periodic minimum-image, radial-search, and box-query operations over a cell and its canonical P1 positions.

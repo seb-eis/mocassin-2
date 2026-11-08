@@ -2,13 +2,14 @@
 
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Numerics;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Model;
 using Mocassin.Core.Symmetry;
+using Mocassin.Symmetry.SpaceGroups;
 
-namespace Mocassin.Symmetry;
+using Mocassin.Symmetry.Diagnostics;
+namespace Mocassin.Symmetry.Geometry;
 
 /// <summary>
 /// The validated continuous geometry of a crystallographic unit cell.

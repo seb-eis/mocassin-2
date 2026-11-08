@@ -2,8 +2,10 @@
 
 using System.Collections.Immutable;
 using Mocassin.Core.Geometry;
+using Mocassin.Symmetry.Geometry;
+using Mocassin.Symmetry.SpaceGroups;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Reduction;
 
 /// <summary>
 /// One symmetry-reduced pair shell around a center position.

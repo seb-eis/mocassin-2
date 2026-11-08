@@ -2,7 +2,7 @@
 
 using Mocassin.Core.Geometry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Geometry;
 
 /// <summary>
 /// The shortest periodic image of a target position relative to a center.

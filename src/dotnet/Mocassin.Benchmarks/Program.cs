@@ -5,7 +5,8 @@ using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Symmetry;
-using Mocassin.Symmetry;
+using Mocassin.Symmetry.Geometry;
+using Mocassin.Symmetry.SpaceGroups;
 
 namespace Mocassin.Benchmarks;
 
