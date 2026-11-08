@@ -506,25 +506,74 @@ verdict.
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
+- [x] Final CI and documentation-build results recorded
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| Design review 1 | 2026-11-08 | `1beb8da` | Independent planning auditor (fresh context) | Changes required |
+| Design review 2 | 2026-11-08 | `3096aa8` | Independent planning auditor (fresh context) | Ready with notes |
+| Design notes accepted | 2026-11-08 | `a299046` | Human owner | Accepted |
+| Audit round 1 | 2026-11-08 | `5a06d67` | Fresh out-of-context audit agent | Fixes required |
+| Audit round 2 | 2026-11-08 | `b6a97ec` | Fresh out-of-context re-audit agent | Passed with notes |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M1 | Major | Symmetry metadata had no Core model/JSON mapping | Envelope metadata, `Project.Symmetry`, hash split | `a299046` / `7c4e748` | Closed |
+| M2 | Major | Composed validation not wired into the loader | `ProjectStore.LoadBytesCore` uses `ProjectValidationService` | `a299046` / `18940a1` | Closed |
+| M3 | Major | `STR007` overlap lacked a structured site path | `StructureSiteReference` and `OrbitOverlap` encoder overload | `a299046` / `67e39e1` | Closed |
+| M4 | Major | Performance criterion was unmeasurable | Preview benchmark, fixture, baseline, tier | `a299046` / `67e39e1` | Closed |
+| M5 | Major | Index-cap rejection had no diagnostic code | Added `STR014` | `a299046` / `67e39e1` | Closed |
+| M6 | Major | `STR008` was unreachable | Removed and documented as unused | `a299046` | Closed |
+| m1 | Minor | `STR011` redundant/undefined | Removed and documented | `a299046` | Closed |
+| m2 | Minor | Reserved-ID reuse had no code | Added `PAR010` | `a299046` | Closed |
+| m3 | Minor | Void-index test belonged to Step 08 | Replaced with reserved-ID/`Find` contract | `a299046` | Closed |
+| m4 | Minor | Particle-set order wording contradictory | Distinguished array order from `ParticleIds` order | `a299046` | Closed |
+| m5 | Minor | Test matrix omissions | Added the missing `PAR`/`STR` rows | `a299046` | Closed |
+| m6 | Minor | Set/dummy names and duplicate members unvalidated | Added `PAR011`, `PAR012`, `STR015` | `a299046` | Closed |
+| m7 | Minor | `particleIds` missing from semantic-order list | Updated project-format documentation | `a299046` | Closed |
+| m8 | Minor | Preview cache hash/version seam undefined | Added `ComputeStructure` and version injection | `a299046` / `7c4e748` | Closed |
+| n1 | Note | Structure default provenance | Recorded deliberate `New Structure` default | `a299046` | Closed |
+| n2 | Note | Core diagnostic class naming | Renamed to `CoreStructureDiagnosticCodes` | `a299046` | Closed |
+| n3 | Note | SPDX/licensing task missing | Added implementation task | `a299046` | Closed |
+| R2-1 | Minor | Benchmark file at project root | Moved under `Mocassin.Benchmarks/Structure/` | `a299046` / `67e39e1` | Closed |
+| R2-2 | Minor | Benchmark tier/perf table | Nightly/release tier and target documented | `a299046` / `67e39e1` | Closed |
+| R2-3 | Minor | Hash documentation incomplete | Public `ComputeStructure` and three-hash docs | `a299046` / `7c4e748` | Closed |
+| R2-4 | Note | Risk wording | “Every used code” wording | `a299046` | Closed |
+| R2-5 | Note | `PROJ034` constant location | Added to `ProjectDiagnosticCodes` | `a299046` / `7c4e748` | Closed |
+| R2-6 | Note | `OrbitOverlap` naming | Record renamed; diagnostic constant unchanged | `a299046` / `67e39e1` | Closed |
+| F1 | Major | Non-finite dummy preview threw | `STR010` and no preview; regression test | `b6a97ec` | Closed |
+| F2 | Minor | Default `ParticleIds` validation threw | `init` normalization, validator guard, `PAR005` tests | `b6a97ec` | Closed |
+| F3 | Minor | Documentation/status drift | Corrected step page, status dashboard, project format | `b6a97ec` | Closed |
+| F4 | Minor | Missing random model round-trip property | Added `ModelPropertyTests` | `b6a97ec` | Closed |
+| F5 | Minor | BZO benchmark omitted H interstitial | Fixture now 17 P1 / `[1,1,3,12]`; baseline regenerated | `b6a97ec` | Closed |
+| F6 | Note | Runner-class evidence label | `evidenceStatus` added; local evidence explicit; manual re-verification | `b6a97ec` | Accepted note |
+
+**Accepted notes and waivers.** Design review “Ready with notes” was accepted at `3096aa8`; the round-2 note
+resolutions were accepted at `a299046`. Audit Note F6 is accepted: the structure-preview baseline is labelled
+local-container evidence and the declared GitHub runner class is re-verified through the manual Benchmark CI
+job on release candidates. The target margin is very large.
+
+**Residual risks.** F6 runner-class evidence remains local until a release-candidate manual benchmark run.
+Windows/macOS CI is not run because Step 03 has no platform-specific code, accepted under the Ubuntu-only
+policy. Sample P-order goldens depend on the proton offset and `symmetry-1` canonical order. The ceria
+transition site shares the oxygen set; transition-state occupation belongs to Step 04. BZO remains
+structural only. CLI/UI diagnostic exposure is verified in Steps 07/12 and 24. The proton offset is
+representative geometry, not a fitted parameter. `TryCreatePreview` uses `structureModel` for CA1716.
+
+**Gate statement.** No Blocker or Major finding remains unclosed. The only remaining item is accepted
+Note F6. Final CI: closeout run [`42514332091`](https://github.com/seb-eis/mocassin-2/actions/runs/42514332091)
+green at `b6a97ec`; local `./tools/verify.sh all` and the strict documentation, DocFX, rustdoc, contract,
+catalogue, API, licence, vulnerability, secret, structure, Rust, and Python gates pass.
 
 ## Human approval
 
