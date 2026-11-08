@@ -3,7 +3,7 @@
 using System.Collections.Immutable;
 using Mocassin.Core.Symmetry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.SpaceGroups;
 
 /// <summary>
 /// One resolved space-group setting from the embedded catalog.

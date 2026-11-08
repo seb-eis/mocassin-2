@@ -4,8 +4,9 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Runtime.CompilerServices;
 using Mocassin.Core.Geometry;
+using Mocassin.Symmetry.Geometry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.SpaceGroups;
 
 /// <summary>
 /// An exact crystallographic symmetry operation <c>x ↦ R·x + t</c>.

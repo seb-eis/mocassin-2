@@ -686,8 +686,8 @@ approval-report, and diff-review templates.
   the file count.
 - File names match the primary type or a permitted concept file (`*Dtos.cs`, `*Ids.cs`, `*Values.cs`,
   `*Templates.cs`, `*Extensions.cs`, and the other suffixes in `tools/structure-policy.json`).
-- New files use the namespace that matches their folder. Step 02 files in `Mocassin.Symmetry` keep the parent
-  namespace through `namespaceBaseline` in `tools/structure-policy.json`; do not add new baseline entries.
+- Files use the namespace that matches their folder. Step 02's `Mocassin.Symmetry` namespaces were aligned in a
+  post-step maintenance update; there is no namespace baseline.
 - Test projects may keep up to 20 files at the root; new tests still belong in the folder matching the code
   under test once folders exist.
 - The policy is enforced by `Mocassin.Architecture.Tests` and `tools/verify.sh structure`. See

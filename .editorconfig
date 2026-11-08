@@ -64,7 +64,7 @@ dotnet_naming_style.camel_case.capitalization = camel_case
 
 # Structure and style
 dotnet_diagnostic.IDE0005.severity = warning
-dotnet_diagnostic.IDE0130.severity = warning
+dotnet_diagnostic.IDE0130.severity = error
 dotnet_diagnostic.IDE0161.severity = error
 
 # Analyzer severities
@@ -82,11 +82,6 @@ dotnet_diagnostic.CA2007.severity = none
 dotnet_diagnostic.CA2201.severity = warning
 dotnet_diagnostic.CA2211.severity = warning
 dotnet_diagnostic.CS1591.severity = warning
-
-# Step 02 keeps the parent namespace for its existing subfolders. New files are
-# enforced by Mocassin.Architecture.Tests through the namespace baseline.
-[src/dotnet/Mocassin.Symmetry/**/*.cs]
-dotnet_diagnostic.IDE0130.severity = none
 
 # Test projects
 [**/*.Tests/*.cs]

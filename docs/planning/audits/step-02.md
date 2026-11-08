@@ -831,3 +831,36 @@ hardening, pending manual runner-class benchmark, and the Step 11 `.msl` symmetr
 
 The closeout CI run on the final step branch was
 [42478356751](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) at `09a3317` — green.
+
+## Post-development maintenance notice
+
+Date: 2026-11-08
+
+Owner: Human owner / implementor
+
+Status: Accepted post-step maintenance. The Step 02 verdict remains **Passed with notes**; this notice records a
+later maintenance change and does not reopen the audit.
+
+After the `step-02` tag, the human owner accepted a code-structure maintenance update that changes the
+`Mocassin.Symmetry` public namespaces to match the folder structure:
+
+- `Mocassin.Symmetry.Caching`
+- `Mocassin.Symmetry.Contracts`
+- `Mocassin.Symmetry.Diagnostics`
+- `Mocassin.Symmetry.Geometry`
+- `Mocassin.Symmetry.Reduction`
+- `Mocassin.Symmetry.SpaceGroups`
+
+Reason: the new code-structure policy requires folder/namespace alignment and forbids root-level or catch-all
+folders. The folder-only refactor at `6341b56` kept the parent namespace; this maintenance update completes the
+alignment.
+
+Impact: intentional public API break. The project has no external consumers yet. Behavior, catalog data,
+formats, and compiled payloads are unchanged.
+
+Tag: `step-02` remains at `dbf5691`. The maintenance update is on `fix/code-structure-policy`, merged to
+`main` after the tag, and is not part of the tagged commit.
+
+Validation: `./tools/verify.sh dotnet` including the architecture/structure test, `./tools/verify.sh contracts`,
+`zensical build --strict`, and the main CI run for the maintenance merge. The Step 02 page carries the same
+notice.

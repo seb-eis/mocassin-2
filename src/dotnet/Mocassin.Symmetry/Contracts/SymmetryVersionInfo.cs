@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-namespace Mocassin.Symmetry;
+using Mocassin.Symmetry.SpaceGroups;
+
+namespace Mocassin.Symmetry.Contracts;
 
 /// <summary>
 /// The symmetry versions recorded by the compiled package.

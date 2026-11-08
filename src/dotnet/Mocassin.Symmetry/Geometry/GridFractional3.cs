@@ -5,7 +5,8 @@ using System.Runtime.CompilerServices;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Geometry;
 
-namespace Mocassin.Symmetry;
+using Mocassin.Symmetry.Diagnostics;
+namespace Mocassin.Symmetry.Geometry;
 
 /// <summary>
 /// An exact fractional point scaled by the symmetry grid denominator.

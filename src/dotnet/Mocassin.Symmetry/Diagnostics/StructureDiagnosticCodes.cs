@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Diagnostics;
 
 /// <summary>
 /// Structured diagnostic codes emitted by symmetry-side structure validation.

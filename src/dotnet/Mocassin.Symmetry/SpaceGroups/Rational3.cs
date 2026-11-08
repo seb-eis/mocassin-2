@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Runtime.CompilerServices;
 using Mocassin.Core.Geometry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.SpaceGroups;
 
 /// <summary>
 /// An exact crystallographic translation with a fixed denominator of 24, normalized to <c>[0, 1)</c>.

@@ -32,7 +32,6 @@ internal static class StructureChecker
             CheckProject(projectFile, policy, repositoryRoot, violations);
         }
 
-        CheckNamespaceBaseline(repositoryRoot, policy, violations);
         return violations;
     }
 
@@ -194,13 +193,8 @@ internal static class StructureChecker
         }
         else if (!string.Equals(declaredNamespace, expectedNamespace, StringComparison.Ordinal))
         {
-            var baselineAllows = policy.NamespaceBaseline.Contains(relativePath, StringComparer.Ordinal)
-                && string.Equals(declaredNamespace, rootNamespace, StringComparison.Ordinal);
-            if (!baselineAllows)
-            {
-                violations.Add(
-                    $"{relativePath}: namespace '{declaredNamespace}' does not match the folder; expected '{expectedNamespace}'. Move the file or fix the namespace.");
-            }
+            violations.Add(
+                $"{relativePath}: namespace '{declaredNamespace}' does not match the folder; expected '{expectedNamespace}'. Move the file or fix the namespace.");
         }
 
         var typeNames = root.DescendantNodes()
@@ -246,70 +240,6 @@ internal static class StructureChecker
             violations.Add(
                 $"{relativePath}: multiple top-level types require a file named after one of them or a concept file name ending in one of: {string.Join(", ", policy.AllowedMultiTypeSuffixes)}.");
         }
-    }
-
-    private static void CheckNamespaceBaseline(
-        string repositoryRoot,
-        StructurePolicy policy,
-        List<string> violations)
-    {
-        foreach (var entry in policy.NamespaceBaseline)
-        {
-            var file = Path.Combine(repositoryRoot, entry.Replace('/', Path.DirectorySeparatorChar));
-            if (!File.Exists(file))
-            {
-                violations.Add($"{entry}: namespace baseline entry refers to a missing file; remove it.");
-                continue;
-            }
-
-            var projectDirectory = FindProjectDirectory(Path.GetDirectoryName(file)!);
-            var projectFile = projectDirectory is null
-                ? null
-                : Directory.EnumerateFiles(projectDirectory, "*.csproj", SearchOption.TopDirectoryOnly)
-                    .FirstOrDefault();
-            if (projectDirectory is null || projectFile is null)
-            {
-                violations.Add($"{entry}: namespace baseline entry is not under a .NET project; remove it.");
-                continue;
-            }
-
-            var rootNamespace = ReadElement(projectFile, "RootNamespace")
-                ?? Path.GetFileNameWithoutExtension(projectFile);
-            var relative = Path.GetRelativePath(projectDirectory, file);
-            var folder = Path.GetDirectoryName(relative);
-            var segments = string.IsNullOrEmpty(folder)
-                ? []
-                : folder.Split(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-            var expectedNamespace = string.Join('.', new[] { rootNamespace }.Concat(segments));
-            var root = CSharpSyntaxTree.ParseText(File.ReadAllText(file), path: file).GetRoot();
-            var declaredNamespace = GetDeclaredNamespace(root);
-
-            if (string.Equals(declaredNamespace, expectedNamespace, StringComparison.Ordinal))
-            {
-                violations.Add($"{entry}: namespace baseline entry is no longer needed; remove it.");
-            }
-            else if (!string.Equals(declaredNamespace, rootNamespace, StringComparison.Ordinal))
-            {
-                violations.Add(
-                    $"{entry}: namespace baseline may only cover files that keep the project root namespace; fix the namespace or remove the entry.");
-            }
-        }
-    }
-
-    private static string? FindProjectDirectory(string directory)
-    {
-        var current = new DirectoryInfo(directory);
-        while (current is not null)
-        {
-            if (current.EnumerateFiles("*.csproj", SearchOption.TopDirectoryOnly).Any())
-            {
-                return current.FullName;
-            }
-
-            current = current.Parent;
-        }
-
-        return null;
     }
 
     private static string? GetDeclaredNamespace(SyntaxNode root) =>

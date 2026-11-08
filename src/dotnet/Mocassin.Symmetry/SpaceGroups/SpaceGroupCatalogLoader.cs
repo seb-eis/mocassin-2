@@ -7,7 +7,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using Mocassin.Core.Symmetry;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.SpaceGroups;
 
 /// <summary>
 /// Loads and validates the embedded space-group catalog.

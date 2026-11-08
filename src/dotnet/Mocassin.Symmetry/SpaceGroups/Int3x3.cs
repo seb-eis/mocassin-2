@@ -3,7 +3,7 @@
 using System.Globalization;
 using System.Runtime.CompilerServices;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.SpaceGroups;
 
 /// <summary>
 /// An exact 3×3 integer matrix used for the linear part of a crystallographic symmetry operation.

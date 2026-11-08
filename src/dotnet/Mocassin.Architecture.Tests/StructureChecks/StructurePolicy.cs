@@ -22,8 +22,6 @@ internal sealed record StructurePolicy
 
     public Dictionary<string, string[]> AllowedFolders { get; init; } = [];
 
-    public string[] NamespaceBaseline { get; init; } = [];
-
     public int TestRootFileLimit { get; init; } = 20;
 
     public int MaxFilesPerFolder { get; init; } = 20;

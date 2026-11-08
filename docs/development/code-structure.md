@@ -19,7 +19,7 @@ namespace, and file name tell the same story.
 | Test project root has at most **20 `.cs` files** | Structure test |
 | At most **800 lines per file** | Structure test |
 | No `#region` as a filing system | Structure test |
-| New files use the namespace that matches their folder | Structure test + namespace baseline |
+| New and existing files use the namespace that matches their folder | `IDE0130` error + structure test |
 | File-scoped namespaces | `IDE0161` error + `dotnet format` |
 | No unused using directives | `IDE0005` + `dotnet format` |
 
@@ -112,27 +112,23 @@ Record the reason in this page. Exceptions should be rare.
 
 Do not use `#region` to simulate folders. Split the file instead.
 
-## 5. Namespaces and the Step 02 baseline
+## 5. Namespaces
 
-New files use namespaces that match their folder:
+New and existing files use namespaces that match their folder:
 
 ```text
 Mocassin.Symmetry/Geometry/CellGeometry.cs  ->  Mocassin.Symmetry.Geometry
 Mocassin.Core/Project/Project.cs            ->  Mocassin.Core.Project
 ```
 
-Step 02 moved existing files into subfolders but intentionally kept the parent namespace `Mocassin.Symmetry`
-to avoid a public API break. Those files are listed in `namespaceBaseline` in
-[`tools/structure-policy.json`](https://github.com/seb-eis/mocassin-2/blob/main/tools/structure-policy.json).
+Step 02 was completed and tagged before this policy existed. A post-step maintenance update aligned the
+`Mocassin.Symmetry` namespaces with its folders — `Caching`, `Contracts`, `Diagnostics`, `Geometry`,
+`Reduction`, and `SpaceGroups`. This accepted a public API break because the project has no external consumers
+yet.
 
-Rules for the baseline:
-
-- **Do not add new entries.** New files must use the folder namespace.
-- When a file is moved or its namespace is fixed, remove it from the baseline. The structure test rejects stale
-  entries, so the list can only shrink.
-- `IDE0130` stays a warning globally and is disabled for `Mocassin.Symmetry`; the structure test enforces the
-  baseline and catches new mismatches.
-- A future cleanup may move the whole assembly namespace, but that is an amendment, not a feature side effect.
+The `step-02` tag remains on the original commit. The maintenance update is recorded on `main`, in the Step 02
+page, and in the Step 02 audit record. There is no namespace baseline: `IDE0130` is an error and the structure
+test enforces the folder namespace for every file.
 
 ## 6. Test projects
 
@@ -152,7 +148,7 @@ Rules for the baseline:
 - file-scoped namespaces as errors;
 - `IDE0161` as an error;
 - `IDE0005` unused usings as a warning;
-- `IDE0130` namespace/folder mismatch as a warning, suppressed for the Step 02 baseline project.
+- `IDE0130` namespace/folder mismatch as an error.
 
 `dotnet format --verify-no-changes` is already part of `tools/verify.sh dotnet` and CI. It now fails on
 namespace style, unused usings, and formatting.
@@ -206,7 +202,6 @@ without breaking partial classes or case-sensitive paths.
 | More than 20 files in a folder | Split into sub-concepts, not by type kind |
 | `Helpers/` or `Utils/` folder | Move each file to the concept it supports and rename it |
 | Namespace does not match folder | Prefer moving the file if the concept is clear; otherwise fix the namespace |
-| New entry in `namespaceBaseline` | Not allowed; use the folder namespace |
 | Folder depth 5 | Flatten or split the intermediate concept |
 | File over 800 lines | Extract collaborators into the same concept folder |
 | `#region` used as a filing system | Split the file or extract a type |

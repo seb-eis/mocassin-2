@@ -3,7 +3,7 @@
 using System.Collections.Immutable;
 using System.Globalization;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Reduction;
 
 /// <summary>
 /// An immutable permutation of site indices.

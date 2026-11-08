@@ -79,9 +79,9 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 ## Active work
 
-Step 02 — Symmetry and Geometry is active on `step/02-symmetry-and-geometry`. The approved feature list has
-all planned features and both amendments are integrated; the independent re-audit passed with non-blocking notes. The step is awaiting explicit human-owner approval for the `--no-ff` merge into `main` and the `step-02` tag. Step 01 is complete: merge `7b4a994`, tag `step-01`, and
-main CI `41929788253` green on Ubuntu + Windows + macOS.
+No step is active. Step 02 is complete: merge `dbf5691`, tag `step-02`, and main CI `42478570935` green.
+Step 03 — Particle and Structure Models is the next unblocked step. A post-development maintenance update
+aligned the `Mocassin.Symmetry` namespaces with its folders; see Notes.
 
 ## Notes
 
@@ -92,4 +92,6 @@ main CI `41929788253` green on Ubuntu + Windows + macOS.
 - A step is not `Done` until its acceptance criteria, tests, documentation, and parity entries pass.
 - Status updates should ride in feature branches or the closeout feature; avoid status-only commits. CI runs
   only at closeout and on `main`.
+- Step 02 received a post-development maintenance update on 2026-11-08: `Mocassin.Symmetry` namespaces were
+  aligned with their folders; the public API break is accepted; the `step-02` tag remains at `dbf5691`.
 - Tag names record completed checkpoints; they do not replace this dashboard.

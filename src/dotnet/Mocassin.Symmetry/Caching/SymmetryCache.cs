@@ -4,8 +4,10 @@ using System.Collections.Immutable;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using Mocassin.Symmetry.Geometry;
+using Mocassin.Symmetry.SpaceGroups;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Caching;
 
 /// <summary>
 /// A bounded, per-compilation cache for symmetry work.

@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
+using Mocassin.Symmetry.SpaceGroups;
 
-namespace Mocassin.Symmetry;
+namespace Mocassin.Symmetry.Reduction;
 
 /// <summary>
 /// The exact point-group decomposition for a center site and an ordered geometry sequence.
