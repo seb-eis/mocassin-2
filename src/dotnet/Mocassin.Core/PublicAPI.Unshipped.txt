@@ -1068,3 +1068,103 @@ static Mocassin.Core.Model.Particles.ParticleModel.operator ==(Mocassin.Core.Mod
 static Mocassin.Core.Model.Particles.ParticleSet.Empty.get -> Mocassin.Core.Model.Particles.ParticleSet!
 static Mocassin.Core.Model.Particles.ParticleSet.operator !=(Mocassin.Core.Model.Particles.ParticleSet? left, Mocassin.Core.Model.Particles.ParticleSet? right) -> bool
 static Mocassin.Core.Model.Particles.ParticleSet.operator ==(Mocassin.Core.Model.Particles.ParticleSet? left, Mocassin.Core.Model.Particles.ParticleSet? right) -> bool
+Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes
+Mocassin.Core.Ids.CellDummyPositionId
+Mocassin.Core.Ids.CellDummyPositionId.CellDummyPositionId() -> void
+Mocassin.Core.Ids.CellDummyPositionId.CellDummyPositionId(System.Guid Value) -> void
+Mocassin.Core.Ids.CellDummyPositionId.Deconstruct(out System.Guid Value) -> void
+Mocassin.Core.Ids.CellDummyPositionId.Equals(Mocassin.Core.Ids.CellDummyPositionId other) -> bool
+Mocassin.Core.Ids.CellDummyPositionId.Value.get -> System.Guid
+Mocassin.Core.Ids.CellDummyPositionId.Value.init -> void
+Mocassin.Core.Model.Structure.CellDummyPosition
+Mocassin.Core.Model.Structure.CellDummyPosition.<Clone>$() -> Mocassin.Core.Model.Structure.CellDummyPosition!
+Mocassin.Core.Model.Structure.CellDummyPosition.CellDummyPosition(Mocassin.Core.Ids.CellDummyPositionId Id, string! Name, Mocassin.Core.Geometry.Fractional3 Fractional) -> void
+Mocassin.Core.Model.Structure.CellDummyPosition.Deconstruct(out Mocassin.Core.Ids.CellDummyPositionId Id, out string! Name, out Mocassin.Core.Geometry.Fractional3 Fractional) -> void
+Mocassin.Core.Model.Structure.CellDummyPosition.Equals(Mocassin.Core.Model.Structure.CellDummyPosition? other) -> bool
+Mocassin.Core.Model.Structure.CellDummyPosition.Fractional.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Model.Structure.CellDummyPosition.Fractional.init -> void
+Mocassin.Core.Model.Structure.CellDummyPosition.Id.get -> Mocassin.Core.Ids.CellDummyPositionId
+Mocassin.Core.Model.Structure.CellDummyPosition.Id.init -> void
+Mocassin.Core.Model.Structure.CellDummyPosition.Name.get -> string!
+Mocassin.Core.Model.Structure.CellDummyPosition.Name.init -> void
+Mocassin.Core.Model.Structure.CellSite
+Mocassin.Core.Model.Structure.CellSite.<Clone>$() -> Mocassin.Core.Model.Structure.CellSite!
+Mocassin.Core.Model.Structure.CellSite.CellSite(Mocassin.Core.Ids.CellSiteId Id, string! Name, Mocassin.Core.Geometry.Fractional3 Fractional, Mocassin.Core.Ids.ParticleSetId ParticleSetId, Mocassin.Core.Model.Structure.SiteStability Stability) -> void
+Mocassin.Core.Model.Structure.CellSite.Deconstruct(out Mocassin.Core.Ids.CellSiteId Id, out string! Name, out Mocassin.Core.Geometry.Fractional3 Fractional, out Mocassin.Core.Ids.ParticleSetId ParticleSetId, out Mocassin.Core.Model.Structure.SiteStability Stability) -> void
+Mocassin.Core.Model.Structure.CellSite.Equals(Mocassin.Core.Model.Structure.CellSite? other) -> bool
+Mocassin.Core.Model.Structure.CellSite.Fractional.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Model.Structure.CellSite.Fractional.init -> void
+Mocassin.Core.Model.Structure.CellSite.Id.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Structure.CellSite.Id.init -> void
+Mocassin.Core.Model.Structure.CellSite.Name.get -> string!
+Mocassin.Core.Model.Structure.CellSite.Name.init -> void
+Mocassin.Core.Model.Structure.CellSite.ParticleSetId.get -> Mocassin.Core.Ids.ParticleSetId
+Mocassin.Core.Model.Structure.CellSite.ParticleSetId.init -> void
+Mocassin.Core.Model.Structure.CellSite.Stability.get -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Structure.CellSite.Stability.init -> void
+Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Structure.SiteStability.Stable = 0 -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Structure.SiteStability.Unstable = 1 -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Structure.SpaceGroupRef
+Mocassin.Core.Model.Structure.SpaceGroupRef.<Clone>$() -> Mocassin.Core.Model.Structure.SpaceGroupRef!
+Mocassin.Core.Model.Structure.SpaceGroupRef.Axis.get -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Model.Structure.SpaceGroupRef.Axis.init -> void
+Mocassin.Core.Model.Structure.SpaceGroupRef.Deconstruct(out int Number, out Mocassin.Core.Symmetry.AxisSetting Axis, out Mocassin.Core.Symmetry.OriginChoice Origin) -> void
+Mocassin.Core.Model.Structure.SpaceGroupRef.Equals(Mocassin.Core.Model.Structure.SpaceGroupRef? other) -> bool
+Mocassin.Core.Model.Structure.SpaceGroupRef.Number.get -> int
+Mocassin.Core.Model.Structure.SpaceGroupRef.Number.init -> void
+Mocassin.Core.Model.Structure.SpaceGroupRef.Origin.get -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Model.Structure.SpaceGroupRef.Origin.init -> void
+Mocassin.Core.Model.Structure.SpaceGroupRef.SpaceGroupRef(int Number, Mocassin.Core.Symmetry.AxisSetting Axis, Mocassin.Core.Symmetry.OriginChoice Origin) -> void
+Mocassin.Core.Model.Structure.StructureModel
+Mocassin.Core.Model.Structure.StructureModel.<Clone>$() -> Mocassin.Core.Model.Structure.StructureModel!
+Mocassin.Core.Model.Structure.StructureModel.Cell.get -> Mocassin.Core.Model.CellParameters!
+Mocassin.Core.Model.Structure.StructureModel.Cell.init -> void
+Mocassin.Core.Model.Structure.StructureModel.Deconstruct(out string! Name, out Mocassin.Core.Model.Structure.SpaceGroupRef! SpaceGroup, out Mocassin.Core.Model.CellParameters! Cell, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellSite!> Sites, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellDummyPosition!> DummyPositions) -> void
+Mocassin.Core.Model.Structure.StructureModel.DummyPositions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellDummyPosition!>
+Mocassin.Core.Model.Structure.StructureModel.DummyPositions.init -> void
+Mocassin.Core.Model.Structure.StructureModel.Equals(Mocassin.Core.Model.Structure.StructureModel? other) -> bool
+Mocassin.Core.Model.Structure.StructureModel.Name.get -> string!
+Mocassin.Core.Model.Structure.StructureModel.Name.init -> void
+Mocassin.Core.Model.Structure.StructureModel.Sites.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellSite!>
+Mocassin.Core.Model.Structure.StructureModel.Sites.init -> void
+Mocassin.Core.Model.Structure.StructureModel.SpaceGroup.get -> Mocassin.Core.Model.Structure.SpaceGroupRef!
+Mocassin.Core.Model.Structure.StructureModel.SpaceGroup.init -> void
+Mocassin.Core.Model.Structure.StructureModel.StructureModel(string! Name, Mocassin.Core.Model.Structure.SpaceGroupRef! SpaceGroup, Mocassin.Core.Model.CellParameters! Cell, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellSite!> Sites, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellDummyPosition!> DummyPositions) -> void
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidDummyName = "STR015" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidDummyPosition = "STR010" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidSiteName = "STR005" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidSitePosition = "STR004" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidStructureName = "STR013" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.MissingParticleSet = "STR006" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.SiteLimitExceeded = "STR012" -> string!
+const Mocassin.Core.Model.Structure.StructureModel.DefaultName = "New Structure" -> string!
+const Mocassin.Core.Model.Structure.StructureModel.MaxReferenceSites = 1000 -> int
+override Mocassin.Core.Ids.CellDummyPositionId.GetHashCode() -> int
+override Mocassin.Core.Ids.CellDummyPositionId.ToString() -> string!
+override Mocassin.Core.Model.Structure.CellDummyPosition.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Structure.CellDummyPosition.GetHashCode() -> int
+override Mocassin.Core.Model.Structure.CellDummyPosition.ToString() -> string!
+override Mocassin.Core.Model.Structure.CellSite.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Structure.CellSite.GetHashCode() -> int
+override Mocassin.Core.Model.Structure.CellSite.ToString() -> string!
+override Mocassin.Core.Model.Structure.SpaceGroupRef.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Structure.SpaceGroupRef.GetHashCode() -> int
+override Mocassin.Core.Model.Structure.SpaceGroupRef.ToString() -> string!
+override Mocassin.Core.Model.Structure.StructureModel.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Structure.StructureModel.GetHashCode() -> int
+override Mocassin.Core.Model.Structure.StructureModel.ToString() -> string!
+static Mocassin.Core.Ids.CellDummyPositionId.Create(System.Guid value) -> Mocassin.Core.Ids.CellDummyPositionId
+static Mocassin.Core.Ids.CellDummyPositionId.New() -> Mocassin.Core.Ids.CellDummyPositionId
+static Mocassin.Core.Ids.CellDummyPositionId.operator !=(Mocassin.Core.Ids.CellDummyPositionId left, Mocassin.Core.Ids.CellDummyPositionId right) -> bool
+static Mocassin.Core.Ids.CellDummyPositionId.operator ==(Mocassin.Core.Ids.CellDummyPositionId left, Mocassin.Core.Ids.CellDummyPositionId right) -> bool
+static Mocassin.Core.Model.Structure.CellDummyPosition.operator !=(Mocassin.Core.Model.Structure.CellDummyPosition? left, Mocassin.Core.Model.Structure.CellDummyPosition? right) -> bool
+static Mocassin.Core.Model.Structure.CellDummyPosition.operator ==(Mocassin.Core.Model.Structure.CellDummyPosition? left, Mocassin.Core.Model.Structure.CellDummyPosition? right) -> bool
+static Mocassin.Core.Model.Structure.CellSite.operator !=(Mocassin.Core.Model.Structure.CellSite? left, Mocassin.Core.Model.Structure.CellSite? right) -> bool
+static Mocassin.Core.Model.Structure.CellSite.operator ==(Mocassin.Core.Model.Structure.CellSite? left, Mocassin.Core.Model.Structure.CellSite? right) -> bool
+static Mocassin.Core.Model.Structure.SpaceGroupRef.operator !=(Mocassin.Core.Model.Structure.SpaceGroupRef? left, Mocassin.Core.Model.Structure.SpaceGroupRef? right) -> bool
+static Mocassin.Core.Model.Structure.SpaceGroupRef.operator ==(Mocassin.Core.Model.Structure.SpaceGroupRef? left, Mocassin.Core.Model.Structure.SpaceGroupRef? right) -> bool
+static Mocassin.Core.Model.Structure.StructureModel.Default.get -> Mocassin.Core.Model.Structure.StructureModel!
+static Mocassin.Core.Model.Structure.StructureModel.operator !=(Mocassin.Core.Model.Structure.StructureModel? left, Mocassin.Core.Model.Structure.StructureModel? right) -> bool
+static Mocassin.Core.Model.Structure.StructureModel.operator ==(Mocassin.Core.Model.Structure.StructureModel? left, Mocassin.Core.Model.Structure.StructureModel? right) -> bool
+~override Mocassin.Core.Ids.CellDummyPositionId.Equals(object obj) -> bool
