@@ -7,10 +7,10 @@
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
 | Audit status | Fixes required |
-| Audited commit | `d6eac6f` (combined solution; docs-only freeze commit follows) |
+| Audited commit | `4a30fdf` (audit-fix solution; docs-only status commit follows) |
 | Step branch | `step/02-symmetry-and-geometry` |
 | Step tag | — |
-| CI run | [42427151237](https://github.com/seb-eis/mocassin-2/actions/runs/42427151237) — green at `d6eac6f` |
+| CI run | [42429237412](https://github.com/seb-eis/mocassin-2/actions/runs/42429237412) — green at `4a30fdf` |
 | Audit date | 2026-11-08 |
 | Auditor | Independent out-of-context audit agent (fresh context) |
 
@@ -25,7 +25,7 @@ The Step 02 audit covers the parent step plus these integrated amendments at the
   [`step-02-amend-2-docs-math.md`](../amendments/step-02-amend-2-docs-math.md), review
   [`step-02-amend-2.md`](../reviews/step-02-amend-2.md).
 
-Combined audit commit: `d6eac6f`. Both amendments are integrated; the human owner accepted the amendment notes.
+Combined audit commit: `d6eac6f`; audit-fix solution: `4a30fdf`. Both amendments are integrated; the first audit returned Fixes required and the fixes are recorded below.
 
 ## Step summary
 
@@ -237,3 +237,24 @@ tag approval only after a passed re-audit).
 Follow-up issue/step: Add the missing test oracles to a new Step 02 feature branch, correct the documentation
 and status text, then request a re-audit at the new commit. Do not merge `step/02-symmetry-and-geometry` into
 `main` until a fresh audit passes.
+
+## Resolution status (fix round 1)
+
+Date: 2026-11-08
+
+Audit-fix squash: `4a30fdf` (`step-02: add brute-force symmetry oracles (audit fix)`). CI:
+[42429237412](https://github.com/seb-eis/mocassin-2/actions/runs/42429237412) — green. A documentation-only
+status commit follows; it changes no code, tests, or configuration.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| **M1** — missing brute-force/random test oracles | Fixed | Added `BruteForceReductionTests` with explicit pair-shell enumeration and chiral-partner oracles for P1/P2/Pmmm and randomized P2 targets, plus randomized cluster canonicalization/expansion oracles. Added explicit all-setting orbit enumeration, generic full-multiplicity checks, grid closure/round-trip checks, and randomized valid-cell minimum-image/radial-search oracles. Added the 274-entry frozen multiplicity table in `tests/reference/symmetry/general-multiplicities.json` with provenance in its README. Symmetry tests: 127/127. |
+| **m1** — condition-limit branch not exercised | Fixed | The branch is documented as defensive and unreachable under the v1 length/determinant limits; the predicate and a high-condition valid-cell stress test remain. Step-page test-table wording now states the same. |
+| **m2** — benchmark not from the declared runner | Fixed | Recorded local-container evidence is explicitly labelled; added a manual `Benchmark (workflow_dispatch)` CI job on `ubuntu-latest` for runner-class verification, and reworded the step-page acceptance to recorded evidence plus release-candidate runner verification. |
+| **m3** — docs/status overstatement and stale checkboxes | Fixed | Corrected the compilation-pipeline determinism and test-tier wording, marked the two completed Step 02 tasks, removed duplicate architecture namespace rows, and completed the amendment-2 documentation checkboxes. |
+| **n1** — cache scaffold | Addressed | Compilation-pipeline documentation now states that Step 08 wires the cache into orbit, point-group, pair, and cluster stages. |
+| **n2** — Step 11 version fields | Addressed | Step 11 task, metadata design, and acceptance criteria now name `symmetry_contract_version`, `space_group_data_version`, and `space_group_data_sha256`. |
+| **n3** — test tiers | Addressed | Added `Trait("Tier", "PR-fast")` to all 22 existing test classes. |
+
+Re-audit request: review `4a30fdf` and the following docs-only status commit. The earlier round remains
+unchanged.
