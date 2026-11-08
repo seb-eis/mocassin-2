@@ -8,6 +8,7 @@ Repository tooling. None of these directories contain production runtime code.
 | --- | --- |
 | [`verify.sh`](verify.sh) | Local validation: `dotnet`, `api`, `structure`, `rust`, `python`, `docs`, `contracts`, or `all` |
 | [`structure-policy.json`](structure-policy.json) | Folder/file limits, forbidden folders, and concept suffixes for the structure test |
+| [`api-projects.txt`](api-projects.txt) | Shared list of public library assemblies checked by ApiCompat |
 | [`check-api-compat.sh`](check-api-compat.sh) | ApiCompat check against the checked-in baseline assemblies |
 | [`update-api-baseline.sh`](update-api-baseline.sh) | Refresh the baseline after an intentional public API change |
 | [`check-license-headers.py`](check-license-headers.py) | SPDX header check |

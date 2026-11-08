@@ -115,9 +115,9 @@ jobs:
                 python=true ;;
               tools/contracts/*|tools/symmetry/*|tools/check-license-headers.py|tools/check-no-secrets.py)
                 contracts=true ;;
-              tools/check-api-compat.sh|tools/update-api-baseline.sh)
+              tools/check-api-compat.sh|tools/update-api-baseline.sh|tools/api-projects.txt)
                 api=true ;;
-              .github/workflows/ci.yml|tools/ci/*)
+              .github/workflows/ci.yml)
                 ci=true ;;
             esac
           done <<< "$changed"
