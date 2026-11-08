@@ -49,7 +49,7 @@ Approved feature list:
 Current feature:
 Feature branch:
 Last local gates:
-Last step-branch CI:
+Last closeout CI:
 Open blockers:
 Next action:
 ```
@@ -211,13 +211,33 @@ rules.
 
 ## 10. CI policy
 
-Feature branches are validated locally. CI runs on:
+CI is intentionally minimal and local-first. The normative rules are in `AGENTS.md` §3.13 and the cost model
+is in [`docs/planning/ci-policy.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/ci-policy.md).
 
-- integration branches matching `step/*`;
-- `main` after a step merge.
+Automatic CI runs only on `main` after a step merge, on Ubuntu, with path filters so only affected jobs run.
+The step closeout run is a single manual `CI` dispatch on the step branch. There are **no per-feature and no
+per-push step-branch CI runs**.
 
-Do not add CI triggers for feature branches just to feel safe. Add a trigger only when it catches a class of
-regression that local gates cannot.
+| Run | Trigger | Runner |
+| --- | --- | --- |
+| Main merge | automatic `push` to `main` | Ubuntu |
+| Step closeout | one manual `workflow_dispatch` per step | Ubuntu |
+| Platform gate | manual `workflow_dispatch` with `platforms` | Windows/macOS |
+| Documentation | manual `docs.yml` | Ubuntu |
+| Benchmark | manual `benchmark.yml` | Ubuntu |
+
+Rules:
+
+- Validate every feature locally with `./tools/verify.sh <area>`; run `./tools/verify.sh all` before closeout.
+- Do not push a step branch just to trigger CI.
+- Windows and macOS stay manual until platform-specific code appears. Promote Windows first; keep macOS manual
+  until there is macOS-specific behaviour to validate.
+- Documentation is built locally with `zensical build --strict` until the site is mature enough to justify
+  automatic docs CI.
+- Keep Nightly disabled until real long-running suites exist.
+- Wait for the automatic `main` run before tagging `step-NN`. Never tag a red `main`.
+- Do not add CI triggers for feature branches or per-push checkpoint runs just to feel safe. Add a trigger only
+  when it catches a class of regression that local gates cannot.
 
 ## 11. Reference data
 
@@ -282,9 +302,10 @@ The step agent's self-check is not the independent audit.
 
 Before merging a completed step:
 
-1. Finish the closeout feature and get step-branch CI green.
-2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, CI run, scope, and known
-   limitations; set its status to `Ready for audit`.
+1. Finish the closeout feature, run `./tools/verify.sh all`, and dispatch the single closeout CI run on the
+   step branch (Ubuntu, path-filtered).
+2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, closeout CI run, scope,
+   and known limitations; set its status to `Ready for audit`.
 3. Freeze the step branch at the audited commit.
 4. The step agent, planner, or human owner spawns a fresh out-of-context audit agent. The auditor must not have
    implemented the step.
@@ -295,10 +316,12 @@ Before merging a completed step:
 6. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, checklist
    completion marks (not item text), evidence, findings, and verdict.
 7. If findings require fixes, the step agent adds the resolutions, fixes them on a new feature branch,
-   squash-merges into the step branch, pushes, waits for CI, and marks the audit `Re-audit required`.
+   squash-merges into the step branch, dispatches one new closeout CI run, and marks the audit `Re-audit
+   required`.
 8. Re-audit the new commit and append a new round to the record. Only a `Passed` audit permits the step-to-main
    approval request.
-9. The human owner still approves the merge and tag.
+9. The human owner still approves the merge and tag. After the merge, wait for the automatic `main` CI run and
+   tag `step-NN` only when it is green.
 
 Use [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/audits/README.md)
 for status values, severities, and the record format. The audit record is the durable record and the auditor
