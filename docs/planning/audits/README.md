@@ -10,6 +10,7 @@ a fresh, out-of-context audit context decides whether the step is ready for appr
 | --- | --- |
 | Step agent (implementor) | Implement, self-check, create/update the audit record's request fields, fix findings, add resolutions, update status/docs/parity |
 | Audit agent (reviewer) | Independent review of the frozen commit; writes evidence, findings, and verdict directly into the audit record |
+| Spawner (step agent, planner, or human owner) | Provides the frozen audit request and spawns a fresh auditor; does not review or approve |
 | Human owner | Approve fixes, merge, and tag |
 
 The audit request, its scope, and its acceptance checklist are owned by the step agent. The audit agent may
@@ -18,6 +19,18 @@ configuration, tests, scope, checklists, resolutions, status dashboard, step pag
 branch. If the auditor starts fixing code, it becomes an implementer and a new auditor is required for the final
 pass. The reviewer writes directly into `docs/planning/audits/step-NN.md`; there is no handoff file and no
 transcription step.
+
+### 1.1 Auditor spawning
+
+The step agent, planner, or human owner may spawn an auditor. The spawner must not be the auditor.
+
+- The auditor is a fresh context with no shared conversation with the implementor or planner.
+- The spawner provides only the frozen commit, the audit request, repository links, and the required
+  commands/scope. It must not supply a desired verdict or substitute a summary for reading the repository.
+- The auditor writes findings and verdict directly into the record. The spawner does not edit them.
+- The human owner approves the final verdict and the merge/tag gate. The spawner must not mark a verdict, waive
+  findings, merge, tag, or push `main`.
+- A re-audit requires a new commit with fixes. Do not re-spawn auditors until a preferred verdict appears.
 
 ## 2. Audit status values
 
@@ -132,6 +145,7 @@ The audit record is the durable record. Do not rely on chat history, and do not 
   round.
 - A record commit that touches any other file is invalid; the verdict must be re-run by a fresh reviewer.
 - The auditor must not approve its own report. The human owner approves the merge and tag.
+- The auditor records that it is a fresh context with no shared conversation with the implementor or planner.
 
 ## 9. Step amendments
 

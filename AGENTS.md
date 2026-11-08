@@ -252,7 +252,16 @@ transcription step.
 
 Reviewer rules:
 
-- A reviewer must be a fresh context that did not author or implement the reviewed work.
+- A reviewer must be a fresh context that did not author or implement the reviewed work. It may be spawned by
+  the planner, implementor, or human owner.
+- The spawner must not be the reviewer. It provides only the frozen commit, the request record, repository
+  links, and the required commands/scope. It must not supply a desired verdict or replace repository reading
+  with a summary.
+- The human owner approves the final verdict and gate. The spawner must not mark a verdict, waive findings,
+  merge, tag, or push `main`. A re-review requires a new commit with fixes; do not re-spawn until a preferred
+  verdict appears.
+- The reviewer states in its record that it is a fresh context with no shared conversation with the
+  planner/implementor.
 - The reviewer writes findings and verdict directly into the durable record. No handoff file, transcription,
   or scribe is used.
 - The reviewer appends a new round and must not alter earlier rounds or reviewer-authored text.

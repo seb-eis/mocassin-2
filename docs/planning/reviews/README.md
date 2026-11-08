@@ -16,6 +16,7 @@ does not review implementation code, because none exists yet.
 | Planning agent (planner) | Facilitate decisions, write the review request, update design docs directly |
 | Step agent (implementor) | Own the step page and review record request, fix design findings, add resolutions |
 | Planning auditor (reviewer) | Fresh, out-of-context design review; writes evidence, findings, and verdict directly into the review record |
+| Spawner (planner, implementor, or human owner) | Provides the frozen request and spawns a fresh reviewer; does not review or approve |
 | Human owner | Approve the verdict and the start of implementation |
 
 The planning auditor must not be the agent that authored the decisions or will implement the step. It may edit
@@ -23,6 +24,18 @@ only the review record's reviewer-owned metadata, evidence, findings, and verdic
 the step page, status dashboard, parity matrix, request scope, checklists, resolutions, code, tests, or
 configuration. The auditor writes directly into `docs/planning/reviews/step-NN.md`; there is no handoff file
 and no transcription step.
+
+### 2.1 Reviewer spawning
+
+The planner, implementor, or human owner may spawn a reviewer. The spawner must not be the reviewer.
+
+- The reviewer is a fresh context with no shared conversation with the planner or implementor.
+- The spawner provides only the frozen commit, the review request, repository links, and the required
+  commands/scope. It must not supply a desired verdict or substitute a summary for reading the repository.
+- The reviewer writes findings and verdict directly into the record. The spawner does not edit them.
+- The human owner approves the final verdict and the start gate. The spawner must not mark a verdict, waive
+  findings, merge, tag, or push `main`.
+- A re-review requires a new commit with fixes. Do not re-spawn reviewers until a preferred verdict appears.
 
 ## 3. Status values
 
@@ -47,8 +60,9 @@ and no transcription step.
    - reviewed commit
    - design decisions and scope
    - known limitations
-4. A fresh planning auditor reads the step page, decisions, dependency contracts, architecture, data
-   contracts, ADRs, quality strategy, open decisions, parity matrix, licensing records, and audit plan. The
+4. The planner, implementor, or human owner spawns a fresh planning auditor. The auditor reads the step page,
+   decisions, dependency contracts, architecture, data contracts, ADRs, quality strategy, open decisions, parity
+   matrix, licensing records, and audit plan. The
    auditor must not have authored or implemented the design.
 5. The planning auditor writes the evidence, findings, and verdict directly into
    `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
@@ -112,6 +126,7 @@ and no transcription step.
 - A record commit that touches any other file is invalid; the verdict must be re-run by a fresh reviewer.
 - Historical records keep the role names in force when they were written; do not rewrite them.
 - The planning auditor must not approve its own report. The human owner approves the start.
+- The reviewer records that it is a fresh context with no shared conversation with the planner or implementor.
 
 ## 9. Review record files
 
