@@ -14,7 +14,7 @@
 | Step | 04 — Transition Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Changes required |
 | Reviewed commit | `43bad05` |
 | Docs branch | `main` |
 | Review date | 2026-11-08 |
@@ -623,11 +623,11 @@ planner/step agent and does not alter the reviewer's round-2 findings, evidence,
 | Step | 04 — Transition Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Changes required |
 | Reviewed commit | `43bad05` |
 | Docs branch | `main` |
-| Review date | — |
-| Reviewer | — |
+| Review date | 2026-11-08 |
+| Reviewer | Independent planning auditor (fresh context, round 3; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
 
@@ -638,21 +638,271 @@ round-2 fix; the review request and status changes are metadata only. Verify the
 Reviewer: append your independence statement, evidence, findings, and verdict for this round below. Keep the
 round-1 and round-2 text unchanged.
 
+### Re-review checklist (round 3)
+
+Marks and notes apply to round 3 only; item text is unchanged.
+
+**Design decisions reviewed**
+
+- [x] Step page design decisions — reviewed the frozen page; R2-1–R2-15 are resolved or acknowledged; R3-1–R3-10 are new.
+- [x] Data contracts and format changes — the flat model envelope is now consistent (R2-1); the transition section, semantic ordering, and canonical-hash rules were re-read.
+- [x] Architecture and module boundaries — Core/Symmetry/Packages separation is sound in general, but the `TransitionPathResolver` placement is the R3-1 blocker.
+- [x] ADRs and open decisions — ADR 0009/0010/0013 and the Step 03 additive-v1 precedent are cited; no open decision blocks the step.
+- [x] Quality strategy and test plan — property tests, contract fixtures, tiers, and the benchmark are present; the orbit-member path case is missing (R3-1).
+- [x] Parity matrix and documentation plan — the parity/status/closeout/audit and `transitions.md` tasks are present; R3-3/R3-8 are page-reference details.
+- [x] Licensing and provenance — no new dependency; MIT/SPDX applies; no GPL source or data is introduced.
+- [x] Post-implementation audit plan — the standard AGENTS §3.10 audit and closeout task apply.
+
+**Dependency and interface checks**
+
+- [x] Dependencies are `Done` and their contracts are stable — Step 03 is complete (`step-03` tag; audit passed); `IParticleQuery`, `Project`, `CellSite`, `StructureModel`, and `Fractional3.TrimToUnitCell` exist.
+- [ ] Inputs, outputs, types, and formats are defined — partial: the path-to-site resolution contract is not implementable as placed (R3-1).
+- [x] Versioning and migration behavior is defined — additive project-v1; Step 03 precedent; ADR 0009 wording is addressed.
+- [ ] No unresolved cross-step interface question remains — R3-1 (Steps 04/08/24) and R3-4 (preview cache) remain; the Step 05/06/07/08/24 interfaces otherwise line up.
+
+**Standard design-review checklist**
+
+- [ ] Scope, non-goals, and acceptance criteria are explicit and testable — non-goals are present; the ceria and vehicle criteria are not achievable under the literal matcher (R3-1).
+- [ ] Design decisions are complete and internally consistent — R3-1, R3-2, R3-3, R3-6 remain.
+- [ ] Required tests, property tests, golden fixtures, and performance targets are defined — the framework is present; the orbit-member acceptance/property case is missing (R3-1).
+- [x] Documentation, status, parity, and audit updates are planned — yes; R3-3/R3-8 are page-reference details.
+- [x] Licensing, provenance, and dependency checks are resolved — no new dependency; MIT/SPDX; no GPL copying.
+- [x] Risks and mitigations are realistic — the table is plausible; it omits the orbit-member resolution and particle-order cache risks (R3-1/R3-4).
+- [x] Code layout and namespace plan follow the structure policy — new folders/files fit the 20-file, depth-4, 800-line limits; no policy violation.
+- [ ] No hidden scope, stale placeholders, or unowned decisions — R3-1 leaves the resolver placement/ownership open; R3-2/R3-3 are stale text.
+
 ### Re-review evidence
 
-_Reviewer to complete._
+**Independence.** I am a fresh planning auditor for round 3. I did not author or implement the Step 04 design, the fix rounds, or any implementation; I have no shared conversation with the planner or implementor. I read the frozen design content and the repository myself; I did not rely on the request summary or the resolution tables.
+
+**Frozen state and worktree.** Worktree `/workspace/mocassin`, branch `main`, `HEAD` `ff4cf81`. The request names `43bad05` as the frozen design commit. `git rev-parse 43bad05` =
+`43bad0525dd36ed575f97da903d2c16a0865b274`; `git rev-parse 4f4c888` =
+`4f4c888a191c1e2c75eb9b71afe783cdb3d55e6e`. `git diff 43bad05..ff4cf81 --stat` shows only
+`docs/planning/reviews/step-04.md`, `docs/planning/status.md`, and the step-page design-review link; `git diff
+43bad05..ff4cf81 -- docs/planning/steps/step-04-transition-model.md docs/planning/02-data-contracts.md` shows
+only the one-line link change (`Re-review required at 43bad05`). The frozen design content is therefore
+identical at `43bad05` and `HEAD`. The record commit's parent will be `ff4cf81`, not `43bad05`, because the
+round-3 request sits between the design commit and the record; this is the same process note as rounds 1 and 2
+(R2-13).
+
+**Commands run (from `/workspace/mocassin`):**
+
+```sh
+git status --short
+# (no output: clean worktree)
+
+git log --oneline --decorate -6
+# ff4cf81 (HEAD -> main) docs: request step-04 design re-review round 3 [skip ci]
+# 43bad05 docs: resolve step-04 re-review findings [skip ci]
+# 3a50206 docs: record step-04 design re-review Changes required [skip ci]
+# 3338963 docs: request step-04 design re-review [skip ci]
+# 4f4c888 docs: revise step-04 design after review [skip ci]
+# 12c8107 docs: record step-04 design review Changes required [skip ci]
+
+git rev-parse 43bad05
+# 43bad0525dd36ed575f97da903d2c16a0865b274
+
+git rev-parse 4f4c888
+# 4f4c888a191c1e2c75eb9b71afe783cdb3d55e6e
+
+git show --stat 43bad05
+# docs/planning/02-data-contracts.md              |  20 ++--
+# docs/planning/steps/step-04-transition-model.md | 129 +++++++++++++++---------
+# 2 files changed, 91 insertions(+), 58 deletions(-)
+
+git diff --stat 4f4c888..43bad05 -- docs/planning
+# docs/planning/02-data-contracts.md              |  20 +-
+# docs/planning/reviews/step-04.md                | 336 +++++++++++++++++++++++-
+# docs/planning/status.md                         |  10 +-
+# docs/planning/steps/step-04-transition-model.md | 131 +++++----
+# 4 files changed, 426 insertions(+), 71 deletions(-)
+
+git diff 4f4c888..43bad05 -- docs/planning
+# Read in full: the step-page revision, the data-contract delta, the status change, and the round-2 record updates.
+
+git show 43bad05:docs/planning/steps/step-04-transition-model.md
+# Read in full (680 lines): sections 1-11, code layout, tasks, acceptance, documentation, tests, risks.
+
+git show 43bad05:docs/planning/02-data-contracts.md
+# Read in full (1,193 lines): model envelope 149-173, transition section 268-340, canonical hash 135-147,
+# simulation shape 410-433.
+
+git diff --check 4f4c888..43bad05
+# (no output)
+
+git diff --stat 43bad05..ff4cf81
+# docs/planning/reviews/step-04.md                | 73 ++++++++++++++++++++++++-
+# docs/planning/status.md                         | 11 ++--
+# docs/planning/steps/step-04-transition-model.md |  2 +-
+# 3 files changed, 77 insertions(+), 9 deletions(-)
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.22s
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+```
+
+**Additional read-only checks.**
+
+```sh
+wc -l src/dotnet/Mocassin.Core/Editing/ProjectEditor.cs
+# 506
+
+grep -n "StateChangeId\|StateChangeGroupId\|TransitionChainId\|KineticTransitionId\|MetropolisTransitionId" \
+  src/dotnet/Mocassin.Core/Ids/TypedIds.cs
+# 123/142/161/180/199: all five typed IDs already exist (added by Step 03, dd642d6)
+
+grep -n "public const double" src/dotnet/Mocassin.Core/Geometry/GeometryTolerances.cs
+# FractionalTrimTolerance = 1e-10; PathMatchTolerance does not exist yet
+
+grep -n "CanonicalizeModel" -A 14 src/dotnet/Mocassin.Core/Project/ProjectJson.cs
+# The current method rebuilds only Particles, ParticleSets, and Structure; ProjectJsonConverter.Write
+# (ProjectJson.cs 262) calls it, ProjectHasher.Compute uses SerializeCanonicalModel, and
+# ProjectCanonicalizer.ToCanonicalUtf8 uses the same serializer.
+
+cat src/dotnet/Mocassin.Core/Mocassin.Core.csproj
+# No ProjectReference to Mocassin.Symmetry.
+
+grep -n "TrimToUnitCell" -A 30 src/dotnet/Mocassin.Core/Geometry/Fractional3.cs
+# TrimComponent snaps within FractionalTrimTolerance (1e-10), then maps into [0,1).
+
+grep -n "IsInsideUnitCell" -A 10 src/dotnet/Mocassin.Core/Model/Structure/StructureModelValidator.cs
+# Reference sites must be finite and inside [0,1) within the fractional trim tolerance.
+
+python3 - <<'PY'
+import json
+p=json.load(open('samples/ceria/ceria.mocprj'))
+for s in p['model']['structure']['sites']:
+    print(s['name'], s['fractional'], s['stability'])
+PY
+# Ce [0, 0, 0] stable
+# O [0.25, 0.25, 0.25] stable
+# O transition [0.5, 0.25, 0.25] unstable
+# There is no O reference site at [0.75, 0.25, 0.25].
+
+grep -n "GetEntryValueAt" -A 4 /workspace/mocassin-original/src/ModelBuilder/ICon.Framework.Symmetry/Analysis/CellAnalysis/UnitCellAdapter.cs
+# GetEntryValueAt uses VectorEncoder.TryEncode, i.e. it resolves any fractional position (including a
+# symmetry-equivalent P1 image) to its unit-cell entry/reference site.
+
+grep -n "ContainsRingTransition" -A 12 \
+  /workspace/mocassin-original/src/ModelBuilder/ICon.Model/Transitions/Modeling/Logic/TransitionAnalyzer/TransitionAnalyzer.cs
+# Any-pair check; raw Fractional3D coordinates with the space-group comparer.
+
+grep -n "AddNormalVehicleRestrictionValidation" -A 12 \
+  /workspace/mocassin-original/src/ModelBuilder/ICon.Model/Transitions/Manager/Services/Validators/AbstractTransitionValidator.cs
+# Returns early when unstableStateGroups.Count > 1; only a single unstable group with more than one
+# pair is restricted. Vehicle6 is therefore supported.
+
+grep -n "5-Site 2-Species Vehicle\|6-Site 2-Species Vehicle\|5-Site Interstitialcy\|7-Site Interstitialcy" -A 4 \
+  /workspace/mocassin-original/docs/userguide-md/transition-model.md
+# Confirms S,S,U,S,S (Vehicle5), S,U,S,S,U,S (Vehicle6), S,U,S,U,S (Interstitialcy5),
+# and S,U,S,U,S,U,S (Interstitialcy7).
+```
+
+**Files reviewed.** `AGENTS.md` (§3.8–§3.13, §4, §5, §7, §8, §9, §10, §11, §12, §16); `docs/planning/reviews/README.md`;
+`docs/planning/reviews/step-design-review-template.md`; this record; `docs/planning/steps/step-04-transition-model.md`
+at `43bad05`; `docs/planning/02-data-contracts.md` at `43bad05`; `docs/planning/03-quality-strategy.md`;
+`docs/planning/05-open-decisions.md`; `docs/planning/ci-policy.md`; `docs/planning/appendix-b-parity-matrix.md`;
+`docs/planning/status.md` at HEAD; `docs/planning/steps/step-03-particle-and-structure-models.md`,
+`step-05-energy-model.md`, `step-06-lattice-and-simulation-models.md`,
+`step-07-validation-and-diagnostics.md`, `step-08-model-compilation-pipeline.md`, and
+`step-24-model-editors-particle-structure-transitions.md` at `43bad05`;
+`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`,
+`0010-canonical-messagepack-signatures.md`, and `0013-format-compatibility-and-api-versioning.md`;
+`docs/development/code-structure.md`; `docs/reference/project-format.md`; `docs/reference/index.md`;
+`contracts/manifest.json`; `contracts/generated/schema/project-v1.schema.json`;
+`contracts/generated/signatures/model-v1.json`; `contracts/generated/fixtures/descriptors.json`;
+`tools/contracts/generate.py`; `tools/verify.sh`; `tools/structure-policy.json`;
+`tools/check-api-compat.sh`; `tools/update-api-baseline.sh`.
+
+**Code and test inventory inspected.** `Mocassin.Core`: `Model/ModelDefinition.cs`,
+`Model/ModelDefinitionJsonConverter.cs`, `Model/Structure/CellSite.cs`,
+`Model/Structure/StructureModelValidator.cs`, `Model/Structure/IStructureQuery.cs`,
+`Model/Particles/IParticleQuery.cs`, `Model/ViewSettings.cs` (camel-case enum converter),
+`Project/Project.cs`, `Project/ProjectJson.cs`, `Project/ProjectHasher.cs`,
+`Project/ProjectCanonicalizer.cs`, `Project/ProjectSchema.cs`, `Project/ProjectValidator.cs`,
+`Editing/ProjectEditor.cs`, `Geometry/Fractional3.cs`, `Geometry/GeometryTolerances.cs`,
+`Ids/TypedIds.cs`, `Diagnostics/Diagnostic.cs`, `Diagnostics/ModelPath.cs`.
+`Mocassin.Symmetry`: `Structure/IStructurePreviewService.cs`, `Structure/StructurePreview.cs`,
+`Structure/StructurePreviewService.cs` (cache-key construction), `Geometry/UnitCellVectorEncoder.cs`,
+`Geometry/StructureSiteReference.cs`. `Mocassin.Architecture.Tests/StructureChecks/StructureChecker.cs`.
+`Mocassin.Packages/Projects/ProjectStore.cs` and `ProjectValidationService.cs` from the round-2 inventory.
+Original reference (read-only, no copy): `KineticTransitionValidator.cs`, `TransitionAnalyzer.cs`,
+`AbstractTransitionValidator.cs`, `StateExchangeGroupValidator.cs`, `UnitCellAdapter.cs`,
+`ConnectorPattern.cs`, and `docs/userguide-md/transition-model.md`.
+
+**Required scope checks.** All thirteen required review-scope areas were re-checked against the frozen
+content: scope/non-goals/acceptance, `ModelDefinition` and JSON/schema round-trip, semantic ordering, every
+built-in pattern and `Custom`, path/stability validation, query/preview boundaries, TRN001–TRN028, manifest/
+schema/fixture tasks, PublicAPI/ApiCompat, code layout, Step 03 dependency stability, documentation/navigation
+and the test plan, and the Step 05/06/07/08/24 interfaces. The findings below record the result.
 
 ### Re-review findings
 
-_Reviewer to complete._
+#### Round-2 resolution verification
+
+| Finding | Severity | Status | Verification |
+| --- | --- | --- | --- |
+| R2-1 | Major | Resolved | The data contract's model envelope now lists the five flat sections (`02-data-contracts.md` 149-167), and the step page says there is no nested `model.transitions` object (83-86). The manifest task adds five flat fields (575-577); the manifest `model` field currently has only `particles`, `particleSets`, and `structure` (`contracts/manifest.json`, `project-v1.schema.json`). The flat shape is consistent with Step 03 and the converter. |
+| R2-2 | Major | Resolved | Both `TryCreatePreview` overloads now take `IParticleQuery particles` (412-430); `ParticleOrder` is defined from `IParticleQuery.Particles` sorted by ID plus `VoidParticle` (453-454). `IParticleQuery` exists in `Mocassin.Core/Model/Particles/IParticleQuery.cs` with exactly `Particles`, `VoidParticle`, and the `Find` overloads; `Project` already implements it (`Project.cs` 12). |
+| R2-3 | Major | Resolved | `TRN026` is now "An unstable position's group contains more than one state change" (350), and §7 says the unstable group must be exactly one `[D, ∅]` pair (308-310). The original `AddNormalVehicleRestrictionValidation` returns early when `unstableStateGroups.Count > 1`, so `Vehicle6` (two unstable positions) is supported; the defect table now says the rule does not limit the number of unstable positions (484). |
+| R2-4 | Major | Resolved | `TRN028` is in the table (352) and §7 (311-313); the pattern table gives S,U,S for `Migration3`, S,U,S,U,S for `Interstitialcy5`, S,U,S,U,S,U,S for `Interstitialcy7`, S,S,U,S,S for `Vehicle5`, and S,U,S,S,U,S for `Vehicle6` (176-179). The original user guide confirms those sequences, so the new rule is scientifically consistent. |
+| R2-5 | Major | Resolved | "A `referencePath` contains a ring when any two canonical resolved positions are equal, including when one point is a periodic image of another" (`02-data-contracts.md` 330-331); the step page rejects an interior return as well as an endpoint ring (263-265, 314-315). The original `ContainsRingTransition` checks every pair; the new rule catches the interior `0→1→0→2` case. |
+| R2-6 | Minor | Resolved | `Ids/TransitionIds.cs` is removed from the layout; the page says the five typed IDs already exist in `Ids/TypedIds.cs` and must not be duplicated (525, 555-557). `TypedIds.cs` 123-211 contains all five. |
+| R2-7 | Minor | Resolved | The layout adds `Project/Project.cs` (implements `ITransitionQuery`), `ProjectHasher.cs` (`ComputeTransition`), and `Model/Transitions/TransitionRefJsonConverter.cs` (504, 520-522); the benchmark-baseline task is present (580-581). |
+| R2-8 | Minor | Resolved | The cache key now includes `catalogDataVersion`, `catalogDataSha256`, and `symmetryContractVersion` (446-450), matching `StructurePreviewService.CreateCacheKey` (`StructurePreviewService.cs` 200-207); the test row covers symmetry versions (652). |
+| R2-9 | Minor | Resolved with residual boundary gap | The design uses `Fractional3.TrimToUnitCell()` (300-304), which snaps within `FractionalTrimTolerance` (1e-10) and maps into `[0,1)` (`Fractional3.cs` 114-150). The `PathMatchTolerance = 1e-6` match is specified. The boundary discontinuity remains as R3-5. |
+| R2-10 | Minor | Resolved with a stale cross-reference | The task and Documentation section now add `docs/reference/transitions.md` and assign the consolidated `diagnostics.md`/`troubleshooting/errors.md` to Step 07 (572-574, 628-630). The validation section still says the help anchor is in `diagnostics.md` (356); see R3-3. |
+| R2-11 | Minor | Resolved | Both overloads use `StructureModel structureModel` (416, 426), matching the Step 03 CA1716 resolution. |
+| R2-12 | Minor | Resolved | `TRN015` accepts `Metropolis2` or a 2-position `Custom` chain (339); `TRN023` rejects both on the kinetic side (347). |
+| R2-13 | Note | Acknowledged | The round-2 record parent is `3338963`, not `4f4c888`; the design content is identical except the review record, status, and step-page link. Process note only. |
+| R2-14 | Note | Resolved | New standalone samples live under `samples/transitions/`; `samples/ceria/ceria.mocprj` is updated in place (545-546, 582-586). |
+| R2-15 | Note | Resolved | Section 3 now says `TRN018` is transition-scoped, matching the table and the acceptance criterion (202-206, 342, 602). |
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Blocker** | **R3-1 — Path resolution matches only literal `CellSite.Fractional` coordinates, so symmetry-equivalent P1 positions cannot be resolved; the ceria 3-site migration and the vehicle acceptance criteria are not implementable as written.** `TransitionPathResolver` is placed in `Mocassin.Core.Model.Transitions` (297-299, 509), and the match is "compared component-wise to `CellSite.Fractional`" after `TrimToUnitCell` (300-304). `CellSite.Fractional` holds only the symmetry-reduced reference site (one O site in ceria), while a valid 3-site O→U→O path must use a different physical O site, which is an orbit member. In the ceria sample the only O reference site is `[0.25, 0.25, 0.25]` and the unstable site is `[0.5, 0.25, 0.25]`; a natural path endpoint `[0.75, 0.25, 0.25]` is an Fm-3m orbit member (8c) but matches no `CellSite`, so it is rejected with `TRN020`. The data contract's own example endpoint `[0.25, 0.75, 0.25]` is likewise an 8c orbit member of `[0.25, 0.25, 0.25]` (`02-data-contracts.md` 293). The original accepted any P1 position: `KineticTransitionValidator.cs` 86 calls `unitCellProvider.GetEntryValueAt`, and `UnitCellAdapter.GetEntryValueAt` uses `VectorEncoder.TryEncode` to resolve the fractional position to its unit-cell entry/reference site. Because `Mocassin.Core.csproj` has no reference to `Mocassin.Symmetry`, the Core resolver cannot build the P1 map; the design does not define an abstraction or a precomputed P1/site map. The step's acceptance criteria (592-601) therefore cannot be satisfied for the ceria sample. | Step page 297-315, 592-601; `02-data-contracts.md` 293, 326-331; `CellSite.cs` 23; `StructureModelValidator.cs` 90, 153-161; `Mocassin.Core.csproj`; `UnitCellVectorEncoder.cs`; `samples/ceria/ceria.mocprj`; original `KineticTransitionValidator.cs` 86 and `UnitCellAdapter.cs` 121. |
+| **Minor** | **R3-2 — The TRN ownership sentence still stops at `TRN027`.** The table now defines `TRN028` (352), but the validation section says "`TRN001`–`TRN027` are owned by `Mocassin.Core`" (354). The task and code layout use TRN001–TRN028 (513, 572). | Step page 352-356, 513, 572. |
+| **Minor** | **R3-3 — The help-anchor target is stale.** The validation section says each code has a help anchor "documented in `docs/reference/diagnostics.md`" (356), while the task and Documentation section create `docs/reference/transitions.md` and assign `diagnostics.md` to Step 07 (572-574, 628-630). | Step page 356, 572-574, 628-630; `docs/reference/index.md` 10. |
+| **Minor** | **R3-4 — The preview cache key does not cover the full `ParticleOrder`.** `transitionModelHash` is the SHA-256 of the closure "(transition, chain, groups, state changes, and referenced particles)" (446-450), but `ParticleOrder` is built from all `IParticleQuery.Particles` sorted by ID plus `VoidParticle` (453-454). Adding or removing an unreferenced particle changes the matrix dimensions and index order while leaving the closure hash unchanged, so a cached preview can be stale. The cache-separation test (652) does not cover this. | Step page 446-454, 652; `IParticleQuery.cs`; `StateChangeMatrices` contract 451-460. |
+| **Minor** | **R3-5 — `PathMatchTolerance` is not honored at the unit-cell boundary.** `TrimToUnitCell` snaps only within `1e-10`; a path point at `0.9999995` and a site at `0.0` are a periodic distance of `5e-7` apart, within the stated `1e-6` tolerance, but the component-wise comparison sees `0.9999995` and reports zero matches (`TRN020`). A wrapped component difference (`min(abs(d), 1-abs(d))`) or a boundary-aware comparer is needed. | Step page 300-304, 648; `Fractional3.cs` 114-150; `GeometryTolerances.cs` 22. |
+| **Note** | **R3-6 — `TRN026` wording differs across the table, §7, and the defect table.** The table says "contains more than one state change" (350), §7 and the defect table say "exactly one `[D, ∅]` pair" (308-310, 484). The rule set is complete because `TRN005` covers an empty group and `TRN012` covers a single non-void pair, but the table should state the exact condition or reference those codes. | Step page 308-310, 350, 484. |
+| **Note** | **R3-7 — Non-positive cell counts are not covered by the preview failure contract.** The service "never throws for invalid user data" (442-443), but the Step 03 `StructurePreviewService.TryCreatePreview` throws `ArgumentOutOfRangeException` for non-positive `(A, B, C)` (`StructurePreviewService.cs` 79-82). The Step 04 contract should say whether `(A, B, C)` are diagnostics or argument errors, especially for the Step 24 UI. | Step page 410-443; `StructurePreviewService.cs` 78-82; step-03 failure boundary. |
+| **Note** | **R3-8 — The documentation task does not update the reference/user-guide/physics index pages.** The task adds the new pages to `zensical.toml` (587) but not to `docs/reference/index.md` (which currently lists only file layout, project format, and future sections) or the user-guide/physics indexes. `zensical build --strict` does not flag an orphaned page, so the link plan is incomplete. | Step page 617-634; `docs/reference/index.md`; `zensical.toml` 38-42. |
+| **Note** | **R3-9 — `ITransitionQuery` and `IParticleQuery` are separate parameters without a same-snapshot invariant.** The preview can be called with two different project snapshots, producing a `ParticleOrder` that disagrees with the transition closure. Document that both must come from the same immutable `Project` snapshot, or pass one combined query. | Step page 410-437. |
+| **Note** | **R3-10 — The preview-cache risk row is stale.** The risk table still says the key includes only "transition hash, structure hash, and `(A,B,C)`" (674), while the design now adds the symmetry catalog/contract versions and should also mention the particle domain (R3-4). | Step page 446-450, 674. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
+verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
+the auditor's findings, evidence, or verdict.
 
 ### Re-review verdict
 
 - [ ] Ready for implementation
 - [ ] Ready with notes
-- [ ] Changes required
+- [x] Changes required
 - [ ] Re-review required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up step:
+Follow-up owner: Planner and Step 04 agent (design revision and finding resolution)
+Follow-up step: Step 04 — Transition Model; a fresh re-review is required after the design commit
+
+**Changes required.** The round-2 fixes are real: the flat project shape is now consistent (R2-1), the
+particle query supplies the matrix order (R2-2), `TRN026` no longer rejects `Vehicle6` (R2-3), `TRN028`
+enforces the correct built-in sequences (R2-4), ring detection covers interior repeats (R2-5), and the layout,
+cache, tolerance, and documentation fixes are present. However, R3-1 is a Blocker: the Core-side
+`TransitionPathResolver` can only compare a path point to a literal `CellSite.Fractional`, so it cannot map
+the symmetry-equivalent P1 positions that the ceria oxygen migration (and the data contract's own example)
+requires. As written, the first acceptance criterion cannot pass for the ceria sample, and the 5-site vehicle
+criterion has the same risk when its end groups share one reference site. The design must either resolve paths
+through the Symmetry P1 encoder (with a Core-side abstraction or a precomputed site map) or explicitly restrict
+and document the reference-path coordinates; the tests and acceptance criteria must include an orbit-member
+path. The remaining minors/notes (R3-2–R3-10) do not independently block the step but should be corrected in
+the same revision. A re-review requires a new design commit with fixes; do not create the step branch or start
+implementation before that. The human owner may treat the Blocker as the gate; if they reclassify it as a Major,
+the verdict remains `Changes required`.
