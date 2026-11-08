@@ -14,7 +14,7 @@
 | Step | 03 — Particle and Structure Models |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Ready with notes |
 | Reviewed commit | `1beb8da8751d3df55865e9f4a592b20ca17d33a1` (`1beb8da`) |
 | Docs branch | `docs/step-03-design-fixes` |
 | Review date | 2026-11-08 |
@@ -177,25 +177,27 @@ and request a fresh review of the new commit.
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — accept `Ready with notes` at design commit `3096aa8`; round-2 notes applied in `a299046`
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale — round-2 notes R2-1–R2-6 are resolved in `a299046`; explicit owner acceptance is pending
+- [x] Residual risks, deferred items, and follow-up owners recorded — see the note table and the step-page risks
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — no Blocker/Major; three Minor findings and three Notes from round 2 are resolved or accepted as notes
+- [x] Final CI and documentation-build results recorded — `zensical build --strict` passes; `python tools/contracts/generate.py --check` reports 17 current files; no CI run for this documentation-only branch
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-08 | `1beb8da` | Independent planning auditor (fresh context) | Changes required |
+| 2 | 2026-11-08 | `3096aa8` | Independent planning auditor (fresh context, round 2) | Ready with notes |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| M1–M6, m1–m8, n1–n3 | see round 1 | see round 1 | See `Resolution status`; fix round 1 is `3096aa8` | `3096aa8` | Resolved — awaiting re-review |
+| M1–M6, m1–m8, n1–n3 | Major/Minor/Note | See round 1 | See `Resolution status` | `3096aa8` | Resolved |
+| R2-1–R2-6 | Minor/Note | See round 2 | See `Note fixes after round 2` | `a299046` | Resolved — awaiting owner acceptance |
 
 ## Human approval
 
@@ -214,23 +216,36 @@ does not alter the reviewer's findings, evidence, or verdict.
 
 | Finding | Status | Resolution |
 | --- | --- | --- |
-| M1 | Resolved — awaiting re-review | Added `ProjectSymmetryMetadata`, `Project.Symmetry`, `ProjectDto.Symmetry`, JSON/canonical-document support, and model/document hash separation. |
-| M2 | Resolved — awaiting re-review | `ProjectStore.LoadBytesCore` now uses `ProjectValidationService` by default; the loader test is required. |
-| M3 | Resolved — awaiting re-review | Added `StructureSiteReference`/`SiteOrbitOverlap` and the additive `UnitCellVectorEncoder.TryCreate` overload with `CellSiteId` paths. |
-| M4 | Resolved — awaiting re-review | Added `StructurePreviewCeria`/`StructurePreviewBariumZirconate` benchmark cases, command, baseline, and PR-medium/release tier; removed the PR-fast wall-clock assertion. |
-| M5 | Resolved — awaiting re-review | Added `STR014` for the signed 32-bit supercell cap. |
-| M6 | Resolved — awaiting re-review | Removed `STR008`; documented that a single-site orbit cannot exceed the catalog maximum of 192. |
-| m1 | Resolved — awaiting re-review | Removed `STR011`; documented it as redundant with `PAR005`, `PAR006`, and `STR006`. |
-| m2 | Resolved — awaiting re-review | Added `PAR010` for reserved-ID reuse. |
-| m3 | Resolved — awaiting re-review | Changed the Step 03 test to the reserved `ParticleId.Void`/`Find` contract; compiled index 0 remains Step 08. |
-| m4 | Resolved — awaiting re-review | Distinguished `ParticleSet.ParticleIds` order from the non-semantic `ParticleSets` array order. |
-| m5 | Resolved — awaiting re-review | Added test rows for `PAR001`, `PAR004`, `STR005`, `STR006`, `STR009`, and `STR010`. |
-| m6 | Resolved — awaiting re-review | Added `PAR011` (set names), `PAR012` (duplicate members), and `STR015` (dummy names). |
-| m7 | Resolved — awaiting re-review | Added particle IDs to the semantic-order list in `docs/reference/project-format.md`. |
-| m8 | Resolved — awaiting re-review | Defined `ProjectHasher.ComputeStructure` and catalog/contract version injection for the preview cache key. |
-| n1 | Resolved — awaiting re-review | Recorded `New Structure` as the deliberate project/UI default and noted the original `Unnamed` model default. |
-| n2 | Resolved — awaiting re-review | Renamed the Core diagnostic class `CoreStructureDiagnosticCodes`. |
-| n3 | Resolved — awaiting re-review | Added the SPDX/licensing implementation task. |
+| M1 | Resolved | Added `ProjectSymmetryMetadata`, `Project.Symmetry`, `ProjectDto.Symmetry`, JSON/canonical-document support, and model/document hash separation. |
+| M2 | Resolved | `ProjectStore.LoadBytesCore` now uses `ProjectValidationService` by default; the loader test is required. |
+| M3 | Resolved | Added `StructureSiteReference`/`SiteOrbitOverlap` and the additive `UnitCellVectorEncoder.TryCreate` overload with `CellSiteId` paths. |
+| M4 | Resolved | Added `StructurePreviewCeria`/`StructurePreviewBariumZirconate` benchmark cases, command, baseline, and PR-medium/release tier; removed the PR-fast wall-clock assertion. |
+| M5 | Resolved | Added `STR014` for the signed 32-bit supercell cap. |
+| M6 | Resolved | Removed `STR008`; documented that a single-site orbit cannot exceed the catalog maximum of 192. |
+| m1 | Resolved | Removed `STR011`; documented it as redundant with `PAR005`, `PAR006`, and `STR006`. |
+| m2 | Resolved | Added `PAR010` for reserved-ID reuse. |
+| m3 | Resolved | Changed the Step 03 test to the reserved `ParticleId.Void`/`Find` contract; compiled index 0 remains Step 08. |
+| m4 | Resolved | Distinguished `ParticleSet.ParticleIds` order from the non-semantic `ParticleSets` array order. |
+| m5 | Resolved | Added test rows for `PAR001`, `PAR004`, `STR005`, `STR006`, `STR009`, and `STR010`. |
+| m6 | Resolved | Added `PAR011` (set names), `PAR012` (duplicate members), and `STR015` (dummy names). |
+| m7 | Resolved | Added particle IDs to the semantic-order list in `docs/reference/project-format.md`. |
+| m8 | Resolved | Defined `ProjectHasher.ComputeStructure` and catalog/contract version injection for the preview cache key. |
+| n1 | Resolved | Recorded `New Structure` as the deliberate project/UI default and noted the original `Unnamed` model default. |
+| n2 | Resolved | Renamed the Core diagnostic class `CoreStructureDiagnosticCodes`. |
+| n3 | Resolved | Added the SPDX/licensing implementation task. |
+
+### Note fixes after round 2
+
+Commit `a299046` applies the round-2 notes without changing the reviewed design commit `3096aa8`.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| R2-1 | Resolved — awaiting owner acceptance | Moved the benchmark to `Mocassin.Benchmarks/Structure/StructurePreviewBenchmarks.cs`, inside the structure-policy folder limits. |
+| R2-2 | Resolved — awaiting owner acceptance | Changed the benchmark tier to Nightly/release and added the structure-preview target to `03-quality-strategy.md` §13. |
+| R2-3 | Resolved — awaiting owner acceptance | Made `ProjectHasher.ComputeStructure` explicitly public, added it to the PublicAPI/ApiCompat task, and updated `design-decisions.md` and `project-format.md` to describe three hashes. |
+| R2-4 | Resolved — awaiting owner acceptance | Changed the risk wording to “every used code”. |
+| R2-5 | Resolved — awaiting owner acceptance | Added `ProjectDiagnosticCodes.SymmetryMetadataMismatch` (`PROJ034`) to the Core code layout. |
+| R2-6 | Resolved — awaiting owner acceptance | Renamed the record to `OrbitOverlap`; the diagnostic constant remains `StructureDiagnosticCodes.SiteOrbitOverlap`. |
 
 ## Re-review round 2
 
