@@ -106,18 +106,39 @@ Stop before:
 
 ## 5. Evidence and approval report
 
-A feature is not ready for approval until the agent can report:
+A feature, review verdict, audit verdict, merge, or tag is not ready for approval until the requesting agent can
+report the full picture, including every earlier round:
 
 ```text
-Branch:
-Commits:
+Decision requested:
+Branch/frozen commit:
+Final verdict:
+Rounds:
+  1. date, commit, reviewer/auditor, verdict
+  2. ...
+Findings and resolutions:
+  ID, severity, issue, evidence, resolution, fixing commit, status
+Accepted notes and waivers:
+Residual risks and follow-up owners:
 Diff summary:
 Tests/commands:
 CI:
+Docs build:
 Docs/status updated:
-Risks:
+Gate statement (no Blocker/Major remains, or the exact exceptions being waived):
 Approval requested for:
 ```
+
+Rules:
+
+- Include every review and audit round, every finding, and every resolution, including findings already fixed.
+- Name the code commit that fixed each finding and the documentation commit that resolved each design note.
+- Report accepted notes and waivers explicitly, with who accepted them and why.
+- State residual risk, deferred items, and follow-up owners.
+- Never report only the latest round or only the findings that remain open.
+- If a round is incomplete or lacks a verdict or resolution, say so; do not omit it.
+- The report is the basis for the human decision. The human owner still approves verdicts, waivers, merges, and
+  tags.
 
 Review the diff itself:
 

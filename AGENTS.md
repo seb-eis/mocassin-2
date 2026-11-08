@@ -160,6 +160,7 @@ Before the first numbered item, complete the pre-implementation design review in
    a passing audit, the auditor's record commit and the step agent's resolution/status commit are the only
    permitted later commits.
 5. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
+   The approval request must include the cumulative approval report in section 3.12.
 6. After approval:
    ```sh
    git switch main
@@ -309,8 +310,10 @@ starts. This gate is separate from the post-implementation audit in section 3.10
 6. If the verdict is `Changes required`, the planning agent and step agent update the design docs directly, the
    step agent adds the resolutions and marks the review `Re-review required`, and a fresh planning auditor
    re-reviews the new commit. The new round is appended; earlier rounds are not overwritten.
-7. Only a `Ready for implementation` verdict permits the human owner to approve starting the step. The step
-   branch is then created from the reviewed `main` commit.
+7. Only a `Ready for implementation` verdict permits the human owner to approve starting the step. The approval
+   request must include the cumulative approval report in section 3.12, covering every review round, finding,
+   resolution, accepted note, waiver, and residual risk. The step branch is then created from the reviewed
+   `main` commit.
 8. Step 00 and Step 01 are recorded as `Waived — process introduced after completion`; no retrospective
    review is required.
 9. The post-implementation audit in section 3.10 remains mandatory.
@@ -349,8 +352,10 @@ out-of-context audit context must review the frozen step branch.
 8. The fresh auditor re-audits the new commit and appends a new round to the record. The same auditor may
    continue if it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every
    earlier round in the record.
-9. Only a `Passed` audit permits the step-to-main approval request. The audit result is evidence, not merge
-   authorization; the human owner still approves the merge.
+9. Only a `Passed` audit permits the step-to-main approval request. The request must include the cumulative
+   approval report in section 3.12, covering every audit and review round, every finding and resolution, every
+   accepted note or waiver, and the residual risk. The audit result is evidence, not merge authorization; the
+   human owner still approves the merge.
 10. After merge, tag `step-NN`, record the result, and delete the step branch.
 
 The audited solution includes every amendment integrated before the freeze. A post-merge amendment needs its
@@ -383,6 +388,33 @@ is planned, reviewed, integrated into the parent step branch, and audited as par
 
 Amendment statuses and the amendment index are in
 [`docs/planning/amendments/README.md`](docs/planning/amendments/README.md).
+
+### 3.12 Approval report
+
+Before the human owner approves any review verdict, audit verdict, waiver, merge, or tag, the agent requesting
+approval must present a **cumulative approval summary** covering the entire history. The summary goes in the
+approval request itself; linking the durable record is not sufficient.
+
+The summary must contain:
+
+1. **Requested decision** — the exact verdict, waiver, merge, or tag being requested, and the frozen commit.
+2. **Final state** — branch, reviewed/audited commit, CI result, and documentation-build result.
+3. **Every round** — for each design-review and audit round: round number, date, reviewed or audited commit,
+   reviewer or auditor identity and spawner, and verdict.
+4. **Every finding** — finding ID, severity, issue, evidence, resolution or fix, resolving commit, and current
+   status. Include findings from every round, including those already fixed.
+5. **Accepted notes and waivers** — each note or waiver, who accepted it, and its rationale or follow-up.
+6. **Residual risk** — open notes, deferred items, known limitations, and follow-up owners.
+7. **Gate statement** — an explicit statement that no Blocker or Major finding remains unclosed, or the complete
+   list of exceptions the human owner is being asked to waive.
+
+Rules:
+
+- Never omit earlier rounds or findings because they were fixed; the fixed history is the point.
+- Never report only the latest round or only the findings that remain open.
+- Do not rewrite earlier records to fit the summary; derive the summary from the durable record.
+- If a round is incomplete or lacks a verdict or resolution, say so instead of omitting it.
+- The summary is evidence for the human owner, not an approval. The human owner still decides.
 
 ## 4. Non-negotiable decisions
 
@@ -818,3 +850,5 @@ from the original and the plan’s “Original reference” sections.
 - [ ] Performance benchmark run for hot-path changes.
 - [ ] Commit message is imperative and scoped.
 - [ ] The change can be explained in terms of the plan, not just the code.
+- [ ] Any approval request includes the cumulative approval report in section 3.12: every round, every finding
+      and resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Major gate statement.

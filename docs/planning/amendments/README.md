@@ -79,6 +79,8 @@ restart the audit at the new frozen commit.
 - The review record is the only file the reviewer may commit.
 - A small amendment may be `Waived` only by explicit human-owner approval, with the rationale recorded in the
   amendment page.
+- When an amendment review verdict is presented for acceptance, include the cumulative approval report required
+  by [`AGENTS.md` §3.12](../../../AGENTS.md), covering every amendment review round, finding, and resolution.
 
 ## 6. Integration and audit
 
@@ -88,6 +90,8 @@ restart the audit at the new frozen commit.
 - The auditor reviews the entire solution: parent step plus integrated amendments.
 - There is one audit verdict, one merge, and one `step-NN` tag for the combined state.
 - The amendment page links to the parent audit record; no separate amendment audit file is created.
+- The parent approval request includes the cumulative report for the combined solution: parent review and audit
+  rounds, every amendment round, every finding and resolution, accepted notes and waivers, and residual risk.
 
 ## 7. Post-merge fallback
 

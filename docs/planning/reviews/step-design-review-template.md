@@ -85,6 +85,31 @@ the auditor's findings, evidence, or verdict.
 Follow-up owner:
 Follow-up step:
 
+## Approval summary
+
+The step agent completes this section before requesting human approval. It must cover the full history, not
+only the latest round.
+
+- [ ] Requested decision and frozen commit recorded
+- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [ ] Accepted notes and waivers recorded with rationale
+- [ ] Residual risks, deferred items, and follow-up owners recorded
+- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
+- [ ] Final CI and documentation-build results recorded
+
+Round history:
+
+| Round | Date | Commit | Reviewer | Verdict |
+| --- | --- | --- | --- | --- |
+| — | — | — | — | — |
+
+Findings and resolutions:
+
+| Finding | Severity | Issue | Resolution | Commit | Status |
+| --- | --- | --- | --- | --- | --- |
+| — | — | — | — | — | — |
+
 ## Human approval
 
 - [ ] Accepted: Ready for implementation

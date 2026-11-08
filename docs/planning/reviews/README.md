@@ -72,8 +72,9 @@ The planner, implementor, or human owner may spawn a reviewer. The spawner must 
 6. If the verdict is `Changes required`, the planning agent and step agent update the design docs directly, the
    step agent adds the resolutions and marks the review `Re-review required`, and a fresh planning auditor
    re-reviews the new commit. The new round is appended; earlier rounds are not overwritten.
-7. On `Ready for implementation`, the human owner approves the start. The step branch is created from the
-   reviewed `main` commit.
+7. On `Ready for implementation`, the human owner approves the start. The approval request includes the
+   cumulative approval report in section 11, covering every round and finding. The step branch is created from
+   the reviewed `main` commit.
 8. The post-implementation audit in `docs/planning/audits/` remains mandatory and separate.
 
 ## 5. What the review must cover
@@ -152,3 +153,11 @@ earlier round.
 - The parent review record links to the amendment review record.
 - The reviewer still edits only the review record and commits only that file.
 - The parent audit covers the combined solution; an integrated amendment does not get a separate audit or tag.
+
+## 11. Approval report
+
+When a review verdict is presented to the human owner, the requesting agent must include the cumulative approval
+report required by [`AGENTS.md` §3.12](../../../AGENTS.md). It must cover every review round, every finding and its
+resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Major gate statement. Reporting only
+the latest round or only open findings is not acceptable. The record's `Approval summary` section is the durable
+source for that report.
