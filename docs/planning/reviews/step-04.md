@@ -14,16 +14,16 @@
 | Step | 04 — Transition Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Changes required |
+| Design review status | Ready for implementation — accepted |
 | Reviewed commit | `a3d8641` |
 | Docs branch | `main` |
 | Review date | 2026-11-08 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
 
 > Round 1 reviewed `b426a13`, round 2 reviewed `4f4c888`, and round 3 reviewed `43bad05` and returned
-> `Changes required`; round 4 reviewed `fe2331c` and returned `Ready with notes`. The design was revised in
-> `a3d8641`; the request metadata now points at that commit for round 5. The earlier reviewer text is
-> unchanged.
+> `Changes required`; round 4 reviewed `fe2331c` and returned `Ready with notes`; round 5 reviewed `a3d8641`
+> and returned `Ready for implementation`. The human owner approved the start gate on 2026-11-08. The earlier
+> reviewer text is unchanged.
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
 
@@ -258,13 +258,13 @@ Findings and resolutions:
 
 ## Human approval
 
-- [ ] Accepted: Ready for implementation
+- [x] Accepted: Ready for implementation
 - [ ] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (chat approval)
+Date: 2026-11-08
 
 ## Resolution status
 
