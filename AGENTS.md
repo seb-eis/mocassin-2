@@ -70,6 +70,10 @@ Before changing anything, read these in order:
 The plan is the source of truth. If code and plan disagree, stop and reconcile them rather than silently
 following one.
 
+Design scratches live in [`docs/planning/drafts/`](docs/planning/drafts/). They are non-normative and are not an
+implementation authorization. A draft becomes a decision only through an ADR, step-page update, amendment, or
+reviewed design change.
+
 ## 3. Branch and merge rules (mandatory)
 
 These rules override convenience. If you are unsure, stop and ask the user.
