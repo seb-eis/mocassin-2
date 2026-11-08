@@ -7,11 +7,11 @@ orbit/permutation reduction, and periodic geometry kernels.
 
 ## Implementation status
 
-- **Status:** In progress
-- **Step branch:** `step/02-symmetry-and-geometry`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) at `09a3317` (closeout CI policy dispatch; Ubuntu)
-- **Main merge:** —
-- **Step tag:** —
+- **Status:** Done
+- **Step branch:** `step/02-symmetry-and-geometry` (merged and deleted)
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) at `09a3317`; [main CI green](https://github.com/seb-eis/mocassin-2/actions/runs/42478570935) at `dbf5691`
+- **Main merge:** `dbf5691` — `--no-ff` merge
+- **Step tag:** `step-02` pushed
 - **Audit:** Passed with notes at `6341b56` (layout-only refactor re-audited)
 - **Design review:** Ready with notes — accepted by the human owner on 2026-11-07
 - **Last updated:** 2026-11-07
