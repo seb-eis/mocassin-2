@@ -6,7 +6,7 @@
 | --- | --- |
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
-| Audit status | Fixes required |
+| Audit status | Passed with notes |
 | Audited commit | `cfc419f` (re-audit-fix solution; docs-only status commit follows) |
 | Step branch | `step/02-symmetry-and-geometry` |
 | Step tag | — |
@@ -447,3 +447,196 @@ status commit follows; it changes no code, tests, or configuration.
 
 Re-audit request: review `cfc419f` and the following docs-only status commit. Earlier rounds and resolutions
 remain unchanged.
+
+## Re-audit round 3
+
+### Re-audit request
+
+| Field | Value |
+| --- | --- |
+| Step | 02 — Symmetry and Geometry |
+| Request owner | Step agent |
+| Audit status | Passed with notes |
+| Reviewed commit | `cfc419f` (`step-02: use independent symmetry oracles (re-audit fix)`) |
+| Freeze commit | `942667d` (docs-only re-audit request/status commit) |
+| Step branch | `step/02-symmetry-and-geometry` |
+| Review date | 2026-11-08 |
+| Reviewer | Independent out-of-context audit agent (same auditor; no implementation edits) |
+| CI run | [42469556610](https://github.com/seb-eis/mocassin-2/actions/runs/42469556610) — `completed`/`success` at `cfc419f` |
+
+Earlier evidence, findings, and verdicts remain unchanged. This round re-checks the independent-oracle and
+fixture fixes, the residual documentation items, and the full gate set.
+
+### Evidence
+
+#### Revision and tree
+
+```text
+git branch --show-current
+step/02-symmetry-and-geometry
+
+git status --porcelain=v1
+(no output; clean working tree)
+
+git rev-parse HEAD
+942667dd5129feac5863ffb453f6225c579e3c1f
+
+git log --oneline -6
+942667d docs: request step-02 re-audit round 3 [skip ci]
+cfc419f step-02: use independent symmetry oracles (re-audit fix)
+41052da docs: record step-02 re-audit Fixes required [skip ci]
+eafc5d5 docs: request step-02 re-audit [skip ci]
+4a30fdf step-02: add brute-force symmetry oracles (audit fix)
+8fdb7a4 docs: record step-02 audit Fixes required [skip ci]
+```
+
+The audited solution is `cfc419f`; `942667d` is the docs-only re-audit request/freeze commit. The tree
+remained clean after the gates.
+
+#### Build, tests, format
+
+```text
+dotnet restore Mocassin.slnx
+All projects are up-to-date for restore.
+
+dotnet build Mocassin.slnx -c Release --no-restore
+Build succeeded. 0 Warning(s), 0 Error(s).
+
+dotnet test Mocassin.slnx -c Release --no-build
+Passed: Mocassin.Symmetry.Tests 127/127
+Passed: Mocassin.Core.Tests 167/167
+Passed: Mocassin.Packages.Tests 30/30
+Passed: Mocassin.App.Tests 1/1
+Passed: Mocassin.Compilation.Tests 1/1
+Passed: Mocassin.Contracts.Tests 1/1
+Passed: Mocassin.Results.Tests 1/1
+Failed: 0, Skipped: 0
+
+dotnet format Mocassin.slnx --verify-no-changes --no-restore
+exit 0 (workspace-loading warning printed; no formatting changes)
+```
+
+Targeted oracle run:
+
+```text
+dotnet test src/dotnet/Mocassin.Symmetry.Tests/Mocassin.Symmetry.Tests.csproj -c Release --no-build \
+  --filter "FullyQualifiedName~BruteForceReductionTests|FullyQualifiedName~EverySettingMatchesTheFrozenGeneralMultiplicityTable|FullyQualifiedName~RandomValidCellsMatchBruteForceMinimumImageAndRadialSearch"
+Total tests: 7; Passed: 7; Failed: 0.
+Names include PairReductionMatchesExplicitEnumeratedOrbitsInP2/Pmmm,
+PairReductionMatchesExplicitEnumerationForRandomP2Targets,
+ClusterReductionMatchesExplicitPermutationOracleInP2AndPmmm,
+ClusterReductionMatchesOracleForRandomAllowedOccupations,
+EverySettingMatchesTheFrozenGeneralMultiplicityTable, and
+RandomValidCellsMatchBruteForceMinimumImageAndRadialSearch.
+```
+
+#### Independent oracle checks
+
+The pair oracle no longer calls `PairReduction` for expectations. It enumerates periodic images over an
+explicit offset box, partitions them with union-find, uses public double `SymmetryOperation.Transform` plus
+`UnitCellVectorEncoder` lookup for image mapping, and compares normalized displacement-orbit signatures for
+chirality. The cluster oracle enumerates all tuples, constructs each permutation orbit, sorts it with its own
+comparer, and builds canonical/expansion codes without calling `ClusterReduction` for expectations.
+
+```text
+python - <<'PY'
+import json
+from ase import __version__ as ase_version
+from ase.spacegroup import Spacegroup
+...
+PY
+ase 3.29.0 fixture entries 230
+ASE mismatches []
+catalog mismatches (rhombohedral/3) []
+```
+
+The ASE check independently regenerated the general-position multiplicity for all 230 international group
+numbers with `Spacegroup(n).equivalent_sites`, compared every value to `ase-general-multiplicities.json`, and
+verified that the rhombohedral-axis rule (`expected = ASE multiplicity / 3`) matches all 274 catalog settings.
+
+#### Documentation, contracts, API, licensing, security, benchmark job
+
+```text
+zensical build --strict
+No issues found
+
+./tools/docs/build-docs.sh
+Zensical strict, DocFX (0 warnings/0 errors), and rustdoc all succeeded
+
+./tools/check-api-compat.sh
+ApiCompat: no breaking changes in 9 assemblies; public API is compatible.
+
+python tools/symmetry/generate_space_groups.py --check
+space-group catalog is current: 274 settings, sha256
+1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395
+
+python tools/contracts/generate.py --check
+Contract artifacts are current (17 files)
+
+python tools/contracts/check_nuget_licenses.py
+NuGet licence policy OK (44 packages).
+
+python tools/check-license-headers.py
+SPDX headers present in 124 source files
+
+python tools/check-no-secrets.py
+No secret patterns found in 391 tracked text files
+
+dotnet list Mocassin.slnx package --vulnerable --include-transitive
+All projects: no vulnerable packages.
+
+python yaml.safe_load(.github/workflows/ci.yml)
+YAML valid; jobs: api-compat, benchmark, contracts, docs, dotnet, platforms, python, rust.
+Benchmark job: ubuntu-latest, workflow_dispatch only, restore/build/P1Expansion20Cubed steps present.
+```
+
+CI run `42469556610` is `completed`/`success` at `cfc419f`; .NET Ubuntu/Windows, Rust, Python 3.11–3.13,
+Documentation, Contracts/policy, and Public API jobs all succeeded. `Benchmark (manual)` was skipped for the
+push event, as designed.
+
+### Fix verification
+
+| Finding | Status | Verification |
+| --- | --- | --- |
+| **M1** — pair/cluster oracles copied production logic; multiplicity same-source | Resolved | The pair oracle now uses explicit candidate enumeration, union-find, public double transforms/encoder lookup, and displacement-orbit signatures; it does not use `PairReduction`’s grid mapping, assigned-set loop, or chiral loop. The cluster oracle enumerates tuples and permutation orbits with its own canonicalization/expansion construction and only calls `ClusterReduction` for the actual result. The ASE 3.29.0 fixture independently reproduces all 230 group multiplicities; the rhombohedral `/3` mapping matches all 274 settings. |
+| **m1** — `CellConditionLimit` | Resolved | Step-page wording now describes the branch as defensive/unreachable under v1 limits and aligns the test-table text. |
+| **m2** — benchmark claim | Resolved — note | Local evidence is clearly labelled; the manual `Benchmark (manual)` job is valid YAML and runs on `workflow_dispatch`. Runner-class verification remains a release-candidate/manual activity, as the reworded acceptance states. |
+| **m3** — documentation overstatement | Resolved | `compilation-pipeline.md` now distinguishes frozen P indices from pair/cluster results verified against brute-force oracles. Architecture rows, Step 02 task boxes, and amendment-2 checkboxes are correct. |
+| **n1** — cache scaffold | Resolved | The pipeline page assigns Step 08 the wiring of the cache into orbit, point-group, pair, and cluster stages. |
+| **n2** — Step 11 fields | Resolved | Step 11 names `symmetry_contract_version`, `space_group_data_version`, and `space_group_data_sha256` in its payload design, task, and acceptance criteria. |
+| **n3** — test tiers | Resolved | `Trait("Tier", "PR-fast")` covers all 22 test classes. |
+| **n4** — stale known-note commit | Resolved | The known note now names `cfc419f`. |
+
+### Findings
+
+| Severity | Finding | Evidence | Resolution |
+| --- | --- | --- | --- |
+| **Note** | **n5 — The pair oracle still uses the public `SpaceGroupOperations.GetStabilizer` and `PeriodicGeometry.ToBucket` helpers.** The reduction-specific union-find, mapping, and chirality logic is independent, but stabilizer construction and bucket rounding are shared with production. This is acceptable because those primitives are separately unit-tested and part of the symmetry contract; a fully independent group implementation is not required for this oracle. | `src/dotnet/Mocassin.Symmetry.Tests/BruteForceReductionTests.cs` (`EnumerateShells`); `SpaceGroupOperations.GetStabilizer`; `PeriodicGeometry.ToBucket`. | No action required; retain the note for future oracle hardening. |
+| **Note** | **n6 — The ASE multiplicity fixture has textual provenance but no committed generator script, exact ASE commit, or fixture checksum.** The source string and `tests/reference/symmetry/README.md` state ASE 3.29.0 and `equivalent_sites`; the auditor independently reproduced all 230 values with ASE 3.29.0. | `tests/reference/symmetry/ase-general-multiplicities.json`; `tests/reference/symmetry/README.md`. | Optional future hardening: add a small generation script and/or checksum. The current provenance is sufficient for this audit. |
+| **Note** | **n7 — The benchmark runner-class result is still pending.** The manual job is valid and the local evidence is labelled, but no `linux-x64-github-ubuntu-latest-dotnet10` run has been recorded yet. | `.github/workflows/ci.yml` benchmark job; `tests/reference/bench/baselines.json` `evidenceStatus`; CI run shows benchmark skipped. | Run the manual benchmark or record the owner-accepted release-candidate result when available. No Step 02 blocker. |
+| **Note** | **n8 — The compiled `.msl` symmetry-version write remains a Step 11 task.** The Step 02 acceptance item stays open by design; Step 11 now names the three fields. | Step 02 acceptance criterion; `docs/planning/steps/step-11-simulation-package-and-msl-writer.md`. | Verify in Step 11 acceptance. |
+
+### Verdict
+
+- [ ] Passed
+- [x] Passed with notes
+- [ ] Fixes required
+- [ ] Re-audit required
+- [ ] Waived
+
+**Passed with notes.** The fix round resolves the remaining M1 test-evidence concern: the pair and cluster
+oracles are now independent of the production reduction builders, the all-setting multiplicity fixture was
+independently reproduced from ASE 3.29.0, and the rhombohedral mapping is correct. All required gates pass at
+`cfc419f`, CI is green, and the earlier m1/m2/m3/n1–n4 items are resolved or explicitly accepted as notes.
+
+The notes above are non-blocking: shared public stabilizer/bucket helpers, optional ASE generator/checksum
+hardening, pending manual runner-class benchmark evidence, and the documented Step 11 payload follow-up. The
+human owner may approve the step merge and tag after reviewing these notes. This audit does not itself
+authorize the merge.
+
+Follow-up owner: Step agent / implementor (status note and any optional hardening); human owner (merge and tag
+approval).
+
+Follow-up issue/step: Record the passed re-audit in the status dashboard, run the manual runner-class
+benchmark when convenient, and verify the three symmetry version fields in Step 11. Merge
+`step/02-symmetry-and-geometry` into `main` only with explicit human owner approval.
