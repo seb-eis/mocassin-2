@@ -14,16 +14,25 @@
 | Step | 03 — Particle and Structure Models |
 | Request owner | Step agent |
 | Audit initiated by | Step agent |
-| Audit status | Fixes required |
-| Audited commit | `5a06d67` |
+| Audit status | Re-audit required |
+| Audited commit | `b6a97ec` |
 | Step branch | `step/03-particle-and-structure-models` |
 | Step tag | — |
-| Closeout CI run | [`42511003132`](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) — green at `5a06d67` |
+| Closeout CI run | [`42514332091`](https://github.com/seb-eis/mocassin-2/actions/runs/42514332091) — green at `b6a97ec` |
 | Platform CI | Not run (Ubuntu-only policy) |
 | Audit date | 2026-11-08 |
 | Auditor | Independent out-of-context audit agent (fresh context; no shared conversation with the implementor or planner) |
 
 Step page: [`Step 03 — Particle and Structure Models`](../steps/step-03-particle-and-structure-models.md)
+
+## Re-audit request
+
+Round 1 returned `Fixes required` at `5a06d67`. F1–F5 were fixed on
+`feature/step-03-particle-and-structure-models/fix-audit-findings` and squashed as `b6a97ec`; F6 is accepted
+as a note with the benchmark evidence explicitly labelled. The replacement closeout CI run
+[`42514332091`](https://github.com/seb-eis/mocassin-2/actions/runs/42514332091) is green at `b6a97ec`.
+The step branch is refrozen at `b6a97ec`; a fresh re-audit of the complete step is requested. Earlier
+reviewer-authored findings, evidence, and verdict are preserved unchanged below.
 
 ## Step summary
 
@@ -266,7 +275,12 @@ the audit record to `Re-audit required` and request a fresh audit of the new com
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F1 — non-finite dummy preview throw | Fixed — `TryCreatePreview` returns `STR010` and no preview; regression test added | Step agent | `b6a97ec` |
+| F2 — default `ParticleIds` validation throw | Fixed — `init` normalization plus validator guard; emits `PAR005`; tests added | Step agent | `b6a97ec` |
+| F3 — documentation/status drift | Fixed — diagnostic ownership, `STR008` typo, status dashboard, and project-format rows corrected | Step agent | `b6a97ec` |
+| F4 — missing random model round-trip property | Fixed — `ModelPropertyTests` added | Step agent | `b6a97ec` |
+| F5 — BZO benchmark fixture omitted H | Fixed — fixture uses 17 P1 positions / `[1,1,3,12]`; baseline and raw result regenerated | Step agent | `b6a97ec` |
+| F6 — runner-class evidence label | Accepted note — `evidenceStatus` added; local-container evidence explicit; target class re-verified manually | Human owner (fix approval) | `b6a97ec` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.

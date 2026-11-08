@@ -9,10 +9,10 @@ validation and a stable public API.
 
 - **Status:** In progress
 - **Step branch:** `step/03-particle-and-structure-models`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) at `5a06d67` (closeout dispatch; Ubuntu)
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42514332091) at `b6a97ec` (replacement closeout dispatch; Ubuntu)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Fixes required at `5a06d67` — fix branch in progress
+- **Audit:** Re-audit required at `b6a97ec` (round 1 `Fixes required` at `5a06d67`; fixes and resolutions recorded)
 - **Design review:** [Ready with notes — accepted](../reviews/step-03.md)
 - **Feature list:** Approved 2026-11-08; step branch created
 - **Last updated:** 2026-11-08
@@ -27,7 +27,7 @@ validation and a stable public API.
 | `validation-composition` | `feature/step-03-particle-and-structure-models/validation-composition` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146, Packages 40/40 | — | `18940a1` |
 | `samples-and-docs` | `feature/step-03-particle-and-structure-models/samples-and-docs` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 263/263, Symmetry 150/150, Packages 40/40 | — | `9039b6f` |
 | `closeout` | `feature/step-03-particle-and-structure-models/closeout` | Squashed | `./tools/verify.sh all` passes; Core 263/263, Symmetry 152/152, Packages 41/41, Architecture 1/1 | [`42511003132`](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) — green | `5a06d67` |
-| `fix-audit-findings` | `feature/step-03-particle-and-structure-models/fix-audit-findings` | Awaiting approval | `./tools/verify.sh all` passes; Core 266/266, Symmetry 153/153, Packages 41/41, Architecture 1/1; BZO benchmark 9.98 µs (17 P1) | — | — |
+| `fix-audit-findings` | `feature/step-03-particle-and-structure-models/fix-audit-findings` | Squashed | `./tools/verify.sh all` passes; Core 266/266, Symmetry 153/153, Packages 41/41, Architecture 1/1; BZO benchmark 9.98 µs (17 P1) | [`42514332091`](https://github.com/seb-eis/mocassin-2/actions/runs/42514332091) — green | `b6a97ec` |
 
 **Deviations and notes:**
 
