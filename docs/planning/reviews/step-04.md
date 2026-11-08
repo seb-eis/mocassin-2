@@ -15,14 +15,14 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Changes required |
-| Reviewed commit | `43bad05` |
+| Reviewed commit | `fe2331c` |
 | Docs branch | `main` |
 | Review date | 2026-11-08 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
 
-> Round 1 reviewed `b426a13` and returned `Changes required`. Round 2 reviewed `4f4c888` and returned
-> `Changes required`. The design was revised in `43bad05`; the request metadata now points at that commit for
-> round 3. The earlier reviewer text is unchanged.
+> Round 1 reviewed `b426a13`, round 2 reviewed `4f4c888`, and round 3 reviewed `43bad05`; all returned
+> `Changes required`. The design was revised in `fe2331c`; the request metadata now points at that commit for
+> round 4. The earlier reviewer text is unchanged.
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
 
@@ -906,3 +906,64 @@ path. The remaining minors/notes (R3-2–R3-10) do not independently block the s
 the same revision. A re-review requires a new design commit with fixes; do not create the step branch or start
 implementation before that. The human owner may treat the Blocker as the gate; if they reclassify it as a Major,
 the verdict remains `Changes required`.
+
+## Round 3 resolutions
+
+Design revision: `fe2331c` — design and data-contract corrections for round 3. This section is owned by the
+planner/step agent and does not alter the reviewer's round-3 findings, evidence, or verdict.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| R3-1 | Resolved — awaiting re-review | Moved `TransitionPathResolver` and the path validator to `Mocassin.Symmetry.Transitions`. The resolver expands each reference site to its P1 orbit with `UnitCellVectorEncoder`, maps a path point to a `(P, cell-offset)` encoding and owning reference site, and accepts any symmetry-equivalent orbit member. Core keeps only the definition-level validator; `ProjectValidationService` composes Core and Symmetry diagnostics. The ceria acceptance criterion and tests now require an orbit-member endpoint. |
+| R3-2 | Resolved — awaiting re-review | The ownership sentence now says `TRN001`–`TRN028`. |
+| R3-3 | Resolved — awaiting re-review | Help anchors now point at `docs/reference/transitions.md`; Step 07 owns the consolidated diagnostics/troubleshooting pages. |
+| R3-4 | Resolved — awaiting re-review | `ProjectHasher.ComputeTransition` now hashes the full `ParticleOrder` (all particles plus void), not only referenced particles; the cache test covers an unreferenced-particle change. |
+| R3-5 | Resolved — awaiting re-review | Path matching uses a periodic component-wise difference over every P1 position with `PathMatchTolerance`, so `0.9999995` matches `0.0`; `TrimToUnitCell` is used for canonicalization, not as the only boundary rule. |
+| R3-6 | Resolved — awaiting re-review | TRN026 now says an unstable position's group must contain exactly one `[D, ∅]` state change in the table, section 7, and the defect table. |
+| R3-7 | Resolved — awaiting re-review | Non-positive `(A,B,C)` counts throw `ArgumentOutOfRangeException` as a programmer contract violation, matching Step 03; invalid model data still returns null plus diagnostics. |
+| R3-8 | Resolved — awaiting re-review | Added the `docs/user-guide/index.md`, `docs/physics/index.md`, and `docs/reference/index.md` update task. |
+| R3-9 | Resolved — awaiting re-review | Added `IProjectQuery : IParticleQuery, IStructureQuery, ITransitionQuery`; the preview service takes that single same-snapshot query instead of separate query objects. |
+| R3-10 | Resolved — awaiting re-review | The cache risk row now lists the transition closure hash including the full particle order, structure hash, `(A,B,C)`, and symmetry catalog/contract versions. |
+
+## Re-review round 4
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Step | 04 — Transition Model |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `fe2331c` |
+| Docs branch | `main` |
+| Review date | — |
+| Reviewer | — |
+
+Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
+
+The design content for round 4 is frozen at `fe2331c`. The delta from the round-3 commit `43bad05` is the
+round-3 fix; the review request and status changes are metadata only. Verify the delta yourself with
+`git diff --stat 43bad05..fe2331c`.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for this round below. Keep the
+earlier rounds unchanged.
+
+### Re-review evidence
+
+_Reviewer to complete._
+
+### Re-review findings
+
+_Reviewer to complete._
+
+### Re-review verdict
+
+- [ ] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+Follow-up owner:
+Follow-up step:
