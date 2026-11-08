@@ -312,11 +312,11 @@ verdict.
 | Step | 04 — Transition Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Changes required |
 | Reviewed commit | `4f4c888` |
 | Docs branch | `main` |
-| Review date | — |
-| Reviewer | — |
+| Review date | 2026-11-08 |
+| Reviewer | Independent planning auditor (fresh context, round 2; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
 
@@ -329,19 +329,263 @@ round-1 text unchanged.
 
 ### Re-review evidence
 
-_Reviewer to complete._
+**Independence.** I am a fresh planning auditor for round 2. I did not author or implement the Step 04 design,
+the fix round, or any implementation; I have no shared conversation with the planner or implementor. I read the
+frozen design content and the repository myself; I did not rely on the request summary or the resolution table.
+
+**Frozen state and worktree.** Worktree `/workspace/mocassin`, branch `main`, `HEAD` `3338963`. The request names
+`4f4c888` (`4f4c888a191c1e2c75eb9b71afe783cdb3d55e6e`) as the frozen design commit. `git diff 4f4c888..3338963
+--stat` shows only `docs/planning/reviews/step-04.md`, `docs/planning/status.md`, and the step-page design-review
+link; the design content is otherwise identical. The record commit's parent will be `3338963`, not `4f4c888`,
+because the re-review request sits between the design commit and the record; this is the same process note as
+round 1 (n2).
+
+**Commands run (from `/workspace/mocassin`):**
+
+```sh
+git status --short
+# (no output: clean worktree)
+
+git log --oneline --decorate -6
+# 3338963 (HEAD -> main) docs: request step-04 design re-review [skip ci]
+# 4f4c888 docs: revise step-04 design after review [skip ci]
+# 12c8107 docs: record step-04 design review Changes required [skip ci]
+# 7d0757b (origin/main) docs: freeze step-04 design for review [skip ci]
+# c0928f1 docs: request step-04 design review [skip ci]
+# b426a13 docs: prepare step-04 design for review
+
+git rev-parse 4f4c888
+# 4f4c888a191c1e2c75eb9b71afe783cdb3d55e6e
+
+git show --stat 4f4c888
+# docs/planning/02-data-contracts.md                 |  30 +-
+# docs/planning/steps/step-04-transition-model.md    | 470 ++++++++++++++++-----
+# docs/planning/steps/step-05-energy-model.md        |   4 +
+# .../steps/step-06-lattice-and-simulation-models.md |   4 +
+# .../steps/step-07-validation-and-diagnostics.md    |   4 +
+# docs/planning/steps/step-08-model-compilation-pipeline.md | 7 +-
+# ...model-editors-particle-structure-transitions.md |   3 +-
+# 7 files changed, 399 insertions(+), 123 deletions(-)
+
+git diff --stat b426a13..4f4c888 -- docs/planning
+# 9 files changed, 673 insertions(+), 127 deletions(-)
+
+git diff b426a13..4f4c888 -- docs/planning
+# Read in full: the Step 04 revision, the data-contract delta, the dependent Step 05/06/07/08/24 changes,
+# the review-record request, and the status change.
+
+git show 4f4c888:docs/planning/steps/step-04-transition-model.md
+# Read in full (651 lines).
+
+git show 4f4c888:docs/planning/02-data-contracts.md
+# Read the model envelope (149-170), transition section (262-336), simulation/parameterization sections, and
+# the canonical-hash rules (1189 lines total).
+
+git diff 4f4c888..3338963 --stat
+# docs/planning/reviews/step-04.md                | 92 +++++++++++++--
+# docs/planning/status.md                         | 10 +--
+# docs/planning/steps/step-04-transition-model.md |  2 +-
+# 3 files changed, 91 insertions(+), 13 deletions(-)
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.23s
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+
+git diff --check b426a13..4f4c888
+# (no output)
+```
+
+**Additional read-only checks.**
+
+```sh
+wc -l src/dotnet/Mocassin.Core/Editing/ProjectEditor.cs
+# 506
+
+grep -n "StateChangeId\|StateChangeGroupId\|TransitionChainId\|KineticTransitionId\|MetropolisTransitionId" \
+  src/dotnet/Mocassin.Core/Ids/TypedIds.cs
+# 123/142/161/180/199: all five typed IDs already exist
+git log --oneline -- src/dotnet/Mocassin.Core/Ids/TypedIds.cs
+# dd642d6 step-03: add crystal structure domain model
+# 90b4497 step-01: add typed ids, units, and diagnostics
+
+grep -rn "PathMatchTolerance\|TrimToUnitCell" src/dotnet --include=*.cs | grep -v '/bin/' | grep -v '/obj/'
+# TrimToUnitCell is used in Fractional3, UnitCellVectorEncoder, SpaceGroupOperations, tests;
+# PathMatchTolerance does not exist yet.
+
+grep -n "CreateCacheKey" -A 6 src/dotnet/Mocassin.Symmetry/Structure/StructurePreviewService.cs
+# The key includes SpaceGroupDataVersion, SpaceGroupDataSha256, SymmetryContractVersion, structureHash, A, B, C.
+
+ls docs/reference docs/troubleshooting
+# docs/reference: file-layout.md index.md project-format.md (no diagnostics.md)
+# docs/troubleshooting: index.md (no errors.md)
+```
+
+**Files reviewed.** `AGENTS.md` (§3.8–§3.13, §4, §5, §7, §8, §9, §10, §11, §12, §16);
+`docs/planning/reviews/README.md`; `docs/planning/reviews/step-design-review-template.md`; this record;
+`docs/planning/steps/step-04-transition-model.md` at `4f4c888`; `docs/planning/02-data-contracts.md` at
+`4f4c888`; `docs/planning/03-quality-strategy.md`; `docs/planning/05-open-decisions.md`;
+`docs/planning/ci-policy.md`; `docs/planning/appendix-b-parity-matrix.md`; `docs/planning/status.md` at HEAD;
+`docs/planning/steps/step-03-particle-and-structure-models.md`, `step-05-energy-model.md`,
+`step-06-lattice-and-simulation-models.md`, `step-07-validation-and-diagnostics.md`,
+`step-08-model-compilation-pipeline.md`, and
+`step-24-model-editors-particle-structure-transitions.md` at `4f4c888`;
+`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`,
+`0010-canonical-messagepack-signatures.md`, and `0013-format-compatibility-and-api-versioning.md`;
+`docs/development/code-structure.md`; `docs/reference/project-format.md`; `docs/reference/index.md`;
+`contracts/manifest.json`; `contracts/generated/schema/project-v1.schema.json`;
+`contracts/generated/signatures/model-v1.json`; `contracts/generated/fixtures/descriptors.json`;
+`tools/contracts/generate.py`; `tools/verify.sh`; `tools/structure-policy.json`;
+`tools/check-api-compat.sh`.
+
+**Code and test inventory inspected.** `Mocassin.Core`: `Model/ModelDefinition.cs`,
+`Model/ModelDefinitionJsonConverter.cs`, `Model/Structure/CellSite.cs`, `Model/Structure/SiteStability.cs`,
+`Model/Particles/Particle.cs`, `Model/Particles/IParticleQuery.cs`, `Model/ViewSettings.cs` (the camel-case enum
+converter), `Project/Project.cs`, `Project/ProjectJson.cs`, `Project/ProjectHasher.cs`,
+`Project/ProjectCanonicalizer.cs`, `Project/ProjectSchema.cs`, `Project/ProjectValidator.cs`,
+`Editing/ProjectEditor.cs`, `Geometry/Fractional3.cs`, `Geometry/GeometryTolerances.cs`, `Ids/TypedIds.cs`.
+`Mocassin.Symmetry`: `Structure/IStructurePreviewService.cs`, `Structure/StructurePreview.cs`,
+`Structure/StructurePreviewService.cs`, `Geometry/StructureSiteReference.cs`,
+`Geometry/UnitCellVectorEncoder.cs`, `Geometry/ExpandedSite.cs`, `Geometry/SiteOrbitInfo.cs`.
+`Mocassin.Packages`: `Projects/ProjectStore.cs`. `Mocassin.Benchmarks`: `Program.cs`,
+`Structure/StructurePreviewBenchmarks.cs`; `tests/reference/bench/baselines.json`. Original reference
+(read-only, no copy): `KineticTransitionValidator.cs`, `TransitionAnalyzer.cs`,
+`AbstractTransitionValidator.cs`, `StateExchangeGroupValidator.cs`.
+
+**Required scope checks.** All thirteen required review-scope areas were inspected: scope/non-goals/acceptance,
+ModelDefinition and JSON/schema round-trip, semantic ordering, every built-in pattern and `Custom`,
+path/stability validation, query/preview boundaries, TRN001–TRN027, manifest/schema/fixtures,
+PublicAPI/ApiCompat, code layout, Step 03 dependency stability, documentation/navigation and test plan, and
+Steps 05/06/07/08/24 interfaces. The findings below record the result.
+
+### Re-review checklist
+
+Marks and notes apply to round 2 only; item text is unchanged.
+
+**Design decisions reviewed**
+
+- [x] Step page design decisions — reviewed the frozen page; M1, M3–M6, M8, M9 and m1–m16 are substantially
+  addressed; R2-1–R2-5 are substantive gaps.
+- [x] Data contracts and format changes — reviewed the model envelope and transition section; the flat/nested
+  shape is contradictory (R2-1).
+- [x] Architecture and module boundaries — Core/Symmetry/Packages separation is sound; the preview-query
+  boundary still lacks particle access (R2-2).
+- [x] ADRs and open decisions — ADR 0009/0010/0013 and the Step 03 additive-v1 precedent are cited; n1 is
+  resolved.
+- [x] Quality strategy and test plan — property tests, fixtures, tiers, and the benchmark are present; the
+  pattern/vehicle/ring cases are missing (R2-3–R2-5).
+- [x] Parity matrix and documentation plan — the parity/status/closeout/audit tasks are present; diagnostics
+  page ownership is still ambiguous (R2-10).
+- [x] Licensing and provenance — no new dependency; MIT/SPDX applies; no GPL source or data is introduced.
+- [x] Post-implementation audit plan — the standard AGENTS §3.10 audit applies; the closeout task is present.
+
+**Dependency and interface checks**
+
+- [x] Dependencies are `Done` and their contracts are stable — Step 03 is complete (`step-03` tag; audit
+  passed); the required Core/Symmetry types exist.
+- [ ] Inputs, outputs, types, and formats are defined — partial: the project JSON shape (R2-1) and the
+  `ITransitionQuery` particle access (R2-2) are unresolved.
+- [x] Versioning and migration behavior is defined — additive project-v1; Step 03 precedent; ADR 0009 wording
+  is addressed (n1).
+- [ ] No unresolved cross-step interface question remains — R2-1 (Steps 05/06/08/24) and R2-2 (Steps 06/08/24)
+  are open.
+
+**Standard design-review checklist**
+
+- [x] Scope, non-goals, and acceptance criteria are explicit and testable — non-goals are now present; most
+  criteria are testable, but the pattern/vehicle/ring cases need added criteria (R2-3–R2-5).
+- [ ] Design decisions are complete and internally consistent — the pattern stability/vehicle rules and the
+  ring definition contradict the original or each other (R2-3–R2-5).
+- [ ] Required tests, property tests, golden fixtures, and performance targets are defined — the framework is
+  present; the cases that would catch R2-3–R2-5 are missing.
+- [x] Documentation, status, parity, and audit updates are planned — yes; R2-10 is a page-ownership detail.
+- [x] Licensing, provenance, and dependency checks are resolved — no new dependency; MIT/SPDX; no GPL copying.
+- [x] Risks and mitigations are realistic — the table is plausible; it does not list the pattern/vehicle/ring
+  contradictions (R2-3–R2-5).
+- [x] Code layout and namespace plan follow the structure policy — the new folders/files fit the limits;
+  R2-6/R2-7 are task/layout accuracy issues, not policy violations.
+- [ ] No hidden scope, stale placeholders, or unowned decisions — R2-1, R2-2, and R2-7 leave an unowned
+  format/interface/public-surface decision.
 
 ### Re-review findings
 
-_Reviewer to complete._
+#### Round-1 resolution verification
+
+| Finding | Severity | Status | Verification |
+| --- | --- | --- | --- |
+| M1 | Major | Resolved | Step page 91–96 and task 531–534 extend `ProjectJson.CanonicalizeModel`; the current method (`ProjectJson.cs` 91–104) still rebuilds only particles, particle sets, and structure, and `ProjectJson.cs` 262 calls it from `ProjectJsonConverter.Write`. `ProjectStore.SaveAsync` (`ProjectStore.cs` 151, 163) uses `ProjectJson.SerializeToUtf8Bytes`, `ProjectHasher.Compute` (`ProjectHasher.cs` 20–25) uses `SerializeCanonicalModel`, and `ProjectEditor.Apply` (`ProjectEditor.cs` 55–62) compares `ComputeDocument`; `ProjectCanonicalizer.ToCanonicalUtf8` delegates to the same serializer. The persistence/hash path is correctly identified. |
+| M2 | Major | Partially resolved — R2-2 | The new signature (`TryCreatePreview(KineticTransition/MetropolisTransition, ITransitionQuery, StructureModel, A, B, C, out diagnostics)`, step page 403–419) returns `TransitionPreview?` and follows the Step 03 null+diagnostics boundary (427–428). But `ITransitionQuery` (372–385) exposes no particles, while `ParticleOrder` (391, 437–438) is defined from the model's `Particles`; the service cannot build it as documented. |
+| M3 | Major | Resolved | `ReverseTransitionId` is on both transition records (236–249); `TRN027` covers unknown/cross-kind/asymmetric/self links (343); `TRN018` is the missing-reverse warning (334); the data contract persists `reverseTransitionId` (291, 301, 329–330); Step 08 treats the explicit link as a separate transition (201–203); the acceptance criterion is testable (574). |
+| M4 | Major | Resolved | The interaction-range rule is removed from Step 04 (352–354); `ENM018` is defined in Step 05 (170–173) and owned by the Step 07 cross-domain stage (Step 07 82–84); Step 07 depends on 04, 05, and 06. No stale `TRN020` range reference remains. |
+| M5 | Major | Resolved | The charge-transfer exception is removed; groups are unconditionally homogeneous (137–140; data contract 320–322); charge-transfer mechanisms use homogeneous charge-state groups; Step 08 total-charge conservation remains (198). The original `StateExchangeGroupValidator` hybrid rule is reflected. |
+| M6 | Major | Resolved | `TransitionRef`/`TransitionKind` are defined in `Mocassin.Core.Model.Transitions` (211–230); Step 06 now uses `TransitionRef` and keeps the persisted kind-specific arrays (Step 06 128–131; data contract 333–334). |
+| M7 | Major | Partially resolved — R2-5, R2-9 | `TransitionPathResolver`, periodic canonicalization, `PathMatchTolerance = 1e-6`, zero/ambiguous `TRN020`, and periodic-image ring detection are specified (293–311). But the ring rule is first/last only (306–307; data contract 326–327) while the original checks every pair, and the canonicalization uses `x - floor(x)` rather than the repository's `TrimToUnitCell` snap. |
+| M8 | Major | Resolved as a contract — input gap R2-2 | `StateChangeMatrices` now defines length, `ParticleOrder`, row-major indexing, binary cells, stable/unstable cardinality, and the empty/default contract (435–444). The only remaining issue is the query input needed to build `ParticleOrder` (R2-2). |
+| M9 | Major | Resolved | `GeneratesReverse` is constrained to true for `Metropolis2`/`Migration3` and false otherwise (196–199); `TRN024` reports a mismatch (340); the data contract says the same (328); Step 08 reads the flag (201–203). |
+| m1 | Minor | Resolved | Non-goals are present (28–37); the `TRN018` acceptance criterion is now testable (574). |
+| m2 | Minor | Resolved | Property tests (632), contract fixtures (630), tiers (609–613), and the `TransitionPreviewCeria` benchmark (633) are present; the benchmark file is in `Mocassin.Benchmarks/Transitions/` (524). |
+| m3 | Minor | Resolved — R2-10 | Parity (560), status/closeout/audit (561–563), and diagnostics-reference tasks (548–549, 600) are present; the page-ownership detail remains R2-10. |
+| m4 | Minor | Resolved | The layout now says `ProjectJson.cs` owns the nested context and `ProjectSchema` is unchanged (89–96); no `ProjectJsonContext.cs` is listed. |
+| m5 | Minor | Resolved | Transition editing uses partial `ProjectEditor.Transitions.*.cs` files (204–205, 497–501); `Editing/` has 4 existing files, so 7 total is below the 20-file limit; partial naming follows `code-structure.md` §4. |
+| m6 | Minor | Resolved — R2-1 | The manifest task now specifies `status`/`notes`, the two fixtures, schema regeneration, and the `model` signature relationship (550–552). The flat/nested field shape is the remaining ambiguity (R2-1). |
+| m7 | Minor | Not resolved — R2-6 | The layout and task add `Ids/TransitionIds.cs` for five IDs (505–506, 535–536), but all five already exist in `Ids/TypedIds.cs` 123–211, added by Step 03 (`dd642d6`). |
+| m8 | Minor | Resolved — R2-12 | The 2-position custom Metropolis case, the 3–8 grammar, and static-linker placement are defined (187–195); `TRN015`/`TRN023` scoping remains a wording issue (R2-12). |
+| m9 | Minor | Partially resolved — R2-3, R2-4 | `TRN001`–`TRN027` now cover unknown groups, no-unstable chains, cross-kind use, reverse flags, group reuse, the vehicle restriction, and reverse links (317–343). `TRN026` is mistranslated (R2-3), and no rule enforces the built-in pattern stability sequence (R2-4). |
+| m10 | Minor | Resolved | The data-contract example is now `[[0.25, 0.25, 0.25], [0.5, 0.25, 0.25], [0.25, 0.75, 0.25]]`, whose first and last points differ (data contract 290). |
+| m11 | Minor | Resolved — R2-8 | The preview echoes the transition reference and `(A, B, C)` (388–399, 429–430) and documents the null+diagnostics failure and cache contracts (427–434); the cache key still omits the symmetry versions (R2-8). |
+| m12 | Minor | Resolved | `IsAssociation` is intentionally not persisted and Step 08 derives the flag with a test (453–455; Step 08 222–224). |
+| m13 | Minor | Partially resolved — R2-3 | The original-defect table and the warning-to-error severity note are present (348–349, 456–468), but the vehicle row and `TRN026` mistranslate the original single-unstable-group restriction (R2-3). |
+| m14 | Minor | Resolved | The dedicated ceria transition-state occupation-set task is present (557–558); the current sample still uses the shared oxygen set (`samples/ceria/ceria.mocprj`). |
+| m15 | Minor | Resolved | The design names `CamelCaseEnumJsonConverter<T>` (97–99); the converter (`Model/ViewSettings.cs` 382–411) writes camelCase and rejects numeric, empty, and undefined values. |
+| m16 | Minor | Resolved | `TRN019` is the total of kinetic plus metropolis transitions (335); names are unique per collection, case-insensitive, and kinetic/metropolis names may coincide (142–146). |
+| n1 | Note | Resolved | The additive-v1/pre-release rationale and Step 03 precedent are recorded (108–111); the manifest status/notes and fixtures are updated; ADR 0009 is not waived generally. |
+| n2 | Note | Acknowledged — R2-13 | The round-2 record parent is `3338963`; the design content is identical to `4f4c888` except the review record, status, and step-page link. Process note. |
+| n3 | Note | Resolved | The single Ubuntu closeout CI task is present (561–563). |
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Major** | **R2-1 — The persisted project shape is contradictory: flat transition sections vs a nested `model.transitions` object.** The step page says "The model stays flat on disk: `model.stateChanges`, `model.stateChangeGroups`, `model.chains`, `model.kineticTransitions`, and `model.metropolisTransitions`" (66, 83–84; task 531–534). `02-data-contracts.md` 149–160 instead shows a nested `"transitions": {}` property inside `model`, and the `#### Transitions` block (262–304) is the value of that nested object. The manifest `model` field has only `particles`, `particleSets`, and `structure` (`contracts/manifest.json`; `project-v1.schema.json`), so the task "add the transition fields" (550–552) does not say whether to add five flat fields or one nested `transitions` object. This changes the converter, `CanonicalizeModel`, fixtures, the generated schema, and the Step 05/06/08/24 model shape. | Step page 66, 83–84, 531–534, 550–552; `02-data-contracts.md` 149–160, 262–304; `contracts/manifest.json` project `model` field; `contracts/generated/schema/project-v1.schema.json` `/properties/model`; `docs/reference/project-format.md` 174. |
+| **Major** | **R2-2 — `ITransitionQuery` exposes no particles, so `TransitionPreview.ParticleOrder` and `StateChangeMatrices` cannot be built as specified.** The query has only transition-domain arrays and `Find` overloads (372–385). `ParticleOrder` is defined as "the model's `Particles` sorted by ID, followed by the implicit void particle" (391, 437–438), and the matrices are indexed by that order (439–441). The preview receives only `ITransitionQuery`, `StructureModel`, and counts (403–419); the text claims the query lets the service "resolve ... particles" (424–426), which is false. A service that derives the order from `StateChanges` omits unreferenced particles (for example ceria Ce) and disagrees with Step 08/24. | Step page 372–385, 391, 403–419, 424–426, 435–444; `IParticleQuery.cs` (Project already implements `IParticleQuery`); `Project.cs` 12; `StateChange.cs` (model particles are separate). |
+| **Major** | **R2-3 — `TRN026` reverses the original vehicle restriction and would reject the supported `Vehicle6` pattern.** `TRN026` says "Vehicle chain has more than one unstable state-change pair" (342). `Vehicle6` is a documented built-in pattern with stability sequence `S,U,S,S,U,S` (179), i.e. two unstable positions. The original `AbstractTransitionValidator.AddNormalVehicleRestrictionValidation` returns early when `unstableStateGroups.Count > 1` and only warns when exactly one unstable group has `StatePairCount > 1`. The m13 row repeats the mistranslation (468). | Step page 179, 342, 468; original `AbstractTransitionValidator.cs` `AddNormalVehicleRestrictionValidation`. |
+| **Major** | **R2-4 — No rule enforces the built-in pattern stability sequence, so paths with the wrong stable/unstable shape pass validation.** The step page requires the resolved path sequence to match the pattern table (176–179, 304–305). `TRN012` only checks the site against the group at the same index (328); `TRN011`/`TRN013`/`TRN022` only check endpoints, consecutive unstables, and at-least-one-unstable (327, 329, 338). An `Interstitialcy5` chain with groups and path `S,S,U,S,S` passes all four, although the table requires `S,U,S,U,S`. The test plan's "Patterns" row only checks linker sequences (616) and the acceptance criteria only cover the valid cases (569–573). | Step page 176–179, 304–305, 327–329, 338, 569–573, 616. |
+| **Major** | **R2-5 — Ring detection only compares the first and last canonical positions; the original rejects any repeated position.** The step page (306–307) and data contract (326–327) define a ring as first/last canonical equality. The original `TransitionAnalyzer.ContainsRingTransition` checks every pair of positions (`for i` / `for j = i + 1`). An interior repeat such as `0→1→0→2` passes the new rule: endpoints are stable, at least one position is unstable, no two unstables are consecutive, and `TRN012` passes if the groups match. The "Paths" test row only names literal and periodic-image rings (618). | Step page 306–307, 618; `02-data-contracts.md` 326–327; original `TransitionAnalyzer.cs` `ContainsRingTransition`. |
+| **Minor** | **R2-6 — The code layout and task add `Ids/TransitionIds.cs` for five typed IDs that already exist.** `StateChangeId`, `StateChangeGroupId`, `TransitionChainId`, `KineticTransitionId`, and `MetropolisTransitionId` are already in `Ids/TypedIds.cs` 123–211, added by Step 03 (`dd642d6`). A new file would duplicate the type definitions. The task should say "reuse the existing IDs; no new file". | Step page 505–506, 535–536; `Ids/TypedIds.cs` 123–211; `git log -- src/dotnet/Mocassin.Core/Ids/TypedIds.cs`; `tools/structure-policy.json` `allowedMultiTypeSuffixes` includes `Ids`. |
+| **Minor** | **R2-7 — Several referenced public surfaces are absent from the code layout and task list.** `ProjectHasher.ComputeTransition` (431–433) is not in the `Project/` layout (502–504) or tasks; `Project` implementing `ITransitionQuery` (423) is not in the layout (no `Project/Project.cs`); `TransitionRefJsonConverter` (214) is not listed; the benchmark baseline in `tests/reference/bench/baselines.json` is implied by the test row (633) but not tasked. This leaves the PublicAPI/ApiCompat and benchmark work incomplete on paper. | Step page 214, 423, 431–434, 502–506, 540–541, 553–554, 633. |
+| **Minor** | **R2-8 — The preview cache key omits the symmetry catalog and contract versions.** The key is `(transitionRef, transitionModelHash, structureHash, A, B, C)` (431–434). `StructurePreviewService.CreateCacheKey` includes `SpaceGroupDataVersion`, `SpaceGroupDataSha256`, and `SymmetryContractVersion` (`StructurePreviewService.cs` 200–207). The transition preview expands paths through the symmetry engine, so a catalog/contract upgrade can change the preview without changing either hash; the cache-separation test (623) does not cover it. | Step page 431–434, 623; `StructurePreviewService.cs` 200–207; `SymmetryVersionInfo.cs`. |
+| **Minor** | **R2-9 — Path canonicalization uses `x - floor(x)` instead of the repository's `TrimToUnitCell` snap.** `Fractional3.TrimToUnitCell()` (`Fractional3.cs` 114–150) snaps components within `GeometryTolerances.FractionalTrimTolerance` (1e-10) to the integer before wrapping and is used by `UnitCellVectorEncoder` (158, 297) and `SpaceGroupOperations`. With `x - floor(x)`, a point at `-1e-9` becomes `0.999999999` and does not match an origin site at `0.0`, although the periodic distance is 1e-9. The design should use `TrimToUnitCell()` or a wrapped-difference comparison and add a boundary test. | Step page 296–299; `Fractional3.cs` 114–150; `GeometryTolerances.cs` 23; `UnitCellVectorEncoder.cs` 158, 297. |
+| **Minor** | **R2-10 — The diagnostics and troubleshooting pages do not exist, but the design says to "update" them; Step 07 owns the catalog.** `docs/reference/` has only `file-layout.md`, `index.md`, and `project-format.md`; `docs/troubleshooting/` has only `index.md`. `docs/reference/index.md` says diagnostics are added with Step 07, and Step 07's Documentation section (200) owns the complete catalog. The Step 04 task (548–549) and Documentation section (600–601) should say whether Step 04 creates the TRN section or Step 07 creates the page. | Step page 548–549, 600–601; `docs/reference/index.md`; `docs/reference/` and `docs/troubleshooting/` listings; Step 07 200. |
+| **Minor** | **R2-11 — `TryCreatePreview` repeats the Step 03 CA1716 parameter-name problem.** The signature uses `StructureModel structure` (406, 415). Step 03 recorded that `structure` triggers CA1716 and renamed the parameter to `structureModel` (`step-03` 43–44). Warnings are errors (`AGENTS.md` §8; `.editorconfig`), so the Step 04 signature as written will fail the build unless it is renamed or carries the same documented suppression. | Step page 406, 415; step-03 43–44; `AGENTS.md` §8. |
+| **Minor** | **R2-12 — `TRN015`/`TRN023` do not clearly cover a 2-position `Custom` Metropolis chain.** The design says a 2-position `Custom` chain is a Metropolis chain (189–190), but `TRN015` says a Metropolis transition must use a "2-position Metropolis chain" (331) and `TRN023` only rejects `Metropolis2` on the kinetic side (339). If `TRN015` is implemented as `Pattern == Metropolis2`, a valid 2-position `Custom` Metropolis transition is rejected; if it accepts any 2-position chain, the wording should say so. | Step page 189–190, 331, 339. |
+| **Note** | **R2-13 — Record parent is the re-review request, not the design commit.** The record commit's parent is `3338963`; `git diff 4f4c888..3338963 --stat` shows only the review record, `status.md`, and the step-page design-review link. The design content is otherwise identical. Process note for the human owner, not a design finding. | Commands in Evidence. |
+| **Note** | **R2-14 — Sample location wording is ambiguous.** The page says "Samples live under `samples/transitions/`" (526), while the task adds ceria KMC/MMC/polaron-hop samples and updates `samples/ceria/ceria.mocprj` (555–558). Clarify which files are new under `samples/transitions/` and which update the existing ceria sample. | Step page 526, 555–558; `samples/ceria/ceria.mocprj`. |
+| **Note** | **R2-15 — `TRN018` is described as a chain rule in one place and a transition rule in another.** Section 3 says "TRN018 warns when a complex chain has no reverse link" (201–202), while the table (334) and acceptance criterion (574) are transition-scoped. The reverse link lives on the transition record, so the table/acceptance are correct; reword section 3. | Step page 201–202, 334, 574. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
+verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
+the auditor's findings, evidence, or verdict.
 
 ### Re-review verdict
 
 - [ ] Ready for implementation
 - [ ] Ready with notes
-- [ ] Changes required
+- [x] Changes required
 - [ ] Re-review required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up step:
+Follow-up owner: Planner and Step 04 agent (design revision and findings resolution)
+Follow-up step: Step 04 — Transition Model; a fresh re-review is required after the design commit
+
+**Changes required.** Five Major findings remain (R2-1–R2-5). The fix round resolved M1, M3–M6, M8, M9 and
+most minors/notes, and the design is substantially stronger: canonical persistence, reverse links,
+`TransitionRef`, `StateChangeMatrices`, the custom grammar, and the test plan are now present. However, the
+persisted project shape is still contradictory (R2-1), the preview query still cannot supply the particle order
+(R2-2), `TRN026` would reject the supported `Vehicle6` pattern (R2-3), no rule enforces the built-in pattern
+stability sequences (R2-4), and the ring rule is narrower than the original (R2-5). Each is a material design or
+cross-step interface issue, so the step cannot start as written. No Blocker is recorded, and the human owner may
+treat any Major as blocking. A re-review requires a new design commit with fixes; do not create the step branch
+or start implementation before that.
