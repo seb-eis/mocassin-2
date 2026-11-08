@@ -241,11 +241,11 @@ does not alter the reviewer's findings, evidence, or verdict.
 | Step | 03 — Particle and Structure Models |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Ready with notes |
 | Reviewed commit | `3096aa82c37a1f5e9fd6bf9ef83576fe691cb6ff` (`3096aa8`) |
 | Docs branch | `docs/step-03-design-fixes` |
-| Review date | — |
-| Reviewer | — |
+| Review date | 2026-11-08 |
+| Reviewer | Independent planning auditor (fresh context, round 2) |
 
 Step page: [`Step 03 — Particle and Structure Models`](../steps/step-03-particle-and-structure-models.md)
 
@@ -258,19 +258,137 @@ round-1 text unchanged.
 
 ### Re-review evidence
 
-_Reviewer to complete._
+**Independence.** I am a fresh, independent planning auditor for round 2. I did not author or implement the
+Step 03 design, the fix round, or any implementation; I have no shared conversation with the planner or
+implementor. I reviewed the design content frozen at `3096aa8` and treated `a90057a` only as request,
+resolution-status, and status metadata.
+
+Files reviewed:
+
+- `AGENTS.md` §§3.8, 3.9, 3.10, 3.12, 10–13, 16; `docs/planning/reviews/README.md`;
+  `docs/planning/reviews/step-design-review-template.md`; this record.
+- Step 03 at `3096aa8`, plus `step-02-symmetry-and-geometry.md`,
+  `step-04-transition-model.md`, `step-07-validation-and-diagnostics.md`, and
+  `step-08-model-compilation-pipeline.md`.
+- Planning contracts: `01-target-architecture.md`, `02-data-contracts.md`, `03-quality-strategy.md`,
+  `05-open-decisions.md`, `appendix-b-parity-matrix.md`, `status.md`.
+- Public docs: `docs/reference/project-format.md`, `docs/glossary/notation.md`,
+  `docs/development/design-decisions.md`, `docs/development/code-structure.md`.
+- Contracts: `contracts/manifest.json`, `contracts/generated/schema/project-v1.schema.json`.
+- Existing code: `Project`, `ProjectJson`/`ProjectDto`, `ProjectHasher`, `ProjectCanonicalizer`,
+  `ProjectValidator`, `ProjectEditor`, `ProjectStore`, `Diagnostic`, `ModelPath`, `TypedIds`,
+  `UnitCellVectorEncoder`, `StructureDiagnosticCodes`, `SymmetryVersionInfo`, `SymmetryCache`,
+  `SpaceGroupCatalog`, `Mocassin.Benchmarks/Program.cs`, `tests/reference/bench/baselines.json`,
+  `tools/structure-policy.json`, and `Mocassin.Architecture.Tests/StructureChecks`.
+- Original reference (read-only, no copy): `StructureInfo.CreateDefault` and `StructureInfoData` for the
+  `Unnamed`/`New Structure` default.
+
+Commands run (read-only):
+
+```text
+git status --short                         -> clean
+git log --oneline -5                       -> a90057a, 3096aa8, a3a330c, b5802bc, 1beb8da
+git diff --stat 1beb8da..3096aa8           -> 6 files, 300 insertions(+), 97 deletions(-)
+git diff --stat 3096aa8..HEAD              -> reviews/step-03.md, status.md, and one metadata line in the step page
+git diff 3096aa8..HEAD -- step page        -> only the Design review link changes
+git diff --check                           -> clean
+zensical build --strict                    -> No issues found
+python tools/contracts/generate.py --check -> Contract artifacts are current (17 files)
+python catalog inspection                  -> 274 settings; maximum 192 operations
+```
+
+The post-freeze delta at `a90057a` is metadata only: the round-2 request, the resolution-status table, the
+status dashboard, and the step-page design-review link. No implementation build or test was run because no
+Step 03 implementation exists. I did not modify code, tests, or any file other than this record.
+
+### Re-review checklist
+
+Marks and notes apply to round 2 only; item text is unchanged.
+
+**Design decisions reviewed**
+
+- [x] Step page design decisions — reviewed the frozen page; M1–M6, m1–m8, and n1–n3 are addressed; R2-1 and R2-2 are new small inconsistencies.
+- [x] Data contracts and format changes — the `symmetry` mapping, `PAR010`–`PAR012`, `STR014`/`STR015`, and semantic-order rules are aligned; R2-3 notes the hash documentation.
+- [x] Architecture and module boundaries — the Core/Symmetry/Packages split is sound; `ProjectValidationService` is the composition point and `ProjectStore` calls it.
+- [x] ADRs and open decisions — no new ADR is required; the project symmetry-metadata decision is recorded.
+- [x] Quality strategy and test plan — the benchmark and the missing test rows are now present; R2-2 notes the tier wording.
+- [x] Parity matrix and documentation plan — the parity rows are planned and the documentation plan is present except R2-3.
+- [x] Licensing and provenance — n3 is resolved; no new third-party dependency is introduced.
+- [x] Post-implementation audit plan — the standard frozen-branch audit applies.
+
+**Dependency and interface checks**
+
+- [x] Dependencies are `Done` and their contracts are stable — Steps 01 and 02 are Done/tagged and the Step 02 catalog/encoder types are available.
+- [x] Inputs, outputs, types, and formats are defined — `ProjectSymmetryMetadata`, `StructureSiteReference`, `SiteOrbitOverlap`, `STR014`, and the benchmark are specified.
+- [x] Versioning and migration behavior is defined — the fields are additive and `schemaVersion` remains 1.
+- [x] No unresolved cross-step interface question remains — M1/M2/M3/M5 are resolved; R2-5 is a constant-placement detail, not an interface gap.
+
+**Standard design-review checklist**
+
+- [x] Scope, non-goals, and acceptance criteria are explicit and testable — the performance criterion is now benchmark-backed; R2-2 is a tier-wording issue.
+- [x] Design decisions are complete and internally consistent — the substantive design is consistent; R2-1 and R2-3 are small inconsistencies.
+- [x] Required tests, property tests, golden fixtures, and performance targets are defined — yes; R2-2 affects the declared tier, not the target.
+- [x] Documentation, status, parity, and audit updates are planned — yes; R2-3 and R2-4 are small gaps.
+- [x] Licensing, provenance, and dependency checks are resolved — n3 records the SPDX convention and no new dependency.
+- [x] Risks and mitigations are realistic — yes; R2-4 is a wording issue.
+- [ ] Code layout and namespace plan follow the structure policy — **not satisfied as written**: R2-1 places the benchmark file at the project root.
+- [x] No hidden scope, stale placeholders, or unowned decisions — no hidden scope; R2-5 notes the `PROJ034` constant location.
 
 ### Re-review findings
 
-_Reviewer to complete._
+#### Round-1 resolution verification
+
+| Finding | Severity | Status | Verification |
+| --- | --- | --- | --- |
+| M1 | Major | Resolved | `ProjectSymmetryMetadata`, `Project.Symmetry`, and `ProjectDto.Symmetry` are specified at Step 03 lines 92–109 and 504–505; the model/document hash split is at line 106; the `PROJ034` comparison is at lines 107–109 and 320–324; the data contract is at `02-data-contracts.md` 124–127; the test is at Step 03 611. The existing `Project` has no `symmetry` member and `ProjectDto` has no field (`Project.cs` 12–84; `ProjectJson.cs` 237–282), so the added type and property are the required change. |
+| M2 | Major | Resolved | `ProjectStore.LoadBytesCore` is explicitly changed to `ProjectValidationService.Validate` by default at Step 03 411–413 and 522–523; `ProjectStore` accepts an injected validator for tests; the test is at 610 and the acceptance criterion at 557. The existing call is `ProjectStore.cs` line 437. |
+| M3 | Major | Resolved | `StructureSiteReference` and `SiteOrbitOverlap` plus the additive `TryCreate` overload are specified at Step 03 252–257, 394–400, 409–410, and 517–518; `Diagnostic.Path` plus `Related` (`Diagnostic.cs` 22–39) can carry both `CellSiteId` paths; the test is at 601 and the acceptance criterion at 545–546. |
+| M4 | Major | Resolved | The benchmark cases, fixture, command, baseline, and tier are specified at Step 03 263–271, 527, 550–551, and 616; the PR-fast wall-clock assertion is removed at 582–583. `Mocassin.Benchmarks/Program.cs` 29–101 currently has only `P1Expansion20Cubed`/`Matrix3`, and `baselines.json` records only P1, so this is a real addition. See R2-2. |
+| M5 | Major | Resolved | `STR014` is defined at Step 03 line 299 and in the ownership text at 318–319 and 328–329; it is emitted by the preview service before allocation (250–251); the test is at 607 and the acceptance criterion at 552. `UnitCellVectorEncoder.IsLatticeSizeSupported` exists at `UnitCellVectorEncoder.cs` 406–411. |
+| M6 | Major | Resolved | `STR008` is removed from the validation table and documented as unused at Step 03 310–312; the catalog maximum is 192 operations (`space-groups.json`: 274 settings, maximum 192). |
+| m1 | Minor | Resolved | `STR011` is removed and documented as unused at Step 03 310–312; the table no longer lists it. |
+| m2 | Minor | Resolved | `PAR010` is added at Step 03 131–133, 285, and 308–309; `02-data-contracts.md` 206–207; `project-format.md` 129; the test is at 592. `ParticleId.Void` and `ParticleSetId.Empty` already exist in `TypedIds.cs` 43 and 67. |
+| m3 | Minor | Resolved | The Step 03 test now asserts `Find(ParticleId.Void)` and the reserved-ID contract (Step 03 127–129 and 592); compiled index 0 remains Step 08 (`step-08` 99 and 111). |
+| m4 | Minor | Resolved | `ParticleSets` array order is non-semantic and `ParticleSet.ParticleIds` order is semantic at Step 03 90 and 142–143; `project-format.md` 130 agrees; no contradictory wording remains. |
+| m5 | Minor | Resolved | The tests now cover `PAR001` (591), `PAR004`/`STR009` (608), and `STR005`/`STR006`/`STR010`/`STR015` (602); `STR011` is removed. |
+| m6 | Minor | Resolved | `PAR011`/`PAR012` are at Step 03 145–146 and 286–287; `STR015` is at 211 and 300; the tests are at 594 and 602. |
+| m7 | Minor | Resolved | `particle IDs in a particle set` is in the semantic-order list at `docs/reference/project-format.md` 69–71 and 130–131; the Step 03 section agrees at 142–143. |
+| m8 | Minor | Resolved | `ProjectHasher.ComputeStructure` and the cache key including `catalogDataSha256` are at Step 03 240–247; `StructurePreviewService` accepts a `SymmetryVersionInfo`, whose three version values are defined at `SymmetryVersionInfo.cs` 13–31. |
+| n1 | Note | Resolved | `New Structure` is recorded as the deliberate project/UI default with the original `Unnamed` model default at Step 03 189–191; the original sources confirm `Unnamed` (`StructureInfo.cs` 26) and `New Structure` (`StructureInfoData.cs` 19). |
+| n2 | Note | Resolved | The Core class is `CoreStructureDiagnosticCodes` at Step 03 330–331 and 458; Symmetry keeps `StructureDiagnosticCodes` at 469. |
+| n3 | Note | Resolved | The SPDX/no-new-dependency task is at Step 03 535 and follows `AGENTS.md` §13. |
+
+No round-1 finding remains open. The fixes are present in the frozen design and are consistent with the
+existing type signatures; the new findings below are separate issues introduced or left by the fix round.
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R2-1 — The new benchmark file is placed at the project root, contradicting the design's own code-layout rule and the structure policy.** Step 03 says "no new root-level files" (lines 430–431), but the layout puts `Mocassin.Benchmarks/StructurePreviewBenchmarks.cs` at the project root (lines 484–485). `tools/structure-policy.json` only permits `Program.cs` and the named support files at a source-project root, and `Mocassin.Architecture.Tests/StructureChecks/StructureChecker.cs` 70–82 rejects any other root file; `Mocassin.Benchmarks` is not a test project. | Step 03 430–431, 484–485; `tools/structure-policy.json` `sourceRootFilePatterns`; `src/dotnet/Mocassin.Architecture.Tests/StructureChecks/StructureChecker.cs` 70–82; `src/dotnet/Mocassin.Benchmarks/Program.cs` is the existing allowed root file. |
+| **Minor** | **R2-2 — The benchmark tier conflicts with the quality strategy, and the new performance target is not added to the performance-target table.** Step 03 calls the preview benchmark "PR-medium/release" (lines 270–271, 550–551, 582–583, and 616), while `03-quality-strategy.md` places benchmarks in Nightly/release (line 34) and lists only model variants/fixtures/manifest drift for PR-medium (lines 157–159); the < 100 ms target is not in §13 (lines 380–405). | Step 03 270–271, 550–551, 582–583, 616; `03-quality-strategy.md` 34, 157–159, 380–405. |
+| **Minor** | **R2-3 — `ComputeStructure` makes the hash documentation incomplete.** Step 03 adds `ProjectHasher.ComputeStructure` (lines 240, 460, and 514), but `docs/development/design-decisions.md` 52/57 still describes "two hashes" and `docs/reference/project-format.md` 208–212 describes only `Compute` and `ComputeDocument`; the documentation plan (Step 03 569–578) does not name those pages. State whether the method is public (then update the docs and `PublicAPI.Unshipped.txt`) or internal. | Step 03 240, 460, 514, 569–578; `docs/development/design-decisions.md` 52–61; `docs/reference/project-format.md` 208–212. |
+| **Note** | **R2-4 — The risk-table mitigation still says every code has a positive and negative test while three codes are documented as unused.** | Step 03 line 633; lines 303–312. |
+| **Note** | **R2-5 — The location of the `PROJ034` code constant is not specified.** The design says Packages emits it (Step 03 109, 301, and 322), but the code layout adds only `ProjectValidationService.cs`; `ProjectDiagnosticCodes` currently ends at `PROJ033` (`ProjectDiagnosticCodes.cs` 13–63). | Step 03 109, 301, 322, 480–482; `ProjectDiagnosticCodes.cs` 13–63. |
+| **Note** | **R2-6 — The new `SiteOrbitOverlap` record shares its name with the existing `StructureDiagnosticCodes.SiteOrbitOverlap` constant.** Different namespaces make this legal, but it is the same clarity problem n2 addressed; rename the record or document the split. | Step 03 397–400; `src/dotnet/Mocassin.Symmetry/Diagnostics/StructureDiagnosticCodes.cs` 27. |
 
 ### Re-review verdict
 
 - [ ] Ready for implementation
-- [ ] Ready with notes
+- [x] Ready with notes
 - [ ] Changes required
 - [ ] Re-review required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up step:
+**Ready with notes.** No Blocker or Major finding remains. All six round-1 Majors (M1–M6) and every
+minor/note (m1–m8, n1–n3) are resolved in the frozen design. The fixes are implementable against the
+existing types: `Project`/`ProjectDto` can gain the optional metadata, `ProjectStore.LoadBytesCore` can call
+the composed validator, the encoder can gain the structured overload, `STR014`/`PAR010`–`PAR012`/`STR015`
+are defined, and the benchmark/test plan is present. Three Minor findings and three Notes remain: R2-1
+(benchmark file at the project root), R2-2 (benchmark tier wording), R2-3 (stale "two hashes" docs), and
+Notes R2-4–R2-6. The human owner must explicitly accept these before implementation; R2-1 should be corrected
+in the design, or handled by the implementer before `tools/verify.sh structure` runs.
+
+Follow-up owner: Step agent / planning agent
+Follow-up step: Correct R2-1, R2-2, and R2-3 or record explicit acceptance; then request human approval for
+`Ready with notes`.
