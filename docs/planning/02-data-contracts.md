@@ -287,11 +287,19 @@ parameterization, and lattice signatures use the MessagePack projection (section
       "id": "…",
       "name": "O migration",
       "chainId": "…",
-      "referencePath": [[0.25, 0.25, 0.25], [0.5, 0.25, 0.25], [0.25, 0.25, 0.25]]
+      "referencePath": [[0.25, 0.25, 0.25], [0.5, 0.25, 0.25], [0.25, 0.75, 0.25]],
+      "reverseTransitionId": null
     }
   ],
   "metropolisTransitions": [
-    { "id": "…", "name": "O exchange", "chainId": "…", "siteAId": "…", "siteBId": "…" }
+    {
+      "id": "…",
+      "name": "O exchange",
+      "chainId": "…",
+      "siteAId": "…",
+      "siteBId": "…",
+      "reverseTransitionId": null
+    }
   ]
 }
 ```
@@ -304,12 +312,26 @@ parameterization, and lattice signatures use the MessagePack projection (section
   - `interstitialcy7`: 7 positions, all `dynamic`, no reverse.
   - `vehicle5`: 5 positions, `dynamic, static, static, dynamic`, no reverse.
   - `vehicle6`: 6 positions, `dynamic, dynamic, static, dynamic, dynamic`, no reverse.
-  - `custom`: 2–8 positions with an explicit, validated `D/S` linker sequence; reverse generation is explicit.
+  - `custom`: 2–8 positions with an explicit, validated `D/S` linker sequence; a 2-position custom chain is a
+    Metropolis chain, and a 3–8-position custom chain is kinetic. Automatic reverse generation is false;
+    define a `reverseTransitionId` instead.
 - `stateChangeIds`, `groupIds`, `linkers`, and `referencePath` are semantic-order arrays and are never
   re-sorted.
+- A state-change group must be homogeneous: it must not mix physical exchanges (different particle symbols)
+  with charge-state exchanges (same symbol, different charge). Charge-transfer mechanisms use homogeneous
+  charge-state groups.
 - `referencePath` positions use the unit-cell fractional coordinate system and may lie outside `[0, 1)`.
+  Persisted values are not wrapped. Site matching and ring detection canonicalize each point modulo one unit
+  cell and use the named `PathMatchTolerance`; a point must match exactly one reference site.
+- A `referencePath` is a ring when its first and last canonical positions are equal, including when the last
+  point is a periodic image of the first. A kinetic path must not be a ring.
+- `generatesReverse` must be `true` for `metropolis2` and `migration3` and `false` for every other pattern.
+- `reverseTransitionId` is an optional same-kind link to the explicitly defined reverse transition. It is
+  symmetric and may not be self-referential. Complex mechanisms use it instead of automatic inverse rules.
 - MMC transitions bind two reference sites; selecting the same site twice means an exchange within one
-  sublattice.
+  sublattice. Both sites must exist and be stable.
+- In memory, simulations reference either kind through `TransitionRef`. The persisted simulation shape remains
+  the kind-specific `kineticTransitionIds` and `metropolisTransitionIds` arrays.
 - Transition collections are sorted by `id` when serialized; the model sections are additive and the project
   `schemaVersion` remains 1.
 

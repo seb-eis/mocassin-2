@@ -167,6 +167,10 @@ The preview uses the same sampling code as compilation (step 08) but does not al
 | `ENM015` | Error | Site energy outside −100..100 eV |
 | `ENM016` | Warning | Site energy for a particle the site cannot occupy |
 | `ENM017` | Warning | Environment sampling estimate exceeds the performance budget |
+| `ENM018` | Warning | A KMC transition path leaves the relevant stable/unstable environment cutoff |
+
+`ENM018` is emitted by the Step 07 cross-domain pipeline because it relates Step 04 transition paths to
+Step 05 cutoffs. Step 04 does not depend on energy data.
 
 ### 7. Editing operations
 

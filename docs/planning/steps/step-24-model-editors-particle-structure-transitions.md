@@ -143,7 +143,8 @@ Tabs or a master-detail tree:
      - position cards in order, each with a group picker;
      - linker selector between cards (dynamic/static) for custom;
      - reverse-generation toggle with explanation;
-     - preview of the S0/S1/S2 occupation matrices.
+     - preview of the S0/S1/S2 occupation matrices, using the Step 04 `StateChangeMatrices` and
+       `ParticleOrder` contract so the editor and compiler interpret matrix indices identically.
    - Validation messages directly on the offending card/linker.
 4. **KMC transitions**
    - Chain picker; reference path editor:

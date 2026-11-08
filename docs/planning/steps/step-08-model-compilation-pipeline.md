@@ -198,7 +198,9 @@ For each transition:
    - charge-transfer transitions may change the formal charge carrier but must conserve total charge;
    - reject combinations that violate either rule, and count them in the report.
 7. Generate the forward rule.
-8. Generate inverse rules only for `Metropolis2` and `Migration3` (swap S0/S2 and reverse the path).
+8. Generate inverse rules only when the chain's `GeneratesReverse` flag is true (validated in Step 04 to be true
+   exactly for `Metropolis2` and `Migration3`); swap S0/S2 and reverse the path. An explicit
+   `reverseTransitionId` is a separate authored transition and does not generate an inverse rule here.
 9. Generate dependent rules for symmetry-equivalent path directions that are not explicitly listed; record
    their mapping.
 10. Deduplicate by `(state0, state1, state2, path direction)`.
@@ -217,6 +219,9 @@ For each transition:
   - rules per collection.
 - The original's `TransitionRuleGenerator` is O(R²) for inverse/dependent pairing; the new compiler should use
   hash maps keyed by state triplet and path direction.
+- Association/dissociation and vehicle movement flags are derived from the state triplet and connector
+  sequence. Step 04 deliberately does not persist an `IsAssociation` flag; add a test for the derived flag so it
+  cannot silently disagree with the rules.
 
 ### 7. Simulation encoding
 

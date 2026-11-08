@@ -78,6 +78,10 @@ Examples of rules that cannot live in a single domain:
 - Every site's particle set exists and contains at least one particle.
 - Every transition's donor/acceptor particles are valid for the positions they occupy.
 - Every kinetic path's stability sequence matches the chain group roles.
+- Every kinetic path point resolves to exactly one reference site; unmatched and ambiguous points are
+  `TRN020` (Step 04).
+- Every kinetic path lies within the relevant stable or unstable environment cutoff; a path outside it is
+  `ENM018` (Warning, owned by this cross-domain stage). Step 04 does not read energy data.
 - Every unstable environment belongs to an unstable site.
 - Every cluster center is a site with an environment.
 - Every doping's source particle is the default occupation at the point the doping is applied.
