@@ -153,15 +153,18 @@ parameterization, and lattice signatures use the MessagePack projection (section
   "particles": [],
   "particleSets": [],
   "structure": {},
-  "transitions": {},
-  "energy": {},
-  "lattice": {},
-  "simulations": []
+  "stateChanges": [],
+  "stateChangeGroups": [],
+  "chains": [],
+  "kineticTransitions": [],
+  "metropolisTransitions": []
 }
 ```
 
 - Steps 03–06 add the sections. A missing `particles`, `particleSets`, or `structure` property loads as the
   empty/default model so that a Step 01 `"model": {}` document remains valid without a schema-version bump.
+  The transition sections are flat at the model root, matching the Step 03 model envelope; there is no nested
+  `transitions` object. Energy, lattice, and simulation sections are likewise added flat by their steps.
   The default structure is P1, `a=b=c=1 Å`, all angles 90°, name `New Structure`, with no sites or dummies.
 - The persisted arrays `particles`, `particleSets`, `structure.sites`, and `structure.dummyPositions` are
   non-semantic and sort by `id` in canonical JSON. `particleIds` inside a particle set is semantic and keeps
@@ -321,10 +324,11 @@ parameterization, and lattice signatures use the MessagePack projection (section
   with charge-state exchanges (same symbol, different charge). Charge-transfer mechanisms use homogeneous
   charge-state groups.
 - `referencePath` positions use the unit-cell fractional coordinate system and may lie outside `[0, 1)`.
-  Persisted values are not wrapped. Site matching and ring detection canonicalize each point modulo one unit
-  cell and use the named `PathMatchTolerance`; a point must match exactly one reference site.
-- A `referencePath` is a ring when its first and last canonical positions are equal, including when the last
-  point is a periodic image of the first. A kinetic path must not be a ring.
+  Persisted values are not wrapped. Site matching and ring detection canonicalize each point with
+  `Fractional3.TrimToUnitCell()` and use the named `PathMatchTolerance`; a point must match exactly one
+  reference site.
+- A `referencePath` contains a ring when any two canonical resolved positions are equal, including when one
+  point is a periodic image of another. A kinetic path must not contain a repeated position.
 - `generatesReverse` must be `true` for `metropolis2` and `migration3` and `false` for every other pattern.
 - `reverseTransitionId` is an optional same-kind link to the explicitly defined reverse transition. It is
   symmetric and may not be self-referential. Complex mechanisms use it instead of automatic inverse rules.

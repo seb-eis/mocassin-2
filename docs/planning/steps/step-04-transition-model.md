@@ -81,7 +81,9 @@ public sealed record ModelDefinition
 ```
 
 - The model stays flat on disk: `model.stateChanges`, `model.stateChangeGroups`, `model.chains`,
-  `model.kineticTransitions`, and `model.metropolisTransitions`.
+  `model.kineticTransitions`, and `model.metropolisTransitions`. There is no nested `model.transitions`
+  object; the placeholder `transitions` object in the earlier contract sketch is replaced by these flat
+  sections, exactly as Step 03 established for `particles`, `particleSets`, and `structure`.
 - The parameterless `ModelDefinition` constructor initializes every new collection to empty, so
   `ModelDefinition.Empty` and a persisted `"model": {}` still load without transition data.
 - `ModelDefinitionJsonConverter` reads and writes the new sections. Missing sections load as empty arrays;
@@ -198,9 +200,10 @@ Pattern rules:
   - it must be `false` for every other pattern;
   - a mismatch is TRN024. Step 08 reads the flag but the validator guarantees it agrees with the pattern.
 - Complex mechanisms (`Interstitialcy5`, `Interstitialcy7`, `Vehicle5`, `Vehicle6`, `Custom`) never generate an
-  inverse automatically. The user may link an explicit reverse transition with `ReverseTransitionId`; TRN018
-  warns when a complex chain has no reverse link. The reverse link is a separate transition, not an inverse rule
-  generated inside the forward transition.
+  inverse automatically. The user may link an explicit reverse transition with `ReverseTransitionId`; TRN018 is
+  emitted on each kinetic or metropolis transition whose chain is complex and whose reverse link is null. It is
+  a transition-level warning, not a chain-level property. The reverse link is a separate transition, not an
+  inverse rule generated inside the forward transition.
 - Chain groups are ordered and semantically meaningful.
 - A chain may reference a group more than once (e.g. the same `[A,V]` group at both ends).
 - A group may not be used at both a stable and an unstable position of the same chain; the group's stability
@@ -257,8 +260,9 @@ public sealed record MetropolisTransition(
 - Endpoints must be stable. Every unstable position must map to an unstable reference site and use an unstable
   group; every stable position must map to a stable reference site and use a stable group. It is not true that
   every intermediate position must be unstable: `Vehicle5` has stable intermediates.
-- The path must not form a ring. Ring detection compares the periodic canonical forms of the first and last
-  points, so a path ending at a periodic image of its start is still a ring.
+- The path must not contain a repeated position. Ring detection compares the periodic canonical forms of
+  every pair of points, so an interior return or a path ending at a periodic image of an earlier point is
+  rejected.
 - Metropolis transitions use exactly two reference sites. `SiteA == SiteB` means an exchange within one
   sublattice and is valid. Both sites must exist and be stable.
 - A transition name is unique within its kind.
@@ -293,18 +297,22 @@ public sealed record ResolvedTransitionPath(
 - `TransitionPathResolver` in `Mocassin.Core.Model.Transitions` resolves every `ReferencePath` point to the
   authored reference sites before stability or group checks run. The resolver is shared by the validator and
   the preview service.
-- For matching, each coordinate is canonicalized modulo one unit cell with `x - floor(x)` per component. The
-  canonical form is compared component-wise to `CellSite.Fractional` with
+- For matching, each finite coordinate is canonicalized with `Fractional3.TrimToUnitCell()`, which snaps
+  components within `GeometryTolerances.FractionalTrimTolerance` of an integer and then maps into `[0, 1)`.
+  The canonical form is compared component-wise to `CellSite.Fractional` with
   `GeometryTolerances.PathMatchTolerance = 1e-6` (fractional units), a new named tolerance. The persisted path
-  point is not changed.
+  point is not changed. A non-finite component is rejected before calling `TrimToUnitCell()`.
 - Exactly one reference site must match each canonical point. Zero matches is TRN020 with the path index;
   more than one match is also TRN020 with the competing site IDs in `Related`. Structure overlap validation
   should make ambiguity impossible, but the check is explicit and defensive.
-- A non-finite path component is TRN020 and no later stability check runs.
 - Stability is taken from the matched `CellSite.Stability`. The chain's group at the same index must agree:
-  stable site → stable group (acceptor not void); unstable site → unstable group (a single `[D, ∅]` pair).
-- Ring detection: canonical first and last positions equal within `PathMatchTolerance` is TRN014. This catches
-  periodic-image rings, not just literal duplicate coordinates.
+  stable site → stable group (acceptor not void); unstable site → unstable group (exactly one `[D, ∅]` pair,
+  TRN026).
+- Pattern stability: the resolved stability sequence of a built-in kinetic pattern must equal the table
+  sequence (TRN028). This is stricter than endpoint/consecutive checks alone: an `Interstitialcy5` path of
+  `S,S,U,S,S` is rejected even though it has stable endpoints and no consecutive unstable positions.
+- Ring detection compares every pair of canonical resolved positions. Any repeated canonical position is
+  TRN014, so `0→1→0→2` is rejected as well as a literal or periodic-image endpoint ring.
 - Consecutive unstable positions are compared from the resolved path (TRN013). A kinetic chain with no unstable
   position is TRN022.
 - MMC transitions do not use `ReferencePath`; their preview path is derived from `SiteAId` and `SiteBId` and
@@ -327,8 +335,8 @@ public sealed record ResolvedTransitionPath(
 | `TRN011` | Error | Kinetic path endpoint is not stable |
 | `TRN012` | Error | Kinetic path position has the wrong group stability |
 | `TRN013` | Error | Consecutive unstable positions |
-| `TRN014` | Error | Path is a ring, including a periodic-image ring |
-| `TRN015` | Error | Metropolis transition does not use a 2-position Metropolis chain |
+| `TRN014` | Error | Path contains a repeated canonical position (ring, self-intersection, or periodic image) |
+| `TRN015` | Error | Metropolis transition does not use `Metropolis2` or a 2-position `Custom` chain |
 | `TRN016` | Error | Metropolis site reference is unknown, unstable, or invalid |
 | `TRN017` | Error | Duplicate name within a named collection |
 | `TRN018` | Warning | Complex transition without an explicit reverse link |
@@ -336,11 +344,12 @@ public sealed record ResolvedTransitionPath(
 | `TRN020` | Error | Path point does not match exactly one reference site, or is non-finite |
 | `TRN021` | Error | Chain references an unknown state-change group |
 | `TRN022` | Error | Kinetic chain has no unstable position |
-| `TRN023` | Error | Kinetic transition uses a `Metropolis2` chain |
+| `TRN023` | Error | Kinetic transition uses `Metropolis2` or a 2-position `Custom` chain |
 | `TRN024` | Error | `GeneratesReverse` disagrees with the pattern |
 | `TRN025` | Error | Group is used at both stable and unstable positions |
-| `TRN026` | Error | Vehicle chain has more than one unstable state-change pair |
+| `TRN026` | Error | An unstable position's group contains more than one state change |
 | `TRN027` | Error | Reverse link is unknown, cross-kind, asymmetric, or self-referential |
+| `TRN028` | Error | Resolved path stability sequence does not match the built-in pattern sequence |
 
 - `TRN001`–`TRN027` are owned by `Mocassin.Core` and emitted by `TransitionModelValidator` and
   `TransitionPathResolver`. Each has a stable code, a structured `ModelPath`, an actionable hint, and a help
@@ -403,7 +412,8 @@ public interface ITransitionPreviewService
     TransitionPreview? TryCreatePreview(
         KineticTransition transition,
         ITransitionQuery transitions,
-        StructureModel structure,
+        IParticleQuery particles,
+        StructureModel structureModel,
         int cellCountA,
         int cellCountB,
         int cellCountC,
@@ -412,7 +422,8 @@ public interface ITransitionPreviewService
     TransitionPreview? TryCreatePreview(
         MetropolisTransition transition,
         ITransitionQuery transitions,
-        StructureModel structure,
+        IParticleQuery particles,
+        StructureModel structureModel,
         int cellCountA,
         int cellCountB,
         int cellCountC,
@@ -421,21 +432,26 @@ public interface ITransitionPreviewService
 ```
 
 - `ITransitionQuery` is implemented by the immutable `Project` snapshot.
+- `IParticleQuery` is the Step 03 contract that exposes `Particles` and `VoidParticle`; the preview service
+  receives it to build the canonical `ParticleOrder` for `StateChangeMatrices`. It does not reach into the
+  project or infer particles from transition data.
 - `ITransitionPreviewService` lives in `Mocassin.Symmetry`; Core never references Symmetry. It receives the
-  full `ITransitionQuery` so it can resolve the chain, groups, state changes, and particles; a transition alone
-  exposes only `ChainId`.
+  full `ITransitionQuery` so it can resolve the chain, groups, and state changes; a transition alone exposes
+  only `ChainId`. The parameter is named `structureModel` to avoid the Step 03 CA1716 reserved-keyword
+  suppression.
 - The preview service follows the Step 03 failure boundary: `TryCreatePreview` returns `null` and diagnostics
   for invalid user data. It never throws for invalid user data and never returns a partial preview.
 - The preview echoes the requested `(A, B, C)` counts and the transition reference, so it cannot be confused
   with another supercell or another transition sharing the same chain.
-- The preview is cached by `(transitionRef, transitionModelHash, structureHash, A, B, C)`, where
-  `transitionModelHash` is a SHA-256 of the canonical closure (transition, chain, groups, state changes, and
-  referenced particles) computed by `ProjectHasher.ComputeTransition`. The cache is scoped to the preview
-  service, bounded, and thread-safe.
+- The preview is cached by `(transitionRef, transitionModelHash, structureHash, A, B, C, catalogDataVersion,
+  catalogDataSha256, symmetryContractVersion)`, where `transitionModelHash` is a SHA-256 of the canonical
+  closure (transition, chain, groups, state changes, and referenced particles) computed by
+  `ProjectHasher.ComputeTransition`. The symmetry-version components match `StructurePreviewService` and are
+  injectable for tests. The cache is scoped to the preview service, bounded, and thread-safe.
 - `StateChangeMatrices` contract:
   - `StateChangeMatrices.Length` equals the chain position count (2 for `Metropolis2`).
-  - `ParticleOrder` is the canonical particle order: the model's `Particles` sorted by ID, followed by the
-    implicit void particle. `ParticleCount = ParticleOrder.Length`.
+  - `ParticleOrder` is the canonical particle order supplied by `IParticleQuery`: its `Particles` sorted by
+    ID, followed by `VoidParticle`. `ParticleCount = ParticleOrder.Length`.
   - each matrix is dense row-major with `ParticleCount * ParticleCount` entries; the entry at
     `donorIndex * ParticleCount + acceptorIndex` is `1` when the position's group contains that
     `[donor, acceptor]` pair and `0` otherwise;
@@ -465,7 +481,7 @@ public interface ITransitionPreviewService
 | Ambiguous end-state selection | S2 is derived deterministically from the group sequence; consecutive unstable positions are TRN013 and a no-unstable kinetic chain is TRN022 |
 | Conservation only during rule generation | Definition-level validation here; mass/charge conservation remains a Step 08 build gate |
 | Original warnings for unbuildable definitions | Definition errors are now Errors; only TRN004/TRN018 remain Warnings |
-| Multiple pairs on a single-transition vehicle | TRN026 rejects more than one unstable state-change pair |
+| Multiple pairs on a single unstable position | TRN026 requires exactly one `[D, ∅]` state change per unstable position; it does not limit the number of unstable positions (so `Vehicle6` is valid) |
 | Charge-transfer ambient ambiguity | Homogeneous groups plus Step 08 total-charge conservation |
 
 ## Code layout
@@ -485,6 +501,7 @@ Mocassin.Core/
       TransitionLinker.cs
       TransitionKind.cs
       TransitionRef.cs
+      TransitionRefJsonConverter.cs
       TransitionChain.cs
       KineticTransition.cs
       MetropolisTransition.cs
@@ -493,17 +510,19 @@ Mocassin.Core/
       ITransitionQuery.cs
       TransitionModelValidator.cs
   Diagnostics/
-    TransitionDiagnosticCodes.cs        # TRN001-TRN027
+    TransitionDiagnosticCodes.cs        # TRN001-TRN028
   Editing/
     ProjectEditor.cs                    # existing Apply/validation core
     ProjectEditor.Transitions.StateChanges.cs
     ProjectEditor.Transitions.Chains.cs
     ProjectEditor.Transitions.Transitions.cs
   Project/
+    Project.cs                          # implements ITransitionQuery
     ProjectJson.cs                      # canonicalization and nested ProjectJsonContext
+    ProjectHasher.cs                    # ComputeTransition closure hash
     ProjectValidator.cs
-  Ids/
-    TransitionIds.cs                    # five typed IDs
+
+The five transition typed IDs already exist in `Ids/TypedIds.cs` from Step 03; no new ID file is added.
 
 Mocassin.Symmetry/
   Transitions/
@@ -523,7 +542,8 @@ Tests mirror the source concept:
 - `Mocassin.Symmetry.Tests/Transitions/TransitionPreviewTests.cs`
 - `Mocassin.Benchmarks/Transitions/TransitionPreviewBenchmarks.cs`
 
-Samples live under `samples/transitions/`. The new user-guide, physics, and reference pages are added to
+New standalone samples live under `samples/transitions/`; the existing `samples/ceria/ceria.mocprj` is updated
+in place for the dedicated unstable-site set. The new user-guide, physics, and reference pages are added to
 `zensical.toml` navigation in the same step.
 
 ## Implementation tasks
@@ -533,28 +553,36 @@ Samples live under `samples/transitions/`. The new user-guide, physics, and refe
   `ProjectJson.CanonicalizeModel`; confirm `ProjectJsonConverter.Write`, `ProjectStore.SaveAsync`, and
   `ProjectHasher.Compute` preserve transitions.
 - [ ] Implement `StateChange`, `StateChangeGroup`, `TransitionChain`, `KineticTransition`,
-  `MetropolisTransition`, `TransitionRef`, `TransitionKind`, and the five typed IDs with their JSON converters.
-- [ ] Implement pattern/linker validation, including the `Custom` grammar and `GeneratesReverse` consistency.
-- [ ] Implement `TransitionPathResolver` and path/stability validation, including periodic canonicalization,
-  the `PathMatchTolerance` match, ring detection, and ambiguous-site diagnostics.
-- [ ] Implement `ITransitionQuery` and `ITransitionPreviewService`, including the `TryCreatePreview` failure
-  boundary, the self-describing preview, `StateChangeMatrices`, and the bounded cache.
+  `MetropolisTransition`, `TransitionRef`, `TransitionKind`, and `TransitionRefJsonConverter`. Reuse the five
+  transition typed IDs already in `Ids/TypedIds.cs`; do not duplicate them.
+- [ ] Implement pattern/linker validation, including the `Custom` grammar, the built-in pattern stability
+  sequences (`TRN028`), and `GeneratesReverse` consistency.
+- [ ] Implement `TransitionPathResolver` and path/stability validation, including `TrimToUnitCell`
+  canonicalization, the `PathMatchTolerance` match, any-repeated-position ring detection, and ambiguous-site
+  diagnostics.
+- [ ] Implement `ITransitionQuery` (implemented by `Project`), `ProjectHasher.ComputeTransition`, and
+  `ITransitionPreviewService`, including the `TryCreatePreview` failure boundary, the self-describing preview,
+  `StateChangeMatrices`, and the bounded cache with symmetry-version key components.
 - [ ] Implement transition preview using the symmetry engine and the requested `(A, B, C)` cell counts,
   including MMC site-pair expansion.
 - [ ] Implement reverse-link validation and `TRN018`.
 - [ ] Implement reference, duplicate-name, count, and cross-kind validation.
 - [ ] Implement editor operations in partial `ProjectEditor.Transitions.*.cs` files and dependent-removal
   diagnostics.
-- [ ] Add `TransitionDiagnosticCodes` for TRN001–TRN027, including hints and help anchors, and update
-  `docs/reference/diagnostics.md`.
+- [ ] Add `TransitionDiagnosticCodes` for TRN001–TRN028, including hints and help anchors. Add
+  `docs/reference/transitions.md` with the TRN table and links; Step 07 creates the consolidated
+  `docs/reference/diagnostics.md` and `docs/troubleshooting/errors.md` and imports/links that page.
 - [ ] Update `contracts/manifest.json`: set `status` to `step-04`, update `notes`, add the transition fields,
   add the `project-transitions-minimal` and `project-transitions-populated` fixtures, and regenerate the
   project schema. Keep the `model` signature skeleton for Step 08; record that the transition fields feed it.
 - [ ] Add XML docs, update `PublicAPI.Unshipped.txt`, and refresh the ApiCompat baseline for every new public
   type and member.
-- [ ] Add ceria KMC (oxygen migration), ceria MMC (O/V exchange), and polaron-hop samples.
-- [ ] Add a 5-site vehicle and a 5-site interstitialcy sample.
-- [ ] Update `samples/ceria/ceria.mocprj` so the unstable oxygen transition site uses a dedicated
+- [ ] Add `TransitionPreviewCeria` to `Mocassin.Benchmarks/Transitions/TransitionPreviewBenchmarks.cs` and
+  record its baseline in `tests/reference/bench/baselines.json` and `tests/reference/bench/`.
+- [ ] Add ceria KMC (oxygen migration), ceria MMC (O/V exchange), and polaron-hop samples under
+  `samples/transitions/`.
+- [ ] Add a 5-site vehicle and a 5-site interstitialcy sample under `samples/transitions/`.
+- [ ] Update `samples/ceria/ceria.mocprj` in place so the unstable oxygen transition site uses a dedicated
   transition-state occupation set instead of the shared oxygen set (the Step 03 deferred item).
 - [ ] Add the new user-guide, physics, and reference pages to `zensical.toml` navigation.
 - [ ] Update the transition rows in `appendix-b-parity-matrix.md`.
@@ -569,8 +597,8 @@ Samples live under `samples/transitions/`. The new user-guide, physics, and refe
 - [ ] A 5-site vehicle with five chain groups (`[A,V_A]`, `[A,V_A]`, `[AB,∅]`, `[B,V_B]`, `[B,V_B]`),
   a `D,S,S,D` chain, and an `S,S,U,S,S` reference path validates.
 - [ ] A 5-site interstitialcy with an `S,U,S,U,S` path validates.
-- [ ] Invalid paths (unstable endpoint, consecutive unstable, periodic-image ring, unmatched point) are
-  rejected with precise diagnostics.
+- [ ] Invalid paths (unstable endpoint, consecutive unstable, pattern-sequence mismatch, any repeated
+  position including a periodic-image ring, unmatched point) are rejected with precise diagnostics.
 - [ ] A complex transition without a reverse link warns `TRN018`; adding a symmetric reverse link clears it.
 - [ ] `GeneratesReverse` set inconsistently with the pattern is rejected with `TRN024`.
 - [ ] The preview enumerates the expected symmetry-equivalent paths and echoes `(A, B, C)` and the transition
@@ -597,8 +625,9 @@ At this point, document the transition model:
 - `docs/development/compilation-pipeline.md` — transition inputs and the deferred rule-generation stage.
 - `docs/reference/project-format.md` — transition sections, field names, semantic ordering, reverse links,
   path matching, and constraints.
-- `docs/reference/diagnostics.md` — TRN001–TRN027, severities, paths, hints, and help anchors.
-- `docs/troubleshooting/errors.md` — common transition-definition failures and fixes.
+- `docs/reference/transitions.md` — transition sections, field names, semantic ordering, reverse links, path
+  matching, and the TRN001–TRN028 table with severities, paths, hints, and help anchors. Step 07 owns the
+  consolidated `docs/reference/diagnostics.md` and `docs/troubleshooting/errors.md` and links to this page.
 
 Add the new user-guide, physics, and reference pages to `zensical.toml` navigation in the same step. Update the
 Step 04 status page, `docs/planning/status.md`, and the transition rows in `appendix-b-parity-matrix.md` at
@@ -615,12 +644,12 @@ preview benchmark. The full benchmark is not a PR-fast wall-clock gate.
 | Groups | Mixed physical/charge exchange rejected; homogeneous charge-state group accepted | PR-fast |
 | Patterns | Every built-in pattern accepts only its valid linker sequence | PR-fast |
 | Custom | Valid/invalid 2-position and 3–8-position custom chains; static placement rules | PR-fast |
-| Paths | Stability, length, no-unstable, ring (literal and periodic image), consecutive-unstable checks | PR-fast |
-| Path matching | `[0,1)` and outside-`[0,1)` points map to sites within `PathMatchTolerance`; zero/ambiguous matches are TRN020 | PR-fast |
+| Paths | Stability, length, no-unstable, pattern-sequence mismatch, any repeated position (interior, literal endpoint, periodic image), consecutive-unstable checks | PR-fast |
+| Path matching | `[0,1)` and outside-`[0,1)` points trim with `TrimToUnitCell` and map to sites within `PathMatchTolerance`; zero/ambiguous matches are TRN020 | PR-fast |
 | Metropolis | Same-site and different-site exchanges; unknown/unstable sites rejected | PR-fast |
 | Reverse links | Symmetric same-kind link accepted; unknown/cross-kind/asymmetric/self link rejected; TRN018 warning | PR-fast |
 | Preview | Symmetry-expanded path count matches brute force; MMC pair expansion; `(A,B,C)` echo | PR-fast |
-| Preview failure/cache | Invalid input returns null + diagnostics; cache keys separate `(A,B,C)`, structure hash, and transition hash | PR-fast |
+| Preview failure/cache | Invalid input returns null + diagnostics; cache keys separate `(A,B,C)`, structure hash, transition hash, and symmetry catalog/contract versions | PR-fast |
 | State-change matrices | Dimensions, particle order, binary cells, unstable cardinality | PR-fast |
 | Editing | Add/update/remove/duplicate/make-group keep references valid; dependents are reported | PR-fast |
 | Model envelope | Empty, transition-only, and combined models round-trip through the project JSON context | PR-fast |
