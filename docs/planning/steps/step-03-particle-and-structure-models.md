@@ -13,7 +13,7 @@ validation and a stable public API.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** [Ready for review](../reviews/step-03.md)
+- **Design review:** [Re-review required](../reviews/step-03.md)
 - **Last updated:** 2026-11-08
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
