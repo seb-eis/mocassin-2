@@ -2,9 +2,10 @@
 
 > Reviewer: write the evidence, findings, and verdict directly into
 > `docs/planning/audits/step-NN.md`. You may edit only your own metadata (`Auditor`, `Audit date`, `Audit
-> status`), the `Evidence`, `Findings`, and `Verdict` sections, and commit only that file with a
-> documentation-only message and `[skip ci]`. Do not edit the request scope, checklists, resolutions, code,
-> tests, configuration, status dashboard, step page, or any other file.
+> status`), the checklist completion marks and inline verification notes (not item text), the `Evidence`,
+> `Findings`, and `Verdict` sections, and commit only that file with a documentation-only message and
+> `[skip ci]`. Do not edit the request scope, checklist item text, resolutions, code, tests, configuration,
+> status dashboard, step page, or any other file.
 
 ## Request
 

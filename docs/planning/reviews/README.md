@@ -96,9 +96,11 @@ and no transcription step.
 
 - The reviewer may edit only `docs/planning/reviews/step-NN.md`.
 - Within that file, the reviewer may edit its own metadata (`Reviewer`, `Review date`, `Design review status`),
-  the `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
-- The reviewer must not edit the request scope, checklists, known limitations, or resolutions owned by the
-  step agent, and must not edit any other file.
+  the three checklist sections (checkbox marks and short inline verification notes only; not item text), the
+  `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
+- The reviewer must not edit the request scope, checklist item text, known limitations, or resolutions owned by
+  the step agent, and must not edit any other file.
+- Checklist marks record what the reviewer actually reviewed; the step agent owns the checklist item text.
 - The reviewer may commit that one file with a documentation-only message and `[skip ci]`; it must not merge,
   tag, push `main`, or delete branches. If it cannot commit, it writes the record and the step agent commits it
   unchanged.

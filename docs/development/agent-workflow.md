@@ -241,8 +241,8 @@ Before a step starts, a fresh planning auditor checks the design out of context.
    `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
    `[skip ci]`. The reviewed commit is the parent of the record commit. It does not merge, tag, push `main`,
    or change any other file. If it cannot commit, it writes the record and the step agent commits it unchanged.
-5. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, evidence,
-   findings, and verdict.
+5. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, checklist
+   completion marks (not item text), evidence, findings, and verdict.
 6. If changes are required, the planning agent and step agent update the design docs directly, add the
    resolutions, and mark the review `Re-review required`. A fresh planning auditor re-reviews the new commit.
 7. Only `Ready for implementation` permits the human owner to approve the start. Create the step branch from
@@ -269,8 +269,8 @@ Before merging a completed step:
    `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
    `[skip ci]`. The audited commit is the parent of the record commit. It does not merge, tag, push `main`,
    or change any other file. If it cannot commit, it writes the record and the step agent commits it unchanged.
-6. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, evidence,
-   findings, and verdict.
+6. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, checklist
+   completion marks (not item text), evidence, findings, and verdict.
 7. If findings require fixes, the step agent adds the resolutions, fixes them on a new feature branch,
    squash-merges into the step branch, pushes, waits for CI, and marks the audit `Re-audit required`.
 8. Re-audit the new commit and append a new round to the record. Only a `Passed` audit permits the step-to-main
