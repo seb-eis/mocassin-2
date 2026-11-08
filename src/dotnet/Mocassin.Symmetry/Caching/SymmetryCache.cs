@@ -114,6 +114,29 @@ internal sealed class SymmetryCache
     }
 
     /// <summary>
+    /// Tries to read a cached value.
+    /// </summary>
+    /// <typeparam name="T">The value type.</typeparam>
+    /// <param name="key">The cache key.</param>
+    /// <param name="value">The cached value when present.</param>
+    /// <returns><see langword="true"/> when the key is cached.</returns>
+    public bool TryGet<T>(string key, out T? value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(key);
+        lock (gate)
+        {
+            if (entries.TryGetValue(key, out var existing))
+            {
+                value = (T)existing;
+                return true;
+            }
+
+            value = default;
+            return false;
+        }
+    }
+
+    /// <summary>
     /// Creates the cell-geometry key.
     /// </summary>
     /// <param name="cellParametersHash">The SHA-256 cell-parameter hash.</param>
