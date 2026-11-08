@@ -87,6 +87,6 @@ No step is active. Step 01 is complete: merge `7b4a994`, tag `step-01`, and main
 - Step 00 is complete: merge `47a9a90`, tag `step-00`, full main CI `41733064540` green.
 - Step 01 is complete: merge `7b4a994`, tag `step-01`, full main CI `41929788253` green.
 - A step is not `Done` until its acceptance criteria, tests, documentation, and parity entries pass.
-- Status updates should ride in feature branches or the closeout feature; avoid status-only commits that
-  trigger an extra step-branch CI run.
+- Status updates should ride in feature branches or the closeout feature; avoid status-only commits. CI runs
+  only at closeout and on `main`.
 - Tag names record completed checkpoints; they do not replace this dashboard.

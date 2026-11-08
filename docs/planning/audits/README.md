@@ -46,12 +46,15 @@ The step agent, planner, or human owner may spawn an auditor. The spawner must n
 
 ## 3. Required sequence
 
-1. The step agent finishes all features, the closeout feature, documentation, status, and parity updates.
-2. The step branch is pushed and its CI is green.
+1. The step agent finishes all features, the closeout feature, documentation, status, and parity updates, then
+   runs `./tools/verify.sh all`.
+2. The step branch is pushed and one closeout CI run is green. Do not run CI per feature; the closeout run is
+   the only step-branch CI run.
 3. The step agent creates or updates `docs/planning/audits/step-NN.md`:
    - status: `Ready for audit`
    - exact audited commit
-   - CI run
+   - closeout CI run
+   - platform CI status: not run, or the Windows/macOS run when platform-specific code required it
    - scope and acceptance criteria
    - known limitations
 4. The step branch is frozen at the audited commit. After a passing audit, only the reviewer's record commit
@@ -74,7 +77,7 @@ The step agent, planner, or human owner may spawn an auditor. The spawner must n
    - the step agent adds the resolutions to the record;
    - the step agent fixes the findings on a new feature branch;
    - squash-merges into the step branch;
-   - pushes and waits for CI;
+   - dispatches one new closeout CI run and waits for it;
    - updates the audit record to `Re-audit required` with the new commit.
 9. The auditor re-audits the new commit and appends a new round to the record. The same auditor may continue if
    it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every earlier round
@@ -82,7 +85,12 @@ The step agent, planner, or human owner may spawn an auditor. The spawner must n
 10. On `Passed`, the human owner gives merge approval. The approval request includes the cumulative approval
     report in section 10, covering every audit and review round, finding, resolution, note, waiver, and residual
     risk.
-11. Merge the step branch into `main` with `--no-ff`, tag `step-NN`, push, and delete the step branch.
+11. Merge the step branch into `main` with `--no-ff`, wait for the automatic `main` CI run, tag `step-NN` only
+    when it is green, push, and delete the step branch.
+
+CI is intentionally minimal: automatic CI runs only on `main`, on Ubuntu, with path filters. Windows and macOS
+are manual and only required when platform-specific code appears. Documentation uses its own manual workflow.
+See [`AGENTS.md` §3.13](../../../AGENTS.md) and [`docs/planning/ci-policy.md`](../ci-policy.md).
 
 ## 4. What the audit must cover
 

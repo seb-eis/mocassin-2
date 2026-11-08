@@ -18,7 +18,8 @@
 | Audited commit | — |
 | Step branch | — |
 | Step tag | — |
-| CI run | — |
+| Closeout CI run | — |
+| Platform CI | Not run (Ubuntu-only policy) |
 | Audit date | — |
 | Auditor | — |
 
@@ -44,7 +45,9 @@ Copy the acceptance criteria from the step page, preserving their wording:
 - [ ] Required tests from the step page pass.
 - [ ] Public/protected XML documentation policy is followed.
 - [ ] Documentation, status dashboard, feature log, and parity matrix are current.
-- [ ] CI is green at the audited commit.
+- [ ] Closeout CI is green at the audited commit.
+- [ ] Windows/macOS runs are recorded, or their absence is accepted because the step has no platform-specific
+      code.
 - [ ] Format/version/fixture changes are documented and tested.
 - [ ] Security, dependency, licence, and secret-scan gates pass.
 - [ ] No unrelated changes or unapproved scope.
