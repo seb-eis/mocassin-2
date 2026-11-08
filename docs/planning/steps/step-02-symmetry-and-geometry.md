@@ -9,7 +9,7 @@ orbit/permutation reduction, and periodic geometry kernels.
 
 - **Status:** In progress
 - **Step branch:** `step/02-symmetry-and-geometry`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42475359256) at `6341b56` (Ubuntu + Windows + policy/docs jobs)
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) at `09a3317` (closeout CI policy dispatch; Ubuntu)
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Passed with notes at `6341b56` (layout-only refactor re-audited)
@@ -46,7 +46,7 @@ orbit/permutation reduction, and periodic geometry kernels.
 - ApiCompat baseline refresh now uses reference assemblies, keeping the checked-in binaries small.
 - Amendment 1 adds the public generic math layer and migrates `CellGeometry` to `Matrix3<double>`.
 - Amendment 2 adds KaTeX 0.19.1 rendering and converts the published symmetry formulas.
-- Combined audited solution commit: `d6eac6f`; audit-fix solution: `cfc419f`.
+- Combined audited solution commit: `d6eac6f`; audit-fix solution: `cfc419f`; final CI-policy sync: `09a3317`.
 - The Symmetry assembly was reorganized into logical folders after the passed audit; namespaces and behavior
   are unchanged, but the audit must cover the new commit.
 

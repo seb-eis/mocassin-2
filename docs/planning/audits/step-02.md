@@ -820,3 +820,14 @@ owner (merge and tag approval).
 
 Follow-up issue/step: Update the status dashboard to the passed layout re-audit, and merge
 `step/02-symmetry-and-geometry` into `main` only with explicit human owner approval.
+
+## Human owner acceptance
+
+Date: 2026-11-08
+
+The human owner approved the `--no-ff` merge into `main` and the annotated `step-02` tag after the passed
+layout re-audit, including acceptance of notes n5–n8 (shared public oracle helpers, optional ASE fixture
+hardening, pending manual runner-class benchmark, and the Step 11 `.msl` symmetry-version follow-up).
+
+The closeout CI run on the final step branch was
+[42478356751](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) at `09a3317` — green.
