@@ -12,7 +12,7 @@ orbit/permutation reduction, and periodic geometry kernels.
 - **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42469556610) at `cfc419f` (Ubuntu + Windows + policy/docs jobs)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `cfc419f`
+- **Audit:** Passed with notes at `cfc419f`
 - **Design review:** Ready with notes — accepted by the human owner on 2026-11-07
 - **Last updated:** 2026-11-07
 
