@@ -6,11 +6,11 @@
 | --- | --- |
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
-| Audit status | Passed with notes |
-| Audited commit | `cfc419f` (re-audit-fix solution; docs-only status commit follows) |
+| Audit status | Re-audit required |
+| Audited commit | `6341b56` (layout-only refactor; docs-only status commit follows) |
 | Step branch | `step/02-symmetry-and-geometry` |
 | Step tag | — |
-| CI run | [42469556610](https://github.com/seb-eis/mocassin-2/actions/runs/42469556610) — green at `cfc419f` |
+| CI run | [42475359256](https://github.com/seb-eis/mocassin-2/actions/runs/42475359256) — green at `6341b56` |
 | Audit date | 2026-11-08 |
 | Auditor | Independent out-of-context audit agent (fresh context) |
 
@@ -25,7 +25,7 @@ The Step 02 audit covers the parent step plus these integrated amendments at the
   [`step-02-amend-2-docs-math.md`](../amendments/step-02-amend-2-docs-math.md), review
   [`step-02-amend-2.md`](../reviews/step-02-amend-2.md).
 
-Combined audit commit: `d6eac6f`; audit-fix solution: `cfc419f`. Both amendments are integrated; the first audit returned Fixes required and the fixes are recorded below.
+Combined audit commit: `d6eac6f`; audit-fix solution: `cfc419f`; layout-only refactor: `6341b56`. Both amendments are integrated; the first audit returned Fixes required and the fixes are recorded below.
 
 ## Step summary
 
@@ -52,7 +52,7 @@ Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-g
 
 ## Known notes for the auditor
 
-- The audited solution is `cfc419f`; a documentation-only audit-request/status commit follows it. The CI run
+- The audited solution is `6341b56`; a documentation-only audit-request/status commit follows it. The CI run
   above is for the solution commit.
 - `periodic-geometry` was implemented before `orbit-reduction` because pair reduction consumes radial search.
   The approved feature set is unchanged.
@@ -456,7 +456,7 @@ remain unchanged.
 | --- | --- |
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
-| Audit status | Passed with notes |
+| Audit status | Re-audit required |
 | Reviewed commit | `cfc419f` (`step-02: use independent symmetry oracles (re-audit fix)`) |
 | Freeze commit | `942667d` (docs-only re-audit request/status commit) |
 | Step branch | `step/02-symmetry-and-geometry` |
@@ -640,3 +640,16 @@ approval).
 Follow-up issue/step: Record the passed re-audit in the status dashboard, run the manual runner-class
 benchmark when convenient, and verify the three symmetry version fields in Step 11. Merge
 `step/02-symmetry-and-geometry` into `main` only with explicit human owner approval.
+
+## Resolution status (layout re-audit request)
+
+Date: 2026-11-08
+
+Layout refactor squash: `6341b56` (`step-02: organize symmetry assembly by responsibility`). CI:
+[42475359256](https://github.com/seb-eis/mocassin-2/actions/runs/42475359256) — green. This is a file-move-only
+refactor: no namespace, public API, behavior, format, or test logic changed. The Symmetry project is grouped
+into `Contracts/`, `SpaceGroups/`, `Geometry/`, `Reduction/`, `Diagnostics/`, and `Caching/`; `git mv` preserved
+file history. The architecture page records the folder layout and the step-page feature log records the squash.
+
+Re-audit request: confirm the move-only nature at `6341b56` and the following docs-only status commit. Earlier
+rounds and resolutions remain unchanged.
