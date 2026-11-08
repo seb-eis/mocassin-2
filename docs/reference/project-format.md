@@ -67,8 +67,8 @@ ordinary model objects. Dense compiled indices (`ParticleIndex`, `PositionIndex`
 in the project file; they belong to the compiled package.
 
 Arrays are sorted by `id` when serialized unless their order is semantic. Semantic orders in later sections
-include state-change group order, chain linkers, doping priority, reference path positions, and job
-configuration order.
+include particle IDs in a particle set, state-change group order, chain linkers, doping priority, reference
+path positions, and job configuration order.
 
 ## Units
 
@@ -126,9 +126,11 @@ as the empty/default model, so a Step 01 `"model": {}` document remains valid.
 ```
 
 - The implicit void particle and empty particle set use reserved IDs, are not serialized as ordinary objects,
-  and must not be reused by authored objects. `isVoid` is computed and never appears in JSON.
+  and must not be reused by authored objects (`PAR010`). `isVoid` is computed and never appears in JSON.
 - `particleIds` order is semantic: the first particle is the default occupation of a stable site.
   `particles`, `particleSets`, `sites`, and `dummyPositions` sort by `id` in canonical JSON.
+- Particle-set names are unique (case-insensitive) and required (`PAR011`); repeated particle IDs inside a set
+  are `PAR012` error.
 - The recommended particle-symbol pattern is `^[A-Z][A-Za-z0-9+\-()]{0,10}$`; a mismatch is `PAR008` warning.
 - `structure.name` is required in the model and defaults to `New Structure` for a new project; an empty or
   whitespace-only value is `STR013`.
@@ -145,8 +147,10 @@ as the empty/default model, so a Step 01 `"model": {}` document remains valid.
   before trimming; values within `FractionalTrimTolerance = 1e-10` of a boundary snap, values beyond it are
   `STR004` error. Positions then convert to the exact `24 × 10^12` grid for P1 expansion. The JSON remains
   `double`-based.
-- More than 10,000 total P1 positions is `STR009` warning; the hard v1 limit is the signed 32-bit linear-index
-  cap. This deliberately relaxes the original hard 10,000 limit.
+- Dummy positions use the same coordinate rule (`STR010`); dummy names are unique (case-insensitive) and
+  empty/duplicate names are `STR015` error.
+- More than 10,000 total P1 positions is `STR009` warning. A requested supercell product `A*B*C*P` above the
+  signed 32-bit linear-index cap is `STR014` error. This deliberately relaxes the original hard 10,000 limit.
 - The optional envelope `symmetry` metadata carries `spaceGroupDataVersion`, `spaceGroupDataSha256`, and
   `symmetryContractVersion`. `Mocassin.Packages.Projects.ProjectValidationService` compares it with the
   embedded values and warns `PROJ034` on a mismatch; the compiled payload is authoritative.
@@ -236,8 +240,8 @@ throws for user data. The Step 01 project codes are:
 | `PROJ033` | An autosave write failed. |
 | `PROJ034` | Project symmetry metadata differs from the embedded catalog/contract versions (warning). |
 
-Step 03 adds the `PAR001`–`PAR009` particle codes and the `STR001`–`STR013` structure codes; their
-user-facing catalogue and help anchors are completed in Step 07.
+Step 03 adds the `PAR001`–`PAR012` particle codes and the `STR001`–`STR015` structure codes; `PAR003`,
+`STR008`, and `STR011` are unused. Their user-facing catalogue and help anchors are completed in Step 07.
 
 ## Persistence
 

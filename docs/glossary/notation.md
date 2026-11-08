@@ -145,8 +145,8 @@ Diagnostic codes are stable uppercase strings with a domain prefix and three dig
 | `PRM` | Parameterization |
 
 Step 01 defines `PROJ001`–`PROJ033`; Step 03 adds `PROJ034` for project symmetry-metadata mismatch, the
-`PAR001`–`PAR009` particle codes, and the `STR001`–`STR013` structure codes. The complete catalogue and help
-anchors are finalized in Step 07.
+`PAR001`–`PAR012` particle codes, and the `STR001`–`STR015` structure codes (`PAR003`, `STR008`, and `STR011`
+are unused). The complete catalogue and help anchors are finalized in Step 07.
 
 ## JSON notation
 

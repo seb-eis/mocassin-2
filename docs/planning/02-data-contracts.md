@@ -121,6 +121,10 @@ to either is a format-breaking change.
 - `symmetry` is an additive optional v1 field; `schemaVersion` remains `1` while the model shape is pre-release.
   Step 03 adds fixtures with and without the field. A present-but-partial metadata object compares only the
   fields it contains; an absent object is accepted without warning.
+- `Mocassin.Core` represents the object as `ProjectSymmetryMetadata?` on `Project` and
+  `ProjectDto.Symmetry`; it is included in the canonical document hash but not the model hash.
+  `ProjectStore.LoadBytesCore` uses `Mocassin.Packages.Projects.ProjectValidationService` by default so the
+  loaded diagnostics include Core, Symmetry, and `PROJ034` results.
 - `schemaVersion` is an integer. Readers accept `1..current`; migrations are pure functions in
   `Mocassin.Core.Project.ProjectMigrations`.
 - Unknown properties are rejected by default (`JsonUnmappedMemberHandling.Disallow`) to catch typos; schema
@@ -199,7 +203,10 @@ parameterization, and lattice signatures use the MessagePack projection (section
 
 - The first particle is the default occupation of a stable site. Unstable sites always default to void.
 - The void particle is implicit and must not be listed. The empty particle set uses the reserved
-  `ParticleSetId.Empty`; authored sets must not reuse that ID.
+  `ParticleSetId.Empty`; authored sets must not reuse that ID. Reusing `ParticleId.Void` or
+  `ParticleSetId.Empty` is `PAR010` error.
+- Set names are unique (case-insensitive); empty or duplicate names are `PAR011` error. A repeated particle ID
+  inside one set is `PAR012` error.
 - Two authored sets with the same ordered `particleIds` are allowed but emit `PAR009` warning; they are not
   merged automatically.
 
@@ -234,8 +241,11 @@ parameterization, and lattice signatures use the MessagePack projection (section
   (`1e-10`) of a boundary snap to the equivalent canonical position; values outside `[0,1)` beyond that
   tolerance are `STR004` error and are not wrapped. The canonical P1 order uses the exact `24 × 10^12`
   fractional grid defined in Step 02; the stored decimal remains the user-facing value.
-- More than 10,000 total P1 positions emits `STR009` warning, not an error. The hard v1 limit is the signed
-  32-bit linear-index cap; this deliberately relaxes the original 10,000 hard limit.
+- Dummy positions use the same coordinate rule and are `STR010` error when invalid; dummy names are unique
+  (case-insensitive) and empty/duplicate names are `STR015` error.
+- More than 10,000 total P1 positions emits `STR009` warning, not an error. A requested supercell product
+  `A*B*C*P` above the signed 32-bit linear-index cap is `STR014` error. This deliberately relaxes the original
+  10,000 hard limit.
 - `number` is the International Tables space-group number, 1..230.
 - `axis` identifies the unique axis or the hexagonal/rhombohedral description; `origin` identifies the origin
   choice. Both are explicit and use `none` when the setting has no such choice.
