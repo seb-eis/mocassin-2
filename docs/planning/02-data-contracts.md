@@ -12,6 +12,7 @@ solver, and external tooling. Contracts are versioned and covered by golden and 
   fixtures may use any RFC 4122 UUID.
 - References are by `id`, never by array position.
 - Arrays are ordered only where order is semantic:
+  - state-change IDs inside a group,
   - state-change group order inside a chain,
   - chain linkers,
   - doping priority,
@@ -304,9 +305,13 @@ parameterization, and lattice signatures use the MessagePack projection (section
   - `vehicle5`: 5 positions, `dynamic, static, static, dynamic`, no reverse.
   - `vehicle6`: 6 positions, `dynamic, dynamic, static, dynamic, dynamic`, no reverse.
   - `custom`: 2–8 positions with an explicit, validated `D/S` linker sequence; reverse generation is explicit.
+- `stateChangeIds`, `groupIds`, `linkers`, and `referencePath` are semantic-order arrays and are never
+  re-sorted.
 - `referencePath` positions use the unit-cell fractional coordinate system and may lie outside `[0, 1)`.
 - MMC transitions bind two reference sites; selecting the same site twice means an exchange within one
   sublattice.
+- Transition collections are sorted by `id` when serialized; the model sections are additive and the project
+  `schemaVersion` remains 1.
 
 #### Energy
 
