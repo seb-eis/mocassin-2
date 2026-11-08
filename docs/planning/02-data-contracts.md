@@ -290,7 +290,7 @@ parameterization, and lattice signatures use the MessagePack projection (section
       "id": "…",
       "name": "O migration",
       "chainId": "…",
-      "referencePath": [[0.25, 0.25, 0.25], [0.5, 0.25, 0.25], [0.25, 0.75, 0.25]],
+      "referencePath": [[0.125, 0.125, 0.125], [0.375, 0.125, 0.125], [0.625, 0.125, 0.125]],
       "reverseTransitionId": null
     }
   ],
@@ -324,11 +324,13 @@ parameterization, and lattice signatures use the MessagePack projection (section
   with charge-state exchanges (same symbol, different charge). Charge-transfer mechanisms use homogeneous
   charge-state groups.
 - `referencePath` positions use the unit-cell fractional coordinate system and may lie outside `[0, 1)`.
-  Persisted values are not wrapped. Site matching and ring detection canonicalize each point with
-  `Fractional3.TrimToUnitCell()` and use the named `PathMatchTolerance`; a point must match exactly one
-  reference site.
-- A `referencePath` contains a ring when any two canonical resolved positions are equal, including when one
-  point is a periodic image of another. A kinetic path must not contain a repeated position.
+  Persisted values are not wrapped. Site matching expands each reference site to its symmetry-equivalent P1
+  orbit, canonicalizes each point with `Fractional3.TrimToUnitCell()`, and uses the named `PathMatchTolerance`;
+  a point must match exactly one P1 position and owning reference site.
+- A `referencePath` contains a ring when any two resolved positions have the same full encoded position
+  (`P` plus cell offset). A point in a different periodic cell is a distinct position, not a duplicate.
+- The coordinates in the JSON example above are illustrative. A concrete path point must match a
+  symmetry-equivalent P1 position of the referenced structure; otherwise it is `TRN020`.
 - `generatesReverse` must be `true` for `metropolis2` and `migration3` and `false` for every other pattern.
 - `reverseTransitionId` is an optional same-kind link to the explicitly defined reverse transition. It is
   symmetric and may not be self-referential. Complex mechanisms use it instead of automatic inverse rules.
