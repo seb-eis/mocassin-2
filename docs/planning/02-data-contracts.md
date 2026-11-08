@@ -113,10 +113,18 @@ to either is a format-breaking change.
   part of the project metadata.
 - `symmetry` is optional advisory metadata written by the application: the embedded catalog data version,
   catalog checksum, and symmetry contract version. Missing metadata is accepted. If present and any value
-  differs from the embedded values, the loader emits `PROJ034` warning and does not rewrite the project; the
-  compiled payload records the authoritative build versions.
+  differs from the embedded values, the composition-layer loader emits `PROJ034` warning and does not rewrite
+  the project; the
+  compiled payload records the authoritative build versions. Parsing stays in `Mocassin.Core`;
+  `Mocassin.Packages.Projects.ProjectValidationService` performs the catalog comparison and appends
+  `PROJ034`, because Core must not reference `Mocassin.Symmetry`.
 - `symmetry` is an additive optional v1 field; `schemaVersion` remains `1` while the model shape is pre-release.
-  Step 03 adds fixtures with and without the field.
+  Step 03 adds fixtures with and without the field. A present-but-partial metadata object compares only the
+  fields it contains; an absent object is accepted without warning.
+- `Mocassin.Core` represents the object as `ProjectSymmetryMetadata?` on `Project` and
+  `ProjectDto.Symmetry`; it is included in the canonical document hash but not the model hash.
+  `ProjectStore.LoadBytesCore` uses `Mocassin.Packages.Projects.ProjectValidationService` by default so the
+  loaded diagnostics include Core, Symmetry, and `PROJ034` results.
 - `schemaVersion` is an integer. Readers accept `1..current`; migrations are pure functions in
   `Mocassin.Core.Project.ProjectMigrations`.
 - Unknown properties are rejected by default (`JsonUnmappedMemberHandling.Disallow`) to catch typos; schema
@@ -151,6 +159,15 @@ parameterization, and lattice signatures use the MessagePack projection (section
 }
 ```
 
+- Steps 03–06 add the sections. A missing `particles`, `particleSets`, or `structure` property loads as the
+  empty/default model so that a Step 01 `"model": {}` document remains valid without a schema-version bump.
+  The default structure is P1, `a=b=c=1 Å`, all angles 90°, name `New Structure`, with no sites or dummies.
+- The persisted arrays `particles`, `particleSets`, `structure.sites`, and `structure.dummyPositions` are
+  non-semantic and sort by `id` in canonical JSON. `particleIds` inside a particle set is semantic and keeps
+  its authored order.
+- `ModelDefinition` in code is flat: it owns `particles`, `particleSets`, and `structure` directly. An
+  in-memory `ParticleModel` grouping must not nest these arrays in the JSON document.
+
 #### Particles
 
 ```json
@@ -164,11 +181,15 @@ parameterization, and lattice signatures use the MessagePack projection (section
 ```
 
 - `symbol` groups species for mass-conservation rules. Species with the same symbol may exchange without
-  violating mass conservation.
-- `charge` is in units of the elementary charge.
+  violating mass conservation. The recommended pattern is `^[A-Z][A-Za-z0-9+\-()]{0,10}$`; a mismatch emits
+  `PAR008` warning, not an error.
+- `charge` is in units of the elementary charge and is restricted to the finite range −1000..1000 by
+  `ChargeElementary`. An out-of-range value is a parse/construction error (`PROJ002`), not a separate
+  particle diagnostic.
 - `isVacancy` marks a pseudo-particle that represents an empty state. Vacancies have `charge = 0` or their
-  default occupation does; the validator warns when both are non-zero.
-- The implicit void particle is not serialized; it is created by the compiler as a reserved ID.
+  default occupation does; the validator warns (`PAR004`) when both are non-zero.
+- The implicit void particle is not serialized; it uses the reserved `ParticleId.Void`. Authored particles
+  must not reuse that ID. `isVoid` is computed and is never a JSON field.
 
 #### Particle sets
 
@@ -181,12 +202,19 @@ parameterization, and lattice signatures use the MessagePack projection (section
 ```
 
 - The first particle is the default occupation of a stable site. Unstable sites always default to void.
-- The void particle is implicit and must not be listed.
+- The void particle is implicit and must not be listed. The empty particle set uses the reserved
+  `ParticleSetId.Empty`; authored sets must not reuse that ID. Reusing `ParticleId.Void` or
+  `ParticleSetId.Empty` is `PAR010` error.
+- Set names are unique (case-insensitive); empty or duplicate names are `PAR011` error. A repeated particle ID
+  inside one set is `PAR012` error.
+- Two authored sets with the same ordered `particleIds` are allowed but emit `PAR009` warning; they are not
+  merged automatically.
 
 #### Structure
 
 ```json
 {
+  "name": "Ceria",
   "spaceGroup": { "number": 225, "axis": "none", "origin": "none" },
   "cell": { "a": 5.41, "b": 5.41, "c": 5.41, "alpha": 90.0, "beta": 90.0, "gamma": 90.0 },
   "sites": [
@@ -201,13 +229,23 @@ parameterization, and lattice signatures use the MessagePack projection (section
 }
 ```
 
+- `name` is the user-visible structure name and is required; it defaults to `New Structure` for a new project
+  but an empty or whitespace-only persisted value is `STR013` error.
 - Lengths are in Å and must be in `0.1..1000`; angles are in degrees and must satisfy
   `0 < α, β, γ < 180°` and a positive Gram determinant.
 - Crystal-system constraints apply: equal lengths/angles, 90°/120° requirements, unique-axis mapping, and
   rhombohedral `0 < α < 120°`. Inconsistent values are rejected; they are never silently normalized.
 - The cell-matrix condition number `||M||∞ · ||M⁻¹||∞` must not exceed `1e12`; otherwise `STR003`.
-- `fractional` components are in `[0, 1)` for the reference position. The canonical P1 order uses the exact
-  `24 × 10^12` fractional grid defined in Step 02; the stored decimal remains the user-facing value.
+- A structure may define at most 1000 reference sites; more is `STR012` error.
+- `fractional` components must be inside `[0, 1)` before trimming. Values within `FractionalTrimTolerance`
+  (`1e-10`) of a boundary snap to the equivalent canonical position; values outside `[0,1)` beyond that
+  tolerance are `STR004` error and are not wrapped. The canonical P1 order uses the exact `24 × 10^12`
+  fractional grid defined in Step 02; the stored decimal remains the user-facing value.
+- Dummy positions use the same coordinate rule and are `STR010` error when invalid; dummy names are unique
+  (case-insensitive) and empty/duplicate names are `STR015` error.
+- More than 10,000 total P1 positions emits `STR009` warning, not an error. A requested supercell product
+  `A*B*C*P` above the signed 32-bit linear-index cap is `STR014` error. This deliberately relaxes the original
+  10,000 hard limit.
 - `number` is the International Tables space-group number, 1..230.
 - `axis` identifies the unique axis or the hexagonal/rhombohedral description; `origin` identifies the origin
   choice. Both are explicit and use `none` when the setting has no such choice.
@@ -216,6 +254,8 @@ parameterization, and lattice signatures use the MessagePack projection (section
   Step 03 updates the manifest and generated schema to mark it reserved and unsupported; until then the
   generated project schema does not yet contain the structure fields. `origin` values are `none`,
   `originChoice1`, and `originChoice2`.
+- `fractional` is a three-number JSON array `[a, b, c]`, not an object. `axis`, `origin`, and `stability` are
+  camelCase JSON strings.
 - The catalog resolves `(number, axis, origin)` to the Hermann–Mauguin symbol, Hall symbol, crystal system, and
   operations. These derived values are never persisted in the project.
 - The default structure is P1: `{ "number": 1, "axis": "none", "origin": "none" }`.

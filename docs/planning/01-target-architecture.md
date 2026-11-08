@@ -142,7 +142,7 @@ Rules:
 | `Mocassin.Symmetry` | Space-group catalog, `SpaceGroupSetting`, `SymmetryOperation`, exact operations, cell geometry transforms, unit-cell encoding, orbit/permutation reduction, structure preview, catalog-dependent structure validation | Model semantics, persistence, Core model ownership |
 | `Mocassin.Compilation` | P1 extension, environment sampling, interaction discovery, transition rule generation, index assignment, compiled model | Job templates, supercells, parameterization values, I/O |
 | `Mocassin.Contracts` | Package/results/state DTOs (`ParameterizedModel`, job/lattice payloads, `.mcs` document types, job-folder/solver/event contracts), schema versions, manifest reader | Build logic, SQL, UI, solver execution |
-| `Mocassin.Packages` | Project JSON persistence, parameterization application, job templates, supercell/doping generation, package encoding, immutable `.msl` writing | Solver execution, UI, `.msl`/`.msr` reading |
+| `Mocassin.Packages` | Project JSON persistence, composed project validation (Core + Symmetry + `PROJ034`), parameterization application, job templates, supercell/doping generation, package encoding, immutable `.msl` writing | Solver execution, UI, `.msl`/`.msr` reading |
 | `Mocassin.Results` | `.msl`/`.msr`/`.mcs` parsing, result collection, evaluation queries, derived quantities, exporters | Simulation execution, package building/writing |
 | `Mocassin.Cli` | Command parsing, orchestration, process launch, progress/logging | Scientific algorithms |
 | `Mocassin.App*` | Presentation, commands, navigation, dialogs | Scientific algorithms |
