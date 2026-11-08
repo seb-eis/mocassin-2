@@ -9,10 +9,10 @@ orbit/permutation reduction, and periodic geometry kernels.
 
 - **Status:** In progress
 - **Step branch:** `step/02-symmetry-and-geometry`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42429237412) at `4a30fdf` (Ubuntu + Windows + policy/docs jobs)
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42469556610) at `cfc419f` (Ubuntu + Windows + policy/docs jobs)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `4a30fdf`
+- **Audit:** Re-audit required at `cfc419f`
 - **Design review:** Ready with notes — accepted by the human owner on 2026-11-07
 - **Last updated:** 2026-11-07
 
@@ -31,6 +31,7 @@ orbit/permutation reduction, and periodic geometry kernels.
 | `amend-1-public-math` | `feature/step-02-symmetry-and-geometry/amend-1-public-math` | Squashed | Core 167/167; Symmetry 117/117; matrix benchmark 0.90 ns transform / 5.22 ns inverse, 0 allocations; API baselines updated | [`42426221778`](https://github.com/seb-eis/mocassin-2/actions/runs/42426221778) — green | `cd796b0` |
 | `amend-2-docs-math` | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | Squashed | Strict docs and combined docs build; 21 rendered KaTeX elements with MathML; screenshot `/tmp/opencode/step-02-symmetry.png` | [`42427151237`](https://github.com/seb-eis/mocassin-2/actions/runs/42427151237) — green | `d6eac6f` |
 | `fix-audit-findings` | `feature/step-02-symmetry-and-geometry/fix-audit-findings` | Squashed | Symmetry 127/127; brute-force/random oracles; full solution tests; strict docs; format clean; benchmark CI job added | [`42429237412`](https://github.com/seb-eis/mocassin-2/actions/runs/42429237412) — green | `4a30fdf` |
+| `fix-audit-round2` | `feature/step-02-symmetry-and-geometry/fix-audit-round2` | Squashed | Independent ASE multiplicity oracle, union-find pair oracle, exhaustive cluster oracle; 127/127 | [`42469556610`](https://github.com/seb-eis/mocassin-2/actions/runs/42469556610) — green | `cfc419f` |
 
 **Deviations and notes:**
 
@@ -44,7 +45,7 @@ orbit/permutation reduction, and periodic geometry kernels.
 - ApiCompat baseline refresh now uses reference assemblies, keeping the checked-in binaries small.
 - Amendment 1 adds the public generic math layer and migrates `CellGeometry` to `Matrix3<double>`.
 - Amendment 2 adds KaTeX 0.19.1 rendering and converts the published symmetry formulas.
-- Combined audited solution commit: `d6eac6f`; audit-fix solution: `4a30fdf`.
+- Combined audited solution commit: `d6eac6f`; audit-fix solution: `cfc419f`.
 
 ## Goal
 

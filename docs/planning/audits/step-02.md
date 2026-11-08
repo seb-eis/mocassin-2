@@ -7,10 +7,10 @@
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
 | Audit status | Fixes required |
-| Audited commit | `4a30fdf` (audit-fix solution; docs-only status commit follows) |
+| Audited commit | `cfc419f` (re-audit-fix solution; docs-only status commit follows) |
 | Step branch | `step/02-symmetry-and-geometry` |
 | Step tag | — |
-| CI run | [42429237412](https://github.com/seb-eis/mocassin-2/actions/runs/42429237412) — green at `4a30fdf` |
+| CI run | [42469556610](https://github.com/seb-eis/mocassin-2/actions/runs/42469556610) — green at `cfc419f` |
 | Audit date | 2026-11-08 |
 | Auditor | Independent out-of-context audit agent (fresh context) |
 
@@ -25,7 +25,7 @@ The Step 02 audit covers the parent step plus these integrated amendments at the
   [`step-02-amend-2-docs-math.md`](../amendments/step-02-amend-2-docs-math.md), review
   [`step-02-amend-2.md`](../reviews/step-02-amend-2.md).
 
-Combined audit commit: `d6eac6f`; audit-fix solution: `4a30fdf`. Both amendments are integrated; the first audit returned Fixes required and the fixes are recorded below.
+Combined audit commit: `d6eac6f`; audit-fix solution: `cfc419f`. Both amendments are integrated; the first audit returned Fixes required and the fixes are recorded below.
 
 ## Step summary
 
@@ -52,7 +52,7 @@ Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-g
 
 ## Known notes for the auditor
 
-- The audited solution is `4a30fdf`; a documentation-only audit-request/status commit follows it. The CI run
+- The audited solution is `cfc419f`; a documentation-only audit-request/status commit follows it. The CI run
   above is for the solution commit.
 - `periodic-geometry` was implemented before `orbit-reduction` because pair reduction consumes radial search.
   The approved feature set is unchanged.
@@ -430,3 +430,20 @@ re-audit).
 Follow-up issue/step: Add independent pair/chiral/cluster oracles and an independent all-setting multiplicity
 source, update the evidence, and request re-audit round 3. Do not merge `step/02-symmetry-and-geometry` into
 `main` until that re-audit passes.
+
+## Resolution status (fix round 2)
+
+Date: 2026-11-08
+
+Re-audit-fix squash: `cfc419f` (`step-02: use independent symmetry oracles (re-audit fix)`). CI:
+[42469556610](https://github.com/seb-eis/mocassin-2/actions/runs/42469556610) — green. A documentation-only
+status commit follows; it changes no code, tests, or configuration.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| **M1** — pair/cluster oracles copied production logic; multiplicity same-source | Fixed | The pair oracle now uses an independent **union-find partition** over explicitly enumerated periodic images, double-precision operation transforms and public encoder lookup, and a displacement-orbit signature for chirality instead of the production mapping/grid helpers. The cluster oracle now enumerates all tuples, builds each permutation orbit, sorts it with an independent comparer, and compares canonical/expansion codes without the production builder. The multiplicity oracle now comes from **ASE 3.29.0** (`ase.spacegroup.Spacegroup.equivalent_sites`), an independent development-only implementation; the fixture is committed with provenance in `tests/reference/symmetry/README.md`. |
+| **m3 residual** — compilation-pipeline “freeze” wording | Fixed | The page now distinguishes frozen P indices from pair/cluster representatives verified against brute-force oracles. |
+| **n4** — stale known-note commit | Fixed | The known-note line now names `cfc419f`. |
+
+Re-audit request: review `cfc419f` and the following docs-only status commit. Earlier rounds and resolutions
+remain unchanged.
