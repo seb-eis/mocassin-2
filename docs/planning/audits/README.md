@@ -79,7 +79,9 @@ The step agent, planner, or human owner may spawn an auditor. The spawner must n
 9. The auditor re-audits the new commit and appends a new round to the record. The same auditor may continue if
    it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every earlier round
    in the record.
-10. On `Passed`, the human owner gives merge approval.
+10. On `Passed`, the human owner gives merge approval. The approval request includes the cumulative approval
+    report in section 10, covering every audit and review round, finding, resolution, note, waiver, and residual
+    risk.
 11. Merge the step branch into `main` with `--no-ff`, tag `step-NN`, push, and delete the step branch.
 
 ## 4. What the audit must cover
@@ -156,3 +158,11 @@ The audit record is the durable record. Do not rely on chat history, and do not 
   delete the existing `step-NN` tag.
 - The amendment page links to the parent audit record. The auditor still edits only the audit record and
   commits only that file.
+
+## 10. Approval report
+
+When an audit verdict is presented to the human owner for merge or tag approval, the requesting agent must include
+the cumulative approval report required by [`AGENTS.md` §3.12](../../../AGENTS.md). It must cover every audit and
+review round, every finding and its resolution, accepted notes and waivers, residual risk, and the
+no-Blocker/no-Major gate statement. Reporting only the latest round or only open findings is not acceptable. The
+record's `Approval summary` section is the durable source for that report.
