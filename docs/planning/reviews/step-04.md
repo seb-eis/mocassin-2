@@ -934,11 +934,11 @@ planner/step agent and does not alter the reviewer's round-3 findings, evidence,
 | Step | 04 — Transition Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Ready with notes |
 | Reviewed commit | `fe2331c` |
 | Docs branch | `main` |
-| Review date | — |
-| Reviewer | — |
+| Review date | 2026-11-08 |
+| Reviewer | Independent planning auditor (fresh context, round 4; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
 
@@ -951,19 +951,288 @@ earlier rounds unchanged.
 
 ### Re-review evidence
 
-_Reviewer to complete._
+**Independence.** I am a fresh planning auditor for round 4. I did not author or implement the Step 04 design, any fix round, or any implementation; I have no shared conversation with the planner or implementor. I read the frozen design content and the repository myself; I did not rely on the request summary or the resolution table.
+
+**Frozen state and worktree.** Worktree `/workspace/mocassin`, branch `main`, `HEAD` `30b8b41`. The request names `fe2331c` (`fe2331c6bdb83d176679cf91c23d3dfdd78fb1ab`) as the frozen design commit. `git diff --stat fe2331c..30b8b41` shows only `docs/planning/reviews/step-04.md`, `docs/planning/status.md`, and the step-page design-review link; `git diff fe2331c..30b8b41 -- docs/planning/steps/step-04-transition-model.md docs/planning/02-data-contracts.md` shows only the one-line link change (`Re-review required at fe2331c`). The frozen design content is therefore identical at `fe2331c` and `HEAD`. The record commit's parent will be `30b8b41`, not `fe2331c`, because the round-4 request sits between the design commit and the record; this is the same process note as rounds 1–3.
+
+**Commands run (from `/workspace/mocassin`):**
+
+```sh
+git status --short
+# (no output: clean worktree)
+
+git log --oneline --decorate -6
+# 30b8b41 (HEAD -> main) docs: request step-04 design re-review round 4 [skip ci]
+# fe2331c docs: resolve step-04 round-3 design findings [skip ci]
+# d4e99cf docs: record step-04 design re-review Changes required [skip ci]
+# ff4cf81 docs: request step-04 design re-review round 3 [skip ci]
+# 43bad05 docs: resolve step-04 re-review findings [skip ci]
+# 3a50206 docs: record step-04 design re-review Changes required [skip ci]
+
+git rev-parse fe2331c
+# fe2331c6bdb83d176679cf91c23d3dfdd78fb1ab
+
+git show --stat fe2331c
+# docs/planning/02-data-contracts.md              |  14 ++-
+# docs/planning/steps/step-04-transition-model.md | 150 +++++++++++++++---------
+# 2 files changed, 101 insertions(+), 63 deletions(-)
+
+git diff --stat 43bad05..fe2331c -- docs/planning
+# docs/planning/02-data-contracts.md              |  14 +-
+# docs/planning/reviews/step-04.md                | 325 +++++++++++++++++++++++-
+# docs/planning/status.md                         |  11 +-
+# docs/planning/steps/step-04-transition-model.md | 152 ++++++-----
+# 4 files changed, 429 insertions(+), 73 deletions(-)
+
+git diff 43bad05..fe2331c -- docs/planning
+# Read in full: the round-3 resolution text, the step-page revision, the data-contract delta, and the status change.
+
+git show fe2331c:docs/planning/steps/step-04-transition-model.md
+# Read in full (716 lines): sections 1-11, code layout, tasks, acceptance, documentation, tests, risks.
+
+git show fe2331c:docs/planning/02-data-contracts.md
+# Read in full (1,195 lines): model envelope 149-173, transition section 268-342,
+# canonical-hash rules 135-147, simulations 409-436.
+
+git diff --stat fe2331c..30b8b41
+# docs/planning/reviews/step-04.md                | 69 +++++++++++++++++++++++--
+# docs/planning/status.md                         |  6 +--
+# docs/planning/steps/step-04-transition-model.md |  2 +-
+# 3 files changed, 69 insertions(+), 8 deletions(-)
+
+git diff fe2331c..30b8b41 -- docs/planning/steps/step-04-transition-model.md docs/planning/02-data-contracts.md
+# Only the one-line `Design review` link change; no design change.
+
+git diff --check 43bad05..fe2331c
+# (no output)
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.23s
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+```
+
+**Additional read-only checks.**
+
+```sh
+wc -l src/dotnet/Mocassin.Core/Editing/ProjectEditor.cs
+# 506
+
+cat src/dotnet/Mocassin.Core/Mocassin.Core.csproj
+# No ProjectReference to Mocassin.Symmetry.
+
+cat src/dotnet/Mocassin.Symmetry/Mocassin.Symmetry.csproj
+# ProjectReference to Mocassin.Core.
+
+cat src/dotnet/Mocassin.Packages/Mocassin.Packages.csproj
+# References Core, Compilation, and Contracts. Compilation references Symmetry, so the
+# ProjectValidationService composition point can see Symmetry types.
+
+grep -n "public ImmutableArray<Fractional3> Positions\|public ImmutableArray<ExpandedSite> ExpandedSites\|public static bool TryCreate\|public bool TryIndexOf\|public Vector4I Encode" \
+  src/dotnet/Mocassin.Symmetry/Geometry/UnitCellVectorEncoder.cs
+# 62 Positions; 67 ExpandedSites; 90/116 TryCreate; 289 TryIndexOf; 312 Encode.
+
+sed -n '20,90p' src/dotnet/Mocassin.Symmetry/Geometry/UnitCellVectorEncoder.cs
+# Each reference site is expanded with SpaceGroupOperations.ExpandGridOrbit, deduplicated on
+# the exact grid, sorted by fractional (a,b,c), and assigned P = 0..Pcount-1.
+# ExpandedSite carries ReferenceSiteIndex, so a P can be mapped back to its owning site.
+
+grep -n "public sealed record Project" src/dotnet/Mocassin.Core/Project/Project.cs
+# public sealed record Project : IParticleQuery, IStructureQuery
+
+grep -n "StateChangeId\|StateChangeGroupId\|TransitionChainId\|KineticTransitionId\|MetropolisTransitionId" \
+  src/dotnet/Mocassin.Core/Ids/TypedIds.cs
+# 123/142/161/180/199: all five typed IDs already exist (added by Step 03, dd642d6).
+
+grep -rn "PathMatchTolerance" src/dotnet
+# (no output; the design adds the new named tolerance.)
+
+grep -n "CanonicalizeModel" -A 14 src/dotnet/Mocassin.Core/Project/ProjectJson.cs
+# The current method rebuilds only Particles, ParticleSets, and Structure; ProjectJsonConverter.Write
+# (ProjectJson.cs 262) calls it, ProjectHasher.Compute uses SerializeCanonicalModel, and
+# ProjectCanonicalizer.ToCanonicalUtf8 uses the same serializer.
+
+grep -n "defined more than once\|Unknown model property" src/dotnet/Mocassin.Core/Model/ModelDefinitionJsonConverter.cs
+# Duplicate and unknown model properties are rejected as the design states.
+
+python3 - <<'PY'
+import json
+p=json.load(open('samples/ceria/ceria.mocprj'))
+for s in p['model']['structure']['sites']:
+    print(s['name'], s['fractional'], s['stability'])
+PY
+# Ce [0, 0, 0] stable
+# O [0.25, 0.25, 0.25] stable
+# O transition [0.5, 0.25, 0.25] unstable
+
+sed -n '10,45p' src/dotnet/Mocassin.Symmetry.Tests/Structure/SampleStructureTests.cs
+# ceriaOrbitSizes = [4, 8, 24]; ceriaOrbit1 = [9, 11, 15, 17, 27, 29, 33, 35]; 36 P1 positions.
+# The stable O 8c orbit therefore includes symmetry-equivalent members such as (0.75, 0.25, 0.25).
+
+grep -n "GetBasicKineticPattern\|GetMetropolisPattern\|GetBasicVehiclePattern\|GetSplitVehiclePattern" -A 8 \
+  /workspace/mocassin-original/src/ModelBuilder/ICon.Model/Transitions/Modeling/Logic/ConnectorPattern/ConnectorPattern.cs
+# Basic kinetic D{2,}; Metropolis D; basic vehicle D+ S S D+; split vehicle D D (S D D)+.
+
+grep -n "ContainsRingTransition" -A 12 \
+  /workspace/mocassin-original/src/ModelBuilder/ICon.Model/Transitions/Modeling/Logic/TransitionAnalyzer/TransitionAnalyzer.cs
+# Any-pair check over raw fractional coordinates with the space-group comparer.
+
+grep -n "GetEntryValueAt" -A 4 \
+  /workspace/mocassin-original/src/ModelBuilder/ICon.Framework.Symmetry/Analysis/CellAnalysis/UnitCellAdapter.cs
+# Resolves any fractional position (including a symmetry-equivalent P1 image) to its unit-cell entry.
+```
+
+**Files reviewed.** `AGENTS.md` (§3.8–§3.13, §4, §5, §7, §8, §9, §10, §11, §12, §16);
+`docs/planning/reviews/README.md`; `docs/planning/reviews/step-design-review-template.md`; this record;
+`docs/planning/steps/step-04-transition-model.md` at `fe2331c`; `docs/planning/02-data-contracts.md` at
+`fe2331c`; `docs/planning/03-quality-strategy.md`; `docs/planning/05-open-decisions.md`;
+`docs/planning/ci-policy.md`; `docs/planning/appendix-b-parity-matrix.md`; `docs/planning/status.md` at HEAD;
+`docs/planning/steps/step-03-particle-and-structure-models.md`, `step-05-energy-model.md`,
+`step-06-lattice-and-simulation-models.md`, `step-07-validation-and-diagnostics.md`,
+`step-08-model-compilation-pipeline.md`, and `step-24-model-editors-particle-structure-transitions.md`;
+`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`,
+`0010-canonical-messagepack-signatures.md`, and `0013-format-compatibility-and-api-versioning.md`;
+`docs/development/code-structure.md`; `docs/reference/project-format.md`; `docs/reference/index.md`;
+`docs/user-guide/index.md`; `docs/physics/index.md`; `zensical.toml`; `contracts/manifest.json`;
+`contracts/generated/schema/project-v1.schema.json`; `contracts/generated/signatures/model-v1.json`;
+`contracts/generated/fixtures/descriptors.json`; `tools/contracts/generate.py`; `tools/verify.sh`;
+`tools/structure-policy.json`; `tools/check-api-compat.sh`; `tools/update-api-baseline.sh`.
+
+**Code and test inventory inspected.** `Mocassin.Core`: `Model/ModelDefinition.cs`,
+`Model/ModelDefinitionJsonConverter.cs`, `Model/Structure/CellSite.cs`,
+`Model/Structure/IStructureQuery.cs`, `Model/Structure/StructureModelValidator.cs`,
+`Model/Particles/IParticleQuery.cs`, `Model/ViewSettings.cs` (the camel-case enum converter),
+`Project/Project.cs`, `Project/ProjectJson.cs`, `Project/ProjectHasher.cs`,
+`Project/ProjectCanonicalizer.cs`, `Project/ProjectSchema.cs`, `Project/ProjectValidator.cs`,
+`Editing/ProjectEditor.cs`, `Geometry/Fractional3.cs`, `Geometry/GeometryTolerances.cs`,
+`Geometry/Vector4I.cs`, `Ids/TypedIds.cs`, `Diagnostics/Diagnostic.cs`, `Diagnostics/ModelPath.cs`.
+`Mocassin.Symmetry`: `Geometry/UnitCellVectorEncoder.cs`, `Geometry/ExpandedSite.cs`,
+`Geometry/StructureSiteReference.cs`, `Structure/IStructurePreviewService.cs`,
+`Structure/StructurePreviewService.cs` (cache-key construction), `Contracts/SymmetryVersionInfo.cs`,
+`SpaceGroups/SpaceGroupService.cs`. `Mocassin.Packages`: `Projects/ProjectValidationService.cs`,
+`Projects/ProjectStore.cs`. `Mocassin.Compilation`, `Mocassin.Contracts` project references.
+`Mocassin.Symmetry.Tests/Structure/SampleStructureTests.cs`, `Mocassin.Symmetry.Tests/UnitCellVectorEncoderTests.cs`,
+`Mocassin.Packages.Tests/Projects/ProjectValidationServiceTests.cs`,
+`Mocassin.Benchmarks/Structure/StructurePreviewBenchmarks.cs`, `tests/reference/bench/baselines.json`.
+Original reference (read-only, no copy): `KineticTransitionValidator.cs`, `TransitionAnalyzer.cs`,
+`AbstractTransitionValidator.cs`, `StateExchangeGroupValidator.cs`, `UnitCellAdapter.cs`,
+`ConnectorPattern.cs`, and `docs/userguide-md/transition-model.md`.
+
+**Required scope checks.** All thirteen required review-scope areas were re-checked against the frozen
+content: scope/non-goals/acceptance, `ModelDefinition` and JSON/schema round-trip, semantic ordering, every
+built-in pattern and `Custom`, path/stability validation, query/preview boundaries, TRN001–TRN028,
+manifest/schema/fixture tasks, PublicAPI/ApiCompat, code layout, Step 03 dependency stability,
+documentation/navigation and the test plan, and the Step 05/06/07/08/24 interfaces. The findings below record
+the result.
+
+### Re-review checklist (round 4)
+
+Marks and notes apply to round 4 only; item text is unchanged.
+
+**Design decisions reviewed**
+
+- [x] Step page design decisions — reviewed the frozen page; R3-1–R3-10 are resolved or acknowledged;
+  R4-1–R4-5 are new minor/notes.
+- [x] Data contracts and format changes — the flat model envelope is consistent; the transition section,
+  semantic ordering, and canonical-hash rules were re-read; the periodic-cell/offset wording is R4-1.
+- [x] Architecture and module boundaries — Core/Symmetry/Packages split is sound; the resolver is now in
+  Symmetry and `Mocassin.Core.csproj` has no Symmetry reference.
+- [x] ADRs and open decisions — ADR 0009/0010/0013 and the Step 03 additive-v1 precedent are cited; no open
+  decision blocks the step.
+- [x] Quality strategy and test plan — property tests, contract fixtures, tiers, and the benchmark are
+  present; the periodic-cell offset test is the R4-1 gap.
+- [x] Parity matrix and documentation plan — parity/status/closeout/audit and `transitions.md` tasks are
+  present; the index-page updates are present.
+- [x] Licensing and provenance — no new dependency; MIT/SPDX applies; no GPL source or data is introduced.
+- [x] Post-implementation audit plan — the standard AGENTS §3.10 audit and closeout task apply.
+
+**Dependency and interface checks**
+
+- [x] Dependencies are `Done` and their contracts are stable — Step 03 is complete (`step-03` tag; audit
+  passed); `IParticleQuery`, `IStructureQuery`, `Project`, `CellSite`, `StructureModel`,
+  `Fractional3.TrimToUnitCell`, and `UnitCellVectorEncoder` exist.
+- [x] Inputs, outputs, types, and formats are defined — the flat model shape, `IProjectQuery`, preview, and
+  matrices are defined; the offset detail is R4-1.
+- [x] Versioning and migration behavior is defined — additive project-v1; Step 03 precedent; ADR 0009
+  wording is addressed.
+- [x] No unresolved cross-step interface question remains — Steps 05/06/07/08/24 line up; the
+  `SimulationKind`/`TransitionKind` mapping is a note (R4-5), not a blocker.
+
+**Standard design-review checklist**
+
+- [x] Scope, non-goals, and acceptance criteria are explicit and testable — non-goals and the orbit-member
+  criterion are present.
+- [x] Design decisions are complete and internally consistent — the R3-1 boundary is fixed; R4-1–R4-4 are
+  minor clarifications.
+- [x] Required tests, property tests, golden fixtures, and performance targets are defined — yes; add the
+  periodic-cell offset case (R4-1).
+- [x] Documentation, status, parity, and audit updates are planned — yes.
+- [x] Licensing, provenance, and dependency checks are resolved — no new dependency; MIT/SPDX; no GPL
+  copying.
+- [x] Risks and mitigations are realistic — the table is plausible; add the offset/ownership notes.
+- [x] Code layout and namespace plan follow the structure policy — new folders/files fit the 20-file,
+  depth-4, 800-line limits; `Int32`/`ImmutableArray`/`UnitCellVectorEncoder` usage is consistent.
+- [x] No hidden scope, stale placeholders, or unowned decisions — R4-2/R4-4 are small ownership
+  clarifications.
 
 ### Re-review findings
 
-_Reviewer to complete._
+#### Round-3 resolution verification
+
+| Finding | Severity | Status | Verification |
+| --- | --- | --- | --- |
+| R3-1 | Blocker | Resolved | `TransitionPathResolver` and `TransitionPathValidator` are now in `Mocassin.Symmetry.Transitions` (step page 299-302, 553-559, 594-596; task 594-596). The resolver builds a `UnitCellVectorEncoder` from the resolved setting and the authored sites and matches against `UnitCellVectorEncoder.Positions`, whose `ExpandedSite.ReferenceSiteIndex` maps every P1 orbit member back to its owning reference site (`UnitCellVectorEncoder.cs` 62, 67, 90-116, 220-244). The ceria golden P order has 36 positions and O 8c orbit `[9, 11, 15, 17, 27, 29, 33, 35]` (`SampleStructureTests.cs` 14-16, 31-39), so an endpoint such as `(0.75, 0.25, 0.25)` is an 8c orbit member and resolves to the O site. The boundary is correct: `Mocassin.Core.csproj` has no Symmetry reference, `Mocassin.Symmetry.csproj` references Core, and the preview service is in Symmetry. The acceptance criterion now requires orbit-member endpoints (629-631), and the path-matching test row requires orbit members (684). The original `KineticTransitionValidator.cs` 86 / `UnitCellAdapter.GetEntryValueAt` behavior is matched. |
+| R3-2 | Minor | Resolved | The ownership sentence now says `TRN001`–`TRN028` (375). The partition itself omits `TRN018`; see R4-2. |
+| R3-3 | Minor | Resolved | The help anchor is now `docs/reference/transitions.md` (378); the task and Documentation section create that page and assign the consolidated `diagnostics.md`/`troubleshooting/errors.md` to Step 07 (606-608, 664-666). |
+| R3-4 | Minor | Resolved | `transitionModelHash` now covers the full `ParticleOrder`, including unreferenced particles and void (470-474); the cache test and risk row were updated (688, 710). |
+| R3-5 | Minor | Resolved | Matching uses a periodic component-wise difference over every P1 position with `PathMatchTolerance = 1e-6` (306-312), and the test row covers boundary points (684). The offset derivation is R4-1. |
+| R3-6 | Note | Resolved | `TRN026` now says "does not contain exactly one `[D, ∅]` state change" in the table (371), §7 (317-318), and the defect table (510). |
+| R3-7 | Note | Resolved | Non-positive `(A, B, C)` counts throw `ArgumentOutOfRangeException`; invalid model data returns `null` plus diagnostics (463-467), matching Step 03. |
+| R3-8 | Note | Resolved | The task updates `docs/user-guide/index.md`, `docs/physics/index.md`, and `docs/reference/index.md` (621-622), not only `zensical.toml`. |
+| R3-9 | Note | Resolved | `IProjectQuery : IParticleQuery, IStructureQuery, ITransitionQuery` is the single same-snapshot query (419, 457-459); the preview service takes it. |
+| R3-10 | Note | Resolved | The cache risk row now lists the transition closure hash (with the full particle order), structure hash, `(A,B,C)`, and symmetry catalog/contract versions (710). |
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R4-1 — The periodic-cell offset in `ResolvedPathPosition.Encoding` is not defined precisely enough, and the data contract's `TrimToUnitCell` wording can be read as discarding it.** The step page says `Encoding` is the full `Vector4I` (cell offset plus P) and that a point in a different periodic cell is a distinct position (303-305, 322-324). The matching text canonicalizes each point with `Fractional3.TrimToUnitCell()`, which maps into `[0,1)`, then compares with a periodic difference "minimum over integer shifts" and requires "exactly one `(P, cell-offset)` candidate" (306-315). The data contract repeats "canonicalizes each point with `Fractional3.TrimToUnitCell()`" (327-329) and then says a different periodic cell is distinct (330-331). `TrimToUnitCell` discards the integer part (`Fractional3.cs` 114-153); the periodic difference is shift-invariant and at a boundary such as `0.9999995` versus `0.0` selects the shift `1`, not the raw cell `0`. The design does not state whether the offset is the raw integer part, the minimizing shift, or a separate convention, and the test plan covers boundary matching (684) but not "same P, different cell offset is not a duplicate". Pin the offset derivation and add that test. | Step page 303-315, 322-324, 684; `02-data-contracts.md` 326-331; `Fractional3.cs` 114-153; `GeometryTolerances.cs` 23. |
+| **Minor** | **R4-2 — `TRN018` has no owner in the Core/Symmetry validation-ownership split.** The rule table defines `TRN018` as a Warning (363), the task says "Implement reverse-link validation and `TRN018`" (602), and the acceptance criterion tests it (638), but the ownership list gives Core `TRN001–TRN009, TRN017, TRN019, and TRN021–TRN027` and Symmetry `TRN010–TRN016, TRN020, and TRN028` (332-335). `TRN018` belongs to neither. Add it to the Core definition-level list (it needs only the chain and reverse link). | Step page 332-335, 363, 602, 638. |
+| **Minor** | **R4-3 — The `Custom` `D+ S+ D+` grammar is broader than the original regex-validated patterns, although the text says it preserves them.** The original `ConnectorPattern` accepts basic kinetic `D{2,}`, Metropolis `D`, basic vehicle `D+ S S D+`, and split vehicle `D D (S D D)+` (`ConnectorPattern.cs` 111-157). The new `D+ S+ D+` also accepts `D S D` (one static) and `D D S S D D` (two static), which the original does not. The design says `Custom` "preserves the original regex-validated connector grammar" (189) and the risk row says rule generation rejects unsupported cases (706), but Step 08 has no such rejection. Either state that `D+ S+ D+` is an intentional generalization and define Step 08 support, or restrict the grammar to the original shapes. | Step page 189-197, 706; original `ConnectorPattern.cs` 111-157; Step 08 179-205. |
+| **Minor** | **R4-4 — `TRN025` is assigned to Core, but its wording can require the resolved path for `Custom` chains.** The table says "Group is used at both stable and unstable positions" (370), and §3 says "the group's stability role is fixed by its pairs (TRN025)" (209-210). For built-in patterns the stability sequence is in the table; for `Custom` it is "inferred from the resolved reference path" (196, 319-321), which Core cannot do. Clarify whether `TRN025` is a pair-level group check (all pairs unstable-role or all stable-role, Core) or a chain-usage check (Symmetry for `Custom`); if it is the latter, move it to the Symmetry list. | Step page 196, 209-210, 319-321, 332-335, 370. |
+| **Note** | **R4-5 — Step 06's `SimulationKind` (`Mmc`/`Kmc`) to `TransitionKind` (`Metropolis`/`Kinetic`) mapping is implicit.** Step 06 says `TransitionRef` carries a `TransitionKind` (`Kinetic` or `Metropolis`) and "the simulation validates that the kind matches `Kind`" (129), and then says "`Kind` is `Mmc` or `Kmc`" (132). The mapping is obvious but not written; state it once in Step 04 or Step 06 to avoid a cross-step ambiguity. | Step 04 212-233; Step 06 99-132. |
 
 ### Re-review verdict
 
 - [ ] Ready for implementation
-- [ ] Ready with notes
+- [x] Ready with notes
 - [ ] Changes required
 - [ ] Re-review required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up step:
+Follow-up owner: Planner and Step 04 agent (accept R4-1–R4-5 or make a focused clarification)
+Follow-up step: Step 04 — Transition Model; the human owner approves the `Ready with notes` gate or
+requests a small clarification round
+
+**Ready with notes.** The round-3 Blocker R3-1 is genuinely removed, not reworded. The path resolver and
+validator now live in `Mocassin.Symmetry.Transitions`; the resolver expands the authored reference sites to
+their P1 orbits with the existing `UnitCellVectorEncoder`, maps a point to a `(P, cell-offset)` encoding and
+owning reference site, and accepts symmetry-equivalent orbit members. The Core boundary is intact
+(`Mocassin.Core.csproj` has no Symmetry reference), the ceria 8c orbit is confirmed by the existing golden P
+order, and the ceria acceptance criterion and path-matching test now require orbit-member endpoints. R3-2–R3-10
+are also resolved as recorded above.
+
+The remaining findings are four Minors and one Note: the precise periodic-cell offset convention (R4-1), the
+missing `TRN018` owner (R4-2), the broader-than-original `Custom` grammar (R4-3), the `TRN025` owner/semantics
+(R4-4), and the implicit `SimulationKind`/`TransitionKind` mapping (R4-5). None is a material contradiction
+with the revised architecture; they are clarifications and test-coverage details. They should be addressed in
+the same step revision or explicitly accepted by the human owner. Per the review process, `Ready with notes`
+requires the human owner to accept these notes explicitly; this reviewer does not approve the gate.
+
+Reviewed commit: `fe2331c` (`fe2331c6bdb83d176679cf91c23d3dfdd78fb1ab`). Documentation gate:
+`zensical build --strict` — no issues found; `python3 tools/contracts/generate.py --check` — 17 artifacts
+current. Record parent: `30b8b41` (the round-4 request commit); the design content is identical at `fe2331c`
+and `HEAD`.
