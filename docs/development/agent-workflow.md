@@ -235,8 +235,9 @@ Before a step starts, a fresh planning auditor checks the design out of context.
    directly.
 2. Freeze the docs at a commit and create or update `docs/planning/reviews/step-NN.md`; set the status to
    `Ready for review` and record the reviewed commit.
-3. A fresh planning auditor, with no implementation context, reviews the step page and all cross-step
-   contracts. The auditor must not have authored or implemented the design.
+3. The planner, implementor, or human owner spawns a fresh planning auditor with no implementation context.
+   The auditor reviews the step page and all cross-step contracts and must not have authored or implemented the
+   design.
 4. The auditor writes the evidence, findings, and verdict directly into
    `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
    `[skip ci]`. The reviewed commit is the parent of the record commit. It does not merge, tag, push `main`,
@@ -264,7 +265,8 @@ Before merging a completed step:
 2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, CI run, scope, and known
    limitations; set its status to `Ready for audit`.
 3. Freeze the step branch at the audited commit.
-4. Let a fresh out-of-context audit agent review it. The auditor must not have implemented the step.
+4. The step agent, planner, or human owner spawns a fresh out-of-context audit agent. The auditor must not have
+   implemented the step.
 5. The auditor writes the evidence, findings, and verdict directly into
    `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
    `[skip ci]`. The audited commit is the parent of the record commit. It does not merge, tag, push `main`,
@@ -287,6 +289,7 @@ writes into it directly.
 | --- | --- |
 | Step feature list | Once, at step start |
 | Each feature squash | Before every squash into the step branch |
+| Reviewer spawning | Planner, implementor, or human owner may spawn a fresh reviewer; the human owner approves the final verdict |
 | Pre-implementation design review | Fresh planning auditor after the design docs are frozen, before implementation |
 | Amendment design review | Focused fresh planning auditor before amendment implementation |
 | Amendment integration | Before the parent step audit freeze |
@@ -319,3 +322,33 @@ step.
 
 Use [`docs/planning/amendments/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/amendments/README.md)
 for statuses, naming, integration, and the post-merge fallback.
+
+## 17. Reviewer spawn card
+
+Use this when the planner or implementor spawns a design reviewer or auditor. Replace the bracketed values and
+do not add a desired verdict or a summary that replaces reading the repository.
+
+```text
+You are a fresh, read-only [design reviewer / auditor]. You did not author or implement this work and have no
+shared conversation with the planner or implementor.
+
+Frozen commit: [full commit]
+Request record: [docs/planning/reviews/step-NN.md or docs/planning/audits/step-NN.md]
+Repository: /workspace/mocassin
+
+Read AGENTS.md, the request record, the step page, and the relevant design/contract docs. Do not rely on my
+summary; inspect the repository at the frozen commit yourself.
+
+Run the required builds/tests and review the diff. Write evidence, findings, verdict, and checklist completion
+marks directly into the request record. You may check checklist boxes but not change item text. Do not edit any
+other file, merge, tag, push main, or delete branches.
+
+If you find issues, report them; do not fix them. The human owner approves the final verdict and gate.
+```
+
+Rules for the spawner:
+
+- Do not ask for a specific verdict or re-spawn until a preferred verdict appears.
+- Do not edit the reviewer's findings, evidence, or verdict.
+- Do not mark the review/audit accepted, waived, merged, or tagged.
+- Fixes require a new commit and a new review round.

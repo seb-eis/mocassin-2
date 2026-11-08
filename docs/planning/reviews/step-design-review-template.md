@@ -13,6 +13,7 @@
 | --- | --- |
 | Step | NN — Step title |
 | Request owner | Step agent |
+| Review initiated by | Planner / implementor / human owner |
 | Design review status | Not requested |
 | Reviewed commit | — |
 | Docs branch | — |
@@ -83,6 +84,16 @@ the auditor's findings, evidence, or verdict.
 
 Follow-up owner:
 Follow-up step:
+
+## Human approval
+
+- [ ] Accepted: Ready for implementation
+- [ ] Accepted: Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+Approved by:
+Date:
 
 ## Resolution status
 

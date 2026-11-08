@@ -13,6 +13,7 @@
 | --- | --- |
 | Step | NN — Step title |
 | Request owner | Step agent |
+| Review initiated by | Planner / implementor / human owner |
 | Audit status | Not requested |
 | Audited commit | — |
 | Step branch | — |
@@ -90,3 +91,13 @@ Follow-up issue/step:
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
+
+## Human approval
+
+- [ ] Accepted: Passed
+- [ ] Accepted: Passed with notes
+- [ ] Fixes required
+- [ ] Waived
+
+Approved by:
+Date:
