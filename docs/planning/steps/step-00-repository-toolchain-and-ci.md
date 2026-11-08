@@ -164,6 +164,10 @@ mocassin/
 
 ### CI
 
+> Historical note: the checklist below records the Step 00 CI matrix. The current policy is `AGENTS.md` §3.13:
+> automatic `main`-only Ubuntu with path filters, one manual step closeout, and manual Windows/macOS platform
+> gates. Do not treat the Step 00 matrix as current.
+
 - [x] GitHub Actions workflow triggered by pushes to `main` and integration branches matching `step/*`, with
   `ubuntu-latest` + `windows-latest` on step branches and `macos-latest` added on `main`. Exclude `step/*/*`
   so feature branches are validated locally and do not consume CI runs. Pull-request CI is not enabled by

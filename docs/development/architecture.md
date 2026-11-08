@@ -7,14 +7,19 @@ kernel describes data and invariants; it does not perform file I/O, SQL, UI work
 
 ```mermaid
 flowchart LR
-  Core[Mocassin.Core] --> Symmetry[Mocassin.Symmetry]
-  Symmetry --> Compilation[Mocassin.Compilation]
-  Compilation --> Contracts[Mocassin.Contracts]
-  Contracts --> Packages[Mocassin.Packages]
-  Contracts --> Results[Mocassin.Results]
-  Packages --> Cli[Mocassin.Cli]
-  Results --> Cli
+  Symmetry[Mocassin.Symmetry] --> Core[Mocassin.Core]
+  Compilation[Mocassin.Compilation] --> Symmetry
+  Compilation --> Core
+  Contracts[Mocassin.Contracts] --> Compilation
+  Packages[Mocassin.Packages] --> Contracts
+  Packages --> Compilation
+  Results[Mocassin.Results] --> Contracts
+  Results --> Core
+  Cli[Mocassin.Cli] --> Packages
+  Cli --> Results
 ```
+
+Arrows point from a project to the project it depends on.
 
 `Mocassin.Core` depends only on the base class library. `Mocassin.Packages.Projects` owns project
 persistence and depends on `Core`; the kernel never calls the store.

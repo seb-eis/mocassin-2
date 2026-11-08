@@ -3,6 +3,10 @@
 This directory records the independent design-review gate that runs before a step is implemented. It is
 separate from the post-implementation audit in `docs/planning/audits/`.
 
+> Historical note: records written before the direct-write policy may reference `.tmp/review/*` handoff files
+> that no longer exist. Treat those references as historical and do not rewrite the record. New reviews write
+> evidence, findings, and verdict directly into the durable record.
+
 ## 1. Purpose
 
 The design review checks that a step is ready to implement: the decisions are complete and consistent, the
@@ -46,6 +50,7 @@ The planner, implementor, or human owner may spawn a reviewer. The spawner must 
 | **In review** | A fresh planning auditor is reviewing the frozen docs. |
 | **Changes required** | Blocking or material design issues were found. |
 | **Re-review required** | Docs were updated and need another review. |
+| **Ready with notes** | Only minor/note findings remain; the human owner explicitly accepts them. |
 | **Ready for implementation** | No blocking design issues remain; the human owner may approve the start. |
 | **Waived** | The human owner explicitly accepted that no review is required. |
 
@@ -105,8 +110,10 @@ The planner, implementor, or human owner may spawn a reviewer. The spawner must 
 - **Ready for implementation** — no blockers or majors remain.
 - **Changes required** — blockers or majors remain.
 - **Ready with notes** — only minor/note findings remain; the human owner accepts them explicitly.
-- **Re-review required** — docs were updated after a `Changes required` verdict.
 - **Waived** — the human owner records why no review is required.
+
+`Re-review required` is a record state, not a verdict; it means the docs changed after a `Changes required`
+verdict and a fresh review is pending.
 
 ## 8. Reviewer write scope
 

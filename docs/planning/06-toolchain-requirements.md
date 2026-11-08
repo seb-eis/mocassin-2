@@ -115,7 +115,7 @@ tests, and packaging.
 
 | Tool / package | Status | Needed for | Notes |
 | --- | --- | --- | --- |
-| Python 3.11–3.13, pip, venv | Required | Steps 00, 22 | Installed by the MOCASSIN image (3.13); CI covers 3.11–3.13. |
+| Python 3.11–3.13, pip, venv | Required | Steps 00, 22 | Installed by the MOCASSIN image (3.13); CI runs 3.13 automatically, 3.11/3.12 manual/nightly. |
 | `pipx` | Optional | Step 00 | Alternative to the dedicated venv; the image uses the venv. |
 | `zensical` 0.0.74 | Required | Steps 00, 30 | Narrative docs build; 0.x, pin exactly. |
 | `mkdocstrings[python]` 1.0.8 | Required | Steps 22, 30 | Pulls `mkdocs`, `mkdocstrings-python` 2.0.10, `mkdocs-autorefs`, `griffe`. |

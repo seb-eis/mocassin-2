@@ -50,7 +50,7 @@ python -m build src/python
 python tools/contracts/generate.py --check
 python tools/check-license-headers.py
 python tools/check-no-secrets.py
-./tools/check-api-compat.sh
+./tools/verify.sh api
 zensical build --strict
 ```
 

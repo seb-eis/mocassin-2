@@ -15,6 +15,7 @@ Usage: tools/verify.sh [mode]
 Modes:
   all        Run every check below (default; use before closeout)
   dotnet     Restore, build, test, and format the .NET solution
+  api        NuGet licence/vulnerability audit and ApiCompat baseline check
   structure  Run only the code-structure policy test
   rust       Format, clippy, and test the Rust workspace
   python     Test and build the Python package
@@ -32,6 +33,20 @@ run_dotnet() {
   dotnet build Mocassin.slnx -c Release --no-restore
   dotnet test Mocassin.slnx -c Release --no-build
   dotnet format Mocassin.slnx --verify-no-changes --no-restore
+}
+
+run_api() {
+  echo "== Public API and dependency gates =="
+  dotnet build Mocassin.slnx -c Release
+  dotnet tool restore
+  python tools/contracts/check_nuget_licenses.py
+  output="$(dotnet list Mocassin.slnx package --vulnerable --include-transitive)"
+  echo "$output"
+  if grep -q "has the following vulnerable packages" <<< "$output"; then
+    echo "vulnerable NuGet packages found" >&2
+    exit 1
+  fi
+  ./tools/check-api-compat.sh
 }
 
 run_structure() {
@@ -79,12 +94,14 @@ mode="${1:-all}"
 case "$mode" in
   all)
     run_dotnet
+    run_api
     run_rust
     run_python
     run_docs
     run_contracts
     ;;
   dotnet) run_dotnet ;;
+  api) run_api ;;
   structure) run_structure ;;
   rust) run_rust ;;
   python) run_python ;;

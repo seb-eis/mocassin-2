@@ -13,7 +13,7 @@
 | --- | --- |
 | Step | NN — Step title |
 | Request owner | Step agent |
-| Review initiated by | Planner / implementor / human owner |
+| Audit initiated by | Planner / implementor / human owner |
 | Audit status | Not requested |
 | Audited commit | — |
 | Step branch | — |

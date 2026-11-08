@@ -92,7 +92,9 @@ unit types.
 ## Structure and symmetry (Step 02 vocabulary; Step 03 fields)
 
 Step 02 supplies the catalog, cell validation, and coordinate vocabulary. The structure section of the
-project schema ships with Step 03; the shape below is the contract it will use.
+project schema ships with Step 03; the shape below is the contract it will use. Step 03 must update
+`contracts/manifest.json` and regenerate the project schema before the fields are accepted; until then the
+generated v1 schema does not contain them.
 
 ```json
 {

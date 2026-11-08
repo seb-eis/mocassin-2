@@ -119,7 +119,9 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
 | --- | --- |
 | Planning | Complete (v1 draft) |
 | Repository and toolchain | Complete (Step 00) |
-| .NET model builder | Not started |
+| Domain kernel and project format | Complete (Step 01) |
+| Symmetry and geometry | Complete (Step 02) |
+| .NET model builder | Not started — Step 03 next |
 | Rust solver | Not started |
 | Avalonia GUI | Not started |
 | Parity validation | Not started |

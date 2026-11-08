@@ -241,7 +241,7 @@ Rules:
   until there is macOS-specific behaviour to validate.
 - Documentation is built locally with `zensical build --strict` until the site is mature enough to justify
   automatic docs CI.
-- Keep Nightly disabled until real long-running suites exist.
+- Keep Nightly manual-only; do not add a schedule until real long-running suites exist.
 - Wait for the automatic `main` run before tagging `step-NN`. Never tag a red `main`.
 - Do not add CI triggers for feature branches or per-push checkpoint runs just to feel safe. Add a trigger only
   when it catches a class of regression that local gates cannot.

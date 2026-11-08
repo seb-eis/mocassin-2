@@ -8,9 +8,10 @@ This is a modern, cross-platform reimplementation of **MOCASSIN** (*Monte Carlo 
 the fixed-lattice MMC/KMC simulation suite for defects and transport in crystalline solids originally developed
 at Forschungszentrum Jülich / RWTH Aachen.
 
-**Current state: planning only.** The repository contains the reimplementation plan, architecture, data
-contracts, and parity matrix. There is no production .NET solution or Rust workspace yet. Do not claim that a
-feature is implemented until code and tests exist.
+**Current state: implementation has started.** Steps 00–02 are complete — repository/toolchain, domain
+kernel and project format, and symmetry/geometry. The .NET solution, Rust workspace skeleton, Python package,
+and documentation toolchain exist. Step 03 is next. Do not claim that a feature is implemented until code and
+tests exist.
 
 Target stack:
 
@@ -445,7 +446,7 @@ confirmation gate, not the development loop. The full rationale and cost data ar
 | Platform gate | manual `workflow_dispatch` with `platforms` | Windows/macOS | On demand only |
 | Documentation | manual `docs.yml` | Ubuntu | Full docs build |
 | Benchmark | manual `benchmark.yml` | Ubuntu | Selected benchmark |
-| Nightly | disabled until real suites exist | — | — |
+| Nightly | manual placeholder; no schedule until real suites exist | — | — |
 
 Rules:
 
@@ -456,7 +457,7 @@ Rules:
 - Path filters must ensure that only affected jobs run. A change to `.github/workflows/ci.yml` forces all jobs.
 - Documentation is validated locally with `zensical build --strict` (and the other docs commands). The
   separate `docs.yml` workflow is manual until the documentation is mature enough to justify automatic runs.
-- Keep Nightly disabled until real long-running suites exist. If it is re-enabled, run it weekly on Ubuntu.
+- Keep Nightly manual-only; do not add a schedule until real long-running suites exist. If a schedule is later introduced, run it weekly on Ubuntu.
 - Target at most 300 billable minutes per month. If usage passes 50% of the allowance before mid-month, switch
   to closeout-only CI and ask the human owner before adding any run.
 - Use `[skip ci]` for docs-only commits and merges.
@@ -573,8 +574,8 @@ The dedicated local development image is
 [`seb-eis/opencode-container`](https://github.com/seb-eis/opencode-container) and does not modify that
 repository. The same tools can also be installed directly for development without opencode.
 
-These commands become valid as the corresponding projects are created. Do not run them expecting success
-today.
+Run the normal local gate with `./tools/verify.sh all`, or the mode for the area you changed. The commands
+below are the underlying gates. End-to-end commands marked “once … exists” are not available yet.
 
 ```bash
 # .NET
@@ -677,11 +678,11 @@ approval-report, and diff-review templates.
 ### Code structure
 
 - The project root is a lobby, not a home. Source projects keep only entry points and project metadata at the
-  root (`AssemblyInfo.cs`, `GlobalUsings.cs`, `<Project>Module.cs`, `Program.cs`, framework app files, and
-  `PublicAPI.*.txt`). Everything else lives in a domain folder.
-- Group by domain concept, not by type kind. No `Utils/`, `Helpers/`, `Common/`, `Shared/`, `Misc/`,
-  `Models/`, `Interfaces/`, `Implementations/`, `Abstractions/`, or `Extensions/` folders. `Internal/` is
-  allowed only inside a named concept folder.
+  root (`AssemblyInfo.cs`, `GlobalUsings.cs`, `Usings.cs`, `<Project>Module.cs`, `Program.cs`, framework app
+  files, `PublicAPI.*.txt`, and `README.md`). Everything else lives in a domain folder.
+- Group by domain concept, not by type kind. No `Utils/`, `Utilities/`, `Helpers/`, `Common/`, `Shared/`,
+  `Misc/`, `Models/`, `Interfaces/`, `Implementations/`, `Abstractions/`, or `Extensions/` folders.
+  `Internal/` is allowed only inside a named concept folder.
 - Limits: at most 20 direct `.cs` files per folder, folder depth 4, and 800 lines per file. Subfolders reset
   the file count.
 - File names match the primary type or a permitted concept file (`*Dtos.cs`, `*Ids.cs`, `*Values.cs`,
@@ -924,6 +925,8 @@ from the original and the plan’s “Original reference” sections.
 - [ ] Commit message is imperative and scoped.
 - [ ] The change can be explained in terms of the plan, not just the code.
 - [ ] Code follows the structure policy in section 8; `tools/verify.sh structure` passes.
+- [ ] Public API changes update `PublicAPI.Unshipped.txt` and, when intentional, the ApiCompat baseline;
+      `./tools/verify.sh api` passes.
 - [ ] Any approval request includes the cumulative approval report in section 3.12: every round, every finding
       and resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Major gate statement.
 - [ ] The CI cost policy in section 3.13 is followed: local validation, one closeout run, one main run, no

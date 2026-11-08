@@ -78,7 +78,7 @@ inside Zensical would be fragile and duplicative.
 ## Rules
 
 - Public .NET APIs require XML docs; public Rust items require doc comments.
-- CI builds the combined site on every PR; broken links or missing API docs block merge.
+- The combined site is built locally and by the manual `docs.yml` workflow; broken links or missing API docs fail that gate.
 - `docs/planning/` is never published.
 - `docs/api/dotnet/index.md` and `docs/api/rust/index.md` are placeholders that keep strict narrative builds
   valid; generated API HTML replaces them under `site/api/...` during the combined build.

@@ -1,11 +1,9 @@
 name: Nightly
 
-# Intentionally disabled in repository settings until real long-running suites
-# exist. If it is re-enabled, keep it weekly and Ubuntu-only. See
-# `docs/planning/ci-policy.md`.
+# Manual placeholder. Do not add a schedule until real long-running suites
+# exist; a scheduled placeholder spends CI minutes without testing anything.
+# See `docs/planning/ci-policy.md`.
 on:
-  schedule:
-    - cron: "0 2 * * 1"
   workflow_dispatch:
 
 permissions:
