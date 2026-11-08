@@ -126,9 +126,10 @@ public sealed record MetropolisSimulation(
 ```
 
 - `TransitionRef` is defined in Step 04 (`Mocassin.Core.Model.Transitions`). It carries a
-  `TransitionKind` (`Kinetic` or `Metropolis`) and the referenced ID; the simulation validates that the kind
-  matches `Kind`. The persisted simulation DTO still writes the kind-specific `kineticTransitionIds` and
-  `metropolisTransitionIds` arrays.
+  `TransitionKind` (`Kinetic` or `Metropolis`) and the referenced ID. The kind mapping is exact:
+  `SimulationKind.Kmc` ↔ `TransitionKind.Kinetic` and `SimulationKind.Mmc` ↔
+  `TransitionKind.Metropolis`; a simulation rejects a reference of the other kind. The persisted simulation
+  DTO still writes the kind-specific `kineticTransitionIds` and `metropolisTransitionIds` arrays.
 - `Kind` is `Mmc` or `Kmc`; a simulation may reference only transitions of the matching kind.
 - `TargetMcsp` is the number of successful steps per mobile particle for the main run.
 - KMC `PreRunMcsp` is the relaxation/normalization pre-run.

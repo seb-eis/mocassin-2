@@ -316,8 +316,9 @@ parameterization, and lattice signatures use the MessagePack projection (section
   - `vehicle5`: 5 positions, `dynamic, static, static, dynamic`, no reverse.
   - `vehicle6`: 6 positions, `dynamic, dynamic, static, dynamic, dynamic`, no reverse.
   - `custom`: 2–8 positions with an explicit, validated `D/S` linker sequence; a 2-position custom chain is a
-    Metropolis chain, and a 3–8-position custom chain is kinetic. Automatic reverse generation is false;
-    define a `reverseTransitionId` instead.
+    Metropolis chain, and a 3–8-position custom chain is kinetic. Kinetic custom chains accept `D{2,7}` or the
+    vehicle-shaped `D+ S+ D+`; the single-static `D S D` sequence is invalid. Automatic reverse generation is
+    false; define a `reverseTransitionId` instead.
 - `stateChangeIds`, `groupIds`, `linkers`, and `referencePath` are semantic-order arrays and are never
   re-sorted.
 - A state-change group must be homogeneous: it must not mix physical exchanges (different particle symbols)
@@ -325,10 +326,12 @@ parameterization, and lattice signatures use the MessagePack projection (section
   charge-state groups.
 - `referencePath` positions use the unit-cell fractional coordinate system and may lie outside `[0, 1)`.
   Persisted values are not wrapped. Site matching expands each reference site to its symmetry-equivalent P1
-  orbit, canonicalizes each point with `Fractional3.TrimToUnitCell()`, and uses the named `PathMatchTolerance`;
-  a point must match exactly one P1 position and owning reference site.
+  orbit and uses the named `PathMatchTolerance`. The cell offset is the minimizing integer shift between the
+  raw point and the matched P1 position (ties toward zero); a point must match exactly one `(P, offset)` pair
+  and owning reference site.
 - A `referencePath` contains a ring when any two resolved positions have the same full encoded position
-  (`P` plus cell offset). A point in a different periodic cell is a distinct position, not a duplicate.
+  (`P` plus cell offset). A point in a different periodic cell has a different offset and is a distinct
+  position, not a duplicate.
 - The coordinates in the JSON example above are illustrative. A concrete path point must match a
   symmetry-equivalent P1 position of the referenced structure; otherwise it is `TRN020`.
 - `generatesReverse` must be `true` for `metropolis2` and `migration3` and `false` for every other pattern.

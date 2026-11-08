@@ -186,12 +186,18 @@ Pattern rules:
 - `Linkers.Length` is always `GroupIds.Length − 1`. A `Static` linker means "no exchange at this connector";
   it is a geometric offset to the next position, not a state change. Static connectors may appear only inside a
   vehicle-shaped sequence; they never appear at either end.
-- `Custom` preserves the original regex-validated connector grammar without hard-coding only the six common
-  names:
+- `Custom` deliberately generalizes the original regex-validated connector grammar without hard-coding only
+  the six common names:
   - a 2-position custom chain is a Metropolis chain: `S,S` with one `D` linker, usable only by a
     `MetropolisTransition`; there is no reference path to infer;
   - a 3–8-position custom chain is a kinetic chain and must match either all-dynamic `D{2,7}` or the
     vehicle-shaped `D+ S+ D+` grammar, with at least one dynamic linker on each side of the static run;
+  - the single-static `D S D` sequence is explicitly invalid (TRN009). A single static connector between two
+    single dynamic connectors links two transitions without the intermediate arrangement the vehicle shapes
+    require; it is not a physical mechanism;
+  - the broader `D+ S+ D+` grammar is intentional, so `D D S S D D` and similar vehicle-shaped sequences are
+    accepted even though they are not one of the original regex names. Step 08 must support every accepted
+    shape or reject it at compile time; the design does not claim the original regex set is exhaustive;
   - a kinetic custom chain's stability sequence is inferred from the resolved reference path after site
     matching, then checked against the chain groups;
   - endpoints are stable, at least one position is unstable, and no two unstable positions are consecutive.
@@ -206,8 +212,10 @@ Pattern rules:
   inverse rule generated inside the forward transition.
 - Chain groups are ordered and semantically meaningful.
 - A chain may reference a group more than once (e.g. the same `[A,V]` group at both ends).
-- A group may not be used at both a stable and an unstable position of the same chain; the group's stability
-  role is fixed by its pairs (TRN025).
+- A group's stability role is fixed by its pairs: every state change must be stable-role (acceptor not void)
+  or every one must be unstable-role (`[D, ∅]`); mixing the two in one group is TRN025. This is a pair-level
+  check that needs no resolved path. A stable position must use a stable-role group and an unstable position
+  an unstable-role group (TRN012), so a group used at both kinds of position fails at one of those uses.
 
 ### 4. Transition references
 
@@ -230,7 +238,8 @@ public readonly record struct TransitionRef(TransitionKind Kind, Guid Id)
 - A `TransitionRef` serialized on its own (for example in a `TransitionPreview` diagnostic) uses
   `{ "kind": "kinetic", "id": "…" }`. `TransitionKind` uses the same camelCase enum rules as the other enums.
 - `TransitionRef` never points across kinds. A Metropolis transition cannot reference a kinetic transition, and
-  the reverse.
+  the reverse. Step 06 maps `SimulationKind.Kmc` to `TransitionKind.Kinetic` and `SimulationKind.Mmc` to
+  `TransitionKind.Metropolis`.
 
 ### 5. KMC transitions
 
@@ -303,13 +312,18 @@ public sealed record ResolvedTransitionPath(
 - `ResolvedPathPosition.P` is the canonical per-cell position index; `Encoding` is the full `Vector4I`
   (cell offset plus `P`). `SiteId` is the reference site whose P1 orbit owns the position; `CanonicalPosition`
   is the exact encoded fractional coordinate, not the raw authored value.
-- For matching, each finite coordinate is canonicalized with `Fractional3.TrimToUnitCell()`, which snaps
-  components within `GeometryTolerances.FractionalTrimTolerance` of an integer and then maps into `[0, 1)`.
-  The point is compared to every `UnitCellVectorEncoder.Positions` entry with a periodic component-wise
-  difference (minimum over integer shifts) and `GeometryTolerances.PathMatchTolerance = 1e-6` (fractional
-  units), a new named tolerance. This lets a point at `0.9999995` match a site at `0.0` and lets a path use
-  any symmetry-equivalent orbit member, not only the authored representative. The persisted path point is not
-  changed. A non-finite component is TRN020 before any matching.
+- For matching, each finite coordinate is first checked for finiteness (TRN020 otherwise). For every
+  `UnitCellVectorEncoder.Positions` entry `p`, and for each component, the resolver considers every integer
+  shift `n` and computes the absolute difference `|x - (p + n)|`. The candidate is the pair `(p, n)` whose
+  component differences are all at most `GeometryTolerances.PathMatchTolerance = 1e-6` (fractional units).
+  The cell offset is the minimizing shift `n`; ties are resolved toward zero. The encoded position is
+  `(nA, nB, nC, P)`, and `CanonicalPosition` is `p`. This is the only offset convention: the raw integer
+  part, `TrimToUnitCell`, and the minimizing shift are not interchangeable. The persisted path point is not
+  changed.
+- A point at `0.9999995` therefore matches `p = 0.0` with `n = 1` (the nearest periodic image), while a
+  point at `0.25` with `p = 0.25` has `n = 0`. A point in a different periodic cell has a different
+  `Encoding` and is a distinct physical position, not a duplicate. `Fractional3.TrimToUnitCell()` is still
+  used by the encoder for canonical P1 construction; it is not the resolver's offset rule.
 - Exactly one `(P, cell-offset)` candidate must match each point. Zero matches is TRN020 with the path index;
   more than one match is also TRN020 with the competing P indices in `Related`. Structure overlap validation
   should make ambiguity impossible, but the check is explicit and defensive.
@@ -330,7 +344,8 @@ public sealed record ResolvedTransitionPath(
 #### Validation ownership
 
 - `Mocassin.Core.Model.Transitions.TransitionModelValidator` owns the definition-level rules that need only
-  the model: TRN001–TRN009, TRN017, TRN019, and TRN021–TRN027.
+  the model: TRN001–TRN009, TRN017–TRN019, and TRN021–TRN027. TRN018 is here because it needs only the chain
+  pattern and the transition's reverse link.
 - `Mocassin.Symmetry.Transitions.TransitionPathValidator` owns the resolved-path and site rules:
   TRN010–TRN016, TRN020, and TRN028. It uses the same `TransitionPathResolver` as the preview service.
 - `Mocassin.Packages.Projects.ProjectValidationService` composes Core and Symmetry diagnostics, as it already
@@ -367,7 +382,7 @@ public sealed record ResolvedTransitionPath(
 | `TRN022` | Error | Kinetic chain has no unstable position |
 | `TRN023` | Error | Kinetic transition uses `Metropolis2` or a 2-position `Custom` chain |
 | `TRN024` | Error | `GeneratesReverse` disagrees with the pattern |
-| `TRN025` | Error | Group is used at both stable and unstable positions |
+| `TRN025` | Error | Group mixes stable-role and unstable-role state changes |
 | `TRN026` | Error | An unstable position's group does not contain exactly one `[D, ∅]` state change |
 | `TRN027` | Error | Reverse link is unknown, cross-kind, asymmetric, or self-referential |
 | `TRN028` | Error | Resolved path stability sequence does not match the built-in pattern sequence |
@@ -677,11 +692,11 @@ preview benchmark. The full benchmark is not a PR-fast wall-clock gate.
 | Test | Assertion | Tier |
 | --- | --- | --- |
 | State changes | Donor/acceptor/void validation, including donor-void reverse pairs | PR-fast |
-| Groups | Mixed physical/charge exchange rejected; homogeneous charge-state group accepted | PR-fast |
+| Groups | Mixed physical/charge exchange rejected; homogeneous charge-state group accepted; mixed stable-role/unstable-role group rejected | PR-fast |
 | Patterns | Every built-in pattern accepts only its valid linker sequence | PR-fast |
-| Custom | Valid/invalid 2-position and 3–8-position custom chains; static placement rules | PR-fast |
+| Custom | Valid/invalid 2-position and 3–8-position custom chains; static placement rules; `D S D` rejected; generalized `D+ S+ D+` accepted | PR-fast |
 | Paths | Stability, length, no-unstable, pattern-sequence mismatch, any repeated encoded position (interior or literal endpoint), consecutive-unstable checks | PR-fast |
-| Path matching | `[0,1)` and outside-`[0,1)` points trim with `TrimToUnitCell`; symmetry-equivalent orbit members match their owning reference site; boundary points within `PathMatchTolerance` match; zero/ambiguous matches are TRN020 | PR-fast |
+| Path matching | Symmetry-equivalent orbit members match their owning reference site; boundary points match the nearest periodic image within `PathMatchTolerance`; the minimizing-shift offset is recorded; same `P` with a different offset is not a duplicate; zero/ambiguous matches are TRN020 | PR-fast |
 | Metropolis | Same-site and different-site exchanges; unknown/unstable sites rejected | PR-fast |
 | Reverse links | Symmetric same-kind link accepted; unknown/cross-kind/asymmetric/self link rejected; TRN018 warning | PR-fast |
 | Preview | Symmetry-expanded path count matches brute force; MMC pair expansion; `(A,B,C)` echo | PR-fast |
@@ -703,7 +718,7 @@ preview benchmark. The full benchmark is not a PR-fast wall-clock gate.
 | --- | --- |
 | Canonicalization drops transition data | Explicit `CanonicalizeModel` extension, save/load test, document-hash edit test |
 | Ambiguous vehicle semantics | Encode the documented unidirectional behavior; add a golden vehicle model and a `Vehicle5` acceptance case |
-| Custom chains create unsupported mechanisms | Restrict to the documented `D`/`S` grammar; rule generation rejects unsupported cases |
+| Custom chains create unsupported mechanisms | Restrict to the documented `D`/`S` grammar (including the explicit `D S D` rejection); Step 08 supports or rejects every accepted shape at compile time |
 | Reverse-generation confusion | Constrained `GeneratesReverse`, explicit reverse links, TRN018, and a Step 08 test |
 | Path stability mismatch with energy model | Resolve paths against reference sites with a named tolerance; revalidate against the structure in Step 08 |
 | Charge-transfer groups mix semantics | Unconditional homogeneous-group rule and Step 08 total-charge conservation test |
