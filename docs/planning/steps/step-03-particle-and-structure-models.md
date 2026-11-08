@@ -9,10 +9,10 @@ validation and a stable public API.
 
 - **Status:** In progress
 - **Step branch:** `step/03-particle-and-structure-models`
-- **Step CI:** —
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) at `5a06d67` (closeout dispatch; Ubuntu)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested (closeout in progress)
+- **Audit:** Ready for audit at `5a06d67`
 - **Design review:** [Ready with notes — accepted](../reviews/step-03.md)
 - **Feature list:** Approved 2026-11-08; step branch created
 - **Last updated:** 2026-11-08
@@ -26,7 +26,7 @@ validation and a stable public API.
 | `queries-and-editing` | `feature/step-03-particle-and-structure-models/queries-and-editing` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146 | — | `8a75bc6` |
 | `validation-composition` | `feature/step-03-particle-and-structure-models/validation-composition` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146, Packages 40/40 | — | `18940a1` |
 | `samples-and-docs` | `feature/step-03-particle-and-structure-models/samples-and-docs` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 263/263, Symmetry 150/150, Packages 40/40 | — | `9039b6f` |
-| `closeout` | `feature/step-03-particle-and-structure-models/closeout` | Awaiting approval | `./tools/verify.sh all` passes; Core 263/263, Symmetry 152/152, Packages 41/41, Architecture 1/1 | — | — |
+| `closeout` | `feature/step-03-particle-and-structure-models/closeout` | Squashed | `./tools/verify.sh all` passes; Core 263/263, Symmetry 152/152, Packages 41/41, Architecture 1/1 | [`42511003132`](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) — green | `5a06d67` |
 
 **Deviations and notes:**
 

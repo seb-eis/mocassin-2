@@ -14,11 +14,11 @@
 | Step | 03 — Particle and Structure Models |
 | Request owner | Step agent |
 | Audit initiated by | Step agent |
-| Audit status | Not requested |
-| Audited commit | — |
+| Audit status | Ready for audit |
+| Audited commit | `5a06d67` |
 | Step branch | `step/03-particle-and-structure-models` |
 | Step tag | — |
-| Closeout CI run | — |
+| Closeout CI run | [`42511003132`](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) — green at `5a06d67` |
 | Platform CI | Not run (Ubuntu-only policy) |
 | Audit date | — |
 | Auditor | — |
