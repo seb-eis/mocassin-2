@@ -2,7 +2,10 @@
 
 using System.Collections.Immutable;
 using Mocassin.Core.Diagnostics;
+using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
+using Mocassin.Core.Model.Particles;
+using Mocassin.Core.Model.Structure;
 
 namespace Mocassin.Core.Project;
 
@@ -23,9 +26,17 @@ public static class ProjectValidator
         var bag = new DiagnosticBag();
         ValidateMetadata(project, bag);
         ValidateTemplates(project, bag);
+        ValidateModel(project, bag);
         ValidateReferences(project, bag);
         ValidateViewSettings(project, bag);
         return bag.Sorted;
+    }
+
+    private static void ValidateModel(Project project, DiagnosticBag bag)
+    {
+        var model = project.Model;
+        bag.AddRange(ParticleModelValidator.Validate(new ParticleModel(model.Particles, model.ParticleSets)));
+        bag.AddRange(StructureModelValidator.Validate(model.Structure));
     }
 
     private static void ValidateMetadata(Project project, DiagnosticBag bag)
@@ -156,6 +167,20 @@ public static class ProjectValidator
 
     private static void ValidateReferences(Project project, DiagnosticBag bag)
     {
+        var particles = project.Model.Particles.IsDefault ? [] : project.Model.Particles;
+        var particleSets = project.Model.ParticleSets.IsDefault ? [] : project.Model.ParticleSets;
+        var structure = project.Model.Structure;
+        var sites = structure.Sites.IsDefault ? [] : structure.Sites;
+        var dummyPositions = structure.DummyPositions.IsDefault ? [] : structure.DummyPositions;
+
+        var particleIds = CollectIds(particles.Select(static particle => particle.Id.Value), "particle", bag);
+        var particleSetIds = CollectIds(particleSets.Select(static particleSet => particleSet.Id.Value), "particleSet", bag);
+        var siteIds = CollectIds(sites.Select(static site => site.Id.Value), "cellSite", bag);
+        var dummyPositionIds = CollectIds(
+            dummyPositions.Select(static dummyPosition => dummyPosition.Id.Value),
+            "cellDummyPosition",
+            bag);
+
         var all = new Dictionary<Guid, string>();
         AddDomain(
             all,
@@ -172,6 +197,34 @@ public static class ProjectValidator
             project.BuildTemplates.Where(static item => item is not null).Select(static item => item.Id.Value),
             "buildTemplate",
             bag);
+        AddDomain(all, particleIds, "particle", bag);
+        AddDomain(all, particleSetIds, "particleSet", bag);
+        AddDomain(all, siteIds, "cellSite", bag);
+        AddDomain(all, dummyPositionIds, "cellDummyPosition", bag);
+
+        foreach (var site in sites)
+        {
+            if (site.ParticleSetId == ParticleSetId.Empty || site.ParticleSetId == default)
+            {
+                continue;
+            }
+
+            var reference = site.ParticleSetId.Value;
+            if (particleSetIds.Contains(reference))
+            {
+                continue;
+            }
+
+            var wrongDomain = particleIds.Contains(reference)
+                || siteIds.Contains(reference)
+                || dummyPositionIds.Contains(reference);
+            bag.Add(Error(
+                wrongDomain ? ProjectDiagnosticCodes.WrongDomainReference : ProjectDiagnosticCodes.UnknownReference,
+                wrongDomain
+                    ? $"Reference {reference:D} points to an object outside the particleSet domain."
+                    : $"Reference {reference:D} does not exist in the particleSet domain.",
+                new ModelPath("cellSite", site.Id.Value, "particleSetId")));
+        }
     }
 
     private static void ValidateViewSettings(Project project, DiagnosticBag bag)

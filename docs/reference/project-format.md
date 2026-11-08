@@ -92,10 +92,8 @@ unit types.
 ## Particles, structure, and symmetry (Step 03 fields)
 
 Step 02 supplies the catalog, cell validation, and coordinate vocabulary. The particle and structure sections
-of the project schema ship with Step 03; the shapes below are the contract they will use. Step 03 must update
-`contracts/manifest.json` and regenerate the project schema before the fields are accepted; until then the
-generated v1 schema does not contain them. A missing `particles`, `particleSets`, or `structure` property loads
-as the empty/default model, so a Step 01 `"model": {}` document remains valid.
+are part of the generated v1 project schema as of Step 03. A missing `particles`, `particleSets`, or
+`structure` property loads as the empty/default model, so a Step 01 `"model": {}` document remains valid.
 
 ```json
 {

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Security.Cryptography;
+using Mocassin.Core.Model.Structure;
 
 namespace Mocassin.Core.Project;
 
@@ -16,12 +17,30 @@ public static class ProjectHasher
     /// <returns>A lowercase hexadecimal SHA-256 digest.</returns>
     /// <remarks>
     /// This is the Step 01 model-content identity used for dirty tracking and for the future compiled
-    /// model signature. It is deliberately distinct from <see cref="ComputeDocument"/>.
+    /// model signature. It is deliberately distinct from <see cref="ComputeDocument"/> and
+    /// <see cref="ComputeStructure"/>.
     /// </remarks>
     public static string Compute(Project project)
     {
         ArgumentNullException.ThrowIfNull(project);
         var bytes = ProjectJson.SerializeCanonicalModel(project.Model);
+        return Convert.ToHexStringLower(SHA256.HashData(bytes));
+    }
+
+    /// <summary>
+    /// Computes the SHA-256 hash of the canonical structure section.
+    /// </summary>
+    /// <param name="structure">The structure to hash.</param>
+    /// <returns>A lowercase hexadecimal SHA-256 digest.</returns>
+    /// <remarks>
+    /// The projection covers the structure name, space group, cell parameters, sites, and dummy positions.
+    /// Non-semantic site and dummy arrays are sorted by ID. This is the structure-preview cache key, not a
+    /// model or document identity.
+    /// </remarks>
+    public static string ComputeStructure(StructureModel structure)
+    {
+        ArgumentNullException.ThrowIfNull(structure);
+        var bytes = ProjectJson.SerializeCanonicalStructure(structure);
         return Convert.ToHexStringLower(SHA256.HashData(bytes));
     }
 

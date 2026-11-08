@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 
+using System.Text.Json.Serialization;
+using Mocassin.Core.Model;
+
 namespace Mocassin.Core.Symmetry;
 
 /// <summary>
@@ -9,6 +12,7 @@ namespace Mocassin.Core.Symmetry;
 /// The member names map to the project wire strings <c>none</c>, <c>originChoice1</c>, and
 /// <c>originChoice2</c> under a camelCase enum serializer.
 /// </remarks>
+[JsonConverter(typeof(CamelCaseEnumJsonConverter<OriginChoice>))]
 public enum OriginChoice
 {
     /// <summary>

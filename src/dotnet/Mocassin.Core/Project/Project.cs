@@ -32,6 +32,41 @@ public sealed record Project
         ImmutableArray<JobTemplate> jobTemplates,
         ImmutableArray<BuildTemplate> buildTemplates,
         ViewSettings viewSettings)
+        : this(
+            schema,
+            schemaVersion,
+            metadata,
+            model,
+            parameterizations,
+            jobTemplates,
+            buildTemplates,
+            viewSettings,
+            symmetry: null)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a project value with optional symmetry metadata.
+    /// </summary>
+    /// <param name="schema">The optional JSON Schema URI.</param>
+    /// <param name="schemaVersion">The project schema version.</param>
+    /// <param name="metadata">The project metadata.</param>
+    /// <param name="model">The scientific model.</param>
+    /// <param name="parameterizations">The parameterization templates.</param>
+    /// <param name="jobTemplates">The job templates.</param>
+    /// <param name="buildTemplates">The build templates.</param>
+    /// <param name="viewSettings">The persisted view state.</param>
+    /// <param name="symmetry">The optional symmetry metadata.</param>
+    public Project(
+        string? schema,
+        int schemaVersion,
+        ProjectMetadata metadata,
+        ModelDefinition model,
+        ImmutableArray<ParameterizationTemplate> parameterizations,
+        ImmutableArray<JobTemplate> jobTemplates,
+        ImmutableArray<BuildTemplate> buildTemplates,
+        ViewSettings viewSettings,
+        ProjectSymmetryMetadata? symmetry)
     {
         Schema = schema;
         SchemaVersion = schemaVersion;
@@ -41,6 +76,7 @@ public sealed record Project
         JobTemplates = jobTemplates.IsDefault ? [] : jobTemplates;
         BuildTemplates = buildTemplates.IsDefault ? [] : buildTemplates;
         ViewSettings = viewSettings ?? Mocassin.Core.Model.ViewSettings.Default;
+        Symmetry = symmetry;
     }
 
     /// <summary>
@@ -62,6 +98,11 @@ public sealed record Project
     /// Gets the scientific model.
     /// </summary>
     public ModelDefinition Model { get; init; }
+
+    /// <summary>
+    /// Gets the optional symmetry metadata.
+    /// </summary>
+    public ProjectSymmetryMetadata? Symmetry { get; init; }
 
     /// <summary>
     /// Gets the parameterization templates.

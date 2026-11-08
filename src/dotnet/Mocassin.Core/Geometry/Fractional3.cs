@@ -2,6 +2,7 @@
 
 using System.Globalization;
 using System.Runtime.CompilerServices;
+using System.Text.Json.Serialization;
 
 namespace Mocassin.Core.Geometry;
 
@@ -12,6 +13,7 @@ namespace Mocassin.Core.Geometry;
 /// Fractional coordinates are stored as <see cref="double"/> values. Discrete symmetry work converts them to
 /// the internal exact grid before deduplication or ordering; this type never implies a Cartesian space.
 /// </remarks>
+[JsonConverter(typeof(Fractional3JsonConverter))]
 public readonly record struct Fractional3(double A, double B, double C)
 {
     /// <summary>

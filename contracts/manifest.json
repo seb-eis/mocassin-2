@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "project": "MOCASSIN",
   "description": "Machine-readable contract manifest for MOCASSIN project, package, results, state, job-folder, event, and MMCFE formats.",
-  "status": "step-01",
-  "notes": "Step 01 defines the project envelope, typed IDs, units, diagnostics, canonical JSON, migrations, persistence, and the generated project schema. Model, transition, energy, lattice, and simulation fields are extended by later steps; every format change requires a version bump and updated fixtures.",
+  "status": "step-03",
+  "notes": "Step 03 adds the flat particle, particle-set, and structure model sections plus the optional project symmetry metadata. Transition, energy, lattice, and simulation sections are extended by later steps; every format change requires a version bump and updated fixtures.",
   "formats": {
     "project": {
       "id": "project",
@@ -69,11 +69,248 @@
           "notes": "ISO-8601 UTC timestamp."
         },
         {
+          "name": "symmetry",
+          "type": "object",
+          "required": false,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "spaceGroupDataVersion",
+              "type": "string",
+              "required": false
+            },
+            {
+              "name": "spaceGroupDataSha256",
+              "type": "string",
+              "required": false
+            },
+            {
+              "name": "symmetryContractVersion",
+              "type": "string",
+              "required": false
+            }
+          ]
+        },
+        {
           "name": "model",
           "type": "object",
           "required": true,
           "additionalProperties": false,
-          "notes": "Empty in Step 01; extended by Steps 03-06."
+          "notes": "Authored model sections. Missing sections load as the empty/default model.",
+          "fields": [
+            {
+              "name": "particles",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "symbol",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "charge",
+                  "type": "float64",
+                  "required": true
+                },
+                {
+                  "name": "isVacancy",
+                  "type": "bool",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "particleSets",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "particleIds",
+                  "type": "array",
+                  "required": true,
+                  "items": "string"
+                }
+              ]
+            },
+            {
+              "name": "structure",
+              "type": "object",
+              "required": false,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "spaceGroup",
+                  "type": "object",
+                  "required": true,
+                  "additionalProperties": false,
+                  "fields": [
+                    {
+                      "name": "number",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "axis",
+                      "type": "string",
+                      "required": true,
+                      "enum": [
+                        "none",
+                        "uniqueAxisA",
+                        "uniqueAxisB",
+                        "uniqueAxisC",
+                        "hexagonal",
+                        "rhombohedral"
+                      ]
+                    },
+                    {
+                      "name": "origin",
+                      "type": "string",
+                      "required": true,
+                      "enum": [
+                        "none",
+                        "originChoice1",
+                        "originChoice2"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "cell",
+                  "type": "object",
+                  "required": true,
+                  "additionalProperties": false,
+                  "fields": [
+                    {
+                      "name": "a",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "b",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "c",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "alpha",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "beta",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "gamma",
+                      "type": "float64",
+                      "required": true
+                    }
+                  ]
+                },
+                {
+                  "name": "sites",
+                  "type": "array",
+                  "required": false,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "id",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "name",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "fractional",
+                      "type": "array",
+                      "required": true,
+                      "items": "float64",
+                      "length": 3
+                    },
+                    {
+                      "name": "particleSetId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "stability",
+                      "type": "string",
+                      "required": true,
+                      "enum": [
+                        "stable",
+                        "unstable"
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "dummyPositions",
+                  "type": "array",
+                  "required": false,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "id",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "name",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "fractional",
+                      "type": "array",
+                      "required": true,
+                      "items": "float64",
+                      "length": 3
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "parameterizations",
@@ -1269,6 +1506,34 @@
         "kind": "events",
         "status": "planned",
         "step": "19"
+      },
+      {
+        "id": "project-structure",
+        "path": "tests/contracts/project-structure.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "03"
+      },
+      {
+        "id": "project-symmetry",
+        "path": "tests/contracts/project-symmetry.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "03"
+      },
+      {
+        "id": "project-symmetry-partial",
+        "path": "tests/contracts/project-symmetry-partial.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "03"
+      },
+      {
+        "id": "project-symmetry-mismatch",
+        "path": "tests/contracts/project-symmetry-mismatch.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "03"
       }
     ]
   }

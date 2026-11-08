@@ -1168,3 +1168,44 @@ static Mocassin.Core.Model.Structure.StructureModel.Default.get -> Mocassin.Core
 static Mocassin.Core.Model.Structure.StructureModel.operator !=(Mocassin.Core.Model.Structure.StructureModel? left, Mocassin.Core.Model.Structure.StructureModel? right) -> bool
 static Mocassin.Core.Model.Structure.StructureModel.operator ==(Mocassin.Core.Model.Structure.StructureModel? left, Mocassin.Core.Model.Structure.StructureModel? right) -> bool
 ~override Mocassin.Core.Ids.CellDummyPositionId.Equals(object obj) -> bool
+Mocassin.Core.Geometry.Fractional3JsonConverter
+Mocassin.Core.Geometry.Fractional3JsonConverter.Fractional3JsonConverter() -> void
+Mocassin.Core.Model.ModelDefinition.ParticleSets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.ParticleSet!>
+Mocassin.Core.Model.ModelDefinition.ParticleSets.init -> void
+Mocassin.Core.Model.ModelDefinition.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!>
+Mocassin.Core.Model.ModelDefinition.Particles.init -> void
+Mocassin.Core.Model.ModelDefinition.Structure.get -> Mocassin.Core.Model.Structure.StructureModel!
+Mocassin.Core.Model.ModelDefinition.Structure.init -> void
+Mocassin.Core.Model.Structure.StructureModel.StructureModel() -> void
+Mocassin.Core.Project.Project.Project(string? schema, int schemaVersion, Mocassin.Core.Project.ProjectMetadata! metadata, Mocassin.Core.Model.ModelDefinition! model, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ParameterizationTemplate!> parameterizations, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.JobTemplate!> jobTemplates, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.BuildTemplate!> buildTemplates, Mocassin.Core.Model.ViewSettings! viewSettings, Mocassin.Core.Project.ProjectSymmetryMetadata? symmetry) -> void
+Mocassin.Core.Project.Project.Symmetry.get -> Mocassin.Core.Project.ProjectSymmetryMetadata?
+Mocassin.Core.Project.Project.Symmetry.init -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata
+Mocassin.Core.Project.ProjectSymmetryMetadata.<Clone>$() -> Mocassin.Core.Project.ProjectSymmetryMetadata!
+Mocassin.Core.Project.ProjectSymmetryMetadata.Deconstruct(out string? SpaceGroupDataVersion, out string? SpaceGroupDataSha256, out string? SymmetryContractVersion) -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata.Equals(Mocassin.Core.Project.ProjectSymmetryMetadata? other) -> bool
+Mocassin.Core.Project.ProjectSymmetryMetadata.ProjectSymmetryMetadata(string? SpaceGroupDataVersion, string? SpaceGroupDataSha256, string? SymmetryContractVersion) -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata.SpaceGroupDataSha256.get -> string?
+Mocassin.Core.Project.ProjectSymmetryMetadata.SpaceGroupDataSha256.init -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata.SpaceGroupDataVersion.get -> string?
+Mocassin.Core.Project.ProjectSymmetryMetadata.SpaceGroupDataVersion.init -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata.SymmetryContractVersion.get -> string?
+Mocassin.Core.Project.ProjectSymmetryMetadata.SymmetryContractVersion.init -> void
+override Mocassin.Core.Geometry.Fractional3JsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Geometry.Fractional3
+override Mocassin.Core.Geometry.Fractional3JsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Geometry.Fractional3 value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Project.ProjectSymmetryMetadata.Equals(object? obj) -> bool
+override Mocassin.Core.Project.ProjectSymmetryMetadata.GetHashCode() -> int
+override Mocassin.Core.Project.ProjectSymmetryMetadata.ToString() -> string!
+static Mocassin.Core.Model.ModelDefinition.Empty.get -> Mocassin.Core.Model.ModelDefinition!
+static Mocassin.Core.Project.ProjectHasher.ComputeStructure(Mocassin.Core.Model.Structure.StructureModel! structure) -> string!
+static Mocassin.Core.Project.ProjectSymmetryMetadata.operator !=(Mocassin.Core.Project.ProjectSymmetryMetadata? left, Mocassin.Core.Project.ProjectSymmetryMetadata? right) -> bool
+static Mocassin.Core.Project.ProjectSymmetryMetadata.operator ==(Mocassin.Core.Project.ProjectSymmetryMetadata? left, Mocassin.Core.Project.ProjectSymmetryMetadata? right) -> bool
+Mocassin.Core.Model.ModelDefinitionJsonConverter
+Mocassin.Core.Model.ModelDefinitionJsonConverter.ModelDefinitionJsonConverter() -> void
+Mocassin.Core.Model.Structure.StructureModelJsonConverter
+Mocassin.Core.Model.Structure.StructureModelJsonConverter.StructureModelJsonConverter() -> void
+override Mocassin.Core.Model.ModelDefinitionJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.ModelDefinition!
+override Mocassin.Core.Model.ModelDefinitionJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.ModelDefinition! value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Model.Structure.StructureModelJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.Structure.StructureModel!
+override Mocassin.Core.Model.Structure.StructureModelJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.Structure.StructureModel! value, System.Text.Json.JsonSerializerOptions! options) -> void
+const Mocassin.Core.Project.ProjectDiagnosticCodes.SymmetryMetadataMismatch = "PROJ034" -> string!

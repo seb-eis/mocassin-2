@@ -3,7 +3,10 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Mocassin.Core.Geometry;
 using Mocassin.Core.Model;
+using Mocassin.Core.Model.Particles;
+using Mocassin.Core.Model.Structure;
 
 namespace Mocassin.Core.Project;
 
@@ -76,7 +79,41 @@ public static class ProjectJson
     internal static byte[] SerializeCanonicalModel(ModelDefinition model)
     {
         ArgumentNullException.ThrowIfNull(model);
-        return JsonSerializer.SerializeToUtf8Bytes(model, DtoOptions);
+        return JsonSerializer.SerializeToUtf8Bytes(CanonicalizeModel(model), DtoOptions);
+    }
+
+    internal static byte[] SerializeCanonicalStructure(StructureModel structure)
+    {
+        ArgumentNullException.ThrowIfNull(structure);
+        return JsonSerializer.SerializeToUtf8Bytes(CanonicalizeStructure(structure), DtoOptions);
+    }
+
+    internal static ModelDefinition CanonicalizeModel(ModelDefinition model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        var particles = model.Particles.IsDefault ? [] : model.Particles;
+        var particleSets = model.ParticleSets.IsDefault ? [] : model.ParticleSets;
+
+        return new ModelDefinition
+        {
+            Particles = [.. particles.OrderBy(static particle => particle.Id.Value)],
+            ParticleSets = [.. particleSets.OrderBy(static particleSet => particleSet.Id.Value)],
+            Structure = CanonicalizeStructure(model.Structure),
+        };
+    }
+
+    internal static StructureModel CanonicalizeStructure(StructureModel structure)
+    {
+        ArgumentNullException.ThrowIfNull(structure);
+        var sites = structure.Sites.IsDefault ? [] : structure.Sites;
+        var dummyPositions = structure.DummyPositions.IsDefault ? [] : structure.DummyPositions;
+
+        return new StructureModel(
+            structure.Name,
+            structure.SpaceGroup,
+            structure.Cell,
+            [.. sites.OrderBy(static site => site.Id.Value)],
+            [.. dummyPositions.OrderBy(static dummyPosition => dummyPosition.Id.Value)]);
     }
 
     private static JsonSerializerOptions CreateOptions(bool writeIndented)
@@ -170,7 +207,8 @@ public sealed class ProjectJsonConverter : JsonConverter<Project>
             dto.Parameterizations,
             dto.JobTemplates,
             dto.BuildTemplates,
-            dto.ViewSettings);
+            dto.ViewSettings,
+            dto.Symmetry);
     }
 
     /// <inheritdoc />
@@ -220,7 +258,8 @@ public sealed class ProjectJsonConverter : JsonConverter<Project>
             Notes = value.Metadata.Notes,
             CreatedUtc = value.Metadata.CreatedUtc,
             ModifiedUtc = value.Metadata.ModifiedUtc,
-            Model = value.Model,
+            Symmetry = value.Symmetry,
+            Model = ProjectJson.CanonicalizeModel(value.Model),
             Parameterizations = parameterizations,
             JobTemplates = jobTemplates,
             BuildTemplates = buildTemplates,
@@ -265,6 +304,8 @@ internal sealed class ProjectDto
     [JsonConverter(typeof(UtcDateTimeOffsetJsonConverter))]
     public DateTimeOffset ModifiedUtc { get; init; }
 
+    public ProjectSymmetryMetadata? Symmetry { get; init; }
+
     [JsonRequired]
     public ModelDefinition? Model { get; init; }
 
@@ -291,6 +332,19 @@ internal sealed class ProjectDto
     WriteIndented = false)]
 [JsonSerializable(typeof(ProjectDto))]
 [JsonSerializable(typeof(ModelDefinition))]
+[JsonSerializable(typeof(ProjectSymmetryMetadata))]
+[JsonSerializable(typeof(Particle))]
+[JsonSerializable(typeof(ParticleSet))]
+[JsonSerializable(typeof(ImmutableArray<Particle>))]
+[JsonSerializable(typeof(ImmutableArray<ParticleSet>))]
+[JsonSerializable(typeof(StructureModel))]
+[JsonSerializable(typeof(SpaceGroupRef))]
+[JsonSerializable(typeof(CellParameters))]
+[JsonSerializable(typeof(CellSite))]
+[JsonSerializable(typeof(CellDummyPosition))]
+[JsonSerializable(typeof(ImmutableArray<CellSite>))]
+[JsonSerializable(typeof(ImmutableArray<CellDummyPosition>))]
+[JsonSerializable(typeof(Fractional3))]
 [JsonSerializable(typeof(ProjectMetadata))]
 [JsonSerializable(typeof(ParameterizationTemplate))]
 [JsonSerializable(typeof(JobTemplate))]

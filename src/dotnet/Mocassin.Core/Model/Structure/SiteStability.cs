@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+using System.Text.Json.Serialization;
+
 namespace Mocassin.Core.Model.Structure;
 
 /// <summary>
@@ -9,6 +11,7 @@ namespace Mocassin.Core.Model.Structure;
 /// The persisted project JSON writes these values as the camel-case strings <c>stable</c> and
 /// <c>unstable</c> once the structure section is serialized.
 /// </remarks>
+[JsonConverter(typeof(CamelCaseEnumJsonConverter<SiteStability>))]
 public enum SiteStability
 {
     /// <summary>

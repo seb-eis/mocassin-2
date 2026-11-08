@@ -20,8 +20,8 @@ validation and a stable public API.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | `particle-model` | `feature/step-03-particle-and-structure-models/particle-model` | Done | `dotnet`, `structure`, `api` pass; Core tests 199/199 | — | `3974596` |
-| `structure-model` | `feature/step-03-particle-and-structure-models/structure-model` | Awaiting approval | `dotnet`, `structure`, `api` pass; Core tests 223/223 | — | — |
-| `model-envelope-and-contracts` | `feature/step-03-particle-and-structure-models/model-envelope-and-contracts` | Planned | — | — | — |
+| `structure-model` | `feature/step-03-particle-and-structure-models/structure-model` | Done | `dotnet`, `structure`, `api` pass; Core tests 223/223 | — | `dd642d6` |
+| `model-envelope-and-contracts` | `feature/step-03-particle-and-structure-models/model-envelope-and-contracts` | Awaiting approval | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core tests 242/242 | — | — |
 | `structure-preview-and-benchmark` | `feature/step-03-particle-and-structure-models/structure-preview-and-benchmark` | Planned | — | — | — |
 | `queries-and-editing` | `feature/step-03-particle-and-structure-models/queries-and-editing` | Planned | — | — | — |
 | `validation-composition` | `feature/step-03-particle-and-structure-models/validation-composition` | Planned | — | — | — |

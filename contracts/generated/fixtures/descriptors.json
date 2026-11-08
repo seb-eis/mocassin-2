@@ -63,6 +63,34 @@
       "kind": "events",
       "status": "planned",
       "step": "19"
+    },
+    {
+      "id": "project-structure",
+      "path": "tests/contracts/project-structure.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "03"
+    },
+    {
+      "id": "project-symmetry",
+      "path": "tests/contracts/project-symmetry.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "03"
+    },
+    {
+      "id": "project-symmetry-partial",
+      "path": "tests/contracts/project-symmetry-partial.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "03"
+    },
+    {
+      "id": "project-symmetry-mismatch",
+      "path": "tests/contracts/project-symmetry-mismatch.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "03"
     }
   ]
 }

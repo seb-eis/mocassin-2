@@ -1,13 +1,51 @@
 // SPDX-License-Identifier: MIT
 
+using System.Collections.Immutable;
+using System.Text.Json.Serialization;
+using Mocassin.Core.Model.Particles;
+using Mocassin.Core.Model.Structure;
+
 namespace Mocassin.Core.Model;
 
 /// <summary>
 /// Root of the authored scientific model.
 /// </summary>
 /// <remarks>
-/// Step 01 establishes the project envelope and keeps the model body empty. Particle, structure,
-/// transition, energy, lattice, and simulation sections are added by Steps 03 through 06. The JSON
-/// representation is therefore an empty object in the initial schema.
+/// The model is flat on disk: <c>model.particles</c>, <c>model.particleSets</c>, and
+/// <c>model.structure</c>. Later steps add transition, energy, lattice, and simulation sections directly at
+/// the model root. <see cref="ParticleModel"/> is an in-memory grouping only and is not a persisted member.
 /// </remarks>
-public sealed record ModelDefinition();
+[JsonConverter(typeof(ModelDefinitionJsonConverter))]
+public sealed record ModelDefinition
+{
+    /// <summary>
+    /// Initializes the empty model used when a project contains <c>"model": {}</c>.
+    /// </summary>
+    [JsonConstructor]
+    public ModelDefinition()
+    {
+        Particles = [];
+        ParticleSets = [];
+        Structure = StructureModel.Default;
+    }
+
+    /// <summary>
+    /// Gets the empty model with no particles or particle sets and the default structure.
+    /// </summary>
+    public static ModelDefinition Empty { get; } = new();
+
+    /// <summary>
+    /// Gets the authored particles.
+    /// </summary>
+    public ImmutableArray<Particle> Particles { get; init; }
+
+    /// <summary>
+    /// Gets the authored particle sets.
+    /// </summary>
+    public ImmutableArray<ParticleSet> ParticleSets { get; init; }
+
+    /// <summary>
+    /// Gets the authored crystal structure.
+    /// </summary>
+    public StructureModel Structure { get; init; }
+}
