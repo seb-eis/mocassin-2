@@ -203,3 +203,34 @@ that review.
    (R-14).
 7. **Optional:** add the historical-record note for the retired `.tmp` handoffs (R-15), and pursue the
    simplification list above.
+
+## Resolution status
+
+Date: 2026-11-08
+Owner: Implementor / maintenance update
+Maintenance commit: `6f5b06a` (follow-up resolution record commit follows)
+
+The reviewer verdict above is retained unchanged. This section records the follow-up maintenance update.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| R-01 | Fixed | `AGENTS.md` now states that Steps 00–02 are complete, Step 03 is next, and the build/test commands are current. |
+| R-02 | Fixed | `README.md`, `docs/index.md`, `docs/planning/README.md`, and `docs/development/index.md` now report Step 02 complete and Step 03 next. |
+| R-03 | Fixed | `nightly.yml` is a manual placeholder with no schedule; CI policy, AGENTS, and contributing docs agree. |
+| R-04 | Fixed | CI matrix/trigger text, benchmark comments, branch examples, Python coverage, and the Step 00 historical note were aligned with the current policy. |
+| R-05 | Fixed | `tools/verify.sh api` runs the NuGet licence policy, vulnerability audit, and ApiCompat; `all` includes it. |
+| R-06 | Fixed | Audit records 03–31 were regenerated from the current template; the audit README requires regeneration when the template changes. |
+| R-07 | Addressed in Step 03 design | `particleIds` is marked semantic; the contract uses `stability` strings; `CellDummyPositionId` is typed; the preview takes cell counts; `STR003` uses the open angle range. The Step 03 design review should confirm the final choices. |
+| R-08 | Step 03 task added | Step 03 now owns the manifest/schema update and fixtures; the reference docs no longer claim the generated schema already contains the fields. The actual schema update remains a Step 03 deliverable. |
+| R-09 | Fixed | Step 03 tasks/acceptance and the general definition of done now require XML docs, `PublicAPI.Unshipped.txt`, and the ApiCompat baseline. |
+| R-10 | Fixed | Amendment audit sections and the amendment index now record the passed parent audit, merge, tag, and post-development maintenance. |
+| R-11 | Fixed | Review/audit status tables include `Ready with notes` and `Passed with notes`; state transitions are separated from verdicts; the audit template uses `Audit initiated by`. |
+| R-12 | Fixed | Architecture diagrams now point to dependencies and include an arrow legend. |
+| R-13 | Fixed | AGENTS now includes `Utilities/`, `Usings.cs`, and `README.md`, matching the full structure policy. |
+| R-14 | Fixed | `tools/README.md` lists the new scripts and `symmetry/`; Step 03 owns the navigation update for the new user-guide pages. |
+| R-15 | Fixed | The reviews README records that pre-policy `.tmp/review` references are historical and not to be rewritten. |
+
+Simplification opportunities: the highest-value items were adopted in this cleanup (CI documentation alignment,
+audit-record regeneration, local API gate, status-surface consolidation). The remaining suggestions — one
+normative process document, on-demand audit creation, a shared API project list, and generated CI docs — are
+recorded as follow-up opportunities, not blockers for Step 03.
