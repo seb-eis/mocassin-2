@@ -186,6 +186,25 @@ public sealed class StructurePreviewTests
     }
 
     [Fact]
+    public void EveryCatalogSettingResolvesToItself()
+    {
+        foreach (var setting in SpaceGroupCatalog.Default.Settings)
+        {
+            var resolved = service.TryResolve(
+                new SpaceGroupRef(setting.Number, setting.Axis, setting.Origin),
+                out var diagnostics);
+
+            Assert.NotNull(resolved);
+            Assert.Empty(diagnostics);
+            Assert.Equal(setting.Number, resolved.Number);
+            Assert.Equal(setting.Axis, resolved.Axis);
+            Assert.Equal(setting.Origin, resolved.Origin);
+            Assert.False(string.IsNullOrWhiteSpace(resolved.HermannMauguin));
+            Assert.False(string.IsNullOrWhiteSpace(resolved.HallSymbol));
+        }
+    }
+
+    [Fact]
     public void StructuredEncoderReportsOverlapWithCellSitePaths()
     {
         var setting = Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog.Default.GetSetting(

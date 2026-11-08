@@ -12,7 +12,7 @@ validation and a stable public API.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Not requested (closeout in progress)
 - **Design review:** [Ready with notes — accepted](../reviews/step-03.md)
 - **Feature list:** Approved 2026-11-08; step branch created
 - **Last updated:** 2026-11-08
@@ -25,8 +25,24 @@ validation and a stable public API.
 | `structure-preview-and-benchmark` | `feature/step-03-particle-and-structure-models/structure-preview-and-benchmark` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 242/242, Symmetry 145/145; benchmark 15.8 µs / 6.7 µs | — | `67e39e1` |
 | `queries-and-editing` | `feature/step-03-particle-and-structure-models/queries-and-editing` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146 | — | `8a75bc6` |
 | `validation-composition` | `feature/step-03-particle-and-structure-models/validation-composition` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146, Packages 40/40 | — | `18940a1` |
-| `samples-and-docs` | `feature/step-03-particle-and-structure-models/samples-and-docs` | Awaiting approval | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 263/263, Symmetry 148/148, Packages 40/40 | — | — |
-| `closeout` | `feature/step-03-particle-and-structure-models/closeout` | Planned | — | — | — |
+| `samples-and-docs` | `feature/step-03-particle-and-structure-models/samples-and-docs` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 263/263, Symmetry 150/150, Packages 40/40 | — | `9039b6f` |
+| `closeout` | `feature/step-03-particle-and-structure-models/closeout` | Awaiting approval | `./tools/verify.sh all` passes; Core 263/263, Symmetry 152/152, Packages 41/41, Architecture 1/1 | — | — |
+
+**Deviations and notes:**
+
+- `samples-and-docs` was amended before squash to use a vacancy particle whose symbol is distinct from the
+  host species. Ceria uses `Vacancy`/`Vc`; barium zirconate uses one shared uncharged `Vacancy`/`V` for both
+  the oxygen and proton sets. The sample READMEs and `docs/user-guide/particles.md` document the convention.
+- The barium zirconate proton reference position is a **stable** site, not a KMC transition-only position.
+  Proton-hopping transitions between the symmetry-equivalent positions belong to Step 04.
+- `ST008`/`STR008` and `STR011` were removed from the design during implementation and are documented as
+  unused; `STR014` and `STR015` were added.
+- `StructurePreviewService.TryCreatePreview` uses the parameter name `structureModel` instead of the design's
+  `structure` because `structure` triggers CA1716 (reserved keyword) without a suppression.
+- `IStructureQuery.Structure` carries a member-level CA1716 suppression; `Project` exposes public
+  `Particles`, `VoidParticle`, `Structure`, and `Find` query members.
+- The ceria sample keeps the unstable oxygen transition site in the shared oxygen set; a dedicated
+  transition-state occupation set is deferred to Step 04 when the transition model exists.
 
 ## Goal
 
@@ -511,72 +527,72 @@ split the new IDs into `Ids/StructureIds.cs`.
 
 ## Implementation tasks
 
-- [ ] Extend `ModelDefinition` with flat `Particles`, `ParticleSets`, and `Structure` sections plus
+- [x] Extend `ModelDefinition` with flat `Particles`, `ParticleSets`, and `Structure` sections plus
   `ModelDefinition.Empty`; update `ProjectJsonContext`, `ProjectJson`, `ProjectSchema`, and `ProjectValidator`.
-- [ ] Add `ProjectSymmetryMetadata`, `Project.Symmetry`, `ProjectDto.Symmetry`, and JSON/canonical-document
+- [x] Add `ProjectSymmetryMetadata`, `Project.Symmetry`, `ProjectDto.Symmetry`, and JSON/canonical-document
   support; keep it out of the model hash.
-- [ ] Implement `Particle`, `ParticleSet`, `ParticleModel` (in-memory only), and the implicit void/empty objects.
-- [ ] Implement `StructureModel` with `Name` and `Default`, `SpaceGroupRef`, `CellParameters`, `CellSite`,
+- [x] Implement `Particle`, `ParticleSet`, `ParticleModel` (in-memory only), and the implicit void/empty objects.
+- [x] Implement `StructureModel` with `Name` and `Default`, `SpaceGroupRef`, `CellParameters`, `CellSite`,
   `CellDummyPosition`, and `SiteStability`.
-- [ ] Add the `CellDummyPositionId` typed ID and reuse the generic typed-ID JSON converter.
-- [ ] Add the `Fractional3` array converter and apply `CamelCaseEnumJsonConverter<T>` to `AxisSetting`,
+- [x] Add the `CellDummyPositionId` typed ID and reuse the generic typed-ID JSON converter.
+- [x] Add the `Fractional3` array converter and apply `CamelCaseEnumJsonConverter<T>` to `AxisSetting`,
   `OriginChoice`, and `SiteStability`; mark `Particle.IsVoid` with `[JsonIgnore]`.
-- [ ] Implement canonical model serialization: sort particles, sets, sites, and dummies by ID; preserve
+- [x] Implement canonical model serialization: sort particles, sets, sites, and dummies by ID; preserve
   `ParticleSet.ParticleIds` order; add shuffle-invariance hash tests.
-- [ ] Implement public `ProjectHasher.ComputeStructure` for the preview cache key; add it to
+- [x] Implement public `ProjectHasher.ComputeStructure` for the preview cache key; add it to
   `PublicAPI.Unshipped.txt` and refresh the ApiCompat baseline.
-- [ ] Implement crystal-system validation, the 1000-reference-site limit, names, reserved IDs, and duplicate
+- [x] Implement crystal-system validation, the 1000-reference-site limit, names, reserved IDs, and duplicate
   set members.
-- [ ] Add the `UnitCellVectorEncoder.TryCreate` overload with `StructureSiteReference`/`OrbitOverlap`;
+- [x] Add the `UnitCellVectorEncoder.TryCreate` overload with `StructureSiteReference`/`OrbitOverlap`;
   reuse the encoder for `StructurePreview`, `StructurePreviewService`, and `StructureValidator`.
-- [ ] Add `STR014` index-cap validation to the preview service; keep `GetLinearIndex` throws for programmer
+- [x] Add `STR014` index-cap validation to the preview service; keep `GetLinearIndex` throws for programmer
   errors only.
-- [ ] Implement `IParticleQuery` and `IStructureQuery` on the immutable `Project` snapshot.
-- [ ] Implement the typed `ProjectEditor` operations and `ProjectValidationService` in `Mocassin.Packages`;
+- [x] Implement `IParticleQuery` and `IStructureQuery` on the immutable `Project` snapshot.
+- [x] Implement the typed `ProjectEditor` operations and `ProjectValidationService` in `Mocassin.Packages`;
   make `ProjectStore.LoadBytesCore` use the composed validator by default.
-- [ ] Add sample definitions for ceria and barium zirconate and populate the existing ceria fixture/sample.
-- [ ] Add `PAR010`–`PAR012`, `STR014`, and `STR015`; remove `STR008`/`STR011` usage and document them as
+- [x] Add sample definitions for ceria and barium zirconate and populate the existing ceria fixture/sample.
+- [x] Add `PAR010`–`PAR012`, `STR014`, and `STR015`; remove `STR008`/`STR011` usage and document them as
   unused. Final help anchors and `docs/reference/diagnostics.md` belong to Step 07.
-- [ ] Add `Mocassin.Benchmarks/Structure/StructurePreviewBenchmarks.cs` and a baseline for ceria/BZO; do not
+- [x] Add `Mocassin.Benchmarks/Structure/StructurePreviewBenchmarks.cs` and a baseline for ceria/BZO; do not
   add a PR-fast wall-clock assertion.
-- [ ] Update `contracts/manifest.json` with the `structure` (including `name`) and optional envelope `symmetry`
+- [x] Update `contracts/manifest.json` with the `structure` (including `name`) and optional envelope `symmetry`
   metadata; regenerate `contracts/generated/schema/project-v1.schema.json`. The project `schemaVersion`
   remains 1 because the fields are additive and the model shape is pre-release.
-- [ ] Add project fixtures with and without the optional `symmetry` metadata, with `"model": {}`, and with a
+- [x] Add project fixtures with and without the optional `symmetry` metadata, with `"model": {}`, and with a
   mismatch; test `PROJ034` in `ProjectValidationService` and `ProjectStore`.
-- [ ] Add XML docs, update `PublicAPI.Unshipped.txt`, and refresh the ApiCompat baseline for every new public
+- [x] Add XML docs, update `PublicAPI.Unshipped.txt`, and refresh the ApiCompat baseline for every new public
   type and member.
-- [ ] Add `SPDX-License-Identifier: MIT` to every new `.cs` file; no new third-party dependency is introduced.
-- [ ] Update the parity matrix rows for particles, particle sets, sites, stability, preview, and dummy
+- [x] Add `SPDX-License-Identifier: MIT` to every new `.cs` file; no new third-party dependency is introduced.
+- [x] Update the parity matrix rows for particles, particle sets, sites, stability, preview, and dummy
   positions to `Implemented`/`Partial` after the acceptance tests pass; mark UI editing rows for Step 24.
-- [ ] Add the new user-guide pages to `zensical.toml` navigation; update the existing structure/symmetry pages.
+- [x] Add the new user-guide pages to `zensical.toml` navigation; update the existing structure/symmetry pages.
 
 ## Acceptance criteria
 
-- [ ] A user can define ceria: 225, a=5.41 Å, name "Ceria", Ce at (0,0,0), O at (0.25,0.25,0.25), and an
+- [x] A user can define ceria: 225, a=5.41 Å, name "Ceria", Ce at (0,0,0), O at (0.25,0.25,0.25), and an
   unstable O site at (0.5,0.25,0.25), using the public editing API.
-- [ ] The preview shows the correct P1 orbit sizes for each site.
-- [ ] Overlapping sites are rejected with a `CellSiteId` path to each offending site through the structured
+- [x] The preview shows the correct P1 orbit sizes for each site.
+- [x] Overlapping sites are rejected with a `CellSiteId` path to each offending site through the structured
   `OrbitOverlap` result; no message parsing is used.
-- [ ] Crystal-system constraints are enforced without silently overwriting user input.
-- [ ] The structure preview is deterministic and cached by `(structureHash, A, B, C, catalogDataVersion,
+- [x] Crystal-system constraints are enforced without silently overwriting user input.
+- [x] The structure preview is deterministic and cached by `(structureHash, A, B, C, catalogDataVersion,
   catalogDataSha256, symmetryContractVersion)`; `structureHash` is the canonical structure-model hash.
-- [ ] The ceria/BZO preview benchmark case and baseline are recorded; the target is mean < 100 ms on the Step
+- [x] The ceria/BZO preview benchmark case and baseline are recorded; the target is mean < 100 ms on the Step
   02 benchmark runner class. The benchmark runs in Nightly/release, not as a PR-fast wall-clock assertion.
-- [ ] A preview request whose `A*B*C*P` exceeds `int.MaxValue` returns `STR014` and no preview.
-- [ ] `"model": {}` still loads as `ModelDefinition.Empty`, and the existing minimal/ceria fixtures round-trip.
-- [ ] JSON round-trips use `[a,b,c]` fractional arrays, camelCase enum strings, and no `isVoid` field.
-- [ ] A project with `symmetry` metadata parses in Core, is included in the document hash, and is compared by
+- [x] A preview request whose `A*B*C*P` exceeds `int.MaxValue` returns `STR014` and no preview.
+- [x] `"model": {}` still loads as `ModelDefinition.Empty`, and the existing minimal/ceria fixtures round-trip.
+- [x] JSON round-trips use `[a,b,c]` fractional arrays, camelCase enum strings, and no `isVoid` field.
+- [x] A project with `symmetry` metadata parses in Core, is included in the document hash, and is compared by
   `ProjectValidationService`; a mismatch emits `PROJ034`.
-- [ ] `ProjectStore.LoadBytesCore` returns Core, Symmetry, and `PROJ034` diagnostics through the composed
+- [x] `ProjectStore.LoadBytesCore` returns Core, Symmetry, and `PROJ034` diagnostics through the composed
   validator.
-- [ ] Shuffling authored particles, sets, sites, or dummies does not change the canonical model hash.
-- [ ] All diagnostics are returned by the composed public validation API. CLI exposure is verified in Steps
+- [x] Shuffling authored particles, sets, sites, or dummies does not change the canonical model hash.
+- [x] All diagnostics are returned by the composed public validation API. CLI exposure is verified in Steps
   07/12; UI exposure is verified in Step 24.
-- [ ] The generated project schema accepts the structure (including `name`), particles, and optional symmetry
+- [x] The generated project schema accepts the structure (including `name`), particles, and optional symmetry
   fields, and fixtures cover present, absent, default-empty, and mismatched metadata.
-- [ ] Public API files and the ApiCompat baseline are current.
-- [ ] Documentation written
+- [x] Public API files and the ApiCompat baseline are current.
+- [x] Documentation written
 
 ## Documentation
 
