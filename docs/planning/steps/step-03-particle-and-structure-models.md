@@ -14,11 +14,19 @@ validation and a stable public API.
 - **Step tag:** —
 - **Audit:** Not requested
 - **Design review:** [Ready with notes — accepted](../reviews/step-03.md)
+- **Feature list:** Approved 2026-11-08; step branch not created yet
 - **Last updated:** 2026-11-08
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `particle-model` | `feature/step-03-particle-and-structure-models/particle-model` | Planned | — | — | — |
+| `structure-model` | `feature/step-03-particle-and-structure-models/structure-model` | Planned | — | — | — |
+| `model-envelope-and-contracts` | `feature/step-03-particle-and-structure-models/model-envelope-and-contracts` | Planned | — | — | — |
+| `structure-preview-and-benchmark` | `feature/step-03-particle-and-structure-models/structure-preview-and-benchmark` | Planned | — | — | — |
+| `queries-and-editing` | `feature/step-03-particle-and-structure-models/queries-and-editing` | Planned | — | — | — |
+| `validation-composition` | `feature/step-03-particle-and-structure-models/validation-composition` | Planned | — | — | — |
+| `samples-and-docs` | `feature/step-03-particle-and-structure-models/samples-and-docs` | Planned | — | — | — |
+| `closeout` | `feature/step-03-particle-and-structure-models/closeout` | Planned | — | — | — |
 
 ## Goal
 

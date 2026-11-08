@@ -81,9 +81,10 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 Step 03 — Particle and Structure Models passed design review. Round 1 returned `Changes required`; fix round 1
 is frozen at `3096aa8`, round 2 returned `Ready with notes`, and the round-2 notes are applied in `a299046`.
-The human owner accepted the verdict on 2026-11-08 and authorized the start gate. The complete feature-branch
-list is awaiting approval; no step branch or implementation exists yet. Step 02 is complete: merge `dbf5691`,
-tag `step-02`, and main CI `42478570935` green.
+The human owner accepted the verdict on 2026-11-08, authorized the start gate, and approved the eight-feature
+breakdown. No step branch or implementation exists yet; the step agent must create the step branch, set the
+step to `In progress`, and begin with `particle-model`. Step 02 is complete: merge `dbf5691`, tag `step-02`,
+and main CI `42478570935` green.
 
 ## Notes
 
