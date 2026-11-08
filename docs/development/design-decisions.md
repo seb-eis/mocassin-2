@@ -42,12 +42,52 @@ The C# domain type groups metadata in `ProjectMetadata`, but the JSON envelope i
 the data contract. A custom converter performs the mapping so the public API and the persisted shape can both
 stay natural.
 
-## Placeholder model and templates
+## Flat model envelope (Step 03)
 
-Step 01 establishes the project envelope before the model domains exist. `ModelDefinition` is intentionally
-empty; parameterization, job, and build templates carry only the fields needed for identity and reference
-validation. Steps 03–10 extend these records. The schema is treated as pre-release until the model shape is
-frozen, and any semantic change after that requires an explicit migration.
+`ModelDefinition` is flat: `particles`, `particleSets`, and `structure` are direct model properties, so the JSON
+shape remains `model.particles`, `model.particleSets`, and `model.structure`. `ParticleModel` is an in-memory
+grouping only and is never nested in the document. `ModelDefinition.Empty` supplies the default structure for
+`"model": {}` and for missing model sections. Custom model and structure converters apply defaults for missing
+fields and reject unknown or duplicate properties; they exist because source-generated construction of
+`init` properties would overwrite constructor defaults with `default` values. Parameterization, job, and build
+templates keep their Step 01 shape until Steps 09–10 extend them.
+
+## Model JSON mapping
+
+- `Fractional3` is a three-number array `[a, b, c]`, never an object.
+- `AxisSetting`, `OriginChoice`, and `SiteStability` use camelCase strings.
+- `Particle.IsVoid` is computed and ignored by serialization.
+- Canonical JSON sorts `particles`, `particleSets`, `sites`, and `dummyPositions` by stable ID.
+  `ParticleSet.ParticleIds` keeps its authored order because the first particle is the default occupation.
+- The canonical model hash is therefore invariant under authoring order but sensitive to the semantic set
+  order.
+- `ModelDefinition` and `StructureModel` use explicit converters so `{}` and missing sections load as defaults
+  without weakening the unknown-field rejection contract.
+
+## Particle and structure validation ownership
+
+Core validates rules that depend only on the project graph: particle names, symbols, sets, reserved IDs,
+structure names, site/dummy names, positions, limits, and site-to-set references. Symmetry validates rules that
+need the catalog, cell geometry, or P1 expansion: space-group resolution, cell/crystal-system constraints,
+orbit overlap, the P1 budget, and the index cap. `Mocassin.Packages.Projects.ProjectValidationService` is the
+single composition point; it also emits the `PROJ034` metadata warning and the cross-domain `PAR004`
+charged-vacancy/default-occupation warning.
+
+`ProjectStore` uses the composed validator by default. `ProjectEditor` keeps the Core-only default and the
+UI/CLI pass the composed validator explicitly, which keeps the Core editing layer free of catalog dependencies.
+`PROJ034` is advisory; it never rewrites the project or blocks loading. The compiled payload records the
+authoritative catalog and contract versions.
+
+## Structure preview
+
+`StructurePreviewService` derives a deterministic preview from the authored structure: resolve the setting,
+validate the cell, expand P1 positions, compute Cartesian positions and cell volume, and expose per-site orbit
+information and the requested cell counts. Overlap detection uses the exact grid and returns structured
+`OrbitOverlap` records with `CellSiteId` paths.
+
+The preview cache is scoped to the service and keyed by the canonical structure hash, cell counts, catalog data
+version/SHA-256, and symmetry contract version. The preview is not the compiled model and has no persisted
+byte format; the compilation pipeline produces the authoritative structure.
 
 ## Canonical JSON and hashes
 

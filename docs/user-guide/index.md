@@ -18,6 +18,8 @@ land.
 
 ## Planned sections
 
+- [Particles and particle sets](particles.md)
+- [Crystal structure](structure.md)
 - Project lifecycle and model editors
 - Validation and diagnostics
 - Parameterization templates

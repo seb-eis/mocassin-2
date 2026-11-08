@@ -999,3 +999,243 @@ static Mocassin.Core.Geometry.Vector4<T>.operator ==(Mocassin.Core.Geometry.Vect
 ~override Mocassin.Core.Geometry.Vector4<T>.Equals(object obj) -> bool
 Mocassin.Core.Geometry.Vector3<T>.Dot(Mocassin.Core.Geometry.Vector3<T> other) -> T
 Mocassin.Core.Geometry.Vector4<T>.Dot(Mocassin.Core.Geometry.Vector4<T> other) -> T
+Mocassin.Core.Diagnostics.ParticleDiagnosticCodes
+Mocassin.Core.Model.Particles.Particle
+Mocassin.Core.Model.Particles.Particle.<Clone>$() -> Mocassin.Core.Model.Particles.Particle!
+Mocassin.Core.Model.Particles.Particle.Charge.get -> Mocassin.Core.Units.ChargeElementary
+Mocassin.Core.Model.Particles.Particle.Charge.init -> void
+Mocassin.Core.Model.Particles.Particle.Deconstruct(out Mocassin.Core.Ids.ParticleId Id, out string! Name, out string! Symbol, out Mocassin.Core.Units.ChargeElementary Charge, out bool IsVacancy) -> void
+Mocassin.Core.Model.Particles.Particle.Equals(Mocassin.Core.Model.Particles.Particle? other) -> bool
+Mocassin.Core.Model.Particles.Particle.Id.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Core.Model.Particles.Particle.Id.init -> void
+Mocassin.Core.Model.Particles.Particle.IsVacancy.get -> bool
+Mocassin.Core.Model.Particles.Particle.IsVacancy.init -> void
+Mocassin.Core.Model.Particles.Particle.IsVoid.get -> bool
+Mocassin.Core.Model.Particles.Particle.Name.get -> string!
+Mocassin.Core.Model.Particles.Particle.Name.init -> void
+Mocassin.Core.Model.Particles.Particle.Particle(Mocassin.Core.Ids.ParticleId Id, string! Name, string! Symbol, Mocassin.Core.Units.ChargeElementary Charge, bool IsVacancy) -> void
+Mocassin.Core.Model.Particles.Particle.Symbol.get -> string!
+Mocassin.Core.Model.Particles.Particle.Symbol.init -> void
+Mocassin.Core.Model.Particles.ParticleModel
+Mocassin.Core.Model.Particles.ParticleModel.<Clone>$() -> Mocassin.Core.Model.Particles.ParticleModel!
+Mocassin.Core.Model.Particles.ParticleModel.EmptyParticleSet.get -> Mocassin.Core.Model.Particles.ParticleSet!
+Mocassin.Core.Model.Particles.ParticleModel.Equals(Mocassin.Core.Model.Particles.ParticleModel? other) -> bool
+Mocassin.Core.Model.Particles.ParticleModel.Find(Mocassin.Core.Ids.ParticleId id) -> Mocassin.Core.Model.Particles.Particle?
+Mocassin.Core.Model.Particles.ParticleModel.Find(Mocassin.Core.Ids.ParticleSetId id) -> Mocassin.Core.Model.Particles.ParticleSet?
+Mocassin.Core.Model.Particles.ParticleModel.ParticleModel(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!> particles, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.ParticleSet!> particleSets) -> void
+Mocassin.Core.Model.Particles.ParticleModel.ParticleSets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.ParticleSet!>
+Mocassin.Core.Model.Particles.ParticleModel.ParticleSets.init -> void
+Mocassin.Core.Model.Particles.ParticleModel.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!>
+Mocassin.Core.Model.Particles.ParticleModel.Particles.init -> void
+Mocassin.Core.Model.Particles.ParticleModel.VoidParticle.get -> Mocassin.Core.Model.Particles.Particle!
+Mocassin.Core.Model.Particles.ParticleSet
+Mocassin.Core.Model.Particles.ParticleSet.<Clone>$() -> Mocassin.Core.Model.Particles.ParticleSet!
+Mocassin.Core.Model.Particles.ParticleSet.Equals(Mocassin.Core.Model.Particles.ParticleSet? other) -> bool
+Mocassin.Core.Model.Particles.ParticleSet.Id.get -> Mocassin.Core.Ids.ParticleSetId
+Mocassin.Core.Model.Particles.ParticleSet.Id.init -> void
+Mocassin.Core.Model.Particles.ParticleSet.Name.get -> string!
+Mocassin.Core.Model.Particles.ParticleSet.Name.init -> void
+Mocassin.Core.Model.Particles.ParticleSet.ParticleIds.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId>
+Mocassin.Core.Model.Particles.ParticleSet.ParticleIds.init -> void
+Mocassin.Core.Model.Particles.ParticleSet.ParticleSet(Mocassin.Core.Ids.ParticleSetId id, string! name, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId> particleIds) -> void
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.DuplicateSetContent = "PAR009" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.DuplicateSetMember = "PAR012" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.InvalidName = "PAR001" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.InvalidSetMembers = "PAR005" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.InvalidSetName = "PAR011" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.NonRecommendedSymbol = "PAR008" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.ParticleLimitExceeded = "PAR002" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.ReservedIdentifier = "PAR010" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.SetLimitExceeded = "PAR007" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.UnknownParticleReference = "PAR006" -> string!
+const Mocassin.Core.Model.Particles.Particle.RecommendedSymbolPattern = "^[A-Z][A-Za-z0-9+\\-()]{0,10}$" -> string!
+const Mocassin.Core.Model.Particles.ParticleModel.MaxCustomParticles = 63 -> int
+const Mocassin.Core.Model.Particles.ParticleModel.MaxParticleSets = 100 -> int
+override Mocassin.Core.Model.Particles.Particle.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Particles.Particle.GetHashCode() -> int
+override Mocassin.Core.Model.Particles.Particle.ToString() -> string!
+override Mocassin.Core.Model.Particles.ParticleModel.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Particles.ParticleModel.GetHashCode() -> int
+override Mocassin.Core.Model.Particles.ParticleModel.ToString() -> string!
+override Mocassin.Core.Model.Particles.ParticleSet.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Particles.ParticleSet.GetHashCode() -> int
+override Mocassin.Core.Model.Particles.ParticleSet.ToString() -> string!
+static Mocassin.Core.Model.Particles.Particle.Void.get -> Mocassin.Core.Model.Particles.Particle!
+static Mocassin.Core.Model.Particles.Particle.operator !=(Mocassin.Core.Model.Particles.Particle? left, Mocassin.Core.Model.Particles.Particle? right) -> bool
+static Mocassin.Core.Model.Particles.Particle.operator ==(Mocassin.Core.Model.Particles.Particle? left, Mocassin.Core.Model.Particles.Particle? right) -> bool
+static Mocassin.Core.Model.Particles.ParticleModel.operator !=(Mocassin.Core.Model.Particles.ParticleModel? left, Mocassin.Core.Model.Particles.ParticleModel? right) -> bool
+static Mocassin.Core.Model.Particles.ParticleModel.operator ==(Mocassin.Core.Model.Particles.ParticleModel? left, Mocassin.Core.Model.Particles.ParticleModel? right) -> bool
+static Mocassin.Core.Model.Particles.ParticleSet.Empty.get -> Mocassin.Core.Model.Particles.ParticleSet!
+static Mocassin.Core.Model.Particles.ParticleSet.operator !=(Mocassin.Core.Model.Particles.ParticleSet? left, Mocassin.Core.Model.Particles.ParticleSet? right) -> bool
+static Mocassin.Core.Model.Particles.ParticleSet.operator ==(Mocassin.Core.Model.Particles.ParticleSet? left, Mocassin.Core.Model.Particles.ParticleSet? right) -> bool
+Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes
+Mocassin.Core.Ids.CellDummyPositionId
+Mocassin.Core.Ids.CellDummyPositionId.CellDummyPositionId() -> void
+Mocassin.Core.Ids.CellDummyPositionId.CellDummyPositionId(System.Guid Value) -> void
+Mocassin.Core.Ids.CellDummyPositionId.Deconstruct(out System.Guid Value) -> void
+Mocassin.Core.Ids.CellDummyPositionId.Equals(Mocassin.Core.Ids.CellDummyPositionId other) -> bool
+Mocassin.Core.Ids.CellDummyPositionId.Value.get -> System.Guid
+Mocassin.Core.Ids.CellDummyPositionId.Value.init -> void
+Mocassin.Core.Model.Structure.CellDummyPosition
+Mocassin.Core.Model.Structure.CellDummyPosition.<Clone>$() -> Mocassin.Core.Model.Structure.CellDummyPosition!
+Mocassin.Core.Model.Structure.CellDummyPosition.CellDummyPosition(Mocassin.Core.Ids.CellDummyPositionId Id, string! Name, Mocassin.Core.Geometry.Fractional3 Fractional) -> void
+Mocassin.Core.Model.Structure.CellDummyPosition.Deconstruct(out Mocassin.Core.Ids.CellDummyPositionId Id, out string! Name, out Mocassin.Core.Geometry.Fractional3 Fractional) -> void
+Mocassin.Core.Model.Structure.CellDummyPosition.Equals(Mocassin.Core.Model.Structure.CellDummyPosition? other) -> bool
+Mocassin.Core.Model.Structure.CellDummyPosition.Fractional.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Model.Structure.CellDummyPosition.Fractional.init -> void
+Mocassin.Core.Model.Structure.CellDummyPosition.Id.get -> Mocassin.Core.Ids.CellDummyPositionId
+Mocassin.Core.Model.Structure.CellDummyPosition.Id.init -> void
+Mocassin.Core.Model.Structure.CellDummyPosition.Name.get -> string!
+Mocassin.Core.Model.Structure.CellDummyPosition.Name.init -> void
+Mocassin.Core.Model.Structure.CellSite
+Mocassin.Core.Model.Structure.CellSite.<Clone>$() -> Mocassin.Core.Model.Structure.CellSite!
+Mocassin.Core.Model.Structure.CellSite.CellSite(Mocassin.Core.Ids.CellSiteId Id, string! Name, Mocassin.Core.Geometry.Fractional3 Fractional, Mocassin.Core.Ids.ParticleSetId ParticleSetId, Mocassin.Core.Model.Structure.SiteStability Stability) -> void
+Mocassin.Core.Model.Structure.CellSite.Deconstruct(out Mocassin.Core.Ids.CellSiteId Id, out string! Name, out Mocassin.Core.Geometry.Fractional3 Fractional, out Mocassin.Core.Ids.ParticleSetId ParticleSetId, out Mocassin.Core.Model.Structure.SiteStability Stability) -> void
+Mocassin.Core.Model.Structure.CellSite.Equals(Mocassin.Core.Model.Structure.CellSite? other) -> bool
+Mocassin.Core.Model.Structure.CellSite.Fractional.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Model.Structure.CellSite.Fractional.init -> void
+Mocassin.Core.Model.Structure.CellSite.Id.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Structure.CellSite.Id.init -> void
+Mocassin.Core.Model.Structure.CellSite.Name.get -> string!
+Mocassin.Core.Model.Structure.CellSite.Name.init -> void
+Mocassin.Core.Model.Structure.CellSite.ParticleSetId.get -> Mocassin.Core.Ids.ParticleSetId
+Mocassin.Core.Model.Structure.CellSite.ParticleSetId.init -> void
+Mocassin.Core.Model.Structure.CellSite.Stability.get -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Structure.CellSite.Stability.init -> void
+Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Structure.SiteStability.Stable = 0 -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Structure.SiteStability.Unstable = 1 -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Structure.SpaceGroupRef
+Mocassin.Core.Model.Structure.SpaceGroupRef.<Clone>$() -> Mocassin.Core.Model.Structure.SpaceGroupRef!
+Mocassin.Core.Model.Structure.SpaceGroupRef.Axis.get -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Model.Structure.SpaceGroupRef.Axis.init -> void
+Mocassin.Core.Model.Structure.SpaceGroupRef.Deconstruct(out int Number, out Mocassin.Core.Symmetry.AxisSetting Axis, out Mocassin.Core.Symmetry.OriginChoice Origin) -> void
+Mocassin.Core.Model.Structure.SpaceGroupRef.Equals(Mocassin.Core.Model.Structure.SpaceGroupRef? other) -> bool
+Mocassin.Core.Model.Structure.SpaceGroupRef.Number.get -> int
+Mocassin.Core.Model.Structure.SpaceGroupRef.Number.init -> void
+Mocassin.Core.Model.Structure.SpaceGroupRef.Origin.get -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Model.Structure.SpaceGroupRef.Origin.init -> void
+Mocassin.Core.Model.Structure.SpaceGroupRef.SpaceGroupRef(int Number, Mocassin.Core.Symmetry.AxisSetting Axis, Mocassin.Core.Symmetry.OriginChoice Origin) -> void
+Mocassin.Core.Model.Structure.StructureModel
+Mocassin.Core.Model.Structure.StructureModel.<Clone>$() -> Mocassin.Core.Model.Structure.StructureModel!
+Mocassin.Core.Model.Structure.StructureModel.Cell.get -> Mocassin.Core.Model.CellParameters!
+Mocassin.Core.Model.Structure.StructureModel.Cell.init -> void
+Mocassin.Core.Model.Structure.StructureModel.Deconstruct(out string! Name, out Mocassin.Core.Model.Structure.SpaceGroupRef! SpaceGroup, out Mocassin.Core.Model.CellParameters! Cell, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellSite!> Sites, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellDummyPosition!> DummyPositions) -> void
+Mocassin.Core.Model.Structure.StructureModel.DummyPositions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellDummyPosition!>
+Mocassin.Core.Model.Structure.StructureModel.DummyPositions.init -> void
+Mocassin.Core.Model.Structure.StructureModel.Equals(Mocassin.Core.Model.Structure.StructureModel? other) -> bool
+Mocassin.Core.Model.Structure.StructureModel.Name.get -> string!
+Mocassin.Core.Model.Structure.StructureModel.Name.init -> void
+Mocassin.Core.Model.Structure.StructureModel.Sites.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellSite!>
+Mocassin.Core.Model.Structure.StructureModel.Sites.init -> void
+Mocassin.Core.Model.Structure.StructureModel.SpaceGroup.get -> Mocassin.Core.Model.Structure.SpaceGroupRef!
+Mocassin.Core.Model.Structure.StructureModel.SpaceGroup.init -> void
+Mocassin.Core.Model.Structure.StructureModel.StructureModel(string! Name, Mocassin.Core.Model.Structure.SpaceGroupRef! SpaceGroup, Mocassin.Core.Model.CellParameters! Cell, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellSite!> Sites, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Structure.CellDummyPosition!> DummyPositions) -> void
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidDummyName = "STR015" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidDummyPosition = "STR010" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidSiteName = "STR005" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidSitePosition = "STR004" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.InvalidStructureName = "STR013" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.MissingParticleSet = "STR006" -> string!
+const Mocassin.Core.Diagnostics.CoreStructureDiagnosticCodes.SiteLimitExceeded = "STR012" -> string!
+const Mocassin.Core.Model.Structure.StructureModel.DefaultName = "New Structure" -> string!
+const Mocassin.Core.Model.Structure.StructureModel.MaxReferenceSites = 1000 -> int
+override Mocassin.Core.Ids.CellDummyPositionId.GetHashCode() -> int
+override Mocassin.Core.Ids.CellDummyPositionId.ToString() -> string!
+override Mocassin.Core.Model.Structure.CellDummyPosition.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Structure.CellDummyPosition.GetHashCode() -> int
+override Mocassin.Core.Model.Structure.CellDummyPosition.ToString() -> string!
+override Mocassin.Core.Model.Structure.CellSite.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Structure.CellSite.GetHashCode() -> int
+override Mocassin.Core.Model.Structure.CellSite.ToString() -> string!
+override Mocassin.Core.Model.Structure.SpaceGroupRef.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Structure.SpaceGroupRef.GetHashCode() -> int
+override Mocassin.Core.Model.Structure.SpaceGroupRef.ToString() -> string!
+override Mocassin.Core.Model.Structure.StructureModel.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Structure.StructureModel.GetHashCode() -> int
+override Mocassin.Core.Model.Structure.StructureModel.ToString() -> string!
+static Mocassin.Core.Ids.CellDummyPositionId.Create(System.Guid value) -> Mocassin.Core.Ids.CellDummyPositionId
+static Mocassin.Core.Ids.CellDummyPositionId.New() -> Mocassin.Core.Ids.CellDummyPositionId
+static Mocassin.Core.Ids.CellDummyPositionId.operator !=(Mocassin.Core.Ids.CellDummyPositionId left, Mocassin.Core.Ids.CellDummyPositionId right) -> bool
+static Mocassin.Core.Ids.CellDummyPositionId.operator ==(Mocassin.Core.Ids.CellDummyPositionId left, Mocassin.Core.Ids.CellDummyPositionId right) -> bool
+static Mocassin.Core.Model.Structure.CellDummyPosition.operator !=(Mocassin.Core.Model.Structure.CellDummyPosition? left, Mocassin.Core.Model.Structure.CellDummyPosition? right) -> bool
+static Mocassin.Core.Model.Structure.CellDummyPosition.operator ==(Mocassin.Core.Model.Structure.CellDummyPosition? left, Mocassin.Core.Model.Structure.CellDummyPosition? right) -> bool
+static Mocassin.Core.Model.Structure.CellSite.operator !=(Mocassin.Core.Model.Structure.CellSite? left, Mocassin.Core.Model.Structure.CellSite? right) -> bool
+static Mocassin.Core.Model.Structure.CellSite.operator ==(Mocassin.Core.Model.Structure.CellSite? left, Mocassin.Core.Model.Structure.CellSite? right) -> bool
+static Mocassin.Core.Model.Structure.SpaceGroupRef.operator !=(Mocassin.Core.Model.Structure.SpaceGroupRef? left, Mocassin.Core.Model.Structure.SpaceGroupRef? right) -> bool
+static Mocassin.Core.Model.Structure.SpaceGroupRef.operator ==(Mocassin.Core.Model.Structure.SpaceGroupRef? left, Mocassin.Core.Model.Structure.SpaceGroupRef? right) -> bool
+static Mocassin.Core.Model.Structure.StructureModel.Default.get -> Mocassin.Core.Model.Structure.StructureModel!
+static Mocassin.Core.Model.Structure.StructureModel.operator !=(Mocassin.Core.Model.Structure.StructureModel? left, Mocassin.Core.Model.Structure.StructureModel? right) -> bool
+static Mocassin.Core.Model.Structure.StructureModel.operator ==(Mocassin.Core.Model.Structure.StructureModel? left, Mocassin.Core.Model.Structure.StructureModel? right) -> bool
+~override Mocassin.Core.Ids.CellDummyPositionId.Equals(object obj) -> bool
+Mocassin.Core.Geometry.Fractional3JsonConverter
+Mocassin.Core.Geometry.Fractional3JsonConverter.Fractional3JsonConverter() -> void
+Mocassin.Core.Model.ModelDefinition.ParticleSets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.ParticleSet!>
+Mocassin.Core.Model.ModelDefinition.ParticleSets.init -> void
+Mocassin.Core.Model.ModelDefinition.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!>
+Mocassin.Core.Model.ModelDefinition.Particles.init -> void
+Mocassin.Core.Model.ModelDefinition.Structure.get -> Mocassin.Core.Model.Structure.StructureModel!
+Mocassin.Core.Model.ModelDefinition.Structure.init -> void
+Mocassin.Core.Model.Structure.StructureModel.StructureModel() -> void
+Mocassin.Core.Project.Project.Project(string? schema, int schemaVersion, Mocassin.Core.Project.ProjectMetadata! metadata, Mocassin.Core.Model.ModelDefinition! model, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ParameterizationTemplate!> parameterizations, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.JobTemplate!> jobTemplates, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.BuildTemplate!> buildTemplates, Mocassin.Core.Model.ViewSettings! viewSettings, Mocassin.Core.Project.ProjectSymmetryMetadata? symmetry) -> void
+Mocassin.Core.Project.Project.Symmetry.get -> Mocassin.Core.Project.ProjectSymmetryMetadata?
+Mocassin.Core.Project.Project.Symmetry.init -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata
+Mocassin.Core.Project.ProjectSymmetryMetadata.<Clone>$() -> Mocassin.Core.Project.ProjectSymmetryMetadata!
+Mocassin.Core.Project.ProjectSymmetryMetadata.Deconstruct(out string? SpaceGroupDataVersion, out string? SpaceGroupDataSha256, out string? SymmetryContractVersion) -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata.Equals(Mocassin.Core.Project.ProjectSymmetryMetadata? other) -> bool
+Mocassin.Core.Project.ProjectSymmetryMetadata.ProjectSymmetryMetadata(string? SpaceGroupDataVersion, string? SpaceGroupDataSha256, string? SymmetryContractVersion) -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata.SpaceGroupDataSha256.get -> string?
+Mocassin.Core.Project.ProjectSymmetryMetadata.SpaceGroupDataSha256.init -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata.SpaceGroupDataVersion.get -> string?
+Mocassin.Core.Project.ProjectSymmetryMetadata.SpaceGroupDataVersion.init -> void
+Mocassin.Core.Project.ProjectSymmetryMetadata.SymmetryContractVersion.get -> string?
+Mocassin.Core.Project.ProjectSymmetryMetadata.SymmetryContractVersion.init -> void
+override Mocassin.Core.Geometry.Fractional3JsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Geometry.Fractional3
+override Mocassin.Core.Geometry.Fractional3JsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Geometry.Fractional3 value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Project.ProjectSymmetryMetadata.Equals(object? obj) -> bool
+override Mocassin.Core.Project.ProjectSymmetryMetadata.GetHashCode() -> int
+override Mocassin.Core.Project.ProjectSymmetryMetadata.ToString() -> string!
+static Mocassin.Core.Model.ModelDefinition.Empty.get -> Mocassin.Core.Model.ModelDefinition!
+static Mocassin.Core.Project.ProjectHasher.ComputeStructure(Mocassin.Core.Model.Structure.StructureModel! structure) -> string!
+static Mocassin.Core.Project.ProjectSymmetryMetadata.operator !=(Mocassin.Core.Project.ProjectSymmetryMetadata? left, Mocassin.Core.Project.ProjectSymmetryMetadata? right) -> bool
+static Mocassin.Core.Project.ProjectSymmetryMetadata.operator ==(Mocassin.Core.Project.ProjectSymmetryMetadata? left, Mocassin.Core.Project.ProjectSymmetryMetadata? right) -> bool
+Mocassin.Core.Model.ModelDefinitionJsonConverter
+Mocassin.Core.Model.ModelDefinitionJsonConverter.ModelDefinitionJsonConverter() -> void
+Mocassin.Core.Model.Structure.StructureModelJsonConverter
+Mocassin.Core.Model.Structure.StructureModelJsonConverter.StructureModelJsonConverter() -> void
+override Mocassin.Core.Model.ModelDefinitionJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.ModelDefinition!
+override Mocassin.Core.Model.ModelDefinitionJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.ModelDefinition! value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Model.Structure.StructureModelJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.Structure.StructureModel!
+override Mocassin.Core.Model.Structure.StructureModelJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.Structure.StructureModel! value, System.Text.Json.JsonSerializerOptions! options) -> void
+const Mocassin.Core.Project.ProjectDiagnosticCodes.SymmetryMetadataMismatch = "PROJ034" -> string!
+Mocassin.Core.Editing.ProjectEditor.AddCellSite(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.CellSite! site) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddDummyPosition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.CellDummyPosition! dummyPosition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddParticle(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Particles.Particle! particle) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddParticleSet(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Particles.ParticleSet! particleSet) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveCellSite(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveDummyPosition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellDummyPositionId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveParticle(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.ParticleId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveParticleSet(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.ParticleSetId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetCellParameters(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.CellParameters! parameters) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetSpaceGroup(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.SpaceGroupRef! reference) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetStructureName(Mocassin.Core.Project.Project! project, string! name) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateCellSite(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.CellSite! site) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateDummyPosition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.CellDummyPosition! dummyPosition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateParticle(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Particles.Particle! particle) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateParticleSet(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Particles.ParticleSet! particleSet) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Model.Particles.IParticleQuery
+Mocassin.Core.Model.Particles.IParticleQuery.Find(Mocassin.Core.Ids.ParticleId id) -> Mocassin.Core.Model.Particles.Particle?
+Mocassin.Core.Model.Particles.IParticleQuery.Find(Mocassin.Core.Ids.ParticleSetId id) -> Mocassin.Core.Model.Particles.ParticleSet?
+Mocassin.Core.Model.Particles.IParticleQuery.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!>
+Mocassin.Core.Model.Particles.IParticleQuery.VoidParticle.get -> Mocassin.Core.Model.Particles.Particle!
+Mocassin.Core.Model.Structure.IStructureQuery
+Mocassin.Core.Model.Structure.IStructureQuery.Find(Mocassin.Core.Ids.CellSiteId id) -> Mocassin.Core.Model.Structure.CellSite?
+Mocassin.Core.Model.Structure.IStructureQuery.Structure.get -> Mocassin.Core.Model.Structure.StructureModel!
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.CellSiteId id) -> Mocassin.Core.Model.Structure.CellSite?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.ParticleId id) -> Mocassin.Core.Model.Particles.Particle?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.ParticleSetId id) -> Mocassin.Core.Model.Particles.ParticleSet?
+Mocassin.Core.Project.Project.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!>
+Mocassin.Core.Project.Project.Structure.get -> Mocassin.Core.Model.Structure.StructureModel!
+Mocassin.Core.Project.Project.VoidParticle.get -> Mocassin.Core.Model.Particles.Particle!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.ChargedVacancy = "PAR004" -> string!

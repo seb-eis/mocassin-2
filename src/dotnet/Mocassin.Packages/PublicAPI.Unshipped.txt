@@ -71,3 +71,6 @@ static Mocassin.Packages.Projects.ProjectStore.GetBackupPath(string! projectPath
 static Mocassin.Packages.Projects.ProjectStore.GetLockPath(string! projectPath) -> string!
 static Mocassin.Packages.Projects.ProjectStoreOptions.operator !=(Mocassin.Packages.Projects.ProjectStoreOptions? left, Mocassin.Packages.Projects.ProjectStoreOptions? right) -> bool
 static Mocassin.Packages.Projects.ProjectStoreOptions.operator ==(Mocassin.Packages.Projects.ProjectStoreOptions? left, Mocassin.Packages.Projects.ProjectStoreOptions? right) -> bool
+Mocassin.Packages.Projects.ProjectValidationService
+static Mocassin.Packages.Projects.ProjectValidationService.Validate(Mocassin.Core.Project.Project! project) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+static Mocassin.Packages.Projects.ProjectValidationService.Validate(Mocassin.Core.Project.Project! project, Mocassin.Symmetry.Structure.IStructureValidator! structureValidator, Mocassin.Symmetry.Contracts.SymmetryVersionInfo! symmetryVersions) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>

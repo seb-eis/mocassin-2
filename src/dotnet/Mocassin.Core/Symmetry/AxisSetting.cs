@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 
+using System.Text.Json.Serialization;
+using Mocassin.Core.Model;
+
 namespace Mocassin.Core.Symmetry;
 
 /// <summary>
@@ -11,6 +14,7 @@ namespace Mocassin.Core.Symmetry;
 /// <see cref="UniqueAxisA"/> is reserved for a future catalog extension and is rejected by the v1 project
 /// validator.
 /// </remarks>
+[JsonConverter(typeof(CamelCaseEnumJsonConverter<AxisSetting>))]
 public enum AxisSetting
 {
     /// <summary>

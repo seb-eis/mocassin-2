@@ -37,5 +37,43 @@
     }
   },
   "evidenceStatus": "Local-container evidence recorded; the declared GitHub runner class is re-verified through the manual Benchmark CI job on release candidates.",
-  "ciJob": "benchmark (workflow_dispatch)"
+  "ciJob": "benchmark (workflow_dispatch)",
+  "structurePreview": {
+    "runnerClass": "linux-x64-github-ubuntu-latest-dotnet10",
+    "command": "dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks -- --filter \"*StructurePreview*\"",
+    "targetMeanMilliseconds": 100,
+    "rawResults": "tests/reference/bench/structure-preview-2026-11-08.txt",
+    "fixtures": {
+      "ceria": {
+        "spaceGroup": 225,
+        "p1Positions": 36,
+        "orbitSizes": [
+          4,
+          8,
+          24
+        ]
+      },
+      "bariumZirconate": {
+        "spaceGroup": 221,
+        "p1Positions": 17,
+        "orbitSizes": [
+          1,
+          1,
+          3,
+          12
+        ]
+      }
+    },
+    "recorded": {
+      "date": "2026-11-08",
+      "environment": "local container, AMD Ryzen 7 7840U, .NET SDK 10.0.403, BenchmarkDotNet 0.15.8, Release, DefaultJob",
+      "ceriaMeanMicroseconds": 16.460,
+      "bariumZirconateMeanMicroseconds": 9.976,
+      "ceriaAllocatedBytes": 36075,
+      "bariumZirconateAllocatedBytes": 24360,
+      "targetMet": true
+    },
+    "evidenceStatus": "Local-container evidence recorded; the declared GitHub runner class is re-verified through the manual Benchmark CI job on release candidates.",
+    "ciJob": "benchmark (workflow_dispatch)"
+  }
 }

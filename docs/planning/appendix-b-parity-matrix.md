@@ -3,6 +3,7 @@
 Status legend:
 
 - **Planned** — part of the phased full-parity scope; not yet implemented.
+- **Partial** — the model/API part is implemented; UI or later-step integration is still pending.
 - **Improvement** — new capability or deliberate fix beyond the original.
 - **Replaced** — original feature is delivered through a different mechanism/UX.
 - **Deferred** — out of the first parity release; target noted.
@@ -14,7 +15,7 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Create new project | Y | Planned | 01/23 | Blank + ceria skeletons in 01; creation UI in 23 |
+| Create new project | Y | Planned | 01/23 | Blank, ceria, and barium-zirconate skeletons in 01/03; creation UI in 23 |
 | Open/save/close project | Y | Planned | 01/23 | Atomic writes, lock, autosave store in 01; lifecycle UI in 23 |
 | Recent files | N | Improvement | 23 | Workspace model |
 | Multiple projects per file | N | Replaced | 23 | One project per file; workspace of open files |
@@ -23,7 +24,7 @@ Status legend:
 | Dirty tracking/unsaved prompt | Y | Planned | 01/23 | Document hash and dirty state in 01; prompt in 23 |
 | Undo/redo | N | Improvement | 01/23 | Core stacks in 01; UI in 23 |
 | Project schema versioning/migration | Y | Planned | 01 | v1 pipeline implemented; migration fixtures added per version |
-| Stable project hash | Y | Improvement | 01/09 | Model and document SHA-256 in 01; compiled signature in 09 |
+| Stable project hash | Y | Improvement | 01/03/09 | Model/document SHA-256 in 01; structure hash in 03; compiled signature in 09 |
 | Legacy `.mocprj` read/write | N | Out of scope | — | ADR 0001 |
 | Project data viewer (JSON/XML) | N | Replaced | 23 | JSON view/debug export |
 
@@ -31,21 +32,21 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Particle name/symbol/charge/vacancy | Y | Planned | 03 | Typed IDs |
-| Implicit void particle | Y | Planned | 03 | Reserved index 0 |
-| 63 custom particle limit | Y | Planned | 03 | Enforced |
-| Particle sets with first-as-default | Y | Planned | 03 | |
+| Particle name/symbol/charge/vacancy | Y | Implemented | 03 | Typed IDs; model, JSON, validation, and editing API |
+| Implicit void particle | Y | Implemented | 03 | Reserved ID; compiled index 0 belongs to 08 |
+| 63 custom particle limit | Y | Implemented | 03 | Enforced |
+| Particle sets with first-as-default | Y | Implemented | 03 | Ordered `particleIds`; composed validation |
 | Drag-and-drop set membership | Y | Planned | 24 | + keyboard |
-| Space group selection (274 settings) | Y | Planned | 02/24 | Catalog, lookup, and validation engine in 02; selection UI in 24 |
-| Space-group operation display | Y | Planned | 24 | |
-| Cell parameters + crystal-system locks | Y | Planned | 02/03/24 | Corrected transform, validation, and tolerances in 02; model/UI in 03/24 |
-| Stable/unstable sites | Y | Planned | 03 | |
-| P1 expansion preview | Y | Planned | 03/24 | Encoder and canonical order in 02; preview UI in 03/24 |
-| Site overlap validation | Y | Planned | 03 | Exact |
-| Dummy position editor | Y | Planned | 24 | Visual only |
+| Space group selection (274 settings) | Y | Partial | 02/03/24 | Catalog, lookup, and validation in 02/03; selection UI in 24 |
+| Space-group operation display | Y | Planned | 24 | Operations are available from the catalog |
+| Cell parameters + crystal-system locks | Y | Partial | 02/03/24 | Corrected transform, validation, and tolerances in 02/03; UI locks in 24 |
+| Stable/unstable sites | Y | Implemented | 03 | Unstable sites default to void |
+| P1 expansion preview | Y | Partial | 02/03/24 | Encoder and P1 order in 02; preview API/cache in 03; UI in 24 |
+| Site overlap validation | Y | Implemented | 03 | Exact grid; structured `CellSiteId` paths |
+| Dummy position editor | Y | Planned | 24 | Model, JSON, and validation in 03; editor UI in 24 |
 | Correct triclinic/rhombohedral cell vectors | Y | Improvement | 02 | Implemented in 02; fixes original bug |
 | Valid group 47 data | Y | Improvement | 02 | Implemented in 02; fixes corrupt setting |
-| Multiple site definitions per orbit | Y | Planned | 03 | With overlap diagnostics |
+| Multiple site definitions per orbit | Y | Implemented | 03 | With overlap diagnostics |
 
 ## 3. Transitions
 

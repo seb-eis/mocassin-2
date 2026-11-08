@@ -251,8 +251,7 @@ parameterization, and lattice signatures use the MessagePack projection (section
   choice. Both are explicit and use `none` when the setting has no such choice.
 - `axis` values are `none`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, and `rhombohedral`. `uniqueAxisA` is
   reserved: the JSON parser accepts the enum value, and the catalog validator rejects it with `STR001` in v1.
-  Step 03 updates the manifest and generated schema to mark it reserved and unsupported; until then the
-  generated project schema does not yet contain the structure fields. `origin` values are `none`,
+  Step 03 marks it reserved and unsupported in the manifest and generated schema. `origin` values are `none`,
   `originChoice1`, and `originChoice2`.
 - `fractional` is a three-number JSON array `[a, b, c]`, not an object. `axis`, `origin`, and `stability` are
   camelCase JSON strings.

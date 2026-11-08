@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Geometry;
+using Mocassin.Core.Ids;
 using Mocassin.Symmetry.SpaceGroups;
 
 using Mocassin.Symmetry.Diagnostics;
@@ -76,7 +77,7 @@ public sealed class UnitCellVectorEncoder
     public int PositionCount => Positions.Length;
 
     /// <summary>
-    /// Builds an encoder from reference sites.
+    /// Builds an encoder from reference positions without stable site identifiers.
     /// </summary>
     /// <param name="setting">The resolved setting.</param>
     /// <param name="referencePositions">The authored reference positions.</param>
@@ -94,16 +95,55 @@ public sealed class UnitCellVectorEncoder
     {
         ArgumentNullException.ThrowIfNull(setting);
         ArgumentNullException.ThrowIfNull(referencePositions);
+        var references = referencePositions
+            .Select(static position => new StructureSiteReference(default, position))
+            .ToArray();
+        return TryCreateCore(setting, references, out encoder, out _, out diagnostics);
+    }
+
+    /// <summary>
+    /// Builds an encoder from stable reference sites and reports structured orbit overlaps.
+    /// </summary>
+    /// <param name="setting">The resolved setting.</param>
+    /// <param name="referenceSites">The authored reference sites.</param>
+    /// <param name="encoder">The encoder when creation succeeds.</param>
+    /// <param name="overlaps">The structured orbit overlaps, sorted deterministically.</param>
+    /// <param name="diagnostics">The structured validation diagnostics.</param>
+    /// <returns><see langword="true"/> when no error was produced.</returns>
+    /// <exception cref="ArgumentNullException">
+    /// <paramref name="setting"/> or <paramref name="referenceSites"/> is <see langword="null"/>.
+    /// </exception>
+    public static bool TryCreate(
+        SpaceGroupSetting setting,
+        IEnumerable<StructureSiteReference> referenceSites,
+        out UnitCellVectorEncoder? encoder,
+        out ImmutableArray<OrbitOverlap> overlaps,
+        out ImmutableArray<Diagnostic> diagnostics)
+    {
+        ArgumentNullException.ThrowIfNull(setting);
+        ArgumentNullException.ThrowIfNull(referenceSites);
+        return TryCreateCore(setting, referenceSites.ToArray(), out encoder, out overlaps, out diagnostics);
+    }
+
+    private static bool TryCreateCore(
+        SpaceGroupSetting setting,
+        StructureSiteReference[] references,
+        out UnitCellVectorEncoder? encoder,
+        out ImmutableArray<OrbitOverlap> overlaps,
+        out ImmutableArray<Diagnostic> diagnostics)
+    {
+        ArgumentNullException.ThrowIfNull(setting);
         encoder = null;
 
-        var references = referencePositions.ToArray();
         var bag = new DiagnosticBag();
         var entries = new List<(GridFractional3 Grid, int ReferenceIndex, int OrbitMemberIndex)>();
-        var ownerByGrid = new Dictionary<GridFractional3, int>();
+        var ownerByGrid = new Dictionary<GridFractional3, (int ReferenceIndex, CellSiteId SiteId)>();
+        var overlapEntries = new List<OrbitOverlap>();
 
         for (var referenceIndex = 0; referenceIndex < references.Length; referenceIndex++)
         {
-            var site = references[referenceIndex];
+            var reference = references[referenceIndex];
+            var site = reference.Position;
             if (!site.IsFinite)
             {
                 bag.Add(new Diagnostic(
@@ -137,24 +177,37 @@ public sealed class UnitCellVectorEncoder
                 var position = orbit[memberIndex];
                 if (ownerByGrid.TryGetValue(position, out var owner))
                 {
-                    if (owner != referenceIndex)
+                    if (owner.ReferenceIndex != referenceIndex)
                     {
+                        var path = reference.Id == default
+                            ? null
+                            : new ModelPath("cellSite", reference.Id.Value);
+                        var related = owner.SiteId == default
+                            ? default
+                            : ImmutableArray.Create(new ModelPath("cellSite", owner.SiteId.Value));
                         bag.Add(new Diagnostic(
                             StructureDiagnosticCodes.SiteOrbitOverlap,
                             DiagnosticSeverity.Error,
                             string.Create(
                                 CultureInfo.InvariantCulture,
-                                $"Reference sites {owner} and {referenceIndex} expand to the same P1 position.")));
+                                $"Reference sites {owner.ReferenceIndex} and {referenceIndex} expand to the same P1 position."),
+                            path,
+                            related: related));
+                        overlapEntries.Add(new OrbitOverlap(
+                            owner.SiteId,
+                            reference.Id,
+                            position.ToFractional3()));
                     }
 
                     continue;
                 }
 
-                ownerByGrid[position] = referenceIndex;
+                ownerByGrid[position] = (referenceIndex, reference.Id);
                 entries.Add((position, referenceIndex, memberIndex));
             }
         }
 
+        overlaps = SortOverlaps(overlapEntries);
         if (bag.HasErrors)
         {
             diagnostics = bag.Sorted;
@@ -204,6 +257,16 @@ public sealed class UnitCellVectorEncoder
         diagnostics = bag.Sorted;
         return true;
     }
+
+    private static ImmutableArray<OrbitOverlap> SortOverlaps(List<OrbitOverlap> overlaps) =>
+    [
+        .. overlaps
+            .OrderBy(static overlap => overlap.FirstSiteId.Value)
+            .ThenBy(static overlap => overlap.SecondSiteId.Value)
+            .ThenBy(static overlap => overlap.Position.A)
+            .ThenBy(static overlap => overlap.Position.B)
+            .ThenBy(static overlap => overlap.Position.C),
+    ];
 
     /// <summary>
     /// Gets the canonical position at a P index.

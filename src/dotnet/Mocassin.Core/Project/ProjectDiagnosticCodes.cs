@@ -43,6 +43,11 @@ public static class ProjectDiagnosticCodes
     public const string InvalidViewSettings = "PROJ021";
 
     /// <summary>
+    /// Project symmetry metadata differs from the embedded catalog or contract versions.
+    /// </summary>
+    public const string SymmetryMetadataMismatch = "PROJ034";
+
+    /// <summary>
     /// A file save failed; the previous file was left intact.
     /// </summary>
     public const string SaveFailed = "PROJ030";

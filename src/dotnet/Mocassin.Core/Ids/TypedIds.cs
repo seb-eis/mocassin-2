@@ -99,6 +99,25 @@ public readonly record struct CellSiteId(Guid Value) : ITypedId<CellSiteId>
 }
 
 /// <summary>
+/// Stable identifier for a cell dummy position.
+/// </summary>
+[JsonConverter(typeof(TypedIdJsonConverter<CellDummyPositionId>))]
+public readonly record struct CellDummyPositionId(Guid Value) : ITypedId<CellDummyPositionId>
+{
+    /// <summary>
+    /// Creates a new sortable UUIDv7 identifier.
+    /// </summary>
+    /// <returns>The new identifier.</returns>
+    public static CellDummyPositionId New() => new(Uuid7.NewGuid());
+
+    /// <inheritdoc />
+    public static CellDummyPositionId Create(Guid value) => new(value);
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString("D", CultureInfo.InvariantCulture);
+}
+
+/// <summary>
 /// Stable identifier for a state change.
 /// </summary>
 [JsonConverter(typeof(TypedIdJsonConverter<StateChangeId>))]

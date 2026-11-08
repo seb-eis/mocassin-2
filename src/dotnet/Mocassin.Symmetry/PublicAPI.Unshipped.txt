@@ -366,3 +366,72 @@ static Mocassin.Symmetry.Contracts.SymmetryVersionInfo.operator !=(Mocassin.Symm
 static Mocassin.Symmetry.Contracts.SymmetryVersionInfo.operator ==(Mocassin.Symmetry.Contracts.SymmetryVersionInfo? left, Mocassin.Symmetry.Contracts.SymmetryVersionInfo? right) -> bool
 Mocassin.Symmetry.Geometry.CellGeometry.Inverse.get -> Mocassin.Core.Geometry.Matrix3<double>
 Mocassin.Symmetry.Geometry.CellGeometry.Matrix.get -> Mocassin.Core.Geometry.Matrix3<double>
+Mocassin.Symmetry.Geometry.OrbitOverlap
+Mocassin.Symmetry.Geometry.OrbitOverlap.<Clone>$() -> Mocassin.Symmetry.Geometry.OrbitOverlap!
+Mocassin.Symmetry.Geometry.OrbitOverlap.Deconstruct(out Mocassin.Core.Ids.CellSiteId FirstSiteId, out Mocassin.Core.Ids.CellSiteId SecondSiteId, out Mocassin.Core.Geometry.Fractional3 Position) -> void
+Mocassin.Symmetry.Geometry.OrbitOverlap.Equals(Mocassin.Symmetry.Geometry.OrbitOverlap? other) -> bool
+Mocassin.Symmetry.Geometry.OrbitOverlap.FirstSiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Symmetry.Geometry.OrbitOverlap.FirstSiteId.init -> void
+Mocassin.Symmetry.Geometry.OrbitOverlap.OrbitOverlap(Mocassin.Core.Ids.CellSiteId FirstSiteId, Mocassin.Core.Ids.CellSiteId SecondSiteId, Mocassin.Core.Geometry.Fractional3 Position) -> void
+Mocassin.Symmetry.Geometry.OrbitOverlap.Position.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.Geometry.OrbitOverlap.Position.init -> void
+Mocassin.Symmetry.Geometry.OrbitOverlap.SecondSiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Symmetry.Geometry.OrbitOverlap.SecondSiteId.init -> void
+Mocassin.Symmetry.Geometry.StructureSiteReference
+Mocassin.Symmetry.Geometry.StructureSiteReference.Deconstruct(out Mocassin.Core.Ids.CellSiteId Id, out Mocassin.Core.Geometry.Fractional3 Position) -> void
+Mocassin.Symmetry.Geometry.StructureSiteReference.Equals(Mocassin.Symmetry.Geometry.StructureSiteReference other) -> bool
+Mocassin.Symmetry.Geometry.StructureSiteReference.Id.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Symmetry.Geometry.StructureSiteReference.Id.init -> void
+Mocassin.Symmetry.Geometry.StructureSiteReference.Position.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.Geometry.StructureSiteReference.Position.init -> void
+Mocassin.Symmetry.Geometry.StructureSiteReference.StructureSiteReference() -> void
+Mocassin.Symmetry.Geometry.StructureSiteReference.StructureSiteReference(Mocassin.Core.Ids.CellSiteId Id, Mocassin.Core.Geometry.Fractional3 Position) -> void
+Mocassin.Symmetry.Structure.IStructurePreviewService
+Mocassin.Symmetry.Structure.IStructurePreviewService.TryCreatePreview(Mocassin.Core.Model.Structure.StructureModel! structureModel, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.Structure.StructurePreview?
+Mocassin.Symmetry.Structure.IStructurePreviewService.TryResolve(Mocassin.Core.Model.Structure.SpaceGroupRef! reference, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.SpaceGroups.SpaceGroupSetting?
+Mocassin.Symmetry.Structure.IStructureValidator
+Mocassin.Symmetry.Structure.IStructureValidator.Validate(Mocassin.Core.Model.Structure.StructureModel! structureModel) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Symmetry.Structure.StructurePreview
+Mocassin.Symmetry.Structure.StructurePreview.<Clone>$() -> Mocassin.Symmetry.Structure.StructurePreview!
+Mocassin.Symmetry.Structure.StructurePreview.CartesianPositions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Cartesian3>
+Mocassin.Symmetry.Structure.StructurePreview.CartesianPositions.init -> void
+Mocassin.Symmetry.Structure.StructurePreview.CellCountA.get -> int
+Mocassin.Symmetry.Structure.StructurePreview.CellCountA.init -> void
+Mocassin.Symmetry.Structure.StructurePreview.CellCountB.get -> int
+Mocassin.Symmetry.Structure.StructurePreview.CellCountB.init -> void
+Mocassin.Symmetry.Structure.StructurePreview.CellCountC.get -> int
+Mocassin.Symmetry.Structure.StructurePreview.CellCountC.init -> void
+Mocassin.Symmetry.Structure.StructurePreview.CellVolumeAngstrom3.get -> double
+Mocassin.Symmetry.Structure.StructurePreview.CellVolumeAngstrom3.init -> void
+Mocassin.Symmetry.Structure.StructurePreview.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Geometry.ExpandedSite!> PositionList, out Mocassin.Symmetry.Geometry.UnitCellVectorEncoder! Encoder, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Cartesian3> CartesianPositions, out double CellVolumeAngstrom3, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Geometry.SiteOrbitInfo!> Orbits, out int CellCountA, out int CellCountB, out int CellCountC) -> void
+Mocassin.Symmetry.Structure.StructurePreview.Encoder.get -> Mocassin.Symmetry.Geometry.UnitCellVectorEncoder!
+Mocassin.Symmetry.Structure.StructurePreview.Encoder.init -> void
+Mocassin.Symmetry.Structure.StructurePreview.Equals(Mocassin.Symmetry.Structure.StructurePreview? other) -> bool
+Mocassin.Symmetry.Structure.StructurePreview.Orbits.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Geometry.SiteOrbitInfo!>
+Mocassin.Symmetry.Structure.StructurePreview.Orbits.init -> void
+Mocassin.Symmetry.Structure.StructurePreview.PositionList.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Geometry.ExpandedSite!>
+Mocassin.Symmetry.Structure.StructurePreview.PositionList.init -> void
+Mocassin.Symmetry.Structure.StructurePreview.StructurePreview(System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Geometry.ExpandedSite!> PositionList, Mocassin.Symmetry.Geometry.UnitCellVectorEncoder! Encoder, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Cartesian3> CartesianPositions, double CellVolumeAngstrom3, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Geometry.SiteOrbitInfo!> Orbits, int CellCountA, int CellCountB, int CellCountC) -> void
+Mocassin.Symmetry.Structure.StructurePreviewService
+Mocassin.Symmetry.Structure.StructurePreviewService.StructurePreviewService(Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog = null, Mocassin.Symmetry.Contracts.SymmetryVersionInfo? versions = null, int cacheCapacity = 256) -> void
+Mocassin.Symmetry.Structure.StructurePreviewService.TryCreatePreview(Mocassin.Core.Model.Structure.StructureModel! structureModel, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.Structure.StructurePreview?
+Mocassin.Symmetry.Structure.StructurePreviewService.TryResolve(Mocassin.Core.Model.Structure.SpaceGroupRef! reference, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.SpaceGroups.SpaceGroupSetting?
+Mocassin.Symmetry.Structure.StructureValidator
+Mocassin.Symmetry.Structure.StructureValidator.StructureValidator(Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog = null) -> void
+Mocassin.Symmetry.Structure.StructureValidator.Validate(Mocassin.Core.Model.Structure.StructureModel! structureModel) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+override Mocassin.Symmetry.Geometry.OrbitOverlap.Equals(object? obj) -> bool
+override Mocassin.Symmetry.Geometry.OrbitOverlap.GetHashCode() -> int
+override Mocassin.Symmetry.Geometry.OrbitOverlap.ToString() -> string!
+override Mocassin.Symmetry.Geometry.StructureSiteReference.GetHashCode() -> int
+override Mocassin.Symmetry.Structure.StructurePreview.Equals(object? obj) -> bool
+override Mocassin.Symmetry.Structure.StructurePreview.GetHashCode() -> int
+override Mocassin.Symmetry.Structure.StructurePreview.ToString() -> string!
+static Mocassin.Symmetry.Geometry.OrbitOverlap.operator !=(Mocassin.Symmetry.Geometry.OrbitOverlap? left, Mocassin.Symmetry.Geometry.OrbitOverlap? right) -> bool
+static Mocassin.Symmetry.Geometry.OrbitOverlap.operator ==(Mocassin.Symmetry.Geometry.OrbitOverlap? left, Mocassin.Symmetry.Geometry.OrbitOverlap? right) -> bool
+static Mocassin.Symmetry.Geometry.StructureSiteReference.operator !=(Mocassin.Symmetry.Geometry.StructureSiteReference left, Mocassin.Symmetry.Geometry.StructureSiteReference right) -> bool
+static Mocassin.Symmetry.Geometry.StructureSiteReference.operator ==(Mocassin.Symmetry.Geometry.StructureSiteReference left, Mocassin.Symmetry.Geometry.StructureSiteReference right) -> bool
+static Mocassin.Symmetry.Geometry.UnitCellVectorEncoder.TryCreate(Mocassin.Symmetry.SpaceGroups.SpaceGroupSetting! setting, System.Collections.Generic.IEnumerable<Mocassin.Symmetry.Geometry.StructureSiteReference>! referenceSites, out Mocassin.Symmetry.Geometry.UnitCellVectorEncoder? encoder, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Geometry.OrbitOverlap!> overlaps, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+static Mocassin.Symmetry.Structure.StructurePreview.operator !=(Mocassin.Symmetry.Structure.StructurePreview? left, Mocassin.Symmetry.Structure.StructurePreview? right) -> bool
+static Mocassin.Symmetry.Structure.StructurePreview.operator ==(Mocassin.Symmetry.Structure.StructurePreview? left, Mocassin.Symmetry.Structure.StructurePreview? right) -> bool
+~override Mocassin.Symmetry.Geometry.StructureSiteReference.Equals(object obj) -> bool
+~override Mocassin.Symmetry.Geometry.StructureSiteReference.ToString() -> string

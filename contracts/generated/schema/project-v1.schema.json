@@ -37,8 +37,231 @@
     "modifiedUtc": {
       "type": "string"
     },
+    "symmetry": {
+      "type": "object",
+      "properties": {
+        "spaceGroupDataVersion": {
+          "type": "string"
+        },
+        "spaceGroupDataSha256": {
+          "type": "string"
+        },
+        "symmetryContractVersion": {
+          "type": "string"
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
     "model": {
       "type": "object",
+      "properties": {
+        "particles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "symbol": {
+                "type": "string"
+              },
+              "charge": {
+                "type": "number"
+              },
+              "isVacancy": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "symbol",
+              "charge",
+              "isVacancy"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "particleSets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "particleIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "particleIds"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "structure": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "spaceGroup": {
+              "type": "object",
+              "properties": {
+                "number": {
+                  "type": "integer"
+                },
+                "axis": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "uniqueAxisA",
+                    "uniqueAxisB",
+                    "uniqueAxisC",
+                    "hexagonal",
+                    "rhombohedral"
+                  ]
+                },
+                "origin": {
+                  "type": "string",
+                  "enum": [
+                    "none",
+                    "originChoice1",
+                    "originChoice2"
+                  ]
+                }
+              },
+              "required": [
+                "number",
+                "axis",
+                "origin"
+              ],
+              "additionalProperties": false
+            },
+            "cell": {
+              "type": "object",
+              "properties": {
+                "a": {
+                  "type": "number"
+                },
+                "b": {
+                  "type": "number"
+                },
+                "c": {
+                  "type": "number"
+                },
+                "alpha": {
+                  "type": "number"
+                },
+                "beta": {
+                  "type": "number"
+                },
+                "gamma": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "a",
+                "b",
+                "c",
+                "alpha",
+                "beta",
+                "gamma"
+              ],
+              "additionalProperties": false
+            },
+            "sites": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "fractional": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "particleSetId": {
+                    "type": "string"
+                  },
+                  "stability": {
+                    "type": "string",
+                    "enum": [
+                      "stable",
+                      "unstable"
+                    ]
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "fractional",
+                  "particleSetId",
+                  "stability"
+                ],
+                "additionalProperties": false
+              }
+            },
+            "dummyPositions": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "id": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": "string"
+                  },
+                  "fractional": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  }
+                },
+                "required": [
+                  "id",
+                  "name",
+                  "fractional"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "name",
+            "spaceGroup",
+            "cell"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [],
       "additionalProperties": false
     },
     "parameterizations": {

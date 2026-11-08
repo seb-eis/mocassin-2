@@ -1,0 +1,77 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e65",
+  "masterSeed": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+  "name": "Mismatched Symmetry Metadata",
+  "description": "Step 03 contract fixture.",
+  "createdUtc": "2026-11-08T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-08T12:00:00.0000000Z",
+  "symmetry": {
+    "spaceGroupDataVersion": "spglib-9.9.9/catalog-0",
+    "spaceGroupDataSha256": "0000000000000000000000000000000000000000000000000000000000000000",
+    "symmetryContractVersion": "symmetry-0"
+  },
+  "model": {
+    "particles": [],
+    "particleSets": [],
+    "structure": {
+      "name": "New Structure",
+      "spaceGroup": {
+        "number": 1,
+        "axis": "none",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 1,
+        "b": 1,
+        "c": 1,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90
+      },
+      "sites": [],
+      "dummyPositions": []
+    }
+  },
+  "parameterizations": [],
+  "jobTemplates": [],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}
