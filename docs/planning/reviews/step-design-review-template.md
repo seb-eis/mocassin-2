@@ -56,6 +56,7 @@ Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
 - [ ] Documentation, status, parity, and audit updates are planned
 - [ ] Licensing, provenance, and dependency checks are resolved
 - [ ] Risks and mitigations are realistic
+- [ ] Code layout and namespace plan follow the structure policy
 - [ ] No hidden scope, stale placeholders, or unowned decisions
 
 ## Evidence

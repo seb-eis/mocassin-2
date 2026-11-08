@@ -50,6 +50,7 @@ Copy the acceptance criteria from the step page, preserving their wording:
       code.
 - [ ] Format/version/fixture changes are documented and tested.
 - [ ] Security, dependency, licence, and secret-scan gates pass.
+- [ ] Code structure policy passes; no new root-level or catch-all folders.
 - [ ] No unrelated changes or unapproved scope.
 - [ ] Branch, tag, and status hygiene are correct.
 

@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json.Nodes;
 using FsCheck.Xunit;
-using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Project;

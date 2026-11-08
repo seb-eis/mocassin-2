@@ -19,7 +19,7 @@ Install the toolchain listed in [`README.md`](README.md#prerequisites) or build 
   `feature/step-<NN>-<slug>/<feature>`.
 - Bug fixes inside a step use `feature/step-<NN>-<slug>/fix-<short-description>`.
 - Keep feature branches short-lived. Rebase only your own unshared branch; never rewrite a shared step branch.
-- Feature branches are validated locally. CI runs only on `main` and `step/*` integration branches.
+- Feature branches are validated locally. CI runs only at step closeout and on `main`; see `AGENTS.md` §3.13.
 
 The full branch, approval, squash-merge, tag, and closeout rules are in
 [`AGENTS.md`](AGENTS.md) §3. Do not merge into a step branch or into `main` without explicit approval.
@@ -42,6 +42,9 @@ cargo test --manifest-path src/rust/Cargo.toml --workspace
 # Python
 python -m pytest src/python/tests
 python -m build src/python
+
+# Code structure
+./tools/verify.sh structure
 
 # Contracts, policy checks, API compatibility, and docs
 python tools/contracts/generate.py --check
@@ -77,6 +80,8 @@ nightly-only assets.
 ## 5. Code style
 
 - .NET: .NET 10, nullable enabled, implicit usings, warnings as errors, XML docs for public APIs.
+- Code structure: follow [`docs/development/code-structure.md`](docs/development/code-structure.md); group files
+  by domain concept, keep the project root for entry points, and run `./tools/verify.sh structure`.
 - Rust: stable Rust, edition 2024, `rustfmt`, `clippy`, no `unsafe` without a `// SAFETY:` comment and a test.
 - Python: typed public APIs, `ruff`-clean, pytest for behaviour.
 - Use the units, diagnostics, geometry, and contract types defined by the plan; do not introduce bare
@@ -100,6 +105,7 @@ Branch:
 Commits:
 Diff summary:
 Tests/commands and results:
+Structure check:
 CI (expected or observed):
 Docs/status updated:
 Risks and limitations:

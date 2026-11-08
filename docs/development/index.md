@@ -28,6 +28,7 @@ The detailed architecture is in the internal plan; the repository layout is summ
 ## Guides
 
 - [Architecture](architecture.md) — immutable domain kernel, dependency direction, project store/edit split.
+- [Code structure](code-structure.md) — folder ownership, file naming, limits, and the structure test.
 - [Design decisions](design-decisions.md) — stable IDs, explicit units, canonical hashing, locking, and schema ownership.
 - [Contributing](contributing.md) — branches, review gates, local quality gates, tests, and docs-as-code.
 - [Agent workflow](agent-workflow.md) — context handoff, prompts, evidence reports, and diff review.

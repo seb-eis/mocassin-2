@@ -2,7 +2,6 @@
 
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Numerics;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Model;

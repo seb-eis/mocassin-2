@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
-using System.Globalization;
 using Mocassin.Core.Geometry;
 
 namespace Mocassin.Symmetry;

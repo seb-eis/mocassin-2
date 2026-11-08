@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
 using FsCheck.Xunit;
-using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Model;
 using Mocassin.Core.Symmetry;

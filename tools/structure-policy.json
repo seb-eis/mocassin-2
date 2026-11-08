@@ -1,0 +1,92 @@
+{
+  "sourceRootFilePatterns": [
+    "AssemblyInfo.cs",
+    "GlobalUsings.cs",
+    "Usings.cs",
+    "*Module.cs",
+    "Program.cs",
+    "App.axaml.cs",
+    "ViewLocator.cs"
+  ],
+  "testRootFilePatterns": [
+    "AssemblyInfo.cs",
+    "GlobalUsings.cs",
+    "Usings.cs",
+    "RepositoryPaths.cs",
+    "TestSupport.cs",
+    "*Tests.cs"
+  ],
+  "noNamespaceFiles": [
+    "AssemblyInfo.cs",
+    "GlobalUsings.cs",
+    "Usings.cs",
+    "Program.cs"
+  ],
+  "noTypeFiles": [
+    "AssemblyInfo.cs",
+    "GlobalUsings.cs",
+    "Usings.cs",
+    "Program.cs"
+  ],
+  "forbiddenFolders": [
+    "Utils",
+    "Utilities",
+    "Helpers",
+    "Common",
+    "Shared",
+    "Misc",
+    "Models",
+    "Interfaces",
+    "Implementations",
+    "Abstractions",
+    "Extensions"
+  ],
+  "nestedOnlyFolders": [
+    "Internal"
+  ],
+  "allowedMultiTypeSuffixes": [
+    "Dtos",
+    "Ids",
+    "Values",
+    "Templates",
+    "Extensions",
+    "Options",
+    "Constants",
+    "Events",
+    "Results",
+    "Tests"
+  ],
+  "testRootFileLimit": 20,
+  "maxFilesPerFolder": 20,
+  "maxDepth": 4,
+  "maxFileLines": 800,
+  "allowedFolders": {},
+  "namespaceBaseline": [
+    "src/dotnet/Mocassin.Symmetry/Caching/SymmetryCache.cs",
+    "src/dotnet/Mocassin.Symmetry/Contracts/SymmetryContract.cs",
+    "src/dotnet/Mocassin.Symmetry/Contracts/SymmetryVersionInfo.cs",
+    "src/dotnet/Mocassin.Symmetry/Diagnostics/StructureDiagnosticCodes.cs",
+    "src/dotnet/Mocassin.Symmetry/Diagnostics/SymmetryDiagnosticCodes.cs",
+    "src/dotnet/Mocassin.Symmetry/Geometry/CellGeometry.cs",
+    "src/dotnet/Mocassin.Symmetry/Geometry/ExpandedSite.cs",
+    "src/dotnet/Mocassin.Symmetry/Geometry/GridFractional3.cs",
+    "src/dotnet/Mocassin.Symmetry/Geometry/MinimumImageResult.cs",
+    "src/dotnet/Mocassin.Symmetry/Geometry/NeighborImage.cs",
+    "src/dotnet/Mocassin.Symmetry/Geometry/PeriodicGeometry.cs",
+    "src/dotnet/Mocassin.Symmetry/Geometry/SiteOrbitInfo.cs",
+    "src/dotnet/Mocassin.Symmetry/Geometry/UnitCellVectorEncoder.cs",
+    "src/dotnet/Mocassin.Symmetry/Reduction/ClusterReduction.cs",
+    "src/dotnet/Mocassin.Symmetry/Reduction/PairReduction.cs",
+    "src/dotnet/Mocassin.Symmetry/Reduction/PointGroup.cs",
+    "src/dotnet/Mocassin.Symmetry/Reduction/SitePermutation.cs",
+    "src/dotnet/Mocassin.Symmetry/SpaceGroups/CatalogDtos.cs",
+    "src/dotnet/Mocassin.Symmetry/SpaceGroups/CatalogJsonContext.cs",
+    "src/dotnet/Mocassin.Symmetry/SpaceGroups/Int3x3.cs",
+    "src/dotnet/Mocassin.Symmetry/SpaceGroups/Rational3.cs",
+    "src/dotnet/Mocassin.Symmetry/SpaceGroups/SpaceGroupCatalog.cs",
+    "src/dotnet/Mocassin.Symmetry/SpaceGroups/SpaceGroupCatalogLoader.cs",
+    "src/dotnet/Mocassin.Symmetry/SpaceGroups/SpaceGroupOperations.cs",
+    "src/dotnet/Mocassin.Symmetry/SpaceGroups/SpaceGroupSetting.cs",
+    "src/dotnet/Mocassin.Symmetry/SpaceGroups/SymmetryOperation.cs"
+  ]
+}

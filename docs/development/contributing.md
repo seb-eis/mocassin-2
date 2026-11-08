@@ -81,7 +81,8 @@ zensical build --strict
 ```
 
 Feature branches are validated locally; CI runs only at step closeout and on `main`. Report the commands and
-their results, including the exit status.
+their results, including the exit status. Code layout follows
+[`code-structure.md`](code-structure.md); run `./tools/verify.sh structure` after adding or moving files.
 
 ## 5. Continuous integration
 
@@ -98,7 +99,7 @@ The `CI` workflow has these jobs:
 | Job | What it checks |
 | --- | --- |
 | `Detect changes` | Enables only the jobs affected by the pushed or dispatched range |
-| `.NET` | Ubuntu by default; restore, Release build, tests with TRX/coverage, `dotnet format` |
+| `.NET` | Ubuntu by default; restore, Release build, tests with TRX/coverage, code-structure test, `dotnet format` |
 | `Rust` | Ubuntu by default; `cargo fmt`, `clippy -D warnings`, tests, Release build |
 | `Python` | Ubuntu, Python 3.13; pytest with JUnit/coverage, wheel/sdist |
 | `Contracts and policy` | Manifest drift, SPDX headers, secret scan, `cargo deny` |

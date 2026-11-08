@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
