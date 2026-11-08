@@ -109,15 +109,15 @@ Before the first numbered item, complete the pre-implementation design review in
    git switch -c feature/step-00-foundation/dotnet-skeleton
    ```
 4. All work commits for that feature belong on the feature branch.
-5. Push every feature branch to `origin` when it is created. Push the step branch after each approved
-   feature squash.
-6. Feature branches are validated **locally**; they do not trigger CI by default. Run the relevant local
-   gates and report the exact commands and results.
-7. CI runs on `main` and on integration branches matching `step/*` (for example `step/00-foundation`). It does
-   not run on feature branches such as `feature/step-00-foundation/dotnet-skeleton`; the GitHub Actions branch
-   filter must exclude `feature/*` and `step/*/*`.
-8. If `main` moves while a step is active, merge `main` into the step branch. Do not rebase a shared step
-   branch or rewrite its history.
+5. Push every feature branch to `origin` when it is created. Push the step branch at step start, at closeout,
+   and when a remote backup or handoff is needed; do not push it for every feature squash.
+6. Feature branches are validated **locally** with `tools/verify.sh`; they do not trigger CI. Run the relevant
+   local gates and report the exact commands and results.
+7. CI is intentionally minimal. Automatic CI runs only on `main` after a step merge, on Ubuntu, with path
+   filters so only affected jobs run. The step closeout run is a single manual `CI` dispatch. There are no
+   per-feature or per-push step-branch runs. See section 3.13.
+8. If `main` moves while a step is active, merge `main` into the step branch when needed. Do not merge it on
+   every main change just to trigger validation. Do not rebase a shared step branch or rewrite its history.
 
 ### 3.3 Feature integration
 
@@ -125,7 +125,7 @@ Before the first numbered item, complete the pre-implementation design review in
 - **Stop and ask the user for explicit approval before every feature squash merge.** Report:
   - feature branch name and commit hash(es);
   - exact local test commands/results;
-  - the expected step-branch CI run after the squash;
+  - confirm that no per-feature CI run will be triggered;
   - a short summary of the diff;
   - any known limitations or follow-up work.
 - Feature integration uses local squash merges after chat approval. Do not open a pull request unless the
@@ -135,12 +135,15 @@ Before the first numbered item, complete the pre-implementation design review in
   git switch step/00-foundation
   git merge --squash feature/step-00-foundation/dotnet-skeleton
   git commit -m "step-00: add .NET solution skeleton"
-  git push origin step/00-foundation
   git branch -D feature/step-00-foundation/dotnet-skeleton
   git push origin --delete feature/step-00-foundation/dotnet-skeleton
   ```
-- The push of the step branch triggers CI. Do not start the next feature until that run is green. If it fails,
-  fix it through another feature or `feature/step-00-foundation/fix-<short-description>` branch and squash it.
+- Feature integration is validated locally before the squash. Do not start the next feature until
+  `tools/verify.sh` passes for the affected area. If it fails, fix it through another feature or
+  `feature/step-00-foundation/fix-<short-description>` branch and squash it. Do not rely on CI to catch
+  feature-level failures.
+- Push the step branch at step start, at closeout, and when a remote backup or handoff is needed. A push does
+  not trigger CI.
 - Never merge a feature branch directly into `main`.
 - Do not commit feature work directly to the step branch. The step branch receives only squash commits,
   merges from `main`, and explicitly approved closeout changes.
@@ -153,24 +156,32 @@ Before the first numbered item, complete the pre-implementation design review in
    - parity-matrix updates;
    - documentation updates;
    - any final acceptance fixes.
-2. Run the step's full acceptance criteria and quality gates on the step branch.
-3. If an emergent design change is required, integrate a step amendment (section 3.11) before the audit freeze.
-   The audit then covers the combined solution.
-4. Complete the independent audit in section 3.10. The step branch must be frozen at the audited commit; after
+2. Run the step's full acceptance criteria and local quality gates (`./tools/verify.sh all`) on the step branch.
+3. Merge the current `main` into the step branch if needed so it has the current `ci.yml`. Dispatch the single
+   closeout CI run on the step branch: `CI` workflow, Ubuntu, path-filtered. Record the run URL or ID in the
+   audit record. Do not run CI after each feature; the closeout run is the only step-branch CI run.
+4. If an emergent design change is required, integrate a step amendment (section 3.11) before the audit freeze.
+   The audit then covers the combined solution. Re-run the closeout CI once after the final amendment is
+   integrated.
+5. Complete the independent audit in section 3.10. The step branch must be frozen at the audited commit; after
    a passing audit, the auditor's record commit and the step agent's resolution/status commit are the only
    permitted later commits.
-5. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
-6. After approval:
+6. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
+   The approval request must include the cumulative approval report in section 3.12.
+7. After approval:
    ```sh
    git switch main
    git pull --ff-only
    git merge --no-ff step/00-foundation -m "step-00: repository, toolchain, and CI"
    git push origin main
+   # wait for the automatic main CI run to pass
    git tag -a step-00 -m "step-00: repository, toolchain, and CI"
    git push origin step-00
    ```
-7. Delete the step branch locally and remotely after the merge.
-8. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
+8. Wait for the automatic `main` CI run before tagging. If it fails, fix forward or revert and re-run; never tag
+   a red `main`.
+9. Delete the step branch locally and remotely after the merge and tag.
+10. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
 
 ### 3.5 Out-of-step changes
 
@@ -247,15 +258,26 @@ transcription step.
 | --- | --- | --- | --- |
 | Planner (planning agent) | Design and planning docs; the review record's request, scope, checklists, and resolutions | Documentation-only commits on the design branch | Code, tests, configuration, audit or design verdicts, step status, merges, tags |
 | Implementor (step agent) | Code, tests, configuration, contracts, step page, status dashboard, parity matrix; the audit/review record's request, scope, checklists, and resolutions | Feature-branch commits; documentation-only record and status commits | The reviewer's findings, evidence, or verdict text; merges and tags without approval |
-| Reviewer (planning auditor or audit agent) | Only the assigned review or audit record: its own metadata, evidence, findings, and verdict | At most one documentation-only record commit per round, with `[skip ci]` | Everything else, including code, tests, configuration, design docs, step page, status dashboard, parity matrix, request scope, checklists, resolutions, merges, tags, and pushes to `main` |
+| Reviewer (planning auditor or audit agent) | Only the assigned review or audit record: its own metadata, checklist completion marks (not item text), evidence, findings, and verdict | At most one documentation-only record commit per round, with `[skip ci]` | Everything else, including code, tests, configuration, design docs, step page, status dashboard, parity matrix, request scope, checklist item text, resolutions, merges, tags, and pushes to `main` |
 | Human owner | Approve gates, merges, and tags | — | — |
 
 Reviewer rules:
 
-- A reviewer must be a fresh context that did not author or implement the reviewed work.
+- A reviewer must be a fresh context that did not author or implement the reviewed work. It may be spawned by
+  the planner, implementor, or human owner.
+- The spawner must not be the reviewer. It provides only the frozen commit, the request record, repository
+  links, and the required commands/scope. It must not supply a desired verdict or replace repository reading
+  with a summary.
+- The human owner approves the final verdict and gate. The spawner must not mark a verdict, waive findings,
+  merge, tag, or push `main`. A re-review requires a new commit with fixes; do not re-spawn until a preferred
+  verdict appears.
+- The reviewer states in its record that it is a fresh context with no shared conversation with the
+  planner/implementor.
 - The reviewer writes findings and verdict directly into the durable record. No handoff file, transcription,
   or scribe is used.
 - The reviewer appends a new round and must not alter earlier rounds or reviewer-authored text.
+- The reviewer marks the request checklists to record what was actually reviewed. It may change checkbox
+  marks and add short inline verification notes, but not the item text; the request owner owns the items.
 - The reviewer records the exact commands, results, and files behind the verdict in the record's `Evidence`
   section, so the human owner can spot-check it.
 - The reviewer must not fix findings. If it edits code, tests, configuration, or design docs, it becomes an
@@ -298,8 +320,10 @@ starts. This gate is separate from the post-implementation audit in section 3.10
 6. If the verdict is `Changes required`, the planning agent and step agent update the design docs directly, the
    step agent adds the resolutions and marks the review `Re-review required`, and a fresh planning auditor
    re-reviews the new commit. The new round is appended; earlier rounds are not overwritten.
-7. Only a `Ready for implementation` verdict permits the human owner to approve starting the step. The step
-   branch is then created from the reviewed `main` commit.
+7. Only a `Ready for implementation` verdict permits the human owner to approve starting the step. The approval
+   request must include the cumulative approval report in section 3.12, covering every review round, finding,
+   resolution, accepted note, waiver, and residual risk. The step branch is then created from the reviewed
+   `main` commit.
 8. Step 00 and Step 01 are recorded as `Waived — process introduced after completion`; no retrospective
    review is required.
 9. The post-implementation audit in section 3.10 remains mandatory.
@@ -314,10 +338,10 @@ The step agent's self-check is not an independent audit. Before a step is merged
 out-of-context audit context must review the frozen step branch.
 
 1. The step agent finishes all features and the closeout feature, updates the step page, status dashboard,
-   parity matrix, and feature log, and gets step-branch CI green.
+   parity matrix, and feature log, runs `tools/verify.sh all`, and gets the single closeout CI run green.
 2. The step agent creates or updates `docs/planning/audits/step-NN.md` using
    [`docs/planning/audits/step-audit-template.md`](docs/planning/audits/step-audit-template.md), records the
-   exact audited commit and CI run, and sets the status to `Ready for audit`.
+   exact audited commit and the closeout CI run, and sets the status to `Ready for audit`.
 3. The step branch is frozen at the audited commit. After a passing audit, two documentation-only commits may
    follow: the auditor's record commit and the step agent's resolution/status commit. Neither may change code,
    tests, configuration, or the auditor's text. If fixes are needed, the step agent uses a new feature branch
@@ -334,13 +358,21 @@ out-of-context audit context must review the frozen step branch.
    and verdict. It must not edit the scope, checklists, resolutions, code, tests, configuration, step page,
    status dashboard, or parity matrix.
 7. If fixes are needed, the step agent adds the resolutions, fixes the findings on a new feature branch,
-   squash-merges into the step branch, pushes, waits for CI, and sets the audit status to `Re-audit required`.
+   squash-merges into the step branch, dispatches one new closeout CI run, and sets the audit status to
+   `Re-audit required`.
 8. The fresh auditor re-audits the new commit and appends a new round to the record. The same auditor may
    continue if it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every
    earlier round in the record.
-9. Only a `Passed` audit permits the step-to-main approval request. The audit result is evidence, not merge
-   authorization; the human owner still approves the merge.
-10. After merge, tag `step-NN`, record the result, and delete the step branch.
+9. Only a `Passed` audit permits the step-to-main approval request. The request must include the cumulative
+   approval report in section 3.12, covering every audit and review round, every finding and resolution, every
+   accepted note or waiver, and the residual risk. The audit result is evidence, not merge authorization; the
+   human owner still approves the merge.
+10. After merge, wait for the automatic `main` CI run. Tag `step-NN` only when it is green; record the result
+    and delete the step branch. Never tag a red `main`.
+
+Platform CI (Windows and macOS) is manual and runs only when the step first touches platform-specific code.
+When it is not run, record that as an accepted risk in the audit record. See section 3.13 and
+[`docs/planning/ci-policy.md`](docs/planning/ci-policy.md).
 
 The audited solution includes every amendment integrated before the freeze. A post-merge amendment needs its
 own audit and tag under section 3.11 and must never move the existing `step-NN` tag.
@@ -372,6 +404,67 @@ is planned, reviewed, integrated into the parent step branch, and audited as par
 
 Amendment statuses and the amendment index are in
 [`docs/planning/amendments/README.md`](docs/planning/amendments/README.md).
+
+### 3.12 Approval report
+
+Before the human owner approves any review verdict, audit verdict, waiver, merge, or tag, the agent requesting
+approval must present a **cumulative approval summary** covering the entire history. The summary goes in the
+approval request itself; linking the durable record is not sufficient.
+
+The summary must contain:
+
+1. **Requested decision** — the exact verdict, waiver, merge, or tag being requested, and the frozen commit.
+2. **Final state** — branch, reviewed/audited commit, CI result, and documentation-build result.
+3. **Every round** — for each design-review and audit round: round number, date, reviewed or audited commit,
+   reviewer or auditor identity and spawner, and verdict.
+4. **Every finding** — finding ID, severity, issue, evidence, resolution or fix, resolving commit, and current
+   status. Include findings from every round, including those already fixed.
+5. **Accepted notes and waivers** — each note or waiver, who accepted it, and its rationale or follow-up.
+6. **Residual risk** — open notes, deferred items, known limitations, and follow-up owners.
+7. **Gate statement** — an explicit statement that no Blocker or Major finding remains unclosed, or the complete
+   list of exceptions the human owner is being asked to waive.
+
+Rules:
+
+- Never omit earlier rounds or findings because they were fixed; the fixed history is the point.
+- Never report only the latest round or only the findings that remain open.
+- Do not rewrite earlier records to fit the summary; derive the summary from the durable record.
+- If a round is incomplete or lacks a verdict or resolution, say so instead of omitting it.
+- The summary is evidence for the human owner, not an approval. The human owner still decides.
+
+### 3.13 CI cost policy
+
+The project uses the GitHub Free private-repository allowance of 2,000 billable minutes per month. CI is a
+confirmation gate, not the development loop. The full rationale and cost data are in
+[`docs/planning/ci-policy.md`](docs/planning/ci-policy.md).
+
+| Run | Trigger | Runner | Scope |
+| --- | --- | --- | --- |
+| Main merge | automatic `push` to `main` | Ubuntu | Path-filtered jobs |
+| Step closeout | one manual `workflow_dispatch` per step | Ubuntu | Path-filtered jobs |
+| Platform gate | manual `workflow_dispatch` with `platforms` | Windows/macOS | On demand only |
+| Documentation | manual `docs.yml` | Ubuntu | Full docs build |
+| Benchmark | manual `benchmark.yml` | Ubuntu | Selected benchmark |
+| Nightly | disabled until real suites exist | — | — |
+
+Rules:
+
+- There are no per-feature and no per-push step-branch CI runs. Validate locally with `tools/verify.sh`.
+- The closeout run is the only step-branch CI run. The main merge runs once more after the `--no-ff` merge.
+- Automatic CI is Ubuntu-only. Windows and macOS are manual. Promote Windows to automatic closeout/main when
+  platform-specific code first appears; keep macOS manual until there is macOS-specific behaviour to validate.
+- Path filters must ensure that only affected jobs run. A change to `.github/workflows/ci.yml` forces all jobs.
+- Documentation is validated locally with `zensical build --strict` (and the other docs commands). The
+  separate `docs.yml` workflow is manual until the documentation is mature enough to justify automatic runs.
+- Keep Nightly disabled until real long-running suites exist. If it is re-enabled, run it weekly on Ubuntu.
+- Target at most 300 billable minutes per month. If usage passes 50% of the allowance before mid-month, switch
+  to closeout-only CI and ask the human owner before adding any run.
+- Use `[skip ci]` for docs-only commits and merges.
+- Never tag a red `main`; wait for the main merge CI before creating `step-NN`.
+
+Platform-specific triggers: P/Invoke, `LibraryImport`, `System.Runtime.InteropServices`, native libraries or
+RID-specific packages, path/case/locking logic, line-ending or encoding-sensitive handling, GUI projects, Rust
+`cfg(windows)` or `cfg(target_os = "...")`, and installers or packaging.
 
 ## 4. Non-negotiable decisions
 
@@ -567,14 +660,15 @@ Update status as follows:
 - **Step start:** after the feature list is approved, set the step to `In progress` and record the step branch.
 - **Each feature:** update its feature row and the step-page checkboxes in the feature branch. Mark it
   `Awaiting approval` before asking for approval.
-- **After squash and step CI:** the next feature or closeout feature records the squash commit and CI result.
-- **Step completion:** the closeout feature records `Done`, the step CI result, and the main merge reference.
-  After the approved merge, create and push the annotated `step-NN` tag.
+- **After squash:** the next feature or closeout feature records the squash commit and the local validation
+  result. CI is not run per feature.
+- **Step completion:** the closeout feature records `Done`, the closeout CI result, and the main merge
+  reference. After the approved merge and a green main CI run, create and push the annotated `step-NN` tag.
 - **Milestones:** create the matching `milestone-mN` tag when the milestone is reached.
 - **Parity:** keep `appendix-b-parity-matrix.md` as the feature-level completeness source.
 
 Do not create duplicate per-step checklist files. The step page is the detailed checklist; `status.md` is the
-roll-up. Avoid status-only commits that trigger an extra step-branch CI run. See
+roll-up. Avoid status-only commits; CI runs only at closeout and on `main`. See
 [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) for context handoff, prompt,
 approval-report, and diff-review templates.
 
@@ -810,3 +904,7 @@ from the original and the plan’s “Original reference” sections.
 - [ ] Performance benchmark run for hot-path changes.
 - [ ] Commit message is imperative and scoped.
 - [ ] The change can be explained in terms of the plan, not just the code.
+- [ ] Any approval request includes the cumulative approval report in section 3.12: every round, every finding
+      and resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Major gate statement.
+- [ ] The CI cost policy in section 3.13 is followed: local validation, one closeout run, one main run, no
+      per-feature CI, and platform runs only when required.

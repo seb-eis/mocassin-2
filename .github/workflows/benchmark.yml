@@ -1,0 +1,46 @@
+name: Benchmark
+
+# Benchmarks are manual and never part of the normal push or closeout gates.
+# The benchmark project lands with a later step; this workflow will fail until
+# `src/dotnet/Mocassin.Benchmarks` exists.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: benchmark-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: "true"
+  DOTNET_CLI_TELEMETRY_OPTOUT: "true"
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: "true"
+
+jobs:
+  benchmark:
+    name: Benchmark
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
+
+      - name: Restore
+        run: dotnet restore Mocassin.slnx
+
+      - name: Build
+        run: dotnet build Mocassin.slnx -c Release --no-restore
+
+      - name: P1Expansion20Cubed
+        run: >
+          dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks --no-build --
+          --filter "*P1Expansion20Cubed*"

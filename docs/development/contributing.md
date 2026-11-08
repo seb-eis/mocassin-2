@@ -29,12 +29,12 @@ file and a directory. The `feature/` prefix keeps the step grouping without that
 5. Implement only that feature's scope; add the tests named in the step plus regression tests.
 6. Update the step page, status dashboard, parity matrix, and documentation in the same feature where
    applicable.
-7. Run the local quality gates and report the exact commands and results.
+7. Run the local quality gates (`./tools/verify.sh <area>`) and report the exact commands and results.
 8. Ask for explicit approval before every feature squash merge. The report must include branch, commits, diff
-   summary, tests, expected CI, docs/status updates, risks, and known limitations.
-9. After approval, squash-merge into the step branch, push the step branch, and delete the feature branch
-   locally and remotely.
-10. Do not start the next feature until the step-branch CI run is green.
+   summary, tests, local validation, docs/status updates, risks, and known limitations.
+9. After approval, squash-merge into the step branch and delete the feature branch locally and remotely. Do not
+   push the step branch just to trigger CI.
+10. Do not start the next feature until the affected local gates pass.
 
 A final closeout feature records the step status, deviations, acceptance evidence, and main merge. The
 step-to-`main` merge is `--no-ff` and requires explicit permission. Tags are created only as part of the
@@ -80,30 +80,32 @@ python tools/check-no-secrets.py
 zensical build --strict
 ```
 
-Feature branches are validated locally; CI runs on `main` and `step/*` integration branches only. Report the
-commands and their results, including the exit status.
+Feature branches are validated locally; CI runs only at step closeout and on `main`. Report the commands and
+their results, including the exit status.
 
 ## 5. Continuous integration
 
-CI runs on pushes to `main` and integration branches matching `step/*`. GitHub's `*` does not match `/`, so
-feature branches and nested `step/*/*` branches are not triggered. Pull-request CI is not enabled until the
-project adopts pull requests.
+CI is intentionally minimal. Automatic CI runs only on `main` after a step merge, on Ubuntu, with path filters
+so only affected jobs run. The step closeout run is a single manual `CI` dispatch on the step branch. There are
+no per-feature and no per-push step-branch runs. Pull-request CI is not enabled until the project adopts pull
+requests.
 
-Step branches run Ubuntu and Windows to keep squash validation responsive. The full matrix, including macOS,
-runs on `main` after the step merge.
+Windows and macOS are manual and run only when platform-specific code appears. Documentation, benchmarks, and
+long-running suites have separate manual workflows.
 
-The workflow has these jobs:
+The `CI` workflow has these jobs:
 
 | Job | What it checks |
 | --- | --- |
-| `.NET` | Ubuntu + Windows on step branches, plus macOS on `main`; restore, Release build, tests with TRX/coverage, `dotnet format` |
-| `Rust` | Ubuntu + Windows on step branches, plus macOS on `main`; `cargo fmt`, `clippy -D warnings`, tests, Release build |
-| `Python` | Editable install on 3.11–3.13, pytest with JUnit/coverage, wheel/sdist |
+| `Detect changes` | Enables only the jobs affected by the pushed or dispatched range |
+| `.NET` | Ubuntu by default; restore, Release build, tests with TRX/coverage, `dotnet format` |
+| `Rust` | Ubuntu by default; `cargo fmt`, `clippy -D warnings`, tests, Release build |
+| `Python` | Ubuntu, Python 3.13; pytest with JUnit/coverage, wheel/sdist |
 | `Contracts and policy` | Manifest drift, SPDX headers, secret scan, `cargo deny` |
 | `Public API compatibility` | ApiCompat against the checked-in baseline assemblies |
-| `Documentation` | Strict Zensical build plus DocFX and rustdoc output |
 
-The scheduled `Nightly` workflow is a placeholder for parity, fuzzing, benchmarks, and screenshot suites.
+Documentation is built by the separate manual `Documentation` workflow. Benchmarks and long-running suites
+have their own manual workflows. The scheduled `Nightly` workflow is disabled until real suites exist.
 
 ## 6. Tests
 

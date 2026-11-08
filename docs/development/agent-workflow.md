@@ -49,7 +49,7 @@ Approved feature list:
 Current feature:
 Feature branch:
 Last local gates:
-Last step-branch CI:
+Last closeout CI:
 Open blockers:
 Next action:
 ```
@@ -106,18 +106,39 @@ Stop before:
 
 ## 5. Evidence and approval report
 
-A feature is not ready for approval until the agent can report:
+A feature, review verdict, audit verdict, merge, or tag is not ready for approval until the requesting agent can
+report the full picture, including every earlier round:
 
 ```text
-Branch:
-Commits:
+Decision requested:
+Branch/frozen commit:
+Final verdict:
+Rounds:
+  1. date, commit, reviewer/auditor, verdict
+  2. ...
+Findings and resolutions:
+  ID, severity, issue, evidence, resolution, fixing commit, status
+Accepted notes and waivers:
+Residual risks and follow-up owners:
 Diff summary:
 Tests/commands:
 CI:
+Docs build:
 Docs/status updated:
-Risks:
+Gate statement (no Blocker/Major remains, or the exact exceptions being waived):
 Approval requested for:
 ```
+
+Rules:
+
+- Include every review and audit round, every finding, and every resolution, including findings already fixed.
+- Name the code commit that fixed each finding and the documentation commit that resolved each design note.
+- Report accepted notes and waivers explicitly, with who accepted them and why.
+- State residual risk, deferred items, and follow-up owners.
+- Never report only the latest round or only the findings that remain open.
+- If a round is incomplete or lacks a verdict or resolution, say so; do not omit it.
+- The report is the basis for the human decision. The human owner still approves verdicts, waivers, merges, and
+  tags.
 
 Review the diff itself:
 
@@ -190,13 +211,33 @@ rules.
 
 ## 10. CI policy
 
-Feature branches are validated locally. CI runs on:
+CI is intentionally minimal and local-first. The normative rules are in `AGENTS.md` §3.13 and the cost model
+is in [`docs/planning/ci-policy.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/ci-policy.md).
 
-- integration branches matching `step/*`;
-- `main` after a step merge.
+Automatic CI runs only on `main` after a step merge, on Ubuntu, with path filters so only affected jobs run.
+The step closeout run is a single manual `CI` dispatch on the step branch. There are **no per-feature and no
+per-push step-branch CI runs**.
 
-Do not add CI triggers for feature branches just to feel safe. Add a trigger only when it catches a class of
-regression that local gates cannot.
+| Run | Trigger | Runner |
+| --- | --- | --- |
+| Main merge | automatic `push` to `main` | Ubuntu |
+| Step closeout | one manual `workflow_dispatch` per step | Ubuntu |
+| Platform gate | manual `workflow_dispatch` with `platforms` | Windows/macOS |
+| Documentation | manual `docs.yml` | Ubuntu |
+| Benchmark | manual `benchmark.yml` | Ubuntu |
+
+Rules:
+
+- Validate every feature locally with `./tools/verify.sh <area>`; run `./tools/verify.sh all` before closeout.
+- Do not push a step branch just to trigger CI.
+- Windows and macOS stay manual until platform-specific code appears. Promote Windows first; keep macOS manual
+  until there is macOS-specific behaviour to validate.
+- Documentation is built locally with `zensical build --strict` until the site is mature enough to justify
+  automatic docs CI.
+- Keep Nightly disabled until real long-running suites exist.
+- Wait for the automatic `main` run before tagging `step-NN`. Never tag a red `main`.
+- Do not add CI triggers for feature branches or per-push checkpoint runs just to feel safe. Add a trigger only
+  when it catches a class of regression that local gates cannot.
 
 ## 11. Reference data
 
@@ -235,14 +276,15 @@ Before a step starts, a fresh planning auditor checks the design out of context.
    directly.
 2. Freeze the docs at a commit and create or update `docs/planning/reviews/step-NN.md`; set the status to
    `Ready for review` and record the reviewed commit.
-3. A fresh planning auditor, with no implementation context, reviews the step page and all cross-step
-   contracts. The auditor must not have authored or implemented the design.
+3. The planner, implementor, or human owner spawns a fresh planning auditor with no implementation context.
+   The auditor reviews the step page and all cross-step contracts and must not have authored or implemented the
+   design.
 4. The auditor writes the evidence, findings, and verdict directly into
    `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
    `[skip ci]`. The reviewed commit is the parent of the record commit. It does not merge, tag, push `main`,
    or change any other file. If it cannot commit, it writes the record and the step agent commits it unchanged.
-5. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, evidence,
-   findings, and verdict.
+5. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, checklist
+   completion marks (not item text), evidence, findings, and verdict.
 6. If changes are required, the planning agent and step agent update the design docs directly, add the
    resolutions, and mark the review `Re-review required`. A fresh planning auditor re-reviews the new commit.
 7. Only `Ready for implementation` permits the human owner to approve the start. Create the step branch from
@@ -260,22 +302,26 @@ The step agent's self-check is not the independent audit.
 
 Before merging a completed step:
 
-1. Finish the closeout feature and get step-branch CI green.
-2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, CI run, scope, and known
-   limitations; set its status to `Ready for audit`.
+1. Finish the closeout feature, run `./tools/verify.sh all`, and dispatch the single closeout CI run on the
+   step branch (Ubuntu, path-filtered).
+2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, closeout CI run, scope,
+   and known limitations; set its status to `Ready for audit`.
 3. Freeze the step branch at the audited commit.
-4. Let a fresh out-of-context audit agent review it. The auditor must not have implemented the step.
+4. The step agent, planner, or human owner spawns a fresh out-of-context audit agent. The auditor must not have
+   implemented the step.
 5. The auditor writes the evidence, findings, and verdict directly into
    `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
    `[skip ci]`. The audited commit is the parent of the record commit. It does not merge, tag, push `main`,
    or change any other file. If it cannot commit, it writes the record and the step agent commits it unchanged.
-6. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, evidence,
-   findings, and verdict.
+6. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, checklist
+   completion marks (not item text), evidence, findings, and verdict.
 7. If findings require fixes, the step agent adds the resolutions, fixes them on a new feature branch,
-   squash-merges into the step branch, pushes, waits for CI, and marks the audit `Re-audit required`.
+   squash-merges into the step branch, dispatches one new closeout CI run, and marks the audit `Re-audit
+   required`.
 8. Re-audit the new commit and append a new round to the record. Only a `Passed` audit permits the step-to-main
    approval request.
-9. The human owner still approves the merge and tag.
+9. The human owner still approves the merge and tag. After the merge, wait for the automatic `main` CI run and
+   tag `step-NN` only when it is green.
 
 Use [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/audits/README.md)
 for status values, severities, and the record format. The audit record is the durable record and the auditor
@@ -287,6 +333,7 @@ writes into it directly.
 | --- | --- |
 | Step feature list | Once, at step start |
 | Each feature squash | Before every squash into the step branch |
+| Reviewer spawning | Planner, implementor, or human owner may spawn a fresh reviewer; the human owner approves the final verdict |
 | Pre-implementation design review | Fresh planning auditor after the design docs are frozen, before implementation |
 | Amendment design review | Focused fresh planning auditor before amendment implementation |
 | Amendment integration | Before the parent step audit freeze |
@@ -319,3 +366,33 @@ step.
 
 Use [`docs/planning/amendments/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/amendments/README.md)
 for statuses, naming, integration, and the post-merge fallback.
+
+## 17. Reviewer spawn card
+
+Use this when the planner or implementor spawns a design reviewer or auditor. Replace the bracketed values and
+do not add a desired verdict or a summary that replaces reading the repository.
+
+```text
+You are a fresh, read-only [design reviewer / auditor]. You did not author or implement this work and have no
+shared conversation with the planner or implementor.
+
+Frozen commit: [full commit]
+Request record: [docs/planning/reviews/step-NN.md or docs/planning/audits/step-NN.md]
+Repository: /workspace/mocassin
+
+Read AGENTS.md, the request record, the step page, and the relevant design/contract docs. Do not rely on my
+summary; inspect the repository at the frozen commit yourself.
+
+Run the required builds/tests and review the diff. Write evidence, findings, verdict, and checklist completion
+marks directly into the request record. You may check checklist boxes but not change item text. Do not edit any
+other file, merge, tag, push main, or delete branches.
+
+If you find issues, report them; do not fix them. The human owner approves the final verdict and gate.
+```
+
+Rules for the spawner:
+
+- Do not ask for a specific verdict or re-spawn until a preferred verdict appears.
+- Do not edit the reviewer's findings, evidence, or verdict.
+- Do not mark the review/audit accepted, waived, merged, or tagged.
+- Fixes require a new commit and a new review round.

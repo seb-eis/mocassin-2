@@ -10,6 +10,7 @@ a fresh, out-of-context audit context decides whether the step is ready for appr
 | --- | --- |
 | Step agent (implementor) | Implement, self-check, create/update the audit record's request fields, fix findings, add resolutions, update status/docs/parity |
 | Audit agent (reviewer) | Independent review of the frozen commit; writes evidence, findings, and verdict directly into the audit record |
+| Spawner (step agent, planner, or human owner) | Provides the frozen audit request and spawns a fresh auditor; does not review or approve |
 | Human owner | Approve fixes, merge, and tag |
 
 The audit request, its scope, and its acceptance checklist are owned by the step agent. The audit agent may
@@ -18,6 +19,18 @@ configuration, tests, scope, checklists, resolutions, status dashboard, step pag
 branch. If the auditor starts fixing code, it becomes an implementer and a new auditor is required for the final
 pass. The reviewer writes directly into `docs/planning/audits/step-NN.md`; there is no handoff file and no
 transcription step.
+
+### 1.1 Auditor spawning
+
+The step agent, planner, or human owner may spawn an auditor. The spawner must not be the auditor.
+
+- The auditor is a fresh context with no shared conversation with the implementor or planner.
+- The spawner provides only the frozen commit, the audit request, repository links, and the required
+  commands/scope. It must not supply a desired verdict or substitute a summary for reading the repository.
+- The auditor writes findings and verdict directly into the record. The spawner does not edit them.
+- The human owner approves the final verdict and the merge/tag gate. The spawner must not mark a verdict, waive
+  findings, merge, tag, or push `main`.
+- A re-audit requires a new commit with fixes. Do not re-spawn auditors until a preferred verdict appears.
 
 ## 2. Audit status values
 
@@ -33,12 +46,15 @@ transcription step.
 
 ## 3. Required sequence
 
-1. The step agent finishes all features, the closeout feature, documentation, status, and parity updates.
-2. The step branch is pushed and its CI is green.
+1. The step agent finishes all features, the closeout feature, documentation, status, and parity updates, then
+   runs `./tools/verify.sh all`.
+2. The step branch is pushed and one closeout CI run is green. Do not run CI per feature; the closeout run is
+   the only step-branch CI run.
 3. The step agent creates or updates `docs/planning/audits/step-NN.md`:
    - status: `Ready for audit`
    - exact audited commit
-   - CI run
+   - closeout CI run
+   - platform CI status: not run, or the Windows/macOS run when platform-specific code required it
    - scope and acceptance criteria
    - known limitations
 4. The step branch is frozen at the audited commit. After a passing audit, only the reviewer's record commit
@@ -61,13 +77,20 @@ transcription step.
    - the step agent adds the resolutions to the record;
    - the step agent fixes the findings on a new feature branch;
    - squash-merges into the step branch;
-   - pushes and waits for CI;
+   - dispatches one new closeout CI run and waits for it;
    - updates the audit record to `Re-audit required` with the new commit.
 9. The auditor re-audits the new commit and appends a new round to the record. The same auditor may continue if
    it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every earlier round
    in the record.
-10. On `Passed`, the human owner gives merge approval.
-11. Merge the step branch into `main` with `--no-ff`, tag `step-NN`, push, and delete the step branch.
+10. On `Passed`, the human owner gives merge approval. The approval request includes the cumulative approval
+    report in section 10, covering every audit and review round, finding, resolution, note, waiver, and residual
+    risk.
+11. Merge the step branch into `main` with `--no-ff`, wait for the automatic `main` CI run, tag `step-NN` only
+    when it is green, push, and delete the step branch.
+
+CI is intentionally minimal: automatic CI runs only on `main`, on Ubuntu, with path filters. Windows and macOS
+are manual and only required when platform-specific code appears. Documentation uses its own manual workflow.
+See [`AGENTS.md` §3.13](../../../AGENTS.md) and [`docs/planning/ci-policy.md`](../ci-policy.md).
 
 ## 4. What the audit must cover
 
@@ -117,9 +140,11 @@ The audit record is the durable record. Do not rely on chat history, and do not 
 
 - The reviewer may edit only `docs/planning/audits/step-NN.md`.
 - Within that file, the reviewer may edit its own metadata (`Auditor`, `Audit date`, `Audit status`), the
-  `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
-- The reviewer must not edit the request scope, checklists, known notes, or resolutions owned by the step
-  agent, and must not edit any other file.
+  `Standard audit checklist` completion marks and inline verification notes (not item text), the `Evidence`
+  section, the `Findings` section, and the `Verdict` section for the current round.
+- The reviewer must not edit the request scope, checklist item text, known notes, or resolutions owned by the
+  step agent, and must not edit any other file.
+- Checklist marks record what the reviewer actually audited; the step agent owns the checklist item text.
 - The reviewer may commit that one file with a documentation-only message and `[skip ci]`; it must not merge,
   tag, push `main`, or delete branches. If it cannot commit, it writes the record and the step agent commits it
   unchanged.
@@ -130,6 +155,7 @@ The audit record is the durable record. Do not rely on chat history, and do not 
   round.
 - A record commit that touches any other file is invalid; the verdict must be re-run by a fresh reviewer.
 - The auditor must not approve its own report. The human owner approves the merge and tag.
+- The auditor records that it is a fresh context with no shared conversation with the implementor or planner.
 
 ## 9. Step amendments
 
@@ -140,3 +166,11 @@ The audit record is the durable record. Do not rely on chat history, and do not 
   delete the existing `step-NN` tag.
 - The amendment page links to the parent audit record. The auditor still edits only the audit record and
   commits only that file.
+
+## 10. Approval report
+
+When an audit verdict is presented to the human owner for merge or tag approval, the requesting agent must include
+the cumulative approval report required by [`AGENTS.md` §3.12](../../../AGENTS.md). It must cover every audit and
+review round, every finding and its resolution, accepted notes and waivers, residual risk, and the
+no-Blocker/no-Major gate statement. Reporting only the latest round or only open findings is not acceptable. The
+record's `Approval summary` section is the durable source for that report.
