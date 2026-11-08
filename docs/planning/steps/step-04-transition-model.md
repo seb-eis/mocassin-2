@@ -13,7 +13,7 @@ geometry, with validation of transition semantics.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** [Re-review required at `4f4c888`](../reviews/step-04.md)
+- **Design review:** [Re-review required at `43bad05`](../reviews/step-04.md)
 - **Last updated:** 2026-11-08
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

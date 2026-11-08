@@ -15,13 +15,14 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Re-review required |
-| Reviewed commit | `4f4c888` |
+| Reviewed commit | `43bad05` |
 | Docs branch | `main` |
 | Review date | 2026-11-08 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
 
-> Round 1 reviewed `b426a13` and returned `Changes required`. The design was revised in `4f4c888`; the request
-> metadata now points at that commit for round 2. The round-1 reviewer text below is unchanged.
+> Round 1 reviewed `b426a13` and returned `Changes required`. Round 2 reviewed `4f4c888` and returned
+> `Changes required`. The design was revised in `43bad05`; the request metadata now points at that commit for
+> round 3. The earlier reviewer text is unchanged.
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
 
@@ -589,3 +590,69 @@ stability sequences (R2-4), and the ring rule is narrower than the original (R2-
 cross-step interface issue, so the step cannot start as written. No Blocker is recorded, and the human owner may
 treat any Major as blocking. A re-review requires a new design commit with fixes; do not create the step branch
 or start implementation before that.
+
+## Round 2 resolutions
+
+Design revision: `43bad05` — design and data-contract corrections for round 2. This section is owned by the
+planner/step agent and does not alter the reviewer's round-2 findings, evidence, or verdict.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| R2-1 | Resolved — awaiting re-review | Kept the flat model shape established by Step 03 and removed the nested `model.transitions` sketch from the data contract; the envelope now lists the five flat transition sections. The manifest task adds five flat fields. |
+| R2-2 | Resolved — awaiting re-review | Added an `IParticleQuery` parameter to both `TryCreatePreview` overloads and defined `ParticleOrder` from `Particles` plus `VoidParticle`. |
+| R2-3 | Resolved — awaiting re-review | Replaced TRN026 with "an unstable position's group contains more than one state change"; it applies per unstable position and no longer limits the number of unstable positions, so `Vehicle6` is valid. |
+| R2-4 | Resolved — awaiting re-review | Added TRN028 for the resolved path stability sequence against the built-in pattern table, plus acceptance and test cases for `Interstitialcy5`/vehicle sequences. |
+| R2-5 | Resolved — awaiting re-review | Ring detection now rejects any repeated canonical resolved position, including interior returns and periodic images, and the data contract says the same. |
+| R2-6 | Resolved — awaiting re-review | Removed `Ids/TransitionIds.cs`; the five typed IDs already exist in `Ids/TypedIds.cs` from Step 03 and are reused. |
+| R2-7 | Resolved — awaiting re-review | Added `Project/Project.cs` (implements `ITransitionQuery`), `ProjectHasher.cs` (`ComputeTransition`), `TransitionRefJsonConverter.cs`, and the benchmark-baseline task to the layout/tasks. |
+| R2-8 | Resolved — awaiting re-review | Preview cache key now includes catalog data version/SHA-256 and symmetry contract version, with injectable versions and a cache-separation test. |
+| R2-9 | Resolved — awaiting re-review | Path canonicalization now uses `Fractional3.TrimToUnitCell()` after a finite check, with `PathMatchTolerance` for site matching and a boundary test. |
+| R2-10 | Resolved — awaiting re-review | Added `docs/reference/transitions.md` as the Step 04 page; Step 07 owns the consolidated diagnostics/troubleshooting pages and links to it. |
+| R2-11 | Resolved — awaiting re-review | Renamed the preview parameter to `structureModel`, matching the Step 03 CA1716 resolution. |
+| R2-12 | Resolved — awaiting re-review | TRN015 now accepts `Metropolis2` or a 2-position `Custom` chain; TRN023 rejects both on the kinetic side. |
+| R2-13 | Acknowledged — awaiting re-review | Process note only; the round-2 text is unchanged and the revision is a new commit. |
+| R2-14 | Resolved — awaiting re-review | New standalone samples live under `samples/transitions/`; `samples/ceria/ceria.mocprj` is updated in place for the dedicated unstable-site set. |
+| R2-15 | Resolved — awaiting re-review | Section 3 now states that TRN018 is transition-scoped, matching the table and acceptance criterion. |
+
+## Re-review round 3
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Step | 04 — Transition Model |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `43bad05` |
+| Docs branch | `main` |
+| Review date | — |
+| Reviewer | — |
+
+Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
+
+The design content for round 3 is frozen at `43bad05`. The delta from the round-2 commit `4f4c888` is the
+round-2 fix; the review request and status changes are metadata only. Verify the delta yourself with
+`git diff --stat 4f4c888..43bad05`.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for this round below. Keep the
+round-1 and round-2 text unchanged.
+
+### Re-review evidence
+
+_Reviewer to complete._
+
+### Re-review findings
+
+_Reviewer to complete._
+
+### Re-review verdict
+
+- [ ] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+Follow-up owner:
+Follow-up step:
