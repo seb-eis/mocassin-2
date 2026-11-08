@@ -22,7 +22,7 @@ namespace Mocassin.Benchmarks.Structure;
 public class StructurePreviewBenchmarks
 {
     private static readonly int[] ceriaOrbitSizes = [4, 8, 24];
-    private static readonly int[] bariumZirconateOrbitSizes = [1, 1, 3];
+    private static readonly int[] bariumZirconateOrbitSizes = [1, 1, 3, 12];
 
     private StructureModel ceria = null!;
     private StructureModel bariumZirconate = null!;
@@ -40,7 +40,7 @@ public class StructurePreviewBenchmarks
         ValidateFixture(
             bariumZirconate,
             "barium zirconate",
-            expectedPositions: 5,
+            expectedPositions: 17,
             expectedOrbits: bariumZirconateOrbitSizes);
     }
 
@@ -128,6 +128,7 @@ public class StructurePreviewBenchmarks
                 CreateSite("Ba", Fractional3.Zero, "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5ea3"),
                 CreateSite("Zr", new Fractional3(0.5, 0.5, 0.5), "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5ea4"),
                 CreateSite("O", new Fractional3(0.5, 0.5, 0.0), "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5ea5"),
+                CreateSite("H interstitial", new Fractional3(0.734, 0.5, 0.0), "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5ea6"),
             ],
         };
 

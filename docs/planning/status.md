@@ -47,7 +47,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Passed | Waived — introduced after completion |
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Done | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) (main: Ubuntu + Windows + macOS) | `7b4a994` | `step-01` | Passed with notes at `05c41ab` | Waived — introduced after completion |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Done | `step/02-symmetry-and-geometry` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) | `dbf5691` | `step-02` | Passed with notes at `6341b56` | Ready with notes — accepted |
-| 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | In progress | `step/03-particle-and-structure-models` | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) | — | — | Ready for audit at `5a06d67` | Ready with notes — accepted at `3096aa8` |
+| 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | In progress | `step/03-particle-and-structure-models` | `fix-audit-findings` | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) | — | — | Fixes required at `5a06d67` (fix in progress) | Ready with notes — accepted at `3096aa8` |
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -79,12 +79,11 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 ## Active work
 
-Step 03 — Particle and Structure Models passed design review. Round 1 returned `Changes required`; fix round 1
-is frozen at `3096aa8`, round 2 returned `Ready with notes`, and the round-2 notes are applied in `a299046`.
-The human owner accepted the verdict on 2026-11-08, authorized the start gate, and approved the eight-feature
-breakdown. No step branch or implementation exists yet; the step agent must create the step branch, set the
-step to `In progress`, and begin with `particle-model`. Step 02 is complete: merge `dbf5691`, tag `step-02`,
-and main CI `42478570935` green.
+Step 03 — Particle and Structure Models is in the step-audit gate. All eight features, including closeout, are
+squashed at `5a06d67`; the single closeout CI run `42511003132` is green (Ubuntu). The first independent audit
+returned `Fixes required`: F1 is Major and F2–F5 are Minor, with one Note (F6). Fixes are being prepared on
+`feature/step-03-particle-and-structure-models/fix-audit-findings`; re-audit follows after the fix squash and a
+new closeout CI run. Step 02 is complete: merge `dbf5691`, tag `step-02`, and main CI `42478570935` green.
 
 ## Notes
 

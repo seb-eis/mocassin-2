@@ -145,6 +145,27 @@ public sealed class StructurePreviewTests
     }
 
     [Fact]
+    public void NonFiniteDummyCoordinateReturnsDiagnosticsAndDoesNotThrow()
+    {
+        var ceria = CreateCeria();
+        var structure = ceria with
+        {
+            DummyPositions =
+            [
+                new CellDummyPosition(
+                    CellDummyPositionId.New(),
+                    "Bad dummy",
+                    new Fractional3(double.NaN, 0.0, 0.0)),
+            ],
+        };
+
+        var preview = service.TryCreatePreview(structure, 1, 1, 1, out var diagnostics);
+
+        Assert.Null(preview);
+        Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == "STR010");
+    }
+
+    [Fact]
     public void IndexCapReturnsStr014AndNoPreview()
     {
         var preview = service.TryCreatePreview(CreateCeria(), 10000, 10000, 10000, out var diagnostics);

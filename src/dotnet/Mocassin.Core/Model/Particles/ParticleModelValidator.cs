@@ -167,7 +167,7 @@ internal static partial class ParticleModelValidator
         DiagnosticBag bag)
     {
         var memberIds = particleSet.ParticleIds;
-        if (memberIds.Length == 0)
+        if (memberIds.IsDefault || memberIds.Length == 0)
         {
             bag.Add(Error(
                 ParticleDiagnosticCodes.InvalidSetMembers,

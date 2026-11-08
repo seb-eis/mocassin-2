@@ -15,6 +15,8 @@ namespace Mocassin.Core.Model.Particles;
 /// </remarks>
 public sealed record ParticleSet
 {
+    private readonly ImmutableArray<ParticleId> particleIds;
+
     /// <summary>
     /// Initializes an authored particle set.
     /// </summary>
@@ -25,7 +27,7 @@ public sealed record ParticleSet
     {
         Id = id;
         Name = name;
-        ParticleIds = particleIds.IsDefault ? [] : particleIds;
+        this.particleIds = Normalize(particleIds);
     }
 
     /// <summary>
@@ -50,7 +52,15 @@ public sealed record ParticleSet
     /// Gets the ordered particle identifiers.
     /// </summary>
     /// <remarks>
-    /// The first identifier is the default occupation of a stable site.
+    /// The first identifier is the default occupation of a stable site. A default array supplied through a
+    /// <c>with</c> expression or object initializer is normalized to an empty array.
     /// </remarks>
-    public ImmutableArray<ParticleId> ParticleIds { get; init; }
+    public ImmutableArray<ParticleId> ParticleIds
+    {
+        get => particleIds;
+        init => particleIds = Normalize(value);
+    }
+
+    private static ImmutableArray<ParticleId> Normalize(ImmutableArray<ParticleId> value) =>
+        value.IsDefault ? [] : value;
 }

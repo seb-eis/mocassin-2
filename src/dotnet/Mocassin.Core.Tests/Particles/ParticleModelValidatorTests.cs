@@ -100,6 +100,18 @@ public sealed class ParticleModelValidatorTests
     }
 
     [Fact]
+    public void SetWithDefaultParticleIdsThroughWithExpressionProducesPar005()
+    {
+        var particleSet = CreateSet("Empty site") with { ParticleIds = default };
+        var model = Model([], [particleSet]);
+
+        Assert.Empty(particleSet.ParticleIds);
+        Assert.Contains(
+            ParticleModelValidator.Validate(model),
+            static diagnostic => diagnostic.Code == ParticleDiagnosticCodes.InvalidSetMembers);
+    }
+
+    [Fact]
     public void SetContainingVoidProducesPar005()
     {
         var model = Model([], [CreateSet("Void site", ParticleId.Void)]);

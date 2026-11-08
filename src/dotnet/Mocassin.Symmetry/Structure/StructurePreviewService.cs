@@ -88,6 +88,28 @@ public sealed class StructurePreviewService : IStructurePreviewService
         ArgumentOutOfRangeException.ThrowIfNegativeOrZero(cellCountC);
 
         var sites = structureModel.Sites.IsDefault ? ImmutableArray<CellSite>.Empty : structureModel.Sites;
+        var dummyPositions = structureModel.DummyPositions.IsDefault
+            ? ImmutableArray<CellDummyPosition>.Empty
+            : structureModel.DummyPositions;
+        var bag = new DiagnosticBag();
+        foreach (var dummyPosition in dummyPositions)
+        {
+            if (!dummyPosition.Fractional.IsFinite)
+            {
+                bag.Add(new Diagnostic(
+                    CoreStructureDiagnosticCodes.InvalidDummyPosition,
+                    DiagnosticSeverity.Error,
+                    "Dummy position must be finite and inside [0,1) within the fractional trim tolerance.",
+                    new ModelPath("cellDummyPosition", dummyPosition.Id.Value, "fractional")));
+            }
+        }
+
+        if (bag.Count > 0)
+        {
+            diagnostics = bag.Sorted;
+            return null;
+        }
+
         string? cacheKey = null;
         if (sites.All(static site => site.Fractional.IsFinite))
         {
@@ -100,7 +122,6 @@ public sealed class StructurePreviewService : IStructurePreviewService
             }
         }
 
-        var bag = new DiagnosticBag();
         var setting = SpaceGroupReferenceResolver.Resolve(catalog, structureModel.SpaceGroup, bag);
         if (setting is null)
         {

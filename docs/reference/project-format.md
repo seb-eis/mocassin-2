@@ -41,7 +41,7 @@ generated JSON Schema is
 | `notes` | no | Optional free-text notes. |
 | `createdUtc` | yes | ISO-8601 UTC creation timestamp. |
 | `modifiedUtc` | yes | ISO-8601 UTC last-modified timestamp. |
-| `model` | yes | Scientific model body. It is an empty object in Step 01 and is extended by Steps 03–06. |
+| `model` | yes | Scientific model body. Step 03 adds `particles`, `particleSets`, and `structure`; energy, lattice, and simulation sections are added by Steps 04–06. |
 | `parameterizations` | yes | Parameterization templates. Step 01 stores identity and model signature only. |
 | `jobTemplates` | yes | Job templates. Step 01 stores identity and name only. |
 | `buildTemplates` | yes | Build recipes binding a job template to a parameterization. |

@@ -12,7 +12,7 @@ validation and a stable public API.
 - **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) at `5a06d67` (closeout dispatch; Ubuntu)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Ready for audit at `5a06d67`
+- **Audit:** Fixes required at `5a06d67` — fix branch in progress
 - **Design review:** [Ready with notes — accepted](../reviews/step-03.md)
 - **Feature list:** Approved 2026-11-08; step branch created
 - **Last updated:** 2026-11-08
@@ -27,6 +27,7 @@ validation and a stable public API.
 | `validation-composition` | `feature/step-03-particle-and-structure-models/validation-composition` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146, Packages 40/40 | — | `18940a1` |
 | `samples-and-docs` | `feature/step-03-particle-and-structure-models/samples-and-docs` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 263/263, Symmetry 150/150, Packages 40/40 | — | `9039b6f` |
 | `closeout` | `feature/step-03-particle-and-structure-models/closeout` | Squashed | `./tools/verify.sh all` passes; Core 263/263, Symmetry 152/152, Packages 41/41, Architecture 1/1 | [`42511003132`](https://github.com/seb-eis/mocassin-2/actions/runs/42511003132) — green | `5a06d67` |
+| `fix-audit-findings` | `feature/step-03-particle-and-structure-models/fix-audit-findings` | Awaiting approval | `./tools/verify.sh all` passes; Core 266/266, Symmetry 153/153, Packages 41/41, Architecture 1/1; BZO benchmark 9.98 µs (17 P1) | — | — |
 
 **Deviations and notes:**
 
@@ -35,8 +36,10 @@ validation and a stable public API.
   the oxygen and proton sets. The sample READMEs and `docs/user-guide/particles.md` document the convention.
 - The barium zirconate proton reference position is a **stable** site, not a KMC transition-only position.
   Proton-hopping transitions between the symmetry-equivalent positions belong to Step 04.
-- `ST008`/`STR008` and `STR011` were removed from the design during implementation and are documented as
+- `STR008` and `STR011` were removed from the design during implementation and are documented as
   unused; `STR014` and `STR015` were added.
+- `PAR004` is emitted by `Mocassin.Packages.Projects.ProjectValidationService` rather than Core because it
+  depends on the default occupation of a site's particle set; the diagnostic-ownership section records it.
 - `StructurePreviewService.TryCreatePreview` uses the parameter name `structureModel` instead of the design's
   `structure` because `structure` triggers CA1716 (reserved keyword) without a suppression.
 - `IStructureQuery.Structure` carries a member-level CA1716 suppression; `Project` exposes public
@@ -350,11 +353,12 @@ resolved catalog setting, or supercell dimensions.
   metadata is accepted. `ProjectValidator` remains Core-only.
 
 Diagnostic ownership follows the assembly boundary. Core emits diagnostics that depend only on the project
-graph and primitive types: `PAR001`–`PAR012`, `STR004`, `STR005`, `STR006`, `STR010`, `STR012`, `STR013`, and
-`STR015`. Symmetry emits diagnostics that require the catalog, cell geometry, or P1 expansion: `STR001`,
-`STR002`, `STR003`, `STR007`, `STR009`, and `STR014`. A composed validator runs both and returns one stable,
-sorted list. The Core class is named `CoreStructureDiagnosticCodes` to avoid confusion with the Symmetry
-`StructureDiagnosticCodes` class.
+graph and primitive types: `PAR001`, `PAR002`, `PAR005`–`PAR012`, `STR004`, `STR005`, `STR006`, `STR010`,
+`STR012`, `STR013`, and `STR015`. `Mocassin.Packages.Projects.ProjectValidationService` emits `PAR004`
+because it needs the default occupation of a site's particle set. Symmetry emits diagnostics that require the
+catalog, cell geometry, or P1 expansion: `STR001`, `STR002`, `STR003`, `STR007`, `STR009`, and `STR014`.
+`PAR003` is not used. A composed validator runs both and returns one stable, sorted list. The Core class is
+named `CoreStructureDiagnosticCodes` to avoid confusion with the Symmetry `StructureDiagnosticCodes` class.
 
 - Site-overlap detection uses exact grid coordinates after P1 expansion; no tolerance-based hash sets. The
   grid is the `24 × 10^12` fractional grid defined in Step 02. The structured encoder overload emits `STR007`

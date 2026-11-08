@@ -28,6 +28,17 @@ public sealed class ParticleSetTests
     }
 
     [Fact]
+    public void DefaultParticleIdsThroughWithExpressionNormalizeToEmpty()
+    {
+        var particleSet = new ParticleSet(ParticleSetId.New(), "Site", [ParticleId.New()]) with
+        {
+            ParticleIds = default,
+        };
+
+        Assert.Empty(particleSet.ParticleIds);
+    }
+
+    [Fact]
     public void ParticleIdsKeepAuthoredOrder()
     {
         var first = ParticleId.New();
