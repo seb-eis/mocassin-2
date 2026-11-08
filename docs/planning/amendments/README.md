@@ -107,8 +107,8 @@ If the parent step is already merged or tagged:
 
 | Amendment | Parent step | Status | Branch | Design review | Parent audit / tag |
 | --- | --- | --- | --- | --- | --- |
-| `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Ready for implementation** | — | [Review](../reviews/step-02-amend-1.md) | — |
-| `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Ready for implementation** | — | [Review](../reviews/step-02-amend-2.md) | — |
+| `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-1-public-math` | [Review](../reviews/step-02-amend-1.md) | `cd796b0`; audit ready at `d6eac6f` |
+| `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | [Review](../reviews/step-02-amend-2.md) | `d6eac6f`; audit ready at `d6eac6f` |
 
 `step-02-amend-1` covers the public generic math layer (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`,
 `Matrix4<T>`) and the replacement of the temporary `CellGeometry` array-based inverse. See

@@ -722,6 +722,9 @@ approval-report, and diff-review templates.
 - Required site sections: user guide, physics explanation, developer architecture guide, tutorials, CLI and
   format reference, troubleshooting/FAQ, performance/HPC, contributing, migration/clean-break, glossary/
   notation/units, examples/publications, and the API landing page.
+- **Math uses KaTeX.** Use `$$...$$` for display math and `\(...\)` for inline math; never use fenced
+  `text` blocks for formulas. The single-dollar `$...$` delimiter is deliberately not enabled. Preview the
+  rendered page before closing a documentation change.
 - **Diagrams use Mermaid fenced blocks** with the `mermaid` language tag, enabled through Zensical SuperFences
   custom fences.
 - **Docs-as-code:** Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Every

@@ -24,12 +24,13 @@ persistence and depends on `Core`; the kernel never calls the store.
 | Namespace | Responsibility |
 | --- | --- |
 | `Mocassin.Core.Ids` | Strongly typed UUID identifiers, UUIDv7 generation, reserved IDs, JSON converters. |
-| `Mocassin.Core.Geometry` | Semantic coordinate wrappers, public generic vector/matrix math (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, `Matrix4<T>`), trim policy. |
+| `Mocassin.Core.Geometry` | Fractional/Cartesian primitives, `Vector4I`, public generic vector/matrix math (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, `Matrix4<T>`), named geometry tolerances, trim policy. |
 | `Mocassin.Core.Units` | Unit value structs, range/finiteness validation, JSON converters. |
 | `Mocassin.Core.Diagnostics` | `Diagnostic`, `DiagnosticSeverity`, `ModelPath`, and stable-sorting `DiagnosticBag`. |
-| `Mocassin.Core.Model` | Model envelope placeholder, template identities, view settings. Steps 03–10 extend it. |
+| `Mocassin.Core.Model` | Model envelope placeholder, template identities, view settings, and `CellParameters`. Steps 03–10 extend it. |
 | `Mocassin.Core.Project` | Project envelope, metadata, JSON context, canonicalizer, hashers, migrations, validator. |
 | `Mocassin.Core.Editing` | Validated mutations, undo/redo changes, dirty tracking, autosave timing. |
+| `Mocassin.Core.Symmetry` | Persisted `AxisSetting`/`OriginChoice` vocabulary and catalog-derived `CrystalSystem`. |
 
 `Mocassin.Packages.Projects` adds:
 
@@ -66,7 +67,40 @@ flowchart LR
 4. The application saves the current project through `ProjectStore` and calls `MarkSaved` with the returned
    value, which includes the updated `modifiedUtc`.
 
-## Immutability and editing
+## Symmetry foundation (Step 02)
+
+`Mocassin.Core` owns the persisted symmetry vocabulary (`AxisSetting`, `OriginChoice`), the catalog-derived
+`CrystalSystem`, and the coordinate primitives. `Mocassin.Symmetry` owns the catalog, exact operations, cell
+geometry, P1 encoding, reduction, and periodic geometry. Core never references Symmetry.
+
+The Symmetry project is grouped by responsibility: `Contracts/` (version records), `SpaceGroups/` (catalog,
+operations, orbit helpers), `Geometry/` (cell, grid, encoder, periodic geometry), `Reduction/` (point groups,
+pair and cluster reduction), `Diagnostics/`, and `Caching/`.
+
+### Catalog generation and embedding
+
+The committed catalog is generated from pinned spglib by `tools/symmetry/generate_space_groups.py`. Normal
+builds embed `src/dotnet/Mocassin.Symmetry/Data/space-groups.json` and its SHA-256 as resources; they never
+run Python, spglib, or network access. The loader verifies the checksum, schema version, data version, 230/274
+counts, identity, determinants, and normalized translations at startup. The Contracts and policy CI job
+regenerates the canonical payload and fails on drift. Provenance and licensing are in `Data/README.md` and
+`NOTICE.md`.
+
+### Exact grid and P1 order
+
+Discrete symmetry uses the internal `24 × 10^12` grid. The canonical P1 order is a format contract: expand,
+trim, exact-grid deduplicate, sort by fractional `(a, b, c)`, and assign `P`. The encoder owns the linear-index
+cap and exact `Vector4I` mapping. See [Compilation Pipeline](compilation-pipeline.md) and
+[Symmetry and Geometry](../physics/symmetry.md).
+
+### Caches and versions
+
+Caches are scoped to one compilation and keyed by catalog version, contract version, setting identity, and
+operation inputs. `SymmetryContract.Version = "symmetry-1"` covers grid, P1 order, reduction, buckets, and
+codes. Compiled packages record the contract version, catalog data version, and catalog SHA-256 through
+`SymmetryVersionInfo`; the project may carry advisory metadata that warns `PROJ034` on mismatch.
+
+
 
 Project data uses records and `ImmutableArray<T>`. Editing never mutates a project in place:
 

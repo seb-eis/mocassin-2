@@ -5,6 +5,7 @@ using Mocassin.Core.Ids;
 
 namespace Mocassin.Core.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class IdsTests
 {
     public static TheoryData<Type> IdTypes =>

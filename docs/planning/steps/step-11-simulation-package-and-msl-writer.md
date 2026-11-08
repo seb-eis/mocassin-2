@@ -113,6 +113,9 @@ pull-based iterator.
 - The writer verifies round-trip decoding of every payload before insert (debug builds) or computes the
   canonical hash and compares it.
 - Payloads are deterministic: same parameterized model → identical bytes → same signature.
+- Package metadata records the symmetry contract version, space-group data version, and space-group data
+  SHA-256 from `SymmetryVersionInfo` (`symmetry_contract_version`, `space_group_data_version`,
+  `space_group_data_sha256`).
 
 ### 5. Metadata columns
 
@@ -175,7 +178,7 @@ If the package exceeds a configurable size, the builder warns and suggests:
 
 ## Implementation tasks
 
-- [ ] Implement the schema creation and version metadata.
+- [ ] Implement the schema creation and version metadata, including the symmetry version fields.
 - [ ] Implement MessagePack/Zstd payload serializers and the canonical signature projection (ADR 0010).
 - [ ] Implement content-addressed model/lattice insertion.
 - [ ] Implement streaming job insertion with batching, progress, and cancellation.
@@ -191,6 +194,8 @@ If the package exceeds a configurable size, the builder warns and suggests:
 - [ ] A package built from the ceria sample opens in SQLite and contains the expected tables/rows.
 - [ ] A published package opens read-only with no `-wal`/`-shm` files and has no results table.
 - [ ] Every job references a valid model and lattice; signatures verify.
+- [ ] Package metadata contains `symmetry_contract_version`, `space_group_data_version`, and
+  `space_group_data_sha256`.
 - [ ] Rebuilding the same project produces identical model/lattice signatures; stored compressed bytes may
   differ but the canonical projections must match.
 - [ ] A cancelled build leaves no temp file and does not modify an existing package.

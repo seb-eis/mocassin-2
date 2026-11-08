@@ -1,0 +1,41 @@
+{
+  "runnerClass": "linux-x64-github-ubuntu-latest-dotnet10",
+  "benchmark": "Mocassin.Benchmarks.P1Expansion20Cubed",
+  "command": "dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks -- --filter \"*P1Expansion20Cubed*\"",
+  "fixture": {
+    "cell": "cubic",
+    "cellLengthAngstrom": 5.41,
+    "p1Positions": 64,
+    "supercell": [
+      20,
+      20,
+      20
+    ],
+    "expandedPositions": 512000
+  },
+  "limits": {
+    "meanSeconds": 1.0,
+    "regressionFraction": 0.1
+  },
+  "recorded": {
+    "date": "2026-11-07",
+    "environment": "local container, AMD Ryzen 7 7840U, .NET SDK 10.0.403, Release, DefaultJob",
+    "meanMicroseconds": 965.3,
+    "targetMet": true
+  },
+  "matrixMath": {
+    "command": "dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks -- --filter \"*Matrix3*\"",
+    "environment": "local container, AMD Ryzen 7 7840U, .NET SDK 10.0.403, Release, DefaultJob",
+    "matrix3Transform": {
+      "meanNanoseconds": 0.8989,
+      "allocatedBytes": 0,
+      "disassembly": "fully inlined; no call to Matrix3.Transform, Vector3<T> operators, or the generic kernel"
+    },
+    "matrix3Inverse": {
+      "meanNanoseconds": 5.2202,
+      "allocatedBytes": 0
+    }
+  },
+  "evidenceStatus": "Local-container evidence recorded; the declared GitHub runner class is re-verified through the manual Benchmark CI job on release candidates.",
+  "ciJob": "benchmark (workflow_dispatch)"
+}

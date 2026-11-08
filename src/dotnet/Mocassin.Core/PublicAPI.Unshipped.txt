@@ -728,3 +728,274 @@ static Mocassin.Core.Units.TimeSeconds.operator ==(Mocassin.Core.Units.TimeSecon
 ~override Mocassin.Core.Units.LengthAngstrom.Equals(object obj) -> bool
 ~override Mocassin.Core.Units.TemperatureKelvin.Equals(object obj) -> bool
 ~override Mocassin.Core.Units.TimeSeconds.Equals(object obj) -> bool
+Mocassin.Core.Geometry.Cartesian3
+Mocassin.Core.Geometry.Cartesian3.Cartesian3() -> void
+Mocassin.Core.Geometry.Cartesian3.Cartesian3(double X, double Y, double Z) -> void
+Mocassin.Core.Geometry.Cartesian3.Cross(Mocassin.Core.Geometry.Cartesian3 other) -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Core.Geometry.Cartesian3.Deconstruct(out double X, out double Y, out double Z) -> void
+Mocassin.Core.Geometry.Cartesian3.DistanceTo(Mocassin.Core.Geometry.Cartesian3 other) -> double
+Mocassin.Core.Geometry.Cartesian3.Dot(Mocassin.Core.Geometry.Cartesian3 other) -> double
+Mocassin.Core.Geometry.Cartesian3.Equals(Mocassin.Core.Geometry.Cartesian3 other) -> bool
+Mocassin.Core.Geometry.Cartesian3.IsFinite.get -> bool
+Mocassin.Core.Geometry.Cartesian3.Length.get -> double
+Mocassin.Core.Geometry.Cartesian3.LengthSquared.get -> double
+Mocassin.Core.Geometry.Cartesian3.X.get -> double
+Mocassin.Core.Geometry.Cartesian3.X.init -> void
+Mocassin.Core.Geometry.Cartesian3.Y.get -> double
+Mocassin.Core.Geometry.Cartesian3.Y.init -> void
+Mocassin.Core.Geometry.Cartesian3.Z.get -> double
+Mocassin.Core.Geometry.Cartesian3.Z.init -> void
+Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Geometry.Fractional3.A.get -> double
+Mocassin.Core.Geometry.Fractional3.A.init -> void
+Mocassin.Core.Geometry.Fractional3.B.get -> double
+Mocassin.Core.Geometry.Fractional3.B.init -> void
+Mocassin.Core.Geometry.Fractional3.C.get -> double
+Mocassin.Core.Geometry.Fractional3.C.init -> void
+Mocassin.Core.Geometry.Fractional3.Cross(Mocassin.Core.Geometry.Fractional3 other) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Geometry.Fractional3.Deconstruct(out double A, out double B, out double C) -> void
+Mocassin.Core.Geometry.Fractional3.Dot(Mocassin.Core.Geometry.Fractional3 other) -> double
+Mocassin.Core.Geometry.Fractional3.Equals(Mocassin.Core.Geometry.Fractional3 other) -> bool
+Mocassin.Core.Geometry.Fractional3.Fractional3() -> void
+Mocassin.Core.Geometry.Fractional3.Fractional3(double A, double B, double C) -> void
+Mocassin.Core.Geometry.Fractional3.IsFinite.get -> bool
+Mocassin.Core.Geometry.Fractional3.Length.get -> double
+Mocassin.Core.Geometry.Fractional3.LengthSquared.get -> double
+Mocassin.Core.Geometry.Fractional3.TrimToUnitCell() -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Geometry.GeometryTolerances
+Mocassin.Core.Geometry.Vector4I
+Mocassin.Core.Geometry.Vector4I.A.get -> int
+Mocassin.Core.Geometry.Vector4I.A.init -> void
+Mocassin.Core.Geometry.Vector4I.B.get -> int
+Mocassin.Core.Geometry.Vector4I.B.init -> void
+Mocassin.Core.Geometry.Vector4I.C.get -> int
+Mocassin.Core.Geometry.Vector4I.C.init -> void
+Mocassin.Core.Geometry.Vector4I.Deconstruct(out int A, out int B, out int C, out int P) -> void
+Mocassin.Core.Geometry.Vector4I.Equals(Mocassin.Core.Geometry.Vector4I other) -> bool
+Mocassin.Core.Geometry.Vector4I.P.get -> int
+Mocassin.Core.Geometry.Vector4I.P.init -> void
+Mocassin.Core.Geometry.Vector4I.Vector4I() -> void
+Mocassin.Core.Geometry.Vector4I.Vector4I(int A, int B, int C, int P) -> void
+const Mocassin.Core.Geometry.GeometryTolerances.FractionalTrimTolerance = 1E-10 -> double
+override Mocassin.Core.Geometry.Cartesian3.GetHashCode() -> int
+override Mocassin.Core.Geometry.Cartesian3.ToString() -> string!
+override Mocassin.Core.Geometry.Fractional3.GetHashCode() -> int
+override Mocassin.Core.Geometry.Fractional3.ToString() -> string!
+override Mocassin.Core.Geometry.Vector4I.GetHashCode() -> int
+override Mocassin.Core.Geometry.Vector4I.ToString() -> string!
+static Mocassin.Core.Geometry.Cartesian3.Zero.get -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator !=(Mocassin.Core.Geometry.Cartesian3 left, Mocassin.Core.Geometry.Cartesian3 right) -> bool
+static Mocassin.Core.Geometry.Cartesian3.operator *(Mocassin.Core.Geometry.Cartesian3 value, double factor) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator *(double factor, Mocassin.Core.Geometry.Cartesian3 value) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator +(Mocassin.Core.Geometry.Cartesian3 left, Mocassin.Core.Geometry.Cartesian3 right) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator -(Mocassin.Core.Geometry.Cartesian3 left, Mocassin.Core.Geometry.Cartesian3 right) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator -(Mocassin.Core.Geometry.Cartesian3 value) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator /(Mocassin.Core.Geometry.Cartesian3 value, double divisor) -> Mocassin.Core.Geometry.Cartesian3
+static Mocassin.Core.Geometry.Cartesian3.operator ==(Mocassin.Core.Geometry.Cartesian3 left, Mocassin.Core.Geometry.Cartesian3 right) -> bool
+static Mocassin.Core.Geometry.Fractional3.Zero.get -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator !=(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> bool
+static Mocassin.Core.Geometry.Fractional3.operator *(Mocassin.Core.Geometry.Fractional3 value, double factor) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator *(double factor, Mocassin.Core.Geometry.Fractional3 value) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator +(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator -(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator -(Mocassin.Core.Geometry.Fractional3 value) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator /(Mocassin.Core.Geometry.Fractional3 value, double divisor) -> Mocassin.Core.Geometry.Fractional3
+static Mocassin.Core.Geometry.Fractional3.operator ==(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> bool
+static Mocassin.Core.Geometry.Vector4I.Zero.get -> Mocassin.Core.Geometry.Vector4I
+static Mocassin.Core.Geometry.Vector4I.operator !=(Mocassin.Core.Geometry.Vector4I left, Mocassin.Core.Geometry.Vector4I right) -> bool
+static Mocassin.Core.Geometry.Vector4I.operator +(Mocassin.Core.Geometry.Vector4I left, Mocassin.Core.Geometry.Vector4I right) -> Mocassin.Core.Geometry.Vector4I
+static Mocassin.Core.Geometry.Vector4I.operator -(Mocassin.Core.Geometry.Vector4I left, Mocassin.Core.Geometry.Vector4I right) -> Mocassin.Core.Geometry.Vector4I
+static Mocassin.Core.Geometry.Vector4I.operator -(Mocassin.Core.Geometry.Vector4I value) -> Mocassin.Core.Geometry.Vector4I
+static Mocassin.Core.Geometry.Vector4I.operator ==(Mocassin.Core.Geometry.Vector4I left, Mocassin.Core.Geometry.Vector4I right) -> bool
+~override Mocassin.Core.Geometry.Cartesian3.Equals(object obj) -> bool
+~override Mocassin.Core.Geometry.Fractional3.Equals(object obj) -> bool
+~override Mocassin.Core.Geometry.Vector4I.Equals(object obj) -> bool
+Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.Hexagonal = 4 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.None = 0 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.Rhombohedral = 5 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.UniqueAxisA = 1 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.UniqueAxisB = 2 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.AxisSetting.UniqueAxisC = 3 -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Cubic = 6 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Hexagonal = 5 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Monoclinic = 1 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Orthorhombic = 2 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Tetragonal = 3 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Triclinic = 0 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.CrystalSystem.Trigonal = 4 -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Symmetry.OriginChoice.None = 0 -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Symmetry.OriginChoice.OriginChoice1 = 1 -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Symmetry.OriginChoice.OriginChoice2 = 2 -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Core.Model.CellParameters
+Mocassin.Core.Model.CellParameters.<Clone>$() -> Mocassin.Core.Model.CellParameters!
+Mocassin.Core.Model.CellParameters.A.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.CellParameters.A.init -> void
+Mocassin.Core.Model.CellParameters.Alpha.get -> Mocassin.Core.Units.AngleDegrees
+Mocassin.Core.Model.CellParameters.Alpha.init -> void
+Mocassin.Core.Model.CellParameters.B.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.CellParameters.B.init -> void
+Mocassin.Core.Model.CellParameters.Beta.get -> Mocassin.Core.Units.AngleDegrees
+Mocassin.Core.Model.CellParameters.Beta.init -> void
+Mocassin.Core.Model.CellParameters.C.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.CellParameters.C.init -> void
+Mocassin.Core.Model.CellParameters.CellParameters(Mocassin.Core.Units.LengthAngstrom A, Mocassin.Core.Units.LengthAngstrom B, Mocassin.Core.Units.LengthAngstrom C, Mocassin.Core.Units.AngleDegrees Alpha, Mocassin.Core.Units.AngleDegrees Beta, Mocassin.Core.Units.AngleDegrees Gamma) -> void
+Mocassin.Core.Model.CellParameters.Deconstruct(out Mocassin.Core.Units.LengthAngstrom A, out Mocassin.Core.Units.LengthAngstrom B, out Mocassin.Core.Units.LengthAngstrom C, out Mocassin.Core.Units.AngleDegrees Alpha, out Mocassin.Core.Units.AngleDegrees Beta, out Mocassin.Core.Units.AngleDegrees Gamma) -> void
+Mocassin.Core.Model.CellParameters.Equals(Mocassin.Core.Model.CellParameters? other) -> bool
+Mocassin.Core.Model.CellParameters.Gamma.get -> Mocassin.Core.Units.AngleDegrees
+Mocassin.Core.Model.CellParameters.Gamma.init -> void
+const Mocassin.Core.Geometry.GeometryTolerances.CellAngleTolerance = 0.001 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.CellConditionLimit = 1000000000000 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.CellDeterminantTolerance = 1E-12 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.CellLengthTolerance = 0.001 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.DistanceEqualityTolerance = 1E-05 -> double
+const Mocassin.Core.Geometry.GeometryTolerances.GeometricEqualityTolerance = 1E-06 -> double
+override Mocassin.Core.Model.CellParameters.Equals(object? obj) -> bool
+override Mocassin.Core.Model.CellParameters.GetHashCode() -> int
+override Mocassin.Core.Model.CellParameters.ToString() -> string!
+static Mocassin.Core.Model.CellParameters.operator !=(Mocassin.Core.Model.CellParameters? left, Mocassin.Core.Model.CellParameters? right) -> bool
+static Mocassin.Core.Model.CellParameters.operator ==(Mocassin.Core.Model.CellParameters? left, Mocassin.Core.Model.CellParameters? right) -> bool
+const Mocassin.Core.Geometry.GeometryTolerances.PairDistanceBucket = 1E-05 -> double
+Mocassin.Core.Geometry.Matrix3<T>
+Mocassin.Core.Geometry.Matrix3<T>.Column0.get -> Mocassin.Core.Geometry.Vector3<T>
+Mocassin.Core.Geometry.Matrix3<T>.Column1.get -> Mocassin.Core.Geometry.Vector3<T>
+Mocassin.Core.Geometry.Matrix3<T>.Column2.get -> Mocassin.Core.Geometry.Vector3<T>
+Mocassin.Core.Geometry.Matrix3<T>.ConditionNumber.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.Deconstruct(out Mocassin.Core.Geometry.Vector3<T> Row0, out Mocassin.Core.Geometry.Vector3<T> Row1, out Mocassin.Core.Geometry.Vector3<T> Row2) -> void
+Mocassin.Core.Geometry.Matrix3<T>.Determinant.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.Equals(Mocassin.Core.Geometry.Matrix3<T> other) -> bool
+Mocassin.Core.Geometry.Matrix3<T>.InfinityNorm.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.Inverse() -> Mocassin.Core.Geometry.Matrix3<T>
+Mocassin.Core.Geometry.Matrix3<T>.M11.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.M12.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.M13.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.M21.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.M22.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.M23.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.M31.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.M32.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.M33.get -> T
+Mocassin.Core.Geometry.Matrix3<T>.Matrix3() -> void
+Mocassin.Core.Geometry.Matrix3<T>.Matrix3(Mocassin.Core.Geometry.Vector3<T> Row0, Mocassin.Core.Geometry.Vector3<T> Row1, Mocassin.Core.Geometry.Vector3<T> Row2) -> void
+Mocassin.Core.Geometry.Matrix3<T>.Row0.get -> Mocassin.Core.Geometry.Vector3<T>
+Mocassin.Core.Geometry.Matrix3<T>.Row0.init -> void
+Mocassin.Core.Geometry.Matrix3<T>.Row1.get -> Mocassin.Core.Geometry.Vector3<T>
+Mocassin.Core.Geometry.Matrix3<T>.Row1.init -> void
+Mocassin.Core.Geometry.Matrix3<T>.Row2.get -> Mocassin.Core.Geometry.Vector3<T>
+Mocassin.Core.Geometry.Matrix3<T>.Row2.init -> void
+Mocassin.Core.Geometry.Matrix3<T>.Transform(Mocassin.Core.Geometry.Vector3<T> vector) -> Mocassin.Core.Geometry.Vector3<T>
+Mocassin.Core.Geometry.Matrix3<T>.Transpose() -> Mocassin.Core.Geometry.Matrix3<T>
+Mocassin.Core.Geometry.Matrix4<T>
+Mocassin.Core.Geometry.Matrix4<T>.Column0.get -> Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Matrix4<T>.Column1.get -> Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Matrix4<T>.Column2.get -> Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Matrix4<T>.Column3.get -> Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Matrix4<T>.ConditionNumber.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.Deconstruct(out Mocassin.Core.Geometry.Vector4<T> Row0, out Mocassin.Core.Geometry.Vector4<T> Row1, out Mocassin.Core.Geometry.Vector4<T> Row2, out Mocassin.Core.Geometry.Vector4<T> Row3) -> void
+Mocassin.Core.Geometry.Matrix4<T>.Determinant.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.Equals(Mocassin.Core.Geometry.Matrix4<T> other) -> bool
+Mocassin.Core.Geometry.Matrix4<T>.InfinityNorm.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.Inverse() -> Mocassin.Core.Geometry.Matrix4<T>
+Mocassin.Core.Geometry.Matrix4<T>.M11.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M12.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M13.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M14.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M21.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M22.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M23.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M24.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M31.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M32.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M33.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M34.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M41.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M42.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M43.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.M44.get -> T
+Mocassin.Core.Geometry.Matrix4<T>.Matrix4() -> void
+Mocassin.Core.Geometry.Matrix4<T>.Matrix4(Mocassin.Core.Geometry.Vector4<T> Row0, Mocassin.Core.Geometry.Vector4<T> Row1, Mocassin.Core.Geometry.Vector4<T> Row2, Mocassin.Core.Geometry.Vector4<T> Row3) -> void
+Mocassin.Core.Geometry.Matrix4<T>.Row0.get -> Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Matrix4<T>.Row0.init -> void
+Mocassin.Core.Geometry.Matrix4<T>.Row1.get -> Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Matrix4<T>.Row1.init -> void
+Mocassin.Core.Geometry.Matrix4<T>.Row2.get -> Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Matrix4<T>.Row2.init -> void
+Mocassin.Core.Geometry.Matrix4<T>.Row3.get -> Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Matrix4<T>.Row3.init -> void
+Mocassin.Core.Geometry.Matrix4<T>.Transform(Mocassin.Core.Geometry.Vector4<T> vector) -> Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Matrix4<T>.Transpose() -> Mocassin.Core.Geometry.Matrix4<T>
+Mocassin.Core.Geometry.Vector3<T>
+Mocassin.Core.Geometry.Vector3<T>.Deconstruct(out T X, out T Y, out T Z) -> void
+Mocassin.Core.Geometry.Vector3<T>.Equals(Mocassin.Core.Geometry.Vector3<T> other) -> bool
+Mocassin.Core.Geometry.Vector3<T>.LengthSquared.get -> T
+Mocassin.Core.Geometry.Vector3<T>.Vector3() -> void
+Mocassin.Core.Geometry.Vector3<T>.Vector3(T X, T Y, T Z) -> void
+Mocassin.Core.Geometry.Vector3<T>.X.get -> T
+Mocassin.Core.Geometry.Vector3<T>.X.init -> void
+Mocassin.Core.Geometry.Vector3<T>.Y.get -> T
+Mocassin.Core.Geometry.Vector3<T>.Y.init -> void
+Mocassin.Core.Geometry.Vector3<T>.Z.get -> T
+Mocassin.Core.Geometry.Vector3<T>.Z.init -> void
+Mocassin.Core.Geometry.Vector4<T>
+Mocassin.Core.Geometry.Vector4<T>.Deconstruct(out T X, out T Y, out T Z, out T W) -> void
+Mocassin.Core.Geometry.Vector4<T>.Equals(Mocassin.Core.Geometry.Vector4<T> other) -> bool
+Mocassin.Core.Geometry.Vector4<T>.LengthSquared.get -> T
+Mocassin.Core.Geometry.Vector4<T>.Vector4() -> void
+Mocassin.Core.Geometry.Vector4<T>.Vector4(T X, T Y, T Z, T W) -> void
+Mocassin.Core.Geometry.Vector4<T>.W.get -> T
+Mocassin.Core.Geometry.Vector4<T>.W.init -> void
+Mocassin.Core.Geometry.Vector4<T>.X.get -> T
+Mocassin.Core.Geometry.Vector4<T>.X.init -> void
+Mocassin.Core.Geometry.Vector4<T>.Y.get -> T
+Mocassin.Core.Geometry.Vector4<T>.Y.init -> void
+Mocassin.Core.Geometry.Vector4<T>.Z.get -> T
+Mocassin.Core.Geometry.Vector4<T>.Z.init -> void
+override Mocassin.Core.Geometry.Matrix3<T>.GetHashCode() -> int
+override Mocassin.Core.Geometry.Matrix3<T>.ToString() -> string!
+override Mocassin.Core.Geometry.Matrix4<T>.GetHashCode() -> int
+override Mocassin.Core.Geometry.Matrix4<T>.ToString() -> string!
+override Mocassin.Core.Geometry.Vector3<T>.GetHashCode() -> int
+override Mocassin.Core.Geometry.Vector3<T>.ToString() -> string!
+override Mocassin.Core.Geometry.Vector4<T>.GetHashCode() -> int
+override Mocassin.Core.Geometry.Vector4<T>.ToString() -> string!
+static Mocassin.Core.Geometry.Matrix3<T>.FromColumns(Mocassin.Core.Geometry.Vector3<T> column0, Mocassin.Core.Geometry.Vector3<T> column1, Mocassin.Core.Geometry.Vector3<T> column2) -> Mocassin.Core.Geometry.Matrix3<T>
+static Mocassin.Core.Geometry.Matrix3<T>.FromRows(Mocassin.Core.Geometry.Vector3<T> row0, Mocassin.Core.Geometry.Vector3<T> row1, Mocassin.Core.Geometry.Vector3<T> row2) -> Mocassin.Core.Geometry.Matrix3<T>
+static Mocassin.Core.Geometry.Matrix3<T>.Identity.get -> Mocassin.Core.Geometry.Matrix3<T>
+static Mocassin.Core.Geometry.Matrix3<T>.operator !=(Mocassin.Core.Geometry.Matrix3<T> left, Mocassin.Core.Geometry.Matrix3<T> right) -> bool
+static Mocassin.Core.Geometry.Matrix3<T>.operator *(Mocassin.Core.Geometry.Matrix3<T> left, Mocassin.Core.Geometry.Matrix3<T> right) -> Mocassin.Core.Geometry.Matrix3<T>
+static Mocassin.Core.Geometry.Matrix3<T>.operator ==(Mocassin.Core.Geometry.Matrix3<T> left, Mocassin.Core.Geometry.Matrix3<T> right) -> bool
+static Mocassin.Core.Geometry.Matrix4<T>.FromColumns(Mocassin.Core.Geometry.Vector4<T> column0, Mocassin.Core.Geometry.Vector4<T> column1, Mocassin.Core.Geometry.Vector4<T> column2, Mocassin.Core.Geometry.Vector4<T> column3) -> Mocassin.Core.Geometry.Matrix4<T>
+static Mocassin.Core.Geometry.Matrix4<T>.FromRows(Mocassin.Core.Geometry.Vector4<T> row0, Mocassin.Core.Geometry.Vector4<T> row1, Mocassin.Core.Geometry.Vector4<T> row2, Mocassin.Core.Geometry.Vector4<T> row3) -> Mocassin.Core.Geometry.Matrix4<T>
+static Mocassin.Core.Geometry.Matrix4<T>.Identity.get -> Mocassin.Core.Geometry.Matrix4<T>
+static Mocassin.Core.Geometry.Matrix4<T>.operator !=(Mocassin.Core.Geometry.Matrix4<T> left, Mocassin.Core.Geometry.Matrix4<T> right) -> bool
+static Mocassin.Core.Geometry.Matrix4<T>.operator *(Mocassin.Core.Geometry.Matrix4<T> left, Mocassin.Core.Geometry.Matrix4<T> right) -> Mocassin.Core.Geometry.Matrix4<T>
+static Mocassin.Core.Geometry.Matrix4<T>.operator ==(Mocassin.Core.Geometry.Matrix4<T> left, Mocassin.Core.Geometry.Matrix4<T> right) -> bool
+static Mocassin.Core.Geometry.Vector3<T>.Cross(Mocassin.Core.Geometry.Vector3<T> left, Mocassin.Core.Geometry.Vector3<T> right) -> Mocassin.Core.Geometry.Vector3<T>
+static Mocassin.Core.Geometry.Vector3<T>.Dot(Mocassin.Core.Geometry.Vector3<T> left, Mocassin.Core.Geometry.Vector3<T> right) -> T
+static Mocassin.Core.Geometry.Vector3<T>.Zero.get -> Mocassin.Core.Geometry.Vector3<T>
+static Mocassin.Core.Geometry.Vector3<T>.operator !=(Mocassin.Core.Geometry.Vector3<T> left, Mocassin.Core.Geometry.Vector3<T> right) -> bool
+static Mocassin.Core.Geometry.Vector3<T>.operator *(Mocassin.Core.Geometry.Vector3<T> value, T factor) -> Mocassin.Core.Geometry.Vector3<T>
+static Mocassin.Core.Geometry.Vector3<T>.operator *(T factor, Mocassin.Core.Geometry.Vector3<T> value) -> Mocassin.Core.Geometry.Vector3<T>
+static Mocassin.Core.Geometry.Vector3<T>.operator +(Mocassin.Core.Geometry.Vector3<T> left, Mocassin.Core.Geometry.Vector3<T> right) -> Mocassin.Core.Geometry.Vector3<T>
+static Mocassin.Core.Geometry.Vector3<T>.operator -(Mocassin.Core.Geometry.Vector3<T> left, Mocassin.Core.Geometry.Vector3<T> right) -> Mocassin.Core.Geometry.Vector3<T>
+static Mocassin.Core.Geometry.Vector3<T>.operator -(Mocassin.Core.Geometry.Vector3<T> value) -> Mocassin.Core.Geometry.Vector3<T>
+static Mocassin.Core.Geometry.Vector3<T>.operator /(Mocassin.Core.Geometry.Vector3<T> value, T divisor) -> Mocassin.Core.Geometry.Vector3<T>
+static Mocassin.Core.Geometry.Vector3<T>.operator ==(Mocassin.Core.Geometry.Vector3<T> left, Mocassin.Core.Geometry.Vector3<T> right) -> bool
+static Mocassin.Core.Geometry.Vector4<T>.Dot(Mocassin.Core.Geometry.Vector4<T> left, Mocassin.Core.Geometry.Vector4<T> right) -> T
+static Mocassin.Core.Geometry.Vector4<T>.Zero.get -> Mocassin.Core.Geometry.Vector4<T>
+static Mocassin.Core.Geometry.Vector4<T>.operator !=(Mocassin.Core.Geometry.Vector4<T> left, Mocassin.Core.Geometry.Vector4<T> right) -> bool
+static Mocassin.Core.Geometry.Vector4<T>.operator *(Mocassin.Core.Geometry.Vector4<T> value, T factor) -> Mocassin.Core.Geometry.Vector4<T>
+static Mocassin.Core.Geometry.Vector4<T>.operator *(T factor, Mocassin.Core.Geometry.Vector4<T> value) -> Mocassin.Core.Geometry.Vector4<T>
+static Mocassin.Core.Geometry.Vector4<T>.operator +(Mocassin.Core.Geometry.Vector4<T> left, Mocassin.Core.Geometry.Vector4<T> right) -> Mocassin.Core.Geometry.Vector4<T>
+static Mocassin.Core.Geometry.Vector4<T>.operator -(Mocassin.Core.Geometry.Vector4<T> left, Mocassin.Core.Geometry.Vector4<T> right) -> Mocassin.Core.Geometry.Vector4<T>
+static Mocassin.Core.Geometry.Vector4<T>.operator -(Mocassin.Core.Geometry.Vector4<T> value) -> Mocassin.Core.Geometry.Vector4<T>
+static Mocassin.Core.Geometry.Vector4<T>.operator /(Mocassin.Core.Geometry.Vector4<T> value, T divisor) -> Mocassin.Core.Geometry.Vector4<T>
+static Mocassin.Core.Geometry.Vector4<T>.operator ==(Mocassin.Core.Geometry.Vector4<T> left, Mocassin.Core.Geometry.Vector4<T> right) -> bool
+~override Mocassin.Core.Geometry.Matrix3<T>.Equals(object obj) -> bool
+~override Mocassin.Core.Geometry.Matrix4<T>.Equals(object obj) -> bool
+~override Mocassin.Core.Geometry.Vector3<T>.Equals(object obj) -> bool
+~override Mocassin.Core.Geometry.Vector4<T>.Equals(object obj) -> bool
+Mocassin.Core.Geometry.Vector3<T>.Dot(Mocassin.Core.Geometry.Vector3<T> other) -> T
+Mocassin.Core.Geometry.Vector4<T>.Dot(Mocassin.Core.Geometry.Vector4<T> other) -> T

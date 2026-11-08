@@ -102,14 +102,26 @@ A **chiral partner** is the representative of the inverse orbit when the inverse
 
 ## Symmetry contract
 
-- `SymmetryContractVersion = "symmetry-1"` covers the fractional grid, canonical P order, pair-shell order,
+- `SymmetryContract.Version = "symmetry-1"` covers the fractional grid, canonical P order, pair-shell order,
   `1 fm` bucket, cluster canonicalization, and reduction semantics.
-- The compiled payload records it with the catalog data version and checksum; changing a covered rule bumps
-  the version.
+- `SymmetryContract.FractionalGridDenominator = 24,000,000,000,000`.
+- The compiled payload records the contract version, catalog data version, and catalog SHA-256; changing a
+  covered rule bumps the version.
 - In-memory caches are scoped per compilation. Persisted IDs use SHA-256, never `string.GetHashCode()`.
 - The project envelope may carry optional `spaceGroupDataVersion`, `spaceGroupDataSha256`, and
   `symmetryContractVersion`; a mismatch warns `PROJ034`. The compiled payload records the authoritative
   versions.
+
+## Space-group catalog
+
+- The embedded catalog has 230 groups in 274 settings: 186 standard, 48 origin-choice, 26 monoclinic
+  unique-axis B/C, and 14 rhombohedral.
+- Data version: `spglib-2.8.0/catalog-1`. The SHA-256 covers the canonical settings payload.
+- The committed JSON is compact and positional:
+  `setting = [number, hermannMauguin, hallSymbol, crystalSystem, axis, origin, operations]`,
+  `operation = [a11..a33, tA, tB, tC]` with translation numerators over 24.
+- Settings are sorted by `(number, axis, origin)`; operations by linear row-major then translation numerators.
+- The catalog is a resource, not a runtime database; normal builds never need spglib.
 
 ## Time and seeds
 

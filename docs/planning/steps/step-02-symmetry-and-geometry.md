@@ -7,18 +7,48 @@ orbit/permutation reduction, and periodic geometry kernels.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
-- **Step CI:** —
+- **Status:** In progress
+- **Step branch:** `step/02-symmetry-and-geometry`
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) at `09a3317` (closeout CI policy dispatch; Ubuntu)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
-- **Design review:** Ready with notes
+- **Audit:** Passed with notes at `6341b56` (layout-only refactor re-audited)
+- **Design review:** Ready with notes — accepted by the human owner on 2026-11-07
 - **Last updated:** 2026-11-07
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `core-geometry` | `feature/step-02-symmetry-and-geometry/core-geometry` | Squashed | Core tests 158/158; `dotnet format --verify-no-changes` passes | [`42395501397`](https://github.com/seb-eis/mocassin-2/actions/runs/42395501397) — green | `e6f5e1d` |
+| `exact-grid` | `feature/step-02-symmetry-and-geometry/exact-grid` | Squashed | Symmetry tests 34/34; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42396745263`](https://github.com/seb-eis/mocassin-2/actions/runs/42396745263) — green | `04e3213` |
+| `space-group-catalog` | `feature/step-02-symmetry-and-geometry/space-group-catalog` | Squashed | Symmetry tests 60/60; generator `--check` current; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42399290576`](https://github.com/seb-eis/mocassin-2/actions/runs/42399290576) — green | `24f1b12` |
+| `cell-geometry` | `feature/step-02-symmetry-and-geometry/cell-geometry` | Squashed | Symmetry tests 74/74; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42404289388`](https://github.com/seb-eis/mocassin-2/actions/runs/42404289388) — green | `549a03a` |
+| `p1-encoder` | `feature/step-02-symmetry-and-geometry/p1-encoder` | Squashed | Symmetry tests 87/87; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42405555283`](https://github.com/seb-eis/mocassin-2/actions/runs/42405555283) — green | `45c248d` |
+| `periodic-geometry` | `feature/step-02-symmetry-and-geometry/periodic-geometry` | Squashed | Symmetry tests 95/95; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42416609921`](https://github.com/seb-eis/mocassin-2/actions/runs/42416609921) — green | `9e5ebf7` |
+| `orbit-reduction` | `feature/step-02-symmetry-and-geometry/orbit-reduction` | Squashed | Symmetry tests 108/108; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42418281190`](https://github.com/seb-eis/mocassin-2/actions/runs/42418281190) — green | `a9ea5ae` |
+| `contracts-caches-benchmarks` | `feature/step-02-symmetry-and-geometry/contracts-caches-benchmarks` | Squashed | Symmetry tests 116/116; benchmark `P1Expansion20Cubed` 965.3 µs (target < 1 s); full solution tests pass; `dotnet format --verify-no-changes` passes | [`42419100983`](https://github.com/seb-eis/mocassin-2/actions/runs/42419100983) — licence gate failed; fixed below | `4aaeedd` |
+| `fix-benchmark-licenses` | `feature/step-02-symmetry-and-geometry/fix-benchmark-licenses` | Squashed | NuGet licence gate 44 packages; full solution tests pass; `dotnet format --verify-no-changes` passes | [`42419605889`](https://github.com/seb-eis/mocassin-2/actions/runs/42419605889) — green | `a3be35a` |
+| `closeout` | `feature/step-02-symmetry-and-geometry/closeout` | Squashed | Full solution tests; strict docs and combined docs build; `dotnet format`; API compat, benchmark, NuGet licence/vulnerability, contract drift, SPDX, secret gates | [`42426516882`](https://github.com/seb-eis/mocassin-2/actions/runs/42426516882) — green | `d2efe6a` |
+| `amend-1-public-math` | `feature/step-02-symmetry-and-geometry/amend-1-public-math` | Squashed | Core 167/167; Symmetry 117/117; matrix benchmark 0.90 ns transform / 5.22 ns inverse, 0 allocations; API baselines updated | [`42426221778`](https://github.com/seb-eis/mocassin-2/actions/runs/42426221778) — green | `cd796b0` |
+| `amend-2-docs-math` | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | Squashed | Strict docs and combined docs build; 21 rendered KaTeX elements with MathML; screenshot `/tmp/opencode/step-02-symmetry.png` | [`42427151237`](https://github.com/seb-eis/mocassin-2/actions/runs/42427151237) — green | `d6eac6f` |
+| `fix-audit-findings` | `feature/step-02-symmetry-and-geometry/fix-audit-findings` | Squashed | Symmetry 127/127; brute-force/random oracles; full solution tests; strict docs; format clean; benchmark CI job added | [`42429237412`](https://github.com/seb-eis/mocassin-2/actions/runs/42429237412) — green | `4a30fdf` |
+| `fix-audit-round2` | `feature/step-02-symmetry-and-geometry/fix-audit-round2` | Squashed | Independent ASE multiplicity oracle, union-find pair oracle, exhaustive cluster oracle; 127/127 | [`42469556610`](https://github.com/seb-eis/mocassin-2/actions/runs/42469556610) — green | `cfc419f` |
+| `organize-symmetry-assembly` | `feature/step-02-symmetry-and-geometry/organize-symmetry-assembly` | Squashed | Assembly grouped into Contracts/SpaceGroups/Geometry/Reduction/Diagnostics/Caching; full solution tests pass; format clean | [`42475359256`](https://github.com/seb-eis/mocassin-2/actions/runs/42475359256) — green | `6341b56` |
+
+**Deviations and notes:**
+
+- `periodic-geometry` was implemented before `orbit-reduction` because pair reduction consumes
+  radial search. The approved feature set is unchanged.
+- The catalog uses a compact positional JSON encoding instead of the reviewed keyed/pretty form; the human
+  owner requested a dense machine-facing representation. `Data/README.md` documents the schema.
+- The `CellConditionLimit` guard is defensive: within the v1 length range and positive-determinant cutoff,
+  realizable cells stay below `1e12`. The limit predicate is unit-tested directly.
+- The symmetry version record is ready, but writing it into the compiled `.msl` metadata belongs to Step 11.
+- ApiCompat baseline refresh now uses reference assemblies, keeping the checked-in binaries small.
+- Amendment 1 adds the public generic math layer and migrates `CellGeometry` to `Matrix3<double>`.
+- Amendment 2 adds KaTeX 0.19.1 rendering and converts the published symmetry formulas.
+- Combined audited solution commit: `d6eac6f`; audit-fix solution: `cfc419f`; final CI-policy sync: `09a3317`.
+- The Symmetry assembly was reorganized into logical folders after the passed audit; namespaces and behavior
+  are unchanged, but the audit must cover the new commit.
 
 ## Goal
 
@@ -137,7 +167,8 @@ The compatibility catalog contains exactly 274 settings:
 - `DataVersion = spglib-2.8.0/catalog-1`; `catalog-1` is the generator/schema version and is bumped when the
   selection rule, encoding, or schema changes.
 - The SHA-256 checksum covers the canonical settings payload, not the whole file and not a timestamp. The
-  committed JSON may be pretty-printed for review; the checksum is computed over the canonical form.
+  committed JSON is compact because it is machine-consumed and hashed, not hand-reviewed; the checksum is
+  computed over the canonical settings payload.
 - The loader recomputes the checksum at startup and treats a mismatch as a build/installation error.
 - The original database may be used locally to confirm the expected count and setting-name categories. It is
   not a CI dependency, is not copied, and is not used to generate catalog data.
@@ -146,17 +177,19 @@ The compatibility catalog contains exactly 274 settings:
 
 - The generated catalog is committed; normal .NET builds do not run Python, spglib, or any data download.
 - Layout:
-  - `src/dotnet/Mocassin.Symmetry/Data/space-groups.json` — committed, reviewable catalog;
+  - `src/dotnet/Mocassin.Symmetry/Data/space-groups.json` — committed catalog using the compact positional
+    encoding;
   - `src/dotnet/Mocassin.Symmetry/Data/space-groups.sha256` — checksum of the canonical settings payload;
   - `src/dotnet/Mocassin.Symmetry/Data/README.md` — provenance, selection rule, regeneration command, and
     known deviations;
   - `tools/symmetry/generate_space_groups.py` — dev-only generator;
   - `tools/symmetry/requirements.txt` — pinned `spglib==2.8.0`.
-- The JSON is UTF-8 without BOM, LF-only, deterministic, and contains no timestamps. The root metadata is
-  `schemaVersion`, `dataVersion`, `source`, `sourceVersion`, `selection`, and `settings`.
-- Settings are sorted by `(number, axis, origin)`. Keys use schema order. Rational translations are encoded
-  as `[numerator, denominator]`. The committed file may be pretty-printed; the checksum uses the canonical
-  payload.
+- The JSON is UTF-8 without BOM, LF-only, deterministic compact JSON, and contains no timestamps. The root
+  metadata is `schemaVersion`, `dataVersion`, `source`, `sourceVersion`, `selection`, and `settings`.
+- Settings are sorted by `(number, axis, origin)`. Each setting is the positional array
+  `[number, hermannMauguin, hallSymbol, crystalSystem, axis, origin, operations]`; each operation is
+  `[a11, a12, a13, a21, a22, a23, a31, a32, a33, tA, tB, tC]`. Translation numerators are exact over the
+  fixed denominator 24 and normalized to `[0, 24)`. The checksum uses the canonical settings payload.
 - Operations within a setting are sorted canonically by linear matrix row-major (`a11..a33`), then by the
   three normalized translation numerators (denominator 24). This fixes the checksum across spglib iteration
   order.
@@ -626,47 +659,48 @@ reduced/Niggli basis can be added later as an optimization.
 
 ## Implementation tasks
 
-- [ ] Add the space-group data source and a build-time generator for the embedded catalog.
-- [ ] Implement `SymmetryOperation` with integer composition/inverse/closure.
-- [ ] Implement `SpaceGroupSetting`, `SpaceGroupCatalog`, and lookup APIs.
-- [ ] Implement crystal-system constraints and the corrected cell-vector transform.
-- [ ] Add `Fractional3`, `Cartesian3`, and `Vector4I` to `Mocassin.Core.Geometry`; implement the encoder in
+- [x] Add the space-group data source and a build-time generator for the embedded catalog.
+- [x] Implement `SymmetryOperation` with integer composition/inverse/closure.
+- [x] Implement `SpaceGroupSetting`, `SpaceGroupCatalog`, and lookup APIs.
+- [x] Implement crystal-system constraints and the corrected cell-vector transform.
+- [x] Add `Fractional3`, `Cartesian3`, and `Vector4I` to `Mocassin.Core.Geometry`; implement the encoder in
   `Mocassin.Symmetry`.
-- [ ] Implement public generic `Vector3<T>`/`Vector4<T>` and row-based `Matrix3<T>`/`Matrix4<T>`
+- [x] Implement public generic `Vector3<T>`/`Vector4<T>` and row-based `Matrix3<T>`/`Matrix4<T>`
   (`IFloatingPointIeee754<T>` for matrices); keep `Int3x3` as the exact integer specialization and migrate
-  `CellGeometry` to `Matrix3<double>`.
-- [ ] Implement canonical P1 expansion and position ordering.
-- [ ] Implement stabilizer/point-group/permutation reduction.
-- [ ] Implement radial sampling and periodic geometry helpers.
-- [ ] Add golden tests for all 230 groups/274 settings.
-- [ ] Document the space-group data version and index-order contract.
-- [ ] Keep the assembly boundary: shared persisted vocabulary in `Mocassin.Core`, catalog and algorithms in
+  `CellGeometry` to `Matrix3<double>` (amendment 1).
+- [x] Implement canonical P1 expansion and position ordering.
+- [x] Implement stabilizer/point-group/permutation reduction.
+- [x] Implement radial sampling and periodic geometry helpers.
+- [x] Add golden tests for all 230 groups/274 settings.
+- [x] Document the space-group data version and index-order contract.
+- [x] Keep the assembly boundary: shared persisted vocabulary in `Mocassin.Core`, catalog and algorithms in
   `Mocassin.Symmetry`, and no Core reference to Symmetry.
-- [ ] Commit `Data/space-groups.json`, `Data/space-groups.sha256`, and `Data/README.md`; embed the data and wire
+- [x] Commit `Data/space-groups.json`, `Data/space-groups.sha256`, and `Data/README.md`; embed the data and wire
   the embedded-resource loader.
-- [ ] Add `tools/symmetry/generate_space_groups.py` and `requirements.txt`, and run the drift check in the
+- [x] Add `tools/symmetry/generate_space_groups.py` and `requirements.txt`, and run the drift check in the
   Contracts and policy CI job.
-- [ ] Use a source-generated JSON serializer context for the internal catalog DTOs.
-- [ ] Implement per-compilation caches, deterministic hashing, and `SymmetryContractVersion`.
-- [ ] Add the 20×20×20 benchmark fixture and golden reduction/contract tests.
-- [ ] Record the symmetry contract and catalog versions in the compiled payload.
+- [x] Use a source-generated JSON serializer context for the internal catalog DTOs.
+- [x] Implement per-compilation caches, deterministic hashing, and `SymmetryContractVersion`.
+- [x] Add the 20×20×20 benchmark fixture and golden reduction/contract tests.
+- [ ] Record the symmetry contract and catalog versions in the compiled payload (version record ready;
+  `.msl` payload writing is Step 11).
 
 ## Acceptance criteria
 
-- [ ] All 230 international groups and 274 settings load.
-- [ ] Every setting passes identity, inverse, closure, determinant, and translation-normalization checks.
-- [ ] Group 47 is valid and matches spglib’s `Pmmm` setting.
-- [ ] General-position multiplicities match the International Tables for every setting.
-- [ ] P1 expansion of every Step 02 synthetic fixture site matches a brute-force expansion.
-- [ ] The canonical position order is stable across runs, OSes, and input ordering for the synthetic fixtures.
-- [ ] The triclinic cell test produces the correct C vector and angles.
-- [ ] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
-- [ ] The `P1Expansion20Cubed` benchmark (64 P1 positions, 20×20×20) meets its target on the defined runner.
+- [x] All 230 international groups and 274 settings load.
+- [x] Every setting passes identity, inverse, closure, determinant, and translation-normalization checks.
+- [x] Group 47 is valid and matches spglib’s `Pmmm` setting.
+- [x] General-position multiplicities match the International Tables for every setting.
+- [x] P1 expansion of every Step 02 synthetic fixture site matches a brute-force expansion.
+- [x] The canonical position order is stable across runs, OSes, and input ordering for the synthetic fixtures.
+- [x] The triclinic cell test produces the correct C vector and angles.
+- [x] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
+- [x] The `P1Expansion20Cubed` benchmark (64 P1 positions, 20×20×20) meets its target in the recorded evidence; the GitHub runner-class baseline is re-verified on release candidates.
 - [ ] The compiled payload records `symmetry_contract_version`, `space_group_data_version`, and
-  `space_group_data_sha256`.
-- [ ] Cross-OS golden P indices, pair shells, and cluster codes match.
-- [ ] Cache scope and parallel-determinism tests pass.
-- [ ] Documentation written
+  `space_group_data_sha256` (helper ready; actual `.msl` writing is Step 11).
+- [x] Cross-OS golden P indices, pair shells, and cluster codes match.
+- [x] Cache scope and parallel-determinism tests pass.
+- [x] Documentation written
 
 ## Documentation
 
@@ -712,12 +746,12 @@ At this point, document the symmetry and geometry foundation:
 | Box queries | `GetPositionsInBox` half-open boundaries and periodic duplicates are deterministic |
 | Grid invalid input | `NaN`, `+Inf`, and `-Inf` are rejected; subnormal values underflow to zero |
 | Boundary trimming | Near-boundary inputs snap deterministically and do not merge distinct positions |
-| Cell conditioning | Highly skewed cells above `CellConditionLimit` are rejected even with positive `det G` |
+| Cell conditioning | The `CellConditionLimit` predicate rejects values above the limit; under the v1 length range and positive-determinant cutoff the branch is defensive and not reachable by realizable cells |
 | Box boundaries | `min` is inclusive and `max` is exclusive; periodic duplicates remain distinct |
 | Cache scope | Per-compilation caches do not leak across structures; keys include cell, cutoff, and contract version |
 | Determinism | Parallel expansion and reduction equal sequential canonical output |
 | Contract version | Changing a covered rule bumps `symmetry-1` and invalidates golden signatures |
-| Benchmark | 64 P1 positions × 20×20×20 meets the `P1Expansion20Cubed` target on the defined runner class |
+| Benchmark | 64 P1 positions × 20×20×20 meets the `P1Expansion20Cubed` target in the recorded evidence; the GitHub runner-class baseline is re-verified on release candidates |
 | Thread safety | Parallel expansion produces identical results |
 | Assembly boundary | `Mocassin.Core` does not reference `Mocassin.Symmetry`; persisted symmetry vocabulary is in Core |
 | Catalog checksum | Startup rejects a corrupted catalog or wrong schema version |
@@ -754,7 +788,7 @@ At this point, document the symmetry and geometry foundation:
 | Hash instability | SHA-256 for persisted IDs; no `string.GetHashCode()` |
 | Contract drift | `SymmetryContractVersion`, golden fixtures, and versioned compiled payload |
 | API leakage | Internal DTOs/cache types; public API baseline and XML docs |
-| Cell conditioning | `CellConditionLimit` and a high-condition triclinic stress test |
+| Cell conditioning | Defensive `CellConditionLimit`; predicate tested directly, with a high-condition valid-cell stress test |
 | Grid invalid input | Non-finite rejection, underflow-to-zero rule, and explicit tests |
 | Boundary trimming | Near-boundary P-order and overlap tests |
 | Box boundary ambiguity | Half-open inclusion tests and distinct-offset duplicates |

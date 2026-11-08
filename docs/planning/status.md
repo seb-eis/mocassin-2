@@ -46,7 +46,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Passed | Waived — introduced after completion |
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Done | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) (main: Ubuntu + Windows + macOS) | `7b4a994` | `step-01` | Passed with notes at `05c41ab` | Waived — introduced after completion |
-| 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Not started | — | — | — | — | — | Not requested | Ready with notes |
+| 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Awaiting approval | `step/02-symmetry-and-geometry` | — | [`42478356751`](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) — green | — | — | Passed with notes at `6341b56`; final sync `09a3317` | Ready with notes — accepted |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -79,7 +79,9 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 ## Active work
 
-No step is active. Step 01 is complete: merge `7b4a994`, tag `step-01`, and main CI `41929788253` green on Ubuntu + Windows + macOS. Step 02 is the next unblocked step.
+Step 02 — Symmetry and Geometry is active on `step/02-symmetry-and-geometry`. The approved feature list has
+all planned features and both amendments are integrated; the independent re-audit passed with non-blocking notes. The step is awaiting explicit human-owner approval for the `--no-ff` merge into `main` and the `step-02` tag. Step 01 is complete: merge `7b4a994`, tag `step-01`, and
+main CI `41929788253` green on Ubuntu + Windows + macOS.
 
 ## Notes
 

@@ -5,6 +5,7 @@ namespace Mocassin.Symmetry.Tests;
 /// <summary>
 /// Smoke tests proving that the Mocassin.Symmetry.Tests test project is wired up.
 /// </summary>
+[Trait("Tier", "PR-fast")]
 public sealed class SmokeTests
 {
     /// <summary>

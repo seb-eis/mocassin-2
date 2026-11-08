@@ -1,1 +1,368 @@
 #nullable enable
+Mocassin.Symmetry.Int3x3
+Mocassin.Symmetry.Int3x3.Deconstruct(out int M11, out int M12, out int M13, out int M21, out int M22, out int M23, out int M31, out int M32, out int M33) -> void
+Mocassin.Symmetry.Int3x3.Determinant.get -> int
+Mocassin.Symmetry.Int3x3.Equals(Mocassin.Symmetry.Int3x3 other) -> bool
+Mocassin.Symmetry.Int3x3.FlipsOrientation.get -> bool
+Mocassin.Symmetry.Int3x3.Int3x3() -> void
+Mocassin.Symmetry.Int3x3.Int3x3(int M11, int M12, int M13, int M21, int M22, int M23, int M31, int M32, int M33) -> void
+Mocassin.Symmetry.Int3x3.Inverse() -> Mocassin.Symmetry.Int3x3
+Mocassin.Symmetry.Int3x3.M11.get -> int
+Mocassin.Symmetry.Int3x3.M11.init -> void
+Mocassin.Symmetry.Int3x3.M12.get -> int
+Mocassin.Symmetry.Int3x3.M12.init -> void
+Mocassin.Symmetry.Int3x3.M13.get -> int
+Mocassin.Symmetry.Int3x3.M13.init -> void
+Mocassin.Symmetry.Int3x3.M21.get -> int
+Mocassin.Symmetry.Int3x3.M21.init -> void
+Mocassin.Symmetry.Int3x3.M22.get -> int
+Mocassin.Symmetry.Int3x3.M22.init -> void
+Mocassin.Symmetry.Int3x3.M23.get -> int
+Mocassin.Symmetry.Int3x3.M23.init -> void
+Mocassin.Symmetry.Int3x3.M31.get -> int
+Mocassin.Symmetry.Int3x3.M31.init -> void
+Mocassin.Symmetry.Int3x3.M32.get -> int
+Mocassin.Symmetry.Int3x3.M32.init -> void
+Mocassin.Symmetry.Int3x3.M33.get -> int
+Mocassin.Symmetry.Int3x3.M33.init -> void
+Mocassin.Symmetry.Int3x3.Transform(Mocassin.Symmetry.Rational3 translation) -> Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.Int3x3.Transform(int x, int y, int z) -> (int X, int Y, int Z)
+Mocassin.Symmetry.Int3x3.Transform(long x, long y, long z) -> (long X, long Y, long Z)
+Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.Rational3.A.get -> int
+Mocassin.Symmetry.Rational3.Add(Mocassin.Symmetry.Rational3 other) -> Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.Rational3.B.get -> int
+Mocassin.Symmetry.Rational3.C.get -> int
+Mocassin.Symmetry.Rational3.Equals(Mocassin.Symmetry.Rational3 other) -> bool
+Mocassin.Symmetry.Rational3.IsZero.get -> bool
+Mocassin.Symmetry.Rational3.Negate() -> Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.Rational3.Rational3() -> void
+Mocassin.Symmetry.Rational3.Rational3(int a, int b, int c) -> void
+Mocassin.Symmetry.Rational3.ToFractional3() -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.SymmetryOperation
+Mocassin.Symmetry.SymmetryOperation.Compose(Mocassin.Symmetry.SymmetryOperation other) -> Mocassin.Symmetry.SymmetryOperation
+Mocassin.Symmetry.SymmetryOperation.Deconstruct(out Mocassin.Symmetry.Int3x3 Linear, out Mocassin.Symmetry.Rational3 Translation) -> void
+Mocassin.Symmetry.SymmetryOperation.Determinant.get -> int
+Mocassin.Symmetry.SymmetryOperation.Equals(Mocassin.Symmetry.SymmetryOperation other) -> bool
+Mocassin.Symmetry.SymmetryOperation.FlipsOrientation.get -> bool
+Mocassin.Symmetry.SymmetryOperation.Inverse() -> Mocassin.Symmetry.SymmetryOperation
+Mocassin.Symmetry.SymmetryOperation.Linear.get -> Mocassin.Symmetry.Int3x3
+Mocassin.Symmetry.SymmetryOperation.Linear.init -> void
+Mocassin.Symmetry.SymmetryOperation.NormalizeTranslation() -> Mocassin.Symmetry.SymmetryOperation
+Mocassin.Symmetry.SymmetryOperation.SymmetryOperation() -> void
+Mocassin.Symmetry.SymmetryOperation.SymmetryOperation(Mocassin.Symmetry.Int3x3 Linear, Mocassin.Symmetry.Rational3 Translation) -> void
+Mocassin.Symmetry.SymmetryOperation.ToAffineMatrix() -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Symmetry.SymmetryOperation.Transform(Mocassin.Core.Geometry.Fractional3 point) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.SymmetryOperation.Translation.get -> Mocassin.Symmetry.Rational3
+Mocassin.Symmetry.SymmetryOperation.Translation.init -> void
+const Mocassin.Symmetry.Rational3.Denominator = 24 -> int
+override Mocassin.Symmetry.Int3x3.GetHashCode() -> int
+override Mocassin.Symmetry.Int3x3.ToString() -> string!
+override Mocassin.Symmetry.Rational3.GetHashCode() -> int
+override Mocassin.Symmetry.Rational3.ToString() -> string!
+override Mocassin.Symmetry.SymmetryOperation.GetHashCode() -> int
+override Mocassin.Symmetry.SymmetryOperation.ToString() -> string!
+static Mocassin.Symmetry.Int3x3.Identity.get -> Mocassin.Symmetry.Int3x3
+static Mocassin.Symmetry.Int3x3.operator !=(Mocassin.Symmetry.Int3x3 left, Mocassin.Symmetry.Int3x3 right) -> bool
+static Mocassin.Symmetry.Int3x3.operator *(Mocassin.Symmetry.Int3x3 left, Mocassin.Symmetry.Int3x3 right) -> Mocassin.Symmetry.Int3x3
+static Mocassin.Symmetry.Int3x3.operator ==(Mocassin.Symmetry.Int3x3 left, Mocassin.Symmetry.Int3x3 right) -> bool
+static Mocassin.Symmetry.Rational3.Zero.get -> Mocassin.Symmetry.Rational3
+static Mocassin.Symmetry.Rational3.operator !=(Mocassin.Symmetry.Rational3 left, Mocassin.Symmetry.Rational3 right) -> bool
+static Mocassin.Symmetry.Rational3.operator ==(Mocassin.Symmetry.Rational3 left, Mocassin.Symmetry.Rational3 right) -> bool
+static Mocassin.Symmetry.SymmetryOperation.Identity.get -> Mocassin.Symmetry.SymmetryOperation
+static Mocassin.Symmetry.SymmetryOperation.operator !=(Mocassin.Symmetry.SymmetryOperation left, Mocassin.Symmetry.SymmetryOperation right) -> bool
+static Mocassin.Symmetry.SymmetryOperation.operator ==(Mocassin.Symmetry.SymmetryOperation left, Mocassin.Symmetry.SymmetryOperation right) -> bool
+~override Mocassin.Symmetry.Int3x3.Equals(object obj) -> bool
+~override Mocassin.Symmetry.Rational3.Equals(object obj) -> bool
+~override Mocassin.Symmetry.SymmetryOperation.Equals(object obj) -> bool
+Mocassin.Symmetry.SpaceGroupCatalog
+Mocassin.Symmetry.SpaceGroupCatalog.DataSha256.get -> string!
+Mocassin.Symmetry.SpaceGroupCatalog.DataVersion.get -> string!
+Mocassin.Symmetry.SpaceGroupCatalog.GetByHallSymbol(string! hallSymbol) -> Mocassin.Symmetry.SpaceGroupSetting?
+Mocassin.Symmetry.SpaceGroupCatalog.GetByHermannMauguin(string! hermannMauguin) -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SpaceGroupSetting!>
+Mocassin.Symmetry.SpaceGroupCatalog.GetSetting(int number, Mocassin.Core.Symmetry.AxisSetting axis, Mocassin.Core.Symmetry.OriginChoice origin) -> Mocassin.Symmetry.SpaceGroupSetting?
+Mocassin.Symmetry.SpaceGroupCatalog.Settings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SpaceGroupSetting!>
+Mocassin.Symmetry.SpaceGroupSetting
+Mocassin.Symmetry.SpaceGroupSetting.<Clone>$() -> Mocassin.Symmetry.SpaceGroupSetting!
+Mocassin.Symmetry.SpaceGroupSetting.Axis.get -> Mocassin.Core.Symmetry.AxisSetting
+Mocassin.Symmetry.SpaceGroupSetting.Axis.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.CrystalSystem.get -> Mocassin.Core.Symmetry.CrystalSystem
+Mocassin.Symmetry.SpaceGroupSetting.CrystalSystem.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.Deconstruct(out int Number, out string! HermannMauguin, out string! HallSymbol, out Mocassin.Core.Symmetry.CrystalSystem CrystalSystem, out Mocassin.Core.Symmetry.AxisSetting Axis, out Mocassin.Core.Symmetry.OriginChoice Origin, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> Operations) -> void
+Mocassin.Symmetry.SpaceGroupSetting.Equals(Mocassin.Symmetry.SpaceGroupSetting? other) -> bool
+Mocassin.Symmetry.SpaceGroupSetting.HallSymbol.get -> string!
+Mocassin.Symmetry.SpaceGroupSetting.HallSymbol.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.HermannMauguin.get -> string!
+Mocassin.Symmetry.SpaceGroupSetting.HermannMauguin.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.Number.get -> int
+Mocassin.Symmetry.SpaceGroupSetting.Number.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.Operations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation>
+Mocassin.Symmetry.SpaceGroupSetting.Operations.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.Origin.get -> Mocassin.Core.Symmetry.OriginChoice
+Mocassin.Symmetry.SpaceGroupSetting.Origin.init -> void
+Mocassin.Symmetry.SpaceGroupSetting.SpaceGroupSetting(int Number, string! HermannMauguin, string! HallSymbol, Mocassin.Core.Symmetry.CrystalSystem CrystalSystem, Mocassin.Core.Symmetry.AxisSetting Axis, Mocassin.Core.Symmetry.OriginChoice Origin, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> Operations) -> void
+override Mocassin.Symmetry.SpaceGroupSetting.Equals(object? obj) -> bool
+override Mocassin.Symmetry.SpaceGroupSetting.GetHashCode() -> int
+override Mocassin.Symmetry.SpaceGroupSetting.ToString() -> string!
+static Mocassin.Symmetry.SpaceGroupCatalog.Default.get -> Mocassin.Symmetry.SpaceGroupCatalog!
+static Mocassin.Symmetry.SpaceGroupSetting.operator !=(Mocassin.Symmetry.SpaceGroupSetting? left, Mocassin.Symmetry.SpaceGroupSetting? right) -> bool
+static Mocassin.Symmetry.SpaceGroupSetting.operator ==(Mocassin.Symmetry.SpaceGroupSetting? left, Mocassin.Symmetry.SpaceGroupSetting? right) -> bool
+Mocassin.Symmetry.CellGeometry
+Mocassin.Symmetry.CellGeometry.A.get -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Symmetry.CellGeometry.B.get -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Symmetry.CellGeometry.C.get -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Symmetry.CellGeometry.ConditionNumber.get -> double
+Mocassin.Symmetry.CellGeometry.GetCellVolume() -> double
+Mocassin.Symmetry.CellGeometry.GetDistance(Mocassin.Core.Geometry.Fractional3 left, Mocassin.Core.Geometry.Fractional3 right) -> double
+Mocassin.Symmetry.CellGeometry.Parameters.get -> Mocassin.Core.Model.CellParameters!
+Mocassin.Symmetry.CellGeometry.ToCartesian(Mocassin.Core.Geometry.Fractional3 fractional) -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Symmetry.CellGeometry.ToFractional(Mocassin.Core.Geometry.Cartesian3 cartesian) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.CellGeometry.VolumeAngstrom3.get -> double
+static Mocassin.Symmetry.CellGeometry.TryCreate(Mocassin.Core.Model.CellParameters! parameters, Mocassin.Core.Symmetry.CrystalSystem crystalSystem, Mocassin.Core.Symmetry.AxisSetting axis, out Mocassin.Symmetry.CellGeometry? geometry, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+static Mocassin.Symmetry.CellGeometry.TryCreate(Mocassin.Core.Model.CellParameters! parameters, Mocassin.Symmetry.SpaceGroupSetting! setting, out Mocassin.Symmetry.CellGeometry? geometry, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+static Mocassin.Symmetry.CellGeometry.TryCreate(Mocassin.Core.Model.CellParameters! parameters, out Mocassin.Symmetry.CellGeometry? geometry, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+Mocassin.Symmetry.ExpandedSite
+Mocassin.Symmetry.ExpandedSite.<Clone>$() -> Mocassin.Symmetry.ExpandedSite!
+Mocassin.Symmetry.ExpandedSite.Deconstruct(out int P, out Mocassin.Core.Geometry.Vector4I Encoding, out Mocassin.Core.Geometry.Fractional3 Fractional, out int ReferenceSiteIndex, out int OrbitMemberIndex) -> void
+Mocassin.Symmetry.ExpandedSite.Encoding.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.ExpandedSite.Encoding.init -> void
+Mocassin.Symmetry.ExpandedSite.Equals(Mocassin.Symmetry.ExpandedSite? other) -> bool
+Mocassin.Symmetry.ExpandedSite.ExpandedSite(int P, Mocassin.Core.Geometry.Vector4I Encoding, Mocassin.Core.Geometry.Fractional3 Fractional, int ReferenceSiteIndex, int OrbitMemberIndex) -> void
+Mocassin.Symmetry.ExpandedSite.Fractional.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.ExpandedSite.Fractional.init -> void
+Mocassin.Symmetry.ExpandedSite.OrbitMemberIndex.get -> int
+Mocassin.Symmetry.ExpandedSite.OrbitMemberIndex.init -> void
+Mocassin.Symmetry.ExpandedSite.P.get -> int
+Mocassin.Symmetry.ExpandedSite.P.init -> void
+Mocassin.Symmetry.ExpandedSite.ReferenceSiteIndex.get -> int
+Mocassin.Symmetry.ExpandedSite.ReferenceSiteIndex.init -> void
+Mocassin.Symmetry.SiteOrbitInfo
+Mocassin.Symmetry.SiteOrbitInfo.<Clone>$() -> Mocassin.Symmetry.SiteOrbitInfo!
+Mocassin.Symmetry.SiteOrbitInfo.Deconstruct(out int ReferenceSiteIndex, out Mocassin.Core.Geometry.Fractional3 Representative, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> Positions, out System.Collections.Immutable.ImmutableArray<int> PositionIndices) -> void
+Mocassin.Symmetry.SiteOrbitInfo.Equals(Mocassin.Symmetry.SiteOrbitInfo? other) -> bool
+Mocassin.Symmetry.SiteOrbitInfo.Multiplicity.get -> int
+Mocassin.Symmetry.SiteOrbitInfo.PositionIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Symmetry.SiteOrbitInfo.PositionIndices.init -> void
+Mocassin.Symmetry.SiteOrbitInfo.Positions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+Mocassin.Symmetry.SiteOrbitInfo.Positions.init -> void
+Mocassin.Symmetry.SiteOrbitInfo.ReferenceSiteIndex.get -> int
+Mocassin.Symmetry.SiteOrbitInfo.ReferenceSiteIndex.init -> void
+Mocassin.Symmetry.SiteOrbitInfo.Representative.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.SiteOrbitInfo.Representative.init -> void
+Mocassin.Symmetry.SiteOrbitInfo.SiteOrbitInfo(int ReferenceSiteIndex, Mocassin.Core.Geometry.Fractional3 Representative, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> Positions, System.Collections.Immutable.ImmutableArray<int> PositionIndices) -> void
+Mocassin.Symmetry.SpaceGroupOperations
+Mocassin.Symmetry.UnitCellVectorEncoder
+Mocassin.Symmetry.UnitCellVectorEncoder.Decode(Mocassin.Core.Geometry.Vector4I position) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.UnitCellVectorEncoder.DecodeLinearIndex(int linearIndex, int cellCountA, int cellCountB, int cellCountC) -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.UnitCellVectorEncoder.Encode(Mocassin.Core.Geometry.Fractional3 fractional) -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.UnitCellVectorEncoder.ExpandedSites.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.ExpandedSite!>
+Mocassin.Symmetry.UnitCellVectorEncoder.GetLinearIndex(Mocassin.Core.Geometry.Vector4I position, int cellCountA, int cellCountB, int cellCountC) -> int
+Mocassin.Symmetry.UnitCellVectorEncoder.GetPosition(int p) -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Symmetry.UnitCellVectorEncoder.Orbits.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SiteOrbitInfo!>
+Mocassin.Symmetry.UnitCellVectorEncoder.PositionCount.get -> int
+Mocassin.Symmetry.UnitCellVectorEncoder.Positions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+Mocassin.Symmetry.UnitCellVectorEncoder.Setting.get -> Mocassin.Symmetry.SpaceGroupSetting!
+Mocassin.Symmetry.UnitCellVectorEncoder.ToSupercellOffset(Mocassin.Core.Geometry.Vector4I relative, int cellCountA, int cellCountB, int cellCountC) -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.UnitCellVectorEncoder.TryIndexOf(Mocassin.Core.Geometry.Fractional3 fractional, out int p) -> bool
+const Mocassin.Symmetry.UnitCellVectorEncoder.MaxP1Positions = 10000 -> int
+override Mocassin.Symmetry.ExpandedSite.Equals(object? obj) -> bool
+override Mocassin.Symmetry.ExpandedSite.GetHashCode() -> int
+override Mocassin.Symmetry.ExpandedSite.ToString() -> string!
+override Mocassin.Symmetry.SiteOrbitInfo.Equals(object? obj) -> bool
+override Mocassin.Symmetry.SiteOrbitInfo.GetHashCode() -> int
+override Mocassin.Symmetry.SiteOrbitInfo.ToString() -> string!
+static Mocassin.Symmetry.ExpandedSite.operator !=(Mocassin.Symmetry.ExpandedSite? left, Mocassin.Symmetry.ExpandedSite? right) -> bool
+static Mocassin.Symmetry.ExpandedSite.operator ==(Mocassin.Symmetry.ExpandedSite? left, Mocassin.Symmetry.ExpandedSite? right) -> bool
+static Mocassin.Symmetry.SiteOrbitInfo.operator !=(Mocassin.Symmetry.SiteOrbitInfo? left, Mocassin.Symmetry.SiteOrbitInfo? right) -> bool
+static Mocassin.Symmetry.SiteOrbitInfo.operator ==(Mocassin.Symmetry.SiteOrbitInfo? left, Mocassin.Symmetry.SiteOrbitInfo? right) -> bool
+static Mocassin.Symmetry.SpaceGroupOperations.ExpandOrbit(Mocassin.Symmetry.SpaceGroupSetting! setting, Mocassin.Core.Geometry.Fractional3 site) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+static Mocassin.Symmetry.UnitCellVectorEncoder.GetLatticePositionCount(int cellCountA, int cellCountB, int cellCountC, int positionCount) -> long
+static Mocassin.Symmetry.UnitCellVectorEncoder.IsLatticeSizeSupported(int cellCountA, int cellCountB, int cellCountC, int positionCount) -> bool
+static Mocassin.Symmetry.UnitCellVectorEncoder.TryCreate(Mocassin.Symmetry.SpaceGroupSetting! setting, System.Collections.Generic.IEnumerable<Mocassin.Core.Geometry.Fractional3>! referencePositions, out Mocassin.Symmetry.UnitCellVectorEncoder? encoder, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+Mocassin.Symmetry.MinimumImageResult
+Mocassin.Symmetry.MinimumImageResult.Deconstruct(out Mocassin.Core.Geometry.Vector4I Offset, out double DistanceAngstrom, out int DistanceBucketFm) -> void
+Mocassin.Symmetry.MinimumImageResult.DistanceAngstrom.get -> double
+Mocassin.Symmetry.MinimumImageResult.DistanceAngstrom.init -> void
+Mocassin.Symmetry.MinimumImageResult.DistanceBucketFm.get -> int
+Mocassin.Symmetry.MinimumImageResult.DistanceBucketFm.init -> void
+Mocassin.Symmetry.MinimumImageResult.Equals(Mocassin.Symmetry.MinimumImageResult other) -> bool
+Mocassin.Symmetry.MinimumImageResult.MinimumImageResult() -> void
+Mocassin.Symmetry.MinimumImageResult.MinimumImageResult(Mocassin.Core.Geometry.Vector4I Offset, double DistanceAngstrom, int DistanceBucketFm) -> void
+Mocassin.Symmetry.MinimumImageResult.Offset.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.MinimumImageResult.Offset.init -> void
+Mocassin.Symmetry.NeighborImage
+Mocassin.Symmetry.NeighborImage.Deconstruct(out Mocassin.Core.Geometry.Vector4I Offset, out double DistanceAngstrom, out int DistanceBucketFm) -> void
+Mocassin.Symmetry.NeighborImage.DistanceAngstrom.get -> double
+Mocassin.Symmetry.NeighborImage.DistanceAngstrom.init -> void
+Mocassin.Symmetry.NeighborImage.DistanceBucketFm.get -> int
+Mocassin.Symmetry.NeighborImage.DistanceBucketFm.init -> void
+Mocassin.Symmetry.NeighborImage.Equals(Mocassin.Symmetry.NeighborImage other) -> bool
+Mocassin.Symmetry.NeighborImage.NeighborImage() -> void
+Mocassin.Symmetry.NeighborImage.NeighborImage(Mocassin.Core.Geometry.Vector4I Offset, double DistanceAngstrom, int DistanceBucketFm) -> void
+Mocassin.Symmetry.NeighborImage.Offset.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.NeighborImage.Offset.init -> void
+Mocassin.Symmetry.PeriodicGeometry
+Mocassin.Symmetry.PeriodicGeometry.Cell.get -> Mocassin.Symmetry.CellGeometry!
+Mocassin.Symmetry.PeriodicGeometry.Encoder.get -> Mocassin.Symmetry.UnitCellVectorEncoder!
+Mocassin.Symmetry.PeriodicGeometry.GetMinimumImage(Mocassin.Core.Geometry.Vector4I center, Mocassin.Core.Geometry.Vector4I target) -> Mocassin.Symmetry.MinimumImageResult
+Mocassin.Symmetry.PeriodicGeometry.GetPositionsInBox(Mocassin.Core.Geometry.Cartesian3 min, Mocassin.Core.Geometry.Cartesian3 max) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I>
+Mocassin.Symmetry.PeriodicGeometry.PeriodicGeometry(Mocassin.Symmetry.CellGeometry! cell, Mocassin.Symmetry.UnitCellVectorEncoder! encoder) -> void
+Mocassin.Symmetry.PeriodicGeometry.RadialSearch(Mocassin.Core.Geometry.Vector4I center, double cutoffAngstrom) -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.NeighborImage>
+override Mocassin.Symmetry.MinimumImageResult.GetHashCode() -> int
+override Mocassin.Symmetry.NeighborImage.GetHashCode() -> int
+static Mocassin.Symmetry.MinimumImageResult.operator !=(Mocassin.Symmetry.MinimumImageResult left, Mocassin.Symmetry.MinimumImageResult right) -> bool
+static Mocassin.Symmetry.MinimumImageResult.operator ==(Mocassin.Symmetry.MinimumImageResult left, Mocassin.Symmetry.MinimumImageResult right) -> bool
+static Mocassin.Symmetry.NeighborImage.operator !=(Mocassin.Symmetry.NeighborImage left, Mocassin.Symmetry.NeighborImage right) -> bool
+static Mocassin.Symmetry.NeighborImage.operator ==(Mocassin.Symmetry.NeighborImage left, Mocassin.Symmetry.NeighborImage right) -> bool
+~override Mocassin.Symmetry.MinimumImageResult.Equals(object obj) -> bool
+~override Mocassin.Symmetry.MinimumImageResult.ToString() -> string
+~override Mocassin.Symmetry.NeighborImage.Equals(object obj) -> bool
+~override Mocassin.Symmetry.NeighborImage.ToString() -> string
+Mocassin.Symmetry.PointGroup
+Mocassin.Symmetry.PointGroup.<Clone>$() -> Mocassin.Symmetry.PointGroup!
+Mocassin.Symmetry.PointGroup.CenterStabilizer.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation>
+Mocassin.Symmetry.PointGroup.CenterStabilizer.init -> void
+Mocassin.Symmetry.PointGroup.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> CenterStabilizer, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> SetwiseStabilizer, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> PointwiseStabilizer, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SitePermutation!> InducedPermutations) -> void
+Mocassin.Symmetry.PointGroup.Equals(Mocassin.Symmetry.PointGroup? other) -> bool
+Mocassin.Symmetry.PointGroup.InducedPermutations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SitePermutation!>
+Mocassin.Symmetry.PointGroup.InducedPermutations.init -> void
+Mocassin.Symmetry.PointGroup.OrderedOrbitSize.get -> int
+Mocassin.Symmetry.PointGroup.PointGroup(System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> CenterStabilizer, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> SetwiseStabilizer, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation> PointwiseStabilizer, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SitePermutation!> InducedPermutations) -> void
+Mocassin.Symmetry.PointGroup.PointwiseStabilizer.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation>
+Mocassin.Symmetry.PointGroup.PointwiseStabilizer.init -> void
+Mocassin.Symmetry.PointGroup.SetOrbitSize.get -> int
+Mocassin.Symmetry.PointGroup.SetwiseStabilizer.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation>
+Mocassin.Symmetry.PointGroup.SetwiseStabilizer.init -> void
+Mocassin.Symmetry.SitePermutation
+Mocassin.Symmetry.SitePermutation.<Clone>$() -> Mocassin.Symmetry.SitePermutation!
+Mocassin.Symmetry.SitePermutation.Count.get -> int
+Mocassin.Symmetry.SitePermutation.Equals(Mocassin.Symmetry.SitePermutation? other) -> bool
+Mocassin.Symmetry.SitePermutation.IsIdentity.get -> bool
+Mocassin.Symmetry.SitePermutation.Mapping.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Symmetry.SitePermutation.SitePermutation(System.Collections.Immutable.ImmutableArray<int> mapping) -> void
+Mocassin.Symmetry.SitePermutation.this[int index].get -> int
+override Mocassin.Symmetry.PointGroup.Equals(object? obj) -> bool
+override Mocassin.Symmetry.PointGroup.GetHashCode() -> int
+override Mocassin.Symmetry.PointGroup.ToString() -> string!
+override Mocassin.Symmetry.SitePermutation.Equals(object? obj) -> bool
+override Mocassin.Symmetry.SitePermutation.GetHashCode() -> int
+override Mocassin.Symmetry.SitePermutation.ToString() -> string!
+static Mocassin.Symmetry.PointGroup.operator !=(Mocassin.Symmetry.PointGroup? left, Mocassin.Symmetry.PointGroup? right) -> bool
+static Mocassin.Symmetry.PointGroup.operator ==(Mocassin.Symmetry.PointGroup? left, Mocassin.Symmetry.PointGroup? right) -> bool
+static Mocassin.Symmetry.SitePermutation.Identity(int count) -> Mocassin.Symmetry.SitePermutation!
+static Mocassin.Symmetry.SitePermutation.operator !=(Mocassin.Symmetry.SitePermutation? left, Mocassin.Symmetry.SitePermutation? right) -> bool
+static Mocassin.Symmetry.SitePermutation.operator ==(Mocassin.Symmetry.SitePermutation? left, Mocassin.Symmetry.SitePermutation? right) -> bool
+static Mocassin.Symmetry.SpaceGroupOperations.GetOrderedOrbit(Mocassin.Symmetry.SpaceGroupSetting! setting, Mocassin.Core.Geometry.Fractional3 center, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> geometry) -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>>
+static Mocassin.Symmetry.SpaceGroupOperations.GetPointGroup(Mocassin.Symmetry.SpaceGroupSetting! setting, Mocassin.Core.Geometry.Fractional3 center, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> geometry) -> Mocassin.Symmetry.PointGroup!
+static Mocassin.Symmetry.SpaceGroupOperations.GetSetOrbit(Mocassin.Symmetry.SpaceGroupSetting! setting, Mocassin.Core.Geometry.Fractional3 center, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> geometry) -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>>
+static Mocassin.Symmetry.SpaceGroupOperations.GetStabilizer(Mocassin.Symmetry.SpaceGroupSetting! setting, Mocassin.Core.Geometry.Fractional3 site) -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.SymmetryOperation>
+Mocassin.Symmetry.ClusterExpansion
+Mocassin.Symmetry.ClusterExpansion.<Clone>$() -> Mocassin.Symmetry.ClusterExpansion!
+Mocassin.Symmetry.ClusterExpansion.ClusterExpansion(ulong OccupationCode, int PermutationIndex) -> void
+Mocassin.Symmetry.ClusterExpansion.Deconstruct(out ulong OccupationCode, out int PermutationIndex) -> void
+Mocassin.Symmetry.ClusterExpansion.Equals(Mocassin.Symmetry.ClusterExpansion? other) -> bool
+Mocassin.Symmetry.ClusterExpansion.OccupationCode.get -> ulong
+Mocassin.Symmetry.ClusterExpansion.OccupationCode.init -> void
+Mocassin.Symmetry.ClusterExpansion.PermutationIndex.get -> int
+Mocassin.Symmetry.ClusterExpansion.PermutationIndex.init -> void
+Mocassin.Symmetry.ClusterOccupation
+Mocassin.Symmetry.ClusterOccupation.<Clone>$() -> Mocassin.Symmetry.ClusterOccupation!
+Mocassin.Symmetry.ClusterOccupation.CanonicalCode.get -> ulong
+Mocassin.Symmetry.ClusterOccupation.CanonicalCode.init -> void
+Mocassin.Symmetry.ClusterOccupation.CanonicalTuple.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Symmetry.ClusterOccupation.CanonicalTuple.init -> void
+Mocassin.Symmetry.ClusterOccupation.ClusterOccupation(ulong CanonicalCode, System.Collections.Immutable.ImmutableArray<int> CanonicalTuple, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.ClusterExpansion!> Expansions) -> void
+Mocassin.Symmetry.ClusterOccupation.Deconstruct(out ulong CanonicalCode, out System.Collections.Immutable.ImmutableArray<int> CanonicalTuple, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.ClusterExpansion!> Expansions) -> void
+Mocassin.Symmetry.ClusterOccupation.Equals(Mocassin.Symmetry.ClusterOccupation? other) -> bool
+Mocassin.Symmetry.ClusterOccupation.Expansions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.ClusterExpansion!>
+Mocassin.Symmetry.ClusterOccupation.Expansions.init -> void
+Mocassin.Symmetry.ClusterReduction
+Mocassin.Symmetry.ClusterReductionResult
+Mocassin.Symmetry.ClusterReductionResult.<Clone>$() -> Mocassin.Symmetry.ClusterReductionResult!
+Mocassin.Symmetry.ClusterReductionResult.ClusterReductionResult(Mocassin.Symmetry.PointGroup! PointGroup, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.ClusterOccupation!> Clusters) -> void
+Mocassin.Symmetry.ClusterReductionResult.Clusters.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.ClusterOccupation!>
+Mocassin.Symmetry.ClusterReductionResult.Clusters.init -> void
+Mocassin.Symmetry.ClusterReductionResult.Deconstruct(out Mocassin.Symmetry.PointGroup! PointGroup, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.ClusterOccupation!> Clusters) -> void
+Mocassin.Symmetry.ClusterReductionResult.Equals(Mocassin.Symmetry.ClusterReductionResult? other) -> bool
+Mocassin.Symmetry.ClusterReductionResult.PointGroup.get -> Mocassin.Symmetry.PointGroup!
+Mocassin.Symmetry.ClusterReductionResult.PointGroup.init -> void
+Mocassin.Symmetry.PairReduction
+Mocassin.Symmetry.PairReductionResult
+Mocassin.Symmetry.PairReductionResult.<Clone>$() -> Mocassin.Symmetry.PairReductionResult!
+Mocassin.Symmetry.PairReductionResult.CenterP.get -> int
+Mocassin.Symmetry.PairReductionResult.CenterP.init -> void
+Mocassin.Symmetry.PairReductionResult.Deconstruct(out int CenterP, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.PairShell!> Shells) -> void
+Mocassin.Symmetry.PairReductionResult.Equals(Mocassin.Symmetry.PairReductionResult? other) -> bool
+Mocassin.Symmetry.PairReductionResult.PairReductionResult(int CenterP, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.PairShell!> Shells) -> void
+Mocassin.Symmetry.PairReductionResult.Shells.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.PairShell!>
+Mocassin.Symmetry.PairReductionResult.Shells.init -> void
+Mocassin.Symmetry.PairShell
+Mocassin.Symmetry.PairShell.<Clone>$() -> Mocassin.Symmetry.PairShell!
+Mocassin.Symmetry.PairShell.ChiralPartnerIndex.get -> int?
+Mocassin.Symmetry.PairShell.ChiralPartnerIndex.init -> void
+Mocassin.Symmetry.PairShell.Deconstruct(out int DistanceBucketFm, out double DistanceAngstrom, out Mocassin.Core.Geometry.Vector4I Representative, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I> EquivalentImages, out int? ChiralPartnerIndex) -> void
+Mocassin.Symmetry.PairShell.DistanceAngstrom.get -> double
+Mocassin.Symmetry.PairShell.DistanceAngstrom.init -> void
+Mocassin.Symmetry.PairShell.DistanceBucketFm.get -> int
+Mocassin.Symmetry.PairShell.DistanceBucketFm.init -> void
+Mocassin.Symmetry.PairShell.Equals(Mocassin.Symmetry.PairShell? other) -> bool
+Mocassin.Symmetry.PairShell.EquivalentImages.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I>
+Mocassin.Symmetry.PairShell.EquivalentImages.init -> void
+Mocassin.Symmetry.PairShell.PairShell(int DistanceBucketFm, double DistanceAngstrom, Mocassin.Core.Geometry.Vector4I Representative, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I> EquivalentImages, int? ChiralPartnerIndex) -> void
+Mocassin.Symmetry.PairShell.Representative.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Symmetry.PairShell.Representative.init -> void
+const Mocassin.Symmetry.ClusterReduction.MaxClusterSites = 9 -> int
+const Mocassin.Symmetry.ClusterReduction.MaxParticleIndex = 63 -> int
+const Mocassin.Symmetry.ClusterReduction.MaxTupleCount = 1000000 -> int
+const Mocassin.Symmetry.ClusterReduction.ParticleBits = 6 -> int
+override Mocassin.Symmetry.ClusterExpansion.Equals(object? obj) -> bool
+override Mocassin.Symmetry.ClusterExpansion.GetHashCode() -> int
+override Mocassin.Symmetry.ClusterExpansion.ToString() -> string!
+override Mocassin.Symmetry.ClusterOccupation.Equals(object? obj) -> bool
+override Mocassin.Symmetry.ClusterOccupation.GetHashCode() -> int
+override Mocassin.Symmetry.ClusterOccupation.ToString() -> string!
+override Mocassin.Symmetry.ClusterReductionResult.Equals(object? obj) -> bool
+override Mocassin.Symmetry.ClusterReductionResult.GetHashCode() -> int
+override Mocassin.Symmetry.ClusterReductionResult.ToString() -> string!
+override Mocassin.Symmetry.PairReductionResult.Equals(object? obj) -> bool
+override Mocassin.Symmetry.PairReductionResult.GetHashCode() -> int
+override Mocassin.Symmetry.PairReductionResult.ToString() -> string!
+override Mocassin.Symmetry.PairShell.Equals(object? obj) -> bool
+override Mocassin.Symmetry.PairShell.GetHashCode() -> int
+override Mocassin.Symmetry.PairShell.ToString() -> string!
+static Mocassin.Symmetry.ClusterExpansion.operator !=(Mocassin.Symmetry.ClusterExpansion? left, Mocassin.Symmetry.ClusterExpansion? right) -> bool
+static Mocassin.Symmetry.ClusterExpansion.operator ==(Mocassin.Symmetry.ClusterExpansion? left, Mocassin.Symmetry.ClusterExpansion? right) -> bool
+static Mocassin.Symmetry.ClusterOccupation.operator !=(Mocassin.Symmetry.ClusterOccupation? left, Mocassin.Symmetry.ClusterOccupation? right) -> bool
+static Mocassin.Symmetry.ClusterOccupation.operator ==(Mocassin.Symmetry.ClusterOccupation? left, Mocassin.Symmetry.ClusterOccupation? right) -> bool
+static Mocassin.Symmetry.ClusterReduction.DecodeOccupation(ulong code, int siteCount) -> System.Collections.Immutable.ImmutableArray<int>
+static Mocassin.Symmetry.ClusterReduction.EncodeOccupation(System.Collections.Immutable.ImmutableArray<int> occupation) -> ulong
+static Mocassin.Symmetry.ClusterReduction.Reduce(Mocassin.Symmetry.SpaceGroupSetting! setting, Mocassin.Core.Geometry.Fractional3 center, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> clusterSites, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<int>> allowedParticles) -> Mocassin.Symmetry.ClusterReductionResult!
+static Mocassin.Symmetry.ClusterReductionResult.operator !=(Mocassin.Symmetry.ClusterReductionResult? left, Mocassin.Symmetry.ClusterReductionResult? right) -> bool
+static Mocassin.Symmetry.ClusterReductionResult.operator ==(Mocassin.Symmetry.ClusterReductionResult? left, Mocassin.Symmetry.ClusterReductionResult? right) -> bool
+static Mocassin.Symmetry.PairReduction.Reduce(Mocassin.Symmetry.PeriodicGeometry! geometry, int centerP, double cutoffAngstrom) -> Mocassin.Symmetry.PairReductionResult!
+static Mocassin.Symmetry.PairReductionResult.operator !=(Mocassin.Symmetry.PairReductionResult? left, Mocassin.Symmetry.PairReductionResult? right) -> bool
+static Mocassin.Symmetry.PairReductionResult.operator ==(Mocassin.Symmetry.PairReductionResult? left, Mocassin.Symmetry.PairReductionResult? right) -> bool
+static Mocassin.Symmetry.PairShell.operator !=(Mocassin.Symmetry.PairShell? left, Mocassin.Symmetry.PairShell? right) -> bool
+static Mocassin.Symmetry.PairShell.operator ==(Mocassin.Symmetry.PairShell? left, Mocassin.Symmetry.PairShell? right) -> bool
+Mocassin.Symmetry.SymmetryContract
+Mocassin.Symmetry.SymmetryVersionInfo
+Mocassin.Symmetry.SymmetryVersionInfo.<Clone>$() -> Mocassin.Symmetry.SymmetryVersionInfo!
+Mocassin.Symmetry.SymmetryVersionInfo.Deconstruct(out string! SymmetryContractVersion, out string! SpaceGroupDataVersion, out string! SpaceGroupDataSha256) -> void
+Mocassin.Symmetry.SymmetryVersionInfo.Equals(Mocassin.Symmetry.SymmetryVersionInfo? other) -> bool
+Mocassin.Symmetry.SymmetryVersionInfo.SpaceGroupDataSha256.get -> string!
+Mocassin.Symmetry.SymmetryVersionInfo.SpaceGroupDataSha256.init -> void
+Mocassin.Symmetry.SymmetryVersionInfo.SpaceGroupDataVersion.get -> string!
+Mocassin.Symmetry.SymmetryVersionInfo.SpaceGroupDataVersion.init -> void
+Mocassin.Symmetry.SymmetryVersionInfo.SymmetryContractVersion.get -> string!
+Mocassin.Symmetry.SymmetryVersionInfo.SymmetryContractVersion.init -> void
+Mocassin.Symmetry.SymmetryVersionInfo.SymmetryVersionInfo(string! SymmetryContractVersion, string! SpaceGroupDataVersion, string! SpaceGroupDataSha256) -> void
+const Mocassin.Symmetry.SymmetryContract.FractionalGridDenominator = 24000000000000 -> long
+const Mocassin.Symmetry.SymmetryContract.Version = "symmetry-1" -> string!
+override Mocassin.Symmetry.SymmetryVersionInfo.Equals(object? obj) -> bool
+override Mocassin.Symmetry.SymmetryVersionInfo.GetHashCode() -> int
+override Mocassin.Symmetry.SymmetryVersionInfo.ToString() -> string!
+static Mocassin.Symmetry.SymmetryVersionInfo.FromCatalog(Mocassin.Symmetry.SpaceGroupCatalog! catalog) -> Mocassin.Symmetry.SymmetryVersionInfo!
+static Mocassin.Symmetry.SymmetryVersionInfo.operator !=(Mocassin.Symmetry.SymmetryVersionInfo? left, Mocassin.Symmetry.SymmetryVersionInfo? right) -> bool
+static Mocassin.Symmetry.SymmetryVersionInfo.operator ==(Mocassin.Symmetry.SymmetryVersionInfo? left, Mocassin.Symmetry.SymmetryVersionInfo? right) -> bool
+Mocassin.Symmetry.CellGeometry.Inverse.get -> Mocassin.Core.Geometry.Matrix3<double>
+Mocassin.Symmetry.CellGeometry.Matrix.get -> Mocassin.Core.Geometry.Matrix3<double>

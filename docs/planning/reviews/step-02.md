@@ -40,6 +40,15 @@ not change the design; that was verified with `git show --stat 848c9a7`.
 
 The parent audit covers these amendments at the combined frozen commit.
 
+### Implementation integration
+
+| Amendment | Branch | Integrated commit | Status |
+| --- | --- | --- | --- |
+| `step-02-amend-1` — public generic math | `feature/step-02-symmetry-and-geometry/amend-1-public-math` | `cd796b0` | Integrated |
+| `step-02-amend-2` — KaTeX documentation math | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | `d6eac6f` | Integrated |
+
+Combined solution commit: `d6eac6f`. The combined solution is ready for the parent audit.
+
 ## Step summary
 
 | Field | Value |

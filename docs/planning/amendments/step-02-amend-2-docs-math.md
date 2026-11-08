@@ -6,12 +6,12 @@
 | --- | --- |
 | Amendment ID | `step-02-amend-2` |
 | Parent step | 02 — Symmetry and Geometry |
-| Status | Ready for implementation |
+| Status | Integrated |
 | Branch | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` |
 | Design review | `docs/planning/reviews/step-02-amend-2.md` |
 | Parent audit | `docs/planning/audits/step-02.md` |
-| Integration commit | — |
-| Combined audit commit | — |
+| Integration commit | `d6eac6f` |
+| Combined audit commit | `d6eac6f` |
 | Tag | `step-02` |
 | Date | 2026-11-07 |
 | Owner | Planner |
@@ -199,14 +199,14 @@ None. This amendment changes documentation assets and site configuration only.
 
 ## Acceptance criteria
 
-- [ ] `zensical build --strict` succeeds, including the fixed amendment-template link.
-- [ ] The built symmetry page references `katex.min.css`, `katex.min.js`, and `javascripts/katex.js`.
-- [ ] The published Step 02 formulas render as math, not monospace boxes.
-- [ ] No fenced `text` math blocks remain in `docs/physics/symmetry.md`.
-- [ ] KaTeX is pinned to `0.19.1` and attributed in `NOTICE.md`.
-- [ ] The math authoring convention is recorded in `AGENTS.md` and the contributing guide.
-- [ ] The single-dollar delimiter is not enabled; inline math uses `\(...\)`.
-- [ ] No code, public API, data-contract, or scientific-behavior changes.
+- [x] `zensical build --strict` succeeds, including the fixed amendment-template link.
+- [x] The built symmetry page references `katex.min.css`, `katex.min.js`, and `javascripts/katex.js`.
+- [x] The published Step 02 formulas render as math, not monospace boxes.
+- [x] No fenced `text` math blocks remain in `docs/physics/symmetry.md`.
+- [x] KaTeX is pinned to `0.19.1` and attributed in `NOTICE.md`.
+- [x] The math authoring convention is recorded in `AGENTS.md` and the contributing guide.
+- [x] The single-dollar delimiter is not enabled; inline math uses `\(...\)`.
+- [x] No code, public API, data-contract, or scientific-behavior changes.
 
 ## Tests
 
@@ -222,15 +222,15 @@ None. This amendment changes documentation assets and site configuration only.
 
 ## Documentation
 
-- [ ] `docs/physics/symmetry.md` converted.
-- [ ] `zensical.toml` updated.
-- [ ] `docs/javascripts/katex.js` added.
-- [ ] `AGENTS.md` and `docs/development/contributing.md` updated.
-- [ ] `docs/development/agent-workflow.md` amendment-template link fixed to the GitHub URL.
-- [ ] `NOTICE.md` updated with the KaTeX MIT attribution and the pinned CDN source.
-- [ ] `docs/planning/reviews/step-02.md` links to this amendment review.
-- [ ] `docs/planning/audits/step-02.md` lists the amendment ID and combined commit.
-- [ ] Amendment page and index updated.
+- [x] `docs/physics/symmetry.md` converted.
+- [x] `zensical.toml` updated.
+- [x] `docs/javascripts/katex.js` added.
+- [x] `AGENTS.md` and `docs/development/contributing.md` updated.
+- [x] `docs/development/agent-workflow.md` amendment-template link fixed to the GitHub URL.
+- [x] `NOTICE.md` updated with the KaTeX MIT attribution and the pinned CDN source.
+- [x] `docs/planning/reviews/step-02.md` links to this amendment review.
+- [x] `docs/planning/audits/step-02.md` lists the amendment ID and combined commit.
+- [x] Amendment page and index updated.
 
 ## Risks and mitigations
 
@@ -253,27 +253,29 @@ None. This amendment changes documentation assets and site configuration only.
 
 - Branch: `feature/step-02-symmetry-and-geometry/amend-2-docs-math`
 - Parent step branch: `step/02-symmetry-and-geometry`
-- Parent branch synchronized with `main` before implementation: —
-- Parent review linked: —
+- Parent branch synchronized with `main` before implementation: `d2efe6a`
+- Parent review linked: `docs/planning/reviews/step-02.md`
 - Approval: normal feature approval; design review before implementation
-- Squash commit: —
-- Parent audit request updated: —
-- Combined frozen commit: —
+- Squash commit: `d6eac6f`
+- Parent audit request updated: `d6eac6f`
+- Combined frozen commit: `d6eac6f`
 
 ## Verification evidence
 
-- Build: `zensical build --strict` at the amendment commit — result and command.
-- Rendered page: `site/physics/symmetry/index.html` — six converted formulas, fractions, roots, subscripts, and
-  aligned equations; screenshot path.
-- Navigation: instant navigation from another page re-renders KaTeX.
-- Accessibility: KaTeX output includes MathML or an equivalent accessible representation.
-- Asset source: pinned CDN URL or vendored path; HTTP status or local file path.
-- Evidence owner: step implementor; record the command output and screenshot path here before closeout.
+- Build: `zensical build --strict` — pass, "No issues found"; combined `tools/docs/build-docs.sh` also passes.
+- Rendered page: `site/physics/symmetry/index.html` — six display formulas and inline math rendered; screenshot
+  at `/tmp/opencode/step-02-symmetry.png`.
+- Navigation: KaTeX initializer uses `document$.subscribe`; verified in the built page with 21 `arithmatex`
+  elements.
+- Accessibility: the rendered DOM contains 21 `katex-mathml` and 21 `katex-html` nodes, with no failed
+  `arithmatex` elements.
+- Asset source: pinned CDN `https://unpkg.com/katex@0.19.1/...` (CSS, minified JS, auto-render).
+- Evidence owner: step implementor.
 
 ## Audit
 
 - Parent audit record: `docs/planning/audits/step-02.md`
-- Audit verdict: —
+- Audit verdict: pending
 - Merge commit: —
 - Tag: `step-02`
 - Post-merge fallback required: no

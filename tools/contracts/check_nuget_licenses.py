@@ -39,6 +39,13 @@ KNOWN_PACKAGE_LICENSES = {
     ("xunit.abstractions", "2.0.3"): "Apache-2.0",
 }
 
+# Some MIT packages ship the licence as a file rather than an SPDX expression.
+# Exact versions force a review when the dependency changes.
+KNOWN_FILE_LICENSES = {
+    ("CommandLineParser", "2.9.1"): "MIT",
+    ("Microsoft.DotNet.PlatformAbstractions", "3.1.6"): "MIT",
+}
+
 KNOWN_LICENSE_URLS = {
     "https://licenses.nuget.org/MIT": "MIT",
     "https://licenses.nuget.org/Apache-2.0": "Apache-2.0",
@@ -137,6 +144,10 @@ def resolve_license(package_id: str, version: str, nuspec: Path) -> tuple[str, s
                         f"{package_id} {version}: OSMFEULA exception is pinned to {expected}; review the new version"
                     )
                 return "OSMFEULA (accepted exception)", "nuspec file"
+
+            known_file = KNOWN_FILE_LICENSES.get((package_id, version))
+            if known_file:
+                return known_file, f"known file licence '{license_text}'"
             fail(f"{package_id} {version}: file licence '{license_text}' requires explicit review")
 
     if license_url and license_url in KNOWN_LICENSE_URLS:

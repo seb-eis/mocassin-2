@@ -121,6 +121,9 @@ Follow the testing trophy in
 
 ## 7. Documentation as code
 
+- Use `$$...$$` for display math and `\(...\)` for inline math; never use fenced `text` blocks for formulas.
+  The single-dollar `$...$` delimiter is not enabled. Preview the rendered page before closing a documentation
+  change.
 - Narrative documentation is in `docs/` and built with Zensical; `docs/planning/` is internal and excluded
   from the published site.
 - Every feature updates the documentation pages named by its step and keeps the strict build green.

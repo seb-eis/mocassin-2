@@ -5,6 +5,7 @@ using Mocassin.Core.Units;
 
 namespace Mocassin.Core.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class UnitValuesTests
 {
     public static TheoryData<Type> UnitTypes =>

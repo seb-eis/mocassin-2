@@ -4,6 +4,7 @@ using Mocassin.Core.Diagnostics;
 
 namespace Mocassin.Core.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class DiagnosticBagTests
 {
     [Fact]
