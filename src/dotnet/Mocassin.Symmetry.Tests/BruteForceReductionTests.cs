@@ -154,58 +154,65 @@ public sealed class BruteForceReductionTests
     {
         var pointGroup = SpaceGroupOperations.GetPointGroup(setting, center, sites);
         var lists = allowed.Select(static particles => particles.Distinct().Order().ToArray()).ToArray();
-        var clusters = new Dictionary<ulong, (int[] Canonical, HashSet<ulong> Expansions)>();
+        var tuples = new List<int[]>();
         var tuple = new int[sites.Length];
 
-        void Visit(int index)
+        void Collect(int index)
         {
             if (index == tuple.Length)
             {
-                var canonical = tuple.ToArray();
-                foreach (var permutation in pointGroup.InducedPermutations)
-                {
-                    var permuted = new int[tuple.Length];
-                    for (var site = 0; site < tuple.Length; site++)
-                    {
-                        permuted[site] = tuple[permutation[site]];
-                    }
-
-                    if (Compare(permuted, canonical) < 0)
-                    {
-                        canonical = permuted;
-                    }
-                }
-
-                var code = Encode(canonical);
-                if (!clusters.TryGetValue(code, out var entry))
-                {
-                    entry = (canonical, []);
-                    clusters.Add(code, entry);
-                }
-
-                foreach (var permutation in pointGroup.InducedPermutations)
-                {
-                    var permuted = new int[canonical.Length];
-                    for (var site = 0; site < canonical.Length; site++)
-                    {
-                        permuted[site] = canonical[permutation[site]];
-                    }
-
-                    entry.Expansions.Add(Encode(permuted));
-                }
-
+                tuples.Add(tuple.ToArray());
                 return;
             }
 
             foreach (var particle in lists[index])
             {
                 tuple[index] = particle;
-                Visit(index + 1);
+                Collect(index + 1);
             }
         }
 
-        Visit(0);
-        return clusters;
+        Collect(0);
+
+        var groups = new Dictionary<ulong, (int[] Canonical, HashSet<ulong> Expansions)>();
+        foreach (var original in tuples)
+        {
+            var orbit = EnumerateOrbit(pointGroup, original)
+                .OrderBy(static item => item, Comparer<int[]>.Create(Compare))
+                .ToArray();
+            var canonical = orbit[0];
+            var canonicalCode = Encode(canonical);
+            if (!groups.TryGetValue(canonicalCode, out var entry))
+            {
+                entry = (canonical, []);
+                groups.Add(canonicalCode, entry);
+            }
+
+            foreach (var member in orbit)
+            {
+                entry.Expansions.Add(Encode(member));
+            }
+        }
+
+        return groups;
+    }
+
+    private static IEnumerable<int[]> EnumerateOrbit(PointGroup pointGroup, int[] tuple)
+    {
+        var seen = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var permutation in pointGroup.InducedPermutations)
+        {
+            var permuted = new int[tuple.Length];
+            for (var site = 0; site < tuple.Length; site++)
+            {
+                permuted[site] = tuple[permutation[site]];
+            }
+
+            if (seen.Add(string.Join(",", permuted)))
+            {
+                yield return permuted;
+            }
+        }
     }
 
     private static int Compare(int[] left, int[] right)
@@ -270,7 +277,6 @@ public sealed class BruteForceReductionTests
     {
         var encoder = geometry.Encoder;
         var centerPosition = encoder.GetPosition(center);
-        var centerGrid = SpaceGroupOperations.ToGrid(centerPosition, nameof(center));
         var stabilizer = SpaceGroupOperations.GetStabilizer(encoder.Setting, centerPosition);
         var cutoffBucket = PeriodicGeometry.ToBucket(cutoff);
         var candidates = new List<(Vector4I Offset, int Bucket)>();
@@ -326,43 +332,73 @@ public sealed class BruteForceReductionTests
             return comparison != 0 ? comparison : left.Offset.C.CompareTo(right.Offset.C);
         });
 
-        var byOffset = candidates.ToDictionary(static candidate => candidate.Offset);
-        var assigned = new HashSet<Vector4I>();
-        var shells = new List<ExpectedShell>();
+        var indexByOffset = candidates
+            .Select((candidate, index) => (candidate.Offset, index))
+            .ToDictionary(static entry => entry.Offset, static entry => entry.index);
+        var parent = Enumerable.Range(0, candidates.Count).ToArray();
 
-        foreach (var candidate in candidates)
+        int Find(int index)
         {
-            if (!assigned.Add(candidate.Offset))
+            while (parent[index] != index)
             {
-                continue;
+                parent[index] = parent[parent[index]];
+                index = parent[index];
             }
 
-            var equivalents = new HashSet<Vector4I> { candidate.Offset };
+            return index;
+        }
+
+        void Union(int left, int right)
+        {
+            var leftRoot = Find(left);
+            var rightRoot = Find(right);
+            if (leftRoot != rightRoot)
+            {
+                parent[rightRoot] = leftRoot;
+            }
+        }
+
+        for (var index = 0; index < candidates.Count; index++)
+        {
             foreach (var operation in stabilizer)
             {
-                var mapped = Map(encoder, centerGrid, operation, candidate.Offset);
+                var mapped = Map(encoder, centerPosition, operation, candidates[index].Offset);
                 if (mapped is { } value
-                    && byOffset.TryGetValue(value, out var image)
-                    && image.Bucket == candidate.Bucket)
+                    && indexByOffset.TryGetValue(value, out var mappedIndex)
+                    && candidates[mappedIndex].Bucket == candidates[index].Bucket)
                 {
-                    equivalents.Add(value);
-                    assigned.Add(value);
+                    Union(index, mappedIndex);
                 }
             }
+        }
 
+        var shells = new List<ExpectedShell>();
+        foreach (var group in Enumerable.Range(0, candidates.Count).GroupBy(Find))
+        {
+            var offsets = group.Select(index => candidates[index].Offset).ToHashSet();
+            var representative = offsets.OrderBy(static offset => offset, Comparer<Vector4I>.Create(CompareOffset)).First();
             shells.Add(new ExpectedShell(
-                candidate.Offset,
-                candidate.Bucket,
-                equivalents,
+                representative,
+                candidates[group.First()].Bucket,
+                offsets,
                 null));
         }
+
+        shells.Sort(static (left, right) =>
+        {
+            var comparison = left.Bucket.CompareTo(right.Bucket);
+            return comparison != 0 ? comparison : CompareOffset(left.Representative, right.Representative);
+        });
 
         for (var index = 0; index < shells.Count; index++)
         {
             var shell = shells[index];
-            var displacement = Displacement(encoder, centerGrid, shell.Representative);
-            var inverse = new GridFractional3(-displacement.A, -displacement.B, -displacement.C);
-            if (IsSameOrbit(stabilizer, inverse, displacement))
+            var displacement = Displacement(encoder, centerPosition, shell.Representative);
+            var forwardSignature = OrbitSignature(stabilizer, displacement);
+            var inverseSignature = OrbitSignature(
+                stabilizer,
+                new Fractional3(-displacement.A, -displacement.B, -displacement.C));
+            if (forwardSignature == inverseSignature)
             {
                 continue;
             }
@@ -374,10 +410,8 @@ public sealed class BruteForceReductionTests
                     continue;
                 }
 
-                if (IsSameOrbit(
-                    stabilizer,
-                    inverse,
-                    Displacement(encoder, centerGrid, shells[partner].Representative)))
+                var partnerDisplacement = Displacement(encoder, centerPosition, shells[partner].Representative);
+                if (OrbitSignature(stabilizer, partnerDisplacement) == inverseSignature)
                 {
                     shells[index] = shell with { ChiralPartner = partner };
                     break;
@@ -388,80 +422,95 @@ public sealed class BruteForceReductionTests
         return shells;
     }
 
+    private static int CompareOffset(Vector4I left, Vector4I right)
+    {
+        var comparison = left.P.CompareTo(right.P);
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+
+        comparison = left.A.CompareTo(right.A);
+        if (comparison != 0)
+        {
+            return comparison;
+        }
+
+        comparison = left.B.CompareTo(right.B);
+        return comparison != 0 ? comparison : left.C.CompareTo(right.C);
+    }
+
     private static Vector4I? Map(
         UnitCellVectorEncoder encoder,
-        GridFractional3 center,
+        Fractional3 center,
         SymmetryOperation operation,
         Vector4I image)
     {
-        var target = SpaceGroupOperations.ToGrid(encoder.Positions[image.P], nameof(image));
-        var absolute = target
-            + new GridFractional3(
-                checked(image.A * GridFractional3.Denominator),
-                checked(image.B * GridFractional3.Denominator),
-                checked(image.C * GridFractional3.Denominator));
-        var centerShift = operation.Transform(center) - center;
-        var mapped = operation.Transform(absolute) - centerShift;
-        var cellA = FloorDiv(mapped.A);
-        var cellB = FloorDiv(mapped.B);
-        var cellC = FloorDiv(mapped.C);
-        var baseGrid = new GridFractional3(
-            mapped.A - (cellA * GridFractional3.Denominator),
-            mapped.B - (cellB * GridFractional3.Denominator),
-            mapped.C - (cellC * GridFractional3.Denominator));
-        if (!encoder.TryGetPositionIndex(baseGrid, out var p))
+        var target = encoder.Positions[image.P];
+        var absolute = new Fractional3(
+            target.A + image.A,
+            target.B + image.B,
+            target.C + image.C);
+        var mappedCenter = operation.Transform(center);
+        var mappedTarget = operation.Transform(absolute);
+        var relative = new Fractional3(
+            mappedTarget.A - mappedCenter.A,
+            mappedTarget.B - mappedCenter.B,
+            mappedTarget.C - mappedCenter.C);
+        var absoluteImage = new Fractional3(
+            center.A + relative.A,
+            center.B + relative.B,
+            center.C + relative.C);
+        var trimmed = absoluteImage.TrimToUnitCell();
+        if (!encoder.TryIndexOf(trimmed, out var p))
         {
             return null;
         }
 
-        return new Vector4I(checked((int)cellA), checked((int)cellB), checked((int)cellC), p);
+        var basePosition = encoder.Positions[p];
+        return new Vector4I(
+            (int)Math.Round(absoluteImage.A - basePosition.A, MidpointRounding.AwayFromZero),
+            (int)Math.Round(absoluteImage.B - basePosition.B, MidpointRounding.AwayFromZero),
+            (int)Math.Round(absoluteImage.C - basePosition.C, MidpointRounding.AwayFromZero),
+            p);
     }
 
-    private static GridFractional3 Displacement(
+    private static Fractional3 Displacement(
         UnitCellVectorEncoder encoder,
-        GridFractional3 center,
+        Fractional3 center,
         Vector4I image)
     {
-        var target = SpaceGroupOperations.ToGrid(encoder.Positions[image.P], nameof(image));
-        return target
-            + new GridFractional3(
-                checked(image.A * GridFractional3.Denominator),
-                checked(image.B * GridFractional3.Denominator),
-                checked(image.C * GridFractional3.Denominator))
-            - center;
+        var target = encoder.Positions[image.P];
+        return new Fractional3(
+            target.A + image.A - center.A,
+            target.B + image.B - center.B,
+            target.C + image.C - center.C);
     }
 
-    private static bool IsSameOrbit(
+    private static string OrbitSignature(
         ImmutableArray<SymmetryOperation> stabilizer,
-        GridFractional3 vector,
-        GridFractional3 target)
+        Fractional3 displacement)
     {
-        var normalizedTarget = Normalize(target);
+        var signatures = new List<string>(stabilizer.Length);
         foreach (var operation in stabilizer)
         {
-            var (x, y, z) = operation.Linear.Transform(vector.A, vector.B, vector.C);
-            if (Normalize(new GridFractional3(x, y, z)) == normalizedTarget)
-            {
-                return true;
-            }
+            var linear = operation.Linear;
+            var x = (linear.M11 * displacement.A) + (linear.M12 * displacement.B) + (linear.M13 * displacement.C);
+            var y = (linear.M21 * displacement.A) + (linear.M22 * displacement.B) + (linear.M23 * displacement.C);
+            var z = (linear.M31 * displacement.A) + (linear.M32 * displacement.B) + (linear.M33 * displacement.C);
+            signatures.Add(string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"{NormalizeComponent(x):F9},{NormalizeComponent(y):F9},{NormalizeComponent(z):F9}"));
         }
 
-        return false;
+        signatures.Sort(StringComparer.Ordinal);
+        return signatures[0];
     }
 
-    private static GridFractional3 Normalize(GridFractional3 value) =>
-        new(Modulo(value.A), Modulo(value.B), Modulo(value.C));
-
-    private static long Modulo(long value)
+    private static double NormalizeComponent(double value)
     {
-        var remainder = value % GridFractional3.Denominator;
-        return remainder < 0 ? remainder + GridFractional3.Denominator : remainder;
-    }
-
-    private static long FloorDiv(long value)
-    {
-        var quotient = value / GridFractional3.Denominator;
-        return value < 0 && value % GridFractional3.Denominator != 0 ? quotient - 1 : quotient;
+        var normalized = value - Math.Floor(value);
+        return normalized == 1.0 ? 0.0 : normalized;
     }
 
     private static PeriodicGeometry CreateGeometry(

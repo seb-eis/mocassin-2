@@ -1,16 +1,15 @@
 # Symmetry Reference Fixtures
 
-## `general-multiplicities.json`
+## `ase-general-multiplicities.json`
 
-Frozen general-position multiplicity per catalog setting: 274 entries keyed by `(number, axis, origin)`.
+General-position multiplicity for each international group number `1..230`, generated independently with
+ASE 3.29.0 (`ase.spacegroup.Spacegroup.equivalent_sites`). ASE is a development-only oracle; it is not a
+runtime dependency and is not installed by the .NET build or CI.
 
-Provenance:
+The .NET test `EverySettingMatchesTheFrozenGeneralMultiplicityTable` maps each catalog setting to its group
+number and applies the one setting-dependent rule: rhombohedral-axis settings use one third of the ASE
+hexagonal-axis general multiplicity. All other settings (standard, origin choices, monoclinic unique-axis
+B/C) share the group multiplicity.
 
-- generated from the pinned `spglib-2.8.0/catalog-1` selection;
-- representative values are cross-checked against the International Tables for Crystallography, Volume A
-  (P1, P-1, P2, Pmmm, R3, R-3m, Fm-3m);
-- the .NET test `EverySettingMatchesTheFrozenGeneralMultiplicityTable` compares every setting, and
-  `GenericOrbitHasFullMultiplicityForEverySetting` independently confirms that a generic point produces the
-  full operation count for every setting.
-
-This file is a golden regression fixture, not a runtime dependency.
+`GenericOrbitHasFullMultiplicityForEverySetting` independently confirms that a generic point produces the
+full operation count for every catalog setting.

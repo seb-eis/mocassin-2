@@ -52,7 +52,7 @@ Step page: [`Step 02 — Symmetry and Geometry`](../steps/step-02-symmetry-and-g
 
 ## Known notes for the auditor
 
-- The audited solution is `d6eac6f`; a documentation-only audit-request/status commit follows it. The CI run
+- The audited solution is `4a30fdf`; a documentation-only audit-request/status commit follows it. The CI run
   above is for the solution commit.
 - `periodic-geometry` was implemented before `orbit-reduction` because pair reduction consumes radial search.
   The approved feature set is unchanged.
