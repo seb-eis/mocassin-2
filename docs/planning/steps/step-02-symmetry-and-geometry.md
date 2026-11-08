@@ -32,6 +32,7 @@ orbit/permutation reduction, and periodic geometry kernels.
 | `amend-2-docs-math` | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | Squashed | Strict docs and combined docs build; 21 rendered KaTeX elements with MathML; screenshot `/tmp/opencode/step-02-symmetry.png` | [`42427151237`](https://github.com/seb-eis/mocassin-2/actions/runs/42427151237) — green | `d6eac6f` |
 | `fix-audit-findings` | `feature/step-02-symmetry-and-geometry/fix-audit-findings` | Squashed | Symmetry 127/127; brute-force/random oracles; full solution tests; strict docs; format clean; benchmark CI job added | [`42429237412`](https://github.com/seb-eis/mocassin-2/actions/runs/42429237412) — green | `4a30fdf` |
 | `fix-audit-round2` | `feature/step-02-symmetry-and-geometry/fix-audit-round2` | Squashed | Independent ASE multiplicity oracle, union-find pair oracle, exhaustive cluster oracle; 127/127 | [`42469556610`](https://github.com/seb-eis/mocassin-2/actions/runs/42469556610) — green | `cfc419f` |
+| `organize-symmetry-assembly` | `feature/step-02-symmetry-and-geometry/organize-symmetry-assembly` | Awaiting approval | Assembly grouped into Contracts/SpaceGroups/Geometry/Reduction/Diagnostics/Caching; full solution tests pass; format clean | — | — |
 
 **Deviations and notes:**
 
@@ -46,6 +47,8 @@ orbit/permutation reduction, and periodic geometry kernels.
 - Amendment 1 adds the public generic math layer and migrates `CellGeometry` to `Matrix3<double>`.
 - Amendment 2 adds KaTeX 0.19.1 rendering and converts the published symmetry formulas.
 - Combined audited solution commit: `d6eac6f`; audit-fix solution: `cfc419f`.
+- The Symmetry assembly was reorganized into logical folders after the passed audit; namespaces and behavior
+  are unchanged, but the audit must cover the new commit.
 
 ## Goal
 

@@ -73,6 +73,10 @@ flowchart LR
 `CrystalSystem`, and the coordinate primitives. `Mocassin.Symmetry` owns the catalog, exact operations, cell
 geometry, P1 encoding, reduction, and periodic geometry. Core never references Symmetry.
 
+The Symmetry project is grouped by responsibility: `Contracts/` (version records), `SpaceGroups/` (catalog,
+operations, orbit helpers), `Geometry/` (cell, grid, encoder, periodic geometry), `Reduction/` (point groups,
+pair and cluster reduction), `Diagnostics/`, and `Caching/`.
+
 ### Catalog generation and embedding
 
 The committed catalog is generated from pinned spglib by `tools/symmetry/generate_space_groups.py`. Normal
