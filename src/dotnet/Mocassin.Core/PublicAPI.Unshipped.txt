@@ -1209,3 +1209,32 @@ override Mocassin.Core.Model.ModelDefinitionJsonConverter.Write(System.Text.Json
 override Mocassin.Core.Model.Structure.StructureModelJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.Structure.StructureModel!
 override Mocassin.Core.Model.Structure.StructureModelJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.Structure.StructureModel! value, System.Text.Json.JsonSerializerOptions! options) -> void
 const Mocassin.Core.Project.ProjectDiagnosticCodes.SymmetryMetadataMismatch = "PROJ034" -> string!
+Mocassin.Core.Editing.ProjectEditor.AddCellSite(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.CellSite! site) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddDummyPosition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.CellDummyPosition! dummyPosition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddParticle(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Particles.Particle! particle) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddParticleSet(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Particles.ParticleSet! particleSet) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveCellSite(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveDummyPosition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellDummyPositionId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveParticle(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.ParticleId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveParticleSet(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.ParticleSetId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetCellParameters(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.CellParameters! parameters) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetSpaceGroup(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.SpaceGroupRef! reference) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetStructureName(Mocassin.Core.Project.Project! project, string! name) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateCellSite(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.CellSite! site) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateDummyPosition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Structure.CellDummyPosition! dummyPosition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateParticle(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Particles.Particle! particle) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateParticleSet(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Particles.ParticleSet! particleSet) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Model.Particles.IParticleQuery
+Mocassin.Core.Model.Particles.IParticleQuery.Find(Mocassin.Core.Ids.ParticleId id) -> Mocassin.Core.Model.Particles.Particle?
+Mocassin.Core.Model.Particles.IParticleQuery.Find(Mocassin.Core.Ids.ParticleSetId id) -> Mocassin.Core.Model.Particles.ParticleSet?
+Mocassin.Core.Model.Particles.IParticleQuery.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!>
+Mocassin.Core.Model.Particles.IParticleQuery.VoidParticle.get -> Mocassin.Core.Model.Particles.Particle!
+Mocassin.Core.Model.Structure.IStructureQuery
+Mocassin.Core.Model.Structure.IStructureQuery.Find(Mocassin.Core.Ids.CellSiteId id) -> Mocassin.Core.Model.Structure.CellSite?
+Mocassin.Core.Model.Structure.IStructureQuery.Structure.get -> Mocassin.Core.Model.Structure.StructureModel!
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.CellSiteId id) -> Mocassin.Core.Model.Structure.CellSite?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.ParticleId id) -> Mocassin.Core.Model.Particles.Particle?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.ParticleSetId id) -> Mocassin.Core.Model.Particles.ParticleSet?
+Mocassin.Core.Project.Project.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!>
+Mocassin.Core.Project.Project.Structure.get -> Mocassin.Core.Model.Structure.StructureModel!
+Mocassin.Core.Project.Project.VoidParticle.get -> Mocassin.Core.Model.Particles.Particle!

@@ -1,7 +1,10 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
+using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
+using Mocassin.Core.Model.Particles;
+using Mocassin.Core.Model.Structure;
 
 namespace Mocassin.Core.Project;
 
@@ -9,7 +12,7 @@ namespace Mocassin.Core.Project;
 /// Immutable root value of one <c>.mocprj</c> project file.
 /// </summary>
 #pragma warning disable CA1724 // The type intentionally names the project domain and the namespace follows the plan.
-public sealed record Project
+public sealed record Project : IParticleQuery, IStructureQuery
 {
 #pragma warning restore CA1724
     /// <summary>
@@ -103,6 +106,85 @@ public sealed record Project
     /// Gets the optional symmetry metadata.
     /// </summary>
     public ProjectSymmetryMetadata? Symmetry { get; init; }
+
+    /// <summary>
+    /// Gets the authored particles. The implicit void particle is not included.
+    /// </summary>
+    public ImmutableArray<Particle> Particles => Model.Particles;
+
+    /// <summary>
+    /// Gets the implicit void particle.
+    /// </summary>
+    public Particle VoidParticle => Particle.Void;
+
+    /// <summary>
+    /// Gets the authored crystal structure.
+    /// </summary>
+    public StructureModel Structure => Model.Structure;
+
+    /// <summary>
+    /// Finds an authored particle or the implicit void particle.
+    /// </summary>
+    /// <param name="id">The particle identifier.</param>
+    /// <returns>The matching particle, or <see langword="null"/> when the identifier is unknown.</returns>
+    public Particle? Find(ParticleId id)
+    {
+        if (id == ParticleId.Void)
+        {
+            return Particle.Void;
+        }
+
+        foreach (var particle in Model.Particles)
+        {
+            if (particle.Id == id)
+            {
+                return particle;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored particle set or the implicit empty particle set.
+    /// </summary>
+    /// <param name="id">The particle-set identifier.</param>
+    /// <returns>The matching particle set, or <see langword="null"/> when the identifier is unknown.</returns>
+    public ParticleSet? Find(ParticleSetId id)
+    {
+        if (id == ParticleSetId.Empty)
+        {
+            return ParticleSet.Empty;
+        }
+
+        foreach (var particleSet in Model.ParticleSets)
+        {
+            if (particleSet.Id == id)
+            {
+                return particleSet;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored cell site.
+    /// </summary>
+    /// <param name="id">The cell-site identifier.</param>
+    /// <returns>The matching site, or <see langword="null"/> when the identifier is unknown.</returns>
+    public CellSite? Find(CellSiteId id)
+    {
+        foreach (var site in Model.Structure.Sites)
+        {
+            if (site.Id == id)
+            {
+                return site;
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// Gets the parameterization templates.

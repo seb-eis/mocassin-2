@@ -22,8 +22,8 @@ validation and a stable public API.
 | `particle-model` | `feature/step-03-particle-and-structure-models/particle-model` | Done | `dotnet`, `structure`, `api` pass; Core tests 199/199 | — | `3974596` |
 | `structure-model` | `feature/step-03-particle-and-structure-models/structure-model` | Done | `dotnet`, `structure`, `api` pass; Core tests 223/223 | — | `dd642d6` |
 | `model-envelope-and-contracts` | `feature/step-03-particle-and-structure-models/model-envelope-and-contracts` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core tests 242/242 | — | `7c4e748` |
-| `structure-preview-and-benchmark` | `feature/step-03-particle-and-structure-models/structure-preview-and-benchmark` | Awaiting approval | `dotnet`, `structure`, `api`, `contracts` pass; Core 242/242, Symmetry 145/145; benchmark 15.8 µs / 6.7 µs | — | — |
-| `queries-and-editing` | `feature/step-03-particle-and-structure-models/queries-and-editing` | Planned | — | — | — |
+| `structure-preview-and-benchmark` | `feature/step-03-particle-and-structure-models/structure-preview-and-benchmark` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 242/242, Symmetry 145/145; benchmark 15.8 µs / 6.7 µs | — | `67e39e1` |
+| `queries-and-editing` | `feature/step-03-particle-and-structure-models/queries-and-editing` | Awaiting approval | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146 | — | — |
 | `validation-composition` | `feature/step-03-particle-and-structure-models/validation-composition` | Planned | — | — | — |
 | `samples-and-docs` | `feature/step-03-particle-and-structure-models/samples-and-docs` | Planned | — | — | — |
 | `closeout` | `feature/step-03-particle-and-structure-models/closeout` | Planned | — | — | — |
