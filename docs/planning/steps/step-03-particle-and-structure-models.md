@@ -13,8 +13,8 @@ validation and a stable public API.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Not requested
-- **Last updated:** —
+- **Design review:** [Ready for review](../reviews/step-03.md)
+- **Last updated:** 2026-11-08
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -40,7 +40,29 @@ occupations, a crystal cell, and stable/unstable reference sites, and see the sy
 
 ## Design
 
-### 1. Particle model
+### 1. Model composition
+
+The existing `ModelDefinition` is an empty root. Step 03 gives it the first two sections:
+
+```csharp
+public sealed record ParticleModel(
+    ImmutableArray<Particle> Particles,
+    ImmutableArray<ParticleSet> ParticleSets);
+
+public sealed record ModelDefinition(
+    ParticleModel Particles,
+    StructureModel Structure);
+```
+
+- `ParticleModel` stores only authored custom particles and particle sets; the void particle and empty set
+  remain implicit.
+- `ModelDefinition` remains the root model envelope. Later steps add transition, energy, lattice, and
+  simulation sections.
+- `ProjectJsonContext`, `ProjectJson`, `ProjectSchema`, and `ProjectValidator` are extended for the new
+  sections. The generated manifest/schema is the cross-language contract; the project `schemaVersion` remains
+  1 because the fields are additive.
+
+### 2. Particle model
 
 ```csharp
 public sealed record Particle(
@@ -69,7 +91,7 @@ public sealed record ParticleSet(
 - Particle sets may not contain the void; unstable sites implicitly default to void.
 - Particle sets are immutable; editing produces a new set and revalidates references.
 
-### 2. Structure model
+### 3. Structure model
 
 ```csharp
 public sealed record StructureModel(
@@ -120,7 +142,7 @@ not reference `Mocassin.Symmetry`.
 - Dummy positions are visual helpers, may coincide with sites, and are excluded from all simulation
   compilation.
 
-### 3. Derived structure data (preview, not compiled)
+### 4. Derived structure data (preview, not compiled)
 
 The model layer exposes a `StructurePreview` for the UI and validation:
 
@@ -147,7 +169,7 @@ resolved catalog setting, or supercell dimensions.
 - The UI shows the orbit size, multiplicity, fractional/Cartesian coordinates, and stability for each site.
 - The preview is not the compiled model; step 08 produces the authoritative compiled structure.
 
-### 4. Validation rules
+### 5. Validation rules
 
 | Code | Severity | Rule |
 | --- | --- | --- |
@@ -189,7 +211,7 @@ and `STR009`. A composed validator runs both and returns one stable, sorted list
 - A site whose orbit overlaps another site is an error because it makes particle assignment ambiguous.
 - Structure validation also computes statistics used by step 07: orbit sizes, total positions, site counts.
 
-### 5. Public API
+### 6. Public API
 
 ```csharp
 public interface IParticleQuery
@@ -231,9 +253,67 @@ public interface IStructureValidator
 - Mutations go through `ProjectEditor` methods such as `AddParticle`, `UpdateParticle`, `AddCellSite`, which
   return a new project and diagnostics.
 
+## Code layout
+
+The new code follows the structure policy: PascalCase domain folders, namespaces that match folders, file names
+that match the primary type, no new root-level files, and no folder above 20 direct files.
+
+```text
+Mocassin.Core/
+  Ids/
+    TypedIds.cs                         # add CellDummyPositionId; reuse ParticleId, ParticleSetId, CellSiteId
+  Model/
+    ModelDefinition.cs                  # add Particles and Structure sections
+    CellParameters.cs                   # existing type, reused by StructureModel
+    Particles/
+      Particle.cs
+      ParticleSet.cs
+      ParticleModel.cs
+      IParticleQuery.cs
+    Structure/
+      StructureModel.cs
+      SpaceGroupRef.cs
+      CellSite.cs
+      CellDummyPosition.cs
+      SiteStability.cs
+      IStructureQuery.cs
+  Editing/
+    ProjectEditor.cs                    # add particle/set/site/dummy/parameter operations
+  Diagnostics/
+    ParticleDiagnosticCodes.cs          # PAR001-PAR007
+    StructureDiagnosticCodes.cs         # Core-side STR004, STR005, STR006, STR010, STR011
+  Project/
+    ProjectJson.cs
+    ProjectJsonContext.cs
+    ProjectSchema.cs
+    ProjectValidator.cs
+
+Mocassin.Symmetry/
+  Diagnostics/
+    StructureDiagnosticCodes.cs         # existing; extend with STR001 and STR008
+  Structure/
+    StructurePreview.cs
+    StructurePreviewService.cs
+    StructureValidator.cs
+    IStructurePreviewService.cs
+    IStructureValidator.cs
+```
+
+Test files mirror the source concept in `Mocassin.Core.Tests` and `Mocassin.Symmetry.Tests`:
+
+- `Particles/ParticleTests.cs`, `Particles/ParticleSetTests.cs`
+- `Structure/StructureModelTests.cs`, `Structure/CellValidationTests.cs`
+- `Structure/StructurePreviewTests.cs`, `Structure/StructureValidatorTests.cs`
+
+`CellParameters` stays in `Model/` because it is an existing Step 01 type; it is referenced from
+`Model/Structure/StructureModel.cs` with a matching namespace. If `TypedIds.cs` approaches the 800-line limit,
+split the new IDs into `Ids/StructureIds.cs`.
+
 ## Implementation tasks
 
-- [ ] Implement `Particle`, `ParticleSet`, and the implicit void/empty objects.
+- [ ] Extend `ModelDefinition` with `ParticleModel` and `StructureModel`; update `ProjectJsonContext`,
+  `ProjectJson`, `ProjectSchema`, and `ProjectValidator`.
+- [ ] Implement `Particle`, `ParticleSet`, `ParticleModel`, and the implicit void/empty objects.
 - [ ] Implement `StructureModel`, `SpaceGroupRef`, `CellParameters`, `CellSite`, `CellDummyPosition`.
 - [ ] Add the `CellDummyPositionId` typed ID and JSON converter.
 - [ ] Implement crystal-system normalization and validation.
@@ -245,7 +325,8 @@ public interface IStructureValidator
 - [ ] Implement `IParticleQuery` and `IStructureQuery` over the project snapshot.
 - [ ] Implement editor operations for particles, sets, cell parameters, sites, and dummies.
 - [ ] Add sample definitions for ceria and barium zirconate.
-- [ ] Add diagnostics and help text for every code.
+- [ ] Add Core-side particle and structure diagnostic codes, extend the Symmetry structure codes, and add help
+  text for every code.
 - [ ] Update `contracts/manifest.json` with the `structure` section and optional envelope `symmetry` metadata;
   regenerate `contracts/generated/schema/project-v1.schema.json`. The project `schemaVersion` remains 1 because
   the fields are additive.
@@ -283,6 +364,7 @@ At this point, document particles and crystal structure:
 
 | Test | Assertion |
 | --- | --- |
+| Model envelope | Empty, particle-only, structure-only, and combined models round-trip through the project JSON context |
 | Particle limits | 63 custom particles accepted; 64 rejected |
 | Void handling | Void cannot be added to a set; void index is 0 |
 | Symbol/charge | Mass symbol preserved; charge validated |
