@@ -16,6 +16,7 @@ solver, and external tooling. Contracts are versioned and covered by golden and 
   - chain linkers,
   - doping priority,
   - reference path positions,
+  - particle IDs in a particle set,
   - job collections/configurations.
 - All other arrays are sorted by `id` when serialized, so identical models produce byte-identical JSON.
 - Compiled objects receive dense integer indices (`ParticleIndex`, `PositionIndex`, `JumpCollectionIndex`,
@@ -194,7 +195,7 @@ parameterization, and lattice signatures use the MessagePack projection (section
       "name": "Ce",
       "fractional": [0.0, 0.0, 0.0],
       "particleSetId": "…",
-      "stable": true
+      "stability": "stable"
     }
   ]
 }
@@ -212,12 +213,14 @@ parameterization, and lattice signatures use the MessagePack projection (section
   choice. Both are explicit and use `none` when the setting has no such choice.
 - `axis` values are `none`, `uniqueAxisB`, `uniqueAxisC`, `hexagonal`, and `rhombohedral`. `uniqueAxisA` is
   reserved: the JSON parser accepts the enum value, and the catalog validator rejects it with `STR001` in v1.
-  The generated schema/manifest marks it reserved, not supported. `origin` values are `none`, `originChoice1`,
-  and `originChoice2`.
+  Step 03 updates the manifest and generated schema to mark it reserved and unsupported; until then the
+  generated project schema does not yet contain the structure fields. `origin` values are `none`,
+  `originChoice1`, and `originChoice2`.
 - The catalog resolves `(number, axis, origin)` to the Hermann–Mauguin symbol, Hall symbol, crystal system, and
   operations. These derived values are never persisted in the project.
 - The default structure is P1: `{ "number": 1, "axis": "none", "origin": "none" }`.
-- Stable sites may define interactions and host particles; unstable sites are transition states.
+- `stability` is `stable` or `unstable`. Stable sites may define interactions and host particles; unstable
+  sites are transition states.
 
 #### Transitions
 

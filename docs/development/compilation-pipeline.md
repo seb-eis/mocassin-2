@@ -62,7 +62,8 @@ canonicalizes allowed occupation tuples under the induced permutation group. The
 Orbit, pair, and cluster work is independent per center/site. Parallel tasks must use local buffers and merge
 results with the documented canonical keys before assigning IDs or storing values. Floating-point reductions
 are not parallelized. Deterministic tests freeze P indices, verify pair-shell and cluster representatives
-against brute-force oracles, and CI repeats the golden P-index and catalog checks on Linux and Windows.
+against brute-force oracles, and CI repeats the golden P-index and catalog checks on Ubuntu. Windows and macOS
+are manual platform gates when platform-sensitive code changes.
 
 ### Caches
 

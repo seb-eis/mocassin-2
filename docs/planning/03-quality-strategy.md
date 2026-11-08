@@ -356,8 +356,8 @@ Contract tests use files produced by the real writers and never share reader/wri
 9. Avalonia headless UI tests
 10. License/header check and dependency audit
 
-Matrix: `ubuntu-latest` and `windows-latest` on step branches; macOS on `main`, nightly, or manual. .NET 10 SDK;
-stable Rust; Python 3.11–3.13.
+Matrix: automatic runs use `ubuntu-latest` only. Step closeout and `main` use path-filtered jobs. Windows and
+macOS are manual platform gates. .NET 10 SDK; stable Rust; Python 3.13 automatic (3.11/3.12 manual/nightly).
 Cache NuGet, Cargo, pip, and the SQLite build.
 
 ### Nightly
@@ -435,7 +435,8 @@ Benchmarks:
 - **One published site.** Zensical owns the root; API outputs are copied into `site/api/dotnet` and
   `site/api/rust` after the Zensical build.
 - **Strict builds.** `zensical build --strict` fails on broken links/anchors; DocFX, rustdoc, and mkdocstrings
-  fail on missing public API docs/docstrings/import errors. CI builds the combined site on every PR.
+  fail on missing public API docs/docstrings/import errors. The combined site is built locally and by the manual
+  `docs.yml` workflow; it is not part of the automatic CI gate.
 - **Docs-as-code.** Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Every
   feature step updates its pages and keeps the strict build green. Step 30 completes coverage, cross-cutting
   content, and API integration; Step 31 packages the site artifact with the release.

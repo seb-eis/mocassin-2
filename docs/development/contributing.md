@@ -76,7 +76,7 @@ python -m build src/python
 python tools/contracts/generate.py --check
 python tools/check-license-headers.py
 python tools/check-no-secrets.py
-./tools/check-api-compat.sh
+./tools/verify.sh api
 zensical build --strict
 ```
 
@@ -106,7 +106,7 @@ The `CI` workflow has these jobs:
 | `Public API compatibility` | ApiCompat against the checked-in baseline assemblies |
 
 Documentation is built by the separate manual `Documentation` workflow. Benchmarks and long-running suites
-have their own manual workflows. The scheduled `Nightly` workflow is disabled until real suites exist.
+have their own manual workflows. `Nightly` is a manual placeholder; it has no schedule until real suites exist.
 
 ## 6. Tests
 

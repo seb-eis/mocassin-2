@@ -25,8 +25,8 @@ A single Ubuntu run is cheap (~12 minutes); Windows is 2× and macOS is 10×.
 | Step closeout | one manual `workflow_dispatch` per step | Ubuntu | Path-filtered jobs |
 | Platform gate | manual `workflow_dispatch` with `platforms` | Windows/macOS | On demand only |
 | Documentation | manual `docs.yml` | Ubuntu | Full docs build |
-| Benchmark | manual `benchmark.yml` | Ubuntu | Selected benchmark, once the project lands |
-| Nightly | disabled until real suites exist | — | Weekly on Ubuntu if re-enabled |
+| Benchmark | manual `benchmark.yml` | Ubuntu | Selected benchmark |
+| Nightly | manual placeholder; no schedule until real suites exist | — | — |
 
 There are **no per-feature and no per-push step-branch CI runs**. Feature branches are validated locally with
 `tools/verify.sh`.
@@ -79,20 +79,20 @@ Promote Windows first. Keep macOS manual until there is actual macOS-specific be
 Step closeout (Ubuntu, path-filtered):
 
 ```sh
-gh workflow run ci.yml --ref step/02-symmetry-and-geometry -f platforms=ubuntu
+gh workflow run ci.yml --ref step/03-particle-and-structure-models -f platforms=ubuntu
 ```
 
-Platform gate (only when required):
+Use the active step branch; the Step 03 branch is the next example. Platform gate (only when required):
 
 ```sh
-gh workflow run ci.yml --ref step/02-symmetry-and-geometry -f platforms=windows
-gh workflow run ci.yml --ref step/02-symmetry-and-geometry -f platforms=all
+gh workflow run ci.yml --ref step/03-particle-and-structure-models -f platforms=windows
+gh workflow run ci.yml --ref step/03-particle-and-structure-models -f platforms=all
 ```
 
 Force every job (for example after a CI-workflow change):
 
 ```sh
-gh workflow run ci.yml --ref step/02-symmetry-and-geometry -f platforms=ubuntu -f force_all=true
+gh workflow run ci.yml --ref step/03-particle-and-structure-models -f platforms=ubuntu -f force_all=true
 ```
 
 Local validation:

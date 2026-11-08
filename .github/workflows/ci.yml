@@ -312,8 +312,8 @@ jobs:
       - name: Contract drift
         run: python tools/contracts/generate.py --check
 
-      # The symmetry generator lands with Step 02. Guard the steps so this
-      # policy can merge before that step without failing main CI.
+      # The symmetry generator is present from Step 02. The guard keeps older
+      # branches and pre-Step-02 snapshots runnable.
       - name: Install symmetry generator tools
         if: hashFiles('tools/symmetry/requirements.txt') != ''
         run: python -m pip install -r tools/symmetry/requirements.txt

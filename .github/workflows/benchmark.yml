@@ -1,8 +1,7 @@
 name: Benchmark
 
 # Benchmarks are manual and never part of the normal push or closeout gates.
-# The benchmark project lands with a later step; this workflow will fail until
-# `src/dotnet/Mocassin.Benchmarks` exists.
+# The benchmark project exists under `src/dotnet/Mocassin.Benchmarks`.
 on:
   workflow_dispatch:
 

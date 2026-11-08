@@ -8,14 +8,20 @@ The repository separates concerns into three languages and one set of contracts:
 
 ```mermaid
 flowchart LR
-  Core --> Symmetry --> Compilation --> Contracts
-  Contracts --> Packages --> Cli
-  Contracts --> Results
+  Symmetry --> Core
+  Compilation --> Symmetry
+  Contracts --> Compilation
+  Packages --> Contracts
+  Results --> Contracts
+  Cli --> Packages
+  Cli --> Results
   App[App + ViewModels + Views] --> Contracts
   App --> Packages
   App --> Results
   App --> Rendering
 ```
+
+Arrows point from a project to the project it depends on.
 
 - .NET owns the model builder, compilation, package writer, results API, CLI, and Avalonia application.
 - Rust owns the solver, `.msl` reader, RNG, state writer, and solver CLI.
@@ -36,6 +42,6 @@ The detailed architecture is in the internal plan; the repository layout is summ
 
 ## Current phase
 
-Step 00 created the build/test/docs skeleton. Step 01 adds the immutable project kernel and `.mocprj` format.
-Scientific model domains, the solver, and the GUI are added in later steps. Do not treat placeholder pages as
-implemented features.
+Steps 00–02 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, and
+the symmetry/geometry kernels. Step 03 — Particle and Structure Models is next. Scientific model domains, the
+solver, and the GUI are added in later steps. Do not treat placeholder pages as implemented features.

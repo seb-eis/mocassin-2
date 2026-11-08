@@ -583,7 +583,7 @@ reduced/Niggli basis can be added later as an optimization.
 - Do not use parallel floating-point reductions.
 - Cache insertion order must not affect results.
 - Final outputs are sorted by the documented canonical keys.
-- Golden tests run on Linux and Windows on step branches; macOS runs them on `main`.
+- Golden tests are platform-independent; CI runs them on Ubuntu automatically, with Windows and macOS as manual platform gates.
 
 #### 7.3 Symmetry contract version
 

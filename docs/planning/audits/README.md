@@ -42,6 +42,7 @@ The step agent, planner, or human owner may spawn an auditor. The spawner must n
 | **Fixes required** | The audit found blocking or material issues. |
 | **Re-audit required** | Fixes were applied and the new commit needs verification. |
 | **Passed** | The audit found no blocking issues at the recorded commit. |
+| **Passed with notes** | Only minor/note findings remain; the human owner explicitly accepts them. |
 | **Waived** | The human owner explicitly accepted a documented exception. |
 
 ## 3. Required sequence
@@ -134,6 +135,8 @@ docs/planning/audits/step-01.md
 Use [`step-audit-template.md`](step-audit-template.md) as the starting point. All 32 files are pre-seeded so
 that every step has an audit entry before implementation. The step agent owns the request fields, scope,
 checklists, and resolutions. The auditor writes the evidence, findings, and verdict directly into this file.
+When the template changes, regenerate every unused pre-seeded record from it before the next step starts; do
+not leave older records on an obsolete template.
 
 The audit record is the durable record. Do not rely on chat history, and do not use a separate handoff file.
 
