@@ -15,14 +15,15 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Changes required |
-| Reviewed commit | `fe2331c` |
+| Reviewed commit | `a3d8641` |
 | Docs branch | `main` |
 | Review date | 2026-11-08 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
 
-> Round 1 reviewed `b426a13`, round 2 reviewed `4f4c888`, and round 3 reviewed `43bad05`; all returned
-> `Changes required`. The design was revised in `fe2331c`; the request metadata now points at that commit for
-> round 4. The earlier reviewer text is unchanged.
+> Round 1 reviewed `b426a13`, round 2 reviewed `4f4c888`, and round 3 reviewed `43bad05` and returned
+> `Changes required`; round 4 reviewed `fe2331c` and returned `Ready with notes`. The design was revised in
+> `a3d8641`; the request metadata now points at that commit for round 5. The earlier reviewer text is
+> unchanged.
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
 
@@ -1236,3 +1237,63 @@ Reviewed commit: `fe2331c` (`fe2331c6bdb83d176679cf91c23d3dfdd78fb1ab`). Documen
 `zensical build --strict` — no issues found; `python3 tools/contracts/generate.py --check` — 17 artifacts
 current. Record parent: `30b8b41` (the round-4 request commit); the design content is identical at `fe2331c`
 and `HEAD`.
+
+## Round 4 resolutions
+
+Design revision: `a3d8641` — focused clarifications for R4-1–R4-5. This section is owned by the
+planner/step agent and does not alter the reviewer's round-4 findings, evidence, or verdict.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| R4-1 | Resolved — awaiting re-review | The cell offset is now explicitly the minimizing integer shift between the raw point and the matched P1 position (ties toward zero); `TrimToUnitCell` is not the offset rule. The test plan covers boundary matching and "same P, different offset is not a duplicate". |
+| R4-2 | Resolved — awaiting re-review | `TRN018` is now in the Core definition-level ownership list (TRN001–TRN009, TRN017–TRN019, TRN021–TRN027). |
+| R4-3 | Accepted — awaiting re-review | The broader `D+ S+ D+` grammar is an intentional generalization, not a claim that the original regex set is exhaustive. `D S D` is explicitly invalid (TRN009) because a single static connector between two single dynamic connectors links two transitions without the required intermediate arrangement. Step 08 must support or reject every accepted shape at compile time. |
+| R4-4 | Resolved — awaiting re-review | TRN025 is now a pair-level Core check: a group must not mix stable-role (acceptor not void) and unstable-role (`[D, ∅]`) state changes. Position/group stability agreement remains TRN012 in Symmetry. |
+| R4-5 | Resolved — awaiting re-review | Step 04 and Step 06 now state the exact mapping: `SimulationKind.Kmc` ↔ `TransitionKind.Kinetic`, `SimulationKind.Mmc` ↔ `TransitionKind.Metropolis`. |
+
+## Re-review round 5
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Step | 04 — Transition Model |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `a3d8641` |
+| Docs branch | `main` |
+| Review date | — |
+| Reviewer | — |
+
+Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
+
+The design content for round 5 is frozen at `a3d8641`. The delta from the round-4 commit `fe2331c` is the
+focused R4-1–R4-5 clarification; the review request and status changes are metadata only. Verify the delta
+yourself with `git diff --stat fe2331c..a3d8641`.
+
+This is a focused follow-up. The human owner asked for a brief review with minimal checks: confirm that
+R4-1–R4-5 are addressed, no new Blocker or Major was introduced, and the documentation gate still passes. Do
+not repeat the full round-1–round-4 review unless the delta introduces a contradiction.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for this round below. Keep the
+earlier rounds unchanged.
+
+### Re-review evidence
+
+_Reviewer to complete._
+
+### Re-review findings
+
+_Reviewer to complete._
+
+### Re-review verdict
+
+- [ ] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+Follow-up owner:
+Follow-up step:
