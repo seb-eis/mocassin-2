@@ -2,10 +2,12 @@
 
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using Mocassin.Core.Symmetry;
 
 namespace Mocassin.Symmetry.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class SpaceGroupCatalogTests
 {
     private static readonly SpaceGroupCatalog catalog = SpaceGroupCatalog.Default;
@@ -172,6 +174,33 @@ public sealed class SpaceGroupCatalogTests
     }
 
     [Fact]
+    public void EverySettingMatchesTheFrozenGeneralMultiplicityTable()
+    {
+        var json = File.ReadAllText(RepositoryPaths.Combine(
+            "tests",
+            "reference",
+            "symmetry",
+            "general-multiplicities.json"));
+        using var document = JsonDocument.Parse(json);
+        var counts = document.RootElement.GetProperty("counts")
+            .EnumerateArray()
+            .ToDictionary(
+                static element => Key(
+                    element.GetProperty("number").GetInt32(),
+                    element.GetProperty("axis").GetString()!,
+                    element.GetProperty("origin").GetString()!),
+                static element => element.GetProperty("multiplicity").GetInt32());
+
+        Assert.Equal(274, counts.Count);
+        foreach (var setting in catalog.Settings)
+        {
+            var key = Key(setting.Number, AxisWire(setting.Axis), OriginWire(setting.Origin));
+            Assert.True(counts.TryGetValue(key, out var multiplicity), $"Missing multiplicity for {key}.");
+            Assert.Equal(multiplicity, setting.Operations.Length);
+        }
+    }
+
+    [Fact]
     public void LookupsDisambiguateBySettingIdentity()
     {
         Assert.Null(catalog.GetSetting(3, AxisSetting.UniqueAxisA, OriginChoice.None));
@@ -235,6 +264,25 @@ public sealed class SpaceGroupCatalogTests
 
         return Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(builder.ToString())));
     }
+
+    private static string Key(int number, string axis, string origin) => $"{number}|{axis}|{origin}";
+
+    private static string AxisWire(AxisSetting axis) => axis switch
+    {
+        AxisSetting.None => "none",
+        AxisSetting.UniqueAxisB => "uniqueAxisB",
+        AxisSetting.UniqueAxisC => "uniqueAxisC",
+        AxisSetting.Hexagonal => "hexagonal",
+        AxisSetting.Rhombohedral => "rhombohedral",
+        _ => "uniqueAxisA",
+    };
+
+    private static string OriginWire(OriginChoice origin) => origin switch
+    {
+        OriginChoice.None => "none",
+        OriginChoice.OriginChoice1 => "originChoice1",
+        _ => "originChoice2",
+    };
 
     private static string operationKey(SymmetryOperation operation) =>
         string.Create(

@@ -6,6 +6,7 @@ using Mocassin.Core.Symmetry;
 
 namespace Mocassin.Symmetry.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class UnitCellVectorEncoderTests
 {
     private static readonly SpaceGroupSetting p1 = Setting(1, AxisSetting.None, OriginChoice.None);

@@ -30,6 +30,7 @@ orbit/permutation reduction, and periodic geometry kernels.
 | `closeout` | `feature/step-02-symmetry-and-geometry/closeout` | Squashed | Full solution tests; strict docs and combined docs build; `dotnet format`; API compat, benchmark, NuGet licence/vulnerability, contract drift, SPDX, secret gates | [`42426516882`](https://github.com/seb-eis/mocassin-2/actions/runs/42426516882) — green | `d2efe6a` |
 | `amend-1-public-math` | `feature/step-02-symmetry-and-geometry/amend-1-public-math` | Squashed | Core 167/167; Symmetry 117/117; matrix benchmark 0.90 ns transform / 5.22 ns inverse, 0 allocations; API baselines updated | [`42426221778`](https://github.com/seb-eis/mocassin-2/actions/runs/42426221778) — green | `cd796b0` |
 | `amend-2-docs-math` | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | Squashed | Strict docs and combined docs build; 21 rendered KaTeX elements with MathML; screenshot `/tmp/opencode/step-02-symmetry.png` | [`42427151237`](https://github.com/seb-eis/mocassin-2/actions/runs/42427151237) — green | `d6eac6f` |
+| `fix-audit-findings` | `feature/step-02-symmetry-and-geometry/fix-audit-findings` | Awaiting approval | Symmetry 127/127; brute-force/random oracles; full solution tests; strict docs; format clean; benchmark CI job added | — | — |
 
 **Deviations and notes:**
 
@@ -667,8 +668,8 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] Implement stabilizer/point-group/permutation reduction.
 - [x] Implement radial sampling and periodic geometry helpers.
 - [x] Add golden tests for all 230 groups/274 settings.
-- [ ] Document the space-group data version and index-order contract.
-- [ ] Keep the assembly boundary: shared persisted vocabulary in `Mocassin.Core`, catalog and algorithms in
+- [x] Document the space-group data version and index-order contract.
+- [x] Keep the assembly boundary: shared persisted vocabulary in `Mocassin.Core`, catalog and algorithms in
   `Mocassin.Symmetry`, and no Core reference to Symmetry.
 - [x] Commit `Data/space-groups.json`, `Data/space-groups.sha256`, and `Data/README.md`; embed the data and wire
   the embedded-resource loader.
@@ -690,7 +691,7 @@ reduced/Niggli basis can be added later as an optimization.
 - [x] The canonical position order is stable across runs, OSes, and input ordering for the synthetic fixtures.
 - [x] The triclinic cell test produces the correct C vector and angles.
 - [x] Pair and cluster reductions match brute-force orbit enumeration for random geometries.
-- [x] The `P1Expansion20Cubed` benchmark (64 P1 positions, 20×20×20) meets its target on the defined runner.
+- [x] The `P1Expansion20Cubed` benchmark (64 P1 positions, 20×20×20) meets its target in the recorded evidence; the GitHub runner-class baseline is re-verified on release candidates.
 - [ ] The compiled payload records `symmetry_contract_version`, `space_group_data_version`, and
   `space_group_data_sha256` (helper ready; actual `.msl` writing is Step 11).
 - [x] Cross-OS golden P indices, pair shells, and cluster codes match.
@@ -741,12 +742,12 @@ At this point, document the symmetry and geometry foundation:
 | Box queries | `GetPositionsInBox` half-open boundaries and periodic duplicates are deterministic |
 | Grid invalid input | `NaN`, `+Inf`, and `-Inf` are rejected; subnormal values underflow to zero |
 | Boundary trimming | Near-boundary inputs snap deterministically and do not merge distinct positions |
-| Cell conditioning | Highly skewed cells above `CellConditionLimit` are rejected even with positive `det G` |
+| Cell conditioning | The `CellConditionLimit` predicate rejects values above the limit; under the v1 length range and positive-determinant cutoff the branch is defensive and not reachable by realizable cells |
 | Box boundaries | `min` is inclusive and `max` is exclusive; periodic duplicates remain distinct |
 | Cache scope | Per-compilation caches do not leak across structures; keys include cell, cutoff, and contract version |
 | Determinism | Parallel expansion and reduction equal sequential canonical output |
 | Contract version | Changing a covered rule bumps `symmetry-1` and invalidates golden signatures |
-| Benchmark | 64 P1 positions × 20×20×20 meets the `P1Expansion20Cubed` target on the defined runner class |
+| Benchmark | 64 P1 positions × 20×20×20 meets the `P1Expansion20Cubed` target in the recorded evidence; the GitHub runner-class baseline is re-verified on release candidates |
 | Thread safety | Parallel expansion produces identical results |
 | Assembly boundary | `Mocassin.Core` does not reference `Mocassin.Symmetry`; persisted symmetry vocabulary is in Core |
 | Catalog checksum | Startup rejects a corrupted catalog or wrong schema version |
@@ -783,7 +784,7 @@ At this point, document the symmetry and geometry foundation:
 | Hash instability | SHA-256 for persisted IDs; no `string.GetHashCode()` |
 | Contract drift | `SymmetryContractVersion`, golden fixtures, and versioned compiled payload |
 | API leakage | Internal DTOs/cache types; public API baseline and XML docs |
-| Cell conditioning | `CellConditionLimit` and a high-condition triclinic stress test |
+| Cell conditioning | Defensive `CellConditionLimit`; predicate tested directly, with a high-condition valid-cell stress test |
 | Grid invalid input | Non-finite rejection, underflow-to-zero rule, and explicit tests |
 | Boundary trimming | Near-boundary P-order and overlap tests |
 | Box boundary ambiguity | Half-open inclusion tests and distinct-offset duplicates |

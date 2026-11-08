@@ -7,6 +7,7 @@ using Mocassin.Core.Symmetry;
 
 namespace Mocassin.Symmetry.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class ContractAndCacheTests
 {
     [Fact]

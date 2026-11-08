@@ -61,8 +61,8 @@ canonicalizes allowed occupation tuples under the induced permutation group. The
 
 Orbit, pair, and cluster work is independent per center/site. Parallel tasks must use local buffers and merge
 results with the documented canonical keys before assigning IDs or storing values. Floating-point reductions
-are not parallelized. Golden fixtures freeze P indices, pair shells, and cluster codes across Linux and
-Windows.
+are not parallelized. Deterministic tests freeze P indices, pair-shell representatives, and cluster codes;
+CI runs the golden P-index and catalog checks on Linux and Windows.
 
 ### Caches
 
@@ -79,7 +79,8 @@ contract version, plus:
 | Canonical P1 order | structure hash |
 
 A capacity breach is a bounded failure, never an unbounded allocation. Cache insertion order never affects
-results.
+results. Step 02 provides the scoped cache and key builders; Step 08 compilation wires them into the orbit,
+point-group, pair, and cluster stages.
 
 ### Versioning
 
@@ -92,7 +93,7 @@ in the step page. The compiled payload records the contract version, catalog dat
 
 ## Test tiers
 
-- **PR-fast:** catalog integrity, group laws, synthetic P1/pair/cluster goldens, cell geometry, minimum
+- **PR-fast:** catalog integrity, group laws, synthetic P1/pair/cluster cases, cell geometry, minimum
   image, encoder round-trips, and the 274-setting contract checks.
 - **PR-medium:** randomized property tests for orbits, pairs, clusters, and geometry.
-- **Nightly/release:** larger random suites, the 20×20×20 expansion benchmark, and cross-platform golden runs.
+- **Nightly/release:** larger random suites, the 20×20×20 expansion benchmark, and cross-platform test runs.

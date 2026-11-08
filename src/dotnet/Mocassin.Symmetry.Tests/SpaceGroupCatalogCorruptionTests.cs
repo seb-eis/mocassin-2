@@ -4,6 +4,7 @@ using System.Text.Json;
 
 namespace Mocassin.Symmetry.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class SpaceGroupCatalogCorruptionTests
 {
     [Fact]

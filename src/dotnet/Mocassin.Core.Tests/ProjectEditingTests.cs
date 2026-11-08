@@ -8,6 +8,7 @@ using ProjectModel = Mocassin.Core.Project.Project;
 
 namespace Mocassin.Core.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class ProjectEditingTests
 {
     private static readonly DateTimeOffset createdAt = DateTimeOffset.Parse(

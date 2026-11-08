@@ -5,6 +5,7 @@ using Mocassin.Core.Project;
 
 namespace Mocassin.Core.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class ProjectMigrationTests
 {
     [Fact]

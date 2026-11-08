@@ -8,6 +8,7 @@ using Mocassin.Core.Units;
 
 namespace Mocassin.Core.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class ProjectPropertyTests
 {
     [Property(MaxTest = 200)]

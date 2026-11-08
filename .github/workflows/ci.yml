@@ -234,6 +234,32 @@ jobs:
       - name: Compare against baseline
         run: ./tools/check-api-compat.sh
 
+  benchmark:
+    name: Benchmark (manual)
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: |
+            Directory.Packages.props
+            **/*.csproj
+
+      - name: Restore
+        run: dotnet restore Mocassin.slnx
+
+      - name: Build
+        run: dotnet build Mocassin.slnx -c Release --no-restore
+
+      - name: P1Expansion20Cubed
+        run: >
+          dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks --no-build --
+          --filter "*P1Expansion20Cubed*"
+
   docs:
     name: Documentation
     runs-on: ubuntu-latest

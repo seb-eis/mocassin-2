@@ -229,8 +229,8 @@ None. This amendment changes documentation assets and site configuration only.
 - [x] `docs/development/agent-workflow.md` amendment-template link fixed to the GitHub URL.
 - [x] `NOTICE.md` updated with the KaTeX MIT attribution and the pinned CDN source.
 - [x] `docs/planning/reviews/step-02.md` links to this amendment review.
-- [ ] `docs/planning/audits/step-02.md` lists the amendment ID and combined commit.
-- [ ] Amendment page and index updated.
+- [x] `docs/planning/audits/step-02.md` lists the amendment ID and combined commit.
+- [x] Amendment page and index updated.
 
 ## Risks and mitigations
 

@@ -6,6 +6,7 @@ using Mocassin.Core.Geometry;
 
 namespace Mocassin.Symmetry.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class GridFractional3Tests
 {
     [Theory]

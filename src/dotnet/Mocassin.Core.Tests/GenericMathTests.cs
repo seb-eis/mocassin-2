@@ -5,6 +5,7 @@ using Mocassin.Core.Geometry;
 
 namespace Mocassin.Core.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class GenericMathTests
 {
     [Fact]

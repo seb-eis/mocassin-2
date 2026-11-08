@@ -24,15 +24,13 @@ persistence and depends on `Core`; the kernel never calls the store.
 | Namespace | Responsibility |
 | --- | --- |
 | `Mocassin.Core.Ids` | Strongly typed UUID identifiers, UUIDv7 generation, reserved IDs, JSON converters. |
-| `Mocassin.Core.Geometry` | Semantic coordinate wrappers, public generic vector/matrix math (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, `Matrix4<T>`), trim policy. |
+| `Mocassin.Core.Geometry` | Fractional/Cartesian primitives, `Vector4I`, public generic vector/matrix math (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`, `Matrix4<T>`), named geometry tolerances, trim policy. |
 | `Mocassin.Core.Units` | Unit value structs, range/finiteness validation, JSON converters. |
 | `Mocassin.Core.Diagnostics` | `Diagnostic`, `DiagnosticSeverity`, `ModelPath`, and stable-sorting `DiagnosticBag`. |
-| `Mocassin.Core.Model` | Model envelope placeholder, template identities, view settings. Steps 03–10 extend it. |
+| `Mocassin.Core.Model` | Model envelope placeholder, template identities, view settings, and `CellParameters`. Steps 03–10 extend it. |
 | `Mocassin.Core.Project` | Project envelope, metadata, JSON context, canonicalizer, hashers, migrations, validator. |
 | `Mocassin.Core.Editing` | Validated mutations, undo/redo changes, dirty tracking, autosave timing. |
-| `Mocassin.Core.Geometry` | Fractional/Cartesian coordinate primitives, `Vector4I`, generic arithmetic kernel, named geometry tolerances. |
 | `Mocassin.Core.Symmetry` | Persisted `AxisSetting`/`OriginChoice` vocabulary and catalog-derived `CrystalSystem`. |
-| `Mocassin.Core.Model` | Model records shared with the project, including `CellParameters`. |
 
 `Mocassin.Packages.Projects` adds:
 

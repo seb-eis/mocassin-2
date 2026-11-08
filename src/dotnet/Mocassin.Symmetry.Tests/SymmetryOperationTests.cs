@@ -5,6 +5,7 @@ using Mocassin.Core.Geometry;
 
 namespace Mocassin.Symmetry.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class SymmetryOperationTests
 {
     private static readonly Int3x3 identity = Int3x3.Identity;

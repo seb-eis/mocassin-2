@@ -9,11 +9,77 @@ using Mocassin.Core.Units;
 
 namespace Mocassin.Symmetry.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class ReductionTests
 {
     private static readonly int[] identityMapping = [0, 1, 2];
     private static readonly int[] swappedMapping = [1, 0];
     private static readonly int[] mixedTuple = [0, 1];
+
+    [Fact]
+    public void GenericOrbitHasFullMultiplicityForEverySetting()
+    {
+        var generic = new Fractional3(0.137123456789, 0.271234567891, 0.419345678912);
+        foreach (var setting in SpaceGroupCatalog.Default.Settings)
+        {
+            var orbit = SpaceGroupOperations.ExpandOrbit(setting, generic);
+            Assert.Equal(setting.Operations.Length, orbit.Length);
+        }
+    }
+
+    [Fact]
+    public void OrbitExpansionMatchesExplicitGridEnumerationForEverySetting()
+    {
+        var points = new[]
+        {
+            new Fractional3(0.137123456789, 0.271234567891, 0.419345678912),
+            new Fractional3(0.25, 0.5, 0.75),
+            new Fractional3(0.0, 0.0, 0.0),
+        };
+
+        foreach (var setting in SpaceGroupCatalog.Default.Settings)
+        {
+            foreach (var point in points)
+            {
+                var expected = new SortedSet<GridFractional3>();
+                var grid = SpaceGroupOperations.ToGrid(point, nameof(point));
+                foreach (var operation in setting.Operations)
+                {
+                    expected.Add(operation.Transform(grid).TrimToUnitCell());
+                }
+
+                var actual = SpaceGroupOperations.ExpandOrbit(setting, point);
+                Assert.Equal(
+                    expected.Select(static entry => entry.ToFractional3()).ToArray(),
+                    actual.Select(static entry => SpaceGroupOperations.ToGrid(entry, nameof(point))).Select(static entry => entry.ToFractional3()).ToArray());
+            }
+        }
+    }
+
+    [Fact]
+    public void GridOperationsStayOnTheExactGridForEverySetting()
+    {
+        var points = new[]
+        {
+            new Fractional3(0.0, 0.0, 0.0),
+            new Fractional3(0.25, 0.5, 0.75),
+            new Fractional3(1.0 / 24.0, 3.0 / 24.0, 5.0 / 24.0),
+        };
+
+        foreach (var setting in SpaceGroupCatalog.Default.Settings)
+        {
+            foreach (var point in points)
+            {
+                var grid = SpaceGroupOperations.ToGrid(point, nameof(point));
+                foreach (var operation in setting.Operations)
+                {
+                    var transformed = operation.Transform(grid);
+                    Assert.True(GridFractional3.TryFromFractional(transformed.ToFractional3(), out var roundTripped, out _));
+                    Assert.Equal(transformed, roundTripped);
+                }
+            }
+        }
+    }
 
     [Fact]
     public void P1PointGroupIsTrivial()

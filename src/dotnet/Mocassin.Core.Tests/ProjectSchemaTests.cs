@@ -7,6 +7,7 @@ using Mocassin.Core.Project;
 
 namespace Mocassin.Core.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class ProjectSchemaTests
 {
     private static readonly string[] fixturePaths =

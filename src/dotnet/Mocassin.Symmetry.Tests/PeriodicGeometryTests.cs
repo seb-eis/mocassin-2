@@ -8,6 +8,7 @@ using Mocassin.Core.Units;
 
 namespace Mocassin.Symmetry.Tests;
 
+[Trait("Tier", "PR-fast")]
 public sealed class PeriodicGeometryTests
 {
     [Fact]
@@ -114,6 +115,62 @@ public sealed class PeriodicGeometryTests
         var second = geometry.RadialSearch(new Vector4I(0, 0, 0, 0), 4.0);
 
         Assert.Equal(first.ToArray(), second.ToArray());
+    }
+
+    [Fact]
+    public void RandomValidCellsMatchBruteForceMinimumImageAndRadialSearch()
+    {
+        var random = new Random(20261108);
+        var checkedCells = 0;
+        while (checkedCells < 20)
+        {
+            var a = 3.0 + (random.NextDouble() * 5.0);
+            var b = 3.0 + (random.NextDouble() * 5.0);
+            var c = 3.0 + (random.NextDouble() * 5.0);
+            var alpha = 70.0 + (random.NextDouble() * 40.0);
+            var beta = 70.0 + (random.NextDouble() * 40.0);
+            var gamma = 70.0 + (random.NextDouble() * 40.0);
+            var parameters = new CellParameters(
+                new LengthAngstrom(a),
+                new LengthAngstrom(b),
+                new LengthAngstrom(c),
+                new AngleDegrees(alpha),
+                new AngleDegrees(beta),
+                new AngleDegrees(gamma));
+            if (!CellGeometry.TryCreate(parameters, out var cell, out _))
+            {
+                continue;
+            }
+
+            Assert.NotNull(cell);
+            Assert.True(UnitCellVectorEncoder.TryCreate(
+                Setting(1),
+                [new Fractional3(0.1, 0.2, 0.3), new Fractional3(0.6, 0.4, 0.8)],
+                out var encoder,
+                out _));
+            Assert.NotNull(encoder);
+            var geometry = new PeriodicGeometry(cell, encoder);
+            var center = new Vector4I(0, 0, 0, 0);
+            var target = new Vector4I(1, -1, 0, 1);
+
+            var actualMinimum = geometry.GetMinimumImage(center, target);
+            var expectedMinimum = BruteForceMinimumImage(geometry, center, target, -10, 10);
+            Assert.Equal(expectedMinimum.Offset, actualMinimum.Offset);
+            Assert.Equal(expectedMinimum.DistanceBucketFm, actualMinimum.DistanceBucketFm);
+            Assert.Equal(expectedMinimum.DistanceAngstrom, actualMinimum.DistanceAngstrom, 10);
+
+            var actualRadial = geometry.RadialSearch(center, 5.0);
+            var expectedRadial = BruteForceRadialSearch(geometry, center, 5.0, -10, 10);
+            Assert.Equal(expectedRadial.Length, actualRadial.Length);
+            for (var index = 0; index < expectedRadial.Length; index++)
+            {
+                Assert.Equal(expectedRadial[index].Offset, actualRadial[index].Offset);
+                Assert.Equal(expectedRadial[index].DistanceBucketFm, actualRadial[index].DistanceBucketFm);
+                Assert.Equal(expectedRadial[index].DistanceAngstrom, actualRadial[index].DistanceAngstrom, 10);
+            }
+
+            checkedCells++;
+        }
     }
 
     private static PeriodicGeometry CreateTriclinic()
