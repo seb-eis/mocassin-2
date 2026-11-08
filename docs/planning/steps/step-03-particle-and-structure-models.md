@@ -7,11 +7,11 @@ validation and a stable public API.
 
 ## Implementation status
 
-- **Status:** In progress
-- **Step branch:** `step/03-particle-and-structure-models`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42514332091) at `b6a97ec` (replacement closeout dispatch; Ubuntu)
-- **Main merge:** —
-- **Step tag:** —
+- **Status:** Done
+- **Step branch:** `step/03-particle-and-structure-models` (merged and deleted)
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42514332091) at `b6a97ec` (Ubuntu)
+- **Main merge:** `162ebe4` — [main CI green](https://github.com/seb-eis/mocassin-2/actions/runs/42521062856)
+- **Step tag:** `step-03`
 - **Audit:** Passed with notes at `b6a97ec` (round 1 `Fixes required` at `5a06d67`; round-2 re-audit passed)
 - **Design review:** [Ready with notes — accepted](../reviews/step-03.md)
 - **Feature list:** Approved 2026-11-08; step branch created
