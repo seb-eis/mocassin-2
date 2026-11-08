@@ -7,17 +7,18 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DEST="$ROOT/tests/contracts/api-baseline/net10.0"
-PROJECTS=(
-  Mocassin.Core
-  Mocassin.Symmetry
-  Mocassin.Compilation
-  Mocassin.Contracts
-  Mocassin.Packages
-  Mocassin.Results
-  Mocassin.App.ViewModels
-  Mocassin.App.Views
-  Mocassin.Rendering
-)
+PROJECTS_FILE="$ROOT/tools/api-projects.txt"
+
+if [[ ! -f "$PROJECTS_FILE" ]]; then
+  echo "error: missing project list $PROJECTS_FILE" >&2
+  exit 1
+fi
+
+mapfile -t PROJECTS < <(grep -vE '^[[:space:]]*(#|$)' "$PROJECTS_FILE")
+if [[ ${#PROJECTS[@]} -eq 0 ]]; then
+  echo "error: no projects listed in $PROJECTS_FILE" >&2
+  exit 1
+fi
 
 dotnet build "$ROOT/Mocassin.slnx" -c Release
 rm -rf "$DEST"

@@ -1,0 +1,14 @@
+# Public library assemblies checked by ApiCompat.
+#
+# One project name per line. These are the assemblies whose public surface is
+# part of the compatibility contract. Do not add apps, CLIs, benchmarks, or
+# test projects here.
+Mocassin.Core
+Mocassin.Symmetry
+Mocassin.Compilation
+Mocassin.Contracts
+Mocassin.Packages
+Mocassin.Results
+Mocassin.App.ViewModels
+Mocassin.App.Views
+Mocassin.Rendering
