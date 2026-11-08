@@ -4,10 +4,118 @@
   "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e61",
   "masterSeed": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "name": "Ceria",
-  "description": "Reduced-ceria skeleton project; structure, transitions, and parameters are added in later steps.",
-  "createdUtc": "2026-11-04T12:00:00.0000000Z",
-  "modifiedUtc": "2026-11-04T12:00:00.0000000Z",
-  "model": {},
+  "description": "Step 03 sample project.",
+  "createdUtc": "2026-11-08T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-08T12:00:00.0000000Z",
+  "symmetry": {
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395",
+    "symmetryContractVersion": "symmetry-1"
+  },
+  "model": {
+    "particles": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+        "name": "Ce4\u002B",
+        "symbol": "Ce",
+        "charge": 4,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+        "name": "O2-",
+        "symbol": "O",
+        "charge": -2,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02",
+        "name": "Vacancy",
+        "symbol": "Vc",
+        "charge": 0,
+        "isVacancy": true
+      }
+    ],
+    "particleSets": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f03",
+        "name": "Cerium site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f04",
+        "name": "Oxygen site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02"
+        ]
+      }
+    ],
+    "structure": {
+      "name": "Ceria",
+      "spaceGroup": {
+        "number": 225,
+        "axis": "none",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 5.41,
+        "b": 5.41,
+        "c": 5.41,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90
+      },
+      "sites": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "name": "Ce",
+          "fractional": [
+            0,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f03",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "name": "O",
+          "fractional": [
+            0.25,
+            0.25,
+            0.25
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f04",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "name": "O transition",
+          "fractional": [
+            0.5,
+            0.25,
+            0.25
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f04",
+          "stability": "unstable"
+        }
+      ],
+      "dummyPositions": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f08",
+          "name": "Center",
+          "fractional": [
+            0.5,
+            0.5,
+            0.5
+          ]
+        }
+      ]
+    }
+  },
   "parameterizations": [],
   "jobTemplates": [],
   "buildTemplates": [],

@@ -14,6 +14,7 @@ public sealed class ProjectSchemaTests
     [
         "tests/contracts/project-minimal.mocprj",
         "tests/contracts/project-ceria.mocprj",
+        "tests/contracts/project-barium-zirconate.mocprj",
         "tests/contracts/project-structure.mocprj",
         "tests/contracts/project-symmetry.mocprj",
         "tests/contracts/project-symmetry-partial.mocprj",
@@ -43,6 +44,9 @@ public sealed class ProjectSchemaTests
     [Theory]
     [InlineData("samples/blank/blank.mocprj", "tests/contracts/project-minimal.mocprj")]
     [InlineData("samples/ceria/ceria.mocprj", "tests/contracts/project-ceria.mocprj")]
+    [InlineData(
+        "samples/barium-zirconate/barium-zirconate.mocprj",
+        "tests/contracts/project-barium-zirconate.mocprj")]
     public void SampleAndContractFixtureAreIdentical(string samplePath, string fixturePath)
     {
         ArgumentNullException.ThrowIfNull(samplePath);

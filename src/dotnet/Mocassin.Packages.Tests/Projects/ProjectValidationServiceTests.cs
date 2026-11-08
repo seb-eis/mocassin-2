@@ -211,8 +211,8 @@ public sealed class ProjectValidationServiceTests
             -2.0,
             "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e80");
         var vacancy = CreateParticle(
-            "VO",
-            "O",
+            "Vacancy",
+            "Vc",
             chargedVacancy ? -2.0 : 0.0,
             "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e81",
             isVacancy: true);

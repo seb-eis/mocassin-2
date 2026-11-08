@@ -24,8 +24,8 @@ validation and a stable public API.
 | `model-envelope-and-contracts` | `feature/step-03-particle-and-structure-models/model-envelope-and-contracts` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core tests 242/242 | — | `7c4e748` |
 | `structure-preview-and-benchmark` | `feature/step-03-particle-and-structure-models/structure-preview-and-benchmark` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 242/242, Symmetry 145/145; benchmark 15.8 µs / 6.7 µs | — | `67e39e1` |
 | `queries-and-editing` | `feature/step-03-particle-and-structure-models/queries-and-editing` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146 | — | `8a75bc6` |
-| `validation-composition` | `feature/step-03-particle-and-structure-models/validation-composition` | Awaiting approval | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146, Packages 40/40 | — | — |
-| `samples-and-docs` | `feature/step-03-particle-and-structure-models/samples-and-docs` | Planned | — | — | — |
+| `validation-composition` | `feature/step-03-particle-and-structure-models/validation-composition` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 261/261, Symmetry 146/146, Packages 40/40 | — | `18940a1` |
+| `samples-and-docs` | `feature/step-03-particle-and-structure-models/samples-and-docs` | Awaiting approval | `dotnet`, `structure`, `api`, `contracts`, `docs` pass; Core 263/263, Symmetry 148/148, Packages 40/40 | — | — |
 | `closeout` | `feature/step-03-particle-and-structure-models/closeout` | Planned | — | — | — |
 
 ## Goal

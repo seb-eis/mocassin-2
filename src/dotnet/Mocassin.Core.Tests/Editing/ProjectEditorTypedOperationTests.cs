@@ -347,7 +347,7 @@ public sealed class ProjectEditorTypedOperationTests
     private static ProjectModel CreateProject()
     {
         var oxygen = CreateParticle("O2-", "O", -2.0, "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e80");
-        var vacancy = CreateParticle("VO", "O", 0.0, "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e81", isVacancy: true);
+        var vacancy = CreateParticle("Vacancy", "Vc", 0.0, "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e81", isVacancy: true);
         var cerium = CreateParticle("Ce4+", "Ce", 4.0, "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e82");
         var oxygenSet = CreateSet("Oxygen site", "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e83", oxygen.Id, vacancy.Id);
         var ceriumSet = CreateSet("Cerium site", "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e84", cerium.Id);

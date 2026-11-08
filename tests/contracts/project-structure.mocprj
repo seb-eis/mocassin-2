@@ -18,8 +18,8 @@
       },
       {
         "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e81",
-        "name": "VO",
-        "symbol": "O",
+        "name": "Vacancy",
+        "symbol": "Vc",
         "charge": 0,
         "isVacancy": true
       },

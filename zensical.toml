@@ -25,7 +25,11 @@ planning/
 nav = [
   { "Home" = "index.md" },
   { "Getting started" = "getting-started/index.md" },
-  { "User guide" = "user-guide/index.md" },
+  { "User guide" = [
+      { "Overview" = "user-guide/index.md" },
+      { "Particles and particle sets" = "user-guide/particles.md" },
+      { "Crystal structure" = "user-guide/structure.md" },
+    ] },
   { "Physics" = [
       { "Overview" = "physics/index.md" },
       { "Symmetry and geometry" = "physics/symmetry.md" },

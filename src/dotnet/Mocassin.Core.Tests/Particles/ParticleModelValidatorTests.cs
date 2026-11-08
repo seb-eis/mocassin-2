@@ -125,7 +125,7 @@ public sealed class ParticleModelValidatorTests
         var oxygen = ParticleId.New();
         var vacancy = ParticleId.New();
         var model = Model(
-            [CreateParticle("O2-", "O", -2.0, oxygen), CreateParticle("VO", "O", 0.0, vacancy)],
+            [CreateParticle("O2-", "O", -2.0, oxygen), CreateParticle("Vacancy", "Vc", 0.0, vacancy)],
             [
                 CreateSet("First", oxygen, vacancy),
                 CreateSet("Second", oxygen, vacancy),
@@ -144,7 +144,7 @@ public sealed class ParticleModelValidatorTests
         var oxygen = ParticleId.New();
         var vacancy = ParticleId.New();
         var model = Model(
-            [CreateParticle("O2-", "O", -2.0, oxygen), CreateParticle("VO", "O", 0.0, vacancy)],
+            [CreateParticle("O2-", "O", -2.0, oxygen), CreateParticle("Vacancy", "Vc", 0.0, vacancy)],
             [
                 CreateSet("First", oxygen, vacancy),
                 CreateSet("Second", vacancy, oxygen),

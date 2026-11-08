@@ -23,6 +23,13 @@
       "step": "01"
     },
     {
+      "id": "project-barium-zirconate",
+      "path": "tests/contracts/project-barium-zirconate.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "03"
+    },
+    {
       "id": "model-v1",
       "path": "tests/contracts/model-v1.msgpack.zst",
       "kind": "compiled-model",
