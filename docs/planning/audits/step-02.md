@@ -6,7 +6,7 @@
 | --- | --- |
 | Step | 02 — Symmetry and Geometry |
 | Request owner | Step agent |
-| Audit status | Re-audit required |
+| Audit status | Passed with notes |
 | Audited commit | `6341b56` (layout-only refactor; docs-only status commit follows) |
 | Step branch | `step/02-symmetry-and-geometry` |
 | Step tag | — |
@@ -653,3 +653,170 @@ file history. The architecture page records the folder layout and the step-page 
 
 Re-audit request: confirm the move-only nature at `6341b56` and the following docs-only status commit. Earlier
 rounds and resolutions remain unchanged.
+
+## Re-audit round 4
+
+### Re-audit request
+
+| Field | Value |
+| --- | --- |
+| Step | 02 — Symmetry and Geometry |
+| Request owner | Step agent |
+| Audit status | Passed with notes |
+| Reviewed commit | `6341b56` (`step-02: organize symmetry assembly by responsibility`) |
+| Freeze commit | `e5c2420` (docs-only re-audit request/status commit) |
+| Step branch | `step/02-symmetry-and-geometry` |
+| Review date | 2026-11-08 |
+| Reviewer | Independent out-of-context audit agent (same auditor; no implementation edits) |
+| CI run | [42475359256](https://github.com/seb-eis/mocassin-2/actions/runs/42475359256) — `completed`/`success` at `6341b56` |
+
+Earlier rounds and resolutions remain unchanged. The only prior-round metadata change in the freeze commit is
+the step-agent status transition to `Re-audit required`; no earlier evidence, finding, or verdict text was
+altered.
+
+### Evidence
+
+#### Revision and tree
+
+```text
+git branch --show-current
+step/02-symmetry-and-geometry
+
+git status --porcelain=v1
+(no output; clean working tree)
+
+git rev-parse HEAD
+e5c24202c635ed025268fba42e1a5041eb19357c
+
+git log --oneline -6
+e5c2420 docs: request layout-only step-02 re-audit [skip ci]
+6341b56 step-02: organize symmetry assembly by responsibility
+1f602b1 docs: record step-02 audit passed [skip ci]
+cf989d7 docs: record step-02 re-audit Passed with notes [skip ci]
+942667d docs: request step-02 re-audit round 3 [skip ci]
+cfc419f step-02: use independent symmetry oracles (re-audit fix)
+```
+
+The audited solution is `6341b56`; `e5c2420` is the docs-only re-audit request/freeze commit. The tree
+remained clean after the gates.
+
+#### Move-only verification
+
+```text
+git diff --stat 1f602b1..6341b56
+28 files changed, 7 insertions(+)
+  27 source files: 0 insertions, 0 deletions each
+  2 docs files: architecture.md (+4), step-02 page (+3)
+
+git diff -M --summary 1f602b1..6341b56
+R100 for all 27 source files:
+  Caching/SymmetryCache.cs
+  Contracts/SymmetryContract.cs, Contracts/SymmetryVersionInfo.cs
+  Diagnostics/StructureDiagnosticCodes.cs, Diagnostics/SymmetryDiagnosticCodes.cs
+  Geometry/{CellGeometry, ExpandedSite, GridFractional3, MinimumImageResult,
+            NeighborImage, PeriodicGeometry, SiteOrbitInfo, UnitCellVectorEncoder}.cs
+  Reduction/{ClusterReduction, PairReduction, PointGroup, SitePermutation}.cs
+  SpaceGroups/{CatalogDtos, CatalogJsonContext, Int3x3, Rational3, SpaceGroupCatalog,
+               SpaceGroupCatalogLoader, SpaceGroupOperations, SpaceGroupSetting,
+               SymmetryOperation}.cs
+
+git diff -M --numstat 1f602b1..6341b56
+0 0 for every moved source file; docs files are the only content changes.
+```
+
+All moves are pure `R100` renames. Namespaces, public APIs, behavior, tests, formats, and test logic are
+unchanged. `SymmetryModule.cs` and `AssemblyInfo.cs` remain at the project root as infrastructure files;
+`Data/` remains unchanged.
+
+#### Build, tests, format
+
+```text
+dotnet restore Mocassin.slnx
+All projects are up-to-date for restore.
+
+dotnet build Mocassin.slnx -c Release --no-restore
+Build succeeded. 0 Warning(s), 0 Error(s).
+
+dotnet test Mocassin.slnx -c Release --no-build
+Passed: Mocassin.Symmetry.Tests 127/127
+Passed: Mocassin.Core.Tests 167/167
+Passed: Mocassin.Packages.Tests 30/30
+Passed: Mocassin.App.Tests 1/1
+Passed: Mocassin.Compilation.Tests 1/1
+Passed: Mocassin.Contracts.Tests 1/1
+Passed: Mocassin.Results.Tests 1/1
+Failed: 0, Skipped: 0
+
+dotnet format Mocassin.slnx --verify-no-changes --no-restore
+exit 0 (workspace-loading warning printed; no formatting changes)
+```
+
+#### Documentation, contracts, API, licensing, security, benchmark job
+
+```text
+zensical build --strict
+No issues found
+
+./tools/docs/build-docs.sh
+Zensical strict, DocFX (0 warnings/0 errors), and rustdoc all succeeded
+
+./tools/check-api-compat.sh
+ApiCompat: no breaking changes in 9 assemblies; public API is compatible.
+
+python tools/symmetry/generate_space_groups.py --check
+space-group catalog is current: 274 settings, sha256
+1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395
+
+python tools/contracts/generate.py --check
+Contract artifacts are current (17 files)
+
+python tools/contracts/check_nuget_licenses.py
+NuGet licence policy OK (44 packages).
+
+python tools/check-license-headers.py
+SPDX headers present in 124 source files
+
+python tools/check-no-secrets.py
+No secret patterns found in 391 tracked text files
+
+dotnet list Mocassin.slnx package --vulnerable --include-transitive
+All projects: no vulnerable packages.
+
+python yaml.safe_load(.github/workflows/ci.yml)
+YAML valid; benchmark job remains ubuntu-latest/workflow_dispatch-only with
+restore, build, and P1Expansion20Cubed steps.
+```
+
+CI run `42475359256` is `completed`/`success` at `6341b56`; all build/test/docs/policy jobs passed. The
+`Benchmark (manual)` job was skipped on the push event, as designed.
+
+### Findings
+
+| Severity | Finding | Evidence | Resolution |
+| --- | --- | --- | --- |
+| **Note** | **n5–n8 remain unchanged and non-blocking.** The layout refactor does not alter the prior notes: shared public stabilizer/bucket helpers in the pair oracle, optional ASE fixture generator/checksum hardening, pending manual runner-class benchmark evidence, and the Step 11 `.msl` payload follow-up. | Earlier round 3 findings; `6341b56` is `R100` move-only; all gates re-passed. | Carried forward for the human owner’s awareness; no layout-related action required. |
+
+No new blocker, major, minor, or layout-specific finding was identified.
+
+### Verdict
+
+- [ ] Passed
+- [x] Passed with notes
+- [ ] Fixes required
+- [ ] Re-audit required
+- [ ] Waived
+
+**Passed with notes.** `6341b56` is a clean move-only refactor: 27 source files are `R100` renames, the only
+content changes are the architecture note and Step 02 feature-log entry, and namespaces, public APIs, behavior,
+tests, and formats are unchanged. All required gates pass, CI is green at `6341b56`, and the previous
+Passed-with-notes verdict remains substantively valid. The prior notes n5–n8 are carried forward; none is
+introduced or worsened by this layout change.
+
+The human owner may approve the step merge and tag after reviewing the carried-forward notes. This audit does
+not itself authorize the merge.
+
+Follow-up owner: Step agent / implementor (record the passed layout re-audit in status when convenient); human
+owner (merge and tag approval).
+
+Follow-up issue/step: Update the status dashboard to the passed layout re-audit, and merge
+`step/02-symmetry-and-geometry` into `main` only with explicit human owner approval.
