@@ -2,9 +2,10 @@
 
 > Reviewer: write the evidence, findings, and verdict directly into
 > `docs/planning/reviews/step-02-amend-1.md`. You may edit only your own metadata (`Reviewer`, `Review date`,
-> `Design review status`), the `Evidence`, `Findings`, and `Verdict` sections, and commit only that file with
-> a documentation-only message and `[skip ci]`. Do not edit the request scope, checklists, resolutions, code,
-> tests, configuration, status dashboard, step page, or any other file.
+> `Design review status`), the checklist completion marks and inline verification notes (not item text), the
+> `Evidence`, `Findings`, and `Verdict` sections, and commit only that file with a documentation-only message
+> and `[skip ci]`. Do not edit the request scope, checklist item text, resolutions, code, tests, configuration,
+> status dashboard, step page, or any other file.
 
 ## Request
 
@@ -33,33 +34,35 @@ Amendment plan: [`Step 02 Amendment 1 — Public Generic Math Types`](../amendme
 
 ## Design decisions reviewed
 
-- [ ] Public `Vector3<T>` and `Vector4<T>` with `INumber<T>` constraints
-- [ ] Public row-based `Matrix3<T>` and `Matrix4<T>` with `IFloatingPoint<T>` constraints
-- [ ] `Int3x3` remains the exact integer specialization
-- [ ] `CellGeometry` migration to `Matrix3<double>` with no behavior change
-- [ ] Row-major convention and `M * v` semantics
-- [ ] Inverse, determinant, condition-number, and singular-matrix behavior
-- [ ] XML documentation and public-API baseline coverage
-- [ ] Tests, benchmarks, and inlining checks
-- [ ] No project/package/results/state format changes
+- [x] Public `Vector3<T>` and `Vector4<T>` with `INumber<T>` constraints
+- [x] Public row-based `Matrix3<T>` and `Matrix4<T>` with `IFloatingPointIeee754<T>` constraints
+- [x] `Int3x3` remains the exact integer specialization
+- [x] `CellGeometry` migration to `Matrix3<double>` with no behavior change
+- [x] Row-major convention and `M * v` semantics
+- [x] Inverse, determinant, condition-number, and singular-matrix behavior
+- [x] XML documentation and public-API baseline coverage
+- [x] Tests, benchmarks, and inlining checks
+- [x] No project/package/results/state format changes
 
 ## Dependency and interface checks
 
-- [ ] Step 02 cell geometry is implemented and its design is stable
-- [ ] The Step 02 audit is not yet frozen
-- [ ] Public API additions are additive and intentional
-- [ ] `Int3x3` and exact symmetry arithmetic remain unchanged
-- [ ] No unresolved cross-step interface question remains
+- [x] Step 02 cell geometry is implemented and its design is stable
+- [x] The Step 02 audit is not yet frozen
+- [x] Public API additions are additive and intentional
+- [x] `Int3x3` and exact symmetry arithmetic remain unchanged
+- [x] No unresolved cross-step interface question remains
 
 ## Standard design-review checklist
 
-- [ ] Scope, non-goals, and acceptance criteria are explicit and testable
-- [ ] Design decisions are complete and internally consistent
-- [ ] Required tests, property tests, golden fixtures, and performance targets are defined
-- [ ] Documentation, status, parity, and audit updates are planned
-- [ ] Licensing, provenance, and dependency checks are resolved
-- [ ] Risks and mitigations are realistic
-- [ ] No hidden scope, stale placeholders, or unowned decisions
+- [x] Scope, non-goals, and acceptance criteria are explicit and testable
+- [x] Design decisions are complete and internally consistent
+- [x] Required tests, property tests, golden fixtures, and performance targets are defined
+- [x] Documentation, status, parity, and audit updates are planned
+- [x] Licensing, provenance, and dependency checks are resolved
+- [x] Risks and mitigations are realistic
+- [x] No hidden scope, stale placeholders, or unowned decisions
+
+> Checklist completion recorded from the round-2 reviewer evidence after the write-scope clarification; item text remains request-owned.
 
 ## Evidence
 

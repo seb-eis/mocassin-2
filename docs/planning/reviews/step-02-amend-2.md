@@ -2,9 +2,10 @@
 
 > Reviewer: write the evidence, findings, and verdict directly into
 > `docs/planning/reviews/step-02-amend-2.md`. You may edit only your own metadata (`Reviewer`, `Review date`,
-> `Design review status`), the `Evidence`, `Findings`, and `Verdict` sections, and commit only that file with
-> a documentation-only message and `[skip ci]`. Do not edit the request scope, checklists, resolutions, code,
-> tests, configuration, status dashboard, step page, or any other file.
+> `Design review status`), the checklist completion marks and inline verification notes (not item text), the
+> `Evidence`, `Findings`, and `Verdict` sections, and commit only that file with a documentation-only message
+> and `[skip ci]`. Do not edit the request scope, checklist item text, resolutions, code, tests, configuration,
+> status dashboard, step page, or any other file.
 
 ## Request
 
@@ -33,32 +34,34 @@ Amendment plan: [`Step 02 Amendment 2 — Documentation Math Rendering with KaTe
 
 ## Design decisions reviewed
 
-- [ ] KaTeX `0.19.1` pinned in `zensical.toml`
-- [ ] `extra_javascript` / `extra_css` asset configuration
-- [ ] `docs/javascripts/katex.js` initializer with `document$`
-- [ ] `pymdownx.arithmatex` already enabled and used correctly
-- [ ] Conversion of Step 02 formulas to `$$...$$` / `$...$`
-- [ ] Documentation convention against fenced `text` math
-- [ ] KaTeX attribution in `NOTICE.md`
-- [ ] Strict docs build, asset-reference, navigation, and accessibility checks
-- [ ] No code, public API, data-contract, or scientific-behavior changes
+- [x] KaTeX `0.19.1` pinned in `zensical.toml`
+- [x] `extra_javascript` / `extra_css` asset configuration
+- [x] `docs/javascripts/katex.js` initializer with `document$`
+- [x] `pymdownx.arithmatex` already enabled and used correctly
+- [x] Conversion of Step 02 formulas to `$$...$$` / `\(...\)`
+- [x] Documentation convention against fenced `text` math
+- [x] KaTeX attribution in `NOTICE.md`
+- [x] Strict docs build, asset-reference, navigation, and accessibility checks
+- [x] No code, public API, data-contract, or scientific-behavior changes
 
 ## Dependency and interface checks
 
-- [ ] Step 02 documentation is active and not yet audit-frozen
-- [ ] Zensical `0.0.74` and `pymdownx.arithmatex` are available
-- [ ] The KaTeX asset source and version are pinned and reproducible
-- [ ] No unresolved docs-toolchain or offline/privacy question remains
+- [x] Step 02 documentation is active and not yet audit-frozen
+- [x] Zensical `0.0.74` and `pymdownx.arithmatex` are available
+- [x] The KaTeX asset source and version are pinned and reproducible
+- [x] No unresolved docs-toolchain or offline/privacy question remains
 
 ## Standard design-review checklist
 
-- [ ] Scope, non-goals, and acceptance criteria are explicit and testable
-- [ ] Design decisions are complete and internally consistent
-- [ ] Required tests, property tests, golden fixtures, and performance targets are defined
-- [ ] Documentation, status, parity, and audit updates are planned
-- [ ] Licensing, provenance, and dependency checks are resolved
-- [ ] Risks and mitigations are realistic
-- [ ] No hidden scope, stale placeholders, or unowned decisions
+- [x] Scope, non-goals, and acceptance criteria are explicit and testable
+- [x] Design decisions are complete and internally consistent
+- [x] Required tests, property tests, golden fixtures, and performance targets are defined
+- [x] Documentation, status, parity, and audit updates are planned
+- [x] Licensing, provenance, and dependency checks are resolved
+- [x] Risks and mitigations are realistic
+- [x] No hidden scope, stale placeholders, or unowned decisions
+
+> Checklist completion recorded from the round-2 reviewer evidence after the write-scope clarification; item text remains request-owned.
 
 ## Evidence
 

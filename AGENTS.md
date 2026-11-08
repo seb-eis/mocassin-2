@@ -247,7 +247,7 @@ transcription step.
 | --- | --- | --- | --- |
 | Planner (planning agent) | Design and planning docs; the review record's request, scope, checklists, and resolutions | Documentation-only commits on the design branch | Code, tests, configuration, audit or design verdicts, step status, merges, tags |
 | Implementor (step agent) | Code, tests, configuration, contracts, step page, status dashboard, parity matrix; the audit/review record's request, scope, checklists, and resolutions | Feature-branch commits; documentation-only record and status commits | The reviewer's findings, evidence, or verdict text; merges and tags without approval |
-| Reviewer (planning auditor or audit agent) | Only the assigned review or audit record: its own metadata, evidence, findings, and verdict | At most one documentation-only record commit per round, with `[skip ci]` | Everything else, including code, tests, configuration, design docs, step page, status dashboard, parity matrix, request scope, checklists, resolutions, merges, tags, and pushes to `main` |
+| Reviewer (planning auditor or audit agent) | Only the assigned review or audit record: its own metadata, checklist completion marks (not item text), evidence, findings, and verdict | At most one documentation-only record commit per round, with `[skip ci]` | Everything else, including code, tests, configuration, design docs, step page, status dashboard, parity matrix, request scope, checklist item text, resolutions, merges, tags, and pushes to `main` |
 | Human owner | Approve gates, merges, and tags | — | — |
 
 Reviewer rules:
@@ -256,6 +256,8 @@ Reviewer rules:
 - The reviewer writes findings and verdict directly into the durable record. No handoff file, transcription,
   or scribe is used.
 - The reviewer appends a new round and must not alter earlier rounds or reviewer-authored text.
+- The reviewer marks the request checklists to record what was actually reviewed. It may change checkbox
+  marks and add short inline verification notes, but not the item text; the request owner owns the items.
 - The reviewer records the exact commands, results, and files behind the verdict in the record's `Evidence`
   section, so the human owner can spot-check it.
 - The reviewer must not fix findings. If it edits code, tests, configuration, or design docs, it becomes an

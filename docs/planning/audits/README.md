@@ -117,9 +117,11 @@ The audit record is the durable record. Do not rely on chat history, and do not 
 
 - The reviewer may edit only `docs/planning/audits/step-NN.md`.
 - Within that file, the reviewer may edit its own metadata (`Auditor`, `Audit date`, `Audit status`), the
-  `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
-- The reviewer must not edit the request scope, checklists, known notes, or resolutions owned by the step
-  agent, and must not edit any other file.
+  `Standard audit checklist` completion marks and inline verification notes (not item text), the `Evidence`
+  section, the `Findings` section, and the `Verdict` section for the current round.
+- The reviewer must not edit the request scope, checklist item text, known notes, or resolutions owned by the
+  step agent, and must not edit any other file.
+- Checklist marks record what the reviewer actually audited; the step agent owns the checklist item text.
 - The reviewer may commit that one file with a documentation-only message and `[skip ci]`; it must not merge,
   tag, push `main`, or delete branches. If it cannot commit, it writes the record and the step agent commits it
   unchanged.
