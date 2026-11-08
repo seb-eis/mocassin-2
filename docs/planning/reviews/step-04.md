@@ -14,11 +14,14 @@
 | Step | 04 — Transition Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Changes required |
-| Reviewed commit | `b426a13` |
+| Design review status | Re-review required |
+| Reviewed commit | `4f4c888` |
 | Docs branch | `main` |
 | Review date | 2026-11-08 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
+
+> Round 1 reviewed `b426a13` and returned `Changes required`. The design was revised in `4f4c888`; the request
+> metadata now points at that commit for round 2. The round-1 reviewer text below is unchanged.
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
 
@@ -241,13 +244,15 @@ Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-08 | `b426a13` | Independent planning auditor (fresh context) | Changes required |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M1–M9 | Major | See round 1 | See `Resolution status` below; design revision is `4f4c888` | `4f4c888` | Resolved — awaiting re-review |
+| m1–m16 | Minor | See round 1 | See `Resolution status` below; design revision is `4f4c888` | `4f4c888` | Resolved — awaiting re-review |
+| n1–n3 | Note | See round 1 | See `Resolution status` below; design revision is `4f4c888` | `4f4c888` | Addressed — awaiting re-review |
 
 ## Human approval
 
@@ -261,9 +266,82 @@ Date:
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
+Design revision: `4f4c888` — design, data-contract, and dependent-step corrections. This section is owned by
+the planner/step agent and does not alter the reviewer's findings, evidence, or verdict.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| M1 | Resolved — awaiting re-review | Added explicit `ProjectJson.CanonicalizeModel` extension, save/write/hash coverage, and a persistence/document-hash test. |
+| M2 | Resolved — awaiting re-review | `ITransitionPreviewService.TryCreatePreview` now takes the transition, `ITransitionQuery`, structure, and counts, returns `TransitionPreview?` with diagnostics, and never returns a partial preview. |
+| M3 | Resolved — awaiting re-review | Added same-kind `ReverseTransitionId` links, symmetric-link validation (`TRN027`), and `TRN018` for a complex chain without a reverse link. |
+| M4 | Resolved — awaiting re-review | Removed the interaction-range rule from Step 04; assigned `ENM018` to the Step 07 cross-domain pipeline and documented the dependency direction in Step 05. |
+| M5 | Resolved — awaiting re-review | Removed the charge-transfer exception; groups are unconditionally homogeneous, matching the original group validator. Charge-transfer chains use homogeneous charge-state groups. |
+| M6 | Resolved — awaiting re-review | Defined `TransitionRef`/`TransitionKind` in Step 04 and updated Step 06 to use them; the persisted simulation JSON keeps kind-specific arrays. |
+| M7 | Resolved — awaiting re-review | Added `TransitionPathResolver`, periodic canonicalization, the named `PathMatchTolerance`, zero/ambiguous-match `TRN020`, periodic-image ring detection, and resolved stability roles. |
+| M8 | Resolved — awaiting re-review | Defined `StateChangeMatrices` dimensions, `ParticleOrder`, row-major indexing, binary encoding, unstable/stable cardinality, and the empty/default contract. |
+| M9 | Resolved — awaiting re-review | Constrained `GeneratesReverse` to the two automatic patterns, added `TRN024`, and updated the data contract to say custom transitions use `reverseTransitionId`. |
+| m1 | Resolved — awaiting re-review | Added a Non-goals section and made the reverse-warning acceptance criterion testable. |
+| m2 | Resolved — awaiting re-review | Added property tests, contract/golden fixtures, test tiers, and a `TransitionPreviewCeria` benchmark with a baseline. |
+| m3 | Resolved — awaiting re-review | Added parity, status/dashboard, closeout, audit, and diagnostics-reference tasks. |
+| m4 | Resolved — awaiting re-review | Corrected the layout: `ProjectJson.cs` owns the nested context; `ProjectSchema.cs` is unchanged while v1 remains. |
+| m5 | Resolved — awaiting re-review | Planned partial `ProjectEditor.Transitions.*.cs` files to stay below the 800-line limit. |
+| m6 | Resolved — awaiting re-review | Specified manifest `status`/`notes`, the two transition fixtures, generated-schema refresh, and the Step 08 model-signature relationship. |
+| m7 | Resolved — awaiting re-review | Added `Ids/TransitionIds.cs` for the five typed IDs and their JSON converter task. |
+| m8 | Resolved — awaiting re-review | Defined the 2-position custom Metropolis case, the 3–8-position custom grammar, and static-linker placement semantics. |
+| m9 | Resolved — awaiting re-review | Expanded the diagnostic table to `TRN001`–`TRN027`, including unknown groups, no-unstable chains, cross-kind use, reverse flags, group reuse, vehicle restriction, and reverse links. |
+| m10 | Resolved — awaiting re-review | Replaced the ring example in the data contract with a non-ring path. |
+| m11 | Resolved — awaiting re-review | Preview now echoes the transition reference and `(A,B,C)`, and has documented failure and cache contracts. |
+| m12 | Resolved — awaiting re-review | Recorded that `IsAssociation` is intentionally not persisted; Step 08 derives movement flags and adds a test. |
+| m13 | Resolved — awaiting re-review | Added the original-defect resolution table and documented the warning-to-error severity change. |
+| m14 | Resolved — awaiting re-review | Added the ceria dedicated transition-state occupation-set task. |
+| m15 | Resolved — awaiting re-review | Named `CamelCaseEnumJsonConverter<T>` and specified rejection of unknown/numeric enum strings. |
+| m16 | Resolved — awaiting re-review | Defined TRN019 as the total of kinetic plus metropolis transitions and name uniqueness as per-collection, case-insensitive. |
+| n1 | Addressed — awaiting re-review | Cited the Step 03 additive-v1 precedent and the pre-release rationale; the manifest status/notes/fixtures are updated. |
+| n2 | Acknowledged — awaiting re-review | Process note only; the round-1 text is unchanged and the revision is a new commit. |
+| n3 | Addressed — awaiting re-review | Added the single Ubuntu closeout CI task to the implementation tasks. |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
+
+## Re-review round 2
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Step | 04 — Transition Model |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `4f4c888` |
+| Docs branch | `main` |
+| Review date | — |
+| Reviewer | — |
+
+Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
+
+The design content for round 2 is frozen at `4f4c888`. The delta from the round-1 commit `b426a13` is the fix
+round recorded above; the review request and status changes are metadata only. Verify the delta yourself with
+`git diff --stat b426a13..4f4c888`.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for this round below. Keep the
+round-1 text unchanged.
+
+### Re-review evidence
+
+_Reviewer to complete._
+
+### Re-review findings
+
+_Reviewer to complete._
+
+### Re-review verdict
+
+- [ ] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+Follow-up owner:
+Follow-up step:

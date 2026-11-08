@@ -48,7 +48,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Done | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) (main: Ubuntu + Windows + macOS) | `7b4a994` | `step-01` | Passed with notes at `05c41ab` | Waived — introduced after completion |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Done | `step/02-symmetry-and-geometry` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) | `dbf5691` | `step-02` | Passed with notes at `6341b56` | Ready with notes — accepted |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Done | `step/03-particle-and-structure-models` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/42521062856) | `162ebe4` | `step-03` | Passed with notes at `b6a97ec` | Ready with notes — accepted at `3096aa8` |
-| 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Ready for review at `b426a13` |
+| 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Re-review required at `4f4c888` |
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -79,10 +79,10 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 ## Active work
 
-Step 04 — Transition Model is in pre-implementation design review. The design is frozen at `b426a13` and the
-review record is `Ready for review`. No step branch or implementation exists yet. Step 03 is complete: merge
-`162ebe4`, tag `step-03`, and main CI `42521062856` green. The independent re-audit passed with notes at
-`b6a97ec`; F1–F5 were fixed and F6 is an accepted Note.
+Step 04 — Transition Model is in pre-implementation design review. Round 1 at `b426a13` returned
+`Changes required`; the design was revised at `4f4c888` and is now `Re-review required`. No step branch or
+implementation exists yet. Step 03 is complete: merge `162ebe4`, tag `step-03`, and main CI `42521062856`
+green. The independent re-audit passed with notes at `b6a97ec`; F1–F5 were fixed and F6 is an accepted Note.
 
 ## Notes
 
