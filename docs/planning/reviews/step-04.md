@@ -1260,11 +1260,11 @@ planner/step agent and does not alter the reviewer's round-4 findings, evidence,
 | Step | 04 — Transition Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Ready for implementation |
 | Reviewed commit | `a3d8641` |
 | Docs branch | `main` |
-| Review date | — |
-| Reviewer | — |
+| Review date | 2026-11-08 |
+| Reviewer | Independent planning auditor (fresh context, round 5; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
 
@@ -1281,19 +1281,127 @@ earlier rounds unchanged.
 
 ### Re-review evidence
 
-_Reviewer to complete._
+**Independence.** I am a fresh planning auditor for round 5. I did not author or implement the Step 04 design, any fix round, or any implementation; I have no shared conversation with the planner or implementor. I read the frozen delta and the repository myself; I did not rely on the resolution table.
+
+**Frozen state and worktree.** Worktree `/workspace/mocassin`, branch `main`, `HEAD` `75056f7` (the round-5 request commit). The request names `a3d8641` (`a3d86414b03e76d9d3a52fe7f915cebe03873c14`) as the frozen design commit. `git diff --stat a3d8641..HEAD` shows only `docs/planning/reviews/step-04.md`, `docs/planning/status.md`, and a one-line step-page change; that step-page change is only the `Design review` link (`a3d8641`), so the design content is identical at `a3d8641` and `HEAD`. The record commit's parent will be `75056f7`, not `a3d8641`, because the round-5 request sits between the design commit and the record; this is the same process note as rounds 1–4.
+
+**Commands run (from `/workspace/mocassin`):**
+
+```sh
+git status --short
+# (no output: clean worktree)
+
+git log --oneline --decorate -5
+# 75056f7 (HEAD -> main) docs: request step-04 focused design re-review round 5 [skip ci]
+# a3d8641 docs: resolve step-04 round-4 notes [skip ci]
+# b85e841 docs: record step-04 design re-review Ready with notes [skip ci]
+# 30b8b41 docs: request step-04 design re-review round 4 [skip ci]
+# fe2331c docs: resolve step-04 round-3 design findings [skip ci]
+
+git rev-parse a3d8641
+# a3d86414b03e76d9d3a52fe7f915cebe03873c14
+
+git show --stat a3d8641
+# docs/planning/02-data-contracts.md                            | 13 +++---
+# docs/planning/steps/step-04-transition-model.md               | 51 ++++++++++++++--------
+# docs/planning/steps/step-06-lattice-and-simulation-models.md |  7 +--
+# 3 files changed, 45 insertions(+), 26 deletions(-)
+
+git diff a3d8641^..a3d8641 -- docs/planning
+# Read in full: the three transition/data-contract hunks, the Step 04 pattern/path/ownership/rule/test/risk
+# revisions, and the Step 06 kind-mapping change. No unrelated planning change.
+
+git show a3d8641:docs/planning/steps/step-04-transition-model.md
+# Read the R4-related sections: pattern rules 175–222, path resolution 300–352, ownership and rule table
+# 344–395, implementation tasks 596–632, acceptance/tests/risks 692–725 (731 lines total).
+# Also scanned the page for stale text (`TRN025`, `TRN018`, `TRN027`, `TrimToUnitCell`, `used at both`,
+# `preserves`, `D S D`, `offset`) — no stale or contradictory statement found.
+
+git diff --stat a3d8641..HEAD
+# docs/planning/reviews/step-04.md                | 69 +++++++++++++++++++++++--
+# docs/planning/status.md                         | 10 ++--
+# docs/planning/steps/step-04-transition-model.md |  2 +-
+# 3 files changed, 71 insertions(+), 10 deletions(-)
+
+git diff a3d8641..HEAD -- docs/planning/steps/step-04-transition-model.md docs/planning/02-data-contracts.md
+# Only the one-line `Design review` link change (`a3d8641`); no design change.
+
+git diff --check a3d8641^..a3d8641
+# (no output)
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.22s
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+```
+
+**Files reviewed.** `AGENTS.md` (§3.8–§3.13, §4, §5, §7, §8, §9, §10, §11, §16); `docs/planning/reviews/README.md`; this record's round-5 request and round-4 findings; `docs/planning/steps/step-04-transition-model.md` at `a3d8641` (R4-related sections and contradiction scan); `docs/planning/02-data-contracts.md` at `a3d8641` (transition section 308–336); `docs/planning/steps/step-06-lattice-and-simulation-models.md` at `a3d8641` (simulation/transition-kind section 99–136); `docs/planning/steps/step-08-model-compilation-pipeline.md` at `a3d8641` (custom/connector scan); `docs/planning/status.md` and the step-page design-review link at `HEAD`.
+
+**Scope.** This is the focused round-5 follow-up requested by the human owner: verify R4-1–R4-5 on the frozen delta, confirm no new Blocker or Major, and re-run the documentation gate. I did not repeat the round-1–round-4 full review; the delta introduces no new architecture or cross-step interface.
+
+### Re-review checklist (round 5)
+
+Marks and notes apply to round 5 only; item text is unchanged.
+
+**Design decisions reviewed**
+
+- [x] Step page design decisions — R4-1–R4-5 verified on the frozen delta; no new contradiction.
+- [x] Data contracts and format changes — offset convention and `Custom` grammar updated consistently with the step page.
+- [x] Architecture and module boundaries — unchanged; `TRN025` stays a Core pair-level rule and `TRN012` remains in Symmetry.
+- [x] ADRs and open decisions — unchanged by the delta; no open decision blocks the step.
+- [x] Quality strategy and test plan — boundary/offset-duplicate and `D S D`/generalized-grammar cases are present.
+- [x] Parity matrix and documentation plan — unchanged; the `transitions.md` ownership remains intact.
+- [x] Licensing and provenance — no new dependency; MIT/SPDX; no GPL source or data is introduced.
+- [x] Post-implementation audit plan — the standard AGENTS §3.10 audit and closeout task still apply.
+
+**Dependency and interface checks**
+
+- [x] Dependencies are `Done` and their contracts are stable — Step 03 is complete (`step-03` tag; audit passed).
+- [x] Inputs, outputs, types, and formats are defined — the `(nA, nB, nC, P)` offset convention is explicit and the `Custom` grammar is exact.
+- [x] Versioning and migration behavior is defined — additive project-v1 and the Step 03 precedent are unchanged.
+- [x] No unresolved cross-step interface question remains — the Step 06 kind mapping is explicit; the Step 08 obligation for accepted custom shapes is stated.
+
+**Standard design-review checklist**
+
+- [x] Scope, non-goals, and acceptance criteria are explicit and testable — unchanged by the delta.
+- [x] Design decisions are complete and internally consistent — R4-1–R4-5 are resolved; no new inconsistency.
+- [x] Required tests, property tests, golden fixtures, and performance targets are defined — the offset and grammar cases were added; the rest is unchanged.
+- [x] Documentation, status, parity, and audit updates are planned — unchanged.
+- [x] Licensing, provenance, and dependency checks are resolved — no change.
+- [x] Risks and mitigations are realistic — the custom-chain and offset risk rows were updated.
+- [x] Code layout and namespace plan follow the structure policy — unchanged; no new file/folder.
+- [x] No hidden scope, stale placeholders, or unowned decisions — none introduced by the delta.
 
 ### Re-review findings
 
-_Reviewer to complete._
+#### Round-4 finding verification
+
+| Finding | Severity | Status | Verification |
+| --- | --- | --- | --- |
+| R4-1 | Minor | Addressed | Step page 315–326 now makes the cell offset the minimizing integer shift `n` between the raw point and the matched P1 position, with ties toward zero, encodes it as `(nA, nB, nC, P)`, and states this is the only offset convention (raw integer part, `TrimToUnitCell`, and the minimizing shift are explicitly not interchangeable; `TrimToUnitCell` remains only the encoder's canonical-P1 rule). Data contract 326–334 says the same. The path-matching test row (699) covers boundary points matching the nearest periodic image, the recorded minimizing-shift offset, and "same `P` with a different offset is not a duplicate". |
+| R4-2 | Minor | Addressed | The Core ownership list is now `TRN001–TRN009, TRN017–TRN019, TRN021–TRN027` with an explicit sentence that `TRN018` is Core because it needs only the chain pattern and the reverse link (346–348); Symmetry keeps `TRN010–TRN016, TRN020, TRN028` (349–350). The partition is complete and disjoint for `TRN001–TRN028`. |
+| R4-3 | Minor | Addressed (accepted) | Step page 189–200 now says `Custom` *deliberately generalizes* the original regex grammar, accepts `D+ S+ D+` intentionally (for example `D D S S D D`), does not claim the original set is exhaustive, and requires Step 08 to support or reject every accepted shape at compile time. The single-static `D S D` sequence is explicitly invalid via `TRN009` (195–197; rule text 369); the data contract 319–320 says the same; tests 697 and the risk row 721 were updated. |
+| R4-4 | Minor | Addressed | `TRN025` is now a pair-level rule: every state change in a group is stable-role (acceptor not void) or all are unstable-role (`[D, ∅]`); mixing is `TRN025`, and the check needs no resolved path (215–218; rule text 385). Position/group agreement remains `TRN012` in the Symmetry list (349–350, 372, 330–332). The group test row covers the mixed-role rejection (695). |
+| R4-5 | Note | Addressed | Step 06 states the exact mapping normatively: `SimulationKind.Kmc` ↔ `TransitionKind.Kinetic` and `SimulationKind.Mmc` ↔ `TransitionKind.Metropolis`, with a cross-kind reference rejected (Step 06 128–132). Step 04 §4 carries a one-line cross-reference to the same mapping (Step 04 240–242). Both are consistent; no ambiguity remains. |
+
+#### New findings
+
+None. The delta is limited to the R4-1–R4-5 clarifications plus the corresponding data-contract, test, risk, and Step 06 text. No new Blocker, Major, Minor, or Note was introduced: the changes do not alter the path-resolution contract, the Core/Symmetry boundary, the project shape, or any cross-step type. Two points were checked and are *not* findings: (a) the resolver task bullet still lists "`TrimToUnitCell` canonicalization" (610), which read with §7 (325–326) refers to the encoder's canonical-P1 construction and is not the offset rule; (b) the R4-5 mapping appears in both Step 04 (as a cross-reference) and Step 06 (as the normative statement) with identical content.
 
 ### Re-review verdict
 
-- [ ] Ready for implementation
+- [x] Ready for implementation
 - [ ] Ready with notes
 - [ ] Changes required
 - [ ] Re-review required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up step:
+Follow-up owner: Human owner (start-gate approval); Step 04 agent after approval
+Follow-up step: Step 04 — Transition Model; create the step branch only after the human owner approves the start
+
+**Ready for implementation.** R4-1–R4-5 are all addressed on the frozen delta, not merely restated: the periodic-cell offset convention is now unique and testable, `TRN018` has a Core owner, the broader `Custom` grammar is explicitly intentional with `D S D` invalid, `TRN025` is a pair-level Core rule with `TRN012` covering position agreement, and the `SimulationKind`/`TransitionKind` mapping is explicit and consistent. No new Blocker or Major was introduced, and no new finding of any severity was recorded. The documentation gate passes (`zensical build --strict` — no issues found; contract artifacts current). This reviewer does not approve the start gate; the human owner approves it.
+
+Reviewed commit: `a3d8641` (`a3d86414b03e76d9d3a52fe7f915cebe03873c14`). Record parent: `75056f7` (the round-5 request commit); the design content is identical at `a3d8641` and `HEAD`.
