@@ -106,7 +106,8 @@ public sealed record ProjectSymmetryMetadata(
 - `ProjectHasher.ComputeDocument` includes the metadata; `ProjectHasher.Compute` hashes only the model section.
 - `Mocassin.Core` stores and serializes the metadata but never reads the embedded catalog.
   `Mocassin.Packages.Projects.ProjectValidationService` compares it with
-  `SymmetryVersionInfo.FromCatalog(SpaceGroupCatalog.Default)` and emits `PROJ034` when a present value differs.
+  `SymmetryVersionInfo.FromCatalog(SpaceGroupCatalog.Default)` and emits `ProjectDiagnosticCodes.SymmetryMetadataMismatch`
+  (`PROJ034`) when a present value differs.
 
 ### 2. Particle model
 
@@ -251,7 +252,7 @@ resolved catalog setting, or supercell dimensions.
   `UnitCellVectorEncoder.IsLatticeSizeSupported` before allocation.
 - `StructurePreviewService` and `StructureValidator` use a structured orbit reference input:
   `StructureSiteReference(CellSiteId Id, Fractional3 Position)` and the additive
-  `UnitCellVectorEncoder.TryCreate` overload that returns `SiteOrbitOverlap(FirstSiteId, SecondSiteId,
+  `UnitCellVectorEncoder.TryCreate` overload that returns `OrbitOverlap(FirstSiteId, SecondSiteId,
   Fractional3 Position)`. The overload emits `STR007` diagnostics with `ModelPath("cellSite", id)` and related
   paths, so the validator never parses message text and never duplicates the orbit comparison. The existing
   Step 02 overload remains for callers that do not need IDs.
@@ -263,12 +264,12 @@ resolved catalog setting, or supercell dimensions.
 #### Preview benchmark
 
 - Add `StructurePreviewCeria` and `StructurePreviewBariumZirconate` BenchmarkDotNet cases to
-  `Mocassin.Benchmarks/StructurePreviewBenchmarks.cs`.
+  `Mocassin.Benchmarks/Structure/StructurePreviewBenchmarks.cs`.
 - Fixtures: the sample ceria and barium zirconate structures, P1 counts recorded in the benchmark output.
 - Command: `dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks -- --filter "*StructurePreview*"`.
 - Record the runner class and raw results in `tests/reference/bench/baselines.json` and
   `tests/reference/bench/`; target mean < 100 ms on `linux-x64-github-ubuntu-latest-dotnet10`.
-- Tier: PR-medium/release. Do not assert wall-clock time in a PR-fast test.
+- Tier: Nightly/release. Do not assert wall-clock time in a PR-fast test.
 
 ### 5. Validation rules
 
@@ -320,8 +321,9 @@ resolved catalog setting, or supercell dimensions.
 - `PROJ034` is a project-level warning. It does not block loading; the compiled payload records the
   authoritative versions. `Mocassin.Core` parses and stores the optional envelope metadata but never reads the
   catalog. `Mocassin.Packages.Projects.ProjectValidationService` compares it with
-  `SymmetryVersionInfo.FromCatalog(SpaceGroupCatalog.Default)` and appends `PROJ034` when any present value
-  differs; missing metadata is accepted. `ProjectValidator` remains Core-only.
+  `SymmetryVersionInfo.FromCatalog(SpaceGroupCatalog.Default)` and appends
+  `ProjectDiagnosticCodes.SymmetryMetadataMismatch` (`PROJ034`) when any present value differs; missing
+  metadata is accepted. `ProjectValidator` remains Core-only.
 
 Diagnostic ownership follows the assembly boundary. Core emits diagnostics that depend only on the project
 graph and primitive types: `PAR001`–`PAR012`, `STR004`, `STR005`, `STR006`, `STR010`, `STR012`, `STR013`, and
@@ -332,7 +334,7 @@ sorted list. The Core class is named `CoreStructureDiagnosticCodes` to avoid con
 
 - Site-overlap detection uses exact grid coordinates after P1 expansion; no tolerance-based hash sets. The
   grid is the `24 × 10^12` fractional grid defined in Step 02. The structured encoder overload emits `STR007`
-  with `CellSiteId` paths and `SiteOrbitOverlap` records; the validator does not parse messages or reimplement
+  with `CellSiteId` paths and `OrbitOverlap` records; the validator does not parse messages or reimplement
   the orbit comparison.
 - Duplicate detection compares the full orbit, not only the seed position.
 - A site whose orbit overlaps another site is an error because it makes particle assignment ambiguous.
@@ -394,7 +396,7 @@ public interface IStructureValidator
 // Mocassin.Symmetry.Geometry
 public readonly record struct StructureSiteReference(CellSiteId Id, Fractional3 Position);
 
-public sealed record SiteOrbitOverlap(
+public sealed record OrbitOverlap(
     CellSiteId FirstSiteId,
     CellSiteId SecondSiteId,
     Fractional3 Position);
@@ -407,7 +409,7 @@ public sealed record SiteOrbitOverlap(
   `StructureModel`, resolve `SpaceGroupRef` through the catalog, and return a preview or diagnostics. The
   `Try*` methods do not throw for invalid user data; a failed preview returns `null` plus diagnostics.
 - `UnitCellVectorEncoder` gains an additive `TryCreate` overload accepting `StructureSiteReference` values and
-  returning `SiteOrbitOverlap` entries plus diagnostics. The existing overload remains source-compatible.
+  returning `OrbitOverlap` entries plus diagnostics. The existing overload remains source-compatible.
 - `ProjectStore.LoadBytesCore` uses `ProjectValidationService.Validate` by default, so loading a project
   returns Core, Symmetry, and `PROJ034` diagnostics. `ProjectStore` accepts an injected validator for tests;
   `ProjectEditor` keeps the Core-only default and the UI/CLI pass the composed validator explicitly.
@@ -457,7 +459,8 @@ Mocassin.Core/
     ParticleDiagnosticCodes.cs          # PAR001-PAR012
     CoreStructureDiagnosticCodes.cs     # Core-side STR004-STR006, STR010, STR012-STR013, STR015
   Project/
-    ProjectHasher.cs                   # add ComputeStructure for the preview cache key
+    ProjectDiagnosticCodes.cs          # add PROJ034 SymmetryMetadataMismatch
+    ProjectHasher.cs                   # add public ComputeStructure for the preview cache key
     ProjectJson.cs
     ProjectJsonContext.cs
     ProjectSchema.cs
@@ -469,7 +472,7 @@ Mocassin.Symmetry/
     StructureDiagnosticCodes.cs         # existing; extend with STR001 and STR014
   Geometry/
     StructureSiteReference.cs
-    SiteOrbitOverlap.cs
+    OrbitOverlap.cs
   Structure/
     StructurePreview.cs
     StructurePreviewService.cs
@@ -482,7 +485,8 @@ Mocassin.Packages/
     ProjectValidationService.cs         # Core + Symmetry + PROJ034 composition
 
 Mocassin.Benchmarks/
-  StructurePreviewBenchmarks.cs         # ceria/BZO preview benchmark
+  Structure/
+    StructurePreviewBenchmarks.cs       # ceria/BZO preview benchmark
 ```
 
 Test files mirror the source concept in `Mocassin.Core.Tests`, `Mocassin.Symmetry.Tests`, and
@@ -511,10 +515,11 @@ split the new IDs into `Ids/StructureIds.cs`.
   `OriginChoice`, and `SiteStability`; mark `Particle.IsVoid` with `[JsonIgnore]`.
 - [ ] Implement canonical model serialization: sort particles, sets, sites, and dummies by ID; preserve
   `ParticleSet.ParticleIds` order; add shuffle-invariance hash tests.
-- [ ] Implement `ProjectHasher.ComputeStructure` for the preview cache key.
+- [ ] Implement public `ProjectHasher.ComputeStructure` for the preview cache key; add it to
+  `PublicAPI.Unshipped.txt` and refresh the ApiCompat baseline.
 - [ ] Implement crystal-system validation, the 1000-reference-site limit, names, reserved IDs, and duplicate
   set members.
-- [ ] Add the `UnitCellVectorEncoder.TryCreate` overload with `StructureSiteReference`/`SiteOrbitOverlap`;
+- [ ] Add the `UnitCellVectorEncoder.TryCreate` overload with `StructureSiteReference`/`OrbitOverlap`;
   reuse the encoder for `StructurePreview`, `StructurePreviewService`, and `StructureValidator`.
 - [ ] Add `STR014` index-cap validation to the preview service; keep `GetLinearIndex` throws for programmer
   errors only.
@@ -524,7 +529,8 @@ split the new IDs into `Ids/StructureIds.cs`.
 - [ ] Add sample definitions for ceria and barium zirconate and populate the existing ceria fixture/sample.
 - [ ] Add `PAR010`–`PAR012`, `STR014`, and `STR015`; remove `STR008`/`STR011` usage and document them as
   unused. Final help anchors and `docs/reference/diagnostics.md` belong to Step 07.
-- [ ] Add `StructurePreviewBenchmarks` and a baseline for ceria/BZO; do not add a PR-fast wall-clock assertion.
+- [ ] Add `Mocassin.Benchmarks/Structure/StructurePreviewBenchmarks.cs` and a baseline for ceria/BZO; do not
+  add a PR-fast wall-clock assertion.
 - [ ] Update `contracts/manifest.json` with the `structure` (including `name`) and optional envelope `symmetry`
   metadata; regenerate `contracts/generated/schema/project-v1.schema.json`. The project `schemaVersion`
   remains 1 because the fields are additive and the model shape is pre-release.
@@ -543,12 +549,12 @@ split the new IDs into `Ids/StructureIds.cs`.
   unstable O site at (0.5,0.25,0.25), using the public editing API.
 - [ ] The preview shows the correct P1 orbit sizes for each site.
 - [ ] Overlapping sites are rejected with a `CellSiteId` path to each offending site through the structured
-  `SiteOrbitOverlap` result; no message parsing is used.
+  `OrbitOverlap` result; no message parsing is used.
 - [ ] Crystal-system constraints are enforced without silently overwriting user input.
 - [ ] The structure preview is deterministic and cached by `(structureHash, A, B, C, catalogDataVersion,
   catalogDataSha256, symmetryContractVersion)`; `structureHash` is the canonical structure-model hash.
 - [ ] The ceria/BZO preview benchmark case and baseline are recorded; the target is mean < 100 ms on the Step
-  02 benchmark runner class. The benchmark runs in PR-medium/release, not as a PR-fast wall-clock assertion.
+  02 benchmark runner class. The benchmark runs in Nightly/release, not as a PR-fast wall-clock assertion.
 - [ ] A preview request whose `A*B*C*P` exceeds `int.MaxValue` returns `STR014` and no preview.
 - [ ] `"model": {}` still loads as `ModelDefinition.Empty`, and the existing minimal/ceria fixtures round-trip.
 - [ ] JSON round-trips use `[a,b,c]` fractional arrays, camelCase enum strings, and no `isVoid` field.
@@ -575,12 +581,15 @@ At this point, document particles and crystal structure:
 - `docs/development/architecture.md` — update: particle/structure domain APIs, editor operations, and the
   Core/Symmetry preview and validation boundary.
 - `docs/reference/project-format.md` — update: particles, structure name, cell constraints, `PAR`/`STR` codes,
-  and canonical model rules. The structure section already exists and must not be duplicated.
+  canonical model rules, and the three hash entry points (`Compute`, `ComputeDocument`, `ComputeStructure`).
+  The structure section already exists and must not be duplicated.
+- `docs/development/design-decisions.md` — update the “two hashes” section to describe the public structure
+  hash used for preview caching.
 
 ## Tests
 
-All cases below are PR-fast except the full random property sweep and the `StructurePreview*` benchmark, which
-are PR-medium and may also run in the release/nightly suite. The sample P-order goldens remain PR-fast.
+All cases below are PR-fast except the full random property sweep, which is PR-medium, and the
+`StructurePreview*` benchmark, which is Nightly/release. The sample P-order goldens remain PR-fast.
 
 | Test | Assertion |
 | --- | --- |
@@ -598,7 +607,7 @@ are PR-medium and may also run in the release/nightly suite. The sample P-order 
 | Cell determinant | Near-degenerate and ill-conditioned cells are rejected; valid cells have `det G > 0` and positive volume |
 | Cell vectors | Triclinic regression, hexagonal γ=120°, rhombohedral α=60°, and right-handedness |
 | Site coordinates | Values within `FractionalTrimTolerance` snap; values outside `[0,1)` beyond tolerance produce `STR004` and are not wrapped |
-| Site overlap | Same orbit, special positions, near-boundary cases, exact grid equality, `SiteOrbitOverlap` pairs, and `CellSiteId` paths |
+| Site overlap | Same orbit, special positions, near-boundary cases, exact grid equality, `OrbitOverlap` pairs, and `CellSiteId` paths |
 | Site/dummy names and sets | `STR005` duplicate site names; `STR006` missing/default set; `STR010` invalid dummy coordinates; `STR015` empty/duplicate dummy names |
 | Preview | Orbit sizes and Cartesian positions match hand calculations; preview echoes `(A,B,C)` |
 | Preview cache | Different `(A,B,C)` or catalog/contract versions do not share a cached preview; `structureHash` changes when the structure changes; invalid input returns diagnostics and no partial preview |
@@ -613,7 +622,7 @@ are PR-medium and may also run in the release/nightly suite. The sample P-order 
 | Space-group reference | `(number, axis, origin)` round-trips for every supported enum value; HM/Hall are derived; unknown combinations produce `STR001`; reserved `uniqueAxisA` is rejected |
 | Symmetry metadata | Matching versions load silently; mismatched catalog/contract emits `PROJ034`; missing/partial metadata is accepted; fixtures cover all cases |
 | Property tests | Random particle/structure models round-trip canonically; random site sets match a brute-force overlap/validation oracle |
-| Performance | `StructurePreviewCeria`/`StructurePreviewBariumZirconate` BenchmarkDotNet cases record a baseline; mean < 100 ms on the Step 02 benchmark runner class; PR-medium/release, not PR-fast |
+| Performance | `StructurePreviewCeria`/`StructurePreviewBariumZirconate` BenchmarkDotNet cases record a baseline; mean < 100 ms on the Step 02 benchmark runner class; Nightly/release, not PR-fast |
 | Sample P order | Ceria and barium zirconate preview P indices are stable and match the Step 02 conventions |
 
 ## Risks and mitigations
@@ -630,7 +639,7 @@ are PR-medium and may also run in the release/nightly suite. The sample P-order 
 | Redundant setting fields drift | Persist only `(number, axis, origin)`; derive HM/Hall/system from the catalog |
 | P-index drift | Golden P-order tests, shuffle invariance, and the exact grid contract |
 | Catalog/contract mismatch | `PROJ034` emitted by `ProjectValidationService`, no automatic rewrite, and the compiled payload records the actual versions |
-| Unreachable diagnostics | Every code has a positive and negative test; `PAR003`, `STR008`, and `STR011` are documented as unused |
+| Unreachable diagnostics | Every used code has a positive and negative test; `PAR003`, `STR008`, and `STR011` are documented as unused |
 | Envelope metadata is parsed but ignored | `ProjectSymmetryMetadata` round-trip tests and `ProjectStore` composed-validation test |
 | Composed validator is bypassed by the loader | `ProjectStore.LoadBytesCore` uses `ProjectValidationService` by default and the test asserts Symmetry/`PROJ034` diagnostics |
 | Preview cache key is incomplete | `ProjectHasher.ComputeStructure` plus catalog/contract version injection and cache-key tests |

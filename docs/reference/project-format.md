@@ -208,8 +208,10 @@ rejected as invalid documents.
 `ProjectHasher.Compute(project)` hashes the canonical **model section** and is the Step 01 model-content
 identity used as the basis for the compiled-model signature. It is not the compiled model signature from
 Step 08. `ProjectHasher.ComputeDocument(project)` hashes the complete canonical project document, including
-metadata and view settings, and is what `ProjectDocument` uses for dirty tracking. Both use SHA-256 and return
-lowercase hexadecimal.
+metadata and view settings, and is what `ProjectDocument` uses for dirty tracking. Step 03 adds the public
+`ProjectHasher.ComputeStructure(structure)` for the canonical **structure section** (name, space group, cell,
+sites, dummies); it is the structure-preview cache key, not a model or document identity. All use SHA-256 and
+return lowercase hexadecimal.
 
 ## Migrations
 

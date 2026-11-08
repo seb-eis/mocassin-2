@@ -49,17 +49,20 @@ empty; parameterization, job, and build templates carry only the fields needed f
 validation. Steps 03–10 extend these records. The schema is treated as pre-release until the model shape is
 frozen, and any semantic change after that requires an explicit migration.
 
-## Canonical JSON and two hashes
+## Canonical JSON and hashes
 
 Canonical JSON is whitespace-free, LF-only, schema-ordered, and sorts non-semantic arrays by stable ID. It
 normalizes timestamps to UTC with seven fractional digits and `-0.0` to `0.0`.
 
-Two SHA-256 hashes are exposed:
+Three SHA-256 hashes are exposed:
 
 - `ProjectHasher.Compute` hashes the canonical **model section** as the basis for the compiled-model
   signature;
 - `ProjectHasher.ComputeDocument` hashes the complete canonical document and is used by `ProjectDocument` for
-  dirty tracking.
+  dirty tracking;
+- `ProjectHasher.ComputeStructure` hashes the canonical **structure section** (name, space group, cell, sites,
+  dummies) and is used as the structure-preview cache key. It is a public API because the Symmetry preview
+  service calls it.
 
 They are deliberately distinct. The compiled-model signature in Step 08 is a different value again, based on
 the canonical MessagePack projection (ADR 0010).

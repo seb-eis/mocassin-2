@@ -391,12 +391,14 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | Open/save typical project | < 500 ms |
 | 3D viewport (10⁵ atoms) | ≥ 30 FPS on integrated GPU |
 | P1 expansion (64 P1 positions, 20×20×20 = 512,000 positions) | < 1 s mean on `ubuntu-latest`, .NET 10 Release |
+| Structure preview (ceria and barium zirconate) | < 100 ms mean on `linux-x64-github-ubuntu-latest-dotnet10` |
 
 Benchmarks:
 
 - `benches/energy.rs`, `benches/kmc.rs`, `benches/mmc.rs`, `benches/context.rs` with Criterion.
 - `Mocassin.Benchmarks` with BenchmarkDotNet for compilation, serialization, and `.msl` writes.
-- `Mocassin.Benchmarks` includes the Step 02 P1 expansion and reduction fixture.
+- `Mocassin.Benchmarks` includes the Step 02 P1 expansion/reduction fixture and the Step 03 structure-preview
+  fixture (`StructurePreviewCeria`, `StructurePreviewBariumZirconate`).
 - A reproducible benchmark package in `tests/reference/bench/` with fixed seeds and inputs.
 - Baselines are stored per runner class (OS, CPU class, .NET/Rust version) in
   `tests/reference/bench/baselines.json`; comparisons use the same class only.
