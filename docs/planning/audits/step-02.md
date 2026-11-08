@@ -258,3 +258,175 @@ status commit follows; it changes no code, tests, or configuration.
 
 Re-audit request: review `4a30fdf` and the following docs-only status commit. The earlier round remains
 unchanged.
+
+## Re-audit round 2
+
+### Re-audit request
+
+| Field | Value |
+| --- | --- |
+| Step | 02 — Symmetry and Geometry |
+| Request owner | Step agent |
+| Audit status | Fixes required |
+| Reviewed commit | `4a30fdf` (`step-02: add brute-force symmetry oracles (audit fix)`) |
+| Freeze commit | `eafc5d5` (docs-only re-audit request/status commit) |
+| Step branch | `step/02-symmetry-and-geometry` |
+| Review date | 2026-11-08 |
+| Reviewer | Independent out-of-context audit agent (same auditor; no implementation edits) |
+| CI run | [42429237412](https://github.com/seb-eis/mocassin-2/actions/runs/42429237412) — `completed`/`success` at `4a30fdf` |
+
+The earlier round’s evidence, findings, and verdict remain unchanged. This round re-checks the fix commit and
+the docs-only freeze commit.
+
+### Evidence
+
+#### Revision and tree
+
+```text
+git branch --show-current
+step/02-symmetry-and-geometry
+
+git status --porcelain=v1
+(no output; clean working tree)
+
+git rev-parse HEAD
+eafc5d54ec1d17232a3be7a8a646e13f98b79c2c
+
+git log --oneline -6
+eafc5d5 docs: request step-02 re-audit [skip ci]
+4a30fdf step-02: add brute-force symmetry oracles (audit fix)
+8fdb7a4 docs: record step-02 audit Fixes required [skip ci]
+33554d4 docs: freeze step-02 for audit [skip ci]
+d6eac6f step-02: add KaTeX math rendering (amend-2)
+d2efe6a step-02: document symmetry foundation and close out
+```
+
+The audited solution is `4a30fdf`; `eafc5d5` is the docs-only re-audit request/freeze commit. The tree
+remained clean after the gates.
+
+#### Build, tests, format
+
+Initial `dotnet build --no-restore` failed in this container because the NuGet cache lacked the
+`Microsoft.CodeAnalysis.PublicApiAnalyzers` package. `dotnet restore Mocassin.slnx` completed successfully,
+after which the required build passed:
+
+```text
+dotnet restore Mocassin.slnx
+All projects restored successfully.
+
+dotnet build Mocassin.slnx -c Release --no-restore
+Build succeeded. 0 Warning(s), 0 Error(s).
+
+dotnet test Mocassin.slnx -c Release --no-build
+Passed: Mocassin.Symmetry.Tests 127/127
+Passed: Mocassin.Core.Tests 167/167
+Passed: Mocassin.Packages.Tests 30/30
+Passed: Mocassin.App.Tests 1/1
+Passed: Mocassin.Compilation.Tests 1/1
+Passed: Mocassin.Contracts.Tests 1/1
+Passed: Mocassin.Results.Tests 1/1
+Failed: 0, Skipped: 0
+
+dotnet format Mocassin.slnx --verify-no-changes --no-restore
+exit 0 (workspace-loading warning printed; no formatting changes)
+```
+
+New-oracle test selection:
+
+```text
+dotnet test src/dotnet/Mocassin.Symmetry.Tests/Mocassin.Symmetry.Tests.csproj -c Release --no-build \
+  --filter "FullyQualifiedName~BruteForceReductionTests|FullyQualifiedName~EverySettingMatches|FullyQualifiedName~GenericOrbitHasFullMultiplicity|FullyQualifiedName~OrbitExpansionMatchesExplicit|FullyQualifiedName~GridOperationsStay|FullyQualifiedName~RandomValidCells"
+Passed 10/10:
+  PairReductionMatchesExplicitEnumeratedOrbitsInP2
+  PairReductionMatchesExplicitEnumeratedOrbitsInPmmm
+  PairReductionMatchesExplicitEnumerationForRandomP2Targets
+  ClusterReductionMatchesOracleForRandomAllowedOccupations
+  ClusterReductionMatchesExplicitPermutationOracleInP2AndPmmm
+  EverySettingMatchesTheFrozenGeneralMultiplicityTable
+  GenericOrbitHasFullMultiplicityForEverySetting
+  OrbitExpansionMatchesExplicitGridEnumerationForEverySetting
+  GridOperationsStayOnTheExactGridForEverySetting
+  RandomValidCellsMatchBruteForceMinimumImageAndRadialSearch
+```
+
+#### Documentation and contracts
+
+```text
+zensical build --strict
+No issues found
+
+./tools/docs/build-docs.sh
+Zensical strict, DocFX (0 warnings/0 errors), and rustdoc all succeeded
+
+python tools/symmetry/generate_space_groups.py --check
+space-group catalog is current: 274 settings, sha256
+1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395
+
+python tools/contracts/generate.py --check
+Contract artifacts are current (17 files)
+
+python tools/contracts/check_nuget_licenses.py
+NuGet licence policy OK (44 packages).
+
+python tools/check-license-headers.py
+SPDX headers present in 124 source files
+
+python tools/check-no-secrets.py
+No secret patterns found in 391 tracked text files
+
+./tools/check-api-compat.sh
+ApiCompat: no breaking changes in 9 assemblies; public API is compatible.
+
+dotnet list Mocassin.slnx package --vulnerable --include-transitive
+All projects: no vulnerable packages.
+
+python yaml.safe_load(.github/workflows/ci.yml)
+YAML parses; jobs: api-compat, benchmark, contracts, docs, dotnet, platforms, python, rust.
+Benchmark job: runs-on ubuntu-latest; if github.event_name == 'workflow_dispatch';
+steps restore, build, and run P1Expansion20Cubed with --no-build.
+```
+
+CI run `42429237412` is `completed`/`success` at `4a30fdf`; all build/test/docs/policy jobs passed. The
+`Benchmark (manual)` job was correctly skipped for the push event.
+
+### Fix verification
+
+| Finding | Status | Verification |
+| --- | --- | --- |
+| **M1** — missing brute-force/random test oracles | **Partially fixed — Major remains** | Orbit-expansion, grid-closure, and randomized minimum-image/radial-search tests now provide useful independent checks, and the pair/cluster tests run. However, the pair oracle `EnumerateShells` is a near-line-for-line copy of `PairReduction.Reduce`: the same assigned-set loop, stabilizer iteration, `Map` copy of `TryMapImage`, copied `Displacement`/`IsSameOrbit`/`Normalize`/`Modulo`/`FloorDiv`, and the same chiral-partner loop. The cluster oracle likewise repeats `ClusterReduction`’s tuple canonicalization/expansion logic and uses the production `GetPointGroup`. A defect in that shared equivalence/canonicalization logic would be mirrored in the oracle. The 274-entry multiplicity fixture exactly equals the catalog `Operations.Length` values; its README describes generation from the same pinned spglib selection and cross-checks only representative settings against International Tables, so it is a frozen same-source regression fixture, not an independent all-setting oracle. |
+| **m1** — `CellConditionLimit` rejection branch | Resolved | The step page now says the predicate rejects values above the limit and that the branch is defensive and unreachable under the v1 length/determinant limits; the test table matches. The high-condition valid-cell stress test remains. The rejection path is not directly exercised, but the intended defensive scope is now honestly documented. |
+| **m2** — benchmark runner-class claim | Resolved — note | Local-container evidence is explicitly labelled in `baselines.json` (`evidenceStatus`) and the step page; the manual `Benchmark (manual)` workflow job is valid YAML and runs on `workflow_dispatch`. The runner-class verification is deferred to release candidates/manual runs, which the reworded acceptance now states. |
+| **m3** — documentation/status overstatement | Mostly resolved — one wording issue remains | The duplicate architecture namespace rows are removed; the two Step 02 task boxes are checked; amendment-2’s two Documentation checkboxes are complete. `docs/development/compilation-pipeline.md` still says deterministic tests “freeze” pair-shell representatives and cluster codes, although the new pair/cluster tests compute expected values dynamically and no fixed golden fixture freezes those outputs. |
+| **n1** — cache scaffold | Resolved | The compilation-pipeline page now explicitly assigns Step 08 the wiring of the scoped cache into orbit, point-group, pair, and cluster stages. |
+| **n2** — Step 11 version fields | Resolved | The Step 11 page now names `symmetry_contract_version`, `space_group_data_version`, and `space_group_data_sha256` in the payload design, implementation task, and acceptance criteria. |
+| **n3** — test tiers | Resolved | `Trait("Tier", "PR-fast")` is present on all 22 test classes in the Core and Symmetry test projects. |
+
+### Findings
+
+| Severity | Finding | Evidence | Resolution |
+| --- | --- | --- | --- |
+| **Major** | **M1 remains — the new pair/cluster “brute-force” oracles are copies of the production algorithms, and the multiplicity fixture is same-source.** The new tests are executed and pass, but they do not independently verify the reduction semantics requested by the acceptance criterion. A bug in the shared mapping/equivalence/chiral logic would be reproduced in `EnumerateShells`, and a bug in the shared induced-permutation/canonicalization logic would be reproduced in `EnumerateClusters`. The all-setting table is a duplicate of catalog operation counts rather than an independent International Tables oracle for every setting. | `src/dotnet/Mocassin.Symmetry.Tests/BruteForceReductionTests.cs:266-389` vs `src/dotnet/Mocassin.Symmetry/PairReduction.cs:46-131`; `BruteForceReductionTests.cs:391-465` vs `PairReduction.cs:133-217`; `BruteForceReductionTests.cs:149-209` vs `src/dotnet/Mocassin.Symmetry/ClusterReduction.cs:136-240`; `tests/reference/symmetry/general-multiplicities.json` (274 entries equal to catalog `Operations.Length`); `tests/reference/symmetry/README.md` (same pinned spglib source, representative cross-checks only). | Replace the copied equivalence/chirality oracle with an independent computation (for example, enumerate stabilizer elements directly from the catalog operations and compare fractional displacement orbits without reusing the production mapping helper), and provide an all-setting multiplicity table from an independent source or explicitly accept a documented same-source golden with owner approval. Re-audit after the oracle and fixture are independent. |
+| **Minor** | **m3 residual — the compilation-pipeline page still claims pair-shell representatives and cluster codes are “frozen”.** The pair/cluster tests now compute expected shells and codes dynamically; no committed golden fixture freezes those results. | `docs/development/compilation-pipeline.md` §Determinism and parallelism; `BruteForceReductionTests.cs` uses dynamic oracles; `ReductionTests.cs` has only small hand-built expectations. | Reword to “deterministic tests compare…” or add fixed pair/cluster golden fixtures. Documentation-only. |
+| **Note** | **n4 — the audit record’s “Known notes” still names `d6eac6f` as the audited solution.** The request header and this round correctly use `4a30fdf`; the step-agent-owned known-note line was not updated in the freeze commit. This does not affect the technical verdict. | `docs/planning/audits/step-02.md:55-56` vs the request header. | Update the known note in the next record/status commit. |
+
+### Verdict
+
+- [ ] Passed
+- [ ] Passed with notes
+- [x] Fixes required
+- [ ] Re-audit required
+- [ ] Waived
+
+**Fixes required.** The fix commit builds and passes all gates, the new tests execute, and the m1/m2/m3/n1/n2/n3
+documentation and process items are substantially addressed. However, the central M1 requirement — genuine
+independent or brute-force oracles rather than copies of production logic — is not met for pair/cluster
+reduction, and the all-setting multiplicity fixture remains same-source. The acceptance criterion for
+brute-force reduction equivalence therefore still lacks durable independent evidence.
+
+Follow-up owner: Step agent / implementor (replace the copied oracles and same-source multiplicity fixture, and
+correct the residual compilation-pipeline wording); human owner (merge/tag approval only after a passed
+re-audit).
+
+Follow-up issue/step: Add independent pair/chiral/cluster oracles and an independent all-setting multiplicity
+source, update the evidence, and request re-audit round 3. Do not merge `step/02-symmetry-and-geometry` into
+`main` until that re-audit passes.
