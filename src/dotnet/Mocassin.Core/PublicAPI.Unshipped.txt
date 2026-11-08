@@ -999,3 +999,72 @@ static Mocassin.Core.Geometry.Vector4<T>.operator ==(Mocassin.Core.Geometry.Vect
 ~override Mocassin.Core.Geometry.Vector4<T>.Equals(object obj) -> bool
 Mocassin.Core.Geometry.Vector3<T>.Dot(Mocassin.Core.Geometry.Vector3<T> other) -> T
 Mocassin.Core.Geometry.Vector4<T>.Dot(Mocassin.Core.Geometry.Vector4<T> other) -> T
+Mocassin.Core.Diagnostics.ParticleDiagnosticCodes
+Mocassin.Core.Model.Particles.Particle
+Mocassin.Core.Model.Particles.Particle.<Clone>$() -> Mocassin.Core.Model.Particles.Particle!
+Mocassin.Core.Model.Particles.Particle.Charge.get -> Mocassin.Core.Units.ChargeElementary
+Mocassin.Core.Model.Particles.Particle.Charge.init -> void
+Mocassin.Core.Model.Particles.Particle.Deconstruct(out Mocassin.Core.Ids.ParticleId Id, out string! Name, out string! Symbol, out Mocassin.Core.Units.ChargeElementary Charge, out bool IsVacancy) -> void
+Mocassin.Core.Model.Particles.Particle.Equals(Mocassin.Core.Model.Particles.Particle? other) -> bool
+Mocassin.Core.Model.Particles.Particle.Id.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Core.Model.Particles.Particle.Id.init -> void
+Mocassin.Core.Model.Particles.Particle.IsVacancy.get -> bool
+Mocassin.Core.Model.Particles.Particle.IsVacancy.init -> void
+Mocassin.Core.Model.Particles.Particle.IsVoid.get -> bool
+Mocassin.Core.Model.Particles.Particle.Name.get -> string!
+Mocassin.Core.Model.Particles.Particle.Name.init -> void
+Mocassin.Core.Model.Particles.Particle.Particle(Mocassin.Core.Ids.ParticleId Id, string! Name, string! Symbol, Mocassin.Core.Units.ChargeElementary Charge, bool IsVacancy) -> void
+Mocassin.Core.Model.Particles.Particle.Symbol.get -> string!
+Mocassin.Core.Model.Particles.Particle.Symbol.init -> void
+Mocassin.Core.Model.Particles.ParticleModel
+Mocassin.Core.Model.Particles.ParticleModel.<Clone>$() -> Mocassin.Core.Model.Particles.ParticleModel!
+Mocassin.Core.Model.Particles.ParticleModel.EmptyParticleSet.get -> Mocassin.Core.Model.Particles.ParticleSet!
+Mocassin.Core.Model.Particles.ParticleModel.Equals(Mocassin.Core.Model.Particles.ParticleModel? other) -> bool
+Mocassin.Core.Model.Particles.ParticleModel.Find(Mocassin.Core.Ids.ParticleId id) -> Mocassin.Core.Model.Particles.Particle?
+Mocassin.Core.Model.Particles.ParticleModel.Find(Mocassin.Core.Ids.ParticleSetId id) -> Mocassin.Core.Model.Particles.ParticleSet?
+Mocassin.Core.Model.Particles.ParticleModel.ParticleModel(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!> particles, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.ParticleSet!> particleSets) -> void
+Mocassin.Core.Model.Particles.ParticleModel.ParticleSets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.ParticleSet!>
+Mocassin.Core.Model.Particles.ParticleModel.ParticleSets.init -> void
+Mocassin.Core.Model.Particles.ParticleModel.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Particles.Particle!>
+Mocassin.Core.Model.Particles.ParticleModel.Particles.init -> void
+Mocassin.Core.Model.Particles.ParticleModel.VoidParticle.get -> Mocassin.Core.Model.Particles.Particle!
+Mocassin.Core.Model.Particles.ParticleSet
+Mocassin.Core.Model.Particles.ParticleSet.<Clone>$() -> Mocassin.Core.Model.Particles.ParticleSet!
+Mocassin.Core.Model.Particles.ParticleSet.Equals(Mocassin.Core.Model.Particles.ParticleSet? other) -> bool
+Mocassin.Core.Model.Particles.ParticleSet.Id.get -> Mocassin.Core.Ids.ParticleSetId
+Mocassin.Core.Model.Particles.ParticleSet.Id.init -> void
+Mocassin.Core.Model.Particles.ParticleSet.Name.get -> string!
+Mocassin.Core.Model.Particles.ParticleSet.Name.init -> void
+Mocassin.Core.Model.Particles.ParticleSet.ParticleIds.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId>
+Mocassin.Core.Model.Particles.ParticleSet.ParticleIds.init -> void
+Mocassin.Core.Model.Particles.ParticleSet.ParticleSet(Mocassin.Core.Ids.ParticleSetId id, string! name, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId> particleIds) -> void
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.DuplicateSetContent = "PAR009" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.DuplicateSetMember = "PAR012" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.InvalidName = "PAR001" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.InvalidSetMembers = "PAR005" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.InvalidSetName = "PAR011" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.NonRecommendedSymbol = "PAR008" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.ParticleLimitExceeded = "PAR002" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.ReservedIdentifier = "PAR010" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.SetLimitExceeded = "PAR007" -> string!
+const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.UnknownParticleReference = "PAR006" -> string!
+const Mocassin.Core.Model.Particles.Particle.RecommendedSymbolPattern = "^[A-Z][A-Za-z0-9+\\-()]{0,10}$" -> string!
+const Mocassin.Core.Model.Particles.ParticleModel.MaxCustomParticles = 63 -> int
+const Mocassin.Core.Model.Particles.ParticleModel.MaxParticleSets = 100 -> int
+override Mocassin.Core.Model.Particles.Particle.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Particles.Particle.GetHashCode() -> int
+override Mocassin.Core.Model.Particles.Particle.ToString() -> string!
+override Mocassin.Core.Model.Particles.ParticleModel.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Particles.ParticleModel.GetHashCode() -> int
+override Mocassin.Core.Model.Particles.ParticleModel.ToString() -> string!
+override Mocassin.Core.Model.Particles.ParticleSet.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Particles.ParticleSet.GetHashCode() -> int
+override Mocassin.Core.Model.Particles.ParticleSet.ToString() -> string!
+static Mocassin.Core.Model.Particles.Particle.Void.get -> Mocassin.Core.Model.Particles.Particle!
+static Mocassin.Core.Model.Particles.Particle.operator !=(Mocassin.Core.Model.Particles.Particle? left, Mocassin.Core.Model.Particles.Particle? right) -> bool
+static Mocassin.Core.Model.Particles.Particle.operator ==(Mocassin.Core.Model.Particles.Particle? left, Mocassin.Core.Model.Particles.Particle? right) -> bool
+static Mocassin.Core.Model.Particles.ParticleModel.operator !=(Mocassin.Core.Model.Particles.ParticleModel? left, Mocassin.Core.Model.Particles.ParticleModel? right) -> bool
+static Mocassin.Core.Model.Particles.ParticleModel.operator ==(Mocassin.Core.Model.Particles.ParticleModel? left, Mocassin.Core.Model.Particles.ParticleModel? right) -> bool
+static Mocassin.Core.Model.Particles.ParticleSet.Empty.get -> Mocassin.Core.Model.Particles.ParticleSet!
+static Mocassin.Core.Model.Particles.ParticleSet.operator !=(Mocassin.Core.Model.Particles.ParticleSet? left, Mocassin.Core.Model.Particles.ParticleSet? right) -> bool
+static Mocassin.Core.Model.Particles.ParticleSet.operator ==(Mocassin.Core.Model.Particles.ParticleSet? left, Mocassin.Core.Model.Particles.ParticleSet? right) -> bool

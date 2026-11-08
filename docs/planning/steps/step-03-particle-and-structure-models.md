@@ -7,19 +7,19 @@ validation and a stable public API.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
+- **Status:** In progress
+- **Step branch:** `step/03-particle-and-structure-models`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
 - **Design review:** [Ready with notes — accepted](../reviews/step-03.md)
-- **Feature list:** Approved 2026-11-08; step branch not created yet
+- **Feature list:** Approved 2026-11-08; step branch created
 - **Last updated:** 2026-11-08
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `particle-model` | `feature/step-03-particle-and-structure-models/particle-model` | Planned | — | — | — |
+| `particle-model` | `feature/step-03-particle-and-structure-models/particle-model` | Awaiting approval | `dotnet`, `structure`, `api` pass; Core tests 199/199 | — | — |
 | `structure-model` | `feature/step-03-particle-and-structure-models/structure-model` | Planned | — | — | — |
 | `model-envelope-and-contracts` | `feature/step-03-particle-and-structure-models/model-envelope-and-contracts` | Planned | — | — | — |
 | `structure-preview-and-benchmark` | `feature/step-03-particle-and-structure-models/structure-preview-and-benchmark` | Planned | — | — | — |
