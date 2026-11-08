@@ -39,6 +39,8 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
     solution and its mapping to new modules.
 15. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
 16. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
+17. [`drafts/`](drafts/) — non-normative design scratches and future-work notes; not part of the reviewed
+    plan and not an implementation authorization.
 
 ## Decisions already made
 
@@ -112,6 +114,13 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
   rustdoc into `/api/dotnet/` and `/api/rust/`, and the Python API is rendered by mkdocstrings at
   `/api/python/`. Step 00 creates the skeleton, every feature step writes its
   pages, Step 30 completes the site, and Step 31 packages it. `docs/planning/` is excluded from publication.
+
+## Drafts
+
+Exploratory design notes live in [`drafts/`](drafts/). They are deliberately non-normative: a draft may be
+incomplete, compare alternatives, or be parked. A draft becomes a decision only through an ADR, a step-page
+update, an amendment, or a reviewed design change. `docs/planning/` and its drafts are excluded from the
+published site.
 
 ## Status
 
