@@ -14,7 +14,7 @@
 | Step | 05 — Energy Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Ready with notes — awaiting human acceptance |
 | Reviewed commit | `6b8d78c` |
 | Docs branch | `main` |
 | Review date | 2026-11-09 |
@@ -273,25 +273,90 @@ failures.
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — approve the Step 05 start gate at `6b8d78c`
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [ ] Accepted notes and waivers recorded with rationale — pending explicit human acceptance of m14, m15,
+  n12, and process note n11; no waiver is requested
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — no Blocker or Major
+  remains; six Majors (M1–M6) are closed
+- [x] Final CI and documentation-build results recorded — design phase; strict docs, contracts, structure,
+  and contract/policy gates pass at `6b8d78c`; no step CI exists yet
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-09 | `fa45192` | Independent planning auditor (fresh context) | Changes required |
+| 2 | 2026-11-09 | `0000f3f` | Fresh independent planning auditor | Changes required |
+| 3 | 2026-11-09 | `6b8d78c` | Fresh independent planning auditor | Ready with notes |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M1 | Major | Energy sections not wired into canonical save/model/document hash | Extended `CanonicalizeModel`/`SerializeCanonicalModel`, added `ComputeEnergy`, omission rules | `0000f3f` | Closed |
+| M2 | Major | No Core/Symmetry validation ownership split | Split validators; `ProjectValidationService` composes; codes stay in Core | `0000f3f` | Closed |
+| M3 | Major | Chiral identity inconsistent across Steps 05/08/09 and contract | Shared `EnergyId`; per-direction `GeometryId`; Step 08/09/contract aligned; `PRM007` retired | `0000f3f` | Closed |
+| M4 | Major | Cost preview omitted center factor, used `int`, missed limits | Center factor, `long` counts, Burnside count, full limit table, diagnostics | `0000f3f` | Closed |
+| M5 | Major | Query/preview boundary not integrated | `IProjectQuery : IEnergyQuery`; `TryCreatePreview(..., out diagnostics)`; cache key | `0000f3f` | Closed |
+| m1 | Minor | Layout named nonexistent/unnecessary files | Corrected `ProjectJsonContext`, removed `ProjectSchema` change, added partials | `0000f3f` | Closed |
+| m2 | Minor | Contract lacked defaults/omission/filter ordering | Added defaults, omission, sort keys, filter semantics | `0000f3f` | Closed |
+| m3 | Minor | Manifest/fixture/version task incomplete | Added status/notes, named fixtures, vectors, ADR 0009 reconciliation | `0000f3f` | Closed |
+| m4 | Minor | Validation semantics ambiguous/divergent | Defined unstable cutoffs, 2..8 offsets, encoder dedup, ring, inclusive filters | `0000f3f` | Closed |
+| m5 | Minor | Documentation/status/parity/audit plan incomplete | Added non-goals, index/nav/status/parity/audit tasks | `0000f3f` | Closed |
+| m6 | Minor | Test plan lacked tiers/per-code/property cases | Added tiers, per-ENM, default/hash/order/overflow, benchmark | `0000f3f` | Closed |
+| m7 | Minor | SPDX/licensing task missing | Added SPDX/no-dependency task and criterion | `0000f3f` | Closed |
+| n1 | Note | ENM018 ownership implicit | Documented Step 05 constant/help anchor, Step 07 emission | `0000f3f` | Closed |
+| n2 | Note | Default cutoff warns on default cell | Suppressed ENM002/sampling warnings for empty model | `0000f3f` | Closed |
+| n3 | Note | Record parent process note | Acknowledged; round-1 text unchanged | `0000f3f` | Acknowledged |
+| M6 | Major | `GeometryId` omitted P1 position indices | Added `centerP`/`partnerP` to projection, preview, compiled contract | `6b8d78c` | Closed |
+| m8 | Minor | ENM007 contradicted stable/unstable centers | Corrected ENM007; only surroundings must be stable | `6b8d78c` | Closed |
+| m9 | Minor | Stale chiral mirroring/conflict requirements | Replaced with shared-`EnergyId`/linked-editing wording | `6b8d78c` | Closed in live design; recorded as m14 |
+| m10 | Minor | Step 07 statistics still `int` | Changed P1/stable/unstable/pair/cluster counts to `long` | `6b8d78c` | Closed |
+| m11 | Minor | No validation-deviation record | Added §7.1, including promoted and retained warnings | `6b8d78c` | Closed; omission recorded as m15 |
+| m12 | Minor | Docs linked to nonexistent pages / duplicated ENM catalog | Removed premature links; reference page defers ENM catalog to Step 07 | `6b8d78c` | Closed |
+| m13 | Minor | Diagnostics test tier conflicted with PR-fast definition | Split Core (PR-fast) and Symmetry (PR-medium) rows | `6b8d78c` | Closed |
+| n4 | Note | Generic §1 ordering rule over-broad | Qualified identifiable arrays and energy-specific keys | `6b8d78c` | Closed |
+| n5 | Note | Schema-generation wording inaccurate | Stated canonicalization applies to save/hash; schema comes from manifest | `6b8d78c` | Closed |
+| n6 | Note | Status dashboard stale at frozen commit | Request commit updates dashboard; process note | `6b8d78c` | Acknowledged |
+| n7 | Note | Bare `double` energy limits | Changed to `EnergyEv` `MinEnergy`/`MaxEnergy` | `6b8d78c` | Closed |
+| n8 | Note | Sampler invalid-input contract unspecified | `TrySamplePairs(..., out pairs, out diagnostics)`; false/empty on invalid | `6b8d78c` | Closed |
+| n9 | Note | ENM009/ENM011 overlap | Split duplicate-offset vs center-equivalent/full-geometry ownership | `6b8d78c` | Closed |
+| n10 | Note | P1PositionCount description ambiguous | Clarified §6 as P1-expanded positions | `6b8d78c` | Closed; naming note n12 remains |
+| m14 | Minor | Pre-seeded Step 05/09/26 audit checklists stale | Not yet fixed; update before those audits or accept | — | Open — acceptance required |
+| m15 | Minor | §7.1 omits ENM013 and misstates site-energy-range origin | Not yet fixed; small documentation correction or accept | — | Open — acceptance required |
+| n12 | Note | `P1PositionCount` naming ambiguous across Steps 05/07 | Not yet renamed/clarified; accept or request a follow-up | — | Open — acceptance required |
+| n11 | Note | Record parent process note | Acknowledged; record commit parent is `1eb29ef` | `76ae25f` | Acknowledged |
+
+Accepted notes and waivers:
+
+- **None accepted yet.** The human owner is asked to explicitly accept m14, m15, n12, and process note n11, or
+  request a small follow-up design commit. No waiver is requested.
+
+Residual risks, deferred items, and follow-up owners:
+
+- **m14:** the pre-seeded audit-request checklists in `docs/planning/audits/step-05.md`, `step-09.md`, and
+  `step-26.md` must be refreshed before their respective audits; owner: the Step 05/09/26 agents. This is a
+  planning-record consistency item, not an implementation blocker.
+- **m15:** §7.1 should add the promoted `ENM013` row and distinguish the new site-energy range check from the
+  original validator's warning behavior; owner: Planner / Step 05 agent.
+- **n12:** `EnergyCostPreview.P1PositionCount` counts stable reference-site P1 positions, while Step 07 uses
+  the same name for total P1 positions; rename to `StableP1PositionCount` or document the distinction; owner:
+  Planner / Step 05 agent.
+- **n11:** process note about the record parent; no action.
+- **Deferred to later steps:** compiled tables and indices (08), template binding (09), solver engine (15),
+  editors (25), consolidated diagnostics/troubleshooting pages and ENM018 emission (07).
+
+CI and documentation results at the frozen design `6b8d78c`:
+
+- `zensical build --strict` — pass, exit 0.
+- `python3 tools/contracts/generate.py --check` — pass, 17 artifacts current.
+- `./tools/verify.sh structure` — pass, 1/1.
+- `./tools/verify.sh contracts` — pass (catalog, SPDX, secret scan, advisories, licences, sources).
+- `git diff --check` — pass.
+- No step CI exists; this is the pre-implementation design gate.
 
 ## Human approval
 
