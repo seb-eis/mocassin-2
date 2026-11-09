@@ -7,6 +7,7 @@ using Mocassin.Core.Geometry;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
+using Mocassin.Core.Model.Transitions;
 
 namespace Mocassin.Core.Project;
 
@@ -93,14 +94,49 @@ public static class ProjectJson
         ArgumentNullException.ThrowIfNull(model);
         var particles = model.Particles.IsDefault ? [] : model.Particles;
         var particleSets = model.ParticleSets.IsDefault ? [] : model.ParticleSets;
+        var stateChanges = model.StateChanges.IsDefault ? [] : model.StateChanges;
+        var stateChangeGroups = model.StateChangeGroups.IsDefault ? [] : model.StateChangeGroups;
+        var chains = model.Chains.IsDefault ? [] : model.Chains;
+        var kineticTransitions = model.KineticTransitions.IsDefault ? [] : model.KineticTransitions;
+        var metropolisTransitions = model.MetropolisTransitions.IsDefault ? [] : model.MetropolisTransitions;
 
         return new ModelDefinition
         {
             Particles = [.. particles.OrderBy(static particle => particle.Id.Value)],
             ParticleSets = [.. particleSets.OrderBy(static particleSet => particleSet.Id.Value)],
             Structure = CanonicalizeStructure(model.Structure),
+            StateChanges = [.. stateChanges.OrderBy(static stateChange => stateChange.Id.Value)],
+            StateChangeGroups = [.. stateChangeGroups
+                .Select(NormalizeStateChangeGroup)
+                .OrderBy(static group => group.Id.Value)],
+            Chains = [.. chains
+                .Select(NormalizeChain)
+                .OrderBy(static chain => chain.Id.Value)],
+            KineticTransitions = [.. kineticTransitions
+                .Select(NormalizeKineticTransition)
+                .OrderBy(static transition => transition.Id.Value)],
+            MetropolisTransitions = [.. metropolisTransitions.OrderBy(static transition => transition.Id.Value)],
         };
     }
+
+    private static StateChangeGroup NormalizeStateChangeGroup(StateChangeGroup group) =>
+        group with
+        {
+            StateChangeIds = group.StateChangeIds.IsDefault ? [] : group.StateChangeIds,
+        };
+
+    private static TransitionChain NormalizeChain(TransitionChain chain) =>
+        chain with
+        {
+            GroupIds = chain.GroupIds.IsDefault ? [] : chain.GroupIds,
+            Linkers = chain.Linkers.IsDefault ? [] : chain.Linkers,
+        };
+
+    private static KineticTransition NormalizeKineticTransition(KineticTransition transition) =>
+        transition with
+        {
+            ReferencePath = transition.ReferencePath.IsDefault ? [] : transition.ReferencePath,
+        };
 
     internal static StructureModel CanonicalizeStructure(StructureModel structure)
     {
@@ -344,6 +380,22 @@ internal sealed class ProjectDto
 [JsonSerializable(typeof(CellDummyPosition))]
 [JsonSerializable(typeof(ImmutableArray<CellSite>))]
 [JsonSerializable(typeof(ImmutableArray<CellDummyPosition>))]
+[JsonSerializable(typeof(StateChange))]
+[JsonSerializable(typeof(StateChangeGroup))]
+[JsonSerializable(typeof(TransitionChain))]
+[JsonSerializable(typeof(KineticTransition))]
+[JsonSerializable(typeof(MetropolisTransition))]
+[JsonSerializable(typeof(TransitionPattern))]
+[JsonSerializable(typeof(TransitionLinker))]
+[JsonSerializable(typeof(TransitionKind))]
+[JsonSerializable(typeof(TransitionRef))]
+[JsonSerializable(typeof(ImmutableArray<StateChange>))]
+[JsonSerializable(typeof(ImmutableArray<StateChangeGroup>))]
+[JsonSerializable(typeof(ImmutableArray<TransitionChain>))]
+[JsonSerializable(typeof(ImmutableArray<KineticTransition>))]
+[JsonSerializable(typeof(ImmutableArray<MetropolisTransition>))]
+[JsonSerializable(typeof(ImmutableArray<TransitionLinker>))]
+[JsonSerializable(typeof(ImmutableArray<Fractional3>))]
 [JsonSerializable(typeof(Fractional3))]
 [JsonSerializable(typeof(ProjectMetadata))]
 [JsonSerializable(typeof(ParameterizationTemplate))]

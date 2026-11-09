@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
+using Mocassin.Core.Model.Transitions;
 
 namespace Mocassin.Core.Model;
 
@@ -11,9 +12,11 @@ namespace Mocassin.Core.Model;
 /// Root of the authored scientific model.
 /// </summary>
 /// <remarks>
-/// The model is flat on disk: <c>model.particles</c>, <c>model.particleSets</c>, and
-/// <c>model.structure</c>. Later steps add transition, energy, lattice, and simulation sections directly at
-/// the model root. <see cref="ParticleModel"/> is an in-memory grouping only and is not a persisted member.
+/// The model is flat on disk: <c>model.particles</c>, <c>model.particleSets</c>, <c>model.structure</c>,
+/// and the transition sections <c>stateChanges</c>, <c>stateChangeGroups</c>, <c>chains</c>,
+/// <c>kineticTransitions</c>, and <c>metropolisTransitions</c>. Later steps add energy, lattice, and simulation
+/// sections directly at the model root. <see cref="ParticleModel"/> is an in-memory grouping only and is not a
+/// persisted member.
 /// </remarks>
 [JsonConverter(typeof(ModelDefinitionJsonConverter))]
 public sealed record ModelDefinition
@@ -27,10 +30,15 @@ public sealed record ModelDefinition
         Particles = [];
         ParticleSets = [];
         Structure = StructureModel.Default;
+        StateChanges = [];
+        StateChangeGroups = [];
+        Chains = [];
+        KineticTransitions = [];
+        MetropolisTransitions = [];
     }
 
     /// <summary>
-    /// Gets the empty model with no particles or particle sets and the default structure.
+    /// Gets the empty model with no particles, particle sets, or transitions and the default structure.
     /// </summary>
     public static ModelDefinition Empty { get; } = new();
 
@@ -48,4 +56,29 @@ public sealed record ModelDefinition
     /// Gets the authored crystal structure.
     /// </summary>
     public StructureModel Structure { get; init; }
+
+    /// <summary>
+    /// Gets the authored state changes.
+    /// </summary>
+    public ImmutableArray<StateChange> StateChanges { get; init; }
+
+    /// <summary>
+    /// Gets the authored state-change groups.
+    /// </summary>
+    public ImmutableArray<StateChangeGroup> StateChangeGroups { get; init; }
+
+    /// <summary>
+    /// Gets the authored transition chains.
+    /// </summary>
+    public ImmutableArray<TransitionChain> Chains { get; init; }
+
+    /// <summary>
+    /// Gets the authored kinetic transitions.
+    /// </summary>
+    public ImmutableArray<KineticTransition> KineticTransitions { get; init; }
+
+    /// <summary>
+    /// Gets the authored Metropolis transitions.
+    /// </summary>
+    public ImmutableArray<MetropolisTransition> MetropolisTransitions { get; init; }
 }
