@@ -254,13 +254,13 @@ public sealed record PairInteractionPreview(
 public interface IEnergyPreviewService
 {
     EnergyCostPreview CreatePreview(
-        StructureModel structure,
+        ModelDefinition model,
         int cellCountA,
         int cellCountB,
         int cellCountC);
 
     ImmutableArray<PairInteractionPreview> CreatePairPreview(
-        StructureModel structure,
+        ModelDefinition model,
         int cellCountA,
         int cellCountB,
         int cellCountC);
@@ -268,7 +268,8 @@ public interface IEnergyPreviewService
 ```
 
 - `IEnergyQuery` is implemented by the immutable `Project` snapshot.
-- `IEnergyPreviewService` lives in `Mocassin.Symmetry`; Core never references Symmetry.
+- `IEnergyPreviewService` reads the structure and energy sections from `ModelDefinition` and lives in
+  `Mocassin.Symmetry`; Core never references Symmetry.
 - Derived pair interactions use stable geometry IDs and a preview-only `PairInteractionPreview`.
 - The preview is advisory; the compiled interaction tables are authoritative in Step 08.
 
