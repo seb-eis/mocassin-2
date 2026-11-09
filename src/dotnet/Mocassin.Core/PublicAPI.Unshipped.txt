@@ -1603,3 +1603,26 @@ static Mocassin.Core.Model.Energy.StableEnvironment.operator ==(Mocassin.Core.Mo
 static Mocassin.Core.Model.Energy.UnstableEnvironment.operator !=(Mocassin.Core.Model.Energy.UnstableEnvironment? left, Mocassin.Core.Model.Energy.UnstableEnvironment? right) -> bool
 static Mocassin.Core.Model.Energy.UnstableEnvironment.operator ==(Mocassin.Core.Model.Energy.UnstableEnvironment? left, Mocassin.Core.Model.Energy.UnstableEnvironment? right) -> bool
 static Mocassin.Core.Project.ProjectHasher.ComputeEnergy(Mocassin.Core.Model.ModelDefinition! model) -> string!
+Mocassin.Core.Diagnostics.EnergyDiagnosticCodes
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ClusterPermutationLimit = "ENM013" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ClusterPermutationWarning = "ENM012" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ClustersPerCenterLimit = "ENM021" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ClustersPerCenterWarning = "ENM020" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.DuplicateClusterGeometry = "ENM011" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.DuplicateClusterOffset = "ENM009" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.DuplicateFilter = "ENM005" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.EnvironmentSamplingLimit = "ENM019" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.EnvironmentSamplingWarning = "ENM017" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ForbiddenSiteEnergy = "ENM016" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidClusterCenter = "ENM007" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidClusterPosition = "ENM010" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidClusterSize = "ENM008" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidCutoff = "ENM001" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidFilterRange = "ENM003" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidFilterSites = "ENM004" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidSiteEnergy = "ENM014" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidUnstableEnvironment = "ENM006" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.KmcPathOutsideEnvironment = "ENM018" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.PeriodicAmbiguity = "ENM002" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.SiteEnergyOutOfRange = "ENM015" -> string!
+static Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.HelpFor(string! code) -> string?

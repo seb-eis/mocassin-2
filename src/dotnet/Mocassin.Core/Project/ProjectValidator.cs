@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
+using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -39,6 +40,7 @@ public static class ProjectValidator
         bag.AddRange(ParticleModelValidator.Validate(new ParticleModel(model.Particles, model.ParticleSets)));
         bag.AddRange(StructureModelValidator.Validate(model.Structure));
         bag.AddRange(TransitionModelValidator.Validate(model));
+        bag.AddRange(EnergyModelValidator.Validate(model));
     }
 
     private static void ValidateMetadata(Project project, DiagnosticBag bag)

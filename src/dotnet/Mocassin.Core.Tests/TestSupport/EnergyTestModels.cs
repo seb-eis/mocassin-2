@@ -64,7 +64,7 @@ internal static class EnergyTestModels
         new LengthAngstrom(3.0),
         new LengthAngstrom(6.0),
         OxygenSiteId,
-        OxygenSiteId);
+        EndpointSiteId);
 
     public static UnstableEnvironment UnstableEnvironment { get; } = new(
         UnstableSiteId,

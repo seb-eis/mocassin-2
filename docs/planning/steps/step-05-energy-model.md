@@ -20,7 +20,7 @@ with validation and cost previews.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | `energy-model-and-persistence` | `feature/step-05-energy-model/energy-model-and-persistence` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
-| `core-validation` | `feature/step-05-energy-model/core-validation` | Not started | — | — | — |
+| `core-validation` | `feature/step-05-energy-model/core-validation` | Awaiting approval | `verify.sh dotnet`, `structure` pass | — | — |
 | `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Not started | — | — | — |
 | `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Not started | — | — | — |
 | `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Not started | — | — | — |
@@ -593,7 +593,7 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
   `ChiralPartnerGeometryId`.
 - [ ] Implement chiral-pair detection and shared-energy linkage.
 - [ ] Implement `ProjectEditor.Energy.cs`, editor operations, and cascade invalidation.
-- [ ] Add the Core energy diagnostic codes and help text, including the `ENM018` constant/help anchor used by
+- [x] Add the Core energy diagnostic codes and help text, including the `ENM018` constant/help anchor used by
   Step 07.
 - [ ] Update `contracts/manifest.json`: set `status` to `step-05`, update `notes`, add the energy fields, add
   the `project-energy-minimal` and `project-energy-populated` fixtures, update the fixture/signature vectors,
