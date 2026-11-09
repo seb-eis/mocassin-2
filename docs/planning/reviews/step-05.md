@@ -1128,3 +1128,194 @@ The full design was reviewed at `6b8d78c` and returned `Ready with notes` (m14, 
 Reviewer: verify m14, m15, and n12 are resolved and that the delta introduces no unrelated design change or
 new contradiction. Keep all earlier round text unchanged and append your reviewer-authored round-4 content
 below.
+
+### Reviewer context
+
+I am a fresh planning auditor for round 4. I did not author or implement this design and have no shared
+conversation with the planner, the implementor, or the round-1/round-2/round-3 reviewers. This is the focused
+delta re-review requested above: I verified m14, m15, and n12 against the revised files and checked that the
+`6b8d78c..2f43a19` delta introduces no unrelated design change or new contradiction. I read `AGENTS.md`
+§3.8–§3.13, `docs/planning/reviews/README.md`, the complete request record, the Step 05 and Step 07 pages and the
+Step 05/09/26 audit records at `2f43a19`, the frozen Step 05/07 design at `6b8d78c`, `docs/planning/status.md`,
+and the original `StableEnvironmentInfoValidator`/`GroupInteractionValidator`/`MocassinEnergySettings` as
+read-only reference. I did not rely on the resolution text alone.
+
+**Frozen state.** Worktree `/workspace/mocassin`, branch `main`, `HEAD` `9484eec`; the worktree was clean before
+this record was written. The reviewed commit is `2f43a19`, and `git show --stat 2f43a19` shows only the five
+in-scope files. The round-4 request commit `9484eec` sits after it; `git diff 2f43a19..9484eec` changes only the
+review record, `status.md`, and the Step 05 page's one-line "Design review" status field, so the reviewed design
+content is unchanged (process note n13). The wider range `6b8d78c..2f43a19` also contains the round-3 record
+commit `76ae25f` and the approval-summary commit `c1d8109`; those are record/status commits, not design changes.
+
+### Round 4 checklist
+
+- [x] **m14 — Step 05 audit checklist refreshed to the revised acceptance criteria.** Every item now matches the
+  Step 05 page: stable-filter symmetry versus one-directional unstable filters with `SiteAId` = environment
+  site; inclusive 1e-5 Å boundaries; 2/8 offsets accepted and 1/9 rejected (`ENM008`); duplicate,
+  center-equivalent, unknown/unstable/filtered, ring/degenerate, and out-of-range clusters (`ENM009`–`ENM011`);
+  brute-force preview counts with the center factor, `long` limits, and the Step 08 cross-check deferred;
+  shared `EnergyId`/`ChiralPartnerGeometryId`; round-trip, default, omission, and semantic order;
+  `ComputeEnergy`; schema and fixtures; `ENM001`–`ENM021` coverage including the `ENM018` Step 07 boundary;
+  SPDX; PublicAPI/ApiCompat; docs/nav/status/parity.
+- [x] **m14 — Step 09 and Step 26 audit checklists use shared-`EnergyId`/linked-editing wording.** Both match the
+  live Step 09/26 requirements, and no mirroring or chiral-conflict requirement remains.
+- [x] **m15 — §7.1 adds `ENM003`, `ENM010`, and `ENM013`, clarifies the cluster-cutoff promotion, and corrects
+  the site-energy −100..100 eV origin.** The promoted/new "Type" column is present. One residual
+  classification inaccuracy is recorded as m16.
+- [x] **n12 — `StableP1PositionCount` rename.** §6 and `EnergyCostPreview` use the new name, and Step 07 now
+  states that `ModelStatistics.P1PositionCount` is the total (stable + unstable) count while the Step 05 field
+  is the stable subset. No stale `EnergyCostPreview.P1PositionCount` reference remains.
+- [x] **Delta scope.** The five in-scope files only; no unrelated design change beyond the review/status
+  metadata already in the range.
+- [x] **No new contradiction outside m16.** The m14/m15/n12 edits agree with the rule table, the Step 07
+  clarification, and the Step 09/26 wording.
+
+### Evidence
+
+**Commands run (from `/workspace/mocassin`):**
+
+```sh
+git status --short
+# (no output: clean worktree before this record was written)
+
+git log --oneline --decorate -6
+# 9484eec (HEAD -> main) docs: request step-05 focused round-4 re-review [skip ci]
+# 2f43a19 docs: resolve step-05 round-3 review notes [skip ci]
+# c1d8109 docs: record step-05 approval summary awaiting acceptance [skip ci]
+# 76ae25f docs: record step-05 design re-review Ready with notes [skip ci]
+# 1eb29ef docs: request step-05 round-3 design re-review [skip ci]
+# 6b8d78c docs: resolve step-05 round-2 review findings [skip ci]
+
+git show --stat 2f43a19
+# docs/planning/audits/step-05.md                    | 27 ++++++++++---
+# docs/planning/audits/step-09.md                    |  2 +-
+# docs/planning/audits/step-26.md                    |  2 +-
+# docs/planning/steps/step-05-energy-model.md        | 45 ++++++++++++++--------
+# .../steps/step-07-validation-and-diagnostics.md    |  3 ++
+# 5 files changed, 54 insertions(+), 25 deletions(-)
+
+git diff --stat 6b8d78c..2f43a19
+# docs/planning/audits/step-05.md                    |  27 +-
+# docs/planning/audits/step-09.md                    |   2 +-
+# docs/planning/audits/step-26.md                    |   2 +-
+# docs/planning/reviews/step-05.md                   | 464 ++++++++++++++++++++-
+# docs/planning/status.md                            |   8 +-
+# docs/planning/steps/step-05-energy-model.md        |  47 ++-
+# .../steps/step-07-validation-and-diagnostics.md    |   3 +
+# 7 files changed, 512 insertions(+), 41 deletions(-)
+
+git diff 6b8d78c..2f43a19 -- docs/planning
+# Reviewed in full. The record/status changes come from the intervening round-3 record and approval-summary
+# commits; the design delta is the five files named by `git show --stat 2f43a19`.
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.24s
+# exit 0
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+# exit 0
+
+git diff --check
+# (no output, exit 0)
+```
+
+**Read-only checks.**
+
+```sh
+git show 2f43a19:docs/planning/steps/step-05-energy-model.md | nl -ba | sed -n '283,352p'
+# ENM001–ENM021 rule table and §7.1: ENM003/ENM010/ENM013 rows present, the site-energy origin is corrected,
+# and the Type column distinguishes Promoted, Promoted + new, and New v1.
+
+git show 2f43a19:docs/planning/steps/step-05-energy-model.md | nl -ba | sed -n '237,244p;410,418p'
+# §6 and EnergyCostPreview use StableP1PositionCount; no P1PositionCount alias remains in Step 05.
+
+git show 2f43a19:docs/planning/steps/step-07-validation-and-diagnostics.md | nl -ba | sed -n '119,125p'
+# States that ModelStatistics.P1PositionCount is the total count and Step 05's field is the stable subset.
+
+git show 2f43a19:docs/planning/audits/step-05.md | nl -ba | sed -n '36,59p'
+# Refreshed Step 05 checklist; each item traceable to the page's acceptance criteria.
+
+git show 2f43a19:docs/planning/audits/step-09.md | nl -ba | sed -n '38,44p'
+git show 2f43a19:docs/planning/audits/step-26.md | nl -ba | sed -n '38,42p'
+# Shared-EnergyId/linked-editing wording matches Step 09 line 207 and Step 26 line 187.
+
+git show 2f43a19:docs/planning/steps/step-09-parameterization-templates.md | nl -ba | sed -n '74,76p;120p;183p;207p;230p'
+git show 2f43a19:docs/planning/steps/step-26-parameterization-job-templates-and-build-ui.md | nl -ba | sed -n '31p;60p;79p;187p'
+# Live step pages use one shared EnergyId/one value and linked editing; PRM007 is reserved, not emitted.
+
+grep -rn "P1PositionCount" docs/planning --include=*.md | grep -v reviews/step-05.md
+# docs/planning/steps/step-07...:107,122-123  (total field and the clarification)
+# docs/planning/steps/step-05...:242-243,414   (StableP1PositionCount only)
+
+grep -rn "consistent with step 08" docs/planning/steps/step-05-energy-model.md
+# (no output: the Step 05 closeout criterion is now a brute-force oracle; Step 08 is a follow-up)
+
+git diff 2f43a19..9484eec --stat
+# docs/planning/reviews/step-05.md            | 87 +++++++---
+# docs/planning/status.md                     |  6 +-
+# docs/planning/steps/step-05-energy-model.md |  2 +-
+# 3 files changed, 74 insertions(+), 21 deletions(-)   # record/status plus the one-line review-status field
+```
+
+**Original reference (read-only, `/workspace/mocassin-original`).**
+
+```sh
+nl -ba src/ModelBuilder/ICon.Model/Energies/Manager/Services/Validators/StableEnvironmentInfoValidator.cs | sed -n '28,105p;134,151p'
+# Filter-range violations are warnings; duplicate defect/site energies, void-on-stable, and NaN/Inf warn;
+# no −100..100 site-energy range check exists.
+
+nl -ba src/ModelBuilder/ICon.Model/Energies/Manager/Services/Validators/GroupInteractionValidator.cs | sed -n '40,135p'
+# Unknown/unsupported center, missing environment, atoms/permutations per group, duplicate geometry, and the
+# environment-range/geometry-validity checks are all warnings (ENM007–ENM010 and ENM013 promotions).
+
+grep -rn "MaxInteractionRange" src/ModelBuilder/ICon.Model --include=*.cs
+# A bare double with no validator rule, so ENM001 is a new v1 check rather than a promotion.
+```
+
+**Files reviewed.** `AGENTS.md` §3.8–§3.13 and §4–§12; `docs/planning/reviews/README.md`; the complete
+`docs/planning/reviews/step-05.md`; `docs/planning/steps/step-05-energy-model.md` at `2f43a19` and `6b8d78c`;
+`docs/planning/steps/step-07-validation-and-diagnostics.md` at `2f43a19` and `6b8d78c`;
+`docs/planning/audits/step-05.md`, `step-09.md`, and `step-26.md` at `2f43a19` and `6b8d78c`;
+`docs/planning/steps/step-09-parameterization-templates.md`; `docs/planning/steps/step-26-parameterization-
+job-templates-and-build-ui.md`; `docs/planning/status.md`; and the original validators/settings listed above.
+
+### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **m16 — §7.1's new promoted-vs-new classification is still internally inconsistent.** The new paragraph lists "duplicate site-energy entries (`ENM014`)" among the "new v1 checks without a direct original counterpart", but the ENM014 row itself records "Duplicate/void warnings" as the original behavior and the next sentence of the same paragraph says the original `StableEnvironmentInfoValidator` "warned on duplicates". The enumeration also reads as exhaustive while omitting `ENM001`, which is likewise a new v1 error because the original `MaxInteractionRange` is a bare double with no validator rule. In addition, the `ENM015` row is labelled `New v1` although its non-finite half was an original NaN/Inf warning. Correct the ENM014 wording to promoted (or "Promoted + new" for the unknown-reference part), label `ENM015` "Promoted + new", and make the new-check list exhaustive or state that it is illustrative. | Step 05 page lines 343–351; rule table lines 285 and 299; original `StableEnvironmentInfoValidator.cs` lines 139–150; `MocassinEnergySettings.cs` lines 70–71. |
+| **Note** | **n13 — Record parent and request-commit metadata.** `HEAD` is `9484eec`; the reviewed commit is `2f43a19`. `git diff 2f43a19..9484eec` touches the review record, `status.md`, and the Step 05 page's one-line "Design review" status field only. This record commit's parent is therefore `9484eec`, not the reviewed commit. Process note for the human owner, not a design finding. | Commands above. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
+verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
+the auditor's findings, evidence, or verdict.
+
+### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+**Verdict: Ready with notes.** m14 is resolved: the Step 05 audit checklist now matches the revised acceptance
+criteria, and the Step 09/26 checklists use the shared-`EnergyId`/linked-editing wording of their live step
+pages. m15 is resolved: §7.1 now carries `ENM003`, `ENM010`, and `ENM013` rows, a promoted/new "Type" column, a
+clarified cluster-cutoff promotion, and the corrected site-energy −100..100 eV origin (the original validator
+warned only on duplicates, void-on-stable, and NaN/Inf; the pair/group settings use the range). n12 is resolved
+by the `StableP1PositionCount` rename and the Step 07 total-vs-stable clarification. The delta contains no
+unrelated design change. One new Minor remains (m16): the promoted/new classification introduced by the m15 fix
+still mislabels duplicate site-energy entries as new, omits the new `ENM001` check from an apparently exhaustive
+list, and labels the mixed `ENM015` rule as `New v1` only. No Blocker or Major remains; m16 is a documentation
+accuracy issue in the deviations record and does not destabilize the energy model, persistence/hash path,
+validation split, cost preview, or cross-step `EnergyId` model. The human owner must explicitly accept m16 (or
+request a one-line follow-up correction) before the start gate.
+The strict documentation build, contract generation, and whitespace check all pass at `2f43a19`; the finding is
+not a tooling failure.
+
+Follow-up owner: Planner and Step 05 agent for m16
+Follow-up step: Step 05 — Energy Model; the human owner decides whether to accept m16 as a note or require a
+follow-up correction. n13 is a process note only.
