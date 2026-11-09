@@ -7,18 +7,26 @@ with validation and cost previews.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
+- **Status:** In progress
+- **Step branch:** `step/05-energy-model`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** [Ready for implementation — awaiting approval](../reviews/step-05.md)
+- **Design review:** [Ready for implementation — accepted at `0b2a571`](../reviews/step-05.md)
+- **Feature list:** Approved 2026-11-09
 - **Last updated:** 2026-11-09
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `energy-model-and-persistence` | `feature/step-05-energy-model/energy-model-and-persistence` | Not started | — | — | — |
+| `core-validation` | `feature/step-05-energy-model/core-validation` | Not started | — | — | — |
+| `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Not started | — | — | — |
+| `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Not started | — | — | — |
+| `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Not started | — | — | — |
+| `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Not started | — | — | — |
+| `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Not started | — | — | — |
+| `closeout` | `feature/step-05-energy-model/closeout` | Not started | — | — | — |
 
 ## Goal
 
