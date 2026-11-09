@@ -49,7 +49,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Done | `step/02-symmetry-and-geometry` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) | `dbf5691` | `step-02` | Passed with notes at `6341b56` | Ready with notes — accepted |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Done | `step/03-particle-and-structure-models` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/42521062856) | `162ebe4` | `step-03` | Passed with notes at `b6a97ec` | Ready with notes — accepted at `3096aa8` |
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Done | `step/04-transition-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) (closeout) | `31ba12d` | `step-04` | Passed with notes at `82c8cb4` | Ready for implementation — accepted at `a3d8641` |
-| 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Re-review required at `2f43a19` |
+| 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Re-review required at `0b2a571` |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -81,8 +81,9 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 Step 05 — Energy Model is in pre-implementation design review. Round 1 returned `Changes required` at
 `fa45192`; round 2 returned `Changes required` at `0000f3f`; round 3 returned `Ready with notes` at
-`6b8d78c`. The notes m14, m15, and n12 were fixed at `2f43a19`, and a focused round-4 re-review is pending.
-No step branch or implementation exists yet. Step 04 is complete: merge
+`6b8d78c`; round 4 returned `Ready with notes` at `2f43a19`; the m16 classification correction is at
+`0b2a571` and a focused round-5 re-review is pending. No step branch or implementation exists yet. Step 04 is
+complete: merge
 `31ba12d`, tag `step-04`, main CI `42697550846` green, audit `Passed with notes` at `82c8cb4`. Step 03 remains
 complete: merge `162ebe4`, tag `step-03`, main CI `42521062856` green, audit passed with notes at `b6a97ec`.
 

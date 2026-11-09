@@ -15,7 +15,7 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Re-review required |
-| Reviewed commit | `2f43a19` |
+| Reviewed commit | `0b2a571` |
 | Docs branch | `main` |
 | Review date | 2026-11-09 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
@@ -273,16 +273,16 @@ failures.
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [x] Requested decision and frozen commit recorded — approve the Step 05 start gate at `6b8d78c`
+- [x] Requested decision and frozen commit recorded — approve the Step 05 start gate at `0b2a571`
 - [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
 - [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale — m14, m15, and n12 were fixed at `2f43a19`; the
-  round-4 re-review is pending; n11 is a process note; no waiver is requested
+- [ ] Accepted notes and waivers recorded with rationale — m14, m15, and n12 were verified in round 4; m16 is
+  fixed at `0b2a571` and the round-5 re-review is pending; n11/n13 are process notes; no waiver is requested
 - [x] Residual risks, deferred items, and follow-up owners recorded
 - [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — no Blocker or Major
   remains; six Majors (M1–M6) are closed
 - [x] Final CI and documentation-build results recorded — design phase; strict docs, contracts, structure,
-  and contract/policy gates pass at `6b8d78c`; no step CI exists yet
+  and contract/policy gates pass at `0b2a571`; no step CI exists yet
 
 Round history:
 
@@ -291,6 +291,7 @@ Round history:
 | 1 | 2026-11-09 | `fa45192` | Independent planning auditor (fresh context) | Changes required |
 | 2 | 2026-11-09 | `0000f3f` | Fresh independent planning auditor | Changes required |
 | 3 | 2026-11-09 | `6b8d78c` | Fresh independent planning auditor | Ready with notes |
+| 4 | 2026-11-09 | `2f43a19` | Fresh independent planning auditor (focused delta) | Ready with notes |
 
 Findings and resolutions:
 
@@ -325,29 +326,32 @@ Findings and resolutions:
 | n8 | Note | Sampler invalid-input contract unspecified | `TrySamplePairs(..., out pairs, out diagnostics)`; false/empty on invalid | `6b8d78c` | Closed |
 | n9 | Note | ENM009/ENM011 overlap | Split duplicate-offset vs center-equivalent/full-geometry ownership | `6b8d78c` | Closed |
 | n10 | Note | P1PositionCount description ambiguous | Clarified §6 as P1-expanded positions | `6b8d78c` | Closed; naming note n12 remains |
-| m14 | Minor | Pre-seeded Step 05/09/26 audit checklists stale | Refreshed all three checklists to the revised acceptance criteria | `2f43a19` | Resolved — round-4 re-review pending |
-| m15 | Minor | §7.1 omits ENM013 and misstates site-energy-range origin | Added ENM003/ENM010/ENM013 rows; distinguished promoted warnings from new v1 checks and corrected the site-energy origin | `2f43a19` | Resolved — round-4 re-review pending |
-| n12 | Note | `P1PositionCount` naming ambiguous across Steps 05/07 | Renamed to `StableP1PositionCount`; Step 07 documents the total-vs-stable distinction | `2f43a19` | Resolved — round-4 re-review pending |
-| n11 | Note | Record parent process note | Acknowledged; record commit parent is `1eb29ef` | `76ae25f` | Acknowledged |
+| m14 | Minor | Pre-seeded Step 05/09/26 audit checklists stale | Refreshed all three checklists to the revised acceptance criteria | `2f43a19` | Closed — round 4 verified |
+| m15 | Minor | §7.1 omits ENM013 and misstates site-energy-range origin | Added ENM003/ENM010/ENM013 rows; distinguished promoted warnings from new v1 checks and corrected the site-energy origin | `2f43a19` | Closed — round 4 verified |
+| n12 | Note | `P1PositionCount` naming ambiguous across Steps 05/07 | Renamed to `StableP1PositionCount`; Step 07 documents the total-vs-stable distinction | `2f43a19` | Closed — round 4 verified |
+| m16 | Minor | §7.1 promoted-vs-new classification internally inconsistent | Split ENM014/ENM015 rows, added ENM001/ENM002, made the new-check list explicitly illustrative | `0b2a571` | Resolved — round-5 re-review pending |
+| n11 | Note | Record parent process note | Acknowledged; round-3 record commit parent is `1eb29ef` | `76ae25f` | Acknowledged |
+| n13 | Note | Record parent process note | Acknowledged; round-4 record commit parent is `9484eec` | `e57bbf3` | Acknowledged |
 
 Accepted notes and waivers:
 
-- **m14, m15, n12:** fixed in the `2f43a19` follow-up design commit; the focused round-4 re-review verifies
-  the fixes. No waiver is requested.
-- **n11:** process note only; no action.
+- **m14, m15, n12:** fixed at `2f43a19` and verified in round 4. No waiver is requested.
+- **m16:** fixed at `0b2a571`; the focused round-5 re-review verifies the correction. No waiver is requested.
+- **n11, n13:** process notes only; no action.
 
 Residual risks, deferred items, and follow-up owners:
 
 - **m14:** resolved by refreshing the pre-seeded audit-request checklists in `docs/planning/audits/step-05.md`,
   `step-09.md`, and `step-26.md`. The Step 05/09/26 agents must still keep them current at audit freeze.
-- **m15:** resolved by the corrected §7.1 table; no further action.
+- **m15:** resolved by the corrected §7.1 table and verified in round 4; no further action.
 - **n12:** resolved by renaming to `StableP1PositionCount` and documenting the Step 07 total-vs-stable
   distinction; no further action.
-- **n11:** process note about the record parent; no action.
+- **m16:** resolved by the §7.1 classification split at `0b2a571`; the round-5 review verifies it.
+- **n11, n13:** process notes about the record parent; no action.
 - **Deferred to later steps:** compiled tables and indices (08), template binding (09), solver engine (15),
   editors (25), consolidated diagnostics/troubleshooting pages and ENM018 emission (07).
 
-CI and documentation results at the frozen design `6b8d78c`:
+CI and documentation results at the frozen design `0b2a571`:
 
 - `zensical build --strict` — pass, exit 0.
 - `python3 tools/contracts/generate.py --check` — pass, 17 artifacts current.
@@ -1319,3 +1323,45 @@ not a tooling failure.
 Follow-up owner: Planner and Step 05 agent for m16
 Follow-up step: Step 05 — Energy Model; the human owner decides whether to accept m16 as a note or require a
 follow-up correction. n13 is a process note only.
+
+## Round 4 resolution status
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| m16 | Resolved — awaiting focused re-review | Planner / Step 05 agent | `0b2a571` |
+| n13 | Acknowledged — awaiting focused re-review | Planner / Step 05 agent | `0b2a571` |
+
+Resolution summary (design content at `0b2a571`):
+
+- **m16.** Split the `ENM014` row into promoted duplicate/void cases and the new unknown-reference check,
+  split the `ENM015` row into promoted non-finite and new range checks, added `ENM001` and `ENM002` rows, and
+  made the new-check paragraph explicitly illustrative rather than exhaustive. Duplicate site-energy entries
+  are now correctly labelled as promoted, not new.
+- **n13.** Process note only; no design change. The round-5 record parent will be the request commit, not the
+  frozen design commit.
+
+## Re-review round 5 (focused)
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Step | 05 — Energy Model |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `0b2a571` |
+| Docs branch | `main` |
+| Review date | 2026-11-09 |
+| Reviewer | Fresh independent planning auditor (round 5, focused §7.1 correction; no shared conversation with the planner or implementor) |
+
+Step page: [`Step 05 — Energy Model`](../steps/step-05-energy-model.md)
+
+This is a focused re-review of the m16 correction only. The full design at `6b8d78c` and the round-3 fixes at
+`2f43a19` were already reviewed. The delta is `git diff 2f43a19..0b2a571 -- docs/planning`, and it changes only
+§7.1 of the Step 05 page.
+
+Reviewer: verify that m16 is resolved — the `ENM014`/`ENM015` promoted-vs-new split, the added `ENM001`/
+`ENM002` rows, and the explicitly illustrative new-check list — and that the delta introduces no unrelated
+change or new contradiction. Keep all earlier round text unchanged and append your reviewer-authored round-5
+content below.
