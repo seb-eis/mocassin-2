@@ -7,11 +7,11 @@ geometry, with validation of transition semantics.
 
 ## Implementation status
 
-- **Status:** In progress — audit passed with notes, awaiting merge approval
+- **Status:** Done
 - **Step branch:** `step/04-transition-model`
 - **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) — replacement closeout, Ubuntu
-- **Main merge:** —
-- **Step tag:** —
+- **Main merge:** `31ba12d`
+- **Step tag:** `step-04`
 - **Audit:** Passed with notes at `82c8cb4` (code frozen at `8c44709`)
 - **Design review:** [Ready for implementation — accepted at `a3d8641`](../reviews/step-04.md)
 - **Last updated:** 2026-11-09

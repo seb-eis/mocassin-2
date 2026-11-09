@@ -48,7 +48,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Done | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) (main: Ubuntu + Windows + macOS) | `7b4a994` | `step-01` | Passed with notes at `05c41ab` | Waived — introduced after completion |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Done | `step/02-symmetry-and-geometry` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) | `dbf5691` | `step-02` | Passed with notes at `6341b56` | Ready with notes — accepted |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Done | `step/03-particle-and-structure-models` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/42521062856) | `162ebe4` | `step-03` | Passed with notes at `b6a97ec` | Ready with notes — accepted at `3096aa8` |
-| 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | In progress | `step/04-transition-model` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) (Ubuntu closeout) | — | — | Passed with notes at `82c8cb4` | Ready for implementation — accepted at `a3d8641` |
+| 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Done | `step/04-transition-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) (closeout) | `31ba12d` | `step-04` | Passed with notes at `82c8cb4` | Ready for implementation — accepted at `a3d8641` |
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -79,12 +79,13 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 ## Active work
 
-Step 04 — Transition Model is implemented on `step/04-transition-model`. The human owner approved the start
-gate on 2026-11-08 and all nine feature branches on 2026-11-09. The step now contains the transition envelope,
+Step 04 — Transition Model is complete. The human owner approved the start gate on 2026-11-08, all nine
+feature branches on 2026-11-09, and the final merge on 2026-11-09. The step contains the transition envelope,
 persistence, definition and resolved-path validation, queries and editing, preview service and benchmark,
-contract schema/fixtures, samples, and user/reference documentation. `./tools/verify.sh all` passed locally and
-the single Ubuntu closeout CI run `42690361556` is green at `288dd37`. Round 1 of the independent audit passed with notes at
-`b2382b3`; F1–F4/N1/N4 were fixed at `ebefc96`; round 2 recorded F5–F7/N5, fixed at `8c44709`; round 3 passed with only N2/N3/N6/N7 notes remaining. The branch awaits human acceptance and merge approval. No step-to-main merge or tag has been requested. Step 03 remains complete: merge `162ebe4`, tag
+contract schema/fixtures, samples, and user/reference documentation. `./tools/verify.sh all` passed locally;
+closeout CI `42695864895` is green at `8c44709`; three independent audit rounds ended `Passed with notes` with
+only notes N2/N3/N6/N7 remaining. The step was merged into `main` as `31ba12d`, main CI `42697550846` is green,
+and the annotated `step-04` tag is pushed. Step 05 is the next unblocked step. Step 03 remains complete: merge `162ebe4`, tag
 `step-03`, main CI `42521062856` green, audit passed with notes at `b6a97ec`.
 
 ## Notes
