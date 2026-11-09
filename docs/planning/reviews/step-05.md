@@ -14,7 +14,7 @@
 | Step | 05 — Energy Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Ready for implementation — awaiting human approval |
+| Design review status | Ready for implementation — accepted |
 | Reviewed commit | `0b2a571` |
 | Docs branch | `main` |
 | Review date | 2026-11-09 |
@@ -364,13 +364,13 @@ CI and documentation results at the frozen design `0b2a571`:
 
 ## Human approval
 
-- [ ] Accepted: Ready for implementation
+- [x] Accepted: Ready for implementation
 - [ ] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (conversation approval)
+Date: 2026-11-09
 
 ## Resolution status
 
