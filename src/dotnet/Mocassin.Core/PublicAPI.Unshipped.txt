@@ -1239,3 +1239,250 @@ Mocassin.Core.Project.Project.Particles.get -> System.Collections.Immutable.Immu
 Mocassin.Core.Project.Project.Structure.get -> Mocassin.Core.Model.Structure.StructureModel!
 Mocassin.Core.Project.Project.VoidParticle.get -> Mocassin.Core.Model.Particles.Particle!
 const Mocassin.Core.Diagnostics.ParticleDiagnosticCodes.ChargedVacancy = "PAR004" -> string!
+Mocassin.Core.Model.ModelDefinition.Chains.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.TransitionChain!>
+Mocassin.Core.Model.ModelDefinition.Chains.init -> void
+Mocassin.Core.Model.ModelDefinition.KineticTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.KineticTransition!>
+Mocassin.Core.Model.ModelDefinition.KineticTransitions.init -> void
+Mocassin.Core.Model.ModelDefinition.MetropolisTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.MetropolisTransition!>
+Mocassin.Core.Model.ModelDefinition.MetropolisTransitions.init -> void
+Mocassin.Core.Model.ModelDefinition.StateChangeGroups.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChangeGroup!>
+Mocassin.Core.Model.ModelDefinition.StateChangeGroups.init -> void
+Mocassin.Core.Model.ModelDefinition.StateChanges.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChange!>
+Mocassin.Core.Model.ModelDefinition.StateChanges.init -> void
+Mocassin.Core.Model.Transitions.KineticTransition
+Mocassin.Core.Model.Transitions.KineticTransition.<Clone>$() -> Mocassin.Core.Model.Transitions.KineticTransition!
+Mocassin.Core.Model.Transitions.KineticTransition.ChainId.get -> Mocassin.Core.Ids.TransitionChainId
+Mocassin.Core.Model.Transitions.KineticTransition.ChainId.init -> void
+Mocassin.Core.Model.Transitions.KineticTransition.Deconstruct(out Mocassin.Core.Ids.KineticTransitionId Id, out string! Name, out Mocassin.Core.Ids.TransitionChainId ChainId, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> ReferencePath, out Mocassin.Core.Ids.KineticTransitionId? ReverseTransitionId) -> void
+Mocassin.Core.Model.Transitions.KineticTransition.Equals(Mocassin.Core.Model.Transitions.KineticTransition? other) -> bool
+Mocassin.Core.Model.Transitions.KineticTransition.Id.get -> Mocassin.Core.Ids.KineticTransitionId
+Mocassin.Core.Model.Transitions.KineticTransition.Id.init -> void
+Mocassin.Core.Model.Transitions.KineticTransition.KineticTransition(Mocassin.Core.Ids.KineticTransitionId Id, string! Name, Mocassin.Core.Ids.TransitionChainId ChainId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> ReferencePath, Mocassin.Core.Ids.KineticTransitionId? ReverseTransitionId) -> void
+Mocassin.Core.Model.Transitions.KineticTransition.Name.get -> string!
+Mocassin.Core.Model.Transitions.KineticTransition.Name.init -> void
+Mocassin.Core.Model.Transitions.KineticTransition.ReferencePath.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+Mocassin.Core.Model.Transitions.KineticTransition.ReferencePath.init -> void
+Mocassin.Core.Model.Transitions.KineticTransition.ReverseTransitionId.get -> Mocassin.Core.Ids.KineticTransitionId?
+Mocassin.Core.Model.Transitions.KineticTransition.ReverseTransitionId.init -> void
+Mocassin.Core.Model.Transitions.MetropolisTransition
+Mocassin.Core.Model.Transitions.MetropolisTransition.<Clone>$() -> Mocassin.Core.Model.Transitions.MetropolisTransition!
+Mocassin.Core.Model.Transitions.MetropolisTransition.ChainId.get -> Mocassin.Core.Ids.TransitionChainId
+Mocassin.Core.Model.Transitions.MetropolisTransition.ChainId.init -> void
+Mocassin.Core.Model.Transitions.MetropolisTransition.Deconstruct(out Mocassin.Core.Ids.MetropolisTransitionId Id, out string! Name, out Mocassin.Core.Ids.TransitionChainId ChainId, out Mocassin.Core.Ids.CellSiteId SiteAId, out Mocassin.Core.Ids.CellSiteId SiteBId, out Mocassin.Core.Ids.MetropolisTransitionId? ReverseTransitionId) -> void
+Mocassin.Core.Model.Transitions.MetropolisTransition.Equals(Mocassin.Core.Model.Transitions.MetropolisTransition? other) -> bool
+Mocassin.Core.Model.Transitions.MetropolisTransition.Id.get -> Mocassin.Core.Ids.MetropolisTransitionId
+Mocassin.Core.Model.Transitions.MetropolisTransition.Id.init -> void
+Mocassin.Core.Model.Transitions.MetropolisTransition.MetropolisTransition(Mocassin.Core.Ids.MetropolisTransitionId Id, string! Name, Mocassin.Core.Ids.TransitionChainId ChainId, Mocassin.Core.Ids.CellSiteId SiteAId, Mocassin.Core.Ids.CellSiteId SiteBId, Mocassin.Core.Ids.MetropolisTransitionId? ReverseTransitionId) -> void
+Mocassin.Core.Model.Transitions.MetropolisTransition.Name.get -> string!
+Mocassin.Core.Model.Transitions.MetropolisTransition.Name.init -> void
+Mocassin.Core.Model.Transitions.MetropolisTransition.ReverseTransitionId.get -> Mocassin.Core.Ids.MetropolisTransitionId?
+Mocassin.Core.Model.Transitions.MetropolisTransition.ReverseTransitionId.init -> void
+Mocassin.Core.Model.Transitions.MetropolisTransition.SiteAId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Transitions.MetropolisTransition.SiteAId.init -> void
+Mocassin.Core.Model.Transitions.MetropolisTransition.SiteBId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Transitions.MetropolisTransition.SiteBId.init -> void
+Mocassin.Core.Model.Transitions.StateChange
+Mocassin.Core.Model.Transitions.StateChange.<Clone>$() -> Mocassin.Core.Model.Transitions.StateChange!
+Mocassin.Core.Model.Transitions.StateChange.AcceptorParticleId.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Core.Model.Transitions.StateChange.AcceptorParticleId.init -> void
+Mocassin.Core.Model.Transitions.StateChange.Deconstruct(out Mocassin.Core.Ids.StateChangeId Id, out string! Name, out Mocassin.Core.Ids.ParticleId DonorParticleId, out Mocassin.Core.Ids.ParticleId AcceptorParticleId) -> void
+Mocassin.Core.Model.Transitions.StateChange.DonorParticleId.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Core.Model.Transitions.StateChange.DonorParticleId.init -> void
+Mocassin.Core.Model.Transitions.StateChange.Equals(Mocassin.Core.Model.Transitions.StateChange? other) -> bool
+Mocassin.Core.Model.Transitions.StateChange.Id.get -> Mocassin.Core.Ids.StateChangeId
+Mocassin.Core.Model.Transitions.StateChange.Id.init -> void
+Mocassin.Core.Model.Transitions.StateChange.Name.get -> string!
+Mocassin.Core.Model.Transitions.StateChange.Name.init -> void
+Mocassin.Core.Model.Transitions.StateChange.StateChange(Mocassin.Core.Ids.StateChangeId Id, string! Name, Mocassin.Core.Ids.ParticleId DonorParticleId, Mocassin.Core.Ids.ParticleId AcceptorParticleId) -> void
+Mocassin.Core.Model.Transitions.StateChangeGroup
+Mocassin.Core.Model.Transitions.StateChangeGroup.<Clone>$() -> Mocassin.Core.Model.Transitions.StateChangeGroup!
+Mocassin.Core.Model.Transitions.StateChangeGroup.Deconstruct(out Mocassin.Core.Ids.StateChangeGroupId Id, out string! Name, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.StateChangeId> StateChangeIds) -> void
+Mocassin.Core.Model.Transitions.StateChangeGroup.Equals(Mocassin.Core.Model.Transitions.StateChangeGroup? other) -> bool
+Mocassin.Core.Model.Transitions.StateChangeGroup.Id.get -> Mocassin.Core.Ids.StateChangeGroupId
+Mocassin.Core.Model.Transitions.StateChangeGroup.Id.init -> void
+Mocassin.Core.Model.Transitions.StateChangeGroup.Name.get -> string!
+Mocassin.Core.Model.Transitions.StateChangeGroup.Name.init -> void
+Mocassin.Core.Model.Transitions.StateChangeGroup.StateChangeGroup(Mocassin.Core.Ids.StateChangeGroupId Id, string! Name, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.StateChangeId> StateChangeIds) -> void
+Mocassin.Core.Model.Transitions.StateChangeGroup.StateChangeIds.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.StateChangeId>
+Mocassin.Core.Model.Transitions.StateChangeGroup.StateChangeIds.init -> void
+Mocassin.Core.Model.Transitions.TransitionChain
+Mocassin.Core.Model.Transitions.TransitionChain.<Clone>$() -> Mocassin.Core.Model.Transitions.TransitionChain!
+Mocassin.Core.Model.Transitions.TransitionChain.Deconstruct(out Mocassin.Core.Ids.TransitionChainId Id, out string! Name, out Mocassin.Core.Model.Transitions.TransitionPattern Pattern, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.StateChangeGroupId> GroupIds, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.TransitionLinker> Linkers, out bool GeneratesReverse) -> void
+Mocassin.Core.Model.Transitions.TransitionChain.Equals(Mocassin.Core.Model.Transitions.TransitionChain? other) -> bool
+Mocassin.Core.Model.Transitions.TransitionChain.GeneratesReverse.get -> bool
+Mocassin.Core.Model.Transitions.TransitionChain.GeneratesReverse.init -> void
+Mocassin.Core.Model.Transitions.TransitionChain.GroupIds.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.StateChangeGroupId>
+Mocassin.Core.Model.Transitions.TransitionChain.GroupIds.init -> void
+Mocassin.Core.Model.Transitions.TransitionChain.Id.get -> Mocassin.Core.Ids.TransitionChainId
+Mocassin.Core.Model.Transitions.TransitionChain.Id.init -> void
+Mocassin.Core.Model.Transitions.TransitionChain.Linkers.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.TransitionLinker>
+Mocassin.Core.Model.Transitions.TransitionChain.Linkers.init -> void
+Mocassin.Core.Model.Transitions.TransitionChain.Name.get -> string!
+Mocassin.Core.Model.Transitions.TransitionChain.Name.init -> void
+Mocassin.Core.Model.Transitions.TransitionChain.Pattern.get -> Mocassin.Core.Model.Transitions.TransitionPattern
+Mocassin.Core.Model.Transitions.TransitionChain.Pattern.init -> void
+Mocassin.Core.Model.Transitions.TransitionChain.TransitionChain(Mocassin.Core.Ids.TransitionChainId Id, string! Name, Mocassin.Core.Model.Transitions.TransitionPattern Pattern, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.StateChangeGroupId> GroupIds, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.TransitionLinker> Linkers, bool GeneratesReverse) -> void
+Mocassin.Core.Model.Transitions.TransitionKind
+Mocassin.Core.Model.Transitions.TransitionKind.Kinetic = 0 -> Mocassin.Core.Model.Transitions.TransitionKind
+Mocassin.Core.Model.Transitions.TransitionKind.Metropolis = 1 -> Mocassin.Core.Model.Transitions.TransitionKind
+Mocassin.Core.Model.Transitions.TransitionLinker
+Mocassin.Core.Model.Transitions.TransitionLinker.Dynamic = 0 -> Mocassin.Core.Model.Transitions.TransitionLinker
+Mocassin.Core.Model.Transitions.TransitionLinker.Static = 1 -> Mocassin.Core.Model.Transitions.TransitionLinker
+Mocassin.Core.Model.Transitions.TransitionPattern
+Mocassin.Core.Model.Transitions.TransitionPattern.Custom = 6 -> Mocassin.Core.Model.Transitions.TransitionPattern
+Mocassin.Core.Model.Transitions.TransitionPattern.Interstitialcy5 = 2 -> Mocassin.Core.Model.Transitions.TransitionPattern
+Mocassin.Core.Model.Transitions.TransitionPattern.Interstitialcy7 = 3 -> Mocassin.Core.Model.Transitions.TransitionPattern
+Mocassin.Core.Model.Transitions.TransitionPattern.Metropolis2 = 0 -> Mocassin.Core.Model.Transitions.TransitionPattern
+Mocassin.Core.Model.Transitions.TransitionPattern.Migration3 = 1 -> Mocassin.Core.Model.Transitions.TransitionPattern
+Mocassin.Core.Model.Transitions.TransitionPattern.Vehicle5 = 4 -> Mocassin.Core.Model.Transitions.TransitionPattern
+Mocassin.Core.Model.Transitions.TransitionPattern.Vehicle6 = 5 -> Mocassin.Core.Model.Transitions.TransitionPattern
+Mocassin.Core.Model.Transitions.TransitionRef
+Mocassin.Core.Model.Transitions.TransitionRef.Deconstruct(out Mocassin.Core.Model.Transitions.TransitionKind Kind, out System.Guid Id) -> void
+Mocassin.Core.Model.Transitions.TransitionRef.Equals(Mocassin.Core.Model.Transitions.TransitionRef other) -> bool
+Mocassin.Core.Model.Transitions.TransitionRef.Id.get -> System.Guid
+Mocassin.Core.Model.Transitions.TransitionRef.Id.init -> void
+Mocassin.Core.Model.Transitions.TransitionRef.IsKinetic.get -> bool
+Mocassin.Core.Model.Transitions.TransitionRef.Kind.get -> Mocassin.Core.Model.Transitions.TransitionKind
+Mocassin.Core.Model.Transitions.TransitionRef.Kind.init -> void
+Mocassin.Core.Model.Transitions.TransitionRef.TransitionRef() -> void
+Mocassin.Core.Model.Transitions.TransitionRef.TransitionRef(Mocassin.Core.Model.Transitions.TransitionKind Kind, System.Guid Id) -> void
+Mocassin.Core.Model.Transitions.TransitionRefJsonConverter
+Mocassin.Core.Model.Transitions.TransitionRefJsonConverter.TransitionRefJsonConverter() -> void
+override Mocassin.Core.Model.Transitions.KineticTransition.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Transitions.KineticTransition.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.KineticTransition.ToString() -> string!
+override Mocassin.Core.Model.Transitions.MetropolisTransition.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Transitions.MetropolisTransition.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.MetropolisTransition.ToString() -> string!
+override Mocassin.Core.Model.Transitions.StateChange.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Transitions.StateChange.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.StateChange.ToString() -> string!
+override Mocassin.Core.Model.Transitions.StateChangeGroup.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Transitions.StateChangeGroup.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.StateChangeGroup.ToString() -> string!
+override Mocassin.Core.Model.Transitions.TransitionChain.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Transitions.TransitionChain.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.TransitionChain.ToString() -> string!
+override Mocassin.Core.Model.Transitions.TransitionRef.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.TransitionRefJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.Transitions.TransitionRef
+override Mocassin.Core.Model.Transitions.TransitionRefJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.Transitions.TransitionRef value, System.Text.Json.JsonSerializerOptions! options) -> void
+static Mocassin.Core.Model.Transitions.KineticTransition.operator !=(Mocassin.Core.Model.Transitions.KineticTransition? left, Mocassin.Core.Model.Transitions.KineticTransition? right) -> bool
+static Mocassin.Core.Model.Transitions.KineticTransition.operator ==(Mocassin.Core.Model.Transitions.KineticTransition? left, Mocassin.Core.Model.Transitions.KineticTransition? right) -> bool
+static Mocassin.Core.Model.Transitions.MetropolisTransition.operator !=(Mocassin.Core.Model.Transitions.MetropolisTransition? left, Mocassin.Core.Model.Transitions.MetropolisTransition? right) -> bool
+static Mocassin.Core.Model.Transitions.MetropolisTransition.operator ==(Mocassin.Core.Model.Transitions.MetropolisTransition? left, Mocassin.Core.Model.Transitions.MetropolisTransition? right) -> bool
+static Mocassin.Core.Model.Transitions.StateChange.operator !=(Mocassin.Core.Model.Transitions.StateChange? left, Mocassin.Core.Model.Transitions.StateChange? right) -> bool
+static Mocassin.Core.Model.Transitions.StateChange.operator ==(Mocassin.Core.Model.Transitions.StateChange? left, Mocassin.Core.Model.Transitions.StateChange? right) -> bool
+static Mocassin.Core.Model.Transitions.StateChangeGroup.operator !=(Mocassin.Core.Model.Transitions.StateChangeGroup? left, Mocassin.Core.Model.Transitions.StateChangeGroup? right) -> bool
+static Mocassin.Core.Model.Transitions.StateChangeGroup.operator ==(Mocassin.Core.Model.Transitions.StateChangeGroup? left, Mocassin.Core.Model.Transitions.StateChangeGroup? right) -> bool
+static Mocassin.Core.Model.Transitions.TransitionChain.operator !=(Mocassin.Core.Model.Transitions.TransitionChain? left, Mocassin.Core.Model.Transitions.TransitionChain? right) -> bool
+static Mocassin.Core.Model.Transitions.TransitionChain.operator ==(Mocassin.Core.Model.Transitions.TransitionChain? left, Mocassin.Core.Model.Transitions.TransitionChain? right) -> bool
+static Mocassin.Core.Model.Transitions.TransitionRef.From(Mocassin.Core.Ids.KineticTransitionId id) -> Mocassin.Core.Model.Transitions.TransitionRef
+static Mocassin.Core.Model.Transitions.TransitionRef.From(Mocassin.Core.Ids.MetropolisTransitionId id) -> Mocassin.Core.Model.Transitions.TransitionRef
+static Mocassin.Core.Model.Transitions.TransitionRef.operator !=(Mocassin.Core.Model.Transitions.TransitionRef left, Mocassin.Core.Model.Transitions.TransitionRef right) -> bool
+static Mocassin.Core.Model.Transitions.TransitionRef.operator ==(Mocassin.Core.Model.Transitions.TransitionRef left, Mocassin.Core.Model.Transitions.TransitionRef right) -> bool
+~override Mocassin.Core.Model.Transitions.TransitionRef.Equals(object obj) -> bool
+~override Mocassin.Core.Model.Transitions.TransitionRef.ToString() -> string
+Mocassin.Core.Diagnostics.TransitionDiagnosticCodes
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.BothParticlesVoid = "TRN003" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.ChargedAcceptorFromVoid = "TRN004" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.ConsecutiveUnstablePositions = "TRN013" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.DonorEqualsAcceptor = "TRN002" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.DuplicateName = "TRN017" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.GeneratesReverseMismatch = "TRN024" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.GroupLinkerCountMismatch = "TRN007" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.GroupStabilityMismatch = "TRN012" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidGroup = "TRN005" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidLinkerSequence = "TRN009" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidMetropolisChain = "TRN015" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidMetropolisSite = "TRN016" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidPatternPositionCount = "TRN008" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidReverseLink = "TRN027" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidUnstablePositionGroup = "TRN026" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.KineticChainWithoutUnstablePosition = "TRN022" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.KineticTransitionUsesMetropolisChain = "TRN023" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.MissingReverseLink = "TRN018" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.MixedGroupExchange = "TRN006" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.MixedGroupStability = "TRN025" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.PathLengthMismatch = "TRN010" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.PathStabilityMismatch = "TRN028" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.RepeatedPathPosition = "TRN014" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.TransitionLimitExceeded = "TRN019" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnknownChainGroup = "TRN021" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnknownParticle = "TRN001" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnmatchedPathPosition = "TRN020" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnstablePathEndpoint = "TRN011" -> string!
+Mocassin.Core.Model.Transitions.ResolvedPathPosition
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.<Clone>$() -> Mocassin.Core.Model.Transitions.ResolvedPathPosition!
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.CanonicalPosition.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.CanonicalPosition.init -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Deconstruct(out Mocassin.Core.Ids.CellSiteId SiteId, out int P, out Mocassin.Core.Geometry.Vector4I Encoding, out Mocassin.Core.Model.Structure.SiteStability Stability, out Mocassin.Core.Geometry.Fractional3 CanonicalPosition) -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Encoding.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Encoding.init -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Equals(Mocassin.Core.Model.Transitions.ResolvedPathPosition? other) -> bool
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.P.get -> int
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.P.init -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.ResolvedPathPosition(Mocassin.Core.Ids.CellSiteId SiteId, int P, Mocassin.Core.Geometry.Vector4I Encoding, Mocassin.Core.Model.Structure.SiteStability Stability, Mocassin.Core.Geometry.Fractional3 CanonicalPosition) -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.SiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.SiteId.init -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Stability.get -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Stability.init -> void
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.<Clone>$() -> Mocassin.Core.Model.Transitions.ResolvedTransitionPath!
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!> Positions) -> void
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Equals(Mocassin.Core.Model.Transitions.ResolvedTransitionPath? other) -> bool
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Positions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!>
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Positions.init -> void
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.ResolvedTransitionPath(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!> Positions) -> void
+const Mocassin.Core.Geometry.GeometryTolerances.PathMatchTolerance = 1E-06 -> double
+override Mocassin.Core.Model.Transitions.ResolvedPathPosition.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Transitions.ResolvedPathPosition.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.ResolvedPathPosition.ToString() -> string!
+override Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Transitions.ResolvedTransitionPath.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.ResolvedTransitionPath.ToString() -> string!
+static Mocassin.Core.Model.Transitions.ResolvedPathPosition.operator !=(Mocassin.Core.Model.Transitions.ResolvedPathPosition? left, Mocassin.Core.Model.Transitions.ResolvedPathPosition? right) -> bool
+static Mocassin.Core.Model.Transitions.ResolvedPathPosition.operator ==(Mocassin.Core.Model.Transitions.ResolvedPathPosition? left, Mocassin.Core.Model.Transitions.ResolvedPathPosition? right) -> bool
+static Mocassin.Core.Model.Transitions.ResolvedTransitionPath.operator !=(Mocassin.Core.Model.Transitions.ResolvedTransitionPath? left, Mocassin.Core.Model.Transitions.ResolvedTransitionPath? right) -> bool
+static Mocassin.Core.Model.Transitions.ResolvedTransitionPath.operator ==(Mocassin.Core.Model.Transitions.ResolvedTransitionPath? left, Mocassin.Core.Model.Transitions.ResolvedTransitionPath? right) -> bool
+Mocassin.Core.Editing.ProjectEditor.AddKineticTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.KineticTransition! transition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddMetropolisTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.MetropolisTransition! transition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddStateChange(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.StateChange! stateChange) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddStateChangeGroup(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.StateChangeGroup! group) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddTransitionChain(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.TransitionChain! chain) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.DuplicateKineticTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.KineticTransitionId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.DuplicateMetropolisTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.MetropolisTransitionId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.DuplicateTransitionChain(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.TransitionChainId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.MakeStateChangeGroup(Mocassin.Core.Project.Project! project, string! name, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.StateChangeId> stateChangeIds) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveKineticTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.KineticTransitionId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveMetropolisTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.MetropolisTransitionId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveStateChange(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.StateChangeId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveStateChangeGroup(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.StateChangeGroupId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveTransitionChain(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.TransitionChainId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateKineticTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.KineticTransition! transition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateMetropolisTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.MetropolisTransition! transition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateStateChange(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.StateChange! stateChange) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateStateChangeGroup(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.StateChangeGroup! group) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateTransitionChain(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.TransitionChain! chain) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Model.Transitions.ITransitionQuery
+Mocassin.Core.Model.Transitions.ITransitionQuery.Chains.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.TransitionChain!>
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.KineticTransitionId id) -> Mocassin.Core.Model.Transitions.KineticTransition?
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.MetropolisTransitionId id) -> Mocassin.Core.Model.Transitions.MetropolisTransition?
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.StateChangeGroupId id) -> Mocassin.Core.Model.Transitions.StateChangeGroup?
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.StateChangeId id) -> Mocassin.Core.Model.Transitions.StateChange?
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.TransitionChainId id) -> Mocassin.Core.Model.Transitions.TransitionChain?
+Mocassin.Core.Model.Transitions.ITransitionQuery.KineticTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.KineticTransition!>
+Mocassin.Core.Model.Transitions.ITransitionQuery.MetropolisTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.MetropolisTransition!>
+Mocassin.Core.Model.Transitions.ITransitionQuery.StateChangeGroups.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChangeGroup!>
+Mocassin.Core.Model.Transitions.ITransitionQuery.StateChanges.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChange!>
+Mocassin.Core.Project.IProjectQuery
+Mocassin.Core.Project.Project.Chains.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.TransitionChain!>
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.KineticTransitionId id) -> Mocassin.Core.Model.Transitions.KineticTransition?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.MetropolisTransitionId id) -> Mocassin.Core.Model.Transitions.MetropolisTransition?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.StateChangeGroupId id) -> Mocassin.Core.Model.Transitions.StateChangeGroup?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.StateChangeId id) -> Mocassin.Core.Model.Transitions.StateChange?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.TransitionChainId id) -> Mocassin.Core.Model.Transitions.TransitionChain?
+Mocassin.Core.Project.Project.KineticTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.KineticTransition!>
+Mocassin.Core.Project.Project.MetropolisTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.MetropolisTransition!>
+Mocassin.Core.Project.Project.StateChangeGroups.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChangeGroup!>
+Mocassin.Core.Project.Project.StateChanges.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChange!>
+static Mocassin.Core.Project.ProjectHasher.ComputeTransition(Mocassin.Core.Project.IProjectQuery! project, Mocassin.Core.Model.Transitions.TransitionRef transition) -> string!

@@ -1,0 +1,184 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 1 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet  restore --nodeReuse:false /p:UseSharedCompilation=false /p:Deterministic=true /p:Optimize=true /p:ArtifactsPath="/workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/" /p:OutDir="/workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/bin/Release/net10.0/" /p:OutputPath="/workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/bin/Release/net10.0/" /p:PublishDir="/workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/publish/" in /workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1
+// command took 1.62 sec and exited with 0
+// start dotnet  build -c Release --no-restore --nodeReuse:false /p:UseSharedCompilation=false /p:Deterministic=true /p:Optimize=true /p:ArtifactsPath="/workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/" /p:OutDir="/workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/bin/Release/net10.0/" /p:OutputPath="/workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/bin/Release/net10.0/" /p:PublishDir="/workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/publish/" --output "/workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/bin/Release/net10.0/" in /workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1
+// command took 8.83 sec and exited with 0
+// ***** Done, took 00:00:10 (10.52 sec)   *****
+// Found 1 benchmarks:
+//   TransitionPreviewBenchmarks.TransitionPreviewCeria: DefaultJob
+
+// **************************
+// Benchmark: TransitionPreviewBenchmarks.TransitionPreviewCeria: DefaultJob
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet Mocassin.Benchmarks-DefaultJob-1.dll --anonymousPipes 123 124 --benchmarkName Mocassin.Benchmarks.Transitions.TransitionPreviewBenchmarks.TransitionPreviewCeria --job Default --benchmarkId 0 in /workspace/mocassin/src/dotnet/Mocassin.Benchmarks/bin/Release/net10.0/Mocassin.Benchmarks-DefaultJob-1/bin/Release/net10.0
+// Failed to set up high priority (Permission denied). In order to run benchmarks with high priority, make sure you have the right permissions.
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.14 (10.0.14, 10.0.1426.52326), X64 RyuJIT x86-64-v4
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX512 BITALG+VBMI2+VNNI+VPOPCNTDQ,AVX512 IFMA+VBMI,AVX512 F+BW+CD+DQ+VL,AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: DefaultJob
+
+OverheadJitting  1: 1 op, 173204.00 ns, 173.2040 us/op
+WorkloadJitting  1: 1 op, 1220776.00 ns, 1.2208 ms/op
+
+OverheadJitting  2: 16 op, 263003.00 ns, 16.4377 us/op
+WorkloadJitting  2: 16 op, 2728981.00 ns, 170.5613 us/op
+
+WorkloadPilot    1: 16 op, 2063233.00 ns, 128.9521 us/op
+WorkloadPilot    2: 32 op, 4017733.00 ns, 125.5542 us/op
+WorkloadPilot    3: 64 op, 8070184.00 ns, 126.0966 us/op
+WorkloadPilot    4: 128 op, 16123154.00 ns, 125.9621 us/op
+WorkloadPilot    5: 256 op, 29919641.00 ns, 116.8736 us/op
+WorkloadPilot    6: 512 op, 52793907.00 ns, 103.1131 us/op
+WorkloadPilot    7: 1024 op, 127693875.00 ns, 124.7010 us/op
+WorkloadPilot    8: 2048 op, 252215348.00 ns, 123.1520 us/op
+WorkloadPilot    9: 4096 op, 488938454.00 ns, 119.3697 us/op
+WorkloadPilot   10: 8192 op, 619177497.00 ns, 75.5832 us/op
+
+OverheadWarmup   1: 8192 op, 15850.00 ns, 1.9348 ns/op
+OverheadWarmup   2: 8192 op, 14187.00 ns, 1.7318 ns/op
+OverheadWarmup   3: 8192 op, 14057.00 ns, 1.7159 ns/op
+OverheadWarmup   4: 8192 op, 14066.00 ns, 1.7170 ns/op
+OverheadWarmup   5: 8192 op, 14056.00 ns, 1.7158 ns/op
+OverheadWarmup   6: 8192 op, 14006.00 ns, 1.7097 ns/op
+OverheadWarmup   7: 8192 op, 13996.00 ns, 1.7085 ns/op
+OverheadWarmup   8: 8192 op, 13997.00 ns, 1.7086 ns/op
+OverheadWarmup   9: 8192 op, 14437.00 ns, 1.7623 ns/op
+OverheadWarmup  10: 8192 op, 13996.00 ns, 1.7085 ns/op
+
+OverheadActual   1: 8192 op, 12394.00 ns, 1.5129 ns/op
+OverheadActual   2: 8192 op, 12353.00 ns, 1.5079 ns/op
+OverheadActual   3: 8192 op, 13435.00 ns, 1.6400 ns/op
+OverheadActual   4: 8192 op, 12704.00 ns, 1.5508 ns/op
+OverheadActual   5: 8192 op, 12674.00 ns, 1.5471 ns/op
+OverheadActual   6: 8192 op, 12624.00 ns, 1.5410 ns/op
+OverheadActual   7: 8192 op, 14988.00 ns, 1.8296 ns/op
+OverheadActual   8: 8192 op, 14508.00 ns, 1.7710 ns/op
+OverheadActual   9: 8192 op, 14397.00 ns, 1.7574 ns/op
+OverheadActual  10: 8192 op, 14367.00 ns, 1.7538 ns/op
+OverheadActual  11: 8192 op, 14367.00 ns, 1.7538 ns/op
+OverheadActual  12: 8192 op, 14377.00 ns, 1.7550 ns/op
+OverheadActual  13: 8192 op, 14397.00 ns, 1.7574 ns/op
+OverheadActual  14: 8192 op, 14357.00 ns, 1.7526 ns/op
+OverheadActual  15: 8192 op, 14697.00 ns, 1.7941 ns/op
+OverheadActual  16: 8192 op, 14386.00 ns, 1.7561 ns/op
+OverheadActual  17: 8192 op, 14317.00 ns, 1.7477 ns/op
+OverheadActual  18: 8192 op, 12574.00 ns, 1.5349 ns/op
+OverheadActual  19: 8192 op, 12594.00 ns, 1.5374 ns/op
+OverheadActual  20: 8192 op, 12393.00 ns, 1.5128 ns/op
+
+WorkloadWarmup   1: 8192 op, 327386684.00 ns, 39.9642 us/op
+WorkloadWarmup   2: 8192 op, 256593318.00 ns, 31.3224 us/op
+WorkloadWarmup   3: 8192 op, 209836405.00 ns, 25.6148 us/op
+WorkloadWarmup   4: 8192 op, 179565266.00 ns, 21.9196 us/op
+WorkloadWarmup   5: 8192 op, 162657764.00 ns, 19.8557 us/op
+WorkloadWarmup   6: 8192 op, 159062750.00 ns, 19.4168 us/op
+WorkloadWarmup   7: 8192 op, 162117371.00 ns, 19.7897 us/op
+WorkloadWarmup   8: 8192 op, 160616461.00 ns, 19.6065 us/op
+WorkloadWarmup   9: 8192 op, 164538646.00 ns, 20.0853 us/op
+WorkloadWarmup  10: 8192 op, 161453938.00 ns, 19.7087 us/op
+
+// BeforeActualRun
+WorkloadActual   1: 8192 op, 162659556.00 ns, 19.8559 us/op
+WorkloadActual   2: 8192 op, 163090263.00 ns, 19.9085 us/op
+WorkloadActual   3: 8192 op, 164155127.00 ns, 20.0385 us/op
+WorkloadActual   4: 8192 op, 160315387.00 ns, 19.5697 us/op
+WorkloadActual   5: 8192 op, 167474785.00 ns, 20.4437 us/op
+WorkloadActual   6: 8192 op, 163546027.00 ns, 19.9641 us/op
+WorkloadActual   7: 8192 op, 161010459.00 ns, 19.6546 us/op
+WorkloadActual   8: 8192 op, 158631413.00 ns, 19.3642 us/op
+WorkloadActual   9: 8192 op, 162247597.00 ns, 19.8056 us/op
+WorkloadActual  10: 8192 op, 160068555.00 ns, 19.5396 us/op
+WorkloadActual  11: 8192 op, 162775634.00 ns, 19.8701 us/op
+WorkloadActual  12: 8192 op, 162598724.00 ns, 19.8485 us/op
+WorkloadActual  13: 8192 op, 172813773.00 ns, 21.0954 us/op
+WorkloadActual  14: 8192 op, 161422501.00 ns, 19.7049 us/op
+WorkloadActual  15: 8192 op, 160616912.00 ns, 19.6066 us/op
+
+// AfterActualRun
+WorkloadResult   1: 8192 op, 162645219.00 ns, 19.8542 us/op
+WorkloadResult   2: 8192 op, 163075926.00 ns, 19.9067 us/op
+WorkloadResult   3: 8192 op, 164140790.00 ns, 20.0367 us/op
+WorkloadResult   4: 8192 op, 160301050.00 ns, 19.5680 us/op
+WorkloadResult   5: 8192 op, 163531690.00 ns, 19.9624 us/op
+WorkloadResult   6: 8192 op, 160996122.00 ns, 19.6528 us/op
+WorkloadResult   7: 8192 op, 158617076.00 ns, 19.3624 us/op
+WorkloadResult   8: 8192 op, 162233260.00 ns, 19.8039 us/op
+WorkloadResult   9: 8192 op, 160054218.00 ns, 19.5379 us/op
+WorkloadResult  10: 8192 op, 162761297.00 ns, 19.8683 us/op
+WorkloadResult  11: 8192 op, 162584387.00 ns, 19.8467 us/op
+WorkloadResult  12: 8192 op, 161408164.00 ns, 19.7031 us/op
+WorkloadResult  13: 8192 op, 160602575.00 ns, 19.6048 us/op
+// GC:  35 0 0 295667296 8192
+// Threading:  0 0 8192
+
+// AfterAll
+// Benchmark Process 25849 has exited with code 0.
+
+Mean = 19.747 us, StdErr = 0.054 us (0.27%), N = 13, StdDev = 0.194 us
+Min = 19.362 us, Q1 = 19.605 us, Median = 19.804 us, Q3 = 19.868 us, Max = 20.037 us
+IQR = 0.264 us, LowerFence = 19.210 us, UpperFence = 20.264 us
+ConfidenceInterval = [19.515 us; 19.979 us] (CI 99.9%), Margin = 0.232 us (1.17% of Mean)
+Skewness = -0.35, Kurtosis = 1.95, MValue = 2
+
+// ** Remained 0 (0.0 %) benchmark(s) to run. Estimated finish 2026-11-09 20:01 (0h 0m from now) **
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  BenchmarkDotNet.Artifacts/results/Mocassin.Benchmarks.Transitions.TransitionPreviewBenchmarks-report.csv
+  BenchmarkDotNet.Artifacts/results/Mocassin.Benchmarks.Transitions.TransitionPreviewBenchmarks-report-github.md
+  BenchmarkDotNet.Artifacts/results/Mocassin.Benchmarks.Transitions.TransitionPreviewBenchmarks-report.html
+
+// * Detailed results *
+TransitionPreviewBenchmarks.TransitionPreviewCeria: DefaultJob
+Runtime = .NET 10.0.14 (10.0.14, 10.0.1426.52326), X64 RyuJIT x86-64-v4; GC = Concurrent Workstation
+Mean = 19.747 us, StdErr = 0.054 us (0.27%), N = 13, StdDev = 0.194 us
+Min = 19.362 us, Q1 = 19.605 us, Median = 19.804 us, Q3 = 19.868 us, Max = 20.037 us
+IQR = 0.264 us, LowerFence = 19.210 us, UpperFence = 20.264 us
+ConfidenceInterval = [19.515 us; 19.979 us] (CI 99.9%), Margin = 0.232 us (1.17% of Mean)
+Skewness = -0.35, Kurtosis = 1.95, MValue = 2
+-------------------- Histogram --------------------
+[19.254 us ; 20.082 us) | @@@@@@@@@@@@@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet v0.15.8, Linux Debian GNU/Linux 13 (trixie)
+AMD Ryzen 7 7840U w/ Radeon 780M Graphics 1.66GHz, 1 CPU, 16 logical and 8 physical cores
+.NET SDK 10.0.403
+  [Host]     : .NET 10.0.14 (10.0.14, 10.0.1426.52326), X64 RyuJIT x86-64-v4
+  DefaultJob : .NET 10.0.14 (10.0.14, 10.0.1426.52326), X64 RyuJIT x86-64-v4
+
+
+| Method                 | Mean     | Error    | StdDev   | Gen0   | Allocated |
+|----------------------- |---------:|---------:|---------:|-------:|----------:|
+| TransitionPreviewCeria | 19.75 us | 0.232 us | 0.194 us | 4.2725 |  35.25 KB |
+
+// * Hints *
+Outliers
+  TransitionPreviewBenchmarks.TransitionPreviewCeria: Default -> 2 outliers were removed (20.44 us, 21.10 us)
+
+// * Legends *
+  Mean      : Arithmetic mean of all measurements
+  Error     : Half of 99.9% confidence interval
+  StdDev    : Standard deviation of all measurements
+  Gen0      : GC Generation 0 collects per 1000 operations
+  Allocated : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
+  1 us      : 1 Microsecond (0.000001 sec)
+
+// * Diagnostic Output - MemoryDiagnoser *
+
+
+// ***** BenchmarkRunner: End *****
+Run time: 00:00:06 (6.59 sec), executed benchmarks: 1
+
+Global total time: 00:00:17 (17.2 sec), executed benchmarks: 1
+// * Artifacts cleanup *
+Artifacts cleanup is finished

@@ -1,0 +1,271 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-000000000b00",
+  "masterSeed": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "name": "5-site interstitialcy",
+  "description": "Step 04 transition sample.",
+  "createdUtc": "2026-11-09T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-09T12:00:00.0000000Z",
+  "model": {
+    "particles": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b01",
+        "name": "O2-",
+        "symbol": "O",
+        "charge": -2,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b02",
+        "name": "Vacancy",
+        "symbol": "Vc",
+        "charge": 0,
+        "isVacancy": true
+      }
+    ],
+    "particleSets": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b03",
+        "name": "Oxygen site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b01",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b02"
+        ]
+      }
+    ],
+    "structure": {
+      "name": "P1 transition sample",
+      "spaceGroup": {
+        "number": 1,
+        "axis": "none",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 5,
+        "b": 5,
+        "c": 5,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90
+      },
+      "sites": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b11",
+          "name": "O1",
+          "fractional": [
+            0.1,
+            0.1,
+            0.1
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000b03",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b12",
+          "name": "U1",
+          "fractional": [
+            0.2,
+            0.1,
+            0.1
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000b03",
+          "stability": "unstable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b13",
+          "name": "O2",
+          "fractional": [
+            0.3,
+            0.1,
+            0.1
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000b03",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b14",
+          "name": "U2",
+          "fractional": [
+            0.4,
+            0.1,
+            0.1
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000b03",
+          "stability": "unstable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b15",
+          "name": "O3",
+          "fractional": [
+            0.5,
+            0.1,
+            0.1
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000b03",
+          "stability": "stable"
+        }
+      ],
+      "dummyPositions": []
+    },
+    "stateChanges": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b21",
+        "name": "O -\u003E vacancy",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b01",
+        "acceptorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b02"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b22",
+        "name": "O -\u003E void",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b01",
+        "acceptorParticleId": "00000000-0000-0000-0000-000000000001"
+      }
+    ],
+    "stateChangeGroups": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b31",
+        "name": "Stable",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b21"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b32",
+        "name": "Unstable",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b22"
+        ]
+      }
+    ],
+    "chains": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b41",
+        "name": "Interstitialcy5",
+        "pattern": "interstitialcy5",
+        "groupIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b31",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b32",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b31",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b32",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b31"
+        ],
+        "linkers": [
+          "dynamic",
+          "dynamic",
+          "dynamic",
+          "dynamic"
+        ],
+        "generatesReverse": false
+      }
+    ],
+    "kineticTransitions": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b51",
+        "name": "Interstitialcy forward",
+        "chainId": "018f4c9a-7f6b-7c3a-9d2e-000000000b41",
+        "referencePath": [
+          [
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.2,
+            0.1,
+            0.1
+          ],
+          [
+            0.3,
+            0.1,
+            0.1
+          ],
+          [
+            0.4,
+            0.1,
+            0.1
+          ],
+          [
+            0.5,
+            0.1,
+            0.1
+          ]
+        ],
+        "reverseTransitionId": "018f4c9a-7f6b-7c3a-9d2e-000000000b52"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b52",
+        "name": "Interstitialcy reverse",
+        "chainId": "018f4c9a-7f6b-7c3a-9d2e-000000000b41",
+        "referencePath": [
+          [
+            0.1,
+            0.1,
+            0.1
+          ],
+          [
+            0.2,
+            0.1,
+            0.1
+          ],
+          [
+            0.3,
+            0.1,
+            0.1
+          ],
+          [
+            0.4,
+            0.1,
+            0.1
+          ],
+          [
+            0.5,
+            0.1,
+            0.1
+          ]
+        ],
+        "reverseTransitionId": "018f4c9a-7f6b-7c3a-9d2e-000000000b51"
+      }
+    ]
+  },
+  "parameterizations": [],
+  "jobTemplates": [],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}

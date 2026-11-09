@@ -1,0 +1,238 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-000000000d00",
+  "masterSeed": "dddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddddd",
+  "name": "Ceria KMC",
+  "description": "Ceria oxygen migration sample.",
+  "createdUtc": "2026-11-09T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-09T12:00:00.0000000Z",
+  "symmetry": {
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395",
+    "symmetryContractVersion": "symmetry-1"
+  },
+  "model": {
+    "particles": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+        "name": "Ce4\u002B",
+        "symbol": "Ce",
+        "charge": 4,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+        "name": "O2-",
+        "symbol": "O",
+        "charge": -2,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02",
+        "name": "Vacancy",
+        "symbol": "Vc",
+        "charge": 0,
+        "isVacancy": true
+      }
+    ],
+    "particleSets": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f03",
+        "name": "Cerium site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f04",
+        "name": "Oxygen site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f09",
+        "name": "Oxygen transition site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01"
+        ]
+      }
+    ],
+    "structure": {
+      "name": "Ceria",
+      "spaceGroup": {
+        "number": 225,
+        "axis": "none",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 5.41,
+        "b": 5.41,
+        "c": 5.41,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90
+      },
+      "sites": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "name": "Ce",
+          "fractional": [
+            0,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f03",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "name": "O",
+          "fractional": [
+            0.25,
+            0.25,
+            0.25
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f04",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "name": "O transition",
+          "fractional": [
+            0.5,
+            0.25,
+            0.25
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f09",
+          "stability": "unstable"
+        }
+      ],
+      "dummyPositions": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f08",
+          "name": "Center",
+          "fractional": [
+            0.5,
+            0.5,
+            0.5
+          ]
+        }
+      ]
+    },
+    "stateChanges": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d21",
+        "name": "O -\u003E vacancy",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+        "acceptorParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d22",
+        "name": "O -\u003E void",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+        "acceptorParticleId": "00000000-0000-0000-0000-000000000001"
+      }
+    ],
+    "stateChangeGroups": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d31",
+        "name": "O vacancy",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d21"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d32",
+        "name": "O unstable",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d22"
+        ]
+      }
+    ],
+    "chains": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d41",
+        "name": "3-site migration",
+        "pattern": "migration3",
+        "groupIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d31",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d32",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000d31"
+        ],
+        "linkers": [
+          "dynamic",
+          "dynamic"
+        ],
+        "generatesReverse": true
+      }
+    ],
+    "kineticTransitions": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000d51",
+        "name": "O migration",
+        "chainId": "018f4c9a-7f6b-7c3a-9d2e-000000000d41",
+        "referencePath": [
+          [
+            0.25,
+            0.25,
+            0.25
+          ],
+          [
+            0,
+            0.25,
+            0.25
+          ],
+          [
+            0.25,
+            0.25,
+            0.75
+          ]
+        ]
+      }
+    ]
+  },
+  "parameterizations": [],
+  "jobTemplates": [],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}

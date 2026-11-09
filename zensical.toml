@@ -29,16 +29,21 @@ nav = [
       { "Overview" = "user-guide/index.md" },
       { "Particles and particle sets" = "user-guide/particles.md" },
       { "Crystal structure" = "user-guide/structure.md" },
+      { "Transitions" = "user-guide/transitions.md" },
     ] },
   { "Physics" = [
       { "Overview" = "physics/index.md" },
       { "Symmetry and geometry" = "physics/symmetry.md" },
+      { "Monte Carlo methods" = "physics/monte-carlo.md" },
+      { "Kinetic Monte Carlo" = "physics/kmc.md" },
+      { "Metropolis Monte Carlo" = "physics/mmc.md" },
     ] },
   { "Tutorials" = "tutorials/index.md" },
   { "Reference" = [
       { "Overview" = "reference/index.md" },
       { "Repository and file layout" = "reference/file-layout.md" },
       { "Project format" = "reference/project-format.md" },
+      { "Transitions" = "reference/transitions.md" },
     ] },
   { "Development" = [
       { "Overview" = "development/index.md" },

@@ -1,0 +1,300 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-000000000a00",
+  "masterSeed": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "name": "5-site vehicle",
+  "description": "Step 04 transition sample.",
+  "createdUtc": "2026-11-09T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-09T12:00:00.0000000Z",
+  "model": {
+    "particles": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a01",
+        "name": "A\u002B",
+        "symbol": "A",
+        "charge": 1,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a02",
+        "name": "B-",
+        "symbol": "B",
+        "charge": -1,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a03",
+        "name": "Vacancy",
+        "symbol": "V",
+        "charge": 0,
+        "isVacancy": true
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a04",
+        "name": "AB pair",
+        "symbol": "AB",
+        "charge": 0,
+        "isVacancy": false
+      }
+    ],
+    "particleSets": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a05",
+        "name": "Vehicle site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a01",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a02",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a03",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a04"
+        ]
+      }
+    ],
+    "structure": {
+      "name": "P1 transition sample",
+      "spaceGroup": {
+        "number": 1,
+        "axis": "none",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 5,
+        "b": 5,
+        "c": 5,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90
+      },
+      "sites": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a11",
+          "name": "A",
+          "fractional": [
+            0,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000a05",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a12",
+          "name": "A next",
+          "fractional": [
+            0.2,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000a05",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a13",
+          "name": "AB transition",
+          "fractional": [
+            0.3,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000a05",
+          "stability": "unstable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a14",
+          "name": "B",
+          "fractional": [
+            0.5,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000a05",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a15",
+          "name": "B next",
+          "fractional": [
+            0.7,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-000000000a05",
+          "stability": "stable"
+        }
+      ],
+      "dummyPositions": []
+    },
+    "stateChanges": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a21",
+        "name": "A -\u003E vacancy",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000a01",
+        "acceptorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000a03"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a22",
+        "name": "B -\u003E vacancy",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000a02",
+        "acceptorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000a03"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a23",
+        "name": "AB -\u003E void",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000a04",
+        "acceptorParticleId": "00000000-0000-0000-0000-000000000001"
+      }
+    ],
+    "stateChangeGroups": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a31",
+        "name": "A vacancy",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a21"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a32",
+        "name": "B vacancy",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a22"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a33",
+        "name": "AB void",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a23"
+        ]
+      }
+    ],
+    "chains": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a41",
+        "name": "Vehicle5",
+        "pattern": "vehicle5",
+        "groupIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a31",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a31",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a33",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a32",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000a32"
+        ],
+        "linkers": [
+          "dynamic",
+          "static",
+          "static",
+          "dynamic"
+        ],
+        "generatesReverse": false
+      }
+    ],
+    "kineticTransitions": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a51",
+        "name": "Vehicle forward",
+        "chainId": "018f4c9a-7f6b-7c3a-9d2e-000000000a41",
+        "referencePath": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0.2,
+            0,
+            0
+          ],
+          [
+            0.3,
+            0,
+            0
+          ],
+          [
+            0.5,
+            0,
+            0
+          ],
+          [
+            0.7,
+            0,
+            0
+          ]
+        ],
+        "reverseTransitionId": "018f4c9a-7f6b-7c3a-9d2e-000000000a52"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000a52",
+        "name": "Vehicle reverse",
+        "chainId": "018f4c9a-7f6b-7c3a-9d2e-000000000a41",
+        "referencePath": [
+          [
+            0,
+            0,
+            0
+          ],
+          [
+            0.2,
+            0,
+            0
+          ],
+          [
+            0.3,
+            0,
+            0
+          ],
+          [
+            0.5,
+            0,
+            0
+          ],
+          [
+            0.7,
+            0,
+            0
+          ]
+        ],
+        "reverseTransitionId": "018f4c9a-7f6b-7c3a-9d2e-000000000a51"
+      }
+    ]
+  },
+  "parameterizations": [],
+  "jobTemplates": [],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}

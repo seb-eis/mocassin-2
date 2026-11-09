@@ -27,6 +27,11 @@ public static class GeometryTolerances
     public const double GeometricEqualityTolerance = 1e-6;
 
     /// <summary>
+    /// Maximum fractional component difference for matching a kinetic reference-path point to a P1 position.
+    /// </summary>
+    public const double PathMatchTolerance = 1e-6;
+
+    /// <summary>
     /// Maximum distance difference for continuous distance predicates outside symmetry reduction, in ångström.
     /// </summary>
     public const double DistanceEqualityTolerance = 1e-5;

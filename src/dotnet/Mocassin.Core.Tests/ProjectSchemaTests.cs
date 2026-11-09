@@ -19,6 +19,8 @@ public sealed class ProjectSchemaTests
         "tests/contracts/project-symmetry.mocprj",
         "tests/contracts/project-symmetry-partial.mocprj",
         "tests/contracts/project-symmetry-mismatch.mocprj",
+        "tests/contracts/project-transitions-minimal.mocprj",
+        "tests/contracts/project-transitions-populated.mocprj",
         "samples/blank/blank.mocprj",
         "samples/ceria/ceria.mocprj",
     ];
@@ -54,6 +56,19 @@ public sealed class ProjectSchemaTests
         Assert.Equal(
             File.ReadAllBytes(RepositoryPaths.Combine(samplePath.Split('/'))),
             File.ReadAllBytes(RepositoryPaths.Combine(fixturePath.Split('/'))));
+    }
+
+    [Fact]
+    public void SchemaRejectsUnknownTransitionField()
+    {
+        var root = JsonNode.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-transitions-minimal.mocprj")))!.AsObject();
+        root["model"]!["stateChanges"]![0]!["unexpected"] = true;
+
+        using var document = JsonDocument.Parse(root.ToJsonString());
+        var result = projectSchema.Evaluate(document.RootElement);
+
+        Assert.False(result.IsValid);
     }
 
     [Fact]

@@ -435,3 +435,49 @@ static Mocassin.Symmetry.Structure.StructurePreview.operator !=(Mocassin.Symmetr
 static Mocassin.Symmetry.Structure.StructurePreview.operator ==(Mocassin.Symmetry.Structure.StructurePreview? left, Mocassin.Symmetry.Structure.StructurePreview? right) -> bool
 ~override Mocassin.Symmetry.Geometry.StructureSiteReference.Equals(object obj) -> bool
 ~override Mocassin.Symmetry.Geometry.StructureSiteReference.ToString() -> string
+Mocassin.Symmetry.Transitions.TransitionPathResolver
+Mocassin.Symmetry.Transitions.TransitionPathResolver.Encoder.get -> Mocassin.Symmetry.Geometry.UnitCellVectorEncoder!
+Mocassin.Symmetry.Transitions.TransitionPathResolver.TryResolve(Mocassin.Core.Model.Transitions.KineticTransition! transition, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Core.Model.Transitions.ResolvedTransitionPath?
+Mocassin.Symmetry.Transitions.TransitionPathValidator
+Mocassin.Symmetry.Transitions.TransitionPathValidator.TransitionPathValidator(Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog = null) -> void
+Mocassin.Symmetry.Transitions.TransitionPathValidator.Validate(Mocassin.Core.Model.ModelDefinition! model) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+static Mocassin.Symmetry.Transitions.TransitionPathResolver.TryCreate(Mocassin.Core.Model.Structure.StructureModel! structure, Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog, out Mocassin.Symmetry.Transitions.TransitionPathResolver? resolver, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+Mocassin.Symmetry.Transitions.ITransitionPreviewService
+Mocassin.Symmetry.Transitions.ITransitionPreviewService.TryCreatePreview(Mocassin.Core.Model.Transitions.KineticTransition! transition, Mocassin.Core.Project.IProjectQuery! project, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.Transitions.TransitionPreview?
+Mocassin.Symmetry.Transitions.ITransitionPreviewService.TryCreatePreview(Mocassin.Core.Model.Transitions.MetropolisTransition! transition, Mocassin.Core.Project.IProjectQuery! project, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.Transitions.TransitionPreview?
+Mocassin.Symmetry.Transitions.TransitionPreview
+Mocassin.Symmetry.Transitions.TransitionPreview.<Clone>$() -> Mocassin.Symmetry.Transitions.TransitionPreview!
+Mocassin.Symmetry.Transitions.TransitionPreview.CellCountA.get -> int
+Mocassin.Symmetry.Transitions.TransitionPreview.CellCountA.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.CellCountB.get -> int
+Mocassin.Symmetry.Transitions.TransitionPreview.CellCountB.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.CellCountC.get -> int
+Mocassin.Symmetry.Transitions.TransitionPreview.CellCountC.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.Chain.get -> Mocassin.Core.Model.Transitions.TransitionChain!
+Mocassin.Symmetry.Transitions.TransitionPreview.Chain.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.Deconstruct(out Mocassin.Core.Model.Transitions.TransitionRef Transition, out Mocassin.Core.Model.Transitions.TransitionChain! Chain, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId> ParticleOrder, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> ReferencePath, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!> ResolvedPath, out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>> ExpandedPaths, out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<int>> StateChangeMatrices, out int ExpectedRuleCount, out int CellCountA, out int CellCountB, out int CellCountC) -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.Equals(Mocassin.Symmetry.Transitions.TransitionPreview? other) -> bool
+Mocassin.Symmetry.Transitions.TransitionPreview.ExpandedPaths.get -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>>
+Mocassin.Symmetry.Transitions.TransitionPreview.ExpandedPaths.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.ExpectedRuleCount.get -> int
+Mocassin.Symmetry.Transitions.TransitionPreview.ExpectedRuleCount.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.ParticleOrder.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId>
+Mocassin.Symmetry.Transitions.TransitionPreview.ParticleOrder.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.ReferencePath.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+Mocassin.Symmetry.Transitions.TransitionPreview.ReferencePath.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.ResolvedPath.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!>
+Mocassin.Symmetry.Transitions.TransitionPreview.ResolvedPath.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.StateChangeMatrices.get -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<int>>
+Mocassin.Symmetry.Transitions.TransitionPreview.StateChangeMatrices.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.Transition.get -> Mocassin.Core.Model.Transitions.TransitionRef
+Mocassin.Symmetry.Transitions.TransitionPreview.Transition.init -> void
+Mocassin.Symmetry.Transitions.TransitionPreview.TransitionPreview(Mocassin.Core.Model.Transitions.TransitionRef Transition, Mocassin.Core.Model.Transitions.TransitionChain! Chain, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId> ParticleOrder, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> ReferencePath, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!> ResolvedPath, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>> ExpandedPaths, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<int>> StateChangeMatrices, int ExpectedRuleCount, int CellCountA, int CellCountB, int CellCountC) -> void
+Mocassin.Symmetry.Transitions.TransitionPreviewService
+Mocassin.Symmetry.Transitions.TransitionPreviewService.TransitionPreviewService(Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog = null, Mocassin.Symmetry.Contracts.SymmetryVersionInfo? versions = null, int cacheCapacity = 256) -> void
+Mocassin.Symmetry.Transitions.TransitionPreviewService.TryCreatePreview(Mocassin.Core.Model.Transitions.KineticTransition! transition, Mocassin.Core.Project.IProjectQuery! project, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.Transitions.TransitionPreview?
+Mocassin.Symmetry.Transitions.TransitionPreviewService.TryCreatePreview(Mocassin.Core.Model.Transitions.MetropolisTransition! transition, Mocassin.Core.Project.IProjectQuery! project, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.Transitions.TransitionPreview?
+override Mocassin.Symmetry.Transitions.TransitionPreview.Equals(object? obj) -> bool
+override Mocassin.Symmetry.Transitions.TransitionPreview.GetHashCode() -> int
+override Mocassin.Symmetry.Transitions.TransitionPreview.ToString() -> string!
+static Mocassin.Symmetry.Transitions.TransitionPreview.operator !=(Mocassin.Symmetry.Transitions.TransitionPreview? left, Mocassin.Symmetry.Transitions.TransitionPreview? right) -> bool
+static Mocassin.Symmetry.Transitions.TransitionPreview.operator ==(Mocassin.Symmetry.Transitions.TransitionPreview? left, Mocassin.Symmetry.Transitions.TransitionPreview? right) -> bool

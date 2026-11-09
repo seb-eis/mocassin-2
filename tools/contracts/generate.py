@@ -138,6 +138,18 @@ def validate_field(field: dict[str, Any], context: str) -> None:
         if "itemAdditionalProperties" in field:
             require(item_type == "object", f"{context}.{name}: itemAdditionalProperties requires object items")
             validate_additional_properties(field["itemAdditionalProperties"], f"{context}.{name}.itemAdditionalProperties")
+        if "itemItems" in field:
+            require(item_type == "array", f"{context}.{name}: itemItems requires array items")
+            item_descriptor = field["itemItems"]
+            require(isinstance(item_descriptor, dict), f"{context}.{name}: itemItems must be an object")
+            validate_field({"name": "item", "required": False, **item_descriptor}, f"{context}.{name}.itemItems")
+        if "itemEnum" in field:
+            values = field["itemEnum"]
+            require(isinstance(values, list) and values, f"{context}.{name}: itemEnum must be a non-empty array")
+            require(
+                all(isinstance(value, (str, int, float, bool)) for value in values),
+                f"{context}.{name}: itemEnum values must be JSON primitives",
+            )
 
 
 def validate_fields(fields: list[dict[str, Any]], context: str, allow_empty: bool = False) -> None:
@@ -294,8 +306,12 @@ def json_schema_type(field: dict[str, Any]) -> dict[str, Any]:
                 )
             else:
                 item_schema["additionalProperties"] = False
+        elif "itemItems" in field:
+            item_schema = json_schema_type({"name": "item", "required": False, **field["itemItems"]})
         else:
             item_schema = json_schema_type({"type": item_type, "required": False})
+        if "itemEnum" in field:
+            item_schema["enum"] = field["itemEnum"]
         schema = {
             "type": "array",
             "items": item_schema,

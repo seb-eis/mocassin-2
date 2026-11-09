@@ -7,26 +7,26 @@ geometry, with validation of transition semantics.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** In progress — audit passed with notes, awaiting merge approval
 - **Step branch:** `step/04-transition-model`
-- **Step CI:** —
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) — replacement closeout, Ubuntu
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Passed with notes at `82c8cb4` (code frozen at `8c44709`)
 - **Design review:** [Ready for implementation — accepted at `a3d8641`](../reviews/step-04.md)
 - **Last updated:** 2026-11-09
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `transition-model-and-persistence` | `feature/step-04-transition-model/transition-model-and-persistence` | Planned | — | — | — |
-| `state-changes-and-groups` | `feature/step-04-transition-model/state-changes-and-groups` | Planned | — | — | — |
-| `chains-and-patterns` | `feature/step-04-transition-model/chains-and-patterns` | Planned | — | — | — |
-| `kinetic-and-metropolis-transitions` | `feature/step-04-transition-model/kinetic-and-metropolis-transitions` | Planned | — | — | — |
-| `queries-and-editing` | `feature/step-04-transition-model/queries-and-editing` | Planned | — | — | — |
-| `transition-preview-and-benchmark` | `feature/step-04-transition-model/transition-preview-and-benchmark` | Planned | — | — | — |
-| `contracts-and-fixtures` | `feature/step-04-transition-model/contracts-and-fixtures` | Planned | — | — | — |
-| `samples-and-docs` | `feature/step-04-transition-model/samples-and-docs` | Planned | — | — | — |
-| `closeout` | `feature/step-04-transition-model/closeout` | Planned | — | — | — |
+| `transition-model-and-persistence` | `feature/step-04-transition-model/transition-model-and-persistence` | Done | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | `106a64f` |
+| `state-changes-and-groups` | `feature/step-04-transition-model/state-changes-and-groups` | Done | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | `8cac5b4` |
+| `chains-and-patterns` | `feature/step-04-transition-model/chains-and-patterns` | Done | `verify.sh dotnet`, `structure` pass (2026-11-09) | — | `1d3503d` |
+| `kinetic-and-metropolis-transitions` | `feature/step-04-transition-model/kinetic-and-metropolis-transitions` | Done | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | `76ee174` |
+| `queries-and-editing` | `feature/step-04-transition-model/queries-and-editing` | Done | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | `1b2cc8c` |
+| `transition-preview-and-benchmark` | `feature/step-04-transition-model/transition-preview-and-benchmark` | Done | `verify.sh dotnet`, `structure`, `api` pass; benchmark 19.75 µs (2026-11-09) | — | `b118133` |
+| `contracts-and-fixtures` | `feature/step-04-transition-model/contracts-and-fixtures` | Done | `verify.sh contracts`, `dotnet`, `structure`, `api` pass (2026-11-09) | — | `c92917b` |
+| `samples-and-docs` | `feature/step-04-transition-model/samples-and-docs` | Done | `verify.sh dotnet`, `docs`, `structure` pass (2026-11-09) | — | `ec04f9d` |
+| `closeout` | `feature/step-04-transition-model/closeout` | Done | `verify.sh all` pass; closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42690361556) | `288dd37` |
 
 ## Goal
 
@@ -605,73 +605,73 @@ in place for the dedicated unstable-site set. The new user-guide, physics, and r
 
 ## Implementation tasks
 
-- [ ] Extend `ModelDefinition` with the flat transition sections and empty defaults; update
+- [x] Extend `ModelDefinition` with the flat transition sections and empty defaults; update
   `ModelDefinitionJsonConverter`, the nested `ProjectJsonContext`, `ProjectValidator`, and
   `ProjectJson.CanonicalizeModel`; confirm `ProjectJsonConverter.Write`, `ProjectStore.SaveAsync`, and
   `ProjectHasher.Compute` preserve transitions.
-- [ ] Implement `StateChange`, `StateChangeGroup`, `TransitionChain`, `KineticTransition`,
+- [x] Implement `StateChange`, `StateChangeGroup`, `TransitionChain`, `KineticTransition`,
   `MetropolisTransition`, `TransitionRef`, `TransitionKind`, and `TransitionRefJsonConverter`. Reuse the five
   transition typed IDs already in `Ids/TypedIds.cs`; do not duplicate them.
-- [ ] Implement pattern/linker validation in Core, including the `Custom` grammar and `GeneratesReverse`
+- [x] Implement pattern/linker validation in Core, including the `Custom` grammar and `GeneratesReverse`
   consistency. The built-in stability-sequence check (`TRN028`) belongs to the Symmetry path validator.
-- [ ] Implement `Mocassin.Symmetry.Transitions.TransitionPathResolver` and `TransitionPathValidator`, including
+- [x] Implement `Mocassin.Symmetry.Transitions.TransitionPathResolver` and `TransitionPathValidator`, including
   P1 orbit expansion, `TrimToUnitCell` canonicalization, the periodic `PathMatchTolerance` match, full-encoding
   duplicate/ring detection, pattern-sequence validation, and ambiguous-site diagnostics.
-- [ ] Implement `ITransitionQuery`, `IProjectQuery` (implemented by `Project`), `ProjectHasher.ComputeTransition`,
+- [x] Implement `ITransitionQuery`, `IProjectQuery` (implemented by `Project`), `ProjectHasher.ComputeTransition`,
   and `ITransitionPreviewService`, including the `TryCreatePreview` failure boundary, the self-describing
   preview, `StateChangeMatrices`, and the bounded cache with symmetry-version key components.
-- [ ] Implement transition preview using the symmetry engine and the requested `(A, B, C)` cell counts,
+- [x] Implement transition preview using the symmetry engine and the requested `(A, B, C)` cell counts,
   including MMC site-pair expansion.
-- [ ] Implement reverse-link validation and `TRN018`.
-- [ ] Implement reference, duplicate-name, count, and cross-kind validation.
-- [ ] Implement editor operations in partial `ProjectEditor.Transitions.*.cs` files and dependent-removal
+- [x] Implement reverse-link validation and `TRN018`.
+- [x] Implement reference, duplicate-name, count, and cross-kind validation.
+- [x] Implement editor operations in partial `ProjectEditor.Transitions.*.cs` files and dependent-removal
   diagnostics; compose the Core and Symmetry validators for transition editing.
-- [ ] Add `TransitionDiagnosticCodes` for TRN001–TRN028, including hints and help anchors. Add
+- [x] Add `TransitionDiagnosticCodes` for TRN001–TRN028, including hints and help anchors. Add
   `docs/reference/transitions.md` with the TRN table and links; Step 07 creates the consolidated
   `docs/reference/diagnostics.md` and `docs/troubleshooting/errors.md` and imports/links that page.
-- [ ] Update `contracts/manifest.json`: set `status` to `step-04`, update `notes`, add the transition fields,
+- [x] Update `contracts/manifest.json`: set `status` to `step-04`, update `notes`, add the transition fields,
   add the `project-transitions-minimal` and `project-transitions-populated` fixtures, and regenerate the
   project schema. Keep the `model` signature skeleton for Step 08; record that the transition fields feed it.
-- [ ] Add XML docs, update `PublicAPI.Unshipped.txt`, and refresh the ApiCompat baseline for every new public
+- [x] Add XML docs, update `PublicAPI.Unshipped.txt`, and refresh the ApiCompat baseline for every new public
   type and member.
-- [ ] Add `TransitionPreviewCeria` to `Mocassin.Benchmarks/Transitions/TransitionPreviewBenchmarks.cs` and
+- [x] Add `TransitionPreviewCeria` to `Mocassin.Benchmarks/Transitions/TransitionPreviewBenchmarks.cs` and
   record its baseline in `tests/reference/bench/baselines.json` and `tests/reference/bench/`.
-- [ ] Add ceria KMC (oxygen migration), ceria MMC (O/V exchange), and polaron-hop samples under
+- [x] Add ceria KMC (oxygen migration), ceria MMC (O/V exchange), and polaron-hop samples under
   `samples/transitions/`.
-- [ ] Add a 5-site vehicle and a 5-site interstitialcy sample under `samples/transitions/`.
-- [ ] Update `samples/ceria/ceria.mocprj` in place so the unstable oxygen transition site uses a dedicated
+- [x] Add a 5-site vehicle and a 5-site interstitialcy sample under `samples/transitions/`.
+- [x] Update `samples/ceria/ceria.mocprj` in place so the unstable oxygen transition site uses a dedicated
   transition-state occupation set instead of the shared oxygen set (the Step 03 deferred item).
-- [ ] Add the new user-guide, physics, and reference pages to `zensical.toml` navigation and to the
+- [x] Add the new user-guide, physics, and reference pages to `zensical.toml` navigation and to the
   `docs/user-guide/index.md`, `docs/physics/index.md`, and `docs/reference/index.md` lists.
-- [ ] Update the transition rows in `appendix-b-parity-matrix.md`.
-- [ ] At closeout, update the Step 04 status page and dashboard, run `./tools/verify.sh all`, dispatch the
+- [x] Update the transition rows in `appendix-b-parity-matrix.md`.
+- [x] At closeout, update the Step 04 status page and dashboard, run `./tools/verify.sh all`, dispatch the
   single Ubuntu closeout CI run, and prepare `docs/planning/audits/step-04.md`. No per-feature CI.
 
 ## Acceptance criteria
 
-- [ ] Ceria oxygen migration can be defined as a 3-site chain with `[O,V_O]`, `[O,∅]`, `[O,V_O]` and a
+- [x] Ceria oxygen migration can be defined as a 3-site chain with `[O,V_O]`, `[O,∅]`, `[O,V_O]` and a
   stable-unstable-stable path whose endpoints are symmetry-equivalent O orbit members, not only the single
   authored O representative.
-- [ ] A 2-site MMC exchange `[A,B]` can be defined and previewed, including a same-site exchange.
-- [ ] A 5-site vehicle with five chain groups (`[A,V_A]`, `[A,V_A]`, `[AB,∅]`, `[B,V_B]`, `[B,V_B]`),
+- [x] A 2-site MMC exchange `[A,B]` can be defined and previewed, including a same-site exchange.
+- [x] A 5-site vehicle with five chain groups (`[A,V_A]`, `[A,V_A]`, `[AB,∅]`, `[B,V_B]`, `[B,V_B]`),
   a `D,S,S,D` chain, and an `S,S,U,S,S` reference path validates.
-- [ ] A 5-site interstitialcy with an `S,U,S,U,S` path validates.
-- [ ] Invalid paths (unstable endpoint, consecutive unstable, pattern-sequence mismatch, any repeated
+- [x] A 5-site interstitialcy with an `S,U,S,U,S` path validates.
+- [x] Invalid paths (unstable endpoint, consecutive unstable, pattern-sequence mismatch, any repeated
   encoded position, unmatched point) are rejected with precise diagnostics.
-- [ ] A complex transition without a reverse link warns `TRN018`; adding a symmetric reverse link clears it.
-- [ ] `GeneratesReverse` set inconsistently with the pattern is rejected with `TRN024`.
-- [ ] The preview enumerates the expected symmetry-equivalent paths and echoes `(A, B, C)` and the transition
+- [x] A complex transition without a reverse link warns `TRN018`; adding a symmetric reverse link clears it.
+- [x] `GeneratesReverse` set inconsistently with the pattern is rejected with `TRN024`.
+- [x] The preview enumerates the expected symmetry-equivalent paths and echoes `(A, B, C)` and the transition
   reference.
-- [ ] An invalid transition returns `null` and diagnostics from `TryCreatePreview`; no partial preview is
+- [x] An invalid transition returns `null` and diagnostics from `TryCreatePreview`; no partial preview is
   returned.
-- [ ] `StateChangeMatrices` has the documented dimensions, particle order, binary encoding, and
+- [x] `StateChangeMatrices` has the documented dimensions, particle order, binary encoding, and
   stable/unstable cardinality.
-- [ ] The transition sections round-trip through save/load, the project JSON context, and the canonical model;
+- [x] The transition sections round-trip through save/load, the project JSON context, and the canonical model;
   semantic arrays preserve order and transition edits change the document hash.
-- [ ] The generated project schema accepts the transition sections, and fixtures cover empty and populated
+- [x] The generated project schema accepts the transition sections, and fixtures cover empty and populated
   models.
-- [ ] Public API files and the ApiCompat baseline are current.
-- [ ] Documentation written.
+- [x] Public API files and the ApiCompat baseline are current.
+- [x] Documentation written.
 
 ## Documentation
 
