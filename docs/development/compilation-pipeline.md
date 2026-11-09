@@ -92,6 +92,30 @@ cluster canonicalization and codes, and reduction semantics. The catalog version
 Changing a covered rule bumps the contract version, updates golden fixtures and signatures, and is called out
 in the step page. The compiled payload records the contract version, catalog data version, and catalog SHA-256.
 
+## Transition stage (Step 04 input, Step 08 rules)
+
+Step 04 defines the transition input consumed by compilation:
+
+- state changes, groups, and chains;
+- one reference kinetic path or Metropolis site pair per transition;
+- explicit reverse links and `generatesReverse`;
+- the advisory `TransitionPreview` with resolved paths, expanded paths, state-change matrices, and expected
+  rule count.
+
+Definition-level validation belongs to `Mocassin.Core.Model.Transitions.TransitionModelValidator`. The
+resolved-path/site rules belong to `Mocassin.Symmetry.Transitions.TransitionPathValidator`, which uses the same
+`TransitionPathResolver` as the preview service. `Mocassin.Packages.Projects.ProjectValidationService`
+composes both with the Step 03 structure validator.
+
+Step 08 performs the deferred work: rule generation, automatic inverse rules for two/three-site mechanisms,
+rule deduplication, inverse/dependent pairing, and mass/charge conservation filtering. The authored model stores
+one reference geometry; Step 08 expands it into all symmetry-equivalent paths and rules. No rule or compiled
+transition index is written to the project.
+
+The preview cache is separate from compilation caches. Its key includes the transition closure hash, structure
+hash, requested `(A, B, C)` counts, transition reference, and symmetry catalog/contract versions. A capacity
+breach is a bounded failure, never an unbounded allocation.
+
 ## Test tiers
 
 - **PR-fast:** catalog integrity, group laws, synthetic P1/pair/cluster cases, cell geometry, minimum

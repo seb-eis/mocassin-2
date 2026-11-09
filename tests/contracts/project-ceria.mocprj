@@ -16,7 +16,7 @@
     "particles": [
       {
         "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
-        "name": "Ce4\u002B",
+        "name": "Ce4+",
         "symbol": "Ce",
         "charge": 4,
         "isVacancy": false
@@ -50,6 +50,14 @@
         "particleIds": [
           "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
           "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f09",
+        "name": "Oxygen transition site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01"
         ]
       }
     ],
@@ -99,7 +107,7 @@
             0.25,
             0.25
           ],
-          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f04",
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f09",
           "stability": "unstable"
         }
       ],

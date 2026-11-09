@@ -41,7 +41,7 @@ generated JSON Schema is
 | `notes` | no | Optional free-text notes. |
 | `createdUtc` | yes | ISO-8601 UTC creation timestamp. |
 | `modifiedUtc` | yes | ISO-8601 UTC last-modified timestamp. |
-| `model` | yes | Scientific model body. Step 03 adds `particles`, `particleSets`, and `structure`; energy, lattice, and simulation sections are added by Steps 04–06. |
+| `model` | yes | Scientific model body. Steps 03–04 add `particles`, `particleSets`, `structure`, and the flat transition sections; energy, lattice, and simulation sections are added by Steps 05–06. |
 | `parameterizations` | yes | Parameterization templates. Step 01 stores identity and model signature only. |
 | `jobTemplates` | yes | Job templates. Step 01 stores identity and name only. |
 | `buildTemplates` | yes | Build recipes binding a job template to a parameterization. |
@@ -160,6 +160,71 @@ For authoring guidance see [Particles and particle sets](../user-guide/particles
 The catalog is embedded, not stored in the project. The data version is `spglib-2.8.0/catalog-1`; see
 [Compilation Pipeline](../development/compilation-pipeline.md) and
 [Symmetry and Geometry](../physics/symmetry.md) for the exact rules.
+
+## Transitions (Step 04 fields)
+
+Step 04 adds five flat transition sections. Missing sections load as empty arrays; a transition-free project
+keeps its Step 01/03 canonical hash because empty sections are omitted when writing.
+
+```json
+{
+  "stateChanges": [
+    { "id": "…", "name": "O2- -> VO", "donorParticleId": "…", "acceptorParticleId": "…" }
+  ],
+  "stateChangeGroups": [
+    { "id": "…", "name": "O vacancy", "stateChangeIds": ["…"] }
+  ],
+  "chains": [
+    {
+      "id": "…",
+      "name": "3-site migration",
+      "pattern": "migration3",
+      "groupIds": ["…", "…", "…"],
+      "linkers": ["dynamic", "dynamic"],
+      "generatesReverse": true
+    }
+  ],
+  "kineticTransitions": [
+    {
+      "id": "…",
+      "name": "O migration",
+      "chainId": "…",
+      "referencePath": [[0.25, 0.25, 0.25], [0.0, 0.25, 0.25], [0.25, 0.25, 0.75]],
+      "reverseTransitionId": null
+    }
+  ],
+  "metropolisTransitions": [
+    {
+      "id": "…",
+      "name": "O exchange",
+      "chainId": "…",
+      "siteAId": "…",
+      "siteBId": "…",
+      "reverseTransitionId": null
+    }
+  ]
+}
+```
+
+- `stateChangeIds`, `groupIds`, `linkers`, and `referencePath` are semantic-order arrays and are never
+  re-sorted. All five transition collections sort by `id` in canonical JSON.
+- `pattern` is one of `metropolis2`, `migration3`, `interstitialcy5`, `interstitialcy7`, `vehicle5`,
+  `vehicle6`, or `custom`; `linkers` are `dynamic` or `static`; enums are camelCase strings.
+- `linkers.length` equals `groupIds.length - 1`. `generatesReverse` is true only for `metropolis2` and
+  `migration3`.
+- A `referencePath` is an array of three-number fractional arrays and may leave `[0,1)`. Points must match
+  exactly one P1 position/owning site within `PathMatchTolerance = 1e-6`; see
+  [Transitions reference](transitions.md).
+- A `metropolisTransitions` entry binds two stable reference sites. The same site may be selected twice for an
+  intra-sublattice exchange.
+- `reverseTransitionId` is an optional symmetric same-kind link. Complex mechanisms use it instead of automatic
+  inverse rules; a missing link is `TRN018` warning.
+- The project `schemaVersion` stays `1`: the sections are additive under the pre-release v1 format, and the
+  manifest/schema/fixtures are regenerated in the same step.
+- `TransitionPreview` is derived data and is never written to the project.
+
+`ProjectHasher.ComputeTransition(project, transitionRef)` hashes the transition closure for preview caching. It
+is separate from the model and document hashes.
 
 ## Model and templates in Step 01 (historical)
 

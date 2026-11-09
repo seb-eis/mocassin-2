@@ -8,6 +8,14 @@ a shared model:
 - **Kinetic Monte Carlo (KMC)** selects and accepts transitions according to their rates. It advances
   simulated time and supports pre-runs, normalization, and field-driven transport.
 
+## Transition mechanisms
+
+The transition model is shared by both Monte Carlo methods:
+
+- [Monte Carlo methods](monte-carlo.md) — MMC/KMC comparison, state triplets, and step ownership.
+- [Kinetic Monte Carlo](kmc.md) — reference paths, stability sequences, reverse links, and preview.
+- [Metropolis Monte Carlo](mmc.md) — two-site exchange, same-site exchange, and site validation.
+
 ## Energy model
 
 The model separates:
