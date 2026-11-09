@@ -275,12 +275,4 @@ internal static partial class TransitionModelValidator
         Guid objectId,
         string? property = null) =>
         new(code, DiagnosticSeverity.Warning, message, new ModelPath(domain, objectId, property));
-
-    /// <summary>
-    /// Validates chain and transition rules. The implementation is added by later feature slices.
-    /// </summary>
-    private static partial void ValidateModelTransitions(
-        ModelDefinition model,
-        Dictionary<ParticleId, Particle> particleById,
-        DiagnosticBag bag);
 }
