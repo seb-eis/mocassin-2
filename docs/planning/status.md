@@ -49,7 +49,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Done | `step/02-symmetry-and-geometry` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) | `dbf5691` | `step-02` | Passed with notes at `6341b56` | Ready with notes — accepted |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Done | `step/03-particle-and-structure-models` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/42521062856) | `162ebe4` | `step-03` | Passed with notes at `b6a97ec` | Ready with notes — accepted at `3096aa8` |
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Done | `step/04-transition-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) (closeout) | `31ba12d` | `step-04` | Passed with notes at `82c8cb4` | Ready for implementation — accepted at `a3d8641` |
-| 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
+| 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Ready for review at `424a404` |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -79,14 +79,10 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 ## Active work
 
-Step 04 — Transition Model is complete. The human owner approved the start gate on 2026-11-08, all nine
-feature branches on 2026-11-09, and the final merge on 2026-11-09. The step contains the transition envelope,
-persistence, definition and resolved-path validation, queries and editing, preview service and benchmark,
-contract schema/fixtures, samples, and user/reference documentation. `./tools/verify.sh all` passed locally;
-closeout CI `42695864895` is green at `8c44709`; three independent audit rounds ended `Passed with notes` with
-only notes N2/N3/N6/N7 remaining. The step was merged into `main` as `31ba12d`, main CI `42697550846` is green,
-and the annotated `step-04` tag is pushed. Step 05 is the next unblocked step. Step 03 remains complete: merge `162ebe4`, tag
-`step-03`, main CI `42521062856` green, audit passed with notes at `b6a97ec`.
+Step 05 — Energy Model is in pre-implementation design review. The design is frozen at `424a404` and the
+review record is `Ready for review`. No step branch or implementation exists yet. Step 04 is complete: merge
+`31ba12d`, tag `step-04`, main CI `42697550846` green, audit `Passed with notes` at `82c8cb4`. Step 03 remains
+complete: merge `162ebe4`, tag `step-03`, main CI `42521062856` green, audit passed with notes at `b6a97ec`.
 
 ## Notes
 

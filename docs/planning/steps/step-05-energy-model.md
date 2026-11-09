@@ -13,8 +13,8 @@ with validation and cost previews.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Not requested
-- **Last updated:** —
+- **Design review:** [Ready for review](../reviews/step-05.md)
+- **Last updated:** 2026-11-09
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -47,7 +47,39 @@ definition is geometric and symbolic; energy values are supplied later by parame
 
 ## Design
 
-### 1. Environments
+### 1. Model composition and persistence
+
+`ModelDefinition` gains the flat energy sections alongside the Step 03/04 particle, structure, and transition
+sections:
+
+```csharp
+public sealed record ModelDefinition
+{
+    // Step 03/04 sections omitted here.
+    StableEnvironment StableEnvironment { get; init; }
+    ImmutableArray<UnstableEnvironment> UnstableEnvironments { get; init; }
+    ImmutableArray<Cluster> Clusters { get; init; }
+    ImmutableArray<SiteEnergySet> SiteEnergies { get; init; }
+}
+```
+
+- The model stays flat on disk: `model.stableEnvironment`, `model.unstableEnvironments`, `model.clusters`, and
+  `model.siteEnergies`.
+- `ModelDefinitionJsonConverter`, `ProjectJsonContext`, `ProjectSchema`, and `ProjectValidator` are extended
+  for the new sections.
+- A missing `stableEnvironment` uses the documented default: cutoff `1.0 Å`, no filters.
+- Semantic array order:
+  - `Cluster.OffsetVectors` — definition order relative to the center.
+  All other collections are sorted when serialized:
+  - `UnstableEnvironments` by `siteId`;
+  - `Clusters` by `id`;
+  - `SiteEnergies` by `siteId`;
+  - `InteractionFilter` entries by `(start, end, siteAId, siteBId)`;
+  - `SiteEnergySet.Entries` by `particleId`.
+- The project `schemaVersion` remains 1 because the energy sections are additive.
+- Pair interactions, cost previews, and derived chiral links are computed data and are never persisted.
+
+### 2. Environments
 
 ```csharp
 public sealed record StableEnvironment(
@@ -75,7 +107,7 @@ public sealed record InteractionFilter(
 - Filters must lie within the cutoff; overlapping filters are allowed but redundant ones warn.
 - Filters are part of the model signature; changing one invalidates pair/cluster parameterizations.
 
-### 2. Clusters
+### 3. Clusters
 
 ```csharp
 public sealed record Cluster(
@@ -97,7 +129,7 @@ public sealed record Cluster(
 - A cluster only contributes to the energy of its center site. To model the same cluster from another
   surrounding position, define another cluster with that position as center.
 
-### 3. Site energies
+### 4. Site energies
 
 ```csharp
 public sealed record SiteEnergySet(
@@ -116,7 +148,7 @@ public sealed record SiteEnergyEntry(
 - Site energies can be overridden by a parameterization template (new capability; see step 09), but the model
   value remains the default.
 
-### 4. Pair interactions (derived, not authored)
+### 5. Pair interactions (derived, not authored)
 
 Pair interactions are discovered by the compiler:
 
@@ -132,7 +164,7 @@ Pair interactions are discovered by the compiler:
 - The model layer exposes a preview with counts and distances; the compiled interaction sets are produced in
   step 08.
 
-### 5. Cost preview
+### 6. Cost preview
 
 Before compilation, compute and show:
 
@@ -146,7 +178,7 @@ Before compilation, compute and show:
 
 The preview uses the same sampling code as compilation (step 08) but does not allocate the full tables.
 
-### 6. Validation rules
+### 7. Validation rules
 
 | Code | Severity | Rule |
 | --- | --- | --- |
@@ -172,7 +204,7 @@ The preview uses the same sampling code as compilation (step 08) but does not al
 `ENM018` is emitted by the Step 07 cross-domain pipeline because it relates Step 04 transition paths to
 Step 05 cutoffs. Step 04 does not depend on energy data.
 
-### 7. Editing operations
+### 8. Editing operations
 
 - Update stable environment cutoff and filters.
 - Add/update/remove unstable environments.
@@ -181,17 +213,132 @@ Step 05 cutoffs. Step 04 does not depend on energy data.
 - Changing the structure (sites) invalidates environments, clusters, and site energies that reference removed
   sites; the editor offers cascade removal or rebase.
 
+### 9. Public API
+
+```csharp
+// Mocassin.Core
+public interface IEnergyQuery
+{
+    StableEnvironment StableEnvironment { get; }
+    ImmutableArray<UnstableEnvironment> UnstableEnvironments { get; }
+    ImmutableArray<Cluster> Clusters { get; }
+    ImmutableArray<SiteEnergySet> SiteEnergies { get; }
+
+    UnstableEnvironment? FindEnvironment(CellSiteId siteId);
+    Cluster? FindCluster(ClusterId id);
+    SiteEnergySet? FindSiteEnergies(CellSiteId siteId);
+}
+
+// Mocassin.Symmetry
+public sealed record ClusterCostPreview(
+    ClusterId ClusterId,
+    int RawPermutationCount,
+    int UniquePermutationCount,
+    long EstimatedBytes);
+
+public sealed record EnergyCostPreview(
+    int P1PositionCount,
+    int PairImageCount,
+    int UniquePairInteractionCount,
+    ImmutableArray<ClusterCostPreview> ClusterCosts,
+    long EstimatedMemoryBytes,
+    int WarningCount);
+
+public sealed record PairInteractionPreview(
+    string StableId,
+    CellSiteId SiteAId,
+    CellSiteId SiteBId,
+    double DistanceAngstrom,
+    bool IsChiral);
+
+public interface IEnergyPreviewService
+{
+    EnergyCostPreview CreatePreview(
+        StructureModel structure,
+        int cellCountA,
+        int cellCountB,
+        int cellCountC);
+
+    ImmutableArray<PairInteractionPreview> CreatePairPreview(
+        StructureModel structure,
+        int cellCountA,
+        int cellCountB,
+        int cellCountC);
+}
+```
+
+- `IEnergyQuery` is implemented by the immutable `Project` snapshot.
+- `IEnergyPreviewService` lives in `Mocassin.Symmetry`; Core never references Symmetry.
+- Derived pair interactions use stable geometry IDs and a preview-only `PairInteractionPreview`.
+- The preview is advisory; the compiled interaction tables are authoritative in Step 08.
+
+## Code layout
+
+The new code follows the structure policy: PascalCase domain folders, namespaces that match folders, no new
+root-level files, and no folder above 20 direct files.
+
+```text
+Mocassin.Core/
+  Model/
+    ModelDefinition.cs                  # add energy sections
+    ModelDefinitionJsonConverter.cs     # read/write the new sections
+    Energy/
+      StableEnvironment.cs
+      UnstableEnvironment.cs
+      InteractionFilter.cs
+      Cluster.cs
+      SiteEnergySet.cs
+      SiteEnergyEntry.cs
+      IEnergyQuery.cs
+      EnergyModelValidator.cs
+  Diagnostics/
+    EnergyDiagnosticCodes.cs            # ENM001-ENM018
+  Editing/
+    ProjectEditor.cs                    # add energy editing operations
+  Project/
+    ProjectJsonContext.cs
+    ProjectSchema.cs
+    ProjectValidator.cs
+
+Mocassin.Symmetry/
+  Energy/
+    EnergyCostPreview.cs
+    ClusterCostPreview.cs
+    PairInteractionPreview.cs
+    EnergyPreviewService.cs
+    IEnergyPreviewService.cs
+```
+
+Tests mirror the source concept:
+
+- `Mocassin.Core.Tests/Energy/EnvironmentTests.cs`
+- `Mocassin.Core.Tests/Energy/ClusterTests.cs`
+- `Mocassin.Core.Tests/Energy/SiteEnergyTests.cs`
+- `Mocassin.Core.Tests/Energy/EnergyModelTests.cs`
+- `Mocassin.Symmetry.Tests/Energy/EnergyPreviewTests.cs`
+
+Samples live under `samples/energy/`. The new user-guide, physics, and troubleshooting pages are added to
+`zensical.toml` navigation in the same step.
+
 ## Implementation tasks
 
+- [ ] Extend `ModelDefinition` with the flat energy sections; update `ModelDefinitionJsonConverter`,
+  `ProjectJsonContext`, `ProjectSchema`, and `ProjectValidator`.
 - [ ] Implement `StableEnvironment`, `UnstableEnvironment`, `InteractionFilter`, `Cluster`, `SiteEnergySet`.
 - [ ] Implement crystal/cutoff/filter validation.
 - [ ] Implement cluster geometry validation (periodic dedup, ring detection, range).
-- [ ] Implement the cost preview using symmetry sampling.
+- [ ] Implement `IEnergyQuery` and `IEnergyPreviewService`.
+- [ ] Implement the cost preview using symmetry sampling and the requested `(A, B, C)` cell counts.
 - [ ] Implement derived pair-interaction preview with stable geometry IDs.
 - [ ] Implement chiral-pair detection and linkage.
 - [ ] Implement editor operations and cascade invalidation.
+- [ ] Add the Core energy diagnostic codes and help text.
+- [ ] Update `contracts/manifest.json` with the energy sections; regenerate the project schema and add fixtures
+  with empty and populated energy data. The project `schemaVersion` remains 1 because the fields are additive.
+- [ ] Add XML docs, update `PublicAPI.Unshipped.txt`, and refresh the ApiCompat baseline for every new public
+  type and member.
 - [ ] Add ceria and barium-zirconate energy models.
-- [ ] Add diagnostics/help text.
+- [ ] Add the new user-guide, physics, building, and troubleshooting pages to `zensical.toml` navigation.
 
 ## Acceptance criteria
 
@@ -201,6 +348,9 @@ Step 05 cutoffs. Step 04 does not depend on energy data.
 - [ ] Duplicate/ring/out-of-range clusters are rejected with paths.
 - [ ] The cost preview reports pair and permutation counts consistent with step 08.
 - [ ] Chiral pair partners are detected and cannot receive independent energies.
+- [ ] The energy sections round-trip through the project JSON context; semantic arrays preserve order.
+- [ ] The generated project schema accepts the energy sections, and fixtures cover empty and populated models.
+- [ ] Public API files and the ApiCompat baseline are current.
 - [ ] Documentation written
 
 ## Documentation
@@ -211,6 +361,9 @@ At this point, document the energy model:
 - `docs/physics/energies.md` — pair/cluster/site contributions and the environment cutoff.
 - `docs/development/compilation-pipeline.md` — environment sampling and derived pair/cluster preview.
 - `docs/troubleshooting/errors.md` — oversized clusters/permutations and how to fix them.
+- `docs/reference/project-format.md` — energy sections, field names, semantic ordering, and constraints.
+
+Add the new user-guide, physics, and troubleshooting pages to `zensical.toml` navigation in the same step.
 
 ## Tests
 
@@ -222,6 +375,9 @@ At this point, document the energy model:
 | Pair preview | Counts match brute-force sampling for random cells |
 | Chiral pairs | Known chiral and achiral geometries |
 | Cost limits | Warning and hard-limit thresholds |
+| Model envelope | Empty, energy-only, and combined models round-trip through the project JSON context |
+| Schema | Generated project schema accepts the energy sections and rejects unknown fields |
+| Semantic order | Cluster offset vectors preserve definition order across serialization |
 | Invalidation | Removing a site cascades or reports dependents |
 
 ## Risks and mitigations

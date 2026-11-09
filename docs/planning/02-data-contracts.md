@@ -15,6 +15,7 @@ solver, and external tooling. Contracts are versioned and covered by golden and 
   - state-change IDs inside a group,
   - state-change group order inside a chain,
   - chain linkers,
+  - cluster offset vectors,
   - doping priority,
   - reference path positions,
   - particle IDs in a particle set,
@@ -380,8 +381,12 @@ parameterization, and lattice signatures use the MessagePack projection (section
 
 - `cutoff` and filter radii are in Å.
 - Filters remove pair interactions between the two referenced sites in the radial range.
-- Cluster offsets are absolute fractional vectors relative to the cluster centre, in definition order.
-- Site energies are in eV; missing entries default to 0.
+- Cluster offsets are absolute fractional vectors relative to the cluster centre, in definition order. The
+  `offsetVectors` array is semantic and is never re-sorted.
+- Site energies are in eV; missing entries default to 0. Energy entries are sorted by `particleId` when
+  serialized.
+- Unstable environments are sorted by `siteId`, clusters by `id`, and site-energy sets by `siteId`.
+- The energy sections are additive and the project `schemaVersion` remains 1.
 
 #### Lattice and doping
 
