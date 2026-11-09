@@ -48,7 +48,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Done | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) (main: Ubuntu + Windows + macOS) | `7b4a994` | `step-01` | Passed with notes at `05c41ab` | Waived — introduced after completion |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Done | `step/02-symmetry-and-geometry` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) | `dbf5691` | `step-02` | Passed with notes at `6341b56` | Ready with notes — accepted |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Done | `step/03-particle-and-structure-models` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/42521062856) | `162ebe4` | `step-03` | Passed with notes at `b6a97ec` | Ready with notes — accepted at `3096aa8` |
-| 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | In progress | `step/04-transition-model` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42693957630) (Ubuntu closeout) | — | — | Re-audit required at `ebefc96` | Ready for implementation — accepted at `a3d8641` |
+| 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | In progress | `step/04-transition-model` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) (Ubuntu closeout) | — | — | Re-audit required at `8c44709` | Ready for implementation — accepted at `a3d8641` |
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -84,7 +84,7 @@ gate on 2026-11-08 and all nine feature branches on 2026-11-09. The step now con
 persistence, definition and resolved-path validation, queries and editing, preview service and benchmark,
 contract schema/fixtures, samples, and user/reference documentation. `./tools/verify.sh all` passed locally and
 the single Ubuntu closeout CI run `42690361556` is green at `288dd37`. Round 1 of the independent audit passed with notes at
-`b2382b3`; F1–F4 and N1/N4 were fixed at `ebefc96`, N2/N3 remain accepted process notes, and a fresh re-audit is required. No step-to-main merge or tag has been requested. Step 03 remains complete: merge `162ebe4`, tag
+`b2382b3`; F1–F4/N1/N4 were fixed at `ebefc96`; round 2 then recorded F5–F7/N5, which were fixed at `8c44709`. N2/N3 remain accepted process notes and a fresh re-audit is required. No step-to-main merge or tag has been requested. Step 03 remains complete: merge `162ebe4`, tag
 `step-03`, main CI `42521062856` green, audit passed with notes at `b6a97ec`.
 
 ## Notes

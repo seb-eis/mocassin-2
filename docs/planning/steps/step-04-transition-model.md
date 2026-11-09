@@ -9,10 +9,10 @@ geometry, with validation of transition semantics.
 
 - **Status:** In progress — audit passed with notes, awaiting merge approval
 - **Step branch:** `step/04-transition-model`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42693957630) — replacement closeout, Ubuntu
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) — replacement closeout, Ubuntu
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `ebefc96` (round 1 passed with notes at `b2382b3`)
+- **Audit:** Re-audit required at `8c44709` (rounds 1–2 passed with notes)
 - **Design review:** [Ready for implementation — accepted at `a3d8641`](../reviews/step-04.md)
 - **Last updated:** 2026-11-09
 

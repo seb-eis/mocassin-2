@@ -14,11 +14,11 @@
 | Step | 04 — Transition Model |
 | Request owner | Step agent |
 | Audit initiated by | Human owner |
-| Audit status | Passed with notes |
-| Audited commit | `ebefc96` |
+| Audit status | Re-audit required |
+| Audited commit | `8c44709` |
 | Step branch | `step/04-transition-model` |
 | Step tag | — |
-| Closeout CI run | [`42693957630`](https://github.com/seb-eis/mocassin-2/actions/runs/42693957630) — green at `ebefc96` |
+| Closeout CI run | [`42695864895`](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) — green at `8c44709` |
 | Platform CI | Not run (Ubuntu-only policy) |
 | Audit date | 2026-11-09 |
 | Auditor | Independent audit agent (fresh context; no shared conversation with the planner or implementor) |
@@ -33,6 +33,14 @@ Round 1 returned **Passed with notes** at code commit `288dd37`. The step agent 
 benchmark evidence) and N3 (docs-only record-parent delta) remain accepted process notes. A fresh re-audit of
 the complete step at `ebefc96` is requested; the reviewer should append a new round and preserve round 1
 unchanged.
+
+### Round 3 re-audit request
+
+Round 2 returned **Passed with notes** at code commit `ebefc96` and recorded F5–F7 (Minor) plus N5 (Note). The
+step agent fixed all four on `feature/step-04-transition-model/fix-reaudit-findings`, squashed the result as
+`8c44709`, ran `./tools/verify.sh all`, and dispatched one replacement closeout CI run (green at `8c44709`).
+N2 (local benchmark evidence) and N3 (docs-only record-parent delta) remain accepted process notes. A fresh
+re-audit of the complete step at `8c44709` is requested; append a new round and preserve rounds 1–2 unchanged.
 
 ## Step summary
 
@@ -417,6 +425,10 @@ The audit result is evidence, not merge authorization.
 | N2 | Accepted note — local-container benchmark evidence; manual Benchmark CI re-verifies the runner class | Step agent | — |
 | N3 | Accepted note — closeout CI is green at the code commit; later commits are documentation-only | Step agent | — |
 | N4 | Fixed — Metropolis chains now reject unstable-role groups with TRN012 | Step agent | `ebefc96` |
+| F5 | Fixed — ceria expanded-path and MMC pair counts now asserted against a brute-force count | Step agent | `8c44709` |
+| F6 | Fixed — nested default chain/group arrays are guarded in the transition closure hash | Step agent | `8c44709` |
+| F7 | Fixed — ambiguous TRN020 now has a regression test for `Related` candidate paths | Step agent | `8c44709` |
+| N5 | Fixed — preview definition validation now uses only the transition closure | Step agent | `8c44709` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
