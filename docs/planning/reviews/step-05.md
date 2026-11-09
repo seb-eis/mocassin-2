@@ -1365,3 +1365,139 @@ Reviewer: verify that m16 is resolved — the `ENM014`/`ENM015` promoted-vs-new 
 `ENM002` rows, and the explicitly illustrative new-check list — and that the delta introduces no unrelated
 change or new contradiction. Keep all earlier round text unchanged and append your reviewer-authored round-5
 content below.
+
+### Reviewer context
+
+I am a fresh planning auditor for round 5. I did not author or implement this design and have no shared
+conversation with the planner, the implementor, or the round-1–round-4 reviewers. This is the focused re-review
+requested above: I verified the m16 correction against the Step 05 page at `0b2a571` and checked that the delta
+introduces no unrelated change or new contradiction. I read `AGENTS.md` §3.8–§3.13, `docs/planning/reviews/
+README.md`, the complete request record, the Step 05 page at `0b2a571` and `2f43a19`, and the original
+`StableEnvironmentInfoValidator`, `GroupInteractionValidator`, and `MocassinEnergySettings` as read-only
+reference. I did not rely on the resolution text alone.
+
+**Frozen state.** Worktree `/workspace/mocassin`, branch `main`, `HEAD` `c236f2e`; the worktree was clean
+before this record was written. The reviewed commit is `0b2a571`, and `git show --stat 0b2a571` shows only
+`docs/planning/steps/step-05-energy-model.md` (13 insertions, 6 deletions), entirely inside §7.1. The round-5
+request commit `c236f2e` sits after it, so this record commit's parent is `c236f2e`, not the reviewed commit
+(process note n14, as anticipated by n13).
+
+### Round 5 checklist
+
+- [x] **m16 — `ENM014` promoted-vs-new split.** The single mixed row is now two rows: duplicate site-energy
+  entries and void-on-stable are `Promoted`, and an unknown site/particle reference is `New v1`. This matches
+  the rule table and the original `StableEnvironmentInfoValidator`, which warned on duplicates and
+  void-on-stable.
+- [x] **m16 — `ENM015` promoted-vs-new split.** Non-finite site energy is `Promoted` (the original warned on
+  NaN/Inf) and the −100..100 eV range is `New v1 (range half)` (the original had no site-energy range check).
+- [x] **m16 — `ENM001`/`ENM002` rows added.** `ENM001` (non-positive/non-finite cutoff, `New v1`) records that
+  `MaxInteractionRange` is a bare double with no original validator rule; `ENM002` (periodic ambiguity,
+  `New v1 (advisory)`, Warning) matches the §7 rule table and is consistent with the empty-model suppression.
+- [x] **m16 — new-check list explicitly illustrative.** The paragraph now reads “include, illustratively” and
+  lists `ENM001`, `ENM002`, the `ENM004` unstable-filter direction, the `ENM014` unknown-reference half, the
+  `ENM015` range half, and the Step 07-owned `ENM018`. It also states explicitly that duplicate site-energy
+  entries and non-finite site energies are promoted warnings, not new checks.
+- [x] **No new contradiction.** The split rows agree with the §7 rule table (`ENM001` Error/Core, `ENM002`
+  Warning/Symmetry, `ENM014`/`ENM015` Error/Core), the §3 site-energy text, the warnings list, and the Step 07
+  `ENM018` boundary.
+- [x] **Delta scope.** `0b2a571` touches only §7.1 of the Step 05 page; the other `2f43a19..0b2a571` changes are
+  the round-4 request/record/status commits (`9484eec`, `e57bbf3`), not design content.
+
+### Evidence
+
+**Commands run (from `/workspace/mocassin`):**
+
+```sh
+git status --short
+# (no output: clean worktree before this record was written)
+
+git log --oneline --decorate -5
+# c236f2e (HEAD -> main) docs: request step-05 focused round-5 re-review [skip ci]
+# 0b2a571 docs: fix step-05 validation deviation classification [skip ci]
+# e57bbf3 docs: record step-05 focused round-4 design re-review Ready with notes [skip ci]
+# 9484eec docs: request step-05 focused round-4 re-review [skip ci]
+# 2f43a19 docs: resolve step-05 round-3 review notes [skip ci]
+
+git show --stat 0b2a571
+# docs/planning/steps/step-05-energy-model.md | 19 +++++++++++++------
+# 1 file changed, 13 insertions(+), 6 deletions(-)
+
+git diff --stat 2f43a19..0b2a571 -- docs/planning
+# docs/planning/reviews/step-05.md            | 278 ++++++++++++++++++++++++++--
+# docs/planning/status.md                     |   6 +-
+# docs/planning/steps/step-05-energy-model.md |  21 ++-
+# 3 files changed, 278 insertions(+), 27 deletions(-)
+
+git diff 2f43a19..0b2a571 -- docs/planning
+# Reviewed in full. The design delta at 0b2a571 is §7.1 only; the record and status changes come from the
+# intervening round-4 request (9484eec) and record (e57bbf3) commits.
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.24s
+# exit 0
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+# exit 0
+
+git diff --check
+# (no output, exit 0)
+```
+
+**Read-only checks.**
+
+```sh
+git show 0b2a571 -- docs/planning/steps/step-05-energy-model.md
+# Only §7.1: two ENM001/ENM002 rows inserted, the ENM014 and ENM015 rows split, and the new-check paragraph
+# made explicitly illustrative.
+
+nl -ba docs/planning/steps/step-05-energy-model.md | sed -n '285,315p;332,363p'
+# Rule table and §7.1 agree: ENM001 Error/Core, ENM002 Warning/Symmetry, ENM014/ENM015 Error/Core; the
+# illustrative list and the promoted-warning sentence match the Type column.
+
+grep -n "ENM001\|ENM002\|ENM014\|ENM015" docs/planning/steps/step-05-energy-model.md
+# §3 site-energy text (lines 201–202) still matches: repeated or unknown-reference entries are ENM014; an
+# out-of-range or non-finite value is ENM015. Acceptance and test rows use the same codes.
+
+nl -ba /workspace/mocassin-original/src/ModelBuilder/ICon.Model/Energies/Manager/Services/Validators/
+StableEnvironmentInfoValidator.cs | sed -n '134,151p'
+# Confirms the original warned only on duplicate entries, void-on-stable, and NaN/Inf; no site-energy range
+# check.
+
+grep -rn "MaxInteractionRange" /workspace/mocassin-original/src/ModelBuilder/ICon.Model --include=*.cs
+# MaxInteractionRange is a bare double used as a constraint bound; no validator rule, so ENM001 is New v1.
+```
+
+**Files reviewed.** `AGENTS.md` §3.8–§3.13; `docs/planning/reviews/README.md`; the complete
+`docs/planning/reviews/step-05.md`; `docs/planning/steps/step-05-energy-model.md` at `0b2a571` and `2f43a19`;
+`docs/planning/status.md`; and the original validators/settings listed above.
+
+### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Note** | **n14 — Record parent and request-commit metadata (process note, not a design finding).** `HEAD` is `c236f2e`; the reviewed commit is `0b2a571`. `git diff 2f43a19..0b2a571` contains the round-4 request commit (`9484eec`), the round-4 record commit (`e57bbf3`), and the m16 fix (`0b2a571`); only the last touches design content. This record commit's parent is therefore the round-5 request commit, not the reviewed commit. n13 recorded the same situation for round 4. | Commands above. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
+verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
+the auditor's findings, evidence, or verdict.
+
+### Verdict
+
+- [x] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+**Verdict: Ready for implementation.** m16 is fully resolved at `0b2a571`. The `ENM014` and `ENM015` rows are
+split so that the promoted original warnings (duplicate/void site energies, non-finite values) are separated
+from the genuinely new v1 checks (unknown references, the −100..100 eV range), `ENM001` and `ENM002` now appear
+in the deviations table with accurate original behaviour, and the new-check paragraph is explicitly
+illustrative and lists the new halves consistently. The delta is confined to §7.1 and introduces no unrelated
+design change or new contradiction: the Type column, rationale, §7 rule table, §3 site-energy text, warnings
+list, and Step 07 `ENM018` boundary all agree. No Blocker, Major, or Minor remains; n13 and n14 are process
+notes about record parents, not design findings. The strict documentation build, contract generation, and
+whitespace check all pass. The human owner approves the final verdict and the Step 05 start gate.
