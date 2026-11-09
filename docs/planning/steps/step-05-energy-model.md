@@ -331,6 +331,8 @@ not a silent relaxation. Advisory and performance conditions stay warnings.
 
 | Condition | Original behavior | Step 05 | Type | Rationale |
 | --- | --- | --- | --- | --- |
+| Environment cutoff non-positive or non-finite | No validator rule; `MaxInteractionRange` is a bare double | `ENM001` Error | New v1 | Every environment needs a usable sampling range |
+| Environment cutoff > half the smallest cell dimension | Not checked | `ENM002` Warning | New v1 (advisory) | Periodic ambiguity is possible but not always wrong |
 | Filter range outside the environment cutoff | Warning | `ENM003` Error | Promoted | The filter cannot be applied deterministically |
 | Unknown/identical filter sites, or an unstable filter not centered on the environment site | Warning / not checked | `ENM004` Error | Promoted + new | The filter cannot be resolved or applied in the intended direction |
 | Unstable environment on a stable site / duplicate per site | Warning | `ENM006` Error | Promoted | The environment is unusable or ambiguous |
@@ -340,15 +342,20 @@ not a silent relaxation. Advisory and performance conditions stay warnings.
 | Invalid surrounding position (unknown/unstable/filtered) or cluster outside the center cutoff | Warning | `ENM010` Error | Promoted | The cluster geometry is not valid or reaches outside the environment |
 | Full-geometry duplicate or center-equivalent position | Warning | `ENM011` Error | Promoted | The original “ring” check finds degenerate geometry |
 | Cluster raw permutations >5000 | Warning | `ENM013` Error | Promoted | The original `PermutationsPerGroup` maximum is exceeded |
-| Unknown site/particle or duplicate site-energy entry | Duplicate/void warnings; unknown references partly structural | `ENM014` Error | Promoted + new | The entry cannot be resolved or is ambiguous |
-| Site energy outside −100..100 eV or non-finite | No site-energy range check; the original only warned on NaN/Inf, duplicates, and void-on-stable. `PairEnergies`/`GroupEnergies` use −100..100 | `ENM015` Error | New v1 | Site energies are also migration barriers; the v1 range matches the pair/group setting |
+| Duplicate site-energy entry or void-on-stable | Warning | `ENM014` Error | Promoted | The entry is ambiguous or occupies an invalid state |
+| Unknown site/particle reference in a site-energy entry | Not checked / partly structural | `ENM014` Error | New v1 | The entry cannot be resolved |
+| Site energy non-finite (NaN/Inf) | Warning | `ENM015` Error | Promoted | A non-finite value cannot be used |
+| Site energy outside −100..100 eV | No site-energy range check; `PairEnergies`/`GroupEnergies` use −100..100 | `ENM015` Error | New v1 (range half) | Site energies are also migration barriers; the v1 range matches the pair/group setting |
 | Sampling hard limits (stable >5000, unstable >1000) | Warning | `ENM019` Error | Promoted | The requested model cannot be compiled within the budget |
 | More than 10 clusters per center | Warning | `ENM021` Error | Promoted | The cluster budget is exceeded |
 
-New v1 checks without a direct original counterpart: unknown site/particle references in site energies
-(`ENM014`), duplicate site-energy entries (`ENM014`), and the site-energy −100..100 eV range (`ENM015`). The
-original `StableEnvironmentInfoValidator` warned on duplicates, void-on-stable, and NaN/Inf only; it did not
-apply the pair/group −100..100 eV setting to site energies.
+New v1 checks without a direct original counterpart include, illustratively: `ENM001` (positive/finite
+environment cutoffs), `ENM002` (periodic-ambiguity warning), the unstable-filter direction constraint in
+`ENM004`, unknown site/particle references in `ENM014`, the site-energy −100..100 eV range in `ENM015`, and
+the Step 07-owned `ENM018` KMC path warning. Duplicate site-energy entries and non-finite site energies are
+promoted warnings (`ENM014`, `ENM015`), not new checks. The original
+`StableEnvironmentInfoValidator` warned on duplicates, void-on-stable, and NaN/Inf only; it did not apply the
+pair/group −100..100 eV setting to site energies.
 
 The following remain warnings because they are advisory or performance-related: `ENM002` (periodic
 ambiguity), `ENM005` (duplicate filter), `ENM012` (cluster permutation warning), `ENM016` (forbidden
