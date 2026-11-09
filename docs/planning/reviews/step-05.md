@@ -14,8 +14,8 @@
 | Step | 05 — Energy Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Changes required |
-| Reviewed commit | `fa45192` |
+| Design review status | Re-review required |
+| Reviewed commit | `0000f3f` |
 | Docs branch | `main` |
 | Review date | 2026-11-09 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
@@ -307,7 +307,84 @@ Date:
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| M1 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| M2 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| M3 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| M4 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| M5 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| m1 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| m2 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| m3 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| m4 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| m5 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| m6 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| m7 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| n1 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| n2 | Resolved — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+| n3 | Acknowledged — awaiting re-review | Planner / Step 05 agent | `0000f3f` |
+
+Resolution summary (design content at `0000f3f`):
+
+- **M1.** `ProjectJson.CanonicalizeModel`/`SerializeCanonicalModel` now own the energy sections; save and both
+  document/model hashes include them. Added `ProjectHasher.ComputeEnergy` for Step 08's cache key. The default
+  `stableEnvironment` and empty sections are omitted on write, preserving pre-Step-05 hashes.
+- **M2.** Split validation ownership: Core owns `ENM001`, `ENM003`–`ENM008`, `ENM014`–`ENM016`, `ENM020`,
+  `ENM021`; Symmetry owns `ENM002`, `ENM009`–`ENM013`, `ENM017`, `ENM019`; `ProjectValidationService` composes
+  them. All codes remain defined once in Core.
+- **M3.** Every directed pair has a `GeometryId`; chiral partners share one `EnergyId` and one energy table.
+  `PairInteractionPreview` exposes `GeometryId`, `EnergyId`, and `ChiralPartnerGeometryId`. Step 08/09 and the
+  data contract now use the shared `EnergyId`; Step 09 stores one value per chiral pair and retires `PRM007`.
+- **M4.** Cost preview uses `centerParticleCount × Π(surrounding sizes)`, `long` counts, Burnside unique
+  permutations, the full warning/hard limit table, and diagnostic results. Named the shared
+  `IEnergyGeometrySampler` kernel and the Step 08 deferral.
+- **M5.** `IProjectQuery` now extends `IEnergyQuery`; the preview service uses
+  `TryCreatePreview(..., out diagnostics)`, returns `null` on invalid data, and caches by energy hash,
+  structure hash, cell counts, and catalog/contract versions.
+- **m1.** Corrected the layout: `ProjectJsonContext` is nested in `Project/ProjectJson.cs`,
+  `ProjectSchema.cs` is unchanged, `ProjectEditor` gains a partial energy file, and `EnergyModelValidator`
+  may split.
+- **m2.** Data contract now states the default/omission rules, canonical sort keys, stable/unstable filter
+  semantics, inclusive boundaries, and surrounding-offset range.
+- **m3.** Manifest task now sets `status`/`notes`, names the `project-energy-minimal` and
+  `project-energy-populated` fixtures, updates vectors, and reconciles ADR 0009 with the additive-v1 precedent.
+- **m4.** Defined unstable-cutoff validation, 2..8 surrounding offsets, encoder-based periodic dedup,
+  center-equivalent/ring semantics, inclusive filter boundaries, one-directional unstable filters, duplicate
+  site-energy entries, and the deviation notes.
+- **m5.** Added non-goals; moved error guidance into the user guide, kept `troubleshooting/errors.md` with
+  Step 07; added nav/index/status/parity/audit tasks.
+- **m6.** Added PR-fast/PR-medium/nightly tiers, per-ENM coverage, default/hash/order/overflow tests, and an
+  energy-preview benchmark target.
+- **m7.** Added the SPDX/no-new-dependency task and acceptance criterion.
+- **n1.** Documented that Step 05 defines the `ENM018` constant/help anchor and Step 07 owns emission and
+  documentation; updated the Step 07 page.
+- **n2.** Suppressed `ENM002` and sampling warnings for the empty default model; documented and tested.
+- **n3.** Process note only; the reviewer's round-1 text is unchanged.
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
+
+## Re-review round 2
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Step | 05 — Energy Model |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `0000f3f` |
+| Docs branch | `main` |
+| Review date | 2026-11-09 |
+| Reviewer | Fresh independent planning auditor (round 2; no shared conversation with the planner or implementor) |
+
+Step page: [`Step 05 — Energy Model`](../steps/step-05-energy-model.md)
+
+The design content for round 2 is frozen at `0000f3f`. The delta from the round-1 commit `fa45192` is the fix
+round recorded in the Resolution status section, the data-contract update, and the Step 07/08/09 interface
+updates. The review request and status changes are metadata only. Verify the delta yourself with
+`git diff --stat fa45192..0000f3f` and inspect the files at `0000f3f`.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for this round below. Keep the
+round-1 text unchanged. This is a re-review of the full design at the new commit, not only a diff check; verify
+that M1–M5, m1–m7, and n1–n2 are resolved and that no new contradiction was introduced.
