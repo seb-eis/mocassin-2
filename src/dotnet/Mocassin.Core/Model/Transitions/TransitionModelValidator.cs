@@ -266,7 +266,7 @@ internal static partial class TransitionModelValidator
         string domain,
         Guid objectId,
         string? property = null) =>
-        new(code, DiagnosticSeverity.Error, message, new ModelPath(domain, objectId, property));
+        new(code, DiagnosticSeverity.Error, message, new ModelPath(domain, objectId, property), HintFor(code));
 
     private static Diagnostic Warning(
         string code,
@@ -274,5 +274,29 @@ internal static partial class TransitionModelValidator
         string domain,
         Guid objectId,
         string? property = null) =>
-        new(code, DiagnosticSeverity.Warning, message, new ModelPath(domain, objectId, property));
+        new(code, DiagnosticSeverity.Warning, message, new ModelPath(domain, objectId, property), HintFor(code));
+
+    private static string? HintFor(string code) => code switch
+    {
+        TransitionDiagnosticCodes.UnknownParticle => "Use an authored particle ID or the implicit void particle.",
+        TransitionDiagnosticCodes.DonorEqualsAcceptor => "Choose a different acceptor particle.",
+        TransitionDiagnosticCodes.BothParticlesVoid => "Use a real donor or acceptor; void cannot replace void.",
+        TransitionDiagnosticCodes.ChargedAcceptorFromVoid => "Author the reverse pair explicitly if it is intentional.",
+        TransitionDiagnosticCodes.InvalidGroup => "Add at least one existing state change to the group.",
+        TransitionDiagnosticCodes.MixedGroupExchange => "Split physical and charge-state exchanges into separate groups.",
+        TransitionDiagnosticCodes.GroupLinkerCountMismatch => "Provide exactly one linker per adjacent position pair.",
+        TransitionDiagnosticCodes.InvalidPatternPositionCount => "Match the position count required by the pattern.",
+        TransitionDiagnosticCodes.InvalidLinkerSequence => "Use the pattern's D/S sequence; custom chains reject D S D.",
+        TransitionDiagnosticCodes.DuplicateName => "Use a unique non-empty name within the collection.",
+        TransitionDiagnosticCodes.MissingReverseLink => "Add a symmetric reverseTransitionId for the complex transition.",
+        TransitionDiagnosticCodes.TransitionLimitExceeded => "Keep at most 100 kinetic and Metropolis transitions in total.",
+        TransitionDiagnosticCodes.UnknownChainGroup => "Reference an existing state-change group.",
+        TransitionDiagnosticCodes.KineticChainWithoutUnstablePosition => "Add at least one unstable position to the kinetic chain.",
+        TransitionDiagnosticCodes.KineticTransitionUsesMetropolisChain => "Use a kinetic chain such as migration3.",
+        TransitionDiagnosticCodes.GeneratesReverseMismatch => "Set generatesReverse true only for metropolis2 and migration3.",
+        TransitionDiagnosticCodes.MixedGroupStability => "Split stable-role and unstable-role pairs into separate groups.",
+        TransitionDiagnosticCodes.InvalidUnstablePositionGroup => "Use exactly one [donor, void] pair at an unstable position.",
+        TransitionDiagnosticCodes.InvalidReverseLink => "Use a symmetric, existing, same-kind reverse transition.",
+        _ => null,
+    };
 }

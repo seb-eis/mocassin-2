@@ -130,3 +130,36 @@ matrices of `ParticleCount²` integers. `ParticleOrder` is authored particles so
 implicit void particle. The entry at `donorIndex * ParticleCount + acceptorIndex` is `1` when the group contains
 that pair. An unstable position has exactly one `1` at `[donor, void]`; a stable position has at least one `1`.
 An invalid transition returns `null` and diagnostics, never a partial preview.
+
+## Help anchors
+
+Each diagnostic code has a stable help anchor in this page and an actionable hint on the diagnostic.
+
+<a id="trn001"></a>`TRN001` — Unknown particle reference.
+<a id="trn002"></a>`TRN002` — Donor equals acceptor.
+<a id="trn003"></a>`TRN003` — Both particles are void.
+<a id="trn004"></a>`TRN004` — Charged acceptor from a void donor.
+<a id="trn005"></a>`TRN005` — Group is empty or references an unknown state change.
+<a id="trn006"></a>`TRN006` — Group mixes physical and charge-state exchanges.
+<a id="trn007"></a>`TRN007` — Group/linker count mismatch.
+<a id="trn008"></a>`TRN008` — Wrong pattern position count.
+<a id="trn009"></a>`TRN009` — Invalid linker sequence.
+<a id="trn010"></a>`TRN010` — Kinetic path length mismatch.
+<a id="trn011"></a>`TRN011` — Kinetic path endpoint is unstable.
+<a id="trn012"></a>`TRN012` — Group stability disagrees with the resolved site.
+<a id="trn013"></a>`TRN013` — Consecutive unstable positions.
+<a id="trn014"></a>`TRN014` — Repeated full encoded path position.
+<a id="trn015"></a>`TRN015` — Metropolis transition uses an incompatible chain.
+<a id="trn016"></a>`TRN016` — Metropolis site is unknown or unstable.
+<a id="trn017"></a>`TRN017` — Duplicate or empty name.
+<a id="trn018"></a>`TRN018` — Complex transition has no explicit reverse link.
+<a id="trn019"></a>`TRN019` — More than 100 transitions.
+<a id="trn020"></a>`TRN020` — Path point is non-finite or unmatched.
+<a id="trn021"></a>`TRN021` — Chain references an unknown group.
+<a id="trn022"></a>`TRN022` — Kinetic chain has no unstable position.
+<a id="trn023"></a>`TRN023` — Kinetic transition uses a Metropolis chain.
+<a id="trn024"></a>`TRN024` — generatesReverse disagrees with the pattern.
+<a id="trn025"></a>`TRN025` — Group mixes stable-role and unstable-role pairs.
+<a id="trn026"></a>`TRN026` — Unstable position group does not contain exactly one [donor, void].
+<a id="trn027"></a>`TRN027` — Invalid reverse link.
+<a id="trn028"></a>`TRN028` — Resolved path stability sequence mismatch.

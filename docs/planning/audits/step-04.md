@@ -13,10 +13,10 @@
 | --- | --- |
 | Step | 04 — Transition Model |
 | Request owner | Step agent |
-| Audit initiated by | Planner / implementor / human owner |
+| Audit initiated by | Human owner |
 | Audit status | Not requested |
 | Audited commit | — |
-| Step branch | — |
+| Step branch | `step/04-transition-model` |
 | Step tag | — |
 | Closeout CI run | — |
 | Platform CI | Not run (Ubuntu-only policy) |
@@ -35,13 +35,29 @@ Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md
 
 ## Step-specific acceptance checklist
 
-- [ ] Ceria oxygen migration can be defined as a 3-site chain with `[O,V_O]`, `[O,∅]`, `[O,V_O]` and a stable-unstable-stable path.
-- [ ] A 2-site MMC exchange `[A,B]` can be defined and previewed.
-- [ ] A 5-site vehicle with five chain groups (`[A,V_A]`, `[A,V_A]`, `[AB,∅]`, `[B,V_B]`, `[B,V_B]`), a `D,S,S,D` chain, and an `S,S,U,S,S` reference path validates.
-- [ ] Invalid paths (unstable endpoint, consecutive unstable, ring) are rejected with precise diagnostics.
-- [ ] Complex transitions warn when no reverse is defined.
-- [ ] The preview enumerates the expected symmetry-equivalent paths.
-- [ ] Documentation written
+- [ ] Ceria oxygen migration can be defined as a 3-site chain with `[O,V_O]`, `[O,∅]`, `[O,V_O]` and a
+      stable-unstable-stable path whose endpoints are symmetry-equivalent O orbit members, not only the single
+      authored O representative.
+- [ ] A 2-site MMC exchange `[A,B]` can be defined and previewed, including a same-site exchange.
+- [ ] A 5-site vehicle with five chain groups (`[A,V_A]`, `[A,V_A]`, `[AB,∅]`, `[B,V_B]`, `[B,V_B]`),
+      a `D,S,S,D` chain, and an `S,S,U,S,S` reference path validates.
+- [ ] A 5-site interstitialcy with an `S,U,S,U,S` path validates.
+- [ ] Invalid paths (unstable endpoint, consecutive unstable, pattern-sequence mismatch, any repeated
+      encoded position, unmatched point) are rejected with precise diagnostics.
+- [ ] A complex transition without a reverse link warns `TRN018`; adding a symmetric reverse link clears it.
+- [ ] `GeneratesReverse` set inconsistently with the pattern is rejected with `TRN024`.
+- [ ] The preview enumerates the expected symmetry-equivalent paths and echoes `(A, B, C)` and the transition
+      reference.
+- [ ] An invalid transition returns `null` and diagnostics from `TryCreatePreview`; no partial preview is
+      returned.
+- [ ] `StateChangeMatrices` has the documented dimensions, particle order, binary encoding, and
+      stable/unstable cardinality.
+- [ ] The transition sections round-trip through save/load, the project JSON context, and the canonical model;
+      semantic arrays preserve order and transition edits change the document hash.
+- [ ] The generated project schema accepts the transition sections, and fixtures cover empty and populated
+      models.
+- [ ] Public API files and the ApiCompat baseline are current.
+- [ ] Documentation written.
 
 ## Standard audit checklist
 
@@ -62,12 +78,19 @@ Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md
 Commands run:
 
 ```text
-
+Pending closeout. The step agent records the exact `./tools/verify.sh all` output and closeout CI run here.
 ```
 
 ## Known notes for the auditor
 
-- Record known limitations, accepted deviations, or areas needing extra attention.
+- Empty transition sections are omitted from the written model so transition-free Step 01/03 projects keep
+  their existing canonical model/document hashes. Non-empty sections are written and hashed; `schemaVersion`
+  remains 1 under the additive-v1 precedent.
+- `TransitionPreview` is derived data and is never persisted.
+- The transition preview benchmark is a local-container measurement; the declared GitHub runner class is
+  re-verified only by the manual Benchmark CI job.
+- Platform CI is not run; Step 04 adds no platform-specific code.
+- The transition-preview cache is bounded and scoped to the service; capacity breach is an explicit failure.
 
 ## Findings
 

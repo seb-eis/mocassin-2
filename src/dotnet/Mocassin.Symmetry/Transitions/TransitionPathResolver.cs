@@ -201,7 +201,8 @@ public sealed class TransitionPathResolver
             DiagnosticSeverity.Error,
             message,
             new ModelPath("kineticTransition", transitionId, "referencePath"),
-            related: [new ModelPath("referencePathPosition", Guid.Empty, index.ToString(CultureInfo.InvariantCulture))]);
+            "Place the point on a canonical P1 position within 1e-6 fractional units.",
+            [new ModelPath("referencePathPosition", Guid.Empty, index.ToString(CultureInfo.InvariantCulture))]);
 
     private sealed record PathMatch(int P, Vector4I Encoding);
 }

@@ -373,5 +373,21 @@ public sealed class TransitionPathValidator
         string domain,
         Guid objectId,
         string? property = null) =>
-        new(code, DiagnosticSeverity.Error, message, new ModelPath(domain, objectId, property));
+        new(code, DiagnosticSeverity.Error, message, new ModelPath(domain, objectId, property), HintFor(code));
+
+    private static string? HintFor(string code) => code switch
+    {
+        TransitionDiagnosticCodes.PathLengthMismatch => "Provide one path point per chain position.",
+        TransitionDiagnosticCodes.UnstablePathEndpoint => "Move the endpoint to a stable reference site.",
+        TransitionDiagnosticCodes.GroupStabilityMismatch => "Match each group role to its position's stability.",
+        TransitionDiagnosticCodes.ConsecutiveUnstablePositions => "Insert a stable position between unstable positions.",
+        TransitionDiagnosticCodes.RepeatedPathPosition => "Remove the repeated full encoded position.",
+        TransitionDiagnosticCodes.InvalidMetropolisChain => "Use a metropolis2 or two-position custom chain.",
+        TransitionDiagnosticCodes.InvalidMetropolisSite => "Use two known stable sites; the same site is allowed.",
+        TransitionDiagnosticCodes.UnmatchedPathPosition => "Place the point on a canonical P1 position within 1e-6.",
+        TransitionDiagnosticCodes.KineticChainWithoutUnstablePosition => "Add at least one unstable resolved position.",
+        TransitionDiagnosticCodes.InvalidUnstablePositionGroup => "Use exactly one [donor, void] pair at the unstable position.",
+        TransitionDiagnosticCodes.PathStabilityMismatch => "Match the built-in pattern's stability sequence.",
+        _ => null,
+    };
 }
