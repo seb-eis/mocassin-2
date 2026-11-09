@@ -709,3 +709,304 @@ only. Verify the delta yourself with `git diff --stat 0000f3f..6b8d78c` and insp
 Reviewer: append your independence statement, evidence, findings, and verdict for this round below. Keep all
 earlier round text unchanged. This is a re-review of the full design at the new commit, not only a diff check;
 verify that M6, m8–m13, and n4–n10 are resolved and that no new contradiction was introduced.
+
+### Reviewer context
+
+I am a fresh planning auditor for round 3. I did not author or implement this design and have no shared
+conversation with the planner, the implementor, or the round-1/round-2 reviewers. I reviewed the full design at
+the frozen commit `6b8d78c`, not only the delta. I read `AGENTS.md` §3.8–§3.13 and §4–§12,
+`docs/planning/reviews/README.md`, the complete request record, the Step 05 page, the data contract, target
+architecture, quality strategy, open decisions, parity matrix, status dashboard, audit plan, ADR 0001/0009/
+0010/0013, `NOTICE.md`, `contracts/manifest.json`, `zensical.toml`, `tools/verify.sh`,
+`tools/structure-policy.json`, the relevant Core/Symmetry/Packages source, and the original
+`GroupInteractionValidator`/`StableEnvironmentInfoValidator`/`MocassinEnergySettings`/`ValueSetting` as
+read-only reference. I did not rely on the resolution text alone.
+
+**Frozen state.** Worktree `/workspace/mocassin`, branch `main`, `HEAD` `1eb29ef` at review time; the worktree
+was clean before this record was written. The frozen design is `6b8d78c`. `0000f3f..6b8d78c` changes the Step
+05 page, data contract, quality strategy, parity row, status text, and the Step 07/08/09/26 pages. The round-3
+request commit `1eb29ef` sits after the frozen commit; this record commit's parent is therefore `1eb29ef`, not
+`6b8d78c` (process note n11). `git diff --stat 6b8d78c -- . ':!docs/planning/reviews/step-05.md'` shows only
+`docs/planning/status.md` changed between the frozen design and the request commit.
+
+### Round 3 checklist
+
+- [x] ModelDefinition energy sections and JSON/schema round-trip — the flat sections, converter, canonical
+  save, source-generated context, manifest, schema, and fixtures are specified.
+- [x] Default `stableEnvironment`, omission rules, and hash stability — verified against the actual
+  `ProjectJson`/`ProjectStore`/`ProjectHasher` path; default and empty energy sections are omitted, so
+  pre-Step-05 hashes remain stable.
+- [x] Semantic cluster-offset order and sorted collections — `offsetVectors` definition order is semantic;
+  the filters, unstable environments, clusters, and site-energy keys are stated.
+- [ ] Environment, cutoff, filter, cluster, and site-energy validation, including the validation-deviations
+  record — the rules and Core/Symmetry ownership are coherent, but §7.1 still omits the promoted `ENM013`
+  cluster-permutation limit and misattributes the site-energy range to the original site-energy validator
+  (m15).
+- [x] ENM001–ENM021 ownership, Step 07 ENM018 boundary, and the Core/Symmetry split — Core, Symmetry, and
+  Step 07 ownership is explicit; `ENM018` remains a Step 07-owned emission with a Step 05 constant/help anchor.
+- [x] Derived pair/chiral preview, GeometryId/EnergyId including `centerP`/`partnerP`, and stable geometry IDs —
+  the P1 position indices are in the projection, the preview record, the Step 08 compiled pair set, and the
+  compiled contract.
+- [x] Cost preview, center-particle permutation factor, `long` counts, and permutation/position limits — the
+  center factor, Burnside count, `long` fields, warning/hard limits, and the Step 08 sampler deferral are
+  present. The `P1PositionCount` naming against Step 07 is a note (n12), not a blocking finding.
+- [x] IEnergyQuery, IProjectQuery, IEnergyPreviewService, and IEnergyGeometrySampler (including the `Try`
+  contract and `ModelDefinition` input) — matches the established query/preview boundary, returns `null`/false
+  with diagnostics on invalid data, and never throws for user data.
+- [x] Step 03 structure/site and Step 04 transition dependencies — reused without a new Core→Symmetry edge;
+  `ENM018` is the only Step 04-facing rule and remains in Step 07.
+- [ ] Step 07/08/09/26 cross-step alignment for shared `EnergyId`, retired `PRM007`, and long statistics — the
+  step pages, data contract, quality strategy, and parity matrix are aligned and Step 07 uses `long`, but the
+  pre-seeded audit-request checklists for Steps 05, 09, and 26 still carry the superseded acceptance wording
+  (m14).
+- [x] Manifest/schema and fixture tasks — `status`/`notes`, energy fields, the two named fixtures, signature
+  vectors, and schema regeneration are named.
+- [x] PublicAPI/ApiCompat tasks — Core, Packages, and Symmetry API files and the ApiCompat baseline are named.
+- [x] Code layout against the structure policy — `ProjectEditor.Energy.cs` and
+  `EnergyModelValidator.Clusters.cs` are valid `Type.Aspect.cs` names; current folder counts leave room for the
+  planned files.
+- [ ] Documentation/nav, status, parity, and audit plans, including no links to pages that do not yet exist —
+  the Step 05 documentation plan no longer links to the Step 07 pages before they exist and the nav/status/
+  parity tasks are present, but the pre-seeded audit-request checklist is stale (m14).
+- [x] No unresolved cross-step interface question remains — the code/data interfaces are aligned. m14 and n12
+  are planning-record and naming notes, not unresolved interfaces.
+
+### Evidence
+
+**Commands run (from `/workspace/mocassin`):**
+
+```sh
+git status --short
+# (no output: clean worktree before this record was written)
+
+git log --oneline --decorate -6
+# 1eb29ef (HEAD -> main) docs: request step-05 round-3 design re-review [skip ci]
+# 6b8d78c docs: resolve step-05 round-2 review findings [skip ci]
+# 9150367 docs: record step-05 design re-review Changes required [skip ci]
+# 4c1cd2f docs: request step-05 round-2 design re-review [skip ci]
+# 0000f3f docs: revise step-05 energy design for review findings [skip ci]
+# 4bf7f66 docs: record step-05 design review Changes required [skip ci]
+
+git show --stat 6b8d78c
+# docs/planning/02-data-contracts.md                 | 15 ++--
+# docs/planning/03-quality-strategy.md               |  2 +-
+# docs/planning/appendix-b-parity-matrix.md          |  2 +-
+# docs/planning/status.md                            |  7 +-
+# docs/planning/steps/step-05-energy-model.md        | 87 +++++++++++++++++-----
+# docs/planning/steps/step-07-validation-and-diagnostics.md | 12 +--
+# docs/planning/steps/step-08-model-compilation-pipeline.md |  4 +-
+# docs/planning/steps/step-09-parameterization-templates.md | 10 +--
+# docs/planning/steps/step-26-parameterization-job-templates-and-build-ui.md | 6 +-
+# 9 files changed, 101 insertions(+), 44 deletions(-)
+
+git diff --stat 0000f3f..6b8d78c
+# docs/planning/02-data-contracts.md                 |  15 +-
+# docs/planning/03-quality-strategy.md               |   2 +-
+# docs/planning/appendix-b-parity-matrix.md          |   2 +-
+# docs/planning/reviews/step-05.md                   | 328 ++++++++++++++++++++-
+# docs/planning/status.md                            |   8 +-
+# docs/planning/steps/step-05-energy-model.md        |  87 ++++--
+# docs/planning/steps/step-07-validation-and-diagnostics.md |  12 +-
+# docs/planning/steps/step-08-model-compilation-pipeline.md |   4 +-
+# docs/planning/steps/step-09-parameterization-templates.md |  10 +-
+# docs/planning/steps/step-26-parameterization-job-templates-and-build-ui.md |   6 +-
+# 10 files changed, 427 insertions(+), 47 deletions(-)
+
+git diff 0000f3f..6b8d78c -- docs/planning
+# Reviewed in full: Step 05 page, data contract, quality strategy, parity row, status text,
+# Step 07/08/09/26 pages, and the review-record resolution/request metadata.
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.24s
+# exit 0
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+# exit 0
+
+./tools/verify.sh structure
+# == Structure ==
+# Passed!  - Failed: 0, Passed: 1, Skipped: 0, Total: 1
+# exit 0
+
+./tools/verify.sh contracts
+# Contract artifacts are current (17 files)
+# space-group catalog is current: 274 settings, sha256 1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395
+# SPDX headers present in 217 source files
+# No secret patterns found in 524 tracked text files
+# advisories ok, bans ok, licenses ok, sources ok
+# exit 0
+
+git diff --check
+# (no output, exit 0)
+```
+
+**Read-only checks.**
+
+```sh
+git diff --stat 6b8d78c -- . ':!docs/planning/reviews/step-05.md'
+# docs/planning/status.md | 8 ++++----
+# 1 file changed, 4 insertions(+), 4 deletions(-)
+
+git show 6b8d78c:docs/planning/steps/step-05-energy-model.md | nl -ba | sed -n '286,346p'
+# ENM001-ENM021 table and §7.1; ENM013 is Error at line 296, but the §7.1 table has no ENM013 row.
+
+git show 6b8d78c:docs/planning/steps/step-07-validation-and-diagnostics.md | sed -n '103,122p'
+# P1/stable/unstable positions, pair interactions, cluster permutations, and memory are long.
+
+git show 6b8d78c:docs/planning/steps/step-08-model-compilation-pipeline.md | sed -n '132,168p'
+# Pair sets carry CenterP/PartnerP; the GeometryId hash includes both P1 indices.
+
+git show 6b8d78c:docs/planning/steps/step-09-parameterization-templates.md | sed -n '74,80p;183p;193,241p'
+# Pair-set identity is the shared EnergyId; PRM007 is reserved; mirroring/conflict tests are removed.
+
+git show 6b8d78c:docs/planning/steps/step-26-parameterization-job-templates-and-build-ui.md | sed -n '28,32p;76,80p;184,188p'
+# Shared chiral-set editing and linked editing wording.
+
+git show 6b8d78c:docs/planning/03-quality-strategy.md | sed -n '108,113p;210,214p'
+# Parameterization property test now says chiral partners share one EnergyId and one value.
+
+git show 6b8d78c:docs/planning/appendix-b-parity-matrix.md | sed -n '78,82p;102,107p'
+# Chiral pair linking and chiral linked editing rows carry the shared-EnergyId wording.
+
+git show 6b8d78c:docs/planning/audits/step-05.md | nl -ba | sed -n '36,44p'
+# Stale checklist: 8-offset-only, "consistent with step 08", and no unstable-filter wording.
+
+git show 6b8d78c:docs/planning/audits/step-09.md | nl -ba | sed -n '38,46p'
+# Stale checklist: "Chiral pair values are mirrored and cannot diverge."
+
+git show 6b8d78c:docs/planning/audits/step-26.md | nl -ba | sed -n '38,48p'
+# Stale checklist: "Chiral pair values mirror and conflicts are flagged."
+
+grep -n "PRM007\|mirrored and\|mirror and\|chiral conflicts\|chiral mirroring" \
+  docs/planning/steps/step-09-parameterization-templates.md \
+  docs/planning/steps/step-26-parameterization-job-templates-and-build-ui.md
+# Only the original-reference sentence ("were linked and mirrored values") and the reserved PRM007 row remain
+# in the step pages; the live requirements use shared EnergyId wording.
+
+grep -n "Chiral pair values\|Chiral pair values are mirrored\|Chiral pair values mirror" \
+  docs/planning/audits/step-09.md docs/planning/audits/step-26.md
+# Confirms the stale audit-request checklists.
+
+wc -l src/dotnet/Mocassin.Core/Editing/ProjectEditor.cs
+# 506 src/dotnet/Mocassin.Core/Editing/ProjectEditor.cs
+
+for d in src/dotnet/Mocassin.Core/Model src/dotnet/Mocassin.Core/Diagnostics \
+         src/dotnet/Mocassin.Core/Editing src/dotnet/Mocassin.Core/Project \
+         src/dotnet/Mocassin.Symmetry/Energy; do
+  find "$d" -maxdepth 1 -name '*.cs' | wc -l
+done
+# 5, 7, 7, 12, 0 direct files; adding the planned files stays under the 20-file limit.
+
+sed -n '80,140p' src/dotnet/Mocassin.Core/Project/ProjectJson.cs
+sed -n '140,160p' src/dotnet/Mocassin.Packages/Projects/ProjectStore.cs
+sed -n '1,90p' src/dotnet/Mocassin.Core/Project/ProjectHasher.cs
+# CanonicalizeModel/SerializeCanonicalModel exist; SaveAsync serializes through ProjectJson; ComputeDocument
+# uses the canonical project; ComputeEnergy is the planned addition.
+
+sed -n '1,80p' src/dotnet/Mocassin.Symmetry/Structure/IStructurePreviewService.cs
+sed -n '1,60p' src/dotnet/Mocassin.Symmetry/Transitions/ITransitionPreviewService.cs
+# Both established previews use TryCreatePreview(..., out diagnostics).
+
+sed -n '1,30p' src/dotnet/Mocassin.Core/Project/IProjectQuery.cs
+# IProjectQuery is IParticleQuery, IStructureQuery, ITransitionQuery; the planned IEnergyQuery addition is additive.
+
+sed -n '1,40p' src/dotnet/Mocassin.Core/Editing/ProjectEditor.cs
+# The editor accepts a Func<Project, ImmutableArray<Diagnostic>> validator, so Packages can inject the
+# composed Core + Symmetry validator without a Core->Symmetry reference.
+```
+
+**Original reference (read-only, `/workspace/mocassin-original`).**
+
+```sh
+nl -ba src/ModelBuilder/ICon.Model/ModelProject/Manager/Settings/Modules/MocassinEnergySettings.cs | sed -n '62,72p'
+# PermutationsPerGroup is 1/1/500/5000; PairEnergies/GroupEnergies are -100..100; site energies are not range-limited.
+
+nl -ba src/ModelBuilder/ICon.Model/Energies/Manager/Services/Validators/GroupInteractionValidator.cs | sed -n '74,81p'
+# AtomsPerGroup and PermutationsPerGroup violations are added as warnings.
+
+nl -ba src/ModelBuilder/ICon.Model/ModelProject/Manager/Objects/ValueSetting.cs | sed -n '92,116p'
+# ParseValue returns 2 and a restriction-violation warning above MaxValue.
+
+nl -ba src/ModelBuilder/ICon.Model/Energies/Manager/Services/Validators/StableEnvironmentInfoValidator.cs | sed -n '134,151p'
+# Defect/site-energy validation warns on duplicates, void-on-stable, and NaN/Inf; no -100..100 range check.
+```
+
+**Files reviewed.** `AGENTS.md`; `docs/planning/reviews/README.md`; `docs/planning/reviews/step-05.md` at
+`6b8d78c`; `docs/planning/steps/step-05-energy-model.md` at `6b8d78c`; `docs/planning/02-data-contracts.md`;
+`docs/planning/01-target-architecture.md`; `docs/planning/03-quality-strategy.md`;
+`docs/planning/05-open-decisions.md`; `docs/planning/appendix-a-original-inventory.md`;
+`docs/planning/appendix-b-parity-matrix.md`; `docs/planning/status.md`; `docs/planning/audits/README.md`;
+`docs/planning/audits/step-05.md`, `step-07.md`, `step-09.md`, `step-26.md`; ADR 0001/0009/0010/0013;
+`step-02-symmetry-and-geometry.md`, `step-03-particle-and-structure-models.md`,
+`step-04-transition-model.md`, `step-06-lattice-and-simulation-models.md`,
+`step-07-validation-and-diagnostics.md`, `step-08-model-compilation-pipeline.md`,
+`step-09-parameterization-templates.md`, `step-15-energy-engine.md`,
+`step-25-model-editors-energy-lattice-simulations.md`, `step-26-parameterization-job-templates-and-build-ui.md`;
+`docs/development/code-structure.md`; `docs/development/compilation-pipeline.md`; `docs/user-guide/index.md`;
+`docs/physics/index.md`; `docs/reference/index.md`; `docs/troubleshooting/index.md`; `zensical.toml`;
+`contracts/manifest.json`; `tools/contracts/generate.py`; `tools/structure-policy.json`; `tools/verify.sh`;
+`src/dotnet/Mocassin.Core` (`Model/ModelDefinition.cs`, `Model/ModelDefinitionJsonConverter.cs`,
+`Project/ProjectJson.cs`, `Project/ProjectHasher.cs`, `Project/ProjectValidator.cs`, `Project/IProjectQuery.cs`,
+`Project/Project.cs`, `Editing/ProjectEditor.cs`, `Editing/ProjectDocument.cs`, `Diagnostics/*`),
+`Mocassin.Symmetry` (`Structure/IStructurePreviewService.cs`, `Transitions/ITransitionPreviewService.cs`,
+`PublicAPI.Unshipped.txt`), `Mocassin.Packages` (`Projects/ProjectStore.cs`,
+`Projects/ProjectValidationService.cs`), `Mocassin.Architecture.Tests/StructureChecks/*`, and
+`Mocassin.Compilation/Mocassin.Compilation.csproj`.
+
+### Round-2 finding status
+
+| Finding | Round-3 status | Verification |
+| --- | --- | --- |
+| M6 | Resolved | `GeometryId` now hashes `(centerSiteId, centerP, partnerSiteId, partnerP, offsetA–C, distanceBucketFm)`; `PairInteractionPreview` exposes `CenterP`/`PartnerP`; Step 08 pair sets and the compiled contract carry the P1 indices; the collision test is in the test table. |
+| m8 | Resolved | `ENM007` now accepts stable and unstable centers and rejects only an unknown/non-reference center or an unstable center without an unstable environment; §3 says only the surrounding positions must be stable. |
+| m9 | Resolved in the live design; residual m14 | Step 09/26, the quality strategy, the data contract, and the parity matrix use shared-`EnergyId`/linked-editing wording and retire `PRM007`. The pre-seeded Step 09/26 audit-request checklists still require mirroring/conflict detection. |
+| m10 | Resolved | Step 07 `ModelStatistics` uses `long` for P1/stable/unstable positions, pair interactions, cluster permutations, and memory; the 63⁹ rationale is recorded. |
+| m11 | Partially resolved — m15 | §7.1 exists and covers most promoted warnings, but it omits the promoted `ENM013` cluster-permutation hard limit and its site-energy-range row does not match the original defect-energy validator. |
+| m12 | Resolved | The Step 05 documentation plan no longer links to `troubleshooting/errors.md` or `reference/diagnostics.md` before Step 07 creates them, and `reference/energy.md` no longer duplicates the ENM catalog. The strict docs build passes. |
+| m13 | Resolved | Diagnostics tests are split into Core (PR-fast) and Symmetry (PR-medium), with a separate ENM018 boundary row. |
+| n4 | Resolved | The generic §1 ordering rule now applies only to arrays of identifiable objects and defers to the §2.2 energy-specific keys for filters and site-energy entries. |
+| n5 | Resolved | `CanonicalizeModel` is stated to apply before save and hashing; the generated schema is stated to come from `contracts/manifest.json` via `tools/contracts/generate.py`. |
+| n6 | Acknowledged | Process note only; the record parent is `1eb29ef`, not the frozen `6b8d78c` (n11). |
+| n7 | Resolved | `EnergyLimits` exposes `MinEnergy`/`MaxEnergy` as `EnergyEv`; count limits remain `int`. |
+| n8 | Resolved | `IEnergyGeometrySampler.TrySamplePairs` returns `false` with an empty array and diagnostics on invalid input and never throws; `IEnergyPreviewService` returns `null` with diagnostics. |
+| n9 | Resolved | `ENM009` owns surrounding-surrounding duplicate offsets; `ENM011` owns center-equivalent and other full-geometry duplicates and does not double-report the same pair. |
+| n10 | Resolved, with naming note n12 | §6 names `EnergyCostPreview.P1PositionCount` as the P1-expanded position count, distinct from the stable reference-site count. The name still differs from Step 07's total `P1PositionCount`; see n12. |
+
+### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **m14 — The pre-seeded audit-request checklists still carry the superseded acceptance criteria.** The Step 05 audit request still says “A cluster with 8 offsets is accepted; 9 offsets are rejected”, “The cost preview reports pair and permutation counts consistent with step 08”, and omits the unstable one-directional filter; the revised Step 05 page accepts 2/8 and rejects 1/9, records the Step 08 cross-check as a Step 08 follow-up, and specifies one-directional unstable filters. The Step 09 and Step 26 audit requests still require chiral mirroring/conflict detection after `PRM007` was retired and independent chiral values became unrepresentable. These records are the closeout audit gate, so they must be updated with the step pages before their audits. | `docs/planning/audits/step-05.md` lines 38–44; `step-09.md` line 42; `step-26.md` line 40; Step 05 page lines 137–147, 596–602; Step 09 page lines 193, 207, 230, 241; Step 26 page line 187; Step 05 page lines 230–232. |
+| **Minor** | **m15 — §7.1 omits the promoted `ENM013` hard limit and misattributes the site-energy range.** The new deviations table lists the promoted `ENM019` sampling hard limit and `ENM021` cluster limit, but not `ENM013` (cluster raw permutations > 5000), although the original `PermutationsPerGroup` maximum is 5000 and `GroupInteractionValidator` reports an over-limit value as a warning. The table also says “Site energy outside −100..100 eV | Warning”, while the original defect/site-energy validator only warns on duplicates, void-on-stable, and NaN/Inf; the −100..100 setting applies to pair/group energies. The table should add `ENM013` (and clarify the `ENM010` cluster-cutoff promotion) and distinguish new ID-reference checks from promoted warnings. | Step 05 page lines 296, 324–340; original `MocassinEnergySettings.cs` lines 67, 70–71; `GroupInteractionValidator.cs` lines 79–80; `ValueSetting.cs` lines 107–115; `StableEnvironmentInfoValidator.cs` lines 134–150. |
+| **Note** | **n12 — `EnergyCostPreview.P1PositionCount` has the same name as Step 07's total P1 position count but counts only stable reference-site P1 positions.** §6 says it counts “every stable reference-site orbit expanded to P1 positions”, while Step 07's `ModelStatistics` separates `P1PositionCount`, `StablePositionCount`, and `UnstablePositionCount`. The description is clear, but the cross-step name is ambiguous; rename the preview field (for example `StableP1PositionCount`) or state the relationship explicitly. | Step 05 page lines 241–242, 403; Step 07 page lines 104–121. |
+| **Note** | **n11 — Record parent.** `HEAD` is `1eb29ef`; the frozen design is `6b8d78c` and `1eb29ef` contains only the round-3 request/status metadata. This record commit's parent is therefore `1eb29ef`, not the reviewed commit. This is a process note for the human owner, not a design finding. | `git log`/`git diff --stat 6b8d78c -- . ':!docs/planning/reviews/step-05.md'` above. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
+verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
+the auditor's findings, evidence, or verdict.
+
+### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Re-review required
+- [ ] Waived
+
+**Verdict: Ready with notes.** M6 is resolved: `GeometryId` now includes the canonical `centerP`/`partnerP`
+P1 indices, and Step 08 and the compiled contract carry the same identity. m8, m10, m12, m13, and n4–n10 are
+resolved or carry only the naming note n12. m9 is resolved in the live design, but its pre-seeded Step 09/26
+audit checklists are stale (m14); m11 is only partially resolved because §7.1 omits the promoted `ENM013`
+limit and misstates the site-energy-range origin (m15). No Blocker or Major remains, and the persistence/hash
+path, Core/Symmetry split, query/preview boundary, cost preview, and cross-step `EnergyId` model are coherent.
+The remaining findings are documentation/planning-record consistency issues; the human owner must explicitly
+accept them, or ask for a small follow-up design commit, before the start gate. The strict documentation build,
+contract generation, structure test, contract/policy gate, and whitespace check all pass at `6b8d78c`; the
+findings are not tooling failures.
+
+Follow-up owner: Planner and Step 05 agent for m14/m15 (and the n12 naming note)
+Follow-up step: Step 05 — Energy Model; a further re-review is required only if the human owner does not accept
+the notes and the design is changed.
