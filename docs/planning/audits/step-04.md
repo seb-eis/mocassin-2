@@ -14,16 +14,25 @@
 | Step | 04 — Transition Model |
 | Request owner | Step agent |
 | Audit initiated by | Human owner |
-| Audit status | Passed with notes |
-| Audited commit | `288dd37` |
+| Audit status | Re-audit required |
+| Audited commit | `ebefc96` |
 | Step branch | `step/04-transition-model` |
 | Step tag | — |
-| Closeout CI run | [`42690361556`](https://github.com/seb-eis/mocassin-2/actions/runs/42690361556) — green at `288dd37` |
+| Closeout CI run | [`42693957630`](https://github.com/seb-eis/mocassin-2/actions/runs/42693957630) — green at `ebefc96` |
 | Platform CI | Not run (Ubuntu-only policy) |
 | Audit date | 2026-11-09 |
 | Auditor | Independent audit agent (fresh context; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
+
+## Re-audit request
+
+Round 1 returned **Passed with notes** at code commit `288dd37`. The step agent fixed F1–F4 and N1/N4 on
+`feature/step-04-transition-model/fix-audit-findings`, squashed the result as `ebefc96`, ran
+`./tools/verify.sh all`, and dispatched one replacement closeout CI run (green at `ebefc96`). N2 (local
+benchmark evidence) and N3 (docs-only record-parent delta) remain accepted process notes. A fresh re-audit of
+the complete step at `ebefc96` is requested; the reviewer should append a new round and preserve round 1
+unchanged.
 
 ## Step summary
 
@@ -277,7 +286,14 @@ authorization.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F1 | Fixed — property tests, brute-force path oracle, cache-key separation, schema rejection added | Step agent | `ebefc96` |
+| F2 | Fixed — preview now runs Core definition validation on the reduced closure | Step agent | `ebefc96` |
+| F3 | Fixed — ambiguous TRN020 now lists competing P indices in `Related` | Step agent | `ebefc96` |
+| F4 | Fixed — preview and Project queries guard default `ImmutableArray` collections | Step agent | `ebefc96` |
+| N1 | Fixed — transition parity rows use `Partial` where rules/UI remain | Step agent | `ebefc96` |
+| N2 | Accepted note — local-container benchmark evidence; manual Benchmark CI re-verifies the runner class | Step agent | — |
+| N3 | Accepted note — closeout CI is green at the code commit; later commits are documentation-only | Step agent | — |
+| N4 | Fixed — Metropolis chains now reject unstable-role groups with TRN012 | Step agent | `ebefc96` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
