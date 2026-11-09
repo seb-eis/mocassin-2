@@ -14,7 +14,7 @@
 | Step | 04 — Transition Model |
 | Request owner | Step agent |
 | Audit initiated by | Human owner |
-| Audit status | Re-audit required |
+| Audit status | Passed with notes |
 | Audited commit | `8c44709` |
 | Step branch | `step/04-transition-model` |
 | Step tag | — |
@@ -412,6 +412,127 @@ full local gate and the replacement closeout CI are green at `ebefc96`; the `90d
 documentation-only; the round-2 diff introduces no unrelated change or design deviation. No Blocker or Major
 finding remains, and no Step 05/06/08, GUI, rule generation, legacy import, or preview persistence was added.
 The audit result is evidence, not merge authorization.
+
+### Re-audit round 3
+
+#### Independence and frozen state (round 3)
+
+I am a fresh re-audit agent. I did not plan, implement, or review Step 04 and have no shared conversation with
+the planner or implementor. I read `AGENTS.md` (§3.8, §3.10, §3.12, §3.13, §4, §5), the audit README and
+template, this record's rounds 1–2 and the round-3 request, the step page, the Step 04 design review, the frozen
+design at `a3d8641`, the transition contracts and reference pages, the quality strategy, the code-structure
+policy, ADRs 0009/0010/0013, the status dashboard, the parity matrix, the manifest/schema/fixtures, the samples,
+the public API files, and the complete round-3 diff. I did not rely on the step-agent resolutions or the request
+summary for the verdict.
+
+Worktree `/workspace/mocassin`, branch `step/04-transition-model`, `HEAD` `19b6b2a`. The audited code commit is
+`8c44709` (`8c44709c4d5ed46197797af52bf8c52ba24a9bb2`); `git status --short` is empty. `git diff --name-only
+8c44709..19b6b2a` lists only `docs/planning/audits/step-04.md`, `docs/planning/status.md`, and
+`docs/planning/steps/step-04-transition-model.md`, so the HEAD delta is documentation-only. The record commit
+parent is therefore the docs-only re-audit-request commit `19b6b2a`, while the audited code is frozen at
+`8c44709` (the same process note as N3).
+
+`git diff --stat ebefc96..8c44709` is 8 files, 349 insertions(+), 15 deletions(-); `git show --stat 8c44709` is
+5 files, 202 insertions(+), 7 deletions(-): the Core transition-closure hasher, the Symmetry preview service,
+and the Symmetry path/preview/sample tests. The remaining diff to `8c44709` is the round-2 record and round-3
+request/status metadata. There is no Step 05/06/08, GUI, rule-generation, legacy-import, schema, fixture, sample,
+format, public-API, or preview-persistence change. `git diff --check` is clean for both ranges.
+
+#### Commands and results (round 3, from `/workspace/mocassin`)
+
+```text
+git status --short
+# (no output; clean worktree)
+git log --oneline -8
+# 19b6b2a docs: request step-04 round-3 re-audit [skip ci]
+# 8c44709 step-04: close re-audit gaps
+# 8098599 docs: record step-04 re-audit Passed with notes [skip ci]
+# 90d95d2 docs: request step-04 re-audit after fixes [skip ci]
+# ebefc96 step-04: address audit findings
+# 5547f6d docs: record step-04 audit passed with notes [skip ci]
+# b2382b3 docs: record step-04 audit Passed with notes [skip ci]
+# 8869f3d docs: record step-04 closeout and request audit [skip ci]
+git diff --name-only 8c44709..19b6b2a
+# docs/planning/audits/step-04.md
+# docs/planning/status.md
+# docs/planning/steps/step-04-transition-model.md
+git diff --stat ebefc96..8c44709
+# 8 files changed, 349 insertions(+), 15 deletions(-)
+git show --stat 8c44709
+# 5 files changed, 202 insertions(+), 7 deletions(-)
+./tools/verify.sh dotnet
+# EXIT 0; build succeeded with 0 warnings/0 errors; Core 339/339, Symmetry 189/189,
+# Packages 42/42, Architecture 1/1, App/Compilation/Contracts/Results 1/1 each;
+# dotnet format clean.
+./tools/verify.sh structure
+# EXIT 0; Mocassin.Architecture.Tests 1/1 passed.
+./tools/verify.sh api
+# EXIT 0; NuGet licence policy OK (47 packages); no vulnerable packages; all nine ApiCompat
+# checks pass; "Public API is compatible with the checked-in baseline."
+./tools/verify.sh contracts
+# EXIT 0; contract artifacts current (17 files); space-group catalogue current (274 settings,
+# sha256 1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395);
+# SPDX headers present in 217 source files; no secret patterns in 523 tracked text files;
+# cargo-deny advisories/bans/licenses/sources ok.
+./tools/verify.sh docs
+# EXIT 0; Zensical strict "No issues found"; DocFX 190 files with 0 warnings/0 errors; rustdoc built.
+./tools/verify.sh all
+# EXIT 0; all of the above plus Rust fmt/clippy/tests and Python 3 tests passed plus package builds.
+```
+
+**Closeout CI (GitHub API; no token printed).** Run `42695864895`: name `CI`, event
+`workflow_dispatch`, branch `step/04-transition-model`, `head_sha`
+`8c44709c4d5ed46197797af52bf8c52ba24a9bb2`, status `completed`, conclusion `success`. Jobs `Detect changes`,
+`Contracts and policy`, `.NET (ubuntu-latest)`, and `Public API compatibility` are `success`; `Python` and
+`Rust` are `skipped` by the path filters. The recent-runs query shows no workflow run for the docs-only
+`19b6b2a` and no per-feature step runs, matching the CI cost policy.
+
+**Scratch probe.** A read-only console probe under `/tmp/opencode/step04probe3` (not committed) loaded the real
+samples and mutated in-memory models. It confirmed ceria-kmc expands to 96 paths and ceria-mmc to 8 site pairs;
+a chain with `GroupIds = default` returns `null` preview with `TRN007`/`TRN008`/`TRN010` and an empty
+`StateChangeIds` group returns `null` with `TRN005`, with no exception; an unrelated invalid state change/group
+does not block a valid ceria-kmc preview (96 paths, no diagnostics); and an ambiguous path produces `TRN020`
+with `Related` entries `referencePathPosition=0` and competing `candidatePosition=p7`, `p8`, `p12`, `p24`.
+
+#### Round-2 finding verification (round 3)
+
+| Finding | Result |
+| --- | --- |
+| F5 | **Fixed.** `CeriaExpandedCountsMatchBruteForce` enumerates every space-group operation, applies it to the ceria-kmc reference path and the ceria-mmc site pair, deduplicates the results, and asserts the preview lengths against those counts; it also asserts both counts are greater than one. The independent probe produced 96 and 8, and no production path asserts a hard-coded count. |
+| F6 | **Fixed.** `ProjectHasher.ComputeTransition` now treats default nested `TransitionChain.GroupIds` and `StateChangeGroup.StateChangeIds` as empty, and `TransitionPreviewService.BuildReducedModel` applies the same guards while constructing the closure. `NestedDefaultCollectionsDoNotThrow` covers the empty `StateChangeIds` branch; the independent probe covers both branches and observes diagnostics, not exceptions. |
+| F7 | **Fixed.** `AmbiguousPathMatchListsCandidatePIndices` asserts that the `TRN020` diagnostic's `Related` list contains a `candidatePosition` entry, so a regression to the pre-fix empty/`referencePathPosition`-only `Related` list fails. The independent probe confirms the competing `P` indices are present, not merely the domain label. |
+| N5 | **Fixed.** `BuildReducedModel` now narrows chains, groups, and state changes to the transition closure (including explicit reverse transitions). `UnrelatedInvalidDefinitionsDoNotBlockAValidTransitionPreview` adds an unrelated state change with unknown particles and an unrelated group, and the valid preview remains non-null with no diagnostics; the probe confirms it. |
+| F1–F4, N1, N4 | **Intact.** The property/brute-force/cache/schema tests, Core validation in the preview, `TRN020` candidate navigation, top-level default-array guards, parity `Partial` rows, and Metropolis stable-role rejection are still present and pass in the full suite. |
+| N2, N3 | **Still accepted notes.** The benchmark baseline remains local-container evidence, and the audited code commit remains `8c44709` while the record parent is the docs-only `19b6b2a`. |
+
+#### Findings (round 3)
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Note** | **N6 — The F6 regression test covers one of the two guarded nested arrays.** `NestedDefaultCollectionsDoNotThrow` sets `StateChangeGroup.StateChangeIds` to `default`; no test sets `TransitionChain.GroupIds` to `default`, although the hasher and reduced-model builders both guard it. The behaviour is correct and independently probed, so this is a test-strength observation rather than an observed defect. | `Mocassin.Symmetry.Tests/Transitions/TransitionPreviewTests.cs` 224-247; `Project/ProjectHasher.cs` 95-105; `TransitionPreviewService.cs` 272-293; scratch probe. |
+| **Note** | **N7 — The F7 regression test asserts candidate presence, not the exact competing indices.** It checks that a `candidatePosition` entry exists in `Related` but does not assert the number or values of the competing `P` entries. The fix is correct and the probe shows `p7`, `p8`, `p12`, and `p24` on the ceria structure; the test would catch removal of all candidate entries. | `Mocassin.Symmetry.Tests/Transitions/TransitionPathTests.cs` 107-140; `TransitionPathResolver.cs` 116-136; scratch probe. |
+
+#### Verdict (round 3)
+
+- [ ] Passed
+- [x] Passed with notes
+- [ ] Fixes required
+- [ ] Re-audit required
+- [ ] Waived
+
+Follow-up owner: Step 04 agent for N6/N7 if the test-strength notes are to be closed; human owner for approval
+of the notes and the merge gate.
+Follow-up issue/step: Step 04 — Transition Model. No Blocker, Major, or Minor finding remains. N2/N3 are the
+earlier accepted process notes; N6/N7 are new test-strength notes with no observed functional defect. A further
+fix commit would require a new feature branch, squash integration, one replacement closeout CI run, and a fresh
+re-audit.
+
+**Verdict (round 3): Passed with notes.** F5, F6, F7, and N5 are verified fixed; F1–F4, N1, and N4 remain
+intact. The full local gate and closeout CI are green at `8c44709`, the `19b6b2a` parent delta is
+documentation-only, and the round-3 diff introduces no unrelated change, design deviation, or non-goal (no
+Step 05/06/08, GUI, rule generation, legacy import, schema/fixture/sample change, or preview persistence). The
+remaining notes are N2 and N3 (accepted earlier) plus N6 and N7 (test-strength observations). The audit result
+is evidence, not merge authorization.
 
 ## Resolution status
 
