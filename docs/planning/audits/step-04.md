@@ -14,7 +14,7 @@
 | Step | 04 — Transition Model |
 | Request owner | Step agent |
 | Audit initiated by | Human owner |
-| Audit status | Re-audit required |
+| Audit status | Passed with notes |
 | Audited commit | `ebefc96` |
 | Step branch | `step/04-transition-model` |
 | Step tag | — |
@@ -281,6 +281,129 @@ validated user workflow. N1–N4 are notes: parity-status wording, local-contain
 docs-only record parent, and the MMC group-role ambiguity. The human owner must explicitly accept F1–F4 and
 N1–N4 or request fixes; a fix commit requires a fresh re-audit. The audit result is evidence, not merge
 authorization.
+
+### Re-audit round 2
+
+#### Independence and frozen state (round 2)
+
+I am a fresh re-audit agent. I did not plan, implement, or review Step 04 and have no shared conversation with
+the planner or implementor. I read `AGENTS.md` (§3.8, §3.10, §3.12, §3.13, §4, §5), the audit README and
+template, this record's round 1 and re-audit request, the step page, the Step 04 design review, the frozen
+design at `a3d8641`, the transition contracts, quality strategy, code-structure policy, ADRs 0009/0010/0013,
+the status dashboard, the parity matrix, the manifest/schema/fixtures, the samples, the public API files, and
+the complete round-2 diff. I did not rely on the step-agent resolutions or the request summary for the verdict.
+
+Worktree `/workspace/mocassin`, branch `step/04-transition-model`, `HEAD` `90d95d2`. The audited code commit is
+`ebefc96` (`ebefc9655a90d3ef7c6b4261d2377f4341b511e2`); `git status --short` is empty. `git diff --name-only
+ebefc96..90d95d2` lists only `docs/planning/audits/step-04.md`, `docs/planning/status.md`, and
+`docs/planning/steps/step-04-transition-model.md`, so the HEAD delta is documentation-only. The record commit
+parent is therefore the docs-only re-audit-request commit `90d95d2`, while the audited code is frozen at
+`ebefc96` (the same process note as N3).
+
+`git diff --stat 288dd37..ebefc96` is 15 files, 637 insertions(+), 85 deletions(-); `git show --stat ebefc96`
+is 12 files, 422 insertions(+), 31 deletions(-). The code/test changes are limited to the Core definition
+validator, project query and hasher guards, the Symmetry path resolver and preview service, the corresponding
+Core/Symmetry tests, and the parity rows. The `InternalsVisibleTo("Mocassin.Symmetry")` entry in Core is the
+only visibility change; it lets Symmetry call the internal Core definition validator and does not change the
+`Core <- Symmetry` dependency direction. No Step 05/06/08, GUI, rule-generation, legacy-import, schema,
+fixture, sample, or preview-persistence change was introduced.
+
+#### Commands and results (round 2, from `/workspace/mocassin`)
+
+```text
+git status --short
+# (no output; clean worktree)
+git log --oneline -7
+# 90d95d2 docs: request step-04 re-audit after fixes [skip ci]
+# ebefc96 step-04: address audit findings
+# 5547f6d docs: record step-04 audit passed with notes [skip ci]
+# b2382b3 docs: record step-04 audit Passed with notes [skip ci]
+# 8869f3d docs: record step-04 closeout and request audit [skip ci]
+# 288dd37 step-04: prepare closeout and audit request
+# ec04f9d step-04: add transition samples and user documentation
+git diff --name-only ebefc96..90d95d2
+# docs/planning/audits/step-04.md
+# docs/planning/status.md
+# docs/planning/steps/step-04-transition-model.md
+git diff --stat 288dd37..ebefc96
+# 15 files changed, 637 insertions(+), 85 deletions(-)
+git show --stat ebefc96
+# 12 files changed, 422 insertions(+), 31 deletions(-)
+./tools/verify.sh dotnet
+# EXIT 0; build succeeded with 0 warnings/0 errors; Core 339/339, Symmetry 185/185,
+# Packages 42/42, Architecture 1/1, App/Compilation/Contracts/Results 1/1 each; dotnet format clean.
+./tools/verify.sh structure
+# EXIT 0; Mocassin.Architecture.Tests 1/1 passed.
+./tools/verify.sh all
+# EXIT 0; includes:
+#   API: NuGet licence policy OK (47 packages); no vulnerable packages; all nine ApiCompat
+#        checks pass; "Public API is compatible with the checked-in baseline."
+#   Rust: fmt, clippy, and tests pass.
+#   Python: 3 tests pass; sdist and wheel build.
+#   Docs: Zensical strict "No issues found"; DocFX 190 files with 0 warnings/0 errors; rustdoc built.
+#   Contracts: artifacts current (17 files); catalogue current (274 settings, sha256
+#        1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395);
+#        SPDX headers present in 217 source files; no secret patterns in 523 tracked text files;
+#        cargo-deny advisories/bans/licenses/sources ok.
+```
+
+**Closeout CI (GitHub API; no token printed).** Run `42693957630`: name `CI`, event
+`workflow_dispatch`, branch `step/04-transition-model`, `head_sha`
+`ebefc9655a90d3ef7c6b4261d2377f4341b511e2`, status `completed`, conclusion `success`. Jobs `Detect changes`,
+`.NET (ubuntu-latest)`, `Public API compatibility`, and `Contracts and policy` are `success`; `Python` and
+`Rust` are `skipped` by the path filters. The recent-runs query shows no workflow run for the docs-only
+`90d95d2` and no per-feature step runs, matching the CI cost policy.
+
+**Scratch probe.** A read-only console probe under `/tmp/opencode/step04probe2` (not committed) loaded the
+real samples and mutated in-memory models to check the round-1 failure boundaries. It confirmed:
+mixed-role group -> `null` preview + `TRN025`; ambiguous path -> `TRN020` with `Related` entries
+`referencePathPosition=0`, `candidatePosition=p1`, and `candidatePosition=p2`; top-level default arrays ->
+`null` preview + `TRN023`; unstable-role Metropolis group -> `TRN012` from Core and composed validation and
+`null` preview + `TRN012`; cache keys differ for structure-name, state-change-name, and version changes;
+ceria-kmc expands to 96 paths and ceria-mmc to 8 pairs. It also exposed F6 and N5 below.
+
+#### Round-1 finding verification (round 2)
+
+| Finding | Result |
+| --- | --- |
+| F1 | **Partially fixed.** The Core ordering property test, the random-path brute-force oracle, the cache-key separation test, and the unknown-transition-field schema test are present and pass. The Preview row's symmetry-expanded path-count-vs-brute-force assertion and non-trivial MMC pair-expansion assertion are still absent (F5). The Core property test randomizes the collection order of one fixed model rather than generating random models, but it does exercise canonical round-trip and hash stability. |
+| F2 | **Fixed.** A mixed-role group referenced by the transition now returns `null` with `TRN025` from `TryCreatePreview` (unit test and independent probe). N5 records that the Core validation is project-wide rather than closure-only. |
+| F3 | **Fixed in code.** An ambiguous path now emits `TRN020` with the competing `P` indices in `Related` (`candidatePosition=p1`, `candidatePosition=p2`) alongside the path position. No regression test was added (F7). |
+| F4 | **Partially fixed.** Default top-level model collections (`Particles`, `Chains`, etc.) now return `null` + diagnostics instead of throwing. Nested default arrays (`TransitionChain.GroupIds`, `StateChangeGroup.StateChangeIds`) still throw from `ProjectHasher.ComputeTransition` (F6). |
+| N1 | **Fixed.** The transition mechanism and reference-path editing rows now use `Partial` where later-step rules or the Step 24 editor UI remain; the `Transition editor` row remains `Planned` at Step 24. |
+| N2 | **Still an accepted note.** The benchmark baseline is unchanged and remains local-container evidence; round 2 produced no GitHub runner-class measurement. The manual Benchmark CI job remains the re-verification path. |
+| N3 | **Still an accepted note.** The audited code is `ebefc96`; the later `90d95d2` record parent is documentation-only. |
+| N4 | **Fixed.** A Metropolis chain with an unstable-role group now produces `TRN012` from Core and composed validation, and `TryCreatePreview` returns `null` + `TRN012` (unit test and independent probe). |
+
+#### Findings (round 2)
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **F5 — F1 is only partially closed: the required Preview test row still lacks the symmetry-expanded path count compared with brute force and the non-trivial MMC pair-expansion assertion.** The step page requires `Symmetry-expanded path count matches brute force; MMC pair expansion; (A,B,C) echo`; the sample test asserts only that previews are non-null with no diagnostics, and the preview tests assert only `Assert.Single(preview.ExpandedPaths)` on the small toy model. No test asserts the ceria-kmc 96-path or ceria-mmc 8-pair counts, so the acceptance count claim is behaviourally correct but unguarded against regression. | Step page `Tests` row at line 710; `Mocassin.Symmetry.Tests/Transitions/TransitionSampleTests.cs` (non-null/empty assertions only); `TransitionPreviewTests.cs` lines 38 and 71; scratch probe prints `ceria-kmc 96` and `ceria-mmc 8`; `grep -rn "ExpandedPaths" src/dotnet/*Tests` shows no count assertion beyond `Assert.Single`. |
+| **Minor** | **F6 — F4 is only partially closed: nested default `ImmutableArray` members still make `TryCreatePreview` throw.** A chain with `GroupIds = default` or a group with `StateChangeIds = default`, both reachable through the public `init` properties/`with`, throws `InvalidOperationException` before the preview can return diagnostics. The failure is in the cache-key path, not in the newly added top-level guards. This is the same in-memory-only class as F4 and is not reachable from persisted JSON. | `ProjectHasher.ComputeTransition` lines 95 and 101 (`SelectMany` over the nested arrays); `TransitionPreviewService.CreateCacheKey` line 491 called at `TryCreatePreview` line 75; scratch probe stack trace `ImmutableArray<T>.ThrowInvalidOperationIfNotInitialized` -> `ProjectHasher.ComputeTransition` -> `TransitionPreviewService.CreateCacheKey` -> `TryCreatePreview`. |
+| **Minor** | **F7 — The F3 fix has no regression test.** The diagnostic now carries the competing `P` indices, but no test asserts the `TRN020` `Related` contents, so a future refactor could silently remove the navigation detail. The existing TRN020 tests assert only the code. `AGENTS.md` §12 requires a regression test for a bug fix. | `grep -rn "Related" src/dotnet/Mocassin.Symmetry.Tests src/dotnet/Mocassin.Core.Tests` finds no TRN020 Related assertion; `TransitionPathResolver.cs` lines 126-133 and 202-220; independent probe verified `referencePathPosition` and `candidatePosition=p1/p2`. |
+| **Note** | **N5 — Preview definition validation is project-wide, not closure-only.** The resolution describes Core validation on the "reduced closure", but `BuildReducedModel` passes every state change, group, and chain and `TransitionModelValidator.Validate` validates them all. A valid ceria-kmc transition preview therefore returns `null` with `TRN001` when an unrelated state change references an unknown particle, and with `TRN005` when an unrelated empty group exists. This fails closed and is consistent with the "invalid user data" failure boundary; it is only broader than the resolution wording. | `TransitionPreviewService.BuildReducedModel` lines 252-282; `TransitionModelValidator.Validate` validates all state changes/groups; scratch probe `F2c`/`F2d` outputs `null` + `TRN001`/`TRN005` for otherwise valid transitions. |
+
+#### Verdict (round 2)
+
+- [ ] Passed
+- [x] Passed with notes
+- [ ] Fixes required
+- [ ] Re-audit required
+- [ ] Waived
+
+Follow-up owner: Step 04 agent for F5–F7 and N5, or explicit human acceptance; human owner for the approval
+gate.
+Follow-up issue/step: Step 04 — Transition Model. F5–F7 are Minor and N5 is a Note; no Blocker or Major remains.
+The human owner must explicitly accept them or request a fix commit. A fix commit requires a new feature
+branch, squash integration, one replacement closeout CI run, and a fresh re-audit.
+
+**Verdict (round 2): Passed with notes.** F2, F3 (in code), N1, and N4 are verified fixed; F1 and F4 are
+partially fixed, with the remaining test-coverage and nested-default-array gaps recorded as F5 and F6. The
+full local gate and the replacement closeout CI are green at `ebefc96`; the `90d95d2` parent delta is
+documentation-only; the round-2 diff introduces no unrelated change or design deviation. No Blocker or Major
+finding remains, and no Step 05/06/08, GUI, rule generation, legacy import, or preview persistence was added.
+The audit result is evidence, not merge authorization.
 
 ## Resolution status
 
