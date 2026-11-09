@@ -1382,3 +1382,32 @@ static Mocassin.Core.Model.Transitions.TransitionRef.operator !=(Mocassin.Core.M
 static Mocassin.Core.Model.Transitions.TransitionRef.operator ==(Mocassin.Core.Model.Transitions.TransitionRef left, Mocassin.Core.Model.Transitions.TransitionRef right) -> bool
 ~override Mocassin.Core.Model.Transitions.TransitionRef.Equals(object obj) -> bool
 ~override Mocassin.Core.Model.Transitions.TransitionRef.ToString() -> string
+Mocassin.Core.Diagnostics.TransitionDiagnosticCodes
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.BothParticlesVoid = "TRN003" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.ChargedAcceptorFromVoid = "TRN004" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.ConsecutiveUnstablePositions = "TRN013" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.DonorEqualsAcceptor = "TRN002" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.DuplicateName = "TRN017" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.GeneratesReverseMismatch = "TRN024" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.GroupLinkerCountMismatch = "TRN007" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.GroupStabilityMismatch = "TRN012" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidGroup = "TRN005" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidLinkerSequence = "TRN009" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidMetropolisChain = "TRN015" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidMetropolisSite = "TRN016" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidPatternPositionCount = "TRN008" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidReverseLink = "TRN027" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.InvalidUnstablePositionGroup = "TRN026" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.KineticChainWithoutUnstablePosition = "TRN022" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.KineticTransitionUsesMetropolisChain = "TRN023" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.MissingReverseLink = "TRN018" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.MixedGroupExchange = "TRN006" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.MixedGroupStability = "TRN025" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.PathLengthMismatch = "TRN010" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.PathStabilityMismatch = "TRN028" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.RepeatedPathPosition = "TRN014" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.TransitionLimitExceeded = "TRN019" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnknownChainGroup = "TRN021" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnknownParticle = "TRN001" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnmatchedPathPosition = "TRN020" -> string!
+const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnstablePathEndpoint = "TRN011" -> string!

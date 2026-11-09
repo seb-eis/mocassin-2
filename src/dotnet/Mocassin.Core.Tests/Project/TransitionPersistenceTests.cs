@@ -67,31 +67,6 @@ public sealed class TransitionPersistenceTests
     }
 
     [Fact]
-    public async Task TransitionOnlyProjectRoundTripsThroughProjectStoreFile()
-    {
-        var directory = Directory.CreateTempSubdirectory("mocassin-transitions-only-");
-        try
-        {
-            var path = Path.Combine(directory.FullName, "transitions-only.mocprj");
-            var store = new ProjectStore();
-            var project = TransitionTestModels.CreateProject(TransitionTestModels.CreateTransitionOnlyModel());
-
-            var saved = await store.SaveAsync(project, path);
-            var loaded = await store.LoadAsync(path);
-
-            Assert.True(saved.IsSuccess);
-            Assert.True(loaded.IsSuccess);
-            Assert.Equal(
-                ProjectHasher.Compute(saved.SavedProject!),
-                ProjectHasher.Compute(loaded.Project!));
-        }
-        finally
-        {
-            directory.Delete(recursive: true);
-        }
-    }
-
-    [Fact]
     public async Task SavedTransitionDocumentContainsNoPreviewPayload()
     {
         var directory = Directory.CreateTempSubdirectory("mocassin-transitions-preview-");

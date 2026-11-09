@@ -6,6 +6,7 @@ using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
+using Mocassin.Core.Model.Transitions;
 
 namespace Mocassin.Core.Project;
 
@@ -37,6 +38,7 @@ public static class ProjectValidator
         var model = project.Model;
         bag.AddRange(ParticleModelValidator.Validate(new ParticleModel(model.Particles, model.ParticleSets)));
         bag.AddRange(StructureModelValidator.Validate(model.Structure));
+        bag.AddRange(TransitionModelValidator.Validate(model));
     }
 
     private static void ValidateMetadata(Project project, DiagnosticBag bag)
