@@ -22,8 +22,8 @@ geometry, with validation of transition semantics.
 | `state-changes-and-groups` | `feature/step-04-transition-model/state-changes-and-groups` | Done | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | `8cac5b4` |
 | `chains-and-patterns` | `feature/step-04-transition-model/chains-and-patterns` | Done | `verify.sh dotnet`, `structure` pass (2026-11-09) | — | `1d3503d` |
 | `kinetic-and-metropolis-transitions` | `feature/step-04-transition-model/kinetic-and-metropolis-transitions` | Done | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | `76ee174` |
-| `queries-and-editing` | `feature/step-04-transition-model/queries-and-editing` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | — |
-| `transition-preview-and-benchmark` | `feature/step-04-transition-model/transition-preview-and-benchmark` | Planned | — | — | — |
+| `queries-and-editing` | `feature/step-04-transition-model/queries-and-editing` | Done | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | `1b2cc8c` |
+| `transition-preview-and-benchmark` | `feature/step-04-transition-model/transition-preview-and-benchmark` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass; benchmark 19.75 µs (2026-11-09) | — | — |
 | `contracts-and-fixtures` | `feature/step-04-transition-model/contracts-and-fixtures` | Planned | — | — | — |
 | `samples-and-docs` | `feature/step-04-transition-model/samples-and-docs` | Planned | — | — | — |
 | `closeout` | `feature/step-04-transition-model/closeout` | Planned | — | — | — |

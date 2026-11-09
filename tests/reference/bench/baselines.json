@@ -67,10 +67,33 @@
     "recorded": {
       "date": "2026-11-08",
       "environment": "local container, AMD Ryzen 7 7840U, .NET SDK 10.0.403, BenchmarkDotNet 0.15.8, Release, DefaultJob",
-      "ceriaMeanMicroseconds": 16.460,
+      "ceriaMeanMicroseconds": 16.46,
       "bariumZirconateMeanMicroseconds": 9.976,
       "ceriaAllocatedBytes": 36075,
       "bariumZirconateAllocatedBytes": 24360,
+      "targetMet": true
+    },
+    "evidenceStatus": "Local-container evidence recorded; the declared GitHub runner class is re-verified through the manual Benchmark CI job on release candidates.",
+    "ciJob": "benchmark (workflow_dispatch)"
+  },
+  "transitionPreview": {
+    "runnerClass": "linux-x64-github-ubuntu-latest-dotnet10",
+    "command": "dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks -- --filter \"*TransitionPreviewCeria*\"",
+    "targetMeanMilliseconds": 100,
+    "rawResults": "tests/reference/bench/transition-preview-2026-11-09.txt",
+    "fixtures": {
+      "ceriaLikeP1": {
+        "spaceGroup": 1,
+        "p1Positions": 3,
+        "chainPositions": 3,
+        "expandedPaths": 1
+      }
+    },
+    "recorded": {
+      "date": "2026-11-09",
+      "environment": "local container, AMD Ryzen 7 7840U, .NET SDK 10.0.403, BenchmarkDotNet 0.15.8, Release, DefaultJob",
+      "ceriaMeanMicroseconds": 19.75,
+      "ceriaAllocatedBytes": 36096,
       "targetMet": true
     },
     "evidenceStatus": "Local-container evidence recorded; the declared GitHub runner class is re-verified through the manual Benchmark CI job on release candidates.",

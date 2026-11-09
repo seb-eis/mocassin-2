@@ -6,6 +6,7 @@ using Mocassin.Core.Model;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
+using Mocassin.Core.Project;
 using Mocassin.Core.Symmetry;
 using Mocassin.Core.Units;
 
@@ -93,6 +94,23 @@ internal static class TransitionTestModels
         [StableGroup.Id, StableGroup.Id],
         [TransitionLinker.Dynamic],
         GeneratesReverse: true);
+
+    public static Project CreateProject(ModelDefinition? model = null) =>
+        new(
+            ProjectSchema.SchemaUri,
+            ProjectSchema.CurrentVersion,
+            new ProjectMetadata(
+                Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d6f00"),
+                new string('a', 64),
+                "Transition preview",
+                null,
+                DateTimeOffset.Parse("2026-11-09T12:00:00Z", System.Globalization.CultureInfo.InvariantCulture),
+                DateTimeOffset.Parse("2026-11-09T12:00:00Z", System.Globalization.CultureInfo.InvariantCulture)),
+            model ?? CreateModel(),
+            [],
+            [],
+            [],
+            ViewSettings.Default);
 
     public static ModelDefinition CreateModel() => new()
     {
