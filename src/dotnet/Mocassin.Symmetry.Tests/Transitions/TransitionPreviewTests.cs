@@ -221,6 +221,67 @@ public sealed class TransitionPreviewTests
     }
 
     [Fact]
+    public void NestedDefaultCollectionsDoNotThrow()
+    {
+        var model = TransitionTestModels.CreateModel();
+        var group = TransitionTestModels.StableGroup with { StateChangeIds = default };
+        var chain = TransitionTestModels.Migration3 with
+        {
+            GroupIds = [group.Id, TransitionTestModels.UnstableGroup.Id, TransitionTestModels.StableGroup.Id],
+        };
+        var transition = TransitionTestModels.KineticTransitionWith(model, stableA, unstablePoint, stableB) with
+        {
+            ChainId = chain.Id,
+        };
+        var project = TransitionTestModels.CreateProject(model with
+        {
+            StateChangeGroups = [group, TransitionTestModels.UnstableGroup],
+            Chains = [chain],
+            KineticTransitions = [transition],
+            MetropolisTransitions = [],
+        });
+        var service = new TransitionPreviewService();
+
+        var preview = service.TryCreatePreview(transition, project, 1, 1, 1, out var diagnostics);
+
+        Assert.Null(preview);
+        Assert.NotEmpty(diagnostics);
+    }
+
+    [Fact]
+    public void UnrelatedInvalidDefinitionsDoNotBlockAValidTransitionPreview()
+    {
+        var model = TransitionTestModels.CreateModel();
+        var unrelated = new StateChange(
+            StateChangeId.New(),
+            "Unrelated broken change",
+            ParticleId.New(),
+            ParticleId.New());
+        var unrelatedGroup = new StateChangeGroup(
+            StateChangeGroupId.New(),
+            "Unrelated broken group",
+            [unrelated.Id]);
+        var project = TransitionTestModels.CreateProject(
+            TransitionTestModels.WithKineticPath(model, stableA, unstablePoint, stableB) with
+            {
+                StateChanges = [.. model.StateChanges, unrelated],
+                StateChangeGroups = [.. model.StateChangeGroups, unrelatedGroup],
+            });
+        var service = new TransitionPreviewService();
+
+        var preview = service.TryCreatePreview(
+            project.Model.KineticTransitions[0],
+            project,
+            1,
+            1,
+            1,
+            out var diagnostics);
+
+        Assert.NotNull(preview);
+        Assert.Empty(diagnostics);
+    }
+
+    [Fact]
     public void PreviewServiceImplementsTheContract()
     {
         Assert.IsAssignableFrom<ITransitionPreviewService>(new TransitionPreviewService());

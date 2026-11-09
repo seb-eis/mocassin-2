@@ -105,6 +105,40 @@ public sealed class TransitionPathTests
     }
 
     [Fact]
+    public void AmbiguousPathMatchListsCandidatePIndices()
+    {
+        var model = TransitionTestModels.CreateModel();
+        var sites = new[]
+        {
+            new CellSite(
+                Mocassin.Core.Ids.CellSiteId.New(),
+                "Close 1",
+                new Fractional3(0.25, 0.25, 0.25),
+                TransitionTestModels.OxygenSet.Id,
+                SiteStability.Stable),
+            new CellSite(
+                Mocassin.Core.Ids.CellSiteId.New(),
+                "Close 2",
+                new Fractional3(0.250001, 0.25, 0.25),
+                TransitionTestModels.OxygenSet.Id,
+                SiteStability.Stable),
+        };
+        model = model with { Structure = model.Structure with { Sites = [.. sites] } };
+        var transition = TransitionTestModels.KineticTransitionWith(
+            model,
+            new Fractional3(0.2500005, 0.25, 0.25));
+
+        Assert.True(TransitionPathResolver.TryCreate(model.Structure, catalog: null, out var resolver, out _));
+        var path = resolver!.TryResolve(transition, out var diagnostics);
+
+        Assert.Null(path);
+        var diagnostic = Assert.Single(diagnostics, static item => item.Code == TransitionDiagnosticCodes.UnmatchedPathPosition);
+        Assert.Contains(
+            diagnostic.Related,
+            static item => item.Domain == "candidatePosition");
+    }
+
+    [Fact]
     public void ValidKineticAndMetropolisModelsHaveNoSymmetryTransitionDiagnostics()
     {
         var model = TransitionTestModels.CreateModel();

@@ -269,13 +269,32 @@ public sealed class TransitionPreviewService : ITransitionPreviewService
                     candidate.Id == metropolis.Id ||
                     (metropolis.ReverseTransitionId is { } reverseId && candidate.Id == reverseId))];
 
+        var chainIds = kineticSubset.Select(static item => item.ChainId)
+            .Concat(metropolisSubset.Select(static item => item.ChainId))
+            .ToHashSet();
+        var chains = (project.Chains.IsDefault ? [] : project.Chains)
+            .Where(chain => chainIds.Contains(chain.Id))
+            .ToImmutableArray();
+        var groupIds = chains
+            .SelectMany(chain => chain.GroupIds.IsDefault ? [] : chain.GroupIds)
+            .ToHashSet();
+        var groups = (project.StateChangeGroups.IsDefault ? [] : project.StateChangeGroups)
+            .Where(group => groupIds.Contains(group.Id))
+            .ToImmutableArray();
+        var stateChangeIds = groups
+            .SelectMany(group => group.StateChangeIds.IsDefault ? [] : group.StateChangeIds)
+            .ToHashSet();
+        var stateChanges = (project.StateChanges.IsDefault ? [] : project.StateChanges)
+            .Where(stateChange => stateChangeIds.Contains(stateChange.Id))
+            .ToImmutableArray();
+
         return new ModelDefinition
         {
             Particles = project.Particles,
             Structure = project.Structure,
-            StateChanges = project.StateChanges,
-            StateChangeGroups = project.StateChangeGroups,
-            Chains = project.Chains,
+            StateChanges = stateChanges,
+            StateChangeGroups = groups,
+            Chains = chains,
             KineticTransitions = kineticSubset,
             MetropolisTransitions = metropolisSubset,
         };

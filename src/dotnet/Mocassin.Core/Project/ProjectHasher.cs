@@ -92,11 +92,15 @@ public static class ProjectHasher
         var chains = (project.Chains.IsDefault ? [] : project.Chains)
             .Where(chain => chainIds.Contains(chain.Id))
             .ToImmutableArray();
-        var groupIds = chains.SelectMany(static chain => chain.GroupIds).ToHashSet();
+        var groupIds = chains
+            .SelectMany(static chain => chain.GroupIds.IsDefault ? [] : chain.GroupIds)
+            .ToHashSet();
         var groups = (project.StateChangeGroups.IsDefault ? [] : project.StateChangeGroups)
             .Where(group => groupIds.Contains(group.Id))
             .ToImmutableArray();
-        var stateChangeIds = groups.SelectMany(static group => group.StateChangeIds).ToHashSet();
+        var stateChangeIds = groups
+            .SelectMany(static group => group.StateChangeIds.IsDefault ? [] : group.StateChangeIds)
+            .ToHashSet();
         var stateChanges = (project.StateChanges.IsDefault ? [] : project.StateChanges)
             .Where(stateChange => stateChangeIds.Contains(stateChange.Id))
             .ToImmutableArray();
