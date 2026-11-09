@@ -77,7 +77,7 @@ Status legend:
 | Hollow-sphere filters | Y | Planned | 05/25 | |
 | Per-unstable-site environments | Y | Planned | 05/25 | |
 | Auto-sampled pair interactions | Y | Planned | 08 | |
-| Chiral pair linking | Y | Planned | 05/08/09 | Shell chiral linking in 02; interaction binding in 05/08/09 |
+| Chiral pair linking | Y | Planned | 05/08/09 | Shell chiral linking in 02; shared `EnergyId` binding in 05/08/09 |
 | Group/cluster interactions (up to 9 positions) | Y | Planned | 05/08 | |
 | Site/defect energies | Y | Planned | 05 | |
 | Cost/permutation limits | Y | Planned | 05/07 | |

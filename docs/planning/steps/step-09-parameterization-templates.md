@@ -71,7 +71,9 @@ public sealed record ParameterizationTemplate(
 
 ### 2. Stable identities
 
-- Pair sets: ID derived from `(centerSiteId, partnerSiteId, canonicalOffset, distanceBucket)`.
+- Pair sets: ID is the shared `EnergyId` defined in Step 05. For an achiral pair it is the directed geometry ID;
+  for a chiral pair it is the lexicographically smaller of the two directions' geometry IDs, so both
+  directions map to one set and one value. The template stores one entry per `EnergyId`.
 - Group sets: ID derived from `(clusterId, centerSiteId, canonicalGeometryHash)`.
 - Rule sets: ID derived from `(transitionId, canonicalStateTriplet, canonicalDirection)`.
 - Site energy overrides: `(siteId, particleId)`.
@@ -115,7 +117,8 @@ ParameterizationResult ParameterizationService.Apply(
 - Validates values:
   - energy finite and within −100..100 eV;
   - frequency finite and > 0 (practical range 1e-3..1e18 Hz);
-  - chiral partners receive the same value (or a single value is stored once).
+  - chiral partners share one `EnergyId`, so exactly one value is stored and independent A→B/B→A values
+    cannot be represented.
 - Produces a `ParameterizedModel` ready for job encoding:
   `record ParameterizedModel(CompiledModel Model, string Signature, EnergyTables Energies, RuleFrequencies Frequencies)`
   in `Mocassin.Contracts`; `Mocassin.Compilation` stays parameterization-free and `Mocassin.Packages`
@@ -177,7 +180,7 @@ When the model signature changes:
 | `PRM004` | Error | Energy outside −100..100 eV or non-finite |
 | `PRM005` | Error | Frequency ≤ 0 or non-finite |
 | `PRM006` | Warning | All values default (template may be unparameterized) |
-| `PRM007` | Warning | Chiral partner values differ |
+| `PRM007` | Reserved | Not used. Step 05 gives chiral partners one shared `EnergyId`, so independent values cannot exist; the code is retained as reserved rather than renumbered. |
 | `PRM008` | Warning | Site energy override targets an invalid site/particle |
 | `PRM009` | Info | Template rebased; N entries copied, M dropped |
 | `PRM010` | Warning | Duplicate template name |

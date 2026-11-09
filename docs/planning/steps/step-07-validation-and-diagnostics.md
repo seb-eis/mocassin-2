@@ -81,7 +81,12 @@ Examples of rules that cannot live in a single domain:
 - Every kinetic path point resolves to exactly one reference site; unmatched and ambiguous points are
   `TRN020` (Step 04).
 - Every kinetic path lies within the relevant stable or unstable environment cutoff; a path outside it is
-  `ENM018` (Warning, owned by this cross-domain stage). Step 04 does not read energy data.
+  `ENM018` (Warning, owned by this cross-domain stage). Step 04 does not read energy data. Step 05 defines the
+  `ENM018` constant and help anchor; Step 07 owns its emission and consolidated documentation.
+
+Step 05 owns the energy diagnostics `ENM001`–`ENM017` and `ENM019`–`ENM021`; Step 07 aggregates them and
+documents them in `docs/reference/diagnostics.md`. The Step 05 Core/Symmetry split is composed by
+`ProjectValidationService`, so Step 07's catalog sees one stable, sorted result.
 - Every unstable environment belongs to an unstable site.
 - Every cluster center is a site with an environment.
 - Every doping's source particle is the default occupation at the point the doping is applied.

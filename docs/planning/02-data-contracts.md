@@ -379,14 +379,32 @@ parameterization, and lattice signatures use the MessagePack projection (section
 }
 ```
 
-- `cutoff` and filter radii are in Å.
-- Filters remove pair interactions between the two referenced sites in the radial range.
-- Cluster offsets are absolute fractional vectors relative to the cluster centre, in definition order. The
-  `offsetVectors` array is semantic and is never re-sorted.
+- `cutoff` and filter radii are in Å. Every environment cutoff (stable and unstable) must be positive and
+  finite; a cutoff above half the smallest cell dimension warns about periodic ambiguity.
+- A missing `stableEnvironment` loads the default cutoff `1.0 Å` with no filters. The default environment is
+  omitted on write when it equals the default. The empty `unstableEnvironments`, `clusters`, and
+  `siteEnergies` arrays are omitted when empty, so a model without authored energy data keeps its previous
+  canonical JSON and hashes.
+- Filters remove pair interactions whose centre-to-partner distance is in the inclusive range
+  `[start, end]`, with the 1e-5 Å distance-equality tolerance. A stable-environment filter is symmetric:
+  `(siteAId, siteBId)` removes both directions. An unstable-environment filter is one-directional:
+  `siteAId` must equal the environment's `siteId`, and `siteBId` is the partner. Filter order is not semantic;
+  filters serialize by `(start, end, siteAId, siteBId)`.
+- Cluster offsets are absolute fractional vectors relative to the cluster centre, in definition order.
+  `offsetVectors` contains the surrounding positions only: 2 to 8 offsets (3 to 9 positions including the
+  centre). The `offsetVectors` array is semantic and is never re-sorted. Periodic identity uses the Step 02
+  `UnitCellVectorEncoder`; duplicate or centre-equivalent encoded positions are rejected.
 - Site energies are in eV; missing entries default to 0. Energy entries are sorted by `particleId` when
-  serialized.
-- Unstable environments are sorted by `siteId`, clusters by `id`, and site-energy sets by `siteId`.
-- The energy sections are additive and the project `schemaVersion` remains 1.
+  serialized. A `(siteId, particleId)` pair may appear at most once.
+- Unstable environments are sorted by `siteId`, clusters by `id`, and site-energy sets by `siteId`. Each
+  environment's `filters` array and each site-energy set's `entries` array use their stated sort keys.
+- `ProjectJson.CanonicalizeModel` applies these rules before save, hashing, and schema generation.
+  `ProjectHasher.Compute` and `ComputeDocument` therefore include the energy sections, and
+  `ProjectHasher.ComputeEnergy(ModelDefinition)` hashes only the canonical energy projection for Step 08's
+  energy-model cache key.
+- The energy sections are additive and the project `schemaVersion` remains 1 under the Step 03/04 additive-v1
+  precedent. ADR 0009's version-bump rule is not waived generally: the manifest `status`/`notes` and fixtures
+  are updated now, and the first released format starts the normal bump discipline.
 
 #### Lattice and doping
 
@@ -497,8 +515,10 @@ configurations are preferred.
   existing frequencies.
 - The original could not edit site energies through a parameterization template. The new format includes
   `siteEnergyOverrides` as an intentional improvement; the GUI marks them as overrides.
-- Chiral pair sets share one interaction ID and one energy table. The compiler refuses two independent
-  values for a linked chiral pair.
+- Chiral pair sets share one interaction identity and one energy table. Each direction has its own stable
+  geometry ID for display and migration, and the shared `EnergyId` is the canonical pair-set identity used by
+  the compiled `object_id` and the parameterization template. A template stores one value per `EnergyId`, so
+  two independent values for a linked chiral pair are unrepresentable.
 
 ### 2.4 Job templates
 
@@ -688,9 +708,10 @@ MessagePack map with snake_case keys. Top-level:
 
 - Pair tables are in canonical shell order: `(distanceBucket, targetP, cellA, cellB, cellC)`, then site
   indices. The stable geometry ID is a content hash used for parameterization matching, not table order. The
-  compiled structure environments carry each shell's geometry ID, distance bucket, representative offset,
-  equivalent-offset count, and optional chiral partner index.
-- Chiral partners share one `object_id` and one energy table.
+  compiled structure environments carry each shell's geometry ID, shared energy ID, distance bucket,
+  representative offset, equivalent-offset count, and optional chiral partner geometry ID.
+- Chiral partners share one `object_id` (the shared `EnergyId`) and one energy table. Each direction keeps its
+  own `GeometryId` and records the inverse direction's `ChiralPartnerGeometryId`.
 - Cluster occupation codes use 6 bits per site, site 0 in the least significant bits, up to 9 sites; unused
   high bits are zero. Codes are canonical under the induced site-permutation group.
 - Pair shells use the `1 fm` distance bucket. Candidate enumeration uses a `cutoff + 1 fm` margin and includes

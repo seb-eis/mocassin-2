@@ -128,6 +128,8 @@ public sealed record CompiledModel(
 
 ### 4. Pair interaction compilation
 
+- Pair-image sampling, filter application, and unique-geometry construction use the Step 05
+  `Mocassin.Symmetry.Energy.IEnergyGeometrySampler`; the preview and the compiler share one kernel.
 - For each stable site (center) and each periodic image within the cutoff:
   - use the Step 02 `RadialSearch` and minimum-image policy;
   - compute distance and partner position;
@@ -144,15 +146,18 @@ public sealed record CompiledModel(
 - Chirality:
   - compute the inverse geometry `B-A` with the opposite periodic offset;
   - if the inverse is not in the same `G0` orbit, the pair is chiral;
-  - link both directions to one energy table and one parameterization set;
-  - the compiled model records the chiral partner index;
+  - link both directions to one shared `EnergyId`, one energy table, and one parameterization set;
+  - the compiled model records each direction's `GeometryId`, the shared `EnergyId`, and the inverse
+    direction's `ChiralPartnerGeometryId`;
   - this is an orbit relationship, not physical chirality; in P1 both directions are separate orbits.
-- Unstable-stable pairs are compiled per unstable environment and are asymmetric by nature.
+- Unstable-stable pairs are compiled per unstable environment and are asymmetric by nature; they have
+  `GeometryId == EnergyId` and no chiral partner.
 - Each pair set carries:
   - `CenterSiteIndex`, `PartnerSiteIndex`;
   - reference offset vector and distance;
+  - `GeometryId` (directed geometry), `EnergyId` (shared table/parameterization identity);
   - `DistanceBucketFm`;
-  - `ChiralPartnerId` (or none);
+  - `ChiralPartnerGeometryId` (or none);
   - multiplicity (`EquivalentModels` count);
   - allowed particle permutations and the particle-table mapping.
 - Pair energy tables are `n_particles × n_particles` in eV; entries not valid for the site pair are zero and
@@ -162,6 +167,8 @@ public sealed record CompiledModel(
 
 - Expand the cluster geometry by the space group.
 - For each unique geometry, build the `PointGroup` at the center: `G0`, `Gset`, `Gseq`, and `P`.
+- The raw permutation count is `centerParticleCount × Π(surroundingParticleSetSize)`; the centre factor is not
+  optional.
 - Enumerate allowed occupation states from the center and surrounding particle sets.
 - Canonicalize under `P`; keep the lexicographically smallest tuple in site order and record every equivalent
   tuple/permutation in the expansion map.
@@ -267,7 +274,7 @@ For MMC:
   the model signature plus canonical energy/frequency values.
 - The compiler caches stage results keyed by content hashes:
   - structure hash → P1 expansion;
-  - energy model hash + structure hash → pair/cluster geometry;
+  - energy model hash (`ProjectHasher.ComputeEnergy(model)`) + structure hash → pair/cluster geometry;
   - transition model hash + structure hash → rules;
   - simulation hash + previous → encoding.
 - Cache entries are immutable and thread-safe. Editing one domain invalidates only dependent stages.
