@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "project": "MOCASSIN",
   "description": "Machine-readable contract manifest for MOCASSIN project, package, results, state, job-folder, event, and MMCFE formats.",
-  "status": "step-03",
-  "notes": "Step 03 adds the flat particle, particle-set, and structure model sections plus the optional project symmetry metadata. Transition, energy, lattice, and simulation sections are extended by later steps; every format change requires a version bump and updated fixtures.",
+  "status": "step-04",
+  "notes": "Step 04 adds the flat state-change, state-change-group, chain, kinetic-transition, and metropolis-transition model sections. The transition fields remain additive under project schema v1; energy, lattice, and simulation sections are extended by later steps. Every semantic format change requires a version bump and updated fixtures.",
   "formats": {
     "project": {
       "id": "project",
@@ -307,6 +307,193 @@
                       "length": 3
                     }
                   ]
+                }
+              ]
+            },
+            {
+              "name": "stateChanges",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "donorParticleId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "acceptorParticleId",
+                  "type": "string",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "stateChangeGroups",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "stateChangeIds",
+                  "type": "array",
+                  "required": true,
+                  "items": "string"
+                }
+              ]
+            },
+            {
+              "name": "chains",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "pattern",
+                  "type": "string",
+                  "required": true,
+                  "enum": [
+                    "metropolis2",
+                    "migration3",
+                    "interstitialcy5",
+                    "interstitialcy7",
+                    "vehicle5",
+                    "vehicle6",
+                    "custom"
+                  ]
+                },
+                {
+                  "name": "groupIds",
+                  "type": "array",
+                  "required": true,
+                  "items": "string"
+                },
+                {
+                  "name": "linkers",
+                  "type": "array",
+                  "required": true,
+                  "items": "string",
+                  "itemEnum": [
+                    "dynamic",
+                    "static"
+                  ]
+                },
+                {
+                  "name": "generatesReverse",
+                  "type": "bool",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "kineticTransitions",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "chainId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "referencePath",
+                  "type": "array",
+                  "required": true,
+                  "items": "array",
+                  "itemItems": {
+                    "type": "array",
+                    "items": "float64",
+                    "length": 3
+                  }
+                },
+                {
+                  "name": "reverseTransitionId",
+                  "type": "string",
+                  "required": false
+                }
+              ]
+            },
+            {
+              "name": "metropolisTransitions",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "chainId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "siteAId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "siteBId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "reverseTransitionId",
+                  "type": "string",
+                  "required": false
                 }
               ]
             }
@@ -1541,6 +1728,20 @@
         "kind": "project",
         "status": "current",
         "step": "03"
+      },
+      {
+        "id": "project-transitions-minimal",
+        "path": "tests/contracts/project-transitions-minimal.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "04"
+      },
+      {
+        "id": "project-transitions-populated",
+        "path": "tests/contracts/project-transitions-populated.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "04"
       }
     ]
   }

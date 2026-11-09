@@ -98,6 +98,20 @@
       "kind": "project",
       "status": "current",
       "step": "03"
+    },
+    {
+      "id": "project-transitions-minimal",
+      "path": "tests/contracts/project-transitions-minimal.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "04"
+    },
+    {
+      "id": "project-transitions-populated",
+      "path": "tests/contracts/project-transitions-populated.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "04"
     }
   ]
 }

@@ -19,6 +19,8 @@ public sealed class ProjectSchemaTests
         "tests/contracts/project-symmetry.mocprj",
         "tests/contracts/project-symmetry-partial.mocprj",
         "tests/contracts/project-symmetry-mismatch.mocprj",
+        "tests/contracts/project-transitions-minimal.mocprj",
+        "tests/contracts/project-transitions-populated.mocprj",
         "samples/blank/blank.mocprj",
         "samples/ceria/ceria.mocprj",
     ];

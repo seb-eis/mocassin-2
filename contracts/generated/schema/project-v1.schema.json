@@ -259,6 +259,185 @@
             "cell"
           ],
           "additionalProperties": false
+        },
+        "stateChanges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "donorParticleId": {
+                "type": "string"
+              },
+              "acceptorParticleId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "donorParticleId",
+              "acceptorParticleId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "stateChangeGroups": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "stateChangeIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "stateChangeIds"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "chains": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "pattern": {
+                "type": "string",
+                "enum": [
+                  "metropolis2",
+                  "migration3",
+                  "interstitialcy5",
+                  "interstitialcy7",
+                  "vehicle5",
+                  "vehicle6",
+                  "custom"
+                ]
+              },
+              "groupIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "linkers": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "enum": [
+                    "dynamic",
+                    "static"
+                  ]
+                }
+              },
+              "generatesReverse": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "pattern",
+              "groupIds",
+              "linkers",
+              "generatesReverse"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "kineticTransitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "chainId": {
+                "type": "string"
+              },
+              "referencePath": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              },
+              "reverseTransitionId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "chainId",
+              "referencePath"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "metropolisTransitions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "chainId": {
+                "type": "string"
+              },
+              "siteAId": {
+                "type": "string"
+              },
+              "siteBId": {
+                "type": "string"
+              },
+              "reverseTransitionId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "chainId",
+              "siteAId",
+              "siteBId"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "required": [],
