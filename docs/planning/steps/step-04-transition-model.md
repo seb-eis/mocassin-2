@@ -12,7 +12,7 @@ geometry, with validation of transition semantics.
 - **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) — replacement closeout, Ubuntu
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `8c44709` (rounds 1–2 passed with notes)
+- **Audit:** Passed with notes at `82c8cb4` (code frozen at `8c44709`)
 - **Design review:** [Ready for implementation — accepted at `a3d8641`](../reviews/step-04.md)
 - **Last updated:** 2026-11-09
 

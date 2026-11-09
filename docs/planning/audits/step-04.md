@@ -550,6 +550,8 @@ is evidence, not merge authorization.
 | F6 | Fixed — nested default chain/group arrays are guarded in the transition closure hash | Step agent | `8c44709` |
 | F7 | Fixed — ambiguous TRN020 now has a regression test for `Related` candidate paths | Step agent | `8c44709` |
 | N5 | Fixed — preview definition validation now uses only the transition closure | Step agent | `8c44709` |
+| N6 | Accepted note — the F6 regression test covers group nested arrays; the chain `GroupIds` guard is present and independently probed | Step agent | — |
+| N7 | Accepted note — the F7 regression test asserts a candidate path exists; exact P values are exercised by the resolver probe | Step agent | — |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -559,25 +561,41 @@ verdict.
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — step-to-main merge approval requested for code commit `8c44709`; audit record at `82c8cb4`.
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — no Blocker, Major, or Minor remains; N2/N3/N6/N7 notes require human acceptance.
+- [x] Final CI and documentation-build results recorded — `./tools/verify.sh all` green; closeout CI `42695864895` green at `8c44709`.
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| Design review 1–5 | 2026-11-08 | `b426a13` → `a3d8641` | Independent planning auditor | Changes required ×3, Ready with notes, Ready for implementation |
+| Audit 1 | 2026-11-09 | `288dd37` | Fresh independent audit agent | Passed with notes (F1–F4, N1–N4) |
+| Audit 2 | 2026-11-09 | `ebefc96` | Fresh independent re-audit agent | Passed with notes (F5–F7, N5) |
+| Audit 3 | 2026-11-09 | `8c44709` | Fresh independent re-audit agent | Passed with notes (N6–N7) |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| F1 | Minor | Missing transition property/cache/brute-force/schema tests | Added property tests, brute-force path oracle, cache-key separation, schema rejection | `ebefc96` | Fixed |
+| F2 | Minor | Preview skipped Core definition validation | Preview runs Core validation on the closure | `ebefc96` | Fixed |
+| F3 | Minor | Ambiguous TRN020 candidate P indices only in message | Added `Related` candidate paths | `ebefc96` | Fixed |
+| F4 | Minor | Preview threw on default top-level arrays | Guarded top-level arrays in preview/query/hash | `ebefc96` | Fixed |
+| F5 | Minor | Expanded-path/MMC pair counts not asserted | Added brute-force ceria path/pair count tests | `8c44709` | Fixed |
+| F6 | Minor | Nested default arrays still threw | Guarded nested chain/group arrays | `8c44709` | Fixed |
+| F7 | Minor | No TRN020 `Related` regression test | Added regression test | `8c44709` | Fixed |
+| N1 | Note | Parity rows marked Implemented too broadly | Transition rows use Partial | `ebefc96` | Fixed |
+| N2 | Note | Benchmark evidence is local-container | Accepted; manual Benchmark CI re-verifies runner class | — | Accepted |
+| N3 | Note | Record parent is docs-only request commit | Accepted; code frozen at recorded commit | — | Accepted |
+| N4 | Note | MMC groups not checked for stable role | Added TRN012 Metropolis check | `ebefc96` | Fixed |
+| N5 | Note | Preview validation was project-wide | Validation now uses only the transition closure | `8c44709` | Fixed |
+| N6 | Note | F6 test covers group nested arrays but not chain `GroupIds` | Accepted; guard independently probed | — | Accepted |
+| N7 | Note | F7 test asserts candidate presence, not exact P values | Accepted; exact values independently probed | — | Accepted |
 
 ## Human approval
 
