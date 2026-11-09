@@ -52,20 +52,20 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| State changes [D,A] | Y | Implemented | 04 | Validation, persistence, preview, editing |
-| State-change groups | Y | Implemented | 04 | Mixed physical/charge and stable/unstable roles rejected |
-| Abstract chains with D/S linkers | Y | Implemented | 04 | Six patterns + custom grammar; `D S D` rejected |
-| 2-site MMC | Y | Implemented | 04/08/17 | Model, validation, and preview in 04; rules in 08/17 |
-| 3-site KMC migration | Y | Implemented | 04/08/16 | Model, path validation, and preview in 04; rules in 08/16 |
-| 5-site interstitialcy | Y | Implemented | 04/08 | Model, path validation, preview, and sample in 04; rules in 08 |
-| 7-site interstitialcy | Y | Implemented | 04/08 | Model, path validation, and preview in 04; rules in 08 |
-| 5-site 2-species vehicle | Y | Implemented | 04/08 | Model, path validation, preview, and sample in 04; rules in 08 |
-| 6-site 2-species vehicle | Y | Implemented | 04/08 | Model, path validation, and preview in 04; rules in 08 |
-| Charge transfer/polaron hop | Y | Implemented | 04/08 | Homogeneous charge-state groups and sample in 04; rules in 08 |
+| State changes [D,A] | Y | Partial | 04/24 | Model, validation, persistence, preview, and editor API in 04; editor UI in 24 |
+| State-change groups | Y | Partial | 04/24 | Mixed physical/charge and stable/unstable roles rejected; editor UI in 24 |
+| Abstract chains with D/S linkers | Y | Partial | 04/24 | Six patterns + custom grammar; `D S D` rejected; editor UI in 24 |
+| 2-site MMC | Y | Partial | 04/08/17 | Model, validation, and preview in 04; rules in 08/17 |
+| 3-site KMC migration | Y | Partial | 04/08/16 | Model, path validation, and preview in 04; rules in 08/16 |
+| 5-site interstitialcy | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; rules in 08 |
+| 7-site interstitialcy | Y | Partial | 04/08 | Model, path validation, and preview in 04; rules in 08 |
+| 5-site 2-species vehicle | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; rules in 08 |
+| 6-site 2-species vehicle | Y | Partial | 04/08 | Model, path validation, and preview in 04; rules in 08 |
+| Charge transfer/polaron hop | Y | Partial | 04/08 | Homogeneous charge-state groups and sample in 04; rules in 08 |
 | Reverse rule generation (2/3-site) | Y | Planned | 08 | |
 | No reverse for complex mechanisms | Y | Planned | 08 | Explicit warning |
 | Dependent/hidden rules | Y | Planned | 08 | |
-| Reference path editing/preview | Y | Implemented | 04/24 | Preview API in 04; editor UI in 24 |
+| Reference path editing/preview | Y | Partial | 04/24 | Preview API in 04; editor UI in 24 |
 | Ambiguity detection | Y | Improvement | 08 | Compile-time error |
 | Transition rule count preview | N | Improvement | 24 | |
 

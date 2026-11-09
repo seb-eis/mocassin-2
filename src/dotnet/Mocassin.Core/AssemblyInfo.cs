@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Mocassin.Core.Tests")]
+[assembly: InternalsVisibleTo("Mocassin.Symmetry")]
 [assembly: SuppressMessage(
     "Naming",
     "CA1716:Identifiers should not match keywords",

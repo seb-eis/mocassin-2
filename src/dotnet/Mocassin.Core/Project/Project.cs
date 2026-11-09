@@ -160,6 +160,11 @@ public sealed record Project : IProjectQuery
             return Particle.Void;
         }
 
+        if (Model.Particles.IsDefault)
+        {
+            return null;
+        }
+
         foreach (var particle in Model.Particles)
         {
             if (particle.Id == id)
@@ -183,6 +188,11 @@ public sealed record Project : IProjectQuery
             return ParticleSet.Empty;
         }
 
+        if (Model.ParticleSets.IsDefault)
+        {
+            return null;
+        }
+
         foreach (var particleSet in Model.ParticleSets)
         {
             if (particleSet.Id == id)
@@ -201,6 +211,11 @@ public sealed record Project : IProjectQuery
     /// <returns>The matching site, or <see langword="null"/> when the identifier is unknown.</returns>
     public CellSite? Find(CellSiteId id)
     {
+        if (Model.Structure.Sites.IsDefault)
+        {
+            return null;
+        }
+
         foreach (var site in Model.Structure.Sites)
         {
             if (site.Id == id)
@@ -219,6 +234,11 @@ public sealed record Project : IProjectQuery
     /// <returns>The matching state change, or <see langword="null"/> when the identifier is unknown.</returns>
     public StateChange? Find(StateChangeId id)
     {
+        if (Model.StateChanges.IsDefault)
+        {
+            return null;
+        }
+
         foreach (var stateChange in Model.StateChanges)
         {
             if (stateChange.Id == id)
@@ -237,6 +257,11 @@ public sealed record Project : IProjectQuery
     /// <returns>The matching group, or <see langword="null"/> when the identifier is unknown.</returns>
     public StateChangeGroup? Find(StateChangeGroupId id)
     {
+        if (Model.StateChangeGroups.IsDefault)
+        {
+            return null;
+        }
+
         foreach (var group in Model.StateChangeGroups)
         {
             if (group.Id == id)
@@ -255,6 +280,11 @@ public sealed record Project : IProjectQuery
     /// <returns>The matching chain, or <see langword="null"/> when the identifier is unknown.</returns>
     public TransitionChain? Find(TransitionChainId id)
     {
+        if (Model.Chains.IsDefault)
+        {
+            return null;
+        }
+
         foreach (var chain in Model.Chains)
         {
             if (chain.Id == id)
@@ -273,6 +303,11 @@ public sealed record Project : IProjectQuery
     /// <returns>The matching transition, or <see langword="null"/> when the identifier is unknown.</returns>
     public KineticTransition? Find(KineticTransitionId id)
     {
+        if (Model.KineticTransitions.IsDefault)
+        {
+            return null;
+        }
+
         foreach (var transition in Model.KineticTransitions)
         {
             if (transition.Id == id)
@@ -291,6 +326,11 @@ public sealed record Project : IProjectQuery
     /// <returns>The matching transition, or <see langword="null"/> when the identifier is unknown.</returns>
     public MetropolisTransition? Find(MetropolisTransitionId id)
     {
+        if (Model.MetropolisTransitions.IsDefault)
+        {
+            return null;
+        }
+
         foreach (var transition in Model.MetropolisTransitions)
         {
             if (transition.Id == id)

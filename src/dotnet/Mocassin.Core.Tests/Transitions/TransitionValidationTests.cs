@@ -186,6 +186,31 @@ public sealed class TransitionValidationTests
     }
 
     [Fact]
+    public void MetropolisChainMustUseStableRoleGroups()
+    {
+        var model = TransitionTestModels.CreateCombinedModel();
+        var stableGroup = model.StateChangeGroups.Single(static group => group.Name == TransitionTestModels.ForwardGroup.Name);
+        var unstableGroup = model.StateChangeGroups.Single(static group => group.Name == TransitionTestModels.UnstableGroup.Name);
+        var chain = new TransitionChain(
+            TransitionChainId.New(),
+            "Unstable Metropolis",
+            TransitionPattern.Metropolis2,
+            [unstableGroup.Id, stableGroup.Id],
+            [TransitionLinker.Dynamic],
+            GeneratesReverse: true);
+        var transition = model.MetropolisTransitions[0] with { ChainId = chain.Id };
+
+        var diagnostics = TransitionModelValidator.Validate(model with
+        {
+            Chains = [chain],
+            KineticTransitions = [],
+            MetropolisTransitions = [transition],
+        });
+
+        Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.GroupStabilityMismatch);
+    }
+
+    [Fact]
     public void KineticAndMetropolisNamesMayCoincideButNotWithinAKind()
     {
         var model = TransitionTestModels.CreateCombinedModel();

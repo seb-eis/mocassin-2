@@ -74,23 +74,33 @@ public static class ProjectHasher
     {
         ArgumentNullException.ThrowIfNull(project);
 
+        var kineticTransitions = project.KineticTransitions.IsDefault
+            ? ImmutableArray<KineticTransition>.Empty
+            : project.KineticTransitions;
+        var metropolisTransitions = project.MetropolisTransitions.IsDefault
+            ? ImmutableArray<MetropolisTransition>.Empty
+            : project.MetropolisTransitions;
         var kinetic = transition.IsKinetic
-            ? project.KineticTransitions.Where(item => item.Id.Value == transition.Id).ToImmutableArray()
+            ? kineticTransitions.Where(item => item.Id.Value == transition.Id).ToImmutableArray()
             : ImmutableArray<KineticTransition>.Empty;
         var metropolis = transition.IsKinetic
             ? ImmutableArray<MetropolisTransition>.Empty
-            : project.MetropolisTransitions.Where(item => item.Id.Value == transition.Id).ToImmutableArray();
+            : metropolisTransitions.Where(item => item.Id.Value == transition.Id).ToImmutableArray();
         var chainIds = kinetic.Select(static item => item.ChainId)
             .Concat(metropolis.Select(static item => item.ChainId))
             .ToHashSet();
-        var chains = project.Chains.Where(chain => chainIds.Contains(chain.Id)).ToImmutableArray();
+        var chains = (project.Chains.IsDefault ? [] : project.Chains)
+            .Where(chain => chainIds.Contains(chain.Id))
+            .ToImmutableArray();
         var groupIds = chains.SelectMany(static chain => chain.GroupIds).ToHashSet();
-        var groups = project.StateChangeGroups.Where(group => groupIds.Contains(group.Id)).ToImmutableArray();
+        var groups = (project.StateChangeGroups.IsDefault ? [] : project.StateChangeGroups)
+            .Where(group => groupIds.Contains(group.Id))
+            .ToImmutableArray();
         var stateChangeIds = groups.SelectMany(static group => group.StateChangeIds).ToHashSet();
-        var stateChanges = project.StateChanges
+        var stateChanges = (project.StateChanges.IsDefault ? [] : project.StateChanges)
             .Where(stateChange => stateChangeIds.Contains(stateChange.Id))
             .ToImmutableArray();
-        var particleOrder = project.Particles
+        var particleOrder = (project.Particles.IsDefault ? [] : project.Particles)
             .OrderBy(static particle => particle.Id.Value)
             .Append(project.VoidParticle)
             .ToImmutableArray();

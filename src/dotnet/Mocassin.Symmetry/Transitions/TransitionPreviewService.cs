@@ -86,6 +86,7 @@ public sealed class TransitionPreviewService : ITransitionPreviewService
         }
 
         var reduced = BuildReducedModel(project, kinetic: transition, metropolis: null);
+        bag.AddRange(TransitionModelValidator.Validate(reduced));
         bag.AddRange(pathValidator.Validate(reduced));
         if (bag.HasErrors)
         {
@@ -159,6 +160,7 @@ public sealed class TransitionPreviewService : ITransitionPreviewService
         }
 
         var reduced = BuildReducedModel(project, kinetic: null, metropolis: transition);
+        bag.AddRange(TransitionModelValidator.Validate(reduced));
         bag.AddRange(pathValidator.Validate(reduced));
         if (bag.HasErrors)
         {
@@ -250,17 +252,34 @@ public sealed class TransitionPreviewService : ITransitionPreviewService
     private static ModelDefinition BuildReducedModel(
         IProjectQuery project,
         KineticTransition? kinetic,
-        MetropolisTransition? metropolis) =>
-        new()
+        MetropolisTransition? metropolis)
+    {
+        var kineticSubset = kinetic is null
+            ? ImmutableArray<KineticTransition>.Empty
+            : project.KineticTransitions.IsDefault
+                ? [kinetic]
+                : [.. project.KineticTransitions.Where(candidate =>
+                    candidate.Id == kinetic.Id ||
+                    (kinetic.ReverseTransitionId is { } reverseId && candidate.Id == reverseId))];
+        var metropolisSubset = metropolis is null
+            ? ImmutableArray<MetropolisTransition>.Empty
+            : project.MetropolisTransitions.IsDefault
+                ? [metropolis]
+                : [.. project.MetropolisTransitions.Where(candidate =>
+                    candidate.Id == metropolis.Id ||
+                    (metropolis.ReverseTransitionId is { } reverseId && candidate.Id == reverseId))];
+
+        return new ModelDefinition
         {
             Particles = project.Particles,
             Structure = project.Structure,
             StateChanges = project.StateChanges,
             StateChangeGroups = project.StateChangeGroups,
             Chains = project.Chains,
-            KineticTransitions = kinetic is null ? [] : [kinetic],
-            MetropolisTransitions = metropolis is null ? [] : [metropolis],
+            KineticTransitions = kineticSubset,
+            MetropolisTransitions = metropolisSubset,
         };
+    }
 
     private static bool TryBuildMatrices(
         IProjectQuery project,
@@ -367,11 +386,15 @@ public sealed class TransitionPreviewService : ITransitionPreviewService
         return true;
     }
 
-    private static ImmutableArray<ParticleId> GetParticleOrder(IProjectQuery project) =>
-    [
-        .. project.Particles.OrderBy(static particle => particle.Id.Value).Select(static particle => particle.Id),
-        project.VoidParticle.Id,
-    ];
+    private static ImmutableArray<ParticleId> GetParticleOrder(IProjectQuery project)
+    {
+        var particles = project.Particles.IsDefault ? [] : project.Particles;
+        return
+        [
+            .. particles.OrderBy(static particle => particle.Id.Value).Select(static particle => particle.Id),
+            project.VoidParticle.Id,
+        ];
+    }
 
     private static int ComputeExpectedRuleCount(IProjectQuery project, TransitionChain chain, int expandedCount)
     {
@@ -459,7 +482,7 @@ public sealed class TransitionPreviewService : ITransitionPreviewService
         return true;
     }
 
-    private string CreateCacheKey(
+    internal string CreateCacheKey(
         IProjectQuery project,
         TransitionRef reference,
         int cellCountA,

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using Mocassin.Core.Geometry;
+using Mocassin.Core.Model;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -122,6 +123,101 @@ public sealed class TransitionPreviewTests
         Assert.Equal(1, first!.CellCountA);
         Assert.Equal(2, differentCounts!.CellCountA);
         Assert.NotSame(first, differentCounts);
+    }
+
+    [Fact]
+    public void InvalidCoreDefinitionReturnsNullPreview()
+    {
+        var model = TransitionTestModels.CreateModel();
+        var mixedGroup = new StateChangeGroup(
+            StateChangeGroupId.New(),
+            "Mixed roles",
+            [TransitionTestModels.Forward.Id, TransitionTestModels.Unstable.Id]);
+        var chain = TransitionTestModels.Migration3 with
+        {
+            GroupIds = [mixedGroup.Id, TransitionTestModels.UnstableGroup.Id, TransitionTestModels.StableGroup.Id],
+        };
+        var transition = TransitionTestModels.KineticTransitionWith(model, stableA, unstablePoint, stableB) with
+        {
+            ChainId = chain.Id,
+        };
+        var project = TransitionTestModels.CreateProject(model with
+        {
+            StateChangeGroups = [mixedGroup, TransitionTestModels.UnstableGroup, TransitionTestModels.StableGroup],
+            Chains = [chain],
+            KineticTransitions = [transition],
+            MetropolisTransitions = [],
+        });
+        var service = new TransitionPreviewService();
+
+        var preview = service.TryCreatePreview(transition, project, 1, 1, 1, out var diagnostics);
+
+        Assert.Null(preview);
+        Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == "TRN025");
+    }
+
+    [Fact]
+    public void DefaultInMemoryCollectionsDoNotThrow()
+    {
+        var project = TransitionTestModels.CreateProject(new ModelDefinition
+        {
+            Particles = default,
+            ParticleSets = default,
+            Structure = StructureModel.Default,
+            StateChanges = default,
+            StateChangeGroups = default,
+            Chains = default,
+            KineticTransitions = default,
+            MetropolisTransitions = default,
+        });
+        var transition = new KineticTransition(
+            KineticTransitionId.New(),
+            "Default arrays",
+            TransitionChainId.New(),
+            default,
+            ReverseTransitionId: null);
+        var service = new TransitionPreviewService();
+
+        var preview = service.TryCreatePreview(transition, project, 1, 1, 1, out var diagnostics);
+
+        Assert.Null(preview);
+        Assert.NotEmpty(diagnostics);
+    }
+
+    [Fact]
+    public void CacheKeySeparatesStructureTransitionAndVersionComponents()
+    {
+        var model = TransitionTestModels.CreateModel();
+        var project = TransitionTestModels.CreateProject(
+            TransitionTestModels.WithKineticPath(model, stableA, unstablePoint, stableB));
+        var reference = TransitionRef.From(project.Model.KineticTransitions[0].Id);
+        var service = new TransitionPreviewService();
+        var key = service.CreateCacheKey(project, reference, 1, 1, 1);
+
+        var structureChanged = project with
+        {
+            Model = project.Model with
+            {
+                Structure = project.Model.Structure with { Name = "Changed structure" },
+            },
+        };
+        var renamedStateChange = project.Model.StateChanges.Single(static item => item.Name == "O -> vacancy") with
+        {
+            Name = "Renamed state change",
+        };
+        var stateChanged = project with
+        {
+            Model = project.Model with
+            {
+                StateChanges = [renamedStateChange, .. project.Model.StateChanges.Skip(1)],
+            },
+        };
+        var otherVersions = new TransitionPreviewService(
+            versions: new SymmetryVersionInfo("symmetry-2", "catalog-x", "sha-x"));
+
+        Assert.NotEqual(key, service.CreateCacheKey(structureChanged, reference, 1, 1, 1));
+        Assert.NotEqual(key, service.CreateCacheKey(stateChanged, reference, 1, 1, 1));
+        Assert.NotEqual(key, otherVersions.CreateCacheKey(project, reference, 1, 1, 1));
     }
 
     [Fact]

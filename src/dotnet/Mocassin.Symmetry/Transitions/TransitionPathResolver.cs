@@ -126,7 +126,11 @@ public sealed class TransitionPathResolver
                     TransitionDiagnosticCodes.UnmatchedPathPosition,
                     $"Reference path point {index} matches {competing} within the path-match tolerance.",
                     transition.Id.Value,
-                    index));
+                    index,
+                    matches.Select(static match => new ModelPath(
+                        "candidatePosition",
+                        Guid.Empty,
+                        string.Create(CultureInfo.InvariantCulture, $"p{match.P}")))));
                 continue;
             }
 
@@ -195,14 +199,31 @@ public sealed class TransitionPathResolver
         return true;
     }
 
-    private static Diagnostic PathError(string code, string message, Guid transitionId, int index) =>
-        new(
+    private static Diagnostic PathError(
+        string code,
+        string message,
+        Guid transitionId,
+        int index,
+        IEnumerable<ModelPath>? candidates = null)
+    {
+        var related = ImmutableArray.CreateBuilder<ModelPath>();
+        related.Add(new ModelPath(
+            "referencePathPosition",
+            Guid.Empty,
+            index.ToString(CultureInfo.InvariantCulture)));
+        if (candidates is not null)
+        {
+            related.AddRange(candidates);
+        }
+
+        return new Diagnostic(
             code,
             DiagnosticSeverity.Error,
             message,
             new ModelPath("kineticTransition", transitionId, "referencePath"),
             "Place the point on a canonical P1 position within 1e-6 fractional units.",
-            [new ModelPath("referencePathPosition", Guid.Empty, index.ToString(CultureInfo.InvariantCulture))]);
+            related.ToImmutable());
+    }
 
     private sealed record PathMatch(int P, Vector4I Encoding);
 }

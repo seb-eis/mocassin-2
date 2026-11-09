@@ -59,6 +59,19 @@ public sealed class ProjectSchemaTests
     }
 
     [Fact]
+    public void SchemaRejectsUnknownTransitionField()
+    {
+        var root = JsonNode.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-transitions-minimal.mocprj")))!.AsObject();
+        root["model"]!["stateChanges"]![0]!["unexpected"] = true;
+
+        using var document = JsonDocument.Parse(root.ToJsonString());
+        var result = projectSchema.Evaluate(document.RootElement);
+
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
     public void SchemaAcceptsOptionalViewFieldsMissing()
     {
         var root = JsonNode.Parse(

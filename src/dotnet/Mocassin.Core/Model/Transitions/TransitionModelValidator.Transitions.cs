@@ -67,6 +67,8 @@ internal static partial class TransitionModelValidator
         ValidateMetropolisTransitions(
             metropolisTransitions,
             chainById,
+            groupById,
+            stateChangeById,
             kineticGuids,
             metropolisById,
             bag);
@@ -126,6 +128,8 @@ internal static partial class TransitionModelValidator
     private static void ValidateMetropolisTransitions(
         ImmutableArray<MetropolisTransition> transitions,
         Dictionary<TransitionChainId, TransitionChain> chainById,
+        Dictionary<StateChangeGroupId, StateChangeGroup> groupById,
+        Dictionary<StateChangeId, StateChange> stateChangeById,
         HashSet<Guid> crossKindIds,
         Dictionary<MetropolisTransitionId, MetropolisTransition> transitionById,
         DiagnosticBag bag)
@@ -149,6 +153,19 @@ internal static partial class TransitionModelValidator
                     "metropolisTransition",
                     transition.Id.Value,
                     "reverseTransitionId"));
+            }
+
+            if (!chain.GroupIds.IsDefault &&
+                chain.GroupIds.Any(groupId =>
+                    groupById.TryGetValue(groupId, out var group) &&
+                    GroupHasUnstableRole(group, stateChangeById)))
+            {
+                bag.Add(Error(
+                    TransitionDiagnosticCodes.GroupStabilityMismatch,
+                    "Metropolis chain positions must use stable-role groups.",
+                    "metropolisTransition",
+                    transition.Id.Value,
+                    "chainId"));
             }
         }
     }
