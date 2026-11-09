@@ -14,8 +14,8 @@
 | Step | 05 — Energy Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Ready with notes — awaiting human acceptance |
-| Reviewed commit | `6b8d78c` |
+| Design review status | Re-review required |
+| Reviewed commit | `2f43a19` |
 | Docs branch | `main` |
 | Review date | 2026-11-09 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
@@ -276,8 +276,8 @@ only the latest round.
 - [x] Requested decision and frozen commit recorded — approve the Step 05 start gate at `6b8d78c`
 - [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
 - [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale — pending explicit human acceptance of m14, m15,
-  n12, and process note n11; no waiver is requested
+- [ ] Accepted notes and waivers recorded with rationale — m14, m15, and n12 were fixed at `2f43a19`; the
+  round-4 re-review is pending; n11 is a process note; no waiver is requested
 - [x] Residual risks, deferred items, and follow-up owners recorded
 - [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — no Blocker or Major
   remains; six Majors (M1–M6) are closed
@@ -325,26 +325,24 @@ Findings and resolutions:
 | n8 | Note | Sampler invalid-input contract unspecified | `TrySamplePairs(..., out pairs, out diagnostics)`; false/empty on invalid | `6b8d78c` | Closed |
 | n9 | Note | ENM009/ENM011 overlap | Split duplicate-offset vs center-equivalent/full-geometry ownership | `6b8d78c` | Closed |
 | n10 | Note | P1PositionCount description ambiguous | Clarified §6 as P1-expanded positions | `6b8d78c` | Closed; naming note n12 remains |
-| m14 | Minor | Pre-seeded Step 05/09/26 audit checklists stale | Not yet fixed; update before those audits or accept | — | Open — acceptance required |
-| m15 | Minor | §7.1 omits ENM013 and misstates site-energy-range origin | Not yet fixed; small documentation correction or accept | — | Open — acceptance required |
-| n12 | Note | `P1PositionCount` naming ambiguous across Steps 05/07 | Not yet renamed/clarified; accept or request a follow-up | — | Open — acceptance required |
+| m14 | Minor | Pre-seeded Step 05/09/26 audit checklists stale | Refreshed all three checklists to the revised acceptance criteria | `2f43a19` | Resolved — round-4 re-review pending |
+| m15 | Minor | §7.1 omits ENM013 and misstates site-energy-range origin | Added ENM003/ENM010/ENM013 rows; distinguished promoted warnings from new v1 checks and corrected the site-energy origin | `2f43a19` | Resolved — round-4 re-review pending |
+| n12 | Note | `P1PositionCount` naming ambiguous across Steps 05/07 | Renamed to `StableP1PositionCount`; Step 07 documents the total-vs-stable distinction | `2f43a19` | Resolved — round-4 re-review pending |
 | n11 | Note | Record parent process note | Acknowledged; record commit parent is `1eb29ef` | `76ae25f` | Acknowledged |
 
 Accepted notes and waivers:
 
-- **None accepted yet.** The human owner is asked to explicitly accept m14, m15, n12, and process note n11, or
-  request a small follow-up design commit. No waiver is requested.
+- **m14, m15, n12:** fixed in the `2f43a19` follow-up design commit; the focused round-4 re-review verifies
+  the fixes. No waiver is requested.
+- **n11:** process note only; no action.
 
 Residual risks, deferred items, and follow-up owners:
 
-- **m14:** the pre-seeded audit-request checklists in `docs/planning/audits/step-05.md`, `step-09.md`, and
-  `step-26.md` must be refreshed before their respective audits; owner: the Step 05/09/26 agents. This is a
-  planning-record consistency item, not an implementation blocker.
-- **m15:** §7.1 should add the promoted `ENM013` row and distinguish the new site-energy range check from the
-  original validator's warning behavior; owner: Planner / Step 05 agent.
-- **n12:** `EnergyCostPreview.P1PositionCount` counts stable reference-site P1 positions, while Step 07 uses
-  the same name for total P1 positions; rename to `StableP1PositionCount` or document the distinction; owner:
-  Planner / Step 05 agent.
+- **m14:** resolved by refreshing the pre-seeded audit-request checklists in `docs/planning/audits/step-05.md`,
+  `step-09.md`, and `step-26.md`. The Step 05/09/26 agents must still keep them current at audit freeze.
+- **m15:** resolved by the corrected §7.1 table; no further action.
+- **n12:** resolved by renaming to `StableP1PositionCount` and documenting the Step 07 total-vs-stable
+  distinction; no further action.
 - **n11:** process note about the record parent; no action.
 - **Deferred to later steps:** compiled tables and indices (08), template binding (09), solver engine (15),
   editors (25), consolidated diagnostics/troubleshooting pages and ENM018 emission (07).
@@ -1075,3 +1073,58 @@ findings are not tooling failures.
 Follow-up owner: Planner and Step 05 agent for m14/m15 (and the n12 naming note)
 Follow-up step: Step 05 — Energy Model; a further re-review is required only if the human owner does not accept
 the notes and the design is changed.
+
+## Round 3 resolution status
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| m14 | Resolved — awaiting focused re-review | Planner / Step 05 agent | `2f43a19` |
+| m15 | Resolved — awaiting focused re-review | Planner / Step 05 agent | `2f43a19` |
+| n12 | Resolved — awaiting focused re-review | Planner / Step 05 agent | `2f43a19` |
+| n11 | Acknowledged — awaiting focused re-review | Planner / Step 05 agent | `2f43a19` |
+
+Resolution summary (design content at `2f43a19`):
+
+- **m14.** Refreshed the pre-seeded Step 05 audit checklist to the revised acceptance criteria (stable-filter
+  symmetry and one-directional unstable filters, inclusive boundaries, 2/8 accepted and 1/9 rejected,
+  center-equivalent/filtered/out-of-range clusters, brute-force preview counts with the Step 08 deferral,
+  shared `EnergyId`, canonical hashing, schema/fixtures, ENM coverage, SPDX, PublicAPI/ApiCompat, and docs).
+  Updated the Step 09 and Step 26 audit checklists to shared-`EnergyId`/linked-editing wording.
+- **m15.** Rewrote §7.1 to add `ENM003`, `ENM010`, and `ENM013`; distinguished promoted warnings from new v1
+  checks; corrected the site-energy −100..100 eV origin (the original did not range-check site energies; the
+  pair/group settings use that range); and recorded the new unknown-reference/duplicate-entry checks.
+- **n12.** Renamed `EnergyCostPreview.P1PositionCount` to `StableP1PositionCount`; Step 07 now documents that
+  `ModelStatistics.P1PositionCount` is the total P1 count while the Step 05 field is the stable subset.
+- **n11.** Process note only; no design change. The round-4 record parent will be the request commit, not the
+  frozen design commit.
+
+## Re-review round 4 (focused)
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Step | 05 — Energy Model |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `2f43a19` |
+| Docs branch | `main` |
+| Review date | 2026-11-09 |
+| Reviewer | Fresh independent planning auditor (round 4, focused delta review; no shared conversation with the planner or implementor) |
+
+Step page: [`Step 05 — Energy Model`](../steps/step-05-energy-model.md)
+
+This is a focused re-review of the round-3 fix delta at `2f43a19`, not a full re-read of every design area.
+The full design was reviewed at `6b8d78c` and returned `Ready with notes` (m14, m15, n12, n11). The delta is
+`git diff 6b8d78c..2f43a19 -- docs/planning`:
+
+- `docs/planning/audits/step-05.md` — refreshed acceptance checklist;
+- `docs/planning/audits/step-09.md` — shared-`EnergyId` wording;
+- `docs/planning/audits/step-26.md` — shared-`EnergyId` wording;
+- `docs/planning/steps/step-05-energy-model.md` — §7.1 correction and `StableP1PositionCount` rename;
+- `docs/planning/steps/step-07-validation-and-diagnostics.md` — total-vs-stable P1 count clarification.
+
+Reviewer: verify m14, m15, and n12 are resolved and that the delta introduces no unrelated design change or
+new contradiction. Keep all earlier round text unchanged and append your reviewer-authored round-4 content
+below.
