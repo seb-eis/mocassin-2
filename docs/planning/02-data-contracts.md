@@ -20,7 +20,9 @@ solver, and external tooling. Contracts are versioned and covered by golden and 
   - reference path positions,
   - particle IDs in a particle set,
   - job collections/configurations.
-- All other arrays are sorted by `id` when serialized, so identical models produce byte-identical JSON.
+- All other arrays of identifiable objects are sorted by `id` when serialized, so identical models produce
+  byte-identical JSON. A section may define a more specific canonical key; for example, energy filters and
+  site-energy entries have no `id` and use the keys stated in §2.2 Energy.
 - Compiled objects receive dense integer indices (`ParticleIndex`, `PositionIndex`, `JumpCollectionIndex`,
   `RuleIndex`) during compilation. These indices are **not** stable across model edits; they are valid only
   inside one compiled package and are recorded with the model signature.
@@ -398,7 +400,8 @@ parameterization, and lattice signatures use the MessagePack projection (section
   serialized. A `(siteId, particleId)` pair may appear at most once.
 - Unstable environments are sorted by `siteId`, clusters by `id`, and site-energy sets by `siteId`. Each
   environment's `filters` array and each site-energy set's `entries` array use their stated sort keys.
-- `ProjectJson.CanonicalizeModel` applies these rules before save, hashing, and schema generation.
+- `ProjectJson.CanonicalizeModel` applies these rules before save and hashing. The generated project schema is
+  produced separately from `contracts/manifest.json` by `tools/contracts/generate.py`.
   `ProjectHasher.Compute` and `ComputeDocument` therefore include the energy sections, and
   `ProjectHasher.ComputeEnergy(ModelDefinition)` hashes only the canonical energy projection for Step 08's
   energy-model cache key.
@@ -707,9 +710,11 @@ MessagePack map with snake_case keys. Top-level:
 | `defect_background` | array | `[position][particle]` site energy in eV |
 
 - Pair tables are in canonical shell order: `(distanceBucket, targetP, cellA, cellB, cellC)`, then site
-  indices. The stable geometry ID is a content hash used for parameterization matching, not table order. The
-  compiled structure environments carry each shell's geometry ID, shared energy ID, distance bucket,
-  representative offset, equivalent-offset count, and optional chiral partner geometry ID.
+  indices. The stable geometry ID is a content hash used for parameterization matching, not table order; its
+  projection includes the center and partner P1 position indices (`centerP`, `partnerP`) as well as the site
+  IDs, periodic offset, and distance bucket. The compiled structure environments carry each shell's geometry
+  ID, shared energy ID, center/partner P1 indices, distance bucket, representative offset, equivalent-offset
+  count, and optional chiral partner geometry ID.
 - Chiral partners share one `object_id` (the shared `EnergyId`) and one energy table. Each direction keeps its
   own `GeometryId` and records the inverse direction's `ChiralPartnerGeometryId`.
 - Cluster occupation codes use 6 bits per site, site 0 in the least significant bits, up to 9 sites; unused

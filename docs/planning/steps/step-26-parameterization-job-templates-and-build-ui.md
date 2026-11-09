@@ -28,7 +28,7 @@ frequencies, define parameter sweeps, preview job counts, build a package, and s
 ## Original reference
 
 - **Parameterization templates:** create only when the model validates; duplicate/delete/migrate; editors for
-  stable/unstable pair energies, group energies, kinetic rule frequencies, chiral mirroring; a migration tool
+  stable/unstable pair energies, group energies, kinetic rule frequencies, shared chiral-set editing; a migration tool
   with a report.
 - **Job templates:** KMC/MMC collections with name, RNG seed, job multiplier, simulation base, base config,
   per-config overrides, lattice size, doping values, selection optimizers, instruction string.
@@ -76,7 +76,7 @@ frequencies, define parameter sweeps, preview job counts, build a package, and s
 
 **Completeness/quality panel**
 
-- Counts of sets/rules, unset values, zero energies, frequency range, chiral conflicts, signature status.
+- Counts of sets/rules, unset values, zero energies, frequency range, chiral linkage status, signature status.
 - Actions: "fill unset with defaults", "export report", "show problems".
 
 **Rebase dialog**
@@ -184,7 +184,7 @@ frequencies, define parameter sweeps, preview job counts, build a package, and s
 
 - [ ] A parameterization can be created from the ceria model, edited, and applied.
 - [ ] Stale signatures are visible and rebase produces a report.
-- [ ] Chiral pair values mirror and conflicts are flagged.
+- [ ] Chiral pair values are edited once through the shared `EnergyId`; independent-value conflicts cannot occur.
 - [ ] Bulk fill/import/export work and validate.
 - [ ] A KMC job template with a doping sweep previews correct job counts and charge balance.
 - [ ] Building from the GUI produces the same model/lattice/job payload hashes as the CLI for the same inputs

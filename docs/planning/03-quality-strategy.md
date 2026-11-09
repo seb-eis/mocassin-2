@@ -109,7 +109,7 @@ Property tests are required for the following, using brute-force or analytic ora
 | --- | --- |
 | Symmetry / geometry | Group laws; stabilizer chain; induced permutations; orbit membership and closure; canonical order independent of input order; coordinate round-trips; minimum-image distance equals brute force; radial-search completeness; distance-bucket stability; pair/cluster reduction is complete and non-redundant; chiral orbit linking |
 | Compilation | Mass/charge conservation per rule; valid indices; rule uniqueness; deterministic byte-identical output; P1 counts match brute-force expansion; every interaction has a table entry |
-| Parameterization | Signature stability; apply → serialize → reload identity; rebase never silently changes unmatched values; chiral mirroring is consistent |
+| Parameterization | Signature stability; apply → serialize → reload identity; rebase never silently changes unmatched values; chiral partners share one `EnergyId` and one value |
 | Supercells / doping | Requested vs applied counts; never exceeds available particles; charge neutrality or explicit failure; order dependence is deterministic; same seed → same lattice |
 | Package / state | Encode → decode identity for all fields and versions; unknown fields ignored / unknown major version rejected; truncated input fails cleanly; checksum verification |
 | Results store | `.msr` package binding, package-signature mismatch rejection, idempotent collection, previous-major read |

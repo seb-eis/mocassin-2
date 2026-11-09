@@ -157,7 +157,8 @@ public sealed record Cluster(
     ImmutableArray<Fractional3> OffsetVectors);
 ```
 
-- The center is an existing stable or unstable reference site; offsets are absolute fractional vectors
+- The center is an existing stable or unstable reference site; an unstable center requires its unstable
+  environment. Only the surrounding positions must be stable. Offsets are absolute fractional vectors
   relative to the center. `OffsetVectors` contains the **surrounding** positions only.
 - Between 2 and 8 offsets (3–9 positions including the center), matching the original `AtomsPerGroup` 2..8
   setting. One offset is rejected as a degenerate cluster; more than eight is rejected because the 6-bit
@@ -166,10 +167,12 @@ public sealed record Cluster(
 - Periodic identity uses the Step 02 `UnitCellVectorEncoder`, not `Fractional3.TrimToUnitCell()`. Each offset
   is resolved to exactly one encoded position `(cellA, cellB, cellC, P)` with the Step 04 minimizing-shift rule
   (ties toward zero). Two offsets are duplicates when their full encoded positions are equal.
-- `ENM009` rejects duplicate offsets. `ENM011` rejects any duplicate in the full geometry (center + offsets),
-  including a zero offset or any offset that resolves to the center's encoded position. This is the operational
-  definition of the original “ring” check (`GeometryGroupAnalyzer.ContainsRing` compares every pair of full
-  geometry positions); a star of distinct positions is valid.
+- `ENM009` rejects duplicate surrounding offsets. `ENM011` rejects center-equivalent positions and any other
+  duplicate in the full geometry (center + offsets), including a zero offset or an offset that resolves to the
+  center's encoded position. The two codes do not double-report: `ENM009` owns a surrounding-surrounding
+  duplicate pair, and `ENM011` adds the center-involving cases. This is the operational definition of the
+  original “ring” check (`GeometryGroupAnalyzer.ContainsRing` compares every pair of full geometry positions);
+  a star of distinct positions is valid.
 - Every surrounding position must resolve to an existing **stable** site and must not be removed by a filter
   of the center's environment. Unresolvable, unstable, or filtered surrounding positions are `ENM010`
   geometry errors, matching the original `GroupGeometryValidity` checks.
@@ -214,8 +217,12 @@ Pair interactions are discovered by the compiler:
   not physical chirality; in P1 every directed pair is its own orbit.
 - Assign two stable identifiers to every directed pair candidate:
   - `GeometryId` is a lowercase SHA-256 over the domain-separated canonical projection of
-    `(siteAId, siteBId, offsetA, offsetB, offsetC, distanceBucketFm)`. It identifies one directed geometry and
-    survives recompilation while the geometry is unchanged.
+    `(centerSiteId, centerP, partnerSiteId, partnerP, offsetA, offsetB, offsetC, distanceBucketFm)`.
+    `centerP` and `partnerP` are the canonical P1 position indices from the Step 02 `Vector4I` encoding; they
+    are required because one reference site can expand to several P1 positions. Omitting them would let two
+    distinct shells with the same site pair, cell offset, and distance bucket collide and silently merge
+    parameterization values. The ID identifies one directed geometry and survives recompilation while the
+    geometry is unchanged.
   - `EnergyId` is the shared energy-table identity. For an achiral pair it equals `GeometryId`. For a chiral
     pair it is the lexicographically smaller of the two directions' `GeometryId` values, so both directions map
     to exactly one energy table and one parameterization set. The compiled model records each direction's
@@ -231,7 +238,8 @@ Pair interactions are discovered by the compiler:
 
 Before compilation, compute and show:
 
-- number of stable positions in the P1 cell;
+- number of P1 positions in the cell: every stable reference-site orbit expanded to P1 positions, not the
+  number of stable reference sites; this is `EnergyCostPreview.P1PositionCount`;
 - number of pair images within the cutoff;
 - number of unique pair interactions after symmetry reduction;
 - expected raw cluster permutations per cluster:
@@ -279,11 +287,11 @@ sampling warnings until it has at least one site; this avoids warning on a place
 | `ENM004` | Error | Core | Filter references an unknown site, identical sites, or (in an unstable environment) a `SiteAId` other than the environment site |
 | `ENM005` | Warning | Core | Duplicate/redundant filter after canonical sorting |
 | `ENM006` | Error | Core | Unstable environment on a stable site or duplicate environment per site |
-| `ENM007` | Error | Core | Cluster center unknown or unstable |
+| `ENM007` | Error | Core | Cluster center unknown, not a stable/unstable reference site, or an unstable center without an unstable environment |
 | `ENM008` | Error | Core | Cluster has fewer than 2 or more than 8 surrounding offsets |
-| `ENM009` | Error | Symmetry | Duplicate cluster offset after periodic encoding |
+| `ENM009` | Error | Symmetry | Duplicate surrounding offset after periodic encoding |
 | `ENM010` | Error | Symmetry | A surrounding position is unknown, unstable, or removed by a center filter, or the cluster exceeds the center environment cutoff |
-| `ENM011` | Error | Symmetry | Cluster full geometry contains a duplicate or center-equivalent position (the original “ring” check) |
+| `ENM011` | Error | Symmetry | Cluster full geometry has a center-equivalent position or another full-geometry duplicate not already reported by `ENM009` |
 | `ENM012` | Warning | Symmetry | Cluster raw permutation count > 500 |
 | `ENM013` | Error | Symmetry | Cluster raw permutation count > 5000 |
 | `ENM014` | Error | Core | Site energy references an unknown site/particle, or repeats a `(siteId, particleId)` entry |
@@ -312,6 +320,30 @@ Validation ownership follows the assembly boundary, matching Steps 03 and 04:
   diagnostics documentation. Step 04 does not depend on energy data.
 - `ENM002` and the sampling warnings are suppressed while the model has no sites, so the default empty model
   (`a=b=c=1 Å`, default `1.0 Å` cutoff) does not warn.
+
+### 7.1 Validation deviations from the original
+
+The original validator reported several model-breaking conditions as warnings. Step 05 promotes them to errors
+so `validate` and `build` fail closed instead of proceeding with silently unusable energy data. This is a
+recorded deviation, not a silent relaxation. Advisory and performance conditions stay warnings.
+
+| Condition | Original behavior | Step 05 | Rationale |
+| --- | --- | --- | --- |
+| Unknown/identical filter sites | Warning | `ENM004` Error | The filter cannot be applied deterministically |
+| Unstable environment on a stable site / duplicate per site | Warning | `ENM006` Error | The environment is unusable or ambiguous |
+| Unknown cluster center | Warning | `ENM007` Error | The cluster has no owner |
+| Offset count outside 2..8 | Warning | `ENM008` Error | The cluster is degenerate or exceeds the 6-bit/9-site code |
+| Duplicate offsets / invalid surrounding geometry / ring-degenerate geometry | Warning | `ENM009`–`ENM011` Error | The cluster geometry is ambiguous or physically degenerate |
+| Unknown site/particle or duplicate site-energy entry | Warning | `ENM014` Error | The entry cannot be resolved or is ambiguous |
+| Site energy outside −100..100 eV | Warning | `ENM015` Error | The value is outside the supported energy range |
+| Sampling hard limits (stable >5000, unstable >1000) | Warning | `ENM019` Error | The requested model cannot be compiled within the budget |
+| More than 10 clusters per center | Warning | `ENM021` Error | The cluster budget is exceeded |
+
+The following remain warnings because they are advisory or performance-related: `ENM002` (periodic
+ambiguity), `ENM005` (duplicate filter), `ENM012` (cluster permutation warning), `ENM016` (forbidden
+occupancy), `ENM017` (sampling warning), `ENM018` (KMC path), and `ENM020` (clusters-per-center warning).
+The inclusive filter boundary, the 2..8 surrounding-offset range, and the stable-or-unstable center rule
+match the original semantics; they are not deviations.
 
 ### 8. Editing operations
 
@@ -356,8 +388,8 @@ public static class EnergyLimits
     public const int ClustersPerPositionHard = 10;
     public const int ClusterOffsetsMin = 2;
     public const int ClusterOffsetsMax = 8;
-    public const double EnergyMinEv = -100.0;
-    public const double EnergyMaxEv = 100.0;
+    public static EnergyEv MinEnergy { get; } = new(-100.0);
+    public static EnergyEv MaxEnergy { get; } = new(100.0);
 }
 
 // Mocassin.Symmetry
@@ -378,18 +410,21 @@ public sealed record PairInteractionPreview(
     string GeometryId,
     string EnergyId,
     CellSiteId SiteAId,
+    int CenterP,
     CellSiteId SiteBId,
+    int PartnerP,
     double DistanceAngstrom,
     bool IsChiral,
     string? ChiralPartnerGeometryId);
 
 public interface IEnergyGeometrySampler
 {
-    ImmutableArray<PairInteractionPreview> SamplePairs(
+    bool TrySamplePairs(
         ModelDefinition model,
         int cellCountA,
         int cellCountB,
         int cellCountC,
+        out ImmutableArray<PairInteractionPreview> pairs,
         out ImmutableArray<Diagnostic> diagnostics);
 }
 
@@ -413,12 +448,14 @@ public interface IEnergyPreviewService
 
 - `IProjectQuery` gains `IEnergyQuery` so the same immutable `Project` snapshot exposes particles, structure,
   transitions, and energy. `IEnergyQuery` is implemented by `Project`.
+- `EnergyLimits` exposes energy bounds as `EnergyEv` at the public API boundary; count limits stay `int`.
 - `IEnergyPreviewService` reads the structure and energy sections from `ModelDefinition` and lives in
   `Mocassin.Symmetry`; Core never references Symmetry. It follows the Step 03/04 preview boundary:
   `TryCreatePreview(..., out diagnostics)` returns `null` on invalid user data and never throws.
 - `IEnergyGeometrySampler` is shared by the preview service and Step 08. It samples pair images, applies
   filters, and builds unique pair geometries; cluster reduction uses the Step 02 `PointGroup`/`SitePermutation`
-  utilities. It does not allocate energy tables.
+  utilities. It does not allocate energy tables. `TrySamplePairs` returns `false` with an empty pair array and
+  diagnostics on invalid input and never throws, matching the preview `TryCreate…` contract.
 - `EnergyPreviewService` caches by the energy hash, structure hash, requested `(A, B, C)`, catalog version, and
   symmetry contract version. `ProjectHasher.ComputeEnergy` is the energy-hash producer.
 - Derived pair interactions use `GeometryId`, the shared `EnergyId`, and
@@ -559,6 +596,8 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
 - [ ] The cost preview reports pair counts and permutation counts that match a brute-force oracle, including
   the center-particle factor and `long` overflow-safe limits; the Step 08 cross-check is recorded as a Step 08
   follow-up instead of a Step 05 closeout claim.
+- [ ] `GeometryId` includes `centerP`/`partnerP`, so distinct P1 shells with the same site pair, offset, and
+  distance bucket do not collide.
 - [ ] Chiral pair partners are detected, share one `EnergyId`, and expose `ChiralPartnerGeometryId`; independent
   A→B/B→A energy values are unrepresentable.
 - [ ] The energy sections round-trip through the project JSON context; the default `stableEnvironment` loads the
@@ -577,11 +616,14 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
 At this point, document the energy model:
 
 - `docs/user-guide/energy.md` — environments, filters, clusters, site energies, cost limits, and how to fix
-  oversized clusters/permutations. This page owns Step 05 error guidance; it links to the Step 07 consolidated
-  troubleshooting page rather than duplicating or owning `docs/troubleshooting/errors.md`.
+  oversized clusters/permutations. This page owns Step 05 error guidance. It does **not** link to
+  `docs/troubleshooting/errors.md` at Step 05 closeout because Step 07 creates that page; Step 07 adds the
+  cross-link when it exists. Step 05 also does not own or duplicate the consolidated troubleshooting page.
 - `docs/physics/energies.md` — pair/cluster/site contributions, the environment cutoff, and the chiral-orbit
   relationship.
-- `docs/reference/energy.md` — the energy model reference, `ENM001`–`ENM021`, defaults, and limits.
+- `docs/reference/energy.md` — the energy model reference: section shape, defaults, limits, semantic ordering,
+  and `GeometryId`/`EnergyId`. It does **not** duplicate the diagnostic catalog; Step 07 owns the complete
+  `ENM` catalog in `docs/reference/diagnostics.md` and adds the cross-link when that page exists.
 - `docs/reference/project-format.md` — energy sections, field names, semantic ordering, defaults, and
   constraints.
 - `docs/development/compilation-pipeline.md` — environment sampling and the derived pair/cluster preview; the
@@ -590,7 +632,9 @@ At this point, document the energy model:
 Add the new user-guide, physics, and reference pages to `zensical.toml` navigation and to
 `docs/user-guide/index.md`, `docs/physics/index.md`, and `docs/reference/index.md` in the same step. Update the
 Step 05 row in `docs/planning/status.md` and the energy rows in `docs/planning/appendix-b-parity-matrix.md`.
-`docs/troubleshooting/errors.md` remains owned by Step 07; Step 05 only adds a link from its own page.
+`docs/troubleshooting/errors.md` and `docs/reference/diagnostics.md` remain owned by Step 07; Step 05 only adds
+the cross-links in Step 07 when those pages exist. A strict documentation build at Step 05 closeout must not
+contain links to pages that do not yet exist.
 
 ## Tests
 
@@ -606,12 +650,15 @@ Test tiers:
 | Filters | Inclusive boundaries with 1e-5 Å tolerance, stable symmetry, unstable one-directionality, overlap warnings | PR-fast |
 | Cluster geometry | 2/8 accepted; 1/9 rejected; periodic duplicates, center-equivalent zero offset, unknown/unstable/filtered surroundings, cutoff | PR-medium |
 | Site energies | Sparse defaults, range, unknown site/particle, duplicate `(site, particle)`, forbidden occupancy | PR-fast |
-| Diagnostics | Positive/negative coverage for every `ENM001`–`ENM021`, including the ENM018 ownership boundary | PR-fast |
+| Core diagnostics | Positive/negative coverage for `ENM001`, `ENM003`–`ENM008`, `ENM014`–`ENM016`, `ENM020`, `ENM021` | PR-fast |
+| Symmetry diagnostics | Positive/negative coverage for `ENM002`, `ENM009`–`ENM013`, `ENM017`, `ENM019` | PR-medium |
+| ENM018 boundary | The Step 07-owned path warning is documented; Step 05 only defines the constant/help anchor | PR-fast |
 | Default environment | Missing/`{}` model loads the 1.0 Å/no-filter default; default is omitted on write; empty sections omitted | PR-fast |
 | Model envelope | Empty, energy-only, and combined models round-trip; semantic offset order preserved; sorted collections stable | PR-fast |
 | Hash | Model/document hashes include energy; `ComputeEnergy` is invariant to array shuffle and unrelated edits | PR-fast |
 | Schema | Generated project schema accepts the energy sections and rejects unknown fields; fixtures empty/populated | PR-fast |
 | Pair preview | Counts and distances match brute-force sampling for random cells | PR-medium |
+| Geometry identity | Multi-P1-site pairs with the same site pair, offset, and distance bucket but different `centerP`/`partnerP` produce distinct `GeometryId` values; no collision | PR-medium |
 | Chiral pairs | Known chiral/achiral geometries; shared `EnergyId`; `ChiralPartnerGeometryId`; no independent values | PR-medium |
 | Permutations | Center factor included; `long` values; Burnside unique count matches brute force; 63^9 case does not overflow | PR-medium/nightly |
 | Cost limits | Warning/hard thresholds for stable, unstable, cluster permutations, and clusters per position | PR-medium |

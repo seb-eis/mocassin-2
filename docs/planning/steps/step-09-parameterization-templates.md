@@ -190,7 +190,7 @@ When the model signature changes:
 - [ ] Implement parameterization records and stable identity derivation.
 - [ ] Implement `ParameterizationFactory.Create` from a compiled model.
 - [ ] Implement `ParameterizationService.Apply` with signature checks.
-- [ ] Implement value validation and chiral mirroring.
+- [ ] Implement value validation and shared chiral-set binding.
 - [ ] Implement `ParameterizationDiff`, `Rebase`, and the report.
 - [ ] Implement site energy overrides.
 - [ ] Implement summary/quality checks.
@@ -204,7 +204,7 @@ When the model signature changes:
 - [ ] Applying the template to the same model succeeds and yields the same compiled values.
 - [ ] A changed model produces a signature mismatch with a useful diff.
 - [ ] Rebase copies unchanged values, defaults new ones, and reports removed ones.
-- [ ] Chiral pair values are mirrored and cannot diverge.
+- [ ] Chiral partners share one `EnergyId` and one value; independent A→B/B→A values are unrepresentable.
 - [ ] Site energy overrides apply and can be reset.
 - [ ] Missing/zero values produce warnings, not silent success.
 - [ ] Template JSON is canonical and round-trips.
@@ -214,7 +214,7 @@ When the model signature changes:
 
 At this point, document parameterization:
 
-- `docs/user-guide/parameterization.md` — template creation, energies, frequencies, chiral mirroring, rebase.
+- `docs/user-guide/parameterization.md` — template creation, energies, frequencies, shared chiral sets, rebase.
 - `docs/reference/project-format.md` — template fields, stable IDs, model signature.
 - `docs/development/compilation-pipeline.md` — signature/rebase flow and completeness checks.
 - `docs/troubleshooting/errors.md` — stale/incompatible templates and missing values.
@@ -227,7 +227,7 @@ At this point, document parameterization:
 | Apply | Values map to the correct tables |
 | Signature | Mismatch rejected with `PRM001` |
 | Rebase | Keep/nearest/reset strategies and report |
-| Chiral | Mirrored values and conflict detection |
+| Chiral | Shared `EnergyId`; one value; no independent-value path |
 | Site overrides | Applied/reset/invalid target |
 | Completeness | Warnings for unset/out-of-range values |
 | Round-trip | Canonical JSON stable |
@@ -238,7 +238,7 @@ At this point, document parameterization:
 | --- | --- |
 | Stable IDs change unexpectedly | Derive from geometry, not list order; test round-trips |
 | Users lose values on model edits | Rebase with explicit report; never auto-apply nearest matches |
-| Chiral divergence | Single storage location and mirroring invariant |
+| Chiral divergence | Single shared `EnergyId`; independent values cannot be represented |
 | Template proliferation | Names, signatures, and a "rebase" workflow in the GUI |
 
 ## Done when

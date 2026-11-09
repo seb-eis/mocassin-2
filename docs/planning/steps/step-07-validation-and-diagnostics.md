@@ -104,19 +104,21 @@ public sealed record ModelStatistics(
     int ParticleCount,
     int ParticleSetCount,
     int ReferenceSiteCount,
-    int P1PositionCount,
-    int StablePositionCount,
-    int UnstablePositionCount,
+    long P1PositionCount,
+    long StablePositionCount,
+    long UnstablePositionCount,
     int KineticTransitionCount,
     int MetropolisTransitionCount,
     int ClusterCount,
-    int EstimatedPairInteractionCount,
-    int EstimatedUniqueClusterPermutations,
+    long EstimatedPairInteractionCount,
+    long EstimatedUniqueClusterPermutations,
     int EstimatedRuleCount,
     long EstimatedPositionsForDefaultSupercell,
     long EstimatedMemoryBytes);
 ```
 
+- Counts that can exceed `int` — P1/stable/unstable positions, pair interactions, cluster permutations, and
+  memory — are `long`, matching the Step 05 cost-preview fields. The 63⁹ cluster case would overflow `int`.
 - Statistics use the same sampling/preview code as steps 02, 05, and 08.
 - They are advisory but must be accurate enough to warn before an expensive build.
 - The CLI prints them as a table or JSON.

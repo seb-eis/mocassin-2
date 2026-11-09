@@ -102,7 +102,7 @@ Status legend:
 | Parameterization template creation | Y | Planned | 09 | |
 | Pair/group energy editing | Y | Planned | 09/26 | |
 | Attempt frequency editing | Y | Planned | 09/26 | |
-| Chiral mirroring | Y | Planned | 09/26 | |
+| Chiral linked editing | Y | Planned | 09/26 | Shared `EnergyId`; one value per chiral pair |
 | Stable model signature | Y | Improvement | 09 | SHA-256 |
 | Template rebase/migration | Y | Planned | 09/26 | Diff + report |
 | Site energy overrides in template | N | Improvement | 09 | Original limitation removed |

@@ -154,8 +154,10 @@ public sealed record CompiledModel(
   `GeometryId == EnergyId` and no chiral partner.
 - Each pair set carries:
   - `CenterSiteIndex`, `PartnerSiteIndex`;
+  - `CenterP`, `PartnerP` (canonical P1 position indices from the `Vector4I` encoding);
   - reference offset vector and distance;
-  - `GeometryId` (directed geometry), `EnergyId` (shared table/parameterization identity);
+  - `GeometryId` (directed geometry; the hash includes `centerSiteId`, `centerP`, `partnerSiteId`,
+    `partnerP`, the offset, and `DistanceBucketFm`), `EnergyId` (shared table/parameterization identity);
   - `DistanceBucketFm`;
   - `ChiralPartnerGeometryId` (or none);
   - multiplicity (`EquivalentModels` count);
