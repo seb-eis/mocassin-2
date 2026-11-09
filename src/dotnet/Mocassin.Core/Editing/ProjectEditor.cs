@@ -14,7 +14,7 @@ namespace Mocassin.Core.Editing;
 /// <summary>
 /// Applies one mutation to an immutable project and validates the candidate before committing it.
 /// </summary>
-public sealed class ProjectEditor
+public sealed partial class ProjectEditor
 {
     private readonly Func<ProjectModel, ImmutableArray<Diagnostic>> validator;
 

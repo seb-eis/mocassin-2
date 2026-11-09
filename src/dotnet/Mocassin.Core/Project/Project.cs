@@ -5,6 +5,7 @@ using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
+using Mocassin.Core.Model.Transitions;
 
 namespace Mocassin.Core.Project;
 
@@ -12,7 +13,7 @@ namespace Mocassin.Core.Project;
 /// Immutable root value of one <c>.mocprj</c> project file.
 /// </summary>
 #pragma warning disable CA1724 // The type intentionally names the project domain and the namespace follows the plan.
-public sealed record Project : IParticleQuery, IStructureQuery
+public sealed record Project : IProjectQuery
 {
 #pragma warning restore CA1724
     /// <summary>
@@ -123,6 +124,31 @@ public sealed record Project : IParticleQuery, IStructureQuery
     public StructureModel Structure => Model.Structure;
 
     /// <summary>
+    /// Gets the authored state changes.
+    /// </summary>
+    public ImmutableArray<StateChange> StateChanges => Model.StateChanges;
+
+    /// <summary>
+    /// Gets the authored state-change groups.
+    /// </summary>
+    public ImmutableArray<StateChangeGroup> StateChangeGroups => Model.StateChangeGroups;
+
+    /// <summary>
+    /// Gets the authored transition chains.
+    /// </summary>
+    public ImmutableArray<TransitionChain> Chains => Model.Chains;
+
+    /// <summary>
+    /// Gets the authored kinetic transitions.
+    /// </summary>
+    public ImmutableArray<KineticTransition> KineticTransitions => Model.KineticTransitions;
+
+    /// <summary>
+    /// Gets the authored Metropolis transitions.
+    /// </summary>
+    public ImmutableArray<MetropolisTransition> MetropolisTransitions => Model.MetropolisTransitions;
+
+    /// <summary>
     /// Finds an authored particle or the implicit void particle.
     /// </summary>
     /// <param name="id">The particle identifier.</param>
@@ -180,6 +206,96 @@ public sealed record Project : IParticleQuery, IStructureQuery
             if (site.Id == id)
             {
                 return site;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored state change.
+    /// </summary>
+    /// <param name="id">The state-change identifier.</param>
+    /// <returns>The matching state change, or <see langword="null"/> when the identifier is unknown.</returns>
+    public StateChange? Find(StateChangeId id)
+    {
+        foreach (var stateChange in Model.StateChanges)
+        {
+            if (stateChange.Id == id)
+            {
+                return stateChange;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored state-change group.
+    /// </summary>
+    /// <param name="id">The state-change-group identifier.</param>
+    /// <returns>The matching group, or <see langword="null"/> when the identifier is unknown.</returns>
+    public StateChangeGroup? Find(StateChangeGroupId id)
+    {
+        foreach (var group in Model.StateChangeGroups)
+        {
+            if (group.Id == id)
+            {
+                return group;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored transition chain.
+    /// </summary>
+    /// <param name="id">The chain identifier.</param>
+    /// <returns>The matching chain, or <see langword="null"/> when the identifier is unknown.</returns>
+    public TransitionChain? Find(TransitionChainId id)
+    {
+        foreach (var chain in Model.Chains)
+        {
+            if (chain.Id == id)
+            {
+                return chain;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored kinetic transition.
+    /// </summary>
+    /// <param name="id">The kinetic-transition identifier.</param>
+    /// <returns>The matching transition, or <see langword="null"/> when the identifier is unknown.</returns>
+    public KineticTransition? Find(KineticTransitionId id)
+    {
+        foreach (var transition in Model.KineticTransitions)
+        {
+            if (transition.Id == id)
+            {
+                return transition;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored Metropolis transition.
+    /// </summary>
+    /// <param name="id">The Metropolis-transition identifier.</param>
+    /// <returns>The matching transition, or <see langword="null"/> when the identifier is unknown.</returns>
+    public MetropolisTransition? Find(MetropolisTransitionId id)
+    {
+        foreach (var transition in Model.MetropolisTransitions)
+        {
+            if (transition.Id == id)
+            {
+                return transition;
             }
         }
 

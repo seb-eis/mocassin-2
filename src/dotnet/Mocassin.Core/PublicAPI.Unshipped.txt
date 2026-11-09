@@ -1444,3 +1444,45 @@ static Mocassin.Core.Model.Transitions.ResolvedPathPosition.operator !=(Mocassin
 static Mocassin.Core.Model.Transitions.ResolvedPathPosition.operator ==(Mocassin.Core.Model.Transitions.ResolvedPathPosition? left, Mocassin.Core.Model.Transitions.ResolvedPathPosition? right) -> bool
 static Mocassin.Core.Model.Transitions.ResolvedTransitionPath.operator !=(Mocassin.Core.Model.Transitions.ResolvedTransitionPath? left, Mocassin.Core.Model.Transitions.ResolvedTransitionPath? right) -> bool
 static Mocassin.Core.Model.Transitions.ResolvedTransitionPath.operator ==(Mocassin.Core.Model.Transitions.ResolvedTransitionPath? left, Mocassin.Core.Model.Transitions.ResolvedTransitionPath? right) -> bool
+Mocassin.Core.Editing.ProjectEditor.AddKineticTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.KineticTransition! transition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddMetropolisTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.MetropolisTransition! transition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddStateChange(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.StateChange! stateChange) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddStateChangeGroup(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.StateChangeGroup! group) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddTransitionChain(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.TransitionChain! chain) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.DuplicateKineticTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.KineticTransitionId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.DuplicateMetropolisTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.MetropolisTransitionId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.DuplicateTransitionChain(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.TransitionChainId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.MakeStateChangeGroup(Mocassin.Core.Project.Project! project, string! name, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.StateChangeId> stateChangeIds) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveKineticTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.KineticTransitionId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveMetropolisTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.MetropolisTransitionId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveStateChange(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.StateChangeId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveStateChangeGroup(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.StateChangeGroupId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveTransitionChain(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.TransitionChainId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateKineticTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.KineticTransition! transition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateMetropolisTransition(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.MetropolisTransition! transition) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateStateChange(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.StateChange! stateChange) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateStateChangeGroup(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.StateChangeGroup! group) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateTransitionChain(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Transitions.TransitionChain! chain) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Model.Transitions.ITransitionQuery
+Mocassin.Core.Model.Transitions.ITransitionQuery.Chains.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.TransitionChain!>
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.KineticTransitionId id) -> Mocassin.Core.Model.Transitions.KineticTransition?
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.MetropolisTransitionId id) -> Mocassin.Core.Model.Transitions.MetropolisTransition?
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.StateChangeGroupId id) -> Mocassin.Core.Model.Transitions.StateChangeGroup?
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.StateChangeId id) -> Mocassin.Core.Model.Transitions.StateChange?
+Mocassin.Core.Model.Transitions.ITransitionQuery.Find(Mocassin.Core.Ids.TransitionChainId id) -> Mocassin.Core.Model.Transitions.TransitionChain?
+Mocassin.Core.Model.Transitions.ITransitionQuery.KineticTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.KineticTransition!>
+Mocassin.Core.Model.Transitions.ITransitionQuery.MetropolisTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.MetropolisTransition!>
+Mocassin.Core.Model.Transitions.ITransitionQuery.StateChangeGroups.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChangeGroup!>
+Mocassin.Core.Model.Transitions.ITransitionQuery.StateChanges.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChange!>
+Mocassin.Core.Project.IProjectQuery
+Mocassin.Core.Project.Project.Chains.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.TransitionChain!>
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.KineticTransitionId id) -> Mocassin.Core.Model.Transitions.KineticTransition?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.MetropolisTransitionId id) -> Mocassin.Core.Model.Transitions.MetropolisTransition?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.StateChangeGroupId id) -> Mocassin.Core.Model.Transitions.StateChangeGroup?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.StateChangeId id) -> Mocassin.Core.Model.Transitions.StateChange?
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.TransitionChainId id) -> Mocassin.Core.Model.Transitions.TransitionChain?
+Mocassin.Core.Project.Project.KineticTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.KineticTransition!>
+Mocassin.Core.Project.Project.MetropolisTransitions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.MetropolisTransition!>
+Mocassin.Core.Project.Project.StateChangeGroups.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChangeGroup!>
+Mocassin.Core.Project.Project.StateChanges.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChange!>
+static Mocassin.Core.Project.ProjectHasher.ComputeTransition(Mocassin.Core.Project.IProjectQuery! project, Mocassin.Core.Model.Transitions.TransitionRef transition) -> string!
