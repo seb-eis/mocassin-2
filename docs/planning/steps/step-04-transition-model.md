@@ -20,8 +20,8 @@ geometry, with validation of transition semantics.
 | --- | --- | --- | --- | --- | --- |
 | `transition-model-and-persistence` | `feature/step-04-transition-model/transition-model-and-persistence` | Done | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | `106a64f` |
 | `state-changes-and-groups` | `feature/step-04-transition-model/state-changes-and-groups` | Done | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | `8cac5b4` |
-| `chains-and-patterns` | `feature/step-04-transition-model/chains-and-patterns` | Awaiting approval | `verify.sh dotnet`, `structure` pass (2026-11-09) | — | — |
-| `kinetic-and-metropolis-transitions` | `feature/step-04-transition-model/kinetic-and-metropolis-transitions` | Planned | — | — | — |
+| `chains-and-patterns` | `feature/step-04-transition-model/chains-and-patterns` | Done | `verify.sh dotnet`, `structure` pass (2026-11-09) | — | `1d3503d` |
+| `kinetic-and-metropolis-transitions` | `feature/step-04-transition-model/kinetic-and-metropolis-transitions` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass (2026-11-09) | — | — |
 | `queries-and-editing` | `feature/step-04-transition-model/queries-and-editing` | Planned | — | — | — |
 | `transition-preview-and-benchmark` | `feature/step-04-transition-model/transition-preview-and-benchmark` | Planned | — | — | — |
 | `contracts-and-fixtures` | `feature/step-04-transition-model/contracts-and-fixtures` | Planned | — | — | — |

@@ -8,6 +8,7 @@ using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
+using Mocassin.Core.Model.Transitions;
 using Mocassin.Core.Project;
 using Mocassin.Core.Symmetry;
 using Mocassin.Core.Units;
@@ -89,6 +90,56 @@ public sealed class ProjectValidationServiceTests
 
         Assert.Contains(composed, static diagnostic => diagnostic.Code == "STR003");
         Assert.DoesNotContain(core, static diagnostic => diagnostic.Code == "STR003");
+    }
+
+    [Fact]
+    public void ComposedValidationIncludesTransitionPathRules()
+    {
+        var project = CreateProject();
+        var oxygen = project.Model.Particles.Single(static particle => particle.Symbol == "O");
+        var vacancy = project.Model.Particles.Single(static particle => particle.IsVacancy);
+        var stateChange = new StateChange(
+            StateChangeId.New(),
+            "O -> vacancy",
+            oxygen.Id,
+            vacancy.Id);
+        var group = new StateChangeGroup(
+            StateChangeGroupId.New(),
+            "O vacancy",
+            [stateChange.Id]);
+        var chain = new TransitionChain(
+            TransitionChainId.New(),
+            "3-site migration",
+            TransitionPattern.Migration3,
+            [group.Id, group.Id, group.Id],
+            [TransitionLinker.Dynamic, TransitionLinker.Dynamic],
+            GeneratesReverse: true);
+        var transition = new KineticTransition(
+            KineticTransitionId.New(),
+            "O migration",
+            chain.Id,
+            [
+                new Fractional3(0.123, 0.234, 0.345),
+                new Fractional3(0.223, 0.234, 0.345),
+                new Fractional3(0.323, 0.234, 0.345),
+            ],
+            ReverseTransitionId: null);
+        var invalid = project with
+        {
+            Model = project.Model with
+            {
+                StateChanges = [stateChange],
+                StateChangeGroups = [group],
+                Chains = [chain],
+                KineticTransitions = [transition],
+            },
+        };
+
+        var composed = ProjectValidationService.Validate(invalid);
+        var core = ProjectValidator.Validate(invalid);
+
+        Assert.Contains(composed, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.UnmatchedPathPosition);
+        Assert.DoesNotContain(core, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.UnmatchedPathPosition);
     }
 
     [Fact]

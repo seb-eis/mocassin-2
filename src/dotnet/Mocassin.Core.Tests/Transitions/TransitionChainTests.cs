@@ -26,7 +26,7 @@ public sealed class TransitionChainTests
         var chain = CreateChain(model, pattern);
 
         Assert.Empty(
-            TransitionModelValidator.Validate(model with { Chains = [chain] })
+            TransitionModelValidator.Validate(WithChains(model, [chain]))
                 .Where(static diagnostic => diagnostic.Code.StartsWith("TRN", StringComparison.Ordinal)));
     }
 
@@ -39,7 +39,7 @@ public sealed class TransitionChainTests
             Linkers = [TransitionLinker.Dynamic],
         };
 
-        var diagnostics = TransitionModelValidator.Validate(model with { Chains = [chain] });
+        var diagnostics = TransitionModelValidator.Validate(WithChains(model, [chain]));
 
         Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.GroupLinkerCountMismatch);
     }
@@ -54,7 +54,7 @@ public sealed class TransitionChainTests
             Linkers = [TransitionLinker.Dynamic, TransitionLinker.Dynamic],
         };
 
-        var diagnostics = TransitionModelValidator.Validate(model with { Chains = [chain] });
+        var diagnostics = TransitionModelValidator.Validate(WithChains(model, [chain]));
 
         Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.InvalidPatternPositionCount);
     }
@@ -68,7 +68,7 @@ public sealed class TransitionChainTests
             Linkers = [TransitionLinker.Dynamic, TransitionLinker.Static],
         };
 
-        var diagnostics = TransitionModelValidator.Validate(model with { Chains = [chain] });
+        var diagnostics = TransitionModelValidator.Validate(WithChains(model, [chain]));
 
         Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.InvalidLinkerSequence);
     }
@@ -83,7 +83,7 @@ public sealed class TransitionChainTests
             GroupIds = [StateChangeGroupId.New(), .. chain.GroupIds.Skip(1)],
         };
 
-        var diagnostics = TransitionModelValidator.Validate(model with { Chains = [chain] });
+        var diagnostics = TransitionModelValidator.Validate(WithChains(model, [chain]));
 
         Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.UnknownChainGroup);
     }
@@ -94,7 +94,7 @@ public sealed class TransitionChainTests
         var model = TransitionTestModels.CreateCombinedModel();
         var chain = CreateChain(model, TransitionPattern.Metropolis2) with { GeneratesReverse = false };
 
-        var diagnostics = TransitionModelValidator.Validate(model with { Chains = [chain] });
+        var diagnostics = TransitionModelValidator.Validate(WithChains(model, [chain]));
 
         Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.GeneratesReverseMismatch);
     }
@@ -106,7 +106,7 @@ public sealed class TransitionChainTests
         var first = CreateChain(model, TransitionPattern.Metropolis2);
         var second = CreateChain(model, TransitionPattern.Migration3) with { Name = first.Name };
 
-        var diagnostics = TransitionModelValidator.Validate(model with { Chains = [first, second] });
+        var diagnostics = TransitionModelValidator.Validate(WithChains(model, [first, second]));
 
         Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.DuplicateName);
     }
@@ -122,7 +122,7 @@ public sealed class TransitionChainTests
         var chain = CreateCustomChain(model, positions, linkers);
 
         Assert.DoesNotContain(
-            TransitionModelValidator.Validate(model with { Chains = [chain] }),
+            TransitionModelValidator.Validate(WithChains(model, [chain])),
             static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.InvalidLinkerSequence);
     }
 
@@ -138,9 +138,17 @@ public sealed class TransitionChainTests
         var chain = CreateCustomChain(model, positions, linkers);
 
         Assert.Contains(
-            TransitionModelValidator.Validate(model with { Chains = [chain] }),
+            TransitionModelValidator.Validate(WithChains(model, [chain])),
             static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.InvalidLinkerSequence);
     }
+
+    private static ModelDefinition WithChains(ModelDefinition model, IEnumerable<TransitionChain> chains) =>
+        model with
+        {
+            Chains = [.. chains],
+            KineticTransitions = [],
+            MetropolisTransitions = [],
+        };
 
     private static TransitionChain CreateChain(ModelDefinition model, TransitionPattern pattern)
     {

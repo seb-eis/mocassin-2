@@ -35,7 +35,7 @@ internal static partial class TransitionModelValidator
         var particleById = CreateParticleMap(particles);
         ValidateStateChanges(stateChanges, particleById, bag);
         ValidateStateChangeGroups(stateChanges, groups, particleById, bag);
-        ValidateModelTransitions(model, particleById, bag);
+        ValidateModelTransitions(model, bag);
 
         return bag.Sorted;
     }

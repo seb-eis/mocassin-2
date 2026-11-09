@@ -31,8 +31,8 @@ public sealed class TransitionPersistenceTests
                 ProjectCanonicalizer.ToCanonicalJson(loaded.Project!));
 
             var model = loaded.Project!.Model;
-            Assert.Equal(2, model.StateChanges.Length);
-            Assert.Equal(2, model.StateChangeGroups.Length);
+            Assert.Equal(3, model.StateChanges.Length);
+            Assert.Equal(3, model.StateChangeGroups.Length);
             Assert.Equal(2, model.Chains.Length);
             Assert.Single(model.KineticTransitions);
             Assert.Single(model.MetropolisTransitions);

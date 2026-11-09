@@ -435,3 +435,10 @@ static Mocassin.Symmetry.Structure.StructurePreview.operator !=(Mocassin.Symmetr
 static Mocassin.Symmetry.Structure.StructurePreview.operator ==(Mocassin.Symmetry.Structure.StructurePreview? left, Mocassin.Symmetry.Structure.StructurePreview? right) -> bool
 ~override Mocassin.Symmetry.Geometry.StructureSiteReference.Equals(object obj) -> bool
 ~override Mocassin.Symmetry.Geometry.StructureSiteReference.ToString() -> string
+Mocassin.Symmetry.Transitions.TransitionPathResolver
+Mocassin.Symmetry.Transitions.TransitionPathResolver.Encoder.get -> Mocassin.Symmetry.Geometry.UnitCellVectorEncoder!
+Mocassin.Symmetry.Transitions.TransitionPathResolver.TryResolve(Mocassin.Core.Model.Transitions.KineticTransition! transition, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Core.Model.Transitions.ResolvedTransitionPath?
+Mocassin.Symmetry.Transitions.TransitionPathValidator
+Mocassin.Symmetry.Transitions.TransitionPathValidator.TransitionPathValidator(Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog = null) -> void
+Mocassin.Symmetry.Transitions.TransitionPathValidator.Validate(Mocassin.Core.Model.ModelDefinition! model) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+static Mocassin.Symmetry.Transitions.TransitionPathResolver.TryCreate(Mocassin.Core.Model.Structure.StructureModel! structure, Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog, out Mocassin.Symmetry.Transitions.TransitionPathResolver? resolver, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool

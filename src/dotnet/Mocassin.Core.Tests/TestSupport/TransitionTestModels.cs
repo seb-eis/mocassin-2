@@ -43,11 +43,22 @@ internal static class TransitionTestModels
         "Reverse group",
         [ReverseStateChange.Id]);
 
+    public static StateChange UnstableStateChange { get; } = new(
+        StateChangeId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f22")),
+        "O2- -> void",
+        ParticleId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f10")),
+        ParticleId.Void);
+
+    public static StateChangeGroup UnstableGroup { get; } = new(
+        StateChangeGroupId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f32")),
+        "Unstable group",
+        [UnstableStateChange.Id]);
+
     public static TransitionChain MigrationChain { get; } = new(
         TransitionChainId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f40")),
         "3-site migration",
         TransitionPattern.Migration3,
-        [ForwardGroup.Id, ReverseGroup.Id, ForwardGroup.Id],
+        [ForwardGroup.Id, UnstableGroup.Id, ForwardGroup.Id],
         [TransitionLinker.Dynamic, TransitionLinker.Dynamic],
         GeneratesReverse: true);
 
@@ -74,16 +85,16 @@ internal static class TransitionTestModels
         MetropolisTransitionId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f60")),
         "O exchange",
         MetropolisChain.Id,
-        CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f15")),
         CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f16")),
+        CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f18")),
         ReverseTransitionId: null);
 
     public static ModelDefinition CreateEmptyModel() => new();
 
     public static ModelDefinition CreateTransitionOnlyModel() => new()
     {
-        StateChanges = [ReverseStateChange, ForwardStateChange],
-        StateChangeGroups = [ReverseGroup, ForwardGroup],
+        StateChanges = [ReverseStateChange, ForwardStateChange, UnstableStateChange],
+        StateChangeGroups = [ReverseGroup, ForwardGroup, UnstableGroup],
         Chains = [MetropolisChain, MigrationChain],
         KineticTransitions = [KineticTransition],
         MetropolisTransitions = [MetropolisTransition],
@@ -125,8 +136,8 @@ internal static class TransitionTestModels
             ParticleSets = [oxygenSet, ceriumSet],
             Structure = StructureModel.Default with
             {
-                Name = "Ceria",
-                SpaceGroup = new SpaceGroupRef(225, AxisSetting.None, OriginChoice.None),
+                Name = "P1 transition test",
+                SpaceGroup = new SpaceGroupRef(1, AxisSetting.None, OriginChoice.None),
                 Cell = new CellParameters(
                     new LengthAngstrom(5.41),
                     new LengthAngstrom(5.41),
@@ -154,6 +165,12 @@ internal static class TransitionTestModels
                         new Fractional3(0.5, 0.25, 0.25),
                         oxygenSet.Id,
                         SiteStability.Unstable),
+                    new CellSite(
+                        CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f18")),
+                        "O endpoint",
+                        new Fractional3(0.75, 0.25, 0.25),
+                        oxygenSet.Id,
+                        SiteStability.Stable),
                 ],
             },
         };

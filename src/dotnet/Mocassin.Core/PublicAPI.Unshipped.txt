@@ -1411,3 +1411,36 @@ const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnknownChainGroup = "T
 const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnknownParticle = "TRN001" -> string!
 const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnmatchedPathPosition = "TRN020" -> string!
 const Mocassin.Core.Diagnostics.TransitionDiagnosticCodes.UnstablePathEndpoint = "TRN011" -> string!
+Mocassin.Core.Model.Transitions.ResolvedPathPosition
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.<Clone>$() -> Mocassin.Core.Model.Transitions.ResolvedPathPosition!
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.CanonicalPosition.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.CanonicalPosition.init -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Deconstruct(out Mocassin.Core.Ids.CellSiteId SiteId, out int P, out Mocassin.Core.Geometry.Vector4I Encoding, out Mocassin.Core.Model.Structure.SiteStability Stability, out Mocassin.Core.Geometry.Fractional3 CanonicalPosition) -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Encoding.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Encoding.init -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Equals(Mocassin.Core.Model.Transitions.ResolvedPathPosition? other) -> bool
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.P.get -> int
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.P.init -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.ResolvedPathPosition(Mocassin.Core.Ids.CellSiteId SiteId, int P, Mocassin.Core.Geometry.Vector4I Encoding, Mocassin.Core.Model.Structure.SiteStability Stability, Mocassin.Core.Geometry.Fractional3 CanonicalPosition) -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.SiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.SiteId.init -> void
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Stability.get -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Core.Model.Transitions.ResolvedPathPosition.Stability.init -> void
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.<Clone>$() -> Mocassin.Core.Model.Transitions.ResolvedTransitionPath!
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!> Positions) -> void
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Equals(Mocassin.Core.Model.Transitions.ResolvedTransitionPath? other) -> bool
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Positions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!>
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Positions.init -> void
+Mocassin.Core.Model.Transitions.ResolvedTransitionPath.ResolvedTransitionPath(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!> Positions) -> void
+const Mocassin.Core.Geometry.GeometryTolerances.PathMatchTolerance = 1E-06 -> double
+override Mocassin.Core.Model.Transitions.ResolvedPathPosition.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Transitions.ResolvedPathPosition.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.ResolvedPathPosition.ToString() -> string!
+override Mocassin.Core.Model.Transitions.ResolvedTransitionPath.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Transitions.ResolvedTransitionPath.GetHashCode() -> int
+override Mocassin.Core.Model.Transitions.ResolvedTransitionPath.ToString() -> string!
+static Mocassin.Core.Model.Transitions.ResolvedPathPosition.operator !=(Mocassin.Core.Model.Transitions.ResolvedPathPosition? left, Mocassin.Core.Model.Transitions.ResolvedPathPosition? right) -> bool
+static Mocassin.Core.Model.Transitions.ResolvedPathPosition.operator ==(Mocassin.Core.Model.Transitions.ResolvedPathPosition? left, Mocassin.Core.Model.Transitions.ResolvedPathPosition? right) -> bool
+static Mocassin.Core.Model.Transitions.ResolvedTransitionPath.operator !=(Mocassin.Core.Model.Transitions.ResolvedTransitionPath? left, Mocassin.Core.Model.Transitions.ResolvedTransitionPath? right) -> bool
+static Mocassin.Core.Model.Transitions.ResolvedTransitionPath.operator ==(Mocassin.Core.Model.Transitions.ResolvedTransitionPath? left, Mocassin.Core.Model.Transitions.ResolvedTransitionPath? right) -> bool
