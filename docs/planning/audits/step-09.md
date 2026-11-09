@@ -39,7 +39,7 @@ Step page: [`Step 09 — Parameterization Templates`](../steps/step-09-parameter
 - [ ] Applying the template to the same model succeeds and yields the same compiled values.
 - [ ] A changed model produces a signature mismatch with a useful diff.
 - [ ] Rebase copies unchanged values, defaults new ones, and reports removed ones.
-- [ ] Chiral pair values are mirrored and cannot diverge.
+- [ ] Chiral partners share one `EnergyId` and one value; independent A→B/B→A values are unrepresentable.
 - [ ] Site energy overrides apply and can be reset.
 - [ ] Missing/zero values produce warnings, not silent success.
 - [ ] Template JSON is canonical and round-trips.

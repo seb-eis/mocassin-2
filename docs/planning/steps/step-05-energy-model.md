@@ -239,7 +239,8 @@ Pair interactions are discovered by the compiler:
 Before compilation, compute and show:
 
 - number of P1 positions in the cell: every stable reference-site orbit expanded to P1 positions, not the
-  number of stable reference sites; this is `EnergyCostPreview.P1PositionCount`;
+  number of stable reference sites; this is `EnergyCostPreview.StableP1PositionCount`, the stable subset of
+  Step 07's total `P1PositionCount`;
 - number of pair images within the cutoff;
 - number of unique pair interactions after symmetry reduction;
 - expected raw cluster permutations per cluster:
@@ -323,21 +324,31 @@ Validation ownership follows the assembly boundary, matching Steps 03 and 04:
 
 ### 7.1 Validation deviations from the original
 
-The original validator reported several model-breaking conditions as warnings. Step 05 promotes them to errors
-so `validate` and `build` fail closed instead of proceeding with silently unusable energy data. This is a
-recorded deviation, not a silent relaxation. Advisory and performance conditions stay warnings.
+The original validator reported many model-breaking conditions as warnings, and it did not range-check site
+energies. Step 05 promotes the model-breaking warnings to errors and adds explicit v1 checks so `validate` and
+`build` fail closed instead of proceeding with silently unusable energy data. This is a recorded deviation,
+not a silent relaxation. Advisory and performance conditions stay warnings.
 
-| Condition | Original behavior | Step 05 | Rationale |
-| --- | --- | --- | --- |
-| Unknown/identical filter sites | Warning | `ENM004` Error | The filter cannot be applied deterministically |
-| Unstable environment on a stable site / duplicate per site | Warning | `ENM006` Error | The environment is unusable or ambiguous |
-| Unknown cluster center | Warning | `ENM007` Error | The cluster has no owner |
-| Offset count outside 2..8 | Warning | `ENM008` Error | The cluster is degenerate or exceeds the 6-bit/9-site code |
-| Duplicate offsets / invalid surrounding geometry / ring-degenerate geometry | Warning | `ENM009`–`ENM011` Error | The cluster geometry is ambiguous or physically degenerate |
-| Unknown site/particle or duplicate site-energy entry | Warning | `ENM014` Error | The entry cannot be resolved or is ambiguous |
-| Site energy outside −100..100 eV | Warning | `ENM015` Error | The value is outside the supported energy range |
-| Sampling hard limits (stable >5000, unstable >1000) | Warning | `ENM019` Error | The requested model cannot be compiled within the budget |
-| More than 10 clusters per center | Warning | `ENM021` Error | The cluster budget is exceeded |
+| Condition | Original behavior | Step 05 | Type | Rationale |
+| --- | --- | --- | --- | --- |
+| Filter range outside the environment cutoff | Warning | `ENM003` Error | Promoted | The filter cannot be applied deterministically |
+| Unknown/identical filter sites, or an unstable filter not centered on the environment site | Warning / not checked | `ENM004` Error | Promoted + new | The filter cannot be resolved or applied in the intended direction |
+| Unstable environment on a stable site / duplicate per site | Warning | `ENM006` Error | Promoted | The environment is unusable or ambiguous |
+| Unknown cluster center or missing unstable environment | Warning | `ENM007` Error | Promoted | The cluster has no owner or no applicable environment |
+| Offset count outside 2..8 | Warning | `ENM008` Error | Promoted | The cluster is degenerate or exceeds the 6-bit/9-site code |
+| Duplicate surrounding offsets | Warning | `ENM009` Error | Promoted | The cluster geometry is ambiguous |
+| Invalid surrounding position (unknown/unstable/filtered) or cluster outside the center cutoff | Warning | `ENM010` Error | Promoted | The cluster geometry is not valid or reaches outside the environment |
+| Full-geometry duplicate or center-equivalent position | Warning | `ENM011` Error | Promoted | The original “ring” check finds degenerate geometry |
+| Cluster raw permutations >5000 | Warning | `ENM013` Error | Promoted | The original `PermutationsPerGroup` maximum is exceeded |
+| Unknown site/particle or duplicate site-energy entry | Duplicate/void warnings; unknown references partly structural | `ENM014` Error | Promoted + new | The entry cannot be resolved or is ambiguous |
+| Site energy outside −100..100 eV or non-finite | No site-energy range check; the original only warned on NaN/Inf, duplicates, and void-on-stable. `PairEnergies`/`GroupEnergies` use −100..100 | `ENM015` Error | New v1 | Site energies are also migration barriers; the v1 range matches the pair/group setting |
+| Sampling hard limits (stable >5000, unstable >1000) | Warning | `ENM019` Error | Promoted | The requested model cannot be compiled within the budget |
+| More than 10 clusters per center | Warning | `ENM021` Error | Promoted | The cluster budget is exceeded |
+
+New v1 checks without a direct original counterpart: unknown site/particle references in site energies
+(`ENM014`), duplicate site-energy entries (`ENM014`), and the site-energy −100..100 eV range (`ENM015`). The
+original `StableEnvironmentInfoValidator` warned on duplicates, void-on-stable, and NaN/Inf only; it did not
+apply the pair/group −100..100 eV setting to site energies.
 
 The following remain warnings because they are advisory or performance-related: `ENM002` (periodic
 ambiguity), `ENM005` (duplicate filter), `ENM012` (cluster permutation warning), `ENM016` (forbidden
@@ -400,7 +411,7 @@ public sealed record ClusterCostPreview(
     long EstimatedBytes);
 
 public sealed record EnergyCostPreview(
-    long P1PositionCount,
+    long StableP1PositionCount,
     long PairImageCount,
     long UniquePairInteractionCount,
     ImmutableArray<ClusterCostPreview> ClusterCosts,

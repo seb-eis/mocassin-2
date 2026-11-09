@@ -119,6 +119,9 @@ public sealed record ModelStatistics(
 
 - Counts that can exceed `int` — P1/stable/unstable positions, pair interactions, cluster permutations, and
   memory — are `long`, matching the Step 05 cost-preview fields. The 63⁹ cluster case would overflow `int`.
+- `ModelStatistics.P1PositionCount` is the total P1 position count (stable and unstable);
+  `EnergyCostPreview.StableP1PositionCount` from Step 05 is the stable reference-site subset, not the same
+  count.
 - Statistics use the same sampling/preview code as steps 02, 05, and 08.
 - They are advisory but must be accurate enough to warn before an expensive build.
 - The CLI prints them as a table or JSON.

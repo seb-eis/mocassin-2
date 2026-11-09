@@ -37,7 +37,7 @@ Step page: [`Step 26 — Parameterization, Job Templates, and Build UI`](../step
 
 - [ ] A parameterization can be created from the ceria model, edited, and applied.
 - [ ] Stale signatures are visible and rebase produces a report.
-- [ ] Chiral pair values mirror and conflicts are flagged.
+- [ ] Chiral pair values are edited once through the shared `EnergyId`; no independent-value conflict exists.
 - [ ] Bulk fill/import/export work and validate.
 - [ ] A KMC job template with a doping sweep previews correct job counts and charge balance.
 - [ ] Building from the GUI produces the same model/lattice/job payload hashes as the CLI for the same inputs (SQLite page layout may differ).

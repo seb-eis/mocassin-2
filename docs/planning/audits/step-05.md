@@ -36,12 +36,27 @@ Step page: [`Step 05 — Energy Model`](../steps/step-05-energy-model.md)
 ## Step-specific acceptance checklist
 
 - [ ] Ceria's stable environment and oxygen migration-edge cluster validate.
-- [ ] A filter that removes a specific sublattice pair is applied symmetrically.
-- [ ] A cluster with 8 offsets is accepted; 9 offsets are rejected.
-- [ ] Duplicate/ring/out-of-range clusters are rejected with paths.
-- [ ] The cost preview reports pair and permutation counts consistent with step 08.
-- [ ] Chiral pair partners are detected and cannot receive independent energies.
-- [ ] Documentation written
+- [ ] A stable filter that removes a specific sublattice pair is applied symmetrically; an unstable filter is
+      one-directional and keeps `SiteAId` equal to the environment site.
+- [ ] Filter boundaries are inclusive and use the 1e-5 Å distance tolerance.
+- [ ] A cluster with 2 or 8 offsets is accepted; 1 or 9 offsets are rejected (`ENM008`).
+- [ ] Duplicate, center-equivalent, unknown/unstable/filtered-surrounding, ring/degenerate, and out-of-range
+      clusters are rejected with paths (`ENM009`–`ENM011`).
+- [ ] The cost preview reports pair counts and permutation counts that match a brute-force oracle, including
+      the center-particle factor and `long` overflow-safe limits; the Step 08 cross-check is recorded as a
+      Step 08 follow-up, not a Step 05 closeout claim.
+- [ ] Chiral pair partners are detected, share one `EnergyId`, and expose `ChiralPartnerGeometryId`;
+      independent A→B/B→A energy values are unrepresentable.
+- [ ] The energy sections round-trip; the default `stableEnvironment` loads the 1.0 Å/no-filter default; empty
+      sections are omitted; semantic arrays preserve order.
+- [ ] Canonical collection ordering and `ProjectHasher.ComputeEnergy` are stable under array shuffles and
+      change when energy data changes.
+- [ ] The generated project schema accepts the energy sections, and fixtures cover empty and populated models.
+- [ ] Every `ENM001`–`ENM021` code has a positive or negative test as applicable, including the ENM018
+      Step 07 boundary.
+- [ ] New files carry SPDX headers and introduce no new dependency.
+- [ ] Public API files and the ApiCompat baseline are current.
+- [ ] Documentation pages, navigation, index links, status dashboard, and parity matrix are updated.
 
 ## Standard audit checklist
 
