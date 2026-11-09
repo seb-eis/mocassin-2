@@ -15,7 +15,7 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Ready for review |
-| Reviewed commit | `424a404` |
+| Reviewed commit | `fa45192` |
 | Docs branch | `main` |
 | Review date | — |
 | Reviewer | — |
