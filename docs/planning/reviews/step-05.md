@@ -14,7 +14,7 @@
 | Step | 05 — Energy Model |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Ready for implementation — awaiting human approval |
 | Reviewed commit | `0b2a571` |
 | Docs branch | `main` |
 | Review date | 2026-11-09 |
@@ -276,8 +276,8 @@ only the latest round.
 - [x] Requested decision and frozen commit recorded — approve the Step 05 start gate at `0b2a571`
 - [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
 - [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale — m14, m15, and n12 were verified in round 4; m16 is
-  fixed at `0b2a571` and the round-5 re-review is pending; n11/n13 are process notes; no waiver is requested
+- [x] Accepted notes and waivers recorded with rationale — no design minor/note remains; process notes
+  n11/n13/n14 are acknowledged; no waiver is requested
 - [x] Residual risks, deferred items, and follow-up owners recorded
 - [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — no Blocker or Major
   remains; six Majors (M1–M6) are closed
@@ -292,6 +292,7 @@ Round history:
 | 2 | 2026-11-09 | `0000f3f` | Fresh independent planning auditor | Changes required |
 | 3 | 2026-11-09 | `6b8d78c` | Fresh independent planning auditor | Ready with notes |
 | 4 | 2026-11-09 | `2f43a19` | Fresh independent planning auditor (focused delta) | Ready with notes |
+| 5 | 2026-11-09 | `0b2a571` | Fresh independent planning auditor (focused §7.1) | Ready for implementation |
 
 Findings and resolutions:
 
@@ -329,15 +330,16 @@ Findings and resolutions:
 | m14 | Minor | Pre-seeded Step 05/09/26 audit checklists stale | Refreshed all three checklists to the revised acceptance criteria | `2f43a19` | Closed — round 4 verified |
 | m15 | Minor | §7.1 omits ENM013 and misstates site-energy-range origin | Added ENM003/ENM010/ENM013 rows; distinguished promoted warnings from new v1 checks and corrected the site-energy origin | `2f43a19` | Closed — round 4 verified |
 | n12 | Note | `P1PositionCount` naming ambiguous across Steps 05/07 | Renamed to `StableP1PositionCount`; Step 07 documents the total-vs-stable distinction | `2f43a19` | Closed — round 4 verified |
-| m16 | Minor | §7.1 promoted-vs-new classification internally inconsistent | Split ENM014/ENM015 rows, added ENM001/ENM002, made the new-check list explicitly illustrative | `0b2a571` | Resolved — round-5 re-review pending |
+| m16 | Minor | §7.1 promoted-vs-new classification internally inconsistent | Split ENM014/ENM015 rows, added ENM001/ENM002, made the new-check list explicitly illustrative | `0b2a571` | Closed — round 5 verified |
 | n11 | Note | Record parent process note | Acknowledged; round-3 record commit parent is `1eb29ef` | `76ae25f` | Acknowledged |
 | n13 | Note | Record parent process note | Acknowledged; round-4 record commit parent is `9484eec` | `e57bbf3` | Acknowledged |
+| n14 | Note | Record parent process note | Acknowledged; round-5 record commit parent is `c236f2e` | `4c0db7b` | Acknowledged |
 
 Accepted notes and waivers:
 
-- **m14, m15, n12:** fixed at `2f43a19` and verified in round 4. No waiver is requested.
-- **m16:** fixed at `0b2a571`; the focused round-5 re-review verifies the correction. No waiver is requested.
-- **n11, n13:** process notes only; no action.
+- **m14, m15, n12:** fixed at `2f43a19` and verified in round 4. Closed.
+- **m16:** fixed at `0b2a571` and verified in round 5. Closed.
+- **n11, n13, n14:** process notes only; acknowledged. No design note or waiver remains.
 
 Residual risks, deferred items, and follow-up owners:
 
@@ -346,8 +348,8 @@ Residual risks, deferred items, and follow-up owners:
 - **m15:** resolved by the corrected §7.1 table and verified in round 4; no further action.
 - **n12:** resolved by renaming to `StableP1PositionCount` and documenting the Step 07 total-vs-stable
   distinction; no further action.
-- **m16:** resolved by the §7.1 classification split at `0b2a571`; the round-5 review verifies it.
-- **n11, n13:** process notes about the record parent; no action.
+- **m16:** resolved by the §7.1 classification split at `0b2a571` and verified in round 5; no further action.
+- **n11, n13, n14:** process notes about the record parent; no action.
 - **Deferred to later steps:** compiled tables and indices (08), template binding (09), solver engine (15),
   editors (25), consolidated diagnostics/troubleshooting pages and ENM018 emission (07).
 

@@ -13,7 +13,7 @@ with validation and cost previews.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** [Re-review required](../reviews/step-05.md)
+- **Design review:** [Ready for implementation — awaiting approval](../reviews/step-05.md)
 - **Last updated:** 2026-11-09
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
