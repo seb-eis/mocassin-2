@@ -15,7 +15,7 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Re-review required |
-| Reviewed commit | `0000f3f` |
+| Reviewed commit | `6b8d78c` |
 | Docs branch | `main` |
 | Review date | 2026-11-09 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
@@ -633,3 +633,79 @@ Six minor and six note findings remain (m8–m13, n4–n10); none is a Blocker. 
 is corrected and the minors are fixed or explicitly accepted, then a fresh reviewer re-reviews the new design
 commit. The documentation build, contract generation, structure test, contract/policy gate, and whitespace
 check all pass at `0000f3f`; the findings are design-completeness findings, not tooling failures.
+
+## Round 2 resolution status
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| M6 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| m8 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| m9 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| m10 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| m11 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| m12 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| m13 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| n4 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| n5 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| n6 | Acknowledged — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| n7 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| n8 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| n9 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+| n10 | Resolved — awaiting re-review | Planner / Step 05 agent | `6b8d78c` |
+
+Resolution summary (design content at `6b8d78c`):
+
+- **M6.** `GeometryId` now hashes `(centerSiteId, centerP, partnerSiteId, partnerP, offsetA–C,
+  distanceBucketFm)`. `PairInteractionPreview` exposes `CenterP`/`PartnerP`; Step 08 pair sets and the compiled
+  contract carry the P1 indices. A collision test is added.
+- **m8.** `ENM007` now rejects an unknown/non-reference center or an unstable center without an unstable
+  environment; stable and unstable centers are both legal, and only the surrounding positions must be stable.
+- **m9.** Step 09/26, the quality strategy, and the parity matrix now use shared-`EnergyId`/linked-editing
+  wording; chiral mirroring and conflict detection are removed because independent values are unrepresentable.
+- **m10.** Step 07 `ModelStatistics` uses `long` for P1/stable/unstable positions, pair interactions, and
+  cluster permutations, with the 63⁹ rationale.
+- **m11.** Added §7.1 “Validation deviations from the original”, classifying every promoted warning and every
+  retained warning with its rationale.
+- **m12.** The documentation plan no longer links to `troubleshooting/errors.md` or `reference/diagnostics.md`
+  before Step 07 creates them, and `reference/energy.md` no longer duplicates the ENM catalog.
+- **m13.** Diagnostics tests are split into Core (PR-fast) and Symmetry (PR-medium), plus the ENM018 boundary
+  row.
+- **n4.** The data-contract §1 ordering rule now qualifies identifiable arrays and defers to the energy-specific
+  keys for filters/entries.
+- **n5.** `CanonicalizeModel` is stated to apply before save and hashing; the generated schema is stated to come
+  from `contracts/manifest.json` via the generator.
+- **n6.** Process note only; the request commit updates the dashboard and the reviewer's round-2 text is
+  unchanged.
+- **n7.** `EnergyLimits` exposes `MinEnergy`/`MaxEnergy` as `EnergyEv`; count limits remain `int`.
+- **n8.** The sampler uses `TrySamplePairs(..., out pairs, out diagnostics)` and returns `false` with an empty
+  array plus diagnostics on invalid input.
+- **n9.** `ENM009` owns surrounding-surrounding duplicate offsets; `ENM011` owns center-equivalent and other
+  full-geometry duplicates and does not double-report the same pair.
+- **n10.** §6 now names `P1PositionCount` as the P1-expanded position count, distinct from the stable
+  reference-site count.
+
+## Re-review round 3
+
+### Re-review request
+
+| Field | Value |
+| --- | --- |
+| Step | 05 — Energy Model |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `6b8d78c` |
+| Docs branch | `main` |
+| Review date | 2026-11-09 |
+| Reviewer | Fresh independent planning auditor (round 3; no shared conversation with the planner or implementor) |
+
+Step page: [`Step 05 — Energy Model`](../steps/step-05-energy-model.md)
+
+The design content for round 3 is frozen at `6b8d78c`. The delta from the round-2 commit `0000f3f` is the
+round-2 fix round recorded in the Round 2 resolution status section plus the affected Step 07/08/09/26, data
+contract, quality-strategy, parity, and status updates. The review request and status changes are metadata
+only. Verify the delta yourself with `git diff --stat 0000f3f..6b8d78c` and inspect the files at `6b8d78c`.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for this round below. Keep all
+earlier round text unchanged. This is a re-review of the full design at the new commit, not only a diff check;
+verify that M6, m8–m13, and n4–n10 are resolved and that no new contradiction was introduced.
