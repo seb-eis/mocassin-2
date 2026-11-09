@@ -19,7 +19,7 @@ with validation and cost previews.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `energy-model-and-persistence` | `feature/step-05-energy-model/energy-model-and-persistence` | Not started | — | — | — |
+| `energy-model-and-persistence` | `feature/step-05-energy-model/energy-model-and-persistence` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `core-validation` | `feature/step-05-energy-model/core-validation` | Not started | — | — | — |
 | `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Not started | — | — | — |
 | `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Not started | — | — | — |

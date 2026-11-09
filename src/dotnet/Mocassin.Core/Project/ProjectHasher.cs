@@ -60,6 +60,30 @@ public static class ProjectHasher
     }
 
     /// <summary>
+    /// Computes the SHA-256 hash of the canonical energy projection of a model.
+    /// </summary>
+    /// <param name="model">The model whose energy sections are hashed.</param>
+    /// <returns>A lowercase hexadecimal SHA-256 digest.</returns>
+    /// <remarks>
+    /// The projection covers the stable environment, unstable environments, clusters, and site energies only.
+    /// It is invariant to particle, structure, and transition edits, so it is the energy-model half of the
+    /// Step 08 compilation cache key. Canonical sorting is applied before hashing.
+    /// </remarks>
+    public static string ComputeEnergy(ModelDefinition model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        var projection = new ModelDefinition
+        {
+            StableEnvironment = model.StableEnvironment,
+            UnstableEnvironments = model.UnstableEnvironments,
+            Clusters = model.Clusters,
+            SiteEnergies = model.SiteEnergies,
+        };
+        var bytes = ProjectJson.SerializeCanonicalModel(projection);
+        return Convert.ToHexStringLower(SHA256.HashData(bytes));
+    }
+
+    /// <summary>
     /// Computes the SHA-256 hash of the canonical closure of one transition.
     /// </summary>
     /// <param name="project">The read-only project snapshot.</param>

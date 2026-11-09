@@ -2,6 +2,7 @@
 
 using System.Collections.Immutable;
 using System.Text.Json.Serialization;
+using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -12,11 +13,12 @@ namespace Mocassin.Core.Model;
 /// Root of the authored scientific model.
 /// </summary>
 /// <remarks>
-/// The model is flat on disk: <c>model.particles</c>, <c>model.particleSets</c>, <c>model.structure</c>,
-/// and the transition sections <c>stateChanges</c>, <c>stateChangeGroups</c>, <c>chains</c>,
-/// <c>kineticTransitions</c>, and <c>metropolisTransitions</c>. Later steps add energy, lattice, and simulation
-/// sections directly at the model root. <see cref="ParticleModel"/> is an in-memory grouping only and is not a
-/// persisted member.
+/// The model is flat on disk: <c>model.particles</c>, <c>model.particleSets</c>, <c>model.structure</c>, the
+/// transition sections <c>stateChanges</c>, <c>stateChangeGroups</c>, <c>chains</c>,
+/// <c>kineticTransitions</c>, and <c>metropolisTransitions</c>, and the energy sections
+/// <c>stableEnvironment</c>, <c>unstableEnvironments</c>, <c>clusters</c>, and <c>siteEnergies</c>. Later steps
+/// add lattice and simulation sections directly at the model root. <see cref="ParticleModel"/> is an in-memory
+/// grouping only and is not a persisted member.
 /// </remarks>
 [JsonConverter(typeof(ModelDefinitionJsonConverter))]
 public sealed record ModelDefinition
@@ -35,6 +37,10 @@ public sealed record ModelDefinition
         Chains = [];
         KineticTransitions = [];
         MetropolisTransitions = [];
+        StableEnvironment = Energy.StableEnvironment.Default;
+        UnstableEnvironments = [];
+        Clusters = [];
+        SiteEnergies = [];
     }
 
     /// <summary>
@@ -81,4 +87,24 @@ public sealed record ModelDefinition
     /// Gets the authored Metropolis transitions.
     /// </summary>
     public ImmutableArray<MetropolisTransition> MetropolisTransitions { get; init; }
+
+    /// <summary>
+    /// Gets the stable-site interaction environment.
+    /// </summary>
+    public StableEnvironment StableEnvironment { get; init; }
+
+    /// <summary>
+    /// Gets the per-unstable-site interaction environments.
+    /// </summary>
+    public ImmutableArray<UnstableEnvironment> UnstableEnvironments { get; init; }
+
+    /// <summary>
+    /// Gets the authored multi-body interaction clusters.
+    /// </summary>
+    public ImmutableArray<Cluster> Clusters { get; init; }
+
+    /// <summary>
+    /// Gets the authored sparse site-energy sets.
+    /// </summary>
+    public ImmutableArray<SiteEnergySet> SiteEnergies { get; init; }
 }

@@ -3,6 +3,7 @@
 using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -13,10 +14,10 @@ namespace Mocassin.Core.Model;
 /// Serializes the flat model envelope and applies defaults for missing sections.
 /// </summary>
 /// <remarks>
-/// Missing <c>particles</c>, <c>particleSets</c>, <c>structure</c>, or transition properties load as the
+/// Missing <c>particles</c>, <c>particleSets</c>, <c>structure</c>, transition, or energy properties load as the
 /// empty/default model. Unknown or duplicate properties are rejected to preserve the project-format contract.
-/// Empty optional transition sections are omitted when writing so that transition-free projects keep their
-/// Step 01/03 canonical model and document hashes.
+/// Empty optional transition sections and empty energy collections are omitted when writing so that projects
+/// without authored data keep their Step 01/03/04 canonical model and document hashes.
 /// </remarks>
 public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition>
 {
@@ -38,6 +39,10 @@ public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition
         var chains = ImmutableArray<TransitionChain>.Empty;
         var kineticTransitions = ImmutableArray<KineticTransition>.Empty;
         var metropolisTransitions = ImmutableArray<MetropolisTransition>.Empty;
+        var stableEnvironment = StableEnvironment.Default;
+        var unstableEnvironments = ImmutableArray<UnstableEnvironment>.Empty;
+        var clusters = ImmutableArray<Cluster>.Empty;
+        var siteEnergies = ImmutableArray<SiteEnergySet>.Empty;
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
         foreach (var property in root.EnumerateObject())
@@ -77,6 +82,22 @@ public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition
                         options,
                         "metropolisTransitions");
                     break;
+                case "stableEnvironment":
+                    stableEnvironment = property.Value.Deserialize<StableEnvironment>(options)
+                        ?? throw new JsonException("Model stableEnvironment must not be null.");
+                    break;
+                case "unstableEnvironments":
+                    unstableEnvironments = ReadArray<UnstableEnvironment>(
+                        property.Value,
+                        options,
+                        "unstableEnvironments");
+                    break;
+                case "clusters":
+                    clusters = ReadArray<Cluster>(property.Value, options, "clusters");
+                    break;
+                case "siteEnergies":
+                    siteEnergies = ReadArray<SiteEnergySet>(property.Value, options, "siteEnergies");
+                    break;
                 default:
                     throw new JsonException($"Unknown model property '{property.Name}'.");
             }
@@ -92,8 +113,24 @@ public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition
             Chains = chains,
             KineticTransitions = kineticTransitions,
             MetropolisTransitions = metropolisTransitions,
+            StableEnvironment = NormalizeEnvironment(stableEnvironment),
+            UnstableEnvironments = [.. unstableEnvironments.Select(NormalizeEnvironment)],
+            Clusters = [.. clusters.Select(NormalizeCluster)],
+            SiteEnergies = [.. siteEnergies.Select(NormalizeSiteEnergySet)],
         };
     }
+
+    private static StableEnvironment NormalizeEnvironment(StableEnvironment environment) =>
+        environment with { Filters = environment.Filters.IsDefault ? [] : environment.Filters };
+
+    private static UnstableEnvironment NormalizeEnvironment(UnstableEnvironment environment) =>
+        environment with { Filters = environment.Filters.IsDefault ? [] : environment.Filters };
+
+    private static Cluster NormalizeCluster(Cluster cluster) =>
+        cluster with { OffsetVectors = cluster.OffsetVectors.IsDefault ? [] : cluster.OffsetVectors };
+
+    private static SiteEnergySet NormalizeSiteEnergySet(SiteEnergySet siteEnergySet) =>
+        siteEnergySet with { Entries = siteEnergySet.Entries.IsDefault ? [] : siteEnergySet.Entries };
 
     /// <inheritdoc />
     public override void Write(Utf8JsonWriter writer, ModelDefinition value, JsonSerializerOptions options)
@@ -113,7 +150,32 @@ public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition
         WriteArrayIfNotEmpty(writer, "chains", value.Chains, options);
         WriteArrayIfNotEmpty(writer, "kineticTransitions", value.KineticTransitions, options);
         WriteArrayIfNotEmpty(writer, "metropolisTransitions", value.MetropolisTransitions, options);
+        WriteStableEnvironment(writer, value.StableEnvironment, options);
+        WriteArrayIfNotEmpty(writer, "unstableEnvironments", value.UnstableEnvironments, options);
+        WriteArrayIfNotEmpty(writer, "clusters", value.Clusters, options);
+        WriteArrayIfNotEmpty(writer, "siteEnergies", value.SiteEnergies, options);
         writer.WriteEndObject();
+    }
+
+    private static void WriteStableEnvironment(
+        Utf8JsonWriter writer,
+        StableEnvironment environment,
+        JsonSerializerOptions options)
+    {
+        if (IsDefaultEnvironment(environment))
+        {
+            return;
+        }
+
+        writer.WritePropertyName("stableEnvironment");
+        JsonSerializer.Serialize(writer, environment, options);
+    }
+
+    internal static bool IsDefaultEnvironment(StableEnvironment environment)
+    {
+        ArgumentNullException.ThrowIfNull(environment);
+        return environment.Cutoff.Value == StableEnvironment.Default.Cutoff.Value
+            && environment.Filters.IsDefaultOrEmpty;
     }
 
     private static void WriteArrayIfNotEmpty<T>(
