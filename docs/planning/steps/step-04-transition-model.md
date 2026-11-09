@@ -7,12 +7,12 @@ geometry, with validation of transition semantics.
 
 ## Implementation status
 
-- **Status:** In progress — closeout
+- **Status:** In progress — ready for audit
 - **Step branch:** `step/04-transition-model`
-- **Step CI:** —
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42690361556) — closeout, Ubuntu
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Ready for audit — code frozen at `288dd37`
 - **Design review:** [Ready for implementation — accepted at `a3d8641`](../reviews/step-04.md)
 - **Last updated:** 2026-11-09
 
@@ -26,7 +26,7 @@ geometry, with validation of transition semantics.
 | `transition-preview-and-benchmark` | `feature/step-04-transition-model/transition-preview-and-benchmark` | Done | `verify.sh dotnet`, `structure`, `api` pass; benchmark 19.75 µs (2026-11-09) | — | `b118133` |
 | `contracts-and-fixtures` | `feature/step-04-transition-model/contracts-and-fixtures` | Done | `verify.sh contracts`, `dotnet`, `structure`, `api` pass (2026-11-09) | — | `c92917b` |
 | `samples-and-docs` | `feature/step-04-transition-model/samples-and-docs` | Done | `verify.sh dotnet`, `docs`, `structure` pass (2026-11-09) | — | `ec04f9d` |
-| `closeout` | `feature/step-04-transition-model/closeout` | In progress | `verify.sh all` on the step branch; closeout CI pending | — | — |
+| `closeout` | `feature/step-04-transition-model/closeout` | Done | `verify.sh all` pass; closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42690361556) | `288dd37` |
 
 ## Goal
 

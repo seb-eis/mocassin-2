@@ -14,13 +14,13 @@
 | Step | 04 — Transition Model |
 | Request owner | Step agent |
 | Audit initiated by | Human owner |
-| Audit status | Not requested |
-| Audited commit | — |
+| Audit status | Ready for audit |
+| Audited commit | `288dd37` |
 | Step branch | `step/04-transition-model` |
 | Step tag | — |
-| Closeout CI run | — |
+| Closeout CI run | [`42690361556`](https://github.com/seb-eis/mocassin-2/actions/runs/42690361556) — green at `288dd37` |
 | Platform CI | Not run (Ubuntu-only policy) |
-| Audit date | — |
+| Audit date | 2026-11-09 |
 | Auditor | — |
 
 Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md)
@@ -78,7 +78,18 @@ Step page: [`Step 04 — Transition Model`](../steps/step-04-transition-model.md
 Commands run:
 
 ```text
-Pending closeout. The step agent records the exact `./tools/verify.sh all` output and closeout CI run here.
+./tools/verify.sh all
+  .NET: build succeeded; Core 336 passed, Symmetry 181 passed, Packages 42 passed,
+        Architecture 1 passed, support suites passed; dotnet format clean
+  Public API: all ApiCompat checks passed; no vulnerable packages
+  Rust: fmt, clippy, and tests passed
+  Python: 3 pytest tests passed; package built
+  Documentation: Zensical strict, DocFX, and rustdoc passed
+  Contracts: artifacts current (17 files), catalog current, SPDX headers present,
+             no secrets, cargo-deny advisories/bans/licenses/sources ok
+
+Closeout CI: run 42690361556, workflow_dispatch on step/04-transition-model,
+Ubuntu, completed/success at 288dd37.
 ```
 
 ## Known notes for the auditor
@@ -91,6 +102,8 @@ Pending closeout. The step agent records the exact `./tools/verify.sh all` outpu
   re-verified only by the manual Benchmark CI job.
 - Platform CI is not run; Step 04 adds no platform-specific code.
 - The transition-preview cache is bounded and scoped to the service; capacity breach is an explicit failure.
+- The audit request/status update is documentation-only; the code audited by the closeout run is frozen at
+  `288dd37`.
 
 ## Findings
 
