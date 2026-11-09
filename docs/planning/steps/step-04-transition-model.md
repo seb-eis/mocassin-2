@@ -7,18 +7,26 @@ geometry, with validation of transition semantics.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
+- **Status:** In progress
+- **Step branch:** `step/04-transition-model`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
 - **Design review:** [Ready for implementation — accepted at `a3d8641`](../reviews/step-04.md)
-- **Last updated:** 2026-11-08
+- **Last updated:** 2026-11-09
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `transition-model-and-persistence` | `feature/step-04-transition-model/transition-model-and-persistence` | Planned | — | — | — |
+| `state-changes-and-groups` | `feature/step-04-transition-model/state-changes-and-groups` | Planned | — | — | — |
+| `chains-and-patterns` | `feature/step-04-transition-model/chains-and-patterns` | Planned | — | — | — |
+| `kinetic-and-metropolis-transitions` | `feature/step-04-transition-model/kinetic-and-metropolis-transitions` | Planned | — | — | — |
+| `queries-and-editing` | `feature/step-04-transition-model/queries-and-editing` | Planned | — | — | — |
+| `transition-preview-and-benchmark` | `feature/step-04-transition-model/transition-preview-and-benchmark` | Planned | — | — | — |
+| `contracts-and-fixtures` | `feature/step-04-transition-model/contracts-and-fixtures` | Planned | — | — | — |
+| `samples-and-docs` | `feature/step-04-transition-model/samples-and-docs` | Planned | — | — | — |
+| `closeout` | `feature/step-04-transition-model/closeout` | Planned | — | — | — |
 
 ## Goal
 
