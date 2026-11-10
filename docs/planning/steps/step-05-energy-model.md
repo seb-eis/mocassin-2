@@ -9,24 +9,24 @@ with validation and cost previews.
 
 - **Status:** In progress
 - **Step branch:** `step/05-energy-model`
-- **Step CI:** —
+- **Step CI:** Closeout pending
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Ready for audit
 - **Design review:** [Ready for implementation — accepted at `0b2a571`](../reviews/step-05.md)
 - **Feature list:** Approved 2026-11-09
-- **Last updated:** 2026-11-09
+- **Last updated:** 2026-11-10
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `energy-model-and-persistence` | `feature/step-05-energy-model/energy-model-and-persistence` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
-| `core-validation` | `feature/step-05-energy-model/core-validation` | Awaiting approval | `verify.sh dotnet`, `structure` pass | — | — |
-| `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
-| `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
-| `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass; benchmark ceria 88.9 µs, BZO 77.4 µs | — | — |
-| `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Awaiting approval | `verify.sh contracts`, `dotnet`, `structure`, `api` pass | — | — |
-| `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Awaiting approval | `verify.sh dotnet`, `docs`, `structure` pass | — | — |
-| `closeout` | `feature/step-05-energy-model/closeout` | Not started | — | — | — |
+| `energy-model-and-persistence` | `feature/step-05-energy-model/energy-model-and-persistence` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `5361adf` |
+| `core-validation` | `feature/step-05-energy-model/core-validation` | Done | `verify.sh dotnet`, `structure` pass | — | `a44f4dc` |
+| `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `3205be0` |
+| `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `d3cb8bb` |
+| `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Done | `verify.sh dotnet`, `structure`, `api` pass; benchmark ceria 88.9 µs, BZO 77.4 µs | — | `1804b51` |
+| `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Done | `verify.sh contracts`, `dotnet`, `structure`, `api` pass | — | `e1987c4` |
+| `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Done | `verify.sh dotnet`, `docs`, `structure` pass | — | `f7b1276` |
+| `closeout` | `feature/step-05-energy-model/closeout` | Awaiting approval | `verify.sh all` and closeout CI pending | — | — |
 
 **Implementation note:** Step 05 introduces no new dependency and no GPL-derived content. Every new source,
 test, tool, and sample file carries `SPDX-License-Identifier: MIT`.
@@ -608,36 +608,36 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
 - [x] Add ceria and barium-zirconate energy models and fixtures.
 - [x] Add the new user-guide, physics, and reference pages to `zensical.toml` navigation and to the
   user-guide/physics/reference index pages; update `docs/reference/project-format.md`.
-- [ ] Update `docs/planning/status.md`, the Step 05 feature log/checkboxes, and
+- [x] Update `docs/planning/status.md`, the Step 05 feature log/checkboxes, and
   `docs/planning/appendix-b-parity-matrix.md`; create `docs/planning/audits/step-05.md` from the template at
   closeout.
 
 ## Acceptance criteria
 
-- [ ] Ceria's stable environment and oxygen migration-edge cluster validate.
-- [ ] A stable filter that removes a specific sublattice pair is applied symmetrically; an unstable filter is
+- [x] Ceria's stable environment and oxygen migration-edge cluster validate.
+- [x] A stable filter that removes a specific sublattice pair is applied symmetrically; an unstable filter is
   one-directional and keeps `SiteAId` equal to the environment site.
-- [ ] Filter boundaries are inclusive and use the 1e-5 Å distance tolerance.
-- [ ] A cluster with 2 or 8 offsets is accepted; 1 or 9 offsets are rejected (`ENM008`).
-- [ ] Duplicate, center-equivalent, unknown/unstable/filtered-surrounding, ring/degenerate, and out-of-range
+- [x] Filter boundaries are inclusive and use the 1e-5 Å distance tolerance.
+- [x] A cluster with 2 or 8 offsets is accepted; 1 or 9 offsets are rejected (`ENM008`).
+- [x] Duplicate, center-equivalent, unknown/unstable/filtered-surrounding, ring/degenerate, and out-of-range
   clusters are rejected with paths (`ENM009`–`ENM011`).
-- [ ] The cost preview reports pair counts and permutation counts that match a brute-force oracle, including
+- [x] The cost preview reports pair counts and permutation counts that match a brute-force oracle, including
   the center-particle factor and `long` overflow-safe limits; the Step 08 cross-check is recorded as a Step 08
   follow-up instead of a Step 05 closeout claim.
-- [ ] `GeometryId` includes `centerP`/`partnerP`, so distinct P1 shells with the same site pair, offset, and
+- [x] `GeometryId` includes `centerP`/`partnerP`, so distinct P1 shells with the same site pair, offset, and
   distance bucket do not collide.
-- [ ] Chiral pair partners are detected, share one `EnergyId`, and expose `ChiralPartnerGeometryId`; independent
+- [x] Chiral pair partners are detected, share one `EnergyId`, and expose `ChiralPartnerGeometryId`; independent
   A→B/B→A energy values are unrepresentable.
-- [ ] The energy sections round-trip through the project JSON context; the default `stableEnvironment` loads the
+- [x] The energy sections round-trip through the project JSON context; the default `stableEnvironment` loads the
   1.0 Å/no-filter default; empty sections are omitted; semantic arrays preserve order.
-- [ ] Canonical collection ordering and `ProjectHasher.ComputeEnergy` are stable under array shuffles and change
+- [x] Canonical collection ordering and `ProjectHasher.ComputeEnergy` are stable under array shuffles and change
   when energy data changes.
-- [ ] The generated project schema accepts the energy sections, and fixtures cover empty and populated models.
-- [ ] Every `ENM001`–`ENM021` code has a positive or negative test as applicable, including the ENM018
+- [x] The generated project schema accepts the energy sections, and fixtures cover empty and populated models.
+- [x] Every `ENM001`–`ENM021` code has a positive or negative test as applicable, including the ENM018
   Step 07 boundary.
-- [ ] New files carry SPDX headers and introduce no new dependency.
-- [ ] Public API files and the ApiCompat baseline are current.
-- [ ] Documentation pages, navigation, index links, status dashboard, and parity matrix are updated.
+- [x] New files carry SPDX headers and introduce no new dependency.
+- [x] Public API files and the ApiCompat baseline are current.
+- [x] Documentation pages, navigation, index links, status dashboard, and parity matrix are updated.
 
 ## Documentation
 

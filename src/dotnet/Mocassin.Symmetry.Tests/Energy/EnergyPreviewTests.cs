@@ -8,6 +8,7 @@ using Mocassin.Core.Model;
 using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
+using Mocassin.Core.Project;
 using Mocassin.Core.Symmetry;
 using Mocassin.Core.Units;
 using Mocassin.Symmetry.Energy;
@@ -35,6 +36,7 @@ public sealed class EnergyPreviewTests
         Assert.Equal(3, cost.StableP1PositionCount);
         Assert.True(cost.PairImageCount > 0);
         Assert.Equal(pairArray.Length, cost.UniquePairInteractionCount);
+        Assert.Equal(cost.PairImageCount, cost.UniquePairInteractionCount);
         var cluster = Assert.Single(cost.ClusterCosts);
         Assert.Equal(12, cluster.RawPermutationCount);
         Assert.Equal(12, cluster.UniquePermutationCount);
@@ -70,6 +72,54 @@ public sealed class EnergyPreviewTests
                 ? forward.GeometryId
                 : reverse.GeometryId,
             forward.EnergyId);
+    }
+
+    [Fact]
+    public void PairImageCountMatchesBruteForceSampling()
+    {
+        var model = CreateModel();
+        var cost = service.TryCreatePreview(model, 1, 1, 1, out _);
+
+        Assert.NotNull(cost);
+        Assert.True(EnergyGeometryContext.TryCreate(model, null, out var context, out _));
+        Assert.NotNull(context);
+        long bruteForce = 0;
+        var stable = model.StableEnvironment;
+        foreach (var site in context.Sites.Where(static site => site.Stability == SiteStability.Stable))
+        {
+            foreach (var centerP in context.GetSitePIndices(site.Id))
+            {
+                foreach (var image in context.Geometry.RadialSearch(new Vector4I(0, 0, 0, centerP), stable.Cutoff.Value))
+                {
+                    var target = context.GetSiteAt(image.Offset.P);
+                    if (target.Stability == SiteStability.Stable &&
+                        !EnergyGeometryContext.IsFiltered(stable.Filters, site, target, image.DistanceAngstrom, true))
+                    {
+                        bruteForce++;
+                    }
+                }
+            }
+        }
+
+        Assert.Equal(bruteForce, cost.PairImageCount);
+    }
+
+    [Fact]
+    public void CeriaPairGeometryIdsAreUniqueAcrossP1Shells()
+    {
+        var project = ProjectJson.Deserialize(
+            File.ReadAllBytes(RepositoryPaths.Combine("samples", "ceria", "ceria.mocprj")));
+
+        var pairs = service.TryCreatePairPreview(project.Model, 1, 1, 1, out var diagnostics);
+
+        Assert.NotNull(pairs);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        var previews = pairs.GetValueOrDefault();
+        Assert.NotEmpty(previews);
+        Assert.Equal(previews.Length, previews.Select(static pair => pair.GeometryId).Distinct().Count());
+        Assert.Contains(
+            previews.GroupBy(static pair => (pair.SiteAId, pair.SiteBId)),
+            static group => group.Select(static pair => pair.CenterP).Distinct().Count() > 1);
     }
 
     [Fact]
