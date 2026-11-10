@@ -169,3 +169,16 @@ report required by [`AGENTS.md` §3.12](../../../AGENTS.md). It must cover every
 resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Major gate statement. Reporting only
 the latest round or only open findings is not acceptable. The record's `Approval summary` section is the durable
 source for that report.
+
+## 12. Cross-cutting reviews
+
+The post-Step-07 checkpoint uses three repository-wide reviews under
+[`cross-cutting/`](cross-cutting/README.md):
+
+- repository policy and planning status (`XC-01`);
+- design foundations and model definition (`XC-02`);
+- documentation status (`XC-03`).
+
+They are not step design reviews and do not create step branches or tags. Each uses a separate fresh reviewer,
+the same read-only record write scope, and human-owner approval. The records are currently draft checklists for
+owner review.
