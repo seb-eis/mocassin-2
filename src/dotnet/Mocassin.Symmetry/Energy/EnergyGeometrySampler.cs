@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using Mocassin.Core.Diagnostics;
+using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Structure;
@@ -89,22 +90,70 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
             AddUnstableCandidates(context, environment, candidates);
         }
 
-        var geometryIds = new Dictionary<(int CenterP, int ShellIndex), string>();
-        foreach (var candidate in candidates)
+        var geometryIds = candidates.Select(ComputeGeometryId).ToArray();
+        var byDirectedKey = new Dictionary<DirectedKey, List<int>>();
+        for (var index = 0; index < candidates.Count; index++)
         {
-            geometryIds[(candidate.CenterP, candidate.ShellIndex)] = ComputeGeometryId(candidate);
+            var candidate = candidates[index];
+            var key = new DirectedKey(
+                candidate.Center.Id,
+                candidate.CenterP,
+                candidate.Partner.Id,
+                candidate.Shell.Representative.P,
+                candidate.Shell.DistanceBucketFm);
+            if (!byDirectedKey.TryGetValue(key, out var list))
+            {
+                list = [];
+                byDirectedKey.Add(key, list);
+            }
+
+            list.Add(index);
+        }
+
+        var partnerIndices = new int?[candidates.Count];
+        for (var index = 0; index < candidates.Count; index++)
+        {
+            var candidate = candidates[index];
+            var inverse = new DirectedKey(
+                candidate.Partner.Id,
+                candidate.Shell.Representative.P,
+                candidate.Center.Id,
+                candidate.CenterP,
+                candidate.Shell.DistanceBucketFm);
+            if (!byDirectedKey.TryGetValue(inverse, out var matches))
+            {
+                continue;
+            }
+
+            var best = -1;
+            foreach (var match in matches)
+            {
+                if (match == index)
+                {
+                    continue;
+                }
+
+                if (best < 0 ||
+                    string.CompareOrdinal(geometryIds[match], geometryIds[best]) < 0)
+                {
+                    best = match;
+                }
+            }
+
+            partnerIndices[index] = best < 0 ? null : best;
         }
 
         var previews = ImmutableArray.CreateBuilder<PairInteractionPreview>(candidates.Count);
-        foreach (var candidate in candidates)
+        for (var index = 0; index < candidates.Count; index++)
         {
-            var geometryId = geometryIds[(candidate.CenterP, candidate.ShellIndex)];
+            var candidate = candidates[index];
+            var geometryId = geometryIds[index];
             var energyId = geometryId;
             string? partnerId = null;
             var isChiral = false;
-            if (candidate.ChiralPartnerIndex is { } partnerIndex &&
-                geometryIds.TryGetValue((candidate.CenterP, partnerIndex), out var partnerGeometryId))
+            if (partnerIndices[index] is { } partnerIndex)
             {
+                var partnerGeometryId = geometryIds[partnerIndex];
                 isChiral = true;
                 partnerId = partnerGeometryId;
                 energyId = string.CompareOrdinal(geometryId, partnerGeometryId) <= 0
@@ -174,8 +223,7 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
                         partner,
                         centerP,
                         shellIndex,
-                        shell,
-                        shell.ChiralPartnerIndex));
+                        shell));
                 }
             }
         }
@@ -215,8 +263,7 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
                     partner,
                     centerP,
                     shellIndex,
-                    shell,
-                    ChiralPartnerIndex: null));
+                    shell));
             }
         }
     }
@@ -255,6 +302,12 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         CellSite Partner,
         int CenterP,
         int ShellIndex,
-        PairShell Shell,
-        int? ChiralPartnerIndex);
+        PairShell Shell);
+
+    private readonly record struct DirectedKey(
+        CellSiteId CenterSiteId,
+        int CenterP,
+        CellSiteId PartnerSiteId,
+        int PartnerP,
+        int DistanceBucketFm);
 }

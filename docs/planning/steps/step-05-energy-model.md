@@ -23,7 +23,7 @@ with validation and cost previews.
 | `core-validation` | `feature/step-05-energy-model/core-validation` | Awaiting approval | `verify.sh dotnet`, `structure` pass | — | — |
 | `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
-| `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Not started | — | — | — |
+| `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass; benchmark ceria 88.9 µs, BZO 77.4 µs | — | — |
 | `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Not started | — | — | — |
 | `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Not started | — | — | — |
 | `closeout` | `feature/step-05-energy-model/closeout` | Not started | — | — | — |
@@ -585,13 +585,13 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
 - [x] Implement the Core `EnergyModelValidator` (`ENM001`, `ENM003`–`ENM008`, `ENM014`–`ENM016`, `ENM020`,
   `ENM021`) and the Symmetry `EnergyGeometryValidator` (`ENM002`, `ENM009`–`ENM013`, `ENM017`, `ENM019`);
   compose them in `ProjectValidationService`.
-- [ ] Implement `IEnergyQuery`, add it to `IProjectQuery`, and implement `IEnergyGeometrySampler`,
+- [x] Implement `IEnergyQuery`, add it to `IProjectQuery`, and implement `IEnergyGeometrySampler`,
   `IEnergyPreviewService`, and the cost/pair previews with `TryCreatePreview(..., out diagnostics)`.
 - [x] Implement cluster geometry validation (encoder-based periodic dedup, center-equivalent/ring detection,
   surrounding-site validity, filter interaction, and cutoff range).
-- [ ] Implement derived pair-interaction preview with `GeometryId`, shared `EnergyId`, and
+- [x] Implement derived pair-interaction preview with `GeometryId`, shared `EnergyId`, and
   `ChiralPartnerGeometryId`.
-- [ ] Implement chiral-pair detection and shared-energy linkage.
+- [x] Implement chiral-pair detection and shared-energy linkage.
 - [x] Implement `ProjectEditor.Energy.cs`, editor operations, and cascade invalidation.
 - [x] Add the Core energy diagnostic codes and help text, including the `ENM018` constant/help anchor used by
   Step 07.
@@ -601,7 +601,7 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
   bump rule is reconciled explicitly in the manifest notes, as in Step 04.
 - [ ] Add `SPDX-License-Identifier: MIT` to every new source, test, tool, and sample file; record in the step log
   that no new dependency or GPL-derived content is introduced, per `NOTICE.md`.
-- [ ] Add XML docs, update `PublicAPI.Unshipped.txt` for Core, Packages, and Symmetry, and refresh the ApiCompat
+- [x] Add XML docs, update `PublicAPI.Unshipped.txt` for Core, Packages, and Symmetry, and refresh the ApiCompat
   baseline for every new public type and member.
 - [ ] Add ceria and barium-zirconate energy models and fixtures.
 - [ ] Add the new user-guide, physics, and reference pages to `zensical.toml` navigation and to the
