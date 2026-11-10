@@ -1,0 +1,154 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9a10",
+  "masterSeed": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "name": "Lattice Minimal",
+  "description": "Step 06 contract fixture with no authored lattice data.",
+  "createdUtc": "2026-11-08T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-08T12:00:00.0000000Z",
+  "model": {
+    "particles": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e80",
+        "name": "O2-",
+        "symbol": "O",
+        "charge": -2,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e81",
+        "name": "Vacancy",
+        "symbol": "Vc",
+        "charge": 0,
+        "isVacancy": true
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e82",
+        "name": "Ce4+",
+        "symbol": "Ce",
+        "charge": 4,
+        "isVacancy": false
+      }
+    ],
+    "particleSets": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e83",
+        "name": "Oxygen site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e80",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e81"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e84",
+        "name": "Cerium site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e82"
+        ]
+      }
+    ],
+    "structure": {
+      "name": "Ceria",
+      "spaceGroup": {
+        "number": 225,
+        "axis": "none",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 5.41,
+        "b": 5.41,
+        "c": 5.41,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90
+      },
+      "sites": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e85",
+          "name": "Ce",
+          "fractional": [
+            0,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e84",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e86",
+          "name": "O",
+          "fractional": [
+            0.25,
+            0.25,
+            0.25
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e83",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e87",
+          "name": "O transition",
+          "fractional": [
+            0.5,
+            0.25,
+            0.25
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e83",
+          "stability": "unstable"
+        }
+      ],
+      "dummyPositions": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e88",
+          "name": "Center",
+          "fractional": [
+            0.5,
+            0.5,
+            0.5
+          ]
+        }
+      ]
+    }
+  },
+  "parameterizations": [],
+  "jobTemplates": [],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}

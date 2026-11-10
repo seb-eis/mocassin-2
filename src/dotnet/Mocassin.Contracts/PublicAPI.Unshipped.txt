@@ -1,1 +1,11 @@
 #nullable enable
+Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.Deterministic = 8 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.KmcSimulation = 64 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.MmcSimulation = 128 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.NoJumpLogging = 2 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.NoSaving = 1 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.None = 0 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.UseDualDofCorrection = 16 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.UseFastExp = 4 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.UsePrerun = 32 -> Mocassin.Contracts.Solver.SolverJobFlags

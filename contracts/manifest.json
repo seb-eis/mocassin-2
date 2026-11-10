@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "project": "MOCASSIN",
   "description": "Machine-readable contract manifest for MOCASSIN project, package, results, state, job-folder, event, and MMCFE formats.",
-  "status": "step-05",
-  "notes": "Step 05 adds the flat stableEnvironment, unstableEnvironments, clusters, and siteEnergies model sections. The energy fields remain additive under project schema v1; the manifest status/notes and fixtures are updated now, and ADR 0009's version-bump rule resumes with the first released format. Lattice and simulation sections are extended by later steps. Every semantic format change requires a version bump and updated fixtures.",
+  "status": "step-06",
+  "notes": "Step 06 adds the flat occupationExchanges, dopings, and simulations model sections. The simulation DTO is a flat object with kind, the matching transition array, and a settings object; kind-specific fields are optional in the generated schema because the generator has no oneOf/discriminator support, and the validator rejects a mismatched shape. Nullable simulation settings use the manifest nullable flag. The lattice and simulation sections remain additive under project schema v1; the manifest status/notes and fixtures are updated now, and ADR 0009's version-bump rule resumes with the first released format.",
   "formats": {
     "project": {
       "id": "project",
@@ -654,6 +654,237 @@
                       "name": "energyEv",
                       "type": "float64",
                       "required": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "occupationExchanges",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sorted by id when serialized.",
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "siteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "sourceParticleId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "targetParticleId",
+                  "type": "string",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "dopings",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sorted by ascending priority when serialized.",
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "priority",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "primaryExchangeId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "dependentExchangeId",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                },
+                {
+                  "name": "chargeCompensation",
+                  "type": "bool",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "simulations",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sorted by id; transition arrays preserve authored order.",
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "kind",
+                  "type": "string",
+                  "required": true,
+                  "enum": [
+                    "kmc",
+                    "mmc"
+                  ]
+                },
+                {
+                  "name": "kineticTransitionIds",
+                  "type": "array",
+                  "required": false,
+                  "items": "string"
+                },
+                {
+                  "name": "metropolisTransitionIds",
+                  "type": "array",
+                  "required": false,
+                  "items": "string"
+                },
+                {
+                  "name": "settings",
+                  "type": "object",
+                  "required": false,
+                  "additionalProperties": false,
+                  "notes": "Common settings plus only the matching kind-specific fields; the validator rejects a mismatched shape.",
+                  "fields": [
+                    {
+                      "name": "temperatureK",
+                      "type": "float64",
+                      "required": false
+                    },
+                    {
+                      "name": "targetMcsp",
+                      "type": "int64",
+                      "required": false
+                    },
+                    {
+                      "name": "writeOutCount",
+                      "type": "int64",
+                      "required": false
+                    },
+                    {
+                      "name": "timeLimitSeconds",
+                      "type": "int64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "minSuccessRate",
+                      "type": "float64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "jobCount",
+                      "type": "int64",
+                      "required": false
+                    },
+                    {
+                      "name": "rngSeed",
+                      "type": "string",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "executionFlags",
+                      "type": "array",
+                      "required": false,
+                      "items": "string",
+                      "itemEnum": [
+                        "noSaving",
+                        "noJumpLogging",
+                        "useFastExp",
+                        "deterministic"
+                      ]
+                    },
+                    {
+                      "name": "instruction",
+                      "type": "string",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "preRunMcsp",
+                      "type": "int64",
+                      "required": false
+                    },
+                    {
+                      "name": "electricFieldModulusVm",
+                      "type": "float64",
+                      "required": false
+                    },
+                    {
+                      "name": "electricFieldDirection",
+                      "type": "array",
+                      "required": false,
+                      "items": "float64",
+                      "length": 3
+                    },
+                    {
+                      "name": "normalizationEnergyEv",
+                      "type": "float64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "maxAttemptFrequencyHz",
+                      "type": "float64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "breakTolerance",
+                      "type": "float64",
+                      "required": false
+                    },
+                    {
+                      "name": "breakSampleLengthMcsp",
+                      "type": "int64",
+                      "required": false
+                    },
+                    {
+                      "name": "breakSampleIntervalMcsp",
+                      "type": "int64",
+                      "required": false
+                    },
+                    {
+                      "name": "resultSampleMcsp",
+                      "type": "int64",
+                      "required": false
                     }
                   ]
                 }
@@ -1918,6 +2149,34 @@
         "kind": "project",
         "status": "current",
         "step": "05"
+      },
+      {
+        "id": "project-lattice-minimal",
+        "path": "tests/contracts/project-lattice-minimal.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "06"
+      },
+      {
+        "id": "project-lattice-populated",
+        "path": "tests/contracts/project-lattice-populated.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "06"
+      },
+      {
+        "id": "project-simulations-minimal",
+        "path": "tests/contracts/project-simulations-minimal.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "06"
+      },
+      {
+        "id": "project-simulations-populated",
+        "path": "tests/contracts/project-simulations-populated.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "06"
       }
     ]
   }

@@ -80,6 +80,42 @@ public sealed class ProjectValidationServiceTests
         Assert.Equal("symmetry.spaceGroupDataVersion", warning.Path?.Property);
     }
 
+    [Theory]
+    [InlineData("project-lattice-populated.mocprj")]
+    [InlineData("project-simulations-populated.mocprj")]
+    public void ComposedValidationIncludesLatticeAndSimulationRules(string fixtureName)
+    {
+        var project = ReadFixture(fixtureName);
+
+        var diagnostics = ProjectValidationService.Validate(project);
+
+        Assert.DoesNotContain(
+            diagnostics,
+            static diagnostic => diagnostic.Code.StartsWith("LAT", StringComparison.Ordinal) ||
+                diagnostic.Code.StartsWith("SIM", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void ComposedValidationReportsSimulationReferenceErrors()
+    {
+        var project = ReadFixture("project-simulations-populated.mocprj");
+        var simulation = project.Model.Simulations[0] with
+        {
+            TransitionIds = [Mocassin.Core.Model.Transitions.TransitionRef.From(KineticTransitionId.New())],
+        };
+        var edited = project with
+        {
+            Model = project.Model with
+            {
+                Simulations = [simulation, project.Model.Simulations[1]],
+            },
+        };
+
+        Assert.Contains(
+            ProjectValidationService.Validate(edited),
+            static diagnostic => diagnostic.Code == SimulationDiagnosticCodes.UnknownTransition);
+    }
+
     [Fact]
     public void ComposedValidationIncludesSymmetryStructureRules()
     {

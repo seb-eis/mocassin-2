@@ -126,6 +126,34 @@
       "kind": "project",
       "status": "current",
       "step": "05"
+    },
+    {
+      "id": "project-lattice-minimal",
+      "path": "tests/contracts/project-lattice-minimal.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "06"
+    },
+    {
+      "id": "project-lattice-populated",
+      "path": "tests/contracts/project-lattice-populated.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "06"
+    },
+    {
+      "id": "project-simulations-minimal",
+      "path": "tests/contracts/project-simulations-minimal.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "06"
+    },
+    {
+      "id": "project-simulations-populated",
+      "path": "tests/contracts/project-simulations-populated.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "06"
     }
   ]
 }

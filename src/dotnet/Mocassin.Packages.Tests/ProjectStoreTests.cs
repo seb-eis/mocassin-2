@@ -33,6 +33,30 @@ public sealed class ProjectStoreTests
             ProjectCanonicalizer.ToCanonicalJson(loaded.Project!));
     }
 
+    [Theory]
+    [InlineData("project-lattice-populated.mocprj")]
+    [InlineData("project-simulations-populated.mocprj")]
+    public async Task SaveAndLoadPreserveLatticeAndSimulationSections(string fixtureName)
+    {
+        using var directory = new TempDirectory();
+        var store = new ProjectStore(
+            new FixedTimeProvider(DateTimeOffset.Parse("2026-11-10T12:00:00Z", CultureInfo.InvariantCulture)));
+        var path = directory.File(fixtureName);
+        var project = ProjectJson.Deserialize(
+            File.ReadAllBytes(RepositoryPaths.Combine("tests", "contracts", fixtureName)));
+
+        var saved = await store.SaveAsync(project, path);
+        var loaded = await store.LoadAsync(path);
+
+        Assert.True(saved.IsSuccess);
+        Assert.True(loaded.IsSuccess);
+        Assert.Equal(
+            project.Model.OccupationExchanges.Length,
+            loaded.Project!.Model.OccupationExchanges.Length);
+        Assert.Equal(project.Model.Dopings.Length, loaded.Project.Model.Dopings.Length);
+        Assert.Equal(project.Model.Simulations.Length, loaded.Project.Model.Simulations.Length);
+    }
+
     [Fact]
     public async Task SaveWritesUtf8WithoutBomAndLfLineEndings()
     {
