@@ -15,15 +15,16 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Re-review required |
-| Reviewed commit | `e587a6b` |
+| Reviewed commit | `6173e61` |
 | Docs branch | `docs/step-06-design-revision` |
 | Review date | 2026-11-10 |
-| Reviewer | — (round-5 reviewer to fill) |
+| Reviewer | — (round-6 reviewer to fill) |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
 
-Round 1 was reviewed at `a64ecf3`, round 2 at `160b226`, round 3 at `5ae32b0`, and round 4 at `fe4868a`; all
-reviewer text is unchanged. The round-4 notes were corrected in `e587a6b`, and the round-5 request is appended
+Round 1 was reviewed at `a64ecf3`, round 2 at `160b226`, round 3 at `5ae32b0`, round 4 at `fe4868a`, and
+round 5 at `e587a6b`; all reviewer text is unchanged. The round-5 notes were corrected in `6173e61`, and the
+round-6 request is appended
 at the end of this record.
 
 ## Step summary
@@ -296,7 +297,8 @@ Round history:
 | 2 | 2026-11-10 | `160b226` | Fresh independent re-reviewer | Ready with notes |
 | 3 | 2026-11-10 | `5ae32b0` | Fresh independent re-reviewer | Ready with notes |
 | 4 | 2026-11-10 | `fe4868a` | Fresh independent re-reviewer | Ready with notes |
-| 5 | 2026-11-10 | `e587a6b` | Awaiting fresh reviewer | — |
+| 5 | 2026-11-10 | `e587a6b` | Fresh independent re-reviewer | Ready with notes |
+| 6 | 2026-11-10 | `6173e61` | Awaiting fresh reviewer | — |
 
 Findings and resolutions:
 
@@ -309,8 +311,11 @@ Findings and resolutions:
 | R2-4–R2-8 | Note | See round 2 | Corrections/acknowledgement; see `Resolution status` | `5ae32b0` | Resolved/acknowledged |
 | R3-1 | Minor | See round 3 | Min-success-rate upper bound added | `fe4868a` | Resolved |
 | R3-2–R3-3 | Note | See round 3 | Flag semantics and deviation placement corrected | `fe4868a` | Resolved |
-| R4-1 | Minor | See round 4 | `SolverJobFlags` carrier and derived-bit table added | `e587a6b` | Resolved — awaiting round 5 |
-| R4-2–R4-4 | Note | See round 4 | Deterministic consumer, normalization canonicalization, dashboard acknowledgement | `e587a6b` | Resolved/acknowledged — awaiting round 5 |
+| R4-1 | Minor | See round 4 | `SolverJobFlags` carrier and derived-bit table added | `e587a6b` | Resolved |
+| R4-2–R4-4 | Note | See round 4 | Deterministic consumer, normalization canonicalization, dashboard acknowledgement | `e587a6b` | Resolved/acknowledged |
+| R5-1 | Minor | See round 5 | Empty-array omission plus pre-Step-06 hash-stability rule/test | `6173e61` | Resolved — awaiting round 6 |
+| R5-2 | Minor | See round 5 | Canonicalized min-success-rate 0/null, empty/null seed, and normalization 0.0/null | `6173e61` | Resolved — awaiting round 6 |
+| R5-3–R5-6 | Note | See round 5 | Deterministic wording, SolverJobFlags composition, SIM009 whitespace, process note | `6173e61` | Resolved/acknowledged — awaiting round 6 |
 
 ## Human approval
 
@@ -1368,3 +1373,28 @@ Follow-up owner: Human owner (accept R5-1–R5-2 or request a small docs correct
 (apply the accepted corrections).
 Follow-up step: Step 06 — Lattice and Simulation Models; the design revision `e587a6b` is otherwise ready for
 implementation.
+
+## Re-review request (round 6)
+
+| Field | Value |
+| --- | --- |
+| Step | 06 — Lattice and Simulation Models |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `6173e61` |
+| Docs branch | `docs/step-06-design-revision` |
+| Review date | — |
+| Reviewer | — |
+
+Design revision: `6173e61fb8163784a1ce273af49ddb9a53e8af2d`.
+
+The revision delta from `e587a6b` is five planning files: the Step 06 page, `02-data-contracts.md`, and Steps
+08, 10, and 11. It adds the empty-array omission/hash-stability rule and test, canonicalizes
+`MinSuccessRate` 0/null, empty/null `RngSeed`, and `NormalizationEnergyEv` 0.0/null, defines the
+`SolverJobFlags` composition boundary (Compilation intent -> Packages composition -> Contracts word), rejects
+empty/whitespace simulation names in `SIM009`, and clarifies the `Deterministic` wording. The round-1 to
+round-5 reviewer text is unchanged.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for round 6 below. Keep the
+earlier rounds unchanged.
