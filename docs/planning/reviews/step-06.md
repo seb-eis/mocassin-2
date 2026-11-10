@@ -14,7 +14,7 @@
 | Step | 06 — Lattice and Simulation Models |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Re-review required |
+| Design review status | Ready with notes — accepted |
 | Reviewed commit | `6173e61` |
 | Docs branch | `docs/step-06-design-revision` |
 | Review date | 2026-11-10 |
@@ -281,13 +281,13 @@ Follow-up step: Step 06 — Lattice and Simulation Models; a fresh re-review is 
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — accept `Ready with notes` at `6173e61`.
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — no Blocker or Major remains; R6-1–R6-4 are accepted.
+- [x] Final CI and documentation-build results recorded — documentation-only branch; Zensical strict, DocFX 0/0, rustdoc, and contract checks green.
 
 Round history:
 
@@ -298,7 +298,7 @@ Round history:
 | 3 | 2026-11-10 | `5ae32b0` | Fresh independent re-reviewer | Ready with notes |
 | 4 | 2026-11-10 | `fe4868a` | Fresh independent re-reviewer | Ready with notes |
 | 5 | 2026-11-10 | `e587a6b` | Fresh independent re-reviewer | Ready with notes |
-| 6 | 2026-11-10 | `6173e61` | Awaiting fresh reviewer | — |
+| 6 | 2026-11-10 | `6173e61` | Fresh independent re-reviewer | Ready with notes — accepted |
 
 Findings and resolutions:
 
@@ -313,19 +313,34 @@ Findings and resolutions:
 | R3-2–R3-3 | Note | See round 3 | Flag semantics and deviation placement corrected | `fe4868a` | Resolved |
 | R4-1 | Minor | See round 4 | `SolverJobFlags` carrier and derived-bit table added | `e587a6b` | Resolved |
 | R4-2–R4-4 | Note | See round 4 | Deterministic consumer, normalization canonicalization, dashboard acknowledgement | `e587a6b` | Resolved/acknowledged |
-| R5-1 | Minor | See round 5 | Empty-array omission plus pre-Step-06 hash-stability rule/test | `6173e61` | Resolved — awaiting round 6 |
-| R5-2 | Minor | See round 5 | Canonicalized min-success-rate 0/null, empty/null seed, and normalization 0.0/null | `6173e61` | Resolved — awaiting round 6 |
-| R5-3–R5-6 | Note | See round 5 | Deterministic wording, SolverJobFlags composition, SIM009 whitespace, process note | `6173e61` | Resolved/acknowledged — awaiting round 6 |
+| R5-1 | Minor | See round 5 | Empty-array omission plus pre-Step-06 hash-stability rule/test | `6173e61` | Resolved |
+| R5-2 | Minor | See round 5 | Canonicalized min-success-rate 0/null, empty/null seed, and normalization 0.0/null | `6173e61` | Resolved |
+| R5-3–R5-6 | Note | See round 5 | Deterministic wording, SolverJobFlags composition, SIM009 whitespace, process note | `6173e61` | Resolved/acknowledged |
+| R6-1 | Minor | See round 6 | Accepted — carry the Compilation-side carrier/default-settings split into Step 10/11 implementation. | — | Accepted note |
+| R6-2–R6-4 | Note | See round 6 | Accepted — fix the data-contract wording at closeout; resolve Step 10 service placement in Step 10's review; record the process note. | — | Accepted note |
+
+Accepted notes, waivers, and residual risk:
+
+| Item | Decision | Rationale / owner |
+| --- | --- | --- |
+| R6-1 | Accepted | The flag carrier/composition split is a Step 10/11 implementation detail; the design already fixes the bit table and dependency direction. Owner: Step 10/11 implementor. |
+| R6-2 | Accepted | Wording-only; the Step 06 semantics are authoritative and the data-contract phrase is corrected in the closeout docs pass. Owner: Step 06 implementor. |
+| R6-3 | Accepted | `ILatticePreviewService` placement is Step 10's design-review scope; Step 10 depends on 06 and does not change the Step 06 model. Owner: Step 10 planner. |
+| R6-4 | Accepted | Process note only; the reviewed design content is exactly `6173e61`. Owner: human owner/planner. |
+| Residual risk | Accepted | No Blocker or Major. The Step 06 audit record and status dashboard are updated at step start/closeout. The docs branch must be merged into `main` before the step branch is created. |
 
 ## Human approval
 
 - [ ] Accepted: Ready for implementation
-- [ ] Accepted: Ready with notes
+- [x] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (chat approval)
+Date: 2026-11-10
+
+Accepted R6-1–R6-4 explicitly. R6-1 is carried into Step 10/11 implementation, R6-2 is a closeout wording fix,
+R6-3 is resolved in Step 10's design review, and R6-4 is a process note. No Blocker or Major remains.
 
 ## Resolution status
 

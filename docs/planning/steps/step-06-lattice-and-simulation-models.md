@@ -13,7 +13,7 @@ validation.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** [Re-review required at `6173e61`](../reviews/step-06.md)
+- **Design review:** [Ready with notes — accepted at `6173e61`](../reviews/step-06.md)
 - **Last updated:** 2026-11-10
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
