@@ -9,10 +9,10 @@ with validation and cost previews.
 
 - **Status:** In progress
 - **Step branch:** `step/05-energy-model`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42874483715) — closeout, Ubuntu
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42878275463) — replacement closeout, Ubuntu
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Ready for audit at `d23fbd6`
+- **Audit:** Re-audit required at `c3c48c4`
 - **Design review:** [Ready for implementation — accepted at `0b2a571`](../reviews/step-05.md)
 - **Feature list:** Approved 2026-11-09
 - **Last updated:** 2026-11-10
@@ -23,10 +23,11 @@ with validation and cost previews.
 | `core-validation` | `feature/step-05-energy-model/core-validation` | Done | `verify.sh dotnet`, `structure` pass | — | `a44f4dc` |
 | `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `3205be0` |
 | `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `d3cb8bb` |
-| `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Done | `verify.sh dotnet`, `structure`, `api` pass; benchmark ceria 88.9 µs, BZO 77.4 µs | — | `1804b51` |
+| `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Done | `verify.sh dotnet`, `structure`, `api` pass; benchmark synthetic ceria-like proxy 88.9 µs, BZO-like proxy 77.4 µs | — | `1804b51` |
 | `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Done | `verify.sh contracts`, `dotnet`, `structure`, `api` pass | — | `e1987c4` |
 | `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Done | `verify.sh dotnet`, `docs`, `structure` pass | — | `f7b1276` |
 | `closeout` | `feature/step-05-energy-model/closeout` | Done | `verify.sh all` pass; closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42874483715) | `d23fbd6` |
+| `fix-audit-findings` | `feature/step-05-energy-model/fix-audit-findings` | Done | `verify.sh all` pass; replacement closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42878275463) | `c3c48c4` |
 
 **Implementation note:** Step 05 introduces no new dependency and no GPL-derived content. Every new source,
 test, tool, and sample file carries `SPDX-License-Identifier: MIT`.

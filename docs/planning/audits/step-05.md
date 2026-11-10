@@ -14,11 +14,11 @@
 | Step | 05 — Energy Model |
 | Request owner | Step agent |
 | Audit initiated by | Human owner |
-| Audit status | Passed with notes |
-| Audited commit | `d23fbd6` |
+| Audit status | Re-audit required |
+| Audited commit | `c3c48c4` |
 | Step branch | `step/05-energy-model` |
 | Step tag | — |
-| Closeout CI run | [`42874483715`](https://github.com/seb-eis/mocassin-2/actions/runs/42874483715) — green at `d23fbd6` |
+| Closeout CI run | [`42878275463`](https://github.com/seb-eis/mocassin-2/actions/runs/42878275463) — green at `c3c48c4` |
 | Platform CI | Not run (Ubuntu-only policy; no platform-specific code) |
 | Audit date | 2026-11-10 |
 | Auditor | Independent audit agent (fresh context; no shared conversation with the planner or implementor) |
@@ -35,9 +35,31 @@ Step page: [`Step 05 — Energy Model`](../steps/step-05-energy-model.md)
   Python, contracts, API compatibility, and structure gates all passed.
 - Closeout CI: run `42874483715`, one manual Ubuntu dispatch; .NET, Contracts and policy, Public API
   compatibility, and change detection passed; Rust/Python jobs were path-filtered and skipped.
-- Benchmark: local short-run mean ceria 88.9 µs and barium zirconate 77.4 µs, below the Step 05 targets.
+- Benchmark: local short-run mean synthetic ceria-like proxy 88.9 µs and BZO-like proxy 77.4 µs, below the
+  Step 05 targets.
 - Known deferrals: compiled pair/cluster tables and the preview-to-compiler cross-check belong to Step 08;
   consolidated `ENM` diagnostics and `ENM018` emission belong to Step 07; energy GUI editors belong to Step 25.
+
+## Re-audit request
+
+Round 1 returned **Passed with notes** at code commit `d23fbd6` (record `5c61d88`). The step agent fixed F1–F4
+on `feature/step-05-energy-model/fix-audit-findings` and squashed the result as `c3c48c4`:
+
+- **F1:** cluster duplicate and centre-equivalence checks now compare the full encoded `(cellA, cellB, cellC, P)`
+  and reserve the zero-shift encoding for centre equivalence.
+- **F2:** omitted unstable environments now inherit the stable cutoff for unstable–stable pair sampling; the
+  user guide and reference were reconciled, and cluster centres still require an explicit environment.
+- **F3:** tests now cover inclusive/tolerance filter boundaries, stable symmetric versus unstable directional
+  filters, inherited unstable sampling, and a Burnside unique count against a brute-force orbit count.
+- **F4:** the cost preview now counts unique `EnergyId` tables for `UniquePairInteractionCount` and pair-table
+  memory, so chiral directions are not double-counted.
+- **N1:** benchmark evidence is labelled as synthetic proxies. **N3:** a null in-memory stable environment now
+  returns null plus diagnostics. **N4:** the Step 08 page records the preview-to-compiler cross-check
+  follow-up. **N2:** acknowledged as the docs-only record-parent process note.
+
+`./tools/verify.sh all` passed at `c3c48c4`, and replacement closeout CI run
+[`42878275463`](https://github.com/seb-eis/mocassin-2/actions/runs/42878275463) is green. A fresh re-audit of
+the complete step at `c3c48c4` is requested; append a new round and preserve round 1 unchanged.
 
 ## Step summary
 
@@ -268,7 +290,14 @@ evidence, not merge authorization.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F1 | Fixed — full encoded duplicate/centre check; regression test added | Step 05 agent | `c3c48c4` |
+| F2 | Fixed — omitted unstable environment inherits stable cutoff for pair sampling; docs reconciled | Step 05 agent | `c3c48c4` |
+| F3 | Fixed — boundary/filter-direction/inheritance tests and brute-force Burnside test added | Step 05 agent | `c3c48c4` |
+| F4 | Fixed — unique `EnergyId` count used for pair-table count and memory | Step 05 agent | `c3c48c4` |
+| N1 | Addressed — benchmark evidence labelled as synthetic proxies | Step 05 agent | `c3c48c4` |
+| N2 | Acknowledged — docs-only record-parent process note | Step 05 agent | `c3c48c4` |
+| N3 | Fixed — null in-memory stable environment returns diagnostics | Step 05 agent | `c3c48c4` |
+| N4 | Addressed — Step 08 page records the cross-check follow-up | Step 05 agent | `c3c48c4` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
