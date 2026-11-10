@@ -90,8 +90,9 @@ with notes at `b6a97ec`.
 
 Each phase closes with three repository-wide reviews: policies and planning, architecture and design status,
 and documentation status. The policies and planning review starts first; architecture/design and documentation
-may run in parallel. The next phase's first step design review waits for all three verdicts, unless the human
-owner waives one with a recorded reason.
+may run in parallel. The architecture and design review also checks original-design fidelity: intended
+corrections, ported original strengths, and regressions. The next phase's first step design review waits for
+all three verdicts, unless the human owner waives one with a recorded reason.
 
 These reviews do not create step branches or tags and do not replace step audits or Step 29 parity validation.
 

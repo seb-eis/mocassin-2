@@ -175,12 +175,18 @@ source for that report.
 After the last step of each phase is merged and tagged, the phase closes with three repository-wide reviews:
 
 - **policies and planning** — agent instructions, workflows, CI, code structure, process records, phase status;
-- **architecture and design status** — architecture, contracts, design status, cross-step interfaces;
+- **architecture and design status** — architecture, contracts, design status, cross-step interfaces, and
+  original-design fidelity (intended corrections, ported original strengths, regressions);
 - **documentation status** — coverage, accuracy, navigation, API docs, publication boundary.
 
 The policies and planning review starts first; the architecture and design, and documentation reviews may
 then run in parallel. The next phase's first step design review may not start until all three verdicts are
 accepted by the human owner, or a review is explicitly waived with a recorded rationale.
+
+The architecture and design status review must explicitly answer whether the phase made the corrections to the
+original that it intended, ported the good/clever original design aspects, and introduced a regression. The
+reviewer records each answer with code, test, benchmark, or side-by-side design evidence; an unrecorded
+regression, a missing intended correction, or a lost original strength is a finding.
 
 ### 12.1 Numbering
 
