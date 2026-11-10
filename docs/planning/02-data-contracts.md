@@ -516,12 +516,14 @@ support; the validator rejects a field that belongs to the other kind (`SIM023`)
 - `executionFlags` is a sorted array of camelCase names: `noSaving`, `noJumpLogging`, `useFastExp`,
   `deterministic`. The empty array means `None`; the `.msl` job payload uses the `u32` bitmask.
   `deterministic` is a new reproducibility flag. `kmcSimulation`/`mmcSimulation`, `usePrerun`, and
-  `useDualDofCorrection` are derived or compiler/optimizer-owned and are not authored project flags. The
-  `.msl` bitmask uses the new enum values: None=0, NoSaving=1, NoJumpLogging=2, UseFastExp=4, Deterministic=8.
-  These are a clean-break contract and do not reuse the original flag bit positions.
-- KMC `preRunMcsp` 0 disables the pre-run (the original −1 sentinel is not persisted). `normalizationEnergyEv`
-  `null` means no normalization (the original default 0). `maxAttemptFrequencyHz` `null` means the maximum from
-  the transition rules.
+  `useDualDofCorrection` are derived or compiler/optimizer-owned and must not appear in the project
+  `executionFlags` array. The `.msl` flag word uses the new bit values: `noSaving`=1, `noJumpLogging`=2,
+  `useFastExp`=4, `deterministic`=8, `useDualDofCorrection`=16, `usePrerun`=32, `kmcSimulation`=64,
+  `mmcSimulation`=128. These are a clean-break contract and do not reuse the original flag bit positions.
+- KMC `preRunMcsp` 0 disables the pre-run (the original −1 sentinel is not persisted).
+  `normalizationEnergyEv` `null` means no normalization (the original default 0); `0.0` is accepted and
+  canonicalizes to `null`, and a positive value enables fixed normalization. `maxAttemptFrequencyHz` `null`
+  means the maximum from the transition rules.
 - MMC `breakTolerance` 0 disables the equilibrium break check; sample lengths/intervals and the result sample
   are MCSP counts.
 - `instruction` is an optional advanced/legacy free-text extension instruction; structured `extensions` in job
@@ -826,13 +828,13 @@ Exact array lengths and invariants are validated by `mocassin-msl` before the so
 | `min_success_rate` | f64? | MCS/s; `null` or 0 disables the rate abort |
 | `electric_field_vm` | f64 | |
 | `electric_field_direction` | `[f64;3]` | Normalized Cartesian direction |
-| `normalization_energy_ev` | f64? | `null` = no normalization |
+| `normalization_energy_ev` | f64? | `null` = no normalization; `0.0` canonicalizes to `null` |
 | `max_attempt_frequency_hz` | f64? | `null` = maximum from the transition rules |
 | `break_tolerance` | f64? | MMC only; 0 disables the break check |
 | `break_sample_length_mcsp` | u64? | MMC only |
 | `break_sample_interval_mcsp` | u64? | MMC only |
 | `result_sample_mcsp` | u64? | MMC only |
-| `flags` | u32 | |
+| `flags` | u32 | `SolverJobFlags` word: bit 0 `noSaving`, bit 1 `noJumpLogging`, bit 2 `useFastExp`, bit 3 `deterministic`, bit 4 `useDualDofCorrection`, bit 5 `usePrerun`, bit 6 `kmcSimulation`, bit 7 `mmcSimulation` |
 | `selection_optimizers` | array | `{position_id:u32, particle_id:u8}` |
 | `extensions` | array | `{id: string, config: map}` for optional solver routines |
 | `instruction` | string? | Advanced/legacy free-text instruction |

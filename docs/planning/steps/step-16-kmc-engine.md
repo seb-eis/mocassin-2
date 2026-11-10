@@ -123,8 +123,9 @@ impl KmcEngine<'_> {
   - draw `u = rng.next_f64()`;
   - if `u > rule.frequency_factor`, increment skip and time, and return `Skipped` without energy work.
 - The pre-check uses one RNG draw and must occur before any energy computation, matching the original.
-- The pre-check is optional (`UseFrequencyPrecheck` flag); disabling it changes trajectory but not the long-time
-  distribution. Default: enabled.
+- The pre-check is optional (`UseFrequencyPrecheck`); disabling it changes trajectory but not the long-time
+  distribution. Default: enabled. The `Deterministic` job flag disables it so the RNG stream does not depend on
+  the pre-check shortcut.
 
 ### 5. Energy and acceptance
 
@@ -149,8 +150,8 @@ impl KmcEngine<'_> {
 ### 6. Time step
 
 - `dt = dof * K_norm / (nu_max * selectable_count)`.
-- `dof = 2` if `DualDof` is set, else 1; document that the original used this to account for forward/backward
-  directions.
+- `dof = 2` if the `.msl` job flag `useDualDofCorrection` (bit 4) is set, else 1; document that the original
+  used this to account for forward/backward directions.
 - `nu_max` is the maximum attempt frequency in the simulation (`AttemptFrequencyModulus`), optionally
   overridden by `MaxAttemptFrequencyHz`.
 - Recompute `dt` when:

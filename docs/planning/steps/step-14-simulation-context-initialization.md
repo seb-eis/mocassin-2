@@ -192,7 +192,7 @@ impl SimulationContext {
   - `K_norm = K_fix * K_auto`.
   - If `K_norm` is not finite, use `K_fix`.
 - Time step:
-  - `dof = 2` if the simulation flag `DualDof` is set, else 1.
+  - `dof = 2` if the `.msl` job flag `useDualDofCorrection` (bit 4) is set, else 1.
   - `dt = dof * K_norm / (nu_max * selectable_jump_count)`.
   - Recompute only when `K_norm` or `selectable_jump_count` changes.
 - MMC has no normalization and no simulated time.

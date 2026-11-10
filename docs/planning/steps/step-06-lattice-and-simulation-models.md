@@ -262,8 +262,8 @@ public enum ExecutionFlags
     sentinel; the new format uses 0 so the contract field can stay unsigned.
   - `ElectricFieldDirection` is a fractional vector; the solver normalizes it to Cartesian. A zero vector with
     a non-zero modulus is invalid (`SIM007`).
-  - `NormalizationEnergyEv` null means no normalization (the original default 0); a positive value enables
-    fixed normalization.
+  - `NormalizationEnergyEv` null means no normalization (the original default 0); `0.0` is accepted and
+    canonicalizes to null, and a positive value enables fixed normalization.
   - `MaxAttemptFrequencyHz` null means use the maximum from the transition rules; a positive value rescales
     all frequencies while preserving ratios. This is a simulation-level default for Step 10's KMC job
     configuration (the original job `BaseFrequency`).
@@ -275,10 +275,15 @@ public enum ExecutionFlags
   - `NoSaving` skips `.mcs` state/checkpoint writes.
   - `NoJumpLogging` disables the KMC jump histogram.
   - `UseFastExp` selects the documented fast exponential approximation instead of libm `exp`.
-  - `Deterministic` requests reproducible execution and disables optional performance shortcuts that would
-    change the RNG stream or block ordering. It is a new flag with no original counterpart.
+  - `Deterministic` requests reproducible execution and disables optional shortcuts that skip or reorder RNG
+    draws. It disables Step 16's `UseFrequencyPrecheck`; the default `None` leaves that pre-check enabled. It is
+    a new flag with no original counterpart.
   - `KmcSimulation`/`MmcSimulation` are derived from `Kind`, `UsePrerun` is derived from `PreRunMcsp > 0`, and
-    `UseDualDofCorrection` is a compiler/optimizer-derived KMC time-stepping flag; none is user-authored.
+    `UseDualDofCorrection` is a compiler/optimizer-derived KMC time-stepping flag. The compiler/job builder
+    writes them into the `.msl` job flag word (bit 6/7, bit 5, and bit 4 respectively); Steps 14/16 read those
+    bits. They must not appear in the project `executionFlags` array (`SIM035`).
+  - The `.msl` word is a separate `SolverJobFlags` contract in `Mocassin.Contracts`, not the user-authored
+    `ExecutionFlags` enum, so the two surfaces cannot be confused.
 - Deviations from the original, recorded deliberately:
   - write-out count 0 is a supported final-state-only mode; `SIM028` does not warn for it even though the
     original recommended band starts at 5, because 0 is a valid hard-range value and a deliberate mode.
@@ -361,7 +366,7 @@ Step 06 owns the model-level lattice/simulation rules. Cross-step ownership is e
 | `SIM032` | Warning | MMC break sample interval above the recommended 100 |
 | `SIM033` | Warning | MMC result sample above the recommended 10,000 |
 | `SIM034` | Warning | KMC normalization energy above the recommended 10 eV |
-| `SIM035` | Error | The persisted execution-flag array contains a duplicate |
+| `SIM035` | Error | The project execution-flag array contains a duplicate or a derived/compiler-owned flag |
 | `SIM036` | Warning | A simulation references 11–100 transitions (recommended 1–10) |
 | `SIM037` | Warning | Min success rate is positive but below 10 MCS/s (recommended at least 10) |
 
@@ -514,8 +519,11 @@ Samples live under `samples/lattice/` and `samples/simulations/`. The new user-g
   `contracts/generated/fixtures/descriptors.json` and the generated project schema. Keep the flat-object
   simulation shape (the generator has no `oneOf`/discriminator support) and document the additive-v1/ADR 0009
   reconciliation.
-- [ ] Add XML docs, update `PublicAPI.Unshipped.txt`, and refresh the ApiCompat baseline for every new public
-  type and member.
+- [ ] Define the `SolverJobFlags` contract and bit table in `Mocassin.Contracts` (authored bits plus the
+  compiler-derived `useDualDofCorrection`, `usePrerun`, and kind bits), with the mapping tests shared by Step
+  11.
+- [ ] Add XML docs, update `PublicAPI.Unshipped.txt` (including `Mocassin.Contracts`), and refresh the
+  ApiCompat baseline for every new public type and member.
 - [ ] Add `SPDX-License-Identifier: MIT` to every new `.cs` file; no new third-party dependency.
 - [ ] Add ceria reduction/hydration and barium-zirconate doping samples.
 - [ ] Add KMC/MMC simulation samples covering the documented defaults and a non-default configuration.
@@ -583,10 +591,10 @@ job-count preview tests belong to Step 10; there is no Step 06 benchmark target.
 | Names | Empty/duplicate occupation-exchange and doping names | PR-fast |
 | Building block | Stable site uses the first set particle; unstable site uses void; derived only | PR-fast |
 | Compensation shape | Dependent without compensation, compensation without dependent, wrong sign | PR-fast |
-| Simulation defaults | Every documented default, including write-out, time limit, field, normalization, and MMC samples | PR-fast |
+| Simulation defaults | Every documented default, including write-out, time limit, field, normalization (0.0 canonicalizes to null), and MMC samples | PR-fast |
 | Simulation limits | Boundary values for every hard range and recommended band in `SIM004`–`SIM037` | PR-fast |
 | Kind compatibility | MMC/KMC transition mixing, duplicate references, and `kind`/record/array disagreement | PR-fast |
-| Execution flags | CamelCase names, sorted array, `None` empty, duplicate rejection, u32 job-payload mapping | PR-fast |
+| Execution flags | CamelCase names, sorted array, `None` empty, duplicate and derived-bit rejection in the project, and the `SolverJobFlags` u32 mapping | PR-fast |
 | Model envelope | Empty, lattice-only, simulation-only, and combined models round-trip through the project JSON context | PR-fast |
 | Persistence/hash | Save/load preserves the sections; lattice/simulation edits change the model and document hashes; canonicalization does not drop them | PR-fast |
 | Schema | Generated project schema accepts the lattice/simulation sections and rejects unknown fields; empty and populated fixtures | PR-fast |

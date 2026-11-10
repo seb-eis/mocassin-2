@@ -110,6 +110,9 @@ pull-based iterator.
   plus energy and frequency values, with the parameterization signature).
 - The lattice payload is `{format_version, lattice_size, position_count, lattice}`.
 - The job payload is the full `JobDescriptor`/settings (including optimizers) plus the model/simulation index.
+  Its `flags` word is a `SolverJobFlags` value in `Mocassin.Contracts` carrying the authored flags plus the
+  compiler/job-builder-derived bits (`useDualDofCorrection`, `usePrerun`, and the kind bit); the project JSON
+  never contains the derived bits.
 - The writer verifies round-trip decoding of every payload before insert (debug builds) or computes the
   canonical hash and compares it.
 - Payloads are deterministic: same parameterized model → identical bytes → same signature.
