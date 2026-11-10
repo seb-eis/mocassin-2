@@ -88,15 +88,17 @@ with notes at `b6a97ec`.
 
 ## Cross-cutting phase checkpoints
 
-Each phase closes with three repository-wide reviews: policy/planning, design foundations, and documentation
-status. The policy review starts first; design and documentation may run in parallel. The next phase's first
-step design review waits for all three verdicts, unless the human owner waives one with a recorded reason.
+Each phase closes with three repository-wide reviews: policies and planning, architecture and design status,
+and documentation status. The policies and planning review starts first; architecture/design and documentation
+may run in parallel. The next phase's first step design review waits for all three verdicts, unless the human
+owner waives one with a recorded reason.
+
 These reviews do not create step branches or tags and do not replace step audits or Step 29 parity validation.
 
 | Phase | Steps | Reviews | Status |
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
-| B. Model definition | 03–07 | `XC-01` [policy](reviews/cross-cutting/xc-01-repository-policy.md), `XC-02` [design](reviews/cross-cutting/xc-02-design-foundations.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | Planned — awaiting Step 07 completion |
+| B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | Planned — awaiting Step 07 completion |
 | C. Compilation and build | 08–12 | `XC-04`/`XC-05`/`XC-06` | Planned |
 | D. Solver | 13–19 | `XC-07`/`XC-08`/`XC-09` | Planned |
 | E. Results | 20–22 | `XC-10`/`XC-11`/`XC-12` | Planned |

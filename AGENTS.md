@@ -475,13 +475,13 @@ RID-specific packages, path/case/locking logic, line-ending or encoding-sensitiv
 
 After the last step of each phase is merged and tagged, the phase closes with three repository-wide reviews:
 
-1. **Policy and planning status** — agent instructions, workflows, CI, code structure, process records, and
-   status. This review starts first.
-2. **Design foundations and model definition** — architecture, contracts, model design, and cross-step
-   interfaces.
+1. **Policies and planning** — agent instructions, workflows, CI, code structure, process records, and
+   phase status. This review starts first.
+2. **Architecture and design status** — architecture, contracts, design status, and cross-step interfaces.
 3. **Documentation status** — coverage, accuracy, navigation, API docs, and the publication boundary.
 
-The design and documentation reviews may run in parallel after the policy review starts.
+The architecture and design, and documentation reviews may run in parallel after the policies and planning
+review starts.
 
 This checkpoint is a **quality gate**. The next phase's first step design review may not start until all three
 verdicts are `Passed` or the human owner accepts `Passed with notes`, or the owner waives a review with a

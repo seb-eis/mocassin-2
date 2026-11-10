@@ -174,13 +174,13 @@ source for that report.
 
 After the last step of each phase is merged and tagged, the phase closes with three repository-wide reviews:
 
-- **policy and planning status** — agent instructions, workflows, CI, code structure, process records, status;
-- **design foundations and model definition** — architecture, contracts, model design, cross-step interfaces;
+- **policies and planning** — agent instructions, workflows, CI, code structure, process records, phase status;
+- **architecture and design status** — architecture, contracts, design status, cross-step interfaces;
 - **documentation status** — coverage, accuracy, navigation, API docs, publication boundary.
 
-The policy review starts first; the design and documentation reviews may then run in parallel. The next
-phase's first step design review may not start until all three verdicts are accepted by the human owner, or a
-review is explicitly waived with a recorded rationale.
+The policies and planning review starts first; the architecture and design, and documentation reviews may
+then run in parallel. The next phase's first step design review may not start until all three verdicts are
+accepted by the human owner, or a review is explicitly waived with a recorded rationale.
 
 ### 12.1 Numbering
 
@@ -188,7 +188,7 @@ Review IDs are globally sequential and are never reused. Each phase gets three n
 
 | Phase | Steps | Reviews |
 | --- | --- | --- |
-| B. Model definition | 03–07 | `XC-01` policy, `XC-02` design, `XC-03` documentation |
+| B. Model definition | 03–07 | `XC-01` policies and planning, `XC-02` architecture and design, `XC-03` documentation |
 | C. Compilation and build | 08–12 | `XC-04`, `XC-05`, `XC-06` |
 | D. Solver | 13–19 | `XC-07`, `XC-08`, `XC-09` |
 | E. Results | 20–22 | `XC-10`, `XC-11`, `XC-12` |

@@ -38,10 +38,10 @@ G Release and documentation
 | G. Release and documentation | 29–31 | Parity, documentation, packaging | Release gates pass, the docs site builds, and artifacts ship |
 
 Each phase is also gated by the three cross-cutting reviews in
-[`reviews/cross-cutting/`](reviews/cross-cutting/README.md): policy/planning, design foundations, and
-documentation status. The policy review starts first; design and documentation may run in parallel. The next
-phase's first step design review may not start until all three verdicts are accepted by the human owner, or a
-review is explicitly waived with a recorded reason. Phase B uses `XC-01`–`XC-03`, Phase C uses `XC-04`–`XC-06`,
+[`reviews/cross-cutting/`](reviews/cross-cutting/README.md): policies and planning, architecture and design
+status, and documentation status. The policies and planning review starts first; architecture/design and
+documentation may run in parallel. The next phase's first step design review may not start until all three
+verdicts are accepted by the human owner, or a review is explicitly waived with a recorded reason. Phase B uses `XC-01`–`XC-03`, Phase C uses `XC-04`–`XC-06`,
 and so on.
 
 ## 3. Step estimates and dependencies
