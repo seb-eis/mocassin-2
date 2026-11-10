@@ -272,8 +272,8 @@ filters, and builds the unique pair geometries without allocating energy tables.
 reduction uses the Step 02 `PointGroup`/`SitePermutation` utilities, so the preview and compiler share the same
 reduction. Step 08 adds table allocation and canonical indices on top of the same kernel. The preview service
 caches by
-`(ProjectHasher.ComputeEnergy(model), ProjectHasher.ComputeStructure(model.Structure), cellCountA, cellCountB,
-cellCountC, catalog version, symmetry contract version)`.
+`(ProjectHasher.ComputeEnergy(model), ProjectHasher.ComputeStructure(model.Structure),
+ProjectHasher.Compute(model), cellCountA, cellCountB, cellCountC, catalog version, symmetry contract version)`.
 
 ### 6.1 Limits and diagnostics
 
@@ -353,7 +353,8 @@ not a silent relaxation. Advisory and performance conditions stay warnings.
 | Invalid surrounding position (unknown/unstable/filtered) or cluster outside the center cutoff | Warning | `ENM010` Error | Promoted | The cluster geometry is not valid or reaches outside the environment |
 | Full-geometry duplicate or center-equivalent position | Warning | `ENM011` Error | Promoted | The original “ring” check finds degenerate geometry |
 | Cluster raw permutations >5000 | Warning | `ENM013` Error | Promoted | The original `PermutationsPerGroup` maximum is exceeded |
-| Duplicate site-energy entry or void-on-stable | Warning | `ENM014` Error | Promoted | The entry is ambiguous or occupies an invalid state |
+| Duplicate site-energy entry | Warning | `ENM014` Error | Promoted | The entry is ambiguous |
+| Site energy for a particle the site cannot occupy (void-on-stable) | Warning | `ENM016` Warning | Retained warning | The entry occupies an invalid state but is not structurally ambiguous |
 | Unknown site/particle reference in a site-energy entry | Not checked / partly structural | `ENM014` Error | New v1 | The entry cannot be resolved |
 | Site energy non-finite (NaN/Inf) | Warning | `ENM015` Error | Promoted | A non-finite value cannot be used |
 | Site energy outside −100..100 eV | No site-energy range check; `PairEnergies`/`GroupEnergies` use −100..100 | `ENM015` Error | New v1 (range half) | Site energies are also migration barriers; the v1 range matches the pair/group setting |
@@ -485,8 +486,9 @@ public interface IEnergyPreviewService
   filters, and builds unique pair geometries; cluster reduction uses the Step 02 `PointGroup`/`SitePermutation`
   utilities. It does not allocate energy tables. `TrySamplePairs` returns `false` with an empty pair array and
   diagnostics on invalid input and never throws, matching the preview `TryCreate…` contract.
-- `EnergyPreviewService` caches by the energy hash, structure hash, requested `(A, B, C)`, catalog version, and
-  symmetry contract version. `ProjectHasher.ComputeEnergy` is the energy-hash producer.
+- `EnergyPreviewService` caches by the energy hash, structure hash, full canonical model hash (so particle and
+  particle-set edits invalidate), requested `(A, B, C)`, catalog version, and symmetry contract version.
+  `ProjectHasher.ComputeEnergy` is the energy-hash producer.
 - Derived pair interactions use `GeometryId`, the shared `EnergyId`, and
   `ChiralPartnerGeometryId`; the preview is advisory and the compiled interaction tables are authoritative in
   Step 08.
@@ -577,13 +579,13 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
 
 ## Implementation tasks
 
-- [ ] Extend `ModelDefinition` with the flat energy sections; update `ModelDefinitionJsonConverter`,
+- [x] Extend `ModelDefinition` with the flat energy sections; update `ModelDefinitionJsonConverter`,
   `ProjectJson.CanonicalizeModel`/`SerializeCanonicalModel`, `ProjectValidator`, and
   `ProjectValidationService`. `ProjectSchema` is unchanged; `ProjectJsonContext` is extended in
   `Project/ProjectJson.cs`.
-- [ ] Add `ProjectHasher.ComputeEnergy(ModelDefinition)` and tests that the model/document hashes include energy
+- [x] Add `ProjectHasher.ComputeEnergy(ModelDefinition)` and tests that the model/document hashes include energy
   data and the energy hash is invariant to unrelated edits.
-- [ ] Implement `StableEnvironment`, `UnstableEnvironment`, `InteractionFilter`, `Cluster`, `SiteEnergySet`,
+- [x] Implement `StableEnvironment`, `UnstableEnvironment`, `InteractionFilter`, `Cluster`, `SiteEnergySet`,
   `SiteEnergyEntry`, and `EnergyLimits`.
 - [x] Implement the Core `EnergyModelValidator` (`ENM001`, `ENM003`–`ENM008`, `ENM014`–`ENM016`, `ENM020`,
   `ENM021`) and the Symmetry `EnergyGeometryValidator` (`ENM002`, `ENM009`–`ENM013`, `ENM017`, `ENM019`);

@@ -38,8 +38,9 @@ A cluster is a multi-body interaction centred on one reference site.
 - A cluster must have 2–8 surrounding offsets (3–9 positions including the centre); one or more than eight is
   `ENM008`.
 - Offsets may lie outside `[0, 1)`. They are resolved with the same nearest-image rule as transition paths.
-- Every surrounding position must resolve to a distinct stable site, must not be removed by a filter of the
-  centre environment, and must stay inside the centre environment cutoff (`ENM009`–`ENM011`).
+- Every surrounding position must resolve to a distinct stable position (full periodic encoding), must not be
+  removed by a filter of the centre environment, and must stay inside the centre environment cutoff
+  (`ENM009`–`ENM011`).
 - A cluster contributes to the energy of its centre only. To model the same geometry from another site,
   create another cluster with that site as centre.
 - Raw permutations are `centreParticleCount × Π(surroundingParticleSetSize)`. More than 500 raw permutations
@@ -71,8 +72,8 @@ parameterization template may override the model value; the authored value remai
 | Cluster raw permutations | 500 | 5000 |
 | Clusters per centre site | 4 | 10 |
 
-The preview also reports the stable P1 position count, pair-image count, unique directed pair geometries,
-per-cluster permutation counts, and estimated energy-table memory.
+The preview also reports the stable P1 position count, pair-image count, unique pair energy tables
+(distinct `EnergyId` values), per-cluster permutation counts, and estimated energy-table memory.
 
 See the [ceria sample](https://github.com/seb-eis/mocassin-2/blob/main/samples/ceria/README.md) for a stable
 environment plus an oxygen migration-edge cluster. The complete diagnostic catalog and consolidated

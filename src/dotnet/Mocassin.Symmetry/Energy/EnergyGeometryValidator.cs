@@ -225,6 +225,7 @@ public sealed class EnergyGeometryValidator
             var offsets = cluster.OffsetVectors.IsDefault ? [] : cluster.OffsetVectors;
             var centerEncoding = new Vector4I(0, 0, 0, centerP);
             var seenEncodings = new HashSet<Vector4I>();
+            var centerEquivalentReported = false;
             var targets = new List<CellSite>(offsets.Length);
             var geometryValid = true;
             foreach (var offset in offsets)
@@ -296,8 +297,9 @@ public sealed class EnergyGeometryValidator
                         "offsetVectors"));
                 }
 
-                if (encoding == centerEncoding)
+                if (encoding == centerEncoding && !centerEquivalentReported)
                 {
+                    centerEquivalentReported = true;
                     bag.Add(Error(
                         EnergyDiagnosticCodes.DuplicateClusterGeometry,
                         "Cluster contains a position equivalent to its centre.",

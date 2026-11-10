@@ -2,6 +2,7 @@
 
 using System.Collections.Immutable;
 using System.Globalization;
+using System.Security.Cryptography;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Ids;
@@ -444,7 +445,11 @@ public sealed class EnergyPreviewService : IEnergyPreviewService
             CultureInfo.InvariantCulture,
             $"energy-{kind}|{versions.SpaceGroupDataVersion}|{versions.SpaceGroupDataSha256}|" +
             $"{versions.SymmetryContractVersion}|{ProjectHasher.ComputeEnergy(model)}|" +
-            $"{ProjectHasher.ComputeStructure(model.Structure)}|{cellCountA}|{cellCountB}|{cellCountC}");
+            $"{ProjectHasher.ComputeStructure(model.Structure)}|{ComputeModelHash(model)}|" +
+            $"{cellCountA}|{cellCountB}|{cellCountC}");
+
+    private static string ComputeModelHash(ModelDefinition model) =>
+        Convert.ToHexStringLower(SHA256.HashData(ProjectJson.SerializeCanonicalModel(model)));
 
     private static long SaturatingAdd(long left, long right)
     {

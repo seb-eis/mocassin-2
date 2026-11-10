@@ -157,6 +157,31 @@ public sealed class EnergyGeometryTests
     }
 
     [Fact]
+    public void TwoCentreEquivalentOffsetsReportOneEnm011()
+    {
+        var model = CreateValidModel() with
+        {
+            Clusters =
+            [
+                new Cluster(
+                    ClusterId.New(),
+                    "Repeated centre",
+                    TransitionTestModels.SiteId(TransitionTestModels.Site2),
+                    [new Fractional3(0.0, 0.0, 0.0), new Fractional3(0.0, 0.0, 0.0)]),
+            ],
+        };
+
+        var diagnostics = validator.Validate(model);
+
+        Assert.Contains(
+            diagnostics,
+            static diagnostic => diagnostic.Code == EnergyDiagnosticCodes.DuplicateClusterOffset);
+        Assert.Single(
+            diagnostics,
+            static diagnostic => diagnostic.Code == EnergyDiagnosticCodes.DuplicateClusterGeometry);
+    }
+
+    [Fact]
     public void CentreEquivalentOffsetProducesEnm011()
     {
         var model = CreateValidModel() with

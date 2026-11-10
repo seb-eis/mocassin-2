@@ -131,7 +131,8 @@ The shared sampling kernel is `Mocassin.Symmetry.Energy.IEnergyGeometrySampler` 
 `EnergyGeometrySampler`. It samples stable–stable and unstable–stable pair images, applies filters, reduces
 images under the centre stabilizer, and produces directed pair geometries without allocating energy tables.
 Step 08 adds table allocation and canonical indices on top of the same kernel. `EnergyPreviewService` caches
-by energy hash, structure hash, requested cell counts, catalog version, and symmetry contract version.
+by energy hash, structure hash, full canonical model hash (including particle and particle-set content),
+requested cell counts, catalog version, and symmetry contract version.
 
 Every directed pair geometry has a `GeometryId` that includes the centre/target P1 indices. Chiral directions
 share one `EnergyId`; Step 08 uses that identity as the compiled `object_id`, and Step 09 stores one parameter

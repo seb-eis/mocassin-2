@@ -379,6 +379,38 @@ public sealed class EnergyPreviewTests
     }
 
     [Fact]
+    public void CacheInvalidatesWhenParticleModelChanges()
+    {
+        var local = new EnergyPreviewService();
+        var model = CreateModel();
+        var first = local.TryCreatePreview(model, 1, 1, 1, out _);
+        Assert.NotNull(first);
+        Assert.Equal(12, first.ClusterCosts.Single().RawPermutationCount);
+
+        var newParticle = new Particle(
+            ParticleId.New(),
+            "P5",
+            "P5",
+            new ChargeElementary(0.0),
+            false);
+        var centerSet = model.ParticleSets.Single(static set => set.Name == "Center set");
+        var changed = model with
+        {
+            Particles = [.. model.Particles, newParticle],
+            ParticleSets =
+            [
+                .. model.ParticleSets.Select(set => set.Id == centerSet.Id
+                    ? set with { ParticleIds = [.. set.ParticleIds, newParticle.Id] }
+                    : set),
+            ],
+        };
+
+        var second = local.TryCreatePreview(changed, 1, 1, 1, out _);
+        Assert.NotNull(second);
+        Assert.Equal(16, second.ClusterCosts.Single().RawPermutationCount);
+    }
+
+    [Fact]
     public void NullStableEnvironmentReturnsNullWithoutThrowing()
     {
         var model = CreateModel() with { StableEnvironment = null! };

@@ -79,7 +79,8 @@ Step 08 uses `EnergyId` as the compiled `object_id`; Step 09 stores one paramete
 - `Mocassin.Symmetry.Energy` owns the sampler, geometry validator, cost preview, and pair preview.
 - `IEnergyPreviewService.TryCreatePreview(..., out diagnostics)` returns `null` on invalid user data and never
   throws for user data.
-- The preview cache key includes the energy hash, structure hash, requested cell counts, catalog version, and
-  symmetry contract version.
+- The preview cache key includes the energy hash, structure hash, full canonical model hash (so particle and
+  particle-set edits invalidate cached counts), requested cell counts, catalog version, and symmetry contract
+  version.
 
 The ceria and barium-zirconate sample projects include energy sections and mirror the contract fixtures.
