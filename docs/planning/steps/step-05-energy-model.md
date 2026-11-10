@@ -22,7 +22,7 @@ with validation and cost previews.
 | `energy-model-and-persistence` | `feature/step-05-energy-model/energy-model-and-persistence` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `core-validation` | `feature/step-05-energy-model/core-validation` | Awaiting approval | `verify.sh dotnet`, `structure` pass | — | — |
 | `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
-| `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Not started | — | — | — |
+| `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Not started | — | — | — |
 | `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Not started | — | — | — |
 | `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Not started | — | — | — |
@@ -592,7 +592,7 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
 - [ ] Implement derived pair-interaction preview with `GeometryId`, shared `EnergyId`, and
   `ChiralPartnerGeometryId`.
 - [ ] Implement chiral-pair detection and shared-energy linkage.
-- [ ] Implement `ProjectEditor.Energy.cs`, editor operations, and cascade invalidation.
+- [x] Implement `ProjectEditor.Energy.cs`, editor operations, and cascade invalidation.
 - [x] Add the Core energy diagnostic codes and help text, including the `ENM018` constant/help anchor used by
   Step 07.
 - [ ] Update `contracts/manifest.json`: set `status` to `step-05`, update `notes`, add the energy fields, add

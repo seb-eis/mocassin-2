@@ -1626,3 +1626,32 @@ const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.KmcPathOutsideEnvironment 
 const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.PeriodicAmbiguity = "ENM002" -> string!
 const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.SiteEnergyOutOfRange = "ENM015" -> string!
 static Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.HelpFor(string! code) -> string?
+Mocassin.Core.Editing.ProjectEditor.AddCluster(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.Cluster! cluster) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddUnstableEnvironment(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.UnstableEnvironment! environment) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.ClearSiteEnergies(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RebaseEnergyReferences(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId oldId, Mocassin.Core.Ids.CellSiteId newId) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveCellSiteAndEnergyReferences(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveCluster(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.ClusterId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveUnstableEnvironment(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetClusterOffsets(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.ClusterId id, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> offsetVectors) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetSiteEnergies(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.SiteEnergySet! siteEnergies) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetStableEnvironment(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.StableEnvironment! environment) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetStableEnvironmentCutoff(Mocassin.Core.Project.Project! project, Mocassin.Core.Units.LengthAngstrom cutoff) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetStableEnvironmentFilters(Mocassin.Core.Project.Project! project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.InteractionFilter!> filters) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateCluster(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.Cluster! cluster) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateUnstableEnvironment(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.UnstableEnvironment! environment) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Model.Energy.IEnergyQuery
+Mocassin.Core.Model.Energy.IEnergyQuery.Clusters.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.Cluster!>
+Mocassin.Core.Model.Energy.IEnergyQuery.FindCluster(Mocassin.Core.Ids.ClusterId id) -> Mocassin.Core.Model.Energy.Cluster?
+Mocassin.Core.Model.Energy.IEnergyQuery.FindEnvironment(Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Model.Energy.UnstableEnvironment?
+Mocassin.Core.Model.Energy.IEnergyQuery.FindSiteEnergies(Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Model.Energy.SiteEnergySet?
+Mocassin.Core.Model.Energy.IEnergyQuery.SiteEnergies.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.SiteEnergySet!>
+Mocassin.Core.Model.Energy.IEnergyQuery.StableEnvironment.get -> Mocassin.Core.Model.Energy.StableEnvironment!
+Mocassin.Core.Model.Energy.IEnergyQuery.UnstableEnvironments.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.UnstableEnvironment!>
+Mocassin.Core.Project.Project.Clusters.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.Cluster!>
+Mocassin.Core.Project.Project.FindCluster(Mocassin.Core.Ids.ClusterId id) -> Mocassin.Core.Model.Energy.Cluster?
+Mocassin.Core.Project.Project.FindEnvironment(Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Model.Energy.UnstableEnvironment?
+Mocassin.Core.Project.Project.FindSiteEnergies(Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Model.Energy.SiteEnergySet?
+Mocassin.Core.Project.Project.SiteEnergies.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.SiteEnergySet!>
+Mocassin.Core.Project.Project.StableEnvironment.get -> Mocassin.Core.Model.Energy.StableEnvironment!
+Mocassin.Core.Project.Project.UnstableEnvironments.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.UnstableEnvironment!>
