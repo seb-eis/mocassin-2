@@ -18,7 +18,7 @@
 | Reviewed commit | `6173e61` |
 | Docs branch | `docs/step-06-design-revision` |
 | Review date | 2026-11-10 |
-| Reviewer | — (round-6 reviewer to fill) |
+| Reviewer | Independent planning auditor (fresh context, round 6; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
 
@@ -1384,8 +1384,8 @@ implementation.
 | Design review status | Re-review required |
 | Reviewed commit | `6173e61` |
 | Docs branch | `docs/step-06-design-revision` |
-| Review date | — |
-| Reviewer | — |
+| Review date | 2026-11-10 |
+| Reviewer | Independent planning auditor (fresh context, round 6; no shared conversation with the planner or implementor) |
 
 Design revision: `6173e61fb8163784a1ce273af49ddb9a53e8af2d`.
 
@@ -1398,3 +1398,230 @@ round-5 reviewer text is unchanged.
 
 Reviewer: append your independence statement, evidence, findings, and verdict for round 6 below. Keep the
 earlier rounds unchanged.
+
+### Re-review round 6
+
+#### Reviewer context and independence
+
+I am a fresh planning auditor for round 6. I did not author or implement the Step 06 design, the revision, or
+any part of the implementation, and I have no shared conversation with the planner, the implementor, or the
+round-1 to round-5 reviewers. I read the frozen design, the step page, the data contracts, the dependent step
+pages, the ADRs, the manifest/schema tooling, the current Core sources, and the original implementation as
+read-only reference myself; I did not rely on the resolution table or the spawn summary for the verdict.
+
+#### Evidence
+
+**Frozen state and worktree.** Worktree `/workspace/playground/step06-design`, branch
+`docs/step-06-design-revision`. At review start `HEAD` was `07845d9`; the frozen design revision is `6173e61`
+and the round-6 request is `07845d9`, whose only parent is `6173e61`. `git show --name-status 07845d9` changes
+only `docs/planning/reviews/step-06.md` and `docs/planning/steps/step-06-lattice-and-simulation-models.md`;
+the step-page change is one line (the design-review link `e587a6b` -> `6173e61`). `git diff --name-only
+6173e61..07845d9` shows only those two files, so the design content is identical at `6173e61`. The worktree
+was clean before and after the builds. I did not touch the shared `/workspace/mocassin` worktree.
+
+**Commands run (from `/workspace/playground/step06-design`):**
+
+```sh
+git status --short
+# (no output: clean worktree)
+
+git log --oneline --decorate -6
+# 07845d9 (HEAD -> docs/step-06-design-revision) docs: request step-06 round-6 design re-review [skip ci]
+# 6173e61 docs: close step-06 round-5 design notes [skip ci]
+# 3ee263f docs: record step-06 round-5 design review Ready with notes [skip ci]
+# 655a04f docs: request step-06 round-5 design re-review [skip ci]
+# e587a6b docs: close step-06 round-4 design notes [skip ci]
+# c0e44bc docs: record step-06 round-4 design review Ready with notes [skip ci]
+
+git show --stat 6173e61
+# commit 6173e61fb8163784a1ce273af49ddb9a53e8af2d
+# docs: close step-06 round-5 design notes [skip ci]
+#  docs/planning/02-data-contracts.md                 | 10 ++++--
+#  .../steps/step-06-lattice-and-simulation-models.md | 42 ++++++++++++++--------
+#  .../steps/step-08-model-compilation-pipeline.md    |  7 ++--
+#  .../steps/step-10-job-templates-and-supercells.md  |  5 +++
+#  .../step-11-simulation-package-and-msl-writer.md   |  5 +--
+#  5 files changed, 46 insertions(+), 23 deletions(-)
+
+git diff --stat 3ee263f..6173e61 -- docs/planning
+#  docs/planning/02-data-contracts.md                 | 10 ++++--
+#  .../steps/step-06-lattice-and-simulation-models.md | 42 ++++++++++++++--------
+#  .../steps/step-08-model-compilation-pipeline.md    |  7 ++--
+#  .../steps/step-10-job-templates-and-supercells.md  |  5 +++
+#  .../step-11-simulation-package-and-msl-writer.md   |  5 +--
+#  5 files changed, 46 insertions(+), 23 deletions(-)
+
+git diff 3ee263f..6173e61 -- docs/planning
+# Full diff inspected. Data contract 449-451: the empty-array omission/hash-stability rule;
+# 516-519 and 528-530: min-success-rate, RNG-seed, and normalization canonicalization.
+# Step 06 111-114, 260-264, 283-286, 290-294, 351, 511-515, 610-611: the hash rule,
+# canonicalization task/test, Deterministic wording, SolverJobFlags composition, and SIM009
+# whitespace rule. Steps 08/10/11: the derived-intent/job-descriptor and package-composition
+# statements. No code or contract artifact changed.
+
+git diff --check
+# (no output, exit 0)
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.25s
+# exit 0
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+# exit 0
+
+./tools/verify.sh docs
+# ==> Zensical (strict): No issues found
+# ==> DocFX: Build succeeded. 0 warning(s), 0 error(s)
+# ==> rustdoc: Documentation built in /workspace/playground/step06-design/site
+# exit 0
+
+git status --short
+# (no output: generated site/target/build output is ignored)
+```
+
+**Additional read-only checks.**
+
+```sh
+git show -s --format='%H %P %s' 6173e61 07845d9
+# 6173e61fb8163784a1ce273af49ddb9a53e8af2d 3ee263ff91ea84c4a2a6fc98ec04315ee146d723 docs: close step-06 round-5 design notes [skip ci]
+# 07845d9847c3a64982c1ebdb12517033858f9362 6173e61fb8163784a1ce273af49ddb9a53e8af2d docs: request step-06 round-6 design re-review [skip ci]
+
+git show --name-status 07845d9
+# M docs/planning/reviews/step-06.md
+# M docs/planning/steps/step-06-lattice-and-simulation-models.md   # one-line design-review link
+
+git diff --name-only 3ee263f..6173e61 -- . ':!docs/planning'
+# (no output: no code, test, configuration, or contract artifact changed)
+
+git merge-base --is-ancestor 6173e61 HEAD
+# exit 0
+```
+
+**Source and contract checks.** I re-checked the canonical path in `ProjectJson.cs`
+(`SerializeCanonicalModel` 81-84, `CanonicalizeModel` 93-133, `ProjectJsonConverter.Write` 313 and 360, the
+nested `ProjectJsonContext`), `ProjectHasher.cs` 26-29 and `ComputeDocument`, `ProjectEditor.cs` 37 and
+57-58, `ProjectStore.SaveAsync` (`Mocassin.Packages/Projects/ProjectStore.cs` 130), and
+`ModelDefinitionJsonConverter.cs` 136-157/181-193 (`WriteArrayIfNotEmpty`; missing arrays read as empty). The
+new sections are not yet in the manifest: `contracts/manifest.json` has `status: step-05` and no
+lattice/simulation model fields; that is the planned Step 06 task. `tools/contracts/generate.py` has no
+`oneOf`/`anyOf`/`discriminator` support, and the generated `project-v1.schema.json` sets
+`additionalProperties: false` at the root and model, so the flat simulation shape and unknown-field rejection
+are consistent with the generator. `IProjectQuery.cs` still composes only the four Step 03-05 interfaces.
+`Mocassin.Compilation.csproj` references `Mocassin.Core` and `Mocassin.Symmetry` only;
+`Mocassin.Contracts.csproj` references `Mocassin.Compilation`; `Mocassin.Packages.csproj` references
+`Mocassin.Compilation` and `Mocassin.Contracts`.
+
+**Original reference checked read-only (`/workspace/mocassin-original`).**
+`SimulationFlags.cs` 10-56 defines the original kind/prerun/dual-dof/logging/fast-exp bits; the user-facing
+overwrite flags are `NoSaving`, `NoJumpLogging`, and `UseFastExp`.
+`JobDbModelBuilder.SetSimulationJobInfoFlags` 236-258 derives the kind and prerun bits and sets
+`UseDualDofCorrection` for KMC; `JumpSelectionOptimizer` 45 can clear it. `SimulationBaseData.cs` defaults the
+lower success rate to 0 and the block count to 100. `MocassinSimulationSettings.InitAsDefault` and
+`ValueSetting` confirm the round-4 hard ranges and recommended bands. These confirm the defaults and limits
+reviewed in earlier rounds; the round-6 delta changes no original-reference claim.
+
+**Cross-step checks.** I read Step 03, Step 04 (authored-order rule 110-117 and the `IProjectQuery` boundary),
+Step 05 (empty-section hash rule 107-109), Step 07 (feasibility 50-58 and 130-137), Step 08 (simulation
+encoding 73-76), Step 10 (job settings, `JobDescriptor` 91-120, preview API 204-263), Step 11 (job package
+84-86 and payload 112-115), Step 14 (`dof` 195), Step 16 (`UseFrequencyPrecheck` 126-128, `dof` 152-154),
+Step 18 (`prerun.mcs` 217), Step 25 (common settings 134-137 and preview 118-125), ADR 0005 (determinism
+guarantees 60-68), ADR 0009, `docs/planning/01-target-architecture.md` (project graph 126-145),
+`03-quality-strategy.md` §9.4, `appendix-b-parity-matrix.md`, `status.md`, and `audits/step-06.md`.
+
+**Round-5 fixes checked.**
+
+- **R5-1** — Step 06 111-114 and data contract 449-451 state that empty `occupationExchanges`, `dopings`, and
+  `simulations` arrays are omitted on write, missing arrays load as empty, and `CanonicalizeModel` treats
+  default arrays as empty, so a pre-Step-06 project keeps its canonical model/document hash. Step 06 511-515
+  adds the empty-array/hash-stability task, and 610-611 adds the persistence/hash and canonical-equivalence
+  tests. This matches the existing converter's `WriteArrayIfNotEmpty` behavior and the canonicalizer's
+  default-array normalization. Resolved.
+- **R5-2** — Step 06 260-264 and data contract 516-519/528-530 define `MinSuccessRate` 0 -> null,
+  empty `RngSeed` -> null, and `NormalizationEnergyEv` 0.0 -> null, with the canonical-equivalence test at
+  Step 06 611. Resolved.
+- **R5-3** — Step 06 283-286 now says baseline reproducibility is ADR 0005's guarantee and the flag disables
+  `UseFrequencyPrecheck` and other RNG-order shortcuts; this is the requested wording. The data contract still
+  uses the old "new reproducibility flag" phrase (520-522), so a residual wording note remains (R6-2).
+- **R5-4** — Step 06 290-294, Step 08 73-76, Step 10 91-120, and Step 11 84-86/112-115 now state the
+  Compilation-intent -> Packages-composition -> Contracts-word boundary and that Compilation does not
+  reference Contracts. The carrier is `JobDescriptor`, which Step 11 calls a build-time Packages type; Step 08
+  tells the Compilation pipeline to record the derived intent on that descriptor. The Compilation-side
+  intermediate is still unnamed, so the layer boundary is not fully implementable as written (R6-1).
+- **R5-5** — `SIM009` now rejects an empty, whitespace-only, or duplicate simulation name (Step 06 351), and
+  the diagnostics test row requires a positive/negative case for every SIM code (616). Resolved.
+- **R5-6** — The round-6 request `07845d9` is docs-only and changes only the review record plus the one-line
+  Step 06 design-review link; the design content is frozen at `6173e61`. This is the same process pattern as
+  n1/R2-8/R5-6 (R6-4).
+
+**Status/process observation.** `docs/planning/status.md` 53 and 82 still name `a64ecf3`; the dashboard is
+implementor-owned and outside the reviewer write scope, and the step page's closeout task includes the status
+update. This repeats R4-4 and is not a new design finding. I did not edit it.
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R6-1 — The R5-4 composition boundary still assigns the derived intent to a Packages type from the Compilation layer.** Step 06 says the compiler/job builder carries `Kind`, `PreRunMcsp`, and `UseDualDofCorrection` "on the job descriptor", and Step 08 tells the Compilation pipeline to "record the derived intent ... on the job descriptor"; Step 11 says `JobDescriptor`/`JobPackage` are build-time `Mocassin.Packages` types, and the architecture assigns job templates and supercells to Packages. `Mocassin.Compilation` references only Core and Symmetry, so it cannot set a field on a Packages type. Adding `UseDualDofCorrection` to Step 10's `JobDescriptor` does not give the compiler a carrier. Name the Compilation intermediate (for example `CompiledSimulation.UseDualDofCorrection` or an equivalent compilation-output field) and have the Packages job builder copy it into `JobDescriptor`, or move `JobDescriptor` to Compilation and update Step 11 and the architecture. Also state whether the compiled model's `default_settings.flags` is the authored subset or the resolved `SolverJobFlags` word. | Step 06 290-294; Step 08 73-76; Step 10 91-120 and 261; Step 11 84-86 and 112-115; `src/dotnet/Mocassin.Compilation/Mocassin.Compilation.csproj`; `src/dotnet/Mocassin.Contracts/Mocassin.Contracts.csproj`; `src/dotnet/Mocassin.Packages/Mocassin.Packages.csproj`; `docs/planning/01-target-architecture.md` 126-145; `02-data-contracts.md` 815. |
+| **Note** | **R6-2 — The data contract still calls `deterministic` a "new reproducibility flag".** Step 06 now correctly says baseline reproducibility is guaranteed by ADR 0005 and the flag selects the canonical RNG-consumption path by disabling Step 16's frequency pre-check. The data contract's `executionFlags` paragraph still uses the old wording, which R5-3 asked to reconcile. Reword it to a flag that selects the canonical RNG path / disables the pre-check, or otherwise state that it does not add a reproducibility guarantee. | `02-data-contracts.md` 520-522; Step 06 283-286; Step 16 126-128; ADR 0005 60-68. |
+| **Note** | **R6-3 — The Step 10 preview service's project placement conflicts with the architecture and the Step 11 Packages ownership.** Step 10 says `ILatticePreviewService` "lives in `Mocassin.Compilation.Jobs`" and uses the same `SupercellGenerator`/doping path as the build; the architecture assigns job templates and supercell/doping generation to `Mocassin.Packages` and says Compilation must not own them, and Step 11 calls `JobDescriptor`/`JobPackage` Packages types. A Compilation-hosted preview that takes a `JobTemplate` and shares the Packages generator cannot be implemented without reversing the dependency direction. Resolve the Step 10 project placement in Step 10's own design review (or update the architecture/dependency table and the Step 25 consumer path). This is a cross-step note, not a Step 06 implementation blocker. | Step 10 204-263; `docs/planning/01-target-architecture.md` 129 and 143-145; Step 11 84-86; Step 25 118-125. |
+| **Note** | **R6-4 — Record parent and frozen delta (process note).** The record commit's parent is `07845d9`, not the frozen design commit `6173e61`. `07845d9` is the docs-only round-6 request; it changes only `docs/planning/reviews/step-06.md` and the one-line Step 06 design-review link (`e587a6b` -> `6173e61`), so the design content reviewed is exactly `6173e61`. This is the same process pattern as n1/R2-8/R5-6, not a design finding. | Commands above; `git show -s --format='%H %P %s' 07845d9`; `git show --name-status 07845d9`; `git diff --name-only 6173e61..07845d9`. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. No Blocker or Major finding remains in round 6.
+
+#### Round-6 checklist
+
+- [x] R5-1 — Empty-array omission, missing-as-empty loading, default-array canonicalization, and the
+  pre-Step-06 hash-stability task/test are present and consistent with the current converter/canonicalizer
+  (Step 06 111-114, 511-515, 610-611; data contract 449-451). Resolved.
+- [x] R5-2 — `MinSuccessRate` 0/null, empty/null `RngSeed`, and `NormalizationEnergyEv` 0.0/null are
+  canonicalized before save/hash, with a dedicated equivalence test (Step 06 260-264, 514-515, 611; data
+  contract 516-519, 528-530). Resolved.
+- [ ] R5-3 — Step 06 wording resolved; the data contract's "new reproducibility flag" phrase remains. Residual
+  Note R6-2.
+- [ ] R5-4 — Composition boundary stated, but the Compilation-side carrier is a Packages `JobDescriptor`.
+  Residual Minor R6-1.
+- [x] R5-5 — `SIM009` rejects empty, whitespace-only, and duplicate names; the diagnostics test row covers
+  every SIM code (Step 06 351, 616). Resolved.
+- [x] R5-6 — Request `07845d9` is docs-only; the design is frozen at `6173e61`. Process Note R6-4.
+- [x] `ModelDefinition` lattice/simulation sections and JSON/schema round-trip: flat sections, converter,
+  canonical model/save/hash, empty-array omission, additive-v1/ADR 0009, and manifest/schema/fixture tasks are
+  defined (Step 06 89-130, 508-532; data contract 412-454).
+- [x] Polymorphic simulation persistence and kind-specific transition arrays: derived `Kind`, flat DTO,
+  exact kind-specific array/settings, authored order, duplicate rejection, and `SIM023` mismatch (Step 06
+  196-255; data contract 456-513).
+- [x] Doping priority/order/serialization, derived building block, and charge-compensation semantics: unique
+  `0..9999` priorities, ascending serialization, derived building block, sign/zero compensation, and Step 10
+  ratio/truncation ownership (Step 06 155-194; data contract 412-445).
+- [x] `SimulationKind`/`TransitionKind` compatibility, defaults, limits, canonicalization, and diagnostic
+  coverage: exact mapping, `SIM002`/`SIM023`, defaults, hard ranges, recommended bands, and the canonical
+  equivalence task (Step 06 196-390; data contract 511-535).
+- [x] `ILatticeQuery`/`ISimulationQuery` and `IProjectQuery`; preview ownership is Step 10: present (Step 06
+  409-448; Step 10 204-263). The Step 10 project placement is cross-step Note R6-3.
+- [x] LAT001-LAT011 and SIM001-SIM037 ownership/validation: contiguous code list, Core validators, Step 07/10
+  handoff, and positive/negative tests (Step 06 319-396, 598-616).
+- [x] Step 03/04 dependencies, manifest/schema/fixture tasks, PublicAPI/ApiCompat, code layout,
+  documentation/navigation, test plans, and cross-step interfaces: checked; residual is R6-1/R6-3.
+- [x] Internal consistency across Step 06, `02-data-contracts.md`, Steps 08, 10, 11, 14, 16, and 25: checked;
+  residual is R6-1/R6-2/R6-3; the status dashboard remains implementor-owned and stale.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+No Blocker or Major remains. R5-1, R5-2, and R5-5 are resolved by `6173e61`; R5-3 is resolved in the Step 06
+page but the data contract wording remains R6-2; R5-4's boundary is stated but the carrier/layer contradiction
+remains R6-1; R5-6 is a process note. R6-1 is a Minor, and R6-2-R6-4 are Notes. Under
+`docs/planning/reviews/README.md` §7, `Ready with notes` requires the human owner to accept R6-1-R6-3
+explicitly, or the planner/Step 06 agent can make the small corrections and request a new round. The start
+gate remains the human owner's decision.
+
+Follow-up owner: Human owner (accept R6-1-R6-3 or request a small docs correction); planner/Step 06 agent
+(apply the accepted corrections).
+Follow-up step: Step 06 — Lattice and Simulation Models; the design revision `6173e61` is otherwise ready for
+implementation.
