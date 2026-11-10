@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Mocassin.Core.Model.Energy;
+using Mocassin.Core.Model.Lattice;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -14,10 +15,10 @@ namespace Mocassin.Core.Model;
 /// Serializes the flat model envelope and applies defaults for missing sections.
 /// </summary>
 /// <remarks>
-/// Missing <c>particles</c>, <c>particleSets</c>, <c>structure</c>, transition, or energy properties load as the
-/// empty/default model. Unknown or duplicate properties are rejected to preserve the project-format contract.
-/// Empty optional transition sections and empty energy collections are omitted when writing so that projects
-/// without authored data keep their Step 01/03/04 canonical model and document hashes.
+/// Missing <c>particles</c>, <c>particleSets</c>, <c>structure</c>, transition, energy, or lattice properties
+/// load as the empty/default model. Unknown or duplicate properties are rejected to preserve the project-format
+/// contract. Empty optional transition, energy, and lattice sections are omitted when writing so that projects
+/// without authored data keep their earlier canonical model and document hashes.
 /// </remarks>
 public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition>
 {
@@ -43,6 +44,8 @@ public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition
         var unstableEnvironments = ImmutableArray<UnstableEnvironment>.Empty;
         var clusters = ImmutableArray<Cluster>.Empty;
         var siteEnergies = ImmutableArray<SiteEnergySet>.Empty;
+        var occupationExchanges = ImmutableArray<OccupationExchange>.Empty;
+        var dopings = ImmutableArray<Doping>.Empty;
         var seen = new HashSet<string>(StringComparer.Ordinal);
 
         foreach (var property in root.EnumerateObject())
@@ -98,6 +101,15 @@ public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition
                 case "siteEnergies":
                     siteEnergies = ReadArray<SiteEnergySet>(property.Value, options, "siteEnergies");
                     break;
+                case "occupationExchanges":
+                    occupationExchanges = ReadArray<OccupationExchange>(
+                        property.Value,
+                        options,
+                        "occupationExchanges");
+                    break;
+                case "dopings":
+                    dopings = ReadArray<Doping>(property.Value, options, "dopings");
+                    break;
                 default:
                     throw new JsonException($"Unknown model property '{property.Name}'.");
             }
@@ -117,6 +129,8 @@ public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition
             UnstableEnvironments = [.. unstableEnvironments.Select(NormalizeEnvironment)],
             Clusters = [.. clusters.Select(NormalizeCluster)],
             SiteEnergies = [.. siteEnergies.Select(NormalizeSiteEnergySet)],
+            OccupationExchanges = occupationExchanges,
+            Dopings = dopings,
         };
     }
 
@@ -154,6 +168,8 @@ public sealed class ModelDefinitionJsonConverter : JsonConverter<ModelDefinition
         WriteArrayIfNotEmpty(writer, "unstableEnvironments", value.UnstableEnvironments, options);
         WriteArrayIfNotEmpty(writer, "clusters", value.Clusters, options);
         WriteArrayIfNotEmpty(writer, "siteEnergies", value.SiteEnergies, options);
+        WriteArrayIfNotEmpty(writer, "occupationExchanges", value.OccupationExchanges, options);
+        WriteArrayIfNotEmpty(writer, "dopings", value.Dopings, options);
         writer.WriteEndObject();
     }
 

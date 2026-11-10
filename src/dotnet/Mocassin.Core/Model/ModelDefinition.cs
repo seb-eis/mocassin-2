@@ -3,6 +3,7 @@
 using System.Collections.Immutable;
 using System.Text.Json.Serialization;
 using Mocassin.Core.Model.Energy;
+using Mocassin.Core.Model.Lattice;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -15,10 +16,10 @@ namespace Mocassin.Core.Model;
 /// <remarks>
 /// The model is flat on disk: <c>model.particles</c>, <c>model.particleSets</c>, <c>model.structure</c>, the
 /// transition sections <c>stateChanges</c>, <c>stateChangeGroups</c>, <c>chains</c>,
-/// <c>kineticTransitions</c>, and <c>metropolisTransitions</c>, and the energy sections
-/// <c>stableEnvironment</c>, <c>unstableEnvironments</c>, <c>clusters</c>, and <c>siteEnergies</c>. Later steps
-/// add lattice and simulation sections directly at the model root. <see cref="ParticleModel"/> is an in-memory
-/// grouping only and is not a persisted member.
+/// <c>kineticTransitions</c>, and <c>metropolisTransitions</c>, the energy sections
+/// <c>stableEnvironment</c>, <c>unstableEnvironments</c>, <c>clusters</c>, and <c>siteEnergies</c>, and the
+/// lattice sections <c>occupationExchanges</c> and <c>dopings</c>. Later steps add simulation sections directly
+/// at the model root. <see cref="ParticleModel"/> is an in-memory grouping only and is not a persisted member.
 /// </remarks>
 [JsonConverter(typeof(ModelDefinitionJsonConverter))]
 public sealed record ModelDefinition
@@ -41,6 +42,8 @@ public sealed record ModelDefinition
         UnstableEnvironments = [];
         Clusters = [];
         SiteEnergies = [];
+        OccupationExchanges = [];
+        Dopings = [];
     }
 
     /// <summary>
@@ -107,4 +110,14 @@ public sealed record ModelDefinition
     /// Gets the authored sparse site-energy sets.
     /// </summary>
     public ImmutableArray<SiteEnergySet> SiteEnergies { get; init; }
+
+    /// <summary>
+    /// Gets the authored occupation exchanges.
+    /// </summary>
+    public ImmutableArray<OccupationExchange> OccupationExchanges { get; init; }
+
+    /// <summary>
+    /// Gets the authored dopings in ascending priority order.
+    /// </summary>
+    public ImmutableArray<Doping> Dopings { get; init; }
 }

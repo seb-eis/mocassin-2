@@ -6,6 +6,7 @@ using System.Text.Json.Serialization;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Energy;
+using Mocassin.Core.Model.Lattice;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -103,6 +104,8 @@ public static class ProjectJson
         var unstableEnvironments = model.UnstableEnvironments.IsDefault ? [] : model.UnstableEnvironments;
         var clusters = model.Clusters.IsDefault ? [] : model.Clusters;
         var siteEnergies = model.SiteEnergies.IsDefault ? [] : model.SiteEnergies;
+        var occupationExchanges = model.OccupationExchanges.IsDefault ? [] : model.OccupationExchanges;
+        var dopings = model.Dopings.IsDefault ? [] : model.Dopings;
 
         return new ModelDefinition
         {
@@ -130,6 +133,10 @@ public static class ProjectJson
             SiteEnergies = [.. siteEnergies
                 .Select(NormalizeSiteEnergySet)
                 .OrderBy(static siteEnergySet => siteEnergySet.SiteId.Value)],
+            OccupationExchanges = [.. occupationExchanges.OrderBy(static exchange => exchange.Id.Value)],
+            Dopings = [.. dopings
+                .OrderBy(static doping => doping.Priority)
+                .ThenBy(static doping => doping.Id.Value)],
         };
     }
 
@@ -468,6 +475,10 @@ internal sealed class ProjectDto
 [JsonSerializable(typeof(ImmutableArray<Cluster>))]
 [JsonSerializable(typeof(ImmutableArray<SiteEnergySet>))]
 [JsonSerializable(typeof(ImmutableArray<SiteEnergyEntry>))]
+[JsonSerializable(typeof(OccupationExchange))]
+[JsonSerializable(typeof(Doping))]
+[JsonSerializable(typeof(ImmutableArray<OccupationExchange>))]
+[JsonSerializable(typeof(ImmutableArray<Doping>))]
 [JsonSerializable(typeof(ImmutableArray<Fractional3>))]
 [JsonSerializable(typeof(Fractional3))]
 [JsonSerializable(typeof(ProjectMetadata))]

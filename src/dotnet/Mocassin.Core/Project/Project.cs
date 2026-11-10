@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Energy;
+using Mocassin.Core.Model.Lattice;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -170,6 +171,22 @@ public sealed record Project : IProjectQuery
     public ImmutableArray<SiteEnergySet> SiteEnergies => Model.SiteEnergies;
 
     /// <summary>
+    /// Gets the authored occupation exchanges.
+    /// </summary>
+    public ImmutableArray<OccupationExchange> OccupationExchanges => Model.OccupationExchanges;
+
+    /// <summary>
+    /// Gets the authored dopings in ascending priority order.
+    /// </summary>
+    public ImmutableArray<Doping> Dopings => Model.Dopings;
+
+    /// <summary>
+    /// Gets the derived default building block.
+    /// </summary>
+    public ImmutableArray<BuildingBlockEntry> DefaultBuildingBlock =>
+        DefaultBuildingBlockBuilder.Build(Model);
+
+    /// <summary>
     /// Finds the environment of one unstable site.
     /// </summary>
     /// <param name="siteId">The unstable-site identifier.</param>
@@ -232,6 +249,52 @@ public sealed record Project : IProjectQuery
             if (siteEnergies.SiteId == siteId)
             {
                 return siteEnergies;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored occupation exchange.
+    /// </summary>
+    /// <param name="id">The occupation-exchange identifier.</param>
+    /// <returns>The matching exchange, or <see langword="null"/> when the identifier is unknown.</returns>
+    public OccupationExchange? Find(OccupationExchangeId id)
+    {
+        if (Model.OccupationExchanges.IsDefault)
+        {
+            return null;
+        }
+
+        foreach (var exchange in Model.OccupationExchanges)
+        {
+            if (exchange.Id == id)
+            {
+                return exchange;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored doping.
+    /// </summary>
+    /// <param name="id">The doping identifier.</param>
+    /// <returns>The matching doping, or <see langword="null"/> when the identifier is unknown.</returns>
+    public Doping? Find(DopingId id)
+    {
+        if (Model.Dopings.IsDefault)
+        {
+            return null;
+        }
+
+        foreach (var doping in Model.Dopings)
+        {
+            if (doping.Id == id)
+            {
+                return doping;
             }
         }
 
