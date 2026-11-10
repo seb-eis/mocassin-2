@@ -23,17 +23,18 @@ file and a directory. The `feature/` prefix keeps the step grouping without that
 ## 2. Step workflow
 
 1. Read `AGENTS.md`, the planning README, the status dashboard, the step page, and its dependencies.
-2. Propose the complete feature-branch list for the step; the owner approves it once.
+2. Propose the complete feature-branch list for the step; the owner approves it once. This is the only
+   feature-level approval; the implementor then squash-merges each feature after the local gates pass.
 3. Create the step branch from current `main` and push it.
 4. Create one feature branch from the step branch for each deliverable and push it.
 5. Implement only that feature's scope; add the tests named in the step plus regression tests.
 6. Update the step page, status dashboard, parity matrix, and documentation in the same feature where
    applicable.
 7. Run the local quality gates (`./tools/verify.sh <area>`) and report the exact commands and results.
-8. Ask for explicit approval before every feature squash merge. The report must include branch, commits, diff
-   summary, tests, local validation, docs/status updates, risks, and known limitations.
-9. After approval, squash-merge into the step branch and delete the feature branch locally and remotely. Do not
-   push the step branch just to trigger CI.
+8. After the local gates pass, squash-merge the feature into the step branch. Do not wait for a per-feature
+   approval; the step-start feature-list approval covers it. Record the branch, commits, diff summary, tests,
+   local validation, docs/status updates, risks, and known limitations in the step page.
+9. Delete the feature branch locally and remotely. Do not push the step branch just to trigger CI.
 10. Do not start the next feature until the affected local gates pass.
 
 A final closeout feature records the step status, deviations, acceptance evidence, and main merge. The
@@ -44,8 +45,8 @@ corresponding approval.
 
 | Gate | Approval |
 | --- | --- |
-| Step feature list | Once, at step start |
-| Each feature squash | Before every squash into the step branch |
+| Step feature list | Once, at step start; covers every feature in the step |
+| Feature squash | No separate gate; the step feature-list approval covers it |
 | Step-to-main merge | Before the `--no-ff` merge |
 | Tag creation/push | Included in the step/milestone/release approval |
 | Release | After Step 31 gates |

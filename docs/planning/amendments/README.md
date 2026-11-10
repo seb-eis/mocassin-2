@@ -58,7 +58,8 @@ Do not use an amendment for:
 3. Run a focused pre-implementation design review under the normal design-review process. Record it in
    `docs/planning/reviews/step-NN-amend-M.md` and link it from the parent design review record.
 4. Implement on the amendment feature branch from the parent step branch. Run the normal local gates.
-5. Get approval and squash-merge the amendment into the parent step branch before the parent audit freeze.
+5. After the design review is accepted and the local gates pass, squash-merge the amendment into the parent
+   step branch before the parent audit freeze.
 6. Update the parent step page, amendment page, audit request, and design review record with the combined
    commit.
 7. Freeze the combined step branch. The parent audit covers the parent step and every integrated amendment at
@@ -84,7 +85,7 @@ restart the audit at the new frozen commit.
 
 ## 6. Integration and audit
 
-- The amendment is integrated into the parent step branch using the normal feature approval and squash rules.
+- The amendment is integrated into the parent step branch using the normal feature squash rules.
 - The parent audit request lists the amendment IDs, the combined commit, and any temporary implementation that
   the amendment replaces.
 - The auditor reviews the entire solution: parent step plus integrated amendments.

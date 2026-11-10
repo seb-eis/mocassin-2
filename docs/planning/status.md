@@ -10,7 +10,7 @@ remain in each step page; each step page also has a feature log.
 | **Not started** | No step branch or feature work yet. |
 | **In progress** | Step branch exists and feature work is underway. |
 | **Blocked** | Work cannot continue until a named blocker is resolved. |
-| **Awaiting approval** | A feature is complete locally and waiting for squash-merge approval. |
+| **Awaiting approval** | The step or audit round is frozen and waiting for human approval of the verdict, merge, or tag. |
 | **Done** | All acceptance criteria pass and the step is merged into `main`. |
 | **Deferred** | Intentionally postponed beyond the first parity release. |
 
@@ -19,7 +19,7 @@ remain in each step page; each step page also has a feature log.
 - **Step start:** after the design review is `Ready for implementation` and the feature-branch list is
   approved, set the step to `In progress` and record the step branch.
 - **Each feature:** update the feature row and step page checkboxes in the feature branch. Mark it
-  `Awaiting approval` before asking for approval.
+  `Squashed` or `Done` after the squash; no per-feature approval is required.
 - **After squash and step CI:** the next feature or the closeout feature records the squash commit and CI
   result.
 - **Step completion:** the closeout feature records `Done`, the step CI result, and the main merge reference.

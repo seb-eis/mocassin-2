@@ -182,7 +182,8 @@ without breaking partial classes or case-sensitive paths.
 
 - **Feature start:** write a directory plan — new folders, new files, moved files, namespaces.
 - **Pre-implementation review:** confirm the layout follows this page.
-- **Feature approval:** report the directory plan and `tools/verify.sh structure` result.
+- **Feature record:** record the directory plan and `tools/verify.sh structure` result in the step page; no
+  separate approval is required.
 - **Audit:** confirm the structure test passes and no new root-level or catch-all folders were added.
 - **Definition of done:** code is grouped by domain concept and the structure test passes.
 
