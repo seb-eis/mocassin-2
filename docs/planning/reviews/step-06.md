@@ -15,16 +15,16 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Re-review required |
-| Reviewed commit | `160b226` |
+| Reviewed commit | `5ae32b0` |
 | Docs branch | `docs/step-06-design-revision` |
 | Review date | 2026-11-10 |
-| Reviewer | Independent planning auditor (fresh context, round 2; no shared conversation with the planner or implementor) |
+| Reviewer | — (round-3 reviewer to fill) |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
 
-Round 1 is recorded in the sections below and was reviewed at `a64ecf3`; its reviewer text is unchanged. The
-design revision is `160b226`. The round-2 request and resolution status are appended after the round-1
-sections.
+Round 1 is recorded in the sections below and was reviewed at `a64ecf3`; round 2 was reviewed at `160b226`.
+Their reviewer text is unchanged. The round-2 notes were corrected in `5ae32b0`, and the round-3 request is
+appended at the end of this record.
 
 ## Step summary
 
@@ -293,15 +293,18 @@ Round history:
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-10 | `a64ecf3` | Independent planning auditor (fresh context) | Changes required |
-| 2 | 2026-11-10 | `160b226` | Awaiting fresh reviewer | — |
+| 2 | 2026-11-10 | `160b226` | Fresh independent re-reviewer | Ready with notes |
+| 3 | 2026-11-10 | `5ae32b0` | Awaiting fresh reviewer | — |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| M1–M7 | Major | See round 1 | Design revision; see `Resolution status` | `160b226` | Resolved — awaiting re-review |
-| m1–m7 | Minor | See round 1 | Design revision; see `Resolution status` | `160b226` | Resolved — awaiting re-review |
-| n1–n3 | Note | See round 1 | Acknowledged/incorporated; see `Resolution status` | `160b226` | Addressed — awaiting re-review |
+| M1–M7 | Major | See round 1 | Design revision; see `Resolution status` | `160b226` | Resolved |
+| m1–m7 | Minor | See round 1 | Design revision; see `Resolution status` | `160b226` | Resolved |
+| n1–n3 | Note | See round 1 | Acknowledged/incorporated; see `Resolution status` | `160b226` | Closed |
+| R2-1–R2-3 | Minor | See round 2 | Small corrections; see `Resolution status` | `5ae32b0` | Resolved — awaiting round 3 |
+| R2-4–R2-8 | Note | See round 2 | Corrections/acknowledgement; see `Resolution status` | `5ae32b0` | Resolved/acknowledged — awaiting round 3 |
 
 ## Human approval
 
@@ -338,6 +341,14 @@ evidence, or verdict.
 | n1 | Acknowledged. The round-1 parent is the docs-only request/freeze commit; the design content reviewed is exactly `a64ecf3`. The revision is a new commit on `docs/step-06-design-revision` because another agent is concurrently editing cross-cutting review docs on `main`'s worktree. | Planner | `160b226` |
 | n2 | Resolved — awaiting re-review. Transition lists preserve authored order; no in-memory sort key is needed. | Planner | `160b226` |
 | n3 | Acknowledged; incorporated in Step 10. `Mocassin.Compilation` already references `Mocassin.Symmetry`, so the shared preview can consume P1 multiplicity without a new dependency. | Planner | `160b226` |
+| R2-1 | Resolved — awaiting round 3. Added `SIM036` warning for 11–100 transitions (recommended 1–10). | Planner | `5ae32b0` |
+| R2-2 | Resolved — awaiting round 3. Added `SIM037` warning for a positive `MinSuccessRate` below 10 MCS/s. | Planner | `5ae32b0` |
+| R2-3 | Resolved — awaiting round 3. Added write-out count to Step 25's simulation-editor common settings. | Planner | `5ae32b0` |
+| R2-4 | Resolved — awaiting round 3. Recorded the write-out-0 final-state-only mode as a deliberate warning-band deviation. | Planner | `5ae32b0` |
+| R2-5 | Resolved — awaiting round 3. Aligned the `.msl` `write_out_count` SQL default to 100 and documented that the writer always sets it from the resolved payload. | Planner | `5ae32b0` |
+| R2-6 | Resolved — awaiting round 3. Corrected the original-reference attribution: max attempt frequency is the KMC job-configuration base frequency, with an optional simulation-level default. | Planner | `5ae32b0` |
+| R2-7 | Resolved — awaiting round 3. `SIM004`, `SIM007`, and `SIM016` now reject non-finite values explicitly, with a general NaN/Inf rule. | Planner | `5ae32b0` |
+| R2-8 | Acknowledged. The round-3 record commit will also have the docs-only request commit as its parent; the design content is frozen at `5ae32b0`. | Planner | `5ae32b0` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -579,3 +590,26 @@ Follow-up owner: Human owner (accept R2-1–R2-3 or request a small docs correct
 (apply the accepted corrections).
 Follow-up step: Step 06 — Lattice and Simulation Models; the design revision `160b226` is otherwise ready for
 implementation.
+
+## Re-review request (round 3)
+
+| Field | Value |
+| --- | --- |
+| Step | 06 — Lattice and Simulation Models |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `5ae32b0` |
+| Docs branch | `docs/step-06-design-revision` |
+| Review date | — |
+| Reviewer | — |
+
+Design revision: `5ae32b0e5768c48629f1faff54e8aa0d62949be6`.
+
+The revision delta from `160b226` is four planning files: the Step 06 page, `02-data-contracts.md`, Step 11,
+and Step 25. It adds `SIM036`/`SIM037`, the write-out-0 deviation, non-finite checks for `SIM004`/`SIM007`/
+`SIM016`, the corrected max-attempt-frequency attribution, the Step 25 write-out field, and the `.msl`
+write-out-count writer/default note. The round-1 and round-2 reviewer text is unchanged.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for round 3 below. Keep the
+round-1 and round-2 text unchanged.
