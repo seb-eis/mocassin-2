@@ -21,5 +21,9 @@ The structural model contains:
 The sample is structural only. Doping levels, hydration levels, transitions, parameterization, and job
 templates are added by later steps.
 
+Step 05 adds a `2.0 Å` stable environment and sparse site energies for the oxygen and proton sites. There is no
+unstable environment or cluster in this reference model; proton-hopping transitions and their environments are
+added by later steps.
+
 The file is produced by the real project writer and is mirrored as
 `tests/contracts/project-barium-zirconate.mocprj`.

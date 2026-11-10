@@ -6,6 +6,11 @@ oxygen site, and an unstable oxygen transition site. The unstable site uses a de
 `Oxygen transition site` occupation set. Step 04 keeps parameterization and job templates for later steps;
 transition examples live under [`samples/transitions/`](../transitions/README.md).
 
+Step 05 adds a `2.7 Å` stable environment, a `1.5 Å` unstable environment for the oxygen transition site, and
+an `Oxygen migration edge` cluster that resolves to the two nearest stable oxygen positions. Sparse site
+energies on the stable oxygen site demonstrate the site-energy shape. The project passes Core and Symmetry
+energy validation without errors or warnings.
+
 The file is produced by the real project writer and is mirrored as
 `tests/contracts/project-ceria.mocprj`. Do not copy the original user-guide project or its database content;
 author the new project against the MIT-licensed schema.

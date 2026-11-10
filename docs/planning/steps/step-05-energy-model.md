@@ -25,7 +25,7 @@ with validation and cost previews.
 | `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass; benchmark ceria 88.9 µs, BZO 77.4 µs | — | — |
 | `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Awaiting approval | `verify.sh contracts`, `dotnet`, `structure`, `api` pass | — | — |
-| `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Not started | — | — | — |
+| `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Awaiting approval | `verify.sh dotnet`, `docs`, `structure` pass | — | — |
 | `closeout` | `feature/step-05-energy-model/closeout` | Not started | — | — | — |
 
 **Implementation note:** Step 05 introduces no new dependency and no GPL-derived content. Every new source,
@@ -605,8 +605,8 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
   that no new dependency or GPL-derived content is introduced, per `NOTICE.md`.
 - [x] Add XML docs, update `PublicAPI.Unshipped.txt` for Core, Packages, and Symmetry, and refresh the ApiCompat
   baseline for every new public type and member.
-- [ ] Add ceria and barium-zirconate energy models and fixtures.
-- [ ] Add the new user-guide, physics, and reference pages to `zensical.toml` navigation and to the
+- [x] Add ceria and barium-zirconate energy models and fixtures.
+- [x] Add the new user-guide, physics, and reference pages to `zensical.toml` navigation and to the
   user-guide/physics/reference index pages; update `docs/reference/project-format.md`.
 - [ ] Update `docs/planning/status.md`, the Step 05 feature log/checkboxes, and
   `docs/planning/appendix-b-parity-matrix.md`; create `docs/planning/audits/step-05.md` from the template at

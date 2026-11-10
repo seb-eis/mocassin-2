@@ -152,7 +152,39 @@
         }
       ],
       "dummyPositions": []
-    }
+    },
+    "stableEnvironment": {
+      "cutoff": 2,
+      "filters": []
+    },
+    "siteEnergies": [
+      {
+        "siteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f19",
+        "entries": [
+          {
+            "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f12",
+            "energyEv": -0.4
+          },
+          {
+            "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f13",
+            "energyEv": 0
+          }
+        ]
+      },
+      {
+        "siteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f1d",
+        "entries": [
+          {
+            "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f13",
+            "energyEv": 0
+          },
+          {
+            "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f1a",
+            "energyEv": 0.2
+          }
+        ]
+      }
+    ]
   },
   "parameterizations": [],
   "jobTemplates": [],

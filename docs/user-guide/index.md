@@ -21,6 +21,7 @@ land.
 - [Particles and particle sets](particles.md)
 - [Crystal structure](structure.md)
 - [Transitions](transitions.md)
+- [Energy model](energy.md)
 - Project lifecycle and model editors
 - Validation and diagnostics
 - Parameterization templates

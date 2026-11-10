@@ -25,6 +25,8 @@ The model separates:
 - site energies;
 - an optional external electric field.
 
+See [Energy contributions](energies.md) for environments, filters, cluster counting, and chiral pair identity.
+
 Model and parameter tables use electronvolts (eV). The solver converts energies to thermal units once per job.
 Transport output uses SI units.
 
