@@ -13,6 +13,7 @@
 | --- | --- |
 | Step | 18 — Tracking, Statistics, and State Writer |
 | Request owner | Step agent |
+| Orchestrator (step agent) | — |
 | Audit initiated by | Planner / implementor / human owner |
 | Audit status | Not requested |
 | Audited commit | — |
@@ -24,6 +25,11 @@
 | Auditor | — |
 
 Step page: [`Step 18 — Tracking, Statistics, and State Writer`](../steps/step-18-tracking-statistics-and-state-writer.md)
+
+> Orchestration: the step agent (the orchestrator) freezes the step branch, requests the auditor, applies fixes
+> autonomously on a new feature branch, reruns closeout CI, adds resolutions without altering reviewer text,
+> and requests re-audit until the auditor no longer identifies issues. The human owner approves the final
+> verdict, merge, and tag.
 
 ## Step summary
 

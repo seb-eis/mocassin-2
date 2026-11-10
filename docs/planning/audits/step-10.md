@@ -13,6 +13,7 @@
 | --- | --- |
 | Step | 10 — Job Templates and Supercell Generation |
 | Request owner | Step agent |
+| Orchestrator (step agent) | — |
 | Audit initiated by | Planner / implementor / human owner |
 | Audit status | Not requested |
 | Audited commit | — |
@@ -24,6 +25,11 @@
 | Auditor | — |
 
 Step page: [`Step 10 — Job Templates and Supercell Generation`](../steps/step-10-job-templates-and-supercells.md)
+
+> Orchestration: the step agent (the orchestrator) freezes the step branch, requests the auditor, applies fixes
+> autonomously on a new feature branch, reruns closeout CI, adds resolutions without altering reviewer text,
+> and requests re-audit until the auditor no longer identifies issues. The human owner approves the final
+> verdict, merge, and tag.
 
 ## Step summary
 
