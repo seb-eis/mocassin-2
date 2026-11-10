@@ -477,11 +477,17 @@ After the last step of each phase is merged and tagged, the phase closes with th
 
 1. **Policies and planning** — agent instructions, workflows, CI, code structure, process records, and
    phase status. This review starts first.
-2. **Architecture and design status** — architecture, contracts, design status, and cross-step interfaces.
+2. **Architecture and design status** — architecture, contracts, design status, cross-step interfaces, and
+   original-design fidelity: the intended corrections to the original, the good/clever original design aspects
+   that were ported, and any regression over the original.
 3. **Documentation status** — coverage, accuracy, navigation, API docs, and the publication boundary.
 
 The architecture and design, and documentation reviews may run in parallel after the policies and planning
 review starts.
+
+The architecture and design review must explicitly answer the original-design fidelity questions and record
+concrete evidence. A missing intended correction, a lost original strength, or an unrecorded regression is a
+finding.
 
 This checkpoint is a **quality gate**. The next phase's first step design review may not start until all three
 verdicts are `Passed` or the human owner accepts `Passed with notes`, or the owner waives a review with a

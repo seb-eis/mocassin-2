@@ -27,8 +27,9 @@
 ## Purpose
 
 Verify that the architecture, contracts, and the completed phase's design are coherent, complete, and ready
-for the next phase. For the Phase B checkpoint, this covers the Steps 00–07 model definition and the Step 08
-compilation interface.
+for the next phase, including original-design fidelity: did we make the intended corrections to the original,
+did we port the original's good/clever design aspects, and did we avoid introducing a regression? For the
+Phase B checkpoint, this covers the Steps 00–07 model definition and the Step 08 compilation interface.
 
 This is a design review, not a line-by-line code audit or scientific parity validation.
 
@@ -53,6 +54,8 @@ This is a design review, not a line-by-line code audit or scientific parity vali
 - ADRs, parity matrix, contracts/manifest and generated schemas
 - Actual code, tests, project references, and public API baselines where needed to confirm design claims
 - Step 08 design page and the interfaces it consumes
+- Original reference build, inventory, and parity material needed to compare intended corrections, ported
+  strengths, and regressions
 
 ## Evidence
 
@@ -108,12 +111,27 @@ The reviewer may use targeted tests/greps rather than the full suite when a find
 - [ ] Public API, typed IDs, namespaces, XML docs, and the ApiCompat baseline are coherent.
 - [ ] Derived data is not persisted; compiled-model expectations for Step 08 are defined.
 
-### C. Original behavior and known issues
+### C. Original design fidelity
 
+Answer the three questions explicitly; a missing or unrecorded answer is a finding.
+
+- [ ] **Corrections:** every original defect, limitation, or undesirable behaviour that this phase intended to
+  correct is actually corrected. Each intended correction is traceable to a requirement, ADR, or step decision,
+  and the evidence shows the corrected behaviour. No intended correction is silently retained.
+- [ ] **Ported strengths:** the good and clever original design aspects that this phase intended to keep are
+  carried into the new design and verified. This includes algorithms, data layouts, caches, incremental
+  updates, validation strategies, performance shortcuts, and workflow ideas. The record states what was kept,
+  adapted, or dropped, and why.
+- [ ] **Regressions:** no unintended regression over the original remains in capability, semantics,
+  performance, memory, diagnostics, determinism, or maintainability. Any deliberate regression is recorded as
+  an explicit trade-off with rationale, owner, and follow-up.
 - [ ] Reverse transition behavior matches the intended original semantics and the deviation is recorded.
 - [ ] Chirality/pair counting, cluster counting, charge compensation, MCSP semantics, and original defects are
   resolved or explicitly documented.
 - [ ] Deviations from the original are intentional, justified, and testable.
+- [ ] A keep/adapt/drop inventory for original design aspects exists, and deliberate regressions have an owner
+  and follow-up.
+- [ ] The evidence is concrete: code, tests, benchmarks, or a side-by-side design comparison, not only prose.
 - [ ] No hidden scope or unowned scientific assumption remains.
 
 ### D. Cross-step interfaces

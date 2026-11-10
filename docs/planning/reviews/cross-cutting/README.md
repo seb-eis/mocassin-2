@@ -8,11 +8,15 @@ Each phase checkpoint has three independent reviews:
 | Review | Focus | Order |
 | --- | --- | --- |
 | **Policies and planning** | Agent instructions, workflows, CI, code structure, process records, phase status | Starts first |
-| **Architecture and design status** | Architecture, contracts, design status, cross-step interfaces | After the policies review |
+| **Architecture and design status** | Architecture, contracts, design status, cross-step interfaces, and original-design fidelity (intended corrections, ported strengths, regressions) | After the policies review |
 | **Documentation status** | Coverage, accuracy, navigation, API docs, publication boundary | After the policies review, in parallel with architecture and design |
 
 The next phase's first step design review may not start until all three reviews are `Passed` or the human
 owner accepts `Passed with notes`, or the owner explicitly waives a review with a recorded rationale.
+
+The **Architecture and design status** review also evaluates original-design fidelity: whether the intended
+corrections were made, whether the good/clever original design aspects were ported, and whether a regression
+over the original was introduced (section 4).
 
 ## 1. Phase checkpoints and numbering
 
@@ -67,7 +71,30 @@ Each review uses the same round-based process as design reviews and implementati
 6. Repeat until the reviewer no longer identifies Blocker/Major issues. The human owner approves the final
    verdict and the phase gate.
 
-## 4. Reviewer rules
+## 4. Original-design fidelity (architecture review)
+
+The **Architecture and design status** review is also the phase's original-design fidelity gate. It must
+explicitly answer three questions:
+
+1. **Corrections** — Did we correct or improve the original issues we intended to correct? Each intended
+   correction must be traceable to a requirement, ADR, or step decision, and the evidence must show the
+   corrected behaviour. No intended correction may be silently left in place.
+2. **Ported strengths** — Did we successfully port the good and clever design aspects of the original? This
+   includes algorithms, data layouts, caches, incremental updates, validation strategies, performance
+   shortcuts, and workflow ideas that were worth keeping. The record must state what was kept, adapted, or
+   dropped, and why.
+3. **Regressions** — Did we introduce a regression over the original? Check capability, semantics, performance,
+   memory, diagnostics, determinism, and maintainability. A deliberate regression is allowed only when it is
+   recorded as an explicit trade-off with a rationale, owner, and follow-up; an unrecorded regression is a
+   finding.
+
+Evidence must be concrete: code, tests, benchmarks, or a side-by-side design comparison, not only prose. A
+missing intended correction, a lost original strength, or an unrecorded regression is at least a Major finding.
+Examples of original strengths to look for include the per-environment energy cache with path-local `S2`
+deltas, the selection pool and selection optimizers, pre-run normalization, static `S2` corrections, CSR
+neighbor links, and incremental lattice-energy updates.
+
+## 5. Reviewer rules
 
 - The reviewer is a fresh context with no shared conversation with the orchestrator or implementors.
 - The reviewer reads the repository at the frozen commit. A summary from the orchestrator is not evidence.
@@ -78,7 +105,7 @@ Each review uses the same round-based process as design reviews and implementati
   appears.
 - The reviewer records exact commands, results, and file references behind the verdict.
 
-## 5. Status values
+## 6. Status values
 
 | Status | Meaning |
 | --- | --- |
@@ -91,12 +118,14 @@ Each review uses the same round-based process as design reviews and implementati
 | **Passed with notes** | Only Minor/Note findings remain; owner accepts them. |
 | **Waived** | Owner explicitly accepts that the review is not required, with a recorded rationale. |
 
-## 6. Phase gate
+## 7. Phase gate
 
 - Freeze the checkpoint after the last step of the phase is merged and tagged.
 - Run the policies and planning review first; then run the architecture and design, and documentation reviews in parallel.
 - The next phase's first step design review may not start until all three verdicts are accepted by the human
   owner.
+- The architecture and design review must record explicit answers to the three original-design fidelity
+  questions, or state why a question is not applicable.
 - A review may be waived only by the human owner, with the reason recorded in its record.
 - The gate does not replace step design reviews, step audits, or Step 29 parity validation.
 - Do not create a step branch, step tag, or release tag for a cross-cutting review.
@@ -104,6 +133,6 @@ Each review uses the same round-based process as design reviews and implementati
   existing tag.
 - A record commit that touches any other file is invalid; re-run the review with a fresh reviewer.
 
-## 7. Record template
+## 8. Record template
 
 Use [`cross-cutting-review-template.md`](cross-cutting-review-template.md) for a new review.

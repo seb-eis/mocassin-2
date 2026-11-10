@@ -41,8 +41,10 @@ Each phase is also gated by the three cross-cutting reviews in
 [`reviews/cross-cutting/`](reviews/cross-cutting/README.md): policies and planning, architecture and design
 status, and documentation status. The policies and planning review starts first; architecture/design and
 documentation may run in parallel. The next phase's first step design review may not start until all three
-verdicts are accepted by the human owner, or a review is explicitly waived with a recorded reason. Phase B uses `XC-01`–`XC-03`, Phase C uses `XC-04`–`XC-06`,
-and so on.
+verdicts are accepted by the human owner, or a review is explicitly waived with a recorded reason. The
+architecture and design review also explicitly checks original-design fidelity: the intended corrections,
+the ported original strengths, and any regression. Phase B uses `XC-01`–`XC-03`, Phase C uses
+`XC-04`–`XC-06`, and so on.
 
 ## 3. Step estimates and dependencies
 
