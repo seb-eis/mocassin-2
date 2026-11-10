@@ -18,7 +18,7 @@
 | Reviewed commit | `160b226` |
 | Docs branch | `docs/step-06-design-revision` |
 | Review date | 2026-11-10 |
-| Reviewer | — (round-2 reviewer to fill) |
+| Reviewer | Independent planning auditor (fresh context, round 2; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
 
@@ -352,8 +352,8 @@ verdict.
 | Design review status | Re-review required |
 | Reviewed commit | `160b226` |
 | Docs branch | `docs/step-06-design-revision` |
-| Review date | — |
-| Reviewer | — |
+| Review date | 2026-11-10 |
+| Reviewer | Independent planning auditor (fresh context, round 2; no shared conversation with the planner or implementor) |
 
 Design revision: `160b22636bae8afce7fa077336fcbc6e0bed8755`.
 
@@ -365,3 +365,217 @@ the design content is identical to the working-tree revision at `160b226`.
 
 Reviewer: append your independence statement, evidence, findings, and verdict for round 2 below. Keep the
 round-1 text unchanged.
+
+### Re-review round 2
+
+#### Reviewer context and independence
+
+I am a fresh planning auditor for round 2. I did not author or implement the Step 06 design, the revision, or any
+part of the implementation, and I have no shared conversation with the planner, the implementor, or the round-1
+reviewer. I read the frozen design, the dependent step pages, the data contracts, the ADRs, the manifest/schema
+tooling, and the original implementation as read-only reference myself; I did not rely on the resolution table or
+the spawn summary for the verdict.
+
+#### Evidence
+
+**Frozen state and worktree.** Worktree `/tmp/opencode/step06-design`, branch `docs/step-06-design-revision`.
+At review start `HEAD` was `dc67746`; the design revision is `160b226` and the re-review request is `dc67746`,
+whose only parent is `160b226`. `git show --name-status dc67746` changes only
+`docs/planning/reviews/step-06.md` and the one-line Step 06 design-review link; the design content is identical
+at `160b226`. The round-1 design content is at `a64ecf3`; the design revision delta from the round-1 base is the
+five files listed below. While this review was written, the shared `/workspace/mocassin` worktree contained
+another agent's uncommitted cross-cutting review edits; I did not touch it.
+
+**Commands run (from `/tmp/opencode/step06-design`):**
+
+```sh
+git status --short
+# (no output: clean worktree)
+
+git log --oneline --decorate -6
+# dc67746 (HEAD -> docs/step-06-design-revision) docs: request step-06 design re-review [skip ci]
+# 160b226 docs: revise step-06 lattice and simulation design after review [skip ci]
+# befdf7e (main) docs: record step-06 design review Changes required [skip ci]
+# ea825d2 docs: add post-step-07 review checkpoint plan [skip ci]
+# 56f41b2 docs: plan post-step-07 repository reviews [skip ci]
+# 2c7ce02 docs: freeze step-06 design for review [skip ci]
+
+git show --stat 160b226
+# commit 160b22636bae8afce7fa077336fcbc6e0bed8755
+# docs: revise step-06 lattice and simulation design after review [skip ci]
+#  docs/planning/02-data-contracts.md                 | 112 +++-
+#  .../steps/step-06-lattice-and-simulation-models.md | 613 ++++++++++++++-------
+#  .../steps/step-10-job-templates-and-supercells.md  |  79 ++-
+#  .../step-11-simulation-package-and-msl-writer.md   |   2 +-
+#  ...-25-model-editors-energy-lattice-simulations.md |   5 +-
+#  5 files changed, 565 insertions(+), 246 deletions(-)
+
+git diff --stat a64ecf3..160b226 -- docs/planning
+# 14 files, 1549 insertions(+), 258 deletions(-); five design files plus nine docs-only
+# main commits between a64ecf3 and befdf7e (cross-cutting review plans, the review record,
+# and status.md). `git diff --stat befdf7e..160b226` shows only the five design files above.
+
+git diff a64ecf3..160b226 -- docs/planning
+# Full diff inspected. The Step 06 design delta is the five files above; the other nine files
+# are the docs-only commits 56f41b2/ea825d2 (cross-cutting review plans), 2c7ce02 (freeze),
+# 6285472 (round-1 request), befdf7e (round-1 record), and status.md. No code or contract
+# artifact changed.
+
+git diff --check
+# (no output, exit 0)
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.25s
+# exit 0
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+# exit 0
+
+./tools/verify.sh docs
+# First run in the fresh worktree exited 255: DocFX found no built Mocassin.*.dll files
+# ("No .NET API project detected"). This is a missing build-output condition, not a docs failure.
+# After `dotnet build Mocassin.slnx -c Release` (Build succeeded, 0 Warning(s), 0 Error(s)):
+# ==> Zensical (strict): No issues found
+# ==> DocFX: Build succeeded
+# ==> rustdoc: Documentation built
+# exit 0
+
+git status --short
+# (no output: build output is ignored)
+```
+
+**Additional read-only checks.**
+
+```sh
+git show -s --format='%H %P %s' 160b226 dc67746
+# 160b226... befdf7e... docs: revise step-06 lattice and simulation design after review [skip ci]
+# dc67746... 160b226... docs: request step-06 design re-review [skip ci]
+
+git show --name-status dc67746
+# M docs/planning/reviews/step-06.md
+# M docs/planning/steps/step-06-lattice-and-simulation-models.md   # one-line design-review link
+
+git merge-base --is-ancestor a64ecf3 HEAD
+# exit 0
+
+git diff --stat a64ecf3..160b226 -- \
+  docs/planning/steps/step-06-lattice-and-simulation-models.md \
+  docs/planning/02-data-contracts.md \
+  docs/planning/steps/step-10-job-templates-and-supercells.md \
+  docs/planning/steps/step-11-simulation-package-and-msl-writer.md \
+  docs/planning/steps/step-25-model-editors-energy-lattice-simulations.md
+# 5 files changed, 565 insertions(+), 246 deletions(-)
+```
+
+**Source and contract checks.** I verified the canonical persistence/hash path in
+`src/dotnet/Mocassin.Core/Project/ProjectJson.cs` (`SerializeCanonicalModel` 81–84, `CanonicalizeModel` 93–133,
+`ProjectJsonConverter.Write` 313 and 360), `ProjectHasher.cs` 26–29 and 58,
+`ProjectEditor.cs` 57–58, `IProjectQuery.cs`, `TransitionRef.cs`, `ModelDefinition.cs` (empty defaults),
+`TypedIds.cs` 237–285 (`OccupationExchangeId`, `DopingId`, `SimulationId`), and
+`Mocassin.Compilation.csproj` 16–17 (`Mocassin.Core` and `Mocassin.Symmetry` references). I checked
+`contracts/manifest.json` (`status: step-05`, fixture list, project model schema) and
+`tools/contracts/generate.py` (no `oneOf`/`anyOf`/`discriminator` support, generated descriptors/schema). I
+checked the original settings and validators read-only in `/workspace/mocassin-original`:
+`MocassinSimulationSettings.cs` (`InitAsDefault`, `TransitionCount`, `TerminationSuccessRate`,
+`WriteCallCount`, `PreRunMcsp`, `Normalization`, `ElectricField`), `ValueSetting.cs` (constructor and
+`SetValues` sorting), `SimulationBaseValidator.cs`, `KineticSimulationValidator.cs`,
+`MetropolisSimulationValidator.cs`, `SimulationBaseData.cs`, `KineticSimulationData.cs`,
+`MetropolisSimulationData.cs`, `ISimulation.cs`, `IKineticSimulation.cs`, and `SimulationFlags.cs`.
+
+**Cross-step checks.** I read Step 03, Step 04 (authored-order rule 110–117 and the `IProjectQuery` boundary),
+Step 05, Step 07 (feasibility 50, 92, 135), Step 08 (simulation encoding), Step 10 (job templates, JOB001–JOB015,
+and the new preview API), Step 11 (write-out metadata), Step 16 (rate abort), Step 25 (editor/preview), ADR 0005,
+ADR 0009, `03-quality-strategy.md`, `appendix-b-parity-matrix.md`, `status.md`, and `audits/step-06.md`.
+
+**Files reviewed.** `AGENTS.md` §3.8–§3.13 and §8/§10/§11; `docs/planning/reviews/README.md`; the Step 06 page
+at `160b226` (all sections); `docs/planning/02-data-contracts.md` (model envelope, lattice/doping, simulations,
+job payload, `.msl` tables); Step 03, 04, 05, 07, 08, 10, 11, 16, and 25 pages; ADR 0005 and 0009;
+`contracts/manifest.json`; `tools/contracts/generate.py`; `contracts/generated/schema/project-v1.schema.json`;
+`contracts/generated/fixtures/descriptors.json`; the Core project/query/hash/editor sources listed above; the
+original simulation and validator sources listed above; `docs/user-guide/`, `docs/reference/project-format.md`,
+`docs/development/architecture.md`, `docs/development/code-structure.md`,
+`docs/development/compilation-pipeline.md`, `zensical.toml`, `tools/verify.sh`,
+`tools/structure-policy.json`, and `tools/api-projects.txt`.
+
+**Scope checks.** I reviewed the full requested scope: `ModelDefinition` lattice/simulation sections and
+JSON/schema round-trip; polymorphic simulation persistence and kind-specific transition arrays; doping
+priority/order/serialization, the derived building block, and charge-compensation semantics;
+`SimulationKind`/`TransitionKind` compatibility, defaults, and limits; `ILatticeQuery`/`ISimulationQuery` and
+their `IProjectQuery` integration, including the preview API now owned by Step 10; LAT001–LAT011 and
+SIM001–SIM035 ownership/validation; Step 03/04 dependencies; manifest/schema/fixture tasks; PublicAPI/ApiCompat
+tasks; code layout; documentation/navigation and test plans; and the remaining cross-step interface questions
+across Step 06, `02-data-contracts.md`, Step 10, Step 11, and Step 25. The findings record the result.
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R2-1 — The recommended-band coverage is still incomplete for the transition count.** The original `TransitionCount` is `new ValueSetting<int>("Transitions per Simulation", 1, 0, 10, 100)`; `ValueSetting.SetValues` sorts the four values to `0,1,10,100`, so the original hard range is 0–100 and the recommended band is 1–10. `SIM003` correctly warns at 0 and `SIM021` errors above 100, but no code warns for 11–100. The step page says the original recommended bands remain warnings, and the acceptance/test table claim every recommended band has a diagnostic and a boundary test; both are false for this band. | Step 06 page 69–76, 320, 338–339, 356–358, 529–530, 571; original `ICon.Model/ModelProject/Manager/Settings/Modules/MocassinSimulationSettings.cs` (`TransitionCount`); original `ValueSetting.cs` (`ValueSetting` constructor and `SetValues`); original `KineticSimulationValidator.cs` and `MetropolisSimulationValidator.cs`. |
+| **Minor** | **R2-2 — The recommended-band coverage is still incomplete for `MinSuccessRate`.** The original `TerminationSuccessRate` is `new ValueSetting<double>("Lower Termination Success Rate", 0, 10, int.MaxValue, int.MaxValue)`; after sorting, the hard range is 0–`int.MaxValue` and the recommended lower bound is 10. `SIM012` only errors negative/non-finite. The default null/0 disabled state is fine, but a positive value below 10 is buildable, outside the original recommended band, and has no warning. The same acceptance/test claim is false for this band. | Step 06 page 75–76, 255, 329, 529–530, 571; original `MocassinSimulationSettings.cs` (`TerminationSuccessRate`); original `SimulationBaseValidator.cs` (`AddTerminationLimitValidations`). |
+| **Minor** | **R2-3 — Step 25's simulation editor common-settings list omits `WriteOutCount`.** Step 06 adds the field and its acceptance requires every original setting; Step 25's original-reference summary names "block count" and its acceptance says "all settings", but the "Common settings" list does not include write-out count. The dependent editor page should list it. | Step 06 page 201, 252–253, 526–528; Step 25 page 36, 134–136, 194. |
+| **Note** | **R2-4 — `SIM028` exempts 0 from the write-out recommended band without a recorded deviation.** The original `WriteCallCount` recommended band is 5–100 and would warn at 0; the design says "0 is allowed" because 0 writes only the final state. This is a sensible final-state-only mode, but it is not in the "Deviations from the original" list. Record it if intentional. | Step 06 page 181–187, 328, 345; original `MocassinSimulationSettings.cs` (`WriteCallCount`); original `SimulationBaseValidator.cs` (`AddCounterValidations`). |
+| **Note** | **R2-5 — The `.msl` `jobs.write_out_count` default is 0 while the model default is 100.** Step 11 says the denormalized columns must match the job payload, so the writer must always set the column; document the SQL default as a fallback or align it to 100 to avoid a silent final-state-only job if a writer omits it. | `02-data-contracts.md` 689; Step 06 page 201, 252–253; Step 11 page 123–127. |
+| **Note** | **R2-6 — The original-reference line attributes max attempt frequency to `IKineticSimulation`.** The original `IKineticSimulation` has pre-run, field vector/magnitude, normalization, and transitions only; max attempt frequency is a job-config setting in Step 10's original reference. The optional simulation-level default is reasonable, but the original-reference attribution should be corrected. | Step 06 page 62–65; original `IKineticSimulation.cs`; original `MocassinSimulationSettings.cs`; Step 10 page 36–45. |
+| **Note** | **R2-7 — The range rules for `TemperatureK`, `BreakTolerance`, and `ElectricFieldDirection` are inequality checks.** A NaN value compares false and would not be rejected by a simple "outside range" test. Steps 03–05 explicitly reject non-finite values; add non-finite checks to `SIM004`, `SIM016`, and `SIM007`, or state that the validators treat NaN/Inf as errors. | Step 06 page 321, 324, 333; Step 03/05 non-finite validation conventions. |
+| **Note** | **R2-8 — Record parent and frozen delta (process note).** The record commit's parent will be `dc67746`, not the frozen design commit `160b226`, because the docs-only re-review request sits between them. `dc67746` touches only the review record and the one-line Step 06 design-review link; the design content is identical at `160b226`. This is the same process pattern as n1, not a design finding. | Commands above; `git show -s --format='%H %P %s'`; `git show --name-status dc67746`. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. No Blocker or Major finding remains in round 2.
+
+#### Round-2 checklist
+
+- [x] M1 — canonical persistence/hash wiring: `CanonicalizeModel`, `Write`, `SaveAsync`, `Compute`,
+  `ComputeDocument`, and `ProjectEditor.Apply` are explicit contracts and tasks; save/load and document-hash
+  tests are planned.
+- [x] M2 — original settings/defaults: `WriteOutCount`, P1Y, KMC pre-run 100, field 1e7 `(1,0,0)`, normalization
+  null, MMC samples 1000/100/200, and the derived-seed deviation are recorded.
+- [x] M3 — ranges/recommended bands/pre-run disable: `SIM004`–`SIM035` and the `0` pre-run disable state are
+  present; residual coverage is R2-1/R2-2.
+- [x] M4 — LAT/SIM versus Step 07/Step 10 ownership and the JOB code handoff: LAT010/LAT011/SIM010/SIM011 are
+  repurposed; Step 10 owns JOB004–JOB015; Step 07 owns build-time non-empty feasibility.
+- [x] M5/M6 — preview ownership and public API: Step 06 exposes no preview; Step 10 owns
+  `ILatticePreviewService`, `LatticePreview`, `JobCountPreview`, request/doping echo, `DopingReport`, per-site
+  populations, the `Try*` failure boundary, the cache, and the Symmetry/multiplicity path.
+- [x] M7 — transition-array ordering: Step 06 now preserves authored order and never re-sorts; Step 04 is
+  unchanged and the data contract follows.
+- [x] m1–m7 — kind/flags, code layout, `IProjectQuery`, manifest/schema/fixtures/ADR 0009, scope/planning/audit
+  coverage, tests, and validation semantics re-checked; residual details are R2-3–R2-7.
+- [x] n1–n3 — record parent/frozen delta, in-memory sort key, and `Compilation`→`Symmetry` dependency re-checked;
+  n2 is resolved by authored order and n3 is confirmed by `Mocassin.Compilation.csproj`.
+- [x] `ModelDefinition` lattice/simulation sections and JSON/schema round-trip: flat model sections, converter,
+  schema, fixtures, and the additive-v1/ADR 0009 reconciliation are defined.
+- [x] Polymorphic simulation persistence and kind-specific arrays: flat DTO, `kind`, exact array selection,
+  authored order, duplicate rejection, and `SIM023` mismatch are defined.
+- [x] Doping priority/order/serialization, derived building block, and charge-compensation semantics: unique
+  `0..9999` priorities, ascending serialization, derived building block, and sign/zero compensation validation
+  are defined; ratio/truncation belongs to Step 10.
+- [x] `SimulationKind`/`TransitionKind` compatibility, defaults, and limits: exact mapping, `SIM002`, defaults,
+  hard ranges, and recommended bands are defined; residual is R2-1/R2-2.
+- [x] `ILatticeQuery`/`ISimulationQuery` and `IProjectQuery`; confirm the preview API is owned by Step 10:
+  confirmed.
+- [x] LAT001–LAT011 and SIM001–SIM035 ownership/validation: complete code list, Core validators, Step 07/10
+  handoff, and positive/negative test plan; residual is R2-1/R2-2.
+- [x] Step 03/04 dependencies, manifest/schema/fixture tasks, PublicAPI/ApiCompat, code layout,
+  documentation/navigation and test plans, and cross-step interfaces: checked; residual is R2-3/R2-6.
+- [x] Internal consistency across Step 06, `02-data-contracts.md`, Step 10, Step 11, and Step 25: checked;
+  residual is R2-3/R2-5.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+No Blocker or Major remains. M1–M7 are resolved by `160b226`; m1–m7 and n1–n3 are addressed or resolved. The
+remaining items are three Minor findings (R2-1, R2-2, R2-3) and five Notes (R2-4–R2-8). Under
+`docs/planning/reviews/README.md` §7, `Ready with notes` requires the human owner to accept the Minor/Note
+findings explicitly; alternatively the planner/step agent can make the small corrections and request a new
+round. The start gate remains the human owner's decision.
+
+Follow-up owner: Human owner (accept R2-1–R2-3 or request a small docs correction); planner/Step 06 agent
+(apply the accepted corrections).
+Follow-up step: Step 06 — Lattice and Simulation Models; the design revision `160b226` is otherwise ready for
+implementation.
