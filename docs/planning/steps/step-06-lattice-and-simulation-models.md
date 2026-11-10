@@ -13,8 +13,8 @@ validation.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Not requested
-- **Last updated:** —
+- **Design review:** [Ready for review](../reviews/step-06.md)
+- **Last updated:** 2026-11-10
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -49,7 +49,38 @@ simulation. These definitions feed step 10 (job expansion and supercells) and st
 
 ## Design
 
-### 1. Lattice model
+### 1. Model composition and persistence
+
+`ModelDefinition` gains the flat lattice and simulation sections alongside the Step 03–05 sections:
+
+```csharp
+public sealed record ModelDefinition
+{
+    // Step 03–05 sections omitted here.
+    ImmutableArray<OccupationExchange> OccupationExchanges { get; init; }
+    ImmutableArray<Doping> Dopings { get; init; }
+    ImmutableArray<Simulation> Simulations { get; init; }
+}
+```
+
+- The model stays flat on disk: `model.occupationExchanges`, `model.dopings`, and `model.simulations`.
+- `ModelDefinitionJsonConverter`, `ProjectJsonContext`, `ProjectSchema`, and `ProjectValidator` are extended
+  for the new sections.
+- `Simulation` is an abstract in-memory record. The persisted simulation DTO carries `kind` and the
+  kind-specific transition arrays/settings (`kineticTransitionIds` or `metropolisTransitionIds`).
+- Semantic ordering:
+  - `Dopings` are serialized in ascending `Priority`; priorities are unique.
+  - `OccupationExchanges` and `Simulations` are sorted by `id`.
+  - `kineticTransitionIds`, `metropolisTransitionIds`, and `ExecutionFlags` are sorted deterministically.
+  - Transition assignment order is not semantic; the solver resolves by rule lookup.
+- The project `schemaVersion` remains 1 because the lattice/simulation sections are additive.
+- Defaults:
+  - no occupation exchanges, dopings, or simulations;
+  - the default building block is derived, not stored;
+  - a new simulation uses the documented defaults.
+- Lattice previews and effective job counts are derived data and are never persisted.
+
+### 2. Lattice model
 
 ```csharp
 public sealed record OccupationExchange(
@@ -92,7 +123,7 @@ public sealed record Doping(
   - total charge before/after (must be neutral within tolerance),
   - which sites are affected.
 
-### 2. Simulation model
+### 3. Simulation model
 
 ```csharp
 public abstract record Simulation(
@@ -151,7 +182,7 @@ public sealed record MetropolisSimulation(
 - Multiple simulations may share transitions; a transition can be active in several simulations.
 - Simulation names are unique within the project.
 
-### 3. Job-count relationship
+### 4. Job-count relationship
 
 - The simulation's `JobCount` is the default number of duplicate jobs per configuration.
 - A job template collection may override it (`jobCountPerConfig`).
@@ -159,7 +190,7 @@ public sealed record MetropolisSimulation(
 - The hard limit is 99,999 jobs per package (the original `.msl` limit); the new format is not limited by
   that number, but the UI warns above 10,000.
 
-### 4. Validation rules
+### 5. Validation rules
 
 | Code | Severity | Rule |
 | --- | --- | --- |
@@ -186,7 +217,7 @@ public sealed record MetropolisSimulation(
 | `SIM010` | Warning | Estimated supercell positions exceed 500,000 |
 | `SIM011` | Warning | Requested MCSP/duplicate combination is very large |
 
-### 5. Editing operations
+### 6. Editing operations
 
 - Add/update/remove occupation exchanges and dopings.
 - Reorder doping priorities with a single operation that renumbers deterministically.
@@ -194,17 +225,138 @@ public sealed record MetropolisSimulation(
 - Assign transitions through a multi-select view model.
 - Duplicate a simulation with new IDs and the same settings.
 
+### 7. Public API
+
+```csharp
+// Mocassin.Core
+public interface ILatticeQuery
+{
+    ImmutableArray<OccupationExchange> OccupationExchanges { get; }
+    ImmutableArray<Doping> Dopings { get; }
+
+    OccupationExchange? Find(OccupationExchangeId id);
+    Doping? Find(DopingId id);
+}
+
+public interface ISimulationQuery
+{
+    ImmutableArray<Simulation> Simulations { get; }
+    Simulation? Find(SimulationId id);
+}
+
+// Mocassin.Compilation
+public sealed record DopingPreview(
+    DopingId DopingId,
+    int RequestedCount,
+    int ActualCount,
+    int DependentCount,
+    double ChargeBefore,
+    double ChargeAfter);
+
+public sealed record LatticePreview(
+    ImmutableArray<DopingPreview> Dopings,
+    long RemainingParticleCount,
+    bool ChargeNeutral);
+
+public sealed record SimulationJobPreview(
+    int JobCount,
+    int EffectiveJobCount,
+    long TotalJobs);
+
+public interface ILatticePreviewService
+{
+    LatticePreview CreatePreview(
+        ModelDefinition model,
+        ImmutableArray<(DopingId DopingId, double Fraction)> fractions,
+        int cellCountA,
+        int cellCountB,
+        int cellCountC);
+
+    SimulationJobPreview CreateJobPreview(
+        Simulation simulation,
+        int? jobCountPerConfiguration = null);
+}
+```
+
+- `ILatticeQuery` and `ISimulationQuery` are implemented by the immutable `Project` snapshot.
+- `ILatticePreviewService` lives in the pure `Mocassin.Compilation` layer; it does not perform I/O or use Symmetry.
+- The preview is advisory; Step 08/10 produce the authoritative lattices and job collections.
+
+## Code layout
+
+The new code follows the structure policy: PascalCase domain folders, namespaces that match folders, no new
+root-level files, and no folder above 20 direct files.
+
+```text
+Mocassin.Core/
+  Model/
+    ModelDefinition.cs                  # add lattice/simulation sections
+    ModelDefinitionJsonConverter.cs     # polymorphic simulation DTO
+    Lattice/
+      OccupationExchange.cs
+      Doping.cs
+      ILatticeQuery.cs
+      LatticeModelValidator.cs
+    Simulations/
+      Simulation.cs
+      KineticSimulation.cs
+      MetropolisSimulation.cs
+      SimulationKind.cs
+      ExecutionFlags.cs
+      ISimulationQuery.cs
+      SimulationModelValidator.cs
+  Diagnostics/
+    LatticeDiagnosticCodes.cs           # LAT001-LAT011
+    SimulationDiagnosticCodes.cs        # SIM001-SIM011
+  Editing/
+    ProjectEditor.cs                    # add lattice/simulation operations
+  Project/
+    ProjectJsonContext.cs
+    ProjectSchema.cs
+    ProjectValidator.cs
+
+Mocassin.Compilation/
+  Preview/
+    DopingPreview.cs
+    LatticePreview.cs
+    SimulationJobPreview.cs
+    LatticePreviewService.cs
+    ILatticePreviewService.cs
+```
+
+Tests mirror the source concept:
+
+- `Mocassin.Core.Tests/Lattice/OccupationExchangeTests.cs`
+- `Mocassin.Core.Tests/Lattice/DopingTests.cs`
+- `Mocassin.Core.Tests/Lattice/LatticeModelTests.cs`
+- `Mocassin.Core.Tests/Simulations/SimulationTests.cs`
+- `Mocassin.Core.Tests/Simulations/SimulationModelTests.cs`
+- `Mocassin.Compilation.Tests/Lattice/LatticePreviewTests.cs`
+
+Samples live under `samples/lattice/` and `samples/simulations/`. The new user-guide pages are added to
+`zensical.toml` navigation in the same step.
+
 ## Implementation tasks
 
-- [ ] Implement `OccupationExchange`, `Doping`, and derived default building block.
+- [ ] Extend `ModelDefinition` with the flat lattice/simulation sections; update
+  `ModelDefinitionJsonConverter`, `ProjectJsonContext`, `ProjectSchema`, and `ProjectValidator`.
+- [ ] Implement `OccupationExchange`, `Doping`, and the derived default building block.
 - [ ] Implement charge-delta calculation and rational compensation validation.
-- [ ] Implement lattice preview with requested vs. actual counts and charge balance.
+- [ ] Implement `ILatticeQuery` and `ISimulationQuery`.
 - [ ] Implement `Simulation`, `KineticSimulation`, `MetropolisSimulation`, and `ExecutionFlags`.
 - [ ] Implement transition-kind compatibility and reference validation.
+- [ ] Implement `LatticePreview`, `SimulationJobPreview`, and `ILatticePreviewService` in
+  `Mocassin.Compilation`.
 - [ ] Implement defaults and editor operations.
+- [ ] Add the Core lattice/simulation diagnostic codes and help text.
+- [ ] Update `contracts/manifest.json` with the lattice/simulation sections; regenerate the project schema and
+  add fixtures with empty and populated lattice/simulation data. The project `schemaVersion` remains 1 because
+  the fields are additive.
+- [ ] Add XML docs, update `PublicAPI.Unshipped.txt`, and refresh the ApiCompat baseline for every new public
+  type and member.
 - [ ] Add ceria reduction/hydration and barium-zirconate doping samples.
 - [ ] Add KMC/MMC simulation samples.
-- [ ] Add diagnostics/help text.
+- [ ] Add the new user-guide pages to `zensical.toml` navigation.
 
 ## Acceptance criteria
 
@@ -215,6 +367,11 @@ public sealed record MetropolisSimulation(
 - [ ] Doping priorities are unique and applied in ascending order.
 - [ ] A KMC simulation cannot select an MMC transition.
 - [ ] All original simulation settings are represented and validated.
+- [ ] The lattice/simulation sections round-trip through the project JSON context; dopings preserve priority
+  order and simulations preserve their kind-specific settings.
+- [ ] The generated project schema accepts the lattice/simulation sections, and fixtures cover empty and
+  populated models.
+- [ ] Public API files and the ApiCompat baseline are current.
 - [ ] Documentation written
 
 ## Documentation
@@ -225,6 +382,9 @@ At this point, document lattice/doping and simulation definitions:
 - `docs/user-guide/simulations.md` — MMC/KMC settings, defaults, transition assignment.
 - `docs/reference/project-format.md` — doping/simulation JSON fields and validation rules.
 - `docs/development/compilation-pipeline.md` — how these definitions feed compilation.
+- `docs/reference/project-format.md` — lattice/doping and simulation JSON fields, ordering, and validation.
+
+Add the new user-guide pages to `zensical.toml` navigation in the same step.
 
 ## Tests
 
@@ -236,6 +396,9 @@ At this point, document lattice/doping and simulation definitions:
 | Simulation limits | Boundary values for temperature, MCSP, job count, field |
 | Kind compatibility | MMC/KMC transition mixing rejected |
 | Defaults | New simulation matches documented defaults |
+| Model envelope | Empty, lattice-only, simulation-only, and combined models round-trip through the project JSON context |
+| Schema | Generated project schema accepts the lattice/simulation sections and rejects unknown fields |
+| Ordering | Doping priority order and simulation kind-specific fields survive serialization unchanged |
 | Editing | Reorder/duplicate/remove keeps references valid |
 
 ## Risks and mitigations
