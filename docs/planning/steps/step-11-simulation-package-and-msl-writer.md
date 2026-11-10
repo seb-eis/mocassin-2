@@ -124,7 +124,7 @@ the writer must keep them identical to the corresponding job/lattice payload val
 
 - job id, model id, lattice id, kind;
 - collection/config names and indices;
-- temperature, field modulus, target/pre-run MCSP, time limit, min success rate;
+- temperature, field modulus, target/pre-run MCSP, write-out count, time limit, min success rate;
 - lattice A/B/C, doping info, flags, seed;
 - created timestamp.
 

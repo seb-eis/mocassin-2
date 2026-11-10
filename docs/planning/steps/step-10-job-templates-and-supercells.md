@@ -201,6 +201,62 @@ public sealed record DopingApplication(
 - The build fails if charge neutrality cannot be achieved and compensation was requested.
 - The build warns if the effective fraction differs from the requested fraction.
 
+### 4.1 Lattice and job-count preview
+
+The GUI and `build --preview` use one preview service over the same generator. There is no second doping,
+truncation, or compensation implementation.
+
+```csharp
+public sealed record ParticlePopulation(ParticleId ParticleId, int Count);
+public sealed record SitePopulation(CellSiteId SiteId, ImmutableArray<ParticlePopulation> Particles);
+
+public sealed record LatticePreview(
+    LatticeRequest Request,
+    ImmutableArray<DopingValue> Dopings,
+    DopingReport Report,
+    ImmutableArray<SitePopulation> RemainingPopulations);
+
+public sealed record JobCountPreview(
+    SimulationId SimulationId,
+    int DefaultJobCount,
+    int EffectiveJobCount,
+    long TotalJobs);
+
+public interface ILatticePreviewService
+{
+    LatticePreview? TryCreatePreview(
+        IProjectQuery project,
+        LatticeRequest request,
+        ImmutableArray<DopingValue> dopings,
+        out ImmutableArray<Diagnostic> diagnostics);
+
+    JobCountPreview? TryCreateJobCountPreview(
+        IProjectQuery project,
+        JobTemplate template,
+        SimulationId simulationId,
+        int? jobCountPerConfiguration,
+        out ImmutableArray<Diagnostic> diagnostics);
+}
+```
+
+- `TryCreatePreview` echoes the requested `(A, B, C)` and doping list, so a preview cannot be confused with a
+  different supercell or fraction set.
+- `Report` is the same `DopingReport` returned by generation: requested vs. applied primary counts, dependent
+  counts, effective fraction, total positions, total charge before/after, and the neutrality flag.
+- `RemainingPopulations` gives the per-site remaining particle counts required by the Step 25 editor.
+- Unknown dopings, fractions outside `[0,1]`, invalid `(A, B, C)`, and impossible compensation return `null`
+  plus diagnostics. The service never throws for invalid user data; a null project or non-positive `(A, B, C)`
+  is a programmer error, matching the Step 03–05 preview boundary.
+- `TryCreateJobCountPreview` resolves the simulation's default job count, the template/collection override, and
+  the total jobs across the template's collections/configs. It does not generate lattices.
+- The preview uses the same `SupercellGenerator`/doping application path as the build. A test generates the
+  same request and asserts that the preview report and the lattice's `DopingReport` are identical.
+- The preview is cached by `(project model hash, lattice request hash, canonical doping list, catalog data
+  version, space-group data SHA-256, symmetry contract version)`, is bounded, and is thread-safe.
+- The service lives in `Mocassin.Compilation.Jobs`; `Mocassin.Compilation` already references
+  `Mocassin.Symmetry`, so P1 site multiplicity is available without a new dependency.
+- Step 25 consumes this service. Step 06 owns only the model definitions and validation.
+
 ### 5. Selection optimizers
 
 - An optimizer removes a `(site, particle)` start option from the KMC selection pool.
@@ -239,8 +295,11 @@ public sealed record DopingApplication(
 - [ ] Implement job expansion and deterministic job IDs/seeds.
 - [ ] Implement supercell generation with charge compensation and truncation.
 - [ ] Implement deterministic sampling and the doping report.
+- [ ] Implement `ILatticePreviewService`, `LatticePreview`, and `JobCountPreview` over the same generator as the
+  build; cover the try/failure boundary, request echo, per-site populations, cache keys, and preview/build
+  report equality.
 - [ ] Implement selection optimizers and their validation.
-- [ ] Implement template validation and job-count preview.
+- [ ] Implement template validation and the job-count preview.
 - [ ] Implement `mocassin build --preview` (no package write).
 - [ ] Add ceria temperature/doping sweep samples.
 - [ ] Add tests for edge cases (0 %, 100 %, tiny cells, impossible compensation).
@@ -251,6 +310,11 @@ public sealed record DopingApplication(
 - [ ] For a 10×10×10 ceria cell and 1 % Ce doping, the applied counts and vacancy compensation are correct.
 - [ ] A requested fraction that cannot be realized is adjusted downward and reported.
 - [ ] An impossible charge compensation fails with `JOB012`.
+- [ ] The lattice preview echoes the request, reports requested/applied counts, per-site remaining populations,
+  total charge before/after, and neutrality, and matches the generated lattice's report for the same request.
+- [ ] The preview returns `null` plus diagnostics for an unknown doping, an out-of-range fraction, an invalid
+  supercell, or impossible compensation; it never returns a partial preview.
+- [ ] The job-count preview reports the default, effective, and total job counts without generating lattices.
 - [ ] Same job descriptor + seed produces an identical lattice across runs and OSes.
 - [ ] Changing a simulation-only setting does not change the lattice for the same job.
 - [ ] Optimizers remove only start options, not lattice particles.
@@ -261,9 +325,11 @@ public sealed record DopingApplication(
 At this point, document job templates and supercells:
 
 - `docs/user-guide/job-templates.md` — collections/configs, inheritance, duplicates, optimizers.
-- `docs/user-guide/lattice.md` — doping preview and effective fractions.
+- `docs/user-guide/lattice.md` — update the page created in Step 06 with doping preview, effective fractions,
+  truncation, and charge compensation.
 - `docs/reference/project-format.md` — job-template JSON and seed derivation.
-- `docs/development/compilation-pipeline.md` — supercell generation, truncation, charge compensation.
+- `docs/development/compilation-pipeline.md` — supercell generation, truncation, charge compensation, and the
+  shared preview service.
 
 ## Tests
 
@@ -278,6 +344,11 @@ At this point, document job templates and supercells:
 | Supercell | Default occupations, replication order |
 | Doping | Counts, truncation, order, multiple dopings |
 | Charge | Compensation ratios and neutrality |
+| Lattice preview | Request/doping echo, applied counts, per-site populations, total charge, neutrality |
+| Preview failure | Unknown doping, fraction outside [0,1], invalid supercell, impossible compensation -> null + diagnostics; no partial preview |
+| Preview/build equality | The preview report equals the generated lattice's `DopingReport` for the same request |
+| Preview cache | Keys separate project model, request, doping list, and catalog/contract versions |
+| Job-count preview | Default/effective/total counts, template overrides, no lattice generation |
 | Sampling | Uniform without replacement; deterministic |
 | Optimizers | Start options removed, lattice unchanged |
 | Edge cases | 0 %, 100 %, tiny cell, impossible ratio |
@@ -289,6 +360,8 @@ At this point, document job templates and supercells:
 | --- | --- |
 | Charge-compensation rounding surprises users | Preview report; explicit requested vs. applied |
 | Multiple dopings interact unpredictably | Validate source occupation at each step; preview sequence |
+| Preview and generated lattice diverge | One generator; preview/build equality test |
+| Preview cache returns stale data | Cache key includes the project model hash, request, doping list, and catalog/contract versions |
 | Non-deterministic sampling | Sorted candidate lists + fixed RNG stream |
 | Memory for huge lattices | Build jobs lazily; stream package writing (step 11) |
 | Seed collisions/duplicates | SHA-256 domain separation and job indices |

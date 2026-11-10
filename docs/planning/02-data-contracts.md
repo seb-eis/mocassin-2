@@ -429,18 +429,33 @@ parameterization, and lattice signatures use the MessagePack projection (section
 }
 ```
 
-- Occupation exchanges are sorted by `id` when serialized.
-- Dopings are applied in ascending `priority`; priorities are unique and the `dopings` array preserves that
-  order.
-- Each doping fraction applies to the particles remaining after higher-priority dopings.
-- `dependentExchangeId` may be omitted when `chargeCompensation` is false or the primary exchange is
-  self-compensating.
-- The default building block is implied: first particle of each stable site's set, void on unstable sites.
-- Simulations are stored under `model.simulations`, sorted by `id`. The kind-specific transition ID arrays and
-  `executionFlags` are sorted deterministically; transition assignment order is not semantic.
-- The lattice and simulation sections are additive and the project `schemaVersion` remains 1.
+- Occupation exchanges are sorted by `id` when serialized. Occupation-exchange and doping names are unique
+  case-insensitively within their collection.
+- Dopings are serialized in ascending `priority`; priorities are unique and in `0..9999`. The order is the
+  deterministic application order.
+- Each doping fraction applies to the particles remaining after higher-priority dopings. The fractions and the
+  supercell are job-template data (Step 10), not model fields.
+- `dependentExchangeId` must be `null` when `chargeCompensation` is `false`. When compensation is `true`, the
+  dependent exchange is required, both charge deltas must be non-zero, and they must have opposite signs. The
+  integer ratio and any downward truncation are Step 10 checks.
+- The default building block is implied: first particle of each stable site's set, void on unstable sites. It is
+  derived by `ILatticeQuery.DefaultBuildingBlock` and is never persisted.
+- Model-level validation covers references, names, priorities, and charge-compensation shape (`LAT001`–`LAT011`).
+  Fractions, supercell limits, same-site application, truncation, charge-compensation counts, and the lattice
+  preview are Step 10 (`JOB004`–`JOB015`).
+- Simulations are stored under `model.simulations`, sorted by `id`. The kind-specific transition ID arrays
+  preserve authored order, as required by Step 04; they are never re-sorted. `executionFlags` is a sorted array
+  of camelCase flag names.
+- The lattice and simulation sections are additive and the project `schemaVersion` remains 1 under the Step
+  03–05 pre-release precedent. The manifest `status`/`notes`, generated schema, descriptors, and fixtures are
+  updated now; ADR 0009's version-bump rule resumes with the first released format.
 
 #### Simulations
+
+The persisted simulation is a flat object. `kind` selects the concrete kind; only the matching transition array
+and kind-specific settings are present. The other kind's fields are absent, not `null`. The JSON schema uses a
+flat object with optional kind-specific fields because the contract generator has no `oneOf`/discriminator
+support; the validator rejects a field that belongs to the other kind (`SIM023`).
 
 ```json
 [
@@ -452,26 +467,63 @@ parameterization, and lattice signatures use the MessagePack projection (section
     "settings": {
       "temperatureK": 773.0,
       "targetMcsp": 200,
-      "preRunMcsp": 100,
-      "timeLimitSeconds": null,
+      "writeOutCount": 100,
+      "timeLimitSeconds": 31536000,
       "minSuccessRate": null,
+      "jobCount": 12,
+      "rngSeed": null,
+      "executionFlags": ["noJumpLogging"],
+      "instruction": null,
+      "preRunMcsp": 100,
       "electricFieldModulusVm": 1.0e7,
       "electricFieldDirection": [1.0, 0.0, 0.0],
       "normalizationEnergyEv": null,
-      "maxAttemptFrequencyHz": null,
-      "executionFlags": ["NoJumpLogging"],
-      "instruction": null
+      "maxAttemptFrequencyHz": null
+    }
+  },
+  {
+    "id": "…",
+    "name": "O exchange 1000 K",
+    "kind": "mmc",
+    "metropolisTransitionIds": ["…"],
+    "settings": {
+      "temperatureK": 1000.0,
+      "targetMcsp": 1000,
+      "writeOutCount": 100,
+      "timeLimitSeconds": 31536000,
+      "minSuccessRate": null,
+      "jobCount": 12,
+      "rngSeed": null,
+      "executionFlags": [],
+      "instruction": null,
+      "breakTolerance": 0.0,
+      "breakSampleLengthMcsp": 1000,
+      "breakSampleIntervalMcsp": 100,
+      "resultSampleMcsp": 200
     }
   }
 ]
 ```
 
-MMC uses `metropolisTransitionIds` and settings `breakTolerance`, `breakSampleLengthMcsp`,
-`breakSampleIntervalMcsp`, `resultSampleMcsp`.
-
-Common execution flags: `NoSaving`, `NoJumpLogging`, `UseFastExp`, `Deterministic`.
-`instruction` is an optional advanced/legacy free-text extension instruction; structured `extensions` in job
-configurations are preferred.
+- `kind` is `kmc` or `mmc`; it must agree with the transition array and the kind-specific settings.
+- `kineticTransitionIds` and `metropolisTransitionIds` preserve authored order and may not contain duplicate
+  `(kind, id)` references.
+- `writeOutCount` is the number of intermediate data-out calls (0 = final state only).
+- `timeLimitSeconds` is the wall-clock limit; `null` means unlimited. The default is 31,536,000 s (P1Y).
+- `minSuccessRate` is in MCS/s; `null` or 0 disables the abort. It is not a fraction.
+- `rngSeed` is optional; `null` or empty derives the seed from the project/job seed (ADR 0005). The original
+  GUID fallback is not reproduced.
+- `executionFlags` is a sorted array of camelCase names: `noSaving`, `noJumpLogging`, `useFastExp`,
+  `deterministic`. The empty array means `None`; the `.msl` job payload uses the `u32` bitmask.
+- KMC `preRunMcsp` 0 disables the pre-run (the original −1 sentinel is not persisted). `normalizationEnergyEv`
+  `null` means no normalization (the original default 0). `maxAttemptFrequencyHz` `null` means the maximum from
+  the transition rules.
+- MMC `breakTolerance` 0 disables the equilibrium break check; sample lengths/intervals and the result sample
+  are MCSP counts.
+- `instruction` is an optional advanced/legacy free-text extension instruction; structured `extensions` in job
+  configurations are preferred.
+- Lattice, job-count, and effective-count previews are Step 10 derived data and are never persisted in the
+  project.
 
 ### 2.3 Parameterization templates
 
@@ -634,6 +686,7 @@ CREATE TABLE jobs (
     temperature_k     REAL    NOT NULL,
     electric_field_vm REAL    NOT NULL DEFAULT 0.0,
     target_mcsp       INTEGER NOT NULL,
+    write_out_count   INTEGER NOT NULL DEFAULT 0,
     pre_run_mcsp      INTEGER NOT NULL DEFAULT 0,
     time_limit_s      INTEGER,
     min_success_rate  REAL,
@@ -747,7 +800,7 @@ MessagePack map with snake_case keys. Top-level:
 | `id` | string | Project simulation ID |
 | `kind` | string | `kmc` / `mmc` |
 | `jump_collection_ids` | `u32[]` | Active collections |
-| `default_settings` | object | Temperature, MCSP, pre-run, limits, field, flags |
+| `default_settings` | object | Temperature, MCSP, write-out count, pre-run, limits, field, normalization, MMC samples, flags |
 | `tracker_models` | array | Global/static tracker definitions and indices |
 
 Exact array lengths and invariants are validated by `mocassin-msl` before the solver allocates memory.
@@ -761,13 +814,18 @@ Exact array lengths and invariants are validated by `mocassin-msl` before the so
 | `kind` | string | `kmc` / `mmc` |
 | `temperature_k` | f64 | |
 | `target_mcsp` | u64 | |
-| `pre_run_mcsp` | u64 | |
-| `time_limit_s` | u64? | |
-| `min_success_rate` | f64? | |
+| `write_out_count` | u32 | Intermediate data-out calls; 0 = final state only |
+| `pre_run_mcsp` | u64 | 0 = pre-run disabled |
+| `time_limit_s` | u64? | `null` = no wall-clock limit |
+| `min_success_rate` | f64? | MCS/s; `null` or 0 disables the rate abort |
 | `electric_field_vm` | f64 | |
 | `electric_field_direction` | `[f64;3]` | Normalized Cartesian direction |
-| `normalization_energy_ev` | f64? | |
-| `max_attempt_frequency_hz` | f64? | |
+| `normalization_energy_ev` | f64? | `null` = no normalization |
+| `max_attempt_frequency_hz` | f64? | `null` = maximum from the transition rules |
+| `break_tolerance` | f64? | MMC only; 0 disables the break check |
+| `break_sample_length_mcsp` | u64? | MMC only |
+| `break_sample_interval_mcsp` | u64? | MMC only |
+| `result_sample_mcsp` | u64? | MMC only |
 | `flags` | u32 | |
 | `selection_optimizers` | array | `{position_id:u32, particle_id:u8}` |
 | `extensions` | array | `{id: string, config: map}` for optional solver routines |
