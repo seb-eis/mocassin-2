@@ -1879,3 +1879,15 @@ static Mocassin.Core.Model.Simulations.Simulation.operator ==(Mocassin.Core.Mode
 virtual Mocassin.Core.Model.Simulations.Simulation.EqualityContract.get -> System.Type!
 virtual Mocassin.Core.Model.Simulations.Simulation.Equals(Mocassin.Core.Model.Simulations.Simulation? other) -> bool
 virtual Mocassin.Core.Model.Simulations.Simulation.PrintMembers(System.Text.StringBuilder! builder) -> bool
+Mocassin.Core.Editing.ProjectEditor.AddDoping(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Lattice.Doping! doping) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddOccupationExchange(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Lattice.OccupationExchange! exchange) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddSimulation(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Simulations.Simulation! simulation) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.DuplicateSimulation(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.SimulationId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveDoping(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.DopingId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveOccupationExchange(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.OccupationExchangeId id, bool removeDependents = false) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveSimulation(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.SimulationId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.ReorderDopings(Mocassin.Core.Project.Project! project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.DopingId> orderedIds) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SwitchSimulationKind(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.SimulationId id, Mocassin.Core.Model.Simulations.SimulationKind kind) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateDoping(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Lattice.Doping! doping) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateOccupationExchange(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Lattice.OccupationExchange! exchange) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateSimulation(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Simulations.Simulation! simulation) -> Mocassin.Core.Editing.ProjectEditResult!

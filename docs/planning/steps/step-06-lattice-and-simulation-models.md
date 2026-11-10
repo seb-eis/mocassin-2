@@ -20,8 +20,8 @@ validation.
 | --- | --- | --- | --- | --- | --- |
 | `lattice-model` | `feature/step-06-lattice-and-simulation-models/lattice-model` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `bc333f3` |
 | `simulation-model` | `feature/step-06-lattice-and-simulation-models/simulation-model` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `1c64c96` |
-| `persistence-and-contracts` | `feature/step-06-lattice-and-simulation-models/persistence-and-contracts` | Awaiting approval | `verify.sh dotnet`, `contracts`, `api`, `structure` pass | — | — |
-| `queries-and-editing` | `feature/step-06-lattice-and-simulation-models/queries-and-editing` | Not started | — | — | — |
+| `persistence-and-contracts` | `feature/step-06-lattice-and-simulation-models/persistence-and-contracts` | Done | `verify.sh dotnet`, `contracts`, `api`, `structure` pass | — | `48e1f20` |
+| `queries-and-editing` | `feature/step-06-lattice-and-simulation-models/queries-and-editing` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `samples-and-docs` | `feature/step-06-lattice-and-simulation-models/samples-and-docs` | Not started | — | — | — |
 | `closeout` | `feature/step-06-lattice-and-simulation-models/closeout` | Not started | — | — | — |
 
