@@ -471,6 +471,44 @@ Platform-specific triggers: P/Invoke, `LibraryImport`, `System.Runtime.InteropSe
 RID-specific packages, path/case/locking logic, line-ending or encoding-sensitive handling, GUI projects, Rust
 `cfg(windows)` or `cfg(target_os = "...")`, and installers or packaging.
 
+### 3.14 Cross-cutting phase reviews
+
+After the last step of each phase is merged and tagged, the phase closes with three repository-wide reviews:
+
+1. **Policy and planning status** — agent instructions, workflows, CI, code structure, process records, and
+   status. This review starts first.
+2. **Design foundations and model definition** — architecture, contracts, model design, and cross-step
+   interfaces.
+3. **Documentation status** — coverage, accuracy, navigation, API docs, and the publication boundary.
+
+The design and documentation reviews may run in parallel after the policy review starts.
+
+This checkpoint is a **quality gate**. The next phase's first step design review may not start until all three
+verdicts are `Passed` or the human owner accepts `Passed with notes`, or the owner waives a review with a
+recorded rationale.
+
+1. Freeze the checkpoint after the phase's last step is merged and tagged. Record the checkpoint commit in each
+   review.
+2. An implementor/step agent orchestrates each review. The orchestrator prepares the request, spawns a fresh
+   independent reviewer, fixes findings on a maintenance branch, adds resolutions without altering reviewer
+   text, records the new commit, and requests re-review. It must not request a particular verdict or edit
+   reviewer evidence, findings, or verdict.
+3. The reviewer is a fresh context, reads the repository at the frozen commit, writes only its assigned record,
+   may check checklists and add inline notes, and commits only that file with `[skip ci]`. It must not fix
+   findings, merge, tag, push `main`, or delete branches.
+4. Repeat until the reviewer no longer identifies Blocker/Major issues. Use a fresh reviewer for the new round
+   unless the same reviewer stayed read-only and outside the remediation.
+5. The human owner approves each final verdict and the phase gate.
+
+Review records live under [`docs/planning/reviews/cross-cutting/`](docs/planning/reviews/cross-cutting/).
+Review IDs are globally sequential (`XC-NN`) and are never reused. Each phase gets three new IDs; the registry
+and status values are in the cross-cutting README. Phase A is waived because the process was introduced after
+it completed.
+
+Findings are remediated through maintenance branches, ADRs, amendments, or step-page updates. Never move an
+existing tag. A cross-cutting review never creates a step branch or step tag, and it does not replace step
+design reviews, step audits, or Step 29 parity validation.
+
 ## 4. Non-negotiable decisions
 
 These are recorded decisions (see [`docs/planning/adr/`](docs/planning/adr/)). Do not reverse them without an

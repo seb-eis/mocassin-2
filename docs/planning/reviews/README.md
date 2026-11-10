@@ -170,15 +170,48 @@ resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Maj
 the latest round or only open findings is not acceptable. The record's `Approval summary` section is the durable
 source for that report.
 
-## 12. Cross-cutting reviews
+## 12. Cross-cutting phase reviews
 
-The post-Step-07 checkpoint uses three repository-wide reviews under
-[`cross-cutting/`](cross-cutting/README.md):
+After the last step of each phase is merged and tagged, the phase closes with three repository-wide reviews:
 
-- repository policy and planning status (`XC-01`);
-- design foundations and model definition (`XC-02`);
-- documentation status (`XC-03`).
+- **policy and planning status** — agent instructions, workflows, CI, code structure, process records, status;
+- **design foundations and model definition** — architecture, contracts, model design, cross-step interfaces;
+- **documentation status** — coverage, accuracy, navigation, API docs, publication boundary.
 
-They are not step design reviews and do not create step branches or tags. Each uses a separate fresh reviewer,
-the same read-only record write scope, and human-owner approval. The records are currently draft checklists for
-owner review.
+The policy review starts first; the design and documentation reviews may then run in parallel. The next
+phase's first step design review may not start until all three verdicts are accepted by the human owner, or a
+review is explicitly waived with a recorded rationale.
+
+### 12.1 Numbering
+
+Review IDs are globally sequential and are never reused. Each phase gets three new IDs:
+
+| Phase | Steps | Reviews |
+| --- | --- | --- |
+| B. Model definition | 03–07 | `XC-01` policy, `XC-02` design, `XC-03` documentation |
+| C. Compilation and build | 08–12 | `XC-04`, `XC-05`, `XC-06` |
+| D. Solver | 13–19 | `XC-07`, `XC-08`, `XC-09` |
+| E. Results | 20–22 | `XC-10`, `XC-11`, `XC-12` |
+| F. GUI | 23–28 | `XC-13`, `XC-14`, `XC-15` |
+| G. Release and documentation | 29–31 | `XC-16`, `XC-17`, `XC-18` |
+
+Phase A is waived because the process was introduced after it completed. The registry and records are in
+[`cross-cutting/`](cross-cutting/README.md).
+
+### 12.2 Orchestration
+
+Each review is orchestrated by an implementor/step agent, not by the reviewer:
+
+1. Freeze the request and target commit.
+2. Spawn a fresh independent reviewer with the frozen commit, record, links, and scope; do not request a
+   verdict or substitute a summary for repository reading.
+3. The reviewer writes only its record and commits only that file with `[skip ci]`.
+4. If findings remain, the orchestrator fixes the repository state on a maintenance branch, updates the
+   appropriate design/process/docs artifact, adds resolutions without altering reviewer text, records the new
+   commit, and requests re-review.
+5. Repeat until the reviewer no longer identifies Blocker/Major issues. Use a fresh reviewer for the new round
+   unless the same reviewer stayed read-only and outside the remediation.
+6. The human owner approves the final verdict and the phase gate.
+
+The reviewer must not fix findings, merge, tag, push `main`, or delete branches. A record commit that touches
+any other file is invalid.
