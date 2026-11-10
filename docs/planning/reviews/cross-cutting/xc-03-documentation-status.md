@@ -27,7 +27,7 @@
 ## Purpose
 
 Verify that the published and developer documentation is complete, accurate, navigable, and consistent with
-the implemented Steps 00–07.
+the completed phase. For the Phase B checkpoint, this covers the implemented Steps 00–07.
 
 This is a documentation review, not a repository-policy audit or a design-correctness review.
 

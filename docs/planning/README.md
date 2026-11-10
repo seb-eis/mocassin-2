@@ -42,7 +42,7 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
 17. [`drafts/`](drafts/) — non-normative design scratches and future-work notes; not part of the reviewed
     plan and not an implementation authorization.
 18. [`reviews/cross-cutting/README.md`](reviews/cross-cutting/README.md) — cross-cutting phase-checkpoint
-    reviews: policy/planning, design foundations, and documentation status.
+    reviews: policies and planning, architecture and design status, and documentation status.
 
 ## Decisions already made
 

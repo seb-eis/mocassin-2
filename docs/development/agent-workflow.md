@@ -345,7 +345,7 @@ writes into it directly.
 | Amendment design review | Focused fresh planning auditor before amendment implementation |
 | Amendment integration | Before the parent step audit freeze |
 | Step completion audit | Fresh out-of-context audit after the step is frozen; includes integrated amendments |
-| Phase checkpoint | After the last step of a phase: policy review first, then design and documentation reviews in parallel |
+| Phase checkpoint | After the last step of a phase: policies and planning review first, then architecture/design and documentation reviews in parallel |
 | Phase gate | Next phase design review waits for all three verdicts; human owner accepts or waives |
 | Post-merge amendment | Separate maintenance audit and a new tag with owner approval |
 | Reviewer record commit | Documentation-only; the record file is the only changed file |

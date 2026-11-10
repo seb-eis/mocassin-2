@@ -1,4 +1,4 @@
-# XC-01 — Repository Policy and Planning Status Audit
+# XC-01 — Policies and Planning
 
 > Reviewer: write evidence, findings, and verdict directly into this record. You may edit only your own
 > metadata, checklist completion marks and inline verification notes (not item text), `Evidence`, `Findings`,
@@ -11,7 +11,7 @@
 | --- | --- |
 | Review ID | XC-01 |
 | Checkpoint | Phase B — Model definition (Steps 03–07) |
-| Type | Repository-wide policy and planning audit |
+| Type | Repository-wide policies and planning audit |
 | Status | Planned — awaiting Step 07 completion |
 | Target commit | After the Step 07 merge and `step-07` tag, plus a docs-only checkpoint commit |
 | Request owner | Step agent / planner |
@@ -27,7 +27,7 @@
 ## Purpose
 
 Verify that the repository's agent instructions, workflows, policies, tooling, planning records, and status
-surfaces are internally consistent and current before Step 08 starts.
+surfaces are internally consistent and current before the next phase starts.
 
 This is not a design review, scientific audit, or documentation-content review.
 

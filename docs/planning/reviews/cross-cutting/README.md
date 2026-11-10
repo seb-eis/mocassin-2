@@ -7,9 +7,9 @@ Each phase checkpoint has three independent reviews:
 
 | Review | Focus | Order |
 | --- | --- | --- |
-| **Policy and planning status** | Agent instructions, workflows, CI, code structure, process records, status | Starts first |
-| **Design foundations and model definition** | Architecture, contracts, model design, cross-step interfaces | After the policy review |
-| **Documentation status** | Coverage, accuracy, navigation, API docs, publication boundary | After the policy review, in parallel with design |
+| **Policies and planning** | Agent instructions, workflows, CI, code structure, process records, phase status | Starts first |
+| **Architecture and design status** | Architecture, contracts, design status, cross-step interfaces | After the policies review |
+| **Documentation status** | Coverage, accuracy, navigation, API docs, publication boundary | After the policies review, in parallel with architecture and design |
 
 The next phase's first step design review may not start until all three reviews are `Passed` or the human
 owner accepts `Passed with notes`, or the owner explicitly waives a review with a recorded rationale.
@@ -21,19 +21,19 @@ Review IDs are globally sequential and are never reused. Each phase gets three n
 | Phase | Steps | Reviews | Status |
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
-| B. Model definition | 03–07 | `XC-01` policy, `XC-02` design, `XC-03` documentation | Planned — awaiting Step 07 completion |
-| C. Compilation and build | 08–12 | `XC-04` policy, `XC-05` design, `XC-06` documentation | Planned |
-| D. Solver | 13–19 | `XC-07` policy, `XC-08` design, `XC-09` documentation | Planned |
-| E. Results | 20–22 | `XC-10` policy, `XC-11` design, `XC-12` documentation | Planned |
-| F. GUI | 23–28 | `XC-13` policy, `XC-14` design, `XC-15` documentation | Planned |
-| G. Release and documentation | 29–31 | `XC-16` policy, `XC-17` design, `XC-18` documentation | Planned |
+| B. Model definition | 03–07 | `XC-01` policies and planning, `XC-02` architecture and design, `XC-03` documentation | Planned — awaiting Step 07 completion |
+| C. Compilation and build | 08–12 | `XC-04` policies and planning, `XC-05` architecture and design, `XC-06` documentation | Planned |
+| D. Solver | 13–19 | `XC-07` policies and planning, `XC-08` architecture and design, `XC-09` documentation | Planned |
+| E. Results | 20–22 | `XC-10` policies and planning, `XC-11` architecture and design, `XC-12` documentation | Planned |
+| F. GUI | 23–28 | `XC-13` policies and planning, `XC-14` architecture and design, `XC-15` documentation | Planned |
+| G. Release and documentation | 29–31 | `XC-16` policies and planning, `XC-17` architecture and design, `XC-18` documentation | Planned |
 
 The first checkpoint records:
 
 | ID | Record | Status |
 | --- | --- | --- |
-| `XC-01` | [`xc-01-repository-policy.md`](xc-01-repository-policy.md) | Planned — awaiting Step 07 completion |
-| `XC-02` | [`xc-02-design-foundations.md`](xc-02-design-foundations.md) | Planned — awaiting Step 07 completion |
+| `XC-01` | [`xc-01-policies-and-planning.md`](xc-01-policies-and-planning.md) | Planned — awaiting Step 07 completion |
+| `XC-02` | [`xc-02-architecture-and-design.md`](xc-02-architecture-and-design.md) | Planned — awaiting Step 07 completion |
 | `XC-03` | [`xc-03-documentation-status.md`](xc-03-documentation-status.md) | Planned — awaiting Step 07 completion |
 
 `XC-01` starts first. Once it is underway, `XC-02` and `XC-03` may run in parallel.
@@ -94,7 +94,7 @@ Each review uses the same round-based process as design reviews and implementati
 ## 6. Phase gate
 
 - Freeze the checkpoint after the last step of the phase is merged and tagged.
-- Run the policy review first; then run the design and documentation reviews in parallel.
+- Run the policies and planning review first; then run the architecture and design, and documentation reviews in parallel.
 - The next phase's first step design review may not start until all three verdicts are accepted by the human
   owner.
 - A review may be waived only by the human owner, with the reason recorded in its record.
