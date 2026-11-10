@@ -15,16 +15,16 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Re-review required |
-| Reviewed commit | `fe4868a` |
+| Reviewed commit | `e587a6b` |
 | Docs branch | `docs/step-06-design-revision` |
 | Review date | 2026-11-10 |
-| Reviewer | Independent planning auditor (fresh context, round 4; no shared conversation with the planner or implementor) |
+| Reviewer | — (round-5 reviewer to fill) |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
 
-Round 1 was reviewed at `a64ecf3`, round 2 at `160b226`, and round 3 at `5ae32b0`; all reviewer text is
-unchanged. The round-3 notes were corrected in `fe4868a`, and the round-4 request is appended at the end of
-this record.
+Round 1 was reviewed at `a64ecf3`, round 2 at `160b226`, round 3 at `5ae32b0`, and round 4 at `fe4868a`; all
+reviewer text is unchanged. The round-4 notes were corrected in `e587a6b`, and the round-5 request is appended
+at the end of this record.
 
 ## Step summary
 
@@ -295,7 +295,8 @@ Round history:
 | 1 | 2026-11-10 | `a64ecf3` | Independent planning auditor (fresh context) | Changes required |
 | 2 | 2026-11-10 | `160b226` | Fresh independent re-reviewer | Ready with notes |
 | 3 | 2026-11-10 | `5ae32b0` | Fresh independent re-reviewer | Ready with notes |
-| 4 | 2026-11-10 | `fe4868a` | Awaiting fresh reviewer | — |
+| 4 | 2026-11-10 | `fe4868a` | Fresh independent re-reviewer | Ready with notes |
+| 5 | 2026-11-10 | `e587a6b` | Awaiting fresh reviewer | — |
 
 Findings and resolutions:
 
@@ -306,8 +307,10 @@ Findings and resolutions:
 | n1–n3 | Note | See round 1 | Acknowledged/incorporated; see `Resolution status` | `160b226` | Closed |
 | R2-1–R2-3 | Minor | See round 2 | Small corrections; see `Resolution status` | `5ae32b0` | Resolved |
 | R2-4–R2-8 | Note | See round 2 | Corrections/acknowledgement; see `Resolution status` | `5ae32b0` | Resolved/acknowledged |
-| R3-1 | Minor | See round 3 | Min-success-rate upper bound added | `fe4868a` | Resolved — awaiting round 4 |
-| R3-2–R3-3 | Note | See round 3 | Flag semantics and deviation placement corrected | `fe4868a` | Resolved — awaiting round 4 |
+| R3-1 | Minor | See round 3 | Min-success-rate upper bound added | `fe4868a` | Resolved |
+| R3-2–R3-3 | Note | See round 3 | Flag semantics and deviation placement corrected | `fe4868a` | Resolved |
+| R4-1 | Minor | See round 4 | `SolverJobFlags` carrier and derived-bit table added | `e587a6b` | Resolved — awaiting round 5 |
+| R4-2–R4-4 | Note | See round 4 | Deterministic consumer, normalization canonicalization, dashboard acknowledgement | `e587a6b` | Resolved/acknowledged — awaiting round 5 |
 
 ## Human approval
 
@@ -355,6 +358,10 @@ evidence, or verdict.
 | R3-1 | Resolved — awaiting round 4. `SIM012` now rejects a min success rate above `int.MaxValue` as well as negative/non-finite values. | Planner | `fe4868a` |
 | R3-2 | Resolved — awaiting round 4. Defined `Deterministic` semantics and mapped the derived/compiler-owned flags (`KmcSimulation`/`MmcSimulation`, `UsePrerun`, `UseDualDofCorrection`) that are not user-authored; documented the new `.msl` bit values. | Planner | `fe4868a` |
 | R3-3 | Resolved — awaiting round 4. Moved the write-out-0 deviation into the simulation section's deviation list. | Planner | `fe4868a` |
+| R4-1 | Resolved — awaiting round 5. Named the `SolverJobFlags` carrier and bit table, including `useDualDofCorrection` bit 4, `usePrerun` bit 5, and the kind bits; Steps 08/11/14/16 now consume the `.msl` flag. | Planner | `e587a6b` |
+| R4-2 | Resolved — awaiting round 5. `Deterministic` now disables Step 16's `UseFrequencyPrecheck`; the bit table is in the `.msl` payload contract. | Planner | `e587a6b` |
+| R4-3 | Resolved — awaiting round 5. `NormalizationEnergyEv = 0.0` is accepted and canonicalizes to `null`; the test plan covers it. | Planner | `e587a6b` |
+| R4-4 | Acknowledged. `docs/planning/status.md` is implementor-owned and will be updated at step start/closeout; it is outside the reviewer and planner write scope. | Planner | `e587a6b` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -1099,3 +1106,27 @@ Follow-up owner: Human owner (accept R4-1–R4-4 or request a small docs correct
 (apply the accepted corrections).
 Follow-up step: Step 06 — Lattice and Simulation Models; the design revision `fe4868a` is otherwise ready for
 implementation.
+
+## Re-review request (round 5)
+
+| Field | Value |
+| --- | --- |
+| Step | 06 — Lattice and Simulation Models |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `e587a6b` |
+| Docs branch | `docs/step-06-design-revision` |
+| Review date | — |
+| Reviewer | — |
+
+Design revision: `e587a6b5a096c595da11b2c1f6cf671c5da5f1ba`.
+
+The revision delta from `fe4868a` is six planning files: the Step 06 page, `02-data-contracts.md`, and Steps
+08, 11, 14, and 16. It adds the `SolverJobFlags` carrier and derived-bit table (including
+`useDualDofCorrection`), ties `Deterministic` to Step 16's `UseFrequencyPrecheck`, canonicalizes
+`NormalizationEnergyEv = 0.0` to `null`, and acknowledges the implementor-owned status dashboard. The round-1
+to round-4 reviewer text is unchanged.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for round 5 below. Keep the
+earlier rounds unchanged.
