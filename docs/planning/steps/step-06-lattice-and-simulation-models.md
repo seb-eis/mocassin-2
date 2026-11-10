@@ -108,6 +108,10 @@ public sealed record ModelDefinition
   - `ProjectHasher.Compute` hashes the canonical model, so lattice/simulation edits change the model hash and
     `ProjectHasher.ComputeDocument` changes with them;
   - `ProjectEditor.Apply` therefore sees a changed document hash instead of treating the edit as a no-op.
+- Empty lattice/simulation arrays are omitted on write, matching the existing behavior for optional transition
+  and energy arrays. Missing arrays load as empty, and `CanonicalizeModel` treats default arrays as empty. A
+  project created before Step 06 therefore keeps its canonical model/document hash; a hash-stability fixture
+  and test prove this.
 - `ProjectSchema` needs no change while `schemaVersion` remains 1; it owns only the version constants. There is
   no standalone `ProjectJsonContext.cs` file.
 - Semantic ordering:
@@ -253,10 +257,11 @@ public enum ExecutionFlags
 - `WriteOutCount` is the number of intermediate data-out calls; 0 writes only the final state. It is the
   original `ISimulation.WriteOutCount` / UI “simulation block count”.
 - `TimeLimitSeconds` is the wall-clock run limit; null means no limit. The default is P1Y (31,536,000 s).
-- `MinSuccessRate` is the lower abort rate in MCS/s (Step 16 defines the abort); null or 0 disables it. It is
-  deliberately not a fraction.
-- `RngSeed` is optional; null or empty means derive from the project/job seed. The original replaced an empty
-  seed with a GUID; that is a recorded deviation required by ADR 0005's deterministic seed rule.
+- `MinSuccessRate` is the lower abort rate in MCS/s (Step 16 defines the abort); null or 0 disables it, and
+  0 canonicalizes to null so equivalent settings hash identically. It is deliberately not a fraction.
+- `RngSeed` is optional; null or empty means derive from the project/job seed, and empty canonicalizes to null.
+  A non-empty seed is preserved verbatim and is limited to 100 characters (`SIM020`). The original replaced an
+  empty seed with a GUID; that is a recorded deviation required by ADR 0005's deterministic seed rule.
 - KMC:
   - `PreRunMcsp` is the relaxation/normalization pre-run; 0 disables it. The original used −1 as the disabled
     sentinel; the new format uses 0 so the contract field can stay unsigned.
@@ -275,15 +280,18 @@ public enum ExecutionFlags
   - `NoSaving` skips `.mcs` state/checkpoint writes.
   - `NoJumpLogging` disables the KMC jump histogram.
   - `UseFastExp` selects the documented fast exponential approximation instead of libm `exp`.
-  - `Deterministic` requests reproducible execution and disables optional shortcuts that skip or reorder RNG
-    draws. It disables Step 16's `UseFrequencyPrecheck`; the default `None` leaves that pre-check enabled. It is
-    a new flag with no original counterpart.
+  - `Deterministic` selects the canonical RNG-consumption path by disabling Step 16's `UseFrequencyPrecheck`
+    and any optional shortcut that skips or reorders RNG draws. Baseline reproducibility is already guaranteed
+    by ADR 0005; this flag changes the trajectory by disabling the pre-check, not the long-time distribution.
+    The default `None` leaves the pre-check enabled. It is a new flag with no original counterpart.
   - `KmcSimulation`/`MmcSimulation` are derived from `Kind`, `UsePrerun` is derived from `PreRunMcsp > 0`, and
-    `UseDualDofCorrection` is a compiler/optimizer-derived KMC time-stepping flag. The compiler/job builder
-    writes them into the `.msl` job flag word (bit 6/7, bit 5, and bit 4 respectively); Steps 14/16 read those
-    bits. They must not appear in the project `executionFlags` array (`SIM035`).
+    `UseDualDofCorrection` is a compiler/optimizer-derived KMC time-stepping flag. They must not appear in the
+    project `executionFlags` array (`SIM035`).
   - The `.msl` word is a separate `SolverJobFlags` contract in `Mocassin.Contracts`, not the user-authored
-    `ExecutionFlags` enum, so the two surfaces cannot be confused.
+    `ExecutionFlags` enum. `Mocassin.Compilation` does not reference Contracts: the compiler/job builder carries
+    the derived intent (`Kind`, `PreRunMcsp`, `UseDualDofCorrection`) on the job descriptor, and
+    `Mocassin.Packages` composes the `SolverJobFlags` word when writing the `.msl` payload. Steps 14/16 read
+    the resulting bits.
 - Deviations from the original, recorded deliberately:
   - write-out count 0 is a supported final-state-only mode; `SIM028` does not warn for it even though the
     original recommended band starts at 5, because 0 is a valid hard-range value and a deliberate mode.
@@ -340,7 +348,7 @@ Step 06 owns the model-level lattice/simulation rules. Cross-step ownership is e
 | `SIM006` | Error | Job count outside 1–1000 |
 | `SIM007` | Error | KMC field direction has a non-finite component, or is zero while the modulus is non-zero |
 | `SIM008` | Error | KMC pre-run MCSP outside 0–1,000,000 |
-| `SIM009` | Error | Simulation name is duplicated (case-insensitive) |
+| `SIM009` | Error | Simulation name is empty, whitespace-only, or duplicated (case-insensitive) |
 | `SIM010` | Error | Write-out count outside 0–1000 |
 | `SIM011` | Error | Time limit is present but not positive |
 | `SIM012` | Error | Min success rate is negative, non-finite, or above `int.MaxValue` |
@@ -501,7 +509,10 @@ Samples live under `samples/lattice/` and `samples/simulations/`. The new user-g
   `ModelDefinitionJsonConverter`, the nested `ProjectJsonContext`, `ProjectJson.CanonicalizeModel`,
   `ProjectValidator`, and `ProjectHasher`.
 - [ ] Add save/load and document-hash tests proving the new sections survive `ProjectJsonConverter.Write` and
-  change `ProjectHasher.Compute`/`ComputeDocument`.
+  change `ProjectHasher.Compute`/`ComputeDocument`; cover empty-array omission and a pre-Step-06 hash-stability
+  fixture.
+- [ ] Canonicalize equivalent simulation settings before save/hash: `minSuccessRate` 0 -> null, empty
+  `rngSeed` -> null, `normalizationEnergyEv` 0.0 -> null.
 - [ ] Implement `OccupationExchange`, `Doping`, `BuildingBlockEntry`, and the derived default building block.
 - [ ] Implement charge-delta calculation and compensation sign/zero validation.
 - [ ] Implement `ILatticeQuery`, `ISimulationQuery`, and their `IProjectQuery`/`Project` integration.
@@ -556,7 +567,7 @@ Samples live under `samples/lattice/` and `samples/simulations/`. The new user-g
   and load; dopings preserve priority order and simulations preserve kind-specific settings and authored-order
   transition arrays.
 - [ ] Lattice/simulation edits change `ProjectHasher.Compute` and `ComputeDocument`; no section is dropped by
-  canonicalization.
+  canonicalization, empty arrays are omitted, and a pre-Step-06 project keeps its canonical hash.
 - [ ] The generated project schema accepts the flat lattice/simulation sections and rejects unknown fields;
   fixtures cover empty and populated models.
 - [ ] Public API files and the ApiCompat baseline are current.
@@ -596,7 +607,8 @@ job-count preview tests belong to Step 10; there is no Step 06 benchmark target.
 | Kind compatibility | MMC/KMC transition mixing, duplicate references, and `kind`/record/array disagreement | PR-fast |
 | Execution flags | CamelCase names, sorted array, `None` empty, duplicate and derived-bit rejection in the project, and the `SolverJobFlags` u32 mapping | PR-fast |
 | Model envelope | Empty, lattice-only, simulation-only, and combined models round-trip through the project JSON context | PR-fast |
-| Persistence/hash | Save/load preserves the sections; lattice/simulation edits change the model and document hashes; canonicalization does not drop them | PR-fast |
+| Persistence/hash | Save/load preserves the sections; lattice/simulation edits change the model and document hashes; canonicalization does not drop them; empty arrays are omitted and a pre-Step-06 project keeps its hash | PR-fast |
+| Canonical equivalence | `minSuccessRate` 0 and null, `rngSeed` empty and null, and `normalizationEnergyEv` 0.0 and null produce the same canonical model/document hash | PR-fast |
 | Schema | Generated project schema accepts the lattice/simulation sections and rejects unknown fields; empty and populated fixtures | PR-fast |
 | Ordering | Doping priority and authored-order transition arrays survive serialization; no silent re-sort | PR-fast |
 | Queries | `Project` implements `ILatticeQuery`/`ISimulationQuery` through `IProjectQuery`; default building block matches the model | PR-fast |

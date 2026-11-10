@@ -96,6 +96,7 @@ public sealed record JobDescriptor(
     string CollectionName,
     string ConfigName,
     SimulationKind Kind,
+    bool UseDualDofCorrection,
     JobSettings Settings,
     LatticeRequest Lattice,
     ImmutableArray<DopingValue> Dopings,
@@ -114,6 +115,10 @@ public sealed record InitialLattice(
 - `JobId` is 1-based and deterministic; it is the solver's `--job` argument.
 - Step 11 wraps a `JobDescriptor` plus its generated `InitialLattice` into a `JobPackage` for writing.
 - `JobIndex` is the duplicate index within a config (0-based).
+- `UseDualDofCorrection` is set by the compiler/optimizer stage for KMC jobs; it is not a user setting.
+  `Mocassin.Packages`, which references Contracts, composes the `.msl` `SolverJobFlags` word from `Kind`,
+  the authored execution flags, `PreRunMcsp > 0`, and this boolean. `Mocassin.Compilation` does not reference
+  Contracts.
 - Effective settings are resolved with explicit inheritance and validated.
 - Seed derivation:
 

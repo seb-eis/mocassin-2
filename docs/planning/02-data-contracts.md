@@ -446,6 +446,9 @@ parameterization, and lattice signatures use the MessagePack projection (section
 - Simulations are stored under `model.simulations`, sorted by `id`. The kind-specific transition ID arrays
   preserve authored order, as required by Step 04; they are never re-sorted. `executionFlags` is a sorted array
   of camelCase flag names.
+- Empty `occupationExchanges`, `dopings`, and `simulations` arrays are omitted on write, matching the optional
+  transition/energy sections. Missing arrays load as empty, and the canonical model treats default arrays as
+  empty, so projects without lattice/simulation data keep their pre-Step-06 model and document hashes.
 - The lattice and simulation sections are additive and the project `schemaVersion` remains 1 under the Step
   03–05 pre-release precedent. The manifest `status`/`notes`, generated schema, descriptors, and fixtures are
   updated now; ADR 0009's version-bump rule resumes with the first released format.
@@ -510,9 +513,10 @@ support; the validator rejects a field that belongs to the other kind (`SIM023`)
   `(kind, id)` references.
 - `writeOutCount` is the number of intermediate data-out calls (0 = final state only).
 - `timeLimitSeconds` is the wall-clock limit; `null` means unlimited. The default is 31,536,000 s (P1Y).
-- `minSuccessRate` is in MCS/s; `null` or 0 disables the abort. It is not a fraction.
-- `rngSeed` is optional; `null` or empty derives the seed from the project/job seed (ADR 0005). The original
-  GUID fallback is not reproduced.
+- `minSuccessRate` is in MCS/s; `null` or 0 disables the abort, and 0 canonicalizes to `null`. It is not a
+  fraction.
+- `rngSeed` is optional; `null` or empty derives the seed from the project/job seed (ADR 0005), and empty
+  canonicalizes to `null`. The original GUID fallback is not reproduced.
 - `executionFlags` is a sorted array of camelCase names: `noSaving`, `noJumpLogging`, `useFastExp`,
   `deterministic`. The empty array means `None`; the `.msl` job payload uses the `u32` bitmask.
   `deterministic` is a new reproducibility flag. `kmcSimulation`/`mmcSimulation`, `usePrerun`, and
