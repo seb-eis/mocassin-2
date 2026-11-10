@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using System.Text.Json.Serialization;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Units;
 
@@ -12,4 +13,4 @@ namespace Mocassin.Core.Model.Energy;
 /// <param name="Energy">The site energy in electronvolt.</param>
 public sealed record SiteEnergyEntry(
     ParticleId ParticleId,
-    EnergyEv Energy);
+    [property: JsonPropertyName("energyEv")] EnergyEv Energy);

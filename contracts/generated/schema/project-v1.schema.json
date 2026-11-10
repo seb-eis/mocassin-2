@@ -438,6 +438,160 @@
             ],
             "additionalProperties": false
           }
+        },
+        "stableEnvironment": {
+          "type": "object",
+          "properties": {
+            "cutoff": {
+              "type": "number"
+            },
+            "filters": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "start": {
+                    "type": "number"
+                  },
+                  "end": {
+                    "type": "number"
+                  },
+                  "siteAId": {
+                    "type": "string"
+                  },
+                  "siteBId": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "start",
+                  "end",
+                  "siteAId",
+                  "siteBId"
+                ],
+                "additionalProperties": false
+              }
+            }
+          },
+          "required": [
+            "cutoff"
+          ],
+          "additionalProperties": false
+        },
+        "unstableEnvironments": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "siteId": {
+                "type": "string"
+              },
+              "cutoff": {
+                "type": "number"
+              },
+              "filters": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "start": {
+                      "type": "number"
+                    },
+                    "end": {
+                      "type": "number"
+                    },
+                    "siteAId": {
+                      "type": "string"
+                    },
+                    "siteBId": {
+                      "type": "string"
+                    }
+                  },
+                  "required": [
+                    "start",
+                    "end",
+                    "siteAId",
+                    "siteBId"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "siteId",
+              "cutoff"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "clusters": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "centerSiteId": {
+                "type": "string"
+              },
+              "offsetVectors": {
+                "type": "array",
+                "items": {
+                  "type": "array",
+                  "items": {
+                    "type": "number"
+                  },
+                  "minItems": 3,
+                  "maxItems": 3
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "centerSiteId",
+              "offsetVectors"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "siteEnergies": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "siteId": {
+                "type": "string"
+              },
+              "entries": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "particleId": {
+                      "type": "string"
+                    },
+                    "energyEv": {
+                      "type": "number"
+                    }
+                  },
+                  "required": [
+                    "particleId",
+                    "energyEv"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "siteId"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "required": [],

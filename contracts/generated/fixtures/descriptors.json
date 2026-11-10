@@ -112,6 +112,20 @@
       "kind": "project",
       "status": "current",
       "step": "04"
+    },
+    {
+      "id": "project-energy-minimal",
+      "path": "tests/contracts/project-energy-minimal.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "05"
+    },
+    {
+      "id": "project-energy-populated",
+      "path": "tests/contracts/project-energy-populated.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "05"
     }
   ]
 }

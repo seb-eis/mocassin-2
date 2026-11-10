@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "project": "MOCASSIN",
   "description": "Machine-readable contract manifest for MOCASSIN project, package, results, state, job-folder, event, and MMCFE formats.",
-  "status": "step-04",
-  "notes": "Step 04 adds the flat state-change, state-change-group, chain, kinetic-transition, and metropolis-transition model sections. The transition fields remain additive under project schema v1; energy, lattice, and simulation sections are extended by later steps. Every semantic format change requires a version bump and updated fixtures.",
+  "status": "step-05",
+  "notes": "Step 05 adds the flat stableEnvironment, unstableEnvironments, clusters, and siteEnergies model sections. The energy fields remain additive under project schema v1; the manifest status/notes and fixtures are updated now, and ADR 0009's version-bump rule resumes with the first released format. Lattice and simulation sections are extended by later steps. Every semantic format change requires a version bump and updated fixtures.",
   "formats": {
     "project": {
       "id": "project",
@@ -494,6 +494,168 @@
                   "name": "reverseTransitionId",
                   "type": "string",
                   "required": false
+                }
+              ]
+            },
+            {
+              "name": "stableEnvironment",
+              "type": "object",
+              "required": false,
+              "additionalProperties": false,
+              "notes": "Missing loads the default 1.0 Å cutoff with no filters; the default is omitted on write.",
+              "fields": [
+                {
+                  "name": "cutoff",
+                  "type": "float64",
+                  "required": true
+                },
+                {
+                  "name": "filters",
+                  "type": "array",
+                  "required": false,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "start",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "end",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "siteAId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "siteBId",
+                      "type": "string",
+                      "required": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "unstableEnvironments",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sorted by siteId when serialized.",
+              "itemFields": [
+                {
+                  "name": "siteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "cutoff",
+                  "type": "float64",
+                  "required": true
+                },
+                {
+                  "name": "filters",
+                  "type": "array",
+                  "required": false,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "start",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "end",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "siteAId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "siteBId",
+                      "type": "string",
+                      "required": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "clusters",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sorted by id; offsetVectors retain definition order.",
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "centerSiteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "offsetVectors",
+                  "type": "array",
+                  "required": true,
+                  "items": "array",
+                  "itemItems": {
+                    "type": "array",
+                    "items": "float64",
+                    "length": 3
+                  }
+                }
+              ]
+            },
+            {
+              "name": "siteEnergies",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sorted by siteId; entries are sorted by particleId.",
+              "itemFields": [
+                {
+                  "name": "siteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "entries",
+                  "type": "array",
+                  "required": false,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "particleId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "energyEv",
+                      "type": "float64",
+                      "required": true
+                    }
+                  ]
                 }
               ]
             }
@@ -1742,6 +1904,20 @@
         "kind": "project",
         "status": "current",
         "step": "04"
+      },
+      {
+        "id": "project-energy-minimal",
+        "path": "tests/contracts/project-energy-minimal.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "05"
+      },
+      {
+        "id": "project-energy-populated",
+        "path": "tests/contracts/project-energy-populated.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "05"
       }
     ]
   }

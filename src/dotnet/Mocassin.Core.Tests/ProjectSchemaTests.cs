@@ -21,6 +21,8 @@ public sealed class ProjectSchemaTests
         "tests/contracts/project-symmetry-mismatch.mocprj",
         "tests/contracts/project-transitions-minimal.mocprj",
         "tests/contracts/project-transitions-populated.mocprj",
+        "tests/contracts/project-energy-minimal.mocprj",
+        "tests/contracts/project-energy-populated.mocprj",
         "samples/blank/blank.mocprj",
         "samples/ceria/ceria.mocprj",
     ];
@@ -56,6 +58,40 @@ public sealed class ProjectSchemaTests
         Assert.Equal(
             File.ReadAllBytes(RepositoryPaths.Combine(samplePath.Split('/'))),
             File.ReadAllBytes(RepositoryPaths.Combine(fixturePath.Split('/'))));
+    }
+
+    [Fact]
+    public void EnergyFixturesCoverEmptyAndPopulatedModels()
+    {
+        var minimal = JsonDocument.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-energy-minimal.mocprj")));
+        var populated = JsonDocument.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-energy-populated.mocprj")));
+        var minimalModel = minimal.RootElement.GetProperty("model");
+        var populatedModel = populated.RootElement.GetProperty("model");
+
+        Assert.False(minimalModel.TryGetProperty("stableEnvironment", out _));
+        Assert.False(minimalModel.TryGetProperty("unstableEnvironments", out _));
+        Assert.False(minimalModel.TryGetProperty("clusters", out _));
+        Assert.False(minimalModel.TryGetProperty("siteEnergies", out _));
+
+        Assert.True(populatedModel.TryGetProperty("stableEnvironment", out _));
+        Assert.True(populatedModel.TryGetProperty("unstableEnvironments", out _));
+        Assert.True(populatedModel.TryGetProperty("clusters", out _));
+        Assert.True(populatedModel.TryGetProperty("siteEnergies", out _));
+    }
+
+    [Fact]
+    public void SchemaRejectsUnknownEnergyField()
+    {
+        var root = JsonNode.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-energy-populated.mocprj")))!.AsObject();
+        root["model"]!["stableEnvironment"]!["unexpected"] = true;
+
+        using var document = JsonDocument.Parse(root.ToJsonString());
+        var result = projectSchema.Evaluate(document.RootElement);
+
+        Assert.False(result.IsValid);
     }
 
     [Fact]

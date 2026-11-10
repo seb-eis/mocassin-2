@@ -24,12 +24,14 @@ with validation and cost previews.
 | `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass; benchmark ceria 88.9 µs, BZO 77.4 µs | — | — |
-| `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Not started | — | — | — |
+| `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Awaiting approval | `verify.sh contracts`, `dotnet`, `structure`, `api` pass | — | — |
 | `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Not started | — | — | — |
 | `closeout` | `feature/step-05-energy-model/closeout` | Not started | — | — | — |
 
-## Goal
+**Implementation note:** Step 05 introduces no new dependency and no GPL-derived content. Every new source,
+test, tool, and sample file carries `SPDX-License-Identifier: MIT`.
 
+## Goal
 Let a user define the interaction model that the compiler will sample into pair and cluster tables. The
 definition is geometric and symbolic; energy values are supplied later by parameterization templates.
 
@@ -595,11 +597,11 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
 - [x] Implement `ProjectEditor.Energy.cs`, editor operations, and cascade invalidation.
 - [x] Add the Core energy diagnostic codes and help text, including the `ENM018` constant/help anchor used by
   Step 07.
-- [ ] Update `contracts/manifest.json`: set `status` to `step-05`, update `notes`, add the energy fields, add
+- [x] Update `contracts/manifest.json`: set `status` to `step-05`, update `notes`, add the energy fields, add
   the `project-energy-minimal` and `project-energy-populated` fixtures, update the fixture/signature vectors,
   and regenerate the schema. The project `schemaVersion` remains 1 under the additive-v1 precedent; ADR 0009's
   bump rule is reconciled explicitly in the manifest notes, as in Step 04.
-- [ ] Add `SPDX-License-Identifier: MIT` to every new source, test, tool, and sample file; record in the step log
+- [x] Add `SPDX-License-Identifier: MIT` to every new source, test, tool, and sample file; record in the step log
   that no new dependency or GPL-derived content is introduced, per `NOTICE.md`.
 - [x] Add XML docs, update `PublicAPI.Unshipped.txt` for Core, Packages, and Symmetry, and refresh the ApiCompat
   baseline for every new public type and member.
