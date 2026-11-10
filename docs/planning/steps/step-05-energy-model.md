@@ -7,12 +7,12 @@ with validation and cost previews.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** Awaiting approval
 - **Step branch:** `step/05-energy-model`
 - **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) — replacement closeout, Ubuntu
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `e6a7839`
+- **Audit:** Passed with notes at `315aa19` (code frozen at `e6a7839`)
 - **Design review:** [Ready for implementation — accepted at `0b2a571`](../reviews/step-05.md)
 - **Feature list:** Approved 2026-11-09
 - **Last updated:** 2026-11-10
@@ -274,7 +274,7 @@ reduction uses the Step 02 `PointGroup`/`SitePermutation` utilities, so the prev
 reduction. Step 08 adds table allocation and canonical indices on top of the same kernel. The preview service
 caches by
 `(ProjectHasher.ComputeEnergy(model), ProjectHasher.ComputeStructure(model.Structure),
-ProjectHasher.Compute(model), cellCountA, cellCountB, cellCountC, catalog version, symmetry contract version)`.
+full canonical model hash, cellCountA, cellCountB, cellCountC, catalog version, symmetry contract version)`.
 
 ### 6.1 Limits and diagnostics
 
