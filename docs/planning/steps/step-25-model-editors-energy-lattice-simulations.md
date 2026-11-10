@@ -118,7 +118,10 @@ model, so they must show costs, geometric relationships, and the effect of chang
   - remaining particles per site;
   - total charge before/after and neutrality;
   - warnings for unattainable fractions.
-- The preview uses the same supercell generator as step 10.
+- The preview calls Step 10's `ILatticePreviewService.TryCreatePreview`; the same service and supercell
+  generator produce the build's `DopingReport`, so the editor cannot diverge from the build. A failed preview
+  shows the diagnostics and no partial result.
+- The job-count summary in the editor uses Step 10's `JobCountPreview`; it does not recompute effective counts.
 
 ### 3. Simulation editor
 
@@ -130,8 +133,8 @@ model, so they must show costs, geometric relationships, and the effect of chang
 
 **Common settings**
 
-- Temperature (K), target MCSP, time limit, minimum success rate, job count, RNG seed (optional), execution
-  flags (checkboxes with explanations), instruction (advanced/extension).
+- Temperature (K), target MCSP, write-out count, time limit, minimum success rate, job count, RNG seed
+  (optional), execution flags (checkboxes with explanations), instruction (advanced/extension).
 - Numeric expression support and unit labels.
 - Defaults button restores documented defaults.
 

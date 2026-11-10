@@ -110,6 +110,10 @@ pull-based iterator.
   plus energy and frequency values, with the parameterization signature).
 - The lattice payload is `{format_version, lattice_size, position_count, lattice}`.
 - The job payload is the full `JobDescriptor`/settings (including optimizers) plus the model/simulation index.
+  Its `flags` word is a `SolverJobFlags` value in `Mocassin.Contracts` carrying the authored flags plus the
+  compiler/job-builder-derived bits (`useDualDofCorrection`, `usePrerun`, and the kind bit). This package layer
+  composes the word from the `JobDescriptor`; `Mocassin.Compilation` does not reference Contracts, and the
+  project JSON never contains the derived bits.
 - The writer verifies round-trip decoding of every payload before insert (debug builds) or computes the
   canonical hash and compares it.
 - Payloads are deterministic: same parameterized model → identical bytes → same signature.
@@ -124,9 +128,13 @@ the writer must keep them identical to the corresponding job/lattice payload val
 
 - job id, model id, lattice id, kind;
 - collection/config names and indices;
-- temperature, field modulus, target/pre-run MCSP, time limit, min success rate;
+- temperature, field modulus, target/pre-run MCSP, write-out count, time limit, min success rate;
 - lattice A/B/C, doping info, flags, seed;
 - created timestamp.
+
+The writer always writes these columns from the resolved job payload; the SQL defaults are fallbacks only. The
+`write_out_count` default is 100 to match the model default, but a resolved job may legitimately write 0 for a
+final-state-only run.
 
 Additional settings live in the job payload. The `.msr`/evaluation layer joins job metadata with results; the
 package itself exposes no combined view.

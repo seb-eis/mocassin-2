@@ -71,7 +71,10 @@ Stages:
 6. **Transition rules** — enumerate state-change combinations, build S0/S1/S2, apply mass/charge conservation,
    generate forward/inverse/dependent rules, and deduplicate.
 7. **Simulation encoding** — build jump collections, directions, rules, field factors, jump count/mapping
-   tables, and tracker mappings for each MMC/KMC simulation.
+   tables, and tracker mappings for each MMC/KMC simulation. Record the derived intent
+   (`UseDualDofCorrection`, `PreRunMcsp > 0`, and the kind) on the job descriptor; `Mocassin.Packages` composes
+   the `.msl` `SolverJobFlags` word. These are compiler/job-builder flags, not project-authored execution
+   flags.
 8. **Indexing** — assign dense, deterministic indices to particles, positions, interactions, rules,
    collections, directions, and trackers.
 9. **Signing** — compute the model signature from canonical compiled content.
