@@ -429,11 +429,16 @@ parameterization, and lattice signatures use the MessagePack projection (section
 }
 ```
 
-- Dopings are applied in ascending `priority`.
+- Occupation exchanges are sorted by `id` when serialized.
+- Dopings are applied in ascending `priority`; priorities are unique and the `dopings` array preserves that
+  order.
 - Each doping fraction applies to the particles remaining after higher-priority dopings.
 - `dependentExchangeId` may be omitted when `chargeCompensation` is false or the primary exchange is
   self-compensating.
 - The default building block is implied: first particle of each stable site's set, void on unstable sites.
+- Simulations are stored under `model.simulations`, sorted by `id`. The kind-specific transition ID arrays and
+  `executionFlags` are sorted deterministically; transition assignment order is not semantic.
+- The lattice and simulation sections are additive and the project `schemaVersion` remains 1.
 
 #### Simulations
 
