@@ -35,6 +35,8 @@ The energy model is flat under `model`:
 ## Defaults and ordering
 
 - A missing `stableEnvironment` loads `1.0 Å` with no filters.
+- An unstable site without an authored environment inherits the stable cutoff for pair sampling but still
+  requires an explicit environment when it is a cluster centre.
 - The default environment is omitted on write when it equals the default. Empty `unstableEnvironments`,
   `clusters`, and `siteEnergies` arrays are omitted.
 - A model with no energy sections therefore keeps its previous canonical JSON and hashes.

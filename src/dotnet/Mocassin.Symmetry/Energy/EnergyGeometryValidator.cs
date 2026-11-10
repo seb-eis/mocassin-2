@@ -115,10 +115,8 @@ public sealed class EnergyGeometryValidator
             Guid.Empty,
             bag);
 
-        var unstableEnvironments = context.Model.UnstableEnvironments.IsDefault
-            ? []
-            : context.Model.UnstableEnvironments;
-        foreach (var unstable in unstableEnvironments.OrderBy(static environment => environment.SiteId.Value))
+        var unstableEnvironments = context.GetEffectiveUnstableEnvironments();
+        foreach (var unstable in unstableEnvironments)
         {
             if (!context.TryGetSite(unstable.SiteId, out var site) ||
                 site.Stability != SiteStability.Unstable)
@@ -225,7 +223,8 @@ public sealed class EnergyGeometryValidator
             }
 
             var offsets = cluster.OffsetVectors.IsDefault ? [] : cluster.OffsetVectors;
-            var seenTargets = new HashSet<int>();
+            var centerEncoding = new Vector4I(0, 0, 0, centerP);
+            var seenEncodings = new HashSet<Vector4I>();
             var targets = new List<CellSite>(offsets.Length);
             var geometryValid = true;
             foreach (var offset in offsets)
@@ -287,7 +286,7 @@ public sealed class EnergyGeometryValidator
                     continue;
                 }
 
-                if (!seenTargets.Add(targetP))
+                if (!seenEncodings.Add(encoding))
                 {
                     bag.Add(Error(
                         EnergyDiagnosticCodes.DuplicateClusterOffset,
@@ -297,7 +296,7 @@ public sealed class EnergyGeometryValidator
                         "offsetVectors"));
                 }
 
-                if (targetP == centerP)
+                if (encoding == centerEncoding)
                 {
                     bag.Add(Error(
                         EnergyDiagnosticCodes.DuplicateClusterGeometry,

@@ -67,6 +67,12 @@ public sealed class EnergyPreviewService : IEnergyPreviewService
         out ImmutableArray<Diagnostic> diagnostics)
     {
         ArgumentNullException.ThrowIfNull(model);
+        if (model.StableEnvironment is null)
+        {
+            diagnostics = [NullStableEnvironment()];
+            return null;
+        }
+
         if (!AreCellCountsPositive(cellCountA, cellCountB, cellCountC, out diagnostics))
         {
             return null;
@@ -115,9 +121,13 @@ public sealed class EnergyPreviewService : IEnergyPreviewService
             .Where(static site => site.Stability == SiteStability.Stable)
             .Sum(site => (long)context.GetSitePIndices(site.Id).Length);
         var pairImageCount = CountPairImages(context);
+        var uniquePairInteractionCount = pairs
+            .Select(static pair => pair.EnergyId)
+            .Distinct(StringComparer.Ordinal)
+            .LongCount();
         var particleCount = (model.Particles.IsDefault ? 0 : model.Particles.Length) + 1L;
         var pairBytes = SaturatingMultiply(
-            SaturatingMultiply((long)pairs.Length, particleCount),
+            SaturatingMultiply(uniquePairInteractionCount, particleCount),
             SaturatingMultiply(particleCount, bytesPerEnergyEntry));
         var clusterBytes = clusterCosts.Aggregate(
             0L,
@@ -125,7 +135,7 @@ public sealed class EnergyPreviewService : IEnergyPreviewService
         var preview = new EnergyCostPreview(
             stableP1PositionCount,
             pairImageCount,
-            pairs.Length,
+            uniquePairInteractionCount,
             clusterCosts,
             SaturatingAdd(pairBytes, clusterBytes));
         diagnostics = validation;
@@ -144,6 +154,12 @@ public sealed class EnergyPreviewService : IEnergyPreviewService
         out ImmutableArray<Diagnostic> diagnostics)
     {
         ArgumentNullException.ThrowIfNull(model);
+        if (model.StableEnvironment is null)
+        {
+            diagnostics = [NullStableEnvironment()];
+            return null;
+        }
+
         if (!AreCellCountsPositive(cellCountA, cellCountB, cellCountC, out diagnostics))
         {
             return null;
@@ -188,6 +204,14 @@ public sealed class EnergyPreviewService : IEnergyPreviewService
         .. new EnergyGeometryValidator(catalog).Validate(model),
     ];
 
+    private static Diagnostic NullStableEnvironment() =>
+        new(
+            EnergyDiagnosticCodes.InvalidCutoff,
+            DiagnosticSeverity.Error,
+            "A stable environment is required.",
+            new ModelPath("stableEnvironment", Guid.Empty, "cutoff"),
+            EnergyDiagnosticCodes.HelpFor(EnergyDiagnosticCodes.InvalidCutoff));
+
     private static long CountPairImages(EnergyGeometryContext context)
     {
         var stable = context.Model.StableEnvironment ?? StableEnvironment.Default;
@@ -196,9 +220,7 @@ public sealed class EnergyPreviewService : IEnergyPreviewService
             .SelectMany(site => context.GetSitePIndices(site.Id));
         var count = context.CountPairImages(stableCenters, stable.Cutoff, stable.Filters, symmetric: true);
 
-        var unstableEnvironments = context.Model.UnstableEnvironments.IsDefault
-            ? []
-            : context.Model.UnstableEnvironments;
+        var unstableEnvironments = context.GetEffectiveUnstableEnvironments();
         foreach (var environment in unstableEnvironments)
         {
             if (!context.TryGetSite(environment.SiteId, out var site) ||

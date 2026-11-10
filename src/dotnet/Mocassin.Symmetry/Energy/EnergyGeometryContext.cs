@@ -122,6 +122,25 @@ internal sealed class EnergyGeometryContext
             ? Encoder.Orbits[referenceIndex].PositionIndices
             : [];
 
+    public ImmutableArray<UnstableEnvironment> GetEffectiveUnstableEnvironments()
+    {
+        var authored = Model.UnstableEnvironments.IsDefault ? [] : Model.UnstableEnvironments;
+        var stableCutoff = (Model.StableEnvironment ?? StableEnvironment.Default).Cutoff;
+        var builder = ImmutableArray.CreateBuilder<UnstableEnvironment>();
+        foreach (var site in Sites)
+        {
+            if (site.Stability != SiteStability.Unstable)
+            {
+                continue;
+            }
+
+            var environment = authored.FirstOrDefault(candidate => candidate.SiteId == site.Id);
+            builder.Add(environment ?? new UnstableEnvironment(site.Id, stableCutoff, []));
+        }
+
+        return [.. builder.OrderBy(static environment => environment.SiteId.Value)];
+    }
+
     public bool TryResolveOffset(
         CellSite center,
         Fractional3 offset,

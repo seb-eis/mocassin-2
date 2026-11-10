@@ -15,8 +15,8 @@ The stable environment defines one cutoff and optional filters for every stable 
 ## Unstable environments
 
 Each unstable site may define its own environment with its own cutoff and filters. If an unstable site has no
-environment, its clusters and relationships are treated as invalid (`ENM007`); the stable environment is not
-silently reused.
+environment, pair sampling inherits the stable cutoff but samples unstable–stable pairs only. Clusters centred
+on an unstable site still require an explicit unstable environment (`ENM007`).
 
 ## Filters
 

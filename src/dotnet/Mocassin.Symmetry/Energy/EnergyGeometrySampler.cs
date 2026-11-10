@@ -58,7 +58,18 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         }
 
         var bag = new DiagnosticBag();
-        var stableEnvironment = model.StableEnvironment ?? StableEnvironment.Default;
+        if (model.StableEnvironment is null)
+        {
+            bag.Add(EnvironmentError(
+                EnergyDiagnosticCodes.InvalidCutoff,
+                "A stable environment is required.",
+                "stableEnvironment",
+                Guid.Empty));
+            diagnostics = bag.Sorted;
+            return false;
+        }
+
+        var stableEnvironment = model.StableEnvironment;
         if (!IsUsableCutoff(stableEnvironment.Cutoff))
         {
             bag.Add(EnvironmentError(
@@ -73,8 +84,8 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         var candidates = new List<PairCandidate>();
         AddStableCandidates(context, stableEnvironment, candidates);
 
-        var unstableEnvironments = model.UnstableEnvironments.IsDefault ? [] : model.UnstableEnvironments;
-        foreach (var environment in unstableEnvironments.OrderBy(static environment => environment.SiteId.Value))
+        var unstableEnvironments = context.GetEffectiveUnstableEnvironments();
+        foreach (var environment in unstableEnvironments)
         {
             if (!IsUsableCutoff(environment.Cutoff))
             {

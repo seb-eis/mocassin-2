@@ -130,6 +130,8 @@ public sealed record CompiledModel(
 
 - Pair-image sampling, filter application, and unique-geometry construction use the Step 05
   `Mocassin.Symmetry.Energy.IEnergyGeometrySampler`; the preview and the compiler share one kernel.
+- Step 08 must cross-check the Step 05 cost/pair preview against the compiled pair and cluster tables and
+  record the result. This is the follow-up deferred from the Step 05 closeout.
 - For each stable site (center) and each periodic image within the cutoff:
   - use the Step 02 `RadialSearch` and minimum-image policy;
   - compute distance and partner position;

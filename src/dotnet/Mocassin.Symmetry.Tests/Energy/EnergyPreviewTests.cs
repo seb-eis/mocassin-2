@@ -12,6 +12,7 @@ using Mocassin.Core.Project;
 using Mocassin.Core.Symmetry;
 using Mocassin.Core.Units;
 using Mocassin.Symmetry.Energy;
+using Mocassin.Symmetry.Tests.TestSupport;
 
 namespace Mocassin.Symmetry.Tests.Energy;
 
@@ -35,8 +36,10 @@ public sealed class EnergyPreviewTests
         Assert.DoesNotContain(pairDiagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
         Assert.Equal(3, cost.StableP1PositionCount);
         Assert.True(cost.PairImageCount > 0);
-        Assert.Equal(pairArray.Length, cost.UniquePairInteractionCount);
-        Assert.Equal(cost.PairImageCount, cost.UniquePairInteractionCount);
+        Assert.Equal(pairArray.Length, cost.PairImageCount);
+        Assert.Equal(
+            pairArray.Select(static pair => pair.EnergyId).Distinct(StringComparer.Ordinal).Count(),
+            cost.UniquePairInteractionCount);
         var cluster = Assert.Single(cost.ClusterCosts);
         Assert.Equal(12, cluster.RawPermutationCount);
         Assert.Equal(12, cluster.UniquePermutationCount);
@@ -234,6 +237,188 @@ public sealed class EnergyPreviewTests
                     [new Fractional3(0.1, 0.0, 0.0), new Fractional3(0.2, 0.0, 0.0)]),
             ],
         };
+    }
+
+    [Fact]
+    public void StableFilterBoundariesAreInclusiveAndSymmetric()
+    {
+        var exact = CreateModel() with
+        {
+            Clusters = [],
+            StableEnvironment = new StableEnvironment(
+                new LengthAngstrom(2.5),
+                [new InteractionFilter(new LengthAngstrom(1.0), new LengthAngstrom(1.0), siteAId, siteBId)]),
+        };
+        var tolerance = CreateModel() with
+        {
+            Clusters = [],
+            StableEnvironment = new StableEnvironment(
+                new LengthAngstrom(2.5),
+                [
+                    new InteractionFilter(
+                        new LengthAngstrom(0.0),
+                        new LengthAngstrom(1.0 - 1e-5),
+                        siteAId,
+                        siteBId),
+                ]),
+        };
+
+        Assert.DoesNotContain(ABPairs(exact), static pair => Math.Abs(pair.DistanceAngstrom - 1.0) < 1e-9);
+        Assert.DoesNotContain(ABPairs(tolerance), static pair => Math.Abs(pair.DistanceAngstrom - 1.0) < 1e-9);
+    }
+
+    [Fact]
+    public void UnstableFilterIsDirectionalAndOmittedEnvironmentInheritsStableCutoff()
+    {
+        var filteredModel = TransitionTestModels.CreateModel() with
+        {
+            StableEnvironment = new StableEnvironment(new LengthAngstrom(2.5), []),
+            UnstableEnvironments =
+            [
+                new UnstableEnvironment(
+                    TransitionTestModels.SiteId(TransitionTestModels.Site3),
+                    new LengthAngstrom(2.5),
+                    [
+                        new InteractionFilter(
+                            new LengthAngstrom(0.0),
+                            new LengthAngstrom(2.0),
+                            TransitionTestModels.SiteId(TransitionTestModels.Site3),
+                            TransitionTestModels.SiteId(TransitionTestModels.Site2)),
+                    ]),
+            ],
+        };
+        var inheritedModel = filteredModel with { UnstableEnvironments = [] };
+
+        var filtered = Pairs(filteredModel);
+        Assert.DoesNotContain(
+            filtered,
+            static pair => pair.SiteAId == TransitionTestModels.SiteId(TransitionTestModels.Site3) &&
+                pair.SiteBId == TransitionTestModels.SiteId(TransitionTestModels.Site2));
+        Assert.Contains(
+            filtered,
+            static pair => pair.SiteAId == TransitionTestModels.SiteId(TransitionTestModels.Site3) &&
+                pair.SiteBId != TransitionTestModels.SiteId(TransitionTestModels.Site2));
+
+        var inherited = Pairs(inheritedModel);
+        Assert.Contains(
+            inherited,
+            static pair => pair.SiteAId == TransitionTestModels.SiteId(TransitionTestModels.Site3));
+    }
+
+    [Fact]
+    public void BurnsideUniqueCountMatchesBruteForceOrbitCount()
+    {
+        var project = ProjectJson.Deserialize(
+            File.ReadAllBytes(RepositoryPaths.Combine("samples", "ceria", "ceria.mocprj")));
+        var model = project.Model;
+        var preview = service.TryCreatePreview(model, 1, 1, 1, out _);
+        Assert.NotNull(preview);
+        var cluster = Assert.Single(model.Clusters);
+        var clusterCost = Assert.Single(preview.ClusterCosts);
+        Assert.True(EnergyGeometryContext.TryCreate(model, null, out var context, out _));
+        Assert.NotNull(context);
+        Assert.True(context.TryGetSite(cluster.CenterSiteId, out var center));
+        Assert.True(context.TryGetCenterP(center, out var centerP));
+
+        var geometry = ImmutableArray.CreateBuilder<Fractional3>();
+        var allowed = ImmutableArray.CreateBuilder<ImmutableArray<ParticleId>>();
+        geometry.Add(center.Fractional.TrimToUnitCell());
+        allowed.Add(GetAllowedParticles(model, center));
+        foreach (var offset in cluster.OffsetVectors)
+        {
+            Assert.True(context.TryResolveOffset(center, offset, out _, out var targetP));
+            geometry.Add(context.Encoder.Positions[targetP]);
+            allowed.Add(GetAllowedParticles(model, context.GetSiteAt(targetP)));
+        }
+
+        var pointGroup = SpaceGroupOperations.GetPointGroup(
+            context.Setting,
+            center.Fractional.TrimToUnitCell(),
+            geometry.ToImmutable());
+        var normalizedAllowed = allowed
+            .Select(static particles => particles.OrderBy(static particle => particle.Value).ToArray())
+            .ToArray();
+        var raw = normalizedAllowed.Aggregate(1L, static (total, particles) => total * particles.Length);
+        var orbits = new HashSet<string>(StringComparer.Ordinal);
+        var tuple = new int[normalizedAllowed.Length];
+
+        void Visit(int index)
+        {
+            if (index == tuple.Length)
+            {
+                var canonical = tuple;
+                foreach (var permutation in pointGroup.InducedPermutations)
+                {
+                    var permuted = new int[tuple.Length];
+                    for (var site = 0; site < tuple.Length; site++)
+                    {
+                        permuted[site] = tuple[permutation[site]];
+                    }
+
+                    if (Compare(permuted, canonical) < 0)
+                    {
+                        canonical = permuted;
+                    }
+                }
+
+                orbits.Add(string.Join(',', canonical));
+                return;
+            }
+
+            for (var value = 0; value < normalizedAllowed[index].Length; value++)
+            {
+                tuple[index] = value;
+                Visit(index + 1);
+            }
+        }
+
+        Visit(0);
+
+        Assert.Equal(raw, clusterCost.RawPermutationCount);
+        Assert.Equal(orbits.Count, clusterCost.UniquePermutationCount);
+    }
+
+    [Fact]
+    public void NullStableEnvironmentReturnsNullWithoutThrowing()
+    {
+        var model = CreateModel() with { StableEnvironment = null! };
+
+        Assert.Null(service.TryCreatePreview(model, 1, 1, 1, out var diagnostics));
+        Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == EnergyDiagnosticCodes.InvalidCutoff);
+    }
+
+    private static ImmutableArray<PairInteractionPreview> ABPairs(ModelDefinition model) =>
+        Pairs(model)
+            .Where(static pair =>
+                (pair.SiteAId == siteAId && pair.SiteBId == siteBId) ||
+                (pair.SiteAId == siteBId && pair.SiteBId == siteAId))
+            .ToImmutableArray();
+
+    private static ImmutableArray<PairInteractionPreview> Pairs(ModelDefinition model)
+    {
+        var pairs = service.TryCreatePairPreview(model, 1, 1, 1, out _);
+        Assert.NotNull(pairs);
+        return pairs.GetValueOrDefault();
+    }
+
+    private static ImmutableArray<ParticleId> GetAllowedParticles(ModelDefinition model, CellSite site)
+    {
+        var particleSet = model.ParticleSets.Single(candidate => candidate.Id == site.ParticleSetId);
+        return particleSet.ParticleIds;
+    }
+
+    private static int Compare(int[] left, int[] right)
+    {
+        for (var index = 0; index < left.Length; index++)
+        {
+            var comparison = left[index].CompareTo(right[index]);
+            if (comparison != 0)
+            {
+                return comparison;
+            }
+        }
+
+        return 0;
     }
 
     private static ModelDefinition CreateLargePermutationModel()

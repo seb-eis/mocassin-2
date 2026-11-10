@@ -128,6 +128,35 @@ public sealed class EnergyGeometryTests
     }
 
     [Fact]
+    public void PeriodicCellShiftIsNotADuplicateOrCentreEquivalentOffset()
+    {
+        var model = CreateValidModel() with
+        {
+            Clusters =
+            [
+                new Cluster(
+                    ClusterId.New(),
+                    "Periodic images",
+                    TransitionTestModels.SiteId(TransitionTestModels.Site2),
+                    [new Fractional3(0.5, 0.0, 0.0), new Fractional3(1.5, 0.0, 0.0)]),
+                new Cluster(
+                    ClusterId.New(),
+                    "Shifted centre image",
+                    TransitionTestModels.SiteId(TransitionTestModels.Site2),
+                    [new Fractional3(1.0, 0.0, 0.0), new Fractional3(0.5, 0.0, 0.0)]),
+            ],
+        };
+
+        var diagnostics = validator.Validate(model);
+
+        Assert.DoesNotContain(
+            diagnostics,
+            static diagnostic => diagnostic.Code is
+                EnergyDiagnosticCodes.DuplicateClusterOffset or
+                EnergyDiagnosticCodes.DuplicateClusterGeometry);
+    }
+
+    [Fact]
     public void CentreEquivalentOffsetProducesEnm011()
     {
         var model = CreateValidModel() with
