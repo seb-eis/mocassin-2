@@ -133,8 +133,8 @@ model, so they must show costs, geometric relationships, and the effect of chang
 
 **Common settings**
 
-- Temperature (K), target MCSP, time limit, minimum success rate, job count, RNG seed (optional), execution
-  flags (checkboxes with explanations), instruction (advanced/extension).
+- Temperature (K), target MCSP, write-out count, time limit, minimum success rate, job count, RNG seed
+  (optional), execution flags (checkboxes with explanations), instruction (advanced/extension).
 - Numeric expression support and unit labels.
 - Defaults button restores documented defaults.
 

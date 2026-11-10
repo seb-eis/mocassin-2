@@ -128,6 +128,10 @@ the writer must keep them identical to the corresponding job/lattice payload val
 - lattice A/B/C, doping info, flags, seed;
 - created timestamp.
 
+The writer always writes these columns from the resolved job payload; the SQL defaults are fallbacks only. The
+`write_out_count` default is 100 to match the model default, but a resolved job may legitimately write 0 for a
+final-state-only run.
+
 Additional settings live in the job payload. The `.msr`/evaluation layer joins job metadata with results; the
 package itself exposes no combined view.
 

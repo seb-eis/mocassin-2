@@ -59,8 +59,9 @@ simulation. These definitions feed step 10 (job expansion and supercells) and st
 - Simulation model:
   - `ISimulation` — custom RNG seed, temperature, target MCSP, `WriteOutCount`, job count, save-run time limit,
     lower success-rate limit.
-  - `IKineticSimulation` adds pre-run MCSP, electric-field vector/magnitude, normalization energy, max attempt
-    frequency, transitions.
+  - `IKineticSimulation` adds pre-run MCSP, electric-field vector/magnitude, normalization energy, and
+    transitions. The max attempt frequency is the KMC job-configuration base frequency (Step 10); Step 06
+    keeps an optional simulation-level default for job templates to inherit.
   - `IMetropolisSimulation` adds break tolerance, break sample length/interval, result sample MCSP,
     transitions.
   - Original UI defaults: temperature 1000 K, target MCSP 1000, write-out count 100, job count 12, time limit
@@ -72,8 +73,8 @@ simulation. These definitions feed step 10 (job expansion and supercells) and st
     1e4–1e9 V/m); normalization −1–`double.MaxValue` (recommended up to 10); break tolerance 0–1 (recommended
     up to 0.1); break sample length 0–100,000 (recommended up to 10,000); break sample interval 1–1000
     (recommended up to 100); result sample 0–1,000,000 (recommended up to 10,000); transition count 0–100 per
-    authoring simulation (a build requires at least one); seed string at most 100 characters; lower success
-    rate 0–`int.MaxValue`.
+    authoring simulation (recommended 1–10; a build requires at least one); seed string at most 100 characters;
+    lower success rate 0–`int.MaxValue` (recommended at least 10 MCS/s).
   - Original empty RNG seeds are replaced by a GUID; the new implementation derives them from the project/job
     seed instead (ADR 0005; recorded deviation).
 - Known issues: the default building block is read-only and implicit; duplicate priorities have no defined
@@ -184,7 +185,9 @@ public sealed record BuildingBlockEntry(
   - occupation-exchange and doping names are unique case-insensitively; the original did not enforce this;
   - the model stores one derived building block instead of a read-only `IBuildingBlock` object;
   - negative normalization energy is rejected; the original −1/0 values both meant “no normalization” and
-    the UI coerced non-positive values to 0, so the new model uses `null` for that state.
+    the UI coerced non-positive values to 0, so the new model uses `null` for that state;
+  - write-out count 0 is a supported final-state-only mode; `SIM028` does not warn for it even though the
+    original recommended band starts at 5, because 0 is a valid hard-range value and a deliberate mode.
 - A doping preview is not part of Step 06. Step 10 owns the single lattice preview service and the shared
   supercell generator.
 
@@ -264,7 +267,8 @@ public enum ExecutionFlags
   - `NormalizationEnergyEv` null means no normalization (the original default 0); a positive value enables
     fixed normalization.
   - `MaxAttemptFrequencyHz` null means use the maximum from the transition rules; a positive value rescales
-    all frequencies while preserving ratios.
+    all frequencies while preserving ratios. This is a simulation-level default for Step 10's KMC job
+    configuration (the original job `BaseFrequency`).
 - MMC:
   - `BreakTolerance` 0 disables the equilibrium break check.
   - Sample lengths/intervals and the result sample are MCSP counts.
@@ -297,7 +301,7 @@ Step 06 owns the model-level lattice/simulation rules. Cross-step ownership is e
 
 | Owner | Rules |
 | --- | --- |
-| Step 06 | `LAT001`–`LAT011`, `SIM001`–`SIM035`: definition-level references, ranges, names, kind compatibility, defaults, and shape |
+| Step 06 | `LAT001`–`LAT011`, `SIM001`–`SIM037`: definition-level references, ranges, names, kind compatibility, defaults, and shape |
 | Step 04 | `TRN001`–`TRN028`: transition definition and resolved-path validity |
 | Step 07 | feasibility: every simulation's transition set is non-empty at build time, zero-mobile checks, and cross-domain preconditions |
 | Step 10 | `JOB004`–`JOB015`: fractions, supercell/job limits, same-site application, truncation, charge compensation, and effective counts |
@@ -318,10 +322,10 @@ Step 06 owns the model-level lattice/simulation rules. Cross-step ownership is e
 | `SIM001` | Error | Simulation references an unknown transition |
 | `SIM002` | Error | MMC simulation references a KMC transition (or vice versa) |
 | `SIM003` | Warning | Simulation has no transitions; it cannot be built until Step 07/10 feasibility passes |
-| `SIM004` | Error | Temperature outside 0.1–10,000 K |
+| `SIM004` | Error | Temperature is non-finite or outside 0.1–10,000 K |
 | `SIM005` | Error | Target MCSP outside 1–1,000,000 |
 | `SIM006` | Error | Job count outside 1–1000 |
-| `SIM007` | Error | KMC field direction is zero while the modulus is non-zero |
+| `SIM007` | Error | KMC field direction has a non-finite component, or is zero while the modulus is non-zero |
 | `SIM008` | Error | KMC pre-run MCSP outside 0–1,000,000 |
 | `SIM009` | Error | Simulation name is duplicated (case-insensitive) |
 | `SIM010` | Error | Write-out count outside 0–1000 |
@@ -330,7 +334,7 @@ Step 06 owns the model-level lattice/simulation rules. Cross-step ownership is e
 | `SIM013` | Error | KMC field modulus is negative or non-finite |
 | `SIM014` | Error | KMC normalization energy is negative or non-finite |
 | `SIM015` | Error | KMC max attempt frequency is zero, negative, or non-finite |
-| `SIM016` | Error | MMC break tolerance outside 0–1 |
+| `SIM016` | Error | MMC break tolerance is non-finite or outside 0–1 |
 | `SIM017` | Error | MMC break sample length outside 0–100,000 |
 | `SIM018` | Error | MMC break sample interval outside 1–1000 |
 | `SIM019` | Error | MMC result sample outside 0–1,000,000 |
@@ -350,18 +354,22 @@ Step 06 owns the model-level lattice/simulation rules. Cross-step ownership is e
 | `SIM033` | Warning | MMC result sample above the recommended 10,000 |
 | `SIM034` | Warning | KMC normalization energy above the recommended 10 eV |
 | `SIM035` | Error | The persisted execution-flag array contains a duplicate |
+| `SIM036` | Warning | A simulation references 11–100 transitions (recommended 1–10) |
+| `SIM037` | Warning | Min success rate is positive but below 10 MCS/s (recommended at least 10) |
 
 - `LAT011` replaces the earlier draft's same-site application-order rule. That rule needs counts and a
   supercell, so it is Step 10's `JOB011`; Step 06 does not duplicate it.
 - The original warning-only settings checks become hard errors at the original minimum/maximum, while the
   original recommended bands remain warnings. This is the same severity policy used by Steps 03–05: a value
   that cannot be built is an error, and an unusual but buildable value is a warning.
+- All numeric range rules treat NaN and infinities as errors; non-finite values are checked before
+  comparisons. `ElectricFieldDirection` must contain three finite components.
 - The original wrong-sign counter-doping warning becomes `LAT009` error. The chosen interpretation is
   recorded here and tested; it is not a silent scientific correction.
 - A newly created simulation has no transitions (`SIM003` warning), matching the original transition-count
   minimum of 0. Step 07/10 blocks a build until the set is non-empty.
 - `Mocassin.Core.Model.Lattice.LatticeModelValidator` owns `LAT001`–`LAT011`.
-  `Mocassin.Core.Model.Simulations.SimulationModelValidator` owns `SIM001`–`SIM035`. Both need only the model
+  `Mocassin.Core.Model.Simulations.SimulationModelValidator` owns `SIM001`–`SIM037`. Both need only the model
   graph and primitive types. `Mocassin.Packages.Projects.ProjectValidationService` composes them with the
   existing Core/Symmetry validators.
 - Every used code has a positive and negative test; each diagnostic carries a stable `ModelPath`, a hint, and a
@@ -445,7 +453,7 @@ Mocassin.Core/
       SimulationModelValidator.cs
   Diagnostics/
     LatticeDiagnosticCodes.cs           # LAT001-LAT011
-    SimulationDiagnosticCodes.cs        # SIM001-SIM035
+    SimulationDiagnosticCodes.cs        # SIM001-SIM037
   Editing/
     ProjectEditor.cs                    # existing Apply/validation core
     ProjectEditor.Lattice.cs            # occupation exchanges, dopings, priority reorder
@@ -491,7 +499,7 @@ Samples live under `samples/lattice/` and `samples/simulations/`. The new user-g
 - [ ] Implement simulation defaults, hard limits, recommended-band warnings, and seed validation.
 - [ ] Implement editor operations in partial `ProjectEditor.Lattice.cs`/`ProjectEditor.Simulations.cs`.
 - [ ] Add the Core lattice/simulation diagnostic codes and help text for `LAT001`–`LAT011` and
-  `SIM001`–`SIM035`.
+  `SIM001`–`SIM037`.
 - [ ] Update `contracts/manifest.json`: set `status` to `step-06`, rewrite `notes`, add the lattice/doping and
   simulation model fields, add the `project-lattice-minimal`, `project-lattice-populated`,
   `project-simulations-minimal`, and `project-simulations-populated` fixtures, and refresh
@@ -568,7 +576,7 @@ job-count preview tests belong to Step 10; there is no Step 06 benchmark target.
 | Building block | Stable site uses the first set particle; unstable site uses void; derived only | PR-fast |
 | Compensation shape | Dependent without compensation, compensation without dependent, wrong sign | PR-fast |
 | Simulation defaults | Every documented default, including write-out, time limit, field, normalization, and MMC samples | PR-fast |
-| Simulation limits | Boundary values for every hard range and recommended band in `SIM004`–`SIM035` | PR-fast |
+| Simulation limits | Boundary values for every hard range and recommended band in `SIM004`–`SIM037` | PR-fast |
 | Kind compatibility | MMC/KMC transition mixing, duplicate references, and `kind`/record/array disagreement | PR-fast |
 | Execution flags | CamelCase names, sorted array, `None` empty, duplicate rejection, u32 job-payload mapping | PR-fast |
 | Model envelope | Empty, lattice-only, simulation-only, and combined models round-trip through the project JSON context | PR-fast |
@@ -577,7 +585,7 @@ job-count preview tests belong to Step 10; there is no Step 06 benchmark target.
 | Ordering | Doping priority and authored-order transition arrays survive serialization; no silent re-sort | PR-fast |
 | Queries | `Project` implements `ILatticeQuery`/`ISimulationQuery` through `IProjectQuery`; default building block matches the model | PR-fast |
 | Editing | Reorder/duplicate/remove/switch-kind keeps references valid or reports dependents | PR-fast |
-| Diagnostics | Positive/negative case for every `LAT001`–`LAT011` and `SIM001`–`SIM035` code | PR-fast |
+| Diagnostics | Positive/negative case for every `LAT001`–`LAT011` and `SIM001`–`SIM037` code | PR-fast |
 | Property tests | Random valid doping/simulation models round-trip canonically and preserve order | PR-medium |
 | Samples | Ceria reduction, BZO doping, KMC, and MMC samples validate | PR-fast |
 

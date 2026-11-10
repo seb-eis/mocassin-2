@@ -686,7 +686,7 @@ CREATE TABLE jobs (
     temperature_k     REAL    NOT NULL,
     electric_field_vm REAL    NOT NULL DEFAULT 0.0,
     target_mcsp       INTEGER NOT NULL,
-    write_out_count   INTEGER NOT NULL DEFAULT 0,
+    write_out_count   INTEGER NOT NULL DEFAULT 100,
     pre_run_mcsp      INTEGER NOT NULL DEFAULT 0,
     time_limit_s      INTEGER,
     min_success_rate  REAL,
@@ -712,6 +712,8 @@ Rules:
 
 - `job_id` is a deterministic 1-based integer assigned at build time in template order
   (collection index, config index, job index) and never reused within a package.
+- The writer always sets the denormalized columns from the resolved job payload; SQL defaults (including
+  `write_out_count DEFAULT 100`) are fallbacks only.
 - The published package has no `results` table. Results live in `.msr` (section 3.6).
 - The database uses `application_id`/`user_version` pragmas in addition to `schema_info` for tooling.
 - The solver opens the package read-only (`SQLITE_OPEN_READONLY`) and never writes it.
