@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Globalization;
+using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Editing;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Ids;
@@ -58,7 +59,11 @@ public sealed class CeriaAuthoringTests
                 oxygenSet.Id,
                 SiteStability.Unstable)));
 
-        Assert.Empty(ProjectValidationService.Validate(project));
+        var diagnostics = ProjectValidationService.Validate(project);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        Assert.Contains(
+            diagnostics,
+            static diagnostic => diagnostic.Code == EnergyDiagnosticCodes.EnvironmentSamplingWarning);
         Assert.Equal("Ceria", project.Structure.Name);
         Assert.Equal(225, project.Structure.SpaceGroup.Number);
         Assert.Equal(5.41, project.Structure.Cell.A.Value);

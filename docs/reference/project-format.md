@@ -41,7 +41,7 @@ generated JSON Schema is
 | `notes` | no | Optional free-text notes. |
 | `createdUtc` | yes | ISO-8601 UTC creation timestamp. |
 | `modifiedUtc` | yes | ISO-8601 UTC last-modified timestamp. |
-| `model` | yes | Scientific model body. Steps 03–04 add `particles`, `particleSets`, `structure`, and the flat transition sections; energy, lattice, and simulation sections are added by Steps 05–06. |
+| `model` | yes | Scientific model body. Steps 03–05 add `particles`, `particleSets`, `structure`, the flat transition sections, and the flat energy sections; lattice and simulation sections are added by Step 06. |
 | `parameterizations` | yes | Parameterization templates. Step 01 stores identity and model signature only. |
 | `jobTemplates` | yes | Job templates. Step 01 stores identity and name only. |
 | `buildTemplates` | yes | Build recipes binding a job template to a parameterization. |
@@ -226,6 +226,57 @@ keeps its Step 01/03 canonical hash because empty sections are omitted when writ
 `ProjectHasher.ComputeTransition(project, transitionRef)` hashes the transition closure for preview caching. It
 is separate from the model and document hashes.
 
+## Energy (Step 05 fields)
+
+Step 05 adds four flat energy sections. Missing sections load as the default/empty energy model, and the
+default stable environment plus empty collections are omitted on write so pre-Step-05 hashes stay stable.
+
+```json
+{
+  "stableEnvironment": {
+    "cutoff": 2.7,
+    "filters": [
+      { "start": 0.0, "end": 1.0, "siteAId": "…", "siteBId": "…" }
+    ]
+  },
+  "unstableEnvironments": [
+    { "siteId": "…", "cutoff": 1.5, "filters": [] }
+  ],
+  "clusters": [
+    {
+      "id": "…",
+      "name": "Oxygen migration edge",
+      "centerSiteId": "…",
+      "offsetVectors": [[-0.25, 0.0, 0.0], [0.25, 0.0, 0.0]]
+    }
+  ],
+  "siteEnergies": [
+    { "siteId": "…", "entries": [{ "particleId": "…", "energyEv": -0.5 }] }
+  ]
+}
+```
+
+- A missing `stableEnvironment` loads a `1.0 Å` cutoff with no filters. The default environment is omitted on
+  write when it equals the default; empty `unstableEnvironments`, `clusters`, and `siteEnergies` arrays are
+  also omitted.
+- `cutoff` and filter radii are in ångström. Every environment cutoff must be positive and finite; a cutoff
+  above half the smallest cell dimension is a periodic-ambiguity warning.
+- Filters remove distances in the inclusive `[start, end]` range with the `1e-5 Å` tolerance. Stable filters
+  are symmetric; unstable filters are one-directional and must start at the environment site.
+- `offsetVectors` is semantic and never re-sorted. It contains the surrounding positions only: 2–8 offsets
+  (3–9 positions including the centre).
+- `unstableEnvironments` sort by `siteId`, `clusters` by `id`, `siteEnergies` by `siteId`, filters by
+  `(start, end, siteAId, siteBId)`, and site-energy entries by `particleId`.
+- Site energies are sparse; a missing entry is `0 eV`. A `(siteId, particleId)` pair may appear once and the
+  value must be finite and within `-100..100 eV`.
+- The project `schemaVersion` stays `1`: the sections are additive under the pre-release v1 format and the
+  manifest/schema/fixtures are regenerated in Step 05.
+- Pair interactions, cost previews, `GeometryId`, and `EnergyId` are derived data and are never written to the
+  project.
+
+For authoring guidance see [Energy model](../user-guide/energy.md). The ceria and barium-zirconate samples
+include energy sections and are mirrored in `tests/contracts/`.
+
 ## Model and templates in Step 01 (historical)
 
 Step 01 deliberately establishes the project envelope before the scientific model domains. At that
@@ -239,7 +290,6 @@ The template records are still the Step 01 shape:
 Steps 03–06 extend `model` with particles, structure, transitions, energy, lattice, and simulations. Steps 09
 and 10 extend the template records. Any semantic change to a released schema requires a migration and a
 format decision.
-
 ## View settings
 
 `viewSettings` is persisted with the project so a shared project opens with the same view:

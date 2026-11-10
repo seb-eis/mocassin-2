@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Model;
+using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -99,6 +100,9 @@ public static class ProjectJson
         var chains = model.Chains.IsDefault ? [] : model.Chains;
         var kineticTransitions = model.KineticTransitions.IsDefault ? [] : model.KineticTransitions;
         var metropolisTransitions = model.MetropolisTransitions.IsDefault ? [] : model.MetropolisTransitions;
+        var unstableEnvironments = model.UnstableEnvironments.IsDefault ? [] : model.UnstableEnvironments;
+        var clusters = model.Clusters.IsDefault ? [] : model.Clusters;
+        var siteEnergies = model.SiteEnergies.IsDefault ? [] : model.SiteEnergies;
 
         return new ModelDefinition
         {
@@ -116,8 +120,66 @@ public static class ProjectJson
                 .Select(NormalizeKineticTransition)
                 .OrderBy(static transition => transition.Id.Value)],
             MetropolisTransitions = [.. metropolisTransitions.OrderBy(static transition => transition.Id.Value)],
+            StableEnvironment = CanonicalizeEnvironment(model.StableEnvironment),
+            UnstableEnvironments = [.. unstableEnvironments
+                .Select(CanonicalizeEnvironment)
+                .OrderBy(static environment => environment.SiteId.Value)],
+            Clusters = [.. clusters
+                .Select(NormalizeCluster)
+                .OrderBy(static cluster => cluster.Id.Value)],
+            SiteEnergies = [.. siteEnergies
+                .Select(NormalizeSiteEnergySet)
+                .OrderBy(static siteEnergySet => siteEnergySet.SiteId.Value)],
         };
     }
+
+    private static StableEnvironment CanonicalizeEnvironment(StableEnvironment environment)
+    {
+        ArgumentNullException.ThrowIfNull(environment);
+        var normalized = NormalizeEnvironment(environment);
+        return ModelDefinitionJsonConverter.IsDefaultEnvironment(normalized)
+            ? StableEnvironment.Default
+            : normalized;
+    }
+
+    private static UnstableEnvironment CanonicalizeEnvironment(UnstableEnvironment environment)
+    {
+        ArgumentNullException.ThrowIfNull(environment);
+        return NormalizeEnvironment(environment);
+    }
+
+    private static StableEnvironment NormalizeEnvironment(StableEnvironment environment) =>
+        environment with
+        {
+            Filters = [.. (environment.Filters.IsDefault ? [] : environment.Filters)
+                .OrderBy(static filter => filter.Start.Value)
+                .ThenBy(static filter => filter.End.Value)
+                .ThenBy(static filter => filter.SiteAId.Value)
+                .ThenBy(static filter => filter.SiteBId.Value)],
+        };
+
+    private static UnstableEnvironment NormalizeEnvironment(UnstableEnvironment environment) =>
+        environment with
+        {
+            Filters = [.. (environment.Filters.IsDefault ? [] : environment.Filters)
+                .OrderBy(static filter => filter.Start.Value)
+                .ThenBy(static filter => filter.End.Value)
+                .ThenBy(static filter => filter.SiteAId.Value)
+                .ThenBy(static filter => filter.SiteBId.Value)],
+        };
+
+    private static Cluster NormalizeCluster(Cluster cluster) =>
+        cluster with
+        {
+            OffsetVectors = cluster.OffsetVectors.IsDefault ? [] : cluster.OffsetVectors,
+        };
+
+    private static SiteEnergySet NormalizeSiteEnergySet(SiteEnergySet siteEnergySet) =>
+        siteEnergySet with
+        {
+            Entries = [.. (siteEnergySet.Entries.IsDefault ? [] : siteEnergySet.Entries)
+                .OrderBy(static entry => entry.ParticleId.Value)],
+        };
 
     private static StateChangeGroup NormalizeStateChangeGroup(StateChangeGroup group) =>
         group with
@@ -395,6 +457,17 @@ internal sealed class ProjectDto
 [JsonSerializable(typeof(ImmutableArray<KineticTransition>))]
 [JsonSerializable(typeof(ImmutableArray<MetropolisTransition>))]
 [JsonSerializable(typeof(ImmutableArray<TransitionLinker>))]
+[JsonSerializable(typeof(StableEnvironment))]
+[JsonSerializable(typeof(UnstableEnvironment))]
+[JsonSerializable(typeof(InteractionFilter))]
+[JsonSerializable(typeof(Cluster))]
+[JsonSerializable(typeof(SiteEnergySet))]
+[JsonSerializable(typeof(SiteEnergyEntry))]
+[JsonSerializable(typeof(ImmutableArray<UnstableEnvironment>))]
+[JsonSerializable(typeof(ImmutableArray<InteractionFilter>))]
+[JsonSerializable(typeof(ImmutableArray<Cluster>))]
+[JsonSerializable(typeof(ImmutableArray<SiteEnergySet>))]
+[JsonSerializable(typeof(ImmutableArray<SiteEnergyEntry>))]
 [JsonSerializable(typeof(ImmutableArray<Fractional3>))]
 [JsonSerializable(typeof(Fractional3))]
 [JsonSerializable(typeof(ProjectMetadata))]

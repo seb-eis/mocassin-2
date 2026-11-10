@@ -73,15 +73,15 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Stable environment cutoff | Y | Planned | 05 | |
-| Hollow-sphere filters | Y | Planned | 05/25 | |
-| Per-unstable-site environments | Y | Planned | 05/25 | |
-| Auto-sampled pair interactions | Y | Planned | 08 | |
-| Chiral pair linking | Y | Planned | 05/08/09 | Shell chiral linking in 02; shared `EnergyId` binding in 05/08/09 |
-| Group/cluster interactions (up to 9 positions) | Y | Planned | 05/08 | |
-| Site/defect energies | Y | Planned | 05 | |
-| Cost/permutation limits | Y | Planned | 05/07 | |
-| Cluster geometry editor/preview | Y | Planned | 25 | |
+| Stable environment cutoff | Y | Partial | 05/25 | Model, validation, preview, and samples in 05; editor UI in 25 |
+| Hollow-sphere filters | Y | Partial | 05/25 | Model, validation, and samples in 05; editor UI in 25 |
+| Per-unstable-site environments | Y | Partial | 05/25 | Model, validation, and samples in 05; editor UI in 25 |
+| Auto-sampled pair interactions | Y | Partial | 05/08 | Shared sampling kernel and preview in 05; compiled tables in 08 |
+| Chiral pair linking | Y | Partial | 05/08/09 | Shell chiral linking in 02; shared `EnergyId` preview in 05; compiled/template binding in 08/09 |
+| Group/cluster interactions (up to 9 positions) | Y | Partial | 05/08 | Model, geometry validation, cost preview, and samples in 05; tables in 08 |
+| Site/defect energies | Y | Partial | 05/25 | Model, validation, editing, and samples in 05; editor UI in 25 |
+| Cost/permutation limits | Y | Partial | 05/07 | Limits, diagnostics, and preview in 05; consolidated statistics/docs in 07 |
+| Cluster geometry editor/preview | Y | Partial | 05/25 | Preview API in 05; editor UI in 25 |
 | Site energy matrix + bulk edit | Y | Improvement | 25 | |
 | Default building block viewer | Y | Planned | 25 | |
 | Occupation exchanges | Y | Planned | 06 | |

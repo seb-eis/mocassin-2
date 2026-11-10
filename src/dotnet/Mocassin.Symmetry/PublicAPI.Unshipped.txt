@@ -481,3 +481,84 @@ override Mocassin.Symmetry.Transitions.TransitionPreview.GetHashCode() -> int
 override Mocassin.Symmetry.Transitions.TransitionPreview.ToString() -> string!
 static Mocassin.Symmetry.Transitions.TransitionPreview.operator !=(Mocassin.Symmetry.Transitions.TransitionPreview? left, Mocassin.Symmetry.Transitions.TransitionPreview? right) -> bool
 static Mocassin.Symmetry.Transitions.TransitionPreview.operator ==(Mocassin.Symmetry.Transitions.TransitionPreview? left, Mocassin.Symmetry.Transitions.TransitionPreview? right) -> bool
+Mocassin.Symmetry.Energy.EnergyGeometrySampler
+Mocassin.Symmetry.Energy.EnergyGeometrySampler.EnergyGeometrySampler(Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog = null) -> void
+Mocassin.Symmetry.Energy.EnergyGeometrySampler.TrySamplePairs(Mocassin.Core.Model.ModelDefinition! model, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Energy.PairInteractionPreview!> pairs, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+Mocassin.Symmetry.Energy.EnergyGeometryValidator
+Mocassin.Symmetry.Energy.EnergyGeometryValidator.EnergyGeometryValidator(Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog = null) -> void
+Mocassin.Symmetry.Energy.EnergyGeometryValidator.Validate(Mocassin.Core.Model.ModelDefinition! model) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Symmetry.Energy.IEnergyGeometrySampler
+Mocassin.Symmetry.Energy.IEnergyGeometrySampler.TrySamplePairs(Mocassin.Core.Model.ModelDefinition! model, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Energy.PairInteractionPreview!> pairs, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+Mocassin.Symmetry.Energy.PairInteractionPreview
+Mocassin.Symmetry.Energy.PairInteractionPreview.<Clone>$() -> Mocassin.Symmetry.Energy.PairInteractionPreview!
+Mocassin.Symmetry.Energy.PairInteractionPreview.CenterP.get -> int
+Mocassin.Symmetry.Energy.PairInteractionPreview.CenterP.init -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.ChiralPartnerGeometryId.get -> string?
+Mocassin.Symmetry.Energy.PairInteractionPreview.ChiralPartnerGeometryId.init -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.Deconstruct(out string! GeometryId, out string! EnergyId, out Mocassin.Core.Ids.CellSiteId SiteAId, out int CenterP, out Mocassin.Core.Ids.CellSiteId SiteBId, out int PartnerP, out double DistanceAngstrom, out bool IsChiral, out string? ChiralPartnerGeometryId) -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.DistanceAngstrom.get -> double
+Mocassin.Symmetry.Energy.PairInteractionPreview.DistanceAngstrom.init -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.EnergyId.get -> string!
+Mocassin.Symmetry.Energy.PairInteractionPreview.EnergyId.init -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.Equals(Mocassin.Symmetry.Energy.PairInteractionPreview? other) -> bool
+Mocassin.Symmetry.Energy.PairInteractionPreview.GeometryId.get -> string!
+Mocassin.Symmetry.Energy.PairInteractionPreview.GeometryId.init -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.IsChiral.get -> bool
+Mocassin.Symmetry.Energy.PairInteractionPreview.IsChiral.init -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.PairInteractionPreview(string! GeometryId, string! EnergyId, Mocassin.Core.Ids.CellSiteId SiteAId, int CenterP, Mocassin.Core.Ids.CellSiteId SiteBId, int PartnerP, double DistanceAngstrom, bool IsChiral, string? ChiralPartnerGeometryId) -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.PartnerP.get -> int
+Mocassin.Symmetry.Energy.PairInteractionPreview.PartnerP.init -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.SiteAId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Symmetry.Energy.PairInteractionPreview.SiteAId.init -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.SiteBId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Symmetry.Energy.PairInteractionPreview.SiteBId.init -> void
+override Mocassin.Symmetry.Energy.PairInteractionPreview.Equals(object? obj) -> bool
+override Mocassin.Symmetry.Energy.PairInteractionPreview.GetHashCode() -> int
+override Mocassin.Symmetry.Energy.PairInteractionPreview.ToString() -> string!
+static Mocassin.Symmetry.Energy.PairInteractionPreview.operator !=(Mocassin.Symmetry.Energy.PairInteractionPreview? left, Mocassin.Symmetry.Energy.PairInteractionPreview? right) -> bool
+static Mocassin.Symmetry.Energy.PairInteractionPreview.operator ==(Mocassin.Symmetry.Energy.PairInteractionPreview? left, Mocassin.Symmetry.Energy.PairInteractionPreview? right) -> bool
+Mocassin.Symmetry.Energy.ClusterCostPreview
+Mocassin.Symmetry.Energy.ClusterCostPreview.<Clone>$() -> Mocassin.Symmetry.Energy.ClusterCostPreview!
+Mocassin.Symmetry.Energy.ClusterCostPreview.ClusterCostPreview(Mocassin.Core.Ids.ClusterId ClusterId, long RawPermutationCount, long UniquePermutationCount, long EstimatedBytes) -> void
+Mocassin.Symmetry.Energy.ClusterCostPreview.ClusterId.get -> Mocassin.Core.Ids.ClusterId
+Mocassin.Symmetry.Energy.ClusterCostPreview.ClusterId.init -> void
+Mocassin.Symmetry.Energy.ClusterCostPreview.Deconstruct(out Mocassin.Core.Ids.ClusterId ClusterId, out long RawPermutationCount, out long UniquePermutationCount, out long EstimatedBytes) -> void
+Mocassin.Symmetry.Energy.ClusterCostPreview.Equals(Mocassin.Symmetry.Energy.ClusterCostPreview? other) -> bool
+Mocassin.Symmetry.Energy.ClusterCostPreview.EstimatedBytes.get -> long
+Mocassin.Symmetry.Energy.ClusterCostPreview.EstimatedBytes.init -> void
+Mocassin.Symmetry.Energy.ClusterCostPreview.RawPermutationCount.get -> long
+Mocassin.Symmetry.Energy.ClusterCostPreview.RawPermutationCount.init -> void
+Mocassin.Symmetry.Energy.ClusterCostPreview.UniquePermutationCount.get -> long
+Mocassin.Symmetry.Energy.ClusterCostPreview.UniquePermutationCount.init -> void
+Mocassin.Symmetry.Energy.EnergyCostPreview
+Mocassin.Symmetry.Energy.EnergyCostPreview.<Clone>$() -> Mocassin.Symmetry.Energy.EnergyCostPreview!
+Mocassin.Symmetry.Energy.EnergyCostPreview.ClusterCosts.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Energy.ClusterCostPreview!>
+Mocassin.Symmetry.Energy.EnergyCostPreview.ClusterCosts.init -> void
+Mocassin.Symmetry.Energy.EnergyCostPreview.Deconstruct(out long StableP1PositionCount, out long PairImageCount, out long UniquePairInteractionCount, out System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Energy.ClusterCostPreview!> ClusterCosts, out long EstimatedMemoryBytes) -> void
+Mocassin.Symmetry.Energy.EnergyCostPreview.EnergyCostPreview(long StableP1PositionCount, long PairImageCount, long UniquePairInteractionCount, System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Energy.ClusterCostPreview!> ClusterCosts, long EstimatedMemoryBytes) -> void
+Mocassin.Symmetry.Energy.EnergyCostPreview.Equals(Mocassin.Symmetry.Energy.EnergyCostPreview? other) -> bool
+Mocassin.Symmetry.Energy.EnergyCostPreview.EstimatedMemoryBytes.get -> long
+Mocassin.Symmetry.Energy.EnergyCostPreview.EstimatedMemoryBytes.init -> void
+Mocassin.Symmetry.Energy.EnergyCostPreview.PairImageCount.get -> long
+Mocassin.Symmetry.Energy.EnergyCostPreview.PairImageCount.init -> void
+Mocassin.Symmetry.Energy.EnergyCostPreview.StableP1PositionCount.get -> long
+Mocassin.Symmetry.Energy.EnergyCostPreview.StableP1PositionCount.init -> void
+Mocassin.Symmetry.Energy.EnergyCostPreview.UniquePairInteractionCount.get -> long
+Mocassin.Symmetry.Energy.EnergyCostPreview.UniquePairInteractionCount.init -> void
+Mocassin.Symmetry.Energy.EnergyPreviewService
+Mocassin.Symmetry.Energy.EnergyPreviewService.EnergyPreviewService(Mocassin.Symmetry.SpaceGroups.SpaceGroupCatalog? catalog = null, Mocassin.Symmetry.Contracts.SymmetryVersionInfo? versions = null, int cacheCapacity = 256) -> void
+Mocassin.Symmetry.Energy.EnergyPreviewService.TryCreatePairPreview(Mocassin.Core.Model.ModelDefinition! model, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Energy.PairInteractionPreview!>?
+Mocassin.Symmetry.Energy.EnergyPreviewService.TryCreatePreview(Mocassin.Core.Model.ModelDefinition! model, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.Energy.EnergyCostPreview?
+Mocassin.Symmetry.Energy.IEnergyPreviewService
+Mocassin.Symmetry.Energy.IEnergyPreviewService.TryCreatePairPreview(Mocassin.Core.Model.ModelDefinition! model, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> System.Collections.Immutable.ImmutableArray<Mocassin.Symmetry.Energy.PairInteractionPreview!>?
+Mocassin.Symmetry.Energy.IEnergyPreviewService.TryCreatePreview(Mocassin.Core.Model.ModelDefinition! model, int cellCountA, int cellCountB, int cellCountC, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Symmetry.Energy.EnergyCostPreview?
+override Mocassin.Symmetry.Energy.ClusterCostPreview.Equals(object? obj) -> bool
+override Mocassin.Symmetry.Energy.ClusterCostPreview.GetHashCode() -> int
+override Mocassin.Symmetry.Energy.ClusterCostPreview.ToString() -> string!
+override Mocassin.Symmetry.Energy.EnergyCostPreview.Equals(object? obj) -> bool
+override Mocassin.Symmetry.Energy.EnergyCostPreview.GetHashCode() -> int
+override Mocassin.Symmetry.Energy.EnergyCostPreview.ToString() -> string!
+static Mocassin.Symmetry.Energy.ClusterCostPreview.operator !=(Mocassin.Symmetry.Energy.ClusterCostPreview? left, Mocassin.Symmetry.Energy.ClusterCostPreview? right) -> bool
+static Mocassin.Symmetry.Energy.ClusterCostPreview.operator ==(Mocassin.Symmetry.Energy.ClusterCostPreview? left, Mocassin.Symmetry.Energy.ClusterCostPreview? right) -> bool
+static Mocassin.Symmetry.Energy.EnergyCostPreview.operator !=(Mocassin.Symmetry.Energy.EnergyCostPreview? left, Mocassin.Symmetry.Energy.EnergyCostPreview? right) -> bool
+static Mocassin.Symmetry.Energy.EnergyCostPreview.operator ==(Mocassin.Symmetry.Energy.EnergyCostPreview? left, Mocassin.Symmetry.Energy.EnergyCostPreview? right) -> bool

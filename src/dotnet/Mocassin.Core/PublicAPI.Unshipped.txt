@@ -1486,3 +1486,172 @@ Mocassin.Core.Project.Project.MetropolisTransitions.get -> System.Collections.Im
 Mocassin.Core.Project.Project.StateChangeGroups.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChangeGroup!>
 Mocassin.Core.Project.Project.StateChanges.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.StateChange!>
 static Mocassin.Core.Project.ProjectHasher.ComputeTransition(Mocassin.Core.Project.IProjectQuery! project, Mocassin.Core.Model.Transitions.TransitionRef transition) -> string!
+Mocassin.Core.Model.Energy.Cluster
+Mocassin.Core.Model.Energy.Cluster.<Clone>$() -> Mocassin.Core.Model.Energy.Cluster!
+Mocassin.Core.Model.Energy.Cluster.CenterSiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Energy.Cluster.CenterSiteId.init -> void
+Mocassin.Core.Model.Energy.Cluster.Cluster(Mocassin.Core.Ids.ClusterId Id, string! Name, Mocassin.Core.Ids.CellSiteId CenterSiteId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> OffsetVectors) -> void
+Mocassin.Core.Model.Energy.Cluster.Deconstruct(out Mocassin.Core.Ids.ClusterId Id, out string! Name, out Mocassin.Core.Ids.CellSiteId CenterSiteId, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> OffsetVectors) -> void
+Mocassin.Core.Model.Energy.Cluster.Equals(Mocassin.Core.Model.Energy.Cluster? other) -> bool
+Mocassin.Core.Model.Energy.Cluster.Id.get -> Mocassin.Core.Ids.ClusterId
+Mocassin.Core.Model.Energy.Cluster.Id.init -> void
+Mocassin.Core.Model.Energy.Cluster.Name.get -> string!
+Mocassin.Core.Model.Energy.Cluster.Name.init -> void
+Mocassin.Core.Model.Energy.Cluster.OffsetVectors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+Mocassin.Core.Model.Energy.Cluster.OffsetVectors.init -> void
+Mocassin.Core.Model.Energy.EnergyLimits
+Mocassin.Core.Model.Energy.InteractionFilter
+Mocassin.Core.Model.Energy.InteractionFilter.<Clone>$() -> Mocassin.Core.Model.Energy.InteractionFilter!
+Mocassin.Core.Model.Energy.InteractionFilter.Deconstruct(out Mocassin.Core.Units.LengthAngstrom Start, out Mocassin.Core.Units.LengthAngstrom End, out Mocassin.Core.Ids.CellSiteId SiteAId, out Mocassin.Core.Ids.CellSiteId SiteBId) -> void
+Mocassin.Core.Model.Energy.InteractionFilter.End.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.Energy.InteractionFilter.End.init -> void
+Mocassin.Core.Model.Energy.InteractionFilter.Equals(Mocassin.Core.Model.Energy.InteractionFilter? other) -> bool
+Mocassin.Core.Model.Energy.InteractionFilter.InteractionFilter(Mocassin.Core.Units.LengthAngstrom Start, Mocassin.Core.Units.LengthAngstrom End, Mocassin.Core.Ids.CellSiteId SiteAId, Mocassin.Core.Ids.CellSiteId SiteBId) -> void
+Mocassin.Core.Model.Energy.InteractionFilter.SiteAId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Energy.InteractionFilter.SiteAId.init -> void
+Mocassin.Core.Model.Energy.InteractionFilter.SiteBId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Energy.InteractionFilter.SiteBId.init -> void
+Mocassin.Core.Model.Energy.InteractionFilter.Start.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.Energy.InteractionFilter.Start.init -> void
+Mocassin.Core.Model.Energy.SiteEnergyEntry
+Mocassin.Core.Model.Energy.SiteEnergyEntry.<Clone>$() -> Mocassin.Core.Model.Energy.SiteEnergyEntry!
+Mocassin.Core.Model.Energy.SiteEnergyEntry.Deconstruct(out Mocassin.Core.Ids.ParticleId ParticleId, out Mocassin.Core.Units.EnergyEv Energy) -> void
+Mocassin.Core.Model.Energy.SiteEnergyEntry.Energy.get -> Mocassin.Core.Units.EnergyEv
+Mocassin.Core.Model.Energy.SiteEnergyEntry.Energy.init -> void
+Mocassin.Core.Model.Energy.SiteEnergyEntry.Equals(Mocassin.Core.Model.Energy.SiteEnergyEntry? other) -> bool
+Mocassin.Core.Model.Energy.SiteEnergyEntry.ParticleId.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Core.Model.Energy.SiteEnergyEntry.ParticleId.init -> void
+Mocassin.Core.Model.Energy.SiteEnergyEntry.SiteEnergyEntry(Mocassin.Core.Ids.ParticleId ParticleId, Mocassin.Core.Units.EnergyEv Energy) -> void
+Mocassin.Core.Model.Energy.SiteEnergySet
+Mocassin.Core.Model.Energy.SiteEnergySet.<Clone>$() -> Mocassin.Core.Model.Energy.SiteEnergySet!
+Mocassin.Core.Model.Energy.SiteEnergySet.Deconstruct(out Mocassin.Core.Ids.CellSiteId SiteId, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.SiteEnergyEntry!> Entries) -> void
+Mocassin.Core.Model.Energy.SiteEnergySet.Entries.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.SiteEnergyEntry!>
+Mocassin.Core.Model.Energy.SiteEnergySet.Entries.init -> void
+Mocassin.Core.Model.Energy.SiteEnergySet.Equals(Mocassin.Core.Model.Energy.SiteEnergySet? other) -> bool
+Mocassin.Core.Model.Energy.SiteEnergySet.SiteEnergySet(Mocassin.Core.Ids.CellSiteId SiteId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.SiteEnergyEntry!> Entries) -> void
+Mocassin.Core.Model.Energy.SiteEnergySet.SiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Energy.SiteEnergySet.SiteId.init -> void
+Mocassin.Core.Model.Energy.StableEnvironment
+Mocassin.Core.Model.Energy.StableEnvironment.<Clone>$() -> Mocassin.Core.Model.Energy.StableEnvironment!
+Mocassin.Core.Model.Energy.StableEnvironment.Cutoff.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.Energy.StableEnvironment.Cutoff.init -> void
+Mocassin.Core.Model.Energy.StableEnvironment.Deconstruct(out Mocassin.Core.Units.LengthAngstrom Cutoff, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.InteractionFilter!> Filters) -> void
+Mocassin.Core.Model.Energy.StableEnvironment.Equals(Mocassin.Core.Model.Energy.StableEnvironment? other) -> bool
+Mocassin.Core.Model.Energy.StableEnvironment.Filters.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.InteractionFilter!>
+Mocassin.Core.Model.Energy.StableEnvironment.Filters.init -> void
+Mocassin.Core.Model.Energy.StableEnvironment.StableEnvironment(Mocassin.Core.Units.LengthAngstrom Cutoff, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.InteractionFilter!> Filters) -> void
+Mocassin.Core.Model.Energy.UnstableEnvironment
+Mocassin.Core.Model.Energy.UnstableEnvironment.<Clone>$() -> Mocassin.Core.Model.Energy.UnstableEnvironment!
+Mocassin.Core.Model.Energy.UnstableEnvironment.Cutoff.get -> Mocassin.Core.Units.LengthAngstrom
+Mocassin.Core.Model.Energy.UnstableEnvironment.Cutoff.init -> void
+Mocassin.Core.Model.Energy.UnstableEnvironment.Deconstruct(out Mocassin.Core.Ids.CellSiteId SiteId, out Mocassin.Core.Units.LengthAngstrom Cutoff, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.InteractionFilter!> Filters) -> void
+Mocassin.Core.Model.Energy.UnstableEnvironment.Equals(Mocassin.Core.Model.Energy.UnstableEnvironment? other) -> bool
+Mocassin.Core.Model.Energy.UnstableEnvironment.Filters.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.InteractionFilter!>
+Mocassin.Core.Model.Energy.UnstableEnvironment.Filters.init -> void
+Mocassin.Core.Model.Energy.UnstableEnvironment.SiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Energy.UnstableEnvironment.SiteId.init -> void
+Mocassin.Core.Model.Energy.UnstableEnvironment.UnstableEnvironment(Mocassin.Core.Ids.CellSiteId SiteId, Mocassin.Core.Units.LengthAngstrom Cutoff, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.InteractionFilter!> Filters) -> void
+Mocassin.Core.Model.ModelDefinition.Clusters.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.Cluster!>
+Mocassin.Core.Model.ModelDefinition.Clusters.init -> void
+Mocassin.Core.Model.ModelDefinition.SiteEnergies.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.SiteEnergySet!>
+Mocassin.Core.Model.ModelDefinition.SiteEnergies.init -> void
+Mocassin.Core.Model.ModelDefinition.StableEnvironment.get -> Mocassin.Core.Model.Energy.StableEnvironment!
+Mocassin.Core.Model.ModelDefinition.StableEnvironment.init -> void
+Mocassin.Core.Model.ModelDefinition.UnstableEnvironments.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.UnstableEnvironment!>
+Mocassin.Core.Model.ModelDefinition.UnstableEnvironments.init -> void
+const Mocassin.Core.Model.Energy.EnergyLimits.ClusterOffsetsMax = 8 -> int
+const Mocassin.Core.Model.Energy.EnergyLimits.ClusterOffsetsMin = 2 -> int
+const Mocassin.Core.Model.Energy.EnergyLimits.ClusterPermutationsHard = 5000 -> int
+const Mocassin.Core.Model.Energy.EnergyLimits.ClusterPermutationsWarning = 500 -> int
+const Mocassin.Core.Model.Energy.EnergyLimits.ClustersPerPositionHard = 10 -> int
+const Mocassin.Core.Model.Energy.EnergyLimits.ClustersPerPositionWarning = 4 -> int
+const Mocassin.Core.Model.Energy.EnergyLimits.StablePositionsHard = 5000 -> int
+const Mocassin.Core.Model.Energy.EnergyLimits.StablePositionsWarning = 500 -> int
+const Mocassin.Core.Model.Energy.EnergyLimits.UnstablePositionsHard = 1000 -> int
+const Mocassin.Core.Model.Energy.EnergyLimits.UnstablePositionsWarning = 100 -> int
+override Mocassin.Core.Model.Energy.Cluster.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Energy.Cluster.GetHashCode() -> int
+override Mocassin.Core.Model.Energy.Cluster.ToString() -> string!
+override Mocassin.Core.Model.Energy.InteractionFilter.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Energy.InteractionFilter.GetHashCode() -> int
+override Mocassin.Core.Model.Energy.InteractionFilter.ToString() -> string!
+override Mocassin.Core.Model.Energy.SiteEnergyEntry.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Energy.SiteEnergyEntry.GetHashCode() -> int
+override Mocassin.Core.Model.Energy.SiteEnergyEntry.ToString() -> string!
+override Mocassin.Core.Model.Energy.SiteEnergySet.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Energy.SiteEnergySet.GetHashCode() -> int
+override Mocassin.Core.Model.Energy.SiteEnergySet.ToString() -> string!
+override Mocassin.Core.Model.Energy.StableEnvironment.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Energy.StableEnvironment.GetHashCode() -> int
+override Mocassin.Core.Model.Energy.StableEnvironment.ToString() -> string!
+override Mocassin.Core.Model.Energy.UnstableEnvironment.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Energy.UnstableEnvironment.GetHashCode() -> int
+override Mocassin.Core.Model.Energy.UnstableEnvironment.ToString() -> string!
+static Mocassin.Core.Model.Energy.Cluster.operator !=(Mocassin.Core.Model.Energy.Cluster? left, Mocassin.Core.Model.Energy.Cluster? right) -> bool
+static Mocassin.Core.Model.Energy.Cluster.operator ==(Mocassin.Core.Model.Energy.Cluster? left, Mocassin.Core.Model.Energy.Cluster? right) -> bool
+static Mocassin.Core.Model.Energy.EnergyLimits.MaxEnergy.get -> Mocassin.Core.Units.EnergyEv
+static Mocassin.Core.Model.Energy.EnergyLimits.MinEnergy.get -> Mocassin.Core.Units.EnergyEv
+static Mocassin.Core.Model.Energy.InteractionFilter.operator !=(Mocassin.Core.Model.Energy.InteractionFilter? left, Mocassin.Core.Model.Energy.InteractionFilter? right) -> bool
+static Mocassin.Core.Model.Energy.InteractionFilter.operator ==(Mocassin.Core.Model.Energy.InteractionFilter? left, Mocassin.Core.Model.Energy.InteractionFilter? right) -> bool
+static Mocassin.Core.Model.Energy.SiteEnergyEntry.operator !=(Mocassin.Core.Model.Energy.SiteEnergyEntry? left, Mocassin.Core.Model.Energy.SiteEnergyEntry? right) -> bool
+static Mocassin.Core.Model.Energy.SiteEnergyEntry.operator ==(Mocassin.Core.Model.Energy.SiteEnergyEntry? left, Mocassin.Core.Model.Energy.SiteEnergyEntry? right) -> bool
+static Mocassin.Core.Model.Energy.SiteEnergySet.operator !=(Mocassin.Core.Model.Energy.SiteEnergySet? left, Mocassin.Core.Model.Energy.SiteEnergySet? right) -> bool
+static Mocassin.Core.Model.Energy.SiteEnergySet.operator ==(Mocassin.Core.Model.Energy.SiteEnergySet? left, Mocassin.Core.Model.Energy.SiteEnergySet? right) -> bool
+static Mocassin.Core.Model.Energy.StableEnvironment.Default.get -> Mocassin.Core.Model.Energy.StableEnvironment!
+static Mocassin.Core.Model.Energy.StableEnvironment.operator !=(Mocassin.Core.Model.Energy.StableEnvironment? left, Mocassin.Core.Model.Energy.StableEnvironment? right) -> bool
+static Mocassin.Core.Model.Energy.StableEnvironment.operator ==(Mocassin.Core.Model.Energy.StableEnvironment? left, Mocassin.Core.Model.Energy.StableEnvironment? right) -> bool
+static Mocassin.Core.Model.Energy.UnstableEnvironment.operator !=(Mocassin.Core.Model.Energy.UnstableEnvironment? left, Mocassin.Core.Model.Energy.UnstableEnvironment? right) -> bool
+static Mocassin.Core.Model.Energy.UnstableEnvironment.operator ==(Mocassin.Core.Model.Energy.UnstableEnvironment? left, Mocassin.Core.Model.Energy.UnstableEnvironment? right) -> bool
+static Mocassin.Core.Project.ProjectHasher.ComputeEnergy(Mocassin.Core.Model.ModelDefinition! model) -> string!
+Mocassin.Core.Diagnostics.EnergyDiagnosticCodes
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ClusterPermutationLimit = "ENM013" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ClusterPermutationWarning = "ENM012" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ClustersPerCenterLimit = "ENM021" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ClustersPerCenterWarning = "ENM020" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.DuplicateClusterGeometry = "ENM011" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.DuplicateClusterOffset = "ENM009" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.DuplicateFilter = "ENM005" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.EnvironmentSamplingLimit = "ENM019" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.EnvironmentSamplingWarning = "ENM017" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.ForbiddenSiteEnergy = "ENM016" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidClusterCenter = "ENM007" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidClusterPosition = "ENM010" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidClusterSize = "ENM008" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidCutoff = "ENM001" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidFilterRange = "ENM003" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidFilterSites = "ENM004" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidSiteEnergy = "ENM014" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.InvalidUnstableEnvironment = "ENM006" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.KmcPathOutsideEnvironment = "ENM018" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.PeriodicAmbiguity = "ENM002" -> string!
+const Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.SiteEnergyOutOfRange = "ENM015" -> string!
+static Mocassin.Core.Diagnostics.EnergyDiagnosticCodes.HelpFor(string! code) -> string?
+Mocassin.Core.Editing.ProjectEditor.AddCluster(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.Cluster! cluster) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.AddUnstableEnvironment(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.UnstableEnvironment! environment) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.ClearSiteEnergies(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RebaseEnergyReferences(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId oldId, Mocassin.Core.Ids.CellSiteId newId) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveCellSiteAndEnergyReferences(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveCluster(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.ClusterId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveUnstableEnvironment(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetClusterOffsets(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.ClusterId id, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> offsetVectors) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetSiteEnergies(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.SiteEnergySet! siteEnergies) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetStableEnvironment(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.StableEnvironment! environment) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetStableEnvironmentCutoff(Mocassin.Core.Project.Project! project, Mocassin.Core.Units.LengthAngstrom cutoff) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.SetStableEnvironmentFilters(Mocassin.Core.Project.Project! project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.InteractionFilter!> filters) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateCluster(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.Cluster! cluster) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateUnstableEnvironment(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Energy.UnstableEnvironment! environment) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Model.Energy.IEnergyQuery
+Mocassin.Core.Model.Energy.IEnergyQuery.Clusters.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.Cluster!>
+Mocassin.Core.Model.Energy.IEnergyQuery.FindCluster(Mocassin.Core.Ids.ClusterId id) -> Mocassin.Core.Model.Energy.Cluster?
+Mocassin.Core.Model.Energy.IEnergyQuery.FindEnvironment(Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Model.Energy.UnstableEnvironment?
+Mocassin.Core.Model.Energy.IEnergyQuery.FindSiteEnergies(Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Model.Energy.SiteEnergySet?
+Mocassin.Core.Model.Energy.IEnergyQuery.SiteEnergies.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.SiteEnergySet!>
+Mocassin.Core.Model.Energy.IEnergyQuery.StableEnvironment.get -> Mocassin.Core.Model.Energy.StableEnvironment!
+Mocassin.Core.Model.Energy.IEnergyQuery.UnstableEnvironments.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.UnstableEnvironment!>
+Mocassin.Core.Project.Project.Clusters.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.Cluster!>
+Mocassin.Core.Project.Project.FindCluster(Mocassin.Core.Ids.ClusterId id) -> Mocassin.Core.Model.Energy.Cluster?
+Mocassin.Core.Project.Project.FindEnvironment(Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Model.Energy.UnstableEnvironment?
+Mocassin.Core.Project.Project.FindSiteEnergies(Mocassin.Core.Ids.CellSiteId siteId) -> Mocassin.Core.Model.Energy.SiteEnergySet?
+Mocassin.Core.Project.Project.SiteEnergies.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.SiteEnergySet!>
+Mocassin.Core.Project.Project.StableEnvironment.get -> Mocassin.Core.Model.Energy.StableEnvironment!
+Mocassin.Core.Project.Project.UnstableEnvironments.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Energy.UnstableEnvironment!>

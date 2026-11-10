@@ -11,12 +11,13 @@ validated project
   → structure / P1 expansion
   → symmetry reduction (environments, pair and cluster representatives)
   → transition and rule generation
+  → energy sampling and tables
   → encoding and ledger construction
   → immutable package
 ```
 
-Later stages add transition, energy, lattice, and simulation compilation. Step 02 owns the first two stages and
-the exact ordering contract they establish.
+Later stages add lattice, simulation, and package compilation. Step 02 owns the first two stages and the exact
+ordering contract they establish; Step 05 defines the energy input consumed by Step 08.
 
 ## Symmetry stage
 
@@ -115,6 +116,32 @@ transition index is written to the project.
 The preview cache is separate from compilation caches. Its key includes the transition closure hash, structure
 hash, requested `(A, B, C)` counts, transition reference, and symmetry catalog/contract versions. A capacity
 breach is a bounded failure, never an unbounded allocation.
+
+## Energy stage (Step 05 input, Step 08 tables)
+
+Step 05 defines the geometric and symbolic energy input consumed by compilation:
+
+- one stable environment and zero or more unstable-site environments;
+- symmetric or one-directional distance filters;
+- ordered multi-body clusters with a centre and 2–8 surrounding offsets;
+- sparse site energies;
+- advisory cost and pair previews.
+
+The shared sampling kernel is `Mocassin.Symmetry.Energy.IEnergyGeometrySampler` /
+`EnergyGeometrySampler`. It samples stable–stable and unstable–stable pair images, applies filters, reduces
+images under the centre stabilizer, and produces directed pair geometries without allocating energy tables.
+Step 08 adds table allocation and canonical indices on top of the same kernel. `EnergyPreviewService` caches
+by energy hash, structure hash, full canonical model hash (including particle and particle-set content),
+requested cell counts, catalog version, and symmetry contract version.
+
+Every directed pair geometry has a `GeometryId` that includes the centre/target P1 indices. Chiral directions
+share one `EnergyId`; Step 08 uses that identity as the compiled `object_id`, and Step 09 stores one parameter
+value per `EnergyId`. Cost previews use `long` counts and a Burnside count for unique cluster permutations, so
+the preview and compiler agree without enumerating the full state product.
+
+Definition-level energy validation belongs to `Mocassin.Core.Model.Energy.EnergyModelValidator`. The
+catalog/cell/encoder rules belong to `Mocassin.Symmetry.Energy.EnergyGeometryValidator`. `ProjectValidationService`
+composes both with the structure and transition validators.
 
 ## Test tiers
 

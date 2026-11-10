@@ -7,21 +7,33 @@ with validation and cost previews.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
-- **Step CI:** —
+- **Status:** Awaiting approval
+- **Step branch:** `step/05-energy-model`
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) — replacement closeout, Ubuntu
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
-- **Design review:** [Ready for implementation — awaiting approval](../reviews/step-05.md)
-- **Last updated:** 2026-11-09
+- **Audit:** Passed with notes at `315aa19` (code frozen at `e6a7839`)
+- **Design review:** [Ready for implementation — accepted at `0b2a571`](../reviews/step-05.md)
+- **Feature list:** Approved 2026-11-09
+- **Last updated:** 2026-11-10
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `energy-model-and-persistence` | `feature/step-05-energy-model/energy-model-and-persistence` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `5361adf` |
+| `core-validation` | `feature/step-05-energy-model/core-validation` | Done | `verify.sh dotnet`, `structure` pass | — | `a44f4dc` |
+| `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `3205be0` |
+| `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `d3cb8bb` |
+| `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Done | `verify.sh dotnet`, `structure`, `api` pass; benchmark synthetic ceria-like proxy 88.9 µs, BZO-like proxy 77.4 µs | — | `1804b51` |
+| `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Done | `verify.sh contracts`, `dotnet`, `structure`, `api` pass | — | `e1987c4` |
+| `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Done | `verify.sh dotnet`, `docs`, `structure` pass | — | `f7b1276` |
+| `closeout` | `feature/step-05-energy-model/closeout` | Done | `verify.sh all` pass; closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42874483715) | `d23fbd6` |
+| `fix-audit-findings` | `feature/step-05-energy-model/fix-audit-findings` | Done | `verify.sh all` pass; replacement closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42878275463) | `c3c48c4` |
+| `fix-reaudit-findings` | `feature/step-05-energy-model/fix-reaudit-findings` | Done | `verify.sh all` pass; replacement closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) | `e6a7839` |
+
+**Implementation note:** Step 05 introduces no new dependency and no GPL-derived content. Every new source,
+test, tool, and sample file carries `SPDX-License-Identifier: MIT`.
 
 ## Goal
-
 Let a user define the interaction model that the compiler will sample into pair and cluster tables. The
 definition is geometric and symbolic; energy values are supplied later by parameterization templates.
 
@@ -261,8 +273,8 @@ filters, and builds the unique pair geometries without allocating energy tables.
 reduction uses the Step 02 `PointGroup`/`SitePermutation` utilities, so the preview and compiler share the same
 reduction. Step 08 adds table allocation and canonical indices on top of the same kernel. The preview service
 caches by
-`(ProjectHasher.ComputeEnergy(model), ProjectHasher.ComputeStructure(model.Structure), cellCountA, cellCountB,
-cellCountC, catalog version, symmetry contract version)`.
+`(ProjectHasher.ComputeEnergy(model), ProjectHasher.ComputeStructure(model.Structure),
+full canonical model hash, cellCountA, cellCountB, cellCountC, catalog version, symmetry contract version)`.
 
 ### 6.1 Limits and diagnostics
 
@@ -342,7 +354,8 @@ not a silent relaxation. Advisory and performance conditions stay warnings.
 | Invalid surrounding position (unknown/unstable/filtered) or cluster outside the center cutoff | Warning | `ENM010` Error | Promoted | The cluster geometry is not valid or reaches outside the environment |
 | Full-geometry duplicate or center-equivalent position | Warning | `ENM011` Error | Promoted | The original “ring” check finds degenerate geometry |
 | Cluster raw permutations >5000 | Warning | `ENM013` Error | Promoted | The original `PermutationsPerGroup` maximum is exceeded |
-| Duplicate site-energy entry or void-on-stable | Warning | `ENM014` Error | Promoted | The entry is ambiguous or occupies an invalid state |
+| Duplicate site-energy entry | Warning | `ENM014` Error | Promoted | The entry is ambiguous |
+| Site energy for a particle the site cannot occupy (void-on-stable) | Warning | `ENM016` Warning | Retained warning | The entry occupies an invalid state but is not structurally ambiguous |
 | Unknown site/particle reference in a site-energy entry | Not checked / partly structural | `ENM014` Error | New v1 | The entry cannot be resolved |
 | Site energy non-finite (NaN/Inf) | Warning | `ENM015` Error | Promoted | A non-finite value cannot be used |
 | Site energy outside −100..100 eV | No site-energy range check; `PairEnergies`/`GroupEnergies` use −100..100 | `ENM015` Error | New v1 (range half) | Site energies are also migration barriers; the v1 range matches the pair/group setting |
@@ -474,8 +487,9 @@ public interface IEnergyPreviewService
   filters, and builds unique pair geometries; cluster reduction uses the Step 02 `PointGroup`/`SitePermutation`
   utilities. It does not allocate energy tables. `TrySamplePairs` returns `false` with an empty pair array and
   diagnostics on invalid input and never throws, matching the preview `TryCreate…` contract.
-- `EnergyPreviewService` caches by the energy hash, structure hash, requested `(A, B, C)`, catalog version, and
-  symmetry contract version. `ProjectHasher.ComputeEnergy` is the energy-hash producer.
+- `EnergyPreviewService` caches by the energy hash, structure hash, full canonical model hash (so particle and
+  particle-set edits invalidate), requested `(A, B, C)`, catalog version, and symmetry contract version.
+  `ProjectHasher.ComputeEnergy` is the energy-hash producer.
 - Derived pair interactions use `GeometryId`, the shared `EnergyId`, and
   `ChiralPartnerGeometryId`; the preview is advisory and the compiled interaction tables are authoritative in
   Step 08.
@@ -566,68 +580,68 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
 
 ## Implementation tasks
 
-- [ ] Extend `ModelDefinition` with the flat energy sections; update `ModelDefinitionJsonConverter`,
+- [x] Extend `ModelDefinition` with the flat energy sections; update `ModelDefinitionJsonConverter`,
   `ProjectJson.CanonicalizeModel`/`SerializeCanonicalModel`, `ProjectValidator`, and
   `ProjectValidationService`. `ProjectSchema` is unchanged; `ProjectJsonContext` is extended in
   `Project/ProjectJson.cs`.
-- [ ] Add `ProjectHasher.ComputeEnergy(ModelDefinition)` and tests that the model/document hashes include energy
+- [x] Add `ProjectHasher.ComputeEnergy(ModelDefinition)` and tests that the model/document hashes include energy
   data and the energy hash is invariant to unrelated edits.
-- [ ] Implement `StableEnvironment`, `UnstableEnvironment`, `InteractionFilter`, `Cluster`, `SiteEnergySet`,
+- [x] Implement `StableEnvironment`, `UnstableEnvironment`, `InteractionFilter`, `Cluster`, `SiteEnergySet`,
   `SiteEnergyEntry`, and `EnergyLimits`.
-- [ ] Implement the Core `EnergyModelValidator` (`ENM001`, `ENM003`–`ENM008`, `ENM014`–`ENM016`, `ENM020`,
+- [x] Implement the Core `EnergyModelValidator` (`ENM001`, `ENM003`–`ENM008`, `ENM014`–`ENM016`, `ENM020`,
   `ENM021`) and the Symmetry `EnergyGeometryValidator` (`ENM002`, `ENM009`–`ENM013`, `ENM017`, `ENM019`);
   compose them in `ProjectValidationService`.
-- [ ] Implement `IEnergyQuery`, add it to `IProjectQuery`, and implement `IEnergyGeometrySampler`,
+- [x] Implement `IEnergyQuery`, add it to `IProjectQuery`, and implement `IEnergyGeometrySampler`,
   `IEnergyPreviewService`, and the cost/pair previews with `TryCreatePreview(..., out diagnostics)`.
-- [ ] Implement cluster geometry validation (encoder-based periodic dedup, center-equivalent/ring detection,
+- [x] Implement cluster geometry validation (encoder-based periodic dedup, center-equivalent/ring detection,
   surrounding-site validity, filter interaction, and cutoff range).
-- [ ] Implement derived pair-interaction preview with `GeometryId`, shared `EnergyId`, and
+- [x] Implement derived pair-interaction preview with `GeometryId`, shared `EnergyId`, and
   `ChiralPartnerGeometryId`.
-- [ ] Implement chiral-pair detection and shared-energy linkage.
-- [ ] Implement `ProjectEditor.Energy.cs`, editor operations, and cascade invalidation.
-- [ ] Add the Core energy diagnostic codes and help text, including the `ENM018` constant/help anchor used by
+- [x] Implement chiral-pair detection and shared-energy linkage.
+- [x] Implement `ProjectEditor.Energy.cs`, editor operations, and cascade invalidation.
+- [x] Add the Core energy diagnostic codes and help text, including the `ENM018` constant/help anchor used by
   Step 07.
-- [ ] Update `contracts/manifest.json`: set `status` to `step-05`, update `notes`, add the energy fields, add
+- [x] Update `contracts/manifest.json`: set `status` to `step-05`, update `notes`, add the energy fields, add
   the `project-energy-minimal` and `project-energy-populated` fixtures, update the fixture/signature vectors,
   and regenerate the schema. The project `schemaVersion` remains 1 under the additive-v1 precedent; ADR 0009's
   bump rule is reconciled explicitly in the manifest notes, as in Step 04.
-- [ ] Add `SPDX-License-Identifier: MIT` to every new source, test, tool, and sample file; record in the step log
+- [x] Add `SPDX-License-Identifier: MIT` to every new source, test, tool, and sample file; record in the step log
   that no new dependency or GPL-derived content is introduced, per `NOTICE.md`.
-- [ ] Add XML docs, update `PublicAPI.Unshipped.txt` for Core, Packages, and Symmetry, and refresh the ApiCompat
+- [x] Add XML docs, update `PublicAPI.Unshipped.txt` for Core, Packages, and Symmetry, and refresh the ApiCompat
   baseline for every new public type and member.
-- [ ] Add ceria and barium-zirconate energy models and fixtures.
-- [ ] Add the new user-guide, physics, and reference pages to `zensical.toml` navigation and to the
+- [x] Add ceria and barium-zirconate energy models and fixtures.
+- [x] Add the new user-guide, physics, and reference pages to `zensical.toml` navigation and to the
   user-guide/physics/reference index pages; update `docs/reference/project-format.md`.
-- [ ] Update `docs/planning/status.md`, the Step 05 feature log/checkboxes, and
+- [x] Update `docs/planning/status.md`, the Step 05 feature log/checkboxes, and
   `docs/planning/appendix-b-parity-matrix.md`; create `docs/planning/audits/step-05.md` from the template at
   closeout.
 
 ## Acceptance criteria
 
-- [ ] Ceria's stable environment and oxygen migration-edge cluster validate.
-- [ ] A stable filter that removes a specific sublattice pair is applied symmetrically; an unstable filter is
+- [x] Ceria's stable environment and oxygen migration-edge cluster validate.
+- [x] A stable filter that removes a specific sublattice pair is applied symmetrically; an unstable filter is
   one-directional and keeps `SiteAId` equal to the environment site.
-- [ ] Filter boundaries are inclusive and use the 1e-5 Å distance tolerance.
-- [ ] A cluster with 2 or 8 offsets is accepted; 1 or 9 offsets are rejected (`ENM008`).
-- [ ] Duplicate, center-equivalent, unknown/unstable/filtered-surrounding, ring/degenerate, and out-of-range
+- [x] Filter boundaries are inclusive and use the 1e-5 Å distance tolerance.
+- [x] A cluster with 2 or 8 offsets is accepted; 1 or 9 offsets are rejected (`ENM008`).
+- [x] Duplicate, center-equivalent, unknown/unstable/filtered-surrounding, ring/degenerate, and out-of-range
   clusters are rejected with paths (`ENM009`–`ENM011`).
-- [ ] The cost preview reports pair counts and permutation counts that match a brute-force oracle, including
+- [x] The cost preview reports pair counts and permutation counts that match a brute-force oracle, including
   the center-particle factor and `long` overflow-safe limits; the Step 08 cross-check is recorded as a Step 08
   follow-up instead of a Step 05 closeout claim.
-- [ ] `GeometryId` includes `centerP`/`partnerP`, so distinct P1 shells with the same site pair, offset, and
+- [x] `GeometryId` includes `centerP`/`partnerP`, so distinct P1 shells with the same site pair, offset, and
   distance bucket do not collide.
-- [ ] Chiral pair partners are detected, share one `EnergyId`, and expose `ChiralPartnerGeometryId`; independent
+- [x] Chiral pair partners are detected, share one `EnergyId`, and expose `ChiralPartnerGeometryId`; independent
   A→B/B→A energy values are unrepresentable.
-- [ ] The energy sections round-trip through the project JSON context; the default `stableEnvironment` loads the
+- [x] The energy sections round-trip through the project JSON context; the default `stableEnvironment` loads the
   1.0 Å/no-filter default; empty sections are omitted; semantic arrays preserve order.
-- [ ] Canonical collection ordering and `ProjectHasher.ComputeEnergy` are stable under array shuffles and change
+- [x] Canonical collection ordering and `ProjectHasher.ComputeEnergy` are stable under array shuffles and change
   when energy data changes.
-- [ ] The generated project schema accepts the energy sections, and fixtures cover empty and populated models.
-- [ ] Every `ENM001`–`ENM021` code has a positive or negative test as applicable, including the ENM018
+- [x] The generated project schema accepts the energy sections, and fixtures cover empty and populated models.
+- [x] Every `ENM001`–`ENM021` code has a positive or negative test as applicable, including the ENM018
   Step 07 boundary.
-- [ ] New files carry SPDX headers and introduce no new dependency.
-- [ ] Public API files and the ApiCompat baseline are current.
-- [ ] Documentation pages, navigation, index links, status dashboard, and parity matrix are updated.
+- [x] New files carry SPDX headers and introduce no new dependency.
+- [x] Public API files and the ApiCompat baseline are current.
+- [x] Documentation pages, navigation, index links, status dashboard, and parity matrix are updated.
 
 ## Documentation
 

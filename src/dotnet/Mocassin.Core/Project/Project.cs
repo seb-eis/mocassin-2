@@ -3,6 +3,7 @@
 using System.Collections.Immutable;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
+using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
@@ -147,6 +148,95 @@ public sealed record Project : IProjectQuery
     /// Gets the authored Metropolis transitions.
     /// </summary>
     public ImmutableArray<MetropolisTransition> MetropolisTransitions => Model.MetropolisTransitions;
+
+    /// <summary>
+    /// Gets the stable-site interaction environment.
+    /// </summary>
+    public StableEnvironment StableEnvironment => Model.StableEnvironment;
+
+    /// <summary>
+    /// Gets the per-unstable-site interaction environments.
+    /// </summary>
+    public ImmutableArray<UnstableEnvironment> UnstableEnvironments => Model.UnstableEnvironments;
+
+    /// <summary>
+    /// Gets the authored multi-body interaction clusters.
+    /// </summary>
+    public ImmutableArray<Cluster> Clusters => Model.Clusters;
+
+    /// <summary>
+    /// Gets the authored sparse site-energy sets.
+    /// </summary>
+    public ImmutableArray<SiteEnergySet> SiteEnergies => Model.SiteEnergies;
+
+    /// <summary>
+    /// Finds the environment of one unstable site.
+    /// </summary>
+    /// <param name="siteId">The unstable-site identifier.</param>
+    /// <returns>The matching environment, or <see langword="null"/> when none is authored.</returns>
+    public UnstableEnvironment? FindEnvironment(CellSiteId siteId)
+    {
+        if (Model.UnstableEnvironments.IsDefault)
+        {
+            return null;
+        }
+
+        foreach (var environment in Model.UnstableEnvironments)
+        {
+            if (environment.SiteId == siteId)
+            {
+                return environment;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored cluster.
+    /// </summary>
+    /// <param name="id">The cluster identifier.</param>
+    /// <returns>The matching cluster, or <see langword="null"/> when the identifier is unknown.</returns>
+    public Cluster? FindCluster(ClusterId id)
+    {
+        if (Model.Clusters.IsDefault)
+        {
+            return null;
+        }
+
+        foreach (var cluster in Model.Clusters)
+        {
+            if (cluster.Id == id)
+            {
+                return cluster;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds the site-energy set of one reference site.
+    /// </summary>
+    /// <param name="siteId">The reference-site identifier.</param>
+    /// <returns>The matching set, or <see langword="null"/> when no entry is authored.</returns>
+    public SiteEnergySet? FindSiteEnergies(CellSiteId siteId)
+    {
+        if (Model.SiteEnergies.IsDefault)
+        {
+            return null;
+        }
+
+        foreach (var siteEnergies in Model.SiteEnergies)
+        {
+            if (siteEnergies.SiteId == siteId)
+            {
+                return siteEnergies;
+            }
+        }
+
+        return null;
+    }
 
     /// <summary>
     /// Finds an authored particle or the implicit void particle.

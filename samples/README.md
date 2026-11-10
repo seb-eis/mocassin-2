@@ -9,5 +9,6 @@ Canonical example projects used by tutorials, CLI checks, and parity tests.
 | [`barium-zirconate/`](barium-zirconate/README.md) | Partially hydrated Y-doped BaZrO₃ reference structure with proton interstitial sites |
 | [`transitions/`](transitions/README.md) | Ceria KMC/MMC, polaron hop, 5-site vehicle, and 5-site interstitialcy transition samples |
 
-Transition samples are added with Step 04. Additional energy/lattice/simulation samples follow in later
-steps. Sample projects must use the current `.mocprj` schema; legacy formats are not supported.
+Transition samples are added with Step 04. Step 05 adds energy environments, clusters, and site energies to
+the ceria and barium-zirconate samples. Additional lattice/simulation samples follow in later steps. Sample
+projects must use the current `.mocprj` schema; legacy formats are not supported.
