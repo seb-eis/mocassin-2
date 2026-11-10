@@ -7,12 +7,12 @@ with validation and cost previews.
 
 ## Implementation status
 
-- **Status:** Awaiting approval
-- **Step branch:** `step/05-energy-model`
+- **Status:** Done
+- **Step branch:** `step/05-energy-model` (merged and deleted)
 - **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) — replacement closeout, Ubuntu
-- **Main merge:** —
-- **Step tag:** —
-- **Audit:** Passed with notes at `315aa19` (code frozen at `e6a7839`)
+- **Main merge:** `c11a364`
+- **Step tag:** `step-05`
+- **Audit:** Passed with notes at `315aa19` (code frozen at `e6a7839`); F8 accepted by the human owner
 - **Design review:** [Ready for implementation — accepted at `0b2a571`](../reviews/step-05.md)
 - **Feature list:** Approved 2026-11-09
 - **Last updated:** 2026-11-10

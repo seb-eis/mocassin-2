@@ -600,7 +600,7 @@ authorization.
 | N5 | Addressed — user-guide wording uses distinct stable position/full encoding | Step 05 agent | `e6a7839` |
 | N6 | Fixed — §7.1 separates `ENM014` duplicate entries from `ENM016` void-on-stable warning | Step 05 agent | `e6a7839` |
 | N7 | Fixed — repeated centre-equivalent offsets report one `ENM011` | Step 05 agent | `e6a7839` |
-| F8 | Open — documentation precision only; step-page wording corrected, public XML remark remains for human acceptance | Step 05 agent | `315aa19` |
+| F8 | Accepted by human owner 2026-11-10 — documentation precision only; step-page wording corrected, public XML remark retained | Step 05 agent | `315aa19` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
