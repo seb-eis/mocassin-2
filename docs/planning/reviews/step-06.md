@@ -14,13 +14,17 @@
 | Step | 06 — Lattice and Simulation Models |
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
-| Design review status | Changes required |
-| Reviewed commit | `a64ecf3` |
-| Docs branch | `main` |
+| Design review status | Re-review required |
+| Reviewed commit | `160b226` |
+| Docs branch | `docs/step-06-design-revision` |
 | Review date | 2026-11-10 |
-| Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
+| Reviewer | — (round-2 reviewer to fill) |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
+
+Round 1 is recorded in the sections below and was reviewed at `a64ecf3`; its reviewer text is unchanged. The
+design revision is `160b226`. The round-2 request and resolution status are appended after the round-1
+sections.
 
 ## Step summary
 
@@ -288,13 +292,16 @@ Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-10 | `a64ecf3` | Independent planning auditor (fresh context) | Changes required |
+| 2 | 2026-11-10 | `160b226` | Awaiting fresh reviewer | — |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M1–M7 | Major | See round 1 | Design revision; see `Resolution status` | `160b226` | Resolved — awaiting re-review |
+| m1–m7 | Minor | See round 1 | Design revision; see `Resolution status` | `160b226` | Resolved — awaiting re-review |
+| n1–n3 | Note | See round 1 | Acknowledged/incorporated; see `Resolution status` | `160b226` | Addressed — awaiting re-review |
 
 ## Human approval
 
@@ -308,9 +315,53 @@ Date:
 
 ## Resolution status
 
+Design revision: `160b226` — Step 06 design, data-contract, Step 10/11/25 dependency, and audit-plan
+corrections. This section is owned by the planner/step agent and does not alter the reviewer's findings,
+evidence, or verdict.
+
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| M1 | Resolved — awaiting re-review. The canonical `ProjectJson.CanonicalizeModel`/write/save/hash path is now an explicit contract and task, with save/load and document-hash tests. | Planner | `160b226` |
+| M2 | Resolved — awaiting re-review. Added `WriteOutCount`; corrected the defaults to the original user-facing values (write-out 100, P1Y, KMC pre-run 100, field 1e7 V/m `(1,0,0)`, no normalization, MMC samples 1000/100/200); recorded the derived-seed deviation. | Planner | `160b226` |
+| M3 | Resolved — awaiting re-review. Added hard ranges and recommended bands for every original simulation setting, expanded `SIM004`–`SIM035`, and made the pre-run disable state representable (`0`). | Planner | `160b226` |
+| M4 | Resolved — awaiting re-review. Removed the Step 10-owned conditions from Step 06; Step 10 owns `JOB004`–`JOB015`, and Step 07 owns build-time non-empty feasibility. | Planner | `160b226` |
+| M5 | Resolved — awaiting re-review. Moved the lattice/job-count preview to Step 10 over the single shared generator; Step 06 defines no preview service. | Planner | `160b226` |
+| M6 | Resolved — awaiting re-review. Redesigned the preview API in Step 10: request/doping echo, `DopingReport`, per-site populations, `Try*` failure boundary, cache, and `JobCountPreview`. | Planner | `160b226` |
+| M7 | Resolved — awaiting re-review. Conformed to Step 04: transition arrays preserve authored order and are never re-sorted; Step 04 is unchanged. | Planner | `160b226` |
+| m1 | Resolved — awaiting re-review. `Kind` is derived from the concrete record; `ExecutionFlags` is a `[Flags]` enum with a sorted camelCase-array/u32 contract; duplicate references and kind/array mismatches are validated. | Planner | `160b226` |
+| m2 | Resolved — awaiting re-review. Removed the nonexistent `ProjectJsonContext.cs`, added `ProjectJson`/`ProjectHasher`, kept `ProjectSchema` unchanged for v1, and planned partial `ProjectEditor.Lattice.cs`/`ProjectEditor.Simulations.cs`. | Planner | `160b226` |
+| m3 | Resolved — awaiting re-review. Added `ILatticeQuery`/`ISimulationQuery` to `IProjectQuery`; moved job-count preview to Step 10. | Planner | `160b226` |
+| m4 | Resolved — awaiting re-review. Added manifest status/notes, four fixture IDs, descriptor/schema refresh, the flat-simulation shape, and the additive-v1/ADR 0009 reconciliation. | Planner | `160b226` |
+| m5 | Resolved — awaiting re-review. Added non-goals, corrected the acceptance criteria, added parity/status/closeout/audit/SPDX and index/nav/samples tasks, removed the duplicate project-format entry, and planned the audit-checklist update at closeout. The status dashboard remains implementor-owned. | Planner | `160b226` |
+| m6 | Resolved — awaiting re-review. Added test tiers, per-code coverage, save/load/document-hash, property, kind-array, and defaults/limits tests; preview tests moved to Step 10. | Planner | `160b226` |
+| m7 | Resolved — awaiting re-review. Made compensation/dependent, duplicate-name, `SIM003`, priority-range, and seed/compensation severity rules consistent, with recorded deviations. | Planner | `160b226` |
+| n1 | Acknowledged. The round-1 parent is the docs-only request/freeze commit; the design content reviewed is exactly `a64ecf3`. The revision is a new commit on `docs/step-06-design-revision` because another agent is concurrently editing cross-cutting review docs on `main`'s worktree. | Planner | `160b226` |
+| n2 | Resolved — awaiting re-review. Transition lists preserve authored order; no in-memory sort key is needed. | Planner | `160b226` |
+| n3 | Acknowledged; incorporated in Step 10. `Mocassin.Compilation` already references `Mocassin.Symmetry`, so the shared preview can consume P1 multiplicity without a new dependency. | Planner | `160b226` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
+
+## Re-review request (round 2)
+
+| Field | Value |
+| --- | --- |
+| Step | 06 — Lattice and Simulation Models |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `160b226` |
+| Docs branch | `docs/step-06-design-revision` |
+| Review date | — |
+| Reviewer | — |
+
+Design revision: `160b22636bae8afce7fa077336fcbc6e0bed8755`.
+
+The revision delta from `a64ecf3` is five planning files: the Step 06 page, `02-data-contracts.md`, and the
+Step 10, Step 11, and Step 25 dependency pages. The round-1 request record and status dashboard are unchanged
+except for the review-record resolution/status text above. The current `main` worktree contains another agent's
+uncommitted cross-cutting review edits, so the revision is frozen on the `docs/step-06-design-revision` branch;
+the design content is identical to the working-tree revision at `160b226`.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for round 2 below. Keep the
+round-1 text unchanged.
