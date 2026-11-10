@@ -1,4 +1,4 @@
-# XC-02 — Design Foundations and Model Definition Review
+# XC-02 — Architecture and Design Status
 
 > Reviewer: write evidence, findings, and verdict directly into this record. You may edit only your own
 > metadata, checklist completion marks and inline verification notes (not item text), `Evidence`, `Findings`,
@@ -10,18 +10,25 @@
 | Field | Value |
 | --- | --- |
 | Review ID | XC-02 |
-| Type | Repository-wide design foundations and model-definition review |
-| Status | Draft for owner review |
+| Checkpoint | Phase B — Model definition (Steps 03–07) |
+| Type | Repository-wide architecture and design-status review |
+| Status | Planned — awaiting Step 07 completion |
 | Target commit | After the Step 07 merge and `step-07` tag, plus a docs-only checkpoint commit |
 | Request owner | Step agent / planner |
+| Orchestrator (implementor) | — |
 | Review initiated by | Human owner |
 | Reviewer | — |
 | Review date | — |
 
+> Orchestration: an implementor agent requests the reviewer, fixes findings on a maintenance branch, adds
+> resolutions without altering reviewer text, and requests re-review until the reviewer no longer identifies
+> issues. The human owner approves the final verdict and the phase gate.
+
 ## Purpose
 
-Verify that the architecture, contracts, and Steps 00–07 model definition are coherent, complete, and ready
-for the Step 08 compilation design and implementation.
+Verify that the architecture, contracts, and the completed phase's design are coherent, complete, and ready
+for the next phase. For the Phase B checkpoint, this covers the Steps 00–07 model definition and the Step 08
+compilation interface.
 
 This is a design review, not a line-by-line code audit or scientific parity validation.
 
