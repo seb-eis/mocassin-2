@@ -14,14 +14,14 @@
 | Step | 05 — Energy Model |
 | Request owner | Step agent |
 | Audit initiated by | Human owner |
-| Audit status | Re-audit required |
+| Audit status | Fixes required |
 | Audited commit | `c3c48c4` |
 | Step branch | `step/05-energy-model` |
 | Step tag | — |
 | Closeout CI run | [`42878275463`](https://github.com/seb-eis/mocassin-2/actions/runs/42878275463) — green at `c3c48c4` |
 | Platform CI | Not run (Ubuntu-only policy; no platform-specific code) |
 | Audit date | 2026-11-10 |
-| Auditor | Independent audit agent (fresh context; no shared conversation with the planner or implementor) |
+| Auditor | Independent re-audit agent (fresh context; no shared conversation with the planner, implementor, or round-1 auditor) |
 
 Step page: [`Step 05 — Energy Model`](../steps/step-05-energy-model.md)
 
@@ -114,6 +114,10 @@ the complete step at `c3c48c4` is requested; append a new round and preserve rou
       `docs/reference/energy.md`, `docs/reference/project-format.md`, `docs/development/compilation-pipeline.md`,
       the nav, the section indexes, `status.md`, and the parity rows are current.
 
+Re-audit round 2 note: every acceptance item above was re-checked at `c3c48c4`; the F1–F4 fixes are present
+and the round-1 F3 test gaps are closed. A new Major cache finding (F5) and two Minor documentation/step-page
+findings (F6, F7) are recorded in round 2.
+
 ## Standard audit checklist
 
 - [x] Required tests from the step page pass. — the committed suite is green (Core 383, Symmetry 208,
@@ -144,6 +148,10 @@ the complete step at `c3c48c4` is requested; append a new round and preserve rou
 - [x] Branch, tag, and status hygiene are correct. — branch `step/05-energy-model`; no `step-05` tag and no
       main merge; the only step-branch CI run is the closeout run; no per-feature runs. The record parent is the
       docs-only audit-request commit `617cd3a`; the audited code is frozen at `d23fbd6` (N2).
+
+Re-audit round 2 note: all standard items above were re-checked at `c3c48c4`; the replacement closeout run
+`42878275463` is green at that commit, no workflow run was created for the docs-only `18e01e3`, and the full
+local gate passes. See round 2 for F5–F7 and N5–N7.
 
 ## Evidence
 
@@ -285,6 +293,122 @@ and an advisory chiral-table memory overestimate. N1–N4 are notes: synthetic b
 record parent, an in-memory null-environment throw, and the Step 08 cross-check follow-up. The human owner must
 explicitly accept F1–F4 and N1–N4 or request fixes; a fix commit requires a fresh re-audit. The audit result is
 evidence, not merge authorization.
+
+### Re-audit round 2
+
+#### Independence and frozen state (round 2)
+
+I am a fresh independent re-audit agent. I did not plan, implement, or review Step 05 and have no shared
+conversation with the planner, implementor, or round-1 auditor. I read `AGENTS.md` (§3.8, §3.10, §3.12, §3.13,
+§4, §5, §7–§12), the audit README and template, this record's round 1 and re-audit request, the Step 05 page,
+the Step 05 design review, the energy section of `docs/planning/02-data-contracts.md`, ADRs 0001/0009/0010/0013,
+the status dashboard, the parity matrix, the manifest/schema/fixtures, the samples, the published energy pages,
+the public API files, and the complete Step 05 implementation and test diff. I did not rely on the request
+summary or the step-agent resolutions for the verdict.
+
+Worktree `/workspace/mocassin`, branch `step/05-energy-model`, `HEAD` `18e01e3`. The audited code commit is
+`c3c48c4` (`c3c48c4774bf4e965c11ab24393a4211f8efa492`); `git status --short` is empty. `git diff --name-only
+c3c48c4..18e01e3` lists only `docs/planning/audits/step-05.md`, `docs/planning/status.md`, and
+`docs/planning/steps/step-05-energy-model.md`, so the HEAD delta is documentation-only. The record commit
+parent is therefore the docs-only re-audit-request commit `18e01e3`, while the audited code is frozen at
+`c3c48c4` (the same process note as N2 in round 1).
+
+`git diff --stat 40bfb30...step/05-energy-model` is 76 files, 7375 insertions(+), 128 deletions(-); `git show
+--stat c3c48c4` is 9 files, 288 insertions(+), 19 deletions(-). The fix commit touches the energy sampler,
+geometry context/validator, preview service, the Symmetry energy tests, the user-guide/reference text, and the
+Step 08 page; the full step diff is limited to Step 05 energy code, tests, contracts, samples, benchmark, and
+documentation. No Step 06/08/09/15/25 implementation, GUI, legacy import, or preview persistence was added.
+
+#### Commands and results (round 2, from `/workspace/mocassin`)
+
+```text
+./tools/verify.sh all
+# EXIT:0
+# .NET: build succeeded (0 warnings / 0 errors), dotnet format clean;
+#       Core 383, Symmetry 213, Packages 42, Architecture 1, and the support suites pass
+# Public API: all nine ApiCompat checks pass; no vulnerable NuGet packages
+# Rust: fmt/clippy/tests pass
+# Python: pytest and package build pass
+# Documentation: Zensical strict ("No issues found"), DocFX (0 warnings / 0 errors), rustdoc pass
+# Contracts: artifacts current (17 files), catalog current, SPDX 250 files, no secret patterns (562 files),
+#            cargo-deny advisories/bans/licenses/sources OK
+
+git diff --check
+# (no output; exit 0)
+git diff --check 40bfb30...c3c48c4
+# (no output; exit 0)
+git diff --stat 40bfb30...step/05-energy-model
+# 76 files changed, 7375 insertions(+), 128 deletions(-)
+git show --stat c3c48c4
+# 9 files changed, 288 insertions(+), 19 deletions(-)
+
+dotnet test src/dotnet/Mocassin.Symmetry.Tests/Mocassin.Symmetry.Tests.csproj -c Release --no-build \
+  --filter "FullyQualifiedName~PeriodicCellShiftIsNotADuplicateOrCentreEquivalentOffset|\
+FullyQualifiedName~StableFilterBoundariesAreInclusiveAndSymmetric|\
+FullyQualifiedName~UnstableFilterIsDirectionalAndOmittedEnvironmentInheritsStableCutoff|\
+FullyQualifiedName~BurnsideUniqueCountMatchesBruteForceOrbitCount|\
+FullyQualifiedName~NullStableEnvironmentReturnsNullWithoutThrowing"
+# Total tests: 5; Passed: 5 (the five new round-2 regression tests)
+```
+
+**Closeout CI (GitHub API; no token printed).** Run `42878275463`: name `CI`, event `workflow_dispatch`,
+branch `step/05-energy-model`, `head_sha` `c3c48c4774bf4e965c11ab24393a4211f8efa492`, status `completed`,
+conclusion `success`. Jobs `Detect changes`, `Public API compatibility`, `.NET (ubuntu-latest)`, and
+`Contracts and policy` are `success`; `Python` and `Rust` are `skipped` by the path filters. The recent-runs
+query shows no workflow run for the docs-only `18e01e3` and no per-feature step runs.
+
+**Scratch probes (not committed).** A read-only console harness under `/tmp/opencode/energycache` loaded the
+real release `Mocassin.Core`/`Mocassin.Symmetry` assemblies and constructed in-memory models. It confirmed the
+F1 periodic-shift boundary, the F2 inherited unstable environment, the N3 null-environment guard, the F4
+distinct-`EnergyId` count, and the two cache/diagnostic behaviours recorded as F5 and N7 below. The probe did
+not modify the repository.
+
+#### Round-1 finding verification (round 2)
+
+| Finding | Result |
+| --- | --- |
+| F1 | **Fixed.** `EnergyGeometryValidator` keys duplicate detection on the full `(cellA, cellB, cellC, P)` encoding and reserves `(0, 0, 0, centerP)` for centre equivalence (`EnergyGeometryValidator.cs:226–306`). `PeriodicCellShiftIsNotADuplicateOrCentreEquivalentOffset` passes; the scratch probe confirms distinct periodic images no longer raise `ENM009`/`ENM011`. |
+| F2 | **Fixed.** `EnergyGeometryContext.GetEffectiveUnstableEnvironments` adds the inherited stable cutoff for every unstable site; the sampler and sampling validator consume it (`EnergyGeometryContext.cs:125–143`; `EnergyGeometrySampler.cs:84–91`; `EnergyGeometryValidator.cs:118–141`). `UnstableFilterIsDirectionalAndOmittedEnvironmentInheritsStableCutoff` passes, and the user guide/reference now agree. |
+| F3 | **Fixed.** The new tests cover inclusive filter boundaries with the 1e-5 Å tolerance, stable symmetric versus unstable directional filtering, inherited unstable sampling, and a Burnside unique count against a brute-force orbit count; all five targeted tests pass. The full Symmetry suite grew from 208 to 213 tests. |
+| F4 | **Fixed in code.** `UniquePairInteractionCount` is now the distinct `EnergyId` count and the pair-table memory uses it (`EnergyPreviewService.cs:121–138`); `ValidModelProducesCostAndPairPreviews` compares the count with the distinct `EnergyId` set. The documentation wording is stale (F6). |
+| N1 | **Addressed.** The step-page feature row and benchmark code identify the fixtures as synthetic ceria-like/BZO-like proxies. |
+| N2 | **Acknowledged.** The audited code is `c3c48c4`; the later `18e01e3` re-audit request is documentation-only, so the record parent differs from the audited code commit. |
+| N3 | **Fixed.** Both preview entry points return `null` plus an `ENM001` diagnostic for a null in-memory `StableEnvironment` before building the cache key (`EnergyPreviewService.cs:70–78, 157–165`); `NullStableEnvironmentReturnsNullWithoutThrowing` passes. |
+| N4 | **Addressed.** `step-08-model-compilation-pipeline.md` now records the preview-versus-compiled-table cross-check as a Step 08 follow-up. |
+
+#### Findings (round 2)
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Major** | **F5 — The energy preview cache key omits the particle model, so a cached preview can report stale counts/memory and suppress the `ENM013` hard-limit diagnostic.** `CreateCacheKey` hashes only `ProjectHasher.ComputeEnergy(model)` (the energy sections) and `ProjectHasher.ComputeStructure(model.Structure)` (`EnergyPreviewService.cs:437–447`; `ProjectHasher.cs:72–84`). The cost preview's cluster estimates and memory depend on `model.ParticleSets`/`model.Particles` (`EnergyPreviewService.cs:128, 244–334`), and `Validate` depends on particle-set membership for cluster permutations. The step-page cache-key design (lines 274–276) omits the particle model for the same reason. After a particle/particle-set edit with unchanged energy/structure, the service returns the old cached entry instead of re-validating. Scratch probe: a one-particle model previewed `cluster raw=1 unique=1 mem=104`; after adding a particle to the centre set the same service returned `raw=1 unique=1 mem=104`, while a fresh service returned `raw=8 unique=8 mem=280`. A 9-site/8-offset cluster that should fail after a 63-particle set edit returned `preview=ok raw=1 errors=0` from the cached service and `preview=null errors=1 codes=ENM013` from a fresh service. This violates the `TryCreatePreview` null-plus-diagnostics contract and the cost-preview acceptance criterion; the preview is advisory, but the stale diagnostic can hide a hard limit. Include a particle-model hash (or a whole-model hash) in the key, and/or revalidate on cache hit; add a regression test and update the cache-key documentation. | `EnergyPreviewService.cs:81–82, 114–143, 244–334, 437–447`; `ProjectHasher.cs:72–84`; `EnergyPreviewTests.CostPreviewIsCachedByEnergyAndCellCounts` (lines 160–178, no particle-change case); step page lines 274–276; `docs/reference/energy.md:82`; `docs/development/compilation-pipeline.md:133–134`; scratch output above. |
+| **Minor** | **F6 — The F4 fix left the public XML doc and user guide describing the old directed-geometry meaning of `UniquePairInteractionCount`.** The property now counts distinct `EnergyId` tables, so chiral directions count once. The XML parameter doc still says "the symmetry-reduced directed pair geometry count" (`EnergyCostPreview.cs:12`), and the user guide still says the preview reports "unique directed pair geometries" (`docs/user-guide/energy.md:74`). For a chiral model these differ; update both to the unique pair energy-table/`EnergyId` count. | `EnergyPreviewService.cs:121–138`; `EnergyCostPreview.cs:12`; `docs/user-guide/energy.md:74`; round-1 F4. |
+| **Minor** | **F7 — Three implemented Step 05 tasks remain unchecked on the step page.** `docs/planning/steps/step-05-energy-model.md:580–587` still has `[ ]` for the `ModelDefinition`/JSON extension, `ProjectHasher.ComputeEnergy`, and the energy records, although the acceptance criteria (lines 619–620), feature log, code, and tests show them complete. Mark them done or record why they are deferred. | Step page lines 580–587 vs 619–620; `ModelDefinition.cs`, `ProjectJson.cs`, `ProjectHasher.cs`, `EnergyModelTests.cs`, `EnergyHashTests.cs`. |
+| **Note** | **N5 — The user-guide cluster wording still says "distinct stable site".** `docs/user-guide/energy.md:41` says every surrounding position must resolve to a "distinct stable site", while F1 now accepts distinct periodic images of the same reference site when their full encodings differ. Recommend "distinct stable position/encoded position" to match the step page and validator. | `docs/user-guide/energy.md:41`; step page lines 178–185; `EnergyGeometryValidator.cs:226–306`; F1 test. |
+| **Note** | **N6 — The Step 05 deviation table combines void-on-stable with `ENM014` Error, but the code emits `ENM016` Warning.** `docs/planning/steps/step-05-energy-model.md:356` lists "Duplicate site-energy entry or void-on-stable" as `ENM014` Error, while the §7 table (line 311) and `EnergyModelValidator` emit `ENM016` Warning for a particle the site cannot occupy (the void case). The normative §7 table and the code are consistent; the §7.1 row is misleading. | Step page lines 311, 356; `EnergyModelValidator.cs:393–398`; `SiteEnergyTests.ForbiddenOccupancyProducesEnm016Warning`. |
+| **Note** | **N7 — Two zero offsets report `ENM009` plus two `ENM011` diagnostics, despite the step page's "do not double-report" wording.** A cluster with offsets `[0, 0]` and `[0, 0]` produces `ENM009`, `ENM011`, and a second `ENM011` in the scratch probe. The diagnostics are not wrong, but the step page says `ENM009` owns surrounding-surrounding duplicates and `ENM011` adds centre-involving cases without double-reporting. Consider suppressing the redundant duplicate diagnostic for two centre-equivalent offsets or clarifying the wording. | `EnergyGeometryValidator.cs:289–306`; scratch probe output `ENM009 ... ENM011 ... ENM011`; step page lines 196–200. |
+
+#### Verdict (round 2)
+
+- [ ] Passed
+- [ ] Passed with notes
+- [x] Fixes required
+- [ ] Re-audit required
+- [ ] Waived
+
+Follow-up owner: Step 05 agent for F5–F7 and N5–N7; human owner for the approval gate.
+Follow-up issue/step: Step 05 — Energy Model. F5 is Major; F6–F7 are Minor; N5–N7 are Notes. No Blocker was
+found. The human owner must require a fix commit or explicitly waive the findings. A fix commit requires a new
+feature branch, squash integration into the step branch, one replacement closeout CI run, and a fresh re-audit.
+
+**Verdict (round 2): Fixes required.** The F1–F4 fixes are verified and covered by the committed regression
+tests; N1–N4 are addressed; the full local gate and replacement closeout CI are green at `c3c48c4`; and the
+HEAD delta is documentation-only. However, F5 is a Major correctness/contract finding in the public preview
+service: the cache key omits the particle model, so a cached cost preview can report stale permutation/memory
+values and can suppress the `ENM013` hard-limit diagnostic after a particle-set edit. This violates the
+`TryCreatePreview` null-plus-diagnostics contract and the step's cost-preview acceptance criterion. F6–F7 are
+Minor documentation/step-page defects; N5–N7 are notes. The energy model, persistence, hashing, validation
+split, sampler, contracts/fixtures, samples, documentation, parity rows, and dashboard are otherwise current.
+The audit result is evidence, not merge authorization.
 
 ## Resolution status
 
