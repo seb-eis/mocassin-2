@@ -22,7 +22,8 @@ Install the toolchain listed in [`README.md`](README.md#prerequisites) or build 
 - Feature branches are validated locally. CI runs only at step closeout and on `main`; see `AGENTS.md` §3.13.
 
 The full branch, approval, squash-merge, tag, and closeout rules are in
-[`AGENTS.md`](AGENTS.md) §3. Do not merge into a step branch or into `main` without explicit approval.
+[`AGENTS.md`](AGENTS.md) §3. Do not merge into `main` without explicit approval. Feature squash merges into a
+step branch follow the approved feature list and do not need a separate approval.
 
 ## 3. Local quality gates
 
@@ -98,7 +99,7 @@ nightly-only assets.
 
 ## 7. Review evidence
 
-A feature is ready for approval only with:
+A feature is complete only with:
 
 ```text
 Branch:
@@ -109,10 +110,10 @@ Structure check:
 CI (expected or observed):
 Docs/status updated:
 Risks and limitations:
-Approval requested for:
+Recorded in the step page:
 ```
 
-Do not approve from prose alone. Review the diff against the step branch, check scope and non-goals, and
+Do not accept a change from prose alone. Review the diff against the step branch, check scope and non-goals, and
 confirm that generated contract artifacts came from the generator rather than being hand-edited.
 
 - Independent reviewers write findings and verdict directly into the review or audit record and commit only

@@ -107,12 +107,12 @@ Acceptance evidence:
 Stop before:
 - any format/API decision not covered by the plan
 - adding a new dependency
-- merging into the step branch
+- merging into `main` or starting a new step
 ```
 
 ## 5. Evidence and approval report
 
-A feature, review verdict, audit verdict, merge, or tag is not ready for approval until the requesting agent can
+A review verdict, audit verdict, merge, or tag is not ready for approval until the requesting agent can
 report the full picture, including every earlier round:
 
 ```text
@@ -153,7 +153,7 @@ Review the diff itself:
 git diff step/00-foundation...feature/step-00-foundation/<feature>
 ```
 
-Do not approve from prose alone.
+Do not review or accept a change from prose alone.
 
 ## 6. Diff review checklist
 
@@ -260,7 +260,7 @@ When generating reference data:
 Reject or stop on:
 
 - a long-lived feature branch that keeps absorbing unrelated changes;
-- an agent chaining multiple features without approval;
+- an agent implementing outside the approved step scope, or bypassing the audit gate;
 - “builds successfully” with no command output;
 - mock-heavy tests that assert handling rather than behaviour;
 - coverage gaming;
@@ -338,8 +338,8 @@ writes into it directly.
 
 | Gate | Approval |
 | --- | --- |
-| Step feature list | Once, at step start |
-| Each feature squash | Before every squash into the step branch |
+| Step feature list | Once, at step start; covers every feature in the step |
+| Feature squash | No separate gate; the step feature-list approval covers it |
 | Reviewer spawning | Planner, implementor, or human owner may spawn a fresh reviewer; the human owner approves the final verdict |
 | Pre-implementation design review | Fresh planning auditor after the design docs are frozen, before implementation |
 | Amendment design review | Focused fresh planning auditor before amendment implementation |
@@ -366,7 +366,7 @@ step.
 3. Run a focused design review under section 13; record it in
    `docs/planning/reviews/step-NN-amend-M.md`.
 4. Implement on `feature/step-NN-<step-slug>/amend-M-<slug>` from the parent step branch and integrate it with
-   the normal feature approval and squash rules.
+   the normal feature squash rules.
 5. Update the parent step page, amendment page, audit request, and review record with the combined commit.
 6. The parent audit under section 14 reviews the entire solution, including integrated amendments. Do not run a
    separate audit or create a separate tag for an integrated amendment.

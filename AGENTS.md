@@ -91,7 +91,8 @@ These rules override convenience. If you are unsure, stop and ask the user.
 - Use lowercase kebab-case. Keep the feature name short and specific.
 - One step is active at a time unless the user explicitly starts parallel work.
 - At the start of a step, propose the complete feature-branch list for that step and ask the user to approve
-  it once. Individual features still require approval before their squash merge.
+  it once. That approval covers every feature in the list; individual features are implemented and
+  squash-merged without a further approval.
 - Short-lived maintenance branches that are not part of a step use `fix/<slug>` or `docs/<slug>` from
   `main`; they are merged into `main` with `--no-ff` after approval.
 
@@ -100,7 +101,8 @@ These rules override convenience. If you are unsure, stop and ask the user.
 Before the first numbered item, complete the pre-implementation design review in section 3.9 and obtain a
 `Ready for implementation` verdict. Do not create the step branch or write implementation code before that.
 
-1. Propose the feature-branch list and get one approval for the step breakdown.
+1. Propose the feature-branch list and get one approval for the step breakdown. This is the only
+   feature-level approval; individual features are squash-merged without a further approval.
 2. Create the step branch from current `main`:
    ```sh
    git switch main
@@ -127,15 +129,16 @@ Before the first numbered item, complete the pre-implementation design review in
 ### 3.3 Feature integration
 
 - A feature branch is integrated into its step branch **only with a squash merge**.
-- **Stop and ask the user for explicit approval before every feature squash merge.** Report:
-  - feature branch name and commit hash(es);
+- Feature squash merges do **not** require a separate approval. The step-start feature-list approval covers
+  every feature in the step.
+- After the local gates pass, squash-merge the feature and record in the step page:
+  - feature branch name and squash commit;
   - exact local test commands/results;
-  - confirm that no per-feature CI run will be triggered;
+  - confirmation that no per-feature CI run was triggered;
   - a short summary of the diff;
   - any known limitations or follow-up work.
-- Feature integration uses local squash merges after chat approval. Do not open a pull request unless the
-  user asks for one.
-- After approval:
+- Feature integration uses local squash merges. Do not open a pull request unless the user asks for one.
+- Then:
   ```sh
   git switch step/00-foundation
   git merge --squash feature/step-00-foundation/dotnet-skeleton
@@ -151,7 +154,7 @@ Before the first numbered item, complete the pre-implementation design review in
   not trigger CI.
 - Never merge a feature branch directly into `main`.
 - Do not commit feature work directly to the step branch. The step branch receives only squash commits,
-  merges from `main`, and explicitly approved closeout changes.
+  merges from `main`, and closeout changes.
 - If the user rejects or abandons a feature, delete its local and remote branch after confirmation.
 
 ### 3.4 Step completion
@@ -211,8 +214,9 @@ After implementation and tests:
 - Do not push to `main` without explicit permission for that push.
 - Do not force-push, rewrite published history, or delete another contributor's branch.
 - Do not open a pull request unless the user asks.
-- When a task or feature is finished, report the branch name, commit hash(es), test results, and ask for
-  the required approval before any merge.
+- When a task or feature is finished, report the branch name, commit hash(es), and test results. A feature
+  inside an approved step is squash-merged without a separate approval; a maintenance branch or a step-to-main
+  merge still needs the approval required by its gate.
 - If the user authorizes a merge, follow their instruction exactly; otherwise leave the branch unmerged.
 
 ### 3.7 Git tags
@@ -399,7 +403,7 @@ is planned, reviewed, integrated into the parent step branch, and audited as par
 4. Implement on `feature/step-NN-<step-slug>/amend-M-<slug>` from the parent step branch. A large amendment may
    use `step/NN-amend-M-<slug>` with the normal feature rules.
 5. Integrate the amendment into the parent step branch before the parent audit freeze, using the normal
-   feature approval and squash process.
+   feature squash process.
 6. Update the parent step page, amendment page, audit request, and design review record with the combined
    commit.
 7. Freeze the combined step branch. The audit in section 3.10 covers the parent step and every integrated
@@ -413,7 +417,8 @@ Amendment statuses and the amendment index are in
 ### 3.12 Approval report
 
 Before the human owner approves any review verdict, audit verdict, waiver, merge, or tag, the agent requesting
-approval must present a **cumulative approval summary** covering the entire history. The summary goes in the
+approval must present a **cumulative approval summary** covering the entire history. Feature squash merges are
+not approval requests; their evidence is recorded in the step page. The summary goes in the
 approval request itself; linking the durable record is not sufficient.
 
 The summary must contain:
@@ -675,8 +680,9 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 2. Check its **Depends on** line; do not start before dependencies are done.
 3. Read the step’s **Original reference**, **Design**, **Acceptance criteria**, **Documentation**, **Tests**, and
    **Risks**.
-4. Propose the feature-branch list for the step and get one approval. Then create/push the step branch if it
-   does not exist, and create the feature branch as described in section 3.
+4. Propose the feature-branch list for the step and get one approval. That approval covers all features in
+   the step. Then create/push the step branch if it does not exist, and create the feature branch as described
+   in section 3.
 5. Implement only that feature’s scope. Resist adding later-phase features to the same branch.
 6. Add the tests named in the step, plus tests for every bug you find.
 7. Update the step page and documentation as part of the feature, or in the final closeout feature:
@@ -687,9 +693,10 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 8. Update the parity matrix status in `appendix-b-parity-matrix.md`.
 9. Run the quality gates.
 10. Commit with an imperative message, e.g. `model: add particle and particle-set validation`.
-11. Push the feature branch, report the result, and ask for approval before the squash merge into the step
-    branch.
-12. After approval, squash-merge, push the step branch, and delete the feature branch locally and remotely.
+11. Push the feature branch and report the result. After the local gates pass, squash-merge it into the step
+    branch without waiting for a per-feature approval.
+12. Delete the feature branch locally and remotely. Push the step branch only at step start, at closeout, or
+    when a remote backup or handoff is needed.
 13. After all features and the closeout feature, update `docs/planning/audits/step-NN.md`, freeze the step
     branch, and request the independent audit described in section 3.10.
 14. Only after a passed audit, ask for permission to merge the step into `main`, then merge with `--no-ff`,
@@ -708,7 +715,7 @@ Update status as follows:
 
 - **Step start:** after the feature list is approved, set the step to `In progress` and record the step branch.
 - **Each feature:** update its feature row and the step-page checkboxes in the feature branch. Mark it
-  `Awaiting approval` before asking for approval.
+  `Squashed` or `Done` after the squash; no per-feature approval is required.
 - **After squash:** the next feature or closeout feature records the squash commit and the local validation
   result. CI is not run per feature.
 - **Step completion:** the closeout feature records `Done`, the closeout CI result, and the main merge
