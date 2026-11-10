@@ -21,6 +21,10 @@
 | Reviewer | — |
 | Review date | — |
 
+> Orchestration: an implementor agent (the orchestrator) freezes the checkpoint, requests the reviewer, fixes
+> findings on a maintenance branch, adds resolutions without altering reviewer text, and requests re-review
+> until the reviewer no longer identifies issues. The human owner approves the final verdict and the phase gate.
+
 ## Purpose
 
 What decision or checkpoint does this review support?

@@ -13,6 +13,7 @@
 | --- | --- |
 | Step | NN — Step title |
 | Request owner | Step agent |
+| Orchestrator (step agent / planner) | — |
 | Review initiated by | Planner / implementor / human owner |
 | Design review status | Not requested |
 | Reviewed commit | — |
@@ -21,6 +22,11 @@
 | Reviewer | — |
 
 Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
+
+> Orchestration: the step agent or planner (the orchestrator) freezes the design, requests the reviewer, applies
+> fixes autonomously on the design docs or a maintenance branch, adds resolutions without altering reviewer
+> text, and requests re-review until the reviewer no longer identifies issues. The human owner approves the
+> final verdict and the start of implementation.
 
 ## Step summary
 
