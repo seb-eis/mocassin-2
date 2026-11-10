@@ -15,16 +15,16 @@
 | Request owner | Step agent / planner |
 | Review initiated by | Human owner |
 | Design review status | Re-review required |
-| Reviewed commit | `5ae32b0` |
+| Reviewed commit | `fe4868a` |
 | Docs branch | `docs/step-06-design-revision` |
 | Review date | 2026-11-10 |
-| Reviewer | Independent planning auditor (fresh context, round 3; no shared conversation with the planner or implementor) |
+| Reviewer | — (round-4 reviewer to fill) |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
 
-Round 1 is recorded in the sections below and was reviewed at `a64ecf3`; round 2 was reviewed at `160b226`.
-Their reviewer text is unchanged. The round-2 notes were corrected in `5ae32b0`, and the round-3 request is
-appended at the end of this record.
+Round 1 was reviewed at `a64ecf3`, round 2 at `160b226`, and round 3 at `5ae32b0`; all reviewer text is
+unchanged. The round-3 notes were corrected in `fe4868a`, and the round-4 request is appended at the end of
+this record.
 
 ## Step summary
 
@@ -294,7 +294,8 @@ Round history:
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-10 | `a64ecf3` | Independent planning auditor (fresh context) | Changes required |
 | 2 | 2026-11-10 | `160b226` | Fresh independent re-reviewer | Ready with notes |
-| 3 | 2026-11-10 | `5ae32b0` | Awaiting fresh reviewer | — |
+| 3 | 2026-11-10 | `5ae32b0` | Fresh independent re-reviewer | Ready with notes |
+| 4 | 2026-11-10 | `fe4868a` | Awaiting fresh reviewer | — |
 
 Findings and resolutions:
 
@@ -303,8 +304,10 @@ Findings and resolutions:
 | M1–M7 | Major | See round 1 | Design revision; see `Resolution status` | `160b226` | Resolved |
 | m1–m7 | Minor | See round 1 | Design revision; see `Resolution status` | `160b226` | Resolved |
 | n1–n3 | Note | See round 1 | Acknowledged/incorporated; see `Resolution status` | `160b226` | Closed |
-| R2-1–R2-3 | Minor | See round 2 | Small corrections; see `Resolution status` | `5ae32b0` | Resolved — awaiting round 3 |
-| R2-4–R2-8 | Note | See round 2 | Corrections/acknowledgement; see `Resolution status` | `5ae32b0` | Resolved/acknowledged — awaiting round 3 |
+| R2-1–R2-3 | Minor | See round 2 | Small corrections; see `Resolution status` | `5ae32b0` | Resolved |
+| R2-4–R2-8 | Note | See round 2 | Corrections/acknowledgement; see `Resolution status` | `5ae32b0` | Resolved/acknowledged |
+| R3-1 | Minor | See round 3 | Min-success-rate upper bound added | `fe4868a` | Resolved — awaiting round 4 |
+| R3-2–R3-3 | Note | See round 3 | Flag semantics and deviation placement corrected | `fe4868a` | Resolved — awaiting round 4 |
 
 ## Human approval
 
@@ -349,6 +352,9 @@ evidence, or verdict.
 | R2-6 | Resolved — awaiting round 3. Corrected the original-reference attribution: max attempt frequency is the KMC job-configuration base frequency, with an optional simulation-level default. | Planner | `5ae32b0` |
 | R2-7 | Resolved — awaiting round 3. `SIM004`, `SIM007`, and `SIM016` now reject non-finite values explicitly, with a general NaN/Inf rule. | Planner | `5ae32b0` |
 | R2-8 | Acknowledged. The round-3 record commit will also have the docs-only request commit as its parent; the design content is frozen at `5ae32b0`. | Planner | `5ae32b0` |
+| R3-1 | Resolved — awaiting round 4. `SIM012` now rejects a min success rate above `int.MaxValue` as well as negative/non-finite values. | Planner | `fe4868a` |
+| R3-2 | Resolved — awaiting round 4. Defined `Deterministic` semantics and mapped the derived/compiler-owned flags (`KmcSimulation`/`MmcSimulation`, `UsePrerun`, `UseDualDofCorrection`) that are not user-authored; documented the new `.msl` bit values. | Planner | `fe4868a` |
+| R3-3 | Resolved — awaiting round 4. Moved the write-out-0 deviation into the simulation section's deviation list. | Planner | `fe4868a` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -838,3 +844,26 @@ Follow-up owner: Human owner (accept R3-1–R3-3 or request a small docs correct
 (apply the accepted corrections).
 Follow-up step: Step 06 — Lattice and Simulation Models; the design revision `5ae32b0` is otherwise ready for
 implementation.
+
+## Re-review request (round 4)
+
+| Field | Value |
+| --- | --- |
+| Step | 06 — Lattice and Simulation Models |
+| Request owner | Step agent / planner |
+| Review initiated by | Human owner |
+| Design review status | Re-review required |
+| Reviewed commit | `fe4868a` |
+| Docs branch | `docs/step-06-design-revision` |
+| Review date | — |
+| Reviewer | — |
+
+Design revision: `fe4868a63a3e1a2da6234f84218e0f9f38d562c2`.
+
+The revision delta from `5ae32b0` is two planning files: the Step 06 page and `02-data-contracts.md`. It adds
+the `MinSuccessRate` upper bound to `SIM012`, defines `Deterministic` and the derived/compiler-owned execution
+flags, documents the new `.msl` flag bit values, and moves the write-out-0 deviation into the simulation
+section. The round-1, round-2, and round-3 reviewer text is unchanged.
+
+Reviewer: append your independence statement, evidence, findings, and verdict for round 4 below. Keep the
+earlier rounds unchanged.
