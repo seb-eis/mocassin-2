@@ -6,6 +6,7 @@ using Mocassin.Core.Model;
 using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Lattice;
 using Mocassin.Core.Model.Particles;
+using Mocassin.Core.Model.Simulations;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
 
@@ -187,6 +188,11 @@ public sealed record Project : IProjectQuery
         DefaultBuildingBlockBuilder.Build(Model);
 
     /// <summary>
+    /// Gets the authored simulations in stable identifier order.
+    /// </summary>
+    public ImmutableArray<Simulation> Simulations => Model.Simulations;
+
+    /// <summary>
     /// Finds the environment of one unstable site.
     /// </summary>
     /// <param name="siteId">The unstable-site identifier.</param>
@@ -295,6 +301,29 @@ public sealed record Project : IProjectQuery
             if (doping.Id == id)
             {
                 return doping;
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
+    /// Finds an authored simulation.
+    /// </summary>
+    /// <param name="id">The simulation identifier.</param>
+    /// <returns>The matching simulation, or <see langword="null"/> when the identifier is unknown.</returns>
+    public Simulation? Find(SimulationId id)
+    {
+        if (Model.Simulations.IsDefault)
+        {
+            return null;
+        }
+
+        foreach (var simulation in Model.Simulations)
+        {
+            if (simulation.Id == id)
+            {
+                return simulation;
             }
         }
 

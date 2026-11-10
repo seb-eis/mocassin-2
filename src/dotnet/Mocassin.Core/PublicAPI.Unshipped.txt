@@ -1739,3 +1739,143 @@ static Mocassin.Core.Model.Lattice.Doping.operator !=(Mocassin.Core.Model.Lattic
 static Mocassin.Core.Model.Lattice.Doping.operator ==(Mocassin.Core.Model.Lattice.Doping? left, Mocassin.Core.Model.Lattice.Doping? right) -> bool
 static Mocassin.Core.Model.Lattice.OccupationExchange.operator !=(Mocassin.Core.Model.Lattice.OccupationExchange? left, Mocassin.Core.Model.Lattice.OccupationExchange? right) -> bool
 static Mocassin.Core.Model.Lattice.OccupationExchange.operator ==(Mocassin.Core.Model.Lattice.OccupationExchange? left, Mocassin.Core.Model.Lattice.OccupationExchange? right) -> bool
+Mocassin.Core.Diagnostics.SimulationDiagnosticCodes
+Mocassin.Core.Model.ModelDefinition.Simulations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Simulations.Simulation!>
+Mocassin.Core.Model.ModelDefinition.Simulations.init -> void
+Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Core.Model.Simulations.ExecutionFlags.Deterministic = 8 -> Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Core.Model.Simulations.ExecutionFlags.NoJumpLogging = 2 -> Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Core.Model.Simulations.ExecutionFlags.NoSaving = 1 -> Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Core.Model.Simulations.ExecutionFlags.None = 0 -> Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Core.Model.Simulations.ExecutionFlags.UseFastExp = 4 -> Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Core.Model.Simulations.ExecutionFlagsJsonConverter
+Mocassin.Core.Model.Simulations.ExecutionFlagsJsonConverter.ExecutionFlagsJsonConverter() -> void
+Mocassin.Core.Model.Simulations.ISimulationQuery
+Mocassin.Core.Model.Simulations.ISimulationQuery.Find(Mocassin.Core.Ids.SimulationId id) -> Mocassin.Core.Model.Simulations.Simulation?
+Mocassin.Core.Model.Simulations.ISimulationQuery.Simulations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Simulations.Simulation!>
+Mocassin.Core.Model.Simulations.KineticSimulation
+Mocassin.Core.Model.Simulations.KineticSimulation.ElectricFieldDirection.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Core.Model.Simulations.KineticSimulation.ElectricFieldDirection.init -> void
+Mocassin.Core.Model.Simulations.KineticSimulation.ElectricFieldModulusVm.get -> double
+Mocassin.Core.Model.Simulations.KineticSimulation.ElectricFieldModulusVm.init -> void
+Mocassin.Core.Model.Simulations.KineticSimulation.Equals(Mocassin.Core.Model.Simulations.KineticSimulation? other) -> bool
+Mocassin.Core.Model.Simulations.KineticSimulation.KineticSimulation() -> void
+Mocassin.Core.Model.Simulations.KineticSimulation.MaxAttemptFrequencyHz.get -> double?
+Mocassin.Core.Model.Simulations.KineticSimulation.MaxAttemptFrequencyHz.init -> void
+Mocassin.Core.Model.Simulations.KineticSimulation.NormalizationEnergyEv.get -> double?
+Mocassin.Core.Model.Simulations.KineticSimulation.NormalizationEnergyEv.init -> void
+Mocassin.Core.Model.Simulations.KineticSimulation.PreRunMcsp.get -> long
+Mocassin.Core.Model.Simulations.KineticSimulation.PreRunMcsp.init -> void
+Mocassin.Core.Model.Simulations.MetropolisSimulation
+Mocassin.Core.Model.Simulations.MetropolisSimulation.BreakSampleIntervalMcsp.get -> long
+Mocassin.Core.Model.Simulations.MetropolisSimulation.BreakSampleIntervalMcsp.init -> void
+Mocassin.Core.Model.Simulations.MetropolisSimulation.BreakSampleLengthMcsp.get -> long
+Mocassin.Core.Model.Simulations.MetropolisSimulation.BreakSampleLengthMcsp.init -> void
+Mocassin.Core.Model.Simulations.MetropolisSimulation.BreakTolerance.get -> double
+Mocassin.Core.Model.Simulations.MetropolisSimulation.BreakTolerance.init -> void
+Mocassin.Core.Model.Simulations.MetropolisSimulation.Equals(Mocassin.Core.Model.Simulations.MetropolisSimulation? other) -> bool
+Mocassin.Core.Model.Simulations.MetropolisSimulation.MetropolisSimulation() -> void
+Mocassin.Core.Model.Simulations.MetropolisSimulation.ResultSampleMcsp.get -> long
+Mocassin.Core.Model.Simulations.MetropolisSimulation.ResultSampleMcsp.init -> void
+Mocassin.Core.Model.Simulations.Simulation
+Mocassin.Core.Model.Simulations.Simulation.Flags.get -> Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Core.Model.Simulations.Simulation.Flags.init -> void
+Mocassin.Core.Model.Simulations.Simulation.Id.get -> Mocassin.Core.Ids.SimulationId
+Mocassin.Core.Model.Simulations.Simulation.Id.init -> void
+Mocassin.Core.Model.Simulations.Simulation.Instruction.get -> string?
+Mocassin.Core.Model.Simulations.Simulation.Instruction.init -> void
+Mocassin.Core.Model.Simulations.Simulation.JobCount.get -> int
+Mocassin.Core.Model.Simulations.Simulation.JobCount.init -> void
+Mocassin.Core.Model.Simulations.Simulation.MinSuccessRate.get -> double?
+Mocassin.Core.Model.Simulations.Simulation.MinSuccessRate.init -> void
+Mocassin.Core.Model.Simulations.Simulation.Name.get -> string!
+Mocassin.Core.Model.Simulations.Simulation.Name.init -> void
+Mocassin.Core.Model.Simulations.Simulation.RngSeed.get -> string?
+Mocassin.Core.Model.Simulations.Simulation.RngSeed.init -> void
+Mocassin.Core.Model.Simulations.Simulation.Simulation() -> void
+Mocassin.Core.Model.Simulations.Simulation.Simulation(Mocassin.Core.Model.Simulations.Simulation! original) -> void
+Mocassin.Core.Model.Simulations.Simulation.TargetMcsp.get -> long
+Mocassin.Core.Model.Simulations.Simulation.TargetMcsp.init -> void
+Mocassin.Core.Model.Simulations.Simulation.TemperatureK.get -> double
+Mocassin.Core.Model.Simulations.Simulation.TemperatureK.init -> void
+Mocassin.Core.Model.Simulations.Simulation.TimeLimitSeconds.get -> long?
+Mocassin.Core.Model.Simulations.Simulation.TimeLimitSeconds.init -> void
+Mocassin.Core.Model.Simulations.Simulation.TransitionIds.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.TransitionRef>
+Mocassin.Core.Model.Simulations.Simulation.TransitionIds.init -> void
+Mocassin.Core.Model.Simulations.Simulation.WriteOutCount.get -> int
+Mocassin.Core.Model.Simulations.Simulation.WriteOutCount.init -> void
+Mocassin.Core.Model.Simulations.SimulationJsonConverter
+Mocassin.Core.Model.Simulations.SimulationJsonConverter.SimulationJsonConverter() -> void
+Mocassin.Core.Model.Simulations.SimulationKind
+Mocassin.Core.Model.Simulations.SimulationKind.Kmc = 0 -> Mocassin.Core.Model.Simulations.SimulationKind
+Mocassin.Core.Model.Simulations.SimulationKind.Mmc = 1 -> Mocassin.Core.Model.Simulations.SimulationKind
+Mocassin.Core.Project.Project.Find(Mocassin.Core.Ids.SimulationId id) -> Mocassin.Core.Model.Simulations.Simulation?
+Mocassin.Core.Project.Project.Simulations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Simulations.Simulation!>
+abstract Mocassin.Core.Model.Simulations.Simulation.<Clone>$() -> Mocassin.Core.Model.Simulations.Simulation!
+abstract Mocassin.Core.Model.Simulations.Simulation.Kind.get -> Mocassin.Core.Model.Simulations.SimulationKind
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.BreakSampleIntervalAboveRecommended = "SIM032" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.BreakSampleLengthAboveRecommended = "SIM031" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.BreakToleranceAboveRecommended = "SIM030" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.DuplicateTransitionReference = "SIM022" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.FieldModulusOutsideRecommendedBand = "SIM029" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidBreakSampleInterval = "SIM018" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidBreakSampleLength = "SIM017" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidBreakTolerance = "SIM016" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidExecutionFlags = "SIM035" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidFieldDirection = "SIM007" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidFieldModulus = "SIM013" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidJobCount = "SIM006" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidMaxAttemptFrequency = "SIM015" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidMinSuccessRate = "SIM012" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidName = "SIM009" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidNormalizationEnergy = "SIM014" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidPreRunMcsp = "SIM008" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidResultSample = "SIM019" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidTargetMcsp = "SIM005" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidTemperature = "SIM004" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidTimeLimit = "SIM011" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.InvalidWriteOutCount = "SIM010" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.JobCountOutsideRecommendedBand = "SIM026" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.KindShapeMismatch = "SIM023" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.MinSuccessRateBelowRecommended = "SIM037" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.NoTransitions = "SIM003" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.NormalizationEnergyAboveRecommended = "SIM034" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.PreRunAboveRecommended = "SIM027" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.ResultSampleAboveRecommended = "SIM033" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.RngSeedTooLong = "SIM020" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.TargetMcspAboveRecommended = "SIM025" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.TemperatureOutsideRecommendedBand = "SIM024" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.TransitionCountOutsideRecommendedBand = "SIM036" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.TransitionLimitExceeded = "SIM021" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.UnknownTransition = "SIM001" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.WriteOutOutsideRecommendedBand = "SIM028" -> string!
+const Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.WrongTransitionKind = "SIM002" -> string!
+override Mocassin.Core.Model.Simulations.ExecutionFlagsJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.Simulations.ExecutionFlags
+override Mocassin.Core.Model.Simulations.ExecutionFlagsJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.Simulations.ExecutionFlags value, System.Text.Json.JsonSerializerOptions! options) -> void
+override Mocassin.Core.Model.Simulations.KineticSimulation.<Clone>$() -> Mocassin.Core.Model.Simulations.KineticSimulation!
+override Mocassin.Core.Model.Simulations.KineticSimulation.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Simulations.KineticSimulation.GetHashCode() -> int
+override Mocassin.Core.Model.Simulations.KineticSimulation.Kind.get -> Mocassin.Core.Model.Simulations.SimulationKind
+override Mocassin.Core.Model.Simulations.KineticSimulation.ToString() -> string!
+override Mocassin.Core.Model.Simulations.MetropolisSimulation.<Clone>$() -> Mocassin.Core.Model.Simulations.MetropolisSimulation!
+override Mocassin.Core.Model.Simulations.MetropolisSimulation.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Simulations.MetropolisSimulation.GetHashCode() -> int
+override Mocassin.Core.Model.Simulations.MetropolisSimulation.Kind.get -> Mocassin.Core.Model.Simulations.SimulationKind
+override Mocassin.Core.Model.Simulations.MetropolisSimulation.ToString() -> string!
+override Mocassin.Core.Model.Simulations.Simulation.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Simulations.Simulation.GetHashCode() -> int
+override Mocassin.Core.Model.Simulations.Simulation.ToString() -> string!
+override Mocassin.Core.Model.Simulations.SimulationJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> Mocassin.Core.Model.Simulations.Simulation!
+override Mocassin.Core.Model.Simulations.SimulationJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, Mocassin.Core.Model.Simulations.Simulation! value, System.Text.Json.JsonSerializerOptions! options) -> void
+override sealed Mocassin.Core.Model.Simulations.KineticSimulation.Equals(Mocassin.Core.Model.Simulations.Simulation? other) -> bool
+override sealed Mocassin.Core.Model.Simulations.MetropolisSimulation.Equals(Mocassin.Core.Model.Simulations.Simulation? other) -> bool
+static Mocassin.Core.Diagnostics.SimulationDiagnosticCodes.HelpFor(string! code) -> string?
+static Mocassin.Core.Model.Simulations.KineticSimulation.operator !=(Mocassin.Core.Model.Simulations.KineticSimulation? left, Mocassin.Core.Model.Simulations.KineticSimulation? right) -> bool
+static Mocassin.Core.Model.Simulations.KineticSimulation.operator ==(Mocassin.Core.Model.Simulations.KineticSimulation? left, Mocassin.Core.Model.Simulations.KineticSimulation? right) -> bool
+static Mocassin.Core.Model.Simulations.MetropolisSimulation.operator !=(Mocassin.Core.Model.Simulations.MetropolisSimulation? left, Mocassin.Core.Model.Simulations.MetropolisSimulation? right) -> bool
+static Mocassin.Core.Model.Simulations.MetropolisSimulation.operator ==(Mocassin.Core.Model.Simulations.MetropolisSimulation? left, Mocassin.Core.Model.Simulations.MetropolisSimulation? right) -> bool
+static Mocassin.Core.Model.Simulations.Simulation.operator !=(Mocassin.Core.Model.Simulations.Simulation? left, Mocassin.Core.Model.Simulations.Simulation? right) -> bool
+static Mocassin.Core.Model.Simulations.Simulation.operator ==(Mocassin.Core.Model.Simulations.Simulation? left, Mocassin.Core.Model.Simulations.Simulation? right) -> bool
+virtual Mocassin.Core.Model.Simulations.Simulation.EqualityContract.get -> System.Type!
+virtual Mocassin.Core.Model.Simulations.Simulation.Equals(Mocassin.Core.Model.Simulations.Simulation? other) -> bool
+virtual Mocassin.Core.Model.Simulations.Simulation.PrintMembers(System.Text.StringBuilder! builder) -> bool

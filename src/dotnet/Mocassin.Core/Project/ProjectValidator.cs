@@ -7,6 +7,7 @@ using Mocassin.Core.Model;
 using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Lattice;
 using Mocassin.Core.Model.Particles;
+using Mocassin.Core.Model.Simulations;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
 
@@ -43,6 +44,7 @@ public static class ProjectValidator
         bag.AddRange(TransitionModelValidator.Validate(model));
         bag.AddRange(EnergyModelValidator.Validate(model));
         bag.AddRange(LatticeModelValidator.Validate(model));
+        bag.AddRange(SimulationModelValidator.Validate(model));
     }
 
     private static void ValidateMetadata(Project project, DiagnosticBag bag)
@@ -182,6 +184,7 @@ public static class ProjectValidator
             ? []
             : project.Model.OccupationExchanges;
         var dopings = project.Model.Dopings.IsDefault ? [] : project.Model.Dopings;
+        var simulations = project.Model.Simulations.IsDefault ? [] : project.Model.Simulations;
 
         var particleIds = CollectIds(particles.Select(static particle => particle.Id.Value), "particle", bag);
         var particleSetIds = CollectIds(particleSets.Select(static particleSet => particleSet.Id.Value), "particleSet", bag);
@@ -195,6 +198,10 @@ public static class ProjectValidator
             "occupationExchange",
             bag);
         var dopingIds = CollectIds(dopings.Select(static doping => doping.Id.Value), "doping", bag);
+        var simulationIds = CollectIds(
+            simulations.Select(static simulation => simulation.Id.Value),
+            "simulation",
+            bag);
 
         var all = new Dictionary<Guid, string>();
         AddDomain(
@@ -218,6 +225,7 @@ public static class ProjectValidator
         AddDomain(all, dummyPositionIds, "cellDummyPosition", bag);
         AddDomain(all, exchangeIds, "occupationExchange", bag);
         AddDomain(all, dopingIds, "doping", bag);
+        AddDomain(all, simulationIds, "simulation", bag);
 
         foreach (var site in sites)
         {

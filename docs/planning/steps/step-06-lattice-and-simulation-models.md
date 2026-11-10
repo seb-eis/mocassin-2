@@ -18,8 +18,8 @@ validation.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `lattice-model` | `feature/step-06-lattice-and-simulation-models/lattice-model` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
-| `simulation-model` | `feature/step-06-lattice-and-simulation-models/simulation-model` | Not started | — | — | — |
+| `lattice-model` | `feature/step-06-lattice-and-simulation-models/lattice-model` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `bc333f3` |
+| `simulation-model` | `feature/step-06-lattice-and-simulation-models/simulation-model` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `persistence-and-contracts` | `feature/step-06-lattice-and-simulation-models/persistence-and-contracts` | Not started | — | — | — |
 | `queries-and-editing` | `feature/step-06-lattice-and-simulation-models/queries-and-editing` | Not started | — | — | — |
 | `samples-and-docs` | `feature/step-06-lattice-and-simulation-models/samples-and-docs` | Not started | — | — | — |
