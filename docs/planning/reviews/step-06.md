@@ -18,7 +18,7 @@
 | Reviewed commit | `fe4868a` |
 | Docs branch | `docs/step-06-design-revision` |
 | Review date | 2026-11-10 |
-| Reviewer | — (round-4 reviewer to fill) |
+| Reviewer | Independent planning auditor (fresh context, round 4; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
 
@@ -855,8 +855,8 @@ implementation.
 | Design review status | Re-review required |
 | Reviewed commit | `fe4868a` |
 | Docs branch | `docs/step-06-design-revision` |
-| Review date | — |
-| Reviewer | — |
+| Review date | 2026-11-10 |
+| Reviewer | Independent planning auditor (fresh context, round 4; no shared conversation with the planner or implementor) |
 
 Design revision: `fe4868a63a3e1a2da6234f84218e0f9f38d562c2`.
 
@@ -867,3 +867,235 @@ section. The round-1, round-2, and round-3 reviewer text is unchanged.
 
 Reviewer: append your independence statement, evidence, findings, and verdict for round 4 below. Keep the
 earlier rounds unchanged.
+
+### Re-review round 4
+
+#### Reviewer context and independence
+
+I am a fresh planning auditor for round 4. I did not author or implement the Step 06 design, the revision, or
+any part of the implementation, and I have no shared conversation with the planner, the implementor, the
+round-1 reviewer, the round-2 reviewer, or the round-3 reviewer. I read the frozen design, the step page, the
+data contracts, the dependent step pages, the ADRs, the manifest/schema tooling, the current Core sources, and
+the original implementation as read-only reference myself; I did not rely on the resolution table or the spawn
+summary for the verdict.
+
+#### Evidence
+
+**Frozen state and worktree.** Worktree `/workspace/playground/step06-design`, branch
+`docs/step-06-design-revision`. At review start `HEAD` was `201d126`; the frozen design revision is `fe4868a`
+and the round-4 request is `201d126`, whose only parent is `fe4868a`. `git show --name-status 201d126` changes
+only `docs/planning/reviews/step-06.md` and `docs/planning/steps/step-06-lattice-and-simulation-models.md`; the
+step-page change is one line (the design-review link `5ae32b0` → `fe4868a`). `git diff --name-only
+fe4868a..HEAD` shows only those two files, so the design content is identical at `fe4868a`. The worktree was
+clean before and after the builds.
+
+**Commands run (from `/workspace/playground/step06-design`):**
+
+```sh
+git status --short
+# (no output: clean worktree)
+
+git log --oneline --decorate -6
+# 201d126 (HEAD -> docs/step-06-design-revision) docs: request step-06 round-4 design re-review [skip ci]
+# fe4868a docs: close step-06 round-3 design notes [skip ci]
+# 3c3d879 docs: record step-06 round-3 design review Ready with notes [skip ci]
+# 2296bc9 docs: request step-06 round-3 design re-review [skip ci]
+# 5ae32b0 docs: address step-06 re-review notes [skip ci]
+# f47f0e8 docs: record step-06 design re-review Ready with notes [skip ci]
+
+git show --stat fe4868a
+# commit fe4868a63a3e1a2da6234f84218e0f9f38d562c2
+# docs: close step-06 round-3 design notes [skip ci]
+#  docs/planning/02-data-contracts.md                 |  4 ++++
+#  .../steps/step-06-lattice-and-simulation-models.md | 16 ++++++++++++----
+#  2 files changed, 16 insertions(+), 4 deletions(-)
+
+git diff --stat 3c3d879..fe4868a -- docs/planning
+#  docs/planning/02-data-contracts.md                 |  4 ++++
+#  .../steps/step-06-lattice-and-simulation-models.md | 16 ++++++++++++----
+#  2 files changed, 16 insertions(+), 4 deletions(-)
+
+git diff 3c3d879..fe4868a -- docs/planning
+# Full diff inspected. Data contract 516-521: the deterministic/derived-flag text and
+# the .msl bit values None=0, NoSaving=1, NoJumpLogging=2, UseFastExp=4, Deterministic=8.
+# Step 06 182-188: the write-out-0 bullet is removed from the lattice deviation list;
+# Step 06 282-284: the simulation deviation list now carries it; Step 06 273-281 adds
+# the per-flag semantics, the derived-flag mapping, and the Deterministic definition;
+# Step 06 341: SIM012 now includes "above `int.MaxValue`". No other planning file
+# changed, and no code or contract artifact changed.
+
+git diff --check
+# (no output, exit 0)
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.23s
+# exit 0
+
+python3 tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+# exit 0
+
+./tools/verify.sh docs
+# DocFX loaded the existing src/dotnet/*/bin/Release assemblies; this docs-only review
+# changed no source.
+# ==> Zensical (strict): No issues found
+# ==> DocFX: Build succeeded. 0 warning(s), 0 error(s)
+# ==> rustdoc: Documentation built in /workspace/playground/step06-design/site
+# exit 0
+
+git status --short
+# (no output: generated site/target/build output is ignored)
+```
+
+**Additional read-only checks.**
+
+```sh
+git show -s --format='%H %P %s' 201d126 fe4868a 3c3d879
+# 201d126... fe4868a... docs: request step-06 round-4 design re-review [skip ci]
+# fe4868a... 3c3d879... docs: close step-06 round-3 design notes [skip ci]
+# 3c3d879... 2296bc9... docs: record step-06 round-3 design review Ready with notes [skip ci]
+
+git show --name-status 201d126
+# M docs/planning/reviews/step-06.md
+# M docs/planning/steps/step-06-lattice-and-simulation-models.md   # one-line design-review link
+
+git diff --stat fe4868a..HEAD
+#  docs/planning/reviews/step-06.md                   | 45 ++++++++++++++++++----
+#  .../steps/step-06-lattice-and-simulation-models.md |  2 +-
+
+git diff --name-only 3c3d879..fe4868a
+# docs/planning/02-data-contracts.md
+# docs/planning/steps/step-06-lattice-and-simulation-models.md
+
+git merge-base --is-ancestor fe4868a HEAD
+# exit 0
+```
+
+**Source and contract checks.** I re-checked the canonical path in `ProjectJson.cs`
+(`SerializeCanonicalModel` 81–84, `CanonicalizeModel` 93–133, `ProjectJsonConverter.Write` 313 and 360, the
+nested `ProjectJsonContext` 483), `ProjectHasher.cs` 26–29 and `ComputeDocument`, `ProjectEditor.cs` 37 and
+57–58 (document-hash no-op guard; file is 506 lines), the existing partials `ProjectEditor.Energy.cs` and
+`ProjectEditor.Transitions.*.cs`, `ProjectStore.SaveAsync` (`Mocassin.Packages/Projects/ProjectStore.cs` 130),
+`IProjectQuery.cs` (currently `IParticleQuery, IStructureQuery, ITransitionQuery, IEnergyQuery`),
+`ProjectSchema.cs` (version constants only), `ModelDefinition.cs` (empty defaults for the Step 03–05 sections),
+`TransitionRef.cs`, `Ids/TypedIds.cs` 237–285 (`OccupationExchangeId`, `DopingId`, `SimulationId`), and
+`Mocassin.Compilation.csproj` (Core and Symmetry references). `ProjectValidationService` exists in
+`Mocassin.Packages/Projects`. The new sections are not yet in the manifest: `contracts/manifest.json` still has
+`status: step-05` and no lattice/simulation model fields; that is the planned Step 06 task.
+`tools/contracts/generate.py` has no `oneOf`/`anyOf`/`discriminator` support, and the generated
+`project-v1.schema.json` sets `additionalProperties: false` at the root and model, so the flat simulation shape
+and unknown-field rejection are consistent with the generator.
+
+**Original reference checked read-only (`/workspace/mocassin-original`).**
+`SimulationFlags.cs` 10–56 defines `KmcSimulation=1`, `MmcSimulation=2`, `UsePrerun=4`, `NoSaving=8`,
+`UseDualDofCorrection=16`, `NoJumpLogging=32`, and `UseFastExp=64`; the user-facing overwrite flags
+(`SimulationExecutionOverwriteFlags` 61–79) are only `NoSaving`, `NoJumpLogging`, and `UseFastExp`.
+`JobDbModelBuilder.SetSimulationJobInfoFlags` (236–258) derives `KmcSimulation`/`MmcSimulation` from the
+simulation type, derives `UsePrerun` from the pre-run value, and sets `UseDualDofCorrection` for KMC;
+`JumpSelectionOptimizer` (45) can clear it, and `RunPostBuildOptimizers` (304–313) applies the optimizer flags
+to `JobFlags`. `MocassinSimulationSettings.InitAsDefault` defines `TerminationSuccessRate`
+`0,10,int.MaxValue,int.MaxValue` and `TransitionCount` `1,0,10,100`; `ValueSetting` sorts the four values and
+`ParseUpper`/`ParseLower` apply the sorted bounds. `SimulationBaseData.cs`, `KineticSimulationData.cs`, and
+`MetropolisSimulationData.cs` confirm the UI defaults (job 12, target MCSP 1000, temperature 1000, write-out
+100, P1Y, KMC pre-run 100, field 10e6 V/m `(1,0,0)`, normalization 0, MMC 0/1000/100/200).
+`DopingValidator.cs` makes wrong-sign counter-doping a critical warning, not an error; `Doping.cs` documents
+`Priority` as a simultaneous-doping group ID.
+
+**Cross-step checks.** I read Step 03, Step 04 (authored-order rule 110–117 and the `IProjectQuery` boundary),
+Step 05, Step 07 (feasibility 93 and 135), Step 08 (compiled simulation shape 74–80), Step 10 (job settings
+36–45, preview API 204–256, JOB001–JOB015), Step 11 (metadata columns 118–134), Step 14 (context flags and
+`dof` 195–196), Step 16 (`UseFrequencyPrecheck` 126, `dof` 152, `NoSaving` 181/190), Step 18 (state flags and
+`prerun.mcs` phase 185/213–217), Step 25 (common settings 134–137), ADR 0005 (determinism guarantees), ADR 0009
+(version bump), `appendix-a-original-inventory.md` 112, `appendix-b-parity-matrix.md`, `status.md`, and
+`audits/step-06.md`.
+
+**Files reviewed.** `AGENTS.md` §3.8–§3.13, §8, §10–§12; `docs/planning/reviews/README.md`; the Step 06 page at
+`fe4868a` (all sections); `docs/planning/02-data-contracts.md` (model envelope, lattice/doping, simulations,
+`.msl` jobs/payload, compiled model); the Step 03, 04, 05, 07, 08, 10, 11, 14, 16, 18, and 25 pages; ADR 0005
+and ADR 0009; `contracts/manifest.json`; `tools/contracts/generate.py`;
+`contracts/generated/schema/project-v1.schema.json`; `contracts/generated/fixtures/descriptors.json`; the Core
+project/query/hash/editor sources listed above; the original simulation and validator sources listed above;
+`docs/user-guide/`, `docs/reference/project-format.md`, `docs/reference/diagnostics.md`,
+`docs/development/architecture.md`, `docs/development/code-structure.md`,
+`docs/development/compilation-pipeline.md`, `zensical.toml`, `tools/verify.sh`, `tools/structure-policy.json`,
+and `tools/api-projects.txt`.
+
+**Scope checks.** I reviewed the full requested scope: `ModelDefinition` lattice/simulation sections and the
+JSON/schema round-trip, including the canonical save/hash path; polymorphic simulation persistence and the
+kind-specific transition arrays; doping priority/order/serialization, the derived building block, and
+charge-compensation semantics; `SimulationKind`/`TransitionKind` compatibility, defaults, limits, and
+diagnostic coverage; `ILatticeQuery`/`ISimulationQuery` and `IProjectQuery` integration, with the preview owned
+by Step 10; LAT001–LAT011 and SIM001–SIM037 ownership and validation; Step 03/04 dependencies;
+manifest/schema/fixture tasks; PublicAPI/ApiCompat; code layout; documentation/navigation and test plans; and
+the remaining cross-step interfaces across Step 06, `02-data-contracts.md`, Step 10, Step 11, Step 25, and the
+solver steps that consume execution flags. The findings record the result.
+
+**Status/process observations.** `docs/planning/status.md` 53 and 82 still say the Step 06 design is
+`Ready for review at a64ecf3`, while the step page and this request say `fe4868a`. The status dashboard is
+implementor-owned and outside the reviewer write scope; the step page's closeout task includes the status
+update. This is a process note (R4-4), not a design finding. I did not edit it.
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R4-1 — The `UseDualDofCorrection` mapping is not carried into the `.msl`/solver contract that consumes it.** The revision says `UseDualDofCorrection` is a compiler/optimizer-derived KMC time-stepping flag and not user-authored (Step 06 280–281), and the data contract lists only `None`, `NoSaving`, `NoJumpLogging`, `UseFastExp`, and `Deterministic` for the `.msl` bitmask (516–521). Step 14 still branches on `dof = 2` if the simulation flag `DualDof` is set (195–196), and Step 16 repeats the rule (152). The compiler-owned bit or field that carries `DualDof` is not named in the compiled-model shape (Step 08 74–80), the compiled `default_settings` (data contract 809), or the `.msl` job payload (`flags` u32, data contract 835). The original sets this bit in `JobFlags` in `JobDbModelBuilder.SetSimulationJobInfoFlags` 236–258, and the post-build optimizer can clear it (`JumpSelectionOptimizer` 45; `RunPostBuildOptimizers` 304–313). Without a named carrier the solver cannot decide the `dof` factor, so the KMC time-step remains ambiguous. Fix: define the compiler-owned bit/field (for example `UseDualDofCorrection` in the compiled simulation default settings and the job-payload bitmask), document it in the `.msl` contract, and update Step 14/16, or state explicitly how the solver derives `DualDof` from the compiled model. | Step 06 page 280–281; `02-data-contracts.md` 516–521, 809, 835; Step 14 page 195–196; Step 16 page 152; Step 08 page 74–80; original `JobDbModelBuilder.cs` 236–258 and `JumpSelectionOptimizer.cs` 45; `appendix-a-original-inventory.md` 112. |
+| **Note** | **R4-2 — `Deterministic` is defined abstractly, but no consuming step maps it to concrete behavior, and `UseFrequencyPrecheck` is exactly the kind of optional shortcut it describes.** The revision defines `Deterministic` as “requests reproducible execution and disables optional performance shortcuts that would change the RNG stream or block ordering” and documents the `.msl` bit 8 (Step 06 278–279; data contract 516–521). Step 16 126 defines an optional `UseFrequencyPrecheck` that “changes trajectory but not the long-time distribution” and is enabled by default; no step says whether `Deterministic` disables it. ADR 0005 already guarantees identical state for the same package/binary/platform/seed, so the flag's relationship to that guarantee needs one sentence. The `.msl` job payload table (data contract 835) still shows only `flags | u32`, so a solver implementor must infer the bit table from the project section. Fix: assign the concrete shortcuts to Steps 16/17/18 (or state that `Deterministic` is reserved and changes no default behavior), reconcile the wording with ADR 0005's determinism guarantee, and place the bit table beside the `.msl` payload. | Step 06 page 273–281; `02-data-contracts.md` 516–521, 835; Step 16 page 126; ADR 0005 `Determinism guarantees`; Step 25 page 137; `appendix-a-original-inventory.md` 112. |
+| **Note** | **R4-3 — `NormalizationEnergyEv = 0.0` is accepted but neither defined nor canonicalized.** The design says `null` means no normalization and “a positive value enables fixed normalization” (Step 06 265–266), and the deviation note says the original −1/0 values both meant no normalization and the new model uses `null` for that state (187–188). `SIM014` rejects only negative/non-finite values (343), so `0.0` is valid. A persisted `0.0` then round-trips and changes the model hash even though it is physically the same as `null` (`K_fix = exp(0)^-1 = 1`, Step 14 190), and the data contract example and text only name `null` (480, 522–523). Fix: reject `0.0` in `SIM014`, or define it as equivalent to `null` and canonicalize it on save; add the boundary test. | Step 06 page 187–188, 265–266, 343; `02-data-contracts.md` 480, 522–523; Step 14 page 190; `SIM014`. |
+| **Note** | **R4-4 — The status dashboard still names `a64ecf3` (process note).** `docs/planning/status.md` 53 and 82 still say the Step 06 design is `Ready for review at a64ecf3`, while the step page (16) and this request (861) say `fe4868a`. The dashboard is implementor-owned and outside the reviewer write scope; the step page's closeout task plans the update. This is the same process pattern as round 3, not a design finding. | `docs/planning/status.md` 53, 82; Step 06 page 16; round-4 request 861. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. No Blocker or Major finding remains in round 4.
+
+#### Round-4 checklist
+
+- [x] R3-1 — `SIM012` now rejects negative, non-finite, and above `int.MaxValue`; the hard upper bound matches
+  the sorted original `TerminationSuccessRate` 0–`int.MaxValue`, and `SIM037` still covers the recommended
+  ≥10 band. Resolved; the acceptance/test lines 545–546/587 now have a diagnostic and boundary test for this
+  bound.
+- [x] R3-2 — `Deterministic` semantics, derived/compiler-owned flags, and `.msl` bit values are documented
+  (Step 06 273–281; data contract 516–521); the mapping is consistent for `KmcSimulation`/`MmcSimulation` and
+  `UsePrerun`, but the `UseDualDofCorrection` consumer is R4-1 and the concrete `Deterministic` shortcuts are
+  R4-2.
+- [x] R3-3 — The write-out-0 deviation is now in the simulation section's deviation list (Step 06 282–284); the
+  lattice deviation list no longer carries it (182–188). Resolved.
+- [x] `ModelDefinition` lattice/simulation sections and JSON/schema round-trip: flat sections,
+  `ModelDefinitionJsonConverter`, nested `ProjectJsonContext`, `CanonicalizeModel`, `Write`/`SaveAsync`,
+  `Compute`/`ComputeDocument`, additive-v1/ADR 0009, and manifest/schema/fixture tasks are defined (Step 06
+  89–130, 493–553; data contract 412–451).
+- [x] Polymorphic simulation persistence and kind-specific transition arrays: abstract record with derived
+  `Kind`, flat DTO, exact kind-specific array/settings, authored order, duplicate rejection, and `SIM023`
+  mismatch (Step 06 196–252; data contract 453–522).
+- [x] Doping priority/order/serialization, derived building block, and charge-compensation semantics: unique
+  `0..9999` priorities, ascending serialization, derived building block, sign/zero compensation, and Step 10
+  ratio/truncation ownership (Step 06 155–192; data contract 412–450).
+- [x] `SimulationKind`/`TransitionKind` compatibility, defaults, limits, and diagnostic coverage: exact mapping,
+  `SIM002`, defaults, hard ranges, and recommended bands (Step 06 196–375); residual is R4-1/R4-2.
+- [x] `ILatticeQuery`/`ISimulationQuery` and `IProjectQuery`; preview ownership is Step 10: present (Step 06
+  396–435; Step 10 204–256).
+- [x] LAT001–LAT011 and SIM001–SIM037 ownership/validation: contiguous code list, Core validators, Step 07/10
+  handoff, and positive/negative tests (Step 06 306–384, 574–598); residual is R4-1/R4-2.
+- [x] Step 03/04 dependencies, manifest/schema/fixture tasks, PublicAPI/ApiCompat, code layout,
+  documentation/navigation, test plans, and cross-step interfaces: checked; the new code stays inside the
+  structure policy, `ProjectSchema` is unchanged for v1, and the four fixtures follow the existing naming;
+  residual is R4-1/R4-3.
+- [x] Internal consistency across Step 06, `02-data-contracts.md`, Step 10, Step 11, and Step 25: checked;
+  residual is R4-1/R4-2 for the solver flag consumers; the status dashboard is R4-4.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+No Blocker or Major remains. R3-1–R3-3 are resolved by `fe4868a`; R4-1 is a Minor and R4-2–R4-4 are Notes.
+Under `docs/planning/reviews/README.md` §7, `Ready with notes` requires the human owner to accept the
+Minor/Note findings explicitly, or the planner/Step 06 agent can make the small corrections and request a new
+round. The start gate remains the human owner's decision.
+
+Follow-up owner: Human owner (accept R4-1–R4-4 or request a small docs correction); planner/Step 06 agent
+(apply the accepted corrections).
+Follow-up step: Step 06 — Lattice and Simulation Models; the design revision `fe4868a` is otherwise ready for
+implementation.
