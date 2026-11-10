@@ -10,13 +10,19 @@
 | Field | Value |
 | --- | --- |
 | Review ID | XC-02 |
+| Checkpoint | Phase B — Model definition (Steps 03–07) |
 | Type | Repository-wide design foundations and model-definition review |
-| Status | Draft for owner review |
+| Status | Planned — awaiting Step 07 completion |
 | Target commit | After the Step 07 merge and `step-07` tag, plus a docs-only checkpoint commit |
 | Request owner | Step agent / planner |
+| Orchestrator (implementor) | — |
 | Review initiated by | Human owner |
 | Reviewer | — |
 | Review date | — |
+
+> Orchestration: an implementor agent requests the reviewer, fixes findings on a maintenance branch, adds
+> resolutions without altering reviewer text, and requests re-review until the reviewer no longer identifies
+> issues. The human owner approves the final verdict and the phase gate.
 
 ## Purpose
 

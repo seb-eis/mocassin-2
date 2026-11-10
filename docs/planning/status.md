@@ -86,19 +86,22 @@ Step 04 is complete: merge `31ba12d`, tag `step-04`, main CI `42697550846` green
 `82c8cb4`. Step 03 remains complete: merge `162ebe4`, tag `step-03`, main CI `42521062856` green, audit passed
 with notes at `b6a97ec`.
 
-## Post-Step 07 checkpoint
+## Cross-cutting phase checkpoints
 
-After Step 07 completes the model definition, three repository-wide reviews are planned. The checklists are
-drafts for owner review.
+Each phase closes with three repository-wide reviews: policy/planning, design foundations, and documentation
+status. The policy review starts first; design and documentation may run in parallel. The next phase's first
+step design review waits for all three verdicts, unless the human owner waives one with a recorded reason.
+These reviews do not create step branches or tags and do not replace step audits or Step 29 parity validation.
 
-| ID | Review | Status |
-| --- | --- | --- |
-| `XC-01` | [Repository policy and planning status audit](reviews/cross-cutting/repository-policy-audit.md) | Draft checklists — owner review pending |
-| `XC-02` | [Design foundations and model definition review](reviews/cross-cutting/design-foundations-review.md) | Draft checklists — owner review pending |
-| `XC-03` | [Documentation status review](reviews/cross-cutting/documentation-status-review.md) | Draft checklists — owner review pending |
-
-These are not step gates and do not create step branches or tags. They do not replace the Step 08 design
-review, step audits, or Step 29 parity validation.
+| Phase | Steps | Reviews | Status |
+| --- | --- | --- | --- |
+| A. Foundations | 00–02 | Waived — process introduced after completion | — |
+| B. Model definition | 03–07 | `XC-01` [policy](reviews/cross-cutting/xc-01-repository-policy.md), `XC-02` [design](reviews/cross-cutting/xc-02-design-foundations.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | Planned — awaiting Step 07 completion |
+| C. Compilation and build | 08–12 | `XC-04`/`XC-05`/`XC-06` | Planned |
+| D. Solver | 13–19 | `XC-07`/`XC-08`/`XC-09` | Planned |
+| E. Results | 20–22 | `XC-10`/`XC-11`/`XC-12` | Planned |
+| F. GUI | 23–28 | `XC-13`/`XC-14`/`XC-15` | Planned |
+| G. Release and documentation | 29–31 | `XC-16`/`XC-17`/`XC-18` | Planned |
 
 ## Notes
 
