@@ -86,6 +86,20 @@ Step 04 is complete: merge `31ba12d`, tag `step-04`, main CI `42697550846` green
 `82c8cb4`. Step 03 remains complete: merge `162ebe4`, tag `step-03`, main CI `42521062856` green, audit passed
 with notes at `b6a97ec`.
 
+## Post-Step 07 checkpoint
+
+After Step 07 completes the model definition, three repository-wide reviews are planned. The checklists are
+drafts for owner review.
+
+| ID | Review | Status |
+| --- | --- | --- |
+| `XC-01` | [Repository policy and planning status audit](reviews/cross-cutting/repository-policy-audit.md) | Draft checklists — owner review pending |
+| `XC-02` | [Design foundations and model definition review](reviews/cross-cutting/design-foundations-review.md) | Draft checklists — owner review pending |
+| `XC-03` | [Documentation status review](reviews/cross-cutting/documentation-status-review.md) | Draft checklists — owner review pending |
+
+These are not step gates and do not create step branches or tags. They do not replace the Step 08 design
+review, step audits, or Step 29 parity validation.
+
 ## Notes
 
 - Feature rows live in each step page under **Implementation status**.
