@@ -14,11 +14,11 @@
 | Step | 05 — Energy Model |
 | Request owner | Step agent |
 | Audit initiated by | Human owner |
-| Audit status | Fixes required |
-| Audited commit | `c3c48c4` |
+| Audit status | Re-audit required |
+| Audited commit | `e6a7839` |
 | Step branch | `step/05-energy-model` |
 | Step tag | — |
-| Closeout CI run | [`42878275463`](https://github.com/seb-eis/mocassin-2/actions/runs/42878275463) — green at `c3c48c4` |
+| Closeout CI run | [`42881426273`](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) — green at `e6a7839` |
 | Platform CI | Not run (Ubuntu-only policy; no platform-specific code) |
 | Audit date | 2026-11-10 |
 | Auditor | Independent re-audit agent (fresh context; no shared conversation with the planner, implementor, or round-1 auditor) |
@@ -410,6 +410,28 @@ Minor documentation/step-page defects; N5–N7 are notes. The energy model, pers
 split, sampler, contracts/fixtures, samples, documentation, parity rows, and dashboard are otherwise current.
 The audit result is evidence, not merge authorization.
 
+## Re-audit request (round 3)
+
+Round 2 returned **Fixes required** at code commit `c3c48c4` (record `fa40d6d`) with F5 (Major) and F6/F7
+(Minor) plus N5–N7 (Notes). The step agent fixed them on
+`feature/step-05-energy-model/fix-reaudit-findings` and squashed the result as `e6a7839`:
+
+- **F5:** the preview cache key now includes the full canonical model hash in addition to the energy and
+  structure hashes, so particle/particle-set edits invalidate cached counts and diagnostics. A regression test
+  verifies cluster raw counts change after a particle-set edit.
+- **F6:** the `UniquePairInteractionCount` XML doc and user guide now describe unique pair energy tables
+  (distinct `EnergyId` values).
+- **F7:** the three completed implementation-task checkboxes on the Step 05 page are marked done.
+- **N5:** user-guide wording now says distinct stable position/full periodic encoding.
+- **N6:** the §7.1 row now separates duplicate site-energy entries (`ENM014` Error) from void-on-stable
+  (`ENM016` Warning).
+- **N7:** repeated centre-equivalent offsets now report one `ENM011` instead of one per offset; the
+  surrounding duplicate still reports `ENM009`.
+
+`./tools/verify.sh all` passed at `e6a7839`, and replacement closeout CI run
+[`42881426273`](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) is green. A fresh re-audit of
+the complete step at `e6a7839` is requested; append a new round and preserve rounds 1–2 unchanged.
+
 ## Resolution status
 
 | Finding | Status | Owner | Commit |
@@ -422,6 +444,12 @@ The audit result is evidence, not merge authorization.
 | N2 | Acknowledged — docs-only record-parent process note | Step 05 agent | `c3c48c4` |
 | N3 | Fixed — null in-memory stable environment returns diagnostics | Step 05 agent | `c3c48c4` |
 | N4 | Addressed — Step 08 page records the cross-check follow-up | Step 05 agent | `c3c48c4` |
+| F5 | Fixed — full canonical model hash added to cache key; particle-set invalidation test added | Step 05 agent | `e6a7839` |
+| F6 | Fixed — XML doc and user guide now describe unique `EnergyId` pair tables | Step 05 agent | `e6a7839` |
+| F7 | Fixed — completed task checkboxes marked done | Step 05 agent | `e6a7839` |
+| N5 | Addressed — user-guide wording uses distinct stable position/full encoding | Step 05 agent | `e6a7839` |
+| N6 | Fixed — §7.1 separates `ENM014` duplicate entries from `ENM016` void-on-stable warning | Step 05 agent | `e6a7839` |
+| N7 | Fixed — repeated centre-equivalent offsets report one `ENM011` | Step 05 agent | `e6a7839` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.

@@ -9,10 +9,10 @@ with validation and cost previews.
 
 - **Status:** In progress
 - **Step branch:** `step/05-energy-model`
-- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42878275463) — replacement closeout, Ubuntu
+- **Step CI:** [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) — replacement closeout, Ubuntu
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `c3c48c4`
+- **Audit:** Re-audit required at `e6a7839`
 - **Design review:** [Ready for implementation — accepted at `0b2a571`](../reviews/step-05.md)
 - **Feature list:** Approved 2026-11-09
 - **Last updated:** 2026-11-10
@@ -28,6 +28,7 @@ with validation and cost previews.
 | `samples-and-docs` | `feature/step-05-energy-model/samples-and-docs` | Done | `verify.sh dotnet`, `docs`, `structure` pass | — | `f7b1276` |
 | `closeout` | `feature/step-05-energy-model/closeout` | Done | `verify.sh all` pass; closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42874483715) | `d23fbd6` |
 | `fix-audit-findings` | `feature/step-05-energy-model/fix-audit-findings` | Done | `verify.sh all` pass; replacement closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42878275463) | `c3c48c4` |
+| `fix-reaudit-findings` | `feature/step-05-energy-model/fix-reaudit-findings` | Done | `verify.sh all` pass; replacement closeout CI green | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) | `e6a7839` |
 
 **Implementation note:** Step 05 introduces no new dependency and no GPL-derived content. Every new source,
 test, tool, and sample file carries `SPDX-License-Identifier: MIT`.
