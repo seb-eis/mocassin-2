@@ -13,17 +13,31 @@
 | --- | --- |
 | Step | 05 — Energy Model |
 | Request owner | Step agent |
-| Audit initiated by | Planner / implementor / human owner |
-| Audit status | Not requested |
-| Audited commit | — |
-| Step branch | — |
+| Audit initiated by | Human owner |
+| Audit status | Ready for audit |
+| Audited commit | `d23fbd6` |
+| Step branch | `step/05-energy-model` |
 | Step tag | — |
-| Closeout CI run | — |
-| Platform CI | Not run (Ubuntu-only policy) |
-| Audit date | — |
+| Closeout CI run | [`42874483715`](https://github.com/seb-eis/mocassin-2/actions/runs/42874483715) — green at `d23fbd6` |
+| Platform CI | Not run (Ubuntu-only policy; no platform-specific code) |
+| Audit date | 2026-11-10 |
 | Auditor | — |
 
 Step page: [`Step 05 — Energy Model`](../steps/step-05-energy-model.md)
+
+## Audit request summary
+
+- Frozen code commit: `d23fbd6` on `step/05-energy-model`.
+- Feature sequence: energy model and persistence (`5361adf`), core validation (`a44f4dc`), symmetry geometry
+  and validation (`3205be0`), queries and editing (`d3cb8bb`), preview and benchmark (`1804b51`), contracts and
+  fixtures (`e1987c4`), samples and docs (`f7b1276`), closeout (`d23fbd6`).
+- Local closeout gate: `./tools/verify.sh all` passed at `d23fbd6`; Zensical strict, DocFX, rustdoc, Rust,
+  Python, contracts, API compatibility, and structure gates all passed.
+- Closeout CI: run `42874483715`, one manual Ubuntu dispatch; .NET, Contracts and policy, Public API
+  compatibility, and change detection passed; Rust/Python jobs were path-filtered and skipped.
+- Benchmark: local short-run mean ceria 88.9 µs and barium zirconate 77.4 µs, below the Step 05 targets.
+- Known deferrals: compiled pair/cluster tables and the preview-to-compiler cross-check belong to Step 08;
+  consolidated `ENM` diagnostics and `ENM018` emission belong to Step 07; energy GUI editors belong to Step 25.
 
 ## Step summary
 
@@ -82,7 +96,15 @@ Commands run:
 
 ## Known notes for the auditor
 
-- Record known limitations, accepted deviations, or areas needing extra attention.
+- The closeout `verify.sh all` and CI cover the frozen code commit `d23fbd6`; later commits may be
+  documentation-only audit-record/status commits.
+- Step 08 must cross-check the Step 05 preview against the compiled pair/cluster tables. This is recorded as a
+  Step 08 follow-up, not a Step 05 closeout claim.
+- `ENM018` is defined with help text but is emitted by Step 07; the consolidated diagnostic catalog and
+  troubleshooting page are Step 07 deliverables.
+- Energy GUI editors are Step 25 deliverables; Step 05 exposes the model, query, editing, and preview APIs.
+- Windows and macOS were not run because Step 05 has no platform-specific code; this is the Ubuntu-only policy.
+- The benchmark values are local short-run measurements, not an official reference-runner certification.
 
 ## Findings
 
