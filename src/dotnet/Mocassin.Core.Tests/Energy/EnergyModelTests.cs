@@ -84,8 +84,8 @@ public sealed class EnergyModelTests
             var saved = await store.SaveAsync(project, path);
             var loaded = await store.LoadAsync(path);
 
-            Assert.True(saved.IsSuccess);
-            Assert.True(loaded.IsSuccess);
+            Assert.True(saved.IsSuccess, string.Join(" | ", saved.Diagnostics));
+            Assert.True(loaded.IsSuccess, string.Join(" | ", loaded.Diagnostics));
             Assert.Equal(
                 ProjectCanonicalizer.ToCanonicalJson(saved.SavedProject!),
                 ProjectCanonicalizer.ToCanonicalJson(loaded.Project!));

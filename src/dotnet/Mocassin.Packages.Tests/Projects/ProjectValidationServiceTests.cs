@@ -201,7 +201,10 @@ public sealed class ProjectValidationServiceTests
             mismatch.Diagnostics,
             static diagnostic => diagnostic.Code == ProjectDiagnosticCodes.SymmetryMetadataMismatch);
         Assert.NotNull(valid.Project);
-        Assert.Empty(valid.Diagnostics);
+        Assert.DoesNotContain(valid.Diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        Assert.Contains(
+            valid.Diagnostics,
+            static diagnostic => diagnostic.Code == EnergyDiagnosticCodes.EnvironmentSamplingWarning);
     }
 
     [Fact]

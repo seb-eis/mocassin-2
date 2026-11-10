@@ -6,6 +6,7 @@ using Mocassin.Core.Ids;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Project;
 using Mocassin.Symmetry.Contracts;
+using Mocassin.Symmetry.Energy;
 using Mocassin.Symmetry.SpaceGroups;
 using Mocassin.Symmetry.Structure;
 using Mocassin.Symmetry.Transitions;
@@ -34,7 +35,8 @@ public static class ProjectValidationService
             project,
             new StructureValidator(catalog),
             SymmetryVersionInfo.FromCatalog(catalog),
-            new TransitionPathValidator(catalog));
+            new TransitionPathValidator(catalog),
+            new EnergyGeometryValidator(catalog));
     }
 
     /// <summary>
@@ -62,17 +64,42 @@ public static class ProjectValidationService
         Project project,
         IStructureValidator structureValidator,
         SymmetryVersionInfo symmetryVersions,
-        TransitionPathValidator transitionPathValidator)
+        TransitionPathValidator transitionPathValidator) =>
+        Validate(
+            project,
+            structureValidator,
+            symmetryVersions,
+            transitionPathValidator,
+            new EnergyGeometryValidator());
+
+    /// <summary>
+    /// Validates a project with explicit Core, structure, transition-path, energy-geometry, and version
+    /// dependencies.
+    /// </summary>
+    /// <param name="project">The project to validate.</param>
+    /// <param name="structureValidator">The Symmetry-side structure validator.</param>
+    /// <param name="symmetryVersions">The expected catalog and contract versions.</param>
+    /// <param name="transitionPathValidator">The Symmetry-side transition-path validator.</param>
+    /// <param name="energyGeometryValidator">The Symmetry-side energy-geometry validator.</param>
+    /// <returns>The composed diagnostics in stable order.</returns>
+    public static ImmutableArray<Diagnostic> Validate(
+        Project project,
+        IStructureValidator structureValidator,
+        SymmetryVersionInfo symmetryVersions,
+        TransitionPathValidator transitionPathValidator,
+        EnergyGeometryValidator energyGeometryValidator)
     {
         ArgumentNullException.ThrowIfNull(project);
         ArgumentNullException.ThrowIfNull(structureValidator);
         ArgumentNullException.ThrowIfNull(symmetryVersions);
         ArgumentNullException.ThrowIfNull(transitionPathValidator);
+        ArgumentNullException.ThrowIfNull(energyGeometryValidator);
 
         var bag = new DiagnosticBag();
         bag.AddRange(ProjectValidator.Validate(project));
         bag.AddRange(structureValidator.Validate(project.Model.Structure));
         bag.AddRange(transitionPathValidator.Validate(project.Model));
+        bag.AddRange(energyGeometryValidator.Validate(project.Model));
         ValidateSymmetryMetadata(project, symmetryVersions, bag);
         ValidateParticleSetCharges(project, bag);
         return bag.Sorted;

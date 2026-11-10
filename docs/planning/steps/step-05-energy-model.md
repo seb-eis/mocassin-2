@@ -21,7 +21,7 @@ with validation and cost previews.
 | --- | --- | --- | --- | --- | --- |
 | `energy-model-and-persistence` | `feature/step-05-energy-model/energy-model-and-persistence` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `core-validation` | `feature/step-05-energy-model/core-validation` | Awaiting approval | `verify.sh dotnet`, `structure` pass | — | — |
-| `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Not started | — | — | — |
+| `symmetry-geometry-and-validation` | `feature/step-05-energy-model/symmetry-geometry-and-validation` | Awaiting approval | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `queries-and-editing` | `feature/step-05-energy-model/queries-and-editing` | Not started | — | — | — |
 | `energy-preview-and-benchmark` | `feature/step-05-energy-model/energy-preview-and-benchmark` | Not started | — | — | — |
 | `contracts-and-fixtures` | `feature/step-05-energy-model/contracts-and-fixtures` | Not started | — | — | — |
@@ -582,12 +582,12 @@ Samples live under `samples/energy/`. The new user-guide, physics, and reference
   data and the energy hash is invariant to unrelated edits.
 - [ ] Implement `StableEnvironment`, `UnstableEnvironment`, `InteractionFilter`, `Cluster`, `SiteEnergySet`,
   `SiteEnergyEntry`, and `EnergyLimits`.
-- [ ] Implement the Core `EnergyModelValidator` (`ENM001`, `ENM003`–`ENM008`, `ENM014`–`ENM016`, `ENM020`,
+- [x] Implement the Core `EnergyModelValidator` (`ENM001`, `ENM003`–`ENM008`, `ENM014`–`ENM016`, `ENM020`,
   `ENM021`) and the Symmetry `EnergyGeometryValidator` (`ENM002`, `ENM009`–`ENM013`, `ENM017`, `ENM019`);
   compose them in `ProjectValidationService`.
 - [ ] Implement `IEnergyQuery`, add it to `IProjectQuery`, and implement `IEnergyGeometrySampler`,
   `IEnergyPreviewService`, and the cost/pair previews with `TryCreatePreview(..., out diagnostics)`.
-- [ ] Implement cluster geometry validation (encoder-based periodic dedup, center-equivalent/ring detection,
+- [x] Implement cluster geometry validation (encoder-based periodic dedup, center-equivalent/ring detection,
   surrounding-site validity, filter interaction, and cutoff range).
 - [ ] Implement derived pair-interaction preview with `GeometryId`, shared `EnergyId`, and
   `ChiralPartnerGeometryId`.

@@ -56,7 +56,7 @@ internal static class EnergyTestModels
 
     public static InteractionFilter StableFilterA { get; } = new(
         new LengthAngstrom(0.0),
-        new LengthAngstrom(3.0),
+        new LengthAngstrom(1.0),
         CeriumSiteId,
         OxygenSiteId);
 
@@ -69,21 +69,15 @@ internal static class EnergyTestModels
     public static UnstableEnvironment UnstableEnvironment { get; } = new(
         UnstableSiteId,
         new LengthAngstrom(4.0),
-        [
-            new InteractionFilter(
-                new LengthAngstrom(0.0),
-                new LengthAngstrom(2.0),
-                UnstableSiteId,
-                OxygenSiteId),
-        ]);
+        []);
 
     public static Cluster MigrationCluster { get; } = new(
         ClusterIdA,
         "Migration edge",
         UnstableSiteId,
         [
-            new Fractional3(0.25, 0.25, 0.0),
-            new Fractional3(0.25, 0.0, 0.25),
+            new Fractional3(-0.25, 0.0, 0.0),
+            new Fractional3(0.25, 0.0, 0.0),
         ]);
 
     public static Cluster SecondCluster { get; } = new(
@@ -91,9 +85,8 @@ internal static class EnergyTestModels
         "Second cluster",
         CeriumSiteId,
         [
-            new Fractional3(-0.25, 0.0, 0.0),
-            new Fractional3(0.0, 0.25, 0.0),
-            new Fractional3(0.0, 0.0, 0.25),
+            new Fractional3(0.25, 0.25, 0.25),
+            new Fractional3(0.75, 0.25, 0.25),
         ]);
 
     public static ModelDefinition CreateEnergyOnlyModel() => new()
