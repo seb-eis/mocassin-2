@@ -185,9 +185,7 @@ public sealed record BuildingBlockEntry(
   - occupation-exchange and doping names are unique case-insensitively; the original did not enforce this;
   - the model stores one derived building block instead of a read-only `IBuildingBlock` object;
   - negative normalization energy is rejected; the original −1/0 values both meant “no normalization” and
-    the UI coerced non-positive values to 0, so the new model uses `null` for that state;
-  - write-out count 0 is a supported final-state-only mode; `SIM028` does not warn for it even though the
-    original recommended band starts at 5, because 0 is a valid hard-range value and a deliberate mode.
+    the UI coerced non-positive values to 0, so the new model uses `null` for that state.
 - A doping preview is not part of Step 06. Step 10 owns the single lattice preview service and the shared
   supercell generator.
 
@@ -274,6 +272,16 @@ public enum ExecutionFlags
   - Sample lengths/intervals and the result sample are MCSP counts.
 - `Flags` contains `NoSaving`, `NoJumpLogging`, `UseFastExp`, and `Deterministic`; the project JSON persists
   camelCase flag names, while the `.msl` job payload uses the `u32` bitmask.
+  - `NoSaving` skips `.mcs` state/checkpoint writes.
+  - `NoJumpLogging` disables the KMC jump histogram.
+  - `UseFastExp` selects the documented fast exponential approximation instead of libm `exp`.
+  - `Deterministic` requests reproducible execution and disables optional performance shortcuts that would
+    change the RNG stream or block ordering. It is a new flag with no original counterpart.
+  - `KmcSimulation`/`MmcSimulation` are derived from `Kind`, `UsePrerun` is derived from `PreRunMcsp > 0`, and
+    `UseDualDofCorrection` is a compiler/optimizer-derived KMC time-stepping flag; none is user-authored.
+- Deviations from the original, recorded deliberately:
+  - write-out count 0 is a supported final-state-only mode; `SIM028` does not warn for it even though the
+    original recommended band starts at 5, because 0 is a valid hard-range value and a deliberate mode.
 - `Instruction` is an extension/routine instruction (MMCFE); the structured `extensions` configuration is a
   job-template override (Steps 10/27) and is preferred, but the string is preserved for advanced/legacy jobs.
 - Defaults (matching the original user experience):
@@ -330,7 +338,7 @@ Step 06 owns the model-level lattice/simulation rules. Cross-step ownership is e
 | `SIM009` | Error | Simulation name is duplicated (case-insensitive) |
 | `SIM010` | Error | Write-out count outside 0–1000 |
 | `SIM011` | Error | Time limit is present but not positive |
-| `SIM012` | Error | Min success rate is negative or non-finite |
+| `SIM012` | Error | Min success rate is negative, non-finite, or above `int.MaxValue` |
 | `SIM013` | Error | KMC field modulus is negative or non-finite |
 | `SIM014` | Error | KMC normalization energy is negative or non-finite |
 | `SIM015` | Error | KMC max attempt frequency is zero, negative, or non-finite |

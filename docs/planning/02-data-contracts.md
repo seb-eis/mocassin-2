@@ -515,6 +515,10 @@ support; the validator rejects a field that belongs to the other kind (`SIM023`)
   GUID fallback is not reproduced.
 - `executionFlags` is a sorted array of camelCase names: `noSaving`, `noJumpLogging`, `useFastExp`,
   `deterministic`. The empty array means `None`; the `.msl` job payload uses the `u32` bitmask.
+  `deterministic` is a new reproducibility flag. `kmcSimulation`/`mmcSimulation`, `usePrerun`, and
+  `useDualDofCorrection` are derived or compiler/optimizer-owned and are not authored project flags. The
+  `.msl` bitmask uses the new enum values: None=0, NoSaving=1, NoJumpLogging=2, UseFastExp=4, Deterministic=8.
+  These are a clean-break contract and do not reuse the original flag bit positions.
 - KMC `preRunMcsp` 0 disables the pre-run (the original −1 sentinel is not persisted). `normalizationEnergyEv`
   `null` means no normalization (the original default 0). `maxAttemptFrequencyHz` `null` means the maximum from
   the transition rules.
