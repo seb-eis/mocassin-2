@@ -129,6 +129,8 @@ public sealed class CrossDomainAndFeasibilityTests
             outcome.Diagnostics,
             static item => item.Code == Step07DiagnosticCodes.KmcSimulationWithoutMobileStart);
         Assert.Equal(second.Id.Value, diagnostic.Path?.ObjectId);
+        Assert.Equal(DiagnosticSeverity.Warning, diagnostic.Severity);
+        Assert.False(string.IsNullOrWhiteSpace(diagnostic.Hint));
         Assert.DoesNotContain(outcome.Diagnostics, static item => item.Code == Step07DiagnosticCodes.NoMobileStartParticle);
     }
 
@@ -150,7 +152,11 @@ public sealed class CrossDomainAndFeasibilityTests
 
         var outcome = CreateValidator().Validate(withOnly, new ValidationOptions(), CancellationToken.None);
 
-        Assert.Contains(outcome.Diagnostics, static item => item.Code == Step07DiagnosticCodes.NoMobileStartParticle);
+        var modelLevel = Assert.Single(
+            outcome.Diagnostics,
+            static item => item.Code == Step07DiagnosticCodes.NoMobileStartParticle);
+        Assert.Equal(DiagnosticSeverity.Warning, modelLevel.Severity);
+        Assert.False(string.IsNullOrWhiteSpace(modelLevel.Hint));
         Assert.DoesNotContain(
             outcome.Diagnostics,
             static item => item.Code == Step07DiagnosticCodes.KmcSimulationWithoutMobileStart);
@@ -188,8 +194,18 @@ public sealed class CrossDomainAndFeasibilityTests
             project,
             options: tight with { IncludeStatistics = true });
 
-        Assert.Contains(without.Diagnostics, static item => item.Code == Step07DiagnosticCodes.EstimatedRuleCountExceeded);
-        Assert.Contains(without.Diagnostics, static item => item.Code == Step07DiagnosticCodes.EstimatedMemoryExceeded);
+        var ruleBudget = Assert.Single(
+            without.Diagnostics,
+            static item => item.Code == Step07DiagnosticCodes.EstimatedRuleCountExceeded);
+        Assert.Equal(DiagnosticSeverity.Error, ruleBudget.Severity);
+        Assert.Equal("estimatedRuleCount", ruleBudget.Path?.Property);
+        Assert.False(string.IsNullOrWhiteSpace(ruleBudget.Hint));
+        var memoryBudget = Assert.Single(
+            without.Diagnostics,
+            static item => item.Code == Step07DiagnosticCodes.EstimatedMemoryExceeded);
+        Assert.Equal(DiagnosticSeverity.Error, memoryBudget.Severity);
+        Assert.Equal("estimatedMemoryBytes", memoryBudget.Path?.Property);
+        Assert.False(string.IsNullOrWhiteSpace(memoryBudget.Hint));
         Assert.Equal(without.Diagnostics.ToArray(), with.Diagnostics.ToArray());
         Assert.Equal(without.IsValid, with.IsValid);
         Assert.Null(without.Statistics);

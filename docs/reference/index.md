@@ -9,11 +9,12 @@ Reference material for the CLI, file formats, diagnostics, and repository toolin
   including the Step 06 lattice/doping and simulation sections.
 - [Transitions](transitions.md) — transition fields, semantic ordering, path matching, preview, and the `TRN` diagnostics.
 - [Energy](energy.md) — environments, filters, clusters, site energies, ordering, limits, `GeometryId`/`EnergyId`.
-- **CLI** — `mocassin` and `mocassin-sim` commands, options, exit codes, and JSON events (added with Steps
-  12 and 19).
+- [CLI](cli.md) — the `mocassin validate` command, exit codes, and the `validation-v1` report; Step 12 extends
+  the command surface.
 - **Formats** — immutable `.msl` package, `.msr` results store, `.mcs` state, job folders, and `solver.json`
   (added with Steps 11, 18, and 20).
-- **Diagnostics** — stable diagnostic codes and help links (added with Step 07).
+- [Diagnostics](diagnostics.md) — every stable diagnostic code with its severity, owner, and help.
+- [Troubleshooting validation errors](../troubleshooting/errors.md) — triage and common fixes.
 - **Extension ABI** — the opt-in extension boundary and versioned host table (added with Step 19).
 
 The machine-readable schema source is `contracts/manifest.json` in the repository. Generated API reference

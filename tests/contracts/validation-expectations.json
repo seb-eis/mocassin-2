@@ -1,0 +1,23 @@
+{
+  "project-ceria.mocprj": {
+    "valid": true,
+    "errors": 0,
+    "codes": []
+  },
+  "project-ceria-validation-bad.mocprj": {
+    "valid": false,
+    "errors": 1,
+    "codes": [
+      "PROJ010"
+    ]
+  },
+  "project-simulations-populated.mocprj": {
+    "valid": true,
+    "errors": 0,
+    "codes": [
+      "ENM017",
+      "ENM017",
+      "ENM018"
+    ]
+  }
+}
