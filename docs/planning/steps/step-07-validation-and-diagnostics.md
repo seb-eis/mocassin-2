@@ -22,7 +22,7 @@ headless `mocassin validate` command.
 | `diagnostic-catalog` | `feature/step-07-validation-and-diagnostics/diagnostic-catalog` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `47ae73f` |
 | `cross-domain-validation` | `feature/step-07-validation-and-diagnostics/cross-domain-validation` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | — |
 | `model-statistics` | `feature/step-07-validation-and-diagnostics/model-statistics` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | — |
-| `validate-cli` | `feature/step-07-validation-and-diagnostics/validate-cli` | Not started | — | — | — |
+| `validate-cli` | `feature/step-07-validation-and-diagnostics/validate-cli` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | — |
 | `diagnostics-docs-and-fixtures` | `feature/step-07-validation-and-diagnostics/diagnostics-docs-and-fixtures` | Not started | — | — | — |
 | `closeout` | `feature/step-07-validation-and-diagnostics/closeout` | Not started | — | — | — |
 

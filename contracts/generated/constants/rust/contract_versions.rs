@@ -26,3 +26,4 @@ pub const STATE_FORMAT_VERSION: u64 = 1;
 pub const STATE_FORMAT: &str = "mocassin.mcs";
 pub const STATE_FILE_EXTENSION: &str = ".mcs";
 pub const STATE_ENCODING: &str = "messagepack";
+pub const VALIDATION_REPORT_VERSION: u64 = 1;
