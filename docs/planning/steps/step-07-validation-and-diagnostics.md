@@ -13,7 +13,7 @@ headless `mocassin validate` command.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for implementation at `31b53e8` — [review record](../reviews/step-07.md) `2d01f3e` (rounds 1–4; no Blocker/Major remaining)
+- **Design review:** Ready for implementation at `31b53e8` — [review record](../reviews/step-07.md) `2d01f3e` (rounds 1–4; no Blocker/Major remaining; human approval 2026-11-11)
 - **Last updated:** 2026-11-11
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

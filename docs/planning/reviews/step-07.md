@@ -828,13 +828,13 @@ gate.
 
 ## Human approval
 
-- [ ] Accepted: Ready for implementation
+- [x] Accepted: Ready for implementation
 - [ ] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-11
 
 ## Resolution status
 
