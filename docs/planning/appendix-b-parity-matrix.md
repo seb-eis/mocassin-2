@@ -27,6 +27,12 @@ Status legend:
 | Stable project hash | Y | Improvement | 01/03/09 | Model/document SHA-256 in 01; structure hash in 03; compiled signature in 09 |
 | Legacy `.mocprj` read/write | N | Out of scope | — | ADR 0001 |
 | Project data viewer (JSON/XML) | N | Replaced | 23 | JSON view/debug export |
+| Cross-domain validation pipeline | Y | Planned | 07 | Load/model/cross-domain/feasibility; no post-validation mutation |
+| Stable diagnostic catalog | Y | Planned | 07 | Codes, owners, severities, paths, hints; docs-drift checked |
+| Model statistics and feasibility | Y | Planned | 07 | Counts, rule/memory estimates, buildability warnings |
+| Headless `mocassin validate` | Y | Planned | 07/12 | Human/JSON output, exit codes, `--stats` |
+| `validation-v1` report | Y | Planned | 07/12 | Sorted diagnostics, summary, optional statistics |
+| GUI diagnostic navigation | Y | Planned | 07/24/25 | `ModelPath` navigation and stats panels |
 
 ## 2. Particles and structure
 

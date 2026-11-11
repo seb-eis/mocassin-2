@@ -43,6 +43,8 @@ decision will be made.
 | Settings schema | Versioned `mocassin.settings` with migrations and retention defaults | [Step 23](steps/step-23-avalonia-shell-and-project-lifecycle.md) |
 | Accessibility | WCAG 2.2 AA target plus manual screen-reader checks | [`03-quality-strategy.md`](03-quality-strategy.md) |
 | Test strategy | Testing trophy; mocks only at true boundaries | [`03-quality-strategy.md`](03-quality-strategy.md) |
+| Validation pipeline | `Mocassin.Packages.Projects.Validation`; load/model/cross-domain/feasibility, build-stage extension | [Step 07](steps/step-07-validation-and-diagnostics.md) |
+| Validation output | `validation-v1` JSON report; sorted diagnostics, raw summary, optional statistics | [`02-data-contracts.md`](02-data-contracts.md) §5.6 / [Step 07](steps/step-07-validation-and-diagnostics.md) |
 
 ## 3. Gated decisions
 

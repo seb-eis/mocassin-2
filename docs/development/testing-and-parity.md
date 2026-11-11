@@ -41,6 +41,24 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 
 PR-fast tests must not depend on nightly-only assets.
 
+## Validation and diagnostics
+
+- The `ProjectValidationPipeline` runs load → model → cross-domain → feasibility and never runs build-stage
+  checks in `validate`.
+- Validation never mutates the project; model and document hashes are unchanged after success, failure, or
+  cancellation.
+- `DiagnosticCatalog` is the stable code registry. Tests prove every public code constant is registered exactly
+  once, every catalog code is documented, and no duplicate or undocumented code exists.
+- Every emitted diagnostic has a real invalid fixture or focused test with severity, `ModelPath`, and hint.
+  Existing Step 03–06 tests count; Step 07 adds the cross-domain, feasibility, and package-level cases.
+- Diagnostics are sorted by severity, code, domain, object ID, property, and message. Exact duplicate
+  `(code, path, message)` triples are removed.
+- `ENM018` does not cascade after a path-resolution error. `SIM038`–`SIM042` cover buildability and hard
+  feasibility limits.
+- `validation-v1` JSON is schema-checked; exit codes distinguish valid, warning-as-error, usage, and I/O
+  failure.
+- Ceria validation targets `< 200 ms` without statistics and `< 2 s` with `--stats`.
+
 ## Statistical parity
 
 Reference observables are compared with the original solver using confidence intervals or Welch's t-test and

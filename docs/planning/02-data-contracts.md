@@ -1114,7 +1114,7 @@ The collector and `.msr` readers verify `run_state_sha256` before storing or eva
 
 ```text
 mocassin new <name> [-o <dir>] [--template ceria|blank]
-mocassin validate <project.mocprj> [--json] [--warnings-as-errors]
+mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 mocassin compile <project.mocprj> -o <compiled-model.json> [--json]
 mocassin build <project.mocprj> -o <project.msl> [--template <id>]
                 [--jobs <range>] [--parallel <n>] [--force] [--json]
@@ -1131,7 +1131,8 @@ mocassin doctor [--json]
 ```
 
 - `<range>` accepts `1-100`, `1,3,5`, and mixed forms.
-- `--json` prints a single JSON object to stdout; human progress goes to stderr.
+- `--json` prints a single JSON object to stdout; human progress goes to stderr. `validate --json` uses the
+  dedicated `validation-v1` report in §5.6; the other commands use the generic command result.
 - `build` refuses to overwrite an existing `.msl` unless `--force`; writes atomically.
 - `simulate` launches `mocassin-sim` per job and captures stdout/stderr. It does not modify the `.msl`.
 - `collect` reads `Job%05d/solver.json`, `run.mcs`, `prerun.mcs`, and logs, validates them, and writes the
@@ -1287,6 +1288,60 @@ event is one JSON object on one line with `schemaVersion = 1` and a stable `even
 - Ordering is guaranteed within one stream; `jobId` is present for per-job events.
 - stdout remains reserved for the human statistics dump or a single final JSON object.
 - Event names and fields are part of the contract manifest and are covered by cross-language tests.
+
+### 5.6 Validation report (`validation-v1`)
+
+`mocassin validate --json` prints one object with `schemaVersion = 1`. The report is the `validation-v1`
+contract; it is not the same shape as the generic command result used by `build`/`simulate`.
+
+```json
+{
+  "schemaVersion": 1,
+  "kind": "validation",
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e80",
+  "modelHash": "sha256:…",
+  "documentHash": "sha256:…",
+  "valid": false,
+  "exitCode": 1,
+  "summary": { "errors": 2, "warnings": 1, "infos": 0 },
+  "diagnostics": [
+    {
+      "code": "TRN012",
+      "severity": "error",
+      "message": "Kinetic path position 1 must be unstable.",
+      "path": { "domain": "transitions", "objectId": "018f4c9a-…", "property": "referencePath[1]" },
+      "hint": "Mark the site as unstable or choose a different reference site.",
+      "related": []
+    }
+  ],
+  "statistics": null
+}
+```
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `schemaVersion` | integer | yes | `1` for this contract. |
+| `kind` | string | yes | Always `validation`. |
+| `projectId` | UUID | yes | Project metadata identity. |
+| `modelHash` | string | yes | Canonical model hash from Step 01. |
+| `documentHash` | string | yes | Canonical document hash from Step 01. |
+| `valid` | boolean | yes | True only when no error remains under the selected policy. |
+| `exitCode` | integer | yes | `0`, `1`, `2`, or `3` as defined by the `validate` command. |
+| `summary` | object | yes | Raw `errors`, `warnings`, and `infos` counts. |
+| `diagnostics` | array | yes | Sorted diagnostics; may be empty. |
+| `statistics` | object or null | yes | Present only with `--stats` and a valid model; otherwise `null`. |
+
+- `diagnostics[]` fields: `code`, `severity`, `message`, optional `path` (`domain`, `objectId`, optional
+  `property`), optional `hint`, and optional `related` paths. `severity` is `error`, `warning`, or `info`.
+- Diagnostics are ordered by severity, code, domain, object ID, property, and message. Exact duplicate
+  `(code, path, message)` triples are removed.
+- `valid` is policy-adjusted; `--warnings-as-errors` makes a warning-only result `valid: false` with
+  `exitCode: 1`. `summary` still reports those items as warnings.
+- `statistics` uses camelCase fields matching `ModelStatistics`; long counts are JSON numbers. The object is
+  omitted/`null` when `--stats` is absent or the model has errors.
+- Human output is not part of this JSON contract. It is stable for tests but not for machine consumers.
+- The contract is added to `contracts/manifest.json` as `validation-v1` with a generated JSON Schema and a
+  schema-validation test.
 
 ## 6. Contract testing
 

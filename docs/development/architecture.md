@@ -45,6 +45,9 @@ persistence and depends on `Core`; the kernel never calls the store.
 | --- | --- |
 | `ProjectStore` | Load/migrate/validate, atomic save, lock acquisition, autosave recovery files. |
 | `ProjectValidationService` | Composes Core, Symmetry, `PROJ034`, and cross-domain `PAR004` validation. |
+| `ProjectValidationPipeline` | Load/model/cross-domain/feasibility pipeline; adds `ENM018`, feasibility diagnostics, optional statistics, and the `ValidationResult` consumed by CLI/GUI. |
+| `DiagnosticCatalog` | Stable registry of every diagnostic code, owner, help text, and documentation anchor. |
+| `ModelStatistics` | Advisory unit-cell/supercell counts and compile-cost estimates from the preview services. |
 | `ProjectFileLock` | A held editing lock that removes itself only if it still owns the lock file. |
 | `ProjectStoreOptions` | Size cap, backup, stale-lock timeout, autosave interval. |
 
@@ -69,8 +72,9 @@ flowchart LR
 1. `ProjectStore.LoadAsync` reads and bounds the file, verifies UTF-8/no BOM, migrates the JSON node, and
    deserializes a `Project`.
 2. `ProjectValidationService` composes the Core `ProjectValidator`, the Symmetry `StructureValidator`, the
-   `PROJ034` metadata comparison, and the cross-domain `PAR004` warning. Validation diagnostics do not throw; a
-   project with errors is still returned for inspection.
+   `PROJ034` metadata comparison, and the cross-domain `PAR004` warning. `ProjectValidationPipeline` adds
+   cross-domain, feasibility, and optional statistics stages and returns one `ValidationResult`. Validation
+   diagnostics do not throw; a project with errors is still returned for inspection.
 3. `ProjectDocument` wraps the loaded value as both current and last-saved. `ProjectEditor.Apply` validates a
    candidate mutation and returns a new immutable project plus one `ProjectChange`.
 4. The application saves the current project through `ProjectStore` and calls `MarkSaved` with the returned

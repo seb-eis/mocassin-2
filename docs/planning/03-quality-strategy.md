@@ -299,6 +299,32 @@ Comparison method:
 Bit-exact trajectories are explicitly not required (see ADR 0005). Determinism is required only for the new
 solver with the same binary, platform, package, and seed.
 
+### 9.7 Validation, diagnostics, and statistics
+
+- **Pipeline order and skipping:** load errors stop the pipeline; model errors skip cross-domain, feasibility,
+  and statistics; `validate` never runs build-stage checks.
+- **No mutation:** model and document hashes are unchanged after success, failure, and cancellation.
+- **Catalog completeness:** every public code constant in Core and Symmetry appears once in
+  `DiagnosticCatalog`; every catalog code appears in `docs/reference/diagnostics.md`; no duplicate or extra
+  code exists.
+- **Per-code emission:** every emitted code has a real invalid fixture or focused test with the expected
+  severity, `ModelPath`, and hint. Existing Step 03–06 tests count; Step 07 adds the missing cross-domain,
+  feasibility, and package-level cases.
+- **Determinism and deduplication:** identical inputs produce byte-identical diagnostic order; exact
+  `(code, path, message)` duplicates are removed.
+- **Cross-domain:** `ENM018` fires only when a KMC path resolves outside the relevant stable/unstable cutoff;
+  it does not cascade after path-resolution errors.
+- **Feasibility:** `SIM038`–`SIM042` fire at their documented boundaries; `RequireBuildable` promotes the
+  buildability warning set and `WarningsAsErrors` promotes every warning.
+- **Statistics:** P1/stable/unstable counts match `StructurePreview`; pair, cluster-permutation, memory, and
+  rule estimates match `EnergyCostPreview`/`TransitionPreview` on hand-computed models; statistics are `null`
+  on invalid models and without `--stats`.
+- **CLI:** human table and summary are stable; `validation-v1` JSON matches the generated schema; exit codes
+  distinguish valid, warning-as-error, usage, and I/O failure.
+- **Performance:** ceria validation is `< 200 ms` without statistics and `< 2 s` with statistics on the
+  benchmark laptop class. Statistics are opt-in and may be excluded from the fast tier.
+- **Cancellation:** a cancelled `validate` returns no partial success and writes nothing.
+
 ## 10. Contract tests
 
 - **Project JSON**: .NET writes fixtures; a JSON Schema validator checks them in CI.
