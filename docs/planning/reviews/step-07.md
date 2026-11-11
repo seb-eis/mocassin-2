@@ -15,7 +15,7 @@
 | Request owner | Step agent |
 | Orchestrator (step agent / planner) | Step agent / planner |
 | Review initiated by | Planner |
-| Reviewed commit | `dc73ee40954070b8e95bf0713f8df4526b208ba6` |
+| Reviewed commit | `4ddd571cacb5e714f246278005531b8ee4a73b2e` (round 2; round 1 reviewed `dc73ee40954070b8e95bf0713f8df4526b208ba6`) |
 | Docs branch | `docs/step-07-design` |
 | Review date | 2026-11-11 |
 | Reviewer | Independent planning auditor (fresh context, round 1; no shared conversation with the planner or implementor) |
@@ -206,7 +206,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -273,7 +273,28 @@ Date:
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| M1 — CLI/report failure paths | Resolved: one `--json` report for every invocation; nullable identity/hashes; `ProjectLoadFailureKind` maps parse (`1`) vs I/O (`3`); edit-lock claim removed | Step agent / planner | `4ddd571` |
+| M2 — Load ownership/`ValidateOnLoad` | Resolved: `ValidateFileAsync` owns `Load`, sets `ValidateOnLoad = false`, rejects double-validation stores; in-memory `Load` is `Skipped`; stage status/count/elapsed defined | Step agent / planner | `4ddd571` |
+| M3 — Build extension point | Resolved: `ValidationContext` defined; `IValidationStage` restricted to `Build`; `RunBuildStage` gates it; Steps 09–12 record the integration point | Step agent / planner | `4ddd571` |
+| M4 — `SIM038`–`SIM040` overlap | Resolved: duplicate KMC-no-unstable code removed; `SIM038` per simulation, `SIM039` model-wide with suppression, no emission when `SIM003`/transition errors fire; codes renumbered `SIM038`–`SIM041` | Step agent / planner | `4ddd571` |
+| M5 — statistics nullability | Resolved: one rule (requested, loaded, no `Model` error, previews succeeded); independent of policy and feasibility/budget errors; `--stats` never changes `valid`; contract, tests, and quality docs aligned | Step agent / planner | `4ddd571` |
+| M6 — manifest/schema tooling | Resolved: `reports.validation` in the manifest (not `formats`), generator/README/version-constant tasks, generated `validation-v1.schema.json`, freshness check | Step agent / planner | `4ddd571` |
+| m1 — catalog completeness types | Resolved: `SymmetryDiagnosticCatalog` is new public; internal constants read inside their assembly; assembly-local tests; Core project codes registered; descriptor file split | Step agent / planner | `4ddd571` |
+| m2 — rule-count overflow | Resolved: `long` statistic and budget, `long` accumulation | Step agent / planner | `4ddd571` |
+| m3 — pair source/field list | Resolved: `EstimatedPairInteractionCount = UniquePairInteractionCount`; all report fields enumerated | Step agent / planner | `4ddd571` |
+| m4 — cancellation granularity | Resolved: between stages/transitions/simulations and around preview calls; atomic preview calls documented | Step agent / planner | `4ddd571` |
+| m5 — hash format | Resolved: raw lowercase hex without a `sha256:` prefix, matching `ProjectHasher` | Step agent / planner | `4ddd571` |
+| m6 — gates/integration tasks | Resolved: PublicAPI/ApiCompat, SPDX, closeout/status/parity/audit, navigation/index, and catalog file-layout tasks added | Step agent / planner | `4ddd571` |
+| m7 — cell-count validation | Resolved: `< 1` is a programmer error (`ArgumentOutOfRangeException`) | Step agent / planner | `4ddd571` |
+| m8 — `ENM018` boundary | Resolved: hop-by-hop minimum-image distance, per-position cutoff selection, strict comparison, first hop only, invalid-cutoff and path-error suppression | Step agent / planner | `4ddd571` |
+| m9 — internal inconsistencies | Resolved: budget lives in `ValidationOptions`; build owners are Steps 09–12 throughout | Step agent / planner | `4ddd571` |
+| n1 — budget rationale | Recorded as initial guardrails tuned by Steps 08/11 | Step agent / planner | `4ddd571` |
+| n2 — stage-status semantics | Defined `Completed`/`Failed`/`Skipped`, post-dedup counts, and `Load` elapsed behavior | Step agent / planner | `4ddd571` |
+| n3 — ceria/hint coverage | Acceptance now references the fixture's recorded warning set and a Step 07 per-code hint test; Step 03–06 tests counted for severity only | Step agent / planner | `4ddd571` |
+| n4 — sizing record | Added a `Sizing` section: seven rows, 2–3 person-weeks, below the split trigger | Step agent / planner | `4ddd571` |
+
+Round 2 request: the design fixes above are at `4ddd571`. A fresh re-review should verify M1–M6 and the minor/note
+resolutions against that commit; reviewer-authored round 1 text is unchanged.
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
