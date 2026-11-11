@@ -19,9 +19,9 @@ headless `mocassin validate` command.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | `validation-core` | `feature/step-07-validation-and-diagnostics/validation-core` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `24d9f58` |
-| `diagnostic-catalog` | `feature/step-07-validation-and-diagnostics/diagnostic-catalog` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | — |
+| `diagnostic-catalog` | `feature/step-07-validation-and-diagnostics/diagnostic-catalog` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `47ae73f` |
 | `cross-domain-validation` | `feature/step-07-validation-and-diagnostics/cross-domain-validation` | Not started | — | — | — |
-| `model-statistics` | `feature/step-07-validation-and-diagnostics/model-statistics` | Not started | — | — | — |
+| `model-statistics` | `feature/step-07-validation-and-diagnostics/model-statistics` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | — |
 | `validate-cli` | `feature/step-07-validation-and-diagnostics/validate-cli` | Not started | — | — | — |
 | `diagnostics-docs-and-fixtures` | `feature/step-07-validation-and-diagnostics/diagnostics-docs-and-fixtures` | Not started | — | — | — |
 | `closeout` | `feature/step-07-validation-and-diagnostics/closeout` | Not started | — | — | — |
@@ -451,6 +451,8 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
   The descriptor record therefore sits with the other Core diagnostic contracts; `DiagnosticCatalog` remains in
   `Mocassin.Packages.Projects.Validation` and composes the three descriptor sets. Public API and behaviour are
   unchanged from the reviewed design.
+- `model-statistics` was implemented before `cross-domain-validation` so the `SIM040`/`SIM041` budget errors in
+  the feasibility stage can consume the statistics estimates directly. The feature set is unchanged.
 
 ## Implementation tasks
 

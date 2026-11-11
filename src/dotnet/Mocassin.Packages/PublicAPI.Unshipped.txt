@@ -269,3 +269,6 @@ Mocassin.Packages.Projects.Validation.ProjectValidationPipeline.ValidateFileAsyn
 Mocassin.Packages.Projects.Validation.DiagnosticCatalog.DiagnosticCatalog(System.Collections.Generic.IEnumerable<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>! descriptors) -> void
 Mocassin.Packages.Projects.Validation.DiagnosticCatalog.All.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
 Mocassin.Packages.Projects.Validation.DiagnosticCatalog.TryGet(string! code, out Mocassin.Core.Diagnostics.DiagnosticDescriptor! descriptor) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatisticsService
+Mocassin.Packages.Projects.Validation.ModelStatisticsService.ModelStatisticsService(Mocassin.Symmetry.Structure.IStructurePreviewService! structurePreview, Mocassin.Symmetry.Energy.IEnergyPreviewService! energyPreview, Mocassin.Symmetry.Transitions.ITransitionPreviewService! transitionPreview) -> void
+Mocassin.Packages.Projects.Validation.ModelStatisticsService.TryCreate(Mocassin.Core.Project.Project! project, Mocassin.Packages.Projects.Validation.ValidationOptions! options, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Projects.Validation.ModelStatistics?

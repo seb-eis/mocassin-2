@@ -3,6 +3,9 @@
 using System.Collections.Immutable;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Project;
+using Mocassin.Symmetry.Energy;
+using Mocassin.Symmetry.Structure;
+using Mocassin.Symmetry.Transitions;
 
 namespace Mocassin.Packages.Projects.Validation;
 
@@ -19,11 +22,27 @@ internal readonly record struct FeasibilityOutcome(
 /// Runs buildability, budget, and statistics checks.
 /// </summary>
 /// <remarks>
-/// The rule set and the statistics service are added by the cross-domain-validation and model-statistics
-/// features. The pipeline keeps the stage so its order and stage reporting are stable from the first feature.
+/// The rule set is added by the cross-domain-validation feature. Statistics are computed here because the
+/// opt-in estimates and the rule/memory budgets are feasibility work.
 /// </remarks>
 internal sealed class FeasibilityValidator
 {
+    private readonly ModelStatisticsService statisticsService;
+
+    /// <summary>
+    /// Initializes the feasibility validator.
+    /// </summary>
+    /// <param name="structurePreview">The structure preview service.</param>
+    /// <param name="energyPreview">The energy preview service.</param>
+    /// <param name="transitionPreview">The transition preview service.</param>
+    public FeasibilityValidator(
+        IStructurePreviewService structurePreview,
+        IEnergyPreviewService energyPreview,
+        ITransitionPreviewService transitionPreview)
+    {
+        statisticsService = new ModelStatisticsService(structurePreview, energyPreview, transitionPreview);
+    }
+
     /// <summary>
     /// Validates feasibility and computes requested statistics.
     /// </summary>
@@ -31,7 +50,7 @@ internal sealed class FeasibilityValidator
     /// <param name="options">The run options.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The stage outcome.</returns>
-    public static FeasibilityOutcome Validate(
+    public FeasibilityOutcome Validate(
         Project project,
         ValidationOptions options,
         CancellationToken cancellationToken)
@@ -39,6 +58,13 @@ internal sealed class FeasibilityValidator
         ArgumentNullException.ThrowIfNull(project);
         ArgumentNullException.ThrowIfNull(options);
         cancellationToken.ThrowIfCancellationRequested();
-        return new FeasibilityOutcome(ImmutableArray<Diagnostic>.Empty, Statistics: null);
+
+        if (!options.IncludeStatistics)
+        {
+            return new FeasibilityOutcome(ImmutableArray<Diagnostic>.Empty, Statistics: null);
+        }
+
+        var statistics = statisticsService.TryCreate(project, options, out var diagnostics, cancellationToken);
+        return new FeasibilityOutcome(diagnostics, statistics);
     }
 }
