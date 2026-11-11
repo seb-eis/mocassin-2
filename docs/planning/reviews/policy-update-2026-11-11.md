@@ -12,7 +12,7 @@
 | --- | --- |
 | Review ID | `POLICY-2026-11-11` |
 | Type | Process and workflow policy update |
-| Target commit | `f1e7045feef8f83752941ff603503b40fb635410` (round 2; round 1 was `92a7ea3`) |
+| Target commit | `e0abc5c3e9e75469260ccab09528a7d086b0dac2` (round 3; round 1 `92a7ea3`, round 2 `f1e7045`) |
 | Request owner | Planner / implementor |
 | Orchestrator (implementor) | Step agent |
 | Review initiated by | Human owner |
@@ -198,7 +198,7 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**.
 
 ## Record state
 
-**State:** Re-review required (round 2: residual F5 wording, R1)
+**State:** Re-review required (round 3: R1/R2 wording fixes)
 
 `Re-review required` is a record state, not a verdict.
 
@@ -233,12 +233,12 @@ Resolutions applied at `f1e7045feef8f83752941ff603503b40fb635410`; reviewer text
 | F2 | Fixed | Root guides (`AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md`) are treated as documentation; added a root-docs test and clarified the closeout wording. | `f1e7045` |
 | F3 | Fixed | Removed the duplicate `Design review status` / `Audit status` / `Status` request fields; `Record state` is the single state field in all three templates and the three XC records. | `f1e7045` |
 | F4 | Fixed | Removed the restated closeout sequence from `agent-workflow.md`; `AGENTS.md` §7.2 now links to the roadmap sizing section instead of repeating it. | `f1e7045` |
-| F5 | Fixed | `AGENTS.md` §7.1 now records `In audit` before `Done`; the `In audit` definitions cover the frozen audit-request state. | `f1e7045` + round 3 |
+| F5 | Fixed | `AGENTS.md` §7.1 now records `In audit` before `Done`; all `In audit` definitions cover the frozen audit-request state. | `e0abc5c` |
 | N1 | Fixed | Added four focused negative tests for the process checker (six new tool tests; 18 total). | `f1e7045` |
 | N2 | Fixed | `--closeout` now wins regardless of argument order; `--list` reports the selected mode. | `f1e7045` |
 | N3 | Fixed | Added the `Changes required` / `Fixes required` vocabulary mapping to `AGENTS.md` §3.15. | `f1e7045` |
 
-## Re-review request
+## Re-review request (round 2)
 
 Round 2 target: `f1e7045feef8f83752941ff603503b40fb635410`.
 
@@ -348,6 +348,23 @@ notes and close the review.
 
 Follow-up owner: Planner / implementor
 Follow-up step: Next process-maintenance change (`docs/policy-follow-up`)
+
+## Re-review request (round 3)
+
+Round 3 target: `e0abc5c3e9e75469260ccab09528a7d086b0dac2`.
+
+Round 2 verdict: `Passed with notes` at `f1e7045`. R1 and R2 are resolved at the round 3 target:
+
+- **R1** — `docs/planning/audits/README.md` now defines `In audit` as "frozen at the audit request; a fresh
+  audit context is pending or reviewing the frozen commit", matching `status.md` and `AGENTS.md`.
+- **R2** — the remediation table now says four process-checker negative tests (six new tool tests; 18 total)
+  and records the round 3 commit for F5.
+
+### Round 3 evidence
+
+### Round 3 findings
+
+### Round 3 verdict
 
 ## Human approval
 
