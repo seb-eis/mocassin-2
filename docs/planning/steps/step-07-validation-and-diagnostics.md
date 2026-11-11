@@ -7,12 +7,12 @@ headless `mocassin validate` command.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** In audit
 - **Step branch:** `step/07-validation-and-diagnostics`
-- **Step CI:** —
+- **Step CI:** closeout run pending
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Requested — `docs/planning/audits/step-07.md`
 - **Design review:** Ready for implementation at `31b53e8` — [review record](../reviews/step-07.md) `2d01f3e` (rounds 1–4; no Blocker/Major remaining; human approval 2026-11-11)
 - **Last updated:** 2026-11-11
 
@@ -20,11 +20,11 @@ headless `mocassin validate` command.
 | --- | --- | --- | --- | --- | --- |
 | `validation-core` | `feature/step-07-validation-and-diagnostics/validation-core` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `24d9f58` |
 | `diagnostic-catalog` | `feature/step-07-validation-and-diagnostics/diagnostic-catalog` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `47ae73f` |
-| `cross-domain-validation` | `feature/step-07-validation-and-diagnostics/cross-domain-validation` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | — |
-| `model-statistics` | `feature/step-07-validation-and-diagnostics/model-statistics` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | — |
-| `validate-cli` | `feature/step-07-validation-and-diagnostics/validate-cli` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | — |
-| `diagnostics-docs-and-fixtures` | `feature/step-07-validation-and-diagnostics/diagnostics-docs-and-fixtures` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts`, `docs` pass | — | — |
-| `closeout` | `feature/step-07-validation-and-diagnostics/closeout` | Not started | — | — | — |
+| `cross-domain-validation` | `feature/step-07-validation-and-diagnostics/cross-domain-validation` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `010562f` |
+| `model-statistics` | `feature/step-07-validation-and-diagnostics/model-statistics` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `ba4e2a3` |
+| `validate-cli` | `feature/step-07-validation-and-diagnostics/validate-cli` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `0ca9bd0` |
+| `diagnostics-docs-and-fixtures` | `feature/step-07-validation-and-diagnostics/diagnostics-docs-and-fixtures` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts`, `docs` pass | — | `06568fe` |
+| `closeout` | `feature/step-07-validation-and-diagnostics/closeout` | Done | `verify.sh all`, closeout CI, `docs` pass | pending | — |
 
 ## Goal
 
@@ -456,34 +456,35 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 
 ## Implementation tasks
 
-- [ ] Implement `ProjectValidationPipeline`, `ValidationOptions`, `ValidationResult`, `ValidationContext`, and
+- [x] Implement `ProjectValidationPipeline`, `ValidationOptions`, `ValidationResult`, `ValidationContext`, and
       stage results, including the in-memory and file entries.
-- [ ] Add `ProjectStoreOptions.ValidateOnLoad` (default `true`) and `ProjectLoadFailureKind`, and use the
+- [x] Add `ProjectStoreOptions.ValidateOnLoad` (default `true`) and `ProjectLoadFailureKind`, and use the
       parse-only load path from `validate`.
-- [ ] Refactor/keep `ProjectValidationService` as the stage-2 composition.
-- [ ] Implement the load/model/cross-domain/feasibility stage order, skipped/failed stage reporting, and the
+- [x] Refactor/keep `ProjectValidationService` as the stage-2 composition.
+- [x] Implement the load/model/cross-domain/feasibility stage order, skipped/failed stage reporting, and the
       `RunBuildStage` gating for additional `IValidationStage` stages.
-- [ ] Implement `ENM018` and `SIM038`–`SIM041` with the documented severities and suppression rules.
-- [ ] Implement `DiagnosticDescriptor`, `CoreDiagnosticCatalog`, `SymmetryDiagnosticCatalog`, and the composed
+- [x] Implement `ENM018` and `SIM038`–`SIM041` with the documented severities and suppression rules.
+- [x] Implement `DiagnosticDescriptor`, `CoreDiagnosticCatalog`, `SymmetryDiagnosticCatalog`, and the composed
       `DiagnosticCatalog`, split into domain descriptor files.
-- [ ] Add catalog completeness, duplicate-code, and documentation-drift tests, including the assembly-local
+- [x] Add catalog completeness, duplicate-code, and documentation-drift tests, including the assembly-local
       internal-constant checks.
-- [ ] Implement `ModelStatistics` and `ModelStatisticsService` with the preview services and `long` accumulators.
-- [ ] Implement `mocassin validate` with human/JSON output, the structured load-failure mapping, exit codes, and
+- [x] Implement `ModelStatistics` and `ModelStatisticsService` with the preview services and `long` accumulators.
+- [x] Implement `mocassin validate` with human/JSON output, the structured load-failure mapping, exit codes, and
       `--stats`.
-- [ ] Extend `contracts/manifest.json` with a `reports.validation` entry, extend `tools/contracts/generate.py` to
+- [x] Extend `contracts/manifest.json` with a `reports.validation` entry, extend `tools/contracts/generate.py` to
       validate reports and emit `contracts/generated/schema/validation-v1.schema.json` (matching the existing
       `<id>-v<version>.schema.json` convention), update `tools/contracts/README.md` and the generated
       `ValidationReportVersion` constant in `Mocassin.Contracts`, and add the schema test.
-- [ ] Update `PublicAPI.Unshipped.txt`/ApiCompat for new public types in `Mocassin.Packages`,
+- [x] Update `PublicAPI.Unshipped.txt`/ApiCompat for new public types in `Mocassin.Packages`,
       `Mocassin.Symmetry`, and `Mocassin.Contracts`.
-- [ ] Add SPDX headers to new files and confirm the licensing/provenance checks stay green.
-- [ ] Add diagnostics reference and troubleshooting pages, add them to `zensical.toml` navigation and
+- [x] Add SPDX headers to new files and confirm the licensing/provenance checks stay green.
+- [x] Add diagnostics reference and troubleshooting pages, add them to `zensical.toml` navigation and
       `docs/reference/index.md`, and add the CLI/format references.
-- [ ] Add the ceria good/bad validation fixtures and the per-code emission matrix.
-- [ ] Add performance tests for `validate` and `validate --stats`.
-- [ ] Add the GUI contract tests for `ModelPath` navigation coverage.
-- [ ] Update the step page, status dashboard, parity matrix, testing-and-parity, closeout evidence, and the
+- [x] Add the ceria good/bad validation fixtures and the per-code emission matrix.
+- [x] Add performance tests for `validate` and `validate --stats`.
+- [x] Add the GUI contract tests for `ModelPath` navigation coverage. Contract-level path coverage is in the
+      Step 07 tests; the interactive navigation is verified in Steps 24–25.
+- [x] Update the step page, status dashboard, parity matrix, testing-and-parity, closeout evidence, and the
       audit request as part of the closeout feature.
 
 ## Sizing
@@ -494,22 +495,22 @@ the status, parity, and audit updates.
 
 ## Acceptance criteria
 
-- [ ] The ceria sample validates with zero errors and the warning set recorded in its fixture.
-- [ ] Every code emitted by the pipeline and the stage-2 validators has a catalog entry. Step 07 adds a
+- [x] The ceria sample validates with zero errors and the warning set recorded in its fixture.
+- [x] Every code emitted by the pipeline and the stage-2 validators has a catalog entry. Step 07 adds a
       per-code test with expected severity, path, and hint for every code it emits and records existing Step
       03–06 tests for their severity coverage.
-- [ ] The catalog has no duplicate or undocumented codes.
-- [ ] Validation never mutates the project; model and document hashes are unchanged.
-- [ ] Diagnostics are deterministically sorted and deduplicated.
-- [ ] `mocassin validate --json` validates against the `validation-v1` schema, including load-failure reports.
-- [ ] Exit codes match the contract, including warnings-as-errors, parse failures, and I/O versus validation
+- [x] The catalog has no duplicate or undocumented codes.
+- [x] Validation never mutates the project; model and document hashes are unchanged.
+- [x] Diagnostics are deterministically sorted and deduplicated.
+- [x] `mocassin validate --json` validates against the `validation-v1` schema, including load-failure reports.
+- [x] Exit codes match the contract, including warnings-as-errors, parse failures, and I/O versus validation
       errors.
-- [ ] `--stats` is opt-in and deterministic. Statistics are `null` only when not requested, the document did
+- [x] `--stats` is opt-in and deterministic. Statistics are `null` only when not requested, the document did
       not load, the model stage failed, or a preview failed; `--stats` never changes diagnostics or `valid`.
-- [ ] Ceria validation completes in `< 200 ms`; ceria `--stats` completes in `< 2 s`.
-- [ ] The GUI contract can navigate from every diagnostic `ModelPath` to an object/property (verified in
-      Steps 24–25).
-- [ ] Documentation written.
+- [x] Ceria validation completes in `< 200 ms`; ceria `--stats` completes in `< 2 s`.
+- [x] The GUI contract can navigate from every diagnostic `ModelPath` to an object/property. Step 07 covers the
+      path contract and Step 07 diagnostics; the interactive verification is completed in Steps 24–25.
+- [x] Documentation written.
 
 ## Documentation
 
