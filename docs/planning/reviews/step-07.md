@@ -736,25 +736,95 @@ Follow-up step: Approve the `Ready for implementation` verdict and the Step 07 s
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
+- [x] Final CI and documentation-build results recorded
 
-Round history:
+### Requested decision
+
+Approve the round-4 design-review verdict `Ready for implementation` for Step 07, frozen design commit
+`31b53e801ea5c3ca136638aa3e254c620447a574`, and authorize starting implementation. Review record commit:
+`2d01f3e`. Branch: `docs/step-07-design` (local, unmerged, not pushed to `main`).
+
+### Final state
+
+- Design target: `31b53e8`; review request/resolution commit: `1509243`; reviewer record commit: `2d01f3e`.
+- Documentation checks: `python tools/check_process_consistency.py` OK; `python tools/check_docs_links.py` OK
+  (143 files); `zensical build --strict` no issues; `python tools/contracts/generate.py --check` current;
+  `./tools/verify.sh contracts` and `./tools/verify.sh structure` passed.
+- No CI run was created for these documentation-only commits (`[skip ci]`).
+- No Blocker or Major finding remains open.
+
+### Round history
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-11 | `dc73ee4` | Fresh independent planning auditor | Changes required |
+| 2 | 2026-11-11 | `4ddd571` | Fresh independent planning auditor | Changes required |
+| 3 | 2026-11-11 | `60437ca` | Fresh independent planning auditor | Ready with notes |
+| 4 | 2026-11-11 | `31b53e8` | Fresh independent planning auditor | Ready for implementation |
 
-Findings and resolutions:
+### Findings and resolutions
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M1 | Major | CLI/report failure paths could not produce the promised report or 1-vs-3 mapping | One report per invocation; nullable identity; structured load failure | `4ddd571`, `60437ca` | Closed |
+| M2 | Major | Load-stage ownership and `ValidateOnLoad` double validation unresolved | `ValidateFileAsync`, store validation disabled, stage status defined | `4ddd571`, `31b53e8` | Closed |
+| M3 | Major | Build extension point not implementable; not recorded in Steps 09–12 | `ValidationContext`, Build-only stages, `RunBuildStage`, receiving pages updated | `4ddd571` | Closed |
+| M4 | Major | `SIM038`–`SIM040` overlapped and cascaded | Distinct KMC-only codes with suppression; renumbered `SIM038`–`SIM041` | `4ddd571`, `60437ca` | Closed |
+| M5 | Major | Statistics nullability contradicted the contract and acceptance tests | One availability rule independent of policy/feasibility errors | `4ddd571` | Closed |
+| M6 | Major | `validation-v1` manifest/schema claim conflicted with contract tooling | `reports` section, generator/schema/version tasks, conventional path | `4ddd571`, `60437ca` | Closed |
+| m1 | Minor | Catalog completeness test named missing/internal types | Public Symmetry catalog, assembly-local tests, Core project codes | `4ddd571` | Closed |
+| m2 | Minor | Rule count could overflow `int` | `long` statistic, budget, and accumulation | `4ddd571` | Closed |
+| m3 | Minor | Pair estimate source and report fields unspecified | Defined unique-pair source and enumerated all fields | `4ddd571` | Closed |
+| m4 | Minor | Cancellation finer than preview APIs allow | Documented between-stage/call checks and atomic previews | `4ddd571` | Closed |
+| m5 | Minor | Hash prefix conflicted with `ProjectHasher` | Raw lowercase hexadecimal specified | `4ddd571` | Closed |
+| m6 | Minor | Gates/integration tasks missing | PublicAPI, SPDX, closeout/status/parity, navigation, file layout added | `4ddd571` | Closed |
+| m7 | Minor | Cell counts unvalidated | `< 1` throws as a programmer error | `4ddd571` | Closed |
+| m8 | Minor | `ENM018` boundary underspecified | Hop/cutoff/comparison/suppression and path identity defined | `4ddd571`, `60437ca` | Closed |
+| m9 | Minor | Budget and Build-owner inconsistencies | `ValidationOptions` budgets; Steps 09–12 throughout | `4ddd571` | Closed |
+| n1 | Note | Budget rationale unrecorded | Recorded as initial guardrails tuned by Steps 08/11 | `4ddd571` | Accepted |
+| n2 | Note | Stage status/count/elapsed semantics undefined | Defined `Completed`/`Failed`/`Skipped`, post-dedup counts, elapsed | `4ddd571`, `31b53e8` | Accepted |
+| n3 | Note | Ceria warning set and hint coverage overstated | Fixture-recorded warnings; Step 07 per-code hint tests | `4ddd571` | Accepted |
+| n4 | Note | Sizing record missing | Seven rows, 2–3 person-weeks, below split trigger | `4ddd571` | Accepted |
+| R2-M1 | Major | Load-failure kind not propagated through `ValidateFileAsync` | `ValidationResult.LoadFailure` and CLI mapping recorded | `60437ca` | Closed |
+| R2-m1 | Minor | `Load` row still mentioned lock diagnostics | OS-sharing/I/O wording only; no edit-lock check | `60437ca` | Closed |
+| R2-m2 | Minor | In-memory `Load` status/count ambiguous | `Skipped` without caller diagnostics; `Failed`/`Completed` with them | `60437ca`, `31b53e8` | Closed |
+| R2-m3 | Minor | Statistics-preview diagnostics had no owning stage | Attributed to `Feasibility` | `60437ca` | Closed |
+| R2-m4 | Minor | Mixed `SIM003`/`SIM039` suppression ambiguous | Explicit evaluation order; `SIM003` never suppresses `SIM039` | `60437ca` | Closed |
+| R2-m5 | Minor | Generated schema path/shape inconsistent | `generated/schema/validation-v1.schema.json`, descriptor and constant home | `60437ca` | Closed |
+| R2-m6 | Minor | `ENM018` domain/object identity unspecified | `kineticTransition`, transition ID, `referencePath[i]` | `60437ca` | Closed |
+| R2-m7 | Minor | `SIM038`/`SIM039` kind scope unclear | KMC-only; MMC has no start pool | `60437ca` | Closed |
+| R3-m1 | Minor | In-memory `Load` wording inconsistent across docs | All six locations aligned with §2 | `31b53e8` | Closed |
+
+### Accepted notes and waivers
+
+- n1–n4 are accepted as non-blocking design notes. Budgets are explicitly advisory guardrails and may be tuned
+  in Steps 08/11 without a contract change.
+- No waiver of a Blocker or Major is requested.
+
+### Residual risk
+
+- The `< 200 ms` / `< 2 s` ceria targets are design targets to be measured in Step 07; the benchmark laptop
+  class must be recorded with the result.
+- Estimation formulas (`ExpectedRuleCount`, `UniquePairInteractionCount`, memory/permutation estimates) remain
+  advisory; Step 08 is authoritative.
+- `validation-v1` is a new external contract. It is frozen at `schemaVersion: 1`; later changes need the normal
+  format-change process.
+- The Step 07 hand-written CLI parser is intentionally minimal; Step 12 may replace it without changing the
+  `validate` semantics.
+- Follow-up owners: Step 07 implementor for measurement and fixtures; Step 08 for authoritative rule counts;
+  Steps 09–12 for Build-stage checks; Step 30 for full CLI/docs coverage.
+
+### Gate statement
+
+No Blocker or Major finding remains unclosed. All round-1 to round-4 findings are recorded above; the round-4
+verdict is `Ready for implementation`. The human owner still approves the verdict and the implementation start
+gate.
 
 ## Human approval
 
