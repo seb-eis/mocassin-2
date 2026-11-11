@@ -15,7 +15,7 @@
 | Request owner | Step agent |
 | Orchestrator (step agent / planner) | Step agent / planner |
 | Review initiated by | Planner |
-| Reviewed commit | `60437ca07219368dca745b4c9e9f056a543bde1a` (round 3; round 2 reviewed `4ddd571cacb5e714f246278005531b8ee4a73b2e`; round 1 reviewed `dc73ee40954070b8e95bf0713f8df4526b208ba6`) |
+| Reviewed commit | `31b53e801ea5c3ca136638aa3e254c620447a574` (round 4; round 3 reviewed `60437ca07219368dca745b4c9e9f056a543bde1a`; round 2 `4ddd571`; round 1 `dc73ee4`) |
 | Docs branch | `docs/step-07-design` |
 | Review date | 2026-11-11 |
 | Reviewer | Independent planning auditor (fresh context, round 3; rounds 1 and 2 were separate fresh contexts; no shared conversation with the planner or implementor) |
@@ -485,7 +485,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready with notes
+**State:** Re-review required
 
 > Round-1 state was `Re-review required`; round 2 re-review returns `Changes required` (see the round-2
 > verdict below).
@@ -645,6 +645,16 @@ resolutions against that commit; reviewer-authored round 1 text is unchanged.
 
 Round 3 request: the fixes are at `60437ca`. A fresh re-review should verify R2-M1 and R2-m1–R2-m7 against that
 commit; all reviewer-authored round 1 and round 2 text is unchanged.
+
+### Round 4 resolution
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| R3-m1 — in-memory `Load` wording | Resolved: the API comment, §3, test table, `03-quality-strategy.md`, and `design-decisions.md` now match §2 (`Skipped` only without caller diagnostics; `Failed`/`Completed` with them) | Step agent / planner | `31b53e8` |
+
+Round 4 request: the round-3 verdict was `Ready with notes` with only R3-m1 open. The consistency fix is at
+`31b53e8`; a fresh re-review should confirm that no Minor remains and that earlier Majors stay closed. All
+reviewer-authored round 1–3 text is unchanged.
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
