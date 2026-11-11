@@ -55,7 +55,22 @@ Commands run:
 - [ ] Proposed check item.
 - [ ] Proposed check item.
 
-### C. Exit criteria
+### C. Original design fidelity
+
+Required for the **Architecture and design status** review; use it for any review that touches design.
+
+- [ ] **Corrections:** the original issues this phase intended to correct are corrected, and the evidence
+      shows the corrected behaviour. List each intended correction and its result.
+- [ ] **Ported strengths:** the good/clever original design aspects this phase intended to keep are present
+      and verified (algorithms, data layouts, caches, incremental updates, validation, performance shortcuts,
+      workflow). State what was kept, adapted, or dropped.
+- [ ] **Regressions:** no unintended regression over the original remains in capability, semantics,
+      performance, memory, diagnostics, determinism, or maintainability. Any deliberate regression is recorded
+      with rationale, owner, and follow-up.
+- [ ] Each answer above is explicit and supported by code, tests, benchmarks, or a side-by-side design
+      comparison, not only prose.
+
+### D. Exit criteria
 
 - [ ] No Blocker or Major finding remains, or every exception is explicitly waived by the human owner.
 - [ ] Remediation owners and follow-ups are recorded.
