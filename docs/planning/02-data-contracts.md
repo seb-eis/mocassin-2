@@ -1350,10 +1350,13 @@ contract; it is not the same shape as the generic command result used by `build`
   set the three identity fields to `null`; a usage error has `exitCode: 2`, an unreadable/missing file has `3`,
   and unparseable or schema-invalid content has `1` with the store's `PROJ` diagnostic. Human output is not part
   of this JSON contract. It is stable for tests but not for machine consumers.
-- The contract is registered in `contracts/manifest.json` under a top-level `reports` object as
-  `validation-v1` (not as an entry in `formats`, whose eight ids are fixed). `tools/contracts/generate.py`
-  validates the `reports` section and emits `contracts/generated/validation-v1.schema.json`; the schema is
-  checked against real CLI output and the generated artifact is freshness-checked by `verify.sh contracts`.
+- The contract is registered in `contracts/manifest.json` under a top-level `reports` object as a descriptor
+  `{ "id": "validation", "title": "Validation report", "schemaVersion": 1, "fields": [...] }` (not as an entry
+  in `formats`, whose eight ids are fixed). `tools/contracts/generate.py` validates the `reports` section and
+  emits `contracts/generated/schema/validation-v1.schema.json`, matching the existing
+  `<id>-v<version>.schema.json` convention. The generated `ValidationReportVersion` constant lives with the
+  other generated version constants in `Mocassin.Contracts`; the schema is checked against real CLI output and
+  the generated artifact is freshness-checked by `verify.sh contracts`.
 
 ## 6. Contract testing
 

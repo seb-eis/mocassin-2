@@ -122,6 +122,7 @@ public sealed record ValidationResult(
     Guid? ProjectId,
     string? ModelHash,
     string? DocumentHash,
+    ProjectLoadFailureKind? LoadFailure,
     bool IsValid,
     DiagnosticSummary Summary,
     ImmutableArray<Diagnostic> Diagnostics,
@@ -160,7 +161,9 @@ public interface IValidationStage
 ```
 
 - `ProjectId`, `ModelHash`, and `DocumentHash` are non-null for any successfully loaded document and `null` in
-  the result of a pre-load failure, matching the `validation-v1` report.
+  the result of a pre-load failure, matching the `validation-v1` report. `LoadFailure` is `null` when the
+  document loaded and carries the `ProjectLoadFailureKind` returned by `ProjectStore` otherwise, so
+  `ValidateFileAsync` propagates the parse-vs-I/O distinction to the CLI without re-reading `PROJ002`.
 - `IsValid` is true only when no `Error` remains after applying `WarningsAsErrors` and
   `RequireBuildable` severity promotion.
 - `Summary` always reports the raw Error/Warning/Info counts. A separate policy flag decides the exit code; the
@@ -173,8 +176,12 @@ public interface IValidationStage
 - `Stages` records skipped stages and per-stage elapsed time. `Completed` means the stage ran (even with
   warnings); `Failed` means the stage ran and produced at least one raw `Error`; `Skipped` means it did not run.
   `DiagnosticCount` is the number of that stage's diagnostics that survive global sorting and deduplication, so
-  the counts sum to the final `Diagnostics.Length`. `Elapsed` is measured for every stage the pipeline runs; the
-  in-memory entry reports `Load` as `Skipped` with `TimeSpan.Zero`.
+  the counts sum to the final `Diagnostics.Length`. `Elapsed` is measured for every stage the pipeline runs. In
+  the in-memory entry, `Load` is `Skipped` with count `0` and `TimeSpan.Zero` when the caller supplies no load
+  diagnostics; when the caller supplies load diagnostics it is `Failed` (if any is an `Error`) or `Completed`,
+  with the surviving count and `TimeSpan.Zero`, because the caller owns the timing. Statistics-preview
+  diagnostics are attributed to the `Feasibility` stage, which is where the opt-in estimates and budget checks
+  run; `Feasibility` is never skipped while statistics are computed.
 - `additionalStages` is the extension point for build checks (Step 09 parameterization, Step 10 job templates,
   Step 11 package limits, Step 12 build orchestration). Every supplied stage must declare
   `ValidationStage.Build`; the constructor throws `ArgumentException` otherwise. Step 07 does not implement
@@ -190,7 +197,7 @@ public interface IValidationStage
 
 | Stage | Responsibility | Owner | Runs in `validate` |
 | --- | --- | --- | --- |
-| `Load` | File bounds, UTF-8, JSON/schema, version/migration, lock/I/O diagnostics | `ProjectStore` via `ValidateFileAsync`; caller-owned in the in-memory entry | `ValidateFileAsync` only |
+| `Load` | File bounds, UTF-8, JSON/schema, version/migration, I/O diagnostics (OS sharing failures only; the read-only path never checks the editing lock) | `ProjectStore` via `ValidateFileAsync`; caller-owned in the in-memory entry | `ValidateFileAsync` only |
 | `Model` | Core graph rules, domain invariants, catalog/cell/geometry, `PROJ034`, `PAR004` | `ProjectValidationService` | If load succeeded |
 | `CrossDomain` | Transition paths versus energy cutoffs, simulation/transition/doping relationships not expressible in one domain | Step 07 `CrossDomainValidator` | If `Model` has no errors |
 | `Feasibility` | Mobile starts, unstable sites, buildability warnings, estimated rule/memory hard limits | Step 07 `FeasibilityValidator` | If `Model` has no errors |
@@ -215,20 +222,21 @@ re-emitted.
 | Code | Severity | Rule | Notes |
 | --- | --- | --- | --- |
 | `ENM018` | Warning | A KMC transition path leaves the relevant stable or unstable environment cutoff. | Precise boundary in the bullet below. Step 05 defines the constant/help; Step 07 emits it. |
-| `SIM038` | Warning | A simulation that has at least one transition has no mobile start particle. | One per affected simulation; suppressed when `SIM003` or `SIM039` fires. Promoted by `RequireBuildable`. |
-| `SIM039` | Warning | The model authors at least one simulation but has no particle mobile in any of them. | One model-level diagnostic; when it fires, per-simulation `SIM038` is suppressed. Promoted by `RequireBuildable`. |
+| `SIM038` | Warning | A KMC simulation that has at least one transition has no mobile start particle. | One per affected KMC simulation; suppressed when `SIM003` fires for it or when `SIM039` fires. Promoted by `RequireBuildable`. |
+| `SIM039` | Warning | The model authors at least one KMC simulation with transitions but has no particle mobile in any of them. | One model-level diagnostic; when it fires, all per-simulation `SIM038` are suppressed. Promoted by `RequireBuildable`. |
 | `SIM040` | Error | Estimated compiled rule count exceeds `MaxEstimatedRuleCount`. | Advisory `TransitionPreview` sum (`long`); Step 08 remains authoritative. |
 | `SIM041` | Error | Estimated energy-table memory exceeds `MaxEstimatedMemoryBytes`. | Uses `EnergyCostPreview.EstimatedMemoryBytes`; both budgets live in `ValidationOptions`. |
 
 - `SIM003` (no transitions) remains a Step 06 warning. `RequireBuildable` promotes `SIM003`, `SIM038`,
   `SIM039`, and `ENM018`; `WarningsAsErrors` promotes every warning.
-- `SIM038` and `SIM039` are deliberately non-overlapping. `SIM038` describes one authored simulation that has
-  transitions but no mobile start particle. `SIM039` describes the stronger model-wide condition and suppresses
-  `SIM038`, so a model with no mobile particle at all emits one diagnostic, not one per simulation. Neither is
-  emitted when `SIM003` already reports the simulation's empty transition set, and neither is emitted for
-  rule-invalid transitions (`SIM001`/`TRN` errors) because those already explain why no usable transition
-  exists. A KMC simulation with no unstable site is covered by `TRN022` (definition) and `SIM003`, so Step 07
-  adds no duplicate code for it.
+- `SIM038` and `SIM039` are deliberately non-overlapping and are KMC-only: MMC transitions have no start pool.
+  Evaluation order is: (1) skip any simulation with zero transitions because Step 06 `SIM003` already reports
+  it; (2) skip any simulation whose transitions are rule-invalid (`SIM001`/`TRN` errors) because those already
+  explain why no usable transition exists; (3) among the remaining KMC simulations, if none has a mobile start
+  particle emit `SIM039` once and suppress all `SIM038`; otherwise emit `SIM038` only for the simulations that
+  lack a mobile start particle. In a mixed model with one empty-transition simulation and one transition-bearing
+  simulation without a mobile start, `SIM003` covers only the first and `SIM039` still fires for the second;
+  `SIM003` never suppresses the model-wide diagnostic.
 - Do **not** duplicate `PAR004`, `PROJ034`, `LAT`, `TRN`, `ENM001`–`ENM017`, `ENM019`–`ENM021`, or `SIM001`–
   `SIM037`; they come from stage `Model`.
 - Parameterization signature checks, job-template references, supercell feasibility, and package limits are
@@ -239,8 +247,8 @@ re-emitted.
   `UnstableEnvironment` for `p_i`'s owning reference site when `p_i` is unstable (falling back to the stable
   cutoff when that environment is absent, mirroring `EnergyGeometryContext`). The rule fires when the
   minimum-image distance is strictly greater than that cutoff; equality is allowed. Emit at most one `ENM018`
-  per transition, at the first offending hop, with `Path.Property = "referencePath[i]"` naming the position
-  left. If the usable cutoff is non-positive or non-finite, skip the check because `ENM` validation already
+  per transition, at the first offending hop, with `Path.Domain = "kineticTransition"`,
+  `Path.ObjectId =` the transition's ID, and `Path.Property = "referencePath[i]"` naming the position left. If the usable cutoff is non-positive or non-finite, skip the check because `ENM` validation already
   reports the invalid cutoff. If path resolution produced `TRN020`, `TRN028`, or another path error for that
   transition, skip `ENM018` to avoid a cascade.
 
@@ -344,8 +352,9 @@ public sealed record ModelStatistics(
   to fail fast long before the package writer's practical limits and are expected to be tuned when Step 08 fixes
   rule generation and Step 11 fixes package/supercell limits; both live in `ValidationOptions` and are documented
   as advisory thresholds.
-- If a required preview fails, `Statistics` is `null` and its diagnostics are appended to the result. The
-  pipeline does not throw for project or preview failures.
+- If a required preview fails, `Statistics` is `null` and its diagnostics are appended to the result under the
+  `Feasibility` stage result (statistics and budgets are feasibility work). The pipeline does not throw for
+  project or preview failures.
 - Statistics are not persisted in the project and are not part of the model hash.
 
 ### 7. CLI contract
@@ -360,9 +369,10 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
   callers keep the default `true`. The pipeline rejects a store configured for validation-on-load instead of
   double validating.
 - `ProjectLoadResult` gains a structured `ProjectLoadFailureKind` (`None`, `NotFound`, `TooLarge`, `Io`,
-  `InvalidContent`) set by `ProjectStore` at the existing failure points. The CLI maps `NotFound`/`TooLarge`/
-  `Io` to exit `3` and `InvalidContent` (BOM, UTF-8, malformed JSON, schema, migration) to exit `1`. The
-  read-only path never acquires the editing lock; an OS sharing/I/O denial surfaces as `Io`/exit `3`.
+  `InvalidContent`) set by `ProjectStore` at the existing failure points. `ValidateFileAsync` copies it to
+  `ValidationResult.LoadFailure`; the CLI maps `NotFound`/`TooLarge`/`Io` to exit `3` and `InvalidContent`
+  (BOM, UTF-8, malformed JSON, schema, migration) to exit `1`. The read-only path never acquires the editing
+  lock; an OS sharing/I/O denial surfaces as `Io`/exit `3`.
 - Exit codes:
   - `0` — valid under the selected policy (warnings allowed unless `--warnings-as-errors`);
   - `1` — validation/model errors, warnings promoted by `--warnings-as-errors`/`RequireBuildable`, or project
@@ -451,8 +461,9 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 - [ ] Implement `mocassin validate` with human/JSON output, the structured load-failure mapping, exit codes, and
       `--stats`.
 - [ ] Extend `contracts/manifest.json` with a `reports.validation` entry, extend `tools/contracts/generate.py` to
-      validate reports and emit `contracts/generated/validation-v1.schema.json`, update
-      `tools/contracts/README.md` and `Mocassin.Contracts` version constants, and add the schema test.
+      validate reports and emit `contracts/generated/schema/validation-v1.schema.json` (matching the existing
+      `<id>-v<version>.schema.json` convention), update `tools/contracts/README.md` and the generated
+      `ValidationReportVersion` constant in `Mocassin.Contracts`, and add the schema test.
 - [ ] Update `PublicAPI.Unshipped.txt`/ApiCompat for new public types in `Mocassin.Packages`,
       `Mocassin.Symmetry`, and `Mocassin.Contracts`.
 - [ ] Add SPDX headers to new files and confirm the licensing/provenance checks stay green.
@@ -512,14 +523,14 @@ At this point, document validation and diagnostics:
 | Catalog docs drift | `docs/reference/diagnostics.md` matches the catalog exactly |
 | Per-code emission | Every Step 07 emitted code has a real fixture/test with severity, path, and hint |
 | Cross-domain | `ENM018` fires at the documented hop/cutoff boundary; no cascade after `TRN020`/`TRN028` |
-| Feasibility | `SIM038`–`SIM041` trigger at the documented boundaries; `SIM039` suppresses `SIM038`; `RequireBuildable` promotes the buildability set |
+| Feasibility | `SIM038`–`SIM041` trigger at the documented boundaries; `SIM039` suppresses `SIM038`; mixed `SIM003`/`SIM039` models behave as specified; MMC is excluded; `RequireBuildable` promotes the buildability set |
 | Determinism | Same project/options yields identical ordered diagnostics and statistics |
 | Deduplication | Exact duplicate `(code, path, message)` is emitted once |
 | Statistics | Counts and estimates match hand-computed small models; `null` only per §2; non-null with `SIM040`/`SIM041` |
 | Statistics sources | P1/stability counts match `StructurePreview`; pair interactions/permutations/memory match `EnergyCostPreview`; rule total is a `long` sum |
 | CLI human output | Stable columns and summary for good/bad projects |
 | CLI JSON | `validation-v1` schema, exit code, `valid`, `summary`, `--stats` nullability, load-failure nulls |
-| CLI errors | Missing file, malformed JSON, unreadable file, and usage errors map to 3/1/3/2 with one report |
+| CLI errors | Missing file, malformed JSON, unreadable file, and usage errors map to 3/1/3/2 with one report; `ValidationResult.LoadFailure` carries the parse/I-O distinction |
 | Build extension | A `Build` stage runs only with `RunBuildStage`; non-`Build` stages are rejected; skipped reasons are recorded |
 | Performance | Ceria `< 200 ms` without stats and `< 2 s` with stats |
 | Cancellation | Cancelled validation returns no partial success and writes nothing |
