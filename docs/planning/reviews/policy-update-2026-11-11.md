@@ -16,7 +16,7 @@
 | Request owner | Planner / implementor |
 | Orchestrator (implementor) | Step agent |
 | Review initiated by | Human owner |
-| Reviewer | Fresh independent reviewer — round 2 (subagent; read-only) |
+| Reviewer | Fresh independent reviewer — round 3 (subagent; read-only) |
 | Review date | 2026-11-11 |
 
 ## Purpose
@@ -198,7 +198,7 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**.
 
 ## Record state
 
-**State:** Re-review required (round 3: R1/R2 wording fixes)
+**State:** Passed (round 3)
 
 `Re-review required` is a record state, not a verdict.
 
@@ -362,9 +362,81 @@ Round 2 verdict: `Passed with notes` at `f1e7045`. R1 and R2 are resolved at the
 
 ### Round 3 evidence
 
+I am a fresh context with no shared conversation with the planner or implementor. I did not author or
+implement this work. Review basis: round 3 target `e0abc5c3e9e75469260ccab09528a7d086b0dac2`, review request
+commit `1b067fd038aab89ee61c99f34919a65766adb1d1` (which changes only this record), and the implementation
+set `987d74c..e0abc5c`. The worktree is `/tmp/opencode/mocassin-policy-update`; the working tree was clean
+before my record edit.
+
+Files reviewed: the full changed set `git diff 987d74c..e0abc5c` (62 files: documentation, process records,
+tooling, and tool tests only; no `src/`, `contracts/`, or runtime code), with a detailed read of the round 3
+delta `f1e7045..e0abc5c`: `docs/planning/audits/README.md` and the two remediation rows in this record.
+I also re-read `AGENTS.md`, `docs/planning/status.md`, `docs/planning/reviews/README.md`,
+`docs/planning/audits/step-audit-template.md`, `docs/planning/closeout/README.md`,
+`docs/development/agent-workflow.md`, `docs/development/drift-checks.md`,
+`docs/development/agent-security.md`, `docs/development/incident-and-rollback.md`, the three review/audit
+templates, `docs/planning/closeout/_template.json`, `tools/verify.sh`, the three checkers, and the tool tests.
+
+Commands and results at `1b067fd` (whose only delta from `e0abc5c` is the round 3 request):
+
+- `git diff --stat 987d74c..e0abc5c` — 62 files changed, 2091 insertions, 3833 deletions; docs, process, and
+  tooling only. `git show --stat e0abc5c` — 2 files: `docs/planning/audits/README.md` (one status-row wording
+  change) and this record (two remediation rows). `git show --stat 1b067fd` — this record only.
+- `git diff --check` and `git diff --check 987d74c..e0abc5c` — both exit 0.
+- `python tools/check_process_consistency.py` — `Process consistency: OK`.
+- `python tools/check_docs_links.py` — `Documentation links OK (142 files scanned)`.
+- `python -m unittest discover -s tools/tests -t . -q` — `Ran 18 tests`, `OK` (7 closeout-checker, 6
+  docs-link, 5 process-consistency tests).
+- `./tools/verify.sh all --require` — exit 0. `git diff --check`, .NET restore/build/test/format, API and
+  dependency gates, Rust fmt/clippy/test, Python pytest/build, documentation/link check, DocFX, rustdoc,
+  contract/symmetry drift, process consistency, tool tests, SPDX headers, secret scan, and `cargo-deny` all
+  ran; final line `Closeout gate completed with required checks enabled.`
+- `zensical build --strict` — exit 0, `No issues found`.
+- `bash -n tools/verify.sh` — syntax OK; the `docs` and `policy` modes referenced by the process pages exist.
+
+Finding verification and reproductions:
+
+- **R1 (closed).** All `In audit` definitions now agree: `docs/planning/audits/README.md:41` says "The step
+  branch is frozen at the audit request; a fresh audit context is pending or reviewing the frozen commit",
+  `docs/planning/status.md:14` says "The step branch is frozen at the audit request; a fresh completion audit
+  is pending or running", and `AGENTS.md:778` records `In audit` at the audit request and `Done` only after the
+  merge. The step-audit template only lists the state, and the drift-check and planning README references use
+  the same lifecycle. No conflicting definition remains.
+- **R2 (closed).** The remediation table now records F5 as fixed at `e0abc5c` with all `In audit` definitions
+  covering the frozen audit-request state, and N1 as four focused process-checker negative tests (six new tool
+  tests; 18 total). The diff `92a7ea3..f1e7045` adds exactly six tool tests: two closeout-checker tests and
+  four process-consistency tests; the current suite has 7 + 6 + 5 = 18. Both corrected claims match the tree.
+- Re-checked the earlier resolutions against the tree: the closeout checker returns before git history on
+  unresolved SHAs (`check_closeout_evidence.py:74-90`); root guides are treated as documentation
+  (`DOC_FILES`); the three templates and `xc-01`–`xc-03` use `Record state`; `agent-workflow.md` links the
+  gate sequences and sizing has one home; the `Changes required` / `Fixes required` mapping is in
+  `AGENTS.md` §3.15. Historical records that still contain the old status fields were correctly not rewritten.
+
+Regressions: none found. The round 3 change is a one-line normative wording alignment plus two correction
+rows. No code, contracts, runtime behaviour, approved decision, link, or status vocabulary changed, and the
+full local and documentation gates pass at the target commit. I left the round 1/2 checklist marks and all
+earlier evidence, findings, and verdicts untouched; the round 3 results are recorded here.
+
 ### Round 3 findings
 
+None. R1 (Minor) and R2 (Note) are closed, and re-verification found no regression, contradiction, stale
+wording, broken link, or incorrect claim in the approved decision set.
+
 ### Round 3 verdict
+
+- [x] Passed
+- [ ] Passed with notes
+- [ ] Fixes required
+- [ ] Waived
+
+Round 3 closes R1 and R2. All `In audit` definitions agree on the frozen-audit-request lifecycle, and the
+remediation table now accurately records the F5 and N1 resolutions. The full local gate, link check, tool
+tests, and strict documentation build pass at the target commit. No Blocker, Major, Minor, or Note finding
+remains from any round, and the approved decision set is implemented without regression. The human owner
+still approves the final verdict and merge.
+
+Follow-up owner: Planner / implementor
+Follow-up step: None required
 
 ## Human approval
 
