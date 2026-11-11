@@ -7,12 +7,12 @@ validation.
 
 ## Implementation status
 
-- **Status:** In progress
-- **Step branch:** `step/06-lattice-and-simulation-models`
+- **Status:** Done
+- **Step branch:** `step/06-lattice-and-simulation-models` (merged and deleted)
 - **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850)
-- **Main merge:** —
-- **Step tag:** —
-- **Audit:** Passed with notes at `c390dcc` (code frozen at `ea6293e`); F1 and N1/N3 awaiting human acceptance
+- **Main merge:** `41cfa4d` (main CI [43091007170](https://github.com/seb-eis/mocassin-2/actions/runs/43091007170) green)
+- **Step tag:** `step-06`
+- **Audit:** Passed with notes at `c390dcc` (code frozen at `ea6293e`); F1 and N1/N3 accepted by the human owner on 2026-11-11
 - **Design review:** [Ready with notes — accepted at `6173e61`](../reviews/step-06.md)
 - **Last updated:** 2026-11-11
 
