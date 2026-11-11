@@ -13,18 +13,35 @@
 | --- | --- |
 | Step | 06 — Lattice and Simulation Models |
 | Request owner | Step agent |
-| Orchestrator (step agent) | — |
-| Audit initiated by | Planner / implementor / human owner |
-| Audit status | Not requested |
-| Audited commit | — |
-| Step branch | — |
+| Orchestrator (step agent) | Step 06 implementor |
+| Audit initiated by | Human owner |
+| Audit status | Ready for audit |
+| Audited commit | Pending closeout commit |
+| Step branch | `step/06-lattice-and-simulation-models` |
 | Step tag | — |
-| Closeout CI run | — |
-| Platform CI | Not run (Ubuntu-only policy) |
+| Closeout CI run | Pending closeout dispatch |
+| Platform CI | Not run (Ubuntu-only policy; no platform-specific code) |
 | Audit date | — |
 | Auditor | — |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
+
+## Audit request summary
+
+- Frozen code commit: the closeout squash on `step/06-lattice-and-simulation-models` (recorded after CI).
+- Feature sequence: lattice model, persistence, and validation (`bc333f3`); simulation model and validation
+  (`1c64c96`); persistence and contracts (`48e1f20`); queries and editing (`cfeb7b6`); samples and docs
+  (`46ea087`); closeout (this commit).
+- Local closeout gate: `./tools/verify.sh all` passed on the step branch; Zensical strict, DocFX, rustdoc,
+  Rust, Python, contracts, API compatibility, and structure gates all passed.
+- Closeout CI: one manual Ubuntu dispatch; the run and result are recorded after dispatch.
+- Known deferrals: Step 10 owns fraction application, integer truncation, charge-compensation counts, the single
+  supercell generator, the lattice/job-count preview service, and effective job counts. Step 11 owns the
+  `.msl` writer and `SolverJobFlags` composition. Step 25 owns the GUI editors. Step 07 owns the consolidated
+  diagnostic catalog and help pages.
+- Accepted design-review residuals: R6-1 (Compilation/Packages carrier for the derived intent) is resolved by
+  `SolverJobFlagsMapper` and its tests; R6-2 (data-contract deterministic wording) is corrected in this step;
+  R6-3 (`ILatticePreviewService` placement) is Step 10; R6-4 is a process note only.
 
 > Orchestration: the step agent (the orchestrator) freezes the step branch, requests the auditor, applies fixes
 > autonomously on a new feature branch, reruns closeout CI, adds resolutions without altering reviewer text,
@@ -41,13 +58,26 @@ Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattic
 
 ## Step-specific acceptance checklist
 
-- [ ] The ceria reduction doping (Ce⁴⁺→Ce³⁺ primary, O²⁻→V_O dependent) validates and previews charge neutrality.
+- [ ] The ceria reduction doping validates at the model level: both deltas are non-zero and opposite in sign,
+      and the derived building block is exposed.
 - [ ] An isovalent doping without a dependent exchange validates.
-- [ ] A dependent exchange with the wrong charge sign is rejected.
-- [ ] Doping priorities are unique and applied in ascending order.
-- [ ] A KMC simulation cannot select an MMC transition.
-- [ ] All original simulation settings are represented and validated.
-- [ ] Documentation written
+- [ ] A dependent exchange with the wrong charge sign is rejected with `LAT009`.
+- [ ] Doping priorities are unique, in `0..9999`, and serialize in ascending order; duplicates are `LAT006`.
+- [ ] A KMC simulation cannot select an MMC transition, and vice versa (`SIM002`).
+- [ ] All original simulation settings are represented: temperature, target MCSP, write-out count, time limit,
+      min success rate, job count, RNG seed, execution flags, KMC pre-run/field/normalization/max frequency,
+      and MMC break tolerance/sample length/interval/result sample.
+- [ ] New simulations use the documented defaults, and every hard range and recommended band has a diagnostic
+      and a boundary test.
+- [ ] The lattice/simulation sections round-trip through the project JSON context, the canonical model, save,
+      and load; dopings preserve priority order and simulations preserve kind-specific settings and
+      authored-order transition arrays.
+- [ ] Lattice/simulation edits change `ProjectHasher.Compute` and `ComputeDocument`; no section is dropped by
+      canonicalization, empty arrays are omitted, and a pre-Step-06 project keeps its canonical hash.
+- [ ] The generated project schema accepts the flat lattice/simulation sections and rejects unknown fields;
+      fixtures cover empty and populated models.
+- [ ] Public API files and the ApiCompat baseline are current.
+- [ ] Documentation written.
 
 ## Standard audit checklist
 
@@ -73,7 +103,18 @@ Commands run:
 
 ## Known notes for the auditor
 
-- Record known limitations, accepted deviations, or areas needing extra attention.
+- No lattice or job-count preview exists in Step 06 by design; Step 10 owns the single preview service and the
+  shared supercell/doping generator.
+- The simulation persisted shape is intentionally flat at the top level with a `settings` object. The generated
+  schema cannot express a `oneOf` discriminator, so kind-specific fields are optional in the schema and the
+  validator (`SIM023`) rejects a mismatched shape.
+- Step 06 adds nullable support to `tools/contracts/generate.py` for the simulation settings that use `null`
+  (`timeLimitSeconds`, `minSuccessRate`, `rngSeed`, `instruction`, `normalizationEnergyEv`,
+  `maxAttemptFrequencyHz`). Existing generated artifacts are unchanged by the feature.
+- Step 10 must cross-check the lattice preview against the generated lattice's doping report; Step 06 does not
+  claim that cross-check.
+- Windows and macOS were not run because Step 06 has no platform-specific code; this is the Ubuntu-only policy.
+- `SolverJobFlags` composition is tested in `Mocassin.Packages.Tests`; the `.msl` writer itself is Step 11.
 
 ## Findings
 
