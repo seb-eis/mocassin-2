@@ -29,6 +29,7 @@ public sealed class ProjectValidationPipeline
 
     private readonly ImmutableArray<IValidationStage> buildStages;
     private readonly FeasibilityValidator feasibilityValidator;
+    private readonly CrossDomainValidator crossDomainValidator;
     private readonly DiagnosticCatalog catalog = DiagnosticCatalog.Default;
 
     /// <summary>
@@ -45,10 +46,11 @@ public sealed class ProjectValidationPipeline
         ITransitionPreviewService? transitionPreview = null,
         IEnumerable<IValidationStage>? additionalStages = null)
     {
-        feasibilityValidator = new FeasibilityValidator(
-            structurePreview ?? new StructurePreviewService(),
-            energyPreview ?? new EnergyPreviewService(),
-            transitionPreview ?? new TransitionPreviewService());
+        var structure = structurePreview ?? new StructurePreviewService();
+        var energy = energyPreview ?? new EnergyPreviewService();
+        var transitions = transitionPreview ?? new TransitionPreviewService();
+        crossDomainValidator = new CrossDomainValidator(structure, transitions);
+        feasibilityValidator = new FeasibilityValidator(structure, energy, transitions);
 
         var stages = additionalStages?.ToImmutableArray() ?? ImmutableArray<IValidationStage>.Empty;
         foreach (var stage in stages)
@@ -200,7 +202,7 @@ public sealed class ProjectValidationPipeline
 
         cancellationToken.ThrowIfCancellationRequested();
         var crossStarted = Stopwatch.GetTimestamp();
-        var crossDiagnostics = CrossDomainValidator.Validate(project, options, cancellationToken);
+        var crossDiagnostics = crossDomainValidator.Validate(project, options, cancellationToken);
         stages.Add(new StageExecution(
             ValidationStage.CrossDomain,
             crossDiagnostics,
