@@ -18,7 +18,7 @@
 | Reviewed commit | `31b53e801ea5c3ca136638aa3e254c620447a574` (round 4; round 3 reviewed `60437ca07219368dca745b4c9e9f056a543bde1a`; round 2 `4ddd571`; round 1 `dc73ee4`) |
 | Docs branch | `docs/step-07-design` |
 | Review date | 2026-11-11 |
-| Reviewer | Independent planning auditor (fresh context, round 3; rounds 1 and 2 were separate fresh contexts; no shared conversation with the planner or implementor) |
+| Reviewer | Independent planning auditor (fresh context, round 4; rounds 1–3 were separate fresh contexts; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 07 — Validation, Diagnostics, and Model Statistics`](../steps/step-07-validation-and-diagnostics.md)
 
@@ -436,6 +436,133 @@ the step page, contract, acceptance criteria, tests, quality strategy, and `test
 `reports` section and generator tasks. Round-2 Minor findings m1–m9 and Notes n1–n4 remain closed or accepted as
 recorded in round 2.
 
+### Re-review round 4 — Evidence
+
+**Review round 4** — frozen design commit `31b53e801ea5c3ca136638aa3e254c620447a574`; HEAD
+`150924339f18aa43412154ecd4c3c8fe763760a1` adds only the round-4 request, resolution, and status. I am a fresh
+context: I did not author or implement this work, I did not participate in rounds 1–3, and I used no handoff,
+summary, or prior conversation. The worktree `/workspace/playground/step07-design` was clean at `1509243`; all
+round-4 evidence is from repository inspection at that state and from the frozen design content at `31b53e8`.
+
+Files reviewed in round 4:
+
+- `AGENTS.md` §3.8–§3.13, §3.15, §7.2, §8, §13; `docs/planning/reviews/README.md`; the review template.
+- `docs/planning/reviews/step-07.md` — every round's findings, evidence, verdicts, `Resolution status`,
+  `Round 3 resolutions`, and `Round 4 resolution`; all reviewer-authored text left intact.
+- `docs/planning/steps/step-07-validation-and-diagnostics.md` — API comment, §2, §3, §4, §5–§7, tests,
+  acceptance criteria, and implementation tasks.
+- Steps 03–06 pages; the Build-stage owner pages 09, 10, 11, and 12.
+- `docs/planning/02-data-contracts.md` §5.5–§5.6 and §6, `03-quality-strategy.md` §9.7,
+  `04-roadmap.md` §3.1, `05-open-decisions.md`, `appendix-b-parity-matrix.md`, `status.md`.
+- `docs/development/architecture.md`, `docs/development/design-decisions.md`,
+  `docs/development/testing-and-parity.md`, `docs/development/code-structure.md`, `zensical.toml`,
+  `docs/reference/index.md`, `docs/reference/project-format.md`, `docs/troubleshooting/index.md`.
+- Implemented APIs: `Mocassin.Packages/Projects/ProjectStore.cs`, `ProjectStoreOptions.cs`,
+  `ProjectStoreResults.cs`, `ProjectValidationService.cs`; `Mocassin.Core/Project/ProjectHasher.cs`,
+  `Mocassin.Core/Project/ProjectDiagnosticCodes.cs`; `Mocassin.Symmetry/Diagnostics/*`,
+  `Mocassin.Symmetry/Structure/StructurePreview.cs`, `Mocassin.Symmetry/Energy/EnergyCostPreview.cs`,
+  `Mocassin.Symmetry/Transitions/TransitionPreview.cs`, `TransitionPathValidator.cs`,
+  `TransitionPathResolver.cs`; `src/dotnet/Mocassin.Cli/Program.cs`; `contracts/manifest.json`;
+  `tools/contracts/generate.py`; `contracts/generated/schema/`; `tools/verify.sh`.
+
+Commands run (from `/workspace/playground/step07-design`):
+
+```sh
+git status --short
+# clean
+
+git log --oneline -8
+# 1509243 docs: record step 07 round 3 resolution and status [skip ci]
+# 31b53e8 docs: align step 07 in-memory load stage wording [skip ci]
+# 71f4419 docs: record step 07 design review round 3 ready with notes [skip ci]
+# 5941883 docs: record step 07 round 2 resolutions and status [skip ci]
+# 60437ca docs: close step 07 round 2 review findings [skip ci]
+# dfd7717 docs: record step 07 design re-review changes required [skip ci]
+# 3f576a1 docs: record step 07 review resolutions and status [skip ci]
+# 4ddd571 docs: revise step 07 validation design for review findings [skip ci]
+
+git diff --stat dc73ee4^..dc73ee4
+# 9 files changed, 470 insertions(+), 166 deletions(-)
+
+git diff --stat 60437ca^..60437ca
+# docs/planning/02-data-contracts.md                        | 11 ++--
+# docs/planning/steps/step-07-validation-and-diagnostics.md | 59 +++++++++++---------
+# 2 files changed, 42 insertions(+), 28 deletions(-)
+
+git diff --stat 31b53e8^..31b53e8
+# docs/development/design-decisions.md                      | 7 ++++---
+# docs/planning/03-quality-strategy.md                      | 2 +-
+# docs/planning/steps/step-07-validation-and-diagnostics.md | 10 +++++-----
+# 3 files changed, 10 insertions(+), 9 deletions(-)
+
+git diff --stat 31b53e8..HEAD
+# docs/planning/reviews/step-07.md                          | 14 ++++++++++++--
+# docs/planning/status.md                                   | 9 +++++----
+# docs/planning/steps/step-07-validation-and-diagnostics.md | 2 +-
+# (round-4 request, resolution, and status only; no design change)
+
+python tools/check_process_consistency.py
+# Process consistency: OK
+
+python tools/check_docs_links.py
+# Documentation links OK (143 files scanned).
+
+zensical build --strict
+# Build started; No issues found; Build finished in 0.27s
+
+python tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+```
+
+Targeted read-only checks:
+
+```sh
+git diff 31b53e8^..31b53e8
+# five wording edits across three files: `Validate` API comment, §3 consumers bullet, the `Pipeline order`
+# test row, 03-quality-strategy §9.7, and design-decisions.md; no rule, type, or contract change
+
+grep -rn "Skipped\|skipped" docs/planning/steps/step-07-validation-and-diagnostics.md \
+  docs/planning/03-quality-strategy.md docs/development/design-decisions.md
+# step page lines 140, 180–184, 213–215, 520 and both summaries now state:
+# `Skipped` only when the caller supplies no load diagnostics; `Failed`/`Completed` with them
+
+grep -rn "in-memory entry\|in-memory Load" docs --include=*.md
+# only the corrected step-page and summary locations; no remaining unconditional "Load is Skipped" statement
+
+grep -rn "SIM042" docs src tests tools
+# no live design/code reference (only historical review text)
+
+grep -rn "ValidateOnLoad\|ProjectLoadFailureKind\|LoadFailure" src/dotnet docs/planning/steps/step-07-validation-and-diagnostics.md
+# still design-only additions; not implemented in src/dotnet, consistent with the task list
+
+grep -n "IValidationStage\|ProjectValidationPipeline\|RunBuildStage" \
+  docs/planning/steps/step-0[89]*.md docs/planning/steps/step-1[012]*.md
+# Steps 09–12 still record the Build-stage integration point
+
+grep -n "ExpectedRuleCount\|UniquePairInteractionCount\|EstimatedMemoryBytes" \
+  src/dotnet/Mocassin.Symmetry/Transitions/TransitionPreview.cs \
+  src/dotnet/Mocassin.Symmetry/Energy/EnergyCostPreview.cs
+# ExpectedRuleCount is int; UniquePairInteractionCount and EstimatedMemoryBytes are long
+
+grep -n "set(formats) == REQUIRED_FORMATS" tools/contracts/generate.py
+# line 178: `formats` must be exactly the eight required ids; the report lives under `reports`
+```
+
+Resolution verification against the design at `31b53e8`:
+
+| Finding | Round-4 verification |
+| --- | --- |
+| R3-m1 | **Closed.** All six locations now agree with §2: the `Validate` API comment (line 140), the §2 stage bullet (lines 180–184), the §3 consumers bullet (lines 213–215), the `Pipeline order` test row (line 520), `03-quality-strategy.md` §9.7 (lines 305–306), and `design-decisions.md` (line 81). Each states that the in-memory `Load` is `Skipped` only when the caller supplies no load diagnostics, and `Failed`/`Completed` (with the surviving count and zero elapsed) when diagnostics are supplied. A test written from the table no longer contradicts the API rule. |
+| R2-M1 | **Still closed.** `ValidationResult.LoadFailure` is `ProjectLoadFailureKind?` (§2), `ValidateFileAsync` copies it from `ProjectLoadResult`, and §7 maps `NotFound`/`TooLarge`/`Io` to exit `3` and `InvalidContent` to `1`. Unchanged by round 4. |
+| R2-m1–R2-m7 | **Still closed.** `Load` row is OS-sharing/I/O only; `ValidateOnLoad` and the skip/count/elapsed rules are intact; statistics-preview diagnostics belong to `Feasibility`; the `SIM003`/`SIM039` mixed-model order is unchanged; the schema path, `ENM018` path identity, and KMC-only `SIM038`/`SIM039` scope are unchanged. |
+| M1–M6 | **Still closed.** Nullable identity/hashes and the single report per invocation for M1; the file/in-memory split plus `ValidateOnLoad` for M2; `ValidationContext`, the `Build`-only restriction, `RunBuildStage`, and Steps 09–12 integration for M3; the non-overlapping `SIM038`–`SIM041` set for M4; the single statistics rule repeated across the step page, contract, acceptance criteria, tests, quality strategy, and `testing-and-parity.md` for M5; the `reports` manifest section and generator/README/version/schema tasks for M6. Round 4 changed only wording, so no earlier closure is disturbed. |
+| m1–m9, n1–n4 | **Still closed or accepted.** Framework and catalog types, `long` accumulators, statistics sources, cancellation granularity, hash format, gate tasks, cell-count validation, `ENM018` boundary, owner lists, budgets, stage semantics, hint coverage, and sizing are unchanged by round 4. |
+
+The round-4 delta is documentation-only (25 changed lines across three files, all in the wording and status
+areas listed above). No rule, type, contract field, stage, test assertion, or acceptance criterion changed, so
+no earlier finding can regress through this commit. The repository checks and the strict documentation build
+pass.
+
 ## Findings
 
 | Severity | Finding | Evidence |
@@ -483,15 +610,28 @@ the auditor's findings, evidence, or verdict.
 | --- | --- | --- |
 | **Minor** | **R3-m1 — The R2-m2 fix is applied only to the §2 stage bullet; five other statements still say the in-memory `Load` stage is always `Skipped`.** §2 now says a caller-supplied in-memory entry reports `Load` as `Failed` (if any caller diagnostic is an `Error`) or `Completed`, with the surviving count and zero elapsed. The `Validate` code comment still says `Load` "is reported as Skipped"; §3 still says the in-memory `Load` "is reported as `Skipped`"; the `Pipeline order` test row still expects `in-memory Load is Skipped`; and `03-quality-strategy.md` and `design-decisions.md` still state the in-memory entry reports `Load` as skipped. A test written from the test table would contradict the §2 API rule, and the two summaries would misdescribe the stage status for callers that pass load diagnostics. | Step page §2 `Validate` comment and `Stages` bullet (lines 140, 180–182), §3 consumers bullet (line 213), Tests `Pipeline order` row (line 520); `docs/planning/03-quality-strategy.md` line 305; `docs/development/design-decisions.md` line 81. |
 
+### Re-review round 4 — Findings
+
+No finding remains. R3-m1 is closed at `31b53e8`: the `Validate` API comment, §2, §3, the `Pipeline order` test
+row, `03-quality-strategy.md` §9.7, and `design-decisions.md` now all distinguish the in-memory `Load` status
+the same way — `Skipped` only when the caller supplies no load diagnostics, and `Failed`/`Completed` with the
+surviving count and zero elapsed when diagnostics are supplied. No new inconsistency or stale statement was
+introduced by the fix, and no earlier Blocker, Major, Minor, or Note has regressed; the accepted Notes n1–n4
+remain accepted.
+
 ## Record state
 
-**State:** Re-review required
+**State:** Ready for implementation
 
 > Round-1 state was `Re-review required`; round 2 re-review returns `Changes required` (see the round-2
 > verdict below).
 >
 > Round 3 re-review returns `Ready with notes` (see the round-3 verdict below). One Minor residual finding
-> remains; no Blocker or Major remains, and the human owner must explicitly accept the Minor.
+> remained; no Blocker or Major remained.
+>
+> Round 4 re-review returns `Ready for implementation` (see the round-4 verdict below). R3-m1 is closed at
+> `31b53e8`; no Blocker, Major, or Minor finding remains. The accepted Notes n1–n4 remain accepted and do not
+> block the start gate.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -567,6 +707,29 @@ remains, this is not `Ready for implementation`; the human owner must explicitly
 Follow-up owner: Step agent / planner
 Follow-up step: Correct the five stale in-memory `Load` statements (R3-m1) when convenient; no re-review is
 required if the human owner accepts `Ready with notes`.
+
+### Re-review round 4 — Verdict
+
+- [x] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Round 4 verdict: Ready for implementation.** No Blocker, Major, or Minor finding remains. R3-m1 is closed at
+`31b53e8`: the in-memory `Load` stage wording is now consistent across the `Validate` API comment, §2, §3, the
+`Pipeline order` test row, `03-quality-strategy.md` §9.7, and `design-decisions.md`, all of which report
+`Skipped` only when the caller supplies no load diagnostics and `Failed`/`Completed` with the surviving count and
+zero elapsed when diagnostics are supplied.
+
+The round-2 Major R2-M1 and the round-1 Majors M1–M6 remain closed; the round-2 Minor findings m1–m9 are closed
+as recorded, and Notes n1–n4 remain accepted and non-blocking. The round-4 delta is wording and status only: no
+rule, type, contract field, stage, test assertion, or acceptance criterion changed, so no earlier closure
+regressed. `python tools/check_process_consistency.py`, `python tools/check_docs_links.py`,
+`python tools/contracts/generate.py --check`, and `zensical build --strict` all pass. The human owner approves
+the final verdict and the start gate; this record is evidence and does not itself authorize starting Step 07.
+
+Follow-up owner: Human owner
+Follow-up step: Approve the `Ready for implementation` verdict and the Step 07 start gate.
 
 ## Approval summary
 
