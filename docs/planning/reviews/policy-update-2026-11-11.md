@@ -12,7 +12,7 @@
 | --- | --- |
 | Review ID | `POLICY-2026-11-11` |
 | Type | Process and workflow policy update |
-| Target commit | `92a7ea372be21bc7c0cb557d4a799b174aeef9a9` |
+| Target commit | `f1e7045feef8f83752941ff603503b40fb635410` (round 2; round 1 was `92a7ea3`) |
 | Request owner | Planner / implementor |
 | Orchestrator (implementor) | Step agent |
 | Review initiated by | Human owner |
@@ -198,7 +198,7 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**.
 
 ## Record state
 
-**State:** **Passed with notes**
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -225,9 +225,31 @@ Follow-up step: Next process-maintenance change (`docs/policy-follow-up`)
 
 ## Remediation status
 
-| Finding | Status | Owner | Commit |
+Resolutions applied at `f1e7045feef8f83752941ff603503b40fb635410`; reviewer text above is unchanged.
+
+| Finding | Status | Resolution | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F1 | Fixed | Invalid or unresolved SHAs now return before git history commands; added a negative test. | `f1e7045` |
+| F2 | Fixed | Root guides (`AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md`) are treated as documentation; added a root-docs test and clarified the closeout wording. | `f1e7045` |
+| F3 | Fixed | Removed the duplicate `Design review status` / `Audit status` / `Status` request fields; `Record state` is the single state field in all three templates and the three XC records. | `f1e7045` |
+| F4 | Fixed | Removed the restated closeout sequence from `agent-workflow.md`; `AGENTS.md` §7.2 now links to the roadmap sizing section instead of repeating it. | `f1e7045` |
+| F5 | Fixed | `AGENTS.md` §7.1 now records `In audit` before `Done`; the `In audit` definition covers the frozen audit-request state. | `f1e7045` |
+| N1 | Fixed | Added six negative tests for the process checker (18 tool tests total). | `f1e7045` |
+| N2 | Fixed | `--closeout` now wins regardless of argument order; `--list` reports the selected mode. | `f1e7045` |
+| N3 | Fixed | Added the `Changes required` / `Fixes required` vocabulary mapping to `AGENTS.md` §3.15. | `f1e7045` |
+
+## Re-review request
+
+Round 2 target: `f1e7045feef8f83752941ff603503b40fb635410`.
+
+Round 1 verdict: `Passed with notes` at `92a7ea3`. The Minor findings and Notes above have been resolved at the
+round 2 target. The review request is otherwise unchanged.
+
+### Round 2 evidence
+
+### Round 2 findings
+
+### Round 2 verdict
 
 ## Human approval
 
