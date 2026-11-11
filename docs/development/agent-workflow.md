@@ -299,18 +299,9 @@ This playbook does not restate the gate sequences. The normative homes are:
 - incident and rollback: [`incident-and-rollback.md`](incident-and-rollback.md);
 - agent security: [`agent-security.md`](agent-security.md).
 
-The closeout sequence is:
-
-1. merge current `main` into the step branch;
-2. run `./tools/verify.sh all --require`;
-3. dispatch one closeout CI run and record its run ID and `head_sha`;
-4. fill and check `docs/planning/closeout/step-NN.json`;
-5. freeze the step branch and request the independent audit;
-6. if `main` moves after the freeze, merge it and re-run closeout and audit, or record a merge-tree CI run for the
-   final merge candidate. Never merge an untested combination.
-
-The gate summary and approval rules are in `AGENTS.md` §3.9–§3.15. The review and audit records are the durable
-evidence; this page is only the operating playbook.
+The closeout sequence, merge-tree rule, and approval rules are in `AGENTS.md` §3.4 and
+[`docs/planning/closeout/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/closeout/README.md).
+The review and audit records are the durable evidence; this page is only the operating playbook.
 
 ## 14. Changing the process
 

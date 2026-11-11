@@ -52,7 +52,7 @@ The step agent, planner, or human owner may spawn an auditor. The spawner must n
 2. The step branch is pushed and one closeout CI run is green. Do not run CI per feature; the closeout run is
    the only step-branch CI run.
 3. The step agent creates `docs/planning/audits/step-NN.md` on demand from the current template:
-   - status: `Ready for audit`
+   - record state: `Ready for audit`
    - exact audited commit
    - closeout CI run ID and full `head_sha`
    - `main` SHA at freeze
@@ -156,8 +156,7 @@ The closeout evidence is a separate machine-checkable file; see
 ## 8. Reviewer write scope
 
 - The reviewer may edit only `docs/planning/audits/step-NN.md`.
-- Within that file, the reviewer may edit its own metadata (`Auditor`, `Audit date`, `Audit status`), the
-  `Record state` field, the `Standard audit checklist` completion marks and inline verification notes (not item
+- Within that file, the reviewer may edit its own metadata (`Auditor`, `Audit date`) and the `Record state` field, the `Standard audit checklist` completion marks and inline verification notes (not item
   text), the `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
 - The reviewer must not edit the request scope, checklist item text, known notes, or resolutions owned by the
   step agent, and must not edit any other file.

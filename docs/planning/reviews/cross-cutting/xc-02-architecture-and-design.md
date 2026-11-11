@@ -12,7 +12,6 @@
 | Review ID | XC-02 |
 | Checkpoint | Phase B — Model definition (Steps 03–07) |
 | Type | Repository-wide architecture and design-status review |
-| Status | Planned — awaiting Step 07 completion |
 | Target commit | After the Step 07 merge and `step-07` tag, plus a docs-only checkpoint commit |
 | Request owner | Step agent / planner |
 | Orchestrator (implementor) | — |
@@ -158,7 +157,7 @@ Answer the three questions explicitly; a missing or unrecorded answer is a findi
 
 ## Record state
 
-**State:** Planned / Ready for review / In review / Fixes required / Re-review required / Passed / Passed with notes / Waived
+**State:** Planned — awaiting Step 07 completion
 
 `Re-review required` is a record state, not a verdict.
 

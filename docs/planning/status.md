@@ -11,7 +11,7 @@ remain in each step page; each step page also has a feature log.
 | **In progress** | Step branch exists and feature work is underway. |
 | **Blocked** | Work cannot continue until a named blocker is resolved. |
 | **Awaiting approval** | The step or audit round is frozen and waiting for human approval of the verdict, merge, or tag. |
-| **In audit** | The step branch is frozen and a fresh completion audit is running. |
+| **In audit** | The step branch is frozen at the audit request; a fresh completion audit is pending or running. |
 | **Done** | All acceptance criteria pass and the step is merged into `main`. |
 | **Deferred** | Intentionally postponed beyond the first parity release. |
 

@@ -32,7 +32,8 @@ The checker fails when:
 - the closeout CI run ID is missing;
 - the audit commit is not an ancestor of the merge candidate;
 - `main_sha_at_freeze` is not an ancestor of the merge candidate;
-- the merge candidate changes non-documentation files and no matching merge-tree CI run is recorded.
+- the merge candidate changes files outside `docs/` and the root guides (`AGENTS.md`, `README.md`,
+  `CONTRIBUTING.md`, `SECURITY.md`) and no matching merge-tree CI run is recorded.
 
 ## Merge-tree rule
 

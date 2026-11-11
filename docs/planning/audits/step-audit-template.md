@@ -1,8 +1,7 @@
 # Step NN Audit Request
 
 > Reviewer: write the evidence, findings, and verdict directly into
-> `docs/planning/audits/step-NN.md`. You may edit only your own metadata (`Auditor`, `Audit date`, `Audit
-> status`, `Record state`), the checklist completion marks and inline verification notes (not item text), the `Evidence`,
+> `docs/planning/audits/step-NN.md`. You may edit only your own metadata (`Auditor`, `Audit date`, `Record state`), the checklist completion marks and inline verification notes (not item text), the `Evidence`,
 > `Findings`, and `Verdict` sections, and commit only that file with a documentation-only message and
 > `[skip ci]`. Do not edit the request scope, checklist item text, resolutions, code, tests, configuration,
 > status dashboard, step page, or any other file.
@@ -15,7 +14,6 @@
 | Request owner | Step agent |
 | Orchestrator (step agent) | — |
 | Audit initiated by | Planner / implementor / human owner |
-| Audit status | Not requested |
 | Audited commit | — |
 | Step branch | — |
 | Step tag | — |

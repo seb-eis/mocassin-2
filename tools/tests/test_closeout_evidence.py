@@ -22,6 +22,7 @@ class CloseoutEvidenceTests(unittest.TestCase):
 
         self.base = self.commit("base.txt", "base\n", "base")
         self.docs = self.commit("docs/planning/note.md", "note\n", "docs")
+        self.root_docs = self.commit("AGENTS.md", "# Guide\n", "root docs")
         self.code = self.commit("code.py", "print('x')\n", "code")
 
     def tearDown(self) -> None:
@@ -51,6 +52,15 @@ class CloseoutEvidenceTests(unittest.TestCase):
 
     def test_valid_docs_only_candidate(self) -> None:
         self.assertEqual(check(self.root, self.evidence()), [])
+
+    def test_root_docs_candidate_is_documentation_only(self) -> None:
+        self.assertEqual(check(self.root, self.evidence(merge_candidate=self.root_docs)), [])
+
+    def test_unresolved_sha_reports_without_traceback(self) -> None:
+        missing = "f" * 40
+        path = self.evidence(audit_commit=missing, closeout_ci={"run_id": "123", "head_sha": missing})
+        errors = check(self.root, path)
+        self.assertTrue(any("does not resolve" in error for error in errors))
 
     def test_invalid_step_identifier(self) -> None:
         path = self.evidence(step="wp-03")

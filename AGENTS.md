@@ -565,6 +565,9 @@ Each rule has one normative home. Summaries link to it; do not copy it into a se
 | Code structure | `docs/development/code-structure.md` |
 | Closeout evidence | `docs/planning/closeout/README.md` |
 
+Design reviews use `Changes required`; audits and cross-cutting reviews use `Fixes required` for the equivalent
+failure state. Each family keeps its own vocabulary; the dashboard columns use the family's terms.
+
 Changing the process:
 
 1. Open a `docs/<slug>` branch from `main`.
@@ -772,8 +775,9 @@ Update status as follows:
   `Squashed` or `Done` after the squash; no per-feature approval is required.
 - **After squash:** the next feature or closeout feature records the squash commit and the local validation
   result. CI is not run per feature.
-- **Step completion:** the closeout feature records `Done`, the closeout CI result, and the main merge
-  reference. After the approved merge and a green main CI run, create and push the annotated `step-NN` tag.
+- **Step completion:** the closeout feature records `In audit`, the closeout CI result, the closeout evidence,
+  and the audit request. After the audit passes and the step is merged, set `Done`, record the main merge
+  reference, and create and push the annotated `step-NN` tag after a green main CI run.
 - **Milestones:** create the matching `milestone-mN` tag when the milestone is reached.
 - **Parity:** keep `appendix-b-parity-matrix.md` as the feature-level completeness source.
 
@@ -784,18 +788,9 @@ approval-report, and diff-review templates.
 
 ### 7.2 Step sizing and split triggers
 
-A step should be small enough to audit in one sitting and large enough to deliver a coherent outcome. Split a
-step before implementation, not during the audit, when:
-
-- it has more than roughly 6–8 features, or features with unrelated outcomes;
-- it is expected to take more than about four weeks for one implementor;
-- it has multiple independent acceptance stories;
-- it mixes low-risk documentation or tooling with high-risk contract, security, or solver work;
-- the audit cannot be read in one sitting.
-
-Record the size estimate and the split trigger in the step page at design time. If a step grows past the
-trigger, split it and update the roadmap before continuing. See
-[`docs/planning/04-roadmap.md`](docs/planning/04-roadmap.md).
+A step must be small enough to audit in one sitting. The size ranges and split triggers are in
+[`docs/planning/04-roadmap.md` §3.1](docs/planning/04-roadmap.md#31-step-sizing-and-split-triggers). Split before
+implementation, not during the audit.
 
 ## 8. Coding conventions
 

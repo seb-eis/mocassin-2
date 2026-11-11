@@ -61,7 +61,7 @@ The planner, implementor, or human owner may spawn a reviewer. The spawner must 
    edits directly.
 2. The docs are frozen at a specific commit.
 3. The step agent creates or updates `docs/planning/reviews/step-NN.md` from the template:
-   - status: `Ready for review`
+   - record state: `Ready for review`
    - reviewed commit
    - design decisions and scope
    - known limitations
@@ -118,8 +118,7 @@ verdict and a fresh review is pending.
 ## 8. Reviewer write scope
 
 - The reviewer may edit only `docs/planning/reviews/step-NN.md`.
-- Within that file, the reviewer may edit its own metadata (`Reviewer`, `Review date`, `Design review status`),
-  the `Record state` field, the three checklist sections (checkbox marks and short inline verification notes
+- Within that file, the reviewer may edit its own metadata (`Reviewer`, `Review date`) and the `Record state` field, the three checklist sections (checkbox marks and short inline verification notes
   only; not item text), the `Evidence` section, the `Findings` section, and the `Verdict` section for the current
   round.
 - The reviewer must not edit the request scope, checklist item text, known limitations, or resolutions owned by

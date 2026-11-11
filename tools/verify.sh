@@ -38,6 +38,7 @@ EOF
 
 mode="all"
 require_closeout=false
+closeout_requested=false
 list_modes=false
 
 for arg in "$@"; do
@@ -49,8 +50,7 @@ for arg in "$@"; do
       require_closeout=true
       ;;
     --closeout)
-      mode="all"
-      require_closeout=true
+      closeout_requested=true
       ;;
     --list)
       list_modes=true
@@ -67,19 +67,24 @@ for arg in "$@"; do
   esac
 done
 
+if [[ "$closeout_requested" == "true" ]]; then
+  mode="all"
+  require_closeout=true
+fi
+
 if [[ "$list_modes" == "true" ]]; then
-  cat <<'EOF'
-Modes:
-  all        dotnet + api + rust + python + docs + contracts
-  dotnet     restore, build, test, format
-  api        licence/vulnerability audit, ApiCompat
-  structure  architecture structure test
-  rust       fmt, clippy, test
-  python     pytest, package build
-  docs       link check, strict site build, DocFX/rustdoc
-  contracts  manifest/symmetry drift, process consistency, SPDX, secrets, cargo-deny
-  policy     api + contracts
-EOF
+  echo "Mode: $mode"
+  case "$mode" in
+    all) echo "  dotnet, api, rust, python, docs, contracts" ;;
+    dotnet) echo "  restore, build, test, format" ;;
+    api) echo "  licence/vulnerability audit, ApiCompat" ;;
+    structure) echo "  architecture structure test" ;;
+    rust) echo "  fmt, clippy, test" ;;
+    python) echo "  pytest, package build" ;;
+    docs) echo "  link check, strict site build, DocFX/rustdoc" ;;
+    contracts) echo "  manifest/symmetry drift, process consistency, SPDX, secrets, cargo-deny" ;;
+    policy) echo "  api + contracts" ;;
+  esac
   exit 0
 fi
 

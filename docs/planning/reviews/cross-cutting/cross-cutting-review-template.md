@@ -13,7 +13,6 @@
 | Review ID | XC-NN |
 | Checkpoint | Phase —<br>Steps — |
 | Type | Repository-wide review |
-| Status | Planned |
 | Target commit | — |
 | Request owner | Step agent / planner |
 | Orchestrator (implementor) | — |

@@ -19,6 +19,7 @@ from pathlib import Path
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
 STEP_RE = re.compile(r"^step-\d{2}$")
 DOC_PREFIXES = ("docs/",)
+DOC_FILES = ("AGENTS.md", "README.md", "CONTRIBUTING.md", "SECURITY.md")
 
 
 def git(root: Path, *args: str) -> str:
@@ -71,6 +72,7 @@ def check(root: Path, evidence_path: Path) -> list[str]:
     candidate = data["merge_candidate"]
     merge_tree = data.get("merge_tree_ci") or {}
 
+    invalid_sha = False
     for name, sha in (
         ("audit_commit", audit),
         ("closeout_ci.head_sha", closeout_sha),
@@ -79,8 +81,13 @@ def check(root: Path, evidence_path: Path) -> list[str]:
     ):
         if not SHA_RE.match(sha or ""):
             errors.append(f"{name} is not a full 40-character commit SHA: {sha!r}")
+            invalid_sha = True
         elif not commit_exists(root, sha):
             errors.append(f"{name} does not resolve to a commit: {sha}")
+            invalid_sha = True
+
+    if invalid_sha:
+        return errors
 
     if audit != closeout_sha:
         errors.append("audit_commit and closeout_ci.head_sha differ")
@@ -93,7 +100,9 @@ def check(root: Path, evidence_path: Path) -> list[str]:
 
     if SHA_RE.match(candidate or "") and SHA_RE.match(main_sha or ""):
         changed = git(root, "diff", "--name-only", f"{audit}..{candidate}").splitlines()
-        code_changes = [path for path in changed if not path.startswith(DOC_PREFIXES)]
+        code_changes = [
+            path for path in changed if path not in DOC_FILES and not path.startswith(DOC_PREFIXES)
+        ]
         if code_changes:
             merge_sha = merge_tree.get("head_sha", "") if isinstance(merge_tree, dict) else ""
             if merge_sha != candidate:

@@ -12,7 +12,6 @@
 | --- | --- |
 | Review ID | `POLICY-2026-11-11` |
 | Type | Process and workflow policy update |
-| Status | Ready for review |
 | Target commit | `92a7ea372be21bc7c0cb557d4a799b174aeef9a9` |
 | Request owner | Planner / implementor |
 | Orchestrator (implementor) | Step agent |

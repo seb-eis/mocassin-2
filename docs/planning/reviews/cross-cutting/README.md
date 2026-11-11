@@ -65,7 +65,7 @@ Each review uses the same round-based process as design reviews and implementati
    file with `[skip ci]`.
 4. If the reviewer reports findings, the orchestrator fixes the repository state on a maintenance branch,
    updates the appropriate design/process/docs artifact, adds resolutions to the record without altering
-   reviewer text, sets the status to `Re-review required`, and records the new commit.
+   reviewer text, sets the record state to `Re-review required`, and records the new commit.
 5. A fresh reviewer re-reviews the new commit. The same reviewer may continue only if it stayed read-only and
    did not participate in the remediation; otherwise use a fresh context. Append a new round.
 6. Repeat until the reviewer no longer identifies Blocker/Major issues. The human owner approves the final
