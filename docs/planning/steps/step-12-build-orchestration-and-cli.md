@@ -119,6 +119,11 @@ public sealed record BuildFailed(string Stage, string Message, int ExitCode) : B
 - `--json` returns `{ "ok": false, "exitCode": 1, "diagnostics": [...] }`.
 - Human output includes the stage, object path, and hint.
 
+Build orchestration calls `ProjectValidationPipeline.ValidateFileAsync` with `RunBuildStage = true` and appends
+its own `IValidationStage` (`Stage = Build`) checks; `validate` uses the same entry with `RunBuildStage = false`.
+The `validate` subcommand keeps the Step 07 `validation-v1` report and exit-code contract; the build command
+keeps the table above.
+
 ### 4. Progress reporting
 
 Human mode:

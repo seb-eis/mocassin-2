@@ -294,6 +294,11 @@ public interface ILatticePreviewService
 | `JOB014` | Warning | Supercell positions exceed 100,000 |
 | `JOB015` | Error | Inherited settings missing a required value |
 
+Build-stage integration: job-template/supercell checks plug into the Step 07 pipeline as an `IValidationStage`
+with `Stage = Build`, run only when `ValidationOptions.RunBuildStage` is true and earlier stages produced no
+errors, and register their `JOB` codes in the Step 07 `DiagnosticCatalog` at that point. Step 07 does not stub
+`JOB` codes.
+
 ## Implementation tasks
 
 - [ ] Implement job template/collection/config records and inheritance.

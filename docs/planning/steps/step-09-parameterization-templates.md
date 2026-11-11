@@ -185,6 +185,10 @@ When the model signature changes:
 | `PRM009` | Info | Template rebased; N entries copied, M dropped |
 | `PRM010` | Warning | Duplicate template name |
 
+Build-stage integration: parameterization checks plug into the Step 07 pipeline as an `IValidationStage` with
+`Stage = Build`, run only when `ValidationOptions.RunBuildStage` is true and earlier stages produced no errors,
+and return `PRM` diagnostics through the shared `DiagnosticCatalog`.
+
 ## Implementation tasks
 
 - [ ] Implement parameterization records and stable identity derivation.
