@@ -277,6 +277,91 @@ default stable environment plus empty collections are omitted on write so pre-St
 For authoring guidance see [Energy model](../user-guide/energy.md). The ceria and barium-zirconate samples
 include energy sections and are mirrored in `tests/contracts/`.
 
+## Lattice and doping (Step 06 fields)
+
+Step 06 adds two flat lattice sections. Missing sections load as empty, and empty arrays are omitted on write so
+pre-Step-06 model and document hashes stay stable.
+
+```json
+{
+  "occupationExchanges": [
+    { "id": "…", "name": "Ce4+ -> Ce3+", "siteId": "…", "sourceParticleId": "…", "targetParticleId": "…" }
+  ],
+  "dopings": [
+    {
+      "id": "…",
+      "name": "Reduce ceria",
+      "priority": 0,
+      "primaryExchangeId": "…",
+      "dependentExchangeId": "…",
+      "chargeCompensation": true
+    }
+  ]
+}
+```
+
+- `occupationExchanges` sort by `id`; `dopings` sort by ascending `priority` and then `id`.
+- Occupation-exchange and doping names are unique case-insensitively within their collection.
+- `priority` is unique and in `0..9999`; the order is the deterministic application order.
+- `dependentExchangeId` is absent when `chargeCompensation` is `false`. When compensation is `true`, it is
+  required and the primary/dependent charge deltas must be non-zero with opposite signs.
+- The default building block is derived (first particle of a stable site's set, void on unstable sites) and is
+  never persisted.
+- Model-level validation covers `LAT001`–`LAT011`. Fractions, supercells, truncation, compensation counts, and
+  previews belong to Step 10 (`JOB004`–`JOB015`).
+
+## Simulations (Step 06 fields)
+
+The `simulations` array holds KMC and MMC definitions. The persisted record is a flat object with a `settings`
+object; only the matching transition array and kind-specific settings are present.
+
+```json
+{
+  "simulations": [
+    {
+      "id": "…",
+      "name": "O migration 773 K",
+      "kind": "kmc",
+      "kineticTransitionIds": ["…"],
+      "settings": {
+        "temperatureK": 773.0,
+        "targetMcsp": 200,
+        "writeOutCount": 100,
+        "timeLimitSeconds": 31536000,
+        "minSuccessRate": null,
+        "jobCount": 12,
+        "rngSeed": null,
+        "executionFlags": ["noJumpLogging"],
+        "instruction": null,
+        "preRunMcsp": 250,
+        "electricFieldModulusVm": 1.0e7,
+        "electricFieldDirection": [1.0, 0.0, 0.0],
+        "normalizationEnergyEv": null,
+        "maxAttemptFrequencyHz": null
+      }
+    }
+  ]
+}
+```
+
+- `kind` is `kmc` or `mmc` and must agree with the concrete record, transition array, and kind-specific
+  settings (`SIM023`).
+- `kineticTransitionIds` and `metropolisTransitionIds` preserve authored order and may not contain duplicate
+  `(kind, id)` references. A simulation may reference transitions used by other simulations.
+- `executionFlags` is a sorted array of `noSaving`, `noJumpLogging`, `useFastExp`, and `deterministic`; the
+  empty array means `None`. The `.msl` payload uses the separate `SolverJobFlags` word, including the derived
+  kind, pre-run, and dual-DOF bits.
+- `minSuccessRate` `0` canonicalizes to `null`; an empty `rngSeed` canonicalizes to `null`; KMC
+  `normalizationEnergyEv` `0.0` canonicalizes to `null`.
+- Simulation names are unique case-insensitively (`SIM009`). Step 06 owns `SIM001`–`SIM037`; job expansion,
+  effective counts, and package writing belong to Steps 10/11.
+- The generated schema keeps optional kind-specific fields because the contract generator has no
+  `oneOf`/discriminator support. The validator, not the schema, rejects a mismatched kind shape.
+
+For authoring guidance see [Lattice and doping](../user-guide/lattice.md) and
+[Simulations](../user-guide/simulations.md). The populated sample projects are mirrored in `tests/contracts/`
+as `project-lattice-populated.mocprj` and `project-simulations-populated.mocprj`.
+
 ## Model and templates in Step 01 (historical)
 
 Step 01 deliberately establishes the project envelope before the scientific model domains. At that

@@ -5,7 +5,8 @@ Reference material for the CLI, file formats, diagnostics, and repository toolin
 ## Sections
 
 - [Repository and file layout](file-layout.md) — source trees, generated artifacts, and the planning exclusion.
-- [Project format](project-format.md) — `.mocprj` envelope, IDs, units, canonicalization, migrations, atomic save.
+- [Project format](project-format.md) — `.mocprj` envelope, IDs, units, canonicalization, migrations, atomic save,
+  including the Step 06 lattice/doping and simulation sections.
 - [Transitions](transitions.md) — transition fields, semantic ordering, path matching, preview, and the `TRN` diagnostics.
 - [Energy](energy.md) — environments, filters, clusters, site energies, ordering, limits, `GeometryId`/`EnergyId`.
 - **CLI** — `mocassin` and `mocassin-sim` commands, options, exit codes, and JSON events (added with Steps

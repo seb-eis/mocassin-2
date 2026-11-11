@@ -84,9 +84,9 @@ Status legend:
 | Cluster geometry editor/preview | Y | Partial | 05/25 | Preview API in 05; editor UI in 25 |
 | Site energy matrix + bulk edit | Y | Improvement | 25 | |
 | Default building block viewer | Y | Planned | 25 | |
-| Occupation exchanges | Y | Planned | 06 | |
-| Ordered dopings/priorities | Y | Planned | 06/10 | |
-| Counter-doping/charge compensation | Y | Planned | 06/10 | |
+| Occupation exchanges | Y | Partial | 06/25 | Model, validation, persistence, query, and editor API in 06; editor UI in 25 |
+| Ordered dopings/priorities | Y | Partial | 06/10/25 | Unique priorities, deterministic order, persistence, and editing in 06; fraction application in 10; editor UI in 25 |
+| Counter-doping/charge compensation | Y | Partial | 06/10/25 | Shape/sign validation and persistence in 06; integer ratios and applied counts in 10; editor UI in 25 |
 | Doping truncation semantics | Y | Planned | 10 | Reported |
 | Deterministic lattice generation | Y | Improvement | 10 | Fixes shared crypto RNG |
 | Doping preview (requested vs applied) | Y | Improvement | 25 | |
@@ -95,10 +95,10 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| MMC simulation definition | Y | Planned | 06 | |
-| KMC simulation definition | Y | Planned | 06 | |
-| All original simulation settings | Y | Planned | 06 | |
-| Transition assignment | Y | Planned | 06/25 | Kind-filtered |
+| MMC simulation definition | Y | Partial | 06/17/25 | Model, defaults, limits, persistence, query, and editor API in 06; solver in 17; editor UI in 25 |
+| KMC simulation definition | Y | Partial | 06/16/25 | Model, defaults, limits, persistence, query, and editor API in 06; solver in 16; editor UI in 25 |
+| All original simulation settings | Y | Partial | 06/25 | Settings, defaults, hard limits, and recommended bands in 06; editor UI in 25 |
+| Transition assignment | Y | Partial | 06/25 | Authored-order, kind-filtered assignment and duplicate rejection in 06; multi-select UI in 25 |
 | Parameterization template creation | Y | Planned | 09 | |
 | Pair/group energy editing | Y | Planned | 09/26 | |
 | Attempt frequency editing | Y | Planned | 09/26 | |

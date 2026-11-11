@@ -143,6 +143,36 @@ Definition-level energy validation belongs to `Mocassin.Core.Model.Energy.Energy
 catalog/cell/encoder rules belong to `Mocassin.Symmetry.Energy.EnergyGeometryValidator`. `ProjectValidationService`
 composes both with the structure and transition validators.
 
+## Lattice and simulation stage (Step 06 input, Steps 10/11)
+
+Step 06 defines the authored lattice/doping and simulation input consumed by job expansion and package writing:
+
+- occupation exchanges and ordered dopings, including charge-compensation shape;
+- the derived default building block;
+- KMC and MMC settings, defaults, hard limits, authored-order transition assignments, and execution flags.
+
+`Mocassin.Core.Model.Lattice.LatticeModelValidator` owns `LAT001`–`LAT011`; it validates only the model graph
+and never needs a fraction, supercell, or applied count. `Mocassin.Core.Model.Simulations.SimulationModelValidator`
+owns `SIM001`–`SIM037`, including kind/transition compatibility, defaults, hard limits, recommended bands, and
+the canonical settings values. `ProjectValidationService` composes both with the existing Core and Symmetry
+validators.
+
+Step 10 expands the simulations into jobs, applies doping fractions in priority order, generates the single
+shared supercell, computes effective job counts, and owns the preview service. Step 06 exposes no lattice or
+job-count preview, so there is only one truncation/compensation implementation.
+
+Step 11 composes the `.msl` `SolverJobFlags` word. The composition boundary is intentional:
+
+```text
+Compilation intent (Kind, PreRunMcsp, UseDualDofCorrection)
+  -> Packages job builder
+     -> Mocassin.Contracts.SolverJobFlags
+```
+
+`Mocassin.Compilation` does not reference `Mocassin.Contracts`. `SolverJobFlagsMapper` maps the four authored
+execution flags and adds the derived KMC/MMC, pre-run, and dual-DOF bits. Steps 14 and 16 consume the resulting
+bits; the project array never contains a derived flag.
+
 ## Test tiers
 
 - **PR-fast:** catalog integrity, group laws, synthetic P1/pair/cluster cases, cell geometry, minimum

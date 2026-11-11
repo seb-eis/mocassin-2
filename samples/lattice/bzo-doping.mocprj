@@ -1,0 +1,191 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b02",
+  "masterSeed": "cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+  "name": "Barium zirconate Y doping",
+  "description": "Yttrium acceptor doping on the Zr site with oxygen-vacancy compensation.",
+  "createdUtc": "2026-11-08T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-08T12:00:00.0000000Z",
+  "model": {
+    "particles": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b10",
+        "name": "Ba2+",
+        "symbol": "Ba",
+        "charge": 2,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b11",
+        "name": "Zr4+",
+        "symbol": "Zr",
+        "charge": 4,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b12",
+        "name": "Y3+",
+        "symbol": "Y",
+        "charge": 3,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b13",
+        "name": "O2-",
+        "symbol": "O",
+        "charge": -2,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b14",
+        "name": "Oxygen vacancy",
+        "symbol": "Vc",
+        "charge": 0,
+        "isVacancy": true
+      }
+    ],
+    "particleSets": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b20",
+        "name": "A site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b10"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b21",
+        "name": "B site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b11",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b12"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b22",
+        "name": "Oxygen site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b13",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b14"
+        ]
+      }
+    ],
+    "structure": {
+      "name": "Barium zirconate",
+      "spaceGroup": {
+        "number": 221,
+        "axis": "none",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 4.19,
+        "b": 4.19,
+        "c": 4.19,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90
+      },
+      "sites": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b30",
+          "name": "Ba",
+          "fractional": [
+            0,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b20",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b31",
+          "name": "Zr",
+          "fractional": [
+            0.5,
+            0.5,
+            0.5
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b21",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b32",
+          "name": "O",
+          "fractional": [
+            0.5,
+            0.5,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b22",
+          "stability": "stable"
+        }
+      ]
+    },
+    "occupationExchanges": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b40",
+        "name": "Zr4+ -> Y3+",
+        "siteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b31",
+        "sourceParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b11",
+        "targetParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b12"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b41",
+        "name": "O2- -> VO",
+        "siteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b32",
+        "sourceParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b13",
+        "targetParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b14"
+      }
+    ],
+    "dopings": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b50",
+        "name": "Yttrium acceptor doping",
+        "priority": 0,
+        "primaryExchangeId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b40",
+        "dependentExchangeId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b41",
+        "chargeCompensation": true
+      }
+    ]
+  },
+  "parameterizations": [],
+  "jobTemplates": [],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}

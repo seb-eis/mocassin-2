@@ -592,6 +592,206 @@
             ],
             "additionalProperties": false
           }
+        },
+        "occupationExchanges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "siteId": {
+                "type": "string"
+              },
+              "sourceParticleId": {
+                "type": "string"
+              },
+              "targetParticleId": {
+                "type": "string"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "siteId",
+              "sourceParticleId",
+              "targetParticleId"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "dopings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "priority": {
+                "type": "integer"
+              },
+              "primaryExchangeId": {
+                "type": "string"
+              },
+              "dependentExchangeId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "chargeCompensation": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "priority",
+              "primaryExchangeId",
+              "chargeCompensation"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "simulations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "kmc",
+                  "mmc"
+                ]
+              },
+              "kineticTransitionIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "metropolisTransitionIds": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "settings": {
+                "type": "object",
+                "properties": {
+                  "temperatureK": {
+                    "type": "number"
+                  },
+                  "targetMcsp": {
+                    "type": "integer"
+                  },
+                  "writeOutCount": {
+                    "type": "integer"
+                  },
+                  "timeLimitSeconds": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "minSuccessRate": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "jobCount": {
+                    "type": "integer"
+                  },
+                  "rngSeed": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "executionFlags": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "noSaving",
+                        "noJumpLogging",
+                        "useFastExp",
+                        "deterministic"
+                      ]
+                    }
+                  },
+                  "instruction": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "preRunMcsp": {
+                    "type": "integer"
+                  },
+                  "electricFieldModulusVm": {
+                    "type": "number"
+                  },
+                  "electricFieldDirection": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    },
+                    "minItems": 3,
+                    "maxItems": 3
+                  },
+                  "normalizationEnergyEv": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "maxAttemptFrequencyHz": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
+                  },
+                  "breakTolerance": {
+                    "type": "number"
+                  },
+                  "breakSampleLengthMcsp": {
+                    "type": "integer"
+                  },
+                  "breakSampleIntervalMcsp": {
+                    "type": "integer"
+                  },
+                  "resultSampleMcsp": {
+                    "type": "integer"
+                  }
+                },
+                "required": [],
+                "additionalProperties": false
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "kind"
+            ],
+            "additionalProperties": false
+          }
         }
       },
       "required": [],

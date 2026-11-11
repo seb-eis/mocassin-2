@@ -115,6 +115,10 @@ def validate_field(field: dict[str, Any], context: str) -> None:
             f"{context}.{name}: enum values must be JSON primitives",
         )
 
+    if "nullable" in field:
+        require(isinstance(field["nullable"], bool), f"{context}.{name}: nullable must be a boolean")
+        require(field_type != "nil", f"{context}.{name}: nullable is not valid for nil fields")
+
     if "fields" in field:
         require(field_type == "object", f"{context}.{name}: fields are only valid for object types")
         validate_fields(field["fields"], f"{context}.{name}.fields", allow_empty=True)
@@ -263,6 +267,20 @@ def with_enum(schema: dict[str, Any], field: dict[str, Any]) -> dict[str, Any]:
 
 
 def json_schema_type(field: dict[str, Any]) -> dict[str, Any]:
+    """Map a manifest field descriptor to a JSON Schema fragment, including nullable support."""
+    schema = _json_schema_type(field)
+    if field.get("nullable"):
+        type_value = schema.get("type")
+        if isinstance(type_value, str):
+            schema["type"] = [type_value, "null"]
+        elif isinstance(type_value, list):
+            schema["type"] = [*type_value, "null"]
+        if "enum" in schema and None not in schema["enum"]:
+            schema["enum"] = [*schema["enum"], None]
+    return schema
+
+
+def _json_schema_type(field: dict[str, Any]) -> dict[str, Any]:
     """Map a manifest field descriptor to a JSON Schema fragment."""
     field_type = field["type"]
     if field_type == "uint64":

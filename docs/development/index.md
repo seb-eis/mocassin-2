@@ -36,6 +36,8 @@ The detailed architecture is in the internal plan; the repository layout is summ
 - [Architecture](architecture.md) — immutable domain kernel, dependency direction, project store/edit split.
 - [Code structure](code-structure.md) — folder ownership, file naming, limits, and the structure test.
 - [Design decisions](design-decisions.md) — stable IDs, explicit units, canonical hashing, locking, and schema ownership.
+- [Compilation pipeline](compilation-pipeline.md) — symmetry, transitions, energy, lattice/simulation input, and how
+  Step 10/11 consume it.
 - [Contributing](contributing.md) — branches, review gates, local quality gates, tests, and docs-as-code.
 - [Agent workflow](agent-workflow.md) — context handoff, prompts, evidence reports, and diff review.
 - [Testing and parity](testing-and-parity.md) — testing trophy, mocks/fakes policy, fixtures, and test tiers.

@@ -23,8 +23,17 @@ public sealed class ProjectSchemaTests
         "tests/contracts/project-transitions-populated.mocprj",
         "tests/contracts/project-energy-minimal.mocprj",
         "tests/contracts/project-energy-populated.mocprj",
+        "tests/contracts/project-lattice-minimal.mocprj",
+        "tests/contracts/project-lattice-populated.mocprj",
+        "tests/contracts/project-simulations-minimal.mocprj",
+        "tests/contracts/project-simulations-populated.mocprj",
         "samples/blank/blank.mocprj",
         "samples/ceria/ceria.mocprj",
+        "samples/lattice/ceria-reduction.mocprj",
+        "samples/lattice/ceria-hydration.mocprj",
+        "samples/lattice/bzo-doping.mocprj",
+        "samples/simulations/ceria-kmc.mocprj",
+        "samples/simulations/ceria-mmc.mocprj",
     ];
 
     private static readonly JsonSchema projectSchema = JsonSchema.FromText(
@@ -79,6 +88,85 @@ public sealed class ProjectSchemaTests
         Assert.True(populatedModel.TryGetProperty("unstableEnvironments", out _));
         Assert.True(populatedModel.TryGetProperty("clusters", out _));
         Assert.True(populatedModel.TryGetProperty("siteEnergies", out _));
+    }
+
+    [Fact]
+    public void LatticeFixturesCoverEmptyAndPopulatedModels()
+    {
+        var minimal = JsonDocument.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-lattice-minimal.mocprj")));
+        var populated = JsonDocument.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-lattice-populated.mocprj")));
+        var minimalModel = minimal.RootElement.GetProperty("model");
+        var populatedModel = populated.RootElement.GetProperty("model");
+
+        Assert.False(minimalModel.TryGetProperty("occupationExchanges", out _));
+        Assert.False(minimalModel.TryGetProperty("dopings", out _));
+
+        Assert.True(populatedModel.TryGetProperty("occupationExchanges", out _));
+        Assert.True(populatedModel.TryGetProperty("dopings", out _));
+    }
+
+    [Fact]
+    public void SimulationFixturesCoverEmptyAndPopulatedModels()
+    {
+        var minimal = JsonDocument.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-simulations-minimal.mocprj")));
+        var populated = JsonDocument.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-simulations-populated.mocprj")));
+        var minimalModel = minimal.RootElement.GetProperty("model");
+        var populatedModel = populated.RootElement.GetProperty("model");
+
+        Assert.False(minimalModel.TryGetProperty("simulations", out _));
+        var simulations = populatedModel.GetProperty("simulations");
+        Assert.Equal(2, simulations.GetArrayLength());
+        Assert.Equal("kmc", simulations[0].GetProperty("kind").GetString());
+        Assert.Equal("mmc", simulations[1].GetProperty("kind").GetString());
+    }
+
+    [Fact]
+    public void SchemaRejectsUnknownLatticeField()
+    {
+        var root = JsonNode.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-lattice-populated.mocprj")))!.AsObject();
+        root["model"]!["occupationExchanges"]![0]!["unexpected"] = true;
+
+        using var document = JsonDocument.Parse(root.ToJsonString());
+        var result = projectSchema.Evaluate(document.RootElement);
+
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public void SchemaRejectsUnknownSimulationField()
+    {
+        var root = JsonNode.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-simulations-populated.mocprj")))!.AsObject();
+        root["model"]!["simulations"]![0]!["settings"]!["unexpected"] = true;
+
+        using var document = JsonDocument.Parse(root.ToJsonString());
+        var result = projectSchema.Evaluate(document.RootElement);
+
+        Assert.False(result.IsValid);
+    }
+
+    [Fact]
+    public void SchemaAcceptsNullSimulationSettings()
+    {
+        var root = JsonNode.Parse(
+            File.ReadAllText(RepositoryPaths.Combine("tests", "contracts", "project-simulations-populated.mocprj")))!.AsObject();
+        var settings = root["model"]!["simulations"]![0]!["settings"]!.AsObject();
+        settings["timeLimitSeconds"] = null;
+        settings["minSuccessRate"] = null;
+        settings["rngSeed"] = null;
+        settings["instruction"] = null;
+        settings["normalizationEnergyEv"] = null;
+        settings["maxAttemptFrequencyHz"] = null;
+
+        using var document = JsonDocument.Parse(root.ToJsonString());
+        var result = projectSchema.Evaluate(document.RootElement);
+
+        Assert.True(result.IsValid, result.ToString());
     }
 
     [Fact]

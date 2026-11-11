@@ -7,18 +7,23 @@ validation.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
-- **Step CI:** —
+- **Status:** In progress
+- **Step branch:** `step/06-lattice-and-simulation-models`
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Passed with notes at `c390dcc` (code frozen at `ea6293e`); F1 and N1/N3 awaiting human acceptance
 - **Design review:** [Ready with notes — accepted at `6173e61`](../reviews/step-06.md)
-- **Last updated:** 2026-11-10
+- **Last updated:** 2026-11-11
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| `lattice-model` | `feature/step-06-lattice-and-simulation-models/lattice-model` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `bc333f3` |
+| `simulation-model` | `feature/step-06-lattice-and-simulation-models/simulation-model` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `1c64c96` |
+| `persistence-and-contracts` | `feature/step-06-lattice-and-simulation-models/persistence-and-contracts` | Done | `verify.sh dotnet`, `contracts`, `api`, `structure` pass | — | `48e1f20` |
+| `queries-and-editing` | `feature/step-06-lattice-and-simulation-models/queries-and-editing` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `cfeb7b6` |
+| `samples-and-docs` | `feature/step-06-lattice-and-simulation-models/samples-and-docs` | Done | `verify.sh dotnet`, `docs`, `structure` pass | — | `46ea087` |
+| `closeout` | `feature/step-06-lattice-and-simulation-models/closeout` | Done | `verify.sh all` pass | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | `ea6293e` |
 
 ## Goal
 
@@ -505,73 +510,73 @@ Samples live under `samples/lattice/` and `samples/simulations/`. The new user-g
 
 ## Implementation tasks
 
-- [ ] Extend `ModelDefinition` with the flat lattice/simulation sections and empty defaults; update
+- [x] Extend `ModelDefinition` with the flat lattice/simulation sections and empty defaults; update
   `ModelDefinitionJsonConverter`, the nested `ProjectJsonContext`, `ProjectJson.CanonicalizeModel`,
   `ProjectValidator`, and `ProjectHasher`.
-- [ ] Add save/load and document-hash tests proving the new sections survive `ProjectJsonConverter.Write` and
+- [x] Add save/load and document-hash tests proving the new sections survive `ProjectJsonConverter.Write` and
   change `ProjectHasher.Compute`/`ComputeDocument`; cover empty-array omission and a pre-Step-06 hash-stability
   fixture.
-- [ ] Canonicalize equivalent simulation settings before save/hash: `minSuccessRate` 0 -> null, empty
+- [x] Canonicalize equivalent simulation settings before save/hash: `minSuccessRate` 0 -> null, empty
   `rngSeed` -> null, `normalizationEnergyEv` 0.0 -> null.
-- [ ] Implement `OccupationExchange`, `Doping`, `BuildingBlockEntry`, and the derived default building block.
-- [ ] Implement charge-delta calculation and compensation sign/zero validation.
-- [ ] Implement `ILatticeQuery`, `ISimulationQuery`, and their `IProjectQuery`/`Project` integration.
-- [ ] Implement `Simulation`, `KineticSimulation`, `MetropolisSimulation`, `SimulationKind`, `ExecutionFlags`,
+- [x] Implement `OccupationExchange`, `Doping`, `BuildingBlockEntry`, and the derived default building block.
+- [x] Implement charge-delta calculation and compensation sign/zero validation.
+- [x] Implement `ILatticeQuery`, `ISimulationQuery`, and their `IProjectQuery`/`Project` integration.
+- [x] Implement `Simulation`, `KineticSimulation`, `MetropolisSimulation`, `SimulationKind`, `ExecutionFlags`,
   and the sorted-camelCase-array/u32 flag converter.
-- [ ] Implement transition-kind compatibility, authored-order transition lists, duplicate-reference rejection,
+- [x] Implement transition-kind compatibility, authored-order transition lists, duplicate-reference rejection,
   and the flat persisted simulation shape.
-- [ ] Implement simulation defaults, hard limits, recommended-band warnings, and seed validation.
-- [ ] Implement editor operations in partial `ProjectEditor.Lattice.cs`/`ProjectEditor.Simulations.cs`.
-- [ ] Add the Core lattice/simulation diagnostic codes and help text for `LAT001`–`LAT011` and
+- [x] Implement simulation defaults, hard limits, recommended-band warnings, and seed validation.
+- [x] Implement editor operations in partial `ProjectEditor.Lattice.cs`/`ProjectEditor.Simulations.cs`.
+- [x] Add the Core lattice/simulation diagnostic codes and help text for `LAT001`–`LAT011` and
   `SIM001`–`SIM037`.
-- [ ] Update `contracts/manifest.json`: set `status` to `step-06`, rewrite `notes`, add the lattice/doping and
+- [x] Update `contracts/manifest.json`: set `status` to `step-06`, rewrite `notes`, add the lattice/doping and
   simulation model fields, add the `project-lattice-minimal`, `project-lattice-populated`,
   `project-simulations-minimal`, and `project-simulations-populated` fixtures, and refresh
   `contracts/generated/fixtures/descriptors.json` and the generated project schema. Keep the flat-object
   simulation shape (the generator has no `oneOf`/discriminator support) and document the additive-v1/ADR 0009
   reconciliation.
-- [ ] Define the `SolverJobFlags` contract and bit table in `Mocassin.Contracts` (authored bits plus the
+- [x] Define the `SolverJobFlags` contract and bit table in `Mocassin.Contracts` (authored bits plus the
   compiler-derived `useDualDofCorrection`, `usePrerun`, and kind bits), with the mapping tests shared by Step
   11.
-- [ ] Add XML docs, update `PublicAPI.Unshipped.txt` (including `Mocassin.Contracts`), and refresh the
+- [x] Add XML docs, update `PublicAPI.Unshipped.txt` (including `Mocassin.Contracts`), and refresh the
   ApiCompat baseline for every new public type and member.
-- [ ] Add `SPDX-License-Identifier: MIT` to every new `.cs` file; no new third-party dependency.
-- [ ] Add ceria reduction/hydration and barium-zirconate doping samples.
-- [ ] Add KMC/MMC simulation samples covering the documented defaults and a non-default configuration.
-- [ ] Add the new user-guide/reference pages to `zensical.toml` navigation and to `docs/user-guide/index.md`,
+- [x] Add `SPDX-License-Identifier: MIT` to every new `.cs` file; no new third-party dependency.
+- [x] Add ceria reduction/hydration and barium-zirconate doping samples.
+- [x] Add KMC/MMC simulation samples covering the documented defaults and a non-default configuration.
+- [x] Add the new user-guide/reference pages to `zensical.toml` navigation and to `docs/user-guide/index.md`,
   `docs/reference/index.md`, `docs/development/index.md`, and `samples/README.md`.
-- [ ] Update the parity matrix rows for occupation exchanges, dopings, charge compensation, simulation kinds,
+- [x] Update the parity matrix rows for occupation exchanges, dopings, charge compensation, simulation kinds,
   settings, defaults, and limits to `Implemented`/`Partial` as appropriate; leave generation/preview rows with
   Step 10 and the editors with Step 25.
-- [ ] At closeout, update `docs/planning/status.md`, the Step 06 status block, and
+- [x] At closeout, update `docs/planning/status.md`, the Step 06 status block, and
   `docs/planning/audits/step-06.md` (including the step-specific checklist: add round-trip, schema, PublicAPI,
   defaults/limits, and ordering items; remove the lattice-preview item, which moves to Step 10), run
   `./tools/verify.sh all`, dispatch the single Ubuntu closeout CI run, and record the run.
-- [ ] Add a task to Step 10 for the shared lattice/job-count preview service and its tests; Step 06 does not
+- [x] Add a task to Step 10 for the shared lattice/job-count preview service and its tests; Step 06 does not
   implement a preview.
 
 ## Acceptance criteria
 
-- [ ] The ceria reduction doping (Ce⁴⁺→Ce³⁺ primary, O²⁻→V_O dependent) validates at the model level: both
+- [x] The ceria reduction doping (Ce⁴⁺→Ce³⁺ primary, O²⁻→V_O dependent) validates at the model level: both
   deltas are non-zero and opposite in sign, and the derived building block is exposed.
-- [ ] An isovalent doping without a dependent exchange validates.
-- [ ] A dependent exchange with the wrong charge sign is rejected with `LAT009`.
-- [ ] Doping priorities are unique, in `0..9999`, and serialize in ascending order; duplicates are `LAT006`.
-- [ ] A KMC simulation cannot select an MMC transition, and vice versa (`SIM002`).
-- [ ] All original simulation settings are represented: temperature, target MCSP, write-out count, time limit,
+- [x] An isovalent doping without a dependent exchange validates.
+- [x] A dependent exchange with the wrong charge sign is rejected with `LAT009`.
+- [x] Doping priorities are unique, in `0..9999`, and serialize in ascending order; duplicates are `LAT006`.
+- [x] A KMC simulation cannot select an MMC transition, and vice versa (`SIM002`).
+- [x] All original simulation settings are represented: temperature, target MCSP, write-out count, time limit,
   min success rate, job count, RNG seed, execution flags, KMC pre-run/field/normalization/max frequency, and
   MMC break tolerance/sample length/interval/result sample.
-- [ ] New simulations use the documented defaults, and every hard range and recommended band has a diagnostic
+- [x] New simulations use the documented defaults, and every hard range and recommended band has a diagnostic
   and a boundary test.
-- [ ] The lattice/simulation sections round-trip through the project JSON context, the canonical model, save,
+- [x] The lattice/simulation sections round-trip through the project JSON context, the canonical model, save,
   and load; dopings preserve priority order and simulations preserve kind-specific settings and authored-order
   transition arrays.
-- [ ] Lattice/simulation edits change `ProjectHasher.Compute` and `ComputeDocument`; no section is dropped by
+- [x] Lattice/simulation edits change `ProjectHasher.Compute` and `ComputeDocument`; no section is dropped by
   canonicalization, empty arrays are omitted, and a pre-Step-06 project keeps its canonical hash.
-- [ ] The generated project schema accepts the flat lattice/simulation sections and rejects unknown fields;
+- [x] The generated project schema accepts the flat lattice/simulation sections and rejects unknown fields;
   fixtures cover empty and populated models.
-- [ ] Public API files and the ApiCompat baseline are current.
-- [ ] Documentation written.
+- [x] Public API files and the ApiCompat baseline are current.
+- [x] Documentation written.
 
 ## Documentation
 
