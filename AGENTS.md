@@ -55,9 +55,15 @@ Before changing anything, read these in order:
     changes that emerge during implementation.
 14. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
     evidence playbook for coding agents.
-15. The step page you intend to work on, plus its dependencies.
-16. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-17. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+15. [`docs/development/drift-checks.md`](docs/development/drift-checks.md) — lightweight monthly and
+    phase-boundary checks between cross-cutting reviews.
+16. [`docs/development/agent-security.md`](docs/development/agent-security.md) — agent threat model,
+    permissions, secrets, and prompt injection.
+17. [`docs/development/incident-and-rollback.md`](docs/development/incident-and-rollback.md) — rollback,
+    hotfix, and postmortem rules.
+18. The step page you intend to work on, plus its dependencies.
+19. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+20. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
@@ -164,19 +170,27 @@ Before the first numbered item, complete the pre-implementation design review in
    - parity-matrix updates;
    - documentation updates;
    - any final acceptance fixes.
-2. Run the step's full acceptance criteria and local quality gates (`./tools/verify.sh all`) on the step branch.
-3. Merge the current `main` into the step branch if needed so it has the current `ci.yml`. Dispatch the single
-   closeout CI run on the step branch: `CI` workflow, Ubuntu, path-filtered. Record the run URL or ID in the
-   audit record. Do not run CI after each feature; the closeout run is the only step-branch CI run.
+2. Run the step's full acceptance criteria and local quality gates (`./tools/verify.sh all --require`) on the
+   step branch.
+3. Merge the current `main` into the step branch so the audit covers the integration tree, not only the step
+   branch in isolation. Dispatch the single closeout CI run on the step branch: `CI` workflow, Ubuntu,
+   path-filtered. Record the run URL or ID and the full `head_sha` in the audit record and closeout evidence. Do
+   not run CI after each feature; the closeout run is the only step-branch CI run.
 4. If an emergent design change is required, integrate a step amendment (section 3.11) before the audit freeze.
    The audit then covers the combined solution. Re-run the closeout CI once after the final amendment is
    integrated.
-5. Complete the independent audit in section 3.10. The step branch must be frozen at the audited commit; after
+5. Fill `docs/planning/closeout/step-NN.json` from [`_template.json`](docs/planning/closeout/_template.json) and run
+   `python tools/check_closeout_evidence.py docs/planning/closeout/step-NN.json`. The evidence must bind the
+   audited commit, the closeout CI `head_sha`, the `main` SHA at freeze, and the merge candidate. If `main` moves
+   after the freeze, apply the **merge-tree rule**: merge the new `main`, run the full local gate, dispatch a
+   replacement closeout CI run, and re-audit; or record an equivalent merge-tree CI run for the final merge
+   candidate. Never merge an untested combination.
+6. Complete the independent audit in section 3.10. The step branch must be frozen at the audited commit; after
    a passing audit, the auditor's record commit and the step agent's resolution/status commit are the only
    permitted later commits.
-6. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
+7. Only after the audit passes, **stop and ask for explicit permission before merging the step into `main`.**
    The approval request must include the cumulative approval report in section 3.12.
-7. After approval:
+8. After approval:
    ```sh
    git switch main
    git pull --ff-only
@@ -186,10 +200,10 @@ Before the first numbered item, complete the pre-implementation design review in
    git tag -a step-00 -m "step-00: repository, toolchain, and CI"
    git push origin step-00
    ```
-8. Wait for the automatic `main` CI run before tagging. If it fails, fix forward or revert and re-run; never tag
+9. Wait for the automatic `main` CI run before tagging. If it fails, fix forward or revert and re-run; never tag
    a red `main`.
-9. Delete the step branch locally and remotely after the merge and tag.
-10. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
+10. Delete the step branch locally and remotely after the merge and tag.
+11. Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
 
 ### 3.5 Out-of-step changes
 
@@ -218,6 +232,10 @@ After implementation and tests:
   inside an approved step is squash-merged without a separate approval; a maintenance branch or a step-to-main
   merge still needs the approval required by its gate.
 - If the user authorizes a merge, follow their instruction exactly; otherwise leave the branch unmerged.
+- Follow the [agent security](docs/development/agent-security.md) rules for permissions, secrets, prompt
+  injection, and high-risk operations.
+- If a bad change reaches `main` or a release, follow the
+  [incident and rollback](docs/development/incident-and-rollback.md) rules.
 
 ### 3.7 Git tags
 
@@ -347,11 +365,16 @@ The step agent's self-check is not an independent audit. Before a step is merged
 out-of-context audit context must review the frozen step branch.
 
 1. The step agent finishes all features and the closeout feature, updates the step page, status dashboard,
-   parity matrix, and feature log, runs `tools/verify.sh all`, and gets the single closeout CI run green.
-2. The step agent creates or updates `docs/planning/audits/step-NN.md` using
+   parity matrix, and feature log, merges current `main`, runs `tools/verify.sh all --require`, and gets the
+   single closeout CI run green.
+2. The step agent creates `docs/planning/audits/step-NN.md` on demand from
    [`docs/planning/audits/step-audit-template.md`](docs/planning/audits/step-audit-template.md), records the
-   exact audited commit and the closeout CI run, and sets the status to `Ready for audit`.
-3. The step branch is frozen at the audited commit. After a passing audit, two documentation-only commits may
+   exact audited commit, the closeout CI run and `head_sha`, the `main` SHA at freeze, and the closeout
+   evidence path, and sets the status to `Ready for audit`. Do not pre-seed audit records for steps that have
+   not started.
+3. The step branch is frozen at the audited commit. If `main` moves after the freeze, apply the merge-tree rule
+   in section 3.4 and the closeout evidence must show that the audited commit, closeout CI, and merge candidate
+   remain consistent. After a passing audit, two documentation-only commits may
    follow: the auditor's record commit and the step agent's resolution/status commit. Neither may change code,
    tests, configuration, or the auditor's text. If fixes are needed, the step agent uses a new feature branch
    and the new commit is re-audited.
@@ -367,8 +390,8 @@ out-of-context audit context must review the frozen step branch.
    and verdict. It must not edit the scope, checklists, resolutions, code, tests, configuration, step page,
    status dashboard, or parity matrix.
 7. If fixes are needed, the step agent adds the resolutions, fixes the findings on a new feature branch,
-   squash-merges into the step branch, dispatches one new closeout CI run, and sets the audit status to
-   `Re-audit required`.
+   squash-merges into the step branch, merges current `main`, updates the closeout evidence, dispatches one new
+   closeout CI run, and sets the audit status to `Re-audit required`.
 8. The fresh auditor re-audits the new commit and appends a new round to the record. The same auditor may
    continue if it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every
    earlier round in the record.
@@ -511,6 +534,11 @@ recorded rationale.
    unless the same reviewer stayed read-only and outside the remediation.
 5. The human owner approves each final verdict and the phase gate.
 
+Run the lightweight [drift checks](docs/development/drift-checks.md) monthly and before each phase boundary; they
+catch stale instructions, status drift, and broken links before the checkpoint. Create cross-cutting review
+records at the phase boundary, not for distant phases; the Phase B records are the current checkpoint's
+already-scoped requests.
+
 Review records live under [`docs/planning/reviews/cross-cutting/`](docs/planning/reviews/cross-cutting/).
 Review IDs are globally sequential (`XC-NN`) and are never reused. Each phase gets three new IDs; the registry
 and status values are in the cross-cutting README. Phase A is waived because the process was introduced after
@@ -519,6 +547,35 @@ it completed.
 Findings are remediated through maintenance branches, ADRs, amendments, or step-page updates. Never move an
 existing tag. A cross-cutting review never creates a step branch or step tag, and it does not replace step
 design reviews, step audits, or Step 29 parity validation.
+
+### 3.15 Rule homes and process changes
+
+Each rule has one normative home. Summaries link to it; do not copy it into a second page that can drift.
+
+| Topic | Normative home |
+| --- | --- |
+| Branch model, feature integration, step completion, tags, roles, approval report | This section, `AGENTS.md` §3 |
+| Design review and audit records | `docs/planning/reviews/README.md` and `docs/planning/audits/README.md` |
+| Cross-cutting phase reviews | `docs/planning/reviews/cross-cutting/README.md` |
+| Drift checks | `docs/development/drift-checks.md` |
+| Agent security | `docs/development/agent-security.md` |
+| Incident and rollback | `docs/development/incident-and-rollback.md` |
+| CI cost and gates | §3.13 and `docs/planning/ci-policy.md` |
+| Testing and quality | `docs/planning/03-quality-strategy.md` |
+| Code structure | `docs/development/code-structure.md` |
+| Closeout evidence | `docs/planning/closeout/README.md` |
+
+Design reviews use `Changes required`; audits and cross-cutting reviews use `Fixes required` for the equivalent
+failure state. Each family keeps its own vocabulary; the dashboard columns use the family's terms.
+
+Changing the process:
+
+1. Open a `docs/<slug>` branch from `main`.
+2. Explain the problem and the proposed rule.
+3. Update the normative page and every dependent template or summary in the same change.
+4. Run `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require`.
+5. Get owner approval. Do not silently change the process in the middle of a step; if a mid-step change is
+   unavoidable, record it as an amendment-level decision and update the process after the step closes.
 
 ## 4. Non-negotiable decisions
 
@@ -718,8 +775,9 @@ Update status as follows:
   `Squashed` or `Done` after the squash; no per-feature approval is required.
 - **After squash:** the next feature or closeout feature records the squash commit and the local validation
   result. CI is not run per feature.
-- **Step completion:** the closeout feature records `Done`, the closeout CI result, and the main merge
-  reference. After the approved merge and a green main CI run, create and push the annotated `step-NN` tag.
+- **Step completion:** the closeout feature records `In audit`, the closeout CI result, the closeout evidence,
+  and the audit request. After the audit passes and the step is merged, set `Done`, record the main merge
+  reference, and create and push the annotated `step-NN` tag after a green main CI run.
 - **Milestones:** create the matching `milestone-mN` tag when the milestone is reached.
 - **Parity:** keep `appendix-b-parity-matrix.md` as the feature-level completeness source.
 
@@ -727,6 +785,12 @@ Do not create duplicate per-step checklist files. The step page is the detailed 
 roll-up. Avoid status-only commits; CI runs only at closeout and on `main`. See
 [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) for context handoff, prompt,
 approval-report, and diff-review templates.
+
+### 7.2 Step sizing and split triggers
+
+A step must be small enough to audit in one sitting. The size ranges and split triggers are in
+[`docs/planning/04-roadmap.md` §3.1](docs/planning/04-roadmap.md#31-step-sizing-and-split-triggers). Split before
+implementation, not during the audit.
 
 ## 8. Coding conventions
 

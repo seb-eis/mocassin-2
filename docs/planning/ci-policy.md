@@ -28,6 +28,10 @@ A single Ubuntu run is cheap (~12 minutes); Windows is 2× and macOS is 10×.
 | Benchmark | manual `benchmark.yml` | Ubuntu | Selected benchmark |
 | Nightly | manual placeholder; no schedule until real suites exist | — | — |
 
+Before closeout, run `./tools/verify.sh all --require`. A skipped required gate is not a pass, and `cargo-deny`
+must be installed for the closeout run. Record the closeout CI run ID, `head_sha`, and the closeout evidence file
+described in [`closeout/README.md`](closeout/README.md).
+
 There are **no per-feature and no per-push step-branch CI runs**. Feature branches are validated locally with
 `tools/verify.sh`.
 
@@ -99,7 +103,7 @@ Local validation:
 
 ```sh
 ./tools/verify.sh dotnet
-./tools/verify.sh all      # before closeout
+./tools/verify.sh all --require   # before closeout
 ```
 
 ## 7. Main merge

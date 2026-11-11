@@ -187,6 +187,9 @@ without breaking partial classes or case-sensitive paths.
 - **Audit:** confirm the structure test passes and no new root-level or catch-all folders were added.
 - **Definition of done:** code is grouped by domain concept and the structure test passes.
 
+The branch, approval, and audit gates are in `AGENTS.md` §3; this page only defines the structure policy and its
+local check.
+
 ## 9. Folder selection rule
 
 1. Is it the project composition root? Put it at the root.

@@ -1,7 +1,7 @@
 # Cross-Cutting Review — <Title>
 
 > Reviewer: write evidence, findings, and verdict directly into this record. You may edit only your own
-> metadata, checklist completion marks and inline verification notes (not item text), `Evidence`, `Findings`,
+> metadata and record state, checklist completion marks and inline verification notes (not item text), `Evidence`, `Findings`,
 > and `Verdict`, and commit only this file with a documentation-only message and `[skip ci]`. Do not edit the
 > scope, checklist item text, resolutions, code, tests, configuration, step pages, status dashboard, or any
 > other file.
@@ -13,7 +13,6 @@
 | Review ID | XC-NN |
 | Checkpoint | Phase —<br>Steps — |
 | Type | Repository-wide review |
-| Status | Planned |
 | Target commit | — |
 | Request owner | Step agent / planner |
 | Orchestrator (implementor) | — |
@@ -84,12 +83,22 @@ Required for the **Architecture and design status** review; use it for any revie
 
 Severity values: **Blocker**, **Major**, **Minor**, **Note**.
 
+## Record state
+
+**State:** Planned / Ready for review / In review / Fixes required / Re-review required / Passed / Passed with notes / Waived
+
+`Re-review required` is a record state, not a verdict.
+
+## Reviewer independence
+
+> I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
+> request owner or the other reviewers.
+
 ## Verdict
 
 - [ ] Passed
 - [ ] Passed with notes
 - [ ] Fixes required
-- [ ] Re-review required
 - [ ] Waived
 
 Follow-up owner:

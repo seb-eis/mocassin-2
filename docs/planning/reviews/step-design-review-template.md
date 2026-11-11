@@ -1,8 +1,7 @@
 # Step NN Design Review
 
 > Reviewer: write the evidence, findings, and verdict directly into
-> `docs/planning/reviews/step-NN.md`. You may edit only your own metadata (`Reviewer`, `Review date`, `Design
-> review status`), the checklist completion marks and inline verification notes (not item text), the
+> `docs/planning/reviews/step-NN.md`. You may edit only your own metadata (`Reviewer`, `Review date`, `Record state`), the checklist completion marks and inline verification notes (not item text), the
 > `Evidence`, `Findings`, and `Verdict` sections, and commit only that file with a documentation-only message
 > and `[skip ci]`. Do not edit the request scope, checklist item text, resolutions, code, tests, configuration,
 > status dashboard, step page, or any other file.
@@ -15,7 +14,6 @@
 | Request owner | Step agent |
 | Orchestrator (step agent / planner) | — |
 | Review initiated by | Planner / implementor / human owner |
-| Design review status | Not requested |
 | Reviewed commit | — |
 | Docs branch | — |
 | Review date | — |
@@ -81,12 +79,22 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning audit
 verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
 the auditor's findings, evidence, or verdict.
 
+## Record state
+
+**State:** Not requested / Ready for review / In review / Changes required / Re-review required / Ready with notes / Ready for implementation / Waived
+
+`Re-review required` is a record state, not a verdict.
+
+## Reviewer independence
+
+> I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
+> planner or implementor.
+
 ## Verdict
 
 - [ ] Ready for implementation
 - [ ] Ready with notes
 - [ ] Changes required
-- [ ] Re-review required
 - [ ] Waived
 
 Follow-up owner:
@@ -135,3 +143,17 @@ Date:
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
+
+## Review rounds
+
+Append each new round below. Never overwrite an earlier round.
+
+### Review round 1
+
+#### Independence and frozen state
+
+#### Commands and results
+
+#### Findings
+
+#### Verdict

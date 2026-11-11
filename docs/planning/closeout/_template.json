@@ -1,0 +1,17 @@
+{
+  "step": "step-NN",
+  "audit_commit": "0000000000000000000000000000000000000000",
+  "closeout_ci": {
+    "run_id": "REPLACE_WITH_RUN_ID",
+    "head_sha": "0000000000000000000000000000000000000000"
+  },
+  "main_sha_at_freeze": "0000000000000000000000000000000000000000",
+  "merge_candidate": "0000000000000000000000000000000000000000",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "notes": [
+    "Replace every zero SHA and placeholder before running tools/check_closeout_evidence.py."
+  ]
+}

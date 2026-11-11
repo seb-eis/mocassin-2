@@ -22,45 +22,47 @@ file and a directory. The `feature/` prefix keeps the step grouping without that
 
 ## 2. Step workflow
 
+The normative branch, approval, merge, tag, and gate rules are in `AGENTS.md` §3. This page is the short
+contributor sequence.
+
 1. Read `AGENTS.md`, the planning README, the status dashboard, the step page, and its dependencies.
 2. Propose the complete feature-branch list for the step; the owner approves it once. This is the only
-   feature-level approval; the implementor then squash-merges each feature after the local gates pass.
+   feature-level approval.
 3. Create the step branch from current `main` and push it.
-4. Create one feature branch from the step branch for each deliverable and push it.
+4. Create one feature branch from the step branch for each deliverable.
 5. Implement only that feature's scope; add the tests named in the step plus regression tests.
-6. Update the step page, status dashboard, parity matrix, and documentation in the same feature where
-   applicable.
-7. Run the local quality gates (`./tools/verify.sh <area>`) and report the exact commands and results.
+6. Update the step page, status dashboard, parity matrix, and documentation in the same feature.
+7. Run the local quality gates (`./tools/verify.sh <area>`).
 8. After the local gates pass, squash-merge the feature into the step branch. Do not wait for a per-feature
-   approval; the step-start feature-list approval covers it. Record the branch, commits, diff summary, tests,
-   local validation, docs/status updates, risks, and known limitations in the step page.
-9. Delete the feature branch locally and remotely. Do not push the step branch just to trigger CI.
-10. Do not start the next feature until the affected local gates pass.
+   approval; the step-start feature-list approval covers it.
+9. Delete the feature branch. Do not push the step branch just to trigger CI.
+10. At closeout, merge current `main`, run `./tools/verify.sh all --require`, dispatch one closeout CI run,
+    fill `docs/planning/closeout/step-NN.json`, check it, freeze the branch, and request the independent audit.
+11. After a passed audit and owner approval, merge with `--no-ff`, wait for green `main` CI, tag `step-NN`, and
+    delete the step branch.
 
-A final closeout feature records the step status, deviations, acceptance evidence, and main merge. The
-step-to-`main` merge is `--no-ff` and requires explicit permission. Tags are created only as part of the
-corresponding approval.
+## 3. Gate references
 
-## 3. Review gates
-
-| Gate | Approval |
+| Gate | Normative home |
 | --- | --- |
-| Step feature list | Once, at step start; covers every feature in the step |
-| Feature squash | No separate gate; the step feature-list approval covers it |
-| Step-to-main merge | Before the `--no-ff` merge |
-| Tag creation/push | Included in the step/milestone/release approval |
-| Release | After Step 31 gates |
+| Branch model, feature squash, step completion, tags | `AGENTS.md` §3.1–§3.7 |
+| Design review | `AGENTS.md` §3.9 and `docs/planning/reviews/README.md` |
+| Step audit | `AGENTS.md` §3.10 and `docs/planning/audits/README.md` |
+| Closeout evidence and merge-tree rule | `docs/planning/closeout/README.md` |
+| Amendments | `AGENTS.md` §3.11 and `docs/planning/amendments/README.md` |
+| Cross-cutting phase reviews | `docs/planning/reviews/cross-cutting/README.md` |
+| Drift checks | `docs/development/drift-checks.md` |
+| Agent security | `docs/development/agent-security.md` |
+| Incident and rollback | `docs/development/incident-and-rollback.md` |
+| CI cost and gates | `AGENTS.md` §3.13 and `docs/planning/ci-policy.md` |
 
-Review the diff itself, not only the prose report:
-
-```sh
-git diff step/00-foundation...feature/step-00-foundation/<feature>
-```
-
-Check scope, non-goals, public APIs/formats/scientific semantics, test quality, dependency justification,
-generated artifacts, status/docs/parity updates, unrelated changes, and licensing.
+Do not duplicate a rule from the normative page here. If a summary and the normative page disagree, the
+normative page wins and the summary is fixed in the same change.
 
 ## 4. Local quality gates
+
+Run the gates relevant to your change before asking for review. Before a step closeout, use
+`./tools/verify.sh all --require` and check the closeout evidence; a skipped required check is not a pass.
 
 ```sh
 dotnet format Mocassin.slnx --verify-no-changes

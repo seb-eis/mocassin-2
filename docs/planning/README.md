@@ -29,19 +29,22 @@ original behaviour to preserve, the target design, concrete tasks, acceptance cr
    development phase, for the dedicated MOCASSIN image.
 8. [`07-reference-build.md`](07-reference-build.md) — verified recipe for building the original solver and
    model builder and generating reference data.
-9. [`status.md`](status.md) — at-a-glance step and feature status dashboard.
+9. [`status.md`](status.md) — at-a-glance step and feature status dashboard, phase checkpoints, and drift
+   checks.
 10. [`audits/README.md`](audits/README.md) — post-implementation step-audit process and approval gate.
 11. [`reviews/README.md`](reviews/README.md) — pre-implementation design-review process and start gate.
 12. [`amendments/README.md`](amendments/README.md) — process for design changes that emerge during
     implementation.
-13. Step pages [`steps/`](steps/) — the implementation sequence, detailed checklists, and feature logs.
-14. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
+13. [`closeout/README.md`](closeout/README.md) — machine-checkable step closeout evidence and the merge-tree
+    rule.
+14. Step pages [`steps/`](steps/) — the implementation sequence, detailed checklists, and feature logs.
+15. [`appendix-a-original-inventory.md`](appendix-a-original-inventory.md) — inventory of the original
     solution and its mapping to new modules.
-15. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
-16. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
-17. [`drafts/`](drafts/) — non-normative design scratches and future-work notes; not part of the reviewed
+16. [`appendix-b-parity-matrix.md`](appendix-b-parity-matrix.md) — feature-by-feature parity checklist.
+17. [`adr/`](adr/) — architecture decision records for choices that are expensive to reverse.
+18. [`drafts/`](drafts/) — non-normative design scratches and future-work notes; not part of the reviewed
     plan and not an implementation authorization.
-18. [`reviews/cross-cutting/README.md`](reviews/cross-cutting/README.md) — cross-cutting phase-checkpoint
+19. [`reviews/cross-cutting/README.md`](reviews/cross-cutting/README.md) — cross-cutting phase-checkpoint
     reviews: policies and planning, architecture and design status, and documentation status.
 
 ## Decisions already made
@@ -104,6 +107,16 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
   version bump.
 - Independent reviewers write their evidence, findings, and verdict directly into the durable review or audit
   record; there is no scribe and no transcription step.
+- Create review, audit, and amendment records on demand from the current template. Do not pre-seed records for
+  steps that have not started; templates rot faster than they are used.
+- Closeout evidence is mandatory at `In audit`: `docs/planning/closeout/step-NN.json` binds the audited commit,
+  the closeout CI run, the `main` SHA at freeze, and the merge candidate. Check it with
+  `python tools/check_closeout_evidence.py`.
+- Run the lightweight [drift checks](../development/drift-checks.md) monthly and before each phase boundary;
+  record the result in [`status.md`](status.md) using [`drift-checks/_template.md`](drift-checks/_template.md).
+- Record Sev 1/2 postmortems in [`incidents/`](incidents/) using the template; follow
+  [`../development/incident-and-rollback.md`](../development/incident-and-rollback.md).
+- The normative rule homes are listed in [`AGENTS.md` §3.15](../../AGENTS.md).
 - Scientific behaviour is specified in prose and tests before implementation. When the original behaviour
   is ambiguous, document the chosen interpretation in the step page.
 - Every step page has a **Documentation** section naming the pages to write at that point. “Documentation

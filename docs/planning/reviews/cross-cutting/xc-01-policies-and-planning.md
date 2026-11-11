@@ -12,7 +12,6 @@
 | Review ID | XC-01 |
 | Checkpoint | Phase B — Model definition (Steps 03–07) |
 | Type | Repository-wide policies and planning audit |
-| Status | Planned — awaiting Step 07 completion |
 | Target commit | After the Step 07 merge and `step-07` tag, plus a docs-only checkpoint commit |
 | Request owner | Step agent / planner |
 | Orchestrator (implementor) | — |
@@ -132,12 +131,22 @@ retired commands. Parse workflow YAML. Use `bash -n`/`shellcheck` on scripts.
 | --- | --- | --- | --- | --- | --- |
 | — | — | — | — | — | — |
 
+## Record state
+
+**State:** Planned — awaiting Step 07 completion
+
+`Re-review required` is a record state, not a verdict.
+
+## Reviewer independence
+
+> I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
+> request owner or the other reviewers.
+
 ## Verdict
 
 - [ ] Passed
 - [ ] Passed with notes
 - [ ] Fixes required
-- [ ] Re-review required
 - [ ] Waived
 
 Follow-up owner:

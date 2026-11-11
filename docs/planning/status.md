@@ -11,6 +11,7 @@ remain in each step page; each step page also has a feature log.
 | **In progress** | Step branch exists and feature work is underway. |
 | **Blocked** | Work cannot continue until a named blocker is resolved. |
 | **Awaiting approval** | The step or audit round is frozen and waiting for human approval of the verdict, merge, or tag. |
+| **In audit** | The step branch is frozen at the audit request; a fresh completion audit is pending or running. |
 | **Done** | All acceptance criteria pass and the step is merged into `main`. |
 | **Deferred** | Intentionally postponed beyond the first parity release. |
 
@@ -22,9 +23,11 @@ remain in each step page; each step page also has a feature log.
   `Squashed` or `Done` after the squash; no per-feature approval is required.
 - **After squash and step CI:** the next feature or the closeout feature records the squash commit and CI
   result.
-- **Step completion:** the closeout feature records `Done`, the step CI result, and the main merge reference.
-  It also updates `docs/planning/audits/step-NN.md` and sets the audit status to `Ready for audit`.
-  After a passed audit and merge, create and push the annotated `step-NN` tag as part of the same approval.
+- **Step completion:** the closeout feature records `In audit`, the closeout CI result, the closeout evidence
+  path, and the audit request. Merge current `main`, run `./tools/verify.sh all --require`, fill and check
+  `docs/planning/closeout/step-NN.json`, and set the audit status to `Ready for audit`. After a passed audit and
+  merge, set the step to `Done`, record the main merge reference, and create and push the annotated `step-NN`
+  tag as part of the same approval.
 - **Audit:** a fresh out-of-context audit agent reviews the frozen step branch and writes its evidence,
   findings, and verdict directly into `docs/planning/audits/step-NN.md`. See
   [`audits/README.md`](audits/README.md).
@@ -109,6 +112,17 @@ These reviews do not create step branches or tags and do not replace step audits
 | E. Results | 20–22 | `XC-10`/`XC-11`/`XC-12` | Planned |
 | F. GUI | 23–28 | `XC-13`/`XC-14`/`XC-15` | Planned |
 | G. Release and documentation | 29–31 | `XC-16`/`XC-17`/`XC-18` | Planned |
+
+## Drift checks
+
+Run a lightweight drift check monthly, at each milestone, and before every phase boundary. Use
+[`docs/planning/drift-checks/_template.md`](drift-checks/_template.md) and
+[`docs/development/drift-checks.md`](../development/drift-checks.md). A drift check is not a gate; it is an
+early-warning signal for the next cross-cutting review.
+
+| Date | Commit | Checked by | Result | Findings / links |
+| --- | --- | --- | --- | --- |
+| — | — | — | — | — |
 
 ## Notes
 

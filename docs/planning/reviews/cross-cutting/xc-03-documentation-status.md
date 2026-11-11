@@ -12,7 +12,6 @@
 | Review ID | XC-03 |
 | Checkpoint | Phase B — Model definition (Steps 03–07) |
 | Type | Repository-wide documentation status review |
-| Status | Planned — awaiting Step 07 completion |
 | Target commit | After the Step 07 merge and `step-07` tag, plus a docs-only checkpoint commit |
 | Request owner | Step agent / planner |
 | Orchestrator (implementor) | — |
@@ -131,12 +130,22 @@ site navigation and the excluded `docs/planning/` boundary.
 | --- | --- | --- | --- | --- | --- |
 | — | — | — | — | — | — |
 
+## Record state
+
+**State:** Planned — awaiting Step 07 completion
+
+`Re-review required` is a record state, not a verdict.
+
+## Reviewer independence
+
+> I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
+> request owner or the other reviewers.
+
 ## Verdict
 
 - [ ] Passed
 - [ ] Passed with notes
 - [ ] Fixes required
-- [ ] Re-review required
 - [ ] Waived
 
 Follow-up owner:
