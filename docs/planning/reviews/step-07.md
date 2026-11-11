@@ -18,7 +18,7 @@
 | Reviewed commit | `60437ca07219368dca745b4c9e9f056a543bde1a` (round 3; round 2 reviewed `4ddd571cacb5e714f246278005531b8ee4a73b2e`; round 1 reviewed `dc73ee40954070b8e95bf0713f8df4526b208ba6`) |
 | Docs branch | `docs/step-07-design` |
 | Review date | 2026-11-11 |
-| Reviewer | Independent planning auditor (fresh context, round 1; no shared conversation with the planner or implementor) |
+| Reviewer | Independent planning auditor (fresh context, round 3; rounds 1 and 2 were separate fresh contexts; no shared conversation with the planner or implementor) |
 
 Step page: [`Step 07 — Validation, Diagnostics, and Model Statistics`](../steps/step-07-validation-and-diagnostics.md)
 
@@ -307,6 +307,135 @@ Resolution verification against the design at `4ddd571`:
 | n3 | Accepted. The acceptance criterion now references the fixture's recorded warning set and a Step 07 per-code hint test; Step 03–06 tests count for severity only. |
 | n4 | Accepted. A `Sizing` section records seven rows, 2–3 person-weeks, and below the split trigger. |
 
+### Re-review round 3 — Evidence
+
+**Review round 3** — frozen design commit `60437ca07219368dca745b4c9e9f056a543bde1a`; HEAD
+`59418839e17c09adf8eb402083da44f0a58cab33` adds only the round-3 request, resolutions, and status. I am a
+fresh context: I did not author or implement this work, I did not participate in rounds 1 or 2, and I used no
+handoff, summary, or prior conversation. The worktree `/workspace/playground/step07-design` was clean at
+`5941883`; all round-3 evidence is from repository inspection at that state and from the frozen design content
+at `60437ca`.
+
+Files reviewed in round 3:
+
+- `AGENTS.md` §3.8–§3.13, §3.15, §7.2, §8, §13; `docs/planning/reviews/README.md`; the review template.
+- `docs/planning/reviews/step-07.md` round-1 and round-2 findings, evidence, verdicts, `Resolution status`, and
+  `Round 3 resolutions`.
+- `docs/planning/steps/step-07-validation-and-diagnostics.md`; Steps 03–06 pages; the Build-stage owner pages
+  09, 10, 11, and 12.
+- `docs/planning/02-data-contracts.md` §5.5–§5.6 and §6, `03-quality-strategy.md` §9.7,
+  `04-roadmap.md` §3.1, `05-open-decisions.md`, `appendix-b-parity-matrix.md`, `status.md`.
+- `docs/development/architecture.md`, `docs/development/design-decisions.md`,
+  `docs/development/testing-and-parity.md`, `docs/development/code-structure.md`, `zensical.toml`,
+  `docs/reference/index.md`, `docs/reference/project-format.md`, `docs/troubleshooting/index.md`.
+- Implemented APIs: `Mocassin.Packages/Projects/ProjectStore.cs`, `ProjectStoreOptions.cs`,
+  `ProjectStoreResults.cs`, `ProjectValidationService.cs`; `Mocassin.Core/Project/ProjectHasher.cs`,
+  `Mocassin.Core/Project/ProjectDiagnosticCodes.cs`, Core diagnostic-code classes;
+  `Mocassin.Symmetry/Diagnostics/*`, `Mocassin.Symmetry/Structure/StructurePreview.cs`,
+  `Mocassin.Symmetry/Energy/EnergyCostPreview.cs`, `Mocassin.Symmetry/Transitions/TransitionPreview.cs`,
+  `TransitionPathValidator.cs`, `TransitionPathResolver.cs`; `Mocassin.Core/Diagnostics/ModelPath.cs`;
+  `src/dotnet/Mocassin.Cli/Program.cs`; `contracts/manifest.json`; `tools/contracts/generate.py`;
+  `contracts/generated/`; `tools/verify.sh`.
+
+Commands run (from `/workspace/playground/step07-design`):
+
+```sh
+git status --short
+# clean
+
+git log --oneline -6
+# 5941883 docs: record step 07 round 2 resolutions and status [skip ci]
+# 60437ca docs: close step 07 round 2 review findings [skip ci]
+# dfd7717 docs: record step 07 design re-review changes required [skip ci]
+# 3f576a1 docs: record step 07 review resolutions and status [skip ci]
+# 4ddd571 docs: revise step 07 validation design for review findings [skip ci]
+# e1e1475 docs: record step 07 design review changes required [skip ci]
+
+git diff --stat dc73ee4^..dc73ee4
+# 9 files changed, 470 insertions(+), 166 deletions(-)
+
+git diff --stat 4ddd571^..4ddd571
+# 10 files changed, 277 insertions(+), 126 deletions(-)
+
+git diff --stat 60437ca^..60437ca
+# docs/planning/02-data-contracts.md                          | 11 ++--
+# docs/planning/steps/step-07-validation-and-diagnostics.md   | 59 +++++++++++++---------
+# 2 files changed, 42 insertions(+), 28 deletions(-)
+
+git diff --stat 60437ca..HEAD
+# docs/planning/reviews/step-07.md                            | 20 ++++++++++++++++++--
+# docs/planning/status.md                                     |  7 ++++---
+# docs/planning/steps/step-07-validation-and-diagnostics.md   |  2 +-
+# (round-3 request, resolutions, and status only; no design change)
+
+python tools/check_process_consistency.py
+# Process consistency: OK
+
+python tools/check_docs_links.py
+# Documentation links OK (143 files scanned).
+
+zensical build --strict
+# Build started; No issues found; Build finished in 0.26s
+
+python tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+
+./tools/verify.sh contracts
+# Contract artifacts current; space-group catalog current; process consistency OK;
+# 18 tests OK; SPDX headers present in 285 source files; no secrets; cargo-deny ok
+```
+
+Targeted read-only checks:
+
+```sh
+grep -rn "ProjectLoadFailureKind" src/dotnet
+# no matches: the load-failure kind and ValidateOnLoad are still design-only additions
+
+grep -n "set(formats) == REQUIRED_FORMATS\|def build_artifacts\|GENERATED_DIR / \"schema\"" \
+  tools/contracts/generate.py
+# line 178: formats must be exactly the eight required ids
+# build_artifacts emits formats under contracts/generated/schema/<id>-v<version>.schema.json
+
+find contracts/generated/schema -maxdepth 1 -type f | sort
+# events-v1, jobFolder-v1, mmcfe-v1, package-v1, project-v1, results-v1, solver-v1, state-v1
+
+grep -n "Convert.ToHexStringLower" src/dotnet/Mocassin.Core/Project/ProjectHasher.cs
+# lowercase hexadecimal, no sha256: prefix
+
+grep -n "SIM003" docs/planning/steps/step-06-lattice-and-simulation-models.md
+# line 350: Simulation has no transitions
+
+grep -n "KMC start pool" docs/planning/steps/step-10-job-templates-and-supercells.md
+# line 47: Selection optimizers remove a particle at a reference site from the KMC start pool.
+
+grep -n "\"kineticTransition\"" src/dotnet/Mocassin.Symmetry/Transitions/TransitionPathValidator.cs
+# existing path domain is kineticTransition with the transition ID
+
+grep -rn "in-memory.*Skipped\|Load.*Skipped\|reports \`Load\` as skipped" \
+  docs/planning docs/development --include=*.md
+# step-07 page lines 140, 180, 213, 520; 03-quality-strategy line 305; design-decisions line 81
+```
+
+Resolution verification against the design at `60437ca`:
+
+| Finding | Round-3 verification |
+| --- | --- |
+| R2-M1 | Closed. `ValidationResult` now declares `ProjectLoadFailureKind? LoadFailure`; the design states `ValidateFileAsync` copies the kind from `ProjectLoadResult`, and the CLI maps `NotFound`/`TooLarge`/`Io` to `3` and `InvalidContent` to `1`. This removes the round-2 gap where only `Stages` and the shared `PROJ002` diagnostic were visible to the CLI. The enum and `ValidateOnLoad` remain planned additions, consistent with the task list. |
+| R2-m1 | Closed. The `Load` row now lists I/O diagnostics for OS sharing failures only and states that the read-only path never checks the editing lock. |
+| R2-m2 | Partially closed. §2 now distinguishes no caller diagnostics (`Skipped`/0/zero elapsed) from caller diagnostics (`Failed` or `Completed`, surviving count, zero elapsed). The same rule is not propagated to the API comment, §3, the test table, or the two design summaries (R3-m1). |
+| R2-m3 | Closed. Statistics-preview diagnostics are attributed to the `Feasibility` stage result, which is consistent with the opt-in budget/statistics work, the stage-count sum rule, and the rule that `Feasibility` runs whenever statistics can be computed. |
+| R2-m4 | Closed. §4 now gives an explicit evaluation order, states that `SIM003` only covers its own simulation, and records the mixed empty/transition-bearing case where `SIM039` still fires. The `SIM038`/`SIM039` scopes and suppression remain non-overlapping. |
+| R2-m5 | Closed. The schema path is now `contracts/generated/schema/validation-v1.schema.json`, matching the existing `<id>-v<version>.schema.json` convention; the `reports.validation` descriptor shape and `ValidationReportVersion` home are stated. The generator task covers validating `reports`, emitting the schema, and updating the README/constant. |
+| R2-m6 | Closed. `ENM018` now specifies `Path.Domain = "kineticTransition"`, `Path.ObjectId` = transition ID, and `Path.Property = "referencePath[i]"`, matching `TransitionPathValidator`'s existing paths. |
+| R2-m7 | Closed. `SIM038`/`SIM039` are KMC-only; the design states MMC transitions have no start pool, and the test row excludes MMC. The KMC start pool is confirmed in Step 10. |
+
+Round-1 Major findings M1–M6 remain closed: M2 is supported by the file/in-memory entry split and
+`ValidateOnLoad`; M3 by `ValidationContext`, the `Build`-only stage restriction, `RunBuildStage`, and the
+Steps 09–12 integration text; M4 by the single `SIM038`–`SIM041` set; M5 by the statistics rule repeated across
+the step page, contract, acceptance criteria, tests, quality strategy, and `testing-and-parity.md`; M6 by the
+`reports` section and generator tasks. Round-2 Minor findings m1–m9 and Notes n1–n4 remain closed or accepted as
+recorded in round 2.
+
 ## Findings
 
 | Severity | Finding | Evidence |
@@ -348,12 +477,21 @@ the auditor's findings, evidence, or verdict.
 | **Minor** | **R2-m6 — `ENM018` specifies the property path but not the diagnostic domain/object identity.** The rule says to emit at the first offending hop with `Path.Property = "referencePath[i]"`, but it does not say whether `Path.Domain` is `kineticTransition` and `Path.ObjectId` is the transition ID. The per-code emission test requires an expected path. | Step page §4 `ENM018` boundary; test table `Cross-domain`; existing `TransitionPathValidator` paths use `kineticTransition`/transition ID. |
 | **Minor** | **R2-m7 — `SIM038`/`SIM039` use "mobile start particle" without saying whether MMC simulations are included.** The term comes from the KMC start pool, but the rule is written for "a simulation" and the model can author KMC and MMC simulations. State the simulation-kind scope; otherwise the feasibility test boundary is ambiguous. | Step page §4 `SIM038`/`SIM039`; Step 10 "KMC start pool"; Step 06 simulation kinds. |
 
+### Re-review round 3 — Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R3-m1 — The R2-m2 fix is applied only to the §2 stage bullet; five other statements still say the in-memory `Load` stage is always `Skipped`.** §2 now says a caller-supplied in-memory entry reports `Load` as `Failed` (if any caller diagnostic is an `Error`) or `Completed`, with the surviving count and zero elapsed. The `Validate` code comment still says `Load` "is reported as Skipped"; §3 still says the in-memory `Load` "is reported as `Skipped`"; the `Pipeline order` test row still expects `in-memory Load is Skipped`; and `03-quality-strategy.md` and `design-decisions.md` still state the in-memory entry reports `Load` as skipped. A test written from the test table would contradict the §2 API rule, and the two summaries would misdescribe the stage status for callers that pass load diagnostics. | Step page §2 `Validate` comment and `Stages` bullet (lines 140, 180–182), §3 consumers bullet (line 213), Tests `Pipeline order` row (line 520); `docs/planning/03-quality-strategy.md` line 305; `docs/development/design-decisions.md` line 81. |
+
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
 
 > Round-1 state was `Re-review required`; round 2 re-review returns `Changes required` (see the round-2
 > verdict below).
+>
+> Round 3 re-review returns `Ready with notes` (see the round-3 verdict below). One Minor residual finding
+> remains; no Blocker or Major remains, and the human owner must explicitly accept the Minor.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -405,6 +543,30 @@ approves the final verdict and the start gate; this record does not authorize st
 
 Follow-up owner: Step agent / planner
 Follow-up step: Step 07 design revision for R2-M1 (and optionally R2-m1–R2-m7), then a fresh re-review (round 3)
+
+### Re-review round 3 — Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Round 3 verdict: Ready with notes.** No Blocker or Major finding remains. R2-M1 is closed: the structured
+load-failure kind is now carried on `ValidationResult.LoadFailure`, `ValidateFileAsync` copies it from
+`ProjectLoadResult`, and the CLI can map parse failures (`1`) versus I/O failures (`3`) without inspecting
+`PROJ002`. R2-m1 and R2-m3–R2-m7 are closed against the design text and the implemented Steps 03–06 APIs. The
+earlier Major findings M1–M6 remain closed.
+
+One Minor finding remains: R3-m1, the residual R2-m2 wording in five places that still calls the in-memory
+`Load` stage unconditionally `Skipped` while §2 now defines `Failed`/`Completed` when caller diagnostics are
+supplied. It is a documentation/test-expectation inconsistency, not an architectural gap; the §2 API rule is
+implementable and unambiguous. The repository checks and the strict documentation build pass. Because a Minor
+remains, this is not `Ready for implementation`; the human owner must explicitly accept the Minor under
+`Ready with notes` before the start gate. This record does not itself authorize starting Step 07.
+
+Follow-up owner: Step agent / planner
+Follow-up step: Correct the five stale in-memory `Load` statements (R3-m1) when convenient; no re-review is
+required if the human owner accepts `Ready with notes`.
 
 ## Approval summary
 
