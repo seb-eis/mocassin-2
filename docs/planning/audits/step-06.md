@@ -16,25 +16,25 @@
 | Orchestrator (step agent) | Step 06 implementor |
 | Audit initiated by | Human owner |
 | Audit status | Ready for audit |
-| Audited commit | Pending closeout commit |
+| Audited commit | `ea6293e` |
 | Step branch | `step/06-lattice-and-simulation-models` |
 | Step tag | — |
-| Closeout CI run | Pending closeout dispatch |
+| Closeout CI run | [`43085605850`](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) — green at `ea6293e` |
 | Platform CI | Not run (Ubuntu-only policy; no platform-specific code) |
-| Audit date | — |
+| Audit date | 2026-11-11 |
 | Auditor | — |
 
 Step page: [`Step 06 — Lattice and Simulation Models`](../steps/step-06-lattice-and-simulation-models.md)
 
 ## Audit request summary
 
-- Frozen code commit: the closeout squash on `step/06-lattice-and-simulation-models` (recorded after CI).
+- Frozen code commit: `ea6293e` on `step/06-lattice-and-simulation-models`.
 - Feature sequence: lattice model, persistence, and validation (`bc333f3`); simulation model and validation
   (`1c64c96`); persistence and contracts (`48e1f20`); queries and editing (`cfeb7b6`); samples and docs
   (`46ea087`); closeout (this commit).
 - Local closeout gate: `./tools/verify.sh all` passed on the step branch; Zensical strict, DocFX, rustdoc,
   Rust, Python, contracts, API compatibility, and structure gates all passed.
-- Closeout CI: one manual Ubuntu dispatch; the run and result are recorded after dispatch.
+- Closeout CI: one manual Ubuntu dispatch, run `43085605850`, green. Detect changes, .NET, Contracts and policy, and Public API compatibility passed; Rust and Python were path-filtered and skipped.
 - Known deferrals: Step 10 owns fraction application, integer truncation, charge-compensation counts, the single
   supercell generator, the lattice/job-count preview service, and effective job counts. Step 11 owns the
   `.msl` writer and `SolverJobFlags` composition. Step 25 owns the GUI editors. Step 07 owns the consolidated

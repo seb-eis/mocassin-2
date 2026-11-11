@@ -9,10 +9,10 @@ validation.
 
 - **Status:** In progress
 - **Step branch:** `step/06-lattice-and-simulation-models`
-- **Step CI:** Pending closeout dispatch
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Ready for audit
+- **Audit:** Ready for audit at `ea6293e`
 - **Design review:** [Ready with notes — accepted at `6173e61`](../reviews/step-06.md)
 - **Last updated:** 2026-11-11
 
@@ -23,7 +23,7 @@ validation.
 | `persistence-and-contracts` | `feature/step-06-lattice-and-simulation-models/persistence-and-contracts` | Done | `verify.sh dotnet`, `contracts`, `api`, `structure` pass | — | `48e1f20` |
 | `queries-and-editing` | `feature/step-06-lattice-and-simulation-models/queries-and-editing` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | `cfeb7b6` |
 | `samples-and-docs` | `feature/step-06-lattice-and-simulation-models/samples-and-docs` | Done | `verify.sh dotnet`, `docs`, `structure` pass | — | `46ea087` |
-| `closeout` | `feature/step-06-lattice-and-simulation-models/closeout` | Awaiting approval | `verify.sh all` pending closeout CI | — | — |
+| `closeout` | `feature/step-06-lattice-and-simulation-models/closeout` | Done | `verify.sh all` pass | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | `ea6293e` |
 
 ## Goal
 
