@@ -50,7 +50,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Done | `step/03-particle-and-structure-models` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/42521062856) | `162ebe4` | `step-03` | Passed with notes at `b6a97ec` | Ready with notes — accepted at `3096aa8` |
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Done | `step/04-transition-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) (closeout) | `31ba12d` | `step-04` | Passed with notes at `82c8cb4` | Ready for implementation — accepted at `a3d8641` |
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Done | `step/05-energy-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) (replacement closeout) | `c11a364` | `step-05` | Passed with notes at `315aa19` | Ready for implementation — accepted at `0b2a571` |
-| 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | In progress | `step/06-lattice-and-simulation-models` | `closeout` (audit freeze) | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | — | — | Ready for audit | Ready with notes — accepted at `6173e61` |
+| 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | In progress | `step/06-lattice-and-simulation-models` | `closeout` (audit passed) | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | — | — | Passed with notes at `c390dcc` (code `ea6293e`); awaiting acceptance | Ready with notes — accepted at `6173e61` |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Not requested |
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -82,8 +82,10 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 Step 06 — Lattice and Simulation Models has started. The design review returned `Ready with notes` at
 `6173e61` and was accepted on 2026-11-10. The step branch `step/06-lattice-and-simulation-models` was created
 from `main` at `b8b54b7`; the feature sequence is squashed through closeout `ea6293e`, and the single Ubuntu
-closeout run [43085605850](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) is green. The step
-branch is frozen for the independent audit. Step 05 is complete: merge
+closeout run [43085605850](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) is green. The
+independent audit returned `Passed with notes` at `c390dcc` for code frozen at `ea6293e`; no Blocker or Major
+remains. The human owner is asked to accept the Minor audit finding F1 and Notes N1/N3, then approve the
+Step 06 merge. Step 05 is complete: merge
 `c11a364`, tag `step-05`, main CI `42892804609` green,
 audit `Passed with notes` at `315aa19`. Step 04 is complete: merge `31ba12d`, tag `step-04`, main CI
 `42697550846` green, audit `Passed with notes` at `82c8cb4`. Step 03 remains complete: merge `162ebe4`, tag

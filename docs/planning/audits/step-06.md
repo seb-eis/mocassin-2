@@ -276,7 +276,10 @@ fix commit requires a fresh re-audit. This audit is evidence, not merge authoriz
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F1 | Open — human decision requested; proposed accept as a test-coverage follow-up (Minor, no behavioural defect) | Step 06 agent / human owner | — |
+| N1 | Open — human decision requested; proposed accept with a wording follow-up for in-memory doping order | Step 06 agent / human owner | — |
+| N2 | Acknowledged — process note; frozen code is `ea6293e` | Step 06 agent | — |
+| N3 | Open — human decision requested; proposed accept because reader-level rejection is intentional and `SIM035` covers out-of-mask in-memory values | Step 06 agent / human owner | — |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -286,25 +289,60 @@ verdict.
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — accept the audit verdict `Passed with notes` for the
+      frozen code commit `ea6293e`, then approve the Step 06 `--no-ff` merge into `main`. Tagging `step-06` is a
+      separate post-merge step and requires a green automatic main CI run.
+- [x] Every review/audit round recorded — six design-review rounds and one audit round are listed below; the
+      full per-finding text is in `docs/planning/reviews/step-06.md` and the audit findings above.
+- [x] Every finding recorded — the design-review groups M1–M7, m1–m7, R2-1–R2-8, R3-1–R3-3, R4-1–R4-4,
+      R5-1–R5-6, and R6-1–R6-4 are resolved or explicitly accepted; audit F1 and N1–N3 are recorded above.
+- [x] Accepted notes and waivers recorded — design residuals R6-1 (Step 10/11 carrier detail, now implemented
+      by `SolverJobFlagsMapper`), R6-2 (deterministic wording, corrected in this step), R6-3 (Step 10 preview
+      placement), and R6-4 (process note) were accepted by the human owner on 2026-11-10.
+- [x] Residual risks, deferred items, and follow-up owners recorded — Step 10 owns fractions, truncation,
+      compensation counts, the single generator/preview, and effective job counts; Step 11 owns the `.msl`
+      writer; Step 25 owns the GUI editors; Step 07 owns the consolidated diagnostics. F1 and N1/N3 are
+      proposed for explicit acceptance with follow-up wording/test-coverage ownership.
+- [x] Explicit no-Blocker/no-Major statement — no Blocker or Major finding remains in the design review or the
+      audit. F1 is Minor (test-coverage completeness); N1–N3 are Notes. The human owner is asked to accept them
+      explicitly or request a fix/re-audit.
+- [x] Final CI and documentation-build results recorded — `./tools/verify.sh all` passed on the step branch;
+      Zensical strict, DocFX 0/0, rustdoc, Rust, Python, contracts, API compatibility, and structure gates
+      passed; the single Ubuntu closeout CI run `43085605850` is green at `ea6293e`.
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-10 | `a64ecf3` | Independent planning auditor (fresh context) | Changes required |
+| 2 | 2026-11-10 | `160b226` | Fresh independent re-reviewer | Ready with notes |
+| 3 | 2026-11-10 | `5ae32b0` | Fresh independent re-reviewer | Ready with notes |
+| 4 | 2026-11-10 | `fe4868a` | Fresh independent re-reviewer | Ready with notes |
+| 5 | 2026-11-10 | `e587a6b` | Fresh independent re-reviewer | Ready with notes |
+| 6 | 2026-11-10 | `6173e61` | Fresh independent re-reviewer | Ready with notes — accepted |
+| A1 | 2026-11-11 | `ea6293e` | Independent audit agent (fresh context) | Passed with notes |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M1–M7 | Major | Round-1 design findings: canonical save/hash path, incomplete settings/defaults, incomplete limits, Step 10-owned rules in Step 06, preview placement/API, and transition-order conflict | Design revision; per-finding detail in the review record | `160b226` | Resolved |
+| m1–m7 | Minor | Round-1 design findings: polymorphism/flag invariants, layout names, query integration, manifest/fixtures, scope/audit coverage, test plan, rule consistency | Design revision; per-finding detail in the review record | `160b226` | Resolved |
+| R2-1–R2-3 | Minor | Round-2 design findings: `SIM036`, `SIM037`, and Step 25 write-out setting | Small corrections | `5ae32b0` | Resolved |
+| R2-4–R2-8 | Note | Round-2 notes: write-out-0 deviation, `.msl` default, max-frequency attribution, non-finite rules, record parent | Corrections/acknowledgement | `5ae32b0` | Resolved/acknowledged |
+| R3-1 | Minor | `MinSuccessRate` upper hard bound | `SIM012` upper bound added | `fe4868a` | Resolved |
+| R3-2–R3-3 | Note | `Deterministic` semantics and deviation placement | Corrected | `fe4868a` | Resolved |
+| R4-1 | Minor | `SolverJobFlags` carrier and derived-bit table | Added; implemented by `SolverJobFlagsMapper` in Step 06 | `e587a6b`, `48e1f20` | Resolved |
+| R4-2–R4-4 | Note | Deterministic consumer, normalization canonicalization, dashboard ownership | Corrected/acknowledged | `e587a6b` | Resolved/acknowledged |
+| R5-1 | Minor | Empty-array omission and pre-Step-06 hash stability | Rule and fixture test added | `6173e61`, `48e1f20` | Resolved |
+| R5-2 | Minor | Canonical `0`/`null` values | Canonicalizer and tests added | `6173e61`, `1c64c96` | Resolved |
+| R5-3–R5-6 | Note | Deterministic wording, composition boundary, `SIM009` whitespace, process note | Corrected/acknowledged | `6173e61` | Resolved/acknowledged |
+| R6-1 | Minor | Compilation-side carrier/`default_settings.flags` split | Accepted residual; `SolverJobFlagsMapper` and tests implement the composition boundary | `48e1f20` | Resolved/accepted |
+| R6-2–R6-4 | Note | Data-contract deterministic wording, Step 10 preview placement, process note | Accepted; wording corrected in this step, placement is Step 10, process note acknowledged | `46ea087` | Resolved/accepted |
+| F1 | Minor | Audit: PR-medium property sweep and asymmetric boundary/kind coverage | Proposed accept as a test-coverage follow-up; no behavioural defect found | — | Open — human decision |
+| N1 | Note | Audit: in-memory `Project.Dopings` order wording | Proposed accept with a wording follow-up; canonical persistence sorts | — | Open — human decision |
+| N2 | Note | Audit: record parent is the docs-only request commit | Acknowledged; frozen code is `ea6293e` | — | Acknowledged |
+| N3 | Note | Audit: flag rejection occurs in the reader rather than only `SIM035` | Proposed accept; reader rejection is intentional and `SIM035` covers out-of-mask in-memory values | — | Open — human decision |
 
 ## Human approval
 

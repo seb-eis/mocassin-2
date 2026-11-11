@@ -12,7 +12,7 @@ validation.
 - **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Ready for audit at `ea6293e`
+- **Audit:** Passed with notes at `c390dcc` (code frozen at `ea6293e`); F1 and N1/N3 awaiting human acceptance
 - **Design review:** [Ready with notes — accepted at `6173e61`](../reviews/step-06.md)
 - **Last updated:** 2026-11-11
 
