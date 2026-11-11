@@ -176,6 +176,137 @@ grep -rn "ProjectValidationPipeline\|IValidationStage" docs/planning/steps/step-
 # no matches: later steps do not record the extension point
 ```
 
+### Re-review round 2 — Evidence
+
+**Review round 2** — frozen design commit `4ddd571cacb5e714f246278005531b8ee4a73b2e`; HEAD
+`3f576a156a92525098a26922810e6067f5f63224` adds only the round-2 request, resolutions, and status. I am a
+fresh context: I did not author or implement this work, I did not participate in round 1, and I used no
+handoff, summary, or prior conversation. The worktree `/workspace/playground/step07-design` was clean at
+`3f576a1`; all round-2 evidence is from repository inspection at that state and from the frozen design
+content at `4ddd571`.
+
+Files reviewed in round 2:
+
+- `AGENTS.md` §3.8–§3.13, §3.15, §7.2, §8, §13; `docs/planning/reviews/README.md`; the review template.
+- `docs/planning/reviews/step-07.md` round-1 findings, evidence, verdict, and `Resolution status`.
+- `docs/planning/steps/step-07-validation-and-diagnostics.md`; Steps 03–06 pages; the Build-stage owner pages
+  09, 10, 11, and 12.
+- `docs/planning/02-data-contracts.md` §5.5–§5.6 and §6, `03-quality-strategy.md` §9.7,
+  `04-roadmap.md` §3.1, `05-open-decisions.md`, `appendix-b-parity-matrix.md`, `status.md`.
+- `docs/development/architecture.md`, `docs/development/design-decisions.md`,
+  `docs/development/testing-and-parity.md`, `docs/development/code-structure.md`, `zensical.toml`,
+  `docs/reference/index.md`, `docs/reference/project-format.md`, `docs/troubleshooting/index.md`.
+- Implemented APIs: `Mocassin.Packages/Projects/ProjectStore.cs`, `ProjectStoreOptions.cs`,
+  `ProjectStoreResults.cs`, `ProjectValidationService.cs`; `Mocassin.Core/Project/ProjectHasher.cs`,
+  `Mocassin.Core/Project/ProjectDiagnosticCodes.cs`, Core diagnostic-code classes;
+  `Mocassin.Symmetry/Diagnostics/*`, `Mocassin.Symmetry/Structure/StructurePreview.cs`,
+  `IStructurePreviewService.cs`, `Mocassin.Symmetry/Energy/EnergyCostPreview.cs`,
+  `ClusterCostPreview.cs`, `IEnergyPreviewService.cs`, `Mocassin.Symmetry/Transitions/TransitionPreview.cs`,
+  `TransitionPreviewService.cs`, `TransitionPathResolver.cs`, `ITransitionPreviewService.cs`,
+  `Mocassin.Core/Model/Transitions/ResolvedTransitionPath.cs`; `src/dotnet/Mocassin.Cli/Program.cs`;
+  `contracts/manifest.json`; `tools/contracts/generate.py`; `tools/verify.sh`.
+
+Commands run (from `/workspace/playground/step07-design`):
+
+```sh
+git status --short
+# clean
+
+git log --oneline -5
+# 3f576a1 docs: record step 07 review resolutions and status [skip ci]
+# 4ddd571 docs: revise step 07 validation design for review findings [skip ci]
+# e1e1475 docs: record step 07 design review changes required [skip ci]
+# eadd6d9 docs: request step 07 design review [skip ci]
+# dc73ee4 docs: prepare step 07 validation and diagnostics design [skip ci]
+
+git diff --stat dc73ee4^..dc73ee4
+# 9 files changed, 470 insertions(+), 166 deletions(-)
+
+git diff --stat 4ddd571^..4ddd571
+# 10 files changed, 277 insertions(+), 126 deletions(-)
+
+git diff --stat e1e1475..3f576a1
+# 12 files changed, 307 insertions(+), 134 deletions(-)
+
+python tools/check_process_consistency.py
+# Process consistency: OK
+
+python tools/check_docs_links.py
+# Documentation links OK (143 files scanned).
+
+zensical build --strict
+# Build started; No issues found; Build finished in 0.27s
+
+python tools/contracts/generate.py --check
+# Contract artifacts are current (17 files)
+
+./tools/verify.sh contracts
+# Contract artifacts current; space-group catalog current; process consistency OK;
+# 18 tests OK; SPDX headers present; no secrets; cargo-deny ok
+```
+
+Targeted read-only checks:
+
+```sh
+grep -rn "SIM042" docs src tests tools
+# only this review record (round-1 and round-2 text); no live design/code reference
+
+grep -rn "ValidateOnLoad\|ProjectLoadFailureKind" src/dotnet
+# no matches: both are still design-only additions
+
+grep -n "set(formats) == REQUIRED_FORMATS" tools/contracts/generate.py
+# line 178: formats must be exactly the eight required ids
+
+find contracts/generated -maxdepth 2 -type f | sort
+# schemas are emitted under contracts/generated/schema/<id>-v<version>.schema.json
+
+grep -rn "class .*DiagnosticCodes" src/dotnet/Mocassin.Core/Diagnostics \
+  src/dotnet/Mocassin.Core/Project
+# all Core code classes are public
+
+grep -rn "InternalsVisibleTo" src/dotnet/Mocassin.Core src/dotnet/Mocassin.Symmetry
+# Core.Tests and Symmetry.Tests are present
+
+grep -n "ExpectedRuleCount\|UniquePairInteractionCount\|EstimatedMemoryBytes" \
+  src/dotnet/Mocassin.Symmetry/Transitions/TransitionPreview.cs \
+  src/dotnet/Mocassin.Symmetry/Energy/EnergyCostPreview.cs
+# ExpectedRuleCount is int; UniquePairInteractionCount and EstimatedMemoryBytes exist
+
+grep -n "CancellationToken" src/dotnet/Mocassin.Symmetry/*/I*PreviewService.cs
+# no matches
+
+grep -n "Convert.ToHexStringLower" src/dotnet/Mocassin.Core/Project/ProjectHasher.cs
+# lowercase hexadecimal, no sha256: prefix
+
+grep -rn "ProjectValidationPipeline\|IValidationStage" docs/planning/steps/step-0[89]*.md \
+  docs/planning/steps/step-1[012]*.md
+# Steps 09-12 now record the Build-stage integration point
+```
+
+Resolution verification against the design at `4ddd571`:
+
+| Finding | Round-2 verification |
+| --- | --- |
+| M1 | Partially closed. Nullable identity/hashes, the single-report rule, and the load-failure kind are present, and the unreachable edit-lock claim is gone. The pipeline API still does not propagate the kind to the CLI (R2-M1). |
+| M2 | Closed. `ValidateFileAsync` owns `Load`, uses `ValidateOnLoad = false`, rejects a validating store, and the in-memory entry reports `Load` as `Skipped`; stage status/count/elapsed semantics are defined (residual wording in R2-m2). |
+| M3 | Closed. `ValidationContext`, `IValidationStage` restricted to `Build`, `RunBuildStage` gating, and the integration text in Steps 09–12 are all present. |
+| M4 | Closed for the duplicate `KMC-no-unstable` code and cascade. `SIM038`/`SIM039` are distinguished, `SIM039` suppresses `SIM038`, and `SIM042` is gone; suppression with per-simulation `SIM003` is still worded ambiguously (R2-m4). |
+| M5 | Closed. The "requested, loaded, no `Model` error, previews succeeded" rule is consistent across the step page §2/§3/§6, contract §5.6, acceptance criteria, test table, quality strategy §9.7, and `testing-and-parity.md`; feasibility/budget errors may coexist with statistics and `--stats` does not change `valid`. |
+| M6 | Closed. The report is registered under a top-level `reports` object, not `formats`; generator/README/version-constant/schema/freshness tasks are recorded. The generated-schema path is inconsistent with the existing `schema/` convention (R2-m5). |
+| m1 | Closed. `SymmetryDiagnosticCatalog` is new public, the internal constants are read inside their assembly, `InternalsVisibleTo` exists, Core `ProjectDiagnosticCodes` are registered, and descriptors are split by domain. |
+| m2 | Closed. `EstimatedRuleCount` and `MaxEstimatedRuleCount` are `long`; the preview remains `int` and the sum is accumulated in `long`. |
+| m3 | Closed. Pair interactions use `UniquePairInteractionCount`; all 17 statistics fields are enumerated in the contract and match `ModelStatistics`. |
+| m4 | Closed. Cancellation is claimed only between stages/transitions/simulations and around atomic preview calls. |
+| m5 | Closed. Hashes are raw lowercase hexadecimal, matching `ProjectHasher`. |
+| m6 | Closed. PublicAPI/ApiCompat, SPDX, closeout/status/parity/audit, navigation/index, and descriptor file-layout tasks are present. |
+| m7 | Closed. `CellCountA/B/C < 1` is a programmer error and throws `ArgumentOutOfRangeException`. |
+| m8 | Closed. The hop-by-hop minimum-image rule, per-position cutoff selection, strict comparison, first hop, invalid-cutoff skip, and path-error suppression are specified. |
+| m9 | Closed. Budgets live in `ValidationOptions`; Steps 09–12 are used throughout. |
+| n1 | Accepted. The budgets are recorded as initial advisory guardrails tuned by Steps 08/11. |
+| n2 | Accepted. `Completed`/`Failed`/`Skipped`, post-dedup counts, and the in-memory `Load` elapsed rule are defined, subject to R2-m2/R2-m3. |
+| n3 | Accepted. The acceptance criterion now references the fixture's recorded warning set and a Step 07 per-code hint test; Step 03–06 tests count for severity only. |
+| n4 | Accepted. A `Sizing` section records seven rows, 2–3 person-weeks, and below the split trigger. |
+
 ## Findings
 
 | Severity | Finding | Evidence |
@@ -204,9 +335,25 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning audit
 verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
 the auditor's findings, evidence, or verdict.
 
+### Re-review round 2 — Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Major** | **R2-M1 — The structured load-failure kind is not propagated to the CLI, so the M1 exit-code mapping still cannot be implemented through the prescribed entry point.** The design adds `ProjectLoadFailureKind` to `ProjectLoadResult` and says the CLI maps `NotFound`/`TooLarge`/`Io` to exit `3` and `InvalidContent` to exit `1`. But the CLI is specified to call `ProjectValidationPipeline.ValidateFileAsync`, whose declared return type is `ValidationResult`; `ValidationResult` has `ProjectId?`, hashes, `IsValid`, `Summary`, `Diagnostics`, `Statistics`, and `Stages`, but no failure kind and no `exitCode`. `Stages` only distinguishes `Failed` from `Skipped`, and both parse and I/O failures emit the same `PROJ002` diagnostic, so the CLI cannot tell `1` from `3` after the pipeline returns. Propagating the kind (on `ValidationResult` or a dedicated load-failure outcome) or changing the file-entry signature must be part of the design. | Step page §2 (`ValidationResult`), §3 (`Load` stage), §7 (CLI calls `ValidateFileAsync`; kind mapping); `ProjectStoreResults.cs` lines 12–38; `ProjectStore.cs` lines 340–373 and 395–463; `ProjectDiagnosticCodes.InvalidDocument` (`PROJ002`) covers missing file, BOM, UTF-8, JSON, schema, and migration failures. |
+| **Minor** | **R2-m1 — The `Load` stage responsibility row still mentions lock diagnostics although the read-only path never checks the editing lock.** The CLI section correctly says the path never acquires the lock and an OS sharing denial surfaces as `Io`, but the stage table still lists "lock/I/O diagnostics" as a `Load` responsibility. The design should either drop the lock wording or state that it means an OS-level sharing failure only. | Step page §3 `Load` row; §7 read-only lock paragraph; `ProjectStore.LoadAsync` has no lock-file check. |
+| **Minor** | **R2-m2 — The in-memory entry's `Load` status is `Skipped` even when the caller supplies load diagnostics, which is ambiguous for error diagnostics and for the stage-count sum rule.** `Validate(project, loadDiagnostics, ...)` is the in-memory entry; §2 says `Load` is reported as `Skipped` with `TimeSpan.Zero`, while §3 says load errors stop the pipeline and stage counts sum to `Diagnostics.Length`. The design does not say whether caller-supplied load errors make the skipped stage carry a non-zero `DiagnosticCount` or whether they are attributed to `Model`. | Step page §2 (`Validate` in-memory entry and `Stages` bullet), §3 (load errors stop the pipeline; counts sum to `Diagnostics.Length`). |
+| **Minor** | **R2-m3 — Statistics-preview failure diagnostics have no owning stage, which conflicts with the "stage counts sum to `Diagnostics.Length`" rule.** §6 says a failed statistics preview appends its diagnostics to the result, but statistics is not one of the five `ValidationStage` values and the result has no statistics stage result. Unless those diagnostics are only duplicates of an earlier preview failure (and are deduplicated), the stage counts cannot sum to the final diagnostics length. | Step page §2 (`Stages` bullet), §6 (failed preview diagnostics appended; statistics are not a stage), `ValidationStage` enum. |
+| **Minor** | **R2-m4 — `SIM039`'s suppression relation to per-simulation `SIM003` is ambiguous for mixed models.** The design says "Neither is emitted when `SIM003` already reports the simulation's empty transition set". `SIM003` is per simulation, while `SIM039` is model-wide. If one simulation has no transitions and another has transitions but no mobile start particle, it is unclear whether `SIM003` suppresses the model-wide `SIM039`, leaving the second simulation without the buildability warning. State the exact evaluation order and the mixed-model case. | Step page §4 `SIM038`/`SIM039` rows and suppression bullets; Step 06 `SIM003` definition ("Simulation has no transitions"). |
+| **Minor** | **R2-m5 — The generated validation schema path/naming does not follow the existing generator convention.** The design and task say `contracts/generated/validation-v1.schema.json`, while every existing generated schema is `contracts/generated/schema/<id>-v<version>.schema.json`. The freshness check works either way, but the path should be consistent or the exception should be stated; the `reports` descriptor shape and its `schemaVersion`/version-constant home are also not specified at file level. | Step page task list; `02-data-contracts.md` §5.6; `tools/contracts/generate.py` `build_artifacts`; `contracts/generated/schema/` listing. |
+| **Minor** | **R2-m6 — `ENM018` specifies the property path but not the diagnostic domain/object identity.** The rule says to emit at the first offending hop with `Path.Property = "referencePath[i]"`, but it does not say whether `Path.Domain` is `kineticTransition` and `Path.ObjectId` is the transition ID. The per-code emission test requires an expected path. | Step page §4 `ENM018` boundary; test table `Cross-domain`; existing `TransitionPathValidator` paths use `kineticTransition`/transition ID. |
+| **Minor** | **R2-m7 — `SIM038`/`SIM039` use "mobile start particle" without saying whether MMC simulations are included.** The term comes from the KMC start pool, but the rule is written for "a simulation" and the model can author KMC and MMC simulations. State the simulation-kind scope; otherwise the feasibility test boundary is ambiguous. | Step page §4 `SIM038`/`SIM039`; Step 10 "KMC start pool"; Step 06 simulation kinds. |
+
 ## Record state
 
-**State:** Re-review required
+**State:** Changes required
+
+> Round-1 state was `Re-review required`; round 2 re-review returns `Changes required` (see the round-2
+> verdict below).
 
 `Re-review required` is a record state, not a verdict.
 
@@ -233,6 +380,31 @@ one statistics-nullability rule across the step page, data contract, and accepta
 
 Follow-up owner: Step agent / planner
 Follow-up step: Step 07 design revision and fresh re-review (round 2)
+
+### Re-review round 2 — Verdict
+
+- [ ] Ready for implementation
+- [ ] Ready with notes
+- [x] Changes required
+- [ ] Waived
+
+**Round 2 verdict: Changes required.** One Major finding remains: the structured
+`ProjectLoadFailureKind` is added to `ProjectLoadResult`, but the CLI consumes `ValidateFileAsync`, which
+returns `ValidationResult` without the kind, so the promised parse-vs-I/O exit-code mapping (`1` vs `3`) is
+still not implementable through the designed entry point (R2-M1). No Blocker was found.
+
+The round-1 Major findings M2–M6 are closed against the design text and the implemented Steps 03–06 APIs.
+M1 is materially improved (nullable identity/hashes, one report for every invocation, `ProjectLoadFailureKind`,
+and removal of the unreachable edit-lock claim) but is not fully closed because of R2-M1. Minor findings
+m1–m9 and Notes n1–n4 are closed or accepted as recorded. Seven new Minor findings remain (R2-m1–R2-m7);
+they are correctness/clarity gaps, not start blockers beyond R2-M1. The repository checks and the strict
+documentation build pass.
+
+Because a Major remains, the design is not `Ready for implementation` or `Ready with notes`. The human owner
+approves the final verdict and the start gate; this record does not authorize starting Step 07.
+
+Follow-up owner: Step agent / planner
+Follow-up step: Step 07 design revision for R2-M1 (and optionally R2-m1–R2-m7), then a fresh re-review (round 3)
 
 ## Approval summary
 
