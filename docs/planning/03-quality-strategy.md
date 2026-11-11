@@ -303,7 +303,7 @@ solver with the same binary, platform, package, and seed.
 
 - **Pipeline order and skipping:** load errors stop the pipeline; model errors skip cross-domain, feasibility,
   and statistics; `validate` never runs build-stage checks (`RunBuildStage = false`), and the in-memory entry
-  reports `Load` as skipped.
+  reports `Load` as skipped only when the caller supplies no load diagnostics.
 - **No mutation:** model and document hashes are unchanged after success, failure, and cancellation.
 - **Catalog completeness:** every public Core code constant and every internal Symmetry constant is registered
   once in its assembly-local catalog; the composed `DiagnosticCatalog` is their union plus package and Step 07

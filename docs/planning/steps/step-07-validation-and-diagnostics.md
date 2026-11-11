@@ -137,7 +137,7 @@ public sealed class ProjectValidationPipeline
         ITransitionPreviewService? transitionPreview = null,
         IEnumerable<IValidationStage>? additionalStages = null);
 
-    // In-memory entry: Load is caller-owned and is reported as Skipped.
+    // In-memory entry: Load is caller-owned and is Skipped unless the caller supplies load diagnostics.
     public ValidationResult Validate(
         Project project,
         ImmutableArray<Diagnostic> loadDiagnostics = default,
@@ -210,9 +210,9 @@ public interface IValidationStage
 - `validate` sets `RunBuildStage = false` and reports stages 1–4. `build` sets `RunBuildStage = true`; additional
   `Build` stages then run after `Feasibility`, in constructor registration order, and only when no earlier stage
   produced an `Error`. A skipped Build stage still appears in `Stages` with `Skipped`.
-- Consumers that already hold a `Project` call the in-memory entry; its `Load` stage is reported as `Skipped`
-  with zero elapsed, and load diagnostics must be passed in by the caller. GUI and CLI file paths use
-  `ValidateFileAsync`, so both report the same stage list.
+- Consumers that already hold a `Project` call the in-memory entry; its `Load` stage is `Skipped` when no load
+  diagnostics are supplied and is `Failed`/`Completed` with the caller-supplied diagnostics otherwise, as
+  defined in §2. GUI and CLI file paths use `ValidateFileAsync`, so both report the same stage list.
 
 ### 4. Cross-domain and feasibility rules
 
@@ -517,7 +517,7 @@ At this point, document validation and diagnostics:
 
 | Test | Assertion |
 | --- | --- |
-| Pipeline order | Load → Model → CrossDomain → Feasibility; later stages skip on earlier errors; in-memory Load is `Skipped` |
+| Pipeline order | Load → Model → CrossDomain → Feasibility; later stages skip on earlier errors; in-memory Load is `Skipped` without caller diagnostics and `Failed`/`Completed` with them |
 | No mutation | Model and document hashes unchanged after validation |
 | Catalog completeness | Every code constant appears once; no duplicate or undocumented code |
 | Catalog docs drift | `docs/reference/diagnostics.md` matches the catalog exactly |
