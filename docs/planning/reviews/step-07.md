@@ -15,7 +15,7 @@
 | Request owner | Step agent |
 | Orchestrator (step agent / planner) | Step agent / planner |
 | Review initiated by | Planner |
-| Reviewed commit | `4ddd571cacb5e714f246278005531b8ee4a73b2e` (round 2; round 1 reviewed `dc73ee40954070b8e95bf0713f8df4526b208ba6`) |
+| Reviewed commit | `60437ca07219368dca745b4c9e9f056a543bde1a` (round 3; round 2 reviewed `4ddd571cacb5e714f246278005531b8ee4a73b2e`; round 1 reviewed `dc73ee40954070b8e95bf0713f8df4526b208ba6`) |
 | Docs branch | `docs/step-07-design` |
 | Review date | 2026-11-11 |
 | Reviewer | Independent planning auditor (fresh context, round 1; no shared conversation with the planner or implementor) |
@@ -350,7 +350,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 > Round-1 state was `Re-review required`; round 2 re-review returns `Changes required` (see the round-2
 > verdict below).
@@ -467,6 +467,22 @@ Date:
 
 Round 2 request: the design fixes above are at `4ddd571`. A fresh re-review should verify M1–M6 and the minor/note
 resolutions against that commit; reviewer-authored round 1 text is unchanged.
+
+### Round 3 resolutions
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| R2-M1 — load-failure kind not propagated | Resolved: `ValidationResult.LoadFailure` carries `ProjectLoadFailureKind?`; `ValidateFileAsync` copies it from `ProjectLoadResult`; the CLI maps it to `1`/`3` | Step agent / planner | `60437ca` |
+| R2-m1 — `Load` row lock wording | Resolved: row now says OS sharing/I/O only and that the read-only path never checks the edit lock | Step agent / planner | `60437ca` |
+| R2-m2 — in-memory `Load` status/count | Resolved: no caller diagnostics → `Skipped`/0; caller diagnostics → `Failed` or `Completed` with surviving count and zero elapsed | Step agent / planner | `60437ca` |
+| R2-m3 — statistics-preview diagnostics | Resolved: attributed to the `Feasibility` stage result, so counts sum to `Diagnostics.Length` | Step agent / planner | `60437ca` |
+| R2-m4 — mixed `SIM003`/`SIM039` | Resolved: explicit evaluation order; `SIM003` suppresses only its own simulation, never the model-wide `SIM039` | Step agent / planner | `60437ca` |
+| R2-m5 — generated schema path/shape | Resolved: `contracts/generated/schema/validation-v1.schema.json`, descriptor shape and `ValidationReportVersion` home specified | Step agent / planner | `60437ca` |
+| R2-m6 — `ENM018` path identity | Resolved: domain `kineticTransition`, transition ID as object, `referencePath[i]` property | Step agent / planner | `60437ca` |
+| R2-m7 — `SIM038`/`SIM039` kind scope | Resolved: both are KMC-only; MMC has no start pool | Step agent / planner | `60437ca` |
+
+Round 3 request: the fixes are at `60437ca`. A fresh re-review should verify R2-M1 and R2-m1–R2-m7 against that
+commit; all reviewer-authored round 1 and round 2 text is unchanged.
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.

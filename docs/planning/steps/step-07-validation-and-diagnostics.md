@@ -13,7 +13,7 @@ headless `mocassin validate` command.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required at `4ddd571` (round 1: Changes required at `dc73ee4`)
+- **Design review:** Re-review required at `60437ca` (round 2: Changes required at `4ddd571`; round 1: Changes required at `dc73ee4`)
 - **Last updated:** 2026-11-11
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

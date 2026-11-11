@@ -54,7 +54,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Done | `step/04-transition-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) (closeout) | `31ba12d` | `step-04` | Passed with notes at `82c8cb4` | Ready for implementation — accepted at `a3d8641` |
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Done | `step/05-energy-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) (replacement closeout) | `c11a364` | `step-05` | Passed with notes at `315aa19` | Ready for implementation — accepted at `0b2a571` |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Done | `step/06-lattice-and-simulation-models` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | `41cfa4d` | `step-06` | Passed with notes at `c390dcc` (code `ea6293e`); accepted 2026-11-11 | Ready with notes — accepted at `6173e61` |
-| 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Re-review required at `4ddd571` (round 1: Changes required at `dc73ee4`) |
+| 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Not started | — | — | — | — | — | Not requested | Re-review required at `60437ca` (round 2: Changes required at `4ddd571`; round 1 at `dc73ee4`) |
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -82,8 +82,9 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 ## Active work
 
-Step 07 — Validation, Diagnostics, and Model Statistics is in re-review at `4ddd571`; round 1 at `dc73ee4`
-returned `Changes required` (six Major, nine Minor, four Notes), all addressed in the design revision. The design
+Step 07 — Validation, Diagnostics, and Model Statistics is in round-3 re-review at `60437ca`; round 2 at
+`4ddd571` returned `Changes required` for one Major (load-failure propagation), now resolved, and round 1 at
+`dc73ee4` returned `Changes required` (six Major, nine Minor, four Notes), all addressed. The design
 covers the `ProjectValidationPipeline`, diagnostic catalog, `validation-v1` report, model statistics, and the
 `mocassin validate` command. Step 06 is
 complete: merge `41cfa4d`, tag `step-06`, main CI `43091007170` green, audit
