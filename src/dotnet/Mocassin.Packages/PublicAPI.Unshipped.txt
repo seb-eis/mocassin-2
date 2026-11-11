@@ -12,7 +12,6 @@ Mocassin.Packages.Projects.ProjectLoadResult.Diagnostics.get -> System.Collectio
 Mocassin.Packages.Projects.ProjectLoadResult.Equals(Mocassin.Packages.Projects.ProjectLoadResult? other) -> bool
 Mocassin.Packages.Projects.ProjectLoadResult.IsSuccess.get -> bool
 Mocassin.Packages.Projects.ProjectLoadResult.Project.get -> Mocassin.Core.Project.Project?
-Mocassin.Packages.Projects.ProjectLoadResult.ProjectLoadResult(Mocassin.Core.Project.Project? project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> void
 Mocassin.Packages.Projects.ProjectLockResult
 Mocassin.Packages.Projects.ProjectLockResult.<Clone>$() -> Mocassin.Packages.Projects.ProjectLockResult!
 Mocassin.Packages.Projects.ProjectLockResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
@@ -80,3 +79,215 @@ Mocassin.Packages.Jobs.SolverJobFlagsMapper
 static Mocassin.Packages.Jobs.SolverJobFlagsMapper.Compose(Mocassin.Core.Model.Simulations.ExecutionFlags authored, Mocassin.Core.Model.Simulations.SimulationKind kind, long preRunMcsp, bool useDualDofCorrection) -> Mocassin.Contracts.Solver.SolverJobFlags
 static Mocassin.Packages.Jobs.SolverJobFlagsMapper.FromAuthored(Mocassin.Core.Model.Simulations.ExecutionFlags flags) -> Mocassin.Contracts.Solver.SolverJobFlags
 static Mocassin.Packages.Jobs.SolverJobFlagsMapper.ToAuthored(Mocassin.Contracts.Solver.SolverJobFlags flags) -> Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Packages.Projects.ProjectLoadFailureKind.InvalidContent = 4 -> Mocassin.Packages.Projects.ProjectLoadFailureKind
+Mocassin.Packages.Projects.Validation.DiagnosticCatalog
+Mocassin.Packages.Projects.ProjectLoadFailureKind.NotFound = 1 -> Mocassin.Packages.Projects.ProjectLoadFailureKind
+Mocassin.Packages.Projects.ProjectLoadFailureKind.Io = 3 -> Mocassin.Packages.Projects.ProjectLoadFailureKind
+Mocassin.Packages.Projects.ProjectLoadFailureKind.TooLarge = 2 -> Mocassin.Packages.Projects.ProjectLoadFailureKind
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor
+Mocassin.Packages.Projects.ProjectLoadFailureKind.None = 0 -> Mocassin.Packages.Projects.ProjectLoadFailureKind
+override Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.ToString() -> string!
+static Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.operator !=(Mocassin.Packages.Projects.Validation.DiagnosticDescriptor? left, Mocassin.Packages.Projects.Validation.DiagnosticDescriptor? right) -> bool
+Mocassin.Packages.Projects.ProjectLoadFailureKind
+static Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.operator ==(Mocassin.Packages.Projects.Validation.DiagnosticDescriptor? left, Mocassin.Packages.Projects.Validation.DiagnosticDescriptor? right) -> bool
+override Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.GetHashCode() -> int
+override Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Equals(object? obj) -> bool
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Equals(Mocassin.Packages.Projects.Validation.DiagnosticDescriptor? other) -> bool
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.<Clone>$() -> Mocassin.Packages.Projects.Validation.DiagnosticDescriptor!
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Deconstruct(out string! Code, out Mocassin.Core.Diagnostics.DiagnosticSeverity DefaultSeverity, out string! Owner, out string! Title, out string! Help, out string! DocumentationAnchor) -> void
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Code.get -> string!
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Code.init -> void
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.Errors.get -> int
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.Errors.init -> void
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Owner.get -> string!
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Owner.init -> void
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Title.get -> string!
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.Warnings.get -> int
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.DefaultSeverity.get -> Mocassin.Core.Diagnostics.DiagnosticSeverity
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Title.init -> void
+Mocassin.Packages.Projects.Validation.DiagnosticSummary
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.DefaultSeverity.init -> void
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.Warnings.init -> void
+override Mocassin.Packages.Projects.Validation.DiagnosticSummary.ToString() -> string!
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.Infos.get -> int
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Help.get -> string!
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.Infos.init -> void
+static Mocassin.Packages.Projects.Validation.DiagnosticSummary.operator !=(Mocassin.Packages.Projects.Validation.DiagnosticSummary? left, Mocassin.Packages.Projects.Validation.DiagnosticSummary? right) -> bool
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.Help.init -> void
+static Mocassin.Packages.Projects.Validation.DiagnosticSummary.operator ==(Mocassin.Packages.Projects.Validation.DiagnosticSummary? left, Mocassin.Packages.Projects.Validation.DiagnosticSummary? right) -> bool
+override Mocassin.Packages.Projects.Validation.DiagnosticSummary.GetHashCode() -> int
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.DocumentationAnchor.get -> string!
+override Mocassin.Packages.Projects.Validation.DiagnosticSummary.Equals(object? obj) -> bool
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.DocumentationAnchor.init -> void
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.Equals(Mocassin.Packages.Projects.Validation.DiagnosticSummary? other) -> bool
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.<Clone>$() -> Mocassin.Packages.Projects.Validation.DiagnosticSummary!
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.Deconstruct(out int Errors, out int Warnings, out int Infos) -> void
+Mocassin.Packages.Projects.Validation.ValidationStage.Model = 1 -> Mocassin.Packages.Projects.Validation.ValidationStage
+Mocassin.Packages.Projects.Validation.ValidationStage.Load = 0 -> Mocassin.Packages.Projects.Validation.ValidationStage
+Mocassin.Packages.Projects.Validation.ValidationStage.CrossDomain = 2 -> Mocassin.Packages.Projects.Validation.ValidationStage
+Mocassin.Packages.Projects.Validation.Step07DiagnosticCodes
+Mocassin.Packages.Projects.Validation.ValidationStage.Feasibility = 3 -> Mocassin.Packages.Projects.Validation.ValidationStage
+Mocassin.Packages.Projects.Validation.ValidationStage.Build = 4 -> Mocassin.Packages.Projects.Validation.ValidationStage
+const Mocassin.Packages.Projects.Validation.Step07DiagnosticCodes.KmcSimulationWithoutMobileStart = "SIM038" -> string!
+const Mocassin.Packages.Projects.Validation.Step07DiagnosticCodes.NoMobileStartParticle = "SIM039" -> string!
+const Mocassin.Packages.Projects.Validation.Step07DiagnosticCodes.EstimatedRuleCountExceeded = "SIM040" -> string!
+const Mocassin.Packages.Projects.Validation.Step07DiagnosticCodes.EstimatedMemoryExceeded = "SIM041" -> string!
+Mocassin.Packages.Projects.Validation.IValidationStage
+Mocassin.Packages.Projects.Validation.ValidationStageStatus.Completed = 0 -> Mocassin.Packages.Projects.Validation.ValidationStageStatus
+Mocassin.Packages.Projects.Validation.ValidationStageStatus.Skipped = 1 -> Mocassin.Packages.Projects.Validation.ValidationStageStatus
+Mocassin.Packages.Projects.Validation.ValidationStageStatus.Failed = 2 -> Mocassin.Packages.Projects.Validation.ValidationStageStatus
+Mocassin.Packages.Projects.Validation.ValidationStageStatus
+Mocassin.Packages.Projects.Validation.ValidationContext.Project.get -> Mocassin.Core.Project.Project!
+Mocassin.Packages.Projects.Validation.ValidationContext.Options.get -> Mocassin.Packages.Projects.Validation.ValidationOptions!
+Mocassin.Packages.Projects.Validation.ValidationContext.Project.init -> void
+Mocassin.Packages.Projects.Validation.ValidationContext.Catalog.get -> Mocassin.Packages.Projects.Validation.DiagnosticCatalog!
+Mocassin.Packages.Projects.Validation.ValidationContext.Options.init -> void
+Mocassin.Packages.Projects.Validation.ValidationContext.Catalog.init -> void
+Mocassin.Packages.Projects.Validation.ValidationContext.PreviousStages.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!>
+Mocassin.Packages.Projects.Validation.ValidationStageResult.Status.get -> Mocassin.Packages.Projects.Validation.ValidationStageStatus
+Mocassin.Packages.Projects.Validation.ValidationStageResult.Stage.get -> Mocassin.Packages.Projects.Validation.ValidationStage
+Mocassin.Packages.Projects.Validation.ValidationStageResult.DiagnosticCount.get -> int
+Mocassin.Packages.Projects.Validation.ValidationContext.PreviousStages.init -> void
+Mocassin.Packages.Projects.Validation.ValidationStageResult.Elapsed.get -> System.TimeSpan
+Mocassin.Packages.Projects.Validation.ValidationStageResult.Status.init -> void
+Mocassin.Packages.Projects.Validation.ValidationStageResult.DiagnosticCount.init -> void
+Mocassin.Packages.Projects.Validation.ValidationStageResult.Stage.init -> void
+Mocassin.Packages.Projects.Validation.ValidationStageResult.Elapsed.init -> void
+Mocassin.Packages.Projects.Validation.ValidationStage
+Mocassin.Packages.Projects.Validation.ValidationStageResult
+Mocassin.Packages.Projects.Validation.ValidationOptions
+override Mocassin.Packages.Projects.Validation.ValidationStageResult.ToString() -> string!
+override Mocassin.Packages.Projects.Validation.ValidationOptions.ToString() -> string!
+static Mocassin.Packages.Projects.Validation.ValidationStageResult.operator !=(Mocassin.Packages.Projects.Validation.ValidationStageResult? left, Mocassin.Packages.Projects.Validation.ValidationStageResult? right) -> bool
+static Mocassin.Packages.Projects.Validation.ValidationOptions.operator !=(Mocassin.Packages.Projects.Validation.ValidationOptions? left, Mocassin.Packages.Projects.Validation.ValidationOptions? right) -> bool
+static Mocassin.Packages.Projects.Validation.ValidationStageResult.operator ==(Mocassin.Packages.Projects.Validation.ValidationStageResult? left, Mocassin.Packages.Projects.Validation.ValidationStageResult? right) -> bool
+static Mocassin.Packages.Projects.Validation.ValidationOptions.operator ==(Mocassin.Packages.Projects.Validation.ValidationOptions? left, Mocassin.Packages.Projects.Validation.ValidationOptions? right) -> bool
+override Mocassin.Packages.Projects.Validation.ValidationStageResult.GetHashCode() -> int
+override Mocassin.Packages.Projects.Validation.ValidationOptions.GetHashCode() -> int
+override Mocassin.Packages.Projects.Validation.ValidationStageResult.Equals(object? obj) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.P1PositionCount.get -> long
+Mocassin.Packages.Projects.Validation.ModelStatistics.ParticleSetCount.get -> int
+Mocassin.Packages.Projects.Validation.ModelStatistics.ReferenceSiteCount.get -> int
+override Mocassin.Packages.Projects.Validation.ValidationOptions.Equals(object? obj) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.ParticleCount.get -> int
+Mocassin.Packages.Projects.Validation.ModelStatistics.ParticleSetCount.init -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.P1PositionCount.init -> void
+Mocassin.Packages.Projects.Validation.ValidationStageResult.Equals(Mocassin.Packages.Projects.Validation.ValidationStageResult? other) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.StablePositionCount.get -> long
+Mocassin.Packages.Projects.Validation.ValidationOptions.Equals(Mocassin.Packages.Projects.Validation.ValidationOptions? other) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.ReferenceSiteCount.init -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.ParticleCount.init -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.<Clone>$() -> Mocassin.Packages.Projects.Validation.ValidationOptions!
+Mocassin.Packages.Projects.Validation.ValidationStageResult.<Clone>$() -> Mocassin.Packages.Projects.Validation.ValidationStageResult!
+Mocassin.Packages.Projects.Validation.ValidationOptions.ValidationOptions() -> void
+Mocassin.Packages.Projects.Validation.ValidationStageResult.Deconstruct(out Mocassin.Packages.Projects.Validation.ValidationStage Stage, out Mocassin.Packages.Projects.Validation.ValidationStageStatus Status, out int DiagnosticCount, out System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics
+Mocassin.Packages.Projects.Validation.ModelStatistics.UnstablePositionCount.get -> long
+Mocassin.Packages.Projects.Validation.ModelStatistics.KineticTransitionCount.get -> int
+override Mocassin.Packages.Projects.Validation.ModelStatistics.ToString() -> string!
+Mocassin.Packages.Projects.Validation.ModelStatistics.UnstablePositionCount.init -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.KineticTransitionCount.init -> void
+static Mocassin.Packages.Projects.Validation.ModelStatistics.operator !=(Mocassin.Packages.Projects.Validation.ModelStatistics? left, Mocassin.Packages.Projects.Validation.ModelStatistics? right) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.MetropolisTransitionCount.get -> int
+Mocassin.Packages.Projects.Validation.ModelStatistics.MetropolisTransitionCount.init -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.ClusterCount.get -> int
+Mocassin.Packages.Projects.Validation.ValidationContext
+Mocassin.Packages.Projects.Validation.ValidationResult.ProjectId.get -> System.Guid?
+Mocassin.Packages.Projects.Validation.ModelStatistics.ClusterCount.init -> void
+override Mocassin.Packages.Projects.Validation.ValidationContext.ToString() -> string!
+Mocassin.Packages.Projects.Validation.ValidationResult.ProjectId.init -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedPairInteractionCount.get -> long
+static Mocassin.Packages.Projects.Validation.ValidationContext.operator !=(Mocassin.Packages.Projects.Validation.ValidationContext? left, Mocassin.Packages.Projects.Validation.ValidationContext? right) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedPairInteractionCount.init -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedUniqueClusterPermutations.get -> long
+Mocassin.Packages.Projects.Validation.ValidationResult
+static Mocassin.Packages.Projects.Validation.ValidationContext.operator ==(Mocassin.Packages.Projects.Validation.ValidationContext? left, Mocassin.Packages.Projects.Validation.ValidationContext? right) -> bool
+Mocassin.Packages.Projects.Validation.ValidationResult.ModelHash.get -> string?
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedUniqueClusterPermutations.init -> void
+override Mocassin.Packages.Projects.Validation.ValidationContext.GetHashCode() -> int
+override Mocassin.Packages.Projects.Validation.ValidationResult.ToString() -> string!
+Mocassin.Packages.Projects.Validation.ValidationResult.ModelHash.init -> void
+override Mocassin.Packages.Projects.Validation.ValidationContext.Equals(object? obj) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedRuleCount.get -> long
+static Mocassin.Packages.Projects.Validation.ValidationResult.operator !=(Mocassin.Packages.Projects.Validation.ValidationResult? left, Mocassin.Packages.Projects.Validation.ValidationResult? right) -> bool
+Mocassin.Packages.Projects.Validation.ValidationContext.Equals(Mocassin.Packages.Projects.Validation.ValidationContext? other) -> bool
+Mocassin.Packages.Projects.Validation.ValidationResult.DocumentHash.get -> string?
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedMemoryBytes.get -> long
+Mocassin.Packages.Projects.Validation.ValidationContext.<Clone>$() -> Mocassin.Packages.Projects.Validation.ValidationContext!
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedRuleCount.init -> void
+static Mocassin.Packages.Projects.Validation.ValidationResult.operator ==(Mocassin.Packages.Projects.Validation.ValidationResult? left, Mocassin.Packages.Projects.Validation.ValidationResult? right) -> bool
+Mocassin.Packages.Projects.Validation.ValidationResult.DocumentHash.init -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountA.get -> int
+Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountB.get -> int
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedMemoryBytes.init -> void
+override Mocassin.Packages.Projects.Validation.ValidationResult.GetHashCode() -> int
+Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountA.init -> void
+Mocassin.Packages.Projects.Validation.ValidationContext.Deconstruct(out Mocassin.Core.Project.Project! Project, out Mocassin.Packages.Projects.Validation.ValidationOptions! Options, out Mocassin.Packages.Projects.Validation.DiagnosticCatalog! Catalog, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!> PreviousStages) -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountB.init -> void
+override Mocassin.Packages.Projects.Validation.ValidationResult.Equals(object? obj) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountC.get -> int
+Mocassin.Packages.Projects.Validation.ValidationResult.LoadFailure.get -> Mocassin.Packages.Projects.ProjectLoadFailureKind?
+Mocassin.Packages.Projects.Validation.ValidationResult.Equals(Mocassin.Packages.Projects.Validation.ValidationResult? other) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedPositions.get -> long
+Mocassin.Packages.Projects.Validation.ValidationResult.LoadFailure.init -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountC.init -> void
+Mocassin.Packages.Projects.Validation.ValidationResult.<Clone>$() -> Mocassin.Packages.Projects.Validation.ValidationResult!
+Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedPositions.init -> void
+Mocassin.Packages.Projects.Validation.ValidationResult.IsValid.get -> bool
+Mocassin.Packages.Projects.Validation.ValidationResult.Deconstruct(out System.Guid? ProjectId, out string? ModelHash, out string? DocumentHash, out Mocassin.Packages.Projects.ProjectLoadFailureKind? LoadFailure, out bool IsValid, out Mocassin.Packages.Projects.Validation.DiagnosticSummary! Summary, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics, out Mocassin.Packages.Projects.Validation.ModelStatistics? Statistics, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!> Stages) -> void
+Mocassin.Packages.Projects.Validation.ValidationResult.IsValid.init -> void
+Mocassin.Packages.Projects.Validation.ValidationResult.Summary.get -> Mocassin.Packages.Projects.Validation.DiagnosticSummary!
+Mocassin.Packages.Projects.Validation.ValidationResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Projects.Validation.ValidationResult.Statistics.get -> Mocassin.Packages.Projects.Validation.ModelStatistics?
+Mocassin.Packages.Projects.Validation.ValidationResult.Summary.init -> void
+Mocassin.Packages.Projects.Validation.ValidationResult.Diagnostics.init -> void
+Mocassin.Packages.Projects.Validation.ValidationResult.Statistics.init -> void
+Mocassin.Packages.Projects.Validation.ValidationResult.Stages.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!>
+Mocassin.Packages.Projects.Validation.ValidationResult.Stages.init -> void
+static Mocassin.Packages.Projects.Validation.ModelStatistics.operator ==(Mocassin.Packages.Projects.Validation.ModelStatistics? left, Mocassin.Packages.Projects.Validation.ModelStatistics? right) -> bool
+override Mocassin.Packages.Projects.Validation.ModelStatistics.GetHashCode() -> int
+override Mocassin.Packages.Projects.Validation.ModelStatistics.Equals(object? obj) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.Equals(Mocassin.Packages.Projects.Validation.ModelStatistics? other) -> bool
+Mocassin.Packages.Projects.Validation.ModelStatistics.<Clone>$() -> Mocassin.Packages.Projects.Validation.ModelStatistics!
+Mocassin.Packages.Projects.Validation.ModelStatistics.StablePositionCount.init -> void
+Mocassin.Packages.Projects.Validation.ModelStatistics.Deconstruct(out int ParticleCount, out int ParticleSetCount, out int ReferenceSiteCount, out long P1PositionCount, out long StablePositionCount, out long UnstablePositionCount, out int KineticTransitionCount, out int MetropolisTransitionCount, out int ClusterCount, out long EstimatedPairInteractionCount, out long EstimatedUniqueClusterPermutations, out long EstimatedRuleCount, out long EstimatedMemoryBytes, out int CellCountA, out int CellCountB, out int CellCountC, out long EstimatedPositions) -> void
+Mocassin.Packages.Projects.Validation.ProjectValidationPipeline
+Mocassin.Packages.Projects.Validation.IValidationStage.Stage.get -> Mocassin.Packages.Projects.Validation.ValidationStage
+Mocassin.Packages.Projects.Validation.IValidationStage.Validate(Mocassin.Packages.Projects.Validation.ValidationContext! context, System.Threading.CancellationToken cancellationToken) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Projects.Validation.ValidationStageResult.ValidationStageResult(Mocassin.Packages.Projects.Validation.ValidationStage Stage, Mocassin.Packages.Projects.Validation.ValidationStageStatus Status, int DiagnosticCount, System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Projects.Validation.DiagnosticSummary.DiagnosticSummary(int Errors, int Warnings, int Infos) -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.IncludeStatistics.get -> bool
+Mocassin.Packages.Projects.Validation.ValidationContext.ValidationContext(Mocassin.Core.Project.Project! Project, Mocassin.Packages.Projects.Validation.ValidationOptions! Options, Mocassin.Packages.Projects.Validation.DiagnosticCatalog! Catalog, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!> PreviousStages) -> void
+Mocassin.Packages.Projects.ProjectLoadResult.ProjectLoadResult(Mocassin.Core.Project.Project? project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> void
+Mocassin.Packages.Projects.ProjectLoadResult.ProjectLoadResult(Mocassin.Core.Project.Project? project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics, Mocassin.Packages.Projects.ProjectLoadFailureKind failureKind) -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.IncludeStatistics.init -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.RequireBuildable.get -> bool
+Mocassin.Packages.Projects.Validation.ValidationOptions.RequireBuildable.init -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.WarningsAsErrors.get -> bool
+Mocassin.Packages.Projects.Validation.ValidationOptions.WarningsAsErrors.init -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.RunBuildStage.get -> bool
+Mocassin.Packages.Projects.Validation.ValidationOptions.RunBuildStage.init -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.CellCountA.get -> int
+Mocassin.Packages.Projects.Validation.ModelStatistics.ModelStatistics(int ParticleCount, int ParticleSetCount, int ReferenceSiteCount, long P1PositionCount, long StablePositionCount, long UnstablePositionCount, int KineticTransitionCount, int MetropolisTransitionCount, int ClusterCount, long EstimatedPairInteractionCount, long EstimatedUniqueClusterPermutations, long EstimatedRuleCount, long EstimatedMemoryBytes, int CellCountA, int CellCountB, int CellCountC, long EstimatedPositions) -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.CellCountA.init -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.CellCountB.get -> int
+Mocassin.Packages.Projects.Validation.DiagnosticDescriptor.DiagnosticDescriptor(string! Code, Mocassin.Core.Diagnostics.DiagnosticSeverity DefaultSeverity, string! Owner, string! Title, string! Help, string! DocumentationAnchor) -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.CellCountB.init -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.CellCountC.get -> int
+Mocassin.Packages.Projects.Validation.ValidationOptions.CellCountC.init -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.MaxEstimatedRuleCount.get -> long
+Mocassin.Packages.Projects.Validation.ValidationOptions.MaxEstimatedRuleCount.init -> void
+Mocassin.Packages.Projects.Validation.ValidationOptions.MaxEstimatedMemoryBytes.get -> long
+Mocassin.Packages.Projects.Validation.ValidationOptions.MaxEstimatedMemoryBytes.init -> void
+static Mocassin.Packages.Projects.Validation.ValidationOptions.Default.get -> Mocassin.Packages.Projects.Validation.ValidationOptions!
+Mocassin.Packages.Projects.Validation.ValidationResult.ValidationResult(System.Guid? ProjectId, string? ModelHash, string? DocumentHash, Mocassin.Packages.Projects.ProjectLoadFailureKind? LoadFailure, bool IsValid, Mocassin.Packages.Projects.Validation.DiagnosticSummary! Summary, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics, Mocassin.Packages.Projects.Validation.ModelStatistics? Statistics, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!> Stages) -> void
+Mocassin.Packages.Projects.ProjectLoadResult.FailureKind.get -> Mocassin.Packages.Projects.ProjectLoadFailureKind
+Mocassin.Packages.Projects.ProjectStoreOptions.ValidateOnLoad.get -> bool
+Mocassin.Packages.Projects.ProjectStoreOptions.ValidateOnLoad.init -> void
+Mocassin.Packages.Projects.Validation.ProjectValidationPipeline.ProjectValidationPipeline(Mocassin.Symmetry.Structure.IStructurePreviewService? structurePreview = null, Mocassin.Symmetry.Energy.IEnergyPreviewService? energyPreview = null, Mocassin.Symmetry.Transitions.ITransitionPreviewService? transitionPreview = null, System.Collections.Generic.IEnumerable<Mocassin.Packages.Projects.Validation.IValidationStage!>? additionalStages = null) -> void
+Mocassin.Packages.Projects.Validation.DiagnosticCatalog.DiagnosticCatalog(System.Collections.Generic.IEnumerable<Mocassin.Packages.Projects.Validation.DiagnosticDescriptor!>! descriptors) -> void
+static Mocassin.Packages.Projects.Validation.DiagnosticCatalog.Default.get -> Mocassin.Packages.Projects.Validation.DiagnosticCatalog!
+Mocassin.Packages.Projects.Validation.DiagnosticCatalog.All.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.DiagnosticDescriptor!>
+Mocassin.Packages.Projects.Validation.ProjectValidationPipeline.Validate(Mocassin.Core.Project.Project! project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> loadDiagnostics = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>), Mocassin.Packages.Projects.Validation.ValidationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Projects.Validation.ValidationResult!
+Mocassin.Packages.Projects.Validation.DiagnosticCatalog.TryGet(string! code, out Mocassin.Packages.Projects.Validation.DiagnosticDescriptor! descriptor) -> bool
+Mocassin.Packages.Projects.Validation.ProjectValidationPipeline.ValidateFileAsync(string! projectPath, Mocassin.Packages.Projects.ProjectStore? store = null, Mocassin.Packages.Projects.Validation.ValidationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.Projects.Validation.ValidationResult!>!

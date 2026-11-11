@@ -7,8 +7,8 @@ headless `mocassin validate` command.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
+- **Status:** In progress
+- **Step branch:** `step/07-validation-and-diagnostics`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
@@ -18,7 +18,7 @@ headless `mocassin validate` command.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `validation-core` | `feature/step-07-validation-and-diagnostics/validation-core` | Not started | — | — | — |
+| `validation-core` | `feature/step-07-validation-and-diagnostics/validation-core` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | — |
 | `diagnostic-catalog` | `feature/step-07-validation-and-diagnostics/diagnostic-catalog` | Not started | — | — | — |
 | `cross-domain-validation` | `feature/step-07-validation-and-diagnostics/cross-domain-validation` | Not started | — | — | — |
 | `model-statistics` | `feature/step-07-validation-and-diagnostics/model-statistics` | Not started | — | — | — |
