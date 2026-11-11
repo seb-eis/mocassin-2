@@ -1,0 +1,17 @@
+{
+  "step": "step-00",
+  "audit_commit": "47a9a90f791dae7adcce21ed005e08e24b0e7423",
+  "closeout_ci": {
+    "run_id": "41733064540",
+    "head_sha": "47a9a90f791dae7adcce21ed005e08e24b0e7423"
+  },
+  "main_sha_at_freeze": "4bdc8926639ad8b53a60a2bf83dfbbd6c8a463f9",
+  "merge_candidate": "47a9a90f791dae7adcce21ed005e08e24b0e7423",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "notes": [
+    "Retroactive evidence reconstructed from the Step 00 audit record. The audit covered the step-00 merge commit and tag, not later documentation-only main commits."
+  ]
+}
