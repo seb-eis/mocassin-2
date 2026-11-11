@@ -276,10 +276,10 @@ fix commit requires a fresh re-audit. This audit is evidence, not merge authoriz
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| F1 | Open — human decision requested; proposed accept as a test-coverage follow-up (Minor, no behavioural defect) | Step 06 agent / human owner | — |
-| N1 | Open — human decision requested; proposed accept with a wording follow-up for in-memory doping order | Step 06 agent / human owner | — |
+| F1 | Accepted by human owner on 2026-11-11 as a test-coverage follow-up (Minor, no behavioural defect) | Step 06 agent / human owner | — |
+| N1 | Accepted by human owner on 2026-11-11 with a wording follow-up for in-memory doping order | Step 06 agent / human owner | — |
 | N2 | Acknowledged — process note; frozen code is `ea6293e` | Step 06 agent | — |
-| N3 | Open — human decision requested; proposed accept because reader-level rejection is intentional and `SIM035` covers out-of-mask in-memory values | Step 06 agent / human owner | — |
+| N3 | Accepted by human owner on 2026-11-11; reader-level rejection is intentional and `SIM035` covers out-of-mask in-memory values | Step 06 agent / human owner | — |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -302,7 +302,7 @@ only the latest round.
 - [x] Residual risks, deferred items, and follow-up owners recorded — Step 10 owns fractions, truncation,
       compensation counts, the single generator/preview, and effective job counts; Step 11 owns the `.msl`
       writer; Step 25 owns the GUI editors; Step 07 owns the consolidated diagnostics. F1 and N1/N3 are
-      proposed for explicit acceptance with follow-up wording/test-coverage ownership.
+      accepted by the human owner on 2026-11-11 with follow-up wording/test-coverage ownership.
 - [x] Explicit no-Blocker/no-Major statement — no Blocker or Major finding remains in the design review or the
       audit. F1 is Minor (test-coverage completeness); N1–N3 are Notes. The human owner is asked to accept them
       explicitly or request a fix/re-audit.
@@ -339,17 +339,17 @@ Findings and resolutions:
 | R5-3–R5-6 | Note | Deterministic wording, composition boundary, `SIM009` whitespace, process note | Corrected/acknowledged | `6173e61` | Resolved/acknowledged |
 | R6-1 | Minor | Compilation-side carrier/`default_settings.flags` split | Accepted residual; `SolverJobFlagsMapper` and tests implement the composition boundary | `48e1f20` | Resolved/accepted |
 | R6-2–R6-4 | Note | Data-contract deterministic wording, Step 10 preview placement, process note | Accepted; wording corrected in this step, placement is Step 10, process note acknowledged | `46ea087` | Resolved/accepted |
-| F1 | Minor | Audit: PR-medium property sweep and asymmetric boundary/kind coverage | Proposed accept as a test-coverage follow-up; no behavioural defect found | — | Open — human decision |
-| N1 | Note | Audit: in-memory `Project.Dopings` order wording | Proposed accept with a wording follow-up; canonical persistence sorts | — | Open — human decision |
+| F1 | Minor | Audit: PR-medium property sweep and asymmetric boundary/kind coverage | Accepted as a test-coverage follow-up; no behavioural defect found | — | Accepted 2026-11-11 |
+| N1 | Note | Audit: in-memory `Project.Dopings` order wording | Accepted with a wording follow-up; canonical persistence sorts | — | Accepted 2026-11-11 |
 | N2 | Note | Audit: record parent is the docs-only request commit | Acknowledged; frozen code is `ea6293e` | — | Acknowledged |
-| N3 | Note | Audit: flag rejection occurs in the reader rather than only `SIM035` | Proposed accept; reader rejection is intentional and `SIM035` covers out-of-mask in-memory values | — | Open — human decision |
+| N3 | Note | Audit: flag rejection occurs in the reader rather than only `SIM035` | Accepted; reader rejection is intentional and `SIM035` covers out-of-mask in-memory values | — | Accepted 2026-11-11 |
 
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-11
