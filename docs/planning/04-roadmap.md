@@ -90,6 +90,20 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 in parallel on model/compiler, solver, UI, and documentation, the calendar estimate is **10–13 months** including
 integration, documentation, and release hardening. A single developer should expect **20–26 months**.
 
+### 3.1 Step sizing and split triggers
+
+A step should be small enough to audit in one sitting and large enough to deliver a coherent outcome. Split a
+step before implementation when:
+
+- it has more than roughly 6–8 features, or features with unrelated outcomes;
+- it is expected to take more than about four weeks for one implementor;
+- it has multiple independent acceptance stories;
+- it mixes low-risk documentation or tooling with high-risk contract, security, or solver work;
+- the audit cannot be read in one sitting.
+
+Record the size estimate and the split trigger in the step page at design time. If a step grows past the
+trigger, split it and update this roadmap before continuing.
+
 ## 4. Milestones
 
 | Milestone | Tag | After step | Demonstrable result |

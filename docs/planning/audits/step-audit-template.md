@@ -2,7 +2,7 @@
 
 > Reviewer: write the evidence, findings, and verdict directly into
 > `docs/planning/audits/step-NN.md`. You may edit only your own metadata (`Auditor`, `Audit date`, `Audit
-> status`), the checklist completion marks and inline verification notes (not item text), the `Evidence`,
+> status`, `Record state`), the checklist completion marks and inline verification notes (not item text), the `Evidence`,
 > `Findings`, and `Verdict` sections, and commit only that file with a documentation-only message and
 > `[skip ci]`. Do not edit the request scope, checklist item text, resolutions, code, tests, configuration,
 > status dashboard, step page, or any other file.
@@ -20,6 +20,10 @@
 | Step branch | — |
 | Step tag | — |
 | Closeout CI run | — |
+| Closeout CI head SHA | — |
+| Main SHA at freeze | — |
+| Merge-tree CI | — |
+| Closeout evidence | `docs/planning/closeout/step-NN.json` |
 | Platform CI | Not run (Ubuntu-only policy) |
 | Audit date | — |
 | Auditor | — |
@@ -52,6 +56,8 @@ Copy the acceptance criteria from the step page, preserving their wording:
 - [ ] Public/protected XML documentation policy is followed.
 - [ ] Documentation, status dashboard, feature log, and parity matrix are current.
 - [ ] Closeout CI is green at the audited commit.
+- [ ] Closeout evidence matches the audited commit and the merge candidate.
+- [ ] If `main` moved after the freeze, a merge-tree CI run or a re-audit is recorded.
 - [ ] Windows/macOS runs are recorded, or their absence is accepted because the step has no platform-specific
       code.
 - [ ] Format/version/fixture changes are documented and tested.
@@ -82,12 +88,22 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**. The auditor writes
 directly. The step agent adds resolutions in the separate `Resolution status` section without altering the
 auditor's findings, evidence, or verdict.
 
+## Record state
+
+**State:** Not requested / Ready for audit / In audit / Fixes required / Re-audit required / Passed / Passed with notes / Waived
+
+`Re-audit required` is a record state, not a verdict.
+
+## Reviewer independence
+
+> I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
+> planner or implementor.
+
 ## Verdict
 
 - [ ] Passed
 - [ ] Passed with notes
 - [ ] Fixes required
-- [ ] Re-audit required
 - [ ] Waived
 
 Follow-up owner:
@@ -136,3 +152,17 @@ Findings and resolutions:
 
 Approved by:
 Date:
+
+## Audit rounds
+
+Append each new round below. Never overwrite an earlier round.
+
+### Audit round 1
+
+#### Independence and frozen state
+
+#### Commands and results
+
+#### Findings
+
+#### Verdict

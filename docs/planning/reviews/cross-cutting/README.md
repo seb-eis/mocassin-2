@@ -99,7 +99,8 @@ neighbor links, and incremental lattice-energy updates.
 - The reviewer is a fresh context with no shared conversation with the orchestrator or implementors.
 - The reviewer reads the repository at the frozen commit. A summary from the orchestrator is not evidence.
 - The reviewer may check checklist boxes and add short inline verification notes. It may not change item text.
-- The reviewer writes only its assigned record and commits only that file with `[skip ci]`.
+- The reviewer writes only its assigned record, may set the `Record state` field, and commits only that file
+  with `[skip ci]`.
 - The reviewer must not fix findings, merge, tag, push `main`, or delete branches.
 - The reviewer must not be asked for a particular verdict and is not re-spawned until a preferred verdict
   appears.
@@ -120,6 +121,10 @@ neighbor links, and incremental lattice-energy updates.
 
 ## 7. Phase gate
 
+- Run the lightweight [drift checks](../../../development/drift-checks.md) monthly and before each phase boundary;
+  they catch stale instructions, status drift, and broken links before the checkpoint.
+- Create cross-cutting review records at the phase boundary, not for distant phases. The Phase B records are
+  the current checkpoint's already-scoped requests and are retained as the transition exception.
 - Freeze the checkpoint after the last step of the phase is merged and tagged.
 - Run the policies and planning review first; then run the architecture and design, and documentation reviews in parallel.
 - The next phase's first step design review may not start until all three verdicts are accepted by the human

@@ -27,7 +27,9 @@ step branch follow the approved feature list and do not need a separate approval
 
 ## 3. Local quality gates
 
-Run the gates relevant to your change before asking for review:
+Run the gates relevant to your change before asking for review. Before a step closeout, run
+`./tools/verify.sh all --require`, fill `docs/planning/closeout/step-NN.json`, and check it with
+`python tools/check_closeout_evidence.py`. `--require` makes a skipped required check a failure.
 
 ```sh
 # .NET

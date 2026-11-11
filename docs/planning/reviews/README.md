@@ -119,8 +119,9 @@ verdict and a fresh review is pending.
 
 - The reviewer may edit only `docs/planning/reviews/step-NN.md`.
 - Within that file, the reviewer may edit its own metadata (`Reviewer`, `Review date`, `Design review status`),
-  the three checklist sections (checkbox marks and short inline verification notes only; not item text), the
-  `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
+  the `Record state` field, the three checklist sections (checkbox marks and short inline verification notes
+  only; not item text), the `Evidence` section, the `Findings` section, and the `Verdict` section for the current
+  round.
 - The reviewer must not edit the request scope, checklist item text, known limitations, or resolutions owned by
   the step agent, and must not edit any other file.
 - Checklist marks record what the reviewer actually reviewed; the step agent owns the checklist item text.
@@ -137,9 +138,19 @@ verdict and a fresh review is pending.
 - The planning auditor must not approve its own report. The human owner approves the start.
 - The reviewer records that it is a fresh context with no shared conversation with the planner or implementor.
 
+### 8.1 What invalidates a review
+
+- The record commit touches any file other than the record. Re-run the review with a fresh reviewer.
+- The reviewer edits code, tests, configuration, or design docs. It has become an implementor; a fresh reviewer
+  is required.
+- The docs branch moves after the frozen commit and before the record commit, except for documented
+  documentation-only request/status commits. Record the delta as a note or re-review.
+- An earlier round is overwritten. Rounds are append-only.
+
 ## 9. Review record files
 
-Create one file per step when its design review starts:
+Create one file per step when its design review starts. Do not pre-seed review records for steps that have not
+started; use the current template at review time.
 
 `docs/planning/reviews/step-00.md`  
 `docs/planning/reviews/step-01.md`  
@@ -201,8 +212,10 @@ Review IDs are globally sequential and are never reused. Each phase gets three n
 | F. GUI | 23–28 | `XC-13`, `XC-14`, `XC-15` |
 | G. Release and documentation | 29–31 | `XC-16`, `XC-17`, `XC-18` |
 
-Phase A is waived because the process was introduced after it completed. The registry and records are in
-[`cross-cutting/`](cross-cutting/README.md).
+Phase A is waived because the process was introduced after it completed. Run the lightweight
+[drift checks](../../development/drift-checks.md) monthly and before each phase boundary. Create cross-cutting
+review records at the phase boundary; the Phase B records are the current checkpoint's already-scoped requests.
+The registry and records are in [`cross-cutting/`](cross-cutting/README.md).
 
 ### 12.2 Orchestration
 

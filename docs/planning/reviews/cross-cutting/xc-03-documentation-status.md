@@ -131,12 +131,22 @@ site navigation and the excluded `docs/planning/` boundary.
 | --- | --- | --- | --- | --- | --- |
 | — | — | — | — | — | — |
 
+## Record state
+
+**State:** Planned / Ready for review / In review / Fixes required / Re-review required / Passed / Passed with notes / Waived
+
+`Re-review required` is a record state, not a verdict.
+
+## Reviewer independence
+
+> I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
+> request owner or the other reviewers.
+
 ## Verdict
 
 - [ ] Passed
 - [ ] Passed with notes
 - [ ] Fixes required
-- [ ] Re-review required
 - [ ] Waived
 
 Follow-up owner:

@@ -47,46 +47,56 @@ The step agent, planner, or human owner may spawn an auditor. The spawner must n
 
 ## 3. Required sequence
 
-1. The step agent finishes all features, the closeout feature, documentation, status, and parity updates, then
-   runs `./tools/verify.sh all`.
+1. The step agent finishes all features, the closeout feature, documentation, status, and parity updates,
+   merges current `main` into the step branch, and runs `./tools/verify.sh all --require`.
 2. The step branch is pushed and one closeout CI run is green. Do not run CI per feature; the closeout run is
    the only step-branch CI run.
-3. The step agent creates or updates `docs/planning/audits/step-NN.md`:
+3. The step agent creates `docs/planning/audits/step-NN.md` on demand from the current template:
    - status: `Ready for audit`
    - exact audited commit
-   - closeout CI run
+   - closeout CI run ID and full `head_sha`
+   - `main` SHA at freeze
+   - closeout evidence path
    - platform CI status: not run, or the Windows/macOS run when platform-specific code required it
    - scope and acceptance criteria
    - known limitations
-4. The step branch is frozen at the audited commit. After a passing audit, only the reviewer's record commit
+4. Fill `docs/planning/closeout/step-NN.json` from `_template.json` and run
+   `python tools/check_closeout_evidence.py docs/planning/closeout/step-NN.json`. The evidence must bind the
+   audited commit, the closeout CI `head_sha`, the `main` SHA at freeze, and the merge candidate.
+5. The step branch is frozen at the audited commit. After a passing audit, only the reviewer's record commit
    and the step agent's resolution/status commit may follow; neither may change code, tests, configuration, or
    the reviewer's text. If fixes are needed, the step agent uses a new feature branch and the new commit is
    re-audited.
-5. A fresh audit agent reads:
+6. If `main` moves after the freeze, apply the **merge-tree rule** in
+   [`../closeout/README.md`](../closeout/README.md): merge the new `main`, run the full local gate, dispatch a
+   replacement closeout CI run, and re-audit; or record an equivalent merge-tree CI run for the final merge
+   candidate. Never merge an untested combination.
+7. A fresh audit agent reads:
    - `AGENTS.md`
    - the step page
    - the audit request
+   - the closeout evidence
    - `docs/planning/status.md`
    - relevant ADRs, contracts, and quality strategy
-6. The auditor runs the required builds/tests and reviews the diff and artifacts.
-7. The auditor writes the evidence, findings, and verdict directly into
+8. The auditor runs the required builds/tests and reviews the diff and artifacts.
+9. The auditor writes the evidence, findings, and verdict directly into
    `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
    `[skip ci]`. The audited commit is the parent of the record commit. The auditor does not merge, tag, push
    `main`, or change any other file. If the auditor cannot commit, it writes the record and the step agent
    commits it unchanged.
-8. If fixes are required:
-   - the step agent adds the resolutions to the record;
-   - the step agent fixes the findings on a new feature branch;
-   - squash-merges into the step branch;
-   - dispatches one new closeout CI run and waits for it;
-   - updates the audit record to `Re-audit required` with the new commit.
-9. The auditor re-audits the new commit and appends a new round to the record. The same auditor may continue if
-   it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every earlier round
-   in the record.
-10. On `Passed`, the human owner gives merge approval. The approval request includes the cumulative approval
+10. If fixes are required:
+    - the step agent adds the resolutions to the record;
+    - the step agent fixes the findings on a new feature branch;
+    - squash-merges into the step branch, merges current `main`, and updates the evidence;
+    - dispatches one new closeout CI run and waits for it;
+    - updates the audit record to `Re-audit required` with the new commit.
+11. The auditor re-audits the new commit and appends a new round to the record. The same auditor may continue if
+    it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every earlier round
+    in the record.
+12. On `Passed`, the human owner gives merge approval. The approval request includes the cumulative approval
     report in section 10, covering every audit and review round, finding, resolution, note, waiver, and residual
     risk.
-11. Merge the step branch into `main` with `--no-ff`, wait for the automatic `main` CI run, tag `step-NN` only
+13. Merge the step branch into `main` with `--no-ff`, wait for the automatic `main` CI run, tag `step-NN` only
     when it is green, push, and delete the step branch.
 
 CI is intentionally minimal: automatic CI runs only on `main`, on Ubuntu, with path filters. Windows and macOS
@@ -100,6 +110,8 @@ See [`AGENTS.md` §3.13](../../../AGENTS.md) and [`docs/planning/ci-policy.md`](
 - Public/protected XML documentation policy.
 - Status dashboard, step page, parity matrix, and feature log accuracy.
 - CI configuration and actual CI result.
+- The closeout CI `head_sha` equals the audited commit, and the closeout evidence file is current.
+- If `main` moved after the freeze, a merge-tree CI run or a re-audit is recorded.
 - Format/version changes, fixtures, and migration behavior.
 - Security, dependency, licence, and secret-scan gates.
 - Code structure and folder ownership; the structure test passes.
@@ -132,20 +144,21 @@ docs/planning/audits/step-01.md
 ...
 ```
 
-Use [`step-audit-template.md`](step-audit-template.md) as the starting point. All 32 files are pre-seeded so
-that every step has an audit entry before implementation. The step agent owns the request fields, scope,
-checklists, and resolutions. The auditor writes the evidence, findings, and verdict directly into this file.
-When the template changes, regenerate every unused pre-seeded record from it before the next step starts; do
-not leave older records on an obsolete template.
+Create `docs/planning/audits/step-NN.md` on demand when the step reaches `Ready for audit`, using
+[`step-audit-template.md`](step-audit-template.md). Do not pre-seed records for steps that have not started;
+templates rot faster than they are used. The step agent owns the request fields, scope, checklists, and
+resolutions. The auditor writes the evidence, findings, and verdict directly into this file.
 
 The audit record is the durable record. Do not rely on chat history, and do not use a separate handoff file.
+The closeout evidence is a separate machine-checkable file; see
+[`../closeout/README.md`](../closeout/README.md).
 
 ## 8. Reviewer write scope
 
 - The reviewer may edit only `docs/planning/audits/step-NN.md`.
 - Within that file, the reviewer may edit its own metadata (`Auditor`, `Audit date`, `Audit status`), the
-  `Standard audit checklist` completion marks and inline verification notes (not item text), the `Evidence`
-  section, the `Findings` section, and the `Verdict` section for the current round.
+  `Record state` field, the `Standard audit checklist` completion marks and inline verification notes (not item
+  text), the `Evidence` section, the `Findings` section, and the `Verdict` section for the current round.
 - The reviewer must not edit the request scope, checklist item text, known notes, or resolutions owned by the
   step agent, and must not edit any other file.
 - Checklist marks record what the reviewer actually audited; the step agent owns the checklist item text.
@@ -158,6 +171,11 @@ The audit record is the durable record. Do not rely on chat history, and do not 
 - The record keeps each round: `### Audit round 1`, `### Re-audit round 2`, etc. Never overwrite an earlier
   round.
 - A record commit that touches any other file is invalid; the verdict must be re-run by a fresh reviewer.
+- The audit is invalidated when the audited branch moves after the freeze except for documented
+  documentation-only request/resolution commits, when the reviewer edits code or design docs, or when an earlier
+  round is overwritten. Re-run the audit with a fresh reviewer.
+- `Re-audit required` is a record state, not a verdict. Keep it in the record state field, not in the verdict
+  checklist.
 - The auditor must not approve its own report. The human owner approves the merge and tag.
 - The auditor records that it is a fresh context with no shared conversation with the implementor or planner.
 

@@ -40,10 +40,14 @@ The detailed architecture is in the internal plan; the repository layout is summ
   Step 10/11 consume it.
 - [Contributing](contributing.md) — branches, review gates, local quality gates, tests, and docs-as-code.
 - [Agent workflow](agent-workflow.md) — context handoff, prompts, evidence reports, and diff review.
+- [Drift checks](drift-checks.md) — lightweight monthly and phase-boundary checks between cross-cutting reviews.
+- [Agent security](agent-security.md) — threat model, permissions, secrets, and prompt injection.
+- [Incident and rollback](incident-and-rollback.md) — severity, rollback, hotfix, and postmortem rules.
 - [Testing and parity](testing-and-parity.md) — testing trophy, mocks/fakes policy, fixtures, and test tiers.
 
 ## Current phase
 
-Steps 00–02 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, and
-the symmetry/geometry kernels. Step 03 — Particle and Structure Models is next. Scientific model domains, the
-solver, and the GUI are added in later steps. Do not treat placeholder pages as implemented features.
+Steps 00–06 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, the
+symmetry/geometry kernels, the particle/structure/transition/energy models, and the lattice/simulation models.
+Step 07 — Validation, Diagnostics, and Model Statistics is next. The solver and GUI are added in later steps. Do
+not treat placeholder pages as implemented features.

@@ -21,6 +21,9 @@ The repository is the memory, not the conversation. At the start of a step, read
 3. [`docs/planning/status.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/status.md)
 4. The step page and its dependencies
 5. Relevant ADRs, data contracts, and reference docs
+6. [`drift-checks.md`](drift-checks.md) and [`agent-security.md`](agent-security.md) when the work touches process,
+   CI, credentials, or cross-step status
+7. [`incident-and-rollback.md`](incident-and-rollback.md) when a bad change has reached `main` or a release
 
 Verify the starting state:
 
@@ -64,6 +67,7 @@ Before implementation:
 - [ ] Dependencies are complete.
 - [ ] The pre-implementation design review is `Ready for implementation`.
 - [ ] The step page, acceptance criteria, tests, and risks were read.
+- [ ] The step is within its size and split trigger, or the split is recorded.
 - [ ] A complete feature-branch list was proposed and approved once.
 - [ ] The step branch was created from current `main`.
 - [ ] The step was marked `In progress` in the step page and dashboard.
@@ -235,7 +239,8 @@ per-push step-branch CI runs**.
 
 Rules:
 
-- Validate every feature locally with `./tools/verify.sh <area>`; run `./tools/verify.sh all` before closeout.
+- Validate every feature locally with `./tools/verify.sh <area>`; run `./tools/verify.sh all --require` before
+  closeout. A skipped required gate is not a pass; `cargo-deny` must be installed for a closeout run.
 - Do not push a step branch just to trigger CI.
 - Windows and macOS stay manual until platform-specific code appears. Promote Windows first; keep macOS manual
   until there is macOS-specific behaviour to validate.
@@ -272,111 +277,56 @@ Reject or stop on:
 - rewriting shared history or force-pushing;
 - copying GPL code or data into the MIT implementation;
 - a scribe transcription step or a reviewer editing anything outside its assigned record;
-- a review/audit record commit that touches code, tests, configuration, status, or design docs.
+- a review/audit record commit that touches code, tests, configuration, status, or design docs;
+- pre-seeding review, audit, or cross-cutting records for work that has not started;
+- skipping a gate without a recorded waiver and a follow-up owner.
 
-## 13. Pre-implementation design review
+## 13. Gate references
 
-Before a step starts, a fresh planning auditor checks the design out of context.
+This playbook does not restate the gate sequences. The normative homes are:
 
-1. The planning agent and step agent finish the step's design decisions and update the step page, contracts,
-   architecture, quality strategy, open decisions, parity matrix, and related docs. They apply those edits
-   directly.
-2. Freeze the docs at a commit and create or update `docs/planning/reviews/step-NN.md`; set the status to
-   `Ready for review` and record the reviewed commit.
-3. The planner, implementor, or human owner spawns a fresh planning auditor with no implementation context.
-   The auditor reviews the step page and all cross-step contracts and must not have authored or implemented the
-   design.
-4. The auditor writes the evidence, findings, and verdict directly into
-   `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
-   `[skip ci]`. The reviewed commit is the parent of the record commit. It does not merge, tag, push `main`,
-   or change any other file. If it cannot commit, it writes the record and the step agent commits it unchanged.
-5. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, checklist
-   completion marks (not item text), evidence, findings, and verdict.
-6. If changes are required, the planning agent and step agent update the design docs directly, add the
-   resolutions, and mark the review `Re-review required`. A fresh planning auditor re-reviews the new commit.
-7. Only `Ready for implementation` permits the human owner to approve the start. Create the step branch from
-   the reviewed `main` commit.
-8. Step 00 and Step 01 are `Waived — process introduced after completion`.
-9. The post-implementation audit in section 14 remains mandatory.
+- design review: [`AGENTS.md` §3.9](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) and
+  [`docs/planning/reviews/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/reviews/README.md);
+- step audit: [`AGENTS.md` §3.10](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) and
+  [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/audits/README.md);
+- closeout evidence and the merge-tree rule:
+  [`docs/planning/closeout/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/closeout/README.md);
+- amendments: [`AGENTS.md` §3.11](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) and
+  [`docs/planning/amendments/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/amendments/README.md);
+- cross-cutting phase reviews:
+  [`docs/planning/reviews/cross-cutting/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/reviews/cross-cutting/README.md);
+- drift checks: [`drift-checks.md`](drift-checks.md);
+- incident and rollback: [`incident-and-rollback.md`](incident-and-rollback.md);
+- agent security: [`agent-security.md`](agent-security.md).
 
-Use [`docs/planning/reviews/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/reviews/README.md)
-for statuses, severities, and the record format. The review record is the durable record and the reviewer
-writes into it directly.
+The closeout sequence is:
 
-## 14. Step completion audit
+1. merge current `main` into the step branch;
+2. run `./tools/verify.sh all --require`;
+3. dispatch one closeout CI run and record its run ID and `head_sha`;
+4. fill and check `docs/planning/closeout/step-NN.json`;
+5. freeze the step branch and request the independent audit;
+6. if `main` moves after the freeze, merge it and re-run closeout and audit, or record a merge-tree CI run for the
+   final merge candidate. Never merge an untested combination.
 
-The step agent's self-check is not the independent audit.
+The gate summary and approval rules are in `AGENTS.md` §3.9–§3.15. The review and audit records are the durable
+evidence; this page is only the operating playbook.
 
-Before merging a completed step:
+## 14. Changing the process
 
-1. Finish the closeout feature, run `./tools/verify.sh all` (including the code-structure test), and dispatch
-   the single closeout CI run on the step branch (Ubuntu, path-filtered).
-2. Update `docs/planning/audits/step-NN.md` from the template with the exact commit, closeout CI run, scope,
-   and known limitations; set its status to `Ready for audit`.
-3. Freeze the step branch at the audited commit.
-4. The step agent, planner, or human owner spawns a fresh out-of-context audit agent. The auditor must not have
-   implemented the step.
-5. The auditor writes the evidence, findings, and verdict directly into
-   `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
-   `[skip ci]`. The audited commit is the parent of the record commit. It does not merge, tag, push `main`,
-   or change any other file. If it cannot commit, it writes the record and the step agent commits it unchanged.
-6. The auditor's write scope is defined in `AGENTS.md` §3.8. It may edit only its own metadata, checklist
-   completion marks (not item text), evidence, findings, and verdict.
-7. If findings require fixes, the step agent adds the resolutions, fixes them on a new feature branch,
-   squash-merges into the step branch, dispatches one new closeout CI run, and marks the audit `Re-audit
-   required`.
-8. Re-audit the new commit and append a new round to the record. Only a `Passed` audit permits the step-to-main
-   approval request.
-9. The human owner still approves the merge and tag. After the merge, wait for the automatic `main` CI run and
-   tag `step-NN` only when it is green.
+Process changes are normal documentation changes, but they have a wider blast radius than project docs.
 
-Use [`docs/planning/audits/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/audits/README.md)
-for status values, severities, and the record format. The audit record is the durable record and the auditor
-writes into it directly.
+1. Open a `docs/<slug>` branch from `main`.
+2. Explain the problem and the proposed rule change in the branch or pull request.
+3. Update the normative page and every template or summary that depends on it in the same change.
+4. Run `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require`.
+5. Get owner approval. Do not change the process silently in the middle of a step; if a mid-step change is
+   unavoidable, record it as an amendment-level decision and update the process after the step closes.
 
-## 15. Review gates
+Do not add a second copy of a rule to make it easier to find. Add a link from the new location to the normative
+page. `tools/check_process_consistency.py` is the mechanical backstop.
 
-| Gate | Approval |
-| --- | --- |
-| Step feature list | Once, at step start; covers every feature in the step |
-| Feature squash | No separate gate; the step feature-list approval covers it |
-| Reviewer spawning | Planner, implementor, or human owner may spawn a fresh reviewer; the human owner approves the final verdict |
-| Pre-implementation design review | Fresh planning auditor after the design docs are frozen, before implementation |
-| Amendment design review | Focused fresh planning auditor before amendment implementation |
-| Amendment integration | Before the parent step audit freeze |
-| Step completion audit | Fresh out-of-context audit after the step is frozen; includes integrated amendments |
-| Phase checkpoint | After the last step of a phase: policies and planning review first, then architecture/design and documentation reviews in parallel |
-| Phase gate | Next phase design review waits for all three verdicts; human owner accepts or waives |
-| Post-merge amendment | Separate maintenance audit and a new tag with owner approval |
-| Reviewer record commit | Documentation-only; the record file is the only changed file |
-| Step-to-main merge | Before the `--no-ff` merge, only after a passed audit |
-| Tag creation/push | Included in the step/milestone/release approval |
-| Release | After Step 31 gates |
-
-The goal is not to slow the agent down. It is to keep every merge explainable, reproducible, and reversible.
-
-## 16. Step amendments
-
-A design change that emerges during implementation uses a planned amendment, not a direct edit to a frozen
-step.
-
-1. Record it as `step-NN-amend-M` from
-   [`docs/planning/amendments/step-amendment-template.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/amendments/step-amendment-template.md).
-2. Keep the parent step active and integrate the amendment before the parent audit freeze.
-3. Run a focused design review under section 13; record it in
-   `docs/planning/reviews/step-NN-amend-M.md`.
-4. Implement on `feature/step-NN-<step-slug>/amend-M-<slug>` from the parent step branch and integrate it with
-   the normal feature squash rules.
-5. Update the parent step page, amendment page, audit request, and review record with the combined commit.
-6. The parent audit under section 14 reviews the entire solution, including integrated amendments. Do not run a
-   separate audit or create a separate tag for an integrated amendment.
-7. If the parent step is already merged, use a maintenance branch, audit the amendment separately, and create a
-   new tag only with explicit owner approval.
-
-Use [`docs/planning/amendments/README.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/amendments/README.md)
-for statuses, naming, integration, and the post-merge fallback.
-
-## 17. Reviewer spawn card
+## 15. Reviewer spawn card
 
 Use this when the planner or implementor spawns a design reviewer or auditor. Replace the bracketed values and
 do not add a desired verdict or a summary that replaces reading the repository.
@@ -397,6 +347,8 @@ marks directly into the request record. You may check checklist boxes but not ch
 other file, merge, tag, push main, or delete branches.
 
 If you find issues, report them; do not fix them. The human owner approves the final verdict and gate.
+State in the record that you are a fresh context with no shared conversation with the planner, implementor, or
+other cross-cutting reviewers.
 ```
 
 Rules for the spawner:
