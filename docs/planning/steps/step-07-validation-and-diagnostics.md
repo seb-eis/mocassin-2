@@ -18,8 +18,8 @@ headless `mocassin validate` command.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `validation-core` | `feature/step-07-validation-and-diagnostics/validation-core` | Done | `verify.sh dotnet`, `structure`, `api` pass | — | — |
-| `diagnostic-catalog` | `feature/step-07-validation-and-diagnostics/diagnostic-catalog` | Not started | — | — | — |
+| `validation-core` | `feature/step-07-validation-and-diagnostics/validation-core` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `24d9f58` |
+| `diagnostic-catalog` | `feature/step-07-validation-and-diagnostics/diagnostic-catalog` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | — |
 | `cross-domain-validation` | `feature/step-07-validation-and-diagnostics/cross-domain-validation` | Not started | — | — | — |
 | `model-statistics` | `feature/step-07-validation-and-diagnostics/model-statistics` | Not started | — | — | — |
 | `validate-cli` | `feature/step-07-validation-and-diagnostics/validate-cli` | Not started | — | — | — |
@@ -442,6 +442,15 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 - Compiled rule generation and rule ambiguity are Step 08.
 - Localization is post-1.0; messages are English and keyed by code.
 - A persistent diagnostic result cache is not introduced; preview caches are enough.
+
+### 12. Implementation deviations
+
+- `DiagnosticDescriptor` lives in `Mocassin.Core.Diagnostics`, not `Mocassin.Packages.Projects.Validation`.
+  The reviewed design's `CoreDiagnosticCatalog` and `SymmetryDiagnosticCatalog` must return descriptors, and the
+  assembly direction (`Core <- Symmetry <- Packages`) forbids those assemblies from referencing a Packages type.
+  The descriptor record therefore sits with the other Core diagnostic contracts; `DiagnosticCatalog` remains in
+  `Mocassin.Packages.Projects.Validation` and composes the three descriptor sets. Public API and behaviour are
+  unchanged from the reviewed design.
 
 ## Implementation tasks
 

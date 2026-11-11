@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-using Mocassin.Core.Diagnostics;
-
-namespace Mocassin.Packages.Projects.Validation;
+namespace Mocassin.Core.Diagnostics;
 
 /// <summary>
 /// The stable, documented description of one diagnostic code.
