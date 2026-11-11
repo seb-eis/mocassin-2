@@ -16,7 +16,7 @@
 | Request owner | Planner / implementor |
 | Orchestrator (implementor) | Step agent |
 | Review initiated by | Human owner |
-| Reviewer | Fresh independent reviewer (subagent; read-only) |
+| Reviewer | Fresh independent reviewer — round 2 (subagent; read-only) |
 | Review date | 2026-11-11 |
 
 ## Purpose
@@ -198,7 +198,7 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Re-review required (round 2: residual F5 wording, R1)
 
 `Re-review required` is a record state, not a verdict.
 
@@ -247,9 +247,107 @@ round 2 target. The review request is otherwise unchanged.
 
 ### Round 2 evidence
 
+I am a fresh context with no shared conversation with the planner or implementor. I did not author or
+implement this work. Review basis: round 2 target `f1e7045feef8f83752941ff603503b40fb635410`, review request
+commit `88caace270f7b3038e3b7122c035472f66f2c3dc` (which changes only this record), and the implementation set
+`987d74c..f1e7045`. The worktree is `/tmp/opencode/mocassin-policy-update`; the working tree was clean before
+my record edit.
+
+Files reviewed: the full changed set `git diff 987d74c..f1e7045` (62 files: documentation, process records,
+tooling, and tool tests only; no `src/`, `contracts/`, or runtime code), with a detailed read of the round 2
+delta `92a7ea3..f1e7045`: `AGENTS.md`, `docs/development/agent-workflow.md`, `docs/planning/status.md`,
+`docs/planning/04-roadmap.md`, `docs/planning/audits/README.md`, `docs/planning/audits/step-audit-template.md`,
+`docs/planning/reviews/README.md`, `docs/planning/reviews/step-design-review-template.md`,
+`docs/planning/reviews/cross-cutting/README.md`, the cross-cutting template and `xc-01`–`xc-03`,
+`docs/planning/closeout/README.md`, `tools/check_closeout_evidence.py`, `tools/check_process_consistency.py`,
+`tools/tests/test_closeout_evidence.py`, `tools/tests/test_process_consistency.py`, and `tools/verify.sh`.
+I also read the round 1 findings and the remediation table, and compared the claims with the tree.
+
+Commands and results at `88caace` (whose only delta from `f1e7045` is the request):
+
+- `git diff --stat 987d74c..f1e7045` — 62 files changed, 1970 insertions, 3832 deletions; docs, process, and
+  tooling only.
+- `git diff --check` and `git diff --check 987d74c..f1e7045` — exit 0.
+- `python tools/check_process_consistency.py` — `Process consistency: OK`.
+- `python tools/check_docs_links.py` — `Documentation links OK (142 files scanned)`.
+- `python -m unittest discover -s tools/tests -t . -q` — `Ran 18 tests`, `OK`. Verbose run: 7 closeout-checker
+  tests, 6 docs-link tests, 5 process-consistency tests (the repository test plus four new negative tests).
+- `./tools/verify.sh all --require` — exit 0. .NET restore/build/test/format, API compatibility, Rust
+  fmt/clippy/test, Python pytest/build, Zensical strict, DocFX, rustdoc, contract/symmetry drift, process
+  consistency, tool tests, SPDX, secret scan, and `cargo-deny` all ran; final line `Closeout gate completed
+  with required checks enabled.`
+- `zensical build --strict` — exit 0, `No issues found`.
+- `bash -n tools/verify.sh` — syntax OK.
+- Checked that the only round 2 record change in `f1e7045` is the removal of the old request `Status` field, and
+  that `88caace` changes only this record.
+
+Finding verification and reproductions:
+
+- **F1 (fixed).** `python tools/check_closeout_evidence.py docs/planning/closeout/_template.json` exits 1 with
+  per-field `does not resolve to a commit` messages and no traceback. `check_closeout_evidence.py:74-88`
+  returns before any git history call once a SHA is format-invalid or unresolved. The new
+  `test_unresolved_sha_reports_without_traceback` would fail on the old code.
+- **F2 (fixed).** Reproduced in a scratch git repository: a candidate changing only `AGENTS.md` and `README.md`
+  now yields `Closeout evidence: OK`; a candidate changing `code.py` still yields the two `merge_tree_ci`
+  errors. The new `test_root_docs_candidate_is_documentation_only` covers this, and the closeout README now
+  names the root guides explicitly.
+- **F3 (fixed).** The request-level `Design review status`, `Audit status`, and `Status` fields are gone from
+  the three templates and the three `xc-01`–`xc-03` records; `Record state` is the single reviewer-owned state
+  field. The reviewer write scopes in both READMEs were updated to match. Older records such as `step-02`,
+  `step-04`, and `step-05` still contain the historical field, which is correct history and was not rewritten.
+- **F4 (fixed).** The restated closeout sequence was removed from `docs/development/agent-workflow.md`; it now
+  links to `AGENTS.md` §3.4 and the closeout README. `AGENTS.md` §7.2 links to the roadmap sizing section
+  instead of duplicating its bullets; `04-roadmap.md` §3.1 is now the single home. The added
+  `#31-step-sizing-and-split-triggers` anchor resolves under the link check.
+- **F5 (partially fixed).** `AGENTS.md` §7.1 now records `In audit` before `Done`, and `status.md` now defines
+  `In audit` as "frozen at the audit request; pending or running". However, the normative audit-status table
+  that `status.md` points to still defines `In audit` as "A fresh audit context is reviewing the frozen
+  commit", so the lifecycle mismatch called out in F5 remains (see R1).
+- **N1 (resolved).** Four new temporary-tree negative tests cover the forbidden term, a record state in a
+  verdict list, a pre-seeded audit for a `Not started` step, and a missing `In audit` status; the checker now
+  correctly reads the dashboard status column. Note R2 on the remediation-table wording.
+- **N2 (resolved).** `./tools/verify.sh --list` prints `Mode: all`; `docs --list` prints `Mode: docs`;
+  both `--closeout docs --list` and `docs --closeout --list` print `Mode: all`, so `--closeout` now wins
+  regardless of argument order, and `--list` reflects the selected mode. The `docs --closeout docs` execution
+  path was inspected rather than run in full to avoid a duplicate full gate, which had already passed.
+- **N3 (resolved).** `AGENTS.md` §3.15 now states the `Changes required` / `Fixes required` mapping and that
+  each family keeps its own vocabulary.
+
+Regressions: none found. The `check_process_consistency` dashboard parser change now reads the `Status` column
+(index 3), which matches the actual `status.md` table; the old greedy regex captured the last column. No code,
+contracts, or runtime behaviour changed. I left the round 1 checklist marks untouched; the round 2 item-level
+results are recorded above.
+
 ### Round 2 findings
 
+| ID | Severity | Area | Finding | Evidence | Recommendation |
+| --- | --- | --- | --- | --- | --- |
+| R1 (F5 residual) | Minor | Status drift | The `In audit` status still has two conflicting definitions. `status.md` says the step is frozen at the audit request and the audit is "pending or running", but `audits/README.md` — the page `status.md` names as the source of the audit statuses — still says "A fresh audit context is reviewing the frozen commit". F5 asked for the definition to be aligned; only `status.md` and `AGENTS.md` were updated. | `docs/planning/audits/README.md:41`; `docs/planning/status.md:14,45`; `AGENTS.md:778`. | Change the `In audit` row in `docs/planning/audits/README.md` to the same "pending or running" wording, then this finding closes. |
+| R2 | Note | Remediation record accuracy | The F5 resolution says "the `In audit` definition covers the frozen audit-request state", which is only true for `status.md`/`AGENTS.md`, and the N1 resolution says "six negative tests for the process checker"; the commit adds four process-checker tests (the six new tests comprise four process-checker and two closeout-checker tests). N1's requested scenarios themselves are covered. | Remediation table rows F5/N1; `tools/tests/test_process_consistency.py`; verbose unittest run. | Reword the two resolution rows: note that the audit README still needs the wording change, and say four process-checker tests / six new tool tests. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**.
+
 ### Round 2 verdict
+
+- [ ] Passed
+- [x] Passed with notes
+- [ ] Fixes required
+- [ ] Waived
+
+Round 2 closes F1–F4 and N1–N3. The two closeout-checker defects are fixed and covered by tests, the templates
+use a single `Record state`, the one-home duplication is removed, `AGENTS.md` §7.1 now records the
+`In audit`/`Done` sequence, the process checker has negative tests, `--closeout` is order-independent, and the
+vocabulary mapping is stated. No Blocker or Major finding remains and no regression was introduced.
+
+F5 remains partly open: the `In audit` wording is still inconsistent in `docs/planning/audits/README.md` (R1,
+Minor), and the remediation table overstates two resolutions (R2, Note). The verdict is `Passed with notes`
+because these are non-blocking, the full local and documentation gates pass, and the owner may accept R1/R2 as
+follow-ups before the next process-maintenance change. The record state is `Re-review required` only if the
+implementor applies the R1/R2 wording fixes and wants them verified; otherwise the human owner can accept the
+notes and close the review.
+
+Follow-up owner: Planner / implementor
+Follow-up step: Next process-maintenance change (`docs/policy-follow-up`)
 
 ## Human approval
 
