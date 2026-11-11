@@ -1,0 +1,17 @@
+{
+  "step": "step-05",
+  "audit_commit": "e6a78394359949e81ff2978433670b57fb12621e",
+  "closeout_ci": {
+    "run_id": "42881426273",
+    "head_sha": "e6a78394359949e81ff2978433670b57fb12621e"
+  },
+  "main_sha_at_freeze": "40bfb30003f9d2ee2c51a99289b37fbed5e6032a",
+  "merge_candidate": "4886716a9c1b8097232763b05e750d3820a6802a",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "notes": [
+    "Retroactive evidence reconstructed from the Step 05 audit record. The audited commit is followed only by the audit request/resolution records."
+  ]
+}

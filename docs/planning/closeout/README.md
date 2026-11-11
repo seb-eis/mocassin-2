@@ -35,6 +35,21 @@ The checker fails when:
 - the merge candidate changes files outside `docs/` and the root guides (`AGENTS.md`, `README.md`,
   `CONTRIBUTING.md`, `SECURITY.md`) and no matching merge-tree CI run is recorded.
 
+## Completed-step backfill
+
+The closeout-evidence policy was introduced after Steps 00–06 were complete. Their files were reconstructed
+from the durable audit records and GitHub Actions history:
+
+| Step | Audit commit | Closeout CI | Merge candidate | Note |
+| --- | --- | --- | --- | --- |
+| `step-00` | `47a9a90` | `41733064540` | `47a9a90` | Audit covered the step merge commit and tag. |
+| `step-01` | `05c41ab` | `41927992251` | `1a94a68` | Later delta is documentation-only. |
+| `step-02` | `6341b56` | `42475359256` | `09a3317` | CI/workflow files changed after the audit; merge-tree run `42478356751` covers `09a3317`, and the remaining delta is documentation-only. |
+| `step-03` | `b6a97ec` | `42514332091` | `ef4de06` | Later delta is documentation-only. |
+| `step-04` | `8c44709` | `42695864895` | `6bebcf9` | Later delta is documentation-only. |
+| `step-05` | `e6a7839` | `42881426273` | `4886716` | Later delta is documentation-only. |
+| `step-06` | `ea6293e` | `43085605850` | `cc6926d` | Later delta is documentation-only. |
+
 ## Merge-tree rule
 
 If `main` moves after the audit freeze and before the merge, do not merge an untested combination. Either:

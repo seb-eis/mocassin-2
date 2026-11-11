@@ -1,0 +1,17 @@
+{
+  "step": "step-02",
+  "audit_commit": "6341b567d93c840bef7982765cab39de766f0060",
+  "closeout_ci": {
+    "run_id": "42475359256",
+    "head_sha": "6341b567d93c840bef7982765cab39de766f0060"
+  },
+  "main_sha_at_freeze": "ab92a97abca03ba6013bb412063d7557aef8d935",
+  "merge_candidate": "09a3317e54866897db9bda3daa5ca70d76029bbc",
+  "merge_tree_ci": {
+    "run_id": "42478356751",
+    "head_sha": "09a3317e54866897db9bda3daa5ca70d76029bbc"
+  },
+  "notes": [
+    "Retroactive evidence reconstructed from the Step 02 audit record. The audit commit is 6341b56. The branch changed CI/workflow files after that audit; the CI-validated merge tree is 09a3317 (run 42478356751). The remaining delta to the branch head 95f4814 and the final merge dbf5691 is documentation-only."
+  ]
+}
