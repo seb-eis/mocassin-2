@@ -38,7 +38,7 @@ The step agent, planner, or human owner may spawn an auditor. The spawner must n
 | --- | --- |
 | **Not requested** | No audit request yet. |
 | **Ready for audit** | Step branch is frozen at a specific commit and the request is complete. |
-| **In audit** | A fresh audit context is reviewing the frozen commit. |
+| **In audit** | The step branch is frozen at the audit request; a fresh audit context is pending or reviewing the frozen commit. |
 | **Fixes required** | The audit found blocking or material issues. |
 | **Re-audit required** | Fixes were applied and the new commit needs verification. |
 | **Passed** | The audit found no blocking issues at the recorded commit. |

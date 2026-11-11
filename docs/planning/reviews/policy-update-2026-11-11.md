@@ -233,8 +233,8 @@ Resolutions applied at `f1e7045feef8f83752941ff603503b40fb635410`; reviewer text
 | F2 | Fixed | Root guides (`AGENTS.md`, `README.md`, `CONTRIBUTING.md`, `SECURITY.md`) are treated as documentation; added a root-docs test and clarified the closeout wording. | `f1e7045` |
 | F3 | Fixed | Removed the duplicate `Design review status` / `Audit status` / `Status` request fields; `Record state` is the single state field in all three templates and the three XC records. | `f1e7045` |
 | F4 | Fixed | Removed the restated closeout sequence from `agent-workflow.md`; `AGENTS.md` §7.2 now links to the roadmap sizing section instead of repeating it. | `f1e7045` |
-| F5 | Fixed | `AGENTS.md` §7.1 now records `In audit` before `Done`; the `In audit` definition covers the frozen audit-request state. | `f1e7045` |
-| N1 | Fixed | Added six negative tests for the process checker (18 tool tests total). | `f1e7045` |
+| F5 | Fixed | `AGENTS.md` §7.1 now records `In audit` before `Done`; the `In audit` definitions cover the frozen audit-request state. | `f1e7045` + round 3 |
+| N1 | Fixed | Added four focused negative tests for the process checker (six new tool tests; 18 total). | `f1e7045` |
 | N2 | Fixed | `--closeout` now wins regardless of argument order; `--list` reports the selected mode. | `f1e7045` |
 | N3 | Fixed | Added the `Changes required` / `Fixes required` vocabulary mapping to `AGENTS.md` §3.15. | `f1e7045` |
 
