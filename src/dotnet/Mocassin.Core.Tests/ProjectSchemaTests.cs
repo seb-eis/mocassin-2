@@ -29,6 +29,11 @@ public sealed class ProjectSchemaTests
         "tests/contracts/project-simulations-populated.mocprj",
         "samples/blank/blank.mocprj",
         "samples/ceria/ceria.mocprj",
+        "samples/lattice/ceria-reduction.mocprj",
+        "samples/lattice/ceria-hydration.mocprj",
+        "samples/lattice/bzo-doping.mocprj",
+        "samples/simulations/ceria-kmc.mocprj",
+        "samples/simulations/ceria-mmc.mocprj",
     ];
 
     private static readonly JsonSchema projectSchema = JsonSchema.FromText(

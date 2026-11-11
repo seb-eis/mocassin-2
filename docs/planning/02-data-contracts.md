@@ -519,7 +519,9 @@ support; the validator rejects a field that belongs to the other kind (`SIM023`)
   canonicalizes to `null`. The original GUID fallback is not reproduced.
 - `executionFlags` is a sorted array of camelCase names: `noSaving`, `noJumpLogging`, `useFastExp`,
   `deterministic`. The empty array means `None`; the `.msl` job payload uses the `u32` bitmask.
-  `deterministic` is a new reproducibility flag. `kmcSimulation`/`mmcSimulation`, `usePrerun`, and
+  `deterministic` selects the canonical RNG-consumption path by disabling the Step 16 frequency pre-check and
+  optional shortcuts; baseline reproducibility is already guaranteed by ADR 0005.
+  `kmcSimulation`/`mmcSimulation`, `usePrerun`, and
   `useDualDofCorrection` are derived or compiler/optimizer-owned and must not appear in the project
   `executionFlags` array. The `.msl` flag word uses the new bit values: `noSaving`=1, `noJumpLogging`=2,
   `useFastExp`=4, `deterministic`=8, `useDualDofCorrection`=16, `usePrerun`=32, `kmcSimulation`=64,
