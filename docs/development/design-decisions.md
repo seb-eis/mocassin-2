@@ -77,8 +77,10 @@ charged-vacancy/default-occupation warning.
 UI/CLI pass the composed validator explicitly, which keeps the Core editing layer free of catalog dependencies.
 Step 07 adds `ProjectValidationPipeline` in `Mocassin.Packages.Projects.Validation`; it keeps
 `ProjectValidationService` as the model/domain stage and adds cross-domain, feasibility, and optional statistics
-stages. `validate` never runs build-stage checks; Steps 09/10/12 append them through `IValidationStage`. The
-diagnostic catalog is the stable registry, and validation never mutates the project.
+stages. The pipeline's file entry loads through `ProjectStoreOptions.ValidateOnLoad = false`, so load diagnostics
+are produced once; the in-memory entry reports `Load` as skipped. `validate` never runs build-stage checks;
+Steps 09–12 append them through `IValidationStage` with `Stage = Build` and `RunBuildStage`. The diagnostic
+catalog is the stable registry, and validation never mutates the project.
 `PROJ034` is advisory; it never rewrites the project or blocks loading. The compiled payload records the
 authoritative catalog and contract versions.
 

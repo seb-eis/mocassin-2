@@ -44,19 +44,22 @@ PR-fast tests must not depend on nightly-only assets.
 ## Validation and diagnostics
 
 - The `ProjectValidationPipeline` runs load → model → cross-domain → feasibility and never runs build-stage
-  checks in `validate`.
+  checks in `validate`; build stages are gated by `RunBuildStage`.
 - Validation never mutates the project; model and document hashes are unchanged after success, failure, or
   cancellation.
-- `DiagnosticCatalog` is the stable code registry. Tests prove every public code constant is registered exactly
-  once, every catalog code is documented, and no duplicate or undocumented code exists.
+- `DiagnosticCatalog` is the stable code registry. Assembly-local tests prove every public Core constant and
+  every internal Symmetry constant is registered exactly once, the composed catalog is the union plus package
+  codes, every catalog code is documented, and no duplicate or undocumented code exists.
 - Every emitted diagnostic has a real invalid fixture or focused test with severity, `ModelPath`, and hint.
-  Existing Step 03–06 tests count; Step 07 adds the cross-domain, feasibility, and package-level cases.
+  Existing Step 03–06 tests count for severity; Step 07 adds its cross-domain, feasibility, and package cases.
 - Diagnostics are sorted by severity, code, domain, object ID, property, and message. Exact duplicate
   `(code, path, message)` triples are removed.
-- `ENM018` does not cascade after a path-resolution error. `SIM038`–`SIM042` cover buildability and hard
+- `ENM018` does not cascade after a path-resolution error. `SIM038`–`SIM041` cover buildability and hard
   feasibility limits.
-- `validation-v1` JSON is schema-checked; exit codes distinguish valid, warning-as-error, usage, and I/O
-  failure.
+- `validation-v1` JSON is schema-checked, including load-failure reports with `null` identity fields; exit codes
+  distinguish valid, warning-as-error, parse failure, usage, and I/O failure.
+- Statistics are `null` only when not requested, after a load failure, after a model-stage error, or after a
+  failed preview; feasibility/budget errors can coexist with non-null statistics.
 - Ceria validation targets `< 200 ms` without statistics and `< 2 s` with `--stats`.
 
 ## Statistical parity

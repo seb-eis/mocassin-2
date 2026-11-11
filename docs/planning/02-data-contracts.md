@@ -1299,8 +1299,8 @@ contract; it is not the same shape as the generic command result used by `build`
   "schemaVersion": 1,
   "kind": "validation",
   "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e80",
-  "modelHash": "sha256:…",
-  "documentHash": "sha256:…",
+  "modelHash": "9f2c…",
+  "documentHash": "4a71…",
   "valid": false,
   "exitCode": 1,
   "summary": { "errors": 2, "warnings": 1, "infos": 0 },
@@ -1322,14 +1322,14 @@ contract; it is not the same shape as the generic command result used by `build`
 | --- | --- | --- | --- |
 | `schemaVersion` | integer | yes | `1` for this contract. |
 | `kind` | string | yes | Always `validation`. |
-| `projectId` | UUID | yes | Project metadata identity. |
-| `modelHash` | string | yes | Canonical model hash from Step 01. |
-| `documentHash` | string | yes | Canonical document hash from Step 01. |
+| `projectId` | UUID or null | yes | Project metadata identity; `null` when the document could not be loaded. |
+| `modelHash` | string or null | yes | Canonical model hash from Step 01, lowercase hexadecimal without a prefix; `null` when the document could not be loaded. |
+| `documentHash` | string or null | yes | Canonical document hash from Step 01, lowercase hexadecimal without a prefix; `null` when the document could not be loaded. |
 | `valid` | boolean | yes | True only when no error remains under the selected policy. |
 | `exitCode` | integer | yes | `0`, `1`, `2`, or `3` as defined by the `validate` command. |
 | `summary` | object | yes | Raw `errors`, `warnings`, and `infos` counts. |
 | `diagnostics` | array | yes | Sorted diagnostics; may be empty. |
-| `statistics` | object or null | yes | Present only with `--stats` and a valid model; otherwise `null`. |
+| `statistics` | object or null | yes | Non-null only when `--stats` was requested and statistics could be computed; otherwise `null`. |
 
 - `diagnostics[]` fields: `code`, `severity`, `message`, optional `path` (`domain`, `objectId`, optional
   `property`), optional `hint`, and optional `related` paths. `severity` is `error`, `warning`, or `info`.
@@ -1337,11 +1337,23 @@ contract; it is not the same shape as the generic command result used by `build`
   `(code, path, message)` triples are removed.
 - `valid` is policy-adjusted; `--warnings-as-errors` makes a warning-only result `valid: false` with
   `exitCode: 1`. `summary` still reports those items as warnings.
-- `statistics` uses camelCase fields matching `ModelStatistics`; long counts are JSON numbers. The object is
-  omitted/`null` when `--stats` is absent or the model has errors.
-- Human output is not part of this JSON contract. It is stable for tests but not for machine consumers.
-- The contract is added to `contracts/manifest.json` as `validation-v1` with a generated JSON Schema and a
-  schema-validation test.
+- `statistics` uses camelCase fields matching `ModelStatistics` exactly: `particleCount`, `particleSetCount`,
+  `referenceSiteCount`, `p1PositionCount`, `stablePositionCount`, `unstablePositionCount`,
+  `kineticTransitionCount`, `metropolisTransitionCount`, `clusterCount`, `estimatedPairInteractionCount`,
+  `estimatedUniqueClusterPermutations`, `estimatedRuleCount`, `estimatedMemoryBytes`, `cellCountA`,
+  `cellCountB`, `cellCountC`, and `estimatedPositions`. Long counts are JSON numbers.
+- Statistics availability is independent of `valid`: the object is non-null when statistics could be computed,
+  which excludes only a missing `--stats`, a load failure, a `Model`-stage error, or a failed preview. A model
+  invalid only because of feasibility/budget errors or promoted warnings can therefore carry statistics;
+  `--stats` never changes diagnostics or `valid`.
+- `--json` prints exactly one report for every invocation, including usage and load failures. Pre-load failures
+  set the three identity fields to `null`; a usage error has `exitCode: 2`, an unreadable/missing file has `3`,
+  and unparseable or schema-invalid content has `1` with the store's `PROJ` diagnostic. Human output is not part
+  of this JSON contract. It is stable for tests but not for machine consumers.
+- The contract is registered in `contracts/manifest.json` under a top-level `reports` object as
+  `validation-v1` (not as an entry in `formats`, whose eight ids are fixed). `tools/contracts/generate.py`
+  validates the `reports` section and emits `contracts/generated/validation-v1.schema.json`; the schema is
+  checked against real CLI output and the generated artifact is freshness-checked by `verify.sh contracts`.
 
 ## 6. Contract testing
 

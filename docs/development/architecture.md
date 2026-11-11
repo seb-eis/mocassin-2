@@ -45,11 +45,11 @@ persistence and depends on `Core`; the kernel never calls the store.
 | --- | --- |
 | `ProjectStore` | Load/migrate/validate, atomic save, lock acquisition, autosave recovery files. |
 | `ProjectValidationService` | Composes Core, Symmetry, `PROJ034`, and cross-domain `PAR004` validation. |
-| `ProjectValidationPipeline` | Load/model/cross-domain/feasibility pipeline; adds `ENM018`, feasibility diagnostics, optional statistics, and the `ValidationResult` consumed by CLI/GUI. |
+| `ProjectValidationPipeline` | Load/model/cross-domain/feasibility pipeline; adds `ENM018`, feasibility diagnostics, optional statistics, and the `ValidationResult` consumed by CLI/GUI. Its file entry owns the `Load` stage and disables store validation-on-load. |
 | `DiagnosticCatalog` | Stable registry of every diagnostic code, owner, help text, and documentation anchor. |
 | `ModelStatistics` | Advisory unit-cell/supercell counts and compile-cost estimates from the preview services. |
 | `ProjectFileLock` | A held editing lock that removes itself only if it still owns the lock file. |
-| `ProjectStoreOptions` | Size cap, backup, stale-lock timeout, autosave interval. |
+| `ProjectStoreOptions` | Size cap, backup, stale-lock timeout, autosave interval, and `ValidateOnLoad`. |
 
 `Mocassin.Contracts` owns the generated format version constants and the contract manifest reader/checks.
 `contracts/manifest.json` remains the source for field names, types, and versions; the project JSON Schema is
@@ -70,11 +70,13 @@ flowchart LR
 ```
 
 1. `ProjectStore.LoadAsync` reads and bounds the file, verifies UTF-8/no BOM, migrates the JSON node, and
-   deserializes a `Project`.
+   deserializes a `Project`. `ProjectStoreOptions.ValidateOnLoad` (default `true`) controls the store's own
+   validation step; the CLI/GUI pipeline file entry sets it to `false` and validates exactly once.
 2. `ProjectValidationService` composes the Core `ProjectValidator`, the Symmetry `StructureValidator`, the
    `PROJ034` metadata comparison, and the cross-domain `PAR004` warning. `ProjectValidationPipeline` adds
-   cross-domain, feasibility, and optional statistics stages and returns one `ValidationResult`. Validation
-   diagnostics do not throw; a project with errors is still returned for inspection.
+   load-stage reporting, cross-domain, feasibility, and optional statistics stages and returns one
+   `ValidationResult`. Validation diagnostics do not throw; a project with errors is still returned for
+   inspection.
 3. `ProjectDocument` wraps the loaded value as both current and last-saved. `ProjectEditor.Apply` validates a
    candidate mutation and returns a new immutable project plus one `ProjectChange`.
 4. The application saves the current project through `ProjectStore` and calls `MarkSaved` with the returned
