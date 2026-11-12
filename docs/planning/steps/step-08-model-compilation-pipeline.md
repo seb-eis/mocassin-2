@@ -152,7 +152,8 @@ public sealed record CompiledModel(
   - compute the inverse geometry `B-A` with the opposite periodic offset;
   - if the inverse is outside both directed centres' `G0` orbits, the pair is chiral; if either centre maps the
     inverse onto the forward direction, it is symmetric;
-  - link both directions to one shared `EnergyId`, one energy table, and one parameterization set;
+  - link both directions to one shared `EnergyId`, one energy table, and one parameterization set; only
+    reciprocal orbit-inverse matches are linked, and one-way matches are left achiral;
   - the compiled model records each direction's `GeometryId`, the shared `EnergyId`, and the inverse
     direction's `ChiralPartnerGeometryId`;
   - this is an orbit relationship, not physical chirality; in P1 both directions are separate orbits.

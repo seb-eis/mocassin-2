@@ -36,12 +36,15 @@ test, tool, and sample file carries `SPDX-License-Identifier: MIT`.
 **Post-step correction (2026-11-12):** The pair-interaction preview now derives chirality from both directed
 centre orbits. It previously linked a forward and reverse candidate by key alone, which marked achiral
 high-symmetry pairs such as ceria Ce–O as chiral. The correction adds `PairShell.IsChiral` (an additive public
-property), requires both directions to see the inverse as a distinct orbit, and includes the periodic offset in
-the reverse-pair key so equal-distance images link to their true inverse. Regression tests are
-`EnergyPreviewTests.CeriaHighSymmetryPairsAreAchiral` and
-`EnergyPreviewTests.PeriodicImagesAtEqualDistanceLinkToTheirTrueInverse`. This was found by the Phase B
-cross-cutting architecture review (XC-02 F-01 and round-2 R2-F1); no energy format, schema, or parameterization
-change follows.
+property), requires both directions to see the inverse as a distinct orbit, matches the inverse by orbit
+membership rather than representative equality, and links only reciprocal orbit-inverse matches, so equal-
+distance images and multi-image orbits resolve to their true partner. Regression tests are
+`EnergyPreviewTests.CeriaHighSymmetryPairsAreAchiral`,
+`EnergyPreviewTests.PeriodicImagesAtEqualDistanceLinkToTheirTrueInverse`,
+`EnergyPreviewTests.P4mmMultiImageOrbitLinksReciprocalChiralPair`, and
+`EnergyPreviewTests.BariumZirconateHighSymmetryPairsAreReciprocal`. This was found by the Phase B cross-cutting
+architecture review (XC-02 F-01, round-2 R2-F1, and round-3 R3-F1); no energy format, schema, or
+parameterization change follows.
 
 ## Goal
 Let a user define the interaction model that the compiler will sample into pair and cluster tables. The
@@ -236,8 +239,11 @@ Pair interactions are discovered by the compiler:
 - Apply filters.
 - Reduce by the center stabilizer `G0`.
 - Detect chiral pairs: the inverse direction is outside both directed centres' `G0` orbits. If either centre's
-  stabilizer maps the inverse onto the forward direction, the pair is symmetric and has no chiral partner. This
-  is an orbit relationship, not physical chirality; in P1 every directed pair is its own orbit.
+  stabilizer maps the inverse onto the forward direction, the pair is symmetric and has no chiral partner. A
+  link is recorded only when the orbit-inverse relation is reciprocal; a one-way orbit match (two forward
+  directions sharing one inverse orbit) is not a chiral pair and is left achiral, so one shared `EnergyId` never
+  has conflicting partner directions. This is an orbit relationship, not physical chirality; in P1 every
+  directed pair is its own orbit.
 - Assign two stable identifiers to every directed pair candidate:
   - `GeometryId` is a lowercase SHA-256 over the domain-separated canonical projection of
     `(centerSiteId, centerP, partnerSiteId, partnerP, offsetA, offsetB, offsetC, distanceBucketFm)`.

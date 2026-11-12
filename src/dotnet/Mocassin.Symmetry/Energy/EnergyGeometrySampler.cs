@@ -102,30 +102,36 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         }
 
         var geometryIds = candidates.Select(ComputeGeometryId).ToArray();
-        var byDirectedKey = new Dictionary<DirectedKey, List<int>>();
+        var byDirectedImage = new Dictionary<DirectedKey, List<int>>();
         for (var index = 0; index < candidates.Count; index++)
         {
             var candidate = candidates[index];
-            var representative = candidate.Shell.Representative;
-            var key = new DirectedKey(
-                candidate.Center.Id,
-                candidate.CenterP,
-                candidate.Partner.Id,
-                representative.P,
-                representative.A,
-                representative.B,
-                representative.C,
-                candidate.Shell.DistanceBucketFm);
-            if (!byDirectedKey.TryGetValue(key, out var list))
+            foreach (var image in candidate.Shell.EquivalentImages)
             {
-                list = [];
-                byDirectedKey.Add(key, list);
-            }
+                var key = new DirectedKey(
+                    candidate.Center.Id,
+                    candidate.CenterP,
+                    candidate.Partner.Id,
+                    image.P,
+                    image.A,
+                    image.B,
+                    image.C,
+                    candidate.Shell.DistanceBucketFm);
+                if (!byDirectedImage.TryGetValue(key, out var list))
+                {
+                    list = [];
+                    byDirectedImage.Add(key, list);
+                }
 
-            list.Add(index);
+                if (!list.Contains(index))
+                {
+                    list.Add(index);
+                }
+            }
         }
 
         var partnerIndices = new int?[candidates.Count];
+        var matchSets = new HashSet<int>[candidates.Count];
         for (var index = 0; index < candidates.Count; index++)
         {
             var candidate = candidates[index];
@@ -139,27 +145,21 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
                 -representative.B,
                 -representative.C,
                 candidate.Shell.DistanceBucketFm);
-            if (!byDirectedKey.TryGetValue(inverse, out var matches))
+            matchSets[index] = byDirectedImage.TryGetValue(inverse, out var matches)
+                ? new HashSet<int>(matches.Where(match => match != index))
+                : [];
+        }
+
+        for (var index = 0; index < candidates.Count; index++)
+        {
+            var reciprocal = matchSets[index]
+                .Where(match => matchSets[match].Contains(index))
+                .OrderBy(match => geometryIds[match], StringComparer.Ordinal)
+                .FirstOrDefault(-1);
+            if (reciprocal >= 0)
             {
-                continue;
+                partnerIndices[index] = reciprocal;
             }
-
-            var best = -1;
-            foreach (var match in matches)
-            {
-                if (match == index)
-                {
-                    continue;
-                }
-
-                if (best < 0 ||
-                    string.CompareOrdinal(geometryIds[match], geometryIds[best]) < 0)
-                {
-                    best = match;
-                }
-            }
-
-            partnerIndices[index] = best < 0 ? null : best;
         }
 
         var previews = ImmutableArray.CreateBuilder<PairInteractionPreview>(candidates.Count);
