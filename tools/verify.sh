@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Local validation for the MOCASSIN workspace.
 #
 # This mirrors the affected CI jobs without spending GitHub Actions minutes.

@@ -102,56 +102,64 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         }
 
         var geometryIds = candidates.Select(ComputeGeometryId).ToArray();
-        var byDirectedKey = new Dictionary<DirectedKey, List<int>>();
+        var byDirectedImage = new Dictionary<DirectedKey, List<int>>();
         for (var index = 0; index < candidates.Count; index++)
         {
             var candidate = candidates[index];
-            var key = new DirectedKey(
-                candidate.Center.Id,
-                candidate.CenterP,
-                candidate.Partner.Id,
-                candidate.Shell.Representative.P,
-                candidate.Shell.DistanceBucketFm);
-            if (!byDirectedKey.TryGetValue(key, out var list))
+            foreach (var image in candidate.Shell.EquivalentImages)
             {
-                list = [];
-                byDirectedKey.Add(key, list);
-            }
+                var key = new DirectedKey(
+                    candidate.Center.Id,
+                    candidate.CenterP,
+                    candidate.Partner.Id,
+                    image.P,
+                    image.A,
+                    image.B,
+                    image.C,
+                    candidate.Shell.DistanceBucketFm);
+                if (!byDirectedImage.TryGetValue(key, out var list))
+                {
+                    list = [];
+                    byDirectedImage.Add(key, list);
+                }
 
-            list.Add(index);
+                if (!list.Contains(index))
+                {
+                    list.Add(index);
+                }
+            }
         }
 
         var partnerIndices = new int?[candidates.Count];
+        var matchSets = new HashSet<int>[candidates.Count];
         for (var index = 0; index < candidates.Count; index++)
         {
             var candidate = candidates[index];
+            var representative = candidate.Shell.Representative;
             var inverse = new DirectedKey(
                 candidate.Partner.Id,
-                candidate.Shell.Representative.P,
+                representative.P,
                 candidate.Center.Id,
                 candidate.CenterP,
+                -representative.A,
+                -representative.B,
+                -representative.C,
                 candidate.Shell.DistanceBucketFm);
-            if (!byDirectedKey.TryGetValue(inverse, out var matches))
+            matchSets[index] = byDirectedImage.TryGetValue(inverse, out var matches)
+                ? new HashSet<int>(matches.Where(match => match != index))
+                : [];
+        }
+
+        for (var index = 0; index < candidates.Count; index++)
+        {
+            var reciprocal = matchSets[index]
+                .Where(match => matchSets[match].Contains(index))
+                .OrderBy(match => geometryIds[match], StringComparer.Ordinal)
+                .FirstOrDefault(-1);
+            if (reciprocal >= 0)
             {
-                continue;
+                partnerIndices[index] = reciprocal;
             }
-
-            var best = -1;
-            foreach (var match in matches)
-            {
-                if (match == index)
-                {
-                    continue;
-                }
-
-                if (best < 0 ||
-                    string.CompareOrdinal(geometryIds[match], geometryIds[best]) < 0)
-                {
-                    best = match;
-                }
-            }
-
-            partnerIndices[index] = best < 0 ? null : best;
         }
 
         var previews = ImmutableArray.CreateBuilder<PairInteractionPreview>(candidates.Count);
@@ -162,8 +170,15 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
             var energyId = geometryId;
             string? partnerId = null;
             var isChiral = false;
-            if (partnerIndices[index] is { } partnerIndex)
+            if (candidate.AllowsChirality &&
+                candidate.Shell.IsChiral &&
+                partnerIndices[index] is { } partnerIndex &&
+                candidates[partnerIndex].AllowsChirality &&
+                candidates[partnerIndex].Shell.IsChiral)
             {
+                // Chirality is a property of the unordered pair: both directed centre orbits must see the
+                // inverse as distinct. If either centre maps the inverse onto the forward direction, the pair
+                // is symmetric and the two directions share no chiral link.
                 var partnerGeometryId = geometryIds[partnerIndex];
                 isChiral = true;
                 partnerId = partnerGeometryId;
@@ -234,7 +249,8 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
                         partner,
                         centerP,
                         shellIndex,
-                        shell));
+                        shell,
+                        AllowsChirality: true));
                 }
             }
         }
@@ -274,7 +290,8 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
                     partner,
                     centerP,
                     shellIndex,
-                    shell));
+                    shell,
+                    AllowsChirality: false));
             }
         }
     }
@@ -313,12 +330,16 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         CellSite Partner,
         int CenterP,
         int ShellIndex,
-        PairShell Shell);
+        PairShell Shell,
+        bool AllowsChirality);
 
     private readonly record struct DirectedKey(
         CellSiteId CenterSiteId,
         int CenterP,
         CellSiteId PartnerSiteId,
         int PartnerP,
+        int OffsetA,
+        int OffsetB,
+        int OffsetC,
         int DistanceBucketFm);
 }

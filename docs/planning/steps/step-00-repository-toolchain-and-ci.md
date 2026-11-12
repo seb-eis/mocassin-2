@@ -12,7 +12,7 @@ decision records that constrain later steps, and the initial standalone document
 - **Step CI:** [run history](https://github.com/seb-eis/mocassin-2/actions?query=branch%3Astep%2F00-foundation) — green (Ubuntu + Windows)
 - **Main merge:** `47a9a90` — `--no-ff` merge; full main CI [`41733064540`](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) green (Ubuntu + Windows + macOS)
 - **Step tag:** `step-00` pushed
-- **Audit:** Passed
+- **Audit:** Passed with notes (two Minor findings and three Notes)
 - **Design review:** Waived — process introduced after completion
 - **Last updated:** 2026-11-04
 

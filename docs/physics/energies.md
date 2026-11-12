@@ -52,11 +52,13 @@ barriers on unstable sites. The model value is the default; a parameterization t
 
 ## Chirality and shared energy tables
 
-Two directed pair geometries can be chiral partners when the inverse direction is a distinct orbit of the
-centre stabilizer. The compiled model keeps both `GeometryId` values for display and migration, but both
-directions share one `EnergyId` and one energy table. Independent `A → B` and `B → A` parameter values are
-therefore not representable. This deliberately makes the orbit relationship explicit instead of silently
-forcing symmetry.
+Two directed pair geometries can be chiral partners when the inverse direction remains a distinct orbit from
+both directed centres. If either centre's stabilizer maps the inverse onto the forward direction, the pair is
+symmetric and has no chiral partner. A chiral link is reciprocal: if two forward directions share one inverse
+orbit, the relation is not one-to-one and those directions stay achiral. The compiled model keeps both
+`GeometryId` values for display and migration, but both directions share one `EnergyId` and one energy table.
+Independent `A → B` and `B → A` parameter values are therefore not representable. This deliberately makes the
+orbit relationship explicit instead of silently forcing symmetry.
 
 In a P1 model every directed pair is its own orbit; the shared identity still applies where an inverse
 geometry exists. Unstable–stable pairs are asymmetric by nature and do not have a chiral partner.

@@ -127,6 +127,10 @@ trigger, split it and update this roadmap before continuing.
 Tags in the table are created on the commit that satisfies the milestone, after the milestone is accepted.
 See [`AGENTS.md`](../../AGENTS.md) section 3.7 for tag rules.
 
+M0–M3 were backfilled on 2026-11-12 on the existing step merge commits (`milestone-m0` → `47a9a90`,
+`milestone-m1` → `7b4a994`, `milestone-m2` → `dbf5691`, `milestone-m3` → `3ed558a`) after the Phase B
+checkpoint identified the missing tags. Later milestones are tagged when they are reached.
+
 ## 5. Parallel work plan
 
 Assuming three core developers plus documentation ownership (shared or dedicated):

@@ -77,7 +77,7 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
 | C. Compilation | [08](steps/step-08-model-compilation-pipeline.md) | P1 extension, environments, interaction and rule generation |
 | C. Compilation | [09](steps/step-09-parameterization-templates.md) | Parameterization templates and model signatures |
 | C. Compilation | [10](steps/step-10-job-templates-and-supercells.md) | Job templates, inheritance, supercell/doping generation |
-| C. Compilation | [11](steps/step-11-simulation-package-and-msl-writer.md) | Compiled package encoding and `.msl` v2 writer |
+| C. Compilation | [11](steps/step-11-simulation-package-and-msl-writer.md) | Compiled package encoding and `.msl` v1 writer |
 | C. Compilation | [12](steps/step-12-build-orchestration-and-cli.md) | Headless build orchestration and `mocassin` CLI |
 | D. Solver | [13](steps/step-13-rust-solver-foundation-and-package-reader.md) | Rust workspace, CLI, `.msl` reader, job model |
 | D. Solver | [14](steps/step-14-simulation-context-initialization.md) | Lattice, neighbor maps, energy background, jump status |
@@ -145,7 +145,8 @@ published site.
 | Repository and toolchain | Complete (Step 00) |
 | Domain kernel and project format | Complete (Step 01) |
 | Symmetry and geometry | Complete (Step 02) |
-| .NET model builder | Not started — Step 03 next |
+| .NET model builder | Partial — model definition complete through Step 07; Step 08 next |
 | Rust solver | Not started |
 | Avalonia GUI | Not started |
+| Validation, diagnostics, and model statistics | Complete (Step 07) |
 | Parity validation | Not started |

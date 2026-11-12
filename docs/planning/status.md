@@ -47,14 +47,14 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 | Step | Title | Phase | Status | Step branch | Current feature | Step CI | Main merge | Step tag | Step audit | Design review |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Passed | Waived — introduced after completion |
+| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Passed with notes | Waived — introduced after completion |
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Done | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) (main: Ubuntu + Windows + macOS) | `7b4a994` | `step-01` | Passed with notes at `05c41ab` | Waived — introduced after completion |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Done | `step/02-symmetry-and-geometry` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) | `dbf5691` | `step-02` | Passed with notes at `6341b56` | Ready with notes — accepted |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Done | `step/03-particle-and-structure-models` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/42521062856) | `162ebe4` | `step-03` | Passed with notes at `b6a97ec` | Ready with notes — accepted at `3096aa8` |
 | 04 | [Transition Model](steps/step-04-transition-model.md) | B. Model definition | Done | `step/04-transition-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42695864895) (closeout) | `31ba12d` | `step-04` | Passed with notes at `82c8cb4` | Ready for implementation — accepted at `a3d8641` |
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Done | `step/05-energy-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) (replacement closeout) | `c11a364` | `step-05` | Passed with notes at `315aa19` | Ready for implementation — accepted at `0b2a571` |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Done | `step/06-lattice-and-simulation-models` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | `41cfa4d` | `step-06` | Passed with notes at `c390dcc` (code `ea6293e`); accepted 2026-11-11 | Ready with notes — accepted at `6173e61` |
-| 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Done | `step/07-validation-and-diagnostics` (merged and deleted) | `3ed558a` | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042) | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) | `step-07` | Passed with notes at `ccd0e55` (`d66f34f`) | Ready for implementation at `31b53e8` — review `2d01f3e`; approved 2026-11-11 |
+| 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Done | `step/07-validation-and-diagnostics` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) | `3ed558a` | `step-07` | Passed with notes at `ccd0e55` (`d66f34f`) | Ready for implementation at `31b53e8` — review `2d01f3e`; approved 2026-11-11 |
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -82,17 +82,18 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 ## Active work
 
-Step 07 — Validation, Diagnostics, and Model Statistics is `Ready for implementation` at `31b53e8`; the review
-record `docs/planning/reviews/step-07.md` passed in round 4 (`2d01f3e`) with no Blocker/Major. Round 3 at
-`60437ca` returned `Ready with notes`; round 2 at `4ddd571` and round 1 at `dc73ee4` returned
-`Changes required`, all findings resolved. The design covers the `ProjectValidationPipeline`, diagnostic
-catalog, `validation-v1` report, model statistics, and the `mocassin validate` command. Human approval to start
-implementation was given on 2026-11-11; the design branch is ready to merge to `main`. Step 06 is
-complete: merge `41cfa4d`, tag `step-06`, main CI `43091007170` green, audit
-`Passed with notes` at `c390dcc` for code `ea6293e`. Step 05 is complete: merge `c11a364`, tag `step-05`, main
-CI `42892804609` green, audit `Passed with notes` at `315aa19`. Step 04 is complete: merge `31ba12d`, tag
-`step-04`, main CI `42697550846` green, audit `Passed with notes` at `82c8cb4`. Step 03 remains complete:
-merge `162ebe4`, tag `step-03`, main CI `42521062856` green, audit passed with notes at `b6a97ec`.
+Phase B — Model definition (Steps 03–07) is complete. Step 07 is merged as `3ed558a`, tagged `step-07`, and
+its main CI run [`43293189634`](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) is green; the
+audit passed with notes at `ccd0e55`. The Phase B cross-cutting checkpoint is in progress: `XC-01` (policies and
+planning) and `XC-03` (documentation) passed with notes; `XC-02` (architecture and design) found one Major
+(`F-01`, fixed at `8d61e71`) a round-2 Major (`R2-F1`, fixed at `47c5927`), and a round-3 Major (`R3-F1`, fixed at `84781f8`); it is at `Re-review required` for the final checkpoint `84781f8`. The Step 08
+design review waits for all three verdicts. A Phase B drift check ran on 2026-11-12 at `38a22d2`; its three Major
+status/documentation findings were remediated before this checkpoint freeze. The XC-02 architecture review
+found one Major (`F-01`: false chiral metadata for achiral high-symmetry pairs); it is fixed in the checkpoint
+by `8d61e71` with the ceria regression test. Drift disposition: D1–D5, D7–D9, D13, and D15 are fixed; D6
+(milestone tags) is an owner decision; D10–D12 are XC-01 follow-ups; D14 is an accepted audit note. Steps 03–06
+remain complete: merges `162ebe4`, `31ba12d`, `c11a364`, and `41cfa4d`; tags `step-03`–`step-06`; all audits
+passed with notes.
 
 ## Cross-cutting phase checkpoints
 
@@ -107,7 +108,7 @@ These reviews do not create step branches or tags and do not replace step audits
 | Phase | Steps | Reviews | Status |
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
-| B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | Planned — awaiting Step 07 completion |
+| B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12 |
 | C. Compilation and build | 08–12 | `XC-04`/`XC-05`/`XC-06` | Planned |
 | D. Solver | 13–19 | `XC-07`/`XC-08`/`XC-09` | Planned |
 | E. Results | 20–22 | `XC-10`/`XC-11`/`XC-12` | Planned |
@@ -123,7 +124,7 @@ early-warning signal for the next cross-cutting review.
 
 | Date | Commit | Checked by | Result | Findings / links |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 2026-11-12 | `38a22d2` | Fresh independent drift-check context (OpenCode subagent) | Drift found — 3 Major, 9 Minor, 3 Note; Major status/documentation drift remediated before checkpoint freeze | [2026-11-12-phase-b.md](drift-checks/2026-11-12-phase-b.md) |
 
 ## Notes
 
@@ -136,4 +137,7 @@ early-warning signal for the next cross-cutting review.
   only at closeout and on `main`.
 - Step 02 received a post-development maintenance update on 2026-11-08: `Mocassin.Symmetry` namespaces were
   aligned with their folders; the public API break is accepted; the `step-02` tag remains at `dbf5691`.
+- Milestones M0–M3 were backfilled on 2026-11-12 with annotated tags on the existing step merge commits:
+  `milestone-m0` → `47a9a90`, `milestone-m1` → `7b4a994`, `milestone-m2` → `dbf5691`, `milestone-m3` →
+  `3ed558a`. Tags were pushed to `origin`; no step tag was moved.
 - Tag names record completed checkpoints; they do not replace this dashboard.

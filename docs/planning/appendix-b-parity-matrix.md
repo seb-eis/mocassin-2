@@ -227,27 +227,27 @@ Status legend:
 | arm64 | N | Improvement | 31 | Target for Apple Silicon/Linux |
 | Windows MSI installer | N | Replaced | 31 | Archives/packages |
 | NuGet evaluation package | Y | Planned | 20/31 | Public API |
-| CI on three OSes | Y | Planned | 00 | |
-| Unit/property/contract tests | Y | Planned | 03 | |
+| CI on three OSes | Y | Partial | 00/07 | Ubuntu automatic on `main`; Windows and macOS manual until platform-specific code appears |
+| Unit/property/contract tests | Y | Implemented | 03–07 | Suite green; Step 29 adds statistical parity and fuzzing |
 | Statistical parity suite | Y | Planned | 29 | |
 | Performance benchmarks | Y | Planned | 29 | |
 | Fuzzing | Y | Planned | 13/29 | |
-| Docs skeleton + build/CI | Y | Planned | 00 | Zensical, nav, build scripts, planning excluded |
-| Standalone docs completion (Zensical) | Y | Planned | 30 | Cross-cutting content, audit, publish |
-| User guide + physics | Y | Planned | 30 | Required content |
-| Developer architecture guide | Y | Planned | 30 | Code structure/design choices |
+| Docs skeleton + build/CI | Y | Implemented | 00/30 | Zensical, navigation, build scripts, and planning exclusion; Step 30 completes content |
+| Standalone docs completion (Zensical) | Y | Partial | 30 | Site builds strictly; completion, audit, and publication in 30 |
+| User guide + physics | Y | Partial | 03–07/30 | Model-definition pages exist; Step 30 completes cross-cutting content |
+| Developer architecture guide | Y | Partial | 00–07/30 | Architecture, compilation pipeline, testing, and workflow pages exist; Step 30 completes |
 | Tutorials | Y | Planned | 30 | Ceria, BaZrO3, vehicle, HPC, analysis |
 | CLI + format reference | Y | Partial | 30/07 | `validate`, diagnostics, and project references in 07; full CLI/formats in 30 |
 | Troubleshooting + FAQ | Y | Planned | 30 | |
 | Performance + HPC guide | Y | Planned | 30 | |
-| Contributing + dev workflow | Y | Planned | 30 | |
+| Contributing + dev workflow | Y | Implemented | 00 | Branches, review gates, local gates, and evidence playbook |
 | Migration + clean-break guide | Y | Planned | 30 | |
 | Glossary, notation, units | Y | Planned | 30 | |
 | Examples + publications | Y | Planned | 30 | |
-| .NET API reference (DocFX) | Y | Planned | 30 | `/api/dotnet/` |
-| Rust API reference (rustdoc) | Y | Planned | 30 | `/api/rust/` |
-| Python API reference (mkdocstrings) | Y | Planned | 30 | `/api/python/` |
-| MIT + original GPL attribution/notices | Y | Planned | 00 | |
+| .NET API reference (DocFX) | Y | Partial | 00/30 | Generated `/api/dotnet/`; Step 30 finalizes coverage and publication |
+| Rust API reference (rustdoc) | Y | Partial | 00/13/30 | Skeleton crates only; the public API grows from Step 13 |
+| Python API reference (mkdocstrings) | Y | Planned | 22/30 | `/api/python/` |
+| MIT + original GPL attribution/notices | Y | Implemented | 00 | `LICENSE`, `NOTICE.md`, and SPDX headers |
 | Legacy file migration | N | Out of scope | — | Owner decision |
 
 ## 10. Known original defects fixed by the plan

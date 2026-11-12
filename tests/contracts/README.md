@@ -4,8 +4,9 @@ Versioned cross-language fixtures for the formats defined in
 [`docs/planning/02-data-contracts.md`](../../docs/planning/02-data-contracts.md):
 
 - `project-*.mocprj` — canonical project JSON written by the real project writer
-  (`ProjectJson.SerializeToUtf8Bytes`); includes the Step 01 envelope fixtures plus the Step 03
-  particle/structure and symmetry-metadata fixtures; mirrored by the `samples/blank` and `samples/ceria` files;
+  (`ProjectJson.SerializeToUtf8Bytes`); includes the Step 01 envelope fixtures plus the Step 03–07
+  particle/structure, symmetry-metadata, transition, energy, lattice/simulation, and validation-report
+  fixtures; mirrored by the `samples/blank` and `samples/ceria` files;
 - `model-*.msgpack.zst` — compiled model payloads written by .NET and read by Rust;
 - `package-*.msl`, `package-*.msr` — package/results stores written by the real writers;
 - `state-*.mcs` — state documents written by Rust and read by .NET/Python;

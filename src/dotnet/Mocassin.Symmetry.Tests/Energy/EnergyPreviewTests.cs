@@ -126,6 +126,163 @@ public sealed class EnergyPreviewTests
     }
 
     [Fact]
+    public void CeriaHighSymmetryPairsAreAchiral()
+    {
+        var project = ProjectJson.Deserialize(
+            File.ReadAllBytes(RepositoryPaths.Combine("samples", "ceria", "ceria.mocprj")));
+
+        var pairs = service.TryCreatePairPreview(project.Model, 1, 1, 1, out var diagnostics);
+
+        Assert.NotNull(pairs);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        var previews = pairs.GetValueOrDefault();
+        Assert.NotEmpty(previews);
+        Assert.All(previews, static pair =>
+        {
+            Assert.False(pair.IsChiral);
+            Assert.Null(pair.ChiralPartnerGeometryId);
+            Assert.Equal(pair.GeometryId, pair.EnergyId);
+        });
+    }
+
+    [Fact]
+    public void PeriodicImagesAtEqualDistanceLinkToTheirTrueInverse()
+    {
+        var particle = new Particle(
+            ParticleId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-2a2b3c4d8f20")),
+            "P0",
+            "P0",
+            new ChargeElementary(0.0),
+            false);
+        var particleSet = new ParticleSet(
+            ParticleSetId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-2a2b3c4d8f30")),
+            "Set",
+            [particle.Id]);
+        var firstSiteId = CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-2a2b3c4d8f10"));
+        var secondSiteId = CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-2a2b3c4d8f11"));
+        var model = new ModelDefinition
+        {
+            Particles = [particle],
+            ParticleSets = [particleSet],
+            Structure = new StructureModel(
+                "P1 equal-distance fixture",
+                new SpaceGroupRef(1, AxisSetting.None, OriginChoice.None),
+                new CellParameters(
+                    new LengthAngstrom(10.0),
+                    new LengthAngstrom(10.0),
+                    new LengthAngstrom(10.0),
+                    new AngleDegrees(90.0),
+                    new AngleDegrees(90.0),
+                    new AngleDegrees(90.0)),
+                [
+                    new CellSite(firstSiteId, "A", new Fractional3(0.0, 0.0, 0.0), particleSet.Id, SiteStability.Stable),
+                    new CellSite(secondSiteId, "B", new Fractional3(0.5, 0.1, 0.2), particleSet.Id, SiteStability.Stable),
+                ],
+                []),
+            StableEnvironment = new StableEnvironment(new LengthAngstrom(6.0), []),
+        };
+
+        var pairs = service.TryCreatePairPreview(model, 1, 1, 1, out var diagnostics);
+
+        Assert.NotNull(pairs);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        var previews = pairs.GetValueOrDefault();
+        var byGeometryId = previews.ToDictionary(static pair => pair.GeometryId, StringComparer.Ordinal);
+        Assert.All(
+            previews.Where(static pair => pair.IsChiral),
+            pair =>
+            {
+                Assert.NotNull(pair.ChiralPartnerGeometryId);
+                Assert.True(byGeometryId.TryGetValue(pair.ChiralPartnerGeometryId!, out var partner));
+                Assert.Equal(pair.GeometryId, partner.ChiralPartnerGeometryId);
+                Assert.Equal(pair.EnergyId, partner.EnergyId);
+            });
+    }
+
+    [Fact]
+    public void P4mmMultiImageOrbitLinksReciprocalChiralPair()
+    {
+        var particle = new Particle(
+            ParticleId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20")),
+            "P0",
+            "P0",
+            new ChargeElementary(0.0),
+            false);
+        var particleSet = new ParticleSet(
+            ParticleSetId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f30")),
+            "Set",
+            [particle.Id]);
+        var firstSiteId = CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f10"));
+        var secondSiteId = CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f11"));
+        var model = new ModelDefinition
+        {
+            Particles = [particle],
+            ParticleSets = [particleSet],
+            Structure = new StructureModel(
+                "P4mm multi-image fixture",
+                new SpaceGroupRef(99, AxisSetting.None, OriginChoice.None),
+                new CellParameters(
+                    new LengthAngstrom(5.0),
+                    new LengthAngstrom(5.0),
+                    new LengthAngstrom(10.0),
+                    new AngleDegrees(90.0),
+                    new AngleDegrees(90.0),
+                    new AngleDegrees(90.0)),
+                [
+                    new CellSite(firstSiteId, "A", new Fractional3(0.0, 0.0, 0.0), particleSet.Id, SiteStability.Stable),
+                    new CellSite(secondSiteId, "B", new Fractional3(0.5, 0.5, 0.2), particleSet.Id, SiteStability.Stable),
+                ],
+                []),
+            StableEnvironment = new StableEnvironment(new LengthAngstrom(4.5), []),
+        };
+
+        var pairs = service.TryCreatePairPreview(model, 1, 1, 1, out var diagnostics);
+
+        Assert.NotNull(pairs);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        var previews = pairs.GetValueOrDefault();
+        Assert.Equal(2, previews.Length);
+        Assert.All(previews, static pair => Assert.True(pair.IsChiral));
+        Assert.All(
+            previews,
+            pair =>
+            {
+                Assert.NotNull(pair.ChiralPartnerGeometryId);
+                var partner = previews.Single(candidate => candidate.GeometryId == pair.ChiralPartnerGeometryId);
+                Assert.Equal(pair.GeometryId, partner.ChiralPartnerGeometryId);
+                Assert.Equal(pair.EnergyId, partner.EnergyId);
+            });
+    }
+
+    [Fact]
+    public void BariumZirconateHighSymmetryPairsAreReciprocal()
+    {
+        var project = ProjectJson.Deserialize(
+            File.ReadAllBytes(RepositoryPaths.Combine(
+                "samples",
+                "barium-zirconate",
+                "barium-zirconate.mocprj")));
+
+        var pairs = service.TryCreatePairPreview(project.Model, 1, 1, 1, out var diagnostics);
+
+        Assert.NotNull(pairs);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        var previews = pairs.GetValueOrDefault();
+        var byGeometryId = previews.ToDictionary(static pair => pair.GeometryId, StringComparer.Ordinal);
+        var chiral = previews.Where(static pair => pair.IsChiral).ToArray();
+        Assert.Equal(24, chiral.Length);
+        Assert.All(
+            chiral,
+            pair =>
+            {
+                Assert.NotNull(pair.ChiralPartnerGeometryId);
+                Assert.True(byGeometryId.TryGetValue(pair.ChiralPartnerGeometryId!, out var partner));
+                Assert.Equal(pair.GeometryId, partner.ChiralPartnerGeometryId);
+                Assert.Equal(pair.EnergyId, partner.EnergyId);
+            });
+    }
+
+    [Fact]
     public void InvalidModelReturnsNullWithoutThrowing()
     {
         var model = CreateModel() with

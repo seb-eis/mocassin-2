@@ -83,20 +83,20 @@ Promote Windows first. Keep macOS manual until there is actual macOS-specific be
 Step closeout (Ubuntu, path-filtered):
 
 ```sh
-gh workflow run ci.yml --ref step/03-particle-and-structure-models -f platforms=ubuntu
+gh workflow run ci.yml --ref <step-branch> -f platforms=ubuntu
 ```
 
-Use the active step branch; the Step 03 branch is the next example. Platform gate (only when required):
+Use the active step branch. Platform gate (only when required):
 
 ```sh
-gh workflow run ci.yml --ref step/03-particle-and-structure-models -f platforms=windows
-gh workflow run ci.yml --ref step/03-particle-and-structure-models -f platforms=all
+gh workflow run ci.yml --ref <step-branch> -f platforms=windows
+gh workflow run ci.yml --ref <step-branch> -f platforms=all
 ```
 
 Force every job (for example after a CI-workflow change):
 
 ```sh
-gh workflow run ci.yml --ref step/03-particle-and-structure-models -f platforms=ubuntu -f force_all=true
+gh workflow run ci.yml --ref <step-branch> -f platforms=ubuntu -f force_all=true
 ```
 
 Local validation:

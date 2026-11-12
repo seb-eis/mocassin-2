@@ -70,6 +70,10 @@ For every directed pair candidate:
 - `EnergyId` is the shared energy-table identity. For an achiral pair it equals `GeometryId`. For a chiral
   pair it is the lexicographically smaller of the two directions' `GeometryId` values.
 - `ChiralPartnerGeometryId` is the inverse direction's `GeometryId` when a chiral partner exists.
+- Chirality is a symmetric pair property: the inverse must be outside both directed centres' stabilizer
+  orbits. If either centre maps the inverse onto the forward direction, the pair is achiral and each direction
+  keeps `EnergyId == GeometryId`. Only reciprocal orbit-inverse matches are linked; a one-way match is left
+  achiral.
 
 Step 08 uses `EnergyId` as the compiled `object_id`; Step 09 stores one parameter value per `EnergyId`.
 

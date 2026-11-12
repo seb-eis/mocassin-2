@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: MIT
 # Build the combined MOCASSIN documentation site.
 #
 # Zensical owns the narrative site. DocFX and rustdoc output is copied into
