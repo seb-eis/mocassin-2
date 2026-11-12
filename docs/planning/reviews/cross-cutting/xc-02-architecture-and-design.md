@@ -358,9 +358,9 @@ Answer the three questions explicitly; a missing or unrecorded answer is a findi
 
 ## Record state
 
-**State:** Re-review required
+**State:** Fixes required
 
-`Re-review required` is a record state, not a verdict.
+`Re-review required` is a record state, not a verdict. Round 2 was performed and still requires fixes.
 
 ## Reviewer independence
 
@@ -417,3 +417,147 @@ are recorded as accepted notes with Step 08/30 follow-ups; they are not Blocker/
 
 Approved by:
 Date:
+
+## Round 2
+
+| Field | Value |
+| --- | --- |
+| Reviewer | Fresh independent reviewer (OpenCode subagent), round 2 |
+| Review date | 2026-11-12 |
+| Reviewed commit | `ddf192e7e6fc9c3f51a2d9924913c01fc20ca600` (Phase B checkpoint after F-01 and F-02–F-04 remediation) |
+| Worktree | `/tmp/opencode/mocassin-xc-02-r2`, branch `docs/xc-02-re-review`, HEAD `e88b7134d184f337f0a4957dd8dab998876e14a3` |
+| Request commit delta | `git diff --stat ddf192e..HEAD` = five documentation files only (`cross-cutting/README.md`, `xc-01`, `xc-02`, `xc-03`, `status.md`); no code, tests, contracts, schemas, or design pages changed after the frozen checkpoint |
+| Record state result | `Fixes required` |
+
+### Independence
+
+I am a fresh context. I did not author or implement the Phase B work or the round-1 review, did not take part in
+the F-01/F-02–F-04 remediation, and have no shared conversation with the round-1 reviewer, the orchestrator, the
+Phase B implementors, or the other reviewers. I read the repository and the original reference read-only and
+wrote only this record. The remediation table, round-1 request, evidence, findings, checkboxes, and verdict text
+above were not changed; only `Record state` was updated to the round-2 result and this section was appended.
+
+### Frozen state
+
+- `git status --short` (before this record edit): empty.
+- `git log --oneline --decorate -15`: `e88b713` (HEAD, request), `ddf192e` (frozen checkpoint), `9ece806`,
+  `374da61`, `415fe28`, `62e1072`, `4a98ad8` (F-01 integration), `8d61e71` (F-01 fix), `f77e8ad`, `2b8f84c`
+  (round-1 record), `08dd8df`, `2fe7b91`, `81fba45`, `38a22d2` (`main`/`origin/main`), `3ed558a` (`step-07`).
+- `git worktree list`: canonical `/workspace/mocassin` at `38a22d2`; review worktrees at their expected
+  branches. No branch was changed, merged, tagged, pushed, or deleted.
+
+### Commands run and results
+
+| Command | Result |
+| --- | --- |
+| `git status --short` | empty before the record edit |
+| `git log --oneline --decorate -15` | as listed above; no code commit after `ddf192e` |
+| `dotnet build Mocassin.slnx -c Release` | **Build succeeded**, 0 warnings, 0 errors (all 21 projects) |
+| `dotnet test Mocassin.slnx -c Release --no-build` | **899 passed**, 0 failed: Core 564, Symmetry 218, Packages 105, Cli 7, App 1, Compilation 1, Contracts 1, Results 1, Architecture 1 |
+| `dotnet test src/dotnet/Mocassin.Symmetry.Tests/... --filter FullyQualifiedName~EnergyPreviewTests` | **13 passed**, 0 failed (includes the new `CeriaHighSymmetryPairsAreAchiral`) |
+| `dotnet test src/dotnet/Mocassin.Symmetry.Tests/... --filter FullyQualifiedName~ReductionTests` | **21 passed**, 0 failed (includes the stronger P1 chirality assertions) |
+| `./tools/verify.sh structure` | passed: `Mocassin.Architecture.Tests` 1/1 |
+| `./tools/verify.sh api` | NuGet licence/vulnerability policy OK; ApiCompat OK for all nine checked assemblies (`Core`, `Symmetry`, `Compilation`, `Contracts`, `Packages`, `Results`, `App.ViewModels`, `App.Views`, `Rendering`) |
+| `./tools/verify.sh contracts` | `Contract artifacts are current (18 files)`; catalog current (274 settings, sha256 `1f3bf67…e3395`); process consistency OK; tool tests 18/18; SPDX 345 files; secret scan 661 files; `cargo-deny` advisories/bans/licenses/sources OK |
+| `python3 tools/contracts/generate.py --check` | `Contract artifacts are current (18 files)` |
+| Targeted probe (outside the repository, `/tmp/opencode/xc02-r2-probe`, not committed) | Ceria: 36 previews, 0 chiral, 36 achiral, 0 chiral/null-partner, 0 achiral/partner, 0 achiral `EnergyId != GeometryId`; reduction: 8 orbit-chiral and 16 achiral shells, 0 linked same-centre partners. P1 collision fixture: 4 previews, 2 asymmetric partner links, 1 declared chiral pair with different `EnergyId`, 2 distinct `EnergyId` values over 4 directions (details in R2-F1). |
+
+### Files reviewed
+
+- `AGENTS.md` §§1, 3, 4, 5, 8, 10, 11, 12, 16; `docs/planning/reviews/cross-cutting/README.md` §4; the full
+  XC-02 record; `docs/planning/reviews/README.md` §6; `docs/planning/drift-checks/2026-11-12-phase-b.md`.
+- Step 05 (`step-05-energy-model.md`) and Step 08 (`step-08-model-compilation-pipeline.md`) pages;
+  `docs/physics/energies.md`; `docs/reference/energy.md`; `docs/development/design-decisions.md`;
+  `docs/development/compilation-pipeline.md`; `docs/development/architecture.md`;
+  `contracts/manifest.json`; `tests/contracts/README.md`; `docs/planning/README.md`; `docs/planning/status.md`.
+- `src/dotnet/Mocassin.Symmetry/Reduction/PairReduction.cs`,
+  `src/dotnet/Mocassin.Symmetry/Energy/EnergyGeometrySampler.cs`,
+  `src/dotnet/Mocassin.Symmetry/Energy/PairInteractionPreview.cs`,
+  `src/dotnet/Mocassin.Symmetry.Tests/Energy/EnergyPreviewTests.cs`,
+  `src/dotnet/Mocassin.Symmetry.Tests/ReductionTests.cs`,
+  `src/dotnet/Mocassin.Symmetry/PublicAPI.Unshipped.txt`,
+  `src/dotnet/Mocassin.Core/Project/ProjectHasher.cs`,
+  `src/dotnet/Mocassin.Packages/Mocassin.Packages.csproj`.
+- Original reference read-only: `SpaceGroupService.CheckInteractionGeometryIsChiralPair` /
+  `GetUnitCellP1PathExtension` and `PairInteractionFinder` (for the original chiral-pair semantics).
+
+### F-01 — fixed
+
+The correction is present in both the reduction primitive and the sampler, not only in prose.
+
+- `PairShell.IsChiral` is computed as `!IsSameOrbit(stabilizer, inverse, displacement)` from the centre
+  stabilizer (`PairReduction.cs:107-118`); `ChiralPartnerIndex` is only linked for chiral shells.
+- `EnergyGeometrySampler` now requires `AllowsChirality` and `Shell.IsChiral` on **both** directed candidates
+  before setting `IsChiral`/`ChiralPartnerGeometryId`, and leaves `EnergyId = GeometryId` otherwise
+  (`EnergyGeometrySampler.cs:160-191`). Unstable–stable candidates pass `AllowsChirality: false`.
+- The ceria reproduction now reports no chiral pairs: 36 achiral previews, no `ChiralPartnerGeometryId`, and
+  `EnergyId == GeometryId` for every preview. This matches the Step 05/08 and `docs/physics/energies.md` rule.
+  The P1 chiral-pair test still passes and asserts `shell.IsChiral` and linked partners; the new ceria test
+  passes.
+- `docs/physics/energies.md`, Step 05 §5, and Step 08 §4 all state the same both-centre orbit rule. The
+  reference page states the `EnergyId` consequence but not the test definition; see R2-F2.
+
+F-01 is **Fixed**. The broader chiral-pair identity path still has a separate defect, R2-F1.
+
+### F-02–F-04 — fixed
+
+- **F-02 Fixed.** `contracts/manifest.json` has `"status": "step-07"` and notes that record both the Step 06
+  lattice/simulation additions and the Step 07 additive `reports.validation`/`validation-v1` report; the
+  `reports.validation` entry exists and the generated artifacts are current (`generate.py --check`). The
+  `tests/contracts/README.md` claim now covers Step 03–07 fixtures. The fix is accurate, not merely present.
+- **F-03 Fixed.** `docs/planning/README.md` now says “.NET model builder — Partial — model definition complete
+  through Step 07; Step 08 next” and adds the Step 07 validation/diagnostics/statistics row. This agrees with
+  `AGENTS.md` §1 (“Phase B is complete … Step 08 … is next”) and `status.md`.
+- **F-04 Fixed.** `docs/development/design-decisions.md` now says “Five SHA-256 hashes are exposed” and lists
+  `Compute`, `ComputeDocument`, `ComputeStructure`, `ComputeEnergy`, and `ComputeTransition` with their
+  projections. These are exactly the five public static entry points in `ProjectHasher.cs`.
+
+### F-05 / F-06 — accepted notes remain
+
+- **F-05 still a Note.** `Mocassin.Packages.csproj` still references only Compilation, Contracts, and Core;
+  `ProjectValidationService`, `ModelStatisticsService`, `FeasibilityValidator`, and `CrossDomainValidator`
+  still consume `Mocassin.Symmetry` namespaces through Compilation's transitive reference. The direction is
+  allowed and the build/architecture gate passes, but the dependency remains implicit. This is not a
+  Blocker/Major; the recorded follow-up stands.
+- **F-06 still a Note.** `docs/development/architecture.md` remains Step 03-era (it still says later steps add
+  transition/energy/lattice/simulation sections and documents only particles/structure); the Phase B
+  architecture is in `compilation-pipeline.md`. This is a documentation-status item with the recorded
+  follow-up; it is not a Blocker/Major.
+
+### Findings (round 2)
+
+| ID | Severity | Area | Finding | Evidence | Recommendation |
+| --- | --- | --- | --- | --- | --- |
+| R2-F1 | **Major** | Energy pair identity / Step 08–09 interface | The F-01 fix makes ceria correct, but the sampler still matches a forward candidate to its inverse by a `DirectedKey` that omits the periodic offset. When two images of the same partner P share a distance bucket but have different cell offsets, both forward directions select the same reverse candidate (the lexicographically smallest geometry) instead of their true inverses. The preview then declares a chiral pair whose partner is not the inverse, and the two directions can keep different `EnergyId` values. This contradicts the Step 05 §5 / Step 08 §4 / `reference/energy.md` contract that a chiral pair links both directions to one shared `EnergyId`, and Step 08 uses the same `IEnergyGeometrySampler` kernel for compiled tables. | Independent probe with a valid P1 model: cubic 10 Å cell, stable sites A=(0,0,0) and B=(0.5,0.1,0.2), stable cutoff 6.0 Å. `TryCreatePairPreview` returns 4 directed pairs at 5.4772 Å and one warning (`ENM002`, advisory cutoff > half the smallest cell dimension; no error). Output: `083a…` partner `97ab…` energy `083a…`; `3cca…` partner `97ab…` energy `3cca…`; `97ab…` partner `083a…` energy `083a…`; `c7da…` partner `083a…` energy `083a…`. Two partner links are non-reciprocal, `3cca…` and its declared partner `97ab…` have different `EnergyId` values, and 4 directions collapse to 2 distinct `EnergyId` values. The true inverse of `3cca…` is the other reverse image (`c7da…`), not `97ab…`. Code: `EnergyGeometrySampler.cs:104-155` (`DirectedKey` has no offset) and `:165-180` (partner chosen by key); test gap: `EnergyPreviewTests` only covers ceria (no linked chiral partner) and the P1 test has no equal-distance same-P images. | Include the negated periodic offset (and the true inverse partner P) in the inverse key, or derive the exact inverse geometry from `PairShell`/the displacement rather than the bucket key; require reciprocal `ChiralPartnerGeometryId` and equal `EnergyId` for every declared chiral pair; add a P1 regression test with a half-cell-coordinate site and a cutoff above half the smallest cell dimension. If such period-ambiguous models are intentionally out of contract, make that an error or state it in Step 05/08 instead of leaving `ENM002` advisory. |
+| R2-F2 | Note | Documentation / physics | The remediation note says the “physics/reference docs state the same rule”, but `docs/reference/energy.md` only states the `EnergyId`/`ChiralPartnerGeometryId` consequences; it never defines the both-centre orbit test. The rule is correctly stated in `docs/physics/energies.md`, Step 05, and Step 08. | `docs/reference/energy.md:63-74`; `docs/physics/energies.md:53-63`; Step 05 §5; Step 08 §4. | Add one sentence to the reference “Identities” section or link the physics page; no behaviour change. |
+| R2-F3 | Note | Public API XML docs | `PairShell.ChiralPartnerIndex` is documented as “the linked inverse shell index, or null when not chiral”, but after the F-01 change a shell can be `IsChiral = true` with a null index when its inverse is not present in the same-centre reduction (ceria has 8 such shells). | `src/dotnet/Mocassin.Symmetry/Reduction/PairReduction.cs:17`; ceria probe reduction count `chiral=8 achiral=16 linked=0`. | Say “null when no inverse shell is present in this reduction”; the `IsChiral` remarks already explain the orbit property. |
+
+Carry-forward status: **F-01 Fixed**, **F-02 Fixed**, **F-03 Fixed**, **F-04 Fixed**, **F-05 Accepted note**
+(unchanged), **F-06 Accepted note** (unchanged). No round-1 finding is reopened except that the F-01 area
+contains the new R2-F1 defect.
+
+### Round 2 checklist
+
+- [x] F-01 is implemented, not only described: both-centre orbit gate, `EnergyId == GeometryId` for achiral
+  pairs, and the ceria case reproduced.
+- [x] The P1 chiral-pair test still reports chiral partners, and the new ceria test runs in the suite.
+- [x] Step 05/08 and `docs/physics/energies.md` state the same rule; the reference-page gap is R2-F2.
+- [x] F-02, F-03, and F-04 remediations are accurate.
+- [x] F-05 and F-06 remain Notes, not Blocker/Major findings.
+- [x] Build, full test suite, targeted tests, structure, API, contracts, and generated-artifact checks pass at
+  the frozen checkpoint.
+- [ ] No Blocker or Major finding remains: **R2-F1 is Major**.
+- [ ] The human owner approves the verdict and remediation plan.
+
+### Round 2 verdict
+
+- [ ] Passed
+- [ ] Passed with notes
+- [x] Fixes required
+- [ ] Waived
+
+Follow-up owner: Phase B orchestrator/implementor (R2-F1); documentation owner (R2-F2, R2-F3).
+
+Follow-up step: Fix R2-F1 on a maintenance branch and re-review this record in round 3. F-01–F-04 are closed;
+F-05/F-06 remain accepted notes. Step 08 must not consume the chiral-pair metadata as authoritative until
+R2-F1 is fixed or the period-ambiguous case is explicitly rejected.
