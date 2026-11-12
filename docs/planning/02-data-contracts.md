@@ -757,6 +757,9 @@ MessagePack map with snake_case keys. Top-level:
 | `transitions` | object | jump collections, directions, rules, mapping tables |
 | `simulations` | array | simulation encodings (active collections, settings defaults, trackers) |
 
+- `particle` indices are compiled indices: `0` is void, then authored particles in ascending `ParticleId`
+  order. This is not the preview/state-change-matrix order (authored particles then void); consumers map by
+  `ParticleId`, never by preview array position.
 - `signature` is the Step 09 parameterization signature and the `models.signature` uniqueness key;
   `model_signature` is the Step 08 compiled-model signature used by parameterization templates and inspection.
   A value-only parameterization change changes `signature` but not `model_signature`.
@@ -850,9 +853,10 @@ MessagePack map with snake_case keys. Top-level:
 - `frequency_factor` is the Step 09 parameterized value relative to the simulation/job maximum; Step 08's
   internal default frequency is not a second runtime source.
 - `movement` is the authoritative fractional displacement per path node. `path_vector` is the Cartesian net
-  displacement and `length` its magnitude; Step 15 computes the runtime field projection from `movement` and
-  the simulation field. The direction has no stored scalar field factor; the compiler's
-  `rule.field_factor` is the charge-weighted scalar. `static_correction` is `null`/NaN in v1 (dynamic S2).
+  displacement, obtained by converting each movement with the cell geometry and summing; `length` is its
+  magnitude. Step 15 computes the runtime field projection from `path_vector` and the simulation field. The
+  direction has no stored scalar field factor; the compiler's `rule.field_factor` is the charge-weighted
+  scalar. `static_correction` is `null`/NaN in v1 (dynamic S2).
 - `tracker_order[i]` names the path node whose mobile tracker receives the movement at node `i`, or the
   sentinel `0xFF` for a non-mobile node. Tracker mappings are definitions; Step 18 owns the values and
   updates.

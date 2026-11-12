@@ -317,6 +317,8 @@ public sealed record ResolvedTransitionPath(
   structure with the symmetry engine. The resolver builds a `UnitCellVectorEncoder` from the resolved
   space-group setting and the authored reference sites, then maps every `ReferencePath` point to a canonical
   P1 position and its owning reference site. Core cannot reference Symmetry, so this boundary is mandatory.
+  Its public API includes whole-transition `TryResolve` plus point/path `TryResolvePoint`/`TryResolvePath`;
+  Step 08 uses the point/path entry for symmetry-expanded directions, and `TryResolve` delegates to it.
 - `ResolvedPathPosition.P` is the canonical per-cell position index; `Encoding` is the full `Vector4I`
   (cell offset plus `P`). `SiteId` is the reference site whose P1 orbit owns the position; `CanonicalPosition`
   is the exact encoded fractional coordinate, not the raw authored value.

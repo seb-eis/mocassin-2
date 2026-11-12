@@ -236,17 +236,22 @@ reduction suites are nightly/release.
   - P1 counts match brute-force expansion, and pair/cluster counts match the Step 05 preview services;
   - within one collection, `state0` maps to at most one rule; ambiguity is `CMP004`;
   - `jump_count`/`jump_mapping` are dense, consistent, and list only selectable directions;
-  - `UseDualDofCorrection`, `UsePrerun`, and kind match the documented derivation and Step 11 flag mapping.
+  - rule field factors reduce to `q` for a single charge and `-q` for its vacancy, using Cartesian-converted
+    movements;
+  - `UseDualDofCorrection` defaults on for every KMC simulation, `UsePrerun` follows `PreRunMcsp > 0`, MMC
+    clears both, and Step 11 maps the intent correctly.
 - Determinism: compiling the same model twice yields byte-identical `CompiledModelJson` and the same
   `ModelSignature` on Ubuntu, Windows, and macOS; runtime settings and parameterization values do not change
   the model signature.
-- Cache: a recording cache proves the invalidation graph after editing one domain at a time; unaffected
+- Cache: a recording cache proves the invalidation graph after editing one domain at a time, including a
+  simulation edit that changes the referenced transition set versus a runtime-settings-only edit; unaffected
   stages are reused and the output is unchanged.
 - Diagnostics: every `CMP` code has a catalog descriptor, documentation anchor, and an emission test with
   severity, `ModelPath`, and hint.
 - Cancellation: a cancelled compile returns no partial model and leaves the project unchanged.
 - Performance on the benchmark laptop class (8 physical cores, 32 GB RAM, .NET 10 Release): ceria
-  `< 1 s`; a 10k-position model `< 30 s` and `< 2 GiB` managed memory; cancellation check within 250 ms.
+  `< 1 s`; a 10k-position model `< 30 s` and `< 2 GiB` managed memory; cancellation is checked between stages
+  and top-level units, with atomic Symmetry calls documented as non-interruptible.
 
 ### 9.4 Supercell and doping
 

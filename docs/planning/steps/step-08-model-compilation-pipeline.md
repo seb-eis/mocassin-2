@@ -15,7 +15,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for review at `36fbba58182b2e769a6d59b3228a60021344248d` — [review record](../reviews/step-08.md)
+- **Design review:** Re-review required
 - **Last updated:** 2026-11-12
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -82,11 +82,16 @@ hash maps, and makes ambiguity a hard compile error rather than a runtime surpri
 - Any mutation of the project, any file I/O, and any dependency on `Mocassin.Packages`,
   `Mocassin.Contracts`, `Mocassin.Results`, or `Mocassin.Cli`.
 
-**Sizing.** The roadmap estimate is 4–6 person-weeks. The feature list has eight rows, including the
-documentation-only closeout. This is at the upper bound of the 6–8 feature audit-sitting guidance but below
-the split trigger: the eight features form one pipeline and a partial compiler is not a usable deliverable.
-No split is proposed. If the first three features exceed 2.5 person-weeks, stop and re-plan the remaining rule
-and encoding work as a roadmap split before continuing; do not carry an over-size step into the audit.
+**Sizing and owner waiver.** The roadmap estimate is 4–6 person-weeks. The feature list has eight rows,
+including the documentation-only closeout. This meets the roadmap §3.1 split trigger (more than about four
+weeks or roughly 6–8 features). The human owner reviewed the design-review finding M5 on 2026-11-12 and
+**explicitly accepted the 4–6 person-week, eight-feature single-step scope as a recorded waiver** rather than a
+roadmap split. Rationale: the eight features form one coherent compiler pipeline, a partial compiler is not a
+usable deliverable for Step 09, and splitting would insert a new roadmap step and change the Step 09–12
+dependency chain. The waiver is recorded in the Step 08 review record and approval summary; it does not waive
+the audit-sitting requirement, so the implementation must still keep each feature independently auditable. If
+the first three features exceed 2.5 person-weeks, stop and ask the owner to re-open the split decision before
+continuing.
 
 ### 2. Compiler API and boundary
 
@@ -149,9 +154,10 @@ public sealed record CompilationCacheStatistics(int Hits, int Misses, int Capaci
   concurrently. The default implementation is `ModelCompiler`. `EnableStageCache = false` disables internal
   caching and ignores `Cache`.
 - **Limits.** `MaxRuleCount`, `MaxEnergyTableBytes`, and `MaxClusterTupleCount` are hard limits that fail with
-  `CMP006` before allocation. `AdvisoryRuleCount` and `AdvisoryEnergyTableBytes` emit `CMP010` warnings but do
-  not fail. The defaults are guardrails, not physics constants; Step 09/11 may tune them through the
-  parameterization/job limits.
+  `CMP006` before allocation. `MaxClusterTupleCount` cannot raise the Symmetry reducer's fixed 1,000,000-tuple
+  ceiling; a lower value is enforced by a pre-check. `AdvisoryRuleCount` and `AdvisoryEnergyTableBytes` emit
+  `CMP010` warnings but do not fail. The defaults are guardrails, not physics constants; Step 09/11 may tune
+  them through the parameterization/job limits.
 - **Exceptions are for programmer errors and cancellation only.** A `null` project, invalid options
   (`MaxDegreeOfParallelism < 1`, negative limits, `StageCacheCapacity < 1`), an arithmetic/contract invariant
   violation, or a caller-supplied cache contract violation throws `ArgumentNullException`,
@@ -196,21 +202,24 @@ parallel, but the output order is canonical and independent of scheduling.
 | 3 | Environments | structure, energy model | stable/unstable environments, pair-image candidates, filters applied | energy hash, structure hash, catalog, contract | `CMP003`; forwarded `ENM` |
 | 4 | Pairs | environments | directed pair geometries, shared energy IDs, chiral links, pair links per position | energy hash, structure hash, catalog, contract | `CMP003` |
 | 5 | Clusters | energy model, structure | point groups, canonical occupation tuples/codes, cluster tables, links | energy hash, structure hash, cluster IDs, allowed occupations | `CMP003`, `CMP006` |
-| 6 | Rules | transitions, structure, particles | collections, directions, state codes, forward/inverse/dependent rules | transition closure hashes, structure hash, particle order, catalog, contract | `CMP004`–`CMP008` |
+| 6 | Rules | referenced transitions, structure, particles | collections, directions, state codes, forward/inverse/dependent rules | active-transition-set hash, transition closure hashes, structure hash, particle order, catalog, contract | `CMP004`–`CMP008` |
 | 7 | Encoding | rules, simulations | jump collections/directions/rules, count/mapping tables, tracker definitions, derived intent | simulation hash, rule hash, structure hash | `CMP006`, `CMP009`, `CMP010` |
 | 8 | Indexing | all prior | dense indices, stable geometry/rule IDs, lookup maps | all prior stage hashes | `CMP006`, `CMP011` |
 | 9 | Signing | canonical compiled projection | `ModelSignature` | canonical projection bytes | `CMP011` |
 | 10 | Report | all prior | counts, per-stage timings, input hashes, cache statistics, summary | — | — |
 
 - `Resolve` is the only stage that may cache by whole-model hash. It stores immutable context values.
-- `Structure` calls `SpaceGroupReferenceResolver`, `CellGeometry.TryCreate`, and
+- `Structure` calls the public `IStructurePreviewService.TryResolve`/`StructurePreviewService.TryResolve`
+  (not the internal `SpaceGroupReferenceResolver`), `CellGeometry.TryCreate`, and
   `UnitCellVectorEncoder.TryCreate` with reference sites sorted by `CellSiteId`. It never re-sorts canonical P1
   order.
 - `Environments`, `Pairs`, and `Clusters` call the **same public Symmetry services as the Step 05 preview**:
   `IEnergyGeometrySampler`/`EnergyGeometrySampler`, `PairReduction`, `PointGroup`, and `ClusterReduction`.
   Step 08 adds table allocation, canonical table order, dense particle indices, and links.
 - `Rules` uses the public `TransitionPathResolver` and the Step 04 authored transition model; it does not
-  duplicate the validator's path rules.
+  duplicate the validator's path rules. Point-level expansion uses the additive public
+  `TransitionPathResolver.TryResolvePoint`/`TryResolvePath` API; the existing whole-transition `TryResolve`
+  delegates to it and `FindMatches`/`TryGetComponentShift` remain private.
 - `Encoding` and `Indexing` are the only stages that assign dense indices. They run after all geometry and
   rule content is known.
 - `Signing` is a pure canonical projection; `Report` never affects the signature.
@@ -218,8 +227,10 @@ parallel, but the output order is canonical and independent of scheduling.
 ### 5. Structure, P1 expansion, and environments
 
 - **Particle index.** `0` is the implicit void particle. Authored particles are sorted by ascending
-  `ParticleId.Value`. This matches `TransitionPreviewService.GetParticleOrder`, keeps the project's
-  canonical ID ordering, and is independent of authored array order. The UI shows the resulting index.
+  `ParticleId.Value`. This is deliberately not the `TransitionPreviewService.GetParticleOrder` order, which is
+  authored particles ascending and then void last; the preview's state-change matrix order is not a compiled
+  index contract. The compiler maps every `ParticleId` to its compiled index explicitly, and tests pin the
+  mapping so state codes and Step 09/11 consumers cannot diverge.
 - **Position index.** The canonical P1 order from Step 02: expand, trim, exact-grid deduplicate, sort by
   fractional `(a,b,c)`, assign `P = 0..Pcount-1`.
 - **Site index.** Reference sites sorted by ascending `CellSiteId.Value`. The compiler feeds the encoder the
@@ -276,8 +287,11 @@ parallel, but the output order is canonical and independent of scheduling.
   Catch its invalid-input `ArgumentException` as `CMP003` and its bounded-enumeration
   `InvalidOperationException` as `CMP006`; a reducer failure must not escape as an unstructured exception.
 - The center particle is always site 0 of the tuple; the raw combination count includes the center particle
-  factor. Do not enumerate the full product when `Burnside`/reducer output is available; honor
-  `MaxClusterTupleCount` and the Step 05 `ENM012`/`ENM013` limits.
+  factor. `ClusterReduction` enumerates tuples and has a fixed 1,000,000 bound but no Burnside output or
+  configurable bound. Before calling it, compute the raw count with saturating `long` arithmetic and emit
+  `CMP006` when it exceeds `MaxClusterTupleCount` or the fixed 1,000,000 ceiling; then call the reducer and
+  convert its bounded-enumeration exception to `CMP006`. The preview's Burnside count is a test cross-check,
+  not a compiler output.
 - Occupation codes are `ulong`, 6 bits per site, site 0 least significant, up to 9 sites, unused high bits
   zero. Particle indices must be `<= 63`; Step 03's 63-particle limit makes this exact.
 - A cluster table is shared by all symmetry-equivalent centers of the authored cluster. Its stable ID is
@@ -302,14 +316,17 @@ For each kinetic or Metropolis transition referenced by at least one simulation:
    resolution errors are `CMP007` with the source `TRN` diagnostic in `Related`.
 2. Build the integer relative encoding of the reference path:
    `relative[i] = (encoding[i].A - encoding[0].A, …, encoding[i].P)`. Node 0 is `(0,0,0,P0)`.
-3. Expand the path under every setting operation, re-resolve each transformed point to a canonical `(P,
-   offset)`, and deduplicate exact relative encodings. Then reduce by the center stabilizer `G0` of `P0`.
-   The canonical representative is the lexicographically smallest relative encoding sequence.
+3. Expand the path under every setting operation, re-resolve each transformed point with the public
+   `TransitionPathResolver.TryResolvePath` to a canonical `(P, offset)`, and deduplicate exact relative
+   encodings. Then reduce by the center stabilizer `G0` of `P0`. The canonical representative is the
+   lexicographically smallest relative encoding sequence. The compiler does not duplicate the nearest-image
+   or tie rule.
 4. Emit one `CompiledJumpDirection` per reduced orbit. Its `position_id` is the representative start P.
    The same direction is mapped to every symmetry-equivalent start P through `jump_count`/`jump_mapping`.
-5. A direction's `movement[i]` is the fractional displacement of the particle at node `i` from S0 to S2; the
-   path vector is the Cartesian net displacement. Directions are deterministic and independent of the
-   simulation field.
+5. A direction's `movement[i]` is the **fractional** displacement of the particle at node `i` from S0 to S2,
+   used for tracking. The compiler converts each movement to Cartesian with the validated cell geometry,
+   sums the Cartesian movements into `pathVector`, and stores both the fractional `movement` array and the
+   Cartesian `path_vector`. Directions are deterministic and independent of the simulation field.
 
 #### 8.2 State triplets and conservation
 
@@ -364,16 +381,18 @@ Step 15 defines `direction.field_projection = 0.5 * (|E|/kT) * (Δx_path · ê)`
 `field = -(direction.field_projection * rule.field_factor)`. Step 08 supplies the rule scalar:
 
 ```text
-pathVector = Σ_i movement_i                  (Cartesian)
-pathUnit   = pathVector / |pathVector|       (0 when |pathVector| = 0)
-fieldFactor = Σ_i q_i * (movement_i · pathUnit)
+cartesianMovement_i = Cell.ToCartesian(movement_i)      (Å; movement_i is fractional)
+pathVector          = Σ_i cartesianMovement_i           (Å)
+fieldFactor          = 0                                 when |pathVector| = 0
+                     = Σ_i q_i * (cartesianMovement_i · pathVector) / |pathVector|²
 ```
 
-For a single charge `q` moving by `Δx`, this is `q`, so the energy is `-0.5 q E·Δx/kT`. For a vacancy
-migration, the vacancy moves opposite to the ion, so `fieldFactor` carries the correct sign. For
-non-collinear multi-site mechanisms the scalar is a documented projection approximation; the single-charge,
-vacancy, and collinear three-site cases are pinned by tests. If Step 15/16 later requires a vector field
-factor, that is a contract change, not a silent reinterpretation.
+The conversion uses the same `CellGeometry` as the structure stage; fractional and Cartesian vectors are never
+mixed in one dot product. For a single charge `q` moving by `Δx`, `fieldFactor = q`, so the energy is
+`-0.5 q E·Δx/kT`. For a vacancy migration, the vacancy moves opposite to the ion, so `fieldFactor` carries the
+correct sign. For non-collinear multi-site mechanisms the scalar is a documented projection approximation; the
+single-charge, vacancy, and collinear three-site cases are pinned by tests. If Step 15/16 later requires a
+vector field factor, that is a contract change, not a silent reinterpretation.
 
 ### 9. Simulation encoding and derived solver intent
 
@@ -413,8 +432,11 @@ public sealed record CompiledSolverIntent(
 
   - `Kind` is the authored simulation kind.
   - `UsePrerun = Kind == Kmc && PreRunMcsp > 0`.
-  - `UseDualDofCorrection = Kind == Kmc &&` at least one active collection's chain generates an automatic
-    inverse rule (`Migration3`; `Metropolis2` is MMC). Complex mechanisms and MMC return `false`.
+  - `UseDualDofCorrection = Kind == Kmc` by default. This matches the original job builder, which sets
+    `UseDualDofCorrection` for every KMC job before the post-build selection optimizer runs. Step 08 does not
+    infer the flag from the mechanism shape (`Migration3` versus vehicle/complex). Step 10 owns the optional
+    selection-optimizer override and must record and test any rule that clears the flag; until that rule is
+    proven, every KMC job keeps the original default.
   - The `.msl` flag word is **not** composed here. Step 10 copies the intent to `JobDescriptor`; Step 11 calls
     `Mocassin.Packages.Jobs.SolverJobFlagsMapper.Compose` with the authored `ExecutionFlags`, kind,
     pre-run MCSP, and the dual-DOF boolean. `Mocassin.Compilation` does not reference `SolverJobFlags`.
@@ -525,10 +547,11 @@ ParameterizedModel.Signature
   job count, seed), parameterization values, timings, diagnostics, file names, and cache state.
 - Step 08 defines the projection field order and types in the Step 08 feature and mirrors ADR 0010's rules
   (structs as arrays in fixed order, fixed-width integers, float64, normalized `-0.0`, domain separation, no
-  compression/timestamps). The manifest gains a `compiledModel` signed-projection entry in Step 08 so the
-  projection order is contract-owned; Step 11 reuses it for the stored payload and cross-language vectors.
-  The Step 08 encoder is hand-coded in `Mocassin.Compilation` because `Compilation` cannot reference
-  `Mocassin.Contracts`.
+  compression/timestamps). Step 08 finalizes the **existing** `signatures.model` manifest entry
+  (`ModelSignatureV1`/`model-v1`) and its golden vector; it does not add a second `compiledModel` signature
+  entry, because the generator requires exactly the `model`, `parameterization`, and `lattice` set. Step 11
+  reuses the model projection for the stored payload and cross-language vectors. The Step 08 encoder is
+  hand-coded in `Mocassin.Compilation` because `Compilation` cannot reference `Mocassin.Contracts`.
 - The projection layout is:
 
   ```text
@@ -551,7 +574,10 @@ ParameterizedModel.Signature
   Step 11 stores `models.signature` = parameterization signature and `models.payload.model_signature` = Step 08
   signature.
 - A model-signature change invalidates templates and parameterizations; a parameterization-only change
-  changes the package model signature but not the compiled-model signature.
+  changes the package model signature but not the compiled-model signature. Adding or removing a simulation,
+  or changing a simulation's active-transition set, changes the compiled simulation encoding and therefore the
+  model signature. Changing only runtime settings (temperature, MCSP, field, pre-run, break settings, jobs,
+  seeds) does not change the model signature.
 
 #### 11.4 Determinism
 
@@ -581,9 +607,13 @@ ParameterizedModel.Signature
   - structure: structure hash;
   - environments/pairs: energy hash + structure hash;
   - clusters: energy hash + structure hash + cluster IDs + allowed-occupation hash;
-  - rules: transition closure hashes + structure hash + particle order;
+  - rules: active-transition-set hash + transition closure hashes + structure hash + particle order;
   - encoding: rule hash + simulation hash + structure hash;
   - indexing/signing: all prior stage hashes.
+- **Active-transition-set hash.** `ProjectHasher.ComputeSimulationSelection(Project)` (new, Core) hashes the
+  canonical simulation IDs, kinds, and authored-order transition references. It is the cache-key input that
+  makes adding/removing a simulation reference change the rule set. The compiler report exposes it as
+  `InputHashes.ActiveTransitions`; `InputHashes.Simulations` hashes the full simulation section.
 - **Invalidation graph:**
 
   | Edit | Rebuilds | Reuses |
@@ -591,11 +621,14 @@ ParameterizedModel.Signature
   | Structure/particles | Resolve, Structure, Environments, Pairs, Clusters, Rules, Encoding, Indexing, Signing | nothing |
   | Energy environments/clusters/site energies | Environments, Pairs, Clusters, Encoding (links), Indexing, Signing | Resolve, Structure, Rules |
   | Transitions/state changes/chains | Rules, Encoding, Indexing, Signing | Resolve, Structure, Pairs, Clusters |
-  | Simulations/settings | Encoding, Indexing, Signing | Resolve, Structure, Pairs, Clusters, Rules |
+  | Simulation active-transition set changes | Rules, Encoding, Indexing, Signing | Resolve, Structure, Pairs, Clusters |
+  | Simulation runtime settings only | Encoding (defaults) | Resolve, Structure, Pairs, Clusters, Rules, Indexing, Signing |
   | Catalog or symmetry contract | all stages | nothing |
 
-- Cache statistics (`hits`, `misses`, `capacity`) are reported but never signed. A cache entry that fails a
-  defensive integrity check is recomputed and emits `CMP012`; normal operation never emits it.
+- Cache statistics (`hits`, `misses`, `capacity`) are reported but never signed. A cached entry is accepted
+  only when its key echo, format version, array lengths/index bounds, and cached content hash match the current
+  key; a mismatch recomputes the stage and emits `CMP012`. Tests inject a wrong-version or wrong-shape entry
+  directly into the caller cache; normal operation never emits `CMP012`.
 
 ### 13. Diagnostics, report, cancellation, parallelism, and performance
 
@@ -613,7 +646,7 @@ Owner prefix: `CMP`, owner “Step 08 — model compilation pipeline”. Codes a
 | `CMP006` | Error | A configured compilation limit (rules, tuples, tables, indices, memory) is exceeded. | `model` / collection |
 | `CMP007` | Error | A transition path cannot be expanded into compiled directions. | `kineticTransition` |
 | `CMP008` | Error | Mass/charge conservation cannot be evaluated (non-finite charge or missing particle). | `kineticTransition` / `stateChange` |
-| `CMP009` | Warning | A transition is not referenced by any simulation and was not compiled; suppressed when `EmitUnusedTransitionWarnings` is false. | transition |
+| `CMP009` | Warning | A transition is not referenced by any simulation and was not compiled; suppressed when `EmitUnusedTransitionWarnings` is false. | `kineticTransition` or `metropolisTransition` |
 | `CMP010` | Warning | The advisory rule/table budget (`AdvisoryRuleCount`/`AdvisoryEnergyTableBytes`) is exceeded but the hard limit is not. | `model` |
 | `CMP011` | Error | The compiled model cannot be signed (canonical projection failure or missing provenance). | `model` |
 | `CMP012` | Warning | A cached stage result failed its integrity check and was recomputed. | `model` |
@@ -637,11 +670,12 @@ Owner prefix: `CMP`, owner “Step 08 — model compilation pipeline”. Codes a
 
 - `CompilerVersion`, `ModelSignature`, `SymmetryContractVersion`, `SpaceGroupDataVersion`,
   `SpaceGroupDataSha256`;
-- `InputHashes` for model, structure, energy, transitions, and simulations;
+- `InputHashes` for model, structure, energy, transitions, simulations, and the active-transition set;
 - `Counts`: particles, P1 positions, stable/unstable positions, sites, environments, pair images, pair
   geometries, pair energy tables, chiral pairs, clusters, cluster tables, cluster occupations, transitions,
-  collections, directions, rules, forward/inverse/dependent/rejected rules, global trackers, static trackers
-  per cell, and estimated energy-table bytes;
+  collections, directions, rules, forward/inverse/dependent rules, rejected rules split by reason
+  (`RejectedByMass`, `RejectedByCharge`, `RejectedByInvalidState`), global trackers, static trackers per cell,
+  and estimated energy-table bytes;
 - per-stage `Status`, `DiagnosticCount`, and `Elapsed`;
 - `Cache` hits/misses/capacity;
 - a human-readable `Summary` suitable for CLI/GUI.
@@ -652,7 +686,10 @@ where tests explicitly compare counts.
 #### 13.3 Cancellation and parallelism
 
 - Check cancellation at every stage boundary, before each top-level position/cluster/transition/simulation,
-  and every 4096 inner enumeration steps. Throw `OperationCanceledException`; return no partial model.
+  and around each atomic Symmetry call. The Step 02/04/05 services (`IEnergyGeometrySampler`,
+  `PairReduction`, `ClusterReduction`, `TransitionPathResolver`) take no `CancellationToken`; one call is
+  atomic and cannot be interrupted. The 250 ms responsiveness target therefore applies between checks, not
+  inside a single atomic reduction/radial-search/path call. Adding tokens to those APIs is a later change.
 - `MaxDegreeOfParallelism = 1` disables parallelism. Independent per-position pair/cluster work and
   per-transition direction/rule enumeration may run in parallel with local buffers. Merge and sort before
   assigning indices. Never parallelize floating-point reductions or signature projection.
@@ -666,7 +703,8 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 
 - ceria sample: compile `< 1 s`;
 - 10k P1-position model: compile `< 30 s`, peak managed memory `< 2 GiB`;
-- cancellation responsive within 250 ms of the next check;
+- cancellation responsive within 250 ms of the next stage/top-level check; a single atomic Symmetry
+  reduction/path call may exceed this, and that is an accepted limitation until those APIs take a token;
 - no per-feature CI; run `Mocassin.Benchmarks/Compilation` locally and record the hardware and result in the
   step page.
 
@@ -693,7 +731,9 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 - [ ] `cluster-compilation`: resolve cluster geometry, call `ClusterReduction`, allocate canonical cluster
   tables, build expansion maps, and link cluster byte positions.
 - [ ] `transition-rule-compilation`: expand directions, build S0/S1/S2, conservation filtering,
-  forward/inverse/dependent rules, deduplication, ambiguity detection, rule IDs, and field factors.
+  forward/inverse/dependent rules, deduplication, ambiguity detection, rule IDs, and field factors. Add the
+  additive public `TransitionPathResolver.TryResolvePoint`/`TryResolvePath` API and Step 04 path-resolver tests;
+  do not duplicate private nearest-image logic.
 - [ ] `simulation-encoding`: build collections, directions, rules, jump count/mapping, tracker
   definitions/mappings, MMC interaction range, selection-optimizer resolution, and derived solver intent.
 - [ ] `indexing-signatures-caching`: dense index assignment, stable IDs, canonical model-signature projection,
@@ -702,8 +742,11 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
   docs anchors, catalog completeness, and per-code tests.
 - [ ] `golden-models-and-closeout`: ceria/BaZrO₃/vehicle/interstitialcy golden compiled models and signature
   vectors, performance and cancellation tests, parity-matrix/status/docs closeout, and the audit request.
-- [ ] Add the `compiledModel` signed-projection manifest entry and golden vector in
-  `indexing-signatures-caching`; Step 11 reuses it for the stored payload and cross-language checks.
+  Add a `Mocassin.Compilation` project reference and `Compilation/` benchmarks to `Mocassin.Benchmarks`, or
+  record a different harness if the benchmark project is not the right fit.
+- [ ] Finalize the existing `signatures.model` (`ModelSignatureV1`/`model-v1`) manifest types and golden
+  vector in `indexing-signatures-caching`; do not add a second signature entry. Step 11 reuses it for the
+  stored payload and cross-language checks.
 - [ ] Add SPDX headers, `PublicAPI.Unshipped.txt` entries, and ApiCompat updates for every new public type.
 - [ ] Update `docs/reference/diagnostics.md`, `docs/development/compilation-pipeline.md`,
   `docs/development/architecture.md`, `docs/development/design-decisions.md`, `docs/planning/03-quality-strategy.md`,
@@ -713,9 +756,10 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 
 - [ ] Ceria compiles to the expected P1 positions, pair sets/tables, cluster sets, and oxygen migration rules.
 - [ ] A 2-site MMC model compiles forward and inverse exchange rules.
-- [ ] A 3-site migration compiles forward and inverse rules, including a chiral case, and sets
-  `UseDualDofCorrection`.
-- [ ] A 5-site vehicle compiles unidirectional rules only, with no automatic inverse and no dual-DOF flag.
+- [ ] A 3-site migration compiles forward and inverse rules, including a chiral case, and keeps the KMC
+  dual-DOF default.
+- [ ] A 5-site vehicle compiles unidirectional rules only, with no automatic inverse; as a KMC simulation it
+  keeps the dual-DOF default unless a documented Step 10 optimizer rule clears it.
 - [ ] Rule generation enforces unstable positions void in S0/S2, stable positions void in S1, and the
   documented mass/charge conservation rules; rejected counts are reported.
 - [ ] Rule ambiguity is detected as `CMP004` with both conflicting transitions/rules.
@@ -755,6 +799,7 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 | Test | Assertion |
 | --- | --- |
 | P1 positions | Compiled positions match the Step 02 encoder for all samples |
+| Particle mapping | Compiled 0=void + authored-ascending indices map explicitly from `ParticleId`; preview matrix order never leaks into state codes |
 | Pair sets | Counts, distances, multiplicities, chiral links, and table order match brute force |
 | Pair bucketing | Symmetry-equivalent images share a bucket; cutoff-boundary images are included with the `1 fm` margin |
 | Pair preview cross-check | Compiled pair-image/unique-table counts equal `EnergyCostPreview`/`TryCreatePairPreview` |
@@ -762,11 +807,11 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 | Cluster tables | Rows, code order, particle mapping, and zero defaults are exact |
 | Rules | S0/S1/S2, stability roles, conservation, rejection counts, forward/inverse/dependent counts |
 | Rule ambiguity | Duplicate `state0` with different outcomes fails with `CMP004` and both identities |
-| Vehicle | Unidirectional only; no inverse generation; no dual-DOF intent |
+| Vehicle | Unidirectional only; no inverse generation; KMC still carries the dual-DOF default |
+| Intent | KMC always sets `UseDualDofCorrection` by default; Step 10 may clear it only with a recorded optimizer rule; MMC false |
 | MMC | Two-site exchanges; no S1/field/pre-run/trackers; MMC intent |
 | Encoding | Jump count/mapping/tracker tables are dense, consistent, and reachable |
 | Trackers | Global/static definitions match indices; 3-site `tracker_order` follows particle identity |
-| Intent | `UseDualDofCorrection`/`UsePrerun`/kind match the documented derivation and Step 11 mapping |
 | Signature | Known vectors; runtime settings and parameterization changes do not alter the model signature |
 | Determinism | Byte-identical JSON/signature across runs; Ubuntu automatic, Windows/macOS manual golden |
 | Cache | Recording cache proves the invalidation graph after a one-domain edit |
@@ -785,7 +830,7 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 | Signature boundary mixes geometry and values | Separate Step 08 and Step 09 signatures; tests prove runtime/parameter changes do not alter the model signature |
 | Cache invalidation bugs | Content-hash keys, per-compilation default, recording-cache tests, no static cache |
 | Field-factor approximation | Documented scalar projection; single-charge/vacancy/collinear tests; vector change requires a contract decision |
-| Step 08 is too large to audit | Eight features at the upper bound; stop-and-split trigger if the first three exceed 2.5 pw |
+| Step 08 is too large to audit | Owner explicitly waived the 4–6 pw/eight-feature split on 2026-11-12; features remain independently auditable, and the owner re-opens the split decision if the first three exceed 2.5 pw |
 | CLI ownership duplication | Step 08 library only; Step 12 owns `compile`/`build` and orchestration |
 
 ## Done when

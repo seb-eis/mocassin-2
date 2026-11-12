@@ -62,7 +62,7 @@ Status legend:
 | State-change groups | Y | Partial | 04/24 | Mixed physical/charge and stable/unstable roles rejected; editor UI in 24 |
 | Abstract chains with D/S linkers | Y | Partial | 04/24 | Six patterns + custom grammar; `D S D` rejected; editor UI in 24 |
 | 2-site MMC | Y | Partial | 04/08/17 | Model, validation, and preview in 04; exchange rules in 08/17 |
-| 3-site KMC migration | Y | Partial | 04/08/16 | Model, path validation, and preview in 04; rules and dual-DOF intent in 08/16 |
+| 3-site KMC migration | Y | Partial | 04/08/16 | Model, path validation, and preview in 04; rules and KMC dual-DOF default in 08/16 |
 | 5-site interstitialcy | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; rules in 08 |
 | 7-site interstitialcy | Y | Partial | 04/08 | Model, path validation, and preview in 04; rules in 08 |
 | 5-site 2-species vehicle | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; unidirectional rules in 08 |

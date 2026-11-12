@@ -165,7 +165,9 @@ Stage caches default to one `Compile` call and are released on return. `Compilat
 caller-owned, thread-safe, bounded cache for repeated builds; Step 12 may keep one per build/session. There is
 no static or process-wide cache, because a long-lived cache across projects complicates invalidation and
 lifetime without a measured need. Cache entries are immutable, keyed by content hashes plus catalog/contract
-versions, and insertion order never affects output.
+versions, and insertion order never affects output. The rule cache key includes
+`ProjectHasher.ComputeSimulationSelection`, so adding or removing a simulation's transition reference
+invalidates the rules; runtime-only simulation edits rebuild the encoding defaults but not the rules.
 
 ## Model signature versus parameterization signature
 
@@ -180,9 +182,11 @@ does not.
 ## Derived solver intent
 
 `CompiledSolverIntent` carries `Kind`, `UsePrerun = Kmc && PreRunMcsp > 0`, and
-`UseDualDofCorrection = Kmc && any active collection generates an automatic inverse rule`. The compiler does
-not compose `SolverJobFlags`: Step 10 copies the intent to `JobDescriptor`, and Step 11 calls
-`SolverJobFlagsMapper.Compose`. The project JSON never stores derived bits.
+`UseDualDofCorrection = Kind == Kmc` by default. The default matches the original job builder, which sets the
+flag for every KMC job; Step 10 may clear it only through a documented and tested selection-optimizer rule.
+The compiler does not infer the flag from the mechanism shape. The compiler does not compose `SolverJobFlags`:
+Step 10 copies the intent to `JobDescriptor`, and Step 11 calls `SolverJobFlagsMapper.Compose`. The project
+JSON never stores derived bits.
 
 ## Tracker definitions versus state
 

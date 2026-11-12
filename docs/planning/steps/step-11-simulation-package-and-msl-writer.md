@@ -107,7 +107,7 @@ pull-based iterator.
 
 - MessagePack maps with snake_case keys, Zstd level 3 (fast) or 9 (`--compact`).
 - The model payload is the canonical `ParameterizedModel` from `Mocassin.Contracts` (compiled geometry/rules
-  plus energy and frequency values, with the parameterization signature).
+  plus energy and frequency values, with the parameterization signature and the Step 08 `model_signature`).
 - The lattice payload is `{format_version, lattice_size, position_count, lattice}`.
 - The job payload is the full `JobDescriptor`/settings (including optimizers) plus the model/simulation index.
   Its `flags` word is a `SolverJobFlags` value in `Mocassin.Contracts` carrying the authored flags plus the

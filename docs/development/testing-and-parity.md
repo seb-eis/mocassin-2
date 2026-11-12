@@ -76,7 +76,7 @@ PR-fast tests must not depend on nightly-only assets.
 - Determinism tests compile twice and compare canonical JSON and signatures; Ubuntu is automatic, Windows and
   macOS are manual golden gates.
 - Cache tests use a recording cache and edit one domain at a time to prove the invalidation graph without
-  asserting private call counts.
+  asserting private call counts, including active-transition-set changes versus runtime-settings-only edits.
 - Cancellation and performance tests cover the ceria sample (`< 1 s`) and a 10k-position model
   (`< 30 s`, `< 2 GiB`).
 - Every `CMP` code has an emission test, catalog completeness check, and documentation-drift check.

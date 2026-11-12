@@ -54,8 +54,8 @@ public interface IModelCompiler
 
 ### Resolve and structure
 
-- Resolve the catalog setting with `SpaceGroupReferenceResolver`, the cell with `CellGeometry.TryCreate`, and
-  the encoder with `UnitCellVectorEncoder.TryCreate`.
+- Resolve the catalog setting with `IStructurePreviewService.TryResolve`, the cell with
+  `CellGeometry.TryCreate`, and the encoder with `UnitCellVectorEncoder.TryCreate`.
 - Reference sites are sorted by `CellSiteId` before encoding, so `ExpandedSite.ReferenceSiteIndex` is stable.
   Particle index `0` is void; authored particles are sorted by `ParticleId`.
 - The canonical P1 order remains the Step 02 contract: expand, trim, exact-grid deduplicate, sort by
@@ -83,6 +83,8 @@ public interface IModelCompiler
 - Call `ClusterReduction.Reduce` with the ordered full geometry and allowed particle indices. The reducer
   owns `G0`, `Gset`, `Gseq`, induced permutations, canonical tuples, 6-bit codes, and expansion maps.
 - The center factor is mandatory; raw combinations are `centerParticleCount × Π(surroundingSetSize)`.
+  Compute the raw count with saturating `long` arithmetic and emit `CMP006` before calling the reducer when it
+  exceeds the configured limit or the reducer's fixed 1,000,000-tuple ceiling.
 - Occupation codes use 6 bits per site, site 0 least significant, up to 9 sites. Particle indices must be
   `<= 63`.
 - One cluster table is shared by symmetry-equivalent centers. It is keyed by the stable cluster energy ID and
@@ -93,8 +95,11 @@ public interface IModelCompiler
 ### Transition directions and rules
 
 - `TransitionPathResolver` resolves the authored reference path to canonical `(P, cell offset)` positions.
-- Expand every setting operation, re-resolve, deduplicate exact relative encodings, and reduce by the start
-  position's `G0`. The canonical representative is the lexicographically smallest relative path.
+  Point/path expansion uses the additive public `TryResolvePoint`/`TryResolvePath` API; the compiler does not
+  duplicate the private nearest-image or tie logic.
+- Expand every setting operation, re-resolve with `TryResolvePath`, deduplicate exact relative encodings, and
+  reduce by the start position's `G0`. The canonical representative is the lexicographically smallest relative
+  path.
 - A direction stores the representative start P, relative path encodings, per-node fractional movement, the
   Cartesian path vector/length, and an inverse flag. The direction does not store a scalar field factor; the
   rule carries the charge-weighted scalar used by Step 15.
@@ -116,9 +121,11 @@ public interface IModelCompiler
   by templates and inspection, not table indices.
 - Default attempt frequency is `1e13 Hz`; Step 09 supplies parameterized values. Static S2 corrections are
   deferred; v1 stores `null`/NaN and uses the dynamic S2 path.
-- The field convention is documented in the Step 08 page: the rule scalar is the charge-weighted movement
-  projected onto the path vector, so a single charge reproduces `-0.5 q E·Δx/kT`. Non-collinear mechanisms
-  are a documented projection approximation.
+- The field convention converts each fractional `movement_i` to Cartesian with the validated cell geometry,
+  sums the Cartesian movements into `pathVector`, and computes
+  `fieldFactor = Σ_i q_i * (cartesianMovement_i · pathVector) / |pathVector|²`. This reduces to `q` for a
+  single charge and carries the correct vacancy sign. Non-collinear mechanisms are a documented projection
+  approximation.
 
 ### Simulation encoding
 
@@ -134,9 +141,9 @@ public interface IModelCompiler
 - MMC `interaction_range` is the `[maxCellA, maxCellB, maxCellC, 0]` local-update cube derived from the
   maximum cutoff and interplanar spacings.
 - `CompiledSolverIntent` carries `Kind`, `UsePrerun = Kmc && PreRunMcsp > 0`, and
-  `UseDualDofCorrection = Kmc && any active collection generates an automatic inverse rule`. Step 10 copies it
-  to `JobDescriptor`; Step 11 composes the `SolverJobFlags` word. `Mocassin.Compilation` never references
-  `SolverJobFlags`.
+  `UseDualDofCorrection = Kind == Kmc` by default, matching the original job builder. Step 10 may clear it only
+  through a documented and tested selection-optimizer rule. Step 10 copies the intent to `JobDescriptor`;
+  Step 11 composes the `SolverJobFlags` word. `Mocassin.Compilation` never references `SolverJobFlags`.
 
 ## Compiled model and package boundary
 
@@ -170,8 +177,8 @@ ParameterizedModel.Signature
   cache state.
 - The projection follows ADR 0010: arrays in fixed field order, fixed-width integers, float64, normalized
   `-0.0`, domain separation, no compression/timestamps. `Mocassin.Compilation` hand-codes it because it
-  cannot reference `Mocassin.Contracts`; the `compiledModel` manifest entry is added with the Step 08
-  signature feature and reused by Step 11 for stored-payload and cross-language checks.
+  cannot reference `Mocassin.Contracts`; Step 08 finalizes the existing `signatures.model` manifest entry,
+  which Step 11 reuses for stored-payload and cross-language checks.
 - Step 09 treats the model signature as opaque and computes the parameterization signature in
   `Mocassin.Contracts`. `models.signature` is the parameterization signature; `models.payload.model_signature`
   is the Step 08 signature.
@@ -181,11 +188,13 @@ ParameterizedModel.Signature
 - Default stage caches are per compilation and released on return. `CompilationOptions.Cache` allows a
   caller-owned, thread-safe, bounded cache for repeated builds; there is no static/process-wide cache.
 - Keys include catalog version/SHA-256, symmetry contract version, and stage-specific content hashes. Pair/
-  cluster work keys on energy + structure hashes; rules key on transition closures + structure; encoding keys
-  on rules + simulations.
+  cluster work keys on energy + structure hashes; rules key on the active-transition-set hash + transition
+  closures + structure; encoding keys on rules + simulations. `ProjectHasher.ComputeSimulationSelection`
+  hashes the referenced simulation transition set so adding/removing a reference invalidates rules.
 - Editing structure invalidates everything; editing energy rebuilds environments/pairs/clusters/encoding but
-  reuses structure and rules; editing transitions rebuilds rules/encoding but reuses geometry; editing
-  simulations rebuilds encoding only. Tests use a recording cache to prove the graph.
+  reuses structure and rules; editing transitions rebuilds rules/encoding but reuses geometry; changing a
+  simulation's active-transition set rebuilds rules/encoding, while changing runtime settings only rebuilds the
+  encoding defaults. Tests use a recording cache to prove the graph.
 - Output order is fixed independently of parallelism, cache insertion, or hash iteration. No parallel
   floating-point reductions. Field factors are quantized before persistence/signing.
 - Same project/options/versions produce byte-identical `CompiledModelJson` and the same signature across runs
