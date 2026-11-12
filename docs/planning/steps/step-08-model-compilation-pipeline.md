@@ -15,7 +15,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for review
+- **Design review:** Ready for review at `36fbba58182b2e769a6d59b3228a60021344248d` — [review record](../reviews/step-08.md)
 - **Last updated:** 2026-11-12
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
