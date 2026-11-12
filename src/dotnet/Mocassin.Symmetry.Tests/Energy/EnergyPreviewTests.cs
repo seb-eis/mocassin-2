@@ -146,6 +146,60 @@ public sealed class EnergyPreviewTests
     }
 
     [Fact]
+    public void PeriodicImagesAtEqualDistanceLinkToTheirTrueInverse()
+    {
+        var particle = new Particle(
+            ParticleId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-2a2b3c4d8f20")),
+            "P0",
+            "P0",
+            new ChargeElementary(0.0),
+            false);
+        var particleSet = new ParticleSet(
+            ParticleSetId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-2a2b3c4d8f30")),
+            "Set",
+            [particle.Id]);
+        var firstSiteId = CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-2a2b3c4d8f10"));
+        var secondSiteId = CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-2a2b3c4d8f11"));
+        var model = new ModelDefinition
+        {
+            Particles = [particle],
+            ParticleSets = [particleSet],
+            Structure = new StructureModel(
+                "P1 equal-distance fixture",
+                new SpaceGroupRef(1, AxisSetting.None, OriginChoice.None),
+                new CellParameters(
+                    new LengthAngstrom(10.0),
+                    new LengthAngstrom(10.0),
+                    new LengthAngstrom(10.0),
+                    new AngleDegrees(90.0),
+                    new AngleDegrees(90.0),
+                    new AngleDegrees(90.0)),
+                [
+                    new CellSite(firstSiteId, "A", new Fractional3(0.0, 0.0, 0.0), particleSet.Id, SiteStability.Stable),
+                    new CellSite(secondSiteId, "B", new Fractional3(0.5, 0.1, 0.2), particleSet.Id, SiteStability.Stable),
+                ],
+                []),
+            StableEnvironment = new StableEnvironment(new LengthAngstrom(6.0), []),
+        };
+
+        var pairs = service.TryCreatePairPreview(model, 1, 1, 1, out var diagnostics);
+
+        Assert.NotNull(pairs);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        var previews = pairs.GetValueOrDefault();
+        var byGeometryId = previews.ToDictionary(static pair => pair.GeometryId, StringComparer.Ordinal);
+        Assert.All(
+            previews.Where(static pair => pair.IsChiral),
+            pair =>
+            {
+                Assert.NotNull(pair.ChiralPartnerGeometryId);
+                Assert.True(byGeometryId.TryGetValue(pair.ChiralPartnerGeometryId!, out var partner));
+                Assert.Equal(pair.GeometryId, partner.ChiralPartnerGeometryId);
+                Assert.Equal(pair.EnergyId, partner.EnergyId);
+            });
+    }
+
+    [Fact]
     public void InvalidModelReturnsNullWithoutThrowing()
     {
         var model = CreateModel() with

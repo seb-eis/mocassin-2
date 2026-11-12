@@ -106,11 +106,15 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         for (var index = 0; index < candidates.Count; index++)
         {
             var candidate = candidates[index];
+            var representative = candidate.Shell.Representative;
             var key = new DirectedKey(
                 candidate.Center.Id,
                 candidate.CenterP,
                 candidate.Partner.Id,
-                candidate.Shell.Representative.P,
+                representative.P,
+                representative.A,
+                representative.B,
+                representative.C,
                 candidate.Shell.DistanceBucketFm);
             if (!byDirectedKey.TryGetValue(key, out var list))
             {
@@ -125,11 +129,15 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         for (var index = 0; index < candidates.Count; index++)
         {
             var candidate = candidates[index];
+            var representative = candidate.Shell.Representative;
             var inverse = new DirectedKey(
                 candidate.Partner.Id,
-                candidate.Shell.Representative.P,
+                representative.P,
                 candidate.Center.Id,
                 candidate.CenterP,
+                -representative.A,
+                -representative.B,
+                -representative.C,
                 candidate.Shell.DistanceBucketFm);
             if (!byDirectedKey.TryGetValue(inverse, out var matches))
             {
@@ -330,5 +338,8 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         int CenterP,
         CellSiteId PartnerSiteId,
         int PartnerP,
+        int OffsetA,
+        int OffsetB,
+        int OffsetC,
         int DistanceBucketFm);
 }

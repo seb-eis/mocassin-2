@@ -14,7 +14,9 @@ namespace Mocassin.Symmetry.Reduction;
 /// <param name="DistanceAngstrom">The representative distance in ångström.</param>
 /// <param name="Representative">The canonical representative image encoding.</param>
 /// <param name="EquivalentImages">Every equivalent image in the shell, sorted canonically.</param>
-/// <param name="ChiralPartnerIndex">The linked inverse shell index, or <see langword="null"/> when not chiral.</param>
+/// <param name="ChiralPartnerIndex">The linked inverse shell index when the inverse shell is present in this centre
+/// reduction, or <see langword="null"/> when no inverse shell is present. Use <see cref="IsChiral"/> for the orbit
+/// property.</param>
 public sealed record PairShell(
     int DistanceBucketFm,
     double DistanceAngstrom,

@@ -36,9 +36,12 @@ test, tool, and sample file carries `SPDX-License-Identifier: MIT`.
 **Post-step correction (2026-11-12):** The pair-interaction preview now derives chirality from both directed
 centre orbits. It previously linked a forward and reverse candidate by key alone, which marked achiral
 high-symmetry pairs such as ceria Ce–O as chiral. The correction adds `PairShell.IsChiral` (an additive public
-property), requires both directions to see the inverse as a distinct orbit, and adds the
-`EnergyPreviewTests.CeriaHighSymmetryPairsAreAchiral` regression test. This was found by the Phase B
-cross-cutting architecture review (XC-02 F-01); no energy format, schema, or parameterization change follows.
+property), requires both directions to see the inverse as a distinct orbit, and includes the periodic offset in
+the reverse-pair key so equal-distance images link to their true inverse. Regression tests are
+`EnergyPreviewTests.CeriaHighSymmetryPairsAreAchiral` and
+`EnergyPreviewTests.PeriodicImagesAtEqualDistanceLinkToTheirTrueInverse`. This was found by the Phase B
+cross-cutting architecture review (XC-02 F-01 and round-2 R2-F1); no energy format, schema, or parameterization
+change follows.
 
 ## Goal
 Let a user define the interaction model that the compiler will sample into pair and cluster tables. The
