@@ -388,8 +388,8 @@ and must not consume the known-wrong chiral preview metadata.
 | F-02 | Fixed | Phase B orchestrator | `62e1072`, `ddf192e` — manifest status/notes and fixture README updated |
 | F-03 | Fixed | Phase B orchestrator | `62e1072` — planning-index status table now says Phase B complete / Step 08 next |
 | F-04 | Fixed | Phase B orchestrator | `62e1072` — design-decisions page lists all five public hash entry points |
-| F-05 | Accepted note — follow-up | Implementor/planner | — — add an explicit `Mocassin.Symmetry` reference or document the intentional transitive use |
-| F-06 | Accepted note — follow-up | Documentation owner | — — fold the Phase B sections into `architecture.md` or link the compilation-pipeline page |
+| F-05 | Accepted note — human owner 2026-11-12 | Implementor/planner | Follow-up: add an explicit `Mocassin.Symmetry` reference or document the intentional transitive use |
+| F-06 | Accepted note — human owner 2026-11-12 | Documentation owner | Follow-up: fold the Phase B sections into `architecture.md` or link the compilation-pipeline page |
 
 The F-01 correction makes chirality a symmetric pair property: `PairShell.IsChiral` records the inverse orbit
 test, and the sampler requires both directed centre orbits to see the inverse as distinct before linking a
@@ -411,12 +411,12 @@ are recorded as accepted notes with Step 08/30 follow-ups; they are not Blocker/
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Sebastian Eisele
+Date: 2026-11-12
 
 ## Round 2
 
@@ -1002,7 +1002,7 @@ not run and are outside this review.
 
 | Finding | Status | Owner | Follow-up |
 | --- | --- | --- | --- |
-| R4-F1 | Accepted note | Phase B orchestrator / Step 08 | The reciprocal-only rule is documented and probed; add a direct barium-zirconate assertion that the 12 one-way H–H matches stay achiral/partnerless, and document the lexicographic tie-break if multiple reciprocal matches ever occur. |
+| R4-F1 | Accepted note — human owner 2026-11-12 | Phase B orchestrator / Step 08 | The reciprocal-only rule is documented and probed; add a direct barium-zirconate assertion that the 12 one-way H–H matches stay achiral/partnerless, and document the lexicographic tie-break if multiple reciprocal matches ever occur. |
 
-No Blocker or Major remains. XC-02 round 4 is **Passed with notes**; the Phase B gate awaits human-owner
-acceptance alongside XC-01 and XC-03.
+No Blocker or Major remains. XC-02 round 4 is **Passed with notes**, accepted by the human owner on
+2026-11-12 alongside XC-01 and XC-03.

@@ -308,24 +308,24 @@ requires the human owner to accept this verdict alongside XC-02 and XC-03.
 | XC01-F1 | Fixed | Orchestrator | `62e1072` — Step 00 dashboard and step page now record `Passed with notes`; the audit-request field is left as historical text and its verdict remains authoritative |
 | XC01-F2 | Fixed | Human owner | `ea453f6` — approved by Sebastian Eisele on 2026-11-12; the Step 07 audit and 2026-11-11 policy-update review both accept `Passed with notes` |
 | XC01-F3 | Fixed | Tooling | `62e1072`, `ddf192e` — SPDX headers added to all tool scripts and the licence checker now scans `tools/**/*.{py,sh,ps1}` (345 files) |
-| XC01-F4 | Open — planner | Planner | — — add an `Approval summary` section to the cross-cutting template/records or state where the cumulative checkpoint report is retained |
+| XC01-F4 | Accepted — human owner 2026-11-12 | Planner | Follow-up: add an `Approval summary` section to the cross-cutting template/records or state where the cumulative checkpoint report is retained |
 | XC01-F5 | Fixed | Human owner | Annotated tags `milestone-m0`–`milestone-m3` created and pushed on 2026-11-12 on the existing step merge commits `47a9a90`, `7b4a994`, `dbf5691`, and `3ed558a` |
 | XC01-F6 | Fixed | Orchestrator | `62e1072` — `contracts/manifest.json` status is `step-07` with a validation-v1 note |
-| XC01-F7 | Open — security/tooling | Security/tooling owner | — — pin workflow actions to commit SHAs or record an accepted exception with a review date |
-| XC01-F8 | Open — security/tooling | Security/tooling owner | — — enable Dependabot or record a named alert owner and review cadence |
-| XC01-F9 | Open — CI owner | Planner/CI owner | — — align the local contracts gate with the CI contracts job, or document the intentional split |
-| XC01-F10 | Accepted note | Step agent/planner | — — `merge_candidate` precision is documented by audit note N1; no action required for the gate |
+| XC01-F7 | Accepted — human owner 2026-11-12 | Security/tooling owner | Follow-up: pin workflow actions to commit SHAs or record an accepted exception with a review date |
+| XC01-F8 | Accepted — human owner 2026-11-12 | Security/tooling owner | Follow-up: enable Dependabot or record a named alert owner and review cadence |
+| XC01-F9 | Accepted — human owner 2026-11-12 | Planner/CI owner | Follow-up: align the local contracts gate with the CI contracts job, or document the intentional split |
+| XC01-F10 | Accepted note — human owner 2026-11-12 | Step agent/planner | `merge_candidate` precision is documented by audit note N1; no action required for the gate |
 | XC01-F11 | Fixed | Orchestrator | `62e1072` — `status.md` now carries the D-ID disposition mapping |
 | XC01-F12 | Fixed | Planner | `62e1072` — `AGENTS.md` clippy command now uses `--workspace --all-targets` |
 
-Final substantive checkpoint after the XC-02 round-3 remediation: `84781f8a4ea3ef64fedaee59d513e26de604ee2c` (this record’s scope is unchanged). XC-01 found no Blocker or Major; the verdict remains **Passed with notes** and no re-review is required. The human owner accepted XC01-F2 on 2026-11-12 (`ea453f6`) and closed XC01-F5 on 2026-11-12 by creating and pushing the four annotated milestone tags; the remaining open Minors are still owner/planner follow-ups.
+Final substantive checkpoint after the XC-02 round-3 remediation: `84781f8a4ea3ef64fedaee59d513e26de604ee2c` (this record’s scope is unchanged). XC-01 found no Blocker or Major; the verdict remains **Passed with notes** and no re-review is required. The human owner accepted XC01-F2 on 2026-11-12 (`ea453f6`), closed XC01-F5 by creating and pushing the four annotated milestone tags, and accepted the remaining Minor/Note follow-ups on 2026-11-12.
 
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Sebastian Eisele
+Date: 2026-11-12
