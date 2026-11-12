@@ -358,7 +358,7 @@ Answer the three questions explicitly; a missing or unrecorded answer is a findi
 
 ## Record state
 
-**State:** Fixes required — round 3 (R3-F1 Major, R3-F2 Minor)
+**State:** Re-review required — round 3 (R3-F1 Major, R3-F2 Minor)
 
 `Re-review required` is a record state, not a verdict. Round 2 was performed and still requires fixes.
 
@@ -760,3 +760,31 @@ link the inverse by orbit membership, or explicitly revise the Step 05 §5 / Ste
 contract for reduced geometries whose inverse is not one-to-one (including same-site multi-image pairs), and
 add P4mm and barium-zirconate regression coverage. Step 08 must not consume the chiral metadata as
 authoritative until R3-F1 is fixed or the limitation is explicitly recorded.
+
+## Round 3 remediation
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| R3-F1 | Fixed | Phase B orchestrator | `84781f8` — the inverse is indexed over every equivalent shell image and only reciprocal orbit-inverse matches are linked |
+| R3-F2 | Fixed | Phase B orchestrator | `84781f8` — P4mm and barium-zirconate regression tests assert reciprocal partners and shared `EnergyId` |
+
+The sampler now indexes all `PairShell.EquivalentImages`, so a forward shell finds its inverse even when the
+inverse is a non-representative image of the reverse shell. A link is recorded only when each direction is in
+the other's orbit-match set; the barium-zirconate H–H cycle therefore keeps 24 reciprocal chiral directions
+(12 pairs) and leaves the 12 one-way orbit matches achiral, matching the original reciprocal pairing. The
+reciprocal-only rule is stated in Step 05 §5, Step 08 §4, `docs/physics/energies.md`, and
+`docs/reference/energy.md`. The P4mm fixture now links its 2 directions (was 0), ceria remains 0 chiral, and
+the P1 equal-distance fixture remains 2 reciprocal pairs.
+
+## Round 4 request
+
+| Field | Value |
+| --- | --- |
+| Target commit | `84781f8a4ea3ef64fedaee59d513e26de604ee2c` (Phase B checkpoint after R3-F1 and R3-F2 remediation) |
+| Requested focus | Re-review R3-F1 and R3-F2, the reciprocal-only rule, and the P4mm/barium-zirconate evidence; confirm no Blocker/Major remains; append a new round without altering rounds 1–3 |
+| Reviewer | — (fresh independent reviewer; fill name and date) |
+| Review date | — |
+
+The orchestrator fixed R3-F1 on the checkpoint branch. The design rule is explicit: a non-reciprocal
+orbit-inverse match is not a chiral pair and is left achiral. R3-F2 is covered by the new P4mm and
+barium-zirconate tests. No earlier round text was changed.
