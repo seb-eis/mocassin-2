@@ -222,7 +222,20 @@ Follow-up step: Step 30 (tutorials, CDN/offline assumptions, and final publicati
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| DOC-01 | Open — Step 30 | Documentation owner | — — add the planned Phase B tutorials or relabel the index until Step 30 |
+| DOC-02 | Fixed | Orchestrator | `62e1072` — parity-matrix documentation/CI/test rows updated to `Implemented`/`Partial` with evidence steps |
+| DOC-03 | Open — Step 30 | Documentation owner | — — replace the invalid `viewSettings` envelope example and schema/seed placeholders |
+| DOC-04 | Partial — Step 30 | Documentation owner | `62e1072` — architecture/status text partly refreshed; remaining future-tense pages stay a Step 30 follow-up |
+| DOC-05 | Open — Step 30/07 follow-up | Documentation owner | — — complete the `SIM012` title, add path/hint columns or record the deviation, and align the drift-check claim |
+| DOC-06 | Open — Step 30 | Documentation owner | — — point the API nav at the placeholder indexes or make it conditional |
+| DOC-07 | Open — Step 30 | Documentation owner | — — document the KaTeX CDN dependency and offline deferral |
+| DOC-08 | Fixed (documented prerequisite) | Tooling | `62e1072` — `tools/docs/README.md` now requires a prior Release build; automatic detection remains optional |
+| DOC-09 | Fixed | Tooling | `62e1072` — PowerShell DocFX now passes `--warningsAsErrors` |
+| DOC-10 | Note — confirm before publication | Documentation owner | — — confirm or exclude `docs/opencode/` from the published site |
+| DOC-11 | Note — publication follow-up | Documentation owner | — — verify public repository/schema links before launch |
+| DOC-12 | Note — Step 22 | Documentation owner | — — keep the Python API placeholder until Step 22 |
+
+Final checkpoint after remediation: `ddf192e7e6fc9c3f51a2d9924913c01fc20ca600`. XC-03 found no Blocker or Major; the verdict remains **Passed with notes** and no re-review is required. The human owner accepts the documentation notes; the open items above are Step 30/22 follow-ups.
 
 ## Human approval
 

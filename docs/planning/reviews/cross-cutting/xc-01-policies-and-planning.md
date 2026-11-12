@@ -305,7 +305,20 @@ requires the human owner to accept this verdict alongside XC-02 and XC-03.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| XC01-F1 | Fixed | Orchestrator | `62e1072` — Step 00 dashboard and step page now record `Passed with notes`; the audit-request field is left as historical text and its verdict remains authoritative |
+| XC01-F2 | Open — human owner | Human owner | — — record the owner/date and accepted verdict in the Step 07 audit and 2026-11-11 policy-update review |
+| XC01-F3 | Fixed | Tooling | `62e1072`, `ddf192e` — SPDX headers added to all tool scripts and the licence checker now scans `tools/**/*.{py,sh,ps1}` (345 files) |
+| XC01-F4 | Open — planner | Planner | — — add an `Approval summary` section to the cross-cutting template/records or state where the cumulative checkpoint report is retained |
+| XC01-F5 | Open — owner decision | Human owner | — — decide whether to create `milestone-m0`–`m3` on the existing milestone commits or record a deferral; never move step tags |
+| XC01-F6 | Fixed | Orchestrator | `62e1072` — `contracts/manifest.json` status is `step-07` with a validation-v1 note |
+| XC01-F7 | Open — security/tooling | Security/tooling owner | — — pin workflow actions to commit SHAs or record an accepted exception with a review date |
+| XC01-F8 | Open — security/tooling | Security/tooling owner | — — enable Dependabot or record a named alert owner and review cadence |
+| XC01-F9 | Open — CI owner | Planner/CI owner | — — align the local contracts gate with the CI contracts job, or document the intentional split |
+| XC01-F10 | Accepted note | Step agent/planner | — — `merge_candidate` precision is documented by audit note N1; no action required for the gate |
+| XC01-F11 | Fixed | Orchestrator | `62e1072` — `status.md` now carries the D-ID disposition mapping |
+| XC01-F12 | Fixed | Planner | `62e1072` — `AGENTS.md` clippy command now uses `--workspace --all-targets` |
+
+Final checkpoint after remediation: `ddf192e7e6fc9c3f51a2d9924913c01fc20ca600`. XC-01 found no Blocker or Major; the verdict remains **Passed with notes** and no re-review is required. The human owner must accept the notes and decide XC01-F2 and XC01-F5; the remaining open Minors are tracked above.
 
 ## Human approval
 

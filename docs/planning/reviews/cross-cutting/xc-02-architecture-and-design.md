@@ -358,7 +358,7 @@ Answer the three questions explicitly; a missing or unrecorded answer is a findi
 
 ## Record state
 
-**State:** Fixes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -384,7 +384,29 @@ and must not consume the known-wrong chiral preview metadata.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F-01 | Fixed | Phase B orchestrator | `8d61e71` (fix and ceria regression test), `4a98ad8` (checkpoint integration), `ddf192e` (final checkpoint) |
+| F-02 | Fixed | Phase B orchestrator | `62e1072`, `ddf192e` — manifest status/notes and fixture README updated |
+| F-03 | Fixed | Phase B orchestrator | `62e1072` — planning-index status table now says Phase B complete / Step 08 next |
+| F-04 | Fixed | Phase B orchestrator | `62e1072` — design-decisions page lists all five public hash entry points |
+| F-05 | Accepted note — follow-up | Implementor/planner | — — add an explicit `Mocassin.Symmetry` reference or document the intentional transitive use |
+| F-06 | Accepted note — follow-up | Documentation owner | — — fold the Phase B sections into `architecture.md` or link the compilation-pipeline page |
+
+The F-01 correction makes chirality a symmetric pair property: `PairShell.IsChiral` records the inverse orbit
+test, and the sampler requires both directed centre orbits to see the inverse as distinct before linking a
+chiral partner. Achiral pairs keep `EnergyId == GeometryId`. The Step 05/08 pages and physics/reference docs
+state the same rule.
+
+## Round 2 request
+
+| Field | Value |
+| --- | --- |
+| Target commit | `ddf192e7e6fc9c3f51a2d9924913c01fc20ca600` (Phase B checkpoint after F-01 and F-02–F-04 remediation; parent of this request commit) |
+| Requested focus | Re-review F-01 and its regression test; confirm no Blocker/Major remains; append a new round without altering round 1 |
+| Reviewer | — (fresh independent reviewer; fill name and date) |
+| Review date | — |
+
+The orchestrator fixed F-01 on `fix/energy-pair-chirality` and integrated it into the checkpoint. F-05 and F-06
+are recorded as accepted notes with Step 08/30 follow-ups; they are not Blocker/Major findings.
 
 ## Human approval
 
