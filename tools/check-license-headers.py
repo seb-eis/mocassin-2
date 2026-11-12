@@ -9,7 +9,14 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
-SOURCE_GLOBS = ("src/dotnet/**/*.cs", "src/rust/**/*.rs", "src/python/**/*.py")
+SOURCE_GLOBS = (
+    "src/dotnet/**/*.cs",
+    "src/rust/**/*.rs",
+    "src/python/**/*.py",
+    "tools/**/*.py",
+    "tools/**/*.sh",
+    "tools/**/*.ps1",
+)
 SKIP_PARTS = {"bin", "obj", "target", "build", "dist", ".venv", "venv"}
 
 
@@ -29,8 +36,10 @@ def main() -> int:
     """Report source files with a missing or wrong SPDX identifier."""
     missing: list[Path] = []
     for path in source_files():
-        first_line = path.read_text(encoding="utf-8").splitlines()[0] if path.stat().st_size else ""
-        if "SPDX-License-Identifier: MIT" not in first_line:
+        header = "\n".join(
+            path.read_text(encoding="utf-8").splitlines()[:5]
+        ) if path.stat().st_size else ""
+        if "SPDX-License-Identifier: MIT" not in header:
             missing.append(path.relative_to(ROOT))
 
     if missing:
