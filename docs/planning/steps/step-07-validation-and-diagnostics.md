@@ -12,7 +12,7 @@ headless `mocassin validate` command.
 - **Step CI:** [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Requested — [audit record](../audits/step-07.md) (Ready for audit)
+- **Audit:** Passed with notes at `ccd0e55` — [audit record](../audits/step-07.md) `d66f34f` (rounds 1–2; F1–F3 resolved; N1–N4 acknowledged)
 - **Design review:** Ready for implementation at `31b53e8` — [review record](../reviews/step-07.md) `2d01f3e` (rounds 1–4; no Blocker/Major remaining; human approval 2026-11-11)
 - **Last updated:** 2026-11-12
 

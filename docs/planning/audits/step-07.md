@@ -217,7 +217,12 @@ Follow-up issue/step: Round-1 F1–F3 are resolved at `ccd0e55`; N1–N4 are ack
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F1 — statistics wording | Resolved: step page now distinguishes always-run budget estimates from the opt-in full statistics record | Step agent | `ccd0e55` |
+| F2 — closeout row | Resolved: green closeout CI, squash `4d0fa53`, and `fix-audit-findings` row recorded | Step agent | `ccd0e55` |
+| F3 — missing test rows | Resolved: determinism, cancellation, mixed `SIM003`/`SIM039`, exact-cutoff `ENM018`, and failure-path no-mutation tests added | Step agent | `ccd0e55` |
+| N1–N2 — docs-only tail | Acknowledged; closeout evidence checker passes | Step agent | `305521a` |
+| N3 — “materialized” wording | Acknowledged as informational; §12 states the construction/withholding distinction correctly | Step agent | — |
+| N4 — direct OS-denied CLI test | Acknowledged as residual coverage note; pipeline `TooLarge`/`Io` and mapping tests cover the path indirectly | Step agent | — |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
