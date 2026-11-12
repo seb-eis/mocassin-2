@@ -211,7 +211,7 @@ auditor's findings, evidence, or verdict.
 - [ ] Waived
 
 Follow-up owner: Step 07 step agent / human owner
-Follow-up issue/step: Accept or fix F1–F3 (Minor) before merge; N1–N2 are acknowledged notes. GUI navigation remains Steps 24–25 and the full CLI surface remains Step 12.
+Follow-up issue/step: Round-1 F1–F3 are resolved at `ccd0e55`; N1–N4 are acknowledged informational notes. Proceed to the merge approval request with the §3.12 cumulative report. GUI navigation remains Steps 24–25 and the full CLI surface remains Step 12.
 
 ## Resolution status
 
@@ -300,3 +300,73 @@ no-mutation) are not delivered. N1–N2 are process/evidence notes. No Blocker o
 
 **Passed with notes.** The step is independently verified at `4d0fa53`; only the three Minor findings and
 two Notes above remain, and the human owner must explicitly accept them.
+
+### Audit round 2
+
+#### Independence and frozen state
+
+Same independent audit agent as round 1; I remained read-only between rounds, did not implement or edit the
+fixes, and have no shared conversation with the planner or implementor. Worktree `/workspace/mocassin`,
+branch `step/07-validation-and-diagnostics`, `HEAD` `305521a` (docs-only evidence/status update), clean.
+The new frozen code commit is `ccd0e55d56cdffbb48c735a1b2829a990271fb23` (fix squash:
+`feature/step-07-validation-and-diagnostics/fix-audit-findings`). `git diff --name-status
+ccd0e55..305521a` lists only the audit record, closeout evidence, dashboard, and step page; no code, test,
+contract, fixture, or configuration changed after the freeze. Round-1 reviewer text was left intact; the
+step agent updated only its own request fields and known notes. `main` is still `5b1eb74`, the branch point
+and recorded freeze SHA.
+
+#### Commands and results
+
+`./tools/verify.sh all --require` passed again with 0 warnings/0 errors and 898 .NET tests (Packages 105,
+Core 564, Symmetry 217, Cli 7, Architecture 1, App/Results/Compilation/Contracts 1 each), plus Rust, Python,
+DocFX (249 models, 0 warnings), rustdoc, Zensical strict, contract freshness (18 files), structure, API
+compatibility, SPDX (321 files), secret scan (660 files), NuGet licence/vulnerability, and cargo-deny gates.
+`python tools/check_closeout_evidence.py docs/planning/closeout/step-07.json` → `Closeout evidence: OK`;
+`python tools/check_process_consistency.py` → OK; `python tools/check_docs_links.py` → 147 files OK;
+`zensical build --strict` → no issues.
+
+GitHub Actions run `43291748042` is `CI`/`workflow_dispatch`, `completed/success`, with
+`head_sha=ccd0e55d56cdffbb48c735a1b2829a990271fb23` on `step/07-validation-and-diagnostics`; the .NET,
+Public API compatibility, Contracts and policy, and Detect changes jobs succeeded, while Python and Rust
+were path-filter skipped. The branch has exactly two runs: the original closeout `43115061587` at
+`4d0fa53` and this replacement at `ccd0e55`; no per-feature CI ran. The closeout evidence now names
+`ccd0e55`/run `43291748042` and its checker passes.
+
+#### Findings
+
+**F1 — resolved.** Step page §6 now states that the preview-based rule/memory estimates always run and that
+`SIM040`/`SIM041` do not depend on `--stats`; §9 correctly makes only the returned statistics record
+opt-in; §12 records the deviation. This matches `FeasibilityValidator`/`ModelStatisticsService`, which
+compute estimates unconditionally and return the statistics object only when `IncludeStatistics` is set.
+
+**F2 — resolved.** The `closeout` feature row now records the green closeout run and squash `4d0fa53`; the
+new `fix-audit-findings` row records `ccd0e55` and the replacement run. The dashboard and the step-page
+status block record the replacement closeout run.
+
+**F3 — resolved for the named rows.** `ValidationRobustnessTests` adds repeat-run determinism for
+diagnostics/summary/statistics, pre-cancelled validation, the mixed empty-transition/no-mobile-start
+`SIM003`/`SIM039` case, the exact `ENM018` cutoff-equality case (fixture hop is exactly 1.25 Å against a
+1.25 Å cutoff), and failure-path model/document-hash immutability. The new file is PR-fast, has an SPDX
+header, and the suite is green.
+
+Residual notes, none blocking:
+
+- **N3 — “Materialized” wording.** §6 and §9 now say the full statistics record is “materialized … only when
+  `--stats` is requested”; in the code the record is constructed in `ModelStatisticsService.TryCreate` on
+  every run and only withheld from the result when statistics are not requested. §12 states the actual
+  withholding correctly. Suggest changing “materialized” to “returned” in §6/§9.
+- **N4 — Direct CLI oversized/OS-denied coverage.** The five named robustness tests are present, but the
+  CLI still lacks a direct exit-`3` test for an oversized document or a true OS-denied read; the pipeline
+  `TooLarge`/`Io` load-failure tests and the CLI mapping cover the path indirectly. Acceptable follow-up.
+- **N1/N2 — still acknowledged.** The closeout evidence records `merge_candidate = ccd0e55` while the branch
+  head `305521a` and this record commit are documentation-only; the checker accepts the docs-only tail.
+  This record's parent will be `305521a`, not the frozen code commit, as in round 1 and Step 06 practice.
+
+No Blocker or Major finding, and no regression in the code, tests, contracts, documentation, parity,
+status, or CI evidence reviewed in round 1.
+
+#### Verdict
+
+**Passed with notes.** All three round-1 Minor findings are resolved at `ccd0e55`; only the informational
+N1–N4 notes remain. The replacement closeout CI is green at the new frozen commit, and the human owner must
+explicitly accept the residual notes before merge approval.
