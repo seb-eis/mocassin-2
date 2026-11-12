@@ -126,6 +126,26 @@ public sealed class EnergyPreviewTests
     }
 
     [Fact]
+    public void CeriaHighSymmetryPairsAreAchiral()
+    {
+        var project = ProjectJson.Deserialize(
+            File.ReadAllBytes(RepositoryPaths.Combine("samples", "ceria", "ceria.mocprj")));
+
+        var pairs = service.TryCreatePairPreview(project.Model, 1, 1, 1, out var diagnostics);
+
+        Assert.NotNull(pairs);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+        var previews = pairs.GetValueOrDefault();
+        Assert.NotEmpty(previews);
+        Assert.All(previews, static pair =>
+        {
+            Assert.False(pair.IsChiral);
+            Assert.Null(pair.ChiralPartnerGeometryId);
+            Assert.Equal(pair.GeometryId, pair.EnergyId);
+        });
+    }
+
+    [Fact]
     public void InvalidModelReturnsNullWithoutThrowing()
     {
         var model = CreateModel() with

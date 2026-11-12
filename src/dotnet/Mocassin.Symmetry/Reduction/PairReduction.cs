@@ -20,7 +20,18 @@ public sealed record PairShell(
     double DistanceAngstrom,
     Vector4I Representative,
     ImmutableArray<Vector4I> EquivalentImages,
-    int? ChiralPartnerIndex);
+    int? ChiralPartnerIndex)
+{
+    /// <summary>
+    /// Gets whether the inverse direction is outside the center-stabilizer orbit.
+    /// </summary>
+    /// <remarks>
+    /// This is an orbit property, not physical chirality. It is independent of whether the inverse shell is
+    /// present in the current reduction, which matters for structures where the inverse direction is not a
+    /// sampled shell around the same centre.
+    /// </remarks>
+    public bool IsChiral { get; init; }
+}
 
 /// <summary>
 /// The symmetry-reduced pair shells for one center position.
@@ -93,25 +104,31 @@ public static class PairReduction
                 .ThenBy(static image => image.B)
                 .ThenBy(static image => image.C)
                 .ToImmutableArray();
+            var displacement = Displacement(encoder, centerGrid, candidate.Offset);
+            var inverse = new GridFractional3(-displacement.A, -displacement.B, -displacement.C);
+            var isChiral = !IsSameOrbit(stabilizer, inverse, displacement);
             shells.Add(new PairShell(
                 candidate.DistanceBucketFm,
                 candidate.DistanceAngstrom,
                 candidate.Offset,
                 equivalents,
-                null));
+                null)
+            {
+                IsChiral = isChiral,
+            });
         }
 
         var withPartners = shells.ToArray();
         for (var index = 0; index < shells.Count; index++)
         {
             var shell = shells[index];
-            var displacement = Displacement(encoder, centerGrid, shell.Representative);
-            var inverse = new GridFractional3(-displacement.A, -displacement.B, -displacement.C);
-            if (IsSameOrbit(stabilizer, inverse, displacement))
+            if (!shell.IsChiral)
             {
                 continue;
             }
 
+            var displacement = Displacement(encoder, centerGrid, shell.Representative);
+            var inverse = new GridFractional3(-displacement.A, -displacement.B, -displacement.C);
             for (var partner = 0; partner < shells.Count; partner++)
             {
                 if (partner == index

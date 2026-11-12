@@ -162,8 +162,15 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
             var energyId = geometryId;
             string? partnerId = null;
             var isChiral = false;
-            if (partnerIndices[index] is { } partnerIndex)
+            if (candidate.AllowsChirality &&
+                candidate.Shell.IsChiral &&
+                partnerIndices[index] is { } partnerIndex &&
+                candidates[partnerIndex].AllowsChirality &&
+                candidates[partnerIndex].Shell.IsChiral)
             {
+                // Chirality is a property of the unordered pair: both directed centre orbits must see the
+                // inverse as distinct. If either centre maps the inverse onto the forward direction, the pair
+                // is symmetric and the two directions share no chiral link.
                 var partnerGeometryId = geometryIds[partnerIndex];
                 isChiral = true;
                 partnerId = partnerGeometryId;
@@ -234,7 +241,8 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
                         partner,
                         centerP,
                         shellIndex,
-                        shell));
+                        shell,
+                        AllowsChirality: true));
                 }
             }
         }
@@ -274,7 +282,8 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
                     partner,
                     centerP,
                     shellIndex,
-                    shell));
+                    shell,
+                    AllowsChirality: false));
             }
         }
     }
@@ -313,7 +322,8 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
         CellSite Partner,
         int CenterP,
         int ShellIndex,
-        PairShell Shell);
+        PairShell Shell,
+        bool AllowsChirality);
 
     private readonly record struct DirectedKey(
         CellSiteId CenterSiteId,
