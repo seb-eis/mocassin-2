@@ -9,7 +9,7 @@ headless `mocassin validate` command.
 
 - **Status:** In audit
 - **Step branch:** `step/07-validation-and-diagnostics`
-- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43115061587)
+- **Step CI:** [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042)
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Requested — [audit record](../audits/step-07.md) (Ready for audit)
@@ -25,6 +25,7 @@ headless `mocassin validate` command.
 | `validate-cli` | `feature/step-07-validation-and-diagnostics/validate-cli` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `0ca9bd0` |
 | `diagnostics-docs-and-fixtures` | `feature/step-07-validation-and-diagnostics/diagnostics-docs-and-fixtures` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts`, `docs` pass | — | `06568fe` |
 | `closeout` | `feature/step-07-validation-and-diagnostics/closeout` | Done | `verify.sh all`, closeout CI, `docs` pass | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43115061587) | `4d0fa53` |
+| `fix-audit-findings` | `feature/step-07-validation-and-diagnostics/fix-audit-findings` | Done | `verify.sh all`, replacement closeout CI, `docs` pass | [replacement green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042) | `ccd0e55` |
 
 ## Goal
 

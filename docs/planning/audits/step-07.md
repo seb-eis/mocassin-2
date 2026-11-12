@@ -15,11 +15,11 @@
 | Request owner | Step agent |
 | Orchestrator (step agent) | Step 07 implementor |
 | Audit initiated by | Human owner |
-| Audited commit | `4d0fa537f6239ffd61fbcb464b9eb9d1ce876d54` |
+| Audited commit | `ccd0e55d56cdffbb48c735a1b2829a990271fb23` (re-audit after F1–F3 fixes) |
 | Step branch | `step/07-validation-and-diagnostics` |
 | Step tag | — |
-| Closeout CI run | [`43115061587`](https://github.com/seb-eis/mocassin-2/actions/runs/43115061587) — green at `4d0fa537f6239ffd61fbcb464b9eb9d1ce876d54` |
-| Closeout CI head SHA | `4d0fa537f6239ffd61fbcb464b9eb9d1ce876d54` |
+| Closeout CI run | [`43291748042`](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042) — green at `ccd0e55d56cdffbb48c735a1b2829a990271fb23` |
+| Closeout CI head SHA | `ccd0e55d56cdffbb48c735a1b2829a990271fb23` |
 | Main SHA at freeze | `5b1eb7496f856660f90f4bb358bd3cbd1d95165d` |
 | Merge-tree CI | Not required; `main` did not move after branch creation |
 | Closeout evidence | `docs/planning/closeout/step-07.json` |
@@ -173,6 +173,10 @@ and the branch point.
   as recorded in the design review.
 - Follow-ups: Step 08 owns authoritative rule counts; Steps 09–12 own build-stage checks; Steps 24–25 own the
   GUI navigation and statistics panels; Step 30 completes the full CLI reference.
+- F1–F3 resolution: the step page now states that budget estimates always run and only the full statistics
+  record is opt-in; the closeout row records the green CI and squash; and the missing determinism,
+  cancellation, mixed `SIM003`/`SIM039`, exact-cutoff `ENM018`, and failure-path no-mutation tests are added in
+  `ValidationRobustnessTests`. Fix squash: `ccd0e55`.
 
 ## Findings
 
