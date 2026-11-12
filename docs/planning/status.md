@@ -137,4 +137,7 @@ early-warning signal for the next cross-cutting review.
   only at closeout and on `main`.
 - Step 02 received a post-development maintenance update on 2026-11-08: `Mocassin.Symmetry` namespaces were
   aligned with their folders; the public API break is accepted; the `step-02` tag remains at `dbf5691`.
+- Milestones M0–M3 were backfilled on 2026-11-12 with annotated tags on the existing step merge commits:
+  `milestone-m0` → `47a9a90`, `milestone-m1` → `7b4a994`, `milestone-m2` → `dbf5691`, `milestone-m3` →
+  `3ed558a`. Tags were pushed to `origin`; no step tag was moved.
 - Tag names record completed checkpoints; they do not replace this dashboard.
