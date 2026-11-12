@@ -12,9 +12,9 @@
 | Review ID | XC-03 |
 | Checkpoint | Phase B — Model definition (Steps 03–07) |
 | Type | Repository-wide documentation status review |
-| Target commit | After the Step 07 merge and `step-07` tag, plus a docs-only checkpoint commit |
+| Target commit | `81fba457d6d4714b4fe56d9c7084a738815b365e` (Phase B checkpoint: drift remediation and record; parent `38a22d2`) |
 | Request owner | Step agent / planner |
-| Orchestrator (implementor) | — |
+| Orchestrator (implementor) | OpenCode Phase B orchestrating agent |
 | Review initiated by | Human owner |
 | Reviewer | — |
 | Review date | — |
@@ -132,7 +132,7 @@ site navigation and the excluded `docs/planning/` boundary.
 
 ## Record state
 
-**State:** Planned — awaiting Step 07 completion
+**State:** Ready for review
 
 `Re-review required` is a record state, not a verdict.
 

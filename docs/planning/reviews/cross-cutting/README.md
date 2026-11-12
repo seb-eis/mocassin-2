@@ -25,7 +25,7 @@ Review IDs are globally sequential and are never reused. Each phase gets three n
 | Phase | Steps | Reviews | Status |
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
-| B. Model definition | 03–07 | `XC-01` policies and planning, `XC-02` architecture and design, `XC-03` documentation | Planned — awaiting Step 07 completion |
+| B. Model definition | 03–07 | `XC-01` policies and planning, `XC-02` architecture and design, `XC-03` documentation | Ready for review at `81fba45` — XC-01 starts first |
 | C. Compilation and build | 08–12 | `XC-04` policies and planning, `XC-05` architecture and design, `XC-06` documentation | Planned |
 | D. Solver | 13–19 | `XC-07` policies and planning, `XC-08` architecture and design, `XC-09` documentation | Planned |
 | E. Results | 20–22 | `XC-10` policies and planning, `XC-11` architecture and design, `XC-12` documentation | Planned |
@@ -36,9 +36,9 @@ The first checkpoint records:
 
 | ID | Record | Status |
 | --- | --- | --- |
-| `XC-01` | [`xc-01-policies-and-planning.md`](xc-01-policies-and-planning.md) | Planned — awaiting Step 07 completion |
-| `XC-02` | [`xc-02-architecture-and-design.md`](xc-02-architecture-and-design.md) | Planned — awaiting Step 07 completion |
-| `XC-03` | [`xc-03-documentation-status.md`](xc-03-documentation-status.md) | Planned — awaiting Step 07 completion |
+| `XC-01` | [`xc-01-policies-and-planning.md`](xc-01-policies-and-planning.md) | Ready for review at `81fba45` — starts first |
+| `XC-02` | [`xc-02-architecture-and-design.md`](xc-02-architecture-and-design.md) | Ready for review at `81fba45` — after XC-01 starts |
+| `XC-03` | [`xc-03-documentation-status.md`](xc-03-documentation-status.md) | Ready for review at `81fba45` — after XC-01 starts |
 
 `XC-01` starts first. Once it is underway, `XC-02` and `XC-03` may run in parallel.
 

@@ -104,7 +104,7 @@ These reviews do not create step branches or tags and do not replace step audits
 | Phase | Steps | Reviews | Status |
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
-| B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | Planned — awaiting Step 07 completion |
+| B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | Ready for review at `81fba45` — XC-01 starts first |
 | C. Compilation and build | 08–12 | `XC-04`/`XC-05`/`XC-06` | Planned |
 | D. Solver | 13–19 | `XC-07`/`XC-08`/`XC-09` | Planned |
 | E. Results | 20–22 | `XC-10`/`XC-11`/`XC-12` | Planned |
