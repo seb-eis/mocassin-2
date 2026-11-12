@@ -15,7 +15,7 @@
 | Request owner | Design planner (Step 08) |
 | Orchestrator (step agent / planner) | Design planner |
 | Review initiated by | Planner |
-| Reviewed commit | `36fbba58182b2e769a6d59b3228a60021344248d` |
+| Reviewed commit | `c676716e88bcdd5e8877938e21ad6950cc2986bb` (round 2; round 1 reviewed `36fbba58182b2e769a6d59b3228a60021344248d`) |
 | Docs branch | `docs/step-08-design` |
 | Review date | 2026-11-12 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner or implementor) |
@@ -252,7 +252,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -318,9 +318,29 @@ Date:
 
 ## Resolution status
 
+Round 1 findings were remediated on `docs/step-08-design` at
+`c676716e88bcdd5e8877938e21ad6950cc2986bb`. M5 is resolved by an explicit human-owner waiver of the roadmap
+§3.1 split trigger, recorded on the Step 08 page and in `status.md`; it is not a silent acceptance. A fresh
+round 2 reviewer must re-check the changed design and the dependency pages (Steps 04, 09, 10, 11).
+
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| M1 | Resolved — `UseDualDofCorrection = Kind == Kmc` default matches the original job builder; Step 10 owns any documented optimizer override | Planner | `c676716` |
+| M2 | Resolved — fractional movements converted to Cartesian; `fieldFactor = Σ q_i (cartesianMovement_i · pathVector)/|pathVector|²` reduces to `q` for one charge | Planner | `c676716` |
+| M3 | Resolved — `ProjectHasher.ComputeSimulationSelection` added to the Rules key; invalidation graph distinguishes active-set and runtime-only simulation edits | Planner | `c676716` |
+| M4 | Resolved — Step 08 finalizes the existing `signatures.model`/`ModelSignatureV1` entry; no second `compiledModel` entry | Planner | `c676716` |
+| M5 | Waived by human owner on 2026-11-12 — 4–6 pw/eight features accepted as one step; waiver recorded on the Step 08 page, status, and this record | Human owner | `c676716` |
+| M6 | Resolved — additive public `TransitionPathResolver.TryResolvePoint`/`TryResolvePath`; Step 04 page updated; no private nearest-image duplication | Planner | `c676716` |
+| m1 | Resolved — use public `IStructurePreviewService.TryResolve`, not internal `SpaceGroupReferenceResolver` | Planner | `c676716` |
+| m2 | Resolved — compiled 0=void order is explicitly not preview matrix order; particle-ID mapping and test added | Planner | `c676716` |
+| m3 | Resolved — pre-check raw cluster count with saturating `long`, honor the reducer's fixed 1,000,000 ceiling, catch bounded failure as `CMP006` | Planner | `c676716` |
+| m4 | Resolved — cancellation is stage/top-level/atomic-call scoped; the 250 ms target is qualified as between checks | Planner | `c676716` |
+| m5 | Resolved — Step 09 now uses `model.ModelSignature`; Step 09 page updated | Planner | `c676716` |
+| m6 | Resolved — signature scope explicitly includes simulation encoding and excludes runtime settings; Step 09 and data contract aligned | Planner | `c676716` |
+| m7 | Resolved — report counts split `RejectedByMass`, `RejectedByCharge`, `RejectedByInvalidState` | Planner | `c676716` |
+| m8 | Resolved — `CMP009` path domain is `kineticTransition` or `metropolisTransition` by kind | Planner | `c676716` |
+| n1 | Addressed — benchmark/reference task added to the golden/closeout feature | Planner | `c676716` |
+| n2 | Addressed — cache-integrity predicate and injected-entry test defined | Planner | `c676716` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
