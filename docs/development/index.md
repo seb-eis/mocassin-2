@@ -47,7 +47,8 @@ The detailed architecture is in the internal plan; the repository layout is summ
 
 ## Current phase
 
-Steps 00–06 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, the
-symmetry/geometry kernels, the particle/structure/transition/energy models, and the lattice/simulation models.
-Step 07 — Validation, Diagnostics, and Model Statistics is next. The solver and GUI are added in later steps. Do
-not treat placeholder pages as implemented features.
+Steps 00–07 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, the
+symmetry/geometry kernels, the particle/structure/transition/energy models, the lattice/simulation models, and
+validation, diagnostics, and model statistics. Phase B is closed at the `step-07` tag; Step 08 — Model
+Compilation Pipeline is next. The solver and GUI are added in later phases. Do not treat placeholder pages as
+implemented features.

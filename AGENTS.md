@@ -8,10 +8,11 @@ This is a modern, cross-platform reimplementation of **MOCASSIN** (*Monte Carlo 
 the fixed-lattice MMC/KMC simulation suite for defects and transport in crystalline solids originally developed
 at Forschungszentrum Jülich / RWTH Aachen.
 
-**Current state: implementation has started.** Steps 00–02 are complete — repository/toolchain, domain
-kernel and project format, and symmetry/geometry. The .NET solution, Rust workspace skeleton, Python package,
-and documentation toolchain exist. Step 03 is next. Do not claim that a feature is implemented until code and
-tests exist.
+**Current state: Phase B is complete.** Steps 00–07 are complete — repository/toolchain and CI; domain kernel
+and project format; symmetry/geometry; the particle, structure, transition, energy, lattice, and simulation
+models; and validation, diagnostics, and model statistics. The .NET solution, Rust workspace skeleton, Python
+package, and documentation toolchain exist. Step 08 — Model Compilation Pipeline is next. Do not claim that a
+feature is implemented until code and tests exist.
 
 Target stack:
 
@@ -685,7 +686,7 @@ The dedicated local development image is
 repository. The same tools can also be installed directly for development without opencode.
 
 Run the normal local gate with `./tools/verify.sh all`, or the mode for the area you changed. The commands
-below are the underlying gates. End-to-end commands marked “once … exists” are not available yet.
+below are the underlying gates. End-to-end commands that depend on a later step are annotated with that step.
 
 ```bash
 # .NET
@@ -700,18 +701,18 @@ cargo clippy --manifest-path src/rust/Cargo.toml --workspace -- -D warnings
 cargo test --manifest-path src/rust/Cargo.toml --workspace
 cargo build --manifest-path src/rust/Cargo.toml --workspace --release
 
-# End-to-end (once the CLI exists)
+# End-to-end (validate is available; build/collect/solver commands land in later steps)
 dotnet run --project src/dotnet/Mocassin.Cli -- validate samples/ceria/ceria.mocprj
 dotnet run --project src/dotnet/Mocassin.Cli -- build samples/ceria/ceria.mocprj -o /tmp/ceria.msl
 cargo run --manifest-path src/rust/Cargo.toml -p mocassin-cli -- \
   --db /tmp/ceria.msl --job 1 --io /tmp/Job00001
 dotnet run --project src/dotnet/Mocassin.Cli -- collect /tmp/ceria.msl --dir /tmp --results /tmp/ceria.msr
 
-# Python analysis API (once the package exists)
+# Python analysis API (package and tests exist; full analysis API lands in Step 22)
 python -m pytest src/python/tests
 python -m build src/python
 
-# Documentation (once the Zensical/DocFX setup exists)
+# Documentation
 zensical build --strict
 dotnet tool restore
 dotnet docfx tools/docfx/docfx.json -o artifacts/docfx
