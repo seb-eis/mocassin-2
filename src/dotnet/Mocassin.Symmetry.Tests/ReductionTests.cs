@@ -210,6 +210,7 @@ public sealed class ReductionTests
 
         Assert.NotEmpty(result.Shells);
         Assert.All(result.Shells, static shell => Assert.Single(shell.EquivalentImages));
+        Assert.All(result.Shells, static shell => Assert.True(shell.IsChiral));
         Assert.All(result.Shells, static shell => Assert.NotNull(shell.ChiralPartnerIndex));
         for (var index = 0; index < result.Shells.Length; index++)
         {

@@ -308,6 +308,8 @@ Mocassin.Symmetry.Reduction.PairShell.DistanceBucketFm.init -> void
 Mocassin.Symmetry.Reduction.PairShell.Equals(Mocassin.Symmetry.Reduction.PairShell? other) -> bool
 Mocassin.Symmetry.Reduction.PairShell.EquivalentImages.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I>
 Mocassin.Symmetry.Reduction.PairShell.EquivalentImages.init -> void
+Mocassin.Symmetry.Reduction.PairShell.IsChiral.get -> bool
+Mocassin.Symmetry.Reduction.PairShell.IsChiral.init -> void
 Mocassin.Symmetry.Reduction.PairShell.PairShell(int DistanceBucketFm, double DistanceAngstrom, Mocassin.Core.Geometry.Vector4I Representative, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I> EquivalentImages, int? ChiralPartnerIndex) -> void
 Mocassin.Symmetry.Reduction.PairShell.Representative.get -> Mocassin.Core.Geometry.Vector4I
 Mocassin.Symmetry.Reduction.PairShell.Representative.init -> void
