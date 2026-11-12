@@ -145,7 +145,8 @@ published site.
 | Repository and toolchain | Complete (Step 00) |
 | Domain kernel and project format | Complete (Step 01) |
 | Symmetry and geometry | Complete (Step 02) |
-| .NET model builder | Not started — Step 03 next |
+| .NET model builder | Partial — model definition complete through Step 07; Step 08 next |
 | Rust solver | Not started |
 | Avalonia GUI | Not started |
+| Validation, diagnostics, and model statistics | Complete (Step 07) |
 | Parity validation | Not started |

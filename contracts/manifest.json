@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "project": "MOCASSIN",
   "description": "Machine-readable contract manifest for MOCASSIN project, package, results, state, job-folder, event, and MMCFE formats.",
-  "status": "step-06",
-  "notes": "Step 06 adds the flat occupationExchanges, dopings, and simulations model sections. The simulation DTO is a flat object with kind, the matching transition array, and a settings object; kind-specific fields are optional in the generated schema because the generator has no oneOf/discriminator support, and the validator rejects a mismatched shape. Nullable simulation settings use the manifest nullable flag. The lattice and simulation sections remain additive under project schema v1; the manifest status/notes and fixtures are updated now, and ADR 0009's version-bump rule resumes with the first released format.",
+  "status": "step-07",
+  "notes": "Step 06 adds the flat occupationExchanges, dopings, and simulations model sections. The simulation DTO is a flat object with kind, the matching transition array, and a settings object; kind-specific fields are optional in the generated schema because the generator has no oneOf/discriminator support, and the validator rejects a mismatched shape. Nullable simulation settings use the manifest nullable flag. The lattice and simulation sections remain additive under project schema v1; the manifest status/notes and fixtures were updated at that step, and ADR 0009's version-bump rule resumes with the first released format. Step 07 adds the additive reports.validation validation-v1 report; the project schema remains v1 and the report is versioned separately.",
   "formats": {
     "project": {
       "id": "project",

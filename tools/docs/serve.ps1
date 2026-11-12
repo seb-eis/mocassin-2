@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # Serve the narrative documentation locally with live reload.
 $ErrorActionPreference = "Stop"
 

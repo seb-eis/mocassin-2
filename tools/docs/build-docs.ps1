@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: MIT
 # Build the combined MOCASSIN documentation site.
 #
 # Zensical owns the narrative site. DocFX and rustdoc output is copied into
@@ -23,7 +24,7 @@ if ((Test-Path "Mocassin.slnx") -and (Test-Path "tools/docfx/docfx.json") -and
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     if (Test-Path "artifacts/docfx") { Remove-Item -Recurse -Force "artifacts/docfx" }
-    & dotnet docfx "tools/docfx/docfx.json" -o "artifacts/docfx"
+    & dotnet docfx "tools/docfx/docfx.json" -o "artifacts/docfx" --warningsAsErrors
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
     New-Item -ItemType Directory -Force "site/api" | Out-Null

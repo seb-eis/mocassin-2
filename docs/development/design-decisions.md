@@ -101,7 +101,7 @@ byte format; the compilation pipeline produces the authoritative structure.
 Canonical JSON is whitespace-free, LF-only, schema-ordered, and sorts non-semantic arrays by stable ID. It
 normalizes timestamps to UTC with seven fractional digits and `-0.0` to `0.0`.
 
-Three SHA-256 hashes are exposed:
+Five SHA-256 hashes are exposed:
 
 - `ProjectHasher.Compute` hashes the canonical **model section** as the basis for the compiled-model
   signature;
@@ -109,7 +109,11 @@ Three SHA-256 hashes are exposed:
   dirty tracking;
 - `ProjectHasher.ComputeStructure` hashes the canonical **structure section** (name, space group, cell, sites,
   dummies) and is used as the structure-preview cache key. It is a public API because the Symmetry preview
-  service calls it.
+  service calls it;
+- `ProjectHasher.ComputeEnergy` hashes the canonical **energy section** (stable and unstable environments,
+  clusters, site energies) and is the energy half of the Step 08 compilation cache key;
+- `ProjectHasher.ComputeTransition` hashes one transition closure (the transition, its chain, referenced
+  groups/state changes, and the full particle order) and is the transition-preview cache key.
 
 They are deliberately distinct. The compiled-model signature in Step 08 is a different value again, based on
 the canonical MessagePack projection (ADR 0010).

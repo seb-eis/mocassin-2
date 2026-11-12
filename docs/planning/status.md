@@ -47,7 +47,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 | Step | Title | Phase | Status | Step branch | Current feature | Step CI | Main merge | Step tag | Step audit | Design review |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Passed | Waived — introduced after completion |
+| 00 | [Repository, Toolchain, and CI](steps/step-00-repository-toolchain-and-ci.md) | A. Foundations | Done | `step/00-foundation` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41733064540) (Ubuntu + Windows + macOS on main) | `47a9a90` | `step-00` | Passed with notes | Waived — introduced after completion |
 | 01 | [Domain Kernel and Project Format](steps/step-01-domain-kernel-and-project-format.md) | A. Foundations | Done | `step/01-domain-kernel` | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/41929788253) (main: Ubuntu + Windows + macOS) | `7b4a994` | `step-01` | Passed with notes at `05c41ab` | Waived — introduced after completion |
 | 02 | [Symmetry and Geometry](steps/step-02-symmetry-and-geometry.md) | A. Foundations | Done | `step/02-symmetry-and-geometry` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/42478356751) | `dbf5691` | `step-02` | Passed with notes at `6341b56` | Ready with notes — accepted |
 | 03 | [Particle and Structure Models](steps/step-03-particle-and-structure-models.md) | B. Model definition | Done | `step/03-particle-and-structure-models` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/42521062856) | `162ebe4` | `step-03` | Passed with notes at `b6a97ec` | Ready with notes — accepted at `3096aa8` |
@@ -87,9 +87,12 @@ its main CI run [`43293189634`](https://github.com/seb-eis/mocassin-2/actions/ru
 audit passed with notes at `ccd0e55`. The Phase B cross-cutting checkpoint is now active: `XC-01` policies and
 planning starts first, then `XC-02` architecture and design and `XC-03` documentation. The Step 08 design review
 waits for all three verdicts. A Phase B drift check ran on 2026-11-12 at `38a22d2`; its three Major
-status/documentation findings were remediated before this checkpoint freeze, and the remaining Minor/Note
-findings are tracked in the cross-cutting reviews. Steps 03–06 remain complete: merges `162ebe4`, `31ba12d`,
-`c11a364`, and `41cfa4d`; tags `step-03`–`step-06`; all audits passed with notes.
+status/documentation findings were remediated before this checkpoint freeze. The XC-02 architecture review
+found one Major (`F-01`: false chiral metadata for achiral high-symmetry pairs); it is fixed in the checkpoint
+by `8d61e71` with the ceria regression test. Drift disposition: D1–D5, D7–D9, D13, and D15 are fixed; D6
+(milestone tags) is an owner decision; D10–D12 are XC-01 follow-ups; D14 is an accepted audit note. Steps 03–06
+remain complete: merges `162ebe4`, `31ba12d`, `c11a364`, and `41cfa4d`; tags `step-03`–`step-06`; all audits
+passed with notes.
 
 ## Cross-cutting phase checkpoints
 
