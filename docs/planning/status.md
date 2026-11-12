@@ -84,16 +84,15 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 Phase B — Model definition (Steps 03–07) is complete. Step 07 is merged as `3ed558a`, tagged `step-07`, and
 its main CI run [`43293189634`](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) is green; the
-audit passed with notes at `ccd0e55`. The Phase B cross-cutting checkpoint is in progress: `XC-01` (policies and
-planning) and `XC-03` (documentation) passed with notes; `XC-02` (architecture and design) found one Major
-(`F-01`, fixed at `8d61e71`) a round-2 Major (`R2-F1`, fixed at `47c5927`), and a round-3 Major (`R3-F1`, fixed at `84781f8`); it is at `Re-review required` for the final checkpoint `84781f8`. The Step 08
-design review waits for all three verdicts. A Phase B drift check ran on 2026-11-12 at `38a22d2`; its three Major
-status/documentation findings were remediated before this checkpoint freeze. The XC-02 architecture review
-found one Major (`F-01`: false chiral metadata for achiral high-symmetry pairs); it is fixed in the checkpoint
-by `8d61e71` with the ceria regression test. Drift disposition: D1–D5, D7–D9, D13, and D15 are fixed; D6
-(milestone tags) is an owner decision; D10–D12 are XC-01 follow-ups; D14 is an accepted audit note. Steps 03–06
-remain complete: merges `162ebe4`, `31ba12d`, `c11a364`, and `41cfa4d`; tags `step-03`–`step-06`; all audits
-passed with notes.
+audit passed with notes at `ccd0e55`. The Phase B cross-cutting checkpoint is complete: `XC-01`, `XC-02`, and
+`XC-03` all passed with notes at the substantive checkpoint `84781f8` and were accepted by the human owner on
+2026-11-12. XC-02 closed three Majors across rounds (`F-01` at `8d61e71`, `R2-F1` at `47c5927`, and `R3-F1` at
+`84781f8`). The checkpoint was merged into `main` as `e48d9ca`; main CI
+[`43311424938`](https://github.com/seb-eis/mocassin-2/actions/runs/43311424938) is green. The Step 08 design
+review may now start. A Phase B drift check ran on 2026-11-12 at `38a22d2`; its Major status/documentation
+findings were remediated, D6 was closed by the `milestone-m0`–`m3` backfill, D10–D12 remain XC-01 follow-ups,
+and D14 is an accepted audit note. Steps 03–06 remain complete: merges `162ebe4`, `31ba12d`, `c11a364`, and
+`41cfa4d`; tags `step-03`–`step-06`; all audits passed with notes.
 
 ## Cross-cutting phase checkpoints
 
@@ -108,7 +107,7 @@ These reviews do not create step branches or tags and do not replace step audits
 | Phase | Steps | Reviews | Status |
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
-| B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12 |
+| B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12; merged `e48d9ca`, main CI `43311424938` green |
 | C. Compilation and build | 08–12 | `XC-04`/`XC-05`/`XC-06` | Planned |
 | D. Solver | 13–19 | `XC-07`/`XC-08`/`XC-09` | Planned |
 | E. Results | 20–22 | `XC-10`/`XC-11`/`XC-12` | Planned |
