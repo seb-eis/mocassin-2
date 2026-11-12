@@ -1,0 +1,19 @@
+{
+  "step": "step-07",
+  "audit_commit": "ccd0e55d56cdffbb48c735a1b2829a990271fb23",
+  "closeout_ci": {
+    "run_id": "43291748042",
+    "head_sha": "ccd0e55d56cdffbb48c735a1b2829a990271fb23"
+  },
+  "main_sha_at_freeze": "5b1eb7496f856660f90f4bb358bd3cbd1d95165d",
+  "merge_candidate": "ccd0e55d56cdffbb48c735a1b2829a990271fb23",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "notes": [
+    "The audited commit is the second closeout code commit after the F1\u2013F3 audit fixes; only documentation/audit records follow it.",
+    "Closeout CI run 43291748042 is the replacement single Ubuntu dispatch at this commit; the first run 43115061587 covered 4d0fa53.",
+    "Main did not move after the step branch was created; no merge-tree CI was required."
+  ]
+}

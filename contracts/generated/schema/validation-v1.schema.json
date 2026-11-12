@@ -1,0 +1,238 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/validation-v1.json",
+  "title": "Validation report",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "validation"
+      ]
+    },
+    "projectId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "modelHash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "documentHash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "valid": {
+      "type": "boolean"
+    },
+    "exitCode": {
+      "type": "integer"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "integer"
+        },
+        "warnings": {
+          "type": "integer"
+        },
+        "infos": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "errors",
+        "warnings",
+        "infos"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string"
+              },
+              "objectId": {
+                "type": "string"
+              },
+              "property": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "domain",
+              "objectId"
+            ],
+            "additionalProperties": false
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "objectId": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "domain",
+                "objectId"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "statistics": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "particleCount": {
+          "type": "integer"
+        },
+        "particleSetCount": {
+          "type": "integer"
+        },
+        "referenceSiteCount": {
+          "type": "integer"
+        },
+        "p1PositionCount": {
+          "type": "integer"
+        },
+        "stablePositionCount": {
+          "type": "integer"
+        },
+        "unstablePositionCount": {
+          "type": "integer"
+        },
+        "kineticTransitionCount": {
+          "type": "integer"
+        },
+        "metropolisTransitionCount": {
+          "type": "integer"
+        },
+        "clusterCount": {
+          "type": "integer"
+        },
+        "estimatedPairInteractionCount": {
+          "type": "integer"
+        },
+        "estimatedUniqueClusterPermutations": {
+          "type": "integer"
+        },
+        "estimatedRuleCount": {
+          "type": "integer"
+        },
+        "estimatedMemoryBytes": {
+          "type": "integer"
+        },
+        "cellCountA": {
+          "type": "integer"
+        },
+        "cellCountB": {
+          "type": "integer"
+        },
+        "cellCountC": {
+          "type": "integer"
+        },
+        "estimatedPositions": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "particleCount",
+        "particleSetCount",
+        "referenceSiteCount",
+        "p1PositionCount",
+        "stablePositionCount",
+        "unstablePositionCount",
+        "kineticTransitionCount",
+        "metropolisTransitionCount",
+        "clusterCount",
+        "estimatedPairInteractionCount",
+        "estimatedUniqueClusterPermutations",
+        "estimatedRuleCount",
+        "estimatedMemoryBytes",
+        "cellCountA",
+        "cellCountB",
+        "cellCountC",
+        "estimatedPositions"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "projectId",
+    "modelHash",
+    "documentHash",
+    "valid",
+    "exitCode",
+    "summary",
+    "diagnostics",
+    "statistics"
+  ]
+}

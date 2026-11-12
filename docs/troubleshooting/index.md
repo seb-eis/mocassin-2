@@ -1,7 +1,8 @@
 # Troubleshooting
 
-Troubleshooting pages are added with the features they describe. Until then, use the diagnostic codes and
-CLI exit codes in the [reference](../reference/index.md) section.
+Troubleshooting pages are added with the features they describe. Validation problems are covered by
+[validation errors](errors.md); the full diagnostic catalog and CLI exit codes are in the
+[reference](../reference/index.md) section.
 
 ## General checks
 

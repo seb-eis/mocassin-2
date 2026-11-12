@@ -1891,3 +1891,27 @@ Mocassin.Core.Editing.ProjectEditor.SwitchSimulationKind(Mocassin.Core.Project.P
 Mocassin.Core.Editing.ProjectEditor.UpdateDoping(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Lattice.Doping! doping) -> Mocassin.Core.Editing.ProjectEditResult!
 Mocassin.Core.Editing.ProjectEditor.UpdateOccupationExchange(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Lattice.OccupationExchange! exchange) -> Mocassin.Core.Editing.ProjectEditResult!
 Mocassin.Core.Editing.ProjectEditor.UpdateSimulation(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Simulations.Simulation! simulation) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Diagnostics.CoreDiagnosticCatalog
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Code.get -> string!
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.DefaultSeverity.get -> Mocassin.Core.Diagnostics.DiagnosticSeverity
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Owner.get -> string!
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Title.get -> string!
+Mocassin.Core.Diagnostics.DiagnosticDescriptor
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Code.init -> void
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.DefaultSeverity.init -> void
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Owner.init -> void
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Title.init -> void
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Help.get -> string!
+override Mocassin.Core.Diagnostics.DiagnosticDescriptor.ToString() -> string!
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.DocumentationAnchor.get -> string!
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Help.init -> void
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.DocumentationAnchor.init -> void
+static Mocassin.Core.Diagnostics.DiagnosticDescriptor.operator !=(Mocassin.Core.Diagnostics.DiagnosticDescriptor? left, Mocassin.Core.Diagnostics.DiagnosticDescriptor? right) -> bool
+static Mocassin.Core.Diagnostics.DiagnosticDescriptor.operator ==(Mocassin.Core.Diagnostics.DiagnosticDescriptor? left, Mocassin.Core.Diagnostics.DiagnosticDescriptor? right) -> bool
+override Mocassin.Core.Diagnostics.DiagnosticDescriptor.GetHashCode() -> int
+override Mocassin.Core.Diagnostics.DiagnosticDescriptor.Equals(object? obj) -> bool
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Equals(Mocassin.Core.Diagnostics.DiagnosticDescriptor? other) -> bool
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.<Clone>$() -> Mocassin.Core.Diagnostics.DiagnosticDescriptor!
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.Deconstruct(out string! Code, out Mocassin.Core.Diagnostics.DiagnosticSeverity DefaultSeverity, out string! Owner, out string! Title, out string! Help, out string! DocumentationAnchor) -> void
+static Mocassin.Core.Diagnostics.CoreDiagnosticCatalog.Descriptors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
+Mocassin.Core.Diagnostics.DiagnosticDescriptor.DiagnosticDescriptor(string! Code, Mocassin.Core.Diagnostics.DiagnosticSeverity DefaultSeverity, string! Owner, string! Title, string! Help, string! DocumentationAnchor) -> void

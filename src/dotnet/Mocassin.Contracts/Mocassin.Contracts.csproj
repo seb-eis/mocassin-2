@@ -15,4 +15,8 @@
   <ItemGroup>
     <ProjectReference Include="../Mocassin.Compilation/Mocassin.Compilation.csproj" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="../../../contracts/generated/constants/csharp/ContractVersions.g.cs" Link="ContractVersions.g.cs" />
+  </ItemGroup>
 </Project>

@@ -8,6 +8,7 @@
     <Project Path="src/dotnet/Mocassin.App.Views/Mocassin.App.Views.csproj" />
     <Project Path="src/dotnet/Mocassin.App/Mocassin.App.csproj" />
     <Project Path="src/dotnet/Mocassin.Cli/Mocassin.Cli.csproj" />
+    <Project Path="src/dotnet/Mocassin.Cli.Tests/Mocassin.Cli.Tests.csproj" />
     <Project Path="src/dotnet/Mocassin.Compilation.Tests/Mocassin.Compilation.Tests.csproj" />
     <Project Path="src/dotnet/Mocassin.Compilation/Mocassin.Compilation.csproj" />
     <Project Path="src/dotnet/Mocassin.Contracts.Tests/Mocassin.Contracts.Tests.csproj" />

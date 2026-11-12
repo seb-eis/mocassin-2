@@ -349,7 +349,7 @@ public sealed class ProjectStore
                 diagnostics.Add(Error(
                     ProjectDiagnosticCodes.InvalidDocument,
                     $"Project file '{fullPath}' does not exist."));
-                return new ProjectLoadResult(null, diagnostics.Sorted);
+                return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.NotFound);
             }
 
             if (info.Length > options.MaxDocumentBytes)
@@ -357,7 +357,7 @@ public sealed class ProjectStore
                 diagnostics.Add(Error(
                     ProjectDiagnosticCodes.InvalidDocument,
                     $"Project file '{fullPath}' exceeds the {options.MaxDocumentBytes} byte limit."));
-                return new ProjectLoadResult(null, diagnostics.Sorted);
+                return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.TooLarge);
             }
 
             var bytes = await File.ReadAllBytesAsync(fullPath, cancellationToken).ConfigureAwait(false);
@@ -368,7 +368,7 @@ public sealed class ProjectStore
             diagnostics.Add(Error(
                 ProjectDiagnosticCodes.InvalidDocument,
                 $"Could not read project '{fullPath}': {exception.Message}"));
-            return new ProjectLoadResult(null, diagnostics.Sorted);
+            return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.Io);
         }
     }
 
@@ -388,7 +388,7 @@ public sealed class ProjectStore
             diagnostics.Add(Error(
                 ProjectDiagnosticCodes.InvalidDocument,
                 $"Project file '{path}' could not be loaded: {exception.Message}"));
-            return new ProjectLoadResult(null, diagnostics.Sorted);
+            return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.InvalidContent);
         }
     }
 
@@ -401,7 +401,7 @@ public sealed class ProjectStore
             diagnostics.Add(Error(
                 ProjectDiagnosticCodes.InvalidDocument,
                 $"Project file '{path}' must be UTF-8 without a byte-order mark."));
-            return new ProjectLoadResult(null, diagnostics.Sorted);
+            return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.InvalidContent);
         }
 
         string text;
@@ -414,7 +414,7 @@ public sealed class ProjectStore
             diagnostics.Add(Error(
                 ProjectDiagnosticCodes.InvalidDocument,
                 $"Project file '{path}' is not valid UTF-8."));
-            return new ProjectLoadResult(null, diagnostics.Sorted);
+            return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.InvalidContent);
         }
 
         JsonNode? node;
@@ -427,7 +427,7 @@ public sealed class ProjectStore
             diagnostics.Add(Error(
                 ProjectDiagnosticCodes.InvalidDocument,
                 $"Project file '{path}' is not valid JSON: {exception.Message}"));
-            return new ProjectLoadResult(null, diagnostics.Sorted);
+            return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.InvalidContent);
         }
 
         if (node is not JsonObject root || !TryReadSchemaVersion(root, out var version))
@@ -435,14 +435,14 @@ public sealed class ProjectStore
             diagnostics.Add(Error(
                 ProjectDiagnosticCodes.InvalidDocument,
                 $"Project file '{path}' must be a JSON object with an integer schemaVersion."));
-            return new ProjectLoadResult(null, diagnostics.Sorted);
+            return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.InvalidContent);
         }
 
         var migration = ProjectMigrations.Apply(root, version);
         diagnostics.AddRange(migration.Diagnostics);
         if (migration.Diagnostics.Any(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error))
         {
-            return new ProjectLoadResult(null, diagnostics.Sorted);
+            return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.InvalidContent);
         }
 
         Project project;
@@ -456,10 +456,14 @@ public sealed class ProjectStore
             diagnostics.Add(Error(
                 ProjectDiagnosticCodes.InvalidDocument,
                 $"Project file '{path}' does not match the project schema: {exception.Message}"));
-            return new ProjectLoadResult(null, diagnostics.Sorted);
+            return new ProjectLoadResult(null, diagnostics.Sorted, ProjectLoadFailureKind.InvalidContent);
         }
 
-        diagnostics.AddRange(validator(project));
+        if (options.ValidateOnLoad)
+        {
+            diagnostics.AddRange(validator(project));
+        }
+
         return new ProjectLoadResult(project, diagnostics.Sorted);
     }
 

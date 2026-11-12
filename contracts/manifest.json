@@ -2179,5 +2179,258 @@
         "step": "06"
       }
     ]
+  },
+  "reports": {
+    "validation": {
+      "id": "validation",
+      "title": "Validation report",
+      "schemaVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "validation"
+          ]
+        },
+        {
+          "name": "projectId",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "modelHash",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "documentHash",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "valid",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "exitCode",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "object",
+          "required": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "errors",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "warnings",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "infos",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "diagnostics",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "severity",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "error",
+                "warning",
+                "info"
+              ]
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "path",
+              "type": "object",
+              "required": false,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "hint",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "related",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "statistics",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "particleCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "particleSetCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "referenceSiteCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "p1PositionCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "stablePositionCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "unstablePositionCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "kineticTransitionCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "metropolisTransitionCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "clusterCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "estimatedPairInteractionCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "estimatedUniqueClusterPermutations",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "estimatedRuleCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "estimatedMemoryBytes",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "cellCountA",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "cellCountB",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "cellCountC",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "estimatedPositions",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        }
+      ]
+    }
   }
 }

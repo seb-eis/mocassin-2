@@ -49,6 +49,8 @@ nav = [
       { "Project format" = "reference/project-format.md" },
       { "Transitions" = "reference/transitions.md" },
       { "Energy" = "reference/energy.md" },
+      { "CLI" = "reference/cli.md" },
+      { "Diagnostics" = "reference/diagnostics.md" },
     ] },
   { "Development" = [
       { "Overview" = "development/index.md" },
@@ -61,7 +63,10 @@ nav = [
       { "Testing and parity" = "development/testing-and-parity.md" },
     ] },
   { "Performance and HPC" = "performance/index.md" },
-  { "Troubleshooting" = "troubleshooting/index.md" },
+  { "Troubleshooting" = [
+      { "Overview" = "troubleshooting/index.md" },
+      { "Validation errors" = "troubleshooting/errors.md" },
+    ] },
   { "Migration" = "migration/index.md" },
   { "Examples" = "examples/index.md" },
   { "Glossary" = [

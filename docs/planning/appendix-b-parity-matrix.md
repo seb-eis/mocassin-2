@@ -27,11 +27,11 @@ Status legend:
 | Stable project hash | Y | Improvement | 01/03/09 | Model/document SHA-256 in 01; structure hash in 03; compiled signature in 09 |
 | Legacy `.mocprj` read/write | N | Out of scope | — | ADR 0001 |
 | Project data viewer (JSON/XML) | N | Replaced | 23 | JSON view/debug export |
-| Cross-domain validation pipeline | Y | Planned | 07 | Load/model/cross-domain/feasibility; no post-validation mutation |
-| Stable diagnostic catalog | Y | Planned | 07 | Codes, owners, severities, paths, hints; docs-drift checked |
-| Model statistics and feasibility | Y | Planned | 07 | Counts, rule/memory estimates, buildability warnings |
-| Headless `mocassin validate` | Y | Planned | 07/12 | Human/JSON output, exit codes, `--stats` |
-| `validation-v1` report | Y | Planned | 07/12 | Sorted diagnostics, summary, optional statistics |
+| Cross-domain validation pipeline | Y | Implemented | 07 | Load/model/cross-domain/feasibility; no post-validation mutation |
+| Stable diagnostic catalog | Y | Implemented | 07 | Codes, owners, severities, paths, hints; docs-drift checked |
+| Model statistics and feasibility | Y | Implemented | 07 | Counts, rule/memory estimates, buildability warnings |
+| Headless `mocassin validate` | Y | Partial | 07/12 | `validate` implemented; Step 12 extends the command surface |
+| `validation-v1` report | Y | Implemented | 07 | Sorted diagnostics, summary, optional statistics; schema checked |
 | GUI diagnostic navigation | Y | Planned | 07/24/25 | `ModelPath` navigation and stats panels |
 
 ## 2. Particles and structure
@@ -86,7 +86,7 @@ Status legend:
 | Chiral pair linking | Y | Partial | 05/08/09 | Shell chiral linking in 02; shared `EnergyId` preview in 05; compiled/template binding in 08/09 |
 | Group/cluster interactions (up to 9 positions) | Y | Partial | 05/08 | Model, geometry validation, cost preview, and samples in 05; tables in 08 |
 | Site/defect energies | Y | Partial | 05/25 | Model, validation, editing, and samples in 05; editor UI in 25 |
-| Cost/permutation limits | Y | Partial | 05/07 | Limits, diagnostics, and preview in 05; consolidated statistics/docs in 07 |
+| Cost/permutation limits | Y | Implemented | 05/07 | Limits, diagnostics, preview, consolidated statistics, and docs |
 | Cluster geometry editor/preview | Y | Partial | 05/25 | Preview API in 05; editor UI in 25 |
 | Site energy matrix + bulk edit | Y | Improvement | 25 | |
 | Default building block viewer | Y | Planned | 25 | |
@@ -190,7 +190,7 @@ Status legend:
 | Shell/tree/tabs/console/status | Y | Planned | 23 | |
 | Project lifecycle | Y | Planned | 23 | |
 | Undo/redo | N | Improvement | 23 | |
-| Model validator/problems | Y | Planned | 23/07 | Navigable |
+| Model validator/problems | Y | Partial | 23/07 | Navigable validation result and paths; UI in 23 |
 | Particle/set editor | Y | Planned | 24 | |
 | Structure editor | Y | Planned | 24 | |
 | Transition editor | Y | Planned | 24 | |
@@ -237,7 +237,7 @@ Status legend:
 | User guide + physics | Y | Planned | 30 | Required content |
 | Developer architecture guide | Y | Planned | 30 | Code structure/design choices |
 | Tutorials | Y | Planned | 30 | Ceria, BaZrO3, vehicle, HPC, analysis |
-| CLI + format reference | Y | Planned | 30 | CLI, project/.msl/.msr/.mcs, job folder, diagnostics |
+| CLI + format reference | Y | Partial | 30/07 | `validate`, diagnostics, and project references in 07; full CLI/formats in 30 |
 | Troubleshooting + FAQ | Y | Planned | 30 | |
 | Performance + HPC guide | Y | Planned | 30 | |
 | Contributing + dev workflow | Y | Planned | 30 | |

@@ -23,7 +23,7 @@ and licence check.
 ## Generated outputs
 
 - `contracts/generated/schema/*.schema.json` — JSON Schema fragments for project, package, results, state,
-  solver, job-folder, events, and MMCFE formats;
+  solver, job-folder, events, and MMCFE formats, plus the `validation-v1` CLI report;
 - `contracts/generated/signatures/*-v1.json` — canonical signature-projection layouts;
 - `contracts/generated/constants/csharp/ContractVersions.g.cs` — C# version constants;
 - `contracts/generated/constants/rust/contract_versions.rs` — Rust version constants;

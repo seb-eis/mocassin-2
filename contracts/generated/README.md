@@ -17,6 +17,7 @@ Do not edit these files by hand. Run the generator instead.
 | `schema/results-v1.schema.json` | Generated contract artifact |
 | `schema/solver-v1.schema.json` | Generated contract artifact |
 | `schema/state-v1.schema.json` | Generated contract artifact |
+| `schema/validation-v1.schema.json` | Generated contract artifact |
 | `signatures/lattice-v1.json` | Generated contract artifact |
 | `signatures/model-v1.json` | Generated contract artifact |
 | `signatures/parameterization-v1.json` | Generated contract artifact |

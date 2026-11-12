@@ -562,3 +562,5 @@ static Mocassin.Symmetry.Energy.ClusterCostPreview.operator !=(Mocassin.Symmetry
 static Mocassin.Symmetry.Energy.ClusterCostPreview.operator ==(Mocassin.Symmetry.Energy.ClusterCostPreview? left, Mocassin.Symmetry.Energy.ClusterCostPreview? right) -> bool
 static Mocassin.Symmetry.Energy.EnergyCostPreview.operator !=(Mocassin.Symmetry.Energy.EnergyCostPreview? left, Mocassin.Symmetry.Energy.EnergyCostPreview? right) -> bool
 static Mocassin.Symmetry.Energy.EnergyCostPreview.operator ==(Mocassin.Symmetry.Energy.EnergyCostPreview? left, Mocassin.Symmetry.Energy.EnergyCostPreview? right) -> bool
+Mocassin.Symmetry.Diagnostics.SymmetryDiagnosticCatalog
+static Mocassin.Symmetry.Diagnostics.SymmetryDiagnosticCatalog.Descriptors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>

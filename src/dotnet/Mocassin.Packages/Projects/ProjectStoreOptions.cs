@@ -26,4 +26,13 @@ public sealed record ProjectStoreOptions
     /// Gets the maximum accepted project document size in bytes.
     /// </summary>
     public long MaxDocumentBytes { get; init; } = 64L * 1024L * 1024L;
+
+    /// <summary>
+    /// Gets a value indicating whether the composed model validator runs after a successful load.
+    /// </summary>
+    /// <remarks>
+    /// Store callers that own a higher-level validation pass, such as the validation pipeline, set this to
+    /// <see langword="false"/> so the model is validated exactly once.
+    /// </remarks>
+    public bool ValidateOnLoad { get; init; } = true;
 }

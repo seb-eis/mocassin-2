@@ -17,9 +17,24 @@ public sealed record ProjectLoadResult
     /// <param name="project">The loaded project, or <see langword="null"/> when parsing failed.</param>
     /// <param name="diagnostics">Diagnostics produced while loading and validating.</param>
     public ProjectLoadResult(Project? project, ImmutableArray<Diagnostic> diagnostics)
+        : this(project, diagnostics, ProjectLoadFailureKind.None)
+    {
+    }
+
+    /// <summary>
+    /// Initializes a load result.
+    /// </summary>
+    /// <param name="project">The loaded project, or <see langword="null"/> when parsing failed.</param>
+    /// <param name="diagnostics">Diagnostics produced while loading and validating.</param>
+    /// <param name="failureKind">The structured failure kind, if the load failed.</param>
+    public ProjectLoadResult(
+        Project? project,
+        ImmutableArray<Diagnostic> diagnostics,
+        ProjectLoadFailureKind failureKind)
     {
         Project = project;
         Diagnostics = diagnostics.IsDefault ? ImmutableArray<Diagnostic>.Empty : diagnostics;
+        FailureKind = failureKind;
     }
 
     /// <summary>
@@ -31,6 +46,11 @@ public sealed record ProjectLoadResult
     /// Gets the load and validation diagnostics.
     /// </summary>
     public ImmutableArray<Diagnostic> Diagnostics { get; }
+
+    /// <summary>
+    /// Gets the structured failure kind, or <see cref="ProjectLoadFailureKind.None"/> when the load succeeded.
+    /// </summary>
+    public ProjectLoadFailureKind FailureKind { get; }
 
     /// <summary>
     /// Gets a value indicating whether a project was loaded without errors.
