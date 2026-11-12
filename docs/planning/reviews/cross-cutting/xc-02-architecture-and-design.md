@@ -358,7 +358,7 @@ Answer the three questions explicitly; a missing or unrecorded answer is a findi
 
 ## Record state
 
-**State:** Re-review required — round 3 (R3-F1 Major, R3-F2 Minor)
+**State:** Passed with notes — round 4 (no Blocker/Major; F-05/F-06 accepted notes remain)
 
 `Re-review required` is a record state, not a verdict. Round 2 was performed and still requires fixes.
 
@@ -788,3 +788,212 @@ the P1 equal-distance fixture remains 2 reciprocal pairs.
 The orchestrator fixed R3-F1 on the checkpoint branch. The design rule is explicit: a non-reciprocal
 orbit-inverse match is not a chiral pair and is left achiral. R3-F2 is covered by the new P4mm and
 barium-zirconate tests. No earlier round text was changed.
+
+## Round 4
+
+| Field | Value |
+| --- | --- |
+| Reviewer | Fresh independent reviewer (OpenCode subagent), round 4 |
+| Review date | 2026-11-12 |
+| Reviewed commit | `84781f8a4ea3ef64fedaee59d513e26de604ee2c` (Phase B checkpoint after R3-F1 and R3-F2 remediation) |
+| Worktree | `/tmp/opencode/mocassin-xc-02-r4`, branch `docs/xc-02-r4`, HEAD `c6f7e46e0da883918433bf202537b37c404edb7d` |
+| Reviewed-tree delta | `git diff --stat 84781f8..HEAD -- src tests contracts tools .github docs/physics docs/reference docs/development docs/planning/steps` is empty; the full delta is five documentation files (`cross-cutting/README.md`, `xc-01`, `xc-02`, `xc-03`, `status.md`), so the code, tests, contracts, and design pages reviewed are exactly the frozen checkpoint |
+| Record state result | `Passed with notes` |
+
+### Independence
+
+I am a fresh context. I did not author or implement the Phase B work, any earlier XC-02 round, or the
+R3-F1/R3-F2 remediation, and I have no shared conversation with the round-1/round-2/round-3 reviewers, the
+orchestrator, the Phase B implementors, or the other reviewers. I read the repository at the frozen commit and
+the original reference read-only, and I wrote only this record. Rounds 1–3, their request text, evidence,
+findings, checkboxes, verdicts, and the orchestrator's remediation tables were not changed; only the top-level
+`Record state` field was updated to the round-4 result and this section was appended.
+
+### Frozen state
+
+- `git status --short` (before this record edit): empty.
+- `git log --oneline --decorate -15`: `c6f7e46` (HEAD, round-4 request), `a7e55cd` (round-3 record merge),
+  `84781f8` (frozen code/docs checkpoint), `eb730f3` (round-3 record), `59ad7d7`, `0650146`, `47c5927`,
+  `c52f728`, `e88b713`, `ddf192e`, `9ece806`, `374da61`, `415fe28`, `62e1072`, `4a98ad8`; `main`/`origin/main`
+  at `38a22d2`, `step-07` at `3ed558a`. No code, test, contract, or design commit follows `84781f8`.
+- `git worktree list`: canonical `/workspace/mocassin` at `38a22d2`; review/phase-B worktrees at their expected
+  branches. No branch was changed, merged, tagged, pushed, or deleted.
+
+### Commands run and results
+
+| Command | Result |
+| --- | --- |
+| `git status --short` | empty before the record edit |
+| `git log --oneline --decorate -15` | as listed in Frozen state; no code commit after `84781f8` |
+| `git diff --stat 84781f8..HEAD -- src tests contracts tools .github docs/physics docs/reference docs/development docs/planning/steps` | empty |
+| `git diff --stat 84781f8..HEAD` | five docs/status files only |
+| `dotnet build Mocassin.slnx -c Release` | **Build succeeded**, 0 warnings, 0 errors (all 21 projects) |
+| `dotnet test Mocassin.slnx -c Release --no-build` | **902 passed**, 0 failed: Core 564, Symmetry 221, Packages 105, Cli 7, App 1, Compilation 1, Contracts 1, Results 1, Architecture 1 |
+| `dotnet test src/dotnet/Mocassin.Symmetry.Tests/... --filter "FullyQualifiedName~EnergyPreviewTests\|FullyQualifiedName~ReductionTests"` | **37 passed**, 0 failed |
+| `dotnet test ... --filter "FullyQualifiedName~ChiralDirectionsShareEnergyIdAndPartnerGeometry\|FullyQualifiedName~CeriaHighSymmetryPairsAreAchiral\|FullyQualifiedName~PeriodicImagesAtEqualDistanceLinkToTheirTrueInverse\|FullyQualifiedName~P4mmMultiImageOrbitLinksReciprocalChiralPair\|FullyQualifiedName~BariumZirconateHighSymmetryPairsAreReciprocal"` | **5 passed**, 0 failed |
+| `dotnet format Mocassin.slnx --verify-no-changes` | exit 0 (workspace-loading warnings only; no formatting change) |
+| `./tools/verify.sh structure` | passed: `Mocassin.Architecture.Tests` 1/1 |
+| `./tools/verify.sh api` | NuGet licence/vulnerability policy OK; ApiCompat OK for Core, Symmetry, Compilation, Contracts, Packages, Results, App.ViewModels, App.Views, Rendering; `Public API is compatible with the checked-in baseline.` |
+| `./tools/verify.sh contracts` | `Contract artifacts are current (18 files)`; catalog current (274 settings, sha256 `1f3bf67…e3395`); `Process consistency: OK`; tool tests 18/18; SPDX 345 files; secret scan 661 files; `cargo-deny` advisories/bans/licenses/sources OK |
+| `python3 tools/contracts/generate.py --check` | `Contract artifacts are current (18 files)` |
+| Independent probe (outside the repository at `/tmp/opencode/xc02-r4-review-probe`, not committed) | P1 equal-distance: 4 previews, 4 chiral, 2 reciprocal pairs, 0 one-way, every declared pair reciprocal and sharing one `EnergyId`; P4mm: 2 previews, 2 chiral, 1 reciprocal pair, 0 one-way; ceria: 36 previews, 0 chiral, every `EnergyId == GeometryId`; barium zirconate: 51 previews, 24 chiral, 12 reciprocal pairs, 36 orbit-membership matches split into 24 reciprocal and 12 one-way (all H–H), with the 12 one-way directions achiral, partnerless, and `EnergyId == GeometryId`; 0 diagnostics; 0 invariant failures. A generated search of 2000 space-group/cell/site/cutoff models (252 produced previews) found no non-reciprocal declared pair and no direction with more than one reciprocal candidate. |
+
+The probe reconstructs stable candidates with `PairReduction.Reduce`, rebuilds the orbit-membership match graph
+from every `PairShell.EquivalentImages`, recomputes each documented `GeometryId`, and compares the preview with
+the reciprocal orbit-inverse expectation and the shared-`EnergyId` rule. It is scratch evidence only and is not
+part of the repository.
+
+### Files reviewed
+
+- `AGENTS.md` §§1, 3, 4, 5, 8, 10, 11, 12, 16; `docs/planning/reviews/cross-cutting/README.md` §4;
+  `docs/planning/reviews/README.md` §§6–8; the full XC-02 record; `docs/planning/drift-checks/2026-11-12-phase-b.md`.
+- Step 05 (`step-05-energy-model.md`), Step 08 (`step-08-model-compilation-pipeline.md`), Step 09
+  (`step-09-parameterization-templates.md`), `docs/physics/energies.md`, `docs/reference/energy.md`,
+  `docs/development/design-decisions.md`, `docs/development/compilation-pipeline.md`,
+  `docs/development/architecture.md`, `contracts/manifest.json`, `tests/contracts/README.md`,
+  `docs/planning/README.md`, `docs/planning/status.md`.
+- `src/dotnet/Mocassin.Symmetry/Energy/EnergyGeometrySampler.cs`,
+  `src/dotnet/Mocassin.Symmetry/Reduction/PairReduction.cs`,
+  `src/dotnet/Mocassin.Symmetry/Energy/PairInteractionPreview.cs`,
+  `src/dotnet/Mocassin.Symmetry/Energy/EnergyPreviewService.cs`,
+  `src/dotnet/Mocassin.Symmetry/Geometry/PeriodicGeometry.cs`,
+  `src/dotnet/Mocassin.Symmetry.Tests/Energy/EnergyPreviewTests.cs`,
+  `src/dotnet/Mocassin.Symmetry.Tests/ReductionTests.cs`,
+  `src/dotnet/Mocassin.Symmetry/PublicAPI.Unshipped.txt`, `src/dotnet/Mocassin.Packages/Mocassin.Packages.csproj`.
+- Original reference read-only, no copying: `PairInteractionFinder.FindAndAssignChiralPartners` /
+  `CheckIsChiralPair`, `StablePairInteraction.SetChiralPartner`, and
+  `SpaceGroupService.CheckInteractionGeometryIsChiralPair` for the original reciprocal-link semantics.
+
+### R3-F1 — fixed
+
+- **Indexing every equivalent image.** The sampler now inserts each candidate into `byDirectedImage` once for
+  every image in `PairShell.EquivalentImages`, keyed by centre site/P, partner site, image P/offset, and distance
+  bucket (`EnergyGeometrySampler.cs:104-131`). The inverse lookup therefore finds a reverse shell whose
+  equivalent image, not necessarily its canonical representative, is the exact negation of the forward
+  representative (`:133-151`).
+- **Orbit membership, not representative equality.** `matchSets[index]` contains every candidate whose image
+  set contains the inverse of the forward representative. A link is recorded only when that relation is
+  mutual: `matchSets[match].Contains(index)` for the selected candidate (`:153-163`). The both-centre chirality
+  gate (`AllowsChirality`, both `PairShell.IsChiral`) and the shared `EnergyId` selection remain at `:173-188`.
+- **Independent reproduction.**
+  - P1 equal-distance fixture: 4 previews, 4 chiral, 2 reciprocal pairs, 0 one-way; every declared partner is
+    reciprocal and both directions share the lexicographically smaller `EnergyId`.
+  - P4mm (#99) multi-image fixture: 2 previews, both chiral and reciprocal, one pair; this is the case that
+    round 3 reported as 0 chiral. The probe confirms the forward orbit and reverse orbit are now linked.
+  - Ceria: 36 previews, 0 chiral, no partner, and `EnergyId == GeometryId` for all 36; the achiral stabilizer
+    orbit rule is preserved.
+  - Barium zirconate: 51 previews, 24 chiral (12 reciprocal pairs), 36 directed geometries with an
+    orbit-membership inverse whose two shells are both orbit-chiral, split into 24 reciprocal and 12 one-way
+    matches. The 12 one-way matches are all H–H and are left achiral: no `ChiralPartnerGeometryId`, and
+    `EnergyId == GeometryId`. This matches the round-3 remediation description.
+- **Result:** R3-F1 is fixed. The sampler no longer requires representative equality, and no one-way match
+  produces a non-reciprocal partner or a divergent `EnergyId` within a declared pair.
+
+### R3-F2 — fixed
+
+- `P4mmMultiImageOrbitLinksReciprocalChiralPair` (`EnergyPreviewTests.cs:203-255`) asserts 2 previews, both
+  chiral, a mutual `ChiralPartnerGeometryId`, and equal `EnergyId`.
+- `BariumZirconateHighSymmetryPairsAreReciprocal` (`:257-283`) asserts exactly 24 chiral directions, mutual
+  partners, and equal `EnergyId`.
+- `PeriodicImagesAtEqualDistanceLinkToTheirTrueInverse` (`:148-200`) remains and passes; the probe confirms its
+  fixture is 4 chiral directions in 2 reciprocal pairs. The ceria achiral test also remains.
+- R3-F2's requirement for multi-image coverage and reciprocal/shared-identity assertions is met. A residual
+  test-specificity observation is recorded as R4-F1 below; it is a Note, not a reopening of R3-F2.
+
+### Reciprocal-only design rule and original semantics
+
+- The rule is stated in all four required places:
+  - Step 05 §5 (`step-05-energy-model.md:241-246`): the inverse must be outside both directed centres' `G0`
+    orbits; a link is recorded only for a reciprocal orbit-inverse relation; a one-way match is left achiral so
+    one shared `EnergyId` never has conflicting partner directions.
+  - Step 08 §4 (`step-08-model-compilation-pipeline.md:151-159`): the inverse uses the opposite periodic
+    offset, both centres must see it as distinct, only reciprocal matches are linked, and one-way matches stay
+    achiral.
+  - `docs/physics/energies.md:53-64`: a chiral link is reciprocal; a non-one-to-one inverse relation leaves the
+    directions achiral; both directions of a chiral pair share one `EnergyId` and one energy table.
+  - `docs/reference/energy.md:70-76`: achiral `EnergyId == GeometryId`; only reciprocal orbit-inverse matches
+    are linked; a one-way match is left achiral.
+- **Original fidelity.** The original `PairInteractionFinder.FindAndAssignChiralPartners` calls
+  `StablePairInteraction.SetChiralPartner`, which stores the link on both interactions
+  (`StablePairInteraction.cs:78-84`). The new rule preserves that mutual-link property: a declared chiral pair
+  always points both ways. The new design is stricter than the original ordered-path predicate for a one-way
+  orbit relation (it declines to pick an arbitrary partner), and that stricter interpretation is explicitly
+  documented and tested rather than silently applied. This is a recorded design choice, not an unrecorded
+  regression.
+- **Observed behaviour.** The probe verifies that every declared chiral pair has a reciprocal partner and one
+  shared `EnergyId`, and that every one-way match is achiral with no partner. The 12 one-way BZ directions keep
+  their own directed geometry IDs, which is the documented Step 05/Step 09 achiral rule
+  (`step-09-parameterization-templates.md:74`), not a divergent identity inside a chiral pair.
+
+### F-01–F-04 remain fixed; F-05/F-06 remain accepted notes
+
+- **F-01 Fixed.** Ceria remains 0 chiral, with no partner and `EnergyId == GeometryId`; the both-centre orbit
+  gate and shared-`EnergyId` logic are present; the P1 chiral test still passes.
+- **F-02 Fixed.** `contracts/manifest.json` is `status: step-07` with Step 06/07 notes; `generate.py --check` and
+  `verify.sh contracts` pass; `tests/contracts/README.md` covers the Step 03–07 fixtures.
+- **F-03 Fixed.** `docs/planning/README.md` says the model builder is complete through Step 07 with Step 08
+  next and lists the Step 07 validation row.
+- **F-04 Fixed.** `docs/development/design-decisions.md` lists all five public hash entry points
+  (`Compute`, `ComputeDocument`, `ComputeStructure`, `ComputeEnergy`, `ComputeTransition`).
+- **F-05 remains a Note.** `Mocassin.Packages.csproj` still references only Compilation, Contracts, and Core;
+  `Mocassin.Symmetry` use remains transitive through Compilation. The direction is allowed and the build and
+  architecture gates pass; the recorded follow-up stands.
+- **F-06 remains a Note.** `docs/development/architecture.md` is still Step 03-era; the Phase B architecture
+  remains in `compilation-pipeline.md`. This is the recorded documentation follow-up, not a Blocker/Major.
+- **R2-F1, R2-F2, R2-F3 remain fixed.** The P1 equal-distance case is reciprocal with a shared `EnergyId`; the
+  reference page states the orbit rule; the `PairShell.ChiralPartnerIndex` XML docs distinguish the link from
+  the orbit property.
+
+### Original-design fidelity (round 4)
+
+- **Corrections:** F-01–F-04 and the R2/R3 fixes remain in place. No intended Phase B correction was found
+  silently retained.
+- **Ported strengths:** exact symmetry/P1 order, centre-stabilizer reduction, stable directed
+  `GeometryId`/shared `EnergyId`, and the auto-sampled pair preview remain. The chiral-pair link — the ported
+  original strength that rounds 1–3 found incomplete — now links the multi-image P4mm case and preserves
+  reciprocal BZ pairs.
+- **Regressions:** no new unrecorded regression found in the pair-identity/chirality path. The reciprocal-only
+  handling of non-one-to-one reduced geometries is a documented interpretation with tests; the achiral
+  directed-identity rule is the pre-existing Step 05/Step 09 decision.
+
+### Findings (round 4)
+
+| ID | Severity | Area | Finding | Evidence | Recommendation |
+| --- | --- | --- | --- | --- | --- |
+| R4-F1 | Note | Energy chirality tests / tie-break robustness | The reciprocal-only rule is implemented and verified by the independent probe, but two details are not directly guarded by the repository tests: (a) the BZ test asserts the chiral count and reciprocity of the 24 declared directions, but not explicitly that the 12 one-way matches are achiral and partnerless; (b) when a direction has more than one reciprocal candidate, the sampler deterministically takes the lexicographically smallest geometry ID, and that tie-break is undocumented and untested. The probe found no such multiple-reciprocal case in the shipped fixtures or in 252 generated preview models, and the declared pairs it did find are reciprocal, so this is a residual robustness/test-specificity note, not an observed defect. | `EnergyGeometrySampler.cs:153-163`; `EnergyPreviewTests.cs:257-283`; probe results: BZ `36 orbit-membership = 24 reciprocal + 12 one-way`, one-way directions achiral/partnerless; search `attempts=2000 previewsProduced=252 hits=0`. | Add an explicit BZ assertion that the one-way H–H directions remain achiral, and either add a guard/test for multiple reciprocal candidates or document the minimum-geometry-ID tie-break. Owner: implementor/tests. |
+
+Carry-forward status: **F-01–F-04 Fixed**, **F-05/F-06 Accepted notes** (unchanged), **R2-F1/R2-F2/R2-F3
+Fixed**, **R3-F1/R3-F2 Fixed**. No earlier finding is reopened. R4-F1 is a new Note; no Blocker or Major remains.
+
+### Round 4 checklist
+
+- [x] R3-F1 is fixed: every `PairShell.EquivalentImages` entry is indexed, the inverse is matched by orbit
+  membership, and only reciprocal orbit-inverse matches are linked.
+- [x] The P4mm multi-image pair links; the P1 equal-distance fixture links 2 reciprocal pairs; ceria remains
+  achiral; barium zirconate links 24 chiral directions (12 reciprocal pairs) and leaves the one-way matches
+  achiral.
+- [x] The reciprocal-only rule is stated in Step 05 §5, Step 08 §4, `docs/physics/energies.md`, and
+  `docs/reference/energy.md`, and is consistent with the original mutual `SetChiralPartner` semantics.
+- [x] No one-way match produces a non-reciprocal partner or a divergent `EnergyId`; declared chiral pairs share
+  one `EnergyId`.
+- [x] R3-F2 is covered by the P4mm and barium-zirconate tests; the equal-distance and ceria tests remain.
+- [x] F-01–F-04 remain fixed; F-05/F-06 remain accepted Notes.
+- [x] Build, full test suite, targeted tests, format, structure, API, contracts, and generated-artifact checks
+  pass at the frozen checkpoint.
+- [x] No new Blocker or Major finding remains; R4-F1 is a Note.
+- [ ] The human owner approves the final verdict and the phase gate.
+
+### Round 4 verdict
+
+- [ ] Passed
+- [x] Passed with notes
+- [ ] Fixes required
+- [ ] Waived
+
+Follow-up owner: Phase B orchestrator/implementor for the R4-F1 Note and the F-05/F-06 accepted follow-ups;
+human owner for the final verdict and phase gate.
+
+Follow-up step: The phase gate may proceed with `Passed with notes` if the human owner accepts R4-F1 and the
+carried F-05/F-06 notes. Step 08 may consume the corrected sampler, but its own design review and the planned
+preview-versus-compiled cross-check still apply. Statistical parity (Step 29) and Step 08 implementation were
+not run and are outside this review.
