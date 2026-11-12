@@ -86,7 +86,7 @@ Phase B — Model definition (Steps 03–07) is complete. Step 07 is merged as `
 its main CI run [`43293189634`](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) is green; the
 audit passed with notes at `ccd0e55`. The Phase B cross-cutting checkpoint is in progress: `XC-01` (policies and
 planning) and `XC-03` (documentation) passed with notes; `XC-02` (architecture and design) found one Major
-(`F-01`, fixed at `8d61e71`) and is at `Re-review required` for the final checkpoint `ddf192e`. The Step 08
+(`F-01`, fixed at `8d61e71`) and a round-2 Major (`R2-F1`, fixed at `47c5927`); it is at `Re-review required` for the final checkpoint `47c5927`. The Step 08
 design review waits for all three verdicts. A Phase B drift check ran on 2026-11-12 at `38a22d2`; its three Major
 status/documentation findings were remediated before this checkpoint freeze. The XC-02 architecture review
 found one Major (`F-01`: false chiral metadata for achiral high-symmetry pairs); it is fixed in the checkpoint
@@ -108,7 +108,7 @@ These reviews do not create step branches or tags and do not replace step audits
 | Phase | Steps | Reviews | Status |
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
-| B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | XC-01 Passed with notes; XC-03 Passed with notes; XC-02 Re-review required at `ddf192e` |
+| B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | XC-01 Passed with notes; XC-03 Passed with notes; XC-02 Re-review required at `47c5927` |
 | C. Compilation and build | 08–12 | `XC-04`/`XC-05`/`XC-06` | Planned |
 | D. Solver | 13–19 | `XC-07`/`XC-08`/`XC-09` | Planned |
 | E. Results | 20–22 | `XC-10`/`XC-11`/`XC-12` | Planned |

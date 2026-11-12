@@ -235,7 +235,7 @@ Follow-up step: Step 30 (tutorials, CDN/offline assumptions, and final publicati
 | DOC-11 | Note — publication follow-up | Documentation owner | — — verify public repository/schema links before launch |
 | DOC-12 | Note — Step 22 | Documentation owner | — — keep the Python API placeholder until Step 22 |
 
-Final checkpoint after remediation: `ddf192e7e6fc9c3f51a2d9924913c01fc20ca600`. XC-03 found no Blocker or Major; the verdict remains **Passed with notes** and no re-review is required. The human owner accepts the documentation notes; the open items above are Step 30/22 follow-ups.
+Final substantive checkpoint after the XC-02 round-2 remediation: `47c5927aba4c12d7e2dacbcaaad11c1db9e688c4` (this record’s scope is unchanged). XC-03 found no Blocker or Major; the verdict remains **Passed with notes** and no re-review is required. The human owner accepts the documentation notes; the open items above are Step 30/22 follow-ups.
 
 ## Human approval
 

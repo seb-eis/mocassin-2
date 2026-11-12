@@ -358,7 +358,7 @@ Answer the three questions explicitly; a missing or unrecorded answer is a findi
 
 ## Record state
 
-**State:** Fixes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict. Round 2 was performed and still requires fixes.
 
@@ -561,3 +561,28 @@ Follow-up owner: Phase B orchestrator/implementor (R2-F1); documentation owner (
 Follow-up step: Fix R2-F1 on a maintenance branch and re-review this record in round 3. F-01–F-04 are closed;
 F-05/F-06 remain accepted notes. Step 08 must not consume the chiral-pair metadata as authoritative until
 R2-F1 is fixed or the period-ambiguous case is explicitly rejected.
+
+## Round 2 remediation
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| R2-F1 | Fixed | Phase B orchestrator | `47c5927` — the reverse-pair key now includes the negated periodic offset; equal-distance images link to their true inverse |
+| R2-F2 | Fixed | Documentation owner | `47c5927` — `docs/reference/energy.md` now states the both-centre orbit rule |
+| R2-F3 | Fixed | Implementer | `47c5927` — `PairShell.ChiralPartnerIndex` XML docs now distinguish the link from the `IsChiral` orbit property |
+
+The independent probe for the P1 equal-distance fixture now reports 0 asymmetric partner links and 0 chiral
+pairs with differing `EnergyId`; the ceria probe remains 36 achiral previews with `EnergyId == GeometryId`. The
+new regression test is `EnergyPreviewTests.PeriodicImagesAtEqualDistanceLinkToTheirTrueInverse`. Full build
+(900 tests), format, structure, API, contracts, and docs gates pass at `47c5927`.
+
+## Round 3 request
+
+| Field | Value |
+| --- | --- |
+| Target commit | `47c5927aba4c12d7e2dacbcaaad11c1db9e688c4` (Phase B checkpoint after R2-F1 and R2-F2/R2-F3 remediation) |
+| Requested focus | Re-review R2-F1, R2-F2, and R2-F3; confirm no Blocker/Major remains; append a new round without altering rounds 1–2 |
+| Reviewer | — (fresh independent reviewer; fill name and date) |
+| Review date | — |
+
+The orchestrator fixed R2-F1 on the checkpoint branch and added the equal-distance regression test. R2-F2 and
+R2-F3 are documentation/XML-doc corrections. No round-1 or round-2 finding text was changed.

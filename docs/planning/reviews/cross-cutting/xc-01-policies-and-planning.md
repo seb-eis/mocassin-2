@@ -318,7 +318,7 @@ requires the human owner to accept this verdict alongside XC-02 and XC-03.
 | XC01-F11 | Fixed | Orchestrator | `62e1072` — `status.md` now carries the D-ID disposition mapping |
 | XC01-F12 | Fixed | Planner | `62e1072` — `AGENTS.md` clippy command now uses `--workspace --all-targets` |
 
-Final checkpoint after remediation: `ddf192e7e6fc9c3f51a2d9924913c01fc20ca600`. XC-01 found no Blocker or Major; the verdict remains **Passed with notes** and no re-review is required. The human owner must accept the notes and decide XC01-F2 and XC01-F5; the remaining open Minors are tracked above.
+Final substantive checkpoint after the XC-02 round-2 remediation: `47c5927aba4c12d7e2dacbcaaad11c1db9e688c4` (this record’s scope is unchanged). XC-01 found no Blocker or Major; the verdict remains **Passed with notes** and no re-review is required. The human owner must accept the notes and decide XC01-F2 and XC01-F5; the remaining open Minors are tracked above.
 
 ## Human approval
 
