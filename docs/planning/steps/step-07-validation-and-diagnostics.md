@@ -24,7 +24,7 @@ headless `mocassin validate` command.
 | `model-statistics` | `feature/step-07-validation-and-diagnostics/model-statistics` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `ba4e2a3` |
 | `validate-cli` | `feature/step-07-validation-and-diagnostics/validate-cli` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts` pass | — | `0ca9bd0` |
 | `diagnostics-docs-and-fixtures` | `feature/step-07-validation-and-diagnostics/diagnostics-docs-and-fixtures` | Done | `verify.sh dotnet`, `structure`, `api`, `contracts`, `docs` pass | — | `06568fe` |
-| `closeout` | `feature/step-07-validation-and-diagnostics/closeout` | Done | `verify.sh all`, closeout CI, `docs` pass | pending | — |
+| `closeout` | `feature/step-07-validation-and-diagnostics/closeout` | Done | `verify.sh all`, closeout CI, `docs` pass | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43115061587) | `4d0fa53` |
 
 ## Goal
 
@@ -304,8 +304,10 @@ public sealed class DiagnosticCatalog
 
 ### 6. Model statistics
 
-`ModelStatistics` is advisory but accurate enough to warn before an expensive build. It is computed only on
-demand; `validate` without `--stats` must not pay for it.
+`ModelStatistics` is advisory but accurate enough to warn before an expensive build. The preview-based
+rule/memory estimates always run in the feasibility stage so `SIM040`/`SIM041` do not depend on `--stats`; the
+full statistics record (including structure partition counts) is materialized and returned only when
+`--stats` is requested.
 
 ```csharp
 public sealed record ModelStatistics(
@@ -417,8 +419,8 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 - Target on a laptop for the ceria sample:
   - `validate` without statistics: `< 200 ms`;
   - `validate --stats`: `< 2 s`;
-  - a model with 10k P1 positions: validation completes without pathological memory growth; statistics may be
-    slower and are opt-in.
+  - a model with 10k P1 positions: validation completes without pathological memory growth; materializing the
+    full statistics record remains opt-in.
 - Cancellation is checked between stages, per transition in the cross-domain stage, per simulation in the
   feasibility stage, and before and after each statistics preview call. The preview-service methods themselves
   take no `CancellationToken` in Steps 03–06, so one preview call is atomic; adding tokens to those interfaces
@@ -451,6 +453,9 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
   The descriptor record therefore sits with the other Core diagnostic contracts; `DiagnosticCatalog` remains in
   `Mocassin.Packages.Projects.Validation` and composes the three descriptor sets. Public API and behaviour are
   unchanged from the reviewed design.
+- `SIM040`/`SIM041` need the preview estimates even without `--stats`, so the feasibility stage always computes
+  the rule/memory estimates and only withholds the full `ModelStatistics` object when statistics were not
+  requested. This keeps `--stats` from changing diagnostics without making the statistics record mandatory.
 - `model-statistics` was implemented before `cross-domain-validation` so the `SIM040`/`SIM041` budget errors in
   the feasibility stage can consume the statistics estimates directly. The feature set is unchanged.
 
