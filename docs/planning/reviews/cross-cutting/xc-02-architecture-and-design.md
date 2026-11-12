@@ -997,3 +997,12 @@ Follow-up step: The phase gate may proceed with `Passed with notes` if the human
 carried F-05/F-06 notes. Step 08 may consume the corrected sampler, but its own design review and the planned
 preview-versus-compiled cross-check still apply. Statistical parity (Step 29) and Step 08 implementation were
 not run and are outside this review.
+
+## Round 4 note disposition
+
+| Finding | Status | Owner | Follow-up |
+| --- | --- | --- | --- |
+| R4-F1 | Accepted note | Phase B orchestrator / Step 08 | The reciprocal-only rule is documented and probed; add a direct barium-zirconate assertion that the 12 one-way H–H matches stay achiral/partnerless, and document the lexicographic tie-break if multiple reciprocal matches ever occur. |
+
+No Blocker or Major remains. XC-02 round 4 is **Passed with notes**; the Phase B gate awaits human-owner
+acceptance alongside XC-01 and XC-03.
