@@ -61,19 +61,19 @@ Status legend:
 | State changes [D,A] | Y | Partial | 04/24 | Model, validation, persistence, preview, and editor API in 04; editor UI in 24 |
 | State-change groups | Y | Partial | 04/24 | Mixed physical/charge and stable/unstable roles rejected; editor UI in 24 |
 | Abstract chains with D/S linkers | Y | Partial | 04/24 | Six patterns + custom grammar; `D S D` rejected; editor UI in 24 |
-| 2-site MMC | Y | Partial | 04/08/17 | Model, validation, and preview in 04; rules in 08/17 |
-| 3-site KMC migration | Y | Partial | 04/08/16 | Model, path validation, and preview in 04; rules in 08/16 |
+| 2-site MMC | Y | Partial | 04/08/17 | Model, validation, and preview in 04; exchange rules in 08/17 |
+| 3-site KMC migration | Y | Partial | 04/08/16 | Model, path validation, and preview in 04; rules and dual-DOF intent in 08/16 |
 | 5-site interstitialcy | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; rules in 08 |
 | 7-site interstitialcy | Y | Partial | 04/08 | Model, path validation, and preview in 04; rules in 08 |
-| 5-site 2-species vehicle | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; rules in 08 |
-| 6-site 2-species vehicle | Y | Partial | 04/08 | Model, path validation, and preview in 04; rules in 08 |
-| Charge transfer/polaron hop | Y | Partial | 04/08 | Homogeneous charge-state groups and sample in 04; rules in 08 |
-| Reverse rule generation (2/3-site) | Y | Planned | 08 | |
-| No reverse for complex mechanisms | Y | Planned | 08 | Explicit warning |
-| Dependent/hidden rules | Y | Planned | 08 | |
+| 5-site 2-species vehicle | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; unidirectional rules in 08 |
+| 6-site 2-species vehicle | Y | Partial | 04/08 | Model, path validation, and preview in 04; unidirectional rules in 08 |
+| Charge transfer/polaron hop | Y | Partial | 04/08 | Homogeneous charge-state groups and sample in 04; conservation/rules in 08 |
+| Reverse rule generation (2/3-site) | Y | Planned | 08 | Auto-inverse for `Metropolis2`/`Migration3`; explicit reverse stays separate |
+| No reverse for complex mechanisms | Y | Planned | 08 | `GeneratesReverse` validated in 04; no auto-inverse in 08 |
+| Dependent/hidden rules | Y | Planned | 08 | Symmetry-equivalent start instances; deduplicated and counted |
 | Reference path editing/preview | Y | Partial | 04/24 | Preview API in 04; editor UI in 24 |
-| Ambiguity detection | Y | Improvement | 08 | Compile-time error |
-| Transition rule count preview | N | Improvement | 24 | |
+| Ambiguity detection | Y | Improvement | 08 | Compile-time `CMP004` with both identities |
+| Transition rule count preview | N | Improvement | 24 | Step 07 statistics are advisory; Step 08 is authoritative |
 
 ## 4. Energy and lattice
 
@@ -83,8 +83,8 @@ Status legend:
 | Hollow-sphere filters | Y | Partial | 05/25 | Model, validation, and samples in 05; editor UI in 25 |
 | Per-unstable-site environments | Y | Partial | 05/25 | Model, validation, and samples in 05; editor UI in 25 |
 | Auto-sampled pair interactions | Y | Partial | 05/08 | Shared sampling kernel and preview in 05; compiled tables in 08 |
-| Chiral pair linking | Y | Partial | 05/08/09 | Shell chiral linking in 02; shared `EnergyId` preview in 05; compiled/template binding in 08/09 |
-| Group/cluster interactions (up to 9 positions) | Y | Partial | 05/08 | Model, geometry validation, cost preview, and samples in 05; tables in 08 |
+| Chiral pair linking | Y | Partial | 05/08/09 | Shell chiral linking in 02; shared `EnergyId` preview in 05; compiled tables in 08; template binding in 09 |
+| Group/cluster interactions (up to 9 positions) | Y | Partial | 05/08 | Model, geometry validation, cost preview, and samples in 05; canonical tables in 08 |
 | Site/defect energies | Y | Partial | 05/25 | Model, validation, editing, and samples in 05; editor UI in 25 |
 | Cost/permutation limits | Y | Implemented | 05/07 | Limits, diagnostics, preview, consolidated statistics, and docs |
 | Cluster geometry editor/preview | Y | Partial | 05/25 | Preview API in 05; editor UI in 25 |
@@ -97,7 +97,27 @@ Status legend:
 | Deterministic lattice generation | Y | Improvement | 10 | Fixes shared crypto RNG |
 | Doping preview (requested vs applied) | Y | Improvement | 25 | |
 
-## 5. Simulations, templates, and builds
+## 5. Compilation pipeline
+
+| Feature | Req | Status | Step | Notes |
+| --- | :---: | --- | --- | --- |
+| Pure compiled model API | Y | Planned | 08 | Synchronous `IModelCompiler` with diagnostics, counts, signatures, cancellation |
+| P1-extended dense compiled model | Y | Planned | 08 | Canonical P indices, dense particle/site/table indices, stable IDs |
+| Auto-sampled pair tables | Y | Planned | 08 | Shares Step 05 sampling/reduction kernel; canonical shell order |
+| Chiral pair linking in compiled tables | Y | Planned | 08/09 | Shared `EnergyId`; one table/value per chiral pair |
+| Cluster tables and occupation codes | Y | Planned | 08 | Point-group canonicalization; 6-bit codes; expansion maps |
+| Forward/inverse/dependent rules | Y | Planned | 08 | Auto-inverse only for `Metropolis2`/`Migration3`; dependent instances for symmetry-equivalent starts |
+| Mass/charge conservation filtering | Y | Planned | 08 | Rejected counts reported; charge-transfer symbols balanced |
+| Rule ambiguity detection | Y | Improvement | 08 | Compile-time `CMP004`; original failed at runtime |
+| Unreferenced transition warning | N | Improvement | 08 | `CMP009` |
+| Simulation encoding / tracker definitions | Y | Planned | 08/18 | Collections, directions, mappings, intent; Step 18 owns state |
+| Compiled-model signature | Y | Improvement | 08/09 | Geometry/rules signature distinct from parameterization signature |
+| Compilation diagnostics/report | Y | Improvement | 08 | `CMP` catalog, counts, timings, input hashes, cache statistics |
+| Compilation stage cache | N | Improvement | 08 | Content-hash keys; per-compilation default, optional caller cache |
+| Compiled-model JSON inspection | N | Improvement | 08/12 | `compiled-inspection-v1`; `mocassin compile` in 12 |
+| Headless `mocassin compile` | Y | Planned | 12 | Step 08 library only; Step 12 owns the command |
+
+## 6. Simulations, templates, and builds
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
@@ -109,7 +129,7 @@ Status legend:
 | Pair/group energy editing | Y | Planned | 09/26 | |
 | Attempt frequency editing | Y | Planned | 09/26 | |
 | Chiral linked editing | Y | Planned | 09/26 | Shared `EnergyId`; one value per chiral pair |
-| Stable model signature | Y | Improvement | 09 | SHA-256 |
+| Stable model signature | Y | Improvement | 08/09 | Compiled geometry/rules signature in 08; parameterization signature in 09 |
 | Template rebase/migration | Y | Planned | 09/26 | Diff + report |
 | Site energy overrides in template | N | Improvement | 09 | Original limitation removed |
 | Job collections/configs | Y | Planned | 10 | |
@@ -125,7 +145,7 @@ Status legend:
 | Package inspection/verification | Y | Improvement | 11/12 | |
 | Build history | N | Improvement | 26 | |
 
-## 6. Solver
+## 7. Solver
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
@@ -152,7 +172,7 @@ Status legend:
 | MPI inside solver | N | Out of scope | — | Job-level parallelism |
 | GPU acceleration | N | Deferred | post-1.0 | Not in original |
 
-## 7. Results and analysis
+## 8. Results and analysis
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
@@ -182,7 +202,7 @@ Status legend:
 | Python package release | Y | Planned | 31 | Wheel/sdist or PyPI |
 | Legacy `.mcs` read | N | Out of scope | — | ADR 0001 |
 
-## 8. GUI
+## 9. GUI
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
@@ -213,7 +233,7 @@ Status legend:
 | Numeric expression input | Y | Planned | 24/25 | |
 | Localization | N | Deferred | post-1.0 | Invariant first; resources ready |
 
-## 9. Platform, packaging, and quality
+## 10. Platform, packaging, and quality
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
@@ -250,7 +270,7 @@ Status legend:
 | MIT + original GPL attribution/notices | Y | Implemented | 00 | `LICENSE`, `NOTICE.md`, and SPDX headers |
 | Legacy file migration | N | Out of scope | — | Owner decision |
 
-## 10. Known original defects fixed by the plan
+## 11. Known original defects fixed by the plan
 
 | Defect | New handling | Step |
 | --- | --- | --- |
@@ -259,7 +279,11 @@ Status legend:
 | Tolerance-based sorted sets/hash inconsistency | Exact rational geometry; no tolerant hashing | 02 |
 | `Vector4I.P` order dependent on DB/tolerance | Canonical position order contract | 02 |
 | `PcgRandom32` seed swap/NextBytes/NextDouble bugs | New ChaCha12 RNG + tests | 13 |
-| Randomized `string.GetHashCode` model hash | SHA-256 canonical model hash | 09 |
+| Randomized `string.GetHashCode` model hash | SHA-256 canonical model hash | 08/09 |
+| Whole-cache invalidation after one edit | Content-hash stage caches + invalidation tests | 08 |
+| O(R²) inverse/dependent rule pairing | Hash-map rule lookup + deduplication | 08 |
+| Ambiguous end-state/rule selection at runtime | Compile-time `CMP004` ambiguity error | 08 |
+| Uncounted hidden/dependent rules | Explicit forward/inverse/dependent counts | 08 |
 | Non-deterministic/shared lattice RNG | Per-job domain-separated seeds | 10 |
 | Unstable lattice positions left uninitialized | Explicit void initialization | 10 |
 | Optimizer mask inverted/double-applied | Correct single application + tests | 10 |

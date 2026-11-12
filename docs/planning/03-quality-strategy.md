@@ -225,16 +225,28 @@ reduction suites are nightly/release.
 ### 9.3 Compilation
 
 - Golden compiled models for ceria, barium zirconate, and a vehicle/interstitialcy model. A golden file
-  records counts, indices, interaction energies, rule state triplets, and tracker mappings.
+  records counts, indices, pair/cluster tables, rule state triplets, tracker mappings, derived solver intent,
+  and the model signature.
 - Invariants:
-  - every active transition rule has valid particle indices;
-  - mass and charge are conserved per rule (except explicitly allowed charge-transfer rules);
-  - every rule has a corresponding direction and collection entry;
-  - every stable pair interaction has a table entry;
-  - every cluster permutation maps to a valid occupation code;
-  - P1 counts match brute-force expansion.
-- Determinism: compiling the same model twice yields byte-identical payloads.
-- Cache invalidation tests edit one domain at a time and assert only the affected stages are rebuilt.
+  - every active transition rule has valid particle indices and a reachable direction/collection entry;
+  - mass and charge are conserved per rule (except explicitly allowed charge-transfer rules, which preserve
+    the carrier-symbol multiset across the path);
+  - every stable pair interaction has a table entry and every environment link points to a valid table;
+  - every cluster permutation maps to a canonical occupation code and a valid table row;
+  - P1 counts match brute-force expansion, and pair/cluster counts match the Step 05 preview services;
+  - within one collection, `state0` maps to at most one rule; ambiguity is `CMP004`;
+  - `jump_count`/`jump_mapping` are dense, consistent, and list only selectable directions;
+  - `UseDualDofCorrection`, `UsePrerun`, and kind match the documented derivation and Step 11 flag mapping.
+- Determinism: compiling the same model twice yields byte-identical `CompiledModelJson` and the same
+  `ModelSignature` on Ubuntu, Windows, and macOS; runtime settings and parameterization values do not change
+  the model signature.
+- Cache: a recording cache proves the invalidation graph after editing one domain at a time; unaffected
+  stages are reused and the output is unchanged.
+- Diagnostics: every `CMP` code has a catalog descriptor, documentation anchor, and an emission test with
+  severity, `ModelPath`, and hint.
+- Cancellation: a cancelled compile returns no partial model and leaves the project unchanged.
+- Performance on the benchmark laptop class (8 physical cores, 32 GB RAM, .NET 10 Release): ceria
+  `< 1 s`; a 10k-position model `< 30 s` and `< 2 GiB` managed memory; cancellation check within 250 ms.
 
 ### 9.4 Supercell and doping
 
@@ -410,6 +422,8 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 
 | Scenario | Target |
 | --- | --- |
+| Compile ceria model (Step 08, no jobs) | < 1 s on the benchmark laptop class |
+| Compile 10k P1-position model (Step 08) | < 30 s, < 2 GiB managed memory |
 | Build compiled model (ceria, 100 jobs) | < 5 s on a 4-core laptop |
 | Build 10⁴ small jobs | < 10 min, < 2 GB peak RSS |
 | Load `.msl` and start job | < 100 ms |
