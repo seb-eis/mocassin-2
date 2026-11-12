@@ -1,0 +1,19 @@
+{
+  "step": "step-07",
+  "audit_commit": "4d0fa537f6239ffd61fbcb464b9eb9d1ce876d54",
+  "closeout_ci": {
+    "run_id": "43115061587",
+    "head_sha": "4d0fa537f6239ffd61fbcb464b9eb9d1ce876d54"
+  },
+  "main_sha_at_freeze": "5b1eb7496f856660f90f4bb358bd3cbd1d95165d",
+  "merge_candidate": "4d0fa537f6239ffd61fbcb464b9eb9d1ce876d54",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "notes": [
+    "The audited commit is the closeout squash commit. Only the audit record, closeout evidence, and status/resolution documentation follow it.",
+    "The closeout CI run is the single manual Ubuntu dispatch for this step; no per-feature CI ran.",
+    "Main did not move after the step branch was created; no merge-tree CI was required."
+  ]
+}

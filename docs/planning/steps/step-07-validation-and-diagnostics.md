@@ -9,12 +9,12 @@ headless `mocassin validate` command.
 
 - **Status:** In audit
 - **Step branch:** `step/07-validation-and-diagnostics`
-- **Step CI:** closeout run pending
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43115061587)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Requested — `docs/planning/audits/step-07.md`
+- **Audit:** Requested — [audit record](../audits/step-07.md) (Ready for audit)
 - **Design review:** Ready for implementation at `31b53e8` — [review record](../reviews/step-07.md) `2d01f3e` (rounds 1–4; no Blocker/Major remaining; human approval 2026-11-11)
-- **Last updated:** 2026-11-11
+- **Last updated:** 2026-11-12
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
