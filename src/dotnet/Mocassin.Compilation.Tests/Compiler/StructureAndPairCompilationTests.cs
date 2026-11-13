@@ -115,3 +115,56 @@ public sealed class PairPreviewCrossCheckTests
             energy.PairTables.Length);
     }
 }
+
+/// <summary>
+/// Covers canonical cluster tables and their bounded pre-check.
+/// </summary>
+[Trait("Tier", "PR-fast")]
+public sealed class ClusterCompilationTests
+{
+    [Fact]
+    public async Task CeriaClusterCompilesToSortedCanonicalOccupations()
+    {
+        var project = await StageTestSupport.LoadProjectAsync("samples/ceria/ceria.mocprj");
+
+        var (context, diagnostics) = StageTestSupport.Run(project, StageTestSupport.ClusterStages());
+        var preview = new Mocassin.Symmetry.Energy.EnergyPreviewService()
+            .TryCreatePreview(project.Model, 1, 1, 1, out _);
+
+        Assert.Empty(diagnostics.Where(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error));
+        var energy = Assert.IsType<Mocassin.Compilation.Energy.CompiledEnergyModel>(context.Energy);
+        var table = Assert.Single(energy.ClusterTables);
+        Assert.NotEmpty(table.Occupations);
+        Assert.Equal(
+            preview!.ClusterCosts.Single().UniquePermutationCount,
+            table.OccupationCount);
+        Assert.Equal(
+            table.Occupations.Select(static occupation => occupation.CanonicalCode).Order(),
+            table.Occupations.Select(static occupation => occupation.CanonicalCode));
+        Assert.All(table.Energies, static value => Assert.Equal(0.0, value));
+        Assert.All(table.Occupations, occupation =>
+        {
+            Assert.Equal(Mocassin.Symmetry.Reduction.ClusterReduction.EncodeOccupation(occupation.CanonicalTuple), occupation.CanonicalCode);
+            Assert.NotEmpty(occupation.Expansions);
+        });
+        Assert.All(
+            context.Structure!.Sites[table.CenterSiteIndex].PositionIndices,
+            p => Assert.Contains(
+                context.Structure.Positions[p].ClusterLinks,
+                link => link.ClusterTableIndex == table.Index && link.SiteSlot == 0));
+    }
+
+    [Fact]
+    public async Task ClusterTupleLimitFailsWithCmp006()
+    {
+        var project = await StageTestSupport.LoadProjectAsync("samples/ceria/ceria.mocprj");
+
+        var (_, diagnostics) = StageTestSupport.Run(
+            project,
+            new CompilationOptions { MaxClusterTupleCount = 0 },
+            StageTestSupport.ClusterStages());
+
+        Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == "CMP006");
+        Assert.Contains(diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+}

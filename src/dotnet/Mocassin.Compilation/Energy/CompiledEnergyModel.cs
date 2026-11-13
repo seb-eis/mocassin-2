@@ -67,14 +67,16 @@ public sealed record CompiledPairTable(
 /// </summary>
 /// <param name="PairGeometries">The directed pair geometries in canonical shell order.</param>
 /// <param name="PairTables">The shared pair tables in canonical shell order.</param>
+/// <param name="ClusterTables">The shared cluster tables in ascending cluster identifier order.</param>
 public sealed record CompiledEnergyModel(
     ImmutableArray<CompiledPairGeometry> PairGeometries,
-    ImmutableArray<CompiledPairTable> PairTables)
+    ImmutableArray<CompiledPairTable> PairTables,
+    ImmutableArray<CompiledClusterTable> ClusterTables)
 {
     /// <summary>
     /// Gets the empty compiled energy model.
     /// </summary>
-    public static CompiledEnergyModel Empty { get; } = new([], []);
+    public static CompiledEnergyModel Empty { get; } = new([], [], []);
 
     /// <summary>
     /// Gets the number of directed pair geometries.
@@ -85,4 +87,14 @@ public sealed record CompiledEnergyModel(
     /// Gets the number of shared pair tables.
     /// </summary>
     public int PairTableCount => PairTables.Length;
+
+    /// <summary>
+    /// Gets the number of shared cluster tables.
+    /// </summary>
+    public int ClusterTableCount => ClusterTables.Length;
+
+    /// <summary>
+    /// Gets the total number of canonical cluster occupations.
+    /// </summary>
+    public int ClusterOccupationCount => ClusterTables.Sum(static table => table.OccupationCount);
 }

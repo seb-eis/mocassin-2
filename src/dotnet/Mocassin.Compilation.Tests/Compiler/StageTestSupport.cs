@@ -34,9 +34,22 @@ internal static class StageTestSupport
     /// <returns>The final context and the accumulated diagnostics.</returns>
     public static (CompilationContext Context, ImmutableArray<Diagnostic> Diagnostics) Run(
         Project project,
+        params ICompilationStage[] stages) =>
+        Run(project, CompilationOptions.Default, stages);
+
+    /// <summary>
+    /// Runs the supplied stages in order with explicit options.
+    /// </summary>
+    /// <param name="project">The project to compile.</param>
+    /// <param name="options">The compilation options.</param>
+    /// <param name="stages">The stage sequence.</param>
+    /// <returns>The final context and the accumulated diagnostics.</returns>
+    public static (CompilationContext Context, ImmutableArray<Diagnostic> Diagnostics) Run(
+        Project project,
+        CompilationOptions options,
         params ICompilationStage[] stages)
     {
-        var context = new CompilationContext(project, CompilationOptions.Default);
+        var context = new CompilationContext(project, options);
         var diagnostics = ImmutableArray.CreateBuilder<Diagnostic>();
         foreach (var stage in stages)
         {
@@ -63,5 +76,15 @@ internal static class StageTestSupport
         new StructureCompilationStage(),
         new EnvironmentCompilationStage(),
         new PairCompilationStage(),
+    ];
+
+    /// <summary>
+    /// Creates the cluster stage prefix.
+    /// </summary>
+    /// <returns>The ordered stages.</returns>
+    public static ICompilationStage[] ClusterStages() =>
+    [
+        .. StructureAndPairStages(),
+        new ClusterCompilationStage(),
     ];
 }

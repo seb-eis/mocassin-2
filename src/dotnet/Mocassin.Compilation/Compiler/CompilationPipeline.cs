@@ -38,7 +38,7 @@ internal static class CompilationPipeline
         new StructureCompilationStage(),
         new EnvironmentCompilationStage(),
         new PairCompilationStage(),
-        new UnavailableCompilationStage(CompilationStage.Clusters),
+        new ClusterCompilationStage(),
         new UnavailableCompilationStage(CompilationStage.Rules),
         new UnavailableCompilationStage(CompilationStage.Encoding),
         new UnavailableCompilationStage(CompilationStage.Indexing),

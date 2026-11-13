@@ -110,10 +110,60 @@ Mocassin.Compilation.Compiler.IModelCompiler.Compile(Mocassin.Core.Project.Proje
 Mocassin.Compilation.Compiler.ModelCompiler
 Mocassin.Compilation.Compiler.ModelCompiler.Compile(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompilationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Compilation.Compiler.CompilationResult!
 Mocassin.Compilation.Compiler.ModelCompiler.ModelCompiler() -> void
+Mocassin.Compilation.Energy.CompiledClusterExpansion
+Mocassin.Compilation.Energy.CompiledClusterExpansion.<Clone>$() -> Mocassin.Compilation.Energy.CompiledClusterExpansion!
+Mocassin.Compilation.Energy.CompiledClusterExpansion.CompiledClusterExpansion(ulong OccupationCode, int PermutationIndex) -> void
+Mocassin.Compilation.Energy.CompiledClusterExpansion.Deconstruct(out ulong OccupationCode, out int PermutationIndex) -> void
+Mocassin.Compilation.Energy.CompiledClusterExpansion.Equals(Mocassin.Compilation.Energy.CompiledClusterExpansion? other) -> bool
+Mocassin.Compilation.Energy.CompiledClusterExpansion.OccupationCode.get -> ulong
+Mocassin.Compilation.Energy.CompiledClusterExpansion.OccupationCode.init -> void
+Mocassin.Compilation.Energy.CompiledClusterExpansion.PermutationIndex.get -> int
+Mocassin.Compilation.Energy.CompiledClusterExpansion.PermutationIndex.init -> void
+Mocassin.Compilation.Energy.CompiledClusterOccupation
+Mocassin.Compilation.Energy.CompiledClusterOccupation.<Clone>$() -> Mocassin.Compilation.Energy.CompiledClusterOccupation!
+Mocassin.Compilation.Energy.CompiledClusterOccupation.CanonicalCode.get -> ulong
+Mocassin.Compilation.Energy.CompiledClusterOccupation.CanonicalCode.init -> void
+Mocassin.Compilation.Energy.CompiledClusterOccupation.CanonicalTuple.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Energy.CompiledClusterOccupation.CanonicalTuple.init -> void
+Mocassin.Compilation.Energy.CompiledClusterOccupation.CompiledClusterOccupation(ulong CanonicalCode, System.Collections.Immutable.ImmutableArray<int> CanonicalTuple, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledClusterExpansion!> Expansions) -> void
+Mocassin.Compilation.Energy.CompiledClusterOccupation.Deconstruct(out ulong CanonicalCode, out System.Collections.Immutable.ImmutableArray<int> CanonicalTuple, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledClusterExpansion!> Expansions) -> void
+Mocassin.Compilation.Energy.CompiledClusterOccupation.Equals(Mocassin.Compilation.Energy.CompiledClusterOccupation? other) -> bool
+Mocassin.Compilation.Energy.CompiledClusterOccupation.Expansions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledClusterExpansion!>
+Mocassin.Compilation.Energy.CompiledClusterOccupation.Expansions.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable
+Mocassin.Compilation.Energy.CompiledClusterTable.<Clone>$() -> Mocassin.Compilation.Energy.CompiledClusterTable!
+Mocassin.Compilation.Energy.CompiledClusterTable.CenterP.get -> int
+Mocassin.Compilation.Energy.CompiledClusterTable.CenterP.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.CenterSiteIndex.get -> int
+Mocassin.Compilation.Energy.CompiledClusterTable.CenterSiteIndex.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.ClusterEnergyId.get -> string!
+Mocassin.Compilation.Energy.CompiledClusterTable.ClusterEnergyId.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.ClusterId.get -> Mocassin.Core.Ids.ClusterId
+Mocassin.Compilation.Energy.CompiledClusterTable.ClusterId.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.CompiledClusterTable(int Index, string! ClusterEnergyId, Mocassin.Core.Ids.ClusterId ClusterId, int CenterSiteIndex, int CenterP, System.Collections.Immutable.ImmutableArray<int> SitePIndices, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I> GeometryEncodings, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledClusterOccupation!> Occupations, System.Collections.Immutable.ImmutableArray<double> Energies, System.Collections.Immutable.ImmutableArray<int> ParticleTableMapping) -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.Deconstruct(out int Index, out string! ClusterEnergyId, out Mocassin.Core.Ids.ClusterId ClusterId, out int CenterSiteIndex, out int CenterP, out System.Collections.Immutable.ImmutableArray<int> SitePIndices, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I> GeometryEncodings, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledClusterOccupation!> Occupations, out System.Collections.Immutable.ImmutableArray<double> Energies, out System.Collections.Immutable.ImmutableArray<int> ParticleTableMapping) -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.Energies.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Compilation.Energy.CompiledClusterTable.Energies.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.Equals(Mocassin.Compilation.Energy.CompiledClusterTable? other) -> bool
+Mocassin.Compilation.Energy.CompiledClusterTable.GeometryEncodings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I>
+Mocassin.Compilation.Energy.CompiledClusterTable.GeometryEncodings.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.Index.get -> int
+Mocassin.Compilation.Energy.CompiledClusterTable.Index.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.OccupationCount.get -> int
+Mocassin.Compilation.Energy.CompiledClusterTable.Occupations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledClusterOccupation!>
+Mocassin.Compilation.Energy.CompiledClusterTable.Occupations.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.ParticleTableMapping.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Energy.CompiledClusterTable.ParticleTableMapping.init -> void
+Mocassin.Compilation.Energy.CompiledClusterTable.SitePIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Energy.CompiledClusterTable.SitePIndices.init -> void
 Mocassin.Compilation.Energy.CompiledEnergyModel
 Mocassin.Compilation.Energy.CompiledEnergyModel.<Clone>$() -> Mocassin.Compilation.Energy.CompiledEnergyModel!
-Mocassin.Compilation.Energy.CompiledEnergyModel.CompiledEnergyModel(System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairGeometry!> PairGeometries, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairTable!> PairTables) -> void
-Mocassin.Compilation.Energy.CompiledEnergyModel.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairGeometry!> PairGeometries, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairTable!> PairTables) -> void
+Mocassin.Compilation.Energy.CompiledEnergyModel.ClusterOccupationCount.get -> int
+Mocassin.Compilation.Energy.CompiledEnergyModel.ClusterTableCount.get -> int
+Mocassin.Compilation.Energy.CompiledEnergyModel.ClusterTables.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledClusterTable!>
+Mocassin.Compilation.Energy.CompiledEnergyModel.ClusterTables.init -> void
+Mocassin.Compilation.Energy.CompiledEnergyModel.CompiledEnergyModel(System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairGeometry!> PairGeometries, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairTable!> PairTables, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledClusterTable!> ClusterTables) -> void
+Mocassin.Compilation.Energy.CompiledEnergyModel.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairGeometry!> PairGeometries, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairTable!> PairTables, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledClusterTable!> ClusterTables) -> void
 Mocassin.Compilation.Energy.CompiledEnergyModel.Equals(Mocassin.Compilation.Energy.CompiledEnergyModel? other) -> bool
 Mocassin.Compilation.Energy.CompiledEnergyModel.PairGeometries.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairGeometry!>
 Mocassin.Compilation.Energy.CompiledEnergyModel.PairGeometries.init -> void
@@ -319,6 +369,15 @@ override Mocassin.Compilation.Compiler.CompilationStageResult.ToString() -> stri
 override Mocassin.Compilation.Compiler.CompiledModel.Equals(object? obj) -> bool
 override Mocassin.Compilation.Compiler.CompiledModel.GetHashCode() -> int
 override Mocassin.Compilation.Compiler.CompiledModel.ToString() -> string!
+override Mocassin.Compilation.Energy.CompiledClusterExpansion.Equals(object? obj) -> bool
+override Mocassin.Compilation.Energy.CompiledClusterExpansion.GetHashCode() -> int
+override Mocassin.Compilation.Energy.CompiledClusterExpansion.ToString() -> string!
+override Mocassin.Compilation.Energy.CompiledClusterOccupation.Equals(object? obj) -> bool
+override Mocassin.Compilation.Energy.CompiledClusterOccupation.GetHashCode() -> int
+override Mocassin.Compilation.Energy.CompiledClusterOccupation.ToString() -> string!
+override Mocassin.Compilation.Energy.CompiledClusterTable.Equals(object? obj) -> bool
+override Mocassin.Compilation.Energy.CompiledClusterTable.GetHashCode() -> int
+override Mocassin.Compilation.Energy.CompiledClusterTable.ToString() -> string!
 override Mocassin.Compilation.Energy.CompiledEnergyModel.Equals(object? obj) -> bool
 override Mocassin.Compilation.Energy.CompiledEnergyModel.GetHashCode() -> int
 override Mocassin.Compilation.Energy.CompiledEnergyModel.ToString() -> string!
@@ -366,6 +425,12 @@ static Mocassin.Compilation.Compiler.CompilationStageResult.operator !=(Mocassin
 static Mocassin.Compilation.Compiler.CompilationStageResult.operator ==(Mocassin.Compilation.Compiler.CompilationStageResult? left, Mocassin.Compilation.Compiler.CompilationStageResult? right) -> bool
 static Mocassin.Compilation.Compiler.CompiledModel.operator !=(Mocassin.Compilation.Compiler.CompiledModel? left, Mocassin.Compilation.Compiler.CompiledModel? right) -> bool
 static Mocassin.Compilation.Compiler.CompiledModel.operator ==(Mocassin.Compilation.Compiler.CompiledModel? left, Mocassin.Compilation.Compiler.CompiledModel? right) -> bool
+static Mocassin.Compilation.Energy.CompiledClusterExpansion.operator !=(Mocassin.Compilation.Energy.CompiledClusterExpansion? left, Mocassin.Compilation.Energy.CompiledClusterExpansion? right) -> bool
+static Mocassin.Compilation.Energy.CompiledClusterExpansion.operator ==(Mocassin.Compilation.Energy.CompiledClusterExpansion? left, Mocassin.Compilation.Energy.CompiledClusterExpansion? right) -> bool
+static Mocassin.Compilation.Energy.CompiledClusterOccupation.operator !=(Mocassin.Compilation.Energy.CompiledClusterOccupation? left, Mocassin.Compilation.Energy.CompiledClusterOccupation? right) -> bool
+static Mocassin.Compilation.Energy.CompiledClusterOccupation.operator ==(Mocassin.Compilation.Energy.CompiledClusterOccupation? left, Mocassin.Compilation.Energy.CompiledClusterOccupation? right) -> bool
+static Mocassin.Compilation.Energy.CompiledClusterTable.operator !=(Mocassin.Compilation.Energy.CompiledClusterTable? left, Mocassin.Compilation.Energy.CompiledClusterTable? right) -> bool
+static Mocassin.Compilation.Energy.CompiledClusterTable.operator ==(Mocassin.Compilation.Energy.CompiledClusterTable? left, Mocassin.Compilation.Energy.CompiledClusterTable? right) -> bool
 static Mocassin.Compilation.Energy.CompiledEnergyModel.Empty.get -> Mocassin.Compilation.Energy.CompiledEnergyModel!
 static Mocassin.Compilation.Energy.CompiledEnergyModel.operator !=(Mocassin.Compilation.Energy.CompiledEnergyModel? left, Mocassin.Compilation.Energy.CompiledEnergyModel? right) -> bool
 static Mocassin.Compilation.Energy.CompiledEnergyModel.operator ==(Mocassin.Compilation.Energy.CompiledEnergyModel? left, Mocassin.Compilation.Energy.CompiledEnergyModel? right) -> bool

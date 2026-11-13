@@ -21,8 +21,8 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | `compiler-core` | `feature/step-08-model-compilation-pipeline/compiler-core` | Done | `verify.sh dotnet` (932 tests), `structure`, `api`, `contracts`, `docs` pass | — | `1deb182` |
-| `structure-and-pair-compilation` | `feature/step-08-model-compilation-pipeline/structure-and-pair-compilation` | Done | `verify.sh dotnet` (939 tests), `structure`, `api`, `contracts` pass | — | — |
-| `cluster-compilation` | `feature/step-08-model-compilation-pipeline/cluster-compilation` | Not started | — | — | — |
+| `structure-and-pair-compilation` | `feature/step-08-model-compilation-pipeline/structure-and-pair-compilation` | Done | `verify.sh dotnet` (939 tests), `structure`, `api`, `contracts` pass | — | `4280773` |
+| `cluster-compilation` | `feature/step-08-model-compilation-pipeline/cluster-compilation` | Done | `verify.sh dotnet` (943 tests), `structure`, `api`, `contracts` pass | — | — |
 | `transition-rule-compilation` | `feature/step-08-model-compilation-pipeline/transition-rule-compilation` | Not started | — | — | — |
 | `simulation-encoding` | `feature/step-08-model-compilation-pipeline/simulation-encoding` | Not started | — | — | — |
 | `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Not started | — | — | — |

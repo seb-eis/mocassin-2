@@ -117,7 +117,7 @@ internal sealed class PairCompilationStage : ICompilationStage
             })
             .ToImmutableArray();
         var structure = context.Structure with { Positions = positions };
-        var energy = new CompiledEnergyModel(geometries.MoveToImmutable(), tables.ToImmutable());
+        var energy = new CompiledEnergyModel(geometries.MoveToImmutable(), tables.ToImmutable(), []);
         return new CompilationStageOutcome(context with { Structure = structure, Energy = energy }, diagnostics);
     }
 
