@@ -258,6 +258,12 @@ The step agent records resolutions here without altering reviewer text.
 | N5-2 | Checker step names `model-v1.json` and compares `fixtureFormat` metadata. | this commit |
 | R4/N4 overstatement correction | R5-3 now actually adds the checklist entries; the earlier R4-3/N4-1/N4-2/N4-3/N4-5 rows are superseded by the round-5 entries. | this commit |
 
+| R6-1 | Documentation checklist now explicitly lists `tools/contracts/README.md`, the toolchain row, and the `verify.sh contracts` step. | this commit |
+| R6-2 | Deleted the contradictory “distance bucket is signed” sentence; the bucket is unsigned and only display distance/path length are excluded. | this commit |
+| N6-1 | Primitive list uses typed `WriteUInt64`/`WriteInt64` and `Write(double)` for scalars; `WriteRaw` is limited to forced headers. | this commit |
+| N6-2 | Added the `position.encoding` include rationale. | this commit |
+| N6-3 | Design-review metadata advanced to rounds 1–6/round 7. | this commit |
+
 ## Design-review rounds
 
 ### Review round 1

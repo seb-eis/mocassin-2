@@ -6,9 +6,9 @@
 | --- | --- |
 | Amendment ID | `step-08-amend-1` |
 | Parent step | 08 — Model Compilation Pipeline |
-| Status | Re-review required (round 5 notes resolved; round 6 requested) |
+| Status | Re-review required (round 6 notes resolved; round 7 requested) |
 | Branch | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` |
-| Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–4; round 4 Ready with notes; round 5 requested) |
+| Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–6; round 6 Ready with notes; round 7 requested) |
 | Parent audit | `docs/planning/audits/step-08.md` |
 | Integration commit | — |
 | Combined audit commit | — |
@@ -88,7 +88,8 @@ environments array<environment>, positions array<position>, interactionRange arr
 - `position` is an 11-element array: `[p uint64, encoding encoding, fractional array<float64> (3), siteIndex uint64,
   siteId string, stability int64, allowedParticleMask uint64, environmentIndex uint64, orbitIndex uint64,
   pairLinks array<pairLink>, clusterLinks array<clusterLink>]`.
-- `encoding` = `[cellA int64, cellB int64, cellC int64, p uint64]`.
+- `encoding` = `[cellA int64, cellB int64, cellC int64, p uint64]`. The position encoding is retained as the
+  canonical base-cell `(0,0,0,p)` and cross-checked against `p`.
 - `pairLink` = `[pairTableIndex uint64, targetP uint64, offset encoding, distanceBucketFm uint64]`.
 - `clusterLink` = `[clusterTableIndex uint64, siteSlot uint64]`.
 
@@ -149,8 +150,9 @@ pre-run, break settings, job counts, seeds, and instructions are excluded.
 ### Canonical encoding
 
 The writer is `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` (internal). It uses
-`MessagePackWriter` over an `IBufferWriter<byte>` for buffer management, `WriteUInt64`/`WriteInt64`/`WriteDouble`
-for the fixed-width scalars, and `WriteRaw` for the forced `0xdd`/`0xdb`/`0xc6`/`0xc3`/`0xc2`/`0xc0` headers.
+`MessagePackWriter` over an `IBufferWriter<byte>` for buffer management, the typed `WriteUInt64`/`WriteInt64`
+and `Write(double)` writers for the fixed-width scalars, and `WriteRaw` for the forced
+`0xdd`/`0xdb`/`0xc6`/`0xc3`/`0xc2`/`0xc0` headers.
 It must not call the compact `WriteArrayHeader`/`WriteString` convenience methods or the minimal-width
 `Write(ulong)`/`Write(long)` overloads; those would break the required header bytes. All fixed headers and scalar bytes are
 written through `WriteRaw`/`Advance` exactly as in the table below. The byte rules are:
@@ -186,8 +188,8 @@ written through `WriteRaw`/`Advance` exactly as in the table below. The byte rul
   static correction lands, a new projection version adds a `staticCorrection` field.
 - The distance bucket is unsigned; only signed `movement` and the signed rule charge vector carry physics.
 - No compression, timestamps, diagnostics, timings, cache state, file names, or display-only distances
-  (`DistanceAngstrom`, `pathLength`) are encoded. Only the integer distance bucket is signed. The raw
-  display distance and path length are inspection-only.
+  (`DistanceAngstrom`, `pathLength`) are encoded; the raw display distance and path length are
+  inspection-only, and the distance bucket is unsigned.
 
 ### Cross-language projection fixtures
 
@@ -312,6 +314,9 @@ projection.
 - [ ] `docs/development/compilation-pipeline.md` describes the manifest-driven projection and encoder.
 - [ ] `docs/planning/02-data-contracts.md` §1.3/§3.3 references the explicit projection.
 - [ ] `docs/planning/adr/0010-canonical-messagepack-signatures.md` notes the shared encoder and descriptor.
+- [ ] `tools/contracts/README.md` documents the `msgpack` requirements, checker, and fixture regeneration.
+- [ ] `docs/planning/06-toolchain-requirements.md` records the dev-only `msgpack` row and Step 08 use.
+- [ ] `./tools/verify.sh contracts` installs `tools/contracts/requirements.txt` and runs the projection checker.
 - [ ] Step page, amendment index, status, parity, audit request, and review record updated.
 
 ## Risks and mitigations
@@ -319,9 +324,9 @@ projection.
 | Risk | Mitigation |
 | --- | --- |
 | Manifest schema becomes too large to maintain | Generate the descriptor and validate nested fields in `contracts` tests |
-| C# and Python encoders diverge | Independent vector is part of `contracts` and fails on mismatch |
+| C# and Python encoders diverge | Independent conformance checker is part of `contracts` and fails on mismatch |
 | Signature values change again | Pre-release, no persisted `.msl`; golden vectors regenerated once |
-| MessagePack package adds a dependency | MIT-compatible, already pinned and audited; no Contracts dependency |
+| MessagePack package adds a dependency | MIT-compatible, centrally pinned and approved; no Contracts dependency |
 | Nested arrays are misordered | Manifest order is the only order; no maps for structs; golden vectors pin it |
 
 ## Dependencies
