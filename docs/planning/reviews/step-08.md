@@ -15,7 +15,7 @@
 | Request owner | Design planner (Step 08) |
 | Orchestrator (step agent / planner) | Design planner |
 | Review initiated by | Planner |
-| Reviewed commit | `c676716e88bcdd5e8877938e21ad6950cc2986bb` (round 2; round 1 reviewed `36fbba58182b2e769a6d59b3228a60021344248d`) |
+| Reviewed commit | `b030cfb7d921277f6983651fb451e736cc2f7896` (round 3; round 2 reviewed `c676716e88bcdd5e8877938e21ad6950cc2986bb`; round 1 `36fbba58182b2e769a6d59b3228a60021344248d`) |
 | Docs branch | `docs/step-08-design` |
 | Review date | 2026-11-12 |
 | Reviewer | Independent planning auditor (round 2; fresh context; no shared conversation with the planner or implementor; round 1 was a separate fresh reviewer) |
@@ -351,7 +351,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -440,6 +440,17 @@ round 2 reviewer must re-check the changed design and the dependency pages (Step
 | m8 | Resolved — `CMP009` path domain is `kineticTransition` or `metropolisTransition` by kind | Planner | `c676716` |
 | n1 | Addressed — benchmark/reference task added to the golden/closeout feature | Planner | `c676716` |
 | n2 | Addressed — cache-integrity predicate and injected-entry test defined | Planner | `c676716` |
+
+Round 2 findings were remediated at `b030cfb7d921277f6983651fb451e736cc2f7896`:
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| M2 (residual) | Resolved — field input is now a per-rule Cartesian charge transport vector summed over moving particle identities, not per-node movements; vacancy hops cannot cancel, identical-ion exchange is zero, distinct-charge/non-collinear paths are exact | Planner | `b030cfb` |
+| m6 (residual) | Resolved — remaining `geometry/rules` summaries in `05-open-decisions`, architecture, parity matrix, and Step 08 now say `geometry/rules/encoding`; runtime-only edits are explicitly excluded | Planner | `b030cfb` |
+| m9 | Resolved — `Resolve` is uncached; the graph no longer reuses it. `Indexing` is keyed on structure/particles/tables/rules/simulation and rebuilds for runtime-only edits; `Signing` excludes runtime settings and is reused | Planner | `b030cfb` |
+| n3 | Addressed — Step 10 records the original optimizer rule: clear dual-DOF when at least one selection mask is reduced, keep it otherwise | Planner | `b030cfb` |
+| n4 | Addressed — Step 08 no longer points at the empty approval summary; the waiver is recorded in the review record and status | Planner | `b030cfb` |
+| n5 | Addressed — the task names the `Mocassin.Symmetry` PublicAPI/ApiCompat entries for `TryResolvePoint`/`TryResolvePath` and the new `Mocassin.Compilation` surface | Planner | `b030cfb` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
