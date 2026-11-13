@@ -15,7 +15,7 @@
 | Request owner | Step agent |
 | Orchestrator (step agent / planner) | Step 08 implementor |
 | Review initiated by | Human owner |
-| Reviewed commit | `ebbdd708f09c8d0dba9dc0a6c62374efb2ec1ba0` |
+| Reviewed commit | `4036100f8fae658ce4fc11587aa88eb454aa84d9` |
 | Docs branch | `step/08-model-compilation-pipeline` |
 | Review date | 2026-11-13 |
 | Reviewer | Fresh independent design-review context (DeepSeek V4.1 Flash 1017, OpenCode review subagent); no shared conversation with the planner or implementor |
