@@ -197,11 +197,11 @@ ParameterizedModel.Signature
   runtime settings.
   `ProjectHasher.ComputeSimulationSelection` hashes the referenced simulation transition set so adding/removing
   a reference invalidates rules.
-- Editing structure invalidates everything; editing energy rebuilds environments/pairs/clusters/encoding but
-  reuses structure and rules; editing transitions rebuilds rules/encoding but reuses geometry; changing a
-  simulation's active-transition set rebuilds rules/encoding, while changing runtime settings rebuilds the
-  encoding defaults and the indexed runtime snapshot but not the signature. Tests use a recording cache to
-  prove the graph.
+- Editing structure invalidates everything; editing energy rebuilds environments/pairs/clusters/encoding/indexing
+  and reuses structure and rules, while site-energy-only edits reuse signing because values are excluded;
+  editing transitions rebuilds rules/encoding but reuses geometry; changing a simulation's active-transition
+  set rebuilds rules/encoding, while changing runtime settings rebuilds the encoding defaults and the indexed
+  runtime snapshot but not the signature. Tests use a recording cache to prove the graph.
 - Output order is fixed independently of parallelism, cache insertion, or hash iteration. No parallel
   floating-point reductions. Charge transport vectors are quantized before persistence/signing.
 - Same project/options/versions produce byte-identical `CompiledModelJson` and the same signature across runs

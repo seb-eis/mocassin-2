@@ -15,7 +15,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required at `850e98d6788830ee8599a80df966f075f88112a1` — [review record](../reviews/step-08.md)
+- **Design review:** Re-review required
 - **Last updated:** 2026-11-12
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -628,7 +628,7 @@ ParameterizedModel.Signature
   | --- | --- | --- |
   | Structure/particles | Structure, Environments, Pairs, Clusters, Rules, Encoding, Indexing, Signing | nothing |
   | Energy environments/clusters/filters | Environments, Pairs, Clusters, Encoding (links), Indexing, Signing | Structure, Rules |
-  | Site-energy values only | Encoding (defect background), Indexing (energy hash) | Structure, Pairs, Clusters, Rules, Signing |
+  | Site-energy values only | Environments, Pairs, Clusters, Encoding (links and background), Indexing (energy hash) | Structure, Rules, Signing |
   | Transitions/state changes/chains | Rules, Encoding, Indexing, Signing | Structure, Pairs, Clusters |
   | Simulation active-transition set changes | Rules, Encoding, Indexing, Signing | Structure, Pairs, Clusters |
   | Simulation runtime settings only | Encoding, Indexing (runtime-default snapshot) | Structure, Pairs, Clusters, Rules, Signing |
