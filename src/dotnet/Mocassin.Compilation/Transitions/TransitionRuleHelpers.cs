@@ -58,7 +58,30 @@ internal static class TransitionRuleHelpers
         int[] state2)
     {
         var movement = new Fractional3[direction.Absolute.Length];
+        // The field contribution is the difference of the charge-weighted endpoint moments:
+        //   sum(q(S2) * x(S2)) - sum(q(S0) * x(S0))
+        // over the fixed path nodes. It is independent of how equal particles are paired and
+        // therefore also covers charge-state changes such as A- -> A and S1-only carriers.
         var vector = new Cartesian3(0.0, 0.0, 0.0);
+        for (var node = 0; node < state0.Length; node++)
+        {
+            var charge0 = Charge(context, state0[node]);
+            var charge2 = Charge(context, state2[node]);
+            if (charge0 == charge2)
+            {
+                continue;
+            }
+
+            var position = context.Cell!.ToCartesian(context.Encoder!.Decode(direction.Absolute[node]));
+            var deltaCharge = charge2 - charge0;
+            vector = new Cartesian3(
+                vector.X + (deltaCharge * position.X),
+                vector.Y + (deltaCharge * position.Y),
+                vector.Z + (deltaCharge * position.Z));
+        }
+
+        // Movement is a particle-identity tracking aid. A charge-state change may alter the number
+        // of occurrences of one compiled particle; that does not affect the charge moment above.
         for (var particle = 1; particle < context.Particles!.Count; particle++)
         {
             var from = state0
@@ -73,10 +96,9 @@ internal static class TransitionRuleHelpers
                 .ToArray();
             if (from.Length != to.Length)
             {
-                return null;
+                continue;
             }
 
-            var charge = context.Particles.Particles[particle].ChargeElementary;
             for (var index = 0; index < from.Length; index++)
             {
                 var sourceNode = from[index];
@@ -87,22 +109,19 @@ internal static class TransitionRuleHelpers
                 }
 
                 var source = context.Encoder!.Decode(direction.Absolute[sourceNode]);
-                var target = context.Encoder.Decode(direction.Absolute[targetNode]);
-                var delta = new Fractional3(
+                var target = context.Encoder!.Decode(direction.Absolute[targetNode]);
+                movement[sourceNode] = new Fractional3(
                     target.A - source.A,
                     target.B - source.B,
                     target.C - source.C);
-                movement[sourceNode] = delta;
-                var cartesian = context.Cell!.ToCartesian(delta);
-                vector = new Cartesian3(
-                    vector.X + (charge * cartesian.X),
-                    vector.Y + (charge * cartesian.Y),
-                    vector.Z + (charge * cartesian.Z));
             }
         }
 
         return (movement, vector);
     }
+
+    internal static double Charge(CompilationContext context, int particle) =>
+        particle == 0 ? 0.0 : context.Particles!.Particles[particle].ChargeElementary;
 
     internal static Cartesian3 SumMovement(CellGeometry cell, ImmutableArray<Fractional3> movement)
     {
