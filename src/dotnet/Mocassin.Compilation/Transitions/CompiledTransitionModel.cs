@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Model.Simulations;
 using Mocassin.Core.Model.Transitions;
+using Mocassin.Compilation.Simulations;
 
 namespace Mocassin.Compilation.Transitions;
 
@@ -113,6 +114,16 @@ public sealed record CompiledTransitionModel(
     /// Gets the empty compiled transition model.
     /// </summary>
     public static CompiledTransitionModel Empty { get; } = new([], [], [], [], [], [], 1, 0);
+
+    /// <summary>
+    /// Gets the KMC global tracker definitions.
+    /// </summary>
+    public ImmutableArray<CompiledGlobalTracker> GlobalTrackers { get; init; } = [];
+
+    /// <summary>
+    /// Gets the KMC static tracker definitions.
+    /// </summary>
+    public ImmutableArray<CompiledStaticTracker> StaticTrackers { get; init; } = [];
 
     /// <summary>
     /// Gets the number of compiled collections.

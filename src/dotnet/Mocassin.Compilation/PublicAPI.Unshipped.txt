@@ -97,6 +97,8 @@ Mocassin.Compilation.Compiler.CompiledModel.ModelSignature.get -> string!
 Mocassin.Compilation.Compiler.CompiledModel.ModelSignature.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.Particles.get -> Mocassin.Compilation.Structure.CompiledParticleTable!
 Mocassin.Compilation.Compiler.CompiledModel.Particles.init -> void
+Mocassin.Compilation.Compiler.CompiledModel.Simulations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Simulations.CompiledSimulation!>
+Mocassin.Compilation.Compiler.CompiledModel.Simulations.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataSha256.get -> string!
 Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataSha256.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataVersion.get -> string!
@@ -220,6 +222,110 @@ Mocassin.Compilation.Energy.CompiledPairTable.ParticleCount.get -> int
 Mocassin.Compilation.Energy.CompiledPairTable.ParticleCount.init -> void
 Mocassin.Compilation.Energy.CompiledPairTable.Values.get -> System.Collections.Immutable.ImmutableArray<double>
 Mocassin.Compilation.Energy.CompiledPairTable.Values.init -> void
+Mocassin.Compilation.Simulations.CompiledGlobalTracker
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.<Clone>$() -> Mocassin.Compilation.Simulations.CompiledGlobalTracker!
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.CollectionIndex.get -> int
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.CollectionIndex.init -> void
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.CompiledGlobalTracker(int Index, int CollectionIndex, int ParticleIndex) -> void
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.Deconstruct(out int Index, out int CollectionIndex, out int ParticleIndex) -> void
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.Equals(Mocassin.Compilation.Simulations.CompiledGlobalTracker? other) -> bool
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.Index.get -> int
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.Index.init -> void
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.ParticleIndex.get -> int
+Mocassin.Compilation.Simulations.CompiledGlobalTracker.ParticleIndex.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.<Clone>$() -> Mocassin.Compilation.Simulations.CompiledRuntimeSettings!
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.BreakSampleIntervalMcsp.get -> long
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.BreakSampleIntervalMcsp.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.BreakSampleLengthMcsp.get -> long
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.BreakSampleLengthMcsp.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.BreakTolerance.get -> double
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.BreakTolerance.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.CompiledRuntimeSettings(double TemperatureK, long TargetMcsp, int WriteOutCount, long? TimeLimitSeconds, double? MinSuccessRate, int JobCount, string? RngSeed, Mocassin.Core.Model.Simulations.ExecutionFlags Flags, string? Instruction, long PreRunMcsp, double ElectricFieldModulusVm, Mocassin.Core.Geometry.Fractional3 ElectricFieldDirection, double? NormalizationEnergyEv, double? MaxAttemptFrequencyHz, double BreakTolerance, long BreakSampleLengthMcsp, long BreakSampleIntervalMcsp, long ResultSampleMcsp) -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.Deconstruct(out double TemperatureK, out long TargetMcsp, out int WriteOutCount, out long? TimeLimitSeconds, out double? MinSuccessRate, out int JobCount, out string? RngSeed, out Mocassin.Core.Model.Simulations.ExecutionFlags Flags, out string? Instruction, out long PreRunMcsp, out double ElectricFieldModulusVm, out Mocassin.Core.Geometry.Fractional3 ElectricFieldDirection, out double? NormalizationEnergyEv, out double? MaxAttemptFrequencyHz, out double BreakTolerance, out long BreakSampleLengthMcsp, out long BreakSampleIntervalMcsp, out long ResultSampleMcsp) -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.ElectricFieldDirection.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.ElectricFieldDirection.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.ElectricFieldModulusVm.get -> double
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.ElectricFieldModulusVm.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.Equals(Mocassin.Compilation.Simulations.CompiledRuntimeSettings? other) -> bool
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.Flags.get -> Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.Flags.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.Instruction.get -> string?
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.Instruction.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.JobCount.get -> int
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.JobCount.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.MaxAttemptFrequencyHz.get -> double?
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.MaxAttemptFrequencyHz.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.MinSuccessRate.get -> double?
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.MinSuccessRate.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.NormalizationEnergyEv.get -> double?
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.NormalizationEnergyEv.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.PreRunMcsp.get -> long
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.PreRunMcsp.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.ResultSampleMcsp.get -> long
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.ResultSampleMcsp.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.RngSeed.get -> string?
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.RngSeed.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.TargetMcsp.get -> long
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.TargetMcsp.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.TemperatureK.get -> double
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.TemperatureK.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.TimeLimitSeconds.get -> long?
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.TimeLimitSeconds.init -> void
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.WriteOutCount.get -> int
+Mocassin.Compilation.Simulations.CompiledRuntimeSettings.WriteOutCount.init -> void
+Mocassin.Compilation.Simulations.CompiledSimulation
+Mocassin.Compilation.Simulations.CompiledSimulation.<Clone>$() -> Mocassin.Compilation.Simulations.CompiledSimulation!
+Mocassin.Compilation.Simulations.CompiledSimulation.ActiveCollectionIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Simulations.CompiledSimulation.ActiveCollectionIndices.init -> void
+Mocassin.Compilation.Simulations.CompiledSimulation.CompiledSimulation(Mocassin.Core.Ids.SimulationId Id, string! Name, Mocassin.Core.Model.Simulations.SimulationKind Kind, System.Collections.Immutable.ImmutableArray<int> ActiveCollectionIndices, Mocassin.Compilation.Simulations.CompiledRuntimeSettings! Settings, Mocassin.Compilation.Simulations.CompiledSolverIntent! Intent, Mocassin.Compilation.Simulations.CompiledTrackerModel! Trackers) -> void
+Mocassin.Compilation.Simulations.CompiledSimulation.Deconstruct(out Mocassin.Core.Ids.SimulationId Id, out string! Name, out Mocassin.Core.Model.Simulations.SimulationKind Kind, out System.Collections.Immutable.ImmutableArray<int> ActiveCollectionIndices, out Mocassin.Compilation.Simulations.CompiledRuntimeSettings! Settings, out Mocassin.Compilation.Simulations.CompiledSolverIntent! Intent, out Mocassin.Compilation.Simulations.CompiledTrackerModel! Trackers) -> void
+Mocassin.Compilation.Simulations.CompiledSimulation.Equals(Mocassin.Compilation.Simulations.CompiledSimulation? other) -> bool
+Mocassin.Compilation.Simulations.CompiledSimulation.Id.get -> Mocassin.Core.Ids.SimulationId
+Mocassin.Compilation.Simulations.CompiledSimulation.Id.init -> void
+Mocassin.Compilation.Simulations.CompiledSimulation.Intent.get -> Mocassin.Compilation.Simulations.CompiledSolverIntent!
+Mocassin.Compilation.Simulations.CompiledSimulation.Intent.init -> void
+Mocassin.Compilation.Simulations.CompiledSimulation.Kind.get -> Mocassin.Core.Model.Simulations.SimulationKind
+Mocassin.Compilation.Simulations.CompiledSimulation.Kind.init -> void
+Mocassin.Compilation.Simulations.CompiledSimulation.Name.get -> string!
+Mocassin.Compilation.Simulations.CompiledSimulation.Name.init -> void
+Mocassin.Compilation.Simulations.CompiledSimulation.Settings.get -> Mocassin.Compilation.Simulations.CompiledRuntimeSettings!
+Mocassin.Compilation.Simulations.CompiledSimulation.Settings.init -> void
+Mocassin.Compilation.Simulations.CompiledSimulation.Trackers.get -> Mocassin.Compilation.Simulations.CompiledTrackerModel!
+Mocassin.Compilation.Simulations.CompiledSimulation.Trackers.init -> void
+Mocassin.Compilation.Simulations.CompiledSolverIntent
+Mocassin.Compilation.Simulations.CompiledSolverIntent.<Clone>$() -> Mocassin.Compilation.Simulations.CompiledSolverIntent!
+Mocassin.Compilation.Simulations.CompiledSolverIntent.CompiledSolverIntent(Mocassin.Core.Model.Simulations.SimulationKind Kind, bool UseDualDofCorrection, bool UsePreRun, long PreRunMcsp) -> void
+Mocassin.Compilation.Simulations.CompiledSolverIntent.Deconstruct(out Mocassin.Core.Model.Simulations.SimulationKind Kind, out bool UseDualDofCorrection, out bool UsePreRun, out long PreRunMcsp) -> void
+Mocassin.Compilation.Simulations.CompiledSolverIntent.Equals(Mocassin.Compilation.Simulations.CompiledSolverIntent? other) -> bool
+Mocassin.Compilation.Simulations.CompiledSolverIntent.Kind.get -> Mocassin.Core.Model.Simulations.SimulationKind
+Mocassin.Compilation.Simulations.CompiledSolverIntent.Kind.init -> void
+Mocassin.Compilation.Simulations.CompiledSolverIntent.PreRunMcsp.get -> long
+Mocassin.Compilation.Simulations.CompiledSolverIntent.PreRunMcsp.init -> void
+Mocassin.Compilation.Simulations.CompiledSolverIntent.UseDualDofCorrection.get -> bool
+Mocassin.Compilation.Simulations.CompiledSolverIntent.UseDualDofCorrection.init -> void
+Mocassin.Compilation.Simulations.CompiledSolverIntent.UsePreRun.get -> bool
+Mocassin.Compilation.Simulations.CompiledSolverIntent.UsePreRun.init -> void
+Mocassin.Compilation.Simulations.CompiledStaticTracker
+Mocassin.Compilation.Simulations.CompiledStaticTracker.<Clone>$() -> Mocassin.Compilation.Simulations.CompiledStaticTracker!
+Mocassin.Compilation.Simulations.CompiledStaticTracker.CompiledStaticTracker(int Index, int PositionIndex, int ParticleIndex) -> void
+Mocassin.Compilation.Simulations.CompiledStaticTracker.Deconstruct(out int Index, out int PositionIndex, out int ParticleIndex) -> void
+Mocassin.Compilation.Simulations.CompiledStaticTracker.Equals(Mocassin.Compilation.Simulations.CompiledStaticTracker? other) -> bool
+Mocassin.Compilation.Simulations.CompiledStaticTracker.Index.get -> int
+Mocassin.Compilation.Simulations.CompiledStaticTracker.Index.init -> void
+Mocassin.Compilation.Simulations.CompiledStaticTracker.ParticleIndex.get -> int
+Mocassin.Compilation.Simulations.CompiledStaticTracker.ParticleIndex.init -> void
+Mocassin.Compilation.Simulations.CompiledStaticTracker.PositionIndex.get -> int
+Mocassin.Compilation.Simulations.CompiledStaticTracker.PositionIndex.init -> void
+Mocassin.Compilation.Simulations.CompiledTrackerModel
+Mocassin.Compilation.Simulations.CompiledTrackerModel.<Clone>$() -> Mocassin.Compilation.Simulations.CompiledTrackerModel!
+Mocassin.Compilation.Simulations.CompiledTrackerModel.CompiledTrackerModel(System.Collections.Immutable.ImmutableArray<int> GlobalTrackerIndices, System.Collections.Immutable.ImmutableArray<int> StaticTrackerIndices) -> void
+Mocassin.Compilation.Simulations.CompiledTrackerModel.Deconstruct(out System.Collections.Immutable.ImmutableArray<int> GlobalTrackerIndices, out System.Collections.Immutable.ImmutableArray<int> StaticTrackerIndices) -> void
+Mocassin.Compilation.Simulations.CompiledTrackerModel.Equals(Mocassin.Compilation.Simulations.CompiledTrackerModel? other) -> bool
+Mocassin.Compilation.Simulations.CompiledTrackerModel.GlobalTrackerIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Simulations.CompiledTrackerModel.GlobalTrackerIndices.init -> void
+Mocassin.Compilation.Simulations.CompiledTrackerModel.StaticTrackerIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Simulations.CompiledTrackerModel.StaticTrackerIndices.init -> void
 Mocassin.Compilation.Structure.CompiledClusterLink
 Mocassin.Compilation.Structure.CompiledClusterLink.<Clone>$() -> Mocassin.Compilation.Structure.CompiledClusterLink!
 Mocassin.Compilation.Structure.CompiledClusterLink.ClusterTableIndex.get -> int
@@ -438,6 +544,8 @@ Mocassin.Compilation.Transitions.CompiledTransitionModel.DirectionCount.get -> i
 Mocassin.Compilation.Transitions.CompiledTransitionModel.Directions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpDirection!>
 Mocassin.Compilation.Transitions.CompiledTransitionModel.Directions.init -> void
 Mocassin.Compilation.Transitions.CompiledTransitionModel.Equals(Mocassin.Compilation.Transitions.CompiledTransitionModel? other) -> bool
+Mocassin.Compilation.Transitions.CompiledTransitionModel.GlobalTrackers.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Simulations.CompiledGlobalTracker!>
+Mocassin.Compilation.Transitions.CompiledTransitionModel.GlobalTrackers.init -> void
 Mocassin.Compilation.Transitions.CompiledTransitionModel.InverseRuleCount.get -> int
 Mocassin.Compilation.Transitions.CompiledTransitionModel.JumpCounts.get -> System.Collections.Immutable.ImmutableArray<int>
 Mocassin.Compilation.Transitions.CompiledTransitionModel.JumpCounts.init -> void
@@ -452,6 +560,8 @@ Mocassin.Compilation.Transitions.CompiledTransitionModel.PositionCount.init -> v
 Mocassin.Compilation.Transitions.CompiledTransitionModel.RuleCount.get -> int
 Mocassin.Compilation.Transitions.CompiledTransitionModel.Rules.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpRule!>
 Mocassin.Compilation.Transitions.CompiledTransitionModel.Rules.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.StaticTrackers.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Simulations.CompiledStaticTracker!>
+Mocassin.Compilation.Transitions.CompiledTransitionModel.StaticTrackers.init -> void
 const Mocassin.Compilation.Compiler.CompiledModel.CurrentFormatVersion = 1 -> int
 const Mocassin.Compilation.Transitions.CompiledJumpRule.DefaultFrequencyHz = 10000000000000 -> double
 override Mocassin.Compilation.Caching.CompilationCacheStatistics.Equals(object? obj) -> bool
@@ -490,6 +600,24 @@ override Mocassin.Compilation.Energy.CompiledPairGeometry.ToString() -> string!
 override Mocassin.Compilation.Energy.CompiledPairTable.Equals(object? obj) -> bool
 override Mocassin.Compilation.Energy.CompiledPairTable.GetHashCode() -> int
 override Mocassin.Compilation.Energy.CompiledPairTable.ToString() -> string!
+override Mocassin.Compilation.Simulations.CompiledGlobalTracker.Equals(object? obj) -> bool
+override Mocassin.Compilation.Simulations.CompiledGlobalTracker.GetHashCode() -> int
+override Mocassin.Compilation.Simulations.CompiledGlobalTracker.ToString() -> string!
+override Mocassin.Compilation.Simulations.CompiledRuntimeSettings.Equals(object? obj) -> bool
+override Mocassin.Compilation.Simulations.CompiledRuntimeSettings.GetHashCode() -> int
+override Mocassin.Compilation.Simulations.CompiledRuntimeSettings.ToString() -> string!
+override Mocassin.Compilation.Simulations.CompiledSimulation.Equals(object? obj) -> bool
+override Mocassin.Compilation.Simulations.CompiledSimulation.GetHashCode() -> int
+override Mocassin.Compilation.Simulations.CompiledSimulation.ToString() -> string!
+override Mocassin.Compilation.Simulations.CompiledSolverIntent.Equals(object? obj) -> bool
+override Mocassin.Compilation.Simulations.CompiledSolverIntent.GetHashCode() -> int
+override Mocassin.Compilation.Simulations.CompiledSolverIntent.ToString() -> string!
+override Mocassin.Compilation.Simulations.CompiledStaticTracker.Equals(object? obj) -> bool
+override Mocassin.Compilation.Simulations.CompiledStaticTracker.GetHashCode() -> int
+override Mocassin.Compilation.Simulations.CompiledStaticTracker.ToString() -> string!
+override Mocassin.Compilation.Simulations.CompiledTrackerModel.Equals(object? obj) -> bool
+override Mocassin.Compilation.Simulations.CompiledTrackerModel.GetHashCode() -> int
+override Mocassin.Compilation.Simulations.CompiledTrackerModel.ToString() -> string!
 override Mocassin.Compilation.Structure.CompiledClusterLink.Equals(object? obj) -> bool
 override Mocassin.Compilation.Structure.CompiledClusterLink.GetHashCode() -> int
 override Mocassin.Compilation.Structure.CompiledClusterLink.ToString() -> string!
@@ -553,6 +681,19 @@ static Mocassin.Compilation.Energy.CompiledPairGeometry.operator !=(Mocassin.Com
 static Mocassin.Compilation.Energy.CompiledPairGeometry.operator ==(Mocassin.Compilation.Energy.CompiledPairGeometry? left, Mocassin.Compilation.Energy.CompiledPairGeometry? right) -> bool
 static Mocassin.Compilation.Energy.CompiledPairTable.operator !=(Mocassin.Compilation.Energy.CompiledPairTable? left, Mocassin.Compilation.Energy.CompiledPairTable? right) -> bool
 static Mocassin.Compilation.Energy.CompiledPairTable.operator ==(Mocassin.Compilation.Energy.CompiledPairTable? left, Mocassin.Compilation.Energy.CompiledPairTable? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledGlobalTracker.operator !=(Mocassin.Compilation.Simulations.CompiledGlobalTracker? left, Mocassin.Compilation.Simulations.CompiledGlobalTracker? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledGlobalTracker.operator ==(Mocassin.Compilation.Simulations.CompiledGlobalTracker? left, Mocassin.Compilation.Simulations.CompiledGlobalTracker? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledRuntimeSettings.operator !=(Mocassin.Compilation.Simulations.CompiledRuntimeSettings? left, Mocassin.Compilation.Simulations.CompiledRuntimeSettings? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledRuntimeSettings.operator ==(Mocassin.Compilation.Simulations.CompiledRuntimeSettings? left, Mocassin.Compilation.Simulations.CompiledRuntimeSettings? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledSimulation.operator !=(Mocassin.Compilation.Simulations.CompiledSimulation? left, Mocassin.Compilation.Simulations.CompiledSimulation? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledSimulation.operator ==(Mocassin.Compilation.Simulations.CompiledSimulation? left, Mocassin.Compilation.Simulations.CompiledSimulation? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledSolverIntent.operator !=(Mocassin.Compilation.Simulations.CompiledSolverIntent? left, Mocassin.Compilation.Simulations.CompiledSolverIntent? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledSolverIntent.operator ==(Mocassin.Compilation.Simulations.CompiledSolverIntent? left, Mocassin.Compilation.Simulations.CompiledSolverIntent? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledStaticTracker.operator !=(Mocassin.Compilation.Simulations.CompiledStaticTracker? left, Mocassin.Compilation.Simulations.CompiledStaticTracker? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledStaticTracker.operator ==(Mocassin.Compilation.Simulations.CompiledStaticTracker? left, Mocassin.Compilation.Simulations.CompiledStaticTracker? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledTrackerModel.Empty.get -> Mocassin.Compilation.Simulations.CompiledTrackerModel!
+static Mocassin.Compilation.Simulations.CompiledTrackerModel.operator !=(Mocassin.Compilation.Simulations.CompiledTrackerModel? left, Mocassin.Compilation.Simulations.CompiledTrackerModel? right) -> bool
+static Mocassin.Compilation.Simulations.CompiledTrackerModel.operator ==(Mocassin.Compilation.Simulations.CompiledTrackerModel? left, Mocassin.Compilation.Simulations.CompiledTrackerModel? right) -> bool
 static Mocassin.Compilation.Structure.CompiledClusterLink.operator !=(Mocassin.Compilation.Structure.CompiledClusterLink? left, Mocassin.Compilation.Structure.CompiledClusterLink? right) -> bool
 static Mocassin.Compilation.Structure.CompiledClusterLink.operator ==(Mocassin.Compilation.Structure.CompiledClusterLink? left, Mocassin.Compilation.Structure.CompiledClusterLink? right) -> bool
 static Mocassin.Compilation.Structure.CompiledEnvironment.operator !=(Mocassin.Compilation.Structure.CompiledEnvironment? left, Mocassin.Compilation.Structure.CompiledEnvironment? right) -> bool

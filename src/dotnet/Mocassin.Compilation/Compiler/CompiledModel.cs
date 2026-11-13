@@ -1,8 +1,11 @@
 // SPDX-License-Identifier: MIT
 
+using System.Collections.Immutable;
+
 using Mocassin.Compilation.Energy;
 using Mocassin.Compilation.Structure;
 using Mocassin.Compilation.Transitions;
+using Mocassin.Compilation.Simulations;
 
 namespace Mocassin.Compilation.Compiler;
 
@@ -103,4 +106,9 @@ public sealed record CompiledModel
     /// Gets the compiled transition model.
     /// </summary>
     public CompiledTransitionModel Transitions { get; init; } = CompiledTransitionModel.Empty;
+
+    /// <summary>
+    /// Gets the compiled simulations in ascending identifier order.
+    /// </summary>
+    public ImmutableArray<CompiledSimulation> Simulations { get; init; } = [];
 }

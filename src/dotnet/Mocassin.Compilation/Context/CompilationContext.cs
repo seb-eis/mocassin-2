@@ -5,6 +5,7 @@ using Mocassin.Compilation.Compiler;
 using Mocassin.Compilation.Energy;
 using Mocassin.Compilation.Structure;
 using Mocassin.Compilation.Transitions;
+using Mocassin.Compilation.Simulations;
 using Mocassin.Core.Model.Simulations;
 using Mocassin.Core.Project;
 using Mocassin.Symmetry.Contracts;
@@ -69,4 +70,9 @@ internal sealed record CompilationContext(Project Project, CompilationOptions Op
     /// Gets the compiled transition model.
     /// </summary>
     public CompiledTransitionModel? Transitions { get; init; }
+
+    /// <summary>
+    /// Gets the compiled simulations.
+    /// </summary>
+    public ImmutableArray<CompiledSimulation> CompiledSimulations { get; init; } = [];
 }

@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 using Mocassin.Compilation.Energy;
 using Mocassin.Compilation.Structure;
 using Mocassin.Compilation.Transitions;
+using Mocassin.Compilation.Simulations;
 using Mocassin.Packages.Projects;
 
 namespace Mocassin.Compilation.Tests.Compiler;
@@ -134,5 +135,15 @@ internal static class StageTestSupport
     [
         .. ClusterStages(),
         new TransitionCompilationStage(),
+    ];
+
+    /// <summary>
+    /// Creates the simulation-encoding stage prefix.
+    /// </summary>
+    /// <returns>The ordered stages.</returns>
+    public static ICompilationStage[] EncodingStages() =>
+    [
+        .. RuleStages(),
+        new EncodingCompilationStage(),
     ];
 }
