@@ -144,3 +144,28 @@ public sealed class VehicleChargeTransportTests
         Assert.Equal(-0.2, rule.Movement[4].A, 12);
     }
 }
+
+/// <summary>
+/// Pins the spectator movement for the interstitialcy sample.
+/// </summary>
+[Trait("Tier", "PR-fast")]
+public sealed class SpectatorMovementTests
+{
+    [Fact]
+    public async Task InteriorStableSpectatorStillMovesPhysically()
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync("samples/transitions/interstitialcy5.mocprj"),
+            kinetic: true);
+
+        var result = new ModelCompiler().Compile(project);
+
+        Assert.True(result.IsSuccess);
+        var rule = Assert.Single(result.Model!.Transitions.Rules.Where(static rule => !rule.IsInverse));
+        Assert.Equal(0.2, rule.Movement[0].A, 12);
+        Assert.Equal(0.2, rule.Movement[2].A, 12);
+        Assert.Equal(-0.4, rule.Movement[4].A, 12);
+        Assert.NotEqual((byte)0xFF, rule.TrackerOrder[2]);
+        Assert.Equal(rule.TrackerOrder[0], rule.TrackerOrder[2]);
+    }
+}

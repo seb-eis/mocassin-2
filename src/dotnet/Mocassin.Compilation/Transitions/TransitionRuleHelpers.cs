@@ -123,6 +123,9 @@ internal static class TransitionRuleHelpers
     internal static double Charge(CompilationContext context, int particle) =>
         particle == 0 ? 0.0 : context.Particles!.Particles[particle].ChargeElementary;
 
+    internal static string? Symbol(CompilationContext context, int particle) =>
+        particle == 0 ? null : context.Particles!.Particles[particle].Symbol;
+
     internal static Cartesian3 SumMovement(CellGeometry cell, ImmutableArray<Fractional3> movement)
     {
         var x = 0.0;

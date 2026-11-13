@@ -122,12 +122,15 @@ public interface IModelCompiler
   by templates and inspection, not table indices.
 - Default attempt frequency is `1e13 Hz`; Step 09 supplies parameterized values. Static S2 corrections are
   deferred; v1 stores `null`/NaN and uses the dynamic S2 path.
-- The compiler converts each fractional `movement_i` to Cartesian with the validated cell geometry and stores
-  a per-rule `chargeTransportVector` summed over moving particle identities:
-  `Σ_p q_p * (x_p(S2) - x_p(S0))`. Each moving particle contributes once; void contributes nothing.
+- The compiler computes the charge transport vector from the charge-weighted endpoint moments over the path
+  nodes: `Σ_nodes (q(S2,node) - q(S0,node)) * x(node)`. For balanced particle counts this equals the
+  particle-identity sum `Σ_p q_p * (x_p(S2) - x_p(S0))`; the moment form also covers charge-state changes.
   Step 15 computes `field = -0.5*(|E|/kT)*(chargeTransportVector·ê)`, which is exact for non-collinear paths
   and gives the correct single-charge/vacancy/exchange signs. The direction's `pathVector` is display/tracking
   only.
+- Movement follows the physical species flow in path order. Identical species (including different charge
+  states of one symbol) are paired in path order, so an interior stable spectator site can remain chemically
+  unchanged while its particle still moves physically.
 
 ### Simulation encoding
 
