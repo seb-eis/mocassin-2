@@ -268,6 +268,10 @@ The step agent records resolutions here without altering reviewer text.
 | N7-2 | The position encoding rationale now requires the writer to assert `Encoding.P == P` and zero cell offsets. | this commit |
 | N7-3 | Replaced the nonexistent `docs/reference/contracts.md` with `contracts/generated/README.md`/`compilation-pipeline.md` and added the generated README to the checklist. | this commit |
 
+| N8-1 | Replaced the last `docs/reference/contracts.md` reference with `contracts/generated/README.md`; resolution row corrected. | this commit |
+| N8-2 | Removed the contradictory “headers/scalars via typed writers” clause; typed writers are scalar-only and `WriteRaw` is header-only. | this commit |
+| N8-3 | Advanced the design-review metadata to rounds 1–8/round 9 and removed the duplicate compilation-pipeline checklist row. | this commit |
+
 ## Design-review rounds
 
 ### Review round 1

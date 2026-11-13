@@ -6,9 +6,9 @@
 | --- | --- |
 | Amendment ID | `step-08-amend-1` |
 | Parent step | 08 — Model Compilation Pipeline |
-| Status | Re-review required (round 7 notes resolved; round 8 requested) |
+| Status | Re-review required (round 8 notes resolved; round 9 requested) |
 | Branch | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` |
-| Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–6; round 6 Ready with notes; round 7 requested) |
+| Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–8; round 8 Ready with notes; round 9 requested) |
 | Parent audit | `docs/planning/audits/step-08.md` |
 | Integration commit | — |
 | Combined audit commit | — |
@@ -154,8 +154,8 @@ The writer is `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` (inter
 and `Write(double)` writers for the fixed-width scalars, and `WriteRaw` for the forced
 `0xdd`/`0xdb`/`0xc6`/`0xc3`/`0xc2`/`0xc0` headers.
 It must not call the compact `WriteArrayHeader`/`WriteString` convenience methods or the minimal-width
-`Write(ulong)`/`Write(long)` overloads; those would break the required header bytes. All fixed headers and scalar bytes are
-written through the typed writers; only forced headers use `WriteRaw`/`Advance`. The byte rules are:
+`Write(ulong)`/`Write(long)` overloads; those would break the required header bytes. Fixed-width scalars use
+the typed writers; all forced headers use `WriteRaw`/`Advance`. The byte rules are:
 
 | Value | Encoding |
 | --- | --- |
@@ -271,8 +271,8 @@ Step 11 reuses the same projection. Any later released-format change requires a 
 - No public API change; `CanonicalProjectionWriter` is internal and no ApiCompat baseline changes. The
   `MessagePack` package reference is a new project dependency and is covered by the licence/vulnerability
   audit.
-- `docs/reference/contracts.md`/`docs/development/compilation-pipeline.md` describe the projection and the
-  independent vector.
+- `contracts/generated/README.md` and `docs/development/compilation-pipeline.md` describe the projection and
+  the conformance fixtures.
 
 ## Temporary implementation and migration
 
@@ -315,8 +315,7 @@ projection.
 - [ ] `docs/planning/02-data-contracts.md` §1.3/§3.3 references the explicit projection.
 - [ ] `docs/planning/adr/0010-canonical-messagepack-signatures.md` notes the shared encoder and descriptor.
 - [ ] `tools/contracts/README.md` documents the `msgpack` requirements, checker, and fixture regeneration.
-- [ ] The generated `contracts/generated/README.md` and `docs/development/compilation-pipeline.md` describe
-  the projection and fixtures.
+- [ ] The generated `contracts/generated/README.md` describes the projection and fixtures.
 - [ ] `docs/planning/06-toolchain-requirements.md` records the dev-only `msgpack` row and Step 08 use.
 - [ ] `./tools/verify.sh contracts` installs `tools/contracts/requirements.txt` and runs the projection checker.
 - [ ] Step page, amendment index, status, parity, audit request, and review record updated.
