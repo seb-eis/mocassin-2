@@ -76,3 +76,27 @@ public sealed class TransitionCompilationTests
         });
     }
 }
+
+/// <summary>
+/// Documents the open complex-mechanism conservation limitation.
+/// </summary>
+[Trait("Tier", "PR-fast")]
+public sealed class ComplexMechanismLimitationTests
+{
+    [Theory]
+    [InlineData("samples/transitions/vehicle5.mocprj")]
+    [InlineData("samples/transitions/interstitialcy5.mocprj")]
+    public async Task ComplexSamplesFailClosedUntilTheConservationAmendment(string sample)
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync(sample),
+            kinetic: true);
+
+        var result = new ModelCompiler().Compile(project);
+
+        Assert.False(result.IsSuccess);
+        Assert.Null(result.Model);
+        Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == "CMP005");
+        Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
+    }
+}

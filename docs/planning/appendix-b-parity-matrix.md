@@ -101,20 +101,20 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Pure compiled model API | Y | Planned | 08 | Synchronous `IModelCompiler` with diagnostics, counts, signatures, cancellation |
-| P1-extended dense compiled model | Y | Planned | 08 | Canonical P indices, dense particle/site/table indices, stable IDs |
-| Auto-sampled pair tables | Y | Planned | 08 | Shares Step 05 sampling/reduction kernel; canonical shell order |
-| Chiral pair linking in compiled tables | Y | Planned | 08/09 | Shared `EnergyId`; one table/value per chiral pair |
-| Cluster tables and occupation codes | Y | Planned | 08 | Point-group canonicalization; 6-bit codes; expansion maps |
-| Forward/inverse/dependent rules | Y | Planned | 08 | Auto-inverse only for `Metropolis2`/`Migration3`; dependent instances for symmetry-equivalent starts |
-| Mass/charge conservation filtering | Y | Planned | 08 | Rejected counts reported; charge-transfer symbols balanced |
-| Rule ambiguity detection | Y | Improvement | 08 | Compile-time `CMP004`; original failed at runtime |
-| Unreferenced transition warning | N | Improvement | 08 | `CMP009` |
-| Simulation encoding / tracker definitions | Y | Planned | 08/18 | Collections, directions, mappings, intent; Step 18 owns state |
-| Compiled-model signature | Y | Improvement | 08/09 | Geometry/rules signature distinct from parameterization signature |
-| Compilation diagnostics/report | Y | Improvement | 08 | `CMP` catalog, counts, timings, input hashes, cache statistics |
-| Compilation stage cache | N | Improvement | 08 | Content-hash keys; per-compilation default, optional caller cache |
-| Compiled-model JSON inspection | N | Improvement | 08/12 | `compiled-inspection-v1`; `mocassin compile` in 12 |
+| Pure compiled model API | Y | Done | 08 | Synchronous `IModelCompiler` with diagnostics, counts, signatures, cancellation |
+| P1-extended dense compiled model | Y | Done | 08 | Canonical P indices, dense particle/site/table indices, stable IDs |
+| Auto-sampled pair tables | Y | Done | 08 | Shares Step 05 sampling/reduction kernel; canonical shell order |
+| Chiral pair linking in compiled tables | Y | Partial | 08/09 | Shared `EnergyId`; one table/value per chiral pair |
+| Cluster tables and occupation codes | Y | Done | 08 | Point-group canonicalization; 6-bit codes; expansion maps |
+| Forward/inverse/dependent rules | Y | Partial | 08 | Auto-inverse only for `Metropolis2`/`Migration3`; dependent instances for symmetry-equivalent starts |
+| Mass/charge conservation filtering | Y | Partial | 08 | Rejected counts reported; charge-transfer symbols balanced |
+| Rule ambiguity detection | Y | Done | 08 | Compile-time `CMP004`; original failed at runtime |
+| Unreferenced transition warning | N | Done | 08 | `CMP009` |
+| Simulation encoding / tracker definitions | Y | Done | 08/18 | Collections, directions, mappings, intent; Step 18 owns state |
+| Compiled-model signature | Y | Done | 08/09 | Geometry/rules signature distinct from parameterization signature |
+| Compilation diagnostics/report | Y | Done | 08 | `CMP` catalog, counts, timings, input hashes, cache statistics |
+| Compilation stage cache | N | Done | 08 | Content-hash keys; per-compilation default, optional caller cache |
+| Compiled-model JSON inspection | N | Done | 08/12 | `compiled-inspection-v1`; `mocassin compile` in 12 |
 | Headless `mocassin compile` | Y | Planned | 12 | Step 08 library only; Step 12 owns the command |
 
 ## 6. Simulations, templates, and builds

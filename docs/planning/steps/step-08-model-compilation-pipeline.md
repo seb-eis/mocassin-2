@@ -26,8 +26,8 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 | `transition-rule-compilation` | `feature/step-08-model-compilation-pipeline/transition-rule-compilation` | Done | `verify.sh dotnet` (947 tests), `structure`, `api`, `contracts` pass | — | `26366aa` |
 | `simulation-encoding` | `feature/step-08-model-compilation-pipeline/simulation-encoding` | Done | `verify.sh dotnet` (950 tests), `structure`, `api`, `contracts` pass | — | `fde55fd` |
 | `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Done | `verify.sh dotnet` (954 tests), `structure`, `api`, `contracts` pass | — | `10966cf` |
-| `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Done | `verify.sh dotnet` (960 tests), `structure`, `api`, `contracts`, `docs` pass | — | — |
-| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Not started | — | — | — |
+| `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Done | `verify.sh dotnet` (960 tests), `structure`, `api`, `contracts`, `docs` pass | — | `6c59163` |
+| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Blocked — complex-mechanism conservation | `verify.sh dotnet` (967 tests), `structure`, `api`, `contracts`, `docs` pass; closeout not requested | — | — |
 
 ### Implementation notes and deviations
 
@@ -42,6 +42,11 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
   until its feature lands, so the default compiler returns `Failed` with no model instead of a fabricated
   success. `CompiledModel` currently carries the format and provenance header; later features add the immutable
   component tables.
+- **Complex mechanism conservation limitation.** The accepted global S0/S2 mass rule rejects the
+  `vehicle5` and `interstitialcy5` sample mechanisms, whose authored explicit-reverse groups do not conserve
+  the stable-endpoint symbol multiset. They fail closed with `CMP005`; no golden model or closeout was
+  fabricated. The ceria, barium-zirconate, and MMC goldens compile and are pinned. A Step 08 amendment is
+  required to define the intended complex-mechanism conservation rule before the step can freeze for audit.
 - **compiler-core local evidence (2026-11-13).** `./tools/verify.sh dotnet` passes (932 tests, 0 failed),
   `./tools/verify.sh structure` passes, `./tools/verify.sh api` passes with the refreshed
   `Mocassin.Compilation` ApiCompat baseline, `./tools/verify.sh contracts` passes, and

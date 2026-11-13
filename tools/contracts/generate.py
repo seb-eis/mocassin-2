@@ -570,7 +570,7 @@ def build_artifacts(manifest: dict[str, Any]) -> dict[Path, str]:
             "formatVersion": vectors["formatVersion"],
             "status": vectors.get("status", "scaffold"),
             "notes": vectors.get("notes", ""),
-            "vectors": [],
+            "vectors": vectors.get("vectors", []),
         }
     )
     return artifacts

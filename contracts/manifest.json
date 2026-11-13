@@ -2047,8 +2047,19 @@
       "path": "tests/contracts/signature-vectors.json",
       "format": "mocassin.signature-vectors",
       "formatVersion": 1,
-      "status": "scaffold",
-      "notes": "Signed-type vectors are added with Steps 08, 09, and 11."
+      "status": "active",
+      "notes": "Step 08 adds the compiled-model vector. Step 09 and Step 11 add their vectors.",
+      "vectors": [
+        {
+          "id": "model-ceria-kmc",
+          "signature": "model",
+          "domainPrefix": "mocassin/model-signature/v1",
+          "projectionType": "ModelSignatureV1",
+          "signatureHex": "a28db57b7ccfd8af29ab2600dd36ab1b84a14f6bc654e3ed226b7cb75b5b357c",
+          "inspectionJsonSha256": "e20ab855588d2a2d73dcbd10b76af45299a059a0a606da0f0042dd6a01471a01",
+          "description": "samples/simulations/ceria-kmc.mocprj with a KMC simulation referencing the first kinetic transition"
+        }
+      ]
     },
     "items": [
       {
