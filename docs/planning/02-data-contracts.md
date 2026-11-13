@@ -840,7 +840,7 @@ MessagePack map with snake_case keys. Top-level:
 | --- | --- | --- |
 | `jump_collections` | array | `{object_id, kind, transition_id, mobile_particle_mask:u64, rule_ids:[u32], direction_ids:[u32]}` |
 | `jump_directions` | array | `{object_id, position_id, collection_id, path:[i32;4], movement:[[f64;3]], path_vector:[f64;3], length, is_inverse}` |
-| `jump_rules` | array | `{rule_id, collection_id, state0:u64, state1:u64, state2:u64, frequency_factor, field_factor, static_correction, tracker_order:[u8;8]}` |
+| `jump_rules` | array | `{rule_id, collection_id, state0:u64, state1:u64, state2:u64, frequency_factor, charge_transport_vector:[f64;3], static_correction, tracker_order:[u8;8]}` |
 | `jump_count` | array | `[position][particle] -> u32` |
 | `jump_mapping` | array | `[position][particle][relative] -> direction index` |
 | `static_tracker_mapping` | array | `[position][particle] -> tracker offset` |
@@ -854,9 +854,10 @@ MessagePack map with snake_case keys. Top-level:
   internal default frequency is not a second runtime source.
 - `movement` is the authoritative fractional displacement per path node. `path_vector` is the Cartesian net
   displacement, obtained by converting each movement with the cell geometry and summing; `length` is its
-  magnitude. Step 15 computes the runtime field projection from `path_vector` and the simulation field. The
-  direction has no stored scalar field factor; the compiler's `rule.field_factor` is the charge-weighted
-  scalar. `static_correction` is `null`/NaN in v1 (dynamic S2).
+  magnitude. `charge_transport_vector` is the particle-identity sum
+  `Σ_p q_p * (x_p(S2) - x_p(S0))` in e·Å and is the exact field input; a particle that moves contributes once,
+  void contributes nothing. Step 15 computes `field = -0.5*(|E|/kT)*(charge_transport_vector·ê)`. A direction
+  has no stored field scalar. `static_correction` is `null`/NaN in v1 (dynamic S2).
 - `tracker_order[i]` names the path node whose mobile tracker receives the movement at node `i`, or the
   sentinel `0xFF` for a non-mobile node. Tracker mappings are definitions; Step 18 owns the values and
   updates.

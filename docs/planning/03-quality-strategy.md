@@ -236,8 +236,8 @@ reduction suites are nightly/release.
   - P1 counts match brute-force expansion, and pair/cluster counts match the Step 05 preview services;
   - within one collection, `state0` maps to at most one rule; ambiguity is `CMP004`;
   - `jump_count`/`jump_mapping` are dense, consistent, and list only selectable directions;
-  - rule field factors reduce to `q` for a single charge and `-q` for its vacancy, using Cartesian-converted
-    movements;
+  - charge transport vectors give `qΔx` for a single charge, the correct vacancy sign, zero for an
+    identical-ion exchange, and non-zero for a distinct-charge exchange or a non-collinear multi-site path;
   - `UseDualDofCorrection` defaults on for every KMC simulation, `UsePrerun` follows `PreRunMcsp > 0`, MMC
     clears both, and Step 11 maps the intent correctly.
 - Determinism: compiling the same model twice yields byte-identical `CompiledModelJson` and the same

@@ -211,13 +211,12 @@ and the full CLI. This avoids a second parser/orchestration path and keeps the c
 validation, file output, and exit-code policy. The data contract's `compile` command is implemented in
 Step 12.
 
-## Field-factor convention
+## Charge-transport field convention
 
-The compiler stores a scalar rule field factor computed as the charge-weighted movement projected onto the
-path vector. This reproduces the familiar single-charge and vacancy limits and keeps Step 15's
-`direction.field_projection * rule.field_factor` contract. Non-collinear multi-site mechanisms are a
-documented projection approximation, pinned by tests; a vector field factor is a future contract change, not
-a silent reinterpretation.
+The compiler stores a per-rule Cartesian charge transport vector `Σ_i q_i * Δx_i`. Step 15 computes the
+field energy from its dot product with the normalized field direction. This is exact for non-collinear
+multi-site mechanisms and gives the correct single-charge and vacancy signs; the direction's `path_vector` is
+display/tracking only. A scalar field factor would lose the sign or cancel for symmetric exchanges.
 
 ## Diagnostics over exceptions for user data
 

@@ -101,8 +101,8 @@ public interface IModelCompiler
   reduce by the start position's `G0`. The canonical representative is the lexicographically smallest relative
   path.
 - A direction stores the representative start P, relative path encodings, per-node fractional movement, the
-  Cartesian path vector/length, and an inverse flag. The direction does not store a scalar field factor; the
-  rule carries the charge-weighted scalar used by Step 15.
+  Cartesian path vector/length, and an inverse flag. The direction stores no field scalar; the rule carries the
+  Cartesian charge transport vector used by Step 15.
 - For each direction, enumerate state-change combinations:
   - stable nodes: donor in S0, acceptor in S2;
   - unstable nodes: void in S0/S2, transition species in S1;
@@ -113,19 +113,21 @@ public interface IModelCompiler
 - Forward rules are emitted for every accepted combination. Inverse rules are emitted only for
   `GeneratesReverse` chains (`Metropolis2`, `Migration3`) and never for an authored explicit reverse
   transition. Dependent rules are symmetry-equivalent instances required at other start positions. They are
-  deduplicated by the full rule outcome `(state0, state1, state2, movement, fieldFactor, trackerOrder)`; two
-  directions may share one rule only when every outcome field is identical.
+  deduplicated by the full rule outcome
+  `(state0, state1, state2, movement, chargeTransportVector, trackerOrder)`; two directions may share one
+  rule only when every outcome field is identical.
 - Rule lookup is guaranteed unambiguous: within one collection, a `state0` maps to at most one rule. A
   collision with a different outcome is `CMP004`.
 - Rule IDs in the payload are dense `u32`; stable rule geometry IDs are domain-separated SHA-256 strings used
   by templates and inspection, not table indices.
 - Default attempt frequency is `1e13 Hz`; Step 09 supplies parameterized values. Static S2 corrections are
   deferred; v1 stores `null`/NaN and uses the dynamic S2 path.
-- The field convention converts each fractional `movement_i` to Cartesian with the validated cell geometry,
-  sums the Cartesian movements into `pathVector`, and computes
-  `fieldFactor = Σ_i q_i * (cartesianMovement_i · pathVector) / |pathVector|²`. This reduces to `q` for a
-  single charge and carries the correct vacancy sign. Non-collinear mechanisms are a documented projection
-  approximation.
+- The compiler converts each fractional `movement_i` to Cartesian with the validated cell geometry and stores
+  a per-rule `chargeTransportVector` summed over moving particle identities:
+  `Σ_p q_p * (x_p(S2) - x_p(S0))`. Each moving particle contributes once; void contributes nothing.
+  Step 15 computes `field = -0.5*(|E|/kT)*(chargeTransportVector·ê)`, which is exact for non-collinear paths
+  and gives the correct single-charge/vacancy/exchange signs. The direction's `pathVector` is display/tracking
+  only.
 
 ### Simulation encoding
 
@@ -187,16 +189,19 @@ ParameterizedModel.Signature
 
 - Default stage caches are per compilation and released on return. `CompilationOptions.Cache` allows a
   caller-owned, thread-safe, bounded cache for repeated builds; there is no static/process-wide cache.
-- Keys include catalog version/SHA-256, symmetry contract version, and stage-specific content hashes. Pair/
-  cluster work keys on energy + structure hashes; rules key on the active-transition-set hash + transition
-  closures + structure; encoding keys on rules + simulations. `ProjectHasher.ComputeSimulationSelection`
-  hashes the referenced simulation transition set so adding/removing a reference invalidates rules.
+- Keys include catalog version/SHA-256, symmetry contract version, and stage-specific content hashes. The cheap
+  resolve stage always runs and is not keyed by the whole-model hash. Pair/cluster work keys on energy +
+  structure hashes; rules key on the active-transition-set hash + transition closures + structure; encoding
+  keys on rules + simulations; indexing excludes runtime settings; signing uses the canonical projection.
+  `ProjectHasher.ComputeSimulationSelection` hashes the referenced simulation transition set so adding/removing
+  a reference invalidates rules.
 - Editing structure invalidates everything; editing energy rebuilds environments/pairs/clusters/encoding but
   reuses structure and rules; editing transitions rebuilds rules/encoding but reuses geometry; changing a
-  simulation's active-transition set rebuilds rules/encoding, while changing runtime settings only rebuilds the
-  encoding defaults. Tests use a recording cache to prove the graph.
+  simulation's active-transition set rebuilds rules/encoding, while changing runtime settings rebuilds the
+  encoding defaults and the indexed runtime snapshot but not the signature. Tests use a recording cache to
+  prove the graph.
 - Output order is fixed independently of parallelism, cache insertion, or hash iteration. No parallel
-  floating-point reductions. Field factors are quantized before persistence/signing.
+  floating-point reductions. Charge transport vectors are quantized before persistence/signing.
 - Same project/options/versions produce byte-identical `CompiledModelJson` and the same signature across runs
   and supported platforms. Golden fixtures are generated by the real compiler.
 

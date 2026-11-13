@@ -144,7 +144,7 @@ adapter and maps compile failures to the build error model.
 
 `CompiledModel` is the internal pure result. Step 09 adds parameterization values and the parameterization
 signature; Step 10 adds jobs and lattices; Step 11 maps the model to the Contracts `.msl` payload and composes
-`SolverJobFlags`; Step 18 owns mutable tracker state. The model signature (geometry/rules) and the
+`SolverJobFlags`; Step 18 owns mutable tracker state. The model signature (geometry/rules/encoding) and the
 parameterization signature (geometry + values) are distinct. Stable geometry/rule IDs, expansion maps, timings,
 and diagnostics are JSON-inspection only and are not persisted in `.msl`.
 

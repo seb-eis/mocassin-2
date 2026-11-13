@@ -129,7 +129,7 @@ Status legend:
 | Pair/group energy editing | Y | Planned | 09/26 | |
 | Attempt frequency editing | Y | Planned | 09/26 | |
 | Chiral linked editing | Y | Planned | 09/26 | Shared `EnergyId`; one value per chiral pair |
-| Stable model signature | Y | Improvement | 08/09 | Compiled geometry/rules signature in 08; parameterization signature in 09 |
+| Stable model signature | Y | Improvement | 08/09 | Compiled geometry/rules/encoding signature in 08; parameterization signature in 09 |
 | Template rebase/migration | Y | Planned | 09/26 | Diff + report |
 | Site energy overrides in template | N | Improvement | 09 | Original limitation removed |
 | Job collections/configs | Y | Planned | 10 | |

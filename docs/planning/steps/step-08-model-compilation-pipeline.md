@@ -15,7 +15,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required at `c676716e88bcdd5e8877938e21ad6950cc2986bb` — [review record](../reviews/step-08.md)
+- **Design review:** Re-review required
 - **Last updated:** 2026-11-12
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -88,7 +88,7 @@ weeks or roughly 6–8 features). The human owner reviewed the design-review fin
 **explicitly accepted the 4–6 person-week, eight-feature single-step scope as a recorded waiver** rather than a
 roadmap split. Rationale: the eight features form one coherent compiler pipeline, a partial compiler is not a
 usable deliverable for Step 09, and splitting would insert a new roadmap step and change the Step 09–12
-dependency chain. The waiver is recorded in the Step 08 review record and approval summary; it does not waive
+dependency chain. The waiver is recorded in the Step 08 review record and status dashboard; it does not waive
 the audit-sitting requirement, so the implementation must still keep each feature independently auditable. If
 the first three features exceed 2.5 person-weeks, stop and ask the owner to re-open the split decision before
 continuing.
@@ -197,18 +197,19 @@ parallel, but the output order is canonical and independent of scheduling.
 
 | # | Stage | Input | Output | Cache key inputs | Primary diagnostics |
 | ---: | --- | --- | --- | --- | --- |
-| 1 | Resolve | `Project` | context: catalog, setting, cell geometry, encoder, sorted particles/sites, simulation set | catalog version/SHA, contract version, structure hash, model hash | `CMP001`, `CMP002` |
+| 1 | Resolve | `Project` | context: catalog, setting, cell geometry, encoder, sorted particles/sites; simulations are read later | not cached (cheap; avoids a whole-model key) | `CMP001`, `CMP002` |
 | 2 | Structure/P1 | context | P1 positions, site mapping, orbits, stable/unstable partition, cell vectors, interaction range | catalog, contract, structure hash | `CMP002`; forwarded `STR` |
 | 3 | Environments | structure, energy model | stable/unstable environments, pair-image candidates, filters applied | energy hash, structure hash, catalog, contract | `CMP003`; forwarded `ENM` |
 | 4 | Pairs | environments | directed pair geometries, shared energy IDs, chiral links, pair links per position | energy hash, structure hash, catalog, contract | `CMP003` |
 | 5 | Clusters | energy model, structure | point groups, canonical occupation tuples/codes, cluster tables, links | energy hash, structure hash, cluster IDs, allowed occupations | `CMP003`, `CMP006` |
 | 6 | Rules | referenced transitions, structure, particles | collections, directions, state codes, forward/inverse/dependent rules | active-transition-set hash, transition closure hashes, structure hash, particle order, catalog, contract | `CMP004`–`CMP008` |
 | 7 | Encoding | rules, simulations | jump collections/directions/rules, count/mapping tables, tracker definitions, derived intent | simulation hash, rule hash, structure hash | `CMP006`, `CMP009`, `CMP010` |
-| 8 | Indexing | all prior | dense indices, stable geometry/rule IDs, lookup maps | all prior stage hashes | `CMP006`, `CMP011` |
-| 9 | Signing | canonical compiled projection | `ModelSignature` | canonical projection bytes | `CMP011` |
+| 8 | Indexing | structure, particles, pair/cluster tables, rules, simulations | dense indices, stable geometry/rule IDs, lookup maps, runtime-default snapshot | structure hash, particle hash, pair/cluster table hashes, rule hash, simulation hash | `CMP006`, `CMP011` |
+| 9 | Signing | canonical compiled projection | `ModelSignature` | canonical projection bytes (no runtime settings) | `CMP011` |
 | 10 | Report | all prior | counts, per-stage timings, input hashes, cache statistics, summary | — | — |
 
-- `Resolve` is the only stage that may cache by whole-model hash. It stores immutable context values.
+- `Resolve` is cheap and always runs; it is not cached by the whole-model hash, so energy/transition edits do
+  not force a misleading "reuse". It stores immutable context values for the later stages.
 - `Structure` calls the public `IStructurePreviewService.TryResolve`/`StructurePreviewService.TryResolve`
   (not the internal `SpaceGroupReferenceResolver`), `CellGeometry.TryCreate`, and
   `UnitCellVectorEncoder.TryCreate` with reference sites sorted by `CellSiteId`. It never re-sorts canonical P1
@@ -356,10 +357,11 @@ For each direction, enumerate the state-change combinations from the chain group
 - **Dependent rule:** a rule instance for a symmetry-equivalent start P/direction that shares the canonical
   state triplet with the representative but is needed because the solver selects by position. Emit it,
   deduplicate it by the full rule outcome, and count it as `dependent`.
-- **Deduplication key:** `(collectionIndex, state0, state1, state2, movement, fieldFactor, trackerOrder)`.
-  If two rules in one collection share `state0` but differ in any of those fields, emit `CMP004` with both
-  transition/rule IDs. If they are identical in every field, merge them into one rule referenced by both
-  directions. This is the compile-time guarantee behind Step 16's per-collection `StateCode0 → rule` lookup.
+- **Deduplication key:** `(collectionIndex, state0, state1, state2, movement, chargeTransportVector,
+  trackerOrder)`. If two rules in one collection share `state0` but differ in any of those fields, emit
+  `CMP004` with both transition/rule IDs. If they are identical in every field, merge them into one rule
+  referenced by both directions. This is the compile-time guarantee behind Step 16's per-collection
+  `StateCode0 → rule` lookup.
 - **Rule IDs.** The persisted `.msl` `rule_id` is a dense `u32` assigned in canonical order. The stable
   `RuleGeometryId` is a domain-separated SHA-256 over `(transitionId, chain pattern, canonical representative
   direction encoding, state0, state1, state2)`. The representative direction is the lexicographically smallest
@@ -367,32 +369,36 @@ For each direction, enumerate the state-change combinations from the chain group
   stable transition/state/direction inputs, not from the dense index.
 - **Frequency.** Every rule carries `DefaultFrequencyHz = 1e13`. Step 09 replaces it with the parameterized
   value; Step 11 writes the final `frequency_factor` relative to the job/simulation maximum.
-- **Field factor.** The compiler computes a scalar `rule.FieldFactor` from the charge-weighted movement along
-  the path (see §8.4). Static S2 corrections are deferred: v1 stores `null`/NaN and uses Step 15's dynamic S2
-  path.
+- **Charge transport vector.** The compiler computes `rule.ChargeTransportVector` from the
+  charge-weighted Cartesian movement along the path (see §8.4). Static S2 corrections are deferred: v1 stores
+  `null`/NaN and uses Step 15's dynamic S2 path.
 - **Derived flags.** Association, dissociation, vehicle, and charge-transfer classification is derived from
   the state triplet and linkers for the report/JSON inspection only. The solver does not consume these flags
   in v1; Step 04 deliberately does not persist `IsAssociation`. A test pins the derivation so it cannot
   silently disagree with the rules.
 
-#### 8.4 Field-factor convention
+#### 8.4 Charge-transport field convention
 
-Step 15 defines `direction.field_projection = 0.5 * (|E|/kT) * (Δx_path · ê)` and
-`field = -(direction.field_projection * rule.field_factor)`. Step 08 supplies the rule scalar:
+Step 08 supplies a per-rule **charge transport vector**; it does not collapse the field work into a scalar.
+The vector is computed from particle identities, not by summing per-node movements, so a vacancy hop and a
+symmetric exchange cannot double-count or cancel spuriously:
 
 ```text
-cartesianMovement_i = Cell.ToCartesian(movement_i)      (Å; movement_i is fractional)
-pathVector          = Σ_i cartesianMovement_i           (Å)
-fieldFactor          = 0                                 when |pathVector| = 0
-                     = Σ_i q_i * (cartesianMovement_i · pathVector) / |pathVector|²
+For each particle p present in S0 or S2 at a path node:
+  displacement_p = Cell.ToCartesian(x_p(S2) - x_p(S0))   (Å; void has no entry)
+chargeTransportVector = Σ_p q_p * displacement_p          (e·Å)
+pathVector            = Σ_i Cell.ToCartesian(movement_i)  (Å; display/tracking only)
+field                 = -0.5 * (|E| / kT) * (chargeTransportVector · ê)
 ```
 
-The conversion uses the same `CellGeometry` as the structure stage; fractional and Cartesian vectors are never
-mixed in one dot product. For a single charge `q` moving by `Δx`, `fieldFactor = q`, so the energy is
-`-0.5 q E·Δx/kT`. For a vacancy migration, the vacancy moves opposite to the ion, so `fieldFactor` carries the
-correct sign. For non-collinear multi-site mechanisms the scalar is a documented projection approximation; the
-single-charge, vacancy, and collinear three-site cases are pinned by tests. If Step 15/16 later requires a
-vector field factor, that is a contract change, not a silent reinterpretation.
+The particle-identity mapping is the same mapping used to derive `tracker_order`: a particle that moves from
+node `i` to node `j` contributes once, not once per node. For a single charge `q` moving by `Δx`, the vector is
+`qΔx`. For a vacancy hop, the ion moves once and the void contributes nothing, so the sign is correct and the
+value cannot cancel. For an exchange of two identical ions the net charge transport is zero; for an exchange of
+different charges it is non-zero. The dot product is exact for non-collinear multi-site mechanisms.
+`pathVector` is display/tracking only and is not used to derive the field. The Å/V/m unit conversion is applied
+by Step 15's existing field convention. Tests pin a single charge, a vacancy, an identical-ion exchange
+(zero), a distinct-charge exchange (non-zero), and a non-collinear multi-site path.
 
 ### 9. Simulation encoding and derived solver intent
 
@@ -408,8 +414,8 @@ For each authored simulation (sorted by `SimulationId`):
   `path` encodings, fractional `movement` per node, Cartesian path vector/length, and inverse flag. Negative
   cell offsets are relative-path coordinates; the solver normalizes them with `ToSupercellOffset`.
 - **Jump rules.** Dense `rule_id`, stable `rule_geometry_id`, collection ID, `state0/1/2`, default frequency,
-  field factor, static correction (null), tracker-order code, and flags. State codes use 6 bits per path node,
-  node 0 least significant, unused bits zero. `tracker_order` uses `0xFF` for a non-mobile node.
+  `chargeTransportVector`, static correction (null), tracker-order code, and flags. State codes use 6 bits per
+  path node, node 0 least significant, unused bits zero. `tracker_order` uses `0xFF` for a non-mobile node.
 - **Jump count/mapping.** `jumpCount[position][particle]` is the number of selectable directions for that
   start state; `jumpMapping[position][particle]` lists the direction indices in relative-slot order. A
   direction is listed only when at least one rule can start from that particle at that position. Zero means
@@ -448,7 +454,7 @@ The internal result is a pure `Mocassin.Compilation` record:
 ```csharp
 public sealed record CompiledModel(
     int FormatVersion,                 // 1
-    string ModelSignature,             // geometry/rules signature, Step 08
+    string ModelSignature,             // geometry/rules/encoding signature, Step 08
     string SymmetryContractVersion,    // "symmetry-1"
     string SpaceGroupDataVersion,
     string SpaceGroupDataSha256,
@@ -483,14 +489,14 @@ metadata (Step 18).
 
 **Contract changes recorded in [`02-data-contracts.md`](../02-data-contracts.md) §3.3:**
 
-- Add top-level `model_signature` (Step 08 geometry/rules signature). Keep `signature` as the Step 09
+- Add top-level `model_signature` (Step 08 geometry/rules/encoding signature). Keep `signature` as the Step 09
   parameterization signature, which is the `models.signature` uniqueness key and the `.mcs`
   `metadata.modelSignature`.
 - Clarify `jump_rules.frequency_factor` is the parameterized value written by Step 09/11; Step 08's internal
   default frequency is not persisted as a second runtime source.
 - Clarify `jump_directions.movement`/`path_vector`/`length` are the authoritative path movement; the
-  direction has no stored scalar field factor, and Step 15 computes the runtime field projection from
-  `movement`. The rule's `field_factor` remains the compiler scalar.
+  direction stores no field scalar. `jump_rules` stores a Cartesian `charge_transport_vector`; Step 15
+  computes the field energy from its dot product with the normalized field direction.
 - Clarify `simulations.tracker_models` are **definitions** (global/static index maps), not mutable tracker
   values.
 - Clarify `interaction_range` is the MMC local-update cube and `structure.environments` carries pair/cluster
@@ -586,9 +592,9 @@ ParameterizedModel.Signature
 - Canonical ordering, invariant-culture formatting, normalized doubles, and stable sorting are mandatory.
 - Distances are exact-grid-derived and used only for `1 fm` buckets and display; the signature records buckets
   and indices, not raw computed distances.
-- Field factors are computed with deterministic scalar arithmetic and quantized to 12 decimal places before
-  persistence and signing. No parallel floating-point reduction, FMA-dependent accumulation, or hash-order
-  iteration affects the output.
+- Charge transport vectors are computed with deterministic scalar arithmetic and quantized to 12 decimal
+  places before persistence and signing. No parallel floating-point reduction, FMA-dependent accumulation, or
+  hash-order iteration affects the output.
 - Golden JSON/signature fixtures are generated by the real compiler and checked for freshness. Windows/macOS
   golden runs are manual platform gates; Ubuntu is automatic.
 
@@ -609,21 +615,22 @@ ParameterizedModel.Signature
   - clusters: energy hash + structure hash + cluster IDs + allowed-occupation hash;
   - rules: active-transition-set hash + transition closure hashes + structure hash + particle order;
   - encoding: rule hash + simulation hash + structure hash;
-  - indexing/signing: all prior stage hashes.
+  - indexing: structure hash + particle hash + pair/cluster table hashes + rule hash + simulation hash;
+  - signing: canonical projection bytes (runtime settings excluded).
 - **Active-transition-set hash.** `ProjectHasher.ComputeSimulationSelection(Project)` (new, Core) hashes the
   canonical simulation IDs, kinds, and authored-order transition references. It is the cache-key input that
   makes adding/removing a simulation reference change the rule set. The compiler report exposes it as
   `InputHashes.ActiveTransitions`; `InputHashes.Simulations` hashes the full simulation section.
-- **Invalidation graph:**
+- **Invalidation graph.** `Resolve` always runs and is not a cache stage. The remaining graph is:
 
   | Edit | Rebuilds | Reuses |
   | --- | --- | --- |
-  | Structure/particles | Resolve, Structure, Environments, Pairs, Clusters, Rules, Encoding, Indexing, Signing | nothing |
-  | Energy environments/clusters/site energies | Environments, Pairs, Clusters, Encoding (links), Indexing, Signing | Resolve, Structure, Rules |
-  | Transitions/state changes/chains | Rules, Encoding, Indexing, Signing | Resolve, Structure, Pairs, Clusters |
-  | Simulation active-transition set changes | Rules, Encoding, Indexing, Signing | Resolve, Structure, Pairs, Clusters |
-  | Simulation runtime settings only | Encoding (defaults) | Resolve, Structure, Pairs, Clusters, Rules, Indexing, Signing |
-  | Catalog or symmetry contract | all stages | nothing |
+  | Structure/particles | Structure, Environments, Pairs, Clusters, Rules, Encoding, Indexing, Signing | nothing |
+  | Energy environments/clusters/site energies | Environments, Pairs, Clusters, Encoding (links), Indexing, Signing | Structure, Rules |
+  | Transitions/state changes/chains | Rules, Encoding, Indexing, Signing | Structure, Pairs, Clusters |
+  | Simulation active-transition set changes | Rules, Encoding, Indexing, Signing | Structure, Pairs, Clusters |
+  | Simulation runtime settings only | Encoding, Indexing (runtime-default snapshot) | Structure, Pairs, Clusters, Rules, Signing |
+  | Catalog or symmetry contract | all cached stages | nothing |
 
 - Cache statistics (`hits`, `misses`, `capacity`) are reported but never signed. A cached entry is accepted
   only when its key echo, format version, array lengths/index bounds, and cached content hash match the current
@@ -731,9 +738,9 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 - [ ] `cluster-compilation`: resolve cluster geometry, call `ClusterReduction`, allocate canonical cluster
   tables, build expansion maps, and link cluster byte positions.
 - [ ] `transition-rule-compilation`: expand directions, build S0/S1/S2, conservation filtering,
-  forward/inverse/dependent rules, deduplication, ambiguity detection, rule IDs, and field factors. Add the
-  additive public `TransitionPathResolver.TryResolvePoint`/`TryResolvePath` API and Step 04 path-resolver tests;
-  do not duplicate private nearest-image logic.
+  forward/inverse/dependent rules, deduplication, ambiguity detection, rule IDs, and charge transport
+  vectors. Add the additive public `TransitionPathResolver.TryResolvePoint`/`TryResolvePath` API and Step 04
+  path-resolver tests; do not duplicate private nearest-image logic.
 - [ ] `simulation-encoding`: build collections, directions, rules, jump count/mapping, tracker
   definitions/mappings, MMC interaction range, selection-optimizer resolution, and derived solver intent.
 - [ ] `indexing-signatures-caching`: dense index assignment, stable IDs, canonical model-signature projection,
@@ -747,7 +754,9 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 - [ ] Finalize the existing `signatures.model` (`ModelSignatureV1`/`model-v1`) manifest types and golden
   vector in `indexing-signatures-caching`; do not add a second signature entry. Step 11 reuses it for the
   stored payload and cross-language checks.
-- [ ] Add SPDX headers, `PublicAPI.Unshipped.txt` entries, and ApiCompat updates for every new public type.
+- [ ] Add SPDX headers, `PublicAPI.Unshipped.txt` entries, and ApiCompat updates for every new public type,
+  including the additive `Mocassin.Symmetry.TransitionPathResolver.TryResolvePoint`/`TryResolvePath` members and
+  the new `Mocassin.Compilation` public surface.
 - [ ] Update `docs/reference/diagnostics.md`, `docs/development/compilation-pipeline.md`,
   `docs/development/architecture.md`, `docs/development/design-decisions.md`, `docs/planning/03-quality-strategy.md`,
   `docs/development/testing-and-parity.md`, and the parity matrix in the same features.
@@ -762,6 +771,8 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
   keeps the dual-DOF default unless a documented Step 10 optimizer rule clears it.
 - [ ] Rule generation enforces unstable positions void in S0/S2, stable positions void in S1, and the
   documented mass/charge conservation rules; rejected counts are reported.
+- [ ] Charge transport vectors give `qΔx` for a single charge, the correct vacancy sign, zero for an
+  identical-ion exchange, and non-zero for a distinct-charge exchange or a non-collinear multi-site path.
 - [ ] Rule ambiguity is detected as `CMP004` with both conflicting transitions/rules.
 - [ ] Every compiled direction/rule is reachable through `jump_count`/`jump_mapping`; every selectable
   `(position, particle, relative slot)` has at most one rule for its `state0`.
@@ -791,7 +802,7 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
   tests, oracles, determinism, caches, and performance.
 - `docs/reference/diagnostics.md` — `CMP` rows and anchors, added with the diagnostics feature.
 - `docs/physics/energies.md` and `docs/physics/symmetry.md` — the scientific conventions the compiler applies
-  (pair/cluster tables, chirality, field factor, conservation).
+  (pair/cluster tables, chirality, charge transport, conservation).
 - `docs/glossary/notation.md` — compiled indices, state codes, and rule identities.
 
 ## Tests
@@ -806,6 +817,7 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 | Clusters | Canonical tuples/codes match exhaustive permutation oracles; expansion maps are complete |
 | Cluster tables | Rows, code order, particle mapping, and zero defaults are exact |
 | Rules | S0/S1/S2, stability roles, conservation, rejection counts, forward/inverse/dependent counts |
+| Charge transport | Single charge -> `qΔx`; vacancy -> correct sign; identical-ion exchange zero; distinct-charge exchange and non-collinear path non-zero |
 | Rule ambiguity | Duplicate `state0` with different outcomes fails with `CMP004` and both identities |
 | Vehicle | Unidirectional only; no inverse generation; KMC still carries the dual-DOF default |
 | Intent | KMC always sets `UseDualDofCorrection` by default; Step 10 may clear it only with a recorded optimizer rule; MMC false |
