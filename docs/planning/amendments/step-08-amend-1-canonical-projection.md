@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-08-amend-1` |
 | Parent step | 08 — Model Compilation Pipeline |
-| Status | Re-review required (round 2) |
+| Status | Ready with notes (round 3; owner acceptance pending) |
 | Branch | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` |
 | Design review | `docs/planning/reviews/step-08-amend-1.md` (round 1 Changes required; re-review requested) |
 | Parent audit | `docs/planning/audits/step-08.md` |
