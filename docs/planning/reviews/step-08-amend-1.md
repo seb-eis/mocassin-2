@@ -606,3 +606,192 @@ Follow-up issue/step: Apply R3-1–R3-8 and note R3-10 to
 `msgpack` requirements/gate details, and request a fresh re-review at the new frozen commit if the owner
 requires the Minor corrections to be re-verified. The parent audit still has A1/A3–A9 open and must be re-run at
 the combined commit.
+
+### Review round 4
+
+#### Independence and frozen state
+
+Fresh context: I did not author or implement Step 08 or this amendment and have no shared conversation with the
+planner or implementor. I reviewed the round-4 delta at the frozen tree
+`26a17ced7fe014614831e45c63294924364f4192` on `step/08-model-compilation-pipeline`; the working tree was clean.
+The design content is `4036100f8fae658ce4fc11587aa88eb454aa84d9`: `git diff --stat 4036100 26a17ce` is the
+single-line `Reviewed commit` metadata change in this record, so the design delta reviewed is `e5d18a0..4036100`
+(and `a51344f..4036100` overall). The parent audit is still `Fixes required` (A1–A9); the amendment addresses
+only A2.
+
+Round 4 closes most of the round-3 notes and, importantly, moves the quantisation and versioning rules into
+their normative parent pages: `docs/development/compilation-pipeline.md` and Step 08 §11.4 now say that all
+projected float64 values are quantised with round-half-away-from-zero on the binary64 product, and ADR 0010
+gained a "Pre-release model layout finalization" section plus a `02-data-contracts.md` §3.3 note recording that
+`status = "final"` is not a release marker. The encoding table, GUID vs content-hash split, `MessagePackWriter`
+primitive set, fixture generator/command, `projectionSha256`, and the five-sample acceptance are now explicit.
+What remains is a small set of internal contradictions in the type table and the descriptor path plus
+bookkeeping. There is no Blocker or Major, and the bytes are implementable from the authoritative per-field
+table.
+
+#### Commands and results
+
+```text
+$ git rev-parse HEAD
+26a17ced7fe014614831e45c63294924364f4192
+
+$ git status --short
+(clean)
+
+$ git branch --show-current
+step/08-model-compilation-pipeline
+
+$ git log --oneline -5
+26a17ce docs: freeze step 08 amendment round 4 review [skip ci]
+4036100 docs: clear step 08 amendment round 3 notes [skip ci]
+e5d18a0 docs: record step 08 amendment ready-with-notes status [skip ci]
+6cec29d docs: record step 08 amendment 1 round 3 review [skip ci]
+a51344f docs: freeze step 08 amendment round 3 review [skip ci]
+
+$ git diff --stat 4036100 26a17ce
+ docs/planning/reviews/step-08-amend-1.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+$ git diff --stat e5d18a0 4036100
+ docs/development/compilation-pipeline.md           |   3 +-
+ docs/planning/02-data-contracts.md                 |   2 +
+ .../adr/0010-canonical-messagepack-signatures.md   |   8 ++
+ docs/planning/amendments/README.md                 |   2 +-
+ .../step-08-amend-1-canonical-projection.md        | 106 +++++++++++++++------
+ docs/planning/reviews/step-08-amend-1.md           |  11 +++
+ .../steps/step-08-model-compilation-pipeline.md    |   4 +-
+ 7 files changed, 102 insertions(+), 34 deletions(-)
+
+$ python tools/contracts/generate.py --check
+Contract artifacts are current (18 files)
+
+$ python tools/check_docs_links.py
+Documentation links OK (152 files scanned).
+
+$ python tools/check_process_consistency.py
+Process consistency: OK
+
+$ python -c 'import msgpack; print(msgpack.version)'
+(1, 2, 4)
+
+$ ls tools/contracts/requirements.txt
+ls: cannot access 'tools/contracts/requirements.txt': No such file or directory
+```
+
+`tools/contracts/requirements.txt` and the `verify.sh` install step are still pending implementation, which is
+consistent with this being a design-only commit.
+
+Quantisation rule check (round-3 residual R3-3). I re-implemented the specified language-neutral operation
+(`scaled = value * 1e12`; `floor(scaled + 0.5)` when `scaled >= 0`, else `ceil(scaled - 0.5)`;
+`result = rounded / 1e12`; zero normalised to `+0.0`) and it reproduces every pinned example:
+
+```text
+5e-13                 -> 1e-12      (scaled = 0.5)
+-5e-13                -> -1e-12
+-4e-13                -> 0.0
+0.30000000000000004   -> 0.3
+-0.0                  -> 0.0
+0.0012345678901235    -> 0.00123456789
+python round(5e-13, 12) = 0.0        (confirms "not the language round function")
+```
+
+Contract and descriptor inspection:
+
+```text
+$ python - <<'EOF'
+import json
+m = json.load(open('contracts/manifest.json'))
+print([(f['name'], f['type']) for f in m['signatures']['model']['fields']])
+print([v['id'] for v in m['fixtures']['signatureVectors']['vectors']])
+print([v['id'] for v in json.load(open('tests/contracts/signature-vectors.json'))['vectors']])
+EOF
+[('formatVersion', 'uint64'), ..., ('particles', 'bin'), ('structure', 'bin'), ('energy', 'bin'),
+ ('transitions', 'bin'), ('simulations', 'bin')]        # projection sections still `bin` at this commit
+['model-ceria-kmc', 'model-vehicle5', 'model-interstitialcy5']
+['model-ceria-kmc', 'model-vehicle5', 'model-interstitialcy5']
+```
+
+`tools/contracts/generate.py` (`build_artifacts`) writes only `contracts/generated/signatures/<id>-v1.json`,
+copying `descriptor["fields"]` verbatim, so a nested `model-v1.json` descriptor is expressible; `validate_field`
+supports `object` fields, `array` `itemFields`, and nested `itemItems`. `msgpack` cannot emit the fixed-width
+headers, which is why the checker must re-encode with `struct.pack` (round-3 evidence still holds).
+
+MessagePack 3.1.12 package check (scratch download under `/tmp/opencode`, not committed). The pinned
+`lib/net9.0/MessagePack.xml` and `MessagePackWriter.cs` expose `WriteRaw(ReadOnlySpan<byte>)`,
+`WriteRaw(in ReadOnlySequence<byte>)`, `Advance(int)`, and `Flush()`, so the specified primitive set is
+implementable. `WriteUInt64`/`WriteInt64` are typed writers (their XML summaries name
+`MessagePackCode.Int32`/`MessagePackCode.Int64`), while minimal-width behaviour belongs to
+`Write(ulong)`/`Write(long)`; `Write(double)` emits `MessagePackCode.Float64` and there is no `WriteDouble`
+entry. The `WriteRaw`-only rule is therefore correct; see N4-2 on the stated reason.
+
+Files and sections read for round 4 in addition to the round-1/round-2/round-3 sets: the full delta
+`a51344f..4036100` and `e5d18a0..4036100`; the amendment page; parent Step 08 §8.4 and §11.3–§11.4; ADR 0010
+"Projection rules", "Pre-release model layout finalization", and "Tooling"; `02-data-contracts.md` §1.3/§3.3;
+`docs/development/compilation-pipeline.md` "Signatures"/"Caches and determinism"; `contracts/manifest.json`
+`signatures.model` and `fixtures.signatureVectors`; `contracts/generated/signatures/model-v1.json`;
+`tests/contracts/signature-vectors.json`; `tools/contracts/generate.py` (`VALID_FIELD_TYPES`, `validate_field`,
+`build_artifacts`); `tools/contracts/README.md`; `tools/verify.sh` `run_contracts`;
+`docs/planning/06-toolchain-requirements.md`; the compiled records `CompiledStructureModel.cs`,
+`CompiledEnergyModel.cs`, `CompiledClusterTable.cs`, `CompiledTransitionModel.cs`,
+`TransitionCompilationDtos.cs`, `TransitionCompilationStage.cs`; `GoldenModelTests.cs`; the five sample
+projects (`samples/simulations/ceria-kmc.mocprj`, `samples/simulations/ceria-mmc.mocprj`,
+`samples/transitions/vehicle5.mocprj`, `samples/transitions/interstitialcy5.mocprj`,
+`samples/barium-zirconate/barium-zirconate.mocprj`); and the MessagePack 3.1.12 package XML/source above.
+
+#### Round-3 finding status
+
+| Finding | Status | Evidence and residual |
+| --- | --- | --- |
+| R3-1 (Minor) | **Resolved** | `StaticCorrection` is in the dropped/derived table as "excluded in v1" (line 139) and in the encoding prose with the Step 15 dynamic-path rationale (lines 183–184); `movement` lengths are stated for both directions and rules (lines 117, 120–121); the dropped-field rationale table covers `collection.ruleIndices`, `rule.directionIndex`, `clusterTable.index`, pair site IDs, `simulation.intent`, and `pathVector`/`pathLength` (lines 129–139). Residual completeness note N4-1. |
+| R3-2 (Minor) | **Partially resolved** | "The per-field table above is authoritative" and the signed exceptions (spatial offsets, enums, `-1` environment sentinel) are stated (lines 167–172); distance buckets, jump tables, canonical tuples/mappings, and pair/cluster site indices are `uint64` (lines 91, 100, 103–113). Three contradictions remain: R4-3. |
+| R3-3 (Minor) | **Resolved** | The language-neutral operation and four pinned examples are stated (lines 173–177, 294); I verified they reproduce with the specified formula; parent §11.4 and `compilation-pipeline.md` are updated in this commit (delta above) and no longer say charge-transport-only. |
+| R3-4 (Minor) | **Resolved** | The fixtures section and acceptance require the same five samples in the manifest, `signature-vectors.json`, `.bin`/`.json` fixtures, and C# goldens (lines 239, 281, 295, 299). The manifest still lists three vectors and the C# goldens still omit interstitialcy, which is implementation work under the acceptance item, not a design gap; residual id-mapping note N4-5. |
+| R3-5 (Minor) | **Resolved** | `tools/contracts/requirements.txt` with `msgpack==1.2.4`, the `pip install -r` step in `run_contracts`, the README, and the toolchain row moved to Step 08 are specified (lines 226, 232–236); the "existing dependency" wording is corrected (lines 47–48). Residual checklist note N4-3. |
+| R3-6 (Minor) | **Resolved** | GUID-valued IDs use lowercase `D`/invariant; content-hash IDs are the 64-character SHA-256 strings as produced and are never parsed as GUIDs (lines 242–247). This matches the current writer's `ToString("D")` calls on typed GUID IDs. |
+| R3-7 (Minor) | **Partially resolved** | `ProjectionFixtureTests.WriteProjectionFixtures`, its `dotnet test` command, `projectionSha256` (SHA-256 of the raw `.bin`), descriptor reuse of `model-v1.json`, and `ProjectionDescriptorTests` vs the internal `ProjectionLayout` are defined (lines 207–219). Residuals: R4-1 (descriptor path still contradicted) and R4-2 (writer mode/metadata comparison). |
+| R3-8 (Minor) | **Resolved** | The primitive set and prohibition are exact (lines 149–153); `WriteRaw`/`Advance` exist in 3.1.12 as verified. Note N4-2 on the stated reason for the two typed writers. |
+| R3-9 (Note) | **Resolved** | The checker is qualified as a byte/type conformance verifier, not the production encoder, and Step 11 remains the Rust encoder/vector owner (lines 239–240, 279–280). Note N4-4 on the remaining "independent" wording. |
+| R3-10 (Note) | **Resolved** | ADR 0010 records the pre-release `model-v1` exception and that `status = "final"` means "finalized for the first release candidate"; `02-data-contracts.md` §3.3 records the same. |
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| Minor | **R4-1 — The descriptor file is still defined twice (R3-7 residual).** The fixtures section says the descriptor is `contracts/generated/signatures/model-v1.json` and explicitly "no duplicate `model-v1.projection.json`" (lines 216–219), but the next paragraph still says `tools/contracts/generate.py` "emits the complete `model-v1` projection descriptor ... to `contracts/generated/signatures/model-v1.projection.json`" (lines 221–222), and the checker "reads the descriptor" without naming which file (line 225). `ProjectionDescriptorTests` reads `model-v1.json`. `generate.py` `build_artifacts` only writes `signatures/<id>-v1.json`, so the second path has no generator. The two files would be generated from the same `fields` array and contain the same tree, so the risk is duplicated/stale build output rather than wrong bytes. Delete the emitting sentence, name the file the Python checker loads, and make the `descriptor` field in the fixture JSON point at it. | Amendment lines 207–230; `tools/contracts/generate.py:525–538`; `contracts/generated/signatures/model-v1.json`; resolution R3-7 ("descriptor reuses `model-v1.json`"). |
+| Minor | **R4-2 — The fixture write mode and the metadata comparison are not stated (R3-7 residual).** The regeneration command runs `dotnet test ... --filter FullyQualifiedName~ProjectionFixtureTests.WriteProjectionFixtures`, and "`ProjectionFixtureTests` also asserts that the checked-in `.bin`/`.json` files match a fresh compile" (lines 207–215). The design does not say how the writer is excluded from the default test run, although a writer that runs in a normal `dotnet test` would rewrite the tracked `.bin`/`.json` and make the freshness assertion self-healing; no golden-write/environment-gate convention exists in the current test projects. The checker step also says it "recomputes the domain-separated signature and `projectionSha256`" without saying it compares them with the `.json` fields, so the tracked metadata could drift from the bytes. State the opt-in write trigger (skipped/opt-in trait or environment variable), the default check test, and that `signatureHex`/`projectionSha256`/`fixtureFormat` are compared. | Amendment lines 207–230, 294; `src/dotnet/Mocassin.Compilation.Tests/Compiler/` and a repo-wide search (no existing write-mode, `UPDATE_GOLDEN`, or `MOCASSIN_WRITE` convention). |
+| Minor | **R4-3 — Three type entries still contradict the authoritative summary and ADR 0010 rule 3 (R3-2 residual).** (a) The structure table says `interactionRange array<uint64>` (line 79) and the summary says interaction-range cell counts are `uint64` (line 168), but the bullet directly below says "exactly four `int64` values" (line 82). (b) `clusterLink`'s `siteSlot` (line 92) and `occupation.expansions`' `permutationIndex` (line 107) are non-negative dense indices (`CompiledClusterLink.SiteSlot` is the occupation slot, `0` = centre; `CompiledClusterExpansion.PermutationIndex` is an induced-permutation index), yet they are `int64`, which is outside the stated signed exceptions (spatial offsets, stability/kind enums, `-1` sentinel) and contrary to ADR 0010 rule 3. (c) The pair-ID rationale says "the structure site table and signed site indices carry the identity" (line 136) although `centerSiteIndex`/`partnerSiteIndex` are now `uint64`. Make (b) `uint64` or add an explicit "source-`int` retention" exception and amend ADR 0010, fix the `interactionRange` bullet, and correct "signed". | Amendment lines 79, 82, 91–92, 100, 107, 136, 167–172, 168; `CompiledStructureModel.cs` `CompiledClusterLink.SiteSlot`; `CompiledClusterTable.cs` `CompiledClusterExpansion.PermutationIndex`; ADR 0010 rule 3 (line 32); resolution R3-2. |
+| Note | **N4-1 — The include/exclude rationale is still not exhaustive.** `direction.index` and `rule.index` are also dropped (array position is the dense index, like the `clusterTable.index` row) without a rationale row, and `position.encoding` is retained although its documented value is the base-cell `(0, 0, 0, P)`, duplicating `position.p`, while pair site IDs are dropped as redundant. Bytes are unaffected; one line per case keeps the rule reviewable. | Amendment lines 83–89, 118, 122, 129–139; `CompiledStructureModel.cs` `CompiledPosition.Encoding`/`P`; `CompiledTransitionModel.cs` `Index` fields. |
+| Note | **N4-2 — The stated reason for prohibiting `WriteUInt64`/`WriteInt64` is imprecise.** The 3.1.12 XML/source shows both are typed writers (`MessagePackCode.Int32`/`Int64` are named in their summaries); the minimal-width encodings are `Write(ulong)`/`Write(long)`, and `WriteArrayHeader`/`WriteString` are the compact ones. The instruction to use `WriteRaw`/`Advance` for every forced header/value is still correct and sufficient, and `Write(double)` could be allowed since it emits `0xcb`; correct the rationale so the rule is defensible. | MessagePack 3.1.12 `lib/net9.0/MessagePack.xml` and `MessagePackWriter.cs` (downloaded to `/tmp/opencode`, not committed); amendment lines 149–153. |
+| Note | **N4-3 — The Documentation checklist omits the files the body requires.** The body requires `tools/contracts/README.md` and the `06-toolchain-requirements.md` row move (lines 234–236), but the Documentation checklist lists only the pipeline doc, data contracts, ADR, and status/parity/audit bookkeeping (lines 302–307). Parent §11.4 and `compilation-pipeline.md` are already edited in this commit, so add the two remaining pages to the checklist so the closeout tick is traceable. | Amendment lines 232–236, 302–307; `tools/contracts/README.md:20`; `06-toolchain-requirements.md:126`. |
+| Note | **N4-4 — "Independent" still appears unqualified in Scope and Risks.** Scope says "an independent Python re-encoding vector so C# and a second implementation agree" (line 39) and the risk row says "C# and Python encoders diverge" (line 314), while the cross-language section and acceptance correctly qualify the checker as a byte/type verifier over C#-produced bytes. Round 3 asked for the qualification in the approval summary; use the same term in the page so the claim is not overstated. | Amendment lines 39, 239–240, 279–280, 314. |
+| Note | **N4-5 — Bookkeeping.** The request's `Design review` row still says "(round 1 Changes required; re-review requested)" while `Status` says "round 4 requested" (lines 9–11). The fixture ids (`ceria-kmc`, `ceria-mmc`, `vehicle5`, `interstitialcy5`, `barium-zirconate`) and the manifest vector ids (`model-ceria-kmc`, `model-vehicle5`, …) differ with no stated mapping, which makes the "same five samples" acceptance harder to check. | Amendment lines 9–11, 200, 239, 281; `contracts/manifest.json` `fixtures.signatureVectors`. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**.
+
+#### Verdict
+
+**Ready with notes.** No Blocker or Major remains. Round 4 resolves R3-1, R3-3, R3-4, R3-5, R3-6, R3-8, R3-9,
+and R3-10, and it moves the quantisation and versioning rules into ADR 0010, §3.3, Step 08 §11.4, and
+`compilation-pipeline.md`; the specified quantisation operation reproduces every pinned example, and the
+`MessagePackWriter`/`WriteRaw` mechanism exists in the pinned package. The canonical encoding is implementable
+from the authoritative per-field table plus the marker table.
+
+R3-2 and R3-7 are only partially resolved (R4-1–R4-3), and the R3-2/R3-7 resolution rows overstate the fix:
+`siteSlot`/`permutationIndex` are still `int64` against the stated exceptions, the `interactionRange` bullet still
+says `int64`, and the descriptor is still described as both `model-v1.json` and `model-v1.projection.json`.
+These are Minor documentation contradictions that must be corrected before implementation (they are not
+waivers), but they do not change the conclusion that the design can be implemented. N4-1–N4-5 are bookkeeping.
+
+The top-level `Record state` and round-1 `Verdict` above are the round-1 snapshot and are preserved unaltered;
+this round's verdict is authoritative. The Python checker remains a byte/type conformance verifier over
+C#-produced bytes, not an independent model-to-projection encoder: the manifest schema review and Step 11's Rust
+encoder/vector are the completeness gates. The parent audit still has A1, A3–A9, and m1–m7 open and must be
+re-run at the combined commit.
+
+Follow-up owner: Step 08 implementor / planner
+Follow-up issue/step: Apply R4-1–R4-3 and N4-1–N4-5 to
+`docs/planning/amendments/step-08-amend-1-canonical-projection.md` (delete the stale `model-v1.projection.json`
+sentence, state the fixture write mode and metadata comparison, and make `siteSlot`/`permutationIndex`
+`uint64` or amend ADR 0010), then request a fresh re-review at the new frozen commit if the owner requires the
+Minor corrections to be re-verified. Integrate the amendment, refresh the closeout evidence and CI, and re-run
+the parent audit at the combined commit with A1, A3–A9, and m1–m7 in scope.
