@@ -24,6 +24,7 @@ internal static class CompilationOrchestrator
     /// <param name="stages">The validated content stages.</param>
     /// <param name="project">The validated project.</param>
     /// <param name="options">The effective options.</param>
+    /// <param name="cache">The optional stage cache.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The complete compilation result.</returns>
     /// <exception cref="OperationCanceledException">Compilation was cancelled.</exception>
@@ -32,9 +33,10 @@ internal static class CompilationOrchestrator
         ImmutableArray<ICompilationStage> stages,
         Project project,
         CompilationOptions options,
+        ICompilationCache? cache,
         CancellationToken cancellationToken)
     {
-        var context = new CompilationContext(project, options);
+        var context = new CompilationContext(project, options) { Cache = cache };
         var executions = new List<StageExecution>(stages.Length + 1);
         CompiledModel? model = null;
         CompilationStage? failedStage = null;
@@ -119,7 +121,7 @@ internal static class CompilationOrchestrator
             model?.SpaceGroupDataVersion,
             model?.SpaceGroupDataSha256,
             stageResults,
-            CompilationCacheStatistics.Empty,
+            cache?.Statistics ?? CompilationCacheStatistics.Empty,
             BuildSummary(status, failedStage, finalized.Diagnostics));
         return new CompilationResult(status, model, finalized.Diagnostics, report);
     }

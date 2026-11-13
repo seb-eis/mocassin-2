@@ -25,6 +25,21 @@ internal sealed class EncodingCompilationStage : ICompilationStage
             throw new InvalidOperationException("The encoding stage requires the compiled structure and rules.");
         }
 
+        if (context.Cache is not null &&
+            context.Cache.TryGet<EncodingCacheEntry>(StageCacheKeys.Encoding(context), out var cached) &&
+            cached is not null &&
+            cached.Transitions.ParticleCount == context.Particles.Count &&
+            cached.Transitions.PositionCount == context.Structure.PositionCount)
+        {
+            return new CompilationStageOutcome(
+                context with
+                {
+                    Transitions = cached.Transitions,
+                    CompiledSimulations = cached.Simulations,
+                },
+                []);
+        }
+
         var transitions = context.Transitions;
         var globalTrackers = BuildGlobalTrackers(transitions);
         var staticTrackers = BuildStaticTrackers(context.Structure.PositionCount, context.Particles.Count);
@@ -55,6 +70,9 @@ internal sealed class EncodingCompilationStage : ICompilationStage
         };
 
         var simulations = BuildSimulations(context, encoded);
+        context.Cache?.GetOrAdd(
+            StageCacheKeys.Encoding(context),
+            () => new EncodingCacheEntry(encoded, simulations));
         return new CompilationStageOutcome(
             context with { Transitions = encoded, CompiledSimulations = simulations },
             []);
@@ -270,6 +288,10 @@ internal sealed class EncodingCompilationStage : ICompilationStage
             mmc.BreakSampleIntervalMcsp,
             mmc.ResultSampleMcsp);
     }
+
+    private sealed record EncodingCacheEntry(
+        CompiledTransitionModel Transitions,
+        ImmutableArray<CompiledSimulation> Simulations);
 
     private readonly record struct JumpMapping(
         ImmutableArray<int> Counts,

@@ -4,6 +4,8 @@ using System.Collections.Immutable;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Compilation.Energy;
 using Mocassin.Compilation.Structure;
+using Mocassin.Compilation.Indexing;
+using Mocassin.Compilation.Caching;
 using Mocassin.Compilation.Transitions;
 using Mocassin.Compilation.Simulations;
 using Mocassin.Core.Model.Simulations;
@@ -75,4 +77,14 @@ internal sealed record CompilationContext(Project Project, CompilationOptions Op
     /// Gets the compiled simulations.
     /// </summary>
     public ImmutableArray<CompiledSimulation> CompiledSimulations { get; init; } = [];
+
+    /// <summary>
+    /// Gets the inspection-only index-to-stable-ID maps.
+    /// </summary>
+    public CompiledIndexMaps? IndexMaps { get; init; }
+
+    /// <summary>
+    /// Gets the optional stage cache used by this run.
+    /// </summary>
+    public ICompilationCache? Cache { get; init; }
 }

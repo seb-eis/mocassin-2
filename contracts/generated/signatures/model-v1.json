@@ -5,12 +5,32 @@
   "domainSeparator": "0x00",
   "hash": "sha256",
   "projectionType": "ModelSignatureV1",
-  "status": "skeleton",
-  "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 08.",
+  "status": "final",
+  "notes": "Final Step 08 compiled-model projection: domain-separated canonical projection over provenance, particles, structure/P1, pair/cluster geometry and table shapes, transition rules/encoding, and simulation encodings. Runtime settings and energy/frequency values are excluded.",
   "fields": [
     {
       "name": "formatVersion",
       "type": "uint64",
+      "required": true
+    },
+    {
+      "name": "symmetryContractVersion",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "spaceGroupDataVersion",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "spaceGroupDataSha256",
+      "type": "string",
+      "required": true
+    },
+    {
+      "name": "particles",
+      "type": "bin",
       "required": true
     },
     {

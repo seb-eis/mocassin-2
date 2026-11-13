@@ -26,6 +26,24 @@ internal sealed class StructureCompilationStage : ICompilationStage
         }
 
         var bag = new DiagnosticBag();
+        if (context.Cache is not null)
+        {
+            var key = StageCacheKeys.Structure(context);
+            if (context.Cache.TryGet<CompiledStructureModel>(key, out var cached) && cached is not null)
+            {
+                if (cached.PositionCount == context.Encoder.PositionCount &&
+                    cached.SiteCount == (context.Project.Structure.Sites.IsDefault ? 0 : context.Project.Structure.Sites.Length))
+                {
+                    return new CompilationStageOutcome(context with { Structure = cached }, []);
+                }
+
+                bag.Add(new Diagnostic(
+                    CompilationErrorCodes.CacheIntegrity,
+                    DiagnosticSeverity.Warning,
+                    "A cached structure entry failed its integrity check and was recomputed."));
+            }
+        }
+
         ImmutableArray<CellSite> sites = context.Project.Structure.Sites.IsDefault
             ? ImmutableArray<CellSite>.Empty
             : [.. context.Project.Structure.Sites.OrderBy(static site => site.Id.Value)];
@@ -85,6 +103,7 @@ internal sealed class StructureCompilationStage : ICompilationStage
             [],
             positions.MoveToImmutable(),
             [0, 0, 0, 0]);
+        context.Cache?.GetOrAdd(key: StageCacheKeys.Structure(context), () => structure);
         return new CompilationStageOutcome(context with { Structure = structure }, bag.Sorted);
     }
 

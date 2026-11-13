@@ -6,6 +6,7 @@ using Mocassin.Compilation.Energy;
 using Mocassin.Compilation.Structure;
 using Mocassin.Compilation.Transitions;
 using Mocassin.Compilation.Simulations;
+using Mocassin.Compilation.Indexing;
 
 namespace Mocassin.Compilation.Compiler;
 
@@ -111,4 +112,9 @@ public sealed record CompiledModel
     /// Gets the compiled simulations in ascending identifier order.
     /// </summary>
     public ImmutableArray<CompiledSimulation> Simulations { get; init; } = [];
+
+    /// <summary>
+    /// Gets the inspection-only index-to-stable-ID maps. This value is never persisted in the package.
+    /// </summary>
+    public CompiledIndexMaps IndexMaps { get; init; } = CompiledIndexMaps.Empty;
 }

@@ -93,6 +93,8 @@ Mocassin.Compilation.Compiler.CompiledModel.Energy.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.Equals(Mocassin.Compilation.Compiler.CompiledModel? other) -> bool
 Mocassin.Compilation.Compiler.CompiledModel.FormatVersion.get -> int
 Mocassin.Compilation.Compiler.CompiledModel.FormatVersion.init -> void
+Mocassin.Compilation.Compiler.CompiledModel.IndexMaps.get -> Mocassin.Compilation.Indexing.CompiledIndexMaps!
+Mocassin.Compilation.Compiler.CompiledModel.IndexMaps.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.ModelSignature.get -> string!
 Mocassin.Compilation.Compiler.CompiledModel.ModelSignature.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.Particles.get -> Mocassin.Compilation.Structure.CompiledParticleTable!
@@ -222,6 +224,21 @@ Mocassin.Compilation.Energy.CompiledPairTable.ParticleCount.get -> int
 Mocassin.Compilation.Energy.CompiledPairTable.ParticleCount.init -> void
 Mocassin.Compilation.Energy.CompiledPairTable.Values.get -> System.Collections.Immutable.ImmutableArray<double>
 Mocassin.Compilation.Energy.CompiledPairTable.Values.init -> void
+Mocassin.Compilation.Indexing.CompiledIndexMaps
+Mocassin.Compilation.Indexing.CompiledIndexMaps.<Clone>$() -> Mocassin.Compilation.Indexing.CompiledIndexMaps!
+Mocassin.Compilation.Indexing.CompiledIndexMaps.ClusterEnergyIds.get -> System.Collections.Immutable.ImmutableArray<string!>
+Mocassin.Compilation.Indexing.CompiledIndexMaps.ClusterEnergyIds.init -> void
+Mocassin.Compilation.Indexing.CompiledIndexMaps.CompiledIndexMaps(System.Collections.Immutable.ImmutableArray<string!> DirectionObjectIds, System.Collections.Immutable.ImmutableArray<string!> RuleGeometryIds, System.Collections.Immutable.ImmutableArray<string!> PairGeometryIds, System.Collections.Immutable.ImmutableArray<string!> ClusterEnergyIds) -> void
+Mocassin.Compilation.Indexing.CompiledIndexMaps.Deconstruct(out System.Collections.Immutable.ImmutableArray<string!> DirectionObjectIds, out System.Collections.Immutable.ImmutableArray<string!> RuleGeometryIds, out System.Collections.Immutable.ImmutableArray<string!> PairGeometryIds, out System.Collections.Immutable.ImmutableArray<string!> ClusterEnergyIds) -> void
+Mocassin.Compilation.Indexing.CompiledIndexMaps.DirectionObjectIds.get -> System.Collections.Immutable.ImmutableArray<string!>
+Mocassin.Compilation.Indexing.CompiledIndexMaps.DirectionObjectIds.init -> void
+Mocassin.Compilation.Indexing.CompiledIndexMaps.Equals(Mocassin.Compilation.Indexing.CompiledIndexMaps? other) -> bool
+Mocassin.Compilation.Indexing.CompiledIndexMaps.PairGeometryIds.get -> System.Collections.Immutable.ImmutableArray<string!>
+Mocassin.Compilation.Indexing.CompiledIndexMaps.PairGeometryIds.init -> void
+Mocassin.Compilation.Indexing.CompiledIndexMaps.RuleGeometryIds.get -> System.Collections.Immutable.ImmutableArray<string!>
+Mocassin.Compilation.Indexing.CompiledIndexMaps.RuleGeometryIds.init -> void
+Mocassin.Compilation.Signatures.CompiledModelJson
+Mocassin.Compilation.Signatures.ModelSignatureProjection
 Mocassin.Compilation.Simulations.CompiledGlobalTracker
 Mocassin.Compilation.Simulations.CompiledGlobalTracker.<Clone>$() -> Mocassin.Compilation.Simulations.CompiledGlobalTracker!
 Mocassin.Compilation.Simulations.CompiledGlobalTracker.CollectionIndex.get -> int
@@ -563,6 +580,9 @@ Mocassin.Compilation.Transitions.CompiledTransitionModel.Rules.init -> void
 Mocassin.Compilation.Transitions.CompiledTransitionModel.StaticTrackers.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Simulations.CompiledStaticTracker!>
 Mocassin.Compilation.Transitions.CompiledTransitionModel.StaticTrackers.init -> void
 const Mocassin.Compilation.Compiler.CompiledModel.CurrentFormatVersion = 1 -> int
+const Mocassin.Compilation.Signatures.CompiledModelJson.Format = "compiled-inspection-v1" -> string!
+const Mocassin.Compilation.Signatures.CompiledModelJson.FormatVersion = 1 -> int
+const Mocassin.Compilation.Signatures.ModelSignatureProjection.Domain = "mocassin/model-signature/v1" -> string!
 const Mocassin.Compilation.Transitions.CompiledJumpRule.DefaultFrequencyHz = 10000000000000 -> double
 override Mocassin.Compilation.Caching.CompilationCacheStatistics.Equals(object? obj) -> bool
 override Mocassin.Compilation.Caching.CompilationCacheStatistics.GetHashCode() -> int
@@ -600,6 +620,9 @@ override Mocassin.Compilation.Energy.CompiledPairGeometry.ToString() -> string!
 override Mocassin.Compilation.Energy.CompiledPairTable.Equals(object? obj) -> bool
 override Mocassin.Compilation.Energy.CompiledPairTable.GetHashCode() -> int
 override Mocassin.Compilation.Energy.CompiledPairTable.ToString() -> string!
+override Mocassin.Compilation.Indexing.CompiledIndexMaps.Equals(object? obj) -> bool
+override Mocassin.Compilation.Indexing.CompiledIndexMaps.GetHashCode() -> int
+override Mocassin.Compilation.Indexing.CompiledIndexMaps.ToString() -> string!
 override Mocassin.Compilation.Simulations.CompiledGlobalTracker.Equals(object? obj) -> bool
 override Mocassin.Compilation.Simulations.CompiledGlobalTracker.GetHashCode() -> int
 override Mocassin.Compilation.Simulations.CompiledGlobalTracker.ToString() -> string!
@@ -681,6 +704,12 @@ static Mocassin.Compilation.Energy.CompiledPairGeometry.operator !=(Mocassin.Com
 static Mocassin.Compilation.Energy.CompiledPairGeometry.operator ==(Mocassin.Compilation.Energy.CompiledPairGeometry? left, Mocassin.Compilation.Energy.CompiledPairGeometry? right) -> bool
 static Mocassin.Compilation.Energy.CompiledPairTable.operator !=(Mocassin.Compilation.Energy.CompiledPairTable? left, Mocassin.Compilation.Energy.CompiledPairTable? right) -> bool
 static Mocassin.Compilation.Energy.CompiledPairTable.operator ==(Mocassin.Compilation.Energy.CompiledPairTable? left, Mocassin.Compilation.Energy.CompiledPairTable? right) -> bool
+static Mocassin.Compilation.Indexing.CompiledIndexMaps.Empty.get -> Mocassin.Compilation.Indexing.CompiledIndexMaps!
+static Mocassin.Compilation.Indexing.CompiledIndexMaps.operator !=(Mocassin.Compilation.Indexing.CompiledIndexMaps? left, Mocassin.Compilation.Indexing.CompiledIndexMaps? right) -> bool
+static Mocassin.Compilation.Indexing.CompiledIndexMaps.operator ==(Mocassin.Compilation.Indexing.CompiledIndexMaps? left, Mocassin.Compilation.Indexing.CompiledIndexMaps? right) -> bool
+static Mocassin.Compilation.Signatures.CompiledModelJson.Write(Mocassin.Compilation.Compiler.CompiledModel! model) -> string!
+static Mocassin.Compilation.Signatures.ModelSignatureProjection.Compute(Mocassin.Compilation.Compiler.CompiledModel! model) -> string!
+static Mocassin.Compilation.Signatures.ModelSignatureProjection.ComputeProjection(Mocassin.Compilation.Compiler.CompiledModel! model) -> byte[]!
 static Mocassin.Compilation.Simulations.CompiledGlobalTracker.operator !=(Mocassin.Compilation.Simulations.CompiledGlobalTracker? left, Mocassin.Compilation.Simulations.CompiledGlobalTracker? right) -> bool
 static Mocassin.Compilation.Simulations.CompiledGlobalTracker.operator ==(Mocassin.Compilation.Simulations.CompiledGlobalTracker? left, Mocassin.Compilation.Simulations.CompiledGlobalTracker? right) -> bool
 static Mocassin.Compilation.Simulations.CompiledRuntimeSettings.operator !=(Mocassin.Compilation.Simulations.CompiledRuntimeSettings? left, Mocassin.Compilation.Simulations.CompiledRuntimeSettings? right) -> bool

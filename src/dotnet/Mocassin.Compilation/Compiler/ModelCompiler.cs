@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
+using Mocassin.Compilation.Caching;
 using Mocassin.Core.Project;
 
 namespace Mocassin.Compilation.Compiler;
@@ -44,6 +45,9 @@ public sealed class ModelCompiler : IModelCompiler
         ArgumentNullException.ThrowIfNull(project);
         var effectiveOptions = CompilationOptions.Validate(options);
         cancellationToken.ThrowIfCancellationRequested();
-        return CompilationOrchestrator.Run(stages, project, effectiveOptions, cancellationToken);
+        ICompilationCache? cache = effectiveOptions.EnableStageCache
+            ? effectiveOptions.Cache ?? new StageCache(effectiveOptions.StageCacheCapacity)
+            : null;
+        return CompilationOrchestrator.Run(stages, project, effectiveOptions, cache, cancellationToken);
     }
 }

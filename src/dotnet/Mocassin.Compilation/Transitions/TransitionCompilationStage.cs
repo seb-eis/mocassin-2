@@ -33,6 +33,15 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             throw new InvalidOperationException("The rule stage requires the compiled structure and particles.");
         }
 
+        if (context.Cache is not null &&
+            context.Cache.TryGet<CompiledTransitionModel>(StageCacheKeys.Rules(context), out var cachedRules) &&
+            cachedRules is not null &&
+            cachedRules.ParticleCount == context.Particles.Count &&
+            cachedRules.PositionCount == context.Structure.PositionCount)
+        {
+            return new CompilationStageOutcome(context with { Transitions = cachedRules }, []);
+        }
+
         if (!TryBuildWorks(context, out var works, out var workDiagnostics))
         {
             return CompilationFailure.FromSource(
@@ -219,6 +228,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             [],
             context.Particles.Count,
             context.Structure.PositionCount);
+        context.Cache?.GetOrAdd(StageCacheKeys.Rules(context), () => model);
         return new CompilationStageOutcome(context with { Transitions = model }, []);
     }
 

@@ -31,30 +31,20 @@ public sealed class ModelCompilerTests
     }
 
     [Fact]
-    public void DefaultPipelineFailsClosedAtTheFirstPlaceholderStage()
+    public void DefaultPipelineCompilesTheEmptyProject()
     {
         var compiler = new ModelCompiler();
         var project = CompilerTestSupport.CreateProject();
 
         var result = compiler.Compile(project);
 
-        Assert.Equal(CompilationStatus.Failed, result.Status);
-        Assert.False(result.IsSuccess);
-        Assert.Null(result.Model);
-        var diagnostic = Assert.Single(result.Diagnostics);
-        Assert.Equal("CMP001", diagnostic.Code);
-        Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
-        Assert.Contains("Indexing", diagnostic.Message, StringComparison.Ordinal);
-
-        AssertAllStagesReported(result.Report, expectedFailedStage: CompilationStage.Indexing, expectedDiagnosticCount: 1);
-        Assert.Null(result.Report.ModelSignature);
+        Assert.True(result.IsSuccess);
+        Assert.NotNull(result.Model);
+        Assert.Empty(result.Diagnostics);
+        Assert.All(result.Report.Stages, stage => Assert.Equal(CompilationStageStatus.Completed, stage.Status));
+        Assert.Equal(CompilationStage.Report, result.Report.Stages[^1].Stage);
+        Assert.Equal(result.Model!.ModelSignature, result.Report.ModelSignature);
         Assert.Equal("symmetry-1", result.Report.SymmetryContractVersion);
-        Assert.Null(result.Report.SpaceGroupDataVersion);
-        Assert.Null(result.Report.SpaceGroupDataSha256);
-        Assert.Contains("'Indexing'", result.Report.Summary, StringComparison.Ordinal);
-        Assert.Equal(0, result.Report.Cache.Hits);
-        Assert.Equal(0, result.Report.Cache.Misses);
-        Assert.Equal(0, result.Report.Cache.Capacity);
     }
 
     [Fact]
@@ -79,7 +69,7 @@ public sealed class ModelCompilerTests
         Parallel.For(0, 8, _ =>
         {
             var result = compiler.Compile(project);
-            if (result.Status != CompilationStatus.Failed || result.Model is not null)
+            if (!result.IsSuccess || result.Model is null)
             {
                 Interlocked.Increment(ref failures);
             }
