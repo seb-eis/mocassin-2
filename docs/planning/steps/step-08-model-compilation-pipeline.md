@@ -27,7 +27,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 | `simulation-encoding` | `feature/step-08-model-compilation-pipeline/simulation-encoding` | Done | `verify.sh dotnet` (950 tests), `structure`, `api`, `contracts` pass | — | `fde55fd` |
 | `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Done | `verify.sh dotnet` (954 tests), `structure`, `api`, `contracts` pass | — | `10966cf` |
 | `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Done | `verify.sh dotnet` (960 tests), `structure`, `api`, `contracts`, `docs` pass | — | `6c59163` |
-| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Done | `verify.sh dotnet` (969 tests), `structure`, `api`, `contracts`, `docs` pass | — | `86348bf` |
+| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Done | `verify.sh dotnet` (970 tests), `structure`, `api`, `contracts`, `docs` pass | — | `86348bf` |
 
 ### Implementation notes and deviations
 
