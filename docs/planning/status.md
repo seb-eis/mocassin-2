@@ -97,8 +97,8 @@ and D14 is an accepted audit note. Steps 03–06 remain complete: merges `162ebe
 Step 08 — Model Compilation Pipeline is in implementation. The design was accepted on 2026-11-13 and merged to
 `main` as `51b99f0` (`[skip ci]`, no workflow run); the reviewed design freeze is `b84cead`, review record
 `1954510`. The step branch is `step/08-model-compilation-pipeline`; `compiler-core` is implemented on the
-step branch with local `dotnet`, `structure`, `api`, `contracts`, and `docs` gates green and no per-feature CI
-run. The remaining seven features will be implemented one feature branch at a time. The design fixes the pure
+step branch (squash `1deb182`) with local `dotnet`, `structure`, `api`, `contracts`, and `docs` gates green and
+no per-feature CI run. The remaining seven features will be implemented one feature branch at a time. The design fixes the pure
 synchronous compiler API, the Step 07 validation boundary, the compiled/parameterized signature split, the
 `CMP` diagnostic family, per-compilation caching, and Step 12 ownership of `mocassin compile`. The human owner
 explicitly waived the roadmap §3.1 split trigger for this 4–6 person-week, eight-feature step on 2026-11-12;

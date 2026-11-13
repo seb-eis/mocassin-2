@@ -20,7 +20,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `compiler-core` | `feature/step-08-model-compilation-pipeline/compiler-core` | Done | `verify.sh dotnet` (932 tests), `structure`, `api`, `contracts`, `docs` pass | — | — |
+| `compiler-core` | `feature/step-08-model-compilation-pipeline/compiler-core` | Done | `verify.sh dotnet` (932 tests), `structure`, `api`, `contracts`, `docs` pass | — | `1deb182` |
 | `structure-and-pair-compilation` | `feature/step-08-model-compilation-pipeline/structure-and-pair-compilation` | Not started | — | — | — |
 | `cluster-compilation` | `feature/step-08-model-compilation-pipeline/cluster-compilation` | Not started | — | — | — |
 | `transition-rule-compilation` | `feature/step-08-model-compilation-pipeline/transition-rule-compilation` | Not started | — | — | — |
@@ -45,7 +45,9 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 - **compiler-core local evidence (2026-11-13).** `./tools/verify.sh dotnet` passes (932 tests, 0 failed),
   `./tools/verify.sh structure` passes, `./tools/verify.sh api` passes with the refreshed
   `Mocassin.Compilation` ApiCompat baseline, `./tools/verify.sh contracts` passes, and
-  `./tools/verify.sh docs` passes. No per-feature CI run was triggered.
+  `./tools/verify.sh docs` passes. No per-feature CI run was triggered. Squash-merged into the step branch as
+  `1deb182` (`step-08: add pure compiler core and stage orchestrator`); the feature branch was deleted locally
+  and remotely.
 
 ## Goal
 
