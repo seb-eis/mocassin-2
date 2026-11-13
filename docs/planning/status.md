@@ -55,7 +55,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Done | `step/05-energy-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) (replacement closeout) | `c11a364` | `step-05` | Passed with notes at `315aa19` | Ready for implementation — accepted at `0b2a571` |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Done | `step/06-lattice-and-simulation-models` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | `41cfa4d` | `step-06` | Passed with notes at `c390dcc` (code `ea6293e`); accepted 2026-11-11 | Ready with notes — accepted at `6173e61` |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Done | `step/07-validation-and-diagnostics` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) | `3ed558a` | `step-07` | Passed with notes at `ccd0e55` (`d66f34f`) | Ready for implementation at `31b53e8` — review `2d01f3e`; approved 2026-11-11 |
-| 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | In progress | `step/08-model-compilation-pipeline` | `golden-models-and-closeout` | — | — | — | Not requested | Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — accepted 2026-11-13 |
+| 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | In progress | `step/08-model-compilation-pipeline` | — | — | — | — | Not requested | Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — accepted 2026-11-13 |
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -94,13 +94,12 @@ findings were remediated, D6 was closed by the `milestone-m0`–`m3` backfill, D
 and D14 is an accepted audit note. Steps 03–06 remain complete: merges `162ebe4`, `31ba12d`, `c11a364`, and
 `41cfa4d`; tags `step-03`–`step-06`; all audits passed with notes.
 
-Step 08 — Model Compilation Pipeline is in implementation. The design was accepted on 2026-11-13 and merged to
+Step 08 — Model Compilation Pipeline is in closeout. The design was accepted on 2026-11-13 and merged to
 `main` as `51b99f0` (`[skip ci]`, no workflow run); the reviewed design freeze is `b84cead`, review record
-`1954510`. The step branch is `step/08-model-compilation-pipeline`; the first seven features are squashed with
-local `dotnet`, `structure`, `api`, `contracts`, and `docs` gates green and no per-feature CI run. The
-closeout feature is blocked on a Step 08 amendment: `vehicle5` was corrected to alternating donor/acceptor
-groups and now compiles, while `interstitialcy5` still cannot balance its three stable sites under the accepted
-global S0/S2 conservation rule and fails closed with `CMP005`. No closeout CI or audit request has been created. The design fixes the pure
+`1954510`. The step branch is `step/08-model-compilation-pipeline`; all eight features are squashed with local
+`dotnet`, `structure`, `api`, `contracts`, and `docs` gates green and no per-feature CI run. The complex
+vehicle and interstitialcy samples now compile using alternating donor/acceptor groups and an interior stable
+spectator self state change; both have pinned signatures. The design fixes the pure
 synchronous compiler API, the Step 07 validation boundary, the compiled/parameterized signature split, the
 `CMP` diagnostic family, per-compilation caching, and Step 12 ownership of `mocassin compile`. The human owner
 explicitly waived the roadmap §3.1 split trigger for this 4–6 person-week, eight-feature step on 2026-11-12;

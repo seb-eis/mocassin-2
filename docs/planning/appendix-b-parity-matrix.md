@@ -104,10 +104,10 @@ Status legend:
 | Pure compiled model API | Y | Done | 08 | Synchronous `IModelCompiler` with diagnostics, counts, signatures, cancellation |
 | P1-extended dense compiled model | Y | Done | 08 | Canonical P indices, dense particle/site/table indices, stable IDs |
 | Auto-sampled pair tables | Y | Done | 08 | Shares Step 05 sampling/reduction kernel; canonical shell order |
-| Chiral pair linking in compiled tables | Y | Partial | 08/09 | Shared `EnergyId`; one table/value per chiral pair |
+| Chiral pair linking in compiled tables | Y | Done | 08/09 | Shared `EnergyId`; one table/value per chiral pair |
 | Cluster tables and occupation codes | Y | Done | 08 | Point-group canonicalization; 6-bit codes; expansion maps |
-| Forward/inverse/dependent rules | Y | Partial | 08 | Auto-inverse only for `Metropolis2`/`Migration3`; dependent instances for symmetry-equivalent starts |
-| Mass/charge conservation filtering | Y | Partial | 08 | Rejected counts reported; charge-transfer symbols balanced |
+| Forward/inverse/dependent rules | Y | Done | 08 | Auto-inverse only for `Metropolis2`/`Migration3`; dependent instances for symmetry-equivalent starts |
+| Mass/charge conservation filtering | Y | Done | 08 | Rejected counts reported; charge-transfer symbols balanced |
 | Rule ambiguity detection | Y | Done | 08 | Compile-time `CMP004`; original failed at runtime |
 | Unreferenced transition warning | N | Done | 08 | `CMP009` |
 | Simulation encoding / tracker definitions | Y | Done | 08/18 | Collections, directions, mappings, intent; Step 18 owns state |

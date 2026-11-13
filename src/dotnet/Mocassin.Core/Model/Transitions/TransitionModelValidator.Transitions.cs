@@ -168,6 +168,8 @@ internal static partial class TransitionModelValidator
                     transition.Id.Value,
                     "chainId"));
             }
+
+            ValidateSpectatorPositions(chain, groupById, stateChangeById, bag);
         }
     }
 

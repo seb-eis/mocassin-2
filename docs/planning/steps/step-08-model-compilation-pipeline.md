@@ -14,7 +14,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested — blocked on a Step 08 amendment for complex-mechanism conservation
+- **Audit:** Ready for audit
 - **Design review:** Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — [review record](../reviews/step-08.md) `195451021031272af96ee1b2ca600d4c8cd83c2c`; accepted by the human owner 2026-11-13
 - **Last updated:** 2026-11-13
 
@@ -27,7 +27,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 | `simulation-encoding` | `feature/step-08-model-compilation-pipeline/simulation-encoding` | Done | `verify.sh dotnet` (950 tests), `structure`, `api`, `contracts` pass | — | `fde55fd` |
 | `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Done | `verify.sh dotnet` (954 tests), `structure`, `api`, `contracts` pass | — | `10966cf` |
 | `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Done | `verify.sh dotnet` (960 tests), `structure`, `api`, `contracts`, `docs` pass | — | `6c59163` |
-| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Blocked — complex-mechanism conservation | `verify.sh dotnet` (966 tests), `structure`, `api`, `contracts`, `docs` pass; closeout not requested | — | `86348bf` |
+| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Done | `verify.sh dotnet` (969 tests), `structure`, `api`, `contracts`, `docs` pass | — | `86348bf` |
 
 ### Implementation notes and deviations
 
@@ -56,23 +56,16 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
   `1deb182` (`step-08: add pure compiler core and stage orchestrator`); the feature branch was deleted locally
   and remotely.
 
-### Closeout blocker (2026-11-13)
+### Complex-mechanism resolution (2026-11-13)
 
-The first seven features and the ceria/BaZrO₃/MMC goldens are complete and green locally. The step cannot
-freeze for audit yet because the accepted global mass-conservation rule in §8.2 rejects the accepted
-`vehicle5` and `interstitialcy5` sample mechanisms:
-
-- The original `vehicle5` and `interstitialcy5` groups did not preserve the non-void symbol multiset between
-  S0 and S2. The vehicle sample has been corrected to alternating donor/acceptor groups and now compiles;
-  `interstitialcy5` still fails closed with `CMP005` and is pinned by `ComplexMechanismLimitationTests`.
-- The Step 04 samples are preview-valid and explicitly defer rule/conservation semantics to Step 08.
-- No vehicle/interstitialcy golden model, closeout evidence, closeout CI run, or audit record was created.
-  Doing so would either fake a non-conserving mechanism or silently change the accepted conservation rule.
-
-Required next action: a Step 08 amendment that defines the intended complex-mechanism conservation and
-explicit-reverse semantics (or corrects the samples/acceptance criteria), followed by a focused design review
-and implementation of the amended rule. `main` moved to `884ffe7` (documentation-only) during the work; the
-step branch was not merged with it because the audit freeze has not been attempted.
+The original `vehicle5` and `interstitialcy5` samples repeated the same donor/acceptor direction on both sides
+of a complex chain. The samples now alternate direction, and `interstitialcy5` uses an explicit **spectator
+self state change** at its interior stable centre. `TransitionModelValidator` accepts a self state change only
+at an interior stable position with unstable neighbours (`TRN002` otherwise), so the middle site remains
+unchanged while the two unstable carriers move through it. The vehicle and interstitialcy samples compile,
+keep their explicit reverse transitions, and have pinned signatures. The charge transport vector is computed
+from the charge-weighted endpoint moments, which reproduces the intended field contribution for single
+charges, vacancies, charge-state changes, and non-collinear paths.
 
 ## Goal
 
