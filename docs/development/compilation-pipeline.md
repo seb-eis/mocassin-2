@@ -192,7 +192,8 @@ ParameterizedModel.Signature
 - Keys include catalog version/SHA-256, symmetry contract version, and stage-specific content hashes. The cheap
   resolve stage always runs and is not keyed by the whole-model hash. Pair/cluster work keys on energy +
   structure hashes; rules key on the active-transition-set hash + transition closures + structure; encoding
-  keys on rules + simulations; indexing excludes runtime settings; signing uses the canonical projection.
+  keys on rules + simulations + energy links; indexing includes the simulation hash and rebuilds for
+  runtime-only simulation edits; signing uses the canonical projection and excludes runtime settings.
   `ProjectHasher.ComputeSimulationSelection` hashes the referenced simulation transition set so adding/removing
   a reference invalidates rules.
 - Editing structure invalidates everything; editing energy rebuilds environments/pairs/clusters/encoding but

@@ -116,10 +116,10 @@ public sealed record InitialLattice(
 - Step 11 wraps a `JobDescriptor` plus its generated `InitialLattice` into a `JobPackage` for writing.
 - `JobIndex` is the duplicate index within a config (0-based).
 - `UseDualDofCorrection` is set by the compiler/optimizer stage for KMC jobs; it is not a user setting.
-  Step 08 keeps the original default (every KMC job true); Step 10 clears it when the selection optimizer
-  reduces at least one environment selection mask and keeps it when no mask is reduced, matching the original
-  `JumpSelectionOptimizer.Run` behavior. `Mocassin.Packages`, which references Contracts, composes the `.msl`
-  `SolverJobFlags` word from `Kind`,
+  Step 08 keeps the original default (every KMC job true); Step 10 clears it only when the selection optimizer
+  reduces **every** environment selection mask, and keeps it when any mask is unchanged (including the mixed
+  case), matching the original `JumpSelectionOptimizer.Run` accumulation. `Mocassin.Packages`, which references
+  Contracts, composes the `.msl` `SolverJobFlags` word from `Kind`,
   the authored execution flags, `PreRunMcsp > 0`, and this boolean. `Mocassin.Compilation` does not reference
   Contracts.
 - Effective settings are resolved with explicit inheritance and validated.

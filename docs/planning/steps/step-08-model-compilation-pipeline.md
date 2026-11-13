@@ -15,7 +15,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required at `b030cfb7d921277f6983651fb451e736cc2f7896` — [review record](../reviews/step-08.md)
+- **Design review:** Re-review required
 - **Last updated:** 2026-11-12
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -203,7 +203,7 @@ parallel, but the output order is canonical and independent of scheduling.
 | 4 | Pairs | environments | directed pair geometries, shared energy IDs, chiral links, pair links per position | energy hash, structure hash, catalog, contract | `CMP003` |
 | 5 | Clusters | energy model, structure | point groups, canonical occupation tuples/codes, cluster tables, links | energy hash, structure hash, cluster IDs, allowed occupations | `CMP003`, `CMP006` |
 | 6 | Rules | referenced transitions, structure, particles | collections, directions, state codes, forward/inverse/dependent rules | active-transition-set hash, transition closure hashes, structure hash, particle order, catalog, contract | `CMP004`–`CMP008` |
-| 7 | Encoding | rules, simulations | jump collections/directions/rules, count/mapping tables, tracker definitions, derived intent | simulation hash, rule hash, structure hash | `CMP006`, `CMP009`, `CMP010` |
+| 7 | Encoding | rules, simulations, energy links | jump collections/directions/rules, count/mapping tables, tracker definitions, derived intent | simulation hash, rule hash, energy hash, structure hash | `CMP006`, `CMP009`, `CMP010` |
 | 8 | Indexing | structure, particles, pair/cluster tables, rules, simulations | dense indices, stable geometry/rule IDs, lookup maps, runtime-default snapshot | structure hash, particle hash, pair/cluster table hashes, rule hash, simulation hash | `CMP006`, `CMP011` |
 | 9 | Signing | canonical compiled projection | `ModelSignature` | canonical projection bytes (no runtime settings) | `CMP011` |
 | 10 | Report | all prior | counts, per-stage timings, input hashes, cache statistics, summary | — | — |
@@ -614,7 +614,7 @@ ParameterizedModel.Signature
   - environments/pairs: energy hash + structure hash;
   - clusters: energy hash + structure hash + cluster IDs + allowed-occupation hash;
   - rules: active-transition-set hash + transition closure hashes + structure hash + particle order;
-  - encoding: rule hash + simulation hash + structure hash;
+  - encoding: rule hash + simulation hash + energy hash + structure hash;
   - indexing: structure hash + particle hash + pair/cluster table hashes + rule hash + simulation hash;
   - signing: canonical projection bytes (runtime settings excluded).
 - **Active-transition-set hash.** `ProjectHasher.ComputeSimulationSelection(Project)` (new, Core) hashes the
@@ -841,7 +841,7 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 | Chiral handling | Reciprocal-orbit rule, shared `EnergyId`, explicit chiral/achiral tests |
 | Signature boundary mixes geometry and values | Separate Step 08 and Step 09 signatures; tests prove runtime/parameter changes do not alter the model signature |
 | Cache invalidation bugs | Content-hash keys, per-compilation default, recording-cache tests, no static cache |
-| Field-factor approximation | Documented scalar projection; single-charge/vacancy/collinear tests; vector change requires a contract decision |
+| Charge-transport field convention | Particle-identity Cartesian vector; single-charge, vacancy, exchange, and non-collinear tests; no scalar projection |
 | Step 08 is too large to audit | Owner explicitly waived the 4–6 pw/eight-feature split on 2026-11-12; features remain independently auditable, and the owner re-opens the split decision if the first three exceed 2.5 pw |
 | CLI ownership duplication | Step 08 library only; Step 12 owns `compile`/`build` and orchestration |
 
