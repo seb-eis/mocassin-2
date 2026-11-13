@@ -264,6 +264,10 @@ The step agent records resolutions here without altering reviewer text.
 | N6-2 | Added the `position.encoding` include rationale. | this commit |
 | N6-3 | Design-review metadata advanced to rounds 1–6/round 7. | this commit |
 
+| N7-1 | Removed the “scalar bytes use WriteRaw” contradiction and the duplicated bucket sentence; typed writers are the scalar path and WriteRaw is header-only. | this commit |
+| N7-2 | The position encoding rationale now requires the writer to assert `Encoding.P == P` and zero cell offsets. | this commit |
+| N7-3 | Replaced the nonexistent `docs/reference/contracts.md` with `contracts/generated/README.md`/`compilation-pipeline.md` and added the generated README to the checklist. | this commit |
+
 ## Design-review rounds
 
 ### Review round 1

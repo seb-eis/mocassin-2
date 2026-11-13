@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-08-amend-1` |
 | Parent step | 08 — Model Compilation Pipeline |
-| Status | Re-review required (round 6 notes resolved; round 7 requested) |
+| Status | Re-review required (round 7 notes resolved; round 8 requested) |
 | Branch | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` |
 | Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–6; round 6 Ready with notes; round 7 requested) |
 | Parent audit | `docs/planning/audits/step-08.md` |
@@ -89,7 +89,7 @@ environments array<environment>, positions array<position>, interactionRange arr
   siteId string, stability int64, allowedParticleMask uint64, environmentIndex uint64, orbitIndex uint64,
   pairLinks array<pairLink>, clusterLinks array<clusterLink>]`.
 - `encoding` = `[cellA int64, cellB int64, cellC int64, p uint64]`. The position encoding is retained as the
-  canonical base-cell `(0,0,0,p)` and cross-checked against `p`.
+  canonical base-cell `(0,0,0,p)`; the writer asserts `Encoding.P == P` and zero cell offsets.
 - `pairLink` = `[pairTableIndex uint64, targetP uint64, offset encoding, distanceBucketFm uint64]`.
 - `clusterLink` = `[clusterTableIndex uint64, siteSlot uint64]`.
 
@@ -155,7 +155,7 @@ and `Write(double)` writers for the fixed-width scalars, and `WriteRaw` for the 
 `0xdd`/`0xdb`/`0xc6`/`0xc3`/`0xc2`/`0xc0` headers.
 It must not call the compact `WriteArrayHeader`/`WriteString` convenience methods or the minimal-width
 `Write(ulong)`/`Write(long)` overloads; those would break the required header bytes. All fixed headers and scalar bytes are
-written through `WriteRaw`/`Advance` exactly as in the table below. The byte rules are:
+written through the typed writers; only forced headers use `WriteRaw`/`Advance`. The byte rules are:
 
 | Value | Encoding |
 | --- | --- |
@@ -189,7 +189,7 @@ written through `WriteRaw`/`Advance` exactly as in the table below. The byte rul
 - The distance bucket is unsigned; only signed `movement` and the signed rule charge vector carry physics.
 - No compression, timestamps, diagnostics, timings, cache state, file names, or display-only distances
   (`DistanceAngstrom`, `pathLength`) are encoded; the raw display distance and path length are
-  inspection-only, and the distance bucket is unsigned.
+  inspection-only.
 
 ### Cross-language projection fixtures
 
@@ -315,6 +315,8 @@ projection.
 - [ ] `docs/planning/02-data-contracts.md` §1.3/§3.3 references the explicit projection.
 - [ ] `docs/planning/adr/0010-canonical-messagepack-signatures.md` notes the shared encoder and descriptor.
 - [ ] `tools/contracts/README.md` documents the `msgpack` requirements, checker, and fixture regeneration.
+- [ ] The generated `contracts/generated/README.md` and `docs/development/compilation-pipeline.md` describe
+  the projection and fixtures.
 - [ ] `docs/planning/06-toolchain-requirements.md` records the dev-only `msgpack` row and Step 08 use.
 - [ ] `./tools/verify.sh contracts` installs `tools/contracts/requirements.txt` and runs the projection checker.
 - [ ] Step page, amendment index, status, parity, audit request, and review record updated.
