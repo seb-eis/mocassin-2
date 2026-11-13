@@ -6,9 +6,9 @@
 | --- | --- |
 | Amendment ID | `step-08-amend-1` |
 | Parent step | 08 — Model Compilation Pipeline |
-| Status | Re-review required (round 8 notes resolved; round 9 requested) |
+| Status | Ready for implementation (round 9, no findings) |
 | Branch | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` |
-| Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–8; round 8 Ready with notes; round 9 requested) |
+| Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–9; round 9 Ready for implementation, no findings) |
 | Parent audit | `docs/planning/audits/step-08.md` |
 | Integration commit | — |
 | Combined audit commit | — |
