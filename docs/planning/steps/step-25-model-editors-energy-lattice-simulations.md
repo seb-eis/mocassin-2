@@ -32,12 +32,16 @@ model, so they must show costs, geometric relationships, and the effect of chang
   with a force-refresh action.
 - **Lattice:** read-only default building block; dopings (dopable/dopant/site); doping applications (primary +
   counter doping, building block, priority, `UseCounterDoping`); building-block viewer.
-- **Simulations:** MMC/KMC grids; transition assignment via selection dialogs; parameter editors for
+- **Simulations:** MMC/KMC WPF grids; transition assignment via selection dialogs; parameter editors for
   temperature, MCSP, block count, time limit, job count; KMC adds pre-run, normalization, field; MMC adds
   break tolerance/sample length/interval/result sample.
 - Validation was separate; no cost preview; no inline explanations.
 
 ## Design
+
+All list/table surfaces use the layout selected by the Step 24 editor-layout spike. The site-energy matrix is a
+dedicated matrix control, not a general table. Do not introduce an Avalonia `DataGrid`, `TreeDataGrid` Pro, or a
+third-party grid dependency.
 
 ### 1. Energy editor
 
@@ -45,7 +49,7 @@ model, so they must show costs, geometric relationships, and the effect of chang
 
 - Cutoff field in Å with a live "neighbor shells" summary: number of images, unique pairs, estimated table
   size.
-- Filter grid: start/end radius, site A/B, enabled flag, remove/duplicate.
+- Filter table: start/end radius, site A/B, enabled flag, remove/duplicate.
 - A visual radial ring diagram shows the cutoff and filter shells; selecting a filter highlights the affected
   site pair.
 - Warning when the cutoff exceeds half the smallest cell dimension.
@@ -93,7 +97,7 @@ model, so they must show costs, geometric relationships, and the effect of chang
 
 **Occupation exchanges**
 
-- Grid: name, site, source particle, target particle, charge delta, usage.
+- Table: name, site, source particle, target particle, charge delta, usage.
 - Add/edit/remove; source/target pickers filtered to the site's set.
 - Inline warnings for source == target, source not default, or charged vacancy.
 
@@ -127,7 +131,7 @@ model, so they must show costs, geometric relationships, and the effect of chang
 
 **List and detail**
 
-- Grid: name, kind, temperature, MCSP, transitions, job count, status/usage.
+- Table: name, kind, temperature, MCSP, transitions, job count, status/usage.
 - Add KMC/MMC; duplicate; delete with dependent job templates.
 - Kind is immutable after creation (delete/recreate with a warning).
 
@@ -173,7 +177,7 @@ model, so they must show costs, geometric relationships, and the effect of chang
 
 ## Implementation tasks
 
-- [ ] Implement stable/unstable environment editors and filter grid.
+- [ ] Implement stable/unstable environment editors and filter table.
 - [ ] Implement the radial filter diagram.
 - [ ] Implement the cluster geometry editor and permutation preview.
 - [ ] Implement the site-energy matrix with bulk edit/import/export.
@@ -187,7 +191,7 @@ model, so they must show costs, geometric relationships, and the effect of chang
 ## Acceptance criteria
 
 - [ ] A user can define the ceria stable environment, migration-edge cluster, and site energies in the GUI.
-- [ ] Filters are editable as a grid and reflected in the radial diagram.
+- [ ] Filters are editable as a table and reflected in the radial diagram.
 - [ ] Cluster geometry shows offsets and rejects rings/duplicates inline.
 - [ ] Site energies support bulk edit and CSV import/export.
 - [ ] The cost preview matches the compiler counts for the ceria sample.

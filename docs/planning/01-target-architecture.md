@@ -241,8 +241,9 @@ The detailed file-sharing rules are in ADR 0011.
 | Concern | Choice | Rationale |
 | --- | --- | --- |
 | Runtime | .NET 10 LTS | Required target; modern C#, nullable, source generators, performance |
-| GUI | Avalonia 11.x | Mature cross-platform XAML UI, MVVM friendly, active ecosystem |
+| GUI | Avalonia 12.x (pinned 12.1.6) | Current cross-platform XAML UI, MVVM friendly, active ecosystem |
 | MVVM | CommunityToolkit.Mvvm | Source-generated observable properties/commands, minimal ceremony |
+| Model editor layout | Master-detail table/list + type-specific editor; Step 24 layout spike | No paid grid or third-party grid dependency; final layout chosen from owner-reviewed POCs |
 | DI/hosting | Microsoft.Extensions.* | Standard configuration, logging, DI, lifetime management |
 | JSON | System.Text.Json | Built-in, source-generated contexts, trimming/AOT friendly |
 | SQLite (.NET) | Microsoft.Data.Sqlite | Lightweight, no EF Core required for `.msl`/`.msr` |
@@ -256,7 +257,7 @@ The detailed file-sharing rules are in ADR 0011.
 | Rust logging | `tracing` + `tracing-subscriber` | Structured logs, JSON output option |
 | Rust parallelism | `rayon` for build/analysis helpers; process-per-job for MC | MC chains are sequential; job-level parallelism is the right granularity |
 | Rust RNG | `rand_chacha` | Reproducible, high-quality, portable |
-| Charts | LiveCharts2 (`LiveChartsCore.SkiaSharpView.Avalonia`) | Scientific plotting, cross-platform, SkiaSharp rendering/export |
+| Charts | LiveCharts2 (`LiveChartsCore.SkiaSharpView.Avalonia`) | Scientific plotting, cross-platform, SkiaSharp rendering/export; verify Avalonia 12 compatibility before Step 27 |
 | Narrative docs | Zensical | Markdown-first, MkDocs-compatible, navigation/search, strict link validation |
 | .NET API docs | DocFX | XML-doc/assembly metadata, .NET navigation and cross-references |
 | Rust API docs | rustdoc (`cargo doc`) | Canonical Rust docs, intra-doc links, doc tests |
