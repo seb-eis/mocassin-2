@@ -15,7 +15,7 @@
 | Request owner | Design planner (Step 08) |
 | Orchestrator (step agent / planner) | Design planner |
 | Review initiated by | Planner |
-| Reviewed commit | `9715082c1d51e8273bf7c636c22593fa0f7ba5e6` (round 4; round 3 reviewed `b030cfb7d921277f6983651fb451e736cc2f7896`; round 2 `c676716e88bcdd5e8877938e21ad6950cc2986bb`; round 1 `36fbba58182b2e769a6d59b3228a60021344248d`) |
+| Reviewed commit | `850e98d6788830ee8599a80df966f075f88112a1` (round 5; round 4 reviewed `9715082c1d51e8273bf7c636c22593fa0f7ba5e6`; round 3 `b030cfb7d921277f6983651fb451e736cc2f7896`; round 2 `c676716e88bcdd5e8877938e21ad6950cc2986bb`; round 1 `36fbba58182b2e769a6d59b3228a60021344248d`) |
 | Docs branch | `docs/step-08-design` |
 | Review date | 2026-11-13 |
 | Reviewer | Independent planning auditor (round 4; fresh context; no shared conversation with the planner or implementor; rounds 1, 2, and 3 were separate fresh reviewers) |
@@ -737,6 +737,12 @@ Round 3 findings m10–m12 were corrected at `9715082c1d51e8273bf7c636c22593fa0f
 | m10 | Resolved — `compilation-pipeline.md` now includes the simulation hash in the indexing key and the energy hash in the encoding key; the energy/runtime invalidation rows match the step page | Planner | `9715082` |
 | m11 | Resolved — Step 10 now clears dual-DOF only when every selection mask is reduced and keeps it in the mixed/none case | Planner | `9715082` |
 | m12 | Resolved — the Step 08 risk row now describes the particle-identity charge transport vector, not a removed scalar approximation | Planner | `9715082` |
+
+Round 4 finding m13 was corrected at `850e98d6788830ee8599a80df966f075f88112a1`:
+
+| Finding | Status | Owner | Commit |
+| --- | --- | --- | --- |
+| m13 | Resolved — the Indexing key now includes the energy hash, and the graph separates environment/cluster edits from site-energy-only edits; Signing excludes energy values and is reused for site-energy-only changes | Planner | `850e98d` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.

@@ -55,7 +55,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 05 | [Energy Model](steps/step-05-energy-model.md) | B. Model definition | Done | `step/05-energy-model` (merged and deleted) | — | [green](https://github.com/seb-eis/mocassin-2/actions/runs/42881426273) (replacement closeout) | `c11a364` | `step-05` | Passed with notes at `315aa19` | Ready for implementation — accepted at `0b2a571` |
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Done | `step/06-lattice-and-simulation-models` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | `41cfa4d` | `step-06` | Passed with notes at `c390dcc` (code `ea6293e`); accepted 2026-11-11 | Ready with notes — accepted at `6173e61` |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Done | `step/07-validation-and-diagnostics` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) | `3ed558a` | `step-07` | Passed with notes at `ccd0e55` (`d66f34f`) | Ready for implementation at `31b53e8` — review `2d01f3e`; approved 2026-11-11 |
-| 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Re-review required at `9715082c1d51e8273bf7c636c22593fa0f7ba5e6` |
+| 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Re-review required at `850e98d6788830ee8599a80df966f075f88112a1` |
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -95,13 +95,13 @@ and D14 is an accepted audit note. Steps 03–06 remain complete: merges `162ebe
 `41cfa4d`; tags `step-03`–`step-06`; all audits passed with notes.
 
 Step 08 — Model Compilation Pipeline is in design review. The design is frozen on `docs/step-08-design` at
-`9715082c1d51e8273bf7c636c22593fa0f7ba5e6`; the step branch and all eight implementation features remain
+`850e98d6788830ee8599a80df966f075f88112a1`; the step branch and all eight implementation features remain
 `Not started` until the human owner accepts the design verdict. The design fixes the pure synchronous compiler
 API, the Step 07 validation boundary, the compiled/parameterized signature split, the `CMP` diagnostic family,
 per-compilation caching, and Step 12 ownership of `mocassin compile`. The human owner explicitly waived the
 roadmap §3.1 split trigger for this 4–6 person-week, eight-feature step on 2026-11-12; the waiver is recorded
-in the Step 08 page and review record. Round 3 returned `Ready with notes`; its m10–m12 documentation notes
-were corrected at `9715082`, and a fresh round 4 review is pending.
+in the Step 08 page and review record. Round 4 returned `Ready with notes`; its m13 cache note was corrected at
+`850e98d`, and a fresh round 5 review is pending.
 
 ## Cross-cutting phase checkpoints
 
