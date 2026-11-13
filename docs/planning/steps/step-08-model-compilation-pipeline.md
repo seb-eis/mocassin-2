@@ -27,7 +27,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 | `simulation-encoding` | `feature/step-08-model-compilation-pipeline/simulation-encoding` | Done | `verify.sh dotnet` (950 tests), `structure`, `api`, `contracts` pass | — | `fde55fd` |
 | `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Done | `verify.sh dotnet` (954 tests), `structure`, `api`, `contracts` pass | — | `10966cf` |
 | `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Done | `verify.sh dotnet` (960 tests), `structure`, `api`, `contracts`, `docs` pass | — | `6c59163` |
-| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Blocked — complex-mechanism conservation | `verify.sh dotnet` (967 tests), `structure`, `api`, `contracts`, `docs` pass; closeout not requested | — | `86348bf` |
+| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Blocked — complex-mechanism conservation | `verify.sh dotnet` (966 tests), `structure`, `api`, `contracts`, `docs` pass; closeout not requested | — | `86348bf` |
 
 ### Implementation notes and deviations
 
@@ -53,6 +53,24 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
   `./tools/verify.sh docs` passes. No per-feature CI run was triggered. Squash-merged into the step branch as
   `1deb182` (`step-08: add pure compiler core and stage orchestrator`); the feature branch was deleted locally
   and remotely.
+
+### Closeout blocker (2026-11-13)
+
+The first seven features and the ceria/BaZrO₃/MMC goldens are complete and green locally. The step cannot
+freeze for audit yet because the accepted global mass-conservation rule in §8.2 rejects the accepted
+`vehicle5` and `interstitialcy5` sample mechanisms:
+
+- `samples/transitions/vehicle5.mocprj` and `samples/transitions/interstitialcy5.mocprj` compile to
+  `CMP005` (`mass ...`), because their authored explicit-reverse chain groups do not preserve the non-void
+  symbol multiset between S0 and S2. `ComplexMechanismLimitationTests` pins this fail-closed behavior.
+- The Step 04 samples are preview-valid and explicitly defer rule/conservation semantics to Step 08.
+- No vehicle/interstitialcy golden model, closeout evidence, closeout CI run, or audit record was created.
+  Doing so would either fake a non-conserving mechanism or silently change the accepted conservation rule.
+
+Required next action: a Step 08 amendment that defines the intended complex-mechanism conservation and
+explicit-reverse semantics (or corrects the samples/acceptance criteria), followed by a focused design review
+and implementation of the amended rule. `main` moved to `884ffe7` (documentation-only) during the work; the
+step branch was not merged with it because the audit freeze has not been attempted.
 
 ## Goal
 
