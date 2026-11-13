@@ -240,6 +240,15 @@ The step agent records resolutions here without altering reviewer text.
 | R3-9 | Python checker is qualified as a canonicality/type conformance verifier; schema review and Step 11 Rust encoder are the completeness gates. | this commit |
 | R3-10 | ADR 0010 pre-release `model-v1` exception and §3.3 note added; `status: final` is not a release marker. | this commit |
 
+| R4-1 | Descriptor duplication removed: `generate.py` writes the nested descriptor in the existing `model-v1.json`; `ProjectionDescriptorTests` and the checker load that file; no `model-v1.projection.json` exists. | this commit |
+| R4-2 | Fixture writer is gated by `MOCASSIN_UPDATE_GOLDENS=1`; normal runs compare tracked fixtures and fail on drift; the checker compares recomputed signature/`projectionSha256` with `.json` metadata and `signature-vectors.json`. | this commit |
+| R4-3 | `interactionRange` is `uint64`; `clusterLink.siteSlot` and expansion `permutationIndex` are `uint64`; “signed site indices” wording removed. | this commit |
+| N4-1 | Added rationale rows for excluded `direction.index`, `rule.index`, and redundant `position.encoding`. | this commit |
+| N4-2 | Clarified that `WriteArrayHeader`/`WriteString` choose compact headers and `WriteUInt64`/`WriteInt64` choose minimal-width integers. | this commit |
+| N4-3 | Documentation checklist now names `tools/contracts/README.md` and the `06-toolchain-requirements.md` row. | this commit |
+| N4-4 | “Independent” is qualified as a byte/type conformance checker, not the production encoder. | this commit |
+| N4-5 | Design-review metadata advanced to rounds 1–4/round 5; fixture `<id>` is defined as the vector id and descriptor as `model-v1`. | this commit |
+
 ## Design-review rounds
 
 ### Review round 1
