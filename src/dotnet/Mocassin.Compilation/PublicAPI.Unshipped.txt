@@ -1,1 +1,139 @@
 #nullable enable
+Mocassin.Compilation.Caching.CompilationCacheStatistics
+Mocassin.Compilation.Caching.CompilationCacheStatistics.<Clone>$() -> Mocassin.Compilation.Caching.CompilationCacheStatistics!
+Mocassin.Compilation.Caching.CompilationCacheStatistics.Capacity.get -> int
+Mocassin.Compilation.Caching.CompilationCacheStatistics.Capacity.init -> void
+Mocassin.Compilation.Caching.CompilationCacheStatistics.CompilationCacheStatistics(int Hits, int Misses, int Capacity) -> void
+Mocassin.Compilation.Caching.CompilationCacheStatistics.Deconstruct(out int Hits, out int Misses, out int Capacity) -> void
+Mocassin.Compilation.Caching.CompilationCacheStatistics.Equals(Mocassin.Compilation.Caching.CompilationCacheStatistics? other) -> bool
+Mocassin.Compilation.Caching.CompilationCacheStatistics.Hits.get -> int
+Mocassin.Compilation.Caching.CompilationCacheStatistics.Hits.init -> void
+Mocassin.Compilation.Caching.CompilationCacheStatistics.Misses.get -> int
+Mocassin.Compilation.Caching.CompilationCacheStatistics.Misses.init -> void
+Mocassin.Compilation.Caching.ICompilationCache
+Mocassin.Compilation.Caching.ICompilationCache.GetOrAdd<T>(string! key, System.Func<T!>! factory) -> T!
+Mocassin.Compilation.Caching.ICompilationCache.Statistics.get -> Mocassin.Compilation.Caching.CompilationCacheStatistics!
+Mocassin.Compilation.Caching.ICompilationCache.TryGet<T>(string! key, out T? value) -> bool
+Mocassin.Compilation.Compiler.CompilationOptions
+Mocassin.Compilation.Compiler.CompilationOptions.<Clone>$() -> Mocassin.Compilation.Compiler.CompilationOptions!
+Mocassin.Compilation.Compiler.CompilationOptions.AdvisoryEnergyTableBytes.get -> long
+Mocassin.Compilation.Compiler.CompilationOptions.AdvisoryEnergyTableBytes.init -> void
+Mocassin.Compilation.Compiler.CompilationOptions.AdvisoryRuleCount.get -> long
+Mocassin.Compilation.Compiler.CompilationOptions.AdvisoryRuleCount.init -> void
+Mocassin.Compilation.Compiler.CompilationOptions.Cache.get -> Mocassin.Compilation.Caching.ICompilationCache?
+Mocassin.Compilation.Compiler.CompilationOptions.Cache.init -> void
+Mocassin.Compilation.Compiler.CompilationOptions.CompilationOptions() -> void
+Mocassin.Compilation.Compiler.CompilationOptions.EmitUnusedTransitionWarnings.get -> bool
+Mocassin.Compilation.Compiler.CompilationOptions.EmitUnusedTransitionWarnings.init -> void
+Mocassin.Compilation.Compiler.CompilationOptions.EnableStageCache.get -> bool
+Mocassin.Compilation.Compiler.CompilationOptions.EnableStageCache.init -> void
+Mocassin.Compilation.Compiler.CompilationOptions.Equals(Mocassin.Compilation.Compiler.CompilationOptions? other) -> bool
+Mocassin.Compilation.Compiler.CompilationOptions.MaxClusterTupleCount.get -> int
+Mocassin.Compilation.Compiler.CompilationOptions.MaxClusterTupleCount.init -> void
+Mocassin.Compilation.Compiler.CompilationOptions.MaxDegreeOfParallelism.get -> int
+Mocassin.Compilation.Compiler.CompilationOptions.MaxDegreeOfParallelism.init -> void
+Mocassin.Compilation.Compiler.CompilationOptions.MaxEnergyTableBytes.get -> long
+Mocassin.Compilation.Compiler.CompilationOptions.MaxEnergyTableBytes.init -> void
+Mocassin.Compilation.Compiler.CompilationOptions.MaxRuleCount.get -> long
+Mocassin.Compilation.Compiler.CompilationOptions.MaxRuleCount.init -> void
+Mocassin.Compilation.Compiler.CompilationOptions.StageCacheCapacity.get -> int
+Mocassin.Compilation.Compiler.CompilationOptions.StageCacheCapacity.init -> void
+Mocassin.Compilation.Compiler.CompilationReport
+Mocassin.Compilation.Compiler.CompilationReport.<Clone>$() -> Mocassin.Compilation.Compiler.CompilationReport!
+Mocassin.Compilation.Compiler.CompilationReport.Cache.get -> Mocassin.Compilation.Caching.CompilationCacheStatistics!
+Mocassin.Compilation.Compiler.CompilationReport.CompilationReport(string! compilerVersion, string? modelSignature, string! symmetryContractVersion, string? spaceGroupDataVersion, string? spaceGroupDataSha256, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Compiler.CompilationStageResult!> stages, Mocassin.Compilation.Caching.CompilationCacheStatistics! cache, string! summary) -> void
+Mocassin.Compilation.Compiler.CompilationReport.CompilerVersion.get -> string!
+Mocassin.Compilation.Compiler.CompilationReport.Equals(Mocassin.Compilation.Compiler.CompilationReport? other) -> bool
+Mocassin.Compilation.Compiler.CompilationReport.ModelSignature.get -> string?
+Mocassin.Compilation.Compiler.CompilationReport.SpaceGroupDataSha256.get -> string?
+Mocassin.Compilation.Compiler.CompilationReport.SpaceGroupDataVersion.get -> string?
+Mocassin.Compilation.Compiler.CompilationReport.Stages.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Compiler.CompilationStageResult!>
+Mocassin.Compilation.Compiler.CompilationReport.Summary.get -> string!
+Mocassin.Compilation.Compiler.CompilationReport.SymmetryContractVersion.get -> string!
+Mocassin.Compilation.Compiler.CompilationResult
+Mocassin.Compilation.Compiler.CompilationResult.<Clone>$() -> Mocassin.Compilation.Compiler.CompilationResult!
+Mocassin.Compilation.Compiler.CompilationResult.CompilationResult(Mocassin.Compilation.Compiler.CompilationStatus status, Mocassin.Compilation.Compiler.CompiledModel? model, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics, Mocassin.Compilation.Compiler.CompilationReport! report) -> void
+Mocassin.Compilation.Compiler.CompilationResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Compilation.Compiler.CompilationResult.Equals(Mocassin.Compilation.Compiler.CompilationResult? other) -> bool
+Mocassin.Compilation.Compiler.CompilationResult.IsSuccess.get -> bool
+Mocassin.Compilation.Compiler.CompilationResult.Model.get -> Mocassin.Compilation.Compiler.CompiledModel?
+Mocassin.Compilation.Compiler.CompilationResult.Report.get -> Mocassin.Compilation.Compiler.CompilationReport!
+Mocassin.Compilation.Compiler.CompilationResult.Status.get -> Mocassin.Compilation.Compiler.CompilationStatus
+Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Clusters = 4 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Encoding = 6 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Environments = 2 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Indexing = 7 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Pairs = 3 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Report = 9 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Resolve = 0 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Rules = 5 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Signing = 8 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStage.Structure = 1 -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStageResult
+Mocassin.Compilation.Compiler.CompilationStageResult.<Clone>$() -> Mocassin.Compilation.Compiler.CompilationStageResult!
+Mocassin.Compilation.Compiler.CompilationStageResult.CompilationStageResult(Mocassin.Compilation.Compiler.CompilationStage stage, Mocassin.Compilation.Compiler.CompilationStageStatus status, int diagnosticCount, System.TimeSpan elapsed) -> void
+Mocassin.Compilation.Compiler.CompilationStageResult.DiagnosticCount.get -> int
+Mocassin.Compilation.Compiler.CompilationStageResult.Elapsed.get -> System.TimeSpan
+Mocassin.Compilation.Compiler.CompilationStageResult.Equals(Mocassin.Compilation.Compiler.CompilationStageResult? other) -> bool
+Mocassin.Compilation.Compiler.CompilationStageResult.Stage.get -> Mocassin.Compilation.Compiler.CompilationStage
+Mocassin.Compilation.Compiler.CompilationStageResult.Status.get -> Mocassin.Compilation.Compiler.CompilationStageStatus
+Mocassin.Compilation.Compiler.CompilationStageStatus
+Mocassin.Compilation.Compiler.CompilationStageStatus.Completed = 0 -> Mocassin.Compilation.Compiler.CompilationStageStatus
+Mocassin.Compilation.Compiler.CompilationStageStatus.Failed = 2 -> Mocassin.Compilation.Compiler.CompilationStageStatus
+Mocassin.Compilation.Compiler.CompilationStageStatus.Skipped = 1 -> Mocassin.Compilation.Compiler.CompilationStageStatus
+Mocassin.Compilation.Compiler.CompilationStatus
+Mocassin.Compilation.Compiler.CompilationStatus.Failed = 1 -> Mocassin.Compilation.Compiler.CompilationStatus
+Mocassin.Compilation.Compiler.CompilationStatus.Succeeded = 0 -> Mocassin.Compilation.Compiler.CompilationStatus
+Mocassin.Compilation.Compiler.CompiledModel
+Mocassin.Compilation.Compiler.CompiledModel.<Clone>$() -> Mocassin.Compilation.Compiler.CompiledModel!
+Mocassin.Compilation.Compiler.CompiledModel.CompiledModel(int formatVersion, string! modelSignature, string! symmetryContractVersion, string! spaceGroupDataVersion, string! spaceGroupDataSha256) -> void
+Mocassin.Compilation.Compiler.CompiledModel.Equals(Mocassin.Compilation.Compiler.CompiledModel? other) -> bool
+Mocassin.Compilation.Compiler.CompiledModel.FormatVersion.get -> int
+Mocassin.Compilation.Compiler.CompiledModel.FormatVersion.init -> void
+Mocassin.Compilation.Compiler.CompiledModel.ModelSignature.get -> string!
+Mocassin.Compilation.Compiler.CompiledModel.ModelSignature.init -> void
+Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataSha256.get -> string!
+Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataSha256.init -> void
+Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataVersion.get -> string!
+Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataVersion.init -> void
+Mocassin.Compilation.Compiler.CompiledModel.SymmetryContractVersion.get -> string!
+Mocassin.Compilation.Compiler.CompiledModel.SymmetryContractVersion.init -> void
+Mocassin.Compilation.Compiler.IModelCompiler
+Mocassin.Compilation.Compiler.IModelCompiler.Compile(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompilationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Compilation.Compiler.CompilationResult!
+Mocassin.Compilation.Compiler.ModelCompiler
+Mocassin.Compilation.Compiler.ModelCompiler.Compile(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompilationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Compilation.Compiler.CompilationResult!
+Mocassin.Compilation.Compiler.ModelCompiler.ModelCompiler() -> void
+const Mocassin.Compilation.Compiler.CompiledModel.CurrentFormatVersion = 1 -> int
+override Mocassin.Compilation.Caching.CompilationCacheStatistics.Equals(object? obj) -> bool
+override Mocassin.Compilation.Caching.CompilationCacheStatistics.GetHashCode() -> int
+override Mocassin.Compilation.Caching.CompilationCacheStatistics.ToString() -> string!
+override Mocassin.Compilation.Compiler.CompilationOptions.Equals(object? obj) -> bool
+override Mocassin.Compilation.Compiler.CompilationOptions.GetHashCode() -> int
+override Mocassin.Compilation.Compiler.CompilationOptions.ToString() -> string!
+override Mocassin.Compilation.Compiler.CompilationReport.Equals(object? obj) -> bool
+override Mocassin.Compilation.Compiler.CompilationReport.GetHashCode() -> int
+override Mocassin.Compilation.Compiler.CompilationReport.ToString() -> string!
+override Mocassin.Compilation.Compiler.CompilationResult.Equals(object? obj) -> bool
+override Mocassin.Compilation.Compiler.CompilationResult.GetHashCode() -> int
+override Mocassin.Compilation.Compiler.CompilationResult.ToString() -> string!
+override Mocassin.Compilation.Compiler.CompilationStageResult.Equals(object? obj) -> bool
+override Mocassin.Compilation.Compiler.CompilationStageResult.GetHashCode() -> int
+override Mocassin.Compilation.Compiler.CompilationStageResult.ToString() -> string!
+override Mocassin.Compilation.Compiler.CompiledModel.Equals(object? obj) -> bool
+override Mocassin.Compilation.Compiler.CompiledModel.GetHashCode() -> int
+override Mocassin.Compilation.Compiler.CompiledModel.ToString() -> string!
+static Mocassin.Compilation.Caching.CompilationCacheStatistics.Empty.get -> Mocassin.Compilation.Caching.CompilationCacheStatistics!
+static Mocassin.Compilation.Caching.CompilationCacheStatistics.operator !=(Mocassin.Compilation.Caching.CompilationCacheStatistics? left, Mocassin.Compilation.Caching.CompilationCacheStatistics? right) -> bool
+static Mocassin.Compilation.Caching.CompilationCacheStatistics.operator ==(Mocassin.Compilation.Caching.CompilationCacheStatistics? left, Mocassin.Compilation.Caching.CompilationCacheStatistics? right) -> bool
+static Mocassin.Compilation.Compiler.CompilationOptions.Default.get -> Mocassin.Compilation.Compiler.CompilationOptions!
+static Mocassin.Compilation.Compiler.CompilationOptions.operator !=(Mocassin.Compilation.Compiler.CompilationOptions? left, Mocassin.Compilation.Compiler.CompilationOptions? right) -> bool
+static Mocassin.Compilation.Compiler.CompilationOptions.operator ==(Mocassin.Compilation.Compiler.CompilationOptions? left, Mocassin.Compilation.Compiler.CompilationOptions? right) -> bool
+static Mocassin.Compilation.Compiler.CompilationReport.operator !=(Mocassin.Compilation.Compiler.CompilationReport? left, Mocassin.Compilation.Compiler.CompilationReport? right) -> bool
+static Mocassin.Compilation.Compiler.CompilationReport.operator ==(Mocassin.Compilation.Compiler.CompilationReport? left, Mocassin.Compilation.Compiler.CompilationReport? right) -> bool
+static Mocassin.Compilation.Compiler.CompilationResult.operator !=(Mocassin.Compilation.Compiler.CompilationResult? left, Mocassin.Compilation.Compiler.CompilationResult? right) -> bool
+static Mocassin.Compilation.Compiler.CompilationResult.operator ==(Mocassin.Compilation.Compiler.CompilationResult? left, Mocassin.Compilation.Compiler.CompilationResult? right) -> bool
+static Mocassin.Compilation.Compiler.CompilationStageResult.operator !=(Mocassin.Compilation.Compiler.CompilationStageResult? left, Mocassin.Compilation.Compiler.CompilationStageResult? right) -> bool
+static Mocassin.Compilation.Compiler.CompilationStageResult.operator ==(Mocassin.Compilation.Compiler.CompilationStageResult? left, Mocassin.Compilation.Compiler.CompilationStageResult? right) -> bool
+static Mocassin.Compilation.Compiler.CompiledModel.operator !=(Mocassin.Compilation.Compiler.CompiledModel? left, Mocassin.Compilation.Compiler.CompiledModel? right) -> bool
+static Mocassin.Compilation.Compiler.CompiledModel.operator ==(Mocassin.Compilation.Compiler.CompiledModel? left, Mocassin.Compilation.Compiler.CompiledModel? right) -> bool

@@ -3,7 +3,7 @@
 namespace Mocassin.Compilation;
 
 /// <summary>
-/// Marker type for the Mocassin.Compilation library. It is replaced by the real implementation in a later step.
+/// Marker type for the Mocassin.Compilation library.
 /// </summary>
 public static class CompilationModule
 {

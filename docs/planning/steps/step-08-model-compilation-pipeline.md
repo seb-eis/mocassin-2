@@ -20,7 +20,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `compiler-core` | `feature/step-08-model-compilation-pipeline/compiler-core` | Not started | — | — | — |
+| `compiler-core` | `feature/step-08-model-compilation-pipeline/compiler-core` | Done | `verify.sh dotnet` (932 tests), `structure`, `api`, `contracts`, `docs` pass | — | — |
 | `structure-and-pair-compilation` | `feature/step-08-model-compilation-pipeline/structure-and-pair-compilation` | Not started | — | — | — |
 | `cluster-compilation` | `feature/step-08-model-compilation-pipeline/cluster-compilation` | Not started | — | — | — |
 | `transition-rule-compilation` | `feature/step-08-model-compilation-pipeline/transition-rule-compilation` | Not started | — | — | — |
@@ -28,6 +28,24 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 | `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Not started | — | — | — |
 | `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Not started | — | — | — |
 | `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Not started | — | — | — |
+
+### Implementation notes and deviations
+
+- **Compiler namespace.** The public compiler contract lives in `Mocassin.Compilation.Compiler`, the cache
+  contracts in `Mocassin.Compilation.Caching`, and the immutable stage input in
+  `Mocassin.Compilation.Context`. The design §2 snippet writes `namespace Mocassin.Compilation;`, but
+  `AGENTS.md` §8 requires each file namespace to match its concept folder, and the accepted architecture
+  layout already assigns these types to `Compiler/`, `Caching/`, and `Context/`. Type names, signatures, and
+  behaviour are unchanged; consumers add a `using` directive.
+- **Fail-closed core.** `compiler-core` lands the public result, report, option, cache, and stage contracts plus
+  the synchronous stage orchestrator. Every content stage is a `CMP001` placeholder that stops the pipeline
+  until its feature lands, so the default compiler returns `Failed` with no model instead of a fabricated
+  success. `CompiledModel` currently carries the format and provenance header; later features add the immutable
+  component tables.
+- **compiler-core local evidence (2026-11-13).** `./tools/verify.sh dotnet` passes (932 tests, 0 failed),
+  `./tools/verify.sh structure` passes, `./tools/verify.sh api` passes with the refreshed
+  `Mocassin.Compilation` ApiCompat baseline, `./tools/verify.sh contracts` passes, and
+  `./tools/verify.sh docs` passes. No per-feature CI run was triggered.
 
 ## Goal
 
