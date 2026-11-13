@@ -1194,3 +1194,214 @@ Documentation checklist entries, delete or correct "Only the integer distance bu
 `Design review` metadata), correct the R5-3 and overstatement resolution rows, then integrate the amendment,
 refresh the closeout evidence and CI, and re-run the parent audit at the combined commit with A1, A3–A9, and
 m1–m7 in scope.
+
+### Review round 7
+
+#### Independence and frozen state
+
+Fresh context: I did not author or implement Step 08 or this amendment and have no shared conversation with the
+planner or implementor. I reviewed the round-7 delta at the frozen tree
+`57a383186c6c9caed815e2c16ba9a3ae33019e95` on `step/08-model-compilation-pipeline`; the working tree was clean.
+The design content is `2adee3c04bdb3983552f65f842459fc890711261`: `git diff --stat 2adee3c 57a3831` is the
+single-line `Reviewed commit` metadata change in this record, so the design delta reviewed is
+`153e27a..2adee3c`. The parent audit is still `Fixes required` (A1–A9); the amendment addresses only A2. There
+is no amendment implementation in the tree (`src/dotnet/Mocassin.Compilation/Signatures/` contains only
+`CompiledModelJson.cs`, `ModelSignatureProjection.cs`, and `SigningCompilationStage.cs`; no
+`CanonicalProjectionWriter` and no `tools/contracts/check_model_projection.py`), so this is a design review only.
+
+Round 7 applies the round-6 corrections: the Documentation checklist gains the `tools/contracts/README.md`,
+`06-toolchain-requirements.md`, and `./tools/verify.sh contracts` rows; the contradictory "Only the integer
+distance bucket is signed" sentence is gone and the bucket is stated unsigned; the writer paragraph names
+`Write(double)` instead of the nonexistent `WriteDouble`; the `position.encoding` rationale is added; and the
+request metadata and amendment index are advanced to round 7. R6-1, R6-2, N6-2, and N6-3 are resolved. The only
+residual from round 6 is the second half of N6-1: the paragraph still prescribes two different scalar
+mechanisms, and the N6-1 resolution row still overstates it (N7-1). The bytes remain fully determined by the
+marker table plus the authoritative per-field table.
+
+#### Commands and results
+
+```text
+$ git rev-parse HEAD
+57a383186c6c9caed815e2c16ba9a3ae33019e95
+
+$ git rev-parse 2adee3c
+2adee3c04bdb3983552f65f842459fc890711261
+
+$ git status --short
+(clean)
+
+$ git branch --show-current
+step/08-model-compilation-pipeline
+
+$ git log --oneline -5
+57a3831 docs: freeze step 08 amendment round 7 review [skip ci]
+2adee3c docs: clear step 08 amendment round 6 notes [skip ci]
+153e27a docs: record step 08 amendment 1 round 6 design review [skip ci]
+14c1e3f docs: freeze step 08 amendment round 6 review [skip ci]
+5af87aa docs: clear step 08 amendment round 5 notes [skip ci]
+
+$ git diff --stat 2adee3c 57a3831
+ docs/planning/reviews/step-08-amend-1.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+$ git diff --stat 153e27a 2adee3c
+ docs/planning/amendments/README.md                 |  2 +-
+ .../step-08-amend-1-canonical-projection.md        | 23 +++++++++++++---------
+ docs/planning/reviews/step-08-amend-1.md           |  6 ++++++
+ 3 files changed, 21 insertions(+), 10 deletions(-)
+
+$ python tools/contracts/generate.py --check
+Contract artifacts are current (18 files)
+
+$ python tools/check_docs_links.py
+Documentation links OK (152 files scanned).
+
+$ python tools/check_process_consistency.py
+Process consistency: OK
+
+$ python -c 'import msgpack; print(msgpack.version)'
+(1, 2, 4)
+
+$ ls tools/contracts/requirements.txt
+ls: cannot access 'tools/contracts/requirements.txt': No such file or directory
+```
+
+Documentation checklist versus the body requirements (R6-1):
+
+```text
+$ sed -n '312,320p' docs/planning/amendments/step-08-amend-1-canonical-projection.md
+## Documentation
+
+- [ ] `docs/development/compilation-pipeline.md` describes the manifest-driven projection and encoder.
+- [ ] `docs/planning/02-data-contracts.md` §1.3/§3.3 references the explicit projection.
+- [ ] `docs/planning/adr/0010-canonical-messagepack-signatures.md` notes the shared encoder and descriptor.
+- [ ] `tools/contracts/README.md` documents the `msgpack` requirements, checker, and fixture regeneration.
+- [ ] `docs/planning/06-toolchain-requirements.md` records the dev-only `msgpack` row and Step 08 use.
+- [ ] `./tools/verify.sh contracts` installs `tools/contracts/requirements.txt` and runs the projection checker.
+- [ ] Step page, amendment index, status, parity, audit request, and review record updated.
+```
+
+Distance-bucket wording (R6-2):
+
+```text
+$ grep -n "distance bucket" docs/planning/amendments/step-08-amend-1-canonical-projection.md
+173:  masks, state codes, tracker indices, jump counts/offsets/mappings, distance buckets, cluster canonical
+189:- The distance bucket is unsigned; only signed `movement` and the signed rule charge vector carry physics.
+192:  inspection-only, and the distance bucket is unsigned.
+```
+
+No "distance bucket is signed" sentence remains. Lines 189 and 192 state the same fact twice in adjacent
+bullets (redundant, not contradictory). The only remaining `signed` uses are `movement` and the rule
+`chargeTransportVector` (lines 141, 189), which is correct.
+
+Writer primitive list (N6-1) and `position.encoding` rationale (N6-2):
+
+```text
+$ sed -n '150,159p' docs/planning/amendments/step-08-amend-1-canonical-projection.md
+### Canonical encoding
+
+The writer is `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` (internal). It uses
+`MessagePackWriter` over an `IBufferWriter<byte>` for buffer management, the typed `WriteUInt64`/`WriteInt64`
+and `Write(double)` writers for the fixed-width scalars, and `WriteRaw` for the forced
+`0xdd`/`0xdb`/`0xc6`/`0xc3`/`0xc2`/`0xc0` headers.
+It must not call the compact `WriteArrayHeader`/`WriteString` convenience methods or the minimal-width
+`Write(ulong)`/`Write(long)` overloads; those would break the required header bytes. All fixed headers and scalar bytes are
+written through `WriteRaw`/`Advance` exactly as in the table below. The byte rules are:
+
+$ sed -n '91,92p' docs/planning/amendments/step-08-amend-1-canonical-projection.md
+- `encoding` = `[cellA int64, cellB int64, cellC int64, p uint64]`. The position encoding is retained as the
+  canonical base-cell `(0,0,0,p)` and cross-checked against `p`.
+```
+
+MessagePack 3.1.12 API check (`/tmp/opencode/mp` and `/tmp/opencode/MPW.cs`, prior-round download reused, not
+committed): `WriteUInt64`/`WriteInt64` route through `TryWriteUInt64`/`TryWriteInt64` ("The
+`MessagePackCode.UInt64`/`Int64` encoding is always used, even if the value could be encoded in fewer bytes"),
+`Write(double)` emits `MessagePackCode.Float64`, and `grep -rn "WriteDouble" lib` returns no matches. The named
+`Write(double)` is therefore API-correct; `WriteRaw(ReadOnlySpan<byte>)` and `Advance(int)` exist. The
+`WriteRaw`-only sentence in line 158 is the residual (N7-1).
+
+Record and index metadata (N6-3):
+
+```text
+$ sed -n '9,11p' docs/planning/amendments/step-08-amend-1-canonical-projection.md
+| Status | Re-review required (round 6 notes resolved; round 7 requested) |
+...
+| Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–6; round 6 Ready with notes; round 7 requested) |
+
+$ sed -n '113p' docs/planning/amendments/README.md
+| `step-08-amend-1` (`canonical-projection`) | 08 — Model Compilation Pipeline | **Re-review required (round 7)** | `feature/.../amend-1-canonical-projection` | [Review](../reviews/step-08-amend-1.md) | pending |
+```
+
+Also inspected: the full `153e27a..2adee3c` delta (amendment page, `amendments/README.md`, the record's
+resolution rows); the complete amendment page; `docs/planning/steps/step-08-model-compilation-pipeline.md`
+§11.3–§11.4; `docs/development/compilation-pipeline.md` "Signatures"; ADR 0010 rules 1–8 and "Pre-release model
+layout finalization"; `02-data-contracts.md` §1.3/§3.3; `contracts/manifest.json` `signatures.model` and
+`fixtures.signatureVectors`; `contracts/generated/signatures/model-v1.json`; `tools/contracts/generate.py`;
+`tools/contracts/README.md`; `tools/verify.sh` `run_contracts`; `docs/planning/06-toolchain-requirements.md:126`;
+`CompiledStructureModel.cs` (`CompiledPosition.Encoding` documented as `(0, 0, 0, P)`),
+`StructureCompilationStage.cs:86–88` (`expanded.Encoding` copied, not recomputed), and
+`ModelSignatureProjection.cs:91`; and `docs/planning/audits/step-08.md` (A2 at line 182, state
+`Fixes required` at line 206).
+
+#### Round-6 finding status
+
+| Finding | Status | Evidence and residual |
+| --- | --- | --- |
+| R6-1 (Minor) | **Resolved** | The Documentation checklist now has all three body-required rows: `tools/contracts/README.md`, the `06-toolchain-requirements.md` dev-only `msgpack` row, and the `./tools/verify.sh contracts` install/check step (lines 317–319), matching the body (lines 242–246) and acceptance line 287. The R6-1 resolution row is now accurate. |
+| R6-2 (Minor) | **Resolved** | "Only the integer distance bucket is signed" is deleted; the paragraph now says the bucket is unsigned and that only display distance/path length are inspection-only (lines 189–192). `distanceBucketFm` stays `uint64` in `pairLink`/`pairGeometry` (lines 93, 102) and in the type summary (line 173). Redundant double statement only. |
+| N6-1 (Note) | **Partially resolved** | The method name is fixed: the paragraph now says `Write(double)` and typed `WriteUInt64`/`WriteInt64` (lines 152–155), which are the correct 3.1.12 primitives. The second half of the note is not applied: line 157–158 still says "All fixed headers and scalar bytes are written through `WriteRaw`/`Advance`", contradicting the typed scalar writers, and the N6-1 resolution row says "`WriteRaw` is limited to forced headers". See N7-1. |
+| N6-2 (Note) | **Resolved** | `encoding` now has an include rationale: it is retained as the canonical base-cell `(0,0,0,p)` and cross-checked against `p` (lines 91–92), matching `CompiledPosition.Encoding`'s documented value (`CompiledStructureModel.cs:70,83`). Residual: the cross-check has no named test (N7-2). |
+| N6-3 (Note) | **Resolved** | `Status` and `Design review` are advanced to "round 7 requested" and "rounds 1–6; round 6 Ready with notes" (lines 9, 11), and the amendment index row reads `Re-review required (round 7)` (`amendments/README.md:113`). |
+
+#### Round-7 checkpoint verification
+
+| Checkpoint | Result |
+| --- | --- |
+| Documentation checklist lists `tools/contracts/README.md` | Yes (line 317). |
+| Documentation checklist lists the `06-toolchain-requirements.md` row | Yes (line 318). |
+| Documentation checklist lists the `verify.sh contracts` step | Yes (line 319). |
+| No contradictory distance-bucket signing sentence | Resolved; no "bucket is signed" text remains. |
+| Writer primitives API-correct for MessagePack 3.1.12 | `WriteUInt64`/`WriteInt64`/`Write(double)`/`WriteRaw`/`Advance` exist and are used correctly; the scalar-vs-`WriteRaw` rule is still duplicated (N7-1). |
+| `position.encoding` include rationale | Present (lines 91–92); cross-check is unnamed (N7-2). |
+| Request metadata rounds 1–6 / round 7 | Present (lines 9, 11) and index advanced. |
+| No remaining contradiction or missing exclusion rationale | All `int64` entries (site/position/environment `stability`, `collection.transitionKind`/`kind`, `simulation.kind`, `environment.siteIndex`, `encoding` cell offsets) fall inside the declared exceptions (lines 172–176); every dropped field has a rationale row (lines 133–142); no new type or exclusion contradiction. |
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| Note | **N7-1 — N6-1 is only half applied: the writer paragraph still prescribes two scalar mechanisms, and the resolution row overstates the fix.** Lines 152–155 say the fixed-width scalars use the typed `WriteUInt64`/`WriteInt64`/`Write(double)` writers; lines 157–158 then say "All fixed headers and scalar bytes are written through `WriteRaw`/`Advance`". Scalar bytes cannot be written through both, and the N6-1 resolution row ("`WriteRaw` is limited to forced headers") states the opposite of line 158. Both mechanisms produce identical canonical bytes, so this is cosmetic, but it is the third round in which the same sentence survives. Pick one rule — typed scalar writers plus `WriteRaw` for the forced headers, or `WriteRaw`/`Advance` for everything — and align the N6-1 row. As a trivial cleanup, the "distance bucket is unsigned" fact is now stated twice (lines 189, 192); one mention suffices. | Amendment lines 152–158, 189–192; resolution rows N6-1 and R6-2; MessagePack 3.1.12 `MPW.cs:328,359,403` and `MessagePack.xml` remarks. |
+| Note | **N7-2 — The new `position.encoding` rationale asserts a cross-check that no test or writer rule names.** Line 92 says `encoding` is "cross-checked against `p`", but the Tests table (lines 297–310) has no encoding-vs-`p` assertion, and the current code path copies `expanded.Encoding` from the compiler (`StructureCompilationStage.cs:86–88`) and writes its components plus `p` independently (`ModelSignatureProjection.cs:91`); there is no guard that the value is `(0,0,0,p)`. State where the check runs (a writer guard/diagnostic or a named test) or drop the claim. Bytes are unaffected because the compiled value is `(0,0,0,p)` by contract. | Amendment lines 91–92, 297–310; `CompiledStructureModel.cs:70,83`; `StructureCompilationStage.cs:86–88`; `ModelSignatureProjection.cs:91`. |
+| Note | **N7-3 — Pre-existing, not introduced by round 7: the API/contract-impact section names a documentation page that does not exist and is not in the checklist.** Line 274 says "`docs/reference/contracts.md`/`docs/development/compilation-pipeline.md` describe the projection and the independent vector", but `docs/reference/` contains only `cli.md`, `diagnostics.md`, `energy.md`, `file-layout.md`, `index.md`, `project-format.md`, and `transitions.md`; there is no `contracts.md`, and the Documentation checklist (lines 314–320) does not include it. `check_docs_links.py` passes because inline code paths are not links. Point the sentence at an existing page (for example `file-layout.md` or `compilation-pipeline.md`) or add the page and its checklist row. No effect on the bytes or the design's implementability. | Amendment line 274 and lines 314–320; `ls docs/reference/`; `python tools/check_docs_links.py` output above. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**.
+
+#### Verdict
+
+**Ready with notes.** No Blocker or Major remains, and round 7 closes the two round-6 Minors and two of the three
+Notes. I verified each requested checkpoint directly: the Documentation checklist now carries the
+`tools/contracts/README.md` row, the `06-toolchain-requirements.md` row, and the `./tools/verify.sh contracts`
+step (R6-1); no "distance bucket is signed" text remains and the bucket is `uint64` everywhere it appears
+(R6-2); the writer primitives named are the real MessagePack 3.1.12 APIs, with `Write(double)` emitting `0xcb`
+and `WriteUInt64`/`WriteInt64` always emitting `0xcf`/`0xd3`, and `WriteRaw`/`Advance` present for the forced
+headers (N6-1 first half); `position.encoding` has an include rationale matching `CompiledPosition.Encoding`
+(N6-2); and the request/`Design review`/index metadata are at rounds 1–6 with round 7 requested (N6-3). The
+per-field type table remains internally consistent: every `int64` entry is inside the declared signed
+exceptions, and every dropped field still has a rationale row.
+
+The only residual design-text defect is the duplicated writer rule and its overstated resolution row (N7-1,
+Note); N7-2 and N7-3 are small precision/bookkeeping notes and N7-3 is pre-existing. Because only Note findings
+remain, the encoding is implementable as written and nothing here blocks the start gate; the human owner should
+explicitly accept or have the step agent clear N7-1–N7-3. The Python checker remains a byte/type conformance
+verifier over C#-produced bytes, not an independent model-to-projection encoder; the manifest schema review and
+Step 11's Rust encoder/vector are the completeness gates. The parent audit still has A1, A3–A9, and m1–m7 open
+and must be re-run at the combined commit. The top-level `Record state` and all earlier rounds are preserved
+unaltered; this round's verdict is authoritative.
+
+Follow-up owner: Step 08 implementor / planner
+Follow-up issue/step: Apply N7-1–N7-3 to
+`docs/planning/amendments/step-08-amend-1-canonical-projection.md` (choose a single writer rule and align the
+N6-1 resolution row, name or remove the `position.encoding` cross-check, and fix or checklist the
+`docs/reference/contracts.md` reference), then integrate the amendment, refresh the closeout evidence and
+dispatch the replacement closeout CI run, and re-run the parent audit at the combined commit with A1, A3–A9, and
+m1–m7 in scope.
