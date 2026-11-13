@@ -63,6 +63,7 @@ decision will be made.
 | Update mechanism | Step 31 | Whether to ship any updater at all | Offline-first: no auto-update; users install new releases via the package/installer |
 | Remote deploy | Step 26/28 | Whether SSH/SFTP deploy ships in the first release | Local build + HPC scripts only; mark deferred in the parity matrix |
 | `.msr` format | Step 20 | Journal mode, locking, and state spill are decided; embedded-size cap and retention defaults may be tuned after benchmarks | `journal_mode=DELETE`, one collector, embed up to 1 GiB then external state files, no auto-delete |
+| Model editor layout | Step 24 spike | Choose the master-detail table/list + editor layout from owner-reviewed POCs: ListBox table, TreeView, TabControl, SplitView, custom TableView, or custom matrix. No DataGrid, TreeDataGrid Pro, or third-party grid. | ListBox table + detail editor baseline from ADR 0003. |
 
 ## 4. Deferred scope
 
@@ -90,6 +91,8 @@ The following are the only topics still expected to need an explicit owner decis
 2. **Remote deploy** scope for the first release (ship or defer).
 3. **Update mechanism** policy (no updater vs. signed installer/package channel).
 4. **AOT/single-file CLI** if dependency constraints make it feasible.
+5. **Model editor layout** after the Step 24 POC spike (choose ListBox table, TreeView, TabControl,
+   SplitView, custom TableView, or custom matrix).
 
 Everything else is either resolved above or specified in the data contracts, architecture, or step pages.
 When a decision is made, add an ADR (if expensive to reverse) and update this page.

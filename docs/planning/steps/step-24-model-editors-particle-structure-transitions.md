@@ -27,16 +27,51 @@ transition semantics visible, prevent invalid states where possible, and explain
 
 ## Original reference
 
-- **Particles:** two DataGrids (particles: name, symbol, charge, vacancy; sets: name + drag-and-drop particles
+- **Particles:** two WPF DataGrids (particles: name, symbol, charge, vacancy; sets: name + drag-and-drop particles
   from a row header). Void is implicit at index 0.
 - **Structure:** space-group table with 274 entries and operations; cell parameter editor that locks dependent
-  fields; cell-site grid (A,B,C, stability, particle set) with a live P1 expansion preview; dummy positions.
+  fields; cell-site table (A,B,C, stability, particle set) with a live P1 expansion preview; dummy positions.
 - **Transitions:** state changes (donor/acceptor), groups (make group), chains (connector string parsed into
   dynamic/static), MMC transitions (chain + two sites), KMC transitions (chain + path vectors).
 - Validation is a separate "Model Validator" console tab; editors do not show inline errors consistently.
 - No undo/redo.
 
 ## Design
+
+### 0. Editor layout spike
+
+Before the final editor design is frozen, build a small owner-reviewable POC of the candidate layouts. This is a
+gated decision: the owner sees each option with representative particle, site, and transition data and picks the
+layout before Step 24 implementation starts.
+
+POC options:
+
+1. **ListBox table + detail editor** (baseline) — header `Grid`, virtualized `ListBox` rows, and a
+   `ContentControl` that shows the selected item's type-specific editor.
+2. **TreeView + detail editor** — hierarchy for model/domain objects, editor on the right.
+3. **TabControl + list + detail** — one tab per domain with a table/list and editor.
+4. **SplitView / GridSplitter master-detail** — resizable selection and editor panes.
+5. **Custom `TableView` `TemplatedControl`** — reusable table surface with headers, selection, sorting hooks, and
+   virtualization.
+6. **Custom matrix control** — for site-energy and other matrix-shaped data only.
+
+Each POC must demonstrate:
+
+- selection, keyboard navigation, focus, and multi-select where needed;
+- virtualization with 1,000+ rows;
+- stable header/row column alignment;
+- search/filter/sort behavior;
+- opening a type-specific editor with validation, reference pickers, and undo/redo;
+- theme, high-contrast, and screen-reader labeling constraints;
+- implementation size and maintenance cost.
+
+Deliverable: a short POC report with screenshots, the recommended option, and the owner decision. Record the
+decision in [`ADR 0003`](../adr/0003-avalonia-mvvm-stack.md) and freeze the final layout before implementing the
+real editors. Do not add a data-grid dependency while the spike is open.
+
+**Avoid:** Avalonia `DataGrid` (deprecated), `TreeDataGrid` Pro/paid controls, third-party grid dependencies,
+inline cell editing for complex model objects, non-virtualized `ItemsControl` in a `ScrollViewer`, and
+independently auto-sized header/row grids.
 
 ### 1. Shared editor framework
 
@@ -53,7 +88,11 @@ public abstract class ModelEditorViewModel<TModel> : ObservableValidator
 }
 ```
 
-- List/detail layout: searchable object list on the left of the editor, detail form on the right.
+- Master-detail layout: a searchable table/list selection surface and a type-specific editor in a
+  `ContentControl`. The table is only a selection surface; the editor owns the fields, validation, reference
+  pickers, and undo/redo.
+- The selected layout comes from the Step 24 layout spike. Until then, use the `ListBox` table + detail baseline
+  from ADR 0003.
 - Add/Remove/Duplicate/Revert commands with undo integration.
 - Inline validation: fields show errors/warnings with tooltips; a summary bar links to the Problems panel.
 - Dirty fields are highlighted; "Apply" is immediate (undoable) or explicit for multi-field forms, configured
@@ -65,7 +104,7 @@ public abstract class ModelEditorViewModel<TModel> : ObservableValidator
 
 ### 2. Particle editor
 
-**Particles grid**
+**Particles table**
 
 - Columns: name, symbol, charge, vacancy, index (computed), usage count (sets/transitions).
 - Void particle is shown pinned at the top, read-only, with an explanation.
@@ -109,7 +148,7 @@ public abstract class ModelEditorViewModel<TModel> : ObservableValidator
 
 **Cell sites**
 
-- Grid: name, fractional A/B/C, stability, particle set, orbit size, multiplicity, Cartesian position.
+- Table: name, fractional A/B/C, stability, particle set, orbit size, multiplicity, Cartesian position.
 - Add site: choose stability and particle set; coordinate fields accept fractions/expressions.
 - P1 preview panel:
   - list of expanded positions with fractional/Cartesian coordinates and symmetry operation;
@@ -130,7 +169,7 @@ public abstract class ModelEditorViewModel<TModel> : ObservableValidator
 Tabs or a master-detail tree:
 
 1. **State changes**
-   - Grid: name, donor, acceptor, vacancy pair, unstable pair, usage count.
+   - Table: name, donor, acceptor, vacancy pair, unstable pair, usage count.
    - Donor/acceptor pickers show charge/symbol; void is selectable as acceptor.
    - Inline warning for donor == acceptor, both void, or charged vacancy pitfalls.
 2. **State-change groups**
@@ -175,16 +214,17 @@ Tabs or a master-detail tree:
 
 ### 6. Performance
 
-- The particle/site grids virtualize for large models.
+- The particle/site tables virtualize for large models.
 - P1 preview and transition rule preview are debounced (250 ms) and cancellable.
 - Editing a field does not rebuild the 3D scene until the edit is committed.
 - Structure changes show a progress indicator if the orbit expansion takes > 100 ms.
 
 ## Implementation tasks
 
-- [ ] Implement the shared model editor framework and reference pickers.
+- [ ] Build and review the editor-layout POC options; record the owner decision.
+- [ ] Implement the shared model editor framework and reference pickers using the chosen layout.
 - [ ] Implement particle and particle-set editors with drag/drop.
-- [ ] Implement space-group picker, cell parameters, and site grid.
+- [ ] Implement space-group picker, cell parameters, and site table.
 - [ ] Implement P1 preview and overlap diagnostics.
 - [ ] Implement dummy positions.
 - [ ] Implement state change/group/chain editors.
@@ -195,6 +235,7 @@ Tabs or a master-detail tree:
 
 ## Acceptance criteria
 
+- [ ] The owner has reviewed the layout POCs and the chosen layout is recorded in ADR 0003.
 - [ ] A user can create the ceria particles, sets, structure, and oxygen migration without the CLI.
 - [ ] Drag-and-drop and keyboard-only flows both work for particle sets.
 - [ ] Changing the space group previews the new orbit sizes before applying.
@@ -203,7 +244,7 @@ Tabs or a master-detail tree:
 - [ ] KMC path editing shows stability colors and symmetry-expanded path count.
 - [ ] Every diagnostic navigates to the offending field.
 - [ ] Undo/redo works across all edits.
-- [ ] Large grids/previews remain responsive.
+- [ ] Large tables and previews remain responsive.
 - [ ] Documentation written
 
 ## Documentation
