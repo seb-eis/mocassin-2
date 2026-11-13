@@ -1045,13 +1045,17 @@ Residual risks and follow-ups:
 
 ## Human approval
 
-- [ ] Accepted: Ready for implementation
+- [x] Accepted: Ready for implementation
 - [ ] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (explicit acceptance, 2026-11-13)
+Date: 2026-11-13
+
+The acceptance covers the `Ready for implementation` verdict at
+`b84ceadda1ba8b1715592a4f6884d76bc7c36fed` and the recorded M5 owner waiver. It does not itself authorize a
+merge to `main`, a tag, or the creation of the step branch; those remain separate approvals.
 
 ## Resolution status
 
