@@ -2,6 +2,7 @@
 
 using Mocassin.Compilation.Energy;
 using Mocassin.Compilation.Structure;
+using Mocassin.Compilation.Transitions;
 
 namespace Mocassin.Compilation.Compiler;
 
@@ -97,4 +98,9 @@ public sealed record CompiledModel
     /// Gets the compiled pair-energy model.
     /// </summary>
     public CompiledEnergyModel Energy { get; init; } = CompiledEnergyModel.Empty;
+
+    /// <summary>
+    /// Gets the compiled transition model.
+    /// </summary>
+    public CompiledTransitionModel Transitions { get; init; } = CompiledTransitionModel.Empty;
 }

@@ -44,14 +44,14 @@ public sealed class ModelCompilerTests
         var diagnostic = Assert.Single(result.Diagnostics);
         Assert.Equal("CMP001", diagnostic.Code);
         Assert.Equal(DiagnosticSeverity.Error, diagnostic.Severity);
-        Assert.Contains("Rules", diagnostic.Message, StringComparison.Ordinal);
+        Assert.Contains("Encoding", diagnostic.Message, StringComparison.Ordinal);
 
-        AssertAllStagesReported(result.Report, expectedFailedStage: CompilationStage.Rules, expectedDiagnosticCount: 1);
+        AssertAllStagesReported(result.Report, expectedFailedStage: CompilationStage.Encoding, expectedDiagnosticCount: 1);
         Assert.Null(result.Report.ModelSignature);
         Assert.Equal("symmetry-1", result.Report.SymmetryContractVersion);
         Assert.Null(result.Report.SpaceGroupDataVersion);
         Assert.Null(result.Report.SpaceGroupDataSha256);
-        Assert.Contains("'Rules'", result.Report.Summary, StringComparison.Ordinal);
+        Assert.Contains("'Encoding'", result.Report.Summary, StringComparison.Ordinal);
         Assert.Equal(0, result.Report.Cache.Hits);
         Assert.Equal(0, result.Report.Cache.Misses);
         Assert.Equal(0, result.Report.Cache.Capacity);

@@ -136,6 +136,49 @@ public sealed class TransitionPathResolver
     }
 
     /// <summary>
+    /// Resolves an ordered fractional path to its canonical P1 positions and cell offsets.
+    /// </summary>
+    /// <param name="points">The fractional points in path order.</param>
+    /// <param name="positions">The resolved positions when successful.</param>
+    /// <param name="diagnostics">The resolution diagnostics.</param>
+    /// <returns><see langword="true"/> when every point resolved and no position repeated.</returns>
+    /// <remarks>
+    /// Repeated encoded positions are rejected because a transition path must visit distinct positions. The
+    /// point is never wrapped or rewritten.
+    /// </remarks>
+    public bool TryResolvePath(
+        ImmutableArray<Fractional3> points,
+        out ImmutableArray<ResolvedPathPosition> positions,
+        out ImmutableArray<Diagnostic> diagnostics)
+    {
+        var bag = new DiagnosticBag();
+        var resolved = ImmutableArray.CreateBuilder<ResolvedPathPosition>(points.IsDefault ? 0 : points.Length);
+        var seen = new Dictionary<Vector4I, int>();
+        var path = points.IsDefault ? ImmutableArray<Fractional3>.Empty : points;
+        for (var index = 0; index < path.Length; index++)
+        {
+            if (!TryResolvePoint(path[index], out var position, out var pointDiagnostics) || position is null)
+            {
+                bag.AddRange(pointDiagnostics);
+                continue;
+            }
+
+            if (seen.TryGetValue(position.Encoding, out var firstIndex))
+            {
+                bag.Add(PointError($"Path point {index} repeats the encoded position of point {firstIndex}."));
+                continue;
+            }
+
+            seen.Add(position.Encoding, index);
+            resolved.Add(position);
+        }
+
+        positions = resolved.ToImmutable();
+        diagnostics = bag.Sorted;
+        return !bag.HasErrors;
+    }
+
+    /// <summary>
     /// Resolves every point of a kinetic reference path.
     /// </summary>
     /// <param name="transition">The kinetic transition whose path is resolved.</param>

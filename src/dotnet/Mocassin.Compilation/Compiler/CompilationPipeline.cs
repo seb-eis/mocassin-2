@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using Mocassin.Compilation.Context;
 using Mocassin.Compilation.Energy;
 using Mocassin.Compilation.Structure;
+using Mocassin.Compilation.Transitions;
 
 namespace Mocassin.Compilation.Compiler;
 
@@ -39,7 +40,7 @@ internal static class CompilationPipeline
         new EnvironmentCompilationStage(),
         new PairCompilationStage(),
         new ClusterCompilationStage(),
-        new UnavailableCompilationStage(CompilationStage.Rules),
+        new TransitionCompilationStage(),
         new UnavailableCompilationStage(CompilationStage.Encoding),
         new UnavailableCompilationStage(CompilationStage.Indexing),
         new UnavailableCompilationStage(CompilationStage.Signing),

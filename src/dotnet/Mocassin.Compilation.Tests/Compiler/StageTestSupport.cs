@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 
 using Mocassin.Compilation.Energy;
 using Mocassin.Compilation.Structure;
+using Mocassin.Compilation.Transitions;
 using Mocassin.Packages.Projects;
 
 namespace Mocassin.Compilation.Tests.Compiler;
@@ -79,6 +80,43 @@ internal static class StageTestSupport
     ];
 
     /// <summary>
+    /// Creates a project whose first simulation references the first transition of the requested kind.
+    /// </summary>
+    /// <param name="project">The source project.</param>
+    /// <param name="kinetic">Whether to reference a kinetic transition.</param>
+    /// <returns>The updated project.</returns>
+    public static Project WithFirstSimulationTransition(Project project, bool kinetic)
+    {
+        var model = project.Model;
+        var transition = kinetic
+            ? Core.Model.Transitions.TransitionRef.From(model.KineticTransitions[0].Id)
+            : Core.Model.Transitions.TransitionRef.From(model.MetropolisTransitions[0].Id);
+        if (model.Simulations.IsDefaultOrEmpty)
+        {
+            Core.Model.Simulations.Simulation created = kinetic
+                ? new Core.Model.Simulations.KineticSimulation
+                {
+                    Id = new Core.Ids.SimulationId(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f99")),
+                    Name = "Compiler test",
+                    TransitionIds = [transition],
+                }
+                : new Core.Model.Simulations.MetropolisSimulation
+                {
+                    Id = new Core.Ids.SimulationId(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f99")),
+                    Name = "Compiler test",
+                    TransitionIds = [transition],
+                };
+            return project with { Model = model with { Simulations = [created] } };
+        }
+
+        var simulation = model.Simulations[0];
+        Core.Model.Simulations.Simulation updated = simulation is Core.Model.Simulations.KineticSimulation kineticSimulation
+            ? kineticSimulation with { TransitionIds = [transition] }
+            : ((Core.Model.Simulations.MetropolisSimulation)simulation) with { TransitionIds = [transition] };
+        return project with { Model = model with { Simulations = [updated] } };
+    }
+
+    /// <summary>
     /// Creates the cluster stage prefix.
     /// </summary>
     /// <returns>The ordered stages.</returns>
@@ -86,5 +124,15 @@ internal static class StageTestSupport
     [
         .. StructureAndPairStages(),
         new ClusterCompilationStage(),
+    ];
+
+    /// <summary>
+    /// Creates the transition-rule stage prefix.
+    /// </summary>
+    /// <returns>The ordered stages.</returns>
+    public static ICompilationStage[] RuleStages() =>
+    [
+        .. ClusterStages(),
+        new TransitionCompilationStage(),
     ];
 }

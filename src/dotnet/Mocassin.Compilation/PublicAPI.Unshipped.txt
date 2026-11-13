@@ -105,6 +105,8 @@ Mocassin.Compilation.Compiler.CompiledModel.Structure.get -> Mocassin.Compilatio
 Mocassin.Compilation.Compiler.CompiledModel.Structure.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.SymmetryContractVersion.get -> string!
 Mocassin.Compilation.Compiler.CompiledModel.SymmetryContractVersion.init -> void
+Mocassin.Compilation.Compiler.CompiledModel.Transitions.get -> Mocassin.Compilation.Transitions.CompiledTransitionModel!
+Mocassin.Compilation.Compiler.CompiledModel.Transitions.init -> void
 Mocassin.Compilation.Compiler.IModelCompiler
 Mocassin.Compilation.Compiler.IModelCompiler.Compile(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompilationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Compilation.Compiler.CompilationResult!
 Mocassin.Compilation.Compiler.ModelCompiler
@@ -350,7 +352,108 @@ Mocassin.Compilation.Structure.CompiledStructureModel.Positions.init -> void
 Mocassin.Compilation.Structure.CompiledStructureModel.SiteCount.get -> int
 Mocassin.Compilation.Structure.CompiledStructureModel.Sites.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledSite!>
 Mocassin.Compilation.Structure.CompiledStructureModel.Sites.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpCollection
+Mocassin.Compilation.Transitions.CompiledJumpCollection.<Clone>$() -> Mocassin.Compilation.Transitions.CompiledJumpCollection!
+Mocassin.Compilation.Transitions.CompiledJumpCollection.CompiledJumpCollection(int Index, Mocassin.Core.Model.Transitions.TransitionRef Transition, Mocassin.Core.Model.Simulations.SimulationKind Kind, ulong MobileParticleMask, System.Collections.Immutable.ImmutableArray<int> DirectionIndices, System.Collections.Immutable.ImmutableArray<int> RuleIndices) -> void
+Mocassin.Compilation.Transitions.CompiledJumpCollection.Deconstruct(out int Index, out Mocassin.Core.Model.Transitions.TransitionRef Transition, out Mocassin.Core.Model.Simulations.SimulationKind Kind, out ulong MobileParticleMask, out System.Collections.Immutable.ImmutableArray<int> DirectionIndices, out System.Collections.Immutable.ImmutableArray<int> RuleIndices) -> void
+Mocassin.Compilation.Transitions.CompiledJumpCollection.DirectionIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Transitions.CompiledJumpCollection.DirectionIndices.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpCollection.Equals(Mocassin.Compilation.Transitions.CompiledJumpCollection? other) -> bool
+Mocassin.Compilation.Transitions.CompiledJumpCollection.Index.get -> int
+Mocassin.Compilation.Transitions.CompiledJumpCollection.Index.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpCollection.Kind.get -> Mocassin.Core.Model.Simulations.SimulationKind
+Mocassin.Compilation.Transitions.CompiledJumpCollection.Kind.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpCollection.MobileParticleMask.get -> ulong
+Mocassin.Compilation.Transitions.CompiledJumpCollection.MobileParticleMask.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpCollection.RuleIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Transitions.CompiledJumpCollection.RuleIndices.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpCollection.Transition.get -> Mocassin.Core.Model.Transitions.TransitionRef
+Mocassin.Compilation.Transitions.CompiledJumpCollection.Transition.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection
+Mocassin.Compilation.Transitions.CompiledJumpDirection.<Clone>$() -> Mocassin.Compilation.Transitions.CompiledJumpDirection!
+Mocassin.Compilation.Transitions.CompiledJumpDirection.CollectionIndex.get -> int
+Mocassin.Compilation.Transitions.CompiledJumpDirection.CollectionIndex.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.CompiledJumpDirection(int Index, string! ObjectId, int CollectionIndex, int PositionId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I> Path, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> Movement, Mocassin.Core.Geometry.Cartesian3 PathVector, double PathLength, bool IsInverse, System.Collections.Immutable.ImmutableArray<int> EquivalentStartPositions) -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.Deconstruct(out int Index, out string! ObjectId, out int CollectionIndex, out int PositionId, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I> Path, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> Movement, out Mocassin.Core.Geometry.Cartesian3 PathVector, out double PathLength, out bool IsInverse, out System.Collections.Immutable.ImmutableArray<int> EquivalentStartPositions) -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.Equals(Mocassin.Compilation.Transitions.CompiledJumpDirection? other) -> bool
+Mocassin.Compilation.Transitions.CompiledJumpDirection.EquivalentStartPositions.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Transitions.CompiledJumpDirection.EquivalentStartPositions.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.Index.get -> int
+Mocassin.Compilation.Transitions.CompiledJumpDirection.Index.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.IsInverse.get -> bool
+Mocassin.Compilation.Transitions.CompiledJumpDirection.IsInverse.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.Movement.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+Mocassin.Compilation.Transitions.CompiledJumpDirection.Movement.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.ObjectId.get -> string!
+Mocassin.Compilation.Transitions.CompiledJumpDirection.ObjectId.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.Path.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I>
+Mocassin.Compilation.Transitions.CompiledJumpDirection.Path.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.PathLength.get -> double
+Mocassin.Compilation.Transitions.CompiledJumpDirection.PathLength.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.PathVector.get -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Compilation.Transitions.CompiledJumpDirection.PathVector.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpDirection.PositionId.get -> int
+Mocassin.Compilation.Transitions.CompiledJumpDirection.PositionId.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule
+Mocassin.Compilation.Transitions.CompiledJumpRule.<Clone>$() -> Mocassin.Compilation.Transitions.CompiledJumpRule!
+Mocassin.Compilation.Transitions.CompiledJumpRule.ChargeTransportVector.get -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Compilation.Transitions.CompiledJumpRule.ChargeTransportVector.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.CollectionIndex.get -> int
+Mocassin.Compilation.Transitions.CompiledJumpRule.CollectionIndex.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.CompiledJumpRule(int Index, string! RuleGeometryId, int CollectionIndex, int DirectionIndex, System.Collections.Immutable.ImmutableArray<int> DirectionIndices, ulong State0, ulong State1, ulong State2, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> Movement, Mocassin.Core.Geometry.Cartesian3 ChargeTransportVector, Mocassin.Core.Geometry.Cartesian3? StaticCorrection, System.Collections.Immutable.ImmutableArray<byte> TrackerOrder, bool IsInverse, double FrequencyHz) -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.Deconstruct(out int Index, out string! RuleGeometryId, out int CollectionIndex, out int DirectionIndex, out System.Collections.Immutable.ImmutableArray<int> DirectionIndices, out ulong State0, out ulong State1, out ulong State2, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> Movement, out Mocassin.Core.Geometry.Cartesian3 ChargeTransportVector, out Mocassin.Core.Geometry.Cartesian3? StaticCorrection, out System.Collections.Immutable.ImmutableArray<byte> TrackerOrder, out bool IsInverse, out double FrequencyHz) -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.DirectionIndex.get -> int
+Mocassin.Compilation.Transitions.CompiledJumpRule.DirectionIndex.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.DirectionIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Transitions.CompiledJumpRule.DirectionIndices.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.Equals(Mocassin.Compilation.Transitions.CompiledJumpRule? other) -> bool
+Mocassin.Compilation.Transitions.CompiledJumpRule.FrequencyHz.get -> double
+Mocassin.Compilation.Transitions.CompiledJumpRule.FrequencyHz.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.Index.get -> int
+Mocassin.Compilation.Transitions.CompiledJumpRule.Index.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.IsInverse.get -> bool
+Mocassin.Compilation.Transitions.CompiledJumpRule.IsInverse.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.Movement.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3>
+Mocassin.Compilation.Transitions.CompiledJumpRule.Movement.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.RuleGeometryId.get -> string!
+Mocassin.Compilation.Transitions.CompiledJumpRule.RuleGeometryId.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.State0.get -> ulong
+Mocassin.Compilation.Transitions.CompiledJumpRule.State0.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.State1.get -> ulong
+Mocassin.Compilation.Transitions.CompiledJumpRule.State1.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.State2.get -> ulong
+Mocassin.Compilation.Transitions.CompiledJumpRule.State2.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.StaticCorrection.get -> Mocassin.Core.Geometry.Cartesian3?
+Mocassin.Compilation.Transitions.CompiledJumpRule.StaticCorrection.init -> void
+Mocassin.Compilation.Transitions.CompiledJumpRule.TrackerOrder.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Compilation.Transitions.CompiledJumpRule.TrackerOrder.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel
+Mocassin.Compilation.Transitions.CompiledTransitionModel.<Clone>$() -> Mocassin.Compilation.Transitions.CompiledTransitionModel!
+Mocassin.Compilation.Transitions.CompiledTransitionModel.CollectionCount.get -> int
+Mocassin.Compilation.Transitions.CompiledTransitionModel.Collections.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpCollection!>
+Mocassin.Compilation.Transitions.CompiledTransitionModel.Collections.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.CompiledTransitionModel(System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpCollection!> Collections, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpDirection!> Directions, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpRule!> Rules, System.Collections.Immutable.ImmutableArray<int> JumpCounts, System.Collections.Immutable.ImmutableArray<int> JumpOffsets, System.Collections.Immutable.ImmutableArray<int> JumpMappings, int ParticleCount, int PositionCount) -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpCollection!> Collections, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpDirection!> Directions, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpRule!> Rules, out System.Collections.Immutable.ImmutableArray<int> JumpCounts, out System.Collections.Immutable.ImmutableArray<int> JumpOffsets, out System.Collections.Immutable.ImmutableArray<int> JumpMappings, out int ParticleCount, out int PositionCount) -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.DirectionCount.get -> int
+Mocassin.Compilation.Transitions.CompiledTransitionModel.Directions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpDirection!>
+Mocassin.Compilation.Transitions.CompiledTransitionModel.Directions.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.Equals(Mocassin.Compilation.Transitions.CompiledTransitionModel? other) -> bool
+Mocassin.Compilation.Transitions.CompiledTransitionModel.InverseRuleCount.get -> int
+Mocassin.Compilation.Transitions.CompiledTransitionModel.JumpCounts.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Transitions.CompiledTransitionModel.JumpCounts.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.JumpMappings.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Transitions.CompiledTransitionModel.JumpMappings.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.JumpOffsets.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Transitions.CompiledTransitionModel.JumpOffsets.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.ParticleCount.get -> int
+Mocassin.Compilation.Transitions.CompiledTransitionModel.ParticleCount.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.PositionCount.get -> int
+Mocassin.Compilation.Transitions.CompiledTransitionModel.PositionCount.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.RuleCount.get -> int
+Mocassin.Compilation.Transitions.CompiledTransitionModel.Rules.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpRule!>
+Mocassin.Compilation.Transitions.CompiledTransitionModel.Rules.init -> void
 const Mocassin.Compilation.Compiler.CompiledModel.CurrentFormatVersion = 1 -> int
+const Mocassin.Compilation.Transitions.CompiledJumpRule.DefaultFrequencyHz = 10000000000000 -> double
 override Mocassin.Compilation.Caching.CompilationCacheStatistics.Equals(object? obj) -> bool
 override Mocassin.Compilation.Caching.CompilationCacheStatistics.GetHashCode() -> int
 override Mocassin.Compilation.Caching.CompilationCacheStatistics.ToString() -> string!
@@ -411,6 +514,18 @@ override Mocassin.Compilation.Structure.CompiledSite.ToString() -> string!
 override Mocassin.Compilation.Structure.CompiledStructureModel.Equals(object? obj) -> bool
 override Mocassin.Compilation.Structure.CompiledStructureModel.GetHashCode() -> int
 override Mocassin.Compilation.Structure.CompiledStructureModel.ToString() -> string!
+override Mocassin.Compilation.Transitions.CompiledJumpCollection.Equals(object? obj) -> bool
+override Mocassin.Compilation.Transitions.CompiledJumpCollection.GetHashCode() -> int
+override Mocassin.Compilation.Transitions.CompiledJumpCollection.ToString() -> string!
+override Mocassin.Compilation.Transitions.CompiledJumpDirection.Equals(object? obj) -> bool
+override Mocassin.Compilation.Transitions.CompiledJumpDirection.GetHashCode() -> int
+override Mocassin.Compilation.Transitions.CompiledJumpDirection.ToString() -> string!
+override Mocassin.Compilation.Transitions.CompiledJumpRule.Equals(object? obj) -> bool
+override Mocassin.Compilation.Transitions.CompiledJumpRule.GetHashCode() -> int
+override Mocassin.Compilation.Transitions.CompiledJumpRule.ToString() -> string!
+override Mocassin.Compilation.Transitions.CompiledTransitionModel.Equals(object? obj) -> bool
+override Mocassin.Compilation.Transitions.CompiledTransitionModel.GetHashCode() -> int
+override Mocassin.Compilation.Transitions.CompiledTransitionModel.ToString() -> string!
 static Mocassin.Compilation.Caching.CompilationCacheStatistics.Empty.get -> Mocassin.Compilation.Caching.CompilationCacheStatistics!
 static Mocassin.Compilation.Caching.CompilationCacheStatistics.operator !=(Mocassin.Compilation.Caching.CompilationCacheStatistics? left, Mocassin.Compilation.Caching.CompilationCacheStatistics? right) -> bool
 static Mocassin.Compilation.Caching.CompilationCacheStatistics.operator ==(Mocassin.Compilation.Caching.CompilationCacheStatistics? left, Mocassin.Compilation.Caching.CompilationCacheStatistics? right) -> bool
@@ -457,3 +572,12 @@ static Mocassin.Compilation.Structure.CompiledSite.operator ==(Mocassin.Compilat
 static Mocassin.Compilation.Structure.CompiledStructureModel.Empty.get -> Mocassin.Compilation.Structure.CompiledStructureModel!
 static Mocassin.Compilation.Structure.CompiledStructureModel.operator !=(Mocassin.Compilation.Structure.CompiledStructureModel? left, Mocassin.Compilation.Structure.CompiledStructureModel? right) -> bool
 static Mocassin.Compilation.Structure.CompiledStructureModel.operator ==(Mocassin.Compilation.Structure.CompiledStructureModel? left, Mocassin.Compilation.Structure.CompiledStructureModel? right) -> bool
+static Mocassin.Compilation.Transitions.CompiledJumpCollection.operator !=(Mocassin.Compilation.Transitions.CompiledJumpCollection? left, Mocassin.Compilation.Transitions.CompiledJumpCollection? right) -> bool
+static Mocassin.Compilation.Transitions.CompiledJumpCollection.operator ==(Mocassin.Compilation.Transitions.CompiledJumpCollection? left, Mocassin.Compilation.Transitions.CompiledJumpCollection? right) -> bool
+static Mocassin.Compilation.Transitions.CompiledJumpDirection.operator !=(Mocassin.Compilation.Transitions.CompiledJumpDirection? left, Mocassin.Compilation.Transitions.CompiledJumpDirection? right) -> bool
+static Mocassin.Compilation.Transitions.CompiledJumpDirection.operator ==(Mocassin.Compilation.Transitions.CompiledJumpDirection? left, Mocassin.Compilation.Transitions.CompiledJumpDirection? right) -> bool
+static Mocassin.Compilation.Transitions.CompiledJumpRule.operator !=(Mocassin.Compilation.Transitions.CompiledJumpRule? left, Mocassin.Compilation.Transitions.CompiledJumpRule? right) -> bool
+static Mocassin.Compilation.Transitions.CompiledJumpRule.operator ==(Mocassin.Compilation.Transitions.CompiledJumpRule? left, Mocassin.Compilation.Transitions.CompiledJumpRule? right) -> bool
+static Mocassin.Compilation.Transitions.CompiledTransitionModel.Empty.get -> Mocassin.Compilation.Transitions.CompiledTransitionModel!
+static Mocassin.Compilation.Transitions.CompiledTransitionModel.operator !=(Mocassin.Compilation.Transitions.CompiledTransitionModel? left, Mocassin.Compilation.Transitions.CompiledTransitionModel? right) -> bool
+static Mocassin.Compilation.Transitions.CompiledTransitionModel.operator ==(Mocassin.Compilation.Transitions.CompiledTransitionModel? left, Mocassin.Compilation.Transitions.CompiledTransitionModel? right) -> bool
