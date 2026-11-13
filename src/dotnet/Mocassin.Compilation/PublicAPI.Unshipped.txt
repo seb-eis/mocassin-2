@@ -88,15 +88,21 @@ Mocassin.Compilation.Compiler.CompilationStatus.Succeeded = 0 -> Mocassin.Compil
 Mocassin.Compilation.Compiler.CompiledModel
 Mocassin.Compilation.Compiler.CompiledModel.<Clone>$() -> Mocassin.Compilation.Compiler.CompiledModel!
 Mocassin.Compilation.Compiler.CompiledModel.CompiledModel(int formatVersion, string! modelSignature, string! symmetryContractVersion, string! spaceGroupDataVersion, string! spaceGroupDataSha256) -> void
+Mocassin.Compilation.Compiler.CompiledModel.Energy.get -> Mocassin.Compilation.Energy.CompiledEnergyModel!
+Mocassin.Compilation.Compiler.CompiledModel.Energy.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.Equals(Mocassin.Compilation.Compiler.CompiledModel? other) -> bool
 Mocassin.Compilation.Compiler.CompiledModel.FormatVersion.get -> int
 Mocassin.Compilation.Compiler.CompiledModel.FormatVersion.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.ModelSignature.get -> string!
 Mocassin.Compilation.Compiler.CompiledModel.ModelSignature.init -> void
+Mocassin.Compilation.Compiler.CompiledModel.Particles.get -> Mocassin.Compilation.Structure.CompiledParticleTable!
+Mocassin.Compilation.Compiler.CompiledModel.Particles.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataSha256.get -> string!
 Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataSha256.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataVersion.get -> string!
 Mocassin.Compilation.Compiler.CompiledModel.SpaceGroupDataVersion.init -> void
+Mocassin.Compilation.Compiler.CompiledModel.Structure.get -> Mocassin.Compilation.Structure.CompiledStructureModel!
+Mocassin.Compilation.Compiler.CompiledModel.Structure.init -> void
 Mocassin.Compilation.Compiler.CompiledModel.SymmetryContractVersion.get -> string!
 Mocassin.Compilation.Compiler.CompiledModel.SymmetryContractVersion.init -> void
 Mocassin.Compilation.Compiler.IModelCompiler
@@ -104,6 +110,196 @@ Mocassin.Compilation.Compiler.IModelCompiler.Compile(Mocassin.Core.Project.Proje
 Mocassin.Compilation.Compiler.ModelCompiler
 Mocassin.Compilation.Compiler.ModelCompiler.Compile(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompilationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Compilation.Compiler.CompilationResult!
 Mocassin.Compilation.Compiler.ModelCompiler.ModelCompiler() -> void
+Mocassin.Compilation.Energy.CompiledEnergyModel
+Mocassin.Compilation.Energy.CompiledEnergyModel.<Clone>$() -> Mocassin.Compilation.Energy.CompiledEnergyModel!
+Mocassin.Compilation.Energy.CompiledEnergyModel.CompiledEnergyModel(System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairGeometry!> PairGeometries, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairTable!> PairTables) -> void
+Mocassin.Compilation.Energy.CompiledEnergyModel.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairGeometry!> PairGeometries, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairTable!> PairTables) -> void
+Mocassin.Compilation.Energy.CompiledEnergyModel.Equals(Mocassin.Compilation.Energy.CompiledEnergyModel? other) -> bool
+Mocassin.Compilation.Energy.CompiledEnergyModel.PairGeometries.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairGeometry!>
+Mocassin.Compilation.Energy.CompiledEnergyModel.PairGeometries.init -> void
+Mocassin.Compilation.Energy.CompiledEnergyModel.PairGeometryCount.get -> int
+Mocassin.Compilation.Energy.CompiledEnergyModel.PairTableCount.get -> int
+Mocassin.Compilation.Energy.CompiledEnergyModel.PairTables.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Energy.CompiledPairTable!>
+Mocassin.Compilation.Energy.CompiledEnergyModel.PairTables.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry
+Mocassin.Compilation.Energy.CompiledPairGeometry.<Clone>$() -> Mocassin.Compilation.Energy.CompiledPairGeometry!
+Mocassin.Compilation.Energy.CompiledPairGeometry.CenterP.get -> int
+Mocassin.Compilation.Energy.CompiledPairGeometry.CenterP.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.CenterSiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Compilation.Energy.CompiledPairGeometry.CenterSiteId.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.CenterSiteIndex.get -> int
+Mocassin.Compilation.Energy.CompiledPairGeometry.CenterSiteIndex.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.ChiralPartnerGeometryId.get -> string?
+Mocassin.Compilation.Energy.CompiledPairGeometry.ChiralPartnerGeometryId.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.CompiledPairGeometry(string! GeometryId, string! EnergyId, int PairTableIndex, int CenterSiteIndex, Mocassin.Core.Ids.CellSiteId CenterSiteId, int CenterP, int PartnerSiteIndex, Mocassin.Core.Ids.CellSiteId PartnerSiteId, int PartnerP, Mocassin.Core.Geometry.Vector4I Offset, int DistanceBucketFm, double DistanceAngstrom, bool IsChiral, string? ChiralPartnerGeometryId) -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.Deconstruct(out string! GeometryId, out string! EnergyId, out int PairTableIndex, out int CenterSiteIndex, out Mocassin.Core.Ids.CellSiteId CenterSiteId, out int CenterP, out int PartnerSiteIndex, out Mocassin.Core.Ids.CellSiteId PartnerSiteId, out int PartnerP, out Mocassin.Core.Geometry.Vector4I Offset, out int DistanceBucketFm, out double DistanceAngstrom, out bool IsChiral, out string? ChiralPartnerGeometryId) -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.DistanceAngstrom.get -> double
+Mocassin.Compilation.Energy.CompiledPairGeometry.DistanceAngstrom.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.DistanceBucketFm.get -> int
+Mocassin.Compilation.Energy.CompiledPairGeometry.DistanceBucketFm.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.EnergyId.get -> string!
+Mocassin.Compilation.Energy.CompiledPairGeometry.EnergyId.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.Equals(Mocassin.Compilation.Energy.CompiledPairGeometry? other) -> bool
+Mocassin.Compilation.Energy.CompiledPairGeometry.GeometryId.get -> string!
+Mocassin.Compilation.Energy.CompiledPairGeometry.GeometryId.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.IsChiral.get -> bool
+Mocassin.Compilation.Energy.CompiledPairGeometry.IsChiral.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.Offset.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Compilation.Energy.CompiledPairGeometry.Offset.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.PairTableIndex.get -> int
+Mocassin.Compilation.Energy.CompiledPairGeometry.PairTableIndex.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.PartnerP.get -> int
+Mocassin.Compilation.Energy.CompiledPairGeometry.PartnerP.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.PartnerSiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Compilation.Energy.CompiledPairGeometry.PartnerSiteId.init -> void
+Mocassin.Compilation.Energy.CompiledPairGeometry.PartnerSiteIndex.get -> int
+Mocassin.Compilation.Energy.CompiledPairGeometry.PartnerSiteIndex.init -> void
+Mocassin.Compilation.Energy.CompiledPairTable
+Mocassin.Compilation.Energy.CompiledPairTable.<Clone>$() -> Mocassin.Compilation.Energy.CompiledPairTable!
+Mocassin.Compilation.Energy.CompiledPairTable.CompiledPairTable(int Index, string! EnergyId, int ParticleCount, System.Collections.Immutable.ImmutableArray<double> Values) -> void
+Mocassin.Compilation.Energy.CompiledPairTable.Deconstruct(out int Index, out string! EnergyId, out int ParticleCount, out System.Collections.Immutable.ImmutableArray<double> Values) -> void
+Mocassin.Compilation.Energy.CompiledPairTable.EnergyId.get -> string!
+Mocassin.Compilation.Energy.CompiledPairTable.EnergyId.init -> void
+Mocassin.Compilation.Energy.CompiledPairTable.Equals(Mocassin.Compilation.Energy.CompiledPairTable? other) -> bool
+Mocassin.Compilation.Energy.CompiledPairTable.GetEnergy(int centerParticle, int partnerParticle) -> double
+Mocassin.Compilation.Energy.CompiledPairTable.Index.get -> int
+Mocassin.Compilation.Energy.CompiledPairTable.Index.init -> void
+Mocassin.Compilation.Energy.CompiledPairTable.ParticleCount.get -> int
+Mocassin.Compilation.Energy.CompiledPairTable.ParticleCount.init -> void
+Mocassin.Compilation.Energy.CompiledPairTable.Values.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Compilation.Energy.CompiledPairTable.Values.init -> void
+Mocassin.Compilation.Structure.CompiledClusterLink
+Mocassin.Compilation.Structure.CompiledClusterLink.<Clone>$() -> Mocassin.Compilation.Structure.CompiledClusterLink!
+Mocassin.Compilation.Structure.CompiledClusterLink.ClusterTableIndex.get -> int
+Mocassin.Compilation.Structure.CompiledClusterLink.ClusterTableIndex.init -> void
+Mocassin.Compilation.Structure.CompiledClusterLink.CompiledClusterLink(int ClusterTableIndex, int SiteSlot) -> void
+Mocassin.Compilation.Structure.CompiledClusterLink.Deconstruct(out int ClusterTableIndex, out int SiteSlot) -> void
+Mocassin.Compilation.Structure.CompiledClusterLink.Equals(Mocassin.Compilation.Structure.CompiledClusterLink? other) -> bool
+Mocassin.Compilation.Structure.CompiledClusterLink.SiteSlot.get -> int
+Mocassin.Compilation.Structure.CompiledClusterLink.SiteSlot.init -> void
+Mocassin.Compilation.Structure.CompiledEnvironment
+Mocassin.Compilation.Structure.CompiledEnvironment.<Clone>$() -> Mocassin.Compilation.Structure.CompiledEnvironment!
+Mocassin.Compilation.Structure.CompiledEnvironment.AllowedParticleMask.get -> ulong
+Mocassin.Compilation.Structure.CompiledEnvironment.AllowedParticleMask.init -> void
+Mocassin.Compilation.Structure.CompiledEnvironment.CompiledEnvironment(int Index, int SiteIndex, Mocassin.Core.Model.Structure.SiteStability Stability, ulong AllowedParticleMask, System.Collections.Immutable.ImmutableArray<int> UpdateParticleIndices) -> void
+Mocassin.Compilation.Structure.CompiledEnvironment.Deconstruct(out int Index, out int SiteIndex, out Mocassin.Core.Model.Structure.SiteStability Stability, out ulong AllowedParticleMask, out System.Collections.Immutable.ImmutableArray<int> UpdateParticleIndices) -> void
+Mocassin.Compilation.Structure.CompiledEnvironment.Equals(Mocassin.Compilation.Structure.CompiledEnvironment? other) -> bool
+Mocassin.Compilation.Structure.CompiledEnvironment.Index.get -> int
+Mocassin.Compilation.Structure.CompiledEnvironment.Index.init -> void
+Mocassin.Compilation.Structure.CompiledEnvironment.SiteIndex.get -> int
+Mocassin.Compilation.Structure.CompiledEnvironment.SiteIndex.init -> void
+Mocassin.Compilation.Structure.CompiledEnvironment.Stability.get -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Compilation.Structure.CompiledEnvironment.Stability.init -> void
+Mocassin.Compilation.Structure.CompiledEnvironment.UpdateParticleIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Structure.CompiledEnvironment.UpdateParticleIndices.init -> void
+Mocassin.Compilation.Structure.CompiledPairLink
+Mocassin.Compilation.Structure.CompiledPairLink.<Clone>$() -> Mocassin.Compilation.Structure.CompiledPairLink!
+Mocassin.Compilation.Structure.CompiledPairLink.CompiledPairLink(int PairTableIndex, int TargetP, Mocassin.Core.Geometry.Vector4I Offset, int DistanceBucketFm) -> void
+Mocassin.Compilation.Structure.CompiledPairLink.Deconstruct(out int PairTableIndex, out int TargetP, out Mocassin.Core.Geometry.Vector4I Offset, out int DistanceBucketFm) -> void
+Mocassin.Compilation.Structure.CompiledPairLink.DistanceBucketFm.get -> int
+Mocassin.Compilation.Structure.CompiledPairLink.DistanceBucketFm.init -> void
+Mocassin.Compilation.Structure.CompiledPairLink.Equals(Mocassin.Compilation.Structure.CompiledPairLink? other) -> bool
+Mocassin.Compilation.Structure.CompiledPairLink.Offset.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Compilation.Structure.CompiledPairLink.Offset.init -> void
+Mocassin.Compilation.Structure.CompiledPairLink.PairTableIndex.get -> int
+Mocassin.Compilation.Structure.CompiledPairLink.PairTableIndex.init -> void
+Mocassin.Compilation.Structure.CompiledPairLink.TargetP.get -> int
+Mocassin.Compilation.Structure.CompiledPairLink.TargetP.init -> void
+Mocassin.Compilation.Structure.CompiledParticle
+Mocassin.Compilation.Structure.CompiledParticle.<Clone>$() -> Mocassin.Compilation.Structure.CompiledParticle!
+Mocassin.Compilation.Structure.CompiledParticle.ChargeElementary.get -> double
+Mocassin.Compilation.Structure.CompiledParticle.ChargeElementary.init -> void
+Mocassin.Compilation.Structure.CompiledParticle.CompiledParticle(int Index, Mocassin.Core.Ids.ParticleId Id, string! Name, string! Symbol, double ChargeElementary, bool IsVacancy) -> void
+Mocassin.Compilation.Structure.CompiledParticle.Deconstruct(out int Index, out Mocassin.Core.Ids.ParticleId Id, out string! Name, out string! Symbol, out double ChargeElementary, out bool IsVacancy) -> void
+Mocassin.Compilation.Structure.CompiledParticle.Equals(Mocassin.Compilation.Structure.CompiledParticle? other) -> bool
+Mocassin.Compilation.Structure.CompiledParticle.Id.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Compilation.Structure.CompiledParticle.Id.init -> void
+Mocassin.Compilation.Structure.CompiledParticle.Index.get -> int
+Mocassin.Compilation.Structure.CompiledParticle.Index.init -> void
+Mocassin.Compilation.Structure.CompiledParticle.IsVacancy.get -> bool
+Mocassin.Compilation.Structure.CompiledParticle.IsVacancy.init -> void
+Mocassin.Compilation.Structure.CompiledParticle.Name.get -> string!
+Mocassin.Compilation.Structure.CompiledParticle.Name.init -> void
+Mocassin.Compilation.Structure.CompiledParticle.Symbol.get -> string!
+Mocassin.Compilation.Structure.CompiledParticle.Symbol.init -> void
+Mocassin.Compilation.Structure.CompiledParticleTable
+Mocassin.Compilation.Structure.CompiledParticleTable.<Clone>$() -> Mocassin.Compilation.Structure.CompiledParticleTable!
+Mocassin.Compilation.Structure.CompiledParticleTable.CompiledParticleTable(System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledParticle!> particles) -> void
+Mocassin.Compilation.Structure.CompiledParticleTable.Count.get -> int
+Mocassin.Compilation.Structure.CompiledParticleTable.Equals(Mocassin.Compilation.Structure.CompiledParticleTable? other) -> bool
+Mocassin.Compilation.Structure.CompiledParticleTable.IndexById.get -> System.Collections.Frozen.FrozenDictionary<Mocassin.Core.Ids.ParticleId, int>!
+Mocassin.Compilation.Structure.CompiledParticleTable.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledParticle!>
+Mocassin.Compilation.Structure.CompiledParticleTable.TryGetIndex(Mocassin.Core.Ids.ParticleId id, out int index) -> bool
+Mocassin.Compilation.Structure.CompiledPosition
+Mocassin.Compilation.Structure.CompiledPosition.<Clone>$() -> Mocassin.Compilation.Structure.CompiledPosition!
+Mocassin.Compilation.Structure.CompiledPosition.AllowedParticleMask.get -> ulong
+Mocassin.Compilation.Structure.CompiledPosition.AllowedParticleMask.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.Cartesian.get -> Mocassin.Core.Geometry.Cartesian3
+Mocassin.Compilation.Structure.CompiledPosition.Cartesian.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.ClusterLinks.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledClusterLink!>
+Mocassin.Compilation.Structure.CompiledPosition.ClusterLinks.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.CompiledPosition(int P, Mocassin.Core.Geometry.Vector4I Encoding, Mocassin.Core.Geometry.Fractional3 Fractional, Mocassin.Core.Geometry.Cartesian3 Cartesian, int SiteIndex, Mocassin.Core.Ids.CellSiteId SiteId, Mocassin.Core.Model.Structure.SiteStability Stability, ulong AllowedParticleMask, int EnvironmentIndex, int OrbitIndex, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledPairLink!> PairLinks, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledClusterLink!> ClusterLinks) -> void
+Mocassin.Compilation.Structure.CompiledPosition.Deconstruct(out int P, out Mocassin.Core.Geometry.Vector4I Encoding, out Mocassin.Core.Geometry.Fractional3 Fractional, out Mocassin.Core.Geometry.Cartesian3 Cartesian, out int SiteIndex, out Mocassin.Core.Ids.CellSiteId SiteId, out Mocassin.Core.Model.Structure.SiteStability Stability, out ulong AllowedParticleMask, out int EnvironmentIndex, out int OrbitIndex, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledPairLink!> PairLinks, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledClusterLink!> ClusterLinks) -> void
+Mocassin.Compilation.Structure.CompiledPosition.Encoding.get -> Mocassin.Core.Geometry.Vector4I
+Mocassin.Compilation.Structure.CompiledPosition.Encoding.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.EnvironmentIndex.get -> int
+Mocassin.Compilation.Structure.CompiledPosition.EnvironmentIndex.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.Equals(Mocassin.Compilation.Structure.CompiledPosition? other) -> bool
+Mocassin.Compilation.Structure.CompiledPosition.Fractional.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Compilation.Structure.CompiledPosition.Fractional.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.OrbitIndex.get -> int
+Mocassin.Compilation.Structure.CompiledPosition.OrbitIndex.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.P.get -> int
+Mocassin.Compilation.Structure.CompiledPosition.P.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.PairLinks.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledPairLink!>
+Mocassin.Compilation.Structure.CompiledPosition.PairLinks.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.SiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Compilation.Structure.CompiledPosition.SiteId.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.SiteIndex.get -> int
+Mocassin.Compilation.Structure.CompiledPosition.SiteIndex.init -> void
+Mocassin.Compilation.Structure.CompiledPosition.Stability.get -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Compilation.Structure.CompiledPosition.Stability.init -> void
+Mocassin.Compilation.Structure.CompiledSite
+Mocassin.Compilation.Structure.CompiledSite.<Clone>$() -> Mocassin.Compilation.Structure.CompiledSite!
+Mocassin.Compilation.Structure.CompiledSite.CompiledSite(int Index, Mocassin.Core.Ids.CellSiteId Id, string! Name, Mocassin.Core.Geometry.Fractional3 Fractional, Mocassin.Core.Model.Structure.SiteStability Stability, Mocassin.Core.Ids.ParticleSetId ParticleSetId, int EnvironmentIndex, System.Collections.Immutable.ImmutableArray<int> PositionIndices) -> void
+Mocassin.Compilation.Structure.CompiledSite.Deconstruct(out int Index, out Mocassin.Core.Ids.CellSiteId Id, out string! Name, out Mocassin.Core.Geometry.Fractional3 Fractional, out Mocassin.Core.Model.Structure.SiteStability Stability, out Mocassin.Core.Ids.ParticleSetId ParticleSetId, out int EnvironmentIndex, out System.Collections.Immutable.ImmutableArray<int> PositionIndices) -> void
+Mocassin.Compilation.Structure.CompiledSite.EnvironmentIndex.get -> int
+Mocassin.Compilation.Structure.CompiledSite.EnvironmentIndex.init -> void
+Mocassin.Compilation.Structure.CompiledSite.Equals(Mocassin.Compilation.Structure.CompiledSite? other) -> bool
+Mocassin.Compilation.Structure.CompiledSite.Fractional.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Compilation.Structure.CompiledSite.Fractional.init -> void
+Mocassin.Compilation.Structure.CompiledSite.Id.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Compilation.Structure.CompiledSite.Id.init -> void
+Mocassin.Compilation.Structure.CompiledSite.Index.get -> int
+Mocassin.Compilation.Structure.CompiledSite.Index.init -> void
+Mocassin.Compilation.Structure.CompiledSite.Name.get -> string!
+Mocassin.Compilation.Structure.CompiledSite.Name.init -> void
+Mocassin.Compilation.Structure.CompiledSite.ParticleSetId.get -> Mocassin.Core.Ids.ParticleSetId
+Mocassin.Compilation.Structure.CompiledSite.ParticleSetId.init -> void
+Mocassin.Compilation.Structure.CompiledSite.PositionIndices.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Structure.CompiledSite.PositionIndices.init -> void
+Mocassin.Compilation.Structure.CompiledSite.Stability.get -> Mocassin.Core.Model.Structure.SiteStability
+Mocassin.Compilation.Structure.CompiledSite.Stability.init -> void
+Mocassin.Compilation.Structure.CompiledStructureModel
+Mocassin.Compilation.Structure.CompiledStructureModel.<Clone>$() -> Mocassin.Compilation.Structure.CompiledStructureModel!
+Mocassin.Compilation.Structure.CompiledStructureModel.CellVectors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Cartesian3>
+Mocassin.Compilation.Structure.CompiledStructureModel.CellVectors.init -> void
+Mocassin.Compilation.Structure.CompiledStructureModel.CellVolumeAngstrom3.get -> double
+Mocassin.Compilation.Structure.CompiledStructureModel.CellVolumeAngstrom3.init -> void
+Mocassin.Compilation.Structure.CompiledStructureModel.CompiledStructureModel(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Cartesian3> CellVectors, double CellVolumeAngstrom3, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledSite!> Sites, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledEnvironment!> Environments, System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledPosition!> Positions, System.Collections.Immutable.ImmutableArray<int> InteractionRange) -> void
+Mocassin.Compilation.Structure.CompiledStructureModel.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Cartesian3> CellVectors, out double CellVolumeAngstrom3, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledSite!> Sites, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledEnvironment!> Environments, out System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledPosition!> Positions, out System.Collections.Immutable.ImmutableArray<int> InteractionRange) -> void
+Mocassin.Compilation.Structure.CompiledStructureModel.EnvironmentCount.get -> int
+Mocassin.Compilation.Structure.CompiledStructureModel.Environments.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledEnvironment!>
+Mocassin.Compilation.Structure.CompiledStructureModel.Environments.init -> void
+Mocassin.Compilation.Structure.CompiledStructureModel.Equals(Mocassin.Compilation.Structure.CompiledStructureModel? other) -> bool
+Mocassin.Compilation.Structure.CompiledStructureModel.InteractionRange.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Compilation.Structure.CompiledStructureModel.InteractionRange.init -> void
+Mocassin.Compilation.Structure.CompiledStructureModel.PositionCount.get -> int
+Mocassin.Compilation.Structure.CompiledStructureModel.Positions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledPosition!>
+Mocassin.Compilation.Structure.CompiledStructureModel.Positions.init -> void
+Mocassin.Compilation.Structure.CompiledStructureModel.SiteCount.get -> int
+Mocassin.Compilation.Structure.CompiledStructureModel.Sites.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Structure.CompiledSite!>
+Mocassin.Compilation.Structure.CompiledStructureModel.Sites.init -> void
 const Mocassin.Compilation.Compiler.CompiledModel.CurrentFormatVersion = 1 -> int
 override Mocassin.Compilation.Caching.CompilationCacheStatistics.Equals(object? obj) -> bool
 override Mocassin.Compilation.Caching.CompilationCacheStatistics.GetHashCode() -> int
@@ -123,6 +319,39 @@ override Mocassin.Compilation.Compiler.CompilationStageResult.ToString() -> stri
 override Mocassin.Compilation.Compiler.CompiledModel.Equals(object? obj) -> bool
 override Mocassin.Compilation.Compiler.CompiledModel.GetHashCode() -> int
 override Mocassin.Compilation.Compiler.CompiledModel.ToString() -> string!
+override Mocassin.Compilation.Energy.CompiledEnergyModel.Equals(object? obj) -> bool
+override Mocassin.Compilation.Energy.CompiledEnergyModel.GetHashCode() -> int
+override Mocassin.Compilation.Energy.CompiledEnergyModel.ToString() -> string!
+override Mocassin.Compilation.Energy.CompiledPairGeometry.Equals(object? obj) -> bool
+override Mocassin.Compilation.Energy.CompiledPairGeometry.GetHashCode() -> int
+override Mocassin.Compilation.Energy.CompiledPairGeometry.ToString() -> string!
+override Mocassin.Compilation.Energy.CompiledPairTable.Equals(object? obj) -> bool
+override Mocassin.Compilation.Energy.CompiledPairTable.GetHashCode() -> int
+override Mocassin.Compilation.Energy.CompiledPairTable.ToString() -> string!
+override Mocassin.Compilation.Structure.CompiledClusterLink.Equals(object? obj) -> bool
+override Mocassin.Compilation.Structure.CompiledClusterLink.GetHashCode() -> int
+override Mocassin.Compilation.Structure.CompiledClusterLink.ToString() -> string!
+override Mocassin.Compilation.Structure.CompiledEnvironment.Equals(object? obj) -> bool
+override Mocassin.Compilation.Structure.CompiledEnvironment.GetHashCode() -> int
+override Mocassin.Compilation.Structure.CompiledEnvironment.ToString() -> string!
+override Mocassin.Compilation.Structure.CompiledPairLink.Equals(object? obj) -> bool
+override Mocassin.Compilation.Structure.CompiledPairLink.GetHashCode() -> int
+override Mocassin.Compilation.Structure.CompiledPairLink.ToString() -> string!
+override Mocassin.Compilation.Structure.CompiledParticle.Equals(object? obj) -> bool
+override Mocassin.Compilation.Structure.CompiledParticle.GetHashCode() -> int
+override Mocassin.Compilation.Structure.CompiledParticle.ToString() -> string!
+override Mocassin.Compilation.Structure.CompiledParticleTable.Equals(object? obj) -> bool
+override Mocassin.Compilation.Structure.CompiledParticleTable.GetHashCode() -> int
+override Mocassin.Compilation.Structure.CompiledParticleTable.ToString() -> string!
+override Mocassin.Compilation.Structure.CompiledPosition.Equals(object? obj) -> bool
+override Mocassin.Compilation.Structure.CompiledPosition.GetHashCode() -> int
+override Mocassin.Compilation.Structure.CompiledPosition.ToString() -> string!
+override Mocassin.Compilation.Structure.CompiledSite.Equals(object? obj) -> bool
+override Mocassin.Compilation.Structure.CompiledSite.GetHashCode() -> int
+override Mocassin.Compilation.Structure.CompiledSite.ToString() -> string!
+override Mocassin.Compilation.Structure.CompiledStructureModel.Equals(object? obj) -> bool
+override Mocassin.Compilation.Structure.CompiledStructureModel.GetHashCode() -> int
+override Mocassin.Compilation.Structure.CompiledStructureModel.ToString() -> string!
 static Mocassin.Compilation.Caching.CompilationCacheStatistics.Empty.get -> Mocassin.Compilation.Caching.CompilationCacheStatistics!
 static Mocassin.Compilation.Caching.CompilationCacheStatistics.operator !=(Mocassin.Compilation.Caching.CompilationCacheStatistics? left, Mocassin.Compilation.Caching.CompilationCacheStatistics? right) -> bool
 static Mocassin.Compilation.Caching.CompilationCacheStatistics.operator ==(Mocassin.Compilation.Caching.CompilationCacheStatistics? left, Mocassin.Compilation.Caching.CompilationCacheStatistics? right) -> bool
@@ -137,3 +366,29 @@ static Mocassin.Compilation.Compiler.CompilationStageResult.operator !=(Mocassin
 static Mocassin.Compilation.Compiler.CompilationStageResult.operator ==(Mocassin.Compilation.Compiler.CompilationStageResult? left, Mocassin.Compilation.Compiler.CompilationStageResult? right) -> bool
 static Mocassin.Compilation.Compiler.CompiledModel.operator !=(Mocassin.Compilation.Compiler.CompiledModel? left, Mocassin.Compilation.Compiler.CompiledModel? right) -> bool
 static Mocassin.Compilation.Compiler.CompiledModel.operator ==(Mocassin.Compilation.Compiler.CompiledModel? left, Mocassin.Compilation.Compiler.CompiledModel? right) -> bool
+static Mocassin.Compilation.Energy.CompiledEnergyModel.Empty.get -> Mocassin.Compilation.Energy.CompiledEnergyModel!
+static Mocassin.Compilation.Energy.CompiledEnergyModel.operator !=(Mocassin.Compilation.Energy.CompiledEnergyModel? left, Mocassin.Compilation.Energy.CompiledEnergyModel? right) -> bool
+static Mocassin.Compilation.Energy.CompiledEnergyModel.operator ==(Mocassin.Compilation.Energy.CompiledEnergyModel? left, Mocassin.Compilation.Energy.CompiledEnergyModel? right) -> bool
+static Mocassin.Compilation.Energy.CompiledPairGeometry.operator !=(Mocassin.Compilation.Energy.CompiledPairGeometry? left, Mocassin.Compilation.Energy.CompiledPairGeometry? right) -> bool
+static Mocassin.Compilation.Energy.CompiledPairGeometry.operator ==(Mocassin.Compilation.Energy.CompiledPairGeometry? left, Mocassin.Compilation.Energy.CompiledPairGeometry? right) -> bool
+static Mocassin.Compilation.Energy.CompiledPairTable.operator !=(Mocassin.Compilation.Energy.CompiledPairTable? left, Mocassin.Compilation.Energy.CompiledPairTable? right) -> bool
+static Mocassin.Compilation.Energy.CompiledPairTable.operator ==(Mocassin.Compilation.Energy.CompiledPairTable? left, Mocassin.Compilation.Energy.CompiledPairTable? right) -> bool
+static Mocassin.Compilation.Structure.CompiledClusterLink.operator !=(Mocassin.Compilation.Structure.CompiledClusterLink? left, Mocassin.Compilation.Structure.CompiledClusterLink? right) -> bool
+static Mocassin.Compilation.Structure.CompiledClusterLink.operator ==(Mocassin.Compilation.Structure.CompiledClusterLink? left, Mocassin.Compilation.Structure.CompiledClusterLink? right) -> bool
+static Mocassin.Compilation.Structure.CompiledEnvironment.operator !=(Mocassin.Compilation.Structure.CompiledEnvironment? left, Mocassin.Compilation.Structure.CompiledEnvironment? right) -> bool
+static Mocassin.Compilation.Structure.CompiledEnvironment.operator ==(Mocassin.Compilation.Structure.CompiledEnvironment? left, Mocassin.Compilation.Structure.CompiledEnvironment? right) -> bool
+static Mocassin.Compilation.Structure.CompiledPairLink.operator !=(Mocassin.Compilation.Structure.CompiledPairLink? left, Mocassin.Compilation.Structure.CompiledPairLink? right) -> bool
+static Mocassin.Compilation.Structure.CompiledPairLink.operator ==(Mocassin.Compilation.Structure.CompiledPairLink? left, Mocassin.Compilation.Structure.CompiledPairLink? right) -> bool
+static Mocassin.Compilation.Structure.CompiledParticle.operator !=(Mocassin.Compilation.Structure.CompiledParticle? left, Mocassin.Compilation.Structure.CompiledParticle? right) -> bool
+static Mocassin.Compilation.Structure.CompiledParticle.operator ==(Mocassin.Compilation.Structure.CompiledParticle? left, Mocassin.Compilation.Structure.CompiledParticle? right) -> bool
+static Mocassin.Compilation.Structure.CompiledParticleTable.Empty.get -> Mocassin.Compilation.Structure.CompiledParticleTable!
+static Mocassin.Compilation.Structure.CompiledParticleTable.VoidIndex.get -> int
+static Mocassin.Compilation.Structure.CompiledParticleTable.operator !=(Mocassin.Compilation.Structure.CompiledParticleTable? left, Mocassin.Compilation.Structure.CompiledParticleTable? right) -> bool
+static Mocassin.Compilation.Structure.CompiledParticleTable.operator ==(Mocassin.Compilation.Structure.CompiledParticleTable? left, Mocassin.Compilation.Structure.CompiledParticleTable? right) -> bool
+static Mocassin.Compilation.Structure.CompiledPosition.operator !=(Mocassin.Compilation.Structure.CompiledPosition? left, Mocassin.Compilation.Structure.CompiledPosition? right) -> bool
+static Mocassin.Compilation.Structure.CompiledPosition.operator ==(Mocassin.Compilation.Structure.CompiledPosition? left, Mocassin.Compilation.Structure.CompiledPosition? right) -> bool
+static Mocassin.Compilation.Structure.CompiledSite.operator !=(Mocassin.Compilation.Structure.CompiledSite? left, Mocassin.Compilation.Structure.CompiledSite? right) -> bool
+static Mocassin.Compilation.Structure.CompiledSite.operator ==(Mocassin.Compilation.Structure.CompiledSite? left, Mocassin.Compilation.Structure.CompiledSite? right) -> bool
+static Mocassin.Compilation.Structure.CompiledStructureModel.Empty.get -> Mocassin.Compilation.Structure.CompiledStructureModel!
+static Mocassin.Compilation.Structure.CompiledStructureModel.operator !=(Mocassin.Compilation.Structure.CompiledStructureModel? left, Mocassin.Compilation.Structure.CompiledStructureModel? right) -> bool
+static Mocassin.Compilation.Structure.CompiledStructureModel.operator ==(Mocassin.Compilation.Structure.CompiledStructureModel? left, Mocassin.Compilation.Structure.CompiledStructureModel? right) -> bool

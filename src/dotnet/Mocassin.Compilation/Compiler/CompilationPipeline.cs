@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
+using Mocassin.Compilation.Context;
+using Mocassin.Compilation.Energy;
+using Mocassin.Compilation.Structure;
 
 namespace Mocassin.Compilation.Compiler;
 
@@ -31,7 +34,15 @@ internal static class CompilationPipeline
     /// <returns>The default content stages.</returns>
     public static ImmutableArray<ICompilationStage> CreateDefaultStages() =>
     [
-        .. ContentStages.Select(static stage => (ICompilationStage)new UnavailableCompilationStage(stage)),
+        new ResolveCompilationStage(),
+        new StructureCompilationStage(),
+        new EnvironmentCompilationStage(),
+        new PairCompilationStage(),
+        new UnavailableCompilationStage(CompilationStage.Clusters),
+        new UnavailableCompilationStage(CompilationStage.Rules),
+        new UnavailableCompilationStage(CompilationStage.Encoding),
+        new UnavailableCompilationStage(CompilationStage.Indexing),
+        new UnavailableCompilationStage(CompilationStage.Signing),
     ];
 
     /// <summary>

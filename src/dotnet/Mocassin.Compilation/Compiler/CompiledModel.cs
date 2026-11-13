@@ -1,5 +1,8 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.Compilation.Energy;
+using Mocassin.Compilation.Structure;
+
 namespace Mocassin.Compilation.Compiler;
 
 /// <summary>
@@ -79,4 +82,19 @@ public sealed record CompiledModel
     /// Gets the SHA-256 of the embedded space-group catalog payload.
     /// </summary>
     public string SpaceGroupDataSha256 { get; init; }
+
+    /// <summary>
+    /// Gets the compiled particle table.
+    /// </summary>
+    public CompiledParticleTable Particles { get; init; } = CompiledParticleTable.Empty;
+
+    /// <summary>
+    /// Gets the compiled P1 structure.
+    /// </summary>
+    public CompiledStructureModel Structure { get; init; } = CompiledStructureModel.Empty;
+
+    /// <summary>
+    /// Gets the compiled pair-energy model.
+    /// </summary>
+    public CompiledEnergyModel Energy { get; init; } = CompiledEnergyModel.Empty;
 }
