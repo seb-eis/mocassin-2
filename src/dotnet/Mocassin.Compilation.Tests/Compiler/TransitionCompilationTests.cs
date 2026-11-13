@@ -112,3 +112,30 @@ public sealed class ComplexMechanismLimitationTests
         Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == "CMP005");
     }
 }
+
+/// <summary>
+/// Pins the vehicle charge-transport result for the neutral A+/B- sample.
+/// </summary>
+[Trait("Tier", "PR-fast")]
+public sealed class VehicleChargeTransportTests
+{
+    [Fact]
+    public async Task NeutralVehiclePairHasZeroNetChargeTransport()
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync("samples/transitions/vehicle5.mocprj"),
+            kinetic: true);
+
+        var result = new ModelCompiler().Compile(project);
+
+        Assert.True(result.IsSuccess);
+        var rule = Assert.Single(result.Model!.Transitions.Rules.Where(static rule => !rule.IsInverse));
+        Assert.Equal(0.0, rule.ChargeTransportVector.X);
+        Assert.Equal(0.0, rule.ChargeTransportVector.Y);
+        Assert.Equal(0.0, rule.ChargeTransportVector.Z);
+        Assert.Equal(0.2, rule.Movement[0].A, 12);
+        Assert.Equal(0.2, rule.Movement[3].A, 12);
+        Assert.Equal(-0.2, rule.Movement[1].A, 12);
+        Assert.Equal(-0.2, rule.Movement[4].A, 12);
+    }
+}
