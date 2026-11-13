@@ -249,6 +249,15 @@ The step agent records resolutions here without altering reviewer text.
 | N4-4 | “Independent” is qualified as a byte/type conformance checker, not the production encoder. | this commit |
 | N4-5 | Design-review metadata advanced to rounds 1–4/round 5; fixture `<id>` is defined as the vector id and descriptor as `model-v1`. | this commit |
 
+| R5-1 | Corrected the writer reason: `WriteUInt64`/`WriteInt64` are fixed-width in 3.1.12; only compact `WriteArrayHeader`/`WriteString` and minimal-width `Write(ulong)`/`Write(long)` are prohibited. | this commit |
+| R5-2 | Removed the duplicate `position.encoding` exclusion and stated the position tuple is 11 elements. | this commit |
+| R5-3 | Documentation checklist now explicitly includes `tools/contracts/README.md`, the toolchain row, and the `verify.sh contracts` step. | this commit |
+| R5-4 | Distance bucket is unsigned; only `environment.siteIndex` uses the -1 sentinel; site/position environment indices are `uint64`. | this commit |
+| R5-5 | Regeneration command now sets `MOCASSIN_UPDATE_GOLDENS=1`. | this commit |
+| N5-1 | Fixture example id is `model-ceria-kmc`. | this commit |
+| N5-2 | Checker step names `model-v1.json` and compares `fixtureFormat` metadata. | this commit |
+| R4/N4 overstatement correction | R5-3 now actually adds the checklist entries; the earlier R4-3/N4-1/N4-2/N4-3/N4-5 rows are superseded by the round-5 entries. | this commit |
+
 ## Design-review rounds
 
 ### Review round 1

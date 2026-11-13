@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-08-amend-1` |
 | Parent step | 08 — Model Compilation Pipeline |
-| Status | Re-review required (round 4 notes resolved; round 5 requested) |
+| Status | Re-review required (round 5 notes resolved; round 6 requested) |
 | Branch | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` |
 | Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–4; round 4 Ready with notes; round 5 requested) |
 | Parent audit | `docs/planning/audits/step-08.md` |
@@ -81,11 +81,12 @@ environments array<environment>, positions array<position>, interactionRange arr
 - `cellVectors`: exactly three arrays of three `float64` values.
 - `interactionRange`: exactly four `uint64` values.
 - `site` = `[index uint64, id string, fractional array<float64> (3), stability int64,
-  particleSetId string, environmentIndex int64, positionIndices array<uint64>]`.
-- `environment` = `[index uint64, siteIndex int64, stability int64, allowedParticleMask uint64,
+  particleSetId string, environmentIndex uint64, positionIndices array<uint64>]`.
+- `environment` = `[index uint64, siteIndex int64 (sentinel -1 for the shared stable environment),
+  stability int64, allowedParticleMask uint64,
   updateParticleIndices array<uint64>]`.
-- `position` = `[p uint64, encoding encoding, fractional array<float64> (3), siteIndex uint64,
-  siteId string, stability int64, allowedParticleMask uint64, environmentIndex int64, orbitIndex uint64,
+- `position` is an 11-element array: `[p uint64, encoding encoding, fractional array<float64> (3), siteIndex uint64,
+  siteId string, stability int64, allowedParticleMask uint64, environmentIndex uint64, orbitIndex uint64,
   pairLinks array<pairLink>, clusterLinks array<clusterLink>]`.
 - `encoding` = `[cellA int64, cellB int64, cellC int64, p uint64]`.
 - `pairLink` = `[pairTableIndex uint64, targetP uint64, offset encoding, distanceBucketFm uint64]`.
@@ -133,7 +134,6 @@ Dropped/derived fields and rationale:
 | `collection.ruleIndices` | excluded | Derived from `rule.collectionIndex`; rule array order is canonical. |
 | `rule.directionIndex` | excluded | `directionIndices` carries every merged direction; the dense representative index is not a stable identity. |
 | `direction.index`, `rule.index` | excluded | Array position is the dense index; `ObjectId`/`RuleGeometryId` are the stable identities. |
-| `position.encoding` | excluded | Redundant with `p` and the position array order; it is `(0,0,0,p)` by contract. |
 | `clusterTable.index` | excluded | Array position is the dense index; `ClusterEnergyId` is the stable identity. |
 | pair `CenterSiteId`/`PartnerSiteId` | excluded | The structure site table and site indices carry the identity; duplicate GUIDs would add no information. |
 | `simulation.intent` | excluded | `UseDualDofCorrection`/`UsePreRun` are derived from kind/MCSP and runtime settings; Step 10/11 own the job flags. |
@@ -149,10 +149,10 @@ pre-run, break settings, job counts, seeds, and instructions are excluded.
 ### Canonical encoding
 
 The writer is `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` (internal). It uses
-`MessagePackWriter` over an `IBufferWriter<byte>` only for buffer management and `WriteRaw` for every forced
-header/value. It must not call `WriteArrayHeader`/`WriteString` (they choose fix/array16/str8/str16) or
-`WriteUInt64`/`WriteInt64` (they choose minimal-width integer forms); those would break the required `0xdd`,
-`0xdb`, `0xcf`, and `0xd3` bytes. All fixed headers and scalar bytes are
+`MessagePackWriter` over an `IBufferWriter<byte>` for buffer management, `WriteUInt64`/`WriteInt64`/`WriteDouble`
+for the fixed-width scalars, and `WriteRaw` for the forced `0xdd`/`0xdb`/`0xc6`/`0xc3`/`0xc2`/`0xc0` headers.
+It must not call the compact `WriteArrayHeader`/`WriteString` convenience methods or the minimal-width
+`Write(ulong)`/`Write(long)` overloads; those would break the required header bytes. All fixed headers and scalar bytes are
 written through `WriteRaw`/`Advance` exactly as in the table below. The byte rules are:
 
 | Value | Encoding |
@@ -170,9 +170,8 @@ written through `WriteRaw`/`Advance` exactly as in the table below. The byte rul
 - The per-field table above is authoritative. As a summary: non-negative counts, dense indices, particle
   masks, state codes, tracker indices, jump counts/offsets/mappings, distance buckets, cluster canonical
   tuples/mappings, and interaction-range cell counts are `uint64`. Signed `int64` is used only for spatial
-  cell offsets, stability/kind enum values, and the `-1` stable-environment sentinel in
-  `site.environmentIndex`/`position.environmentIndex`/`environment.siteIndex`. Pair/cluster site indices are
-  non-negative and therefore `uint64`.
+  cell offsets, stability/kind enum values, and the -1 sentinel in `environment.siteIndex` only.
+  Pair/cluster site indices are non-negative and therefore `uint64`.
 - All projected floating-point values are `float64`. The language-neutral quantization operation is:
   `scaled = value * 1e12`; if `scaled >= 0`, `rounded = floor(scaled + 0.5)`, else
   `rounded = ceil(scaled - 0.5)`; `result = rounded / 1e12`; `result == 0` is normalized to `+0.0`.
@@ -185,6 +184,7 @@ written through `WriteRaw`/`Advance` exactly as in the table below. The byte rul
   `SHA-256("mocassin/model-signature/v1" || 0x00 || projection)`.
 - `StaticCorrection` is absent from `model-v1`: v1 stores `null` and Step 15 uses the dynamic S2 path. If a
   static correction lands, a new projection version adds a `staticCorrection` field.
+- The distance bucket is unsigned; only signed `movement` and the signed rule charge vector carry physics.
 - No compression, timestamps, diagnostics, timings, cache state, file names, or display-only distances
   (`DistanceAngstrom`, `pathLength`) are encoded. Only the integer distance bucket is signed. The raw
   display distance and path length are inspection-only.
@@ -200,7 +200,7 @@ canonical MessagePack projection bytes) and `tests/contracts/projections/<id>.js
 ```json
 {
   "fixtureFormat": "canonical-projection-v1",
-  "id": "ceria-kmc",
+  "id": "model-ceria-kmc",
   "descriptor": "model-v1",
   "signatureHex": "…",
   "projectionSha256": "…"
@@ -213,7 +213,7 @@ canonical MessagePack projection bytes) and `tests/contracts/projections/<id>.js
 compiler); regenerate with:
 
 ```sh
-dotnet test src/dotnet/Mocassin.Compilation.Tests/Mocassin.Compilation.Tests.csproj -c Release \
+MOCASSIN_UPDATE_GOLDENS=1 dotnet test src/dotnet/Mocassin.Compilation.Tests/Mocassin.Compilation.Tests.csproj -c Release \
   --filter FullyQualifiedName~ProjectionFixtureTests.WriteProjectionFixtures
 ```
 
@@ -229,12 +229,13 @@ and scalar types) in the existing `contracts/generated/signatures/model-v1.json`
 projection file. The Python checker
 `tools/contracts/check_model_projection.py`:
 
-1. reads the descriptor and each `.bin` fixture;
+1. reads `contracts/generated/signatures/model-v1.json` and each `.bin` fixture;
 2. decodes the MessagePack tree with `msgpack` 1.2.4 (declared in `tools/contracts/requirements.txt`);
 3. walks the descriptor to recover scalar types (uint64/int64/float64) and re-encodes the tree using fixed-
    width `struct.pack` headers and the byte rules above;
 4. compares the re-encoded bytes with the fixture, recomputes the domain-separated signature and
-   `projectionSha256`, and compares both with the `.json` metadata and `signature-vectors.json`.
+   `projectionSha256`, and compares both, plus `fixtureFormat`, with the `.json` metadata and
+   `signature-vectors.json`.
 
 `tools/contracts/requirements.txt` is added with `msgpack==1.2.4`. `tools/verify.sh run_contracts` installs it
 with `python -m pip install -r tools/contracts/requirements.txt` before running
