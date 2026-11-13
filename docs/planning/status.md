@@ -98,9 +98,9 @@ Step 08 — Model Compilation Pipeline is in implementation. The design was acce
 `main` as `51b99f0` (`[skip ci]`, no workflow run); the reviewed design freeze is `b84cead`, review record
 `1954510`. The step branch is `step/08-model-compilation-pipeline`; the first seven features are squashed with
 local `dotnet`, `structure`, `api`, `contracts`, and `docs` gates green and no per-feature CI run. The
-closeout feature is blocked on a Step 08 amendment: the accepted global S0/S2 conservation rule rejects the
-`vehicle5` and `interstitialcy5` sample mechanisms, which fail closed with `CMP005`. No closeout CI or audit
-request has been created. The design fixes the pure
+closeout feature is blocked on a Step 08 amendment: `vehicle5` was corrected to alternating donor/acceptor
+groups and now compiles, while `interstitialcy5` still cannot balance its three stable sites under the accepted
+global S0/S2 conservation rule and fails closed with `CMP005`. No closeout CI or audit request has been created. The design fixes the pure
 synchronous compiler API, the Step 07 validation boundary, the compiled/parameterized signature split, the
 `CMP` diagnostic family, per-compilation caching, and Step 12 ownership of `mocassin compile`. The human owner
 explicitly waived the roadmap §3.1 split trigger for this 4–6 person-week, eight-feature step on 2026-11-12;

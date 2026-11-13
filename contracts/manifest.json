@@ -2058,6 +2058,14 @@
           "signatureHex": "a28db57b7ccfd8af29ab2600dd36ab1b84a14f6bc654e3ed226b7cb75b5b357c",
           "inspectionJsonSha256": "e20ab855588d2a2d73dcbd10b76af45299a059a0a606da0f0042dd6a01471a01",
           "description": "samples/simulations/ceria-kmc.mocprj with a KMC simulation referencing the first kinetic transition"
+        },
+        {
+          "id": "model-vehicle5",
+          "signature": "model",
+          "domainPrefix": "mocassin/model-signature/v1",
+          "projectionType": "ModelSignatureV1",
+          "signatureHex": "91cae9a4d68bbed2645abd5e41ea9ce3c2d5d021f465c1bfca9456eaf441fdcd",
+          "description": "samples/transitions/vehicle5.mocprj with a KMC simulation referencing the corrected forward vehicle transition"
         }
       ]
     },

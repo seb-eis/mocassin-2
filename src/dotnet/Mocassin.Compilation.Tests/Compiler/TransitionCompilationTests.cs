@@ -78,18 +78,31 @@ public sealed class TransitionCompilationTests
 }
 
 /// <summary>
-/// Documents the open complex-mechanism conservation limitation.
+/// Covers the corrected vehicle sample and the remaining interstitialcy limitation.
 /// </summary>
 [Trait("Tier", "PR-fast")]
 public sealed class ComplexMechanismLimitationTests
 {
-    [Theory]
-    [InlineData("samples/transitions/vehicle5.mocprj")]
-    [InlineData("samples/transitions/interstitialcy5.mocprj")]
-    public async Task ComplexSamplesFailClosedUntilTheConservationAmendment(string sample)
+    [Fact]
+    public async Task CorrectedVehicleCompilesUnidirectionalRules()
     {
         var project = StageTestSupport.WithFirstSimulationTransition(
-            await StageTestSupport.LoadProjectAsync(sample),
+            await StageTestSupport.LoadProjectAsync("samples/transitions/vehicle5.mocprj"),
+            kinetic: true);
+
+        var result = new ModelCompiler().Compile(project);
+
+        Assert.True(result.IsSuccess, string.Join(Environment.NewLine, result.Diagnostics.Select(static item => item.ToString())));
+        Assert.NotEmpty(result.Model!.Transitions.Rules);
+        Assert.Equal(0, result.Model.Transitions.InverseRuleCount);
+        Assert.Equal(0, result.Model.Transitions.Collections[0].DirectionIndices.Length % 1);
+    }
+
+    [Fact]
+    public async Task InterstitialcyStillFailsClosedUntilTheConservationAmendment()
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync("samples/transitions/interstitialcy5.mocprj"),
             kinetic: true);
 
         var result = new ModelCompiler().Compile(project);
@@ -97,6 +110,5 @@ public sealed class ComplexMechanismLimitationTests
         Assert.False(result.IsSuccess);
         Assert.Null(result.Model);
         Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == "CMP005");
-        Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error);
     }
 }

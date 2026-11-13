@@ -42,11 +42,13 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
   until its feature lands, so the default compiler returns `Failed` with no model instead of a fabricated
   success. `CompiledModel` currently carries the format and provenance header; later features add the immutable
   component tables.
-- **Complex mechanism conservation limitation.** The accepted global S0/S2 mass rule rejects the
-  `vehicle5` and `interstitialcy5` sample mechanisms, whose authored explicit-reverse groups do not conserve
-  the stable-endpoint symbol multiset. They fail closed with `CMP005`; no golden model or closeout was
-  fabricated. The ceria, barium-zirconate, and MMC goldens compile and are pinned. A Step 08 amendment is
-  required to define the intended complex-mechanism conservation rule before the step can freeze for audit.
+- **Vehicle sample correction and interstitialcy limitation.** `vehicle5.mocprj` originally repeated the
+  `A -> V` and `B -> V` groups on both sides of the vehicle, producing `S0 = [A, A, void, B, B]` and
+  `S2 = [V, V, void, V, V]`. The sample now authors the conserving alternating groups
+  `[A -> V, V -> A, AB -> void, B -> V, V -> B]` and a separate reverse chain, so the vehicle compiles
+  unidirectional rules and has a pinned signature. `interstitialcy5` still has three stable sites that can
+  only swap `O`/`V` in an odd number of directions, so its symbol inventory cannot balance under the accepted
+  conservation rule; it fails closed with `CMP005`. No interstitialcy golden or closeout was fabricated.
 - **compiler-core local evidence (2026-11-13).** `./tools/verify.sh dotnet` passes (932 tests, 0 failed),
   `./tools/verify.sh structure` passes, `./tools/verify.sh api` passes with the refreshed
   `Mocassin.Compilation` ApiCompat baseline, `./tools/verify.sh contracts` passes, and
@@ -60,9 +62,9 @@ The first seven features and the ceria/BaZrO₃/MMC goldens are complete and gre
 freeze for audit yet because the accepted global mass-conservation rule in §8.2 rejects the accepted
 `vehicle5` and `interstitialcy5` sample mechanisms:
 
-- `samples/transitions/vehicle5.mocprj` and `samples/transitions/interstitialcy5.mocprj` compile to
-  `CMP005` (`mass ...`), because their authored explicit-reverse chain groups do not preserve the non-void
-  symbol multiset between S0 and S2. `ComplexMechanismLimitationTests` pins this fail-closed behavior.
+- The original `vehicle5` and `interstitialcy5` groups did not preserve the non-void symbol multiset between
+  S0 and S2. The vehicle sample has been corrected to alternating donor/acceptor groups and now compiles;
+  `interstitialcy5` still fails closed with `CMP005` and is pinned by `ComplexMechanismLimitationTests`.
 - The Step 04 samples are preview-valid and explicitly defer rule/conservation semantics to Step 08.
 - No vehicle/interstitialcy golden model, closeout evidence, closeout CI run, or audit record was created.
   Doing so would either fake a non-conserving mechanism or silently change the accepted conservation rule.

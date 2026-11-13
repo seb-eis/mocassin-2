@@ -35,6 +35,20 @@ public sealed class GoldenModelTests
 [Trait("Tier", "PR-medium")]
 public sealed class GoldenSampleTests
 {
+    [Fact]
+    public async Task VehicleCompilesToAStableSignature()
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync("samples/transitions/vehicle5.mocprj"),
+            kinetic: true);
+
+        var result = new ModelCompiler().Compile(project);
+
+        Assert.True(result.IsSuccess, string.Join(Environment.NewLine, result.Diagnostics.Select(static item => item.ToString())));
+        Assert.Equal("91cae9a4d68bbed2645abd5e41ea9ce3c2d5d021f465c1bfca9456eaf441fdcd", result.Model!.ModelSignature);
+        Assert.Equal(0, result.Model.Transitions.InverseRuleCount);
+    }
+
     [Theory]
     [InlineData("samples/ceria/ceria.mocprj", false, "2e1d56fb6274492c404c8277dccb8d6014b05fd01975bfa162613beb7c009217")]
     [InlineData("samples/barium-zirconate/barium-zirconate.mocprj", false, "fb8462ca13be8dace30eb3eff2f310e42e8e6cbf57b9f71f927d95c3b9426e83")]
