@@ -9,14 +9,14 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
+- **Status:** In progress
+- **Step branch:** `step/08-model-compilation-pipeline`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — [review record](../reviews/step-08.md) `195451021031272af96ee1b2ca600d4c8cd83c2c`; accepted by the human owner 2026-11-13 (awaiting docs merge/step start)
-- **Last updated:** 2026-11-12
+- **Design review:** Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — [review record](../reviews/step-08.md) `195451021031272af96ee1b2ca600d4c8cd83c2c`; accepted by the human owner 2026-11-13
+- **Last updated:** 2026-11-13
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
