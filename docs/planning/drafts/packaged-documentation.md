@@ -30,10 +30,10 @@ must be accepted before Step 30/31 are frozen.
 
 ## Current facts
 
-- Avalonia is pinned in `Directory.Packages.props` at **11.3.22** for `Avalonia`, `Avalonia.Desktop`,
+- Avalonia is pinned in `Directory.Packages.props` at **12.1.6** for `Avalonia`, `Avalonia.Desktop`,
   `Avalonia.Fonts.Inter`, and `Avalonia.Themes.Fluent`.
 - `docs/planning/01-target-architecture.md` and
-  [ADR 0003](../adr/0003-avalonia-mvvm-stack.md) also say **Avalonia 11.x**.
+  [ADR 0003](../adr/0003-avalonia-mvvm-stack.md) say **Avalonia 12.x**.
 - Avalonia 12 includes the MIT-licensed `Avalonia.Controls.WebView` package with:
   - `NativeWebView` for embedded web content;
   - `NativeWebDialog` for a separate web dialog;
@@ -44,7 +44,7 @@ must be accepted before Step 30/31 are frozen.
   - macOS: WKWebView is built in.
   - Linux: WebKitGTK 4.1 + libsoup3 + GTK3 are the baseline; WPE WebKit is optional;
     `NativeWebDialog` always uses WebKitGTK. (`NativeWebView` falls back to WebKitGTK when WPE is absent.)
-- The app projects are still placeholders, so an Avalonia 12 upgrade before Step 23 is inexpensive.
+- The app projects are still placeholders; the Avalonia 12.x pin is already applied before Step 23.
 - The current `zensical.toml` loads KaTeX from `unpkg.com`; packaged docs must vendor KaTeX, fonts, search,
   and any other runtime asset.
 
@@ -84,7 +84,6 @@ must be accepted before Step 30/31 are frozen.
 
 **Phase 2 — embedded viewer**
 
-- Upgrade the UI stack to Avalonia 12 before Step 23 expands the app.
 - Use `NativeWebView` with a virtual origin / request interception mapping to the bundle.
 - Fall back to a loopback-only HTTP server if interception is not available in the pinned version.
 - Use `NativeWebDialog` for a standalone Help window or Linux fallback.

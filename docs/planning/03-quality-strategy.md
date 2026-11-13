@@ -382,6 +382,9 @@ Contract tests use files produced by the real writers and never share reader/wri
 - Automated accessibility-tree checks run in headless tests; manual screen-reader checks (NVDA/Orca/VoiceOver)
   are part of the release checklist.
 - Screenshot tests for the shell, each editor, and the 3D viewport on Windows/Linux/macOS (tolerance-based).
+- The Step 24 editor-layout spike produces owner-reviewable POCs and screenshot baselines for each option. The
+  chosen layout gets headless selection/keyboard/virtualization tests; no data-grid dependency is added without
+  an ADR.
 - Commands are tested through their observable effects: project state, diagnostics, generated files, and
   navigation — not through mock verification.
 - Manual smoke checklist per release: create project, add each object type, validate, parameterize, build,
