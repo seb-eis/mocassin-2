@@ -202,7 +202,21 @@ The step agent records resolutions here without altering reviewer text.
 
 | Finding | Resolution | Commit |
 | --- | --- | --- |
-| — | — | — |
+| F1 | The amendment now lists every nested field, field order, and type for particles, structure, energy, transitions, and simulations; no `array<...>` placeholders remain. | this commit |
+| F2 | The encoding table fixes array `0xdd`+u32, str `0xdb`+u32, bin `0xc6`+u32, uint64 `0xcf`+8, int64 `0xd3`+8, float64 `0xcb`+8, bool `0xc3/0xc2`, and nil `0xc0`; no maps are used in v1. | this commit |
+| F3 | The float64 rule now specifies 12-decimal `MidpointRounding.AwayFromZero` quantization, `-0.0` normalization, and NaN/Inf rejection. | this commit |
+| F4 | `CompiledModelJson` gains a complete `projectionInput` object; Python re-encodes it, `msgpack` is declared in `tools/contracts/requirements.txt`, and vectors cover ceria, MMC, vehicle, and interstitialcy. | this commit |
+| F5 | A descriptor-binding test compares recursive `projectionInput` keys/types with the generated manifest descriptor. | this commit |
+| F6 | The integration plan now includes closeout evidence refresh, `verify.sh all --require`, one replacement closeout CI run, the merge-tree rule, the combined commit, and re-audit of A1/A3–A9. | this commit |
+| F7 | Dependency wording is corrected: no project references MessagePack yet; the .NET package is added and the Python `msgpack` dev requirement is declared. | this commit |
+| F8 | Bool/nil encoding and optional chiral-partner string-vs-nil are explicit and covered by tests. | this commit |
+| F9 | Energy values, runtime settings, diagnostics, timings, cache state, file names, and display-only distances are explicitly excluded and tested. | this commit |
+| F10 | `CanonicalProjectionWriter` is stated to be internal; no public API or ApiCompat change. | this commit |
+| F11 | Golden bookkeeping now names ceria, MMC, vehicle, interstitialcy, and BaZrO₃ consistently. | this commit |
+| F12 | The audit section now records `Fixes required (A1–A9)`. | this commit |
+| N1 | The inherited `../audits/step-08.md` step-page link will be fixed in the resolution/status commit. | this commit |
+| N2 | The `model-v1` rationale cites the pre-release `02-data-contracts.md` §3.3 precedent. | this commit |
+| N3 | Step 11 remains the production Rust encoder/vector owner; Python is the independent pre-Step-11 check. | this commit |
 
 ## Design-review rounds
 

@@ -6,9 +6,9 @@
 | --- | --- |
 | Amendment ID | `step-08-amend-1` |
 | Parent step | 08 — Model Compilation Pipeline |
-| Status | Planned |
+| Status | Re-review required |
 | Branch | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` |
-| Design review | `docs/planning/reviews/step-08-amend-1.md` |
+| Design review | `docs/planning/reviews/step-08-amend-1.md` (round 1 Changes required; re-review requested) |
 | Parent audit | `docs/planning/audits/step-08.md` |
 | Integration commit | — |
 | Combined audit commit | — |
@@ -44,15 +44,18 @@ amendment is integrated before the combined freeze and re-audit.
 - No change to the `ParameterizedModel` payload (Step 09), `.msl` SQLite schema (Step 11), or solver
   behaviour.
 - No change to the compiled geometry, rules, conservation, tracking, or simulation semantics.
-- No new dependency outside the centrally pinned `MessagePack` 3.1.12 package.
+- No new .NET dependency outside the centrally pinned `MessagePack` 3.1.12 package; the Python checker adds the
+  existing `msgpack` development dependency to `tools/contracts/requirements.txt`.
 
 ## Design
 
 ### Manifest projection
 
 `signatures.model.fields` becomes an explicit, ordered projection. `object` fields are MessagePack arrays in
-manifest field order; `array` fields are MessagePack arrays; only `map` fields use MessagePack maps. The
-top-level projection is:
+manifest field order; `array` fields are MessagePack arrays; `map` fields are the only MessagePack maps and
+none are used in v1. Every nested object is an array with the field order below.
+
+Top-level projection (MessagePack array of 9 values):
 
 | # | Field | Type |
 | ---: | --- | --- |
@@ -60,47 +63,119 @@ top-level projection is:
 | 1 | `symmetryContractVersion` | `string` |
 | 2 | `spaceGroupDataVersion` | `string` |
 | 3 | `spaceGroupDataSha256` | `string` |
-| 4 | `particles` | `array` of `{index uint64, id string, symbol string, charge float64, isVacancy bool}` |
-| 5 | `structure` | `{cellVectors array<array<float64>>, volume float64, sites array<...>, environments array<...>, positions array<...>, interactionRange array<int64>}` |
-| 6 | `energy` | `{pairGeometries array<...>, pairTables array<...>, clusterTables array<...>}` |
-| 7 | `transitions` | `{collections array<...>, directions array<...>, rules array<...>, globalTrackers array<...>, staticTrackers array<...>, jumpCounts array<int64>, jumpOffsets array<int64>, jumpMappings array<int64>}` |
-| 8 | `simulations` | `array` of `{id string, kind int64, activeCollections array<uint64>, globalTrackers array<uint64>, staticTrackers array<uint64>}` |
+| 4 | `particles` | `array<particle>` |
+| 5 | `structure` | `structure` |
+| 6 | `energy` | `energy` |
+| 7 | `transitions` | `transitions` |
+| 8 | `simulations` | `array<simulation>` |
 
-The implementation adds the exact nested field lists to the manifest. The current compiled-model record
-fields define them:
+#### Particles
 
-- `CompiledStructureModel`: cell vectors, volume, sites, environments, positions, interaction range.
-- `CompiledEnergyModel`: directed pair geometry IDs/energy IDs/indices/offsets/buckets/chirality, pair table
-  IDs/counts, cluster energy IDs/geometry/occupation codes/tuples/expansions/particle mapping.
-- `CompiledTransitionModel`: collection identity/kind/mobile mask/direction and rule indices, direction
-  stable ID/collection/start/path/movement/path vector/inverse/equivalent starts, rule stable ID/collection/
-  directions/state codes/movement/charge vector/tracker order/inverse, tracker definitions, jump tables.
-- `CompiledSimulation`: ID, kind, active collections, tracker indices. Runtime settings and energy/frequency
-  values are excluded.
+`particle` = `[index uint64, id string, symbol string, charge float64, isVacancy bool]`.
+
+#### Structure
+
+`structure` = `[cellVectors array<array<float64>>, volume float64, sites array<site>,
+environments array<environment>, positions array<position>, interactionRange array<int64>]`.
+
+- `cellVectors`: exactly three arrays of three `float64` values.
+- `interactionRange`: exactly four `int64` values.
+- `site` = `[index uint64, id string, fractional array<float64> (3), stability int64,
+  particleSetId string, environmentIndex int64, positionIndices array<uint64>]`.
+- `environment` = `[index uint64, siteIndex int64, stability int64, allowedParticleMask uint64,
+  updateParticleIndices array<uint64>]`.
+- `position` = `[p uint64, encoding encoding, fractional array<float64> (3), siteIndex uint64,
+  siteId string, stability int64, allowedParticleMask uint64, environmentIndex int64, orbitIndex uint64,
+  pairLinks array<pairLink>, clusterLinks array<clusterLink>]`.
+- `encoding` = `[cellA int64, cellB int64, cellC int64, p uint64]`.
+- `pairLink` = `[pairTableIndex uint64, targetP uint64, offset encoding, distanceBucketFm int64]`.
+- `clusterLink` = `[clusterTableIndex uint64, siteSlot int64]`.
+
+#### Energy
+
+`energy` = `[pairGeometries array<pairGeometry>, pairTables array<pairTable>,
+clusterTables array<clusterTable>]`.
+
+- `pairGeometry` = `[geometryId string, energyId string, pairTableIndex uint64, centerSiteIndex uint64,
+  centerP uint64, partnerSiteIndex uint64, partnerP uint64, offset encoding, distanceBucketFm int64,
+  isChiral bool, chiralPartnerGeometryId string|nil]`.
+- `pairTable` = `[index uint64, energyId string, particleCount uint64]`. Energy values are excluded.
+- `clusterTable` = `[clusterEnergyId string, clusterId string, centerSiteIndex uint64, centerP uint64,
+  sitePIndices array<uint64>, geometryEncodings array<encoding>, occupations array<occupation>,
+  particleTableMapping array<int64>]`. Cluster energy values are excluded.
+- `occupation` = `[canonicalCode uint64, canonicalTuple array<int64>,
+  expansions array<[occupationCode uint64, permutationIndex int64]>]`.
+
+#### Transitions
+
+`transitions` = `[collections array<collection>, directions array<direction>, rules array<rule>,
+globalTrackers array<globalTracker>, staticTrackers array<staticTracker>, jumpCounts array<int64>,
+jumpOffsets array<int64>, jumpMappings array<int64>]`.
+
+- `collection` = `[index uint64, transitionKind int64, transitionId string, kind int64,
+  mobileParticleMask uint64, directionIndices array<uint64>]`.
+- `direction` = `[objectId string, collectionIndex uint64, positionId uint64, path array<encoding>,
+  movement array<array<float64>> (3), pathVector array<float64> (3), pathLength float64,
+  isInverse bool, equivalentStartPositions array<uint64>]`.
+- `rule` = `[ruleGeometryId string, collectionIndex uint64, directionIndices array<uint64>,
+  state0 uint64, state1 uint64, state2 uint64, movement array<array<float64>> (3),
+  chargeTransportVector array<float64> (3), trackerOrder array<uint64>, isInverse bool]`.
+  The default attempt frequency is a constant and is excluded.
+- `globalTracker` = `[index uint64, collectionIndex uint64, particleIndex uint64]`.
+- `staticTracker` = `[index uint64, positionIndex uint64, particleIndex uint64]`.
+
+#### Simulations
+
+`simulation` = `[id string, kind int64, activeCollections array<uint64>,
+globalTrackers array<uint64>, staticTrackers array<uint64>]`. Runtime settings, temperatures, MCSP, field,
+pre-run, break settings, job counts, seeds, and instructions are excluded.
 
 ### Canonical encoding
 
-- Add `MessagePack` 3.1.12 to `Mocassin.Compilation`. The package is MIT-compatible, centrally pinned, and
-  already used by the solution; this is not a `Mocassin.Contracts` dependency.
-- Implement `CanonicalProjectionWriter` using `MessagePackWriter` for array/string/bin framing and
-  fixed-width raw integers for canonical `uint64`/`int64` values.
-- Encode every projection as a MessagePack array in manifest order; encode optional values as `nil`; encode
-  `float64` values with `-0.0` normalized to `+0.0`; reject non-finite required values.
-- Keep the SHA-256 domain separation `mocassin/model-signature/v1 || 0x00 || projection`.
-- Remove the temporary `BinaryWriter` projection. There is no compatibility shim; no compiled model or
-  `.msl` package has been released.
+The writer is `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` (internal). It uses the centrally
+pinned `MessagePack` 3.1.12 package for MessagePack framing and writes canonical fixed-width values. The byte
+rules are:
 
-### Cross-language evidence
+| Value | Encoding |
+| --- | --- |
+| array | `0xdd` + 4-byte big-endian count |
+| map | not used in v1 |
+| string | `0xdb` + 4-byte big-endian UTF-8 byte length + UTF-8 bytes |
+| binary | `0xc6` + 4-byte big-endian length + bytes |
+| `uint64` | `0xcf` + 8-byte big-endian value |
+| `int64` | `0xd3` + 8-byte big-endian two's-complement value |
+| `float64` | `0xcb` + 8-byte big-endian IEEE-754 bits |
+| `bool` | `0xc3` (true) / `0xc2` (false) |
+| nil | `0xc0` |
 
-- Extend `tools/contracts/generate.py` to emit the model projection descriptor from the manifest.
-- Add a Python canonical encoder/checker (`msgpack` for framing plus fixed-width integer headers) that reads
-  the generated descriptor and compares a real ceria projection digest to the C# signature vector.
-- Keep the C# golden signature and JSON inspection hash in `tests/contracts/signature-vectors.json`.
+- Every count and non-negative index is `uint64`; stability/kind/spatial component values are `int64`.
+- All floating-point values are `float64`, quantized to 12 decimal places with
+  `MidpointRounding.AwayFromZero`, with `-0.0` normalized to `+0.0`. NaN and Inf are rejected.
+- Every field is present. Optional strings use `nil`; no field is omitted.
+- The projection is the top-level array above. The signature is
+  `SHA-256("mocassin/model-signature/v1" || 0x00 || projection)`.
+- No compression, timestamps, diagnostics, timings, cache state, file names, or display-only distances
+  (for example `DistanceAngstrom`) are encoded. Only the integer distance bucket is signed.
+
+### Projection input and cross-language evidence
+
+`CompiledModelJson.Write` (`compiled-inspection-v1`) gains a `projectionInput` object containing exactly the
+logical tree above: top-level provenance, arrays, and nested objects with the same field names and order. It
+contains no signature, timings, diagnostics, cache state, or file names. The Python checker parses this object
+and re-encodes it with the canonical byte rules; it does not infer missing fields.
+
+`tools/contracts/generate.py` emits the manifest projection descriptor. A C# test serializes `projectionInput`
+and compares its recursive key order/types against that descriptor, so a manifest edit that the encoder misses
+fails a test. The Python checker uses the `msgpack` 1.2.4 package for framing primitives plus fixed-width
+integer/double headers, declared in `tools/contracts/requirements.txt`. Coverage includes ceria, MMC, vehicle,
+and interstitialcy projections; the C# golden tests pin the same set plus BaZrO₃. Step 11 remains the owner of
+the production Rust encoder and vector; Python is an independent pre-Step-11 check.
 
 ### Versioning
 
 Keep `signatures.model` / `ModelSignatureV1` / `model-v1`: this is the first definition of the compiled-model
-projection and no `.msl` package has been released. The generated descriptor and golden vectors are updated;
+projection and no `.msl` package has been released (`02-data-contracts.md` §3.3 records the same pre-release
+precedent for `model_signature`). The generated descriptor and golden vectors are updated;
 Step 11 reuses the same projection. Any later released-format change requires a version bump and an ADR.
 
 ## API and contract impact
@@ -108,8 +183,9 @@ Step 11 reuses the same projection. Any later released-format change requires a 
 - `contracts/manifest.json` and generated `contracts/generated/signatures/model-v1.json` change.
 - `tests/contracts/signature-vectors.json` changes.
 - `ModelSignatureProjection` remains the public signing entry point; its bytes and signature values change.
-- No PublicAPI change; no ApiCompat baseline change. The `MessagePack` package reference is a new project
-  dependency and is covered by the licence/vulnerability audit.
+- No public API change; `CanonicalProjectionWriter` is internal and no ApiCompat baseline changes. The
+  `MessagePack` package reference is a new project dependency and is covered by the licence/vulnerability
+  audit.
 - `docs/reference/contracts.md`/`docs/development/compilation-pipeline.md` describe the projection and the
   independent vector.
 
@@ -135,9 +211,12 @@ projection.
 | Test | Assertion |
 | --- | --- |
 | Manifest schema validation | Every projection field has a supported type and order; generator check passes |
-| C# canonical encoding | Format version is uint64; strings/bin/arrays use MessagePack; -0.0 normalized |
-| Independent Python vector | Python re-encoding of the ceria projection matches the C# signature |
+| Descriptor binding | Recursive keys/types of `projectionInput` match the generated manifest descriptor |
+| C# canonical encoding | Format version is uint64; strings/bin/arrays use fixed MessagePack headers; bool/nil are `0xc3`/`0xc2`/`0xc0`; -0.0 normalized |
+| Optional values | A chiral pair with a partner and one without encode string vs nil reproducibly |
+| Independent Python vectors | Python re-encoding matches C# for ceria, MMC, vehicle, and interstitialcy |
 | Determinism | Two compiles produce identical bytes/signature/JSON |
+| Display-only exclusion | Changing a display distance without changing its bucket does not change the signature |
 | Scope exclusion | Runtime/temperature and energy-value edits do not change the signature |
 | Golden refresh | Ceria/MMC/vehicle/interstitialcy signatures are pinned |
 | Cache integrity | A projection-keyed cache entry with the wrong shape is rejected with CMP012 |
@@ -171,13 +250,15 @@ projection.
 - Parent step branch: `step/08-model-compilation-pipeline`
 - Approval: pending
 - Squash commit: pending
-- Parent audit request updated: pending
+- Parent audit request updated: after integration; refresh `docs/planning/closeout/step-08.json`, run
+  `./tools/verify.sh all --require`, dispatch one replacement closeout CI run, and apply the merge-tree rule if
+  `main` moves
 - Combined frozen commit: pending
 
 ## Audit
 
 - Parent audit record: `docs/planning/audits/step-08.md`
-- Audit verdict: Fixes required (A2)
+- Audit verdict: Fixes required (A1–A9)
 - Merge commit: pending
 - Tag: pending
 - Post-merge fallback required: no
