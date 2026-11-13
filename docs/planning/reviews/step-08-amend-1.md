@@ -804,3 +804,172 @@ sentence, state the fixture write mode and metadata comparison, and make `siteSl
 `uint64` or amend ADR 0010), then request a fresh re-review at the new frozen commit if the owner requires the
 Minor corrections to be re-verified. Integrate the amendment, refresh the closeout evidence and CI, and re-run
 the parent audit at the combined commit with A1, A3–A9, and m1–m7 in scope.
+
+### Review round 5
+
+#### Independence and frozen state
+
+Fresh context: I did not author or implement Step 08 or this amendment and have no shared conversation with the
+planner or implementor. I reviewed the round-5 delta at the frozen tree
+`b7105461bb4e8a36a0e7cff5688a35dd945d5ea2` on `step/08-model-compilation-pipeline`; the working tree was clean.
+The design content is `270cc075993aa7e9019b1c1e9b78f9c9587647b2`: `git diff --stat 270cc07 b710546` is the
+single-line `Reviewed commit` metadata change in this record, so the design delta reviewed is
+`26a17ce..270cc07`. The parent audit is still `Fixes required` (A1–A9); the amendment addresses only A2.
+
+Round 5 is a narrow pass over the round-4 Minors and Notes. It does remove the duplicate descriptor path, add the
+`MOCASSIN_UPDATE_GOLDENS` write gate and the `.json` metadata comparison, make `interactionRange`,
+`clusterLink.siteSlot`, and expansion `permutationIndex` `uint64`, remove the "signed site indices" wording, add
+the `direction.index`/`rule.index` rationale rows, and advance the request/status/index metadata. Three round-4
+items are not actually applied: the `WriteUInt64`/`WriteInt64` rationale is inverted (R5-1), the new
+`position.encoding` rationale contradicts the `position` tuple (R5-2), and the Documentation checklist still omits
+the README/toolchain rows the body requires (R5-3). The per-field type table itself is now internally consistent;
+the remaining type contradictions are in the surrounding prose (R5-4). No Blocker or Major remains: the marker
+table and the authoritative per-field table still determine the bytes, including for `position.encoding`, because
+the table lists it.
+
+#### Commands and results
+
+```text
+$ git rev-parse HEAD
+b7105461bb4e8a36a0e7cff5688a35dd945d5ea2
+
+$ git status --short
+(clean)
+
+$ git branch --show-current
+step/08-model-compilation-pipeline
+
+$ git log --oneline -5
+b710546 docs: freeze step 08 amendment round 5 review [skip ci]
+270cc07 docs: clear step 08 amendment round 4 notes [skip ci]
+e211d99 docs: record step 08 amendment 1 round 4 design review [skip ci]
+26a17ce docs: freeze step 08 amendment round 4 review [skip ci]
+4036100 docs: clear step 08 amendment round 3 notes [skip ci]
+
+$ git diff --stat 270cc07 b710546
+ docs/planning/reviews/step-08-amend-1.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+$ git diff --stat 26a17ce 270cc07
+ docs/planning/amendments/README.md                 |   2 +-
+ .../step-08-amend-1-canonical-projection.md        |  43 +++--
+ docs/planning/reviews/step-08-amend-1.md           | 198 +++++++++++++++++++++
+ 3 files changed, 224 insertions(+), 19 deletions(-)
+
+$ python tools/contracts/generate.py --check
+Contract artifacts are current (18 files)
+
+$ python tools/check_docs_links.py
+Documentation links OK (152 files scanned).
+
+$ python tools/check_process_consistency.py
+Process consistency: OK
+
+$ grep -n "model-v1.projection" docs/planning/amendments/step-08-amend-1-canonical-projection.md
+(no matches)
+
+$ grep -n "MOCASSIN_UPDATE_GOLDENS" docs/planning/amendments/step-08-amend-1-canonical-projection.md
+220:`ProjectionFixtureTests` writes only when `MOCASSIN_UPDATE_GOLDENS=1`; in a normal test run it compares the
+
+$ grep -n "position.encoding\|Only the integer distance bucket\|environmentIndex int64" \
+    docs/planning/amendments/step-08-amend-1-canonical-projection.md
+84:  particleSetId string, environmentIndex int64, positionIndices array<uint64>]`.
+88:  siteId string, stability int64, allowedParticleMask uint64, environmentIndex int64, orbitIndex uint64,
+136:| `position.encoding` | excluded | Redundant with `p` and the position array order; it is `(0,0,0,p)` by contract. |
+189:  (`DistanceAngstrom`, `pathLength`) are encoded. Only the integer distance bucket is signed. The raw
+```
+
+MessagePack 3.1.12 API check (`/tmp/opencode/mp`, not committed; round-4 download reused):
+
+```text
+$ sed -n 1374,1388p lib/net8.0/MessagePack.xml
+TryWriteUInt64 ... "The MessagePackCode.UInt64 encoding is always used, even if the value could be encoded in
+fewer bytes."
+
+$ sed -n 1236,1249p lib/net8.0/MessagePack.xml
+TryWriteInt64 ... "The MessagePackCode.Int64 encoding is always used, even if the value could be encoded in
+fewer bytes."
+
+$ sed -n 3120,3130p lib/net8.0/MessagePack.xml
+Write(UInt64) ... "Writes an UInt64 using a built-in 1-byte code when within specific MessagePack-supported
+ranges, or the most compact of UInt8, UInt16, UInt32, Int8, Int16, Int32."
+
+$ sed -n 2996,3011p lib/net8.0/MessagePack.xml
+WriteArrayHeader(uint) ... "in the most compact form of MinFixArray, Array16, or Array32."
+
+$ grep -n "public void WriteRaw\|public void Advance" /tmp/opencode/MPW.cs
+95:        public void WriteRaw(ReadOnlySpan<byte> rawMessagePackBlock) => this.writer.Write(rawMessagePackBlock);
+713:        public void Advance(int length) => this.writer.Advance(length);
+```
+
+Environment-index sentinel check:
+
+```text
+$ sed -n 55,100p src/dotnet/Mocassin.Compilation/Structure/EnvironmentCompilationStage.cs
+environmentIndexBySite[index] = ...Stable ? 0 : -1;      // initial placeholder
+environmentIndexBySite[siteIndex] = index + 1;           // assigned for every unstable site
+updatedSites = sites.Select(site => site with { EnvironmentIndex = environmentIndexBySite[site.Index] })
+```
+
+Every compiled site and position therefore carries an environment index `>= 0` (the only surviving `-1` is
+`CompiledEnvironment.SiteIndex` for the shared stable environment, as documented in
+`CompiledStructureModel.cs`).
+
+Files and sections read for round 5 in addition to the round-4 set: the full delta `26a17ce..270cc07`; the
+amendment page; `docs/planning/reviews/README.md` §7–§8; the MessagePack 3.1.12 `MessagePack.xml` and
+`MessagePackWriter` source; `src/dotnet/Mocassin.Compilation/Structure/CompiledStructureModel.cs` and
+`EnvironmentCompilationStage.cs`; `Energy/CompiledClusterTable.cs`; `Transitions/CompiledTransitionModel.cs`;
+`Signatures/ModelSignatureProjection.cs`; `tools/contracts/generate.py` `build_artifacts`; and
+`docs/planning/06-toolchain-requirements.md`.
+
+#### Round-4 finding status
+
+| Finding | Status | Evidence and residual |
+| --- | --- | --- |
+| R4-1 (Minor) | **Resolved** | The descriptor is defined once as `contracts/generated/signatures/model-v1.json` and the page states "there is no separate projection file" (lines 222–229); `grep model-v1.projection` in the amendment returns no matches; `generate.py` `build_artifacts` writes `signatures/<id>-v1.json`, so `model-v1` resolves to that file. |
+| R4-2 (Minor) | **Resolved** | The write mode is `MOCASSIN_UPDATE_GOLDENS=1`, the default run compares tracked fixtures and fails on drift, and the checker compares the recomputed signature/`projectionSha256` with the `.json` metadata and `signature-vectors.json` (lines 220–237). Residual command inconsistency: R5-5. |
+| R4-3 (Minor) | **Partially resolved** | `interactionRange` is `uint64` in the table and bullet (lines 79, 82); `siteSlot` and `permutationIndex` are `uint64` (lines 92, 107); "signed site indices" is gone (line 138). Residual: the prose still calls the distance bucket signed, and the environment-index sentinel is unreachable; see R5-4. |
+| N4-1 (Note) | **Partially resolved** | Rationale rows were added for `direction.index`/`rule.index` and `position.encoding` (lines 135–136), but the `position.encoding` row contradicts the tuple; see R5-2. |
+| N4-2 (Note) | **Not resolved** | The rewording keeps and sharpens the incorrect minimal-width claim about `WriteUInt64`/`WriteInt64`; see R5-1. |
+| N4-3 (Note) | **Not resolved** | The Documentation checklist is unchanged (lines 309–314) although the body requires `tools/contracts/README.md` and the `06-toolchain-requirements.md` row (lines 241–243); the resolution row says they are listed; see R5-3. |
+| N4-4 (Note) | **Resolved** | The Scope now names a "Python conformance checker" and the acceptance says "a byte/type verifier, not the production model encoder" (lines 39, 286–287); "independent" remains in Scope/Risks but is qualified in the same sentence or the adjacent acceptance item. |
+| N4-5 (Note) | **Partially resolved** | `Status`, `Design review`, and the amendment index are advanced to round 5 (lines 9, 11; `README.md:113`), and the `<id>` rule names the five vector ids (lines 210–211). Residual: the JSON example still shows `"id": "ceria-kmc"`; see N5-1. |
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| Minor | **R5-1 — N4-2 is still open: the MessagePack writer rationale is inverted and now asserts a false property.** The page says the writer "must not call ... `WriteUInt64`/`WriteInt64` (they choose minimal-width integer forms); those would break the required `0xdd`, `0xdb`, `0xcf`, and `0xd3` bytes" (lines 153–155). In the pinned 3.1.12 package both are fixed-width writers: `TryWriteUInt64`/`TryWriteInt64` state "The `MessagePackCode.UInt64`/`Int64` encoding is always used, even if the value could be encoded in fewer bytes", so `WriteUInt64`/`WriteInt64` produce exactly `0xcf`/`0xd3`. The minimal-width forms are `Write(ulong)`/`Write(long)`; only `WriteArrayHeader`/`WriteString` (and `Write(ulong)`) are compact. The mandated `WriteRaw`/`Advance` rule is still safe and the bytes are unaffected, but an implementer may reject the correct primitive. Prohibit `Write(ulong)`/`Write(long)`/`WriteArrayHeader`/`WriteString` instead, or state that `WriteUInt64`/`WriteInt64` (and `Write(double)`, which emits `0xcb`) are allowed; correct the N4-2 resolution row. | Amendment lines 151–156; MessagePack 3.1.12 `MessagePack.xml` (`TryWriteUInt64`, `TryWriteInt64`, `Write(UInt64)`, `WriteArrayHeader`) and `MessagePackWriter.cs:317,348,95,713`; resolution row N4-2. |
+| Minor | **R5-2 — N4-1 introduced a schema contradiction: `position.encoding` is both included and excluded.** The authoritative `position` tuple still contains `encoding encoding` (lines 87–89), while the new rationale row marks it `excluded` as redundant with `p` because it is `(0,0,0,p)` (line 136). The two readings differ in the encoded arity (a 12-field position with a four-integer `encoding` sub-array vs an 11-field position), so a second implementation cannot tell from the Design which field list is normative, even though "the per-field table is authoritative" favours inclusion. Decide one: remove `encoding` from the tuple (matching the rationale and reducing bytes) or delete the exclusion row and state that it is retained because it is the literal encoding. | Amendment lines 87–89, 136; `CompiledStructureModel.cs` `CompiledPosition.Encoding`; resolution row N4-1. |
+| Minor | **R5-3 — N4-3 is not applied: the Documentation checklist still omits the two pages the body requires.** The body requires `tools/contracts/README.md` to document the checker/regeneration and `docs/planning/06-toolchain-requirements.md` to move the `msgpack` row to Step 08 (lines 241–243), but the Documentation checklist lists only `compilation-pipeline.md`, `02-data-contracts.md`, ADR 0010, and status/parity/audit bookkeeping (lines 309–314). The closeout documentation tick therefore cannot cover the two required edits, and the N4-3 resolution row claims they are listed. | Amendment lines 241–243, 309–314; `tools/contracts/README.md`; `06-toolchain-requirements.md:126`; resolution row N4-3. |
+| Minor | **R5-4 — R4-3 residual: two type statements still contradict the per-field table and ADR 0010 rule 3.** (a) The exclusion paragraph still says "Only the integer distance bucket is signed" (line 189) while `distanceBucketFm` is `uint64` in `pairLink` and `pairGeometry` (lines 91, 100) and the summary lists distance buckets as `uint64` (line 171). (b) The signed exception is stated as the `-1` sentinel "in `site.environmentIndex`/`position.environmentIndex`/`environment.siteIndex`" (lines 172–174), but `EnvironmentCompilationStage` assigns an index `>= 0` to every site (0 stable, `index + 1` unstable) when it rewrites sites and positions, so only `environment.siteIndex` can be `-1`. These are non-negative indices encoded `int64`, outside the stated exceptions and contrary to ADR 0010 rule 3, unless a source-`int` retention exception is declared. Fix the distance-bucket sentence and either make the two environment indices `uint64` or add the explicit exception and amend ADR 0010. | Amendment lines 84, 88, 91, 100, 171–175, 189; `EnvironmentCompilationStage.cs:58–100`; `CompiledStructureModel.cs` `CompiledSite`/`CompiledPosition`/`CompiledEnvironment`; ADR 0010 rule 3. |
+| Minor | **R5-5 — The documented fixture-regeneration command cannot write.** The page says `ProjectionFixtureTests` writes only when `MOCASSIN_UPDATE_GOLDENS=1`, but the "regenerate with" block runs `dotnet test ... --filter FullyQualifiedName~ProjectionFixtureTests.WriteProjectionFixtures` with no environment assignment (lines 215–221). Run as written, the test takes the compare path and fails on drift instead of refreshing the tracked `.bin`/`.json` files. Prefix the command with `MOCASSIN_UPDATE_GOLDENS=1` (or state the variable must be exported) so the writer mode is reachable. | Amendment lines 215–221; no `MOCASSIN_UPDATE_GOLDENS` mention in the command. |
+| Note | **N5-1 — The fixture metadata example still contradicts the stated vector id.** The prose defines `<id>` as the vector id (`model-ceria-kmc`, …) and the descriptor as `model-v1` (lines 210–211), but the JSON example still shows `"id": "ceria-kmc"` (line 204). Align the example with the vector-id rule so the checked-in `tests/contracts/projections/<id>.bin`/`.json` names, the `id` field, and `signature-vectors.json` agree. | Amendment lines 200–211; `contracts/manifest.json` `fixtures.signatureVectors`. |
+| Note | **N5-2 — Two small precision gaps in the checker description.** Step 1 says it "reads the descriptor" (line 232) without restating `contracts/generated/signatures/model-v1.json` inside the numbered steps, and step 4 compares the recomputed signature and `projectionSha256` with the `.json` metadata but not `fixtureFormat`. Neither changes the bytes; naming the path in step 1 and comparing `fixtureFormat` would make the fixture metadata checks complete. | Amendment lines 202–207, 229–237. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**.
+
+#### Verdict
+
+**Ready with notes.** No Blocker or Major remains: the round-5 delta closes R4-1 and R4-2, fixes the
+`interactionRange`/`siteSlot`/`permutationIndex` types and the "signed site indices" wording (R4-3 a/b), and the
+canonical bytes remain determinable from the marker table plus the authoritative per-field table. The checker
+remains a byte/type conformance verifier over C#-produced bytes, not an independent model-to-projection encoder;
+Step 11's Rust encoder/vector and this schema review are the completeness gates.
+
+However, three of the five round-4 resolutions overstate the change: N4-2 is not corrected and now asserts a
+false fixed-width property for `WriteUInt64`/`WriteInt64` (R5-1), N4-1's new `position.encoding` row contradicts
+the `position` tuple (R5-2), and N4-3's checklist edit is absent (R5-3). R4-3 is only partially resolved (R5-4),
+and the regeneration command does not enable the write mode (R5-5). These are Minor documentation corrections
+that must be applied before implementation and are not waivers; they do not change the conclusion that the
+encoding is implementable. The top-level `Record state`, round-1 checklist, and earlier round verdicts are
+preserved unaltered; this round's verdict is authoritative.
+
+Follow-up owner: Step 08 implementor / planner
+Follow-up issue/step: Apply R5-1–R5-5 and N5-1–N5-2 to
+`docs/planning/amendments/step-08-amend-1-canonical-projection.md` (reconcile `position.encoding`, correct the
+`WriteUInt64`/`WriteInt64` rationale and the "signed distance bucket" sentence, make the two environment indices
+`uint64` or declare the source-`int` exception, add the README/toolchain checklist rows, and enable
+`MOCASSIN_UPDATE_GOLDENS=1` in the regeneration command), correct the overstating N4-1/N4-2/N4-3/N4-5 resolution
+rows, then integrate the amendment, refresh the closeout evidence and CI, and re-run the parent audit at the
+combined commit with A1, A3–A9, and m1–m7 in scope.
