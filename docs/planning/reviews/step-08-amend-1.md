@@ -261,3 +261,153 @@ still leaves the exact field lists and byte rules to implementation.
 the Python vector independently specified and gated, add the C# descriptor-conformance test, and complete the
 closeout CI/evidence integration checklist. The parent audit must then be re-run at the combined frozen commit
 with A1/A3–A9 still in scope.
+
+### Review round 2
+
+#### Independence and frozen state
+
+Fresh context: I did not author or implement Step 08 or this amendment and had no shared conversation with the
+planner or implementor. I reviewed the round-2 delta at the frozen commit
+`bf83509d0f569870d676c4dbaa4d527b0c79fb73` on `step/08-model-compilation-pipeline`; the working tree was clean.
+The design content is `5646aec730114a9f1df0b104bf2280948641b965`: the freeze commit only changes the
+request's `Reviewed commit` line (`git diff --stat 5646aec bf83509` = one file, one line), so the delta reviewed
+is `db52abb..5646aec`. The parent audit is still `Fixes required` (A1–A9); the amendment addresses only A2.
+
+The round-2 changes are real: the amendment now names every top-level and nested field with an order and a
+type, replaces the ambiguous integer/float prose with an explicit marker table, adds the 12-decimal
+quantization rule, adds `projectionInput` and a descriptor-binding test, adds four cross-language vectors, and
+adds closeout evidence/CI/merge-tree steps. F1–F3, F6, and N1–N3 are substantially addressed. The remaining
+material gap is the cross-language evidence chain: the Python checker's type source, fixtures, and gate are
+still not defined, and the named descriptor test does not bind the hand-written byte encoder.
+
+#### Commands and results
+
+```text
+$ git rev-parse HEAD
+bf83509d0f569870d676c4dbaa4d527b0c79fb73
+
+$ git status --short
+(clean)
+
+$ git log --oneline -3
+bf83509 docs: freeze step 08 amendment re-review [skip ci]
+5646aec docs: resolve step 08 amendment review findings [skip ci]
+512d696 docs: record step 08 amendment 1 design review [skip ci]
+
+$ git diff --stat 5646aec bf83509
+ docs/planning/reviews/step-08-amend-1.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+$ git diff --stat db52abb bf83509
+ .../step-08-amend-1-canonical-projection.md | 169 +++++++++++++++-----
+ docs/planning/reviews/step-08-amend-1.md    | 200 +++++++++++++++++----
+ docs/planning/steps/step-08-model-compilation-pipeline.md | 2 +-
+ 3 files changed, 294 insertions(+), 77 deletions(-)
+
+$ python tools/contracts/generate.py --check
+Contract artifacts are current (18 files)
+
+$ python tools/check_docs_links.py
+Documentation links OK (152 files scanned).
+
+$ python tools/check_process_consistency.py
+Process consistency: OK
+
+$ python -c 'import msgpack; print(msgpack.version)'
+(1, 2, 4)
+
+$ ls tools/contracts/requirements.txt
+ls: cannot access 'tools/contracts/requirements.txt': No such file or directory
+
+$ grep -n "msgpack" docs/planning/06-toolchain-requirements.md
+126:| `msgpack` 1.2.4 | Required | Step 22 | `.mcs` reader. |
+
+$ grep -n "step-08-amend-1" docs/planning/amendments/README.md
+113:| `step-08-amend-1` (`canonical-projection`) | 08 — Model Compilation Pipeline | **Planned** | ... |
+
+$ python - <<'EOF'
+import json
+v = json.load(open('tests/contracts/signature-vectors.json'))
+print([x['id'] for x in v['vectors']])          # ceria, vehicle5, interstitialcy5
+m = json.load(open('contracts/manifest.json'))['signatures']['model']
+print([(f['name'], f['type']) for f in m['fields']])  # nine flat fields, sections still `bin`
+EOF
+['model-ceria-kmc', 'model-vehicle5', 'model-interstitialcy5']
+[('formatVersion', 'uint64'), ..., ('particles', 'bin'), ('structure', 'bin'), ('energy', 'bin'),
+ ('transitions', 'bin'), ('simulations', 'bin')]
+```
+
+Serialization check of the proposed `projectionInput` scalar forms (scratch console app under
+`/tmp/opencode/jsontest`, not committed):
+
+```text
+$ dotnet run
+{"charge":2,"zero":-0,"volume":40,"x":5E-13}
+
+$ python -c 'import json; print(type(json.loads("2")), type(json.loads("-0")))'
+<class 'int'> <class 'int'>
+```
+
+`System.Text.Json` writes integer-valued `double`s without a fractional part (`2.0` → `2`) and `-0.0` as `-0`,
+so a JSON-only reader cannot recover the declared `float64` type. This is the evidence for R2-1.
+
+Files and sections read for round 2 in addition to the round-1 set: the complete delta `db52abb..5646aec` for
+the amendment page, the step-page link line, and this record's resolution table; `docs/planning/amendments/README.md`
+§3, §6, and the index; `docs/planning/reviews/README.md` §6–§7; `docs/planning/steps/step-08-model-compilation-pipeline.md`
+§11.3–§11.4; `docs/development/compilation-pipeline.md` "Signatures"/"Caches and determinism";
+`docs/planning/02-data-contracts.md` §1.3/§3.3; `docs/planning/adr/0010-canonical-messagepack-signatures.md`;
+`contracts/manifest.json` `signatures.model` and `fixtures.signatureVectors`;
+`contracts/generated/signatures/model-v1.json`; `tools/contracts/generate.py` (`validate_field`,
+`build_artifacts`); `tools/contracts/README.md`; `tools/verify.sh` `run_contracts`;
+`docs/planning/06-toolchain-requirements.md`; `src/dotnet/Mocassin.Compilation/Signatures/ModelSignatureProjection.cs`
+and `CompiledModelJson.cs`; the compiled records (`CompiledStructureModel.cs`, `CompiledParticleTable.cs`,
+`CompiledClusterTable.cs`, `CompiledTransitionModel.cs`, `CompiledSimulation.cs`, `CompiledModel.cs`);
+`Energy/ClusterCompilationStage.cs`, `Transitions/TransitionCompilationStage.cs`, and
+`Simulations/EncodingCompilationStage.cs`; `GoldenModelTests.cs`; `tests/contracts/signature-vectors.json`.
+
+#### Round-1 finding status
+
+| Finding | Status | Evidence and residual |
+| --- | --- | --- |
+| F1 (Blocker) | **Partially resolved** | Every nested section now has a named, ordered, typed field list (amendment lines 72–131); no `array<...>` placeholders remain. Residuals: `CompiledJumpRule.StaticCorrection` is neither signed nor declared excluded, and the `movement ... (3)` length notation is ambiguous; see R2-2. |
+| F2 (Major) | **Resolved** | The encoding table fixes array `0xdd`, str `0xdb`, bin `0xc6`, uint64 `0xcf`, int64 `0xd3`, float64 `0xcb`, bool `0xc3`/`0xc2`, nil `0xc0`, and no maps in v1 (lines 139–149). This is unambiguous and matches ADR 0010 rules 2–6. |
+| F3 (Major) | **Partially resolved** | 12-decimal `MidpointRounding.AwayFromZero`, `-0.0` normalization, and NaN/Inf rejection are stated for all float64 (lines 152–153). Residuals: the parent step §11.4 and `compilation-pipeline.md` still say only charge-transport vectors are quantized; no quantization/fractional vector is added; the C#-specific rounding rule needs a language-neutral definition; see R2-4. |
+| F4 (Major) | **Not resolved** | `projectionInput` and four vectors are added, but the checker's scalar-type source, input fixtures, dependency file, and gate are not defined, and the round-1 statement that the checker reads the generated descriptor was removed; see R2-1. |
+| F5 (Major) | **Partially resolved** | A descriptor-binding test is added, but it compares `projectionInput` (built by `CompiledModelJson`) with the descriptor, not the byte writer; the claim that it catches an encoder miss is only true through the un-gated Python vector; see R2-1. |
+| F6 (Major) | **Resolved** | Integration now requires the closeout-evidence refresh, `./tools/verify.sh all --require`, one replacement closeout CI run, the merge-tree rule, the squash/combined commit, and the parent audit request update (lines 247–256). |
+| F7 (Minor) | **Partially resolved** | The "already used" claim and public-API statement are corrected. Residual: `msgpack` is called an "existing" dependency although `tools/contracts/requirements.txt` does not exist, and `tools/contracts/README.md` and `06-toolchain-requirements.md` are not in the documentation plan; see R2-8. |
+| F8 (Minor) | **Partially resolved** | Bool/nil markers are explicit and the chiral string-vs-nil test is added; `StaticCorrection` is the remaining optional value that is neither listed nor excluded; see R2-2. |
+| F9 (Minor) | **Partially resolved** | Energy values, runtime settings, timings, diagnostics, cache state, file names, and `DistanceAngstrom` are excluded and tested. `direction.pathLength` is a signed raw distance while the text says only the integer bucket is signed; see R2-5. |
+| F10 (Minor) | **Resolved** | `CanonicalProjectionWriter` is internal; no public API or ApiCompat change, and no MessagePack type appears in the public surface. |
+| F11 (Minor) | **Partially resolved** | Four Python vectors and BaZrO₃ are named, but the C#/manifest/Python ownership is still inconsistent: the C# goldens do not pin interstitialcy, BaZrO₃ is not in the Python set, and the manifest fixture currently lists three vectors; see R2-6. |
+| F12 (Minor) | **Partially resolved** | The amendment page status is `Re-review required` and the audit section records `Fixes required (A1–A9)`. The amendments index still says `Planned`, and the combined re-audit scope (A1, A3–A9, m1–m7) is not stated explicitly; see R2-7. |
+| N1 (Note) | **Resolved** | The step-page link is now `../audits/step-08.md` and `python tools/check_docs_links.py` passes (152 files). |
+| N2 (Note) | **Resolved** | The versioning rationale cites `02-data-contracts.md` §3.3 (lines 768–770), which records the pre-release additive-v1 precedent; no released `.msl` exists. See R2-11 for the remaining record-keeping note. |
+| N3 (Note) | **Resolved** | Step 11 remains the production Rust encoder/vector owner; Python is the interim check. |
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Major** | **R2-1 — The independent-vector input, type mapping, fixture lifecycle, gate, and byte-level descriptor binding are still undefined (F4/F5 residual).** `projectionInput` fixes the value tree, but the round-2 text no longer says the Python checker reads the generated descriptor. JSON does not carry the declared scalar type: `System.Text.Json` writes `2.0` as `2` and `-0.0` as `-0` (verified), so integer-valued `float64` fields (`charge`, `volume`) are indistinguishable from `uint64`/`int64`; the existing inspection JSON also uses display forms (for example the string `stability`), so the design must say `projectionInput` uses the projection scalar forms, not the inspection forms. Without a declared type source a second encoder cannot choose `0xcf`/`0xd3`/`0xcb`. In addition: no path or regeneration rule is defined for the four checked-in `projectionInput` fixtures or their expected signatures; `tools/contracts/requirements.txt` does not exist; and `verify.sh contracts` runs only `generate.py --check`, process consistency, licence headers, secrets, and cargo-deny, so the Python vector is not gated. The descriptor test itself serializes `projectionInput` (produced by `CompiledModelJson`, not `CanonicalProjectionWriter`) and compares keys/types, so a manifest edit applied to the JSON but missed in the byte writer still passes; the stated guarantee is true only if the Python vector runs. Add: the checker loads `contracts/generated/signatures/model-v1.json` and coerces each `projectionInput` value to the declared scalar type; the four fixture files and how they are generated/refreshed; the requirements file and the `contracts` gate entry; and a byte-level encoder-conformance test (or generated order/type table) that checks the encoder itself. | Amendment lines 160–172; `CompiledModelJson.cs` `charge`/`volume`/`stability` writes; `ModelSignatureProjection.cs`; `tools/verify.sh:151-163`; `ls tools/contracts/requirements.txt`; serialization check above. |
+| Minor | **R2-2 — The nested schema still has omissions and length ambiguity (F1/F8 residual).** `CompiledJumpRule.StaticCorrection` (`Cartesian3?`, documented `null` in v1) is neither in the `rule` tuple nor named in the exclusion prose. `movement array<array<float64>> (3)` is ambiguous: the outer array has one entry per path node (the node count varies), while each inner vector has three components. `collection.ruleIndices`, `rule.directionIndex`, `clusterTable.index`, `pairGeometry.centerSiteId`/`partnerSiteId`, and `simulation.intent` are dropped without the include/exclude rationale F1 requested (they are mostly redundant/derivable, but the design should say so). State the `StaticCorrection` rule (nil in v1, excluded until a versioned change), write the movement length rule, and add a one-line rationale for each redundant field. | Amendment lines 103–125; `Transitions/CompiledTransitionModel.cs` `CompiledJumpRule` (`StaticCorrection`, `FrequencyHz`); `CompiledClusterTable.Index`; `CompiledJumpCollection.RuleIndices`; `CompiledJumpDirection.Movement`; `EncodingCompilationStage.cs:245-254` (`Intent.Kind` duplicates `Kind`); `TransitionCompilationStage.cs:180-191`. |
+| Minor | **R2-3 — The general scalar-type rule contradicts the explicit field table.** "Every count and non-negative index is `uint64`" (line 151) conflicts with `jumpCounts`/`jumpOffsets`/`jumpMappings array<int64>` (lines 112–113), `particleTableMapping array<int64>` (line 105), `canonicalTuple array<int64>` (line 106), and `distanceBucketFm int64` (a non-negative bucket). A second language cannot tell which rule wins. State that the per-field table is authoritative and scope the sentence (for example, "signed where the source value can be negative or where the `int` model is retained"), or make the non-negative fields `uint64`. | Amendment lines 105–113, 151. |
+| Minor | **R2-4 — The quantization rule is broader than the parent design and has no test or language-neutral definition (F3 residual).** The amendment quantizes every `float64`; parent step §11.4 and `compilation-pipeline.md` say only charge-transport vectors are quantized to 12 decimals, so the two normative pages will describe different bytes unless the parent pages are updated. The test table has no rounding/fractional vector (F3 asked for one). `MidpointRounding.AwayFromZero` is stated in C# terms; Python/Rust must perform decimal rounding on the same representation to match at midpoints (`round()`/binary formatting is not equivalent). State the scope, align §11.4/`compilation-pipeline.md`, define the decimal operation, and add a non-trivial fractional and midpoint vector. | Amendment lines 152–153, 215; parent step §11.4 (lines 631–634); `compilation-pipeline.md:209`; `ModelSignatureProjection.cs:380-390`. |
+| Minor | **R2-5 — `direction.pathLength` contradicts the "only the integer distance bucket is signed" rule (F9 residual).** `pathLength` is a raw Cartesian distance in ångström, yet the amendment includes it and says no display-only distances are encoded and "Only the integer distance bucket is signed". Parent step §11.4 says the signature records buckets and indices, not raw computed distances. Either exclude `pathLength` (it is derived from the signed `pathVector`) or state why it is canonical geometry and qualify the sentence; also enumerate the excluded display-only fields (`Name`, `Cartesian`, `DistanceAngstrom`, runtime settings) so the rule is reviewable. | Amendment lines 117–119, 157–158; parent step §11.4 (lines 632–634); `ModelSignatureProjection.cs:277`; `CompiledJumpDirection.PathLength`. |
+| Minor | **R2-6 — Golden-vector bookkeeping is still inconsistent (F11 residual).** The amendment says "the C# golden tests pin the same set [ceria, MMC, vehicle, interstitialcy] plus BaZrO₃", but `GoldenModelTests` pins ceria, vehicle, ceria-MMC, and BaZrO₃ and does not pin interstitialcy; the interstitialcy signature exists only in the manifest-generated `tests/contracts/signature-vectors.json` (three vectors today). The test table also omits BaZrO₃. State which vectors are manifest-declared/regenerated and which are C#-test-only, and reconcile the BaZrO₃/interstitialcy sets. | Amendment lines 170–171, 217–221; `GoldenModelTests.cs:16-30,39-50,53-55`; `tests/contracts/signature-vectors.json`; `contracts/manifest.json` `fixtures.signatureVectors`. |
+| Minor | **R2-7 — Status and combined-audit scope bookkeeping (F12 residual).** The amendment page is `Re-review required`, but the index row in `docs/planning/amendments/README.md:113` still says `Planned`. The Audit section records `Fixes required (A1–A9)` but does not state that the combined re-audit scope explicitly includes A1, A3–A9, and m1–m7 (the parent audit's verdict covers the whole step). Advance the index status and state the combined scope. | Amendment lines 258–263; `docs/planning/amendments/README.md:113`; parent audit findings A1–A9, m1–m7. |
+| Minor | **R2-8 — Dependency wording and documentation are still inaccurate (F7 residual).** The amendment calls `msgpack` the "existing" development dependency, but no `tools/contracts/requirements.txt` exists and the toolchain lists `msgpack` only for Step 22. `tools/contracts/README.md` still says the generator uses the standard library only, and neither it nor `06-toolchain-requirements.md` is in the documentation checklist. Also, msgpack-python always writes minimal-width arrays/strings/integers, so it cannot emit the specified `0xdd`/`0xdb`/`0xcf`/`0xd3` headers; the checker must hand-write those headers (msgpack only supplies the float64 marker and UTF-8 handling) or the design should say why the dependency is needed. | Amendment lines 47–48, 169–170, 224–229; `ls tools/contracts/requirements.txt`; `06-toolchain-requirements.md:126`; `tools/contracts/README.md`; msgpack-python `Packer` behavior. |
+| Note | **R2-9 — The canonical text form of `id`/`transitionId`/`objectId` strings is not stated.** The current encoder uses `Guid.ToString("D", InvariantCulture)` (lowercase, hyphenated); a Rust encoder must reproduce the same text. `projectionInput` hides this for the Python check, so specify the rendering (for example lowercase `D` format, invariant culture). | `ModelSignatureProjection.cs:94,122,125,157,197,248,333`; amendment `id string` fields. |
+| Note | **R2-10 — `projectionInput.formatVersion` is ambiguous.** `compiled-inspection-v1` already has its own `formatVersion`; the projection field must be `CompiledModel.FormatVersion`, not the inspection format version. State this explicitly (round 1 F4 named the collision). | `CompiledModelJson.cs` `FormatVersion`; `CompiledModel.FormatVersion`; amendment line 162. |
+| Note | **R2-11 — Record the pre-release `model-v1` exception.** The retention is justified by the §3.3 pre-release precedent and ADR 0010's bump rule applies to released signed types. Add a sentence to ADR 0010/§3.3 that this redefinition is the pre-release exception, and note that `signatures.model.status = "final"` is not a release marker. | `contracts/manifest.json` `signatures.model.status`; ADR 0010 "Consequences"; data contracts §3.3. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**.
+
+#### Verdict
+
+**Changes required.** The round-2 design substantially closes F1–F3, F6, and N1–N3 and the encoding table is now
+unambiguous, but the central cross-language evidence is still not implementable as written: `projectionInput`
+has no declared scalar-type source, fixture lifecycle, or gate, and the descriptor test does not bind the byte
+encoder (R2-1, Major). The remaining Minors (R2-2–R2-8) should be corrected in the same pass. After those
+changes, request a fresh re-review at a new frozen commit; the parent audit must then be re-run at the combined
+commit with A1, A3–A9, and m1–m7 still in scope.
