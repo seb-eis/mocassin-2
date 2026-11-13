@@ -972,25 +972,76 @@ Follow-up step: Step 08 design revision and fresh design review (round 2)
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — accept `Ready for implementation` at
+  `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` (review record `195451021031272af96ee1b2ca600d4c8cd83c2c`).
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict) — six rounds, below.
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status) — below and in the
+  round resolution tables.
+- [x] Accepted notes and waivers recorded with rationale — M5 owner waiver; n1–n5 observations addressed.
+- [x] Residual risks, deferred items, and follow-up owners recorded — below.
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — no Blocker, Major, or Minor
+  remains; M5 is an accepted owner waiver, not a finding waiver.
+- [x] Final CI and documentation-build results recorded — local docs/process gates pass; no CI run was made
+  because this is a docs-only `[skip ci]` change.
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-12 | `36fbba58182b2e769a6d59b3228a60021344248d` | fresh planning auditor | Changes required |
+| 2 | 2026-11-12 | `c676716e88bcdd5e8877938e21ad6950cc2986bb` | fresh planning auditor | Changes required |
+| 3 | 2026-11-13 | `b030cfb7d921277f6983651fb451e736cc2f7896` | fresh planning auditor | Ready with notes |
+| 4 | 2026-11-13 | `9715082c1d51e8273bf7c636c22593fa0f7ba5e6` | fresh planning auditor | Ready with notes |
+| 5 | 2026-11-13 | `850e98d6788830ee8599a80df966f075f88112a1` | fresh planning auditor | Ready with notes |
+| 6 | 2026-11-13 | `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` | fresh planning auditor | Ready for implementation |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M1 | Major | Dual-DOF was redefined for `Migration3` only | KMC default true, matching the original job builder; Step 10 owns the every-mask clear rule | `c676716` | Resolved |
+| M2 | Major | Field-factor formula was dimensionally inconsistent and cancelled for vacancy hops | Per-rule particle-identity Cartesian charge transport vector; Step 15 consumes it | `b030cfb` | Resolved |
+| M3 | Major | Rules cache did not invalidate on simulation transition-set edits | `ProjectHasher.ComputeSimulationSelection` in the Rules key; conditional graph | `c676716` | Resolved |
+| M4 | Major | `compiledModel` manifest entry conflicted with the existing `model` signature | Finalize `signatures.model`/`ModelSignatureV1`; no duplicate entry | `c676716` | Resolved |
+| M5 | Major | 4–6 pw/eight features meets the roadmap split trigger | Human owner explicitly waived the split on 2026-11-12; recorded on page, status, and record | `c676716` | Waived by owner |
+| M6 | Major | Point-level path resolution needed private `TransitionPathResolver` logic | Additive public `TryResolvePoint`/`TryResolvePath`; `TryResolve` delegates | `c676716` | Resolved |
+| m1 | Minor | Internal `SpaceGroupReferenceResolver` was named | Use public `IStructurePreviewService.TryResolve` | `c676716` | Resolved |
+| m2 | Minor | Compiled particle order was claimed to match preview order | Explicit 0=void compiled mapping; preview order is not a contract | `c676716` | Resolved |
+| m3 | Minor | Cluster Burnside/configurable-bound wording was not implementable | Saturating pre-check; fixed 1,000,000 ceiling; catch bounded failure | `c676716` | Resolved |
+| m4 | Minor | Cancellation was finer than the tokenless Symmetry APIs | Stage/top-level/atomic-call scope; 250 ms qualified | `c676716` | Resolved |
+| m5 | Minor | Step 09 used `model.Signature` | Align to `model.ModelSignature` | `c676716` | Resolved |
+| m6 | Minor | Signature scope drift in summary pages | All summaries say geometry/rules/encoding; runtime settings excluded | `b030cfb` | Resolved |
+| m7 | Minor | `CMP005` report lacked rejection-by-reason counts | Added mass/charge/invalid-state counts | `c676716` | Resolved |
+| m8 | Minor | `CMP009` path domain was generic | `kineticTransition`/`metropolisTransition` by kind | `c676716` | Resolved |
+| m9 | Minor | Resolve/Indexing cache keys contradicted the invalidation graph | Resolve uncached; Indexing keyed on the full relevant hashes | `b030cfb` | Resolved |
+| m10 | Minor | Cache summary page contradicted the step page | Simulation hash in indexing, energy hash in encoding, matching rows | `9715082` | Resolved |
+| m11 | Minor | Step 10 dual-DOF rule inverted the original mixed case | Clear only when every mask is reduced; keep otherwise | `9715082` | Resolved |
+| m12 | Minor | Risk row described the removed scalar field factor | Risk row describes the particle-identity vector | `9715082` | Resolved |
+| m13 | Minor | Site-energy invalidation row was incomplete | Indexing key includes the energy hash; signing excludes values | `850e98d` | Resolved |
+| m14 | Minor | Site-energy row contradicted the energy-hash keys | Rebuild environments/pairs/clusters/encoding/indexing; reuse structure/rules/signing | `b84cead` | Resolved |
+| n1 | Note | No benchmark project reference/task | Added the benchmark/reference task | `c676716` | Addressed |
+| n2 | Note | `CMP012` integrity predicate undefined | Key echo/version/shape/content hash + injected-entry test | `c676716` | Addressed |
+| n3 | Note | Step 10 dual-DOF clear rule undefined | Recorded the original every-mask rule | `9715082` | Resolved |
+| n4 | Note | Waiver page pointed at an empty approval summary | Page points at the review record and status | `b030cfb` | Resolved |
+| n5 | Note | Additive Symmetry PublicAPI entries only generic | Task names the `TryResolvePoint`/`TryResolvePath` entries | `b030cfb` | Resolved |
+
+No finding is waived. M5 is an explicit human-owner acceptance of the 4–6 pw/eight-feature step size, not a
+finding waiver; the design itself has no open Blocker, Major, or Minor.
+
+Residual risks and follow-ups:
+
+- Step 08 is intentionally implemented as one owner-waived 4–6 pw/eight-feature step; the implementation must
+  keep each feature independently auditable and re-open the split decision if the first three exceed 2.5 pw.
+- The additive `Mocassin.Symmetry` path API and the new `ProjectHasher.ComputeSimulationSelection` must land
+  with PublicAPI/ApiCompat entries and tests before dependants use them.
+- The per-rule charge transport vector changes Step 15's field input from the earlier scalar design; Step 15/16
+  implementation must use the vector and pin the single-charge, vacancy, exchange, and non-collinear cases.
+- Step 10's dual-DOF clear rule depends on the selection optimizer; it needs a parity test against the original
+  mixed-case behaviour.
+- Performance and cache-hit targets are design targets on the benchmark laptop class; they are measured during
+  the Step 08 features, not assumed by this review.
+- Local documentation/process gates pass. No CI run was triggered because all commits are documentation-only
+  with `[skip ci]`.
 
 ## Human approval
 
