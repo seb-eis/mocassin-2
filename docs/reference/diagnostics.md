@@ -132,7 +132,7 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 | [`SYM002`](#sym002) | warning | Step 02 — symmetry and geometry | A fractional coordinate was rounded to the nearest exact-grid point | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`SYM003`](#sym003) | error | Step 02 — symmetry and geometry | A fractional coordinate is outside the representable exact-grid range | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`TRN001`](#trn001) | error | Step 04 — transition model | A state change references an unknown particle | Review the referenced model object, correct the reported condition, and revalidate. |
-| [`TRN002`](#trn002) | error | Step 04 — transition model | A state change has the same donor and acceptor | Review the referenced model object, correct the reported condition, and revalidate. |
+| [`TRN002`](#trn002) | error | Step 04 — transition model | A self state change is not at an interior stable spectator position | Use a self state change only at an interior stable spectator position with unstable neighbours. |
 | [`TRN003`](#trn003) | error | Step 04 — transition model | Both donor and acceptor are the implicit void particle | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`TRN004`](#trn004) | warning | Step 04 — transition model | A void donor is replaced by a charged acceptor, which is likely an implicit reverse pair | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`TRN005`](#trn005) | error | Step 04 — transition model | A state-change group is empty or references an unknown state change | Review the referenced model object, correct the reported condition, and revalidate. |
@@ -664,7 +664,7 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 
 ### TRN002
 
-**A state change has the same donor and acceptor.** Review the referenced model object, correct the reported condition, and revalidate.
+**A self state change is not at an interior stable spectator position.** Use a self state change only at an interior stable spectator position with unstable neighbours.
 
 ### TRN003
 

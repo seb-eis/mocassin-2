@@ -111,15 +111,27 @@
     "stateChanges": [
       {
         "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b21",
-        "name": "O -\u003E vacancy",
+        "name": "O -> vacancy",
         "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b01",
         "acceptorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b02"
       },
       {
         "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b22",
-        "name": "O -\u003E void",
+        "name": "O -> void",
         "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b01",
         "acceptorParticleId": "00000000-0000-0000-0000-000000000001"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b23",
+        "name": "vacancy -> O",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b02",
+        "acceptorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b01"
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b24",
+        "name": "spectator O",
+        "donorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b01",
+        "acceptorParticleId": "018f4c9a-7f6b-7c3a-9d2e-000000000b01"
       }
     ],
     "stateChangeGroups": [
@@ -136,6 +148,20 @@
         "stateChangeIds": [
           "018f4c9a-7f6b-7c3a-9d2e-000000000b22"
         ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b33",
+        "name": "Vacancy to O",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b23"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b34",
+        "name": "Spectator O",
+        "stateChangeIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b24"
+        ]
       }
     ],
     "chains": [
@@ -146,7 +172,26 @@
         "groupIds": [
           "018f4c9a-7f6b-7c3a-9d2e-000000000b31",
           "018f4c9a-7f6b-7c3a-9d2e-000000000b32",
-          "018f4c9a-7f6b-7c3a-9d2e-000000000b31",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b34",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b32",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b33"
+        ],
+        "linkers": [
+          "dynamic",
+          "dynamic",
+          "dynamic",
+          "dynamic"
+        ],
+        "generatesReverse": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b42",
+        "name": "Interstitialcy5 reverse",
+        "pattern": "interstitialcy5",
+        "groupIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b33",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b32",
+          "018f4c9a-7f6b-7c3a-9d2e-000000000b34",
           "018f4c9a-7f6b-7c3a-9d2e-000000000b32",
           "018f4c9a-7f6b-7c3a-9d2e-000000000b31"
         ],
@@ -196,7 +241,7 @@
       {
         "id": "018f4c9a-7f6b-7c3a-9d2e-000000000b52",
         "name": "Interstitialcy reverse",
-        "chainId": "018f4c9a-7f6b-7c3a-9d2e-000000000b41",
+        "chainId": "018f4c9a-7f6b-7c3a-9d2e-000000000b42",
         "referencePath": [
           [
             0.1,

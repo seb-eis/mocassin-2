@@ -78,10 +78,10 @@ public sealed class TransitionCompilationTests
 }
 
 /// <summary>
-/// Covers the corrected vehicle sample and the remaining interstitialcy limitation.
+/// Covers the corrected vehicle and interstitialcy samples.
 /// </summary>
 [Trait("Tier", "PR-fast")]
-public sealed class ComplexMechanismLimitationTests
+public sealed class ComplexMechanismTests
 {
     [Fact]
     public async Task CorrectedVehicleCompilesUnidirectionalRules()
@@ -99,7 +99,7 @@ public sealed class ComplexMechanismLimitationTests
     }
 
     [Fact]
-    public async Task InterstitialcyStillFailsClosedUntilTheConservationAmendment()
+    public async Task CorrectedInterstitialcyCompilesWithASpectatorCentre()
     {
         var project = StageTestSupport.WithFirstSimulationTransition(
             await StageTestSupport.LoadProjectAsync("samples/transitions/interstitialcy5.mocprj"),
@@ -107,9 +107,14 @@ public sealed class ComplexMechanismLimitationTests
 
         var result = new ModelCompiler().Compile(project);
 
-        Assert.False(result.IsSuccess);
-        Assert.Null(result.Model);
-        Assert.Contains(result.Diagnostics, static diagnostic => diagnostic.Code == "CMP005");
+        Assert.True(result.IsSuccess, string.Join(Environment.NewLine, result.Diagnostics.Select(static item => item.ToString())));
+        Assert.NotEmpty(result.Model!.Transitions.Rules);
+        Assert.Equal(0, result.Model.Transitions.InverseRuleCount);
+        Assert.Equal("3d14d6081c36dce18b19c5641b9771b764b87367663f1438ca65ceb1bc850d73", result.Model.ModelSignature);
+        var rule = Assert.Single(result.Model.Transitions.Rules.Where(static rule => !rule.IsInverse));
+        Assert.Equal(-4.0, rule.ChargeTransportVector.X, 12);
+        Assert.Equal(0.0, rule.ChargeTransportVector.Y, 12);
+        Assert.Equal(0.0, rule.ChargeTransportVector.Z, 12);
     }
 }
 

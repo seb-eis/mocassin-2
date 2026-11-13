@@ -122,6 +122,7 @@ internal static partial class TransitionModelValidator
             }
 
             ValidateUnstablePositions(chain, groupById, stateChangeById, bag);
+            ValidateSpectatorPositions(chain, groupById, stateChangeById, bag);
         }
     }
 
@@ -228,6 +229,53 @@ internal static partial class TransitionModelValidator
         }
 
         AddMissingReverseLink(transition.Id.Value, "metropolisTransition", crossKindIds.Contains(reverseId.Value), bag);
+    }
+
+    private static void ValidateSpectatorPositions(
+        TransitionChain chain,
+        Dictionary<StateChangeGroupId, StateChangeGroup> groupById,
+        Dictionary<StateChangeId, StateChange> stateChangeById,
+        DiagnosticBag bag)
+    {
+        var stabilitySequence = GetBuiltInStabilitySequence(chain.Pattern);
+        if (stabilitySequence is null ||
+            chain.GroupIds.IsDefault ||
+            chain.GroupIds.Length != stabilitySequence.Value.Length)
+        {
+            return;
+        }
+
+        for (var index = 0; index < chain.GroupIds.Length; index++)
+        {
+            if (!groupById.TryGetValue(chain.GroupIds[index], out var group) ||
+                group.StateChangeIds.IsDefault)
+            {
+                continue;
+            }
+
+            var hasSpectator = group.StateChangeIds.Any(stateChangeId =>
+                stateChangeById.TryGetValue(stateChangeId, out var stateChange) &&
+                stateChange.DonorParticleId == stateChange.AcceptorParticleId);
+            if (!hasSpectator)
+            {
+                continue;
+            }
+
+            var isInteriorStable = index > 0 &&
+                                   index < stabilitySequence.Value.Length - 1 &&
+                                   stabilitySequence.Value[index] == SiteStability.Stable &&
+                                   stabilitySequence.Value[index - 1] == SiteStability.Unstable &&
+                                   stabilitySequence.Value[index + 1] == SiteStability.Unstable;
+            if (!isInteriorStable)
+            {
+                bag.Add(Error(
+                    TransitionDiagnosticCodes.DonorEqualsAcceptor,
+                    "A self state change is only valid at an interior stable spectator position with unstable neighbours.",
+                    "chain",
+                    chain.Id.Value,
+                    "groupIds"));
+            }
+        }
     }
 
     private static void ValidateUnstablePositions(

@@ -2066,6 +2066,14 @@
           "projectionType": "ModelSignatureV1",
           "signatureHex": "91cae9a4d68bbed2645abd5e41ea9ce3c2d5d021f465c1bfca9456eaf441fdcd",
           "description": "samples/transitions/vehicle5.mocprj with a KMC simulation referencing the corrected forward vehicle transition"
+        },
+        {
+          "id": "model-interstitialcy5",
+          "signature": "model",
+          "domainPrefix": "mocassin/model-signature/v1",
+          "projectionType": "ModelSignatureV1",
+          "signatureHex": "3d14d6081c36dce18b19c5641b9771b764b87367663f1438ca65ceb1bc850d73",
+          "description": "samples/transitions/interstitialcy5.mocprj with a KMC simulation referencing the forward interstitialcy transition"
         }
       ]
     },
