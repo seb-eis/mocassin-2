@@ -982,3 +982,209 @@ Follow-up issue/step: Apply R5-1–R5-5 and N5-1–N5-2 to
 `MOCASSIN_UPDATE_GOLDENS=1` in the regeneration command), correct the overstating N4-1/N4-2/N4-3/N4-5 resolution
 rows, then integrate the amendment, refresh the closeout evidence and CI, and re-run the parent audit at the
 combined commit with A1, A3–A9, and m1–m7 in scope.
+
+### Review round 6
+
+#### Independence and frozen state
+
+Fresh context: I did not author or implement Step 08 or this amendment and have no shared conversation with the
+planner or implementor. I reviewed the round-6 delta at the frozen tree
+`14c1e3f0b860ffff3af67ab8a367d77131a1d234` on `step/08-model-compilation-pipeline`; the working tree was clean.
+The design content is `5af87aa748da9bf1ac66970afab377d3e8b0b57b`: `git diff --stat 5af87aa 14c1e3f` is the
+single-line `Reviewed commit` metadata change in this record, so the design delta reviewed is
+`270cc07..5af87aa`. The parent audit is still `Fixes required` (A1–A9); the amendment addresses only A2.
+
+Round 6 applies most of the round-5 corrections. The writer rationale now states the true 3.1.12 property
+(`WriteUInt64`/`WriteInt64` are fixed-width; the compact `WriteArrayHeader`/`WriteString` and the minimal-width
+`Write(ulong)`/`Write(long)` are prohibited), the `position` tuple is explicitly an 11-element array and the
+duplicate `position.encoding` exclusion row is gone, `site`/`position` `environmentIndex` are `uint64` with the
+`-1` sentinel confined to `environment.siteIndex`, the regeneration command enables `MOCASSIN_UPDATE_GOLDENS=1`,
+and the fixture id and checker descriptor/metadata statements are aligned. Two round-5 items are not applied:
+the Documentation checklist is unchanged (R6-1) and the exclusion paragraph still declares the distance bucket
+signed (R6-2). No Blocker or Major remains; the bytes are still determined by the marker table plus the
+authoritative per-field table.
+
+#### Commands and results
+
+```text
+$ git rev-parse HEAD
+14c1e3f0b860ffff3af67ab8a367d77131a1d234
+
+$ git status --short
+(clean)
+
+$ git branch --show-current
+step/08-model-compilation-pipeline
+
+$ git log --oneline -5
+14c1e3f docs: freeze step 08 amendment round 6 review [skip ci]
+5af87aa docs: clear step 08 amendment round 5 notes [skip ci]
+ae53f5e docs: record step 08 amendment 1 round 5 design review [skip ci]
+b710546 docs: freeze step 08 amendment round 5 review [skip ci]
+270cc07 docs: clear step 08 amendment round 4 notes [skip ci]
+
+$ git diff --stat 5af87aa 14c1e3f
+ docs/planning/reviews/step-08-amend-1.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+$ git diff --stat 270cc07 5af87aa
+ docs/planning/amendments/README.md                 |  2 +-
+ .../step-08-amend-1-canonical-projection.md        | 35 ++--
+ docs/planning/reviews/step-08-amend-1.md           | 180 ++++++++++++++++++++-
+ 3 files changed, 198 insertions(+), 19 deletions(-)
+
+$ python tools/contracts/generate.py --check
+Contract artifacts are current (18 files)
+
+$ python tools/check_docs_links.py
+Documentation links OK (152 files scanned).
+
+$ python tools/check_process_consistency.py
+Process consistency: OK
+```
+
+Documentation checklist versus the body requirements:
+
+```text
+$ sed -n '310,315p' docs/planning/amendments/step-08-amend-1-canonical-projection.md
+## Documentation
+
+- [ ] `docs/development/compilation-pipeline.md` describes the manifest-driven projection and encoder.
+- [ ] `docs/planning/02-data-contracts.md` §1.3/§3.3 references the explicit projection.
+- [ ] `docs/planning/adr/0010-canonical-messagepack-signatures.md` notes the shared encoder and descriptor.
+- [ ] Step page, amendment index, status, parity, audit request, and review record updated.
+
+$ grep -n "contracts/README\|06-toolchain\|verify.sh contracts" \
+    docs/planning/amendments/step-08-amend-1-canonical-projection.md
+242:... `tools/contracts/README.md` documents the checker
+243:and fixture regeneration; `docs/planning/06-toolchain-requirements.md` moves the `msgpack` row to Step 08
+246:The checker runs in `./tools/verify.sh contracts`, ...
+285:- [ ] ... the Python checker is in `verify.sh contracts`.
+```
+
+Distance-bucket wording:
+
+```text
+$ grep -n "distance bucket" docs/planning/amendments/step-08-amend-1-canonical-projection.md
+171:  masks, state codes, tracker indices, jump counts/offsets/mappings, distance buckets, cluster canonical
+187:- The distance bucket is unsigned; only signed `movement` and the signed rule charge vector carry physics.
+189:  (`DistanceAngstrom`, `pathLength`) are encoded. Only the integer distance bucket is signed. The raw
+```
+
+MessagePack 3.1.12 API check (`/tmp/opencode/mp` and `/tmp/opencode/MPW.cs`, prior-round download reused, not
+committed):
+
+```text
+$ grep -n "public void WriteUInt64\|public void WriteInt64\|public void Write(double" /tmp/opencode/MPW.cs
+328:        public void WriteUInt64(ulong value)   -> MessagePackPrimitives.TryWriteUInt64(span, value, ...)
+359:        public void WriteInt64(long value)     -> MessagePackPrimitives.TryWriteInt64(span, value, ...)
+403:        public void Write(double value)        -> MessagePackPrimitives.TryWrite(span, value, ...)
+
+$ grep -rn "WriteDouble" /tmp/opencode/mp/lib
+(no matches)
+
+$ MessagePack.xml (net8.0)
+TryWriteUInt64 remarks: "The MessagePackCode.UInt64 encoding is always used, even if the value could be
+  encoded in fewer bytes."
+TryWriteInt64 remarks:  "The MessagePackCode.Int64 encoding is always used, even if the value could be
+  encoded in fewer bytes."
+Write(UInt64)/Write(Int64): "... most compact of UInt8, UInt16, UInt32, ..." (minimal width)
+Write(Double): "Writes a MessagePackCode.Float64 value."
+WriteArrayHeader: "... in the most compact form of MinFixArray, Array16, or Array32."
+```
+
+`WriteUInt64`/`WriteInt64` are therefore fixed-width, so the amended rule is factually correct. The
+`MessagePackWriter` XML summary for `WriteUInt64` says "using MessagePackCode.Int32" (a library doc typo); the
+implementation goes through `TryWriteUInt64`, which is unconditionally `0xcf`, so the design statement is right.
+
+Environment-index evidence (for `uint64` and the single `-1` sentinel):
+
+```text
+$ sed -n '37,46p;56,96p' src/dotnet/Mocassin.Compilation/Structure/EnvironmentCompilationStage.cs
+unstable = sites.Where(site => site.Stability == SiteStability.Unstable)
+                .Select(site => authoredBySite.TryGetValue(...) ? environment : new UnstableEnvironment(...))
+                .OrderBy(environment => environment.SiteId.Value)
+environmentIndexBySite[index] = Stable ? 0 : -1;   // placeholder
+environmentIndexBySite[siteIndex] = index + 1;     // set for every unstable site
+updatedSites/updatedPositions = ... EnvironmentIndex = environmentIndexBySite[...]
+
+$ grep -n "SiteIndex" src/dotnet/Mocassin.Compilation/Structure/CompiledStructureModel.cs
+35:/// <param name="SiteIndex">The owning reference site, or <c>-1</c> for the shared stable environment.</param>
+```
+
+Every site/position therefore receives `0` or `index + 1`, and the only reachable `-1` is
+`CompiledEnvironment.SiteIndex`; `uint64` is safe and the sentinel scoping is correct. `CompiledPosition` has 12
+members (`P`, `Encoding`, `Fractional`, `Cartesian`, `SiteIndex`, `SiteId`, `Stability`,
+`AllowedParticleMask`, `EnvironmentIndex`, `OrbitIndex`, `PairLinks`, `ClusterLinks`); excluding the display-only
+`Cartesian` leaves exactly the 11 projected fields.
+
+Also inspected: the full `270cc07..5af87aa` delta (amendment, `amendments/README.md:113`, this record's
+resolution rows); the amendment page in full; Step 08 §11.4:633 and `compilation-pipeline.md:209` (both now say
+all projected float64 values are quantized); `contracts/manifest.json` `fixtures.signatureVectors` and
+`tests/contracts/signature-vectors.json` (still three vectors, which is implementation work under the
+acceptance item, not a design gap); `tools/contracts/README.md:20`; `tools/verify.sh` `run_contracts`;
+`docs/planning/06-toolchain-requirements.md:126`; and `docs/planning/audits/step-08.md` (A2 at line 182,
+state `Fixes required` at line 206).
+
+#### Round-5 finding status
+
+| Finding | Status | Evidence and residual |
+| --- | --- | --- |
+| R5-1 (Minor) | **Resolved** | The rule now permits `WriteUInt64`/`WriteInt64` as fixed-width and prohibits the compact `WriteArrayHeader`/`WriteString` and minimal-width `Write(ulong)`/`Write(long)` (amendment lines 151–156); verified in 3.1.12 (`MPW.cs:328,359,403`, `TryWriteUInt64`/`TryWriteInt64` "always used"). Cosmetic residual N6-1. |
+| R5-2 (Minor) | **Resolved** | `position` is stated as an 11-element array (lines 88–90) and contains `encoding`; no `position.encoding` row remains in the dropped/derived table (lines 130–141). `grep` finds no second statement, and `CompiledPosition` minus `Cartesian` is 11 fields. Residual N6-2. |
+| R5-3 (Minor) | **Not resolved** | The Documentation checklist (lines 310–315) still lists only the pipeline doc, data contracts, ADR 0010, and bookkeeping; the body-required `tools/contracts/README.md`, the `06-toolchain-requirements.md` row, and the `verify.sh contracts` entry (lines 242–246) are absent. See R6-1. |
+| R5-4 (Minor) | **Partially resolved** | `site`/`position` `environmentIndex` are `uint64` and the sentinel is scoped to `environment.siteIndex` only (lines 83–90, 173; verified against `EnvironmentCompilationStage`). Residual: the exclusion paragraph still says "Only the integer distance bucket is signed" (line 189); see R6-2. |
+| R5-5 (Minor) | **Resolved** | The regeneration command now starts with `MOCASSIN_UPDATE_GOLDENS=1` (line 216), matching the stated write gate (line 220). |
+| N5-1 (Note) | **Resolved** | The fixture example is `"id": "model-ceria-kmc"` (line 203), consistent with the `<id>` rule (lines 210–211) and the manifest vector ids. |
+| N5-2 (Note) | **Resolved** | Checker step 1 names `contracts/generated/signatures/model-v1.json` (line 232) and step 4 compares `fixtureFormat` as well (line 237). |
+
+#### Round-6 checkpoint verification
+
+| Checkpoint | Result |
+| --- | --- |
+| Writer primitive reason (fixed-width vs compact) | Resolved for `WriteUInt64`/`WriteInt64`/`WriteArrayHeader`/`WriteString`/`Write(ulong)`/`Write(long)`; the `WriteDouble` name is wrong (N6-1) but the byte rule is unaffected. |
+| `position` arity and duplicate exclusion | Resolved: 11 elements, `encoding` included, no exclusion row. |
+| Documentation checklist (README, toolchain row, `verify.sh`) | Not resolved (R6-1). |
+| Distance bucket unsigned; `environment.siteIndex` `-1`; environment indices `uint64` | Resolved in the table/summary/sentinel prose, except the leftover "distance bucket is signed" sentence (R6-2). |
+| Regeneration command sets `MOCASSIN_UPDATE_GOLDENS=1` | Resolved. |
+| Fixture id example and checker descriptor path/metadata | Resolved. |
+| No remaining per-field type / exclusion-rationale contradiction | One contradiction remains (line 189, R6-2); all `int64` entries fall inside the declared exceptions. |
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| Minor | **R6-1 — R5-3 is still not applied, and this round's resolution rows assert that it is.** The Documentation checklist is byte-for-byte the round-5 list: it has no `tools/contracts/README.md` row, no `docs/planning/06-toolchain-requirements.md` row, and no `./tools/verify.sh contracts` entry, although the body requires all three (lines 242–246) and acceptance line 285 names the `verify.sh` entry. The implementor's R5-3 row says the checklist "now explicitly includes" them, and the new "R4/N4 overstatement correction" row says "R5-3 now actually adds the checklist entries". The closeout documentation tick therefore still cannot cover the two required page edits. Add the three entries to the Documentation checklist and correct the two resolution rows. | Amendment lines 242–246, 285, 310–315; `docs/planning/reviews/step-08-amend-1.md` resolution rows R5-3 and "R4/N4 overstatement correction". |
+| Minor | **R6-2 — The exclusion paragraph still contradicts the unsigned distance bucket (R5-4(a) residual).** The same bullet list now says "The distance bucket is unsigned" (line 187) and, two lines later, "Only the integer distance bucket is signed" (line 189). `distanceBucketFm` is `uint64` in both `pairLink` and `pairGeometry` (lines 92, 101) and the summary lists distance buckets as `uint64` (line 171), so line 189 should read that no raw distance is signed, or be deleted. Because the per-field table is declared authoritative the bytes are still determinate (`0xcf`), which is why this stays Minor, but a second implementation could take the sentence as a `0xd3` instruction. | Amendment lines 92, 101, 171, 173, 187–190; ADR 0010 rule 3. |
+| Note | **N6-1 — The primitive list names a `MessagePackWriter` method that does not exist and contradicts itself on the `WriteRaw` rule.** The paragraph says the writer uses "`WriteUInt64`/`WriteInt64`/`WriteDouble` for the fixed-width scalars" (line 152) and then that "All fixed headers and scalar bytes are written through `WriteRaw`/`Advance`" (line 156). MessagePack 3.1.12 has `Write(double)` (which emits `0xcb`) but no `WriteDouble`, so the name comes from the current `BinaryWriter` helper, not `MessagePackWriter`. Both mechanisms produce the same bytes, so this is cosmetic; state `Write(double)` and pick one rule (typed scalar writers plus `WriteRaw` for the forced headers, or `WriteRaw` for everything). | Amendment lines 151–156; `/tmp/opencode/mp/lib/**` and `MPW.cs:328,359,403`; `ModelSignatureProjection.cs:380` (`WriteDouble(BinaryWriter, double)` helper). |
+| Note | **N6-2 — `position.encoding` is now retained without an include rationale.** Removing the contradictory exclusion row was correct, but N4-1 asked for one line per redundant field and the retained `encoding` (whose value is `(0,0,0,p)`) now has none, while the adjacent dropped fields do. One line stating it is kept because it is the literal compiled encoding would close N4-1 completely. Bytes are unaffected. | Amendment lines 88–91, 130–141. |
+| Note | **N6-3 — Request metadata is still one round behind.** `Status` says "round 5 notes resolved; round 6 requested" but `Design review` still says "rounds 1–4; round 4 Ready with notes; round 5 requested" (line 11); the index row is correctly at round 6. Advance the `Design review` row when the round-6 record lands. | Amendment lines 9–11; `docs/planning/amendments/README.md:113`. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**.
+
+#### Verdict
+
+**Ready with notes.** No Blocker or Major remains. Round 6 correctly fixes the writer primitive rationale
+(R5-1), the `position` arity and duplicate `position.encoding` exclusion (R5-2), the `environmentIndex` types and
+sentinel scope (R5-4 b), the regeneration command (R5-5), and the fixture id/checker metadata (N5-1, N5-2); I
+confirmed each against the pinned MessagePack 3.1.12 package and the environment compilation stage. The canonical
+bytes are implementable from the marker table plus the authoritative per-field table.
+
+Two round-5 Minors were claimed resolved but are still open: the Documentation checklist edit is absent
+(R6-1), and the exclusion paragraph still declares the distance bucket signed (R6-2). The resolution rows for
+R5-3 and the "R4/N4 overstatement correction" row should be corrected; this is the second round in which the
+checklist claim does not match the page. N6-1–N6-3 are cosmetic. These are Minor documentation corrections
+that must be applied before implementation and are not waivers; they do not change the conclusion that the
+encoding is implementable. The Python checker remains a byte/type conformance verifier over C#-produced bytes,
+not an independent model-to-projection encoder; Step 11's Rust encoder/vector and this schema review are the
+completeness gates. The top-level `Record state` and all earlier rounds are preserved unaltered; this round's
+verdict is authoritative.
+
+Follow-up owner: Step 08 implementor / planner
+Follow-up issue/step: Apply R6-1, R6-2, and N6-1–N6-3 to
+`docs/planning/amendments/step-08-amend-1-canonical-projection.md` (add the README/toolchain/`verify.sh`
+Documentation checklist entries, delete or correct "Only the integer distance bucket is signed", use
+`Write(double)` and one writer rule, add the `position.encoding` include rationale, and advance the
+`Design review` metadata), correct the R5-3 and overstatement resolution rows, then integrate the amendment,
+refresh the closeout evidence and CI, and re-run the parent audit at the combined commit with A1, A3–A9, and
+m1–m7 in scope.
