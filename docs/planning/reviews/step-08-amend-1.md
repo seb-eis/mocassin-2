@@ -229,6 +229,17 @@ The step agent records resolutions here without altering reviewer text.
 | R2-10 | Fixture metadata uses `fixtureFormat: canonical-projection-v1`, distinct from model/inspection format versions. | this commit |
 | R2-11 | ADR 0010/§3.3 pre-release `model-v1` exception is required in docs. | this commit |
 
+| R3-1 | `StaticCorrection` is explicitly excluded in v1; movement outer length equals path node count and inner length is three; dropped/derived field rationale table added; `pathVector`/`pathLength` are excluded as display-only. | this commit |
+| R3-2 | Per-field table is authoritative; jump tables, canonical tuples, distance buckets, interaction range, and pair/cluster site indices are `uint64`; signed `int64` is limited to cell offsets, enums, and the `-1` environment sentinel. | this commit |
+| R3-3 | Language-neutral quantization operation added, midpoint/fractional vectors pinned, and parent §11.4/`compilation-pipeline.md` updated to all projected float64. | this commit |
+| R3-4 | Authoritative store ownership and regeneration split defined; all five samples required across manifest, signature vectors, fixtures, and C# goldens. | this commit |
+| R3-5 | `msgpack==1.2.4` requirements file, `verify.sh contracts` install step, README, and toolchain-row updates specified. | this commit |
+| R3-6 | GUID-valued IDs and SHA-256 content-hash IDs are split; content hashes are used exactly as generated. | this commit |
+| R3-7 | `ProjectionFixtureTests.WriteProjectionFixtures` and regeneration command named; `projectionSha256` defined; descriptor reuses `model-v1.json`; `ProjectionDescriptorTests` binding defined. | this commit |
+| R3-8 | Writer primitive set fixed to `MessagePackWriter` buffer + `WriteRaw`/`Advance`; compact convenience methods are forbidden. | this commit |
+| R3-9 | Python checker is qualified as a canonicality/type conformance verifier; schema review and Step 11 Rust encoder are the completeness gates. | this commit |
+| R3-10 | ADR 0010 pre-release `model-v1` exception and §3.3 note added; `status: final` is not a release marker. | this commit |
+
 ## Design-review rounds
 
 ### Review round 1

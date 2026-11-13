@@ -110,7 +110,7 @@ If the parent step is already merged or tagged:
 | --- | --- | --- | --- | --- | --- |
 | `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-1-public-math` | [Review](../reviews/step-02-amend-1.md) | `dbf5691`; audit `6341b56` |
 | `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | [Review](../reviews/step-02-amend-2.md) | `dbf5691`; audit `6341b56` |
-| `step-08-amend-1` (`canonical-projection`) | 08 — Model Compilation Pipeline | **Ready with notes** | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` | [Review](../reviews/step-08-amend-1.md) | pending |
+| `step-08-amend-1` (`canonical-projection`) | 08 — Model Compilation Pipeline | **Re-review required** | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` | [Review](../reviews/step-08-amend-1.md) | pending |
 
 `step-02-amend-1` covers the public generic math layer (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`,
 `Matrix4<T>`) and the replacement of the temporary `CellGeometry` array-based inverse. See

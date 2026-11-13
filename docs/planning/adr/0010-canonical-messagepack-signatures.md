@@ -45,6 +45,14 @@ Signatures are computed over a **canonical MessagePack projection** of the logic
 The stored `.msl` payload may remain a MessagePack map with Zstd compression. Readers decode it, re-encode the
 canonical projection, and compare the SHA-256 value with the stored signature.
 
+### Pre-release model layout finalization
+
+The `signatures.model` / `ModelSignatureV1` / `model-v1` layout is finalized once in Step 08 while the `.msl`
+format is unreleased. This is an explicit pre-release exception to rule 1's format-breaking-change warning:
+there is no released compiled-model payload to migrate, and `signatures.model.status = "final"` means
+"finalized for the first release candidate", not "released". Any later field or type change after the first
+released `.msl` requires a version bump and a new ADR.
+
 ### Tooling
 
 - `tools/contracts` emits the projection field order and type information from the manifest.

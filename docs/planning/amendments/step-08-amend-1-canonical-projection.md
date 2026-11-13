@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-08-amend-1` |
 | Parent step | 08 — Model Compilation Pipeline |
-| Status | Ready with notes (round 3; owner acceptance pending) |
+| Status | Re-review required (round 3 notes resolved; round 4 requested) |
 | Branch | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` |
 | Design review | `docs/planning/reviews/step-08-amend-1.md` (round 1 Changes required; re-review requested) |
 | Parent audit | `docs/planning/audits/step-08.md` |
@@ -44,8 +44,8 @@ amendment is integrated before the combined freeze and re-audit.
 - No change to the `ParameterizedModel` payload (Step 09), `.msl` SQLite schema (Step 11), or solver
   behaviour.
 - No change to the compiled geometry, rules, conservation, tracking, or simulation semantics.
-- No new .NET dependency outside the centrally pinned `MessagePack` 3.1.12 package; the Python checker adds the
-  existing `msgpack` development dependency to `tools/contracts/requirements.txt`.
+- No new .NET dependency outside the centrally pinned `MessagePack` 3.1.12 package; the Python checker adds a
+  new dev-only `msgpack==1.2.4` requirement in `tools/contracts/requirements.txt`.
 
 ## Design
 
@@ -76,7 +76,7 @@ Top-level projection (MessagePack array of 9 values):
 #### Structure
 
 `structure` = `[cellVectors array<array<float64>>, volume float64, sites array<site>,
-environments array<environment>, positions array<position>, interactionRange array<int64>]`.
+environments array<environment>, positions array<position>, interactionRange array<uint64>]`.
 
 - `cellVectors`: exactly three arrays of three `float64` values.
 - `interactionRange`: exactly four `int64` values.
@@ -88,7 +88,7 @@ environments array<environment>, positions array<position>, interactionRange arr
   siteId string, stability int64, allowedParticleMask uint64, environmentIndex int64, orbitIndex uint64,
   pairLinks array<pairLink>, clusterLinks array<clusterLink>]`.
 - `encoding` = `[cellA int64, cellB int64, cellC int64, p uint64]`.
-- `pairLink` = `[pairTableIndex uint64, targetP uint64, offset encoding, distanceBucketFm int64]`.
+- `pairLink` = `[pairTableIndex uint64, targetP uint64, offset encoding, distanceBucketFm uint64]`.
 - `clusterLink` = `[clusterTableIndex uint64, siteSlot int64]`.
 
 #### Energy
@@ -97,32 +97,46 @@ environments array<environment>, positions array<position>, interactionRange arr
 clusterTables array<clusterTable>]`.
 
 - `pairGeometry` = `[geometryId string, energyId string, pairTableIndex uint64, centerSiteIndex uint64,
-  centerP uint64, partnerSiteIndex uint64, partnerP uint64, offset encoding, distanceBucketFm int64,
+  centerP uint64, partnerSiteIndex uint64, partnerP uint64, offset encoding, distanceBucketFm uint64,
   isChiral bool, chiralPartnerGeometryId string|nil]`.
 - `pairTable` = `[index uint64, energyId string, particleCount uint64]`. Energy values are excluded.
 - `clusterTable` = `[clusterEnergyId string, clusterId string, centerSiteIndex uint64, centerP uint64,
   sitePIndices array<uint64>, geometryEncodings array<encoding>, occupations array<occupation>,
-  particleTableMapping array<int64>]`. Cluster energy values are excluded.
-- `occupation` = `[canonicalCode uint64, canonicalTuple array<int64>,
+  particleTableMapping array<uint64>]`. Cluster energy values are excluded.
+- `occupation` = `[canonicalCode uint64, canonicalTuple array<uint64>,
   expansions array<[occupationCode uint64, permutationIndex int64]>]`.
 
 #### Transitions
 
 `transitions` = `[collections array<collection>, directions array<direction>, rules array<rule>,
-globalTrackers array<globalTracker>, staticTrackers array<staticTracker>, jumpCounts array<int64>,
-jumpOffsets array<int64>, jumpMappings array<int64>]`.
+globalTrackers array<globalTracker>, staticTrackers array<staticTracker>, jumpCounts array<uint64>,
+jumpOffsets array<uint64>, jumpMappings array<uint64>]`.
 
 - `collection` = `[index uint64, transitionKind int64, transitionId string, kind int64,
   mobileParticleMask uint64, directionIndices array<uint64>]`.
+- `movement` has one three-component `float64` vector per path node. The outer length equals `path.Length`.
 - `direction` = `[objectId string, collectionIndex uint64, positionId uint64, path array<encoding>,
-  movement array<array<float64>> (3), pathVector array<float64> (3), isInverse bool,
-  equivalentStartPositions array<uint64>]`.
+  movement array<array<float64>>, isInverse bool, equivalentStartPositions array<uint64>]`.
+- `rule` `movement` has one three-component `float64` vector per path node; its outer length equals the
+  representative direction path length.
 - `rule` = `[ruleGeometryId string, collectionIndex uint64, directionIndices array<uint64>,
-  state0 uint64, state1 uint64, state2 uint64, movement array<array<float64>> (3),
+  state0 uint64, state1 uint64, state2 uint64, movement array<array<float64>>,
   chargeTransportVector array<float64> (3), trackerOrder array<uint64>, isInverse bool]`.
   The default attempt frequency is a constant and is excluded.
 - `globalTracker` = `[index uint64, collectionIndex uint64, particleIndex uint64]`.
 - `staticTracker` = `[index uint64, positionIndex uint64, particleIndex uint64]`.
+
+Dropped/derived fields and rationale:
+
+| Field | Treatment | Rationale |
+| --- | --- | --- |
+| `collection.ruleIndices` | excluded | Derived from `rule.collectionIndex`; rule array order is canonical. |
+| `rule.directionIndex` | excluded | `directionIndices` carries every merged direction; the dense representative index is not a stable identity. |
+| `clusterTable.index` | excluded | Array position is the dense index; `ClusterEnergyId` is the stable identity. |
+| pair `CenterSiteId`/`PartnerSiteId` | excluded | The structure site table and signed site indices carry the identity; duplicate GUIDs would add no information. |
+| `simulation.intent` | excluded | `UseDualDofCorrection`/`UsePreRun` are derived from kind/MCSP and runtime settings; Step 10/11 own the job flags. |
+| `direction.pathVector`, `pathLength` | excluded | Display/tracking only and derivable from `movement` plus the cell vectors; the signed `movement` and rule `chargeTransportVector` carry the physics. |
+| `StaticCorrection` | excluded in v1 | Null in v1; a versioned field when the S2 correction lands. |
 
 #### Simulations
 
@@ -132,9 +146,11 @@ pre-run, break settings, job counts, seeds, and instructions are excluded.
 
 ### Canonical encoding
 
-The writer is `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` (internal). It uses the centrally
-pinned `MessagePack` 3.1.12 package for MessagePack framing and writes canonical fixed-width values. The byte
-rules are:
+The writer is `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` (internal). It uses
+`MessagePackWriter` over an `IBufferWriter<byte>` only for buffer management and `WriteRaw` for every forced
+header/value; it must not call the compact `WriteArrayHeader`, `WriteString`, `WriteUInt64`, or `WriteInt64`
+convenience methods, because those choose minimal-width encodings. All fixed headers and scalar bytes are
+written through `WriteRaw`/`Advance` exactly as in the table below. The byte rules are:
 
 | Value | Encoding |
 | --- | --- |
@@ -148,16 +164,24 @@ rules are:
 | `bool` | `0xc3` (true) / `0xc2` (false) |
 | nil | `0xc0` |
 
-- Counts, dense indices, particle masks, state codes, and tracker indices are `uint64`. Spatial cell
-  components, stability/kind enum values, jump count/offset/mapping values, and cluster canonical tuples are
-  `int64`.
-- All projected floating-point values are `float64`, quantized to 12 decimal places with round-half-away-
-  from-zero, with `-0.0` normalized to `+0.0`. NaN and Inf are rejected. Examples: `0.0000000000005` →
-  `0.000000000001`, `-0.0000000000004` → `0.0`, `-0.0` → `0.0`. This strengthens the parent §11.4 wording
-  (which mentioned charge transport vectors) and the parent page/pipeline doc are updated in the amendment.
+- The per-field table above is authoritative. As a summary: non-negative counts, dense indices, particle
+  masks, state codes, tracker indices, jump counts/offsets/mappings, distance buckets, cluster canonical
+  tuples/mappings, and interaction-range cell counts are `uint64`. Signed `int64` is used only for spatial
+  cell offsets, stability/kind enum values, and the `-1` stable-environment sentinel in
+  `site.environmentIndex`/`position.environmentIndex`/`environment.siteIndex`. Pair/cluster site indices are
+  non-negative and therefore `uint64`.
+- All projected floating-point values are `float64`. The language-neutral quantization operation is:
+  `scaled = value * 1e12`; if `scaled >= 0`, `rounded = floor(scaled + 0.5)`, else
+  `rounded = ceil(scaled - 0.5)`; `result = rounded / 1e12`; `result == 0` is normalized to `+0.0`.
+  This is round-half-away-from-zero on the binary64 product, not the language `round` function. NaN and Inf
+  are rejected. Pin `5e-13 → 1e-12`, `-4e-13 → 0.0`, `0.30000000000000004 → 0.3`, and `-0.0 → 0.0` in both
+  C# and Python. This amendment updates parent Step 08 §11.4 and `compilation-pipeline.md` from
+  “charge transport vectors are quantized” to “all projected float64 values are quantized”.
 - Every field is present. Optional strings use `nil`; no field is omitted.
 - The projection is the top-level array above. The signature is
   `SHA-256("mocassin/model-signature/v1" || 0x00 || projection)`.
+- `StaticCorrection` is absent from `model-v1`: v1 stores `null` and Step 15 uses the dynamic S2 path. If a
+  static correction lands, a new projection version adds a `staticCorrection` field.
 - No compression, timestamps, diagnostics, timings, cache state, file names, or display-only distances
   (`DistanceAngstrom`, `pathLength`) are encoded. Only the integer distance bucket is signed. The raw
   display distance and path length are inspection-only.
@@ -180,8 +204,19 @@ canonical MessagePack projection bytes) and `tests/contracts/projections/<id>.js
 }
 ```
 
-The fixture is generated by the real compiler and checked for freshness by a C# test. The files are tracked;
-they are not a package format.
+The fixture is generated by `ProjectionFixtureTests.WriteProjectionFixtures` (a C# test using the real
+compiler); regenerate with:
+
+```sh
+dotnet test src/dotnet/Mocassin.Compilation.Tests/Mocassin.Compilation.Tests.csproj -c Release \
+  --filter FullyQualifiedName~ProjectionFixtureTests.WriteProjectionFixtures
+```
+
+`ProjectionFixtureTests` also asserts that the checked-in `.bin`/`.json` files match a fresh compile.
+`projectionSha256` is the lowercase SHA-256 of the raw `.bin` bytes. The descriptor is the generated
+`contracts/generated/signatures/model-v1.json` (no duplicate `model-v1.projection.json`); the
+`ProjectionDescriptorTests` reads that file and compares its recursive field names/order/types with the
+internal `ProjectionLayout` table used by the encoder. The files are tracked; they are not a package format.
 
 `tools/contracts/generate.py` emits the complete `model-v1` projection descriptor (nested field names, order,
 and scalar types) to `contracts/generated/signatures/model-v1.projection.json`. The Python checker
@@ -194,13 +229,22 @@ and scalar types) to `contracts/generated/signatures/model-v1.projection.json`. 
 4. compares the re-encoded bytes with the fixture and recomputes the domain-separated signature and
    `projectionSha256`.
 
+`tools/contracts/requirements.txt` is added with `msgpack==1.2.4`. `tools/verify.sh run_contracts` installs it
+with `python -m pip install -r tools/contracts/requirements.txt` before running
+`python tools/contracts/check_model_projection.py --check`. `tools/contracts/README.md` documents the checker
+and fixture regeneration; `docs/planning/06-toolchain-requirements.md` moves the `msgpack` row to Step 08
+(dev-only, also used by Step 22).
+
 The checker runs in `./tools/verify.sh contracts`, so a descriptor/encoder drift fails the normal gate. The
 fixtures cover ceria KMC, ceria MMC, vehicle5, interstitialcy5, and barium zirconate. Step 11 remains the owner
 of the production Rust encoder and vector; Python is an independent pre-Step-11 check.
 
-GUID/identifier strings are encoded as lowercase `Guid.ToString("D", CultureInfo.InvariantCulture)` text
-(`8-4-4-4-12`, hyphens, lowercase hex). The fixture `fixtureFormat` is distinct from the compiled-model
-`formatVersion` and the inspection `formatVersion`.
+GUID-valued IDs (`ParticleId`, `ParticleSetId`, `CellSiteId`, `ClusterId`, transition IDs, `SimulationId`) are
+encoded as lowercase `Guid.ToString("D", CultureInfo.InvariantCulture)` text (`8-4-4-4-12`, hyphens,
+lowercase hex). Content-hash IDs (`GeometryId`, `EnergyId`, `ClusterEnergyId`, `ObjectId`,
+`RuleGeometryId`) are the lowercase 64-character SHA-256 strings exactly as produced; they are never parsed as
+GUIDs. The fixture `fixtureFormat` is distinct from the compiled-model `formatVersion` and the inspection
+`formatVersion`.
 
 ### Versioning
 
@@ -232,8 +276,9 @@ projection.
 - [ ] The manifest defines every canonical projection field with name, type, order, and nested section layout.
 - [ ] The generator emits the complete projection descriptor and `--check` is current; the Python checker is in `verify.sh contracts`.
 - [ ] The C# encoder uses the standard MessagePack package with fixed-width canonical integers.
-- [ ] An independent Python implementation reproduces all five projection fixtures and signatures.
-- [ ] Golden signatures and inspection JSON hashes are regenerated and deterministic.
+- [ ] An independent Python conformance checker reproduces all five projection fixtures and signatures; it is
+  a byte/type verifier, not the production model encoder.
+- [ ] Golden signatures and inspection JSON hashes are regenerated and deterministic; the manifest, `signature-vectors.json`, `.bin`/`.json` fixtures, and C# goldens all contain the same five samples.
 - [ ] Energy values, runtime settings, timings, diagnostics, and file names remain excluded.
 - [ ] All local gates pass, including `api` and `contracts`.
 
@@ -246,6 +291,7 @@ projection.
 | C# canonical encoding | Format version is uint64; strings/bin/arrays use fixed MessagePack headers; bool/nil are `0xc3`/`0xc2`/`0xc0`; -0.0 normalized |
 | Optional values | A chiral pair with a partner and one without encode string vs nil reproducibly |
 | Fixed-width integers | Python decodes/encodes uint64/int64/float64 per the descriptor; 2.0 stays float64 |
+| Quantization midpoint vector | `5e-13→1e-12`, `-4e-13→0.0`, `0.30000000000000004→0.3`, `-0.0→0.0` match in C# and Python |
 | Independent Python vectors | Python re-encoding matches the `.bin` fixtures for ceria, MMC, vehicle, interstitialcy, and BaZrO₃ |
 | Determinism | Two compiles produce identical bytes/signature/JSON |
 | Display-only exclusion | Changing a display distance without changing its bucket does not change the signature |
