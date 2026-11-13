@@ -7,6 +7,8 @@ using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Symmetry.Geometry;
 
+using Mocassin.Compilation.Diagnostics;
+
 namespace Mocassin.Compilation.Structure;
 
 /// <summary>
@@ -72,7 +74,7 @@ internal sealed class EnvironmentCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromMessage(
                     context,
-                    CompilationErrorCodes.EnergyGeometry,
+                    CompilationDiagnosticCodes.EnergyGeometry,
                     $"An unstable environment references an unknown site '{environment.SiteId:D}'.");
             }
 

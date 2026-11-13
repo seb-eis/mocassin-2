@@ -12,6 +12,8 @@ using Mocassin.Core.Model.Transitions;
 using Mocassin.Symmetry.Transitions;
 using static Mocassin.Compilation.Transitions.TransitionRuleHelpers;
 
+using Mocassin.Compilation.Diagnostics;
+
 namespace Mocassin.Compilation.Transitions;
 
 /// <summary>
@@ -46,7 +48,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
         {
             return CompilationFailure.FromSource(
                 context,
-                CompilationErrorCodes.Precondition,
+                CompilationDiagnosticCodes.Precondition,
                 "A simulation transition cannot be resolved for compilation.",
                 workDiagnostics);
         }
@@ -63,11 +65,13 @@ internal sealed class TransitionCompilationStage : ICompilationStage
         {
             return CompilationFailure.FromSource(
                 context,
-                CompilationErrorCodes.PathExpansion,
+                CompilationDiagnosticCodes.PathExpansion,
                 "The transition path resolver cannot be built.",
                 resolverDiagnostics);
         }
 
+        var warnings = new DiagnosticBag();
+        AddUnusedTransitionWarnings(context, works, warnings);
         var drafts = new List<DirectionDraft>();
         var inverseByForward = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var work in works)
@@ -77,7 +81,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromSource(
                     context,
-                    CompilationErrorCodes.PathExpansion,
+                    CompilationDiagnosticCodes.PathExpansion,
                     "A transition path cannot be expanded into compiled directions.",
                     diagnostics);
             }
@@ -128,7 +132,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromMessage(
                     context,
-                    CompilationErrorCodes.NoValidRules,
+                    CompilationDiagnosticCodes.NoValidRules,
                     string.Create(
                         CultureInfo.InvariantCulture,
                         $"Transition '{work.Transition.Id:D}' produced no valid rules after conservation filtering " +
@@ -219,6 +223,15 @@ internal sealed class TransitionCompilationStage : ICompilationStage
                 [.. collectionRules.Select(static rule => rule.Index)]));
         }
 
+        if (rulesByCollection.Length > context.Options.AdvisoryRuleCount)
+        {
+            warnings.Add(new Diagnostic(
+                CompilationDiagnosticCodes.AdvisoryBudget,
+                DiagnosticSeverity.Warning,
+                $"The compiled rule count {rulesByCollection.Length} exceeds the advisory budget " +
+                $"{context.Options.AdvisoryRuleCount}; the hard limit was not exceeded."));
+        }
+
         var model = new CompiledTransitionModel(
             collections.MoveToImmutable(),
             directions.MoveToImmutable(),
@@ -229,7 +242,51 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             context.Particles.Count,
             context.Structure.PositionCount);
         context.Cache?.GetOrAdd(StageCacheKeys.Rules(context), () => model);
-        return new CompilationStageOutcome(context with { Transitions = model }, []);
+        return new CompilationStageOutcome(context with { Transitions = model }, warnings.Sorted);
+    }
+
+    private static void AddUnusedTransitionWarnings(
+        CompilationContext context,
+        ImmutableArray<TransitionWork> works,
+        DiagnosticBag bag)
+    {
+        if (!context.Options.EmitUnusedTransitionWarnings)
+        {
+            return;
+        }
+
+        var referenced = works.Select(static work => work.Transition).ToHashSet();
+        if (!context.Project.KineticTransitions.IsDefault)
+        {
+            foreach (var transition in context.Project.KineticTransitions)
+            {
+                var reference = TransitionRef.From(transition.Id);
+                if (!referenced.Contains(reference))
+                {
+                    bag.Add(new Diagnostic(
+                        CompilationDiagnosticCodes.UnusedTransition,
+                        DiagnosticSeverity.Warning,
+                        $"Kinetic transition '{transition.Name}' is not referenced by any simulation and was not compiled.",
+                        new ModelPath("kineticTransition", transition.Id.Value)));
+                }
+            }
+        }
+
+        if (!context.Project.MetropolisTransitions.IsDefault)
+        {
+            foreach (var transition in context.Project.MetropolisTransitions)
+            {
+                var reference = TransitionRef.From(transition.Id);
+                if (!referenced.Contains(reference))
+                {
+                    bag.Add(new Diagnostic(
+                        CompilationDiagnosticCodes.UnusedTransition,
+                        DiagnosticSeverity.Warning,
+                        $"Metropolis transition '{transition.Name}' is not referenced by any simulation and was not compiled.",
+                        new ModelPath("metropolisTransition", transition.Id.Value)));
+                }
+            }
+        }
     }
 
     private static bool TryBuildWorks(
@@ -259,7 +316,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             if (transition is null || chain is null)
             {
                 bag.Add(new Diagnostic(
-                    CompilationErrorCodes.Precondition,
+                    CompilationDiagnosticCodes.Precondition,
                     DiagnosticSeverity.Error,
                     $"Simulation kinetic transition '{reference.Id:D}' cannot be resolved.",
                     new ModelPath("kineticTransition", reference.Id)));
@@ -276,7 +333,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             if (transition is null || chain is null)
             {
                 bag.Add(new Diagnostic(
-                    CompilationErrorCodes.Precondition,
+                    CompilationDiagnosticCodes.Precondition,
                     DiagnosticSeverity.Error,
                     $"Simulation Metropolis transition '{reference.Id:D}' cannot be resolved.",
                     new ModelPath("metropolisTransition", reference.Id)));
@@ -335,7 +392,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             if (siteA is null || siteB is null)
             {
                 bag.Add(new Diagnostic(
-                    CompilationErrorCodes.PathExpansion,
+                    CompilationDiagnosticCodes.PathExpansion,
                     DiagnosticSeverity.Error,
                     "A Metropolis transition references an unknown site.",
                     new ModelPath("metropolisTransition", work.Transition.Id)));
@@ -448,7 +505,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
         {
             error = CompilationFailure.FromMessage(
                 context,
-                CompilationErrorCodes.Conservation,
+                CompilationDiagnosticCodes.Conservation,
                 "The transition chain length does not match the compiled path length.");
             return false;
         }
@@ -461,7 +518,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             {
                 error = CompilationFailure.FromMessage(
                     context,
-                    CompilationErrorCodes.Conservation,
+                    CompilationDiagnosticCodes.Conservation,
                     $"The transition chain references an unknown state-change group '{groups[node]:D}'.");
                 return false;
             }
@@ -477,7 +534,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
                     {
                         error = CompilationFailure.FromMessage(
                             context,
-                            CompilationErrorCodes.Conservation,
+                            CompilationDiagnosticCodes.Conservation,
                             $"A state-change group references an unknown state change '{stateChangeId:D}'.");
                         return false;
                     }
@@ -487,7 +544,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
                     {
                         error = CompilationFailure.FromMessage(
                             context,
-                            CompilationErrorCodes.Conservation,
+                            CompilationDiagnosticCodes.Conservation,
                             "A state change references an uncompiled particle.");
                         return false;
                     }
@@ -689,7 +746,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
 
             ambiguity = CompilationFailure.FromMessage(
                 context,
-                CompilationErrorCodes.RuleAmbiguity,
+                CompilationDiagnosticCodes.RuleAmbiguity,
                 $"Two rules in collection {direction.CollectionIndex} share state0 {outcome.State0} with different outcomes " +
                 $"('{existing.ProvisionalRuleId}' and '{ComputeRuleGeometryId(outcome, direction)}').",
                 new ModelPath(

@@ -25,8 +25,8 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 | `cluster-compilation` | `feature/step-08-model-compilation-pipeline/cluster-compilation` | Done | `verify.sh dotnet` (943 tests), `structure`, `api`, `contracts` pass | — | `dee2034` |
 | `transition-rule-compilation` | `feature/step-08-model-compilation-pipeline/transition-rule-compilation` | Done | `verify.sh dotnet` (947 tests), `structure`, `api`, `contracts` pass | — | `26366aa` |
 | `simulation-encoding` | `feature/step-08-model-compilation-pipeline/simulation-encoding` | Done | `verify.sh dotnet` (950 tests), `structure`, `api`, `contracts` pass | — | `fde55fd` |
-| `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Done | `verify.sh dotnet` (954 tests), `structure`, `api`, `contracts` pass | — | — |
-| `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Not started | — | — | — |
+| `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Done | `verify.sh dotnet` (954 tests), `structure`, `api`, `contracts` pass | — | `10966cf` |
+| `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Done | `verify.sh dotnet` (960 tests), `structure`, `api`, `contracts`, `docs` pass | — | — |
 | `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Not started | — | — | — |
 
 ### Implementation notes and deviations

@@ -8,6 +8,8 @@ using Mocassin.Core.Geometry;
 using Mocassin.Symmetry.Energy;
 using Mocassin.Symmetry.Geometry;
 
+using Mocassin.Compilation.Diagnostics;
+
 namespace Mocassin.Compilation.Energy;
 
 /// <summary>
@@ -32,7 +34,7 @@ internal sealed class PairCompilationStage : ICompilationStage
         {
             return CompilationFailure.FromSource(
                 context,
-                CompilationErrorCodes.EnergyGeometry,
+                CompilationDiagnosticCodes.EnergyGeometry,
                 "The pair geometries cannot be sampled.",
                 diagnostics);
         }
@@ -50,7 +52,7 @@ internal sealed class PairCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromMessage(
                     context,
-                    CompilationErrorCodes.EnergyGeometry,
+                    CompilationDiagnosticCodes.EnergyGeometry,
                     $"A sampled pair references an unknown site ('{preview.SiteAId:D}', '{preview.SiteBId:D}').");
             }
 

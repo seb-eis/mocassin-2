@@ -6,6 +6,8 @@ using Mocassin.Compilation.Context;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Model.Structure;
 
+using Mocassin.Compilation.Diagnostics;
+
 namespace Mocassin.Compilation.Structure;
 
 /// <summary>
@@ -38,7 +40,7 @@ internal sealed class StructureCompilationStage : ICompilationStage
                 }
 
                 bag.Add(new Diagnostic(
-                    CompilationErrorCodes.CacheIntegrity,
+                    CompilationDiagnosticCodes.CacheIntegrity,
                     DiagnosticSeverity.Warning,
                     "A cached structure entry failed its integrity check and was recomputed."));
             }
@@ -72,7 +74,7 @@ internal sealed class StructureCompilationStage : ICompilationStage
         {
             return CompilationFailure.FromSource(
                 context,
-                CompilationErrorCodes.Structure,
+                CompilationDiagnosticCodes.Structure,
                 "The compiled site table cannot be built.",
                 bag.Sorted);
         }
@@ -126,7 +128,7 @@ internal sealed class StructureCompilationStage : ICompilationStage
             if (!context.Particles.TryGetIndex(particleId, out var index) || index == 0)
             {
                 bag.Add(new Diagnostic(
-                    CompilationErrorCodes.Structure,
+                    CompilationDiagnosticCodes.Structure,
                     DiagnosticSeverity.Error,
                     $"Site '{site.Name}' references an uncompiled particle '{particleId:D}'.",
                     new ModelPath("cellSite", site.Id.Value, "particleSetId")));

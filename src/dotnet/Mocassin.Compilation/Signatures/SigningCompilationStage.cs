@@ -4,6 +4,8 @@ using Mocassin.Compilation.Compiler;
 using Mocassin.Compilation.Context;
 using Mocassin.Core.Diagnostics;
 
+using Mocassin.Compilation.Diagnostics;
+
 namespace Mocassin.Compilation.Signatures;
 
 /// <summary>
@@ -63,7 +65,7 @@ internal sealed class SigningCompilationStage : ICompilationStage
             return new CompilationStageOutcome(
                 context,
                 [new Diagnostic(
-                    CompilationErrorCodes.Signature,
+                    CompilationDiagnosticCodes.Signature,
                     DiagnosticSeverity.Error,
                     $"The compiled model cannot be signed: {exception.Message}")]);
         }

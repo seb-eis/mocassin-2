@@ -3,6 +3,8 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using Mocassin.Compilation.Caching;
 using Mocassin.Compilation.Context;
 using Mocassin.Core.Diagnostics;
@@ -122,7 +124,11 @@ internal static class CompilationOrchestrator
             model?.SpaceGroupDataSha256,
             stageResults,
             cache?.Statistics ?? CompilationCacheStatistics.Empty,
-            BuildSummary(status, failedStage, finalized.Diagnostics));
+            BuildSummary(status, failedStage, finalized.Diagnostics))
+        {
+            Counts = model is null ? CompilationCounts.Empty : CompilationCounts.FromModel(model),
+            InputHashes = BuildInputHashes(project),
+        };
         return new CompilationResult(status, model, finalized.Diagnostics, report);
     }
 
@@ -153,6 +159,30 @@ internal static class CompilationOrchestrator
                 stage.Elapsed))
             .ToImmutableArray();
         return new FinalizedStages(diagnostics, results);
+    }
+
+    private static CompilationInputHashes BuildInputHashes(Project project)
+    {
+        var references = project.Simulations.IsDefault
+            ? []
+            : project.Simulations
+                .SelectMany(static simulation => simulation.TransitionIds.IsDefault ? [] : simulation.TransitionIds)
+                .Distinct()
+                .OrderBy(static reference => reference.Kind)
+                .ThenBy(static reference => reference.Id)
+                .ToArray();
+        var closures = references
+            .Select(reference => ProjectHasher.ComputeTransition(project, reference))
+            .ToArray();
+        var transitionHash = Convert.ToHexStringLower(
+            SHA256.HashData(Encoding.UTF8.GetBytes(string.Join('|', closures))));
+        return new CompilationInputHashes(
+            ProjectHasher.Compute(project),
+            ProjectHasher.ComputeStructure(project.Structure),
+            ProjectHasher.ComputeEnergy(project.Model),
+            transitionHash,
+            ProjectHasher.ComputeDocument(project),
+            ProjectHasher.ComputeSimulationSelection(project));
     }
 
     private static string BuildSummary(

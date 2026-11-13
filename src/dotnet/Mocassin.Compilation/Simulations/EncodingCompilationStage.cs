@@ -3,7 +3,9 @@
 using System.Collections.Immutable;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Compilation.Context;
+using Mocassin.Compilation.Diagnostics;
 using Mocassin.Compilation.Transitions;
+using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Model.Simulations;
 
 namespace Mocassin.Compilation.Simulations;
@@ -70,6 +72,21 @@ internal sealed class EncodingCompilationStage : ICompilationStage
         };
 
         var simulations = BuildSimulations(context, encoded);
+        var warnings = new DiagnosticBag();
+        var tableBytes = context.Energy is null
+            ? 0L
+            : context.Energy.PairTables.Sum(
+                  static table => (long)table.ParticleCount * table.ParticleCount * sizeof(double))
+              + context.Energy.ClusterTables.Sum(static table => (long)table.OccupationCount * sizeof(double));
+        if (tableBytes > context.Options.AdvisoryEnergyTableBytes)
+        {
+            warnings.Add(new Diagnostic(
+                CompilationDiagnosticCodes.AdvisoryBudget,
+                DiagnosticSeverity.Warning,
+                $"The estimated energy-table size {tableBytes} bytes exceeds the advisory budget " +
+                $"{context.Options.AdvisoryEnergyTableBytes}; the hard limit was not exceeded."));
+        }
+
         context.Cache?.GetOrAdd(
             StageCacheKeys.Encoding(context),
             () => new EncodingCacheEntry(encoded, simulations));

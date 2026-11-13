@@ -88,6 +88,16 @@ public sealed record CompilationReport
     public CompilationCacheStatistics Cache { get; }
 
     /// <summary>
+    /// Gets the authoritative compiled-content counts.
+    /// </summary>
+    public CompilationCounts Counts { get; init; } = CompilationCounts.Empty;
+
+    /// <summary>
+    /// Gets the compilation input hashes.
+    /// </summary>
+    public CompilationInputHashes InputHashes { get; init; } = CompilationInputHashes.Empty;
+
+    /// <summary>
     /// Gets the human-readable run summary.
     /// </summary>
     public string Summary { get; }

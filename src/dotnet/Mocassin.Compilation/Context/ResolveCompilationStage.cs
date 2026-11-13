@@ -11,6 +11,8 @@ using Mocassin.Symmetry.Geometry;
 using Mocassin.Symmetry.SpaceGroups;
 using Mocassin.Symmetry.Structure;
 
+using Mocassin.Compilation.Diagnostics;
+
 namespace Mocassin.Compilation.Context;
 
 /// <summary>
@@ -36,7 +38,7 @@ internal sealed class ResolveCompilationStage : ICompilationStage
         {
             return CompilationFailure.FromSource(
                 context,
-                CompilationErrorCodes.Precondition,
+                CompilationDiagnosticCodes.Precondition,
                 "The structure space group cannot be resolved for compilation.",
                 bag.Sorted);
         }
@@ -47,7 +49,7 @@ internal sealed class ResolveCompilationStage : ICompilationStage
             bag.AddRange(cellDiagnostics);
             return CompilationFailure.FromSource(
                 context,
-                CompilationErrorCodes.Structure,
+                CompilationDiagnosticCodes.Structure,
                 "The structure cell cannot be built for compilation.",
                 bag.Sorted);
         }
@@ -71,7 +73,7 @@ internal sealed class ResolveCompilationStage : ICompilationStage
             bag.AddRange(encoderDiagnostics);
             return CompilationFailure.FromSource(
                 context,
-                CompilationErrorCodes.Structure,
+                CompilationDiagnosticCodes.Structure,
                 "The structure cannot be expanded into canonical P1 positions.",
                 bag.Sorted);
         }
@@ -82,7 +84,7 @@ internal sealed class ResolveCompilationStage : ICompilationStage
         {
             return CompilationFailure.FromSource(
                 context,
-                CompilationErrorCodes.Precondition,
+                CompilationDiagnosticCodes.Precondition,
                 "The particle model cannot be compiled.",
                 bag.Sorted);
         }
@@ -120,7 +122,7 @@ internal sealed class ResolveCompilationStage : ICompilationStage
             if (particles.Count > 63)
             {
                 bag.Add(new Diagnostic(
-                    CompilationErrorCodes.CompileLimit,
+                    CompilationDiagnosticCodes.CompileLimit,
                     DiagnosticSeverity.Error,
                     "The compiled particle table exceeds the 6-bit occupation-code limit."));
                 return null;
@@ -129,7 +131,7 @@ internal sealed class ResolveCompilationStage : ICompilationStage
             if (particle.Id == ParticleId.Void)
             {
                 bag.Add(new Diagnostic(
-                    CompilationErrorCodes.Precondition,
+                    CompilationDiagnosticCodes.Precondition,
                     DiagnosticSeverity.Error,
                     "An authored particle reuses the reserved implicit void identifier."));
                 return null;

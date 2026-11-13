@@ -2,11 +2,23 @@
 
 Every diagnostic emitted by project validation, model compilation, and the CLI has a stable code. The
 catalog below is generated from the same descriptors the application uses (`CoreDiagnosticCatalog`,
-`SymmetryDiagnosticCatalog`, and the Step 07 descriptors); a documentation-drift test fails when this page and
+`SymmetryDiagnosticCatalog`, the Step 08 compilation descriptors, and the Step 07 descriptors); a documentation-drift test fails when this page and
 the catalog disagree. Per-instance `hint` values are supplied by the producing rule and may be more specific.
 
 | Code | Severity | Owner | Title | Help |
 | --- | --- | --- | --- | --- |
+| [`CMP001`](#cmp001) | error | Step 08 — model compilation pipeline | A required compilation precondition failed | Correct the referenced model object or the compiler input, then compile again. |
+| [`CMP002`](#cmp002) | error | Step 08 — model compilation pipeline | The structure cannot be encoded or P1-expanded for compilation | Correct the structure, space group, cell, or site coordinates and revalidate. |
+| [`CMP003`](#cmp003) | error | Step 08 — model compilation pipeline | Pair or cluster geometry cannot be resolved during compilation | Correct the environment, cluster, or site geometry and revalidate. |
+| [`CMP004`](#cmp004) | error | Step 08 — model compilation pipeline | Two rules in one collection share a start state but differ in outcome | Split or correct the overlapping transition rules so one start state has one outcome. |
+| [`CMP005`](#cmp005) | error | Step 08 — model compilation pipeline | A transition produces no valid rules after conservation filtering | Check the state changes, particle symbols, and total charge for mass and charge conservation. |
+| [`CMP006`](#cmp006) | error | Step 08 — model compilation pipeline | A configured compilation limit is exceeded | Reduce the model size or raise the documented compiler limit knowingly. |
+| [`CMP007`](#cmp007) | error | Step 08 — model compilation pipeline | A transition path cannot be expanded into compiled directions | Place every path point on a canonical P1 position and revalidate the transition. |
+| [`CMP008`](#cmp008) | error | Step 08 — model compilation pipeline | Mass or charge conservation cannot be evaluated | Correct the state changes, particle symbols, or charges and revalidate. |
+| [`CMP009`](#cmp009) | warning | Step 08 — model compilation pipeline | A transition is not referenced by any simulation and was not compiled | Reference the transition from a simulation or remove it. |
+| [`CMP010`](#cmp010) | warning | Step 08 — model compilation pipeline | The advisory rule or table budget is exceeded | Review the model size; the hard compilation limit has not been exceeded. |
+| [`CMP011`](#cmp011) | error | Step 08 — model compilation pipeline | The compiled model cannot be signed | Check the compiled model for missing provenance or non-finite values. |
+| [`CMP012`](#cmp012) | warning | Step 08 — model compilation pipeline | A cached stage result failed its integrity check and was recomputed | No action is required; the compiler recomputed the affected stage. |
 | [`ENM001`](#enm001) | error | Step 05 — energy model | An environment cutoff is not positive and finite | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`ENM002`](#enm002) | warning | Step 05 — energy model | An environment cutoff exceeds half the smallest cell dimension | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`ENM003`](#enm003) | error | Step 05 — energy model | A filter range is inverted or extends beyond the owning environment cutoff | Review the referenced model object, correct the reported condition, and revalidate. |
@@ -149,6 +161,54 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 | [`TRN028`](#trn028) | error | Step 04 — transition model | A resolved kinetic path stability sequence does not match the built-in pattern sequence | Review the referenced model object, correct the reported condition, and revalidate. |
 
 ## Codes
+
+### CMP001
+
+**A required compilation precondition failed.** Correct the referenced model object or the compiler input, then compile again.
+
+### CMP002
+
+**The structure cannot be encoded or P1-expanded for compilation.** Correct the structure, space group, cell, or site coordinates and revalidate.
+
+### CMP003
+
+**Pair or cluster geometry cannot be resolved during compilation.** Correct the environment, cluster, or site geometry and revalidate.
+
+### CMP004
+
+**Two rules in one collection share a start state but differ in outcome.** Split or correct the overlapping transition rules so one start state has one outcome.
+
+### CMP005
+
+**A transition produces no valid rules after conservation filtering.** Check the state changes, particle symbols, and total charge for mass and charge conservation.
+
+### CMP006
+
+**A configured compilation limit is exceeded.** Reduce the model size or raise the documented compiler limit knowingly.
+
+### CMP007
+
+**A transition path cannot be expanded into compiled directions.** Place every path point on a canonical P1 position and revalidate the transition.
+
+### CMP008
+
+**Mass or charge conservation cannot be evaluated.** Correct the state changes, particle symbols, or charges and revalidate.
+
+### CMP009
+
+**A transition is not referenced by any simulation and was not compiled.** Reference the transition from a simulation or remove it.
+
+### CMP010
+
+**The advisory rule or table budget is exceeded.** Review the model size; the hard compilation limit has not been exceeded.
+
+### CMP011
+
+**The compiled model cannot be signed.** Check the compiled model for missing provenance or non-finite values.
+
+### CMP012
+
+**A cached stage result failed its integrity check and was recomputed.** No action is required; the compiler recomputed the affected stage.
 
 ### ENM001
 

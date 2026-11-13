@@ -14,6 +14,8 @@ using Mocassin.Core.Model.Structure;
 using Mocassin.Symmetry.Reduction;
 using Mocassin.Symmetry.Transitions;
 
+using Mocassin.Compilation.Diagnostics;
+
 namespace Mocassin.Compilation.Energy;
 
 /// <summary>
@@ -45,7 +47,7 @@ internal sealed class ClusterCompilationStage : ICompilationStage
         {
             return CompilationFailure.FromSource(
                 context,
-                CompilationErrorCodes.EnergyGeometry,
+                CompilationDiagnosticCodes.EnergyGeometry,
                 "The cluster geometry cannot be resolved against the structure.",
                 resolverDiagnostics);
         }
@@ -62,7 +64,7 @@ internal sealed class ClusterCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromMessage(
                     context,
-                    CompilationErrorCodes.EnergyGeometry,
+                    CompilationDiagnosticCodes.EnergyGeometry,
                     $"Cluster '{cluster.Name}' references an unknown centre site.",
                     new ModelPath("cluster", cluster.Id.Value, "centerSiteId"));
             }
@@ -73,7 +75,7 @@ internal sealed class ClusterCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromSource(
                     context,
-                    CompilationErrorCodes.EnergyGeometry,
+                    CompilationDiagnosticCodes.EnergyGeometry,
                     $"Cluster '{cluster.Name}' cannot resolve its centre position.",
                     centreDiagnostics);
             }
@@ -94,7 +96,7 @@ internal sealed class ClusterCompilationStage : ICompilationStage
                 {
                     return CompilationFailure.FromSource(
                         context,
-                        CompilationErrorCodes.EnergyGeometry,
+                        CompilationDiagnosticCodes.EnergyGeometry,
                         $"Cluster '{cluster.Name}' cannot resolve a surrounding position.",
                         diagnostics);
                 }
@@ -103,7 +105,7 @@ internal sealed class ClusterCompilationStage : ICompilationStage
                 {
                     return CompilationFailure.FromMessage(
                         context,
-                        CompilationErrorCodes.EnergyGeometry,
+                        CompilationDiagnosticCodes.EnergyGeometry,
                         $"Cluster '{cluster.Name}' resolves a surrounding position to an unstable site.",
                         new ModelPath("cluster", cluster.Id.Value, "offsetVectors"));
                 }
@@ -118,7 +120,7 @@ internal sealed class ClusterCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromMessage(
                     context,
-                    CompilationErrorCodes.EnergyGeometry,
+                    CompilationDiagnosticCodes.EnergyGeometry,
                     $"Cluster '{cluster.Name}' references an unknown surrounding site.");
             }
 
@@ -137,7 +139,7 @@ internal sealed class ClusterCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromMessage(
                     context,
-                    CompilationErrorCodes.CompileLimit,
+                    CompilationDiagnosticCodes.CompileLimit,
                     string.Create(
                         CultureInfo.InvariantCulture,
                         $"Cluster '{cluster.Name}' needs {rawCount} occupation tuples, above the limit {hardLimit}."),
@@ -157,7 +159,7 @@ internal sealed class ClusterCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromMessage(
                     context,
-                    CompilationErrorCodes.EnergyGeometry,
+                    CompilationDiagnosticCodes.EnergyGeometry,
                     $"Cluster '{cluster.Name}' has invalid geometry: {exception.Message}",
                     new ModelPath("cluster", cluster.Id.Value));
             }
@@ -165,7 +167,7 @@ internal sealed class ClusterCompilationStage : ICompilationStage
             {
                 return CompilationFailure.FromMessage(
                     context,
-                    CompilationErrorCodes.CompileLimit,
+                    CompilationDiagnosticCodes.CompileLimit,
                     $"Cluster '{cluster.Name}' exceeds the bounded occupation enumeration: {exception.Message}",
                     new ModelPath("cluster", cluster.Id.Value));
             }
