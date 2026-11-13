@@ -176,7 +176,11 @@ Severity values: **Blocker**, **Major**, **Minor**, **Note**.
 
 ## Record state
 
-**State:** Changes required
+**State:** Ready for implementation
+
+> Round-9 state is `Ready for implementation`: N8-1–N8-3 are resolved and no Blocker, Major, Minor, or Note
+> finding is recorded in round 9. Earlier rounds and their verdicts are preserved unaltered; the round-9 verdict
+> is authoritative.
 
 ## Reviewer independence
 
@@ -1642,3 +1646,243 @@ add the page, and correct the N7-3 resolution row) and N8-2/N8-3 (delete "fixed 
 sentence, advance the `Design review` metadata, drop the duplicate checklist page), then integrate the
 amendment, refresh the closeout evidence and dispatch the replacement closeout CI run, and re-run the parent
 audit at the combined commit with A1, A3–A9, and m1–m7 in scope.
+
+### Review round 9
+
+#### Independence and frozen state
+
+Fresh context: I did not author or implement Step 08 or this amendment and have no shared conversation with the
+planner or implementor. I reviewed the round-9 delta at the frozen tree
+`0bb4099dbc7ea0a2ed5b562cd1b0dffe2430b80c` on `step/08-model-compilation-pipeline`; the working tree was clean.
+The design content is `651c00f53668a6bc32340050004b1433a8b80eeb`: `git diff --stat 651c00f 0bb4099` is the
+single-line `Reviewed commit` metadata change in this record, so the design delta reviewed is
+`d9ab533..651c00f` (the amendment page and the amendment index; the review-record part of that diff is the
+round-8 record and the implementor's round-8 resolutions). The parent audit is still `Fixes required`
+(A1–A9; A2 at `docs/planning/audits/step-08.md:182`), and the amendment addresses only A2. There is no amendment
+implementation in the tree (`src/dotnet/Mocassin.Compilation/Signatures/` contains only `CompiledModelJson.cs`,
+`ModelSignatureProjection.cs`, and `SigningCompilationStage.cs`; there is no `CanonicalProjectionWriter`, no
+`tools/contracts/check_model_projection.py` and no `tools/contracts/requirements.txt`), so this is a design
+review only.
+
+Round 9 is a narrow correction pass: it points the API/contract-impact section at
+`contracts/generated/README.md` and `docs/development/compilation-pipeline.md`, makes the writer rule
+single-valued (typed scalar writers, `WriteRaw`/`Advance` only for the forced header bytes), advances the
+request metadata to rounds 1–8/round 9, and trims the duplicated `compilation-pipeline.md` checklist row. I
+verified all four requested checks against the frozen tree: N8-1–N8-3 are resolved and I found no new Blocker,
+Major, Minor, or Note. The per-field tables, the exclusions, and the documentation plan remain internally
+consistent, and the canonical bytes remain determined by the marker table plus the authoritative per-field
+table.
+
+#### Commands and results
+
+```text
+$ git rev-parse HEAD
+0bb4099dbc7ea0a2ed5b562cd1b0dffe2430b80c
+
+$ git rev-parse 651c00f
+651c00f53668a6bc32340050004b1433a8b80eeb
+
+$ git status --short
+(clean)
+
+$ git branch --show-current
+step/08-model-compilation-pipeline
+
+$ git log --oneline -6
+0bb4099 docs: freeze step 08 amendment round 9 review [skip ci]
+651c00f docs: clear step 08 amendment round 8 notes [skip ci]
+11f3368 docs: record step 08 amendment 1 round 8 design review [skip ci]
+bd71919 docs: freeze step 08 amendment round 8 review [skip ci]
+d9ab533 docs: clear step 08 amendment round 7 notes [skip ci]
+7479687 docs: record step 08 amendment 1 round 7 design review [skip ci]
+
+$ git diff --stat 651c00f 0bb4099
+ docs/planning/reviews/step-08-amend-1.md | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+$ git diff --stat d9ab533 651c00f
+ docs/planning/amendments/README.md                 |   2 +-
+ .../step-08-amend-1-canonical-projection.md        |  15 +-
+ docs/planning/reviews/step-08-amend-1.md           | 235 ++++++++++++++++++++-
+ 3 files changed, 242 insertions(+), 10 deletions(-)
+
+$ python tools/contracts/generate.py --check
+Contract artifacts are current (18 files)
+
+$ python tools/check_docs_links.py
+Documentation links OK (152 files scanned).
+
+$ python tools/check_process_consistency.py
+Process consistency: OK
+
+$ python -c 'import msgpack; print(msgpack.version)'
+(1, 2, 4)
+
+$ ls tools/contracts/requirements.txt
+ls: cannot access 'tools/contracts/requirements.txt': No such file or directory
+
+$ ls src/dotnet/Mocassin.Compilation/Signatures/
+CompiledModelJson.cs  ModelSignatureProjection.cs  SigningCompilationStage.cs
+```
+
+Nonexistent-page check (N8-1):
+
+```text
+$ grep -rn "reference/contracts.md" docs/ tools/ contracts/
+docs/planning/reviews/step-08-amend-1.md:269: ... (historical N7-3 resolution row)
+docs/planning/reviews/step-08-amend-1.md:271: ... (historical N8-1 resolution row)
+docs/planning/reviews/step-08-amend-1.md:1383, 1413, 1437, 1534, 1593, 1603, 1612, 1629: ... (preserved review-round text)
+(no occurrence in the amendment page or in any other design/contract/tool file)
+
+$ sed -n '272,276p' docs/planning/amendments/step-08-amend-1-canonical-projection.md
+audit.
+- `contracts/generated/README.md` and `docs/development/compilation-pipeline.md` describe the projection and
+  the conformance fixtures.
+
+$ ls docs/reference/
+cli.md  diagnostics.md  energy.md  file-layout.md  index.md  project-format.md  transitions.md
+(no contracts.md; both named pages exist)
+```
+
+Writer mechanism (N8-2):
+
+```text
+$ sed -n '150,159p' docs/planning/amendments/step-08-amend-1-canonical-projection.md
+### Canonical encoding
+
+The writer is `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` (internal). It uses
+`MessagePackWriter` over an `IBufferWriter<byte>` for buffer management, the typed `WriteUInt64`/`WriteInt64`
+and `Write(double)` writers for the fixed-width scalars, and `WriteRaw` for the forced
+`0xdd`/`0xdb`/`0xc6`/`0xc3`/`0xc2`/`0xc0` headers.
+It must not call the compact `WriteArrayHeader`/`WriteString` convenience methods or the minimal-width
+`Write(ulong)`/`Write(long)` overloads; those would break the required header bytes. Fixed-width scalars use
+the typed writers; all forced headers use `WriteRaw`/`Advance`. The byte rules are:
+```
+
+The paragraph now assigns every type exactly one mechanism: `uint64`/`int64`/`float64` to the typed writers
+and `string`/`binary`/`array`/`bool`/`nil` to `WriteRaw`/`Advance` for the listed `0xdd`/`0xdb`/`0xc6`/`0xc3`/
+`0xc2`/`0xc0` bytes. No clause sends headers through the typed writers.
+
+Metadata and checklist (N8-3):
+
+```text
+$ sed -n '9,11p' docs/planning/amendments/step-08-amend-1-canonical-projection.md
+| Status | Re-review required (round 8 notes resolved; round 9 requested) |
+...
+| Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–8; round 8 Ready with notes; round 9 requested) |
+
+$ sed -n '113p' docs/planning/amendments/README.md
+| `step-08-amend-1` (`canonical-projection`) | 08 — Model Compilation Pipeline | **Re-review required (round 9)** | ... | [Review](../reviews/step-08-amend-1.md) | pending |
+
+$ sed -n '313,321p' docs/planning/amendments/step-08-amend-1-canonical-projection.md
+- [ ] `docs/development/compilation-pipeline.md` describes the manifest-driven projection and encoder.
+- [ ] `docs/planning/02-data-contracts.md` §1.3/§3.3 references the explicit projection.
+- [ ] `docs/planning/adr/0010-canonical-messagepack-signatures.md` notes the shared encoder and descriptor.
+- [ ] `tools/contracts/README.md` documents the `msgpack` requirements, checker, and fixture regeneration.
+- [ ] The generated `contracts/generated/README.md` describes the projection and fixtures.
+- [ ] `docs/planning/06-toolchain-requirements.md` records the dev-only `msgpack` row and Step 08 use.
+- [ ] `./tools/verify.sh contracts` installs `tools/contracts/requirements.txt` and runs the projection checker.
+- [ ] Step page, amendment index, status, parity, audit request, and review record updated.
+```
+
+Eight checklist rows; `compilation-pipeline.md` appears once, in its original row, and the new row is limited
+to the generated README.
+
+Type, exclusion, and docs-plan scan (the per-field tables are unchanged at `651c00f`):
+
+```text
+$ python -c "import json; m=json.load(open('contracts/manifest.json')); print([v['id'] for v in m['fixtures']['signatureVectors']['vectors']]); print([(f['name'], f['type']) for f in m['signatures']['model']['fields']])"
+['model-ceria-kmc', 'model-vehicle5', 'model-interstitialcy5']
+[('formatVersion', 'uint64'), ('symmetryContractVersion', 'string'), ('spaceGroupDataVersion', 'string'), ('spaceGroupDataSha256', 'string'), ('particles', 'bin'), ('structure', 'bin'), ('energy', 'bin'), ('transitions', 'bin'), ('simulations', 'bin')]
+
+$ grep -nE "(^|[^u])int64" docs/planning/amendments/step-08-amend-1-canonical-projection.md
+83:- `site` = `[index uint64, id string, fractional array<float64> (3), stability int64,
+85:- `environment` = `[index uint64, siteIndex int64 (sentinel -1 for the shared stable environment),
+86:  stability int64, allowedParticleMask uint64,
+89:  siteId string, stability int64, allowedParticleMask uint64, environmentIndex uint64, orbitIndex uint64,
+91:- `encoding` = `[cellA int64, cellB int64, cellC int64, p uint64]`. The position encoding is retained as the
+117:- `collection` = `[index uint64, transitionKind int64, transitionId string, kind int64,
+146:`simulation` = `[id string, kind int64, activeCollections array<uint64>,
+167:| `int64` | `0xd3` + 8-byte big-endian two's-complement value |
+174:  tuples/mappings, and interaction-range cell counts are `uint64`. Signed `int64` is used only for spatial
+197:cannot preserve the `uint64`/`int64`/`float64` distinction (`2.0` may round-trip as `2`, `-0.0` as `-0`).
+236:3. walks the descriptor to recover scalar types (uint64/int64/float64) and re-encodes the tree using fixed-
+303:| Fixed-width integers | Python decodes/encodes uint64/int64/float64 per the descriptor; 2.0 stays float64 |
+```
+Every per-field `int64` line (83–91, 117, 146) is inside the declared exceptions: `stability`/`kind` enum
+values, the `environment.siteIndex` sentinel, and the `encoding` cell offsets; lines 167, 174, 197, 236, and
+303 are the marker table and explanatory text.
+
+The projected fields also match the compiled records at the frozen tree: `CompiledPosition` has 12 members and
+the 11-element position tuple is that record minus the display-only `Cartesian`; `CompiledEnvironment` and
+`CompiledSite` match the `environment`/`site` tuples minus display-only `Name`/`Cartesian`; `CompiledJumpDirection`/
+`CompiledJumpRule` match the `direction`/`rule` tuples with `Index`, `DirectionIndex`, `PathVector`,
+`PathLength`, `FrequencyHz`, and `StaticCorrection` omitted by the rationale/prose; and `CompiledSimulation`
+matches the `simulation` tuple with runtime settings and intent excluded. No field is both included and
+excluded, and every excluded field named in the dropped/derived table is absent from its tuple.
+
+Also inspected: the full `d9ab533..651c00f` delta for the amendment page and index; the complete amendment page;
+the N8-1–N8-3 resolution rows (record lines 271–273) and the N7-3 row (line 269); the parent Step 08
+§11.3–§11.4 and implementation status; `docs/development/compilation-pipeline.md` "Signatures";
+`docs/planning/adr/0010-canonical-messagepack-signatures.md` rules 1–8 and "Pre-release model layout
+finalization"; `docs/planning/02-data-contracts.md` §1.3/§3.3; `contracts/manifest.json` `signatures.model` and
+`fixtures.signatureVectors`; `contracts/generated/signatures/model-v1.json`; `tools/contracts/generate.py`;
+`tools/contracts/README.md`; `tools/verify.sh` `run_contracts`; `docs/planning/06-toolchain-requirements.md:126`;
+`CompiledStructureModel.cs`, `CompiledTransitionModel.cs`, `CompiledSimulation.cs`, and the current encoder; and
+`docs/planning/audits/step-08.md` (A2 at line 182; state `Fixes required` at line 206).
+
+#### Round-8 finding status
+
+| Finding | Status | Evidence and residual |
+| --- | --- | --- |
+| N8-1 (Minor) | **Resolved** | The API/contract-impact section now names `contracts/generated/README.md` and `docs/development/compilation-pipeline.md` (amendment lines 274–275); `grep -rn "reference/contracts.md"` finds the token only in this record's preserved historical text, `docs/reference/` has no `contracts.md`, and both named pages exist. The N7-3 resolution row (record line 269) now matches the page. |
+| N8-2 (Note) | **Resolved** | The writer paragraph enumerates the typed `WriteUInt64`/`WriteInt64`/`Write(double)` writers for the fixed-width scalars and `WriteRaw` for the forced `0xdd`/`0xdb`/`0xc6`/`0xc3`/`0xc2`/`0xc0` bytes (amendment lines 152–155), then closes with "Fixed-width scalars use the typed writers; all forced headers use `WriteRaw`/`Advance`" (lines 157–158). No remaining clause assigns the forced headers to the typed writers. |
+| N8-3 (Note) | **Resolved** | `Status` and `Design review` are at round 9 with rounds 1–8 / round 8 Ready with notes (amendment lines 9, 11), and the index row is `Re-review required (round 9)` (`docs/planning/amendments/README.md:113`). The new Documentation row now names only `contracts/generated/README.md`; `docs/development/compilation-pipeline.md` appears once, in its original row, and the checklist has eight unique rows (lines 314–321). |
+
+#### Round-9 checkpoint verification
+
+| Checkpoint | Result |
+| --- | --- |
+| No nonexistent `docs/reference/contracts.md` reference remains | **Pass.** The amendment names `contracts/generated/README.md` and `docs/development/compilation-pipeline.md` (lines 274–275); the only `reference/contracts.md` occurrences are preserved review-round history, and `docs/reference/` has no `contracts.md`. |
+| Writer mechanism is unambiguous: typed scalar writers, `WriteRaw` only for headers | **Pass.** Fixed-width scalars use `WriteUInt64`/`WriteInt64`/`Write(double)`; all forced `0xdd`/`0xdb`/`0xc6`/`0xc3`/`0xc2`/`0xc0` bytes use `WriteRaw`/`Advance`; compact/minimal-width conveniences are prohibited (lines 152–158, 160–170). |
+| Metadata is round 9 and no duplicate checklist row | **Pass.** Lines 9/11 are round 9 with rounds 1–8, the index is round 9, and the trimmed checklist has eight unique rows with `compilation-pipeline.md` listed once (lines 314–321). |
+| No remaining contradiction in types, exclusions, or documentation plan | **Pass.** Every `int64` entry is inside the declared exceptions, each tuple matches its compiled record minus the excluded fields, every dropped field has a rationale row or prose statement, and every body-required documentation page appears exactly once in the checklist. |
+
+#### Findings
+
+No finding is recorded in round 9. N8-1 (Minor) and N8-2/N8-3 (Notes) are resolved, the four requested
+checkpoints pass, and the round-9 edits introduce no new Blocker, Major, Minor, or Note. The only residuals are
+the already-recorded cross-language qualification (the Python checker is a byte/type conformance verifier over
+C#-produced bytes, not the production model encoder; Step 11 owns the Rust encoder/vector) and the
+implementation work that the acceptance criteria and documentation checklist cover (the nested manifest
+descriptor, the `CanonicalProjectionWriter`, the `.bin`/`.json` fixtures, `tools/contracts/requirements.txt`,
+the checker, the five-sample golden refresh, and the named documentation updates). The parent audit still has
+A1, A3–A9, and m1–m7 open and must be re-run at the combined commit.
+
+#### Verdict
+
+- [x] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Round 9 verdict: Ready for implementation.** No Blocker, Major, Minor, or Note finding remains. The
+round-9 delta fixes all three round-8 items: the dangling `docs/reference/contracts.md` pointer is replaced by
+existing pages (N8-1), the writer rule is single-valued with typed scalar writers and `WriteRaw`/`Advance` only
+for the forced headers (N8-2), and the request/index metadata is at round 9 with no duplicate checklist row
+(N8-3). The per-field tables, the dropped/derived-field rationale, the canonical marker table, the
+quantisation rule, and the documentation plan are internally consistent; an independent encoder can derive the
+bytes from the marker table plus the authoritative per-field table.
+
+The Python checker remains a byte/type conformance verifier over C#-produced bytes, not an independent
+model-to-projection encoder; the manifest schema review and Step 11's Rust encoder/vector are the completeness
+gates, as recorded in earlier rounds. The top-level `Record state` now reflects this round's verdict; all
+earlier rounds and their reviewer text are preserved unaltered.
+
+Follow-up owner: Step 08 implementor / planner
+Follow-up issue/step: Integrate the amendment and implement the acceptance items (the complete nested manifest
+descriptor, the internal `CanonicalProjectionWriter`, the five `.bin`/`.json` projection fixtures,
+`tools/contracts/requirements.txt`, the conformance checker and its `verify.sh contracts`/README/toolchain
+entries, and the named documentation updates), then refresh `docs/planning/closeout/step-08.json`, run
+`./tools/verify.sh all --require`, dispatch the replacement closeout CI run, and re-run the parent audit at the
+combined commit with A1, A3–A9, and m1–m7 in scope.
