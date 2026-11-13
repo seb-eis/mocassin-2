@@ -1117,6 +1117,10 @@ Round 5 finding m14 was corrected at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed`:
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
 
+## Amendment reviews
+
+- [`step-08-amend-1`](step-08-amend-1.md) — canonical compiled-model projection (A2).
+
 ## Review rounds
 
 Append each new round below. Never overwrite an earlier round.
