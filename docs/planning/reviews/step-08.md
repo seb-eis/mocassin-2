@@ -18,7 +18,7 @@
 | Reviewed commit | `9715082c1d51e8273bf7c636c22593fa0f7ba5e6` (round 4; round 3 reviewed `b030cfb7d921277f6983651fb451e736cc2f7896`; round 2 `c676716e88bcdd5e8877938e21ad6950cc2986bb`; round 1 `36fbba58182b2e769a6d59b3228a60021344248d`) |
 | Docs branch | `docs/step-08-design` |
 | Review date | 2026-11-13 |
-| Reviewer | Independent planning auditor (round 3; fresh context; no shared conversation with the planner or implementor; rounds 1 and 2 were separate fresh reviewers) |
+| Reviewer | Independent planning auditor (round 4; fresh context; no shared conversation with the planner or implementor; rounds 1, 2, and 3 were separate fresh reviewers) |
 
 Step page: [`Step 08 — Model Compilation Pipeline`](../steps/step-08-model-compilation-pipeline.md)
 
@@ -37,32 +37,32 @@ Step page: [`Step 08 — Model Compilation Pipeline`](../steps/step-08-model-com
 
 ## Design decisions reviewed
 
-- [x] Step page design decisions — reviewed; the pipeline, API, diagnostics, and feature breakdown are coherent, but M1/M2/M5 affect the stated derivation, field convention, and sizing claim. Round 2: M1/M4/M5/M6 are remediated; the M2 vacancy case remains (Major). Round 3: M2 is resolved — the particle-identity vector matches the original `Σ q_i movement_i`; the risk table still describes the removed scalar (m12).
-- [x] Data contracts and format changes — reviewed; the existing `model` signature entry and the new `compiledModel` task conflict (M4), and the signature-scope wording differs from Step 09 (m6). Round 2: M4 resolved against `contracts/manifest.json` and `tools/contracts/generate.py`; m6 remains in summary pages (`05-open-decisions.md` row 50, `architecture.md` line 147, parity-matrix line 132). Round 3: m6 is resolved in §1.3/§3.3, Step 09, every summary page, and the parity row; `charge_transport_vector` replaces `field_factor`.
-- [x] Architecture and module boundaries — reviewed; `Mocassin.Compilation` is pure and the documented folder layout follows `code-structure.md`; the internal resolver reference is m1. Round 2: m1 resolved via public `IStructurePreviewService.TryResolve`; the additive Symmetry API's PublicAPI/ApiCompat entries are only covered generically (n5). Round 3: n5 is addressed (the task names the `Mocassin.Symmetry` members); `compilation-pipeline.md` still says indexing excludes runtime settings (m10).
+- [x] Step page design decisions — reviewed; the pipeline, API, diagnostics, and feature breakdown are coherent, but M1/M2/M5 affect the stated derivation, field convention, and sizing claim. Round 2: M1/M4/M5/M6 are remediated; the M2 vacancy case remains (Major). Round 3: M2 is resolved — the particle-identity vector matches the original `Σ q_i movement_i`; the risk table still describes the removed scalar (m12). Round 4: m12 is resolved — the risk row now matches §8.4 and §3.3; the remaining m13 is a cache-graph nuance, not a design-decision issue.
+- [x] Data contracts and format changes — reviewed; the existing `model` signature entry and the new `compiledModel` task conflict (M4), and the signature-scope wording differs from Step 09 (m6). Round 2: M4 resolved against `contracts/manifest.json` and `tools/contracts/generate.py`; m6 remains in summary pages (`05-open-decisions.md` row 50, `architecture.md` line 147, parity-matrix line 132). Round 3: m6 is resolved in §1.3/§3.3, Step 09, every summary page, and the parity row; `charge_transport_vector` replaces `field_factor`. Round 4: m10 is resolved in §1.3/§3.3 and the summary pages; `charge_transport_vector:[f64;3]` remains the §3.3 field and Step 15 input.
+- [x] Architecture and module boundaries — reviewed; `Mocassin.Compilation` is pure and the documented folder layout follows `code-structure.md`; the internal resolver reference is m1. Round 2: m1 resolved via public `IStructurePreviewService.TryResolve`; the additive Symmetry API's PublicAPI/ApiCompat entries are only covered generically (n5). Round 3: n5 is addressed (the task names the `Mocassin.Symmetry` members); `compilation-pipeline.md` still says indexing excludes runtime settings (m10). Round 4: m10 is resolved — `compilation-pipeline.md` now keys indexing on the simulation hash and encoding on the energy-derived hash; m13 records the site-energy sub-case of the energy graph row.
 - [x] ADRs and open decisions — reviewed; ADR 0010 domain separation is followed and the open-decision rows record the compiler/signature/cache/intent boundaries. Round 2: ADR 0010 remains followed; row 50 still describes the compiled signature as `geometry/rules` rather than geometry/rules/encoding (m6). Round 3: row 50 now says geometry/rules/encoding and excludes runtime settings (m6 resolved).
-- [x] Quality strategy and test plan — reviewed; the test families are strong, but the field-factor/dual-DOF tests encode M1/M2 and the cache row does not exercise simulation-transition edits (M3). Round 2: M1 and M3 are covered; the Step 08 Tests table still has no field-factor row, and the quality strategy's `-q` vacancy assertion is not derivable (M2). Round 3: §9.3 and the Step 08 acceptance/test table now pin `qΔx`, the vacancy sign, zero identical-ion exchange, and non-zero distinct-charge/non-collinear paths; the `-q` claim is gone (M2 resolved).
+- [x] Quality strategy and test plan — reviewed; the test families are strong, but the field-factor/dual-DOF tests encode M1/M2 and the cache row does not exercise simulation-transition edits (M3). Round 2: M1 and M3 are covered; the Step 08 Tests table still has no field-factor row, and the quality strategy's `-q` vacancy assertion is not derivable (M2). Round 3: §9.3 and the Step 08 acceptance/test table now pin `qΔx`, the vacancy sign, zero identical-ion exchange, and non-zero distinct-charge/non-collinear paths; the `-q` claim is gone (M2 resolved). Round 4: m11 is resolved — Step 10 now matches the original every-mask accumulation; m13 affects the cache-test expectation, not the charge-transport coverage.
 - [x] Parity matrix and documentation plan — reviewed; the Step 08 parity rows and the named documentation pages are present. Round 2: the dual-DOF parity row is updated; the stable-signature row still says `geometry/rules` (m6). Round 3: the parity row now says geometry/rules/encoding (m6 resolved).
 - [x] Licensing and provenance — reviewed; no new dependency or GPL-derived content is introduced, and the SPDX/PublicAPI task is recorded. Round 2: unchanged; no new dependency or GPL-derived content. Round 3: unchanged.
 - [x] Post-implementation audit plan — reviewed; the `golden-models-and-closeout` feature records the audit request and closeout work. Round 2: the feature and closeout tasks remain present. Round 3: unchanged.
 
 ## Dependency and interface checks
 
-- [x] Dependencies are `Done` and their contracts are stable — Steps 02–07 are Done and their public preview/validation APIs are implemented; the internal-resolver and path-point details are m1/M6. Round 2: re-checked the implemented APIs; the named services and signatures exist, and m1/M6 are resolved. Round 3: re-checked `ProjectHasher` (no `ComputeSimulationSelection` yet; named as a new Core producer), `ClusterReduction.MaxTupleCount`, private `TransitionPathResolver.FindMatches`/`TryGetComponentShift`, `Diagnostic.Related`, and `SolverJobFlagsMapper.Compose`.
-- [x] Inputs, outputs, types, and formats are defined — mostly defined, but the field-factor units (M2), manifest signature identity (M4), and Step 09 `model.Signature` name (m5) are ambiguous. Round 2: M4 and m5 are resolved; the M2 path-vector/vacancy definition and m6 summary drift remain. Round 3: M2 and m6 are resolved; `charge_transport_vector:[f64;3]` is defined in §3.3 and consumed by Step 15. Step 10's dual-DOF rule misstates the original mixed case (m11).
+- [x] Dependencies are `Done` and their contracts are stable — Steps 02–07 are Done and their public preview/validation APIs are implemented; the internal-resolver and path-point details are m1/M6. Round 2: re-checked the implemented APIs; the named services and signatures exist, and m1/M6 are resolved. Round 3: re-checked `ProjectHasher` (no `ComputeSimulationSelection` yet; named as a new Core producer), `ClusterReduction.MaxTupleCount`, private `TransitionPathResolver.FindMatches`/`TryGetComponentShift`, `Diagnostic.Related`, and `SolverJobFlagsMapper.Compose`. Round 4: re-checked the same APIs at `9715082`; `ProjectHasher` still has no `ComputeSimulationSelection` and it remains the named new Core producer; `TransitionPathResolver`, `ClusterReduction`, `Diagnostic.Related`, and `SolverJobFlagsMapper.Compose` are unchanged.
+- [x] Inputs, outputs, types, and formats are defined — mostly defined, but the field-factor units (M2), manifest signature identity (M4), and Step 09 `model.Signature` name (m5) are ambiguous. Round 2: M4 and m5 are resolved; the M2 path-vector/vacancy definition and m6 summary drift remain. Round 3: M2 and m6 are resolved; `charge_transport_vector:[f64;3]` is defined in §3.3 and consumed by Step 15. Step 10's dual-DOF rule misstates the original mixed case (m11). Round 4: m11 is resolved — Step 10 now clears dual-DOF only when every selection mask is reduced; `charge_transport_vector:[f64;3]` and the Step 15 consumption are unchanged.
 - [x] Versioning and migration behavior is defined — `model_signature` is additive before the first released `.msl`; `format_version` stays `1`, and `models.signature` remains the Step 09 parameterization signature. Round 2: unchanged and consistent with `02-data-contracts.md` §3.3 and Step 11. Round 3: unchanged.
-- [x] No unresolved cross-step interface question remains — M3, M4, M6, m1, m2, m5, and m6 remain. Round 2: M3, M4, M6, m1, m2, and m5 are resolved; the M2 field-factor definition and the m6 summary drift remain. Round 3: all named interfaces exist and M2/m6 are resolved; the remaining findings are cache/summary-consistency Minors (m10–m12), not interface gaps.
+- [x] No unresolved cross-step interface question remains — M3, M4, M6, m1, m2, m5, and m6 remain. Round 2: M3, M4, M6, m1, m2, and m5 are resolved; the M2 field-factor definition and the m6 summary drift remain. Round 3: all named interfaces exist and M2/m6 are resolved; the remaining findings are cache/summary-consistency Minors (m10–m12), not interface gaps. Round 4: m10–m12 are resolved; m13 is a cache-graph/test-expectation Minor, not a cross-step interface gap.
 
 ## Standard design-review checklist
 
-- [x] Scope, non-goals, and acceptance criteria are explicit and testable — scope/non-goals are explicit and the acceptance table is testable; the sizing claim is the exception (M5). Round 2: the sizing statement now records the split trigger and the owner's recorded waiver; acceptance criteria remain testable. Round 3: the five charge-transport cases are acceptance criteria and tests.
-- [ ] Design decisions are complete and internally consistent — M1, M2, M3, M4, and M6 are material contradictions; m5/m6 are interface wording. Round 2: M1/M3/M4/M6 are resolved; the M2 vacancy contradiction remains. Round 3: M1–M4/M6 and M2 are resolved; the stale risk-row wording (m12) and the compilation-page indexing key (m10) are small remaining inconsistencies.
-- [x] Required tests, property tests, golden fixtures, and performance targets are defined — families and targets are defined, but M2's formula and M1's derivation need tests that do not merely encode the design, and M3's cache test omits simulation-transition edits. Round 2: M1/M3 tests are added and M4/M5 are covered; the field-factor coverage is not in the Step 08 test table and the `-q` vacancy assertion is unsupported (M2). Round 3: the Step 08 test table and §9.3 now cover single charge, vacancy sign, zero identical-ion exchange, non-zero distinct-charge exchange, and non-collinear paths.
-- [x] Documentation, status, parity, and audit updates are planned — the named pages, CMP docs, parity rows, status links, and closeout/audit task are present. Round 2: the dependency pages and status are updated; the signature-scope summary drift is m6. Round 3: signature summaries and the parity row are aligned; m12 is a stale risk row, not a plan gap.
-- [x] Licensing, provenance, and dependency checks are resolved — no new dependency, SPDX/PublicAPI tasks recorded, and the embedded catalog provenance is unchanged. Round 2: unchanged; the Symmetry public-API baseline entry is only a Note (n5). Round 3: n5 is addressed; unchanged otherwise.
-- [x] Risks and mitigations are realistic — the table covers the main failure modes; the missing risks for M1–M3 are captured by those findings rather than by a separate risk entry. Round 2: the M1/M3 risks are resolved; the field-factor risk row remains accurate but the formula issue is M2. Round 3: the field-factor risk row still describes the removed scalar projection and a "vector change requires a contract decision" (m12); the other risks are realistic.
+- [x] Scope, non-goals, and acceptance criteria are explicit and testable — scope/non-goals are explicit and the acceptance table is testable; the sizing claim is the exception (M5). Round 2: the sizing statement now records the split trigger and the owner's recorded waiver; acceptance criteria remain testable. Round 3: the five charge-transport cases are acceptance criteria and tests. Round 4: unchanged; m13 is a cache-test detail, not an acceptance gap.
+- [x] Design decisions are complete and internally consistent — M1, M2, M3, M4, and M6 are material contradictions; m5/m6 are interface wording. Round 2: M1/M3/M4/M6 are resolved; the M2 vacancy contradiction remains. Round 3: M1–M4/M6 and M2 are resolved; the stale risk-row wording (m12) and the compilation-page indexing key (m10) are small remaining inconsistencies. Round 4: m10 and m12 are resolved; m13 is the only remaining inconsistency, in the site-energy sub-case of the invalidation graph.
+- [x] Required tests, property tests, golden fixtures, and performance targets are defined — families and targets are defined, but M2's formula and M1's derivation need tests that do not merely encode the design, and M3's cache test omits simulation-transition edits. Round 2: M1/M3 tests are added and M4/M5 are covered; the field-factor coverage is not in the Step 08 test table and the `-q` vacancy assertion is unsupported (M2). Round 3: the Step 08 test table and §9.3 now cover single charge, vacancy sign, zero identical-ion exchange, non-zero distinct-charge exchange, and non-collinear paths. Round 4: the m11 correction is reflected in Step 10; m13 affects the cache row's site-energy expectation.
+- [x] Documentation, status, parity, and audit updates are planned — the named pages, CMP docs, parity rows, status links, and closeout/audit task are present. Round 2: the dependency pages and status are updated; the signature-scope summary drift is m6. Round 3: signature summaries and the parity row are aligned; m12 is a stale risk row, not a plan gap. Round 4: m12 is resolved and the status/page links are current.
+- [x] Licensing, provenance, and dependency checks are resolved — no new dependency, SPDX/PublicAPI tasks recorded, and the embedded catalog provenance is unchanged. Round 2: unchanged; the Symmetry public-API baseline entry is only a Note (n5). Round 3: n5 is addressed; unchanged otherwise. Round 4: unchanged.
+- [x] Risks and mitigations are realistic — the table covers the main failure modes; the missing risks for M1–M3 are captured by those findings rather than by a separate risk entry. Round 2: the M1/M3 risks are resolved; the field-factor risk row remains accurate but the formula issue is M2. Round 3: the field-factor risk row still describes the removed scalar projection and a "vector change requires a contract decision" (m12); the other risks are realistic. Round 4: m12 is resolved — the risk row now describes the particle-identity vector and its tests; m13 is not a risk-table issue.
 - [x] Code layout and namespace plan follow the structure policy — the `Compilation/{Compiler,Context,Structure,...}` layout is domain-based and within the documented limits. Round 2: unchanged. Round 3: unchanged.
-- [ ] No hidden scope, stale placeholders, or unowned decisions — the `compiledModel` manifest task (M4), the benchmark project reference (n1), and the split decision (M5) are unowned/stale. Round 2: M4/n1/M5 are addressed; Step 10's optimizer-clear rule is a Note (n3), and the m6 summary drift remains. Round 3: M4/n1/M5/m6 are addressed; Step 10's original-optimizer rule is still inaccurate (m11) and the risk row is stale (m12).
+- [x] No hidden scope, stale placeholders, or unowned decisions — the `compiledModel` manifest task (M4), the benchmark project reference (n1), and the split decision (M5) are unowned/stale. Round 2: M4/n1/M5 are addressed; Step 10's optimizer-clear rule is a Note (n3), and the m6 summary drift remains. Round 3: M4/n1/M5/m6 are addressed; Step 10's original-optimizer rule is still inaccurate (m11) and the risk row is stale (m12). Round 4: m11 and m12 are resolved; m13 is a documented cache nuance, not hidden scope.
 
 ## Step 08-specific checks
 
@@ -81,23 +81,28 @@ Step page: [`Step 08 — Model Compilation Pipeline`](../steps/step-08-model-com
       (point-level path resolution) remain. Round 2: m1/m2/m3/M6 are resolved against the implemented APIs;
       the field-factor vacancy case is separate (M2). Round 3: M2 is resolved — the particle-identity vector
       matches the original `Σ q_i movement_i` and Step 15 consumes it; Step 10's rule (m11) is the only
-      remaining cross-step detail.
+      remaining cross-step detail. Round 4: m11 is resolved — Step 10 now matches the original every-mask
+      accumulation; the stage/API reconciliation is unchanged.
 - [x] `CompiledModel` is reconciled with `02-data-contracts.md` §3.3 and the Step 11 `.msl` writer; persisted,
       JSON-inspection-only, and composed-later data are separated. — The persisted/inspection/composed split
       matches §3.3, but m5 (`model.Signature` vs `ModelSignature`) and m6 (signature scope) need reconciliation.
       Round 2: m5 is resolved in Step 09; m6's normative sections are aligned but the summary pages still say
       `geometry/rules`. Round 3: m5/m6 are resolved; §3.3 stores `charge_transport_vector:[f64;3]` and the
-      persisted/inspection split is unchanged.
+      persisted/inspection split is unchanged. Round 4: unchanged; the §3.3 field and Step 15 consumption remain
+      aligned.
 - [x] Dense indexing, stable geometry/rule IDs, model signature, the Step 09 parameterization-signature
       boundary, and byte-identical determinism are defined. — Index rules and deterministic ordering are
       defined; M4 (manifest identity) and m6 (active-collection scope) remain. Round 2: M4 is resolved; the
       normative m6 wording now includes encoding/active collections, but the summary drift remains. Round 3:
-      M4/m6 are resolved; the signature is geometry/rules/encoding and excludes runtime settings.
-- [ ] The derived solver intent (`UseDualDofCorrection`, `UsePrerun`, kind) is defined and Step 11 owns the
+      M4/m6 are resolved; the signature is geometry/rules/encoding and excludes runtime settings. Round 4: m10
+      is resolved for the simulation-hash/encoding keys; m13 records the site-energy sub-case of the graph.
+- [x] The derived solver intent (`UseDualDofCorrection`, `UsePrerun`, kind) is defined and Step 11 owns the
       `.msl` flag word. — `UsePrerun`/kind and the composition boundary are correct; M1 is a material divergence
       for `UseDualDofCorrection`. Round 2: M1 is resolved — `UseDualDofCorrection = Kind == Kmc` matches the
       original job builder; Step 10's clear rule is a Note (n3). Round 3: M1 remains resolved; n3 is only
-      partially addressed — Step 10's mixed-case rule does not match `JumpSelectionOptimizer.Run` (m11).
+      partially addressed — Step 10's mixed-case rule does not match `JumpSelectionOptimizer.Run` (m11). Round 4:
+      m11 is resolved — Step 10 now clears only when every selection mask is reduced and keeps the mixed/none
+      case, matching the original accumulation; Step 08's `Kind == Kmc` default is unchanged.
 - [x] Tracker mappings emitted by Step 08 and mutable tracker state owned by Step 18 are separated. —
       Confirmed: global/static definitions and `tracker_order` are Step 08; Step 18 owns values, mobile
       assignment, and `.mcs` output. Round 2: unchanged. Round 3: unchanged.
@@ -109,12 +114,13 @@ Step page: [`Step 08 — Model Compilation Pipeline`](../steps/step-08-model-com
 - [x] The `mocassin compile` ownership question is resolved explicitly (Step 08 minimal command vs library/test
       harness; Step 12 full CLI). — Confirmed: Step 08 library plus pure `CompiledModelJson`; Step 12 owns the
       command and file output. Round 2: unchanged; Step 12 ownership remains explicit. Round 3: unchanged.
-- [ ] Cache keys, invalidation graph, lifetime, thread safety, and tests are defined. — Lifetime/thread safety
+- [x] Cache keys, invalidation graph, lifetime, thread safety, and tests are defined. — Lifetime/thread safety
       are defined, but the simulation-transition invalidation path and missing simulation hash are M3. Round 2:
       M3 is resolved by the active-transition-set hash; the Resolve/Indexing key wording against the graph is a
       Minor (m9). Round 3: Resolve is uncached and Indexing/Signing are keyed as stated, but m9 is only partially
       resolved — `compilation-pipeline.md` says indexing excludes runtime settings while the step page keys
-      Indexing on the simulation hash (m10).
+      Indexing on the simulation hash (m10). Round 4: m10 is resolved; m13 is the remaining site-energy
+      Indexing/Signing sub-case of the energy row.
 - [x] Diagnostics/report fields, stage counts/timings, and realistic performance targets are defined. — Report
       fields and targets are concrete; m7 notes the missing by-reason rejection breakdown. Round 2: m7 and m4
       are resolved; the report now splits rejected counts by reason and qualifies the cancellation target.
@@ -123,13 +129,14 @@ Step page: [`Step 08 — Model Compilation Pipeline`](../steps/step-08-model-com
       the sizing estimate and split trigger are recorded. — Eight required branches are present and all are
       `Not started`; 4–6 pw/eight features exceed the recorded split trigger (M5). Round 2: the owner waiver is
       recorded on the Step 08 page, `status.md`, and the resolution table; no split is claimed silently. Round 3:
-      the owner waiver remains recorded and all eight rows are `Not started`.
+      the owner waiver remains recorded and all eight rows are `Not started`. Round 4: unchanged.
 - [x] No production compiler code, step branch, or pre-seeded review verdict exists. — Confirmed:
       `Mocassin.Compilation` contains only `CompilationModule.cs`, the test project only has `SmokeTests.cs`,
       no `step/08...` branch exists, and this record contains no verdict before this round. Round 2: re-verified
       at `c3b44f7`; all eight feature rows remain `Not started` and no step or feature branch exists. Round 3:
       re-verified at `b05c8b5`; only `CompilationModule.cs` and `SmokeTests.cs` exist and no step/feature branch
-      exists.
+      exists. Round 4: re-verified at `053db7a`; the compiler/test projects contain only the module marker, smoke
+      test, PublicAPI files, and project files, and no step or feature branch exists.
 
 ## Evidence
 
@@ -441,6 +448,130 @@ branch -a` has no `step/08-model-compilation-pipeline` or `feature/step-08-model
 all eight feature rows remain `Not started`, and the compiler/test projects contain only the module marker,
 smoke test, PublicAPI files, and project files.
 
+**Re-review round 4** — frozen design commit `9715082c1d51e8273bf7c636c22593fa0f7ba5e6`; request/current tip
+`053db7ab606e6d4f3faee7c03fc7a4a83a157c03`; round-3 record `29951241021abdabccb5ee348f36acac0b5f9438`;
+round-2 record `eae3bf84b90d4a288599e306b9eb3ade6598ba85`; round-1 record
+`520fad1214be76b5fe48d70a83cf2a9bab569af0`. I am a fresh context: I did not author or implement this design, did
+not participate in its preparation or any discussion of its decisions, and used no handoff, summary, or prior
+conversation. The worktree `/workspace/playground/step08-design` was clean at `053db7a` before this record was
+written; all evidence is from repository inspection at that state and from the frozen design content at
+`9715082`.
+
+Files read in full or in the relevant sections:
+
+- `AGENTS.md` §3.8–§3.9 and §3.15; `docs/planning/reviews/README.md`; this record, including rounds 1–3 and all
+  findings and resolution tables; the Step 08 page at `9715082` in full.
+- Steps 04, 09, 10, 11, 14, 15, 16, and 17 (path API, signature boundary, job/dual-DOF, package, context,
+  field/energy, KMC/MMC consumption).
+- `docs/planning/02-data-contracts.md` §1.3, §2.3, §3.3; `docs/development/architecture.md`,
+  `design-decisions.md`, `compilation-pipeline.md`, `testing-and-parity.md`;
+  `docs/planning/03-quality-strategy.md` §9.3/§13; `docs/planning/05-open-decisions.md`;
+  `docs/planning/appendix-b-parity-matrix.md`; `docs/planning/status.md`.
+- Implemented APIs: `Mocassin.Core/Project/ProjectHasher.cs`, `Mocassin.Core/Diagnostics/{Diagnostic,ModelPath}.cs`,
+  `Mocassin.Symmetry/Reduction/ClusterReduction.cs`,
+  `Mocassin.Symmetry/Transitions/TransitionPathResolver.cs`,
+  `Mocassin.Symmetry/Structure/{IStructurePreviewService,StructurePreviewService}.cs`,
+  `Mocassin.Packages/Jobs/SolverJobFlagsMapper.cs`, `contracts/manifest.json`,
+  `contracts/generated/signatures/model-v1.json`, and `tools/contracts/generate.py`.
+- Read-only original reference: `JobDbModelBuilder.SetSimulationJobInfoFlags` (`IKineticSimulationModel` sets
+  `UseDualDofCorrection` for every KMC job), `JumpSelectionOptimizer.Run` (lines 37–45),
+  `RunPostBuildOptimizers` (subtracts the returned `removedFlags`), `KineticSimulationModelBuilder.
+  GetChargeTransportVector` (lines 271–277), `KineticTransitionModelBuilder.AddMovementMatrix` (lines
+  334–347), and `TransitionModelBuilder.CreateChargeTransportMatrix` (lines 30–37).
+
+Commands run (from `/workspace/playground/step08-design`):
+
+```sh
+git status --short
+# no output before this record was written; exit 0
+
+python tools/check_process_consistency.py
+# Process consistency: OK (exit 0)
+
+python tools/check_docs_links.py
+# Documentation links OK (149 files scanned). (exit 0)
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.30s (exit 0)
+
+git diff --check
+# no output; exit 0
+
+python tools/contracts/generate.py --check
+# Contract artifacts are current (18 files) (exit 0)
+
+git diff --stat 9715082..HEAD
+# pre-record-commit request state (this record commit adds the round-4 text):
+# docs/planning/reviews/step-08.md                          | 14 +++++++++++---
+# docs/planning/status.md                                   |  8 ++++----
+# docs/planning/steps/step-08-model-compilation-pipeline.md |  2 +-
+# 3 files changed, 16 insertions(+), 8 deletions(-)
+
+git diff --name-only 9715082..HEAD
+# docs/planning/reviews/step-08.md
+# docs/planning/status.md
+# docs/planning/steps/step-08-model-compilation-pipeline.md
+
+git branch --list
+# * docs/step-08-design
+# + main
+
+git worktree list
+# /workspace/mocassin                  644ee09 [main]
+# /workspace/playground/step08-design  053db7a [docs/step-08-design]
+
+find src/dotnet/Mocassin.Compilation src/dotnet/Mocassin.Compilation.Tests -type f \
+  -not -path '*/obj/*' -not -path '*/bin/*'
+# src/dotnet/Mocassin.Compilation/PublicAPI.Unshipped.txt
+# src/dotnet/Mocassin.Compilation/PublicAPI.Shipped.txt
+# src/dotnet/Mocassin.Compilation/CompilationModule.cs
+# src/dotnet/Mocassin.Compilation/Mocassin.Compilation.csproj
+# src/dotnet/Mocassin.Compilation.Tests/SmokeTests.cs
+# src/dotnet/Mocassin.Compilation.Tests/Mocassin.Compilation.Tests.csproj
+```
+
+Targeted read-only checks:
+
+```sh
+nl -ba docs/development/compilation-pipeline.md | sed -n '192,203p'
+# lines 194-196: "encoding keys on rules + simulations + energy links; indexing includes the simulation hash
+# and rebuilds for runtime-only simulation edits; signing uses the canonical projection and excludes runtime
+# settings." Lines 199-203: "editing energy rebuilds environments/pairs/clusters/encoding but reuses structure
+# and rules".
+
+nl -ba /workspace/mocassin-original/src/ModelBuilder/ICon.Model.Translator/Database/Optimization/
+  JumpSelectionOptimizer.cs | sed -n '37,46p'
+# line 41: `isReducedMask |= optimizedSetMask == environmentDefinition.SelectionParticleMask`
+# line 45: returns `UseDualDofCorrection` when any mask was unchanged, so the flag is removed only when every
+# mask changed.
+
+grep -n "Charge-transport field convention\|Field-factor approximation" \
+  docs/planning/steps/step-08-model-compilation-pipeline.md
+# line 844: "Charge-transport field convention | Particle-identity Cartesian vector; single-charge, vacancy,
+# exchange, and non-collinear tests; no scalar projection"; no "Field-factor approximation" row remains.
+
+nl -ba docs/planning/steps/step-10-job-templates-and-supercells.md | sed -n '118,124p'
+# lines 119-121: clears only when the optimizer reduces **every** selection mask and keeps it when any mask is
+# unchanged (including the mixed case).
+
+nl -ba src/dotnet/Mocassin.Core/Project/ProjectHasher.cs | sed -n '62,82p'
+# ComputeEnergy includes `SiteEnergies` (lines 75-80); no `ComputeSimulationSelection` method exists yet.
+
+nl -ba docs/planning/steps/step-08-model-compilation-pipeline.md | sed -n '618,633p'
+# line 618 indexing key has no energy hash; line 619 signing key is the canonical projection; line 629 lists
+# `Indexing, Signing` in the energy invalidation row (m13).
+```
+
+The frozen-state check passes: `git diff --name-only 9715082..HEAD` is exactly this record, `status.md`, and the
+Step 08 page's review-status link. The status change records the round-3 `Ready with notes` result and the
+round-4 request; the page change only updates the review link to `9715082`. No design, contract, code, test,
+configuration, step-branch, or implementation commit was made after the freeze. `git branch --list` contains only
+`docs/step-08-design` and `main`; no `step/08-model-compilation-pipeline` or
+`feature/step-08-model-compilation-pipeline/*` branch exists. All eight feature rows remain `Not started`, and
+the compiler/test projects contain only the module marker, smoke test, PublicAPI files, and project files.
+
 ## Findings
 
 | Severity | Finding | Evidence |
@@ -481,15 +612,26 @@ smoke test, PublicAPI files, and project files.
 | **Minor** | **m11 — n3's Step 10 rule does not match the original optimizer's mixed-case behavior.** Step 10 now says the optimizer "clears it when the selection optimizer reduces at least one environment selection mask and keeps it when no mask is reduced, matching the original `JumpSelectionOptimizer.Run` behavior." The original sets `isReducedMask \|= optimizedSetMask == environmentDefinition.SelectionParticleMask` and returns `UseDualDofCorrection` when true, so it clears only when **every** environment mask changed; when some but not all masks are reduced it keeps the flag. The new text clears in exactly that mixed case, halving `dof` where the original keeps `dof = 2`. The resolution-table entry for n3 repeats the inaccurate rule. | `docs/planning/steps/step-10-job-templates-and-supercells.md` lines 118–121; original `JumpSelectionOptimizer.cs` lines 37–45; Step 08 §9 (`Kind == Kmc` default) and Step 16 line 153. |
 | **Minor** | **m12 — the Step 08 risk table still describes the removed scalar field-factor approximation.** The risk row says "Field-factor approximation \| Documented scalar projection; single-charge/vacancy/collinear tests; vector change requires a contract decision", but §8.4 now supplies a Cartesian per-rule charge transport vector and Step 15 consumes it; a scalar projection is no longer the design and a "vector change" is not pending. The stale row contradicts the normative §8.4 and the data contract. | Step 08 page line 844; §8.4 lines 380–401; Step 15 lines 107–117; `02-data-contracts.md` lines 857–860. |
 
+### Findings — re-review round 4
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **m13 — the energy invalidation row claims `Indexing` and `Signing` rebuild for a site-energy-only edit, but neither key contains the energy hash and the signature projection excludes energy values.** `ProjectHasher.ComputeEnergy` includes `SiteEnergies`, so a site-energy edit changes the environments/pairs/clusters/encoding keys. It does not change the indexing key (`structure hash, particle hash, pair/cluster table hashes, rule hash, simulation hash`) or the signing input (the canonical projection, whose energy section is "table IDs, geometry, codes, mappings; not energy values"). A recording-cache test that edits one energy domain via site energies would therefore observe indexing and signing hits where the graph promises rebuilds. This is the residual site-energy sub-case of m10; it is a performance/test-expectation inconsistency, not a stale-output risk. | Step 08 page §4 row 8 (line 207), §12 keys (lines 618–619), §11.3 projection (line 571), and graph line 629; `ProjectHasher.ComputeEnergy` lines 68–80; `03-quality-strategy.md` §9.3 cache test (lines 246–248). |
+
 Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
 verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
 the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
 
-`Re-review required` is a record state, not a verdict.
+> Round-4 state is `Ready with notes`: no Blocker or Major remains; one Minor (m13) remains and requires explicit
+> human-owner acceptance. Round 3 returned `Ready with notes` for m10–m12; m10, m11, and m12 are closed at
+> `9715082`, and the round-4 delta is documentation-only.
+
+`Re-review required` is a record state, not a verdict. `Ready with notes` requires explicit human-owner
+acceptance of the remaining Minor (m13).
 
 ## Reviewer independence
 
@@ -882,3 +1024,105 @@ record is evidence and does not itself authorize starting Step 08.
 
 Follow-up owner: Step agent / planner
 Follow-up step: Correct m10–m12, then human-owner acceptance of `Ready with notes`
+
+### Re-review round 4
+
+#### Independence and frozen state
+
+I am a fresh context for this round. I did not author or implement this design, did not participate in its
+preparation or any discussion of its decisions, and used no handoff, summary, or prior conversation. I read the
+frozen repository state at `9715082c1d51e8273bf7c636c22593fa0f7ba5e6` and the request/current tip
+`053db7ab606e6d4f3faee7c03fc7a4a83a157c03` directly. I am not the round-1, round-2, or round-3 reviewer; every
+earlier round is kept unchanged above.
+
+The frozen-state check passes: `git diff --name-only 9715082..HEAD` is exactly
+`docs/planning/reviews/step-08.md`, `docs/planning/status.md`, and
+`docs/planning/steps/step-08-model-compilation-pipeline.md`. The status change records the round-3 verdict and the
+round-4 request; the step-page change only updates the review link to `9715082`. No design, contract, code, test,
+configuration, step-branch, or implementation commit was made after the freeze. `git branch --list` contains only
+`docs/step-08-design` and `main`; no `step/08-model-compilation-pipeline` or
+`feature/step-08-model-compilation-pipeline/*` branch exists. All eight feature rows remain `Not started`, and
+the compiler/test projects contain only the module marker, smoke test, PublicAPI files, and project files.
+
+#### Commands and results
+
+All commands were run in `/workspace/playground/step08-design`:
+
+```sh
+git status --short
+# no output before this record was written; exit 0
+
+python tools/check_process_consistency.py
+# Process consistency: OK (exit 0)
+
+python tools/check_docs_links.py
+# Documentation links OK (149 files scanned). (exit 0)
+
+zensical build --strict
+# Build started
+# No issues found
+# Build finished in 0.30s (exit 0)
+
+git diff --check
+# no output; exit 0
+
+python tools/contracts/generate.py --check
+# Contract artifacts are current (18 files) (exit 0)
+
+git diff --stat 9715082..HEAD
+# pre-record-commit request state (this record commit adds the round-4 text):
+# docs/planning/reviews/step-08.md                          | 14 +++++++++++---
+# docs/planning/status.md                                   |  8 ++++----
+# docs/planning/steps/step-08-model-compilation-pipeline.md |  2 +-
+# 3 files changed, 16 insertions(+), 8 deletions(-)
+
+git branch --list
+# * docs/step-08-design
+# + main
+```
+
+The strict documentation build, process check, link check, whitespace check, and contract-freshness check all
+pass. The full file list, API checks, and targeted greps are in `Evidence` above.
+
+#### Findings
+
+Round-4 status of the round-3 findings:
+
+| Finding | Round-4 status | Basis |
+| --- | --- | --- |
+| m10 | **Resolved** | `compilation-pipeline.md` now keys indexing on the simulation hash and encoding on the energy-derived hash ("energy links"); the runtime and energy prose no longer contradicts the step page's keys. The residual site-energy sub-case is m13. |
+| m11 | **Resolved** | Step 10 now clears dual-DOF only when every environment selection mask is reduced and keeps it in the mixed/none case. The original `JumpSelectionOptimizer.Run` sets `isReducedMask` when a mask is **unchanged** and returns `UseDualDofCorrection`, and `RunPostBuildOptimizers` subtracts the returned flag, so the flag is removed only when all masks changed. |
+| m12 | **Resolved** | The Step 08 risk row now reads "Charge-transport field convention \| Particle-identity Cartesian vector; single-charge, vacancy, exchange, and non-collinear tests; no scalar projection", matching §8.4 and `02-data-contracts.md` §3.3; no "vector change requires a contract decision" remains. |
+
+The round-1 and round-2 findings remain resolved or addressed as recorded. I re-checked the artefacts they
+depend on: the `signatures.model` manifest entry and `REQUIRED_SIGNATURES` (M4), `ProjectHasher` (`Compute`,
+`ComputeStructure`, `ComputeEnergy`, `ComputeTransition`; `ComputeSimulationSelection` remains the named new Core
+producer) (M3), `ClusterReduction.MaxTupleCount` (m3), the public `TransitionPathResolver` surface (M6),
+`Diagnostic.Related`, `SolverJobFlagsMapper.Compose`, and the Step 09/10/11/15 signature, job, and field text
+(m5, m6, m11). No regression was introduced at `9715082`; the m11 correction fixes Step 10 without altering
+Step 08's `Kind == Kmc` default.
+
+The new round-4 finding is m13 in `Findings — re-review round 4`. No Blocker or Major was found. m10, m11, and
+m12 are resolved; m13 is a small cache-graph/test-expectation inconsistency, not an interface or correctness
+gap. The core architecture remains sound: a pure synchronous staged compiler over the implemented Step 02/04/05/06
+services, an explicit Step 07 validation boundary, a separate compiled-model signature, the particle-identity
+charge-transport vector, the Step 18 tracker split, and the `CMP` family.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Round 4 verdict: Ready with notes.** No Blocker or Major remains. m10, m11, and m12 are resolved at
+`9715082`; the design matches the original dual-DOF accumulation, the particle-identity charge transport vector,
+and the compilation cache keys. One Minor remains: m13, the site-energy sub-case of the energy invalidation row,
+where the graph promises `Indexing`/`Signing` rebuilds that the stated keys and the "not energy values" signature
+projection do not produce. It is a documentation/test-expectation inconsistency, not a stale-output risk, and it
+is the only open finding. Under `docs/planning/reviews/README.md`, `Ready with notes` requires the human owner to
+accept m13 explicitly; the planner should split the energy row into environment/cluster and site-energy cases, or
+qualify the site-energy claim. This record is evidence and does not itself authorize starting Step 08.
+
+Follow-up owner: Step agent / planner and human owner
+Follow-up step: Correct or explicitly accept m13; human-owner acceptance of `Ready with notes`
