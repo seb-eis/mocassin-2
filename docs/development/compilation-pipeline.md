@@ -1,181 +1,230 @@
 # Compilation Pipeline
 
 Compilation is a pure, staged pipeline. Each stage has explicit inputs, outputs, and cache boundaries; no stage
-performs file I/O or UI work. This page describes the symmetry stage introduced in Step 02 and how later stages
-consume its results.
+performs file I/O or UI work. Step 02 owns the symmetry kernels, Step 04 the transition input, Step 05 the
+energy input and shared sampling kernel, Step 06 the simulation input, and Step 07 the validation gate. Step 08
+adds the compiler that composes those inputs into a deterministic `CompiledModel`.
 
 ## Stage order
 
 ```text
-validated project
+validated Project
+  → resolve (catalog, setting, cell, encoder, sorted particles/sites, simulations)
   → structure / P1 expansion
-  → symmetry reduction (environments, pair and cluster representatives)
-  → transition and rule generation
-  → energy sampling and tables
-  → encoding and ledger construction
-  → immutable package
+  → environments and pair-image sampling
+  → pair reduction, chirality, pair tables
+  → cluster geometry and permissible reduction
+  → transition direction expansion and rule generation
+  → simulation encoding (collections, directions, rules, mappings, trackers, intent)
+  → dense indexing and stable IDs
+  → canonical model signature
+  → report
 ```
 
-Later stages add lattice, simulation, and package compilation. Step 02 owns the first two stages and the exact
-ordering contract they establish; Step 05 defines the energy input consumed by Step 08.
+Step 09 adds parameterization values and the parameterization signature; Step 10 adds jobs/lattices; Step 11
+writes the `.msl` package and composes the `SolverJobFlags` word; Step 12 owns build orchestration and the
+`mocassin` CLI.
 
-## Symmetry stage
+## Compiler API and purity
 
-### Inputs
+```csharp
+namespace Mocassin.Compilation;
 
-- A validated cell (`CellParameters`) and a resolved `SpaceGroupSetting`.
-- Reference sites as `Fractional3` coordinates.
-- Optional interaction cutoffs for pair and cluster environments.
+public interface IModelCompiler
+{
+    CompilationResult Compile(
+        Project project,
+        CompilationOptions? options = null,
+        CancellationToken cancellationToken = default);
+}
+```
 
-### Outputs
+- Compilation is CPU-bound and synchronous. It returns a complete `CompilationResult` and takes a
+  `CancellationToken`. Step 12 wraps it in the async build event stream. `Mocassin.Compilation` has no
+  `Task`, file path, stream, serializer-to-file, or `Mocassin.Packages`/`Mocassin.Contracts` dependency.
+- User-data problems produce `Diagnostic` values and `Status = Failed`; programmer errors, contract
+  violations, and cancellation throw. Cancellation returns no partial model.
+- The compiler assumes a project that passed `ProjectValidationPipeline`. It does not run the validation
+  pipeline, does not consume `ValidationResult`, and does not expose an `IValidationStage`. Step 12 owns the
+  Build validation stage and maps compilation failures to the build error model.
+- Stage services may reject invalid input defensively; the compiler then emits `CMP001` and copies the source
+  `STR`/`TRN`/`ENM`/`SIM` diagnostics into `Related` instead of re-authoring them.
 
-- `UnitCellVectorEncoder` with canonical P1 positions, `ExpandedSite` records, and `SiteOrbitInfo` records.
-- `PointGroup` for each center/geometry combination: `G0`, `Gset`, `Gseq`, and induced permutations.
-- `PairReductionResult` with canonical shells, equivalent images, and chiral links.
-- `ClusterReductionResult` with canonical occupation tuples, 6-bit codes, and expansion maps.
-- `SymmetryVersionInfo` containing the contract, catalog data version, and catalog checksum.
+## Stage details
 
-### Exact grid
+### Resolve and structure
 
-All discrete work uses `GridFractional3` with denominator `24 × 10^12`. Cartesian geometry uses
-`Cartesian3`/`CellGeometry` and `double`. The pipeline converts to Cartesian only for distances, cell vectors,
-and radial search; it never uses a tolerance comparer to deduplicate or order sites.
+- Resolve the catalog setting with `IStructurePreviewService.TryResolve`, the cell with
+  `CellGeometry.TryCreate`, and the encoder with `UnitCellVectorEncoder.TryCreate`.
+- Reference sites are sorted by `CellSiteId` before encoding, so `ExpandedSite.ReferenceSiteIndex` is stable.
+  Particle index `0` is void; authored particles are sorted by `ParticleId`.
+- The canonical P1 order remains the Step 02 contract: expand, trim, exact-grid deduplicate, sort by
+  fractional `(a,b,c)`, assign `P`.
+- The compiled structure records the cell vectors, P1 positions `[cellA, cellB, cellC, P]`, owning site index,
+  stability, allowed-particle mask, orbit membership, environments, interaction range, and tracker counts.
 
-### P1 expansion and ordering
+### Environments and pairs
 
-The encoder expands each reference site to its orbit, trims to `[0, 1)`, deduplicates exact grid points,
-sorts by fractional `(a, b, c)`, and assigns `P` in ascending order. Two reference sites that expand to the
-same grid position produce `STR007`; positions above the 10,000 budget produce `STR009`.
+- One stable environment plus effective unstable environments (authored or inherited stable cutoff).
+- Pair sampling uses `IEnergyGeometrySampler`/`EnergyGeometrySampler` with unit-cell counts. That kernel owns
+  radial search, `1 fm` buckets, the `cutoff + 1 fm` margin, filters, `G0` reduction, and chiral linking.
+- The compiler allocates pair tables, maps directed geometries to shared `EnergyId` values, and re-sorts the
+  tables into canonical shell order `(distanceBucket, targetP, cellA, cellB, cellC)`, then center/partner site
+  index. Table order is not derived from the preview's display order.
+- Pair tables are `n_particles × n_particles` row-major in eV. Invalid particle combinations are zero; the
+  position's allowed-particle mask is authoritative.
+- Step 08 does not call the preview service at runtime. A test cross-checks compiled pair-image, unique-table,
+  cluster, and permutation counts against `EnergyCostPreview`/`TryCreatePairPreview`. This closes the Step 05
+  consistency follow-up without adding a second implementation.
 
-The linear index is `P + cellC*Pcount + cellB*Pcount*Ccount + cellA*Pcount*Ccount*Bcount`, computed in
-64-bit arithmetic with a hard `int.MaxValue` cap. Negative offsets are relative-path coordinates and must be
-normalized with `ToSupercellOffset` before linearization.
+### Clusters
 
-### Symmetry reduction
+- Resolve the center and ordered offsets to canonical P1 positions and their stable reference sites.
+- Call `ClusterReduction.Reduce` with the ordered full geometry and allowed particle indices. The reducer
+  owns `G0`, `Gset`, `Gseq`, induced permutations, canonical tuples, 6-bit codes, and expansion maps.
+- The center factor is mandatory; raw combinations are `centerParticleCount × Π(surroundingSetSize)`.
+  Compute the raw count with saturating `long` arithmetic and emit `CMP006` before calling the reducer when it
+  exceeds the configured limit or the reducer's fixed 1,000,000-tuple ceiling.
+- Occupation codes use 6 bits per site, site 0 least significant, up to 9 sites. Particle indices must be
+  `<= 63`.
+- One cluster table is shared by symmetry-equivalent centers. It is keyed by the stable cluster energy ID and
+  stores sorted occupation codes, energies (default `0.0`), and a center-particle row mapping.
+- Cluster contributions are counted at the center. The environment link records the table and the byte
+  position used for incremental code updates.
 
-Pair reduction enumerates periodic images inside the cutoff, buckets distances to whole femtometres, sorts by
-`(distanceBucket, targetP, cellA, cellB, cellC)`, and groups candidates under `G0`. Cluster reduction
-canonicalizes allowed occupation tuples under the induced permutation group. The exact semantics are in
-[Symmetry and Geometry](../physics/symmetry.md).
+### Transition directions and rules
 
-### Determinism and parallelism
+- `TransitionPathResolver` resolves the authored reference path to canonical `(P, cell offset)` positions.
+  Point/path expansion uses the additive public `TryResolvePoint`/`TryResolvePath` API; the compiler does not
+  duplicate the private nearest-image or tie logic.
+- Expand every setting operation, re-resolve with `TryResolvePath`, deduplicate exact relative encodings, and
+  reduce by the start position's `G0`. The canonical representative is the lexicographically smallest relative
+  path.
+- A direction stores the representative start P, relative path encodings, per-node fractional movement, the
+  Cartesian path vector/length, and an inverse flag. The direction stores no field scalar; the rule carries the
+  Cartesian charge transport vector used by Step 15.
+- For each direction, enumerate state-change combinations:
+  - stable nodes: donor in S0, acceptor in S2;
+  - unstable nodes: void in S0/S2, transition species in S1;
+  - stable nodes: void in S1;
+  - MMC has no S1.
+- Reject combinations that fail mass or total-charge conservation. Charge-transfer mechanisms must preserve
+  the carrier-symbol multiset across the full path. Report rejected counts by reason.
+- Forward rules are emitted for every accepted combination. Inverse rules are emitted only for
+  `GeneratesReverse` chains (`Metropolis2`, `Migration3`) and never for an authored explicit reverse
+  transition. Dependent rules are symmetry-equivalent instances required at other start positions. They are
+  deduplicated by the full rule outcome
+  `(state0, state1, state2, movement, chargeTransportVector, trackerOrder)`; two directions may share one
+  rule only when every outcome field is identical.
+- Rule lookup is guaranteed unambiguous: within one collection, a `state0` maps to at most one rule. A
+  collision with a different outcome is `CMP004`.
+- Rule IDs in the payload are dense `u32`; stable rule geometry IDs are domain-separated SHA-256 strings used
+  by templates and inspection, not table indices.
+- Default attempt frequency is `1e13 Hz`; Step 09 supplies parameterized values. Static S2 corrections are
+  deferred; v1 stores `null`/NaN and uses the dynamic S2 path.
+- The compiler converts each fractional `movement_i` to Cartesian with the validated cell geometry and stores
+  a per-rule `chargeTransportVector` summed over moving particle identities:
+  `Σ_p q_p * (x_p(S2) - x_p(S0))`. Each moving particle contributes once; void contributes nothing.
+  Step 15 computes `field = -0.5*(|E|/kT)*(chargeTransportVector·ê)`, which is exact for non-collinear paths
+  and gives the correct single-charge/vacancy/exchange signs. The direction's `pathVector` is display/tracking
+  only.
 
-Orbit, pair, and cluster work is independent per center/site. Parallel tasks must use local buffers and merge
-results with the documented canonical keys before assigning IDs or storing values. Floating-point reductions
-are not parallelized. Deterministic tests freeze P indices, verify pair-shell and cluster representatives
-against brute-force oracles, and CI repeats the golden P-index and catalog checks on Ubuntu. Windows and macOS
-are manual platform gates when platform-sensitive code changes.
+### Simulation encoding
 
-### Caches
+- One collection per distinct transition used by a simulation, shared across simulations. KMC collections
+  carry rules/directions; MMC collections are two-site exchanges with uniform partner-cell selection.
+- `jumpCount[position][particle]` and `jumpMapping[position][particle]` list only selectable directions and
+  resolve the solver's uniform direction selection. Zero means blocked.
+- Tracker **definitions** and index mappings are compiled:
+  - global: `(collection, particle)`, excluding void;
+  - static: `position * (particleCount - 1) + (particle - 1)`, excluding void;
+  - `tracker_order` per rule follows particle identity and uses `0xFF` for non-mobile nodes.
+  Step 18 owns mutable tracker values, mobile-tracker assignment, and `.mcs` output. MMC has no trackers.
+- MMC `interaction_range` is the `[maxCellA, maxCellB, maxCellC, 0]` local-update cube derived from the
+  maximum cutoff and interplanar spacings.
+- `CompiledSolverIntent` carries `Kind`, `UsePrerun = Kmc && PreRunMcsp > 0`, and
+  `UseDualDofCorrection = Kind == Kmc` by default, matching the original job builder. Step 10 may clear it only
+  through a documented and tested selection-optimizer rule. Step 10 copies the intent to `JobDescriptor`;
+  Step 11 composes the `SolverJobFlags` word. `Mocassin.Compilation` never references `SolverJobFlags`.
 
-Caches are owned by one compilation; they are not static. Keys include the catalog data version and symmetry
-contract version, plus:
+## Compiled model and package boundary
 
-| Cache | Additional key inputs |
-| --- | --- |
-| Cell geometry | cell-parameter SHA-256 |
-| Orbit / stabilizer | setting identity, exact center grid |
-| Point group | setting identity, center grid, ordered geometry hash |
-| Pair shells | setting identity, center P, cutoff bucket, cell hash |
-| Cluster reduction | setting identity, center P, offset hash, allowed-occupation hash |
-| Canonical P1 order | structure hash |
+The internal `CompiledModel` is a `Mocassin.Compilation` record with typed IDs and immutable arrays. It is not
+the persisted DTO.
 
-A capacity breach is a bounded failure, never an unbounded allocation. Cache insertion order never affects
-results. Step 02 provides the scoped cache and key builders; Step 08 compilation wires them into the orbit,
-point-group, pair, and cluster stages.
+- **Persisted in `.msl`:** compiled geometry/rules/encoding, parameterized energy/frequency values, symmetry
+  contract/catalog versions, and both signatures. Step 11 maps the internal model to the Contracts
+  `ParameterizedModel` payload defined in the data-contract §3.3.
+- **Inspection only:** stable geometry/rule IDs, expansion maps, equivalent images, input hashes, timings,
+  diagnostics, cache statistics, derived flags, and the index→ID mapping. `CompiledModelJson` emits these as
+  `compiled-inspection-v1`; it is not a `.msl` contract.
+- **Composed later:** parameterization values/signature (Step 09), jobs/lattices/selection optimizers (Steps
+  10–11), `.msl` flags (Step 11), tracking state/`.mcs` metadata (Step 18).
 
-### Versioning
-
-`SymmetryContract.Version = "symmetry-1"` covers the grid, canonical P1 order, pair ordering and bucket,
-cluster canonicalization and codes, and reduction semantics. The catalog version
-(`spglib-2.8.0/catalog-1`) is independent and changes only with the catalog payload or selection rule.
-
-Changing a covered rule bumps the contract version, updates golden fixtures and signatures, and is called out
-in the step page. The compiled payload records the contract version, catalog data version, and catalog SHA-256.
-
-## Transition stage (Step 04 input, Step 08 rules)
-
-Step 04 defines the transition input consumed by compilation:
-
-- state changes, groups, and chains;
-- one reference kinetic path or Metropolis site pair per transition;
-- explicit reverse links and `generatesReverse`;
-- the advisory `TransitionPreview` with resolved paths, expanded paths, state-change matrices, and expected
-  rule count.
-
-Definition-level validation belongs to `Mocassin.Core.Model.Transitions.TransitionModelValidator`. The
-resolved-path/site rules belong to `Mocassin.Symmetry.Transitions.TransitionPathValidator`, which uses the same
-`TransitionPathResolver` as the preview service. `Mocassin.Packages.Projects.ProjectValidationService`
-composes both with the Step 03 structure validator.
-
-Step 08 performs the deferred work: rule generation, automatic inverse rules for two/three-site mechanisms,
-rule deduplication, inverse/dependent pairing, and mass/charge conservation filtering. The authored model stores
-one reference geometry; Step 08 expands it into all symmetry-equivalent paths and rules. No rule or compiled
-transition index is written to the project.
-
-The preview cache is separate from compilation caches. Its key includes the transition closure hash, structure
-hash, requested `(A, B, C)` counts, transition reference, and symmetry catalog/contract versions. A capacity
-breach is a bounded failure, never an unbounded allocation.
-
-## Energy stage (Step 05 input, Step 08 tables)
-
-Step 05 defines the geometric and symbolic energy input consumed by compilation:
-
-- one stable environment and zero or more unstable-site environments;
-- symmetric or one-directional distance filters;
-- ordered multi-body clusters with a centre and 2–8 surrounding offsets;
-- sparse site energies;
-- advisory cost and pair previews.
-
-The shared sampling kernel is `Mocassin.Symmetry.Energy.IEnergyGeometrySampler` /
-`EnergyGeometrySampler`. It samples stable–stable and unstable–stable pair images, applies filters, reduces
-images under the centre stabilizer, and produces directed pair geometries without allocating energy tables.
-Step 08 adds table allocation and canonical indices on top of the same kernel. `EnergyPreviewService` caches
-by energy hash, structure hash, full canonical model hash (including particle and particle-set content),
-requested cell counts, catalog version, and symmetry contract version.
-
-Every directed pair geometry has a `GeometryId` that includes the centre/target P1 indices. Chiral directions
-share one `EnergyId`; Step 08 uses that identity as the compiled `object_id`, and Step 09 stores one parameter
-value per `EnergyId`. Cost previews use `long` counts and a Burnside count for unique cluster permutations, so
-the preview and compiler agree without enumerating the full state product.
-
-Definition-level energy validation belongs to `Mocassin.Core.Model.Energy.EnergyModelValidator`. The
-catalog/cell/encoder rules belong to `Mocassin.Symmetry.Energy.EnergyGeometryValidator`. `ProjectValidationService`
-composes both with the structure and transition validators.
-
-## Lattice and simulation stage (Step 06 input, Steps 10/11)
-
-Step 06 defines the authored lattice/doping and simulation input consumed by job expansion and package writing:
-
-- occupation exchanges and ordered dopings, including charge-compensation shape;
-- the derived default building block;
-- KMC and MMC settings, defaults, hard limits, authored-order transition assignments, and execution flags.
-
-`Mocassin.Core.Model.Lattice.LatticeModelValidator` owns `LAT001`–`LAT011`; it validates only the model graph
-and never needs a fraction, supercell, or applied count. `Mocassin.Core.Model.Simulations.SimulationModelValidator`
-owns `SIM001`–`SIM037`, including kind/transition compatibility, defaults, hard limits, recommended bands, and
-the canonical settings values. `ProjectValidationService` composes both with the existing Core and Symmetry
-validators.
-
-Step 10 expands the simulations into jobs, applies doping fractions in priority order, generates the single
-shared supercell, computes effective job counts, and owns the preview service. Step 06 exposes no lattice or
-job-count preview, so there is only one truncation/compensation implementation.
-
-Step 11 composes the `.msl` `SolverJobFlags` word. The composition boundary is intentional:
+## Signatures
 
 ```text
-Compilation intent (Kind, PreRunMcsp, UseDualDofCorrection)
-  -> Packages job builder
-     -> Mocassin.Contracts.SolverJobFlags
+CompiledModel.ModelSignature
+  = SHA-256("mocassin/model-signature/v1" || 0x00 || canonical compiled projection)
+
+ParameterizedModel.Signature
+  = SHA-256("mocassin/parameterization-signature/v1" || 0x00 ||
+            canonical(model signature + energy/frequency values))
 ```
 
-`Mocassin.Compilation` does not reference `Mocassin.Contracts`. `SolverJobFlagsMapper` maps the four authored
-execution flags and adds the derived KMC/MMC, pre-run, and dual-DOF bits. Steps 14 and 16 consume the resulting
-bits; the project array never contains a derived flag.
+- The Step 08 projection covers particles, structure/P1, environments, pair/cluster geometry and table
+  shapes, transitions/rules, jump encoding, tracker definitions, active-collection selection, indexing rules,
+  the symmetry contract version, and the catalog version/SHA-256.
+- It excludes runtime simulation settings, parameterization values, timings, diagnostics, file names, and
+  cache state.
+- The projection follows ADR 0010: arrays in fixed field order, fixed-width integers, float64, normalized
+  `-0.0`, domain separation, no compression/timestamps. `Mocassin.Compilation` hand-codes it because it
+  cannot reference `Mocassin.Contracts`; Step 08 finalizes the existing `signatures.model` manifest entry,
+  which Step 11 reuses for stored-payload and cross-language checks.
+- Step 09 treats the model signature as opaque and computes the parameterization signature in
+  `Mocassin.Contracts`. `models.signature` is the parameterization signature; `models.payload.model_signature`
+  is the Step 08 signature.
+
+## Caches and determinism
+
+- Default stage caches are per compilation and released on return. `CompilationOptions.Cache` allows a
+  caller-owned, thread-safe, bounded cache for repeated builds; there is no static/process-wide cache.
+- Keys include catalog version/SHA-256, symmetry contract version, and stage-specific content hashes. The cheap
+  resolve stage always runs and is not keyed by the whole-model hash. Pair/cluster work keys on energy +
+  structure hashes; rules key on the active-transition-set hash + transition closures + structure; encoding
+  keys on rules + simulations + energy links; indexing includes the energy and simulation hashes and rebuilds
+  for site-energy or runtime-only edits; signing uses the canonical projection and excludes energy values and
+  runtime settings.
+  `ProjectHasher.ComputeSimulationSelection` hashes the referenced simulation transition set so adding/removing
+  a reference invalidates rules.
+- Editing structure invalidates everything; editing energy rebuilds environments/pairs/clusters/encoding/indexing
+  and reuses structure and rules, while site-energy-only edits reuse signing because values are excluded;
+  editing transitions rebuilds rules/encoding but reuses geometry; changing a simulation's active-transition
+  set rebuilds rules/encoding, while changing runtime settings rebuilds the encoding defaults and the indexed
+  runtime snapshot but not the signature. Tests use a recording cache to prove the graph.
+- Output order is fixed independently of parallelism, cache insertion, or hash iteration. No parallel
+  floating-point reductions. Charge transport vectors are quantized before persistence/signing.
+- Same project/options/versions produce byte-identical `CompiledModelJson` and the same signature across runs
+  and supported platforms. Golden fixtures are generated by the real compiler.
+
+## Diagnostics
+
+- Compilation reuses `Diagnostic`, `ModelPath`, `DiagnosticBag`, and `DiagnosticDescriptor`.
+- `CMP001`–`CMP012` are owned by `Mocassin.Compilation.Diagnostics`. `CompilationDiagnosticCatalog` registers
+  them; `DiagnosticCatalog.Default` composes Core + Symmetry + Compilation + Step 07.
+- `CMP001` wraps a failed precondition, adds the source diagnostic to `Diagnostics`, and preserves its path
+  in `Related`. `CMP004` is rule ambiguity, `CMP005` is no valid rules, `CMP006` is a compile limit, `CMP007`
+  is path expansion, `CMP008` is conservation evaluation, `CMP009` is an unused transition warning, `CMP010`
+  is an advisory budget warning, `CMP011` is a signature failure, and `CMP012` is a defensive cache-integrity
+  warning.
+- Catalog completeness, duplicate detection, and docs drift are tests. Step 08 adds the `CMP` rows/anchors to
+  `docs/reference/diagnostics.md` in its diagnostics feature.
 
 ## Test tiers
 
-- **PR-fast:** catalog integrity, group laws, synthetic P1/pair/cluster cases, cell geometry, minimum
-  image, encoder round-trips, and the 274-setting contract checks.
-- **PR-medium:** randomized property tests for orbits, pairs, clusters, and geometry.
-- **Nightly/release:** larger random suites, the 20×20×20 expansion benchmark, and cross-platform test runs.
+- **PR-fast:** P1/pair/cluster golden counts, small rule-generation cases, conservation, tracker mappings,
+  derived intent, signature vectors, cancellation, `CMP` emission.
+- **PR-medium:** randomized pair/cluster/rule property tests, preview cross-checks, cache invalidation,
+  determinism.
+- **Nightly/release:** 10k-position performance/memory, cross-platform golden runs, larger random suites,
+  fuzzed project inputs.

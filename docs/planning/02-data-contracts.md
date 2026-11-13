@@ -86,6 +86,11 @@ The stored `.msl` payload may remain a compressed MessagePack map. Readers decod
 projection, and compare the digest. The manifest is the source for projection field order and types; a change
 to either is a format-breaking change.
 
+Step 08's compiled-model signature covers geometry, rules, encoding, indexing, and the symmetry/catalog
+versions; it excludes parameterization values and runtime simulation settings. Step 09's parameterization
+signature covers the compiled-model signature plus the canonical energy/frequency values. The two are
+deliberately distinct; see §3.3.
+
 ## 2. Project file (`.mocprj`, JSON)
 
 ### 2.1 Envelope
@@ -580,11 +585,13 @@ support; the validator rejects a field that belongs to the other kind (`SIM023`)
 }
 ```
 
-- `modelSignature` is a SHA-256 hash of the canonical compiled model (structure, transitions, environments,
-  interaction geometry, indices). A parameterization whose signature does not match the current model cannot
-  be used to build jobs; the GUI offers "rebase" and shows which sets changed.
-- Rule IDs are stable strings derived from the rule's state triplet and direction, so recompilation can match
-  existing frequencies.
+- `modelSignature` is the Step 08 compiled-model signature: a SHA-256 hash of the canonical compiled geometry
+  (structure, transitions, environments, interaction geometry, indices), excluding parameterization values and
+  runtime simulation settings. It is distinct from the Step 09 parameterization signature stored in the `.msl`
+  `models.signature`. A parameterization whose model signature does not match the current compiled model
+  cannot be used to build jobs; the GUI offers "rebase" and shows which sets changed.
+- Rule IDs are stable strings derived from the rule's transition, state triplet, and canonical direction, so
+  recompilation can match existing frequencies; the dense `.msl` `rule_id` is not the template identity.
 - The original could not edit site energies through a parameterization template. The new format includes
   `siteEnergyOverrides` as an intentional improvement; the GUI marks them as overrides.
 - Chiral pair sets share one interaction identity and one energy table. Each direction has its own stable
@@ -673,7 +680,7 @@ CREATE TABLE schema_info (
 
 CREATE TABLE models (
     model_id       INTEGER PRIMARY KEY,
-    signature      TEXT    NOT NULL UNIQUE,   -- SHA-256 canonical projection (ADR 0010)
+    signature      TEXT    NOT NULL UNIQUE,   -- Step 09 parameterization signature (ADR 0010)
     format_version INTEGER NOT NULL,
     payload        BLOB    NOT NULL            -- Zstd(MessagePack(ParameterizedModel))
 );
@@ -739,7 +746,8 @@ MessagePack map with snake_case keys. Top-level:
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `format_version` | u32 | Payload version |
-| `signature` | string | SHA-256 of canonical parameterized model (geometry + energy/frequency values) |
+| `signature` | string | SHA-256 of canonical parameterized model (geometry + energy/frequency values); the Step 09 parameterization signature |
+| `model_signature` | string | SHA-256 of canonical compiled geometry/rules/encoding (Step 08 model signature), excluding parameterization values and runtime settings |
 | `symmetry_contract_version` | string | Symmetry contract version, e.g. `symmetry-1` |
 | `space_group_data_version` | string | Catalog data version, e.g. `spglib-2.8.0/catalog-1` |
 | `space_group_data_sha256` | string | SHA-256 of the canonical catalog payload |
@@ -749,8 +757,21 @@ MessagePack map with snake_case keys. Top-level:
 | `transitions` | object | jump collections, directions, rules, mapping tables |
 | `simulations` | array | simulation encodings (active collections, settings defaults, trackers) |
 
+- `particle` indices are compiled indices: `0` is void, then authored particles in ascending `ParticleId`
+  order. This is not the preview/state-change-matrix order (authored particles then void); consumers map by
+  `ParticleId`, never by preview array position.
+- `signature` is the Step 09 parameterization signature and the `models.signature` uniqueness key;
+  `model_signature` is the Step 08 compiled-model signature used by parameterization templates and inspection.
+  A value-only parameterization change changes `signature` but not `model_signature`.
 - The model-signature projection includes the symmetry contract version and the catalog data version and
   checksum, so a rule or catalog change invalidates parameterizations.
+- `model_signature` is additive before the first released `.msl`. `format_version` stays `1` because no released
+  package exists, matching the pre-release additive-v1 precedent; the manifest entry, schema, and fixtures are
+  added with the Step 11 writer and Step 08 signature feature.
+- The payload is the parameterized form. Step 08's internal `CompiledModel` is not the persisted DTO; Step 11
+  maps it to this payload. Stable geometry/rule ID strings, expansion maps, equivalent images, input hashes,
+  timings, diagnostics, cache statistics, derived classification flags, and the index→ID map are
+  JSON-inspection only (`compiled-inspection-v1`) and are not persisted in `.msl`.
 
 `structure` fields:
 
@@ -766,7 +787,18 @@ MessagePack map with snake_case keys. Top-level:
 | `global_tracker_count` | u32 | |
 
 - `position_count = Pcount`.
-- `site_index` identifies the reference site; it is not the P index.
+- `site_index` identifies the reference site; reference sites are sorted by `CellSiteId` during compilation,
+  so the index is stable for a given structure. It is not the P index.
+- `positions` are in ascending `P` order; `particle_ids` is the allowed particle index list for the owning
+  site.
+- `environments` is indexed by position. Each entry carries `selection_particle_mask:u64`, pair links,
+  cluster links, and `update_particle_ids`. A pair link is `{target_position:u32, energy_id:u32}`; a cluster
+  link is `{cluster_id:u32, byte_position:u8}` used for incremental occupation-code updates.
+- `interaction_range` is the MMC local-update cube `[maxCellA, maxCellB, maxCellC, 0]`, derived from the
+  maximum stable/unstable cutoff and the cell interplanar spacings plus one boundary cell.
+- `static_trackers_per_cell = position_count * (particle_count - 1)`; void (index 0) has no tracker.
+- `global_tracker_count` is the sum of per-collection non-void particle tracker counts. These are tracker
+  **definitions**, not mutable values; Step 18 owns the values.
 - The linear index is
   `P + cellC*Pcount + cellB*Pcount*Ccount + cellA*Pcount*Ccount*Bcount`.
 - The index is a signed 32-bit integer. The total `Acount*Bcount*Ccount*Pcount` is validated in 64-bit and
@@ -778,8 +810,8 @@ MessagePack map with snake_case keys. Top-level:
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `pair_tables` | array | `{object_id, energies:[f64; n_particles*n_particles]}` |
-| `cluster_tables` | array | `{object_id, occupation_codes:[u64], energies:[f64], particle_table_mapping:[u8; n_particles]}` |
-| `defect_background` | array | `[position][particle]` site energy in eV |
+| `cluster_tables` | array | `{object_id, occupation_codes:[u64], energies:[f64], particle_table_mapping:[u8]}` |
+| `defect_background` | array | `[position][particle]` site energy in eV, row-major |
 
 - Pair tables are in canonical shell order: `(distanceBucket, targetP, cellA, cellB, cellC)`, then site
   indices. The stable geometry ID is a content hash used for parameterization matching, not table order; its
@@ -787,10 +819,17 @@ MessagePack map with snake_case keys. Top-level:
   IDs, periodic offset, and distance bucket. The compiled structure environments carry each shell's geometry
   ID, shared energy ID, center/partner P1 indices, distance bucket, representative offset, equivalent-offset
   count, and optional chiral partner geometry ID.
+- Pair `object_id` is the shared `EnergyId`; the table is `n_particles × n_particles` row-major
+  `[centerParticle][partnerParticle]`. Entries for particle combinations the site pair cannot realize are
+  zero; the position's `selection_particle_mask` is authoritative.
 - Chiral partners share one `object_id` (the shared `EnergyId`) and one energy table. Each direction keeps its
   own `GeometryId` and records the inverse direction's `ChiralPartnerGeometryId`.
 - Cluster occupation codes use 6 bits per site, site 0 in the least significant bits, up to 9 sites; unused
   high bits are zero. Codes are canonical under the induced site-permutation group.
+- Cluster `object_id` is the stable cluster energy identity
+  `SHA-256("mocassin/cluster-energy-id/v1" || clusterId || centerSiteId || canonical geometry hash)`.
+  `occupation_codes` are sorted ascending; `particle_table_mapping` holds one row per allowed center particle
+  in ascending compiled particle index; energies are eV and default to `0.0` until Step 09 applies values.
 - Pair shells use the `1 fm` distance bucket. Candidate enumeration uses a `cutoff + 1 fm` margin and includes
   shells with `bucket <= cutoffBucket`.
 - Minimum-image and radial-search results always carry the cell offset; no implicit wrapping is allowed.
@@ -799,13 +838,31 @@ MessagePack map with snake_case keys. Top-level:
 
 | Key | Type | Meaning |
 | --- | --- | --- |
-| `jump_collections` | array | `{object_id, mobile_particle_mask:u64, rule_ids:[u32], direction_ids:[u32]}` |
-| `jump_directions` | array | `{object_id, position_id, collection_id, path:[i32;4], movement:[[f64;3]], field_factor, length}` |
-| `jump_rules` | array | `{rule_id, state0:u64, state1:u64, state2:u64, frequency_factor, field_factor, static_correction, tracker_order:[u8;8]}` |
+| `jump_collections` | array | `{object_id, kind, transition_id, mobile_particle_mask:u64, rule_ids:[u32], direction_ids:[u32]}` |
+| `jump_directions` | array | `{object_id, position_id, collection_id, path:[i32;4], movement:[[f64;3]], path_vector:[f64;3], length, is_inverse}` |
+| `jump_rules` | array | `{rule_id, collection_id, state0:u64, state1:u64, state2:u64, frequency_factor, charge_transport_vector:[f64;3], static_correction, tracker_order:[u8;8]}` |
 | `jump_count` | array | `[position][particle] -> u32` |
 | `jump_mapping` | array | `[position][particle][relative] -> direction index` |
 | `static_tracker_mapping` | array | `[position][particle] -> tracker offset` |
 | `global_tracker_mapping` | array | `[collection][particle] -> tracker index` |
+
+- `rule_id` is a dense `u32` assigned by canonical collection order, then `(state0, state1, state2)` and the
+  representative direction; stable rule geometry IDs are inspection-only and are not persisted.
+- `state0`/`state1`/`state2` use 6 bits per path node, node 0 least significant, unused high bits zero. For
+  MMC, `state1` is `0` and is ignored.
+- `frequency_factor` is the Step 09 parameterized value relative to the simulation/job maximum; Step 08's
+  internal default frequency is not a second runtime source.
+- `movement` is the authoritative fractional displacement per path node. `path_vector` is the Cartesian net
+  displacement, obtained by converting each movement with the cell geometry and summing; `length` is its
+  magnitude. `charge_transport_vector` is the particle-identity sum
+  `Σ_p q_p * (x_p(S2) - x_p(S0))` in e·Å and is the exact field input; a particle that moves contributes once,
+  void contributes nothing. Step 15 computes `field = -0.5*(|E|/kT)*(charge_transport_vector·ê)`. A direction
+  has no stored field scalar. `static_correction` is `null`/NaN in v1 (dynamic S2).
+- `tracker_order[i]` names the path node whose mobile tracker receives the movement at node `i`, or the
+  sentinel `0xFF` for a non-mobile node. Tracker mappings are definitions; Step 18 owns the values and
+  updates.
+- Within one collection, `state0` maps to at most one rule; the compiler rejects ambiguity. A direction is
+  listed in `jump_mapping` only when at least one rule can start from that `(position, particle)`.
 
 `simulations` fields:
 
@@ -815,7 +872,14 @@ MessagePack map with snake_case keys. Top-level:
 | `kind` | string | `kmc` / `mmc` |
 | `jump_collection_ids` | `u32[]` | Active collections |
 | `default_settings` | object | Temperature, MCSP, write-out count, pre-run, limits, field, normalization, MMC samples, flags |
-| `tracker_models` | array | Global/static tracker definitions and indices |
+| `tracker_models` | array | Global/static tracker definitions and indices; empty/absent for MMC |
+
+- `tracker_models` are definitions only. Global trackers are `(collection, particle)`; static trackers are
+  `(position, particle)` per cell. Step 18 owns mutable values, mobile-tracker assignment, and `.mcs` output.
+- Derived solver intent (`UseDualDofCorrection`, `UsePrerun`, kind) is not a model-payload field. Step 10
+  carries it on the job descriptor and Step 11 composes the job `flags` word.
+- Runtime default settings are not part of `model_signature`; they are job-expansion inputs and are excluded
+  from the template-invalidating signature.
 
 Exact array lengths and invariants are validated by `mocassin-msl` before the solver allocates memory.
 
@@ -1133,6 +1197,8 @@ mocassin doctor [--json]
 - `<range>` accepts `1-100`, `1,3,5`, and mixed forms.
 - `--json` prints a single JSON object to stdout; human progress goes to stderr. `validate --json` uses the
   dedicated `validation-v1` report in §5.6; the other commands use the generic command result.
+- `mocassin compile` is implemented in Step 12. Step 08 provides the pure `IModelCompiler` and the canonical
+  `compiled-inspection-v1` JSON projection; it does not add a command or file-I/O path.
 - `build` refuses to overwrite an existing `.msl` unless `--force`; writes atomically.
 - `simulate` launches `mocassin-sim` per job and captures stdout/stderr. It does not modify the `.msl`.
 - `collect` reads `Job%05d/solver.json`, `run.mcs`, `prerun.mcs`, and logs, validates them, and writes the

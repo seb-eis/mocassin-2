@@ -117,6 +117,37 @@ through `SymmetryVersionInfo`; the project may carry advisory metadata that warn
 structure-preview cache is scoped to the preview service and keyed by the canonical structure hash, the
 requested cell counts, the catalog data version/SHA-256, and the contract version.
 
+## Compilation pipeline (Step 08)
+
+`Mocassin.Compilation` is a pure library with no file I/O, SQLite, Avalonia, or `Mocassin.Packages`/
+`Mocassin.Contracts` dependency. It depends on `Mocassin.Core` and `Mocassin.Symmetry` and exposes a
+synchronous `IModelCompiler` with a `CancellationToken`; Step 12 wraps it in async build orchestration.
+
+```text
+Mocassin.Compilation/
+  CompilationModule.cs
+  Compiler/          # IModelCompiler, ModelCompiler, options, result, stage orchestrator
+  Context/           # resolved catalog/cell/encoder/particle/site context
+  Structure/         # P1 structure, environments, tracker definitions
+  Energy/            # pair/cluster tables, links, stable geometry IDs
+  Transitions/       # direction expansion, state triplets, rules, conservation, ambiguity
+  Simulations/       # collections, directions, mappings, derived intent
+  Indexing/          # dense indices and stable-ID maps
+  Signatures/        # canonical projection and CompiledModelJson
+  Diagnostics/       # CMP codes and descriptors
+  Caching/           # bounded, thread-safe stage cache
+```
+
+The compiler assumes a project that passed `ProjectValidationPipeline`; it does not run validation and does not
+expose an `IValidationStage`, because those types live in `Mocassin.Packages`. Step 12 owns the Build-stage
+adapter and maps compile failures to the build error model.
+
+`CompiledModel` is the internal pure result. Step 09 adds parameterization values and the parameterization
+signature; Step 10 adds jobs and lattices; Step 11 maps the model to the Contracts `.msl` payload and composes
+`SolverJobFlags`; Step 18 owns mutable tracker state. The model signature (geometry/rules/encoding) and the
+parameterization signature (geometry + values) are distinct. Stable geometry/rule IDs, expansion maps, timings,
+and diagnostics are JSON-inspection only and are not persisted in `.msl`.
+
 ## Particle and structure model (Step 03)
 
 `Mocassin.Core` owns the persisted particle and structure model:

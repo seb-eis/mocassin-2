@@ -115,8 +115,10 @@ Five SHA-256 hashes are exposed:
 - `ProjectHasher.ComputeTransition` hashes one transition closure (the transition, its chain, referenced
   groups/state changes, and the full particle order) and is the transition-preview cache key.
 
-They are deliberately distinct. The compiled-model signature in Step 08 is a different value again, based on
-the canonical MessagePack projection (ADR 0010).
+They are deliberately distinct. The Step 08 compiled-model signature is a different value again, computed over
+the canonical compiled geometry/rules/encoding projection and excluding parameterization values and runtime
+settings. Step 09 computes the parameterization signature over the model signature plus the canonical
+energy/frequency values; both follow ADR 0010's canonical projection rules.
 
 ## Manifest as schema source
 
@@ -140,6 +142,81 @@ format change, while older readers still round-trip it unchanged. Nested style v
 - Autosave is an explicit `ProjectStore.WriteAutosaveAsync` operation. `ProjectDocument` exposes
   `IsAutosaveDue` and `MarkAutosaved`; the UI timer is added in Step 23.
 - Autosave does not update `modifiedUtc`; only a real save does.
+
+## Synchronous, pure compiler (Step 08)
+
+`IModelCompiler.Compile` is synchronous and takes a `CancellationToken`. Compilation is CPU-bound, has no I/O,
+and must not be made async merely to look modern. Step 12 owns the async orchestration and progress events.
+`Mocassin.Compilation` does not reference `Mocassin.Contracts` or `Mocassin.Packages`; user-data failures
+return diagnostics, while programmer errors, contract violations, and cancellation throw.
+
+## Compilation assumes validation
+
+The compiler consumes a `Project` that passed `ProjectValidationPipeline`. It does not accept or duplicate a
+`ValidationResult`, run the load/model/cross-domain/feasibility stages, or add an `IValidationStage`.
+`IValidationStage` lives in `Mocassin.Packages` and the dependency direction forbids `Compilation` from
+referencing it. Step 12 owns the Build stage and calls the compiler after validation. A stage service that
+rejects invalid input is reported as `CMP001` with the source diagnostic preserved in `Related`, so the
+compiler fails closed without re-authoring validation rules.
+
+## Compilation cache lifetime
+
+Stage caches default to one `Compile` call and are released on return. `CompilationOptions.Cache` allows a
+caller-owned, thread-safe, bounded cache for repeated builds; Step 12 may keep one per build/session. There is
+no static or process-wide cache, because a long-lived cache across projects complicates invalidation and
+lifetime without a measured need. Cache entries are immutable, keyed by content hashes plus catalog/contract
+versions, and insertion order never affects output. The rule cache key includes
+`ProjectHasher.ComputeSimulationSelection`, so adding or removing a simulation's transition reference
+invalidates the rules; runtime-only simulation edits rebuild the encoding defaults but not the rules.
+
+## Model signature versus parameterization signature
+
+Step 08 computes `CompiledModel.ModelSignature` over geometry, rules, encoding, indexing, and catalog/contract
+versions; it excludes runtime simulation settings and all energy/frequency values. Step 09 treats that value
+as opaque, stores it in the parameterization template, and computes the parameterization signature over the
+model signature plus the canonical values. The `.msl` `models.signature` and `.mcs`
+`metadata.modelSignature` are the parameterization signature; the `.msl` payload also carries
+`model_signature` for template/model identity. A geometry change invalidates templates; a value-only change
+does not.
+
+## Derived solver intent
+
+`CompiledSolverIntent` carries `Kind`, `UsePrerun = Kmc && PreRunMcsp > 0`, and
+`UseDualDofCorrection = Kind == Kmc` by default. The default matches the original job builder, which sets the
+flag for every KMC job; Step 10 may clear it only through a documented and tested selection-optimizer rule.
+The compiler does not infer the flag from the mechanism shape. The compiler does not compose `SolverJobFlags`:
+Step 10 copies the intent to `JobDescriptor`, and Step 11 calls `SolverJobFlagsMapper.Compose`. The project
+JSON never stores derived bits.
+
+## Tracker definitions versus state
+
+Step 08 emits tracker **definitions and index mappings**: global `(collection, particle)`, static
+`(position, particle)`, and per-rule `tracker_order` following particle identity. Step 18 owns mutable tracker
+values, mobile-tracker assignment at initialization, accumulation, and `.mcs` output. MMC has no trackers.
+
+## Compile diagnostics
+
+Step 08 owns the `CMP` prefix. `CompilationDiagnosticCatalog` registers `CMP001`–`CMP012` as
+`DiagnosticDescriptor` values; `DiagnosticCatalog.Default` composes them with Core, Symmetry, and Step 07.
+`CMP001` wraps a failed precondition, adds the source `STR`/`TRN`/`ENM`/`SIM` diagnostic to `Diagnostics`,
+and preserves its path in `Related`.
+Rule ambiguity (`CMP004`), no valid rules (`CMP005`), compile limits (`CMP006`), path expansion (`CMP007`),
+conservation evaluation (`CMP008`), and signature failure (`CMP011`) are errors; unused transitions
+(`CMP009`), advisory budgets (`CMP010`), and defensive cache recomputation (`CMP012`) are warnings.
+
+## `mocassin compile` ownership
+
+Step 08 ships the library and a pure canonical JSON inspection writer only. Step 12 owns `mocassin compile`
+and the full CLI. This avoids a second parser/orchestration path and keeps the compiler free of loading,
+validation, file output, and exit-code policy. The data contract's `compile` command is implemented in
+Step 12.
+
+## Charge-transport field convention
+
+The compiler stores a per-rule Cartesian charge transport vector `Σ_i q_i * Δx_i`. Step 15 computes the
+field energy from its dot product with the normalized field direction. This is exact for non-collinear
+multi-site mechanisms and gives the correct single-charge and vacancy signs; the direction's `path_vector` is
+display/tracking only. A scalar field factor would lose the sign or cancel for symmetric exchanges.
 
 ## Diagnostics over exceptions for user data
 

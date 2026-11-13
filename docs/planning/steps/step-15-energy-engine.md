@@ -97,22 +97,24 @@ raw_s1 = Σ_{i=1..L-1} E[p_i][S1_i]     // p_0 contributes zero
 s2 = energy after applying the state change
 conf = s2 - s0
 s1 = s0 + raw_s1 + 0.5 * conf
-field = -(direction.field_projection * rule.field_factor)
+field = -0.5 * (|E| / kT) * (rule.charge_transport_vector · ê)
 barrier_forward = (s1 - s0) + field
 barrier_backward = (s1 - s2) - field
 ```
 
 - The state codes are packed particle IDs in path order; decode with bounds checks.
 - For MMC, S1 is unused; `s0` and `s2` are the two-site energies.
-- Field factors are precomputed in kT units:
-  - `direction.field_projection = 0.5 * (|E| / kT) * (Δx_path · ê)`, where `Δx_path` is the
-    Cartesian displacement of the transition path and `ê` is the unit field direction;
-  - `rule.field_factor` encodes the net charge projection/sign for that rule; the compiler computes it from
-    the path occupation change (Step 08);
-  - `field = -(direction.field_projection * rule.field_factor)`.
-  For a single charge `q` moving by `Δx`, this reduces to the familiar `-0.5 q E·Δx / kT`.
-  - The product must have the same sign convention as the original; tests pin a known case.
-- `direction` and `rule` field factors are `f64`; zero field yields zero.
+- The field input is the per-rule Cartesian **charge transport vector** compiled in Step 08:
+  - `rule.charge_transport_vector = Σ_p q_p * (x_p(S2) - x_p(S0))`, summed over moving particle
+    identities; each particle contributes once, and void contributes nothing.
+  - `ê` is the unit field direction; `|E|` is the field modulus and `kT` the thermal energy.
+  - `field = -0.5 * (|E| / kT) * (rule.charge_transport_vector · ê)`, using the same Å/V/m scale as the
+    existing field convention.
+  - This is exact for non-collinear multi-site paths. For a single charge `q` moving by `Δx`, it reduces to
+    `-0.5 q E·Δx/kT`; a vacancy hop carries the correct sign because the ion moves once and the void has no
+    charge. An identical-ion exchange has zero net charge transport; a distinct-charge exchange does not.
+  - `direction.path_vector` is display/tracking only and is not used to derive the field.
+- `rule.charge_transport_vector` is three `f64` components; zero field yields zero.
 
 ### 3. S2 computation
 

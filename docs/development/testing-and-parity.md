@@ -62,6 +62,25 @@ PR-fast tests must not depend on nightly-only assets.
   failed preview; feasibility/budget errors can coexist with non-null statistics.
 - Ceria validation targets `< 200 ms` without statistics and `< 2 s` with `--stats`.
 
+## Compilation
+
+- The compiler is tested against real projects and the real Step 02/04/05/06 services: no mocks for
+  symmetry, energy sampling, transition paths, or compiled tables.
+- Golden compiled models for ceria, barium zirconate, and vehicle/interstitialcy record P1 counts, pair and
+  cluster tables, rule state triplets, tracker mappings, intent, and signatures.
+- Brute-force oracles cover P1 expansion, pair shells/multiplicities, cluster canonicalization, and rule
+  conservation. Compiled pair/cluster counts are cross-checked against `EnergyPreviewService`; this closes
+  the Step 05 preview/compiler consistency follow-up.
+- Property tests assert dense indices, unique `state0` per collection, reachable directions/rules, tracker
+  mapping consistency, and mass/charge conservation.
+- Determinism tests compile twice and compare canonical JSON and signatures; Ubuntu is automatic, Windows and
+  macOS are manual golden gates.
+- Cache tests use a recording cache and edit one domain at a time to prove the invalidation graph without
+  asserting private call counts, including active-transition-set changes versus runtime-settings-only edits.
+- Cancellation and performance tests cover the ceria sample (`< 1 s`) and a 10k-position model
+  (`< 30 s`, `< 2 GiB`).
+- Every `CMP` code has an emission test, catalog completeness check, and documentation-drift check.
+
 ## Statistical parity
 
 Reference observables are compared with the original solver using confidence intervals or Welch's t-test and

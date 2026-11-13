@@ -45,6 +45,14 @@ decision will be made.
 | Test strategy | Testing trophy; mocks only at true boundaries | [`03-quality-strategy.md`](03-quality-strategy.md) |
 | Validation pipeline | `Mocassin.Packages.Projects.Validation`; load/model/cross-domain/feasibility, build-stage extension | [Step 07](steps/step-07-validation-and-diagnostics.md) |
 | Validation output | `validation-v1` JSON report; sorted diagnostics, raw summary, optional statistics | [`02-data-contracts.md`](02-data-contracts.md) §5.6 / [Step 07](steps/step-07-validation-and-diagnostics.md) |
+| Compiler API | Synchronous, pure `IModelCompiler.Compile(Project, CompilationOptions, CancellationToken)`; Step 12 wraps it asynchronously | [Step 08](steps/step-08-model-compilation-pipeline.md) |
+| Compilation validation boundary | Compiler assumes a validated `Project`, does not consume `ValidationResult`, and does not expose `IValidationStage`; Step 12 owns the Build stage | [Step 08](steps/step-08-model-compilation-pipeline.md) / [Step 12](steps/step-12-build-orchestration-and-cli.md) |
+| Compiled vs parameterized signature | Step 08 geometry/rules/encoding `model_signature`; Step 09 parameterization signature over model + values; runtime settings excluded | [Step 08](steps/step-08-model-compilation-pipeline.md) / [Step 09](steps/step-09-parameterization-templates.md) |
+| Compilation cache | Per-compilation by default; optional caller-owned bounded thread-safe `ICompilationCache`; no static process-wide cache | [Step 08](steps/step-08-model-compilation-pipeline.md) |
+| Derived solver intent | Compiler emits `Kind`, `UsePrerun`, `UseDualDofCorrection`; Step 11 composes `SolverJobFlags` | [Step 06](steps/step-06-lattice-and-simulation-models.md) / [Step 08](steps/step-08-model-compilation-pipeline.md) / [Step 11](steps/step-11-simulation-package-and-msl-writer.md) |
+| Tracker ownership | Step 08 emits definitions/mappings; Step 18 owns mutable trackers, mobile assignment, and `.mcs` output | [Step 08](steps/step-08-model-compilation-pipeline.md) / [Step 18](steps/step-18-tracking-statistics-and-state-writer.md) |
+| Compile diagnostics | Step 08 owns the `CMP` prefix; `CompilationDiagnosticCatalog` composes into `DiagnosticCatalog`; docs-drift checked | [Step 08](steps/step-08-model-compilation-pipeline.md) / [Step 07](steps/step-07-validation-and-diagnostics.md) |
+| `mocassin compile` | Step 08 is library + canonical JSON inspection only; Step 12 owns the command and full CLI | [Step 08](steps/step-08-model-compilation-pipeline.md) / [Step 12](steps/step-12-build-orchestration-and-cli.md) |
 
 ## 3. Gated decisions
 

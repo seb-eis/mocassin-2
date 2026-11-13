@@ -35,7 +35,8 @@ dominated by setup.
   - sets each environment's particle, mobility, stability, lattice vector, definition, tracker id;
   - computes `PrerunGoalMcs = PreRunMcsp * mobiles`, `TotalGoal = PrerunGoal + TargetMcsp * mobiles`, rounded
     to a multiple of 100; block sizes for ~1 % progress;
-  - converts energy tables from eV to kT, pre-multiplies field factors, sets PCG state/increment;
+  - converts energy tables from eV to kT, precomputes field terms from the charge transport vectors, sets
+    PCG state/increment;
   - computes `K_norm = K_fix / RawMax` (or `K_fix`), `Δt = dof * K_norm / (νmax * selectable)`.
 - Environment linking:
   - tags constant tables;
