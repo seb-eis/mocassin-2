@@ -15,7 +15,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required at `9715082c1d51e8273bf7c636c22593fa0f7ba5e6` — [review record](../reviews/step-08.md)
+- **Design review:** Re-review required
 - **Last updated:** 2026-11-12
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -204,7 +204,7 @@ parallel, but the output order is canonical and independent of scheduling.
 | 5 | Clusters | energy model, structure | point groups, canonical occupation tuples/codes, cluster tables, links | energy hash, structure hash, cluster IDs, allowed occupations | `CMP003`, `CMP006` |
 | 6 | Rules | referenced transitions, structure, particles | collections, directions, state codes, forward/inverse/dependent rules | active-transition-set hash, transition closure hashes, structure hash, particle order, catalog, contract | `CMP004`–`CMP008` |
 | 7 | Encoding | rules, simulations, energy links | jump collections/directions/rules, count/mapping tables, tracker definitions, derived intent | simulation hash, rule hash, energy hash, structure hash | `CMP006`, `CMP009`, `CMP010` |
-| 8 | Indexing | structure, particles, pair/cluster tables, rules, simulations | dense indices, stable geometry/rule IDs, lookup maps, runtime-default snapshot | structure hash, particle hash, pair/cluster table hashes, rule hash, simulation hash | `CMP006`, `CMP011` |
+| 8 | Indexing | structure, particles, energy tables/site energies, rules, simulations | dense indices, stable geometry/rule IDs, lookup maps, runtime-default snapshot | structure hash, particle hash, energy hash, pair/cluster table hashes, rule hash, simulation hash | `CMP006`, `CMP011` |
 | 9 | Signing | canonical compiled projection | `ModelSignature` | canonical projection bytes (no runtime settings) | `CMP011` |
 | 10 | Report | all prior | counts, per-stage timings, input hashes, cache statistics, summary | — | — |
 
@@ -615,7 +615,8 @@ ParameterizedModel.Signature
   - clusters: energy hash + structure hash + cluster IDs + allowed-occupation hash;
   - rules: active-transition-set hash + transition closure hashes + structure hash + particle order;
   - encoding: rule hash + simulation hash + energy hash + structure hash;
-  - indexing: structure hash + particle hash + pair/cluster table hashes + rule hash + simulation hash;
+  - indexing: structure hash + particle hash + energy hash + pair/cluster table hashes + rule hash + simulation
+    hash;
   - signing: canonical projection bytes (runtime settings excluded).
 - **Active-transition-set hash.** `ProjectHasher.ComputeSimulationSelection(Project)` (new, Core) hashes the
   canonical simulation IDs, kinds, and authored-order transition references. It is the cache-key input that
@@ -626,7 +627,8 @@ ParameterizedModel.Signature
   | Edit | Rebuilds | Reuses |
   | --- | --- | --- |
   | Structure/particles | Structure, Environments, Pairs, Clusters, Rules, Encoding, Indexing, Signing | nothing |
-  | Energy environments/clusters/site energies | Environments, Pairs, Clusters, Encoding (links), Indexing, Signing | Structure, Rules |
+  | Energy environments/clusters/filters | Environments, Pairs, Clusters, Encoding (links), Indexing, Signing | Structure, Rules |
+  | Site-energy values only | Encoding (defect background), Indexing (energy hash) | Structure, Pairs, Clusters, Rules, Signing |
   | Transitions/state changes/chains | Rules, Encoding, Indexing, Signing | Structure, Pairs, Clusters |
   | Simulation active-transition set changes | Rules, Encoding, Indexing, Signing | Structure, Pairs, Clusters |
   | Simulation runtime settings only | Encoding, Indexing (runtime-default snapshot) | Structure, Pairs, Clusters, Rules, Signing |
