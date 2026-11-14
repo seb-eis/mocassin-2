@@ -14,7 +14,7 @@
 | Request owner | Step 09 planner |
 | Orchestrator (step agent / planner) | General planner/orchestrator |
 | Review initiated by | Planner |
-| Reviewed commit | `1ee5a2a3f5b6e34b44a1881e46390700e962f6b3` |
+| Reviewed commit | `53bbfd58a6038aa932d0e20bac91f757546c5f2e` |
 | Docs branch | `docs/step-09-design` |
 | Review date | 2026-11-14 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner, implementor, step agent, or orchestrator) |
@@ -56,7 +56,7 @@ Step page: [`Step 09 — Parameterization Templates`](../steps/step-09-parameter
 - [x] Completeness/quality metrics and warning vs error thresholds. — Concrete thresholds; `PRM006` and intentional zero values contradict (m4).
 - [x] Determinism, untrusted-template bounds, and performance targets/benchmark plan. — Determinism/limits/targets are concrete; the pair-entry limit parenthetical is arithmetically wrong (m7).
 - [x] Testing: acceptance mapping, real compiled models, golden/projection fixtures, property tests, freshness, and tiers. — Real models/goldens/property tests are named; the checker wiring (m2), vector source (m3), and chiral fixture (M5) need changes.
-- [x] Feature list and sizing: seven features, dependencies, honest 3–4 person-week estimate below the four-week trigger, no roadmap split. — Seven features/dependencies are coherent; the day estimates sum to 17–22 days (3.4–4.4 pw), so the exact "below four weeks" claim is not supported (M4).
+- [x] Feature list and sizing: seven features, dependencies, honest 3.4–4.4 person-week estimate, recorded 09A/09B split option, and owner decision required before start. — Seven features/dependencies are coherent; the day estimates sum to 17–22 days (3.4–4.4 pw), so the exact "below four weeks" claim is not supported (M4).
 - [x] Parity and documentation: Step 09 rows, published pages, navigation, and diagnostics anchors. — Rows/pages/nav are planned; the `PRM007` anchor conflict (m1) and the Step 26 exchange expectation (m12) remain.
 
 ## Dependency and interface checks
@@ -144,7 +144,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -202,12 +202,56 @@ Date:
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
+Resolved by the Step 09 planner on 2026-11-14; design freeze
+`53bbfd58a6038aa932d0e20bac91f757546c5f2e`. The reviewer-authored findings, evidence, and verdict above are
+unchanged.
 
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
+Summary of the substantive choices:
+
+- **M1:** the model payload now stores each rule's absolute `frequency_hz`; `frequency_factor` is a Step 16
+  per-job derivation, not a model field. Step 11 `verify` and Step 13 re-encode the projection from the stored
+  absolute values exactly. Updated: data contract §3.3, Steps 08/09/11/13/16, quality strategy.
+- **M2:** a nullable template selects the implicit default (`ParameterizationTemplateDefaults.CreateDefault`);
+  projects with `parameterizations: []` build with defaults. The implicit default suppresses `PRM003`/`PRM006`;
+  an explicit empty template emits both. Step 11/12 acceptance and selection rules updated.
+- **M3:** feature 1 owns the `contracts/manifest.json` project-field update, schema regeneration, new
+  `samples/parameterizations/*.mocprj` fixtures, and the `ProjectSchemaTests.fixturePaths` change.
+- **M4:** the honest estimate is 17–22 days (3.4–4.4 pw); the upper bound exceeds the four-week split trigger.
+  The step page records a 09A/09B split option and requires the human owner to choose before step start.
+- **M5:** the chiral test uses the real barium-zirconate model (24 reciprocal chiral pairs); a generated
+  P1/P4mm project fixture covers the link-change case.
+
+| Finding | Status | Resolution | Commit |
+| --- | --- | --- | --- |
+| M1 | Resolved | Model payload stores absolute `frequency_hz`; no factor × maximum reconstruction; Steps 08/11/13/16 and data contract updated. | `53bbfd5` |
+| M2 | Resolved | Nullable template + implicit default path; samples with no templates build; `PRM003`/`PRM006` behavior defined; Steps 11/12 acceptance updated. | `53bbfd5` |
+| M3 | Resolved | Manifest project fields, generated schema, sample fixtures, and `ProjectSchemaTests.fixturePaths` assigned to feature 1. | `53bbfd5` |
+| M4 | Accepted — owner decision required | 17–22 days = 3.4–4.4 pw recorded; upper bound exceeds the four-week trigger; 09A/09B split option and owner decision recorded in §1. | `53bbfd5` |
+| M5 | Resolved | Real BaZrO₃ chiral model (24 pairs) plus generated P1/P4mm link-change fixture and golden entry. | `53bbfd5` |
+| m1 | Resolved | No `PRM007` token in `docs/reference/diagnostics.md`; retirement documented only in planning/design pages. | `53bbfd5` |
+| m2 | Resolved | Parameterization projections moved to `tests/contracts/projections/parameterization/`; new checker reads the subdirectory; model glob unchanged. | `53bbfd5` |
+| m3 | Resolved | Parameterization vectors added to `contracts/manifest.json` fixtures and regenerated by `tools/contracts/generate.py`; no hand-edited `signature-vectors.json`. | `53bbfd5` |
+| m4 | Resolved | `PRM006` now means no explicit entries; explicit `0 eV`/`1e13 Hz` suppresses it; implicit default suppresses both `PRM003`/`PRM006`. | `53bbfd5` |
+| m5 | Resolved | `ParameterizationFactory.Create` takes `Project` and returns the same summary as `Describe`; project/model pairing documented. | `53bbfd5` |
+| m6 | Resolved | `NearestGeometry` is pair-only; groups/rules/site overrides require exact IDs, so changed group geometry defaults. | `53bbfd5` |
+| m7 | Resolved | Pair-table bound clarified: 64 compiled particles including void (64² cells), at most 63² non-void template entries. | `53bbfd5` |
+| m8 | Resolved | `[property: JsonPropertyName("energyEv")]`/`("frequencyHz")` pinned on the template entry records. | `53bbfd5` |
+| m9 | Resolved | Mismatched project/model is a caller contract violation; unmapped authored background is `PRM008` Warning (stale user data); structural signature mismatch is `PRM001` Error. | `53bbfd5` |
+| m10 | Resolved | Step 08 §10 no longer lists a site-energy background; the site-energy invalidation row is marked as no compiled-content change, with Step 09 ownership. | `53bbfd5` |
+| m11 | Resolved | Step 10 names `Mocassin.Packages.Parameterization.ParameterizedModel` as its input and excludes parameterization values from job/lattice payloads. | `53bbfd5` |
+| m12 | Resolved | Step 26 exchanges a valid `.mocprj` project fragment containing selected `parameterizations`; no separate format/version. | `53bbfd5` |
+| m13 | Resolved | Step 12 `build` gains `--warnings-as-errors`; validation warnings exit 1, promoted parameterization warnings exit 4. | `53bbfd5` |
+| m14 | Resolved | `Validate` returns diagnostics only (no diff), builds lookup maps but no dense tables/signature; `Apply` returns the diff on `PRM001`. | `53bbfd5` |
+| m15 | Resolved | `ProjectEditor` template methods are explicitly added by feature 1 with exact signatures; the current editor has none. | `53bbfd5` |
+| m16 | Resolved | Canonical ordering/signed-zero normalization is a `ProjectJson`/`ProjectCanonicalizer` write-time guarantee; `with` cannot bypass it. | `53bbfd5` |
+| m17 | Resolved | Structured `ParameterizationValueKey` replaces free-form strings; pair/group/rule/site key fields and canonical entry encodings are specified. | `53bbfd5` |
+| n1 | Resolved | Namespace aligned to `Mocassin.Packages.Parameterization`; Contracts signature type named `ParameterizationSignatureV1` to match the manifest projection type. | `53bbfd5` |
+| n2 | Resolved | `PRM004` references `EnergyLimits`; quality thresholds use `FrequencyHz`; `TemplateValue` is documented as a display-only union with unit by kind. | `53bbfd5` |
+| n3 | Resolved | `docs/planning/closeout/step-09.json` and `check_closeout_evidence.py` added to feature 7/closeout scope. | `53bbfd5` |
+| n4 | Resolved | The Compilation change is recorded as a public visibility/`PublicAPI`/ApiCompat change for `CanonicalProjectionWriter`/`Quantize`; no parameterization semantics or dependency edge. | `53bbfd5` |
+
+The step agent/planner fills resolutions after the verdict without altering the reviewer's findings, evidence,
+or verdict.
 
 ## Review rounds
 

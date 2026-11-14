@@ -16,7 +16,7 @@ completeness checks.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Not requested
+- **Design review:** Re-review required at `53bbfd58a6038aa932d0e20bac91f757546c5f2e`
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
