@@ -49,7 +49,7 @@ public sealed class ParameterizationFactory(TimeProvider? timeProvider = null)
         var descriptors = CompiledModelContract.DescribePairTables(model);
         var createdUtc = (options.CreatedUtc ?? (timeProvider ?? TimeProvider.System).GetUtcNow()).ToUniversalTime();
         var id = options.Id ?? ParameterizationId.Create(Uuid7.NewGuid(createdUtc));
-        var template = CreateTemplate(model, descriptors, id, options.Name, createdUtc);
+        var template = CreateHeaders(model, descriptors, id, options.Name, createdUtc);
         var summary = ParameterizationSummaryBuilder.BuildCore(project, model, template, descriptors);
         return new TemplateCreationResult(template, summary, CreateDiagnostics(project, template));
     }
@@ -71,7 +71,17 @@ public sealed class ParameterizationFactory(TimeProvider? timeProvider = null)
         ParameterizationTemplate? template = null) =>
         ParameterizationSummaryBuilder.Build(project, model, template);
 
-    private static ParameterizationTemplate CreateTemplate(
+    /// <summary>
+    /// Creates the sparse set headers for a compiled model. Rebase reuses this to keep template identity while
+    /// adopting the new model signature and headers.
+    /// </summary>
+    /// <param name="model">The compiled model.</param>
+    /// <param name="descriptors">The validated pair-table descriptors.</param>
+    /// <param name="id">The stable template identifier.</param>
+    /// <param name="name">The template name.</param>
+    /// <param name="createdUtc">The UTC creation timestamp.</param>
+    /// <returns>The header-only template.</returns>
+    internal static ParameterizationTemplate CreateHeaders(
         CompiledModel model,
         ImmutableArray<PairTableDescriptor> descriptors,
         ParameterizationId id,

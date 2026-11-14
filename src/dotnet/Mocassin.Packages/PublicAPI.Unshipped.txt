@@ -535,3 +535,87 @@ Mocassin.Packages.Parameterization.ParameterizationResult.IsSuccess.get -> bool
 Mocassin.Packages.Parameterization.ParameterizationService.Apply(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.ParameterizationTemplate? template = null, Mocassin.Packages.Parameterization.ParameterizationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Parameterization.ParameterizationResult!
 Mocassin.Packages.Parameterization.ParameterizationService.Describe(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.ParameterizationTemplate? template = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Parameterization.ParameterizationSummary!
 Mocassin.Packages.Parameterization.ParameterizationService.Validate(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.ParameterizationTemplate? template = null, Mocassin.Packages.Parameterization.ParameterizationOptions? options = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Parameterization.IParameterizationService.Diff(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.ParameterizationTemplate? template = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Parameterization.ParameterizationDiff!
+Mocassin.Packages.Parameterization.IParameterizationService.Rebase(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.ParameterizationTemplate! template, Mocassin.Packages.Parameterization.ParameterizationRebaseOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Parameterization.ParameterizationRebaseResult!
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.<Clone>$() -> Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch!
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.AddedKey.get -> Mocassin.Packages.Parameterization.ParameterizationValueKey!
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.AddedKey.init -> void
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.Deconstruct(out Mocassin.Packages.Parameterization.ParameterizationValueKey! RemovedKey, out Mocassin.Packages.Parameterization.ParameterizationValueKey! AddedKey, out double Value, out int SourceDistanceBucketFm, out int TargetDistanceBucketFm) -> void
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.Equals(Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch? other) -> bool
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.ParameterizationDescriptorMatch(Mocassin.Packages.Parameterization.ParameterizationValueKey! RemovedKey, Mocassin.Packages.Parameterization.ParameterizationValueKey! AddedKey, double Value, int SourceDistanceBucketFm, int TargetDistanceBucketFm) -> void
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.RemovedKey.get -> Mocassin.Packages.Parameterization.ParameterizationValueKey!
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.RemovedKey.init -> void
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.SourceDistanceBucketFm.get -> int
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.SourceDistanceBucketFm.init -> void
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.TargetDistanceBucketFm.get -> int
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.TargetDistanceBucketFm.init -> void
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.Value.get -> double
+Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.Value.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseOptions
+Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.<Clone>$() -> Mocassin.Packages.Parameterization.ParameterizationRebaseOptions!
+Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.Equals(Mocassin.Packages.Parameterization.ParameterizationRebaseOptions? other) -> bool
+Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.NearestDistanceToleranceFm.get -> int
+Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.NearestDistanceToleranceFm.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.ParameterizationRebaseOptions() -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.Strategy.get -> Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy
+Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.Strategy.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.<Clone>$() -> Mocassin.Packages.Parameterization.ParameterizationRebaseReport!
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.AmbiguousMatches.get -> int
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.AmbiguousMatches.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.CopiedValues.get -> int
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.CopiedValues.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.Deconstruct(out Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy Strategy, out Mocassin.Packages.Parameterization.ParameterizationDiff! Diff, out int CopiedValues, out int DefaultedValues, out int DroppedValues, out int AmbiguousMatches, out int DescriptorMatches) -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.DefaultedValues.get -> int
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.DefaultedValues.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.DescriptorMatchDetails.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch!>
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.DescriptorMatchDetails.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.DescriptorMatches.get -> int
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.DescriptorMatches.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.Diff.get -> Mocassin.Packages.Parameterization.ParameterizationDiff!
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.Diff.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.DroppedValues.get -> int
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.DroppedValues.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.Equals(Mocassin.Packages.Parameterization.ParameterizationRebaseReport? other) -> bool
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.ParameterizationRebaseReport(Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy Strategy, Mocassin.Packages.Parameterization.ParameterizationDiff! Diff, int CopiedValues, int DefaultedValues, int DroppedValues, int AmbiguousMatches, int DescriptorMatches) -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.Strategy.get -> Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy
+Mocassin.Packages.Parameterization.ParameterizationRebaseReport.Strategy.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.<Clone>$() -> Mocassin.Packages.Parameterization.ParameterizationRebaseResult!
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.Deconstruct(out Mocassin.Core.Model.ParameterizationTemplate! Template, out Mocassin.Packages.Parameterization.ParameterizationRebaseReport! Report, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.Diagnostics.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.Equals(Mocassin.Packages.Parameterization.ParameterizationRebaseResult? other) -> bool
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.ParameterizationRebaseResult(Mocassin.Core.Model.ParameterizationTemplate! Template, Mocassin.Packages.Parameterization.ParameterizationRebaseReport! Report, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.Report.get -> Mocassin.Packages.Parameterization.ParameterizationRebaseReport!
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.Report.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.Template.get -> Mocassin.Core.Model.ParameterizationTemplate!
+Mocassin.Packages.Parameterization.ParameterizationRebaseResult.Template.init -> void
+Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy
+Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy.KeepMatching = 0 -> Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy
+Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy.NearestGeometry = 1 -> Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy
+Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy.Reset = 2 -> Mocassin.Packages.Parameterization.ParameterizationRebaseStrategy
+Mocassin.Packages.Parameterization.ParameterizationService.Diff(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.ParameterizationTemplate? template = null, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Parameterization.ParameterizationDiff!
+Mocassin.Packages.Parameterization.ParameterizationService.Rebase(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.ParameterizationTemplate! template, Mocassin.Packages.Parameterization.ParameterizationRebaseOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Parameterization.ParameterizationRebaseResult!
+override Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.Equals(object? obj) -> bool
+override Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.GetHashCode() -> int
+override Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.ToString() -> string!
+override Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.Equals(object? obj) -> bool
+override Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.GetHashCode() -> int
+override Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.ToString() -> string!
+override Mocassin.Packages.Parameterization.ParameterizationRebaseReport.Equals(object? obj) -> bool
+override Mocassin.Packages.Parameterization.ParameterizationRebaseReport.GetHashCode() -> int
+override Mocassin.Packages.Parameterization.ParameterizationRebaseReport.ToString() -> string!
+override Mocassin.Packages.Parameterization.ParameterizationRebaseResult.Equals(object? obj) -> bool
+override Mocassin.Packages.Parameterization.ParameterizationRebaseResult.GetHashCode() -> int
+override Mocassin.Packages.Parameterization.ParameterizationRebaseResult.ToString() -> string!
+static Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.operator !=(Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch? left, Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch? right) -> bool
+static Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch.operator ==(Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch? left, Mocassin.Packages.Parameterization.ParameterizationDescriptorMatch? right) -> bool
+static Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.Default.get -> Mocassin.Packages.Parameterization.ParameterizationRebaseOptions!
+static Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.operator !=(Mocassin.Packages.Parameterization.ParameterizationRebaseOptions? left, Mocassin.Packages.Parameterization.ParameterizationRebaseOptions? right) -> bool
+static Mocassin.Packages.Parameterization.ParameterizationRebaseOptions.operator ==(Mocassin.Packages.Parameterization.ParameterizationRebaseOptions? left, Mocassin.Packages.Parameterization.ParameterizationRebaseOptions? right) -> bool
+static Mocassin.Packages.Parameterization.ParameterizationRebaseReport.operator !=(Mocassin.Packages.Parameterization.ParameterizationRebaseReport? left, Mocassin.Packages.Parameterization.ParameterizationRebaseReport? right) -> bool
+static Mocassin.Packages.Parameterization.ParameterizationRebaseReport.operator ==(Mocassin.Packages.Parameterization.ParameterizationRebaseReport? left, Mocassin.Packages.Parameterization.ParameterizationRebaseReport? right) -> bool
+static Mocassin.Packages.Parameterization.ParameterizationRebaseResult.operator !=(Mocassin.Packages.Parameterization.ParameterizationRebaseResult? left, Mocassin.Packages.Parameterization.ParameterizationRebaseResult? right) -> bool
+static Mocassin.Packages.Parameterization.ParameterizationRebaseResult.operator ==(Mocassin.Packages.Parameterization.ParameterizationRebaseResult? left, Mocassin.Packages.Parameterization.ParameterizationRebaseResult? right) -> bool

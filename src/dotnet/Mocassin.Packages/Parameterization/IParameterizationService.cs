@@ -14,8 +14,8 @@ namespace Mocassin.Packages.Parameterization;
 /// </summary>
 /// <remarks>
 /// The service is stateless and safe to reuse concurrently: every call reads immutable inputs and allocates its
-/// own result. A <see langword="null"/> template selects the implicit default. The full validation, diff, and
-/// rebase surface is added by later Step 09 features on this interface.
+/// own result. A <see langword="null"/> template selects the implicit default. Diff and rebase are pure
+/// read-only operations; rebase returns a new template and never saves it.
 /// </remarks>
 [SuppressMessage(
     "Naming",
@@ -72,5 +72,43 @@ public interface IParameterizationService
         Project project,
         CompiledModel model,
         ParameterizationTemplate? template = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Compares a template with a compiled model by stable identity without applying it.
+    /// </summary>
+    /// <param name="project">The project snapshot that produced <paramref name="model"/>.</param>
+    /// <param name="model">The compiled model.</param>
+    /// <param name="template">The explicit template, or <see langword="null"/> for the implicit default.</param>
+    /// <param name="cancellationToken">Cancels the operation before the slot walk.</param>
+    /// <returns>
+    /// The added, removed, and matched slots plus related geometry changes. A <see langword="null"/> template is
+    /// described as the implicit default, so every required compiled slot is reported as added.
+    /// </returns>
+    public ParameterizationDiff Diff(
+        Project project,
+        CompiledModel model,
+        ParameterizationTemplate? template = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Rebuilds a template against a current compiled model with an explicit copy/keep/reset strategy.
+    /// </summary>
+    /// <param name="project">The project snapshot that produced <paramref name="model"/>.</param>
+    /// <param name="model">The compiled model.</param>
+    /// <param name="template">The template to rebase.</param>
+    /// <param name="options">The strategy and nearest-descriptor tolerance.</param>
+    /// <param name="cancellationToken">Cancels the operation before the slot walk.</param>
+    /// <returns>The rebound template, its report, and the <c>PRM009</c> informational diagnostic.</returns>
+    /// <remarks>
+    /// Rebase never mutates the input and never saves the result. Values are copied only for exact identity
+    /// matches or, with <see cref="ParameterizationRebaseStrategy.NearestGeometry"/>, unique reported pair
+    /// descriptor matches. Removed entries are always reported and dropped; they are never silently reused.
+    /// </remarks>
+    public ParameterizationRebaseResult Rebase(
+        Project project,
+        CompiledModel model,
+        ParameterizationTemplate template,
+        ParameterizationRebaseOptions options,
         CancellationToken cancellationToken = default);
 }

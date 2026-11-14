@@ -9,8 +9,8 @@ namespace Mocassin.Core.Diagnostics;
 /// </summary>
 /// <remarks>
 /// The catalog contains every non-retired <c>PRM</c> descriptor. Structural checks are emitted by Core
-/// <c>ProjectValidator</c>; compiled-bound checks are emitted by <c>Mocassin.Packages</c>. The retired
-/// <c>PRM007</c> code and the rebase-only <c>PRM009</c> code are not registered.
+/// <c>ProjectValidator</c>; compiled-bound checks and the rebase report are emitted by <c>Mocassin.Packages</c>.
+/// The retired <c>PRM007</c> code is not registered.
 /// </remarks>
 public static class ParameterizationDiagnosticCatalog
 {
@@ -68,6 +68,13 @@ public static class ParameterizationDiagnosticCatalog
             "A site-energy value targets an unknown or forbidden site/particle",
             "Correct the site/particle key or remove the site-energy override.",
             "#prm008"),
+        new(
+            ParameterizationDiagnosticCodes.RebaseReport,
+            DiagnosticSeverity.Info,
+            "Step 09 — parameterization templates",
+            "A parameterization template was rebased against the current compiled model",
+            "Review every copied, defaulted, dropped, and ambiguous value before saving the rebased template.",
+            "#prm009"),
         new(
             ParameterizationDiagnosticCodes.DuplicateName,
             DiagnosticSeverity.Warning,

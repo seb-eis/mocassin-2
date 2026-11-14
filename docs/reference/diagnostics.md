@@ -70,6 +70,7 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 | [`PRM005`](#prm005) | error | Step 09 — parameterization templates | A frequency is non-positive or non-finite | Set the attempt frequency to a positive, finite value. |
 | [`PRM006`](#prm006) | warning | Step 09 — parameterization templates | An explicit template contains no explicit values | Set at least one value, or build with the implicit default parameterization. |
 | [`PRM008`](#prm008) | warning | Step 09 — parameterization templates | A site-energy value targets an unknown or forbidden site/particle | Correct the site/particle key or remove the site-energy override. |
+| [`PRM009`](#prm009) | info | Step 09 — parameterization templates | A parameterization template was rebased against the current compiled model | Review every copied, defaulted, dropped, and ambiguous value before saving the rebased template. |
 | [`PRM010`](#prm010) | warning | Step 09 — parameterization templates | Two parameterization templates use the same name | Give each parameterization template a distinct name. |
 | [`PRM011`](#prm011) | warning | Step 09 — parameterization templates | A Metropolis transition rule set is not parameterizable and is ignored | Remove the Metropolis rule set; MMC rules are not parameterizable. |
 | [`PRM012`](#prm012) | warning | Step 09 — parameterization templates | A pair or group entry names a particle the reference site cannot occupy | Use a particle the reference site can occupy, or remove the entry. |
@@ -424,6 +425,10 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 ### PRM008
 
 **A site-energy value targets an unknown or forbidden site/particle.** Correct the site/particle key or remove the site-energy override.
+
+### PRM009
+
+**A parameterization template was rebased against the current compiled model.** Review every copied, defaulted, dropped, and ambiguous value before saving the rebased template.
 
 ### PRM010
 

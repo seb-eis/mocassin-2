@@ -27,7 +27,10 @@ public sealed class ParameterizationDiagnosticCatalogTests
         Assert.Equal(expected, actual);
         Assert.Equal(actual.Length, actual.Distinct(StringComparer.Ordinal).Count());
         Assert.DoesNotContain("PRM007", actual);
-        Assert.DoesNotContain("PRM009", actual);
+        var rebase = Assert.Single(
+            DiagnosticCatalog.Default.All,
+            static descriptor => descriptor.Code == "PRM009");
+        Assert.Equal(DiagnosticSeverity.Info, rebase.DefaultSeverity);
     }
 
     [Fact]

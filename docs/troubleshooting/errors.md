@@ -44,10 +44,25 @@ failure with exit `4`. Validation-stage warnings promoted by the same flag exit 
 | `PRM003` warning | Required pair, group, or kinetic-rule slots are unset; defaults are applied | Review the applied defaults for the reported counts, or set the missing values explicitly. |
 | `PRM006` warning | The selected explicit template contains no explicit values at all | Set at least one value, or build without selecting an empty template so the implicit default is used. |
 | `PRM008` warning | A site-energy override or authored background entry targets an unknown site/particle or a particle the site cannot occupy | Correct the site/particle key or remove the entry. |
+| `PRM009` info | A template was rebased; the message carries the copied, defaulted, dropped, and ambiguous counts | Review the rebase report before saving the rebound template. |
 | `PRM011` warning | The template contains a Metropolis rule set | MMC rules are not parameterizable; remove the set. The compiled default remains. |
 | `PRM012` warning | A pair or group entry names a particle the reference site cannot occupy | Use a particle from the site's particle set, or remove the entry. |
 | `PRM015` warning | At least 20 explicit pair/group values are dominated by one non-default value | Check for a bulk-fill or paste error and vary the values deliberately. |
 | `PRM016` warning | An attempt frequency is outside the plausible `1e-3..1e18 Hz` band but still positive and finite | Check the frequency; use a project template and rebuild. |
+
+### Rebase and stale values
+
+A stale template is never silently reinterpreted. `Apply` rejects it with `PRM001` and a diff. Run `Diff` to see
+the **Added**, **Removed**, **Matched**, and **Changed** (geometry-change) slots, then choose a strategy:
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| Values disappeared after `KeepMatching` | The model geometry, particle order, or chiral link changed, so the stable IDs changed | This is intended. Use `NearestGeometry` only when the model offers a unique matching geometry, or re-enter the values. |
+| `NearestGeometry` copied nothing and reported ambiguity | More than one added pair slot shares the logical site pair and distance tolerance | Reduce `NearestDistanceToleranceFm` so only one candidate qualifies, or keep the safe default behavior and re-enter the values. |
+| Chiral values disappeared after a geometry change | Chiral entries are exact-ID only; a changed shared `EnergyId` or chiral link cannot be proven equivalent | Re-enter the shared value once. Independent A→B and B→A values do not exist by design. |
+| A group or site override disappeared | Groups and site overrides have no nearest-geometry path | Re-enter the group value, or reset the site override to the authored background. |
+| A rebase report says every value was dropped | The `Reset` strategy discards all values but keeps the template identity and headers | Apply the intended values again. Use `ParameterizationFactory.Create` instead if a genuinely new template is wanted. |
+| `PRM009` appears after a successful rebase | The rebase report is informational | Inspect the copied, defaulted, dropped, and ambiguous counts before committing the template. |
 
 ## Statistics
 

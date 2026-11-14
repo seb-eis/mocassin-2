@@ -37,8 +37,8 @@ completeness checks.
 | `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `9a11a38` |
 | `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `222c02e` |
 | `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `ce20049` |
-| `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
-| `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | Approved | — | — | — |
+| `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `4063c4d` |
+| `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
 | `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | Approved | — | — | — |
 
 ### Feature 1 outcome and deviations
@@ -236,7 +236,7 @@ Notes and limitations:
 
 ### Feature 5 outcome
 
-`validation-and-diagnostics` is implemented on its feature branch and awaits the feature squash.
+`validation-and-diagnostics` was squash-merged as `4063c4d`. No per-feature CI run was triggered.
 
 Implemented:
 
@@ -285,6 +285,65 @@ Notes and limitations:
 - Range diagnostics are emitted once per accepted authored entry; a chiral mirrored cell no longer duplicates
   `PRM004` for the same shared value. Applied values and signatures are unchanged.
 - `Diff`/`Rebase`, strategies, `PRM009`, golden templates, benchmarks, parity, and closeout remain features 6–7.
+
+### Feature 6 outcome
+
+`diff-and-rebase` is implemented on its feature branch and awaits the feature squash.
+
+Implemented:
+
+- `IParameterizationService.Diff`/`ParameterizationService.Diff` and
+  `ParameterizationRebaseStrategy`/`ParameterizationRebaseOptions`/`ParameterizationRebaseReport`/
+  `ParameterizationRebaseResult`. The explicit `Diff` surface also accepts the implicit default template.
+- `KeepMatching`, `NearestGeometry`, and `Reset` with the report counts, deterministic key ordering, and no
+  mutation of the input template or model. `Reset` preserves the template identity and rebuilds the current set
+  headers.
+- `NearestGeometry` is pair-only, copies only a unique candidate with the same logical site pair, chiral flag,
+  stable/unstable kind, particle pair, and a distance-bucket difference within the configured tolerance. Every
+  copy is listed in `DescriptorMatchDetails`; ambiguous candidates copy nothing and are counted.
+- Chiral entries are exact-ID only. A changed chiral link or chiral geometry drops the shared value and defaults
+  the new slots, because the template stores no reciprocal-link identity that could prove equivalence.
+- `PRM009` is registered as an info diagnostic with the copied/defaulted/dropped/ambiguous counts, a docs row and
+  anchor, and catalog coverage. The retired `PRM007` remains unregistered.
+- The diff now matches site-energy overrides through their `(siteId, particleId)` identity instead of reporting
+  every site override as removed. This fixes a latent feature-4 diff classification bug and lets rebase preserve
+  valid overrides.
+- Tests: `ParameterizationDiffTests`, `ParameterizationRebaseTests`, and
+  `ParameterizationRebasePropertyTests`, including ceria, ceria-kmc, barium zirconate, and the vehicle chiral
+  model; the diagnostic catalog tests now assert the `PRM009` info descriptor and documentation row.
+- Documentation: the user-guide diff/rebase section, the troubleshooting rebase/stale-value section, and the
+  diagnostics reference row for `PRM009`.
+
+Local gates:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 637, Symmetry 223, Compilation 99,
+  Packages 203, Cli 7, App 1, Contracts 14, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; licence policy 51 packages, no vulnerable packages, ApiCompat compatible
+  (the `Mocassin.Core.dll` and `Mocassin.Packages.dll` baselines were refreshed for the intentional additions).
+- `./tools/verify.sh contracts` — exit 0 (run with `/tmp/opencode/docvenv/bin` prepended to `PATH`; the
+  documented `/home/node/.venvs/mocassin/bin` is absent); 18 generated artifacts current, 5 model projections
+  and 3 parameterization projections OK, catalog current, process consistency OK, 20 tool tests passed, SPDX 466
+  files, no secrets in 797 tracked text files; `cargo-deny` is not installed and was skipped because this is not
+  a closeout run.
+- `./tools/verify.sh docs` — exit 0 (same `PATH`); links OK (154 files), Zensical "No issues found", DocFX 0
+  warnings/0 errors, rustdoc generated, site built.
+
+Notes and limitations:
+
+- No per-feature CI run was triggered.
+- `ParameterizationRebaseReport.DescriptorMatchDetails` and `ParameterizationDescriptorMatch` are additive to the
+  accepted report record. The design declares only the `int DescriptorMatches` count, but the feature scope and
+  the GUI/CLI report require every nearest match. The list length equals `DescriptorMatches`; no format changes.
+- The design comment says `100 fm` is `0.1 Å`; the template bucket is in femtometres, so the declared default
+  `100` is `0.001 Å`. The value is unchanged and the documentation states the correct conversion.
+- `NearestGeometry` additionally requires the same stable/unstable kind and the same particle pair, and excludes
+  chiral entries. These are conservative readings of "unique reported descriptor match" that prevent copying a
+  value between different particles or across a changed chiral link.
+- A generated P1/P4mm chiral-link fixture remains feature 7; the real barium-zirconate model covers the chiral
+  geometry-change path, including 24 chiral geometries (12 reciprocal tables) sharing one value per `EnergyId`.
+- The feature row remains `In progress` until the feature branch is squash-merged; this section records the
+  implementation and local evidence, not a squash commit.
 
 ## Goal
 

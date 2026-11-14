@@ -2029,6 +2029,7 @@ const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.LimitExceeded = 
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.MetropolisRuleSetIgnored = "PRM011" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.ModelSignatureMismatch = "PRM001" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.NoExplicitValues = "PRM006" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.RebaseReport = "PRM009" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.RequiredValuesUnset = "PRM003" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.UniformValues = "PRM015" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.UnknownReference = "PRM002" -> string!

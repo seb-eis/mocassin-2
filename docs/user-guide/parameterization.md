@@ -5,8 +5,9 @@ energies, cluster energies, site energies, and kinetic attempt frequencies. The 
 semantics; the template defines the values that are applied to it.
 
 > **Draft scope.** Step 09 is implemented in features. This page documents template creation, the completeness
-> summary, applying a template, and site-energy overrides/reset. The full compiled-bound validation pass,
-> diff/rebase, and the remaining completeness diagnostics land with the later Step 09 features.
+> summary, applying a template, site-energy overrides/reset, and diff/rebase with the explicit rebase report.
+> The checked-in golden templates, final benchmark run, and closeout documentation remain the final Step 09
+> feature.
 
 ## What a template contains
 
@@ -192,14 +193,82 @@ shifting the background.
 The applied background is the dense `[position][particle]` table in ascending P order, row-major, exactly as
 Step 11 writes it to `energy.defect_background` and Step 15 consumes it.
 
+## Diff and rebase
+
+A template stores the compiled-model signature it was created against. When the model changes, `Apply` rejects
+the template with `PRM001` before any stable ID is matched. `ParameterizationService.Diff` explains the
+difference without applying or saving anything:
+
+```csharp
+var diff = new ParameterizationService().Diff(project, model, template);
+```
+
+The diff classifies every pair, group, kinetic-rule, and site-override slot:
+
+- **Added** — the compiled model requires the slot, but the template has no entry; applying would use the
+  default.
+- **Removed** — the template has an entry, but the compiled model no longer has that stable identity; applying
+  would ignore it.
+- **Matched** — the stable identity and the stored descriptor agree; the value is unchanged.
+- **Geometry changes** — a removed and an added pair or group key share a conservative logical descriptor, such
+  as the same unordered site pair. This is display information only. It does not authorize copying a value.
+
+`Diff` with a `null` template describes the implicit default: every required compiled slot is **Added**, and
+nothing is **Removed**. Diffs are deterministic and ordered by value kind and stable key.
+
+### Rebase strategies
+
+`ParameterizationService.Rebase` returns a new template, its report, and a `PRM009` informational diagnostic.
+It never mutates the input template or model and never saves the result; the caller decides whether to commit
+the returned template through the project editor.
+
+| Strategy | Copy behavior | Use when |
+| --- | --- | --- |
+| `KeepMatching` (default) | Copy only exact stable-identity matches. New slots default and removed entries are dropped. | Catalog or contract changes where the stable IDs survive. |
+| `NearestGeometry` | Do everything `KeepMatching` does, then copy a removed **pair** value into a unique added pair slot with the same logical site pair and chiral flag, the same particle pair, and a distance-bucket difference within `NearestDistanceToleranceFm`. | A cell or geometry change where the pair identity changes but the geometry is still recognizably the same. |
+| `Reset` | Keep the template ID, name, and creation time, adopt the new model signature and set headers, and clear every value and override. | Start over without breaking build-template references. |
+
+`NearestGeometry` is deliberately conservative:
+
+- it matches pair values only — groups, kinetic rules, and site overrides require exact IDs;
+- a candidate must use the same particle pair; the strategy never copies a value between different particles;
+- more than one candidate is ambiguous, is reported, and copies nothing;
+- chiral entries are exact-ID only. A changed chiral link or a changed chiral geometry drops the old shared
+  value and defaults the new slots, because the template stores no reciprocal-link identity that could prove
+  the link is unchanged.
+
+`Reset` is not the same as creating a new template. `ParameterizationFactory.Create` assigns a new
+`ParameterizationId`; `Reset` preserves the existing identity so build templates keep working.
+
+### Reading the rebase report
+
+`ParameterizationRebaseReport` reports:
+
+- the strategy and the pre-rebase diff;
+- `CopiedValues` — explicit values copied by exact identity or by a unique nearest descriptor;
+- `DefaultedValues` — current required slots left unset, which therefore use defaults;
+- `DroppedValues` — template entries discarded without a value copy (for `Reset`, every entry);
+- `AmbiguousMatches` — nearest pairs with more than one candidate, or several stale entries competing for one
+  target; nothing was copied for them;
+- `DescriptorMatches` — the nearest-descriptor subset of the copies;
+- `DescriptorMatchDetails` — every nearest copy, with the removed key, added key, value, and source/target
+  distance buckets. The list length equals `DescriptorMatches`.
+
+`PRM009` (info) carries the same counts in its message. Treat it as a review prompt, not a failure: inspect the
+dropped and ambiguous counts before saving the rebound template, especially when the model geometry changed.
+
+`Reset` preserves the template identity but reports every previous entry as dropped and every required slot as
+defaulted, so a reset is visible in the report rather than looking like a silent loss.
+
 ## Limits and diagnostics
 
 The structural template limits and malformed stable keys are reported by the `PRM` diagnostic family.
 Apply reports `PRM001` for a stale model signature, `PRM002` for unknown keys or descriptor disagreements,
-`PRM004`/`PRM005` for invalid effective energies or frequencies, `PRM008` for invalid site-energy targets,
-`PRM012` for particles a reference site cannot occupy, and `PRM013` for resource limits. The remaining
-completeness and plausibility warnings (`PRM003`, `PRM006`, `PRM011`, `PRM015`, `PRM016`) are added by the
-validation feature and will appear in a later revision of this page.
+`PRM003` when required slots are unset, `PRM004`/`PRM005` for invalid effective energies or frequencies,
+`PRM006` when an explicit template has no explicit values, `PRM008` for invalid site-energy targets,
+`PRM011` for ignored Metropolis rule sets, `PRM012` for particles a reference site cannot occupy, `PRM013` for
+resource limits, `PRM015` for suspiciously uniform values, and `PRM016` for implausible frequencies. Rebase
+additionally reports `PRM009` with the copied, defaulted, dropped, and ambiguous counts.
 
 See the [diagnostics reference](../reference/diagnostics.md) for the registered codes and the
 [energy model](energy.md#site-energies) for the authored site-energy background that a template overrides.
