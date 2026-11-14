@@ -50,6 +50,7 @@ mocassin build <project.mocprj> -o <project.msl>
                 [--parallel <n>]
                 [--compact]
                 [--force]
+                [--warnings-as-errors]
                 [--json]
 mocassin inspect <project.msl> [--json]
 mocassin verify <project.msl> [--json]
@@ -61,8 +62,10 @@ mocassin clean ...           # step 28
 mocassin doctor [--json]
 ```
 
-- `build` selects a build template if one is provided; otherwise it requires exactly one usable template or
-  explicit `--parameterization` plus a job template (future flag).
+- `build` selects a build template if one is provided. Otherwise it uses `--parameterization`, or exactly one
+  project parameterization; if the project has `parameterizations: []`, it uses the implicit default
+  parameterization (Step 09 §5.1). Multiple project templates with no selection are an explicit error listing
+  the IDs; a job template is still required for job expansion in Steps 10/12.
 - `--jobs` applies after full expansion: job IDs are assigned from the complete template, then only the
   selected IDs are written. This keeps IDs stable across partial builds.
 - `--parallel` controls compilation/lattice generation concurrency; package writes are serialized.
@@ -77,8 +80,9 @@ mocassin doctor [--json]
 ```text
 Load project
   → validate (stage 1–4)
-  → select build template + parameterization
+  → select build template + parameterization (or implicit default)
   → compile model (step 08)
+  → validate parameterization against the compiled model (step 09)
   → apply parameterization (step 09)
   → expand jobs (step 10)
   → for each selected job: generate lattice + encode job
@@ -124,6 +128,14 @@ its own `IValidationStage` (`Stage = Build`) checks; `validate` uses the same en
 The `validate` subcommand keeps the Step 07 `validation-v1` report and exit-code contract; the build command
 keeps the table above.
 
+The build pipeline then calls `IModelCompiler.Compile` and, immediately after a successful compile,
+`IParameterizationService.Validate(project, model, template)` before `ParameterizationService.Apply`. Step 09
+does not add its own `IValidationStage`: `ValidationContext` has no compiled model, and compiling inside a
+validation stage would duplicate this orchestration. Structural `PRM` checks still run in `validate` because
+they live in Core `ProjectValidator`; signature/ID checks require the compiled model and therefore run here in
+`build`. There is no `mocassin parameterize` command; `build --parameterization <id>` selects a project
+template, and creation/editing is the Step 09 library API used by the GUI.
+
 ### 4. Progress reporting
 
 Human mode:
@@ -155,6 +167,10 @@ JSON Lines mode:
 - If multiple, `--template` is required; the error lists the available IDs/names.
 - `--parameterization` can override the template’s parameterization for experimentation; the signature is
   checked.
+- If no template/parameterization is selected and the project has no parameterizations, `build` uses the
+  implicit default (all `0 eV`, `1e13 Hz`, authored site background) and does not emit `PRM003`/`PRM006`.
+- `--warnings-as-errors` promotes build-stage validation and parameterization warnings. Validation-stage
+  promotion exits `1`; a promoted parameterization warning exits `4`, matching the error-class table.
 - `--dry-run` prints the effective job count, lattice sizes, doping reports, and package size estimate without
   writing.
 
@@ -195,7 +211,8 @@ It prints a diagnosis table and exits 0 if healthy, 1 otherwise.
 ## Acceptance criteria
 
 - [ ] `mocassin validate samples/ceria/ceria.mocprj` exits 0 with the expected warnings.
-- [ ] `mocassin build samples/ceria -o /tmp/ceria.msl` produces a package that `mocassin verify` accepts.
+- [ ] `mocassin build samples/ceria -o /tmp/ceria.msl` produces a package that `mocassin verify` accepts using
+      the implicit default parameterization (`parameterizations: []`).
 - [ ] `--jobs 1-3` writes exactly jobs 1–3 with stable IDs.
 - [ ] Cancelling a build leaves no temp file and preserves an existing package.
 - [ ] `--json` output validates against a schema and contains the exit code.
@@ -221,6 +238,7 @@ At this point, document the build CLI:
 | Partial | Selected IDs, gaps, metadata |
 | Cancellation | Temp cleanup, old package intact |
 | Errors | Exit codes for each failure class |
+| Warnings-as-errors | Validation warnings exit 1; promoted parameterization warnings exit 4; unflagged build still succeeds |
 | JSON | Schema and machine-readable progress |
 | Doctor | Healthy/unhealthy scenarios |
 | Clean | `--dry-run` lists only; no deletion without confirmation; `.msl` untouched |

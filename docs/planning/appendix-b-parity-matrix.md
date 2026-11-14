@@ -125,13 +125,18 @@ Status legend:
 | KMC simulation definition | Y | Partial | 06/16/25 | Model, defaults, limits, persistence, query, and editor API in 06; solver in 16; editor UI in 25 |
 | All original simulation settings | Y | Partial | 06/25 | Settings, defaults, hard limits, and recommended bands in 06; editor UI in 25 |
 | Transition assignment | Y | Partial | 06/25 | Authored-order, kind-filtered assignment and duplicate rejection in 06; multi-select UI in 25 |
-| Parameterization template creation | Y | Planned | 09 | |
-| Pair/group energy editing | Y | Planned | 09/26 | |
-| Attempt frequency editing | Y | Planned | 09/26 | |
-| Chiral linked editing | Y | Planned | 09/26 | Shared `EnergyId`; one value per chiral pair |
-| Stable model signature | Y | Improvement | 08/09 | Compiled geometry/rules/encoding signature in 08; parameterization signature in 09 |
-| Template rebase/migration | Y | Planned | 09/26 | Diff + report |
-| Site energy overrides in template | N | Improvement | 09 | Original limitation removed |
+| Parameterization template persistence | Y | Planned | 09 | Project-resident `parameterizations`; UUIDv7 identity; project `schemaVersion`, no separate document |
+| Parameterization template creation | Y | Planned | 09 | Sparse values, set headers, required-slot summary; library API only |
+| Pair/group energy editing | Y | Planned | 09/26 | Compiled-bound apply/validation in 09; editor UI in 26 |
+| Attempt frequency editing | Y | Planned | 09/26 | Step 11 writes absolute `frequency_hz`; Step 16 derives the per-job factor |
+| Chiral linked editing | Y | Improvement | 09/26 | Shared `EnergyId`; one value per chiral pair; independent values unrepresentable |
+| Stable model signature | Y | Improvement | 08/09 | Compiled geometry/rules/encoding signature in 08; values-only parameterization signature in 09 |
+| Parameterization signature | Y | Improvement | 09 | Finalized `signatures.parameterization`; golden projection vectors |
+| Template defaults/completeness | N | Improvement | 09 | Sparse defaults, `PRM003`/`PRM006` completeness warnings |
+| Template rebase/migration | Y | Planned | 09/26 | Diff + explicit report; no silent reuse; editor in 26 |
+| Site energy overrides in template | N | Improvement | 09 | Original limitation removed; reset-to-model |
+| `PRM` diagnostics | N | Improvement | 09 | Structural Core checks + compiled-bound Packages checks; docs-drift checked |
+| `mocassin parameterize` CLI | N | Replaced | 12 | Step 12 owns `compile`/`build --parameterization`; no separate command |
 | Job collections/configs | Y | Planned | 10 | |
 | Base + config overrides | Y | Planned | 10/26 | Correct inheritance |
 | Job duplicates/multiplier | Y | Planned | 10 | |

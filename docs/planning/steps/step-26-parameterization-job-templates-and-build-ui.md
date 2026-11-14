@@ -88,7 +88,10 @@ frequencies, define parameter sweeps, preview job counts, build a package, and s
 
 **Import/export**
 
-- JSON template exchange with schema version and signature.
+- JSON template exchange writes a valid `.mocprj` **project fragment** containing only the selected
+  `parameterizations` entries (same project `schemaVersion`, template shape, and model signature) and imports
+  it through the normal project validator. It introduces no separate template envelope, version, or ADR; a
+  future standalone format would need its own ADR and manifest entry.
 - CSV import/export for energies/frequencies with explicit columns and validation.
 
 ### 2. Job template editor
