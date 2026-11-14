@@ -862,9 +862,15 @@ implementation, not during the audit.
 - Required site sections: user guide, physics explanation, developer architecture guide, tutorials, CLI and
   format reference, troubleshooting/FAQ, performance/HPC, contributing, migration/clean-break, glossary/
   notation/units, examples/publications, and the API landing page.
-- **Math uses KaTeX.** Use `$$...$$` for display math and `\(...\)` for inline math; never use fenced
-  `text` blocks for formulas. The single-dollar `$...$` delimiter is deliberately not enabled. Preview the
-  rendered page before closing a documentation change.
+- **Math delimiters depend on the audience.**
+  - Published pages under `docs/` (except `docs/planning/`) render with KaTeX through
+    `docs/javascripts/katex.js`: use `$$...$$` for display and `\(...\)` for inline math. The single-dollar
+    `$...$` delimiter is deliberately not enabled. GitHub and IDE previews do not run the initializer, so
+    preview with `zensical serve` or the built `site/`.
+  - Planning records under `docs/planning/` are read outside the Zensical build: use `$...$` for inline and
+    `$$...$$` for display, and do not use `\(...\)` or `\[...\]`.
+  - Never use fenced `text` blocks for formulas. `python tools/check_doc_math.py` reports delimiter warnings
+    (non-fatal by default).
 - **Diagrams use Mermaid fenced blocks** with the `mermaid` language tag, enabled through Zensical SuperFences
   custom fences.
 - **Docs-as-code:** Step 00 creates the Zensical skeleton, navigation, build scripts, and Docs CI job. Every
