@@ -11,10 +11,10 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 
 - **Status:** In audit
 - **Step branch:** `step/08-model-compilation-pipeline`
-- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43533462127)
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43536613334)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `ba8e889` — [request](../audits/step-08.md)
+- **Audit:** Re-audit required at `a1fe97f` — [request](../audits/step-08.md)
 - **Design review:** Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — [review record](../reviews/step-08.md) `195451021031272af96ee1b2ca600d4c8cd83c2c`; accepted by the human owner 2026-11-13
 - **Last updated:** 2026-11-13
 
@@ -27,7 +27,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 | `simulation-encoding` | `feature/step-08-model-compilation-pipeline/simulation-encoding` | Done | `verify.sh dotnet` (950 tests), `structure`, `api`, `contracts` pass | — | `fde55fd` |
 | `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Done | `verify.sh dotnet` (954 tests), `structure`, `api`, `contracts` pass | — | `10966cf` |
 | `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Done | `verify.sh dotnet` (960 tests), `structure`, `api`, `contracts`, `docs` pass | — | `6c59163` |
-| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Done | `verify.sh dotnet` (985 tests), `structure`, `api`, `contracts`, `docs` pass | — | `86348bf` |
+| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Done | `verify.sh dotnet` (990 tests), `structure`, `api`, `contracts`, `docs` pass | — | `86348bf` |
 
 ### Implementation notes and deviations
 
