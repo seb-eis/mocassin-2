@@ -223,8 +223,15 @@ ParameterizedModel.Signature
   so no stable IDs are projected and Step 13 can re-encode from the `.msl` payload alone. Template metadata,
   set headers, unset markers, and runtime settings are excluded. The applied values are quantized before
   storage, so the persisted payload and the signature cannot drift.
-- `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` is made public and reused by Contracts, so the
-  model and parameterization projections share one quantization/header/string implementation.
+- `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` is public and reused by Contracts, so the model
+  and parameterization projections share one fixed-width header, string, and quantization implementation.
+  `ParameterizationSignatureV1.Compute` streams the projection through an `IncrementalHash`-backed
+  `IBufferWriter<byte>`; `ComputeProjection` materializes bytes only for golden fixtures and diagnostics.
+- `tests/contracts/projections/parameterization/*.bin` are the canonical parameterization byte fixtures for
+  ceria, ceria KMC, and BaZrO₃. They live in a subdirectory so the model checker's `projections/*.bin` glob
+  does not consume them. `tools/contracts/check_parameterization_projection.py` independently re-encodes them
+  from the generated `parameterization-v1` descriptor in `verify.sh contracts`, and the
+  `signatures.parameterization` entry is `final` in the manifest.
 - `models.signature` is the parameterization signature; `models.payload.model_signature` is the Step 08
   signature. A value-only change changes the former, not the latter.
 

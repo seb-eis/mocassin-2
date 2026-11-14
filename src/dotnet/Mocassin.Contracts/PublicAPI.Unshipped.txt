@@ -36,3 +36,26 @@ const Mocassin.Contracts.ContractVersions.SolverEncoding = "utf-8-json" -> strin
 const Mocassin.Contracts.ContractVersions.StateFormat = "mocassin.mcs" -> string!
 const Mocassin.Contracts.ContractVersions.StateFileExtension = ".mcs" -> string!
 const Mocassin.Contracts.ContractVersions.StateEncoding = "messagepack" -> string!
+Mocassin.Contracts.Parameterization.ParameterizationSignatureV1
+Mocassin.Contracts.Parameterization.ParameterizationValues
+Mocassin.Contracts.Parameterization.ParameterizationValues.<Clone>$() -> Mocassin.Contracts.Parameterization.ParameterizationValues!
+Mocassin.Contracts.Parameterization.ParameterizationValues.Deconstruct(out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> PairTables, out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> GroupSets, out System.Collections.Immutable.ImmutableArray<double> SiteEnergies, out System.Collections.Immutable.ImmutableArray<double> TransitionRuleFrequencies) -> void
+Mocassin.Contracts.Parameterization.ParameterizationValues.Equals(Mocassin.Contracts.Parameterization.ParameterizationValues? other) -> bool
+Mocassin.Contracts.Parameterization.ParameterizationValues.GroupSets.get -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>>
+Mocassin.Contracts.Parameterization.ParameterizationValues.GroupSets.init -> void
+Mocassin.Contracts.Parameterization.ParameterizationValues.PairTables.get -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>>
+Mocassin.Contracts.Parameterization.ParameterizationValues.PairTables.init -> void
+Mocassin.Contracts.Parameterization.ParameterizationValues.ParameterizationValues(System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> PairTables, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> GroupSets, System.Collections.Immutable.ImmutableArray<double> SiteEnergies, System.Collections.Immutable.ImmutableArray<double> TransitionRuleFrequencies) -> void
+Mocassin.Contracts.Parameterization.ParameterizationValues.SiteEnergies.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Parameterization.ParameterizationValues.SiteEnergies.init -> void
+Mocassin.Contracts.Parameterization.ParameterizationValues.TransitionRuleFrequencies.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Parameterization.ParameterizationValues.TransitionRuleFrequencies.init -> void
+const Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.Domain = "mocassin/parameterization-signature/v1" -> string!
+const Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.FormatVersion = 1 -> ulong
+override Mocassin.Contracts.Parameterization.ParameterizationValues.Equals(object? obj) -> bool
+override Mocassin.Contracts.Parameterization.ParameterizationValues.GetHashCode() -> int
+override Mocassin.Contracts.Parameterization.ParameterizationValues.ToString() -> string!
+static Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.Compute(string! modelSignature, Mocassin.Contracts.Parameterization.ParameterizationValues! values) -> string!
+static Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.ComputeProjection(string! modelSignature, Mocassin.Contracts.Parameterization.ParameterizationValues! values) -> byte[]!
+static Mocassin.Contracts.Parameterization.ParameterizationValues.operator !=(Mocassin.Contracts.Parameterization.ParameterizationValues? left, Mocassin.Contracts.Parameterization.ParameterizationValues? right) -> bool
+static Mocassin.Contracts.Parameterization.ParameterizationValues.operator ==(Mocassin.Contracts.Parameterization.ParameterizationValues? left, Mocassin.Contracts.Parameterization.ParameterizationValues? right) -> bool

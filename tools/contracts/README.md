@@ -16,21 +16,26 @@ python tools/contracts/generate.py --check
 # Check restored NuGet package licences against the project allow-list
 python tools/contracts/check_nuget_licenses.py
 
-# Verify the canonical compiled-model projection fixtures (ADR 0010)
+# Verify the canonical compiled-model and parameterization projection fixtures (ADR 0010)
 python -m pip install -r tools/contracts/requirements.txt
 python tools/contracts/check_model_projection.py
+python tools/contracts/check_parameterization_projection.py
 ```
 
 The generator uses the Python standard library only. `msgpack==1.2.4` is required only by the projection
 fixture checker; it does not affect the generator or the .NET build.
 
-Regenerate all five projection fixtures from the repository root (never filter the test run, because a
-filtered `MOCASSIN_UPDATE_GOLDENS=1` run writes only the selected fixtures and leaves the rest stale):
+Regenerate all five compiled-model and three parameterization projection fixtures from the repository root
+(never filter a fixture-generating test class, because a filtered `MOCASSIN_UPDATE_GOLDENS=1` run writes only
+the selected fixtures and leaves the rest stale):
 
 ```sh
 MOCASSIN_UPDATE_GOLDENS=1 dotnet test src/dotnet/Mocassin.Compilation.Tests \
   -c Release --filter FullyQualifiedName~ProjectionFixtureTests
+MOCASSIN_UPDATE_GOLDENS=1 dotnet test src/dotnet/Mocassin.Compilation.Tests \
+  -c Release --filter FullyQualifiedName~ParameterizationProjectionFixtureTests
 python tools/contracts/check_model_projection.py
+python tools/contracts/check_parameterization_projection.py
 ```
 
 ## Generated outputs
@@ -43,8 +48,10 @@ python tools/contracts/check_model_projection.py
 - `contracts/generated/constants/python/contract_versions.py` — Python version constants;
 - `contracts/generated/fixtures/descriptors.json` — language-neutral fixture descriptors;
 - `tests/contracts/projections/*.{bin,json}` — canonical compiled-model projection fixtures and metadata;
-- `tests/contracts/signature-vectors.json` — signed-type vectors (compiled-model vectors from Step 08; later
-  steps add their own).
+- `tests/contracts/projections/parameterization/*.{bin,json}` — canonical parameterization projection fixtures
+  and metadata; the subdirectory keeps them outside the model checker's `projections/*.bin` glob;
+- `tests/contracts/signature-vectors.json` — signed-type vectors (compiled-model vectors from Step 08 and
+  parameterization vectors from Step 09).
 
 Generated artifacts are checked in and must be regenerated, never hand-edited. CI runs the `--check` command
 and fails on drift.

@@ -2964,8 +2964,8 @@
       "id": "parameterization",
       "domainPrefix": "mocassin/parameterization-signature/v1",
       "projectionType": "ParameterizationSignatureV1",
-      "status": "skeleton",
-      "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 09.",
+      "status": "final",
+      "notes": "Final Step 09 parameterization projection: domain-separated six-field MessagePack array over the compiled-model signature and the dense applied values. Stable IDs, template metadata, set headers, sparse/unset markers, diagnostics, summaries, timings, and all runtime settings are excluded. Floats are float64 quantized to 12 decimals with round half away from zero; negative zero is normalized.",
       "fields": [
         {
           "name": "formatVersion",
@@ -2978,29 +2978,36 @@
           "required": true
         },
         {
-          "name": "stablePairs",
-          "type": "bin",
-          "required": true
-        },
-        {
-          "name": "unstablePairs",
-          "type": "bin",
-          "required": true
+          "name": "pairTables",
+          "type": "array",
+          "required": true,
+          "items": "array",
+          "itemItems": {
+            "type": "array",
+            "items": "float64"
+          }
         },
         {
           "name": "groupSets",
-          "type": "bin",
-          "required": true
+          "type": "array",
+          "required": true,
+          "items": "array",
+          "itemItems": {
+            "type": "array",
+            "items": "float64"
+          }
         },
         {
           "name": "siteEnergies",
-          "type": "bin",
-          "required": true
+          "type": "array",
+          "required": true,
+          "items": "float64"
         },
         {
           "name": "transitionRules",
-          "type": "bin",
-          "required": true
+          "type": "array",
+          "required": true,
+          "items": "float64"
         }
       ]
     },
@@ -3094,6 +3101,36 @@
           "projectionType": "ModelSignatureV1",
           "signatureHex": "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2",
           "description": "model-barium-zirconate"
+        },
+        {
+          "id": "parameterization-barium-zirconate",
+          "signature": "parameterization",
+          "domainPrefix": "mocassin/parameterization-signature/v1",
+          "projectionType": "ParameterizationSignatureV1",
+          "signatureHex": "6a1ff985c7fa6950b29b8d78aa5a5d1751318d5b6285dbe9ebcb32389b63c439",
+          "projectionSha256": "71db3c6ebe2436a11b49fc6424cfec37be2dcab00400286ad7b5d29fa6d7caab",
+          "modelSignature": "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2",
+          "description": "Deterministic dense values over the compiled shapes of the matching sample; parameterization-barium-zirconate.json"
+        },
+        {
+          "id": "parameterization-ceria-kmc",
+          "signature": "parameterization",
+          "domainPrefix": "mocassin/parameterization-signature/v1",
+          "projectionType": "ParameterizationSignatureV1",
+          "signatureHex": "ab22580975f1d7a07bc5163e760b4f8716fa6a04084777216f5925bd2ff5e1b7",
+          "projectionSha256": "11f3ff9f27e700a4cd5e87fa8e3964d24441ba3b32799f9d4e6cad8e4a5f445c",
+          "modelSignature": "812a7a77a8b78993cf8c475061fbf071fea27082569f154737ed12eb3d64a314",
+          "description": "Deterministic dense values over the compiled shapes of the matching sample; parameterization-ceria-kmc.json"
+        },
+        {
+          "id": "parameterization-ceria",
+          "signature": "parameterization",
+          "domainPrefix": "mocassin/parameterization-signature/v1",
+          "projectionType": "ParameterizationSignatureV1",
+          "signatureHex": "aa4c11cd12e9a6f4d2fc454ced8c11cb36862e921498c0ea78f4fc09537391c4",
+          "projectionSha256": "b1058d0e4806de182321ab9b6aeb9c94349f3436a243bb33abab1288e32711b1",
+          "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
+          "description": "Deterministic dense values over the compiled shapes of the matching sample; parameterization-ceria.json"
         }
       ]
     },

@@ -33,13 +33,70 @@ completeness checks.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `template-model-and-persistence` | `feature/step-09-parameterization-templates/template-model-and-persistence` | In progress | — | — | — |
-| `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | Approved | — | — | — |
+| `template-model-and-persistence` | `feature/step-09-parameterization-templates/template-model-and-persistence` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `c7f9992` |
+| `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
 | `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | Approved | — | — | — |
 | `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Approved | — | — | — |
 | `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | Approved | — | — | — |
 | `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | Approved | — | — | — |
 | `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | Approved | — | — | — |
+
+### Feature 1 outcome and deviations
+
+`template-model-and-persistence` was squash-merged as `c7f9992`. No per-feature CI run was triggered.
+
+Local gates:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 637, Symmetry 223, Compilation 95,
+  Packages 105, Cli 7, App 1, Contracts 1, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; licence policy 51 packages, no vulnerable packages, ApiCompat compatible
+  (only the `Mocassin.Core.dll` baseline was refreshed).
+- `./tools/verify.sh contracts` — exit 0; 18 generated artifacts current, 5 model projections OK, catalog
+  current, process consistency OK, 18 tool tests passed, SPDX 427 files, no secrets, cargo-deny OK.
+- `./tools/verify.sh docs` — exit 0; links OK (153 files), Zensical "No issues found", DocFX 0 warnings/0
+  errors, rustdoc generated, site built.
+
+Recorded deviations and limitations:
+
+- `PRM005` structural validation covers zero frequency (and defensively non-finite values); negative and
+  non-finite frequencies are still rejected by the existing `FrequencyHz`/JSON unit converters. Revisit only if
+  feature 5 needs a different compiled-bound behaviour.
+- `ParameterizationTemplateEditor` reports an unknown template-internal set with the existing `PROJ010`
+  unknown-reference code; the design defines no Core `PRM` code for that editor-only case.
+- `PRM014` also rejects duplicate group-set headers for the same `ClusterEnergyId` and empty transition IDs to
+  make canonical ordering and key uniqueness deterministic.
+- `ParameterizationTemplateDefaults.CreateDefault` is deferred to feature 4 (defaulting/apply).
+- `ParameterizationLimits.MaxAppliedValueBytes` is defined but enforced only by the apply feature.
+
+### Feature 2 outcome
+
+`parameterization-signature` implementation is complete on its feature branch and awaits the feature squash.
+
+Local gates:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 637, Symmetry 223, Compilation 99,
+  Packages 105, Cli 7, App 1, Contracts 14, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; licence policy 51 packages, no vulnerable packages, ApiCompat compatible
+  (`Mocassin.Compilation.dll` and `Mocassin.Contracts.dll` baselines refreshed).
+- `./tools/verify.sh contracts` — exit 0; 18 generated artifacts current, 5 model projections and 3
+  parameterization projections OK, catalog current, process consistency OK, 20 tool tests passed, SPDX 434
+  files, no secrets, cargo-deny OK.
+- `./tools/verify.sh docs` — exit 0; links OK (153 files), Zensical "No issues found", DocFX 0 warnings/0
+  errors, rustdoc generated, site built.
+
+Notes and limitations:
+
+- No per-feature CI run was triggered.
+- The parameterization golden vectors use deterministic dense values over the real compiled table/rule shapes
+  and the compiled default rule frequencies, because template creation and apply/defaulting land in features 3
+  and 4. Feature 7 can replace them with golden applied-template values without changing the projection.
+- `CanonicalProjectionWriter` is now public and generalized to `IBufferWriter<byte>`; `Quantize` is public.
+  `ParameterizationSignatureV1.Compute` streams through an `IncrementalHash`-backed buffer and
+  `ComputeProjection` remains for fixtures/diagnostics.
+- The Python parameterization checker reuses the model checker's generic projection encoder; new Python unit
+  vectors cover the 12-decimal midpoints and nested-array encoding.
 
 ## Goal
 
