@@ -14,8 +14,9 @@
 | Request owner | Step 10 orchestrator |
 | Orchestrator (step agent / planner) | General orchestrator |
 | Review initiated by | Human owner |
-| Reviewed commit | `2eb6a5715ea51f324a579ae8974f9e8526005fa9` |
+| Reviewed commit | `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43` |
 | Round 1 frozen commit | `c66b483f6ef064858d0e8082543d2fcec8386ed3` |
+| Round 2 frozen commit | `2eb6a5715ea51f324a579ae8974f9e8526005fa9` |
 | Docs branch | `docs/step-10-design` |
 | Review date | 2026-11-14 |
 | Reviewer | Independent planning auditor (round 1; fresh context; no shared conversation with the planner, implementor, step agent, or orchestrator) |
@@ -308,9 +309,10 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
-`Changes required` is the round-2 review verdict and record state; it is not a merge authorization.
+`Changes required` was the round-2 review verdict; it is not a merge authorization. The round-3 re-review
+target is `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43`.
 
 ## Reviewer independence
 
@@ -555,6 +557,25 @@ Follow-up owner: Step agent / planner
 Follow-up step: Step 10 design revision round 3 (dual-DOF environment set, JOB009/JOB017, stage naming,
 mixed compensation, `.msl` `doping_info` statement) and fresh review
 
+## Round 2 resolutions
+
+Design revision commit: `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43`. The round-2 reviewer text is unchanged; the
+step agent owns this section.
+
+| Finding | Resolution | Files |
+| --- | --- | --- |
+| R2-1 | The dual-DOF environment set is now every `CompiledStructureModel.Environments` entry. For each environment, the predicate is reduced when an optimizer targets a site owning a P1 position with that environment and the particle is allowed. No compiled mask is mutated. The all-reduced rule and one/some/all test are explicit. | Step 10 §5, Tests; Step 08 selection-optimizer wording |
+| R2-2 | `JOB009` no longer claims duplicate optimizers; duplicates are only `JOB017`. `JOB009` is reference-invalid in Core and removes-all in the build stage. | Step 10 §6 |
+| R2-3 | The stage is consistently `JobTemplateValidationStage`; the ownership table assigns compiled-bound `JOB009` to it, and Step 08 no longer claims to resolve authored optimizers. | Step 10 §6–§7; Step 08 |
+| R2-4 | Compensated pairs are checked individually (`JOB012`). A final non-neutral lattice caused by an uncompensated charged doping — including a mixed compensated/non-compensated config — is `JOB016`, not `JOB012`. | Step 10 §3, §6, acceptance |
+| R2-5 | The `.msl` `doping_info` format is recorded as a pre-implementation contract update; no published `.msl` exists and no schema bump is claimed. | Step 10 §8; data contract §3.4 |
+| R2-6 | `{dopingId}` is the canonical lowercase hyphenated GUID (`ToString("D")`). | Step 10 §4; data contract §3.4 |
+| R2-7 | Any 64-hex seed text is decoded; every other explicit seed is hashed. The project-seed-equality special case is removed, and a custom-seed golden vector is added. | Step 10 §2 |
+| R2-8 | Every hex digest is explicitly decoded to 32 bytes; a populated synthetic request-hash and lattice-seed vector is added. | Step 10 §2 |
+| R2-9 | `TryCreateJobCountPreview` is simulation-scoped: default and effective counts for that simulation's collections, whole-template total, no separate override. | Step 10 §4.1, Tests |
+
+No earlier reviewer text, resolution table, or checklist item was altered.
+
 ## Approval summary
 
 The step agent completes this section before requesting human approval. It must cover the full history, not
@@ -573,7 +594,8 @@ Round history:
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-14 | `c66b483` | Independent planning auditor (fresh context) | Changes required |
-| 2 | 2026-11-14 | `2eb6a57` | Pending fresh auditor | Pending |
+| 2 | 2026-11-14 | `2eb6a57` | Independent planning auditor (fresh context) | Changes required |
+| 3 | 2026-11-14 | `07f14f2` | Pending fresh auditor | Pending |
 
 Findings and resolutions:
 
@@ -607,3 +629,9 @@ Date:
 | m1–m11 | Resolved in design revision (see table above) | Step agent | `2eb6a57` |
 | n1 | Accepted; no change (eight features retained) | Step agent | `2eb6a57` |
 | n2–n4 | Resolved in design revision (see table above) | Step agent | `2eb6a57` |
+| R2-1 | Resolved in round-3 design revision | Step agent | `07f14f2` |
+| R2-2 | Resolved in round-3 design revision | Step agent | `07f14f2` |
+| R2-3 | Resolved in round-3 design revision | Step agent | `07f14f2` |
+| R2-4 | Resolved in round-3 design revision | Step agent | `07f14f2` |
+| R2-5 | Resolved in round-3 design revision | Step agent | `07f14f2` |
+| R2-6–R2-9 | Resolved in round-3 design revision (see round-2 resolutions) | Step agent | `07f14f2` |
