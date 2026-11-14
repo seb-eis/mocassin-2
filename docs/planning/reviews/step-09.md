@@ -182,25 +182,61 @@ Follow-up step: Step 09 design re-review (round 2)
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded: accept the round-4 `Ready with notes` verdict for design
+  freeze `26d6a0e`, merge `docs/step-09-design` into `main`, and start Step 09 with the approved seven-feature
+  list. The single-step 3.4–4.4 person-week exception and the M1/M2 format decisions were approved by the
+  human owner on 2026-11-14.
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict).
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status).
+- [x] Accepted notes and waivers recorded with rationale.
+- [x] Residual risks, deferred items, and follow-up owners recorded.
+- [x] Explicit no-Blocker/no-Major statement: no Blocker and no Major remains open after round 4.
+- [x] Final CI and documentation-build results recorded: `docs --require` and `policy --require` pass at the
+  design freeze and at the record tip; no CI run was used because every commit is documentation-only.
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-14 | `1ee5a2a` | Fresh design reviewer A | Changes required (M1–M3 Major; m1–m17, n1–n4) |
+| 2 | 2026-11-14 | `53bbfd5` | Fresh design reviewer B | Ready with notes (R2-1–R2-6) |
+| 3 | 2026-11-14 | `b5db289` | Fresh design reviewer C | Ready with notes (R3-1) |
+| 4 | 2026-11-14 | `26d6a0e` | Fresh design reviewer D | Ready with notes (no new findings; R3-1 resolved) |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M1 | Major | Parameterization signature not reproducible from the `.msl` payload | Store each rule's absolute `frequency_hz`; contract and Steps 08/11/13/16 updated | `53bbfd5` | Resolved |
+| M2 | Major | No unparameterized/default build path | Implicit default template for `parameterizations: []`; Step 11/12 acceptance updated | `53bbfd5` | Resolved |
+| M3 | Major | Project-format manifest/schema not updated | Feature 1 owns manifest fields, schema regeneration, sample fixtures, and `ProjectSchemaTests` | planned (feature 1) | Resolved as planned work |
+| M4 | Minor | Sizing claim contradicted the four-week trigger | 3.4–4.4 person-weeks recorded; single-step exception approved 2026-11-14 | `b5db289` | Owner decision recorded |
+| M5 | Minor | Chiral acceptance named a non-existent fixture | Real barium-zirconate model plus generated P1/P4mm link-change fixture; 24 chiral geometries (12 reciprocal pairs) | `53bbfd5` | Resolved |
+| m1–m17 | Minor | Consistency, API-binding, fixture, and validation findings | All resolved; m4 closed by R2-2 | `53bbfd5`, `b5db289` | Resolved |
+| n1–n4 | Note | Naming, unit-type, closeout-evidence, and API-change notes | All resolved | `53bbfd5`, `b5db289` | Resolved |
+| R2-1 | Minor | Parity row still assigned the per-job factor to Step 11 | Step 11 writes absolute `frequency_hz`; Step 16 derives the factor | `b5db289` | Resolved |
+| R2-2 | Minor | `PRM006` catalogue row used the superseded rule | Explicit-entries rule; explicit defaults suppress it | `b5db289` | Resolved |
+| R2-3 | Minor | Chiral count wording conflated geometries and pairs | "24 chiral geometries (12 reciprocal pairs)" consistently | `b5db289` | Resolved |
+| R2-4 | Note | Single-step option had no roadmap bookkeeping | Owner exception recorded in roadmap §3.1 and the Step 09 row | `b5db289` | Resolved |
+| R2-5 | Note | Dashboard still reported the design review as `Not requested` | Orchestrator updates the dashboard at acceptance | this commit | Resolved |
+| R2-6 | Note | Step 13 acceptance less explicit than the Step 09 claim | Explicit re-encoding acceptance bullet added | `b5db289` | Resolved |
+| R3-1 | Minor | No ADR-0010-scoped authorization for the parameterization signature finalization | ADR 0010 pre-release finalization now covers both signatures | `26d6a0e` | Resolved |
+
+Accepted notes and waivers:
+
+- The human owner accepted the single-step 3.4–4.4 person-week exception to roadmap §3.1 on 2026-11-14; the
+  09A/09B split is recorded as considered and rejected.
+- No Blocker or Major is waived; none remains.
+
+Residual risks and follow-ups:
+
+- The 4.4 person-week upper bound makes Step 09 a larger audit sitting; the audit must still be completable in
+  one sitting, and each feature stays independently auditable.
+- The absolute `frequency_hz` model payload is a pre-release `.msl` change authorized by ADR 0010; no released
+  format exists yet.
+- Projects without a template build with the implicit default; explicit empty templates warn.
+- Cross-language Rust reproduction is deferred to Step 13's acceptance, which now states it explicitly.
+- The design branch is not yet merged to `main`; the step branch is created from the reviewed `main` commit.
 
 ## Human approval
 
