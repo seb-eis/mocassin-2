@@ -56,7 +56,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Done | `step/06-lattice-and-simulation-models` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | `41cfa4d` | `step-06` | Passed with notes at `c390dcc` (code `ea6293e`); accepted 2026-11-11 | Ready with notes — accepted at `6173e61` |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Done | `step/07-validation-and-diagnostics` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) | `3ed558a` | `step-07` | Passed with notes at `ccd0e55` (`d66f34f`) | Ready for implementation at `31b53e8` — review `2d01f3e`; approved 2026-11-11 |
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Done | `step/08-model-compilation-pipeline` (merged and deleted) | `step-08` | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43578897490) | `f91fc63` | `step-08` | Passed with notes at `28e741f` (`f97b2c4`) | Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — accepted 2026-11-13 |
-| 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | In progress | `step/09-parameterization-templates` | `parameterization-signature` | — | — | — | Not requested | Ready with notes at `26d6a0e` (round 4) — awaiting owner acceptance |
+| 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | In progress | `step/09-parameterization-templates` | `factory-and-summary` | — | — | — | Not requested | Ready with notes at `26d6a0e` (round 4) — accepted 2026-11-14 |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -99,11 +99,12 @@ Step 08 — Model Compilation Pipeline is complete: merged as `f91fc63` (`--no-f
 at `28e741f`. The design was accepted on 2026-11-13 and merged to `main` as `51b99f0`; the human owner waived
 the roadmap §3.1 split trigger for the 4–6 person-week step on 2026-11-12.
 
-Step 09 — Parameterization Templates is in design review. The design freeze is `26d6a0e`; the review record
-`docs/planning/reviews/step-09.md` returned `Ready with notes` in round 4 after `Changes required` in round 1.
-The human owner approved the seven-feature list and accepted the single-step 3.4–4.4 person-week exception on
-2026-11-14. The design branch is `docs/step-09-design`; the step branch and implementation start only after the
-owner accepts the design verdict and the design docs are merged to `main`.
+Step 09 — Parameterization Templates is in progress on `step/09-parameterization-templates`. The design freeze
+is `26d6a0e`; the review record `docs/planning/reviews/step-09.md` returned `Ready with notes` in round 4 and the
+human owner accepted it on 2026-11-14 together with the seven-feature list and the single-step 3.4–4.4
+person-week exception. Features 1–2 (`template-model-and-persistence`, `parameterization-signature`) are
+squash-merged as `c7f9992` and `9a11a38`; feature 3 (`factory-and-summary`) is the current feature. No
+per-feature CI run is used.
 
 ## Cross-cutting phase checkpoints
 

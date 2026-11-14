@@ -34,8 +34,8 @@ completeness checks.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | `template-model-and-persistence` | `feature/step-09-parameterization-templates/template-model-and-persistence` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `c7f9992` |
-| `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
-| `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | Approved | — | — | — |
+| `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `9a11a38` |
+| `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
 | `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Approved | — | — | — |
 | `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | Approved | — | — | — |
 | `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | Approved | — | — | — |
@@ -71,7 +71,7 @@ Recorded deviations and limitations:
 
 ### Feature 2 outcome
 
-`parameterization-signature` implementation is complete on its feature branch and awaits the feature squash.
+`parameterization-signature` was squash-merged as `9a11a38`. No per-feature CI run was triggered.
 
 Local gates:
 
@@ -97,6 +97,65 @@ Notes and limitations:
   `ComputeProjection` remains for fixtures/diagnostics.
 - The Python parameterization checker reuses the model checker's generic projection encoder; new Python unit
   vectors cover the 12-decimal midpoints and nested-array encoding.
+
+### Feature 3 outcome
+
+`factory-and-summary` implementation is complete on its feature branch and awaits the feature squash.
+
+Implemented:
+
+- `ParameterizationFactory.Create` and `Describe` with `ParameterizationTemplateOptions`,
+  `TemplateCreationResult`, and `ParameterizationSummary` in `Mocassin.Packages.Parameterization`.
+- Sparse set headers for stable/unstable pair tables, cluster tables, and kinetic transition collections;
+  site-energy headers are not written. Pair tables are partitioned by the centre reference site's stability;
+  chiral tables use the direction whose `GeometryId` equals the shared `EnergyId`.
+- Required-slot counts, chiral shared-slot counts, site-energy slot and override counts, estimated applied-value
+  bytes, effective energy/frequency ranges, non-default count, identical-value share, and `HasExplicitValues`.
+- UUIDv7 identifier and `TimeProvider` creation timestamp (the supplied timestamp is normalized to UTC).
+- `PRM010` duplicate-name warning against `project.parameterizations`; the factory never mutates the project.
+- Compiled-model contract validation with `InvalidOperationException`, including table lengths, achiral descriptor
+  agreement, centre-stability agreement, chiral partner links, and occupation/rule index consistency.
+- The user-guide parameterization draft page and its navigation entry.
+
+Local gates:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 637, Symmetry 223, Compilation 99,
+  Packages 135, Cli 7, App 1, Contracts 14, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; licence policy 51 packages, no vulnerable packages, ApiCompat compatible
+  (only the `Mocassin.Packages.dll` baseline was refreshed).
+- `./tools/verify.sh contracts` — exit 0; 18 generated artifacts current, 5 model projections and 3
+  parameterization projections OK, catalog current, process consistency OK, 20 tool tests passed, SPDX 445
+  files, no secrets in 780 files, cargo-deny OK.
+- `./tools/verify.sh docs` — exit 0; links OK (154 files), Zensical "No issues found", DocFX 0 warnings/0
+  errors, rustdoc generated, site built.
+
+Measured performance (PR-medium guard, 10 iterations after warm-up): ceria create plus summary average
+0.037 ms; describe average 0.032 ms; both far below the 20 ms target. Required slots for the ceria default
+template: 126 (120 pair + 6 group).
+
+Notes and limitations:
+
+- The design text in §4 says "every pair table has exactly one geometry". That conflicts with the reciprocal
+  chiral table, which has two geometries sharing one `EnergyId` (§3.4/§8). The implemented invariant is: every
+  pair table has at least one geometry; all geometries share the centre stability; achiral geometries agree on
+  the descriptor; and a chiral table has exactly one representative whose `GeometryId` equals the `EnergyId`
+  plus a valid reciprocal partner link. Real vehicle/interstitialcy chiral tables have swapped reciprocal
+  sites, so descriptor agreement is validated only for achiral tables.
+- `ParameterizationFactory.Describe` is static (the factory instance only carries the creation clock); the
+  `IParameterizationService.Describe` instance surface remains feature 4 and will delegate to the same summary
+  builder.
+- The sparse/dense equivalence property is summary-level because apply/defaulting is feature 4: adding explicit
+  defaults for every required slot leaves the effective ranges, slot counts, and byte estimate unchanged.
+- `SetValueCount` counts explicit pair, group, and rule values; site-energy overrides are counted separately.
+  `NonDefaultValueCount` compares explicit values with their effective defaults, including authored site
+  background for overrides. `IdenticalValueShare` is the most frequent non-default pair/group value divided by
+  all explicit pair/group values.
+- When `Id` is omitted, the UUIDv7 timestamp is the resolved creation timestamp so the identifier is
+  deterministic under an injected clock. An empty name is a caller error and throws `ArgumentException`; length
+  and structural template rules remain `ProjectValidator` diagnostics.
+- Full template validation (`PRM001/002/003/006/008/011/012/015/016`), apply, site-energy overrides, diff, and
+  rebase remain features 4–7 and are not claimed here.
 
 ## Goal
 
@@ -1326,7 +1385,7 @@ and the CLI note that Step 12 replaces a hypothetical `mocassin parameterize`.
 - [ ] Add `ProjectEditor` template operations and structural `PRM` validation.
 - [ ] Add `ParameterizationValues`, `ParameterizationSignatureV1`, the public canonical writer reuse, manifest
       finalization, generated descriptor, and golden projection vectors.
-- [ ] Implement `ParameterizationFactory.Create` and `Describe`, set headers, and `ParameterizationSummary`.
+- [x] Implement `ParameterizationFactory.Create` and `Describe`, set headers, and `ParameterizationSummary`.
 - [ ] Implement `ParameterizationService.Apply`, defaults, quantization, site-energy background, overrides, and
       `ParameterizedModel`.
 - [ ] Implement compiled-bound `Validate` and every `PRM` emission/path.
@@ -1336,7 +1395,7 @@ and the CLI note that Step 12 replaces a hypothetical `mocassin parameterize`.
 
 ## Acceptance criteria
 
-- [ ] Creating a template from the ceria compiled model produces exactly the expected sets/rules.
+- [x] Creating a template from the ceria compiled model produces exactly the expected sets/rules.
 - [ ] Applying the template to the same model succeeds and yields the same compiled values.
 - [ ] A changed model produces a signature mismatch with a useful diff.
 - [ ] Rebase copies unchanged values, defaults new ones, and reports removed ones without silent reuse.

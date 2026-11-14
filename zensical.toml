@@ -31,6 +31,7 @@ nav = [
       { "Crystal structure" = "user-guide/structure.md" },
       { "Transitions" = "user-guide/transitions.md" },
       { "Energy model" = "user-guide/energy.md" },
+      { "Parameterization" = "user-guide/parameterization.md" },
       { "Lattice and doping" = "user-guide/lattice.md" },
       { "Simulations" = "user-guide/simulations.md" },
     ] },
