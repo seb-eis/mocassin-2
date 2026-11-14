@@ -15,11 +15,11 @@
 | Request owner | Step agent |
 | Orchestrator (step agent) | Step 08 implementor |
 | Audit initiated by | Human owner |
-| Audited commit | `a1fe97f067b6a1937802fbe8a2e15135ec4e06cc` |
+| Audited commit | `28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e` |
 | Step branch | `step/08-model-compilation-pipeline` |
 | Step tag | — |
-| Closeout CI run | [`43536613334`](https://github.com/seb-eis/mocassin-2/actions/runs/43536613334) — green at `a1fe97f067b6a1937802fbe8a2e15135ec4e06cc` |
-| Closeout CI head SHA | `a1fe97f067b6a1937802fbe8a2e15135ec4e06cc` |
+| Closeout CI run | [`43538703111`](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111) — green at `28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e` |
+| Closeout CI head SHA | `28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e` |
 | Main SHA at freeze | `884ffe78f8b8f2a9fa6093afcce94856a6094c73` |
 | Merge-tree CI | Not required; `main` 884ffe7 was merged before the freeze |
 | Closeout evidence | `docs/planning/closeout/step-08.json` |
@@ -251,9 +251,9 @@ See `### Audit round 3`.
 | --- | --- | --- | --- |
 | A1 | Resolved — direction keys include the collection; forward+reverse vehicle/interstitialcy compile together | Implementor | `ba8e889` |
 | A2 | Resolved — full nested manifest schema, canonical MessagePack writer, binary fixtures, Python checker | Implementor | `ba8e889` |
-| A3 | Resolved — particle-set hash added to structure key; charge, environment, and particle-set edits covered | Implementor | `a1fe97f` |
+| A3 | Resolved — canonical particle-set membership hash in the structure/rules key; membership-only cache test; stale-model probe fixed | Implementor | `28e741f` |
 | A4 | Resolved — RejectedByMass/Charge/InvalidState populated and reported | Implementor | `ba8e889` |
-| A5 | Resolved — rule-count check during enumeration; pair-table pre-check; CMP006 tests | Implementor | `a1fe97f` |
+| A5 | Resolved — global AddRule limit before materialization, cluster/pair pre-checks, saturating `long` arithmetic, CMP006 tests | Implementor | `28e741f` |
 | A6 | Resolved — trackers are KMC-collection-scoped; MMC rules use 0xFF; mixed scoping covered | Implementor | `ba8e889` |
 | A7 | Resolved locally — ceria <1 s and 10k-position <30 s/<2 GiB tests; no benchmark project | Implementor | `ba8e889` |
 | A8 | Resolved — CMP001/002/003/004/005/006/007/008/009/010/011/012 emission/catalog coverage | Implementor | `a1fe97f` |
@@ -263,8 +263,15 @@ See `### Audit round 3`.
 | m3 | Open — TryResolve still does not delegate to TryResolvePath | Implementor | — |
 | m4 | Resolved — step-page audit link fixed | Implementor | `ba8e889` |
 | m5 | Resolved — vacuous vehicle assertion removed | Implementor | `ba8e889` |
-| m6 | Resolved — docs movement wording matches species pairing | Implementor | `ba8e889` |
+| m6 | Resolved — movement now pairs by species symbol; docs match the implementation | Implementor | `28e741f` |
 | m7 | Open — unreferenced self state change still validates | Implementor | — |
+| R3-1 | Partially addressed — C#/Python quantization vectors and the unfiltered fixture-regeneration note added; descriptor-binding and cluster-fixture coverage remain accepted minors | Implementor | `28e741f` |
+| R3-2 | Accepted minor — mixed KMC+MMC tracker scoping is verified by code inspection, not a dedicated test | Implementor | — |
+| R3-3 | Accepted minor — 10k evidence has no transitions/simulations and uses a live-heap delta, not peak managed memory | Implementor | — |
+| R3-4 | Resolved — `ComputeTransport` pairs by species symbol and the docs state the same | Implementor | `28e741f` |
+| R3-5 | Resolved — status step 09 reset to `Not requested`; step-page date updated | Implementor | `28e741f` |
+| R3-6 | Accepted process note — the round-three fixes were closed with one replacement dispatch; the two earlier dispatches remain in CI history | Implementor | — |
+| R3-7 | Accepted minor — pairs/clusters are recomputed; only structure, rules, encoding, and signing are cached | Implementor | — |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.

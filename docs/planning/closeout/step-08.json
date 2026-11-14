@@ -1,18 +1,19 @@
 {
   "step": "step-08",
-  "audit_commit": "a1fe97f067b6a1937802fbe8a2e15135ec4e06cc",
+  "audit_commit": "28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e",
   "closeout_ci": {
-    "run_id": "43536613334",
-    "head_sha": "a1fe97f067b6a1937802fbe8a2e15135ec4e06cc"
+    "run_id": "43538703111",
+    "head_sha": "28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e"
   },
   "main_sha_at_freeze": "884ffe78f8b8f2a9fa6093afcce94856a6094c73",
-  "merge_candidate": "a1fe97f067b6a1937802fbe8a2e15135ec4e06cc",
+  "merge_candidate": "28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e",
   "merge_tree_ci": {
     "run_id": "",
     "head_sha": ""
   },
   "notes": [
-    "Closeout CI run 43536613334 is the replacement single Ubuntu dispatch after audit round-two fixes.",
+    "Closeout CI run 43538703111 is the single replacement Ubuntu dispatch after the audit round-three residuals.",
+    "Earlier dispatches 43536001693 and 43536613334 covered intermediate commits; they are recorded as process history, not as closeout runs.",
     "main 884ffe7 (documentation-only Avalonia/editor-plan change) was merged before the freeze.",
     "Only documentation and audit-record commits follow the audited commit."
   ]

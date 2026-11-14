@@ -10,8 +10,8 @@
 | Branch | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` |
 | Design review | `docs/planning/reviews/step-08-amend-1.md` (rounds 1–9; round 9 Ready for implementation, no findings) |
 | Parent audit | `docs/planning/audits/step-08.md` |
-| Integration commit | `a1fe97f067b6a1937802fbe8a2e15135ec4e06cc` |
-| Combined audit commit | `a1fe97f067b6a1937802fbe8a2e15135ec4e06cc` |
+| Integration commit | `ba8e889cb51041352c876681801b12f455b2f7ee` |
+| Combined audit commit | `28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e` |
 | Tag | `step-08` |
 | Date | 2026-11-13 |
 | Owner | Human owner |
@@ -341,16 +341,16 @@ projection.
 - Branch: `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection`
 - Parent step branch: `step/08-model-compilation-pipeline`
 - Approval: pending
-- Squash commit: `a1fe97f`
+- Squash commit: `ba8e889`; audit follow-ups `a1fe97f` and `28e741f`
 - Parent audit request updated: after integration; refresh `docs/planning/closeout/step-08.json`, run
   `./tools/verify.sh all --require`, dispatch one replacement closeout CI run, and apply the merge-tree rule if
   `main` moves
-- Combined frozen commit: `a1fe97f`; re-audit scope is A1, A3–A9 and minors m1–m7 in addition to A2
+- Combined frozen commit: `28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e`; re-audit scope is the round-three residuals and minors
 
 ## Audit
 
 - Parent audit record: `docs/planning/audits/step-08.md`
-- Audit verdict: Fixes required (A1–A9); re-audit requested at `a1fe97f`
+- Audit verdict: Fixes required (round 3); re-audit requested at `28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e`
 - Merge commit: pending
 - Tag: pending
 - Post-merge fallback required: no
