@@ -157,7 +157,7 @@ the persisted DTO.
 
 - **Persisted in `.msl`:** compiled geometry/rules/encoding, parameterized energy/frequency values, symmetry
   contract/catalog versions, and both signatures. Step 09 returns a build-time
-  `Mocassin.Packages.Parameterizations.ParameterizedModel` wrapping `CompiledModel` + the Contracts
+  `Mocassin.Packages.Parameterization.ParameterizedModel` wrapping `CompiledModel` + the Contracts
   `ParameterizationValues`; Step 11 maps those to the data-contract §3.3 payload. The Contracts type is not
   the whole payload and does not embed the compiler's internal record.
 - **Inspection only:** stable geometry/rule IDs, expansion maps, equivalent images, input hashes, timings,

@@ -35,7 +35,10 @@ until the target MCSP or an abort condition.
   - choose an environment and relative direction uniformly over selectable **directions** (not rate-weighted).
 - Path: build the periodic-trimmed path from the direction's `JumpSequence`.
 - Rule: find the rule whose `StateCode0` matches the path's start state; none → site blocked.
-- Frequency pre-check: if `FrequencyFactor < 1 − ε` and `< U`, skip without energy work.
+- Frequency pre-check: at job initialization derive
+  `FrequencyFactor = rule.frequency_hz / job.max_attempt_frequency_hz` (when the job cap is `null`, use the
+  maximum of the model's absolute `frequency_hz` values); if `FrequencyFactor < 1 − ε` and `< U`, skip
+  without energy work. The factor is a derived job value, not a model payload field.
 - Energies: S0/S1/S2, field terms; `P_raw = exp(−b01)`, `P_norm = P_raw * K_norm`.
 - Outcomes:
   - `b10_noField ≤ 0` → end-unstable (count, histogram, advance time, no state change);
@@ -119,9 +122,10 @@ impl KmcEngine<'_> {
 
 ### 4. Frequency pre-check
 
-- If `rule.frequency_factor < 1 − 1e-12`:
+- Build `frequency_factor = rule.frequency_hz / max_attempt_frequency_hz` once at job initialization (the
+  denominator is the job's configured cap or the model maximum). If `frequency_factor < 1 − 1e-12`:
   - draw `u = rng.next_f64()`;
-  - if `u > rule.frequency_factor`, increment skip and time, and return `Skipped` without energy work.
+  - if `u > frequency_factor`, increment skip and time, and return `Skipped` without energy work.
 - The pre-check uses one RNG draw and must occur before any energy computation, matching the original.
 - The pre-check is optional (`UseFrequencyPrecheck`); disabling it changes trajectory but not the long-time
   distribution. Default: enabled. The `Deterministic` job flag disables it so the RNG stream does not depend on

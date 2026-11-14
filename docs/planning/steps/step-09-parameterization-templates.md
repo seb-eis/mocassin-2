@@ -16,7 +16,7 @@ completeness checks.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for review at `1ee5a2a3f5b6e34b44a1881e46390700e962f6b3`
+- **Design review:** Not requested
 - **Last updated:** —
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -89,19 +89,32 @@ shared `EnergyId`, sparse defaults, computed descriptors, and the `PRM` diagnost
 - Any change to `Mocassin.Compilation` beyond making its canonical projection writer reusable (§6). The
   compiler stays parameterization-free.
 
-**Sizing and split check.** Roadmap §3.1 estimates Step 09 at 1–3 person-weeks. Seven features are proposed,
-including the documentation/closeout feature. The signature/manifest finalization, compiled-bound diagnostics,
-site-energy background, and golden/rebase fixtures make the honest estimate **3–4 person-weeks**, above the
-roadmap midpoint but below the four-week split trigger; the feature count is within 6–8. No roadmap split is
-proposed: the features form one coherent template/apply/rebase contract, and a split would insert a new step
-into the Step 09–12 dependency chain. If the first three features exceed 2 person-weeks, stop and ask the owner
-to re-open the estimate; if the total exceeds four weeks, split before continuing.
+**Sizing and split check.** Roadmap §3.1 estimates Step 09 at 1–3 person-weeks. The seven feature estimates in
+§12 sum to **17–22 days, i.e. 3.4–4.4 person-weeks at five days/week**. The upper bound exceeds the §3.1
+four-week split trigger; the lower bound does not. The feature count is within 6–8. This design therefore records
+the honest range rather than claiming it is below the trigger:
+
+- **Split option (owner decision required before step start).**
+  - **09A — template and values:** features 1–4 (records/persistence/contract, signature, factory/summary,
+    apply/defaults/site energies). Roughly 11–13 days; produces a buildable default/explicit parameterization.
+  - **09B — validation and exchange:** features 5–7 (diagnostics, diff/rebase, golden/docs/closeout). Roughly
+    6–9 days; depends on 09A.
+  - This would add a roadmap step and change the Step 09–12 dependency chain, so it requires the human owner's
+    decision and a roadmap update; it is not applied by this design.
+- **Single-step option:** keep the seven features and accept the 4.4 pw upper bound, with the first three
+  features required to finish within 2 person-weeks or the owner re-opens the split decision.
+- **Either way:** if the first three features exceed 2 person-weeks, stop; if the elapsed total reaches four
+  weeks before feature 7, split the remaining work into a new step rather than compressing the audit.
+
+The human owner must choose the split or the single-step risk before implementation starts.
 
 **Licensing, status, and audit.** No new third-party code, data, or dependency is introduced; the step uses
 the existing MIT source and committed sample projects, and copies no original MOCASSIN source or database
 content. This design change does not edit `status.md`; the implementor sets the step `In progress` at step
 start. The closeout feature records the feature log, parity, documentation, `./tools/verify.sh all --require`,
-the closeout CI run, and requests the independent audit; no audit record is created now.
+the closeout CI run, `docs/planning/closeout/step-09.json` (checked by
+`python tools/check_closeout_evidence.py`), and requests the independent audit; no audit record is created
+now.
 
 ### 2. Dependency boundary and ownership
 
@@ -120,7 +133,7 @@ Step 09 must not reverse that direction or add a parameterization edge to `Mocas
 | Project persistence and canonical JSON | `Mocassin.Core.Project` + `Mocassin.Packages.Projects` | `ProjectJson`/`ProjectCanonicalizer` stay the single serializer; `ProjectStore` stays the atomic file owner. |
 | Structural template validation (`PRM004`, `PRM005`, `PRM010`, `PRM013`, `PRM014`) | `Mocassin.Core.Project.ProjectValidator` | It needs only the project graph, must run for every editor mutation and load, and must not depend on a compiled model. |
 | Applied value DTO and signature projection | `Mocassin.Contracts.Parameterization` | `ParameterizationValues` is the persisted value section and must be shared with Step 11; Contracts already references Compilation. |
-| Factory, service, compiled-bound validation, diff/rebase, summaries, `ParameterizedModel` | `Mocassin.Packages.Parameterizations` | They consume `Project` + `CompiledModel`, apply metadata, and return diagnostics; Packages already references Core, Compilation, and Contracts. |
+| Factory, service, compiled-bound validation, diff/rebase, summaries, `ParameterizedModel` | `Mocassin.Packages.Parameterization` | They consume `Project` + `CompiledModel`, apply metadata, and return diagnostics; Packages already references Core, Compilation, and Contracts. |
 | Parameterization diagnostics catalog | `Mocassin.Core.Diagnostics` (codes and descriptors), emitted from Core and Packages | One `PRM` family, one catalog entry, one documentation anchor; Core owns the stable code registry and the docs-drift test. |
 | Compiled parameterization values | Not in `Mocassin.Compilation` | The compiler emits zero pair/cluster energies and the default `1e13 Hz`; values are applied after compilation. |
 
@@ -128,7 +141,9 @@ Boundary rules:
 
 - `Mocassin.Compilation` gains no template, value, site-energy, or diagnostics dependency. It already exposes
   every identity and default Step 09 needs (`EnergyId`, `ClusterEnergyId`, `RuleGeometryId`, `FrequencyHz`,
-  table values, position masks, site stability).
+  table values, position masks, site stability). The only Compilation change is making
+  `CanonicalProjectionWriter`/`Quantize` public for Contracts reuse; this is an API visibility change
+  (PublicAPI/ApiCompat evidence), not parameterization semantics or a dependency edge.
 - `Mocassin.Contracts` may reference `Mocassin.Compilation`; it must not reference `Mocassin.Packages` or
   `Mocassin.Results`. `ParameterizationValues` contains no compiled-model type, so the persisted value section
   stays a plain contract DTO.
@@ -138,7 +153,7 @@ Boundary rules:
   compact display descriptors, and values; it does not duplicate the compiled tables.
 - Code layout follows `docs/development/code-structure.md`: Core value records in concept files under
   `Mocassin.Core/Model/` and editor operations in `Mocassin.Core/Editing/`;
-  `Mocassin.Contracts/Parameterization/`; and `Mocassin.Packages/Parameterizations/`. No forbidden folder
+  `Mocassin.Contracts/Parameterization/`; and `Mocassin.Packages/Parameterization/`. No forbidden folder
   names, no catch-all helper folder, and no namespace baseline change.
 
 **Actual Step 08 boundary correction.** The implemented `CompiledEnergyModel` contains pair geometries, pair
@@ -159,9 +174,11 @@ avoids reopening the completed Step 08 and keeps the authored site energies in t
   may target the same compiled model.
 - `ParameterizationId` is the existing Core typed UUIDv7. It is assigned when a template is created, never
   derived from the model, and preserved by rebase so build templates keep working. A copy gets a new ID.
-- Canonical JSON sorts `parameterizations` by `Id.Value` (already implemented). Within a template, the record
-  constructor sorts sets and entries by their stable keys and normalizes `-0.0` to `+0.0`, so authoring order
-  cannot change the document hash.
+- Canonical JSON sorts `parameterizations` by `Id.Value` (already implemented). Within a template,
+  `ProjectJson`/`ProjectCanonicalizer` **write-time normalization** sorts sets/entries by their stable keys and
+  normalizes `-0.0` to `+0.0`. The record constructor may apply the same normalization as a convenience, but
+  the authoritative guarantee is the serializer: `with`-based editor operations cannot bypass it. The canonical
+  document hash therefore depends only on semantic content, not authoring order or signed zero.
 - Template names are labels, not references. They are compared case-insensitively; a duplicate is `PRM010`
   warning. Empty names remain the existing `PROJ020` error.
 - There is no template-level `formatVersion` in v1. The template shape is part of the project `schemaVersion`.
@@ -169,8 +186,9 @@ avoids reopening the completed Step 08 and keeps the authored site energies in t
   fields and no sample or fixture populates one), so `schemaVersion` stays `1` and no migration is needed.
   After the first release, any semantic template change bumps `schemaVersion` and adds a pure migration in
   `Mocassin.Core.Project.ProjectMigrations`. Never reinterpret an existing field.
-- A future standalone template export/import is a Step 26 UI convenience over the same JSON object; if it
-  becomes a separate on-disk contract, it needs its own version and an ADR. It is not introduced here.
+- Step 26's JSON exchange uses a valid `.mocprj` **project fragment** containing only the selected
+  `parameterizations` entries; it reuses the project schema/template shape and introduces no separate format,
+  version, or ADR. A future standalone template format would need its own manifest entry and ADR.
 
 #### 3.2 Record shape
 
@@ -213,7 +231,7 @@ public sealed record PairEnergySet(
 public sealed record PairEnergyEntry(
     ParticleId CenterParticleId,
     ParticleId PartnerParticleId,
-    EnergyEv Energy);
+    [property: JsonPropertyName("energyEv")] EnergyEv Energy);
 
 public sealed record GroupEnergySet(
     string ClusterEnergyId,
@@ -223,12 +241,12 @@ public sealed record GroupEnergySet(
 
 public sealed record GroupEnergyEntry(
     ImmutableArray<ParticleId> OccupationParticleIds,
-    EnergyEv Energy);
+    [property: JsonPropertyName("energyEv")] EnergyEv Energy);
 
 public sealed record SiteEnergyOverride(
     CellSiteId SiteId,
     ParticleId ParticleId,
-    EnergyEv Energy);
+    [property: JsonPropertyName("energyEv")] EnergyEv Energy);
 
 public sealed record TransitionRuleSet(
     TransitionKind TransitionKind,
@@ -237,9 +255,17 @@ public sealed record TransitionRuleSet(
 
 public sealed record RuleFrequencyEntry(
     string RuleGeometryId,
-    FrequencyHz Frequency);
+    [property: JsonPropertyName("frequencyHz")] FrequencyHz Frequency);
+
+public static class ParameterizationTemplateDefaults
+{
+    // In-memory only; the reserved empty ParameterizationId is rejected for persisted templates.
+    public static ParameterizationTemplate CreateDefault(string modelSignature);
+}
 ```
 
+- The Core concept file imports `System.Text.Json.Serialization` for the `JsonPropertyName` and
+  `UtcDateTimeOffsetJsonConverter` attributes.
 - The `PairEnergySet` descriptor is display/rebase metadata, not identity. The identity is `EnergyId`. For a
   reciprocal chiral table, the descriptor comes from the direction whose `GeometryId` equals the shared
   `EnergyId` (the lexicographically smaller direction); the inverse direction is represented by the same set
@@ -258,6 +284,9 @@ public sealed record RuleFrequencyEntry(
   the typed API. Range and positivity rules are still validated for JSON and programmatic input.
 - `CreatedUtc` keeps the existing `UtcDateTimeOffsetJsonConverter` annotation from the Step 01 stub; it is
   normalized to UTC `Z` by the project serializer and excluded from the parameterization signature.
+- The JSON names `energyEv` and `frequencyHz` are pinned with `[property: JsonPropertyName(...)]`, matching
+  the data contract, fixtures, and generated schema; the existing `SiteEnergyEntry` uses the same pattern.
+  Renaming the properties or omitting the attributes would silently emit `energy`/`frequency`.
 
 #### 3.3 Sparse values and defaults
 
@@ -379,11 +408,33 @@ The persisted JSON shape is:
   authored text.
 - Unknown properties are rejected by the existing `JsonUnmappedMemberHandling.Disallow` policy.
 - A missing value array loads as empty. The Step 01 stub is readable; no legacy template format is imported.
-- The `ParameterizationTemplate` constructor normalizes order and signed zero but does **not** throw for
-  out-of-range or malformed user values; `ProjectValidator` reports them as `PRM` diagnostics. This keeps a bad
-  template loadable so the user can fix it, instead of turning it into an opaque `PROJ002`.
+- The serializer normalizes order/signed zero at write time (and the record constructor may do the same); it
+  does **not** throw for out-of-range or malformed user values. `ProjectValidator` reports those as `PRM`
+  diagnostics, so a bad template stays loadable and editable instead of becoming an opaque `PROJ002`. Tests
+  construct templates through `with` with shuffled arrays and `-0.0` and assert the canonical bytes/hash.
 
-#### 3.6 Bindings to the implemented Step 08 model
+#### 3.6 Project-format contract work
+
+The extended template is a project-format change, not only a C# record change. Feature 1 owns all of it:
+
+- Update `contracts/manifest.json` `formats.project.fields.parameterizations.itemFields` to list
+  `stablePairSets`, `unstablePairSets`, `groupSets`, `siteEnergyOverrides`, and `transitionRuleSets` with their
+  nested item fields and `itemAdditionalProperties: false`, matching §3.2/§3.5. The project `schemaVersion`
+  stays `1` because this is the pre-release additive extension; after release the same change would require a
+  schema bump and migration.
+- Regenerate `contracts/generated/schema/project-v1.schema.json` and the other generated artifacts with
+  `python tools/contracts/generate.py`; never hand-edit them. The generated schema must accept the new fields
+  and keep rejecting unknown properties.
+- Add the template-bearing project fixtures (`samples/parameterizations/ceria-parameters.mocprj` and
+  `samples/parameterizations/barium-zirconate-parameters.mocprj`, plus any `tests/contracts/` variants) to the
+  hardcoded `ProjectSchemaTests.fixturePaths` list, so every fixture is schema-validated.
+- Add the new Core/Contracts/Packages public types to the source-generated `ProjectJsonContext` where they are
+  persisted.
+- Run `./tools/verify.sh contracts` (manifest/schema current, project schema tests) and
+  `./tools/verify.sh dotnet` in feature 1. A manifest/schema/fixture change that is not regenerated or listed
+  is a gate failure, not a follow-up.
+
+#### 3.7 Bindings to the implemented Step 08 model
 
 | Template data | Implemented source |
 | --- | --- |
@@ -398,11 +449,15 @@ The persisted JSON shape is:
 | Allowed particle slot | `CompiledPosition.AllowedParticleMask` for any position owned by the reference site; void is excluded |
 | Site-energy background | `Project.Model.SiteEnergies` (`SiteEnergySet`/`SiteEnergyEntry`) mapped through the compiled sites and positions |
 
-#### 3.7 Editing operations
+#### 3.8 Editing operations
 
-- `ProjectEditor.AddParameterizationTemplate`, `UpdateParameterizationTemplate`, and
-  `RemoveParameterizationTemplate` are pure project mutations validated through the existing
-  `ProjectValidator`; they return `ProjectEditResult` like the other editors.
+- The implemented `ProjectEditor` has no parameterization methods today. **Feature 1 adds** these pure project
+  mutations, validated through the existing `ProjectValidator` and returning `ProjectEditResult`:
+  `AddParameterizationTemplate(Project, ParameterizationTemplate)`,
+  `UpdateParameterizationTemplate(Project, ParameterizationTemplate)`, and
+  `RemoveParameterizationTemplate(Project, ParameterizationId)`.
+- These are additive to `ProjectEditor.Energy.cs`-style partial files; no existing editor method signature
+  changes.
 - `Mocassin.Core.Editing.ParameterizationTemplateEditor` (concept file `ParameterizationTemplates.cs`) owns
   pure template-level operations: `Rename`, `SetPairEnergy`, `ClearPairEnergy`, `SetGroupEnergy`,
   `ClearGroupEnergy`, `SetRuleFrequency`, `ClearRuleFrequency`, `SetSiteEnergyOverride`,
@@ -430,14 +485,19 @@ public sealed record TemplateCreationResult(
 public sealed class ParameterizationFactory(TimeProvider? timeProvider = null)
 {
     public TemplateCreationResult Create(
+        Project project,
         CompiledModel model,
         ParameterizationTemplateOptions options);
 }
 ```
 
-- The factory is pure, synchronous, and does not require a `Project`. It assigns a UUIDv7 (or the supplied ID),
-  uses `TimeProvider.GetUtcNow()` (or the supplied timestamp), records `model.ModelSignature`, and creates the
-  set headers (§3.3) with empty entries. Rule-set headers are kinetic only.
+- The factory is pure and synchronous. It takes the same `Project` snapshot that produced `CompiledModel`
+  because the site-energy background and site slots are project data; this also makes its summary identical to
+  `ParameterizationService.Describe(project, model, null)` for the same pair. It assigns a UUIDv7 (or the
+  supplied ID), uses `TimeProvider.GetUtcNow()` (or the supplied timestamp), records `model.ModelSignature`,
+  and creates the set headers (§3.3) with empty entries. Rule-set headers are kinetic only.
+- It checks name uniqueness against `project.parameterizations` (`PRM010` warning) and reports, but does not
+  mutate, the project; `ProjectEditor.AddParameterizationTemplate` commits it.
 - It partitions pair tables into `stablePairSets`/`unstablePairSets` by the centre reference site's stability;
   every table appears exactly once. A chiral table uses the direction whose `GeometryId` equals the shared
   `EnergyId` for its descriptor. Group headers use `ClusterEnergyId`; kinetic transition headers use
@@ -449,10 +509,10 @@ public sealed class ParameterizationFactory(TimeProvider? timeProvider = null)
   are `nParticles × nParticles`, occupation/rule arrays are consistent) with `InvalidOperationException`,
   because a `CompiledModel` is compiler-owned and a violation is a programmer/contract error, not user data.
 - The returned summary reports required slots, set headers, chiral pair tables, estimated value bytes, and the
-  effective-default ranges. It is the same summary produced by `Describe` with no template.
-- Name duplication is checked by `ProjectValidator` when the template is added to a project (`PRM010`), not by
-  the model-only factory. The factory does not mutate the project; `ProjectEditor.AddParameterizationTemplate`
-  commits it.
+  effective site-background/default ranges. Because it receives the same `Project` + `CompiledModel` pair, it is
+  the same summary produced by `Describe(project, model, null)`; `ProjectValidator` re-checks the name and
+  structural limits when the template is added.
+- The factory does not mutate the project; `ProjectEditor.AddParameterizationTemplate` commits the template.
 
 ### 5. Applying a template
 
@@ -480,14 +540,14 @@ public interface IParameterizationService
     ParameterizationResult Apply(
         Project project,
         CompiledModel model,
-        ParameterizationTemplate template,
+        ParameterizationTemplate? template = null,
         ParameterizationOptions? options = null,
         CancellationToken cancellationToken = default);
 
     ImmutableArray<Diagnostic> Validate(
         Project project,
         CompiledModel model,
-        ParameterizationTemplate template,
+        ParameterizationTemplate? template = null,
         ParameterizationOptions? options = null,
         CancellationToken cancellationToken = default);
 
@@ -500,7 +560,7 @@ public interface IParameterizationService
     ParameterizationDiff Diff(
         Project project,
         CompiledModel model,
-        ParameterizationTemplate template,
+        ParameterizationTemplate? template = null,
         CancellationToken cancellationToken = default);
 
     ParameterizationRebaseResult Rebase(
@@ -512,14 +572,15 @@ public interface IParameterizationService
 }
 ```
 
-`ParameterizedModel` lives in `Mocassin.Packages.Parameterizations`. It is the build-time composition consumed
+`ParameterizedModel` lives in `Mocassin.Packages.Parameterization`. It is the build-time composition consumed
 by Step 10 and mapped by Step 11; it is **not** the persisted payload DTO. The full `.msl` payload is assembled
 by Step 11 from `CompiledModel` + `ParameterizationValues` (see §6 and the data contract §3.3).
 
-`Validate` is a non-allocating preflight: it checks the model signature, IDs, descriptor consistency, ranges,
-limits, and completeness, but does not build dense applied tables or compute the signature. `Apply` performs
-the full build and repeats the checks defensively. Step 12 can therefore call `Validate` after compilation and
-then `Apply` without paying for a second full table allocation.
+`Validate` is a preflight with no dense applied tables and no signature computation: it checks the model
+signature, IDs, descriptor consistency, ranges, limits, and completeness, but it still builds lookup maps and
+diagnostics. It returns diagnostics only; it does **not** return a `ParameterizationDiff` (that is on
+`ParameterizationResult` for `Apply`). `Apply` performs the full build and repeats the checks defensively, so
+Step 12 can call `Validate` after compilation and then `Apply` without a second full table allocation.
 
 ```csharp
 public sealed record ParameterizationOptions
@@ -532,8 +593,8 @@ public sealed record ParameterizationOptions
 
 public sealed record ParameterizationQualityOptions
 {
-    public double MinimumPlausibleFrequencyHz { get; init; } = 1e-3;
-    public double MaximumPlausibleFrequencyHz { get; init; } = 1e18;
+    public FrequencyHz MinimumPlausibleFrequency { get; init; } = new(1e-3);
+    public FrequencyHz MaximumPlausibleFrequency { get; init; } = new(1e18);
     public int IdenticalValueMinimumCount { get; init; } = 20;
     public double IdenticalValueShareThreshold { get; init; } = 0.90;
     public static ParameterizationQualityOptions Default { get; } = new();
@@ -543,12 +604,16 @@ public sealed record ParameterizationQualityOptions
 `Apply` requires the same `Project` snapshot that produced `CompiledModel`, because the site-energy background
 comes from the project. The compiled model does not persist a project/document hash, so the service cannot
 verify the pairing; Step 12's build pipeline passes the pair, and the GUI/tests pass real project/model pairs.
-A mismatched project is a caller/programmer error, not user data; site IDs that do not exist in the compiled
-model are reported/ignored rather than silently applied.
+A mismatched pair is a **caller contract violation**, not a user-data path; the service does not silently
+apply a partial background. A stale authored site-energy entry that does not map to the compiled model is
+reported as `PRM008` **Warning** and ignored (the rest of the project/model pair is still usable); a structural
+mismatch that changes the model signature is `PRM001` Error and no model is produced. This keeps programmer
+misuse (nulls, wrong types) separate from stale project data (warnings).
 
 `Apply` algorithm:
 
-1. Reject a null/invalid template with programmer exceptions; validate user data through diagnostics.
+1. A null template selects the implicit default (§5.1); a non-null template is validated as user data through
+   diagnostics. Null `project`/`model` and other programmer misuse throw; a bad template does not.
 2. Compare `template.ModelSignature` with `model.ModelSignature`. On mismatch, return `PRM001` with the
    `ParameterizationDiff` summary, `Model = null`, and no partially applied result. Never rebase implicitly.
 3. Build lookup maps: `EnergyId` → pair table index, `ClusterEnergyId` → cluster table index,
@@ -570,7 +635,7 @@ model are reported/ignored rather than silently applied.
 7. Quantize every applied value to 12 decimal places with round-half-away-from-zero on the binary64 product
    and normalize `-0.0` to `+0.0`. The quantized values are what `ParameterizationValues` stores and what
    Step 11 persists, so re-encoding the payload reproduces the signature exactly.
-8. Compute `Signature = ParameterizationSignature.Compute(model.ModelSignature, values)`.
+8. Compute `Signature = ParameterizationSignatureV1.Compute(model.ModelSignature, values)`.
 9. Return `ParameterizedModel` plus the summary and diagnostics. `Apply` never mutates the project, compiled
    model, or template.
 
@@ -578,8 +643,12 @@ Defaulting and warning rules:
 
 - Missing pair/cluster values default to `0 eV`; missing rule frequencies default to the compiled
   `CompiledJumpRule.FrequencyHz` (currently `1e13 Hz`); missing site overrides use the authored background.
-- `PRM003` warns once with counts when required pair/group/rule slots are unset.
-- `PRM006` warns when no explicit value differs from its default.
+- For an explicit template, `PRM003` warns once with counts when required pair/group/kinetic-rule slots are
+  unset, and `PRM006` warns when the template has **no explicit entries at all** (`HasExplicitValues = false`).
+  An explicit `0 eV` or explicit `1e13 Hz` is an explicit entry and suppresses `PRM006`; it does not suppress
+  `PRM003` for other unset slots.
+- The implicit default template (§5.1) reports `HasExplicitValues = false` but suppresses both `PRM003` and
+  `PRM006`: there is no user-authored template to warn about.
 - A build may proceed with warnings; `--warnings-as-errors`/`WarningsAsErrors` can promote them in Step 12.
 - Signature mismatch is the only condition that makes the parameterization unusable. Resource-limit errors
   also fail the apply; warnings do not.
@@ -597,8 +666,9 @@ Site-energy background (owned by Step 09 because Step 08 does not compile it):
 - Missing authored entries stay `0 eV`. The table is dense `[position][particle]` row-major, matching the
   `.msl` `energy.defect_background` field and Step 15's per-position background consumption.
 - An authored site-energy entry whose site or particle does not map to the compiled model is reported once
-  (`PRM008`) and ignored; this indicates a mismatched project/model pair or a template built against another
-  project, and it must not silently shift the background.
+  (`PRM008`, Warning) and ignored; this is stale project data (or a mismatched project/model pair), and it
+  must not silently shift the background. A structural mismatch that changes the model signature is
+  `PRM001` Error and produces no model.
 - Overrides replace the background for the named `(site, particle)` everywhere; removing an override restores
   the authored value. The editor exposes "reset to model" as removal, not as writing the old value.
 - Step 15 consumes the resulting table unchanged; Step 09 does not change solver semantics, field signs, or
@@ -608,11 +678,45 @@ Step 10/11/12 consumption:
 
 - Step 10 receives `ParameterizedModel` as the model half of job expansion; it does not inspect template JSON.
 - Step 11 writes `models.signature` = `ParameterizedModel.Signature`, the payload `model_signature` =
-  `CompiledModel.ModelSignature`, the applied pair/cluster/site values, and the applied rule frequencies. It
-  computes the `.msl` `frequency_factor` from those absolute values; Step 08's default is not a second runtime
-  source.
+  `CompiledModel.ModelSignature`, the applied pair/cluster/site values, and each rule's **absolute**
+  `frequency_hz`. It does not write a relative factor; Step 16 derives any per-job factor from
+  `frequency_hz` and the job's `max_attempt_frequency_hz`. Step 11 `verify` and Step 13 re-encode the
+  parameterization projection from these stored absolute values exactly.
 - Step 12 calls `Apply` after `IModelCompiler.Compile` and maps a failure to build error exit `4`. It passes the
-  resulting `ParameterizedModel` to Step 10/11.
+  resulting `ParameterizedModel` to Step 10/11. When the project has no selected template (for example
+  `parameterizations: []`), Step 12 uses the implicit default template; see §5.1.
+
+#### 5.1 Implicit default build
+
+Samples such as `samples/ceria/ceria.mocprj`, `samples/simulations/ceria-kmc.mocprj`, and
+`samples/barium-zirconate/barium-zirconate.mocprj` have `parameterizations: []`. They must remain buildable.
+
+- `ParameterizationTemplateDefaults.CreateDefault(string modelSignature)` returns an in-memory template with the
+  reserved empty `ParameterizationId`, name `"Default parameters"`, `CreatedUtc = DateTimeOffset.UnixEpoch`,
+  the current `ModelSignature`, and no set headers or values. It is never persisted; `ProjectValidator`
+  rejects a persisted template with the empty/reserved ID as `PRM014`.
+- `Apply`, `Validate`, and `Diff` accept a nullable template. `null` means the implicit default: all pair and
+  group values are `0 eV`, all kinetic rule frequencies are the compiled `1e13 Hz`, all MMC rules keep their
+  compiled default, and the site-energy background is the authored `model.siteEnergies` table.
+- The default summary reports all required slots unset and `HasExplicitValues = false`, but the implicit
+  default **suppresses `PRM003` and `PRM006`**: there is no user-authored template to warn about. It still
+  applies `PRM004`/`PRM005`/`PRM008`/`PRM013`/`PRM014` and `PRM016` to the effective values (which are
+  defaults) and emits no `PRM001`.
+- An **explicit** template with no entries is user data: it emits `PRM003` and `PRM006`. This distinguishes
+  "the project intentionally has no template" from "the user created a template but has not parameterized it".
+- Step 12 selection: a build template or `--parameterization` selects an explicit template; with exactly one
+  project template, that template is used; with none, the implicit default is used; with multiple and no
+  selection, Step 12 reports an explicit selection error listing the IDs. Step 11's ceria acceptance and
+  Step 12's `mocassin build samples/ceria` acceptance therefore pass with the default path.
+- The default build is still parameterized in the package sense: the parameterization signature covers the
+  default values and the authored site-energy background, so its `.msl` model row is distinct from a
+  differently valued build of the same geometry.
+- `Describe(null)` returns the default summary. `Diff(null)` is a display-only description with every required
+  slot in `Added` and nothing in `Removed`; `Rebase` still requires an explicit template because there is no
+  user template to rebase.
+- Tests cover: default build of ceria/ceria-kmc/BaZrO3; default summary all-default; no `PRM003`/`PRM006` for
+  null; explicit empty template emits both; a persisted template with the reserved ID is `PRM014`;
+  `--parameterization`/template selection overrides the default.
 
 ### 6. Parameterization signature
 
@@ -630,7 +734,7 @@ Do not assert record equality for `ParameterizationTemplate` or `Parameterizatio
 `ImmutableArray<T>` equality is reference-based. Tests compare canonical JSON bytes, array contents, and
 signatures instead.
 
-`ParameterizationSignature` is a static class in `Mocassin.Contracts.Parameterization` with the domain constant
+`ParameterizationSignatureV1` is a static class in `Mocassin.Contracts.Parameterization` with the domain constant
 and `Compute(string modelSignature, ParameterizationValues values)`.
 
 ```text
@@ -658,8 +762,9 @@ ParameterizedModel.Signature
 - `groupSets` is in ascending `CompiledClusterTable.Index`; values are in `Occupations` order.
 - `siteEnergies` is the dense `[position][particle]` background in ascending `P`, row-major, with particle `0`
   (void) at the start of each row.
-- `transitionRules` is in ascending compiled `CompiledJumpRule.Index`; the value is the effective absolute
-  frequency in hertz.
+- `transitionRules` is in ascending `CompiledJumpRule.Index`; the value is the effective absolute frequency
+  in hertz, persisted by Step 11 as `jump_rules[].frequency_hz`. This is what makes the projection exactly
+  reproducible from the `.msl` payload; no relative factor or job maximum is signed.
 - No stable IDs are projected. `modelSignature` cryptographically binds the table/rule order and geometry; the
   values are meaningful only inside that model. This also lets Rust re-encode the projection from the `.msl`
   payload, which does not persist `RuleGeometryId` (those IDs are inspection-only).
@@ -683,7 +788,7 @@ ParameterizedModel.Signature
   Compilation. No `Mocassin.Compilation` type gains parameterization semantics. Every new public type in Core,
   Contracts, and Packages updates its `PublicAPI.Unshipped.txt` and ApiCompat baseline; the
   `./tools/verify.sh api` gate must pass.
-- `ParameterizationSignature.Compute` writes through an `IncrementalHash`-backed `IBufferWriter<byte>`, so it
+- `ParameterizationSignatureV1.Compute` writes through an `IncrementalHash`-backed `IBufferWriter<byte>`, so it
   does not materialize a second full projection of large tables. `ComputeProjection` (to an
   `ArrayBufferWriter<byte>`) remains for the golden `.bin` fixtures and diagnostics.
 - `CanonicalProjectionWriter.Quantize` is public (with XML docs) so `Apply` quantizes stored values with the
@@ -705,8 +810,9 @@ ParameterizedModel.Signature
   signature; runtime settings are job-expansion inputs.
 - `.msl models.signature` and `.mcs metadata.modelSignature` are the **parameterization** signature;
   `.msl payload model_signature` remains the Step 08 compiled-model signature.
-- Step 11 persists exactly the quantized `ParameterizationValues`; Step 13's Rust reader re-encodes the same
-  six-field projection from the decoded payload and compares it with the stored parameterization signature.
+- Step 11 persists exactly the quantized `ParameterizationValues`, including each rule's absolute
+  `frequency_hz`; Step 13's Rust reader re-encodes the same six-field projection from the decoded payload and
+  compares it with the stored parameterization signature. There is no factor × maximum reconstruction.
   Cross-language reproduction is part of Step 11/13 acceptance; Step 09 supplies the C# encoder, golden
   projection bytes, and Python re-encoding check.
 
@@ -721,7 +827,7 @@ Owner: “Step 09 — parameterization templates”. Codes are stable API.
 | `PRM001` | Error | Packages `Apply`/`Validate` | Template model signature does not match the compiled model. |
 | `PRM002` | Warning | Packages | Template references an unknown pair/group/rule ID, or a stored descriptor disagrees with the current model for the same ID. The model wins; the entry is ignored. |
 | `PRM003` | Warning | Packages | Required pair/group/kinetic-rule slots are unset; defaults are applied. One diagnostic per template with counts. |
-| `PRM004` | Error | Core and Packages | Energy is non-finite or outside `-100..100 eV`. |
+| `PRM004` | Error | Core and Packages | Energy is non-finite or outside `EnergyLimits.MinEnergy.Value..EnergyLimits.MaxEnergy.Value` (`-100..100 eV`). |
 | `PRM005` | Error | Core and Packages | Frequency is non-positive or non-finite. |
 | `PRM006` | Warning | Packages | No explicit value differs from its default; the template may be unparameterized. |
 | `PRM007` | Reserved | — | Retired. Chiral partners share one `EnergyId`; independent A→B/B→A values are unrepresentable. The code is not registered and never emitted. |
@@ -742,8 +848,10 @@ Owner: “Step 09 — parameterization templates”. Codes are stable API.
 - `ParameterizationDiagnosticCatalog` in `Mocassin.Core.Diagnostics` registers every non-retired `PRM`
   descriptor and is composed into `CoreDiagnosticCatalog`, so `DiagnosticCatalog.Default` already includes the
   family. The docs-drift test requires every registered code in `docs/reference/diagnostics.md`; Step 09 adds
-  the anchors and rows. `PRM007` is documented as retired but is not a catalog row; the implementation does
-  not declare a `PRM007` constant, so the Core catalog test's "every declared code is registered" rule holds.
+  the anchors and rows for registered codes only. `PRM007` is retired, is not a catalog row, is not declared
+  as a constant, and **must not appear as a token in `docs/reference/diagnostics.md`**: the test collects every
+  `[A-Z]{3,4}\d{3}` token and requires exact set equality with the catalog. Its retirement is recorded only in
+  this planning page, the data contract, and the design decisions.
 - Paths use `ModelPath("parameterization", template.Id.Value, property)`. Set-level properties are
   `stablePairSets`, `unstablePairSets`, `groupSets`, `siteEnergyOverrides`, `transitionRuleSets`, `name`, or
   `modelSignature`. Entry-level properties identify the stable key, for example
@@ -751,8 +859,9 @@ Owner: “Step 09 — parameterization templates”. Codes are stable API.
   `groupSets/{clusterEnergyId}/entries/{occupation}/energyEv`,
   `transitionRuleSets/{kind}/{transitionId}/{ruleGeometryId}/frequencyHz`, or
   `siteEnergyOverrides/{siteId}/{particleId}/energyEv`. Messages carry the counts and IDs needed to act.
-- `PRM001` carries the `ParameterizationDiff` in the result; the diagnostic message summarizes added/removed/
-  matched counts and names the first few IDs. `PRM009` carries the rebase counts.
+- `Apply` returns the `ParameterizationDiff` in `ParameterizationResult` when `PRM001` fires; `Validate` returns
+  diagnostics only and puts the mismatch summary in the `PRM001` message (no diff object). `PRM009` carries the
+  rebase counts in its message and the `ParameterizationRebaseResult.Report`.
 
 #### 7.2 Build-stage integration and CLI ownership
 
@@ -801,17 +910,24 @@ public enum ParameterizationValueKind
     SiteEnergyOverride = 4,
 }
 
-public sealed record ParameterizationDiffEntry(
+public sealed record ParameterizationValueKey(
     ParameterizationValueKind Kind,
-    string Key,
-    string? SecondaryKey,
+    string? SetId,                 // EnergyId, ClusterEnergyId, or rule-set transition ID
+    TransitionKind? TransitionKind,
+    Guid? TransitionId,
+    string? EntryId,               // canonical entry key; see below
+    CellSiteId? SiteId,
+    ParticleId? ParticleId);
+
+public sealed record ParameterizationDiffEntry(
+    ParameterizationValueKey Key,
     double? TemplateValue,
     string? Descriptor);
 
 public sealed record ParameterizationGeometryChange(
     ParameterizationValueKind Kind,
-    string RemovedKey,
-    string AddedKey,
+    ParameterizationValueKey RemovedKey,
+    ParameterizationValueKey AddedKey,
     string Reason);
 
 public sealed record ParameterizationDiff(
@@ -837,10 +953,15 @@ public sealed record ParameterizationRebaseResult(
     ImmutableArray<Diagnostic> Diagnostics);
 ```
 
-In a `ParameterizationDiffEntry`, `Key` is the set/transition identity and `SecondaryKey` is the entry identity
-(the particle pair, occupation tuple, or rule geometry ID). For a site override, `Key` is the site ID and
-`SecondaryKey` is the particle ID. `Descriptor` is a short human-readable geometry/occupation summary when the
-current model can supply one.
+`ParameterizationValueKey` is structured so kind, set, and entry never collide. For a pair/group entry
+`SetId` is the `EnergyId`/`ClusterEnergyId` and `EntryId` is the canonical entry key: pair
+`"{centerParticleId:D}/{partnerParticleId:D}"`, group the comma-joined occupation particle IDs in site order.
+For a rule entry `SetId`/`TransitionKind`/`TransitionId` identify the set and `EntryId` is `RuleGeometryId`.
+For a site override `SiteId`/`ParticleId` are set and the other fields are null. `TemplateValue` is a
+display-only union: eV for pair/group/site kinds and Hz for `RuleFrequency`, selected by `Key.Kind`; it is not
+an API unit boundary, while typed model/API values use `EnergyEv`/`FrequencyHz`. `Descriptor` is a short
+geometry/occupation summary when the current model can supply one. Tests compare keys by record equality; no
+delimiter parsing is used.
 
 `ParameterizationDiff` compares the template to the current compiled model by stable identity:
 
@@ -858,14 +979,15 @@ Strategies:
 - **`KeepMatching` (default).** Copy values only for exact stable-ID matches. New slots default; removed
   entries are dropped; site overrides are kept only when `(siteId, particleId)` still exists in the model.
   This is the safe default for a model signature change caused by catalog/contract versions where IDs survive.
-- **`NearestGeometry` (opt-in).** Same as `KeepMatching`, then for removed **pair** and **group** entries look
-  for a unique added slot with the same logical descriptor and acceptable distance:
+- **`NearestGeometry` (opt-in).** Same as `KeepMatching`, then for removed **pair** entries look for a unique
+  added slot with the same logical descriptor and acceptable bucket distance:
   - pair: same unordered `{centerSiteId, partnerSiteId}` and `IsChiral`, and
     `|sourceBucket - targetBucket| <= NearestDistanceToleranceFm` (the template stores `distanceBucketFm`, so
     no raw distance is needed); if more than one candidate matches, copy nothing and report
     `AmbiguousMatches`;
-  - group: same `ClusterId` and center site ID, and the same canonical occupation tuple; unique only;
-  - rules and site overrides: exact-ID matches only; no nearest copying.
+  - groups, rules, and site overrides: exact-ID matches only; no nearest copying. A changed group geometry
+    (new `ClusterEnergyId`) defaults rather than copying because the template stores no offset/geometry hash
+    that could justify a nearest match.
   Every copied value appears in `DescriptorMatches` and in the report. A changed chiral link never matches
   across the break: the old shared ID is dropped and both new slots default.
 - **`Reset`.** Return a template with the same ID and name, the new model signature, the new set headers, and
@@ -887,7 +1009,7 @@ Guarantees:
 
 ### 9. Completeness and quality
 
-`ParameterizationSummary` is a build-time record in `Mocassin.Packages.Parameterizations` with these metrics:
+`ParameterizationSummary` is a build-time record in `Mocassin.Packages.Parameterization` with these metrics:
 
 - stable/unstable pair table counts, admissible pair slot count, explicitly set pair value count;
 - group table count, group slot count (sum of canonical occupation counts), set group value count;
@@ -899,14 +1021,14 @@ Guarantees:
 - effective energy min/max, effective frequency min/median/max;
 - estimated applied-value bytes;
 - identical-value share and non-parameterizable (MMC) rule-set count;
-- `AllValuesDefault`.
+- `HasExplicitValues` (whether the template has at least one explicit entry; explicit defaults count).
 
 Warnings and thresholds:
 
 | Signal | Diagnostic | Threshold |
 | --- | --- | --- |
 | Required values unset | `PRM003` Warning | `UnsetValueCount > 0`; one summary diagnostic |
-| No explicit non-default value | `PRM006` Warning | `AllValuesDefault` |
+| No explicit template entries | `PRM006` Warning | `HasExplicitValues == false` for an explicit template; suppressed for the implicit default |
 | Frequency outside plausible band | `PRM016` Warning | `< 1e-3` or `> 1e18 Hz`, but `> 0` |
 | Metropolis rule set present | `PRM011` Warning | any Metropolis `TransitionRuleSet`; ignored, MMC default remains |
 | Suspiciously uniform values | `PRM015` Warning | `>= 20` explicit pair/group values and `>= 90 %` identical non-default value |
@@ -945,7 +1067,7 @@ The project file is already bounded by `ProjectStoreOptions.MaxDocumentBytes` (6
 | --- | ---: | --- |
 | Templates per project | 256 | `PRM013` |
 | Pair sets per template | 100,000 | `PRM013` |
-| Pair entries per set | 4,096 (63² = 3,969 fits) | `PRM013` |
+| Pair entries per set | 4,096 table cells (64 compiled particles including void = 64²; the template stores at most 63² = 3,969 non-void entries) | `PRM013` |
 | Group sets per template | 100,000 | `PRM013` |
 | Group entries per set | 1,000,000 | `PRM013` |
 | Site overrides per template | 1,000,000 | `PRM013` |
@@ -999,23 +1121,26 @@ compiler, compiler tables, project store, or domain objects.
 | Creating a template from the ceria compiled model produces exactly the expected sets/rules | Compile `samples/ceria/ceria.mocprj` and `samples/simulations/ceria-kmc.mocprj`; assert `Create` headers equal the compiled pair/cluster tables and kinetic transition collections by ID, and `Describe` kinetic rule counts equal the compiled kinetic `CompiledJumpRule` count. No magic counts: identity/count equality against the compiled model. |
 | Applying the template to the same model succeeds and yields the same compiled values | Apply an empty template to ceria and ceria-kmc; assert pair/group values are `0`, frequencies are the compiled default, site background equals the authored `SiteEnergies`, and the golden signature matches. Then apply a fully populated checked-in template and compare every table/rule/site value with the fixture arrays. |
 | A changed model produces a signature mismatch with a useful diff | Compile ceria, edit a site coordinate (or a cell parameter) through `ProjectEditor`, recompile, apply the old template; assert `PRM001`, `Model == null`, and the diff lists the changed/removed/added IDs. |
-| Rebase copies unchanged values, defaults new ones, and reports removed ones | `KeepMatching` test with an exact-ID subset; assert copied/defaulted/dropped counts, `PRM009`, and that every copied value has an exact source ID. `NearestGeometry` test with a unique descriptor match and an ambiguous pair; assert the ambiguous case copies nothing. `Reset` test asserts no values and the new signature. |
-| Chiral partners share one `EnergyId` and one value; independent A→B/B→A values are unrepresentable | Compile a real chiral model (P4mm/P1 fixture with a stable environment; the Symmetry P1 chiral fixture is the oracle), assert one pair table for both directions, one template entry, a symmetric table (`table[X][Y] == table[Y][X]`), and no public API/JSON field for a direction-specific value. A mirrored duplicate with a different value is rejected. Break the chiral link and assert the value is dropped, not reused. |
-| Site energy overrides apply and can be reset | Ceria authored site energies; set an override, assert every owned position changes; remove it, assert the authored value returns; invalid site/particle produces `PRM008` and leaves the background unchanged. |
-| Missing/zero values produce warnings, not silent success | Empty/partial templates produce `PRM003`/`PRM006`; zero explicit values do not trigger `PRM006` if they are intentional; `WarningsAsErrors` promotion is Step 12's policy test. |
+| Rebase copies unchanged values, defaults new ones, and reports removed ones | `KeepMatching` test with an exact-ID subset; assert copied/defaulted/dropped counts, `PRM009`, and that every copied value has an exact source ID. `NearestGeometry` test with a unique pair descriptor match and an ambiguous pair; assert the ambiguous case copies nothing. A changed group `ClusterEnergyId` must default, not copy (no nearest group path). `Reset` test asserts no values and the new signature. |
+| Chiral partners share one `EnergyId` and one value; independent A→B/B→A values are unrepresentable | Compile the real `samples/barium-zirconate/barium-zirconate.mocprj` model (the Step 05/08 oracle has 24 reciprocal chiral pairs) and assert the compiled chiral geometry count is 24, one pair table per shared `EnergyId`, one template entry, a symmetric table (`table[X][Y] == table[Y][X]`), and no public API/JSON field for a direction-specific value. A mirrored duplicate with a different value is rejected. For the link-change case, use a generated P1/P4mm project fixture (checked into `tests/contracts/` and added to the golden list) because no shipped sample breaks the chiral link. |
+| Site energy overrides apply and can be reset | Ceria authored site energies; set an override, assert every owned position changes; remove it, assert the authored value returns; invalid override or stale authored background target produces `PRM008` Warning and leaves other background values unchanged. |
+| Missing/zero values produce warnings, not silent success | An explicit empty template produces `PRM003`/`PRM006`; an explicit `0 eV` entry suppresses `PRM006` but not `PRM003` for other unset slots; the implicit default build emits neither; `--warnings-as-errors` promotion is Step 12's policy test. |
 | Template JSON is canonical and round-trips | Project JSON round-trip, shuffled authoring order, `-0.0`, comma-decimal culture, unknown-field rejection, additive missing arrays, and canonical document-hash stability. |
 | Documentation written | `./tools/verify.sh docs --require` plus the docs-drift diagnostic test. |
 
 #### 11.2 Test inventory
 
 - **Core/contracts:** `ParameterizationTemplateTests` (normalization, ordering, `-0.0`, default arrays,
-  canonical JSON, limits), `ParameterizationTemplateJsonTests` (round-trip, unknown fields, additive fields),
-  `ParameterizationDiagnosticTests` (every `PRM` constant registered exactly once, documented, severity/path).
-- **Contracts:** `ParameterizationSignatureTests` (golden vectors, quantization, domain separation, values-only,
+  canonical JSON, limits, `with`-bypass write-time canonicalization), `ParameterizationTemplateJsonTests`
+  (round-trip, unknown fields, additive fields), `ParameterizationDiagnosticTests` (every `PRM` constant
+  registered exactly once, documented, severity/path), and the extended `ProjectSchemaTests` fixture list
+  covering the new `samples/parameterizations/*.mocprj` files and regenerated project schema.
+- **Contracts:** `ParameterizationSignatureV1Tests` (golden vectors, quantization, domain separation, values-only,
   same effective values ⇒ same signature, culture independence), `ParameterizationProjectionFixtureTests`
   (C# projection bytes equal `tests/contracts/projections/parameterization-*.bin`).
 - **Packages:** `ParameterizationFactoryTests`, `ParameterizationSummaryTests`, `ParameterizationApplyTests`
   (defaults, overrides, chiral, forbidden particles, quantization, signature), `ParameterizationValidationTests`
+  (`Validate` returns `PRM001` without a diff; `Apply` returns the diff for the same mismatch),
   (every compiled-bound `PRM` code with a real model), `ParameterizationDiffTests`,
   `ParameterizationRebaseTests` (all strategies, report, no silent reuse), `ParameterizationSiteEnergyTests`,
   `ParameterizationPerformanceTests`, and a property test for sparse/dense equivalence.
@@ -1023,14 +1148,23 @@ compiler, compiler tables, project store, or domain objects.
   exact/reported descriptors; apply never mutates; signature is invariant under template entry order and
   culture; random valid templates never throw and never exceed configured allocations.
 - **Golden fixtures:**
-  - `tests/contracts/projections/parameterization-ceria.bin/.json`
-  - `tests/contracts/projections/parameterization-ceria-kmc.bin/.json`
-  - `tests/contracts/projections/parameterization-barium-zirconate.bin/.json`
+  - `tests/contracts/projections/parameterization/parameterization-ceria.bin/.json`
+  - `tests/contracts/projections/parameterization/parameterization-ceria-kmc.bin/.json`
+  - `tests/contracts/projections/parameterization/parameterization-barium-zirconate.bin/.json`
+  - `tests/contracts/projections/parameterization/parameterization-chiral-p1.bin/.json` (generated P1/P4mm
+    link-change fixture; also a project fixture under `tests/contracts/`)
   - `samples/parameterizations/ceria-parameters.mocprj` and
     `samples/parameterizations/barium-zirconate-parameters.mocprj` (project fixtures containing a populated
     `parameterizations` array; no standalone template file is introduced).
-  - `tests/contracts/signature-vectors.json` entries for each parameterization vector.
-- **Freshness:** golden projections are generated by the real `ParameterizationSignature` over the real
+  - `tests/contracts/signature-vectors.json` parameterization entries generated from
+    `contracts/manifest.json` `fixtures.signatureVectors.vectors` by `tools/contracts/generate.py`; never
+    hand-edited.
+- **Checker wiring:** parameterization `.bin` fixtures live in the `projections/parameterization/`
+  subdirectory so the model checker's `projections/*.bin` glob never consumes them. A new
+  `tools/contracts/check_parameterization_projection.py` reads the subdirectory and the generated
+  `parameterization-v1.json` descriptor; `tools/verify.sh contracts` runs the model checker, the
+  parameterization checker, and `generate.py --check`.
+- **Freshness:** golden projections are generated by the real `ParameterizationSignatureV1` over the real
   compiled model and checked by `tools/contracts/check_parameterization_projection.py`; the generated
   descriptor is checked by `tools/contracts/generate.py --check`. A changed model, values, or projection
   without regenerated fixtures fails `verify.sh contracts`.
@@ -1047,16 +1181,17 @@ compiler, compiler tables, project store, or domain objects.
 
 | # | Feature | Scope | Depends on | Tests | Docs |
 | ---: | --- | --- | --- | --- | --- |
-| 1 | `template-model-and-persistence` | Extend `ParameterizationTemplate`; add pair/group/rule/site value records, `ParameterizationLimits`, normalization/canonicalization, `ProjectJson` round-trip, `ProjectEditor`/`ParameterizationTemplateEditor` operations, structural `PRM004/005/010/013/014` in Core. | 08 | Core JSON/canonical/limits/editor/validation tests; new template fixtures. | Data contract §2.3, project-format handoff note, design decisions. |
-| 2 | `parameterization-signature` | `ParameterizationValues` and `ParameterizationSignatureV1` in Contracts; public canonical writer; finalize `signatures.parameterization`; generated descriptor; golden `.bin`/`.json` vectors; Python checker; `verify.sh contracts` wiring. | 1 | Signature vectors, projection fixtures, culture/quantization tests. | Data contract §1.3/§3.3, compilation-pipeline signature section, diagnostics note. |
+| 1 | `template-model-and-persistence` | Extend `ParameterizationTemplate`; add pair/group/rule/site value records, `ParameterizationLimits`, write-time normalization/canonicalization, `ProjectJson` round-trip, `ProjectEditor`/`ParameterizationTemplateEditor` operations, structural `PRM004/005/010/013/014` in Core; update `contracts/manifest.json` project fields, regenerate the schema, add fixtures and `ProjectSchemaTests.fixturePaths`. | 08 | Core JSON/canonical/limits/editor/validation tests; project schema/fixture tests; `verify.sh contracts`. | Data contract §2.3, project-format schema handoff, design decisions. |
+| 2 | `parameterization-signature` | `ParameterizationValues` and `ParameterizationSignatureV1` in Contracts; public canonical writer; finalize `signatures.parameterization`; generated descriptor; golden `.bin`/`.json` vectors under `projections/parameterization/`; add parameterization vectors to the manifest fixture section and regenerate `signature-vectors.json`; new Python checker and `verify.sh contracts` wiring. | 1 | Signature vectors, projection fixtures, culture/quantization tests; checker/model-glob isolation. | Data contract §1.3/§3.3, compilation-pipeline signature section, diagnostics note. |
 | 3 | `factory-and-summary` | `ParameterizationFactory.Create`, `Describe`, set headers, required-slot counts, chiral/quality metrics, `ParameterizationSummary`, sparse/dense equivalence property. | 1, 2 | Factory/summary tests on ceria, ceria-kmc, BaZrO₃. | User-guide parameterization draft (creation/summary). |
 | 4 | `apply-and-site-energies` | `IParameterizationService`/`ParameterizationService.Apply`, defaults, quantization, site-energy background, overrides, `ParameterizedModel`, signature computation. | 2, 3 | Apply/default/override/golden tests. | User-guide parameterization (apply/reset), design decisions (site background). |
 | 5 | `validation-and-diagnostics` | Full `PRM` catalog/descriptors, compiled-bound `Validate`, `PRM001/002/003/006/008/011/012/015/016`, paths, docs anchors, Step 12 integration contract. | 4 | Per-code emission tests; catalog/docs drift; stale-template test. | Diagnostics reference rows, troubleshooting stale/incomplete template, Step 12 note. |
 | 6 | `diff-and-rebase` | `ParameterizationDiff`, `Rebase` strategies/report, chiral/link-change handling, ambiguity rules, `PRM009`; property tests. | 4 | Diff/rebase/property/no-silent-reuse tests. | User-guide rebase, troubleshooting. |
-| 7 | `golden-templates-docs-and-closeout` | Checked-in ceria/BaZrO₃ templates and golden parameterized values/signatures; benchmarks; user-guide/reference/development/troubleshooting pages; nav; parity matrix; step status/closeout feature log. | 1–6 | Full `verify.sh all` at closeout; docs gate; benchmark run. | All named pages; parity; step page. |
+| 7 | `golden-templates-docs-and-closeout` | Checked-in ceria/BaZrO₃ templates and golden parameterized values/signatures; benchmarks; user-guide/reference/development/troubleshooting pages; nav; parity matrix; step status/closeout feature log; `docs/planning/closeout/step-09.json`. | 1–6 | Full `verify.sh all` at closeout; docs gate; `check_closeout_evidence.py`; benchmark run. | All named pages; parity; step page; closeout evidence. |
 
 - Estimated effort: feature 1 3–4 days, 2 3 days, 3 2 days, 4 3–4 days, 5 2–3 days, 6 2–3 days, 7 2–3 days;
-  roughly 3–4 person-weeks in total (design, tests, and docs included).
+  **17–22 days = 3.4–4.4 person-weeks** (design, tests, and docs included). The upper bound exceeds the
+  four-week split trigger; see §1 for the recorded 09A/09B split option and the owner decision.
 - Feature 1 is the contract foundation; no later feature starts until its JSON/canonical tests pass.
 - Features 2 and 3 can overlap only after feature 1; feature 4 needs both. Features 5 and 6 can run in
   parallel after feature 4. Feature 7 is last and includes the documentation/closeout work.
@@ -1071,7 +1206,9 @@ Published pages and content (written in features 3–7, not by this design chang
   diff/rebase report, and the warning/error semantics.
 - `docs/reference/project-format.md` — the extended `parameterizations` shape, stable IDs, canonical ordering,
   versioning, limits, and the `PRM` diagnostics link.
-- `docs/reference/diagnostics.md` — `PRM001`–`PRM016` rows/anchors, `PRM007` retired note.
+- `docs/reference/diagnostics.md` — rows/anchors for every registered `PRM` code (all of `PRM001`–`PRM016`
+  except retired `PRM007`); do **not** add a `PRM007` token to this page because the docs-drift test requires
+  exact set equality with the catalog.
 - `docs/development/compilation-pipeline.md` — parameterization stage, signature projection, values-only
   relationship to the model signature, and the Step 11/12 boundary.
 - `docs/development/design-decisions.md` — template persistence/sparsity, site-energy background ownership,
@@ -1141,7 +1278,8 @@ At this point, document parameterization:
 - `docs/user-guide/parameterization.md` — template creation, sparse values/defaults, energies, frequencies,
   shared chiral sets, site overrides/reset, diff/rebase.
 - `docs/reference/project-format.md` — template fields, stable IDs, canonical order, versioning, limits.
-- `docs/reference/diagnostics.md` — `PRM` rows and the retired `PRM007` note.
+- `docs/reference/diagnostics.md` — registered `PRM` rows only; no `PRM007` token (the docs-drift test
+  compares the page's code tokens exactly with the catalog).
 - `docs/development/compilation-pipeline.md` — signature/rebase flow, defaults, completeness, Step 11/12
   boundary.
 - `docs/development/design-decisions.md` — persistence/sparsity, site background, validation/CLI boundaries,

@@ -71,6 +71,18 @@ pub struct ParameterizedModel {
     pub simulations: Vec<SimulationModel>,
 }
 
+pub struct JumpRule {
+    pub rule_id: RuleId,
+    pub collection_id: JumpCollectionId,
+    pub state0: StateCode,
+    pub state1: StateCode,
+    pub state2: StateCode,
+    pub frequency_hz: f64,          // absolute Step 09 value; signed
+    pub charge_transport_vector: [f64; 3],
+    pub static_correction: Option<[f64; 3]>,
+    pub tracker_order: [u8; 8],
+}
+
 pub struct JobPackage {
     pub job_id: u32,
     pub kind: SimulationKind,
@@ -110,7 +122,9 @@ impl Package {
 - Read `schema_info`; require `format_version` in the supported range and `application_id` match.
 - Query `jobs` by id; join `models` and `lattices`; decode Zstd+MessagePack.
 - Verify:
-  - payload signatures match the stored `signature` by re-encoding the ADR 0010 canonical projection;
+  - payload signatures match the stored `signature` by re-encoding the ADR 0010 canonical projection; the
+    parameterization projection uses `model_signature`, the pair/group/site tables, and the absolute
+    `jump_rules[].frequency_hz` values read directly from the payload (never a factor × maximum);
   - `lattice.len() == a*b*c*position_count`;
   - every particle index < particle count;
   - every position index < position count;

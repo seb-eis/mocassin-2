@@ -108,7 +108,8 @@ projection is a fixed six-field MessagePack array:
 - Every float is quantized to 12 decimals (round half away from zero) and `-0.0` normalizes to `+0.0`.
 - `contracts/manifest.json` `signatures.parameterization` is finalized by Step 09 (`status: final`, typed
   fields, `projectionType: ParameterizationSignatureV1`); the generated descriptor and
-  `tests/contracts/projections/parameterization-*.bin` vectors are checked by `verify.sh contracts`.
+  `tests/contracts/projections/parameterization/*.bin` vectors (a subdirectory, so the model checker's
+  `projections/*.bin` glob does not consume them) are checked by `verify.sh contracts`.
 
 The two signatures are deliberately distinct; see §3.3.
 
@@ -654,11 +655,17 @@ target the same compiled model.
 - **Canonical order.** `parameterizations` sorts by `id`. Within a template: pair sets sort by `energyId`,
   pair entries by `(centerParticleId, partnerParticleId)`, group sets by `clusterEnergyId`, group entries by
   the `occupationParticleIds` sequence in site order, site overrides by `(siteId, particleId)`, rule sets by
-  `(transitionKind, transitionId)`, and rule entries by `ruleGeometryId`. Values format invariantly and
-  `-0.0` normalizes to `0.0`.
+  `(transitionKind, transitionId)`, and rule entries by `ruleGeometryId`. The canonicalizer applies this at
+  write time (record construction may also normalize for convenience); `with`-based edits cannot bypass it.
+  Values format invariantly and `-0.0` normalizes to `0.0`.
 - **Limits.** `ParameterizationLimits` caps templates per project, sets and entries per template, name and
   stable-ID lengths, and total explicit entries. A violation is `PRM013`/`PRM014`; the project file cap still
   applies. The exact values are in the Step 09 page.
+- **Manifest and schema.** The project-format descriptor in `contracts/manifest.json`
+  (`formats.project.fields.parameterizations.itemFields`) and the generated
+  `contracts/generated/schema/project-v1.schema.json` are updated in the same Step 09 feature as the record
+  shape. The generator is run, the new template-bearing fixtures are added to `ProjectSchemaTests.fixturePaths`,
+  and `verify.sh contracts` is a gate. The manifest remains the single source; no hand-edited schema.
 - **Validation.** Structural checks (`PRM004`, `PRM005`, `PRM010`, `PRM013`, `PRM014`) run in Core
   `ProjectValidator` on load, save, and edit. Compiled-bound checks (`PRM001`–`PRM003`, `PRM006`, `PRM008`,
   `PRM009`, `PRM011`, `PRM012`, `PRM015`, `PRM016`) run in `Mocassin.Packages` after compilation. `PRM007` is
@@ -837,7 +844,7 @@ MessagePack map with snake_case keys. Top-level:
   added with the Step 11 writer and Step 08 signature feature.
 - The payload is the parameterized form. Step 08's internal `CompiledModel` is not the persisted DTO; Step 11
   maps `CompiledModel` + the Contracts `ParameterizationValues` to this payload. The build-time
-  `ParameterizedModel` used by Steps 10–11 lives in `Mocassin.Packages.Parameterizations` and wraps
+  `ParameterizedModel` used by Steps 10–11 lives in `Mocassin.Packages.Parameterization` and wraps
   `CompiledModel`, `ParameterizationValues`, and the parameterization signature; it is not the persisted DTO.
   Stable geometry/rule ID strings, expansion maps, equivalent images, input hashes, timings, diagnostics,
   cache statistics, derived classification flags, and the index→ID map are JSON-inspection only
@@ -914,7 +921,7 @@ MessagePack map with snake_case keys. Top-level:
 | --- | --- | --- |
 | `jump_collections` | array | `{object_id, kind, transition_id, mobile_particle_mask:u64, rule_ids:[u32], direction_ids:[u32]}` |
 | `jump_directions` | array | `{object_id, position_id, collection_id, path:[i32;4], movement:[[f64;3]], path_vector:[f64;3], length, is_inverse}` |
-| `jump_rules` | array | `{rule_id, collection_id, state0:u64, state1:u64, state2:u64, frequency_factor, charge_transport_vector:[f64;3], static_correction, tracker_order:[u8;8]}` |
+| `jump_rules` | array | `{rule_id, collection_id, state0:u64, state1:u64, state2:u64, frequency_hz:f64, charge_transport_vector:[f64;3], static_correction, tracker_order:[u8;8]}` |
 | `jump_count` | array | `[position][particle] -> u32` |
 | `jump_mapping` | array | `[position][particle][relative] -> direction index` |
 | `static_tracker_mapping` | array | `[position][particle] -> tracker offset` |
@@ -924,9 +931,11 @@ MessagePack map with snake_case keys. Top-level:
   representative direction; stable rule geometry IDs are inspection-only and are not persisted.
 - `state0`/`state1`/`state2` use 6 bits per path node, node 0 least significant, unused high bits zero. For
   MMC, `state1` is `0` and is ignored.
-- Step 09 applies an absolute frequency per rule (defaulting missing entries to the compiled `1e13 Hz`);
-  `frequency_factor` is that Step 09 value relative to the simulation/job maximum. Step 08's internal default
-  frequency is not a second runtime source.
+- Step 09 applies an absolute frequency per rule (defaulting missing entries to the compiled `1e13 Hz`).
+  Step 11 writes that absolute value as `frequency_hz`; it is the authoritative model value and is part of
+  the parameterization signature. Step 16 derives any per-job normalization or pre-check factor from
+  `frequency_hz` and the job's `max_attempt_frequency_hz`; the factor is not persisted in the model payload
+  and is not part of the model signature. Step 08's internal default is not a second runtime source.
 - `movement` is the authoritative fractional displacement per path node. `path_vector` is the Cartesian net
   displacement, obtained by converting each movement with the cell geometry and summing; `length` is its
   magnitude. `charge_transport_vector` is the particle-identity sum
@@ -974,7 +983,7 @@ Exact array lengths and invariants are validated by `mocassin-msl` before the so
 | `electric_field_vm` | f64 | |
 | `electric_field_direction` | `[f64;3]` | Normalized Cartesian direction |
 | `normalization_energy_ev` | f64? | `null` = no normalization; `0.0` canonicalizes to `null` |
-| `max_attempt_frequency_hz` | f64? | `null` = maximum from the transition rules |
+| `max_attempt_frequency_hz` | f64? | Job-level maximum used for normalization/pre-check factor derivation; `null` = maximum of the model's absolute `jump_rules.frequency_hz` values. It does not replace or rescale the persisted model frequencies. |
 | `break_tolerance` | f64? | MMC only; 0 disables the break check |
 | `break_sample_length_mcsp` | u64? | MMC only |
 | `break_sample_interval_mcsp` | u64? | MMC only |

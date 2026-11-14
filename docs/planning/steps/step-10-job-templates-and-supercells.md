@@ -26,6 +26,11 @@ Turn one parameterized model into a reproducible set of simulation jobs and init
 able to define a parameter sweep, preview the effective settings and doping counts, and get identical
 lattices for the same seed.
 
+The model input is the Step 09 build-time `Mocassin.Packages.Parameterization.ParameterizedModel`
+(`CompiledModel` + applied `ParameterizationValues` + parameterization signature), not project JSON. Job and
+lattice payloads exclude parameterization values; the lattice request hash deliberately does not depend on
+them, so changing energies or frequencies does not change a lattice for the same job coordinates.
+
 ## Original reference
 
 - `ProjectJobSetTemplate` contains KMC and MMC job package descriptions.

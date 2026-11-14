@@ -356,23 +356,30 @@ solver with the same binary, platform, package, and seed.
 - **Sparse/default equivalence:** applying a sparse template and applying an equivalent template with explicit
   default values produce identical `ParameterizationValues` and parameterization signatures. Missing pair and
   group values are `0 eV`; missing rule frequencies are the compiled default; missing site overrides use the
-  authored background.
-- **Chiral:** a chiral pair has one table, one value, and no direction-specific API or JSON field; breaking the
-  chiral link drops the old value and defaults both new slots.
+  authored background. The implicit default path (a project with `parameterizations: []`) builds ceria,
+  ceria-kmc, and barium zirconate with all defaults, reports `HasExplicitValues = false`, and emits neither
+  `PRM003` nor `PRM006`; an explicit empty template emits both.
+- **Chiral:** the real barium-zirconate model (24 reciprocal chiral pairs) has one table and one value per
+  shared `EnergyId`, a symmetric particle table, and no direction-specific API or JSON field; a generated
+  P1/P4mm fixture covers breaking the chiral link and asserts the old value is dropped, not reused.
 - **Site energies:** the applied `[position][particle]` background equals the authored `siteEnergies` mapped
   through compiled site ownership; overrides replace every owned position and removal restores the authored
   value; invalid targets warn and do not alter the table. Step 15's site-energy/barrier test consumes the same
   table.
 - **Signature:** the six-field values-only projection is deterministic; same effective values from different
   templates produce the same digest; a value-only change changes the parameterization signature but not the
-  model signature; a geometry/rules/catalog change changes both; the checked-in `.bin` vector is re-encoded by
-  the Python checker and, from Step 13 on, by Rust.
+  model signature; a geometry/rules/catalog change changes both. The `.msl` model payload stores each rule's
+  absolute `frequency_hz`, so the checked-in `.bin` vector is re-encoded exactly by the Python checker and,
+  from Step 13 on, by Rust without a factor × maximum reconstruction.
 - **Rebase:** `KeepMatching` copies only exact IDs; `NearestGeometry` copies only unique, reported descriptor
   matches and never across a changed chiral link; ambiguous matches copy nothing; `Reset` copies nothing; every
   strategy emits the report.
 - **Diagnostics:** every non-retired `PRM` code has a descriptor, documentation anchor, and an emission test
   with severity, `ModelPath`, and hint; structural codes are visible in `validate`, compiled-bound codes in the
   post-compile call; `PRM007` is not registered.
+- **Project format:** the generated `project-v1.schema.json` accepts the extended template fields and rejects
+  unknown ones; the `ProjectSchemaTests` fixture list includes the new `samples/parameterizations/*.mocprj`
+  files; `tools/contracts/generate.py --check` and `verify.sh contracts` pass.
 - **Limits and safety:** oversized counts, strings, and applied tables fail with `PRM013` before allocation;
   arbitrary structurally valid template JSON produces diagnostics rather than an uncaught exception.
 - **Performance:** ceria create `< 20 ms`, apply + signature `< 50 ms`, and the synthetic 1,000-position case

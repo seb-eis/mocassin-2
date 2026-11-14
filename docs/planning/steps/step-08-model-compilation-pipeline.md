@@ -407,7 +407,9 @@ For each direction, enumerate the state-change combinations from the chain group
   direction among merged identical-outcome directions. Step 09 derives its template rule-set identity from the
   stable transition/state/direction inputs, not from the dense index.
 - **Frequency.** Every rule carries `DefaultFrequencyHz = 1e13`. Step 09 replaces it with the parameterized
-  value; Step 11 writes the final `frequency_factor` relative to the job/simulation maximum.
+  absolute value; Step 11 writes it as the model payload's `frequency_hz`. Step 16 derives any per-job
+  normalization/pre-check factor from `frequency_hz` and the job's `max_attempt_frequency_hz`; the factor is
+  not a model payload field.
 - **Charge transport vector.** The compiler computes `rule.ChargeTransportVector` from the
   charge-weighted Cartesian movement along the path (see §8.4). Static S2 corrections are deferred: v1 stores
   `null`/NaN and uses Step 15's dynamic S2 path.
@@ -507,7 +509,9 @@ public sealed record CompiledModel(
 - `CompiledParticleTable`: symbols, charges, vacancy flags, count; index 0 is void.
 - `CompiledStructureModel`: cell vectors, P1 positions, site table, environments, interaction range, tracker
   counts.
-- `CompiledEnergyModel`: pair tables, cluster tables, defect/site-energy background.
+- `CompiledEnergyModel`: pair tables and cluster tables. The authored site-energy background is **not**
+  compiled here; Step 09 resolves it per `[position][particle]` and Step 11 persists it (see the post-step
+  correction note).
 - `CompiledTransitionModel`: collections, directions, rules, jump count/mapping, tracker definitions and
   mappings.
 - `CompiledSimulation`: simulation ID, kind, active collection indices, runtime default settings snapshot,
@@ -531,8 +535,9 @@ metadata (Step 18).
 - Add top-level `model_signature` (Step 08 geometry/rules/encoding signature). Keep `signature` as the Step 09
   parameterization signature, which is the `models.signature` uniqueness key and the `.mcs`
   `metadata.modelSignature`.
-- Clarify `jump_rules.frequency_factor` is the parameterized value written by Step 09/11; Step 08's internal
-  default frequency is not persisted as a second runtime source.
+- Clarify `jump_rules.frequency_hz` is the absolute parameterized value written by Step 09/11; Step 08's
+  internal default frequency is not persisted as a second runtime source. Per-job normalization factors are
+  derived by the solver, not stored in the model payload.
 - Clarify `jump_directions.movement`/`path_vector`/`length` are the authoritative path movement; the
   direction stores no field scalar. `jump_rules` stores a Cartesian `charge_transport_vector`; Step 15
   computes the field energy from its dot product with the normalized field direction.
@@ -667,7 +672,7 @@ ParameterizedModel.Signature
   | --- | --- | --- |
   | Structure/particles | Structure, Environments, Pairs, Clusters, Rules, Encoding, Indexing, Signing | nothing |
   | Energy environments/clusters/filters | Environments, Pairs, Clusters, Encoding (links), Indexing, Signing | Structure, Rules |
-  | Site-energy values only | Environments, Pairs, Clusters, Encoding (links and background), Indexing (energy hash) | Structure, Rules, Signing |
+  | Site-energy values only | None in `CompiledModel` (Step 09 re-applies the background and parameterization signature) | All compiled stages/content; the energy hash may cause cache misses but not content changes |
   | Transitions/state changes/chains | Rules, Encoding, Indexing, Signing | Structure, Pairs, Clusters |
   | Simulation active-transition set changes | Rules, Encoding, Indexing, Signing | Structure, Pairs, Clusters |
   | Simulation runtime settings only | Encoding, Indexing (runtime-default snapshot) | Structure, Pairs, Clusters, Rules, Signing |

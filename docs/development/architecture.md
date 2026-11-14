@@ -155,7 +155,7 @@ maps, timings, and diagnostics are JSON-inspection only and are not persisted in
 
 Step 09's ownership follows the project graph: `Mocassin.Core` owns the project-resident template and value
 records; `Mocassin.Contracts` owns the applied `ParameterizationValues` and the values-only
-`ParameterizationSignatureV1`; `Mocassin.Packages.Parameterizations` owns the factory, apply, validation, diff,
+`ParameterizationSignatureV1`; `Mocassin.Packages.Parameterization` owns the factory, apply, validation, diff,
 and rebase and returns a build-time `ParameterizedModel`. `Mocassin.Compilation` gains no parameterization
 type or dependency. The site-energy background is resolved by Step 09 from authored `model.siteEnergies` (the
 compiler does not compile it) and is persisted by Step 11 as `energy.defect_background`.

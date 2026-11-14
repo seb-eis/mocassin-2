@@ -91,7 +91,7 @@ Flow:
 1. Create a temp file `project.msl.tmp-<pid>` in the target directory.
 2. Open SQLite, set pragmas, create schema, write `schema_info`.
 3. Compile/parameterize the model (step 08/09) once; serialize and insert the model row. Step 09 returns a
-   build-time `ParameterizedModel` (`Mocassin.Packages.Parameterizations`) wrapping `CompiledModel` + the
+   build-time `ParameterizedModel` (`Mocassin.Packages.Parameterization`) wrapping `CompiledModel` + the
    Contracts `ParameterizationValues`; Step 11 maps both to the data-contract §3.3 payload.
 4. Stream job descriptors from step 10:
    - generate the lattice (step 10);
@@ -111,7 +111,12 @@ pull-based iterator.
 - The model payload is assembled in Step 11 from the compiled geometry/rules plus the Contracts
   `ParameterizationValues` (applied pair/group/site values and rule frequencies), with the Step 09
   parameterization signature and the Step 08 `model_signature`. The payload's `energy.defect_background` is
-  the Step 09-resolved `[position][particle]` table.
+  the Step 09-resolved `[position][particle]` table, and `transitions.jump_rules[].frequency_hz` is the Step 09
+  applied **absolute** frequency. No relative `frequency_factor` is stored in the model payload; the solver
+  derives per-job factors from `frequency_hz` and the job's `max_attempt_frequency_hz`.
+- `verify` re-encodes the complete `ParameterizationSignatureV1` projection from the decoded payload
+  (`model_signature`, pair/group/site tables, and absolute rule frequencies) and compares it with
+  `models.signature`; the frequency values are read directly, never reconstructed from a factor × maximum.
 - The lattice payload is `{format_version, lattice_size, position_count, lattice}`.
 - The job payload is the full `JobDescriptor`/settings (including optimizers) plus the model/simulation index.
   Its `flags` word is a `SolverJobFlags` value in `Mocassin.Contracts` carrying the authored flags plus the
@@ -207,9 +212,12 @@ If the package exceeds a configurable size, the builder warns and suggests:
 
 ## Acceptance criteria
 
-- [ ] A package built from the ceria sample opens in SQLite and contains the expected tables/rows.
+- [ ] A package built from the ceria sample with `parameterizations: []` uses the implicit default
+      parameterization, opens in SQLite, and contains the expected tables/rows.
 - [ ] A published package opens read-only with no `-wal`/`-shm` files and has no results table.
 - [ ] Every job references a valid model and lattice; signatures verify.
+- [ ] `verify` re-encodes the parameterization signature from the payload's absolute `frequency_hz` values
+      exactly; no factor × maximum reconstruction is used.
 - [ ] Package metadata contains `symmetry_contract_version`, `space_group_data_version`, and
   `space_group_data_sha256`.
 - [ ] Rebuilding the same project produces identical model/lattice signatures; stored compressed bytes may
