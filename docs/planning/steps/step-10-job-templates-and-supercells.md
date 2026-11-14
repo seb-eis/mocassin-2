@@ -301,6 +301,10 @@ public sealed record DopingApplication(
 ```
 
 - `EffectiveFraction = AvailablePrimary == 0 ? 0.0 : AppliedPrimary / (double)AvailablePrimary`.
+- `IsChargeNeutral = |TotalChargeAfter| <= ChargeNeutralityToleranceElementary × max(1, TotalPositions)` with the
+  named `1e-6` tolerance. This predicate describes the **absolute final** lattice; a non-neutral base lattice
+  can therefore set it false without any diagnostic. `JOB016` requires both `hasUncompensatedCharge` and
+  `IsChargeNeutral == false`.
 - The full `DopingReport` is build-time/preview data, not a package field. The package stores the compact
   `DopingInfo` summary, which is sufficient to reconstruct the displayed counts but not the per-site state.
   The GUI shows the full report from the same preview/build service.
@@ -628,7 +632,8 @@ exception is needed.
 - [ ] Changing a simulation-only setting does not change the lattice for the same job.
 - [ ] A same-site sequential doping applies to the particles remaining after earlier dopings.
 - [ ] A non-compensated charged lattice (including a mixed compensated/non-compensated config) is permitted
-  with `JOB016`; an unrealizable/unbalanced compensated pair is `JOB012`.
+  with `JOB016` when `IsChargeNeutral` is false; an unrealizable/unbalanced compensated pair is `JOB012`.
+  `IsChargeNeutral` uses `1e-6 × max(1, total_positions)` and never fails a pre-existing base charge by itself.
 - [ ] `validate` reports structural `JOB001`–`JOB008`, the `JOB009` reference check, `JOB015`, `JOB017`,
   `JOB018`, and `JOB020` without a compiled model; `JOB009`'s removes-all check and the other compiled-bound
   codes require the build stage.
@@ -664,7 +669,7 @@ At this point, document job templates and supercells:
 | Sampling | Fisher–Yates golden vector matches; uniform without replacement; deterministic per seed | PR-medium |
 | Supercell | Default occupations, replication order, row-major index formula | PR-fast |
 | Doping | Counts, truncation, priority order, multiple dopings, same-site sequential doping | PR-medium |
-| Charge | Integer and fractional charge ratios, 1e-6 tolerance, non-compensated `JOB016`, compensated `JOB012`, pre-existing non-neutral base reports only | PR-medium |
+| Charge | Integer and fractional charge ratios, 1e-6 tolerance; `JOB016` only with an applied uncompensated charged doping; compensated `JOB012`; a pre-existing non-neutral base sets `IsChargeNeutral=false` with no `JOB012`/`JOB016` | PR-medium |
 | Doping report | Available/requested/applied counts, `EffectiveFraction`, `DopingInfo` round-trip, no-doping vs zero-applied | PR-fast |
 | Doping property | Random dopings keep applied counts within available bounds and stay deterministic per seed | PR-medium |
 | Sampling property | Random valid requests never exceed candidates; determinism holds across repeated runs | PR-medium |
@@ -696,5 +701,6 @@ At this point, document job templates and supercells:
 
 ## Done when
 
-A job template can be expanded into deterministic job descriptors and valid, charge-neutral supercells, with
-a report that explains every applied doping count.
+A job template can be expanded into deterministic job descriptors and valid supercells, with a report that
+explains every applied doping count and charge: compensated pairs are balanced, non-compensated charge is
+warned, and a pre-existing base charge is reported without being misclassified as a doping failure.
