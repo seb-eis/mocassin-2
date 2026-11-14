@@ -30,7 +30,7 @@ Versions are candidate pins as of **2026-11-03**. Keep the image pins and the pr
 
 | Tool | Status | Needed for | Notes |
 | --- | --- | --- | --- |
-| Node 22 / npm, OpenCode CLI | Present | Tooling only | Not a MOCASSIN runtime dependency. |
+| Node 26 / npm, OpenCode CLI | Present | Tooling only | Version follows `opencode:base`; not a MOCASSIN runtime dependency. |
 | git, git-lfs, curl, ca-certificates | Present | Steps 00+ | Repository and downloads. |
 | sqlite3, zstd | Present | Steps 11, 18, 20 | Package/state inspection. |
 | jq, rg, fd, tree, file, unzip/zip, xxd | Present | Steps 00+ | General inspection and scripts. |
