@@ -6,7 +6,7 @@ production build of the original project.
 
 - Original repository: `https://github.com/seb-eis/mocassin`
 - Verified commit: `876dcc9e6928e1af0dbea64c92e7e17bc6dcca70` (2022-12-13)
-- Local reference clone: `/workspace/mocassin-original` (read-only; do not modify)
+- Local reference clone: `/workspace/mocassin-original` (gitignored; read-only; do not modify or commit)
 - Work copy and outputs: outside the original clone, e.g. `/tmp/opencode/mocassin-reference`
 
 The original clone must remain untouched. All recipes copy it to a work directory first.

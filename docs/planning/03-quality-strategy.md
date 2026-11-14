@@ -316,7 +316,8 @@ Comparison method:
 - Compare distributions with a Kolmogorov–Smirnov test and an effect-size threshold.
 - Record the exact reference version, commit, compiler flags, and seeds in `tests/reference/README.md`.
 - Build the original solver/model builder using
-  [`07-reference-build.md`](07-reference-build.md); the original clone stays read-only.
+  [`07-reference-build.md`](07-reference-build.md); the gitignored `/workspace/mocassin-original` clone stays
+  read-only.
 
 Bit-exact trajectories are explicitly not required (see ADR 0005). Determinism is required only for the new
 solver with the same binary, platform, package, and seed.
