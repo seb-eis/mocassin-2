@@ -354,12 +354,15 @@ Residual risks and follow-ups:
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (Sebastian Eisele)
+Date: 2026-11-14
+
+The owner accepted the round-2 notes R2-1, R2-2, R2-3, and R2-5, and approved the merge and the `step-09` tag
+after green `main` CI.
 
 ## Audit rounds
 
