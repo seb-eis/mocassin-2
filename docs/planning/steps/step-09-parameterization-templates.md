@@ -17,7 +17,7 @@ completeness checks.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required at `53bbfd58a6038aa932d0e20bac91f757546c5f2e`
+- **Design review:** Re-review required at `b5db2892aae77954e9ae55d0bb2c66f6e8a14925`
 - **Last updated:** —
 
 ### Owner decisions (2026-11-14)
