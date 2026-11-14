@@ -241,12 +241,15 @@ Residual risks and follow-ups:
 ## Human approval
 
 - [ ] Accepted: Ready for implementation
-- [ ] Accepted: Ready with notes
+- [x] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (Sebastian Eisele)
+Date: 2026-11-14
+
+The owner also approved the design merge, the single-step 3.4–4.4 person-week exception, the M1 absolute
+`frequency_hz` decision, the M2 implicit-default decision, and the seven-feature list on 2026-11-14.
 
 ## Resolution status
 
