@@ -311,12 +311,13 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready for implementation
 
 `Ready with notes` was the round-4 verdict (2026-11-14) at
 `bb62e405f27199173cdabc256f6f6d43aa033da1`; it is not a merge authorization. Rounds 1 and 2 were
 `Changes required`, round 3 was `Ready with notes`, and R4-1/R4-2 are resolved in round 5 at
-`c5454af050ccd3f1e02f892424ccd714c5d56f89`.
+`c5454af050ccd3f1e02f892424ccd714c5d56f89`. The round-5 verdict at that commit is
+`Ready for implementation`; the human owner still approves the start.
 
 ## Reviewer independence
 
@@ -949,6 +950,154 @@ step agent owns this section.
 
 No earlier reviewer text, resolution, or checklist item was altered.
 
+## Round 5 review
+
+### Reviewer identity and scope
+
+| Field | Value |
+| --- | --- |
+| Reviewer | Independent planning auditor (round 5; fresh context; no shared conversation with the planner, implementor, step agent, or orchestrator) |
+| Review date | 2026-11-14 |
+| Branch | `docs/step-10-design` |
+| Round 4 revised design commit | `bb62e405f27199173cdabc256f6f6d43aa033da1` |
+| Round 5 revised design commit | `c5454af050ccd3f1e02f892424ccd714c5d56f89` |
+| Round 5 resolution/status commit | `95a213edf074282a87940dc5506ba60d605f3ef3` |
+| Record parent | `95a213edf074282a87940dc5506ba60d605f3ef3` |
+| Design delta reviewed | `git show --stat c5454af`: 1 file, 10 insertions, 4 deletions |
+
+> I am a fresh context for round 5. I did not author or implement the reviewed work and have no shared
+> conversation with the planner, implementor, step agent, or orchestrator. I read the repository at
+> `c5454af050ccd3f1e02f892424ccd714c5d56f89` and the resolution/status delta at
+> `95a213edf074282a87940dc5506ba60d605f3ef3` directly rather than relying on the resolution table, and I
+> edited and committed only this review record.
+
+The read-only original clone (`/workspace/mocassin-original`) is still absent from this environment. Original
+behaviour claims were checked against Step 06's design text and the current model/validator code. That is a
+review limitation, not a finding.
+
+### Evidence
+
+Files read in this round:
+
+- `AGENTS.md` §3.8–§3.9, §3.12, §8, §10–§12, and §16; `docs/planning/reviews/README.md` and the
+  design-review template; this record's request, rounds 1–4, and all four resolution sections.
+- `docs/planning/steps/step-10-job-templates-and-supercells.md` in full at `c5454af`, with particular
+  attention to §3 (generation and neutrality algorithm), §4 (`DopingReport` and the new predicate), §6
+  (`JOB012`/`JOB016` descriptors), the acceptance criteria, the test table, and "Done when"; the isolated
+  design commit `c5454af` and the complete `bb62e40..c5454af` delta; `git show --stat 95a213e`;
+  `docs/planning/status.md`.
+- `docs/planning/steps/step-06-lattice-and-simulation-models.md` lines 150–200 (compensation shape, charge
+  deltas, permitted non-compensated charged doping, and the absence of a base-neutrality invariant);
+  `docs/planning/03-quality-strategy.md` §9.4; `docs/planning/02-data-contracts.md` (the report is not a
+  package field); `docs/user-guide/lattice.md`.
+- Current code used to verify the charge semantics: `src/dotnet/Mocassin.Core/Model/Particles/Particle.cs`
+  (`ChargeElementary Charge` is authored data); `src/dotnet/Mocassin.Core/Units/UnitValues.cs`
+  (`ChargeElementary` accepts any finite value in −1000..1000, including fractional charges); and
+  `src/dotnet/Mocassin.Core/Model/Lattice/LatticeModelValidator.cs` (only compensation shape and non-zero
+  opposite-sign delta checks; no total-charge or base-neutrality check).
+
+Commands run and exact results (before this record was written):
+
+```text
+git status --short
+# no output (exit 0); branch docs/step-10-design, no untracked or modified files
+
+git rev-parse HEAD
+# 95a213edf074282a87940dc5506ba60d605f3ef3
+
+git cat-file -t c5454af050ccd3f1e02f892424ccd714c5d56f89
+# commit
+
+git diff --stat bb62e40 c5454af
+# 3 files changed, 183 insertions(+), 9 deletions(-)
+# The range also contains the round-4 resolution/status commit 708c493 and the
+# round-4 record commit 1eea88d (review record, status dashboard, Step 10 status
+# line). The isolated design revision is c5454af.
+
+git show --stat c5454af
+# 1 file changed, 10 insertions(+), 4 deletions(-)
+# docs/planning/steps/step-10-job-templates-and-supercells.md
+
+git show --stat 95a213e
+# 3 files changed, 24 insertions(+), 7 deletions(-)
+# docs/planning/reviews/step-10.md, docs/planning/status.md, Step 10 status line
+
+git rev-parse c5454af^ ; git rev-parse 95a213e^
+# 1eea88da961b17f5441f21920cef21978df6c36b
+# c5454af050ccd3f1e02f892424ccd714c5d56f89
+# c5454af is the round-5 design commit; 95a213e is the documentation-only
+# resolution/status commit directly on top of it.
+
+python tools/check_docs_links.py
+# Documentation links OK (158 files scanned). (exit 0)
+
+python tools/check_doc_math.py
+# Documentation math conventions OK (155 files scanned). (exit 0)
+
+python tools/check_process_consistency.py
+# Process consistency: OK (exit 0)
+
+./tools/verify.sh docs --require
+# git diff --check passed; docs math/links passed; Zensical (strict) "No issues found";
+# DocFX "Build succeeded. 0 warning(s) 0 error(s)"; rustdoc completed;
+# "Documentation built in /workspace/site";
+# "Closeout gate completed with required checks enabled." (exit 0)
+
+./tools/verify.sh policy --require
+# git diff --check passed; build 0 warnings/0 errors; ApiCompat passed for every project
+# ("Public API is compatible with the checked-in baseline"); contract artifacts current
+# (18 files); model projection OK (5 fixtures); parameterization projection OK (4 fixtures);
+# space-group catalog current (274 settings, sha256
+# 1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395); process
+# consistency OK; 31 contract tests OK; SPDX headers present in 470 source files;
+# no secret patterns in 817 tracked text files; advisories/bans/licenses/sources ok;
+# "Closeout gate completed with required checks enabled." (exit 0)
+```
+
+The isolated design revision is `c5454af`, which touches only the Step 10 page: it adds the `IsChargeNeutral`
+predicate in §4, qualifies the neutrality acceptance line, makes the charge test row explicit, and rewrites
+"Done when". The seed/sampler specification, dual-DOF rule, `JOB` table, ownership split, report shape, and
+cross-step interfaces are unchanged. `95a213e` touches only the review record, the status dashboard, and the
+Step 10 status line; no design, code, test, or configuration change follows `c5454af`.
+
+### Resolution verification
+
+| Finding | Round-5 status | Verification |
+| --- | --- | --- |
+| R4-1 (Minor) | **Resolved** | §4 lines 304–307 define `IsChargeNeutral = abs(TotalChargeAfter) <= ChargeNeutralityToleranceElementary * max(1, TotalPositions)`, with the named `1e-6` constant introduced in §3 line 251. The field is explicitly the **absolute final** lattice; the base charge is exposed separately as `TotalChargeBefore`. `JOB016` now requires both `hasUncompensatedCharge` and `IsChargeNeutral == false`; §3 lines 264–271 states the same condition, and the `JOB016` table row (line 443) matches. A non-neutral base is a model property reported through `TotalChargeBefore` (and through `IsChargeNeutral` whenever the final lattice remains charged) and never triggers `JOB012`/`JOB016` by itself (§3 lines 266–273); this matches Step 06 lines 177–183 (a non-compensated charged delta is allowed and there is no base-neutrality invariant) and current code: `ChargeElementary` accepts fractional charges (`UnitValues.cs` lines 184–216), while `LatticeModelValidator` checks only compensation shape and opposite-sign deltas (`LatticeModelValidator.cs` lines 248–305). Acceptance lines 634–636 and the charge test row (line 672) use the same predicate and the no-diagnostic base rule. §3's "and `IsChargeNeutral = false`" is the consequence of the §4 predicate, not a conditional assignment. |
+| R4-2 (Note) | **Resolved** | The charge test row (line 672) now states explicitly that a pre-existing non-neutral base sets `IsChargeNeutral=false` with no `JOB012`/`JOB016`, replacing the terse "reports only" cell. "Done when" (lines 702–706) no longer promises "charge-neutral supercells"; it requires balanced compensated pairs, warned non-compensated charge, and a reported-but-not-misclassified base charge. This is consistent with the §3 model-property rule and the acceptance line. No Step 10 text still promises unconditional neutrality. |
+
+### Findings
+
+| ID | Severity | Finding | Evidence |
+| --- | --- | --- | --- |
+| — | — | No Blocker, Major, Minor, or Note finding remains in round 5. | R4-1 and R4-2 are resolved in the current text; no new contradiction or regression was found. |
+
+No Blocker or Major was found. The round-5 revision is confined to the charge predicate, the acceptance and
+test wording, and "Done when". It does not reopen the architecture, the seed/sampler contract, the dual-DOF
+navigation, the mixed compensated/non-compensated rule, the `JOB` table, or the `.msl` `doping_info` decision.
+Every earlier round-1–round-4 finding remains resolved or accepted as recorded; the only round-4 items, R4-1
+and R4-2, are now closed.
+
+### Verdict
+
+- [x] Ready for implementation
+- [ ] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Verdict: Ready for implementation.** R4-1 is resolved by a numeric absolute-final predicate,
+`abs(TotalChargeAfter) <= 1e-6 * max(1, TotalPositions)`, with `JOB016` requiring both an applied
+uncompensated charged doping and a false predicate and a non-neutral base reported without a diagnostic.
+R4-2 is resolved by the explicit charge test row and the rewritten "Done when", which no longer promises
+unconditional charge neutrality and matches the model-property rule. No new contradiction or regression was
+found, and no Blocker, Major, Minor, or Note remains in the current revision. All required repository gates
+pass. This record is evidence and does not authorize the step; the human owner still approves the start.
+
+Follow-up owner: Human owner / Step agent
+Follow-up step: Step 10 implementation start after owner approval of the feature list and step branch; the
+post-implementation audit remains mandatory.
+
 ## Approval summary
 
 The step agent completes this section before requesting human approval. It must cover the full history, not
@@ -970,7 +1119,7 @@ Round history:
 | 2 | 2026-11-14 | `2eb6a57` | Independent planning auditor (fresh context) | Changes required |
 | 3 | 2026-11-14 | `07f14f2` | Independent planning auditor (fresh context) | Ready with notes |
 | 4 | 2026-11-14 | `bb62e40` | Independent planning auditor (round 4; fresh context) | Ready with notes |
-| 5 | 2026-11-14 | `c5454af` | Pending fresh auditor | Pending |
+| 5 | 2026-11-14 | `c5454af` | Independent planning auditor (round 5; fresh context) | Ready for implementation |
 
 Findings and resolutions:
 
