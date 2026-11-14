@@ -24,6 +24,7 @@ public sealed class ParameterizationDiagnosticTests
         Assert.Equal(declared, registered);
         Assert.Equal(registered.Length, registered.Distinct(StringComparer.Ordinal).Count());
         Assert.DoesNotContain("PRM007", registered);
+        Assert.Null(ParameterizationDiagnosticCodes.HelpFor("PRM007"));
     }
 
     [Fact]
@@ -53,5 +54,6 @@ public sealed class ParameterizationDiagnosticTests
                 Assert.Contains($"### {descriptor.Code}", text, StringComparison.Ordinal);
                 Assert.Contains($"[`{descriptor.Code}`](#{descriptor.DocumentationAnchor.TrimStart('#')})", text, StringComparison.Ordinal);
             });
+        Assert.DoesNotContain("PRM007", text, StringComparison.Ordinal);
     }
 }

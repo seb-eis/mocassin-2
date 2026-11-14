@@ -2020,12 +2020,17 @@ Mocassin.Core.Model.TransitionRuleSet.TransitionKind.init -> void
 Mocassin.Core.Model.TransitionRuleSet.TransitionRuleSet(Mocassin.Core.Model.Transitions.TransitionKind transitionKind, System.Guid transitionId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.RuleFrequencyEntry!> rules = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.RuleFrequencyEntry!>)) -> void
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.DuplicateName = "PRM010" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.ForbiddenParticle = "PRM012" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.ImplausibleFrequency = "PRM016" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidEnergy = "PRM004" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidFrequency = "PRM005" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidKey = "PRM014" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidSiteEnergyTarget = "PRM008" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.LimitExceeded = "PRM013" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.MetropolisRuleSetIgnored = "PRM011" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.ModelSignatureMismatch = "PRM001" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.NoExplicitValues = "PRM006" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.RequiredValuesUnset = "PRM003" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.UniformValues = "PRM015" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.UnknownReference = "PRM002" -> string!
 const Mocassin.Core.Model.ParameterizationLimits.GroupEntriesPerSet = 1000000 -> int
 const Mocassin.Core.Model.ParameterizationLimits.GroupSetsPerTemplate = 100000 -> int

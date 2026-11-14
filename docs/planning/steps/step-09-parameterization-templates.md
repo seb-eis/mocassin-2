@@ -36,8 +36,8 @@ completeness checks.
 | `template-model-and-persistence` | `feature/step-09-parameterization-templates/template-model-and-persistence` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `c7f9992` |
 | `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `9a11a38` |
 | `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `222c02e` |
-| `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
-| `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | Approved | — | — | — |
+| `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `ce20049` |
+| `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
 | `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | Approved | — | — | — |
 | `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | Approved | — | — | — |
 
@@ -176,7 +176,7 @@ it, §4 above now records it, and the feature-3 contract tests pin it.
 
 ### Feature 4 outcome
 
-`apply-and-site-energies` implementation is complete on its feature branch and awaits the feature squash.
+`apply-and-site-energies` was squash-merged as `ce20049`. No per-feature CI run was triggered.
 
 Implemented:
 
@@ -233,6 +233,58 @@ Notes and limitations:
 - A hostile or malformed compiled model still fails through `CompiledModelContract` with
   `InvalidOperationException`, because the compiler owns that model; user template data fails through `PRM`
   diagnostics instead.
+
+### Feature 5 outcome
+
+`validation-and-diagnostics` is implemented on its feature branch and awaits the feature squash.
+
+Implemented:
+
+- The full non-retired `PRM` catalog: descriptors for `PRM003`, `PRM006`, `PRM011`, `PRM015`, and `PRM016`
+  joined the feature-4 codes; `PRM007` remains retired with no constant or descriptor, and `PRM009` remains
+  feature 6. `DiagnosticCatalog.Default` composes every registered `PRM` descriptor exactly once.
+- `IParameterizationService.Validate`/`ParameterizationService.Validate` return compiled-bound diagnostics only
+  (no diff and no dense applied tables) and never compile. `Apply` uses the same analyzer, so both surfaces
+  share target, range, and plausibility checks; only `Apply` builds the dense values and signature.
+- `PRM003` (one summary warning with pair/group/kinetic-rule counts), `PRM006` (explicit template with no
+  explicit entries), `PRM011` (Metropolis rule set present and ignored), `PRM015` (at least 20 explicit
+  pair/group values with at least 90 % one non-default value), and `PRM016` (finite positive frequency outside
+  `1e-3..1e18 Hz`). The implicit default template suppresses `PRM003`/`PRM006`; an explicit zero or explicit
+  compiled-default frequency suppresses `PRM006` but not `PRM003`.
+- The Step 12 contract is documented: `build --warnings-as-errors` promotes build-stage validation and
+  parameterization warnings, validation warnings exit `1`, promoted parameterization warnings exit `4`, and
+  `mocassin validate` never compiles.
+- Diagnostics-reference rows and anchors for every registered `PRM` code, plus a troubleshooting section for
+  stale, incomplete, and implausible templates.
+
+Local gates:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 637, Symmetry 223, Compilation 99,
+  Packages 170, Cli 7, App 1, Contracts 14, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; licence policy 51 packages, no vulnerable packages, ApiCompat compatible
+  (the `Mocassin.Core.dll` and `Mocassin.Packages.dll` baselines were refreshed for intentional additions).
+- `./tools/verify.sh contracts` — exit 0; 18 generated artifacts current, 5 model projections and 3
+  parameterization projections OK, catalog current, process consistency OK, 20 tool tests passed, SPDX 462
+  files, no secrets in 791 tracked text files, cargo-deny OK.
+- `./tools/verify.sh docs` — exit 0; links OK (154 files), Zensical "No issues found", DocFX 0 warnings/0
+  errors, rustdoc generated, site built.
+
+Notes and limitations:
+
+- No per-feature CI run was triggered.
+- `PRM003` now warns when a sparse explicit template leaves required slots unset; the checked-in ceria sample
+  template is sparse and therefore reports 89 of 126 required values unset. The applied values and golden
+  signature are unchanged.
+- `Validate` reports a signature mismatch as `PRM001` with a summary message but no `ParameterizationDiff`;
+  `Apply` still returns the diff for the same mismatch.
+- `PRM016` is evaluated for explicit rule frequencies and for compiled defaults that are not overridden; a
+  compiled default outside the plausible band is defensive compiler-owned data, not user template data.
+- `PRM015` uses the existing summary `IdenticalValueShare`, which counts non-default explicit pair/group values;
+  explicit defaults therefore do not trigger a uniform-value warning.
+- Range diagnostics are emitted once per accepted authored entry; a chiral mirrored cell no longer duplicates
+  `PRM004` for the same shared value. Applied values and signatures are unchanged.
+- `Diff`/`Rebase`, strategies, `PRM009`, golden templates, benchmarks, parity, and closeout remain features 6–7.
 
 ## Goal
 

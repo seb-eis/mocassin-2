@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 
+using System.Collections.Immutable;
 using System.Diagnostics.CodeAnalysis;
 using Mocassin.Compilation.Compiler;
+using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Model;
 using Mocassin.Core.Project;
 
@@ -33,6 +35,25 @@ public interface IParameterizationService
     /// <param name="cancellationToken">Cancels the operation before large allocations.</param>
     /// <returns>The applied model or diagnostics, the summary, and the mismatch diff when applicable.</returns>
     public ParameterizationResult Apply(
+        Project project,
+        CompiledModel model,
+        ParameterizationTemplate? template = null,
+        ParameterizationOptions? options = null,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Validates a template against a compiled model without applying it or computing the signature.
+    /// </summary>
+    /// <param name="project">The project snapshot that produced <paramref name="model"/>.</param>
+    /// <param name="model">The compiled model.</param>
+    /// <param name="template">The explicit template, or <see langword="null"/> for the implicit default.</param>
+    /// <param name="options">The validation options, or <see langword="null"/> for the defaults.</param>
+    /// <param name="cancellationToken">Cancels the operation before the entry walk.</param>
+    /// <returns>
+    /// The diagnostics in stable order. A signature-mismatch <c>PRM001</c> carries no diff object; use
+    /// <see cref="Apply"/> when the diff is required.
+    /// </returns>
+    public ImmutableArray<Diagnostic> Validate(
         Project project,
         CompiledModel model,
         ParameterizationTemplate? template = null,

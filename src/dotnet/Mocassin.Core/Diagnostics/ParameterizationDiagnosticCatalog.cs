@@ -5,12 +5,12 @@ using System.Collections.Immutable;
 namespace Mocassin.Core.Diagnostics;
 
 /// <summary>
-/// Registers the parameterization-template diagnostic codes owned by Core.
+/// Registers the parameterization-template diagnostic codes owned by Step 09.
 /// </summary>
 /// <remarks>
-/// Feature 1 of Step 09 registered the five structural checks that need the project graph. Feature 4 adds the
-/// compiled-bound codes that <c>ParameterizationService.Apply</c> itself emits. The remaining compiled-bound
-/// <c>PRM</c> codes are registered by the parameterization validation feature.
+/// The catalog contains every non-retired <c>PRM</c> descriptor. Structural checks are emitted by Core
+/// <c>ProjectValidator</c>; compiled-bound checks are emitted by <c>Mocassin.Packages</c>. The retired
+/// <c>PRM007</c> code and the rebase-only <c>PRM009</c> code are not registered.
 /// </remarks>
 public static class ParameterizationDiagnosticCatalog
 {
@@ -34,6 +34,13 @@ public static class ParameterizationDiagnosticCatalog
             "Remove the stale entry or rebase the template against the current model.",
             "#prm002"),
         new(
+            ParameterizationDiagnosticCodes.RequiredValuesUnset,
+            DiagnosticSeverity.Warning,
+            "Step 09 — parameterization templates",
+            "Required pair, group, or kinetic-rule values are unset and defaults are applied",
+            "Set the missing values explicitly, or review the applied defaults before building.",
+            "#prm003"),
+        new(
             ParameterizationDiagnosticCodes.InvalidEnergy,
             DiagnosticSeverity.Error,
             "Step 09 — parameterization templates",
@@ -48,6 +55,13 @@ public static class ParameterizationDiagnosticCatalog
             "Set the attempt frequency to a positive, finite value.",
             "#prm005"),
         new(
+            ParameterizationDiagnosticCodes.NoExplicitValues,
+            DiagnosticSeverity.Warning,
+            "Step 09 — parameterization templates",
+            "An explicit template contains no explicit values",
+            "Set at least one value, or build with the implicit default parameterization.",
+            "#prm006"),
+        new(
             ParameterizationDiagnosticCodes.InvalidSiteEnergyTarget,
             DiagnosticSeverity.Warning,
             "Step 09 — parameterization templates",
@@ -61,6 +75,13 @@ public static class ParameterizationDiagnosticCatalog
             "Two parameterization templates use the same name",
             "Give each parameterization template a distinct name.",
             "#prm010"),
+        new(
+            ParameterizationDiagnosticCodes.MetropolisRuleSetIgnored,
+            DiagnosticSeverity.Warning,
+            "Step 09 — parameterization templates",
+            "A Metropolis transition rule set is not parameterizable and is ignored",
+            "Remove the Metropolis rule set; MMC rules are not parameterizable.",
+            "#prm011"),
         new(
             ParameterizationDiagnosticCodes.ForbiddenParticle,
             DiagnosticSeverity.Warning,
@@ -82,5 +103,19 @@ public static class ParameterizationDiagnosticCatalog
             "A stable key is malformed, duplicated, or missing",
             "Use lowercase 64-character hexadecimal stable keys and remove duplicate value keys.",
             "#prm014"),
+        new(
+            ParameterizationDiagnosticCodes.UniformValues,
+            DiagnosticSeverity.Warning,
+            "Step 09 — parameterization templates",
+            "Explicit pair or group values are suspiciously uniform",
+            "Check for a bulk-fill or paste error and vary the reported values deliberately.",
+            "#prm015"),
+        new(
+            ParameterizationDiagnosticCodes.ImplausibleFrequency,
+            DiagnosticSeverity.Warning,
+            "Step 09 — parameterization templates",
+            "An attempt frequency is outside the plausible band but still positive and finite",
+            "Check the attempt frequency; the accepted physical range is 1e-3..1e18 Hz.",
+            "#prm016"),
     ];
 }

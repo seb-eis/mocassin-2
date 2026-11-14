@@ -68,7 +68,14 @@ public sealed class ParameterizationApplyTests
         var result = new ParameterizationService().Apply(project, model, template);
 
         Assert.True(result.IsSuccess);
-        Assert.Empty(result.Diagnostics);
+        Assert.All(result.Diagnostics, static diagnostic => Assert.Equal(DiagnosticSeverity.Warning, diagnostic.Severity));
+        var completeness = Assert.Single(
+            result.Diagnostics,
+            static diagnostic => diagnostic.Code == ParameterizationDiagnosticCodes.RequiredValuesUnset);
+        Assert.Contains("89 of 126 required values unset", completeness.Message, StringComparison.Ordinal);
+        Assert.DoesNotContain(
+            result.Diagnostics,
+            static diagnostic => diagnostic.Code == ParameterizationDiagnosticCodes.NoExplicitValues);
         Assert.NotNull(result.Model);
         var applied = result.Model!;
         AssertPairEntries(applied, model, template);

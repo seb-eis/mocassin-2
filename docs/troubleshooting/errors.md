@@ -30,6 +30,25 @@ and general help. The per-instance message and `hint` usually name the exact obj
 | `SIM039` warning | No KMC simulation has a mobile start particle | Fix the start pools; this suppresses the per-simulation `SIM038`. |
 | `SIM040`/`SIM041` error | Estimated rule count or memory exceeds the advisory budget | Reduce the model or raise the budget in `ValidationOptions` knowingly. |
 
+## Parameterization templates
+
+`mocassin validate` runs only the structural `PRM` checks that live in Core `ProjectValidator`; it never
+compiles. Stale or incomplete templates that need a compiled model are reported by `mocassin build` after
+compilation. A build may proceed with parameterization warnings; `--warnings-as-errors` turns them into a build
+failure with exit `4`. Validation-stage warnings promoted by the same flag exit `1`.
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| `PRM001` error | The model geometry, rules, or catalog changed after the template was created | Rebase the template, or recreate it from the current compiled model; never reuse values across changed geometry. |
+| `PRM002` warning | A template entry references a pair/group/rule ID that the current model no longer has, or its descriptor disagrees | Remove the stale entry or rebase the template; the model value wins. |
+| `PRM003` warning | Required pair, group, or kinetic-rule slots are unset; defaults are applied | Review the applied defaults for the reported counts, or set the missing values explicitly. |
+| `PRM006` warning | The selected explicit template contains no explicit values at all | Set at least one value, or build without selecting an empty template so the implicit default is used. |
+| `PRM008` warning | A site-energy override or authored background entry targets an unknown site/particle or a particle the site cannot occupy | Correct the site/particle key or remove the entry. |
+| `PRM011` warning | The template contains a Metropolis rule set | MMC rules are not parameterizable; remove the set. The compiled default remains. |
+| `PRM012` warning | A pair or group entry names a particle the reference site cannot occupy | Use a particle from the site's particle set, or remove the entry. |
+| `PRM015` warning | At least 20 explicit pair/group values are dominated by one non-default value | Check for a bulk-fill or paste error and vary the values deliberately. |
+| `PRM016` warning | An attempt frequency is outside the plausible `1e-3..1e18 Hz` band but still positive and finite | Check the frequency; use a project template and rebuild. |
+
 ## Statistics
 
 `--stats` adds advisory counts and estimates. Statistics are non-null whenever they can be computed, even when
