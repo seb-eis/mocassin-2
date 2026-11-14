@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.Compilation.Indexing;
+using Mocassin.Compilation.Signatures;
 using Mocassin.Compilation.Structure;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Model.Structure;
@@ -181,6 +183,29 @@ public sealed class CompilationDiagnosticEmissionTests
 
         Assert.False(result.IsSuccess);
         Assert.Contains(result.Diagnostics, static item => item.Code == "CMP004");
+    }
+
+    [Fact]
+    public async Task NonFiniteTransportEmitsCmp011DuringSigning()
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync("samples/simulations/ceria-kmc.mocprj"),
+            kinetic: true);
+        var stages = StageTestSupport.EncodingStages().Append(new IndexingCompilationStage()).ToArray();
+        var (context, diagnostics) = StageTestSupport.Run(project, stages);
+        Assert.Empty(diagnostics.Where(static item => item.Severity == DiagnosticSeverity.Error));
+        var rule = context.Transitions!.Rules[0] with
+        {
+            ChargeTransportVector = new Cartesian3(double.NaN, 0.0, 0.0),
+        };
+        var mutated = context with
+        {
+            Transitions = context.Transitions with { Rules = context.Transitions.Rules.SetItem(0, rule) },
+        };
+
+        var outcome = new SigningCompilationStage().Execute(mutated, CancellationToken.None);
+
+        Assert.Contains(outcome.Diagnostics, static item => item.Code == "CMP011");
     }
 
     [Fact]
