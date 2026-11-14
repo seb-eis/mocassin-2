@@ -1,4 +1,4 @@
 # Pinned documentation toolchain. Keep in sync with
 # docs/planning/06-toolchain-requirements.md and the development image.
-zensical==0.0.74
+zensical==0.1.1
 mkdocstrings[python]==1.0.8
