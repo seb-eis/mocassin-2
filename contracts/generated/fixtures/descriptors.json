@@ -197,6 +197,27 @@
       "kind": "project",
       "status": "current",
       "step": "06"
+    },
+    {
+      "id": "project-parameterizations-populated",
+      "path": "tests/contracts/project-parameterizations-populated.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "09"
+    },
+    {
+      "id": "sample-parameterizations-ceria",
+      "path": "samples/parameterizations/ceria-parameters.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "09"
+    },
+    {
+      "id": "sample-parameterizations-barium-zirconate",
+      "path": "samples/parameterizations/barium-zirconate-parameters.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "09"
     }
   ]
 }

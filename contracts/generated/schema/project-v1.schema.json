@@ -813,6 +813,228 @@
           },
           "createdUtc": {
             "type": "string"
+          },
+          "stablePairSets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "energyId": {
+                  "type": "string"
+                },
+                "centerSiteId": {
+                  "type": "string"
+                },
+                "partnerSiteId": {
+                  "type": "string"
+                },
+                "distanceBucketFm": {
+                  "type": "integer"
+                },
+                "isChiral": {
+                  "type": "boolean"
+                },
+                "entries": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "centerParticleId": {
+                        "type": "string"
+                      },
+                      "partnerParticleId": {
+                        "type": "string"
+                      },
+                      "energyEv": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "centerParticleId",
+                      "partnerParticleId",
+                      "energyEv"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "energyId",
+                "centerSiteId",
+                "partnerSiteId",
+                "distanceBucketFm",
+                "isChiral",
+                "entries"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "unstablePairSets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "energyId": {
+                  "type": "string"
+                },
+                "centerSiteId": {
+                  "type": "string"
+                },
+                "partnerSiteId": {
+                  "type": "string"
+                },
+                "distanceBucketFm": {
+                  "type": "integer"
+                },
+                "isChiral": {
+                  "type": "boolean"
+                },
+                "entries": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "centerParticleId": {
+                        "type": "string"
+                      },
+                      "partnerParticleId": {
+                        "type": "string"
+                      },
+                      "energyEv": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "centerParticleId",
+                      "partnerParticleId",
+                      "energyEv"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "energyId",
+                "centerSiteId",
+                "partnerSiteId",
+                "distanceBucketFm",
+                "isChiral",
+                "entries"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "groupSets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "clusterEnergyId": {
+                  "type": "string"
+                },
+                "clusterId": {
+                  "type": "string"
+                },
+                "centerSiteId": {
+                  "type": "string"
+                },
+                "entries": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "occupationParticleIds": {
+                        "type": "array",
+                        "items": {
+                          "type": "string"
+                        }
+                      },
+                      "energyEv": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "occupationParticleIds",
+                      "energyEv"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "clusterEnergyId",
+                "clusterId",
+                "centerSiteId",
+                "entries"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "siteEnergyOverrides": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "siteId": {
+                  "type": "string"
+                },
+                "particleId": {
+                  "type": "string"
+                },
+                "energyEv": {
+                  "type": "number"
+                }
+              },
+              "required": [
+                "siteId",
+                "particleId",
+                "energyEv"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "transitionRuleSets": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "transitionKind": {
+                  "type": "string",
+                  "enum": [
+                    "kinetic",
+                    "metropolis"
+                  ]
+                },
+                "transitionId": {
+                  "type": "string"
+                },
+                "rules": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "ruleGeometryId": {
+                        "type": "string"
+                      },
+                      "frequencyHz": {
+                        "type": "number"
+                      }
+                    },
+                    "required": [
+                      "ruleGeometryId",
+                      "frequencyHz"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "transitionKind",
+                "transitionId",
+                "rules"
+              ],
+              "additionalProperties": false
+            }
           }
         },
         "required": [

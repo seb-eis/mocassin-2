@@ -918,6 +918,237 @@
               "name": "createdUtc",
               "type": "string",
               "required": true
+            },
+            {
+              "name": "stablePairSets",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sparse stable-site pair values; sorted by energyId and particle key.",
+              "itemFields": [
+                {
+                  "name": "energyId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "centerSiteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "partnerSiteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "distanceBucketFm",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "isChiral",
+                  "type": "bool",
+                  "required": true
+                },
+                {
+                  "name": "entries",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "centerParticleId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "partnerParticleId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "energyEv",
+                      "type": "float64",
+                      "required": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "unstablePairSets",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sparse unstable-site pair values; sorted by energyId and particle key.",
+              "itemFields": [
+                {
+                  "name": "energyId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "centerSiteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "partnerSiteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "distanceBucketFm",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "isChiral",
+                  "type": "bool",
+                  "required": true
+                },
+                {
+                  "name": "entries",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "centerParticleId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "partnerParticleId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "energyEv",
+                      "type": "float64",
+                      "required": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "groupSets",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sparse values; sorted by clusterEnergyId and occupation tuple.",
+              "itemFields": [
+                {
+                  "name": "clusterEnergyId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "clusterId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "centerSiteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "entries",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "occupationParticleIds",
+                      "type": "array",
+                      "required": true,
+                      "items": "string"
+                    },
+                    {
+                      "name": "energyEv",
+                      "type": "float64",
+                      "required": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "siteEnergyOverrides",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Sparse overrides of the authored site-energy background; sorted by siteId and particleId.",
+              "itemFields": [
+                {
+                  "name": "siteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "particleId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "energyEv",
+                  "type": "float64",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "transitionRuleSets",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "notes": "Kinetic rule frequencies; sorted by transitionKind, transitionId, and ruleGeometryId.",
+              "itemFields": [
+                {
+                  "name": "transitionKind",
+                  "type": "string",
+                  "required": true,
+                  "enum": [
+                    "kinetic",
+                    "metropolis"
+                  ]
+                },
+                {
+                  "name": "transitionId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "rules",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "ruleGeometryId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "frequencyHz",
+                      "type": "float64",
+                      "required": true
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },
@@ -3013,6 +3244,27 @@
         "kind": "project",
         "status": "current",
         "step": "06"
+      },
+      {
+        "id": "project-parameterizations-populated",
+        "path": "tests/contracts/project-parameterizations-populated.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "09"
+      },
+      {
+        "id": "sample-parameterizations-ceria",
+        "path": "samples/parameterizations/ceria-parameters.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "09"
+      },
+      {
+        "id": "sample-parameterizations-barium-zirconate",
+        "path": "samples/parameterizations/barium-zirconate-parameters.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "09"
       }
     ]
   },

@@ -125,6 +125,8 @@ public static class ProjectValidator
             }
         }
 
+        ValidateParameterizationTemplates(validParameterizations, bag);
+
         foreach (var template in validJobTemplates)
         {
             if (string.IsNullOrWhiteSpace(template.Name))
@@ -170,6 +172,46 @@ public static class ProjectValidator
                 buildTemplateIds,
                 new ModelPath("buildTemplate", template.Id.Value, "parameterizationId"),
                 bag);
+        }
+    }
+
+    private static void ValidateParameterizationTemplates(
+        IEnumerable<ParameterizationTemplate> templates,
+        DiagnosticBag bag)
+    {
+        var ordered = templates
+            .OrderBy(static template => template.Id.Value)
+            .ToArray();
+
+        if (ordered.Length > ParameterizationLimits.TemplatesPerProject)
+        {
+            bag.Add(Error(
+                ParameterizationDiagnosticCodes.LimitExceeded,
+                string.Create(
+                    System.Globalization.CultureInfo.InvariantCulture,
+                    $"A project may contain at most {ParameterizationLimits.TemplatesPerProject} parameterization templates."),
+                new ModelPath("parameterization", Guid.Empty)));
+        }
+
+        var names = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
+        foreach (var template in ordered)
+        {
+            bag.AddRange(ParameterizationTemplateValidator.Validate(template));
+
+            if (string.IsNullOrWhiteSpace(template.Name))
+            {
+                continue;
+            }
+
+            if (!names.TryAdd(template.Name, template.Id.Value))
+            {
+                bag.Add(new Diagnostic(
+                    ParameterizationDiagnosticCodes.DuplicateName,
+                    DiagnosticSeverity.Warning,
+                    $"Template name '{template.Name}' is used by more than one parameterization template.",
+                    new ModelPath("parameterization", template.Id.Value, "name"),
+                    ParameterizationDiagnosticCodes.HelpFor(ParameterizationDiagnosticCodes.DuplicateName)));
+            }
         }
     }
 

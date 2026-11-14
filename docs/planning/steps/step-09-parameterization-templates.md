@@ -10,15 +10,15 @@ completeness checks.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Feature list:** Approved 2026-11-14 (seven features; step branch not created)
-- **Step branch:** —
+- **Status:** In progress
+- **Feature list:** Approved 2026-11-14 (seven features; step branch created)
+- **Step branch:** `step/09-parameterization-templates`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
 - **Design review:** Re-review required at `26d6a0ecff543ac65eb60d60d9f9c893e00f32bc`
-- **Last updated:** —
+- **Last updated:** 2026-11-14
 
 ### Owner decisions (2026-11-14)
 
@@ -33,7 +33,7 @@ completeness checks.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `template-model-and-persistence` | `feature/step-09-parameterization-templates/template-model-and-persistence` | Approved | — | — | — |
+| `template-model-and-persistence` | `feature/step-09-parameterization-templates/template-model-and-persistence` | In progress | — | — | — |
 | `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | Approved | — | — | — |
 | `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | Approved | — | — | — |
 | `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Approved | — | — | — |

@@ -9,10 +9,7 @@ namespace Mocassin.Core.Diagnostics;
 /// </summary>
 public static class CoreDiagnosticCatalog
 {
-    /// <summary>
-    /// Gets the registered descriptors, sorted by ordinal code.
-    /// </summary>
-    public static ImmutableArray<DiagnosticDescriptor> Descriptors { get; } =
+    private static readonly ImmutableArray<DiagnosticDescriptor> coreDescriptors =
     [
         new("ENM001", DiagnosticSeverity.Error, "Step 05 — energy model", "An environment cutoff is not positive and finite", "Review the referenced model object, correct the reported condition, and revalidate.", "#enm001"),
         new("ENM002", DiagnosticSeverity.Warning, "Step 05 — energy model", "An environment cutoff exceeds half the smallest cell dimension", "Review the referenced model object, correct the reported condition, and revalidate.", "#enm002"),
@@ -141,5 +138,15 @@ public static class CoreDiagnosticCatalog
         new("TRN026", DiagnosticSeverity.Error, "Step 04 — transition model", "An unstable position's group does not contain exactly one [D, ∅] state change", "Review the referenced model object, correct the reported condition, and revalidate.", "#trn026"),
         new("TRN027", DiagnosticSeverity.Error, "Step 04 — transition model", "A reverse link is unknown, cross-kind, asymmetric, or self-referential", "Review the referenced model object, correct the reported condition, and revalidate.", "#trn027"),
         new("TRN028", DiagnosticSeverity.Error, "Step 04 — transition model", "A resolved kinetic path stability sequence does not match the built-in pattern sequence", "Review the referenced model object, correct the reported condition, and revalidate.", "#trn028"),
+    ];
+
+    /// <summary>
+    /// Gets the registered descriptors, sorted by ordinal code.
+    /// </summary>
+    public static ImmutableArray<DiagnosticDescriptor> Descriptors { get; } =
+    [
+        .. coreDescriptors
+            .Concat(ParameterizationDiagnosticCatalog.Descriptors)
+            .OrderBy(static descriptor => descriptor.Code, StringComparer.Ordinal),
     ];
 }

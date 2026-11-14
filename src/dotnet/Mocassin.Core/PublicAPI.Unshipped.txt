@@ -253,7 +253,6 @@ Mocassin.Core.Model.ParameterizationTemplate
 Mocassin.Core.Model.ParameterizationTemplate.<Clone>$() -> Mocassin.Core.Model.ParameterizationTemplate!
 Mocassin.Core.Model.ParameterizationTemplate.CreatedUtc.get -> System.DateTimeOffset
 Mocassin.Core.Model.ParameterizationTemplate.CreatedUtc.init -> void
-Mocassin.Core.Model.ParameterizationTemplate.Deconstruct(out Mocassin.Core.Ids.ParameterizationId Id, out string! Name, out string! ModelSignature, out System.DateTimeOffset CreatedUtc) -> void
 Mocassin.Core.Model.ParameterizationTemplate.Equals(Mocassin.Core.Model.ParameterizationTemplate? other) -> bool
 Mocassin.Core.Model.ParameterizationTemplate.Id.get -> Mocassin.Core.Ids.ParameterizationId
 Mocassin.Core.Model.ParameterizationTemplate.Id.init -> void
@@ -261,7 +260,6 @@ Mocassin.Core.Model.ParameterizationTemplate.ModelSignature.get -> string!
 Mocassin.Core.Model.ParameterizationTemplate.ModelSignature.init -> void
 Mocassin.Core.Model.ParameterizationTemplate.Name.get -> string!
 Mocassin.Core.Model.ParameterizationTemplate.Name.init -> void
-Mocassin.Core.Model.ParameterizationTemplate.ParameterizationTemplate(Mocassin.Core.Ids.ParameterizationId Id, string! Name, string! ModelSignature, System.DateTimeOffset CreatedUtc) -> void
 Mocassin.Core.Model.RenderBoxSettings
 Mocassin.Core.Model.RenderBoxSettings.<Clone>$() -> Mocassin.Core.Model.RenderBoxSettings!
 Mocassin.Core.Model.RenderBoxSettings.Equals(Mocassin.Core.Model.RenderBoxSettings? other) -> bool
@@ -1916,3 +1914,174 @@ Mocassin.Core.Diagnostics.DiagnosticDescriptor.Deconstruct(out string! Code, out
 static Mocassin.Core.Diagnostics.CoreDiagnosticCatalog.Descriptors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
 Mocassin.Core.Diagnostics.DiagnosticDescriptor.DiagnosticDescriptor(string! Code, Mocassin.Core.Diagnostics.DiagnosticSeverity DefaultSeverity, string! Owner, string! Title, string! Help, string! DocumentationAnchor) -> void
 static Mocassin.Core.Project.ProjectHasher.ComputeSimulationSelection(Mocassin.Core.Project.Project! project) -> string!
+Mocassin.Core.Diagnostics.ParameterizationDiagnosticCatalog
+Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes
+Mocassin.Core.Editing.ParameterizationTemplateEditResult
+Mocassin.Core.Editing.ParameterizationTemplateEditResult.<Clone>$() -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+Mocassin.Core.Editing.ParameterizationTemplateEditResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Core.Editing.ParameterizationTemplateEditResult.Equals(Mocassin.Core.Editing.ParameterizationTemplateEditResult? other) -> bool
+Mocassin.Core.Editing.ParameterizationTemplateEditResult.IsSuccess.get -> bool
+Mocassin.Core.Editing.ParameterizationTemplateEditResult.ParameterizationTemplateEditResult(Mocassin.Core.Model.ParameterizationTemplate! template, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> void
+Mocassin.Core.Editing.ParameterizationTemplateEditResult.Template.get -> Mocassin.Core.Model.ParameterizationTemplate!
+Mocassin.Core.Editing.ParameterizationTemplateEditor
+Mocassin.Core.Editing.ProjectEditor.AddParameterizationTemplate(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.ParameterizationTemplate! template) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.RemoveParameterizationTemplate(Mocassin.Core.Project.Project! project, Mocassin.Core.Ids.ParameterizationId id) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Editing.ProjectEditor.UpdateParameterizationTemplate(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.ParameterizationTemplate! template) -> Mocassin.Core.Editing.ProjectEditResult!
+Mocassin.Core.Model.GroupEnergyEntry
+Mocassin.Core.Model.GroupEnergyEntry.<Clone>$() -> Mocassin.Core.Model.GroupEnergyEntry!
+Mocassin.Core.Model.GroupEnergyEntry.Energy.get -> Mocassin.Core.Units.EnergyEv
+Mocassin.Core.Model.GroupEnergyEntry.Energy.init -> void
+Mocassin.Core.Model.GroupEnergyEntry.Equals(Mocassin.Core.Model.GroupEnergyEntry? other) -> bool
+Mocassin.Core.Model.GroupEnergyEntry.GroupEnergyEntry(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId> occupationParticleIds = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId>), Mocassin.Core.Units.EnergyEv energy = default(Mocassin.Core.Units.EnergyEv)) -> void
+Mocassin.Core.Model.GroupEnergyEntry.OccupationParticleIds.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId>
+Mocassin.Core.Model.GroupEnergyEntry.OccupationParticleIds.init -> void
+Mocassin.Core.Model.GroupEnergySet
+Mocassin.Core.Model.GroupEnergySet.<Clone>$() -> Mocassin.Core.Model.GroupEnergySet!
+Mocassin.Core.Model.GroupEnergySet.CenterSiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.GroupEnergySet.CenterSiteId.init -> void
+Mocassin.Core.Model.GroupEnergySet.ClusterEnergyId.get -> string!
+Mocassin.Core.Model.GroupEnergySet.ClusterEnergyId.init -> void
+Mocassin.Core.Model.GroupEnergySet.ClusterId.get -> Mocassin.Core.Ids.ClusterId
+Mocassin.Core.Model.GroupEnergySet.ClusterId.init -> void
+Mocassin.Core.Model.GroupEnergySet.Entries.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.GroupEnergyEntry!>
+Mocassin.Core.Model.GroupEnergySet.Entries.init -> void
+Mocassin.Core.Model.GroupEnergySet.Equals(Mocassin.Core.Model.GroupEnergySet? other) -> bool
+Mocassin.Core.Model.GroupEnergySet.GroupEnergySet(string! clusterEnergyId, Mocassin.Core.Ids.ClusterId clusterId, Mocassin.Core.Ids.CellSiteId centerSiteId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.GroupEnergyEntry!> entries = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.GroupEnergyEntry!>)) -> void
+Mocassin.Core.Model.PairEnergyEntry
+Mocassin.Core.Model.PairEnergyEntry.<Clone>$() -> Mocassin.Core.Model.PairEnergyEntry!
+Mocassin.Core.Model.PairEnergyEntry.CenterParticleId.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Core.Model.PairEnergyEntry.CenterParticleId.init -> void
+Mocassin.Core.Model.PairEnergyEntry.Deconstruct(out Mocassin.Core.Ids.ParticleId CenterParticleId, out Mocassin.Core.Ids.ParticleId PartnerParticleId, out Mocassin.Core.Units.EnergyEv Energy) -> void
+Mocassin.Core.Model.PairEnergyEntry.Energy.get -> Mocassin.Core.Units.EnergyEv
+Mocassin.Core.Model.PairEnergyEntry.Energy.init -> void
+Mocassin.Core.Model.PairEnergyEntry.Equals(Mocassin.Core.Model.PairEnergyEntry? other) -> bool
+Mocassin.Core.Model.PairEnergyEntry.PairEnergyEntry(Mocassin.Core.Ids.ParticleId CenterParticleId, Mocassin.Core.Ids.ParticleId PartnerParticleId, Mocassin.Core.Units.EnergyEv Energy) -> void
+Mocassin.Core.Model.PairEnergyEntry.PartnerParticleId.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Core.Model.PairEnergyEntry.PartnerParticleId.init -> void
+Mocassin.Core.Model.PairEnergySet
+Mocassin.Core.Model.PairEnergySet.<Clone>$() -> Mocassin.Core.Model.PairEnergySet!
+Mocassin.Core.Model.PairEnergySet.CenterSiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.PairEnergySet.CenterSiteId.init -> void
+Mocassin.Core.Model.PairEnergySet.DistanceBucketFm.get -> int
+Mocassin.Core.Model.PairEnergySet.DistanceBucketFm.init -> void
+Mocassin.Core.Model.PairEnergySet.EnergyId.get -> string!
+Mocassin.Core.Model.PairEnergySet.EnergyId.init -> void
+Mocassin.Core.Model.PairEnergySet.Entries.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.PairEnergyEntry!>
+Mocassin.Core.Model.PairEnergySet.Entries.init -> void
+Mocassin.Core.Model.PairEnergySet.Equals(Mocassin.Core.Model.PairEnergySet? other) -> bool
+Mocassin.Core.Model.PairEnergySet.IsChiral.get -> bool
+Mocassin.Core.Model.PairEnergySet.IsChiral.init -> void
+Mocassin.Core.Model.PairEnergySet.PairEnergySet(string! energyId, Mocassin.Core.Ids.CellSiteId centerSiteId, Mocassin.Core.Ids.CellSiteId partnerSiteId, int distanceBucketFm, bool isChiral, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.PairEnergyEntry!> entries = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.PairEnergyEntry!>)) -> void
+Mocassin.Core.Model.PairEnergySet.PartnerSiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.PairEnergySet.PartnerSiteId.init -> void
+Mocassin.Core.Model.ParameterizationLimits
+Mocassin.Core.Model.ParameterizationTemplate.GroupSets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.GroupEnergySet!>
+Mocassin.Core.Model.ParameterizationTemplate.GroupSets.init -> void
+Mocassin.Core.Model.ParameterizationTemplate.ParameterizationTemplate(Mocassin.Core.Ids.ParameterizationId id, string! name, string! modelSignature, System.DateTimeOffset createdUtc, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.PairEnergySet!> stablePairSets = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.PairEnergySet!>), System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.PairEnergySet!> unstablePairSets = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.PairEnergySet!>), System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.GroupEnergySet!> groupSets = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.GroupEnergySet!>), System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.SiteEnergyOverride!> siteEnergyOverrides = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.SiteEnergyOverride!>), System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.TransitionRuleSet!> transitionRuleSets = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.TransitionRuleSet!>)) -> void
+Mocassin.Core.Model.ParameterizationTemplate.SiteEnergyOverrides.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.SiteEnergyOverride!>
+Mocassin.Core.Model.ParameterizationTemplate.SiteEnergyOverrides.init -> void
+Mocassin.Core.Model.ParameterizationTemplate.StablePairSets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.PairEnergySet!>
+Mocassin.Core.Model.ParameterizationTemplate.StablePairSets.init -> void
+Mocassin.Core.Model.ParameterizationTemplate.TransitionRuleSets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.TransitionRuleSet!>
+Mocassin.Core.Model.ParameterizationTemplate.TransitionRuleSets.init -> void
+Mocassin.Core.Model.ParameterizationTemplate.UnstablePairSets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.PairEnergySet!>
+Mocassin.Core.Model.ParameterizationTemplate.UnstablePairSets.init -> void
+Mocassin.Core.Model.RuleFrequencyEntry
+Mocassin.Core.Model.RuleFrequencyEntry.<Clone>$() -> Mocassin.Core.Model.RuleFrequencyEntry!
+Mocassin.Core.Model.RuleFrequencyEntry.Deconstruct(out string! RuleGeometryId, out Mocassin.Core.Units.FrequencyHz Frequency) -> void
+Mocassin.Core.Model.RuleFrequencyEntry.Equals(Mocassin.Core.Model.RuleFrequencyEntry? other) -> bool
+Mocassin.Core.Model.RuleFrequencyEntry.Frequency.get -> Mocassin.Core.Units.FrequencyHz
+Mocassin.Core.Model.RuleFrequencyEntry.Frequency.init -> void
+Mocassin.Core.Model.RuleFrequencyEntry.RuleFrequencyEntry(string! RuleGeometryId, Mocassin.Core.Units.FrequencyHz Frequency) -> void
+Mocassin.Core.Model.RuleFrequencyEntry.RuleGeometryId.get -> string!
+Mocassin.Core.Model.RuleFrequencyEntry.RuleGeometryId.init -> void
+Mocassin.Core.Model.SiteEnergyOverride
+Mocassin.Core.Model.SiteEnergyOverride.<Clone>$() -> Mocassin.Core.Model.SiteEnergyOverride!
+Mocassin.Core.Model.SiteEnergyOverride.Deconstruct(out Mocassin.Core.Ids.CellSiteId SiteId, out Mocassin.Core.Ids.ParticleId ParticleId, out Mocassin.Core.Units.EnergyEv Energy) -> void
+Mocassin.Core.Model.SiteEnergyOverride.Energy.get -> Mocassin.Core.Units.EnergyEv
+Mocassin.Core.Model.SiteEnergyOverride.Energy.init -> void
+Mocassin.Core.Model.SiteEnergyOverride.Equals(Mocassin.Core.Model.SiteEnergyOverride? other) -> bool
+Mocassin.Core.Model.SiteEnergyOverride.ParticleId.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Core.Model.SiteEnergyOverride.ParticleId.init -> void
+Mocassin.Core.Model.SiteEnergyOverride.SiteEnergyOverride(Mocassin.Core.Ids.CellSiteId SiteId, Mocassin.Core.Ids.ParticleId ParticleId, Mocassin.Core.Units.EnergyEv Energy) -> void
+Mocassin.Core.Model.SiteEnergyOverride.SiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.SiteEnergyOverride.SiteId.init -> void
+Mocassin.Core.Model.TransitionRuleSet
+Mocassin.Core.Model.TransitionRuleSet.<Clone>$() -> Mocassin.Core.Model.TransitionRuleSet!
+Mocassin.Core.Model.TransitionRuleSet.Equals(Mocassin.Core.Model.TransitionRuleSet? other) -> bool
+Mocassin.Core.Model.TransitionRuleSet.Rules.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.RuleFrequencyEntry!>
+Mocassin.Core.Model.TransitionRuleSet.Rules.init -> void
+Mocassin.Core.Model.TransitionRuleSet.TransitionId.get -> System.Guid
+Mocassin.Core.Model.TransitionRuleSet.TransitionId.init -> void
+Mocassin.Core.Model.TransitionRuleSet.TransitionKind.get -> Mocassin.Core.Model.Transitions.TransitionKind
+Mocassin.Core.Model.TransitionRuleSet.TransitionKind.init -> void
+Mocassin.Core.Model.TransitionRuleSet.TransitionRuleSet(Mocassin.Core.Model.Transitions.TransitionKind transitionKind, System.Guid transitionId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.RuleFrequencyEntry!> rules = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.RuleFrequencyEntry!>)) -> void
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.DuplicateName = "PRM010" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidEnergy = "PRM004" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidFrequency = "PRM005" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidKey = "PRM014" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.LimitExceeded = "PRM013" -> string!
+const Mocassin.Core.Model.ParameterizationLimits.GroupEntriesPerSet = 1000000 -> int
+const Mocassin.Core.Model.ParameterizationLimits.GroupSetsPerTemplate = 100000 -> int
+const Mocassin.Core.Model.ParameterizationLimits.MaxAppliedValueBytes = 2147483648 -> long
+const Mocassin.Core.Model.ParameterizationLimits.PairEntriesPerSet = 4096 -> int
+const Mocassin.Core.Model.ParameterizationLimits.PairSetsPerTemplate = 100000 -> int
+const Mocassin.Core.Model.ParameterizationLimits.RuleEntriesPerSet = 1000000 -> int
+const Mocassin.Core.Model.ParameterizationLimits.SiteOverridesPerTemplate = 1000000 -> int
+const Mocassin.Core.Model.ParameterizationLimits.StableIdLength = 64 -> int
+const Mocassin.Core.Model.ParameterizationLimits.TemplateNameLength = 200 -> int
+const Mocassin.Core.Model.ParameterizationLimits.TemplatesPerProject = 256 -> int
+const Mocassin.Core.Model.ParameterizationLimits.TotalExplicitValueEntriesPerTemplate = 2000000 -> int
+const Mocassin.Core.Model.ParameterizationLimits.TransitionRuleSetsPerTemplate = 100000 -> int
+override Mocassin.Core.Editing.ParameterizationTemplateEditResult.Equals(object? obj) -> bool
+override Mocassin.Core.Editing.ParameterizationTemplateEditResult.GetHashCode() -> int
+override Mocassin.Core.Editing.ParameterizationTemplateEditResult.ToString() -> string!
+override Mocassin.Core.Model.GroupEnergyEntry.Equals(object? obj) -> bool
+override Mocassin.Core.Model.GroupEnergyEntry.GetHashCode() -> int
+override Mocassin.Core.Model.GroupEnergyEntry.ToString() -> string!
+override Mocassin.Core.Model.GroupEnergySet.Equals(object? obj) -> bool
+override Mocassin.Core.Model.GroupEnergySet.GetHashCode() -> int
+override Mocassin.Core.Model.GroupEnergySet.ToString() -> string!
+override Mocassin.Core.Model.PairEnergyEntry.Equals(object? obj) -> bool
+override Mocassin.Core.Model.PairEnergyEntry.GetHashCode() -> int
+override Mocassin.Core.Model.PairEnergyEntry.ToString() -> string!
+override Mocassin.Core.Model.PairEnergySet.Equals(object? obj) -> bool
+override Mocassin.Core.Model.PairEnergySet.GetHashCode() -> int
+override Mocassin.Core.Model.PairEnergySet.ToString() -> string!
+override Mocassin.Core.Model.RuleFrequencyEntry.Equals(object? obj) -> bool
+override Mocassin.Core.Model.RuleFrequencyEntry.GetHashCode() -> int
+override Mocassin.Core.Model.RuleFrequencyEntry.ToString() -> string!
+override Mocassin.Core.Model.SiteEnergyOverride.Equals(object? obj) -> bool
+override Mocassin.Core.Model.SiteEnergyOverride.GetHashCode() -> int
+override Mocassin.Core.Model.SiteEnergyOverride.ToString() -> string!
+override Mocassin.Core.Model.TransitionRuleSet.Equals(object? obj) -> bool
+override Mocassin.Core.Model.TransitionRuleSet.GetHashCode() -> int
+override Mocassin.Core.Model.TransitionRuleSet.ToString() -> string!
+static Mocassin.Core.Diagnostics.ParameterizationDiagnosticCatalog.Descriptors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
+static Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.HelpFor(string! code) -> string?
+static Mocassin.Core.Editing.ParameterizationTemplateEditResult.operator !=(Mocassin.Core.Editing.ParameterizationTemplateEditResult? left, Mocassin.Core.Editing.ParameterizationTemplateEditResult? right) -> bool
+static Mocassin.Core.Editing.ParameterizationTemplateEditResult.operator ==(Mocassin.Core.Editing.ParameterizationTemplateEditResult? left, Mocassin.Core.Editing.ParameterizationTemplateEditResult? right) -> bool
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.ClearGroupEnergy(Mocassin.Core.Model.ParameterizationTemplate! template, string! clusterEnergyId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId> occupationParticleIds) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.ClearPairEnergy(Mocassin.Core.Model.ParameterizationTemplate! template, string! energyId, Mocassin.Core.Ids.ParticleId centerParticleId, Mocassin.Core.Ids.ParticleId partnerParticleId) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.ClearRuleFrequency(Mocassin.Core.Model.ParameterizationTemplate! template, Mocassin.Core.Model.Transitions.TransitionKind transitionKind, System.Guid transitionId, string! ruleGeometryId) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.ClearValues(Mocassin.Core.Model.ParameterizationTemplate! template) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.RemoveSiteEnergyOverride(Mocassin.Core.Model.ParameterizationTemplate! template, Mocassin.Core.Ids.CellSiteId siteId, Mocassin.Core.Ids.ParticleId particleId) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.Rename(Mocassin.Core.Model.ParameterizationTemplate! template, string! name) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.SetGroupEnergy(Mocassin.Core.Model.ParameterizationTemplate! template, string! clusterEnergyId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Ids.ParticleId> occupationParticleIds, Mocassin.Core.Units.EnergyEv energy) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.SetPairEnergy(Mocassin.Core.Model.ParameterizationTemplate! template, string! energyId, Mocassin.Core.Ids.ParticleId centerParticleId, Mocassin.Core.Ids.ParticleId partnerParticleId, Mocassin.Core.Units.EnergyEv energy) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.SetRuleFrequency(Mocassin.Core.Model.ParameterizationTemplate! template, Mocassin.Core.Model.Transitions.TransitionKind transitionKind, System.Guid transitionId, string! ruleGeometryId, Mocassin.Core.Units.FrequencyHz frequency) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Editing.ParameterizationTemplateEditor.SetSiteEnergyOverride(Mocassin.Core.Model.ParameterizationTemplate! template, Mocassin.Core.Ids.CellSiteId siteId, Mocassin.Core.Ids.ParticleId particleId, Mocassin.Core.Units.EnergyEv energy) -> Mocassin.Core.Editing.ParameterizationTemplateEditResult!
+static Mocassin.Core.Model.GroupEnergyEntry.operator !=(Mocassin.Core.Model.GroupEnergyEntry? left, Mocassin.Core.Model.GroupEnergyEntry? right) -> bool
+static Mocassin.Core.Model.GroupEnergyEntry.operator ==(Mocassin.Core.Model.GroupEnergyEntry? left, Mocassin.Core.Model.GroupEnergyEntry? right) -> bool
+static Mocassin.Core.Model.GroupEnergySet.operator !=(Mocassin.Core.Model.GroupEnergySet? left, Mocassin.Core.Model.GroupEnergySet? right) -> bool
+static Mocassin.Core.Model.GroupEnergySet.operator ==(Mocassin.Core.Model.GroupEnergySet? left, Mocassin.Core.Model.GroupEnergySet? right) -> bool
+static Mocassin.Core.Model.PairEnergyEntry.operator !=(Mocassin.Core.Model.PairEnergyEntry? left, Mocassin.Core.Model.PairEnergyEntry? right) -> bool
+static Mocassin.Core.Model.PairEnergyEntry.operator ==(Mocassin.Core.Model.PairEnergyEntry? left, Mocassin.Core.Model.PairEnergyEntry? right) -> bool
+static Mocassin.Core.Model.PairEnergySet.operator !=(Mocassin.Core.Model.PairEnergySet? left, Mocassin.Core.Model.PairEnergySet? right) -> bool
+static Mocassin.Core.Model.PairEnergySet.operator ==(Mocassin.Core.Model.PairEnergySet? left, Mocassin.Core.Model.PairEnergySet? right) -> bool
+static Mocassin.Core.Model.RuleFrequencyEntry.operator !=(Mocassin.Core.Model.RuleFrequencyEntry? left, Mocassin.Core.Model.RuleFrequencyEntry? right) -> bool
+static Mocassin.Core.Model.RuleFrequencyEntry.operator ==(Mocassin.Core.Model.RuleFrequencyEntry? left, Mocassin.Core.Model.RuleFrequencyEntry? right) -> bool
+static Mocassin.Core.Model.SiteEnergyOverride.operator !=(Mocassin.Core.Model.SiteEnergyOverride? left, Mocassin.Core.Model.SiteEnergyOverride? right) -> bool
+static Mocassin.Core.Model.SiteEnergyOverride.operator ==(Mocassin.Core.Model.SiteEnergyOverride? left, Mocassin.Core.Model.SiteEnergyOverride? right) -> bool
+static Mocassin.Core.Model.TransitionRuleSet.operator !=(Mocassin.Core.Model.TransitionRuleSet? left, Mocassin.Core.Model.TransitionRuleSet? right) -> bool
+static Mocassin.Core.Model.TransitionRuleSet.operator ==(Mocassin.Core.Model.TransitionRuleSet? left, Mocassin.Core.Model.TransitionRuleSet? right) -> bool

@@ -62,6 +62,11 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 | [`PAR010`](#par010) | error | Step 03 — particle and structure models | An authored object reuses a reserved implicit-object identifier | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PAR011`](#par011) | error | Step 03 — particle and structure models | A particle-set name is empty or used more than once (case-insensitive) | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PAR012`](#par012) | error | Step 03 — particle and structure models | A particle set contains the same particle identifier more than once | Review the referenced model object, correct the reported condition, and revalidate. |
+| [`PRM004`](#prm004) | error | Step 09 — parameterization templates | An energy is non-finite or outside the accepted range | Set the energy to a finite value within the accepted -100..100 eV range. |
+| [`PRM005`](#prm005) | error | Step 09 — parameterization templates | A frequency is non-positive or non-finite | Set the attempt frequency to a positive, finite value. |
+| [`PRM010`](#prm010) | warning | Step 09 — parameterization templates | Two parameterization templates use the same name | Give each parameterization template a distinct name. |
+| [`PRM013`](#prm013) | error | Step 09 — parameterization templates | A template resource limit is exceeded | Reduce the template size or split the work into smaller templates. |
+| [`PRM014`](#prm014) | error | Step 09 — parameterization templates | A stable key is malformed, duplicated, or missing | Use lowercase 64-character hexadecimal stable keys and remove duplicate value keys. |
 | [`PROJ001`](#proj001) | error | Step 01 — project format | The document declares a schema version newer than this application supports | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PROJ002`](#proj002) | error | Step 01 — project format | The document is malformed or cannot be parsed as a project | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PROJ003`](#proj003) | error | Step 01 — project format | Two objects in the same domain share an identifier | Review the referenced model object, correct the reported condition, and revalidate. |
@@ -381,6 +386,26 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 ### PAR012
 
 **A particle set contains the same particle identifier more than once.** Review the referenced model object, correct the reported condition, and revalidate.
+
+### PRM004
+
+**An energy is non-finite or outside the accepted range.** Set the energy to a finite value within the accepted -100..100 eV range.
+
+### PRM005
+
+**A frequency is non-positive or non-finite.** Set the attempt frequency to a positive, finite value.
+
+### PRM010
+
+**Two parameterization templates use the same name.** Give each parameterization template a distinct name.
+
+### PRM013
+
+**A template resource limit is exceeded.** Reduce the template size or split the work into smaller templates.
+
+### PRM014
+
+**A stable key is malformed, duplicated, or missing.** Use lowercase 64-character hexadecimal stable keys and remove duplicate value keys.
 
 ### PROJ001
 
