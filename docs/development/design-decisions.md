@@ -197,6 +197,33 @@ occupation tuple, `RuleGeometryId` inside `(transitionKind, transitionId)`, and 
 overrides. A model-signature change invalidates the template before ID matching; diff/rebase is explicit and
 reported, and values are never silently reused across changed geometry.
 
+### Diff and rebase are reported, never implicit
+
+`Diff` is a pure description by stable identity. It classifies template entries as `Matched`, `Added`, or
+`Removed` and groups related pair/group removals and additions as display-only `GeometryChanges`. Rebase is a
+separate explicit operation with three strategies:
+
+- `KeepMatching` copies only exact stable IDs and defaults every new slot.
+- `NearestGeometry` is pair-only and opt-in. It copies a removed pair value only into a unique added slot with
+  the same unordered site pair, chiral flag, stability kind, particle pair, and a distance bucket within the
+  configured tolerance. Ambiguous candidates copy nothing and are counted. Groups, rules, and site overrides
+  remain exact-ID-only because the template stores no offset or geometry hash that could justify a nearest
+  match.
+- `Reset` preserves the template identity and creation time, adopts the new signature and headers, and clears
+  every value.
+
+`ParameterizationRebaseReport` records copied/defaulted/dropped/ambiguous counts plus every nearest copy, and
+`PRM009` carries the same counts. A changed chiral link has no exact ID and is excluded from nearest copying,
+so the shared value is dropped rather than reused across the break. The service never mutates its inputs or
+saves the result; Step 26 will show the report before the user commits the rebound template.
+
+The checked-in golden fixtures are generated through the real compiler and apply path, not a synthetic value
+pattern. `ParameterizationGoldenFixtureTests` pins the ceria, ceria-KMC, barium-zirconate, and P1 chiral
+applied values and projections; `ParameterizationChiralFixtureTests` regenerates the P1/P4mm link-change
+projects and proves the drop/no-copy rule. Intentional regeneration uses `MOCASSIN_UPDATE_GOLDENS=1`, then the
+manifest signature vectors and `tools/contracts/generate.py`; `verify.sh contracts` rejects stale fixtures.
+
+
 ## Parameterization values, signature, and site background
 
 `Mocassin.Contracts` owns the applied `ParameterizationValues` and the `ParameterizationSignatureV1`

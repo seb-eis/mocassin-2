@@ -37,6 +37,12 @@ compiles. Stale or incomplete templates that need a compiled model are reported 
 compilation. A build may proceed with parameterization warnings; `--warnings-as-errors` turns them into a build
 failure with exit `4`. Validation-stage warnings promoted by the same flag exit `1`.
 
+The full create/edit/apply/rebase flow is in
+[Parameterization templates](../user-guide/parameterization.md). Worked examples are
+`samples/parameterizations/ceria-parameters.mocprj` and
+`samples/parameterizations/barium-zirconate-parameters.mocprj`; their applied values and signatures are the
+checked-in golden fixtures.
+
 | Symptom | Likely cause | Fix |
 | --- | --- | --- |
 | `PRM001` error | The model geometry, rules, or catalog changed after the template was created | Rebase the template, or recreate it from the current compiled model; never reuse values across changed geometry. |

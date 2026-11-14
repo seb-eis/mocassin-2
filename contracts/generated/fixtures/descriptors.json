@@ -53,30 +53,40 @@
         "signature": "parameterization",
         "domainPrefix": "mocassin/parameterization-signature/v1",
         "projectionType": "ParameterizationSignatureV1",
-        "signatureHex": "6a1ff985c7fa6950b29b8d78aa5a5d1751318d5b6285dbe9ebcb32389b63c439",
-        "projectionSha256": "71db3c6ebe2436a11b49fc6424cfec37be2dcab00400286ad7b5d29fa6d7caab",
+        "signatureHex": "a7f6ebd97ea336308360949e4fe703bb1c88220a545e9f9db06f009cd6d32b9d",
+        "projectionSha256": "3dbc1b8cf790d39a542155997148c272344e804b4c0cdea89bed68520ad3f6c1",
         "modelSignature": "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2",
-        "description": "Deterministic dense values over the compiled shapes of the matching sample; parameterization-barium-zirconate.json"
+        "description": "Real apply of the checked-in barium-zirconate template over the compiled sample; parameterization-barium-zirconate.json"
       },
       {
         "id": "parameterization-ceria-kmc",
         "signature": "parameterization",
         "domainPrefix": "mocassin/parameterization-signature/v1",
         "projectionType": "ParameterizationSignatureV1",
-        "signatureHex": "ab22580975f1d7a07bc5163e760b4f8716fa6a04084777216f5925bd2ff5e1b7",
-        "projectionSha256": "11f3ff9f27e700a4cd5e87fa8e3964d24441ba3b32799f9d4e6cad8e4a5f445c",
+        "signatureHex": "da9d7167a0dadf67b97709f92a552ff2b18b16b9c376e9acc2fc95448e14c43a",
+        "projectionSha256": "fa0165111932d3f70d983c27bc7ac870a97e0424e23be84c9194ab323c32b20f",
         "modelSignature": "812a7a77a8b78993cf8c475061fbf071fea27082569f154737ed12eb3d64a314",
-        "description": "Deterministic dense values over the compiled shapes of the matching sample; parameterization-ceria-kmc.json"
+        "description": "Implicit default apply over the compiled ceria KMC sample; parameterization-ceria-kmc.json"
       },
       {
         "id": "parameterization-ceria",
         "signature": "parameterization",
         "domainPrefix": "mocassin/parameterization-signature/v1",
         "projectionType": "ParameterizationSignatureV1",
-        "signatureHex": "aa4c11cd12e9a6f4d2fc454ced8c11cb36862e921498c0ea78f4fc09537391c4",
-        "projectionSha256": "b1058d0e4806de182321ab9b6aeb9c94349f3436a243bb33abab1288e32711b1",
+        "signatureHex": "cac3b231e667164fa7dfd4daa7b326dbc5e23bde17fe30873f775f7f77975042",
+        "projectionSha256": "e8bd8daf9a72ef53356914939eeb4fc71e10af9e0a7c22773bed5c5d656b9fd1",
         "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
-        "description": "Deterministic dense values over the compiled shapes of the matching sample; parameterization-ceria.json"
+        "description": "Real apply of the checked-in ceria template over the compiled sample; parameterization-ceria.json"
+      },
+      {
+        "id": "parameterization-chiral-p1",
+        "signature": "parameterization",
+        "domainPrefix": "mocassin/parameterization-signature/v1",
+        "projectionType": "ParameterizationSignatureV1",
+        "signatureHex": "ac5b381e8acaf8489f30d95b687b42637bc50719f1a7f23006735336523f474b",
+        "projectionSha256": "a958f0b4731611bab0d63b2b839eb1c026d6266c61e429da7de4d982cac0c6ce",
+        "modelSignature": "6d49e4d2ce5bdc4ed1f5383ce8bd07666938c1e8ab0b981520d53b7386c404f0",
+        "description": "Real apply of the checked-in P1 chiral template over the generated P1 link-change fixture; parameterization-chiral-p1.json"
       }
     ]
   },
@@ -245,6 +255,48 @@
     {
       "id": "sample-parameterizations-barium-zirconate",
       "path": "samples/parameterizations/barium-zirconate-parameters.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "09"
+    },
+    {
+      "id": "parameterization-applied-values-ceria",
+      "path": "tests/contracts/parameterizations/parameterization-ceria.json",
+      "kind": "parameterization-applied-values",
+      "status": "current",
+      "step": "09"
+    },
+    {
+      "id": "parameterization-applied-values-ceria-kmc",
+      "path": "tests/contracts/parameterizations/parameterization-ceria-kmc.json",
+      "kind": "parameterization-applied-values",
+      "status": "current",
+      "step": "09"
+    },
+    {
+      "id": "parameterization-applied-values-barium-zirconate",
+      "path": "tests/contracts/parameterizations/parameterization-barium-zirconate.json",
+      "kind": "parameterization-applied-values",
+      "status": "current",
+      "step": "09"
+    },
+    {
+      "id": "parameterization-applied-values-chiral-p1",
+      "path": "tests/contracts/parameterizations/parameterization-chiral-p1.json",
+      "kind": "parameterization-applied-values",
+      "status": "current",
+      "step": "09"
+    },
+    {
+      "id": "project-chiral-p4mm",
+      "path": "tests/contracts/project-chiral-p4mm.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "09"
+    },
+    {
+      "id": "project-chiral-p1",
+      "path": "tests/contracts/project-chiral-p1.mocprj",
       "kind": "project",
       "status": "current",
       "step": "09"

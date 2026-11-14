@@ -1,0 +1,27 @@
+{
+  "fixtureFormat": "parameterization-applied-values-v1",
+  "id": "parameterization-ceria-kmc",
+  "source": "samples/simulations/ceria-kmc.mocprj",
+  "templateName": "Default parameters",
+  "modelSignature": "812a7a77a8b78993cf8c475061fbf071fea27082569f154737ed12eb3d64a314",
+  "signatureHex": "da9d7167a0dadf67b97709f92a552ff2b18b16b9c376e9acc2fc95448e14c43a",
+  "pairTables": [],
+  "groupSets": [],
+  "siteEnergies": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+  ],
+  "transitionRuleFrequencies": [
+    10000000000000,
+    10000000000000,
+    10000000000000,
+    10000000000000
+  ]
+}

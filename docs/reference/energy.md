@@ -75,7 +75,8 @@ For every directed pair candidate:
   keeps `EnergyId == GeometryId`. Only reciprocal orbit-inverse matches are linked; a one-way match is left
   achiral.
 
-Step 08 uses `EnergyId` as the compiled `object_id`; Step 09 stores one parameter value per `EnergyId`.
+Step 08 uses `EnergyId` as the compiled `object_id`; Step 09 stores one parameter value per `EnergyId` (see
+[parameterization template values](project-format.md#parameterization-template-values-step-09)).
 
 ## API surface
 

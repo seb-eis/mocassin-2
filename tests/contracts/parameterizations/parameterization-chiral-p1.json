@@ -1,0 +1,42 @@
+{
+  "fixtureFormat": "parameterization-applied-values-v1",
+  "id": "parameterization-chiral-p1",
+  "source": "tests/contracts/project-chiral-p1.mocprj",
+  "templateName": "P1 chiral parameters",
+  "modelSignature": "6d49e4d2ce5bdc4ed1f5383ce8bd07666938c1e8ab0b981520d53b7386c404f0",
+  "signatureHex": "ac5b381e8acaf8489f30d95b687b42637bc50719f1a7f23006735336523f474b",
+  "pairTables": [
+    [
+      0,
+      0,
+      0,
+      0.22
+    ],
+    [
+      0,
+      0,
+      0,
+      0.22
+    ],
+    [
+      0,
+      0,
+      0,
+      0.22
+    ],
+    [
+      0,
+      0,
+      0,
+      0.22
+    ]
+  ],
+  "groupSets": [],
+  "siteEnergies": [
+    0,
+    0,
+    0,
+    0
+  ],
+  "transitionRuleFrequencies": []
+}

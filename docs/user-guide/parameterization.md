@@ -4,10 +4,8 @@ A parameterization template supplies the numerical values that a compiled model 
 energies, cluster energies, site energies, and kinetic attempt frequencies. The model defines geometry and
 semantics; the template defines the values that are applied to it.
 
-> **Draft scope.** Step 09 is implemented in features. This page documents template creation, the completeness
-> summary, applying a template, site-energy overrides/reset, and diff/rebase with the explicit rebase report.
-> The checked-in golden templates, final benchmark run, and closeout documentation remain the final Step 09
-> feature.
+Step 09 provides the library API. The graphical parameterization editor and bulk import/export are Step 26;
+the `mocassin` build commands that select a template are Step 12.
 
 ## What a template contains
 
@@ -78,6 +76,61 @@ zero pair and group energies, compiled rule frequencies, and the authored site-e
 The template name is a label, not a reference. Identifiers are what build templates use. Two templates may
 target the same compiled model; a duplicate name is only a warning. Commit a template through
 `ProjectEditor.AddParameterizationTemplate` and let project validation re-check its structure.
+
+### Checked-in golden templates
+
+Two populated project fixtures are checked in as worked examples:
+
+- `samples/parameterizations/ceria-parameters.mocprj` — the ceria pair, cluster, and site-energy values.
+- `samples/parameterizations/barium-zirconate-parameters.mocprj` — the barium-zirconate values, including the
+  reciprocal chiral tables (one shared value per `energyId`).
+
+Both are ordinary projects: open one, compile its model, and apply its single template. Their applied values
+and parameterization signatures are pinned by the golden fixtures under `tests/contracts/parameterizations/`
+and `tests/contracts/projections/parameterization/`, which are regenerated through the real compiler and
+apply path (`MOCASSIN_UPDATE_GOLDENS=1`). The generated P1/P4mm link-change fixtures
+(`tests/contracts/project-chiral-p1.mocprj` and `project-chiral-p4mm.mocprj`) cover the changed-chiral-link
+case.
+
+## Editing values
+
+`ParameterizationTemplateEditor` provides pure template mutations. Every operation validates the stable key,
+returns a new template, and never mutates its input. The returned `ParameterizationTemplateEditResult` carries
+the candidate template and any structural diagnostics.
+
+```csharp
+// Pair or group energy.
+var pair = ParameterizationTemplateEditor.SetPairEnergy(
+    template, energyId, centerParticleId, partnerParticleId, new EnergyEv(-0.5));
+
+var group = ParameterizationTemplateEditor.SetGroupEnergy(
+    template, clusterEnergyId, occupationParticleIds, new EnergyEv(0.48));
+
+// Kinetic attempt frequency.
+var rule = ParameterizationTemplateEditor.SetRuleFrequency(
+    template, TransitionKind.Kinetic, transitionId, ruleGeometryId, new FrequencyHz(2.0e13));
+
+// Clear a value: the slot falls back to its default.
+var cleared = ParameterizationTemplateEditor.ClearPairEnergy(
+    template, energyId, centerParticleId, partnerParticleId);
+
+// Rename the label. The identifier is unchanged.
+var renamed = ParameterizationTemplateEditor.Rename(template, "Ceria parameters v2");
+```
+
+- A `Clear*` operation removes the entry; it does not write the default value. The effective value then comes
+  from the model defaults described above.
+- `SetPairEnergy` normalizes a chiral entry to the lexicographically smaller particle orientation and stores one
+  shared value. Writing the mirrored orientation updates the same entry.
+- `SetGroupEnergy` identifies the entry by the canonical occupation tuple in site order.
+- `ParameterizationTemplateEditor.ClearValues` removes every explicit value and override while keeping the
+  identity, name, model signature, and set headers.
+- Look up stable keys in the template or the compiled model, not in authored array positions. Unknown keys are
+  reported as diagnostics rather than silently creating a new identity.
+
+The editor operations are the same ones Step 26 will drive from the GUI. Bulk fill, filtering, and JSON
+exchange are later-step conveniences; Step 09 exposes only the pure operations and the summary/diff data they
+need.
 
 ## Reading the summary
 

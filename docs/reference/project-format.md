@@ -400,6 +400,63 @@ missing array loads as empty.
 - Structural limits and malformed keys are reported by the `PRM` diagnostics; see
   [Diagnostics](diagnostics.md).
 
+#### Stable identities
+
+| Value | Identity | Source |
+| --- | --- | --- |
+| Pair energy | `energyId` | The shared compiled pair identity; the lexicographically smaller directed geometry for a reciprocal chiral pair. |
+| Group energy | `clusterEnergyId` + canonical `occupationParticleIds` tuple | The compiled cluster identity and the canonical occupation in site order. |
+| Rule frequency | `ruleGeometryId` inside `(transitionKind, transitionId)` | The compiled rule geometry identity. |
+| Site-energy override | `(siteId, particleId)` | The authored reference site and particle. |
+
+Dense compiled indices are never template identities. An unknown or malformed key is `PRM014`; a key that no
+longer exists in the current model is `PRM002` and is ignored. Applying a template whose `modelSignature`
+differs from the compiled model is `PRM001`; rebase is an explicit operation.
+
+#### Canonical ordering
+
+1. `stablePairSets`, `unstablePairSets` by `energyId` ordinal; entries by
+   `(centerParticleId, partnerParticleId)`.
+2. `groupSets` by `clusterEnergyId` ordinal; entries by the `occupationParticleIds` GUID sequence in site order.
+3. `siteEnergyOverrides` by `(siteId, particleId)`.
+4. `transitionRuleSets` by `(transitionKind, transitionId)`; `rules` by `ruleGeometryId` ordinal.
+
+The canonical document orders `parameterizations` by `id`. Two templates that differ only beyond the 12th
+decimal have different document hashes but the same applied values and parameterization signature: `apply`
+quantizes to 12 decimals with round-half-away-from-zero before storing and signing.
+
+#### Limits
+
+| Limit | Value | Diagnostic |
+| --- | ---: | --- |
+| Templates per project | 256 | `PRM013` |
+| Pair sets per template | 100,000 | `PRM013` |
+| Pair entries per set | 4,096 table cells (64 compiled particles including void) | `PRM013` |
+| Group sets per template | 100,000 | `PRM013` |
+| Group entries per set | 1,000,000 | `PRM013` |
+| Site overrides per template | 1,000,000 | `PRM013` |
+| Transition rule sets per template | 100,000 | `PRM013` |
+| Rule entries per set | 1,000,000 | `PRM013` |
+| Explicit value entries per template | 2,000,000 | `PRM013` |
+| Stable ID length | 64 lowercase hex characters | `PRM014` |
+| Template name length | 200 characters | `PRM013` |
+| Applied value bytes per apply | 2 GiB | `PRM013` |
+
+Counts are checked with 64-bit arithmetic before allocation. The enclosing project document is also bounded by
+`ProjectStoreOptions.MaxDocumentBytes` (64 MiB). Template content is data only: it never selects a file,
+command, glob, or SQL statement.
+
+#### Versioning
+
+There is no template-level format version in v1. The template shape is part of the project `schemaVersion`;
+Step 09 extends the pre-release Step 01 stub additively, so `schemaVersion` stays `1`. After the first released
+`.mocprj`, any semantic template change bumps `schemaVersion` and adds a pure migration in
+`ProjectMigrations`. Unknown properties are rejected by the project reader; never reinterpret an existing field.
+
+The checked-in golden templates are `samples/parameterizations/ceria-parameters.mocprj` and
+`samples/parameterizations/barium-zirconate-parameters.mocprj`. Their applied values and signatures are pinned
+by `tests/contracts/parameterizations/` and `tests/contracts/projections/parameterization/`.
+
 ## View settings
 
 `viewSettings` is persisted with the project so a shared project opens with the same view:

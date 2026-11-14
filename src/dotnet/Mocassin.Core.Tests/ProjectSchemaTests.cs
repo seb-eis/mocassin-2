@@ -28,6 +28,8 @@ public sealed class ProjectSchemaTests
         "tests/contracts/project-simulations-minimal.mocprj",
         "tests/contracts/project-simulations-populated.mocprj",
         "tests/contracts/project-parameterizations-populated.mocprj",
+        "tests/contracts/project-chiral-p4mm.mocprj",
+        "tests/contracts/project-chiral-p1.mocprj",
         "samples/blank/blank.mocprj",
         "samples/ceria/ceria.mocprj",
         "samples/parameterizations/ceria-parameters.mocprj",

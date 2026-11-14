@@ -43,3 +43,8 @@ jobs:
         run: >
           dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks --no-build --
           --filter "*P1Expansion20Cubed*"
+
+      - name: Parameterization
+        run: >
+          dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks --no-build --
+          --filter "*ParameterizationBenchmarks*"

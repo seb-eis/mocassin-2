@@ -1,0 +1,8 @@
+{
+  "fixtureFormat": "canonical-projection-v1",
+  "id": "parameterization-chiral-p1",
+  "descriptor": "parameterization-v1",
+  "modelSignature": "6d49e4d2ce5bdc4ed1f5383ce8bd07666938c1e8ab0b981520d53b7386c404f0",
+  "signatureHex": "ac5b381e8acaf8489f30d95b687b42637bc50719f1a7f23006735336523f474b",
+  "projectionSha256": "a958f0b4731611bab0d63b2b839eb1c026d6266c61e429da7de4d982cac0c6ce"
+}

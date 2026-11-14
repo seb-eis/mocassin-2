@@ -17,7 +17,7 @@ completeness checks.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required at `26d6a0ecff543ac65eb60d60d9f9c893e00f32bc`
+- **Design review:** Ready with notes at `26d6a0ecff543ac65eb60d60d9f9c893e00f32bc` (round 4) — accepted 2026-11-14
 - **Last updated:** 2026-11-14
 
 ### Owner decisions (2026-11-14)
@@ -38,8 +38,8 @@ completeness checks.
 | `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `222c02e` |
 | `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `ce20049` |
 | `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `4063c4d` |
-| `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
-| `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | Approved | — | — | — |
+| `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `f6cfce3` |
+| `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | In progress | — | — | — |
 
 ### Feature 1 outcome and deviations
 
@@ -288,7 +288,7 @@ Notes and limitations:
 
 ### Feature 6 outcome
 
-`diff-and-rebase` is implemented on its feature branch and awaits the feature squash.
+`diff-and-rebase` was squash-merged as `f6cfce3`. No per-feature CI run was triggered.
 
 Implemented:
 
@@ -340,10 +340,116 @@ Notes and limitations:
 - `NearestGeometry` additionally requires the same stable/unstable kind and the same particle pair, and excludes
   chiral entries. These are conservative readings of "unique reported descriptor match" that prevent copying a
   value between different particles or across a changed chiral link.
-- A generated P1/P4mm chiral-link fixture remains feature 7; the real barium-zirconate model covers the chiral
-  geometry-change path, including 24 chiral geometries (12 reciprocal tables) sharing one value per `EnergyId`.
-- The feature row remains `In progress` until the feature branch is squash-merged; this section records the
-  implementation and local evidence, not a squash commit.
+- A generated P1/P4mm chiral-link fixture was previously assigned to feature 7. Feature 7 now supplies it as
+  `tests/contracts/project-chiral-p4mm.mocprj` and `tests/contracts/project-chiral-p1.mocprj`, with a
+  projection fixture and a test that proves the shared value is dropped rather than copied; the real
+  barium-zirconate model also covers the chiral geometry-change path, including 24 chiral geometries
+  (12 reciprocal tables) sharing one value per `EnergyId`.
+- Feature 6 is squash-merged; this section records the implementation and the local evidence above.
+
+### Feature 7 outcome
+
+`golden-templates-docs-and-closeout` is implemented on its feature branch; this section records the work and
+the local evidence. It is not squash-merged yet.
+
+Implemented:
+
+- **Checked-in golden templates.** `samples/parameterizations/ceria-parameters.mocprj` and
+  `samples/parameterizations/barium-zirconate-parameters.mocprj` were already the worked examples; feature 7
+  adds the golden applied values and signatures produced through the real `ModelCompiler` and
+  `ParameterizationService.Apply`, not a synthetic value pattern:
+  - `tests/contracts/parameterizations/{parameterization-ceria,parameterization-ceria-kmc,parameterization-barium-zirconate,parameterization-chiral-p1}.json`;
+  - `tests/contracts/projections/parameterization/*.bin/.json`.
+  Ceria uses its checked-in template, barium zirconate uses its checked-in template, and ceria KMC uses the
+  implicit default path (the sample has `parameterizations: []`).
+- **Generator/check flow.** `ParameterizationGoldenFixtureTests` (Packages tests, PR-medium) regenerates and
+  checks the fixtures with `MOCASSIN_UPDATE_GOLDENS=1` and fails when the checked-in bytes or applied values
+  drift. The synthetic `ParameterizationTestValues` and the old Compilation-test generator were removed. The
+  manifest `fixtures.signatureVectors.vectors` and `fixtures.items` were updated, and
+  `python tools/contracts/generate.py` regenerated `signature-vectors.json` and the generated descriptors.
+  The Python checker re-encodes all four projections from the `parameterization-v1` descriptor.
+- **Chiral link-change fixture.** `ParameterizationChiralFixtureTests` generates and checks
+  `tests/contracts/project-chiral-p4mm.mocprj` and `tests/contracts/project-chiral-p1.mocprj` (the P1 fixture
+  uses a 10.1 Å c axis so the chiral pair identity changes while the logical site pair stays recognizable).
+  The test proves the P4mm chiral value is `Removed`, not copied, by a `NearestGeometry` rebase into P1, and
+  that the P1 template applies one shared value per chiral table in both directions. Both projects are in
+  `ProjectSchemaTests.fixturePaths` and the manifest fixture registry.
+- **Benchmarks.** `Mocassin.Benchmarks/Parameterization/ParameterizationBenchmarks.cs` adds BenchmarkDotNet
+  measurements for creation, apply, signature, the implicit-default KMC path, and canonical template JSON
+  round-trip; `benchmark.yml` dispatches the suite manually.
+- **Documentation.** Completed the user guide (creation, checked-in templates, editing via
+  `ParameterizationTemplateEditor`, apply, completeness, site overrides/reset, diff/rebase and report),
+  project-format reference (identities, canonical order, limits, versioning, golden fixtures), diagnostics
+  cross-links, development compilation-pipeline/design-decisions (signature and rebase flow, golden
+  regeneration), troubleshooting (stale/incomplete/rebase links), energy cross-links, performance results, and
+  the `Parameterization` navigation entry.
+- **Parity.** Step 09 rows in `appendix-b-parity-matrix.md` now distinguish delivered library features from
+  the Step 26 editor UI and the Step 12 CLI replacement.
+
+Measured performance (`dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks --no-build --
+--filter "*ParameterizationBenchmarks*"`, BenchmarkDotNet 0.15.8, .NET SDK 10.0.403 / host runtime 10.0.14
+Release, AMD Ryzen 7 7840U 8 physical / 16 logical cores, Debian GNU/Linux 13):
+
+| Benchmark | Mean | Allocated |
+| --- | ---: | ---: |
+| `CreateCeriaTemplate` | 7.610 µs | 21.13 KB |
+| `ApplyCeria` | 21.929 µs | 124.78 KB |
+| `ApplyCeriaKmc` | 3.435 µs | 70.65 KB |
+| `SignatureCeria` | 6.944 µs | 65.89 KB |
+| `CanonicalTemplateJsonRoundTrip` | 138.904 µs | 204.70 KB |
+
+All values are far below the design targets (`< 20 ms` create, `< 50 ms` apply, `< 100 ms` round-trip). The
+benchmark host is a 16-logical-core laptop-class CPU, not the design's 8-physical-core benchmark laptop, so the
+absolute numbers are conservative for the target class; the synthetic large-model case remains a separate
+PR-medium/nightly guard.
+
+Local gates: see the "Feature 7 gate evidence" section below.
+
+Notes and limitations:
+
+- No per-feature CI run was triggered.
+- The ceria-KMC golden fixture is the implicit-default apply (zero pair/group values, compiled `1e13 Hz`);
+  the checked-in ceria and barium-zirconate templates cover the populated path.
+- The P1 link-change fixture deliberately changes the c axis; the real barium-zirconate test still covers the
+  pure cell-parameter geometry change. The fixture is a generated `tests/contracts/` project, not a shipped
+  sample.
+- The benchmark numbers were measured on the development container, not the release benchmark runner. They are
+  recorded to show the order of magnitude and the relative cost of create/apply/signature/round-trip; every
+  design target is met with substantial margin on the checked-in samples.
+- `docs/planning/closeout/step-09.json` and the audit record are not created in this feature; the orchestrator
+  owns the closeout evidence and the single closeout CI dispatch.
+
+### Feature 7 gate evidence
+
+`golden-templates-docs-and-closeout` has not been squash-merged yet, so the feature row remains `In progress`.
+The full closeout gate was run on the feature branch with the Python toolchain and `cargo-deny` installed:
+
+```sh
+PATH=/home/node/.venvs/mocassin/bin:$PATH ./tools/verify.sh all --require
+# exit 0; "Closeout gate completed with required checks enabled."
+```
+
+- **.NET:** exit 0; build 0 warnings / 0 errors; Core 639, Symmetry 223, Compilation 95, Packages 212, Cli 7,
+  App 1, Contracts 14, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- **API/dependencies:** exit 0; NuGet licence policy 51 packages; no vulnerable packages; ApiCompat compatible
+  for all baselines.
+- **Rust:** exit 0; `cargo fmt --check`, clippy `-D warnings`, and the workspace tests passed.
+- **Python:** exit 0; 3 tests passed; package build completed.
+- **Documentation:** exit 0; links OK (154 files); Zensical strict "No issues found"; DocFX 340 models,
+  0 warnings / 0 errors; rustdoc generated; site built.
+- **Contracts/policy:** exit 0; 18 generated artifacts current; model projections 5 fixtures; parameterization
+  projections 4 fixtures; space-group catalog current (274 settings, sha256
+  `1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395`); process consistency OK; 20 tool tests
+  passed; SPDX headers in 467 source files; no secret patterns in 799 tracked text files; `cargo-deny`
+  advisories/bans/licenses/sources ok.
+- **Benchmark:** `dotnet run -c Release --project src/dotnet/Mocassin.Benchmarks --no-build --
+  --filter "*ParameterizationBenchmarks*"`; 5 benchmarks executed; results in the feature-7 outcome above.
+- No per-feature CI run was triggered.
+
+Remaining closeout work belongs to the orchestrator: squash-merge this feature into the step branch, merge
+current `main`, run the single closeout CI dispatch, fill `docs/planning/closeout/step-09.json` and run
+`python tools/check_closeout_evidence.py`, then create and freeze `docs/planning/audits/step-09.md` for the
+independent audit. This feature does not create the audit record, the closeout JSON, a tag, or a merge.
 
 ## Goal
 
@@ -1571,33 +1677,33 @@ and the CLI note that Step 12 replaces a hypothetical `mocassin parameterize`.
 
 ## Implementation tasks
 
-- [ ] Extend the Core template record and add pair/group/rule/site value records, limits, normalization, and
+- [x] Extend the Core template record and add pair/group/rule/site value records, limits, normalization, and
       canonical JSON.
-- [ ] Add `ProjectEditor` template operations and structural `PRM` validation.
-- [ ] Add `ParameterizationValues`, `ParameterizationSignatureV1`, the public canonical writer reuse, manifest
+- [x] Add `ProjectEditor` template operations and structural `PRM` validation.
+- [x] Add `ParameterizationValues`, `ParameterizationSignatureV1`, the public canonical writer reuse, manifest
       finalization, generated descriptor, and golden projection vectors.
 - [x] Implement `ParameterizationFactory.Create` and `Describe`, set headers, and `ParameterizationSummary`.
 - [x] Implement `ParameterizationService.Apply`, defaults, quantization, site-energy background, overrides, and
       `ParameterizedModel`.
-- [ ] Implement compiled-bound `Validate` and every `PRM` emission/path.
-- [ ] Implement `ParameterizationDiff` and the `KeepMatching`/`NearestGeometry`/`Reset` rebase report.
-- [ ] Add ceria and barium-zirconate template fixtures, golden parameterized values/signatures, and benchmarks.
-- [ ] Update docs, diagnostics, parity, and the feature log; run the closeout gates.
+- [x] Implement compiled-bound `Validate` and every `PRM` emission/path.
+- [x] Implement `ParameterizationDiff` and the `KeepMatching`/`NearestGeometry`/`Reset` rebase report.
+- [x] Add ceria and barium-zirconate template fixtures, golden parameterized values/signatures, and benchmarks.
+- [x] Update docs, diagnostics, parity, and the feature log; run the closeout gates.
 
 ## Acceptance criteria
 
 - [x] Creating a template from the ceria compiled model produces exactly the expected sets/rules.
 - [x] Applying the template to the same model succeeds and yields the same compiled values.
 - [x] A changed model produces a signature mismatch with a useful diff.
-- [ ] Rebase copies unchanged values, defaults new ones, and reports removed ones without silent reuse.
+- [x] Rebase copies unchanged values, defaults new ones, and reports removed ones without silent reuse.
 - [x] Chiral partners share one `EnergyId` and one value; independent A→B/B→A values are unrepresentable.
 - [x] Site energy overrides apply and can be reset to the authored model value.
-- [ ] Missing/zero values produce warnings, not silent success.
-- [ ] Template JSON is canonical and round-trips, including culture, `-0.0`, and additive missing arrays.
-- [ ] The parameterization signature is deterministic, finalized in the manifest, and reproduced by the
+- [x] Missing/zero values produce warnings, not silent success.
+- [x] Template JSON is canonical and round-trips, including culture, `-0.0`, and additive missing arrays.
+- [x] The parameterization signature is deterministic, finalized in the manifest, and reproduced by the
       checked-in projection vector.
-- [ ] Untrusted-template limits reject oversized counts/strings/values with `PRM` errors before allocation.
-- [ ] Documentation written.
+- [x] Untrusted-template limits reject oversized counts/strings/values with `PRM` errors before allocation.
+- [x] Documentation written.
 
 ## Documentation
 

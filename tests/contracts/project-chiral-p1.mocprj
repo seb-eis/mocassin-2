@@ -1,0 +1,184 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f41",
+  "masterSeed": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "name": "P1 chiral-link fixture",
+  "description": "Step 09 generated chiral link-change fixture.",
+  "createdUtc": "2026-11-14T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-14T12:00:00.0000000Z",
+  "model": {
+    "particles": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20",
+        "name": "P0",
+        "symbol": "P0",
+        "charge": 0,
+        "isVacancy": false
+      }
+    ],
+    "particleSets": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f30",
+        "name": "Set",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20"
+        ]
+      }
+    ],
+    "structure": {
+      "name": "P1/P4mm chiral-link fixture",
+      "spaceGroup": {
+        "number": 1,
+        "axis": "none",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 5,
+        "b": 5,
+        "c": 10.1,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90
+      },
+      "sites": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f10",
+          "name": "A",
+          "fractional": [
+            0,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f30",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f11",
+          "name": "B",
+          "fractional": [
+            0.5,
+            0.5,
+            0.2
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f30",
+          "stability": "stable"
+        }
+      ],
+      "dummyPositions": []
+    },
+    "stableEnvironment": {
+      "cutoff": 4.5,
+      "filters": []
+    }
+  },
+  "parameterizations": [
+    {
+      "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f90",
+      "name": "P1 chiral parameters",
+      "modelSignature": "6d49e4d2ce5bdc4ed1f5383ce8bd07666938c1e8ab0b981520d53b7386c404f0",
+      "createdUtc": "2026-11-14T12:00:00.0000000Z",
+      "stablePairSets": [
+        {
+          "energyId": "135df22033f8c67be7be4a3c90006b450adb801234aa9e379f3eeb2aff223d94",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f10",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f11",
+          "distanceBucketFm": 407190,
+          "isChiral": true,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20",
+              "energyEv": 0.22
+            }
+          ]
+        },
+        {
+          "energyId": "5b11abb84bd9a2596674d430f6581ab9b69630c6450bfd18444cdfb3e8ef7da0",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f10",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f11",
+          "distanceBucketFm": 407190,
+          "isChiral": true,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20",
+              "energyEv": 0.22
+            }
+          ]
+        },
+        {
+          "energyId": "7505aeff38d1a7c57d04b2c1017d47bc60e5fce18a981f1b23082139020c04f8",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f10",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f11",
+          "distanceBucketFm": 407190,
+          "isChiral": true,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20",
+              "energyEv": 0.22
+            }
+          ]
+        },
+        {
+          "energyId": "c4bb3ed2a63ba6ed320c552e86f8fa4007bf7951aaabd0003c735f5f21239ca9",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f11",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f10",
+          "distanceBucketFm": 407190,
+          "isChiral": true,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-3a2b3c4d8f20",
+              "energyEv": 0.22
+            }
+          ]
+        }
+      ],
+      "unstablePairSets": [],
+      "groupSets": [],
+      "siteEnergyOverrides": [],
+      "transitionRuleSets": []
+    }
+  ],
+  "jobTemplates": [],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}
