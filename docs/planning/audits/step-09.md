@@ -244,11 +244,12 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-audit required — round 1 returned `Fixes required` (F-01 Blocker; F-02–F-05 Minor; F-06–F-07
-Notes). The step agent's resolutions are recorded in `## Resolution status`; after the fix feature is
-squash-merged, a replacement closeout CI run and refreshed closeout evidence will follow.
+**State:** Passed with notes — round 2 re-audited `916bae1b66aeb0d3b8fb1e451072523a869b596e` and found the
+round-1 findings resolved; only the round-2 notes R2-1–R2-5 remain and require explicit human-owner acceptance.
+Round 1 remains `Fixes required` as recorded in `### Audit round 1`; the round-2 verdict is in
+`### Audit round 2`.
 
-`Re-audit required` is a record state, not a verdict.
+`Passed with notes` is a record state and the round-2 verdict; it does not alter the round-1 verdict.
 
 ## Reviewer independence
 
@@ -358,3 +359,104 @@ unused applied-byte constant). Because a Blocker remains, the step cannot be app
 
 **Fixes required** — fix F-01 and the Minor findings, add regression tests, refresh the closeout evidence and
 one replacement closeout CI run, then request a fresh re-audit. No merge or tag is authorized by this record.
+
+### Audit round 2
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author or implement Step 09, I did not write audit round 1, and I have no
+shared conversation with the planner, implementor, round-1 auditor, or orchestrator. I received only the
+frozen commit/branch state, the audit request, repository links, and the required commands/scope; no desired
+verdict or summary was supplied. I read the repository myself and reproduced every round-1 claim from the
+tree; the `Resolution status` table was not treated as evidence. Nothing in the repository was edited except
+this record; scratch probes live under `/tmp/opencode/step09-probe` and are not committed.
+
+Frozen state: branch `step/09-parameterization-templates`; audited code commit
+`916bae1b66aeb0d3b8fb1e451072523a869b596e`; request tip `3229ee4a429a370b42c1823afc72905761986ebc`.
+`git diff --name-status 916bae1..3229ee4` contains only four `docs/planning/` files (this record, the closeout
+evidence, `status.md`, and the Step 09 page), so the request tip is documentation-only. `main` and
+`origin/main` are both `b81355e00946f7abee5c4a56be23d8e1f777743e`, an ancestor of the audited commit; no
+merge-tree run is required. The working tree is clean. There is no `step-09` tag locally or on `origin` (only
+`step-00`–`step-08`), and no merge to `main`. The only branch runs are the earlier `43630049214` at
+`20c73bc` and the replacement `43634322838` at `916bae1`; no run exists at `638f3e3`/`3229ee4` or on any
+feature branch.
+
+#### Commands and results
+
+- `PATH=/home/node/.venvs/mocassin/bin:$PATH ./tools/verify.sh all --require` — **exit 0**, "Closeout gate
+  completed with required checks enabled." .NET Release build 0 warnings/0 errors; `dotnet format` clean;
+  tests: Core 641, Symmetry 223, Compilation 96, Packages 218, Contracts 15, Cli 7, App 1, Results 1,
+  Architecture 1 (1,203 total, 0 failed/skipped). ApiCompat compatible for all baselines; NuGet licence policy
+  51 packages, no vulnerable packages. Rust `fmt`/`clippy -D warnings`/workspace tests passed. Python 3 tests
+  passed and wheel/sdist built. Documentation links OK (155 files), Zensical strict "No issues found", DocFX
+  340 models 0 warnings/0 errors, rustdoc and site built. Contracts/policy: 18 artifacts current, model
+  projections 5, parameterization projections 4, space-group catalog current (274 settings, sha256
+  `1f3bf67d…`), process consistency OK, 20 tool tests, SPDX headers 468 files, no secret patterns in 812
+  tracked text files, cargo-deny advisories/bans/licenses/sources ok.
+- `python tools/check_closeout_evidence.py docs/planning/closeout/step-09.json` — `Closeout evidence: OK`.
+- `python tools/contracts/check_model_projection.py` — `Model projection check OK (5 fixtures).`
+- `python tools/contracts/check_parameterization_projection.py` — `Parameterization projection check OK (4
+  fixtures).`
+- Targeted round-1 regression runs (Release, `--no-build`): Packages `ParameterizationValidationTests` +
+  `ParameterizationApplyTests` + `ParameterizationOptionsTests` 29/29; Core `ParameterizationTemplateTests`
+  13/13; Compilation `ProjectionFixtureTests` 7/7; Contracts `ParameterizationSignatureV1Tests` 14/14.
+- GitHub API `GET /repos/seb-eis/mocassin-2/actions/runs/43634322838` — `name=CI`,
+  `event=workflow_dispatch`, `status=completed`, `conclusion=success`, `run_attempt=1`,
+  `head_branch=step/09-parameterization-templates`,
+  `head_sha=916bae1b66aeb0d3b8fb1e451072523a869b596e`, created `2026-11-14T19:51:09Z`, updated
+  `2026-11-14T19:54:24Z`. Jobs: Detect changes success; .NET (ubuntu-latest) success; Contracts and policy
+  success; Public API compatibility success; Python and Rust skipped by path filters.
+- Scratch probes under `/tmp/opencode/step09-probe` (project references to Core/Compilation/Packages; not
+  committed):
+  - stale-only site override on ceria: `required=126 set=0 unset=126 hasExplicit=True`; `Validate` codes
+    `PRM003, PRM008`; `Apply` success with a model and the same codes (no `PRM006`).
+  - direct mirrored chiral pair on BaZrO₃: one entry `SetValueCount=1`, `Unset=143`; two mirrored entries
+    `SetValueCount=2`, `Unset=142`; both `Apply` results have signature
+    `db07809c8c06bd043b5e9355c078fce582e06269d5e21afa8d6328d4b7110760`; canonical project bytes are equal.
+  - over-limit direct template (100,001 unique pair sets): `Apply` returns `PRM013` only, `Model == null`,
+    no exception, ~103 ms; the summary builder runs before the structural count check.
+
+#### Re-verification against the round-1 findings
+
+| Finding | Round 1 | Round 2 status |
+| --- | --- | --- |
+| F-01 | Blocker | **Resolved.** `CanonicalProjectionWriter.Quantize` rejects a scaled or rounded non-finite result and remains input-finite guarded; `ParameterizationEntryWalker.ValidateFrequency` adds `PRM005` for a finite value whose `× 1e12` scaling overflows; `Apply` returns `ParameterizationResult(null, …)` before signing. `HugeFiniteFrequencyIsAnErrorAndProducesNoModel`, `HugeFiniteEnergyIsAnErrorAndProducesNoModel`, `QuantizationRejectsFiniteValuesAboveTheScalingRange`, and `FiniteValuesAboveTheQuantizationRangeAreRejected` pass. The projection guard cannot emit infinity; it throws for a non-quantizable value. |
+| F-02 | Minor | **Resolved for the named pair/group/rule metrics.** `PairMetrics`/`GroupMetrics`/`RuleMetrics` count only entries that resolve to a required compiled slot; `StalePairAndGroupEntriesDoNotSuppressCompletenessWarnings` and `StaleRuleEntriesDoNotSuppressCompletenessWarnings` assert `SetValueCount == 0`, the full unset count, `HasExplicitValues == false`, `PRM003`, and `PRM006`. Residual edge cases are notes R2-1/R2-2. |
+| F-03 | Minor | **Resolved.** `ParameterizationAnalyzer.Analyze` calls `ProjectValidator.ValidateTemplate` for a direct template before compiled-bound matching; `PRM013` (overlong name), `PRM014` (empty ID, malformed stable ID, duplicate key), and no model on `Apply` are covered by `ApplyAndValidateRunTheStructuralTemplateValidator`. R2-3 records the summary-before-validation ordering note. |
+| F-04 | Minor | **Resolved.** `status.md` and the Step 09 page now record features 1–7 through `20c73bc`, fixes `916bae1`, replacement run `43634322838`, and `Re-audit required`; the stale "feature 4 is current" and "not squash-merged" text is gone. |
+| F-05 | Minor | **Resolved.** `tools/contracts/README.md` names four parameterization projection fixtures and the real `Mocassin.Packages.Tests.Parameterization.ParameterizationGoldenFixtureTests`/`ParameterizationChiralFixtureTests` generators; `find tests/contracts/projections/parameterization -name '*.bin'` returns four and the old `ParameterizationProjectionFixtureTests` name is absent. |
+| F-06 | Note | **Resolved at write time.** The canonicalizer folds same-value mirrored chiral entries onto the smaller `(ParticleId, ParticleId)` orientation (`CanonicalJsonFoldsMirroredChiralDuplicatesWithTheSameValue`), keeps conflicting values for `PRM014` (`CanonicalJsonKeepsConflictingMirroredChiralValuesForValidation`), and the probe confirms identical canonical bytes and signatures for the same-value mirror. R2-2 records the in-memory summary note. |
+| F-07 | Note | **Resolved.** `ParameterizationOptions.MaxAppliedValueBytes` defaults to `ParameterizationLimits.MaxAppliedValueBytes` (`ParameterizationOptionsTests`); the analyzer enforces the configured limit before allocating dense targets and returns `PRM013` (`MaxAppliedValueBytesIsEnforcedBeforeAllocation`); the Step 09 page's claim now matches the default/lowerable option. |
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| Note | **R2-1 — A stale-only site-energy override still suppresses `PRM006`.** `HasExplicitValues` includes every site-energy override, valid or stale, so a template whose only value is an ignored override emits `PRM003` and `PRM008` but not `PRM006`; the required-slot `SetValueCount` is correctly `0` and no applied value changes. This is narrower than F-02 (which named pair/group/rule metrics) but is the same stale-entry asymmetry the resolution wording describes generically. | `ParameterizationSummaryBuilder.cs:72-76` (`explicitSiteValues = overrides.Length`, included in `hasExplicitValues`); `ParameterizationAnalyzer.cs:149-157` (`PRM006` on `!HasExplicitValues`); probe output `required=126 set=0 unset=126 hasExplicit=True`, codes `PRM003, PRM008`, `Apply` model present. |
+| Note | **R2-2 — A directly supplied in-memory mirrored chiral template counts the shared slot twice in the summary.** The write-time canonicalizer folds the two orientations only when the project is serialized; `Apply`/`Validate` on a `with`-built template summarize both entries. The applied values and signature are identical, conflicting values still fail `PRM014`, and a write/read round-trip folds the pair. | `ParameterizationSummaryBuilder.cs:344-370` (`explicitCount++` per matching entry, no slot de-duplication); `ParameterizationTemplateCanonicalizer.cs:82-104` (write-time fold only); probe `oneSet=1 twoSet=2 oneUnset=143 twoUnset=142`, identical apply signatures, canonical bytes equal. |
+| Note | **R2-3 — Structural validation runs after the summary builder for direct templates.** `Analyze` builds the summary (which copies/filters the template arrays and iterates entries) before `ProjectValidator.ValidateTemplate`; the structural count check therefore rejects an over-limit template only after that work. The applied-value cap is checked before dense allocation, so this is an ordering/efficiency note, not a diagnostic or output defect. | `ParameterizationAnalyzer.cs:48` before `:53-56`; `ParameterizationSummaryBuilder.cs:58-62,175-185` (`ValidSets`/`ValidGroupSets`/`ValidOverrides`/`ValidRuleSets` array copies); probe 100,001 unique sets → `PRM013`, `Model == null`, ~103 ms, no exception. |
+| Note | **R2-4 — The squashed round-1 fix feature branch and its worktree remain.** Local and `origin` still have `feature/step-09-parameterization-templates/fix-audit-round-1` at `c926efb`, checked out at `/workspace/playground/step09-impl`; AGENTS §3.3 expects the feature branch to be deleted after the squash. The branch tree equals `916bae1` (`git diff --stat c926efb..916bae1` is empty), so the frozen step tree is unaffected; cleanup belongs to the step agent after merge. | `git branch -a`, `git worktree list`, `git ls-remote --heads origin`, `git diff --stat c926efb..916bae1`. |
+| Note | **R2-5 — The `PRM005` code summary and `HelpFor` hint still omit the quantization-overflow condition.** The catalog descriptor and `docs/reference/diagnostics.md` were updated, and the walker message mentions the projection limit, but the public XML summary and the help hint still say only "non-positive or non-finite"/"positive, finite". This is a documentation/help-text inconsistency, not a diagnostic-behavior defect. | `ParameterizationDiagnosticCodes.cs:49-52,103`; `ParameterizationDiagnosticCatalog.cs:51-55`; `docs/reference/diagnostics.md` `PRM005` row and section. |
+
+#### Checklist (round 2)
+
+- [x] Step-specific 1–11: creation, apply, changed-model `PRM001`, rebase, chiral one-value, site overrides, missing/zero warnings, canonical JSON, signature/golden vector, limits, documentation.
+- [x] Standard 1–12: required tests, XML docs, docs/status/feature log/parity, closeout CI, closeout evidence, main-move rule, platform CI, format/fixtures, security/licence/secret, structure, scope, branch/tag/status.
+
+#### Verdict
+
+**Passed with notes.** The round-1 findings are resolved at `916bae1`: F-01's non-quantizable finite values
+return `PRM` errors with no model and no non-finite signature, F-02's pair/group/rule completeness metrics
+count only required slots, F-03's service surfaces run the structural validator, F-04/F-05's documentation is
+current, F-06's write-time chiral fold is safe and conflicts still report `PRM014`, and F-07's applied-value
+limit comes from the Core constant. The full local gate and the replacement closeout CI run are green at that
+commit, the closeout evidence is consistent, and no `step-09` tag or merge exists.
+
+The only remaining items are notes R2-1–R2-5: the stale-only site-override `PRM006` asymmetry, the in-memory
+mirrored-chiral summary double count, the summary-before-structural-validation ordering, the retained fix
+feature branch/worktree, and the stale `PRM005` XML/help wording. None changes an applied value, signature,
+format, contract, or acceptance criterion; the human owner must explicitly accept them before merge.
+
+This round reproduced every round-1 claim from the tree; the `Resolution status` table was not treated as
+evidence. No finding was waived by this auditor; the human owner retains the waiver and merge decision. Round 1
+is unchanged.
