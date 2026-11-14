@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using Mocassin.Core.Geometry;
+using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Energy;
 using Mocassin.Core.Model.Lattice;
@@ -328,7 +329,9 @@ public sealed class ProjectJsonConverter : JsonConverter<Project>
         ArgumentNullException.ThrowIfNull(value);
 
         var parameterizations = value.Parameterizations
+            .Where(static item => item is not null)
             .OrderBy(static item => item.Id.Value)
+            .Select(ParameterizationTemplateCanonicalizer.Normalize)
             .ToImmutableArray();
         var jobTemplates = value.JobTemplates
             .OrderBy(static item => item.Id.Value)
@@ -494,6 +497,22 @@ internal sealed class ProjectDto
 [JsonSerializable(typeof(Fractional3))]
 [JsonSerializable(typeof(ProjectMetadata))]
 [JsonSerializable(typeof(ParameterizationTemplate))]
+[JsonSerializable(typeof(PairEnergySet))]
+[JsonSerializable(typeof(PairEnergyEntry))]
+[JsonSerializable(typeof(GroupEnergySet))]
+[JsonSerializable(typeof(GroupEnergyEntry))]
+[JsonSerializable(typeof(SiteEnergyOverride))]
+[JsonSerializable(typeof(TransitionRuleSet))]
+[JsonSerializable(typeof(RuleFrequencyEntry))]
+[JsonSerializable(typeof(ImmutableArray<ParameterizationTemplate>))]
+[JsonSerializable(typeof(ImmutableArray<PairEnergySet>))]
+[JsonSerializable(typeof(ImmutableArray<PairEnergyEntry>))]
+[JsonSerializable(typeof(ImmutableArray<GroupEnergySet>))]
+[JsonSerializable(typeof(ImmutableArray<GroupEnergyEntry>))]
+[JsonSerializable(typeof(ImmutableArray<SiteEnergyOverride>))]
+[JsonSerializable(typeof(ImmutableArray<TransitionRuleSet>))]
+[JsonSerializable(typeof(ImmutableArray<RuleFrequencyEntry>))]
+[JsonSerializable(typeof(ImmutableArray<ParticleId>))]
 [JsonSerializable(typeof(JobTemplate))]
 [JsonSerializable(typeof(BuildTemplate))]
 [JsonSerializable(typeof(ViewSettings))]

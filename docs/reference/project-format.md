@@ -42,7 +42,7 @@ generated JSON Schema is
 | `createdUtc` | yes | ISO-8601 UTC creation timestamp. |
 | `modifiedUtc` | yes | ISO-8601 UTC last-modified timestamp. |
 | `model` | yes | Scientific model body. Steps 03–05 add `particles`, `particleSets`, `structure`, the flat transition sections, and the flat energy sections; lattice and simulation sections are added by Step 06. |
-| `parameterizations` | yes | Parameterization templates. Step 01 stores identity and model signature only. |
+| `parameterizations` | yes | Parameterization templates. Step 09 extends the Step 01 identity stub with sparse pair, group, site-energy, and rule-frequency value sets. |
 | `jobTemplates` | yes | Job templates. Step 01 stores identity and name only. |
 | `buildTemplates` | yes | Build recipes binding a job template to a parameterization. |
 | `viewSettings` | yes | Camera, render box, and per-object style state. |
@@ -375,6 +375,88 @@ The template records are still the Step 01 shape:
 Steps 03–06 extend `model` with particles, structure, transitions, energy, lattice, and simulations. Steps 09
 and 10 extend the template records. Any semantic change to a released schema requires a migration and a
 format decision.
+
+### Parameterization template values (Step 09)
+
+Step 09 keeps the Step 01 identity fields (`id`, `name`, `modelSignature`, `createdUtc`) and adds five optional
+arrays. The arrays are written by the current writer and may be absent in a hand-written or older document; a
+missing array loads as empty.
+
+| Field | Contents |
+| --- | --- |
+| `stablePairSets` | Shared stable-site pair-energy tables keyed by `energyId`. |
+| `unstablePairSets` | Shared unstable-site pair-energy tables keyed by `energyId`. |
+| `groupSets` | Cluster-energy tables keyed by `clusterEnergyId` plus the canonical `occupationParticleIds` tuple. |
+| `siteEnergyOverrides` | Site-energy overrides keyed by `(siteId, particleId)`. |
+| `transitionRuleSets` | Kinetic rule frequencies keyed by `(transitionKind, transitionId)` and `ruleGeometryId`. |
+
+- Values are sparse: a missing pair or group value means `0 eV`, a missing rule frequency means the compiled
+  default, and a missing site override means the authored model background. An explicit `0` or default frequency
+  is a real entry.
+- Pair and cluster identities are 64-character lowercase hexadecimal content hashes. A chiral pair table stores
+  one shared value per `energyId`; independent A→B and B→A values are not representable.
+- The writer sorts sets and entries by their stable keys, formats numbers invariantly, and normalizes `-0.0` to
+  `0.0`. Record-level edits cannot bypass this canonicalization.
+- Structural limits and malformed keys are reported by the `PRM` diagnostics; see
+  [Diagnostics](diagnostics.md).
+
+#### Stable identities
+
+| Value | Identity | Source |
+| --- | --- | --- |
+| Pair energy | `energyId` | The shared compiled pair identity; the lexicographically smaller directed geometry for a reciprocal chiral pair. |
+| Group energy | `clusterEnergyId` + canonical `occupationParticleIds` tuple | The compiled cluster identity and the canonical occupation in site order. |
+| Rule frequency | `ruleGeometryId` inside `(transitionKind, transitionId)` | The compiled rule geometry identity. |
+| Site-energy override | `(siteId, particleId)` | The authored reference site and particle. |
+
+Dense compiled indices are never template identities. An unknown or malformed key is `PRM014`; a key that no
+longer exists in the current model is `PRM002` and is ignored. Applying a template whose `modelSignature`
+differs from the compiled model is `PRM001`; rebase is an explicit operation.
+
+#### Canonical ordering
+
+1. `stablePairSets`, `unstablePairSets` by `energyId` ordinal; entries by
+   `(centerParticleId, partnerParticleId)`.
+2. `groupSets` by `clusterEnergyId` ordinal; entries by the `occupationParticleIds` GUID sequence in site order.
+3. `siteEnergyOverrides` by `(siteId, particleId)`.
+4. `transitionRuleSets` by `(transitionKind, transitionId)`; `rules` by `ruleGeometryId` ordinal.
+
+The canonical document orders `parameterizations` by `id`. Two templates that differ only beyond the 12th
+decimal have different document hashes but the same applied values and parameterization signature: `apply`
+quantizes to 12 decimals with round-half-away-from-zero before storing and signing.
+
+#### Limits
+
+| Limit | Value | Diagnostic |
+| --- | ---: | --- |
+| Templates per project | 256 | `PRM013` |
+| Pair sets per template | 100,000 | `PRM013` |
+| Pair entries per set | 4,096 table cells (64 compiled particles including void) | `PRM013` |
+| Group sets per template | 100,000 | `PRM013` |
+| Group entries per set | 1,000,000 | `PRM013` |
+| Site overrides per template | 1,000,000 | `PRM013` |
+| Transition rule sets per template | 100,000 | `PRM013` |
+| Rule entries per set | 1,000,000 | `PRM013` |
+| Explicit value entries per template | 2,000,000 | `PRM013` |
+| Stable ID length | 64 lowercase hex characters | `PRM014` |
+| Template name length | 200 characters | `PRM013` |
+| Applied value bytes per apply | 2 GiB | `PRM013` |
+
+Counts are checked with 64-bit arithmetic before allocation. The enclosing project document is also bounded by
+`ProjectStoreOptions.MaxDocumentBytes` (64 MiB). Template content is data only: it never selects a file,
+command, glob, or SQL statement.
+
+#### Versioning
+
+There is no template-level format version in v1. The template shape is part of the project `schemaVersion`;
+Step 09 extends the pre-release Step 01 stub additively, so `schemaVersion` stays `1`. After the first released
+`.mocprj`, any semantic template change bumps `schemaVersion` and adds a pure migration in
+`ProjectMigrations`. Unknown properties are rejected by the project reader; never reinterpret an existing field.
+
+The checked-in golden templates are `samples/parameterizations/ceria-parameters.mocprj` and
+`samples/parameterizations/barium-zirconate-parameters.mocprj`. Their applied values and signatures are pinned
+by `tests/contracts/parameterizations/` and `tests/contracts/projections/parameterization/`.
+
 ## View settings
 
 `viewSettings` is persisted with the project so a shared project opens with the same view:

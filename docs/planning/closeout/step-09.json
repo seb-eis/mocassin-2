@@ -1,0 +1,20 @@
+{
+  "step": "step-09",
+  "audit_commit": "916bae1b66aeb0d3b8fb1e451072523a869b596e",
+  "closeout_ci": {
+    "run_id": "43634322838",
+    "head_sha": "916bae1b66aeb0d3b8fb1e451072523a869b596e"
+  },
+  "main_sha_at_freeze": "b81355e00946f7abee5c4a56be23d8e1f777743e",
+  "merge_candidate": "916bae1b66aeb0d3b8fb1e451072523a869b596e",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "notes": [
+    "Closeout CI run 43634322838 is the single replacement Ubuntu dispatch after the audit round 1 fixes.",
+    "Earlier run 43630049214 covered 20c73bc before the fixes; it is recorded as process history, not as the closeout run.",
+    "main b81355e was already an ancestor of the frozen commit; no merge-tree run is required.",
+    "Only documentation and audit-record commits follow the audited commit."
+  ]
+}

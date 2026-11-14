@@ -1,0 +1,752 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e61",
+  "masterSeed": "bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+  "name": "Ceria",
+  "description": "Step 03 sample project.",
+  "createdUtc": "2026-11-08T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-08T12:00:00.0000000Z",
+  "symmetry": {
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395",
+    "symmetryContractVersion": "symmetry-1"
+  },
+  "model": {
+    "particles": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+        "name": "Ce4\u002B",
+        "symbol": "Ce",
+        "charge": 4,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+        "name": "O2-",
+        "symbol": "O",
+        "charge": -2,
+        "isVacancy": false
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02",
+        "name": "Vacancy",
+        "symbol": "Vc",
+        "charge": 0,
+        "isVacancy": true
+      }
+    ],
+    "particleSets": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f03",
+        "name": "Cerium site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f04",
+        "name": "Oxygen site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f09",
+        "name": "Oxygen transition site",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01"
+        ]
+      }
+    ],
+    "structure": {
+      "name": "Ceria",
+      "spaceGroup": {
+        "number": 225,
+        "axis": "none",
+        "origin": "none"
+      },
+      "cell": {
+        "a": 5.41,
+        "b": 5.41,
+        "c": 5.41,
+        "alpha": 90,
+        "beta": 90,
+        "gamma": 90
+      },
+      "sites": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "name": "Ce",
+          "fractional": [
+            0,
+            0,
+            0
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f03",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "name": "O",
+          "fractional": [
+            0.25,
+            0.25,
+            0.25
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f04",
+          "stability": "stable"
+        },
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "name": "O transition",
+          "fractional": [
+            0.5,
+            0.25,
+            0.25
+          ],
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f09",
+          "stability": "unstable"
+        }
+      ],
+      "dummyPositions": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f08",
+          "name": "Center",
+          "fractional": [
+            0.5,
+            0.5,
+            0.5
+          ]
+        }
+      ]
+    },
+    "stableEnvironment": {
+      "cutoff": 2.7,
+      "filters": []
+    },
+    "unstableEnvironments": [
+      {
+        "siteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+        "cutoff": 1.5,
+        "filters": []
+      }
+    ],
+    "clusters": [
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f70",
+        "name": "Oxygen migration edge",
+        "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+        "offsetVectors": [
+          [
+            -0.25,
+            0,
+            0
+          ],
+          [
+            0.25,
+            0,
+            0
+          ]
+        ]
+      }
+    ],
+    "siteEnergies": [
+      {
+        "siteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+        "entries": [
+          {
+            "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+            "energyEv": -0.5
+          },
+          {
+            "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f02",
+            "energyEv": 0
+          }
+        ]
+      }
+    ]
+  },
+  "parameterizations": [
+    {
+      "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e80",
+      "name": "Ceria parameters",
+      "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
+      "createdUtc": "2026-11-14T12:00:00.0000000Z",
+      "stablePairSets": [
+        {
+          "energyId": "2db14145a41c4efd50155fd5399dc3736d138d5d36bae5df39717f741a8b0a70",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": 0.11
+            }
+          ]
+        },
+        {
+          "energyId": "47551c835da7040c7e177de4b7b17f17dd2317eb6b53253391b2f84ff00dc5d6",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "energyEv": 0.06
+            }
+          ]
+        },
+        {
+          "energyId": "54681a7f920b633e7d0af570577d27a447de01752cddf7748012e115ab990aba",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "energyEv": 0.07
+            }
+          ]
+        },
+        {
+          "energyId": "7a9966904caa2f6da99c4a02cba3e91e3cc35ad3ec3469bef3a5fb32b21cdb95",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "energyEv": 0.1
+            }
+          ]
+        },
+        {
+          "energyId": "826367f07d50292a07c28d2140c71fdb980f331007f821938a64774d226c9ca0",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "energyEv": 0.09
+            }
+          ]
+        },
+        {
+          "energyId": "923ab806b0878b4b9577a94a212bcafc863f240d174bbed3b019e62ab2ee3400",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "energyEv": 0.08
+            }
+          ]
+        },
+        {
+          "energyId": "a39a854bc1f83c7ec53f548566d525f6a0c46c751f47be0f9178972df2bbf55f",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": 0.1
+            }
+          ]
+        },
+        {
+          "energyId": "a52d5bf33514bb5be48c4f304631842a32c965e16271843ac4fa79684e543bdf",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": 0.05
+            }
+          ]
+        },
+        {
+          "energyId": "a6eea1ca6832836242cfd740a824e430cb37fc2470f1b879987442c7fb26d62c",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "energyEv": 0.05
+            }
+          ]
+        },
+        {
+          "energyId": "a727853f61ace389d738c702a8d85a8516679fe553328b29ad250ef44c4859aa",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": 0.09
+            }
+          ]
+        },
+        {
+          "energyId": "b73ea181aeaca21a84eb87a1e4daf8a0ae5375d18272a229d6d8394f7f095999",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "energyEv": 0.11
+            }
+          ]
+        },
+        {
+          "energyId": "b8a1eb7ce9a374dda81bb21ebd55af448779120a4e69ec3f03ad8e6a0e3136e8",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f05",
+          "distanceBucketFm": 234260,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f00",
+              "energyEv": 0.08
+            }
+          ]
+        }
+      ],
+      "unstablePairSets": [
+        {
+          "energyId": "030d22d9881c6e3292af37380fe0bdf0ac3e6e5191b7427da3167fe891de5968",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.06
+            }
+          ]
+        },
+        {
+          "energyId": "06c6dcb1c456992e8cb0898adb8beae606f17b767634c374199c95c5428dce58",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.06
+            }
+          ]
+        },
+        {
+          "energyId": "21d5d0232e7cddaec296f056edeb3bb44cbdfa235272e401dbe352c523600345",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.05
+            }
+          ]
+        },
+        {
+          "energyId": "22137e2ec53c8eeebe48ec05714152e4c6d7dd53402095553134b1b6ba1e5824",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.025
+            }
+          ]
+        },
+        {
+          "energyId": "2e3ad314728f424d6b3041363f1a6ad6302fbaf002326dda1ea2a7513c0822cb",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.07
+            }
+          ]
+        },
+        {
+          "energyId": "32495f5163c9309f04eef115a649ba37906d06d27bfab9ef9d96eb9c83b6e5fc",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.07
+            }
+          ]
+        },
+        {
+          "energyId": "329ee88ef797ee3479bbbc0b704b898a5e6d380317a731d76e246ba3a85b8a1e",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.035
+            }
+          ]
+        },
+        {
+          "energyId": "528db5cbbaf2a3d7e1d9106592085eaecbcc84c41f760dc283344e2e0070c5db",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.02
+            }
+          ]
+        },
+        {
+          "energyId": "5b9de13d7dc8828a4fb7c99eff14801e85b528c351d441412a6487c32aab949a",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.055
+            }
+          ]
+        },
+        {
+          "energyId": "60fa3cad0fdc6fc9661f9d3b747686b2bcff9deba620b2f73c1b4bd5b7c0a8a3",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.05
+            }
+          ]
+        },
+        {
+          "energyId": "73858f669e7bbe97f77e1bd2fb5e851673f8c354a529cd8864de77c23ddeccb0",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.065
+            }
+          ]
+        },
+        {
+          "energyId": "84f0fa16b02eedcdb900adda139d1745e19aa6283d69363cef2e633ce3a8c953",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.035
+            }
+          ]
+        },
+        {
+          "energyId": "86c801bae605d6de88d7112afc6a2387dcc79c827116e9f6f11f5e963bbc0b07",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.03
+            }
+          ]
+        },
+        {
+          "energyId": "8adaa85cd5ab04b8f5db9c2b546a66c08c465be608ed6c9f057236bba2f1b8c3",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.045
+            }
+          ]
+        },
+        {
+          "energyId": "8b79b2991e01bebfde453aa39e91c531f06ee5c0fd8b3abefd5799cb03b2ca83",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.04
+            }
+          ]
+        },
+        {
+          "energyId": "9d2301cb023251e7a7e7e1dacbd8dbc7ed5364327c0fed0e98aee821d9d8242d",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.045
+            }
+          ]
+        },
+        {
+          "energyId": "a21c1b28ccf9c20d45979c440f66e45fc9e8d8f9f0d4d9057a62a0da9bc31d17",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.02
+            }
+          ]
+        },
+        {
+          "energyId": "a292b9df5eb65c52f5607887d3e47489a0b8940c2276a289961902e7e5afd97b",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.065
+            }
+          ]
+        },
+        {
+          "energyId": "a40e2c5ffff03674d5847ac46741a526454afeadff403da511b1803effb09a93",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.03
+            }
+          ]
+        },
+        {
+          "energyId": "b260edc19f0ed4405e0f5cc49de66f5cc1b25c83f6c920ee46b54211eadc5e0f",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.04
+            }
+          ]
+        },
+        {
+          "energyId": "bb47c2f17479ccdb8ffde6c098fbdca73e57ab18bcba0a4c6d7b342d2787b359",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.025
+            }
+          ]
+        },
+        {
+          "energyId": "d5abfd01dfab03a01fe56755902414c276c33e71549fba2b955e6e189ad05526",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.02
+            }
+          ]
+        },
+        {
+          "energyId": "ec3ed9f3a7b4460c832efeefadf6450d2ca340101a5d3e8b3f990ba327df5365",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.055
+            }
+          ]
+        },
+        {
+          "energyId": "fab7f2ce71bcde382e9e35010d198796138c642675b8a23069c206ebb7db3004",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "partnerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "distanceBucketFm": 135250,
+          "isChiral": false,
+          "entries": [
+            {
+              "centerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "partnerParticleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+              "energyEv": -0.025
+            }
+          ]
+        }
+      ],
+      "groupSets": [
+        {
+          "clusterEnergyId": "79fed55eaad104c74eb2e04e4aaceee396a4c3f765babe86e441af12eff0027d",
+          "clusterId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f70",
+          "centerSiteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07",
+          "entries": [
+            {
+              "occupationParticleIds": [
+                "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+                "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+                "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01"
+              ],
+              "energyEv": 0.48
+            }
+          ]
+        }
+      ],
+      "siteEnergyOverrides": [
+        {
+          "siteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f06",
+          "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f01",
+          "energyEv": 0.1
+        }
+      ],
+      "transitionRuleSets": []
+    }
+  ],
+  "jobTemplates": [],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}

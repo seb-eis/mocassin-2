@@ -5,8 +5,8 @@
   "domainSeparator": "0x00",
   "hash": "sha256",
   "projectionType": "ParameterizationSignatureV1",
-  "status": "skeleton",
-  "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 09.",
+  "status": "final",
+  "notes": "Final Step 09 parameterization projection: domain-separated six-field MessagePack array over the compiled-model signature and the dense applied values. Stable IDs, template metadata, set headers, sparse/unset markers, diagnostics, summaries, timings, and all runtime settings are excluded. Floats are float64 quantized to 12 decimals with round half away from zero; negative zero is normalized.",
   "fields": [
     {
       "name": "formatVersion",
@@ -19,29 +19,36 @@
       "required": true
     },
     {
-      "name": "stablePairs",
-      "type": "bin",
-      "required": true
-    },
-    {
-      "name": "unstablePairs",
-      "type": "bin",
-      "required": true
+      "name": "pairTables",
+      "type": "array",
+      "required": true,
+      "items": "array",
+      "itemItems": {
+        "type": "array",
+        "items": "float64"
+      }
     },
     {
       "name": "groupSets",
-      "type": "bin",
-      "required": true
+      "type": "array",
+      "required": true,
+      "items": "array",
+      "itemItems": {
+        "type": "array",
+        "items": "float64"
+      }
     },
     {
       "name": "siteEnergies",
-      "type": "bin",
-      "required": true
+      "type": "array",
+      "required": true,
+      "items": "float64"
     },
     {
       "name": "transitionRules",
-      "type": "bin",
-      "required": true
+      "type": "array",
+      "required": true,
+      "items": "float64"
     }
   ]
 }

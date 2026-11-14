@@ -15,13 +15,15 @@ namespace Mocassin.Compilation.Signatures;
 /// array/string convenience methods are deliberately not used because they choose fix/array16/str8/str16
 /// encodings; forced headers are written with <c>MessagePackWriter.WriteRaw</c>.
 /// </remarks>
-internal ref struct CanonicalProjectionWriter
+public ref struct CanonicalProjectionWriter
 {
     private MessagePackWriter writer;
 
-    /// <summary>Initializes a canonical projection writer over a buffer.</summary>
-    public CanonicalProjectionWriter(ArrayBufferWriter<byte> buffer)
+    /// <summary>Initializes a canonical projection writer over a buffer writer.</summary>
+    /// <param name="buffer">The destination buffer writer.</param>
+    public CanonicalProjectionWriter(IBufferWriter<byte> buffer)
     {
+        ArgumentNullException.ThrowIfNull(buffer);
         writer = new MessagePackWriter(buffer);
     }
 
@@ -80,7 +82,17 @@ internal ref struct CanonicalProjectionWriter
     /// <summary>Flushes the final MessagePack span to the buffer.</summary>
     public void Flush() => writer.Flush();
 
-    internal static double Quantize(double value)
+    /// <summary>
+    /// Quantizes a projected double to 12 decimal places with round half away from zero.
+    /// </summary>
+    /// <param name="value">The finite value to quantize.</param>
+    /// <returns>The quantized value with negative zero normalized to positive zero.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// The value is not finite, or it is too large for the 12-decimal scaling step and would quantize to
+    /// infinity. Both cases are programmer errors; user-supplied values must be rejected with a diagnostic
+    /// before the projection is written.
+    /// </exception>
+    public static double Quantize(double value)
     {
         if (!double.IsFinite(value))
         {
@@ -88,8 +100,20 @@ internal ref struct CanonicalProjectionWriter
         }
 
         var scaled = value * 1e12;
+        if (!double.IsFinite(scaled))
+        {
+            throw new InvalidOperationException(
+                "The canonical projection value is too large to quantize to 12 decimal places without overflow.");
+        }
+
         var rounded = scaled >= 0.0 ? Math.Floor(scaled + 0.5) : Math.Ceiling(scaled - 0.5);
         var result = rounded / 1e12;
+        if (!double.IsFinite(result))
+        {
+            throw new InvalidOperationException(
+                "The canonical projection value is too large to quantize to 12 decimal places without overflow.");
+        }
+
         return result == 0.0 ? 0.0 : result;
     }
 }

@@ -1,0 +1,8 @@
+{
+  "fixtureFormat": "canonical-projection-v1",
+  "id": "parameterization-ceria",
+  "descriptor": "parameterization-v1",
+  "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
+  "signatureHex": "cac3b231e667164fa7dfd4daa7b326dbc5e23bde17fe30873f775f7f77975042",
+  "projectionSha256": "e8bd8daf9a72ef53356914939eeb4fc71e10af9e0a7c22773bed5c5d656b9fd1"
+}

@@ -1,23 +1,8 @@
 // SPDX-License-Identifier: MIT
 
-using System.Text.Json.Serialization;
 using Mocassin.Core.Ids;
-using Mocassin.Core.Project;
 
 namespace Mocassin.Core.Model;
-
-/// <summary>
-/// A versioned set of numerical values that parameterizes a compiled model.
-/// </summary>
-/// <param name="Id">The stable template identifier.</param>
-/// <param name="Name">The user-visible template name.</param>
-/// <param name="ModelSignature">The compiled-model signature this template targets.</param>
-/// <param name="CreatedUtc">The UTC creation timestamp.</param>
-public sealed record ParameterizationTemplate(
-    ParameterizationId Id,
-    string Name,
-    string ModelSignature,
-    [property: JsonConverter(typeof(UtcDateTimeOffsetJsonConverter))] DateTimeOffset CreatedUtc);
 
 /// <summary>
 /// A reusable job-template definition.

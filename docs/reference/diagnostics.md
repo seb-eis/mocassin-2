@@ -1,9 +1,10 @@
 # Diagnostics
 
 Every diagnostic emitted by project validation, model compilation, and the CLI has a stable code. The
-catalog below is generated from the same descriptors the application uses (`CoreDiagnosticCatalog`,
-`SymmetryDiagnosticCatalog`, the Step 08 compilation descriptors, and the Step 07 descriptors); a documentation-drift test fails when this page and
-the catalog disagree. Per-instance `hint` values are supplied by the producing rule and may be more specific.
+catalog below is generated from the same descriptors the application uses (`CoreDiagnosticCatalog`, including
+the Step 09 parameterization descriptors; `SymmetryDiagnosticCatalog`; the Step 08 compilation descriptors;
+and the Step 07 descriptors); a documentation-drift test fails when this page and the catalog disagree.
+Per-instance `hint` values are supplied by the producing rule and may be more specific.
 
 | Code | Severity | Owner | Title | Help |
 | --- | --- | --- | --- | --- |
@@ -62,6 +63,21 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 | [`PAR010`](#par010) | error | Step 03 — particle and structure models | An authored object reuses a reserved implicit-object identifier | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PAR011`](#par011) | error | Step 03 — particle and structure models | A particle-set name is empty or used more than once (case-insensitive) | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PAR012`](#par012) | error | Step 03 — particle and structure models | A particle set contains the same particle identifier more than once | Review the referenced model object, correct the reported condition, and revalidate. |
+| [`PRM001`](#prm001) | error | Step 09 — parameterization templates | A template model signature does not match the compiled model | Rebase or recreate the template against the current compiled model. |
+| [`PRM002`](#prm002) | warning | Step 09 — parameterization templates | A template entry references an unknown key or disagrees with the current model | Remove the stale entry or rebase the template against the current model. |
+| [`PRM003`](#prm003) | warning | Step 09 — parameterization templates | Required pair, group, or kinetic-rule values are unset and defaults are applied | Set the missing values explicitly, or review the applied defaults before building. |
+| [`PRM004`](#prm004) | error | Step 09 — parameterization templates | An energy is non-finite or outside the accepted range | Set the energy to a finite value within the accepted -100..100 eV range. |
+| [`PRM005`](#prm005) | error | Step 09 — parameterization templates | A frequency is non-positive, non-finite, or too large for the canonical projection | Set the attempt frequency to a positive, finite value that survives 12-decimal quantization. |
+| [`PRM006`](#prm006) | warning | Step 09 — parameterization templates | An explicit template contains no explicit values | Set at least one value, or build with the implicit default parameterization. |
+| [`PRM008`](#prm008) | warning | Step 09 — parameterization templates | A site-energy value targets an unknown or forbidden site/particle | Correct the site/particle key or remove the site-energy override. |
+| [`PRM009`](#prm009) | info | Step 09 — parameterization templates | A parameterization template was rebased against the current compiled model | Review every copied, defaulted, dropped, and ambiguous value before saving the rebased template. |
+| [`PRM010`](#prm010) | warning | Step 09 — parameterization templates | Two parameterization templates use the same name | Give each parameterization template a distinct name. |
+| [`PRM011`](#prm011) | warning | Step 09 — parameterization templates | A Metropolis transition rule set is not parameterizable and is ignored | Remove the Metropolis rule set; MMC rules are not parameterizable. |
+| [`PRM012`](#prm012) | warning | Step 09 — parameterization templates | A pair or group entry names a particle the reference site cannot occupy | Use a particle the reference site can occupy, or remove the entry. |
+| [`PRM013`](#prm013) | error | Step 09 — parameterization templates | A template resource limit is exceeded | Reduce the template size or split the work into smaller templates. |
+| [`PRM014`](#prm014) | error | Step 09 — parameterization templates | A stable key is malformed, duplicated, or missing | Use lowercase 64-character hexadecimal stable keys and remove duplicate value keys. |
+| [`PRM015`](#prm015) | warning | Step 09 — parameterization templates | Explicit pair or group values are suspiciously uniform | Check for a bulk-fill or paste error and vary the reported values deliberately. |
+| [`PRM016`](#prm016) | warning | Step 09 — parameterization templates | An attempt frequency is outside the plausible band but still positive and finite | Check the attempt frequency; the accepted physical range is 1e-3..1e18 Hz. |
 | [`PROJ001`](#proj001) | error | Step 01 — project format | The document declares a schema version newer than this application supports | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PROJ002`](#proj002) | error | Step 01 — project format | The document is malformed or cannot be parsed as a project | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PROJ003`](#proj003) | error | Step 01 — project format | Two objects in the same domain share an identifier | Review the referenced model object, correct the reported condition, and revalidate. |
@@ -381,6 +397,66 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 ### PAR012
 
 **A particle set contains the same particle identifier more than once.** Review the referenced model object, correct the reported condition, and revalidate.
+
+### PRM001
+
+**A template model signature does not match the compiled model.** Rebase or recreate the template against the current compiled model.
+
+### PRM002
+
+**A template entry references an unknown key or disagrees with the current model.** Remove the stale entry or rebase the template against the current model.
+
+### PRM003
+
+**Required pair, group, or kinetic-rule values are unset and defaults are applied.** Set the missing values explicitly, or review the applied defaults before building.
+
+### PRM004
+
+**An energy is non-finite or outside the accepted range.** Set the energy to a finite value within the accepted -100..100 eV range.
+
+### PRM005
+
+**A frequency is non-positive, non-finite, or too large for the canonical projection.** Set the attempt frequency to a positive, finite value that survives 12-decimal quantization. A finite value whose twelve-decimal scaling overflows is rejected before the signature is computed.
+
+### PRM006
+
+**An explicit template contains no explicit values.** Set at least one value, or build with the implicit default parameterization.
+
+### PRM008
+
+**A site-energy value targets an unknown or forbidden site/particle.** Correct the site/particle key or remove the site-energy override.
+
+### PRM009
+
+**A parameterization template was rebased against the current compiled model.** Review every copied, defaulted, dropped, and ambiguous value before saving the rebased template.
+
+### PRM010
+
+**Two parameterization templates use the same name.** Give each parameterization template a distinct name.
+
+### PRM011
+
+**A Metropolis transition rule set is not parameterizable and is ignored.** Remove the Metropolis rule set; MMC rules are not parameterizable.
+
+### PRM012
+
+**A pair or group entry names a particle the reference site cannot occupy.** Use a particle the reference site can occupy, or remove the entry.
+
+### PRM013
+
+**A template resource limit is exceeded.** Reduce the template size or split the work into smaller templates.
+
+### PRM014
+
+**A stable key is malformed, duplicated, or missing.** Use lowercase 64-character hexadecimal stable keys and remove duplicate value keys.
+
+### PRM015
+
+**Explicit pair or group values are suspiciously uniform.** Check for a bulk-fill or paste error and vary the reported values deliberately.
+
+### PRM016
+
+**An attempt frequency is outside the plausible band but still positive and finite.** Check the attempt frequency; the accepted physical range is 1e-3..1e18 Hz.
 
 ### PROJ001
 

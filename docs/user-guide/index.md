@@ -22,11 +22,11 @@ land.
 - [Crystal structure](structure.md)
 - [Transitions](transitions.md)
 - [Energy model](energy.md)
+- [Parameterization](parameterization.md)
 - [Lattice and doping](lattice.md)
 - [Simulations](simulations.md)
 - Project lifecycle and model editors
 - Validation and diagnostics
-- Parameterization templates
 - Job templates and supercells
 - Building and running simulations
 - Results, plots, and reports

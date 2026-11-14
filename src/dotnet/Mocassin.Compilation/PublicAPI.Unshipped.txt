@@ -860,3 +860,16 @@ static Mocassin.Compilation.Transitions.CompiledJumpRule.operator ==(Mocassin.Co
 static Mocassin.Compilation.Transitions.CompiledTransitionModel.Empty.get -> Mocassin.Compilation.Transitions.CompiledTransitionModel!
 static Mocassin.Compilation.Transitions.CompiledTransitionModel.operator !=(Mocassin.Compilation.Transitions.CompiledTransitionModel? left, Mocassin.Compilation.Transitions.CompiledTransitionModel? right) -> bool
 static Mocassin.Compilation.Transitions.CompiledTransitionModel.operator ==(Mocassin.Compilation.Transitions.CompiledTransitionModel? left, Mocassin.Compilation.Transitions.CompiledTransitionModel? right) -> bool
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.CanonicalProjectionWriter() -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.CanonicalProjectionWriter(System.Buffers.IBufferWriter<byte>! buffer) -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.Flush() -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.WriteArrayHeader(int count) -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.WriteBinary(System.ReadOnlySpan<byte> value) -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.WriteBool(bool value) -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.WriteDouble(double value) -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.WriteInt64(long value) -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.WriteNil() -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.WriteString(string! value) -> void
+Mocassin.Compilation.Signatures.CanonicalProjectionWriter.WriteUInt64(ulong value) -> void
+static Mocassin.Compilation.Signatures.CanonicalProjectionWriter.Quantize(double value) -> double

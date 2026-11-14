@@ -24,7 +24,7 @@ Status legend:
 | Dirty tracking/unsaved prompt | Y | Planned | 01/23 | Document hash and dirty state in 01; prompt in 23 |
 | Undo/redo | N | Improvement | 01/23 | Core stacks in 01; UI in 23 |
 | Project schema versioning/migration | Y | Planned | 01 | v1 pipeline implemented; migration fixtures added per version |
-| Stable project hash | Y | Improvement | 01/03/09 | Model/document SHA-256 in 01; structure hash in 03; compiled signature in 09 |
+| Stable project hash | Y | Done | 01/03/09 | Model/document SHA-256 in 01; structure hash in 03; compiled and parameterization signatures in 08/09 |
 | Legacy `.mocprj` read/write | N | Out of scope | — | ADR 0001 |
 | Project data viewer (JSON/XML) | N | Replaced | 23 | JSON view/debug export |
 | Cross-domain validation pipeline | Y | Implemented | 07 | Load/model/cross-domain/feasibility; no post-validation mutation |
@@ -83,7 +83,7 @@ Status legend:
 | Hollow-sphere filters | Y | Partial | 05/25 | Model, validation, and samples in 05; editor UI in 25 |
 | Per-unstable-site environments | Y | Partial | 05/25 | Model, validation, and samples in 05; editor UI in 25 |
 | Auto-sampled pair interactions | Y | Partial | 05/08 | Shared sampling kernel and preview in 05; compiled tables in 08 |
-| Chiral pair linking | Y | Partial | 05/08/09 | Shell chiral linking in 02; shared `EnergyId` preview in 05; compiled tables in 08; template binding in 09 |
+| Chiral pair linking | Y | Done | 05/08/09 | Shell chiral linking in 02; shared `EnergyId` preview in 05; compiled tables in 08; one shared value and no direction-specific field in 09 |
 | Group/cluster interactions (up to 9 positions) | Y | Partial | 05/08 | Model, geometry validation, cost preview, and samples in 05; canonical tables in 08 |
 | Site/defect energies | Y | Partial | 05/25 | Model, validation, editing, and samples in 05; editor UI in 25 |
 | Cost/permutation limits | Y | Implemented | 05/07 | Limits, diagnostics, preview, consolidated statistics, and docs |
@@ -125,17 +125,18 @@ Status legend:
 | KMC simulation definition | Y | Partial | 06/16/25 | Model, defaults, limits, persistence, query, and editor API in 06; solver in 16; editor UI in 25 |
 | All original simulation settings | Y | Partial | 06/25 | Settings, defaults, hard limits, and recommended bands in 06; editor UI in 25 |
 | Transition assignment | Y | Partial | 06/25 | Authored-order, kind-filtered assignment and duplicate rejection in 06; multi-select UI in 25 |
-| Parameterization template persistence | Y | Planned | 09 | Project-resident `parameterizations`; UUIDv7 identity; project `schemaVersion`, no separate document |
-| Parameterization template creation | Y | Planned | 09 | Sparse values, set headers, required-slot summary; library API only |
-| Pair/group energy editing | Y | Planned | 09/26 | Compiled-bound apply/validation in 09; editor UI in 26 |
-| Attempt frequency editing | Y | Planned | 09/26 | Step 11 writes absolute `frequency_hz`; Step 16 derives the per-job factor |
-| Chiral linked editing | Y | Improvement | 09/26 | Shared `EnergyId`; one value per chiral pair; independent values unrepresentable |
-| Stable model signature | Y | Improvement | 08/09 | Compiled geometry/rules/encoding signature in 08; values-only parameterization signature in 09 |
-| Parameterization signature | Y | Improvement | 09 | Finalized `signatures.parameterization`; golden projection vectors |
-| Template defaults/completeness | N | Improvement | 09 | Sparse defaults, `PRM003`/`PRM006` completeness warnings |
-| Template rebase/migration | Y | Planned | 09/26 | Diff + explicit report; no silent reuse; editor in 26 |
-| Site energy overrides in template | N | Improvement | 09 | Original limitation removed; reset-to-model |
-| `PRM` diagnostics | N | Improvement | 09 | Structural Core checks + compiled-bound Packages checks; docs-drift checked |
+| Parameterization template persistence | Y | Done | 09 | Project-resident `parameterizations`; UUIDv7 identity; canonical JSON/ordering/limits; project `schemaVersion`, no separate document |
+| Parameterization template creation | Y | Done | 09 | Sparse values, set headers, required-slot summary; library API only |
+| Pair/group energy editing | Y | Partial | 09/26 | Compiled-bound apply/validation and pure editor operations in 09; editor UI in 26 |
+| Attempt frequency editing | Y | Partial | 09/26 | Absolute `frequency_hz` values and pure editor operation in 09; editor UI in 26; Step 16 derives the per-job factor |
+| Chiral linked editing | Y | Partial | 09/26 | Improvement: shared `EnergyId`, one value per chiral pair, independent values unrepresentable; editor UI in 26 |
+| Stable model signature | Y | Done | 08/09 | Compiled geometry/rules/encoding signature in 08; values-only parameterization signature in 09 |
+| Parameterization signature | Y | Done | 09 | Finalized `signatures.parameterization`; golden applied values and projection vectors |
+| Template defaults/completeness | N | Done | 09 | Sparse defaults, `PRM003`/`PRM006` completeness warnings |
+| Template rebase/migration | Y | Partial | 09/26 | Diff + explicit report; no silent reuse; editor UI in 26 |
+| Site energy overrides in template | N | Done | 09 | Original limitation removed; reset-to-model |
+| `PRM` diagnostics | N | Done | 09 | Structural Core checks + compiled-bound Packages checks; docs-drift checked |
+| Checked-in golden templates | N | Done | 09 | Ceria and barium-zirconate templates; applied values and signatures regenerated through the real compiler/apply path |
 | `mocassin parameterize` CLI | N | Replaced | 12 | Step 12 owns `compile`/`build --parameterization`; no separate command |
 | Job collections/configs | Y | Planned | 10 | |
 | Base + config overrides | Y | Planned | 10/26 | Correct inheritance |

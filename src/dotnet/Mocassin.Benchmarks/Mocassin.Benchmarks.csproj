@@ -13,5 +13,8 @@
   <ItemGroup>
     <ProjectReference Include="../Mocassin.Core/Mocassin.Core.csproj" />
     <ProjectReference Include="../Mocassin.Symmetry/Mocassin.Symmetry.csproj" />
+    <ProjectReference Include="../Mocassin.Compilation/Mocassin.Compilation.csproj" />
+    <ProjectReference Include="../Mocassin.Contracts/Mocassin.Contracts.csproj" />
+    <ProjectReference Include="../Mocassin.Packages/Mocassin.Packages.csproj" />
   </ItemGroup>
 </Project>

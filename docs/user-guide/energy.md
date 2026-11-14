@@ -61,7 +61,8 @@ Site energies are sparse per site and particle:
 - an entry for a particle the site cannot occupy is a warning (`ENM016`).
 
 Site energies act as local offsets and can represent fixed migration barriers on unstable sites. A
-parameterization template may override the model value; the authored value remains the default.
+[parameterization template](parameterization.md#site-energy-overrides-and-reset) may override the model value;
+the authored value remains the default.
 
 ## Costs and limits
 

@@ -197,6 +197,33 @@ occupation tuple, `RuleGeometryId` inside `(transitionKind, transitionId)`, and 
 overrides. A model-signature change invalidates the template before ID matching; diff/rebase is explicit and
 reported, and values are never silently reused across changed geometry.
 
+### Diff and rebase are reported, never implicit
+
+`Diff` is a pure description by stable identity. It classifies template entries as `Matched`, `Added`, or
+`Removed` and groups related pair/group removals and additions as display-only `GeometryChanges`. Rebase is a
+separate explicit operation with three strategies:
+
+- `KeepMatching` copies only exact stable IDs and defaults every new slot.
+- `NearestGeometry` is pair-only and opt-in. It copies a removed pair value only into a unique added slot with
+  the same unordered site pair, chiral flag, stability kind, particle pair, and a distance bucket within the
+  configured tolerance. Ambiguous candidates copy nothing and are counted. Groups, rules, and site overrides
+  remain exact-ID-only because the template stores no offset or geometry hash that could justify a nearest
+  match.
+- `Reset` preserves the template identity and creation time, adopts the new signature and headers, and clears
+  every value.
+
+`ParameterizationRebaseReport` records copied/defaulted/dropped/ambiguous counts plus every nearest copy, and
+`PRM009` carries the same counts. A changed chiral link has no exact ID and is excluded from nearest copying,
+so the shared value is dropped rather than reused across the break. The service never mutates its inputs or
+saves the result; Step 26 will show the report before the user commits the rebound template.
+
+The checked-in golden fixtures are generated through the real compiler and apply path, not a synthetic value
+pattern. `ParameterizationGoldenFixtureTests` pins the ceria, ceria-KMC, barium-zirconate, and P1 chiral
+applied values and projections; `ParameterizationChiralFixtureTests` regenerates the P1/P4mm link-change
+projects and proves the drop/no-copy rule. Intentional regeneration uses `MOCASSIN_UPDATE_GOLDENS=1`, then the
+manifest signature vectors and `tools/contracts/generate.py`; `verify.sh contracts` rejects stale fixtures.
+
+
 ## Parameterization values, signature, and site background
 
 `Mocassin.Contracts` owns the applied `ParameterizationValues` and the `ParameterizationSignatureV1`
@@ -214,6 +241,29 @@ Step 08's implemented `CompiledEnergyModel` has pair and cluster tables but no s
 Step 09 resolves the authored `model.siteEnergies` onto the compiled `[position][particle]` table, applies
 template overrides, and Step 11 writes it as `energy.defect_background`. Step 15 consumes the same table.
 This keeps the completed compiler unchanged and the authored site energies in their existing Core home.
+
+### Site-energy background resolution
+
+`ParameterizationService.Apply` builds the dense background directly from the supplied `Project` snapshot:
+
+1. Resolve each authored `SiteEnergySet` by `CellSiteId` to the compiled reference site and each
+   `SiteEnergyEntry` by `ParticleId` to the compiled particle index.
+2. Copy the value to every `CompiledPosition` owned by that reference site, at row-major index
+   `P * particleCount + particleIndex`. Particle `0` (void) and particles outside the site's allowed mask stay
+   `0 eV`; a missing authored entry also stays `0 eV`.
+3. Apply template `SiteEnergyOverrides` last. An override replaces the authored value at every owned position,
+   so "reset to model" is removal of the override, never a copied value.
+4. Report an authored entry or override whose site/particle does not map, or whose particle the site cannot
+   occupy, as `PRM008` **Warning** and ignore it. A stale entry therefore cannot silently shift the background.
+   A structural mismatch that changes the compiled-model signature is `PRM001` **Error** and produces no
+   `ParameterizedModel`.
+
+The table is quantized to 12 decimals before signing, like every other applied value. The dense table is
+`[position][particle]` row-major in ascending P order, matching Step 11's `energy.defect_background` and Step
+15's per-position consumption. Because the project is the source of the authored background, `Apply` requires
+the same `Project` snapshot that produced the compiled model. The compiled model does not persist a project
+hash, so Step 12 and the GUI pass a real project/model pair; a mismatched pair is a caller contract violation,
+while an individual stale site entry is recoverable user data reported as `PRM008`.
 
 Step 09 adds no `IValidationStage`: `ValidationContext` has no compiled model, and compiling inside validation
 would duplicate Step 12. Structural `PRM` checks run in Core `ProjectValidator`; compiled-bound checks run in

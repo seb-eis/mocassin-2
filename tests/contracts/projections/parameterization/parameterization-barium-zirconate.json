@@ -1,0 +1,8 @@
+{
+  "fixtureFormat": "canonical-projection-v1",
+  "id": "parameterization-barium-zirconate",
+  "descriptor": "parameterization-v1",
+  "modelSignature": "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2",
+  "signatureHex": "a7f6ebd97ea336308360949e4fe703bb1c88220a545e9f9db06f009cd6d32b9d",
+  "projectionSha256": "3dbc1b8cf790d39a542155997148c272344e804b4c0cdea89bed68520ad3f6c1"
+}

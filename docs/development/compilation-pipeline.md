@@ -186,9 +186,54 @@ the persisted DTO.
   `ParameterizationService.Validate`, which Step 12 calls after compilation. Step 09 adds no
   `IValidationStage` because `ValidationContext` has no compiled model and compiling inside validation would
   duplicate Step 12. There is no `mocassin parameterize` command.
-- Diff/rebase is explicit. `KeepMatching` copies only exact stable IDs; `NearestGeometry` copies only unique,
-  reported pair/group descriptor matches; `Reset` copies nothing. Values are never silently reused across
-  changed geometry, and a changed chiral link drops the shared value.
+- Diff/rebase is explicit. `Diff` classifies every pair, group, kinetic-rule, and site-override slot as
+  `Matched`, `Added`, or `Removed` by stable identity and reports related geometry changes as display-only
+  information. `KeepMatching` copies only exact stable IDs; `NearestGeometry` copies only unique, reported
+  **pair** descriptor matches (it is pair-only); `Reset` copies nothing. Values are never silently reused
+  across changed geometry, and a changed chiral link drops the shared value. Rebase preserves the template
+  identity and creation time, adopts the new model signature and headers, never mutates its inputs, and emits
+  `PRM009` with the copied/defaulted/dropped/ambiguous counts.
+
+### Rebase flow
+
+1. The template stores the `ModelSignature` it was created against. A changed model makes `Apply`/`Validate`
+   return `PRM001` before any stable ID is matched. `Diff` remains usable on the stale template.
+2. Inspect `ParameterizationDiff`: `Added` slots would default, `Removed` entries would be ignored, and
+   `Matched` entries keep their values. A pair or group removed/added pair with the same logical descriptor is
+   listed under `GeometryChanges`, but that is not permission to copy a value.
+3. Choose a strategy. `KeepMatching` is the safe default when IDs survive a catalog/contract change.
+   `NearestGeometry` is opt-in for a pair geometry change and copies only a unique candidate with the same
+   unordered site pair, chiral flag, stability kind, particle pair, and a distance bucket within
+   `NearestDistanceToleranceFm`. Ambiguous candidates copy nothing and are counted. Groups, kinetic rules, and
+   site overrides require exact IDs; a changed group identity defaults rather than copying.
+4. Review `ParameterizationRebaseReport` before committing the returned template. `DescriptorMatchDetails`
+   lists every nearest copy with its source/target buckets; `CopiedValues` equals exact matches plus
+   `DescriptorMatches`. A changed chiral link has no exact ID and is excluded from nearest copying, so the old
+   shared value is dropped and the new slots default.
+5. Persist only the template the caller chooses, through the project editor. The service does not save.
+
+### Golden fixtures
+
+The checked-in golden templates are applied through the real `ModelCompiler` and `ParameterizationService.Apply`
+by `ParameterizationGoldenFixtureTests`. That test writes and checks:
+
+- `tests/contracts/parameterizations/*.json` — the full applied pair/group/site/rule values and signature;
+- `tests/contracts/projections/parameterization/*.bin/.json` — the canonical projection bytes and metadata.
+
+`ParameterizationChiralFixtureTests` generates and checks the P1/P4mm link-change projects and proves that a
+P4mm chiral value is dropped rather than copied by a P1 rebase. To regenerate fixtures intentionally:
+
+```sh
+MOCASSIN_UPDATE_GOLDENS=1 dotnet test src/dotnet/Mocassin.Packages.Tests \
+  --filter "FullyQualifiedName~ParameterizationGoldenFixtureTests|FullyQualifiedName~ParameterizationChiralFixtureTests"
+python tools/contracts/generate.py
+```
+
+Then update the matching `contracts/manifest.json` `fixtures.signatureVectors.vectors` entries and run
+`./tools/verify.sh contracts`. The Python checker re-encodes every `.bin` from the generated
+`parameterization-v1` descriptor; `generate.py --check` keeps `signature-vectors.json` current. Never
+hand-edit a generated fixture or `signature-vectors.json`.
+
 
 ## Signatures
 
@@ -223,8 +268,16 @@ ParameterizedModel.Signature
   so no stable IDs are projected and Step 13 can re-encode from the `.msl` payload alone. Template metadata,
   set headers, unset markers, and runtime settings are excluded. The applied values are quantized before
   storage, so the persisted payload and the signature cannot drift.
-- `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` is made public and reused by Contracts, so the
-  model and parameterization projections share one quantization/header/string implementation.
+- `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` is public and reused by Contracts, so the model
+  and parameterization projections share one fixed-width header, string, and quantization implementation.
+  `ParameterizationSignatureV1.Compute` streams the projection through an `IncrementalHash`-backed
+  `IBufferWriter<byte>`; `ComputeProjection` materializes bytes only for golden fixtures and diagnostics.
+- `tests/contracts/projections/parameterization/*.bin` are the canonical parameterization byte fixtures for
+  ceria, ceria KMC, barium zirconate, and the generated P1 chiral link-change project. They live in a
+  subdirectory so the model checker's `projections/*.bin` glob does not consume them.
+  `tools/contracts/check_parameterization_projection.py` independently re-encodes them from the generated
+  `parameterization-v1` descriptor in `verify.sh contracts`, and the `signatures.parameterization` entry is
+  `final` in the manifest.
 - `models.signature` is the parameterization signature; `models.payload.model_signature` is the Step 08
   signature. A value-only change changes the former, not the latter.
 

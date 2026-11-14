@@ -136,6 +136,18 @@ they live in Core `ProjectValidator`; signature/ID checks require the compiled m
 `build`. There is no `mocassin parameterize` command; `build --parameterization <id>` selects a project
 template, and creation/editing is the Step 09 library API used by the GUI.
 
+Step 09 feature 5 supplies `IParameterizationService.Validate`, which returns compiled-bound diagnostics only
+(no diff and no applied tables). Step 12 calls it after the compile and maps the results as follows:
+
+- validation-stage errors, or warnings promoted by `--warnings-as-errors`, exit `1`;
+- compiled-bound parameterization errors, or parameterization warnings promoted by `--warnings-as-errors`,
+  exit `4`; an unflagged build may still succeed with warnings;
+- `mocassin validate` never compiles, so it runs only the structural `PRM` checks in Core `ProjectValidator`
+  and cannot detect a stale model signature (`PRM001`), unknown/changed keys (`PRM002`), completeness
+  (`PRM003`/`PRM006`), site targets (`PRM008`), Metropolis sets (`PRM011`), forbidden particles (`PRM012`),
+  uniform values (`PRM015`), or the plausible frequency band (`PRM016`). `mocassin build` reports those after
+  compilation.
+
 ### 4. Progress reporting
 
 Human mode:
