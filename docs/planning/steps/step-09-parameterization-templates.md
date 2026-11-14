@@ -10,13 +10,13 @@ completeness checks.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** In audit
 - **Feature list:** Approved 2026-11-14 (seven features; step branch created)
 - **Step branch:** `step/09-parameterization-templates`
-- **Step CI:** —
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43630049214) at `20c73bc`
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Ready for audit at `20c73bc` — [record](../audits/step-09.md)
 - **Design review:** Ready with notes at `26d6a0ecff543ac65eb60d60d9f9c893e00f32bc` (round 4) — accepted 2026-11-14
 - **Last updated:** 2026-11-14
 
@@ -39,7 +39,7 @@ completeness checks.
 | `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `ce20049` |
 | `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `4063c4d` |
 | `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `f6cfce3` |
-| `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | In progress | — | — | — |
+| `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | Done | `verify.sh all --require` exit 0 (see below) | — | `20c73bc` |
 
 ### Feature 1 outcome and deviations
 
@@ -421,8 +421,8 @@ Notes and limitations:
 
 ### Feature 7 gate evidence
 
-`golden-templates-docs-and-closeout` has not been squash-merged yet, so the feature row remains `In progress`.
-The full closeout gate was run on the feature branch with the Python toolchain and `cargo-deny` installed:
+`golden-templates-docs-and-closeout` was squash-merged into the step branch as `20c73bc`. The full closeout
+gate was run on the step branch with the Python toolchain and `cargo-deny` installed:
 
 ```sh
 PATH=/home/node/.venvs/mocassin/bin:$PATH ./tools/verify.sh all --require
