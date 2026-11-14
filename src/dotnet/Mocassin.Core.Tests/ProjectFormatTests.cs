@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
+using Mocassin.Core.Model.Jobs;
 using Mocassin.Core.Project;
 using ProjectModel = Mocassin.Core.Project.Project;
 

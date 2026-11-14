@@ -327,6 +327,44 @@ public readonly record struct JobTemplateId(Guid Value) : ITypedId<JobTemplateId
 }
 
 /// <summary>
+/// Stable identifier for a job-template collection.
+/// </summary>
+[JsonConverter(typeof(TypedIdJsonConverter<JobCollectionId>))]
+public readonly record struct JobCollectionId(Guid Value) : ITypedId<JobCollectionId>
+{
+    /// <summary>
+    /// Creates a new sortable UUIDv7 identifier.
+    /// </summary>
+    /// <returns>The new identifier.</returns>
+    public static JobCollectionId New() => new(Uuid7.NewGuid());
+
+    /// <inheritdoc />
+    public static JobCollectionId Create(Guid value) => new(value);
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString("D", CultureInfo.InvariantCulture);
+}
+
+/// <summary>
+/// Stable identifier for a job-template configuration.
+/// </summary>
+[JsonConverter(typeof(TypedIdJsonConverter<JobConfigId>))]
+public readonly record struct JobConfigId(Guid Value) : ITypedId<JobConfigId>
+{
+    /// <summary>
+    /// Creates a new sortable UUIDv7 identifier.
+    /// </summary>
+    /// <returns>The new identifier.</returns>
+    public static JobConfigId New() => new(Uuid7.NewGuid());
+
+    /// <inheritdoc />
+    public static JobConfigId Create(Guid value) => new(value);
+
+    /// <inheritdoc />
+    public override string ToString() => Value.ToString("D", CultureInfo.InvariantCulture);
+}
+
+/// <summary>
 /// Stable identifier for a build template.
 /// </summary>
 [JsonConverter(typeof(TypedIdJsonConverter<BuildTemplateId>))]

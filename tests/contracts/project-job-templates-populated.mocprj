@@ -1,0 +1,104 @@
+{
+  "$schema": "https://mocassin.dev/schemas/project-v1.json",
+  "schemaVersion": 1,
+  "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e60",
+  "masterSeed": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+  "name": "Job template fixture",
+  "description": "Additive job-template fixture for Step 10.",
+  "createdUtc": "2026-11-04T12:00:00.0000000Z",
+  "modifiedUtc": "2026-11-04T12:00:00.0000000Z",
+  "model": {},
+  "parameterizations": [],
+  "jobTemplates": [
+    {
+      "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e71",
+      "name": "KMC temperature series",
+      "collections": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e88",
+          "name": "T773",
+          "simulationId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e89",
+          "baseSettings": {
+            "temperatureK": 773.0,
+            "targetMcsp": 200,
+            "extensions": [
+              {
+                "id": "mmcfe",
+                "config": {
+                  "alphaCount": 50,
+                  "relaxCycles": 20000000
+                }
+              }
+            ]
+          },
+          "jobCountPerConfig": 4,
+          "rngSeed": "collection-seed",
+          "selectionOptimizers": [
+            {
+              "siteId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e83",
+              "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e84"
+            }
+          ],
+          "configs": [
+            {
+              "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e87",
+              "name": "x001",
+              "overrides": {
+                "targetMcsp": 250
+              },
+              "lattice": {
+                "a": 10,
+                "b": 10,
+                "c": 10
+              },
+              "dopings": [
+                {
+                  "dopingId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e81",
+                  "fraction": 0.01
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "buildTemplates": [],
+  "viewSettings": {
+    "camera": {
+      "position": [
+        0,
+        0,
+        0
+      ],
+      "target": [
+        0,
+        0,
+        -1
+      ],
+      "up": [
+        0,
+        1,
+        0
+      ],
+      "projection": "perspective",
+      "fieldOfViewDegrees": 45,
+      "nearPlane": 0.1,
+      "farPlane": 1000
+    },
+    "renderBox": {
+      "min": [
+        -1,
+        -1,
+        -1
+      ],
+      "max": [
+        1,
+        1,
+        1
+      ],
+      "visible": true
+    },
+    "objectStyles": []
+  }
+}

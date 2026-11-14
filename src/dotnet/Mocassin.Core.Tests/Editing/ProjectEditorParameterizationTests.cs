@@ -145,7 +145,7 @@ public sealed class ProjectEditorParameterizationTests
     {
         var editor = new ProjectEditor();
         var template = ParameterizationTestModels.CreatePopulatedTemplate();
-        var job = new Mocassin.Core.Model.JobTemplate(JobTemplateId.New(), "Job template");
+        var job = new Mocassin.Core.Model.Jobs.JobTemplate(JobTemplateId.New(), "Job template");
         var build = new Mocassin.Core.Model.BuildTemplate(
             BuildTemplateId.New(),
             "Build template",

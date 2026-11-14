@@ -58,6 +58,27 @@ public sealed class ProjectStoreTests
     }
 
     [Fact]
+    public async Task SaveAndLoadPreserveJobTemplates()
+    {
+        using var directory = new TempDirectory();
+        var store = new ProjectStore(
+            new FixedTimeProvider(DateTimeOffset.Parse("2026-11-14T12:00:00Z", CultureInfo.InvariantCulture)));
+        var path = directory.File("job-templates.mocprj");
+        var project = ProjectJson.Deserialize(
+            File.ReadAllBytes(RepositoryPaths.Combine("tests", "contracts", "project-job-templates-populated.mocprj")));
+
+        var saved = await store.SaveAsync(project, path);
+        var loaded = await store.LoadAsync(path);
+
+        Assert.True(saved.IsSuccess);
+        Assert.True(loaded.IsSuccess);
+        var collection = loaded.Project!.JobTemplates.Single().Collections!.Value.Single();
+        Assert.Equal(773.0, collection.BaseSettings!.TemperatureK);
+        Assert.Equal(10, collection.Configs!.Value.Single().Lattice.A);
+        Assert.Equal(0.01, collection.Configs.Value.Single().Dopings!.Value.Single().Fraction);
+    }
+
+    [Fact]
     public async Task SaveWritesUtf8WithoutBomAndLfLineEndings()
     {
         using var directory = new TempDirectory();

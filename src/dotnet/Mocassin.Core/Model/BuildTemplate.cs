@@ -5,17 +5,6 @@ using Mocassin.Core.Ids;
 namespace Mocassin.Core.Model;
 
 /// <summary>
-/// A reusable job-template definition.
-/// </summary>
-/// <param name="Id">The stable template identifier.</param>
-/// <param name="Name">The user-visible template name.</param>
-/// <remarks>
-/// Step 01 stores the identity only; collections, configurations, settings, and seed handling are
-/// added by Step 10.
-/// </remarks>
-public sealed record JobTemplate(JobTemplateId Id, string Name);
-
-/// <summary>
 /// A reusable recipe that binds a job template to a parameterization.
 /// </summary>
 /// <param name="Id">The stable build-template identifier.</param>
