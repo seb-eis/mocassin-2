@@ -17,7 +17,11 @@ internal static class StageCacheKeys
     /// Creates the structure-stage key.
     /// </summary>
     public static string Structure(CompilationContext context) =>
-        Key("structure", context, ProjectHasher.ComputeStructure(context.Project.Structure));
+        Key(
+            "structure",
+            context,
+            ProjectHasher.ComputeStructure(context.Project.Structure),
+            ParticleHash(context));
 
     /// <summary>
     /// Creates the pair/energy-stage key.

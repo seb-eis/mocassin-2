@@ -44,7 +44,7 @@ internal sealed class EncodingCompilationStage : ICompilationStage
 
         var transitions = context.Transitions;
         var globalTrackers = BuildGlobalTrackers(transitions);
-        if (globalTrackers.Any(static tracker => tracker.Index > byte.MaxValue))
+        if (globalTrackers.Any(static tracker => tracker.Index >= byte.MaxValue))
         {
             return CompilationFailure.FromMessage(
                 context,

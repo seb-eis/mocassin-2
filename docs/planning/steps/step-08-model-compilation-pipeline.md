@@ -37,18 +37,14 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
   `AGENTS.md` §8 requires each file namespace to match its concept folder, and the accepted architecture
   layout already assigns these types to `Compiler/`, `Caching/`, and `Context/`. Type names, signatures, and
   behaviour are unchanged; consumers add a `using` directive.
-- **Fail-closed core.** `compiler-core` lands the public result, report, option, cache, and stage contracts plus
-  the synchronous stage orchestrator. Every content stage is a `CMP001` placeholder that stops the pipeline
-  until its feature lands, so the default compiler returns `Failed` with no model instead of a fabricated
-  success. `CompiledModel` currently carries the format and provenance header; later features add the immutable
-  component tables.
-- **Vehicle sample correction and interstitialcy limitation.** `vehicle5.mocprj` originally repeated the
-  `A -> V` and `B -> V` groups on both sides of the vehicle, producing `S0 = [A, A, void, B, B]` and
-  `S2 = [V, V, void, V, V]`. The sample now authors the conserving alternating groups
-  `[A -> V, V -> A, AB -> void, B -> V, V -> B]` and a separate reverse chain, so the vehicle compiles
-  unidirectional rules and has a pinned signature. `interstitialcy5` still has three stable sites that can
-  only swap `O`/`V` in an odd number of directions, so its symbol inventory cannot balance under the accepted
-  conservation rule; it fails closed with `CMP005`. No interstitialcy golden or closeout was fabricated.
+- **Compiler core.** `compiler-core` landed the public result, report, option, cache, and stage contracts plus
+  the synchronous stage orchestrator. Every later feature replaced its placeholder with the real stage; the
+  complete pipeline now produces a signed compiled model or a diagnostics-only failure.
+- **Vehicle and interstitialcy sample correction.** `vehicle5.mocprj` now authors alternating
+  `[A -> V, V -> A, AB -> void, B -> V, V -> B]` groups and a separate reverse chain. `interstitialcy5`
+  authors alternating outer groups plus an explicit spectator self state change at its interior stable
+  centre. Both compile, keep their explicit reverse transitions, and have pinned signatures; the spectator
+  placement is validated as `TRN002` only outside an interior stable position with unstable neighbours.
 - **compiler-core local evidence (2026-11-13).** `./tools/verify.sh dotnet` passes (932 tests, 0 failed),
   `./tools/verify.sh structure` passes, `./tools/verify.sh api` passes with the refreshed
   `Mocassin.Compilation` ApiCompat baseline, `./tools/verify.sh contracts` passes, and

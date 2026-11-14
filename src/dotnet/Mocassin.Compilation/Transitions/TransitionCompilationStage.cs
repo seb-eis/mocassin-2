@@ -603,12 +603,23 @@ internal sealed class TransitionCompilationStage : ICompilationStage
         var allowVoidDonor = direction.Transition.IsKinetic
             && context.Project.Find(new KineticTransitionId(direction.Transition.Id))?.ReverseTransitionId is not null;
         CompilationStageOutcome? failure = null;
+        var generated = 0;
         Enumerate(0);
 
         void Enumerate(int node)
         {
             if (node == choices.Count)
             {
+                generated++;
+                if (generated > context.Options.MaxRuleCount)
+                {
+                    failure ??= CompilationFailure.FromMessage(
+                        context,
+                        CompilationDiagnosticCodes.CompileLimit,
+                        $"Rule generation exceeded the hard limit {context.Options.MaxRuleCount}.");
+                    return;
+                }
+
                 var outcome = Evaluate(context, direction, state0, state1, state2, allowVoidDonor, rejectionCounts);
                 if (outcome is null)
                 {

@@ -71,6 +71,17 @@ internal sealed class PairCompilationStage : ICompilationStage
         }
 
         candidates.Sort(Compare);
+        var uniqueEnergyIds = candidates.Select(static candidate => candidate.Preview.EnergyId).Distinct(StringComparer.Ordinal).LongCount();
+        var estimatedBytes = uniqueEnergyIds * context.Particles.Count * context.Particles.Count * sizeof(double);
+        if (estimatedBytes > context.Options.MaxEnergyTableBytes)
+        {
+            return CompilationFailure.FromMessage(
+                context,
+                CompilationDiagnosticCodes.CompileLimit,
+                $"The estimated pair-table size {estimatedBytes} bytes exceeds the hard limit " +
+                $"{context.Options.MaxEnergyTableBytes}.");
+        }
+
         var tableByEnergyId = new Dictionary<string, int>(StringComparer.Ordinal);
         var tables = ImmutableArray.CreateBuilder<CompiledPairTable>();
         var geometries = ImmutableArray.CreateBuilder<CompiledPairGeometry>(candidates.Count);
