@@ -26,6 +26,8 @@
 | Platform CI | Not run (Ubuntu-only policy; no platform-specific code) |
 | Audit date | 2026-11-13 |
 | Auditor | Fresh independent audit context (DeepSeek V4.1 Flash 1017, OpenCode audit subagent); no shared conversation with the planner or implementor |
+| Audit date (round 2) | 2026-11-14 |
+| Auditor (round 2) | Fresh independent Step 08 re-auditor (DeepSeek V4.1 Flash 1017, OpenCode audit subagent); no shared conversation with the planner or implementor. Repository changes were read-only; reproduction used a scratch probe under `/tmp/opencode/probe2`, outside the tree. |
 
 Step page: [`Step 08 — Model Compilation Pipeline`](../steps/step-08-model-compilation-pipeline.md)
 
@@ -47,34 +49,34 @@ Step page: [`Step 08 — Model Compilation Pipeline`](../steps/step-08-model-com
 - [x] Ceria compiles to the expected P1 positions, pair sets/tables, cluster sets, and oxygen migration rules. (audit: covered by structure/pair/cluster/rule tests, the ceria KMC golden signature, and the pinned inspection-JSON hash)
 - [x] A 2-site MMC model compiles forward and inverse exchange rules. (audit: `MetropolisExchangeCompilesForwardAndInverseRulesWithoutState1` and the ceria-MMC golden)
 - [ ] A 3-site migration compiles forward and inverse rules, including a chiral case, and keeps the KMC dual-DOF default. (audit: forward/inverse and dual-DOF are covered for ceria; no explicit chiral rule/migration case is asserted anywhere)
-- [x] A 5-site vehicle compiles unidirectional rules only, with no automatic inverse; as a KMC simulation it keeps the dual-DOF default unless a documented Step 10 optimizer rule clears it. (audit: unidirectional/no-inverse is pinned; dual-DOF is pinned for KMC generally, not for the vehicle specifically. The explicit reverse transition cannot be compiled alongside the forward one — finding A1)
-- [ ] Rule generation enforces unstable positions void in S0/S2, stable positions void in S1, and the documented mass/charge conservation rules; rejected counts are reported. (audit: state roles and conservation are enforced; `RejectedByMass/Charge/InvalidState` are never populated — finding A4)
-- [ ] Charge transport vectors give `qΔx` for a single charge, the correct vacancy sign, zero for an identical-ion exchange, and non-zero for a distinct-charge exchange or a non-collinear multi-site path. (audit: only the interstitialcy/vacancy pin (-4.0) and the neutral vehicle pin (0.0) exist; the other named cases are untested — finding A9)
-- [ ] Rule ambiguity is detected as `CMP004` with both conflicting transitions/rules. (audit: detection logic exists, but no emission test demonstrates it — finding A8)
+- [x] A 5-site vehicle compiles unidirectional rules only, with no automatic inverse; as a KMC simulation it keeps the dual-DOF default unless a documented Step 10 optimizer rule clears it. (audit: unidirectional/no-inverse is pinned; dual-DOF is pinned for KMC generally, not for the vehicle specifically. The explicit reverse transition cannot be compiled alongside the forward one — finding A1) (audit r2: A1 closed — both `vehicle5` and `interstitialcy5` compile the forward and explicit-reverse transitions together as two collections, with no automatic inverse and no second-transition `CMP005`; vehicle dual-DOF remains covered by the KMC encoding tests)
+- [x] Rule generation enforces unstable positions void in S0/S2, stable positions void in S1, and the documented mass/charge conservation rules; rejected counts are reported. (audit: state roles and conservation are enforced; `RejectedByMass/Charge/InvalidState` are never populated — finding A4) (audit r2: A4 closed — the counts are populated on `CompiledTransitionModel`/`CompilationCounts`; `ceria-kmc` reports 2/0/0 and `KmcCompilationReportsRuleAndInverseCounts` asserts `RejectedByMass > 0`)
+- [ ] Charge transport vectors give `qΔx` for a single charge, the correct vacancy sign, zero for an identical-ion exchange, and non-zero for a distinct-charge exchange or a non-collinear multi-site path. (audit: only the interstitialcy/vacancy pin (-4.0) and the neutral vehicle pin (0.0) exist; the other named cases are untested — finding A9) (audit r2: A9 still open — no distinct-charge-exchange or non-collinear-path test was added; the endpoint-moment implementation itself is sound)
+- [ ] Rule ambiguity is detected as `CMP004` with both conflicting transitions/rules. (audit: detection logic exists, but no emission test demonstrates it — finding A8) (audit r2: CMP004 is reachable and reports both rule geometry IDs in a crafted-stable-group probe, but there is still no emission test; CMP011 has no emission test either)
 - [x] Every compiled direction/rule is reachable through `jump_count`/`jump_mapping`; every selectable `(position, particle, relative slot)` has at most one rule for its `state0`. (audit: uniqueness follows from the `(collection, startP, state0)` rule store; a scratch harness confirmed every ceria direction is mapped, but there is no dedicated assertion)
-- [ ] Tracker definitions/mappings are emitted for KMC and absent for MMC; a 3-site migration's `tracker_order` follows particle identity. (audit: 3-site `tracker_order` and KMC emission are pinned; MMC collections still emit tracker definitions and rule tracker orders, and KMC simulations receive trackers for non-active/MMC collections — finding A6)
-- [x] `CompiledModel.ModelSignature` is stable across recompilation, excludes runtime settings and parameterization values, and changes exactly when compiled geometry/rules/encoding changes. (audit: stability and runtime-setting exclusion are tested; coverage is adequate. The projection byte format itself is finding A2)
+- [x] Tracker definitions/mappings are emitted for KMC and absent for MMC; a 3-site migration's `tracker_order` follows particle identity. (audit: 3-site `tracker_order` and KMC emission are pinned; MMC collections still emit tracker definitions and rule tracker orders, and KMC simulations receive trackers for non-active/MMC collections — finding A6) (audit r2: A6 closed in behaviour — global/static trackers are built only for KMC collections, MMC rules carry `0xFF`, and a mixed KMC+MMC probe gives the KMC simulation only its own collection's trackers; no mixed-scope test exists, see R2-2)
+- [x] `CompiledModel.ModelSignature` is stable across recompilation, excludes runtime settings and parameterization values, and changes exactly when compiled geometry/rules/encoding changes. (audit: stability and runtime-setting exclusion are tested; coverage is adequate. The projection byte format itself is finding A2) (audit r2: A2 closed in substance — the canonical MessagePack projection is implemented from the full manifest descriptor and verified byte-for-byte by the Python checker on all five fixtures; the amendment's quantization-vector and descriptor-binding tests and cluster-fixture coverage are still missing, see R2-1)
 - [ ] Compiling the same project twice yields byte-identical `CompiledModelJson` and signature on Ubuntu, Windows, and macOS. (audit: Ubuntu is verified; Windows/macOS were not run. Accepted per the manual platform policy and recorded as a note)
-- [ ] Stage caches reuse unaffected stages after a single-domain edit and never change the output. (audit: fails — a caller cache returns stale rules and a different signature after a particle edit, and a successful stale compile where a fresh compile fails `CMP005`; pairs/clusters/indexing are not cached — finding A3)
-- [ ] Ceria compiles in `< 1 s`; a 10k-position model compiles in `< 30 s` with `< 2 GiB` managed memory. (audit: ceria measured ~1 ms; the guard is `< 2 s`, and no 10k-position or memory evidence exists — finding A7)
+- [ ] Stage caches reuse unaffected stages after a single-domain edit and never change the output. (audit: fails — a caller cache returns stale rules and a different signature after a particle edit, and a successful stale compile where a fresh compile fails `CMP005`; pairs/clusters/indexing are not cached — finding A3) (audit r2: A3 still fails — an allowed-particle-set edit hits the stale structure cache and a cached compile returns a different signature (`6` vs `14` mask) than a fresh compile; the charge/donor/cutoff cases are fixed)
+- [ ] Ceria compiles in `< 1 s`; a 10k-position model compiles in `< 30 s` with `< 2 GiB` managed memory. (audit: ceria measured ~1 ms; the guard is `< 2 s`, and no 10k-position or memory evidence exists — finding A7) (audit r2: the guard is now `< 1 s` and ceria measures 120 ms; the 10k test compiles in 879 ms, but its model has no transitions/rules and the memory assertion is a live-heap delta, not the required peak, see R2-3)
 - [x] Cancellation returns no partial model and leaves the project unchanged. (audit: cancelled-token and between-stage cancellation tests pass; project immutability is asserted for a successful compile. A mid-stage/mid-Symmetry cancellation run is not exercised, which the design accepts)
-- [ ] Every `CMP` code has a catalog descriptor, documentation anchor, and emission test. (audit: catalog and anchors are complete and tested; only `CMP006`, `CMP009`, and `CMP010` have emission tests — finding A8)
-- [x] Documentation written. (audit: the named pages are present and describe the implemented pipeline; the post-freeze request commit breaks the docs link gate — finding m4)
+- [ ] Every `CMP` code has a catalog descriptor, documentation anchor, and emission test. (audit: catalog and anchors are complete and tested; only `CMP006`, `CMP009`, and `CMP010` have emission tests — finding A8) (audit r2: ten codes now have emission tests; `CMP004` and `CMP011` still do not)
+- [x] Documentation written. (audit: the named pages are present and describe the implemented pipeline; the post-freeze request commit breaks the docs link gate — finding m4) (audit r2: m4 closed — `./tools/verify.sh docs` passes at the tip; the step page still carries a stale "interstitialcy fails `CMP005`" bullet, see R2-5)
 
 ## Standard audit checklist
 
-- [ ] Required tests from the step page pass. (audit: all 970 existing tests pass, but several tests named in the step page's Tests table are absent: brute-force pair/cluster oracles, charge-transport cases, cache invalidation after a one-domain edit, 10k performance/memory, and per-code CMP emission)
+- [ ] Required tests from the step page pass. (audit: all 970 existing tests pass, but several tests named in the step page's Tests table are absent: brute-force pair/cluster oracles, charge-transport cases, cache invalidation after a one-domain edit, 10k performance/memory, and per-code CMP emission) (audit r2: all 985 tests pass, but distinct-charge/non-collinear transport, `CMP004`/`CMP011` emission, and a particle-set cache-invalidation case remain absent)
 - [x] Public/protected XML documentation policy is followed. (audit: documentation file generated with warnings-as-errors; `PublicAPI.Unshipped.txt` updated; ApiCompat clean)
-- [x] Documentation, status dashboard, feature log, and parity matrix are current. (audit: updated, though the parity matrix marks the stage cache `Done` despite A3, and the request commit's step-page link is broken)
-- [x] Closeout CI is green at the audited commit. (audit: run 43520011439 is `workflow_dispatch`, `success`, `head_sha` = `ebc0e46a052d4fb9d12dd0111f905be13ec51849`; contracts/.NET/ApiCompat jobs green, Python/Rust skipped by path filters)
-- [x] Closeout evidence matches the audited commit and the merge candidate. (audit: `check_closeout_evidence.py` reports OK; `main` 884ffe7 is an ancestor of the audited commit; no merge-tree run required)
-- [x] If `main` moved after the freeze, a merge-tree CI run or a re-audit is recorded. (audit: `main` did not move after the freeze; the merge-tree field is correctly empty)
+- [ ] Documentation, status dashboard, feature log, and parity matrix are current. (audit: updated, though the parity matrix marks the stage cache `Done` despite A3, and the request commit's step-page link is broken) (audit r2: docs build is green, but `status.md` marks step 09 `Re-audit required` and step 08 `Ready for audit`, and the parity matrix still marks dependent rules/caches `Done`; see R2-5)
+- [x] Closeout CI is green at the audited commit. (audit: run 43520011439 is `workflow_dispatch`, `success`, `head_sha` = `ebc0e46a052d4fb9d12dd0111f905be13ec51849`; contracts/.NET/ApiCompat jobs green, Python/Rust skipped by path filters) (audit r2: run 43533462127 is `workflow_dispatch`, `success`, `head_sha` = `ba8e889...`; Detect changes/.NET/Public API compatibility/Contracts and policy green, Rust/Python skipped by path filters)
+- [x] Closeout evidence matches the audited commit and the merge candidate. (audit: `check_closeout_evidence.py` reports OK; `main` 884ffe7 is an ancestor of the audited commit; no merge-tree run required) (audit r2: the checker reports OK on the frozen tip; note the file still named `ebc0e46`/run 43520011439 at `ba8e889` and was only updated in the docs commit `2a74aa3`, see R2-6)
+- [x] If `main` moved after the freeze, a merge-tree CI run or a re-audit is recorded. (audit: `main` did not move after the freeze; the merge-tree field is correctly empty) (audit r2: `origin/main` is still 884ffe7 and an ancestor of `ba8e889`)
 - [x] Windows/macOS runs are recorded, or their absence is accepted because the step has no platform-specific code. (audit: not run; accepted under the manual platform policy. The cross-platform determinism claim is therefore unverified — note N2)
-- [ ] Format/version/fixture changes are documented and tested. (audit: the model-signature projection does not match ADR 0010/the manifest, and only the C# projection is pinned — finding A2)
-- [x] Security, dependency, licence, and secret-scan gates pass. (audit: `contracts` mode: 403 SPDX headers, no secret patterns in 722 tracked text files, advisories/bans/licenses/sources ok, NuGet licence/vulnerability audit clean)
+- [x] Format/version/fixture changes are documented and tested. (audit: the model-signature projection does not match ADR 0010/the manifest, and only the C# projection is pinned — finding A2) (audit r2: the canonical projection now matches the manifest descriptor and the Python checker; the amendment's quantization midpoint vectors and descriptor-binding test are still missing, and no fixture exercises cluster tables, see R2-1)
+- [x] Security, dependency, licence, and secret-scan gates pass. (audit: `contracts` mode: 403 SPDX headers, no secret patterns in 722 tracked text files, advisories/bans/licenses/sources ok, NuGet licence/vulnerability audit clean) (audit r2: 407 SPDX headers, no secrets in 734 tracked text files, 51-package licence policy, no vulnerable packages)
 - [x] Code structure policy passes; no new root-level or catch-all folders. (audit: `structure` mode passes; `Mocassin.Compilation` is split by concept and stays within the file/folder limits)
-- [x] No unrelated changes or unapproved scope. (audit: the diff is the compiler, tests, contracts/fixtures, the additive `TransitionPathResolver` API, the documented sample/validator correction, and the required docs/status updates)
-- [x] Branch, tag, and status hygiene are correct. (audit: work is on `step/08-model-compilation-pipeline`; no step tag; no per-feature CI; only documentation commits follow the freeze)
+- [x] No unrelated changes or unapproved scope. (audit: the diff is the compiler, tests, contracts/fixtures, the additive `TransitionPathResolver` API, the documented sample/validator correction, and the required docs/status updates) (audit r2: the post-freeze commit `2a74aa3` also updates a binary API baseline, so the delta is not strictly documentation-only, see R2-6)
+- [x] Branch, tag, and status hygiene are correct. (audit: work is on `step/08-model-compilation-pipeline`; no step tag; no per-feature CI; only documentation commits follow the freeze) (audit r2: branch/tag model is correct and no step tag exists; the non-doc baseline binary and the status-row error are the hygiene exceptions in R2-5/R2-6)
 
 ## Evidence
 
@@ -158,6 +160,9 @@ MessagePack arrays/str/bin and fixed-width `uint64`/`int64`. The only pinned evi
 `GoldenModelTests` and `tests/contracts/signature-vectors.json`; no cross-language or manifest-driven vector
 exists.
 
+Round 2 (re-audit) commands, gate results, projection cross-checks, and reproduction-probe output are
+recorded under `### Audit round 2` below.
+
 ## Known notes for the auditor
 
 - The `vehicle5` and `interstitialcy5` samples originally repeated the same donor/acceptor direction on both
@@ -205,6 +210,8 @@ auditor's findings, evidence, or verdict.
 
 **State:** Fixes required
 
+**Round 2 state (2026-11-14):** Fixes required — see `### Audit round 2`.
+
 `Re-audit required` is a record state, not a verdict.
 
 ## Reviewer independence
@@ -223,6 +230,9 @@ Follow-up owner: Step 08 implementor (step agent)
 Follow-up issue/step: Fix A1–A9 and the minor findings on a feature branch, squash into
 `step/08-model-compilation-pipeline`, merge current `main`, refresh the closeout evidence, dispatch one
 replacement closeout CI run, add the resolutions, and request re-audit.
+
+Round 2 (2026-11-14) verdict: **Fixes required** — A3 remains a Blocker; A5, A8, and A9 remain Major. See
+`### Audit round 2`.
 
 ## Resolution status
 
@@ -328,3 +338,133 @@ evidence/format layers, not in the verified per-mechanism physics.
 **Fixes required.** A1–A3 must be fixed and re-audited; A4–A9 and the minor findings should be fixed or
 explicitly accepted with a recorded rationale. The branch must be frozen again at the fixed commit with a
 replacement closeout CI run and refreshed closeout evidence.
+
+### Audit round 2
+
+#### Independence and frozen state
+
+Fresh context: I did not author or implement Step 08, amendment 1, or the round-1 fixes and have no shared
+conversation with the planner or implementor. I read the round-1 findings and resolution table, the amendment
+and its review record, then reproduced every claim from the repository and a scratch probe
+(`/tmp/opencode/probe2`, project references to `Mocassin.Compilation` and `Mocassin.Packages`; not committed
+and not part of the tree). Nothing in the repository was edited except this record.
+
+Frozen state: branch `step/08-model-compilation-pipeline`; audited code commit
+`ba8e889cb51041352c876681801b12f455b2f7ee`; tip `2a74aa3` is the only commit above it. `main` at freeze
+`884ffe78f8b8f2a9fa6093afcce94856a6094c73` is `origin/main` and an ancestor of the audited commit; it did
+not move, so no merge-tree run is required. The tip's `docs/planning/closeout/step-08.json` binds `ba8e889`
+and run `43533462127`. The delta `ba8e889..2a74aa3` is mostly documentation but also updates
+`tests/contracts/api-baseline/net10.0/Mocassin.Compilation.dll` (R2-6).
+
+#### Commands and results
+
+- `./tools/verify.sh dotnet` — PASS. Release build/test of `Mocassin.slnx`; 985 tests, 0 failed
+  (Compilation 81, Core 565, Symmetry 223, Packages 105, Cli 7, App 1, Results 1, Contracts 1,
+  Architecture 1); `dotnet format` clean.
+- `./tools/verify.sh structure` — PASS (`Mocassin.Architecture.Tests` 1/1).
+- `./tools/verify.sh api` — PASS (NuGet licence policy OK for 51 packages; no vulnerable packages;
+  ApiCompat compatible for Core, Symmetry, Compilation, Contracts, Packages, Results, App.ViewModels,
+  App.Views, Rendering).
+- `./tools/verify.sh contracts` — PASS (18 contract artifacts current; `msgpack==1.2.4`; "Model projection
+  check OK (5 fixtures)"; space-group catalog current, 274 settings, sha256 `1f3bf67d...`; 18 tool tests;
+  407 SPDX headers; no secret patterns in 734 tracked text files; cargo-deny advisories/bans/licenses/
+  sources ok).
+- `./tools/verify.sh docs` — PASS at the tip (152 files scanned; Zensical strict build, DocFX
+  0 warnings/0 errors).
+- `python tools/check_closeout_evidence.py docs/planning/closeout/step-08.json` — `Closeout evidence: OK`.
+- `python tools/contracts/check_model_projection.py` — `Model projection check OK (5 fixtures)`.
+- GitHub API run `43533462127` — `workflow_dispatch`, `completed/success`, `head_sha` =
+  `ba8e889cb51041352c876681801b12f455b2f7ee`; jobs Detect changes, .NET (ubuntu-latest), Public API
+  compatibility, and Contracts and policy all `success`; Rust/Python skipped by path filters. No run exists
+  for the docs-only tip `2a74aa3`.
+- `git diff --stat main...HEAD` — 120 files, +13887/−145; reviewed the amendment/fix diff
+  (`contracts/manifest.json`, `contracts/generated/signatures/model-v1.json`, the encoder/fixtures/checker,
+  `StageCacheKeys`, the transition/encoding/environment stages, and the new tests).
+
+Projection cross-checks: all five `.bin` fixtures re-hash to their `.json` `projectionSha256` and
+`signatureHex`, and those signatures equal `tests/contracts/signature-vectors.json`; the descriptor in
+`contracts/generated/signatures/model-v1.json` re-encodes each decoded tree byte-for-byte under the Python
+checker. The fixtures exercise string/nil/bool/uint64/int64/float64 headers and both chiral-with-partner and
+nil-partner pair geometries. No fixture contains cluster tables, occupations, or cluster links.
+
+Probe results (real samples loaded through `ProjectStore`, edits applied to immutable project records):
+
+- A1: `vehicle5` referencing both kinetic transitions compiles successfully with 2 collections, 2 directions,
+  2 rules, `InverseRuleCount = 0`, and one non-empty direction/rule per collection; `interstitialcy5` is
+  identical. The new theory test covers both samples.
+- A3: O charge edit → rules cache miss, signature changes; donor/acceptor swap → rules cache miss, `CMP005`
+  for both cached and fresh compiles; structure rename → structure miss; stable-environment cutoff edit →
+  structure and rules hits, encoding miss. Adding `H+` to the oxygen particle set → **structure cache hit,
+  cached signature differs from a fresh compile, mask 6 vs 14**.
+- A4: `ceria-kmc` reports `RejectedByMass/Charge/InvalidState = 2/0/0`.
+- A5: `MaxRuleCount = 0` → `CMP006`; `MaxRuleCount = 3` with 4 rules → `CMP006`; `MaxRuleCount = 4` →
+  success; `MaxEnergyTableBytes = 0` on `samples/ceria/ceria.mocprj` → `CMP006`; on `ceria-kmc`, whose
+  energy model has no pair tables, it succeeds with `CMP009`.
+- A6: mixed KMC+MMC → the KMC simulation declares 2 global and 6 static trackers for its own collection; the
+  MMC simulation declares none; MMC rules carry `trackerOrder = [255,255]`; KMC rules carry real indices and
+  `0xFF` for untracked/void nodes.
+- A8: a crafted ambiguity (a second same-symbol/same-charge vacancy particle making two stable-group choices
+  share `state0`) emits `CMP004` with both rule geometry IDs. No public-API path produced `CMP011`
+  (non-finite input is rejected earlier or fails in input hashing before signing).
+- A7: `TenThousandPositionModelCompilesWithinTheBudget` 879 ms; `CeriaCompilesWithinTheLocalBudget` 120 ms.
+- m1: no direction has more than one equivalent start; `DependentRules = 0`.
+
+#### Re-verification against the resolution table
+
+| Finding | Round 1 | Round 2 status |
+| --- | --- | --- |
+| A1 | Blocker | **Resolved (closed)** — explicit forward+reverse compile together for both samples; no automatic inverse. |
+| A2 | Blocker | **Resolved in substance (closed)** — canonical MessagePack projection, manifest descriptor, five byte fixtures, and Python checker pass; residual test/doc gaps in R2-1. |
+| A3 | Blocker | **Not resolved (Blocker)** — particle-set edits bypass the structure cache key and return a stale model. |
+| A4 | Major | **Resolved (closed)** — counts populated and asserted. |
+| A5 | Major | **Partially resolved (Major)** — CMP006 fires with the right boundary, but only after enumeration/table allocation; no saturating arithmetic. |
+| A6 | Major | **Resolved in behaviour (closed)** — KMC-only global/static trackers, MMC `0xFF`, scoped simulation trackers; no mixed-scope test (R2-2). |
+| A7 | Major | **Partially resolved (Minor residual)** — ceria 120 ms and 10k 879 ms; no peak-memory evidence and the 10k model has no rules (R2-3). |
+| A8 | Major | **Not resolved** — `CMP004` and `CMP011` emission tests are still absent. |
+| A9 | Major | **Not resolved** — distinct-charge-exchange and non-collinear-path transport tests are still absent. |
+| m1 | Minor | **Open** — no orbit reduction; `DependentRules = 0`, while the parity matrix marks dependent rules `Done`. |
+| m2 | Minor | **Partially resolved (R2-4)** — the overflow guard is `> byte.MaxValue`, so index 255 collides with the `0xFF` sentinel. |
+| m3 | Minor | **Open** — `TryResolve` still duplicates the point loop instead of delegating to `TryResolvePath`. |
+| m4 | Minor | **Resolved** — docs link gate is green at the tip. |
+| m5 | Minor | **Not resolved** — the vacuous `DirectionIndices.Length % 1` assertion is still at `TransitionCompilationTests.cs:98`; the resolution row's "removed" claim is false. |
+| m6 | Minor | **Not resolved** — `compilation-pipeline.md:131-133` still says different charge states of one symbol are paired for movement; the code pairs by compiled particle index. The resolution row's claim is false. |
+| m7 | Minor | **Open** — `DonorEqualsAcceptor` is emitted only by chain-level `ValidateSpectatorPositions`; an unreferenced self state change still validates. |
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Blocker** | **A3 residual — a particle-set edit returns a stale compiled model from a caller cache.** The structure key is `ProjectHasher.ComputeStructure`, which covers the structure name, space group, cell, sites, and dummy positions only. `StructureCompilationStage.BuildMask` derives each compiled position's `AllowedParticleMask` from `site.ParticleSetId` and the set's `ParticleIds`, which live in `ModelDefinition` and are not hashed. The integrity guard checks only position/site counts, so the stale entry is accepted. Adding a valid `H+` particle to the oxygen set returns the old mask and a different signature from a fresh compile. The rules key's `ParticleHash` covers authored particles, not particle sets, and the structure stage runs first, so downstream keys cannot repair it. This is the same stale-output class as the original A3 and violates "reuse unaffected stages ... and never change the output". | `StageCacheKeys.Structure`; `ProjectHasher.ComputeStructure`; `StructureCompilationStage.BuildMask`/cache guard; probe (structure hit, mask 6 cached vs 14 fresh, signatures differ). |
+| **Major** | **A5 residual — hard limits are enforced only after allocation.** `TransitionCompilationStage` builds the complete `rulesByCollection` array (and the `ruleStore` dictionary) before `rulesByCollection.Length > MaxRuleCount`; `EncodingCompilationStage` computes `tableBytes` from already-materialized pair/cluster tables before comparing it with `MaxEnergyTableBytes`; the sums use plain `long` arithmetic. `CompilationOptions` still documents "fail with CMP006 before an allocation", and step page §13.3 requires bounded allocations and saturating arithmetic. The boundary behaviour is correct, but the memory-exhaustion failure mode the limit exists to prevent is not closed off. | `TransitionCompilationStage.Execute` lines 145-232; `EncodingCompilationStage.Execute` lines 87-99; `CompilationOptions` XML docs; step page §13.3 lines 743-744; probe boundary results. |
+| **Major** | **A8 unresolved — `CMP004` and `CMP011` emission tests are missing.** `grep CMP0` over `Mocassin.Compilation.Tests` finds assertions for CMP001/002/003/005/006/007/008/009/010/012 only. `CMP004` is reachable (crafted stable-group probe reports both rule geometry IDs) and `CMP011` is the signing-stage catch, but neither has a test. The acceptance item "Every `CMP` code has ... an emission test" and the step's ambiguity test row remain unmet. | `CompilationDiagnosticEmissionTests.cs`; `CompilationDiagnosticsTests.cs`; catalog test; probe CMP004 output. |
+| **Major** | **A9 unresolved — the named transport cases are still untested.** The only pins are the interstitialcy/vacancy vector (`-4.0`) and the neutral vehicle vector (`0.0`). There is no distinct-charge exchange (`q` differs between partners) and no non-collinear multi-site path. The endpoint-moment implementation is sound, but the acceptance row is not demonstrated. | `grep ChargeTransport` in `Mocassin.Compilation.Tests`; `TransitionCompilationTests.cs:115-117, 138-140`; step page Tests row "Charge transport". |
+| Minor | **R2-1 — A2 residuals: the amendment test plan is not fully implemented.** No quantization midpoint vectors (`5e-13→1e-12`, `-4e-13→0.0`, `0.30000000000000004→0.3`, `-0.0→0.0`) exist in C# or Python; the Python checker re-encodes already-quantized values and never quantizes. There is no `ProjectionDescriptorTests`/`ProjectionLayout`, although the amendment names that binding test. The documented regeneration filter `FullyQualifiedName~ProjectionFixtureTests.WriteProjectionFixtures` matches no test (the actual method is `ProjectionFixturesAreCurrent`). The checker does not compare `signature-vectors.json` as the amendment states. No fixture contains cluster tables/occupations/cluster links, so those canonical branches are unverified by the cross-language checker. The writer does not assert `Encoding.P == P`/zero cell offsets. The amendment acceptance boxes remain unchecked. | `CanonicalProjectionWriter.cs`; `ProjectionFixtureTests.cs`; `check_model_projection.py`; amendment Tests/Acceptance tables; fixture-tree decode (cluster counts zero for all five). |
+| Minor | **R2-2 — the A6 mixed-scope fix has no test.** `SimulationEncodingTests` has only single-kind KMC/MMC cases; no test builds two simulations or a mixed KMC+MMC project, and no test asserts MMC rule `trackerOrder = 0xFF`. The resolution row "mixed scoping covered" is not supported. The behaviour was verified by the probe. | `SimulationEncodingTests.cs`; `StageTestSupport` creates one simulation; probe mixed result. |
+| Minor | **R2-3 — the 10k performance evidence is narrower than the criterion.** `CreateLargeProject` has no transitions, simulations, pairs, or rules, so the test exercises structure/environments/indexing/signing over 10k positions but not rule-heavy compilation. Memory is `GC.GetTotalMemory(forceFullCollection: true)` before/after (live-heap delta), not the step page's "peak managed memory". The time targets are met (879 ms / 120 ms). | `CompilationPerformanceTests.cs`; step page lines 752 and 826. |
+| Minor | **R2-4 — the m2 overflow guard is off by one.** `globalTrackers.Any(t => t.Index > byte.MaxValue)` permits index 255; `BuildTrackerOrder` then casts it with `checked((byte)index)`, producing `0xFF`, which is the "no tracker" sentinel. An exact-256-tracker model silently loses one tracker instead of failing with `CMP006`. The fix should reject `>= byte.MaxValue` or reserve the sentinel explicitly. | `EncodingCompilationStage.BuildGlobalTrackers`/`BuildTrackerOrder`. |
+| Minor | **R2-5 — status, step-page, and parity drift.** `status.md` marks step 08 `Ready for audit` (the step page says re-audit) and step 09 `Re-audit required`. The step page's implementation-notes bullet still says `interstitialcy5` fails closed with `CMP005`, contradicting the later complex-mechanism resolution and the pinned golden. The parity matrix marks dependent rules `Done` although `DependentRules = 0` and no equivalent starts are populated, and marks the stage cache `Done` despite A3. | `docs/planning/status.md` rows 08/09; step page implementation notes; parity matrix rows for dependent rules and stage cache; probe m1. |
+| Minor | **R2-6 — freeze/evidence timing and a non-doc delta.** At `ba8e889`, `docs/planning/closeout/step-08.json` still named `ebc0e46`/run `43520011439`; it was updated only in `2a74aa3`, so the audited commit alone did not bind the replacement closeout run. `2a74aa3` also updates `tests/contracts/api-baseline/net10.0/Mocassin.Compilation.dll`, so the post-freeze delta is not strictly documentation-only. The evidence's `merge_candidate` is `ba8e889` while the branch tip is `2a74aa3`; the checker's docs-only allowance does not cover the tip's binary. | `git show ba8e889:docs/planning/closeout/step-08.json`; `git show --stat 2a74aa3`; `check_closeout_evidence.py` logic. |
+| Note | **N2 unchanged** — Windows/macOS determinism remains unverified and is accepted under the manual platform policy. | Platform CI row. |
+| Note | **R2-7** — `CanonicalProjectionWriter.WriteBinary` is unused in v1 (all sections are nested arrays), and the signing cache path computes the projection twice (once for the key, once in `Compute`). No correctness impact. | `ModelSignatureProjection.ComputeProjection`/`Compute`; `SigningCompilationStage`. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**.
+
+#### Verdict
+
+**Fixes required.** The amendment's core A2 defect is fixed and independently verifiable; A1, A4, and the
+observable A6 tracker behaviour are closed. However, A3 remains a Blocker: a legitimate particle-set edit
+returns a stale structure from a caller cache and a model whose signature differs from a fresh compile. A5
+remains a Major (post-allocation limit checks), and A8/A9 remain Major because the required `CMP004`/`CMP011`
+and distinct-charge/non-collinear transport tests are still absent. The resolution table also overstates the
+state of A3, A5, A6's mixed coverage, m5, and m6; the record at `ba8e889` does not support those "Resolved"
+claims.
+
+The fix should: include the particle-set membership in the structure (and therefore downstream) cache key;
+enforce the rule/table hard limits before enumeration/allocation with saturating arithmetic and correct the
+options/step-page wording; add `CMP004`/`CMP011` emission tests; add the distinct-charge-exchange and
+non-collinear-path transport tests; add the A2 quantization/descriptor-binding tests and correct the fixture
+regeneration command; correct m5/m6 and the status/parity/step-page drift; update the closeout evidence at
+the fixed commit; and dispatch exactly one replacement closeout CI run before requesting re-audit.
+
+The resolver should not treat the resolution table's statuses as evidence; this round reproduced them from
+the tree. No finding was waived by this auditor; the human owner retains the waiver decision.
