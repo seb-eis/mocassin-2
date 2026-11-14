@@ -7,14 +7,14 @@ generation with charge compensation.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Feature list:** Proposed 2026-11-14 (eight features; pending design review and owner approval)
-- **Step branch:** —
+- **Status:** In progress
+- **Feature list:** Approved 2026-11-14 (eight features; step branch created)
+- **Step branch:** `step/10-job-templates`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for implementation at `c5454af050ccd3f1e02f892424ccd714c5d56f89` (round 5) — [record](../reviews/step-10.md); awaiting human owner acceptance
+- **Design review:** Ready for implementation at `c5454af050ccd3f1e02f892424ccd714c5d56f89` (round 5) — [record](../reviews/step-10.md); accepted by the human owner 2026-11-14
 - **Last updated:** 2026-11-14
 
 ### Proposed feature list
