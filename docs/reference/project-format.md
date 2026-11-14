@@ -43,7 +43,7 @@ generated JSON Schema is
 | `modifiedUtc` | yes | ISO-8601 UTC last-modified timestamp. |
 | `model` | yes | Scientific model body. Steps 03–05 add `particles`, `particleSets`, `structure`, the flat transition sections, and the flat energy sections; lattice and simulation sections are added by Step 06. |
 | `parameterizations` | yes | Parameterization templates. Step 09 extends the Step 01 identity stub with sparse pair, group, site-energy, and rule-frequency value sets. |
-| `jobTemplates` | yes | Job templates. Step 01 stores identity and name only. |
+| `jobTemplates` | yes | Job templates. Step 10 extends the Step 01 identity stub with collections, configurations, inheritable settings, lattice requests, dopings, and selection optimizers. |
 | `buildTemplates` | yes | Build recipes binding a job template to a parameterization. |
 | `viewSettings` | yes | Camera, render box, and per-object style state. |
 
@@ -307,8 +307,8 @@ pre-Step-06 model and document hashes stay stable.
   required and the primary/dependent charge deltas must be non-zero with opposite signs.
 - The default building block is derived (first particle of a stable site's set, void on unstable sites) and is
   never persisted.
-- Model-level validation covers `LAT001`–`LAT011`. Fractions, supercells, truncation, compensation counts, and
-  previews belong to Step 10 (`JOB004`–`JOB015`).
+- Model-level validation covers `LAT001`–`LAT011`. Job-template structure, fractions, supercells, truncation,
+  compensation counts, extensions, and previews belong to Step 10 (`JOB001`–`JOB020`).
 
 ## Simulations (Step 06 fields)
 

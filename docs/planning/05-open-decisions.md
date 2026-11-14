@@ -61,6 +61,7 @@ decision will be made.
 | Site-energy background | Step 08 does not compile it; Step 09 resolves authored `siteEnergies` to the `[position][particle]` background, applies overrides, and Step 15 consumes the table | [Step 09](steps/step-09-parameterization-templates.md) / [`02-data-contracts.md`](02-data-contracts.md) §3.3 |
 | Parameterization build-stage validation | No Step 09 `IValidationStage`; structural `PRM` checks run in Core, compiled-bound checks run in `ParameterizationService.Validate` called by Step 12 after compilation | [Step 09](steps/step-09-parameterization-templates.md) / [Step 12](steps/step-12-build-orchestration-and-cli.md) |
 | `mocassin parameterize` | Not added; Step 12 owns `mocassin compile` and `mocassin build --parameterization <id>`; template creation/editing is the library API used by Steps 12/26 | [Step 09](steps/step-09-parameterization-templates.md) / [Step 12](steps/step-12-build-orchestration-and-cli.md) |
+| Job/lattice seeds and build sampler | ADR 0005 tuple order; SHA-256 job/lattice derivation with fixed endianness; build-side SHA-256 counter stream and Fisher–Yates sampling; no new dependency | [Step 10](steps/step-10-job-templates-and-supercells.md) / [ADR 0005](adr/0005-statistical-parity-and-rng.md) |
 
 ## 3. Gated decisions
 

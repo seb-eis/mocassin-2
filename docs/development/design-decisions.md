@@ -265,10 +265,12 @@ the same `Project` snapshot that produced the compiled model. The compiled model
 hash, so Step 12 and the GUI pass a real project/model pair; a mismatched pair is a caller contract violation,
 while an individual stale site entry is recoverable user data reported as `PRM008`.
 
-Step 09 adds no `IValidationStage`: `ValidationContext` has no compiled model, and compiling inside validation
-would duplicate Step 12. Structural `PRM` checks run in Core `ProjectValidator`; compiled-bound checks run in
-`ParameterizationService.Validate`, called by Step 12 after compilation. For the same reason there is no
-`mocassin parameterize` CLI; Step 12 owns `compile` and `build --parameterization`.
+At Step 09, `ValidationContext` had no compiled model, and compiling inside validation would duplicate Step 12,
+so Step 09 adds no `IValidationStage`. Structural `PRM` checks run in Core `ProjectValidator`; compiled-bound
+checks run in `ParameterizationService.Validate`, called by Step 12 after compilation. For the same reason there
+is no `mocassin parameterize` CLI; Step 12 owns `compile` and `build --parameterization`.
+Step 10 adds an optional `CompiledModel` to `ValidationContext` for its own `JOB` build stage. Step 09 remains
+stage-free; Step 12 registers the Step 10 stage only after compilation.
 
 ## Derived solver intent
 

@@ -257,12 +257,17 @@ reduction suites are nightly/release.
 
 - Doping fractions respect integer truncation and dependent-exchange ratios.
 - Charge compensation is exact (total charge within tolerance) or the build fails with a diagnostic.
-- Doping order is respected; changing priority changes the lattice deterministically.
-- Same seed + same job coordinates yields the same lattice across runs.
+- Doping order is respected; changing priority changes the lattice deterministically; same-site dopings apply
+  to the particles remaining after earlier entries.
+- Same seed + same job coordinates yields the same lattice across runs and OSes. Golden vectors freeze the
+  ADR 0005 job-seed tuple, the lattice seed, and the SHA-256 counter sampler.
 - Edge cases: zero doping, 100 % doping, supercell too small for requested fraction, dependent exchange
-  impossible, multiple dopings on the same site, vacancy default occupation.
+  impossible, non-compensated charged doping, fractional charge ratios, multiple dopings on the same site,
+  vacancy default occupation, NaN/Inf fractions.
 - Property test: for random valid inputs, the number of replaced particles never exceeds the available
   count and every replaced particle came from the source set.
+- Step 10 owns expansion (< 10 s for 10⁴ small jobs) and generation (< 1 GiB peak, cancellation every job);
+  Step 11 owns the full 10⁴-job package build budget (< 10 min, < 2 GB).
 
 ### 9.5 Solver physics
 

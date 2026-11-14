@@ -461,9 +461,10 @@ For each authored simulation (sorted by `SimulationId`):
   start state; `jumpMapping[position][particle]` lists the direction indices in relative-slot order. A
   direction is listed only when at least one rule can start from that particle at that position. Zero means
   the site is blocked for that particle.
-- **Selection optimizers.** Step 08 resolves the simulation's authored optimizers to compiled `(position,
-  particle)` pairs for the report; Step 10 applies template/job-level optimizer overrides. They are not part
-  of the compiled model signature.
+- **Selection optimizers.** Step 08 exposes the compiled site, position, environment, and selection masks; it
+  does not interpret authored optimizers. Step 10 expands job-level optimizers to compiled `(position,
+  particle)` pairs, computes the dual-DOF predicate, and reports removed start options. Optimizers are not
+  part of the compiled model signature.
 - **MMC interaction range.** `interaction_range = [maxCellA, maxCellB, maxCellC, 0]`, derived from the maximum
   stable/unstable cutoff and the cell interplanar spacings, plus one cell for boundary images. Step 17 uses it
   to bound local updates.

@@ -330,7 +330,7 @@ Step 06 owns the model-level lattice/simulation rules. Cross-step ownership is e
 | Step 06 | `LAT001`–`LAT011`, `SIM001`–`SIM037`: definition-level references, ranges, names, kind compatibility, defaults, and shape |
 | Step 04 | `TRN001`–`TRN028`: transition definition and resolved-path validity |
 | Step 07 | feasibility: every simulation's transition set is non-empty at build time, zero-mobile checks, and cross-domain preconditions |
-| Step 10 | `JOB004`–`JOB015`: fractions, supercell/job limits, same-site application, truncation, charge compensation, and effective counts |
+| Step 10 | `JOB001`–`JOB020`: template structure, fractions, supercell/job limits, same-site application, truncation, charge compensation, extensions, and effective counts; structural codes run in `validate`, compiled-bound codes in the build stage |
 
 | Code | Severity | Rule |
 | --- | --- | --- |

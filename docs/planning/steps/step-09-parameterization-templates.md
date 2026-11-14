@@ -1141,7 +1141,8 @@ Site-energy background (owned by Step 09 because Step 08 does not compile it):
 
 Step 10/11/12 consumption:
 
-- Step 10 receives `ParameterizedModel` as the model half of job expansion; it does not inspect template JSON.
+- Step 10 receives the project and compiled model for job expansion/preview; it does not inspect template
+  JSON or parameterization values. The `ParameterizedModel` is Step 11's package-model input.
 - Step 11 writes `models.signature` = `ParameterizedModel.Signature`, the payload `model_signature` =
   `CompiledModel.ModelSignature`, the applied pair/cluster/site values, and each rule's **absolute**
   `frequency_hz`. It does not write a relative factor; Step 16 derives any per-job factor from

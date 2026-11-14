@@ -63,8 +63,9 @@ Step 06 owns `LAT001`–`LAT011`: references, site stability, particle-set membe
 priority range and uniqueness, compensation shape and charge signs, and names.
 
 Fractions, unknown doping references in a job template, same-site application order, requested-versus-applied
-counts, truncation, charge-compensation ratios, supercell limits, and the lattice preview belong to Step 10
-(`JOB004`–`JOB015`). The project stores no derived building block, applied counts, or preview data.
+counts, truncation, charge-compensation ratios, supercell/job limits, extensions, and the lattice preview
+belong to Step 10 (`JOB001`–`JOB020`). The project stores no derived building block, applied counts, or
+preview data.
 
 ## Editing operations
 
