@@ -14,10 +14,11 @@
 | Request owner | Step 10 orchestrator |
 | Orchestrator (step agent / planner) | General orchestrator |
 | Review initiated by | Human owner |
-| Reviewed commit | `bb62e405f27199173cdabc256f6f6d43aa033da1` |
+| Reviewed commit | `c5454af050ccd3f1e02f892424ccd714c5d56f89` |
 | Round 1 frozen commit | `c66b483f6ef064858d0e8082543d2fcec8386ed3` |
 | Round 2 frozen commit | `2eb6a5715ea51f324a579ae8974f9e8526005fa9` |
 | Round 3 frozen commit | `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43` |
+| Round 4 frozen commit | `bb62e405f27199173cdabc256f6f6d43aa033da1` |
 | Docs branch | `docs/step-10-design` |
 | Review date | 2026-11-14 |
 | Reviewer | Independent planning auditor (round 1; fresh context; no shared conversation with the planner, implementor, step agent, or orchestrator) |
@@ -310,11 +311,12 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready with notes
+**State:** Re-review required
 
-`Ready with notes` is the round-4 verdict (2026-11-14) at `bb62e405f27199173cdabc256f6f6d43aa033da1`; it is
-not a merge authorization. Rounds 1 and 2 were `Changes required` and round 3 was `Ready with notes`. Only
-R4-1 (Minor) and R4-2 (Note) remain; the human owner must accept them explicitly or request a focused revision.
+`Ready with notes` was the round-4 verdict (2026-11-14) at
+`bb62e405f27199173cdabc256f6f6d43aa033da1`; it is not a merge authorization. Rounds 1 and 2 were
+`Changes required`, round 3 was `Ready with notes`, and R4-1/R4-2 are resolved in round 5 at
+`c5454af050ccd3f1e02f892424ccd714c5d56f89`.
 
 ## Reviewer independence
 
@@ -935,6 +937,18 @@ Follow-up owner: Step agent / planner and human owner
 Follow-up step: Step 10 implementation start after owner acceptance of R4-1 and R4-2, or a focused round-5
 revision that defines the total-charge neutrality predicate and aligns the "Done when"/test wording
 
+## Round 4 resolutions
+
+Design revision commit: `c5454af050ccd3f1e02f892424ccd714c5d56f89`. The round-4 reviewer text is unchanged; the
+step agent owns this section.
+
+| Finding | Resolution | Files |
+| --- | --- | --- |
+| R4-1 | `IsChargeNeutral = |TotalChargeAfter| <= 1e-6 × max(1, TotalPositions)` with the named `ChargeNeutralityToleranceElementary`. It describes the absolute final lattice; `JOB016` requires both `hasUncompensatedCharge` and `IsChargeNeutral == false`. A non-neutral base can set the flag false without a diagnostic. | Step 10 §4, §3, acceptance, Tests |
+| R4-2 | The test cell now states the base-charge behavior explicitly, and "Done when" no longer promises unconditional charge neutrality; it requires balanced compensated pairs, warned non-compensated charge, and a reported-but-not-misclassified base charge. | Step 10 Tests, Done when |
+
+No earlier reviewer text, resolution, or checklist item was altered.
+
 ## Approval summary
 
 The step agent completes this section before requesting human approval. It must cover the full history, not
@@ -956,6 +970,7 @@ Round history:
 | 2 | 2026-11-14 | `2eb6a57` | Independent planning auditor (fresh context) | Changes required |
 | 3 | 2026-11-14 | `07f14f2` | Independent planning auditor (fresh context) | Ready with notes |
 | 4 | 2026-11-14 | `bb62e40` | Independent planning auditor (round 4; fresh context) | Ready with notes |
+| 5 | 2026-11-14 | `c5454af` | Pending fresh auditor | Pending |
 
 Findings and resolutions:
 
@@ -998,3 +1013,5 @@ Date:
 | R3-1 | Resolved in round-4 design revision | Step agent | `bb62e40` |
 | R3-2 | Resolved in round-4 design revision | Step agent | `bb62e40` |
 | R3-3 | Resolved in round-4 design revision | Step agent | `bb62e40` |
+| R4-1 | Resolved in round-5 design revision | Step agent | `c5454af` |
+| R4-2 | Resolved in round-5 design revision | Step agent | `c5454af` |
