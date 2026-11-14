@@ -262,12 +262,15 @@ Algorithm:
    - every applied compensated pair must itself satisfy
      `|n_p × Δq_p + n_d × Δq_d| ≤ 1e-6 × max(1, n_p + n_d)`; otherwise `JOB012` fails the build;
    - track `hasUncompensatedCharge`, true when an applied doping has compensation off and a nonzero charge
-     delta (including an isovalent/zero-delta doping, which does not count);
-   - if `hasUncompensatedCharge`, the final non-neutral lattice is permitted with `JOB016` (warning) and
+     delta (isovalent/zero-delta dopings are excluded);
+   - a non-neutral **base** lattice is a model property, not a doping failure: it is reported through
+     `TotalChargeBefore`/`IsChargeNeutral` but never triggers `JOB012` or `JOB016` by itself. Step 06 has no
+     base-neutrality invariant, so Step 10 does not invent one;
+   - if `hasUncompensatedCharge` and the final lattice is non-neutral, report `JOB016` (warning) and
      `IsChargeNeutral = false`; this also covers a mixed config with one compensated and one intentionally
      non-compensated charged doping;
-   - if no uncompensated charge was applied and the final total is still non-neutral beyond
-     `1e-6 × max(1, total_positions)`, `JOB012` fails the build.
+   - `JOB012` is only the unrealizable/unbalanced compensated-pair failure above; it is never used for a
+     pre-existing base charge.
 4. Return the lattice plus a `DopingReport`.
 
 - Same-site dopings are ordinary sequential dopings: after a partial `A→B`, a later `A→C` applies to the
@@ -626,8 +629,9 @@ exception is needed.
 - [ ] A same-site sequential doping applies to the particles remaining after earlier dopings.
 - [ ] A non-compensated charged lattice (including a mixed compensated/non-compensated config) is permitted
   with `JOB016`; an unrealizable/unbalanced compensated pair is `JOB012`.
-- [ ] `validate` reports structural `JOB001`–`JOB009`/`JOB015`/`JOB017`/`JOB018`/`JOB020` errors without a
-  compiled model.
+- [ ] `validate` reports structural `JOB001`–`JOB008`, the `JOB009` reference check, `JOB015`, `JOB017`,
+  `JOB018`, and `JOB020` without a compiled model; `JOB009`'s removes-all check and the other compiled-bound
+  codes require the build stage.
 - [ ] The 99,999-job cap and the structural count caps fail with `JOB019`/`JOB020`.
 - [ ] Optimizers remove only start options at every P1 image of the target site, never lattice particles, and
   clear dual-DOF only under the documented all-masks rule.
@@ -660,7 +664,7 @@ At this point, document job templates and supercells:
 | Sampling | Fisher–Yates golden vector matches; uniform without replacement; deterministic per seed | PR-medium |
 | Supercell | Default occupations, replication order, row-major index formula | PR-fast |
 | Doping | Counts, truncation, priority order, multiple dopings, same-site sequential doping | PR-medium |
-| Charge | Integer and fractional charge ratios, 1e-6 tolerance, non-compensated `JOB016`, compensated `JOB012` | PR-medium |
+| Charge | Integer and fractional charge ratios, 1e-6 tolerance, non-compensated `JOB016`, compensated `JOB012`, pre-existing non-neutral base reports only | PR-medium |
 | Doping report | Available/requested/applied counts, `EffectiveFraction`, `DopingInfo` round-trip, no-doping vs zero-applied | PR-fast |
 | Doping property | Random dopings keep applied counts within available bounds and stay deterministic per seed | PR-medium |
 | Sampling property | Random valid requests never exceed candidates; determinism holds across repeated runs | PR-medium |
