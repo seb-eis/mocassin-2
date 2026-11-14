@@ -6,6 +6,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import math
 import struct
 import sys
 from pathlib import Path
@@ -30,6 +31,14 @@ def string(value: str) -> bytes:
     return b"\xdb" + struct.pack(">I", len(data)) + data
 
 
+def quantize(value: float) -> float:
+    """Quantize a projected double to 12 decimals, round half away from zero."""
+    scaled = value * 1e12
+    rounded = math.floor(scaled + 0.5) if scaled >= 0.0 else math.ceil(scaled - 0.5)
+    result = rounded / 1e12
+    return 0.0 if result == 0.0 else result
+
+
 def encode_field(field: dict, value) -> bytes:
     kind = field["type"]
     if kind == "uint64":
@@ -37,7 +46,7 @@ def encode_field(field: dict, value) -> bytes:
     if kind == "int64":
         return b"\xd3" + struct.pack(">q", int(value))
     if kind == "float64":
-        return b"\xcb" + struct.pack(">d", float(value))
+        return b"\xcb" + struct.pack(">d", quantize(float(value)))
     if kind == "bool":
         return b"\xc3" if value else b"\xc2"
     if kind == "nil":

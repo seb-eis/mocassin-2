@@ -86,9 +86,17 @@ internal sealed class EncodingCompilationStage : ICompilationStage
         var warnings = new DiagnosticBag();
         var tableBytes = context.Energy is null
             ? 0L
-            : context.Energy.PairTables.Sum(
-                  static table => (long)table.ParticleCount * table.ParticleCount * sizeof(double))
-              + context.Energy.ClusterTables.Sum(static table => (long)table.OccupationCount * sizeof(double));
+            : context.Energy.PairTables.Aggregate(
+                context.Energy.ClusterTables.Aggregate(
+                    0L,
+                    static (current, table) => SaturatingMath.Add(
+                        current,
+                        SaturatingMath.Multiply(table.OccupationCount, sizeof(double)))),
+                static (current, table) => SaturatingMath.Add(
+                    current,
+                    SaturatingMath.Multiply(
+                        SaturatingMath.Multiply(table.ParticleCount, table.ParticleCount),
+                        sizeof(double))));
         if (tableBytes > context.Options.MaxEnergyTableBytes)
         {
             return CompilationFailure.FromMessage(

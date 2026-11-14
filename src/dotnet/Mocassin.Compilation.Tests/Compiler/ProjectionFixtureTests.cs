@@ -67,6 +67,24 @@ public sealed class ProjectionFixtureTests
         }
     }
 
+
+    [Theory]
+    [InlineData(5e-13, 1e-12)]
+    [InlineData(-4e-13, 0.0)]
+    [InlineData(0.30000000000000004, 0.3)]
+    [InlineData(2.0, 2.0)]
+    public void QuantizationUsesRoundHalfAwayFromZero(double input, double expected) =>
+        Assert.Equal(expected, CanonicalProjectionWriter.Quantize(input));
+
+    [Fact]
+    public void QuantizationNormalizesNegativeZero()
+    {
+        var value = CanonicalProjectionWriter.Quantize(-0.0);
+
+        Assert.Equal(0.0, value);
+        Assert.False(double.IsNegative(value));
+    }
+
     private static readonly (string Id, string Sample, string? Kind)[] samples =
     [
         ("model-ceria-kmc", "samples/simulations/ceria-kmc.mocprj", "kmc"),

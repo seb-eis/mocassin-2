@@ -24,6 +24,15 @@ python tools/contracts/check_model_projection.py
 The generator uses the Python standard library only. `msgpack==1.2.4` is required only by the projection
 fixture checker; it does not affect the generator or the .NET build.
 
+Regenerate all five projection fixtures from the repository root (never filter the test run, because a
+filtered `MOCASSIN_UPDATE_GOLDENS=1` run writes only the selected fixtures and leaves the rest stale):
+
+```sh
+MOCASSIN_UPDATE_GOLDENS=1 dotnet test src/dotnet/Mocassin.Compilation.Tests \
+  -c Release --filter FullyQualifiedName~ProjectionFixtureTests
+python tools/contracts/check_model_projection.py
+```
+
 ## Generated outputs
 
 - `contracts/generated/schema/*.schema.json` — JSON Schema fragments for project, package, results, state,

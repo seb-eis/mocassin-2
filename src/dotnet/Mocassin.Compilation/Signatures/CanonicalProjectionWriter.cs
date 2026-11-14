@@ -80,7 +80,7 @@ internal ref struct CanonicalProjectionWriter
     /// <summary>Flushes the final MessagePack span to the buffer.</summary>
     public void Flush() => writer.Flush();
 
-    private static double Quantize(double value)
+    internal static double Quantize(double value)
     {
         if (!double.IsFinite(value))
         {

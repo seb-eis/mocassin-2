@@ -72,7 +72,11 @@ internal sealed class PairCompilationStage : ICompilationStage
 
         candidates.Sort(Compare);
         var uniqueEnergyIds = candidates.Select(static candidate => candidate.Preview.EnergyId).Distinct(StringComparer.Ordinal).LongCount();
-        var estimatedBytes = uniqueEnergyIds * context.Particles.Count * context.Particles.Count * sizeof(double);
+        var estimatedBytes = SaturatingMath.Multiply(
+            SaturatingMath.Multiply(
+                SaturatingMath.Multiply(uniqueEnergyIds, context.Particles.Count),
+                context.Particles.Count),
+            sizeof(double));
         if (estimatedBytes > context.Options.MaxEnergyTableBytes)
         {
             return CompilationFailure.FromMessage(

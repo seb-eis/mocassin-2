@@ -206,8 +206,13 @@ internal sealed class ClusterCompilationStage : ICompilationStage
             occupations.Sort(static (left, right) => left.CanonicalCode.CompareTo(right.CanonicalCode));
             var sitePIndexArray = sitePIndices.MoveToImmutable();
             var geometryEncodingArray = geometryEncodings.MoveToImmutable();
-            var estimatedBytes = (long)occupations.Count * sizeof(double);
-            var totalBytes = tables.Sum(static table => (long)table.OccupationCount * sizeof(double)) + estimatedBytes;
+            var estimatedBytes = SaturatingMath.Multiply(occupations.Count, sizeof(double));
+            var totalBytes = tables.Aggregate(
+                0L,
+                static (current, table) => SaturatingMath.Add(
+                    current,
+                    SaturatingMath.Multiply(table.OccupationCount, sizeof(double))));
+            totalBytes = SaturatingMath.Add(totalBytes, estimatedBytes);
             if (totalBytes > context.Options.MaxEnergyTableBytes)
             {
                 return CompilationFailure.FromMessage(

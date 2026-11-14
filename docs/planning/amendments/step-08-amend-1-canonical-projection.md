@@ -283,14 +283,14 @@ projection.
 
 ## Acceptance criteria
 
-- [ ] The manifest defines every canonical projection field with name, type, order, and nested section layout.
-- [ ] The generator emits the complete projection descriptor and `--check` is current; the Python checker is in `verify.sh contracts`.
-- [ ] The C# encoder uses the standard MessagePack package with fixed-width canonical integers.
-- [ ] An independent Python conformance checker reproduces all five projection fixtures and signatures; it is
+- [x] The manifest defines every canonical projection field with name, type, order, and nested section layout.
+- [x] The generator emits the complete projection descriptor and `--check` is current; the Python checker is in `verify.sh contracts`.
+- [x] The C# encoder uses the standard MessagePack package with fixed-width canonical integers.
+- [x] An independent Python conformance checker reproduces all five projection fixtures and signatures; it is
   a byte/type verifier, not the production model encoder.
-- [ ] Golden signatures and inspection JSON hashes are regenerated and deterministic; the manifest, `signature-vectors.json`, `.bin`/`.json` fixtures, and C# goldens all contain the same five samples.
-- [ ] Energy values, runtime settings, timings, diagnostics, and file names remain excluded.
-- [ ] All local gates pass, including `api` and `contracts`.
+- [x] Golden signatures and inspection JSON hashes are regenerated and deterministic; the manifest, `signature-vectors.json`, `.bin`/`.json` fixtures, and C# goldens all contain the same five samples.
+- [x] Energy values, runtime settings, timings, diagnostics, and file names remain excluded.
+- [x] All local gates pass, including `api` and `contracts`.
 
 ## Tests
 
@@ -311,14 +311,14 @@ projection.
 
 ## Documentation
 
-- [ ] `docs/development/compilation-pipeline.md` describes the manifest-driven projection and encoder.
-- [ ] `docs/planning/02-data-contracts.md` §1.3/§3.3 references the explicit projection.
-- [ ] `docs/planning/adr/0010-canonical-messagepack-signatures.md` notes the shared encoder and descriptor.
-- [ ] `tools/contracts/README.md` documents the `msgpack` requirements, checker, and fixture regeneration.
-- [ ] The generated `contracts/generated/README.md` describes the projection and fixtures.
-- [ ] `docs/planning/06-toolchain-requirements.md` records the dev-only `msgpack` row and Step 08 use.
-- [ ] `./tools/verify.sh contracts` installs `tools/contracts/requirements.txt` and runs the projection checker.
-- [ ] Step page, amendment index, status, parity, audit request, and review record updated.
+- [x] `docs/development/compilation-pipeline.md` describes the manifest-driven projection and encoder.
+- [x] `docs/planning/02-data-contracts.md` §1.3/§3.3 references the explicit projection.
+- [x] `docs/planning/adr/0010-canonical-messagepack-signatures.md` notes the shared encoder and descriptor.
+- [x] `tools/contracts/README.md` documents the `msgpack` requirements, checker, and fixture regeneration.
+- [x] The generated `contracts/generated/README.md` describes the projection and fixtures.
+- [x] `docs/planning/06-toolchain-requirements.md` records the dev-only `msgpack` row and Step 08 use.
+- [x] `./tools/verify.sh contracts` installs `tools/contracts/requirements.txt` and runs the projection checker.
+- [x] Step page, amendment index, status, parity, audit request, and review record updated.
 
 ## Risks and mitigations
 
