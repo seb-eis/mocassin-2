@@ -128,7 +128,7 @@ Status legend:
 | Parameterization template persistence | Y | Planned | 09 | Project-resident `parameterizations`; UUIDv7 identity; project `schemaVersion`, no separate document |
 | Parameterization template creation | Y | Planned | 09 | Sparse values, set headers, required-slot summary; library API only |
 | Pair/group energy editing | Y | Planned | 09/26 | Compiled-bound apply/validation in 09; editor UI in 26 |
-| Attempt frequency editing | Y | Planned | 09/26 | Absolute Hz per `RuleGeometryId`; factor written by Step 11 |
+| Attempt frequency editing | Y | Planned | 09/26 | Step 11 writes absolute `frequency_hz`; Step 16 derives the per-job factor |
 | Chiral linked editing | Y | Improvement | 09/26 | Shared `EnergyId`; one value per chiral pair; independent values unrepresentable |
 | Stable model signature | Y | Improvement | 08/09 | Compiled geometry/rules/encoding signature in 08; values-only parameterization signature in 09 |
 | Parameterization signature | Y | Improvement | 09 | Finalized `signatures.parameterization`; golden projection vectors |

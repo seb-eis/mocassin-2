@@ -231,6 +231,9 @@ pub enum PackageError {
 - [ ] `mocassin-sim --db ceria.msl --job 1 --dry-run` reports the same counts as `mocassin inspect`.
 - [ ] Future schema versions and corrupt/truncated payloads are rejected with clear errors.
 - [ ] Signature mismatches are detected.
+- [ ] The reader re-encodes the Step 09 parameterization signature exactly from `model_signature`, the
+      pair/group/site tables, and the absolute `jump_rules[].frequency_hz` values; a changed frequency is
+      detected without any factor × maximum reconstruction.
 - [ ] Every index/length is validated before allocation.
 - [ ] Seed derivation is deterministic and domain-separated; golden vectors pass.
 - [ ] Loading a ceria job takes < 100 ms.

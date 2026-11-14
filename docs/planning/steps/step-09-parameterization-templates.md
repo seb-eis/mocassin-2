@@ -11,6 +11,7 @@ completeness checks.
 ## Implementation status
 
 - **Status:** Not started
+- **Feature list:** Approved 2026-11-14 (seven features; step branch not created)
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
@@ -19,15 +20,26 @@ completeness checks.
 - **Design review:** Re-review required at `53bbfd58a6038aa932d0e20bac91f757546c5f2e`
 - **Last updated:** —
 
+### Owner decisions (2026-11-14)
+
+- **Sizing:** Step 09 proceeds as a **single step** with a recorded exception. The honest estimate is
+  3.4–4.4 person-weeks; the upper bound exceeds the roadmap §3.1 four-week split trigger. The 09A/09B split
+  was considered and rejected. The exception is recorded in `docs/planning/04-roadmap.md`.
+- **M1:** the absolute `frequency_hz` model-payload design is confirmed. This is a pre-release `.msl` payload
+  change; Step 11 is not implemented yet, so no published package is affected.
+- **M2:** the implicit default build path for projects with `parameterizations: []` is confirmed.
+- **Feature list:** the seven-feature list is approved for implementation; approval does not mark the step
+  `In progress` and does not create the step branch.
+
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `template-model-and-persistence` | `feature/step-09-parameterization-templates/template-model-and-persistence` | Proposed | — | — | — |
-| `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | Proposed | — | — | — |
-| `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | Proposed | — | — | — |
-| `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Proposed | — | — | — |
-| `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | Proposed | — | — | — |
-| `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | Proposed | — | — | — |
-| `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | Proposed | — | — | — |
+| `template-model-and-persistence` | `feature/step-09-parameterization-templates/template-model-and-persistence` | Approved | — | — | — |
+| `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | Approved | — | — | — |
+| `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | Approved | — | — | — |
+| `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Approved | — | — | — |
+| `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | Approved | — | — | — |
+| `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | Approved | — | — | — |
+| `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | Approved | — | — | — |
 
 ## Goal
 
@@ -91,22 +103,21 @@ shared `EnergyId`, sparse defaults, computed descriptors, and the `PRM` diagnost
 
 **Sizing and split check.** Roadmap §3.1 estimates Step 09 at 1–3 person-weeks. The seven feature estimates in
 §12 sum to **17–22 days, i.e. 3.4–4.4 person-weeks at five days/week**. The upper bound exceeds the §3.1
-four-week split trigger; the lower bound does not. The feature count is within 6–8. This design therefore records
-the honest range rather than claiming it is below the trigger:
+four-week split trigger; the lower bound does not. The feature count is within 6–8.
 
-- **Split option (owner decision required before step start).**
-  - **09A — template and values:** features 1–4 (records/persistence/contract, signature, factory/summary,
-    apply/defaults/site energies). Roughly 11–13 days; produces a buildable default/explicit parameterization.
-  - **09B — validation and exchange:** features 5–7 (diagnostics, diff/rebase, golden/docs/closeout). Roughly
-    6–9 days; depends on 09A.
-  - This would add a roadmap step and change the Step 09–12 dependency chain, so it requires the human owner's
-    decision and a roadmap update; it is not applied by this design.
-- **Single-step option:** keep the seven features and accept the 4.4 pw upper bound, with the first three
-  features required to finish within 2 person-weeks or the owner re-opens the split decision.
-- **Either way:** if the first three features exceed 2 person-weeks, stop; if the elapsed total reaches four
-  weeks before feature 7, split the remaining work into a new step rather than compressing the audit.
+**Owner-approved exception (2026-11-14).** The human owner approved Step 09 as a **single step** at the honest
+3.4–4.4 person-week estimate, accepting the upper-bound risk. The 09A/09B split was considered and rejected:
 
-The human owner must choose the split or the single-step risk before implementation starts.
+- **09A — template and values:** features 1–4 (records/persistence/contract, signature, factory/summary,
+  apply/defaults/site energies). Roughly 11–13 days; produces a buildable default/explicit parameterization.
+- **09B — validation and exchange:** features 5–7 (diagnostics, diff/rebase, golden/docs/closeout). Roughly
+  6–9 days; depends on 09A.
+- Rejected because the seven features form one coherent template/apply/rebase contract, and a split would add
+  a roadmap step and change the Step 09–12 dependency chain.
+
+The exception is recorded in `docs/planning/04-roadmap.md` §3.1 and the Step 09 estimate row. It applies only to
+Step 09. If the first three features exceed 2 person-weeks, stop and ask the owner; if the elapsed total reaches
+four weeks before feature 7, split the remaining work rather than compressing the audit.
 
 **Licensing, status, and audit.** No new third-party code, data, or dependency is introduced; the step uses
 the existing MIT source and committed sample projects, and copies no original MOCASSIN source or database
@@ -690,6 +701,8 @@ Step 10/11/12 consumption:
 
 Samples such as `samples/ceria/ceria.mocprj`, `samples/simulations/ceria-kmc.mocprj`, and
 `samples/barium-zirconate/barium-zirconate.mocprj` have `parameterizations: []`. They must remain buildable.
+**Owner-confirmed 2026-11-14:** the implicit default build path is the supported behavior for projects with no
+template.
 
 - `ParameterizationTemplateDefaults.CreateDefault(string modelSignature)` returns an in-memory template with the
   reserved empty `ParameterizationId`, name `"Default parameters"`, `CreatedUtc = DateTimeOffset.UnixEpoch`,
@@ -771,6 +784,9 @@ ParameterizedModel.Signature
 - Every float is `float64`, quantized to 12 decimals with round-half-away-from-zero on the binary64 product;
   `-0.0` is normalized to `+0.0`; NaN/Inf are rejected. Strings are UTF-8 as stored. Every field is present;
   arrays use forced canonical headers. Domain separation is applied before hashing.
+- **Owner-confirmed 2026-11-14:** the model payload stores the absolute rule `frequency_hz`; the per-job
+  factor is derived by Step 16. This is a pre-release `.msl` payload change; Step 11 is not implemented, so no
+  published package or fixture is affected.
 - **Excluded:** template `Id`, `Name`, `CreatedUtc`, set headers, sparse/unset markers, display descriptors,
   diagnostics, summaries, timings, file names, cache state, job/lattice/run settings, temperature, MCSP, field,
   seeds, and any solver output. The projection contains only the compiled-model identity and the applied
@@ -829,7 +845,7 @@ Owner: “Step 09 — parameterization templates”. Codes are stable API.
 | `PRM003` | Warning | Packages | Required pair/group/kinetic-rule slots are unset; defaults are applied. One diagnostic per template with counts. |
 | `PRM004` | Error | Core and Packages | Energy is non-finite or outside `EnergyLimits.MinEnergy.Value..EnergyLimits.MaxEnergy.Value` (`-100..100 eV`). |
 | `PRM005` | Error | Core and Packages | Frequency is non-positive or non-finite. |
-| `PRM006` | Warning | Packages | No explicit value differs from its default; the template may be unparameterized. |
+| `PRM006` | Warning | Packages | No explicit entries at all (`HasExplicitValues == false`) for an explicit template; suppressed for the implicit default. An explicit `0 eV`/`1e13 Hz` suppresses it. |
 | `PRM007` | Reserved | — | Retired. Chiral partners share one `EnergyId`; independent A→B/B→A values are unrepresentable. The code is not registered and never emitted. |
 | `PRM008` | Warning | Packages | A site-energy override, or an authored background entry from the supplied project, targets an unknown site/particle or a particle the site cannot occupy; the value is ignored. A background mismatch usually means the project and compiled model are not the same pair. |
 | `PRM009` | Info | Packages | Template rebase report: N copied, M defaulted, K dropped, A ambiguous. |
@@ -1122,7 +1138,7 @@ compiler, compiler tables, project store, or domain objects.
 | Applying the template to the same model succeeds and yields the same compiled values | Apply an empty template to ceria and ceria-kmc; assert pair/group values are `0`, frequencies are the compiled default, site background equals the authored `SiteEnergies`, and the golden signature matches. Then apply a fully populated checked-in template and compare every table/rule/site value with the fixture arrays. |
 | A changed model produces a signature mismatch with a useful diff | Compile ceria, edit a site coordinate (or a cell parameter) through `ProjectEditor`, recompile, apply the old template; assert `PRM001`, `Model == null`, and the diff lists the changed/removed/added IDs. |
 | Rebase copies unchanged values, defaults new ones, and reports removed ones | `KeepMatching` test with an exact-ID subset; assert copied/defaulted/dropped counts, `PRM009`, and that every copied value has an exact source ID. `NearestGeometry` test with a unique pair descriptor match and an ambiguous pair; assert the ambiguous case copies nothing. A changed group `ClusterEnergyId` must default, not copy (no nearest group path). `Reset` test asserts no values and the new signature. |
-| Chiral partners share one `EnergyId` and one value; independent A→B/B→A values are unrepresentable | Compile the real `samples/barium-zirconate/barium-zirconate.mocprj` model (the Step 05/08 oracle has 24 reciprocal chiral pairs) and assert the compiled chiral geometry count is 24, one pair table per shared `EnergyId`, one template entry, a symmetric table (`table[X][Y] == table[Y][X]`), and no public API/JSON field for a direction-specific value. A mirrored duplicate with a different value is rejected. For the link-change case, use a generated P1/P4mm project fixture (checked into `tests/contracts/` and added to the golden list) because no shipped sample breaks the chiral link. |
+| Chiral partners share one `EnergyId` and one value; independent A→B/B→A values are unrepresentable | Compile the real `samples/barium-zirconate/barium-zirconate.mocprj` model (the Step 05/08 oracle has 24 chiral geometries, i.e. 12 reciprocal pairs) and assert the compiled chiral geometry count is 24, one pair table per shared `EnergyId`, one template entry, a symmetric table (`table[X][Y] == table[Y][X]`), and no public API/JSON field for a direction-specific value. A mirrored duplicate with a different value is rejected. For the link-change case, use a generated P1/P4mm project fixture (checked into `tests/contracts/` and added to the golden list) because no shipped sample breaks the chiral link. |
 | Site energy overrides apply and can be reset | Ceria authored site energies; set an override, assert every owned position changes; remove it, assert the authored value returns; invalid override or stale authored background target produces `PRM008` Warning and leaves other background values unchanged. |
 | Missing/zero values produce warnings, not silent success | An explicit empty template produces `PRM003`/`PRM006`; an explicit `0 eV` entry suppresses `PRM006` but not `PRM003` for other unset slots; the implicit default build emits neither; `--warnings-as-errors` promotion is Step 12's policy test. |
 | Template JSON is canonical and round-trips | Project JSON round-trip, shuffled authoring order, `-0.0`, comma-decimal culture, unknown-field rejection, additive missing arrays, and canonical document-hash stability. |

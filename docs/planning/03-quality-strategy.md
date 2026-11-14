@@ -359,7 +359,7 @@ solver with the same binary, platform, package, and seed.
   authored background. The implicit default path (a project with `parameterizations: []`) builds ceria,
   ceria-kmc, and barium zirconate with all defaults, reports `HasExplicitValues = false`, and emits neither
   `PRM003` nor `PRM006`; an explicit empty template emits both.
-- **Chiral:** the real barium-zirconate model (24 reciprocal chiral pairs) has one table and one value per
+- **Chiral:** the real barium-zirconate model (24 chiral geometries, i.e. 12 reciprocal pairs) has one table and one value per
   shared `EnergyId`, a symmetric particle table, and no direction-specific API or JSON field; a generated
   P1/P4mm fixture covers breaking the chiral link and asserts the old value is dropped, not reused.
 - **Site energies:** the applied `[position][particle]` background equals the authored `siteEnergies` mapped

@@ -62,7 +62,7 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 | 06 | Lattice and simulation models | 03, 04 | 1–3 pw |
 | 07 | Validation, diagnostics, model statistics | 03–06 | 2–3 pw |
 | 08 | Compilation pipeline (P1, environments, interactions, rules) | 02–07 | 4–6 pw |
-| 09 | Parameterization templates and signatures | 08 | 1–3 pw |
+| 09 | Parameterization templates and signatures | 08 | 1–3 pw (owner-approved 3.4–4.4 pw single-step exception, 2026-11-14) |
 | 10 | Job templates, inheritance, supercell/doping generation | 06, 08, 09 | 3–4 pw |
 | 11 | Compiled package encoding and `.msl` v1 writer | 08–10 | 3–4 pw |
 | 12 | Build orchestration and `mocassin` CLI | 10, 11 | 1–3 pw |
@@ -103,6 +103,13 @@ step before implementation when:
 
 Record the size estimate and the split trigger in the step page at design time. If a step grows past the
 trigger, split it and update this roadmap before continuing.
+
+**Recorded exception — Step 09 (2026-11-14).** The human owner approved Step 09 as a single step at an honest
+3.4–4.4 person-week estimate. The upper bound exceeds the four-week trigger. The 09A/09B split was considered
+and rejected because the seven features form one coherent template/apply/rebase contract and a split would add
+a roadmap step and change the Step 09–12 dependency chain. This exception applies only to Step 09; a later step
+that exceeds the trigger must split or record a new owner-approved exception. The Step 09 row above and the
+Step 09 page record the same estimate and exception.
 
 ## 4. Milestones
 
