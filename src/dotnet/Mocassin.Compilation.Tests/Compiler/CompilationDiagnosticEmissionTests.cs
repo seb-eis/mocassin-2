@@ -145,6 +145,45 @@ public sealed class CompilationDiagnosticEmissionTests
     }
 
     [Fact]
+    public async Task ConflictingRuleOutcomesEmitCmp004()
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync("samples/transitions/vehicle5.mocprj"),
+            kinetic: true);
+        var vacancy = project.Particles.First(static particle => particle.Symbol == "V");
+        var a = project.Particles.First(static particle => particle.Symbol == "A");
+        var secondVacancy = vacancy with
+        {
+            Id = Core.Ids.ParticleId.New(),
+            Name = "Vacancy 2",
+        };
+        var secondChange = new Core.Model.Transitions.StateChange(
+            Core.Ids.StateChangeId.New(),
+            "A -> vacancy 2",
+            a.Id,
+            secondVacancy.Id);
+        var group = project.Model.StateChangeGroups.First(static item => item.Name == "A vacancy");
+        var invalid = project with
+        {
+            Model = project.Model with
+            {
+                Particles = [.. project.Particles, secondVacancy],
+                StateChanges = [.. project.StateChanges, secondChange],
+                StateChangeGroups = [
+                    .. project.Model.StateChangeGroups.Select(item => item.Id == group.Id
+                        ? item with { StateChangeIds = [.. item.StateChangeIds, secondChange.Id] }
+                        : item),
+                ],
+            },
+        };
+
+        var result = new ModelCompiler().Compile(invalid);
+
+        Assert.False(result.IsSuccess);
+        Assert.Contains(result.Diagnostics, static item => item.Code == "CMP004");
+    }
+
+    [Fact]
     public async Task HardRuleLimitEmitsCmp006()
     {
         var project = StageTestSupport.WithFirstSimulationTransition(

@@ -95,7 +95,6 @@ public sealed class ComplexMechanismTests
         Assert.True(result.IsSuccess, string.Join(Environment.NewLine, result.Diagnostics.Select(static item => item.ToString())));
         Assert.NotEmpty(result.Model!.Transitions.Rules);
         Assert.Equal(0, result.Model.Transitions.InverseRuleCount);
-        Assert.Equal(0, result.Model.Transitions.Collections[0].DirectionIndices.Length % 1);
     }
 
     [Fact]
