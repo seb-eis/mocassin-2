@@ -213,10 +213,13 @@ Step 12.
 
 ## Charge-transport field convention
 
-The compiler stores a per-rule Cartesian charge transport vector `Σ_i q_i * Δx_i`. Step 15 computes the
-field energy from its dot product with the normalized field direction. This is exact for non-collinear
-multi-site mechanisms and gives the correct single-charge and vacancy signs; the direction's `path_vector` is
-display/tracking only. A scalar field factor would lose the sign or cancel for symmetric exchanges.
+The compiler stores a per-rule Cartesian charge transport vector as the difference of the charge-weighted
+endpoint moments over the path nodes, `Σ_nodes (q(S2) - q(S0)) * x(node)`. For balanced particle counts this
+is the particle-identity sum `Σ_i q_i * Δx_i`; the moment form also covers charge-state changes. Step 15
+computes the field energy from its dot product with the normalized field direction. This is exact for
+non-collinear multi-site mechanisms and gives the correct single-charge and vacancy signs; the direction's
+`path_vector` is display/tracking only. A scalar field factor would lose the sign or cancel for symmetric
+exchanges.
 
 ## Diagnostics over exceptions for user data
 

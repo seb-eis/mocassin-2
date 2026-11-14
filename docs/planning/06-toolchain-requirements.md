@@ -123,7 +123,7 @@ tests, and packaging.
 | `pytest-cov` 7.1.0 | Recommended | Steps 22, 29 | Coverage report. |
 | `hypothesis` 6.170.14 | Required | Step 22 | Property-based reader/aggregation tests. |
 | `numpy` 2.5.4 | Required | Step 22 | Array API. |
-| `msgpack` 1.2.4 | Required | Step 22 | `.mcs` reader. |
+| `msgpack` 1.2.4 | Required | Steps 08/22 | Step 08 projection fixture checker (dev-only); `.mcs` reader. |
 | `build` 1.6.1 | Required | Steps 22, 31 | Wheel/sdist build. |
 | `twine` 7.0.0 | Optional | Step 31 | PyPI upload/check. |
 | `mypy` 2.4.1 | Optional | Step 22 | Static type checking; `ruff` is already present. |

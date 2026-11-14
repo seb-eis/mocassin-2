@@ -11,6 +11,6 @@ These projects exercise the Step 04 transition model with the current `.mocprj` 
 | `interstitialcy5.mocprj` | 5-site interstitialcy with an `S,U,S,U,S` path |
 
 The files are produced by the real project writer. They are valid under Core and Symmetry validation, and every
-transition preview succeeds. Compilation into rules, conservation filtering, and automatic inverse rules remain
-Step 08 work. The ceria samples reuse the canonical [ceria structure](../ceria/ceria.mocprj) and its dedicated
+transition preview succeeds. The vehicle and interstitialcy samples use alternating donor/acceptor groups; the
+interstitialcy keeps its middle stable site unchanged through an explicit spectator self state change. The ceria samples reuse the canonical [ceria structure](../ceria/ceria.mocprj) and its dedicated
 transition-state occupation set.

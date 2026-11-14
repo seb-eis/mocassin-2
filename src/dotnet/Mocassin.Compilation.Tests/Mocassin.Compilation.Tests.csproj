@@ -20,10 +20,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Using Include="Mocassin.Compilation.Caching" />
+    <Using Include="Mocassin.Compilation.Compiler" />
+    <Using Include="Mocassin.Compilation.Context" />
+    <Using Include="Mocassin.Core.Diagnostics" />
+    <Using Include="Mocassin.Core.Project" />
     <Using Include="Xunit" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Mocassin.Compilation/Mocassin.Compilation.csproj" />
+    <ProjectReference Include="../Mocassin.Packages/Mocassin.Packages.csproj" />
   </ItemGroup>
 </Project>

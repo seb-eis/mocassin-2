@@ -15,10 +15,23 @@ python tools/contracts/generate.py --check
 
 # Check restored NuGet package licences against the project allow-list
 python tools/contracts/check_nuget_licenses.py
+
+# Verify the canonical compiled-model projection fixtures (ADR 0010)
+python -m pip install -r tools/contracts/requirements.txt
+python tools/contracts/check_model_projection.py
 ```
 
-The generator uses the Python standard library only in Step 00. Add a dependency only with a justification
-and licence check.
+The generator uses the Python standard library only. `msgpack==1.2.4` is required only by the projection
+fixture checker; it does not affect the generator or the .NET build.
+
+Regenerate all five projection fixtures from the repository root (never filter the test run, because a
+filtered `MOCASSIN_UPDATE_GOLDENS=1` run writes only the selected fixtures and leaves the rest stale):
+
+```sh
+MOCASSIN_UPDATE_GOLDENS=1 dotnet test src/dotnet/Mocassin.Compilation.Tests \
+  -c Release --filter FullyQualifiedName~ProjectionFixtureTests
+python tools/contracts/check_model_projection.py
+```
 
 ## Generated outputs
 
@@ -29,8 +42,9 @@ and licence check.
 - `contracts/generated/constants/rust/contract_versions.rs` — Rust version constants;
 - `contracts/generated/constants/python/contract_versions.py` — Python version constants;
 - `contracts/generated/fixtures/descriptors.json` — language-neutral fixture descriptors;
-- `tests/contracts/signature-vectors.json` — initial signed-type vector scaffold (vectors arrive with Steps
-  08, 09, and 11).
+- `tests/contracts/projections/*.{bin,json}` — canonical compiled-model projection fixtures and metadata;
+- `tests/contracts/signature-vectors.json` — signed-type vectors (compiled-model vectors from Step 08; later
+  steps add their own).
 
 Generated artifacts are checked in and must be regenerated, never hand-edited. CI runs the `--check` command
 and fails on drift.

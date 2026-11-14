@@ -9,25 +9,59 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
-- **Step CI:** —
+- **Status:** In audit
+- **Step branch:** `step/08-model-compilation-pipeline`
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
-- **Design review:** Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — [review record](../reviews/step-08.md) `195451021031272af96ee1b2ca600d4c8cd83c2c`; accepted by the human owner 2026-11-13 (awaiting docs merge/step start)
-- **Last updated:** 2026-11-12
+- **Audit:** Passed with notes (round 4, `f97b2c4`) — [record](../audits/step-08.md); awaiting human approval
+- **Design review:** Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — [review record](../reviews/step-08.md) `195451021031272af96ee1b2ca600d4c8cd83c2c`; accepted by the human owner 2026-11-13
+- **Last updated:** 2026-11-14
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| `compiler-core` | `feature/step-08-model-compilation-pipeline/compiler-core` | Not started | — | — | — |
-| `structure-and-pair-compilation` | `feature/step-08-model-compilation-pipeline/structure-and-pair-compilation` | Not started | — | — | — |
-| `cluster-compilation` | `feature/step-08-model-compilation-pipeline/cluster-compilation` | Not started | — | — | — |
-| `transition-rule-compilation` | `feature/step-08-model-compilation-pipeline/transition-rule-compilation` | Not started | — | — | — |
-| `simulation-encoding` | `feature/step-08-model-compilation-pipeline/simulation-encoding` | Not started | — | — | — |
-| `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Not started | — | — | — |
-| `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Not started | — | — | — |
-| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Not started | — | — | — |
+| `compiler-core` | `feature/step-08-model-compilation-pipeline/compiler-core` | Done | `verify.sh dotnet` (932 tests), `structure`, `api`, `contracts`, `docs` pass | — | `1deb182` |
+| `structure-and-pair-compilation` | `feature/step-08-model-compilation-pipeline/structure-and-pair-compilation` | Done | `verify.sh dotnet` (939 tests), `structure`, `api`, `contracts` pass | — | `4280773` |
+| `cluster-compilation` | `feature/step-08-model-compilation-pipeline/cluster-compilation` | Done | `verify.sh dotnet` (943 tests), `structure`, `api`, `contracts` pass | — | `dee2034` |
+| `transition-rule-compilation` | `feature/step-08-model-compilation-pipeline/transition-rule-compilation` | Done | `verify.sh dotnet` (947 tests), `structure`, `api`, `contracts` pass | — | `26366aa` |
+| `simulation-encoding` | `feature/step-08-model-compilation-pipeline/simulation-encoding` | Done | `verify.sh dotnet` (950 tests), `structure`, `api`, `contracts` pass | — | `fde55fd` |
+| `indexing-signatures-caching` | `feature/step-08-model-compilation-pipeline/indexing-signatures-caching` | Done | `verify.sh dotnet` (954 tests), `structure`, `api`, `contracts` pass | — | `10966cf` |
+| `compile-diagnostics-and-report` | `feature/step-08-model-compilation-pipeline/compile-diagnostics-and-report` | Done | `verify.sh dotnet` (960 tests), `structure`, `api`, `contracts`, `docs` pass | — | `6c59163` |
+| `golden-models-and-closeout` | `feature/step-08-model-compilation-pipeline/golden-models-and-closeout` | Done | `verify.sh dotnet` (999 tests), `structure`, `api`, `contracts`, `docs` pass | — | `86348bf` |
+
+### Implementation notes and deviations
+
+- **Compiler namespace.** The public compiler contract lives in `Mocassin.Compilation.Compiler`, the cache
+  contracts in `Mocassin.Compilation.Caching`, and the immutable stage input in
+  `Mocassin.Compilation.Context`. The design §2 snippet writes `namespace Mocassin.Compilation;`, but
+  `AGENTS.md` §8 requires each file namespace to match its concept folder, and the accepted architecture
+  layout already assigns these types to `Compiler/`, `Caching/`, and `Context/`. Type names, signatures, and
+  behaviour are unchanged; consumers add a `using` directive.
+- **Compiler core.** `compiler-core` landed the public result, report, option, cache, and stage contracts plus
+  the synchronous stage orchestrator. Every later feature replaced its placeholder with the real stage; the
+  complete pipeline now produces a signed compiled model or a diagnostics-only failure.
+- **Vehicle and interstitialcy sample correction.** `vehicle5.mocprj` now authors alternating
+  `[A -> V, V -> A, AB -> void, B -> V, V -> B]` groups and a separate reverse chain. `interstitialcy5`
+  authors alternating outer groups plus an explicit spectator self state change at its interior stable
+  centre. Both compile, keep their explicit reverse transitions, and have pinned signatures; the spectator
+  placement is validated as `TRN002` only outside an interior stable position with unstable neighbours.
+- **compiler-core local evidence (2026-11-13).** `./tools/verify.sh dotnet` passes (932 tests, 0 failed),
+  `./tools/verify.sh structure` passes, `./tools/verify.sh api` passes with the refreshed
+  `Mocassin.Compilation` ApiCompat baseline, `./tools/verify.sh contracts` passes, and
+  `./tools/verify.sh docs` passes. No per-feature CI run was triggered. Squash-merged into the step branch as
+  `1deb182` (`step-08: add pure compiler core and stage orchestrator`); the feature branch was deleted locally
+  and remotely.
+
+### Complex-mechanism resolution (2026-11-13)
+
+The original `vehicle5` and `interstitialcy5` samples repeated the same donor/acceptor direction on both sides
+of a complex chain. The samples now alternate direction, and `interstitialcy5` uses an explicit **spectator
+self state change** at its interior stable centre. `TransitionModelValidator` accepts a self state change only
+at an interior stable position with unstable neighbours (`TRN002` otherwise), so the middle site remains
+unchanged while the two unstable carriers move through it. The vehicle and interstitialcy samples compile,
+keep their explicit reverse transitions, and have pinned signatures. The charge transport vector is computed
+from the charge-weighted endpoint moments, which reproduces the intended field contribution for single
+charges, vacancies, charge-state changes, and non-collinear paths.
 
 ## Goal
 
@@ -592,8 +626,8 @@ ParameterizedModel.Signature
 - Canonical ordering, invariant-culture formatting, normalized doubles, and stable sorting are mandatory.
 - Distances are exact-grid-derived and used only for `1 fm` buckets and display; the signature records buckets
   and indices, not raw computed distances.
-- Charge transport vectors are computed with deterministic scalar arithmetic and quantized to 12 decimal
-  places before persistence and signing. No parallel floating-point reduction, FMA-dependent accumulation, or
+- All projected floating-point values are computed with deterministic scalar arithmetic and quantized to 12
+  decimal places using round-half-away-from-zero on the binary64 product before persistence and signing. No parallel floating-point reduction, FMA-dependent accumulation, or
   hash-order iteration affects the output.
 - Golden JSON/signature fixtures are generated by the real compiler and checked for freshness. Windows/macOS
   golden runs are manual platform gates; Ubuntu is automatic.

@@ -106,12 +106,25 @@ public sealed class PeriodicGeometry
 
         var centerPosition = Encoder.GetPosition(center.P);
         var cutoffBucket = ToBucket(cutoffAngstrom);
-        GetBoxSize(cutoffAngstrom + GeometryTolerances.PairDistanceBucket, out var maxA, out var maxB, out var maxC);
+        var radius = cutoffAngstrom + GeometryTolerances.PairDistanceBucket;
+        GetBoxSize(radius, out var maxA, out var maxB, out var maxC);
+        var boundA = radius * (Math.Abs(Cell.Inverse.M11) + Math.Abs(Cell.Inverse.M12) + Math.Abs(Cell.Inverse.M13));
+        var boundB = radius * (Math.Abs(Cell.Inverse.M21) + Math.Abs(Cell.Inverse.M22) + Math.Abs(Cell.Inverse.M23));
+        var boundC = radius * (Math.Abs(Cell.Inverse.M31) + Math.Abs(Cell.Inverse.M32) + Math.Abs(Cell.Inverse.M33));
         var results = new List<NeighborImage>();
 
         for (var p = 0; p < Encoder.PositionCount; p++)
         {
             var targetPosition = Encoder.Positions[p];
+            var deltaA = targetPosition.A - centerPosition.A;
+            var deltaB = targetPosition.B - centerPosition.B;
+            var deltaC = targetPosition.C - centerPosition.C;
+            if (NearestIntegerDistance(deltaA, maxA) > boundA ||
+                NearestIntegerDistance(deltaB, maxB) > boundB ||
+                NearestIntegerDistance(deltaC, maxC) > boundC)
+            {
+                continue;
+            }
             for (var a = -maxA; a <= maxA; a++)
             {
                 for (var b = -maxB; b <= maxB; b++)
@@ -244,6 +257,12 @@ public sealed class PeriodicGeometry
         Cell.GetDistance(
             center,
             new Fractional3(target.A + offsetA, target.B + offsetB, target.C + offsetC));
+
+    private static double NearestIntegerDistance(double value, int bound)
+    {
+        var rounded = Math.Clamp(Math.Round(value, MidpointRounding.AwayFromZero), -bound, bound);
+        return Math.Abs(value - rounded);
+    }
 
     private void GetBoxSize(double radius, out int maxA, out int maxB, out int maxC)
     {

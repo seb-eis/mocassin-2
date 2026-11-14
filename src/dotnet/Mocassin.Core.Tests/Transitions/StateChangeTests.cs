@@ -44,6 +44,51 @@ public sealed class StateChangeTests
     }
 
     [Fact]
+    public void SpectatorSelfStateChangeAtInteriorStablePositionIsAccepted()
+    {
+        var model = TransitionTestModels.CreateCombinedModel();
+        var spectator = new StateChange(
+            StateChangeId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f23")),
+            "spectator O",
+            TransitionTestModels.ForwardStateChange.DonorParticleId,
+            TransitionTestModels.ForwardStateChange.DonorParticleId);
+        var spectatorGroup = new StateChangeGroup(
+            StateChangeGroupId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f33")),
+            "Spectator group",
+            [spectator.Id]);
+        var chain = new TransitionChain(
+            TransitionChainId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f42")),
+            "5-site interstitialcy",
+            TransitionPattern.Interstitialcy5,
+            [
+                TransitionTestModels.ForwardGroup.Id,
+                TransitionTestModels.UnstableGroup.Id,
+                spectatorGroup.Id,
+                TransitionTestModels.UnstableGroup.Id,
+                TransitionTestModels.ReverseGroup.Id,
+            ],
+            [
+                TransitionLinker.Dynamic,
+                TransitionLinker.Dynamic,
+                TransitionLinker.Dynamic,
+                TransitionLinker.Dynamic,
+            ],
+            GeneratesReverse: false);
+        var candidate = model with
+        {
+            StateChanges = [.. model.StateChanges, spectator],
+            StateChangeGroups = [.. model.StateChangeGroups, spectatorGroup],
+            Chains = [.. model.Chains, chain],
+            KineticTransitions = [],
+            MetropolisTransitions = [],
+        };
+
+        var diagnostics = TransitionModelValidator.Validate(candidate);
+
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Code == TransitionDiagnosticCodes.DonorEqualsAcceptor);
+    }
+
+    [Fact]
     public void BothVoidParticlesAreReported()
     {
         var model = TransitionTestModels.CreateCombinedModel();

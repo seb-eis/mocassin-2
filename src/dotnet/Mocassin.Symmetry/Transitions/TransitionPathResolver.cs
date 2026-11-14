@@ -86,6 +86,99 @@ public sealed class TransitionPathResolver
     }
 
     /// <summary>
+    /// Resolves one fractional point to its unique canonical P1 position and cell offset.
+    /// </summary>
+    /// <param name="point">The fractional point to resolve.</param>
+    /// <param name="position">The resolved position when successful.</param>
+    /// <param name="diagnostics">The resolution diagnostics.</param>
+    /// <returns><see langword="true"/> when exactly one canonical position matched.</returns>
+    /// <remarks>
+    /// The component shift uses the nearest integer cell offset with ties resolved toward zero. The point is
+    /// never wrapped or rewritten. This is the public point-level boundary used by cluster and transition
+    /// compilation; it does not duplicate the private nearest-image or tie rule.
+    /// </remarks>
+    public bool TryResolvePoint(
+        Fractional3 point,
+        out ResolvedPathPosition? position,
+        out ImmutableArray<Diagnostic> diagnostics)
+    {
+        position = null;
+        var bag = new DiagnosticBag();
+        if (!point.IsFinite)
+        {
+            bag.Add(PointError("The fractional point is not finite."));
+            diagnostics = bag.Sorted;
+            return false;
+        }
+
+        var matches = FindMatches(point);
+        if (matches.Count != 1)
+        {
+            var competing = matches.Count == 0
+                ? "no canonical P1 position"
+                : $"multiple canonical P1 positions ({string.Join(", ", matches.Select(static match => match.P))})";
+            bag.Add(PointError($"The fractional point matches {competing} within the path-match tolerance."));
+            diagnostics = bag.Sorted;
+            return false;
+        }
+
+        var match = matches[0];
+        var expanded = encoder.ExpandedSites[match.P];
+        var site = referenceSites[expanded.ReferenceSiteIndex];
+        position = new ResolvedPathPosition(
+            site.Id,
+            match.P,
+            match.Encoding,
+            site.Stability,
+            encoder.Positions[match.P]);
+        diagnostics = bag.Sorted;
+        return true;
+    }
+
+    /// <summary>
+    /// Resolves an ordered fractional path to its canonical P1 positions and cell offsets.
+    /// </summary>
+    /// <param name="points">The fractional points in path order.</param>
+    /// <param name="positions">The resolved positions when successful.</param>
+    /// <param name="diagnostics">The resolution diagnostics.</param>
+    /// <returns><see langword="true"/> when every point resolved and no position repeated.</returns>
+    /// <remarks>
+    /// Repeated encoded positions are rejected because a transition path must visit distinct positions. The
+    /// point is never wrapped or rewritten.
+    /// </remarks>
+    public bool TryResolvePath(
+        ImmutableArray<Fractional3> points,
+        out ImmutableArray<ResolvedPathPosition> positions,
+        out ImmutableArray<Diagnostic> diagnostics)
+    {
+        var bag = new DiagnosticBag();
+        var resolved = ImmutableArray.CreateBuilder<ResolvedPathPosition>(points.IsDefault ? 0 : points.Length);
+        var seen = new Dictionary<Vector4I, int>();
+        var path = points.IsDefault ? ImmutableArray<Fractional3>.Empty : points;
+        for (var index = 0; index < path.Length; index++)
+        {
+            if (!TryResolvePoint(path[index], out var position, out var pointDiagnostics) || position is null)
+            {
+                bag.AddRange(pointDiagnostics);
+                continue;
+            }
+
+            if (seen.TryGetValue(position.Encoding, out var firstIndex))
+            {
+                bag.Add(PointError($"Path point {index} repeats the encoded position of point {firstIndex}."));
+                continue;
+            }
+
+            seen.Add(position.Encoding, index);
+            resolved.Add(position);
+        }
+
+        positions = resolved.ToImmutable();
+        diagnostics = bag.Sorted;
+        return !bag.HasErrors;
+    }
+
+    /// <summary>
     /// Resolves every point of a kinetic reference path.
     /// </summary>
     /// <param name="transition">The kinetic transition whose path is resolved.</param>
@@ -198,6 +291,14 @@ public sealed class TransitionPathResolver
         shift = (int)rounded;
         return true;
     }
+
+    private static Diagnostic PointError(string message) =>
+        new(
+            TransitionDiagnosticCodes.UnmatchedPathPosition,
+            DiagnosticSeverity.Error,
+            message,
+            new ModelPath("pathPoint", Guid.Empty),
+            "Place the point on a canonical P1 position within 1e-6 fractional units.");
 
     private static Diagnostic PathError(
         string code,

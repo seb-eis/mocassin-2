@@ -73,24 +73,14 @@ internal static partial class TransitionModelValidator
                     "acceptorParticleId"));
             }
 
-            if (stateChange.DonorParticleId == stateChange.AcceptorParticleId)
+            if (stateChange.DonorParticleId == ParticleId.Void &&
+                stateChange.AcceptorParticleId == ParticleId.Void)
             {
-                if (stateChange.DonorParticleId == ParticleId.Void)
-                {
-                    bag.Add(Error(
-                        TransitionDiagnosticCodes.BothParticlesVoid,
-                        "State change must not use the implicit void particle as both donor and acceptor.",
-                        "stateChange",
-                        stateChange.Id.Value));
-                }
-                else
-                {
-                    bag.Add(Error(
-                        TransitionDiagnosticCodes.DonorEqualsAcceptor,
-                        "State change donor and acceptor must differ.",
-                        "stateChange",
-                        stateChange.Id.Value));
-                }
+                bag.Add(Error(
+                    TransitionDiagnosticCodes.BothParticlesVoid,
+                    "State change must not use the implicit void particle as both donor and acceptor.",
+                    "stateChange",
+                    stateChange.Id.Value));
             }
 
             if (donorKnown &&
@@ -279,7 +269,7 @@ internal static partial class TransitionModelValidator
     private static string? HintFor(string code) => code switch
     {
         TransitionDiagnosticCodes.UnknownParticle => "Use an authored particle ID or the implicit void particle.",
-        TransitionDiagnosticCodes.DonorEqualsAcceptor => "Choose a different acceptor particle.",
+        TransitionDiagnosticCodes.DonorEqualsAcceptor => "Use a self state change only at an interior stable spectator position with unstable neighbours.",
         TransitionDiagnosticCodes.BothParticlesVoid => "Use a real donor or acceptor; void cannot replace void.",
         TransitionDiagnosticCodes.ChargedAcceptorFromVoid => "Author the reverse pair explicitly if it is intentional.",
         TransitionDiagnosticCodes.InvalidGroup => "Add at least one existing state change to the group.",

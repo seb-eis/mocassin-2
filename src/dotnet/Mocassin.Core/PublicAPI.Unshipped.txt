@@ -1915,3 +1915,4 @@ Mocassin.Core.Diagnostics.DiagnosticDescriptor.<Clone>$() -> Mocassin.Core.Diagn
 Mocassin.Core.Diagnostics.DiagnosticDescriptor.Deconstruct(out string! Code, out Mocassin.Core.Diagnostics.DiagnosticSeverity DefaultSeverity, out string! Owner, out string! Title, out string! Help, out string! DocumentationAnchor) -> void
 static Mocassin.Core.Diagnostics.CoreDiagnosticCatalog.Descriptors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
 Mocassin.Core.Diagnostics.DiagnosticDescriptor.DiagnosticDescriptor(string! Code, Mocassin.Core.Diagnostics.DiagnosticSeverity DefaultSeverity, string! Owner, string! Title, string! Help, string! DocumentationAnchor) -> void
+static Mocassin.Core.Project.ProjectHasher.ComputeSimulationSelection(Mocassin.Core.Project.Project! project) -> string!

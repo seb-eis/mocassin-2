@@ -3,6 +3,7 @@
 using System.Collections.Immutable;
 using System.Security.Cryptography;
 using Mocassin.Core.Model;
+using Mocassin.Core.Model.Simulations;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
 
@@ -78,6 +79,44 @@ public static class ProjectHasher
             UnstableEnvironments = model.UnstableEnvironments,
             Clusters = model.Clusters,
             SiteEnergies = model.SiteEnergies,
+        };
+        var bytes = ProjectJson.SerializeCanonicalModel(projection);
+        return Convert.ToHexStringLower(SHA256.HashData(bytes));
+    }
+
+    /// <summary>
+    /// Computes the SHA-256 hash of the canonical simulation active-transition selection.
+    /// </summary>
+    /// <param name="project">The project to hash.</param>
+    /// <returns>A lowercase hexadecimal SHA-256 digest.</returns>
+    /// <remarks>
+    /// The projection covers the simulation identifiers, kinds, and authored transition references only. It is
+    /// the Step 08 rules cache-key input: adding or removing a reference changes the required rule set while
+    /// runtime-only simulation edits do not.
+    /// </remarks>
+    public static string ComputeSimulationSelection(Project project)
+    {
+        ArgumentNullException.ThrowIfNull(project);
+        var simulations = project.Simulations.IsDefault
+            ? ImmutableArray<Simulation>.Empty
+            : project.Simulations
+                .Select(static simulation => simulation.Kind == SimulationKind.Kmc
+                    ? (Simulation)new KineticSimulation
+                    {
+                        Id = simulation.Id,
+                        Name = string.Empty,
+                        TransitionIds = simulation.TransitionIds,
+                    }
+                    : new MetropolisSimulation
+                    {
+                        Id = simulation.Id,
+                        Name = string.Empty,
+                        TransitionIds = simulation.TransitionIds,
+                    })
+                .ToImmutableArray();
+        var projection = new ModelDefinition
+        {
+            Simulations = simulations,
         };
         var bytes = ProjectJson.SerializeCanonicalModel(projection);
         return Convert.ToHexStringLower(SHA256.HashData(bytes));

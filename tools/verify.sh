@@ -151,6 +151,10 @@ run_docs() {
 run_contracts() {
   echo "== Contracts and policy =="
   python tools/contracts/generate.py --check
+  if [[ -f tools/contracts/requirements.txt ]]; then
+    python -m pip install -r tools/contracts/requirements.txt
+  fi
+  python tools/contracts/check_model_projection.py
   if [[ -f tools/symmetry/requirements.txt ]]; then
     python -m pip install -r tools/symmetry/requirements.txt
   fi

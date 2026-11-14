@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Reflection;
+using Mocassin.Compilation.Diagnostics;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Packages.Projects.Validation;
 using Mocassin.Symmetry.Diagnostics;
@@ -15,6 +16,7 @@ public sealed class DiagnosticCatalogTests
     {
         var expected = CoreDiagnosticCatalog.Descriptors
             .Concat(SymmetryDiagnosticCatalog.Descriptors)
+            .Concat(CompilationDiagnosticCatalog.Descriptors)
             .Select(static descriptor => descriptor.Code)
             .Concat(Step07Codes())
             .Order(StringComparer.Ordinal)

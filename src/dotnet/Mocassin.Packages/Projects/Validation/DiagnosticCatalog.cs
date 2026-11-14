@@ -2,6 +2,7 @@
 
 using System.Collections.Frozen;
 using System.Collections.Immutable;
+using Mocassin.Compilation.Diagnostics;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Packages.Projects.Validation.Diagnostics;
 using Mocassin.Symmetry.Diagnostics;
@@ -46,11 +47,12 @@ public sealed class DiagnosticCatalog
     }
 
     /// <summary>
-    /// Gets the default catalog, composed from the Core, Symmetry, and Step 07 descriptors.
+    /// Gets the default catalog, composed from the Core, Symmetry, Compilation, and Step 07 descriptors.
     /// </summary>
     public static DiagnosticCatalog Default { get; } = new(
         CoreDiagnosticCatalog.Descriptors
             .Concat(SymmetryDiagnosticCatalog.Descriptors)
+            .Concat(CompilationDiagnosticCatalog.Descriptors)
             .Concat(Step07Descriptors.All));
 
     /// <summary>

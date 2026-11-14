@@ -1,0 +1,7 @@
+{
+  "fixtureFormat": "canonical-projection-v1",
+  "id": "model-ceria-kmc",
+  "descriptor": "model-v1",
+  "signatureHex": "812a7a77a8b78993cf8c475061fbf071fea27082569f154737ed12eb3d64a314",
+  "projectionSha256": "0ed799ab5447befca61a4fdf147c511eda2977e7e5461a3db1e2ee9dac51e784"
+}

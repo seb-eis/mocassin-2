@@ -146,7 +146,7 @@ public sealed record StateChangeGroup(
   `StateExchangeGroupValidator`. Charge-transfer chains therefore use homogeneous charge-state groups; there is
   no "charge-transfer chain" exception at group level. A chain-level check (TRN006) reports a mixed group at the
   chain reference when the group itself is invalid.
-- A state change with donor == acceptor is rejected (no-op).
+- A self state change (donor == acceptor) is accepted only at an interior stable spectator position with unstable neighbours, where it leaves that site unchanged. It is `TRN002` elsewhere.
 - A state change where both donor and acceptor are void is rejected.
 - `StateChange`, `StateChangeGroup`, `TransitionChain`, `KineticTransition`, and `MetropolisTransition` names are
   unique within their own collection, case-insensitive. Kinetic and Metropolis transition names may coincide

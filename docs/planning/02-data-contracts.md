@@ -762,6 +762,8 @@ MessagePack map with snake_case keys. Top-level:
   `ParticleId`, never by preview array position.
 - `signature` is the Step 09 parameterization signature and the `models.signature` uniqueness key;
   `model_signature` is the Step 08 compiled-model signature used by parameterization templates and inspection.
+- The Step 08 `model-v1` projection is finalized once before the first released `.msl`; the pre-release
+  exception is recorded in ADR 0010. `signatures.model.status = "final"` is not a release marker.
   A value-only parameterization change changes `signature` but not `model_signature`.
 - The model-signature projection includes the symmetry contract version and the catalog data version and
   checksum, so a rule or catalog change invalidates parameterizations.

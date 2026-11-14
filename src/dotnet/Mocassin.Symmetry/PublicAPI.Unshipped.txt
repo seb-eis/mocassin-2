@@ -566,3 +566,5 @@ static Mocassin.Symmetry.Energy.EnergyCostPreview.operator !=(Mocassin.Symmetry.
 static Mocassin.Symmetry.Energy.EnergyCostPreview.operator ==(Mocassin.Symmetry.Energy.EnergyCostPreview? left, Mocassin.Symmetry.Energy.EnergyCostPreview? right) -> bool
 Mocassin.Symmetry.Diagnostics.SymmetryDiagnosticCatalog
 static Mocassin.Symmetry.Diagnostics.SymmetryDiagnosticCatalog.Descriptors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
+Mocassin.Symmetry.Transitions.TransitionPathResolver.TryResolvePoint(Mocassin.Core.Geometry.Fractional3 point, out Mocassin.Core.Model.Transitions.ResolvedPathPosition? position, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+Mocassin.Symmetry.Transitions.TransitionPathResolver.TryResolvePath(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> points, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!> positions, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool

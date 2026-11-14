@@ -138,6 +138,11 @@ Mocassin.Compilation/
   Caching/           # bounded, thread-safe stage cache
 ```
 
+The public compiler contract lives in `Mocassin.Compilation.Compiler` (`IModelCompiler`, `ModelCompiler`,
+`CompilationOptions`, `CompilationResult`, `CompiledModel`, and the report and stage records); the cache
+contracts live in `Mocassin.Compilation.Caching`, and the immutable stage input lives in
+`Mocassin.Compilation.Context`. The folder namespaces follow the repository structure policy.
+
 The compiler assumes a project that passed `ProjectValidationPipeline`; it does not run validation and does not
 expose an `IValidationStage`, because those types live in `Mocassin.Packages`. Step 12 owns the Build-stage
 adapter and maps compile failures to the build error model.
