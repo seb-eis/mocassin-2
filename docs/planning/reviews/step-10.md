@@ -308,9 +308,9 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Changes required
 
-`Re-review required` is a record state, not a verdict.
+`Changes required` is the round-2 review verdict and record state; it is not a merge authorization.
 
 ## Reviewer independence
 
@@ -372,6 +372,188 @@ step agent owns this section.
 | n2 | The preview cache is bounded to 8 entries / 256 MiB with LRU eviction and a test. | Step 10 §4.1 |
 | n3 | Step 10 now owns expansion `< 10 s`, generation `< 1 GiB` with cancellation; Step 11 owns the full package-build budget. | Step 10 Tests; `03-quality-strategy.md` §9.4 |
 | n4 | The original 99,999-job cap is retained as `JOB019`; the parity matrix records it as implemented, not replaced. | parity matrix; Step 10 §8 |
+
+## Round 2 review
+
+### Reviewer identity and scope
+
+| Field | Value |
+| --- | --- |
+| Reviewer | Independent planning auditor (round 2; fresh context; no shared conversation with the planner, implementor, step agent, or orchestrator) |
+| Review date | 2026-11-14 |
+| Branch | `docs/step-10-design` |
+| Round 1 frozen commit | `c66b483f6ef064858d0e8082543d2fcec8386ed3` |
+| Round 2 revised design commit | `2eb6a5715ea51f324a579ae8974f9e8526005fa9` |
+| Resolution/status commit | `19c076c95b0dbcb7cd8d064ed0ff6a10e364b46e` |
+| Record parent | `19c076c95b0dbcb7cd8d064ed0ff6a10e364b46e` |
+| Design delta reviewed | `git show --stat 2eb6a57`: 14 files, 332 insertions, 168 deletions |
+
+> I am a fresh context for round 2. I did not author or implement the reviewed work and have no shared
+> conversation with the planner, implementor, step agent, or orchestrator. I read the repository at
+> `2eb6a5715ea51f324a579ae8974f9e8526005fa9` and the resolution/status delta at `19c076c95b0dbcb7cd8d064ed0ff6a10e364b46e`
+> directly rather than relying on the resolution table, and I edited and committed only this review record.
+
+The read-only original clone (`/workspace/mocassin-original`) is still absent from this environment. Original
+behaviour claims were checked against the Step 06/08 design text, the Step 08 review record that quotes
+`JumpSelectionOptimizer.Run` and `RunPostBuildOptimizers`, and the current compiled-model types. That is a
+review limitation, not a finding.
+
+### Evidence
+
+Files read in this round:
+
+- `AGENTS.md` §3.8–§3.9, §3.12, §8, §10–§12, and §16; `docs/planning/reviews/README.md` and the design-review
+  template; the request record, round-1 findings, and step-agent resolutions in this file.
+- `docs/planning/steps/step-10-job-templates-and-supercells.md` in full; the complete diff `c66b483..2eb6a57`
+  and the isolated revision `2eb6a57`; `docs/planning/status.md`; `docs/planning/02-data-contracts.md` §1,
+  §2.4, §3.3, §3.4; `docs/planning/01-target-architecture.md`; `docs/planning/03-quality-strategy.md` §9.4;
+  `docs/planning/04-roadmap.md` §3.1; `docs/planning/05-open-decisions.md`;
+  `docs/planning/appendix-b-parity-matrix.md`.
+- ADR 0005 (statistical parity and RNG), 0009, 0010, 0011, 0013, and 0014; the relevant Step 06 compensation
+  and doping rules; Steps 07, 08, 09, 11, 12, 13, 25, and 26; `docs/reference/project-format.md` and
+  `docs/user-guide/lattice.md`; `docs/development/design-decisions.md`, `compilation-pipeline.md`, and
+  `code-structure.md`.
+- Current code/contracts used to verify the claimed navigation and types:
+  `src/dotnet/Mocassin.Core/Project/ProjectHasher.cs`;
+  `src/dotnet/Mocassin.Core/Project/ProjectMetadata.cs`;
+  `src/dotnet/Mocassin.Compilation/Simulations/CompiledSimulation.cs`;
+  `src/dotnet/Mocassin.Compilation/Structure/CompiledStructureModel.cs`;
+  `src/dotnet/Mocassin.Compilation/Transitions/CompiledTransitionModel.cs`;
+  `src/dotnet/Mocassin.Packages/Projects/Validation/ValidationContext.cs`;
+  `src/dotnet/Mocassin.Packages/Projects/Validation/DiagnosticCatalog.cs`;
+  `src/dotnet/Mocassin.Core/Model/Templates.cs`; `src/dotnet/Mocassin.Core/Ids/TypedIds.cs`.
+
+Commands run and exact results (before this record was written):
+
+```text
+git status --short
+# no output (exit 0)
+
+git rev-parse HEAD
+# 19c076c95b0dbcb7cd8d064ed0ff6a10e364b46e
+
+git cat-file -t 2eb6a5715ea51f324a579ae8974f9e8526005fa9
+# commit
+
+git diff --stat c66b483 2eb6a57
+# 16 files changed, 716 insertions(+), 170 deletions(-)
+# Includes the round-1 request/record commits; the isolated design revision is:
+
+git show --stat 2eb6a57
+# 14 files changed, 332 insertions(+), 168 deletions(-)
+# Step 10 421 lines, data contracts 27, quality strategy 11, architecture 2, open decisions 1,
+# parity 2, Steps 06/09/11/12/13/25, project-format 4, user-guide/lattice 5
+
+git show --stat 19c076c
+# 3 files changed, 51 insertions(+), 6 deletions(-)
+# docs/planning/reviews/step-10.md, docs/planning/status.md, Step 10 status line
+
+python tools/check_docs_links.py
+# Documentation links OK (158 files scanned). (exit 0)
+
+python tools/check_doc_math.py
+# Documentation math conventions OK (155 files scanned). (exit 0)
+
+python tools/check_process_consistency.py
+# Process consistency: OK (exit 0)
+
+./tools/verify.sh docs --require
+# git diff --check passed; docs math/links passed; Zensical strict "No issues found";
+# DocFX "Build succeeded. 0 warning(s) 0 error(s)"; rustdoc completed;
+# "Closeout gate completed with required checks enabled." (exit 0)
+
+./tools/verify.sh policy --require
+# git diff --check passed; build 0 warnings/0 errors; ApiCompat passed for every project;
+# contract artifacts current (18 files); model projection OK (5 fixtures); parameterization
+# projection OK (4 fixtures); space-group catalog current (274 settings, sha256
+# 1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395); process consistency
+# OK; 31 contract tests OK; SPDX headers in 470 files; no secret patterns in 817 tracked
+# text files; advisories/bans/licenses/sources ok; "Closeout gate completed with required
+# checks enabled." (exit 0)
+```
+
+Golden-vector check (reimplemented independently from the written specification, not copied from the page):
+
+```python
+master = bytes(range(32))
+job = sha256(master + u32le(0) + u32le(0) + u32le(0) + b"mocassin/job/v1").digest()
+lattice = sha256(b"mocassin/lattice/v1" + job + bytes(32)).digest()
+# counter DRBG: block = sha256(b"mocassin/lattice-rng/v1" + lattice + u64le(i));
+# x = le_u64(block[0:8]); Lemire NextBounded; Fisher-Yates for i = 0..k-1, n = 10, k = 3
+```
+
+```text
+job_seed     884a9517b16620af2257945215f5552c1f5af0580ed2c911456b1a29a4f54ce7  (matches)
+lattice_seed 7f601350f114b61ba560fa983218cfd41e41df83953072ff415eafa21adbf394  (matches)
+selected     [1, 7, 2]                                                          (matches)
+```
+
+The three golden values are reproducible exactly as written in Step 10 §2 and are consistent with ADR 0005's
+tuple order and Step 13's `derive_job_seed(master, collection, config, job, purpose)` byte order.
+
+### Resolution verification
+
+| Finding | Round-2 status | Verification |
+| --- | --- | --- |
+| M1 | Resolved | ADR 0005 tuple order is used (`master, collection, config, job, purpose`); the fields are fixed-width little-endian with a terminal UTF-8 purpose; the project `masterSeed` is required and validated as 32-byte lowercase hex; the golden vector matches. Step 13's byte order now matches. Notes R2-7 and R2-8 remain about the seed-text special case and the request-hash encoding, not about the job-seed contract. |
+| M2 | Resolved | Step 10 §2 lines 170–213 list every hashed field and encoding, name the SHA-256 counter DRBG, Lemire `NextBounded`, and Fisher–Yates, and freeze job-seed, lattice-seed, and sampler vectors. The golden vectors reproduce. R2-8 notes the missing populated request-hash vector. |
+| M3 | Resolved | A compensation-requested doping with `requested > 0` and no feasible `n_p` now emits `JOB012` and stops generation/preview; `available == 0` or `requested == 0` is explicitly not a `JOB012` failure. This matches `JOB012`, the acceptance criterion, and the preview failure rule (`null` + diagnostics). |
+| M4 | Resolved | The ratio is `−Δq_p / Δq_d`, the search scans `n_p` downward with `1e-6`, compensated neutrality uses `1e-6 × max(1, total_positions)`, non-compensated charged lattices are permitted with `JOB016`, and Step 06 guarantees non-zero opposite-sign deltas for compensated dopings. R2-4 records the remaining mixed-compensation edge case. |
+| M5 | Resolved | Step 10 §3 now applies every doping to the current lattice and states that a later `A→C` applies to the remaining `A` particles; the narrower rule is removed, matching Step 06 and the data contract. |
+| M6 | Resolved | `DopingReport` is build/preview data; only the structured `DopingInfo` is persisted; `DopingApplication` has priority and available primary; `EffectiveFraction` is defined; the data contract §3.4 and Step 11 match. R2-6 notes the undefined textual `DopingId` encoding. |
+| M7 | **Partially resolved** | The site→P1 mapping is now explicit and implementable. The dual-DOF rule remains unimplementable as written: it navigates from `CompiledSimulation.ActiveCollectionIndices` to `CompiledEnvironment`, but those indices address `CompiledTransitionModel.Collections` (jump collections), which do not own environments; environments belong to `CompiledSite`/`CompiledPosition`. The set of masks and whether the bit is cleared only at the optimizer's target site or at every active environment are undefined. This affects `UseDualDofCorrection` and therefore the KMC `dof` factor (R2-1, Major). |
+| M8 | Resolved | Extensions now live inside `baseSettings`/`overrides`, a non-null array replaces the inherited list, ids are unique and bounded, configs are objects, and `JOB018` covers the extension content/bounds; data contract §2.4 matches. R2-2 records the new `JOB009`/`JOB017` duplicate-optimizer overlap. |
+| M9 | Resolved | Step 25 now keys the compiled model by the project model/document hash, clears the preview on edit, and either recompiles with debounce/cancellation or disables the preview; the preview service never compiles. |
+| m1 | Resolved | Step 06, data contract, `project-format.md`, and `user-guide/lattice.md` now say `JOB001`–`JOB020`. XC-02 remains a historical record from before this design. |
+| m2 | Resolved | The documentation plan adds `docs/reference/diagnostics.md` and `docs/reference/cli.md`; both paths exist. |
+| m3 | Resolved | The test table gains canonicalization/persistence, golden seeds/sampler, report round-trip, validation-stage, limits, tiers, and explicitly defers writer/reader integration to Steps 11/13 (nightly). |
+| m4 | Resolved | Hard caps are defined and `JobId` is bounded to `1..99,999`; `JOB019`/`JOB020` cover overflow; the parity matrix records the retained original cap. |
+| m5 | Resolved | The preview rejects non-finite fractions, treats invalid `(A,B,C)` as diagnostics, throws only for a null project/compiled model, and removes the duplicate job-count override. R2-9 notes the remaining `SimulationId` role in `TryCreateJobCountPreview`. |
+| m6 | Resolved | Typed `JobCollectionId`/`JobConfigId`, immutable byte arrays, the `Mocassin.Core.Model.Jobs` move, and PublicAPI/ApiCompat work are in the design and task list. |
+| m7 | Resolved | Structural `JOB` checks run through the Core `JobTemplateValidator` in `validate`; compiled-bound checks run in the Build stage; acceptance and tests pin the split. R2-3 records the remaining stage-name/ownership drift. |
+| m8 | Resolved | `JOB016`–`JOB020` cover the missing conditions and the overloaded rules are narrowed. R2-2 records the one remaining code overlap. |
+| m9 | Resolved | Step 11 owns only package-size limits; Step 12 now constructs `ValidationContext` with the compiled model and registers the Step 10 stage. |
+| m10 | Resolved | Step 10 states the direct/transitive references; the architecture row and Step 09 consumption wording are corrected. |
+| m11 | Resolved | `DopingInfo` is a versioned, structured, priority-ordered entry list that preserves zero-applied entries and is defined in the data contract. R2-6 notes the id encoding. |
+| n1 | Accepted; no change needed | The eight-feature list is within the roadmap's "roughly 6–8" trigger and the step page records owner approval. Keeping the list is a legitimate owner decision. |
+| n2 | Resolved | The cache is bounded to 8 entries / 256 MiB with LRU and a test; the policy is sufficient for the preview size. |
+| n3 | Resolved | Step 10 owns expansion (`< 10 s`) and generation (`< 1 GiB`, cancellation); Step 11 owns the full package-build budget; the quality strategy records the split. |
+| n4 | Resolved | The original 99,999-job cap is retained as `JOB019`; the parity matrix is updated and Step 26's guard wording is now consistent. |
+
+### Findings
+
+| ID | Severity | Finding | Evidence |
+| --- | --- | --- | --- |
+| **R2-1** | **Major** | **M7's dual-DOF mask rule is still not implementable because the environment set and the clear scope are undefined.** Step 10 says "For each environment of the simulation's active KMC collections (`CompiledSimulation.ActiveCollectionIndices` → `CompiledEnvironment`), clear the optimizer particle bit from `AllowedParticleMask`." `ActiveCollectionIndices` indexes `CompiledTransitionModel.Collections`, whose entries are `CompiledJumpCollection` records with a `MobileParticleMask`; they do not own environments. Environments belong to sites and positions (`CompiledSite.EnvironmentIndex`, `CompiledPosition.EnvironmentIndex`). There is no documented collection→rule→start-position→environment navigation. It is also unclear whether the bit is cleared only in the target site's environment or in every environment reached by the active collections; the latter would remove valid start options at other sites and change the "every mask changed" predicate. The flag selects `dof = 2` versus `dof = 1` in Steps 14/16, so a wrong set changes the KMC time step. Define the exact environment set and the per-environment clear rule, and add a test where only some environments change. | Step 10 §5 lines 376–381 and §2 lines 141–144; `CompiledTransitionModel.cs` lines 20–31; `CompiledSimulation.cs` lines 100–108; `CompiledStructureModel.cs` lines 20–43; Step 14 line 196; Step 16 line 157; Step 08 §9 lines 464–466. |
+| **R2-2** | **Minor** | **`JOB009` and `JOB017` both claim the duplicate-optimizer condition.** `JOB009` is "Optimizer reference invalid, duplicate target, or removes every usable start option"; `JOB017` is "Duplicate doping reference in a config, or duplicate `(site, particle)` optimizer". A duplicate `(site, particle)` optimizer therefore has two codes and two possible severities, although both are errors; the Core validator ownership row names both codes. Keep one code (or state precedence) and make the ownership table unambiguous. | Step 10 §6 lines 404, 412, and 421–422. |
+| **R2-3** | **Minor** | **The build-stage type name and optimizer ownership still drift across pages.** Step 10 §6 names `JobTemplateBuildValidator` for the Packages `IValidationStage`, while §7 and Step 12 name `JobTemplateValidationStage`. The ownership table also assigns only `JOB010`–`JOB014`, `JOB016`, and `JOB019` to the Packages stage, but `JOB009`'s "removes every usable start option" is compiled-bound and is not assigned to either side explicitly. In addition, Step 08 still says it "resolves the simulation's authored optimizers to compiled `(position, particle)` pairs for the report", while optimizers are authored on job collections and Step 10 owns their expansion. Use one stage name and state which page owns optimizer resolution/reporting. | Step 10 §6 lines 419–422 and §7 lines 427–438; Step 12 line 99; Step 08 §9 lines 464–466; Step 10 §1 lines 78–98 and §5 lines 367–390. |
+| **R2-4** | **Minor** | **The global neutrality rule makes a mixed compensated/non-compensated configuration fail with `JOB012`, although a non-compensated charged lattice is documented as permitted with `JOB016`.** Step 10 §3 says "if any doping requested compensation" the total charge must be within tolerance, else `JOB012`; only "if no doping requested compensation" is a non-neutral lattice permitted with `JOB016`. Step 06 allows a non-compensated primary exchange with any charge delta, including a charged one. A config with one compensated doping and one intentionally non-compensated charged doping therefore always fails `JOB012`, and the acceptance criterion's "non-compensated charged lattice is permitted" is false for that mixed case. State the precedence explicitly or make the neutrality check per-doping. | Step 10 §3 lines 252–255 and §6 line 411; Step 06 lines 173–180 and 187–190; Step 10 acceptance lines 597–598. |
+| **R2-5** | **Minor** | **The revision changes a documented `.msl` field format while saying there is no package format change.** Step 10 §8 says "no package/results format changes in this step", but the same revision changes `doping_info` in the `.msl` job and lattice payloads from the legacy priority/fraction summary to the `v1:{dopingId}:...` entry list (data contract §3.4). The `.msl` is not implemented yet, so a version bump may not be needed, but the statement is inaccurate and the audit trail should record that this is a pre-implementation contract update. | Step 10 §8 lines 497–499; `02-data-contracts.md` §3.4 lines 1006 and 1016; Step 10 §4 lines 286–295. |
+| **R2-6** | **Note** | **The `DopingInfo` `{dopingId}` textual encoding is not defined.** The format is declared machine-readable, but the design only defines the 16-byte RFC 4122 encoding for the lattice-request hash; it does not say whether the string uses the canonical hyphenated lowercase GUID form, a 32-hex form, or another encoding. Specify the exact invariant-culture id encoding so independent readers (results/analysis, GUI) parse the same string. | Step 10 §4 lines 289–293; §2 line 185; `02-data-contracts.md` §3.4 line 1006. |
+| **R2-7** | **Note** | **The collection/simulation seed text rule has an unnecessary project-seed-dependent special case.** "A value that is exactly the project's 64-hex seed is decoded, not re-hashed" means the same collection `RngSeed` string is interpreted as bytes only while it equals the project seed, and as UTF-8 text after the project seed changes. That is deterministic but surprising and couples two independent settings. Prefer "any canonical 64-hex value is decoded; every other explicit seed is UTF-8 hashed", or state why the equality rule is required, and add a golden vector for the custom-seed path. | Step 10 §2 lines 149–153; `02-data-contracts.md` line 548; `ProjectMetadata.cs` lines 38–57. |
+| **R2-8** | **Note** | **The lattice-request projection has no golden vector and its hex-to-byte decoding is only stated for one field.** The formula writes `structure_hash[32]`, but `ProjectHasher.ComputeStructure` returns a lowercase 64-character hex digest; the text explicitly says only `SpaceGroupDataSha256` is decoded from hex. Add a populated-model request-hash golden vector and state that every hex digest is decoded to 32 bytes before concatenation. | Step 10 §2 lines 170–195; `ProjectHasher.cs` lines 44–50. |
+| **R2-9** | **Note** | **`TryCreateJobCountPreview` takes a `SimulationId` while computing totals across the whole template.** The signature is `(Project, JobTemplate, SimulationId)`, but the text says it resolves "the total jobs across the template's collections/configs", which can include collections bound to other simulations. State whether `simulationId` filters the template, selects the default job count, or is redundant. | Step 10 §4.1 lines 327–331 and 350–352; data contract §2.4 lines 680–696. |
+
+No Blocker was found. R2-1 is a Major and must be fixed; R2-2–R2-5 are Minor and should be fixed or explicitly accepted; R2-6–R2-9 are Notes.
+
+### Verdict
+
+- [ ] Ready for implementation
+- [ ] Ready with notes
+- [x] Changes required
+- [ ] Waived
+
+**Verdict: Changes required.** The revision resolves M1–M6, M8, and M9 in substance; the seed, sampler,
+compensation, same-site, report, extension, and Step 25 contracts are now implementable, and the published
+golden vectors reproduce exactly. M7 is only partially resolved: the P1 image mapping is fixed, but the
+dual-DOF rule still cannot be implemented from the written environment navigation and clear scope (R2-1), and
+that flag changes the KMC degree-of-freedom factor. Four Minor findings and four Notes remain. The required
+repository gates pass. A focused round-3 revision and re-review of the dual-DOF rule (plus the Minor items) is
+required before the step can start.
+
+Follow-up owner: Step agent / planner
+Follow-up step: Step 10 design revision round 3 (dual-DOF environment set, JOB009/JOB017, stage naming,
+mixed compensation, `.msl` `doping_info` statement) and fresh review
 
 ## Approval summary
 
