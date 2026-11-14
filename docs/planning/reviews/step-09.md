@@ -144,7 +144,11 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
+
+> Round-2 state is `Ready with notes`: no Blocker or Major remains; R2-1..R2-3 are Minor and R2-4..R2-6 are
+> Notes, all requiring explicit human-owner acceptance before implementation starts. Round-1 findings, evidence,
+> and verdict are unchanged below.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -274,3 +278,132 @@ Three Major findings (M1 signature reproduction from the `.msl` payload; M2 no u
 #### Verdict
 
 **Changes required** — M1–M3 must be corrected in the design docs, and M4–M5 and m1–m17/n1–n4 should be resolved or explicitly accepted, before a `Ready for implementation` verdict can be considered.
+
+### Review round 2
+
+#### Independence and frozen state
+
+I am a fresh context with no shared conversation with the planner, implementor, step agent, or orchestrator. I
+did not author or implement the reviewed work, did not write round 1, and received only the frozen design
+commit, the request record, repository links, and the required commands/scope; no desired verdict or summary
+was supplied. All evidence below is from reading `/workspace/playground/step09-design` at the request tip
+`c8359e7803ba645602b1d65c1afac8e8dbdbab9f` and the frozen design at
+`53bbfd58a6038aa932d0e20bac91f757546c5f2e`.
+
+Frozen-state checks:
+
+- `git rev-parse HEAD` — `c8359e7803ba645602b1d65c1afac8e8dbdbab9f`.
+- `git diff --name-only 53bbfd5..c8359e7` — exactly `docs/planning/reviews/step-09.md` and
+  `docs/planning/steps/step-09-parameterization-templates.md`. The step-page delta is one `Design review`
+  status line; the record delta is the planner's `Resolution status` plus a request-owned review-metadata and
+  checklist item update.
+- `git diff 57a9ddb..c8359e7 -- docs/planning/reviews/step-09.md` — no hunk in the round-1 `Findings`,
+  `Evidence`, `## Reviewer independence`, `## Verdict`, or `### Review round 1` text. The planner did not alter
+  reviewer-authored findings, evidence, or verdict; only the reviewed-commit metadata, one request-owned
+  checklist item, the `Record state`, and the resolutions changed.
+- `git status --short` — clean before this record; no step or feature branch exists; `docs/planning/audits/step-09.md`
+  is absent.
+
+I re-read every checklist item above against `53bbfd5`; all marks remain `[x]` and no item text was changed.
+The round-1 notes are unchanged. Round-2 residuals are recorded only in this appended section.
+
+#### Commands and results
+
+Run in `/workspace/playground/step09-design`; full logs are in `/tmp/opencode/step09-review2/` (scratch, not
+committed).
+
+```sh
+./tools/verify.sh docs --require
+# exit 0; "Documentation links OK (153 files scanned).";
+# Zensical strict: "No issues found";
+# DocFX: "Applying templates to 302 model(s)..." then "Build succeeded." / "0 warning(s)" / "0 error(s)";
+# rustdoc generated for every workspace crate;
+# "Closeout gate completed with required checks enabled."
+
+./tools/verify.sh policy --require
+# exit 0; "NuGet licence policy OK (51 packages)."; no vulnerable packages;
+# ApiCompat: "Public API is compatible with the checked-in baseline" (the only notes are unresolved
+# MessagePack.dll references for Mocassin.Compilation/Mocassin.Packages, not breaking-change findings);
+# "Contract artifacts are current (18 files)"; "Model projection check OK (5 fixtures).";
+# "space-group catalog is current: 274 settings ..."; "Process consistency: OK";
+# "Ran 18 tests ... OK"; "SPDX headers present in 411 source files";
+# "No secret patterns found in 739 tracked text files";
+# "advisories ok, bans ok, licenses ok, sources ok";
+# "Closeout gate completed with required checks enabled."
+```
+
+Repository probes: `grep`/`sed` over the frozen design pages, data contract, manifest and generated schema,
+contract tools, compiler/validator/editor code, tests, samples, roadmap, status dashboard, and parity matrix.
+No code probe was needed: the round-1 factor×maximum probe is obsoleted by the absolute `frequency_hz` design,
+and the remaining questions are document-consistency questions verified against the tree.
+
+#### Resolution verification
+
+| Item | Round-2 status | Reproduced evidence |
+| --- | --- | --- |
+| M1 | Resolved in the contract; two residual documentation gaps (R2-1, R2-6). | `02-data-contracts.md` lines 924 and 934–938 now persist `jump_rules[].frequency_hz` as the absolute Step 09 value and state that the per-job factor is derived, not stored; line 102 pins projection values to compiled table/rule order. Step 09 lines 765–767 and 811–817 sign the absolute values and forbid factor × maximum; Step 11 lines 111–119 says `verify` re-encodes from the payload; Step 13 lines 74–84 and 125–127 define `frequency_hz` and the exact re-encoding; Step 16 lines 38–41 and 125–128 derive the runtime factor. No model-level `frequency_factor` field remains. |
+| M2 | Resolved. | Step 09 lines 543–545, 615, and 689–719 define nullable templates, `ParameterizationTemplateDefaults.CreateDefault`, the reserved empty ID, `PRM003`/`PRM006` suppression for the implicit default, and the explicit-empty case. Step 11 lines 215–216 and Step 12 lines 65–68 and 213–215 update acceptance and selection. `samples/{ceria,barium-zirconate,simulations,transitions,lattice}/*.mocprj` all contain `"parameterizations": []`. |
+| M3 | Resolved as a planned, owned feature-1 change. | Step 09 lines 416–435 assign the `contracts/manifest.json` project `itemFields` update, `generate.py` regeneration, new `samples/parameterizations/*.mocprj` fixtures, `ProjectJsonContext`, and `ProjectSchemaTests.fixturePaths` to feature 1 (line 1184). The current manifest (lines 896–914) still has only `id`, `name`, `modelSignature`, and `createdUtc`; the generated schema still has `additionalProperties: false`; `ProjectSchemaTests` lines 13–35 has a hardcoded list. The design now closes exactly that gap. |
+| M4 | Accepted — owner decision required (R2-4). | Step 09 lines 92–109 records 17–22 days = 3.4–4.4 pw, the 09A/09B split option, the single-step option, and the mandatory owner choice; lines 1192–1194 sum the feature estimates. Roadmap line 65 still lists 1–3 pw and §3.1 requires a roadmap update when a step exceeds the trigger. |
+| M5 | Resolved in substance; count wording is wrong (R2-3). | Step 09 line 1125 compiles the real `samples/barium-zirconate/barium-zirconate.mocprj` and uses a generated P1/P4mm link-change fixture; lines 1150–1158 add both to the golden list. The sample compiles (`Mocassin.Compilation.Tests/Compiler/GoldenModelTests.cs` line 54) and the symmetry oracle asserts 24 chiral previews (`EnergyPreviewTests.cs` lines 258–283). |
+| m1 | Resolved. | `docs/reference/diagnostics.md` contains no `PRM` token today; Step 09 lines 850–854 and 1209–1211 forbid a `PRM007` token and keep retirement in planning/design pages. `DiagnosticDocumentationTests` lines 16–24 still enforces exact set equality. |
+| m2 | Resolved. | `tools/contracts/check_model_projection.py` line 94 uses `FIXTURES.glob("*.bin")`, which does not descend; Step 09 lines 1162–1166 place parameterization fixtures in `projections/parameterization/` and wire a separate checker; data contract line 111 records the same rule. |
+| m3 | Resolved. | `tools/contracts/generate.py` lines 254–258 validate the `fixtures.signatureVectors` object and lines 566–575 regenerate `signature-vectors.json`; Step 09 lines 1159–1161 and 1185 require manifest vectors plus regeneration, with no hand edit. |
+| m4 | Partially resolved — the `PRM006` table row is stale (R2-2). | Step 09 lines 647–651, 1031, and 1127 now define `PRM006` as `HasExplicitValues == false` and state that explicit `0 eV`/`1e13 Hz` suppresses it; line 832 still says “No explicit value differs from its default”, which fires for an explicit default. |
+| m5 | Resolved. | Step 09 lines 485–515 make `ParameterizationFactory.Create` take `Project` and `CompiledModel` and state that its summary equals `Describe(project, model, null)`; the factory no longer has a project-less summary. |
+| m6 | Resolved. | Step 09 lines 982–990 limit `NearestGeometry` to unique pair descriptors with a bucket tolerance; groups, rules, and site overrides are exact-ID only, so a changed group geometry defaults. |
+| m7 | Resolved. | Step 09 line 1070 states 4,096 `64²` cells including void and at most `63² = 3,969` non-void entries, matching `ParticleModel.MaxCustomParticles = 63` and compiled particle index 0 = void. |
+| m8 | Resolved. | Step 09 lines 234, 244, 249, and 258 pin `[property: JsonPropertyName("energyEv")]`/`("frequencyHz")` on every persisted entry record, matching the existing `SiteEnergyEntry.cs` line 16 and the data-contract JSON. |
+| m9 | Resolved. | Step 09 lines 604–611, 668–671, and the `PRM008` row (line 834) separate a caller contract violation from stale authored background data (`PRM008` Warning) and a structural signature mismatch (`PRM001` Error). |
+| m10 | Resolved. | Step 08 lines 509–513 remove the compiled site-energy background and lines 672–676 mark the site-energy-only row as no compiled-content change; the correction note at lines 35–38 assigns the table to Step 09/11. |
+| m11 | Resolved. | Step 10 lines 28–32 name `Mocassin.Packages.Parameterization.ParameterizedModel` as the input and exclude parameterization values from job/lattice payloads. |
+| m12 | Resolved. | Step 26 lines 91–94 make import/export a valid `.mocprj` project fragment with the existing project version/template shape, explicitly rejecting a separate format or ADR. |
+| m13 | Resolved. | Step 12 adds `--warnings-as-errors` to the `build` synopsis (line 53), defines validation-stage exit 1 versus promoted parameterization exit 4 (lines 170–173), and updates acceptance/documentation (lines 213–215 and 241). |
+| m14 | Resolved. | Step 09 lines 579–583 state `Validate` returns diagnostics only and builds lookup maps but no dense tables/signature; lines 862–864 put the diff on `Apply`'s result and the mismatch summary in the `PRM001` message. |
+| m15 | Resolved. | Step 09 lines 452–467 explicitly say the current `ProjectEditor` has no template methods, add `Add`/`Update`/`Remove` signatures in feature 1, and add the pure `ParameterizationTemplateEditor` operations. The implemented editor has no parameterization methods. |
+| m16 | Resolved. | Step 09 lines 177–181 and 411–414 make `ProjectJson`/`ProjectCanonicalizer` write-time normalization the authoritative guarantee, so `with` cannot bypass ordering or signed-zero normalization; data contract lines 655–660 records the same. |
+| m17 | Resolved. | Step 09 lines 904–964 replace the free-form diff key with `ParameterizationValueKey(Kind, SetId, TransitionKind, TransitionId, EntryId, SiteId, ParticleId)` and specify the canonical entry encodings; reports and tests can compare records, not delimited strings. |
+| n1 | Resolved. | Step 09 uses `Mocassin.Packages.Parameterization` (lines 136, 575, and the feature rows) and `ParameterizationSignatureV1` in `Mocassin.Contracts.Parameterization` (line 737); no plural `Parameterizations` namespace remains in the design pages. |
+| n2 | Resolved. | Step 09 line 830 uses `EnergyLimits.MinEnergy`/`MaxEnergy` (`EnergyLimits.cs` lines 65/70), lines 594–601 use `FrequencyHz` thresholds, and lines 960–962 document `TemplateValue` as a display-only union whose unit is selected by `Key.Kind`. |
+| n3 | Resolved. | Step 09 lines 114–117 and the feature-7 row (line 1190) add `docs/planning/closeout/step-09.json` and `python tools/check_closeout_evidence.py` to the closeout scope. |
+| n4 | Resolved. | Step 09 lines 144–146 and 784–795 record the public `CanonicalProjectionWriter`/`Quantize` change with `PublicAPI` and ApiCompat evidence and no parameterization semantics or dependency edge; `Mocassin.Compilation` still references only Core and Symmetry. |
+
+#### Round 2 findings
+
+| ID | Severity | Finding | Evidence |
+| --- | --- | --- | --- |
+| R2-1 | **Minor** | **M1 residual: the parity matrix still assigns the per-job factor to Step 11.** The row says “Absolute Hz per `RuleGeometryId`; factor written by Step 11”, which contradicts the M1 resolution: Step 11 writes the absolute `frequency_hz`; Step 16 derives the per-job pre-check/normalization factor. This is the only remaining `factor` statement outside the Step 16 derivation text. Fix the row to “Step 11 writes absolute `frequency_hz`; Step 16 derives the per-job factor.” | `appendix-b-parity-matrix.md` line 131; contrast `02-data-contracts.md` lines 934–938, Step 11 lines 111–118, Step 16 lines 38–41/125–128, and Step 09 lines 765–767. |
+| R2-2 | **Minor** | **m4 residual: the `PRM006` catalogue row still uses the superseded rule.** The table says `PRM006` fires when “No explicit value differs from its default”. Under that wording an explicit `0 eV` or `1e13 Hz` is equal to its default and fires, while §5, §9, and §11.1 say an explicit default is an explicit entry and suppresses `PRM006`. Reword the row to “No explicit entries at all (`HasExplicitValues == false`) for an explicit template; suppressed for the implicit default.” | Step 09 line 832 versus lines 647–651, 1031, and 1127; quality strategy line 361. |
+| R2-3 | **Minor** | **M5 residual: “24 reciprocal chiral pairs” is 24 chiral directed geometries, i.e. 12 reciprocal pairs.** The compiled counter divides chiral geometries by two, and the symmetry oracle asserts 24 chiral previews; each preview has a reciprocal partner. The acceptance assertion “compiled chiral geometry count is 24” is correct, but the “pairs” wording in the resolution and two design pages can be read as 24 shared `EnergyId`s, pair tables, or template entries. State “24 chiral geometries (12 reciprocal pairs)” consistently. | `Mocassin.Compilation/Compiler/CompilationCounts.cs` line 88 (`ChiralPairs = ...IsChiral) / 2`); `EnergyPreviewTests.cs` lines 258–283 (`Assert.Equal(24, chiral.Length)`); Step 09 line 1125; quality strategy line 362; `Resolution status` table, M5. |
+| R2-4 | Note | **M4 follow-up: the single-step option has no roadmap bookkeeping.** The step page records 3.4–4.4 pw and the split option, and the owner must choose. If the owner accepts the single-step 4.4 pw option, roadmap line 65 still says 1–3 pw and §3.1 says a step that exceeds four weeks is split and the roadmap updated; the accepted exception should be recorded there (or the step-page estimate explicitly made the source of record) before implementation. | Step 09 lines 92–109 and 1192–1194; `04-roadmap.md` line 65 and §3.1 lines 93–105. |
+| R2-5 | Note | **Planning-status lag: the dashboard still reports the design review as `Not requested`.** The step page and this record say a re-review is pending at `53bbfd5`. This is a status-only inconsistency; the planner/step agent should update the dashboard (or record that the design-review column is updated only at acceptance). It does not affect the design or the gate. | `status.md` line 59 row 09 (design review “Not requested”); Step 09 page line 19 (“Re-review required at `53bbfd...`”). |
+| R2-6 | Note | **M1 follow-up: Step 13’s acceptance list is less explicit than Step 09 claims.** Step 09 says Rust reproduction is “recorded as a Step 13 acceptance item”, but Step 13’s acceptance list only has the generic “Signature mismatches are detected”; the exact absolute-`frequency_hz` re-encoding rule is in the reader’s verify bullet and test table. Add an explicit Step 13 acceptance bullet (or soften the Step 09 claim) when Step 13 is designed. | Step 09 lines 1171–1173; Step 13 lines 125–127, 231–239, and 252–259. |
+
+No Blocker was found. Three Minor findings and three Notes remain; none changes the core API, the project/package
+signatures, or the step split. The design remains implementable after the wording fixes.
+
+Residual implementation risks to keep visible:
+
+- The `PRM` catalog and `docs/reference/diagnostics.md` must be updated in the same feature that registers a
+  code; the docs-drift test compares the catalog and page exactly. Feature 1 adds structural `PRM` emissions and
+  feature 5 owns the full catalog/docs, so feature 1 must not register a code that it leaves undocumented.
+- Any new `tests/contracts/` project fixture (including the generated chiral-link P1/P4mm fixture) should be
+  added to `contracts/manifest.json` `fixtures.items` as well as `ProjectSchemaTests.fixturePaths`, so the
+  manifest remains the fixture registry as well as the schema source.
+- The M4 owner decision (09A/09B split versus single-step 4.4 pw) remains a prerequisite to implementation and is
+  not a review verdict.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Ready with notes.** No Blocker or Major remains. M1–M3 and M5 are substantively resolved; M4 is recorded as an
+owner decision; m1–m3, m5–m17, and n1–n4 are resolved as claimed; m4 is only partially resolved. The required
+`docs` and `policy` gates pass, the frozen design delta contains only the review record and one step-page status
+line, the planner did not alter the round-1 findings/evidence/verdict, and no implementation code or step branch
+exists. R2-1..R2-3 should be corrected in the design branch and R2-4..R2-6 recorded before the owner accepts;
+under `docs/planning/reviews/README.md`, `Ready with notes` requires the human owner to accept the remaining
+Minor/Note findings explicitly. This record is evidence and does not authorize starting Step 09.
