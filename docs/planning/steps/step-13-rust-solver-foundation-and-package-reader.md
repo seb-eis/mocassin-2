@@ -140,7 +140,7 @@ impl Package {
 ### 4. RNG
 
 ```rust
-pub fn derive_job_seed(master: &[u8; 32], purpose: &[u8], collection: u32, config: u32, job: u32) -> [u8; 32];
+pub fn derive_job_seed(master: &[u8; 32], collection: u32, config: u32, job: u32, purpose: &[u8]) -> [u8; 32];
 pub fn derive_lattice_seed(job_seed: &[u8; 32], lattice_request_hash: &[u8; 32]) -> [u8; 32];
 
 pub struct Rng {
@@ -163,6 +163,11 @@ impl Rng {
 }
 ```
 
+- `derive_job_seed` hashes exactly `master[32] || u32_le(collection) || u32_le(config) || u32_le(job) ||
+  purpose` (ADR 0005 order); the Rust parameter order is a convenience and must not change the byte order.
+- `derive_lattice_seed` hashes `"mocassin/lattice/v1" || job_seed[32] || lattice_request_hash[32]`. The Rust
+  solver reads the lattice and seed from the package; lattice generation itself is the .NET build-side
+  SHA-256 counter stream in Step 10.
 - `Rng::export_state()`/`from_state()` are the only supported resume path; the state writer and reader must
   round-trip `RngStateV1` exactly. Implement a thin serializable ChaCha12 wrapper rather than depending on a
   third-party RNG’s private layout.

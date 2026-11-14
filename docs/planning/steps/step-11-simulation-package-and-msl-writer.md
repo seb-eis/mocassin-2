@@ -181,9 +181,10 @@ package itself exposes no combined view.
 - every job id is unique/contiguous as expected;
 - the package contains no `results` table and requires no `-wal`/`-shm` files.
 
-Build-stage integration: package/supercell limits plug into the Step 07 pipeline as an `IValidationStage` with
+Build-stage integration: package-size limits plug into the Step 07 pipeline as an `IValidationStage` with
 `Stage = Build`, run only when `ValidationOptions.RunBuildStage` is true and earlier stages produced no errors,
-and report through the shared `ValidationResult`/`DiagnosticCatalog`.
+and report through the shared `ValidationResult`/`DiagnosticCatalog`. Supercell and job-expansion limits are
+Step 10's stage; Step 11 validates only what it writes.
 
 ### 8. Package size and performance
 

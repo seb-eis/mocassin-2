@@ -125,7 +125,12 @@ third-party grid dependency.
 - The preview calls Step 10's `ILatticePreviewService.TryCreatePreview` with the current project and compiled
   model; the same service and supercell generator produce the build's `DopingReport`, so the editor cannot
   diverge from the build. A failed preview shows the diagnostics and no partial result.
-- The job-count summary in the editor uses Step 10's `JobCountPreview`; it does not recompute effective counts.
+- The editor caches the last compiled model keyed by the project model/document hash. A model edit marks it
+  stale and clears the preview; the preview button either recompiles through the shared Step 08 compiler with
+  debounce/cancellation or stays disabled with a "compile to preview" action. The preview service itself never
+  compiles.
+- The job-count summary in the editor uses Step 10's `JobCountPreview`; it does not recompute effective counts
+  and does not pass a separate job-count override (the template/collection owns it).
 
 ### 3. Simulation editor
 

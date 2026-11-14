@@ -146,7 +146,7 @@ Status legend:
 | Build template selection | Y | Planned | 10/12/26 | |
 | Create/overwrite package | Y | Planned | 11/26 | |
 | Append to existing package | N | Deferred | post-1.0 | Not required; rebuild is safer |
-| 99,999-job cap | N | Replaced | 11 | Warning at 10k; no hard cap |
+| 99,999-job cap | Y | Planned | 10 | Hard cap `JOB019`; warning `JOB013` above 10k |
 | Build progress/cancel/log | Y | Planned | 12/26 | |
 | Package inspection/verification | Y | Improvement | 11/12 | |
 | Build history | N | Improvement | 26 | |
