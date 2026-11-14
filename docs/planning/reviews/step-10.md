@@ -309,7 +309,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
 
 `Changes required` was the round-2 review verdict; it is not a merge authorization. The round-3 re-review
 target is `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43`.
@@ -576,6 +576,201 @@ step agent owns this section.
 
 No earlier reviewer text, resolution table, or checklist item was altered.
 
+## Round 3 review
+
+### Reviewer identity and scope
+
+| Field | Value |
+| --- | --- |
+| Reviewer | Independent planning auditor (round 3; fresh context; no shared conversation with the planner, implementor, step agent, or orchestrator) |
+| Review date | 2026-11-14 |
+| Branch | `docs/step-10-design` |
+| Round 1 frozen commit | `c66b483f6ef064858d0e8082543d2fcec8386ed3` |
+| Round 2 revised design commit | `2eb6a5715ea51f324a579ae8974f9e8526005fa9` |
+| Round 3 revised design commit | `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43` |
+| Round 3 resolution/status commit | `0a5667a5b1491a6f2bbe17bde9323f5edaec93ae` |
+| Record parent | `0a5667a5b1491a6f2bbe17bde9323f5edaec93ae` |
+| Design delta reviewed | `git show --stat 07f14f2`: 3 files, 68 insertions, 37 deletions |
+
+> I am a fresh context for round 3. I did not author or implement the reviewed work and have no shared
+> conversation with the planner, implementor, step agent, or orchestrator. I read the repository at
+> `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43` and the resolution/status delta at
+> `0a5667a5b1491a6f2bbe17bde9323f5edaec93ae` directly rather than relying on the resolution table, and I
+> edited and committed only this review record.
+
+The read-only original clone (`/workspace/mocassin-original`) is still absent from this environment. Original
+behaviour claims were checked against the Step 08 review and audit text that quote
+`JumpSelectionOptimizer.Run` and `RunPostBuildOptimizers`, the Step 06/08 design text, and the current compiled
+types. That is a review limitation, not a finding.
+
+### Evidence
+
+Files read in this round:
+
+- `AGENTS.md` §3.8–§3.9, §3.12, §8, §10–§12, and §16; `docs/planning/reviews/README.md` and the design-review
+  template; this record's request, round-1/2 text, and round-2 resolutions.
+- `docs/planning/steps/step-10-job-templates-and-supercells.md` in full; the complete diff
+  `2eb6a57..07f14f2` and the isolated design commit `07f14f2`; `git show --stat 0a5667a`;
+  `docs/planning/status.md`; `docs/planning/02-data-contracts.md` §2.4, §3.3, and §3.4;
+  `docs/planning/01-target-architecture.md`; `docs/planning/03-quality-strategy.md` §9.4;
+  `docs/planning/04-roadmap.md` §3.1; `docs/planning/05-open-decisions.md`;
+  `docs/planning/appendix-b-parity-matrix.md`.
+- ADR 0005 (statistical parity and RNG), 0009 (contract manifest), 0010 (canonical signatures), 0011 (immutable
+  package), 0013 (format compatibility), and 0014 (extension ABI/trust boundary).
+- Steps 06, 07, 08, 09, 11, 12, 13, 14, 16, 25, and 26; `docs/reference/project-format.md`,
+  `docs/reference/diagnostics.md`, `docs/user-guide/lattice.md`; `docs/development/design-decisions.md`,
+  `compilation-pipeline.md`, and `code-structure.md`.
+- Current code/contracts used to verify the claimed navigation, types, and vectors:
+  `src/dotnet/Mocassin.Compilation/Structure/CompiledStructureModel.cs`,
+  `src/dotnet/Mocassin.Compilation/Structure/EnvironmentCompilationStage.cs`,
+  `src/dotnet/Mocassin.Compilation/Compiler/CompiledModel.cs`,
+  `src/dotnet/Mocassin.Compilation/Simulations/CompiledSimulation.cs`,
+  `src/dotnet/Mocassin.Compilation/Transitions/CompiledTransitionModel.cs`,
+  `src/dotnet/Mocassin.Core/Project/ProjectHasher.cs`,
+  `src/dotnet/Mocassin.Core/Project/ProjectMetadata.cs`,
+  `src/dotnet/Mocassin.Core/Ids/TypedIds.cs`,
+  `src/dotnet/Mocassin.Core/Model/Particles/Particle.cs`,
+  `src/dotnet/Mocassin.Core/Model/Lattice/Doping.cs`,
+  `src/dotnet/Mocassin.Core/Model/Lattice/LatticeModelValidator.cs`,
+  `src/dotnet/Mocassin.Packages/Projects/Validation/ValidationContext.cs`, and
+  `src/dotnet/Mocassin.Packages/Projects/Validation/DiagnosticCatalog.cs`.
+
+Commands run and exact results (before this record was written):
+
+```text
+git status --short
+# no output (exit 0)
+
+git rev-parse HEAD
+# 0a5667a5b1491a6f2bbe17bde9323f5edaec93ae
+
+git cat-file -t 07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43
+# commit
+
+git diff --stat 2eb6a57 07f14f2
+# 5 files changed, 301 insertions(+), 43 deletions(-)
+# The five files include the round-2 record commit 563cd31 and the status line.
+# The design-only delta in the reviewed commit is:
+
+git show --stat 07f14f2
+# 3 files changed, 68 insertions(+), 37 deletions(-)
+# docs/planning/02-data-contracts.md | 2 +-
+# docs/planning/steps/step-08-model-compilation-pipeline.md | 7 +-
+# docs/planning/steps/step-10-job-templates-and-supercells.md | 96 ++++++++++++++--------
+
+git show --stat 0a5667a
+# 3 files changed, 34 insertions(+), 6 deletions(-)
+# docs/planning/reviews/step-10.md, docs/planning/status.md, Step 10 status line.
+
+python tools/check_docs_links.py
+# Documentation links OK (158 files scanned). (exit 0)
+
+python tools/check_doc_math.py
+# Documentation math conventions OK (155 files scanned). (exit 0)
+
+python tools/check_process_consistency.py
+# Process consistency: OK (exit 0)
+
+./tools/verify.sh docs --require
+# git diff --check passed; Zensical (strict) "No issues found"; DocFX "Build succeeded.
+# 0 warning(s) 0 error(s)"; rustdoc completed; "Documentation built in /workspace/site";
+# "Closeout gate completed with required checks enabled." (exit 0)
+
+./tools/verify.sh policy --require
+# git diff --check passed; build 0 warnings/0 errors; "Public API is compatible with the
+# checked-in baseline"; contract artifacts current (18 files); model projection OK
+# (5 fixtures); parameterization projection OK (4 fixtures); space-group catalog current
+# (274 settings, sha256 1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395);
+# process consistency OK; 31 contract tests OK; SPDX headers present in 470 source files;
+# no secret patterns in 817 tracked text files; advisories/bans/licenses/sources ok;
+# "Closeout gate completed with required checks enabled." (exit 0)
+```
+
+The `2eb6a57..07f14f2` stat includes the round-2 reviewer record commit `563cd31`; the actual design revision
+is the isolated `07f14f2` commit. The round-3 resolution/status commit `0a5667a` touches only the review record,
+the status dashboard, and the Step 10 status line. No code, test, configuration, or design page changed after
+`07f14f2`.
+
+Golden-vector check, reimplemented independently from the written specification rather than copied from the
+page:
+
+```python
+def u32(x): return struct.pack("<I", x)
+def sha(b): return hashlib.sha256(b).digest()
+
+master = sha(b"mocassin/seed-text/v1" + b"ceria-seed-1")
+job_custom = sha(master + u32(0) + u32(0) + u32(0) + b"mocassin/job/v1")
+job_base = sha(bytes(range(32)) + u32(0) + u32(0) + u32(0) + b"mocassin/job/v1")
+lattice_zero = sha(b"mocassin/lattice/v1" + job_base + bytes(32))
+request = sha(
+    b"mocassin/lattice-request/v1"
+    + bytes(range(0x00, 0x20)) + bytes(range(0x20, 0x40)) + bytes(range(0x40, 0x60))
+    + u32(10) + u32(10) + u32(10) + u32(1)
+    + bytes.fromhex("00112233445566778899aabbccddeeff")
+    + struct.pack("<d", 0.01)
+    + u32(len(b"2026.1")) + b"2026.1" + bytes(range(0x60, 0x80))
+    + u32(len(b"symmetry-1")) + b"symmetry-1")
+lattice_custom = sha(b"mocassin/lattice/v1" + job_custom + request)
+```
+
+```text
+job_seed        884a9517b16620af2257945215f5552c1f5af0580ed2c911456b1a29a4f54ce7  (matches)
+lattice_seed    7f601350f114b61ba560fa983218cfd41e41df83953072ff415eafa21adbf394  (matches)
+sampler [1, 7, 2]                                                              (matches)
+custom job_seed b6d2d1614b2b819445764523ef5613a47b7712a218e303d1a3d2cdb4f71a5c2e  (matches)
+request_hash    5719de5efea8b57ef6960229bf2248de0da3bb497c2f29507d1742157f878295  (matches)
+custom lattice  a497141d26d005eb5caa17025b3c1e3564f31f8d46518a7a36d311623be464d2  (matches)
+```
+
+The sampler check used the written counter DRBG (`SHA-256("mocassin/lattice-rng/v1" || lattice_seed ||
+u64_le(counter))`, first eight bytes little-endian), Lemire rejection, and Fisher–Yates for `i = 0..k-1`,
+`j = i + NextBounded(n - i)`. It reproduces `[1, 7, 2]` exactly.
+
+### Resolution verification
+
+| Finding | Round-3 status | Verification |
+| --- | --- | --- |
+| R2-1 (M7) | Resolved | The environment set is now **every `CompiledModel.Structure.Environments` entry** (`CompiledStructureModel.Environments`), and the public navigation exists: `CompiledSite.PositionIndices`, `CompiledPosition.EnvironmentIndex` and `AllowedParticleMask`, and `CompiledEnvironment.AllowedParticleMask`/`SiteIndex`. A shared stable environment (`SiteIndex = -1`; every stable site's positions have `EnvironmentIndex = 0`) is reduced when any optimizer targets a stable site and its particle is allowed at that position. A site-specific unstable environment (`SiteIndex >= 0`) is reduced only by an optimizer on its owning site. The predicate is implementable for both shapes. The all-reduced rule matches the Step 08 review quote of `JumpSelectionOptimizer.Run` (`isReducedMask \|= optimizedMask == originalMask`): keep the flag when there is no optimizer, when any environment is unchanged (including the mixed case), or when the bit is already clear; clear only when every environment is reduced. The compiled model is not mutated; the predicate is per job. The "three environments, one/some/all reduced" test is in the test table. Steps 14/16 still read the resulting `.msl` bit (`dof = 2`/`1`), and Step 08 now says it exposes compiled data without interpreting authored optimizers. Consistent. The original clone is absent, so the original-code check relies on the Step 08 review quote, not a fresh source read. |
+| R2-2 | Resolved | `JOB009` is now "reference invalid or removes every usable start option"; `JOB017` owns duplicate `(site, particle)` optimizers. The ownership table assigns `JOB009`'s reference check to Core and its removes-all check to the Packages stage, and `JOB017` to Core. The explicit sentence "Duplicate `(site, particle)` optimizers are owned only by `JOB017`; `JOB009` does not duplicate that rule" removes the overlap. |
+| R2-3 | Resolved | The stage is `JobTemplateValidationStage` in §6, §7, and Step 12; no `JobTemplateBuildValidator` remains in the repository. The ownership table names the compiled-bound `JOB009` half explicitly. Step 08 now says it "exposes the compiled site, position, environment, and selection masks; it does not interpret authored optimizers", and Step 10 owns expansion and the dual-DOF predicate. |
+| R2-4 | Resolved for the asked case | Each applied compensated pair is checked individually at `1e-6 × max(1, n_p + n_d)`; a compensation-requested doping that cannot realize a pair is `JOB012`; `hasUncompensatedCharge` makes a mixed compensated/non-compensated config `JOB016` instead of `JOB012`; the final `JOB012` fallback applies only when no uncompensated charge was applied. The acceptance criterion and `JOB016` table row now include the mixed case. R3-1 records the adjacent pre-existing-base-lattice case that this revision does not classify. |
+| R2-5 | Resolved | §8 now says `doping_info` is a pre-implementation `.msl` field defined by Step 10 and written by Step 11, with no schema-version bump because no `.msl` exists, and no `.msr`/`.mcs` change. Data contract §3.4 and Step 11 map the same field. |
+| R2-6 | Resolved | `{dopingId}` is the canonical lowercase hyphenated GUID (`Guid.ToString("D")`) in Step 10 §4 and data contract §3.4. `DopingId.ToString()` already uses `Value.ToString("D", CultureInfo.InvariantCulture)`, so the planned encoding matches the current typed ID. |
+| R2-7 | Resolved | The project-seed-equality special case is gone. Any 64-character lowercase hex seed text is decoded; every other explicit seed text is hashed with `SHA-256("mocassin/seed-text/v1" || UTF8(seedText))`. The custom seed `ceria-seed-1` vector reproduces `b6d2d161…` exactly. |
+| R2-8 | Resolved | Every `[32]` input is stated to be a SHA-256 digest decoded from its canonical 64-character lowercase hex form, including `structure_hash`, `particle_hash`, `lattice_hash`, and `SpaceGroupDataSha256`; the version strings are UTF-8 with `u32_le` length prefixes. The populated synthetic vector reproduces request hash `5719de5e…` and, with the custom job seed, lattice seed `a497141d…` exactly. |
+| R2-9 | Resolved | `TryCreateJobCountPreview` is explicitly simulation-scoped: `DefaultJobCount` is that simulation's `Simulation.JobCount`; `EffectiveJobCount` is the job total for the template collections bound to that simulation after collection/config overrides; `TotalJobs` is the whole-template total. There is no separate count-override parameter. The test row is updated. |
+
+### Findings
+
+| ID | Severity | Finding | Evidence |
+| --- | --- | --- | --- |
+| **R3-1** | **Minor** | **The `JOB012` final-neutrality fallback misclassifies a pre-existing non-neutral base lattice as an unbalanced compensation failure.** `hasUncompensatedCharge` is set only by an *applied doping* with compensation off and a nonzero charge delta. If the generated base lattice is itself non-neutral — Step 06 does not require the first particle of each stable set to produce a neutral default, and `Particle.Charge` is arbitrary — then a config with no doping, or with only compensated/isovalent dopings, reaches the final check with `hasUncompensatedCharge = false` and a non-zero `TotalChargeAfter`. The design then emits `JOB012`, although no compensated pair was unbalanced and the acceptance criterion says a non-compensated charged lattice is permitted with `JOB016`. `JOB012`'s descriptor ("compensation pair cannot be realized, or an applied compensated pair is not charge-balanced") and `JOB016`'s descriptor ("because an uncompensated charged doping was applied") both fail to cover a charged base lattice. Define whether a non-neutral base lattice is a model error, a `JOB016` warning, or excluded by comparing the doping-induced change (`TotalChargeAfter - TotalChargeBefore`) rather than the absolute final total. | Step 10 §3 lines 262–270 and acceptance lines 627–628; `JOB012`/`JOB016` rows lines 432 and 436; Step 06 lines 177–183 (non-compensated charged exchange allowed; no base-neutrality invariant); `Particle.cs` line 25 (arbitrary `ChargeElementary`); `LatticeModelValidator.cs` lines 286–289 (only compensation sign checks, no total-charge check). |
+| **R3-2** | **Note** | **The `hasUncompensatedCharge` parenthetical contradicts its own predicate.** The sentence says the flag is true for "an applied doping [that] has compensation off and a nonzero charge delta (including an isovalent/zero-delta doping, which does not count)". An isovalent doping has zero delta, so it cannot be an example of a nonzero delta; the intent is clearly "excluding". Reword to avoid an implementer setting the flag for an isovalent doping. | Step 10 §3 lines 264–265. |
+| **R3-3** | **Note** | **The `validate` acceptance line names the whole `JOB009` code as structural, although the removes-all half is compiled-bound.** The acceptance criterion says `validate` reports structural `JOB001`–`JOB009`/`JOB015`/`JOB017`/`JOB018`/`JOB020` errors without a compiled model. The §6/§7 ownership split puts only `JOB009`'s reference check in Core; its removes-all check needs the compiled model and runs in the Packages `JobTemplateValidationStage`. Align the acceptance wording with the split (for example, "`JOB001`–`JOB008` and the `JOB009` reference check"). | Step 10 acceptance line 629; §6 ownership table lines 446–447; §7 lines 458–462. |
+
+No Blocker or Major was found. R3-1 is a Minor edge case; R3-2 and R3-3 are Notes. They do not reopen the
+architecture, the seed/sampler contract, the dual-DOF navigation, or the mixed compensated/non-compensated rule.
+
+### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Verdict: Ready with notes.** R2-1–R2-9 are resolved in substance: the dual-DOF environment set is explicit
+and navigable from the public compiled types, the all-reduced rule matches the original accumulation, the
+`JOB009`/`JOB017` ownership and stage naming are consistent, the mixed compensated/non-compensated case is
+`JOB016`, the `.msl` `doping_info` change is recorded as a pre-implementation contract update, and the
+`DopingId`, seed-text, hex-decoding, and `TryCreateJobCountPreview` Notes are addressed. All six published
+golden values reproduce independently. One Minor (R3-1, the pre-existing non-neutral base lattice) and two
+Notes (R3-2, R3-3) remain; the human owner must accept them explicitly or request a focused revision. The
+required repository gates pass. This record is evidence and does not authorize the step.
+
+Follow-up owner: Step agent / planner
+Follow-up step: Step 10 implementation start after owner acceptance of R3-1–R3-3, or a focused round-4
+revision for the base-lattice neutrality classification
+
 ## Approval summary
 
 The step agent completes this section before requesting human approval. It must cover the full history, not
@@ -595,7 +790,7 @@ Round history:
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-14 | `c66b483` | Independent planning auditor (fresh context) | Changes required |
 | 2 | 2026-11-14 | `2eb6a57` | Independent planning auditor (fresh context) | Changes required |
-| 3 | 2026-11-14 | `07f14f2` | Pending fresh auditor | Pending |
+| 3 | 2026-11-14 | `07f14f2` | Independent planning auditor (fresh context) | Ready with notes |
 
 Findings and resolutions:
 
