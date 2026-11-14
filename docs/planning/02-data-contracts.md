@@ -1006,7 +1006,7 @@ Exact array lengths and invariants are validated by `mocassin-msl` before the so
 | `selection_optimizers` | array | `{position_id:u32, particle_id:u8}`; `position_id` is the canonical P1 position index |
 | `extensions` | array | `{id: string, config: map}` for optional solver routines; canonical JSON |
 | `instruction` | string? | Advanced/legacy free-text instruction |
-| `doping_info` | string | Machine-readable `v1:{dopingId}:{priority}:{requestedPrimary}:{appliedPrimary}:{appliedDependent}:{effectiveFraction:R}` entries joined by `;`; empty when no doping values are configured |
+| `doping_info` | string | Machine-readable `v1:{dopingId}:{priority}:{requestedPrimary}:{appliedPrimary}:{appliedDependent}:{effectiveFraction:R}` entries joined by `;`; `dopingId` is a lowercase hyphenated GUID; empty when no doping values are configured |
 
 The lattice itself is stored once in the `lattices` table and referenced by the job:
 

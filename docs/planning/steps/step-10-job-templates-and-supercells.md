@@ -147,10 +147,13 @@ public sealed record GeneratedLattice(
   Contracts.
 - Effective settings are resolved with explicit inheritance and validated.
 - **Master seed bytes.** Resolve `seedText` as the first non-empty of: collection `RngSeed`, simulation
-  `RngSeed`, project `masterSeed`. The project seed is required and is 32 bytes of lowercase hexadecimal;
-  a custom collection/simulation seed is UTF-8 hashed with
-  `SHA-256("mocassin/seed-text/v1" || UTF8(seedText))` to produce 32 bytes. A value that is exactly the
-  project's 64-hex seed is decoded, not re-hashed. The build never creates or persists a seed.
+  `RngSeed`, project `masterSeed`. The project seed is required and is 32 bytes of lowercase hexadecimal. Any
+  seed text that is exactly 64 lowercase hex characters is decoded; every other explicit seed text is UTF-8
+  hashed with `SHA-256("mocassin/seed-text/v1" || UTF8(seedText))`. The rule never depends on whether another
+  seed changed. The build never creates or persists a seed. A custom seed `ceria-seed-1` with
+  collection/config/job all zero yields job seed
+  `b6d2d1614b2b819445764523ef5613a47b7712a218e303d1a3d2cdb4f71a5c2e`; that is the second seed golden
+  vector.
 - **Job seed.** This follows ADR 0005's tuple order and is the normative cross-language contract:
 
 ```text
@@ -189,10 +192,17 @@ lattice_request_hash = SHA-256(
   u32_le(UTF8_length(symmetry_contract_version)) || UTF8(symmetry_contract_version))
 ```
 
-  `SpaceGroupDataSha256` is decoded from its canonical 32-byte hex value. `ProjectHasher.ComputeParticles` and
+  Every `[32]` input is a SHA-256 digest decoded from its canonical 64-character lowercase hex form, including
+  `structure_hash`, `particle_hash`, `lattice_hash`, and `SpaceGroupDataSha256`; the two version strings are
+  UTF-8 with a `u32_le` byte-length prefix. `ProjectHasher.ComputeParticles` and
   `ProjectHasher.ComputeLattice` are Step 10 additions; they canonicalize the particle/particle-set and
   lattice/doping definitions exactly once. The hash excludes transitions, parameterization values,
-  temperatures, and other runtime settings.
+  temperatures, and other runtime settings. A synthetic request-hash vector fixes the projection:
+  structure/particle/lattice hashes `00..1f`, `20..3f`, `40..5f`; `A=B=C=10`; one doping
+  `00112233-4455-6677-8899-aabbccddeeff` at `0.01`; space-group data version `2026.1` with digest `60..7f`;
+  symmetry contract `symmetry-1`. The expected request hash is
+  `5719de5efea8b57ef6960229bf2248de0da3bb497c2f29507d1742157f878295`, and with the custom job seed above
+  the lattice seed is `a497141d26d005eb5caa17025b3c1e3564f31f8d46518a7a36d311623be464d2`.
 - **Lattice seed and RNG.** `lattice_seed = SHA-256("mocassin/lattice/v1" || job_seed[32] || lattice_request_hash[32])`.
   The build-side sampler uses a deterministic SHA-256 counter DRBG:
 
@@ -249,10 +259,15 @@ Algorithm:
    - no particle is outside its site's set;
    - unstable sites are void (they are always void in the initial state);
    - doping counts match the report;
-   - if any doping requested compensation, the total charge must satisfy
-     `|total_charge| ≤ 1e-6 × max(1, total_positions)`; otherwise `JOB012` fails the build;
-   - if no doping requested compensation, a non-neutral lattice is permitted by Step 06 and is reported with
-     `JOB016` (warning) and `IsChargeNeutral = false`.
+   - every applied compensated pair must itself satisfy
+     `|n_p × Δq_p + n_d × Δq_d| ≤ 1e-6 × max(1, n_p + n_d)`; otherwise `JOB012` fails the build;
+   - track `hasUncompensatedCharge`, true when an applied doping has compensation off and a nonzero charge
+     delta (including an isovalent/zero-delta doping, which does not count);
+   - if `hasUncompensatedCharge`, the final non-neutral lattice is permitted with `JOB016` (warning) and
+     `IsChargeNeutral = false`; this also covers a mixed config with one compensated and one intentionally
+     non-compensated charged doping;
+   - if no uncompensated charge was applied and the final total is still non-neutral beyond
+     `1e-6 × max(1, total_positions)`, `JOB012` fails the build.
 4. Return the lattice plus a `DopingReport`.
 
 - Same-site dopings are ordinary sequential dopings: after a partial `A→B`, a later `A→C` applies to the
@@ -288,10 +303,12 @@ public sealed record DopingApplication(
   The GUI shows the full report from the same preview/build service.
 - `DopingInfo` is machine-readable and identifies each doping:
   `"v1:{dopingId}:{priority}:{requestedPrimary}:{appliedPrimary}:{appliedDependent}:{effectiveFraction:R}"`,
-  joined by `;`, ordered by ascending priority, using invariant culture. A template with no doping values has
-  an empty string. A template whose entries all apply zero counts still carries the entries, so "no doping
-  configured" and "doping applied zero" remain distinguishable.
-- The build fails with `JOB012` if any compensation-requested doping cannot realize a positive pair.
+  joined by `;`, ordered by ascending priority, using invariant culture. `{dopingId}` is the canonical
+  lowercase hyphenated GUID (`Guid.ToString("D")`). A template with no doping values has an empty string. A
+  template whose entries all apply zero counts still carries the entries, so "no doping configured" and
+  "doping applied zero" remain distinguishable.
+- The build fails with `JOB012` if any compensation-requested doping cannot realize a positive pair, or if the
+  applied pair itself is not charge-balanced within tolerance.
 - The build warns with `JOB011` if the effective fraction differs from the requested fraction.
 
 ### 4.1 Lattice and job-count preview
@@ -347,9 +364,11 @@ public interface ILatticePreviewService
 - Unknown dopings, non-finite fractions, fractions outside `[0,1]`, `(A, B, C)` outside 1–256, and impossible
   compensation return `null` plus diagnostics. A null project or compiled model is a programmer error and
   throws; all project/user data problems are diagnostics, matching the Step 03–05 preview boundary.
-- `TryCreateJobCountPreview` resolves the simulation's default job count, the template/collection override, and
-  the total jobs across the template's collections/configs. It does not generate lattices and has no separate
-  count-override parameter; the template/collection is the only source.
+- `TryCreateJobCountPreview` is scoped by `simulationId`: `DefaultJobCount` is that simulation's
+  `Simulation.JobCount`; `EffectiveJobCount` is the job total for the template collections bound to that
+  simulation after collection/config overrides; `TotalJobs` is the whole-template total across all
+  simulations. It does not generate lattices and has no separate count-override parameter; the
+  template/collection is the only source.
 - The preview uses the same `SupercellGenerator`/doping application path as the build. A test generates the
   same request and asserts that the preview report and the lattice's `DopingReport` are identical.
 - The preview cache is an LRU bounded to **8 entries and 256 MiB**, keyed by
@@ -373,12 +392,18 @@ public interface ILatticePreviewService
   canonical P1 position owned by that site (`CompiledSite.PositionIndices`), using the compiled particle index.
   The entries are sorted by `(position_id, particle_id)`. This is the mapping Step 14 consumes; it removes the
   particle at every periodic image of the reference site, not only the canonical image.
-- **Compensation masks and dual DOF.** Start from `CompiledSimulation.Intent.UseDualDofCorrection`. For each
-  environment of the simulation's active KMC collections (`CompiledSimulation.ActiveCollectionIndices` →
-  `CompiledEnvironment`), clear the optimizer particle bit from `AllowedParticleMask`. Clear
-  `UseDualDofCorrection` only when at least one optimizer exists and **every** such environment mask changed;
-  keep it when no optimizer exists, when a mask was already clear, or when any mask remains unchanged (the
-  mixed case). This matches the original `JumpSelectionOptimizer.Run` accumulation.
+- **Compensation masks and dual DOF.** Start from `CompiledSimulation.Intent.UseDualDofCorrection`. The
+  environment set is **every `CompiledStructureModel.Environments` entry**, not the active jump collections
+  (those own rules/directions, not environments). For each environment `e`:
+  - original mask = `e.AllowedParticleMask`;
+  - `e` is *reduced* when at least one optimizer targets a site that owns a P1 position with
+    `CompiledPosition.EnvironmentIndex == e` and the optimizer particle is allowed at that position;
+  - the compiled model is immutable; no mask is mutated. The predicate is computed per job.
+  Clear `UseDualDofCorrection` only when at least one optimizer exists and **every** environment is reduced;
+  keep it when no optimizer exists, when any environment is unchanged (including the mixed case), or when the
+  bit was already clear. This reproduces the original `JumpSelectionOptimizer.Run` rule
+  `isReducedMask |= optimizedMask == originalMask`; a test with three environments covers one, some, and all
+  reduced. MMC always keeps `UseDualDofCorrection = false`.
 - Optimizers are applied after compilation and before job encoding. A KMC simulation with no selectable start
   option for any of its transitions after optimization is `JOB009` (error); MMC simulations ignore
   optimizers.
@@ -401,14 +426,14 @@ public interface ILatticePreviewService
 | `JOB006` | Error | Doping reference unknown |
 | `JOB007` | Error | Duplicate collection/config name |
 | `JOB008` | Error | Job count outside 1–1000 |
-| `JOB009` | Error | Optimizer reference invalid, duplicate target, or removes every usable start option for a required mechanism |
+| `JOB009` | Error | Optimizer reference invalid or removes every usable start option for a required mechanism |
 | `JOB010` | Warning | Requested doping cannot be realized; 0 applied |
 | `JOB011` | Warning | Effective doping fraction differs from requested |
-| `JOB012` | Error | Compensation cannot be realized, or a compensated lattice is not neutral |
+| `JOB012` | Error | Compensation pair cannot be realized, or an applied compensated pair is not charge-balanced |
 | `JOB013` | Warning | Total jobs exceed 10,000 |
 | `JOB014` | Warning | Supercell positions exceed 100,000 |
 | `JOB015` | Error | Inherited settings missing a required value or not applicable to the collection's simulation kind |
-| `JOB016` | Warning | Lattice is not charge-neutral and no compensation was requested |
+| `JOB016` | Warning | Final lattice is not charge-neutral because an uncompensated charged doping was applied (including a mixed compensated/non-compensated config) |
 | `JOB017` | Error | Duplicate doping reference in a config, or duplicate `(site, particle)` optimizer |
 | `JOB018` | Error | Extension id is empty/duplicated, config is not a JSON object, or an extension bound is exceeded |
 | `JOB019` | Error | Total expanded jobs exceed 99,999 |
@@ -418,8 +443,10 @@ Validation ownership is split so `validate` catches project-level problems witho
 
 | Owner | Codes | Runs in |
 | --- | --- | --- |
-| Core `JobTemplateValidator` | `JOB001`–`JOB003`, `JOB005`–`JOB009` (reference/duplicate checks), `JOB015`, `JOB017`, `JOB018`, `JOB020`; cell-range part of `JOB004` | `ProjectValidator` on load, save, and edit; also inside build validation |
-| Packages `JobTemplateBuildValidator` (`IValidationStage`) | total-position part of `JOB004`, `JOB010`–`JOB014`, `JOB016`, `JOB019` | Step 07 `Build` stage when a compiled model is supplied |
+| Core `JobTemplateValidator` | `JOB001`–`JOB003`, `JOB005`–`JOB008`, `JOB009` (reference check only), `JOB015`, `JOB017`, `JOB018`, `JOB020`; cell-range part of `JOB004` | `ProjectValidator` on load, save, and edit; also inside build validation |
+| Packages `JobTemplateValidationStage` (`IValidationStage`) | total-position part of `JOB004`, `JOB009` (removes-all check), `JOB010`–`JOB014`, `JOB016`, `JOB019` | Step 07 `Build` stage when a compiled model is supplied |
+
+Duplicate `(site, particle)` optimizers are owned only by `JOB017`; `JOB009` does not duplicate that rule.
 
 ### 7. Build-stage validation and diagnostics
 
@@ -496,7 +523,10 @@ public sealed record JobExtension(string Id, JsonElement Config);
   collections/configs/dopings arrays are omitted on write.
 - The project format remains `schemaVersion = 1` (additive pre-release change, same exception as Steps 03–09).
   `contracts/manifest.json`'s `jobTemplates.itemFields`, the generated project schema, and the project
-  fixtures are updated together; no package/results format changes in this step.
+  fixtures are updated together.
+- `doping_info` is a pre-implementation `.msl` field defined here and written by Step 11. Because `.msl` is
+  not implemented yet, this is a contract update without a schema-version bump; it is recorded in the step
+  page and audit trail. No published package is affected, and no `.msr`/`.mcs` change is made.
 
 ### 9. Build-time types and step interfaces
 
@@ -594,8 +624,8 @@ exception is needed.
   job-seed/lattice-seed/sampler golden vectors match.
 - [ ] Changing a simulation-only setting does not change the lattice for the same job.
 - [ ] A same-site sequential doping applies to the particles remaining after earlier dopings.
-- [ ] A non-compensated charged lattice is permitted with `JOB016`; a compensated unrealizable/neutrality
-  failure is `JOB012`.
+- [ ] A non-compensated charged lattice (including a mixed compensated/non-compensated config) is permitted
+  with `JOB016`; an unrealizable/unbalanced compensated pair is `JOB012`.
 - [ ] `validate` reports structural `JOB001`–`JOB009`/`JOB015`/`JOB017`/`JOB018`/`JOB020` errors without a
   compiled model.
 - [ ] The 99,999-job cap and the structural count caps fail with `JOB019`/`JOB020`.
@@ -638,9 +668,9 @@ At this point, document job templates and supercells:
 | Preview failure | Unknown doping, non-finite/out-of-range fraction, invalid supercell, impossible compensation -> null + diagnostics; no partial preview | PR-fast |
 | Preview/build equality | The preview report equals the generated lattice's `DopingReport` for the same request | PR-fast |
 | Preview cache | Keys separate project model, request, doping list, and catalog/contract versions; 8-entry/256-MiB eviction | PR-fast |
-| Job-count preview | Default/effective/total counts, template overrides, no lattice generation, no duplicate override parameter | PR-fast |
+| Job-count preview | Simulation-scoped default/effective counts, whole-template total, template overrides, no lattice generation, no duplicate override parameter | PR-fast |
 | Validation | `validate` catches structural `JOB` errors; `build` catches compiled-bound `JOB` errors | PR-fast |
-| Optimizers | Every P1 position of the site removed; lattice unchanged; dual-DOF all-masks rule; `JOB009` | PR-fast |
+| Optimizers | Every P1 position of the site removed; lattice unchanged; dual-DOF one/some/all environment reduction; `JOB009`; duplicate `JOB017` | PR-fast |
 | Limits | Collection/config/doping/optimizer/extension caps and `JOB019`/`JOB020` | PR-fast |
 | Edge cases | 0 %, 100 %, tiny cell, impossible ratio, NaN/Inf | PR-fast |
 | Performance | 10⁴ small jobs expand in < 10 s; generation peak stays under 1 GiB with cancellation every job | PR-medium |
