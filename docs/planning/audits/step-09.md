@@ -15,11 +15,11 @@
 | Request owner | Step agent |
 | Orchestrator (step agent) | General planner/orchestrator |
 | Audit initiated by | Human owner |
-| Audited commit | `20c73bcb3b1643320ad5acbdd6ff5c0d18e2ad5b` |
+| Audited commit | `916bae1b66aeb0d3b8fb1e451072523a869b596e` |
 | Step branch | `step/09-parameterization-templates` |
 | Step tag | — |
-| Closeout CI run | [`43630049214`](https://github.com/seb-eis/mocassin-2/actions/runs/43630049214) — green at `20c73bcb3b1643320ad5acbdd6ff5c0d18e2ad5b` |
-| Closeout CI head SHA | `20c73bcb3b1643320ad5acbdd6ff5c0d18e2ad5b` |
+| Closeout CI run | [`43634322838`](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) — green at `916bae1b66aeb0d3b8fb1e451072523a869b596e` |
+| Closeout CI head SHA | `916bae1b66aeb0d3b8fb1e451072523a869b596e` |
 | Main SHA at freeze | `b81355e00946f7abee5c4a56be23d8e1f777743e` |
 | Merge-tree CI | Not required; `main` `b81355e` is an ancestor of the audited commit |
 | Closeout evidence | `docs/planning/closeout/step-09.json` |
@@ -224,7 +224,7 @@ Repository reading and probes:
   - Ceria-KMC golden values are the implicit-default apply (the sample has no template); ceria and BaZrO₃ use
     their checked-in populated templates.
   - Benchmark numbers were measured in the development container and are order-of-magnitude evidence.
-- Closeout: exactly one closeout CI dispatch (`43630049214`); no per-feature CI runs; Windows/macOS not run.
+- Closeout after the round-1 fixes: one replacement dispatch (`43634322838`); the earlier run `43630049214` on `20c73bc` is process history. No per-feature CI runs; Windows/macOS not run.
 
 ## Findings
 

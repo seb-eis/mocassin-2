@@ -13,10 +13,10 @@ completeness checks.
 - **Status:** In audit
 - **Feature list:** Approved 2026-11-14 (seven features; step branch created)
 - **Step branch:** `step/09-parameterization-templates`
-- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43630049214) at `20c73bc` — superseded by the round-1 fixes; replacement closeout run pending
+- **Step CI:** [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) at `916bae1`; earlier run `43630049214` at `20c73bc` is process history
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required — round 1 `Fixes required` at `20c73bc` ([record](../audits/step-09.md)); fixes and resolutions are on `feature/step-09-parameterization-templates/fix-audit-round-1`
+- **Audit:** Re-audit required at `916bae1` — round 1 `Fixes required` at `20c73bc` ([record](../audits/step-09.md)); fixes squashed as `916bae1`, resolutions recorded, re-audit requested
 - **Design review:** Ready with notes at `26d6a0ecff543ac65eb60d60d9f9c893e00f32bc` (round 4) — accepted 2026-11-14
 - **Last updated:** 2026-11-14
 
@@ -447,18 +447,17 @@ PATH=/home/node/.venvs/mocassin/bin:$PATH ./tools/verify.sh all --require
   --filter "*ParameterizationBenchmarks*"`; 5 benchmarks executed; results in the feature-7 outcome above.
 - No per-feature CI run was triggered.
 
-Remaining closeout work belongs to the orchestrator: squash-merge the round-1 fix feature into the step branch,
-merge current `main` if it moved, run the single replacement closeout CI dispatch, refresh
-`docs/planning/closeout/step-09.json` and run `python tools/check_closeout_evidence.py`, then request the
-re-audit against the new commit. The audit record remains `Re-audit required` until that audit passes. This
-feature does not create a tag or a merge.
+The orchestrator squashed the round-1 fix feature into the step branch as `916bae1`, ran the full local gate,
+dispatched the single replacement closeout CI run [`43634322838`](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838)
+(green at `916bae1`), and refreshed `docs/planning/closeout/step-09.json`. The audit record remains
+`Re-audit required` until a fresh audit passes. This feature does not create a tag or a merge.
 
 ## Audit round 1 resolutions
 
 Round 1 of the independent audit returned `Fixes required` at `20c73bc`; the findings and evidence are in
-[`../audits/step-09.md`](../audits/step-09.md). The fixes are on
-`feature/step-09-parameterization-templates/fix-audit-round-1`; the audit record's `Resolution status` table
-carries the fixing commits. The record is `Re-audit required` until a fresh audit passes.
+[`../audits/step-09.md`](../audits/step-09.md). The fixes were squash-merged as `916bae1`; the audit record's
+`Resolution status` table carries the fixing commits. Round 2 is requested against `916bae1`; the record is
+`Re-audit required` until a fresh audit passes.
 
 - **F-01 (Blocker):** an effective rule frequency must be positive, finite, and small enough for the canonical
   12-decimal projection. A larger finite value is a `PRM005` error and produces no model instead of throwing;
