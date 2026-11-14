@@ -292,28 +292,86 @@ verdict.
 
 ## Approval summary
 
-The step agent completes this section before requesting human approval. It must cover the full history, not
-only the latest round.
+The step agent completed this section before requesting human approval.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded: approve the Step 08 merge from
+  `step/08-model-compilation-pipeline`; frozen code commit `28e741fca35fa93d2eaa9cb20a3abf3ee6d1c26e`;
+  replacement closeout CI run [`43538703111`](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111);
+  no `step-08` tag has been created or requested yet.
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict).
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status).
+- [x] Accepted notes and waivers recorded with rationale.
+- [x] Residual risks, deferred items, and follow-up owners recorded.
+- [x] Explicit no-Blocker/no-Major statement: audit round 4 has **no Blocker and no Major** findings. A3 and
+  A5's requested residuals are closed; only minor/note findings remain and are explicitly accepted below or
+  deferred to a later step.
+- [x] Final CI and documentation-build results recorded: run `43538703111` is `completed/success` at
+  `28e741f`; `./tools/verify.sh dotnet` (999 tests), `structure`, `api`, `contracts`, and `docs` pass at the
+  frozen commit; `docs` and `contracts` also pass at the docs-only tip `99d00ff`; projection checker OK (5
+  fixtures); closeout evidence OK.
 
-Round history:
+### Round history
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| Audit 1 | 2026-11-13 | `ebc0e46` | Fresh independent Step 08 auditor (DeepSeek V4.1 Flash 1017, OpenCode) | Fixes required (A1–A9, m1–m7) |
+| Audit 2 | 2026-11-14 | `ba8e889` | Fresh independent Step 08 re-auditor | Fixes required (A3 Blocker; A5/A8/A9 Major) |
+| Audit 3 | 2026-11-14 | `a1fe97f` | Fresh independent Step 08 re-auditor | Fixes required (A3 Blocker; A5 Major) |
+| Audit 4 | 2026-11-14 | `28e741f` | Fresh independent Step 08 re-auditor | **Passed with notes** (minor/note findings only) |
+| Amendment 1 design review | 2026-11-13 | n/a | Fresh independent design reviewer | Ready for implementation (round 9, no findings) |
 
-Findings and resolutions:
+### Findings and resolutions
 
-| Finding | Severity | Issue | Resolution | Commit | Status |
+| Finding | Severity | Issue | Resolution | Fix commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| A1 | Blocker | Directions deduplicated across collections | Direction keys include the collection; forward+explicit reverse compile together | `ba8e889` | Closed |
+| A2 | Blocker | Non-canonical custom `BinaryWriter` projection | Manifest-driven canonical MessagePack projection, fixtures, independent Python checker | `ba8e889` | Closed |
+| A3 | Blocker | Caller cache could return stale model | Particle-table and particle-set membership hashes in structure/rules keys; membership-only test | `28e741f` | Closed |
+| A4 | Major | Rejected counts never reported | Counts populated on the model and report | `ba8e889` | Closed |
+| A5 | Major | Hard limits not enforced before allocation | Global `AddRule` cap, pair/cluster pre-checks, saturating `long` arithmetic, CMP006 tests | `28e741f` | Closed (R4-1 minor remains) |
+| A6 | Major | Trackers not KMC-scoped | KMC-only trackers; MMC rules use `0xFF`; overflow guard | `ba8e889` | Closed (R3-2 test gap accepted) |
+| A7 | Major | 10k/performance evidence missing | Ceria `< 1 s` and 10k `< 30 s`/`< 2 GiB` local tests | `ba8e889` | Closed locally (R3-3 evidence scope accepted) |
+| A8 | Major | CMP emission tests missing | CMP001–CMP012 emission/catalog coverage | `a1fe97f` | Closed |
+| A9 | Major | Named charge-transport cases untested | Single-charge, neutral vehicle, distinct-charge exchange, non-collinear path tests | `a1fe97f` | Closed |
+| m1 | Minor | Equivalent-start orbit reduction/dependent rules unimplemented | Deferred; parity matrix marks dependent rules `Partial` | — | Open, accepted for this step |
+| m2 | Minor | Tracker index could throw | Guard rejects index 255 before the `0xFF` sentinel collision | `a1fe97f` | Closed |
+| m3 | Minor | `TryResolve` does not delegate to `TryResolvePath` | Pre-existing duplication; no behavioural defect observed | — | Open, accepted |
+| m4 | Minor | Broken docs link | Step-page link fixed | `ba8e889` | Closed |
+| m5 | Minor | Vacuous vehicle assertion | Removed | `ba8e889` | Closed |
+| m6 | Minor | Movement docs overstated charge-state pairing | Movement now pairs by species symbol; docs match | `28e741f` | Closed |
+| m7 | Minor | Unreferenced self state change validates | Pre-existing validation scope; no Step 08 regression | — | Open, accepted |
+| R3-1 | Minor | A2 residuals: descriptor binding/cluster fixture coverage | Quantization vectors and regeneration note added; remaining sub-items accepted | `28e741f` | Partially closed, accepted |
+| R3-2 | Minor | No mixed KMC+MMC tracker-scope test | Behaviour verified by inspection | — | Accepted |
+| R3-3 | Minor | 10k evidence narrower than criterion | Time targets met; memory is a live-heap delta and the model has no rules | — | Accepted |
+| R3-4 | Minor | m6 still unresolved | Fixed by species pairing | `28e741f` | Closed |
+| R3-5 | Minor | Status/step-page hygiene | Step 09 reset; step-page date updated | `28e741f` | Closed |
+| R3-6 | Minor | Extra closeout dispatch on an intermediate commit | Recorded as process history; one replacement dispatch used for the final freeze | — | Accepted process note |
+| R3-7 | Minor | Pairs/clusters are not cached | Structure/rules/encoding/signing are cached; no incorrect output observed | — | Accepted |
+| R4-1 | Minor | Combined pair+cluster total checked after materialization | Per-category limits are enforced before allocation; encoding catches the combined total | — | Accepted |
+| R4-2 | Minor | No explicit chiral 3-site rule test; no brute-force oracles | Pre-existing test-plan gaps; chiral geometry is exercised by projection fixtures | — | Accepted |
+| R4-3 | Note | Cache test asserts invalidation only | Auditor probe confirmed cached == fresh output | — | Accepted note |
+| R4-4 | Note | Capacity check precedes duplicate-key merge | Exact-limit false positive not reproduced | — | Accepted note |
+| R4-5 | Note | Symmetric same-symbol charge-state exchange has zero movement | Charge transport remains non-zero; species pairing is the documented rule | — | Accepted note |
+
+### Accepted notes, residual risks, and follow-ups
+
+- **Accepted minor findings:** R3-1 (remaining descriptor-binding/cluster-fixture sub-items), R3-2, R3-3,
+  R3-7, R4-1, R4-2, and open minors m1, m3, m7. They do not produce incorrect output; they narrow evidence,
+  leave pre-existing validation behavior in place, or defer performance/caching work.
+- **Accepted notes:** R4-3, R4-4, R4-5, N2 (Windows/macOS byte-identity is unverified under the manual
+  platform policy), and CMP011 reachability only through direct signing-stage injection.
+- **Residual risks:** MMC/KMC mixed-tracker scoping has no dedicated test; the 10k model has no transitions
+  and measures a live-heap delta rather than peak managed memory; pairs and clusters always recompute; the
+  combined pair+cluster byte total is checked in encoding after both tables exist.
+- **Follow-up owners:** Step 08 implementor for any optional minor fixes the human owner requires; later
+  parameterization/package steps for the deferred orbit-compression and caching work.
+- **No waiver of a Blocker or Major is requested**; none remains after audit round 4.
+
+### Decision requested
+
+Approve merging `step/08-model-compilation-pipeline` into `main` at frozen code commit `28e741f` (branch tip
+`f97b2c4` contains documentation and audit records only), optionally creating the `step-08` tag afterwards.
+No merge, tag, or `main` push has been performed by the step agent.
 
 ## Human approval
 
