@@ -14,7 +14,7 @@
 | Request owner | Step 09 planner |
 | Orchestrator (step agent / planner) | General planner/orchestrator |
 | Review initiated by | Planner |
-| Reviewed commit | `b5db2892aae77954e9ae55d0bb2c66f6e8a14925` |
+| Reviewed commit | `26d6a0ecff543ac65eb60d60d9f9c893e00f32bc` |
 | Docs branch | `docs/step-09-design` |
 | Review date | 2026-11-14 |
 | Reviewer | Independent planning auditor (fresh context; no shared conversation with the planner, implementor, step agent, or orchestrator) |
@@ -144,7 +144,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready with notes
+**State:** Re-review required
 
 > Round-2 state is `Ready with notes`: no Blocker or Major remains; R2-1..R2-3 are Minor and R2-4..R2-6 are
 > Notes, all requiring explicit human-owner acceptance before implementation starts. Round-1 findings, evidence,
@@ -286,6 +286,21 @@ or verdict.
 | R2-6 | Resolved | Step 13 acceptance now explicitly requires exact re-encoding of the parameterization signature from `model_signature`, the value tables, and absolute `jump_rules[].frequency_hz`. | `b5db289` |
 
 The round-2 reviewer text and boxes are unchanged.
+
+### Round 3 resolution (2026-11-14)
+
+- **R3-1:** resolved by extending ADR 0010's pre-release exception from `signatures.model` to both signed
+  projections and adding the parameterization finalization basis. No released `.msl` exists; the
+  `parameterization-v1` entry is finalized while unreleased and is closed with golden vectors and the Python
+  checker in Step 09 feature 2. The Step 09 §6.1, data contract §1.3/§3.3, and `05-open-decisions` reference
+  the same ADR home without duplicating the rule.
+- **R2-5:** remains orchestrator-owned; `docs/planning/status.md` was not edited by the planner.
+
+| Item | Status | Resolution | Commit |
+| --- | --- | --- | --- |
+| R3-1 | Resolved | ADR 0010 pre-release signature-layout exception now covers `signatures.parameterization`; Step 09 §6.1, data contract §1.3/§3.3, and `05-open-decisions` reference it. No released `.msl`; feature 2 closes it with golden vectors and the Python checker. | `26d6a0e` |
+
+The round-3 reviewer text and boxes are unchanged.
 
 ## Review rounds
 
