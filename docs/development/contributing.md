@@ -125,9 +125,7 @@ Follow the testing trophy in
 
 ## 7. Documentation as code
 
-- Use `$$...$$` for display math and `\(...\)` for inline math; never use fenced `text` blocks for formulas.
-  The single-dollar `$...$` delimiter is not enabled. Preview the rendered page before closing a documentation
-  change.
+- Math delimiters depend on the audience; see [Math rendering](#math-rendering) below.
 - Narrative documentation is in `docs/` and built with Zensical; `docs/planning/` is internal and excluded
   from the published site.
 - Every feature updates the documentation pages named by its step and keeps the strict build green.
@@ -135,6 +133,21 @@ Follow the testing trophy in
 - Update the step page checkboxes/feature log, `docs/planning/status.md`, and the parity matrix as part of the
   feature, not as a separate status-only commit.
 - Use Mermaid fenced blocks for diagrams.
+
+### Math rendering
+
+Published pages under `docs/` (except `docs/planning/`) render math with KaTeX through
+`docs/javascripts/katex.js`. Use `$$...$$` for display math and `\(...\)` for inline math. The single-dollar
+`$...$` delimiter is intentionally not enabled. GitHub and IDE previews do not run the initializer, so preview
+with `zensical serve` or the built `site/`.
+
+Planning records under `docs/planning/` are read outside the Zensical build. Use `$...$` for inline math and
+`$$...$$` for display math. Do not use `\(...\)` or `\[...\]` there.
+
+Never use fenced `text` blocks for formulas. The KaTeX assets are pinned to 0.19.1 on unpkg; an offline
+preview needs vendored assets, and [`NOTICE.md`](https://github.com/seb-eis/mocassin-2/blob/main/NOTICE.md)
+records the attribution. Run `python tools/check_doc_math.py` to report delimiter warnings; it is
+warning-only by default and `./tools/verify.sh docs` runs it.
 
 ## 8. Licensing and dependencies
 

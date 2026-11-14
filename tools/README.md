@@ -14,6 +14,7 @@ Repository tooling. None of these directories contain production runtime code.
 | [`check-license-headers.py`](check-license-headers.py) | SPDX header check |
 | [`check-no-secrets.py`](check-no-secrets.py) | Secret-pattern scan |
 | [`check_docs_links.py`](check_docs_links.py) | Relative-link and anchor check across the root guides and `docs/` |
+| [`check_doc_math.py`](check_doc_math.py) | Math-delimiter convention check for published docs and planning records (warning-only by default) |
 | [`check_process_consistency.py`](check_process_consistency.py) | Status/verdict vocabulary, template fields, gate text, and unused-record drift |
 | [`check_closeout_evidence.py`](check_closeout_evidence.py) | Audit, closeout CI, main SHA, and merge-candidate consistency |
 

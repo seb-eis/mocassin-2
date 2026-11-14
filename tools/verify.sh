@@ -82,7 +82,7 @@ if [[ "$list_modes" == "true" ]]; then
     structure) echo "  architecture structure test" ;;
     rust) echo "  fmt, clippy, test" ;;
     python) echo "  pytest, package build" ;;
-    docs) echo "  link check, strict site build, DocFX/rustdoc" ;;
+    docs) echo "  math check, link check, strict site build, DocFX/rustdoc" ;;
     contracts) echo "  manifest/symmetry drift, process consistency, SPDX, secrets, cargo-deny" ;;
     policy) echo "  api + contracts" ;;
   esac
@@ -144,6 +144,7 @@ run_python() {
 
 run_docs() {
   echo "== Documentation =="
+  python tools/check_doc_math.py
   python tools/check_docs_links.py
   ./tools/docs/build-docs.sh
 }

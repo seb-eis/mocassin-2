@@ -101,6 +101,8 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
 
 ## Working conventions
 
+- Planning records use `$...$` for inline math and `$$...$$` for display. They are read outside the
+  Zensical build, so do not use `\(...\)` or `\[...\]`; `python tools/check_doc_math.py` reports violations.
 - Every step has an explicit **Done when** section. A step is not complete because code exists; its
   acceptance criteria and tests must pass.
 - Contracts in [`02-data-contracts.md`](02-data-contracts.md) change only through an ADR and a schema
