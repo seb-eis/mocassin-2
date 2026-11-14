@@ -1103,13 +1103,15 @@ post-implementation audit remains mandatory.
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — accept `Ready for implementation` at
+  `c5454af050ccd3f1e02f892424ccd714c5d56f89`; merge the docs branch and start Step 10 with the approved
+  eight-feature list.
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale — n1 accepted; no waivers
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — none remain
+- [x] Final CI and documentation-build results recorded — docs and policy gates pass at `c5454af`
 
 Round history:
 
@@ -1123,9 +1125,55 @@ Round history:
 
 Findings and resolutions:
 
-| Finding | Severity | Issue | Resolution | Commit | Status |
+| Finding | Severity | Issue (evidence anchor) | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M1 | Major | Job/lattice seed contract (Step 10 §2; ADR 0005; Step 13) | ADR tuple order, fixed encoding, seed vectors | `2eb6a57` | Resolved |
+| M2 | Major | Lattice request/RNG/sampling (Step 10 §2) | Field-complete hash, SHA-256 counter DRBG, Fisher–Yates, vectors | `2eb6a57` | Resolved |
+| M3 | Major | Impossible compensation warning vs `JOB012` (§3) | `JOB012` error; zero-request case exempt | `2eb6a57` | Resolved |
+| M4 | Major | Fractional charge/neutrality (§3) | Downward ratio search, `1e-6`, `JOB016` | `2eb6a57` | Resolved |
+| M5 | Major | Same-site doping rule (§3) | Sequential remaining-particle application | `2eb6a57` | Resolved |
+| M6 | Major | `DopingReport` persistence/effective fraction (§4) | Report is build-time; structured `DopingInfo`; fields defined | `2eb6a57` | Resolved |
+| M7 | Major | Optimizer P1/dual-DOF rule (§5) | P1 image mapping; all-environment predicate | `07f14f2` | Resolved |
+| M8 | Major | Extension shape/inheritance (§8) | Extensions in settings; replace semantics; bounds/`JOB018` | `2eb6a57` | Resolved |
+| M9 | Major | Step 25 compile path (§4.1; Step 25) | Compiled-model cache, invalidation, recompile/disable | `2eb6a57` | Resolved |
+| m1 | Minor | `JOB` ownership (Step 06/data contract) | `JOB001`–`JOB020` ownership updated | `2eb6a57` | Resolved |
+| m2 | Minor | Docs plan omitted diagnostics/CLI | Added both pages | `2eb6a57` | Resolved |
+| m3 | Minor | Tests missing persistence/goldens/tiers | Added | `2eb6a57` | Resolved |
+| m4 | Minor | No hard job/template bounds | Caps + `JOB019`/`JOB020` | `2eb6a57` | Resolved |
+| m5 | Minor | Preview failure boundary/NaN/count override | Clarified; NaN/Inf; one override source | `2eb6a57` | Resolved |
+| m6 | Minor | Typed IDs/immutability/PublicAPI | Typed IDs, immutable arrays, API gate | `2eb6a57` | Resolved |
+| m7 | Minor | `validate` missed structural errors | Core validator runs in validate | `2eb6a57` | Resolved |
+| m8 | Minor | Overloaded/missing `JOB` codes | `JOB016`–`JOB020`; narrowed rules | `2eb6a57` | Resolved |
+| m9 | Minor | Step 11/12 stage overlap | Step 11 package-only; Step 12 registers stage | `2eb6a57` | Resolved |
+| m10 | Minor | Cross-step wording drift | Step 10/architecture/Step 09 corrected | `2eb6a57` | Resolved |
+| m11 | Minor | `DopingInfo` ambiguity | Versioned structured entries | `2eb6a57` | Resolved |
+| n1 | Note | Eight features at split boundary | Accepted; list retained | `2eb6a57` | Accepted |
+| n2 | Note | Cache unbounded | 8 entries/256 MiB LRU | `2eb6a57` | Resolved |
+| n3 | Note | Performance ownership unclear | Step 10/11 split recorded | `2eb6a57` | Resolved |
+| n4 | Note | 99,999 cap deviation unrecorded | Retained as `JOB019`; parity updated | `2eb6a57` | Resolved |
+| R2-1 | Major | Dual-DOF environment navigation | All `CompiledStructureModel.Environments`; per-environment predicate | `07f14f2` | Resolved |
+| R2-2 | Minor | `JOB009`/`JOB017` duplicate optimizer | `JOB017` only | `07f14f2` | Resolved |
+| R2-3 | Minor | Stage naming/ownership/Step 08 drift | `JobTemplateValidationStage`; ownership fixed | `07f14f2` | Resolved |
+| R2-4 | Minor | Mixed compensated/non-compensated neutrality | Pair checks `JOB012`; `JOB016` for uncompensated charge | `07f14f2` | Resolved |
+| R2-5 | Minor | `.msl` `doping_info` format-change statement | Pre-implementation contract update recorded | `07f14f2` | Resolved |
+| R2-6 | Note | `DopingId` string encoding | Lowercase hyphenated GUID | `07f14f2` | Resolved |
+| R2-7 | Note | Seed-text project-seed special case | Any 64-hex decoded; custom-seed vector | `07f14f2` | Resolved |
+| R2-8 | Note | Request-hash vector/hex decoding | All hex decoded; synthetic vector | `07f14f2` | Resolved |
+| R2-9 | Note | `JobCountPreview` simulation scope | Simulation-scoped counts; whole-template total | `07f14f2` | Resolved |
+| R3-1 | Minor | Non-neutral base misclassified as `JOB012` | Base charge is reported, not diagnosed | `bb62e40` | Resolved |
+| R3-2 | Note | "including" vs "excluding" isovalent | Fixed | `bb62e40` | Resolved |
+| R3-3 | Note | `validate` acceptance named all of `JOB009` | Split reference vs removes-all | `bb62e40` | Resolved |
+| R4-1 | Minor | `IsChargeNeutral` had no numeric predicate | `1e-6 × max(1, positions)`; `JOB016` conjunction | `c5454af` | Resolved |
+| R4-2 | Note | Test/Done when promised unconditional neutrality | Explicit base-charge behavior | `c5454af` | Resolved |
+
+Accepted notes and waivers: n1 is accepted as an owner decision (eight coherent features remain within the
+roadmap's "roughly 6–8" range). No waivers were requested.
+
+Residual risk: the original GPL clone was unavailable during review, so original-behaviour checks used the
+Step 06/08 design and review quotations; the new design's build-side SHA-256 lattice stream is deliberately
+different from the solver's ChaCha12 stream; `doping_info` is a pre-implementation `.msl` contract field; and
+no implementation exists yet. No residual risk is a Blocker or Major. The no-Blocker/no-Major gate statement is
+satisfied.
 
 ## Human approval
 
