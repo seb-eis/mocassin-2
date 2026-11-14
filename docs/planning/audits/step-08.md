@@ -376,12 +376,17 @@ No merge, tag, or `main` push has been performed by the step agent.
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-14
+
+Merge: `f91fc632fbba67a5757f8df7588484e5d13c2458` (`--no-ff`)
+Main CI: run `43578897490` — green at `f91fc63`
+Tag: `step-08` (annotated, pushed)
+Step branch: deleted locally and remotely after merge and tag
 
 ## Audit rounds
 

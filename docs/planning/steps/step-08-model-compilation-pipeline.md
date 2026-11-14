@@ -9,12 +9,12 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 
 ## Implementation status
 
-- **Status:** In audit
-- **Step branch:** `step/08-model-compilation-pipeline`
-- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111)
-- **Main merge:** —
-- **Step tag:** —
-- **Audit:** Passed with notes (round 4, `f97b2c4`) — [record](../audits/step-08.md); awaiting human approval
+- **Status:** Done
+- **Step branch:** `step/08-model-compilation-pipeline` (merged and deleted)
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111); [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43578897490)
+- **Main merge:** `f91fc632fbba67a5757f8df7588484e5d13c2458`
+- **Step tag:** `step-08`
+- **Audit:** Passed with notes (round 4, `f97b2c4`) — [record](../audits/step-08.md); accepted by the human owner 2026-11-14
 - **Design review:** Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — [review record](../reviews/step-08.md) `195451021031272af96ee1b2ca600d4c8cd83c2c`; accepted by the human owner 2026-11-13
 - **Last updated:** 2026-11-14
 

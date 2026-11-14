@@ -15,6 +15,7 @@
     "Closeout CI run 43538703111 is the single replacement Ubuntu dispatch after the audit round-three residuals.",
     "Earlier dispatches 43536001693 and 43536613334 covered intermediate commits; they are recorded as process history, not as closeout runs.",
     "main 884ffe7 (documentation-only Avalonia/editor-plan change) was merged before the freeze.",
-    "Only documentation and audit-record commits follow the audited commit."
+    "Only documentation and audit-record commits follow the audited commit.",
+    "Merged into main with --no-ff as f91fc632fbba67a5757f8df7588484e5d13c2458; automatic main CI run 43578897490 succeeded; annotated tag step-08 created and pushed."
   ]
 }
