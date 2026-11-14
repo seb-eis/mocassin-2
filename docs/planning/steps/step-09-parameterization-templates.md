@@ -797,6 +797,11 @@ ParameterizedModel.Signature
   into one `pairTables` field; `groupSets`, `siteEnergies`, and `transitionRules` keep their names but become
   typed arrays. The data contract and generated descriptor are updated together. No second signature entry is
   added: the generator requires exactly `model`, `parameterization`, and `lattice`.
+- **Authorization:** ADR 0010's pre-release signature-layout exception covers this finalization (extended from
+  the model layout to both signed projections). No released `.msl` exists and no package or contract fixture is
+  affected; the entry is closed with golden projection vectors and the Python checker in feature 2
+  (`parameterization-signature`). Any later field/type change after the first released `.msl` needs a version
+  bump and a new ADR.
 - `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` is made public (with XML docs and an updated
   `PublicAPI.Unshipped.txt`/ApiCompat baseline), generalized from `ArrayBufferWriter<byte>` to
   `IBufferWriter<byte>`, and reused by `Mocassin.Contracts`. This is the smallest way to guarantee one

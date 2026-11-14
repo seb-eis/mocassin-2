@@ -109,7 +109,9 @@ projection is a fixed six-field MessagePack array:
 - `contracts/manifest.json` `signatures.parameterization` is finalized by Step 09 (`status: final`, typed
   fields, `projectionType: ParameterizationSignatureV1`); the generated descriptor and
   `tests/contracts/projections/parameterization/*.bin` vectors (a subdirectory, so the model checker's
-  `projections/*.bin` glob does not consume them) are checked by `verify.sh contracts`.
+  `projections/*.bin` glob does not consume them) are checked by `verify.sh contracts`. ADR 0010's
+  pre-release signature-layout exception authorizes this finalization: no released `.msl` exists, and the
+  entry is closed with golden vectors and the Python checker in Step 09 feature 2.
 
 The two signatures are deliberately distinct; see §3.3.
 
@@ -834,9 +836,10 @@ MessagePack map with snake_case keys. Top-level:
   `ParticleId`, never by preview array position.
 - `signature` is the Step 09 parameterization signature and the `models.signature` uniqueness key;
   `model_signature` is the Step 08 compiled-model signature used by parameterization templates and inspection.
-- The Step 08 `model-v1` projection is finalized once before the first released `.msl`; the pre-release
-  exception is recorded in ADR 0010. `signatures.model.status = "final"` is not a release marker.
-  A value-only parameterization change changes `signature` but not `model_signature`.
+- The Step 08 `model-v1` and Step 09 `parameterization-v1` projections are finalized once before the first
+  released `.msl`; ADR 0010 records the pre-release signature-layout exception for both.
+  `signatures.model.status = "final"` and `signatures.parameterization.status = "final"` are not release
+  markers. A value-only parameterization change changes `signature` but not `model_signature`.
 - The model-signature projection includes the symmetry contract version and the catalog data version and
   checksum, so a rule or catalog change invalidates parameterizations.
 - `model_signature` is additive before the first released `.msl`. `format_version` stays `1` because no released
