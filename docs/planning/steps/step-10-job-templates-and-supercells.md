@@ -14,7 +14,7 @@ generation with charge compensation.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for review at `c66b483f6ef064858d0e8082543d2fcec8386ed3` — [record](../reviews/step-10.md)
+- **Design review:** Re-review required at `2eb6a5715ea51f324a579ae8974f9e8526005fa9` — [record](../reviews/step-10.md)
 - **Last updated:** 2026-11-14
 
 ### Proposed feature list

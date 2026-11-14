@@ -14,7 +14,8 @@
 | Request owner | Step 10 orchestrator |
 | Orchestrator (step agent / planner) | General orchestrator |
 | Review initiated by | Human owner |
-| Reviewed commit | `c66b483f6ef064858d0e8082543d2fcec8386ed3` |
+| Reviewed commit | `2eb6a5715ea51f324a579ae8974f9e8526005fa9` |
+| Round 1 frozen commit | `c66b483f6ef064858d0e8082543d2fcec8386ed3` |
 | Docs branch | `docs/step-10-design` |
 | Review date | 2026-11-14 |
 | Reviewer | Independent planning auditor (round 1; fresh context; no shared conversation with the planner, implementor, step agent, or orchestrator) |
@@ -307,7 +308,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -340,6 +341,38 @@ not authorize the step.
 Follow-up owner: Step agent / planner
 Follow-up step: Step 10 design revision and fresh design review (round 2)
 
+## Round 1 resolutions
+
+Design revision commit: `2eb6a5715ea51f324a579ae8974f9e8526005fa9`. The reviewer text above is unchanged; the
+step agent owns this section.
+
+| Finding | Resolution | Files |
+| --- | --- | --- |
+| M1 | Seed derivation now follows ADR 0005's tuple order with fixed-width `u32_le` fields and a terminal purpose; master-seed text normalization and a job-seed golden vector are defined. The project seed is required; no build-time state is added. | Step 10 §2; Step 13 §4; ADR 0005; `05-open-decisions.md` |
+| M2 | The lattice request projection now lists every hashed field and encoding (structure, particles/sets, lattice/dopings, A/B/C, fractions, catalog/contract provenance). The build-side SHA-256 counter DRBG, Lemire bounded draws, Fisher–Yates sampling, and golden seed/sampler vectors are normative. | Step 10 §2; `05-open-decisions.md`; `03-quality-strategy.md` §9.4 |
+| M3 | A compensation-requested doping that cannot realize a positive pair now emits `JOB012` and stops generation/preview; zero requested/available is explicitly not a failure. | Step 10 §3, §4, acceptance |
+| M4 | The ratio search scans `n_p` downward with the named `1e-6` tolerance, validates compensated neutrality at `1e-6 × max(1, total_positions)`, and permits non-compensated charged lattices with `JOB016`; particle charges are included in the request hash. | Step 10 §2–§3 |
+| M5 | All same-site dopings now apply sequentially to the current remaining particles; the narrower "must be the earlier result" rule is removed. | Step 10 §3 |
+| M6 | `DopingReport` is explicitly build/preview data; only the structured `DopingInfo` is persisted. `DopingApplication` gains priority and available count, and `EffectiveFraction` is defined. | Step 10 §3–§4, §10; data contract §3.4; Step 11 §4 |
+| M7 | Optimizers expand to every P1 image of the site, sorted by `(position_id, particle_id)`; dual-DOF is cleared only under the explicit all-active-environment-masks rule, with no-optimizer/mixed behavior stated. | Step 10 §5 |
+| M8 | Extensions live inside `baseSettings`/`overrides`; a non-null array replaces the inherited list. Unique ids, object configs, 16-entry/256-KiB bounds, and `JOB018` are defined. | Step 10 §8; data contract §2.4 |
+| M9 | Step 25 now owns a compiled-model cache keyed by model/document hash, invalidates on edits, and either recompiles with debounce/cancellation or disables preview. The preview service never compiles. | Step 10 §4.1; Step 25 §2 |
+| m1 | Ownership is now `JOB001`–`JOB020`; Step 06, the data contract, project-format, and the lattice guide are updated. XC-02 remains a historical record from before this design. | Step 06; data contract; `project-format.md`; `user-guide/lattice.md` |
+| m2 | The documentation plan adds `docs/reference/diagnostics.md` and `docs/reference/cli.md`. | Step 10 Documentation |
+| m3 | The test plan adds canonicalization/persistence, golden seeds/sampler, report round-trip, validation-stage, limits, tiers, and moves writer/reader integration to the later steps. | Step 10 Tests |
+| m4 | Hard caps are defined (`JOB019`/`JOB020`), with `JobId` bounded to 1..99,999. | Step 10 §8; parity matrix |
+| m5 | The preview rejects non-finite fractions, treats all invalid `(A,B,C)` as diagnostics, throws only for null project/model, and removes the duplicate job-count override parameter. | Step 10 §4.1 |
+| m6 | Typed `JobCollectionId`/`JobConfigId`, immutable byte arrays, the `Model.Jobs` move, and PublicAPI/ApiCompat work are added to the design and tasks. | Step 10 §1, §8, tasks |
+| m7 | Structural `JOB` checks now run through Core `JobTemplateValidator` in `validate`; only compiled-bound checks need the Build stage. Acceptance and tests pin this. | Step 10 §6–§7; Step 07 |
+| m8 | `JOB016`–`JOB020` now cover non-neutral non-compensated lattices, duplicates, extension bounds, the 99,999 cap, and structural caps; overloaded rules are narrowed. | Step 10 §6 |
+| m9 | Step 11 owns only package limits; Step 12 explicitly constructs `ValidationContext` with the compiled model and registers `JobTemplateValidationStage`. | Step 11; Step 12 |
+| m10 | Step 10 now states Packages' direct references and transitive Symmetry; the architecture table and Step 09 consumption wording are corrected. | Step 10 §4.1; architecture; Step 09 |
+| m11 | `DopingInfo` is now `v1:{dopingId}:{priority}:{requested}:{appliedPrimary}:{appliedDependent}:{effectiveFraction:R}` entries, preserving zero-applied entries. | Step 10 §4; data contract §3.4 |
+| n1 | The eight-feature list is retained; it is within the "roughly 6–8" trigger and the owner approved it. | Step 10 §12 |
+| n2 | The preview cache is bounded to 8 entries / 256 MiB with LRU eviction and a test. | Step 10 §4.1 |
+| n3 | Step 10 now owns expansion `< 10 s`, generation `< 1 GiB` with cancellation; Step 11 owns the full package-build budget. | Step 10 Tests; `03-quality-strategy.md` §9.4 |
+| n4 | The original 99,999-job cap is retained as `JOB019`; the parity matrix records it as implemented, not replaced. | parity matrix; Step 10 §8 |
+
 ## Approval summary
 
 The step agent completes this section before requesting human approval. It must cover the full history, not
@@ -357,7 +390,8 @@ Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-14 | `c66b483` | Independent planning auditor (fresh context) | Changes required |
+| 2 | 2026-11-14 | `2eb6a57` | Pending fresh auditor | Pending |
 
 Findings and resolutions:
 
@@ -379,4 +413,15 @@ Date:
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| M1 | Resolved in design revision | Step agent | `2eb6a57` |
+| M2 | Resolved in design revision | Step agent | `2eb6a57` |
+| M3 | Resolved in design revision | Step agent | `2eb6a57` |
+| M4 | Resolved in design revision | Step agent | `2eb6a57` |
+| M5 | Resolved in design revision | Step agent | `2eb6a57` |
+| M6 | Resolved in design revision | Step agent | `2eb6a57` |
+| M7 | Resolved in design revision | Step agent | `2eb6a57` |
+| M8 | Resolved in design revision | Step agent | `2eb6a57` |
+| M9 | Resolved in design revision | Step agent | `2eb6a57` |
+| m1–m11 | Resolved in design revision (see table above) | Step agent | `2eb6a57` |
+| n1 | Accepted; no change (eight features retained) | Step agent | `2eb6a57` |
+| n2–n4 | Resolved in design revision (see table above) | Step agent | `2eb6a57` |
