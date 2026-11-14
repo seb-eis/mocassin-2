@@ -121,6 +121,15 @@ public sealed class ParameterizationSignatureV1Tests
     }
 
     [Fact]
+    public void FiniteValuesAboveTheQuantizationRangeAreRejected()
+    {
+        Assert.Throws<InvalidOperationException>(() =>
+            ParameterizationSignatureV1.Compute(modelSignature, Values(pairValue: 1e300)));
+        Assert.Throws<InvalidOperationException>(() =>
+            ParameterizationSignatureV1.ComputeProjection(modelSignature, Values(pairValue: double.MaxValue)));
+    }
+
+    [Fact]
     public void EmptymodelSignatureIsRejected()
     {
         Assert.Throws<ArgumentNullException>(() =>

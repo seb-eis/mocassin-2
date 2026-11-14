@@ -72,7 +72,10 @@ public static class ParameterizationLimits
     public const int TemplateNameLength = 200;
 
     /// <summary>
-    /// The maximum size of the dense applied values in bytes.
+    /// The default maximum size of the dense applied values in bytes.
     /// </summary>
+    /// <remarks>
+    /// This value is the default for the configurable apply limit; callers may lower it for a smaller batch.
+    /// </remarks>
     public const long MaxAppliedValueBytes = 2L * 1024 * 1024 * 1024;
 }

@@ -663,6 +663,7 @@ static Mocassin.Core.Project.ProjectMigrationResult.operator ==(Mocassin.Core.Pr
 static Mocassin.Core.Project.ProjectMigrations.All.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Project.IProjectMigration!>
 static Mocassin.Core.Project.ProjectMigrations.Apply(System.Text.Json.Nodes.JsonNode! document, int fromVersion) -> Mocassin.Core.Project.ProjectMigrationResult!
 static Mocassin.Core.Project.ProjectValidator.Validate(Mocassin.Core.Project.Project! project) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+static Mocassin.Core.Project.ProjectValidator.ValidateTemplate(Mocassin.Core.Model.ParameterizationTemplate! template) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
 static Mocassin.Core.Units.AngleDegrees.Create(double value) -> Mocassin.Core.Units.AngleDegrees
 static Mocassin.Core.Units.AngleDegrees.IsValid(double value) -> bool
 static Mocassin.Core.Units.AngleDegrees.TryCreate(double value, out Mocassin.Core.Units.AngleDegrees result) -> bool

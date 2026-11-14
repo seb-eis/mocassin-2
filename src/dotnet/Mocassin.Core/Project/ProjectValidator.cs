@@ -36,6 +36,22 @@ public static class ProjectValidator
         return bag.Sorted;
     }
 
+    /// <summary>
+    /// Validates the structural rules of one parameterization template without a compiled model.
+    /// </summary>
+    /// <param name="template">The template to validate.</param>
+    /// <returns>The diagnostics in stable order.</returns>
+    /// <remarks>
+    /// This is the same structural check that <see cref="Validate(Project)"/> applies to project templates. It
+    /// is exposed for callers that accept a template directly, such as the parameterization service, so that
+    /// malformed user data returns <c>PRM</c> diagnostics instead of being reported as a stale reference.
+    /// </remarks>
+    public static ImmutableArray<Diagnostic> ValidateTemplate(ParameterizationTemplate template)
+    {
+        ArgumentNullException.ThrowIfNull(template);
+        return ParameterizationTemplateValidator.Validate(template);
+    }
+
     private static void ValidateModel(Project project, DiagnosticBag bag)
     {
         var model = project.Model;
@@ -196,7 +212,7 @@ public static class ProjectValidator
         var names = new Dictionary<string, Guid>(StringComparer.OrdinalIgnoreCase);
         foreach (var template in ordered)
         {
-            bag.AddRange(ParameterizationTemplateValidator.Validate(template));
+            bag.AddRange(ValidateTemplate(template));
 
             if (string.IsNullOrWhiteSpace(template.Name))
             {

@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using System.Collections.Immutable;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Compilation.Transitions;
 using Mocassin.Core.Diagnostics;
@@ -254,16 +255,21 @@ public sealed class ParameterizationApplyTests
                 new EnergyEv(1.0))]);
         var descriptor = FindAchiralDescriptorWithForbiddenParticle(model);
         var forbidden = FirstForbiddenParticle(model, descriptor);
-        var forbiddenSet = new PairEnergySet(
-            descriptor.EnergyId,
-            descriptor.CenterSiteId,
-            descriptor.PartnerSiteId,
-            descriptor.DistanceBucketFm,
-            descriptor.IsChiral,
-            [new PairEnergyEntry(forbidden, forbidden, new EnergyEv(2.0))]);
+        var forbiddenEntry = new PairEnergyEntry(forbidden, forbidden, new EnergyEv(2.0));
+        var stable = template.StablePairSets
+            .Select(set => set.EnergyId == descriptor.EnergyId
+                ? set with { Entries = [.. set.Entries, forbiddenEntry] }
+                : set)
+            .ToImmutableArray();
+        var unstable = template.UnstablePairSets
+            .Select(set => set.EnergyId == descriptor.EnergyId
+                ? set with { Entries = [.. set.Entries, forbiddenEntry] }
+                : set)
+            .ToImmutableArray();
         var edited = template with
         {
-            StablePairSets = [.. template.StablePairSets, unknownSet, forbiddenSet],
+            StablePairSets = [.. stable, unknownSet],
+            UnstablePairSets = unstable,
         };
 
         var result = new ParameterizationService().Apply(project, model, edited);

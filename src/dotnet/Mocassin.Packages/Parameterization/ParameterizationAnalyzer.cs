@@ -50,6 +50,11 @@ internal static class ParameterizationAnalyzer
         var templateId = effectiveTemplate.Id.Value;
         var bag = new DiagnosticBag();
 
+        if (template is not null)
+        {
+            bag.AddRange(ProjectValidator.ValidateTemplate(template));
+        }
+
         if (!string.Equals(effectiveTemplate.ModelSignature, model.ModelSignature, StringComparison.Ordinal))
         {
             var diff = ParameterizationDiffBuilder.Build(model, effectiveTemplate);
@@ -62,6 +67,11 @@ internal static class ParameterizationAnalyzer
                 new ModelPath("parameterization", templateId, "modelSignature"),
                 ParameterizationDiagnosticCodes.HelpFor(ParameterizationDiagnosticCodes.ModelSignatureMismatch)));
             return new ParameterizationAnalysis(summary, bag.Sorted, diff, null);
+        }
+
+        if (bag.HasErrors)
+        {
+            return new ParameterizationAnalysis(summary, bag.Sorted, null, null);
         }
 
         if (options.MaxAppliedValueBytes < 0 ||

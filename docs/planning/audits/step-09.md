@@ -244,7 +244,9 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Fixes required — see F-01 (Blocker) and the Minor/Note findings.
+**State:** Re-audit required — round 1 returned `Fixes required` (F-01 Blocker; F-02–F-05 Minor; F-06–F-07
+Notes). The step agent's resolutions are recorded in `## Resolution status`; after the fix feature is
+squash-merged, a replacement closeout CI run and refreshed closeout evidence will follow.
 
 `Re-audit required` is a record state, not a verdict.
 
@@ -272,7 +274,13 @@ are documentation fixes. Do not merge or tag until a fresh re-audit passes.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F-01 | Fixed — non-quantizable frequencies are `PRM005` errors, energies remain `PRM004`, and `Quantize` guards against overflow; regression tests added | Step agent (implementor) | `870e252` |
+| F-02 | Fixed — completeness counts only entries that resolve to required slots; stale entries no longer suppress `PRM003`/`PRM006`; regression tests added | Step agent (implementor) | `870e252` |
+| F-03 | Fixed — `Apply`/`Validate` run `ProjectValidator.ValidateTemplate`; `PRM013`/`PRM014` are returned for direct templates; regression tests added | Step agent (implementor) | `870e252` |
+| F-04 | Fixed — status dashboard and feature-7 narrative now record the audit/re-audit state | Step agent (implementor) | `76c4cc7` |
+| F-05 | Fixed — contract-tools README names four fixtures and the real Packages generators | Step agent (implementor) | `76c4cc7` |
+| F-06 | Fixed — the write-time canonicalizer folds same-value mirrored chiral entries onto the smaller orientation and keeps conflicts for `PRM014` | Step agent (implementor) | `beccdc6` |
+| F-07 | Fixed — `ParameterizationLimits.MaxAppliedValueBytes` is the default for `ParameterizationOptions.MaxAppliedValueBytes`; the step-page claim is corrected | Step agent (implementor) | `96e1d9f` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.

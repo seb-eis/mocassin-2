@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.Core.Model;
 using Mocassin.Core.Units;
 
 namespace Mocassin.Packages.Parameterization;
@@ -28,7 +29,11 @@ public sealed record ParameterizationOptions
     /// <summary>
     /// Gets the maximum size in bytes of the dense applied-value arrays.
     /// </summary>
-    public long MaxAppliedValueBytes { get; init; } = 2L * 1024 * 1024 * 1024;
+    /// <remarks>
+    /// The default is the hard <see cref="ParameterizationLimits.MaxAppliedValueBytes"/> bound. Callers may
+    /// lower it, for example to keep a batch build small.
+    /// </remarks>
+    public long MaxAppliedValueBytes { get; init; } = ParameterizationLimits.MaxAppliedValueBytes;
 
     /// <summary>
     /// Gets the default options.

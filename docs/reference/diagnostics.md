@@ -67,7 +67,7 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 | [`PRM002`](#prm002) | warning | Step 09 — parameterization templates | A template entry references an unknown key or disagrees with the current model | Remove the stale entry or rebase the template against the current model. |
 | [`PRM003`](#prm003) | warning | Step 09 — parameterization templates | Required pair, group, or kinetic-rule values are unset and defaults are applied | Set the missing values explicitly, or review the applied defaults before building. |
 | [`PRM004`](#prm004) | error | Step 09 — parameterization templates | An energy is non-finite or outside the accepted range | Set the energy to a finite value within the accepted -100..100 eV range. |
-| [`PRM005`](#prm005) | error | Step 09 — parameterization templates | A frequency is non-positive or non-finite | Set the attempt frequency to a positive, finite value. |
+| [`PRM005`](#prm005) | error | Step 09 — parameterization templates | A frequency is non-positive, non-finite, or too large for the canonical projection | Set the attempt frequency to a positive, finite value that survives 12-decimal quantization. |
 | [`PRM006`](#prm006) | warning | Step 09 — parameterization templates | An explicit template contains no explicit values | Set at least one value, or build with the implicit default parameterization. |
 | [`PRM008`](#prm008) | warning | Step 09 — parameterization templates | A site-energy value targets an unknown or forbidden site/particle | Correct the site/particle key or remove the site-energy override. |
 | [`PRM009`](#prm009) | info | Step 09 — parameterization templates | A parameterization template was rebased against the current compiled model | Review every copied, defaulted, dropped, and ambiguous value before saving the rebased template. |
@@ -416,7 +416,7 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 
 ### PRM005
 
-**A frequency is non-positive or non-finite.** Set the attempt frequency to a positive, finite value.
+**A frequency is non-positive, non-finite, or too large for the canonical projection.** Set the attempt frequency to a positive, finite value that survives 12-decimal quantization. A finite value whose twelve-decimal scaling overflows is rejected before the signature is computed.
 
 ### PRM006
 

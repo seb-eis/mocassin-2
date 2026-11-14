@@ -51,8 +51,8 @@ public static class ParameterizationDiagnosticCatalog
             ParameterizationDiagnosticCodes.InvalidFrequency,
             DiagnosticSeverity.Error,
             "Step 09 — parameterization templates",
-            "A frequency is non-positive or non-finite",
-            "Set the attempt frequency to a positive, finite value.",
+            "A frequency is non-positive, non-finite, or too large for the canonical projection",
+            "Set the attempt frequency to a positive, finite value that survives 12-decimal quantization.",
             "#prm005"),
         new(
             ParameterizationDiagnosticCodes.NoExplicitValues,

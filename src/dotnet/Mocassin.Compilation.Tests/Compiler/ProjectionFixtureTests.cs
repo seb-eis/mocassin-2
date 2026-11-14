@@ -85,6 +85,13 @@ public sealed class ProjectionFixtureTests
         Assert.False(double.IsNegative(value));
     }
 
+    [Fact]
+    public void QuantizationRejectsFiniteValuesAboveTheScalingRange()
+    {
+        Assert.Throws<InvalidOperationException>(() => CanonicalProjectionWriter.Quantize(1e300));
+        Assert.Throws<InvalidOperationException>(() => CanonicalProjectionWriter.Quantize(double.MaxValue));
+    }
+
     private static readonly (string Id, string Sample, string? Kind)[] samples =
     [
         ("model-ceria-kmc", "samples/simulations/ceria-kmc.mocprj", "kmc"),

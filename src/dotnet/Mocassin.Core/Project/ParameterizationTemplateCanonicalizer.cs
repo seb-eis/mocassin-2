@@ -8,13 +8,16 @@ using Mocassin.Core.Units;
 namespace Mocassin.Core.Project;
 
 /// <summary>
-/// Applies the canonical template order and signed-zero normalization used by the project serializer.
+/// Applies the canonical template order, the shared-chiral orientation fold, and signed-zero normalization
+/// used by the project serializer.
 /// </summary>
 /// <remarks>
 /// This is the authoritative write-time guarantee. Records are immutable but expose <c>init</c> properties, so
 /// editor code can naturally produce out-of-order arrays through <c>with</c>; the serializer always normalizes
-/// them before writing or hashing. Null nested elements are invalid user data and are removed rather than
-/// crashing the serializer; <see cref="ParameterizationTemplateValidator"/> reports them.
+/// them before writing or hashing. Mirrored chiral entries with the same value collapse onto the smaller
+/// particle-pair orientation; conflicting values are kept so the validator reports them. Null nested elements
+/// are invalid user data and are removed rather than crashing the serializer;
+/// <see cref="ParameterizationTemplateValidator"/> reports them.
 /// </remarks>
 internal static class ParameterizationTemplateCanonicalizer
 {
@@ -53,27 +56,65 @@ internal static class ParameterizationTemplateCanonicalizer
                 .Select(static set => set with
                 {
                     EnergyId = set.EnergyId ?? string.Empty,
-                    Entries = NormalizePairEntries(set.Entries),
+                    Entries = NormalizePairEntries(set.Entries, set.IsChiral),
                 }),
         ];
     }
 
-    private static ImmutableArray<PairEnergyEntry> NormalizePairEntries(ImmutableArray<PairEnergyEntry> entries)
+    private static ImmutableArray<PairEnergyEntry> NormalizePairEntries(
+        ImmutableArray<PairEnergyEntry> entries,
+        bool isChiral)
     {
         if (entries.IsDefault)
         {
             return [];
         }
 
-        return
-        [
-            .. entries
-                .Where(static entry => entry is not null)
+        var normalized = entries
+            .Where(static entry => entry is not null)
+            .Select(static entry => entry with { Energy = Normalize(entry.Energy) })
+            .ToArray();
+        if (!isChiral)
+        {
+            return SortedPairEntries(normalized);
+        }
+
+        // A chiral pair has one shared value. Fold mirrored duplicates with the same value onto the smaller
+        // (ParticleId, ParticleId) orientation so the canonical document depends only on semantic content.
+        // Conflicting values are deliberately kept so ParameterizationTemplateValidator can report PRM014;
+        // the canonicalizer never chooses between them.
+        var canonical = new List<PairEnergyEntry>(normalized.Length);
+        foreach (var group in normalized.GroupBy(static entry => PairOrientation(entry)))
+        {
+            var items = group
                 .OrderBy(static entry => entry.CenterParticleId.Value)
                 .ThenBy(static entry => entry.PartnerParticleId.Value)
-                .Select(static entry => entry with { Energy = Normalize(entry.Energy) }),
-        ];
+                .ToArray();
+            if (items.Length == 2 &&
+                items[0].CenterParticleId != items[1].CenterParticleId &&
+                items[0].Energy.Value == items[1].Energy.Value)
+            {
+                canonical.Add(items[0]);
+                continue;
+            }
+
+            canonical.AddRange(items);
+        }
+
+        return SortedPairEntries(canonical);
     }
+
+    private static ImmutableArray<PairEnergyEntry> SortedPairEntries(IEnumerable<PairEnergyEntry> entries) =>
+    [
+        .. entries
+            .OrderBy(static entry => entry.CenterParticleId.Value)
+            .ThenBy(static entry => entry.PartnerParticleId.Value),
+    ];
+
+    private static (Guid Center, Guid Partner) PairOrientation(PairEnergyEntry entry) =>
+        entry.PartnerParticleId.Value.CompareTo(entry.CenterParticleId.Value) < 0
+            ? (entry.PartnerParticleId.Value, entry.CenterParticleId.Value)
+            : (entry.CenterParticleId.Value, entry.PartnerParticleId.Value);
 
     private static ImmutableArray<GroupEnergySet> NormalizeGroupSets(ImmutableArray<GroupEnergySet> sets)
     {

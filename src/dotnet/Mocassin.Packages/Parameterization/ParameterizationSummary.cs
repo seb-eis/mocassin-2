@@ -9,13 +9,13 @@ namespace Mocassin.Packages.Parameterization;
 /// <param name="StablePairTableCount">The number of compiled pair tables whose centre reference site is stable.</param>
 /// <param name="UnstablePairTableCount">The number of compiled pair tables whose centre reference site is unstable.</param>
 /// <param name="PairSlotCount">The number of required pair values over both stable and unstable tables.</param>
-/// <param name="ExplicitPairValueCount">The number of pair values explicitly present in the template.</param>
+/// <param name="ExplicitPairValueCount">The number of pair values explicitly present in the template and inside the required slot space.</param>
 /// <param name="GroupTableCount">The number of compiled cluster tables.</param>
 /// <param name="GroupSlotCount">The number of canonical cluster occupations, i.e. required group values.</param>
-/// <param name="ExplicitGroupValueCount">The number of group values explicitly present in the template.</param>
+/// <param name="ExplicitGroupValueCount">The number of group values explicitly present in the template and inside the required slot space.</param>
 /// <param name="KineticTransitionRuleSetCount">The number of compiled kinetic transition rule collections.</param>
 /// <param name="KineticRuleSlotCount">The number of parameterizable kinetic jump rules.</param>
-/// <param name="ExplicitRuleFrequencyCount">The number of rule frequencies explicitly present in the template.</param>
+/// <param name="ExplicitRuleFrequencyCount">The number of rule frequencies explicitly present in the template and inside the required slot space.</param>
 /// <param name="SiteEnergySlotCount">The number of admissible reference-site/particle site-energy slots.</param>
 /// <param name="SiteEnergyOverrideCount">The number of site-energy overrides present in the template.</param>
 /// <param name="ChiralPairTableCount">The number of reciprocal chiral pair tables; each contributes one shared value per particle pair.</param>

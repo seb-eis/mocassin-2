@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using System.Collections.Immutable;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Compilation.Transitions;
 using Mocassin.Core.Diagnostics;
@@ -235,6 +236,245 @@ public sealed class ParameterizationValidationTests
     }
 
     [Fact]
+    public async Task HugeFiniteFrequencyIsAnErrorAndProducesNoModel()
+    {
+        var (project, model) = await ParameterizationTestSupport.LoadAndCompileAsync(
+            ParameterizationTestSupport.CeriaKmc);
+        var kinetic = FindKineticRule(model);
+        var template = CreateTemplate(project, model);
+        var edited = ParameterizationTemplateEditor.SetRuleFrequency(
+            template,
+            TransitionKind.Kinetic,
+            kinetic.Collection.Transition.Id,
+            kinetic.Rule.RuleGeometryId,
+            new FrequencyHz(1e300)).Template;
+
+        var diagnostics = new ParameterizationService().Validate(project, model, edited);
+
+        var invalid = Assert.Single(
+            diagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.InvalidFrequency);
+        Assert.Equal(DiagnosticSeverity.Error, invalid.Severity);
+        Assert.Contains("canonical 12-decimal projection", invalid.Message, StringComparison.Ordinal);
+
+        var applied = new ParameterizationService().Apply(project, model, edited);
+        Assert.False(applied.IsSuccess);
+        Assert.Null(applied.Model);
+        Assert.Contains(
+            applied.Diagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.InvalidFrequency &&
+                item.Severity == DiagnosticSeverity.Error);
+    }
+
+    [Fact]
+    public async Task HugeFiniteEnergyIsAnErrorAndProducesNoModel()
+    {
+        var (project, model) = await ParameterizationTestSupport.LoadAndCompileAsync(
+            ParameterizationTestSupport.Ceria);
+        var slot = FindPairSlot(model);
+        var template = CreateTemplate(project, model);
+        var edited = ParameterizationTemplateEditor.SetPairEnergy(
+            template,
+            slot.EnergyId,
+            slot.Center,
+            slot.Partner,
+            new EnergyEv(1e300)).Template;
+
+        var diagnostics = new ParameterizationService().Validate(project, model, edited);
+
+        var invalid = Assert.Single(diagnostics, static item => item.Code == ParameterizationDiagnosticCodes.InvalidEnergy);
+        Assert.Equal(DiagnosticSeverity.Error, invalid.Severity);
+
+        var applied = new ParameterizationService().Apply(project, model, edited);
+        Assert.False(applied.IsSuccess);
+        Assert.Null(applied.Model);
+        Assert.Contains(
+            applied.Diagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.InvalidEnergy &&
+                item.Severity == DiagnosticSeverity.Error);
+    }
+
+    [Fact]
+    public async Task StalePairAndGroupEntriesDoNotSuppressCompletenessWarnings()
+    {
+        var (project, model) = await ParameterizationTestSupport.LoadAndCompileAsync(
+            ParameterizationTestSupport.CeriaParameters);
+        var template = Assert.Single(project.Parameterizations);
+        var particle = model.Particles.Particles[1].Id;
+        var stalePair = template.StablePairSets[0] with
+        {
+            EnergyId = new string('0', 64),
+            Entries = [new PairEnergyEntry(particle, particle, new EnergyEv(1.0))],
+        };
+        var group = template.GroupSets[0];
+        var table = model.Energy.ClusterTables.Single(
+            candidate => string.Equals(candidate.ClusterEnergyId, group.ClusterEnergyId, StringComparison.Ordinal));
+        var occupation = table.Occupations[0].CanonicalTuple
+            .Select(index => model.Particles.Particles[index].Id)
+            .ToImmutableArray();
+        var staleGroup = group with
+        {
+            ClusterEnergyId = new string('1', 64),
+            Entries = [new GroupEnergyEntry(occupation, new EnergyEv(1.0))],
+        };
+        var stale = template with
+        {
+            StablePairSets = [stalePair],
+            UnstablePairSets = [],
+            GroupSets = [staleGroup],
+            SiteEnergyOverrides = [],
+            TransitionRuleSets = [],
+        };
+        var required = ParameterizationFactory.Describe(project, model, template).RequiredSlotCount;
+
+        var summary = ParameterizationFactory.Describe(project, model, stale);
+
+        Assert.Equal(0, summary.SetValueCount);
+        Assert.Equal(required, summary.UnsetValueCount);
+        Assert.False(summary.HasExplicitValues);
+
+        var service = new ParameterizationService();
+        var diagnostics = service.Validate(project, model, stale);
+
+        Assert.Equal(
+            2,
+            diagnostics.Count(static item => item.Code == ParameterizationDiagnosticCodes.UnknownReference));
+        var unset = Assert.Single(
+            diagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.RequiredValuesUnset);
+        Assert.Contains(
+            string.Create(
+                System.Globalization.CultureInfo.InvariantCulture,
+                $"{required} of {required} required values unset"),
+            unset.Message,
+            StringComparison.Ordinal);
+        Assert.Contains(
+            diagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.NoExplicitValues);
+
+        var applied = service.Apply(project, model, stale);
+        Assert.True(applied.IsSuccess);
+        Assert.NotNull(applied.Model);
+        Assert.Contains(
+            applied.Diagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.NoExplicitValues);
+    }
+
+    [Fact]
+    public async Task StaleRuleEntriesDoNotSuppressCompletenessWarnings()
+    {
+        var (project, model) = await ParameterizationTestSupport.LoadAndCompileAsync(
+            ParameterizationTestSupport.CeriaKmc);
+        var template = CreateTemplate(project, model);
+        var stale = template with
+        {
+            TransitionRuleSets =
+            [
+                new TransitionRuleSet(
+                    TransitionKind.Kinetic,
+                    Guid.Parse("55555555-5555-7555-8555-555555555555"),
+                    [new RuleFrequencyEntry(new string('2', 64), new FrequencyHz(2.0e13))]),
+            ],
+        };
+        var required = ParameterizationFactory.Describe(project, model, template).RequiredSlotCount;
+
+        var summary = ParameterizationFactory.Describe(project, model, stale);
+
+        Assert.Equal(0, summary.SetValueCount);
+        Assert.Equal(required, summary.UnsetValueCount);
+        Assert.False(summary.HasExplicitValues);
+
+        var diagnostics = new ParameterizationService().Validate(project, model, stale);
+
+        Assert.Single(diagnostics, static item => item.Code == ParameterizationDiagnosticCodes.UnknownReference);
+        Assert.Contains(
+            diagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.RequiredValuesUnset);
+        Assert.Contains(
+            diagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.NoExplicitValues);
+
+        var applied = new ParameterizationService().Apply(project, model, stale);
+        Assert.True(applied.IsSuccess);
+        Assert.All(
+            applied.Model!.Values.TransitionRuleFrequencies,
+            static value => Assert.Equal(CompiledJumpRule.DefaultFrequencyHz, value));
+    }
+
+    [Fact]
+    public async Task ApplyAndValidateRunTheStructuralTemplateValidator()
+    {
+        var (project, model) = await ParameterizationTestSupport.LoadAndCompileAsync(
+            ParameterizationTestSupport.Ceria);
+        var template = CreateTemplate(project, model);
+        var service = new ParameterizationService();
+
+        var overlong = template with
+        {
+            Name = new string('a', ParameterizationLimits.TemplateNameLength + 1),
+        };
+        var limit = Assert.Single(
+            service.Validate(project, model, overlong),
+            static item => item.Code == ParameterizationDiagnosticCodes.LimitExceeded &&
+                item.Path?.Property == "name");
+        Assert.Equal(DiagnosticSeverity.Error, limit.Severity);
+        AssertApplyFailsWithStructuralError(
+            service,
+            project,
+            model,
+            overlong,
+            ParameterizationDiagnosticCodes.LimitExceeded);
+
+        var emptyId = template with { Id = ParameterizationId.Create(Guid.Empty) };
+        var empty = Assert.Single(
+            service.Validate(project, model, emptyId),
+            static item => item.Code == ParameterizationDiagnosticCodes.InvalidKey &&
+                item.Path?.Property == "id");
+        Assert.Equal(DiagnosticSeverity.Error, empty.Severity);
+        AssertApplyFailsWithStructuralError(
+            service,
+            project,
+            model,
+            emptyId,
+            ParameterizationDiagnosticCodes.InvalidKey);
+
+        var malformed = template with
+        {
+            StablePairSets =
+            [
+                new PairEnergySet("not-a-stable-id", default, default, 0, false),
+            ],
+        };
+        var malformedDiagnostics = service.Validate(project, model, malformed);
+        Assert.Contains(
+            malformedDiagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.InvalidKey);
+        Assert.DoesNotContain(
+            malformedDiagnostics,
+            static item => item.Code == ParameterizationDiagnosticCodes.UnknownReference);
+        AssertApplyFailsWithStructuralError(
+            service,
+            project,
+            model,
+            malformed,
+            ParameterizationDiagnosticCodes.InvalidKey);
+
+        var duplicate = template with
+        {
+            StablePairSets = [template.StablePairSets[0], template.StablePairSets[0]],
+        };
+        Assert.Contains(
+            service.Validate(project, model, duplicate),
+            static item => item.Code == ParameterizationDiagnosticCodes.InvalidKey);
+        AssertApplyFailsWithStructuralError(
+            service,
+            project,
+            model,
+            duplicate,
+            ParameterizationDiagnosticCodes.InvalidKey);
+    }
+
+    [Fact]
     public async Task UnknownSetForbiddenParticleAndInvalidSiteTargetKeepTheirCodes()
     {
         var (project, model) = await ParameterizationTestSupport.LoadAndCompileAsync(
@@ -255,9 +495,19 @@ public sealed class ParameterizationValidationTests
             slot.DistanceBucketFm,
             false,
             [new PairEnergyEntry(forbidden, forbidden, new EnergyEv(1.0))]);
-        var template = CreateTemplate(project, model) with
+        var created = CreateTemplate(project, model);
+        var template = created with
         {
-            StablePairSets = [.. CreateTemplate(project, model).StablePairSets, unknownSet, forbiddenSet],
+            StablePairSets =
+            [
+                .. created.StablePairSets.Select(set => set.EnergyId == slot.EnergyId
+                    ? forbiddenSet
+                    : set),
+                unknownSet,
+            ],
+            UnstablePairSets = created.UnstablePairSets.Select(set => set.EnergyId == slot.EnergyId
+                ? forbiddenSet
+                : set).ToImmutableArray(),
             SiteEnergyOverrides =
             [
                 new SiteEnergyOverride(
@@ -294,6 +544,22 @@ public sealed class ParameterizationValidationTests
         var applied = new ParameterizationService().Apply(project, model, null, options);
         Assert.False(applied.IsSuccess);
         Assert.Null(applied.Model);
+    }
+
+    private static void AssertApplyFailsWithStructuralError(
+        ParameterizationService service,
+        Project project,
+        CompiledModel model,
+        ParameterizationTemplate template,
+        string code)
+    {
+        var applied = service.Apply(project, model, template);
+
+        Assert.False(applied.IsSuccess);
+        Assert.Null(applied.Model);
+        Assert.Contains(
+            applied.Diagnostics,
+            item => item.Code == code && item.Severity == DiagnosticSeverity.Error);
     }
 
     private static ParameterizationTemplate CreateTemplate(Project project, CompiledModel model) =>

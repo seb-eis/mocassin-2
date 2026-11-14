@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using System.Globalization;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Compilation.Energy;
+using Mocassin.Compilation.Signatures;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
@@ -529,14 +530,14 @@ internal sealed class ParameterizationEntryWalker
 
     private void ValidateFrequency(double value, string property)
     {
-        if (!double.IsFinite(value) || value <= 0.0)
+        if (!double.IsFinite(value) || value <= 0.0 || !IsQuantizable(value))
         {
             bag.Add(new Diagnostic(
                 ParameterizationDiagnosticCodes.InvalidFrequency,
                 DiagnosticSeverity.Error,
                 string.Create(
                     CultureInfo.InvariantCulture,
-                    $"The effective rule frequency {value} Hz is not finite or is not positive."),
+                    $"The effective rule frequency {value} Hz is not finite, is not positive, or is too large for the canonical 12-decimal projection."),
                 new ModelPath("parameterization", templateId, property),
                 ParameterizationDiagnosticCodes.HelpFor(ParameterizationDiagnosticCodes.InvalidFrequency)));
             return;
@@ -558,6 +559,13 @@ internal sealed class ParameterizationEntryWalker
             new ModelPath("parameterization", templateId, property),
             ParameterizationDiagnosticCodes.HelpFor(ParameterizationDiagnosticCodes.ImplausibleFrequency)));
     }
+
+    /// <summary>
+    /// Determines whether a finite value survives the 12-decimal scaling used by
+    /// <see cref="CanonicalProjectionWriter.Quantize"/>.
+    /// </summary>
+    private static bool IsQuantizable(double value) =>
+        double.IsFinite(value) && double.IsFinite(value * 1e12);
 
     private void AddUnknownReference(string property, string message) =>
         bag.Add(new Diagnostic(

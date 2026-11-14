@@ -13,10 +13,10 @@ completeness checks.
 - **Status:** In audit
 - **Feature list:** Approved 2026-11-14 (seven features; step branch created)
 - **Step branch:** `step/09-parameterization-templates`
-- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43630049214) at `20c73bc`
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43630049214) at `20c73bc` — superseded by the round-1 fixes; replacement closeout run pending
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Ready for audit at `20c73bc` — [record](../audits/step-09.md)
+- **Audit:** Re-audit required — round 1 `Fixes required` at `20c73bc` ([record](../audits/step-09.md)); fixes and resolutions are on `feature/step-09-parameterization-templates/fix-audit-round-1`
 - **Design review:** Ready with notes at `26d6a0ecff543ac65eb60d60d9f9c893e00f32bc` (round 4) — accepted 2026-11-14
 - **Last updated:** 2026-11-14
 
@@ -67,7 +67,8 @@ Recorded deviations and limitations:
 - `PRM014` also rejects duplicate group-set headers for the same `ClusterEnergyId` and empty transition IDs to
   make canonical ordering and key uniqueness deterministic.
 - `ParameterizationTemplateDefaults.CreateDefault` is deferred to feature 4 (defaulting/apply).
-- `ParameterizationLimits.MaxAppliedValueBytes` is defined but enforced only by the apply feature.
+- `ParameterizationLimits.MaxAppliedValueBytes` is the default for the configurable
+  `ParameterizationOptions.MaxAppliedValueBytes`; callers may lower it.
 
 ### Feature 2 outcome
 
@@ -349,8 +350,8 @@ Notes and limitations:
 
 ### Feature 7 outcome
 
-`golden-templates-docs-and-closeout` is implemented on its feature branch; this section records the work and
-the local evidence. It is not squash-merged yet.
+`golden-templates-docs-and-closeout` was squash-merged into the step branch as `20c73bc`. This section records
+the work and the local evidence.
 
 Implemented:
 
@@ -446,10 +447,48 @@ PATH=/home/node/.venvs/mocassin/bin:$PATH ./tools/verify.sh all --require
   --filter "*ParameterizationBenchmarks*"`; 5 benchmarks executed; results in the feature-7 outcome above.
 - No per-feature CI run was triggered.
 
-Remaining closeout work belongs to the orchestrator: squash-merge this feature into the step branch, merge
-current `main`, run the single closeout CI dispatch, fill `docs/planning/closeout/step-09.json` and run
-`python tools/check_closeout_evidence.py`, then create and freeze `docs/planning/audits/step-09.md` for the
-independent audit. This feature does not create the audit record, the closeout JSON, a tag, or a merge.
+Remaining closeout work belongs to the orchestrator: squash-merge the round-1 fix feature into the step branch,
+merge current `main` if it moved, run the single replacement closeout CI dispatch, refresh
+`docs/planning/closeout/step-09.json` and run `python tools/check_closeout_evidence.py`, then request the
+re-audit against the new commit. The audit record remains `Re-audit required` until that audit passes. This
+feature does not create a tag or a merge.
+
+## Audit round 1 resolutions
+
+Round 1 of the independent audit returned `Fixes required` at `20c73bc`; the findings and evidence are in
+[`../audits/step-09.md`](../audits/step-09.md). The fixes are on
+`feature/step-09-parameterization-templates/fix-audit-round-1`; the audit record's `Resolution status` table
+carries the fixing commits. The record is `Re-audit required` until a fresh audit passes.
+
+- **F-01 (Blocker):** an effective rule frequency must be positive, finite, and small enough for the canonical
+  12-decimal projection. A larger finite value is a `PRM005` error and produces no model instead of throwing;
+  huge finite energies remain `PRM004` through the existing energy range. `CanonicalProjectionWriter.Quantize`
+  now throws for a value that would quantize to infinity, so no signature can contain a non-finite value.
+  Regression tests cover `1e300 Hz`, `1e300 eV`, `double.MaxValue`, `Validate`, and `Apply`.
+- **F-02:** the summary counts only pair/group/rule entries that resolve to a required compiled slot. Stale
+  entries that emit `PRM002` no longer count as set values, so `PRM003` reports the full unset count and
+  `PRM006` fires when nothing applies.
+- **F-03:** `Apply` and `Validate` run `ProjectValidator.ValidateTemplate` on a directly supplied template, so
+  an overlong name (`PRM013`), an empty template ID, a malformed stable key, or a duplicate key (`PRM014`) is
+  reported before compiled-bound matching instead of being accepted or misreported as `PRM002`.
+- **F-04:** the status dashboard and the feature-7 narrative no longer describe a feature-4 work state; they
+  record the frozen/audit state and the pending replacement closeout run.
+- **F-05:** the contract-tools README names four parameterization fixtures and the real
+  `ParameterizationGoldenFixtureTests`/`ParameterizationChiralFixtureTests` generators.
+- **F-06:** the write-time canonicalizer folds same-value mirrored chiral entries onto the smaller
+  `(ParticleId, ParticleId)` orientation; conflicting values are kept so the validator emits `PRM014`.
+- **F-07:** `ParameterizationLimits.MaxAppliedValueBytes` is now the default for
+  `ParameterizationOptions.MaxAppliedValueBytes` (the option remains configurable downward).
+
+Design clarifications (not format changes beyond the findings):
+
+- The canonical projection rejects finite values whose `× 1e12` scaling overflows in addition to NaN/Inf
+  (§5 step 6, §6.1, and the `PRM005` row in §7.1).
+- The write-time canonical form folds duplicated chiral orientations with the same value (§3.4).
+- `ProjectValidator.ValidateTemplate` is an additive public entry point for the structural check that already
+  runs on project templates; it lets the Packages service validate a directly supplied template.
+- `ParameterizationOptions.MaxAppliedValueBytes` defaults to the Core constant; this changes no format or
+  signature, only the source of the same 2 GiB bound.
 
 ## Goal
 
@@ -758,10 +797,11 @@ signature have a uniform rule-order array. `Describe` counts required frequency 
   independent A→B and B→A values. The shared table must be symmetric under particle exchange because the
   solver applies it from both centre directions: setting a chiral entry `(X, Y, E)` stores `table[X][Y] = E`
   and `table[Y][X] = E`. The template stores the lexicographically smaller `(ParticleId, ParticleId)`
-  orientation; a mirrored duplicate with a different value is `PRM014`, and `Describe` counts chiral slots as
-  unordered particle pairs. Achiral and unstable–stable tables are ordered and are not mirrored. If the chiral
-  link changes or breaks, the shared `EnergyId` changes (or two IDs replace one), the old value is removed, and
-  the new slots default. `PRM007` stays retired and is not registered.
+  orientation; a same-value mirrored duplicate is folded onto that orientation at write time, a mirrored
+  duplicate with a different value is `PRM014`, and `Describe` counts chiral slots as unordered particle pairs.
+  Achiral and unstable–stable tables are ordered and are not mirrored. If the chiral link changes or breaks,
+  the shared `EnergyId` changes (or two IDs replace one), the old value is removed, and the new slots default.
+  `PRM007` stays retired and is not registered.
 - **Unstable–stable pairs.** They remain in `UnstablePairSets`, use `GeometryId == EnergyId`, have no chiral
   partner, and are parameterized exactly once per table.
 
@@ -1011,7 +1051,7 @@ public sealed record ParameterizationOptions
 {
     public bool EmitCompletenessWarnings { get; init; } = true;
     public ParameterizationQualityOptions Quality { get; init; } = new();
-    public long MaxAppliedValueBytes { get; init; } = 2L * 1024 * 1024 * 1024;
+    public long MaxAppliedValueBytes { get; init; } = ParameterizationLimits.MaxAppliedValueBytes;
     public static ParameterizationOptions Default { get; } = new();
 }
 
@@ -1053,9 +1093,11 @@ misuse (nulls, wrong types) separate from stale project data (warnings).
    - rule entries map `RuleGeometryId`; an unknown rule is `PRM002` and is ignored;
    - site overrides replace the authored background at every P1 position owned by the reference site; an
      unknown site, unknown particle, or forbidden particle is `PRM008` and is ignored.
-6. Validate every effective value: finite energy in `-100..100 eV` (`PRM004`), finite frequency `> 0`
-   (`PRM005`), plausible frequency range (`PRM016`, warning), and configured resource limits (`PRM013`). A
-   non-finite value is a contract error for a typed value but is still checked defensively.
+6. Validate every effective value: finite energy in `-100..100 eV` (`PRM004`), finite frequency `> 0` that
+   survives the 12-decimal canonical scaling (`PRM005`), plausible frequency range (`PRM016`, warning), and
+   configured resource limits (`PRM013`). A non-finite value is a contract error for a typed value but is still
+   checked defensively; a finite value that would quantize to infinity is rejected before the projection is
+   written.
 7. Quantize every applied value to 12 decimal places with round-half-away-from-zero on the binary64 product
    and normalize `-0.0` to `+0.0`. The quantized values are what `ParameterizationValues` stores and what
    Step 11 persists, so re-encoding the payload reproduces the signature exactly.
@@ -1195,8 +1237,10 @@ ParameterizedModel.Signature
   values are meaningful only inside that model. This also lets Rust re-encode the projection from the `.msl`
   payload, which does not persist `RuleGeometryId` (those IDs are inspection-only).
 - Every float is `float64`, quantized to 12 decimals with round-half-away-from-zero on the binary64 product;
-  `-0.0` is normalized to `+0.0`; NaN/Inf are rejected. Strings are UTF-8 as stored. Every field is present;
-  arrays use forced canonical headers. Domain separation is applied before hashing.
+  `-0.0` is normalized to `+0.0`; NaN/Inf are rejected. A finite value whose `× 1e12` scaling overflows is
+  rejected too: validation returns `PRM005`/`PRM004`, and the writer throws as a programmer-error guard rather
+  than signing infinity. Strings are UTF-8 as stored. Every field is present; arrays use forced canonical
+  headers. Domain separation is applied before hashing.
 - **Owner-confirmed 2026-11-14:** the model payload stores the absolute rule `frequency_hz`; the per-job
   factor is derived by Step 16. This is a pre-release `.msl` payload change; Step 11 is not implemented, so no
   published package or fixture is affected.
@@ -1262,7 +1306,7 @@ Owner: “Step 09 — parameterization templates”. Codes are stable API.
 | `PRM002` | Warning | Packages | Template references an unknown pair/group/rule ID, or a stored descriptor disagrees with the current model for the same ID. The model wins; the entry is ignored. |
 | `PRM003` | Warning | Packages | Required pair/group/kinetic-rule slots are unset; defaults are applied. One diagnostic per template with counts. |
 | `PRM004` | Error | Core and Packages | Energy is non-finite or outside `EnergyLimits.MinEnergy.Value..EnergyLimits.MaxEnergy.Value` (`-100..100 eV`). |
-| `PRM005` | Error | Core and Packages | Frequency is non-positive or non-finite. |
+| `PRM005` | Error | Core and Packages | Frequency is non-positive, non-finite, or too large to quantize to 12 decimals for the canonical projection. |
 | `PRM006` | Warning | Packages | No explicit entries at all (`HasExplicitValues == false`) for an explicit template; suppressed for the implicit default. An explicit `0 eV`/`1e13 Hz` suppresses it. |
 | `PRM007` | Reserved | — | Retired. Chiral partners share one `EnergyId`; independent A→B/B→A values are unrepresentable. The code is not registered and never emitted. |
 | `PRM008` | Warning | Packages | A site-energy override, or an authored background entry from the supplied project, targets an unknown site/particle or a particle the site cannot occupy; the value is ignored. A background mismatch usually means the project and compiled model are not the same pair. |
@@ -1276,9 +1320,11 @@ Owner: “Step 09 — parameterization templates”. Codes are stable API.
 | `PRM016` | Warning | Packages | An attempt frequency is outside the plausible `1e-3..1e18 Hz` range but still positive and finite. |
 
 - `PRM004`, `PRM005`, `PRM010`, `PRM013`, and `PRM014` are structural and run in Core `ProjectValidator`, so
-  load, save, and every `ProjectEditor` mutation see them. `PRM001`, `PRM002`, `PRM003`, `PRM006`, `PRM008`,
-  `PRM009`, `PRM011`, `PRM012`, `PRM015`, and `PRM016` need the compiled model or the rebase result and run in
-  `Mocassin.Packages`.
+  load, save, and every `ProjectEditor` mutation see them. `Apply` and `Validate` also run the structural
+  template validator on a directly supplied template through `ProjectValidator.ValidateTemplate`, so a
+  malformed key or over-limit template returns `PRM013`/`PRM014` instead of being misreported as `PRM002`.
+  `PRM001`, `PRM002`, `PRM003`, `PRM006`, `PRM008`, `PRM009`, `PRM011`, `PRM012`, `PRM015`, and `PRM016` need
+  the compiled model or the rebase result and run in `Mocassin.Packages`.
 - `ParameterizationDiagnosticCatalog` in `Mocassin.Core.Diagnostics` registers every non-retired `PRM`
   descriptor and is composed into `CoreDiagnosticCatalog`, so `DiagnosticCatalog.Default` already includes the
   family. The docs-drift test requires every registered code in `docs/reference/diagnostics.md`; Step 09 adds
@@ -1570,8 +1616,10 @@ compiler, compiler tables, project store, or domain objects.
   registered exactly once, documented, severity/path), and the extended `ProjectSchemaTests` fixture list
   covering the new `samples/parameterizations/*.mocprj` files and regenerated project schema.
 - **Contracts:** `ParameterizationSignatureV1Tests` (golden vectors, quantization, domain separation, values-only,
-  same effective values ⇒ same signature, culture independence), `ParameterizationProjectionFixtureTests`
-  (C# projection bytes equal `tests/contracts/projections/parameterization-*.bin`).
+  same effective values ⇒ same signature, culture independence).
+- **Packages goldens:** `ParameterizationGoldenFixtureTests` (applied values and projection bytes equal
+  `tests/contracts/parameterizations/*.json` and `tests/contracts/projections/parameterization/*.bin`) and
+  `ParameterizationChiralFixtureTests` (P1/P4mm link-change projects).
 - **Packages:** `ParameterizationFactoryTests`, `ParameterizationSummaryTests`, `ParameterizationApplyTests`
   (defaults, overrides, chiral, forbidden particles, quantization, signature), `ParameterizationValidationTests`
   (`Validate` returns `PRM001` without a diff; `Apply` returns the diff for the same mismatch),

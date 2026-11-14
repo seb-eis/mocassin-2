@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using FsCheck.Xunit;
+using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Transitions;
 using Mocassin.Core.Project;
@@ -159,6 +160,96 @@ public sealed class ParameterizationTemplateTests
         Assert.Equal(
             ProjectHasher.ComputeDocument(ParameterizationTestModels.CreateProject(template)),
             ProjectHasher.ComputeDocument(ParameterizationTestModels.CreateProject(reversed)));
+    }
+
+    [Fact]
+    public void CanonicalJsonFoldsMirroredChiralDuplicatesWithTheSameValue()
+    {
+        var mirrored = ParameterizationTestModels.CreateEmptyTemplate() with
+        {
+            StablePairSets =
+            [
+                ParameterizationTestModels.CreatePairSet(
+                    ParameterizationTestModels.PairEnergyIdA,
+                    chiral: true,
+                    [
+                        ParameterizationTestModels.Entry(
+                            ParameterizationTestModels.ParticleB,
+                            ParameterizationTestModels.ParticleA,
+                            0.1),
+                        ParameterizationTestModels.Entry(
+                            ParameterizationTestModels.ParticleA,
+                            ParameterizationTestModels.ParticleB,
+                            0.1),
+                    ]),
+            ],
+        };
+        var folded = mirrored with
+        {
+            StablePairSets =
+            [
+                ParameterizationTestModels.CreatePairSet(
+                    ParameterizationTestModels.PairEnergyIdA,
+                    chiral: true,
+                    [
+                        ParameterizationTestModels.Entry(
+                            ParameterizationTestModels.ParticleA,
+                            ParameterizationTestModels.ParticleB,
+                            0.1),
+                    ]),
+            ],
+        };
+
+        var entries = TemplateJson(mirrored)
+            .GetProperty("stablePairSets")[0]
+            .GetProperty("entries");
+        Assert.Single(entries.EnumerateArray());
+        Assert.Equal(
+            ParameterizationTestModels.ParticleA.Value.ToString("D"),
+            entries[0].GetProperty("centerParticleId").GetString());
+        Assert.Equal(
+            ProjectCanonicalizer.ToCanonicalJson(ParameterizationTestModels.CreateProject(folded)),
+            ProjectCanonicalizer.ToCanonicalJson(ParameterizationTestModels.CreateProject(mirrored)));
+        Assert.Equal(
+            ProjectHasher.ComputeDocument(ParameterizationTestModels.CreateProject(folded)),
+            ProjectHasher.ComputeDocument(ParameterizationTestModels.CreateProject(mirrored)));
+    }
+
+    [Fact]
+    public void CanonicalJsonKeepsConflictingMirroredChiralValuesForValidation()
+    {
+        var conflicting = ParameterizationTestModels.CreateEmptyTemplate() with
+        {
+            StablePairSets =
+            [
+                ParameterizationTestModels.CreatePairSet(
+                    ParameterizationTestModels.PairEnergyIdA,
+                    chiral: true,
+                    [
+                        ParameterizationTestModels.Entry(
+                            ParameterizationTestModels.ParticleB,
+                            ParameterizationTestModels.ParticleA,
+                            0.1),
+                        ParameterizationTestModels.Entry(
+                            ParameterizationTestModels.ParticleA,
+                            ParameterizationTestModels.ParticleB,
+                            0.2),
+                    ]),
+            ],
+        };
+
+        var entries = TemplateJson(conflicting)
+            .GetProperty("stablePairSets")[0]
+            .GetProperty("entries");
+        Assert.Equal(2, entries.GetArrayLength());
+        Assert.Contains(
+            ProjectValidator.Validate(ParameterizationTestModels.CreateProject(conflicting)),
+            static diagnostic => diagnostic.Code == ParameterizationDiagnosticCodes.InvalidKey &&
+                diagnostic.Message.Contains("chiral", StringComparison.Ordinal));
+
+        var reloaded = ProjectJson.Deserialize(
+            ProjectCanonicalizer.ToCanonicalUtf8(ParameterizationTestModels.CreateProject(conflicting)));
+        Assert.Equal(2, reloaded.Parameterizations.Single().StablePairSets[0].Entries.Length);
     }
 
     [Property(MaxTest = 50)]

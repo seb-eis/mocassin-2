@@ -4,7 +4,6 @@ using System.Collections.Immutable;
 using System.Globalization;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Compilation.Energy;
-using Mocassin.Compilation.Transitions;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Structure;
@@ -327,28 +326,24 @@ internal static class ParameterizationSummaryBuilder
                 return;
             }
 
-            explicitCount += entries.Length;
             PairTableDescriptor? descriptor = null;
             if (set.EnergyId is not null)
             {
                 byId.TryGetValue(set.EnergyId, out descriptor);
             }
 
+            if (descriptor is null ||
+                descriptor.CenterSiteId != set.CenterSiteId ||
+                descriptor.PartnerSiteId != set.PartnerSiteId ||
+                descriptor.DistanceBucketFm != set.DistanceBucketFm ||
+                descriptor.IsChiral != set.IsChiral)
+            {
+                return;
+            }
+
             foreach (var entry in entries)
             {
-                if (entry is null)
-                {
-                    continue;
-                }
-
-                var value = entry.Energy.Value;
-                if (value != 0.0)
-                {
-                    nonDefaultCount++;
-                    valueCounts[value] = valueCounts.GetValueOrDefault(value) + 1;
-                }
-
-                if (descriptor is null ||
+                if (entry is null ||
                     !model.Particles.TryGetIndex(entry.CenterParticleId, out var center) ||
                     !model.Particles.TryGetIndex(entry.PartnerParticleId, out var partner))
                 {
@@ -359,10 +354,20 @@ internal static class ParameterizationSummaryBuilder
                 var mirrored = descriptor.IsChiral &&
                                Contains(descriptor.CenterMask, partner) &&
                                Contains(descriptor.PartnerMask, center);
-                if (ordered || mirrored)
+                if (!ordered && !mirrored)
                 {
-                    range.Add(value);
+                    continue;
                 }
+
+                explicitCount++;
+                var value = entry.Energy.Value;
+                if (value != 0.0)
+                {
+                    nonDefaultCount++;
+                    valueCounts[value] = valueCounts.GetValueOrDefault(value) + 1;
+                }
+
+                range.Add(value);
             }
         }
     }
@@ -381,6 +386,12 @@ internal static class ParameterizationSummaryBuilder
             var byId = new Dictionary<string, (CompiledClusterTable Table, Dictionary<string, int> Occupations)>(
                 tables.Length,
                 StringComparer.Ordinal);
+            var siteMasks = new ulong[model.Structure.Sites.Length];
+            for (var index = 0; index < siteMasks.Length; index++)
+            {
+                siteMasks[index] = CompiledModelContract.SiteMask(model.Structure, index);
+            }
+
             long slots = 0;
             foreach (var table in tables)
             {
@@ -406,25 +417,29 @@ internal static class ParameterizationSummaryBuilder
             foreach (var set in sets)
             {
                 var entries = set.Entries;
-                if (entries.IsDefault)
+                if (entries.IsDefault ||
+                    set.ClusterEnergyId is null ||
+                    !byId.TryGetValue(set.ClusterEnergyId, out var target))
                 {
                     continue;
                 }
 
-                explicitCount += entries.Length;
-                Dictionary<string, int>? occupations = null;
-                if (set.ClusterEnergyId is not null && byId.TryGetValue(set.ClusterEnergyId, out var target))
+                var table = target.Table;
+                var centerSiteId = model.Structure.Sites[table.CenterSiteIndex].Id;
+                if (table.ClusterId != set.ClusterId || centerSiteId != set.CenterSiteId)
                 {
-                    occupations = target.Occupations;
+                    continue;
                 }
 
                 foreach (var entry in entries)
                 {
-                    if (entry is null)
+                    if (entry is null ||
+                        !TryResolveOccupation(model, table, target.Occupations, siteMasks, entry))
                     {
                         continue;
                     }
 
+                    explicitCount++;
                     var value = entry.Energy.Value;
                     if (value != 0.0)
                     {
@@ -432,26 +447,7 @@ internal static class ParameterizationSummaryBuilder
                         valueCounts[value] = valueCounts.GetValueOrDefault(value) + 1;
                     }
 
-                    if (occupations is null)
-                    {
-                        continue;
-                    }
-
-                    var indices = new int[entry.OccupationParticleIds.IsDefault ? 0 : entry.OccupationParticleIds.Length];
-                    var valid = true;
-                    for (var item = 0; item < indices.Length; item++)
-                    {
-                        if (!model.Particles.TryGetIndex(entry.OccupationParticleIds[item], out indices[item]))
-                        {
-                            valid = false;
-                            break;
-                        }
-                    }
-
-                    if (valid && occupations.ContainsKey(OccupationKey(indices)))
-                    {
-                        range.Add(value);
-                    }
+                    range.Add(value);
                 }
             }
 
@@ -462,6 +458,43 @@ internal static class ParameterizationSummaryBuilder
                 nonDefaultCount,
                 range,
                 valueCounts);
+        }
+
+        private static bool TryResolveOccupation(
+            CompiledModel model,
+            CompiledClusterTable table,
+            Dictionary<string, int> occupations,
+            ulong[] siteMasks,
+            GroupEnergyEntry entry)
+        {
+            var occupation = entry.OccupationParticleIds.IsDefault
+                ? ImmutableArray<ParticleId>.Empty
+                : entry.OccupationParticleIds;
+            if (occupation.Length != table.SitePIndices.Length)
+            {
+                return false;
+            }
+
+            var indices = new int[occupation.Length];
+            for (var slot = 0; slot < indices.Length; slot++)
+            {
+                if (!model.Particles.TryGetIndex(occupation[slot], out indices[slot]))
+                {
+                    return false;
+                }
+            }
+
+            for (var slot = 0; slot < indices.Length; slot++)
+            {
+                var positionIndex = table.SitePIndices[slot];
+                var siteIndex = model.Structure.Positions[positionIndex].SiteIndex;
+                if (!Contains(siteMasks[siteIndex], indices[slot]))
+                {
+                    return false;
+                }
+            }
+
+            return occupations.ContainsKey(OccupationKey(indices));
         }
 
         private static string OccupationKey(ImmutableArray<int> tuple) =>
@@ -483,20 +516,19 @@ internal static class ParameterizationSummaryBuilder
         public static RuleMetrics Build(CompiledModel model, ImmutableArray<TransitionRuleSet> sets)
         {
             var collections = model.Transitions.Collections;
-            var kineticRuleIds = new HashSet<string>(StringComparer.Ordinal);
+            var collectionIndexByTransition = new Dictionary<(TransitionKind Kind, Guid Id), int>(
+                collections.Length);
             var kineticCollectionCount = 0;
             var nonParameterizableCount = 0;
             var kineticSlots = 0;
             foreach (var collection in collections)
             {
+                collectionIndexByTransition[(collection.Transition.Kind, collection.Transition.Id)] =
+                    collection.Index;
                 if (collection.Transition.Kind == TransitionKind.Kinetic)
                 {
                     kineticCollectionCount++;
                     kineticSlots += Length(collection.RuleIndices);
-                    foreach (var ruleIndex in collection.RuleIndices)
-                    {
-                        kineticRuleIds.Add(model.Transitions.Rules[ruleIndex].RuleGeometryId);
-                    }
                 }
                 else
                 {
@@ -523,38 +555,33 @@ internal static class ParameterizationSummaryBuilder
             foreach (var set in sets)
             {
                 var entries = set.Rules;
-                if (entries.IsDefault)
+                if (entries.IsDefault ||
+                    set.TransitionKind != TransitionKind.Kinetic ||
+                    !collectionIndexByTransition.TryGetValue(
+                        (set.TransitionKind, set.TransitionId),
+                        out var collectionIndex))
                 {
                     continue;
                 }
 
-                explicitCount += entries.Length;
-                var kineticSet = set.TransitionKind == TransitionKind.Kinetic;
                 foreach (var entry in entries)
                 {
-                    if (entry is null)
+                    if (entry is null ||
+                        entry.RuleGeometryId is null ||
+                        !ruleByGeometryId.TryGetValue(entry.RuleGeometryId, out var ruleIndex) ||
+                        model.Transitions.Rules[ruleIndex].CollectionIndex != collectionIndex)
                     {
                         continue;
                     }
 
+                    explicitCount++;
                     var value = entry.Frequency.Value;
-                    if (entry.RuleGeometryId is not null &&
-                        ruleByGeometryId.TryGetValue(entry.RuleGeometryId, out var ruleIndex))
-                    {
-                        if (value != model.Transitions.Rules[ruleIndex].FrequencyHz)
-                        {
-                            nonDefaultCount++;
-                        }
-
-                        if (kineticSet && kineticRuleIds.Contains(entry.RuleGeometryId))
-                        {
-                            frequencies[ruleIndex] = value;
-                        }
-                    }
-                    else if (value != CompiledJumpRule.DefaultFrequencyHz)
+                    if (value != model.Transitions.Rules[ruleIndex].FrequencyHz)
                     {
                         nonDefaultCount++;
                     }
+
+                    frequencies[ruleIndex] = value;
                 }
             }
 
