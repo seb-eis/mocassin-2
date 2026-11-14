@@ -144,7 +144,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
 
 > Round-2 state is `Ready with notes`: no Blocker or Major remains; R2-1..R2-3 are Minor and R2-4..R2-6 are
 > Notes, all requiring explicit human-owner acceptance before implementation starts. Round-1 findings, evidence,
@@ -153,6 +153,10 @@ the auditor's findings, evidence, or verdict.
 > Round-3 state is `Ready with notes`: no Blocker or Major remains; one Minor (R3-1) and the orchestrator-owned
 > dashboard update (R2-5) require explicit human-owner acceptance before implementation starts. Rounds 1–2
 > reviewer text is unchanged.
+>
+> Round-4 state is `Ready with notes`: R3-1 is resolved and no design finding remains open; the only outstanding
+> item is the orchestrator-owned dashboard update (R2-5), which the human owner must accept explicitly.
+> Rounds 1–3 reviewer text is unchanged.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -569,3 +573,112 @@ code or step branch exists, and the planner did not alter the round-1/round-2 fi
 One Minor (R3-1) and the R2-5 dashboard follow-up require explicit human-owner acceptance under
 `docs/planning/reviews/README.md` before implementation starts. This record is evidence and does not authorize
 starting Step 09.
+
+### Review round 4
+
+#### Independence and frozen state
+
+I am a fresh context with no shared conversation with the planner, implementor, step agent, or orchestrator. I
+did not author or implement the reviewed work, did not write rounds 1–3, and received only the frozen design
+commit, the request record, repository links, and the required commands/scope; no desired verdict or summary
+was supplied. All evidence below is from reading `/workspace/playground/step09-design` at the request tip
+`dc51d2d5cfa2c282b425185079e42504fe966e61` and the frozen design at
+`26d6a0ecff543ac65eb60d60d9f9c893e00f32bc`.
+
+Frozen-state checks:
+
+- `git rev-parse HEAD` — `dc51d2d5cfa2c282b425185079e42504fe966e61`.
+- `git diff --name-status 26d6a0e..dc51d2d` — exactly `M docs/planning/reviews/step-09.md` and
+  `M docs/planning/steps/step-09-parameterization-templates.md` (2 files, +18/−3). The step-page hunk is the
+  single `Design review:` status line. This is the documentation-only request/status delta allowed by
+  `reviews/README.md` §8.1.
+- `git show --stat 26d6a0e` — four design docs (`02-data-contracts.md`, `05-open-decisions.md`,
+  `adr/0010-canonical-messagepack-signatures.md`, `steps/step-09-parameterization-templates.md`; 27 insertions,
+  12 deletions) and **no** review record. The commit's parent is `534218b` (the round-3 record commit), and
+  `git diff 534218b..26d6a0e -- docs/planning/reviews/step-09.md` is empty, so the R3-1 fix could not have
+  altered rounds 1–3.
+- `git diff 26d6a0e..dc51d2d -- docs/planning/reviews/step-09.md` — three hunks only: the reviewed-commit
+  metadata row, the `Record state` value, and an appended `### Round 3 resolution` block. No hunk touches the
+  request scope, checklist item text, `## Evidence`, `## Findings`, `## Reviewer independence`, `## Verdict`, or
+  `### Review round 1/2/3`; a grep of the diff for checklist lines returns nothing.
+- `git status --short` — clean before this record. `git branch -a` — only `docs/step-09-design`, `main`,
+  `origin/docs/step-09-design`, `origin/main`; no step or feature branch. `docs/planning/audits/step-09.md` is
+  absent. `git log -3 -- docs/planning/status.md` — last touched by `81d1f32` (Step 08 closeout).
+
+I re-read every checklist item above against `26d6a0e`; all marks remain `[x]` and no item text was changed.
+The round-1/2/3 sections are unchanged; round-4 residuals are recorded only in this appended section.
+
+#### Commands and results
+
+Run in `/workspace/playground/step09-design`; full logs are in `/tmp/opencode/step09-review4/` (scratch, not
+committed).
+
+```sh
+./tools/verify.sh docs --require
+# exit 0; "Documentation links OK (153 files scanned).";
+# Zensical (strict): "No issues found";
+# DocFX: "Applying templates to 302 model(s)..." then "Build succeeded." / "0 warning(s)" / "0 error(s)";
+# rustdoc generated for every workspace crate;
+# "Closeout gate completed with required checks enabled."
+
+./tools/verify.sh policy --require
+# exit 0; "NuGet licence policy OK (51 packages)."; no vulnerable packages for any solution project;
+# ApiCompat: "Public API is compatible with the checked-in baseline";
+# "Contract artifacts are current (18 files)"; "Model projection check OK (5 fixtures).";
+# "space-group catalog is current: 274 settings, sha256 1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395";
+# "Process consistency: OK"; "Ran 18 tests in 0.427s" (OK);
+# "SPDX headers present in 411 source files"; "No secret patterns found in 739 tracked text files";
+# "advisories ok, bans ok, licenses ok, sources ok";
+# "Closeout gate completed with required checks enabled."
+```
+
+Repository probes: `grep`/`sed` over the ADR, data contract §1.3/§3.3, open decisions, Step 09 §6.1 and the
+feature table, the manifest and generated descriptors, the projections fixture tree, the tags, and the status
+dashboard.
+
+#### R3-1 verification (reproduced, not taken from the resolution table)
+
+| Claim | Reproduced evidence |
+| --- | --- |
+| The pre-release finalization is authorized by a normative, ADR-0010-scoped decision. | `adr/0010-canonical-messagepack-signatures.md` lines 48–61, section “Pre-release signature layout finalization”: it names both `signatures.model` / `ModelSignatureV1` / `model-v1` (Step 08) and `signatures.parameterization` / `ParameterizationSignatureV1` / `parameterization-v1` (Step 09) as finalized once while the `.msl` format is unreleased; it calls this “an explicit pre-release exception to rule 1's format-breaking-change warning”, states that `status = "final"` means “finalized for the first release candidate, not released”, and requires a version bump and a new ADR for any later field/type change after the first released `.msl`. The parameterization half names the replacement of the Step 00 skeleton fields, the generated descriptor, and closure with golden vectors plus the Python checker in Step 09 feature 2 (`parameterization-signature`). |
+| The rule has one normative home and the other pages reference it. | ADR 0010 is the only page that states the exception as a decision. `02-data-contracts.md` §1.3 lines 109–114 says the finalization is authorized by “ADR 0010's pre-release signature-layout exception”; §3.3 lines 839–842 says “ADR 0010 records the pre-release signature-layout exception for both” and that neither `status` value is a release marker; Step 09 §6.1 lines 800–804 says “ADR 0010's pre-release signature-layout exception covers this finalization (extended from the model layout to both signed projections)”; `05-open-decisions.md` line 59 says the layout finalization “is covered by ADR 0010's signature-layout exception”. No page presents a competing rule or a different basis, and a grep for “new ADR”/“decision note” finds only the post-release future requirement in the ADR and Step 09. |
+| The text is consistent with the data contract and Step 09. | The six-field typed projection (`formatVersion`, `modelSignature`, `pairTables`, `groupSets`, `siteEnergies`, `transitionRules`) and the domain prefix are identical in `02-data-contracts.md` §1.3 and Step 09 §6.1. The feature name `parameterization-signature` matches the approved feature table (Step 09 line 37) and the feature-2 scope (line 1206: finalize the manifest entry, generated descriptor, golden vectors, manifest fixture vectors, and the Python checker). `contracts/manifest.json` still has `signatures.parameterization.status = "skeleton"` with the `stablePairs`/`unstablePairs` placeholder `bin` fields, matching the ADR's “replaces the Step 00 skeleton fields” description and leaving the change to feature 2. |
+| The text is consistent with AGENTS §11. | Item 1 (ADR or explicit decision note): ADR 0010, amended in this commit. Item 2 (version bump): deferred only by the recorded pre-release exception, with the post-release bump-plus-ADR rule stated; this matches the accepted `model-v1` precedent in `reviews/step-08-amend-1.md` (R3-10) and `02-data-contracts.md` §3.3. Item 5 (canonical signature-projection vectors): planned for the signed type in feature 2 and recorded in the manifest fixture section with `generate.py` regeneration. Items 3–4/6 (fixtures and cross-language vectors): unchanged, and no parameterization projection fixture exists yet (`tests/contracts/projections/` contains model fixtures only). Item 7 (docs): updated in the same commit. No released `.msl` exists (`git tag` lists no `v*` tag; no `.msl` is tracked), so the exception's premise holds. |
+| The design is otherwise unchanged and still coherent. | `git diff 534218b..26d6a0e` touches only the four authorization/versioning statements above. The signed values, the absolute `jump_rules[].frequency_hz` rule, the 12-decimal quantization, the exclusion list, and the Step 11/13/16 consumption rules are unchanged from `b5db289`, and the round-3 `docs`/`policy` gates still pass on this tree. |
+
+R2-5 remains correctly assigned: `docs/planning/status.md` row 09 still reads design review `Not requested`, the
+file was last changed by `81d1f32` (Step 08 closeout), and neither the planner nor this reviewer edited it. The
+dashboard update belongs to the orchestrator/step agent at acceptance or step start under AGENTS §3.8.
+
+#### Findings
+
+No new finding. R3-1 is resolved: the authorization now exists in its normative ADR home, the data contract and
+Step 09 references agree, and the pre-release premise (no released `.msl`) holds. No earlier-round finding,
+evidence item, independence statement, verdict, or checklist item was altered.
+
+Residual/administrative notes (not findings, unchanged from round 3 unless stated):
+
+- The `Approval summary` section is still empty; the step agent must complete the cumulative report required by
+  AGENTS §3.12 before the human owner is asked to accept this verdict.
+- R2-5: the dashboard `Design review` cell for Step 09 must be updated by the orchestrator/step agent at
+  acceptance/step start; the reviewer and planner cannot edit `status.md`.
+- The round-2 residual implementation risks (catalog/docs atomicity, `fixtures.items` registration for new
+  `tests/contracts/` fixtures, and the M4 owner decision as a prerequisite) remain visible and unchanged.
+- The round-1 checklist inline note about ADR 0010 covering only `signatures.model` is historical text from the
+  frozen round-1 review; it is preserved unaltered and is superseded by this round's reproduced evidence.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Ready with notes.** No Blocker or Major remains and R3-1 is verified resolved from the tree: ADR 0010 now
+carries the pre-release signature-layout exception for `signatures.parameterization`, and the data contract
+§1.3/§3.3, open decisions, and Step 09 §6.1 reference that single normative home consistently with AGENTS §11.
+The frozen-design delta contains only the R3-1 docs change, the required `docs` and `policy` gates pass, the
+planner did not alter rounds 1–3 or any checklist item text, no implementation code or step branch exists, and
+R2-5 is still correctly assigned to the orchestrator. The only open item is the administrative R2-5 dashboard
+update, which the human owner must accept explicitly under `docs/planning/reviews/README.md` before
+implementation starts. This record is evidence and does not authorize starting Step 09.
