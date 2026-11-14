@@ -227,3 +227,75 @@ public sealed class CacheInvalidationTests
             where T : class => inner.GetOrAdd(key, factory);
     }
 }
+
+/// <summary>
+/// Covers structure-cache invalidation when particle sets change.
+/// </summary>
+[Trait("Tier", "PR-medium")]
+public sealed class ParticleSetCacheTests
+{
+    [Fact]
+    public async Task ParticleSetEditMissesTheStructureCache()
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync("samples/simulations/ceria-kmc.mocprj"),
+            kinetic: true);
+        var cache = new RecordingCache(256);
+        var compiler = new ModelCompiler();
+        var options = new CompilationOptions { Cache = cache };
+        var baseline = compiler.Compile(project, options);
+        Assert.True(baseline.IsSuccess);
+        cache.Hits.Clear();
+
+        var hydrogen = new Core.Model.Particles.Particle(
+            Core.Ids.ParticleId.New(), "H+", "H", new Core.Units.ChargeElementary(1.0), false);
+        var oxygen = project.Particles.First(static particle => particle.Symbol == "O");
+        var oxygenSite = project.Structure.Sites[0];
+        var set = new Core.Model.Particles.ParticleSet(
+            Core.Ids.ParticleSetId.New(),
+            "O/H",
+            [oxygen.Id, hydrogen.Id]);
+        var edited = project with
+        {
+            Model = project.Model with
+            {
+                Particles = [.. project.Particles, hydrogen],
+                ParticleSets = [.. project.Model.ParticleSets, set],
+                Structure = project.Structure with
+                {
+                    Sites = [.. project.Structure.Sites.Select(site =>
+                        site.Id == oxygenSite.Id ? site with { ParticleSetId = set.Id } : site)],
+                },
+            },
+        };
+        var updated = compiler.Compile(edited, options);
+
+        Assert.True(updated.IsSuccess);
+        Assert.NotEqual(baseline.Model!.ModelSignature, updated.Model!.ModelSignature);
+        Assert.DoesNotContain(cache.Hits, static key => key.StartsWith("structure|", StringComparison.Ordinal));
+    }
+
+    private sealed class RecordingCache(int capacity) : ICompilationCache
+    {
+        private readonly StageCache inner = new(capacity);
+
+        public HashSet<string> Hits { get; } = new(StringComparer.Ordinal);
+
+        public CompilationCacheStatistics Statistics => inner.Statistics;
+
+        public bool TryGet<T>(string key, out T? value)
+            where T : class
+        {
+            var found = inner.TryGet(key, out value);
+            if (found)
+            {
+                Hits.Add(key);
+            }
+
+            return found;
+        }
+
+        public T GetOrAdd<T>(string key, Func<T> factory)
+            where T : class => inner.GetOrAdd(key, factory);
+    }
+}
