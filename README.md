@@ -40,7 +40,7 @@ directly on a workstation; opencode is not required.
 | .NET SDK | `10.0.403` (pinned in `global.json`) | Libraries, CLI, Avalonia app, tests |
 | Rust stable | `1.99.1` with `rustfmt` and `clippy` | Solver workspace |
 | Python | `3.11`–`3.13` | Python package, docs, contract tooling |
-| Zensical | `0.0.74` (pinned in `tools/docs/requirements.txt`) | Narrative documentation |
+| Zensical | `0.1.1` (pinned in `tools/docs/requirements.txt`) | Narrative documentation |
 | DocFX | `2.81.0` (pinned in `.config/dotnet-tools.json`) | .NET API documentation |
 | `cargo-deny` | `0.20.2` (configuration in `deny.toml`) | Rust licence/advisory checks |
 

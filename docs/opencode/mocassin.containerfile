@@ -132,7 +132,7 @@ RUN dotnet tool install --global docfx --version 2.81.0 \
 # --------------------------------------------------
 RUN python3 -m venv "$HOME/.venvs/mocassin" \
     && "$HOME/.venvs/mocassin/bin/pip" install --no-cache-dir \
-        'zensical==0.0.74' \
+        'zensical==0.1.1' \
         'mkdocstrings[python]==1.0.8' \
         'pytest==9.2.0' \
         'pytest-cov==7.1.0' \
