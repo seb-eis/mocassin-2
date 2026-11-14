@@ -84,7 +84,7 @@ internal sealed class DirectionDraft
             relative,
             start.P,
             Stability.Reverse().ToArray(),
-            DirectionKey(relative, isInverse: true),
+            DirectionKey(CollectionIndex, relative, isInverse: true),
             Key);
     }
 }

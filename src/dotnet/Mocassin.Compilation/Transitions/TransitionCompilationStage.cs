@@ -223,6 +223,14 @@ internal sealed class TransitionCompilationStage : ICompilationStage
                 [.. collectionRules.Select(static rule => rule.Index)]));
         }
 
+        if (rulesByCollection.Length > context.Options.MaxRuleCount)
+        {
+            return CompilationFailure.FromMessage(
+                context,
+                CompilationDiagnosticCodes.CompileLimit,
+                $"The compiled rule count {rulesByCollection.Length} exceeds the hard limit {context.Options.MaxRuleCount}.");
+        }
+
         if (rulesByCollection.Length > context.Options.AdvisoryRuleCount)
         {
             warnings.Add(new Diagnostic(
@@ -240,7 +248,12 @@ internal sealed class TransitionCompilationStage : ICompilationStage
             [],
             [],
             context.Particles.Count,
-            context.Structure.PositionCount);
+            context.Structure.PositionCount)
+        {
+            RejectedByMass = rejectionCounts[0],
+            RejectedByCharge = rejectionCounts[1],
+            RejectedByInvalidState = rejectionCounts[2],
+        };
         context.Cache?.GetOrAdd(StageCacheKeys.Rules(context), () => model);
         return new CompilationStageOutcome(context with { Transitions = model }, warnings.Sorted);
     }
@@ -460,7 +473,7 @@ internal sealed class TransitionCompilationStage : ICompilationStage
                 encoding.C - start.C,
                 encoding.P))
             .ToArray();
-        var key = DirectionKey(relative, IsInverse);
+        var key = DirectionKey(work.CollectionIndex, relative, IsInverse);
         var existing = all.FirstOrDefault(draft => string.Equals(draft.Key, key, StringComparison.Ordinal));
         if (existing is not null)
         {

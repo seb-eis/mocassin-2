@@ -29,6 +29,9 @@ internal sealed class EnvironmentCompilationStage : ICompilationStage
         }
 
         var sites = context.Structure.Sites;
+        var positionsBySite = context.Structure.Positions
+            .GroupBy(static position => position.SiteIndex)
+            .ToDictionary(static group => group.Key, static group => group.ToArray());
         var siteIndexById = sites
             .Select(static (site, index) => (site.Id, index))
             .ToDictionary(static entry => entry.Id, static entry => entry.index);
@@ -51,9 +54,10 @@ internal sealed class EnvironmentCompilationStage : ICompilationStage
         ulong stableMask = 0;
         foreach (var site in sites.Where(static site => site.Stability == SiteStability.Stable))
         {
-            stableMask |= context.Structure.Positions
-                .Where(position => position.SiteIndex == site.Index)
-                .Aggregate(0UL, static (mask, position) => mask | position.AllowedParticleMask);
+            if (positionsBySite.TryGetValue(site.Index, out var sitePositions))
+            {
+                stableMask |= sitePositions.Aggregate(0UL, static (mask, position) => mask | position.AllowedParticleMask);
+            }
         }
 
         environments.Add(new CompiledEnvironment(
@@ -78,9 +82,9 @@ internal sealed class EnvironmentCompilationStage : ICompilationStage
                     $"An unstable environment references an unknown site '{environment.SiteId:D}'.");
             }
 
-            var mask = context.Structure.Positions
-                .Where(position => position.SiteIndex == siteIndex)
-                .Aggregate(0UL, static (current, position) => current | position.AllowedParticleMask);
+            var mask = positionsBySite.TryGetValue(siteIndex, out var sitePositions)
+                ? sitePositions.Aggregate(0UL, static (current, position) => current | position.AllowedParticleMask)
+                : 0UL;
             environmentIndexBySite[siteIndex] = index + 1;
             environments.Add(new CompiledEnvironment(
                 index + 1,

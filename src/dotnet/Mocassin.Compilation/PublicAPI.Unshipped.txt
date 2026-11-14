@@ -651,6 +651,12 @@ Mocassin.Compilation.Transitions.CompiledTransitionModel.ParticleCount.get -> in
 Mocassin.Compilation.Transitions.CompiledTransitionModel.ParticleCount.init -> void
 Mocassin.Compilation.Transitions.CompiledTransitionModel.PositionCount.get -> int
 Mocassin.Compilation.Transitions.CompiledTransitionModel.PositionCount.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.RejectedByCharge.get -> int
+Mocassin.Compilation.Transitions.CompiledTransitionModel.RejectedByCharge.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.RejectedByInvalidState.get -> int
+Mocassin.Compilation.Transitions.CompiledTransitionModel.RejectedByInvalidState.init -> void
+Mocassin.Compilation.Transitions.CompiledTransitionModel.RejectedByMass.get -> int
+Mocassin.Compilation.Transitions.CompiledTransitionModel.RejectedByMass.init -> void
 Mocassin.Compilation.Transitions.CompiledTransitionModel.RuleCount.get -> int
 Mocassin.Compilation.Transitions.CompiledTransitionModel.Rules.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Compilation.Transitions.CompiledJumpRule!>
 Mocassin.Compilation.Transitions.CompiledTransitionModel.Rules.init -> void

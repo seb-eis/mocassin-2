@@ -125,6 +125,15 @@ public sealed record CompiledTransitionModel(
     /// </summary>
     public ImmutableArray<CompiledStaticTracker> StaticTrackers { get; init; } = [];
 
+    /// <summary>Gets the number of combinations rejected by mass conservation.</summary>
+    public int RejectedByMass { get; init; }
+
+    /// <summary>Gets the number of combinations rejected by charge conservation.</summary>
+    public int RejectedByCharge { get; init; }
+
+    /// <summary>Gets the number of combinations rejected by invalid state roles.</summary>
+    public int RejectedByInvalidState { get; init; }
+
     /// <summary>
     /// Gets the number of compiled collections.
     /// </summary>

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using Mocassin.Compilation.Context;
 using Mocassin.Core.Project;
 
@@ -40,12 +42,42 @@ internal static class StageCacheKeys
     /// <summary>
     /// Creates the rule-stage key.
     /// </summary>
-    public static string Rules(CompilationContext context) =>
-        Key(
+    public static string Rules(CompilationContext context)
+    {
+        var references = context.Project.Simulations.IsDefault
+            ? []
+            : context.Project.Simulations
+                .SelectMany(static simulation => simulation.TransitionIds.IsDefault ? [] : simulation.TransitionIds)
+                .Distinct()
+                .OrderBy(static reference => reference.Kind)
+                .ThenBy(static reference => reference.Id)
+                .ToArray();
+        var closures = references
+            .Select(reference => ProjectHasher.ComputeTransition(context.Project, reference))
+            .ToArray();
+        return Key(
             "rules",
             context,
             ProjectHasher.ComputeSimulationSelection(context.Project),
-            ProjectHasher.ComputeStructure(context.Project.Structure));
+            ProjectHasher.ComputeStructure(context.Project.Structure),
+            ParticleHash(context),
+            string.Join('|', closures));
+    }
+
+    private static string ParticleHash(CompilationContext context)
+    {
+        var builder = new StringBuilder();
+        var particles = context.Project.Particles.IsDefault ? [] : context.Project.Particles;
+        foreach (var particle in particles.OrderBy(static particle => particle.Id.Value))
+        {
+            builder.Append(particle.Id.Value.ToString("D", CultureInfo.InvariantCulture)).Append('|')
+                .Append(particle.Symbol).Append('|')
+                .Append(particle.Charge.Value.ToString("R", CultureInfo.InvariantCulture)).Append('|')
+                .Append(particle.IsVacancy ? '1' : '0').Append(';');
+        }
+
+        return Convert.ToHexStringLower(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(builder.ToString())));
+    }
 
     /// <summary>
     /// Creates the encoding-stage key.

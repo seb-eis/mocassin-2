@@ -44,7 +44,18 @@ internal sealed class EncodingCompilationStage : ICompilationStage
 
         var transitions = context.Transitions;
         var globalTrackers = BuildGlobalTrackers(transitions);
-        var staticTrackers = BuildStaticTrackers(context.Structure.PositionCount, context.Particles.Count);
+        if (globalTrackers.Any(static tracker => tracker.Index > byte.MaxValue))
+        {
+            return CompilationFailure.FromMessage(
+                context,
+                CompilationDiagnosticCodes.CompileLimit,
+                "The compiled global tracker count exceeds the 8-bit tracker-order limit.");
+        }
+
+        var staticTrackers = BuildStaticTrackers(
+            context.Structure.PositionCount,
+            context.Particles.Count,
+            transitions.Collections.Any(static collection => collection.Kind == SimulationKind.Kmc));
         var trackerIndex = globalTrackers
             .ToDictionary(
                 static tracker => (tracker.CollectionIndex, tracker.ParticleIndex),
@@ -78,6 +89,15 @@ internal sealed class EncodingCompilationStage : ICompilationStage
             : context.Energy.PairTables.Sum(
                   static table => (long)table.ParticleCount * table.ParticleCount * sizeof(double))
               + context.Energy.ClusterTables.Sum(static table => (long)table.OccupationCount * sizeof(double));
+        if (tableBytes > context.Options.MaxEnergyTableBytes)
+        {
+            return CompilationFailure.FromMessage(
+                context,
+                CompilationDiagnosticCodes.CompileLimit,
+                $"The estimated energy-table size {tableBytes} bytes exceeds the hard limit " +
+                $"{context.Options.MaxEnergyTableBytes}.");
+        }
+
         if (tableBytes > context.Options.AdvisoryEnergyTableBytes)
         {
             warnings.Add(new Diagnostic(
@@ -98,7 +118,9 @@ internal sealed class EncodingCompilationStage : ICompilationStage
     private static ImmutableArray<CompiledGlobalTracker> BuildGlobalTrackers(CompiledTransitionModel model)
     {
         var builder = ImmutableArray.CreateBuilder<CompiledGlobalTracker>();
-        foreach (var collection in model.Collections.OrderBy(static collection => collection.Index))
+        foreach (var collection in model.Collections
+                     .Where(static collection => collection.Kind == SimulationKind.Kmc)
+                     .OrderBy(static collection => collection.Index))
         {
             for (var particle = 1; particle < model.ParticleCount; particle++)
             {
@@ -114,8 +136,16 @@ internal sealed class EncodingCompilationStage : ICompilationStage
         return builder.ToImmutable();
     }
 
-    private static ImmutableArray<CompiledStaticTracker> BuildStaticTrackers(int positionCount, int particleCount)
+    private static ImmutableArray<CompiledStaticTracker> BuildStaticTrackers(
+        int positionCount,
+        int particleCount,
+        bool hasKmc)
     {
+        if (!hasKmc)
+        {
+            return [];
+        }
+
         var builder = ImmutableArray.CreateBuilder<CompiledStaticTracker>(
             positionCount * Math.Max(0, particleCount - 1));
         for (var position = 0; position < positionCount; position++)
@@ -140,6 +170,16 @@ internal sealed class EncodingCompilationStage : ICompilationStage
     {
         var nodes = rule.Movement.Length;
         var order = ImmutableArray.CreateBuilder<byte>(nodes);
+        if (model.Collections[rule.CollectionIndex].Kind == SimulationKind.Mmc)
+        {
+            for (var node = 0; node < nodes; node++)
+            {
+                order.Add(0xFF);
+            }
+
+            return order.MoveToImmutable();
+        }
+
         for (var node = 0; node < nodes; node++)
         {
             var particle = (int)((rule.State0 >> (6 * node)) & 63);
@@ -237,7 +277,9 @@ internal sealed class EncodingCompilationStage : ICompilationStage
             var trackerStatic = new List<int>();
             if (simulation.Kind == SimulationKind.Kmc)
             {
-                trackerGlobal.AddRange(model.GlobalTrackers.Select(static tracker => tracker.Index));
+                trackerGlobal.AddRange(model.GlobalTrackers
+                    .Where(tracker => collectionIndices.Contains(tracker.CollectionIndex))
+                    .Select(static tracker => tracker.Index));
                 trackerStatic.AddRange(model.StaticTrackers.Select(static tracker => tracker.Index));
             }
 

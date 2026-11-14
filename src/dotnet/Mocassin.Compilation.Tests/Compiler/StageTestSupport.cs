@@ -81,6 +81,24 @@ internal static class StageTestSupport
     ];
 
     /// <summary>
+    /// Creates a project whose first simulation references the supplied transitions.
+    /// </summary>
+    /// <param name="project">The source project.</param>
+    /// <param name="transitions">The transition references.</param>
+    /// <returns>The updated project.</returns>
+    public static Project WithSimulationTransitions(Project project, params Core.Model.Transitions.TransitionRef[] transitions)
+    {
+        var model = project.Model;
+        Core.Model.Simulations.Simulation created = new Core.Model.Simulations.KineticSimulation
+        {
+            Id = new Core.Ids.SimulationId(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f99")),
+            Name = "Compiler test",
+            TransitionIds = [.. transitions],
+        };
+        return project with { Model = model with { Simulations = [created] } };
+    }
+
+    /// <summary>
     /// Creates a project whose first simulation references the first transition of the requested kind.
     /// </summary>
     /// <param name="project">The source project.</param>

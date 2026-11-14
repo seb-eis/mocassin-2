@@ -190,9 +190,11 @@ internal static class TransitionRuleHelpers
         }
     }
 
-    internal static string DirectionKey(Vector4I[] relative, bool isInverse)
+    internal static string DirectionKey(int collectionIndex, Vector4I[] relative, bool isInverse)
     {
-        var builder = new StringBuilder(isInverse ? "i" : "f");
+        var builder = new StringBuilder(isInverse ? "i" : "f")
+            .Append(collectionIndex)
+            .Append('|');
         AppendPath(builder, relative);
         return builder.ToString();
     }

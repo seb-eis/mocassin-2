@@ -1,0 +1,7 @@
+{
+  "fixtureFormat": "canonical-projection-v1",
+  "id": "model-ceria-mmc",
+  "descriptor": "model-v1",
+  "signatureHex": "bf7fea8429d97cb35ccd3bd1424a1c97c073b98cca2feb458525ffef0e4bb214",
+  "projectionSha256": "2b0b7388a030edaf0518440e898e74f879dac98cb0a53c1fcbecdd44b84b0000"
+}

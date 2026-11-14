@@ -110,11 +110,12 @@ public sealed class ComplexMechanismTests
         Assert.True(result.IsSuccess, string.Join(Environment.NewLine, result.Diagnostics.Select(static item => item.ToString())));
         Assert.NotEmpty(result.Model!.Transitions.Rules);
         Assert.Equal(0, result.Model.Transitions.InverseRuleCount);
-        Assert.Equal("3d14d6081c36dce18b19c5641b9771b764b87367663f1438ca65ceb1bc850d73", result.Model.ModelSignature);
+        Assert.Equal("e2b8255b09f136519f8febff410721029592bdcac0ee220e2d59dd887c82c798", result.Model.ModelSignature);
         var rule = Assert.Single(result.Model.Transitions.Rules.Where(static rule => !rule.IsInverse));
         Assert.Equal(-4.0, rule.ChargeTransportVector.X, 12);
         Assert.Equal(0.0, rule.ChargeTransportVector.Y, 12);
         Assert.Equal(0.0, rule.ChargeTransportVector.Z, 12);
+        Assert.Equal(0.2, rule.Movement[2].A, 12);
     }
 }
 
@@ -167,5 +168,32 @@ public sealed class SpectatorMovementTests
         Assert.Equal(-0.4, rule.Movement[4].A, 12);
         Assert.NotEqual((byte)0xFF, rule.TrackerOrder[2]);
         Assert.Equal(rule.TrackerOrder[0], rule.TrackerOrder[2]);
+    }
+}
+
+/// <summary>
+/// Covers explicit reverse transitions compiled alongside their forward partner.
+/// </summary>
+[Trait("Tier", "PR-fast")]
+public sealed class ExplicitReverseCompilationTests
+{
+    [Theory]
+    [InlineData("samples/transitions/vehicle5.mocprj")]
+    [InlineData("samples/transitions/interstitialcy5.mocprj")]
+    public async Task ForwardAndReverseTransitionsCompileInOneProject(string sample)
+    {
+        var loaded = await StageTestSupport.LoadProjectAsync(sample);
+        var transitions = loaded.Model.KineticTransitions
+            .Select(static transition => Core.Model.Transitions.TransitionRef.From(transition.Id))
+            .ToArray();
+        var project = StageTestSupport.WithSimulationTransitions(loaded, transitions);
+
+        var result = new ModelCompiler().Compile(project);
+
+        Assert.True(result.IsSuccess, string.Join(Environment.NewLine, result.Diagnostics.Select(static item => item.ToString())));
+        Assert.Equal(2, result.Model!.Transitions.CollectionCount);
+        Assert.Equal(0, result.Model.Transitions.InverseRuleCount);
+        Assert.All(result.Model.Transitions.Collections, collection => Assert.NotEmpty(collection.DirectionIndices));
+        Assert.All(result.Model.Transitions.Collections, collection => Assert.NotEmpty(collection.RuleIndices));
     }
 }

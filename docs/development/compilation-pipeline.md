@@ -180,10 +180,16 @@ ParameterizedModel.Signature
   the symmetry contract version, and the catalog version/SHA-256.
 - It excludes runtime simulation settings, parameterization values, timings, diagnostics, file names, and
   cache state.
-- The projection follows ADR 0010: arrays in fixed field order, fixed-width integers, float64, normalized
-  `-0.0`, domain separation, no compression/timestamps. `Mocassin.Compilation` hand-codes it because it
-  cannot reference `Mocassin.Contracts`; Step 08 finalizes the existing `signatures.model` manifest entry,
-  which Step 11 reuses for stored-payload and cross-language checks.
+- The projection follows ADR 0010 and the full nested `signatures.model` manifest schema: arrays in fixed
+  field order, fixed-width `uint64`/`int64`, float64, normalized `-0.0`, domain separation, and no
+  compression/timestamps. `Mocassin.Compilation` owns a small `CanonicalProjectionWriter` built on the
+  centrally pinned `MessagePack` 3.1.12 package; it writes fixed-width scalars and forced canonical headers.
+- All projected float64 values are quantized to 12 decimal places with round-half-away-from-zero on the
+  binary64 product. Energy values, runtime settings, display distances, `pathLength`, and `StaticCorrection`
+  (null in v1) are excluded.
+- `tests/contracts/projections/*.bin` are the canonical byte fixtures for ceria KMC, ceria MMC, vehicle5,
+  interstitialcy5, and BaZrO₃; `tools/contracts/check_model_projection.py` independently re-encodes them from
+  the generated descriptor in `verify.sh contracts`. Step 11 reuses the same manifest entry and projection.
 - Step 09 treats the model signature as opaque and computes the parameterization signature in
   `Mocassin.Contracts`. `models.signature` is the parameterization signature; `models.payload.model_signature`
   is the Step 08 signature.

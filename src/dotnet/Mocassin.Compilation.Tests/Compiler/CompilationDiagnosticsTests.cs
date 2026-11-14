@@ -71,6 +71,7 @@ public sealed class CompilationDiagnosticsTests
         Assert.True(result.IsSuccess);
         Assert.True(result.Report.Counts.Rules > 0);
         Assert.True(result.Report.Counts.InverseRules > 0);
+        Assert.True(result.Report.Counts.RejectedByMass > 0);
         Assert.Equal(result.Model!.Transitions.RuleCount, result.Report.Counts.Rules);
         Assert.Equal(result.Model.Transitions.InverseRuleCount, result.Report.Counts.InverseRules);
     }

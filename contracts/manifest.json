@@ -1931,28 +1931,801 @@
         },
         {
           "name": "particles",
-          "type": "bin",
-          "required": true
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemFields": [
+            {
+              "name": "index",
+              "type": "uint64",
+              "required": true
+            },
+            {
+              "name": "id",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "symbol",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "charge",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "isVacancy",
+              "type": "bool",
+              "required": true
+            }
+          ]
         },
         {
           "name": "structure",
-          "type": "bin",
-          "required": true
+          "type": "object",
+          "required": true,
+          "fields": [
+            {
+              "name": "cellVectors",
+              "type": "array",
+              "required": true,
+              "items": "array",
+              "itemItems": {
+                "type": "array",
+                "itemItems": {
+                  "type": "float64"
+                },
+                "items": "array"
+              }
+            },
+            {
+              "name": "volume",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "sites",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "index",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "fractional",
+                  "type": "array",
+                  "required": true,
+                  "items": "float64"
+                },
+                {
+                  "name": "stability",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "particleSetId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "environmentIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "positionIndices",
+                  "type": "array",
+                  "required": true,
+                  "items": "uint64"
+                }
+              ]
+            },
+            {
+              "name": "environments",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "index",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "siteIndex",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "stability",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "allowedParticleMask",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "updateParticleIndices",
+                  "type": "array",
+                  "required": true,
+                  "items": "uint64"
+                }
+              ]
+            },
+            {
+              "name": "positions",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "p",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "encoding",
+                  "type": "object",
+                  "required": true,
+                  "fields": [
+                    {
+                      "name": "cellA",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellB",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellC",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "p",
+                      "type": "uint64",
+                      "required": true
+                    }
+                  ]
+                },
+                {
+                  "name": "fractional",
+                  "type": "array",
+                  "required": true,
+                  "items": "float64"
+                },
+                {
+                  "name": "siteIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "siteId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "stability",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "allowedParticleMask",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "environmentIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "orbitIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "pairLinks",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemFields": [
+                    {
+                      "name": "pairTableIndex",
+                      "type": "uint64",
+                      "required": true
+                    },
+                    {
+                      "name": "targetP",
+                      "type": "uint64",
+                      "required": true
+                    },
+                    {
+                      "name": "encoding",
+                      "type": "object",
+                      "required": true,
+                      "fields": [
+                        {
+                          "name": "cellA",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "cellB",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "cellC",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "p",
+                          "type": "uint64",
+                          "required": true
+                        }
+                      ]
+                    },
+                    {
+                      "name": "distanceBucketFm",
+                      "type": "uint64",
+                      "required": true
+                    }
+                  ]
+                },
+                {
+                  "name": "clusterLinks",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemFields": [
+                    {
+                      "name": "clusterTableIndex",
+                      "type": "uint64",
+                      "required": true
+                    },
+                    {
+                      "name": "siteSlot",
+                      "type": "uint64",
+                      "required": true
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "interactionRange",
+              "type": "array",
+              "required": true,
+              "items": "uint64"
+            }
+          ]
         },
         {
           "name": "energy",
-          "type": "bin",
-          "required": true
+          "type": "object",
+          "required": true,
+          "fields": [
+            {
+              "name": "pairGeometries",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "geometryId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "energyId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "pairTableIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "centerSiteIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "centerP",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "partnerSiteIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "partnerP",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "encoding",
+                  "type": "object",
+                  "required": true,
+                  "fields": [
+                    {
+                      "name": "cellA",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellB",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellC",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "p",
+                      "type": "uint64",
+                      "required": true
+                    }
+                  ]
+                },
+                {
+                  "name": "distanceBucketFm",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "isChiral",
+                  "type": "bool",
+                  "required": true
+                },
+                {
+                  "name": "chiralPartnerGeometryId",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "pairTables",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "index",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "energyId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "particleCount",
+                  "type": "uint64",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "clusterTables",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "clusterEnergyId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "clusterId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "centerSiteIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "centerP",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "sitePIndices",
+                  "type": "array",
+                  "required": true,
+                  "items": "uint64"
+                },
+                {
+                  "name": "geometryEncodings",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemFields": [
+                    {
+                      "name": "cellA",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellB",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellC",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "p",
+                      "type": "uint64",
+                      "required": true
+                    }
+                  ]
+                },
+                {
+                  "name": "occupations",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemFields": [
+                    {
+                      "name": "canonicalCode",
+                      "type": "uint64",
+                      "required": true
+                    },
+                    {
+                      "name": "canonicalTuple",
+                      "type": "array",
+                      "required": true,
+                      "items": "uint64"
+                    },
+                    {
+                      "name": "expansions",
+                      "type": "array",
+                      "required": true,
+                      "items": "object",
+                      "itemFields": [
+                        {
+                          "name": "occupationCode",
+                          "type": "uint64",
+                          "required": true
+                        },
+                        {
+                          "name": "permutationIndex",
+                          "type": "uint64",
+                          "required": true
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "particleTableMapping",
+                  "type": "array",
+                  "required": true,
+                  "items": "uint64"
+                }
+              ]
+            }
+          ]
         },
         {
           "name": "transitions",
-          "type": "bin",
-          "required": true
+          "type": "object",
+          "required": true,
+          "fields": [
+            {
+              "name": "collections",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "index",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "transitionKind",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "transitionId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "kind",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "mobileParticleMask",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "directionIndices",
+                  "type": "array",
+                  "required": true,
+                  "items": "uint64"
+                }
+              ]
+            },
+            {
+              "name": "directions",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "collectionIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "positionId",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "path",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemFields": [
+                    {
+                      "name": "cellA",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellB",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellC",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "p",
+                      "type": "uint64",
+                      "required": true
+                    }
+                  ]
+                },
+                {
+                  "name": "movement",
+                  "type": "array",
+                  "required": true,
+                  "items": "array",
+                  "itemItems": {
+                    "type": "array",
+                    "itemItems": {
+                      "type": "float64"
+                    },
+                    "items": "array"
+                  }
+                },
+                {
+                  "name": "isInverse",
+                  "type": "bool",
+                  "required": true
+                },
+                {
+                  "name": "equivalentStartPositions",
+                  "type": "array",
+                  "required": true,
+                  "items": "uint64"
+                }
+              ]
+            },
+            {
+              "name": "rules",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "ruleGeometryId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "collectionIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "directionIndices",
+                  "type": "array",
+                  "required": true,
+                  "items": "uint64"
+                },
+                {
+                  "name": "state0",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "state1",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "state2",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "movement",
+                  "type": "array",
+                  "required": true,
+                  "items": "array",
+                  "itemItems": {
+                    "type": "array",
+                    "itemItems": {
+                      "type": "float64"
+                    },
+                    "items": "array"
+                  }
+                },
+                {
+                  "name": "chargeTransportVector",
+                  "type": "array",
+                  "required": true,
+                  "items": "float64"
+                },
+                {
+                  "name": "trackerOrder",
+                  "type": "array",
+                  "required": true,
+                  "items": "uint64"
+                },
+                {
+                  "name": "isInverse",
+                  "type": "bool",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "globalTrackers",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "index",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "collectionIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "particleIndex",
+                  "type": "uint64",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "staticTrackers",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemFields": [
+                {
+                  "name": "index",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "positionIndex",
+                  "type": "uint64",
+                  "required": true
+                },
+                {
+                  "name": "particleIndex",
+                  "type": "uint64",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "jumpCounts",
+              "type": "array",
+              "required": true,
+              "items": "uint64"
+            },
+            {
+              "name": "jumpOffsets",
+              "type": "array",
+              "required": true,
+              "items": "uint64"
+            },
+            {
+              "name": "jumpMappings",
+              "type": "array",
+              "required": true,
+              "items": "uint64"
+            }
+          ]
         },
         {
           "name": "simulations",
-          "type": "bin",
-          "required": true
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemFields": [
+            {
+              "name": "id",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "kind",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "activeCollections",
+              "type": "array",
+              "required": true,
+              "items": "uint64"
+            },
+            {
+              "name": "globalTrackers",
+              "type": "array",
+              "required": true,
+              "items": "uint64"
+            },
+            {
+              "name": "staticTrackers",
+              "type": "array",
+              "required": true,
+              "items": "uint64"
+            }
+          ]
         }
       ]
     },
@@ -2055,8 +2828,8 @@
           "signature": "model",
           "domainPrefix": "mocassin/model-signature/v1",
           "projectionType": "ModelSignatureV1",
-          "signatureHex": "a28db57b7ccfd8af29ab2600dd36ab1b84a14f6bc654e3ed226b7cb75b5b357c",
-          "inspectionJsonSha256": "e20ab855588d2a2d73dcbd10b76af45299a059a0a606da0f0042dd6a01471a01",
+          "signatureHex": "812a7a77a8b78993cf8c475061fbf071fea27082569f154737ed12eb3d64a314",
+          "inspectionJsonSha256": "e2b4be280cf91724446b35e91e312765efe249c368919c91ffef45f2d476c162",
           "description": "samples/simulations/ceria-kmc.mocprj with a KMC simulation referencing the first kinetic transition"
         },
         {
@@ -2064,7 +2837,7 @@
           "signature": "model",
           "domainPrefix": "mocassin/model-signature/v1",
           "projectionType": "ModelSignatureV1",
-          "signatureHex": "91cae9a4d68bbed2645abd5e41ea9ce3c2d5d021f465c1bfca9456eaf441fdcd",
+          "signatureHex": "56b5d908194a5a006ba62daa21105edf48b42b529a755e6e694fe35a786eee69",
           "description": "samples/transitions/vehicle5.mocprj with a KMC simulation referencing the corrected forward vehicle transition"
         },
         {
@@ -2072,8 +2845,24 @@
           "signature": "model",
           "domainPrefix": "mocassin/model-signature/v1",
           "projectionType": "ModelSignatureV1",
-          "signatureHex": "3d14d6081c36dce18b19c5641b9771b764b87367663f1438ca65ceb1bc850d73",
+          "signatureHex": "e2b8255b09f136519f8febff410721029592bdcac0ee220e2d59dd887c82c798",
           "description": "samples/transitions/interstitialcy5.mocprj with a KMC simulation referencing the forward interstitialcy transition"
+        },
+        {
+          "id": "model-ceria-mmc",
+          "signature": "model",
+          "domainPrefix": "mocassin/model-signature/v1",
+          "projectionType": "ModelSignatureV1",
+          "signatureHex": "bf7fea8429d97cb35ccd3bd1424a1c97c073b98cca2feb458525ffef0e4bb214",
+          "description": "model-ceria-mmc"
+        },
+        {
+          "id": "model-barium-zirconate",
+          "signature": "model",
+          "domainPrefix": "mocassin/model-signature/v1",
+          "projectionType": "ModelSignatureV1",
+          "signatureHex": "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2",
+          "description": "model-barium-zirconate"
         }
       ]
     },

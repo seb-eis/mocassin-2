@@ -136,3 +136,94 @@ public sealed class SimulationSelectionHashTests
         Assert.NotEqual(baseline, ProjectHasher.ComputeSimulationSelection(withoutTransition));
     }
 }
+
+/// <summary>
+/// Covers cache invalidation for single-domain edits.
+/// </summary>
+[Trait("Tier", "PR-medium")]
+public sealed class CacheInvalidationTests
+{
+    [Fact]
+    public async Task ParticleChargeEditMissesTheRulesCacheAndChangesTheModel()
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync("samples/simulations/ceria-kmc.mocprj"),
+            kinetic: true);
+        var cache = new RecordingRecordingCache(256);
+        var compiler = new ModelCompiler();
+        var options = new CompilationOptions { Cache = cache };
+        var baseline = compiler.Compile(project, options);
+        Assert.True(baseline.IsSuccess);
+        cache.Hits.Clear();
+
+        var oxygen = project.Particles.First(static particle => particle.Symbol == "O");
+        var edited = project with
+        {
+            Model = project.Model with
+            {
+                Particles = [.. project.Particles.Select(particle => particle.Id == oxygen.Id
+                    ? particle with { Charge = new Core.Units.ChargeElementary(-1.0) }
+                    : particle)],
+            },
+        };
+        var updated = compiler.Compile(edited, options);
+
+        Assert.True(updated.IsSuccess);
+        Assert.NotEqual(baseline.Model!.ModelSignature, updated.Model!.ModelSignature);
+        Assert.DoesNotContain(cache.Hits, static key => key.StartsWith("rules|", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public async Task EnergyEnvironmentEditReusesStructureAndRulesButMissesEncoding()
+    {
+        var project = StageTestSupport.WithFirstSimulationTransition(
+            await StageTestSupport.LoadProjectAsync("samples/simulations/ceria-kmc.mocprj"),
+            kinetic: true);
+        var cache = new RecordingRecordingCache(256);
+        var compiler = new ModelCompiler();
+        var options = new CompilationOptions { Cache = cache };
+        Assert.True(compiler.Compile(project, options).IsSuccess);
+        cache.Hits.Clear();
+
+        var edited = project with
+        {
+            Model = project.Model with
+            {
+                StableEnvironment = project.Model.StableEnvironment with
+                {
+                    Cutoff = new Core.Units.LengthAngstrom(2.5),
+                },
+            },
+        };
+        var updated = compiler.Compile(edited, options);
+
+        Assert.True(updated.IsSuccess);
+        Assert.Contains(cache.Hits, static key => key.StartsWith("structure|", StringComparison.Ordinal));
+        Assert.Contains(cache.Hits, static key => key.StartsWith("rules|", StringComparison.Ordinal));
+        Assert.DoesNotContain(cache.Hits, static key => key.StartsWith("encoding|", StringComparison.Ordinal));
+    }
+
+    private sealed class RecordingRecordingCache(int capacity) : ICompilationCache
+    {
+        private readonly StageCache inner = new(capacity);
+
+        public HashSet<string> Hits { get; } = new(StringComparer.Ordinal);
+
+        public CompilationCacheStatistics Statistics => inner.Statistics;
+
+        public bool TryGet<T>(string key, out T? value)
+            where T : class
+        {
+            var found = inner.TryGet(key, out value);
+            if (found)
+            {
+                Hits.Add(key);
+            }
+
+            return found;
+        }
+
+        public T GetOrAdd<T>(string key, Func<T> factory)
+            where T : class => inner.GetOrAdd(key, factory);
+    }
+}
