@@ -1019,11 +1019,13 @@ incomplete.
 - Do not merge a step branch into `main` without explicit user permission and a `--no-ff` merge.
 - Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
 - Do not add CI triggers for feature branches; use local gates and run CI after squashing into the step branch.
-- Do not modify `/workspace/mocassin-original` if it is present. It is a read-only reference clone.
+- Do not modify or commit `/workspace/mocassin-original`. It is the gitignored, read-only GPL-3.0 reference
+  clone of `https://github.com/seb-eis/mocassin` at the verified commit.
 
 ## 15. Useful references in the original repository
 
-If `/workspace/mocassin-original` is available, these are the most useful starting points. Read, do not copy.
+The read-only reference clone is at `/workspace/mocassin-original` (gitignored; never commit it). These are
+the most useful starting points. Read, do not copy.
 
 - Project/model semantics: `src/ModelBuilder/ICon.Model/`
 - Symmetry and geometry: `src/ModelBuilder/ICon.Framework.Symmetry/`
