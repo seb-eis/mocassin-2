@@ -206,6 +206,17 @@ internal sealed class ClusterCompilationStage : ICompilationStage
             occupations.Sort(static (left, right) => left.CanonicalCode.CompareTo(right.CanonicalCode));
             var sitePIndexArray = sitePIndices.MoveToImmutable();
             var geometryEncodingArray = geometryEncodings.MoveToImmutable();
+            var estimatedBytes = (long)occupations.Count * sizeof(double);
+            var totalBytes = tables.Sum(static table => (long)table.OccupationCount * sizeof(double)) + estimatedBytes;
+            if (totalBytes > context.Options.MaxEnergyTableBytes)
+            {
+                return CompilationFailure.FromMessage(
+                    context,
+                    CompilationDiagnosticCodes.CompileLimit,
+                    $"The estimated cluster-table size {totalBytes} bytes exceeds the hard limit " +
+                    $"{context.Options.MaxEnergyTableBytes}.");
+            }
+
             var tableIndex = tables.Count;
             tables.Add(new CompiledClusterTable(
                 tableIndex,

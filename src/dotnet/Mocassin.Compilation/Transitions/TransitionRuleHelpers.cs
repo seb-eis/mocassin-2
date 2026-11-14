@@ -80,18 +80,23 @@ internal static class TransitionRuleHelpers
                 vector.Z + (deltaCharge * position.Z));
         }
 
-        // Movement is a particle-identity tracking aid. A charge-state change may alter the number
-        // of occurrences of one compiled particle; that does not affect the charge moment above.
-        for (var particle = 1; particle < context.Particles!.Count; particle++)
+        // Movement follows species flow in path order. Different charge states of one symbol are
+        // paired together, so a chemically unchanged spectator site still moves physically.
+        var symbols = context.Particles!.Particles
+            .Skip(1)
+            .Select(static particle => particle.Symbol)
+            .Distinct(StringComparer.Ordinal)
+            .ToArray();
+        foreach (var symbol in symbols)
         {
             var from = state0
                 .Select((value, node) => (value, node))
-                .Where(entry => entry.value == particle)
+                .Where(entry => string.Equals(Symbol(context, entry.value), symbol, StringComparison.Ordinal))
                 .Select(static entry => entry.node)
                 .ToArray();
             var to = state2
                 .Select((value, node) => (value, node))
-                .Where(entry => entry.value == particle)
+                .Where(entry => string.Equals(Symbol(context, entry.value), symbol, StringComparison.Ordinal))
                 .Select(static entry => entry.node)
                 .ToArray();
             if (from.Length != to.Length)
@@ -109,7 +114,7 @@ internal static class TransitionRuleHelpers
                 }
 
                 var source = context.Encoder!.Decode(direction.Absolute[sourceNode]);
-                var target = context.Encoder!.Decode(direction.Absolute[targetNode]);
+                var target = context.Encoder.Decode(direction.Absolute[targetNode]);
                 movement[sourceNode] = new Fractional3(
                     target.A - source.A,
                     target.B - source.B,

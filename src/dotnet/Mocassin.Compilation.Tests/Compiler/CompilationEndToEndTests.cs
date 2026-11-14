@@ -229,43 +229,33 @@ public sealed class CacheInvalidationTests
 }
 
 /// <summary>
-/// Covers structure-cache invalidation when particle sets change.
+/// Covers structure-cache invalidation when particle-set membership changes.
 /// </summary>
 [Trait("Tier", "PR-medium")]
 public sealed class ParticleSetCacheTests
 {
     [Fact]
-    public async Task ParticleSetEditMissesTheStructureCache()
+    public async Task ParticleSetMembershipEditMissesTheStructureCache()
     {
         var project = StageTestSupport.WithFirstSimulationTransition(
             await StageTestSupport.LoadProjectAsync("samples/simulations/ceria-kmc.mocprj"),
             kinetic: true);
-        var cache = new RecordingCache(256);
+        var cache = new RecordingSetCache(256);
         var compiler = new ModelCompiler();
         var options = new CompilationOptions { Cache = cache };
         var baseline = compiler.Compile(project, options);
         Assert.True(baseline.IsSuccess);
         cache.Hits.Clear();
 
-        var hydrogen = new Core.Model.Particles.Particle(
-            Core.Ids.ParticleId.New(), "H+", "H", new Core.Units.ChargeElementary(1.0), false);
         var oxygen = project.Particles.First(static particle => particle.Symbol == "O");
-        var oxygenSite = project.Structure.Sites[0];
-        var set = new Core.Model.Particles.ParticleSet(
-            Core.Ids.ParticleSetId.New(),
-            "O/H",
-            [oxygen.Id, hydrogen.Id]);
+        var site = project.Structure.Sites[0];
+        var set = project.Model.ParticleSets.First(item => item.Id == site.ParticleSetId);
+        var reduced = set with { ParticleIds = [oxygen.Id] };
         var edited = project with
         {
             Model = project.Model with
             {
-                Particles = [.. project.Particles, hydrogen],
-                ParticleSets = [.. project.Model.ParticleSets, set],
-                Structure = project.Structure with
-                {
-                    Sites = [.. project.Structure.Sites.Select(site =>
-                        site.Id == oxygenSite.Id ? site with { ParticleSetId = set.Id } : site)],
-                },
+                ParticleSets = [.. project.Model.ParticleSets.Select(item => item.Id == reduced.Id ? reduced : item)],
             },
         };
         var updated = compiler.Compile(edited, options);
@@ -275,7 +265,7 @@ public sealed class ParticleSetCacheTests
         Assert.DoesNotContain(cache.Hits, static key => key.StartsWith("structure|", StringComparison.Ordinal));
     }
 
-    private sealed class RecordingCache(int capacity) : ICompilationCache
+    private sealed class RecordingSetCache(int capacity) : ICompilationCache
     {
         private readonly StageCache inner = new(capacity);
 

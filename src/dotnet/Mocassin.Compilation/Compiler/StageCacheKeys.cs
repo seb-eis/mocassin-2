@@ -80,6 +80,18 @@ internal static class StageCacheKeys
                 .Append(particle.IsVacancy ? '1' : '0').Append(';');
         }
 
+        var sets = context.Project.Model.ParticleSets.IsDefault ? [] : context.Project.Model.ParticleSets;
+        foreach (var set in sets.OrderBy(static set => set.Id.Value))
+        {
+            builder.Append('#')
+                .Append(set.Id.Value.ToString("D", CultureInfo.InvariantCulture))
+                .Append('|');
+            foreach (var particle in set.ParticleIds)
+            {
+                builder.Append(particle.Value.ToString("D", CultureInfo.InvariantCulture)).Append(',');
+            }
+        }
+
         return Convert.ToHexStringLower(SHA256.HashData(System.Text.Encoding.UTF8.GetBytes(builder.ToString())));
     }
 
