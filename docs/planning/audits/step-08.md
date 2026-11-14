@@ -15,13 +15,13 @@
 | Request owner | Step agent |
 | Orchestrator (step agent) | Step 08 implementor |
 | Audit initiated by | Human owner |
-| Audited commit | `ebc0e46a052d4fb9d12dd0111f905be13ec51849` |
+| Audited commit | `ba8e889cb51041352c876681801b12f455b2f7ee` |
 | Step branch | `step/08-model-compilation-pipeline` |
 | Step tag | — |
-| Closeout CI run | [`43520011439`](https://github.com/seb-eis/mocassin-2/actions/runs/43520011439) — green at `ebc0e46a052d4fb9d12dd0111f905be13ec51849` |
-| Closeout CI head SHA | `ebc0e46a052d4fb9d12dd0111f905be13ec51849` |
+| Closeout CI run | [`43533462127`](https://github.com/seb-eis/mocassin-2/actions/runs/43533462127) — green at `ba8e889cb51041352c876681801b12f455b2f7ee` |
+| Closeout CI head SHA | `ba8e889cb51041352c876681801b12f455b2f7ee` |
 | Main SHA at freeze | `884ffe78f8b8f2a9fa6093afcce94856a6094c73` |
-| Merge-tree CI | Not required; `main` was merged into the step branch before the freeze |
+| Merge-tree CI | Not required; `main` 884ffe7 was merged before the freeze |
 | Closeout evidence | `docs/planning/closeout/step-08.json` |
 | Platform CI | Not run (Ubuntu-only policy; no platform-specific code) |
 | Audit date | 2026-11-13 |
@@ -228,7 +228,22 @@ replacement closeout CI run, add the resolutions, and request re-audit.
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| A1 | Resolved — direction keys include the collection; forward+reverse vehicle/interstitialcy compile together | Implementor | `ba8e889` |
+| A2 | Resolved — full nested manifest schema, canonical MessagePack writer, binary fixtures, Python checker | Implementor | `ba8e889` |
+| A3 | Resolved for stale-output correctness — rules key includes transition closures/particle hash; charge edit test misses rules; structure/rules hit on environment edit | Implementor | `ba8e889` |
+| A4 | Resolved — RejectedByMass/Charge/InvalidState populated and reported | Implementor | `ba8e889` |
+| A5 | Resolved — MaxRuleCount and MaxEnergyTableBytes fail with CMP006 | Implementor | `ba8e889` |
+| A6 | Resolved — trackers are KMC-collection-scoped; MMC rules use 0xFF; mixed scoping covered | Implementor | `ba8e889` |
+| A7 | Resolved locally — ceria <1 s and 10k-position <30 s/<2 GiB tests; no benchmark project | Implementor | `ba8e889` |
+| A8 | Partially resolved — CMP001/002/003/005/006/007/008/009/010/012 emission tests; CMP004/CMP011 still lack emission tests | Implementor | `ba8e889` |
+| A9 | Partially resolved — ceria/interstitialcy/vehicle transport pins; distinct-charge and non-collinear cases still missing | Implementor | `ba8e889` |
+| m1 | Open — equivalent-start orbit reduction/dependent rules remain unimplemented | Implementor | — |
+| m2 | Resolved — global tracker index overflow fails closed with CMP006 | Implementor | `ba8e889` |
+| m3 | Open — TryResolve still does not delegate to TryResolvePath | Implementor | — |
+| m4 | Resolved — step-page audit link fixed | Implementor | `ba8e889` |
+| m5 | Resolved — vacuous vehicle assertion removed | Implementor | `ba8e889` |
+| m6 | Resolved — docs movement wording matches species pairing | Implementor | `ba8e889` |
+| m7 | Open — unreferenced self state change still validates | Implementor | — |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
