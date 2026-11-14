@@ -215,6 +215,29 @@ Step 09 resolves the authored `model.siteEnergies` onto the compiled `[position]
 template overrides, and Step 11 writes it as `energy.defect_background`. Step 15 consumes the same table.
 This keeps the completed compiler unchanged and the authored site energies in their existing Core home.
 
+### Site-energy background resolution
+
+`ParameterizationService.Apply` builds the dense background directly from the supplied `Project` snapshot:
+
+1. Resolve each authored `SiteEnergySet` by `CellSiteId` to the compiled reference site and each
+   `SiteEnergyEntry` by `ParticleId` to the compiled particle index.
+2. Copy the value to every `CompiledPosition` owned by that reference site, at row-major index
+   `P * particleCount + particleIndex`. Particle `0` (void) and particles outside the site's allowed mask stay
+   `0 eV`; a missing authored entry also stays `0 eV`.
+3. Apply template `SiteEnergyOverrides` last. An override replaces the authored value at every owned position,
+   so "reset to model" is removal of the override, never a copied value.
+4. Report an authored entry or override whose site/particle does not map, or whose particle the site cannot
+   occupy, as `PRM008` **Warning** and ignore it. A stale entry therefore cannot silently shift the background.
+   A structural mismatch that changes the compiled-model signature is `PRM001` **Error** and produces no
+   `ParameterizedModel`.
+
+The table is quantized to 12 decimals before signing, like every other applied value. The dense table is
+`[position][particle]` row-major in ascending P order, matching Step 11's `energy.defect_background` and Step
+15's per-position consumption. Because the project is the source of the authored background, `Apply` requires
+the same `Project` snapshot that produced the compiled model. The compiled model does not persist a project
+hash, so Step 12 and the GUI pass a real project/model pair; a mismatched pair is a caller contract violation,
+while an individual stale site entry is recoverable user data reported as `PRM008`.
+
 Step 09 adds no `IValidationStage`: `ValidationContext` has no compiled model, and compiling inside validation
 would duplicate Step 12. Structural `PRM` checks run in Core `ProjectValidator`; compiled-bound checks run in
 `ParameterizationService.Validate`, called by Step 12 after compilation. For the same reason there is no

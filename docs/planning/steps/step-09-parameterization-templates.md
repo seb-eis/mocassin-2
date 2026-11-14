@@ -35,8 +35,8 @@ completeness checks.
 | --- | --- | --- | --- | --- | --- |
 | `template-model-and-persistence` | `feature/step-09-parameterization-templates/template-model-and-persistence` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `c7f9992` |
 | `parameterization-signature` | `feature/step-09-parameterization-templates/parameterization-signature` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `9a11a38` |
-| `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
-| `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | Approved | — | — | — |
+| `factory-and-summary` | `feature/step-09-parameterization-templates/factory-and-summary` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | `222c02e` |
+| `apply-and-site-energies` | `feature/step-09-parameterization-templates/apply-and-site-energies` | In progress | `dotnet`, `structure`, `api`, `contracts`, `docs` all exit 0 (see below) | — | — |
 | `validation-and-diagnostics` | `feature/step-09-parameterization-templates/validation-and-diagnostics` | Approved | — | — | — |
 | `diff-and-rebase` | `feature/step-09-parameterization-templates/diff-and-rebase` | Approved | — | — | — |
 | `golden-templates-docs-and-closeout` | `feature/step-09-parameterization-templates/golden-templates-docs-and-closeout` | Approved | — | — | — |
@@ -100,7 +100,7 @@ Notes and limitations:
 
 ### Feature 3 outcome
 
-`factory-and-summary` implementation is complete on its feature branch and awaits the feature squash.
+`factory-and-summary` was squash-merged as `222c02e`. No per-feature CI run was triggered.
 
 Implemented:
 
@@ -156,6 +156,83 @@ Notes and limitations:
   and structural template rules remain `ProjectValidator` diagnostics.
 - Full template validation (`PRM001/002/003/006/008/011/012/015/016`), apply, site-energy overrides, diff, and
   rebase remain features 4–7 and are not claimed here.
+
+### Design clarification (2026-11-14): pair-table geometry invariant
+
+The accepted §4 text said “every pair table has exactly one geometry”. That conflicts with §3.4/§8, which
+require a reciprocal chiral table to carry two directed geometries sharing one `EnergyId`. The implemented and
+now normative invariant is:
+
+- every pair table has **at least one** geometry;
+- all geometries of one table share the centre reference-site stability;
+- achiral geometries agree on the display descriptor (`centerSiteId`, `partnerSiteId`, `distanceBucketFm`);
+- a chiral table has exactly one representative whose `GeometryId` equals the shared `EnergyId`, plus a valid
+  reciprocal partner link (`ChiralPartnerGeometryId` pointing at another geometry of the same table);
+- real vehicle/interstitialcy chiral tables have swapped reciprocal sites, so descriptor agreement is validated
+  only for achiral tables.
+
+This is a clarification of the accepted design, not a format or public-contract change. Feature 3 implemented
+it, §4 above now records it, and the feature-3 contract tests pin it.
+
+### Feature 4 outcome
+
+`apply-and-site-energies` implementation is complete on its feature branch and awaits the feature squash.
+
+Implemented:
+
+- `Mocassin.Core.Model.ParameterizationTemplateDefaults.CreateDefault` with the reserved empty
+  `ParameterizationId`, `"Default parameters"`, `DateTimeOffset.UnixEpoch`, and no headers or values; the
+  implicit-default path in `Apply`/`Describe` for projects with no template.
+- `IParameterizationService`/`ParameterizationService` with `Apply` and `Describe`; `Describe` delegates to the
+  feature-3 summary builder. The remaining `Validate`/`Diff`/`Rebase` members are features 5–6.
+- `ParameterizedModel`, `ParameterizationResult`, `ParameterizationOptions`, `ParameterizationQualityOptions`,
+  and the `ParameterizationDiff`/`ParameterizationValueKey`/`ParameterizationDiffEntry`/
+  `ParameterizationGeometryChange` records in `Mocassin.Packages.Parameterization`.
+- `Apply` signature verification (`PRM001`, `Model == null`, diff summary on the result), sparse defaults,
+  dense pair/group/site/rule tables, authored site-energy background resolution, overrides and reset-to-model,
+  12-decimal round-half-away-from-zero quantization with signed-zero normalization, `MaxAppliedValueBytes`
+  enforcement, and `ParameterizationSignatureV1` signing.
+- Apply-time warnings `PRM002` (unknown/changed key), `PRM008` (invalid site-energy target), and `PRM012`
+  (forbidden particle) leave the effective value and signature unchanged; errors `PRM004`/`PRM005`/`PRM013`
+  produce no model. `PRM001`, `PRM002`, `PRM008`, and `PRM012` are registered in the Core catalog for Apply;
+  the remaining completeness/plausibility codes (`PRM003`/`PRM006`/`PRM011`/`PRM015`/`PRM016`) remain feature 5.
+- Tests: implicit default, populated ceria and BaZrO₃ templates, deterministic signatures, model/value
+  signature separation, chiral symmetric storage, quantization boundaries, resource limit, unknown/forbidden
+  entries, Metropolis-rule ignoring, site background/override/reset/stale entries, `PRM001` diff, and
+  apply+sign performance guards.
+- Golden applied-template signatures (pinned in `ParameterizationApplyTests`):
+  - ceria: `cac3b231e667164fa7dfd4daa7b326dbc5e23bde17fe30873f775f7f77975042`;
+  - barium zirconate: `a7f6ebd97ea336308360949e4fe703bb1c88220a545e9f9db06f009cd6d32b9d`.
+
+Local gates:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 637, Symmetry 223, Compilation 99,
+  Packages 157, Cli 7, App 1, Contracts 14, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; licence policy 51 packages, no vulnerable packages, ApiCompat compatible
+  (the `Mocassin.Core.dll` and `Mocassin.Packages.dll` baselines were refreshed for intentional additions).
+- `./tools/verify.sh contracts` — exit 0; 18 generated artifacts current, 5 model projections and 3
+  parameterization projections OK, catalog current, process consistency OK, 20 tool tests passed, SPDX 456
+  files, no secrets in 791 files, cargo-deny OK.
+- `./tools/verify.sh docs` — exit 0; links OK (154 files), Zensical "No issues found", DocFX 0 warnings/0
+  errors, rustdoc generated, site built.
+
+Measured performance (PR-medium guard, 10 iterations after warm-up): ceria apply plus signature average
+0.100 ms; ceria KMC apply plus signature average 0.014 ms; both far below the 50 ms target.
+
+Notes and limitations:
+
+- No per-feature CI run was triggered.
+- `Apply` returns no `ParameterizedModel` for `PRM001`, `PRM004`, `PRM005`, and `PRM013`; warnings still produce
+  a model. This is stricter than the design's shorthand “signature mismatch is the only unusable condition”
+  but follows the rule that error diagnostics fail an apply and warnings do not.
+- The `ParameterizationDiff` is produced only for the `PRM001` result; the explicit `Diff`/`Rebase` service,
+  strategies, report, and `PRM009` remain feature 6.
+- `IParameterizationService` currently exposes `Apply` and `Describe`; feature 5 adds `Validate` and feature 6
+  adds `Diff`/`Rebase` as additive members.
+- A hostile or malformed compiled model still fails through `CompiledModelContract` with
+  `InvalidOperationException`, because the compiler owns that model; user template data fails through `PRM`
+  diagnostics instead.
 
 ## Goal
 
@@ -632,9 +709,12 @@ public sealed class ParameterizationFactory(TimeProvider? timeProvider = null)
   stability or no geometry) is an `InvalidOperationException`, because the compiled model is compiler-owned.
 - It never fills values. A newly created template therefore applies to the same effective values as an
   unparameterized build: zero pair/cluster energies, `1e13 Hz`, and the authored site-energy background.
-- It validates compiled-model contract invariants (every pair table has exactly one geometry, table lengths
-  are `nParticles × nParticles`, occupation/rule arrays are consistent) with `InvalidOperationException`,
-  because a `CompiledModel` is compiler-owned and a violation is a programmer/contract error, not user data.
+- It validates compiled-model contract invariants (every pair table has at least one geometry, all geometries
+  of a table share the centre-site stability, achiral descriptors agree, a chiral table has exactly one
+  representative whose `GeometryId` equals the shared `EnergyId` plus a valid reciprocal partner link, table
+  lengths are `nParticles × nParticles`, and occupation/rule arrays are consistent) with
+  `InvalidOperationException`, because a `CompiledModel` is compiler-owned and a violation is a
+  programmer/contract error, not user data.
 - The returned summary reports required slots, set headers, chiral pair tables, estimated value bytes, and the
   effective site-background/default ranges. Because it receives the same `Project` + `CompiledModel` pair, it is
   the same summary produced by `Describe(project, model, null)`; `ProjectValidator` re-checks the name and
@@ -1386,7 +1466,7 @@ and the CLI note that Step 12 replaces a hypothetical `mocassin parameterize`.
 - [ ] Add `ParameterizationValues`, `ParameterizationSignatureV1`, the public canonical writer reuse, manifest
       finalization, generated descriptor, and golden projection vectors.
 - [x] Implement `ParameterizationFactory.Create` and `Describe`, set headers, and `ParameterizationSummary`.
-- [ ] Implement `ParameterizationService.Apply`, defaults, quantization, site-energy background, overrides, and
+- [x] Implement `ParameterizationService.Apply`, defaults, quantization, site-energy background, overrides, and
       `ParameterizedModel`.
 - [ ] Implement compiled-bound `Validate` and every `PRM` emission/path.
 - [ ] Implement `ParameterizationDiff` and the `KeepMatching`/`NearestGeometry`/`Reset` rebase report.
@@ -1396,11 +1476,11 @@ and the CLI note that Step 12 replaces a hypothetical `mocassin parameterize`.
 ## Acceptance criteria
 
 - [x] Creating a template from the ceria compiled model produces exactly the expected sets/rules.
-- [ ] Applying the template to the same model succeeds and yields the same compiled values.
-- [ ] A changed model produces a signature mismatch with a useful diff.
+- [x] Applying the template to the same model succeeds and yields the same compiled values.
+- [x] A changed model produces a signature mismatch with a useful diff.
 - [ ] Rebase copies unchanged values, defaults new ones, and reports removed ones without silent reuse.
-- [ ] Chiral partners share one `EnergyId` and one value; independent A→B/B→A values are unrepresentable.
-- [ ] Site energy overrides apply and can be reset to the authored model value.
+- [x] Chiral partners share one `EnergyId` and one value; independent A→B/B→A values are unrepresentable.
+- [x] Site energy overrides apply and can be reset to the authored model value.
 - [ ] Missing/zero values produce warnings, not silent success.
 - [ ] Template JSON is canonical and round-trips, including culture, `-0.0`, and additive missing arrays.
 - [ ] The parameterization signature is deterministic, finalized in the manifest, and reproduced by the

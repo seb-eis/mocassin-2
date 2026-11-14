@@ -62,9 +62,13 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 | [`PAR010`](#par010) | error | Step 03 — particle and structure models | An authored object reuses a reserved implicit-object identifier | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PAR011`](#par011) | error | Step 03 — particle and structure models | A particle-set name is empty or used more than once (case-insensitive) | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PAR012`](#par012) | error | Step 03 — particle and structure models | A particle set contains the same particle identifier more than once | Review the referenced model object, correct the reported condition, and revalidate. |
+| [`PRM001`](#prm001) | error | Step 09 — parameterization templates | A template model signature does not match the compiled model | Rebase or recreate the template against the current compiled model. |
+| [`PRM002`](#prm002) | warning | Step 09 — parameterization templates | A template entry references an unknown key or disagrees with the current model | Remove the stale entry or rebase the template against the current model. |
 | [`PRM004`](#prm004) | error | Step 09 — parameterization templates | An energy is non-finite or outside the accepted range | Set the energy to a finite value within the accepted -100..100 eV range. |
 | [`PRM005`](#prm005) | error | Step 09 — parameterization templates | A frequency is non-positive or non-finite | Set the attempt frequency to a positive, finite value. |
+| [`PRM008`](#prm008) | warning | Step 09 — parameterization templates | A site-energy value targets an unknown or forbidden site/particle | Correct the site/particle key or remove the site-energy override. |
 | [`PRM010`](#prm010) | warning | Step 09 — parameterization templates | Two parameterization templates use the same name | Give each parameterization template a distinct name. |
+| [`PRM012`](#prm012) | warning | Step 09 — parameterization templates | A pair or group entry names a particle the reference site cannot occupy | Use a particle the reference site can occupy, or remove the entry. |
 | [`PRM013`](#prm013) | error | Step 09 — parameterization templates | A template resource limit is exceeded | Reduce the template size or split the work into smaller templates. |
 | [`PRM014`](#prm014) | error | Step 09 — parameterization templates | A stable key is malformed, duplicated, or missing | Use lowercase 64-character hexadecimal stable keys and remove duplicate value keys. |
 | [`PROJ001`](#proj001) | error | Step 01 — project format | The document declares a schema version newer than this application supports | Review the referenced model object, correct the reported condition, and revalidate. |
@@ -387,6 +391,14 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 
 **A particle set contains the same particle identifier more than once.** Review the referenced model object, correct the reported condition, and revalidate.
 
+### PRM001
+
+**A template model signature does not match the compiled model.** Rebase or recreate the template against the current compiled model.
+
+### PRM002
+
+**A template entry references an unknown key or disagrees with the current model.** Remove the stale entry or rebase the template against the current model.
+
 ### PRM004
 
 **An energy is non-finite or outside the accepted range.** Set the energy to a finite value within the accepted -100..100 eV range.
@@ -395,9 +407,17 @@ the catalog disagree. Per-instance `hint` values are supplied by the producing r
 
 **A frequency is non-positive or non-finite.** Set the attempt frequency to a positive, finite value.
 
+### PRM008
+
+**A site-energy value targets an unknown or forbidden site/particle.** Correct the site/particle key or remove the site-energy override.
+
 ### PRM010
 
 **Two parameterization templates use the same name.** Give each parameterization template a distinct name.
+
+### PRM012
+
+**A pair or group entry names a particle the reference site cannot occupy.** Use a particle the reference site can occupy, or remove the entry.
 
 ### PRM013
 

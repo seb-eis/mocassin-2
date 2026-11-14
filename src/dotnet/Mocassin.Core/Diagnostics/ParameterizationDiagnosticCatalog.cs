@@ -5,10 +5,11 @@ using System.Collections.Immutable;
 namespace Mocassin.Core.Diagnostics;
 
 /// <summary>
-/// Registers the structural parameterization-template diagnostic codes owned by Core.
+/// Registers the parameterization-template diagnostic codes owned by Core.
 /// </summary>
 /// <remarks>
-/// Feature 1 of Step 09 registers only the five checks that need the project graph. The compiled-model-bound
+/// Feature 1 of Step 09 registered the five structural checks that need the project graph. Feature 4 adds the
+/// compiled-bound codes that <c>ParameterizationService.Apply</c> itself emits. The remaining compiled-bound
 /// <c>PRM</c> codes are registered by the parameterization validation feature.
 /// </remarks>
 public static class ParameterizationDiagnosticCatalog
@@ -18,6 +19,20 @@ public static class ParameterizationDiagnosticCatalog
     /// </summary>
     public static ImmutableArray<DiagnosticDescriptor> Descriptors { get; } =
     [
+        new(
+            ParameterizationDiagnosticCodes.ModelSignatureMismatch,
+            DiagnosticSeverity.Error,
+            "Step 09 — parameterization templates",
+            "A template model signature does not match the compiled model",
+            "Rebase or recreate the template against the current compiled model.",
+            "#prm001"),
+        new(
+            ParameterizationDiagnosticCodes.UnknownReference,
+            DiagnosticSeverity.Warning,
+            "Step 09 — parameterization templates",
+            "A template entry references an unknown key or disagrees with the current model",
+            "Remove the stale entry or rebase the template against the current model.",
+            "#prm002"),
         new(
             ParameterizationDiagnosticCodes.InvalidEnergy,
             DiagnosticSeverity.Error,
@@ -33,12 +48,26 @@ public static class ParameterizationDiagnosticCatalog
             "Set the attempt frequency to a positive, finite value.",
             "#prm005"),
         new(
+            ParameterizationDiagnosticCodes.InvalidSiteEnergyTarget,
+            DiagnosticSeverity.Warning,
+            "Step 09 — parameterization templates",
+            "A site-energy value targets an unknown or forbidden site/particle",
+            "Correct the site/particle key or remove the site-energy override.",
+            "#prm008"),
+        new(
             ParameterizationDiagnosticCodes.DuplicateName,
             DiagnosticSeverity.Warning,
             "Step 09 — parameterization templates",
             "Two parameterization templates use the same name",
             "Give each parameterization template a distinct name.",
             "#prm010"),
+        new(
+            ParameterizationDiagnosticCodes.ForbiddenParticle,
+            DiagnosticSeverity.Warning,
+            "Step 09 — parameterization templates",
+            "A pair or group entry names a particle the reference site cannot occupy",
+            "Use a particle the reference site can occupy, or remove the entry.",
+            "#prm012"),
         new(
             ParameterizationDiagnosticCodes.LimitExceeded,
             DiagnosticSeverity.Error,

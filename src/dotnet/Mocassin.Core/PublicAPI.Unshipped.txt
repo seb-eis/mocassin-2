@@ -250,6 +250,8 @@ Mocassin.Core.Model.ObjectStyle.Wireframe.get -> bool
 Mocassin.Core.Model.ObjectStyleJsonConverter
 Mocassin.Core.Model.ObjectStyleJsonConverter.ObjectStyleJsonConverter() -> void
 Mocassin.Core.Model.ParameterizationTemplate
+Mocassin.Core.Model.ParameterizationTemplateDefaults
+static Mocassin.Core.Model.ParameterizationTemplateDefaults.CreateDefault(string! modelSignature) -> Mocassin.Core.Model.ParameterizationTemplate!
 Mocassin.Core.Model.ParameterizationTemplate.<Clone>$() -> Mocassin.Core.Model.ParameterizationTemplate!
 Mocassin.Core.Model.ParameterizationTemplate.CreatedUtc.get -> System.DateTimeOffset
 Mocassin.Core.Model.ParameterizationTemplate.CreatedUtc.init -> void
@@ -2017,10 +2019,14 @@ Mocassin.Core.Model.TransitionRuleSet.TransitionKind.get -> Mocassin.Core.Model.
 Mocassin.Core.Model.TransitionRuleSet.TransitionKind.init -> void
 Mocassin.Core.Model.TransitionRuleSet.TransitionRuleSet(Mocassin.Core.Model.Transitions.TransitionKind transitionKind, System.Guid transitionId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.RuleFrequencyEntry!> rules = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.RuleFrequencyEntry!>)) -> void
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.DuplicateName = "PRM010" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.ForbiddenParticle = "PRM012" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidEnergy = "PRM004" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidFrequency = "PRM005" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidKey = "PRM014" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.InvalidSiteEnergyTarget = "PRM008" -> string!
 const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.LimitExceeded = "PRM013" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.ModelSignatureMismatch = "PRM001" -> string!
+const Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes.UnknownReference = "PRM002" -> string!
 const Mocassin.Core.Model.ParameterizationLimits.GroupEntriesPerSet = 1000000 -> int
 const Mocassin.Core.Model.ParameterizationLimits.GroupSetsPerTemplate = 100000 -> int
 const Mocassin.Core.Model.ParameterizationLimits.MaxAppliedValueBytes = 2147483648 -> long

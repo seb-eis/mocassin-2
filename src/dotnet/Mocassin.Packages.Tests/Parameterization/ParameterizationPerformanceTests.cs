@@ -54,4 +54,63 @@ public sealed class ParameterizationPerformanceTests(ITestOutputHelper output)
             describeAverage < TimeSpan.FromMilliseconds(20),
             $"Ceria describe averaged {describeAverage.TotalMilliseconds:F3} ms; the target is below 20 ms.");
     }
+
+    [Fact]
+    public async Task CeriaApplyAndSignatureStayWithinTheLocalBudget()
+    {
+        var (project, model) = await ParameterizationTestSupport.LoadAndCompileAsync(
+            ParameterizationTestSupport.CeriaParameters);
+        var template = Assert.Single(project.Parameterizations);
+        var service = new ParameterizationService();
+        for (var index = 0; index < 3; index++)
+        {
+            _ = service.Apply(project, model, template);
+        }
+
+        const int iterations = 10;
+        var applied = 0;
+        var started = Stopwatch.GetTimestamp();
+        for (var index = 0; index < iterations; index++)
+        {
+            applied += service.Apply(project, model, template).Model!.Values.SiteEnergies.Length;
+        }
+
+        var applyElapsed = Stopwatch.GetElapsedTime(started);
+        var applyAverage = applyElapsed / iterations;
+        output.WriteLine(
+            $"Ceria apply+sign average: {applyAverage.TotalMilliseconds:F3} ms; site slots per apply: {applied / iterations}.");
+        Assert.True(applied > 0);
+        Assert.True(
+            applyAverage < TimeSpan.FromMilliseconds(50),
+            $"Ceria apply+sign averaged {applyAverage.TotalMilliseconds:F3} ms; the target is below 50 ms.");
+    }
+
+    [Fact]
+    public async Task CeriaKmcApplyAndSignatureStayWithinTheLocalBudget()
+    {
+        var (project, model) = await ParameterizationTestSupport.LoadAndCompileAsync(
+            ParameterizationTestSupport.CeriaKmc);
+        var service = new ParameterizationService();
+        for (var index = 0; index < 3; index++)
+        {
+            _ = service.Apply(project, model);
+        }
+
+        const int iterations = 10;
+        var rules = 0;
+        var started = Stopwatch.GetTimestamp();
+        for (var index = 0; index < iterations; index++)
+        {
+            rules += service.Apply(project, model).Model!.Values.TransitionRuleFrequencies.Length;
+        }
+
+        var applyElapsed = Stopwatch.GetElapsedTime(started);
+        var applyAverage = applyElapsed / iterations;
+        output.WriteLine(
+            $"Ceria KMC apply+sign average: {applyAverage.TotalMilliseconds:F3} ms; rules per apply: {rules / iterations}.");
+        Assert.True(rules > 0);
+        Assert.True(
+            applyAverage < TimeSpan.FromMilliseconds(50),
+            $"Ceria KMC apply+sign averaged {applyAverage.TotalMilliseconds:F3} ms; the target is below 50 ms.");
+    }
 }

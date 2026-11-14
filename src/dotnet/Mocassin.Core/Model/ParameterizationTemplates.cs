@@ -311,3 +311,30 @@ public sealed record TransitionRuleSet
 public sealed record RuleFrequencyEntry(
     string RuleGeometryId,
     [property: JsonPropertyName("frequencyHz")] FrequencyHz Frequency);
+
+/// <summary>
+/// Creates the in-memory implicit default template used when a project has no explicit parameterization.
+/// </summary>
+/// <remarks>
+/// The default template is never persisted. It carries the reserved empty <see cref="ParameterizationId"/>,
+/// has no set headers or values, and therefore applies the compiled defaults and the authored site-energy
+/// background. <c>ProjectValidator</c> rejects a persisted template with the empty identifier as <c>PRM014</c>.
+/// </remarks>
+public static class ParameterizationTemplateDefaults
+{
+    /// <summary>
+    /// Creates the implicit default template for a compiled-model signature.
+    /// </summary>
+    /// <param name="modelSignature">The compiled-model signature the template targets.</param>
+    /// <returns>The in-memory default template.</returns>
+    /// <exception cref="ArgumentException"><paramref name="modelSignature"/> is empty.</exception>
+    public static ParameterizationTemplate CreateDefault(string modelSignature)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(modelSignature);
+        return new ParameterizationTemplate(
+            default,
+            "Default parameters",
+            modelSignature,
+            DateTimeOffset.UnixEpoch);
+    }
+}
