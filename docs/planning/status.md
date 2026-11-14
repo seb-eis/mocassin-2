@@ -56,7 +56,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 06 | [Lattice and Simulation Models](steps/step-06-lattice-and-simulation-models.md) | B. Model definition | Done | `step/06-lattice-and-simulation-models` (merged and deleted) | — | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43085605850) | `41cfa4d` | `step-06` | Passed with notes at `c390dcc` (code `ea6293e`); accepted 2026-11-11 | Ready with notes — accepted at `6173e61` |
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Done | `step/07-validation-and-diagnostics` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) | `3ed558a` | `step-07` | Passed with notes at `ccd0e55` (`d66f34f`) | Ready for implementation at `31b53e8` — review `2d01f3e`; approved 2026-11-11 |
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Done | `step/08-model-compilation-pipeline` (merged and deleted) | `step-08` | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43578897490) | `f91fc63` | `step-08` | Passed with notes at `28e741f` (`f97b2c4`) | Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — accepted 2026-11-13 |
-| 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | In audit | `step/09-parameterization-templates` | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) at `916bae1` | — | — | Re-audit required at `916bae1` (round 1 `Fixes required` at `20c73bc`) | Ready with notes at `26d6a0e` (round 4) — accepted 2026-11-14 |
+| 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Awaiting approval | `step/09-parameterization-templates` | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) at `916bae1` | — | — | Passed with notes at `916bae1` (`3aeacb1`) — awaiting owner approval | Ready with notes at `26d6a0e` (round 4) — accepted 2026-11-14 |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -111,8 +111,9 @@ Independent audit round 1 returned `Fixes required` at `20c73bc`: F-01 is a Bloc
 canonical 12-decimal projection range could throw instead of returning `PRM` diagnostics), F-02/F-03 are Minor
 completeness and structural-validation defects, F-04/F-05 are Minor stale documentation, and F-06/F-07 are
 Notes. The fixes were squash-merged as `916bae1`, the full local gate passed, the replacement closeout CI run
-is green, and `docs/planning/closeout/step-09.json` binds the new commit. A fresh round-2 audit is requested;
-the step audit state is `Re-audit required` until it passes.
+is green, and `docs/planning/closeout/step-09.json` binds the new commit. Audit round 2 returned `Passed with
+notes` at `916bae1` (record `3aeacb1`); the five non-blocking notes are accepted and the step awaits the human
+owner's merge and tag approval.
 
 ## Cross-cutting phase checkpoints
 

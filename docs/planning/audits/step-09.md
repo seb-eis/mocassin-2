@@ -291,24 +291,65 @@ verdict.
 The step agent completes this section before requesting human approval. It must cover the full history, not
 only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded: accept the round-2 `Passed with notes` verdict for
+  audited commit `916bae1b66aeb0d3b8fb1e451072523a869b596e`, then merge `step/09-parameterization-templates`
+  into `main` with `--no-ff` and tag `step-09` after green `main` CI.
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict).
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status).
+- [x] Accepted notes and waivers recorded with rationale.
+- [x] Residual risks, deferred items, and follow-up owners recorded.
+- [x] Explicit no-Blocker/no-Major statement: no Blocker and no Major remains open after audit round 2.
+- [x] Final CI and documentation-build results recorded: `./tools/verify.sh all --require` passes at `916bae1`;
+  closeout CI run `43634322838` is `completed/success` at `916bae1`; `check_closeout_evidence.py` reports OK;
+  both projection checkers report OK (5 model, 4 parameterization fixtures).
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| Design 1 | 2026-11-14 | `1ee5a2a` | Fresh design reviewer | Changes required |
+| Design 2 | 2026-11-14 | `53bbfd5` | Fresh design reviewer | Ready with notes |
+| Design 3 | 2026-11-14 | `b5db289` | Fresh design reviewer | Ready with notes |
+| Design 4 | 2026-11-14 | `26d6a0e` | Fresh design reviewer | Ready with notes (accepted by owner) |
+| Audit 1 | 2026-11-14 | `20c73bc` | Fresh auditor | Fixes required (F-01 Blocker, F-02–F-07) |
+| Audit 2 | 2026-11-14 | `916bae1` | Fresh auditor | **Passed with notes** (R2-1–R2-5) |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
+| Design M1–M3 | Major | Signature reproducibility, default build, project-format contract | Absolute `frequency_hz`, implicit default, manifest/schema/fixtures planned and implemented | `53bbfd5`, features 1–2 | Closed |
+| Design M4 | Minor | Sizing exceeded the four-week trigger | Owner-approved single-step exception recorded | `b5db289` | Accepted |
+| Design M5 | Minor | Chiral fixture did not exist | Real BaZrO₃ plus generated chiral fixture | `53bbfd5`, feature 7 | Closed |
+| Design m1–m17, n1–n4 | Minor/Note | Consistency, API, fixture, and docs findings | All resolved or accepted | `53bbfd5`, `b5db289`, `26d6a0e` | Closed |
+| Design R2-1–R2-6, R3-1 | Minor/Note | Round-2/3 wording and authorization | Resolved; dashboard update by orchestrator | `b5db289`, `26d6a0e`, `41d33d3` | Closed |
+| F-01 | **Blocker** | Non-quantizable finite values threw during signing | `PRM005` before projection; `Quantize` guard; regression tests | `916bae1` | Closed |
+| F-02 | Minor | Stale entries counted as set values | Required-slot-only completeness metrics | `916bae1` | Closed |
+| F-03 | Minor | Structural validation skipped by `Apply`/`Validate` | `ProjectValidator.ValidateTemplate` added and invoked | `916bae1` | Closed |
+| F-04 | Minor | Stale status/step-page narrative | Corrected | `916bae1` | Closed |
+| F-05 | Minor | Stale contracts README fixture count/generator | Corrected | `916bae1` | Closed |
+| F-06 | Note | Mirrored chiral entries not folded | Folded at write time; conflicts still error | `916bae1` | Closed |
+| F-07 | Note | Unused applied-value limit constant | Limit now defaults the option and is enforced | `916bae1` | Closed |
+
+Accepted notes and waivers:
+
+- Design rounds 2–4 notes and the audit round-2 notes R2-1 (stale-only site override suppresses `PRM006`),
+  R2-2 (direct in-memory mirrored chiral template double-counts a summary slot), R2-3 (structural validation
+  runs after summary construction for a direct over-limit template), and R2-5 (`PRM005` XML/help text omits the
+  quantization-overflow wording) are accepted as non-blocking. R2-4 (stale fix branch/worktree) was resolved by
+  deleting the squashed branch and worktree.
+- The human owner accepted the single-step 3.4–4.4 person-week exception on 2026-11-14; the 09A/09B split was
+  considered and rejected.
+- No Blocker or Major is waived; none remains.
+
+Residual risks and follow-ups:
+
+- The accepted notes above are edge-case metrics/text issues for direct in-memory templates; the normal project
+  path is unaffected. Follow-up owner: Step 09 implementor for any later cleanup.
+- The absolute `frequency_hz` model payload and the implicit default build path are pre-release decisions
+  authorized by ADR 0010 and the design review; no released format exists.
+- Benchmark numbers were measured in the development container and are order-of-magnitude evidence.
+- Windows/macOS CI was not run under the Ubuntu-only policy for a step with no platform-specific code.
 
 ## Human approval
 

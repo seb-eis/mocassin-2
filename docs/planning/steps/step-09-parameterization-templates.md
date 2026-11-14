@@ -10,13 +10,13 @@ completeness checks.
 
 ## Implementation status
 
-- **Status:** In audit
+- **Status:** Awaiting approval
 - **Feature list:** Approved 2026-11-14 (seven features; step branch created)
 - **Step branch:** `step/09-parameterization-templates`
 - **Step CI:** [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) at `916bae1`; earlier run `43630049214` at `20c73bc` is process history
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required at `916bae1` — round 1 `Fixes required` at `20c73bc` ([record](../audits/step-09.md)); fixes squashed as `916bae1`, resolutions recorded, re-audit requested
+- **Audit:** Passed with notes at `916bae1` (round 2, record `3aeacb1`) — [record](../audits/step-09.md); awaiting owner approval of the merge and tag
 - **Design review:** Ready with notes at `26d6a0ecff543ac65eb60d60d9f9c893e00f32bc` (round 4) — accepted 2026-11-14
 - **Last updated:** 2026-11-14
 
