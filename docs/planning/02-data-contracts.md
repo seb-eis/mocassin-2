@@ -88,8 +88,29 @@ to either is a format-breaking change.
 
 Step 08's compiled-model signature covers geometry, rules, encoding, indexing, and the symmetry/catalog
 versions; it excludes parameterization values and runtime simulation settings. Step 09's parameterization
-signature covers the compiled-model signature plus the canonical energy/frequency values. The two are
-deliberately distinct; see §3.3.
+signature covers the compiled-model signature plus the canonical applied values. Its `ParameterizationSignatureV1`
+projection is a fixed six-field MessagePack array:
+
+```text
+[formatVersion(uint64), modelSignature(string),
+ pairTables([[float64 × nParticles²] × pairTableCount]),
+ groupSets([[float64 × occupationCount] × clusterTableCount]),
+ siteEnergies([float64 × positionCount × particleCount]),
+ transitionRules([float64 × ruleCount])]
+```
+
+- Values are in compiled table/rule order and are the **quantized applied** values, not the sparse template.
+  `modelSignature` binds the order and identity; no stable IDs are projected, so a reader can reproduce the
+  digest from the `.msl` payload alone.
+- `siteEnergies` is the dense `[position][particle]` background with void at index 0 of each row.
+- Excluded: template ID/name/timestamps, set headers, display descriptors, unset markers, diagnostics,
+  summaries, timings, file names, and every runtime job/simulation setting.
+- Every float is quantized to 12 decimals (round half away from zero) and `-0.0` normalizes to `+0.0`.
+- `contracts/manifest.json` `signatures.parameterization` is finalized by Step 09 (`status: final`, typed
+  fields, `projectionType: ParameterizationSignatureV1`); the generated descriptor and
+  `tests/contracts/projections/parameterization-*.bin` vectors are checked by `verify.sh contracts`.
+
+The two signatures are deliberately distinct; see §3.3.
 
 ## 2. Project file (`.mocprj`, JSON)
 
@@ -544,15 +565,24 @@ support; the validator rejects a field that belongs to the other kind (`SIM023`)
 
 ### 2.3 Parameterization templates
 
+A parameterization template is stored inside the project `parameterizations` array. There is no separate
+template document or sidecar in v1. Templates are identified by a UUIDv7 `ParameterizationId`; a
+`BuildTemplate.parameterizationId` or an explicit build selection references one by ID. Multiple templates may
+target the same compiled model.
+
 ```json
 {
-  "id": "…",
+  "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e6f",
   "name": "Ceria parameters",
-  "modelSignature": "sha256:…",
-  "createdUtc": "…",
+  "modelSignature": "812a…",
+  "createdUtc": "2026-11-14T12:00:00Z",
   "stablePairSets": [
     {
-      "interactionId": "…",
+      "energyId": "…",
+      "centerSiteId": "…",
+      "partnerSiteId": "…",
+      "distanceBucketFm": 248,
+      "isChiral": false,
       "entries": [
         { "centerParticleId": "…", "partnerParticleId": "…", "energyEv": 0.0 }
       ]
@@ -561,13 +591,11 @@ support; the validator rejects a field that belongs to the other kind (`SIM023`)
   "unstablePairSets": [],
   "groupSets": [
     {
-      "interactionId": "…",
+      "clusterEnergyId": "…",
+      "clusterId": "…",
+      "centerSiteId": "…",
       "entries": [
-        {
-          "centerParticleId": "…",
-          "surroundingParticleIds": ["…", "…"],
-          "energyEv": 0.48
-        }
+        { "occupationParticleIds": ["…", "…"], "energyEv": 0.48 }
       ]
     }
   ],
@@ -576,9 +604,10 @@ support; the validator rejects a field that belongs to the other kind (`SIM023`)
   ],
   "transitionRuleSets": [
     {
+      "transitionKind": "kinetic",
       "transitionId": "…",
       "rules": [
-        { "ruleId": "…", "frequencyHz": 1.0e13 }
+        { "ruleGeometryId": "…", "frequencyHz": 1.0e13 }
       ]
     }
   ]
@@ -589,15 +618,51 @@ support; the validator rejects a field that belongs to the other kind (`SIM023`)
   (structure, transitions, environments, interaction geometry, indices), excluding parameterization values and
   runtime simulation settings. It is distinct from the Step 09 parameterization signature stored in the `.msl`
   `models.signature`. A parameterization whose model signature does not match the current compiled model
-  cannot be used to build jobs; the GUI offers "rebase" and shows which sets changed.
-- Rule IDs are stable strings derived from the rule's transition, state triplet, and canonical direction, so
-  recompilation can match existing frequencies; the dense `.msl` `rule_id` is not the template identity.
-- The original could not edit site energies through a parameterization template. The new format includes
-  `siteEnergyOverrides` as an intentional improvement; the GUI marks them as overrides.
-- Chiral pair sets share one interaction identity and one energy table. Each direction has its own stable
-  geometry ID for display and migration, and the shared `EnergyId` is the canonical pair-set identity used by
-  the compiled `object_id` and the parameterization template. A template stores one value per `EnergyId`, so
-  two independent values for a linked chiral pair are unrepresentable.
+  cannot be used to build jobs; `Apply` rejects it with `PRM001`, and the GUI offers "rebase" and shows which
+  sets changed.
+- **Sparse values.** Absence means "not parameterized": a missing pair/group value defaults to `0 eV`, a
+  missing rule frequency defaults to the compiled `1e13 Hz` default, and a missing site-energy override means
+  the authored model background. An explicit `0 eV` or explicit `1e13 Hz` is a real entry. Creation writes one
+  set header for every compiled pair table, cluster table, and kinetic transition collection but no value
+  entries; `ParameterizationService.Describe` enumerates the individual required slots.
+- **Pair identity** is `energyId`, the Step 05/08 shared pair energy identity. It equals `GeometryId` for an
+  achiral or unstable–stable pair and is the lexicographically smaller `GeometryId` for a reciprocal chiral
+  pair. Each direction keeps its own `GeometryId` for display, but a template stores one value per
+  `EnergyId`; independent A→B/B→A values are unrepresentable. `centerSiteId`, `partnerSiteId`,
+  `distanceBucketFm`, and `isChiral` are display/rebase descriptors, not identity; for a chiral table they
+  come from the direction whose `GeometryId` equals the shared `EnergyId`. A descriptor mismatch for the same
+  ID is `PRM002` and the compiled model wins. A chiral table is symmetric under particle exchange: setting
+  `(X, Y, E)` also sets `(Y, X, E)`, the template stores the smaller particle-ID orientation, and a mirrored
+  duplicate with a different value is `PRM014`. Achiral and unstable–stable tables are ordered.
+- **Group identity** is `clusterEnergyId`, the Step 08 stable cluster energy ID, plus the canonical
+  `occupationParticleIds` tuple in site order (center first). The tuple uses authored particle IDs, not
+  compiled indices. `clusterId` and `centerSiteId` are display descriptors.
+- **Rule identity** is `ruleGeometryId`, the Step 08 stable rule geometry ID, inside a
+  `(transitionKind, transitionId)` set. Only kinetic transitions are parameterizable; MMC rules keep their
+  compiled default and are not written into a template. Both kind and ID are stored so a hand-written or stale
+  Metropolis set is unambiguous and is warned/ignored with `PRM011`, and because kinetic and Metropolis
+  transitions are separate domains. The dense `.msl` `rule_id` is never a template identity.
+- **Site overrides** are keyed by `(siteId, particleId)`. Site energies are per reference site, not per P1
+  position. `siteEnergyOverrides` is an intentional improvement over the original, which could not edit site
+  energies through a template. A missing override uses the authored `model.siteEnergies` background; removing
+  an override is "reset to model".
+- **Versioning.** The template shape is part of the project `schemaVersion`; it has no separate
+  `formatVersion`. Step 09 extends the Step 01 template stub additively before the first released `.mocprj`,
+  so `schemaVersion` stays `1` and no migration is needed. After release, a semantic template change requires
+  a `schemaVersion` bump and a migration in `Core.Project.ProjectMigrations`. Never reinterpret an existing
+  field.
+- **Canonical order.** `parameterizations` sorts by `id`. Within a template: pair sets sort by `energyId`,
+  pair entries by `(centerParticleId, partnerParticleId)`, group sets by `clusterEnergyId`, group entries by
+  the `occupationParticleIds` sequence in site order, site overrides by `(siteId, particleId)`, rule sets by
+  `(transitionKind, transitionId)`, and rule entries by `ruleGeometryId`. Values format invariantly and
+  `-0.0` normalizes to `0.0`.
+- **Limits.** `ParameterizationLimits` caps templates per project, sets and entries per template, name and
+  stable-ID lengths, and total explicit entries. A violation is `PRM013`/`PRM014`; the project file cap still
+  applies. The exact values are in the Step 09 page.
+- **Validation.** Structural checks (`PRM004`, `PRM005`, `PRM010`, `PRM013`, `PRM014`) run in Core
+  `ProjectValidator` on load, save, and edit. Compiled-bound checks (`PRM001`–`PRM003`, `PRM006`, `PRM008`,
+  `PRM009`, `PRM011`, `PRM012`, `PRM015`, `PRM016`) run in `Mocassin.Packages` after compilation. `PRM007` is
+  retired and not registered.
 
 ### 2.4 Job templates
 
@@ -682,7 +747,7 @@ CREATE TABLE models (
     model_id       INTEGER PRIMARY KEY,
     signature      TEXT    NOT NULL UNIQUE,   -- Step 09 parameterization signature (ADR 0010)
     format_version INTEGER NOT NULL,
-    payload        BLOB    NOT NULL            -- Zstd(MessagePack(ParameterizedModel))
+    payload        BLOB    NOT NULL            -- Zstd(MessagePack(compiled model payload, §3.3))
 );
 
 CREATE TABLE lattices (
@@ -771,9 +836,16 @@ MessagePack map with snake_case keys. Top-level:
   package exists, matching the pre-release additive-v1 precedent; the manifest entry, schema, and fixtures are
   added with the Step 11 writer and Step 08 signature feature.
 - The payload is the parameterized form. Step 08's internal `CompiledModel` is not the persisted DTO; Step 11
-  maps it to this payload. Stable geometry/rule ID strings, expansion maps, equivalent images, input hashes,
-  timings, diagnostics, cache statistics, derived classification flags, and the index→ID map are
-  JSON-inspection only (`compiled-inspection-v1`) and are not persisted in `.msl`.
+  maps `CompiledModel` + the Contracts `ParameterizationValues` to this payload. The build-time
+  `ParameterizedModel` used by Steps 10–11 lives in `Mocassin.Packages.Parameterizations` and wraps
+  `CompiledModel`, `ParameterizationValues`, and the parameterization signature; it is not the persisted DTO.
+  Stable geometry/rule ID strings, expansion maps, equivalent images, input hashes, timings, diagnostics,
+  cache statistics, derived classification flags, and the index→ID map are JSON-inspection only
+  (`compiled-inspection-v1`) and are not persisted in `.msl`.
+- The parameterization signature covers the applied pair/group/site values and rule frequencies in dense
+  compiled order. It does not include stable ID strings, so Step 13 can re-encode it from this payload without
+  persisting the inspection-only `rule_geometry_id`. A value-only change changes `signature` but not
+  `model_signature`; a geometry/rules/catalog change changes both.
 
 `structure` fields:
 
@@ -813,7 +885,7 @@ MessagePack map with snake_case keys. Top-level:
 | --- | --- | --- |
 | `pair_tables` | array | `{object_id, energies:[f64; n_particles*n_particles]}` |
 | `cluster_tables` | array | `{object_id, occupation_codes:[u64], energies:[f64], particle_table_mapping:[u8]}` |
-| `defect_background` | array | `[position][particle]` site energy in eV, row-major |
+| `defect_background` | array | `[position][particle]` site energy in eV, row-major; Step 09 resolves the authored `siteEnergies` background, applies template overrides, and quantizes it |
 
 - Pair tables are in canonical shell order: `(distanceBucket, targetP, cellA, cellB, cellC)`, then site
   indices. The stable geometry ID is a content hash used for parameterization matching, not table order; its
@@ -852,8 +924,9 @@ MessagePack map with snake_case keys. Top-level:
   representative direction; stable rule geometry IDs are inspection-only and are not persisted.
 - `state0`/`state1`/`state2` use 6 bits per path node, node 0 least significant, unused high bits zero. For
   MMC, `state1` is `0` and is ignored.
-- `frequency_factor` is the Step 09 parameterized value relative to the simulation/job maximum; Step 08's
-  internal default frequency is not a second runtime source.
+- Step 09 applies an absolute frequency per rule (defaulting missing entries to the compiled `1e13 Hz`);
+  `frequency_factor` is that Step 09 value relative to the simulation/job maximum. Step 08's internal default
+  frequency is not a second runtime source.
 - `movement` is the authoritative fractional displacement per path node. `path_vector` is the Cartesian net
   displacement, obtained by converting each movement with the cell geometry and summing; `length` is its
   magnitude. `charge_transport_vector` is the particle-identity sum

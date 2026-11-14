@@ -79,6 +79,7 @@ Load project
   → validate (stage 1–4)
   → select build template + parameterization
   → compile model (step 08)
+  → validate parameterization against the compiled model (step 09)
   → apply parameterization (step 09)
   → expand jobs (step 10)
   → for each selected job: generate lattice + encode job
@@ -123,6 +124,14 @@ Build orchestration calls `ProjectValidationPipeline.ValidateFileAsync` with `Ru
 its own `IValidationStage` (`Stage = Build`) checks; `validate` uses the same entry with `RunBuildStage = false`.
 The `validate` subcommand keeps the Step 07 `validation-v1` report and exit-code contract; the build command
 keeps the table above.
+
+The build pipeline then calls `IModelCompiler.Compile` and, immediately after a successful compile,
+`IParameterizationService.Validate(project, model, template)` before `ParameterizationService.Apply`. Step 09
+does not add its own `IValidationStage`: `ValidationContext` has no compiled model, and compiling inside a
+validation stage would duplicate this orchestration. Structural `PRM` checks still run in `validate` because
+they live in Core `ProjectValidator`; signature/ID checks require the compiled model and therefore run here in
+`build`. There is no `mocassin parameterize` command; `build --parameterization <id>` selects a project
+template, and creation/editing is the Step 09 library API used by the GUI.
 
 ### 4. Progress reporting
 

@@ -179,6 +179,47 @@ model signature plus the canonical values. The `.msl` `models.signature` and `.m
 `model_signature` for template/model identity. A geometry change invalidates templates; a value-only change
 does not.
 
+## Parameterization templates are sparse project data
+
+A parameterization template is part of the `.mocprj` document, not a compiled artifact or a separate file.
+`ParameterizationId` is UUIDv7 and is preserved by rebase so build templates keep working. The template
+shape is versioned by the project `schemaVersion`; there is no second template version axis in v1. Step 09
+extends the Step 01 stub additively before the first release.
+
+Values are sparse: absence means unset, not zero. Pair/group absence defaults to `0 eV`, rule-frequency
+absence to the compiled `1e13 Hz`, and site-override absence to the authored `model.siteEnergies` background.
+Creation writes only set headers, so a fresh template is visibly unparameterized and `PRM003`/`PRM006` can
+report it. This is deliberately different from the original dense default-filled sets: it distinguishes
+"reviewed and left at default" from "not reviewed" and keeps large templates small.
+
+Identities are content identities, never dense indices: `EnergyId`, `ClusterEnergyId` plus the canonical
+occupation tuple, `RuleGeometryId` inside `(transitionKind, transitionId)`, and `(siteId, particleId)` for site
+overrides. A model-signature change invalidates the template before ID matching; diff/rebase is explicit and
+reported, and values are never silently reused across changed geometry.
+
+## Parameterization values, signature, and site background
+
+`Mocassin.Contracts` owns the applied `ParameterizationValues` and the `ParameterizationSignatureV1`
+projection; `Mocassin.Packages` owns the factory, apply, validation, diff, and rebase and returns a build-time
+`ParameterizedModel` (compiled model + applied values + signature). The `.msl` payload is assembled by
+Step 11 from those parts. `Mocassin.Compilation` stays parameterization-free and does not reference Contracts.
+
+The parameterization projection is values-only: `formatVersion`, `modelSignature`, dense `pairTables`,
+`groupSets`, `siteEnergies`, and `transitionRules`. The model signature binds geometry and order, so stable
+IDs are unnecessary and Step 13 can re-encode the digest from the payload. The applied values are quantized
+to 12 decimals before storage and signing; the sparse template is not signed directly, so two templates with
+the same effective values produce the same package signature.
+
+Step 08's implemented `CompiledEnergyModel` has pair and cluster tables but no site-energy background.
+Step 09 resolves the authored `model.siteEnergies` onto the compiled `[position][particle]` table, applies
+template overrides, and Step 11 writes it as `energy.defect_background`. Step 15 consumes the same table.
+This keeps the completed compiler unchanged and the authored site energies in their existing Core home.
+
+Step 09 adds no `IValidationStage`: `ValidationContext` has no compiled model, and compiling inside validation
+would duplicate Step 12. Structural `PRM` checks run in Core `ProjectValidator`; compiled-bound checks run in
+`ParameterizationService.Validate`, called by Step 12 after compilation. For the same reason there is no
+`mocassin parameterize` CLI; Step 12 owns `compile` and `build --parameterization`.
+
 ## Derived solver intent
 
 `CompiledSolverIntent` carries `Kind`, `UsePrerun = Kmc && PreRunMcsp > 0`, and

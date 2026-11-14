@@ -150,8 +150,15 @@ adapter and maps compile failures to the build error model.
 `CompiledModel` is the internal pure result. Step 09 adds parameterization values and the parameterization
 signature; Step 10 adds jobs and lattices; Step 11 maps the model to the Contracts `.msl` payload and composes
 `SolverJobFlags`; Step 18 owns mutable tracker state. The model signature (geometry/rules/encoding) and the
-parameterization signature (geometry + values) are distinct. Stable geometry/rule IDs, expansion maps, timings,
-and diagnostics are JSON-inspection only and are not persisted in `.msl`.
+parameterization signature (model identity + applied values) are distinct. Stable geometry/rule IDs, expansion
+maps, timings, and diagnostics are JSON-inspection only and are not persisted in `.msl`.
+
+Step 09's ownership follows the project graph: `Mocassin.Core` owns the project-resident template and value
+records; `Mocassin.Contracts` owns the applied `ParameterizationValues` and the values-only
+`ParameterizationSignatureV1`; `Mocassin.Packages.Parameterizations` owns the factory, apply, validation, diff,
+and rebase and returns a build-time `ParameterizedModel`. `Mocassin.Compilation` gains no parameterization
+type or dependency. The site-energy background is resolved by Step 09 from authored `model.siteEnergies` (the
+compiler does not compile it) and is persisted by Step 11 as `energy.defect_background`.
 
 ## Particle and structure model (Step 03)
 

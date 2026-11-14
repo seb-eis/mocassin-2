@@ -31,6 +31,11 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 
 ### Implementation notes and deviations
 
+- **Post-step correction (2026-11-14, Step 09 design).** The implemented `CompiledEnergyModel` contains pair
+  geometries, pair tables, and cluster tables only. It does not compile the authored site-energy background
+  mentioned in the §10 design bullet. Step 09 resolves `Project.Model.SiteEnergies` onto the compiled
+  `[position][particle]` background, applies template overrides, and Step 11 writes it as the `.msl`
+  `energy.defect_background`. The Step 09 page and the data contract are authoritative for that boundary.
 - **Compiler namespace.** The public compiler contract lives in `Mocassin.Compilation.Compiler`, the cache
   contracts in `Mocassin.Compilation.Caching`, and the immutable stage input in
   `Mocassin.Compilation.Context`. The design §2 snippet writes `namespace Mocassin.Compilation;`, but

@@ -62,7 +62,8 @@ pub struct StateCode(u64);
 
 pub struct ParameterizedModel {
     pub format_version: u32,
-    pub signature: String,
+    pub signature: String,          // Step 09 parameterization signature
+    pub model_signature: String,    // Step 08 compiled-model signature
     pub particles: ParticleTable,
     pub structure: StructureModel,
     pub energy: EnergyModel,

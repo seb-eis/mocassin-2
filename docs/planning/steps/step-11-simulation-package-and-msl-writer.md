@@ -90,7 +90,9 @@ Flow:
 
 1. Create a temp file `project.msl.tmp-<pid>` in the target directory.
 2. Open SQLite, set pragmas, create schema, write `schema_info`.
-3. Compile/parameterize the model (step 08/09) once; serialize and insert the model row.
+3. Compile/parameterize the model (step 08/09) once; serialize and insert the model row. Step 09 returns a
+   build-time `ParameterizedModel` (`Mocassin.Packages.Parameterizations`) wrapping `CompiledModel` + the
+   Contracts `ParameterizationValues`; Step 11 maps both to the data-contract §3.3 payload.
 4. Stream job descriptors from step 10:
    - generate the lattice (step 10);
    - serialize the lattice; insert or reuse by signature;
@@ -106,8 +108,10 @@ pull-based iterator.
 ### 4. Payload encoding
 
 - MessagePack maps with snake_case keys, Zstd level 3 (fast) or 9 (`--compact`).
-- The model payload is the canonical `ParameterizedModel` from `Mocassin.Contracts` (compiled geometry/rules
-  plus energy and frequency values, with the parameterization signature and the Step 08 `model_signature`).
+- The model payload is assembled in Step 11 from the compiled geometry/rules plus the Contracts
+  `ParameterizationValues` (applied pair/group/site values and rule frequencies), with the Step 09
+  parameterization signature and the Step 08 `model_signature`. The payload's `energy.defect_background` is
+  the Step 09-resolved `[position][particle]` table.
 - The lattice payload is `{format_version, lattice_size, position_count, lattice}`.
 - The job payload is the full `JobDescriptor`/settings (including optimizers) plus the model/simulation index.
   Its `flags` word is a `SolverJobFlags` value in `Mocassin.Contracts` carrying the authored flags plus the

@@ -109,7 +109,7 @@ Property tests are required for the following, using brute-force or analytic ora
 | --- | --- |
 | Symmetry / geometry | Group laws; stabilizer chain; induced permutations; orbit membership and closure; canonical order independent of input order; coordinate round-trips; minimum-image distance equals brute force; radial-search completeness; distance-bucket stability; pair/cluster reduction is complete and non-redundant; chiral orbit linking |
 | Compilation | Mass/charge conservation per rule; valid indices; rule uniqueness; deterministic byte-identical output; P1 counts match brute-force expansion; every interaction has a table entry |
-| Parameterization | Signature stability; apply → serialize → reload identity; rebase never silently changes unmatched values; chiral partners share one `EnergyId` and one value |
+| Parameterization | Sparse and explicit-default templates apply to identical values; signature stability under entry order, culture, and round-trip; apply → persist → reload identity; rebase copies only exact or uniquely reported descriptors and never silently reuses values across changed geometry; chiral partners share one `EnergyId` and one value; site overrides round-trip and reset; arbitrary structurally valid template JSON never throws or exceeds a configured allocation |
 | Supercells / doping | Requested vs applied counts; never exceeds available particles; charge neutrality or explicit failure; order dependence is deterministic; same seed → same lattice |
 | Package / state | Encode → decode identity for all fields and versions; unknown fields ignored / unknown major version rejected; truncated input fails cleanly; checksum verification |
 | Results store | `.msr` package binding, package-signature mismatch rejection, idempotent collection, previous-major read |
@@ -345,6 +345,39 @@ solver with the same binary, platform, package, and seed.
   benchmark laptop class. Statistics are opt-in and may be excluded from the fast tier.
 - **Cancellation:** a cancelled `validate` returns no partial success and writes nothing.
 
+### 9.8 Parameterization
+
+- **Template round-trip:** project JSON → template → project JSON is stable for shuffled authoring order,
+  comma-decimal cultures, `-0.0`, additive missing arrays, and unknown-field rejection. The canonical document
+  hash is stable across those permutations.
+- **Identity:** pair/group/rule set IDs equal the compiled `EnergyId`/`ClusterEnergyId`/`RuleGeometryId` on
+  ceria, barium zirconate, and ceria KMC; a geometry or catalog/contract change invalidates the model
+  signature before ID matching.
+- **Sparse/default equivalence:** applying a sparse template and applying an equivalent template with explicit
+  default values produce identical `ParameterizationValues` and parameterization signatures. Missing pair and
+  group values are `0 eV`; missing rule frequencies are the compiled default; missing site overrides use the
+  authored background.
+- **Chiral:** a chiral pair has one table, one value, and no direction-specific API or JSON field; breaking the
+  chiral link drops the old value and defaults both new slots.
+- **Site energies:** the applied `[position][particle]` background equals the authored `siteEnergies` mapped
+  through compiled site ownership; overrides replace every owned position and removal restores the authored
+  value; invalid targets warn and do not alter the table. Step 15's site-energy/barrier test consumes the same
+  table.
+- **Signature:** the six-field values-only projection is deterministic; same effective values from different
+  templates produce the same digest; a value-only change changes the parameterization signature but not the
+  model signature; a geometry/rules/catalog change changes both; the checked-in `.bin` vector is re-encoded by
+  the Python checker and, from Step 13 on, by Rust.
+- **Rebase:** `KeepMatching` copies only exact IDs; `NearestGeometry` copies only unique, reported descriptor
+  matches and never across a changed chiral link; ambiguous matches copy nothing; `Reset` copies nothing; every
+  strategy emits the report.
+- **Diagnostics:** every non-retired `PRM` code has a descriptor, documentation anchor, and an emission test
+  with severity, `ModelPath`, and hint; structural codes are visible in `validate`, compiled-bound codes in the
+  post-compile call; `PRM007` is not registered.
+- **Limits and safety:** oversized counts, strings, and applied tables fail with `PRM013` before allocation;
+  arbitrary structurally valid template JSON produces diagnostics rather than an uncaught exception.
+- **Performance:** ceria create `< 20 ms`, apply + signature `< 50 ms`, and the synthetic 1,000-position case
+  `< 2 s`/`< 256 MiB` on the benchmark laptop class; the signature writer streams at `>= 100 MB/s`.
+
 ## 10. Contract tests
 
 - **Project JSON**: .NET writes fixtures; a JSON Schema validator checks them in CI.
@@ -432,6 +465,10 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | --- | --- |
 | Compile ceria model (Step 08, no jobs) | < 1 s on the benchmark laptop class |
 | Compile 10k P1-position model (Step 08) | < 30 s, < 2 GiB managed memory |
+| Create ceria parameterization template + summary (Step 09) | < 20 ms |
+| Apply + parameterization signature, ceria (Step 09) | < 50 ms |
+| Apply + signature, synthetic 1k-position/4-particle/100-table/10k-rule model (Step 09) | < 2 s, < 256 MiB |
+| Parameterization signature throughput (Step 09) | >= 100 MB/s single-threaded, streaming |
 | Build compiled model (ceria, 100 jobs) | < 5 s on a 4-core laptop |
 | Build 10⁴ small jobs | < 10 min, < 2 GB peak RSS |
 | Load `.msl` and start job | < 100 ms |
@@ -448,8 +485,9 @@ Benchmarks:
 
 - `benches/energy.rs`, `benches/kmc.rs`, `benches/mmc.rs`, `benches/context.rs` with Criterion.
 - `Mocassin.Benchmarks` with BenchmarkDotNet for compilation, serialization, and `.msl` writes.
-- `Mocassin.Benchmarks` includes the Step 02 P1 expansion/reduction fixture and the Step 03 structure-preview
-  fixture (`StructurePreviewCeria`, `StructurePreviewBariumZirconate`).
+- `Mocassin.Benchmarks` includes the Step 02 P1 expansion/reduction fixture, the Step 03 structure-preview
+  fixture (`StructurePreviewCeria`, `StructurePreviewBariumZirconate`), and the Step 09 parameterization
+  create/apply/signature/round-trip fixtures. Benchmarks are dispatched manually via `benchmark.yml`.
 - A reproducible benchmark package in `tests/reference/bench/` with fixed seeds and inputs.
 - Baselines are stored per runner class (OS, CPU class, .NET/Rust version) in
   `tests/reference/bench/baselines.json`; comparisons use the same class only.

@@ -23,7 +23,7 @@ validated Project
 
 Step 09 adds parameterization values and the parameterization signature; Step 10 adds jobs/lattices; Step 11
 writes the `.msl` package and composes the `SolverJobFlags` word; Step 12 owns build orchestration and the
-`mocassin` CLI.
+`mocassin` CLI. Step 09 does not change the compiler: it consumes the compiled identities and tables.
 
 ## Compiler API and purity
 
@@ -156,13 +156,39 @@ The internal `CompiledModel` is a `Mocassin.Compilation` record with typed IDs a
 the persisted DTO.
 
 - **Persisted in `.msl`:** compiled geometry/rules/encoding, parameterized energy/frequency values, symmetry
-  contract/catalog versions, and both signatures. Step 11 maps the internal model to the Contracts
-  `ParameterizedModel` payload defined in the data-contract §3.3.
+  contract/catalog versions, and both signatures. Step 09 returns a build-time
+  `Mocassin.Packages.Parameterizations.ParameterizedModel` wrapping `CompiledModel` + the Contracts
+  `ParameterizationValues`; Step 11 maps those to the data-contract §3.3 payload. The Contracts type is not
+  the whole payload and does not embed the compiler's internal record.
 - **Inspection only:** stable geometry/rule IDs, expansion maps, equivalent images, input hashes, timings,
   diagnostics, cache statistics, derived flags, and the index→ID mapping. `CompiledModelJson` emits these as
   `compiled-inspection-v1`; it is not a `.msl` contract.
 - **Composed later:** parameterization values/signature (Step 09), jobs/lattices/selection optimizers (Steps
   10–11), `.msl` flags (Step 11), tracking state/`.mcs` metadata (Step 18).
+
+## Parameterization (Step 09)
+
+- A parameterization template is Core project data (`Project.parameterizations`), not a compiled artifact. It
+  stores a `ModelSignature`, sparse values keyed by `EnergyId`, `ClusterEnergyId`, `RuleGeometryId`, and
+  `(siteId, particleId)`, plus compact display descriptors. It never stores dense indices or the compiled
+  tables.
+- `ParameterizationFactory.Create` writes set headers for every compiled pair table, cluster table, and
+  transition collection and no values. `ParameterizationService.Describe` enumerates required slots and
+  quality metrics.
+- `ParameterizationService.Apply` rejects a model-signature mismatch (`PRM001`), maps template values to dense
+  compiled tables, defaults missing pair/group values to `0 eV`, missing frequencies to the compiled `1e13 Hz`,
+  and missing site overrides to the authored `model.siteEnergies` background. It quantizes to 12 decimals
+  before storage and signing and returns a build-time `ParameterizedModel`.
+- The site-energy background is **not** part of `CompiledModel`; Step 09 resolves it per
+  `[position][particle]`, applies overrides, and Step 11 persists it as `energy.defect_background`. Step 15
+  consumes that table unchanged.
+- Structural `PRM` checks run in Core `ProjectValidator`; compiled-bound checks run in
+  `ParameterizationService.Validate`, which Step 12 calls after compilation. Step 09 adds no
+  `IValidationStage` because `ValidationContext` has no compiled model and compiling inside validation would
+  duplicate Step 12. There is no `mocassin parameterize` command.
+- Diff/rebase is explicit. `KeepMatching` copies only exact stable IDs; `NearestGeometry` copies only unique,
+  reported pair/group descriptor matches; `Reset` copies nothing. Values are never silently reused across
+  changed geometry, and a changed chiral link drops the shared value.
 
 ## Signatures
 
@@ -191,8 +217,16 @@ ParameterizedModel.Signature
   interstitialcy5, and BaZrO₃; `tools/contracts/check_model_projection.py` independently re-encodes them from
   the generated descriptor in `verify.sh contracts`. Step 11 reuses the same manifest entry and projection.
 - Step 09 treats the model signature as opaque and computes the parameterization signature in
-  `Mocassin.Contracts`. `models.signature` is the parameterization signature; `models.payload.model_signature`
-  is the Step 08 signature.
+  `Mocassin.Contracts` from `modelSignature` + `ParameterizationValues`. `ParameterizationSignatureV1` is a
+  fixed six-field array: `formatVersion`, `modelSignature`, `pairTables`, `groupSets`, `siteEnergies`, and
+  `transitionRules`. Values are in dense compiled table/rule order; `modelSignature` binds identity and order,
+  so no stable IDs are projected and Step 13 can re-encode from the `.msl` payload alone. Template metadata,
+  set headers, unset markers, and runtime settings are excluded. The applied values are quantized before
+  storage, so the persisted payload and the signature cannot drift.
+- `Mocassin.Compilation.Signatures.CanonicalProjectionWriter` is made public and reused by Contracts, so the
+  model and parameterization projections share one quantization/header/string implementation.
+- `models.signature` is the parameterization signature; `models.payload.model_signature` is the Step 08
+  signature. A value-only change changes the former, not the latter.
 
 ## Caches and determinism
 
