@@ -144,11 +144,15 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
 
 > Round-2 state is `Ready with notes`: no Blocker or Major remains; R2-1..R2-3 are Minor and R2-4..R2-6 are
 > Notes, all requiring explicit human-owner acceptance before implementation starts. Round-1 findings, evidence,
 > and verdict are unchanged below.
+>
+> Round-3 state is `Ready with notes`: no Blocker or Major remains; one Minor (R3-1) and the orchestrator-owned
+> dashboard update (R2-5) require explicit human-owner acceptance before implementation starts. Rounds 1–2
+> reviewer text is unchanged.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -433,3 +437,120 @@ line, the planner did not alter the round-1 findings/evidence/verdict, and no im
 exists. R2-1..R2-3 should be corrected in the design branch and R2-4..R2-6 recorded before the owner accepts;
 under `docs/planning/reviews/README.md`, `Ready with notes` requires the human owner to accept the remaining
 Minor/Note findings explicitly. This record is evidence and does not authorize starting Step 09.
+
+### Review round 3
+
+#### Independence and frozen state
+
+I am a fresh context with no shared conversation with the planner, implementor, step agent, or orchestrator. I
+did not author or implement the reviewed work and did not write rounds 1–2. I received only the frozen design
+commit, the request record, the repository links, and the required commands/scope; no desired verdict or summary
+was supplied. All evidence below is from reading `/workspace/playground/step09-design` at the request tip
+`0c503122c15070f8056687e566672528cb2b7c49` and the frozen design at
+`b5db2892aae77954e9ae55d0bb2c66f6e8a14925`.
+
+Frozen-state checks:
+
+- `git rev-parse HEAD` — `0c503122c15070f8056687e566672528cb2b7c49`.
+- `git diff --name-status b5db289..0c50312` — exactly `M docs/planning/reviews/step-09.md` and
+  `M docs/planning/steps/step-09-parameterization-templates.md` (31 insertions, 5 deletions).
+  The step-page hunk is one `Design review` status line (`Re-review required at b5db289…`). The record hunk is
+  the reviewed-commit metadata, the `Record state`, two M5 resolution lines, and the appended
+  `### Round 2 resolution` block. This is a documentation-only request/status delta, recorded per
+  `reviews/README.md` §8.1.
+- `git show --stat b5db2892aae77954e9ae55d0bb2c66f6e8a14925` — five docs files
+  (`03-quality-strategy.md`, `04-roadmap.md`, `appendix-b-parity-matrix.md`,
+  `steps/step-09-parameterization-templates.md`, `steps/step-13-rust-solver-foundation-and-package-reader.md`)
+  and **no** review record. Rounds 1–2 reviewer findings, evidence, and verdict text are therefore untouched by
+  the fix commit; the request commit's record diff contains no hunk in the round-1/round-2 `Findings`,
+  `Evidence`, `## Reviewer independence`, `## Verdict`, or `### Review round` text.
+- `git status --short` — clean before this record. `git branch -a` — only `docs/step-09-design`, `main`,
+  `origin/docs/step-09-design`, `origin/main`; no step or feature branch. `git worktree list` —
+  `/workspace/mocassin` (main) and this worktree. `docs/planning/audits/step-09.md` is absent.
+
+I re-read every checklist item above against `b5db289`; all marks remain `[x]` and no item text was changed.
+The round-1 and round-2 sections are unchanged; round-3 residuals are recorded only in this appended section.
+
+#### Commands and results
+
+Run in `/workspace/playground/step09-design`; full logs are in `/tmp/opencode/step09-review3/` (scratch, not
+committed).
+
+```sh
+./tools/verify.sh docs --require
+# exit 0; "Documentation links OK (153 files scanned).";
+# Zensical strict: "No issues found";
+# DocFX: "Applying templates to 302 model(s)..." then "Build succeeded." / "0 warning(s)" / "0 error(s)";
+# rustdoc generated for every workspace crate;
+# "Closeout gate completed with required checks enabled."
+
+./tools/verify.sh policy --require
+# exit 0; "NuGet licence policy OK (51 packages)."; "no vulnerable packages" for every solution project;
+# ApiCompat: "Public API is compatible with the checked-in baseline" (only unresolved MessagePack.dll
+# reference notes for Mocassin.Compilation/Mocassin.Packages, not breaking-change findings);
+# "Contract artifacts are current (18 files)"; "Model projection check OK (5 fixtures).";
+# "space-group catalog is current: 274 settings, sha256 1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395";
+# "Process consistency: OK"; "Ran 18 tests ... OK";
+# "SPDX headers present in 411 source files"; "No secret patterns found in 739 tracked text files";
+# "advisories ok, bans ok, licenses ok, sources ok";
+# "Closeout gate completed with required checks enabled."
+```
+
+Repository probes: `grep`/`sed` over the frozen design pages, record, data contract and ADR 0010, manifest and
+generated schema, contract tools, roadmap, status dashboard, parity matrix, Steps 08/10–13/16/26, the
+implemented compiler/symmetry code, the compiler and symmetry tests, and the samples. No code probe was needed
+for the frequency issue: the absolute `frequency_hz` design removes the round-1 factor × maximum reconstruction,
+so round 3 is a document-consistency and decision-record check.
+
+#### Round-2 and owner-decision verification
+
+| Item | Round-3 status | Reproduced evidence |
+| --- | --- | --- |
+| R2-1 | Resolved. | `appendix-b-parity-matrix.md` line 131 now reads “Step 11 writes absolute `frequency_hz`; Step 16 derives the per-job factor”. Consistent with `02-data-contracts.md` lines 924 and 934–938 (`jump_rules[].frequency_hz` is the Step 09 applied absolute value; the factor is derived, not persisted), Step 11 lines 114–119 and 219–220, Step 16 lines 39–41 and 125–128, and Step 09 lines 765–767 and 792–795. A repository grep for `frequency_factor` finds only the Step 16 derivation and Step 11's explicit “no relative `frequency_factor` is stored in the model payload”. |
+| R2-2 | Resolved. | Step 09 line 848: “No explicit entries at all (`HasExplicitValues == false`) for an explicit template; suppressed for the implicit default. An explicit `0 eV`/`1e13 Hz` suppresses it.” Matches §5 lines 658–662, §9 lines 1040 and 1047, §11.1 line 1143, and `03-quality-strategy.md` line 361. A grep for “differs from its default” finds only the historical round-1/round-2 reviewer text, no design page. |
+| R2-3 | Resolved and consistent. | Step 09 line 1141 and `03-quality-strategy.md` line 362 both read “24 chiral geometries, i.e. 12 reciprocal pairs”; the M5 resolution (record lines 225 and 234) uses the same wording. Reproduced from code: `Mocassin.Compilation/Compiler/CompilationCounts.cs` line 88 computes `ChiralPairs = …Count(IsChiral) / 2`, and `Mocassin.Symmetry.Tests/Energy/EnergyPreviewTests.cs` lines 258–283 (`BariumZirconateHighSymmetryPairsAreReciprocal`) asserts exactly 24 chiral previews whose partners are reciprocal and share the `EnergyId`. So 24 directed chiral geometries are 12 reciprocal pairs; the acceptance assertion “compiled chiral geometry count is 24” is correct. |
+| R2-4 | Recorded as an owner decision. | Step 09 lines 25–27 and 104–120 record the single-step approval, the honest 3.4–4.4 pw estimate, the upper-bound trigger breach, and the 09A/09B split (features 1–4 vs 5–7) as considered and rejected. `04-roadmap.md` line 65 carries the row exception and §3.1 lines 107–113 records the same exception, its Step 09-only scope, and the re-split rule. The step page remains `Status: Not started` (line 13). |
+| R2-5 | Verified; correctly assigned to the orchestrator. | `docs/planning/status.md` is unchanged by this review cycle (last touched by `81d1f32`, Step 08 closeout); row 09 (line 59) still reports design review `Not requested` while the step page line 20 reports `Re-review required at b5db289…`. The resolution assigns the dashboard update to the orchestrator at acceptance/step start, which is the correct write scope: AGENTS §3.8 forbids the planner from editing step status and forbids the reviewer from editing any other file. Accepted as an outstanding orchestrator/step-agent follow-up; no design impact. |
+| R2-6 | Resolved. | Step 13's acceptance list (lines 234–237) now requires the reader to “re-encode the Step 09 parameterization signature exactly from `model_signature`, the pair/group/site tables, and the absolute `jump_rules[].frequency_hz` values; a changed frequency is detected without any factor × maximum reconstruction”. Matches Step 11 acceptance lines 219–220 and Step 09 lines 1188–1189. |
+| M1 owner decision | Recorded; step not started. | Step 09 lines 28–29 and 787–789 confirm the absolute `frequency_hz` model-payload design as a pre-release `.msl` change; data contract §3.3 lines 934–938 is the authoritative field rule. No model-level `frequency_factor` remains. |
+| M2 owner decision | Recorded; step not started. | Step 09 lines 704–705 confirm the implicit default build (`parameterizations: []`), with the full path at §5.1 lines 707–732. `samples/ceria/ceria.mocprj`, `samples/simulations/ceria-kmc.mocprj`, and `samples/barium-zirconate/barium-zirconate.mocprj` all contain `"parameterizations": []`; Step 11 lines 211–219 and Step 12 lines 65–68/213–215 build through the default. |
+| Seven-feature list | Approved, without marking the step in progress. | Step 09 line 14 and lines 31–42 record the 2026-11-14 approval of the seven features; the status block stays `Not started` (line 13) and no step branch exists (`git branch -a`). Estimates at lines 1208–1210 sum to 17–22 days. |
+
+#### Findings
+
+| ID | Severity | Finding | Evidence |
+| --- | --- | --- | --- |
+| R3-1 | **Minor** | **The `signatures.parameterization` finalization has no ADR-0010-scoped pre-release statement.** Step 09 finalizes the existing `skeleton` projection into the six-field typed `ParameterizationSignatureV1` layout (`status: final`, new `projectionType`, the two placeholder `bin` pair fields replaced), but ADR 0010 records its pre-release layout-finalization exception only for `signatures.model` / `ModelSignatureV1` / `model-v1`, and the data contract repeats only the model exception. ADR 0010 rule 1 makes manifest field-order/type changes format-breaking, and AGENTS §11 requires “an ADR or explicit decision note” for a format change. Record the same explicit pre-release basis for the parameterization layout before feature 2 implements it — either extend ADR 0010's “Pre-release model layout finalization” section to cover `signatures.parameterization`, or add a one-line decision note in Step 09 §6.1 / data contract §1.3 stating that the projection is finalized while the `.msl` format is unreleased and no package or fixture is affected. This is carried forward from the round-1 “ADRs and open decisions” and round-2 “Versioning and migration” inline notes; it implies no API, projection, or design change and does not block implementation. | ADR 0010 lines 48–56 (exception names only `signatures.model`; “Any later field or type change after the first released `.msl` requires a version bump and a new ADR”); Step 09 lines 794–799 (finalization) and 787–789 (pre-release statement scoped to the frequency payload); `02-data-contracts.md` lines 87 (order/type change is format-breaking), 109–112 (finalization documented, no decision-note basis), and 837–838 (model-only exception); `05-open-decisions.md` line 59 records the signature decision but not the versioning basis; AGENTS §11. |
+
+No Blocker and no Major was found. R2-1..R2-4 and R2-6 are resolved as reproduced above; R2-5 is verified and
+correctly assigned to the orchestrator; the M1, M2, M4, and seven-feature owner decisions are recorded without
+starting the step. Only R3-1 (Minor) and the R2-5 dashboard follow-up remain for explicit human-owner
+acceptance.
+
+Residual/administrative notes (not findings):
+
+- The `Approval summary` section is still empty; the step agent must complete the cumulative report required by
+  AGENTS §3.12 before the human owner is asked to accept this verdict.
+- The dashboard `Design review` cell for Step 09 must be updated by the orchestrator/step agent at
+  acceptance/step start (the reviewer and planner cannot edit `status.md`).
+- The round-2 residual implementation risks (catalog/docs atomicity, `fixtures.items` registration for new
+  `tests/contracts/` fixtures, and the M4 owner decision as a prerequisite) remain visible and unchanged.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Ready with notes.** No Blocker or Major remains. The round-2 fixes are reproduced from the tree: R2-1 (parity
+row), R2-2 (`PRM006` catalogue row), R2-3 (“24 chiral geometries, i.e. 12 reciprocal pairs”, confirmed against
+`CompilationCounts` and the symmetry oracle), R2-4 (single-step exception in the step page and roadmap §3.1 with
+the 09A/09B split recorded as considered and rejected), R2-5 (status dashboard unchanged and the update
+correctly assigned to the orchestrator), and R2-6 (Step 13 acceptance requires the exact re-encoding). The M1,
+M2, and M4 owner decisions and the approved seven-feature list are recorded with the step still `Not started`.
+The required `docs` and `policy` gates pass, the frozen-design delta is documentation-only, no implementation
+code or step branch exists, and the planner did not alter the round-1/round-2 findings, evidence, or verdict.
+One Minor (R3-1) and the R2-5 dashboard follow-up require explicit human-owner acceptance under
+`docs/planning/reviews/README.md` before implementation starts. This record is evidence and does not authorize
+starting Step 09.
