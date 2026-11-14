@@ -1,7 +1,8 @@
 # Reference Build Tools
 
 Scripts for building the **archived original MOCASSIN** solver/model builder and generating reference data.
-The original clone is never modified; everything runs in a work copy.
+The original clone is never modified; everything runs in a work copy. The clone lives at the gitignored
+`/workspace/mocassin-original`.
 
 Full recipe and compatibility notes: [`docs/planning/07-reference-build.md`](../../docs/planning/07-reference-build.md).
 

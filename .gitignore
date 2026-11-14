@@ -82,6 +82,9 @@ Thumbs.db
 # Local analysis scratch
 /tmp/
 
+# Read-only upstream reference clone (GPL-3.0 reference only; never commit)
+/mocassin-original/
+
 # Generated documentation site and API outputs
 site/
 artifacts/docfx/

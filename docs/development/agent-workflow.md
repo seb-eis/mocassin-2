@@ -256,7 +256,7 @@ Rules:
 When generating reference data:
 
 - use [`docs/planning/07-reference-build.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/07-reference-build.md);
-- keep `/workspace/mocassin-original` read-only;
+- keep the gitignored `/workspace/mocassin-original` reference clone read-only;
 - record the original commit, compiler, package pins, seeds, and hashes;
 - treat the original as an oracle, not as source to copy.
 
