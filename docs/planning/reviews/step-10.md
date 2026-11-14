@@ -14,9 +14,10 @@
 | Request owner | Step 10 orchestrator |
 | Orchestrator (step agent / planner) | General orchestrator |
 | Review initiated by | Human owner |
-| Reviewed commit | `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43` |
+| Reviewed commit | `bb62e405f27199173cdabc256f6f6d43aa033da1` |
 | Round 1 frozen commit | `c66b483f6ef064858d0e8082543d2fcec8386ed3` |
 | Round 2 frozen commit | `2eb6a5715ea51f324a579ae8974f9e8526005fa9` |
+| Round 3 frozen commit | `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43` |
 | Docs branch | `docs/step-10-design` |
 | Review date | 2026-11-14 |
 | Reviewer | Independent planning auditor (round 1; fresh context; no shared conversation with the planner, implementor, step agent, or orchestrator) |
@@ -309,10 +310,10 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready with notes
+**State:** Re-review required
 
-`Changes required` was the round-2 review verdict; it is not a merge authorization. The round-3 re-review
-target is `07f14f2e23feff9d9c1f7ff7c46ce4d074a86b43`.
+`Ready with notes` was the round-3 review verdict; it is not a merge authorization. The round-4 re-review
+target is `bb62e405f27199173cdabc256f6f6d43aa033da1`.
 
 ## Reviewer independence
 
@@ -771,6 +772,19 @@ Follow-up owner: Step agent / planner
 Follow-up step: Step 10 implementation start after owner acceptance of R3-1–R3-3, or a focused round-4
 revision for the base-lattice neutrality classification
 
+## Round 3 resolutions
+
+Design revision commit: `bb62e405f27199173cdabc256f6f6d43aa033da1`. The round-3 reviewer text is unchanged; the
+step agent owns this section.
+
+| Finding | Resolution | Files |
+| --- | --- | --- |
+| R3-1 | A non-neutral **base** lattice is now explicitly a model property: it is reported through `TotalChargeBefore`/`IsChargeNeutral` but never triggers `JOB012` or `JOB016` by itself. `JOB012` is only the unrealizable/unbalanced compensated-pair failure. `JOB016` requires an applied uncompensated charged doping. Step 06 has no base-neutrality invariant, so Step 10 does not invent one. | Step 10 §3, §6, Tests |
+| R3-2 | The parenthetical now says isovalent/zero-delta dopings are **excluded** from `hasUncompensatedCharge`. | Step 10 §3 |
+| R3-3 | The `validate` acceptance line now names `JOB001`–`JOB008`, the `JOB009` reference check, `JOB015`, `JOB017`, `JOB018`, and `JOB020`; the compiled-bound half of `JOB009` is explicitly build-stage-only. | Step 10 acceptance |
+
+No earlier reviewer text, resolution, or checklist item was altered.
+
 ## Approval summary
 
 The step agent completes this section before requesting human approval. It must cover the full history, not
@@ -791,6 +805,7 @@ Round history:
 | 1 | 2026-11-14 | `c66b483` | Independent planning auditor (fresh context) | Changes required |
 | 2 | 2026-11-14 | `2eb6a57` | Independent planning auditor (fresh context) | Changes required |
 | 3 | 2026-11-14 | `07f14f2` | Independent planning auditor (fresh context) | Ready with notes |
+| 4 | 2026-11-14 | `bb62e40` | Pending fresh auditor | Pending |
 
 Findings and resolutions:
 
@@ -830,3 +845,6 @@ Date:
 | R2-4 | Resolved in round-3 design revision | Step agent | `07f14f2` |
 | R2-5 | Resolved in round-3 design revision | Step agent | `07f14f2` |
 | R2-6–R2-9 | Resolved in round-3 design revision (see round-2 resolutions) | Step agent | `07f14f2` |
+| R3-1 | Resolved in round-4 design revision | Step agent | `bb62e40` |
+| R3-2 | Resolved in round-4 design revision | Step agent | `bb62e40` |
+| R3-3 | Resolved in round-4 design revision | Step agent | `bb62e40` |
