@@ -43,7 +43,7 @@ generated JSON Schema is
 | `modifiedUtc` | yes | ISO-8601 UTC last-modified timestamp. |
 | `model` | yes | Scientific model body. Steps 03–05 add `particles`, `particleSets`, `structure`, the flat transition sections, and the flat energy sections; lattice and simulation sections are added by Step 06. |
 | `parameterizations` | yes | Parameterization templates. Step 09 extends the Step 01 identity stub with sparse pair, group, site-energy, and rule-frequency value sets. |
-| `jobTemplates` | yes | Job templates. Step 01 stores identity and name only. |
+| `jobTemplates` | yes | Job templates. Step 10 extends the Step 01 identity stub with collections, configurations, inheritable settings, lattice requests, dopings, and selection optimizers. |
 | `buildTemplates` | yes | Build recipes binding a job template to a parameterization. |
 | `viewSettings` | yes | Camera, render box, and per-object style state. |
 

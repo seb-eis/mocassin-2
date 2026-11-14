@@ -117,7 +117,8 @@ public sealed record ValidationContext(
     Project Project,
     ValidationOptions Options,
     DiagnosticCatalog Catalog,
-    ImmutableArray<ValidationStageResult> PreviousStages);
+    ImmutableArray<ValidationStageResult> PreviousStages,
+    CompiledModel? CompiledModel = null);
 
 public sealed record ValidationResult(
     Guid? ProjectId,
@@ -187,6 +188,11 @@ public interface IValidationStage
   Step 11 package limits, Step 12 build orchestration). Every supplied stage must declare
   `ValidationStage.Build`; the constructor throws `ArgumentException` otherwise. Step 07 does not implement
   stage `Build`.
+- `CompiledModel` is optional and populated only by build-time callers after compilation. Step 10 adds this
+  field for its `JOB` stage. `validate` leaves it `null` and does not register compiled-bound stages;
+  `build`/`build --preview` (Step 12) construct the context with the compiled model and register the Step 10
+  job-template stage. This keeps the pipeline usable before a model is compiled without making every stage
+  tolerate a missing model.
 - `ValidateFileAsync` is the only entry that performs I/O. It uses a `ProjectStore` configured with
   `ValidateOnLoad = false`; if an injected store has `ValidateOnLoad = true`, the pipeline throws
   `ArgumentException` rather than validate twice. CLI and GUI consumers use this entry (or a store already

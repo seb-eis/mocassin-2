@@ -44,6 +44,7 @@ mocassin new <name> [-o <dir>] [--template blank|ceria]
 mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 mocassin compile <project.mocprj> [-o <compiled.json>] [--json]
 mocassin build <project.mocprj> -o <project.msl>
+                [--preview]
                 [--template <buildTemplateId>]
                 [--parameterization <id>]
                 [--jobs <range>]
@@ -66,6 +67,9 @@ mocassin doctor [--json]
   project parameterization; if the project has `parameterizations: []`, it uses the implicit default
   parameterization (Step 09 §5.1). Multiple project templates with no selection are an explicit error listing
   the IDs; a job template is still required for job expansion in Steps 10/12.
+- `--preview` is implemented first by Step 10 as a no-write path (load → validate → compile → parameterize →
+  expand → preview). Step 12 keeps that path and adds package writing, `--jobs`, `--parallel`, `--force`,
+  progress events, and partial-build handling.
 - `--jobs` applies after full expansion: job IDs are assigned from the complete template, then only the
   selected IDs are written. This keeps IDs stable across partial builds.
 - `--parallel` controls compilation/lattice generation concurrency; package writes are serialized.
@@ -216,7 +220,7 @@ It prints a diagnosis table and exits 0 if healthy, 1 otherwise.
 - [ ] Implement error/exit-code mapping, JSON output/events, and `clean --dry-run`.
 - [ ] Implement progress, ETA, throttling, and quiet mode.
 - [ ] Implement build-template selection and partial jobs.
-- [ ] Implement `--dry-run` preview.
+- [ ] Preserve and extend the Step 10 `build --preview` path; implement `clean --dry-run`.
 - [ ] Add integration tests that build the ceria sample and verify the package.
 - [ ] Add CLI docs and shell completion generation.
 

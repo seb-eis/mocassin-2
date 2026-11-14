@@ -708,12 +708,20 @@ target the same compiled model.
 ```
 
 - `baseSettings` and `config.overrides` are partial; `null`/absent means inherit. Explicit `null` cannot
-  mean "set to zero"; use the numeric value for that.
-- `jobCountPerConfig` creates duplicate jobs with different derived seeds.
-- Selection optimizers exclude a particle at a reference site from the KMC starting-point pool.
+  mean "set to zero"; use the numeric value for that. The shared fields are `temperatureK`, `targetMcsp`,
+  `writeOutCount`, `timeLimitSeconds`, `minSuccessRate`, `flags`, `instruction`, `preRunMcsp`,
+  `electricFieldModulusVm`, `electricFieldDirection`, `normalizationEnergyEv`, `maxAttemptFrequencyHz`,
+  `breakTolerance`, `breakSampleLengthMcsp`, `breakSampleIntervalMcsp`, and `resultSampleMcsp`; KMC-only
+  overrides are invalid on an MMC collection and vice versa.
+- `jobCountPerConfig` is optional; when omitted it inherits the simulation's `JobCount`. It creates duplicate
+  jobs with different derived seeds.
+- Selection optimizers exclude a particle at a reference site from the KMC starting-point pool. The project
+  stores `(siteId, particleId)`; the `.msl` payload stores the corresponding canonical P1 `position_id` and
+  compiled `particle_id`.
 - `extensions` are structured, versioned configuration objects for optional solver routines (e.g. MMCFE);
-  they inherit/override like other settings. A raw `instruction` string remains available for advanced/legacy
-  workflows but is not the preferred configuration path.
+  they inherit/override like other settings. An array is ordered by `id`, duplicate ids are rejected, and the
+  `config` object is kept as canonical JSON. A raw `instruction` string remains available for
+  advanced/legacy workflows but is not the preferred configuration path.
 
 ### 2.5 Build templates
 
@@ -992,10 +1000,10 @@ Exact array lengths and invariants are validated by `mocassin-msl` before the so
 | `break_sample_interval_mcsp` | u64? | MMC only |
 | `result_sample_mcsp` | u64? | MMC only |
 | `flags` | u32 | `SolverJobFlags` word: bit 0 `noSaving`, bit 1 `noJumpLogging`, bit 2 `useFastExp`, bit 3 `deterministic`, bit 4 `useDualDofCorrection`, bit 5 `usePrerun`, bit 6 `kmcSimulation`, bit 7 `mmcSimulation` |
-| `selection_optimizers` | array | `{position_id:u32, particle_id:u8}` |
-| `extensions` | array | `{id: string, config: map}` for optional solver routines |
+| `selection_optimizers` | array | `{position_id:u32, particle_id:u8}`; `position_id` is the canonical P1 position index |
+| `extensions` | array | `{id: string, config: map}` for optional solver routines; canonical JSON |
 | `instruction` | string? | Advanced/legacy free-text instruction |
-| `doping_info` | string | Human-readable `[index@value]` summary |
+| `doping_info` | string | Human-readable `{priority}@{effectiveFraction:R}` summary joined by `;`; empty when no doping applied |
 
 The lattice itself is stored once in the `lattices` table and referenced by the job:
 
@@ -1005,7 +1013,16 @@ The lattice itself is stored once in the `lattices` table and referenced by the 
 | `lattice_size` | `[u32;3]` | Supercell a,b,c |
 | `position_count` | u32 | P1 positions per unit cell |
 | `lattice` | `u8[]` | Initial particle index per linearized position; length = a*b*c*position_count |
-| `doping_info` | string | Human-readable applied-doping summary |
+| `doping_info` | string | Human-readable applied-doping summary in the job-payload format |
+
+The `lattice` array uses row-major cell order. With cell indices `a ∈ [0,A)`, `b ∈ [0,B)`, `c ∈ [0,C)` and
+canonical P1 position `P ∈ [0,position_count)`:
+
+```text
+index = ((a * B + b) * C + c) * position_count + P
+```
+
+The same layout is used by Step 10's generator/preview, the `.msl` writer, and the Step 13 reader.
 
 The solver derives the site-energy background from the compiled model's `[position][particle]` table repeated
 over the supercell. Per-job background overrides are not part of version 1; a future extension can add a

@@ -8,17 +8,30 @@ generation with charge compensation.
 ## Implementation status
 
 - **Status:** Not started
+- **Feature list:** Proposed 2026-11-14 (eight features; pending design review and owner approval)
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
 - **Design review:** Not requested
-- **Last updated:** —
+- **Last updated:** 2026-11-14
 
-| Feature | Branch | Status | Local gates | Step CI | Squash commit |
-| --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+### Proposed feature list
+
+| # | Feature | Branch | Status |
+| --- | --- | --- | --- |
+| 1 | Job template model and persistence | `feature/step-10-job-templates/job-template-model` | Proposed |
+| 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | Proposed |
+| 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | Proposed |
+| 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Proposed |
+| 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Proposed |
+| 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Proposed |
+| 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Proposed |
+| 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | Proposed |
+
+The feature list is a design proposal. It is approved once by the human owner together with the design verdict; it does
+not create the step branch and does not mark the step `In progress`.
 
 ## Goal
 
@@ -26,10 +39,11 @@ Turn one parameterized model into a reproducible set of simulation jobs and init
 able to define a parameter sweep, preview the effective settings and doping counts, and get identical
 lattices for the same seed.
 
-The model input is the Step 09 build-time `Mocassin.Packages.Parameterization.ParameterizedModel`
-(`CompiledModel` + applied `ParameterizationValues` + parameterization signature), not project JSON. Job and
-lattice payloads exclude parameterization values; the lattice request hash deliberately does not depend on
-them, so changing energies or frequencies does not change a lattice for the same job coordinates.
+The build-time chain starts from the Step 09 `Mocassin.Packages.Parameterization.ParameterizedModel`
+(`CompiledModel` + applied `ParameterizationValues` + parameterization signature), not project JSON. Job
+expansion itself needs the project and the compiled model, not the parameterization values; lattice generation
+is deliberately parameterization-independent. The lattice request hash therefore excludes parameterization
+values, so changing energies or frequencies does not change a lattice for the same job coordinates.
 
 ## Original reference
 
@@ -66,7 +80,7 @@ public sealed record JobCollection(
     string Name,
     SimulationId SimulationId,
     JobSettings BaseSettings,
-    int JobCountPerConfig,
+    int? JobCountPerConfig,
     string? RngSeed,
     ImmutableArray<SelectionOptimizer> Optimizers,
     ImmutableArray<JobConfig> Configs);
@@ -100,25 +114,29 @@ public sealed record JobDescriptor(
     int JobIndex,
     string CollectionName,
     string ConfigName,
+    SimulationId SimulationId,
+    int SimulationIndex,
     SimulationKind Kind,
     bool UseDualDofCorrection,
-    JobSettings Settings,
+    ResolvedJobSettings Settings,
     LatticeRequest Lattice,
     ImmutableArray<DopingValue> Dopings,
     ImmutableArray<SelectionOptimizer> Optimizers,
     byte[] Seed);
 
-// Serialized DTO lives in Mocassin.Contracts; produced by this step.
-public sealed record InitialLattice(
+// Build-time generated lattice in Mocassin.Packages.Jobs.
+public sealed record GeneratedLattice(
     int SizeA, int SizeB, int SizeC,
     int PositionCount,
     byte[] Particles,
+    DopingReport Report,
     string DopingInfo);
 ```
 
 - Expand collections in order, configs in order, duplicates in ascending `JobIndex`.
 - `JobId` is 1-based and deterministic; it is the solver's `--job` argument.
-- Step 11 wraps a `JobDescriptor` plus its generated `InitialLattice` into a `JobPackage` for writing.
+- Step 11 wraps a `JobDescriptor` plus its `GeneratedLattice` into a `JobPackage` and maps the lattice to the
+  `Mocassin.Contracts` serialized `InitialLattice` DTO.
 - `JobIndex` is the duplicate index within a config (0-based).
 - `UseDualDofCorrection` is set by the compiler/optimizer stage for KMC jobs; it is not a user setting.
   Step 08 keeps the original default (every KMC job true); Step 10 clears it only when the selection optimizer
@@ -238,19 +256,27 @@ public sealed record JobCountPreview(
 public interface ILatticePreviewService
 {
     LatticePreview? TryCreatePreview(
-        IProjectQuery project,
+        Project project,
+        CompiledModel model,
         LatticeRequest request,
         ImmutableArray<DopingValue> dopings,
         out ImmutableArray<Diagnostic> diagnostics);
 
     JobCountPreview? TryCreateJobCountPreview(
-        IProjectQuery project,
+        Project project,
         JobTemplate template,
         SimulationId simulationId,
         int? jobCountPerConfiguration,
         out ImmutableArray<Diagnostic> diagnostics);
 }
 ```
+
+- The service takes the current `Project` and its `CompiledModel`: the project supplies the authored model/hash,
+  the compiled model supplies the P1 positions, sites, particle indices, and selection masks. A preview never
+  triggers a compilation.
+- The service and the generator live in `Mocassin.Packages.Jobs`, not `Mocassin.Compilation`. The architecture
+  assigns job templates, supercells, and parameterization-dependent build data to `Packages`; `Compilation`
+  stays a pure model compiler with no job-template or supercell knowledge.
 
 - `TryCreatePreview` echoes the requested `(A, B, C)` and doping list, so a preview cannot be confused with a
   different supercell or fraction set.
@@ -266,9 +292,10 @@ public interface ILatticePreviewService
   same request and asserts that the preview report and the lattice's `DopingReport` are identical.
 - The preview is cached by `(project model hash, lattice request hash, canonical doping list, catalog data
   version, space-group data SHA-256, symmetry contract version)`, is bounded, and is thread-safe.
-- The service lives in `Mocassin.Compilation.Jobs`; `Mocassin.Compilation` already references
-  `Mocassin.Symmetry`, so P1 site multiplicity is available without a new dependency.
-- Step 25 consumes this service. Step 06 owns only the model definitions and validation.
+- `Mocassin.Packages` already references `Core`, `Symmetry`, `Compilation`, and `Contracts`, so the service can
+  use `ProjectHasher`, `CompiledModel`, and the contract DTOs without reversing a dependency.
+- Step 25 consumes this service with the current project and compiled model. Step 06 owns only the model
+  definitions and validation.
 
 ### 5. Selection optimizers
 
@@ -306,6 +333,116 @@ Build-stage integration: job-template/supercell checks plug into the Step 07 pip
 with `Stage = Build`, run only when `ValidationOptions.RunBuildStage` is true and earlier stages produced no
 errors, and register their `JOB` codes in the Step 07 `DiagnosticCatalog` at that point. Step 07 does not stub
 `JOB` codes.
+
+### 7. Build-stage validation and diagnostics
+
+`ValidationContext` gains an optional `CompiledModel? CompiledModel` property (additive; defaults to `null`).
+The Step 10 `JobTemplateValidationStage` is the single `Build`-stage owner for `JOB001`–`JOB015`; it runs only
+when `RunBuildStage` is true, the context carries a compiled model, and earlier stages have no error.
+
+- `validate` keeps `RunBuildStage = false` and reports stages 1–4. `build` and `mocassin build --preview`
+  supply the compiled model and run the job-template stage.
+- Structural checks (collections/configs/names/references/fractions/cell ranges/job counts/optimizer
+  references) run in the same stage, so there is one diagnostic path and the preview service uses the same
+  validator. Only the total-position limit and the doping/compensation checks need the compiled model.
+- `JOB004` covers both cell size outside 1–256 and total positions above 500,000; `JOB009` also covers an
+  optimizer that removes every usable start option for a required mechanism; `JOB015` also covers a settings
+  override that is not applicable to the collection's simulation kind.
+- Step 07's `ValidationContext` snippet is updated in this design to carry the optional model; the pipeline
+  remains the only Build-stage extension point.
+
+### 8. Job settings, inheritance, and persistence
+
+`JobSettings` is a partial record with nullable fields. `null` means inherit; an explicit
+`ExecutionFlags.None` or zero value overrides the inherited value.
+
+```csharp
+public sealed record JobSettings
+{
+    public double? TemperatureK { get; init; }
+    public long? TargetMcsp { get; init; }
+    public int? WriteOutCount { get; init; }
+    public long? TimeLimitSeconds { get; init; }
+    public double? MinSuccessRate { get; init; }
+    public ExecutionFlags? Flags { get; init; }
+    public string? Instruction { get; init; }
+
+    public long? PreRunMcsp { get; init; }
+    public double? ElectricFieldModulusVm { get; init; }
+    public Fractional3? ElectricFieldDirection { get; init; }
+    public double? NormalizationEnergyEv { get; init; }
+    public double? MaxAttemptFrequencyHz { get; init; }
+
+    public double? BreakTolerance { get; init; }
+    public long? BreakSampleLengthMcsp { get; init; }
+    public long? BreakSampleIntervalMcsp { get; init; }
+    public long? ResultSampleMcsp { get; init; }
+
+    public ImmutableArray<JobExtension>? Extensions { get; init; }
+}
+
+public sealed record JobExtension(string Id, JsonElement Config);
+```
+
+- Effective settings are resolved from the compiled `CompiledRuntimeSettings` (simulation defaults), then the
+  collection `BaseSettings`, then the config `Overrides`. A duplicate job changes only its seed, never its
+  settings. `JobCollection.JobCountPerConfig` is `int?`; `null` inherits `Simulation.JobCount`.
+- KMC-only overrides on an MMC collection (or vice versa) are `JOB015` errors. The effective values are
+  validated against the Step 06 ranges before expansion.
+- `Extensions` is an optional ordered array of `{id, config}` objects. Step 10 validates only a non-empty
+  unique `id` and an object-valued `config`; it preserves the config as canonical JSON (sorted property names,
+  normalized numbers) so project hashes are deterministic. The concrete extension schema and semantic
+  validation are owned by Steps 27/28; Step 10 does not invent an MMCFE schema.
+- `JobTemplate`, `JobCollection`, `JobConfig`, `JobSettings`, `LatticeRequest`, `DopingValue`, and
+  `SelectionOptimizer` live in `Mocassin.Core.Model.Jobs`. `ProjectJson`/`ProjectHasher` gain a canonical
+  template converter: templates sorted by `JobTemplateId`, collections and configs in authored order, dopings
+  in ascending resolved doping priority with ties rejected, optimizer arrays in authored order, and
+  extensions sorted by `Id`. Empty collections/configs/dopings arrays are omitted on write.
+- The project format remains `schemaVersion = 1` (additive pre-release change, same exception as Steps 03–09).
+  `contracts/manifest.json`'s `jobTemplates.itemFields`, the generated project schema, and the project
+  fixtures are updated together; no package/results format changes in this step.
+
+### 9. Build-time types and step interfaces
+
+- Build-time `JobDescriptor`, `ResolvedJobSettings`, `GeneratedLattice`, `SupercellGenerator`,
+  `JobTemplateExpander`, and `ILatticePreviewService` live in `Mocassin.Packages.Jobs`.
+- `JobDescriptor` additionally carries `SimulationId` and the compiled `SimulationIndex`; `Settings` is the
+  resolved, non-nullable effective settings. `UseDualDofCorrection` is copied from
+  `CompiledSimulation.Intent` and may be cleared only by the documented optimizer rule.
+- `GeneratedLattice` carries the particle byte array, its `DopingReport`, and the canonical `DopingInfo`
+  summary. The `Mocassin.Contracts` serialized `InitialLattice` DTO is produced by Step 11 from
+  `GeneratedLattice`; it is not a Compilation type. Step 11 remains the only package-payload mapper.
+- `Mocassin.Compilation` is unchanged: it never sees a job template, doping fraction, optimizer, or lattice
+  request. This keeps the architecture's `Packages -> Compilation` dependency direction intact.
+
+### 10. Lattice layout and doping summary
+
+- A supercell is `A × B × C` compiled P1 cells. The flat particle array uses row-major cell order:
+  `index = ((a * B + b) * C + c) * PositionCount + P`, with `a` outermost and `P` in canonical P1 order.
+  `PositionCount` is the compiled `Structure.Positions.Length` per unit cell. The same layout is used by the
+  preview, the `.msl` lattice DTO, and the Step 13 reader.
+- Stable sites default to the first particle of their authored particle set; unstable sites default to void
+  index 0. Doping replaces particles only within the referenced exchange's site and particle set.
+- `DopingInfo` is the invariant-culture, priority-ordered summary
+  `"{priority}@{effectiveFraction:R}"` joined by `;`; no applied doping yields the empty string. It is
+  display/metadata only; the authoritative counts are in `DopingReport` and the package lattice signature.
+- The applied count is `floor(fraction × available)`; the charge-compensation algorithm may reduce it to the
+  smallest realizable integer pair. Requested versus applied counts are always both reported.
+
+### 11. `mocassin build --preview` boundary
+
+Step 10 adds only the preview path: load → validate → compile → parameterize → expand → preview. It never
+opens, writes, or replaces a package and never invokes the Step 11 writer. Step 12 owns the full `build`
+command, package writing, `--jobs`, `--parallel`, `--force`, partial builds, and progress events; it reuses the
+same expansion and preview services. If Step 12 has not landed, the preview command is still useful and cannot
+produce a half-written `.msl`.
+
+### 12. Feature sizing
+
+The roadmap estimate is **3–4 person-weeks**, within the four-week split trigger. The eight features above are
+the complete implementation list; no separate 10A/10B split is planned. The design review may merge adjacent
+features (for example 4+5 or 6+7) if it judges the feature count too high; any merge does not change the scope
+or acceptance criteria.
 
 ## Implementation tasks
 

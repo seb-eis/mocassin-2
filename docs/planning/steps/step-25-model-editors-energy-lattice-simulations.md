@@ -122,9 +122,9 @@ third-party grid dependency.
   - remaining particles per site;
   - total charge before/after and neutrality;
   - warnings for unattainable fractions.
-- The preview calls Step 10's `ILatticePreviewService.TryCreatePreview`; the same service and supercell
-  generator produce the build's `DopingReport`, so the editor cannot diverge from the build. A failed preview
-  shows the diagnostics and no partial result.
+- The preview calls Step 10's `ILatticePreviewService.TryCreatePreview` with the current project and compiled
+  model; the same service and supercell generator produce the build's `DopingReport`, so the editor cannot
+  diverge from the build. A failed preview shows the diagnostics and no partial result.
 - The job-count summary in the editor uses Step 10's `JobCountPreview`; it does not recompute effective counts.
 
 ### 3. Simulation editor

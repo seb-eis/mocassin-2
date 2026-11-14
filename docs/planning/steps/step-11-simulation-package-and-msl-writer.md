@@ -81,9 +81,9 @@ public interface ISimulationPackageWriter : IAsyncDisposable
     Task CompleteAsync(CancellationToken ct);
 }
 
-// JobPackage = Step 10 JobDescriptor + generated InitialLattice.
+// JobPackage = Step 10 JobDescriptor + generated lattice.
 // JobDescriptor/JobPackage are build-time Packages types; serialized job/lattice DTOs live in Contracts.
-public sealed record JobPackage(JobDescriptor Descriptor, InitialLattice Lattice);
+public sealed record JobPackage(JobDescriptor Descriptor, GeneratedLattice Lattice);
 ```
 
 Flow:
@@ -117,7 +117,10 @@ pull-based iterator.
 - `verify` re-encodes the complete `ParameterizationSignatureV1` projection from the decoded payload
   (`model_signature`, pair/group/site tables, and absolute rule frequencies) and compares it with
   `models.signature`; the frequency values are read directly, never reconstructed from a factor × maximum.
-- The lattice payload is `{format_version, lattice_size, position_count, lattice}`.
+- The writer maps Step 10's `GeneratedLattice` (particles, `DopingReport`, canonical `DopingInfo`) to the
+  Contracts `InitialLattice` DTO. The payload is
+  `{format_version, lattice_size, position_count, lattice, doping_info}`; the flat `lattice` order is the
+  Step 10 §10 row-major layout.
 - The job payload is the full `JobDescriptor`/settings (including optimizers) plus the model/simulation index.
   Its `flags` word is a `SolverJobFlags` value in `Mocassin.Contracts` carrying the authored flags plus the
   compiler/job-builder-derived bits (`useDualDofCorrection`, `usePrerun`, and the kind bit). This package layer
