@@ -27,6 +27,10 @@ mocassin/
 | `tests/contracts/api-baseline/net10.0/` | `tools/update-api-baseline.sh` | Yes; refresh after an intentional public API change |
 | `tests/contracts/**/*.mcs`, `*.msl`, `*.msr`, `*.log`, `Job*/` | Real writers | Yes; explicit `.gitignore` exceptions |
 
+`contracts/generated/schema/` holds one schema per format or report. `package-v1.schema.json` is the SQLite row
+schema; `package-payloads-v1.schema.json` separately describes the top-level model, job, and lattice payloads and
+uses the manifest's payload unknown-key policy.
+
 ## Planning docs
 
 `docs/planning/` contains the internal roadmap, step pages, ADRs, contracts, and parity matrix. Zensical

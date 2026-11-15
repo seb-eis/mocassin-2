@@ -117,6 +117,10 @@
           "type": "integer",
           "minimum": 0
         },
+        "write_out_count": {
+          "type": "integer",
+          "minimum": 0
+        },
         "pre_run_mcsp": {
           "type": "integer",
           "minimum": 0
@@ -125,12 +129,6 @@
           "type": "integer"
         },
         "min_success_rate": {
-          "type": "number"
-        },
-        "norm_factor": {
-          "type": "number"
-        },
-        "base_frequency_hz": {
           "type": "number"
         },
         "lattice_a": {
@@ -177,6 +175,7 @@
         "temperature_k",
         "electric_field_vm",
         "target_mcsp",
+        "write_out_count",
         "pre_run_mcsp",
         "lattice_a",
         "lattice_b",

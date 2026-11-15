@@ -21,7 +21,7 @@ read-only inspection/verification library for the build CLI.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `eb8513d` |
-| 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Pending | — | — | — |
+| 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Pending | — | — | — |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Pending | — | — | — |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Pending | — | — | — |
@@ -73,6 +73,32 @@ per feature.
   The lattice vectors bind the current `modelSignature`, so feature 4's per-image pair-link change must
   regenerate them with the Step 08/09 vectors. The `PKG` descriptors are not yet composed into
   `DiagnosticCatalog.Default`; that belongs to the schema/verification features.
+- **Parity:** no parity-matrix row is completed by this contract-only feature.
+
+#### Feature 2 — Package manifest and schema
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema`
+- **Squash commit:** recorded in the follow-up status commit.
+- **Local gates:** `./tools/verify.sh contracts` exit 0 (contract artifacts current at 19 files, model 5 /
+  parameterization 4 / lattice 2 projection fixtures, process consistency, 45 tool tests, SPDX 545 files,
+  secrets, cargo-deny); `./tools/verify.sh dotnet` exit 0 (all solution tests including 382 Packages tests);
+  `./tools/verify.sh structure` exit 0; `./tools/verify.sh api` exit 0; `./tools/verify.sh docs` exit 0.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Diff summary:** finalized `signatures.lattice` to the five-field `LatticeSignatureV1` projection with
+  `status: final` and no `dopingInfo`; added `formats.package.payloads` with the top-level model/job/lattice
+  payload descriptors and their `format_version` values; extended `generate.py` to validate payload descriptors
+  and emit the separate `contracts/generated/schema/package-payloads-v1.schema.json` (row schema unchanged);
+  expressed the payload unknown-key policy as `formats.package.payloads.unknownFields = "ignore"` so the
+  generator derives `additionalProperties` from the manifest (R2-8); removed `jobs.norm_factor` /
+  `jobs.base_frequency_hz`; added the missing `jobs.write_out_count` column required by data contracts §3.2;
+  kept `jump_directions.object_id` and did not add `jump_collections.object_id`; regenerated all 19 generated
+  artifacts; added Python generator/descriptor tests and C# payload-schema-vs-DTO/descriptor tests; updated
+  `docs/reference/file-layout.md`.
+- **Known limitations / follow-ups:** the payload schema deliberately types nested maps and arrays only as
+  `object`/`array` at the fidelity the manifest entry uses; the full payload field list remains in data contracts
+  §3.3–§3.4 and the DTOs. No previous-major `.msl` fixture exists; the current-only fixture policy starts at v2.
+  `write_out_count` was a pre-existing manifest drift against the already-frozen data contract, not a new shape
+  decision.
 - **Parity:** no parity-matrix row is completed by this contract-only feature.
 
 ## Goal
@@ -595,7 +621,7 @@ Two options, for the human owner's start-gate decision:
 ## Implementation tasks
 
 - [x] Add the Contracts package DTOs, payload constants, `LatticeSignatureV1`, and `PKG` descriptors.
-- [ ] Finalize `signatures.lattice` and add `formats.package.payloads`; extend the generator and regenerate.
+- [x] Finalize `signatures.lattice` and add `formats.package.payloads`; extend the generator and regenerate.
 - [ ] Implement schema creation, pragmas, `application_id`/`user_version`, and `schema_info`.
 - [ ] Implement the model payload mapper and the write-time parameterization re-encode.
 - [ ] Persist the environment pair-link `offset` and the variable-length `tracker_order`, with the writer

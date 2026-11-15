@@ -502,7 +502,7 @@
               "type": "object",
               "required": false,
               "additionalProperties": false,
-              "notes": "Missing loads the default 1.0 \u00c5 cutoff with no filters; the default is omitted on write.",
+              "notes": "Missing loads the default 1.0 Å cutoff with no filters; the default is omitted on write.",
               "fields": [
                 {
                   "name": "cutoff",
@@ -1727,6 +1727,246 @@
       "encoding": "sqlite",
       "formatVersion": 1,
       "unknownFields": "reject",
+      "payloads": {
+        "formatVersion": 1,
+        "unknownFields": "ignore",
+        "model": {
+          "title": "Compiled model payload",
+          "fields": [
+            {
+              "name": "format_version",
+              "type": "uint64",
+              "required": true,
+              "enum": [
+                1
+              ]
+            },
+            {
+              "name": "signature",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "model_signature",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "symmetry_contract_version",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "space_group_data_version",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "space_group_data_sha256",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "particle",
+              "type": "object",
+              "required": true,
+              "additionalProperties": true
+            },
+            {
+              "name": "structure",
+              "type": "object",
+              "required": true,
+              "additionalProperties": true
+            },
+            {
+              "name": "energy",
+              "type": "object",
+              "required": true,
+              "additionalProperties": true
+            },
+            {
+              "name": "transitions",
+              "type": "object",
+              "required": true,
+              "additionalProperties": true
+            },
+            {
+              "name": "simulations",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemAdditionalProperties": true
+            }
+          ]
+        },
+        "job": {
+          "title": "Job payload",
+          "fields": [
+            {
+              "name": "format_version",
+              "type": "uint64",
+              "required": true,
+              "enum": [
+                1
+              ]
+            },
+            {
+              "name": "simulation_index",
+              "type": "uint64",
+              "required": true
+            },
+            {
+              "name": "kind",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "kmc",
+                "mmc"
+              ]
+            },
+            {
+              "name": "temperature_k",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "target_mcsp",
+              "type": "uint64",
+              "required": true
+            },
+            {
+              "name": "write_out_count",
+              "type": "uint64",
+              "required": true
+            },
+            {
+              "name": "pre_run_mcsp",
+              "type": "uint64",
+              "required": true
+            },
+            {
+              "name": "time_limit_s",
+              "type": "uint64",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "min_success_rate",
+              "type": "float64",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "electric_field_vm",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "electric_field_direction",
+              "type": "array",
+              "items": "float64",
+              "length": 3,
+              "required": true
+            },
+            {
+              "name": "normalization_energy_ev",
+              "type": "float64",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "max_attempt_frequency_hz",
+              "type": "float64",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "break_tolerance",
+              "type": "float64",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "break_sample_length_mcsp",
+              "type": "uint64",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "break_sample_interval_mcsp",
+              "type": "uint64",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "result_sample_mcsp",
+              "type": "uint64",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "flags",
+              "type": "uint64",
+              "required": true
+            },
+            {
+              "name": "selection_optimizers",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemAdditionalProperties": true
+            },
+            {
+              "name": "extensions",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemAdditionalProperties": true
+            },
+            {
+              "name": "instruction",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "doping_info",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        "lattice": {
+          "title": "Initial lattice payload",
+          "fields": [
+            {
+              "name": "format_version",
+              "type": "uint64",
+              "required": true,
+              "enum": [
+                1
+              ]
+            },
+            {
+              "name": "lattice_size",
+              "type": "array",
+              "items": "uint64",
+              "length": 3,
+              "required": true
+            },
+            {
+              "name": "position_count",
+              "type": "uint64",
+              "required": true
+            },
+            {
+              "name": "lattice",
+              "type": "bin",
+              "required": true
+            }
+          ]
+        }
+      },
       "tables": {
         "schema_info": {
           "fields": [
@@ -1853,6 +2093,11 @@
               "required": true
             },
             {
+              "name": "write_out_count",
+              "type": "uint64",
+              "required": true
+            },
+            {
               "name": "pre_run_mcsp",
               "type": "uint64",
               "required": true
@@ -1864,16 +2109,6 @@
             },
             {
               "name": "min_success_rate",
-              "type": "float64",
-              "required": false
-            },
-            {
-              "name": "norm_factor",
-              "type": "float64",
-              "required": false
-            },
-            {
-              "name": "base_frequency_hz",
               "type": "float64",
               "required": false
             },
@@ -3385,8 +3620,8 @@
       "id": "lattice",
       "domainPrefix": "mocassin/lattice-signature/v1",
       "projectionType": "LatticeSignatureV1",
-      "status": "skeleton",
-      "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 11.",
+      "status": "final",
+      "notes": "Final Step 11 lattice projection: domain-separated five-field MessagePack array over the lattice payload format version, the referenced compiled-model signature, the supercell size, the P1 position count, and the row-major particle array. Build metadata and the doping summary are excluded, so byte-identical initial lattices deduplicate across jobs.",
       "fields": [
         {
           "name": "formatVersion",
@@ -3413,11 +3648,6 @@
         {
           "name": "particles",
           "type": "bin",
-          "required": true
-        },
-        {
-          "name": "dopingInfo",
-          "type": "string",
           "required": true
         }
       ]

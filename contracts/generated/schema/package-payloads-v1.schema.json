@@ -1,0 +1,271 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/package-payloads-v1.json",
+  "title": "Simulation package payloads",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json. Separate from the .msl SQLite row schema.",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "model": {
+      "type": "object",
+      "properties": {
+        "format_version": {
+          "type": "integer",
+          "minimum": 0,
+          "enum": [
+            1
+          ]
+        },
+        "signature": {
+          "type": "string"
+        },
+        "model_signature": {
+          "type": "string"
+        },
+        "symmetry_contract_version": {
+          "type": "string"
+        },
+        "space_group_data_version": {
+          "type": "string"
+        },
+        "space_group_data_sha256": {
+          "type": "string"
+        },
+        "particle": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "structure": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "energy": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "transitions": {
+          "type": "object",
+          "additionalProperties": true
+        },
+        "simulations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        }
+      },
+      "required": [
+        "format_version",
+        "signature",
+        "model_signature",
+        "symmetry_contract_version",
+        "space_group_data_version",
+        "space_group_data_sha256",
+        "particle",
+        "structure",
+        "energy",
+        "transitions",
+        "simulations"
+      ],
+      "additionalProperties": true,
+      "title": "Compiled model payload"
+    },
+    "job": {
+      "type": "object",
+      "properties": {
+        "format_version": {
+          "type": "integer",
+          "minimum": 0,
+          "enum": [
+            1
+          ]
+        },
+        "simulation_index": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "kmc",
+            "mmc"
+          ]
+        },
+        "temperature_k": {
+          "type": "number"
+        },
+        "target_mcsp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "write_out_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "pre_run_mcsp": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "time_limit_s": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "min_success_rate": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "electric_field_vm": {
+          "type": "number"
+        },
+        "electric_field_direction": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "normalization_energy_ev": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "max_attempt_frequency_hz": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "break_tolerance": {
+          "type": [
+            "number",
+            "null"
+          ]
+        },
+        "break_sample_length_mcsp": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "break_sample_interval_mcsp": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "result_sample_mcsp": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "flags": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "selection_optimizers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "extensions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "instruction": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "doping_info": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "format_version",
+        "simulation_index",
+        "kind",
+        "temperature_k",
+        "target_mcsp",
+        "write_out_count",
+        "pre_run_mcsp",
+        "time_limit_s",
+        "min_success_rate",
+        "electric_field_vm",
+        "electric_field_direction",
+        "normalization_energy_ev",
+        "max_attempt_frequency_hz",
+        "break_tolerance",
+        "break_sample_length_mcsp",
+        "break_sample_interval_mcsp",
+        "result_sample_mcsp",
+        "flags",
+        "selection_optimizers",
+        "extensions",
+        "instruction",
+        "doping_info"
+      ],
+      "additionalProperties": true,
+      "title": "Job payload"
+    },
+    "lattice": {
+      "type": "object",
+      "properties": {
+        "format_version": {
+          "type": "integer",
+          "minimum": 0,
+          "enum": [
+            1
+          ]
+        },
+        "lattice_size": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "minItems": 3,
+          "maxItems": 3
+        },
+        "position_count": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "lattice": {
+          "type": "string",
+          "contentEncoding": "base64"
+        }
+      },
+      "required": [
+        "format_version",
+        "lattice_size",
+        "position_count",
+        "lattice"
+      ],
+      "additionalProperties": true,
+      "title": "Initial lattice payload"
+    }
+  },
+  "required": [
+    "model",
+    "job",
+    "lattice"
+  ]
+}

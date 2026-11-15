@@ -90,6 +90,33 @@ public sealed class LatticeProjectionFixtureTests
     }
 
     [Fact]
+    public void LatticeDescriptorIsFinalAndBindsTheFiveFieldProjection()
+    {
+        var path = RepositoryPaths.Combine(
+            "contracts",
+            "generated",
+            "signatures",
+            "lattice-v1.json");
+        using var document = JsonDocument.Parse(File.ReadAllText(path));
+        var root = document.RootElement;
+
+        Assert.Equal("final", root.GetProperty("status").GetString());
+        Assert.Equal("LatticeSignatureV1", root.GetProperty("projectionType").GetString());
+        Assert.Equal("mocassin/lattice-signature/v1", root.GetProperty("domainPrefix").GetString());
+
+        var fields = root.GetProperty("fields").EnumerateArray().ToArray();
+        Assert.Equal(
+            ["formatVersion", "modelSignature", "latticeSize", "positionCount", "particles"],
+            fields.Select(static field => field.GetProperty("name").GetString()));
+        Assert.Equal(
+            ["uint64", "string", "array", "uint64", "bin"],
+            fields.Select(static field => field.GetProperty("type").GetString()));
+        Assert.Equal(3, fields[2].GetProperty("length").GetInt32());
+        Assert.All(fields, static field => Assert.True(field.GetProperty("required").GetBoolean()));
+        Assert.DoesNotContain("dopingInfo", fields.Select(static field => field.GetProperty("name").GetString()));
+    }
+
+    [Fact]
     public void SignatureVectorEntriesMatchTheProjectionFixtures()
     {
         if (string.Equals(
