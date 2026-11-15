@@ -16,7 +16,8 @@ read-only inspection/verification library for the build CLI.
 - **Audit:** Not requested
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
-  toolchain and native Zstandard — **Planned**; design review [ready for review](../reviews/step-11-amend-1.md) (2026-11-15)
+  toolchain and native Zstandard — **Planned**; round 1 design review `Changes required`, design re-frozen for
+  re-review ([record](../reviews/step-11-amend-1.md))
 - **Feature list:** Approved 2026-11-15 (seven features)
 - **Last updated:** 2026-11-15
 
@@ -264,6 +265,11 @@ Feature 7 is held until [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet
 and integrated. The amendment moves the repository from `net10.0` to `net11.0` and replaces the
 `ZstdSharp.Port` payload codec with the in-box `System.IO.Compression` Zstandard API.
 
+Design-review state: round 1 returned `Changes required` at `06774ee`; the design is re-frozen for re-review after
+the resolutions. Part A of the benchmark gate is **complete** (2026-11-15, amendment §9.1) and passed under the
+owner-approved small-payload rule (absolute decode penalty ≤ 0.15 µs below 8 KiB, ≥ 100 MB/s throughput, ≤ +10 %
+relative at or above 8 KiB).
+
 Design consequences recorded here so the parent design stays coherent:
 
 - §3 and §6 item 14: the payload codec is the in-box `ZstandardEncoder`/`ZstandardDecoder` with a single
@@ -274,9 +280,17 @@ Design consequences recorded here so the parent design stays coherent:
   native Zstd `Quality`.
 - §7: performance targets are measured on .NET 11 Release builds.
 - Feature 7 generates the checked-in `.msl` fixture, the `package-summary-v1` golden, the extracted payloads, and
-  the 10⁴-job benchmark **once**, on the amended toolchain. No fixture is generated on `net10.0`.
-- The amendment carries a two-part benchmark gate: a real-payload codec comparison before design acceptance and
-  the 10⁴-job budget before the audit freeze, with a recorded rollback threshold.
+  the 10⁴-job benchmark **once**, on the amended toolchain. The one deliberate exception is the amendment's
+  pre-amendment compatibility fixture and golden frames, captured with the net10 writer **before** the retarget
+  so the net11 reader and the quality-mapping test have a real pre-switch reference.
+- The amendment's benchmark gate has two parts: Part A (real-payload codec comparison) is complete and recorded
+  in the amendment page; Part B (10⁴ jobs) runs before the audit freeze against a mandatory net10 reference, with
+  a documented absolute fallback and a recorded rollback rule that no longer depends on byte identity.
+- Byte identity is an observation, not a correctness or rollback threshold: signatures and `package-summary-v1`
+  are logical projections, and only byte-capturing artifacts are re-captured if a runtime patch changes frames.
+- The lattice decode-bound gap found in the review (the read-only reader passes `int.MaxValue`) is **not** fixed
+  by this amendment; it is a Step 11 fix feature (`fix-lattice-decode-guard`) before the audit freeze, with a
+  lattice bomb test. Until it lands, no page claims the lattice path is bounded by `PackageVerificationOptions`.
 
 ## Goal
 
@@ -845,6 +859,12 @@ Two options, for the human owner's start-gate decision:
 - [ ] Write the documentation named below and update parity/status.
 - [ ] Review and integrate [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) (.NET 11
       toolchain and native Zstandard) before feature 7 generates the fixtures and before the audit freeze.
+- [ ] Capture the pre-amendment `.msl` compatibility fixture and the golden codec frames with the net10 writer
+      before the retarget (amendment §9.4–§9.5), and commit them with the amendment feature.
+- [ ] Close the lattice decode-bound gap found by review A1-10 in a Step 11 fix feature
+      (`feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard`): derive the bound from the
+      `lattices` row, apply it in `PackageReader.ReadLatticesAsync`, and add the lattice bomb test before the
+      audit freeze.
 
 ## Acceptance criteria
 
