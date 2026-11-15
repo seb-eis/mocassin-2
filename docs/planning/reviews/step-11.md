@@ -15,7 +15,8 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `d8ade7a29b287ef96bda537f5cd3102d9caa1b41` |
+| Reviewed commit | `f04bd3cb5f424bff0e4f8d736d84185370775308` |
+| Round 1 frozen commit | `d8ade7a29b287ef96bda537f5cd3102d9caa1b41` |
 | Docs branch | `docs/step-11-design` |
 | Review date | 2026-11-15 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation |
@@ -302,7 +303,7 @@ does not exercise them).
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -360,10 +361,34 @@ Date:
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| M-1 | Closed in design — environment pair entries are now one row per periodic image with `{target_position, offset, energy_id}`; the compiler emits one `CompiledPairLink` per image from `PairShell.EquivalentImages` (exposed additively on `PairInteractionPreview`), so the existing four-field model-signature link projection signs every runtime image. The model-signature values change for multi-image shells, so the Step 08/09 signature fixtures and sample `modelSignature` values are regenerated. Step 08/13/14/15 and the data contract are aligned. The cross-step Symmetry/Compilation change needs start-gate/owner approval and an ApiCompat refresh. | Planner; owner for the cross-step change; step agent implements | `f04bd3c` |
+| M-2 | Closed in design — `tracker_order` is a variable-length `u8[]` with one global tracker index or `0xFF` per path node and length equal to the representative direction's path length; data contract, Step 13, Step 18, and the model-signature note are aligned. | Planner | `f04bd3c` |
+| M-3 | Closed in design — `PKG` descriptors are Contracts-owned; `Mocassin.Packages` composes them into `DiagnosticCatalog.Default` for docs drift/build-side lookup; `Mocassin.Results` builds diagnostics from the same descriptors and gains no `Mocassin.Packages` reference. | Planner | `f04bd3c` |
+| m-1 | Closed — `PKG001`–`PKG010` are defined with severity, check, and docs anchor; the verifier check list is numbered and mapped. | Planner | `f04bd3c` |
+| m-2 | Closed — `package-summary-v1` is defined in data contracts §3.5 (schema, model/lattice/job entries, `seedHex`, normalization, sort order) and is the deterministic/golden projection. | Planner | `f04bd3c` |
+| m-3 | Closed — ADR 0009 gains the "pre-release package-shape finalization" section; Step 11 §6 and `05-open-decisions.md` record the basis and the first-release resumption. | Planner | `f04bd3c` |
+| m-4 | Closed — Step 14 is in the dependency reconciliation table; Step 14 §4 now names the payload source fields and the exact `cell + offset` expansion. | Planner | `f04bd3c` |
+| m-5 | Closed — `generate.py` emits a separate `contracts/generated/schema/package-payloads-v1.schema.json`; `package-v1.schema.json` stays the row schema; payload schemas use `additionalProperties: true`. | Planner | `f04bd3c` |
+| m-6 | Closed — Step 11 §9 defines the folder/namespace layout for the DTOs, writer, payload mappers, signature, descriptors, inspector, tests, and benchmark. | Planner | `f04bd3c` |
+| n-1 | Closed — `PackageInspection`, `PackageVerificationReport`, `PackageVerificationCheck`, `PackageVerificationOptions`, `IMslPackageInspector`, and `IPackageVerifier` are defined; `PackageWarning` is replaced by `Diagnostic`. | Planner | `f04bd3c` |
+| n-2 | Closed — orphaned temp files are removed by `mocassin clean` (Step 28), stated explicitly. | Planner | `f04bd3c` |
+| n-3 | Closed — the `usePrerun` check is qualified by kind (KMC only, iff `pre_run_mcsp > 0`; MMC requires it clear and `pre_run_mcsp = 0`). | Planner | `f04bd3c` |
+| n-4 | Closed — the verifier checks only payload-derived columns and checks authored/build metadata for presence/format/uniqueness. | Planner | `f04bd3c` |
+| n-5 | Closed in design — feature 3/6 records the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges; verification owner is the step agent at implementation. | Step agent | `f04bd3c` |
 
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
+Resolution notes:
+
+- Round 2 should review the frozen design at `f04bd3cb5f424bff0e4f8d736d84185370775308`; the only later diff on
+  this branch is this record update.
+- M-1 was deeper than the finding text: the compiled pair link is one entry per symmetry shell, while the
+  runtime needs every periodic image. The design therefore emits one compiled link per image (signed by the
+  existing four-field model-signature projection) and records the additive preview field plus the regenerated
+  Step 08/09 signature fixtures as a cross-step prerequisite. If the owner rejects that change, the alternative
+  (solver-side reconstruction from a stored bucket/geometry identity) needs a documented uniqueness proof for
+  chiral or coincident shells; the design recommends the per-image compiled link.
+- The review noted that the earlier 3.5–4.0 pw estimate already exceeded the roadmap's 3–4 pw row. The M-1 fix
+  makes the honest estimate 3.8–4.2 pw, whose upper bound exceeds the four-week trigger; Step 11 §10 now records
+  the single-step-exception request (recommended, as for Step 09) and the 11A/11B split alternative.
 
 ## Review rounds
 
