@@ -7,15 +7,15 @@ generation with charge compensation.
 
 ## Implementation status
 
-- **Status:** In audit
+- **Status:** Awaiting approval
 - **Feature list:** Approved 2026-11-14 (eight features; step branch created)
 - **Step branch:** `step/10-job-templates`
 - **Step CI:** [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43704552037) at `c10e6d7`
 - **Main merge:** —
 - **Step tag:** —
 - **Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json)
-- **Audit:** Ready for audit at `c10e6d7` (round 1 `Fixes required` at `f2a364d`, all F-1–F-7 resolved;
-  replacement closeout CI green) — [record](../audits/step-10.md)
+- **Audit:** `Passed with notes` at `c10e6d7` (round 2; round 1 `Fixes required` at `f2a364d`, all F-1–F-7
+  resolved); replacement closeout CI green — [record](../audits/step-10.md)
 - **Design review:** Ready for implementation at `c5454af050ccd3f1e02f892424ccd714c5d56f89` (round 5) — [record](../reviews/step-10.md); accepted by the human owner 2026-11-14
 - **Last updated:** 2026-11-15
 
@@ -422,7 +422,10 @@ Recorded deviations and limitations:
 - Feature 8 was squash-merged into `step/10-job-templates` as `057a85c`
   (`step-10: complete documentation, parity, and closeout`); no per-feature CI run was triggered.
 
-**Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json) records the audited commit `f2a364d`, closeout CI run `43699356371` with the same `head_sha`, `main` SHA at freeze `ca9a98f`, and merge candidate `f2a364d`. The checker reports `Closeout evidence: OK`; `main` was already an ancestor, so no merge-tree run is required.
+**Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json) records the audited
+commit `c10e6d7`, replacement closeout CI run `43704552037` with the same `head_sha`, `main` SHA at freeze
+`ca9a98f`, and merge candidate `c10e6d7`. The earlier run `43699356371` at `f2a364d` remains process history.
+The checker reports `Closeout evidence: OK`; `main` was already an ancestor, so no merge-tree run is required.
 
 ## Goal
 
@@ -1080,8 +1083,12 @@ At this point, document job templates and supercells:
 | Optimizers | Every P1 position of the site removed; lattice unchanged; dual-DOF one/some/all environment reduction; `JOB009`; duplicate `JOB017` | PR-fast |
 | Limits | Collection/config/doping/optimizer/extension caps and `JOB019`/`JOB020` | PR-fast |
 | Edge cases | 0 %, 100 %, tiny cell, impossible ratio, NaN/Inf | PR-fast |
-| Performance | 10⁴ small jobs expand in < 10 s; generation peak stays under 1 GiB with cancellation every job | PR-medium |
+| Performance | 10⁴ small jobs expand within a 30 s smoke bound; the measured < 10 s and < 1 GiB generation target is deferred to Step 29/release performance work | PR-medium |
 | Writer/reader integration | Later Step 11/13 round-trip test; deferred to those steps, not claimed here | nightly |
+
+The Step 10 performance test is a non-flaky expansion smoke bound. Measured generation wall-clock and
+peak-memory targets (< 10 s and < 1 GiB on the reference runner) are explicitly deferred to Step 29/release
+performance work.
 
 ## Risks and mitigations
 

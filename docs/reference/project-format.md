@@ -621,8 +621,10 @@ rejected as invalid documents.
 - no insignificant whitespace, LF-only separators;
 - object keys in schema order;
 - non-semantic arrays sorted by stable ID;
-- invariant shortest round-trip numbers;
-- `-0.0` normalized to `0.0`;
+- invariant shortest round-trip numbers, except inside opaque extension-config objects, where the authored
+  JSON number token is preserved verbatim (`1` and `1.0` differ, integers above 2^53 and values outside
+  binary64 stay exact);
+- `-0.0` normalized to `0.0` for every non-extension number;
 - timestamps normalized to UTC with seven fractional digits and a `Z` suffix;
 - enums written as camelCase strings;
 - optional null properties omitted.

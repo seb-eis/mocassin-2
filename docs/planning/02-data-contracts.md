@@ -170,7 +170,10 @@ projection:
 - UTF-8 without BOM, no insignificant whitespace, `\n` only where a separator is required;
 - object keys in schema order (manifest order), not hash-map order;
 - non-semantic arrays sorted by `id`;
-- numbers in invariant, shortest round-trip form; no NaN/Inf; normalize `-0.0` to `0.0`;
+- numbers in invariant, shortest round-trip form; no NaN/Inf; normalize `-0.0` to `0.0`, except inside
+  opaque extension-config objects, where the authored JSON number token is preserved verbatim (see §2.4);
+  the exception keeps integers above 2^53 and values outside binary64 exact and makes `1` and `1.0` distinct
+  tokens, while every other project number keeps the shortest round-trip rule;
 - timestamps normalized to UTC `Z` with fixed fractional digits;
 - unknown fields excluded (they are rejected by the reader anyway);
 - `symmetry` is envelope metadata: it is included in the document hash, not the model hash.
@@ -723,8 +726,10 @@ target the same compiled model.
 - `extensions` are structured, versioned configuration objects for optional solver routines (e.g. MMCFE).
   They live inside `baseSettings`/`overrides`: `null` inherits, a non-null array replaces the inherited list as
   a whole, ids are unique and ≤64 characters, at most 16 entries and 256 KiB total are allowed, and each
-  `config` is a JSON object kept as canonical JSON. A raw `instruction` string remains available for
-  advanced/legacy workflows but is not the preferred configuration path.
+  `config` is a JSON object kept as canonical JSON. Extension-config number tokens are the documented
+  canonical-hash exception: they are preserved verbatim rather than normalized to shortest round-trip
+  binary64 (see §2.1). A raw `instruction` string remains available for advanced/legacy workflows but is not the
+  preferred configuration path.
 
 ### 2.5 Build templates
 

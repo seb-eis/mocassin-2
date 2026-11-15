@@ -99,7 +99,10 @@ byte format; the compilation pipeline produces the authoritative structure.
 ## Canonical JSON and hashes
 
 Canonical JSON is whitespace-free, LF-only, schema-ordered, and sorts non-semantic arrays by stable ID. It
-normalizes timestamps to UTC with seven fractional digits and `-0.0` to `0.0`.
+normalizes timestamps to UTC with seven fractional digits and `-0.0` to `0.0`. Opaque extension-config
+objects are the documented exception: their JSON number tokens are preserved verbatim so Steps 27/28
+configurations round-trip exactly (including integers above 2^53 and values outside binary64), and `1` and
+`1.0` therefore hash differently. Every non-extension project number keeps the shortest round-trip rule.
 
 Five SHA-256 hashes are exposed:
 

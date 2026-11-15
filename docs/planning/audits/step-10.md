@@ -374,8 +374,9 @@ Round-2 code reading:
   squash.
 - `main` `ca9a98fe8c7756ccff7fb8bfa1e6fad7aef906a5` was already an ancestor of the frozen commit; no merge-tree
   run was needed. Only documentation and audit-record commits follow the audited commit.
-- The closeout CI run is the single Ubuntu dispatch for this step. No per-feature CI ran and no replacement
-  closeout run was dispatched.
+- The replacement closeout CI run `43704552037` is the Ubuntu dispatch for the audited commit `c10e6d7`; the
+  earlier `43699356371` at `f2a364d` remains process history. No per-feature CI ran, and no further closeout
+  run was dispatched after the replacement.
 - Platform CI (Windows/macOS) was not run. Step 10 adds managed C# compilation/lattice code with no P/Invoke,
   native library, RID-specific package, `System.Runtime.InteropServices`, GUI project, installer, or
   `cfg(windows)`/`cfg(target_os)` branch; path and case handling is not touched.
@@ -459,7 +460,7 @@ round-2 re-audit.
 
 | Finding | Status | Owner | Fix commit | Resolution |
 | --- | --- | --- | --- | --- |
-| F-1 (Major) | Fixed | Step agent | `5f37515` | Added `Mocassin.Packages.Projects.Validation.JobTemplateValidationStage` and wired `ValidationContext.CompiledModel` through `ProjectValidationPipeline.Validate`/`ValidateFileAsync`. The stage owns total-position `JOB004`, large-supercell `JOB014`, job totals `JOB013`/`JOB019`, removes-all `JOB009`, and doping/truncation/compensation/neutrality `JOB010`–`JOB012`/`JOB016` through the shared `LatticePreviewService`. `mocassin build --preview` now compiles first, registers the stage with the compiled model, and sets `RunBuildStage = true`; build stages are skipped without either. Tests cover a real compiled model, skipping, each owned code, and a CLI compiled-bound failure. Design decisions, Step 10 §6–§7, and Step 12 now describe the implemented type and wiring. |
+| F-1 (Major) | Fixed | Step agent | `5f37515` | Added `Mocassin.Packages.Projects.Validation.JobTemplateValidationStage` and wired `ValidationContext.CompiledModel` through `ProjectValidationPipeline.Validate`/`ValidateFileAsync`. The stage owns total-position `JOB004`, large-supercell `JOB014`, job totals `JOB013`/`JOB019`, removes-all `JOB009`, and doping/truncation/compensation/neutrality `JOB010`–`JOB012`/`JOB016` through the shared `LatticePreviewService`. `mocassin build --preview` now compiles first, registers the stage with the compiled model, and sets `RunBuildStage = true`; build stages are skipped without either. `JobTemplateValidationStageTests` directly pin `JOB004`, `JOB009`, `JOB012`, `JOB013`, `JOB014`, and `JOB019`, plus the real-model, no-model, pipeline run/skip, and CLI compiled-bound failure paths; `JOB010`, `JOB011`, and `JOB016` are covered through the shared `LatticePreviewService`/`DopingApplicationTests` preview path. Design decisions, Step 10 §6–§7, and Step 12 now describe the implemented type and wiring. |
 | F-2 (Minor) | Fixed | Step agent | `5f37515` | Added the missing sampling property/uniformity tests, the random-doping property and determinism test, the exact 10×10×10 ceria + 1 % Ce acceptance test, the explicit simulation-setting invariance test (same request hash, lattice seed, particles, and report), a 10⁴-job expansion smoke test declared `PR-medium`, and a CLI `build --preview` compiled-bound failure test. |
 | F-3 (Minor) | Fixed | Step agent | `5f37515` | Corrected the feature-8 wording so closeout CI, closeout evidence, and the audit request are step-agent tasks and the orchestrator only routes and spawns. The `docs/planning/status.md` Active work and dashboard state are updated in the accompanying documentation commit. |
 | F-4 (Minor) | Fixed | Step agent | `5f37515` | The compensation search now samples the maximal primary selection once and searches downward using the dependent availability that remains after the prefix, including positions that are both primary and dependent sources. `OverlappingPrimaryAndDependentSourcesReduceToAFeasiblePair` reproduces the former false `JOB012` and pins the 5+5 feasible pair. |
@@ -467,33 +468,92 @@ round-2 re-audit.
 | F-6 (Note) | Fixed | Step agent | `5f37515` | `JOB013`/`JOB019` ownership now matches the accepted ownership table: the Core structural validator no longer accumulates job totals, and the compiled-bound stage emits both codes. `JobTemplateValidatorTests.JobTotalsAreDeferredToTheCompiledBoundBuildStage` pins the Core side; stage tests pin `JOB013`/`JOB019`. |
 | F-7 (Note) | Fixed | Step agent | `5f37515` | Removed the broad `JOB` filter. The populated job-template fixture now asserts its exact expected structural codes (`JOB002`, `JOB006`, `JOB009`), every other schema fixture asserts no diagnostics, and the envelope fixture asserts only its expected `JOB001` stub code, so a future invalid job template cannot hide. |
 
-All seven findings are addressed; none is accepted or deferred. No reviewer-authored finding, evidence, or
-verdict text was changed.
+All seven round-1 findings are addressed; none of F-1–F-7 is accepted or deferred. No reviewer-authored
+finding, evidence, or verdict text was changed.
+
+## Round 2 resolutions
+
+The step agent owns this section. The round-2 reviewer text above is unchanged. These resolutions are
+documentation and test-plan corrections only; no code, test, or configuration file changed after `c10e6d7`.
+
+| Finding | Status | Owner | Resolution |
+| --- | --- | --- | --- |
+| R2-1 (Minor) | Accepted — documented and deferred | Step agent | The Step 10 Performance row now states the actual 30 s expansion smoke bound and explicitly defers the measured < 10 s / < 1 GiB generation target to Step 29/release performance work. No measured memory test is claimed in Step 10. |
+| R2-2 (Minor) | Fixed | Step agent | The normative canonical-JSON rules in `docs/planning/02-data-contracts.md` §2.1 and §2.4, `docs/reference/project-format.md` Canonical JSON, and `docs/development/design-decisions.md` now record the extension-config raw-number-token exception and its scope. Every non-extension number keeps the shortest round-trip rule and `-0.0` normalization. |
+| R2-3 (Note) | Fixed | Step agent | The stale pre-replacement closeout paragraph in the Step 10 page and the “Known notes for the auditor” bullet in this record now identify `c10e6d7` and replacement run `43704552037`; `43699356371` at `f2a364d` is recorded as process history. |
+| R2-4 (Note) | Accepted — wording corrected | Step agent | The F-1 resolution now states precisely which codes the stage tests pin directly (`JOB004`, `JOB009`, `JOB012`, `JOB013`, `JOB014`, `JOB019`) and that `JOB010`/`JOB011`/`JOB016` are covered through the shared `LatticePreviewService`/`DopingApplicationTests` preview path. Direct stage-level assertions for those three warnings remain optional and are not acceptance-required. |
+| R2-5 (Note) | Accepted | Step agent | The pre-release public parameter insertion in `ProjectValidationPipeline.Validate`/`ValidateFileAsync` is recorded as accepted. Step 12 and external consumers use named arguments; the optional model may move after `CancellationToken` in a future major. The intentional ApiCompat baseline refresh is already documented. |
 
 ## Approval summary
 
-The step agent completes this section before the orchestrator presents the approval request. It must cover the
-full history, not only the latest round.
+The step agent completes this section before the orchestrator presents the approval request. It covers the full
+history, not only the latest round. The human owner still decides the verdict, merge, and tag.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
+- [x] Final CI and documentation-build results recorded
+
+**Requested decision:** accept the round-2 `Passed with notes` verdict at audited commit
+`c10e6d7ff1d399afb48a0d9b24667c996995c92a`, and approve the Step 10 `--no-ff` merge into `main` and the
+annotated `step-10` tag after this documentation-only resolution/status commit. The frozen audited commit is
+`c10e6d7`; the replacement closeout CI run is `43704552037` at the same `head_sha`.
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-15 | `f2a364d` | Fresh independent completion auditor (OpenCode subagent; no shared context with planner, implementor, or orchestrator) | `Fixes required` |
+| 2 | 2026-11-15 | `c10e6d7` | Fresh independent completion auditor (OpenCode subagent; no shared context with round 1 or the implementor) | `Passed with notes` |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| F-1 | Major | Compiled-bound `JobTemplateValidationStage` and `ValidationContext.CompiledModel` plumbing were absent. | Implemented the stage, pipeline plumbing, `build --preview` wiring, and stage/CLI tests; reconciled design and Step 12 docs. | `5f37515`, squash `c10e6d7` | Fixed |
+| F-2 | Minor | Required property/acceptance/performance/CLI tests were missing. | Added sampler/uniformity, doping property, 10×10×10 ceria, setting-invariance, performance smoke, and CLI failure tests. | `5f37515`, squash `c10e6d7` | Fixed apart from the R2-1 test-plan wording, now reconciled |
+| F-3 | Minor | Status narrative was stale and assigned step-agent closeout work to the orchestrator. | Corrected feature-8 wording and refreshed the status dashboard/Active work. | `5f37515`, squash `c10e6d7` | Fixed |
+| F-4 | Minor | Compensation search used pre-primary dependent availability and could emit a false `JOB012`. | Search now uses post-primary dependent availability including source overlap; regression test added. | `5f37515`, squash `c10e6d7` | Fixed |
+| F-5 | Note | Extension-config numbers were canonicalized through binary64. | Raw number tokens are preserved; round-trip test added; normative canonical-JSON pages reconciled under R2-2. | `5f37515`, squash `c10e6d7` | Fixed |
+| F-6 | Note | `JOB013`/`JOB019` ownership differed from the accepted table. | Totals moved to the compiled-bound stage; Core tests pin the deferral. | `5f37515`, squash `c10e6d7` | Fixed |
+| F-7 | Note | Schema/envelope tests filtered all `JOB` diagnostics. | Replaced the broad filter with exact fixture-specific expectations. | `5f37515`, squash `c10e6d7` | Fixed |
+| R2-1 | Minor | Step-page Performance row promised < 10 s and < 1 GiB without matching assertions. | Row now states the 30 s smoke bound and defers measured targets to Step 29/release performance work. | This docs commit | Accepted and documented |
+| R2-2 | Minor | Canonical-JSON contract pages contradicted the raw-number-token policy. | Reconciled §2.1/§2.4 of the data contract, the published Canonical JSON list, and design-decisions. | This docs commit | Fixed |
+| R2-3 | Note | Two durable records still described the pre-replacement closeout. | Updated the Step 10 closeout paragraph and audit Known notes to `c10e6d7`/`43704552037`. | This docs commit | Fixed |
+| R2-4 | Note | F-1 resolution overclaimed direct stage coverage of `JOB010`/`JOB011`/`JOB016`. | F-1 resolution now names the directly pinned codes and the shared preview/doping coverage for the three warnings. | This docs commit | Accepted and corrected |
+| R2-5 | Note | Public parameter was inserted before `CancellationToken`. | Recorded as an accepted pre-release API change; release consumers use named arguments and a future major may reorder. | This docs commit | Accepted |
+
+**Accepted notes and waivers:**
+
+- R2-1: accepted as a documented deferral. Step 10 keeps the non-flaky 30 s expansion smoke bound; measured
+  wall-clock and peak-memory targets belong to Step 29/release performance work.
+- R2-2: accepted as fixed by the canonical-JSON documentation reconciliation; no code change was needed.
+- R2-3: accepted as fixed by the stale-text corrections in this resolution commit.
+- R2-4: accepted with corrected wording. `JOB012` proves the stage-to-preview wiring; direct stage assertions
+  for `JOB010`/`JOB011`/`JOB016` are optional, not acceptance-required, and the codes remain covered by the
+  shared preview/doping tests.
+- R2-5: accepted as a pre-release public API note. Step 12 and external consumers use named arguments; a future
+  major may reorder the optional parameter after `CancellationToken`.
+
+**Residual risk:** R2-1 leaves measured generation performance/memory to Step 29/release performance work (owner:
+Step 29/release); R2-4 leaves direct stage-level `JOB010`/`JOB011`/`JOB016` assertions to optional future
+hardening (owner: Step 10/future hardening); R2-5 leaves the pre-release public optional-parameter ordering in
+place until a future major (owner: Step 12/external consumers). No Blocker or Major remains.
+
+**Gate statement:** no Blocker or Major finding remains. The human owner is asked to accept the two round-2
+Minors (R2-1 and R2-2) and three Notes (R2-3, R2-4, and R2-5), all recorded above, and to approve the merge and
+tag.
+
+**Final CI and documentation-build results:** replacement closeout CI run `43704552037` is
+`workflow_dispatch`, `completed/success`, all six jobs green at `c10e6d7`; the earlier run `43699356371` at
+`f2a364d` is process history. The local `./tools/verify.sh all --require` gate is exit 0 with 1,410 .NET tests,
+Rust fmt/clippy/tests, Python 3, docs strict/DocFX 0-0/rustdoc, 18 contract artifacts, and 31 policy tests.
+For this docs-only resolution commit, `./tools/verify.sh docs --require` is exit 0 and
+`python tools/check_closeout_evidence.py docs/planning/closeout/step-10.json` reports
+`Closeout evidence: OK`.
 
 ## Human approval
 
