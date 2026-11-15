@@ -25,7 +25,7 @@ read-only inspection/verification library for the build CLI.
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `c0d8d64` |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `bdafaa4` |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `4fe6225` |
-| 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
+| 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `cbe345f` |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Pending | — | — | — |
 
 ### Approved feature list
@@ -222,7 +222,7 @@ per feature.
 #### Feature 6 — Package verification and inspection
 
 - **Branch:** `feature/step-11-simulation-package-and-msl-writer/package-verification`
-- **Squash commit:** recorded in the follow-up status commit.
+- **Squash commit:** `cbe345f` (`step-11: add package verification and inspection`).
 - **Local gates:** `./tools/verify.sh all --require` exit 0 — .NET build 0 warnings and all solution tests
   (415 Packages, 18 Results, 685 Core, 223 Symmetry, 96 Compilation, 37 Contracts, 17 Cli, 1 App,
   1 Architecture); NuGet licence policy OK (58 packages); ApiCompat clean after refreshing the
