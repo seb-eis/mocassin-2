@@ -57,7 +57,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 07 | [Validation, Diagnostics, and Model Statistics](steps/step-07-validation-and-diagnostics.md) | B. Model definition | Done | `step/07-validation-and-diagnostics` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43291748042) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) | `3ed558a` | `step-07` | Passed with notes at `ccd0e55` (`d66f34f`) | Ready for implementation at `31b53e8` — review `2d01f3e`; approved 2026-11-11 |
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Done | `step/08-model-compilation-pipeline` (merged and deleted) | `step-08` | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43578897490) | `f91fc63` | `step-08` | Passed with notes at `28e741f` (`f97b2c4`) | Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — accepted 2026-11-13 |
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Done | `step/09-parameterization-templates` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43639561778) | `ef2f335` | `step-09` | Passed with notes at `916bae1` (`3aeacb1`) — accepted 2026-11-14 | Ready with notes at `26d6a0e` (round 4) — accepted 2026-11-14 |
-| 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Awaiting approval | `step/10-job-templates` | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43704552037) at `c10e6d7` | — | — | Passed with notes at `c10e6d7` (round 1 `Fixes required` at `f2a364d`; F-1–F-7 resolved, R2-1–R2-5 recorded) | Ready for implementation at `c5454af` — accepted 2026-11-14 |
+| 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Done | `step/10-job-templates` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43709029767) at `945dddf` | `945dddf` | `step-10` | Passed with notes at `c10e6d7` — accepted 2026-11-15 | Ready for implementation at `c5454af` — accepted 2026-11-14 |
 | 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -116,16 +116,15 @@ notes` at `916bae1` (record `3aeacb1`); the owner accepted the notes on 2026-11-
 as `ef2f335` (`--no-ff`), main CI [`43639561778`](https://github.com/seb-eis/mocassin-2/actions/runs/43639561778)
 is green, and the annotated `step-09` tag is pushed. The step branch was deleted.
 
-Step 10 — Job Templates and Supercell Generation is awaiting approval on `step/10-job-templates`. Independent
-audit round 1 returned `Fixes required` at `f2a364d`; the step agent fixed all seven findings and squash-merged
-them as `c10e6d7` (`step-10: fix audit round 1 findings`). The replacement closeout CI run
-[`43704552037`](https://github.com/seb-eis/mocassin-2/actions/runs/43704552037) is green at `c10e6d7` (all six
-jobs), and `docs/planning/closeout/step-10.json` binds that commit and run; the earlier
-[`43699356371`](https://github.com/seb-eis/mocassin-2/actions/runs/43699356371) at `f2a364d` remains process
-history. Audit round 2 returned `Passed with notes` at `c10e6d7`: R2-1 (performance test-plan deferral) and R2-2
-(canonical-JSON contract reconciliation) are the remaining Minors, and R2-3–R2-5 are Notes; the step-agent
-resolution/status commit records each resolution and the cumulative approval summary. The human owner is asked
-to accept the verdict and notes and approve the merge and `step-10` tag; no merge or tag exists yet.
+Step 10 — Job Templates and Supercell Generation is complete. The owner accepted the `Passed with notes`
+verdict at `c10e6d7` on 2026-11-15; the step merged into `main` as `945dddf` (`--no-ff`), main CI
+[`43709029767`](https://github.com/seb-eis/mocassin-2/actions/runs/43709029767) is green at that merge, and the
+annotated `step-10` tag is pushed. The step branch was deleted. The replacement closeout run
+[`43704552037`](https://github.com/seb-eis/mocassin-2/actions/runs/43704552037) remains the closeout evidence at
+`c10e6d7`; the earlier [`43699356371`](https://github.com/seb-eis/mocassin-2/actions/runs/43699356371) at
+`f2a364d` is process history. R2-1 (performance test-plan deferral) and R2-2 (canonical-JSON contract
+reconciliation) are recorded and accepted, with R2-3–R2-5 as Notes. Step 11 — Simulation Package and `.msl`
+Writer is next; its design review has not yet been requested.
 
 ## Cross-cutting phase checkpoints
 

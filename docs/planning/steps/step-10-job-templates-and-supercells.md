@@ -7,15 +7,15 @@ generation with charge compensation.
 
 ## Implementation status
 
-- **Status:** Awaiting approval
+- **Status:** Done
 - **Feature list:** Approved 2026-11-14 (eight features; step branch created)
-- **Step branch:** `step/10-job-templates`
-- **Step CI:** [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43704552037) at `c10e6d7`
-- **Main merge:** —
-- **Step tag:** —
+- **Step branch:** `step/10-job-templates` (merged and deleted)
+- **Step CI:** [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43709029767) at `945dddf`
+- **Main merge:** `945dddf`
+- **Step tag:** `step-10`
 - **Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json)
 - **Audit:** `Passed with notes` at `c10e6d7` (round 2; round 1 `Fixes required` at `f2a364d`, all F-1–F-7
-  resolved); replacement closeout CI green — [record](../audits/step-10.md)
+  resolved) — accepted 2026-11-15 — [record](../audits/step-10.md)
 - **Design review:** Ready for implementation at `c5454af050ccd3f1e02f892424ccd714c5d56f89` (round 5) — [record](../reviews/step-10.md); accepted by the human owner 2026-11-14
 - **Last updated:** 2026-11-15
 
