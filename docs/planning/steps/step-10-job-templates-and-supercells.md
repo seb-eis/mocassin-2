@@ -7,13 +7,14 @@ generation with charge compensation.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** In audit
 - **Feature list:** Approved 2026-11-14 (eight features; step branch created)
 - **Step branch:** `step/10-job-templates`
-- **Step CI:** —
+- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43699356371) at `f2a364d`
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json)
+- **Audit:** Ready for audit at `f2a364d` — [record](../audits/step-10.md)
 - **Design review:** Ready for implementation at `c5454af050ccd3f1e02f892424ccd714c5d56f89` (round 5) — [record](../reviews/step-10.md); accepted by the human owner 2026-11-14
 - **Last updated:** 2026-11-15
 
@@ -418,7 +419,7 @@ Recorded deviations and limitations:
 - Feature 8 was squash-merged into `step/10-job-templates` as `057a85c`
   (`step-10: complete documentation, parity, and closeout`); no per-feature CI run was triggered.
 
-**Closeout evidence:** the orchestrator creates `docs/planning/closeout/step-10.json` after the single closeout CI run and records the audited commit, CI `head_sha`, `main` SHA at freeze, and merge candidate. Do not create it with placeholder hashes.
+**Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json) records the audited commit `f2a364d`, closeout CI run `43699356371` with the same `head_sha`, `main` SHA at freeze `ca9a98f`, and merge candidate `f2a364d`. The checker reports `Closeout evidence: OK`; `main` was already an ancestor, so no merge-tree run is required.
 
 ## Goal
 

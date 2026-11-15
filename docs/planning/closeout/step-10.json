@@ -1,0 +1,19 @@
+{
+  "step": "step-10",
+  "audit_commit": "f2a364dd5f96bca2f9a3df5588443f48cb10f61c",
+  "closeout_ci": {
+    "run_id": "43699356371",
+    "head_sha": "f2a364dd5f96bca2f9a3df5588443f48cb10f61c"
+  },
+  "main_sha_at_freeze": "ca9a98fe8c7756ccff7fb8bfa1e6fad7aef906a5",
+  "merge_candidate": "f2a364dd5f96bca2f9a3df5588443f48cb10f61c",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "notes": [
+    "Closeout CI run 43699356371 is the single Ubuntu dispatch for this step (workflow_dispatch with platforms=ubuntu and force_all=true).",
+    "main ca9a98fe8c7756ccff7fb8bfa1e6fad7aef906a5 was already an ancestor of the frozen commit; no merge-tree run is required.",
+    "Only documentation and audit-record commits follow the audited commit."
+  ]
+}
