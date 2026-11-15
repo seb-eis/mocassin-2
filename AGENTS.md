@@ -339,6 +339,13 @@ Reviewer rules:
   `docs: record step-NN audit Passed [skip ci]`.
 - Optional scratch notes may live under `.tmp/`. They are not gate artifacts and are never committed.
 
+**Harness binding.** The four roles are bound as OpenCode agents in `.opencode/agents/`, and `opencode.json` makes
+the orchestrator the default primary agent. `.opencode/commands/step-start.md` and `step-closeout.md` are the two
+entry points. The binding enforces four rules only: the orchestrator cannot edit and can spawn only the three
+roles; the reviewer can edit only `step-*.md`/`xc-*.md` records and cannot spawn; the planner cannot edit code
+areas. Shell, pushes, merges, and tags are procedural, so owner approval and branch protection remain the real
+controls. See [`docs/development/orchestration.md`](docs/development/orchestration.md) §9 for the full statement.
+
 ### 3.9 Pre-implementation design review
 
 Every new step must pass an independent design review before the step branch is created or implementation
@@ -590,6 +597,7 @@ Each rule has one normative home. Summaries link to it; do not copy it into a se
 | Agent security | `docs/development/agent-security.md` |
 | Incident and rollback | `docs/development/incident-and-rollback.md` |
 | CI cost and gates | §3.13 and `docs/planning/ci-policy.md` |
+| OpenCode agent and command binding | `docs/development/orchestration.md` §9 |
 | Testing and quality | `docs/planning/03-quality-strategy.md` |
 | Code structure | `docs/development/code-structure.md` |
 | Closeout evidence | `docs/planning/closeout/README.md` |
@@ -645,6 +653,8 @@ Current repository:
 ```text
 mocassin/
 ├── AGENTS.md
+├── opencode.json           # default agent: the orchestrator
+├── .opencode/              # four role agents and the two step commands
 ├── README.md
 ├── LICENSE                 # MIT
 ├── NOTICE.md               # original GPL attribution + MIT boundary

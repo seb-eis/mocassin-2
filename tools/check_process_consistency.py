@@ -33,6 +33,13 @@ REQUIRED_FILES = (
     "tools/check_closeout_evidence.py",
     "tools/check_docs_links.py",
     "tools/verify.sh",
+    "opencode.json",
+    ".opencode/agents/orchestrator.md",
+    ".opencode/agents/planner.md",
+    ".opencode/agents/implementor.md",
+    ".opencode/agents/reviewer.md",
+    ".opencode/commands/step-start.md",
+    ".opencode/commands/step-closeout.md",
 )
 
 REQUIRED_INTEGRATION = (
@@ -54,6 +61,9 @@ REQUIRED_INTEGRATION = (
     ("docs/planning/reviews/cross-cutting/README.md", "drift checks"),
     ("docs/planning/04-roadmap.md", "split trigger"),
     ("docs/development/agent-workflow.md", "Changing the process"),
+    ("AGENTS.md", ".opencode/agents"),
+    ("docs/development/orchestration.md", ".opencode/agents"),
+    ("docs/development/orchestration.md", "default_agent"),
 )
 
 FORBIDDEN_TERMS = (
