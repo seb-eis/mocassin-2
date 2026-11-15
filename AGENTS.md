@@ -25,7 +25,7 @@ Target stack:
 
 | Component | Technology |
 | --- | --- |
-| Model builder, compilation, package writer, results API, CLI | C# / .NET 10 |
+| Model builder, compilation, package writer, results API, CLI | C# / .NET 11 |
 | Desktop GUI | Avalonia UI + CommunityToolkit.Mvvm, cross-platform |
 | Solver | Rust (`mocassin-sim`) |
 | Project format | Versioned UTF-8 JSON (`.mocprj`) |
@@ -862,7 +862,7 @@ implementation, not during the audit.
 
 ### .NET
 
-- .NET 10, nullable enabled, implicit usings, warnings as errors.
+- .NET 11, nullable enabled, implicit usings, warnings as errors.
 - Prefer immutable records/`ImmutableArray<T>` for model data; mutable only inside editors/builders.
 - Use typed IDs (`ParticleId`, `CellSiteId`, …) in the model; dense integer indices only in compiled data.
 - Use explicit unit types (`LengthAngstrom`, `EnergyEv`, `TemperatureKelvin`, …); no bare `double` at API

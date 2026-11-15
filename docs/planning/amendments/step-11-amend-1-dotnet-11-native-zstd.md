@@ -528,6 +528,36 @@ for `sample-lattice-6`, which is why the prose above quotes a 0.04–0.07 µs ra
    reported runs; the measurement report records them.
 5. Scope excludes MessagePack serialization, SQLite I/O, and job insertion.
 
+**Post-swap re-run (implementation confirmation, 2026-11-15).** After the codec replacement the same paired probe
+was re-run on the amended tree against the **checked-in** payloads and golden frames
+(`tests/contracts/packages/amend-1/`), so it measures the implemented path and the committed artefacts rather than
+the `/tmp` capture. Twelve payloads × levels 3 and 9; **240/240 required checks per run, 0 failed**.
+
+| Run | Level | Origin | Size Δ | Encode Δ (worst) | Decode < 8 KiB: worst absolute | Decode ≥ 8 KiB: worst ratio | Throughput (min) | Refined gate |
+| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | --- |
+| controlled (tiering off) | 3 | sample | +0.000 % | −1.38 % | **+0.0627 µs** | n/a | 300 MB/s | PASS |
+| controlled (tiering off) | 9 | sample | +0.000 % | −8.44 % | +0.0100 µs | n/a | 297 MB/s | PASS |
+| controlled (tiering off) | 3 | supplementary | +0.000 % | −6.44 % | n/a | 0.9423 | 2,059 MB/s | PASS |
+| controlled (tiering off) | 9 | supplementary | +0.000 % | −10.14 % | n/a | 1.0208 | 2,188 MB/s | PASS |
+| default JIT/PGO | 3 | sample | +0.000 % | +4.12 % | **+0.1055 µs** | n/a | 304 MB/s | PASS |
+| default JIT/PGO | 9 | sample | +0.000 % | −12.01 % | +0.0404 µs | n/a | 305 MB/s | PASS |
+| default JIT/PGO | 3 | supplementary | +0.000 % | −26.57 % | n/a | 0.9329 | 6,145 MB/s | PASS |
+| default JIT/PGO | 9 | supplementary | +0.000 % | −15.22 % | n/a | 0.9902 | 7,222 MB/s | PASS |
+
+- **Size:** exactly 0.000 % because every native frame is byte-identical to its checked-in golden (24/24). The
+  `CodecGoldenTests` PR-fast test asserts the same through `PayloadEncoder` at levels 3 and 9, including the
+  `sample-model-1` seed vector (3,475 B → 1,415 B / 1,387 B).
+- **Encode:** within +4.12 % worst case (default-JIT level 3; the controlled run is faster on every row), far
+  inside the ≤ +25 % rule.
+- **Decode:** the worst small-payload absolute penalty is +0.1055 µs against the ≤ 0.15 µs rule; the ≥ 8 KiB
+  supplementary payload is +2.08 % against the ≤ +10 % rule. Throughput is ≥ 297 MB/s against the ≥ 100 MB/s
+  floor.
+- **Cross-decoder:** 48/48 probe frames pass `zstd -t` and `zstd -d`, and the 24 checked-in goldens pass
+  `zstd -t`; cross-decoding in both directions is part of the 240 checks.
+- **Cross-version and invariance:** the pre-amendment `.msl` fixture verifies on the amended tree and its
+  canonical summary matches its golden (PR-fast test). The reverse direction and the summary equality are
+  recorded in §9.5. `./tools/verify.sh contracts` is green with no `contracts/**` diff.
+
 #### 9.2 Part B — 10⁴-job budget (before the audit freeze)
 
 Feature 7's benchmark runs on the amended tree and records wall clock, peak RSS, package size, model-payload
@@ -612,6 +642,13 @@ Captured **before** the retarget, on the amendment feature branch, with the stil
   check: check out the pre-retarget commit in a temporary worktree, run its reader on a native-written package,
   and record the result in the feature log. It is not a recurring test, because the pre-amendment build no
   longer exists on the branch.
+- **Reverse-direction result (2026-11-15):** the amended `net11.0` writer produced a package with SHA-256
+  `053e4c8f5bd4ee115061dd5cb2b38266a50b155e504fe2108017216963413e59` — identical to the fixture's, because the
+  native frames are byte-identical and SQLite output is deterministic. The pre-retarget `net10.0` build at
+  `e2b00ea` (temporary worktree) read it with `PackageVerifier`: `IsValid = true`, 10 checks, 0 diagnostics,
+  1 model / 6 lattices / 6 jobs, and produced the same canonical-summary SHA-256
+  `60c95e1bcb2438781a6d9a2597840fd04c8e0e6c3caec254cf76589ec2739d2d` as the checked-in golden. The forward
+  direction (fixture read on `net11.0`) is the PR-fast `PreAmendmentPackageCompatibilityTests`.
 
 #### 9.6 Synthetic probe (supplementary, not a gate)
 

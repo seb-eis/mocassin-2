@@ -3,6 +3,10 @@
 Performance targets and benchmark procedure are defined in the internal quality strategy. Public results are
 published here once the solver and build pipeline exist.
 
+> **Toolchain note.** The measurements recorded on this page were taken on .NET 10 and are kept as recorded.
+> Measurements taken after the Step 11 amendment use .NET 11 (`net11.0`). Historical numbers are not rewritten
+> across the toolchain change; compare only within the same runner/toolchain class.
+
 ## Planned targets
 
 | Scenario | Target |

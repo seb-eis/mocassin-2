@@ -40,7 +40,7 @@ MOCASSIN is a fixed-lattice Markov-chain Monte Carlo suite for crystalline solid
 
 ### 3.2 Technical constraints
 
-- **.NET 10** is the minimum runtime for all managed components. No .NET Framework, no `netstandard2.0`.
+- **.NET 11** is the minimum runtime for all managed components (target `net11.0`). No .NET Framework, no `netstandard2.0`.
 - **Avalonia UI** must run on Windows 10/11, mainstream Linux desktops, and macOS (Apple Silicon and Intel).
 - **Rust** solver must build on the same three platforms with stable Rust and no platform-specific
   toolchain requirement beyond a C linker for the bundled SQLite build.

@@ -244,7 +244,7 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| .NET 10 | Y | Planned | 00 | |
+| .NET 11 | Y | Implemented | 00/11 | Retargeted by amendment 1 |
 | Avalonia cross-platform | Y | Planned | 23 | |
 | Rust solver | Y | Planned | 13 | |
 | Windows support | Y | Planned | 31 | |

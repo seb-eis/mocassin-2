@@ -361,7 +361,7 @@ internal static class DopingApplier
     }
 
     private static void CollectSourcePositions(
-        Span<byte> particles,
+        ReadOnlySpan<byte> particles,
         int positionCount,
         CompiledSite site,
         int sourceIndex,

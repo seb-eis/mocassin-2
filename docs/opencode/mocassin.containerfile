@@ -108,10 +108,12 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
 
 # --------------------------------------------------
 # .NET SDK: user-local, pinned patch version.
+# The repository pin lives in global.json (11.0.100);
+# the image installs that SDK only.
 # --------------------------------------------------
 RUN curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
     && bash /tmp/dotnet-install.sh \
-        --version 10.0.403 \
+        --version 11.0.100 \
         --install-dir "$DOTNET_ROOT" \
         --no-path \
     && rm -f /tmp/dotnet-install.sh \
@@ -123,7 +125,7 @@ RUN curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
 # which is already on PATH above.
 # --------------------------------------------------
 RUN dotnet tool install --global docfx --version 2.81.0 \
-    && dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.5.12
+    && dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.6.0
 
 # --------------------------------------------------
 # Python: one venv for docs, tests, packaging, and lint.
@@ -169,11 +171,23 @@ RUN cargo install cargo-binstall --version 1.26.2 --locked \
     && install_tool flamegraph@0.6.15
 
 # --------------------------------------------------
+# Repository SDK pin. Copied only so that the check
+# below resolves global.json exactly as the repository
+# does. The build context must be the repository root
+# (see the build command in the header).
+# --------------------------------------------------
+COPY global.json /opt/mocassin-sdk-pin/global.json
+
+# --------------------------------------------------
 # Verification as the runtime user.
 # --------------------------------------------------
 RUN set -eux; \
     dotnet --version; \
     dotnet --list-sdks; \
+    test "$(dotnet --list-sdks | wc -l)" -eq 1; \
+    dotnet --list-sdks | grep -qE '^11\.0\.100 \['; \
+    ! dotnet --list-sdks | grep -qE '^10\.'; \
+    test "$(cd /opt/mocassin-sdk-pin && dotnet --version)" = "11.0.100"; \
     test "$(command -v dotnet)" = "$DOTNET_ROOT/dotnet"; \
     test -x "$HOME/.dotnet/tools/docfx"; \
     rustc --version; \

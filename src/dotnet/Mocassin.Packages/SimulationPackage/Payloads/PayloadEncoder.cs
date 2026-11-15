@@ -1,8 +1,9 @@
 // SPDX-License-Identifier: MIT
 
+using System.Buffers;
+using System.IO.Compression;
 using MessagePack;
 using Mocassin.Contracts.Packages;
-using ZstdSharp;
 
 namespace Mocassin.Packages.SimulationPackage.Payloads;
 
@@ -10,8 +11,10 @@ namespace Mocassin.Packages.SimulationPackage.Payloads;
 /// Encodes and decodes the <c>.msl</c> payloads as standard Zstd frames around MessagePack maps.
 /// </summary>
 /// <remarks>
-/// No dictionaries and no custom framing are used. Decoding rejects a frame whose declared or bounded
-/// decompressed size exceeds the configured guard before allocating the result.
+/// The in-box <see cref="ZstandardEncoder"/> has exactly one path: a one-shot encode at the authored Zstd quality
+/// with <c>SetSourceLength</c>, so the frame declares its exact decompressed size. No dictionary, checksum,
+/// long-distance matching, custom framing, or streaming path is used. Decoding rejects an empty payload, a
+/// non-positive guard, or a frame whose declared bound exceeds the guard before allocating the result.
 /// </remarks>
 internal sealed class PayloadEncoder
 {
@@ -29,7 +32,7 @@ internal sealed class PayloadEncoder
     /// <summary>
     /// Initializes an encoder.
     /// </summary>
-    /// <param name="compressionLevel">The Zstd level in 1..19.</param>
+    /// <param name="compressionLevel">The Zstd quality in 1..19.</param>
     /// <exception cref="ArgumentOutOfRangeException">The level is outside 1..19.</exception>
     public PayloadEncoder(int compressionLevel)
     {
@@ -91,8 +94,24 @@ internal sealed class PayloadEncoder
     {
         ArgumentNullException.ThrowIfNull(payload);
         var messagePack = MessagePackSerializer.Serialize(payload, serializerOptions);
-        using var compressor = new Compressor(compressionLevel);
-        return compressor.Wrap(messagePack).ToArray();
+        var options = new ZstandardCompressionOptions { Quality = compressionLevel };
+        using var encoder = new ZstandardEncoder(options);
+        encoder.SetSourceLength(messagePack.Length);
+        var destination = new byte[ZstandardEncoder.GetMaxCompressedLength(messagePack.Length)];
+        var status = encoder.Compress(
+            messagePack,
+            destination,
+            out int consumed,
+            out int written,
+            isFinalBlock: true);
+        if (status != OperationStatus.Done || consumed != messagePack.Length)
+        {
+            throw new InvalidOperationException(
+                $"The Zstandard encoder returned {status} after consuming {consumed} of " +
+                $"{messagePack.Length} bytes into a {destination.Length}-byte destination.");
+        }
+
+        return destination.AsSpan(0, written).ToArray();
     }
 
     private static TPayload Decode<TPayload>(
@@ -113,36 +132,34 @@ internal sealed class PayloadEncoder
                 "The decompressed-size guard must be positive.");
         }
 
-        using var decompressor = new Decompressor();
-        ulong declared;
-        try
+        if (!ZstandardDecoder.TryGetMaxDecompressedLength(payload, out long bound))
         {
-            declared = Decompressor.GetDecompressedSize(payload);
-        }
-        catch (ZstdException exception)
-        {
-            throw new InvalidDataException($"The {description} payload is not a valid Zstd frame.", exception);
+            throw new InvalidDataException($"The {description} payload is not a valid Zstd frame.");
         }
 
-        if (declared > (ulong)maxDecompressedBytes)
+        if (bound > maxDecompressedBytes)
         {
             throw new InvalidDataException(
-                $"The {description} payload declares {declared} decompressed bytes, above the {maxDecompressedBytes} guard.");
+                $"The {description} payload declares {bound} decompressed bytes, above the {maxDecompressedBytes} guard.");
         }
 
-        byte[] messagePack;
-        try
+        if (bound > Array.MaxLength)
         {
-            messagePack = decompressor.Unwrap(payload, (int)maxDecompressedBytes).ToArray();
+            throw new InvalidDataException(
+                $"The {description} payload declares {bound} decompressed bytes, above the maximum array length.");
         }
-        catch (ZstdException exception)
+
+        var destination = new byte[(int)bound];
+        if (!ZstandardDecoder.TryDecompress(payload, destination, out int written))
         {
-            throw new InvalidDataException($"The {description} payload is not a valid Zstd frame.", exception);
+            throw new InvalidDataException($"The {description} payload is not a valid Zstd frame.");
         }
 
         try
         {
-            return MessagePackSerializer.Deserialize<TPayload>(messagePack, serializerOptions);
+            return MessagePackSerializer.Deserialize<TPayload>(
+                destination.AsMemory(0, written),
+                serializerOptions);
         }
         catch (MessagePackSerializationException exception)
         {

@@ -24,7 +24,9 @@ mocassin/
 | `artifacts/docfx/` | DocFX | No |
 | `target/doc/` | `cargo doc` | No |
 | `contracts/generated/` | `tools/contracts/generate.py` | Yes; regenerate, never hand-edit |
-| `tests/contracts/api-baseline/net10.0/` | `tools/update-api-baseline.sh` | Yes; refresh after an intentional public API change |
+| `tests/contracts/api-baseline/net11.0/` | `tools/update-api-baseline.sh` | Yes; refresh after an intentional public API change |
+| `tests/contracts/packages/amend-1-net10/` | Captured with the pre-amendment `net10.0` writer | Yes; compatibility fixture, never regenerated |
+| `tests/contracts/packages/amend-1/` | Captured with the pre-amendment `ZstdSharp` codec | Yes; raw payloads and golden frames, bytes may be re-captured with a note |
 | `tests/contracts/**/*.mcs`, `*.msl`, `*.msr`, `*.log`, `Job*/` | Real writers | Yes; explicit `.gitignore` exceptions |
 
 `contracts/generated/schema/` holds one schema per format or report. `package-v1.schema.json` is the SQLite row

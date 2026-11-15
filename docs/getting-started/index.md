@@ -4,7 +4,7 @@
 
 | Tool | Version | Purpose |
 | --- | --- | --- |
-| .NET SDK | `10.0.403` | Libraries, CLI, Avalonia application, tests |
+| .NET SDK | `11.0.100` | Libraries, CLI, Avalonia application, tests |
 | Rust stable | `1.99.1` | Solver workspace |
 | Python | `3.11`–`3.13` | Python package, documentation, contract tooling |
 | Zensical | `0.0.74` | This documentation site |

@@ -13,7 +13,12 @@ Versioned cross-language fixtures for the formats defined in
 - `job-folder/` — a real solver job folder;
 - `events-*.jsonl` — machine-readable event streams;
 - `signature-vectors.json` — canonical projection bytes and SHA-256 digests;
-- `api-baseline/net10.0/` — checked-in assemblies for the `ApiCompat` gate.
+- `api-baseline/net11.0/` — checked-in assemblies for the `ApiCompat` gate.
+- `packages/amend-1-net10/` — a real `.msl` written by the unamended `net10.0` writer, its
+  `package-summary-v1` golden, and provenance; a compatibility fixture that is never regenerated.
+- `packages/amend-1/` — the pre-amendment codec goldens: raw payloads (`payloads/*.bin`), `ZstdSharp.Port`
+  frames at levels 3 and 9 (`golden/*.zst`), and `goldens.json`. Bytes are an observation and may be
+  re-captured with a recorded note; the level → `Quality` mapping does not change.
 
 The `.gitignore` contains explicit exceptions so `*.mcs`, `*.msl`, `*.msr`, `*.log`, and `Job*/` fixtures are
 tracked. Do not hand-author binary fixtures; regenerate them with the real writer and record the command and

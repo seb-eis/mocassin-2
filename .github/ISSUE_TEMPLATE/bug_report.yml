@@ -57,7 +57,7 @@ body:
     attributes:
       label: Environment
       description: OS, architecture, .NET/Rust/Python versions, and commit or tag.
-      placeholder: "Ubuntu 24.04 x86_64; .NET 10.0.403; Rust 1.99.1; commit abc1234"
+      placeholder: "Ubuntu 24.04 x86_64; .NET 11.0.100; Rust 1.99.1; commit abc1234"
     validations:
       required: true
   - type: checkboxes

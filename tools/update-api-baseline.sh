@@ -6,7 +6,7 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-DEST="$ROOT/tests/contracts/api-baseline/net10.0"
+DEST="$ROOT/tests/contracts/api-baseline/net11.0"
 PROJECTS_FILE="$ROOT/tools/api-projects.txt"
 
 if [[ ! -f "$PROJECTS_FILE" ]]; then
@@ -27,11 +27,11 @@ mkdir -p "$DEST"
 for project in "${PROJECTS[@]}"; do
   # Prefer the reference assembly: it carries the public surface without implementation
   # code or embedded data resources, keeping the checked-in baselines small.
-  reference="$ROOT/src/dotnet/$project/obj/Release/net10.0/ref/$project.dll"
+  reference="$ROOT/src/dotnet/$project/obj/Release/net11.0/ref/$project.dll"
   if [[ -f "$reference" ]]; then
     cp "$reference" "$DEST/$project.dll"
   else
-    cp "$ROOT/src/dotnet/$project/bin/Release/net10.0/$project.dll" "$DEST/$project.dll"
+    cp "$ROOT/src/dotnet/$project/bin/Release/net11.0/$project.dll" "$DEST/$project.dll"
   fi
 done
 

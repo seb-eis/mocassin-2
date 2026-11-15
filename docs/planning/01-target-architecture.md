@@ -248,7 +248,7 @@ The detailed file-sharing rules are in ADR 0011.
 
 | Concern | Choice | Rationale |
 | --- | --- | --- |
-| Runtime | .NET 10 LTS | Required target; modern C#, nullable, source generators, performance |
+| Runtime | .NET 11 (STS) | Required target; modern C#, nullable, source generators, performance |
 | GUI | Avalonia 12.x (pinned 12.1.6) | Current cross-platform XAML UI, MVVM friendly, active ecosystem |
 | MVVM | CommunityToolkit.Mvvm | Source-generated observable properties/commands, minimal ceremony |
 | Model editor layout | Master-detail table/list + type-specific editor; Step 24 layout spike | No paid grid or third-party grid dependency; final layout chosen from owner-reviewed POCs |
@@ -275,7 +275,7 @@ The detailed file-sharing rules are in ADR 0011.
 | 3D | Silk.NET + Avalonia native host (spike), abstraction layer | Cross-platform GPU, control over instancing/picking; fallback to OpenGL control |
 | Testing (.NET) | xUnit + FluentAssertions + FsCheck | Standard, property-based geometry tests |
 | Testing (Rust) | built-in + `proptest` + `criterion` + `insta` | Unit, property, benchmarks, snapshots |
-| CI | GitHub Actions matrix | Windows/Linux/macOS, .NET 10, stable Rust |
+| CI | GitHub Actions matrix | Windows/Linux/macOS, .NET 11, stable Rust |
 
 ### 6.1 Modern .NET/C# usage
 

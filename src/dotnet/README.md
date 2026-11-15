@@ -1,6 +1,6 @@
 # .NET solution
 
-The .NET 10 solution is rooted at [`Mocassin.slnx`](../../Mocassin.slnx). Projects live directly below this
+The .NET 11 solution is rooted at [`Mocassin.slnx`](../../Mocassin.slnx). Projects live directly below this
 directory:
 
 | Project | Responsibility |

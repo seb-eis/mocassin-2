@@ -1,13 +1,20 @@
 // SPDX-License-Identifier: MIT
 
+using System.IO.Compression;
 using MessagePack;
-using ZstdSharp;
 
 namespace Mocassin.Results.Packages.Internal;
 
 /// <summary>
 /// Read-only Zstd+MessagePack payload decoding with decompressed-size guards.
 /// </summary>
+/// <remarks>
+/// The decoder is driven by the frame header, so it reads both packages written by the in-box encoder and
+/// pre-amendment packages written by the former third-party codec. It rejects an empty payload, a
+/// non-positive guard,
+/// a malformed frame, or a declared bound above the guard before allocating the result. It returns the failure as
+/// an error message; <c>PackageVerifierEngine</c> maps it to <c>PKG004</c>.
+/// </remarks>
 internal static class PackagePayloadDecoder
 {
     private static readonly MessagePackSerializerOptions serializerOptions =
@@ -39,38 +46,36 @@ internal static class PackagePayloadDecoder
             return default;
         }
 
-        using var decompressor = new Decompressor();
-        ulong declared;
-        try
+        if (!ZstandardDecoder.TryGetMaxDecompressedLength(payload, out long bound))
         {
-            declared = Decompressor.GetDecompressedSize(payload);
-        }
-        catch (ZstdException exception)
-        {
-            error = $"The payload is not a valid Zstd frame: {exception.Message}";
+            error = "The payload is not a valid Zstd frame.";
             return default;
         }
 
-        if (declared > (ulong)maxDecompressedBytes)
+        if (bound > maxDecompressedBytes)
         {
-            error = $"The payload declares {declared} decompressed bytes, above the {maxDecompressedBytes} guard.";
+            error = $"The payload declares {bound} decompressed bytes, above the {maxDecompressedBytes} guard.";
             return default;
         }
 
-        byte[] messagePack;
-        try
+        if (bound > Array.MaxLength)
         {
-            messagePack = decompressor.Unwrap(payload, (int)maxDecompressedBytes).ToArray();
+            error = $"The payload declares {bound} decompressed bytes, above the maximum array length.";
+            return default;
         }
-        catch (ZstdException exception)
+
+        var destination = new byte[(int)bound];
+        if (!ZstandardDecoder.TryDecompress(payload, destination, out int written))
         {
-            error = $"The payload is not a valid Zstd frame: {exception.Message}";
+            error = "The payload is not a valid Zstd frame.";
             return default;
         }
 
         try
         {
-            return MessagePackSerializer.Deserialize<TPayload>(messagePack, serializerOptions);
+            return MessagePackSerializer.Deserialize<TPayload>(
+                destination.AsMemory(0, written),
+                serializerOptions);
         }
         catch (MessagePackSerializationException exception)
         {

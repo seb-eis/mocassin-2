@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+using System.Buffers;
+using System.IO.Compression;
 using Microsoft.Data.Sqlite;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Contracts.Packages;
@@ -8,7 +10,6 @@ using Mocassin.Packages.Jobs;
 using Mocassin.Packages.Parameterization;
 using Mocassin.Packages.SimulationPackage;
 using MessagePack;
-using ZstdSharp;
 
 namespace Mocassin.Results.Tests.Packages.TestSupport;
 
@@ -95,16 +96,34 @@ internal static class PackageTestSupport
     public static byte[] Encode<TPayload>(TPayload payload)
     {
         var messagePack = MessagePackSerializer.Serialize(payload);
-        using var compressor = new Compressor(3);
-        return compressor.Wrap(messagePack).ToArray();
+        var options = new ZstandardCompressionOptions { Quality = 3 };
+        using var encoder = new ZstandardEncoder(options);
+        encoder.SetSourceLength(messagePack.Length);
+        var destination = new byte[ZstandardEncoder.GetMaxCompressedLength(messagePack.Length)];
+        if (encoder.Compress(messagePack, destination, out _, out int written, isFinalBlock: true) !=
+            OperationStatus.Done)
+        {
+            throw new InvalidOperationException("The test-support payload encoder failed.");
+        }
+
+        return destination.AsSpan(0, written).ToArray();
     }
 
     /// <summary>Decodes a model payload for a controlled mutation.</summary>
     public static ModelPayload DecodeModel(byte[] payload)
     {
-        using var decompressor = new Decompressor();
-        var messagePack = decompressor.Unwrap(payload, 512 * 1024 * 1024).ToArray();
-        return MessagePackSerializer.Deserialize<ModelPayload>(messagePack);
+        if (!ZstandardDecoder.TryGetMaxDecompressedLength(payload, out long bound))
+        {
+            throw new InvalidDataException("The test-support model payload is not a valid Zstd frame.");
+        }
+
+        var destination = new byte[(int)bound];
+        if (!ZstandardDecoder.TryDecompress(payload, destination, out int written))
+        {
+            throw new InvalidDataException("The test-support model payload cannot be decompressed.");
+        }
+
+        return MessagePackSerializer.Deserialize<ModelPayload>(destination.AsMemory(0, written));
     }
 
     /// <summary>Reads a scalar from a read-only package.</summary>

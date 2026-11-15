@@ -24,7 +24,7 @@ public sealed class JobTemplatePersistenceTests
     {
         var project = CreateProject(CreateTemplate());
 
-        var root = JsonDocument.Parse(ProjectCanonicalizer.ToCanonicalJson(project)).RootElement;
+        var root = JsonElement.Parse(ProjectCanonicalizer.ToCanonicalJson(project));
         var template = root.GetProperty("jobTemplates")[0];
         var collection = template.GetProperty("collections")[0];
 
@@ -44,8 +44,8 @@ public sealed class JobTemplatePersistenceTests
                 .Select(static doping => Guid.Parse(doping.GetProperty("dopingId").GetString()!)));
 
         var empty = CreateProject(new JobTemplate(JobTemplateId.New(), "Empty"));
-        var emptyTemplate = JsonDocument.Parse(ProjectCanonicalizer.ToCanonicalJson(empty))
-            .RootElement.GetProperty("jobTemplates")[0];
+        var emptyTemplate = JsonElement.Parse(ProjectCanonicalizer.ToCanonicalJson(empty))
+            .GetProperty("jobTemplates")[0];
         Assert.False(emptyTemplate.TryGetProperty("collections", out _));
     }
 
@@ -93,8 +93,8 @@ public sealed class JobTemplatePersistenceTests
         {
             Extensions =
             [
-                new JobExtension("a", JsonDocument.Parse("{\"c\":30,\"d\":40}").RootElement.Clone()),
-                new JobExtension("z", JsonDocument.Parse("{\"a\":1,\"b\":2}").RootElement.Clone()),
+                new JobExtension("a", JsonElement.Parse("{\"c\":30,\"d\":40}").Clone()),
+                new JobExtension("z", JsonElement.Parse("{\"a\":1,\"b\":2}").Clone()),
             ],
         };
         var changed = project with
@@ -123,7 +123,7 @@ public sealed class JobTemplatePersistenceTests
             [
                 new JobExtension(
                     "big",
-                    JsonDocument.Parse("{\"value\":9007199254740993,\"huge\":1e400}").RootElement.Clone()),
+                    JsonElement.Parse("{\"value\":9007199254740993,\"huge\":1e400}").Clone()),
             ],
         };
         var changed = project with
@@ -182,10 +182,10 @@ public sealed class JobTemplatePersistenceTests
             0.02);
         var firstExtension = new JobExtension(
             "z",
-            JsonDocument.Parse("{\"b\":2,\"a\":1.0}").RootElement.Clone());
+            JsonElement.Parse("{\"b\":2,\"a\":1.0}").Clone());
         var secondExtension = new JobExtension(
             "a",
-            JsonDocument.Parse("{\"d\":4,\"c\":3}").RootElement.Clone());
+            JsonElement.Parse("{\"d\":4,\"c\":3}").Clone());
         var optimizers = new[]
         {
             new SelectionOptimizer(CellSiteId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e83")), ParticleId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5e84"))),

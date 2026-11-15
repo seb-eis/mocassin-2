@@ -10,7 +10,6 @@
     <PackageReference Include="Microsoft.CodeAnalysis.PublicApiAnalyzers" PrivateAssets="all" />
     <PackageReference Include="MessagePack" />
     <PackageReference Include="Microsoft.Data.Sqlite" />
-    <PackageReference Include="ZstdSharp.Port" />
     <AdditionalFiles Include="PublicAPI.Shipped.txt" />
     <AdditionalFiles Include="PublicAPI.Unshipped.txt" />
   </ItemGroup>

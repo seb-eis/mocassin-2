@@ -72,21 +72,27 @@ Required for Avalonia, screenshot tests, and the 3D viewer. Included in
 
 | Tool | Status | Needed for | Notes |
 | --- | --- | --- | --- |
-| .NET SDK 10.0.x | Required | Steps 00+ | Installed by the MOCASSIN image; pin `10.0.403` in `global.json`. |
+| .NET SDK 11.0.x | Required | Steps 00+ | Installed by the MOCASSIN image (`11.0.100` only); pin `11.0.100` in `global.json` with `rollForward: latestPatch`. |
 | `dotnet format` | Required | Steps 00+ | Built into the installed SDK. |
 | DocFX 2.81.0 | Required | Step 00 docs job, Step 30 | **~300 MB installed.** Install as a global tool; add `~/.dotnet/tools` to `PATH`. |
-| `dotnet-reportgenerator-globaltool` 5.5.12 | Recommended | Step 29 | Coverage report aggregation. |
+| `dotnet-reportgenerator-globaltool` 5.6.0 | Recommended | Step 29 | Coverage report aggregation; 5.6.0 is the first release with a `tools/net11.0/any` asset. |
 | `dotnet-counters`, `dotnet-trace`, `dotnet-dump` | Optional | Step 29 | .NET runtime diagnostics; `perf` remains the primary profiler. |
 | Avalonia, CommunityToolkit.Mvvm, LiveCharts2, Silk.NET | Project-local | Steps 23–28 | NuGet packages, restored per repo. |
-| MessagePack, ZstdSharp, Microsoft.Data.Sqlite | Project-local | Steps 11, 18, 20 | NuGet packages. |
+| MessagePack, Microsoft.Data.Sqlite | Project-local | Steps 11, 18, 20 | NuGet packages. |
 | xUnit, FsCheck, FluentAssertions | Project-local | Steps 00+ | Test packages. |
 | `System.Numerics.Tensors` | Project-local | Step 20 | Vectorized evaluations. |
 | `Microsoft.CodeAnalysis.PublicApiAnalyzers` | Project-local | Steps 00, 31 | Public API analyzer package. |
-| `Microsoft.DotNet.ApiCompat.Tool` | Required | Steps 00, 31 | Dotnet tool for the public-API compatibility gate; declare it in `.config/dotnet-tools.json`. |
+| `Microsoft.DotNet.ApiCompat.Tool` 11.0.100 | Required | Steps 00, 31 | Dotnet tool for the public-API compatibility gate; declare it in `.config/dotnet-tools.json`. The 11.0.100 package ships a `tools/net10.0/any` asset with `rollForward: Major`, so it runs on the .NET 11 runtime. |
 | Serilog | Project-local | Steps 23–28 | Application logging. |
 
 **Note:** `dotnet tool install --global` writes shims to `~/.dotnet/tools`. The MOCASSIN image adds that
 directory to `PATH`.
+
+**Native Zstandard licensing.** The in-box `System.IO.Compression.Zstandard*` API is part of the MIT-licensed
+.NET runtime. The native zstd implementation that the runtime wraps is **BSD-3-Clause**, and the runtime's own
+third-party notices carry it. The repository ships framework-dependent assemblies and does not redistribute the
+runtime, so `NOTICE.md` is unchanged. A self-contained, single-file, or NativeAOT artifact (Step 31) must carry
+the runtime's third-party notices, including the BSD-3-Clause zstd notice.
 
 ## 5. Rust
 
@@ -212,6 +218,7 @@ xvfb-run -a glxinfo -B
 
 Plus:
 
+- `dotnet --list-sdks` shows only `11.0.100`; `dotnet --version` resolves `11.0.100` from `global.json`.
 - `dotnet tool list --global` shows DocFX and ReportGenerator.
 - `~/.dotnet/tools` is on `PATH`.
 - The venv at `/home/node/.venvs/mocassin` imports `zensical`, `mkdocstrings`, and the Python handler.
