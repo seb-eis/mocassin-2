@@ -34,6 +34,7 @@ internal static class PackageFixtureBuilder
     private static readonly JsonSerializerOptions jsonOptions = new()
     {
         WriteIndented = true,
+        NewLine = "\n",
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 

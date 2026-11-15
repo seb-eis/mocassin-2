@@ -10,7 +10,7 @@ namespace Mocassin.Results.Packages.Internal;
 /// </summary>
 internal static class PackageSummaryBuilder
 {
-    private static readonly JsonSerializerOptions options = new() { WriteIndented = true };
+    private static readonly JsonSerializerOptions options = new() { WriteIndented = true, NewLine = "\n" };
 
     /// <summary>Builds the canonical summary document.</summary>
     /// <exception cref="InvalidDataException">A required payload cannot be decoded.</exception>

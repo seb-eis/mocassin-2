@@ -34,6 +34,7 @@ public static class SimulationPackageBudget
     private static readonly JsonSerializerOptions jsonOptions = new()
     {
         WriteIndented = true,
+        NewLine = "\n",
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 

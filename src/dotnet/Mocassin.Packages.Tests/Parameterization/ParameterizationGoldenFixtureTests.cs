@@ -23,6 +23,7 @@ public sealed class ParameterizationGoldenFixtureTests
     private static readonly JsonSerializerOptions jsonOptions = new()
     {
         WriteIndented = true,
+        NewLine = "\n",
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 
