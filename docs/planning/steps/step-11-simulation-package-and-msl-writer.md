@@ -21,7 +21,7 @@ read-only inspection/verification library for the build CLI.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `eb8513d` |
-| 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
+| 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `9b754af` |
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Pending | — | — | — |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Pending | — | — | — |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Pending | — | — | — |
@@ -78,7 +78,7 @@ per feature.
 #### Feature 2 — Package manifest and schema
 
 - **Branch:** `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema`
-- **Squash commit:** recorded in the follow-up status commit.
+- **Squash commit:** `9b754af` (`step-11: finalize the package payload manifest and schema`).
 - **Local gates:** `./tools/verify.sh contracts` exit 0 (contract artifacts current at 19 files, model 5 /
   parameterization 4 / lattice 2 projection fixtures, process consistency, 45 tool tests, SPDX 545 files,
   secrets, cargo-deny); `./tools/verify.sh dotnet` exit 0 (all solution tests including 382 Packages tests);
