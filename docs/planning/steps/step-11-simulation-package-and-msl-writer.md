@@ -24,7 +24,7 @@ read-only inspection/verification library for the build CLI.
 | 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `9b754af` |
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `c0d8d64` |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `bdafaa4` |
-| 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
+| 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `4fe6225` |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Pending | — | — | — |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Pending | — | — | — |
 
@@ -191,7 +191,7 @@ per feature.
 #### Feature 5 — Job and lattice payload encoding
 
 - **Branch:** `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding`
-- **Squash commit:** recorded in the follow-up status commit.
+- **Squash commit:** `4fe6225` (`step-11: encode the generated lattices and expanded jobs`).
 - **Local gates:** `./tools/verify.sh all --require` exit 0 — .NET build 0 warnings and all solution tests
   (414 Packages, 685 Core, 223 Symmetry, 96 Compilation, 37 Contracts, 17 Cli, 1 Results, 1 App,
   1 Architecture); NuGet licence policy OK (58 packages); ApiCompat clean after refreshing the
