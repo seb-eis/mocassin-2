@@ -81,9 +81,9 @@ does not spawn a reviewer directly. The spawner must not be the reviewer.
 6. If the verdict is `Changes required`, the planning agent and step agent update the design docs directly, the
    step agent adds the resolutions and marks the review `Re-review required`, and a fresh planning auditor
    re-reviews the new commit. The new round is appended; earlier rounds are not overwritten.
-7. On `Ready for implementation`, the human owner approves the start. The approval request includes the
-   cumulative approval report in section 11, covering every round and finding. The step branch is created from
-   the reviewed `main` commit.
+7. On `Ready for implementation`, the human owner approves the start. The orchestrator presents the verdict and
+   the feature list; the cumulative approval report is for a merge, tag, or Blocker/Major waiver, not for this
+   gate. The step branch is created from the reviewed `main` commit.
 8. The post-implementation audit in `docs/planning/audits/` remains mandatory and separate.
 
 ## 5. What the review must cover
@@ -178,24 +178,25 @@ earlier round.
 
 ## 11. Approval report
 
-When a review verdict is presented to the human owner, the requesting agent must include the cumulative approval
-report required by [`AGENTS.md` §3.12](../../../AGENTS.md). It must cover every review round, every finding and its
-resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Major gate statement. Reporting only
-the latest round or only open findings is not acceptable. The record's `Approval summary` section is the durable
-source for that report.
+When a merge, a tag, or a Blocker/Major waiver is presented to the human owner, the requesting agent must include
+the cumulative approval report required by [`AGENTS.md` §3.12](../../../AGENTS.md). A verdict acceptance on its
+own does not need it. The report must cover every review round, every finding and its resolution, accepted notes
+and waivers, residual risk, and the no-Blocker/no-Major gate statement. Reporting only the latest round or only
+open findings is not acceptable. The record's `Approval summary` section is the durable source for that report.
 
 ## 12. Cross-cutting phase reviews
 
-After the last step of each phase is merged and tagged, the phase closes with three repository-wide reviews:
+After the last step of each phase is merged and tagged, the phase closes with one combined repository-wide
+review with three sections:
 
 - **policies and planning** — agent instructions, workflows, CI, code structure, process records, phase status;
 - **architecture and design status** — architecture, contracts, design status, cross-step interfaces, and
   original-design fidelity (intended corrections, ported original strengths, regressions);
 - **documentation status** — coverage, accuracy, navigation, API docs, publication boundary.
 
-The policies and planning review starts first; the architecture and design, and documentation reviews may
-then run in parallel. The next phase's first step design review may not start until all three verdicts are
-accepted by the human owner, or a review is explicitly waived with a recorded rationale.
+The owner may ask for three separate reviews when a phase is unusually risky; that is an explicit choice. The
+next phase's first step design review may not start until the combined verdict is accepted by the human owner, or
+the review is explicitly waived with a recorded rationale.
 
 The architecture and design status review must explicitly answer whether the phase made the corrections to the
 original that it intended, ported the good/clever original design aspects, and introduced a regression. The
@@ -204,21 +205,21 @@ regression, a missing intended correction, or a lost original strength is a find
 
 ### 12.1 Numbering
 
-Review IDs are globally sequential and are never reused. Each phase gets three new IDs:
+Review IDs are globally sequential and are never reused. From Phase C, each phase gets one combined ID:
 
 | Phase | Steps | Reviews |
 | --- | --- | --- |
-| B. Model definition | 03–07 | `XC-01` policies and planning, `XC-02` architecture and design, `XC-03` documentation |
-| C. Compilation and build | 08–12 | `XC-04`, `XC-05`, `XC-06` |
-| D. Solver | 13–19 | `XC-07`, `XC-08`, `XC-09` |
-| E. Results | 20–22 | `XC-10`, `XC-11`, `XC-12` |
-| F. GUI | 23–28 | `XC-13`, `XC-14`, `XC-15` |
-| G. Release and documentation | 29–31 | `XC-16`, `XC-17`, `XC-18` |
+| B. Model definition | 03–07 | `XC-01`, `XC-02`, `XC-03` (historical, three separate) |
+| C. Compilation and build | 08–12 | `XC-04` (combined) |
+| D. Solver | 13–19 | `XC-05` |
+| E. Results | 20–22 | `XC-06` |
+| F. GUI | 23–28 | `XC-07` |
+| G. Release and documentation | 29–31 | `XC-08` |
 
 Phase A is waived because the process was introduced after it completed. Run the lightweight
-[drift checks](../../development/drift-checks.md) monthly and before each phase boundary. Create cross-cutting
-review records at the phase boundary; the Phase B records are the current checkpoint's already-scoped requests.
-The registry and records are in [`cross-cutting/`](cross-cutting/README.md).
+[drift checks](../../development/drift-checks.md) at each milestone, or monthly when there is none; event-driven
+checks still apply. Create cross-cutting review records at the phase boundary; the Phase B records are
+historical. The registry and records are in [`cross-cutting/`](cross-cutting/README.md).
 
 ### 12.2 Orchestration
 

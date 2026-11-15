@@ -33,6 +33,13 @@ REQUIRED_FILES = (
     "tools/check_closeout_evidence.py",
     "tools/check_docs_links.py",
     "tools/verify.sh",
+    "opencode.json",
+    ".opencode/agents/orchestrator.md",
+    ".opencode/agents/planner.md",
+    ".opencode/agents/implementor.md",
+    ".opencode/agents/reviewer.md",
+    ".opencode/commands/step-start.md",
+    ".opencode/commands/step-closeout.md",
 )
 
 REQUIRED_INTEGRATION = (
@@ -44,8 +51,8 @@ REQUIRED_INTEGRATION = (
     ("AGENTS.md", "step sizing"),
     ("docs/planning/status.md", "In audit"),
     ("docs/planning/status.md", "Drift checks"),
-    ("docs/planning/audits/step-audit-template.md", "Main SHA at freeze"),
-    ("docs/planning/audits/step-audit-template.md", "Merge-tree CI"),
+    ("docs/planning/audits/step-audit-template.md", "closeout evidence file"),
+    ("docs/planning/audits/step-audit-template.md", "merge candidate"),
     ("docs/planning/audits/step-audit-template.md", "Closeout evidence"),
     ("docs/planning/audits/step-audit-template.md", "Record state"),
     ("docs/planning/reviews/step-design-review-template.md", "Record state"),
@@ -54,6 +61,9 @@ REQUIRED_INTEGRATION = (
     ("docs/planning/reviews/cross-cutting/README.md", "drift checks"),
     ("docs/planning/04-roadmap.md", "split trigger"),
     ("docs/development/agent-workflow.md", "Changing the process"),
+    ("AGENTS.md", ".opencode/agents"),
+    ("docs/development/orchestration.md", ".opencode/agents"),
+    ("docs/development/orchestration.md", "default_agent"),
 )
 
 FORBIDDEN_TERMS = (

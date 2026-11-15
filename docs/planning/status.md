@@ -128,11 +128,11 @@ Writer is next; its design review has not yet been requested.
 
 ## Cross-cutting phase checkpoints
 
-Each phase closes with three repository-wide reviews: policies and planning, architecture and design status,
-and documentation status. The policies and planning review starts first; architecture/design and documentation
-may run in parallel. The architecture and design review also checks original-design fidelity: intended
-corrections, ported original strengths, and regressions. The next phase's first step design review waits for
-all three verdicts, unless the human owner waives one with a recorded reason.
+Each phase closes with a repository-wide review. From Phase C that is one combined review with policies,
+architecture/design, and documentation sections; the Phase B checkpoint used three separate reviews. The
+architecture and design section also checks original-design fidelity: intended corrections, ported original
+strengths, and regressions. The next phase's first step design review waits for the combined verdict, unless the
+human owner waives the review with a recorded reason.
 
 These reviews do not create step branches or tags and do not replace step audits or Step 29 parity validation.
 
@@ -140,15 +140,16 @@ These reviews do not create step branches or tags and do not replace step audits
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
 | B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12; merged `e48d9ca`, main CI `43311424938` green |
-| C. Compilation and build | 08–12 | `XC-04`/`XC-05`/`XC-06` | Planned |
-| D. Solver | 13–19 | `XC-07`/`XC-08`/`XC-09` | Planned |
-| E. Results | 20–22 | `XC-10`/`XC-11`/`XC-12` | Planned |
-| F. GUI | 23–28 | `XC-13`/`XC-14`/`XC-15` | Planned |
-| G. Release and documentation | 29–31 | `XC-16`/`XC-17`/`XC-18` | Planned |
+| C. Compilation and build | 08–12 | `XC-04` combined | Planned |
+| D. Solver | 13–19 | `XC-05` combined | Planned |
+| E. Results | 20–22 | `XC-06` combined | Planned |
+| F. GUI | 23–28 | `XC-07` combined | Planned |
+| G. Release and documentation | 29–31 | `XC-08` combined | Planned |
 
 ## Drift checks
 
-Run a lightweight drift check monthly, at each milestone, and before every phase boundary. Use
+Run a lightweight drift check at each milestone (or monthly when there is no milestone). Event-driven checks
+after a process, CI, or architecture change still apply. Use
 [`docs/planning/drift-checks/_template.md`](drift-checks/_template.md) and
 [`docs/development/drift-checks.md`](../development/drift-checks.md). A drift check is not a gate; it is an
 early-warning signal for the next cross-cutting review.

@@ -53,7 +53,7 @@ The orchestrator must not:
 - spawn a generic general-purpose agent in place of a defined role agent;
 - pass its own conversation history, assumptions, or preferred outcome to a reviewer or auditor.
 
-The orchestrator does not spawn the human owner. It presents the cumulative approval report from
+For a merge, a tag, or a Blocker/Major waiver the orchestrator presents the cumulative approval report from
 [`AGENTS.md` §3.12](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) and asks for the owner's
 decision. After the owner approves a merge or tag, the step agent or the owner performs it; the orchestrator
 checks that the result is recorded.
@@ -130,3 +130,24 @@ before an explicit orchestrator role existed. That was the deviation that motiva
 closeout record must note it as a process deviation in the step page. No retrospective reimplementation is
 required, and the feature is not re-audited as if the new rule had applied; the Step 10 audit covers the commits
 as they exist. Future steps follow this page from their first feature.
+
+## 9. Harness binding
+
+The repository binds the four roles as OpenCode agents in `.opencode/agents/` and sets the orchestrator as the
+`default_agent` in `opencode.json`. `.opencode/commands/step-start.md` and `step-closeout.md` are thin routers.
+
+The binding enforces only what a permission list can enforce:
+
+| Rule | Enforced how |
+| --- | --- |
+| The orchestrator cannot edit any file | `edit "*"` denied |
+| The orchestrator can spawn only the planner, implementor, and reviewer | `subagent "*"` denied, then the three allowed |
+| The reviewer can edit only `step-*.md` and `xc-*.md` records, and cannot spawn helpers | `edit "*"` denied, then the record paths allowed; `subagent "*"` denied |
+| The planner cannot edit `src/`, `tests/`, `tools/`, or `contracts/` | those `edit` paths denied |
+
+Everything else is procedural. Shell is unrestricted, so an agent can still write through a command; pushes,
+merges, and tags are not restricted and rely on owner approval and branch protection; the reviewer's assigned-record
+rule is not enforceable; and the orchestrator cannot make even a handoff-card or status edit, so those are routed
+to the step agent. A human can select another agent with the agent picker (shift+tab in the container) and bypass the binding
+entirely. Another harness ports
+the same four prompts; the binding is an adapter, not a second rule set.

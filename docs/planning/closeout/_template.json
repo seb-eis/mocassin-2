@@ -11,6 +11,8 @@
     "run_id": "",
     "head_sha": ""
   },
+  "platform_ci": "not run",
+  "tag": "",
   "notes": [
     "Replace every zero SHA and placeholder before running tools/check_closeout_evidence.py."
   ]

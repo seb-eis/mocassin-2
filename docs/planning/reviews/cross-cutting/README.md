@@ -3,16 +3,17 @@
 This directory records the cross-cutting quality gate that runs after the steps of each phase are complete.
 It is a repository-wide review, not a per-step design review or per-step audit.
 
-Each phase checkpoint has three independent reviews:
+From Phase C, each phase checkpoint uses **one combined review** with three sections. The owner may ask for three
+separate reviews when the phase is unusually risky; that choice is recorded in the checkpoint.
 
-| Review | Focus | Order |
+| Section | Focus | Order |
 | --- | --- | --- |
 | **Policies and planning** | Agent instructions, workflows, CI, code structure, process records, phase status | Starts first |
 | **Architecture and design status** | Architecture, contracts, design status, cross-step interfaces, and original-design fidelity (intended corrections, ported strengths, regressions) | After the policies review |
 | **Documentation status** | Coverage, accuracy, navigation, API docs, publication boundary | After the policies review, in parallel with architecture and design |
 
-The next phase's first step design review may not start until all three reviews are `Passed` or the human
-owner accepts `Passed with notes`, or the owner explicitly waives a review with a recorded rationale.
+The next phase's first step design review may not start until the combined review is `Passed` or the human
+owner accepts `Passed with notes`, or the owner explicitly waives the review with a recorded rationale.
 
 The **Architecture and design status** review also evaluates original-design fidelity: whether the intended
 corrections were made, whether the good/clever original design aspects were ported, and whether a regression
@@ -20,17 +21,17 @@ over the original was introduced (section 4).
 
 ## 1. Phase checkpoints and numbering
 
-Review IDs are globally sequential and are never reused. Each phase gets three new IDs.
+Review IDs are globally sequential and are never reused. From Phase C, each phase gets one combined ID.
 
 | Phase | Steps | Reviews | Status |
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
-| B. Model definition | 03–07 | `XC-01` policies and planning, `XC-02` architecture and design, `XC-03` documentation | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12; merged `e48d9ca`, main CI `43311424938` green |
-| C. Compilation and build | 08–12 | `XC-04` policies and planning, `XC-05` architecture and design, `XC-06` documentation | Planned |
-| D. Solver | 13–19 | `XC-07` policies and planning, `XC-08` architecture and design, `XC-09` documentation | Planned |
-| E. Results | 20–22 | `XC-10` policies and planning, `XC-11` architecture and design, `XC-12` documentation | Planned |
-| F. GUI | 23–28 | `XC-13` policies and planning, `XC-14` architecture and design, `XC-15` documentation | Planned |
-| G. Release and documentation | 29–31 | `XC-16` policies and planning, `XC-17` architecture and design, `XC-18` documentation | Planned |
+| B. Model definition | 03–07 | `XC-01` policies and planning, `XC-02` architecture and design, `XC-03` documentation (historical) | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12; merged `e48d9ca`, main CI `43311424938` green |
+| C. Compilation and build | 08–12 | `XC-04` combined | Planned |
+| D. Solver | 13–19 | `XC-05` combined | Planned |
+| E. Results | 20–22 | `XC-06` combined | Planned |
+| F. GUI | 23–28 | `XC-07` combined | Planned |
+| G. Release and documentation | 29–31 | `XC-08` combined | Planned |
 
 The first checkpoint records:
 
@@ -52,7 +53,7 @@ The first checkpoint records:
 | Human owner | Approves the checklists, final verdicts, and phase gate |
 
 The orchestrator must not be the reviewer, must not fix findings, and must not edit reviewer text. It may
-coordinate all three reviews in a checkpoint; the three reviewers must be separate fresh contexts.
+coordinate the combined review; when the owner asks for three separate reviews, each gets a fresh context.
 
 ## 3. Orchestration
 
@@ -128,8 +129,8 @@ neighbor links, and incremental lattice-energy updates.
 - Create cross-cutting review records at the phase boundary, not for distant phases. The Phase B records are
   the current checkpoint's already-scoped requests and are retained as the transition exception.
 - Freeze the checkpoint after the last step of the phase is merged and tagged.
-- Run the policies and planning review first; then run the architecture and design, and documentation reviews in parallel.
-- The next phase's first step design review may not start until all three verdicts are accepted by the human
+- Run the combined review in one pass; the policies, architecture, and documentation sections follow in that order.
+- The next phase's first step design review may not start until the combined verdict is accepted by the human
   owner.
 - The architecture and design review must record explicit answers to the three original-design fidelity
   questions, or state why a question is not applicable.

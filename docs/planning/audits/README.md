@@ -57,11 +57,8 @@ an auditor directly. The spawner must not be the auditor.
    the only step-branch CI run.
 3. The step agent creates `docs/planning/audits/step-NN.md` on demand from the current template:
    - record state: `Ready for audit`
-   - exact audited commit
-   - closeout CI run ID and full `head_sha`
-   - `main` SHA at freeze
-   - closeout evidence path
-   - platform CI status: not run, or the Windows/macOS run when platform-specific code required it
+   - a link to the closeout evidence file, which holds the audited commit, closeout CI run ID and `head_sha`,
+     `main` SHA at freeze, merge candidate, merge-tree CI, platform CI, and tag
    - scope and acceptance criteria
    - known limitations
 4. Fill `docs/planning/closeout/step-NN.json` from `_template.json` and run
@@ -99,7 +96,7 @@ an auditor directly. The spawner must not be the auditor.
     in the record.
 12. On `Passed`, the human owner gives merge approval. The approval request includes the cumulative approval
     report in section 10, covering every audit and review round, finding, resolution, note, waiver, and residual
-    risk.
+    risk. A verdict acceptance on its own does not need it.
 13. Merge the step branch into `main` with `--no-ff`, wait for the automatic `main` CI run, tag `step-NN` only
     when it is green, push, and delete the step branch.
 

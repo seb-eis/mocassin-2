@@ -136,8 +136,8 @@ Stop before:
 
 ## 5. Evidence and approval report
 
-A review verdict, audit verdict, merge, or tag is not ready for approval until the requesting agent can
-report the full picture, including every earlier round:
+A merge, a tag, or a Blocker/Major waiver is not ready for approval until the requesting agent can report the
+full picture, including every earlier round. A verdict acceptance uses the record's round table instead:
 
 ```text
 Decision requested:

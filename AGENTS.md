@@ -270,6 +270,8 @@ Rules:
 - Do not create tags automatically in CI, and do not tag feature branches or step branches.
 - Step and milestone tags are internal history markers, not package versions. Release builds may use
   `git describe --tags --match 'v*'` for versioning.
+- `step-NN`, `milestone-mN`, and release tags are required. `planning-complete` and `development-ready` are
+  optional one-time markers; do not create them retroactively.
 
 Tag message template:
 
@@ -337,6 +339,13 @@ Reviewer rules:
   `docs: record step-NN audit Passed [skip ci]`.
 - Optional scratch notes may live under `.tmp/`. They are not gate artifacts and are never committed.
 
+**Harness binding.** The four roles are bound as OpenCode agents in `.opencode/agents/`, and `opencode.json` makes
+the orchestrator the default primary agent. `.opencode/commands/step-start.md` and `step-closeout.md` are the two
+entry points. The binding enforces four rules only: the orchestrator cannot edit and can spawn only the three
+roles; the reviewer can edit only `step-*.md`/`xc-*.md` records and cannot spawn; the planner cannot edit code
+areas. Shell, pushes, merges, and tags are procedural, so owner approval and branch protection remain the real
+controls. See [`docs/development/orchestration.md`](docs/development/orchestration.md) §9 for the full statement.
+
 ### 3.9 Pre-implementation design review
 
 Every new step must pass an independent design review before the step branch is created or implementation
@@ -367,8 +376,8 @@ planning auditor; the human owner approves the verdict and start gate.
    step agent adds the resolutions and marks the review `Re-review required`, and the orchestrator spawns a
    fresh planning auditor for the new commit. The new round is appended; earlier rounds are not overwritten.
 7. Only a `Ready for implementation` verdict permits the human owner to approve starting the step. The
-   orchestrator presents the approval request with the cumulative approval report in section 3.12, covering
-   every review round, finding, resolution, accepted note, waiver, and residual risk, but does not approve it.
+   orchestrator presents the verdict and the feature list and stops for approval; it does not approve them. The
+   cumulative report in section 3.12 is for a merge, a tag, or a Blocker/Major waiver, not for this start gate.
    The step branch is then created from the reviewed `main` commit.
 8. Step 00 and Step 01 are recorded as `Waived — process introduced after completion`; no retrospective
    review is required.
@@ -389,10 +398,10 @@ approves the merge and tag.
    parity matrix, and feature log, merges current `main`, runs `tools/verify.sh all --require`, and gets the
    single closeout CI run green.
 2. The step agent creates `docs/planning/audits/step-NN.md` on demand from
-   [`docs/planning/audits/step-audit-template.md`](docs/planning/audits/step-audit-template.md), records the
-   exact audited commit, the closeout CI run and `head_sha`, the `main` SHA at freeze, and the closeout
-   evidence path, and sets the status to `Ready for audit`. Do not pre-seed audit records for steps that have
-   not started.
+   [`docs/planning/audits/step-audit-template.md`](docs/planning/audits/step-audit-template.md), links the
+   closeout evidence file (which holds the audited commit, closeout CI run and `head_sha`, `main` SHA at freeze,
+   and merge candidate), and sets the status to `Ready for audit`. Do not pre-seed audit records for steps that
+   have not started.
 3. The step branch is frozen at the audited commit. If `main` moves after the freeze, apply the merge-tree rule
    in section 3.4 and the closeout evidence must show that the audited commit, closeout CI, and merge candidate
    remain consistent. After a passing audit, two documentation-only commits may
@@ -460,10 +469,11 @@ Amendment statuses and the amendment index are in
 
 ### 3.12 Approval report
 
-Before the human owner approves any review verdict, audit verdict, waiver, merge, or tag, the agent requesting
-approval must present a **cumulative approval summary** covering the entire history. Feature squash merges are
-not approval requests; their evidence is recorded in the step page. The summary goes in the
-approval request itself; linking the durable record is not sufficient.
+Before the human owner approves a merge, a tag, or a waiver of a Blocker or Major finding, the agent requesting
+approval must present a **cumulative approval summary** covering the entire history. Accepting a design-review
+or audit verdict on its own does not need the summary: the record's round table is the reference. Feature squash
+merges are not approval requests; their evidence is recorded in the step page. The summary goes in the approval
+request itself; linking the durable record is not sufficient.
 
 The summary must contain:
 
@@ -522,24 +532,25 @@ RID-specific packages, path/case/locking logic, line-ending or encoding-sensitiv
 
 ### 3.14 Cross-cutting phase reviews
 
-After the last step of each phase is merged and tagged, the phase closes with three repository-wide reviews:
+After the last step of each phase is merged and tagged, the phase closes with **one combined repository-wide
+review** with three sections:
 
 1. **Policies and planning** — agent instructions, workflows, CI, code structure, process records, and
-   phase status. This review starts first.
+   phase status.
 2. **Architecture and design status** — architecture, contracts, design status, cross-step interfaces, and
    original-design fidelity: the intended corrections to the original, the good/clever original design aspects
    that were ported, and any regression over the original.
 3. **Documentation status** — coverage, accuracy, navigation, API docs, and the publication boundary.
 
-The architecture and design, and documentation reviews may run in parallel after the policies and planning
-review starts.
+The owner may still ask for the three separate reviews when a phase is unusually risky; that is an explicit
+choice, recorded in the checkpoint.
 
 The architecture and design review must explicitly answer the original-design fidelity questions and record
 concrete evidence. A missing intended correction, a lost original strength, or an unrecorded regression is a
 finding.
 
-This checkpoint is a **quality gate**. The next phase's first step design review may not start until all three
-verdicts are `Passed` or the human owner accepts `Passed with notes`, or the owner waives a review with a
+This checkpoint is a **quality gate**. The next phase's first step design review may not start until the
+combined verdict is `Passed` or the human owner accepts `Passed with notes`, or the owner waives the review with a
 recorded rationale.
 
 1. Freeze the checkpoint after the phase's last step is merged and tagged. Record the checkpoint commit in each
@@ -557,15 +568,16 @@ recorded rationale.
    unless the same reviewer stayed read-only and outside the remediation.
 5. The human owner approves each final verdict and the phase gate.
 
-Run the lightweight [drift checks](docs/development/drift-checks.md) monthly and before each phase boundary; they
-catch stale instructions, status drift, and broken links before the checkpoint. Create cross-cutting review
-records at the phase boundary, not for distant phases; the Phase B records are the current checkpoint's
-already-scoped requests.
+Run the lightweight [drift checks](docs/development/drift-checks.md) at each milestone, or monthly when the
+project has no milestone; event-driven checks after a process, CI, architecture, or status change still apply.
+They catch stale instructions, status drift, and broken links before the checkpoint. Create cross-cutting review
+records at the phase boundary, not for distant phases; the Phase B records are historical.
 
 Review records live under [`docs/planning/reviews/cross-cutting/`](docs/planning/reviews/cross-cutting/).
-Review IDs are globally sequential (`XC-NN`) and are never reused. Each phase gets three new IDs; the registry
-and status values are in the cross-cutting README. Phase A is waived because the process was introduced after
-it completed.
+Review IDs are globally sequential (`XC-NN`) and are never reused. From Phase C, each phase gets **one** combined
+review ID; the three-review set stays available when the owner asks for it. The registry and status values are in
+the cross-cutting README. Phase A is waived because the process was introduced after it completed, and the Phase
+B records are historical.
 
 Findings are remediated through maintenance branches, ADRs, amendments, or step-page updates. Never move an
 existing tag. A cross-cutting review never creates a step branch or step tag, and it does not replace step
@@ -585,12 +597,17 @@ Each rule has one normative home. Summaries link to it; do not copy it into a se
 | Agent security | `docs/development/agent-security.md` |
 | Incident and rollback | `docs/development/incident-and-rollback.md` |
 | CI cost and gates | §3.13 and `docs/planning/ci-policy.md` |
+| OpenCode agent and command binding | `docs/development/orchestration.md` §9 |
 | Testing and quality | `docs/planning/03-quality-strategy.md` |
 | Code structure | `docs/development/code-structure.md` |
 | Closeout evidence | `docs/planning/closeout/README.md` |
 
 Design reviews use `Changes required`; audits and cross-cutting reviews use `Fixes required` for the equivalent
 failure state. Each family keeps its own vocabulary; the dashboard columns use the family's terms.
+
+**Effective from Step 11.** The combined phase review, the reduced approval-report scope, the canonical
+closeout evidence, the optional planning tags, and the reduced scheduled drift check apply from Step 11 onwards.
+Records, pages, evidence files, and tags for Steps 00–10 are historical and are not rewritten.
 
 Changing the process:
 
@@ -636,6 +653,8 @@ Current repository:
 ```text
 mocassin/
 ├── AGENTS.md
+├── opencode.json           # default agent: the orchestrator
+├── .opencode/              # four role agents and the two step commands
 ├── README.md
 ├── LICENSE                 # MIT
 ├── NOTICE.md               # original GPL attribution + MIT boundary
@@ -1085,7 +1104,7 @@ from the original and the plan’s “Original reference” sections.
 - [ ] Code follows the structure policy in section 8; `tools/verify.sh structure` passes.
 - [ ] Public API changes update `PublicAPI.Unshipped.txt` and, when intentional, the ApiCompat baseline;
       `./tools/verify.sh api` passes.
-- [ ] Any approval request includes the cumulative approval report in section 3.12: every round, every finding
+- [ ] A merge, tag, or Blocker/Major waiver request includes the cumulative approval report in section 3.12: every round, every finding
       and resolution, accepted notes and waivers, residual risk, and the no-Blocker/no-Major gate statement.
 - [ ] The CI cost policy in section 3.13 is followed: local validation, one closeout run, one main run, no
       per-feature CI, and platform runs only when required.
