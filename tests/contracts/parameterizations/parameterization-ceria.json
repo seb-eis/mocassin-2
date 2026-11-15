@@ -3,8 +3,8 @@
   "id": "parameterization-ceria",
   "source": "samples/parameterizations/ceria-parameters.mocprj",
   "templateName": "Ceria parameters",
-  "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
-  "signatureHex": "cac3b231e667164fa7dfd4daa7b326dbc5e23bde17fe30873f775f7f77975042",
+  "modelSignature": "a9e0a45aec33294202b59fdb17c82335121d292ca96f579c479b85898cd0d113",
+  "signatureHex": "8f86a7f92b55e0d045a381576f6f19016391815b93c0867040d82d0f65f0dbff",
   "pairTables": [
     [
       0,

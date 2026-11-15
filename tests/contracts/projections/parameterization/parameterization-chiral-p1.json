@@ -2,7 +2,7 @@
   "fixtureFormat": "canonical-projection-v1",
   "id": "parameterization-chiral-p1",
   "descriptor": "parameterization-v1",
-  "modelSignature": "6d49e4d2ce5bdc4ed1f5383ce8bd07666938c1e8ab0b981520d53b7386c404f0",
-  "signatureHex": "ac5b381e8acaf8489f30d95b687b42637bc50719f1a7f23006735336523f474b",
-  "projectionSha256": "a958f0b4731611bab0d63b2b839eb1c026d6266c61e429da7de4d982cac0c6ce"
+  "modelSignature": "ca44ca89b6a0238b20d5c8ce9ee7556b8acd3547f4adf2c631963d3ee30afc92",
+  "signatureHex": "51263129e0faf8fe9e58ceba0d05cbb1d241a436e012551a4bf1ef032260f1e8",
+  "projectionSha256": "6b1f068be210b20bad9267efe2f509976deaf75cae119773d87dfe7d8acea254"
 }

@@ -23,7 +23,7 @@ read-only inspection/verification library for the build CLI.
 | 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `eb8513d` |
 | 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `9b754af` |
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `c0d8d64` |
-| 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Pending | — | — | — |
+| 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Pending | — | — | — |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Pending | — | — | — |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Pending | — | — | — |
@@ -139,6 +139,54 @@ per feature.
   the required Windows closeout run are recorded above.
 - **Parity:** no parity-matrix row is completed by this schema/publication feature; the package writer rows stay
   `Planned` until the encoders, fixtures, and CLI integration land.
+
+#### Feature 4 — Model payload encoding
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding`
+- **Squash commit:** recorded in the follow-up status commit.
+- **Local gates:** `./tools/verify.sh all --require` exit 0 after the format fixes — .NET build 0 warnings and all
+  solution tests (407 Packages tests, 96 Compilation, 223 Symmetry, 37 Contracts, 683 Core, 17 Cli, 1 Results,
+  1 App, 1 Architecture); NuGet licence policy OK (**58** packages); ApiCompat clean after refreshing the
+  `Mocassin.Symmetry` and `Mocassin.Contracts` baselines; Rust fmt/clippy/test; Python pytest and package build;
+  docs strict build; contract artifacts current, model 5 / parameterization 4 / lattice 2 projection fixtures,
+  process consistency, 45 tool tests, SPDX, secrets, cargo-deny.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Diff summary:** added the additive `PairInteractionPreview.EquivalentImages` field and made
+  `PairCompilationStage` emit one `CompiledPairLink` per `PairShell.EquivalentImages` element (representative
+  included), so the existing four-field model-signature link projection signs every runtime image; added the
+  real `ParameterizedModel` → `ModelPayload` mappers (`ModelPayloadMapper`, `StructurePayloadMapper`,
+  `EnergyPayloadMapper`, `TransitionPayloadMapper`, `SimulationPayloadMapper`, `FieldDirectionConverter`),
+  the Zstd+MessagePack `PayloadEncoder` with a decompressed-size guard, and the `WriteModelAsync` write-time
+  parameterization re-encode; added `MessagePack` and `ZstdSharp.Port` references to `Mocassin.Packages`;
+  added 8 model-payload tests (round-trip, signature re-encode, one-to-one per-image links, multi-image
+  expansion, tracker order, determinism, decode guard, field direction) and a writer integration test; refreshed
+  `PublicAPI.Unshipped.txt` and the `Mocassin.Symmetry`/`Mocassin.Contracts` ApiCompat baselines; updated the
+  Step 09 golden-signature note.
+- **Regenerated vectors (old → new):**
+  - `model-barium-zirconate`: `c0fd836e…` → `5e62f9dd…`.
+  - `parameterization-barium-zirconate`: `a7f6ebd9…` → `828a5494…` (`modelSignature` → `5e62f9dd…`).
+  - `parameterization-ceria`: `cac3b231…` → `8f86a7f9…` (`modelSignature` → `a9e0a45a…`).
+  - `parameterization-chiral-p1`: `ac5b381e…` → `51263129…` (`modelSignature` `6d49e4d2…` → `ca44ca89…`).
+  - `lattice-ceria-1x1x1`: `0d8327cd…` → `55f9e076…` (`modelSignature` → `a9e0a45a…`).
+  - `lattice-ceria-2x2x2`: `2b132c6c…` → `d8bd1660…` (`modelSignature` → `a9e0a45a…`).
+  - Sample/template `modelSignature` values: ceria parameters `3cee4758…` → `a9e0a45a…`; barium-zirconate
+    parameters `c0fd836e…` → `5e62f9dd…`; `project-chiral-p1.mocprj` regenerated to `ca44ca89…`.
+  - `model-ceria-kmc`, `model-ceria-mmc`, `model-vehicle5`, `model-interstitialcy5`, and their parameterization
+    vectors are unchanged because those compiled models have no multi-image pair shells.
+  - Commands: `MOCASSIN_UPDATE_GOLDENS=1 dotnet test` for `ProjectionFixtureTests`,
+    `ParameterizationGoldenFixtureTests`, `ParameterizationChiralFixtureTests`, and
+    `LatticeProjectionFixtureTests`; then the manifest vector metadata was refreshed from the generated fixture
+    metadata and `python tools/contracts/generate.py` regenerated `signature-vectors.json` and
+    `contracts/generated/fixtures/descriptors.json`.
+- **Licence result (n-5):** `ZstdSharp.Port/0.8.8` is **MIT**; `MessagePack/3.1.12` is **MIT**; the transitive
+  `SQLitePCLRaw.*`/`Microsoft.Data.Sqlite` edges remain MIT/Apache-2.0. `check_nuget_licenses.py`:
+  `NuGet licence policy OK (58 packages)`.
+- **Known limitations / follow-ups:** `WriteJobAsync` and the job/lattice payload encoders remain feature 5; the
+  Step 14 runtime `cell + offset` expansion test is the cross-step acceptance test. The model signature is an
+  identity string and is not re-encoded from the payload; the writer checks the decoded parameterization
+  projection and the compiled-model identity instead.
+- **Parity:** no parity-matrix row is completed by the model payload feature; the package writer rows stay
+  `Planned` until job/lattice encoding, verification, fixtures, and CLI integration land.
 
 ## Goal
 
@@ -679,9 +727,9 @@ Two options, for the human owner's start-gate decision:
 - [x] Add the Contracts package DTOs, payload constants, `LatticeSignatureV1`, and `PKG` descriptors.
 - [x] Finalize `signatures.lattice` and add `formats.package.payloads`; extend the generator and regenerate.
 - [x] Implement schema creation, pragmas, `application_id`/`user_version`, and `schema_info`.
-- [ ] Implement the model payload mapper and the write-time parameterization re-encode.
-- [ ] Persist the environment pair-link `offset` and the variable-length `tracker_order`, with the writer
-      contract assertions and Step 14 expansion tests.
+- [x] Implement the model payload mapper and the write-time parameterization re-encode.
+- [x] Persist the environment pair-link `offset` and the variable-length `tracker_order`, with the writer
+      contract assertions; the Step 14 consumer expansion is its own cross-step acceptance test.
 - [ ] Implement the lattice payload/signature and content-addressed dedup.
 - [ ] Implement the job payload mapper, `SolverJobFlags` composition, Cartesian field conversion, optimizer
       mapping, extension JSON, and payload-derived columns.
@@ -698,7 +746,7 @@ Two options, for the human owner's start-gate decision:
       (the new `JobExtension.ToCanonicalJson`), `Mocassin.Symmetry` (the new
       `PairInteractionPreview.EquivalentImages`), `Mocassin.Compilation`, `Mocassin.Packages`, and
       `Mocassin.Results`.
-- [ ] Record the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges.
+- [x] Record the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges.
 - [ ] Write the documentation named below and update parity/status.
 
 ## Acceptance criteria

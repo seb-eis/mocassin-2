@@ -166,18 +166,15 @@ Mocassin.Contracts.Packages.JumpDirectionPayload
 Mocassin.Contracts.Packages.JumpDirectionPayload.<Clone>$() -> Mocassin.Contracts.Packages.JumpDirectionPayload!
 Mocassin.Contracts.Packages.JumpDirectionPayload.CollectionId.get -> uint
 Mocassin.Contracts.Packages.JumpDirectionPayload.CollectionId.init -> void
-Mocassin.Contracts.Packages.JumpDirectionPayload.Deconstruct(out string! ObjectId, out uint PositionId, out uint CollectionId, out System.Collections.Immutable.ImmutableArray<int> Path, out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> Movement, out System.Collections.Immutable.ImmutableArray<double> PathVector, out double Length, out bool IsInverse) -> void
 Mocassin.Contracts.Packages.JumpDirectionPayload.Equals(Mocassin.Contracts.Packages.JumpDirectionPayload? other) -> bool
 Mocassin.Contracts.Packages.JumpDirectionPayload.IsInverse.get -> bool
 Mocassin.Contracts.Packages.JumpDirectionPayload.IsInverse.init -> void
-Mocassin.Contracts.Packages.JumpDirectionPayload.JumpDirectionPayload(string! ObjectId, uint PositionId, uint CollectionId, System.Collections.Immutable.ImmutableArray<int> Path, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> Movement, System.Collections.Immutable.ImmutableArray<double> PathVector, double Length, bool IsInverse) -> void
 Mocassin.Contracts.Packages.JumpDirectionPayload.Length.get -> double
 Mocassin.Contracts.Packages.JumpDirectionPayload.Length.init -> void
 Mocassin.Contracts.Packages.JumpDirectionPayload.Movement.get -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>>
 Mocassin.Contracts.Packages.JumpDirectionPayload.Movement.init -> void
 Mocassin.Contracts.Packages.JumpDirectionPayload.ObjectId.get -> string!
 Mocassin.Contracts.Packages.JumpDirectionPayload.ObjectId.init -> void
-Mocassin.Contracts.Packages.JumpDirectionPayload.Path.get -> System.Collections.Immutable.ImmutableArray<int>
 Mocassin.Contracts.Packages.JumpDirectionPayload.Path.init -> void
 Mocassin.Contracts.Packages.JumpDirectionPayload.PathVector.get -> System.Collections.Immutable.ImmutableArray<double>
 Mocassin.Contracts.Packages.JumpDirectionPayload.PathVector.init -> void
@@ -543,3 +540,6 @@ static Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.Compute(s
 static Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.ComputeProjection(string! modelSignature, Mocassin.Contracts.Parameterization.ParameterizationValues! values) -> byte[]!
 static Mocassin.Contracts.Parameterization.ParameterizationValues.operator !=(Mocassin.Contracts.Parameterization.ParameterizationValues? left, Mocassin.Contracts.Parameterization.ParameterizationValues? right) -> bool
 static Mocassin.Contracts.Parameterization.ParameterizationValues.operator ==(Mocassin.Contracts.Parameterization.ParameterizationValues? left, Mocassin.Contracts.Parameterization.ParameterizationValues? right) -> bool
+Mocassin.Contracts.Packages.JumpDirectionPayload.Path.get -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<int>>
+Mocassin.Contracts.Packages.JumpDirectionPayload.Deconstruct(out string! ObjectId, out uint PositionId, out uint CollectionId, out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<int>> Path, out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> Movement, out System.Collections.Immutable.ImmutableArray<double> PathVector, out double Length, out bool IsInverse) -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.JumpDirectionPayload(string! ObjectId, uint PositionId, uint CollectionId, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<int>> Path, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> Movement, System.Collections.Immutable.ImmutableArray<double> PathVector, double Length, bool IsInverse) -> void

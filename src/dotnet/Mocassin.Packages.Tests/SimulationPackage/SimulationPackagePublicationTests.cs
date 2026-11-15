@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: MIT
 
+using Microsoft.Data.Sqlite;
+using Mocassin.Contracts.Parameterization;
+using Mocassin.Packages.Parameterization;
 using Mocassin.Packages.SimulationPackage;
 using Mocassin.Packages.SimulationPackage.Internal;
+using Mocassin.Packages.SimulationPackage.Payloads;
+using Mocassin.Packages.Tests.Parameterization;
 using Mocassin.Packages.Tests.SimulationPackage.TestSupport;
 
 namespace Mocassin.Packages.Tests.SimulationPackage;
@@ -210,6 +215,46 @@ public sealed class SimulationPackagePublicationTests
         Assert.True(File.Exists(result.Path));
         Assert.Equal(1, result.JobCount);
         Assert.Empty(temp.TemporaryFiles());
+    }
+
+    [Fact]
+    public async Task WriteModelAsyncStoresAReencodableModelPayload()
+    {
+        var (project, compiled) = ParameterizationTestSupport.LoadAndCompile(ParameterizationTestSupport.Ceria);
+        var applied = new ParameterizationService().Apply(project, compiled, template: null).Model!;
+        using var temp = new TemporaryDirectory();
+        var path = temp.Combine("ceria.msl");
+
+        var writer = SimulationPackageWriter.Create(
+            SimulationPackageTestSupport.Request(path),
+            new PackageBuildOptions(),
+            new PackageFileSystem());
+        await using (writer)
+        {
+            await writer.WriteModelAsync(applied);
+            await writer.WriteJobRowAsync(
+                SimulationPackageTestSupport.JobRow(modelSignature: applied.Signature));
+            var result = await writer.CompleteAsync();
+            Assert.Equal(path, result.Path);
+            Assert.Equal(1, result.ModelCount);
+        }
+
+        await using var connection = new SqliteConnection(
+            new SqliteConnectionStringBuilder
+            {
+                DataSource = path,
+                Mode = SqliteOpenMode.ReadOnly,
+                Pooling = false,
+            }.ToString());
+        await connection.OpenAsync();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT payload FROM models;";
+        var bytes = (byte[])(await command.ExecuteScalarAsync())!;
+        var decoded = PayloadEncoder.DecodeModel(bytes);
+        Assert.Equal(applied.Signature, decoded.Signature);
+        Assert.Equal(applied.ModelSignature, decoded.ModelSignature);
+        var values = ModelPayloadMapper.ToParameterizationValues(decoded);
+        Assert.Equal(applied.Signature, ParameterizationSignatureV1.Compute(decoded.ModelSignature, values));
     }
 
     [Fact]

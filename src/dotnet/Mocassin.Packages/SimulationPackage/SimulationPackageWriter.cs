@@ -6,8 +6,10 @@ using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.Data.Sqlite;
 using Mocassin.Contracts.Packages;
+using Mocassin.Contracts.Parameterization;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Packages.Parameterization;
+using Mocassin.Packages.SimulationPackage.Payloads;
 using Mocassin.Packages.SimulationPackage.Internal;
 
 namespace Mocassin.Packages.SimulationPackage;
@@ -31,6 +33,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
     private readonly string temporaryPath;
     private readonly string directory;
     private readonly string appVersion;
+    private readonly PayloadEncoder payloadEncoder;
     private readonly HashSet<string> latticeSignatures = new(StringComparer.Ordinal);
     private SqliteConnection? connection;
     private SqliteTransaction? jobTransaction;
@@ -47,7 +50,8 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         IPackageFileSystem fileSystem,
         string targetPath,
         string temporaryPath,
-        SqliteConnection connection)
+        SqliteConnection connection,
+        PayloadEncoder payloadEncoder)
     {
         this.request = request;
         this.options = options;
@@ -57,6 +61,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         directory = Path.GetDirectoryName(targetPath)!;
         this.connection = connection;
         appVersion = ResolveAppVersion();
+        this.payloadEncoder = payloadEncoder;
     }
 
     /// <summary>
@@ -119,7 +124,14 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
             throw;
         }
 
-        return new SimulationPackageWriter(request, options, fileSystem, targetPath, temporaryPath, connection);
+        return new SimulationPackageWriter(
+            request,
+            options,
+            fileSystem,
+            targetPath,
+            temporaryPath,
+            connection,
+            new PayloadEncoder(options.CompressionLevel));
     }
 
     /// <inheritdoc />
@@ -128,13 +140,44 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
     /// through <see cref="WriteModelRowAsync"/>.
     /// </remarks>
     /// <exception cref="NotSupportedException">The model payload encoder is not part of this feature yet.</exception>
-    public Task WriteModelAsync(ParameterizedModel model, CancellationToken cancellationToken = default)
+    public async Task WriteModelAsync(ParameterizedModel model, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(model);
         cancellationToken.ThrowIfCancellationRequested();
         ThrowIfUnavailable();
-        throw new NotSupportedException(
-            "The model payload encoder is implemented in Step 11 feature 4.");
+
+        var payload = ModelPayloadMapper.Map(model);
+        var bytes = payloadEncoder.EncodeModel(payload);
+        var decoded = PayloadEncoder.DecodeModel(bytes);
+        if (!string.Equals(decoded.Signature, model.Signature, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "The decoded model payload signature does not match the parameterized model.");
+        }
+
+        if (!string.Equals(decoded.ModelSignature, model.ModelSignature, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "The decoded model payload does not carry the compiled-model signature.");
+        }
+
+        var values = ModelPayloadMapper.ToParameterizationValues(decoded);
+        var reencoded = ParameterizationSignatureV1.Compute(decoded.ModelSignature, values);
+        if (!string.Equals(reencoded, model.Signature, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException(
+                "The parameterization signature re-encoded from the decoded payload does not match the model.");
+        }
+
+        await WriteModelRowAsync(
+            new PackageModelRow(
+                model.Signature,
+                (int)decoded.FormatVersion,
+                bytes,
+                decoded.SymmetryContractVersion,
+                decoded.SpaceGroupDataVersion,
+                decoded.SpaceGroupDataSha256),
+            cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />

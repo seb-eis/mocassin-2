@@ -60,7 +60,9 @@ public sealed record JumpCollectionPayload(
 /// <param name="ObjectId">The stable compiled direction identity.</param>
 /// <param name="PositionId">The representative start canonical P1 index.</param>
 /// <param name="CollectionId">The owning collection index.</param>
-/// <param name="Path">The relative node encodings <c>[cellA, cellB, cellC, P]</c>; node zero is the start.</param>
+/// <param name="Path">
+/// The per-node relative encodings <c>[cellA, cellB, cellC, P]</c>; node zero is the start.
+/// </param>
 /// <param name="Movement">The per-node fractional movement vectors.</param>
 /// <param name="PathVector">The Cartesian net path vector in ångström.</param>
 /// <param name="Length">The magnitude of <see cref="PathVector"/> in ångström.</param>
@@ -70,7 +72,7 @@ public sealed record JumpDirectionPayload(
     [property: Key("object_id")] string ObjectId,
     [property: Key("position_id")] uint PositionId,
     [property: Key("collection_id")] uint CollectionId,
-    [property: Key("path")] ImmutableArray<int> Path,
+    [property: Key("path")] ImmutableArray<ImmutableArray<int>> Path,
     [property: Key("movement")] ImmutableArray<ImmutableArray<double>> Movement,
     [property: Key("path_vector")] ImmutableArray<double> PathVector,
     [property: Key("length")] double Length,

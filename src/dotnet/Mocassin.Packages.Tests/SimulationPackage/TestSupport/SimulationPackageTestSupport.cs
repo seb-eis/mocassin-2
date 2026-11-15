@@ -42,13 +42,14 @@ internal static class SimulationPackageTestSupport
         int jobId = 1,
         string latticeSignature = LatticeSignature,
         int temperatureK = 900,
-        uint flags = 0x40)
+        uint flags = 0x40,
+        string? modelSignature = null)
     {
         var seed = new byte[32];
         Array.Fill(seed, (byte)0x5a);
         return new PackageJobRow(
             jobId,
-            ModelSignature,
+            modelSignature ?? ModelSignature,
             LatticeRow(latticeSignature),
             "kmc",
             "collection",

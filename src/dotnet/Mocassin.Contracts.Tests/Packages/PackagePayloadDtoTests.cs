@@ -63,7 +63,7 @@ public sealed class PackagePayloadDtoTests
                 "direction",
                 1,
                 0,
-                ImmutableArray.Create(0, 0, 0, 1),
+                ImmutableArray.Create(ImmutableArray.Create(0, 0, 0, 1)),
                 ImmutableArray.Create(ImmutableArray.Create(0.0, 0.0, 0.0)),
                 ImmutableArray.Create(0.0, 0.0, 1.0),
                 1.0,

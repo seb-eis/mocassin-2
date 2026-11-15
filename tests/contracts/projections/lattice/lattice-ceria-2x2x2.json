@@ -2,7 +2,7 @@
   "fixtureFormat": "canonical-projection-v1",
   "id": "lattice-ceria-2x2x2",
   "descriptor": "lattice-v1",
-  "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
-  "signatureHex": "2b132c6cb08a0ce0a08830a1ee465227fc99507e84995a394b94de1be0e8c2db",
-  "projectionSha256": "d9617a224104a70c8652ae49aaa0ced7487b2156864f4f07ea8b925a0f1cf4f8"
+  "modelSignature": "a9e0a45aec33294202b59fdb17c82335121d292ca96f579c479b85898cd0d113",
+  "signatureHex": "d8bd1660b6f4f3bd75c543e0471f0aabdfaf38707b6ec85a890efdc0dd45dd9c",
+  "projectionSha256": "5719bbc816d08a2c565dabc13f9549c851288ce46f3885e00a25fffc88d59295"
 }
