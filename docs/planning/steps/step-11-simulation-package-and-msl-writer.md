@@ -22,7 +22,7 @@ read-only inspection/verification library for the build CLI.
 | --- | --- | --- | --- | --- | --- |
 | 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `eb8513d` |
 | 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `9b754af` |
-| 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
+| 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `c0d8d64` |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Pending | — | — | — |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Pending | — | — | — |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Pending | — | — | — |
@@ -104,7 +104,7 @@ per feature.
 #### Feature 3 — SQLite schema and publication barrier
 
 - **Branch:** `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication`
-- **Squash commit:** recorded in the follow-up status commit.
+- **Squash commit:** `c0d8d64` (`step-11: add the SQLite schema and publication barrier`).
 - **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests including **399** Packages tests,
   format clean); `./tools/verify.sh structure` exit 0; `./tools/verify.sh api` exit 0 (NuGet licence policy OK
   for **57** packages, ApiCompat clean); `./tools/verify.sh contracts` exit 0 (19 artifacts current, projection
