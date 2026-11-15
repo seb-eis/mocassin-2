@@ -154,6 +154,8 @@ public static class ProjectValidator
             }
         }
 
+        bag.AddRange(JobTemplateValidator.Validate(project));
+
         foreach (var template in validBuildTemplates)
         {
             if (string.IsNullOrWhiteSpace(template.Name))

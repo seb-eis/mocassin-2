@@ -15,14 +15,14 @@ generation with charge compensation.
 - **Step tag:** —
 - **Audit:** Not requested
 - **Design review:** Ready for implementation at `c5454af050ccd3f1e02f892424ccd714c5d56f89` (round 5) — [record](../reviews/step-10.md); accepted by the human owner 2026-11-14
-- **Last updated:** 2026-11-14
+- **Last updated:** 2026-11-15
 
 ### Proposed feature list
 
 | # | Feature | Branch | Status |
 | --- | --- | --- | --- |
-| 1 | Job template model and persistence | `feature/step-10-job-templates/job-template-model` | Proposed |
-| 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | Proposed |
+| 1 | Job template model and persistence | `feature/step-10-job-templates/job-template-model` | Done |
+| 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | In progress |
 | 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | Proposed |
 | 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Proposed |
 | 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Proposed |
@@ -32,6 +32,49 @@ generation with charge compensation.
 
 The feature list is a design proposal. It is approved once by the human owner together with the design verdict; it does
 not create the step branch and does not mark the step `In progress`.
+
+### Feature log
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| `job-template-model` | `feature/step-10-job-templates/job-template-model` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` — reported green by the feature-1 agent | — | `c8d5269` |
+| `settings-inheritance-and-validation` | `feature/step-10-job-templates/settings-inheritance-and-validation` | In progress | See outcome below | — | — |
+
+Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
+job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
+project-job-templates fixture. No per-feature CI run was triggered.
+
+#### Feature 2 outcome and deviations
+
+`settings-inheritance-and-validation` adds the Core structural `JOB001`–`JOB020` validator, the nullable
+`JobSettingsValidator`, the Packages `ResolvedJobSettings`/`JobSettingsResolver`, and the optional
+`ValidationContext.CompiledModel`. Structural job errors now appear in `validate` without a compiled model.
+
+Local gates:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 677, Symmetry 223, Compilation 96,
+  Packages 226, Cli 7, App 1, Contracts 15, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; licence policy 51 packages, no vulnerable packages, ApiCompat compatible
+  (the `Mocassin.Core` and `Mocassin.Packages` baselines were refreshed).
+- `./tools/verify.sh contracts` — exit 0; 18 generated artifacts current, 5 model and 4 parameterization
+  projections OK, 274 space-group settings current, process consistency OK, 31 tool tests passed, SPDX 488
+  files, no secrets, cargo-deny OK.
+- `./tools/verify.sh docs` — exit 0; links OK, Zensical strict build clean, DocFX 0 warnings/0 errors,
+  rustdoc generated, site built.
+
+Recorded deviations and limitations:
+
+- `JOB004` currently checks only the `1..256` cell-size range. The compiled-bound total-position cap remains in
+  the Step 10 build stage, as designed.
+- `JOB015` validates each explicit override layer and its kind applicability. A structurally incomplete
+  inherited value is reported by the Packages resolver when it becomes effective; no compiled model exists in
+  `validate`.
+- A non-neutral base lattice remains a reported model property and is not diagnosed by this structural layer.
+  The `JOB012`/`JOB016` doping outcomes remain in later features.
+- The existing job-template persistence fixture is intentionally reference-only; the envelope round-trip tests
+  exclude `JOB` diagnostics for it, while the dedicated `JobTemplateValidatorTests` cover the structural codes.
+- No per-feature CI run was triggered.
 
 ## Goal
 

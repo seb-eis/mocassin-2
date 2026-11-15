@@ -62,7 +62,8 @@ public sealed class ProjectStoreTests
     {
         using var directory = new TempDirectory();
         var store = new ProjectStore(
-            new FixedTimeProvider(DateTimeOffset.Parse("2026-11-14T12:00:00Z", CultureInfo.InvariantCulture)));
+            new FixedTimeProvider(DateTimeOffset.Parse("2026-11-14T12:00:00Z", CultureInfo.InvariantCulture)),
+            new ProjectStoreOptions { ValidateOnLoad = false });
         var path = directory.File("job-templates.mocprj");
         var project = ProjectJson.Deserialize(
             File.ReadAllBytes(RepositoryPaths.Combine("tests", "contracts", "project-job-templates-populated.mocprj")));

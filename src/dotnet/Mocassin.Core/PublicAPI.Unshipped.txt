@@ -2275,3 +2275,27 @@ static Mocassin.Core.Model.Jobs.SelectionOptimizer.operator !=(Mocassin.Core.Mod
 static Mocassin.Core.Model.Jobs.SelectionOptimizer.operator ==(Mocassin.Core.Model.Jobs.SelectionOptimizer? left, Mocassin.Core.Model.Jobs.SelectionOptimizer? right) -> bool
 ~override Mocassin.Core.Ids.JobCollectionId.Equals(object obj) -> bool
 ~override Mocassin.Core.Ids.JobConfigId.Equals(object obj) -> bool
+Mocassin.Core.Diagnostics.JobDiagnosticCodes
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.DuplicateName = "JOB007" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.DuplicateReference = "JOB017" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.FractionMismatch = "JOB011" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidCellSize = "JOB004" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidCompensation = "JOB012" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidDopingFraction = "JOB005" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidExtension = "JOB018" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidJobCount = "JOB008" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidOptimizer = "JOB009" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidSettings = "JOB015" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.JobCountWarning = "JOB013" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.JobLimitExceeded = "JOB019" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.LargeSupercell = "JOB014" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.LimitExceeded = "JOB020" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.NoCollections = "JOB001" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.NoConfigs = "JOB003" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.NonNeutralLattice = "JOB016" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.UnknownDoping = "JOB006" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.UnknownSimulation = "JOB002" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.UnrealizedDoping = "JOB010" -> string!
+static Mocassin.Core.Diagnostics.JobDiagnosticCodes.HelpFor(string! code) -> string?
+Mocassin.Core.Model.Jobs.JobSettingsValidator
+static Mocassin.Core.Model.Jobs.JobSettingsValidator.Validate(Mocassin.Core.Model.Jobs.JobSettings? settings, Mocassin.Core.Model.Simulations.SimulationKind? kind, Mocassin.Core.Diagnostics.ModelPath! path, bool validateKindApplicability = true) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>

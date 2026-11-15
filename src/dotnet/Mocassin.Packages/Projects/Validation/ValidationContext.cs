@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
+using Mocassin.Compilation.Compiler;
 using Mocassin.Core.Project;
 
 namespace Mocassin.Packages.Projects.Validation;
@@ -12,8 +13,13 @@ namespace Mocassin.Packages.Projects.Validation;
 /// <param name="Options">The options of the current run.</param>
 /// <param name="Catalog">The diagnostic catalog used by the run.</param>
 /// <param name="PreviousStages">The results of the stages that already ran.</param>
+/// <param name="CompiledModel">
+/// The optional compiled model supplied by build orchestration. Structural <c>validate</c> leaves it
+/// <see langword="null"/>; build stages that need compiled data require it.
+/// </param>
 public sealed record ValidationContext(
     Project Project,
     ValidationOptions Options,
     DiagnosticCatalog Catalog,
-    ImmutableArray<ValidationStageResult> PreviousStages);
+    ImmutableArray<ValidationStageResult> PreviousStages,
+    CompiledModel? CompiledModel = null);

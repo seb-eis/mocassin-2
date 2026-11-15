@@ -123,6 +123,8 @@ Mocassin.Packages.Projects.Validation.ValidationContext.Catalog.get -> Mocassin.
 Mocassin.Packages.Projects.Validation.ValidationContext.Options.init -> void
 Mocassin.Packages.Projects.Validation.ValidationContext.Catalog.init -> void
 Mocassin.Packages.Projects.Validation.ValidationContext.PreviousStages.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!>
+Mocassin.Packages.Projects.Validation.ValidationContext.CompiledModel.get -> Mocassin.Compilation.Compiler.CompiledModel?
+Mocassin.Packages.Projects.Validation.ValidationContext.CompiledModel.init -> void
 Mocassin.Packages.Projects.Validation.ValidationStageResult.Status.get -> Mocassin.Packages.Projects.Validation.ValidationStageStatus
 Mocassin.Packages.Projects.Validation.ValidationStageResult.Stage.get -> Mocassin.Packages.Projects.Validation.ValidationStage
 Mocassin.Packages.Projects.Validation.ValidationStageResult.DiagnosticCount.get -> int
@@ -201,7 +203,7 @@ Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountB.get -> int
 Mocassin.Packages.Projects.Validation.ModelStatistics.EstimatedMemoryBytes.init -> void
 override Mocassin.Packages.Projects.Validation.ValidationResult.GetHashCode() -> int
 Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountA.init -> void
-Mocassin.Packages.Projects.Validation.ValidationContext.Deconstruct(out Mocassin.Core.Project.Project! Project, out Mocassin.Packages.Projects.Validation.ValidationOptions! Options, out Mocassin.Packages.Projects.Validation.DiagnosticCatalog! Catalog, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!> PreviousStages) -> void
+Mocassin.Packages.Projects.Validation.ValidationContext.Deconstruct(out Mocassin.Core.Project.Project! Project, out Mocassin.Packages.Projects.Validation.ValidationOptions! Options, out Mocassin.Packages.Projects.Validation.DiagnosticCatalog! Catalog, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!> PreviousStages, out Mocassin.Compilation.Compiler.CompiledModel? CompiledModel) -> void
 Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountB.init -> void
 override Mocassin.Packages.Projects.Validation.ValidationResult.Equals(object? obj) -> bool
 Mocassin.Packages.Projects.Validation.ModelStatistics.CellCountC.get -> int
@@ -236,7 +238,7 @@ Mocassin.Packages.Projects.Validation.IValidationStage.Validate(Mocassin.Package
 Mocassin.Packages.Projects.Validation.ValidationStageResult.ValidationStageResult(Mocassin.Packages.Projects.Validation.ValidationStage Stage, Mocassin.Packages.Projects.Validation.ValidationStageStatus Status, int DiagnosticCount, System.TimeSpan Elapsed) -> void
 Mocassin.Packages.Projects.Validation.DiagnosticSummary.DiagnosticSummary(int Errors, int Warnings, int Infos) -> void
 Mocassin.Packages.Projects.Validation.ValidationOptions.IncludeStatistics.get -> bool
-Mocassin.Packages.Projects.Validation.ValidationContext.ValidationContext(Mocassin.Core.Project.Project! Project, Mocassin.Packages.Projects.Validation.ValidationOptions! Options, Mocassin.Packages.Projects.Validation.DiagnosticCatalog! Catalog, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!> PreviousStages) -> void
+Mocassin.Packages.Projects.Validation.ValidationContext.ValidationContext(Mocassin.Core.Project.Project! Project, Mocassin.Packages.Projects.Validation.ValidationOptions! Options, Mocassin.Packages.Projects.Validation.DiagnosticCatalog! Catalog, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Validation.ValidationStageResult!> PreviousStages, Mocassin.Compilation.Compiler.CompiledModel? CompiledModel = null) -> void
 Mocassin.Packages.Projects.ProjectLoadResult.ProjectLoadResult(Mocassin.Core.Project.Project? project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> void
 Mocassin.Packages.Projects.ProjectLoadResult.ProjectLoadResult(Mocassin.Core.Project.Project? project, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics, Mocassin.Packages.Projects.ProjectLoadFailureKind failureKind) -> void
 Mocassin.Packages.Projects.Validation.ValidationOptions.IncludeStatistics.init -> void
@@ -619,3 +621,49 @@ static Mocassin.Packages.Parameterization.ParameterizationRebaseReport.operator 
 static Mocassin.Packages.Parameterization.ParameterizationRebaseReport.operator ==(Mocassin.Packages.Parameterization.ParameterizationRebaseReport? left, Mocassin.Packages.Parameterization.ParameterizationRebaseReport? right) -> bool
 static Mocassin.Packages.Parameterization.ParameterizationRebaseResult.operator !=(Mocassin.Packages.Parameterization.ParameterizationRebaseResult? left, Mocassin.Packages.Parameterization.ParameterizationRebaseResult? right) -> bool
 static Mocassin.Packages.Parameterization.ParameterizationRebaseResult.operator ==(Mocassin.Packages.Parameterization.ParameterizationRebaseResult? left, Mocassin.Packages.Parameterization.ParameterizationRebaseResult? right) -> bool
+Mocassin.Packages.Jobs.JobSettingsResolver
+Mocassin.Packages.Jobs.ResolvedJobSettings
+Mocassin.Packages.Jobs.ResolvedJobSettings.<Clone>$() -> Mocassin.Packages.Jobs.ResolvedJobSettings!
+Mocassin.Packages.Jobs.ResolvedJobSettings.BreakSampleIntervalMcsp.get -> long
+Mocassin.Packages.Jobs.ResolvedJobSettings.BreakSampleIntervalMcsp.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.BreakSampleLengthMcsp.get -> long
+Mocassin.Packages.Jobs.ResolvedJobSettings.BreakSampleLengthMcsp.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.BreakTolerance.get -> double
+Mocassin.Packages.Jobs.ResolvedJobSettings.BreakTolerance.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.Deconstruct(out double TemperatureK, out long TargetMcsp, out int WriteOutCount, out long? TimeLimitSeconds, out double? MinSuccessRate, out Mocassin.Core.Model.Simulations.ExecutionFlags Flags, out string? Instruction, out long PreRunMcsp, out double ElectricFieldModulusVm, out Mocassin.Core.Geometry.Fractional3 ElectricFieldDirection, out double? NormalizationEnergyEv, out double? MaxAttemptFrequencyHz, out double BreakTolerance, out long BreakSampleLengthMcsp, out long BreakSampleIntervalMcsp, out long ResultSampleMcsp, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobExtension!> Extensions) -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.ElectricFieldDirection.get -> Mocassin.Core.Geometry.Fractional3
+Mocassin.Packages.Jobs.ResolvedJobSettings.ElectricFieldDirection.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.ElectricFieldModulusVm.get -> double
+Mocassin.Packages.Jobs.ResolvedJobSettings.ElectricFieldModulusVm.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.Equals(Mocassin.Packages.Jobs.ResolvedJobSettings? other) -> bool
+Mocassin.Packages.Jobs.ResolvedJobSettings.Extensions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobExtension!>
+Mocassin.Packages.Jobs.ResolvedJobSettings.Extensions.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.Flags.get -> Mocassin.Core.Model.Simulations.ExecutionFlags
+Mocassin.Packages.Jobs.ResolvedJobSettings.Flags.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.Instruction.get -> string?
+Mocassin.Packages.Jobs.ResolvedJobSettings.Instruction.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.MaxAttemptFrequencyHz.get -> double?
+Mocassin.Packages.Jobs.ResolvedJobSettings.MaxAttemptFrequencyHz.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.MinSuccessRate.get -> double?
+Mocassin.Packages.Jobs.ResolvedJobSettings.MinSuccessRate.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.NormalizationEnergyEv.get -> double?
+Mocassin.Packages.Jobs.ResolvedJobSettings.NormalizationEnergyEv.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.PreRunMcsp.get -> long
+Mocassin.Packages.Jobs.ResolvedJobSettings.PreRunMcsp.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.ResolvedJobSettings(double TemperatureK, long TargetMcsp, int WriteOutCount, long? TimeLimitSeconds, double? MinSuccessRate, Mocassin.Core.Model.Simulations.ExecutionFlags Flags, string? Instruction, long PreRunMcsp, double ElectricFieldModulusVm, Mocassin.Core.Geometry.Fractional3 ElectricFieldDirection, double? NormalizationEnergyEv, double? MaxAttemptFrequencyHz, double BreakTolerance, long BreakSampleLengthMcsp, long BreakSampleIntervalMcsp, long ResultSampleMcsp, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobExtension!> Extensions) -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.ResultSampleMcsp.get -> long
+Mocassin.Packages.Jobs.ResolvedJobSettings.ResultSampleMcsp.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.TargetMcsp.get -> long
+Mocassin.Packages.Jobs.ResolvedJobSettings.TargetMcsp.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.TemperatureK.get -> double
+Mocassin.Packages.Jobs.ResolvedJobSettings.TemperatureK.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.TimeLimitSeconds.get -> long?
+Mocassin.Packages.Jobs.ResolvedJobSettings.TimeLimitSeconds.init -> void
+Mocassin.Packages.Jobs.ResolvedJobSettings.WriteOutCount.get -> int
+Mocassin.Packages.Jobs.ResolvedJobSettings.WriteOutCount.init -> void
+override Mocassin.Packages.Jobs.ResolvedJobSettings.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.ResolvedJobSettings.GetHashCode() -> int
+override Mocassin.Packages.Jobs.ResolvedJobSettings.ToString() -> string!
+static Mocassin.Packages.Jobs.JobSettingsResolver.Resolve(Mocassin.Core.Model.Jobs.JobCollection! collection, Mocassin.Core.Model.Jobs.JobConfig! config, Mocassin.Compilation.Simulations.CompiledSimulation! simulation, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Packages.Jobs.ResolvedJobSettings?
+static Mocassin.Packages.Jobs.ResolvedJobSettings.operator !=(Mocassin.Packages.Jobs.ResolvedJobSettings? left, Mocassin.Packages.Jobs.ResolvedJobSettings? right) -> bool
+static Mocassin.Packages.Jobs.ResolvedJobSettings.operator ==(Mocassin.Packages.Jobs.ResolvedJobSettings? left, Mocassin.Packages.Jobs.ResolvedJobSettings? right) -> bool
