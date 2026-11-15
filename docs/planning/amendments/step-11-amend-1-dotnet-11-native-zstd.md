@@ -750,8 +750,12 @@ change, and vice versa; and the pre-switch evidence is captured before either ca
       (`coverage.cobertura.xml` produced). The `VSTEST_ARTIFACTS_DIRECTORY` message persists because this
       environment has no `/run/user/1000`; it is recorded as a benign, environment-specific test-host message,
       not suppressed.
-- [x] `tools/reference/Mocassin.ReferenceHarness` is retargeted to `net11.0`. The GPL reference clone is not
-      available in this environment, so its build is recorded as an unresolved Step 29 item, not as verified.
+- [x] `tools/reference/Mocassin.ReferenceHarness` is retargeted to `net11.0` and builds against a copy of the
+      GPL reference clone placed outside the repository tree (`/tmp/opencode/mocassin-reference/original`, so the
+      repository's central package management does not apply to the clone). The verification build used
+      `-p:NuGetAudit=false` because the clone's legacy packages carry known-vulnerability audit warnings that
+      `TreatWarningsAsErrors` would otherwise reject; it reports one RID warning from the clone's
+      `SQLitePCLRaw.lib.e_sqlite3` assets. The clone itself is not part of the solution gate.
 - [x] `NOTICE.md` is unchanged (framework-dependent build); the self-contained/AOT third-party-notice obligation
       is recorded as a Step 31 follow-up and in `06-toolchain-requirements.md` §4.
 - [x] Toolchain documentation is updated and `./tools/verify.sh docs` is green.

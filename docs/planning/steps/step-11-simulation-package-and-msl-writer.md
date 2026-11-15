@@ -289,9 +289,11 @@ per feature.
   decode +2.08 % (≤ +10 %), throughput ≥ 297 MB/s (≥ 100), 240/240 checks.
 - **Known limitations / follow-ups:** the container image was not built (owner-accepted risk, deferred to
   closeout); the `VSTEST_ARTIFACTS_DIRECTORY` message persists because `/run/user/1000` is absent here and is
-  recorded as benign; the ReferenceHarness retarget is unverified without the GPL clone (Step 29 item);
-  `fix-lattice-decode-guard` remains a separate fix feature before the audit freeze; Part B is feature 7; the
-  superseded `docs/dotnet-11-container` branch (`9ab4bb8`) is still present and is removed as closeout cleanup.
+  recorded as benign; the ReferenceHarness builds on `net11.0` with the GPL clone copied outside the repository
+  and `-p:NuGetAudit=false` (the clone's legacy packages carry audit warnings; one RID warning), and it remains
+  outside the solution gate; `fix-lattice-decode-guard` remains a separate fix feature before the audit freeze;
+  Part B is feature 7; the superseded `docs/dotnet-11-container` branch (`9ab4bb8`) is still present and is
+  removed as closeout cleanup.
 - **Parity:** the `.NET 11` row in `appendix-b-parity-matrix.md` §10 is now `Implemented`.
 
 ### Amendment 1 — .NET 11 toolchain and native Zstandard
