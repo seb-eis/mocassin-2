@@ -17,7 +17,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Assigned for Step 11; the amendment feature branch is created after the design verdict |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `06774ee874786d5a95424705b19900cd6e0035cf` |
+| Reviewed commit | `17e723cae686c15bdfa7e61fc648d7d1da8086ef` |
 | Docs branch | `step/11-simulation-package-and-msl-writer` |
 | Review date | 2026-11-15 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
@@ -30,13 +30,12 @@ Parent step page:
 
 Parent design review record: [`step-11.md`](step-11.md) (`Ready with notes`, accepted 2026-11-15)
 
-Frozen state: `06774ee874786d5a95424705b19900cd6e0035cf` is the design freeze, re-frozen on 2026-11-15 after the
-human owner answered the amendment's five open questions. The record was first created at the earlier freeze
-`2124e5a7109f44e2b59e5c14c12dc1181677bffa`; between that freeze and this one the amendment page, the amendment
-index, and `05-open-decisions.md` changed to record the owner decisions (container-branch disposition, image-build
-risk, ReportGenerator, Test SDK, reference harness). The request-update commit changes only this record: the
-reviewed commit, the owner-decision checklist item, and this note. A reviewer can verify the frozen design with
-`git diff --name-status 06774ee874786d5a95424705b19900cd6e0035cf HEAD`.
+Frozen state: `17e723cae686c15bdfa7e61fc648d7d1da8086ef` is the design freeze for round 2, after the round-1
+`Changes required` resolutions. Round 1 reviewed `06774ee874786d5a95424705b19900cd6e0035cf`; the record has
+since gained the reviewer's round-1 evidence, findings, and verdict, and the design pages changed to resolve
+them (amendment page `36e6b44`, parent step/index/decisions/status `17e723c`). The resolution rows below list every
+finding and its fix. A reviewer can verify the round-2 delta with
+`git diff --name-status 06774ee HEAD`.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the amendment
 > design and completed this request, and relays the verdict and owner decisions. The planner and step agent
@@ -53,6 +52,7 @@ reviewed commit, the owner-decision checklist item, and this note. A reviewer ca
 | Delivers | Repo-wide `net10.0` → `net11.0` retarget on SDK 11.0.100, removal of `ZstdSharp.Port`, and replacement of the `.msl` payload codec with the in-box `System.IO.Compression` Zstandard API — with no `.msl` format, manifest, canonical-signature, `package-summary-v1`, or solver-contract change |
 | Sizing | Toolchain and dependency migration only; the amendment feature is one branch. The codec work is two internal encoder/decoder files plus test support. No expected person-week change to the Step 11 estimate |
 | Review scope | The amendment delta and its impact on the parent step, not a full re-review of the Step 11 design |
+| Benchmark Part A | Complete 2026-11-15 and passing under the owner-approved small-payload rule (amendment §9.1); no longer an outstanding gate |
 
 ## Delta scope
 
@@ -84,7 +84,7 @@ reviewed in [`step-11.md`](step-11.md) and are unchanged.
       inventory is incomplete — see A1-01.*
 - [x] Toolchain migration surface — the file inventory and counts are complete and correct: 21 solution
       projects via the central TFM, one explicit project outside the solution, two ApiCompat scripts, nine
-      baseline assemblies, ten DocFX entries, three workflows, one image, and the named documentation.
+      baseline assemblies, nine DocFX entries, three workflows, one image, and the named documentation.
       *Reviewed: 21/1/2/9/9/3/1 verified; the repository has nine DocFX paths, not ten (A1-09), and the named
       documentation omits current normative planning pages (A1-01).*
 - [x] SDK pin and roll-forward policy — `11.0.100` with `latestPatch`, `allowPrerelease: false`, and the
@@ -273,7 +273,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 `Re-review required` is a record state, not a verdict.
 
@@ -351,9 +351,27 @@ Date:
 
 ## Resolution status
 
+Round 1 returned `Changes required` at `06774ee`. The design was updated, re-frozen at
+`17e723cae686c15bdfa7e61fc648d7d1da8086ef`, and every finding below is resolved in the design or explicitly
+routed. Reviewer-authored evidence, findings, finding details, and verdict are unchanged.
+
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| A1-01 | **Closed.** The migration inventory is complete and split: §6.1 lists 13 active pages with their current statement and post-retarget wording (`README.md`, `CONTRIBUTING.md`, `AGENTS.md` §1/§8, `src/dotnet/README.md`, `docs/getting-started/index.md`, `docs/planning/README.md`, `00-scope-and-principles.md` §3.2, `01-target-architecture.md` §6, `03-quality-strategy.md` §9.3/§11/§13, `06-toolchain-requirements.md`, `appendix-b-parity-matrix.md` §10, `docs/reference/file-layout.md`, `tests/contracts/README.md`), and lists the historical pages that stay .NET 10 (step pages 00/02/08/09, `07-reference-build.md`, ADRs, audits, reviews, bench baselines, performance measurements). The Documentation checklist carries the edits. | Planner | `36e6b44` |
+| A1-02 | **Closed.** Part A is recorded as a **completed pre-acceptance gate** with the durable evidence table, method, provenance, limitations, and the owner decision (§9.1); the request's step summary now says Part A is complete; "Order of work" no longer schedules it (step 4 says do not re-run); the Dependencies line says complete, and Part B remains the pre-audit-freeze gate. | Planner | `36e6b44` |
+| A1-03 | **Closed.** Byte identity is an **observation**, explicitly not a gate or rollback trigger; the hard gates are round-trip, cross-decode, canonical signature/`package-summary-v1` equality, size, encode, decode (refined rule), and throughput. §5 states exactly what is regenerated if bytes differ (golden frames + feature-7 byte artifacts) and what is not (signatures, summary, pre-amendment fixture, `contracts/**`). | Planner | `36e6b44` |
+| A1-04 | **Closed.** A pre-amendment `.msl` is captured with the net10 writer as the **first commit of the feature branch** and checked in at `tests/contracts/packages/amend-1-net10/` with its `package-summary-v1` and provenance; the net11 reader reads it as a PR-fast test. The reverse direction is a recorded one-time migration check from a temporary pre-retarget worktree. Feature order step 0 and §9.5 record the capture. | Planner | `36e6b44` |
+| A1-05 | **Closed.** §4 now states each decoder's contract separately: the writer throws (`InvalidDataException`/`ArgumentOutOfRangeException`), while `PackagePayloadDecoder.TryDecode` returns `default` plus an `out string? error` and `PackageVerifierEngine` maps that error to `PKG004`. The signatures are not unified. | Planner | `36e6b44` |
+| A1-06 | **Closed.** The empty-payload and non-positive-guard checks are restored as steps 1–2 in both decoders, with the reason recorded (`TryGetMaxDecompressedLength` returns `true, bound=0` for an empty span, so it cannot be first). The test table has an "Empty and non-positive guard" row. | Planner | `36e6b44` |
+| A1-07 | **Closed.** §7's assertion block now proves "11.0.100 only": exact SDK count `1`, positive 11.0.100 grep, negative `10.` grep, global.json pin, and `dotnet` path check. | Planner | `36e6b44` |
+| A1-08 | **Closed.** Part B's net10 reference run is **mandatory** (the unamended tree is available at the pre-retarget commit); the only fallback is a documented absolute set (10 min, 2 GB, ≥100 jobs/s, <50 MB model payload, <2 GB package) with the comparison recorded as not made, and the Part A ≤+3 % payload rule still bounds the codec. | Planner | `36e6b44` |
+| A1-09 | **Closed.** The request now says nine DocFX entries; §6 says nine assembly paths; the repository has nine. | Planner | `36e6b44` |
+| A1-10 | **Closed (routed).** §4 states the real lattice bound (writer `min(int.MaxValue, 4·A·B·C·P)`; reader passes `int.MaxValue`; bounded only by `Array.MaxLength`) and no longer claims the verification options bound it. A Step 11 fix feature `fix-lattice-decode-guard` derives the bound from the `lattices` row, applies it in `PackageReader.ReadLatticesAsync`, and adds the lattice bomb test before the audit freeze; it is a task on the parent step page and a dependency of the amendment. | Planner; step agent implements | `36e6b44`, `17e723c` |
+| A1-11 | **Closed.** "Cross-version read" is PR-fast **because** it now reads a checked-in fixture; "Toolchain identity" and "Reverse-direction read" are retiered to `One-time (migration)` and described as recorded evidence, with a closing note that these are not recurring test tiers. | Planner | `36e6b44` |
+| A1-12 | **Closed.** §9.4 records the pre-amendment golden frames and hashes for all 12 real payloads at levels 3 and 9, including the seed vector `sample-model-1` (3,475 B → 1,415 B / 1,387 B), states the check-in location (`tests/contracts/packages/amend-1/golden/` + `goldens.json` + `payloads/`), and gives the re-capture rule if a runtime patch changes bytes. | Planner | `36e6b44` |
+| A1-13 | **Closed.** The licensing paragraph now distinguishes the MIT managed API/runtime from the **BSD-3-Clause native zstd**; `NOTICE.md` is unchanged because the repository is framework-dependent and does not redistribute the runtime; a self-contained/AOT artifact would have to carry the runtime's third-party notices, recorded as a Step 31 follow-up. | Planner | `36e6b44` |
+| A1-14 | **Closed.** §6.2 records that `microsoft.dotnet.apicompat.tool 11.0.100` is itself a `tools/net10.0/any` asset with `rollForward: Major`; it runs on the .NET 11 runtime and compares net10↔net11 assemblies, so the one-SDK image does not break the ApiCompat gate. | Planner | `36e6b44` |
+| A1-15 | **Closed.** §6.2 now orders the proof: preserve `tests/contracts/api-baseline/net10.0/` in `.tmp/net10-baseline/` (or read it from git) **before** `tools/update-api-baseline.sh` runs `rm -rf "$DEST"`, then generate net11, then compare with both reference packs; the exact command and the recorded-output requirement are stated. | Planner | `36e6b44` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
