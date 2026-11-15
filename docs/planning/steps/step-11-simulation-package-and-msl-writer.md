@@ -22,7 +22,7 @@ read-only inspection/verification library for the build CLI.
 | --- | --- | --- | --- | --- | --- |
 | 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `eb8513d` |
 | 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `9b754af` |
-| 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Pending | — | — | — |
+| 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Pending | — | — | — |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Pending | — | — | — |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Pending | — | — | — |
@@ -100,6 +100,45 @@ per feature.
   `write_out_count` was a pre-existing manifest drift against the already-frozen data contract, not a new shape
   decision.
 - **Parity:** no parity-matrix row is completed by this contract-only feature.
+
+#### Feature 3 — SQLite schema and publication barrier
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication`
+- **Squash commit:** recorded in the follow-up status commit.
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests including **399** Packages tests,
+  format clean); `./tools/verify.sh structure` exit 0; `./tools/verify.sh api` exit 0 (NuGet licence policy OK
+  for **57** packages, ApiCompat clean); `./tools/verify.sh contracts` exit 0 (19 artifacts current, projection
+  fixtures, 45 tool tests, SPDX 560 files, secrets, cargo-deny); `./tools/verify.sh docs` exit 0.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Licence result (n-5):** `Microsoft.Data.Sqlite/10.0.14` and `Microsoft.Data.Sqlite.Core/10.0.14` are **MIT**;
+  the transitive `SQLitePCLRaw.*/2.1.13` packages are **Apache-2.0**; all are on the allow-list
+  (`check_nuget_licenses.py`: `NuGet licence policy OK (57 packages)`). `ZstdSharp.Port` is not referenced yet;
+  its licence result is recorded when feature 4 adds the encoder.
+- **Diff summary:** added `Mocassin.Packages.SimulationPackage` with `PackageBuildRequest` (including the
+  explicit `TargetPath` clarification), `PackageBuildOptions`, `PackageWriteResult`, `JobPackage`,
+  `ISimulationPackageWriter`, and `SimulationPackageWriter`; created the exact v1 SQLite schema
+  (`schema_info`/`models`/`lattices`/`jobs` plus the two indices, `application_id=0x4D4F4353`,
+  `user_version=1`), build pragmas (`page_size=8192`, WAL, `synchronous=NORMAL`, `foreign_keys=ON`,
+  `temp_store=MEMORY`), batch commits, checkpoint + `journal_mode=DELETE`, optional `VACUUM`, and
+  `PRAGMA optimize`; implemented temp-file creation and cleanup, SHA-256 of the published bytes, file fsync,
+  Unix directory fsync, atomic rename, `PKG009` advisory warning, and failure/cancellation cleanup; added the
+  contract-typed internal `PackageModelRow`/`PackageLatticeRow`/`PackageJobRow` seams for features 4/5 and 17
+  real-SQLite tests; added `Microsoft.Data.Sqlite` to `Mocassin.Packages`, refreshed `PublicAPI.Unshipped.txt`
+  and the Packages ApiCompat baseline; documented the atomic publication in `docs/reference/file-layout.md`.
+- **R2-7 resolution:** the file fsync uses `FileStream.Flush(true)`; the containing-directory fsync uses a
+  minimal Unix libc `open`/`fsync`/`close` interop (`DllImport`, `UnmanagedType.LPUTF8Str`, `SetLastError`,
+  `CharSet.Ansi`). .NET has no managed directory-fsync API. Windows has no equivalent directory-durability
+  primitive in this path, so the Windows branch skips the directory call and relies on the file fsync plus atomic
+  replace. This is the solution's first platform-specific native code and a §3.13 trigger: the closeout must
+  dispatch the manual **Windows** platform job; the macOS Unix path is the same code exercised on Ubuntu, so a
+  macOS run is optional/manual. If the Windows run is unavailable, it is an accepted risk in the audit.
+- **Known limitations / follow-ups:** `WriteModelAsync`/`WriteJobAsync` are the public encode paths and throw
+  `NotSupportedException` until features 4/5 fill them; feature 3 exercises the schema/publication barrier
+  through the contract-typed internal row seam. `PRAGMA optimize` creates SQLite's internal `sqlite_stat1`
+  table, which is not a contract table and is ignored by the schema test. The Windows directory-fsync skip and
+  the required Windows closeout run are recorded above.
+- **Parity:** no parity-matrix row is completed by this schema/publication feature; the package writer rows stay
+  `Planned` until the encoders, fixtures, and CLI integration land.
 
 ## Goal
 
@@ -228,6 +267,7 @@ package) and removes the ambiguity of which model a job references.
 public sealed record JobPackage(JobDescriptor Descriptor, GeneratedLattice Lattice);
 
 public sealed record PackageBuildRequest(
+    string TargetPath,            // final .msl path; temp file is written beside it
     Guid ProjectId,
     string JobSelection,          // "all" or "1-100,250"; validated non-empty
     DateTimeOffset CreatedUtc);   // supplied, never read from the clock
@@ -261,6 +301,11 @@ public interface ISimulationPackageWriter : IAsyncDisposable
 `SimulationPackageWriter.Create(PackageBuildRequest request, PackageBuildOptions options)` is the factory
 (`Mocassin.Packages` has no DI container yet; the module marker stays a marker). Every call performs bounded
 synchronous SQLite/encode work on the caller's task; there is no fake `Task.Run`.
+
+Implementation clarification: `PackageBuildRequest` carries the final `TargetPath`; the design's pipeline and
+`PackageWriteResult.Path` require it, and the frozen snippet omitted it. The temporary build file is
+`<target>.tmp-<pid>-<random>`, which is `<name>.msl.tmp-*` for a `.msl` target and matches the `.gitignore`
+pattern.
 
 Pipeline:
 
@@ -568,6 +613,17 @@ Failure behaviour: a cancelled or failed build deletes the temp file and leaves 
 disk-full/IO error surfaces as `IOException` and deletes the temp file; the published file is only ever
 replaced by the atomic rename after the file and directory are synced.
 
+**Directory fsync and platform consequence (R2-7).** The file is flushed with
+`FileStream.Flush(flushToDisk: true)`. .NET has no managed directory-fsync API, so the containing-directory
+flush uses a minimal Unix libc `open`/`fsync`/`close` interop (`DllImport` with
+`UnmanagedType.LPUTF8Str`, `SetLastError`, and `CharSet.Ansi`). Windows has no equivalent directory-durability
+primitive in this path; the Windows branch skips the directory call and relies on the file fsync plus the atomic
+replace, which is the documented Windows guarantee. This is the solution's first platform-specific native code
+and a `AGENTS.md` §3.13 trigger: the step closeout must dispatch the manual **Windows** platform job
+(`platforms=windows` or `all`) to compile and exercise the Windows branch. macOS uses the same Unix libc path
+exercised on Ubuntu, so a macOS run is optional/manual, not required. If the Windows run is unavailable at
+closeout, it is recorded as an accepted risk in the audit.
+
 ### 8. Build integration and step boundaries
 
 - Step 12 owns `mocassin build`: it loads, validates, compiles, parameterizes, expands jobs, generates lattices,
@@ -622,7 +678,7 @@ Two options, for the human owner's start-gate decision:
 
 - [x] Add the Contracts package DTOs, payload constants, `LatticeSignatureV1`, and `PKG` descriptors.
 - [x] Finalize `signatures.lattice` and add `formats.package.payloads`; extend the generator and regenerate.
-- [ ] Implement schema creation, pragmas, `application_id`/`user_version`, and `schema_info`.
+- [x] Implement schema creation, pragmas, `application_id`/`user_version`, and `schema_info`.
 - [ ] Implement the model payload mapper and the write-time parameterization re-encode.
 - [ ] Persist the environment pair-link `offset` and the variable-length `tracker_order`, with the writer
       contract assertions and Step 14 expansion tests.
@@ -630,7 +686,7 @@ Two options, for the human owner's start-gate decision:
 - [ ] Implement the job payload mapper, `SolverJobFlags` composition, Cartesian field conversion, optimizer
       mapping, extension JSON, and payload-derived columns.
 - [ ] Implement batching, streaming, progress/cancellation, and bounded memory.
-- [ ] Implement the temp file, fsync of file and directory, atomic rename, and failure cleanup.
+- [x] Implement the temp file, fsync of file and directory, atomic rename, and failure cleanup.
 - [ ] Implement the read-only inspector/verifier with the `package-summary-v1` projection, bounded decoding,
       and `PKG001`–`PKG010`.
 - [ ] Add the `PKG` descriptors to Contracts and compose them into `DiagnosticCatalog.Default`; confirm

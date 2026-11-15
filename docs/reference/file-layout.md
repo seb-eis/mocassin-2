@@ -31,6 +31,16 @@ mocassin/
 schema; `package-payloads-v1.schema.json` separately describes the top-level model, job, and lattice payloads and
 uses the manifest's payload unknown-key policy.
 
+## Atomic package publication
+
+`mocassin build` (Step 12) writes only the immutable `.msl`; it never appends to an existing package. The writer
+builds in `<target>.tmp-<pid>-<random>` beside the target (ignored as `*.msl.tmp-*`), uses WAL and batch commits
+during the build, checkpoints and switches to `journal_mode=DELETE`, then hashes, fsyncs the file, fsyncs the
+containing directory on Unix, and atomically replaces the target. Windows has no equivalent directory fsync in
+this path; the file fsync plus atomic replace is its guarantee. A cancelled or failed build deletes the temp file
+and leaves an existing package untouched. There is no `.bak` file. Orphaned `*.msl.tmp-*` files are inert and may
+be removed by `mocassin clean` (Step 28).
+
 ## Planning docs
 
 `docs/planning/` contains the internal roadmap, step pages, ADRs, contracts, and parity matrix. Zensical
