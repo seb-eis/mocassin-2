@@ -558,12 +558,12 @@ For this docs-only resolution commit, `./tools/verify.sh docs --require` is exit
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (via OpenCode session)
+Date: 2026-11-15
 
 ## Audit rounds
 
