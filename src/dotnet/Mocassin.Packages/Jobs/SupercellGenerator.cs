@@ -67,10 +67,58 @@ public static class SupercellGenerator
         ArgumentNullException.ThrowIfNull(project);
         ArgumentNullException.ThrowIfNull(model);
         ArgumentNullException.ThrowIfNull(job);
+
+        return Generate(
+            project,
+            model,
+            job.Lattice,
+            job.Dopings,
+            job.Seed.AsSpan(),
+            Path(project, job, "lattice"),
+            Path(project, job, "dopings"),
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Generates the lattice of one lattice request and doping list from the supplied seed.
+    /// </summary>
+    /// <param name="project">The project that supplies the authored particles, sets, and dopings.</param>
+    /// <param name="model">The compiled model that supplies the P1 positions and compiled particle indices.</param>
+    /// <param name="request">The requested supercell size.</param>
+    /// <param name="dopings">The requested doping values; an empty array means none.</param>
+    /// <param name="seed">The 32-byte job seed that determines the sampling stream.</param>
+    /// <param name="latticePath">The diagnostic path of the lattice request.</param>
+    /// <param name="dopingsPath">The diagnostic path of the requested dopings.</param>
+    /// <param name="cancellationToken">Cancels generation between cell layers.</param>
+    /// <returns>The generated lattice and diagnostics, or diagnostics and no lattice on invalid user data.</returns>
+    /// <remarks>
+    /// This is the shared generation path used by the job build and the lattice preview. The preview supplies a
+    /// fixed seed because it exposes only seed-independent report counts and per-site populations.
+    /// </remarks>
+    /// <exception cref="ArgumentNullException">An argument is <see langword="null"/>.</exception>
+    /// <exception cref="ArgumentException">The seed is not 32 bytes.</exception>
+    /// <exception cref="InvalidOperationException">
+    /// The compiled model is inconsistent with the project: it has no positions, a stable site has no usable
+    /// particle set, or a particle index does not fit the byte lattice.
+    /// </exception>
+    internal static SupercellGenerationResult Generate(
+        Project project,
+        CompiledModel model,
+        LatticeRequest request,
+        ImmutableArray<DopingValue> dopings,
+        ReadOnlySpan<byte> seed,
+        ModelPath latticePath,
+        ModelPath dopingsPath,
+        CancellationToken cancellationToken = default)
+    {
+        ArgumentNullException.ThrowIfNull(project);
+        ArgumentNullException.ThrowIfNull(model);
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(latticePath);
+        ArgumentNullException.ThrowIfNull(dopingsPath);
         cancellationToken.ThrowIfCancellationRequested();
 
         var bag = new DiagnosticBag();
-        var request = job.Lattice;
         var positionCount = model.Structure.PositionCount;
         if (positionCount <= 0)
         {
@@ -85,7 +133,7 @@ public static class SupercellGenerator
                     CultureInfo.InvariantCulture,
                     $"The supercell request ({request.A}, {request.B}, {request.C}) with {positionCount} positions per cell " +
                     $"must use cell counts in {MinimumCellCount}..{MaximumCellCount} and stay within {MaximumPositions} positions."),
-                Path(project, job, "lattice")));
+                latticePath));
             return Failed(bag);
         }
 
@@ -96,31 +144,31 @@ public static class SupercellGenerator
                 string.Create(
                     CultureInfo.InvariantCulture,
                     $"The supercell has {totalPositions} positions; the warning threshold is {PositionWarningThreshold}."),
-                Path(project, job, "lattice")));
+                latticePath));
         }
 
-        var dopings = job.Dopings.IsDefault ? ImmutableArray<DopingValue>.Empty : job.Dopings;
-        if (!LatticeRequestHasher.TryResolveDopings(project, dopings, out var resolvedDopings, out var unknown))
+        var requestedDopings = dopings.IsDefault ? ImmutableArray<DopingValue>.Empty : dopings;
+        if (!LatticeRequestHasher.TryResolveDopings(project, requestedDopings, out var resolvedDopings, out var unknown))
         {
             bag.Add(Error(
                 JobDiagnosticCodes.UnknownDoping,
                 string.Create(
                     CultureInfo.InvariantCulture,
                     $"The lattice request references unknown doping '{unknown.GetValueOrDefault().Value:D}'."),
-                Path(project, job, "dopings")));
+                dopingsPath));
             return Failed(bag);
         }
 
-        if (job.Seed.IsDefault || job.Seed.Length != LatticeSeedDeriver.SeedByteLength)
+        if (seed.Length != LatticeSeedDeriver.SeedByteLength)
         {
             throw new ArgumentException(
                 $"The job seed must contain exactly {LatticeSeedDeriver.SeedByteLength} bytes.",
-                nameof(job));
+                nameof(seed));
         }
 
-        var requestHash = LatticeRequestHasher.Compute(project, model, request, dopings);
+        var requestHash = LatticeRequestHasher.Compute(project, model, request, requestedDopings);
         var latticeSeed = LatticeSeedDeriver.DeriveLatticeSeed(
-            job.Seed.AsSpan(),
+            seed,
             Convert.FromHexString(requestHash));
 
         var pattern = CreateBasePattern(project, model);
@@ -147,7 +195,7 @@ public static class SupercellGenerator
                 particles,
                 positionCount,
                 sampler,
-                Path(project, job, "dopings"),
+                dopingsPath,
                 bag,
                 out var report))
         {

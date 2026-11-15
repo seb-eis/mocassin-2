@@ -25,8 +25,8 @@ generation with charge compensation.
 | 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done |
 | 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | Done |
 | 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Done |
-| 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | In progress |
-| 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Proposed |
+| 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Done |
+| 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | In progress |
 | 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Proposed |
 | 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | Proposed |
 
@@ -41,7 +41,8 @@ not create the step branch and does not mark the step `In progress`.
 | `settings-inheritance-and-validation` | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done | See outcome below | — | `a7fc120` |
 | `job-expansion-and-seeds` | `feature/step-10-job-templates/job-expansion-and-seeds` | Done | `all --require` green; see outcome below | — | `a6435bf` |
 | `supercell-generation` | `feature/step-10-job-templates/supercell-generation` | Done | `all --require` green; see outcome below | — | `8ae41e8` |
-| `doping-and-charge-compensation` | `feature/step-10-job-templates/doping-and-charge-compensation` | In progress | See outcome below | — | — |
+| `doping-and-charge-compensation` | `feature/step-10-job-templates/doping-and-charge-compensation` | Done | `all --require` green; see outcome below | — | `b35e5dc` |
+| `lattice-preview-service` | `feature/step-10-job-templates/lattice-preview-service` | In progress | `all --require` green; see outcome below | — | — |
 
 Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
 job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
@@ -240,7 +241,74 @@ Recorded deviations and limitations:
 - Doping zones and concentration gradients are not placed; the sequential model is the documented limitation.
 - Optimizers, the preview service, the CLI path, and the operator/acceptance documentation remain in features
   6–8.
-- No per-feature CI run was triggered.
+- Feature 5 was squash-merged into `step/10-job-templates` as `b35e5dc` (`step-10: add sequential doping and
+  charge compensation`). The squash was validated locally; no per-feature CI run was triggered.
+
+#### Feature 6 outcome and deviations
+
+`lattice-preview-service` adds the shared `ILatticePreviewService`, the `ParticlePopulation`, `SitePopulation`,
+`LatticePreview`, and `JobCountPreview` records, the `LatticePreviewService`, and the bounded
+`LatticePreviewCache` to `Mocassin.Packages.Jobs`. The lattice preview delegates to a new internal
+`SupercellGenerator` overload that both the job build and the preview use, so there is no second doping,
+truncation, or compensation implementation. The generator keeps the job-build `JobDescriptor` entry point and
+now shares one core path with the preview.
+
+`TryCreatePreview` echoes the exact `LatticeRequest` and doping list, returns the same `DopingReport` produced by
+generation, and exposes deterministic per-site remaining populations. Populations exclude the implicit void
+particle, include only positive counts, order sites by ascending `CellSiteId` and particles by ascending compiled
+particle index, and retain a doping-targeted site even when its population is empty. Unknown dopings, non-finite
+or out-of-range fractions, invalid cell sizes, and impossible compensation return `null` with diagnostics and are
+never partially built or cached. A null project, model, or request is a programmer error and throws.
+
+The preview cache is instance-scoped, thread-safe, and bounded to eight entries and 256 MiB of estimated payload
+with LRU eviction. Its key combines the project model hash, lattice-request hash, canonical resolved doping list,
+space-group data version and SHA-256, and symmetry contract version, so an edit to any component cannot reuse a
+stale preview. A single preview larger than the byte budget is still returned but is not cached. Internal seams
+(`CachedEntryCount`, `CachedBytes`, `IsCached`, `EstimatePayloadBytes`, and the explicit-capacity constructor)
+support the eviction tests.
+
+`TryCreateJobCountPreview` is scoped by `SimulationId` and never expands jobs or generates lattices. It derives
+the default count from the authored project simulation that the compiler copies verbatim into
+`CompiledRuntimeSettings.JobCount`, sums the effective counts of the collections bound to that simulation after
+collection overrides, and separately sums the whole-template total across every simulation. An unknown requested
+or collection simulation is `JOB002`; an effective count outside `1..1000` is `JOB008`; either failure returns
+`null` rather than a partial preview. A template with invalid lattice requests or doping values still produces a
+complete job-count preview, which pins the no-generation boundary.
+
+The 29 `LatticePreviewServiceTests` cases cover the request/doping echo, report equality with the build, per-site
+populations and void exclusion, all failure cases, cache reuse, request/doping/model/symmetry key separation,
+eight-entry and payload eviction, concurrent previews, simulation-scoped default/effective/total counts,
+inheritance and overrides, unknown simulation, invalid counts, and no lattice generation.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET build reports 0 warnings/0 errors; Core 682, Symmetry 223, Compilation 96, Packages 343, Cli 7,
+  App 1, Contracts 15, Results 1, and Architecture 1 tests passed; `dotnet format` is clean; the NuGet licence
+  policy covers 51 packages with no vulnerable packages; ApiCompat is compatible with the checked-in baseline;
+  the Rust workspace tests are green; the Python package reports 3 passed tests; Zensical strict, DocFX
+  (0 warnings/0 errors), and rustdoc are clean; 18 contract artifacts are current; 514 source files carry SPDX
+  headers; no secret patterns were found in 863 tracked text files; and cargo-deny advisories/bans/licenses/
+  sources are OK.
+- Focused feature tests: the 29 `LatticePreviewServiceTests` cases pass.
+
+Recorded deviations and limitations:
+
+- The preview samples with a fixed 32-byte zero seed because it exposes only the seed-independent report counts,
+  charges, effective fractions, and per-site populations. The preview/build equality test therefore asserts the
+  report fields and `DopingInfo`; the generated particle positions themselves remain job-seed dependent.
+- The job-count preview reads the authored `Simulation.JobCount` rather than a compiled value because the
+  required signature has no compiled model. The Step 08 compiler copies that value verbatim into
+  `CompiledRuntimeSettings.JobCount`, so the two values agree for a consistent project.
+- The job-count preview validates the count of every template collection whenever a whole-template total is
+  requested, including collections bound to other simulations. A stale reference in an unrelated collection
+  therefore returns `null` instead of an incomplete total.
+- The cache stores the preview report and populations, not the generated particle bytes, so the 256 MiB bound is
+  an estimate of the cached preview payload. The payload-eviction test injects a smaller byte budget through the
+  internal constructor rather than allocating a 256 MiB lattice.
+- Optimizers, `mocassin build --preview`, the CLI path, and the operator/acceptance documentation remain in
+  features 7–8.
+- Feature 6 is not marked `Done`; it has not been squash-merged and no per-feature CI run was triggered.
 
 ## Goal
 

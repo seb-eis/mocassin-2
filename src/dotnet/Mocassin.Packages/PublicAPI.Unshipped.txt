@@ -845,3 +845,74 @@ static Mocassin.Packages.Jobs.LatticeSeedDeriver.DeriveLatticeSeed(System.ReadOn
 static Mocassin.Packages.Jobs.SupercellGenerationResult.operator !=(Mocassin.Packages.Jobs.SupercellGenerationResult? left, Mocassin.Packages.Jobs.SupercellGenerationResult? right) -> bool
 static Mocassin.Packages.Jobs.SupercellGenerationResult.operator ==(Mocassin.Packages.Jobs.SupercellGenerationResult? left, Mocassin.Packages.Jobs.SupercellGenerationResult? right) -> bool
 static Mocassin.Packages.Jobs.SupercellGenerator.Generate(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Packages.Jobs.JobDescriptor! job, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Jobs.SupercellGenerationResult!
+Mocassin.Packages.Jobs.ILatticePreviewService
+Mocassin.Packages.Jobs.ILatticePreviewService.TryCreateJobCountPreview(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Jobs.JobTemplate! jobTemplate, Mocassin.Core.Ids.SimulationId simulationId, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Packages.Jobs.JobCountPreview?
+Mocassin.Packages.Jobs.ILatticePreviewService.TryCreatePreview(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.Jobs.LatticeRequest! request, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> dopings, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Packages.Jobs.LatticePreview?
+Mocassin.Packages.Jobs.JobCountPreview
+Mocassin.Packages.Jobs.JobCountPreview.<Clone>$() -> Mocassin.Packages.Jobs.JobCountPreview!
+Mocassin.Packages.Jobs.JobCountPreview.Deconstruct(out Mocassin.Core.Ids.SimulationId SimulationId, out int DefaultJobCount, out int EffectiveJobCount, out long TotalJobs) -> void
+Mocassin.Packages.Jobs.JobCountPreview.DefaultJobCount.get -> int
+Mocassin.Packages.Jobs.JobCountPreview.DefaultJobCount.init -> void
+Mocassin.Packages.Jobs.JobCountPreview.EffectiveJobCount.get -> int
+Mocassin.Packages.Jobs.JobCountPreview.EffectiveJobCount.init -> void
+Mocassin.Packages.Jobs.JobCountPreview.Equals(Mocassin.Packages.Jobs.JobCountPreview? other) -> bool
+Mocassin.Packages.Jobs.JobCountPreview.JobCountPreview(Mocassin.Core.Ids.SimulationId SimulationId, int DefaultJobCount, int EffectiveJobCount, long TotalJobs) -> void
+Mocassin.Packages.Jobs.JobCountPreview.SimulationId.get -> Mocassin.Core.Ids.SimulationId
+Mocassin.Packages.Jobs.JobCountPreview.SimulationId.init -> void
+Mocassin.Packages.Jobs.JobCountPreview.TotalJobs.get -> long
+Mocassin.Packages.Jobs.JobCountPreview.TotalJobs.init -> void
+Mocassin.Packages.Jobs.LatticePreview
+Mocassin.Packages.Jobs.LatticePreview.<Clone>$() -> Mocassin.Packages.Jobs.LatticePreview!
+Mocassin.Packages.Jobs.LatticePreview.Deconstruct(out Mocassin.Core.Model.Jobs.LatticeRequest! Request, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> Dopings, out Mocassin.Packages.Jobs.DopingReport! Report, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.SitePopulation!> RemainingPopulations) -> void
+Mocassin.Packages.Jobs.LatticePreview.Dopings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!>
+Mocassin.Packages.Jobs.LatticePreview.Dopings.init -> void
+Mocassin.Packages.Jobs.LatticePreview.Equals(Mocassin.Packages.Jobs.LatticePreview? other) -> bool
+Mocassin.Packages.Jobs.LatticePreview.LatticePreview(Mocassin.Core.Model.Jobs.LatticeRequest! Request, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> Dopings, Mocassin.Packages.Jobs.DopingReport! Report, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.SitePopulation!> RemainingPopulations) -> void
+Mocassin.Packages.Jobs.LatticePreview.RemainingPopulations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.SitePopulation!>
+Mocassin.Packages.Jobs.LatticePreview.RemainingPopulations.init -> void
+Mocassin.Packages.Jobs.LatticePreview.Report.get -> Mocassin.Packages.Jobs.DopingReport!
+Mocassin.Packages.Jobs.LatticePreview.Report.init -> void
+Mocassin.Packages.Jobs.LatticePreview.Request.get -> Mocassin.Core.Model.Jobs.LatticeRequest!
+Mocassin.Packages.Jobs.LatticePreview.Request.init -> void
+Mocassin.Packages.Jobs.LatticePreviewService
+Mocassin.Packages.Jobs.LatticePreviewService.LatticePreviewService() -> void
+Mocassin.Packages.Jobs.LatticePreviewService.TryCreateJobCountPreview(Mocassin.Core.Project.Project! project, Mocassin.Core.Model.Jobs.JobTemplate! jobTemplate, Mocassin.Core.Ids.SimulationId simulationId, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Packages.Jobs.JobCountPreview?
+Mocassin.Packages.Jobs.LatticePreviewService.TryCreatePreview(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.Jobs.LatticeRequest! request, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> dopings, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Packages.Jobs.LatticePreview?
+Mocassin.Packages.Jobs.ParticlePopulation
+Mocassin.Packages.Jobs.ParticlePopulation.<Clone>$() -> Mocassin.Packages.Jobs.ParticlePopulation!
+Mocassin.Packages.Jobs.ParticlePopulation.Count.get -> int
+Mocassin.Packages.Jobs.ParticlePopulation.Count.init -> void
+Mocassin.Packages.Jobs.ParticlePopulation.Deconstruct(out Mocassin.Core.Ids.ParticleId ParticleId, out int Count) -> void
+Mocassin.Packages.Jobs.ParticlePopulation.Equals(Mocassin.Packages.Jobs.ParticlePopulation? other) -> bool
+Mocassin.Packages.Jobs.ParticlePopulation.ParticleId.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Packages.Jobs.ParticlePopulation.ParticleId.init -> void
+Mocassin.Packages.Jobs.ParticlePopulation.ParticlePopulation(Mocassin.Core.Ids.ParticleId ParticleId, int Count) -> void
+Mocassin.Packages.Jobs.SitePopulation
+Mocassin.Packages.Jobs.SitePopulation.<Clone>$() -> Mocassin.Packages.Jobs.SitePopulation!
+Mocassin.Packages.Jobs.SitePopulation.Deconstruct(out Mocassin.Core.Ids.CellSiteId SiteId, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.ParticlePopulation!> Particles) -> void
+Mocassin.Packages.Jobs.SitePopulation.Equals(Mocassin.Packages.Jobs.SitePopulation? other) -> bool
+Mocassin.Packages.Jobs.SitePopulation.Particles.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.ParticlePopulation!>
+Mocassin.Packages.Jobs.SitePopulation.Particles.init -> void
+Mocassin.Packages.Jobs.SitePopulation.SiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Packages.Jobs.SitePopulation.SiteId.init -> void
+Mocassin.Packages.Jobs.SitePopulation.SitePopulation(Mocassin.Core.Ids.CellSiteId SiteId, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.ParticlePopulation!> Particles) -> void
+override Mocassin.Packages.Jobs.JobCountPreview.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.JobCountPreview.GetHashCode() -> int
+override Mocassin.Packages.Jobs.JobCountPreview.ToString() -> string!
+override Mocassin.Packages.Jobs.LatticePreview.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.LatticePreview.GetHashCode() -> int
+override Mocassin.Packages.Jobs.LatticePreview.ToString() -> string!
+override Mocassin.Packages.Jobs.ParticlePopulation.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.ParticlePopulation.GetHashCode() -> int
+override Mocassin.Packages.Jobs.ParticlePopulation.ToString() -> string!
+override Mocassin.Packages.Jobs.SitePopulation.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.SitePopulation.GetHashCode() -> int
+override Mocassin.Packages.Jobs.SitePopulation.ToString() -> string!
+static Mocassin.Packages.Jobs.JobCountPreview.operator !=(Mocassin.Packages.Jobs.JobCountPreview? left, Mocassin.Packages.Jobs.JobCountPreview? right) -> bool
+static Mocassin.Packages.Jobs.JobCountPreview.operator ==(Mocassin.Packages.Jobs.JobCountPreview? left, Mocassin.Packages.Jobs.JobCountPreview? right) -> bool
+static Mocassin.Packages.Jobs.LatticePreview.operator !=(Mocassin.Packages.Jobs.LatticePreview? left, Mocassin.Packages.Jobs.LatticePreview? right) -> bool
+static Mocassin.Packages.Jobs.LatticePreview.operator ==(Mocassin.Packages.Jobs.LatticePreview? left, Mocassin.Packages.Jobs.LatticePreview? right) -> bool
+static Mocassin.Packages.Jobs.ParticlePopulation.operator !=(Mocassin.Packages.Jobs.ParticlePopulation? left, Mocassin.Packages.Jobs.ParticlePopulation? right) -> bool
+static Mocassin.Packages.Jobs.ParticlePopulation.operator ==(Mocassin.Packages.Jobs.ParticlePopulation? left, Mocassin.Packages.Jobs.ParticlePopulation? right) -> bool
+static Mocassin.Packages.Jobs.SitePopulation.operator !=(Mocassin.Packages.Jobs.SitePopulation? left, Mocassin.Packages.Jobs.SitePopulation? right) -> bool
+static Mocassin.Packages.Jobs.SitePopulation.operator ==(Mocassin.Packages.Jobs.SitePopulation? left, Mocassin.Packages.Jobs.SitePopulation? right) -> bool
