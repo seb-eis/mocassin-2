@@ -17,7 +17,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Assigned for Step 11; the amendment feature branch is created after the design verdict |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `2124e5a7109f44e2b59e5c14c12dc1181677bffa` |
+| Reviewed commit | `06774ee874786d5a95424705b19900cd6e0035cf` |
 | Docs branch | `step/11-simulation-package-and-msl-writer` |
 | Review date | 2026-11-15 |
 | Reviewer | — |
@@ -30,10 +30,13 @@ Parent step page:
 
 Parent design review record: [`step-11.md`](step-11.md) (`Ready with notes`, accepted 2026-11-15)
 
-Frozen state: `2124e5a7109f44e2b59e5c14c12dc1181677bffa` is the design freeze. The later request commit adds
-this record and replaces four request-time pointers (step page, status dashboard, amendment index, parent review
-note) with links to it. No design content changes between the freeze and the request commit; a reviewer can
-verify with `git diff --name-status 2124e5a7109f44e2b59e5c14c12dc1181677bffa HEAD`.
+Frozen state: `06774ee874786d5a95424705b19900cd6e0035cf` is the design freeze, re-frozen on 2026-11-15 after the
+human owner answered the amendment's five open questions. The record was first created at the earlier freeze
+`2124e5a7109f44e2b59e5c14c12dc1181677bffa`; between that freeze and this one the amendment page, the amendment
+index, and `05-open-decisions.md` changed to record the owner decisions (container-branch disposition, image-build
+risk, ReportGenerator, Test SDK, reference harness). The request-update commit changes only this record: the
+reviewed commit, the owner-decision checklist item, and this note. A reviewer can verify the frozen design with
+`git diff --name-status 06774ee874786d5a95424705b19900cd6e0035cf HEAD`.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the amendment
 > design and completed this request, and relays the verdict and owner decisions. The planner and step agent
@@ -111,7 +114,9 @@ reviewed in [`step-11.md`](step-11.md) and are unchanged.
 - [ ] Integration sequencing — amendment branch name, squash into the parent step branch, and integration
       before the audit freeze with the combined commit recorded.
 - [ ] `docs/dotnet-11-container` disposition — supersede/fold/land-first options and the recommendation.
-- [ ] Open questions — the five owner questions are genuine decisions with options, not deferred design work.
+- [ ] Owner decisions — the five previously open questions (container branch, image build, ReportGenerator,
+      Test SDK, reference harness) are answered and recorded in the amendment's `Owner decisions` section;
+      no open question remains for this amendment.
 
 ## Dependency and interface checks
 
