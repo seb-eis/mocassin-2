@@ -225,13 +225,14 @@ tasks). The fix has a real dimension source and an explicit orphan-row fallback:
   and `lattice_c` and the referenced model payload's `structure.position_count` (already decoded within
   `MaxModelPayloadBytes`): `min(int.MaxValue, 4 × a × b × c × position_count)`.
 - A lattice row with **no** referencing job has no dimension source. It must not fall back to `int.MaxValue`;
-  the fix bounds it with an explicit `MaxLatticePayloadBytes` option and reports the orphan row as a
-  package-structure finding, so an unreferenced row can never drive an unbounded allocation.
+  the fix bounds it with an explicit `MaxLatticePayloadBytes` option, so an unreferenced row can never drive an
+  unbounded allocation. No new diagnostic code is introduced and the verifier's diagnostics contract is
+  unchanged.
 
 Until that fix lands, no page claims the lattice path is bounded by the verification options, and the
 `03-quality-strategy.md` §9.9 bomb claim is corrected to name the lattice exception.
 
-**Resolved (2026-11-15)** by the Step 11 fix feature `fix-lattice-decode-guard` (squash `SQUASH_PLACEHOLDER`).
+**Resolved (2026-11-15)** by the Step 11 fix feature `fix-lattice-decode-guard` (squash `25a3787`).
 `PackageReader.ReadLatticesAsync` now derives each lattice bound from the referencing job's `lattice_a/b/c` and
 the referenced model payload's `position_count` with overflow-safe arithmetic, always caps it by the new
 `PackageVerificationOptions.MaxLatticePayloadBytes` (default 512 MiB), and uses that cap for an orphan lattice
@@ -666,9 +667,11 @@ faster. It is indicative only; §9.1 is the gate.
 
 ## API and contract impact
 
-- No public API addition, removal, or signature change. `PayloadEncoder` and `PackagePayloadDecoder` are
-  `internal`. `PackageBuildOptions.CompressionLevel` keeps its name, type, default, and 1..19 range; only its XML
-  documentation gains a sentence.
+- No public API addition, removal, or signature change **from this amendment**. `PayloadEncoder` and
+  `PackagePayloadDecoder` are `internal`. `PackageBuildOptions.CompressionLevel` keeps its name, type, default,
+  and 1..19 range; only its XML documentation gains a sentence. The separately routed
+  `fix-lattice-decode-guard` feature adds the `PackageVerificationOptions.MaxLatticePayloadBytes` init property
+  (a non-breaking addition, recorded on the step page).
 - No project/package/results/state format change. No `format_version` bump. `contracts/manifest.json` and
   `contracts/generated/**` are untouched. ADR 0009's version-bump rule is not engaged.
 - ApiCompat: the baseline **directory and assemblies** move to `net11.0`. The public surface must be identical;
@@ -747,10 +750,13 @@ change, and vice versa; and the pre-switch evidence is captured before either ca
       the amended tree with the mandatory net10 reference (or the documented absolute fallback). **Part A is
       complete and re-confirmed after the swap (§9.1); Part B belongs to feature 7 and is not part of this
       feature.**
-- [x] The lattice decode-bound gap (§4) is recorded as a Step 11 fix-feature task (`fix-lattice-decode-guard`);
-      no page claims the lattice path is bounded by the verification options until that fix lands.
+- [x] The lattice decode-bound gap (§4) is closed by the Step 11 fix feature (`fix-lattice-decode-guard`),
+      squashed as `25a3787`: derived per-job bound, `MaxLatticePayloadBytes` cap/fallback, bomb test, and the
+      updated §5 check 4 wording.
 - [x] The ApiCompat baseline is regenerated at `tests/contracts/api-baseline/net11.0/`; the one-time cross-TFM
-      comparison reports no breaking changes; `PublicAPI.*.txt` is unchanged; `verify.sh api` is green.
+      comparison reports no breaking changes; the retarget left `PublicAPI.*.txt` unchanged and `verify.sh api` is
+      green. (The later routed `fix-lattice-decode-guard` feature adds `PackageVerificationOptions.MaxLatticePayloadBytes`
+      to `PublicAPI.Unshipped.txt`; it is an intentional, ApiCompat-compatible addition recorded on the step page.)
 - [x] `./tools/verify.sh all --require` passes on the amendment branch (exit 0).
 - [x] The containerfile installs 11.0.100 only and asserts it; ReportGenerator 5.6.0 and DocFX 2.81.0 resolve;
       the image build is **not** claimed as verified — it is deferred to closeout as the accepted risk.
@@ -844,7 +850,7 @@ package payloads. No domain doubles.
 | Reference harness cannot be verified without the GPL reference clone | Retarget it; verify when the clone exists; if unavailable before the freeze, record it as a Step 29 item, not as verified |
 | Rollback after integration | Part A is complete; the feature branch stays unmerged until the full gates and Part B-adjacent checks pass; post-integration rollback uses a fix branch before the audit freeze and is recorded |
 | The level-3 decode ratio is inside host/JIT noise | The owner-approved small-payload rule gates absolutes (≤0.15 µs) and throughput (≥100 MB/s) below 8 KiB, and keeps the relative ≤10 % rule for ≥8 KiB; the measured worst absolute penalty is 0.06319 µs (controlled) / 0.05689 µs (default JIT) (§9.1) |
-| Decoder relaxation accepts foreign frames | `TryGetMaxDecompressedLength` rejects non-Zstd input, the model/job guards bound the allocation, and the writer always declares the exact size. The lattice read path is bounded by the derived per-job bound and `MaxLatticePayloadBytes` (implemented by `fix-lattice-decode-guard`, `SQUASH_PLACEHOLDER`); the bomb test covers a referenced row and an orphan row |
+| Decoder relaxation accepts foreign frames | `TryGetMaxDecompressedLength` rejects non-Zstd input, the model/job guards bound the allocation, and the writer always declares the exact size. The lattice read path is bounded by the derived per-job bound and `MaxLatticePayloadBytes` (implemented by `fix-lattice-decode-guard`, `25a3787`); the bomb test covers a referenced row and an orphan row |
 
 ## Dependencies
 
@@ -862,8 +868,7 @@ package payloads. No domain doubles.
 - **Step 11 fix feature `fix-lattice-decode-guard`** is required before the audit freeze: derive the lattice
   bound from a referencing `jobs` row (`lattice_a/b/c`) times the model payload's `position_count`, apply it in
   `PackageReader.ReadLatticesAsync`, bound an orphan lattice row (no referencing job) with an explicit
-  `MaxLatticePayloadBytes` option instead of `int.MaxValue`, report the orphan as a package-structure finding,
-  and add the lattice bomb test (A1-10, R2-01). The parent step page lists it; the amendment records the routing
+  `MaxLatticePayloadBytes` option instead of `int.MaxValue`, and add the lattice bomb test (A1-10, R2-01). The parent step page lists it; the amendment records the routing
   and does not claim the fix.
 - The pre-amendment `.msl` fixture and golden frames must be captured on the feature branch **before** the
   retarget (feature order step 0); the net10 writer is the only source.

@@ -30,6 +30,7 @@ read-only inspection/verification library for the build CLI.
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `4fe6225` |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `cbe345f` |
 | A1 .NET 11 toolchain and native Zstandard | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | Squashed | `all --require` exit 0; one-time cross-TFM ApiCompat 9/9 | Not run (no per-feature CI) | `00753e7` |
+| A1-fix Lattice decode guard | `feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `25a3787` |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Held (after amendment 1) | — | — | — |
 
 ### Approved feature list
@@ -260,7 +261,28 @@ per feature.
 - **Parity:** the package inspection/verification row remains `Improvement` because the Step 12 CLI half is
   still pending; the read-only library half is complete.
 
-#### Amendment 1 — .NET 11 toolchain and native Zstandard
+##### A1-fix — Lattice decode guard
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard`
+- **Squash commit:** `25a3787` (`step-11: bound the read-only lattice decode guard`); feature commit `bc9eaed`.
+- **Local gates:** `./tools/verify.sh all --require` exit 0 — build and 1,514 tests (0 failed, 0 warnings),
+  format, `api`, `structure`, `contracts`, `policy`, Rust, Python, and the strict docs build.
+- **Diff summary:** the read-only reader no longer passes `int.MaxValue` to the lattice decoder.
+  `PackageReader.ReadLatticesAsync` builds a per-lattice bound from the referencing `jobs` row
+  (`lattice_id`, `model_id`, `lattice_a/b/c`) and the decoded model payload's `structure.position_count`, and
+  decodes each lattice with it. `LatticePayloadBound.Compute` applies `4 × a × b × c × position_count` with
+  `checked` arithmetic and falls back to the cap on invalid or overflowing dimensions.
+  `PackageVerificationOptions.MaxLatticePayloadBytes` (init property, default 512 MiB) is the hard cap and the
+  orphan-lattice fallback; `PublicAPI.Unshipped.txt` records the addition. Tests: four bound unit tests and four
+  real-SQLite integration tests — a referenced lattice frame above the derived 3,456-byte bound yields `PKG004`
+  with that guard in the message; an orphan frame above a 4,096-byte cap yields `PKG004`; an orphan within the
+  cap still decodes; a legitimate 40×40×40 (256,000-position) lattice verifies. No `.msl` format, payload,
+  signature, or diagnostic code changed; `Mocassin.Results` still references only `Core + Contracts`.
+- **Known limitation:** a legitimate lattice whose decompressed payload exceeds the 512 MiB default (about
+  134M positions at the writer's 4× factor) needs a raised `MaxLatticePayloadBytes`; the option is per call.
+- **Resolves:** A1-10 / R2-01 (the amendment review's routed residual minor).
+
+### Amendment 1 — .NET 11 toolchain and native Zstandard
 
 - **Branch:** `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd`
 - **Squash commit:** `00753e7` (`step-11: retarget to .NET 11 and replace the payload codec`). Feature commits:
@@ -911,7 +933,7 @@ Two options, for the human owner's start-gate decision:
       (`feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard`): derive the bound from the
       referencing `jobs` row (`lattice_a/b/c`) and the model payload's `position_count`, apply it in
       `PackageReader.ReadLatticesAsync`, bound an orphan lattice row (no referencing job) with an explicit
-      `MaxLatticePayloadBytes` option, and add the lattice bomb test. Squashed as `SQUASH_PLACEHOLDER`.
+      `MaxLatticePayloadBytes` option, and add the lattice bomb test. Squashed as `25a3787`.
 
 ## Acceptance criteria
 
