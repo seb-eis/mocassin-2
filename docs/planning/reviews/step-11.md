@@ -366,6 +366,11 @@ Date: 2026-11-15
 
 ## Resolution status
 
+> Amendment: [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11 toolchain and
+> native Zstandard — is a late design change to this step, planned while the step is still active and before the
+> audit freeze. Its focused design review is recorded separately. It does not reopen any
+> finding above.
+
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
 | M-1 | Closed in design — environment pair entries are now one row per periodic image with `{target_position, offset, energy_id}`; the compiler emits one `CompiledPairLink` per image from `PairShell.EquivalentImages` (exposed additively on `PairInteractionPreview`), so the existing four-field model-signature link projection signs every runtime image. The model-signature values change for multi-image shells, so the Step 08/09 signature fixtures and sample `modelSignature` values are regenerated. Step 08/13/14/15 and the data contract are aligned. The cross-step Symmetry/Compilation change needs start-gate/owner approval and an ApiCompat refresh. | Planner; owner for the cross-step change; step agent implements | `f04bd3c` |

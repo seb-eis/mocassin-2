@@ -15,6 +15,8 @@ read-only inspection/verification library for the build CLI.
 - **Step tag:** —
 - **Audit:** Not requested
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
+- **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
+  toolchain and native Zstandard — **Planned**; design review ready for review (2026-11-15)
 - **Feature list:** Approved 2026-11-15 (seven features)
 - **Last updated:** 2026-11-15
 
@@ -26,7 +28,7 @@ read-only inspection/verification library for the build CLI.
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `bdafaa4` |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `4fe6225` |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `cbe345f` |
-| 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Pending | — | — | — |
+| 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Held (after amendment 1) | — | — | — |
 
 ### Approved feature list
 
@@ -256,6 +258,26 @@ per feature.
 - **Parity:** the package inspection/verification row remains `Improvement` because the Step 12 CLI half is
   still pending; the read-only library half is complete.
 
+### Amendment 1 — .NET 11 toolchain and native Zstandard
+
+Feature 7 is held until [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) is reviewed
+and integrated. The amendment moves the repository from `net10.0` to `net11.0` and replaces the
+`ZstdSharp.Port` payload codec with the in-box `System.IO.Compression` Zstandard API.
+
+Design consequences recorded here so the parent design stays coherent:
+
+- §3 and §6 item 14: the payload codec is the in-box `ZstandardEncoder`/`ZstandardDecoder` with a single
+  one-shot encoding path. The third-party `ZstdSharp.Port` reference edge disappears; the
+  `Microsoft.Data.Sqlite` edge and its MIT licence result remain. No `.msl` format, payload version, canonical
+  signature, or solver contract changes.
+- §2: `PackageBuildOptions.CompressionLevel` keeps its name, default, and 1..19 range and maps by identity to the
+  native Zstd `Quality`.
+- §7: performance targets are measured on .NET 11 Release builds.
+- Feature 7 generates the checked-in `.msl` fixture, the `package-summary-v1` golden, the extracted payloads, and
+  the 10⁴-job benchmark **once**, on the amended toolchain. No fixture is generated on `net10.0`.
+- The amendment carries a two-part benchmark gate: a real-payload codec comparison before design acceptance and
+  the 10⁴-job budget before the audit freeze, with a recorded rollback threshold.
+
 ## Goal
 
 Write the complete, reproducible input for the Rust solver: one immutable file containing the shared
@@ -391,7 +413,7 @@ public sealed record PackageBuildRequest(
 public sealed record PackageBuildOptions
 {
     public bool Overwrite { get; init; }
-    public int CompressionLevel { get; init; } = 3;   // 1..19
+    public int CompressionLevel { get; init; } = 3;   // Zstd quality, 1..19 (amendment 1)
     public bool Vacuum { get; init; }
     public int BatchSize { get; init; } = 500;
     public long AdvisorySizeBytes { get; init; } = 2L * 1024 * 1024 * 1024;
@@ -452,8 +474,10 @@ The writer never holds all jobs or lattices in memory. `WriteJobAsync` requires 
 
 All payloads are MessagePack maps with snake_case keys, encoded with `MessagePack-CSharp` using explicit
 `[Key("...")]` names (no contractless resolver) and `MessagePackSecurity.UntrustedData`, then compressed with a
-standard Zstd frame (`ZstdSharp.Port`; no dictionaries, no custom framing). Readers ignore unknown keys within
-the current major and reject an unsupported `format_version`.
+standard Zstd frame (in-box `System.IO.Compression.ZstandardEncoder`/`ZstandardDecoder` under .NET 11, one
+one-shot encoding path, quality = `PackageBuildOptions.CompressionLevel`; see
+[amendment 1](../amendments/step-11-amend-1-dotnet-11-native-zstd.md); no dictionaries, no custom framing).
+Readers ignore unknown keys within the current major and reject an unsupported `format_version`.
 
 - **Model payload** — the §3.3 map. `format_version = 1` is the payload-encoding version, independent of
   `CompiledModel.FormatVersion`. The mapping is mechanical and one-way:
@@ -703,7 +727,9 @@ the same feature as the code that needs it, with regenerated artifacts and fixtu
     owned with `DiagnosticCatalog.Default` composing them in `Mocassin.Packages`.
 14. Adding `ZstdSharp.Port` and `Microsoft.Data.Sqlite` references to `Mocassin.Packages`/`Mocassin.Results` is a
     new package-reference edge; the feature that adds it records the MIT licence result from
-    `check_nuget_licenses.py` and the `policy` gate.
+    `check_nuget_licenses.py` and the `policy` gate. **Superseded by amendment 1:** the payload codec is the
+    in-box `System.IO.Compression` Zstandard API, so `ZstdSharp.Port` is removed and only the
+    `Microsoft.Data.Sqlite` edge remains. The historical licence results in the feature log are retained.
 
 Fixture consequences: regenerate `contracts/generated/**`, add `tests/contracts/projections/lattice/*.bin`
 vectors and their metadata, extend `tests/contracts/signature-vectors.json`, add
@@ -713,7 +739,7 @@ current+previous policy, and this step records the current-only fixture layout s
 
 ### 7. Bounds, performance, and failure behaviour
 
-Targets (benchmark laptop class, .NET 10 Release):
+Targets (benchmark laptop class, .NET 11 Release):
 
 - 10,000 small jobs (10×10×10 ceria, ~1,000 positions) in under 10 minutes and under 2 GB peak RSS.
 - Model payload under 50 MB for a complex model.
@@ -817,6 +843,8 @@ Two options, for the human owner's start-gate decision:
       `Mocassin.Results`.
 - [x] Record the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges.
 - [ ] Write the documentation named below and update parity/status.
+- [ ] Review and integrate [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) (.NET 11
+      toolchain and native Zstandard) before feature 7 generates the fixtures and before the audit freeze.
 
 ## Acceptance criteria
 
