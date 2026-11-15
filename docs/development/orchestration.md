@@ -148,5 +148,6 @@ The binding enforces only what a permission list can enforce:
 Everything else is procedural. Shell is unrestricted, so an agent can still write through a command; pushes,
 merges, and tags are not restricted and rely on owner approval and branch protection; the reviewer's assigned-record
 rule is not enforceable; and the orchestrator cannot make even a handoff-card or status edit, so those are routed
-to the step agent. A human can select another agent with Tab and bypass the binding entirely. Another harness ports
+to the step agent. A human can select another agent with the agent picker (shift+tab in the container) and bypass the binding
+entirely. Another harness ports
 the same four prompts; the binding is an adapter, not a second rule set.
