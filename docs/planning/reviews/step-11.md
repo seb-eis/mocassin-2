@@ -95,9 +95,10 @@ Step page: [`Step 11 — Simulation Package and .msl Writer`](../steps/step-11-s
 - [x] Versioning and migration behavior is defined — package schema, payload, and compiled-model versions are
       independent domains; the pre-release finalizations and the current-only fixture policy are recorded —
       reviewed; m-3 records the ADR 0009 gap.
-- [ ] No unresolved cross-step interface question remains — the Step 06 field/frequency text, Step 13's payload
-      struct, Step 12's `inspect`/`verify` ownership, and the Step 12 build sample are reconciled — not
-      satisfied: M-1, M-2, and m-4 (Step 14 is absent from the reconciliation).
+- [x] No unresolved cross-step interface question remains — the Step 06 field/frequency text, Step 13's payload
+      struct, Step 12's `inspect`/`verify` ownership, and the Step 12 build sample are reconciled — round 2:
+      M-1, M-2, and m-4 are closed in the design; the remaining R2-3 verifier-derivation detail is recorded in
+      the round-2 findings, not an open interface question.
 - [x] The writer/verifier split matches the architecture — `Mocassin.Packages` writes and self-checks its own
       payloads, `Mocassin.Results` owns read-only `.msl` inspection/verification, and neither creates a circular
       project reference — verified against the csproj graph; M-3 is about diagnostics composition, not the split.
@@ -115,7 +116,8 @@ Step page: [`Step 11 — Simulation Package and .msl Writer`](../steps/step-11-s
 
 - [x] Scope, non-goals, and acceptance criteria are explicit and testable — reviewed; the scope and non-goals
       are clear; m-1/m-2 make two acceptance claims not yet testable.
-- [ ] Design decisions are complete and internally consistent — not satisfied: M-1, M-2, M-3.
+- [x] Design decisions are complete and internally consistent — round 2: M-1, M-2, and M-3 are closed in the
+      design; R2-1, R2-2, R2-3, and R2-4 are documentation/verifier details recorded in the round-2 findings.
 - [x] Required tests, property tests, golden fixtures, and performance targets are defined — reviewed; the
       tiered table covers mapping, property, golden, corruption, cross-language, and performance tests; m-2.
 - [x] Documentation, status, parity, and audit updates are planned — reviewed; the named pages, status row,
@@ -123,8 +125,12 @@ Step page: [`Step 11 — Simulation Package and .msl Writer`](../steps/step-11-s
 - [x] Licensing, provenance, and dependency checks are resolved — reviewed; no GPL-derived content; n-5.
 - [x] Risks and mitigations are realistic — reviewed; the risk table covers bloat, drift, pre-release deltas,
       transaction locking, cancellation, determinism, extension tokens, dedup provenance, and verifier bounds.
-- [ ] Code layout and namespace plan follow the structure policy — not stated: m-6.
-- [ ] No hidden scope, stale placeholders, or unowned decisions — not satisfied: m-1, m-2, m-5, m-6.
+- [x] Code layout and namespace plan follow the structure policy — round 2: Step 11 §9 supplies the layout
+      table; the folders, namespaces, file counts, depth, and `Dtos`/`Options` suffixes match
+      `tools/structure-policy.json` (m-6 closed).
+- [x] No hidden scope, stale placeholders, or unowned decisions — round 2: m-1, m-2, m-5, and m-6 are closed;
+      R2-4 (stale `jump_collections.object_id` delta) and R2-5 (stale request-summary sizing) are recorded as
+      documentation findings.
 
 ## Evidence
 
@@ -303,9 +309,10 @@ does not exercise them).
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
 
-`Re-review required` is a record state, not a verdict.
+Round 2 verdict: `Ready with notes` — see `### Re-review round 2` below. No Blocker or Major finding remains;
+four Minor and five Note findings are recorded for acceptance or correction before implementation.
 
 ## Reviewer independence
 
@@ -435,3 +442,110 @@ implementation starts:
 **Changes required.** The scope, feature list, sizing, lattice-signature finalization, writer/publication
 barrier, and most of the model/job mapping are sound, and both required gates pass. The design is not ready for
 implementation until M-1, M-2, and M-3 are corrected and the Minors are either fixed or explicitly accepted.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author or implement the reviewed work, I did not perform review round 1, and I
+have no shared conversation with the planner, implementor, or orchestrator. I read the repository myself rather
+than relying on a summary. Round-2 reviewer: DeepSeek V4.1 Flash 1017 (opencode-go).
+
+- `git rev-parse HEAD` → `ebd7e5d9a30796e3dc8ddc033ce18fa22b0d19c9` (`docs/step-11-design`).
+- `git diff --name-status f04bd3cb5f424bff0e4f8d736d84185370775308 HEAD` → `M docs/planning/reviews/step-11.md`
+  only. The frozen design content under review is `f04bd3c`; `ebd7e5d` is the round-1 resolution/record commit
+  and differs from the frozen design only by this record. `git status --porcelain` was empty before and after
+  the gates; no repository file was modified by this review.
+- The reviewed tree therefore matches the frozen commit except for the review record that this round appends to.
+
+#### Commands and results
+
+- `./tools/verify.sh docs` → **exit 0**. `Documentation math conventions OK (159 files scanned)`; `Documentation
+  links OK (162 files scanned)`; Zensical strict build `No issues found`; DocFX `0 warning(s) 0 error(s)`;
+  rustdoc succeeded.
+- `./tools/verify.sh policy` → **exit 0**. ApiCompat ran without breaking changes for all projects; contract
+  artifacts current (18 files); model projection check OK (5 fixtures); parameterization projection check OK
+  (4 fixtures); space-group catalog current (274 settings, sha256
+  `1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395`); process consistency OK; 37 Python unit
+  tests OK; SPDX headers present in 528 source files; no secret patterns in 890 tracked text files; cargo-deny
+  advisories/bans/licenses/sources OK.
+- Read-only code/contract inspections (no repository edits):
+  - `PairShell.EquivalentImages` exists as `ImmutableArray<Vector4I>` (`src/dotnet/Mocassin.Symmetry/Reduction/PairReduction.cs:24`);
+    `PairInteractionPreview` has no image list (`src/dotnet/Mocassin.Symmetry/Energy/PairInteractionPreview.cs:19-32`);
+    `CompiledPairLink` is four fields (`src/dotnet/Mocassin.Compilation/Structure/CompiledStructureModel.cs:53-60`);
+    `PairCompilationStage` adds one link per shell candidate (`src/dotnet/Mocassin.Compilation/Energy/PairCompilationStage.cs:120-126`);
+    the model-signature link projection writes four fields including the full `Vector4I` offset
+    (`src/dotnet/Mocassin.Compilation/Signatures/ModelSignatureProjection.cs:129-136`).
+  - `CompiledJumpRule.TrackerOrder` is `ImmutableArray<byte>` (`src/dotnet/Mocassin.Compilation/Transitions/CompiledTransitionModel.cs:70-82`);
+    `BuildTrackerOrder` allocates `rule.Movement.Length` bytes and emits `0xFF` for non-mobile nodes
+    (`src/dotnet/Mocassin.Compilation/Simulations/EncodingCompilationStage.cs:173-206`); the model projection
+    writes the variable length.
+  - `DiagnosticCatalog.Default` is in `Mocassin.Packages.Projects.Validation` and composes Core/Symmetry/
+    Compilation/Step 07 (`src/dotnet/Mocassin.Packages/Projects/Validation/DiagnosticCatalog.cs:48-55`);
+    `Mocassin.Results.csproj` references only `Mocassin.Core` and `Mocassin.Contracts`;
+    `DiagnosticCatalogTests.DefaultIsTheUnionOfTheDomainCatalogsAndStep07Codes` pins the exact composition and
+    `DiagnosticDocumentationTests` pins the code set to `docs/reference/diagnostics.md`.
+  - `contracts/manifest.json`: `signatures.lattice` is still the Step 00 skeleton with `dopingInfo`; `formats.package`
+    has no `payloads` key; `formats.package.tables.jobs` still has `norm_factor`/`base_frequency_hz`;
+    `formats.package.unknownFields` is `reject`. The generated `package-v1.schema.json` is the row schema.
+  - `tools/contracts/generate.py` validates `fields`/`tables`/`events`, derives `additionalProperties` from
+    `unknownFields`, and emits one schema artifact per format; `check_model_projection.py` globs
+    `tests/contracts/projections/*.bin` non-recursively (`:21`), so a `lattice/` subdirectory is excluded.
+  - `tests/contracts/signature-vectors.json` has 9 vectors (5 model, 4 parameterization, no lattice);
+    `samples/jobs/ceria-temperature-sweep.mocprj` has `parameterizations: []` and six jobs (2+2+1+1);
+    `Directory.Packages.props` versions `Microsoft.Data.Sqlite`, `MessagePack`, and `ZstdSharp.Port`, and no
+    project currently references the latter two; `.gitignore` has the `.msl.tmp-*` and `.msl` fixture exceptions.
+  - Fence audit of the changed pages: `step-13-rust-solver-foundation-and-package-reader.md` has **11** fence
+    lines (odd/unbalanced); the other changed step pages and `02-data-contracts.md` are balanced.
+
+#### Round-1 finding closure
+
+| Finding | Round-2 status | Evidence |
+| --- | --- | --- |
+| M-1 | **Closed in design.** Pair entries are one row per periodic image with `{target_position, offset:[i32;3], energy_id}`; `PairShell.EquivalentImages` is the real image list; the compiler change is feasible because every shell candidate carries a `PairShell`; the four-field model-signature link projection signs each image, so the regenerated Step 08/09 vectors and sample `modelSignature` values are the correct consequence. Step 08 §6, Step 14 §4, and Step 15 §4 are aligned. | `02-data-contracts.md:926-939`; Step 11 `:249-254`, `:463-473`; `PairReduction.cs:24`; `EnergyGeometrySampler.cs:222-290`; `ModelSignatureProjection.cs:129-136`; Step 08 `:316-320`; Step 14 `:132-145`. Residual R2-3. |
+| M-2 | **Closed in design.** `tracker_order` is a variable `u8[]`/`Vec<u8>` with one global tracker index or `0xFF` per node; the compiled source is the variable `CompiledJumpRule.TrackerOrder`; Step 13, Step 18, and the model-signature note are aligned. | `02-data-contracts.md:990,1014-1018`; Step 11 `:267-270`; Step 13 `:86,112-113,160-162`; Step 18 `:83-88`; `CompiledTransitionModel.cs:82`; `EncodingCompilationStage.cs:173-206`. Residual R2-2/R2-3. |
+| M-3 | **Closed in design.** `PKG` descriptors are Contracts-owned; `Mocassin.Packages` composes them into `DiagnosticCatalog.Default`; `Mocassin.Results` uses the same descriptors directly and keeps `Core + Contracts` only. | Step 11 `:424-429`; `01-target-architecture.md:134-140`; `DiagnosticCatalog.cs:48-55`; `Mocassin.Results.csproj`; `05-open-decisions.md` package-inspection row. R2-9 notes the exact-union test consequence. |
+| m-1 | **Closed.** `PKG001`–`PKG010` have severities, checks, and docs anchors; the check list is numbered and mapped. | Step 11 `:370-417`. |
+| m-2 | **Closed.** `package-summary-v1` is defined with schema, model/lattice/job entries, normalization, sort order, and golden location. | `02-data-contracts.md:1115-1159`; Step 11 `:305-314`. |
+| m-3 | **Closed.** ADR 0009 now records the pre-release package-shape finalization and the first-release resumption. | ADR 0009 `:68-80`; Step 11 `:433-437`; `05-open-decisions.md` package-shape row. |
+| m-4 | **Closed.** Step 14 is in the dependency reconciliation and §4 states the exact `cell + offset` expansion. | Step 11 `:105-106,111-121`; Step 14 `:132-145`. |
+| m-5 | **Closed.** A separate `contracts/generated/schema/package-payloads-v1.schema.json` is specified; the row schema stays separate; payload schemas use `additionalProperties: true`. | Step 11 `:441-448`; `generate.py:373-412,508-524`; `package-v1.schema.json`. R2-8 notes the manifest-policy gap. |
+| m-6 | **Closed.** Step 11 §9 gives the folder/namespace/file plan, and it respects the 20-file, depth-4, 800-line, and suffix rules. | Step 11 `:520-538`; `tools/structure-policy.json`. R2-6 notes the PublicAPI task wording. |
+| n-1 | **Closed.** `PackageInspection`, `PackageVerificationReport`, `PackageVerificationCheck`, `PackageVerificationOptions`, `IMslPackageInspector`, and `IPackageVerifier` are defined; `PackageWarning` is gone. | Step 11 `:322-363`. |
+| n-2 | **Closed.** Orphaned temp files are removed by `mocassin clean` (Step 28), stated explicitly. | Step 11 `:223-225`; Step 12 `:62`. |
+| n-3 | **Closed.** The `usePrerun` rule is qualified by kind; MMC requires `pre_run_mcsp = 0`, which the resolver and validation permit for valid jobs. | Step 11 `:400-401`; `SolverJobFlagsMapper.cs:59-96`; `JobSettingsResolver.cs:70-96`. |
+| n-4 | **Closed.** Only payload-derived columns are compared; authored/build metadata is checked for presence/format/uniqueness. | Step 11 `:395-399`; `02-data-contracts.md:839-840`. |
+| n-5 | **Closed in design.** The new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` edges are explicitly licence-gated in the feature that adds them; neither is currently referenced. | Step 11 `:480-482,580`; `Directory.Packages.props:18,30`; csproj grep. |
+
+#### Findings
+
+| ID | Severity | Finding | Evidence |
+| --- | --- | --- | --- |
+| **R2-1** | **Minor** | The Step 13 page has an unbalanced code fence introduced by the M-2 edit: the `JumpRule` block is closed at line 106, the `JobPackage` struct then sits outside a fence, and the original closing fence at line 124 is orphaned. The page has 11 fence lines (odd); the rendering swallows/loses the `### 3. .msl reader` block. | `docs/planning/steps/step-13-rust-solver-foundation-and-package-reader.md:106,115-124`; `grep -c '^```'` = 11; `./tools/verify.sh docs` does not detect fence balance. |
+| **R2-2** | **Minor** | The new `PairLink.offset` comment still says “representative relative cell image”, contradicting the per-image M-1 contract (one entry per periodic image, not only the shell representative). | Step 13 `:89-93`; Step 11 `:249-254`; `02-data-contracts.md:926-939`. |
+| **R2-3** | **Minor** | Two verifier/reader validations reference facts the payload does not carry: (a) “the shell representative is present” (check 5) cannot be evaluated because `distance_bucket_fm`, the representative marker, and any symmetry reference are absent and `Mocassin.Results` references only `Core + Contracts`; (b) “`tracker_order.Length` equals the rule's node count” has no independent source because `jump_rules` has no node count or representative-direction id and the state codes do not uniquely encode trailing void nodes. Either persist a node count/representative marker (and define the derivation), or narrow the checks to what the payload proves. | Step 11 `:384-388,600`; Step 13 `:160-162`; `02-data-contracts.md:988-990`; `Mocassin.Results.csproj`. |
+| **R2-4** | **Minor** | Step 11 §6 item 4 records removal of `jump_collections.object_id`, but §3.3 never contained that field at either the round-1 or the frozen commit; only `jump_directions.object_id` exists. The delta is stale and will confuse the implementation/audit. | Step 11 `:451-453`; `02-data-contracts.md:988` (also at `d8ade7a`); `grep -n object_id` finds only energy tables and `jump_directions`. |
+| **R2-5** | **Note** | The request's `Step summary` sizing line still says “3.5–4.0 person-weeks … within the roadmap §3.1 … trigger”, while the revised design §10 says the honest estimate is 3.8–4.2 pw and the upper bound exceeds the four-week trigger. The request owner should update the summary so the start-gate decision is presented consistently. | `docs/planning/reviews/step-11.md` `Step summary`; Step 11 `:540-557`; `04-roadmap.md` §3.1 Step 09 precedent. |
+| **R2-6** | **Note** | The task “Update `PublicAPI.Unshipped.txt` and the ApiCompat baseline for all three projects” is narrower than the actual API surface: the change also adds a public member to `Mocassin.Symmetry.PairInteractionPreview` and to `Mocassin.Core` (`JobExtension.ToCanonicalJson`). §6 item 10 mentions the Symmetry/Compilation baseline, but the task line should name Core/Symmetry explicitly. | Step 11 `:531,579`; `Mocassin.Symmetry/PublicAPI.Unshipped.txt:494-501`; `src/dotnet/Mocassin.Core/Model/Jobs/JobExtension.cs`; Step 11 §6 item 10. |
+| **R2-7** | **Note** | The publication barrier requires an `fsync` of the containing directory (`:221`) without naming the mechanism or the platform consequence. .NET has no managed directory-fsync API; a Unix P/Invoke is a platform-specific trigger under `AGENTS.md` §3.13 and needs a recorded platform-gate/CI decision (Windows has no equivalent). | Step 11 `:208-225,571`; `AGENTS.md` §3.13; risk table `:676`. |
+| **R2-8** | **Note** | The new payload schemas are specified as `additionalProperties: true`, while `formats.package.unknownFields` is `reject` and `generate.py` derives `additionalProperties` from that field. The manifest does not express the payload unknown-key policy; the implementation must hard-code the exception in the generator, which weakens the “manifest is the single source” claim. | Step 11 `:441-448`; `contracts/manifest.json` `formats.package.unknownFields`; `tools/contracts/generate.py:373-412`. |
+| **R2-9** | **Note** | Adding `PackageDiagnosticDescriptors` to `DiagnosticCatalog.Default` will break the exact-union test `DefaultIsTheUnionOfTheDomainCatalogsAndStep07Codes`; the design's diagnostic-ownership test row mentions appearance in `Default` and the docs page but not the exact-composition expectation. The implementation should update that expectation explicitly (it is not a defect in the design, just an unlisted test change). | `src/dotnet/Mocassin.Packages.Tests/Projects/Validation/DiagnosticCatalogTests.cs:17-31`; `DiagnosticDocumentationTests.cs:17-45`; Step 11 `:656`. |
+
+No Blocker or Major finding remains. R2-1–R2-4 are small documentation or verifier-derivation corrections; R2-5–R2-9 are observations for the implementation and start gate.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Ready with notes.** The three round-1 Majors (M-1, M-2, M-3) are closed in the design with evidence in the
+shipped code and contracts, the remaining round-1 Minors and Notes are resolved, and both required gates pass.
+The four Minor findings are documentation or verifier-detail corrections that do not change the package format,
+the writer/verifier boundary, or the cross-step solver contract; the five Notes are for the implementation and
+the start-gate presentation. The human owner may accept the notes, or the planner may correct R2-1–R2-4 and
+append a further round; this reviewer does not approve the start gate.
+
+Follow-up owner: Human owner (accept `Ready with notes`); planner/step agent for R2-1–R2-4 if corrected.
+Follow-up step: Step 11 — start-gate decision; no re-review is required for the Notes.
