@@ -23,7 +23,7 @@ read-only inspection/verification library for the build CLI.
 | 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `eb8513d` |
 | 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `9b754af` |
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `c0d8d64` |
-| 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
+| 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `bdafaa4` |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Pending | — | — | — |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Pending | — | — | — |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Pending | — | — | — |
@@ -143,7 +143,7 @@ per feature.
 #### Feature 4 — Model payload encoding
 
 - **Branch:** `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding`
-- **Squash commit:** recorded in the follow-up status commit.
+- **Squash commit:** `bdafaa4` (`step-11: encode the parameterized model payload`).
 - **Local gates:** `./tools/verify.sh all --require` exit 0 after the format fixes — .NET build 0 warnings and all
   solution tests (407 Packages tests, 96 Compilation, 223 Symmetry, 37 Contracts, 683 Core, 17 Cli, 1 Results,
   1 App, 1 Architecture); NuGet licence policy OK (**58** packages); ApiCompat clean after refreshing the
