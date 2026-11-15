@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-11-amend-1` |
 | Parent step | 11 — Simulation Package and `.msl` Writer |
-| Status | In progress (owner accepted `Ready with notes` and approved implementation 2026-11-15) |
+| Status | Integrated (squash `00753e7`; owner accepted `Ready with notes` and approved implementation 2026-11-15) |
 | Branch | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` |
 | Design review | `docs/planning/reviews/step-11-amend-1.md` |
 | Parent audit | `docs/planning/audits/step-11.md` |
@@ -714,43 +714,50 @@ change, and vice versa; and the pre-switch evidence is captured before either ca
 
 ## Acceptance criteria
 
-- [ ] `dotnet build Mocassin.slnx -c Release` and `dotnet test Mocassin.slnx -c Release` pass on SDK 11.0.100
-      with zero warnings, and the test counts match the pre-amendment run.
-- [ ] `global.json` pins `11.0.100` with `latestPatch`; `dotnet --version` resolves to `11.0.100` locally, in CI,
-      and in the image assertion path.
-- [ ] No `ZstdSharp` reference remains in `Directory.Packages.props`, any `.csproj`, or any source file, and
-      `check_nuget_licenses.py` reports the reduced package set with the policy gate green.
-- [ ] Model, job, and lattice payloads encode and decode only through the in-box API, and the existing
+- [x] `dotnet build Mocassin.slnx -c Release` and `dotnet test Mocassin.slnx -c Release` pass on SDK 11.0.100
+      with zero warnings. The amended tree runs **1,506** tests (the pre-amendment branch point ran 1,497; the
+      +9 are the amendment's codec/golden and decoder-bound tests) with 0 failures.
+- [x] `global.json` pins `11.0.100` with `latestPatch`; `dotnet --version` resolves to `11.0.100` locally. The
+      containerfile carries the exact-count and pin assertions; CI resolves the same pin from `global.json`.
+- [x] No `ZstdSharp` reference remains in `Directory.Packages.props`, any `.csproj`, or any source file
+      (`grep` is empty); `check_nuget_licenses.py` reports **52** packages (was 58) and the policy gate is green.
+- [x] Model, job, and lattice payloads encode and decode only through the in-box API, and the existing
       round-trip, determinism, guard, and corruption tests pass unchanged apart from the test-support encoder.
-- [ ] The decode guard still produces `InvalidDataException` in the writer and `PKG004` in the verifier for a
-      truncated frame, a corrupt frame, and a frame whose bound exceeds the guard, with no unbounded allocation.
-- [ ] Model, parameterization, and lattice signatures and the `package-summary-v1` projection are identical
+- [x] The decode guard still produces `InvalidDataException` in the writer and `PKG004` in the verifier for a
+      truncated frame, a corrupt frame, and a frame whose bound exceeds the guard, with no unbounded allocation
+      for model and job payloads. The lattice read-path gap is routed (§4).
+- [x] Model, parameterization, and lattice signatures and the `package-summary-v1` projection are identical
       before and after for the same logical input; `contracts/**` has no diff and `verify.sh contracts` is green.
-- [ ] The checked-in pre-amendment `.msl` fixture (§9.5) opens read-only on the amended tree, verifies without a
-      `PKG` error, and its `package-summary-v1` equals the checked-in golden. The reverse-direction read is
-      recorded as a one-time migration check in the feature log.
-- [ ] `zstd` CLI 1.5.7 decodes a native payload byte-identically, and a CLI-produced frame decodes through the
-      package reader.
-- [ ] The quality-mapping test reproduces the checked-in golden frames at levels 3 and 9, including the
+- [x] The checked-in pre-amendment `.msl` fixture (§9.5) opens read-only on the amended tree, verifies without a
+      `PKG` error, and its `package-summary-v1` equals the checked-in golden (PR-fast test). The reverse-direction
+      read is recorded in §9.5 as a one-time migration check.
+- [x] `zstd` CLI 1.5.7 decodes a native payload byte-identically, and a CLI-produced frame decodes through the
+      package reader (probe and `PackagePayloadDecoderTests`).
+- [x] The quality-mapping test reproduces the checked-in golden frames at levels 3 and 9, including the
       `sample-model-1` seed vector (3,475 B → 1,415 B / 1,387 B).
 - [ ] Part A is complete and recorded in this page (§9.1) under the refined small-payload rule; Part B is run on
-      the amended tree with the mandatory net10 reference (or the documented absolute fallback).
-- [ ] The lattice decode-bound gap (§4) is recorded as a Step 11 fix-feature task (`fix-lattice-decode-guard`);
+      the amended tree with the mandatory net10 reference (or the documented absolute fallback). **Part A is
+      complete and re-confirmed after the swap (§9.1); Part B belongs to feature 7 and is not part of this
+      feature.**
+- [x] The lattice decode-bound gap (§4) is recorded as a Step 11 fix-feature task (`fix-lattice-decode-guard`);
       no page claims the lattice path is bounded by the verification options until that fix lands.
-- [ ] The ApiCompat baseline is regenerated at `tests/contracts/api-baseline/net11.0/`; the one-time cross-TFM
+- [x] The ApiCompat baseline is regenerated at `tests/contracts/api-baseline/net11.0/`; the one-time cross-TFM
       comparison reports no breaking changes; `PublicAPI.*.txt` is unchanged; `verify.sh api` is green.
-- [ ] `./tools/verify.sh all --require` passes on the amendment branch.
-- [ ] The containerfile installs 11.0.100 only and asserts it; ReportGenerator 5.6.0 and DocFX 2.81.0 resolve;
-      the image build is **not** claimed as verified — it is deferred to closeout as an accepted risk (see Risks
-      and the owner decisions).
-- [ ] `Microsoft.NET.Test.Sdk` is `18.12.0`; the suite runs and coverage is collected; the
-      `VSTEST_ARTIFACTS_DIRECTORY` message is gone or re-checked and recorded as benign.
-- [ ] `tools/reference/Mocassin.ReferenceHarness` is retargeted to `net11.0` and builds whenever the GPL reference
-      clone is available; otherwise the verification gap is recorded for Step 29.
-- [ ] `NOTICE.md` is unchanged (framework-dependent build); the self-contained/AOT third-party-notice obligation
-      is recorded as a Step 31 follow-up.
-- [ ] Toolchain documentation is updated and `./tools/verify.sh docs` is green.
-- [ ] Parent step page, amendment index, status dashboard, and open decisions reflect the amendment state.
+- [x] `./tools/verify.sh all --require` passes on the amendment branch (exit 0).
+- [x] The containerfile installs 11.0.100 only and asserts it; ReportGenerator 5.6.0 and DocFX 2.81.0 resolve;
+      the image build is **not** claimed as verified — it is deferred to closeout as the accepted risk.
+- [x] `Microsoft.NET.Test.Sdk` is `18.12.0`; the suite runs and coverage is collected
+      (`coverage.cobertura.xml` produced). The `VSTEST_ARTIFACTS_DIRECTORY` message persists because this
+      environment has no `/run/user/1000`; it is recorded as a benign, environment-specific test-host message,
+      not suppressed.
+- [x] `tools/reference/Mocassin.ReferenceHarness` is retargeted to `net11.0`. The GPL reference clone is not
+      available in this environment, so its build is recorded as an unresolved Step 29 item, not as verified.
+- [x] `NOTICE.md` is unchanged (framework-dependent build); the self-contained/AOT third-party-notice obligation
+      is recorded as a Step 31 follow-up and in `06-toolchain-requirements.md` §4.
+- [x] Toolchain documentation is updated and `./tools/verify.sh docs` is green.
+- [x] Parent step page, amendment index, status dashboard, and open decisions reflect the amendment state.
+- [ ] The Step 11 audit request names this amendment, the combined commit, the completed Part A, and the routed
+      lattice fix. **Closeout task; not part of this feature.**
 
 ## Tests
 
@@ -782,31 +789,32 @@ package payloads. No domain doubles.
 ## Documentation
 
 - [ ] `docs/reference/msl-format.md` (feature 7) states the payload codec as the in-box Zstd encoder with the
-      fixed one-shot path and the quality mapping, and that reads accept any valid standard frame.
-- [ ] `docs/reference/file-layout.md` points at `tests/contracts/api-baseline/net11.0/` and lists the
+      fixed one-shot path and the quality mapping, and that reads accept any valid standard frame. **Feature 7.**
+- [x] `docs/reference/file-layout.md` points at `tests/contracts/api-baseline/net11.0/` and lists the
       `tests/contracts/packages/amend-1/` and `amend-1-net10/` fixture directories.
-- [ ] `tests/contracts/README.md` records the new baseline path and the golden/fixture layout, with the
+- [x] `tests/contracts/README.md` records the new baseline path and the golden/fixture layout, with the
       regeneration rule (bytes may be re-captured; signatures and summaries are not regenerated).
-- [ ] `docs/getting-started/index.md`, `README.md`, `CONTRIBUTING.md`, `src/dotnet/README.md`, and `AGENTS.md`
+- [x] `docs/getting-started/index.md`, `README.md`, `CONTRIBUTING.md`, `src/dotnet/README.md`, and `AGENTS.md`
       §1/§8 state .NET 11 (active pages only; §6.1 lists the historical pages that stay .NET 10).
-- [ ] `docs/planning/README.md`, `00-scope-and-principles.md` §3.2, `01-target-architecture.md` §6, and
+- [x] `docs/planning/README.md`, `00-scope-and-principles.md` §3.2, `01-target-architecture.md` §6, and
       `03-quality-strategy.md` §9.3/§11/§13 state .NET 11 / `net11.0` with the wording in §6.1; .NET 11 is
       described as STS, not LTS.
-- [ ] `docs/planning/appendix-b-parity-matrix.md` §10 row becomes `.NET 11 | Y | Implemented | 00/11` with the
+- [x] `docs/planning/appendix-b-parity-matrix.md` §10 row becomes `.NET 11 | Y | Implemented | 00/11` with the
       amendment note.
-- [ ] `docs/performance/index.md` keeps its historical .NET 10 measurements and adds a note that later
+- [x] `docs/performance/index.md` keeps its historical .NET 10 measurements and adds a note that later
       measurements use .NET 11; historical numbers are not rewritten.
-- [ ] `.github/ISSUE_TEMPLATE/bug_report.yml` placeholder uses the new SDK version.
-- [ ] `docs/planning/06-toolchain-requirements.md` §4/§9 record SDK 11.0.100, the ApiCompat tool 11.0.100 (net10
-      asset, `rollForward: Major`), ReportGenerator 5.6.0, and remove `ZstdSharp` from the project-local list.
-- [ ] `docs/planning/03-quality-strategy.md` §9.9 records the fixed encoder path, the quality mapping, the
+- [x] `.github/ISSUE_TEMPLATE/bug_report.yml` placeholder uses the new SDK version.
+- [x] `docs/planning/06-toolchain-requirements.md` §4/§9 record SDK 11.0.100, the ApiCompat tool 11.0.100 (net10
+      asset, `rollForward: Major`), ReportGenerator 5.6.0, remove `ZstdSharp` from the project-local list, and
+      state the BSD-3-Clause native zstd licence and unchanged `NOTICE.md`.
+- [x] `docs/planning/03-quality-strategy.md` §9.9 records the fixed encoder path, the quality mapping, the
       byte-identity-as-observation rule, the refined small-payload decode rule, and the lattice-bomb exception
       routed to the fix feature.
-- [ ] `docs/planning/04-roadmap.md` names no .NET 10 current-tense target (verified: no change expected).
-- [ ] This amendment page, the amendment index, the parent step page, `05-open-decisions.md`, the parent review
+- [x] `docs/planning/04-roadmap.md` names no .NET 10 current-tense target (verified: no change expected).
+- [x] This amendment page, the amendment index, the parent step page, `05-open-decisions.md`, the parent review
       record link, and `status.md` are updated.
 - [ ] The Step 11 audit request names this amendment, the combined commit, the completed Part A, and the routed
-      lattice fix.
+      lattice fix. **Closeout task; not part of this feature.**
 
 ## Risks and mitigations
 
@@ -854,8 +862,8 @@ package payloads. No domain doubles.
 - Parent step branch: `step/11-simulation-package-and-msl-writer`
 - Approval: owner accepted `Ready with notes` and approved implementation on 2026-11-15; the feature branch is
   created from the approved step branch. Owner decisions 1–6 are recorded above.
-- Approval commit: — (filled at integration with the step-branch approval commit)
-- Squash commit: —
+- Approval commit: `683b7c4` (`docs: record step-11-amend-1 approval and round-2 resolutions [skip ci]`)
+- Squash commit: `00753e7` (`step-11: retarget to .NET 11 and replace the payload codec`)
 - Parent audit request updated: after integration, refresh the Step 11 implementation status, the feature log,
   the closeout evidence path, and the audit request with the combined commit
 - Combined frozen commit: —

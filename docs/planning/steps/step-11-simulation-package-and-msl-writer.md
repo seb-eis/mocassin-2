@@ -16,9 +16,8 @@ read-only inspection/verification library for the build CLI.
 - **Audit:** Not requested
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
-  toolchain and native Zstandard — **In progress**; design review `Ready with notes` accepted 2026-11-15
-  ([record](../reviews/step-11-amend-1.md)); feature branch
-  `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd`
+  toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
+  2026-11-15 ([record](../reviews/step-11-amend-1.md))
 - **Feature list:** Approved 2026-11-15 (seven features)
 - **Last updated:** 2026-11-15
 
@@ -30,7 +29,7 @@ read-only inspection/verification library for the build CLI.
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `bdafaa4` |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `4fe6225` |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `cbe345f` |
-| A1 .NET 11 toolchain and native Zstandard | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | In progress | — | Not run (no per-feature CI) | — |
+| A1 .NET 11 toolchain and native Zstandard | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | Squashed | `all --require` exit 0; one-time cross-TFM ApiCompat 9/9 | Not run (no per-feature CI) | `00753e7` |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Held (after amendment 1) | — | — | — |
 
 ### Approved feature list
@@ -261,6 +260,40 @@ per feature.
 - **Parity:** the package inspection/verification row remains `Improvement` because the Step 12 CLI half is
   still pending; the read-only library half is complete.
 
+#### Amendment 1 — .NET 11 toolchain and native Zstandard
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd`
+- **Squash commit:** `00753e7` (`step-11: retarget to .NET 11 and replace the payload codec`). Feature commits:
+  `e2b00ea` pre-amendment fixture and codec goldens (net10 writer), `b0f189e` retarget, `771c28b` codec swap,
+  `1f7f61a` amended-tree evidence. Approval commit on the step branch: `683b7c4`.
+- **Local gates:** `./tools/verify.sh all --require` exit 0 — build and 1,506 tests (0 failed, 0 warnings),
+  format, `api`, `structure`, `contracts` (19 artifacts current; 5/4/2 projections), `policy` (NuGet licences
+  52 packages, 9 ApiCompat comparisons, SPDX 593 files, secrets 965 files, cargo-deny), Rust, Python, and the
+  strict docs build (DocFX 0 warnings/0 errors). One-time cross-TFM ApiCompat: 9/9 assemblies report "no
+  breaking changes"; `PublicAPI.*.txt` unchanged.
+- **Step CI:** not run — feature branches do not trigger CI; the closeout run is the only step-branch run.
+- **Diff summary:** `global.json` to SDK `11.0.100`/`latestPatch`; all 21 solution projects plus the reference
+  harness to `net11.0`; `Microsoft.NET.Test.Sdk 18.12.0`; ApiCompat tool `11.0.100` and the baseline renamed and
+  regenerated at `tests/contracts/api-baseline/net11.0/`; DocFX paths/metadata and the containerfile (11.0.100
+  only, exact-count assertions, ReportGenerator 5.6.0, carried-over `COPY global.json` pin); the eight active
+  documentation pages plus the parity row and the bug-report placeholder; `ZstdSharp.Port` removed and the
+  payload codec replaced by the one-shot in-box `ZstandardEncoder`/`ZstandardDecoder` (writer, reader, and test
+  support); three analyzer adaptations required by SDK 11 (`CA1517` read-only span, two `CA2026` `JsonElement`
+  conversions); the pre-amendment `.msl` fixture, 12 raw payloads, and 24 golden frames checked in with tests.
+- **Cross-version evidence:** the `net10.0` fixture verifies on `net11.0` and its canonical summary matches the
+  golden (PR-fast). The reverse check (net10 build at `e2b00ea` reading a net11-written package) reported
+  `IsValid=true`, 10 checks, 0 diagnostics, and the same summary SHA-256 `60c95e1b…`; the net11 writer
+  reproduced the net10 package SHA-256 `053e4c8f…` because the payload frames are byte-identical.
+- **Part A re-run:** refined gate PASS in both the controlled and default-JIT runs; size 0.000 % (24/24
+  byte-identical goldens), encode worst +4.12 %, worst small-payload decode +0.1055 µs (≤ 0.15 µs), ≥ 8 KiB
+  decode +2.08 % (≤ +10 %), throughput ≥ 297 MB/s (≥ 100), 240/240 checks.
+- **Known limitations / follow-ups:** the container image was not built (owner-accepted risk, deferred to
+  closeout); the `VSTEST_ARTIFACTS_DIRECTORY` message persists because `/run/user/1000` is absent here and is
+  recorded as benign; the ReferenceHarness retarget is unverified without the GPL clone (Step 29 item);
+  `fix-lattice-decode-guard` remains a separate fix feature before the audit freeze; Part B is feature 7; the
+  superseded `docs/dotnet-11-container` branch (`9ab4bb8`) is still present and is removed as closeout cleanup.
+- **Parity:** the `.NET 11` row in `appendix-b-parity-matrix.md` §10 is now `Implemented`.
+
 ### Amendment 1 — .NET 11 toolchain and native Zstandard
 
 Feature 7 is held until [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) is reviewed
@@ -268,12 +301,12 @@ and integrated. The amendment moves the repository from `net10.0` to `net11.0` a
 `ZstdSharp.Port` payload codec with the in-box `System.IO.Compression` Zstandard API.
 
 Design-review state: round 1 returned `Changes required` at `06774ee`; the re-review returned `Ready with notes`
-at `17e723c`, accepted by the human owner on 2026-11-15. The amendment is **in progress** on
-`feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd`. The first feature commit
-captures the pre-amendment `.msl` compatibility fixture and the golden codec frames with the still-net10 writer,
-before the retarget. Part A of the benchmark gate is **complete** (2026-11-15, amendment §9.1) and passed under
-the owner-approved small-payload rule (absolute decode penalty ≤ 0.15 µs below 8 KiB, ≥ 100 MB/s throughput,
-≤ +10 % relative at or above 8 KiB).
+at `17e723c`, accepted by the human owner on 2026-11-15. The amendment is **integrated** as `00753e7` after a
+feature branch that captured the pre-amendment `.msl` compatibility fixture and the golden codec frames with the
+still-net10 writer (`e2b00ea`), retargeted the repository (`b0f189e`), and replaced the codec (`771c28b`). Part A
+of the benchmark gate is **complete** (2026-11-15, amendment §9.1), and re-confirmed on the amended tree after
+the swap, under the owner-approved small-payload rule (absolute decode penalty ≤ 0.15 µs below 8 KiB,
+≥ 100 MB/s throughput, ≤ +10 % relative at or above 8 KiB).
 
 Design consequences recorded here so the parent design stays coherent:
 
@@ -864,10 +897,11 @@ Two options, for the human owner's start-gate decision:
       `Mocassin.Results`.
 - [x] Record the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges.
 - [ ] Write the documentation named below and update parity/status.
-- [ ] Review and integrate [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) (.NET 11
+- [x] Review and integrate [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) (.NET 11
       toolchain and native Zstandard) before feature 7 generates the fixtures and before the audit freeze.
-- [ ] Capture the pre-amendment `.msl` compatibility fixture and the golden codec frames with the net10 writer
-      before the retarget (amendment §9.4–§9.5), and commit them with the amendment feature.
+      Integrated as `00753e7` after the `Ready with notes` acceptance.
+- [x] Capture the pre-amendment `.msl` compatibility fixture and the golden codec frames with the net10 writer
+      before the retarget (amendment §9.4–§9.5), and commit them with the amendment feature (`e2b00ea`).
 - [ ] Close the lattice decode-bound gap found by review A1-10 in a Step 11 fix feature
       (`feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard`): derive the bound from the
       referencing `jobs` row (`lattice_a/b/c`) and the model payload's `position_count`, apply it in
