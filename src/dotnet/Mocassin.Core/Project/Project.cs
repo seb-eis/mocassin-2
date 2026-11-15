@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Energy;
+using Mocassin.Core.Model.Jobs;
 using Mocassin.Core.Model.Lattice;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Simulations;

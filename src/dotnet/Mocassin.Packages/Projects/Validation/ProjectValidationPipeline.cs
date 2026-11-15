@@ -2,6 +2,7 @@
 
 using System.Collections.Immutable;
 using System.Diagnostics;
+using Mocassin.Compilation.Compiler;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Project;
 using Mocassin.Symmetry.Energy;
@@ -77,13 +78,26 @@ public sealed class ProjectValidationPipeline
     /// <param name="project">The project snapshot.</param>
     /// <param name="loadDiagnostics">Optional caller-owned load diagnostics.</param>
     /// <param name="options">Optional run options.</param>
+    /// <param name="compiledModel">
+    /// The optional compiled model supplied by build orchestration. Build stages run only when
+    /// <see cref="ValidationOptions.RunBuildStage"/> is enabled and this model is present.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The immutable validation result.</returns>
     public ValidationResult Validate(
         Project project,
         ImmutableArray<Diagnostic> loadDiagnostics = default,
         ValidationOptions? options = null,
-        CancellationToken cancellationToken = default)
+        CompiledModel? compiledModel = null,
+        CancellationToken cancellationToken = default) =>
+        ValidateCore(project, compiledModel, loadDiagnostics, options, cancellationToken);
+
+    private ValidationResult ValidateCore(
+        Project project,
+        CompiledModel? compiledModel,
+        ImmutableArray<Diagnostic> loadDiagnostics,
+        ValidationOptions? options,
+        CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(project);
         var effectiveOptions = GetValidatedOptions(options);
@@ -110,7 +124,14 @@ public sealed class ProjectValidationPipeline
             return AssembleResult(identity, loadFailure: null, stages, statistics: null, effectiveOptions);
         }
 
-        return RunLoadedStages(project, identity, loadFailure: null, stages, effectiveOptions, cancellationToken);
+        return RunLoadedStages(
+            project,
+            identity,
+            loadFailure: null,
+            stages,
+            effectiveOptions,
+            compiledModel,
+            cancellationToken);
     }
 
     /// <summary>
@@ -119,14 +140,27 @@ public sealed class ProjectValidationPipeline
     /// <param name="projectPath">The project file path.</param>
     /// <param name="store">Optional store configured with <see cref="ProjectStoreOptions.ValidateOnLoad"/> disabled.</param>
     /// <param name="options">Optional run options.</param>
+    /// <param name="compiledModel">
+    /// The optional compiled model supplied by build orchestration. Build stages run only when
+    /// <see cref="ValidationOptions.RunBuildStage"/> is enabled and this model is present.
+    /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The immutable validation result.</returns>
     /// <exception cref="ArgumentException">The supplied store would validate on load.</exception>
-    public async Task<ValidationResult> ValidateFileAsync(
+    public Task<ValidationResult> ValidateFileAsync(
         string projectPath,
         ProjectStore? store = null,
         ValidationOptions? options = null,
-        CancellationToken cancellationToken = default)
+        CompiledModel? compiledModel = null,
+        CancellationToken cancellationToken = default) =>
+        ValidateFileCoreAsync(projectPath, store, options, compiledModel, cancellationToken);
+
+    private async Task<ValidationResult> ValidateFileCoreAsync(
+        string projectPath,
+        ProjectStore? store,
+        ValidationOptions? options,
+        CompiledModel? compiledModel,
+        CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(projectPath);
         var effectiveOptions = GetValidatedOptions(options);
@@ -171,6 +205,7 @@ public sealed class ProjectValidationPipeline
             loadFailure: null,
             stages,
             effectiveOptions,
+            compiledModel,
             cancellationToken);
     }
 
@@ -180,6 +215,7 @@ public sealed class ProjectValidationPipeline
         ProjectLoadFailureKind? loadFailure,
         List<StageExecution> stages,
         ValidationOptions options,
+        CompiledModel? compiledModel,
         CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -221,7 +257,7 @@ public sealed class ProjectValidationPipeline
             HasError(feasibilityDiagnostics) ? ValidationStageStatus.Failed : ValidationStageStatus.Completed,
             Stopwatch.GetElapsedTime(feasibilityStarted)));
 
-        RunBuildStages(project, options, stages, cancellationToken);
+        RunBuildStages(project, options, compiledModel, stages, cancellationToken);
 
         return AssembleResult(identity, loadFailure, stages, feasibility.Statistics, options);
     }
@@ -242,6 +278,7 @@ public sealed class ProjectValidationPipeline
     private void RunBuildStages(
         Project project,
         ValidationOptions options,
+        CompiledModel? compiledModel,
         List<StageExecution> stages,
         CancellationToken cancellationToken)
     {
@@ -250,7 +287,7 @@ public sealed class ProjectValidationPipeline
             return;
         }
 
-        var blocked = stages.Exists(static stage => HasError(stage.Diagnostics));
+        var blocked = compiledModel is null || stages.Exists(static stage => HasError(stage.Diagnostics));
         var previous = FinalizeStages(stages).Stages;
         foreach (var stage in buildStages)
         {
@@ -262,7 +299,7 @@ public sealed class ProjectValidationPipeline
 
             cancellationToken.ThrowIfCancellationRequested();
             var started = Stopwatch.GetTimestamp();
-            var context = new ValidationContext(project, options, catalog, previous);
+            var context = new ValidationContext(project, options, catalog, previous, compiledModel);
             var diagnostics = stage.Validate(context, cancellationToken);
             if (diagnostics.IsDefault)
             {

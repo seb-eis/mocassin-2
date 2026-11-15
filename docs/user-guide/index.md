@@ -25,9 +25,9 @@ land.
 - [Parameterization](parameterization.md)
 - [Lattice and doping](lattice.md)
 - [Simulations](simulations.md)
+- [Job templates and supercells](job-templates.md)
 - Project lifecycle and model editors
 - Validation and diagnostics
-- Job templates and supercells
 - Building and running simulations
 - Results, plots, and reports
 - 3D visualization and MMCFE

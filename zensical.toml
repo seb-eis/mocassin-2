@@ -34,6 +34,7 @@ nav = [
       { "Parameterization" = "user-guide/parameterization.md" },
       { "Lattice and doping" = "user-guide/lattice.md" },
       { "Simulations" = "user-guide/simulations.md" },
+      { "Job templates and supercells" = "user-guide/job-templates.md" },
     ] },
   { "Physics" = [
       { "Overview" = "physics/index.md" },

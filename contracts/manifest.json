@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "project": "MOCASSIN",
   "description": "Machine-readable contract manifest for MOCASSIN project, package, results, state, job-folder, event, and MMCFE formats.",
-  "status": "step-07",
-  "notes": "Step 06 adds the flat occupationExchanges, dopings, and simulations model sections. The simulation DTO is a flat object with kind, the matching transition array, and a settings object; kind-specific fields are optional in the generated schema because the generator has no oneOf/discriminator support, and the validator rejects a mismatched shape. Nullable simulation settings use the manifest nullable flag. The lattice and simulation sections remain additive under project schema v1; the manifest status/notes and fixtures were updated at that step, and ADR 0009's version-bump rule resumes with the first released format. Step 07 adds the additive reports.validation validation-v1 report; the project schema remains v1 and the report is versioned separately.",
+  "status": "step-10",
+  "notes": "Step 06 adds the flat occupationExchanges, dopings, and simulations model sections. The simulation DTO is a flat object with kind, the matching transition array, and a settings object; kind-specific fields are optional in the generated schema because the generator has no oneOf/discriminator support, and the validator rejects a mismatched shape. Nullable simulation settings use the manifest nullable flag. The lattice and simulation sections remain additive under project schema v1; the manifest status/notes and fixtures were updated at that step, and ADR 0009's version-bump rule resumes with the first released format. Step 07 adds the additive reports.validation validation-v1 report; the project schema remains v1 and the report is versioned separately. Step 10 extends the jobTemplates identity stub with collections, configurations, inheritable settings, lattice requests, dopings, selection optimizers, and opaque canonical extension configs; the project schema remains additive v1 and the new populated fixture is registered.",
   "formats": {
     "project": {
       "id": "project",
@@ -1152,7 +1152,7 @@
             }
           ]
         },
-        {
+                {
           "name": "jobTemplates",
           "type": "array",
           "required": true,
@@ -1168,6 +1168,376 @@
               "name": "name",
               "type": "string",
               "required": true
+            },
+            {
+              "name": "collections",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "simulationId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "baseSettings",
+                  "type": "object",
+                  "required": false,
+                  "additionalProperties": false,
+                  "fields": [
+                    {
+                      "name": "temperatureK",
+                      "type": "float64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "targetMcsp",
+                      "type": "int64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "writeOutCount",
+                      "type": "int64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "timeLimitSeconds",
+                      "type": "int64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "minSuccessRate",
+                      "type": "float64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "flags",
+                      "type": "array",
+                      "required": false,
+                      "items": "string",
+                      "notes": "Sorted camelCase authored execution flags."
+                    },
+                    {
+                      "name": "instruction",
+                      "type": "string",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "preRunMcsp",
+                      "type": "int64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "electricFieldModulusVm",
+                      "type": "float64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "electricFieldDirection",
+                      "type": "array",
+                      "required": false,
+                      "nullable": true,
+                      "items": "float64",
+                      "length": 3
+                    },
+                    {
+                      "name": "normalizationEnergyEv",
+                      "type": "float64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "maxAttemptFrequencyHz",
+                      "type": "float64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "breakTolerance",
+                      "type": "float64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "breakSampleLengthMcsp",
+                      "type": "int64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "breakSampleIntervalMcsp",
+                      "type": "int64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "resultSampleMcsp",
+                      "type": "int64",
+                      "required": false,
+                      "nullable": true
+                    },
+                    {
+                      "name": "extensions",
+                      "type": "array",
+                      "required": false,
+                      "items": "object",
+                      "itemAdditionalProperties": false,
+                      "itemFields": [
+                        {
+                          "name": "id",
+                          "type": "string",
+                          "required": true
+                        },
+                        {
+                          "name": "config",
+                          "type": "object",
+                          "required": true,
+                          "additionalProperties": true
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "jobCountPerConfig",
+                  "type": "int64",
+                  "required": false,
+                  "nullable": true
+                },
+                {
+                  "name": "rngSeed",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                },
+                {
+                  "name": "selectionOptimizers",
+                  "type": "array",
+                  "required": false,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "siteId",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "particleId",
+                      "type": "string",
+                      "required": true
+                    }
+                  ]
+                },
+                {
+                  "name": "configs",
+                  "type": "array",
+                  "required": false,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "id",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "name",
+                      "type": "string",
+                      "required": true
+                    },
+                    {
+                      "name": "overrides",
+                      "type": "object",
+                      "required": false,
+                      "additionalProperties": false,
+                      "fields": [
+                        {
+                          "name": "temperatureK",
+                          "type": "float64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "targetMcsp",
+                          "type": "int64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "writeOutCount",
+                          "type": "int64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "timeLimitSeconds",
+                          "type": "int64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "minSuccessRate",
+                          "type": "float64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "flags",
+                          "type": "array",
+                          "required": false,
+                          "items": "string",
+                          "notes": "Sorted camelCase authored execution flags."
+                        },
+                        {
+                          "name": "instruction",
+                          "type": "string",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "preRunMcsp",
+                          "type": "int64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "electricFieldModulusVm",
+                          "type": "float64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "electricFieldDirection",
+                          "type": "array",
+                          "required": false,
+                          "nullable": true,
+                          "items": "float64",
+                          "length": 3
+                        },
+                        {
+                          "name": "normalizationEnergyEv",
+                          "type": "float64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "maxAttemptFrequencyHz",
+                          "type": "float64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "breakTolerance",
+                          "type": "float64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "breakSampleLengthMcsp",
+                          "type": "int64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "breakSampleIntervalMcsp",
+                          "type": "int64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "resultSampleMcsp",
+                          "type": "int64",
+                          "required": false,
+                          "nullable": true
+                        },
+                        {
+                          "name": "extensions",
+                          "type": "array",
+                          "required": false,
+                          "items": "object",
+                          "itemAdditionalProperties": false,
+                          "itemFields": [
+                            {
+                              "name": "id",
+                              "type": "string",
+                              "required": true
+                            },
+                            {
+                              "name": "config",
+                              "type": "object",
+                              "required": true,
+                              "additionalProperties": true
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "lattice",
+                      "type": "object",
+                      "required": true,
+                      "additionalProperties": false,
+                      "fields": [
+                        {
+                          "name": "a",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "b",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "c",
+                          "type": "int64",
+                          "required": true
+                        }
+                      ]
+                    },
+                    {
+                      "name": "dopings",
+                      "type": "array",
+                      "required": false,
+                      "items": "object",
+                      "itemAdditionalProperties": false,
+                      "itemFields": [
+                        {
+                          "name": "dopingId",
+                          "type": "string",
+                          "required": true
+                        },
+                        {
+                          "name": "fraction",
+                          "type": "float64",
+                          "required": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
             }
           ]
         },
@@ -3354,6 +3724,20 @@
         "kind": "project",
         "status": "current",
         "step": "09"
+      },
+      {
+        "id": "project-job-templates-populated",
+        "path": "tests/contracts/project-job-templates-populated.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "10"
+      },
+      {
+        "id": "project-jobs-ceria-sweep",
+        "path": "samples/jobs/ceria-temperature-sweep.mocprj",
+        "kind": "project",
+        "status": "current",
+        "step": "10"
       }
     ]
   },

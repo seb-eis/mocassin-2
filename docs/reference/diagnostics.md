@@ -2,8 +2,9 @@
 
 Every diagnostic emitted by project validation, model compilation, and the CLI has a stable code. The
 catalog below is generated from the same descriptors the application uses (`CoreDiagnosticCatalog`, including
-the Step 09 parameterization descriptors; `SymmetryDiagnosticCatalog`; the Step 08 compilation descriptors;
-and the Step 07 descriptors); a documentation-drift test fails when this page and the catalog disagree.
+the Step 09 parameterization descriptors and the Step 10 job-template descriptors; `SymmetryDiagnosticCatalog`;
+the Step 08 compilation descriptors; and the Step 07 descriptors); a documentation-drift test fails when this
+page and the catalog disagree.
 Per-instance `hint` values are supplied by the producing rule and may be more specific.
 
 | Code | Severity | Owner | Title | Help |
@@ -41,6 +42,26 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 | [`ENM019`](#enm019) | error | Step 05 — energy model | An environment sampling estimate exceeds the hard limit | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`ENM020`](#enm020) | warning | Step 05 — energy model | More than four clusters share one centre site | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`ENM021`](#enm021) | error | Step 05 — energy model | More than ten clusters share one centre site | Review the referenced model object, correct the reported condition, and revalidate. |
+| [`JOB001`](#job001) | error | Step 10 — job templates and supercells | Template has no collections | Add at least one collection with one configuration. |
+| [`JOB002`](#job002) | error | Step 10 — job templates and supercells | Collection references an unknown simulation | Reference an existing simulation of the matching kind. |
+| [`JOB003`](#job003) | error | Step 10 — job templates and supercells | Collection has no configurations | Add at least one configuration to the collection. |
+| [`JOB004`](#job004) | error | Step 10 — job templates and supercells | Cell size outside 1–256, or total positions > 500,000 | Use cell counts in 1..256 and keep the generated supercell within 500,000 positions. |
+| [`JOB005`](#job005) | error | Step 10 — job templates and supercells | Doping fraction is non-finite or outside [0,1] | Use a finite doping fraction in the inclusive range 0..1. |
+| [`JOB006`](#job006) | error | Step 10 — job templates and supercells | Doping reference unknown | Reference an existing doping definition. |
+| [`JOB007`](#job007) | error | Step 10 — job templates and supercells | Duplicate collection/config name | Give every collection and every configuration a unique, non-empty name. |
+| [`JOB008`](#job008) | error | Step 10 — job templates and supercells | Job count outside 1–1000 | Use a job count in 1..1000. |
+| [`JOB009`](#job009) | error | Step 10 — job templates and supercells | Optimizer reference invalid or removes every usable start option for a required mechanism | Use a stable site and a particle allowed at that site, and keep a usable start option. |
+| [`JOB010`](#job010) | warning | Step 10 — job templates and supercells | Requested doping cannot be realized; 0 applied | Increase the available source population or lower the requested fraction. |
+| [`JOB011`](#job011) | warning | Step 10 — job templates and supercells | Effective doping fraction differs from requested | Review the requested fraction; applied counts are truncated downward. |
+| [`JOB012`](#job012) | error | Step 10 — job templates and supercells | Compensation pair cannot be realized, or an applied compensated pair is not charge-balanced | Choose dopings, charges, and fractions that admit an integer balanced pair. |
+| [`JOB013`](#job013) | warning | Step 10 — job templates and supercells | Total jobs exceed 10,000 | Reduce the configurations or jobs per configuration unless the large run is intentional. |
+| [`JOB014`](#job014) | warning | Step 10 — job templates and supercells | Supercell positions exceed 100,000 | Reduce the cell size unless the large supercell is intentional. |
+| [`JOB015`](#job015) | error | Step 10 — job templates and supercells | Inherited settings are missing, invalid, or not applicable to the simulation kind | Set finite values within the documented ranges and use only fields for the simulation kind. |
+| [`JOB016`](#job016) | warning | Step 10 — job templates and supercells | Final lattice is not charge-neutral because an uncompensated charged doping was applied | Enable charge compensation or accept the non-neutral lattice knowingly. |
+| [`JOB017`](#job017) | error | Step 10 — job templates and supercells | Duplicate doping reference or optimizer entry | Remove duplicate doping references and duplicate (site, particle) optimizers. |
+| [`JOB018`](#job018) | error | Step 10 — job templates and supercells | Extension id is empty/duplicated, config is not an object, or an extension bound is exceeded | Use a unique non-empty id (at most 64 characters), an object config of at most 64 KiB, at most 16 entries, and at most 256 KiB in total. |
+| [`JOB019`](#job019) | error | Step 10 — job templates and supercells | Total expanded jobs exceed 99,999 | Reduce the template to at most 99,999 expanded jobs. |
+| [`JOB020`](#job020) | error | Step 10 — job templates and supercells | Template/collection/config/optimizer/doping count exceeds a structural cap | Reduce the template to the documented Step 10 structural caps. |
 | [`LAT001`](#lat001) | error | Step 06 — lattice and simulation models | An occupation exchange references an unknown site or particle | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`LAT002`](#lat002) | error | Step 06 — lattice and simulation models | An occupation exchange references an unstable site | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`LAT003`](#lat003) | error | Step 06 — lattice and simulation models | An occupation-exchange source particle is not in the site's particle set | Review the referenced model object, correct the reported condition, and revalidate. |
@@ -309,6 +330,86 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 ### ENM021
 
 **More than ten clusters share one centre site.** Review the referenced model object, correct the reported condition, and revalidate.
+
+### JOB001
+
+**Template has no collections.** Add at least one collection with one configuration.
+
+### JOB002
+
+**Collection references an unknown simulation.** Reference an existing simulation of the matching kind.
+
+### JOB003
+
+**Collection has no configurations.** Add at least one configuration to the collection.
+
+### JOB004
+
+**Cell size outside 1–256, or total positions > 500,000.** Use cell counts in 1..256 and keep the generated supercell within 500,000 positions.
+
+### JOB005
+
+**Doping fraction is non-finite or outside [0,1].** Use a finite doping fraction in the inclusive range 0..1.
+
+### JOB006
+
+**Doping reference unknown.** Reference an existing doping definition.
+
+### JOB007
+
+**Duplicate collection/config name.** Give every collection and every configuration a unique, non-empty name.
+
+### JOB008
+
+**Job count outside 1–1000.** Use a job count in 1..1000.
+
+### JOB009
+
+**Optimizer reference invalid or removes every usable start option for a required mechanism.** Use a stable site and a particle allowed at that site, and keep a usable start option.
+
+### JOB010
+
+**Requested doping cannot be realized; 0 applied.** Increase the available source population or lower the requested fraction.
+
+### JOB011
+
+**Effective doping fraction differs from requested.** Review the requested fraction; applied counts are truncated downward.
+
+### JOB012
+
+**Compensation pair cannot be realized, or an applied compensated pair is not charge-balanced.** Choose dopings, charges, and fractions that admit an integer balanced pair.
+
+### JOB013
+
+**Total jobs exceed 10,000.** Reduce the configurations or jobs per configuration unless the large run is intentional.
+
+### JOB014
+
+**Supercell positions exceed 100,000.** Reduce the cell size unless the large supercell is intentional.
+
+### JOB015
+
+**Inherited settings are missing, invalid, or not applicable to the simulation kind.** Set finite values within the documented ranges and use only fields for the simulation kind.
+
+### JOB016
+
+**Final lattice is not charge-neutral because an uncompensated charged doping was applied.** Enable charge compensation or accept the non-neutral lattice knowingly.
+
+### JOB017
+
+**Duplicate doping reference or optimizer entry.** Remove duplicate doping references and duplicate (site, particle) optimizers.
+
+### JOB018
+
+**Extension id is empty/duplicated, config is not an object, or an extension bound is exceeded.** Use a unique non-empty id (at most 64 characters), an object config of at most 64 KiB, at most 16 entries, and at most 256 KiB in total.
+
+### JOB019
+
+**Total expanded jobs exceed 99,999.** Reduce the template to at most 99,999 expanded jobs.
+
+### JOB020
+
+**Template/collection/config/optimizer/doping count exceeds a structural cap.** Reduce the template to the documented Step 10 structural caps.
 
 ### LAT001
 

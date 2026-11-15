@@ -93,9 +93,9 @@ Status legend:
 | Occupation exchanges | Y | Partial | 06/25 | Model, validation, persistence, query, and editor API in 06; editor UI in 25 |
 | Ordered dopings/priorities | Y | Partial | 06/10/25 | Unique priorities, deterministic order, persistence, and editing in 06; fraction application in 10; editor UI in 25 |
 | Counter-doping/charge compensation | Y | Partial | 06/10/25 | Shape/sign validation and persistence in 06; integer ratios and applied counts in 10; editor UI in 25 |
-| Doping truncation semantics | Y | Planned | 10 | Reported |
-| Deterministic lattice generation | Y | Improvement | 10 | Fixes shared crypto RNG |
-| Doping preview (requested vs applied) | Y | Improvement | 25 | |
+| Doping truncation semantics | Y | Done | 10 | `floor(fraction × available)`, requested vs applied counts, and `JOB010`/`JOB011` |
+| Deterministic lattice generation | Y | Improvement | 10 | Fixes the shared crypto RNG; job/lattice seed and SHA-256 sampler vectors |
+| Doping preview (requested vs applied) | Y | Improvement | 10/25 | Shared preview service and `build --preview` in 10; editor UI in 25 |
 
 ## 5. Compilation pipeline
 
@@ -138,15 +138,16 @@ Status legend:
 | `PRM` diagnostics | N | Done | 09 | Structural Core checks + compiled-bound Packages checks; docs-drift checked |
 | Checked-in golden templates | N | Done | 09 | Ceria and barium-zirconate templates; applied values and signatures regenerated through the real compiler/apply path |
 | `mocassin parameterize` CLI | N | Replaced | 12 | Step 12 owns `compile`/`build --parameterization`; no separate command |
-| Job collections/configs | Y | Planned | 10 | |
-| Base + config overrides | Y | Planned | 10/26 | Correct inheritance |
-| Job duplicates/multiplier | Y | Planned | 10 | |
-| Selection optimizers | Y | Planned | 10 | Applied once, correct mask |
-| Lattice size + doping values | Y | Planned | 10/26 | |
-| Build template selection | Y | Planned | 10/12/26 | |
+| Job collections/configs | Y | Done | 10 | Typed Core records, project JSON/manifest, authored-order expansion, and structural `JOB` validation |
+| Base + config overrides | Y | Partial | 10/26 | Correct simulation → collection → config inheritance, kind checks, and extension replacement in 10; editor UI in 26 |
+| Job duplicates/multiplier | Y | Done | 10 | `jobCountPerConfig`/simulation default, 1-based IDs, per-duplicate seeds |
+| Selection optimizers | Y | Partial | 10/11/14/26 | P1 image expansion, dual-DOF rule, and `JOB009` reference check in 10; `.msl` encoding in 11; runtime removal in 14; editor UI in 26 |
+| Lattice size + doping values | Y | Partial | 10/26 | Deterministic supercell, dopings, truncation, compensation, and preview in 10; editor UI in 26 |
+| Build template selection | Y | Partial | 10/12/26 | `build --preview --template` selection in 10; full build command in 12; UI in 26 |
+| Build preview (no package write) | Y | Done | 10 | Shared `ILatticePreviewService`, `build-preview-v1`, and CLI path; never opens or writes `.msl` |
 | Create/overwrite package | Y | Planned | 11/26 | |
 | Append to existing package | N | Deferred | post-1.0 | Not required; rebuild is safer |
-| 99,999-job cap | Y | Planned | 10 | Hard cap `JOB019`; warning `JOB013` above 10k |
+| 99,999-job cap | Y | Done | 10 | Hard cap `JOB019`; warning `JOB013` above 10k |
 | Build progress/cancel/log | Y | Planned | 12/26 | |
 | Package inspection/verification | Y | Improvement | 11/12 | |
 | Build history | N | Improvement | 26 | |

@@ -362,6 +362,144 @@ For authoring guidance see [Lattice and doping](../user-guide/lattice.md) and
 [Simulations](../user-guide/simulations.md). The populated sample projects are mirrored in `tests/contracts/`
 as `project-lattice-populated.mocprj` and `project-simulations-populated.mocprj`.
 
+## Job templates (Step 10 fields)
+
+Step 10 extends the Step 01 `jobTemplates` identity stub with collections, configurations, inheritable settings,
+lattice requests, dopings, and selection optimizers. Missing sections load as empty; empty collection,
+configuration, and doping arrays are omitted on write so pre-Step-10 documents keep their canonical hash.
+`schemaVersion` stays `1` under the same additive pre-release rule as Steps 03–09.
+
+```json
+{
+  "jobTemplates": [
+    {
+      "id": "…",
+      "name": "Ceria temperature sweep",
+      "collections": [
+        {
+          "id": "…",
+          "name": "T773",
+          "simulationId": "…",
+          "baseSettings": { "temperatureK": 773.0 },
+          "jobCountPerConfig": 2,
+          "rngSeed": "ceria-seed",
+          "selectionOptimizers": [
+            { "siteId": "…", "particleId": "…" }
+          ],
+          "configs": [
+            {
+              "id": "…",
+              "name": "x001",
+              "overrides": { "targetMcsp": 150 },
+              "lattice": { "a": 6, "b": 6, "c": 6 },
+              "dopings": [{ "dopingId": "…", "fraction": 0.01 }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
+```
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `id`, `name` | yes | Stable template identity and user-visible name. |
+| `collections` | no | Collections in authored order. An empty list is `JOB001`. |
+
+A collection:
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `id`, `name` | yes | Stable collection identity and unique, non-empty name (`JOB007`). |
+| `simulationId` | yes | Existing simulation; an unknown reference is `JOB002`. |
+| `baseSettings` | no | Partial setting overrides; absent inherits the compiled simulation defaults. |
+| `jobCountPerConfig` | no | Duplicate count per configuration (`1..1000`); absent inherits `Simulation.jobCount`. |
+| `rngSeed` | no | Optional seed text; absent inherits the simulation/project seed. |
+| `selectionOptimizers` | no | KMC `(siteId, particleId)` start-option removals in authored order. |
+| `configs` | no | Configurations in authored order. An empty list is `JOB003`. |
+
+A configuration:
+
+| Field | Required | Meaning |
+| --- | --- | --- |
+| `id`, `name` | yes | Stable configuration identity and unique, non-empty name within the collection (`JOB007`). |
+| `overrides` | no | Partial setting overrides applied after `baseSettings`. |
+| `lattice` | yes | `{ "a", "b", "c" }` cell counts; each in `1..256` (`JOB004`). |
+| `dopings` | no | `{ "dopingId", "fraction" }` entries; fraction in `0..1` (`JOB005`, `JOB006`, `JOB017`). |
+
+`baseSettings` and `overrides` share `JobSettings`. A missing or `null` field inherits; an explicit value
+replaces it, and an explicit `0`/`ExecutionFlags.None` is a real override. The shared fields are
+`temperatureK`, `targetMcsp`, `writeOutCount`, `timeLimitSeconds`, `minSuccessRate`, `flags`, `instruction`, and
+`extensions`. KMC-only fields are `preRunMcsp`, `electricFieldModulusVm`, `electricFieldDirection`,
+`normalizationEnergyEv`, and `maxAttemptFrequencyHz`; MMC-only fields are `breakTolerance`,
+`breakSampleLengthMcsp`, `breakSampleIntervalMcsp`, and `resultSampleMcsp`. A KMC-only field on an MMC collection
+or the reverse is `JOB015`. The accepted ranges match the simulation settings in
+[Project format — Simulations](#simulations-step-06-fields).
+
+`extensions` is an ordered array of `{ "id": string, "config": object }` entries inside `baseSettings` or
+`overrides`. A missing or `null` list inherits; a non-null list replaces the inherited list as a whole. Ids are
+unique and non-empty and at most 64 characters; each `config` is a JSON object of at most 64 KiB; at most 16
+entries and 256 KiB total are allowed per effective list. The config is stored as canonical JSON (sorted object
+property names, array order preserved, number tokens preserved verbatim) so the project hash is deterministic.
+Numbers are not reinterpreted as IEEE-754 binary64: integers above 2^53 stay exact, values outside the binary64
+range are accepted, and `1.0` is a different token from `1`. The extension consumers (Steps 27/28) own the
+schema and must define numeric ranges in terms of JSON numbers, not binary64 round-trips. Invalid content or
+bounds are `JOB018`; the concrete extension schema belongs to the extension consumer.
+
+### Canonical ordering
+
+1. `jobTemplates` by ascending `JobTemplateId`.
+2. Collections in authored order; configurations in authored order. Collection and configuration names are
+   unique case-insensitively within their parent.
+3. `selectionOptimizers` in authored order. Duplicate `(siteId, particleId)` pairs are `JOB017`.
+4. `dopings` by ascending resolved doping priority, then by `DopingId`. This is the application order; two
+   dopings with the same priority are rejected by the Step 06 lattice validator.
+5. `extensions` by `Id` ordinal. The `config` object is canonicalized recursively.
+
+### Seeds
+
+The build resolves one master seed text as the first non-empty of the collection `rngSeed`, the simulation
+`rngSeed`, and the project `masterSeed` (always required). A 64-character lowercase hexadecimal text is decoded
+to 32 bytes; every other text is hashed as
+`SHA-256("mocassin/seed-text/v1" || UTF-8(text))`. Each job seed is
+
+```text
+SHA-256(master_seed[32] ||
+        u32_le(collection_index) ||
+        u32_le(config_index) ||
+        u32_le(job_index) ||
+        UTF8("mocassin/job/v1"))
+```
+
+with zero-based indices and little-endian `u32` fields. The build never creates or persists a seed. Changing a
+runtime setting alone does not change the seed or the lattice request.
+
+### Limits
+
+| Limit | Value | Diagnostic |
+| --- | --- | ---: |
+| Templates per project | 100 | `JOB020` |
+| Collections per template | 100 | `JOB020` |
+| Configurations per collection | 1,000 | `JOB020` |
+| Dopings per configuration | 1,000 | `JOB020` |
+| Optimizers per collection | 1,000 | `JOB020` |
+| Effective jobs per configuration | 1–1,000 | `JOB008` |
+| Total expanded jobs per template | 99,999 | `JOB019` |
+| Total-job warning threshold | 10,000 | `JOB013` |
+| Cell counts per axis | 1–256 | `JOB004` |
+| Total positions per supercell | 500,000 | `JOB004` |
+| Position warning threshold | 100,000 | `JOB014` |
+
+`validate` reports the structural rules without a compiled model: `JOB001`–`JOB008`, the optimizer reference
+half of `JOB009`, `JOB015`, `JOB017`, `JOB018`, and `JOB020`. The build stage reports the compiled-bound
+total-position, doping-count, compensation, neutrality, removes-all, and expanded-job checks. The complete list
+is in [Diagnostics](diagnostics.md).
+
+The checked-in populated fixture is `tests/contracts/project-job-templates-populated.mocprj`; the buildable sample is
+`samples/jobs/ceria-temperature-sweep.mocprj`. See the [job-template guide](../user-guide/job-templates.md) for
+authoring and previewing.
+
 ## Model and templates in Step 01 (historical)
 
 Step 01 deliberately establishes the project envelope before the scientific model domains. At that
@@ -483,8 +621,10 @@ rejected as invalid documents.
 - no insignificant whitespace, LF-only separators;
 - object keys in schema order;
 - non-semantic arrays sorted by stable ID;
-- invariant shortest round-trip numbers;
-- `-0.0` normalized to `0.0`;
+- invariant shortest round-trip numbers, except inside opaque extension-config objects, where the authored
+  JSON number token is preserved verbatim (`1` and `1.0` differ, integers above 2^53 and values outside
+  binary64 stay exact);
+- `-0.0` normalized to `0.0` for every non-extension number;
 - timestamps normalized to UTC with seven fractional digits and a `Z` suffix;
 - enums written as camelCase strings;
 - optional null properties omitted.

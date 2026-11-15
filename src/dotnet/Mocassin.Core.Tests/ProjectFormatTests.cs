@@ -4,8 +4,10 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
+using Mocassin.Core.Model.Jobs;
 using Mocassin.Core.Project;
 using ProjectModel = Mocassin.Core.Project.Project;
 
@@ -162,9 +164,14 @@ public sealed class ProjectFormatTests
     }
 
     [Fact]
-    public void ValidatorAcceptsSampleProject()
+    public void ValidatorReportsOnlyTheEmptyJobTemplateStub()
     {
-        Assert.Empty(ProjectValidator.Validate(CreateProject()));
+        // This envelope fixture intentionally keeps an empty job-template stub. Pin the exact expected code so a
+        // future invalid job template is not hidden by a broad JOB filter.
+        var diagnostics = ProjectValidator.Validate(CreateProject());
+
+        var diagnostic = Assert.Single(diagnostics);
+        Assert.Equal(JobDiagnosticCodes.NoCollections, diagnostic.Code);
     }
 
     [Fact]

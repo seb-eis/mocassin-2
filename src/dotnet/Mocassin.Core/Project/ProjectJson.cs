@@ -7,6 +7,7 @@ using Mocassin.Core.Geometry;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Energy;
+using Mocassin.Core.Model.Jobs;
 using Mocassin.Core.Model.Lattice;
 using Mocassin.Core.Model.Particles;
 using Mocassin.Core.Model.Simulations;
@@ -334,7 +335,9 @@ public sealed class ProjectJsonConverter : JsonConverter<Project>
             .Select(ParameterizationTemplateCanonicalizer.Normalize)
             .ToImmutableArray();
         var jobTemplates = value.JobTemplates
+            .Where(static item => item is not null)
             .OrderBy(static item => item.Id.Value)
+            .Select(item => JobTemplateCanonicalizer.Normalize(value, item))
             .ToImmutableArray();
         var buildTemplates = value.BuildTemplates
             .OrderBy(static item => item.Id.Value)
@@ -514,6 +517,18 @@ internal sealed class ProjectDto
 [JsonSerializable(typeof(ImmutableArray<RuleFrequencyEntry>))]
 [JsonSerializable(typeof(ImmutableArray<ParticleId>))]
 [JsonSerializable(typeof(JobTemplate))]
+[JsonSerializable(typeof(JobCollection))]
+[JsonSerializable(typeof(JobConfig))]
+[JsonSerializable(typeof(JobSettings))]
+[JsonSerializable(typeof(JobExtension))]
+[JsonSerializable(typeof(LatticeRequest))]
+[JsonSerializable(typeof(DopingValue))]
+[JsonSerializable(typeof(SelectionOptimizer))]
+[JsonSerializable(typeof(ImmutableArray<JobCollection>))]
+[JsonSerializable(typeof(ImmutableArray<JobConfig>))]
+[JsonSerializable(typeof(ImmutableArray<JobExtension>))]
+[JsonSerializable(typeof(ImmutableArray<DopingValue>))]
+[JsonSerializable(typeof(ImmutableArray<SelectionOptimizer>))]
 [JsonSerializable(typeof(BuildTemplate))]
 [JsonSerializable(typeof(ViewSettings))]
 [JsonSerializable(typeof(CameraSettings))]

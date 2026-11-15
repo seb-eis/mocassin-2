@@ -24,6 +24,8 @@ public sealed class IdsTests
         typeof(SimulationId),
         typeof(ParameterizationId),
         typeof(JobTemplateId),
+        typeof(JobCollectionId),
+        typeof(JobConfigId),
         typeof(BuildTemplateId),
     ];
 

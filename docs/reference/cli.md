@@ -65,3 +65,50 @@ hint, followed by the raw summary, an optional statistics table, and the policy-
 The report is the `validation-v1` contract. Its generated JSON Schema is
 `contracts/generated/schema/validation-v1.schema.json`; the manifest entry lives under `reports`, not
 `formats`.
+
+## `mocassin build --preview`
+
+```text
+mocassin build <project.mocprj> --preview [--template <jobTemplateId>] [--json]
+```
+
+Step 10 adds the preview path only. The command loads, validates, compiles, expands, and previews one job
+template. It never opens, writes, or replaces a `.msl` package and never calls the Step 11 writer. Step 12 owns
+the full package-building command and the `--jobs`, `--parallel`, `--force`, and `--compact` options.
+
+| Option | Meaning |
+| --- | --- |
+| `--preview` | Required. Selects the no-write build-preview path. |
+| `--template <jobTemplateId>` | Selects one template when the project contains several. A project with exactly one template may omit it. |
+| `--json` | Print exactly one `build-preview-v1` JSON report to stdout. |
+
+The command previews:
+
+- the selected template, its collections, configurations, and total expanded job count;
+- each collection's job count, compiled dual-degree-of-freedom flag, and selection-optimizer
+  target/removed-start count;
+- each configuration's lattice size, generated position count, job count, requested and applied doping counts,
+  effective fraction, charge before and after doping, and neutrality;
+- the validation, compilation, expansion, and preview diagnostics, including `JOB` warnings.
+
+The preview generates **one lattice per configuration**, not one per duplicate job. The per-configuration job
+count still reflects duplicate expansion, and lattice diagnostics are deduplicated in the report. Seeds are
+derived from the template and project in the same way as a real build; the preview never creates or persists a
+seed and never records generated particle positions.
+
+`--template` takes the job-template GUID, not an index or a name. It is required when the project has more than
+one template; a project with exactly one template may omit it. A project with no template is a validation error
+(exit 1), and an unknown template identifier is reported as a `PROJ010` unknown-reference diagnostic.
+
+Exit codes follow `validate`:
+
+| Code | Meaning |
+| --- | --- |
+| `0` | The preview completed; warnings do not invalidate it. |
+| `1` | Validation, compilation, expansion, template-selection, or lattice-preview errors. |
+| `2` | Usage or argument error, including several templates without `--template`. |
+| `3` | The project file is missing, unreadable, oversized, or failed with an operating-system/I/O error. |
+
+The `build-preview-v1` report mirrors the `validation-v1` envelope (`schemaVersion`, `kind`, identity hashes,
+`valid`, `exitCode`, `summary`, `diagnostics`) and adds a `preview` payload. It is an interim Step 10 report;
+Step 12 may replace it with the final build report contract.

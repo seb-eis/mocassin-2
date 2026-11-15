@@ -222,15 +222,6 @@ Mocassin.Core.Model.CanonicalDoubleArrayJsonConverter
 Mocassin.Core.Model.CanonicalDoubleArrayJsonConverter.CanonicalDoubleArrayJsonConverter() -> void
 Mocassin.Core.Model.CanonicalDoubleJsonConverter
 Mocassin.Core.Model.CanonicalDoubleJsonConverter.CanonicalDoubleJsonConverter() -> void
-Mocassin.Core.Model.JobTemplate
-Mocassin.Core.Model.JobTemplate.<Clone>$() -> Mocassin.Core.Model.JobTemplate!
-Mocassin.Core.Model.JobTemplate.Deconstruct(out Mocassin.Core.Ids.JobTemplateId Id, out string! Name) -> void
-Mocassin.Core.Model.JobTemplate.Equals(Mocassin.Core.Model.JobTemplate? other) -> bool
-Mocassin.Core.Model.JobTemplate.Id.get -> Mocassin.Core.Ids.JobTemplateId
-Mocassin.Core.Model.JobTemplate.Id.init -> void
-Mocassin.Core.Model.JobTemplate.JobTemplate(Mocassin.Core.Ids.JobTemplateId Id, string! Name) -> void
-Mocassin.Core.Model.JobTemplate.Name.get -> string!
-Mocassin.Core.Model.JobTemplate.Name.init -> void
 Mocassin.Core.Model.ModelDefinition
 Mocassin.Core.Model.ModelDefinition.<Clone>$() -> Mocassin.Core.Model.ModelDefinition!
 Mocassin.Core.Model.ModelDefinition.Equals(Mocassin.Core.Model.ModelDefinition? other) -> bool
@@ -308,7 +299,6 @@ Mocassin.Core.Project.Project.<Clone>$() -> Mocassin.Core.Project.Project!
 Mocassin.Core.Project.Project.BuildTemplates.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.BuildTemplate!>
 Mocassin.Core.Project.Project.BuildTemplates.init -> void
 Mocassin.Core.Project.Project.Equals(Mocassin.Core.Project.Project? other) -> bool
-Mocassin.Core.Project.Project.JobTemplates.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.JobTemplate!>
 Mocassin.Core.Project.Project.JobTemplates.init -> void
 Mocassin.Core.Project.Project.Metadata.get -> Mocassin.Core.Project.ProjectMetadata!
 Mocassin.Core.Project.Project.Metadata.init -> void
@@ -316,7 +306,6 @@ Mocassin.Core.Project.Project.Model.get -> Mocassin.Core.Model.ModelDefinition!
 Mocassin.Core.Project.Project.Model.init -> void
 Mocassin.Core.Project.Project.Parameterizations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ParameterizationTemplate!>
 Mocassin.Core.Project.Project.Parameterizations.init -> void
-Mocassin.Core.Project.Project.Project(string? schema, int schemaVersion, Mocassin.Core.Project.ProjectMetadata! metadata, Mocassin.Core.Model.ModelDefinition! model, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ParameterizationTemplate!> parameterizations, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.JobTemplate!> jobTemplates, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.BuildTemplate!> buildTemplates, Mocassin.Core.Model.ViewSettings! viewSettings) -> void
 Mocassin.Core.Project.Project.Schema.get -> string?
 Mocassin.Core.Project.Project.Schema.init -> void
 Mocassin.Core.Project.Project.SchemaVersion.get -> int
@@ -489,9 +478,6 @@ override Mocassin.Core.Model.CanonicalDoubleArrayJsonConverter.Read(ref System.T
 override Mocassin.Core.Model.CanonicalDoubleArrayJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, System.Collections.Immutable.ImmutableArray<double> value, System.Text.Json.JsonSerializerOptions! options) -> void
 override Mocassin.Core.Model.CanonicalDoubleJsonConverter.Read(ref System.Text.Json.Utf8JsonReader reader, System.Type! typeToConvert, System.Text.Json.JsonSerializerOptions! options) -> double
 override Mocassin.Core.Model.CanonicalDoubleJsonConverter.Write(System.Text.Json.Utf8JsonWriter! writer, double value, System.Text.Json.JsonSerializerOptions! options) -> void
-override Mocassin.Core.Model.JobTemplate.Equals(object? obj) -> bool
-override Mocassin.Core.Model.JobTemplate.GetHashCode() -> int
-override Mocassin.Core.Model.JobTemplate.ToString() -> string!
 override Mocassin.Core.Model.ModelDefinition.Equals(object? obj) -> bool
 override Mocassin.Core.Model.ModelDefinition.GetHashCode() -> int
 override Mocassin.Core.Model.ModelDefinition.ToString() -> string!
@@ -622,8 +608,6 @@ static Mocassin.Core.Model.BuildTemplate.operator !=(Mocassin.Core.Model.BuildTe
 static Mocassin.Core.Model.BuildTemplate.operator ==(Mocassin.Core.Model.BuildTemplate? left, Mocassin.Core.Model.BuildTemplate? right) -> bool
 static Mocassin.Core.Model.CameraSettings.operator !=(Mocassin.Core.Model.CameraSettings? left, Mocassin.Core.Model.CameraSettings? right) -> bool
 static Mocassin.Core.Model.CameraSettings.operator ==(Mocassin.Core.Model.CameraSettings? left, Mocassin.Core.Model.CameraSettings? right) -> bool
-static Mocassin.Core.Model.JobTemplate.operator !=(Mocassin.Core.Model.JobTemplate? left, Mocassin.Core.Model.JobTemplate? right) -> bool
-static Mocassin.Core.Model.JobTemplate.operator ==(Mocassin.Core.Model.JobTemplate? left, Mocassin.Core.Model.JobTemplate? right) -> bool
 static Mocassin.Core.Model.ModelDefinition.operator !=(Mocassin.Core.Model.ModelDefinition? left, Mocassin.Core.Model.ModelDefinition? right) -> bool
 static Mocassin.Core.Model.ModelDefinition.operator ==(Mocassin.Core.Model.ModelDefinition? left, Mocassin.Core.Model.ModelDefinition? right) -> bool
 static Mocassin.Core.Model.ObjectStyle.operator !=(Mocassin.Core.Model.ObjectStyle? left, Mocassin.Core.Model.ObjectStyle? right) -> bool
@@ -1178,7 +1162,6 @@ Mocassin.Core.Model.ModelDefinition.Particles.init -> void
 Mocassin.Core.Model.ModelDefinition.Structure.get -> Mocassin.Core.Model.Structure.StructureModel!
 Mocassin.Core.Model.ModelDefinition.Structure.init -> void
 Mocassin.Core.Model.Structure.StructureModel.StructureModel() -> void
-Mocassin.Core.Project.Project.Project(string? schema, int schemaVersion, Mocassin.Core.Project.ProjectMetadata! metadata, Mocassin.Core.Model.ModelDefinition! model, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ParameterizationTemplate!> parameterizations, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.JobTemplate!> jobTemplates, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.BuildTemplate!> buildTemplates, Mocassin.Core.Model.ViewSettings! viewSettings, Mocassin.Core.Project.ProjectSymmetryMetadata? symmetry) -> void
 Mocassin.Core.Project.Project.Symmetry.get -> Mocassin.Core.Project.ProjectSymmetryMetadata?
 Mocassin.Core.Project.Project.Symmetry.init -> void
 Mocassin.Core.Project.ProjectSymmetryMetadata
@@ -1917,6 +1900,8 @@ Mocassin.Core.Diagnostics.DiagnosticDescriptor.Deconstruct(out string! Code, out
 static Mocassin.Core.Diagnostics.CoreDiagnosticCatalog.Descriptors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
 Mocassin.Core.Diagnostics.DiagnosticDescriptor.DiagnosticDescriptor(string! Code, Mocassin.Core.Diagnostics.DiagnosticSeverity DefaultSeverity, string! Owner, string! Title, string! Help, string! DocumentationAnchor) -> void
 static Mocassin.Core.Project.ProjectHasher.ComputeSimulationSelection(Mocassin.Core.Project.Project! project) -> string!
+static Mocassin.Core.Project.ProjectHasher.ComputeParticles(Mocassin.Core.Project.Project! project) -> string!
+static Mocassin.Core.Project.ProjectHasher.ComputeLattice(Mocassin.Core.Project.Project! project) -> string!
 Mocassin.Core.Diagnostics.ParameterizationDiagnosticCatalog
 Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes
 Mocassin.Core.Editing.ParameterizationTemplateEditResult
@@ -2098,3 +2083,221 @@ static Mocassin.Core.Model.SiteEnergyOverride.operator !=(Mocassin.Core.Model.Si
 static Mocassin.Core.Model.SiteEnergyOverride.operator ==(Mocassin.Core.Model.SiteEnergyOverride? left, Mocassin.Core.Model.SiteEnergyOverride? right) -> bool
 static Mocassin.Core.Model.TransitionRuleSet.operator !=(Mocassin.Core.Model.TransitionRuleSet? left, Mocassin.Core.Model.TransitionRuleSet? right) -> bool
 static Mocassin.Core.Model.TransitionRuleSet.operator ==(Mocassin.Core.Model.TransitionRuleSet? left, Mocassin.Core.Model.TransitionRuleSet? right) -> bool
+Mocassin.Core.Ids.JobCollectionId
+Mocassin.Core.Ids.JobCollectionId.Deconstruct(out System.Guid Value) -> void
+Mocassin.Core.Ids.JobCollectionId.Equals(Mocassin.Core.Ids.JobCollectionId other) -> bool
+Mocassin.Core.Ids.JobCollectionId.JobCollectionId() -> void
+Mocassin.Core.Ids.JobCollectionId.JobCollectionId(System.Guid Value) -> void
+Mocassin.Core.Ids.JobCollectionId.Value.get -> System.Guid
+Mocassin.Core.Ids.JobCollectionId.Value.init -> void
+Mocassin.Core.Ids.JobConfigId
+Mocassin.Core.Ids.JobConfigId.Deconstruct(out System.Guid Value) -> void
+Mocassin.Core.Ids.JobConfigId.Equals(Mocassin.Core.Ids.JobConfigId other) -> bool
+Mocassin.Core.Ids.JobConfigId.JobConfigId() -> void
+Mocassin.Core.Ids.JobConfigId.JobConfigId(System.Guid Value) -> void
+Mocassin.Core.Ids.JobConfigId.Value.get -> System.Guid
+Mocassin.Core.Ids.JobConfigId.Value.init -> void
+Mocassin.Core.Model.Jobs.DopingValue
+Mocassin.Core.Model.Jobs.DopingValue.<Clone>$() -> Mocassin.Core.Model.Jobs.DopingValue!
+Mocassin.Core.Model.Jobs.DopingValue.Deconstruct(out Mocassin.Core.Ids.DopingId DopingId, out double Fraction) -> void
+Mocassin.Core.Model.Jobs.DopingValue.DopingId.get -> Mocassin.Core.Ids.DopingId
+Mocassin.Core.Model.Jobs.DopingValue.DopingId.init -> void
+Mocassin.Core.Model.Jobs.DopingValue.DopingValue(Mocassin.Core.Ids.DopingId DopingId, double Fraction) -> void
+Mocassin.Core.Model.Jobs.DopingValue.Equals(Mocassin.Core.Model.Jobs.DopingValue? other) -> bool
+Mocassin.Core.Model.Jobs.DopingValue.Fraction.get -> double
+Mocassin.Core.Model.Jobs.DopingValue.Fraction.init -> void
+Mocassin.Core.Model.Jobs.JobCollection
+Mocassin.Core.Model.Jobs.JobCollection.<Clone>$() -> Mocassin.Core.Model.Jobs.JobCollection!
+Mocassin.Core.Model.Jobs.JobCollection.BaseSettings.get -> Mocassin.Core.Model.Jobs.JobSettings?
+Mocassin.Core.Model.Jobs.JobCollection.BaseSettings.init -> void
+Mocassin.Core.Model.Jobs.JobCollection.Configs.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobConfig!>?
+Mocassin.Core.Model.Jobs.JobCollection.Configs.init -> void
+Mocassin.Core.Model.Jobs.JobCollection.Deconstruct(out Mocassin.Core.Ids.JobCollectionId Id, out string! Name, out Mocassin.Core.Ids.SimulationId SimulationId, out Mocassin.Core.Model.Jobs.JobSettings? BaseSettings, out int? JobCountPerConfig, out string? RngSeed, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!>? Optimizers, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobConfig!>? Configs) -> void
+Mocassin.Core.Model.Jobs.JobCollection.Equals(Mocassin.Core.Model.Jobs.JobCollection? other) -> bool
+Mocassin.Core.Model.Jobs.JobCollection.Id.get -> Mocassin.Core.Ids.JobCollectionId
+Mocassin.Core.Model.Jobs.JobCollection.Id.init -> void
+Mocassin.Core.Model.Jobs.JobCollection.JobCollection(Mocassin.Core.Ids.JobCollectionId Id, string! Name, Mocassin.Core.Ids.SimulationId SimulationId, Mocassin.Core.Model.Jobs.JobSettings? BaseSettings = null, int? JobCountPerConfig = null, string? RngSeed = null, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!>? Optimizers = null, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobConfig!>? Configs = null) -> void
+Mocassin.Core.Model.Jobs.JobCollection.JobCountPerConfig.get -> int?
+Mocassin.Core.Model.Jobs.JobCollection.JobCountPerConfig.init -> void
+Mocassin.Core.Model.Jobs.JobCollection.Name.get -> string!
+Mocassin.Core.Model.Jobs.JobCollection.Name.init -> void
+Mocassin.Core.Model.Jobs.JobCollection.Optimizers.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!>?
+Mocassin.Core.Model.Jobs.JobCollection.Optimizers.init -> void
+Mocassin.Core.Model.Jobs.JobCollection.RngSeed.get -> string?
+Mocassin.Core.Model.Jobs.JobCollection.RngSeed.init -> void
+Mocassin.Core.Model.Jobs.JobCollection.SimulationId.get -> Mocassin.Core.Ids.SimulationId
+Mocassin.Core.Model.Jobs.JobCollection.SimulationId.init -> void
+Mocassin.Core.Model.Jobs.JobConfig
+Mocassin.Core.Model.Jobs.JobConfig.<Clone>$() -> Mocassin.Core.Model.Jobs.JobConfig!
+Mocassin.Core.Model.Jobs.JobConfig.Deconstruct(out Mocassin.Core.Ids.JobConfigId Id, out string! Name, out Mocassin.Core.Model.Jobs.LatticeRequest! Lattice, out Mocassin.Core.Model.Jobs.JobSettings? Overrides, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!>? Dopings) -> void
+Mocassin.Core.Model.Jobs.JobConfig.Dopings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!>?
+Mocassin.Core.Model.Jobs.JobConfig.Dopings.init -> void
+Mocassin.Core.Model.Jobs.JobConfig.Equals(Mocassin.Core.Model.Jobs.JobConfig? other) -> bool
+Mocassin.Core.Model.Jobs.JobConfig.Id.get -> Mocassin.Core.Ids.JobConfigId
+Mocassin.Core.Model.Jobs.JobConfig.Id.init -> void
+Mocassin.Core.Model.Jobs.JobConfig.JobConfig(Mocassin.Core.Ids.JobConfigId Id, string! Name, Mocassin.Core.Model.Jobs.LatticeRequest! Lattice, Mocassin.Core.Model.Jobs.JobSettings? Overrides = null, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!>? Dopings = null) -> void
+Mocassin.Core.Model.Jobs.JobConfig.Lattice.get -> Mocassin.Core.Model.Jobs.LatticeRequest!
+Mocassin.Core.Model.Jobs.JobConfig.Lattice.init -> void
+Mocassin.Core.Model.Jobs.JobConfig.Name.get -> string!
+Mocassin.Core.Model.Jobs.JobConfig.Name.init -> void
+Mocassin.Core.Model.Jobs.JobConfig.Overrides.get -> Mocassin.Core.Model.Jobs.JobSettings?
+Mocassin.Core.Model.Jobs.JobConfig.Overrides.init -> void
+Mocassin.Core.Model.Jobs.JobExtension
+Mocassin.Core.Model.Jobs.JobExtension.<Clone>$() -> Mocassin.Core.Model.Jobs.JobExtension!
+Mocassin.Core.Model.Jobs.JobExtension.Config.get -> System.Text.Json.JsonElement
+Mocassin.Core.Model.Jobs.JobExtension.Config.init -> void
+Mocassin.Core.Model.Jobs.JobExtension.Deconstruct(out string! Id, out System.Text.Json.JsonElement Config) -> void
+Mocassin.Core.Model.Jobs.JobExtension.Equals(Mocassin.Core.Model.Jobs.JobExtension? other) -> bool
+Mocassin.Core.Model.Jobs.JobExtension.Id.get -> string!
+Mocassin.Core.Model.Jobs.JobExtension.Id.init -> void
+Mocassin.Core.Model.Jobs.JobExtension.JobExtension(string! Id, System.Text.Json.JsonElement Config) -> void
+Mocassin.Core.Model.Jobs.JobSettings
+Mocassin.Core.Model.Jobs.JobSettings.<Clone>$() -> Mocassin.Core.Model.Jobs.JobSettings!
+Mocassin.Core.Model.Jobs.JobSettings.BreakSampleIntervalMcsp.get -> long?
+Mocassin.Core.Model.Jobs.JobSettings.BreakSampleIntervalMcsp.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.BreakSampleLengthMcsp.get -> long?
+Mocassin.Core.Model.Jobs.JobSettings.BreakSampleLengthMcsp.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.BreakTolerance.get -> double?
+Mocassin.Core.Model.Jobs.JobSettings.BreakTolerance.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.ElectricFieldDirection.get -> Mocassin.Core.Geometry.Fractional3?
+Mocassin.Core.Model.Jobs.JobSettings.ElectricFieldDirection.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.ElectricFieldModulusVm.get -> double?
+Mocassin.Core.Model.Jobs.JobSettings.ElectricFieldModulusVm.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.Equals(Mocassin.Core.Model.Jobs.JobSettings? other) -> bool
+Mocassin.Core.Model.Jobs.JobSettings.Extensions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobExtension!>?
+Mocassin.Core.Model.Jobs.JobSettings.Extensions.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.Flags.get -> Mocassin.Core.Model.Simulations.ExecutionFlags?
+Mocassin.Core.Model.Jobs.JobSettings.Flags.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.Instruction.get -> string?
+Mocassin.Core.Model.Jobs.JobSettings.Instruction.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.JobSettings() -> void
+Mocassin.Core.Model.Jobs.JobSettings.MaxAttemptFrequencyHz.get -> double?
+Mocassin.Core.Model.Jobs.JobSettings.MaxAttemptFrequencyHz.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.MinSuccessRate.get -> double?
+Mocassin.Core.Model.Jobs.JobSettings.MinSuccessRate.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.NormalizationEnergyEv.get -> double?
+Mocassin.Core.Model.Jobs.JobSettings.NormalizationEnergyEv.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.PreRunMcsp.get -> long?
+Mocassin.Core.Model.Jobs.JobSettings.PreRunMcsp.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.ResultSampleMcsp.get -> long?
+Mocassin.Core.Model.Jobs.JobSettings.ResultSampleMcsp.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.TargetMcsp.get -> long?
+Mocassin.Core.Model.Jobs.JobSettings.TargetMcsp.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.TemperatureK.get -> double?
+Mocassin.Core.Model.Jobs.JobSettings.TemperatureK.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.TimeLimitSeconds.get -> long?
+Mocassin.Core.Model.Jobs.JobSettings.TimeLimitSeconds.init -> void
+Mocassin.Core.Model.Jobs.JobSettings.WriteOutCount.get -> int?
+Mocassin.Core.Model.Jobs.JobSettings.WriteOutCount.init -> void
+Mocassin.Core.Model.Jobs.JobTemplate
+Mocassin.Core.Model.Jobs.JobTemplate.<Clone>$() -> Mocassin.Core.Model.Jobs.JobTemplate!
+Mocassin.Core.Model.Jobs.JobTemplate.Collections.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobCollection!>?
+Mocassin.Core.Model.Jobs.JobTemplate.Collections.init -> void
+Mocassin.Core.Model.Jobs.JobTemplate.Deconstruct(out Mocassin.Core.Ids.JobTemplateId Id, out string! Name) -> void
+Mocassin.Core.Model.Jobs.JobTemplate.Equals(Mocassin.Core.Model.Jobs.JobTemplate? other) -> bool
+Mocassin.Core.Model.Jobs.JobTemplate.Id.get -> Mocassin.Core.Ids.JobTemplateId
+Mocassin.Core.Model.Jobs.JobTemplate.Id.init -> void
+Mocassin.Core.Model.Jobs.JobTemplate.JobTemplate(Mocassin.Core.Ids.JobTemplateId Id, string! Name) -> void
+Mocassin.Core.Model.Jobs.JobTemplate.Name.get -> string!
+Mocassin.Core.Model.Jobs.JobTemplate.Name.init -> void
+Mocassin.Core.Model.Jobs.LatticeRequest
+Mocassin.Core.Model.Jobs.LatticeRequest.<Clone>$() -> Mocassin.Core.Model.Jobs.LatticeRequest!
+Mocassin.Core.Model.Jobs.LatticeRequest.A.get -> int
+Mocassin.Core.Model.Jobs.LatticeRequest.A.init -> void
+Mocassin.Core.Model.Jobs.LatticeRequest.B.get -> int
+Mocassin.Core.Model.Jobs.LatticeRequest.B.init -> void
+Mocassin.Core.Model.Jobs.LatticeRequest.C.get -> int
+Mocassin.Core.Model.Jobs.LatticeRequest.C.init -> void
+Mocassin.Core.Model.Jobs.LatticeRequest.Deconstruct(out int A, out int B, out int C) -> void
+Mocassin.Core.Model.Jobs.LatticeRequest.Equals(Mocassin.Core.Model.Jobs.LatticeRequest? other) -> bool
+Mocassin.Core.Model.Jobs.LatticeRequest.LatticeRequest(int A, int B, int C) -> void
+Mocassin.Core.Model.Jobs.SelectionOptimizer
+Mocassin.Core.Model.Jobs.SelectionOptimizer.<Clone>$() -> Mocassin.Core.Model.Jobs.SelectionOptimizer!
+Mocassin.Core.Model.Jobs.SelectionOptimizer.Deconstruct(out Mocassin.Core.Ids.CellSiteId SiteId, out Mocassin.Core.Ids.ParticleId ParticleId) -> void
+Mocassin.Core.Model.Jobs.SelectionOptimizer.Equals(Mocassin.Core.Model.Jobs.SelectionOptimizer? other) -> bool
+Mocassin.Core.Model.Jobs.SelectionOptimizer.ParticleId.get -> Mocassin.Core.Ids.ParticleId
+Mocassin.Core.Model.Jobs.SelectionOptimizer.ParticleId.init -> void
+Mocassin.Core.Model.Jobs.SelectionOptimizer.SelectionOptimizer(Mocassin.Core.Ids.CellSiteId SiteId, Mocassin.Core.Ids.ParticleId ParticleId) -> void
+Mocassin.Core.Model.Jobs.SelectionOptimizer.SiteId.get -> Mocassin.Core.Ids.CellSiteId
+Mocassin.Core.Model.Jobs.SelectionOptimizer.SiteId.init -> void
+Mocassin.Core.Project.Project.JobTemplates.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobTemplate!>
+Mocassin.Core.Project.Project.Project(string? schema, int schemaVersion, Mocassin.Core.Project.ProjectMetadata! metadata, Mocassin.Core.Model.ModelDefinition! model, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ParameterizationTemplate!> parameterizations, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobTemplate!> jobTemplates, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.BuildTemplate!> buildTemplates, Mocassin.Core.Model.ViewSettings! viewSettings) -> void
+Mocassin.Core.Project.Project.Project(string? schema, int schemaVersion, Mocassin.Core.Project.ProjectMetadata! metadata, Mocassin.Core.Model.ModelDefinition! model, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.ParameterizationTemplate!> parameterizations, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.JobTemplate!> jobTemplates, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.BuildTemplate!> buildTemplates, Mocassin.Core.Model.ViewSettings! viewSettings, Mocassin.Core.Project.ProjectSymmetryMetadata? symmetry) -> void
+override Mocassin.Core.Ids.JobCollectionId.GetHashCode() -> int
+override Mocassin.Core.Ids.JobCollectionId.ToString() -> string!
+override Mocassin.Core.Ids.JobConfigId.GetHashCode() -> int
+override Mocassin.Core.Ids.JobConfigId.ToString() -> string!
+override Mocassin.Core.Model.Jobs.DopingValue.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Jobs.DopingValue.GetHashCode() -> int
+override Mocassin.Core.Model.Jobs.DopingValue.ToString() -> string!
+override Mocassin.Core.Model.Jobs.JobCollection.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Jobs.JobCollection.GetHashCode() -> int
+override Mocassin.Core.Model.Jobs.JobCollection.ToString() -> string!
+override Mocassin.Core.Model.Jobs.JobConfig.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Jobs.JobConfig.GetHashCode() -> int
+override Mocassin.Core.Model.Jobs.JobConfig.ToString() -> string!
+override Mocassin.Core.Model.Jobs.JobExtension.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Jobs.JobExtension.GetHashCode() -> int
+override Mocassin.Core.Model.Jobs.JobExtension.ToString() -> string!
+override Mocassin.Core.Model.Jobs.JobSettings.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Jobs.JobSettings.GetHashCode() -> int
+override Mocassin.Core.Model.Jobs.JobSettings.ToString() -> string!
+override Mocassin.Core.Model.Jobs.JobTemplate.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Jobs.JobTemplate.GetHashCode() -> int
+override Mocassin.Core.Model.Jobs.JobTemplate.ToString() -> string!
+override Mocassin.Core.Model.Jobs.LatticeRequest.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Jobs.LatticeRequest.GetHashCode() -> int
+override Mocassin.Core.Model.Jobs.LatticeRequest.ToString() -> string!
+override Mocassin.Core.Model.Jobs.SelectionOptimizer.Equals(object? obj) -> bool
+override Mocassin.Core.Model.Jobs.SelectionOptimizer.GetHashCode() -> int
+override Mocassin.Core.Model.Jobs.SelectionOptimizer.ToString() -> string!
+static Mocassin.Core.Ids.JobCollectionId.Create(System.Guid value) -> Mocassin.Core.Ids.JobCollectionId
+static Mocassin.Core.Ids.JobCollectionId.New() -> Mocassin.Core.Ids.JobCollectionId
+static Mocassin.Core.Ids.JobCollectionId.operator !=(Mocassin.Core.Ids.JobCollectionId left, Mocassin.Core.Ids.JobCollectionId right) -> bool
+static Mocassin.Core.Ids.JobCollectionId.operator ==(Mocassin.Core.Ids.JobCollectionId left, Mocassin.Core.Ids.JobCollectionId right) -> bool
+static Mocassin.Core.Ids.JobConfigId.Create(System.Guid value) -> Mocassin.Core.Ids.JobConfigId
+static Mocassin.Core.Ids.JobConfigId.New() -> Mocassin.Core.Ids.JobConfigId
+static Mocassin.Core.Ids.JobConfigId.operator !=(Mocassin.Core.Ids.JobConfigId left, Mocassin.Core.Ids.JobConfigId right) -> bool
+static Mocassin.Core.Ids.JobConfigId.operator ==(Mocassin.Core.Ids.JobConfigId left, Mocassin.Core.Ids.JobConfigId right) -> bool
+static Mocassin.Core.Model.Jobs.DopingValue.operator !=(Mocassin.Core.Model.Jobs.DopingValue? left, Mocassin.Core.Model.Jobs.DopingValue? right) -> bool
+static Mocassin.Core.Model.Jobs.DopingValue.operator ==(Mocassin.Core.Model.Jobs.DopingValue? left, Mocassin.Core.Model.Jobs.DopingValue? right) -> bool
+static Mocassin.Core.Model.Jobs.JobCollection.operator !=(Mocassin.Core.Model.Jobs.JobCollection? left, Mocassin.Core.Model.Jobs.JobCollection? right) -> bool
+static Mocassin.Core.Model.Jobs.JobCollection.operator ==(Mocassin.Core.Model.Jobs.JobCollection? left, Mocassin.Core.Model.Jobs.JobCollection? right) -> bool
+static Mocassin.Core.Model.Jobs.JobConfig.operator !=(Mocassin.Core.Model.Jobs.JobConfig? left, Mocassin.Core.Model.Jobs.JobConfig? right) -> bool
+static Mocassin.Core.Model.Jobs.JobConfig.operator ==(Mocassin.Core.Model.Jobs.JobConfig? left, Mocassin.Core.Model.Jobs.JobConfig? right) -> bool
+static Mocassin.Core.Model.Jobs.JobExtension.operator !=(Mocassin.Core.Model.Jobs.JobExtension? left, Mocassin.Core.Model.Jobs.JobExtension? right) -> bool
+static Mocassin.Core.Model.Jobs.JobExtension.operator ==(Mocassin.Core.Model.Jobs.JobExtension? left, Mocassin.Core.Model.Jobs.JobExtension? right) -> bool
+static Mocassin.Core.Model.Jobs.JobSettings.operator !=(Mocassin.Core.Model.Jobs.JobSettings? left, Mocassin.Core.Model.Jobs.JobSettings? right) -> bool
+static Mocassin.Core.Model.Jobs.JobSettings.operator ==(Mocassin.Core.Model.Jobs.JobSettings? left, Mocassin.Core.Model.Jobs.JobSettings? right) -> bool
+static Mocassin.Core.Model.Jobs.JobTemplate.operator !=(Mocassin.Core.Model.Jobs.JobTemplate? left, Mocassin.Core.Model.Jobs.JobTemplate? right) -> bool
+static Mocassin.Core.Model.Jobs.JobTemplate.operator ==(Mocassin.Core.Model.Jobs.JobTemplate? left, Mocassin.Core.Model.Jobs.JobTemplate? right) -> bool
+static Mocassin.Core.Model.Jobs.LatticeRequest.operator !=(Mocassin.Core.Model.Jobs.LatticeRequest? left, Mocassin.Core.Model.Jobs.LatticeRequest? right) -> bool
+static Mocassin.Core.Model.Jobs.LatticeRequest.operator ==(Mocassin.Core.Model.Jobs.LatticeRequest? left, Mocassin.Core.Model.Jobs.LatticeRequest? right) -> bool
+static Mocassin.Core.Model.Jobs.SelectionOptimizer.operator !=(Mocassin.Core.Model.Jobs.SelectionOptimizer? left, Mocassin.Core.Model.Jobs.SelectionOptimizer? right) -> bool
+static Mocassin.Core.Model.Jobs.SelectionOptimizer.operator ==(Mocassin.Core.Model.Jobs.SelectionOptimizer? left, Mocassin.Core.Model.Jobs.SelectionOptimizer? right) -> bool
+~override Mocassin.Core.Ids.JobCollectionId.Equals(object obj) -> bool
+~override Mocassin.Core.Ids.JobConfigId.Equals(object obj) -> bool
+Mocassin.Core.Diagnostics.JobDiagnosticCodes
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.DuplicateName = "JOB007" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.DuplicateReference = "JOB017" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.FractionMismatch = "JOB011" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidCellSize = "JOB004" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidCompensation = "JOB012" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidDopingFraction = "JOB005" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidExtension = "JOB018" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidJobCount = "JOB008" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidOptimizer = "JOB009" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.InvalidSettings = "JOB015" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.JobCountWarning = "JOB013" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.JobLimitExceeded = "JOB019" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.LargeSupercell = "JOB014" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.LimitExceeded = "JOB020" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.NoCollections = "JOB001" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.NoConfigs = "JOB003" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.NonNeutralLattice = "JOB016" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.UnknownDoping = "JOB006" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.UnknownSimulation = "JOB002" -> string!
+const Mocassin.Core.Diagnostics.JobDiagnosticCodes.UnrealizedDoping = "JOB010" -> string!
+static Mocassin.Core.Diagnostics.JobDiagnosticCodes.HelpFor(string! code) -> string?
+Mocassin.Core.Model.Jobs.JobSettingsValidator
+static Mocassin.Core.Model.Jobs.JobSettingsValidator.Validate(Mocassin.Core.Model.Jobs.JobSettings? settings, Mocassin.Core.Model.Simulations.SimulationKind? kind, Mocassin.Core.Diagnostics.ModelPath! path, bool validateKindApplicability = true) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>

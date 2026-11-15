@@ -300,6 +300,20 @@
       "kind": "project",
       "status": "current",
       "step": "09"
+    },
+    {
+      "id": "project-job-templates-populated",
+      "path": "tests/contracts/project-job-templates-populated.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "10"
+    },
+    {
+      "id": "project-jobs-ceria-sweep",
+      "path": "samples/jobs/ceria-temperature-sweep.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "10"
     }
   ]
 }

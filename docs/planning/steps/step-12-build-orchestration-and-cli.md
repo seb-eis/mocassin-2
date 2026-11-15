@@ -96,8 +96,10 @@ Load project
 ```
 
 - Build/preview validation constructs `ValidationContext` with the compiled model and registers
-  `JobTemplateValidationStage` when `RunBuildStage` is true. `validate` does not compile and does not register
-  the stage; the Core `JobTemplateValidator` still reports structural `JOB` errors there.
+  `JobTemplateValidationStage` when `RunBuildStage` is true. The Step 10 `mocassin build --preview` already
+  compiles first and uses this wiring; Step 12 reuses it and adds the package/build stages. `validate` does not
+  compile and does not register the stage; the Core `JobTemplateValidator` still reports structural `JOB`
+  errors there.
 - The pipeline is an async `IAsyncEnumerable<BuildEvent>`:
 
 ```csharp

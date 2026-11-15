@@ -3,6 +3,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Json.Schema;
+using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Project;
 
 namespace Mocassin.Core.Tests;
@@ -28,6 +29,7 @@ public sealed class ProjectSchemaTests
         "tests/contracts/project-simulations-minimal.mocprj",
         "tests/contracts/project-simulations-populated.mocprj",
         "tests/contracts/project-parameterizations-populated.mocprj",
+        "tests/contracts/project-job-templates-populated.mocprj",
         "tests/contracts/project-chiral-p4mm.mocprj",
         "tests/contracts/project-chiral-p1.mocprj",
         "samples/blank/blank.mocprj",
@@ -39,6 +41,7 @@ public sealed class ProjectSchemaTests
         "samples/lattice/bzo-doping.mocprj",
         "samples/simulations/ceria-kmc.mocprj",
         "samples/simulations/ceria-mmc.mocprj",
+        "samples/jobs/ceria-temperature-sweep.mocprj",
     ];
 
     private static readonly JsonSchema projectSchema = JsonSchema.FromText(
@@ -320,7 +323,24 @@ public sealed class ProjectSchemaTests
             Assert.Equal(
                 ProjectCanonicalizer.ToCanonicalJson(project),
                 ProjectCanonicalizer.ToCanonicalJson(loaded));
-            Assert.Empty(ProjectValidator.Validate(project));
+
+            var diagnostics = ProjectValidator.Validate(project);
+            if (relativePath == "tests/contracts/project-job-templates-populated.mocprj")
+            {
+                // This reference-only fixture has an empty model on purpose. Pin its exact structural codes so
+                // a future invalid job template cannot hide behind a broad JOB filter.
+                Assert.Equal(
+                    [
+                        JobDiagnosticCodes.UnknownSimulation,
+                        JobDiagnosticCodes.UnknownDoping,
+                        JobDiagnosticCodes.InvalidOptimizer,
+                    ],
+                    diagnostics.Select(static diagnostic => diagnostic.Code).Order(StringComparer.Ordinal).ToArray());
+            }
+            else
+            {
+                Assert.Empty(diagnostics);
+            }
         }
     }
 }

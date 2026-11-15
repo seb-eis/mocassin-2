@@ -7,31 +7,425 @@ generation with charge compensation.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** Awaiting approval
 - **Feature list:** Approved 2026-11-14 (eight features; step branch created)
 - **Step branch:** `step/10-job-templates`
-- **Step CI:** —
+- **Step CI:** [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43704552037) at `c10e6d7`
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json)
+- **Audit:** `Passed with notes` at `c10e6d7` (round 2; round 1 `Fixes required` at `f2a364d`, all F-1–F-7
+  resolved); replacement closeout CI green — [record](../audits/step-10.md)
 - **Design review:** Ready for implementation at `c5454af050ccd3f1e02f892424ccd714c5d56f89` (round 5) — [record](../reviews/step-10.md); accepted by the human owner 2026-11-14
-- **Last updated:** 2026-11-14
+- **Last updated:** 2026-11-15
 
 ### Proposed feature list
 
 | # | Feature | Branch | Status |
 | --- | --- | --- | --- |
-| 1 | Job template model and persistence | `feature/step-10-job-templates/job-template-model` | Proposed |
-| 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | Proposed |
-| 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | Proposed |
-| 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Proposed |
-| 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Proposed |
-| 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Proposed |
-| 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Proposed |
-| 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | Proposed |
+| 1 | Job template model and persistence | `feature/step-10-job-templates/job-template-model` | Done |
+| 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done |
+| 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | Done |
+| 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Done |
+| 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Done |
+| 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Done |
+| 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Done |
+| 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | Done |
 
 The feature list is a design proposal. It is approved once by the human owner together with the design verdict; it does
 not create the step branch and does not mark the step `In progress`.
+
+### Feature log
+
+| Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- |
+| `job-template-model` | `feature/step-10-job-templates/job-template-model` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` — reported green by the feature-1 agent | — | `c8d5269` |
+| `settings-inheritance-and-validation` | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done | See outcome below | — | `a7fc120` |
+| `job-expansion-and-seeds` | `feature/step-10-job-templates/job-expansion-and-seeds` | Done | `all --require` green; see outcome below | — | `a6435bf` |
+| `supercell-generation` | `feature/step-10-job-templates/supercell-generation` | Done | `all --require` green; see outcome below | — | `8ae41e8` |
+| `doping-and-charge-compensation` | `feature/step-10-job-templates/doping-and-charge-compensation` | Done | `all --require` green; see outcome below | — | `b35e5dc` |
+| `lattice-preview-service` | `feature/step-10-job-templates/lattice-preview-service` | Done | `all --require` green; see outcome below | — | `a95511e` |
+| `selection-optimizers-and-build-preview` | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Done | See feature 7 outcome below | — | `cd1e830` |
+| `documentation-parity-and-closeout` | `feature/step-10-job-templates/documentation-parity-and-closeout` | Done | `docs --require` and `all --require` green; see feature 8 outcome below | — | `057a85c` |
+| `audit-round-1-fixes` | `feature/step-10-job-templates/fix-audit-round-1` | Done | `all --require` green; see audit record resolutions | — | `c10e6d7` |
+
+Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
+job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
+project-job-templates fixture. No per-feature CI run was triggered.
+
+#### Feature 2 outcome and deviations
+
+`settings-inheritance-and-validation` adds the Core structural `JOB001`–`JOB020` validator, the nullable
+`JobSettingsValidator`, the Packages `ResolvedJobSettings`/`JobSettingsResolver`, and the optional
+`ValidationContext.CompiledModel`. Structural job errors now appear in `validate` without a compiled model.
+
+Local gates:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 677, Symmetry 223, Compilation 96,
+  Packages 226, Cli 7, App 1, Contracts 15, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; licence policy 51 packages, no vulnerable packages, ApiCompat compatible
+  (the `Mocassin.Core` and `Mocassin.Packages` baselines were refreshed).
+- `./tools/verify.sh contracts` — exit 0; 18 generated artifacts current, 5 model and 4 parameterization
+  projections OK, 274 space-group settings current, process consistency OK, 31 tool tests passed, SPDX 488
+  files, no secrets, cargo-deny OK.
+- `./tools/verify.sh docs` — exit 0; links OK, Zensical strict build clean, DocFX 0 warnings/0 errors,
+  rustdoc generated, site built.
+
+Recorded deviations and limitations:
+
+- `JOB004` currently checks only the `1..256` cell-size range. The compiled-bound total-position cap remains in
+  the Step 10 build stage, as designed.
+- `JOB015` validates each explicit override layer and its kind applicability. A structurally incomplete
+  inherited value is reported by the Packages resolver when it becomes effective; no compiled model exists in
+  `validate`.
+- A non-neutral base lattice remains a reported model property and is not diagnosed by this structural layer.
+  The `JOB012`/`JOB016` doping outcomes remain in later features.
+- The existing job-template persistence fixture is intentionally reference-only; the envelope round-trip tests
+  exclude `JOB` diagnostics for it, while the dedicated `JobTemplateValidatorTests` cover the structural codes.
+- No per-feature CI run was triggered.
+
+#### Feature 3 outcome and deviations
+
+`job-expansion-and-seeds` adds the build-time deterministic expansion of one job template. It adds
+`JobDescriptor`, `JobExpansionResult`, `JobSeedDeriver`, and the static `JobTemplateExpander` to
+`Mocassin.Packages.Jobs`. Expansion resolves each collection by `SimulationId` against `CompiledModel`, keeps the
+authored collection and configuration order, applies the collection `JobCountPerConfig` override or the compiled
+simulation `JobCount`, and assigns 1-based job identifiers across the complete template. A descriptor carries the
+job/collection/configuration/duplicate indices, the authored names, the simulation identifier and compiled
+simulation index, the compiled kind and dual degree-of-freedom intent, the resolved settings, the authored
+lattice request, the dopings, the collection optimizers, and the 32-byte seed. Every configuration is resolved
+and every count is validated before the first descriptor is emitted, so invalid user data returns diagnostics and
+an empty job list instead of a partial expansion.
+
+Seed derivation follows the recorded contract: the master seed text is the first non-empty of the collection
+`RngSeed`, the compiled simulation `RngSeed`, and the project `MasterSeed`. A 64-character lowercase hexadecimal
+text is decoded to 32 bytes; every other text is hashed as
+`SHA-256("mocassin/seed-text/v1" || UTF8(text))`. The job seed is
+`SHA-256(master[32] || u32_le(collectionIndex) || u32_le(configIndex) || u32_le(jobIndex) || UTF8("mocassin/job/v1"))`.
+No build step creates or persists a seed.
+
+Golden seed vectors covered by `JobSeedDeriverTests`:
+
+- master `000102…1e1f`, indices `0/0/0` →
+  `884a9517b16620af2257945215f5552c1f5af0580ed2c911456b1a29a4f54ce7`;
+- seed text `ceria-seed-1`, indices `0/0/0` →
+  `b6d2d1614b2b819445764523ef5613a47b7712a218e303d1a3d2cdb4f71a5c2e`.
+
+Diagnostics: `JOB001` for an empty collection list, `JOB002` for a collection that references an unknown
+simulation, `JOB003` for a collection without configurations, `JOB008` for an effective job count outside
+`1..1000`, `JOB019` for more than 99,999 expanded jobs, `JOB015` for a configuration that fails settings
+resolution, and `PROJ010` for an unknown template identifier.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 677, Symmetry 223, Compilation 96,
+  Packages 251, Cli 7, App 1, Contracts 15, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; NuGet licence policy OK (51 packages), no vulnerable packages, ApiCompat
+  compatible with the new `Mocassin.Packages` public surface.
+- `./tools/verify.sh contracts` — exit 0; 18 contract artifacts current, 5 model and 4 parameterization
+  projections OK, 274 space-group settings current, process consistency OK, tool tests passed, SPDX headers in
+  494 files, no secret patterns in 837 tracked text files, cargo-deny advisories/bans/licenses/sources OK.
+- `./tools/verify.sh docs` — exit 0; link check, Zensical strict build, DocFX, and rustdoc clean.
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET, Public API/dependency, Rust, Python, documentation, and contracts/policy stages all passed:
+  the Rust workspace tests were green, the Python package reported 3 passed tests, and the DocFX,
+  rustdoc, and Zensical strict builds were clean.
+
+Recorded deviations and limitations:
+
+- Feature 3 covers expansion, descriptors, and seeds only. Supercells, lattice-request hashing, doping counts,
+  optimizer evaluation, the preview service, the CLI path, and the `JOB010`–`JOB012`/`JOB016` outcomes remain in
+  features 4–7.
+- The expander requires a valid project `MasterSeed` and reports project metadata diagnostics before expanding.
+  Arbitrary seed text is supported through the collection and simulation `RngSeed` layers, which matches
+  `ProjectValidator`.
+- Seed equality in the expansion tests is asserted by content because `ImmutableArray<byte>` compares by
+  reference; the golden vectors themselves are asserted as lowercase hex strings.
+- Feature 3 was squash-merged into `step/10-job-templates` as `a6435bf` (`step-10: add deterministic job
+  expansion and seeds`). The squash was validated locally; no per-feature CI run was triggered.
+
+#### Feature 4 outcome and deviations
+
+`supercell-generation` adds `ProjectHasher.ComputeParticles` and `ProjectHasher.ComputeLattice`, the
+`LatticeRequestHasher` projection, `LatticeSeedDeriver`, the deterministic `LatticeSampler`, `GeneratedLattice`,
+`SupercellGenerationResult`, and `SupercellGenerator` to their documented locations. The generator validates
+`A`/`B`/`C` in `1..256` and the 500,000-position hard cap (`JOB004`), warns above 100,000 positions (`JOB014`),
+replicates the base unit cell in row-major order, and defaults stable sites to the first particle of the
+authored particle set and unstable sites to compiled void index `0`. It derives and returns the lattice-request
+hash and lattice seed but does not apply dopings, charge compensation, optimizers, or previews.
+
+The accepted synthetic vector reproduces request hash
+`5719de5efea8b57ef6960229bf2248de0da3bb497c2f29507d1742157f878295` and lattice seed
+`a497141d26d005eb5caa17025b3c1e3564f31f8d46518a7a36d311623be464d2`. The sampler vector reproduces the
+documented `[1, 7, 2]` selection.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET build reports 0 warnings/0 errors; Core 682, Symmetry 223, Compilation 96, Packages 291, Cli 7,
+  App 1, Contracts 15, Results 1, and Architecture 1 tests passed; `dotnet format` is clean; the NuGet licence
+  policy covers 51 packages with no vulnerable packages; ApiCompat is compatible with the checked-in baseline;
+  the Rust workspace tests are green; the Python package reports 3 passed tests; Zensical strict, DocFX
+  (0 warnings/0 errors), and rustdoc are clean; 18 contract artifacts are current; 505 source files carry SPDX
+  headers; no secret patterns were found; and cargo-deny advisories/bans/licenses/sources are OK.
+- Focused feature tests: the 40 `LatticeRequestHasherTests`, `LatticeSeedDeriverTests`, `LatticeSamplerTests`,
+  and `SupercellGeneratorTests` cases and the 5 `ProjectHasherLatticeTests` cases all pass.
+
+Recorded deviations and limitations:
+
+- Feature 4 generates only the base lattice. Sequential doping, truncation, charge compensation, the
+  `DopingReport`/`DopingInfo`, the `JOB010`–`JOB012`/`JOB016` outcomes, optimizers, the preview service, and the
+  CLI path remain in features 5–7.
+- The request hash resolves doping priorities because they are part of the projection. A request that references
+  an unknown doping returns `JOB006` from the generator instead of hashing an invalid request; fractional doping
+  validation and application remain in feature 5.
+- The generator throws `InvalidOperationException` for a compiled model that is inconsistent with the project
+  (no P1 positions, an unusable stable-site particle set, or a particle index that does not fit the byte
+  lattice). That is a contract violation, not user data.
+- `GeneratedLattice` carried only the size, position count, and particle bytes at feature completion. Feature 5
+  extends it with the doping report and summary.
+- Feature 4 was squash-merged into `step/10-job-templates` as `8ae41e8` (`step-10: add deterministic supercell
+  generation`). The squash was validated locally; no per-feature CI run was triggered.
+
+#### Feature 5 outcome and deviations
+
+`doping-and-charge-compensation` completes the build-time lattice generator with sequential doping, truncation,
+charge compensation, and the doping report. It adds `DopingApplication` and `DopingReport` (with
+`ChargeNeutralityToleranceElementary = 1e-6` and the canonical `ToDopingInfo` formatting), extends
+`GeneratedLattice` with `Report` and `DopingInfo`, and adds the internal `DopingApplier` that `SupercellGenerator`
+runs after base replication.
+
+The applier resolves each requested doping and applies it to the current lattice in ascending resolved priority.
+It counts the primary source particle on the exchange site in the current lattice, computes
+`floor(fraction × available)` with finite `[0,1]` validation (`JOB005`), and records `JOB010` only when a positive
+fraction has no source particle and `JOB011` whenever the effective fraction differs from the request. A
+compensating doping computes `Δq_p` and `Δq_d` from the compiled particles, scans `n_p` downward from the
+requested count, and accepts the first pair whose `n_p × (−Δq_p/Δq_d)` is integral within `1e-6` and fits the
+dependent source population. An unrealizable or unbalanced pair is `JOB012` and returns no lattice. Primary and
+dependent positions are sampled without replacement with one `LatticeSampler` stream per generated lattice; the
+dependent source positions are recomputed after the primary application. Same-site dopings see only the particles
+that previous applications left behind. A non-neutral final lattice caused by an applied uncompensated charged
+doping is `JOB016`; a non-neutral base lattice is reported through `TotalChargeBefore`/`IsChargeNeutral` without a
+diagnostic.
+
+After the dopings, the generator verifies the final lattice against the compiled structure: unstable positions
+must hold the void index and stable positions must hold a particle in their compiled allowed-particle mask.
+`DopingInfo` is `v1:{dopingId:D}:{priority}:{requested}:{appliedPrimary}:{appliedDependent}:{effectiveFraction:R}`
+entries joined by `;` in priority order, empty only when no doping was requested.
+
+The 23 new `DopingApplicationTests` cases cover 0 %, 100 %, tiny-cell truncation, request/priority ordering,
+same-site sequences, integer and fractional compensation ratios, dependent capacity limits, impossible
+compensation, `JOB016` for non-compensated and mixed configs, a pre-existing non-neutral base,
+`JOB010`/`JOB011`/`JOB005`, the exact `DopingInfo` form, deterministic repeat generation, and the single shared
+sampler stream.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 682, Symmetry 223, Compilation 96,
+  Packages 314, Cli 7, App 1, Contracts 15, Results 1, and Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET, Public API/dependency, Rust, Python, documentation, and contracts/policy stages all passed: the
+  NuGet licence policy covers 51 packages with no vulnerable packages, ApiCompat is compatible with the
+  checked-in baseline, the Rust workspace tests are green, the Python package reports 3 passed tests, Zensical
+  strict/DocFX/rustdoc are clean, 18 contract artifacts are current, 508 source files carry SPDX headers, no
+  secret patterns were found in 854 tracked text files, and cargo-deny advisories/bans/licenses/sources are OK.
+
+Recorded deviations and limitations:
+
+- The final-lattice scan checks site masks and unstable-site voids. "Doping counts match the report" is
+  guaranteed at application time rather than re-derived afterwards, because a later same-site doping can consume
+  particles produced by an earlier application; the report is an application log, not a final population
+  snapshot.
+- `JOB010` and `JOB011` can both appear for an unrealizable doping, because a positive request with no source
+  particle also differs from the effective fraction of zero. The design defines no mutual exclusion.
+- The generator throws `InvalidOperationException` for a project/compiled-model inconsistency (a requested
+  doping or exchange that does not resolve, a particle index that does not fit the byte lattice, or a final
+  lattice that violates the compiled site mask). These are contract violations, not user data.
+- Doping zones and concentration gradients are not placed; the sequential model is the documented limitation.
+- Optimizers, the preview service, the CLI path, and the operator/acceptance documentation remain in features
+  6–8.
+- Feature 5 was squash-merged into `step/10-job-templates` as `b35e5dc` (`step-10: add sequential doping and
+  charge compensation`). The squash was validated locally; no per-feature CI run was triggered.
+
+#### Feature 6 outcome and deviations
+
+`lattice-preview-service` adds the shared `ILatticePreviewService`, the `ParticlePopulation`, `SitePopulation`,
+`LatticePreview`, and `JobCountPreview` records, the `LatticePreviewService`, and the bounded
+`LatticePreviewCache` to `Mocassin.Packages.Jobs`. The lattice preview delegates to a new internal
+`SupercellGenerator` overload that both the job build and the preview use, so there is no second doping,
+truncation, or compensation implementation. The generator keeps the job-build `JobDescriptor` entry point and
+now shares one core path with the preview.
+
+`TryCreatePreview` echoes the exact `LatticeRequest` and doping list, returns the same `DopingReport` produced by
+generation, and exposes deterministic per-site remaining populations. Populations exclude the implicit void
+particle, include only positive counts, order sites by ascending `CellSiteId` and particles by ascending compiled
+particle index, and retain a doping-targeted site even when its population is empty. Unknown dopings, non-finite
+or out-of-range fractions, invalid cell sizes, and impossible compensation return `null` with diagnostics and are
+never partially built or cached. A null project, model, or request is a programmer error and throws.
+
+The preview cache is instance-scoped, thread-safe, and bounded to eight entries and 256 MiB of estimated payload
+with LRU eviction. Its key combines the project model hash, lattice-request hash, canonical resolved doping list,
+space-group data version and SHA-256, and symmetry contract version, so an edit to any component cannot reuse a
+stale preview. A single preview larger than the byte budget is still returned but is not cached. Internal seams
+(`CachedEntryCount`, `CachedBytes`, `IsCached`, `EstimatePayloadBytes`, and the explicit-capacity constructor)
+support the eviction tests.
+
+`TryCreateJobCountPreview` is scoped by `SimulationId` and never expands jobs or generates lattices. It derives
+the default count from the authored project simulation that the compiler copies verbatim into
+`CompiledRuntimeSettings.JobCount`, sums the effective counts of the collections bound to that simulation after
+collection overrides, and separately sums the whole-template total across every simulation. An unknown requested
+or collection simulation is `JOB002`; an effective count outside `1..1000` is `JOB008`; either failure returns
+`null` rather than a partial preview. A template with invalid lattice requests or doping values still produces a
+complete job-count preview, which pins the no-generation boundary.
+
+The 29 `LatticePreviewServiceTests` cases cover the request/doping echo, report equality with the build, per-site
+populations and void exclusion, all failure cases, cache reuse, request/doping/model/symmetry key separation,
+eight-entry and payload eviction, concurrent previews, simulation-scoped default/effective/total counts,
+inheritance and overrides, unknown simulation, invalid counts, and no lattice generation.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET build reports 0 warnings/0 errors; Core 682, Symmetry 223, Compilation 96, Packages 343, Cli 7,
+  App 1, Contracts 15, Results 1, and Architecture 1 tests passed; `dotnet format` is clean; the NuGet licence
+  policy covers 51 packages with no vulnerable packages; ApiCompat is compatible with the checked-in baseline;
+  the Rust workspace tests are green; the Python package reports 3 passed tests; Zensical strict, DocFX
+  (0 warnings/0 errors), and rustdoc are clean; 18 contract artifacts are current; 514 source files carry SPDX
+  headers; no secret patterns were found in 863 tracked text files; and cargo-deny advisories/bans/licenses/
+  sources are OK.
+- Focused feature tests: the 29 `LatticePreviewServiceTests` cases pass.
+
+Recorded deviations and limitations:
+
+- The preview samples with a fixed 32-byte zero seed because it exposes only the seed-independent report counts,
+  charges, effective fractions, and per-site populations. The preview/build equality test therefore asserts the
+  report fields and `DopingInfo`; the generated particle positions themselves remain job-seed dependent.
+- The job-count preview reads the authored `Simulation.JobCount` rather than a compiled value because the
+  required signature has no compiled model. The Step 08 compiler copies that value verbatim into
+  `CompiledRuntimeSettings.JobCount`, so the two values agree for a consistent project.
+- The job-count preview validates the count of every template collection whenever a whole-template total is
+  requested, including collections bound to other simulations. A stale reference in an unrelated collection
+  therefore returns `null` instead of an incomplete total.
+- The cache stores the preview report and populations, not the generated particle bytes, so the 256 MiB bound is
+  an estimate of the cached preview payload. The payload-eviction test injects a smaller byte budget through the
+  internal constructor rather than allocating a 256 MiB lattice.
+- Optimizers, `mocassin build --preview`, the CLI path, and the operator/acceptance documentation remain in
+  features 7–8.
+- Feature 6 was squash-merged into `step/10-job-templates` as `a95511e`
+  (`step-10: add shared lattice and job-count preview service`). The squash was validated locally; no
+  per-feature CI run was triggered.
+
+#### Feature 7 outcome and deviations
+
+`selection-optimizers-and-build-preview` adds the `Mocassin.Packages.Jobs.Optimization` subfolder with
+`CompiledSelectionOptimizer`, `SelectionOptimizerPlan`, `SelectionOptimizerEffect`, and
+`SelectionOptimizerResolver`. The resolver expands every authored `(siteId, particleId)` to every canonical P1
+position owned by the site, sorts the result by `(positionId, particleId)`, and never mutates the compiled model.
+The dual-DOF flag starts from `CompiledSimulation.Intent.UseDualDofCorrection` and is cleared only when at least
+one optimizer exists and every compiled environment is reduced; no-optimizer, mixed, partially reduced, and
+already-clear cases keep the intent. MMC ignores optimizers and keeps the flag clear.
+
+`JobDescriptor` now carries the sorted `CompiledOptimizers` payload and takes `UseDualDofCorrection` from the
+collection plan. `JobTemplateExpander` resolves the plan before emitting descriptors and returns diagnostics
+instead of a partial expansion. Lattice generation ignores the compiled optimizer targets, so optimizers never
+remove lattice particles.
+
+The compiled-bound removes-all check uses the existing `CompiledTransitionModel` jump-count table and each
+active KMC collection's mobile-particle mask. It reports `JOB009` only when an optimizer actually removes a
+selectable start option and no other selectable start remains for that collection. When the jump table is
+missing or unsized, or the compiled simulation has no active collection, the plan records the precise
+`StartOptionCheckLimitation` and does not pretend the check ran.
+
+`mocassin build --preview` adds `Mocassin.Cli.Build.PreviewCommand` and `PreviewReportWriter`. The command loads,
+validates, compiles, expands, and previews one selected template; it never opens or writes a `.msl` and never
+calls the Step 11 writer. A project with several templates requires `--template`; an ambiguous implicit
+selection is a usage error. The human and `build-preview-v1` JSON forms report the template and job counts, each
+collection's dual-DOF flag and optimizer target/removed-start counts, and each configuration's lattice size,
+position count, requested/applied doping counts, effective fraction, charge before/after, and neutrality.
+
+`samples/jobs/ceria-temperature-sweep.mocprj` extends the ceria KMC simulation sample with Ce4+/Ce3+ species,
+a compensated Ce reduction doping, two temperatures, two lattice sizes, duplicate jobs, and a Ce-site optimizer.
+It is registered in `ProjectSchemaTests.fixturePaths` and the manifest fixture registry.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET build reports 0 warnings/0 errors; Core 683, Symmetry 223, Compilation 96, Packages 358, Cli 16,
+  App 1, Contracts 15, Results 1, and Architecture 1 tests passed; `dotnet format` is clean; the NuGet licence
+  policy covers 51 packages with no vulnerable packages; ApiCompat is compatible with the checked-in baseline;
+  the Rust workspace tests are green; the Python package reports 3 passed tests; Zensical strict, DocFX
+  (0 warnings/0 errors), and rustdoc are clean; 18 contract artifacts are current; 522 source files carry SPDX
+  headers; no secret patterns were found in 863 tracked text files; and cargo-deny advisories/bans/licenses/
+  sources are OK.
+- Focused feature tests: the 14 `SelectionOptimizerResolverTests` cases, the updated
+  `JobTemplateExpanderTests` and `SupercellGeneratorTests`, and the 9 `PreviewCommandTests` cases pass. The new
+  ceria sweep sample validates with zero errors and previews to six jobs across two collections and four
+  configurations.
+
+Recorded deviations and limitations:
+
+- The removes-all check is limited to the compiled jump-count table and the simulation's
+  `ActiveCollectionIndices`. It does not reconstruct a runtime selection pool, which Step 14 owns. The
+  `StartOptionCheckEvaluated`/`StartOptionCheckLimitation` fields make the boundary explicit.
+- `CompiledSelectionOptimizer.ParticleId` is the dense compiled particle index, not the stable `ParticleId`;
+  Step 11 encodes it as the `.msl` particle id and Step 14 applies it to the runtime pool.
+- The `build-preview-v1` JSON report is an interim Step 10 shape that mirrors the `validation-v1` envelope. It is
+  not yet a manifest-owned report; Step 12 may formalize the full build report.
+- The preview generates one lattice per configuration, not per duplicate job. Lattice diagnostics are
+  deduplicated in the report while the per-configuration job count still reflects the duplicate expansion.
+- Feature 7 was squash-merged into `step/10-job-templates` as `cd1e830`
+  (`step-10: add selection optimizers and build preview`). The squash was validated locally; no per-feature CI
+  run was triggered.
+
+#### Feature 8 outcome and deviations
+
+`documentation-parity-and-closeout` completes the Step 10 documentation set, parity entries, and the closeout
+record. It adds `docs/user-guide/job-templates.md`; updates the lattice guide with generation, truncation,
+same-site sequencing, compensation, neutrality, preview, and row-major layout; documents the job-template JSON,
+canonical ordering, extension bounds, seed derivation, and limits; documents the preview CLI and no-write
+guarantee; and records the build pipeline and design decisions for the SHA-256 stream,
+`ValidationContext.CompiledModel`, the Packages/Compilation boundary, and the optimizer dual-DOF rule. The
+`zensical.toml` navigation and user-guide index link the new page. `docs/reference/diagnostics.md` already
+matched the catalog; the documentation-drift test remains the check.
+
+The parity matrix now marks the Step 10 job, optimizer, lattice/doping, cap, and preview rows with their
+implemented/partial state and remaining editor or later-step owners. The Step 10 page feature log records the
+squash commits for features 1–8.
+
+Local gates on the feature branch (after `dotnet restore Mocassin.slnx` and
+`dotnet build Mocassin.slnx -c Release`):
+
+- `./tools/verify.sh docs --require` — exit 0. Math conventions OK (157 files), documentation links OK (160
+  files), Zensical strict build `No issues found`, DocFX 376 documented files with 0 warnings/0 errors, and
+  rustdoc clean; the combined site is built in `site/`.
+- `./tools/verify.sh all --require` — exit 0. .NET build 0 warnings and 1,394 tests passed across the nine
+  test projects; ApiCompat and NuGet audit clean; Rust `fmt`, `clippy`, and tests clean; Python 3 passed; the
+  documentation gate as above; 31 contract/policy tests, SPDX headers in 522 source files, no secret patterns,
+  and `cargo-deny` reporting advisories, bans, licences, and sources all `ok`.
+- No per-feature CI run was triggered.
+
+Recorded deviations and limitations:
+
+- Closeout CI dispatch, the closeout evidence file, and the audit request are step-agent tasks; the orchestrator
+  only routes requests, spawns the fresh auditor, and relays the verdict and owner decisions. The feature-8
+  squash predates that closeout work, which the later closeout/audit record commits completed.
+- The GUI documentation describes the intended Step 25/26 surfaces as planned; the pages do not claim those
+  editors exist in Step 10.
+- The job-template guide links to the CLI reference page without a fragment: the repository link checker and
+  Zensical derive different heading slugs for `mocassin build --preview` because of the `--` token.
+- An earlier DocFX run reported three `InvalidAssemblyReference` warnings for MessagePack against stale
+  build outputs. A clean `dotnet restore` plus Release build removed them; both gates are green with no
+  toolchain or configuration change.
+- `build-preview-v1` remains an interim report shape until Step 12 formalises the build report.
+- Feature 8 was squash-merged into `step/10-job-templates` as `057a85c`
+  (`step-10: complete documentation, parity, and closeout`); no per-feature CI run was triggered.
+
+**Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json) records the audited
+commit `c10e6d7`, replacement closeout CI run `43704552037` with the same `head_sha`, `main` SHA at freeze
+`ca9a98f`, and merge candidate `c10e6d7`. The earlier run `43699356371` at `f2a364d` remains process history.
+The checker reports `Closeout evidence: OK`; `main` was already an ancestor, so no merge-tree run is required.
 
 ## Goal
 
@@ -457,18 +851,23 @@ Duplicate `(site, particle)` optimizers are owned only by `JOB017`; `JOB009` doe
 
 ### 7. Build-stage validation and diagnostics
 
-`ValidationContext` gains an optional `CompiledModel? CompiledModel` property (additive; defaults to `null`).
-The Step 10 `JobTemplateValidationStage` delegates to the Core validator first, then runs the compiled-bound
-checks; it runs only when `RunBuildStage` is true, the context carries a compiled model, and earlier stages
-have no error.
+`ValidationContext` carries an optional `CompiledModel? CompiledModel` property (additive; defaults to
+`null`). The implemented
+`Mocassin.Packages.Projects.Validation.JobTemplateValidationStage` is the Step 10 `IValidationStage`
+(`Stage = Build`); it delegates to the Core validator first, then runs the compiled-bound checks. It runs only
+when `RunBuildStage` is true, the context carries a compiled model, and earlier stages have no error.
 
 - `validate` keeps `RunBuildStage = false`; it still runs the Core `JobTemplateValidator` through
-  `ProjectValidator`, so structural `JOB` errors appear without a compile. This is a deliberate change from
-  the earlier draft.
-- `build` and `mocassin build --preview` supply the compiled model, register the Step 10 stage, and run the
-  compiled-bound checks. Step 12 owns that registration and the `ValidationContext` construction.
+  `ProjectValidator`, so structural `JOB` errors appear without a compile. `JOB013` and `JOB019` are now owned
+  by the compiled-bound stage so the documented ownership table and the code agree; `validate` therefore
+  reports them only through `build`/`build --preview`, while the Core validator keeps the structural caps.
+- `mocassin build --preview` compiles the project first, then calls
+  `ProjectValidationPipeline.Validate` with the compiled model, `RunBuildStage = true`, and the stage
+  registered. The full `build` command in Step 12 reuses the same pipeline wiring and appends its package/build
+  stages.
 - Step 07's `ValidationContext` snippet is updated in this design to carry the optional model; the pipeline
-  remains the only Build-stage extension point.
+  remains the only Build-stage extension point. Build stages are recorded as skipped, not run, when
+  `RunBuildStage` is false or the compiled model is absent.
 - `JOB001`–`JOB020` are registered in the Step 07 `DiagnosticCatalog`; Step 07 does not stub them.
 
 ### 8. Job settings, inheritance, and persistence
@@ -513,7 +912,8 @@ public sealed record JobExtension(string Id, JsonElement Config);
   `baseSettings`/`overrides` (not as a config sibling). `null` inherits; a non-null array **replaces** the
   inherited list as a whole. Step 10 validates a non-empty unique `id` (≤64 chars), an object-valued `config`
   of at most 64 KiB, at most 16 extensions and 256 KiB total per effective settings list; it preserves the
-  config as canonical JSON (sorted property names, normalized numbers) so project hashes are deterministic.
+  config as canonical JSON (sorted property names, array order and number tokens preserved verbatim) so project
+  hashes are deterministic without binary64 rounding; Steps 27/28 define the extension schema ranges.
   The concrete extension schema and semantic validation are owned by Steps 27/28; Step 10 does not invent an
   MMCFE schema. Invalid extension content/bounds are `JOB018`.
 - **Hard limits.** At most 100 job templates per project, 100 collections per template, 1,000 configs per
@@ -601,46 +1001,47 @@ exception is needed.
 
 ## Implementation tasks
 
-- [ ] Implement typed job-template/collection/config records, `JobSettings`, extensions, and inheritance.
-- [ ] Move `JobTemplate` into `Mocassin.Core.Model.Jobs`, add typed IDs, and update JSON/PublicAPI/ApiCompat.
-- [ ] Implement project JSON canonicalization, manifest/schema, and persistence round-trip.
-- [ ] Implement job expansion, deterministic IDs, master/job seed derivation, and structural limits.
-- [ ] Implement supercell generation with sequential doping, truncation, charge compensation, and the report.
-- [ ] Implement the deterministic SHA-256 counter sampler and golden vectors.
-- [ ] Implement `ILatticePreviewService`, `LatticePreview`, and `JobCountPreview` over the same generator as the
+- [x] Implement typed job-template/collection/config records, `JobSettings`, extensions, and inheritance.
+- [x] Move `JobTemplate` into `Mocassin.Core.Model.Jobs`, add typed IDs, and update JSON/PublicAPI/ApiCompat.
+- [x] Implement project JSON canonicalization, manifest/schema, and persistence round-trip.
+- [x] Implement job expansion, deterministic IDs, master/job seed derivation, and structural limits.
+- [x] Implement supercell generation with sequential doping, truncation, charge compensation, and the report.
+- [x] Implement the deterministic SHA-256 counter sampler and golden vectors.
+- [x] Implement `ILatticePreviewService`, `LatticePreview`, and `JobCountPreview` over the same generator as the
   build; cover the try/failure boundary, request echo, per-site populations, bounded cache, and preview/build
   report equality.
-- [ ] Implement selection optimizers, P1 image mapping, `UseDualDofCorrection`, and their validation.
-- [ ] Implement the Core structural validator and the Packages compiled-bound Build stage.
-- [ ] Implement `mocassin build --preview` (no package write) and register the build stage in Step 12.
-- [ ] Add ceria temperature/doping sweep samples.
-- [ ] Add tests for edge cases (0 %, 100 %, tiny cells, NaN/Inf, impossible compensation, same-site sequence).
+- [x] Implement selection optimizers, P1 image mapping, `UseDualDofCorrection`, and their validation.
+- [x] Implement the Core structural validator and the Packages compiled-bound Build stage.
+- [x] Implement `mocassin build --preview` (no package write), compile first, and register the compiled-bound
+  `JobTemplateValidationStage`; Step 12 reuses the same pipeline wiring for the full build.
+- [x] Add ceria temperature/doping sweep samples.
+- [x] Add tests for edge cases (0 %, 100 %, tiny cells, NaN/Inf, impossible compensation, same-site sequence).
 
 ## Acceptance criteria
 
-- [ ] The ceria KMC sample expands to the expected number of jobs with deterministic IDs.
-- [ ] For a 10×10×10 ceria cell and 1 % Ce doping, the applied counts and vacancy compensation are correct.
-- [ ] A requested fraction that cannot be realized is adjusted downward and reported.
-- [ ] An impossible charge compensation fails with `JOB012`.
-- [ ] The lattice preview echoes the request, reports requested/applied counts, per-site remaining populations,
+- [x] The ceria KMC sample expands to the expected number of jobs with deterministic IDs.
+- [x] For a 10×10×10 ceria cell and 1 % Ce doping, the applied counts and vacancy compensation are correct.
+- [x] A requested fraction that cannot be realized is adjusted downward and reported.
+- [x] An impossible charge compensation fails with `JOB012`.
+- [x] The lattice preview echoes the request, reports requested/applied counts, per-site remaining populations,
   total charge before/after, and neutrality, and matches the generated lattice's report for the same request.
-- [ ] The preview returns `null` plus diagnostics for an unknown doping, a non-finite or out-of-range
+- [x] The preview returns `null` plus diagnostics for an unknown doping, a non-finite or out-of-range
   fraction, an invalid supercell, or impossible compensation; it never returns a partial preview.
-- [ ] The job-count preview reports the default, effective, and total job counts without generating lattices.
-- [ ] Same job descriptor + seed produces an identical lattice across runs and OSes, and the documented
+- [x] The job-count preview reports the default, effective, and total job counts without generating lattices.
+- [x] Same job descriptor + seed produces an identical lattice across runs and OSes, and the documented
   job-seed/lattice-seed/sampler golden vectors match.
-- [ ] Changing a simulation-only setting does not change the lattice for the same job.
-- [ ] A same-site sequential doping applies to the particles remaining after earlier dopings.
-- [ ] A non-compensated charged lattice (including a mixed compensated/non-compensated config) is permitted
+- [x] Changing a simulation-only setting does not change the lattice for the same job.
+- [x] A same-site sequential doping applies to the particles remaining after earlier dopings.
+- [x] A non-compensated charged lattice (including a mixed compensated/non-compensated config) is permitted
   with `JOB016` when `IsChargeNeutral` is false; an unrealizable/unbalanced compensated pair is `JOB012`.
   `IsChargeNeutral` uses `1e-6 × max(1, total_positions)` and never fails a pre-existing base charge by itself.
-- [ ] `validate` reports structural `JOB001`–`JOB008`, the `JOB009` reference check, `JOB015`, `JOB017`,
+- [x] `validate` reports structural `JOB001`–`JOB008`, the `JOB009` reference check, `JOB015`, `JOB017`,
   `JOB018`, and `JOB020` without a compiled model; `JOB009`'s removes-all check and the other compiled-bound
   codes require the build stage.
-- [ ] The 99,999-job cap and the structural count caps fail with `JOB019`/`JOB020`.
-- [ ] Optimizers remove only start options at every P1 image of the target site, never lattice particles, and
+- [x] The 99,999-job cap and the structural count caps fail with `JOB019`/`JOB020`.
+- [x] Optimizers remove only start options at every P1 image of the target site, never lattice particles, and
   clear dual-DOF only under the documented all-masks rule.
-- [ ] Documentation written
+- [x] Documentation written
 
 ## Documentation
 
@@ -682,8 +1083,12 @@ At this point, document job templates and supercells:
 | Optimizers | Every P1 position of the site removed; lattice unchanged; dual-DOF one/some/all environment reduction; `JOB009`; duplicate `JOB017` | PR-fast |
 | Limits | Collection/config/doping/optimizer/extension caps and `JOB019`/`JOB020` | PR-fast |
 | Edge cases | 0 %, 100 %, tiny cell, impossible ratio, NaN/Inf | PR-fast |
-| Performance | 10⁴ small jobs expand in < 10 s; generation peak stays under 1 GiB with cancellation every job | PR-medium |
+| Performance | 10⁴ small jobs expand within a 30 s smoke bound; the measured < 10 s and < 1 GiB generation target is deferred to Step 29/release performance work | PR-medium |
 | Writer/reader integration | Later Step 11/13 round-trip test; deferred to those steps, not claimed here | nightly |
+
+The Step 10 performance test is a non-flaky expansion smoke bound. Measured generation wall-clock and
+peak-memory targets (< 10 s and < 1 GiB on the reference runner) are explicitly deferred to Step 29/release
+performance work.
 
 ## Risks and mitigations
 

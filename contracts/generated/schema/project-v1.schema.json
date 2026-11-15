@@ -1056,6 +1056,375 @@
           },
           "name": {
             "type": "string"
+          },
+          "collections": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "simulationId": {
+                  "type": "string"
+                },
+                "baseSettings": {
+                  "type": "object",
+                  "properties": {
+                    "temperatureK": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "targetMcsp": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "writeOutCount": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "timeLimitSeconds": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "minSuccessRate": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "flags": {
+                      "type": "array",
+                      "items": {
+                        "type": "string"
+                      }
+                    },
+                    "instruction": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "preRunMcsp": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "electricFieldModulusVm": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "electricFieldDirection": {
+                      "type": [
+                        "array",
+                        "null"
+                      ],
+                      "items": {
+                        "type": "number"
+                      },
+                      "minItems": 3,
+                      "maxItems": 3
+                    },
+                    "normalizationEnergyEv": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "maxAttemptFrequencyHz": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "breakTolerance": {
+                      "type": [
+                        "number",
+                        "null"
+                      ]
+                    },
+                    "breakSampleLengthMcsp": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "breakSampleIntervalMcsp": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "resultSampleMcsp": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    },
+                    "extensions": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "config": {
+                            "type": "object",
+                            "additionalProperties": true
+                          }
+                        },
+                        "required": [
+                          "id",
+                          "config"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [],
+                  "additionalProperties": false
+                },
+                "jobCountPerConfig": {
+                  "type": [
+                    "integer",
+                    "null"
+                  ]
+                },
+                "rngSeed": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                },
+                "selectionOptimizers": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "siteId": {
+                        "type": "string"
+                      },
+                      "particleId": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "siteId",
+                      "particleId"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "configs": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "name": {
+                        "type": "string"
+                      },
+                      "overrides": {
+                        "type": "object",
+                        "properties": {
+                          "temperatureK": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "targetMcsp": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "writeOutCount": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "timeLimitSeconds": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "minSuccessRate": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "flags": {
+                            "type": "array",
+                            "items": {
+                              "type": "string"
+                            }
+                          },
+                          "instruction": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "preRunMcsp": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "electricFieldModulusVm": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "electricFieldDirection": {
+                            "type": [
+                              "array",
+                              "null"
+                            ],
+                            "items": {
+                              "type": "number"
+                            },
+                            "minItems": 3,
+                            "maxItems": 3
+                          },
+                          "normalizationEnergyEv": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "maxAttemptFrequencyHz": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "breakTolerance": {
+                            "type": [
+                              "number",
+                              "null"
+                            ]
+                          },
+                          "breakSampleLengthMcsp": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "breakSampleIntervalMcsp": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "resultSampleMcsp": {
+                            "type": [
+                              "integer",
+                              "null"
+                            ]
+                          },
+                          "extensions": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {
+                                  "type": "string"
+                                },
+                                "config": {
+                                  "type": "object",
+                                  "additionalProperties": true
+                                }
+                              },
+                              "required": [
+                                "id",
+                                "config"
+                              ],
+                              "additionalProperties": false
+                            }
+                          }
+                        },
+                        "required": [],
+                        "additionalProperties": false
+                      },
+                      "lattice": {
+                        "type": "object",
+                        "properties": {
+                          "a": {
+                            "type": "integer"
+                          },
+                          "b": {
+                            "type": "integer"
+                          },
+                          "c": {
+                            "type": "integer"
+                          }
+                        },
+                        "required": [
+                          "a",
+                          "b",
+                          "c"
+                        ],
+                        "additionalProperties": false
+                      },
+                      "dopings": {
+                        "type": "array",
+                        "items": {
+                          "type": "object",
+                          "properties": {
+                            "dopingId": {
+                              "type": "string"
+                            },
+                            "fraction": {
+                              "type": "number"
+                            }
+                          },
+                          "required": [
+                            "dopingId",
+                            "fraction"
+                          ],
+                          "additionalProperties": false
+                        }
+                      }
+                    },
+                    "required": [
+                      "id",
+                      "name",
+                      "lattice"
+                    ],
+                    "additionalProperties": false
+                  }
+                }
+              },
+              "required": [
+                "id",
+                "name",
+                "simulationId"
+              ],
+              "additionalProperties": false
+            }
           }
         },
         "required": [
