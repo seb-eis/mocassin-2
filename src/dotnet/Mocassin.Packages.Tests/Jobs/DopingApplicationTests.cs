@@ -2,86 +2,17 @@
 
 using System.Collections.Immutable;
 using System.Globalization;
-using Mocassin.Compilation.Compiler;
-using Mocassin.Compilation.Structure;
+using FsCheck.Xunit;
 using Mocassin.Core.Diagnostics;
-using Mocassin.Core.Geometry;
-using Mocassin.Core.Ids;
-using Mocassin.Core.Model;
 using Mocassin.Core.Model.Jobs;
-using Mocassin.Core.Model.Lattice;
-using Mocassin.Core.Model.Particles;
-using Mocassin.Core.Model.Simulations;
-using Mocassin.Core.Model.Structure;
-using Mocassin.Core.Project;
-using Mocassin.Core.Units;
 using Mocassin.Packages.Jobs;
+using static Mocassin.Packages.Tests.Jobs.DopingTestScenario;
 
 namespace Mocassin.Packages.Tests.Jobs;
 
 [Trait("Tier", "PR-medium")]
 public sealed class DopingApplicationTests
 {
-    private static readonly ParticleId particleA = CreateParticle("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9a01");
-
-    private static readonly ParticleId particleB = CreateParticle("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9a02");
-
-    private static readonly ParticleId particleC = CreateParticle("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9a03");
-
-    private static readonly ParticleId particleA2 = CreateParticle("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9a04");
-
-    private static readonly ParticleId particleX = CreateParticle("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9a05");
-
-    private static readonly ParticleId particleY = CreateParticle("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9a06");
-
-    private static readonly ParticleId particleZ = CreateParticle("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9a07");
-
-    private static readonly ParticleSetId setA = CreateSet("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b01");
-
-    private static readonly ParticleSetId setX = CreateSet("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b02");
-
-    private static readonly ParticleSetId setU = CreateSet("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b03");
-
-    private static readonly ParticleSetId setZ = CreateSet("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9b04");
-
-    private static readonly CellSiteId siteAId = CreateSite("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c01");
-
-    private static readonly CellSiteId siteXId = CreateSite("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c02");
-
-    private static readonly CellSiteId siteUId = CreateSite("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c03");
-
-    private static readonly CellSiteId siteZId = CreateSite("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c04");
-
-    private static readonly OccupationExchangeId exchangeAb =
-        OccupationExchangeId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9d01", CultureInfo.InvariantCulture));
-
-    private static readonly OccupationExchangeId exchangeAc =
-        OccupationExchangeId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9d02", CultureInfo.InvariantCulture));
-
-    private static readonly OccupationExchangeId exchangeAa =
-        OccupationExchangeId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9d03", CultureInfo.InvariantCulture));
-
-    private static readonly OccupationExchangeId exchangeXy =
-        OccupationExchangeId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9d04", CultureInfo.InvariantCulture));
-
-    private static readonly DopingId consumeXDoping =
-        DopingId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9e01", CultureInfo.InvariantCulture));
-
-    private static readonly DopingId compensatedIntegerDoping =
-        DopingId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9e02", CultureInfo.InvariantCulture));
-
-    private static readonly DopingId compensatedFractionalDoping =
-        DopingId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9e03", CultureInfo.InvariantCulture));
-
-    private static readonly DopingId plainDoping =
-        DopingId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9e04", CultureInfo.InvariantCulture));
-
-    private static readonly DopingId sameSiteDoping =
-        DopingId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9e05", CultureInfo.InvariantCulture));
-
-    private static readonly DopingId isovalentDoping =
-        DopingId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9e06", CultureInfo.InvariantCulture));
-
     [Fact]
     public void NoDopingsProducesAnEmptyReportAndSummary()
     {
@@ -363,6 +294,33 @@ public sealed class DopingApplicationTests
     }
 
     [Fact]
+    public void OverlappingPrimaryAndDependentSourcesReduceToAFeasiblePair()
+    {
+        var (project, model) = CreateScenario();
+
+        var result = Generate(
+            project,
+            model,
+            new LatticeRequest(10, 1, 1),
+            (overlappingCompensatedDoping, 1.0));
+
+        Assert.True(result.IsSuccess);
+        var lattice = result.Lattice!;
+        var application = Assert.Single(lattice.Report.Applications);
+        Assert.Equal(10, application.AvailablePrimary);
+        Assert.Equal(10, application.RequestedPrimary);
+        Assert.Equal(5, application.AppliedPrimary);
+        Assert.Equal(5, application.AppliedDependent);
+        Assert.Equal(0.5, application.EffectiveFraction);
+        Assert.Equal(0, CountParticle(lattice, model, particleA));
+        Assert.Equal(5, CountParticle(lattice, model, particleB));
+        Assert.Equal(5, CountParticle(lattice, model, particleD));
+        Assert.True(lattice.Report.IsChargeNeutral);
+        Assert.DoesNotContain(result.Diagnostics, static diagnostic =>
+            diagnostic.Code == JobDiagnosticCodes.InvalidCompensation);
+    }
+
+    [Fact]
     public void NonCompensatedChargedDopingWarnsJob016()
     {
         var (project, model) = CreateScenario();
@@ -568,214 +526,63 @@ public sealed class DopingApplicationTests
             diagnostic.Code == JobDiagnosticCodes.InvalidCompensation);
     }
 
-    private static SupercellGenerationResult Generate(
-        Project project,
-        CompiledModel model,
-        LatticeRequest request,
-        params (DopingId DopingId, double Fraction)[] dopings)
+    [Property(MaxTest = 100)]
+    public bool RandomDopingCountsStayWithinTheAvailableBoundsAndStayDeterministic(double[]? fractions)
     {
-        var values = dopings.Select(static doping => new DopingValue(doping.DopingId, doping.Fraction));
-        return SupercellGenerator.Generate(project, model, CreateJob(request, [.. values]));
-    }
-
-    private static int CountParticle(GeneratedLattice lattice, CompiledModel model, ParticleId particleId)
-    {
-        Assert.True(model.Particles.TryGetIndex(particleId, out var index));
-        return lattice.Particles.Count(value => value == index);
-    }
-
-    private static JobDescriptor CreateJob(
-        LatticeRequest request,
-        ImmutableArray<DopingValue>? dopings = null) => new(
-        1,
-        0,
-        0,
-        0,
-        "collection",
-        "config",
-        SimulationId.Create(Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9f01", CultureInfo.InvariantCulture)),
-        0,
-        SimulationKind.Kmc,
-        UseDualDofCorrection: false,
-        new ResolvedJobSettings(
-            900.0,
-            500,
-            7,
-            null,
-            null,
-            ExecutionFlags.Deterministic,
-            null,
-            0,
-            0.0,
-            Fractional3.Zero,
-            null,
-            null,
-            0.01,
-            1000,
-            100,
-            200,
-            []),
-        request,
-        dopings ?? [],
-        [],
-        [.. Enumerable.Repeat((byte)0x5a, LatticeSeedDeriver.SeedByteLength)]);
-
-    private static (Project Project, CompiledModel Model) CreateScenario(bool chargedBase = false)
-    {
-        var particles = new Particle[]
+        if (fractions is null)
         {
-            new(particleA, "A", "A", new ChargeElementary(1.0), IsVacancy: false),
-            new(particleB, "B", "B", new ChargeElementary(2.0), IsVacancy: false),
-            new(particleC, "C", "C", new ChargeElementary(2.5), IsVacancy: false),
-            new(particleA2, "A2", "A2", new ChargeElementary(1.0), IsVacancy: false),
-            new(particleX, "X", "X", new ChargeElementary(-1.0), IsVacancy: false),
-            new(particleY, "Y", "Y", new ChargeElementary(-2.0), IsVacancy: false),
-            new(particleZ, "Z", "Z", new ChargeElementary(1.0), IsVacancy: false),
-        };
-
-        var sites = new List<CellSite>
-        {
-            new(siteAId, "A", new Fractional3(0.0, 0.0, 0.0), setA, SiteStability.Stable),
-            new(siteXId, "X", new Fractional3(0.5, 0.0, 0.0), setX, SiteStability.Stable),
-            new(siteUId, "U", new Fractional3(0.5, 0.5, 0.5), setU, SiteStability.Unstable),
-        };
-
-        var compiledSites = new List<CompiledSite>
-        {
-            new(0, siteAId, "A", new Fractional3(0.0, 0.0, 0.0), SiteStability.Stable, setA, 0, [0]),
-            new(1, siteXId, "X", new Fractional3(0.5, 0.0, 0.0), SiteStability.Stable, setX, 1, [1]),
-            new(2, siteUId, "U", new Fractional3(0.5, 0.5, 0.5), SiteStability.Unstable, setU, 2, [2]),
-        };
-
-        var positions = new List<CompiledPosition>
-        {
-            CompiledPositionAt(0, siteAId, SiteStability.Stable, 0, 0b11110UL),
-            CompiledPositionAt(1, siteXId, SiteStability.Stable, 1, 0b1100000UL),
-            CompiledPositionAt(2, siteUId, SiteStability.Unstable, 2, 0b10UL),
-        };
-
-        if (chargedBase)
-        {
-            sites.Add(new CellSite(siteZId, "Z", new Fractional3(0.25, 0.25, 0.25), setZ, SiteStability.Stable));
-            compiledSites.Add(
-                new CompiledSite(3, siteZId, "Z", new Fractional3(0.25, 0.25, 0.25), SiteStability.Stable, setZ, 3, [3]));
-            positions.Add(CompiledPositionAt(3, siteZId, SiteStability.Stable, 3, 1UL << 7));
+            return true;
         }
 
-        var project = new Project(
-            null,
-            ProjectSchema.CurrentVersion,
-            new ProjectMetadata(
-                Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9f00", CultureInfo.InvariantCulture),
-                new string('a', 64),
-                "Doping test",
-                null,
-                DateTimeOffset.UnixEpoch,
-                DateTimeOffset.UnixEpoch),
-            new ModelDefinition
-            {
-                Particles = [.. particles],
-                ParticleSets =
-                [
-                    new ParticleSet(setA, "A site", [particleA, particleB, particleC, particleA2]),
-                    new ParticleSet(setX, "X site", [particleX, particleY]),
-                    new ParticleSet(setU, "U site", [particleA]),
-                    new ParticleSet(setZ, "Z site", [particleZ]),
-                ],
-                Structure = StructureModel.Default with
-                {
-                    Name = "Doping test",
-                    Sites = [.. sites],
-                },
-                OccupationExchanges =
-                [
-                    new OccupationExchange(exchangeAb, "A to B", siteAId, particleA, particleB),
-                    new OccupationExchange(exchangeAc, "A to C", siteAId, particleA, particleC),
-                    new OccupationExchange(exchangeAa, "A to A2", siteAId, particleA, particleA2),
-                    new OccupationExchange(exchangeXy, "X to Y", siteXId, particleX, particleY),
-                ],
-                Dopings =
-                [
-                    new Doping(consumeXDoping, "Consume X", 5, exchangeXy, null, ChargeCompensation: false),
-                    new Doping(
-                        compensatedIntegerDoping,
-                        "Compensated integer",
-                        10,
-                        exchangeAb,
-                        exchangeXy,
-                        ChargeCompensation: true),
-                    new Doping(
-                        compensatedFractionalDoping,
-                        "Compensated fractional",
-                        20,
-                        exchangeAc,
-                        exchangeXy,
-                        ChargeCompensation: true),
-                    new Doping(plainDoping, "Plain", 30, exchangeAb, null, ChargeCompensation: false),
-                    new Doping(sameSiteDoping, "Same site", 40, exchangeAc, null, ChargeCompensation: false),
-                    new Doping(isovalentDoping, "Isovalent", 50, exchangeAa, null, ChargeCompensation: false),
-                ],
-            },
-            [],
-            [],
-            [],
-            ViewSettings.Default);
-
-        var compiledModel = new CompiledModel(
-            CompiledModel.CurrentFormatVersion,
-            "test-model",
-            "symmetry-1",
-            "2026.1",
-            new string('b', 64))
+        var values = fractions
+            .Where(static fraction => double.IsFinite(fraction))
+            .Select(static fraction => Math.Clamp(fraction, 0.0, 1.0))
+            .Take(4)
+            .ToArray();
+        if (values.Length == 0)
         {
-            Particles = new CompiledParticleTable(
-            [
-                new CompiledParticle(0, ParticleId.Void, "Void", "V", 0.0, IsVacancy: false),
-                new CompiledParticle(1, particleA, "A", "A", 1.0, IsVacancy: false),
-                new CompiledParticle(2, particleB, "B", "B", 2.0, IsVacancy: false),
-                new CompiledParticle(3, particleC, "C", "C", 2.5, IsVacancy: false),
-                new CompiledParticle(4, particleA2, "A2", "A2", 1.0, IsVacancy: false),
-                new CompiledParticle(5, particleX, "X", "X", -1.0, IsVacancy: false),
-                new CompiledParticle(6, particleY, "Y", "Y", -2.0, IsVacancy: false),
-                new CompiledParticle(7, particleZ, "Z", "Z", 1.0, IsVacancy: false),
-            ]),
-            Structure = new CompiledStructureModel(
-                [new Cartesian3(5.0, 0.0, 0.0), new Cartesian3(0.0, 5.0, 0.0), new Cartesian3(0.0, 0.0, 5.0)],
-                125.0,
-                [.. compiledSites],
-                [],
-                [.. positions],
-                [0, 0, 0, 0]),
-        };
+            return true;
+        }
 
-        return (project, compiledModel);
+        var (project, model) = CreateScenario();
+        var dopings = values
+            .Select((fraction, index) => new DopingValue(
+                index % 2 == 0 ? compensatedIntegerDoping : plainDoping,
+                fraction))
+            .ToImmutableArray();
+        var request = new LatticeRequest(10, 1, 1);
+        var first = SupercellGenerator.Generate(project, model, CreateJob(request, dopings));
+        var second = SupercellGenerator.Generate(project, model, CreateJob(request, dopings));
+
+        if (!first.IsSuccess || !second.IsSuccess)
+        {
+            return false;
+        }
+
+        if (!first.Lattice!.Particles.SequenceEqual(second.Lattice!.Particles) ||
+            !first.Lattice.Report.Applications.SequenceEqual(second.Lattice.Report.Applications))
+        {
+            return false;
+        }
+
+        foreach (var application in first.Lattice.Report.Applications)
+        {
+            if (application.AppliedPrimary < 0 ||
+                application.AppliedPrimary > application.RequestedPrimary ||
+                application.RequestedPrimary > application.AvailablePrimary)
+            {
+                return false;
+            }
+
+            var expected = application.AvailablePrimary == 0
+                ? 0.0
+                : application.AppliedPrimary / (double)application.AvailablePrimary;
+            if (Math.Abs(expected - application.EffectiveFraction) > 1e-12)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
-
-    private static CompiledPosition CompiledPositionAt(
-        int position,
-        CellSiteId siteId,
-        SiteStability stability,
-        int siteIndex,
-        ulong allowedParticleMask) => new(
-        position,
-        new Vector4I(0, 0, 0, position),
-        Fractional3.Zero,
-        Cartesian3.Zero,
-        siteIndex,
-        siteId,
-        stability,
-        allowedParticleMask,
-        siteIndex,
-        siteIndex,
-        [],
-        []);
-
-    private static ParticleId CreateParticle(string value) =>
-        ParticleId.Create(Guid.Parse(value, CultureInfo.InvariantCulture));
-
-    private static ParticleSetId CreateSet(string value) =>
-        ParticleSetId.Create(Guid.Parse(value, CultureInfo.InvariantCulture));
-
-    private static CellSiteId CreateSite(string value) =>
-        CellSiteId.Create(Guid.Parse(value, CultureInfo.InvariantCulture));
 }

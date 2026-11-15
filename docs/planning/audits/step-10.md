@@ -287,7 +287,7 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Fixes required
+**State:** Re-audit required
 
 `Re-audit required` is a record state, not a verdict.
 
@@ -321,12 +321,24 @@ Follow-up issue/step: Step 10 fix feature branch, then re-audit at the new froze
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
+The step agent owns this section. The reviewer-authored findings, evidence, and verdict above are unchanged.
 
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
+Round-1 fixes are committed on `feature/step-10-job-templates/fix-audit-round-1`; the fix commit is
+`5f375152a7768c615eb7d2673ddbfbf14457b348`. The step branch is not yet updated and no closeout CI has been
+dispatched for this commit; the orchestrator routes the replacement closeout run and the round-2 re-audit.
+
+| Finding | Status | Owner | Fix commit | Resolution |
+| --- | --- | --- | --- | --- |
+| F-1 (Major) | Fixed | Step agent | `5f37515` | Added `Mocassin.Packages.Projects.Validation.JobTemplateValidationStage` and wired `ValidationContext.CompiledModel` through `ProjectValidationPipeline.Validate`/`ValidateFileAsync`. The stage owns total-position `JOB004`, large-supercell `JOB014`, job totals `JOB013`/`JOB019`, removes-all `JOB009`, and doping/truncation/compensation/neutrality `JOB010`–`JOB012`/`JOB016` through the shared `LatticePreviewService`. `mocassin build --preview` now compiles first, registers the stage with the compiled model, and sets `RunBuildStage = true`; build stages are skipped without either. Tests cover a real compiled model, skipping, each owned code, and a CLI compiled-bound failure. Design decisions, Step 10 §6–§7, and Step 12 now describe the implemented type and wiring. |
+| F-2 (Minor) | Fixed | Step agent | `5f37515` | Added the missing sampling property/uniformity tests, the random-doping property and determinism test, the exact 10×10×10 ceria + 1 % Ce acceptance test, the explicit simulation-setting invariance test (same request hash, lattice seed, particles, and report), a 10⁴-job expansion smoke test declared `PR-medium`, and a CLI `build --preview` compiled-bound failure test. |
+| F-3 (Minor) | Fixed | Step agent | `5f37515` | Corrected the feature-8 wording so closeout CI, closeout evidence, and the audit request are step-agent tasks and the orchestrator only routes and spawns. The `docs/planning/status.md` Active work and dashboard state are updated in the accompanying documentation commit. |
+| F-4 (Minor) | Fixed | Step agent | `5f37515` | The compensation search now samples the maximal primary selection once and searches downward using the dependent availability that remains after the prefix, including positions that are both primary and dependent sources. `OverlappingPrimaryAndDependentSourcesReduceToAFeasiblePair` reproduces the former false `JOB012` and pins the 5+5 feasible pair. |
+| F-5 (Note) | Fixed | Step agent | `5f37515` | Extension-config canonicalization now preserves each JSON number token verbatim instead of writing an IEEE-754 double. Integers above 2⁵³ and values outside the binary64 range round-trip exactly; `ExtensionConfigNumbersRoundTripWithoutBinary64Rounding` pins the behavior. `docs/reference/project-format.md` and Step 10 §8 record the policy for Steps 27/28. |
+| F-6 (Note) | Fixed | Step agent | `5f37515` | `JOB013`/`JOB019` ownership now matches the accepted ownership table: the Core structural validator no longer accumulates job totals, and the compiled-bound stage emits both codes. `JobTemplateValidatorTests.JobTotalsAreDeferredToTheCompiledBoundBuildStage` pins the Core side; stage tests pin `JOB013`/`JOB019`. |
+| F-7 (Note) | Fixed | Step agent | `5f37515` | Removed the broad `JOB` filter. The populated job-template fixture now asserts its exact expected structural codes (`JOB002`, `JOB006`, `JOB009`), every other schema fixture asserts no diagnostics, and the envelope fixture asserts only its expected `JOB001` stub code, so a future invalid job template cannot hide. |
+
+All seven findings are addressed; none is accepted or deferred. No reviewer-authored finding, evidence, or
+verdict text was changed.
 
 ## Approval summary
 

@@ -270,7 +270,8 @@ so Step 09 adds no `IValidationStage`. Structural `PRM` checks run in Core `Proj
 checks run in `ParameterizationService.Validate`, called by Step 12 after compilation. For the same reason there
 is no `mocassin parameterize` CLI; Step 12 owns `compile` and `build --parameterization`.
 Step 10 adds an optional `CompiledModel` to `ValidationContext` for its own `JOB` build stage. Step 09 remains
-stage-free; Step 12 registers the Step 10 stage only after compilation.
+stage-free; `mocassin build --preview` registers the Step 10 stage after compilation, and Step 12 reuses the
+same wiring for the full build.
 
 ## Build-side SHA-256 streams (Step 10)
 
@@ -292,16 +293,26 @@ seed, so no seed becomes stale when a template is copied or a run is restarted.
 
 ## `ValidationContext.CompiledModel` (Step 10)
 
-`ValidationContext` gains an optional `CompiledModel?` property, defaulting to `null`. It is additive: the load,
-model, cross-domain, and feasibility stages never need it, and `validate` keeps `RunBuildStage = false`. The
-Step 10 `JobTemplateValidationStage` runs only when `RunBuildStage` is true, a compiled model is supplied, and
-earlier stages have no error. It first delegates to the Core structural validator, then runs the compiled-bound
-checks (total position count and job limit, optimizer removes-all, doping/compensation/neutrality outcomes).
+`ValidationContext` carries an optional `CompiledModel?` property, defaulting to `null`. It is additive: the
+load, model, cross-domain, and feasibility stages never need it, and `validate` keeps `RunBuildStage = false`.
+`ProjectValidationPipeline.Validate` and `ValidateFileAsync` accept the optional model; the pipeline runs its
+Build stages only when `RunBuildStage` is true **and** a compiled model is present, and otherwise records them
+as skipped. Earlier-stage errors also skip the Build stages.
 
+The implemented `Mocassin.Packages.Projects.Validation.JobTemplateValidationStage` is the Step 10 Build stage
+(`Stage = ValidationStage.Build`). It delegates to the Core structural validator first, then adds the
+compiled-bound checks:
+
+- total-position `JOB004`, large-supercell `JOB014`, and job-total `JOB013`/`JOB019`;
+- the optimizer removes-all `JOB009` check through `SelectionOptimizerResolver`;
+- doping realisation, truncation, compensation, and neutrality (`JOB010`–`JOB012` and `JOB016`) through the
+  shared `LatticePreviewService`, so validation and generation cannot diverge.
+
+`mocassin build --preview` compiles the project first and then calls the pipeline with the compiled model and
+`RunBuildStage = true`; Step 12's full build reuses the same pipeline wiring and appends its own Build stages.
 This is deliberately not a second validation pipeline. The Build stage remains the only extension point, the
-Core structural validator remains available to `validate` without a compiled model, and Step 12 owns the
-`ValidationContext` construction and stage registration. A model that is missing or stale relative to the
-project is a caller contract problem, not a user-data diagnostic.
+Core structural validator remains available to `validate` without a compiled model, and a model that is missing
+or stale relative to the project is a caller contract problem, not a user-data diagnostic.
 
 ## Packages/Compilation boundary (Step 10)
 

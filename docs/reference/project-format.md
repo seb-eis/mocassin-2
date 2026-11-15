@@ -441,8 +441,11 @@ or the reverse is `JOB015`. The accepted ranges match the simulation settings in
 `overrides`. A missing or `null` list inherits; a non-null list replaces the inherited list as a whole. Ids are
 unique and non-empty and at most 64 characters; each `config` is a JSON object of at most 64 KiB; at most 16
 entries and 256 KiB total are allowed per effective list. The config is stored as canonical JSON (sorted object
-property names, normalized numbers) so the project hash is deterministic. Invalid content or bounds are
-`JOB018`; the concrete extension schema belongs to the extension consumer.
+property names, array order preserved, number tokens preserved verbatim) so the project hash is deterministic.
+Numbers are not reinterpreted as IEEE-754 binary64: integers above 2^53 stay exact, values outside the binary64
+range are accepted, and `1.0` is a different token from `1`. The extension consumers (Steps 27/28) own the
+schema and must define numeric ranges in terms of JSON numbers, not binary64 round-trips. Invalid content or
+bounds are `JOB018`; the concrete extension schema belongs to the extension consumer.
 
 ### Canonical ordering
 

@@ -132,8 +132,14 @@ internal static class CanonicalJson
 {
     /// <summary>
     /// Normalizes an arbitrary JSON value: object properties are sorted ordinally, arrays keep their order, and
-    /// numbers are written as IEEE-754 binary64 values.
+    /// number tokens are preserved verbatim.
     /// </summary>
+    /// <remarks>
+    /// Extension configuration is opaque to the project format, so numbers are not reinterpreted as IEEE-754
+    /// binary64. This keeps integers above 2^53 exact, avoids rejecting values outside the binary64 range, and
+    /// makes the document hash depend on the authored numeric token. Steps 27/28 own the extension schema; this
+    /// policy is the format-level round-trip rule they must build on.
+    /// </remarks>
     /// <param name="element">The value to normalize.</param>
     /// <returns>The normalized value.</returns>
     public static JsonElement Normalize(JsonElement element)
@@ -175,7 +181,7 @@ internal static class CanonicalJson
                 writer.WriteStringValue(element.GetString());
                 break;
             case JsonValueKind.Number:
-                writer.WriteNumberValue(element.GetDouble());
+                writer.WriteRawValue(element.GetRawText(), skipInputValidation: true);
                 break;
             case JsonValueKind.True:
                 writer.WriteBooleanValue(true);

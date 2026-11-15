@@ -3,6 +3,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Json.Schema;
+using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Project;
 
 namespace Mocassin.Core.Tests;
@@ -322,10 +323,24 @@ public sealed class ProjectSchemaTests
             Assert.Equal(
                 ProjectCanonicalizer.ToCanonicalJson(project),
                 ProjectCanonicalizer.ToCanonicalJson(loaded));
-            // Some schema fixtures keep a reference-only job-template stub; structural job validation is
-            // covered by JobTemplateValidatorTests.
-            Assert.Empty(ProjectValidator.Validate(project)
-                .Where(static diagnostic => !diagnostic.Code.StartsWith("JOB", StringComparison.Ordinal)));
+
+            var diagnostics = ProjectValidator.Validate(project);
+            if (relativePath == "tests/contracts/project-job-templates-populated.mocprj")
+            {
+                // This reference-only fixture has an empty model on purpose. Pin its exact structural codes so
+                // a future invalid job template cannot hide behind a broad JOB filter.
+                Assert.Equal(
+                    [
+                        JobDiagnosticCodes.UnknownSimulation,
+                        JobDiagnosticCodes.UnknownDoping,
+                        JobDiagnosticCodes.InvalidOptimizer,
+                    ],
+                    diagnostics.Select(static diagnostic => diagnostic.Code).Order(StringComparer.Ordinal).ToArray());
+            }
+            else
+            {
+                Assert.Empty(diagnostics);
+            }
         }
     }
 }

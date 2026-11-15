@@ -254,23 +254,7 @@ public sealed class JobTemplateValidatorTests
     }
 
     [Fact]
-    public void TotalJobsAboveWarningThresholdIsJob013()
-    {
-        var configs = ImmutableArray.CreateBuilder<JobConfig>();
-        for (var index = 0; index < 11; index++)
-        {
-            configs.Add(CreateConfig(index));
-        }
-
-        var collection = CreateCollectionFrom(configs.ToImmutable()) with { JobCountPerConfig = 1000 };
-        var diagnostics = ProjectValidator.Validate(CreateProject(CreateTemplate(collection)));
-
-        Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == JobDiagnosticCodes.JobCountWarning);
-        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Code == JobDiagnosticCodes.JobLimitExceeded);
-    }
-
-    [Fact]
-    public void TotalJobsAboveHardLimitIsJob019()
+    public void JobTotalsAreDeferredToTheCompiledBoundBuildStage()
     {
         var configs = ImmutableArray.CreateBuilder<JobConfig>();
         for (var index = 0; index < 100; index++)
@@ -281,7 +265,8 @@ public sealed class JobTemplateValidatorTests
         var collection = CreateCollectionFrom(configs.ToImmutable()) with { JobCountPerConfig = 1000 };
         var diagnostics = ProjectValidator.Validate(CreateProject(CreateTemplate(collection)));
 
-        Assert.Contains(diagnostics, static diagnostic => diagnostic.Code == JobDiagnosticCodes.JobLimitExceeded);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Code == JobDiagnosticCodes.JobCountWarning);
+        Assert.DoesNotContain(diagnostics, static diagnostic => diagnostic.Code == JobDiagnosticCodes.JobLimitExceeded);
     }
 
     private static ProjectModel CreateProject(JobTemplate template) =>

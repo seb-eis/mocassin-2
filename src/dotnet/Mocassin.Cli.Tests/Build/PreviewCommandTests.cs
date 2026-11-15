@@ -75,6 +75,33 @@ public sealed class PreviewCommandTests
     }
 
     [Fact]
+    public async Task CompiledBoundValidationFailureSurfacesFromTheBuildStage()
+    {
+        using var directory = new TempDirectory();
+        var path = directory.File("oversized.mocprj");
+        var root = JsonNode.Parse(await File.ReadAllTextAsync(sample))!.AsObject();
+        root["jobTemplates"]![0]!["collections"]![0]!["configs"]![0]!["lattice"] = new JsonObject
+        {
+            ["a"] = 256,
+            ["b"] = 256,
+            ["c"] = 256,
+        };
+        await File.WriteAllTextAsync(path, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
+
+        var (exitCode, stdout, _) = await Run(path, "--preview", "--json");
+
+        Assert.Equal(1, exitCode);
+        using var document = JsonDocument.Parse(stdout);
+        var rootElement = document.RootElement;
+        Assert.False(rootElement.GetProperty("valid").GetBoolean());
+        Assert.Equal(JsonValueKind.Null, rootElement.GetProperty("preview").ValueKind);
+        Assert.Contains(
+            rootElement.GetProperty("diagnostics").EnumerateArray(),
+            static diagnostic => diagnostic.GetProperty("code").GetString() == "JOB004");
+        Assert.Empty(Directory.GetFiles(directory.Path, "*.msl", SearchOption.AllDirectories));
+    }
+
+    [Fact]
     public async Task SeveralTemplatesWithoutSelectionAreAUsageError()
     {
         using var directory = new TempDirectory();

@@ -34,7 +34,7 @@ public sealed class JobTemplatePersistenceTests
                 .EnumerateArray()
                 .Select(static extension => extension.GetProperty("id").GetString()));
         Assert.Equal(
-            "{\"a\":1,\"b\":2}",
+            "{\"a\":1.0,\"b\":2}",
             collection.GetProperty("baseSettings").GetProperty("extensions")[1]
                 .GetProperty("config").GetRawText());
         Assert.Equal(
@@ -109,6 +109,40 @@ public sealed class JobTemplatePersistenceTests
         };
 
         Assert.NotEqual(ProjectHasher.ComputeDocument(project), ProjectHasher.ComputeDocument(changed));
+    }
+
+    [Fact]
+    public void ExtensionConfigNumbersRoundTripWithoutBinary64Rounding()
+    {
+        var project = CreateProject(CreateTemplate());
+        var template = project.JobTemplates.Single();
+        var collection = template.Collections!.Value.Single();
+        var settings = collection.BaseSettings! with
+        {
+            Extensions =
+            [
+                new JobExtension(
+                    "big",
+                    JsonDocument.Parse("{\"value\":9007199254740993,\"huge\":1e400}").RootElement.Clone()),
+            ],
+        };
+        var changed = project with
+        {
+            JobTemplates =
+            [
+                template with
+                {
+                    Collections = [collection with { BaseSettings = settings }],
+                },
+            ],
+        };
+
+        var canonical = ProjectCanonicalizer.ToCanonicalJson(changed);
+        Assert.Contains("9007199254740993", canonical, StringComparison.Ordinal);
+        Assert.Contains("1e400", canonical, StringComparison.Ordinal);
+
+        var loaded = ProjectJson.Deserialize(ProjectCanonicalizer.ToCanonicalUtf8(changed));
+        Assert.Equal(canonical, ProjectCanonicalizer.ToCanonicalJson(loaded));
     }
 
     [Fact]

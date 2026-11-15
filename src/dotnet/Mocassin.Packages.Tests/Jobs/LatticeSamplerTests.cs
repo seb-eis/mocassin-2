@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using FsCheck.Xunit;
 using Mocassin.Packages.Jobs;
 
 namespace Mocassin.Packages.Tests.Jobs;
@@ -92,6 +93,48 @@ public sealed class LatticeSamplerTests
         Assert.Equal(5, selected.Length);
         Assert.Equal(5, selected.Distinct().Count());
         Assert.All(selected, value => Assert.Contains(value, candidates));
+    }
+
+    [Property(MaxTest = 200)]
+    public bool RandomRequestsNeverExceedTheCandidates(int[]? values, int count)
+    {
+        if (values is null)
+        {
+            return true;
+        }
+
+        var candidates = values.Distinct().Take(64).ToArray();
+        if (candidates.Length == 0)
+        {
+            return true;
+        }
+
+        var sampleSize = (int)((uint)count % (uint)(candidates.Length + 1));
+        var selected = new LatticeSampler(Convert.FromHexString(samplerSeed))
+            .SampleWithoutReplacement(candidates, sampleSize);
+
+        return selected.Length == sampleSize &&
+               selected.Distinct().Count() == sampleSize &&
+               selected.All(candidates.Contains);
+    }
+
+    [Fact]
+    public void SingleDrawsAreApproximatelyUniformAcrossTheCandidateSet()
+    {
+        const int candidateCount = 12;
+        const int drawCount = 12_000;
+        var counts = new int[candidateCount];
+        var sampler = new LatticeSampler(Convert.FromHexString(samplerSeed));
+        int[] candidates = [.. Enumerable.Range(0, candidateCount)];
+
+        for (var draw = 0; draw < drawCount; draw++)
+        {
+            counts[sampler.SampleWithoutReplacement(candidates, 1)[0]]++;
+        }
+
+        // Expected count is 1,000 with a standard deviation of about 30; the bounds are roughly five sigma
+        // and keep the test deterministic (fixed seed and draw count).
+        Assert.All(counts, count => Assert.InRange(count, 850, 1_150));
     }
 
     [Fact]

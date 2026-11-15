@@ -2,6 +2,7 @@
 
 using System.Collections.Immutable;
 using System.Globalization;
+using Mocassin.Compilation.Compiler;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
@@ -91,16 +92,28 @@ public sealed class ProjectValidationPipelineTests
     }
 
     [Fact]
-    public void BuildStageRunsOnlyWhenRequested()
+    public void BuildStageRunsOnlyWhenRequestedAndACompiledModelIsPresent()
     {
+        var project = LoadCeria();
+        var model = new ModelCompiler().Compile(project).Model!;
         var stage = new RecordingStage(ValidationStage.Build);
         var pipeline = new ProjectValidationPipeline(additionalStages: [stage]);
 
-        var without = pipeline.Validate(CreateProject());
+        var without = pipeline.Validate(project);
         Assert.Equal(0, stage.Calls);
         Assert.DoesNotContain(without.Stages, static item => item.Stage == ValidationStage.Build);
 
-        var with = pipeline.Validate(CreateProject(), options: new ValidationOptions { RunBuildStage = true });
+        var withoutModel = pipeline.Validate(
+            project,
+            options: new ValidationOptions { RunBuildStage = true });
+        Assert.Equal(0, stage.Calls);
+        var skipped = Assert.Single(withoutModel.Stages.Where(static item => item.Stage == ValidationStage.Build));
+        Assert.Equal(ValidationStageStatus.Skipped, skipped.Status);
+
+        var with = pipeline.Validate(
+            project,
+            options: new ValidationOptions { RunBuildStage = true },
+            compiledModel: model);
         Assert.Equal(1, stage.Calls);
         var build = Assert.Single(with.Stages.Where(static item => item.Stage == ValidationStage.Build));
         Assert.Equal(ValidationStageStatus.Completed, build.Status);
@@ -111,10 +124,13 @@ public sealed class ProjectValidationPipelineTests
     {
         var stage = new RecordingStage(ValidationStage.Build);
         var pipeline = new ProjectValidationPipeline(additionalStages: [stage]);
+        var project = LoadCeria() with { BuildTemplates = CreateProjectWithUnknownReference().BuildTemplates };
+        var model = new ModelCompiler().Compile(project).Model!;
 
         var result = pipeline.Validate(
-            CreateProjectWithUnknownReference(),
-            options: new ValidationOptions { RunBuildStage = true });
+            project,
+            options: new ValidationOptions { RunBuildStage = true },
+            compiledModel: model);
 
         Assert.Equal(0, stage.Calls);
         var build = Assert.Single(result.Stages.Where(static item => item.Stage == ValidationStage.Build));

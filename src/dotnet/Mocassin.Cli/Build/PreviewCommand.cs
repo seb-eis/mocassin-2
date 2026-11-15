@@ -119,18 +119,24 @@ internal static class PreviewCommand
         }
 
         var project = load.Project;
-        var validation = new ProjectValidationPipeline().Validate(project, load.Diagnostics);
-        if (validation.Diagnostics.Any(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error))
-        {
-            var report = Failure(1, validation.Diagnostics);
-            Write(json, stdout, stderr, report);
-            return 1;
-        }
-
         var compilation = new ModelCompiler().Compile(project);
         if (!compilation.IsSuccess)
         {
             var report = Failure(1, compilation.Diagnostics);
+            Write(json, stdout, stderr, report);
+            return 1;
+        }
+
+        var validation = new ProjectValidationPipeline(
+                additionalStages: [new JobTemplateValidationStage()])
+            .Validate(
+                project,
+                load.Diagnostics,
+                new ValidationOptions { RunBuildStage = true },
+                compilation.Model);
+        if (validation.Diagnostics.Any(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error))
+        {
+            var report = Failure(1, validation.Diagnostics);
             Write(json, stdout, stderr, report);
             return 1;
         }

@@ -110,6 +110,7 @@ internal static class DopingApplier
             var dependentDelta = 0.0;
             var appliedPrimary = 0;
             var appliedDependent = 0;
+            var compensatedPrimarySelection = ImmutableArray<int>.Empty;
 
             if (requestedPrimary == 0)
             {
@@ -160,11 +161,19 @@ internal static class DopingApplier
                     dependentSite,
                     dependentSource,
                     dependentCandidates);
+
+                // The primary application can consume positions that are also dependent sources. Sample the
+                // maximal primary selection once, then search downward using the dependent availability that
+                // remains after the first primaryCount positions of that selection.
+                compensatedPrimarySelection = sampler.SampleWithoutReplacement(
+                    [.. primaryCandidates],
+                    requestedPrimary);
                 if (!TryFindCompensatedPair(
                         requestedPrimary,
                         primaryDelta,
                         dependentDelta,
-                        dependentCandidates.Count,
+                        [.. dependentCandidates],
+                        compensatedPrimarySelection,
                         out appliedPrimary,
                         out appliedDependent))
                 {
@@ -188,10 +197,20 @@ internal static class DopingApplier
 
             if (appliedPrimary > 0)
             {
-                var selected = sampler.SampleWithoutReplacement([.. primaryCandidates], appliedPrimary);
-                foreach (var position in selected)
+                if (doping.ChargeCompensation)
                 {
-                    particles[position] = (byte)primaryTarget;
+                    for (var index = 0; index < appliedPrimary; index++)
+                    {
+                        particles[compensatedPrimarySelection[index]] = (byte)primaryTarget;
+                    }
+                }
+                else
+                {
+                    var selected = sampler.SampleWithoutReplacement([.. primaryCandidates], appliedPrimary);
+                    foreach (var position in selected)
+                    {
+                        particles[position] = (byte)primaryTarget;
+                    }
                 }
             }
 
@@ -297,33 +316,43 @@ internal static class DopingApplier
         int requestedPrimary,
         double primaryDelta,
         double dependentDelta,
-        int dependentAvailable,
+        ImmutableArray<int> dependentCandidates,
+        ImmutableArray<int> primarySelection,
         out int appliedPrimary,
         out int appliedDependent)
     {
+        // Only positions that are both primary sources and dependent sources can consume dependent
+        // availability. Count the overlap in the prefix of the maximal primary selection.
+        var dependentSet = dependentCandidates.ToHashSet();
+        var consumed = 0;
+        foreach (var position in primarySelection)
+        {
+            if (dependentSet.Contains(position))
+            {
+                consumed++;
+            }
+        }
+
         var ratio = -primaryDelta / dependentDelta;
         for (var primaryCount = requestedPrimary; primaryCount >= 1; primaryCount--)
         {
             var dependentCount = primaryCount * ratio;
-            if (!double.IsFinite(dependentCount))
-            {
-                continue;
-            }
-
             var rounded = Math.Round(dependentCount);
-            if (Math.Abs(dependentCount - rounded) > DopingReport.ChargeNeutralityToleranceElementary)
+            var remaining = dependentCandidates.Length - consumed;
+            if (double.IsFinite(dependentCount) &&
+                Math.Abs(dependentCount - rounded) <= DopingReport.ChargeNeutralityToleranceElementary &&
+                rounded >= 0.0 &&
+                rounded <= remaining)
             {
-                continue;
+                appliedPrimary = primaryCount;
+                appliedDependent = (int)rounded;
+                return true;
             }
 
-            if (rounded < 0.0 || rounded > dependentAvailable)
+            if (dependentSet.Contains(primarySelection[primaryCount - 1]))
             {
-                continue;
+                consumed--;
             }
-
-            appliedPrimary = primaryCount;
-            appliedDependent = (int)rounded;
-            return true;
         }
 
         appliedPrimary = 0;

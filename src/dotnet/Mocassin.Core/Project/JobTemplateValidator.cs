@@ -16,8 +16,8 @@ namespace Mocassin.Core.Project;
 /// <remarks>
 /// The validator owns <c>JOB001</c>–<c>JOB003</c>, <c>JOB005</c>–<c>JOB008</c>, the reference half of
 /// <c>JOB009</c>, <c>JOB015</c>, <c>JOB017</c>, <c>JOB018</c>, <c>JOB020</c>, and the cell-range part of
-/// <c>JOB004</c>. Total-position, doping-count, compensation, neutrality, and removes-all checks require a
-/// compiled model and belong to the Packages build stage.
+/// <c>JOB004</c>. Total-position, job-total, doping-count, compensation, neutrality, and removes-all checks
+/// require a compiled model and belong to the Packages build stage.
 /// </remarks>
 internal static class JobTemplateValidator
 {
@@ -28,8 +28,6 @@ internal static class JobTemplateValidator
     private const int optimizersPerCollection = 1000;
     private const int jobCountMinimum = 1;
     private const int jobCountMaximum = 1000;
-    private const long jobWarningThreshold = 10_000;
-    private const long jobHardLimit = 99_999;
     private const int minimumCellCount = 1;
     private const int maximumCellCount = 256;
 
@@ -161,7 +159,6 @@ internal static class JobTemplateValidator
         }
 
         var collectionNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-        long totalJobs = 0;
         foreach (var collection in collections)
         {
             if (collection is null)
@@ -226,9 +223,6 @@ internal static class JobTemplateValidator
             }
 
             var configNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-            var effectiveJobCount = collection.JobCountPerConfig ?? simulation?.JobCount ?? 0;
-            var jobsPerConfig = Math.Max(effectiveJobCount, 0);
-            totalJobs += (long)jobsPerConfig * configs.Length;
             foreach (var config in configs)
             {
                 if (config is not null)
@@ -236,25 +230,6 @@ internal static class JobTemplateValidator
                     ValidateConfig(config, configNames, simulation, dopings, bag);
                 }
             }
-        }
-
-        if (totalJobs > jobHardLimit)
-        {
-            bag.Add(Error(
-                JobDiagnosticCodes.JobLimitExceeded,
-                string.Create(
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    $"The template expands to {totalJobs} jobs; the hard limit is {jobHardLimit}."),
-                new ModelPath("jobTemplate", template.Id.Value, "collections")));
-        }
-        else if (totalJobs > jobWarningThreshold)
-        {
-            bag.Add(Warning(
-                JobDiagnosticCodes.JobCountWarning,
-                string.Create(
-                    System.Globalization.CultureInfo.InvariantCulture,
-                    $"The template expands to {totalJobs} jobs; the warning threshold is {jobWarningThreshold}."),
-                new ModelPath("jobTemplate", template.Id.Value, "collections")));
         }
     }
 
@@ -460,7 +435,4 @@ internal static class JobTemplateValidator
 
     private static Diagnostic Error(string code, string message, ModelPath path) =>
         new(code, DiagnosticSeverity.Error, message, path, JobDiagnosticCodes.HelpFor(code));
-
-    private static Diagnostic Warning(string code, string message, ModelPath path) =>
-        new(code, DiagnosticSeverity.Warning, message, path, JobDiagnosticCodes.HelpFor(code));
 }

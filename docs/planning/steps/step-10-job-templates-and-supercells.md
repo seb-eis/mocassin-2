@@ -14,7 +14,8 @@ generation with charge compensation.
 - **Main merge:** —
 - **Step tag:** —
 - **Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json)
-- **Audit:** Ready for audit at `f2a364d` — [record](../audits/step-10.md)
+- **Audit:** Fixes required at `f2a364d` (round 1, F-1 Major plus F-2–F-7); fixes on
+  `feature/step-10-job-templates/fix-audit-round-1` at `5f37515`; re-audit required — [record](../audits/step-10.md)
 - **Design review:** Ready for implementation at `c5454af050ccd3f1e02f892424ccd714c5d56f89` (round 5) — [record](../reviews/step-10.md); accepted by the human owner 2026-11-14
 - **Last updated:** 2026-11-15
 
@@ -46,6 +47,7 @@ not create the step branch and does not mark the step `In progress`.
 | `lattice-preview-service` | `feature/step-10-job-templates/lattice-preview-service` | Done | `all --require` green; see outcome below | — | `a95511e` |
 | `selection-optimizers-and-build-preview` | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Done | See feature 7 outcome below | — | `cd1e830` |
 | `documentation-parity-and-closeout` | `feature/step-10-job-templates/documentation-parity-and-closeout` | Done | `docs --require` and `all --require` green; see feature 8 outcome below | — | `057a85c` |
+| `audit-round-1-fixes` | `feature/step-10-job-templates/fix-audit-round-1` | Ready for re-audit | `all --require` green; see audit record resolutions | — | `5f37515` (not yet squashed into the step branch) |
 
 Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
 job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
@@ -406,8 +408,9 @@ Local gates on the feature branch (after `dotnet restore Mocassin.slnx` and
 
 Recorded deviations and limitations:
 
-- The feature does not dispatch closeout CI, create `docs/planning/closeout/step-10.json`, or create
-  `docs/planning/audits/step-10.md`. The orchestrator owns those steps after this branch is integrated.
+- Closeout CI dispatch, the closeout evidence file, and the audit request are step-agent tasks; the orchestrator
+  only routes requests, spawns the fresh auditor, and relays the verdict and owner decisions. The feature-8
+  squash predates that closeout work, which the later closeout/audit record commits completed.
 - The GUI documentation describes the intended Step 25/26 surfaces as planned; the pages do not claim those
   editors exist in Step 10.
 - The job-template guide links to the CLI reference page without a fragment: the repository link checker and
@@ -845,18 +848,23 @@ Duplicate `(site, particle)` optimizers are owned only by `JOB017`; `JOB009` doe
 
 ### 7. Build-stage validation and diagnostics
 
-`ValidationContext` gains an optional `CompiledModel? CompiledModel` property (additive; defaults to `null`).
-The Step 10 `JobTemplateValidationStage` delegates to the Core validator first, then runs the compiled-bound
-checks; it runs only when `RunBuildStage` is true, the context carries a compiled model, and earlier stages
-have no error.
+`ValidationContext` carries an optional `CompiledModel? CompiledModel` property (additive; defaults to
+`null`). The implemented
+`Mocassin.Packages.Projects.Validation.JobTemplateValidationStage` is the Step 10 `IValidationStage`
+(`Stage = Build`); it delegates to the Core validator first, then runs the compiled-bound checks. It runs only
+when `RunBuildStage` is true, the context carries a compiled model, and earlier stages have no error.
 
 - `validate` keeps `RunBuildStage = false`; it still runs the Core `JobTemplateValidator` through
-  `ProjectValidator`, so structural `JOB` errors appear without a compile. This is a deliberate change from
-  the earlier draft.
-- `build` and `mocassin build --preview` supply the compiled model, register the Step 10 stage, and run the
-  compiled-bound checks. Step 12 owns that registration and the `ValidationContext` construction.
+  `ProjectValidator`, so structural `JOB` errors appear without a compile. `JOB013` and `JOB019` are now owned
+  by the compiled-bound stage so the documented ownership table and the code agree; `validate` therefore
+  reports them only through `build`/`build --preview`, while the Core validator keeps the structural caps.
+- `mocassin build --preview` compiles the project first, then calls
+  `ProjectValidationPipeline.Validate` with the compiled model, `RunBuildStage = true`, and the stage
+  registered. The full `build` command in Step 12 reuses the same pipeline wiring and appends its package/build
+  stages.
 - Step 07's `ValidationContext` snippet is updated in this design to carry the optional model; the pipeline
-  remains the only Build-stage extension point.
+  remains the only Build-stage extension point. Build stages are recorded as skipped, not run, when
+  `RunBuildStage` is false or the compiled model is absent.
 - `JOB001`–`JOB020` are registered in the Step 07 `DiagnosticCatalog`; Step 07 does not stub them.
 
 ### 8. Job settings, inheritance, and persistence
@@ -901,7 +909,8 @@ public sealed record JobExtension(string Id, JsonElement Config);
   `baseSettings`/`overrides` (not as a config sibling). `null` inherits; a non-null array **replaces** the
   inherited list as a whole. Step 10 validates a non-empty unique `id` (≤64 chars), an object-valued `config`
   of at most 64 KiB, at most 16 extensions and 256 KiB total per effective settings list; it preserves the
-  config as canonical JSON (sorted property names, normalized numbers) so project hashes are deterministic.
+  config as canonical JSON (sorted property names, array order and number tokens preserved verbatim) so project
+  hashes are deterministic without binary64 rounding; Steps 27/28 define the extension schema ranges.
   The concrete extension schema and semantic validation are owned by Steps 27/28; Step 10 does not invent an
   MMCFE schema. Invalid extension content/bounds are `JOB018`.
 - **Hard limits.** At most 100 job templates per project, 100 collections per template, 1,000 configs per
@@ -1000,8 +1009,8 @@ exception is needed.
   report equality.
 - [x] Implement selection optimizers, P1 image mapping, `UseDualDofCorrection`, and their validation.
 - [x] Implement the Core structural validator and the Packages compiled-bound Build stage.
-- [ ] Implement `mocassin build --preview` (no package write) and register the build stage in Step 12
-  (preview path done; Step 12 still owns the build-stage registration).
+- [x] Implement `mocassin build --preview` (no package write), compile first, and register the compiled-bound
+  `JobTemplateValidationStage`; Step 12 reuses the same pipeline wiring for the full build.
 - [x] Add ceria temperature/doping sweep samples.
 - [x] Add tests for edge cases (0 %, 100 %, tiny cells, NaN/Inf, impossible compensation, same-site sequence).
 
