@@ -667,3 +667,72 @@ override Mocassin.Packages.Jobs.ResolvedJobSettings.ToString() -> string!
 static Mocassin.Packages.Jobs.JobSettingsResolver.Resolve(Mocassin.Core.Model.Jobs.JobCollection! collection, Mocassin.Core.Model.Jobs.JobConfig! config, Mocassin.Compilation.Simulations.CompiledSimulation! simulation, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Packages.Jobs.ResolvedJobSettings?
 static Mocassin.Packages.Jobs.ResolvedJobSettings.operator !=(Mocassin.Packages.Jobs.ResolvedJobSettings? left, Mocassin.Packages.Jobs.ResolvedJobSettings? right) -> bool
 static Mocassin.Packages.Jobs.ResolvedJobSettings.operator ==(Mocassin.Packages.Jobs.ResolvedJobSettings? left, Mocassin.Packages.Jobs.ResolvedJobSettings? right) -> bool
+Mocassin.Packages.Jobs.JobDescriptor
+Mocassin.Packages.Jobs.JobDescriptor.<Clone>$() -> Mocassin.Packages.Jobs.JobDescriptor!
+Mocassin.Packages.Jobs.JobDescriptor.CollectionIndex.get -> int
+Mocassin.Packages.Jobs.JobDescriptor.CollectionIndex.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.CollectionName.get -> string!
+Mocassin.Packages.Jobs.JobDescriptor.CollectionName.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.ConfigIndex.get -> int
+Mocassin.Packages.Jobs.JobDescriptor.ConfigIndex.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.ConfigName.get -> string!
+Mocassin.Packages.Jobs.JobDescriptor.ConfigName.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.Deconstruct(out int JobId, out int CollectionIndex, out int ConfigIndex, out int JobIndex, out string! CollectionName, out string! ConfigName, out Mocassin.Core.Ids.SimulationId SimulationId, out int SimulationIndex, out Mocassin.Core.Model.Simulations.SimulationKind Kind, out bool UseDualDofCorrection, out Mocassin.Packages.Jobs.ResolvedJobSettings! Settings, out Mocassin.Core.Model.Jobs.LatticeRequest! Lattice, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> Dopings, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!> Optimizers, out System.Collections.Immutable.ImmutableArray<byte> Seed) -> void
+Mocassin.Packages.Jobs.JobDescriptor.Dopings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!>
+Mocassin.Packages.Jobs.JobDescriptor.Dopings.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.Equals(Mocassin.Packages.Jobs.JobDescriptor? other) -> bool
+Mocassin.Packages.Jobs.JobDescriptor.JobDescriptor(int JobId, int CollectionIndex, int ConfigIndex, int JobIndex, string! CollectionName, string! ConfigName, Mocassin.Core.Ids.SimulationId SimulationId, int SimulationIndex, Mocassin.Core.Model.Simulations.SimulationKind Kind, bool UseDualDofCorrection, Mocassin.Packages.Jobs.ResolvedJobSettings! Settings, Mocassin.Core.Model.Jobs.LatticeRequest! Lattice, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> Dopings, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!> Optimizers, System.Collections.Immutable.ImmutableArray<byte> Seed) -> void
+Mocassin.Packages.Jobs.JobDescriptor.JobId.get -> int
+Mocassin.Packages.Jobs.JobDescriptor.JobId.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.JobIndex.get -> int
+Mocassin.Packages.Jobs.JobDescriptor.JobIndex.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.Kind.get -> Mocassin.Core.Model.Simulations.SimulationKind
+Mocassin.Packages.Jobs.JobDescriptor.Kind.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.Lattice.get -> Mocassin.Core.Model.Jobs.LatticeRequest!
+Mocassin.Packages.Jobs.JobDescriptor.Lattice.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.Optimizers.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!>
+Mocassin.Packages.Jobs.JobDescriptor.Optimizers.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.Seed.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Packages.Jobs.JobDescriptor.Seed.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.Settings.get -> Mocassin.Packages.Jobs.ResolvedJobSettings!
+Mocassin.Packages.Jobs.JobDescriptor.Settings.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.SimulationId.get -> Mocassin.Core.Ids.SimulationId
+Mocassin.Packages.Jobs.JobDescriptor.SimulationId.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.SimulationIndex.get -> int
+Mocassin.Packages.Jobs.JobDescriptor.SimulationIndex.init -> void
+Mocassin.Packages.Jobs.JobDescriptor.UseDualDofCorrection.get -> bool
+Mocassin.Packages.Jobs.JobDescriptor.UseDualDofCorrection.init -> void
+Mocassin.Packages.Jobs.JobExpansionResult
+Mocassin.Packages.Jobs.JobExpansionResult.<Clone>$() -> Mocassin.Packages.Jobs.JobExpansionResult!
+Mocassin.Packages.Jobs.JobExpansionResult.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.JobDescriptor!> Jobs, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Packages.Jobs.JobExpansionResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Jobs.JobExpansionResult.Diagnostics.init -> void
+Mocassin.Packages.Jobs.JobExpansionResult.Equals(Mocassin.Packages.Jobs.JobExpansionResult? other) -> bool
+Mocassin.Packages.Jobs.JobExpansionResult.IsSuccess.get -> bool
+Mocassin.Packages.Jobs.JobExpansionResult.JobExpansionResult(System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.JobDescriptor!> Jobs, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Packages.Jobs.JobExpansionResult.Jobs.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.JobDescriptor!>
+Mocassin.Packages.Jobs.JobExpansionResult.Jobs.init -> void
+Mocassin.Packages.Jobs.JobSeedDeriver
+Mocassin.Packages.Jobs.JobTemplateExpander
+const Mocassin.Packages.Jobs.JobSeedDeriver.JobDomain = "mocassin/job/v1" -> string!
+const Mocassin.Packages.Jobs.JobSeedDeriver.SeedByteLength = 32 -> int
+const Mocassin.Packages.Jobs.JobSeedDeriver.SeedTextDomain = "mocassin/seed-text/v1" -> string!
+const Mocassin.Packages.Jobs.JobTemplateExpander.MaximumExpandedJobs = 99999 -> int
+override Mocassin.Packages.Jobs.JobDescriptor.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.JobDescriptor.GetHashCode() -> int
+override Mocassin.Packages.Jobs.JobDescriptor.ToString() -> string!
+override Mocassin.Packages.Jobs.JobExpansionResult.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.JobExpansionResult.GetHashCode() -> int
+override Mocassin.Packages.Jobs.JobExpansionResult.ToString() -> string!
+static Mocassin.Packages.Jobs.JobDescriptor.operator !=(Mocassin.Packages.Jobs.JobDescriptor? left, Mocassin.Packages.Jobs.JobDescriptor? right) -> bool
+static Mocassin.Packages.Jobs.JobDescriptor.operator ==(Mocassin.Packages.Jobs.JobDescriptor? left, Mocassin.Packages.Jobs.JobDescriptor? right) -> bool
+static Mocassin.Packages.Jobs.JobExpansionResult.Failed(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Packages.Jobs.JobExpansionResult!
+static Mocassin.Packages.Jobs.JobExpansionResult.operator !=(Mocassin.Packages.Jobs.JobExpansionResult? left, Mocassin.Packages.Jobs.JobExpansionResult? right) -> bool
+static Mocassin.Packages.Jobs.JobExpansionResult.operator ==(Mocassin.Packages.Jobs.JobExpansionResult? left, Mocassin.Packages.Jobs.JobExpansionResult? right) -> bool
+static Mocassin.Packages.Jobs.JobSeedDeriver.DeriveJobSeed(System.ReadOnlySpan<byte> masterSeed, int collectionIndex, int configIndex, int jobIndex) -> System.Collections.Immutable.ImmutableArray<byte>
+static Mocassin.Packages.Jobs.JobSeedDeriver.DeriveJobSeed(string! seedText, int collectionIndex, int configIndex, int jobIndex) -> System.Collections.Immutable.ImmutableArray<byte>
+static Mocassin.Packages.Jobs.JobSeedDeriver.DeriveMasterSeed(string! seedText) -> System.Collections.Immutable.ImmutableArray<byte>
+static Mocassin.Packages.Jobs.JobSeedDeriver.IsCanonicalHexSeed(string? seedText) -> bool
+static Mocassin.Packages.Jobs.JobSeedDeriver.ResolveSeedText(string? collectionSeed, string? simulationSeed, string? projectSeed) -> string?
+static Mocassin.Packages.Jobs.JobTemplateExpander.Expand(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Ids.JobTemplateId templateId) -> Mocassin.Packages.Jobs.JobExpansionResult!
+static Mocassin.Packages.Jobs.JobTemplateExpander.Expand(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.Jobs.JobTemplate! template) -> Mocassin.Packages.Jobs.JobExpansionResult!

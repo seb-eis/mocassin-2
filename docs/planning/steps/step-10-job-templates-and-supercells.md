@@ -22,8 +22,8 @@ generation with charge compensation.
 | # | Feature | Branch | Status |
 | --- | --- | --- | --- |
 | 1 | Job template model and persistence | `feature/step-10-job-templates/job-template-model` | Done |
-| 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | In progress |
-| 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | Proposed |
+| 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done |
+| 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | In progress |
 | 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Proposed |
 | 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Proposed |
 | 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Proposed |
@@ -38,7 +38,8 @@ not create the step branch and does not mark the step `In progress`.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | `job-template-model` | `feature/step-10-job-templates/job-template-model` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` — reported green by the feature-1 agent | — | `c8d5269` |
-| `settings-inheritance-and-validation` | `feature/step-10-job-templates/settings-inheritance-and-validation` | In progress | See outcome below | — | — |
+| `settings-inheritance-and-validation` | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done | See outcome below | — | `a7fc120` |
+| `job-expansion-and-seeds` | `feature/step-10-job-templates/job-expansion-and-seeds` | In progress | See outcome below | — | — |
 
 Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
 job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
@@ -74,6 +75,67 @@ Recorded deviations and limitations:
   The `JOB012`/`JOB016` doping outcomes remain in later features.
 - The existing job-template persistence fixture is intentionally reference-only; the envelope round-trip tests
   exclude `JOB` diagnostics for it, while the dedicated `JobTemplateValidatorTests` cover the structural codes.
+- No per-feature CI run was triggered.
+
+#### Feature 3 outcome and deviations
+
+`job-expansion-and-seeds` adds the build-time deterministic expansion of one job template. It adds
+`JobDescriptor`, `JobExpansionResult`, `JobSeedDeriver`, and the static `JobTemplateExpander` to
+`Mocassin.Packages.Jobs`. Expansion resolves each collection by `SimulationId` against `CompiledModel`, keeps the
+authored collection and configuration order, applies the collection `JobCountPerConfig` override or the compiled
+simulation `JobCount`, and assigns 1-based job identifiers across the complete template. A descriptor carries the
+job/collection/configuration/duplicate indices, the authored names, the simulation identifier and compiled
+simulation index, the compiled kind and dual degree-of-freedom intent, the resolved settings, the authored
+lattice request, the dopings, the collection optimizers, and the 32-byte seed. Every configuration is resolved
+and every count is validated before the first descriptor is emitted, so invalid user data returns diagnostics and
+an empty job list instead of a partial expansion.
+
+Seed derivation follows the recorded contract: the master seed text is the first non-empty of the collection
+`RngSeed`, the compiled simulation `RngSeed`, and the project `MasterSeed`. A 64-character lowercase hexadecimal
+text is decoded to 32 bytes; every other text is hashed as
+`SHA-256("mocassin/seed-text/v1" || UTF8(text))`. The job seed is
+`SHA-256(master[32] || u32_le(collectionIndex) || u32_le(configIndex) || u32_le(jobIndex) || UTF8("mocassin/job/v1"))`.
+No build step creates or persists a seed.
+
+Golden seed vectors covered by `JobSeedDeriverTests`:
+
+- master `000102…1e1f`, indices `0/0/0` →
+  `884a9517b16620af2257945215f5552c1f5af0580ed2c911456b1a29a4f54ce7`;
+- seed text `ceria-seed-1`, indices `0/0/0` →
+  `b6d2d1614b2b819445764523ef5613a47b7712a218e303d1a3d2cdb4f71a5c2e`.
+
+Diagnostics: `JOB001` for an empty collection list, `JOB002` for a collection that references an unknown
+simulation, `JOB003` for a collection without configurations, `JOB008` for an effective job count outside
+`1..1000`, `JOB019` for more than 99,999 expanded jobs, `JOB015` for a configuration that fails settings
+resolution, and `PROJ010` for an unknown template identifier.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 677, Symmetry 223, Compilation 96,
+  Packages 251, Cli 7, App 1, Contracts 15, Results 1, Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh structure` — exit 0; architecture structure test passed.
+- `./tools/verify.sh api` — exit 0; NuGet licence policy OK (51 packages), no vulnerable packages, ApiCompat
+  compatible with the new `Mocassin.Packages` public surface.
+- `./tools/verify.sh contracts` — exit 0; 18 contract artifacts current, 5 model and 4 parameterization
+  projections OK, 274 space-group settings current, process consistency OK, tool tests passed, SPDX headers in
+  494 files, no secret patterns in 837 tracked text files, cargo-deny advisories/bans/licenses/sources OK.
+- `./tools/verify.sh docs` — exit 0; link check, Zensical strict build, DocFX, and rustdoc clean.
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET, Public API/dependency, Rust, Python, documentation, and contracts/policy stages all passed:
+  the Rust workspace tests were green, the Python package reported 3 passed tests, and the DocFX,
+  rustdoc, and Zensical strict builds were clean.
+
+Recorded deviations and limitations:
+
+- Feature 3 covers expansion, descriptors, and seeds only. Supercells, lattice-request hashing, doping counts,
+  optimizer evaluation, the preview service, the CLI path, and the `JOB010`–`JOB012`/`JOB016` outcomes remain in
+  features 4–7.
+- The expander requires a valid project `MasterSeed` and reports project metadata diagnostics before expanding.
+  Arbitrary seed text is supported through the collection and simulation `RngSeed` layers, which matches
+  `ProjectValidator`.
+- Seed equality in the expansion tests is asserted by content because `ImmutableArray<byte>` compares by
+  reference; the golden vectors themselves are asserted as lowercase hex strings.
+- Feature 3 is recorded as `In progress`; it is not marked Done before the squash merge.
 - No per-feature CI run was triggered.
 
 ## Goal
