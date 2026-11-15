@@ -66,7 +66,9 @@ per feature.
   `tools/contracts/check_lattice_projection.py`, wired into `verify.sh contracts`; extended the manifest
   signature-vector list and regenerated the contract artifacts; refreshed `PublicAPI.Unshipped.txt` and the
   Contracts ApiCompat baseline.
-- **Known limitations / follow-ups:** the generated `signatures.lattice` descriptor is still the Step 00
+- **Known limitations / follow-ups:** the Contracts DTOs use MessagePack annotations through the existing
+  `Mocassin.Compilation` package reference; the payload-encoder feature adds the explicit MessagePack
+  reference when it lands. The generated `signatures.lattice` descriptor is still the Step 00
   skeleton with `dopingInfo`; feature 2 finalizes it and the checker then cross-validates the final descriptor.
   The lattice vectors bind the current `modelSignature`, so feature 4's per-image pair-link change must
   regenerate them with the Step 08/09 vectors. The `PKG` descriptors are not yet composed into
