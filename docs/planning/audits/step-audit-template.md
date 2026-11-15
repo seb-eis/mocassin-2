@@ -15,17 +15,13 @@
 | Orchestrator | — |
 | Step agent (implementor) | — |
 | Audit initiated by | Orchestrator, on request of the step agent |
-| Audited commit | — |
 | Step branch | — |
-| Step tag | — |
-| Closeout CI run | — |
-| Closeout CI head SHA | — |
-| Main SHA at freeze | — |
-| Merge-tree CI | — |
 | Closeout evidence | `docs/planning/closeout/step-NN.json` |
-| Platform CI | Not run (Ubuntu-only policy) |
 | Audit date | — |
 | Auditor | — |
+
+The closeout evidence file holds the audited commit, closeout CI run and `head_sha`, `main` SHA at freeze, merge candidate,
+merge-tree CI, platform CI, and tag. Do not restate them here: one source, one place.
 
 Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
 
@@ -74,6 +70,8 @@ Commands run:
 
 ```
 
+Evidence file: `docs/planning/closeout/step-NN.json`
+
 ## Known notes for the auditor
 
 - Record known limitations, accepted deviations, or areas needing extra attention.
@@ -120,7 +118,7 @@ verdict.
 
 ## Approval summary
 
-The step agent completes this section before the orchestrator presents the approval request. It must cover the
+The step agent completes this section before a merge, tag, or Blocker/Major waiver request. It must cover the
 full history, not only the latest round.
 
 - [ ] Requested decision and frozen commit recorded

@@ -53,7 +53,7 @@ The orchestrator must not:
 - spawn a generic general-purpose agent in place of a defined role agent;
 - pass its own conversation history, assumptions, or preferred outcome to a reviewer or auditor.
 
-The orchestrator does not spawn the human owner. It presents the cumulative approval report from
+For a merge, a tag, or a Blocker/Major waiver the orchestrator presents the cumulative approval report from
 [`AGENTS.md` §3.12](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) and asks for the owner's
 decision. After the owner approves a merge or tag, the step agent or the owner performs it; the orchestrator
 checks that the result is recorded.

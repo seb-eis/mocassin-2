@@ -5,10 +5,11 @@ keeps the phase-end review from becoming a rescue operation.
 
 Run a drift check:
 
-- monthly, or at least once per milestone;
-- before each phase boundary;
+- at each milestone, or monthly when the project has no milestone;
 - after a process, CI-policy, architecture, or status change;
 - when someone notices stale instructions, broken links, or contradictory status.
+
+Running one before a phase boundary is optional; the cross-cutting review covers the same ground.
 
 A drift check should take about 15–30 minutes and does not require a fresh reviewer. Record the result in
 [`docs/planning/status.md`](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/status.md) and escalate to a full cross-cutting review when you find

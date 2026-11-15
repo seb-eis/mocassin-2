@@ -18,6 +18,14 @@ independent audit. Do not pre-seed files for steps that have not started.
 | `main_sha_at_freeze` | Full SHA of `main` that was merged into the step branch before the freeze. |
 | `merge_candidate` | Full SHA of the commit that will be merged into `main`. |
 | `merge_tree_ci` | Run ID and `head_sha` for the merge-tree validation, when required. |
+| `platform_ci` | `not run`, or the Windows/macOS run reference. |
+| `tag` | The step tag, when it exists. |
+
+`platform_ci` and `tag` were added after Steps 00–10; those evidence files are historical and do not carry them.
+
+From Step 11, this file is the single source for the audited commit, closeout CI, `main` SHA at freeze, merge
+candidate, merge-tree CI, platform CI, and tag. The audit record links to it and does not restate those values.
+Older records and evidence files are historical and are not rewritten.
 
 ## Check
 
