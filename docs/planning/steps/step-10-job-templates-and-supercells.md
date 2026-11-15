@@ -10,12 +10,12 @@ generation with charge compensation.
 - **Status:** In audit
 - **Feature list:** Approved 2026-11-14 (eight features; step branch created)
 - **Step branch:** `step/10-job-templates`
-- **Step CI:** [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43699356371) at `f2a364d`
+- **Step CI:** [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43704552037) at `c10e6d7`
 - **Main merge:** —
 - **Step tag:** —
 - **Closeout evidence:** [`docs/planning/closeout/step-10.json`](../closeout/step-10.json)
-- **Audit:** Fixes required at `f2a364d` (round 1, F-1 Major plus F-2–F-7); fixes on
-  `feature/step-10-job-templates/fix-audit-round-1` at `5f37515`; re-audit required — [record](../audits/step-10.md)
+- **Audit:** Ready for audit at `c10e6d7` (round 1 `Fixes required` at `f2a364d`, all F-1–F-7 resolved;
+  replacement closeout CI green) — [record](../audits/step-10.md)
 - **Design review:** Ready for implementation at `c5454af050ccd3f1e02f892424ccd714c5d56f89` (round 5) — [record](../reviews/step-10.md); accepted by the human owner 2026-11-14
 - **Last updated:** 2026-11-15
 
@@ -47,7 +47,7 @@ not create the step branch and does not mark the step `In progress`.
 | `lattice-preview-service` | `feature/step-10-job-templates/lattice-preview-service` | Done | `all --require` green; see outcome below | — | `a95511e` |
 | `selection-optimizers-and-build-preview` | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Done | See feature 7 outcome below | — | `cd1e830` |
 | `documentation-parity-and-closeout` | `feature/step-10-job-templates/documentation-parity-and-closeout` | Done | `docs --require` and `all --require` green; see feature 8 outcome below | — | `057a85c` |
-| `audit-round-1-fixes` | `feature/step-10-job-templates/fix-audit-round-1` | Ready for re-audit | `all --require` green; see audit record resolutions | — | `5f37515` (not yet squashed into the step branch) |
+| `audit-round-1-fixes` | `feature/step-10-job-templates/fix-audit-round-1` | Done | `all --require` green; see audit record resolutions | — | `c10e6d7` |
 
 Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
 job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the

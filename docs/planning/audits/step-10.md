@@ -15,11 +15,11 @@
 | Orchestrator | — |
 | Step agent (implementor) | Step agent (implementor) |
 | Audit initiated by | Orchestrator, on request of the step agent |
-| Audited commit | `f2a364dd5f96bca2f9a3df5588443f48cb10f61c` |
+| Audited commit | `c10e6d7ff1d399afb48a0d9b24667c996995c92a` |
 | Step branch | `step/10-job-templates` |
 | Step tag | — |
-| Closeout CI run | [`43699356371`](https://github.com/seb-eis/mocassin-2/actions/runs/43699356371) — green at `f2a364dd5f96bca2f9a3df5588443f48cb10f61c` |
-| Closeout CI head SHA | `f2a364dd5f96bca2f9a3df5588443f48cb10f61c` |
+| Closeout CI run | [`43704552037`](https://github.com/seb-eis/mocassin-2/actions/runs/43704552037) — green at `c10e6d7ff1d399afb48a0d9b24667c996995c92a` |
+| Closeout CI head SHA | `c10e6d7ff1d399afb48a0d9b24667c996995c92a` |
 | Main SHA at freeze | `ca9a98fe8c7756ccff7fb8bfa1e6fad7aef906a5` |
 | Merge-tree CI | Not required; `main` `ca9a98f` is an ancestor of the audited commit |
 | Closeout evidence | `docs/planning/closeout/step-10.json` |
@@ -287,9 +287,9 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-audit required
+**State:** Ready for audit
 
-`Re-audit required` is a record state, not a verdict.
+`Ready for audit` and `Re-audit required` are record states, not verdicts.
 
 ## Reviewer independence
 
@@ -323,9 +323,13 @@ Follow-up issue/step: Step 10 fix feature branch, then re-audit at the new froze
 
 The step agent owns this section. The reviewer-authored findings, evidence, and verdict above are unchanged.
 
-Round-1 fixes are committed on `feature/step-10-job-templates/fix-audit-round-1`; the fix commit is
-`5f375152a7768c615eb7d2673ddbfbf14457b348`. The step branch is not yet updated and no closeout CI has been
-dispatched for this commit; the orchestrator routes the replacement closeout run and the round-2 re-audit.
+Round-1 fixes were committed on `feature/step-10-job-templates/fix-audit-round-1` at
+`5f375152a7768c615eb7d2673ddbfbf14457b348` and squash-merged into `step/10-job-templates` as
+`c10e6d7ff1d399afb48a0d9b24667c996995c92a` (`step-10: fix audit round 1 findings`). The replacement closeout CI
+run [`43704552037`](https://github.com/seb-eis/mocassin-2/actions/runs/43704552037) is green at `c10e6d7` with
+all six jobs successful; the earlier run `43699356371` at `f2a364d` remains process history. The fix feature
+branch was deleted locally and remotely. The audit request is ready at `c10e6d7`; the orchestrator routes the
+round-2 re-audit.
 
 | Finding | Status | Owner | Fix commit | Resolution |
 | --- | --- | --- | --- | --- |
