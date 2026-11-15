@@ -1,1 +1,147 @@
 #nullable enable
+Mocassin.Results.Packages.IPackageVerifier
+Mocassin.Results.Packages.IMslPackageInspector
+Mocassin.Results.Packages.PackageVerificationCheck
+Mocassin.Results.Packages.PackageVerificationOptions
+override Mocassin.Results.Packages.PackageVerificationOptions.ToString() -> string!
+override Mocassin.Results.Packages.PackageVerificationCheck.ToString() -> string!
+static Mocassin.Results.Packages.PackageVerificationOptions.operator !=(Mocassin.Results.Packages.PackageVerificationOptions? left, Mocassin.Results.Packages.PackageVerificationOptions? right) -> bool
+static Mocassin.Results.Packages.PackageVerificationCheck.operator !=(Mocassin.Results.Packages.PackageVerificationCheck? left, Mocassin.Results.Packages.PackageVerificationCheck? right) -> bool
+static Mocassin.Results.Packages.PackageVerificationOptions.operator ==(Mocassin.Results.Packages.PackageVerificationOptions? left, Mocassin.Results.Packages.PackageVerificationOptions? right) -> bool
+static Mocassin.Results.Packages.PackageVerificationCheck.operator ==(Mocassin.Results.Packages.PackageVerificationCheck? left, Mocassin.Results.Packages.PackageVerificationCheck? right) -> bool
+override Mocassin.Results.Packages.PackageVerificationOptions.GetHashCode() -> int
+override Mocassin.Results.Packages.PackageVerificationCheck.GetHashCode() -> int
+override Mocassin.Results.Packages.PackageVerificationOptions.Equals(object? obj) -> bool
+override Mocassin.Results.Packages.PackageVerificationCheck.Equals(object? obj) -> bool
+Mocassin.Results.Packages.PackageVerificationOptions.Equals(Mocassin.Results.Packages.PackageVerificationOptions? other) -> bool
+Mocassin.Results.Packages.PackageVerificationOptions.<Clone>$() -> Mocassin.Results.Packages.PackageVerificationOptions!
+Mocassin.Results.Packages.PackageVerificationCheck.Equals(Mocassin.Results.Packages.PackageVerificationCheck? other) -> bool
+Mocassin.Results.Packages.PackageVerificationCheck.Message.get -> string!
+Mocassin.Results.Packages.PackageVerificationCheck.Code.get -> string!
+Mocassin.Results.Packages.PackageVerificationCheck.Passed.get -> bool
+Mocassin.Results.Packages.PackageVerificationOptions.Deconstruct(out long MaxModelPayloadBytes, out long MaxJobPayloadBytes, out long AdvisorySizeBytes) -> void
+Mocassin.Results.Packages.PackageVerificationCheck.<Clone>$() -> Mocassin.Results.Packages.PackageVerificationCheck!
+Mocassin.Results.Packages.PackageVerificationCheck.Code.init -> void
+Mocassin.Results.Packages.PackageVerificationCheck.Passed.init -> void
+Mocassin.Results.Packages.PackageVerificationCheck.Deconstruct(out string! Code, out bool Passed, out string! Message) -> void
+Mocassin.Results.Packages.PackageVerificationCheck.Message.init -> void
+Mocassin.Results.Packages.PackageCollectionInfo.Kind.get -> string!
+Mocassin.Results.Packages.PackageModelInfo.Signature.get -> string!
+Mocassin.Results.Packages.PackageCollectionInfo.Kind.init -> void
+Mocassin.Results.Packages.PackageModelInfo.ModelSignature.get -> string!
+Mocassin.Results.Packages.PackageModelInfo.Signature.init -> void
+Mocassin.Results.Packages.PackageModelInfo.PayloadFormatVersion.get -> int
+Mocassin.Results.Packages.PackageModelInfo.ModelSignature.init -> void
+Mocassin.Results.Packages.PackageCollectionInfo.CollectionName.get -> string!
+Mocassin.Results.Packages.PackageModelInfo.PayloadFormatVersion.init -> void
+Mocassin.Results.Packages.PackageCollectionInfo.CollectionName.init -> void
+Mocassin.Results.Packages.PackageModelInfo.PayloadBytes.get -> long
+Mocassin.Results.Packages.PackageModelInfo.PayloadBytes.init -> void
+Mocassin.Results.Packages.PackageModelInfo
+Mocassin.Results.Packages.PackageCollectionInfo
+override Mocassin.Results.Packages.PackageModelInfo.ToString() -> string!
+static Mocassin.Results.Packages.PackageModelInfo.operator !=(Mocassin.Results.Packages.PackageModelInfo? left, Mocassin.Results.Packages.PackageModelInfo? right) -> bool
+override Mocassin.Results.Packages.PackageCollectionInfo.ToString() -> string!
+static Mocassin.Results.Packages.PackageModelInfo.operator ==(Mocassin.Results.Packages.PackageModelInfo? left, Mocassin.Results.Packages.PackageModelInfo? right) -> bool
+static Mocassin.Results.Packages.PackageCollectionInfo.operator !=(Mocassin.Results.Packages.PackageCollectionInfo? left, Mocassin.Results.Packages.PackageCollectionInfo? right) -> bool
+override Mocassin.Results.Packages.PackageModelInfo.GetHashCode() -> int
+Mocassin.Results.Packages.PackageCollectionInfo.JobCount.get -> int
+override Mocassin.Results.Packages.PackageModelInfo.Equals(object? obj) -> bool
+static Mocassin.Results.Packages.PackageCollectionInfo.operator ==(Mocassin.Results.Packages.PackageCollectionInfo? left, Mocassin.Results.Packages.PackageCollectionInfo? right) -> bool
+Mocassin.Results.Packages.PackageCollectionInfo.JobCount.init -> void
+Mocassin.Results.Packages.PackageCollectionInfo.ConfigName.get -> string!
+Mocassin.Results.Packages.PackageModelInfo.Equals(Mocassin.Results.Packages.PackageModelInfo? other) -> bool
+override Mocassin.Results.Packages.PackageCollectionInfo.GetHashCode() -> int
+Mocassin.Results.Packages.PackageModelInfo.<Clone>$() -> Mocassin.Results.Packages.PackageModelInfo!
+Mocassin.Results.Packages.PackageCollectionInfo.ConfigName.init -> void
+override Mocassin.Results.Packages.PackageCollectionInfo.Equals(object? obj) -> bool
+Mocassin.Results.Packages.PackageCollectionInfo.Equals(Mocassin.Results.Packages.PackageCollectionInfo? other) -> bool
+Mocassin.Results.Packages.PackageModelInfo.Deconstruct(out string! Signature, out string! ModelSignature, out int PayloadFormatVersion, out long PayloadBytes) -> void
+Mocassin.Results.Packages.PackageCollectionInfo.<Clone>$() -> Mocassin.Results.Packages.PackageCollectionInfo!
+Mocassin.Results.Packages.PackageCollectionInfo.Deconstruct(out string! Kind, out string! CollectionName, out string! ConfigName, out int JobCount) -> void
+Mocassin.Results.Packages.PackageVerificationOptions.MaxJobPayloadBytes.get -> long
+Mocassin.Results.Packages.PackageVerificationOptions.AdvisorySizeBytes.get -> long
+Mocassin.Results.Packages.PackageVerificationOptions.MaxModelPayloadBytes.get -> long
+Mocassin.Results.Packages.PackageVerificationOptions.MaxJobPayloadBytes.init -> void
+Mocassin.Results.Packages.PackageVerificationOptions.AdvisorySizeBytes.init -> void
+Mocassin.Results.Packages.PackageVerificationOptions.MaxModelPayloadBytes.init -> void
+Mocassin.Results.Packages.PackageVerificationReport.Checks.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageVerificationCheck!>
+Mocassin.Results.Packages.PackageVerificationReport.Checks.init -> void
+Mocassin.Results.Packages.PackageVerificationReport.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Results.Packages.PackageVerificationReport.Diagnostics.init -> void
+Mocassin.Results.Packages.PackageVerificationReport.Inspection.get -> Mocassin.Results.Packages.PackageInspection!
+Mocassin.Results.Packages.PackageVerificationReport.Inspection.init -> void
+Mocassin.Results.Packages.PackageVerificationReport.IsValid.get -> bool
+Mocassin.Results.Packages.PackageVerificationReport.IsValid.init -> void
+Mocassin.Results.Packages.PackageInspection.SymmetryContractVersion.get -> string!
+Mocassin.Results.Packages.PackageInspection.FormatVersion.get -> int
+Mocassin.Results.Packages.PackageInspection.CreatedUtc.get -> System.DateTimeOffset
+Mocassin.Results.Packages.PackageInspection.ProjectId.get -> System.Guid
+Mocassin.Results.Packages.PackageInspection.FormatVersion.init -> void
+Mocassin.Results.Packages.PackageInspection.SpaceGroupDataSha256.get -> string!
+Mocassin.Results.Packages.PackageInspection.SymmetryContractVersion.init -> void
+Mocassin.Results.Packages.PackageInspection.CreatedUtc.init -> void
+Mocassin.Results.Packages.PackageInspection.ProjectId.init -> void
+Mocassin.Results.Packages.PackageInspection.SpaceGroupDataSha256.init -> void
+Mocassin.Results.Packages.PackageVerificationReport
+Mocassin.Results.Packages.PackageInspection.LatticeCount.get -> int
+Mocassin.Results.Packages.PackageInspection.Models.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageModelInfo!>
+Mocassin.Results.Packages.PackageInspection.JobCount.get -> int
+Mocassin.Results.Packages.PackageInspection.LatticeCount.init -> void
+Mocassin.Results.Packages.PackageInspection.Models.init -> void
+override Mocassin.Results.Packages.PackageVerificationReport.ToString() -> string!
+Mocassin.Results.Packages.PackageInspection.JobCount.init -> void
+Mocassin.Results.Packages.PackageInspection.MinTemperatureK.get -> double
+Mocassin.Results.Packages.PackageInspection.Collections.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageCollectionInfo!>
+Mocassin.Results.Packages.PackageInspection
+static Mocassin.Results.Packages.PackageVerificationReport.operator !=(Mocassin.Results.Packages.PackageVerificationReport? left, Mocassin.Results.Packages.PackageVerificationReport? right) -> bool
+Mocassin.Results.Packages.PackageInspection.MinTemperatureK.init -> void
+Mocassin.Results.Packages.PackageInspection.Collections.init -> void
+static Mocassin.Results.Packages.PackageVerificationReport.operator ==(Mocassin.Results.Packages.PackageVerificationReport? left, Mocassin.Results.Packages.PackageVerificationReport? right) -> bool
+override Mocassin.Results.Packages.PackageVerificationReport.GetHashCode() -> int
+override Mocassin.Results.Packages.PackageInspection.ToString() -> string!
+override Mocassin.Results.Packages.PackageVerificationReport.Equals(object? obj) -> bool
+Mocassin.Results.Packages.PackageVerificationReport.Equals(Mocassin.Results.Packages.PackageVerificationReport? other) -> bool
+static Mocassin.Results.Packages.PackageInspection.operator !=(Mocassin.Results.Packages.PackageInspection? left, Mocassin.Results.Packages.PackageInspection? right) -> bool
+Mocassin.Results.Packages.PackageVerificationReport.<Clone>$() -> Mocassin.Results.Packages.PackageVerificationReport!
+static Mocassin.Results.Packages.PackageInspection.operator ==(Mocassin.Results.Packages.PackageInspection? left, Mocassin.Results.Packages.PackageInspection? right) -> bool
+Mocassin.Results.Packages.PackageInspection.MinElectricFieldVm.get -> double
+override Mocassin.Results.Packages.PackageInspection.GetHashCode() -> int
+Mocassin.Results.Packages.PackageInspection.LatticeReuseFactor.get -> double
+Mocassin.Results.Packages.PackageInspection.MaxElectricFieldVm.get -> double
+Mocassin.Results.Packages.PackageInspection.SizeBytes.get -> long
+Mocassin.Results.Packages.PackageInspection.MinElectricFieldVm.init -> void
+Mocassin.Results.Packages.PackageVerificationReport.Deconstruct(out bool IsValid, out System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageVerificationCheck!> Checks, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics, out Mocassin.Results.Packages.PackageInspection! Inspection) -> void
+Mocassin.Results.Packages.PackageInspection.MaxTemperatureK.get -> double
+override Mocassin.Results.Packages.PackageInspection.Equals(object? obj) -> bool
+Mocassin.Results.Packages.PackageInspection.LatticeReuseFactor.init -> void
+Mocassin.Results.Packages.PackageInspection.MaxElectricFieldVm.init -> void
+Mocassin.Results.Packages.PackageInspection.SizeBytes.init -> void
+Mocassin.Results.Packages.PackageInspection.MaxTemperatureK.init -> void
+Mocassin.Results.Packages.PackageInspection.Equals(Mocassin.Results.Packages.PackageInspection? other) -> bool
+Mocassin.Results.Packages.PackageInspection.<Clone>$() -> Mocassin.Results.Packages.PackageInspection!
+Mocassin.Results.Packages.PackageInspection.AppVersion.get -> string!
+Mocassin.Results.Packages.PackageInspection.SpaceGroupDataVersion.get -> string!
+Mocassin.Results.Packages.PackageInspection.AppVersion.init -> void
+Mocassin.Results.Packages.PackageInspection.SpaceGroupDataVersion.init -> void
+Mocassin.Results.Packages.PackageInspection.JobSelection.get -> string!
+Mocassin.Results.Packages.PackageInspection.Generator.get -> string!
+Mocassin.Results.Packages.PackageInspection.Deconstruct(out int FormatVersion, out string! AppVersion, out System.DateTimeOffset CreatedUtc, out System.Guid ProjectId, out string! Generator, out string! JobSelection, out string! SymmetryContractVersion, out string! SpaceGroupDataVersion, out string! SpaceGroupDataSha256, out System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageModelInfo!> Models, out int LatticeCount, out int JobCount, out System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageCollectionInfo!> Collections, out double MinTemperatureK, out double MaxTemperatureK, out double MinElectricFieldVm, out double MaxElectricFieldVm, out long SizeBytes, out double LatticeReuseFactor) -> void
+Mocassin.Results.Packages.PackageInspection.Generator.init -> void
+Mocassin.Results.Packages.PackageInspection.JobSelection.init -> void
+Mocassin.Results.Packages.PackageModelInfo.PackageModelInfo(string! Signature, string! ModelSignature, int PayloadFormatVersion, long PayloadBytes) -> void
+Mocassin.Results.Packages.PackageCollectionInfo.PackageCollectionInfo(string! Kind, string! CollectionName, string! ConfigName, int JobCount) -> void
+Mocassin.Results.Packages.PackageVerificationOptions.PackageVerificationOptions(long MaxModelPayloadBytes = 536870912, long MaxJobPayloadBytes = 8388608, long AdvisorySizeBytes = 2147483648) -> void
+Mocassin.Results.Packages.IMslPackageInspector.BuildCanonicalSummaryAsync(string! path, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonDocument!>!
+Mocassin.Results.Packages.IPackageVerifier.VerifyAsync(string! path, Mocassin.Results.Packages.PackageVerificationOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Results.Packages.PackageVerificationReport!>!
+Mocassin.Results.Packages.IMslPackageInspector.InspectAsync(string! path, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Results.Packages.PackageInspection!>!
+Mocassin.Results.Packages.PackageVerificationCheck.PackageVerificationCheck(string! Code, bool Passed, string! Message) -> void
+Mocassin.Results.Packages.PackageInspection.PackageInspection(int FormatVersion, string! AppVersion, System.DateTimeOffset CreatedUtc, System.Guid ProjectId, string! Generator, string! JobSelection, string! SymmetryContractVersion, string! SpaceGroupDataVersion, string! SpaceGroupDataSha256, System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageModelInfo!> Models, int LatticeCount, int JobCount, System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageCollectionInfo!> Collections, double MinTemperatureK, double MaxTemperatureK, double MinElectricFieldVm, double MaxElectricFieldVm, long SizeBytes, double LatticeReuseFactor) -> void
+Mocassin.Results.Packages.PackageVerificationReport.PackageVerificationReport(bool IsValid, System.Collections.Immutable.ImmutableArray<Mocassin.Results.Packages.PackageVerificationCheck!> Checks, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics, Mocassin.Results.Packages.PackageInspection! Inspection) -> void
+Mocassin.Results.Packages.PackageVerifier
+Mocassin.Results.Packages.MslPackageInspector
+Mocassin.Results.Packages.PackageVerifier.PackageVerifier() -> void
+Mocassin.Results.Packages.MslPackageInspector.MslPackageInspector() -> void
+Mocassin.Results.Packages.PackageVerifier.VerifyAsync(string! path, Mocassin.Results.Packages.PackageVerificationOptions! options, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Results.Packages.PackageVerificationReport!>!
+Mocassin.Results.Packages.MslPackageInspector.InspectAsync(string! path, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Results.Packages.PackageInspection!>!
+Mocassin.Results.Packages.MslPackageInspector.BuildCanonicalSummaryAsync(string! path, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<System.Text.Json.JsonDocument!>!

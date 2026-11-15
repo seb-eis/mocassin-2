@@ -25,7 +25,7 @@ read-only inspection/verification library for the build CLI.
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `c0d8d64` |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `bdafaa4` |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `4fe6225` |
-| 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Pending | — | — | — |
+| 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Pending | — | — | — |
 
 ### Approved feature list
@@ -218,6 +218,43 @@ per feature.
   `.msl` fixture, benchmark, and canonical-summary golden.
 - **Parity:** no parity-matrix row is completed by this encoding feature; the package writer rows stay
   `Planned` until verification, fixtures, and CLI integration land.
+
+#### Feature 6 — Package verification and inspection
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/package-verification`
+- **Squash commit:** recorded in the follow-up status commit.
+- **Local gates:** `./tools/verify.sh all --require` exit 0 — .NET build 0 warnings and all solution tests
+  (415 Packages, 18 Results, 685 Core, 223 Symmetry, 96 Compilation, 37 Contracts, 17 Cli, 1 App,
+  1 Architecture); NuGet licence policy OK (58 packages); ApiCompat clean after refreshing the
+  `Mocassin.Contracts`/`Mocassin.Results` baselines; Rust fmt/clippy/test; Python pytest and package build;
+  docs strict build; contract artifacts current, projection fixtures, process consistency, 45 tool tests, SPDX,
+  secrets, cargo-deny.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Diff summary:** added `Mocassin.Results.Packages` with `IMslPackageInspector`/`MslPackageInspector`,
+  `IPackageVerifier`/`PackageVerifier`, `PackageInspection`, `PackageVerificationReport`,
+  `PackageVerificationOptions`, and `package-summary-v1`; added a read-only `PackageReader`, bounded
+  Zstd+MessagePack decoder, payload invariant checks, and the ordered `PKG001`–`PKG010` engine; composed
+  `PackageDiagnosticDescriptors.All` into `DiagnosticCatalog.Default` and documented every PKG code; added 18
+  real-package tests covering inspection, summary determinism, read-only/no-WAL, and every PKG code; refreshed
+  `PublicAPI.Unshipped.txt` and the Contracts/Results ApiCompat baselines.
+- **`PKG` evidence:** `PKG001` text file; `PKG002` `application_id=0`; `PKG003` dropped
+  `ix_jobs_temperature`; `PKG004` `X'0102'` model payload; `PKG005` wrong model signature and wrong lattice
+  signature; `PKG006` job `model_id=999` with FK off; `PKG007` changed `temperature_k`; `PKG008` `results`
+  table and a `-wal` sidecar; `PKG009` advisory size 1 (warning only, `IsValid` true); `PKG010` model
+  position `site_index=999`. Every failing fixture is a real SQLite package built by the real writer.
+- **R2-3 closure:** the verifier no longer asserts "the shell representative is present" or an independent
+  tracker-order node count. `tracker_order` is checked as non-empty, length ≤ the documented ten six-bit
+  node slots, with non-sentinel values below `global_tracker_count`; the writer retains the
+  representative-path-length assertion. No new payload field was invented.
+- **R2-9 closure:** `DiagnosticCatalogTests.DefaultIsTheUnionOfTheDomainCatalogsAndStep07Codes` now includes
+  `PackageDiagnosticDescriptors.All`; `DiagnosticDocumentationTests` covers the ten new PKG codes and headings.
+- **Licence result (n-5):** `Mocassin.Results` now references `Microsoft.Data.Sqlite` (MIT),
+  `MessagePack` (MIT), and `ZstdSharp.Port` (MIT); transitive `SQLitePCLRaw` remains Apache-2.0.
+  `check_nuget_licenses.py`: `NuGet licence policy OK (58 packages)`.
+- **Known limitations / follow-ups:** `inspect`/`verify` CLI wiring and PKG→exit-code mapping are Step 12;
+  the checked-in `.msl` fixture, canonical-summary golden, and benchmark are Step 7/feature 7.
+- **Parity:** the package inspection/verification row remains `Improvement` because the Step 12 CLI half is
+  still pending; the read-only library half is complete.
 
 ## Goal
 
@@ -767,9 +804,9 @@ Two options, for the human owner's start-gate decision:
 - [x] Implement batching, streaming, progress/cancellation, and bounded memory. (The writer streams and
       honors cancellation; Step 12 owns the user-facing progress surface.)
 - [x] Implement the temp file, fsync of file and directory, atomic rename, and failure cleanup.
-- [ ] Implement the read-only inspector/verifier with the `package-summary-v1` projection, bounded decoding,
+- [x] Implement the read-only inspector/verifier with the `package-summary-v1` projection, bounded decoding,
       and `PKG001`–`PKG010`.
-- [ ] Add the `PKG` descriptors to Contracts and compose them into `DiagnosticCatalog.Default`; confirm
+- [x] Add the `PKG` descriptors to Contracts and compose them into `DiagnosticCatalog.Default`; confirm
       `Mocassin.Results` does not reference `Mocassin.Packages`.
 - [ ] Add checked-in `.msl` fixtures, canonical summaries, extracted payloads, and regeneration command.
 - [x] Add the lattice projection golden vectors and `verify.sh contracts` checker.
@@ -792,7 +829,7 @@ Two options, for the human owner's start-gate decision:
       `application_id = 0x4D4F4353` and `user_version = 1`.
 - [x] Every job references a valid model and lattice; `job_id` is unique and ascending; a partial build leaves
       gaps exactly as recorded in `job_selection`.
-- [ ] `verify` re-encodes the parameterization signature from the payload's absolute `frequency_hz` values and
+- [x] `verify` re-encodes the parameterization signature from the payload's absolute `frequency_hz` values and
       re-encodes the lattice signature from the particle array and the referenced `model_signature`.
 - [x] Every environment pair entry is one row per periodic image with its relative `offset`; the compiler emits
       one `CompiledPairLink` per image and the writer maps it one-to-one, Step 14's target expansion
@@ -802,7 +839,7 @@ Two options, for the human owner's start-gate decision:
       verifier proves the payload-checkable part (non-empty, non-sentinel values below `global_tracker_count`,
       length within the documented bound), and Step 13's reader loads it as a variable `u8[]` with `0xFF` for
       non-mobile nodes; Step 18's mobile-tracker permutation follows the same indices.
-- [ ] `PKG001`–`PKG010` are documented with severities and anchors, `PKG` descriptors are composed into
+- [x] `PKG001`–`PKG010` are documented with severities and anchors, `PKG` descriptors are composed into
       `DiagnosticCatalog.Default`, and `Mocassin.Results` still references only `Core` and `Contracts`.
 - [ ] The checked-in `.msl` fixture's `package-summary-v1` golden matches a rebuild after normalizing
       `created_utc`, `app_version`, `generator`, size, and payload byte hashes.
@@ -816,7 +853,7 @@ Two options, for the human owner's start-gate decision:
       number token above 2^53.
 - [x] A cancelled build leaves no temp file and does not modify an existing package.
 - [x] A simulated disk-full/write error leaves the previous package intact.
-- [ ] `verify` detects a truncated payload, a corrupt Zstd frame, a wrong signature, a missing FK, a wrong
+- [x] `verify` detects a truncated payload, a corrupt Zstd frame, a wrong signature, a missing FK, a wrong
       payload-derived column, a stray `-wal`, and an injected `results` table, each with the expected `PKG` code.
 - [ ] 10⁴ small jobs build within the time/size budget.
 - [x] No EF Core, no native structs, no custom binary header, and no results table.

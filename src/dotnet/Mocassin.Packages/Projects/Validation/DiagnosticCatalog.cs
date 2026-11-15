@@ -3,6 +3,7 @@
 using System.Collections.Frozen;
 using System.Collections.Immutable;
 using Mocassin.Compilation.Diagnostics;
+using Mocassin.Contracts.Packages;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Packages.Projects.Validation.Diagnostics;
 using Mocassin.Symmetry.Diagnostics;
@@ -53,6 +54,7 @@ public sealed class DiagnosticCatalog
         CoreDiagnosticCatalog.Descriptors
             .Concat(SymmetryDiagnosticCatalog.Descriptors)
             .Concat(CompilationDiagnosticCatalog.Descriptors)
+            .Concat(PackageDiagnosticDescriptors.All)
             .Concat(Step07Descriptors.All));
 
     /// <summary>

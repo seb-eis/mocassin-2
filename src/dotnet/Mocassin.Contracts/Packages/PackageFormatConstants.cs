@@ -12,6 +12,11 @@ namespace Mocassin.Contracts.Packages;
 public static class PackageFormatConstants
 {
     /// <summary>
+    /// The SQLite <c>application_id</c> (<c>"MOCS"</c>).
+    /// </summary>
+    public const long ApplicationId = 0x4D4F4353;
+
+    /// <summary>
     /// The model payload (<c>ModelPayload</c>) encoding version.
     /// </summary>
     public const uint ModelPayloadFormatVersion = 1;

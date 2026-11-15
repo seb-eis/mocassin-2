@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.Contracts.Packages;
+
 namespace Mocassin.Packages.SimulationPackage;
 
 /// <summary>
@@ -16,7 +18,7 @@ internal static class SimulationPackageSchema
     public const int FormatVersion = 1;
 
     /// <summary>The SQLite <c>application_id</c>: <c>"MOCS"</c>.</summary>
-    public const long ApplicationId = 0x4D4F4353;
+    public const long ApplicationId = PackageFormatConstants.ApplicationId;
 
     /// <summary>The SQLite page size, set before the first table.</summary>
     public const int PageSize = 8192;
