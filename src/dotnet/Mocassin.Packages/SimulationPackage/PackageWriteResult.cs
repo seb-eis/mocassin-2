@@ -22,4 +22,11 @@ public sealed record PackageWriteResult(
     int ModelCount,
     int LatticeCount,
     long SizeBytes,
-    ImmutableArray<Diagnostic> Warnings);
+    ImmutableArray<Diagnostic> Warnings)
+{
+    /// <summary>
+    /// Gets the lattice reuse factor <c>JobCount / LatticeCount</c>; 1.0 means every lattice is unique and a
+    /// higher value means deduplication.
+    /// </summary>
+    public double LatticeReuseFactor => LatticeCount == 0 ? 0.0 : (double)JobCount / LatticeCount;
+}

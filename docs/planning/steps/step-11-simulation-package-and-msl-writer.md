@@ -24,7 +24,7 @@ read-only inspection/verification library for the build CLI.
 | 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `9b754af` |
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `c0d8d64` |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `bdafaa4` |
-| 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Pending | — | — | — |
+| 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Pending | — | — | — |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Pending | — | — | — |
 
@@ -187,6 +187,37 @@ per feature.
   projection and the compiled-model identity instead.
 - **Parity:** no parity-matrix row is completed by the model payload feature; the package writer rows stay
   `Planned` until job/lattice encoding, verification, fixtures, and CLI integration land.
+
+#### Feature 5 — Job and lattice payload encoding
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding`
+- **Squash commit:** recorded in the follow-up status commit.
+- **Local gates:** `./tools/verify.sh all --require` exit 0 — .NET build 0 warnings and all solution tests
+  (414 Packages, 685 Core, 223 Symmetry, 96 Compilation, 37 Contracts, 17 Cli, 1 Results, 1 App,
+  1 Architecture); NuGet licence policy OK (58 packages); ApiCompat clean after refreshing the
+  `Mocassin.Core` and `Mocassin.Packages` baselines; Rust fmt/clippy/test; Python pytest and package build;
+  docs strict build; contract artifacts current, projection fixtures, process consistency, 45 tool tests, SPDX,
+  secrets, cargo-deny.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Diff summary:** added `LatticePayloadMapper` (flat row-major particles, dimensions, five-field signature)
+  and `JobPayloadMapper` (resolved settings, `SolverJobFlagsMapper.Compose`, normalized Cartesian field,
+  compiled optimizers, canonical extension JSON, doping summary); extended `PayloadEncoder` with job/lattice
+  Zstd+MessagePack round-trips and decompressed-size guards; implemented `WriteJobAsync` with real generated
+  lattices and descriptors, content-addressed lattice insert/dedup, payload-derived columns, strictly ascending
+  job ids (gaps preserved), batching/cancellation, and `LatticeReuseFactor`; added the public
+  `JobExtension.ToCanonicalJson()` helper reusing the project canonicalizer; added 8 real-sample
+  encoding/dedup/columns/job-id/cancellation tests and 2 canonical-JSON tests; refreshed
+  `PublicAPI.Unshipped.txt` and the Core/Packages ApiCompat baselines; updated the step page/status.
+- **Dedup and ids:** the six-job `samples/jobs/ceria-temperature-sweep.mocprj` builds six distinct lattices
+  (1.0 reuse factor); an identical-lattice pair plus one different lattice yields 2 rows and a 1.5 reuse
+  factor; a 1/3 job-id pair preserves the gap.
+- **Licence result:** no new reference edge in this feature; the feature-3/4 `Microsoft.Data.Sqlite`,
+  `MessagePack`, and `ZstdSharp.Port` results stand (MIT/Apache-2.0; 58 packages OK).
+- **Known limitations / follow-ups:** Step 12 owns the user-facing progress surface; the writer streams one
+  job at a time and honors cancellation. Step 6 owns the verifier and fixtures; Step 7 owns the checked-in
+  `.msl` fixture, benchmark, and canonical-summary golden.
+- **Parity:** no parity-matrix row is completed by this encoding feature; the package writer rows stay
+  `Planned` until verification, fixtures, and CLI integration land.
 
 ## Goal
 
@@ -730,10 +761,11 @@ Two options, for the human owner's start-gate decision:
 - [x] Implement the model payload mapper and the write-time parameterization re-encode.
 - [x] Persist the environment pair-link `offset` and the variable-length `tracker_order`, with the writer
       contract assertions; the Step 14 consumer expansion is its own cross-step acceptance test.
-- [ ] Implement the lattice payload/signature and content-addressed dedup.
-- [ ] Implement the job payload mapper, `SolverJobFlags` composition, Cartesian field conversion, optimizer
+- [x] Implement the lattice payload/signature and content-addressed dedup.
+- [x] Implement the job payload mapper, `SolverJobFlags` composition, Cartesian field conversion, optimizer
       mapping, extension JSON, and payload-derived columns.
-- [ ] Implement batching, streaming, progress/cancellation, and bounded memory.
+- [x] Implement batching, streaming, progress/cancellation, and bounded memory. (The writer streams and
+      honors cancellation; Step 12 owns the user-facing progress surface.)
 - [x] Implement the temp file, fsync of file and directory, atomic rename, and failure cleanup.
 - [ ] Implement the read-only inspector/verifier with the `package-summary-v1` projection, bounded decoding,
       and `PKG001`–`PKG010`.
@@ -751,18 +783,18 @@ Two options, for the human owner's start-gate decision:
 
 ## Acceptance criteria
 
-- [ ] A package built from `samples/jobs/ceria-temperature-sweep.mocprj` (six jobs, `parameterizations: []`)
+- [x] A package built from `samples/jobs/ceria-temperature-sweep.mocprj` (six jobs, `parameterizations: []`)
       uses the implicit default parameterization, opens read-only, and contains one model row, the expected
       job rows, and the expected lattice rows.
 - [ ] A package built with an explicit in-test parameterization stores the applied pair/group/site/frequency
       values, not compiled defaults, and `models.signature` equals `ParameterizedModel.Signature`.
-- [ ] The published package has no `results` table, needs no `-wal`/`-shm` files, and reports
+- [x] The published package has no `results` table, needs no `-wal`/`-shm` files, and reports
       `application_id = 0x4D4F4353` and `user_version = 1`.
-- [ ] Every job references a valid model and lattice; `job_id` is unique and ascending; a partial build leaves
+- [x] Every job references a valid model and lattice; `job_id` is unique and ascending; a partial build leaves
       gaps exactly as recorded in `job_selection`.
 - [ ] `verify` re-encodes the parameterization signature from the payload's absolute `frequency_hz` values and
       re-encodes the lattice signature from the particle array and the referenced `model_signature`.
-- [ ] Every environment pair entry is one row per periodic image with its relative `offset`; the compiler emits
+- [x] Every environment pair entry is one row per periodic image with its relative `offset`; the compiler emits
       one `CompiledPairLink` per image and the writer maps it one-to-one, Step 14's target expansion
       (`cell + offset` wrapped, `target_position`) reproduces the compiled minimum-image link for every pair
       table, and a multi-image shell (for example a six-image nearest-neighbour shell) is fully present.
@@ -774,20 +806,20 @@ Two options, for the human owner's start-gate decision:
       `DiagnosticCatalog.Default`, and `Mocassin.Results` still references only `Core` and `Contracts`.
 - [ ] The checked-in `.msl` fixture's `package-summary-v1` golden matches a rebuild after normalizing
       `created_utc`, `app_version`, `generator`, size, and payload byte hashes.
-- [ ] Two jobs whose lattices are byte-identical share one `lattices` row; a different particle array does not.
+- [x] Two jobs whose lattices are byte-identical share one `lattices` row; a different particle array does not.
 - [ ] Rebuilding the same project produces identical model/lattice signatures and an identical canonical
       summary; stored bytes may differ only in build metadata.
-- [ ] The job `flags` word equals `SolverJobFlagsMapper.Compose(...)` and contains exactly one kind bit.
-- [ ] The job `electric_field_direction` is a unit vector equal to the compiled cell transform of the authored
+- [x] The job `flags` word equals `SolverJobFlagsMapper.Compose(...)` and contains exactly one kind bit.
+- [x] The job `electric_field_direction` is a unit vector equal to the compiled cell transform of the authored
       fractional direction (tested on a non-orthogonal cell).
-- [ ] `extensions[].config_json` is byte-equal to the project canonical JSON for the same config, including a
+- [x] `extensions[].config_json` is byte-equal to the project canonical JSON for the same config, including a
       number token above 2^53.
-- [ ] A cancelled build leaves no temp file and does not modify an existing package.
-- [ ] A simulated disk-full/write error leaves the previous package intact.
+- [x] A cancelled build leaves no temp file and does not modify an existing package.
+- [x] A simulated disk-full/write error leaves the previous package intact.
 - [ ] `verify` detects a truncated payload, a corrupt Zstd frame, a wrong signature, a missing FK, a wrong
       payload-derived column, a stray `-wal`, and an injected `results` table, each with the expected `PKG` code.
 - [ ] 10⁴ small jobs build within the time/size budget.
-- [ ] No EF Core, no native structs, no custom binary header, and no results table.
+- [x] No EF Core, no native structs, no custom binary header, and no results table.
 - [ ] Documentation written
 
 ## Documentation

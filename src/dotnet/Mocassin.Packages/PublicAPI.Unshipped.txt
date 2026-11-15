@@ -1065,3 +1065,4 @@ static Mocassin.Packages.SimulationPackage.PackageBuildRequest.operator ==(Mocas
 static Mocassin.Packages.SimulationPackage.PackageWriteResult.operator !=(Mocassin.Packages.SimulationPackage.PackageWriteResult? left, Mocassin.Packages.SimulationPackage.PackageWriteResult? right) -> bool
 static Mocassin.Packages.SimulationPackage.PackageWriteResult.operator ==(Mocassin.Packages.SimulationPackage.PackageWriteResult? left, Mocassin.Packages.SimulationPackage.PackageWriteResult? right) -> bool
 static Mocassin.Packages.SimulationPackage.SimulationPackageWriter.Create(Mocassin.Packages.SimulationPackage.PackageBuildRequest! request, Mocassin.Packages.SimulationPackage.PackageBuildOptions! options) -> Mocassin.Packages.SimulationPackage.ISimulationPackageWriter!
+Mocassin.Packages.SimulationPackage.PackageWriteResult.LatticeReuseFactor.get -> double

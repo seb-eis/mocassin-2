@@ -2,12 +2,11 @@
 
 using System.Collections.Immutable;
 using System.Globalization;
-using System.Reflection;
 using System.Security.Cryptography;
 using Microsoft.Data.Sqlite;
 using Mocassin.Contracts.Packages;
 using Mocassin.Contracts.Parameterization;
-using Mocassin.Core.Diagnostics;
+using Mocassin.Core.Geometry;
 using Mocassin.Packages.Parameterization;
 using Mocassin.Packages.SimulationPackage.Payloads;
 using Mocassin.Packages.SimulationPackage.Internal;
@@ -41,6 +40,9 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
     private int jobCount;
     private int modelId = -1;
     private string? modelSignature;
+    private string? compiledModelSignature;
+    private ImmutableArray<Cartesian3> cellVectors;
+    private int lastJobId;
     private bool completed;
     private bool disposed;
 
@@ -60,7 +62,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         this.temporaryPath = temporaryPath;
         directory = Path.GetDirectoryName(targetPath)!;
         this.connection = connection;
-        appVersion = ResolveAppVersion();
+        appVersion = SimulationPackageWriterSupport.ResolveAppVersion();
         this.payloadEncoder = payloadEncoder;
     }
 
@@ -83,8 +85,8 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         PackageBuildOptions options,
         IPackageFileSystem fileSystem)
     {
-        ValidateRequest(request);
-        ValidateOptions(options);
+        SimulationPackageWriterSupport.ValidateRequest(request);
+        SimulationPackageWriterSupport.ValidateOptions(options);
         ArgumentNullException.ThrowIfNull(fileSystem);
 
         var targetPath = Path.GetFullPath(request.TargetPath);
@@ -120,7 +122,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         catch
         {
             connection.Dispose();
-            TryDelete(fileSystem, temporaryPath);
+            SimulationPackageWriterSupport.TryDelete(fileSystem, temporaryPath);
             throw;
         }
 
@@ -178,6 +180,12 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
                 decoded.SpaceGroupDataVersion,
                 decoded.SpaceGroupDataSha256),
             cancellationToken).ConfigureAwait(false);
+        compiledModelSignature = decoded.ModelSignature;
+        cellVectors =
+        [
+            .. decoded.Structure.CellVectorsAng.Select(static row =>
+                new Cartesian3(row[0], row[1], row[2])),
+        ];
     }
 
     /// <inheritdoc />
@@ -186,13 +194,67 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
     /// through <see cref="WriteJobRowAsync"/>.
     /// </remarks>
     /// <exception cref="NotSupportedException">The job payload encoder is not part of this feature yet.</exception>
-    public Task WriteJobAsync(JobPackage job, CancellationToken cancellationToken = default)
+    public async Task WriteJobAsync(JobPackage job, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(job);
         cancellationToken.ThrowIfCancellationRequested();
         ThrowIfUnavailable();
-        throw new NotSupportedException(
-            "The job and lattice payload encoder is implemented in Step 11 feature 5.");
+        if (modelId < 0 || modelSignature is null || compiledModelSignature is null || cellVectors.IsDefault)
+        {
+            throw new InvalidOperationException("Write the model before the first job.");
+        }
+
+        var latticePayload = LatticePayloadMapper.Map(job.Lattice);
+        var latticeBytes = payloadEncoder.EncodeLattice(latticePayload);
+        var latticeProduct = (long)job.Lattice.SizeA * job.Lattice.SizeB * job.Lattice.SizeC * job.Lattice.PositionCount;
+        var maxLatticeBytes = Math.Min((long)int.MaxValue, 4L * latticeProduct);
+        var decodedLattice = PayloadEncoder.DecodeLattice(latticeBytes, maxLatticeBytes);
+        var latticeSignature = LatticeSignatureV1.Compute(compiledModelSignature, latticePayload);
+        if (!string.Equals(
+                LatticeSignatureV1.Compute(compiledModelSignature, decodedLattice),
+                latticeSignature,
+                StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("The decoded lattice payload does not reproduce its signature.");
+        }
+
+        var jobPayload = JobPayloadMapper.Map(job.Descriptor, cellVectors, job.Lattice.DopingInfo);
+        var jobBytes = payloadEncoder.EncodeJob(jobPayload);
+        var decodedJob = PayloadEncoder.DecodeJob(jobBytes);
+        if (decodedJob.FormatVersion != jobPayload.FormatVersion ||
+            decodedJob.SimulationIndex != jobPayload.SimulationIndex ||
+            decodedJob.Flags != jobPayload.Flags ||
+            !string.Equals(decodedJob.DopingInfo, jobPayload.DopingInfo, StringComparison.Ordinal))
+        {
+            throw new InvalidOperationException("The decoded job payload does not reproduce its settings.");
+        }
+
+        var row = new PackageJobRow(
+            job.Descriptor.JobId,
+            modelSignature,
+            new PackageLatticeRow(latticeSignature, (int)decodedLattice.FormatVersion, latticeBytes),
+            decodedJob.Kind,
+            job.Descriptor.CollectionName,
+            job.Descriptor.ConfigName,
+            job.Descriptor.CollectionIndex,
+            job.Descriptor.ConfigIndex,
+            job.Descriptor.JobIndex,
+            decodedJob.TemperatureK,
+            decodedJob.ElectricFieldVm,
+            checked((long)decodedJob.TargetMcsp),
+            checked((int)decodedJob.WriteOutCount),
+            checked((long)decodedJob.PreRunMcsp),
+            decodedJob.TimeLimitS is { } timeLimit ? checked((long)timeLimit) : null,
+            decodedJob.MinSuccessRate,
+            job.Lattice.SizeA,
+            job.Lattice.SizeB,
+            job.Lattice.SizeC,
+            decodedJob.DopingInfo,
+            decodedJob.Flags,
+            job.Descriptor.Seed.AsMemory(),
+            (int)decodedJob.FormatVersion,
+            jobBytes);
+        await WriteJobRowAsync(row, cancellationToken).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
@@ -231,7 +293,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
             fileSystem.Move(temporaryPath, targetPath, overwrite: true);
 
             var sizeBytes = new FileInfo(targetPath).Length;
-            var warnings = AdvisoryWarnings(sizeBytes);
+            var warnings = SimulationPackageWriterSupport.AdvisoryWarnings(sizeBytes, options.AdvisorySizeBytes);
             var result = new PackageWriteResult(
                 targetPath,
                 sha256,
@@ -267,7 +329,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         }
         finally
         {
-            TryDelete(fileSystem, temporaryPath);
+            SimulationPackageWriterSupport.TryDelete(fileSystem, temporaryPath);
         }
 
         return ValueTask.CompletedTask;
@@ -289,7 +351,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
             throw new InvalidOperationException("A v1 package contains exactly one model row.");
         }
 
-        ValidateModelRow(model);
+        SimulationPackageWriterSupport.ValidateModelRow(model);
         using var transaction = GetConnection().BeginTransaction();
         try
         {
@@ -356,12 +418,18 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
             throw new InvalidOperationException("The job references a different model signature.");
         }
 
-        ValidateJobRow(job);
+        SimulationPackageWriterSupport.ValidateJobRow(job);
+        if (job.JobId <= lastJobId)
+        {
+            throw new InvalidOperationException("Job ids must be strictly ascending in template order.");
+        }
+
         jobTransaction ??= GetConnection().BeginTransaction();
         try
         {
             var latticeId = InsertOrGetLattice(job.Lattice, jobTransaction);
             InsertJob(job, latticeId, jobTransaction);
+            lastJobId = job.JobId;
             jobCount++;
             pendingJobs++;
             if (pendingJobs >= options.BatchSize)
@@ -376,100 +444,6 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         }
 
         return Task.CompletedTask;
-    }
-
-    private static void ValidateRequest(PackageBuildRequest request)
-    {
-        ArgumentNullException.ThrowIfNull(request);
-        ArgumentException.ThrowIfNullOrWhiteSpace(request.TargetPath);
-        ArgumentException.ThrowIfNullOrWhiteSpace(request.JobSelection);
-        if (request.ProjectId == Guid.Empty)
-        {
-            throw new ArgumentException("The project id must not be empty.", nameof(request));
-        }
-    }
-
-    private static void ValidateOptions(PackageBuildOptions options)
-    {
-        ArgumentNullException.ThrowIfNull(options);
-        if (options.CompressionLevel is < 1 or > 19)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(options),
-                options.CompressionLevel,
-                "The compression level must be in 1..19.");
-        }
-
-        if (options.BatchSize <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(options), options.BatchSize, "The batch size must be positive.");
-        }
-
-        if (options.AdvisorySizeBytes <= 0)
-        {
-            throw new ArgumentOutOfRangeException(
-                nameof(options),
-                options.AdvisorySizeBytes,
-                "The advisory size must be positive.");
-        }
-    }
-
-    private static void ValidateModelRow(PackageModelRow model)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.Signature);
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.SymmetryContractVersion);
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.SpaceGroupDataVersion);
-        ArgumentException.ThrowIfNullOrWhiteSpace(model.SpaceGroupDataSha256);
-        if (model.FormatVersion < 1)
-        {
-            throw new ArgumentOutOfRangeException(nameof(model), model.FormatVersion, "The payload format version must be positive.");
-        }
-
-        if (model.Payload.IsEmpty)
-        {
-            throw new ArgumentException("The model payload must not be empty.", nameof(model));
-        }
-    }
-
-    private static void ValidateJobRow(PackageJobRow job)
-    {
-        if (job.JobId <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(job), job.JobId, "The job id must be positive.");
-        }
-
-        ArgumentException.ThrowIfNullOrWhiteSpace(job.Lattice.Signature);
-        ArgumentException.ThrowIfNullOrWhiteSpace(job.CollectionName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(job.ConfigName);
-        if (job.Lattice.FormatVersion < 1 || job.PayloadFormatVersion < 1)
-        {
-            throw new ArgumentException("The payload format versions must be positive.", nameof(job));
-        }
-
-        if (job.Lattice.Payload.IsEmpty || job.Payload.IsEmpty)
-        {
-            throw new ArgumentException("The lattice and job payloads must not be empty.", nameof(job));
-        }
-
-        if (job.Kind is not ("kmc" or "mmc"))
-        {
-            throw new ArgumentException("The job kind must be 'kmc' or 'mmc'.", nameof(job));
-        }
-
-        if (job.CollectionIndex < 0 || job.ConfigIndex < 0 || job.JobIndex < 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(job), "The job indices must be non-negative.");
-        }
-
-        if (job.LatticeA <= 0 || job.LatticeB <= 0 || job.LatticeC <= 0)
-        {
-            throw new ArgumentOutOfRangeException(nameof(job), "The lattice sizes must be positive.");
-        }
-
-        if (job.Seed.Length != 32)
-        {
-            throw new ArgumentException("The job seed must be 32 bytes.", nameof(job));
-        }
     }
 
     internal static void ConfigureDatabase(SqliteConnection connection)
@@ -493,54 +467,13 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         transaction.Commit();
     }
 
-    private static string ResolveAppVersion()
-    {
-        var entryAssembly = Assembly.GetEntryAssembly();
-        var informational = entryAssembly?
-            .GetCustomAttribute<AssemblyInformationalVersionAttribute>()?
-            .InformationalVersion;
-        if (!string.IsNullOrWhiteSpace(informational))
-        {
-            return informational;
-        }
-
-        return entryAssembly?.GetName().Version?.ToString()
-            ?? typeof(SimulationPackageWriter).Assembly.GetName().Version?.ToString()
-            ?? "0.0.0";
-    }
-
-    private static string FormatCreatedUtc(DateTimeOffset value) =>
-        value.ToUniversalTime().ToString("yyyy-MM-dd'T'HH:mm:ss.fffffff'Z'", CultureInfo.InvariantCulture);
-
-    private static ImmutableArray<Diagnostic> AdvisoryWarnings(long sizeBytes, long advisorySizeBytes)
-    {
-        if (sizeBytes <= advisorySizeBytes)
-        {
-            return ImmutableArray<Diagnostic>.Empty;
-        }
-
-        return
-        [
-            new Diagnostic(
-                PackageDiagnosticCodes.AdvisorySize,
-                DiagnosticSeverity.Warning,
-                string.Create(
-                    CultureInfo.InvariantCulture,
-                    $"The package is {sizeBytes} bytes, above the advisory limit of {advisorySizeBytes} bytes."),
-                hint: "Reduce duplicate jobs or supercell sizes, or rebuild with --compact compression."),
-        ];
-    }
-
-    private ImmutableArray<Diagnostic> AdvisoryWarnings(long sizeBytes) =>
-        AdvisoryWarnings(sizeBytes, options.AdvisorySizeBytes);
-
     private void InsertSchemaInfo(SqliteTransaction transaction, PackageModelRow model)
     {
         var rows = new (string Key, string Value)[]
         {
             ("format_version", SimulationPackageSchema.FormatVersion.ToString(CultureInfo.InvariantCulture)),
             ("app_version", appVersion),
-            ("created_utc", FormatCreatedUtc(request.CreatedUtc)),
+            ("created_utc", SimulationPackageWriterSupport.FormatCreatedUtc(request.CreatedUtc)),
             ("project_id", request.ProjectId.ToString("D", CultureInfo.InvariantCulture)),
             ("generator", $"mocassin .NET {appVersion}"),
             ("job_selection", request.JobSelection),
@@ -621,7 +554,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         command.Parameters.AddWithValue("$flags", (long)job.Flags);
         command.Parameters.Add("$seed", SqliteType.Blob).Value = job.Seed.ToArray();
         command.Parameters.Add("$payload", SqliteType.Blob).Value = job.Payload.ToArray();
-        command.Parameters.AddWithValue("$createdUtc", FormatCreatedUtc(request.CreatedUtc));
+        command.Parameters.AddWithValue("$createdUtc", SimulationPackageWriterSupport.FormatCreatedUtc(request.CreatedUtc));
         command.ExecuteNonQuery();
     }
 
@@ -712,25 +645,6 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         return Convert.ToString(command.ExecuteScalar(), CultureInfo.InvariantCulture) ?? string.Empty;
     }
 
-    private static void TryDelete(IPackageFileSystem fileSystem, string path)
-    {
-        try
-        {
-            if (fileSystem.FileExists(path))
-            {
-                fileSystem.Delete(path);
-            }
-        }
-        catch (IOException)
-        {
-            // Best-effort cleanup; the target was never truncated.
-        }
-        catch (UnauthorizedAccessException)
-        {
-            // Best-effort cleanup; the target was never truncated.
-        }
-    }
-
     private void Abort()
     {
         if (disposed)
@@ -741,7 +655,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
         disposed = true;
         RollbackJobBatch();
         DisposeConnection();
-        TryDelete(fileSystem, temporaryPath);
+        SimulationPackageWriterSupport.TryDelete(fileSystem, temporaryPath);
     }
 
     private void ThrowIfUnavailable()
