@@ -134,6 +134,9 @@ Rules:
   the build CLI, evaluation, and external tools.
 - `Results` depends on `Core` + `Contracts` (not `Packages`) and owns `.msl`/`.msr`/`.mcs` reading, structural
   package inspection/verification, collection, and evaluation.
+- Package-verification diagnostics (`PKG`) are Contracts-owned descriptors. `Packages` composes them into its
+  `DiagnosticCatalog` for the docs-drift check and build-side lookup; `Results` constructs its diagnostics from
+  the same descriptors and must not reference `Mocassin.Packages` or its catalog.
 - `Cli` depends on `Packages` + `Results`; it may launch the Rust solver.
 - `App` is the composition root and references views, view models, and rendering. Views reference view models;
   view models depend on public library APIs and never reference views or controls.

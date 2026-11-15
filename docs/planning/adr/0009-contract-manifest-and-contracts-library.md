@@ -65,3 +65,16 @@ to the builder/writer.
 - `Mocassin.Contracts` must not depend on `Mocassin.Packages` or `Mocassin.Results`.
 - `Mocassin.Results` must not depend on `Mocassin.Packages`.
 - CI regenerates contract artifacts and fails on drift.
+
+### Pre-release package-shape finalization
+
+The `.msl` package has never been released. Step 11 therefore finalizes the package-shaped manifest entries while
+no released package exists: it adds `formats.package.payloads` (top-level model/job/lattice payload descriptors)
+and a separate generated `package-payloads-v1.schema.json`, and it removes the undefined `jobs.norm_factor` and
+`jobs.base_frequency_hz` columns from `formats.package.tables.jobs`. Both stay at `formatVersion = 1`.
+
+This is the package-shape counterpart of ADR 0010's pre-release signature-layout finalization: it does not waive
+the version-bump rule generally. The rule applies from the first released `.msl`; a later change to a table or
+payload shape requires a version bump, regenerated artifacts, and updated fixtures. Steps 03–10 applied the same
+pre-release basis to additive project-JSON sections, and Step 11 records the package basis here so the shape
+change is not a silent exception.

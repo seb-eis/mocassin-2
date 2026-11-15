@@ -146,7 +146,8 @@ Two modes:
 
 When a position changes from particle `old` to `new`:
 
-- For each link `(target, pair_id)`:
+- For each link `(target, pair_id)` — the links built by Step 14 from the payload's
+  `{target_position, offset, energy_id}` pair entries, so each target already resolves its periodic image:
   `energy[target][center_particle] += pair_table[pair_id][center][new] - pair_table[pair_id][center][old]`
   for every center particle that the target supports.
 - For each cluster link `(cluster_id, code_byte)`:

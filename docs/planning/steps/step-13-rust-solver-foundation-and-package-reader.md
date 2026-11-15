@@ -83,8 +83,34 @@ pub struct JumpRule {
     pub frequency_hz: f64,          // absolute non-negative Step 09 value
     pub charge_transport_vector: [f64; 3],
     pub static_correction: Option<[f64; 3]>,
-    pub tracker_order: [u8; 8],
+    pub tracker_order: Vec<u8>,     // one global tracker index or 0xFF per path node
 }
+
+pub struct PairLink {
+    pub target_position: PositionId,
+    pub offset: [i32; 3],           // representative relative cell image
+    pub pair_id: u32,               // shared pair table index
+}
+
+pub struct ClusterLink {
+    pub cluster_id: u32,
+    pub byte_position: u8,
+}
+
+pub struct EnvironmentModel {
+    pub selection_particle_mask: u64,
+    pub pairs: Vec<PairLink>,
+    pub clusters: Vec<ClusterLink>,
+    pub update_particle_ids: Vec<u8>,
+}
+```
+
+- `StructureModel.environments` is a `Vec<EnvironmentModel>` indexed by position. Each `pairs` entry is one
+  periodic image of a compiled pair shell (`target_position`, `offset`, `pair_id`); a runtime target is the
+  centre's supercell cell plus `offset`, wrapped component-wise into the supercell, at `target_position`.
+  Step 14 builds the `target_position_offset`/`pair_id` links from it.
+- `tracker_order` is variable-length: `tracker_order.len()` equals the representative direction's `path.len()`
+  (the state-code node count); entries are global tracker indices below `global_tracker_count` or `0xFF`.
 
 pub struct JobPackage {
     pub job_id: u32,
@@ -131,6 +157,9 @@ impl Package {
   - `lattice.len() == a*b*c*position_count`;
   - every particle index < particle count;
   - every position index < position count;
+  - every pair link's `target_position < position_count` and every cluster link's `byte_position < site_count`;
+  - `tracker_order.len()` equals the rule's path-node count, and every non-sentinel value is below
+    `global_tracker_count`;
   - all jump mapping/count/tracker table dimensions match;
   - rule state codes reference valid particles for their positions;
   - no NaN/Inf in required numeric fields.

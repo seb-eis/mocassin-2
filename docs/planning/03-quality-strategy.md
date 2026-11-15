@@ -395,25 +395,31 @@ solver with the same binary, platform, package, and seed.
 
 - **Payload mapping identity:** every model payload field equals its documented compiled or applied source
   (`CompiledModel`, `ParameterizationValues`); pair/cluster energies and the defect background are the applied
-  Step 09 values, never the compiler's zero defaults; the job payload equals the resolved `JobDescriptor` plus
-  the generated lattice; the lattice byte array equals `GeneratedLattice.Particles` in the documented row-major
-  order.
+  Step 09 values, never the compiler's zero defaults; every environment pair entry carries its compiled
+  representative `offset` and `target_position`; `tracker_order` is variable-length with one entry per path
+  node; the job payload equals the resolved `JobDescriptor` plus the generated lattice; the lattice byte array
+  equals `GeneratedLattice.Particles` in the documented row-major order.
+- **Cross-step payload conformance:** Step 14's link expansion (`cell + offset` wrapped, `target_position`)
+  reproduces the compiled minimum-image links, and Step 15's `(target, pair_id)` deltas consume them; Step 18
+  consumes the variable-length `tracker_order` with the `0xFF` sentinel. A fixture package exercises a partner
+  position with more than one periodic image.
 - **Signatures:** the parameterization projection re-encodes from the payload's applied tables and absolute
   `frequency_hz` values; the lattice projection re-encodes from the payload plus the referenced
   `model_signature`; a mutation of any signed value changes the digest. `model_signature` is checked against
   the compiled model at write time and is an identity string for readers.
 - **Determinism and dedup:** the same project, parameterization, and job set produce identical model/lattice
-  signatures and an identical canonical package summary; only build metadata (`created_utc`, `app_version`) and
-  SQLite/Zstd implementation details may differ in the bytes. Byte-identical lattices insert once; a different
-  particle array inserts a second row.
+  signatures and an identical `package-summary-v1` projection (data contracts §3.5); only build metadata
+  (`created_utc`, `app_version`, `generator`), size, payload byte hashes, and SQLite/Zstd implementation details
+  may differ in the bytes. Byte-identical lattices insert once; a different particle array inserts a second row.
 - **Atomicity and failure injection:** cancellation, a simulated write/disk-full error, and a crash after
   writing the temp file leave an existing package untouched and produce no `-wal`/`-shm` files or partial
   package. The published file is only replaced by the fsynced atomic rename.
 - **Immutability and schema:** a published package opens read-only, has no `results` table, reports
   `application_id = 0x4D4F4353` and `user_version = 1`, and its `schema_info` matches the manifest.
-- **Verification:** every `PKG` code has a corrupt, truncated, inconsistent, or injected-table fixture; a
-  decompression bomb or an oversized declared count yields a diagnostic instead of an allocation; verification
-  never throws for untrusted input and never mutates the file.
+- **Verification:** each `PKG001`–`PKG010` code has a corrupt, truncated, inconsistent, or injected-table
+  fixture with its documented severity and docs anchor; a decompression bomb or an oversized declared count
+  yields a diagnostic instead of an allocation; verification never throws for untrusted input and never mutates
+  the file. `PKG` descriptors are Contracts-owned; the verifier's project has no `Mocassin.Packages` reference.
 - **Fixtures:** a checked-in `.msl` produced by the real writer plus its canonical summary (normalized build
   metadata) and extracted model payload; the regeneration command is recorded and `verify.sh contracts` checks
   the lattice projection vectors.

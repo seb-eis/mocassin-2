@@ -909,7 +909,7 @@ MessagePack map with snake_case keys. Top-level:
 | `positions` | array | `{vector4:[i32;4], site_index:u32, stable:bool, particle_ids:u8[]}` in ascending `P` order; `vector4` is `[cellA, cellB, cellC, P]`, with base positions `[0,0,0,P]` |
 | `position_count` | u32 | Length of `positions` |
 | `site_count` | u32 | Number of user reference sites |
-| `environments` | array | Per position: `selection_particle_mask:u64`, pair interactions, cluster interactions, `update_particle_ids` |
+| `environments` | array | Per position: `selection_particle_mask:u64`, `pairs:[{target_position:u32, offset:[i32;3], energy_id:u32}]`, `clusters:[{cluster_id:u32, byte_position:u8}]`, `update_particle_ids:u8[]` |
 | `interaction_range` | `[i32;4]` | MMC interaction cube |
 | `static_trackers_per_cell` | u32 | |
 | `global_tracker_count` | u32 | |
@@ -921,9 +921,23 @@ MessagePack map with snake_case keys. Top-level:
   with base positions `[0,0,0,P]`. `particle_ids` is the ascending list of compiled particle indices set in
   `AllowedParticleMask`, including void (`0`) when the position may be empty; consumers reconstruct the mask
   from it.
-- `environments` is indexed by position. Each entry carries `selection_particle_mask:u64`, pair links,
-  cluster links, and `update_particle_ids`. A pair link is `{target_position:u32, energy_id:u32}`; a cluster
-  link is `{cluster_id:u32, byte_position:u8}` used for incremental occupation-code updates.
+- `environments` is indexed by position. Each entry carries `selection_particle_mask:u64`, `pairs`,
+  `clusters`, and `update_particle_ids`. A pair link is
+  `{target_position:u32, offset:[i32;3], energy_id:u32}` and there is **one entry per periodic image**:
+  - `target_position` is the partner canonical P1 index; `energy_id` is the shared pair table index.
+  - `offset` is the image's relative cell offset `[cellA, cellB, cellC]` from the centre position. It is
+    required: the same `target_position` occurs once per image, images can use different pair tables, and
+    without the offset the solver cannot place the target instance.
+  - The runtime target is the centre's supercell cell plus `offset`, wrapped component-wise into
+    `[0,A)×[0,B)×[0,C)`, at `target_position`. Step 14 owns this expansion; Step 15 consumes the resulting
+    `(target, pair_id)` links.
+  - The compiled source is `CompiledPairLink`, one entry per periodic image: `PairCompilationStage` expands
+    each `PairShell.EquivalentImages` (via the additive `PairInteractionPreview.EquivalentImages`) into one
+    link per image, so the model signature continues to sign every runtime image with its existing four-field
+    link schema. The writer maps the links one-to-one; `energy_id = PairTableIndex`.
+  - `distance_bucket_fm` is not stored in the package: the pair table index is the energy identity, and the
+    bucket remains signed in the compiled link and used by parameterization/inspection.
+- A cluster link is `{cluster_id:u32, byte_position:u8}` used for incremental occupation-code updates.
 - `interaction_range` is the MMC local-update cube `[maxCellA, maxCellB, maxCellC, 0]`, derived from the
   maximum stable/unstable cutoff and the cell interplanar spacings plus one boundary cell.
 - `static_trackers_per_cell = position_count * (particle_count - 1)`; void (index 0) has no tracker.
@@ -973,7 +987,7 @@ MessagePack map with snake_case keys. Top-level:
 | --- | --- | --- |
 | `jump_collections` | array | `{kind, transition_id, mobile_particle_mask:u64, rule_ids:[u32], direction_ids:[u32]}` |
 | `jump_directions` | array | `{object_id, position_id, collection_id, path:[i32;4], movement:[[f64;3]], path_vector:[f64;3], length, is_inverse}` |
-| `jump_rules` | array | `{rule_id, collection_id, state0:u64, state1:u64, state2:u64, frequency_hz:f64, charge_transport_vector:[f64;3], static_correction, tracker_order:[u8;8]}` |
+| `jump_rules` | array | `{rule_id, collection_id, state0:u64, state1:u64, state2:u64, frequency_hz:f64, charge_transport_vector:[f64;3], static_correction, tracker_order:u8[]}` |
 | `jump_count` | array | `[position][particle] -> u32` |
 | `jump_mapping` | array | Flat `u32` concatenation in `[position][particle][relative]` order; offsets are the prefix sums of `jump_count` |
 | `static_tracker_mapping` | array | Dense `[position][particle] -> i32` tracker offset, `-1` when none |
@@ -997,9 +1011,11 @@ MessagePack map with snake_case keys. Top-level:
   `Σ_p q_p * (x_p(S2) - x_p(S0))` in e·Å and is the exact field input; a particle that moves contributes once,
   void contributes nothing. Step 15 computes `field = -0.5*(|E|/kT)*(charge_transport_vector·ê)`. A direction
   has no stored field scalar. `static_correction` is `null`/NaN in v1 (dynamic S2).
-- `tracker_order[i]` names the path node whose mobile tracker receives the movement at node `i`, or the
-  sentinel `0xFF` for a non-mobile node. Tracker mappings are definitions; Step 18 owns the values and
-  updates.
+- `tracker_order[i]` is the compiled **global tracker index** that follows the mobile particle at path node `i`,
+  or the sentinel `0xFF` for a non-mobile node. Its length is exactly the rule's path-node count (the
+  representative direction's `path` length and the state-code node count); it is a variable-length `u8[]`, not
+  a fixed eight-entry array. The compiled source is `CompiledJumpRule.TrackerOrder`, whose length the model
+  signature also projects. Tracker mappings are definitions; Step 18 owns the values and updates.
 - Within one collection, `state0` maps to at most one rule; the compiler rejects ambiguity. A direction is
   listed in `jump_mapping` only when at least one rule can start from that `(position, particle)`.
 
@@ -1095,6 +1111,52 @@ The `.msl` is immutable after a successful build:
 A published `.msl` must be readable without `-wal` or `-shm` files. This makes it safe on read-only media and
 shared HPC filesystems. The solver and evaluation readers open it with
 `SQLITE_OPEN_READONLY`, `query_only=ON`, and `foreign_keys=ON`. Readers must not rely on WAL semantics.
+
+#### Canonical package summary (`package-summary-v1`)
+
+Determinism, golden fixtures, and inspection compare a **documented inspector projection**, not raw file bytes.
+The projection is UTF-8 JSON (2-space indent, `\n`, invariant shortest round-trip numbers, `-0.0` as `0.0`,
+arrays sorted by the keys below):
+
+```json
+{
+  "format": "mocassin.package-summary",
+  "formatVersion": 1,
+  "schema": {
+    "formatVersion": 1,
+    "projectId": "…",
+    "jobSelection": "all",
+    "symmetryContractVersion": "symmetry-1",
+    "spaceGroupDataVersion": "…",
+    "spaceGroupDataSha256": "…"
+  },
+  "models": [
+    { "signature": "…", "modelSignature": "…", "payloadFormatVersion": 1,
+      "particleCount": 3, "positionCount": 32, "siteCount": 2, "environmentCount": 32,
+      "pairTableCount": 4, "clusterTableCount": 0, "collectionCount": 1, "ruleCount": 96 }
+  ],
+  "lattices": [
+    { "signature": "…", "latticeSize": [10, 10, 10], "positionCount": 32, "latticeLength": 32000 }
+  ],
+  "jobs": [
+    { "jobId": 1, "modelSignature": "…", "latticeSignature": "…", "kind": "kmc",
+      "collectionName": "T773", "configName": "x001", "collectionIndex": 0, "configIndex": 0,
+      "jobIndex": 0, "temperatureK": 773.0, "electricFieldVm": 1.0e7, "targetMcsp": 200,
+      "writeOutCount": 100, "preRunMcsp": 0, "timeLimitS": 31536000, "minSuccessRate": null,
+      "latticeSize": [10, 10, 10], "dopingInfo": "", "flags": 64, "seedHex": "…" }
+  ],
+  "counts": { "modelCount": 1, "latticeCount": 1, "jobCount": 1, "latticeReuseFactor": 1.0 }
+}
+```
+
+- Excluded and normalized: `created_utc`, `app_version`, `generator`, file size, payload byte hashes, SQLite
+  page layout, and Zstd/MessagePack implementation details. `seedHex` is the deterministic job seed in
+  lowercase hex, so it is stable and comparable.
+- `lattices` is the distinct set sorted by `signature`; `models` by `signature`; `jobs` by `jobId`.
+  `counts.latticeReuseFactor` is `jobCount / latticeCount` (1.0 means every lattice is unique; higher means
+  reuse).
+- The summary is produced by the Step 11 inspector (`Mocassin.Results.Packages`) and is the golden artifact
+  beside each checked-in `.msl`. It is not stored in the package and is not a package format.
 
 ### 3.6 Results store (`.msr`, SQLite)
 
