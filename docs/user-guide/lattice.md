@@ -63,9 +63,12 @@ Step 06 owns `LAT001`–`LAT011`: references, site stability, particle-set membe
 priority range and uniqueness, compensation shape and charge signs, and names.
 
 Fractions, unknown doping references in a job template, same-site application order, requested-versus-applied
-counts, truncation, charge-compensation ratios, supercell/job limits, extensions, and the lattice preview
-belong to Step 10 (`JOB001`–`JOB020`). The project stores no derived building block, applied counts, or
+counts, truncation, charge-compensation ratios, supercell/job limits, extensions, and the lattice preview are
+Step 10 job-builder checks (`JOB001`–`JOB020`). The project stores no derived building block, applied counts, or
 preview data.
+
+Preview a template without writing a package with
+`mocassin build <project.mocprj> --preview`; see the [CLI reference](../reference/cli.md).
 
 ## Editing operations
 

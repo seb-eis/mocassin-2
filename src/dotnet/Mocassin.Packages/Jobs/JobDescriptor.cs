@@ -4,6 +4,7 @@ using System.Collections.Immutable;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model.Jobs;
 using Mocassin.Core.Model.Simulations;
+using Mocassin.Packages.Jobs.Optimization;
 
 namespace Mocassin.Packages.Jobs;
 
@@ -33,6 +34,10 @@ namespace Mocassin.Packages.Jobs;
 /// <param name="Dopings">The requested doping fractions in authored order.</param>
 /// <param name="Optimizers">The collection selection optimizers in authored order.</param>
 /// <param name="Seed">The 32-byte deterministic job seed.</param>
+/// <param name="CompiledOptimizers">
+/// The compiled <c>(position, particle)</c> start options removed from the KMC selection pool, sorted by
+/// position and particle index. Empty for MMC and for a collection without optimizers.
+/// </param>
 public sealed record JobDescriptor(
     int JobId,
     int CollectionIndex,
@@ -48,4 +53,5 @@ public sealed record JobDescriptor(
     LatticeRequest Lattice,
     ImmutableArray<DopingValue> Dopings,
     ImmutableArray<SelectionOptimizer> Optimizers,
-    ImmutableArray<byte> Seed);
+    ImmutableArray<byte> Seed,
+    ImmutableArray<CompiledSelectionOptimizer> CompiledOptimizers = default);

@@ -307,6 +307,13 @@
       "kind": "project",
       "status": "current",
       "step": "10"
+    },
+    {
+      "id": "project-jobs-ceria-sweep",
+      "path": "samples/jobs/ceria-temperature-sweep.mocprj",
+      "kind": "project",
+      "status": "current",
+      "step": "10"
     }
   ]
 }

@@ -8,6 +8,7 @@ using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model.Jobs;
 using Mocassin.Core.Project;
+using Mocassin.Packages.Jobs.Optimization;
 
 namespace Mocassin.Packages.Jobs;
 
@@ -134,12 +135,24 @@ public static class JobTemplateExpander
                 configPlans.Add(new ConfigPlan(config, settings));
             }
 
+            var optimizers = collection.Optimizers is { IsDefault: false } authoredOptimizers
+                ? authoredOptimizers
+                : ImmutableArray<SelectionOptimizer>.Empty;
+            var optimizerPlan = SelectionOptimizerResolver.Resolve(
+                model,
+                compiled.Simulation,
+                collection.Id,
+                optimizers,
+                out var optimizerDiagnostics);
+            diagnostics.AddRange(optimizerDiagnostics);
+
             totalJobs += (long)jobCount * configPlans.Count;
             plans.Add(new CollectionPlan(
                 collectionIndex,
                 collection,
                 compiled,
                 jobCount,
+                optimizerPlan,
                 configPlans));
         }
 
@@ -190,7 +203,7 @@ public static class JobTemplateExpander
                         plan.Compiled.Simulation.Id,
                         plan.Compiled.Index,
                         plan.Compiled.Simulation.Kind,
-                        plan.Compiled.Simulation.Intent.UseDualDofCorrection,
+                        plan.OptimizerPlan.UseDualDofCorrection,
                         configPlan.Settings,
                         config.Lattice,
                         dopings,
@@ -199,7 +212,8 @@ public static class JobTemplateExpander
                             masterSeed.AsSpan(),
                             plan.CollectionIndex,
                             configIndex,
-                            jobIndex)));
+                            jobIndex),
+                        plan.OptimizerPlan.Targets));
                     jobId++;
                 }
             }
@@ -274,5 +288,6 @@ public static class JobTemplateExpander
         JobCollection Collection,
         CompiledSimulationEntry Compiled,
         int JobCount,
+        SelectionOptimizerPlan OptimizerPlan,
         List<ConfigPlan> Configs);
 }

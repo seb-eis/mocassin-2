@@ -9,6 +9,7 @@ Canonical example projects used by tutorials, CLI checks, and parity tests.
 | [`barium-zirconate/`](barium-zirconate/README.md) | Partially hydrated Y-doped BaZrO₃ reference structure with proton interstitial sites |
 | [`transitions/`](transitions/README.md) | Ceria KMC/MMC, polaron hop, 5-site vehicle, and 5-site interstitialcy transition samples |
 | [`lattice/`](lattice/README.md) | Ceria reduction/hydration and barium-zirconate doping samples |
+| [`jobs/`](jobs/README.md) | Ceria temperature/doping sweep with a Step 10 job template |
 | [`simulations/`](simulations/README.md) | KMC/MMC samples with documented defaults and non-default configurations |
 
 Transition samples are added with Step 04. Step 05 adds energy environments, clusters, and site energies to

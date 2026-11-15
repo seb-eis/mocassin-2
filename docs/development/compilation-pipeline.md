@@ -150,6 +150,21 @@ public interface IModelCompiler
   through a documented and tested selection-optimizer rule. Step 10 copies the intent to `JobDescriptor`;
   Step 11 composes the `SolverJobFlags` word. `Mocassin.Compilation` never references `SolverJobFlags`.
 
+### Selection optimizers (Step 10)
+
+`Mocassin.Packages.Jobs.Optimization.SelectionOptimizerResolver` turns each authored `(siteId, particleId)`
+optimizer into one `(positionId, particleId)` target per canonical P1 position owned by the compiled site. The
+targets are sorted by position and particle index and stored on the build-time `JobDescriptor`; Step 11 encodes
+them and Step 14 removes them from the runtime selection pool. The lattice generator ignores them entirely.
+
+Dual-DOF starts from `CompiledSimulation.Intent.UseDualDofCorrection`. An environment is reduced when an
+optimizer target lies on a position with that environment index and the optimizer particle is allowed there.
+The flag is cleared only when at least one optimizer exists and every compiled environment is reduced; MMC
+keeps it clear. The compiled model and its masks are never mutated. The `JOB009` removes-all check uses the
+compiled `jumpCount[position][particle]` table and each active KMC collection's mobile-particle mask. If that
+table is unavailable, the plan records `StartOptionCheckEvaluated = false` and a precise limitation instead of
+claiming the check ran.
+
 ## Compiled model and package boundary
 
 The internal `CompiledModel` is a `Mocassin.Compilation` record with typed IDs and immutable arrays. It is not

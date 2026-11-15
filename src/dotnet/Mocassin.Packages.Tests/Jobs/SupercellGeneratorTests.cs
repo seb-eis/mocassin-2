@@ -15,6 +15,7 @@ using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Project;
 using Mocassin.Core.Units;
 using Mocassin.Packages.Jobs;
+using Mocassin.Packages.Jobs.Optimization;
 
 namespace Mocassin.Packages.Tests.Jobs;
 
@@ -90,6 +91,24 @@ public sealed class SupercellGeneratorTests
         Assert.Equal<byte>(first.Lattice!.Particles, second.Lattice!.Particles);
         Assert.Equal(first.LatticeRequestHash, second.LatticeRequestHash);
         Assert.Equal<byte>(first.LatticeSeed, second.LatticeSeed);
+    }
+
+    [Fact]
+    public void CompiledSelectionOptimizersNeverChangeTheLatticeParticles()
+    {
+        var project = CreateProject();
+        var model = CreateCompiledModel();
+        var request = new LatticeRequest(2, 2, 2);
+        var without = SupercellGenerator.Generate(project, model, CreateJob(request));
+        var with = SupercellGenerator.Generate(
+            project,
+            model,
+            CreateJob(request, compiledOptimizers: [new CompiledSelectionOptimizer(0, 1)]));
+
+        Assert.True(without.IsSuccess);
+        Assert.True(with.IsSuccess);
+        Assert.Equal<byte>(without.Lattice!.Particles, with.Lattice!.Particles);
+        Assert.Equal(without.Lattice.Report.Applications.ToArray(), with.Lattice.Report.Applications.ToArray());
     }
 
     [Fact]
@@ -190,7 +209,8 @@ public sealed class SupercellGeneratorTests
 
     private static JobDescriptor CreateJob(
         LatticeRequest request,
-        ImmutableArray<DopingValue>? dopings = null) => new(
+        ImmutableArray<DopingValue>? dopings = null,
+        ImmutableArray<CompiledSelectionOptimizer>? compiledOptimizers = null) => new(
         1,
         0,
         0,
@@ -222,7 +242,8 @@ public sealed class SupercellGeneratorTests
         request,
         dopings ?? [],
         [],
-        [.. Enumerable.Repeat((byte)0x5a, LatticeSeedDeriver.SeedByteLength)]);
+        [.. Enumerable.Repeat((byte)0x5a, LatticeSeedDeriver.SeedByteLength)],
+        compiledOptimizers ?? []);
 
     private static Project CreateProject() => new(
         null,

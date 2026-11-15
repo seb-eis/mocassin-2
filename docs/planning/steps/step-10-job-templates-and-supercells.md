@@ -26,8 +26,8 @@ generation with charge compensation.
 | 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | Done |
 | 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Done |
 | 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Done |
-| 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | In progress |
-| 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Proposed |
+| 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Done |
+| 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | In progress |
 | 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | Proposed |
 
 The feature list is a design proposal. It is approved once by the human owner together with the design verdict; it does
@@ -42,7 +42,8 @@ not create the step branch and does not mark the step `In progress`.
 | `job-expansion-and-seeds` | `feature/step-10-job-templates/job-expansion-and-seeds` | Done | `all --require` green; see outcome below | — | `a6435bf` |
 | `supercell-generation` | `feature/step-10-job-templates/supercell-generation` | Done | `all --require` green; see outcome below | — | `8ae41e8` |
 | `doping-and-charge-compensation` | `feature/step-10-job-templates/doping-and-charge-compensation` | Done | `all --require` green; see outcome below | — | `b35e5dc` |
-| `lattice-preview-service` | `feature/step-10-job-templates/lattice-preview-service` | In progress | `all --require` green; see outcome below | — | — |
+| `lattice-preview-service` | `feature/step-10-job-templates/lattice-preview-service` | Done | `all --require` green; see outcome below | — | `a95511e` |
+| `selection-optimizers-and-build-preview` | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | In progress | See feature 7 outcome below | — | — |
 
 Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
 job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
@@ -308,7 +309,69 @@ Recorded deviations and limitations:
   internal constructor rather than allocating a 256 MiB lattice.
 - Optimizers, `mocassin build --preview`, the CLI path, and the operator/acceptance documentation remain in
   features 7–8.
-- Feature 6 is not marked `Done`; it has not been squash-merged and no per-feature CI run was triggered.
+- Feature 6 was squash-merged into `step/10-job-templates` as `a95511e`
+  (`step-10: add shared lattice and job-count preview service`). The squash was validated locally; no
+  per-feature CI run was triggered.
+
+#### Feature 7 outcome and deviations
+
+`selection-optimizers-and-build-preview` adds the `Mocassin.Packages.Jobs.Optimization` subfolder with
+`CompiledSelectionOptimizer`, `SelectionOptimizerPlan`, `SelectionOptimizerEffect`, and
+`SelectionOptimizerResolver`. The resolver expands every authored `(siteId, particleId)` to every canonical P1
+position owned by the site, sorts the result by `(positionId, particleId)`, and never mutates the compiled model.
+The dual-DOF flag starts from `CompiledSimulation.Intent.UseDualDofCorrection` and is cleared only when at least
+one optimizer exists and every compiled environment is reduced; no-optimizer, mixed, partially reduced, and
+already-clear cases keep the intent. MMC ignores optimizers and keeps the flag clear.
+
+`JobDescriptor` now carries the sorted `CompiledOptimizers` payload and takes `UseDualDofCorrection` from the
+collection plan. `JobTemplateExpander` resolves the plan before emitting descriptors and returns diagnostics
+instead of a partial expansion. Lattice generation ignores the compiled optimizer targets, so optimizers never
+remove lattice particles.
+
+The compiled-bound removes-all check uses the existing `CompiledTransitionModel` jump-count table and each
+active KMC collection's mobile-particle mask. It reports `JOB009` only when an optimizer actually removes a
+selectable start option and no other selectable start remains for that collection. When the jump table is
+missing or unsized, or the compiled simulation has no active collection, the plan records the precise
+`StartOptionCheckLimitation` and does not pretend the check ran.
+
+`mocassin build --preview` adds `Mocassin.Cli.Build.PreviewCommand` and `PreviewReportWriter`. The command loads,
+validates, compiles, expands, and previews one selected template; it never opens or writes a `.msl` and never
+calls the Step 11 writer. A project with several templates requires `--template`; an ambiguous implicit
+selection is a usage error. The human and `build-preview-v1` JSON forms report the template and job counts, each
+collection's dual-DOF flag and optimizer target/removed-start counts, and each configuration's lattice size,
+position count, requested/applied doping counts, effective fraction, charge before/after, and neutrality.
+
+`samples/jobs/ceria-temperature-sweep.mocprj` extends the ceria KMC simulation sample with Ce4+/Ce3+ species,
+a compensated Ce reduction doping, two temperatures, two lattice sizes, duplicate jobs, and a Ce-site optimizer.
+It is registered in `ProjectSchemaTests.fixturePaths` and the manifest fixture registry.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET build reports 0 warnings/0 errors; Core 683, Symmetry 223, Compilation 96, Packages 358, Cli 16,
+  App 1, Contracts 15, Results 1, and Architecture 1 tests passed; `dotnet format` is clean; the NuGet licence
+  policy covers 51 packages with no vulnerable packages; ApiCompat is compatible with the checked-in baseline;
+  the Rust workspace tests are green; the Python package reports 3 passed tests; Zensical strict, DocFX
+  (0 warnings/0 errors), and rustdoc are clean; 18 contract artifacts are current; 522 source files carry SPDX
+  headers; no secret patterns were found in 863 tracked text files; and cargo-deny advisories/bans/licenses/
+  sources are OK.
+- Focused feature tests: the 14 `SelectionOptimizerResolverTests` cases, the updated
+  `JobTemplateExpanderTests` and `SupercellGeneratorTests`, and the 9 `PreviewCommandTests` cases pass. The new
+  ceria sweep sample validates with zero errors and previews to six jobs across two collections and four
+  configurations.
+
+Recorded deviations and limitations:
+
+- The removes-all check is limited to the compiled jump-count table and the simulation's
+  `ActiveCollectionIndices`. It does not reconstruct a runtime selection pool, which Step 14 owns. The
+  `StartOptionCheckEvaluated`/`StartOptionCheckLimitation` fields make the boundary explicit.
+- `CompiledSelectionOptimizer.ParticleId` is the dense compiled particle index, not the stable `ParticleId`;
+  Step 11 encodes it as the `.msl` particle id and Step 14 applies it to the runtime pool.
+- The `build-preview-v1` JSON report is an interim Step 10 shape that mirrors the `validation-v1` envelope. It is
+  not yet a manifest-owned report; Step 12 may formalize the full build report.
+- The preview generates one lattice per configuration, not per duplicate job. Lattice diagnostics are
+  deduplicated in the report while the per-configuration job count still reflects the duplicate expansion.
+- Feature 7 is not marked `Done`; it has not been squash-merged and no per-feature CI run was triggered.
 
 ## Goal
 

@@ -19,8 +19,9 @@ namespace Mocassin.Packages.Jobs;
 /// <c>index = ((a * B + b) * C + c) * PositionCount + P</c>. A stable site defaults to the first particle of its
 /// authored particle set and an unstable site defaults to the compiled void index. Requested dopings are then
 /// applied sequentially in ascending priority to the current lattice, with charge compensation, truncation, and
-/// the deterministic lattice sampler described by <see cref="DopingApplier"/>. Selection optimizers belong to a
-/// later Step 10 feature. Invalid user data returns diagnostics and no partial lattice.
+/// the deterministic lattice sampler described by <see cref="DopingApplier"/>. Selection optimizers change only
+/// the compiled KMC start-option plan and never the lattice particles. Invalid user data returns diagnostics and
+/// no partial lattice.
 /// </remarks>
 public static class SupercellGenerator
 {

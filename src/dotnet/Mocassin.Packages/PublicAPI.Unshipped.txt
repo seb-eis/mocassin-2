@@ -677,11 +677,13 @@ Mocassin.Packages.Jobs.JobDescriptor.ConfigIndex.get -> int
 Mocassin.Packages.Jobs.JobDescriptor.ConfigIndex.init -> void
 Mocassin.Packages.Jobs.JobDescriptor.ConfigName.get -> string!
 Mocassin.Packages.Jobs.JobDescriptor.ConfigName.init -> void
-Mocassin.Packages.Jobs.JobDescriptor.Deconstruct(out int JobId, out int CollectionIndex, out int ConfigIndex, out int JobIndex, out string! CollectionName, out string! ConfigName, out Mocassin.Core.Ids.SimulationId SimulationId, out int SimulationIndex, out Mocassin.Core.Model.Simulations.SimulationKind Kind, out bool UseDualDofCorrection, out Mocassin.Packages.Jobs.ResolvedJobSettings! Settings, out Mocassin.Core.Model.Jobs.LatticeRequest! Lattice, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> Dopings, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!> Optimizers, out System.Collections.Immutable.ImmutableArray<byte> Seed) -> void
+Mocassin.Packages.Jobs.JobDescriptor.Deconstruct(out int JobId, out int CollectionIndex, out int ConfigIndex, out int JobIndex, out string! CollectionName, out string! ConfigName, out Mocassin.Core.Ids.SimulationId SimulationId, out int SimulationIndex, out Mocassin.Core.Model.Simulations.SimulationKind Kind, out bool UseDualDofCorrection, out Mocassin.Packages.Jobs.ResolvedJobSettings! Settings, out Mocassin.Core.Model.Jobs.LatticeRequest! Lattice, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> Dopings, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!> Optimizers, out System.Collections.Immutable.ImmutableArray<byte> Seed, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!> CompiledOptimizers) -> void
+Mocassin.Packages.Jobs.JobDescriptor.CompiledOptimizers.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!>
+Mocassin.Packages.Jobs.JobDescriptor.CompiledOptimizers.init -> void
 Mocassin.Packages.Jobs.JobDescriptor.Dopings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!>
 Mocassin.Packages.Jobs.JobDescriptor.Dopings.init -> void
 Mocassin.Packages.Jobs.JobDescriptor.Equals(Mocassin.Packages.Jobs.JobDescriptor? other) -> bool
-Mocassin.Packages.Jobs.JobDescriptor.JobDescriptor(int JobId, int CollectionIndex, int ConfigIndex, int JobIndex, string! CollectionName, string! ConfigName, Mocassin.Core.Ids.SimulationId SimulationId, int SimulationIndex, Mocassin.Core.Model.Simulations.SimulationKind Kind, bool UseDualDofCorrection, Mocassin.Packages.Jobs.ResolvedJobSettings! Settings, Mocassin.Core.Model.Jobs.LatticeRequest! Lattice, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> Dopings, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!> Optimizers, System.Collections.Immutable.ImmutableArray<byte> Seed) -> void
+Mocassin.Packages.Jobs.JobDescriptor.JobDescriptor(int JobId, int CollectionIndex, int ConfigIndex, int JobIndex, string! CollectionName, string! ConfigName, Mocassin.Core.Ids.SimulationId SimulationId, int SimulationIndex, Mocassin.Core.Model.Simulations.SimulationKind Kind, bool UseDualDofCorrection, Mocassin.Packages.Jobs.ResolvedJobSettings! Settings, Mocassin.Core.Model.Jobs.LatticeRequest! Lattice, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> Dopings, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!> Optimizers, System.Collections.Immutable.ImmutableArray<byte> Seed, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!> CompiledOptimizers = default(System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!>)) -> void
 Mocassin.Packages.Jobs.JobDescriptor.JobId.get -> int
 Mocassin.Packages.Jobs.JobDescriptor.JobId.init -> void
 Mocassin.Packages.Jobs.JobDescriptor.JobIndex.get -> int
@@ -916,3 +918,60 @@ static Mocassin.Packages.Jobs.ParticlePopulation.operator !=(Mocassin.Packages.J
 static Mocassin.Packages.Jobs.ParticlePopulation.operator ==(Mocassin.Packages.Jobs.ParticlePopulation? left, Mocassin.Packages.Jobs.ParticlePopulation? right) -> bool
 static Mocassin.Packages.Jobs.SitePopulation.operator !=(Mocassin.Packages.Jobs.SitePopulation? left, Mocassin.Packages.Jobs.SitePopulation? right) -> bool
 static Mocassin.Packages.Jobs.SitePopulation.operator ==(Mocassin.Packages.Jobs.SitePopulation? left, Mocassin.Packages.Jobs.SitePopulation? right) -> bool
+Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer
+Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.<Clone>$() -> Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!
+Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.CompiledSelectionOptimizer(int PositionId, int ParticleId) -> void
+Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.Deconstruct(out int PositionId, out int ParticleId) -> void
+Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.Equals(Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer? other) -> bool
+Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.ParticleId.get -> int
+Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.ParticleId.init -> void
+Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.PositionId.get -> int
+Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.PositionId.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.<Clone>$() -> Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect!
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.Deconstruct(out Mocassin.Core.Model.Jobs.SelectionOptimizer! Optimizer, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!> Targets, out int? RemovedStartOptions) -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.Equals(Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect? other) -> bool
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.Optimizer.get -> Mocassin.Core.Model.Jobs.SelectionOptimizer!
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.Optimizer.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.RemovedStartOptions.get -> int?
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.RemovedStartOptions.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.SelectionOptimizerEffect(Mocassin.Core.Model.Jobs.SelectionOptimizer! Optimizer, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!> Targets, int? RemovedStartOptions) -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.Targets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!>
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.Targets.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.<Clone>$() -> Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan!
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.AuthoredOptimizerCount.get -> int
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.AuthoredOptimizerCount.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!> Targets, out int AuthoredOptimizerCount, out bool UseDualDofCorrection, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect!> Effects, out bool StartOptionCheckEvaluated, out string? StartOptionCheckLimitation) -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.Effects.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect!>
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.Effects.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.Equals(Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan? other) -> bool
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.SelectionOptimizerPlan(System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!> Targets, int AuthoredOptimizerCount, bool UseDualDofCorrection, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect!> Effects, bool StartOptionCheckEvaluated, string? StartOptionCheckLimitation) -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.StartOptionCheckEvaluated.get -> bool
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.StartOptionCheckEvaluated.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.StartOptionCheckLimitation.get -> string?
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.StartOptionCheckLimitation.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.Targets.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer!>
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.Targets.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.UseDualDofCorrection.get -> bool
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.UseDualDofCorrection.init -> void
+Mocassin.Packages.Jobs.Optimization.SelectionOptimizerResolver
+const Mocassin.Packages.Jobs.Optimization.SelectionOptimizerResolver.MissingJumpTableLimitation = "The compiled transition model has no jump-count table sized for its positions and particles, so the removes-all JOB009 start-option check was not evaluated." -> string!
+const Mocassin.Packages.Jobs.Optimization.SelectionOptimizerResolver.NoActiveCollectionLimitation = "The compiled simulation has no active transition collection, so the removes-all JOB009 start-option check was not evaluated." -> string!
+override Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.GetHashCode() -> int
+override Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.ToString() -> string!
+override Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.GetHashCode() -> int
+override Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.ToString() -> string!
+override Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.GetHashCode() -> int
+override Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.ToString() -> string!
+static Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.operator !=(Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer? left, Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer? right) -> bool
+static Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer.operator ==(Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer? left, Mocassin.Packages.Jobs.Optimization.CompiledSelectionOptimizer? right) -> bool
+static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.operator !=(Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect? left, Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect? right) -> bool
+static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect.operator ==(Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect? left, Mocassin.Packages.Jobs.Optimization.SelectionOptimizerEffect? right) -> bool
+static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.operator !=(Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan? left, Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan? right) -> bool
+static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.operator ==(Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan? left, Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan? right) -> bool
+static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.WithoutOptimizers(bool useDualDofCorrection) -> Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan!
+static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerResolver.Resolve(Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Compilation.Simulations.CompiledSimulation! simulation, Mocassin.Core.Ids.JobCollectionId collectionId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!> optimizers, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan!

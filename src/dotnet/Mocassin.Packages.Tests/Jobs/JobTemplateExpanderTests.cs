@@ -3,14 +3,17 @@
 using System.Collections.Immutable;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Compilation.Simulations;
+using Mocassin.Compilation.Structure;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model;
 using Mocassin.Core.Model.Jobs;
 using Mocassin.Core.Model.Simulations;
+using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Project;
 using Mocassin.Packages.Jobs;
+using Mocassin.Packages.Jobs.Optimization;
 
 namespace Mocassin.Packages.Tests.Jobs;
 
@@ -19,6 +22,15 @@ public sealed class JobTemplateExpanderTests
 {
     private const string masterSeed =
         "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f";
+
+    private static readonly ParticleId optimizerParticle = ParticleId.Create(
+        Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4de001"));
+
+    private static readonly CellSiteId optimizerSite = CellSiteId.Create(
+        Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4de002"));
+
+    private static readonly ParticleSetId optimizerParticleSet = ParticleSetId.Create(
+        Guid.Parse("018f4c9a-7f6b-7c3a-9d2e-1a2b3c4de003"));
 
     [Fact]
     public void ExpandsCollectionsConfigsAndDuplicatesInAuthoredOrder()
@@ -145,14 +157,16 @@ public sealed class JobTemplateExpanderTests
     public void DescriptorCarriesCompiledDataSettingsLatticeDopingsAndOptimizers()
     {
         var id = SimulationId.New();
-        var model = CreateModel(CreateSimulation(id, SimulationKind.Kmc, 1, useDualDof: true));
+        var model = CreateModel(
+            CreateSimulation(id, SimulationKind.Kmc, 1, useDualDof: true),
+            structure: CreateOptimizerStructure(),
+            particles: CreateOptimizerParticles());
         var lattice = new LatticeRequest(2, 3, 4);
         var dopings = ImmutableArray.Create(
             new DopingValue(DopingId.New(), 0.1),
             new DopingValue(DopingId.New(), 0.2));
         var optimizers = ImmutableArray.Create(
-            new SelectionOptimizer(CellSiteId.New(), ParticleId.New()),
-            new SelectionOptimizer(CellSiteId.New(), ParticleId.New()));
+            new SelectionOptimizer(optimizerSite, optimizerParticle));
         var config = Config("c1", lattice, dopings, new JobSettings { TemperatureK = 950.0 });
         var collection = CreateCollection(id, "alpha", 1, [config], null, optimizers);
         var template = CreateTemplate(collection);
@@ -169,6 +183,7 @@ public sealed class JobTemplateExpanderTests
         Assert.Equal(lattice, job.Lattice);
         Assert.Equal(dopings, job.Dopings);
         Assert.Equal(optimizers, job.Optimizers);
+        Assert.Equal([new CompiledSelectionOptimizer(0, 1)], job.CompiledOptimizers.ToArray());
         Assert.Equal(32, job.Seed.Length);
         Assert.Equal<byte>(
             JobSeedDeriver.DeriveJobSeed(masterSeed, 0, 0, 0),
@@ -269,6 +284,62 @@ public sealed class JobTemplateExpanderTests
     {
         Simulations = [.. simulations],
     };
+
+    private static CompiledModel CreateModel(
+        CompiledSimulation simulation,
+        CompiledStructureModel structure,
+        CompiledParticleTable particles) => new(
+        CompiledModel.CurrentFormatVersion,
+        "test-model",
+        "symmetry-1",
+        "catalog-1",
+        new string('0', 64))
+        {
+            Simulations = [simulation],
+            Structure = structure,
+            Particles = particles,
+        };
+
+    private static CompiledParticleTable CreateOptimizerParticles() => new(
+    [
+        new CompiledParticle(0, ParticleId.Void, "Void", "V", 0.0, IsVacancy: false),
+        new CompiledParticle(1, optimizerParticle, "A", "A", 1.0, IsVacancy: false),
+    ]);
+
+    private static CompiledStructureModel CreateOptimizerStructure() => new(
+        [new Cartesian3(5.0, 0.0, 0.0), new Cartesian3(0.0, 5.0, 0.0), new Cartesian3(0.0, 0.0, 5.0)],
+        125.0,
+        [
+            new CompiledSite(
+                0,
+                optimizerSite,
+                "A",
+                Fractional3.Zero,
+                SiteStability.Stable,
+                optimizerParticleSet,
+                0,
+                [0]),
+        ],
+        [
+            new CompiledEnvironment(0, 0, SiteStability.Stable, 0b10UL, [1]),
+            new CompiledEnvironment(1, -1, SiteStability.Stable, 0b10UL, [1]),
+        ],
+        [
+            new CompiledPosition(
+                0,
+                new Vector4I(0, 0, 0, 0),
+                Fractional3.Zero,
+                Cartesian3.Zero,
+                0,
+                optimizerSite,
+                SiteStability.Stable,
+                0b10UL,
+                0,
+                0,
+                [],
+                []),
+        ],
+        [0, 0, 0]);
 
     private static CompiledSimulation CreateSimulation(
         SimulationId id,

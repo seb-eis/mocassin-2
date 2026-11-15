@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.Cli.Build;
 using Mocassin.Cli.Validation;
 
 namespace Mocassin.Cli;
@@ -17,11 +18,23 @@ public static class Program
     public static Task<int> Main(string[] args)
     {
         ArgumentNullException.ThrowIfNull(args);
+        if (args.Length > 0 && string.Equals(args[0], "build", StringComparison.Ordinal))
+        {
+            if (args.Contains("--preview", StringComparer.Ordinal))
+            {
+                return PreviewCommand.RunAsync(args[1..], Console.Out, Console.Error);
+            }
+
+            Console.Error.WriteLine("usage: mocassin build <project.mocprj> --preview [--template <jobTemplateId>] [--json]");
+            Console.Error.WriteLine("The full package build arrives with Step 12.");
+            return Task.FromResult(2);
+        }
+
         if (args.Length == 0 || !string.Equals(args[0], "validate", StringComparison.Ordinal))
         {
             var json = args.Contains("--json", StringComparer.Ordinal);
             Console.Error.WriteLine("usage: mocassin <command> [options]");
-            Console.Error.WriteLine("commands: validate");
+            Console.Error.WriteLine("commands: validate, build --preview");
             if (json)
             {
                 var (report, exitCode) = ValidationReportWriter.UsageError();
