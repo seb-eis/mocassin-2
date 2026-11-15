@@ -11,9 +11,10 @@
 | Field | Value |
 | --- | --- |
 | Step | NN — Step title |
-| Request owner | Step agent |
-| Orchestrator (step agent) | — |
-| Audit initiated by | Planner / implementor / human owner |
+| Request owner | Step agent (implementor) |
+| Orchestrator | — |
+| Step agent (implementor) | — |
+| Audit initiated by | Orchestrator, on request of the step agent |
 | Audited commit | — |
 | Step branch | — |
 | Step tag | — |
@@ -28,10 +29,11 @@
 
 Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
 
-> Orchestration: the step agent (the orchestrator) freezes the step branch, requests the auditor, applies fixes
-> autonomously on a new feature branch, reruns closeout CI, adds resolutions without altering reviewer text,
-> and requests re-audit until the auditor no longer identifies issues. The human owner approves the final
-> verdict, merge, and tag.
+> Orchestration: the orchestrator spawns a fresh auditor when the step agent has frozen the step branch and
+> completed the audit request, and relays the verdict and owner decisions. The step agent applies fixes on a new
+> feature branch, reruns closeout CI, adds resolutions without altering reviewer text, and asks the orchestrator
+> for re-audit until the auditor no longer identifies issues. The orchestrator does not fix findings or edit the
+> audit record. The human owner approves the final verdict, merge, and tag.
 
 ## Step summary
 
@@ -95,7 +97,7 @@ auditor's findings, evidence, or verdict.
 ## Reviewer independence
 
 > I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
-> planner or implementor.
+> planner, implementor, or orchestrator.
 
 ## Verdict
 
@@ -118,8 +120,8 @@ verdict.
 
 ## Approval summary
 
-The step agent completes this section before requesting human approval. It must cover the full history, not
-only the latest round.
+The step agent completes this section before the orchestrator presents the approval request. It must cover the
+full history, not only the latest round.
 
 - [ ] Requested decision and frozen commit recorded
 - [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)

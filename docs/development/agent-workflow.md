@@ -13,6 +13,11 @@ Use this page to prepare work, review agent output, and keep contexts small enou
 - Start a fresh context at the next step boundary.
 - Refresh mid-step if context compression loses important constraints, or if the agent begins mixing old and
   current decisions.
+- Do not carry a reviewer into the implementation context, or an implementor into the review context.
+- The **orchestrator** is the long-lived coordination context and the owner’s only direct interface. The role
+  agents it spawns (planner, step agent/implementor, planning auditor, auditor) are the fresh contexts.
+- Do not carry the orchestrator’s chat history into a reviewer. Pass the spawn card, the frozen commit, and
+  repository links only.
 
 The repository is the memory, not the conversation. At the start of a step, read:
 
@@ -36,9 +41,23 @@ git status --short
 
 ### Agent roles and write scopes
 
-The normative matrix is in [`AGENTS.md`](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) §3.8.
-In short: the planner and implementor edit their own artifacts directly; the reviewer may edit only its
-assigned review or audit record; the human owner approves gates. There is no scribe and no transcription step.
+The normative matrix is in [`AGENTS.md`](https://github.com/seb-eis/mocassin-2/blob/main/AGENTS.md) §3.8 and the
+orchestration rules are in [`orchestration.md`](orchestration.md). In short: the orchestrator is the owner’s
+only direct interface and spawns every role agent; the planner and step agent edit their own artifacts
+directly; the reviewer may edit only its assigned review or audit record; the human owner approves gates. There
+is no scribe and no transcription step.
+
+| Role | Scope | Not |
+| --- | --- | --- |
+| Orchestrator | Intake, routing, spawning, handoffs, relaying, discussion, small non-normative docs fixes | Design, code, tests, configuration, records, verdicts, gates, merges, tags |
+| Planner | Design and planning docs; request scope in the review record | Code, tests, configuration, verdicts, step status, merges, tags |
+| Step agent (implementor) | Code, tests, configuration, contracts, step page, status, parity; request and resolutions in records | Reviewer findings, evidence, or verdict text; merges and tags without approval |
+| Reviewer (planning auditor or auditor) | Only the assigned record: own metadata, checklist marks, evidence, findings, verdict | Everything else, including code, design docs, request scope, resolutions, merges, tags |
+| Human owner | Approval of gates, waivers, merges, and tags | — |
+
+The orchestrator may edit documentation directly only for typos, links and navigation entries, handoff cards,
+and status notes that restate an already-recorded decision. Process rules, design, contracts, acceptance
+criteria, records, and status that asserts a gate passed belong to the owning role.
 
 ## 2. Context handoff card
 
@@ -57,7 +76,8 @@ Open blockers:
 Next action:
 ```
 
-The next context should not need the previous chat history.
+The role ending its context writes the card; the orchestrator relays it and the next context should not need the
+previous chat history.
 
 ## 3. Step start checklist
 
@@ -277,6 +297,8 @@ Reject or stop on:
 - rewriting shared history or force-pushing;
 - copying GPL code or data into the MIT implementation;
 - a scribe transcription step or a reviewer editing anything outside its assigned record;
+- bypassing the orchestrator to spawn a role agent directly, or letting the orchestrator design, implement,
+  review, approve, merge, or tag;
 - a review/audit record commit that touches code, tests, configuration, status, or design docs;
 - pre-seeding review, audit, or cross-cutting records for work that has not started;
 - skipping a gate without a recorded waiver and a follow-up owner.
@@ -319,12 +341,12 @@ page. `tools/check_process_consistency.py` is the mechanical backstop.
 
 ## 15. Reviewer spawn card
 
-Use this when the planner or implementor spawns a design reviewer or auditor. Replace the bracketed values and
-do not add a desired verdict or a summary that replaces reading the repository.
+Use this when the orchestrator spawns a design reviewer or auditor on behalf of the request owner. Replace the
+bracketed values and do not add a desired verdict or a summary that replaces reading the repository.
 
 ```text
 You are a fresh, read-only [design reviewer / auditor]. You did not author or implement this work and have no
-shared conversation with the planner or implementor.
+shared conversation with the planner, implementor, or orchestrator.
 
 Frozen commit: [full commit]
 Request record: [docs/planning/reviews/step-NN.md or docs/planning/audits/step-NN.md]
@@ -338,13 +360,13 @@ marks directly into the request record. You may check checklist boxes but not ch
 other file, merge, tag, push main, or delete branches.
 
 If you find issues, report them; do not fix them. The human owner approves the final verdict and gate.
-State in the record that you are a fresh context with no shared conversation with the planner, implementor, or
-other cross-cutting reviewers.
+State in the record that you are a fresh context with no shared conversation with the planner, implementor,
+orchestrator, or other cross-cutting reviewers.
 ```
 
-Rules for the spawner:
+Rules for the orchestrator as spawner:
 
 - Do not ask for a specific verdict or re-spawn until a preferred verdict appears.
 - Do not edit the reviewer's findings, evidence, or verdict.
 - Do not mark the review/audit accepted, waived, merged, or tagged.
-- Fixes require a new commit and a new review round.
+- Fixes require a new commit and a new review round, made by the step agent or planner.

@@ -18,8 +18,9 @@ Blocker/Major drift. Use [`docs/planning/drift-checks/_template.md`](https://git
 
 ### Policy and process
 
-- [ ] `AGENTS.md`, `docs/development/agent-workflow.md`, and `docs/development/contributing.md` agree on
-      branches, approvals, gates, and reviewer roles.
+- [ ] `AGENTS.md`, `docs/development/orchestration.md`, `docs/development/agent-workflow.md`, and
+      `docs/development/contributing.md` agree on branches, approvals, gates, orchestrator routing, and reviewer
+      roles.
 - [ ] The CI workflow matches the run matrix and `tools/verify.sh`.
 - [ ] No documented command, path, mode, or tag is stale.
 - [ ] Status and verdict vocabularies agree across process, templates, and records.

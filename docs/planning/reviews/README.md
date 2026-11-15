@@ -20,7 +20,7 @@ does not review implementation code, because none exists yet.
 | Planning agent (planner) | Facilitate decisions, write the review request, update design docs directly |
 | Step agent (implementor) | Own the step page and review record request, fix design findings, add resolutions |
 | Planning auditor (reviewer) | Fresh, out-of-context design review; writes evidence, findings, and verdict directly into the review record |
-| Spawner (planner, implementor, or human owner) | Provides the frozen request and spawns a fresh reviewer; does not review or approve |
+| Orchestrator (spawner) | Provides the frozen request and spawns a fresh reviewer on behalf of the request owner; relays the verdict; does not review or approve |
 | Human owner | Approve the verdict and the start of implementation |
 
 The planning auditor must not be the agent that authored the decisions or will implement the step. It may edit
@@ -31,15 +31,19 @@ and no transcription step.
 
 ### 2.1 Reviewer spawning
 
-The planner, implementor, or human owner may spawn a reviewer. The spawner must not be the reviewer.
+The orchestrator is the only spawner. The planner or step agent asks the orchestrator for a review; the owner
+does not spawn a reviewer directly. The spawner must not be the reviewer.
 
-- The reviewer is a fresh context with no shared conversation with the planner or implementor.
-- The spawner provides only the frozen commit, the review request, repository links, and the required
-  commands/scope. It must not supply a desired verdict or substitute a summary for reading the repository.
-- The reviewer writes findings and verdict directly into the record. The spawner does not edit them.
-- The human owner approves the final verdict and the start gate. The spawner must not mark a verdict, waive
+- The reviewer is a fresh context with no shared conversation with the planner, implementor, or orchestrator.
+- The orchestrator provides only the frozen commit, the review request, repository links, and the required
+  commands/scope. It must not supply a desired verdict, pass on its conversation history, or substitute a
+  summary for reading the repository.
+- The reviewer writes findings and verdict directly into the record. The orchestrator and request owner do not
+  edit them.
+- The human owner approves the final verdict and the start gate. The orchestrator must not mark a verdict, waive
   findings, merge, tag, or push `main`.
-- A re-review requires a new commit with fixes. Do not re-spawn reviewers until a preferred verdict appears.
+- A re-review requires a new commit with fixes, made by the planner or step agent. Do not re-spawn reviewers
+  until a preferred verdict appears.
 
 ## 3. Status values
 
@@ -65,7 +69,7 @@ The planner, implementor, or human owner may spawn a reviewer. The spawner must 
    - reviewed commit
    - design decisions and scope
    - known limitations
-4. The planner, implementor, or human owner spawns a fresh planning auditor. The auditor reads the step page,
+4. The step agent asks the orchestrator to spawn a fresh planning auditor. The auditor reads the step page,
    decisions, dependency contracts, architecture, data contracts, ADRs, quality strategy, open decisions, parity
    matrix, licensing records, and audit plan. The
    auditor must not have authored or implemented the design.
@@ -218,18 +222,18 @@ The registry and records are in [`cross-cutting/`](cross-cutting/README.md).
 
 ### 12.2 Orchestration
 
-Each review is orchestrated by an implementor/step agent, not by the reviewer:
+Each review is coordinated by the orchestrator, not by the reviewer:
 
-1. Freeze the request and target commit.
-2. Spawn a fresh independent reviewer with the frozen commit, record, links, and scope; do not request a
-   verdict or substitute a summary for repository reading.
+1. The planner or step agent freezes the request and target commit.
+2. The orchestrator spawns a fresh independent reviewer with the frozen commit, record, links, and scope; it does
+   not request a verdict or substitute a summary for repository reading.
 3. The reviewer writes only its record and commits only that file with `[skip ci]`.
-4. If findings remain, the orchestrator fixes the repository state on a maintenance branch, updates the
+4. If findings remain, the planner or step agent fixes the repository state on a maintenance branch, updates the
    appropriate design/process/docs artifact, adds resolutions without altering reviewer text, records the new
-   commit, and requests re-review.
+   commit, and asks the orchestrator for re-review.
 5. Repeat until the reviewer no longer identifies Blocker/Major issues. Use a fresh reviewer for the new round
    unless the same reviewer stayed read-only and outside the remediation.
 6. The human owner approves the final verdict and the phase gate.
 
-The reviewer must not fix findings, merge, tag, push `main`, or delete branches. A record commit that touches
-any other file is invalid.
+The orchestrator must not fix findings, edit reviewer text, or approve the verdict. The reviewer must not fix
+findings, merge, tag, push `main`, or delete branches. A record commit that touches any other file is invalid.

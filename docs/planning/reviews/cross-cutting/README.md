@@ -46,28 +46,30 @@ The first checkpoint records:
 
 | Role | Responsibility |
 | --- | --- |
-| Implementor orchestrator | Freezes the request, spawns the reviewer, fixes findings, adds resolutions, requests re-review |
+| Orchestrator | Coordinates the review, freezes nothing itself, spawns the reviewer, relays findings and decisions |
+| Planner / implementor | Prepares the request, scope, and checklist; remediates findings and adds resolutions |
 | Reviewer | Fresh independent context; writes evidence, findings, and verdict only |
 | Human owner | Approves the checklists, final verdicts, and phase gate |
 
-The orchestrator must be an implementor/step agent, not the reviewer. It may be the same agent for all three
-reviews in a checkpoint, but the three reviewers must be separate fresh contexts.
+The orchestrator must not be the reviewer, must not fix findings, and must not edit reviewer text. It may
+coordinate all three reviews in a checkpoint; the three reviewers must be separate fresh contexts.
 
 ## 3. Orchestration
 
 Each review uses the same round-based process as design reviews and implementation:
 
-1. The orchestrator prepares the request, scope, checklist, and target commit.
-2. A fresh reviewer is spawned. The spawner provides the frozen commit, record, repository links, and required
-   commands/scope. It must not provide a desired verdict or a summary that substitutes for reading the
-   repository.
+1. The planner or implementor prepares the request, scope, checklist, and target commit, and asks the
+   orchestrator for a reviewer.
+2. The orchestrator spawns a fresh reviewer. It provides the frozen commit, record, repository links, and
+   required commands/scope. It must not provide a desired verdict, pass on its conversation history, or a
+   summary that substitutes for reading the repository.
 3. The reviewer writes evidence, findings, verdict, and checklist marks into its record and commits only that
    file with `[skip ci]`.
-4. If the reviewer reports findings, the orchestrator fixes the repository state on a maintenance branch,
-   updates the appropriate design/process/docs artifact, adds resolutions to the record without altering
-   reviewer text, sets the record state to `Re-review required`, and records the new commit.
-5. A fresh reviewer re-reviews the new commit. The same reviewer may continue only if it stayed read-only and
-   did not participate in the remediation; otherwise use a fresh context. Append a new round.
+4. If the reviewer reports findings, the planner or implementor fixes the repository state on a maintenance
+   branch, updates the appropriate design/process/docs artifact, adds resolutions to the record without
+   altering reviewer text, sets the record state to `Re-review required`, and records the new commit.
+5. The orchestrator spawns a fresh reviewer for the new commit. The same reviewer may continue only if it stayed
+   read-only and did not participate in the remediation; otherwise use a fresh context. Append a new round.
 6. Repeat until the reviewer no longer identifies Blocker/Major issues. The human owner approves the final
    verdict and the phase gate.
 
