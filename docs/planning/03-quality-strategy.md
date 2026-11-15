@@ -419,7 +419,10 @@ solver with the same binary, platform, package, and seed.
 - **Verification:** each `PKG001`–`PKG010` code has a corrupt, truncated, inconsistent, or injected-table
   fixture with its documented severity and docs anchor; a decompression bomb or an oversized declared count
   yields a diagnostic instead of an allocation; verification never throws for untrusted input and never mutates
-  the file. `PKG` descriptors are Contracts-owned; the verifier's project has no `Mocassin.Packages` reference.
+  the file. Model and job payloads are bounded by `PackageVerificationOptions`; the lattice read path is bounded
+  only by `Array.MaxLength` until the routed `fix-lattice-decode-guard` Step 11 feature lands (amendment 1 §4),
+  and no page claims otherwise in the meantime. `PKG` descriptors are Contracts-owned; the verifier's project has
+  no `Mocassin.Packages` reference.
 - **Fixtures:** a checked-in `.msl` produced by the real writer plus its canonical summary (normalized build
   metadata) and extracted model payload; the regeneration command is recorded and `verify.sh contracts` checks
   the lattice projection vectors.

@@ -6,8 +6,8 @@
 | --- | --- |
 | Amendment ID | `step-11-amend-1` |
 | Parent step | 11 — Simulation Package and `.msl` Writer |
-| Status | Planned (round 1 review returned `Changes required`; design re-frozen for re-review 2026-11-15) |
-| Branch | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` (planned; created only after the design verdict) |
+| Status | In progress (owner accepted `Ready with notes` and approved implementation 2026-11-15) |
+| Branch | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` |
 | Design review | `docs/planning/reviews/step-11-amend-1.md` |
 | Parent audit | `docs/planning/audits/step-11.md` |
 | Integration commit | — |
@@ -218,10 +218,18 @@ destination + returned slice).
 `min(int.MaxValue, 4 × A × B × C × P)`, but the read-only reader (`PackageReader.ReadLatticesAsync`) passes
 `int.MaxValue`, and `PackageVerificationOptions` has no lattice limit. A hostile lattice frame is therefore
 bounded only by `Array.MaxLength` (≈2 GiB) in `inspect`/`verify` today. This amendment **does not** fix that
-call site; it is routed to a Step 11 fix feature (`fix-lattice-decode-guard`) that derives the bound from the
-`lattices` row (`4 × a × b × c × position_count`) and adds the lattice bomb test (see Dependencies and the step
-page tasks). Until that fix lands, no page claims the lattice path is bounded by the verification options, and
-the `03-quality-strategy.md` §9.9 bomb claim is corrected to name the lattice exception.
+call site; it is routed to a Step 11 fix feature (`fix-lattice-decode-guard`; see Dependencies and the step page
+tasks). The fix has a real dimension source and an explicit orphan-row fallback:
+
+- For a lattice row referenced by a job, the bound is derived from that `jobs` row's `lattice_a`, `lattice_b`,
+  and `lattice_c` and the referenced model payload's `structure.position_count` (already decoded within
+  `MaxModelPayloadBytes`): `min(int.MaxValue, 4 × a × b × c × position_count)`.
+- A lattice row with **no** referencing job has no dimension source. It must not fall back to `int.MaxValue`;
+  the fix bounds it with an explicit `MaxLatticePayloadBytes` option and reports the orphan row as a
+  package-structure finding, so an unreferenced row can never drive an unbounded allocation.
+
+Until that fix lands, no page claims the lattice path is bounded by the verification options, and the
+`03-quality-strategy.md` §9.9 bomb claim is corrected to name the lattice exception.
 
 **Round-trip self-check.** The writer's existing decode-before-insert self-check uses the new decoder, so the
 new path is exercised on every payload it writes.
@@ -278,13 +286,13 @@ Verified file inventory. Counts are from the frozen design commit, not estimates
 | ApiCompat tool | `.config/dotnet-tools.json` | `microsoft.dotnet.apicompat.tool` `10.0.403` → `11.0.100` |
 | Docs API | `tools/docfx/docfx.json` | 9 assembly paths and `TargetFramework` → `net11.0` |
 | CI | `.github/workflows/ci.yml`, `benchmark.yml`, `docs.yml` | **no literal SDK version exists**; all three use `global-json-file: global.json`. Verify `actions/setup-dotnet@v6` installs 11.0.100 at the closeout run |
-| Image | `docs/opencode/mocassin.containerfile` | install `11.0.100` only (the .NET 10 install is removed); keep the `COPY global.json` pin assertion; `ReportGenerator` `5.5.12` → `5.6.0`; DocFX unchanged. The image build is deferred to closeout as an accepted risk (§7) |
+| Image | `docs/opencode/mocassin.containerfile` | install `11.0.100` only (the .NET 10 install is removed); **carry over** the `COPY global.json` pin step and its assertion block from `9ab4bb8` (the current containerfile has no such step); `ReportGenerator` `5.5.12` → `5.6.0`; DocFX unchanged. The image build is deferred to closeout as an accepted risk (§7) |
 | Test tooling | `Directory.Packages.props` | `Microsoft.NET.Test.Sdk` `18.11.0` → `18.12.0` (owner-accepted net11 compatibility bump, §6 verification items) |
 | Packages | `Directory.Packages.props` | remove the `ZstdSharp.Port` version |
 | Packages | `Mocassin.Packages.csproj`, `Mocassin.Results.csproj` | remove the `ZstdSharp.Port` reference |
 | Codec | `PayloadEncoder.cs`, `PackagePayloadDecoder.cs` | native encode/decode (sections 2–4) |
 | Test support | `Mocassin.Results.Tests/.../PackageTestSupport.cs` | native encoder; no new package reference |
-| Docs (active, current tense) | see §6.1 — includes the root guides, the published pages, the toolchain page, and the five planning pages that still say .NET 10 | SDK version, baseline path, dependency list, benchmark-environment note, parity row |
+| Docs (active, current tense) | see §6.1 — includes the root guides, the published pages, the toolchain page, and the six planning pages that still say .NET 10 | SDK version, baseline path, dependency list, benchmark-environment note, parity row |
 
 `global.json` final content:
 
@@ -386,7 +394,8 @@ test "$(command -v dotnet)" = "$DOTNET_ROOT/dotnet"
 ```
 
   The exact-count check is the primary negative evidence; the `10.` grep is a belt-and-braces guard against a
-  base-image SDK. The `COPY global.json` step stays: it makes the image fail if the pin and the SDK ever drift.
+  base-image SDK. The `COPY global.json` step is **carried over from `9ab4bb8`** (it does not exist in the
+  current containerfile): it makes the image fail if the pin and the SDK ever drift.
 - `docfx` stays `2.81.0` (the package ships `tools/net11.0/any`; with only the 11.0.0 runtime installed the tool
   host selects it).
 - `dotnet-reportgenerator-globaltool` moves `5.5.12` → `5.6.0`, **accepted by the owner**. `5.5.12` ships at most a
@@ -489,10 +498,15 @@ cannot hide behind a fast corpus average.
 
 | Origin | Level | Size Δ | Encode Δ | Decode Δ | Throughput | Worst absolute decode penalty | Verdict |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | --- |
-| sample | 3 | +0.000 % | −4.20 % | +9.27 % (+11.04 %) | 302 MB/s (304) | +0.064 µs (+0.069) | PASS (refined rule) |
-| sample | 9 | +0.000 % | −5.88 % | +4.62 % (+6.10 %) | 299 MB/s (302) | ≤ +0.05 µs | PASS |
+| sample | 3 | +0.000 % | −4.20 % | +9.27 % (+11.04 %) | 302 MB/s (304) | +0.063 µs (+0.057) | PASS (refined rule) |
+| sample | 9 | +0.000 % | −5.88 % | +4.62 % (+6.10 %) | 299 MB/s (302) | +0.018 µs (+0.024) | PASS |
 | supplementary | 3 | +0.000 % | −5.98 % (−83.61 %) | −2.00 % (−23.94 %) | 2,133 MB/s (4,616) | n/a (≥ 8 KB) | PASS |
 | supplementary | 9 | +0.000 % | −10.51 % (−18.45 %) | −0.22 % (−2.86 %) | 2,323 MB/s (7,319) | n/a (≥ 8 KB) | PASS |
+
+The absolute penalties are rounded from the raw JSON of the two runs: level 3 controlled `+0.06319 µs`
+(`sample-lattice-6`) and default `+0.05689 µs` (`sample-lattice-4`); level 9 controlled `+0.01785 µs` and default
+`+0.02360 µs` (`sample-lattice-5`). The focused 10-repetition run reports `0.77 → 0.84 µs` (`+0.07 µs` rounded)
+for `sample-lattice-6`, which is why the prose above quotes a 0.04–0.07 µs range for the two 2 KB lattices.
 
 - **Checks:** 264 checks per run — 240 required and 24 informational byte-identity — with **0 failed** in both
   full runs. Round-trip 100 %, cross-decode 100 %, `zstd -t` 48/48, `zstd -d` 48/48, CLI→native 24/24.
@@ -518,8 +532,11 @@ cannot hide behind a fast corpus average.
 
 Feature 7's benchmark runs on the amended tree and records wall clock, peak RSS, package size, model-payload
 size, and job insertion rate for 10⁴ small jobs (10×10×10 ceria, ~1,000 positions). The **net10 reference run is
-mandatory**: the unamended tree is available at the pre-retarget commit, so the same harness runs in a temporary
-worktree and its numbers are recorded with the amended run (A1-08).
+mandatory**: the unamended tree is available at the pre-retarget commit, but the feature-7 harness does not exist
+there. The approved method is to copy (cherry-pick) the benchmark source into a temporary worktree of the
+pre-retarget commit and build it there against the net10 writer; if only the read side is being compared, the
+amended harness can instead read a package written by the net10 writer. The method used is recorded with the
+numbers (A1-08).
 
 | Budget | Target |
 | --- | --- |
@@ -769,7 +786,7 @@ package payloads. No domain doubles.
 | `dotnet list package --vulnerable` output format changes | Verify the grep phrase in `verify.sh` and `ci.yml` during the migration; update both together |
 | Reference harness cannot be verified without the GPL reference clone | Retarget it; verify when the clone exists; if unavailable before the freeze, record it as a Step 29 item, not as verified |
 | Rollback after integration | Part A is complete; the feature branch stays unmerged until the full gates and Part B-adjacent checks pass; post-integration rollback uses a fix branch before the audit freeze and is recorded |
-| The level-3 decode ratio is inside host/JIT noise | The owner-approved small-payload rule gates absolutes (≤0.15 µs) and throughput (≥100 MB/s) below 8 KiB, and keeps the relative ≤10 % rule for ≥8 KiB; the measured worst absolute penalty is 0.07 µs (§9.1) |
+| The level-3 decode ratio is inside host/JIT noise | The owner-approved small-payload rule gates absolutes (≤0.15 µs) and throughput (≥100 MB/s) below 8 KiB, and keeps the relative ≤10 % rule for ≥8 KiB; the measured worst absolute penalty is 0.06319 µs (controlled) / 0.05689 µs (default JIT) (§9.1) |
 | Decoder relaxation accepts foreign frames | `TryGetMaxDecompressedLength` rejects non-Zstd input, the model/job guards bound the allocation, and the writer always declares the exact size. The lattice read path is **not** yet bounded by a verification option (§4); it is routed to a Step 11 fix feature with a bomb test, and no page claims otherwise until it lands |
 
 ## Dependencies
@@ -786,8 +803,11 @@ package payloads. No domain doubles.
 - **Part A is complete** (2026-11-15, §9.1) and was the pre-acceptance gate. It is evidence at this freeze, not a
   future dependency. Its reproducible part is the golden-frame test; Part B remains a pre-audit-freeze gate.
 - **Step 11 fix feature `fix-lattice-decode-guard`** is required before the audit freeze: derive the lattice
-  bound from the `lattices` row, apply it in `PackageReader.ReadLatticesAsync`, and add the lattice bomb test
-  (A1-10). The parent step page lists it; the amendment records the routing and does not claim the fix.
+  bound from a referencing `jobs` row (`lattice_a/b/c`) times the model payload's `position_count`, apply it in
+  `PackageReader.ReadLatticesAsync`, bound an orphan lattice row (no referencing job) with an explicit
+  `MaxLatticePayloadBytes` option instead of `int.MaxValue`, report the orphan as a package-structure finding,
+  and add the lattice bomb test (A1-10, R2-01). The parent step page lists it; the amendment records the routing
+  and does not claim the fix.
 - The pre-amendment `.msl` fixture and golden frames must be captured on the feature branch **before** the
   retarget (feature order step 0); the net10 writer is the only source.
 
@@ -795,7 +815,9 @@ package payloads. No domain doubles.
 
 - Branch: `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd`
 - Parent step branch: `step/11-simulation-package-and-msl-writer`
-- Approval: pending design review and owner start approval
+- Approval: owner accepted `Ready with notes` and approved implementation on 2026-11-15; the feature branch is
+  created from the approved step branch. Owner decisions 1–6 are recorded above.
+- Approval commit: — (filled at integration with the step-branch approval commit)
 - Squash commit: —
 - Parent audit request updated: after integration, refresh the Step 11 implementation status, the feature log,
   the closeout evidence path, and the audit request with the combined commit
@@ -821,7 +843,7 @@ match, and no open question remains for this amendment.
 | 3 | ReportGenerator 5.6.0 | **Accepted.** `5.5.12` has no `net11.0` tool asset. | §7; the .NET 10 runtime dependence is removed from the image toolchain |
 | 4 | Microsoft.NET.Test.Sdk | **Bumped to 18.12.0.** | §6 verification items and Risks; the suite and coverage must run, and the `VSTEST_ARTIFACTS_DIRECTORY` message is expected to disappear or be re-checked and recorded as benign |
 | 5 | ReferenceHarness | **Retargeted now** to `net11.0`. | §6; the project is outside `Mocassin.slnx` and is verified when the GPL reference clone is available, otherwise the gap is a Step 29 item |
-| 6 | Part A level-3 decode ratio on 2,109-byte lattices (2026-11-15, after the Part A measurement) | **Keep the switch and refine the small-payload gate.** For payloads under ~8 KB, gate on an absolute penalty (≤0.15 µs per payload) plus the ≥100 MB/s floor; record the relative ratio but do not gate it. Payloads ≥8 KB keep the ≤+10 % rule. | §9.1 thresholds and owner-decision rationale; Part A is complete and passes; the measured worst absolute penalty is 0.064 µs (controlled) / 0.069 µs (default JIT); Part B keeps its budgets and does not use the per-payload decode rule |
+| 6 | Part A level-3 decode ratio on 2,109-byte lattices (2026-11-15, after the Part A measurement) | **Keep the switch and refine the small-payload gate.** For payloads under ~8 KB, gate on an absolute penalty (≤0.15 µs per payload) plus the ≥100 MB/s floor; record the relative ratio but do not gate it. Payloads ≥8 KB keep the ≤+10 % rule. | §9.1 thresholds and owner-decision rationale; Part A is complete and passes; the measured worst absolute penalty is 0.06319 µs (controlled) / 0.05689 µs (default JIT); Part B keeps its budgets and does not use the per-payload decode rule |
 
 The decision-6 exception rationale is recorded in full in §9.1: the two 2,109-byte lattices decode in 0.6–0.8 µs,
 so a 10 % relative threshold is 60–84 ns and sits inside the host/JIT run-to-run spread; the absolute penalty is

@@ -67,8 +67,9 @@ The review covers the amendment delta only:
    signature, `package-summary-v1`, or solver contract changes, and the fixture consequences that follow.
 4. **Benchmark gate and rollback** — the real-payload comparison required before acceptance, the 10⁴-job budget
    required before the audit freeze, the thresholds, and the rollback rule.
-5. **Integration sequencing** — feature 7 held, no fixture generated on `net10.0`, and integration before the
-   Step 11 audit freeze.
+5. **Integration sequencing** — feature 7 held, no **feature-7** `.msl`/canonical-summary fixture generated on
+   `net10.0` (the amendment's pre-amendment compatibility fixture and golden codec frames are deliberate net10
+   artifacts captured before the retarget), and integration before the Step 11 audit freeze.
 
 Out of scope for this review: re-reviewing Step 11's payload mapping, pair-link expansion, tracker order,
 schema, publication barrier, verifier, `PKG` codes, parity rows, or the accepted parent design. Those were
@@ -343,12 +344,17 @@ Findings and resolutions:
 ## Human approval
 
 - [ ] Accepted: Ready for implementation
-- [ ] Accepted: Ready with notes
+- [x] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-15
+
+The owner accepted `Ready with notes` on 2026-11-15 and approved implementation of `step-11-amend-1`. The three
+Minor findings R2-01…R2-03 and the four Notes R2-04…R2-07 are resolved in the design and step pages by the
+resolution rows below; non-blocking. The feature branch was created from the parent step branch after this
+record. The parent Step 11 audit remains not started.
 
 ## Resolution status
 
@@ -376,6 +382,24 @@ routed. Reviewer-authored evidence, findings, finding details, and verdict are u
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
+
+### Resolution status — round 2
+
+Round 2 returned `Ready with notes` (0 Blocker, 0 Major, 3 Minor, 4 Note). The human owner accepted the verdict
+and the notes on 2026-11-15. The three Minor findings are corrected in the amendment/step/decisions pages and the
+request's `Delta scope`; the four Notes are corrected in the wording and counts the reviewer named. Reviewer
+text is unchanged. The resolving commit is the approval commit on the step branch; its hash and the feature
+branch are recorded in the amendment page's `Integration` section and the Step 11 feature log.
+
+| Finding | Status | Owner | Resolution |
+| --- | --- | --- | --- |
+| R2-01 | **Closed.** The routed `fix-lattice-decode-guard` is re-specified with the real dimension source and an explicit orphan-row fallback; the parent page's lattice-bound claim is marked pending. | Step agent | Amendment §4 "Lattice bound" and Dependencies now derive the bound from a referencing `jobs` row (`lattice_a × lattice_b × lattice_c`) times the model payload's `structure.position_count` (the model read is already bounded by `MaxModelPayloadBytes`), capped at `Array.MaxLength`. A lattice row with **no referencing job** has no dimension source, so the fix bounds it with an explicit `MaxLatticePayloadBytes` option and reports the orphan row as a package-structure finding instead of decoding under `int.MaxValue`. The Step 11 page §5 check 4 now says the lattice bound is pending the fix, and the task text uses the same source/fallback wording. |
+| R2-02 | **Closed.** The open-decisions rollback row names both benchmark parts and every threshold. | Step agent | `05-open-decisions.md` now says "a Part A or Part B threshold breach or a correctness failure"; a regression in the implemented codec remains a Part A threshold breach even though the Part A measurement passed. |
+| R2-03 | **Closed.** The request's `Delta scope` no longer implies that no net10 fixture exists. | Step agent | The `Delta scope` item now says no **feature-7** `.msl`/canonical-summary fixture is generated on `net10.0`, and that the compatibility fixture and golden frames are deliberate pre-retarget net10 artifacts. |
+| R2-04 | **Closed.** The absolute decode penalties use the raw-JSON values. | Step agent | §9.1 now reports `+0.063 µs (default +0.057 µs)` for level 3 and `+0.018 µs (default +0.024 µs)` for level 9, with the raw values `+0.06319`/`+0.05689 µs` and `+0.01785`/`+0.02360 µs`; owner decision 6 and the Risks row use `0.06319 µs` (controlled) and `0.05689 µs` (default JIT). The gate (≤0.15 µs) and verdict are unchanged. |
+| R2-05 | **Closed.** The §6 inventory count is corrected from five to six planning pages. | Step agent | §6's Docs row now says six planning pages, matching the §6.1 table. |
+| R2-06 | **Closed.** Part B states how the net10 reference is produced. | Step agent | §9.2 now says the feature-7 harness is copied/cherry-picked into the temporary pre-retarget worktree, or the amended harness is run against a package written by the net10 writer, and the method is recorded with the numbers; the reference run is not claimed to exist at the pre-retarget commit. |
+| R2-07 | **Closed.** The containerfile wording says the pin step is added/carried over, not kept. | Step agent | §6's Image row and §7 now say the `COPY global.json` pin step is **carried over from `9ab4bb8`** (the current containerfile has no such step), matching §8. |
 
 ## Review rounds
 

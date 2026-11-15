@@ -16,8 +16,9 @@ read-only inspection/verification library for the build CLI.
 - **Audit:** Not requested
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
-  toolchain and native Zstandard — **Planned**; round 1 design review `Changes required`, design re-frozen for
-  re-review ([record](../reviews/step-11-amend-1.md))
+  toolchain and native Zstandard — **In progress**; design review `Ready with notes` accepted 2026-11-15
+  ([record](../reviews/step-11-amend-1.md)); feature branch
+  `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd`
 - **Feature list:** Approved 2026-11-15 (seven features)
 - **Last updated:** 2026-11-15
 
@@ -29,6 +30,7 @@ read-only inspection/verification library for the build CLI.
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `bdafaa4` |
 | 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `4fe6225` |
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `cbe345f` |
+| A1 .NET 11 toolchain and native Zstandard | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | In progress | — | Not run (no per-feature CI) | — |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Held (after amendment 1) | — | — | — |
 
 ### Approved feature list
@@ -265,10 +267,13 @@ Feature 7 is held until [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet
 and integrated. The amendment moves the repository from `net10.0` to `net11.0` and replaces the
 `ZstdSharp.Port` payload codec with the in-box `System.IO.Compression` Zstandard API.
 
-Design-review state: round 1 returned `Changes required` at `06774ee`; the design is re-frozen for re-review after
-the resolutions. Part A of the benchmark gate is **complete** (2026-11-15, amendment §9.1) and passed under the
-owner-approved small-payload rule (absolute decode penalty ≤ 0.15 µs below 8 KiB, ≥ 100 MB/s throughput, ≤ +10 %
-relative at or above 8 KiB).
+Design-review state: round 1 returned `Changes required` at `06774ee`; the re-review returned `Ready with notes`
+at `17e723c`, accepted by the human owner on 2026-11-15. The amendment is **in progress** on
+`feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd`. The first feature commit
+captures the pre-amendment `.msl` compatibility fixture and the golden codec frames with the still-net10 writer,
+before the retarget. Part A of the benchmark gate is **complete** (2026-11-15, amendment §9.1) and passed under
+the owner-approved small-payload rule (absolute decode penalty ≤ 0.15 µs below 8 KiB, ≥ 100 MB/s throughput,
+≤ +10 % relative at or above 8 KiB).
 
 Design consequences recorded here so the parent design stays coherent:
 
@@ -634,9 +639,11 @@ Checks, in order (each produces one `PackageVerificationCheck` and zero or one `
    are present.
 3. Every job references an existing model and lattice; `job_id` is unique, positive, and ascending; the
    `(collection_index, config_index, job_index)` triple is unique; names are non-empty.
-4. Every payload decodes within the explicit decompressed-size bound (model/job from
-   `PackageVerificationOptions`; lattice `4 × a × b × c × position_count`, capped at the signed 32-bit index
-   limit) and its payload `format_version` matches the column.
+4. Every payload decodes within the explicit decompressed-size bound: model and job from
+   `PackageVerificationOptions`. The lattice bound (`4 × a × b × c × position_count`, capped at the signed
+   32-bit index limit) is **pending** the `fix-lattice-decode-guard` fix feature — the read-only reader currently
+   passes `int.MaxValue` (amendment 1 §4) — so no page claims the lattice path is bounded until that fix lands.
+   Every payload's `format_version` matches the column.
 5. Model payload invariants: pair-table lengths are `particle_count²`; cluster occupation/energy/mapping lengths
    agree; `defect_background.Length == position_count × particle_count`; environment pair entries have
    `target_position < position_count`; cluster `byte_position < site_count`; `tracker_order` is a non-empty
@@ -863,8 +870,10 @@ Two options, for the human owner's start-gate decision:
       before the retarget (amendment §9.4–§9.5), and commit them with the amendment feature.
 - [ ] Close the lattice decode-bound gap found by review A1-10 in a Step 11 fix feature
       (`feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard`): derive the bound from the
-      `lattices` row, apply it in `PackageReader.ReadLatticesAsync`, and add the lattice bomb test before the
-      audit freeze.
+      referencing `jobs` row (`lattice_a/b/c`) and the model payload's `position_count`, apply it in
+      `PackageReader.ReadLatticesAsync`, bound an orphan lattice row (no referencing job) with an explicit
+      `MaxLatticePayloadBytes` option and report it as a package-structure finding, and add the lattice bomb
+      test before the audit freeze.
 
 ## Acceptance criteria
 
