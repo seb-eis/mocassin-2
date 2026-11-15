@@ -20,7 +20,7 @@ read-only inspection/verification library for the build CLI.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
+| 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `eb8513d` |
 | 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Pending | — | — | — |
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Pending | — | — | — |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Pending | — | — | — |
@@ -52,7 +52,7 @@ per feature.
 #### Feature 1 — Package contracts and lattice signature
 
 - **Branch:** `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature`
-- **Squash commit:** recorded in the follow-up status commit.
+- **Squash commit:** `eb8513d` (`step-11: add the .msl payload contracts and lattice signature`).
 - **Local gates:** `./tools/verify.sh dotnet` exit 0 (build, all solution tests including 37 Contracts and 375
   Packages tests, format); `./tools/verify.sh structure` exit 0; `./tools/verify.sh api` exit 0;
   `./tools/verify.sh contracts` exit 0 (contract artifacts current, model 5 / parameterization 4 / lattice 2
