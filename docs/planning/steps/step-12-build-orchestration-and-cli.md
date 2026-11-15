@@ -78,6 +78,8 @@ mocassin doctor [--json]
   catalog in `02-data-contracts.md`.
 - `collect` and `evaluate` accept `--results <file.msr>`; the default is `<package>.msr`.
 - `build`/`inspect`/`verify` never modify an existing `.msl`; `--force` replaces it atomically.
+- `inspect`/`verify` are thin CLI wrappers over the read-only `Mocassin.Results.Packages` inspector/verifier
+  added by Step 11; the CLI owns formatting, exit codes, and `--json`, not package parsing.
 
 ### 2. Build pipeline
 
@@ -232,8 +234,10 @@ It prints a diagnosis table and exits 0 if healthy, 1 otherwise.
 ## Acceptance criteria
 
 - [ ] `mocassin validate samples/ceria/ceria.mocprj` exits 0 with the expected warnings.
-- [ ] `mocassin build samples/ceria -o /tmp/ceria.msl` produces a package that `mocassin verify` accepts using
-      the implicit default parameterization (`parameterizations: []`).
+- [ ] `mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o /tmp/ceria.msl` produces a package that
+      `mocassin verify` accepts using the implicit default parameterization (`parameterizations: []`). The
+      `samples/ceria/ceria.mocprj` file has no simulation or job template and therefore cannot expand jobs; it
+      is a model-definition sample, not a build sample.
 - [ ] `--jobs 1-3` writes exactly jobs 1–3 with stable IDs.
 - [ ] Cancelling a build leaves no temp file and preserves an existing package.
 - [ ] `--json` output validates against a schema and contains the exit code.

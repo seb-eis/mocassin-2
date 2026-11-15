@@ -80,11 +80,13 @@ pub struct TrackerState {
   - add it to the global tracker for `(collection, particle_at_node)`;
   - add it to the static tracker for `(cell, position, particle_at_node)`;
   - transfer/accumulate the mobile tracker according to the rule's `tracker_order_code`.
-- `tracker_order_code[i]` defines which path node's mobile tracker id receives the movement at node `i`.
+- `tracker_order_code[i]` is the compiled **global tracker index** that follows the mobile particle at path node
+  `i`, or `0xFF` for a non-mobile node. The array length equals the rule's path-node count.
   - The rule identifies the moving particle identity across the path.
-  - Implement the transfer as a permutation of tracker ids before adding the movement, so the tracker follows
-    the physical particle.
-- Validate tracker order codes at load time (values < path length or a documented sentinel).
+  - Implement the transfer as a permutation of the referenced trackers before adding the movement, so the
+    tracker follows the physical particle.
+- Validate tracker order codes at load time: length equals the path length, and every value is below
+  `tracker_transition_count`/`global_tracker_count` or the `0xFF` sentinel.
 
 ### 2. Jump histograms
 

@@ -313,8 +313,12 @@ parallel, but the output order is canonical and independent of scheduling.
 - The compiled pair table is `n_particles × n_particles`, row-major `[centerParticle][partnerParticle]` in eV.
   Entries for particle combinations the site pair cannot realize are zero; the environment's particle mask is
   authoritative and `mocassin-msl` validates it.
-- The environment link records the table index (`EnergyId`), target P, and the representative relative
-  offset. The solver applies `0.5` pair double-count correction as Step 15 defines.
+- The environment link records the table index (`EnergyId`), target P, and the image's relative offset. Step 11
+  requires one link per periodic image to keep the solver's runtime neighbour list complete: the compiler
+  expands `PairShell.EquivalentImages` (exposed additively on `PairInteractionPreview`) into one
+  `CompiledPairLink` per image. The existing four-field link projection then signs every image; its values
+  change for multi-image shells and the Step 08/09 signature fixtures are regenerated (Step 11 design, M-1). The
+  solver applies `0.5` pair double-count correction as Step 15 defines.
 
 ### 7. Cluster compilation
 

@@ -47,18 +47,22 @@ canonical projection, and compare the SHA-256 value with the stored signature.
 
 ### Pre-release signature layout finalization
 
-The `signatures.model` / `ModelSignatureV1` / `model-v1` layout is finalized once in Step 08 and the
+The `signatures.model` / `ModelSignatureV1` / `model-v1` layout is finalized once in Step 08, the
 `signatures.parameterization` / `ParameterizationSignatureV1` / `parameterization-v1` layout is finalized once
-in Step 09, while the `.msl` format is unreleased. This is an explicit pre-release exception to rule 1's
-format-breaking-change warning: there is no released compiled-model payload to migrate, and
-`signatures.model.status = "final"` or `signatures.parameterization.status = "final"` means "finalized for the
-first release candidate", not "released".
+in Step 09, and the `signatures.lattice` / `LatticeSignatureV1` / `lattice-v1` layout is finalized once in
+Step 11, while the `.msl` format is unreleased. This is an explicit pre-release exception to rule 1's
+format-breaking-change warning: there is no released compiled-model or package payload to migrate, and
+`signatures.*.status = "final"` means "finalized for the first release candidate", not "released".
 
 The Step 09 parameterization finalization replaces the Step 00 skeleton fields with the typed six-field
 projection, adds the generated descriptor, and is closed with golden projection vectors and the Python
-checker in Step 09 feature 2 (`parameterization-signature`). No released `.msl` or contract fixture is
-affected. Any later field or type change to either signed projection after the first released `.msl` requires
-a version bump and a new ADR.
+checker in Step 09 feature 2 (`parameterization-signature`). The Step 11 lattice finalization removes the
+Step 00 `dopingInfo` skeleton field (the doping summary is job provenance, not part of the initial state) and
+keeps `modelSignature` (lattice entries are compiled particle indices), leaving the five-field projection
+`[formatVersion, modelSignature, latticeSize, positionCount, particles]`. It adds the generated descriptor,
+golden projection vectors, and the projection checker. No released `.msl` or contract fixture is affected. Any
+later field or type change to a signed projection after the first released `.msl` requires a version bump and a
+new ADR.
 
 ### Tooling
 

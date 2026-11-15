@@ -130,10 +130,20 @@ impl SimulationContext {
 
 ### 4. Neighbor links
 
-- For each unit-cell position and each periodic image within the interaction range:
+- Source: each position's `EnvironmentModel` in the `.msl` model payload (`02-data-contracts.md` §3.3). A pair
+  link is `{target_position, offset:[i32;3], pair_id}` where `pair_id` is the shared pair table index and
+  `offset` is the image's relative cell offset. The payload already expands each compiled symmetry shell into
+  one link per periodic image; do not de-duplicate links by `target_position`.
+- For each unit-cell position and each pair link:
+  - the target instance is the centre's supercell cell plus `offset`, wrapped component-wise into
+    `[0,A)×[0,B)×[0,C)`, at `target_position`;
   - create a link to the target environment;
   - record the pair interaction id;
   - record cluster links `(cluster_id, code_byte)` for clusters that reference this pair.
+- The `offset` is not optional: the same `target_position` occurs once per periodic image, and two images can
+  reference different pair tables. Do not reconstruct the image from the target index.
+- Validate at load: `target_position < P`, `|offset|` fits the `i32` arithmetic used for the cell add, and the
+  resulting target index is in `[0, A*B*C*P)`.
 - Build links as CSR:
   - `link_offsets: Vec<u32>` length `P+1`;
   - `links: Vec<Link>` with `target_position_offset`, `pair_id`, `cluster_start`, `cluster_len`;
