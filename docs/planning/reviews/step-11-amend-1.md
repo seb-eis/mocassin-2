@@ -273,9 +273,10 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
 
-`Re-review required` is a record state, not a verdict.
+Round 1's verdict is recorded above; the round-2 verdict is appended below. `Ready with notes` is the current
+record state: only Minor and Note findings remain, and the human owner must explicitly accept them.
 
 ## Reviewer independence
 
@@ -420,3 +421,85 @@ roll-forward, and cross-TFM proof ordering. Details and evidence are in the top-
 feasible and contract-preserving; the Major findings are design, inventory, test-fixture, and gate-sequencing
 corrections that must be made before the owner's implementation gate. Re-review at a new frozen commit after the
 resolutions; earlier rounds are not overwritten.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+Fresh context spawned by the orchestrator for this focused amendment re-review. I did not author or implement
+the amendment or the parent Step 11 design, I did not perform round 1, and I have no shared conversation with the
+planner, implementor, orchestrator, or the round-1 reviewer. I read the repository at the frozen design commit
+`17e723cae686c15bdfa7e61fc648d7d1da8086ef` and verified that the only later commit
+`478f37a9d7397f5fe21ecf9cc6b1648d454ed5ac` changes this record alone
+(`git diff --name-status 17e723c 478f37a` -> `M docs/planning/reviews/step-11-amend-1.md`). The six parent
+feature squashes (`eb8513d`, `9b754af`, `c0d8d64`, `bdafaa4`, `4fe6225`, `cbe345f`) are ancestors of the step
+branch; `docs/planning/audits/step-11.md` and `docs/planning/closeout/step-11.json` do not exist, so the parent
+audit has not started and the amendment window in [`amendments/README.md`](../amendments/README.md) §4 is open.
+I edited only this record and changed no code, test, configuration, design page, status page, or other file;
+`git status --short` was empty before the record edit. The human owner approves the final verdict and the
+implementation gate; this record is evidence, not an approval.
+
+#### Round-1 finding disposition
+
+| Finding | Disposition |
+| --- | --- |
+| A1-01 | **Closed.** §6.1 now lists every active page that states .NET 10 in the present tense (README, CONTRIBUTING, AGENTS §1/§8, `src/dotnet/README.md`, getting-started, `docs/planning/README.md`, `00` §3.2, `01` §6, `03` §9.3/§11/§13, `06` §4/§9, `appendix-b` §10, `file-layout.md`, `tests/contracts/README.md`, the bug-report template) and classifies the historical pages. A repository-wide `grep` found no unlisted active page; the only historical step pages with .NET 10 are 00/02/08/09 (Step 11's mentions are the amendment's source/target wording). The §6 phrase "the five planning pages" is stale because §6.1 lists six (R2-05). |
+| A1-02 | **Closed.** Part A is recorded as a completed pre-acceptance gate in §9.1 with provenance, method, thresholds, results, limitations, and the owner decision. `/tmp/opencode/part-a/results/PART-A-REPORT.md` and the raw JSONs still exist and match the page: 264 checks per run (240 required + 24 informational byte-identity), 0 failed, and the size/encode/decode/throughput values match to rounding. "Order of work" step 4 says do not re-run, Dependencies says complete, and Part B remains the pre-audit-freeze gate. The absolute-penalty figures are slightly imprecise versus the raw JSON (R2-04). |
+| A1-03 | **Closed.** Byte identity is an observation, not a gate or rollback trigger, in §9.1, §9.3, §5, and the owner decision. The hard gates are round-trip, cross-decode, signature/`package-summary-v1` equality, size, encode, decode (refined rule), and throughput. |
+| A1-04 | **Closed.** §9.5 specifies the pre-amendment `.msl` at `tests/contracts/packages/amend-1-net10/` with provenance and `package-summary-v1`; feature order step 0 captures it before the retarget; the test table tiers the read PR-fast; the `.gitignore` exception `!tests/contracts/**/*.msl` exists. The reverse direction is a recorded one-time migration check. |
+| A1-05 | **Closed.** §4 states the writer's throwing contract and the reader's `TryDecode`/`out string? error` contract separately; the code matches (`PayloadEncoder.Decode` throws; `PackagePayloadDecoder.TryDecode` returns `default` plus an error; the verifier maps it to `PKG004`). |
+| A1-06 | **Closed.** §4 restores empty-payload and non-positive-guard checks as steps 1–2 in both decoders and explains why `TryGetMaxDecompressedLength` cannot be first; the test table has the "Empty and non-positive guard" row. The current code has both checks. |
+| A1-07 | **Closed.** §7 asserts the exact SDK count (1), the positive `11.0.100` grep, the negative `10.` grep, the `global.json` pin, and the `DOTNET_ROOT/dotnet` path. The current containerfile still installs 10.0.403; that is the design's change. §8 correctly says the `COPY global.json` step is carried over from `9ab4bb8` (R2-07 on the "keep"/"stays" wording in §6/§7). |
+| A1-08 | **Closed.** §9.2 makes the net10 reference run mandatory and gives the absolute fallback (10 min, 2 GB, ≥100 jobs/s, <50 MB model payload, <2 GB package) only for a documented environmental reason; the comparison-not-made statement is required. The feature-7 harness does not exist at the pre-retarget commit, so the worktree method needs one sentence (R2-06). |
+| A1-09 | **Closed.** The request says nine DocFX entries, §6 says nine assembly paths, and `tools/docfx/docfx.json` has nine. |
+| A1-10 | **Closed as a routing decision, with a residual design defect (R2-01).** §4 states the real writer/reader bounds and routes the fix; the fix feature is a parent-step task and an amendment dependency. But the fix is specified to derive the bound "from the `lattices` row", which has no dimensions, and the parent page §5 check 4 still claims the `4 × a × b × c × position_count` verifier bound. The obligation is owned (step agent, before the audit freeze) but not yet correctly specified; orphan lattice rows remain bounded only by `Array.MaxLength` until the fix. |
+| A1-11 | **Closed.** The test table tiers "Cross-version read" PR-fast because it reads the checked-in fixture; "Toolchain identity" and "Reverse-direction read" are `One-time (migration)` and are described as recorded evidence. |
+| A1-12 | **Closed.** §9.4 records the 12 payloads at levels 3 and 9, the raw/frame SHA-256 values, the seed vector (`sample-model-1`, 3,475 B -> 1,415/1,387 B), the check-in layout (`tests/contracts/packages/amend-1/golden/`, `goldens.json`, `payloads/`), and the runtime-patch re-capture rule. The values match the Part A report/raw JSON. |
+| A1-13 | **Closed.** The licensing paragraph distinguishes the MIT managed API/runtime from the BSD-3-Clause native zstd; `NOTICE.md` is unchanged for a framework-dependent build, and the self-contained/AOT notice obligation is a Step 31 follow-up. |
+| A1-14 | **Closed.** §6.2 records the tool's `tools/net10.0/any` asset and `rollForward: Major` runtimeconfig. I installed 11.0.100 into `/tmp/opencode/apicompat-11`, built a root with only the 11.0.0 runtime, and ran the tool successfully; the runtimeconfig rolls forward. |
+| A1-15 | **Closed.** §6.2 preserves `tests/contracts/api-baseline/net10.0/` in `.tmp/net10-baseline/` (or reads it from git) before `tools/update-api-baseline.sh` runs `rm -rf "$DEST"`, then generates net11 and compares with both reference packs; the exact command and recorded-output requirement are stated. |
+
+#### Commands and results
+
+| Command | Result |
+| --- | --- |
+| `git diff --name-status 17e723c 478f37a` | `M docs/planning/reviews/step-11-amend-1.md` only. |
+| `./tools/verify.sh docs` | **exit 0**: math check 161 files, link check 164 files, Zensical strict build, DocFX 421 files with 0 warnings/0 errors, rustdoc. |
+| `./tools/verify.sh policy` | **exit 0**: NuGet licence policy (58 packages), `--vulnerable` phrase present with no vulnerable packages, all 9 ApiCompat comparisons clean (pre-existing unresolved MessagePack/ZstdSharp reference advisories only), 19 contract artifacts current, model/parameterization/lattice projections 5/4/2, 45 tool tests, SPDX 590 files, secrets 957 files, cargo-deny. |
+| `grep -c '<Project Path=' Mocassin.slnx`; `find tests/contracts/api-baseline/net10.0 -type f \| wc -l`; `grep -c 'bin/Release/net10.0' tools/docfx/docfx.json` | 21 solution projects; 9 API baseline assemblies; 9 DocFX assembly paths. |
+| `grep -rn 'setup-dotnet\|global-json-file\|dotnet-version' .github/workflows` | `ci.yml` (2 jobs), `benchmark.yml`, and `docs.yml` use `actions/setup-dotnet@v6` plus `global-json-file: global.json`; no SDK literal. `nightly.yml` has no .NET setup. |
+| `git ls-files \| grep -E '\.(msl\|msr\|mcs)$'` | empty — no checked-in `.msl` exists at the freeze. |
+| `git merge-base --is-ancestor <feature> HEAD` for the six features; `ls docs/planning/audits/step-11.md docs/planning/closeout/step-11.json` | all six features are ancestors; both audit/closeout files are absent. |
+| `git branch -a --list '*dotnet-11*'`; `git show 9ab4bb8:docs/opencode/mocassin.containerfile` | local and `origin/docs/dotnet-11-container` at `9ab4bb8`; both SDKs and the `COPY global.json` pin step are present. |
+| Repository-wide `grep` for `.NET 10`/`net10.0`/`10.0.403` over the active pages and `docs/planning/steps` | every active statement is listed in §6.1; the only historical step pages with .NET 10 are 00/02/08/09 (Step 11's mentions are the amendment's source/target wording). |
+| `dotnet --list-sdks`; `dotnet --list-runtimes`; `zstd --version` | SDKs 10.0.403 and 11.0.100; runtimes 10.0.14 and 11.0.0; `zstd` CLI 1.5.7. |
+| NuGet checks: Test SDK 18.12.0; ReportGenerator 5.6.0 and 5.5.12 assets; DocFX 2.81.0 assets | 18.12.0 exists; 5.6.0 ships `tools/net11.0/any`, 5.5.12 stops at `tools/net10.0/any`; DocFX 2.81.0 ships `tools/net11.0/any`. |
+| `dotnet tool install --tool-path /tmp/opencode/apicompat-11 --version 11.0.100 microsoft.dotnet.apicompat.tool`; run from a root with only the 11.0.0 runtime | Tool runs (`11.0.100+297acf...`); the package runtimeconfig's `rollForward: Major` works. |
+| Part A raw JSON parse (`part-a-raw-tiered-off.json`, `part-a-raw-tiered-on.json`) | 264 checks per run (240 required + 24 informational), 0 failed; `GateRows` sample level 3 is `Pass: false` under the old per-level ≤+10 % rule, which owner decision 6 replaces; controlled worst sample absolute penalty +0.06319 µs, default +0.05689 µs; focused p05 0.77 -> 0.84 µs. |
+| `git status --short` after the gates | empty; the reviewer changed no repository file. |
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R2-01 — A1-10's routed fix is specified against a `lattices` row that has no dimensions, and the parent page still claims the bound.** The fix (`fix-lattice-decode-guard`) says it "derives the bound from the `lattices` row (`4 × a × b × c × position_count`)". The `lattices` table has only `lattice_id`, `signature`, `format_version`, and `payload`; the dimensions live in the referencing `jobs` row (`lattice_a/b/c`) plus the model payload's position count. An orphan lattice row has no dimension source, so without a global cap it remains bounded only by `Array.MaxLength`. The parent step page §5 check 4 still states the `4 × a × b × c × position_count` bound as an implemented verifier check although `PackageReader.ReadLatticesAsync` passes `int.MaxValue`. The obligation is owned (step agent, before the audit freeze), but the specification must name the job/model source and the orphan-row fallback, and the parent page must mark the bound as pending. | `SimulationPackageSchema.cs:54-59`; `PackageReader.cs:266-276`; `SimulationPackageSchema.cs:78-80`; amendment §4 "Lattice bound (known gap, routed)" and Dependencies; `docs/planning/steps/step-11-simulation-package-and-msl-writer.md:637-639,864-867`. |
+| **Minor** | **R2-02 — The open-decisions rollback row narrows the rollback triggers and omits the Part A thresholds.** The row says "Part A passed under the refined rule (2026-11-15), so only a Part B budget breach or a correctness failure can still trigger rollback." Amendment §9.3 also makes a compressed-size, encode, decode, or throughput threshold breach a rollback trigger; a regression in the implemented codec is still a Part A threshold breach even though the Part A measurement passed. The row should say "a Part A or Part B threshold breach or a correctness failure". | `docs/planning/05-open-decisions.md:91`; amendment §9.3. |
+| **Minor** | **R2-03 — The request's Delta scope still says "no fixture generated on `net10.0`", contradicting the deliberate pre-amendment artifacts.** The design deliberately captures the pre-amendment `.msl` compatibility fixture and the 24 golden frames with the unamended net10 writer (feature order step 0, §9.4–§9.5). The request's listing should say "no feature-7 `.msl`/canonical-summary fixture generated on `net10.0`; the compatibility fixture and golden frames are deliberate net10 artifacts." The request owner owns the wording; the reviewer did not edit it. | Request record "Delta scope" item 5; amendment §9.4, §9.5, and "Order of work" step 0; request "Step summary". |
+| **Note** | **R2-04 — The Part A absolute decode penalty is not exactly the raw-JSON value.** §9.1 and owner decision 6 report `0.064 µs` (controlled) and `0.069 µs` (default JIT). The raw JSON gives `+0.06319 µs` (controlled, `p05-sample-lattice-6` L3) and `+0.05689 µs` (default, `p04-sample-lattice-4` L3); the focused run reports `0.77 -> 0.84 µs` for p05. The conclusion is unaffected because the gate is `≤0.15 µs`, but the page should use the raw values or state the rounding/source. | `part-a-raw-tiered-off.json`; `part-a-raw-tiered-on.json`; `PART-A-REPORT.md` §5.3 and §9; amendment §9.1 result row and owner decision 6. |
+| **Note** | **R2-05 — The §6 inventory count says "the five planning pages"; §6.1 lists six.** The six are `docs/planning/README.md`, `00-scope-and-principles.md` §3.2, `01-target-architecture.md` §6, `03-quality-strategy.md` §9.3/§11/§13, `06-toolchain-requirements.md` §4/§9, and `appendix-b-parity-matrix.md` §10 (plus the non-planning pages). The inventory is complete; only the count phrase is stale. | Amendment §6 "Docs" row and §6.1; resolution A1-01. |
+| **Note** | **R2-06 — Part B says the "same harness" runs at the pre-retarget commit, but the feature-7 benchmark harness does not exist there.** The mandatory net10 reference is still feasible, but the design should say that the feature-7 harness is copied/cherry-picked into the temporary worktree (or that the amended harness is run against a net10-written package) so the reference run is not mistaken for an unavailable environmental artifact. | Amendment §9.2; Step 11 feature 7 scope; `find src/dotnet/Mocassin.Benchmarks` has no `SimulationPackage` benchmark at the freeze. |
+| **Note** | **R2-07 — The §6 image row and §7 say "keep"/"stays" the `COPY global.json` pin assertion, but the current containerfile has no such step.** §8 correctly says the step is carried over from `9ab4bb8`; the wording should say "add/carry over" rather than "keep"/"stays". | `docs/opencode/mocassin.containerfile`; `git show 9ab4bb8:docs/opencode/mocassin.containerfile`; amendment §6/§7/§8. |
+
+#### Verdict
+
+**Verdict: Ready with notes.** The codec choice is sound and contract-preserving: the native one-shot path, the
+identity quality mapping, the decode contract, the no-format/no-signature/no-summary/no-solver impact, the
+pre-amendment fixture capture, the Part A evidence (matching the raw JSON to rounding), the refined small-payload
+rule, and the owner decisions are coherent. Every round-1 Major is closed. A1-10 is closed as a routing decision
+with the residual Minor R2-01. Three Minor and four Note findings remain; none is a Blocker or a Major. The
+human owner must explicitly accept the three Minor findings (R2-01..R2-03) before the implementation gate. The
+step agent owns the resolutions and the parent page/status updates after this record. The parent Step 11 audit
+remains not started, the amendment window is open, and the human owner approves the final verdict and the
+implementation gate.
+
+**Round-2 severity counts:** 0 Blocker, 0 Major, 3 Minor, 4 Note. Earlier rounds remain unchanged above.
