@@ -60,6 +60,7 @@ nav = [
       { "Compilation pipeline" = "development/compilation-pipeline.md" },
       { "Design decisions" = "development/design-decisions.md" },
       { "Contributing" = "development/contributing.md" },
+      { "Orchestration" = "development/orchestration.md" },
       { "Agent workflow" = "development/agent-workflow.md" },
       { "Agent security" = "development/agent-security.md" },
       { "Drift checks" = "development/drift-checks.md" },

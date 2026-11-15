@@ -40,6 +40,7 @@ The detailed architecture is in the internal plan; the repository layout is summ
   Step 10/11 consume it.
 - [Contributing](contributing.md) — branches, review gates, local quality gates, tests, and docs-as-code.
 - [Agent workflow](agent-workflow.md) — context handoff, prompts, evidence reports, and diff review.
+- [Orchestration and role delegation](orchestration.md) — orchestrator role, spawning, and handoff rules.
 - [Drift checks](drift-checks.md) — lightweight monthly and phase-boundary checks between cross-cutting reviews.
 - [Agent security](agent-security.md) — threat model, permissions, secrets, and prompt injection.
 - [Incident and rollback](incident-and-rollback.md) — severity, rollback, hotfix, and postmortem rules.

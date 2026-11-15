@@ -11,6 +11,7 @@ from pathlib import Path
 REQUIRED_FILES = (
     "AGENTS.md",
     "docs/development/agent-workflow.md",
+    "docs/development/orchestration.md",
     "docs/development/contributing.md",
     "docs/development/drift-checks.md",
     "docs/development/incident-and-rollback.md",
@@ -66,6 +67,7 @@ FORBIDDEN_TERMS = (
 NORMATIVE_FILES = (
     "AGENTS.md",
     "docs/development/agent-workflow.md",
+    "docs/development/orchestration.md",
     "docs/development/contributing.md",
     "docs/development/code-structure.md",
     "docs/planning/README.md",
