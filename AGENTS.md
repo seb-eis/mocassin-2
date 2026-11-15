@@ -14,6 +14,13 @@ models; and validation, diagnostics, and model statistics. The .NET solution, Ru
 package, and documentation toolchain exist. Step 08 — Model Compilation Pipeline is next. Do not claim that a
 feature is implemented until code and tests exist.
 
+**Orchestration:** every engagement is coordinated by one orchestrator agent. The human owner interacts only
+with the orchestrator and does not spawn role agents directly. The orchestrator spawns planners, design
+reviewers, step agents/implementors, auditors, and cross-cutting reviewers; it relays their requests and the
+owner's decisions, handles general discussion, and may make simple non-normative documentation edits. It does
+not design, implement, review, or approve on its own. See
+[`docs/development/orchestration.md`](docs/development/orchestration.md).
+
 Target stack:
 
 | Component | Technology |
@@ -54,17 +61,19 @@ Before changing anything, read these in order:
 12. [`docs/planning/reviews/README.md`](docs/planning/reviews/README.md) — design-review process and start gate.
 13. [`docs/planning/amendments/README.md`](docs/planning/amendments/README.md) — amendment process for design
     changes that emerge during implementation.
-14. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
+14. [`docs/development/orchestration.md`](docs/development/orchestration.md) — orchestrator role, delegation,
+    spawning, and handoff rules.
+15. [`docs/development/agent-workflow.md`](docs/development/agent-workflow.md) — context, prompt, review, and
     evidence playbook for coding agents.
-15. [`docs/development/drift-checks.md`](docs/development/drift-checks.md) — lightweight monthly and
+16. [`docs/development/drift-checks.md`](docs/development/drift-checks.md) — lightweight monthly and
     phase-boundary checks between cross-cutting reviews.
-16. [`docs/development/agent-security.md`](docs/development/agent-security.md) — agent threat model,
+17. [`docs/development/agent-security.md`](docs/development/agent-security.md) — agent threat model,
     permissions, secrets, and prompt injection.
-17. [`docs/development/incident-and-rollback.md`](docs/development/incident-and-rollback.md) — rollback,
+18. [`docs/development/incident-and-rollback.md`](docs/development/incident-and-rollback.md) — rollback,
     hotfix, and postmortem rules.
-18. The step page you intend to work on, plus its dependencies.
-19. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
-20. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
+19. The step page you intend to work on, plus its dependencies.
+20. [`docs/planning/appendix-b-parity-matrix.md`](docs/planning/appendix-b-parity-matrix.md) — what “done” means.
+21. [`docs/planning/adr/0008-standalone-documentation-toolchain.md`](docs/planning/adr/0008-standalone-documentation-toolchain.md),
    [`docs/planning/adr/0009-contract-manifest-and-contracts-library.md`](docs/planning/adr/0009-contract-manifest-and-contracts-library.md),
    [`docs/planning/adr/0010-canonical-messagepack-signatures.md`](docs/planning/adr/0010-canonical-messagepack-signatures.md),
    [`docs/planning/adr/0011-immutable-package-and-results-store.md`](docs/planning/adr/0011-immutable-package-and-results-store.md),
@@ -279,28 +288,34 @@ after the Step 31 release gates pass.
 
 ### 3.8 Agent roles and write scopes
 
-The workflow has four roles. Each role edits only the artifacts it owns. There is no scribe and no
+The workflow has five roles. Each role edits only the artifacts it owns. There is no scribe and no
 transcription step.
 
 | Role | May edit | May commit | Must not edit |
 | --- | --- | --- | --- |
+| Orchestrator | Handoff cards and status notes that restate a recorded decision; small non-normative documentation fixes (typos, links, index and navigation entries) | Documentation-only `docs/<slug>` commits with `[skip ci]` | Code, tests, configuration, contracts, generated artifacts, design or process rules, ADRs, step pages that assert status, review/audit/cross-cutting records, verdicts, waivers, merges, tags, `main` |
 | Planner (planning agent) | Design and planning docs; the review record's request, scope, checklists, and resolutions | Documentation-only commits on the design branch | Code, tests, configuration, audit or design verdicts, step status, merges, tags |
 | Implementor (step agent) | Code, tests, configuration, contracts, step page, status dashboard, parity matrix; the audit/review record's request, scope, checklists, and resolutions | Feature-branch commits; documentation-only record and status commits | The reviewer's findings, evidence, or verdict text; merges and tags without approval |
 | Reviewer (planning auditor or audit agent) | Only the assigned review or audit record: its own metadata, checklist completion marks (not item text), evidence, findings, and verdict | At most one documentation-only record commit per round, with `[skip ci]` | Everything else, including code, tests, configuration, design docs, step page, status dashboard, parity matrix, request scope, checklist item text, resolutions, merges, tags, and pushes to `main` |
 | Human owner | Approve gates, merges, and tags | — | — |
 
+Orchestration rule: the orchestrator is the human owner's only direct interaction point and spawns every role
+agent. The owner does not spawn role agents directly, and role agents do not spawn each other. The orchestrator
+never designs, implements, reviews, approves, merges, or tags on its own. The normative page is
+[`docs/development/orchestration.md`](docs/development/orchestration.md).
+
 Reviewer rules:
 
-- A reviewer must be a fresh context that did not author or implement the reviewed work. It may be spawned by
-  the planner, implementor, or human owner.
-- The spawner must not be the reviewer. It provides only the frozen commit, the request record, repository
-  links, and the required commands/scope. It must not supply a desired verdict or replace repository reading
-  with a summary.
-- The human owner approves the final verdict and gate. The spawner must not mark a verdict, waive findings,
+- A reviewer must be a fresh context that did not author or implement the reviewed work. It is spawned by the
+  orchestrator, which relays the request from the planner or step agent.
+- The orchestrator is the only spawner and must not be the reviewer. It provides only the frozen commit, the
+  request record, repository links, and the required commands/scope. It must not supply a desired verdict or
+  replace repository reading with a summary.
+- The human owner approves the final verdict and gate. The orchestrator must not mark a verdict, waive findings,
   merge, tag, or push `main`. A re-review requires a new commit with fixes; do not re-spawn until a preferred
   verdict appears.
 - The reviewer states in its record that it is a fresh context with no shared conversation with the
-  planner/implementor.
+  planner/implementor or the orchestrator.
 - The reviewer writes findings and verdict directly into the durable record. No handoff file, transcription,
   or scribe is used.
 - The reviewer appends a new round and must not alter earlier rounds or reviewer-authored text.
@@ -325,7 +340,9 @@ Reviewer rules:
 ### 3.9 Pre-implementation design review
 
 Every new step must pass an independent design review before the step branch is created or implementation
-starts. This gate is separate from the post-implementation audit in section 3.10.
+starts. This gate is separate from the post-implementation audit in section 3.10. The planner and step agent own
+the design work, the review request, and the resolutions; the orchestrator routes the request and spawns the
+planning auditor; the human owner approves the verdict and start gate.
 
 1. The planning agent and step agent finish the step's design decisions and update the step page, data
    contracts, architecture, quality strategy, open decisions, parity matrix, and related docs. They apply those
@@ -334,9 +351,10 @@ starts. This gate is separate from the post-implementation audit in section 3.10
    `docs/planning/reviews/step-NN.md` using
    [`docs/planning/reviews/step-design-review-template.md`](docs/planning/reviews/step-design-review-template.md).
    Set the design-review status to `Ready for review` and record the reviewed commit.
-3. A fresh planning auditor with no implementation context reads the step page, design decisions, dependency
-   contracts, architecture, data contracts, ADRs, quality strategy, open decisions, parity matrix, licensing
-   records, and audit plan. The auditor must not have authored or implemented the design.
+3. The step agent asks the orchestrator to spawn a fresh planning auditor with no implementation context. The
+   auditor reads the step page, design decisions, dependency contracts, architecture, data contracts, ADRs,
+   quality strategy, open decisions, parity matrix, licensing records, and audit plan. The auditor must not have
+   authored or implemented the design.
 4. The auditor writes the evidence, findings, and verdict directly into
    `docs/planning/reviews/step-NN.md` and commits only that file with a documentation-only message and
    `[skip ci]`. The reviewed commit is the parent of the record commit. The auditor does not merge, tag, push
@@ -346,12 +364,12 @@ starts. This gate is separate from the post-implementation audit in section 3.10
    and verdict. It must not edit the request scope, checklists, resolutions, design docs, step page, status
    dashboard, parity matrix, code, tests, or configuration.
 6. If the verdict is `Changes required`, the planning agent and step agent update the design docs directly, the
-   step agent adds the resolutions and marks the review `Re-review required`, and a fresh planning auditor
-   re-reviews the new commit. The new round is appended; earlier rounds are not overwritten.
-7. Only a `Ready for implementation` verdict permits the human owner to approve starting the step. The approval
-   request must include the cumulative approval report in section 3.12, covering every review round, finding,
-   resolution, accepted note, waiver, and residual risk. The step branch is then created from the reviewed
-   `main` commit.
+   step agent adds the resolutions and marks the review `Re-review required`, and the orchestrator spawns a
+   fresh planning auditor for the new commit. The new round is appended; earlier rounds are not overwritten.
+7. Only a `Ready for implementation` verdict permits the human owner to approve starting the step. The
+   orchestrator presents the approval request with the cumulative approval report in section 3.12, covering
+   every review round, finding, resolution, accepted note, waiver, and residual risk, but does not approve it.
+   The step branch is then created from the reviewed `main` commit.
 8. Step 00 and Step 01 are recorded as `Waived — process introduced after completion`; no retrospective
    review is required.
 9. The post-implementation audit in section 3.10 remains mandatory.
@@ -363,7 +381,9 @@ records and are excluded from the published site.
 ### 3.10 Step audit gate
 
 The step agent's self-check is not an independent audit. Before a step is merged into `main`, a fresh,
-out-of-context audit context must review the frozen step branch.
+out-of-context audit context must review the frozen step branch. The step agent owns the closeout, the audit
+request, and the resolutions; the orchestrator spawns the auditor and relays the verdict; the human owner
+approves the merge and tag.
 
 1. The step agent finishes all features and the closeout feature, updates the step page, status dashboard,
    parity matrix, and feature log, merges current `main`, runs `tools/verify.sh all --require`, and gets the
@@ -379,9 +399,9 @@ out-of-context audit context must review the frozen step branch.
    follow: the auditor's record commit and the step agent's resolution/status commit. Neither may change code,
    tests, configuration, or the auditor's text. If fixes are needed, the step agent uses a new feature branch
    and the new commit is re-audited.
-4. A fresh audit agent reads `AGENTS.md`, the step page, the audit record, the status dashboard, and relevant
-   ADRs/contracts, then runs the required builds/tests and reviews the diff. The auditor must not have
-   implemented the step.
+4. The step agent asks the orchestrator to spawn a fresh audit agent. The auditor reads `AGENTS.md`, the step
+   page, the audit record, the status dashboard, and relevant ADRs/contracts, then runs the required
+   builds/tests and reviews the diff. The auditor must not have implemented the step.
 5. The auditor writes the evidence, findings, and verdict directly into
    `docs/planning/audits/step-NN.md` and commits only that file with a documentation-only message and
    `[skip ci]`. The audited commit is the parent of the record commit. The auditor does not merge, tag, push
@@ -393,13 +413,13 @@ out-of-context audit context must review the frozen step branch.
 7. If fixes are needed, the step agent adds the resolutions, fixes the findings on a new feature branch,
    squash-merges into the step branch, merges current `main`, updates the closeout evidence, dispatches one new
    closeout CI run, and sets the audit status to `Re-audit required`.
-8. The fresh auditor re-audits the new commit and appends a new round to the record. The same auditor may
-   continue if it stayed within the reviewer write scope; otherwise start a fresh audit context. Keep every
-   earlier round in the record.
-9. Only a `Passed` audit permits the step-to-main approval request. The request must include the cumulative
-   approval report in section 3.12, covering every audit and review round, every finding and resolution, every
-   accepted note or waiver, and the residual risk. The audit result is evidence, not merge authorization; the
-   human owner still approves the merge.
+8. The orchestrator spawns a fresh auditor for the new commit; the auditor re-audits and appends a new round to
+   the record. The same auditor may continue if it stayed within the reviewer write scope; otherwise start a
+   fresh audit context. Keep every earlier round in the record.
+9. Only a `Passed` audit permits the step-to-main approval request. The orchestrator presents the request with
+   the cumulative approval report in section 3.12, covering every audit and review round, every finding and
+   resolution, every accepted note or waiver, and the residual risk, but does not approve it. The audit result
+   is evidence, not merge authorization; the human owner still approves the merge.
 10. After merge, wait for the automatic `main` CI run. Tag `step-NN` only when it is green; record the result
     and delete the step branch. Never tag a red `main`.
 
@@ -524,9 +544,11 @@ recorded rationale.
 
 1. Freeze the checkpoint after the phase's last step is merged and tagged. Record the checkpoint commit in each
    review.
-2. An implementor/step agent orchestrates each review. The orchestrator prepares the request, spawns a fresh
-   independent reviewer, fixes findings on a maintenance branch, adds resolutions without altering reviewer
-   text, records the new commit, and requests re-review. It must not request a particular verdict or edit
+2. The orchestrator coordinates each review: it requests the frozen request and record from the planner or step
+   agent, spawns a fresh independent reviewer, and relays findings and decisions between the reviewer, the
+   remediating role, and the owner. The planner or step agent prepares the request and remediates findings on a
+   maintenance branch, adds resolutions without altering reviewer text, records the new commit, and asks the
+   orchestrator for re-review. The orchestrator must not fix findings, request a particular verdict, or edit
    reviewer evidence, findings, or verdict.
 3. The reviewer is a fresh context, reads the repository at the frozen commit, writes only its assigned record,
    may check checklists and add inline notes, and commits only that file with `[skip ci]`. It must not fix
@@ -556,6 +578,7 @@ Each rule has one normative home. Summaries link to it; do not copy it into a se
 | Topic | Normative home |
 | --- | --- |
 | Branch model, feature integration, step completion, tags, roles, approval report | This section, `AGENTS.md` §3 |
+| Orchestrator role and delegation | `docs/development/orchestration.md` |
 | Design review and audit records | `docs/planning/reviews/README.md` and `docs/planning/audits/README.md` |
 | Cross-cutting phase reviews | `docs/planning/reviews/cross-cutting/README.md` |
 | Drift checks | `docs/development/drift-checks.md` |
@@ -734,6 +757,10 @@ Quality gates for any change:
 
 The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as work packages, not suggestions.
 
+The orchestrator routes the work and spawns the role agents; the step agent (implementor) performs the numbered
+implementation steps below. The orchestrator does not implement a feature, write the step page, squash commits,
+run the gates, or edit records. It presents approval requests and relays decisions; the human owner approves.
+
 1. Choose the lowest-numbered unblocked step unless the owner assigns another.
 2. Check its **Depends on** line; do not start before dependencies are done.
 3. Read the step’s **Original reference**, **Design**, **Acceptance criteria**, **Documentation**, **Tests**, and
@@ -756,9 +783,9 @@ The 32 steps are in [`docs/planning/steps/`](docs/planning/steps/). Use them as 
 12. Delete the feature branch locally and remotely. Push the step branch only at step start, at closeout, or
     when a remote backup or handoff is needed.
 13. After all features and the closeout feature, update `docs/planning/audits/step-NN.md`, freeze the step
-    branch, and request the independent audit described in section 3.10.
-14. Only after a passed audit, ask for permission to merge the step into `main`, then merge with `--no-ff`,
-    tag `step-NN`, push, and delete the step branch.
+    branch, and ask the orchestrator to request the independent audit described in section 3.10.
+14. Only after a passed audit, the orchestrator presents the merge request. After owner approval, merge with
+    `--no-ff`, tag `step-NN`, push, and delete the step branch.
 
 A step is not done because the code compiles. Its acceptance criteria, tests, docs, parity entries, and audit
 must pass.
@@ -1019,6 +1046,9 @@ incomplete.
 - Do not merge a step branch into `main` without explicit user permission and a `--no-ff` merge.
 - Do not use fast-forward or squash for the step-to-main merge unless the user explicitly requests it.
 - Do not add CI triggers for feature branches; use local gates and run CI after squashing into the step branch.
+- Do not bypass the orchestrator to spawn a role agent directly; the owner asks the orchestrator, and role agents
+  do not spawn each other.
+- Do not let the orchestrator design, implement, review, approve, merge, or tag instead of delegating.
 - Do not modify or commit `/workspace/mocassin-original`. It is the gitignored, read-only GPL-3.0 reference
   clone of `https://github.com/seb-eis/mocassin` at the verified commit.
 

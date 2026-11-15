@@ -10,7 +10,7 @@ a fresh, out-of-context audit context decides whether the step is ready for appr
 | --- | --- |
 | Step agent (implementor) | Implement, self-check, create/update the audit record's request fields, fix findings, add resolutions, update status/docs/parity |
 | Audit agent (reviewer) | Independent review of the frozen commit; writes evidence, findings, and verdict directly into the audit record |
-| Spawner (step agent, planner, or human owner) | Provides the frozen audit request and spawns a fresh auditor; does not review or approve |
+| Orchestrator (spawner) | Provides the frozen audit request and spawns a fresh auditor on behalf of the step agent; relays the verdict; does not review or approve |
 | Human owner | Approve fixes, merge, and tag |
 
 The audit request, its scope, and its acceptance checklist are owned by the step agent. The audit agent may
@@ -22,15 +22,19 @@ transcription step.
 
 ### 1.1 Auditor spawning
 
-The step agent, planner, or human owner may spawn an auditor. The spawner must not be the auditor.
+The orchestrator is the only spawner. The step agent asks the orchestrator for an audit; the owner does not spawn
+an auditor directly. The spawner must not be the auditor.
 
-- The auditor is a fresh context with no shared conversation with the implementor or planner.
-- The spawner provides only the frozen commit, the audit request, repository links, and the required
-  commands/scope. It must not supply a desired verdict or substitute a summary for reading the repository.
-- The auditor writes findings and verdict directly into the record. The spawner does not edit them.
-- The human owner approves the final verdict and the merge/tag gate. The spawner must not mark a verdict, waive
-  findings, merge, tag, or push `main`.
-- A re-audit requires a new commit with fixes. Do not re-spawn auditors until a preferred verdict appears.
+- The auditor is a fresh context with no shared conversation with the implementor, planner, or orchestrator.
+- The orchestrator provides only the frozen commit, the audit request, repository links, and the required
+  commands/scope. It must not supply a desired verdict, pass on its conversation history, or substitute a
+  summary for reading the repository.
+- The auditor writes findings and verdict directly into the record. The orchestrator and step agent do not edit
+  them.
+- The human owner approves the final verdict and the merge/tag gate. The orchestrator must not mark a verdict,
+  waive findings, merge, tag, or push `main`.
+- A re-audit requires a new commit with fixes, made by the step agent. Do not re-spawn auditors until a
+  preferred verdict appears.
 
 ## 2. Audit status values
 
@@ -176,7 +180,8 @@ The closeout evidence is a separate machine-checkable file; see
 - `Re-audit required` is a record state, not a verdict. Keep it in the record state field, not in the verdict
   checklist.
 - The auditor must not approve its own report. The human owner approves the merge and tag.
-- The auditor records that it is a fresh context with no shared conversation with the implementor or planner.
+- The auditor records that it is a fresh context with no shared conversation with the implementor, planner, or
+  orchestrator.
 
 ## 9. Step amendments
 

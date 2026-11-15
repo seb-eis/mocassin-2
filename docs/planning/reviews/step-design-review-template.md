@@ -11,9 +11,10 @@
 | Field | Value |
 | --- | --- |
 | Step | NN — Step title |
-| Request owner | Step agent |
-| Orchestrator (step agent / planner) | — |
-| Review initiated by | Planner / implementor / human owner |
+| Request owner | Step agent (implementor) |
+| Orchestrator | — |
+| Step agent (implementor) | — |
+| Review initiated by | Orchestrator, on request of the planner or step agent |
 | Reviewed commit | — |
 | Docs branch | — |
 | Review date | — |
@@ -21,10 +22,12 @@
 
 Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
 
-> Orchestration: the step agent or planner (the orchestrator) freezes the design, requests the reviewer, applies
-> fixes autonomously on the design docs or a maintenance branch, adds resolutions without altering reviewer
-> text, and requests re-review until the reviewer no longer identifies issues. The human owner approves the
-> final verdict and the start of implementation.
+> Orchestration: the orchestrator spawns a fresh planning auditor after the step agent has frozen the design and
+> completed the review request, and relays the verdict and owner decisions. The planner and step agent update the
+> design docs, apply fixes on the design docs or a maintenance branch, add resolutions without altering reviewer
+> text, and ask the orchestrator for re-review until the auditor no longer identifies issues. The orchestrator
+> does not edit the design or the review record. The human owner approves the final verdict and the start of
+> implementation.
 
 ## Step summary
 
@@ -88,7 +91,7 @@ the auditor's findings, evidence, or verdict.
 ## Reviewer independence
 
 > I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
-> planner or implementor.
+> planner, implementor, or orchestrator.
 
 ## Verdict
 
@@ -102,8 +105,8 @@ Follow-up step:
 
 ## Approval summary
 
-The step agent completes this section before requesting human approval. It must cover the full history, not
-only the latest round.
+The request owner (step agent or planner) completes this section before the orchestrator presents the approval
+request. It must cover the full history, not only the latest round.
 
 - [ ] Requested decision and frozen commit recorded
 - [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
