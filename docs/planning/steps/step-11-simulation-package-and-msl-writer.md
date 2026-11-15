@@ -280,6 +280,8 @@ per feature.
   payload codec replaced by the one-shot in-box `ZstandardEncoder`/`ZstandardDecoder` (writer, reader, and test
   support); three analyzer adaptations required by SDK 11 (`CA1517` read-only span, two `CA2026` `JsonElement`
   conversions); the pre-amendment `.msl` fixture, 12 raw payloads, and 24 golden frames checked in with tests.
+- **Authorization:** the human owner authorized the `.NET 11` stack/convention update in `AGENTS.md` §1/§8 as
+  part of the approved amendment (2026-11-15); the change is factual toolchain wording, not a process-rule change.
 - **Cross-version evidence:** the `net10.0` fixture verifies on `net11.0` and its canonical summary matches the
   golden (PR-fast). The reverse check (net10 build at `e2b00ea` reading a net11-written package) reported
   `IsValid=true`, 10 checks, 0 diagnostics, and the same summary SHA-256 `60c95e1b…`; the net11 writer

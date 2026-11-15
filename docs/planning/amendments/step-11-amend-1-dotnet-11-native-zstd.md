@@ -10,7 +10,7 @@
 | Branch | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` |
 | Design review | `docs/planning/reviews/step-11-amend-1.md` |
 | Parent audit | `docs/planning/audits/step-11.md` |
-| Integration commit | — |
+| Integration commit | `00753e7` (`step-11: retarget to .NET 11 and replace the payload codec`) |
 | Combined audit commit | — |
 | Tag | `step-11` |
 | Date | 2026-11-15 |
@@ -868,6 +868,9 @@ package payloads. No domain doubles.
   created from the approved step branch. Owner decisions 1–6 are recorded above.
 - Approval commit: `683b7c4` (`docs: record step-11-amend-1 approval and round-2 resolutions [skip ci]`)
 - Squash commit: `00753e7` (`step-11: retarget to .NET 11 and replace the payload codec`)
+- Authorization: the human owner authorized the `.NET 11` stack/convention update in `AGENTS.md` §1/§8 as part of
+  the approved amendment on 2026-11-15; it is a factual toolchain row, not a process-rule change (owner decision
+  7).
 - Parent audit request updated: after integration, refresh the Step 11 implementation status, the feature log,
   the closeout evidence path, and the audit request with the combined commit
 - Combined frozen commit: —
@@ -893,6 +896,7 @@ match, and no open question remains for this amendment.
 | 4 | Microsoft.NET.Test.Sdk | **Bumped to 18.12.0.** | §6 verification items and Risks; the suite and coverage must run, and the `VSTEST_ARTIFACTS_DIRECTORY` message is expected to disappear or be re-checked and recorded as benign |
 | 5 | ReferenceHarness | **Retargeted now** to `net11.0`. | §6; the project is outside `Mocassin.slnx` and is verified when the GPL reference clone is available, otherwise the gap is a Step 29 item |
 | 6 | Part A level-3 decode ratio on 2,109-byte lattices (2026-11-15, after the Part A measurement) | **Keep the switch and refine the small-payload gate.** For payloads under ~8 KB, gate on an absolute penalty (≤0.15 µs per payload) plus the ≥100 MB/s floor; record the relative ratio but do not gate it. Payloads ≥8 KB keep the ≤+10 % rule. | §9.1 thresholds and owner-decision rationale; Part A is complete and passes; the measured worst absolute penalty is 0.06319 µs (controlled) / 0.05689 µs (default JIT); Part B keeps its budgets and does not use the per-payload decode rule |
+| 7 | Authorization for the `.NET 11` stack/convention update in `AGENTS.md` (2026-11-15) | **Authorized as part of the approved amendment.** The owner approved the `AGENTS.md` §1 stack table and §8 .NET convention row moving from .NET 10 to .NET 11 as a factual consequence of `step-11-amend-1`; no process rule changes. | §6.1 and the `AGENTS.md` §1/§8 edits; the change is recorded in the Step 11 feature log and does not engage `AGENTS.md` §3.15. |
 
 The decision-6 exception rationale is recorded in full in §9.1: the two 2,109-byte lattices decode in 0.6–0.8 µs,
 so a 10 % relative threshold is 60–84 ns and sits inside the host/JIT run-to-run spread; the absolute penalty is
