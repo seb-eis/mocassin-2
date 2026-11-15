@@ -16,7 +16,7 @@ read-only inspection/verification library for the build CLI.
 - **Audit:** Not requested
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
-  toolchain and native Zstandard — **Planned**; design review ready for review (2026-11-15)
+  toolchain and native Zstandard — **Planned**; design review [ready for review](../reviews/step-11-amend-1.md) (2026-11-15)
 - **Feature list:** Approved 2026-11-15 (seven features)
 - **Last updated:** 2026-11-15
 

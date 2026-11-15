@@ -368,7 +368,7 @@ Date: 2026-11-15
 
 > Amendment: [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11 toolchain and
 > native Zstandard — is a late design change to this step, planned while the step is still active and before the
-> audit freeze. Its focused design review is recorded separately. It does not reopen any
+> audit freeze. Its focused design review is [`step-11-amend-1.md`](step-11-amend-1.md). It does not reopen any
 > finding above.
 
 | Finding | Status | Owner | Commit |
