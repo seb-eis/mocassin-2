@@ -25,6 +25,7 @@ mocassin/
 | `target/doc/` | `cargo doc` | No |
 | `contracts/generated/` | `tools/contracts/generate.py` | Yes; regenerate, never hand-edit |
 | `tests/contracts/api-baseline/net11.0/` | `tools/update-api-baseline.sh` | Yes; refresh after an intentional public API change |
+| `tests/contracts/packages/msl-v1/` | The amended `.NET 11` writer (feature-7 regeneration command) | Yes; `.msl` + `package-summary-v1` + extracted payloads |
 | `tests/contracts/packages/amend-1-net10/` | Captured with the pre-amendment `net10.0` writer | Yes; compatibility fixture, never regenerated |
 | `tests/contracts/packages/amend-1/` | Captured with the pre-amendment `ZstdSharp` codec | Yes; raw payloads and golden frames, bytes may be re-captured with a note |
 | `tests/contracts/**/*.mcs`, `*.msl`, `*.msr`, `*.log`, `Job*/` | Real writers | Yes; explicit `.gitignore` exceptions |
@@ -32,6 +33,25 @@ mocassin/
 `contracts/generated/schema/` holds one schema per format or report. `package-v1.schema.json` is the SQLite row
 schema; `package-payloads-v1.schema.json` separately describes the top-level model, job, and lattice payloads and
 uses the manifest's payload unknown-key policy.
+
+## Simulation packages
+
+A `.msl` package is a single immutable SQLite file, written wherever the user chooses (there is no reserved
+directory). The format, schema, payloads, versioning, and verification checks are in
+[Simulation package format](msl-format.md).
+
+Immutable-package rules:
+
+- Publication writes a new file and atomically replaces the target; it never appends to or updates a published
+  package. Rebuild to change anything.
+- A published package has no `results` table and no `-wal`/`-shm` sidecar. Results are written to a separate
+  `.msr` store (Step 20), bound to the package signature; it is not a sidecar and must not be placed inside the
+  package.
+- Readers open the package read-only (`Mode=ReadOnly`, `Cache=Private`, `query_only=ON`) and never mutate it.
+- The package SHA-256 is recorded by the build; the writer's result also reports the job/lattice counts, the
+  lattice reuse factor, and any advisory size warning.
+- `tests/contracts/packages/msl-v1/` holds the checked-in fixture and its canonical summary; the two amendment
+  fixture directories preserve the pre-switch compatibility evidence.
 
 ## Atomic package publication
 

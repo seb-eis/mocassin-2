@@ -35,6 +35,7 @@ nav = [
       { "Lattice and doping" = "user-guide/lattice.md" },
       { "Simulations" = "user-guide/simulations.md" },
       { "Job templates and supercells" = "user-guide/job-templates.md" },
+      { "Building a simulation package" = "user-guide/building.md" },
     ] },
   { "Physics" = [
       { "Overview" = "physics/index.md" },
@@ -48,6 +49,7 @@ nav = [
   { "Reference" = [
       { "Overview" = "reference/index.md" },
       { "Repository and file layout" = "reference/file-layout.md" },
+      { "Simulation package format" = "reference/msl-format.md" },
       { "Project format" = "reference/project-format.md" },
       { "Transitions" = "reference/transitions.md" },
       { "Energy" = "reference/energy.md" },

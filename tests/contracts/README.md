@@ -14,6 +14,8 @@ Versioned cross-language fixtures for the formats defined in
 - `events-*.jsonl` — machine-readable event streams;
 - `signature-vectors.json` — canonical projection bytes and SHA-256 digests;
 - `api-baseline/net11.0/` — checked-in assemblies for the `ApiCompat` gate.
+- `packages/msl-v1/` — the checked-in `.msl` v1 fixture written by the amended .NET 11 writer, its
+  `package-summary-v1` golden, the extracted payloads, and the env-gated regeneration test.
 - `packages/amend-1-net10/` — a real `.msl` written by the unamended `net10.0` writer, its
   `package-summary-v1` golden, and provenance; a compatibility fixture that is never regenerated.
 - `packages/amend-1/` — the pre-amendment codec goldens: raw payloads (`payloads/*.bin`), `ZstdSharp.Port`

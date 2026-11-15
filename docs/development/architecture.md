@@ -217,6 +217,57 @@ The project format is a cross-language contract even though only .NET writes it.
 `.mocprj`; they consume compiled packages and states. The project schema is therefore owned by the .NET model
 builder and documented in [Project Format](../reference/project-format.md).
 
+The compiled simulation package is a cross-language contract in both directions: .NET writes and reads it, and
+the Rust solver reads it. Its schema, payloads, and verification rules are documented in
+[Simulation Package Format](../reference/msl-format.md).
+
+## Simulation package boundary (Step 11)
+
+The package stack has two runtime halves separated by a one-way dependency wall:
+
+| Project | Owns | Must not |
+| --- | --- | --- |
+| `Mocassin.Contracts` | Payload DTOs, format constants, canonical projection shapes, and the `PKG` diagnostic descriptors | Perform I/O, SQLite, or compression |
+| `Mocassin.Packages` | Project persistence (`Projects`) and the package writer, schema, and payload mappers (`SimulationPackage`) | Reference `Mocassin.Results` |
+| `Mocassin.Results` | The read-only reader, inspector, verifier, `package-summary-v1`, and bounded decoding | Reference `Mocassin.Packages`, or write anything |
+
+`Mocassin.Contracts` is the only shared vocabulary, so the reader cannot call writer code and the writer cannot
+call the verifier. The writer's decode-before-insert self-check uses its own encoder/decoder only.
+
+Payload mapping is one-way and explicit:
+
+```mermaid
+flowchart LR
+  Param[ParameterizedModel] --> Model[ModelPayload]
+  Lattice[GeneratedLattice] --> LatticePayload[LatticePayload]
+  Job[JobDescriptor + cell vectors + doping] --> JobPayload[JobPayload]
+  Model --> Encoder[PayloadEncoder]
+  LatticePayload --> Encoder
+  JobPayload --> Encoder
+  Encoder -->|MessagePack then Zstd frame| Blob[(SQLite payload blob)]
+```
+
+Signatures are canonical MessagePack projections (ADR 0010), never compressed bytes. Lattice rows are
+content-addressed by `LatticeSignatureV1` and shared by every job with the same particle array; jobs reference
+the model and lattice rows. The `PKG` descriptors live in Contracts and are composed into
+`DiagnosticCatalog.Default` by Packages, while Results builds the same diagnostics directly from the Contracts
+descriptors and still references only `Core` and `Contracts`.
+
+The reader is the trust boundary: it checks the declared decompressed size against the guard before allocating,
+bounds lattice payloads from the referencing job and model, rejects an empty payload or a malformed frame, and
+reports a `PKG` diagnostic instead of throwing for untrusted package data. The writer always declares the exact
+size and never uses a dictionary, checksum, long-distance matching, or custom framing.
+
+Publication and immutability are described in [Repository and file layout](../reference/file-layout.md): a
+published package is never mutated, results belong in a separate `.msr` store, and publication is an atomic
+rename after the file and Unix directory are fsynced. Windows skips the directory fsync and relies on the file
+fsync plus atomic replace.
+
+The toolchain is .NET 11 with the in-box `System.IO.Compression` Zstandard API and no third-party codec. The
+managed API and runtime are MIT; the native zstd implementation they wrap is BSD-3-Clause and is not
+redistributed by this framework-dependent repository. A self-contained or NativeAOT artifact must carry the
+runtime's third-party notices (Step 31).
+
 ## Testing
 
 - `Mocassin.Core.Tests` covers IDs, units, diagnostics, canonical JSON, migrations, validation, editing, and

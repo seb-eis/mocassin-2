@@ -145,11 +145,12 @@ Status legend:
 | Lattice size + doping values | Y | Partial | 10/26 | Deterministic supercell, dopings, truncation, compensation, and preview in 10; editor UI in 26 |
 | Build template selection | Y | Partial | 10/12/26 | `build --preview --template` selection in 10; full build command in 12; UI in 26 |
 | Build preview (no package write) | Y | Done | 10 | Shared `ILatticePreviewService`, `build-preview-v1`, and CLI path; never opens or writes `.msl` |
-| Create/overwrite package | Y | Planned | 11/12/26 | Immutable `.msl` v1 writer and atomic publication in 11; full build command and `--force` in 12; build UI in 26 |
+| Create/overwrite package | Y | Partial | 11/12/26 | Immutable `.msl` v1 writer, verifier, fixtures, and atomic publication in 11; full build command and `--force` in 12; build UI in 26 |
 | Append to existing package | N | Deferred | post-1.0 | Not required; rebuild is safer |
 | 99,999-job cap | Y | Done | 10 | Hard cap `JOB019`; warning `JOB013` above 10k |
 | Build progress/cancel/log | Y | Planned | 12/26 | |
-| Package inspection/verification | Y | Improvement | 11/12 | Read-only inspector/verifier and `PKG` diagnostics in 11; `inspect`/`verify` CLI in 12 |
+| Package inspection/verification | Y | Improvement | 11/12 | Read-only inspector/verifier, `PKG` diagnostics, `package-summary-v1`, and fixtures in 11; `inspect`/`verify` CLI in 12 |
+| `.msl` v1 format and fixtures | Y | Done | 11 | Schema, content-addressed payloads, canonical summary, verification, checked-in `msl-v1` fixture, and the pre-switch compatibility fixture |
 | Build history | N | Improvement | 26 | |
 
 ## 7. Solver

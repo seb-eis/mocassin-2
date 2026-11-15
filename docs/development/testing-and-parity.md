@@ -30,6 +30,21 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - Fixtures are versioned, small, deterministic, and regenerable with a recorded command.
 - `tests/contracts/` holds cross-language fixtures; `tests/reference/` holds parity and benchmark assets.
 
+## Simulation-package fixtures (Step 11)
+
+- `tests/contracts/packages/msl-v1/` is the checked-in `.msl` v1 fixture written by the real writer, with its
+  `package-summary-v1` golden and extracted payloads. Regenerate it with
+  `MOCASSIN_REGENERATE_PACKAGE_FIXTURES=1 dotnet test src/dotnet/Mocassin.Results.Tests/Mocassin.Results.Tests.csproj -c Release --filter "FullyQualifiedName~RegeneratePackageFixture"`.
+- `tests/contracts/packages/amend-1-net10/` is the pre-.NET 11 compatibility package. It is byte-fixed and never
+  regenerated; the net11 reader must keep reading it.
+- `tests/contracts/packages/amend-1/` holds the pre-amendment codec goldens (raw payloads and frames at levels 3
+  and 9); bytes may be re-captured with a recorded note, and the level mapping must not change.
+- Schema, payload mapping, signature, atomicity, immutability, and `PKG` checks are PR-fast. A rebuild-and-compare
+  of the canonical summary and the Step 13 cross-language read are PR-medium. Corruption/fuzz and the 10⁴-job
+  budget are nightly/release.
+- The canonical summary is the golden. Package bytes are recorded by SHA-256 and compared only as an observation,
+  because a runtime patch may change compressed bytes without changing the logical content.
+
 ## Test tiers
 
 | Tier | Contents | Target |

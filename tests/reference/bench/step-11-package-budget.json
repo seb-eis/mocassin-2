@@ -1,0 +1,93 @@
+{
+  "step": "step-11",
+  "part": "Part B \u2014 10^4-job simulation-package build",
+  "generatedAtUtc": "2026-11-15T22:23:11.1827003+00:00",
+  "method": "The feature-7 benchmark source (Mocassin.Benchmarks/SimulationPackage) was run once on the amended net11.0 tree at the recorded commit and once on the pre-amendment net10.0 worktree at e2b00ea (amendment A1-08/R2-06: the harness is copied into the worktree). Both runs use the real ceria sample, 10 collections x 1 config x 1,000 jobs at 10x10x10, compression level 3, and a fixed created_utc. Wall clock includes compile, parameterize, expand, generate, and write; insertion rate uses only WriteJobAsync. Peak RSS is /proc/self/status VmHWM.",
+  "platform": {
+    "os": "Debian GNU/Linux 13 (trixie)",
+    "runtimeNet10": ".NET 10.0.14",
+    "runtimeNet11": ".NET 11.0.0",
+    "sdkNet10": "10.0.403",
+    "sdkNet11": "11.0.100"
+  },
+  "workload": {
+    "collectionCount": 10,
+    "jobsPerConfig": 1000,
+    "latticeSize": 10,
+    "compressionLevel": 3,
+    "jobCount": 10000,
+    "latticeCount": 10000
+  },
+  "runs": {
+    "net10": {
+      "step": "step-11",
+      "part": "Part B \u2014 10\u2074-job simulation-package build",
+      "generatedAtUtc": "2026-11-15T22:23:44.137448+00:00",
+      "runtime": "10.0.14",
+      "frameworkDescription": ".NET 10.0.14",
+      "operatingSystem": "Debian GNU/Linux 13 (trixie)",
+      "sourceCommit": "e2b00ea2887f32fef940afb925325e6713816395",
+      "sample": "samples/jobs/ceria-temperature-sweep.mocprj",
+      "collectionCount": 10,
+      "jobsPerConfig": 1000,
+      "latticeSize": 10,
+      "compressionLevel": 3,
+      "jobCount": 10000,
+      "latticeCount": 10000,
+      "modelCount": 1,
+      "totalSeconds": 4.0279079,
+      "preparationSeconds": 0.5080881,
+      "generationSeconds": 1.4363955,
+      "insertionSeconds": 1.9120504,
+      "jobInsertionRate": 5229.987661413109,
+      "packageBytes": 10051584,
+      "modelPayloadBytes": 1415,
+      "peakRssBytes": 119119872,
+      "packageSha256": "6650275c1519bf827dc4b2b088f93376758d8c2d70775e273f934555e77e953b",
+      "integrityCheck": "ok"
+    },
+    "net11": {
+      "step": "step-11",
+      "part": "Part B \u2014 10\u2074-job simulation-package build",
+      "generatedAtUtc": "2026-11-15T22:23:11.1827003+00:00",
+      "runtime": "11.0.0",
+      "frameworkDescription": ".NET 11.0.0",
+      "operatingSystem": "Debian GNU/Linux 13 (trixie)",
+      "sourceCommit": "8745a64c4e7d9ad3e10f3a9065483f285bf34752",
+      "sample": "samples/jobs/ceria-temperature-sweep.mocprj",
+      "collectionCount": 10,
+      "jobsPerConfig": 1000,
+      "latticeSize": 10,
+      "compressionLevel": 3,
+      "jobCount": 10000,
+      "latticeCount": 10000,
+      "modelCount": 1,
+      "totalSeconds": 3.8740823,
+      "preparationSeconds": 0.4010266,
+      "generationSeconds": 1.6495418,
+      "insertionSeconds": 1.7084719,
+      "jobInsertionRate": 5853.183772001167,
+      "packageBytes": 10051584,
+      "modelPayloadBytes": 1415,
+      "peakRssBytes": 118263808,
+      "packageSha256": "d7b2fbe51c8ff74198572785d5ff7c447b6b38a00f4d6bdd3422eac6a0e9ff16",
+      "integrityCheck": "ok"
+    }
+  },
+  "comparison": {
+    "wallClockDeltaPercent": -3.8189949675860215,
+    "packageSizeDeltaPercent": 0.0,
+    "insertionRateDeltaPercent": 11.91582372528341,
+    "peakRssDeltaPercent": -0.7186575888865965,
+    "packageShaNote": "The package SHA-256 differs because schema_info.app_version carries each build's informational version (1.0.0+<source commit>); the payload bytes are codec-identical and the package size is equal."
+  },
+  "budgets": {
+    "wallClockMaxSeconds": 600,
+    "wallClockMaxDeltaPercent": 5.0,
+    "peakRssMaxBytes": 2147483648,
+    "packageSizeMaxDeltaPercent": 3.0,
+    "minInsertionRate": 100.0,
+    "maxModelPayloadBytes": 52428800
+  },
+  "verdict": "pass"
+}

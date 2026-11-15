@@ -915,15 +915,16 @@ Two options, for the human owner's start-gate decision:
       and `PKG001`–`PKG010`.
 - [x] Add the `PKG` descriptors to Contracts and compose them into `DiagnosticCatalog.Default`; confirm
       `Mocassin.Results` does not reference `Mocassin.Packages`.
-- [ ] Add checked-in `.msl` fixtures, canonical summaries, extracted payloads, and regeneration command.
+- [x] Add checked-in `.msl` fixtures, canonical summaries, extracted payloads, and regeneration command: `tests/contracts/packages/msl-v1/` with `package-summary-v1.json`, `payloads/index.json`, and the env-gated `RegeneratePackageFixture` test; the net10 compatibility fixture and codec goldens stay.
 - [x] Add the lattice projection golden vectors and `verify.sh contracts` checker.
-- [ ] Add the `Mocassin.Benchmarks/SimulationPackage` benchmark and record the 10⁴-job budget.
-- [ ] Update `PublicAPI.Unshipped.txt` and the ApiCompat baseline for `Mocassin.Contracts`, `Mocassin.Core`
+- [x] Add the `Mocassin.Benchmarks/SimulationPackage` benchmark and record the 10⁴-job budget: the one-shot budget runner and a BenchmarkDotNet case, with the net10 reference run recorded in `tests/reference/bench/step-11-package-budget.json`.
+- [x] Update `PublicAPI.Unshipped.txt` and the ApiCompat baseline for `Mocassin.Contracts`, `Mocassin.Core`
       (the new `JobExtension.ToCanonicalJson`), `Mocassin.Symmetry` (the new
       `PairInteractionPreview.EquivalentImages`), `Mocassin.Compilation`, `Mocassin.Packages`, and
-      `Mocassin.Results`.
+      `Mocassin.Results`. Refreshed by features 1–6, amendment 1, and `fix-lattice-decode-guard`; the only
+      later addition is `PackageVerificationOptions.MaxLatticePayloadBytes`.
 - [x] Record the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges.
-- [ ] Write the documentation named below and update parity/status.
+- [x] Write the documentation named below and update parity/status.
 - [x] Review and integrate [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) (.NET 11
       toolchain and native Zstandard) before feature 7 generates the fixtures and before the audit freeze.
       Integrated as `00753e7` after the `Ready with notes` acceptance.
@@ -958,11 +959,11 @@ Two options, for the human owner's start-gate decision:
       non-mobile nodes; Step 18's mobile-tracker permutation follows the same indices.
 - [x] `PKG001`–`PKG010` are documented with severities and anchors, `PKG` descriptors are composed into
       `DiagnosticCatalog.Default`, and `Mocassin.Results` still references only `Core` and `Contracts`.
-- [ ] The checked-in `.msl` fixture's `package-summary-v1` golden matches a rebuild after normalizing
-      `created_utc`, `app_version`, `generator`, size, and payload byte hashes.
+- [x] The checked-in `.msl` fixture's `package-summary-v1` golden matches a rebuild after normalizing
+      `created_utc`, `app_version`, `generator`, size, and payload byte hashes (`PackageFixtureTests`).
 - [x] Two jobs whose lattices are byte-identical share one `lattices` row; a different particle array does not.
-- [ ] Rebuilding the same project produces identical model/lattice signatures and an identical canonical
-      summary; stored bytes may differ only in build metadata.
+- [x] Rebuilding the same project produces identical model/lattice signatures and an identical canonical
+      summary; stored bytes may differ only in build metadata (`PackageFixtureTests.RebuildReproducesTheFixtureSummary`).
 - [x] The job `flags` word equals `SolverJobFlagsMapper.Compose(...)` and contains exactly one kind bit.
 - [x] The job `electric_field_direction` is a unit vector equal to the compiled cell transform of the authored
       fractional direction (tested on a non-orthogonal cell).
@@ -972,25 +973,29 @@ Two options, for the human owner's start-gate decision:
 - [x] A simulated disk-full/write error leaves the previous package intact.
 - [x] `verify` detects a truncated payload, a corrupt Zstd frame, a wrong signature, a missing FK, a wrong
       payload-derived column, a stray `-wal`, and an injected `results` table, each with the expected `PKG` code.
-- [ ] 10⁴ small jobs build within the time/size budget.
+- [x] 10⁴ small jobs build within the time/size budget (amended: 3.87 s, 10.05 MB, 118 MB peak RSS, 5,853 jobs/s; net10 reference: 4.03 s, equal size, 119 MB, 5,230 jobs/s).
 - [x] No EF Core, no native structs, no custom binary header, and no results table.
-- [ ] Documentation written
+- [x] Documentation written
 
 ## Documentation
 
 At this point, document the simulation package:
 
-- `docs/reference/msl-format.md` — SQLite schema, `application_id`/`user_version`, content-addressed
+- [x] `docs/reference/msl-format.md` — SQLite schema, `application_id`/`user_version`, content-addressed
   models/lattices, model/job/lattice payloads (including the pair-link `offset` and variable-length
   `tracker_order`), `package-summary-v1`, versioning, and verification checks (new page plus a nav entry in
   `zensical.toml` and `docs/reference/index.md`).
-- `docs/reference/file-layout.md` — package location, immutable package rules, `.msr` sidecar, atomic-write and
-  temp-file behaviour, the checked-in fixture layout, and the generated `package-payloads-v1.schema.json`.
-- `docs/reference/diagnostics.md` — `PKG001`–`PKG010` with severity, owner, and help text.
-- `docs/development/architecture.md` — `Mocassin.Packages` writer versus `Mocassin.Results` reader boundary, the
-  Contracts-owned `PKG` descriptors, and the payload mapping.
-- `docs/development/testing-and-parity.md` — package fixture regeneration and the `.msl` test tiers.
-- No user-guide build page: `docs/user-guide/building.md` belongs to Step 12, which owns the build CLI.
+- [x] `docs/reference/file-layout.md` — package location, immutable package rules, the separate `.msr` store,
+  atomic-write and temp-file behaviour, the checked-in fixture layout, and the generated
+  `package-payloads-v1.schema.json`.
+- [x] `docs/reference/diagnostics.md` — `PKG001`–`PKG010` with severity, owner, and help text (feature 6).
+- [x] `docs/development/architecture.md` — `Mocassin.Packages` writer versus `Mocassin.Results` reader boundary,
+  the Contracts-owned `PKG` descriptors, the payload mapping, and the .NET 11/native-zstd toolchain.
+- [x] `docs/development/testing-and-parity.md` — package fixture regeneration and the `.msl` test tiers.
+- [x] `docs/user-guide/building.md` — the build pipeline, options, reproducibility, atomic publication, and the
+  Step 12 CLI status. The owner directed that this page be written in feature 7 even though the original design
+  deferred the CLI-facing page to Step 12; it describes the implemented pipeline and marks the command as
+  Step 12 work.
 
 ## Tests
 

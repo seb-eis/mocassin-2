@@ -26,6 +26,7 @@ land.
 - [Lattice and doping](lattice.md)
 - [Simulations](simulations.md)
 - [Job templates and supercells](job-templates.md)
+- [Building a simulation package](building.md)
 - Project lifecycle and model editors
 - Validation and diagnostics
 - Building and running simulations

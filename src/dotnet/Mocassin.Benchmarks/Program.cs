@@ -3,6 +3,7 @@
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Diagnosers;
 using BenchmarkDotNet.Running;
+using Mocassin.Benchmarks.SimulationPackage;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Symmetry;
 using Mocassin.Symmetry.Geometry;
@@ -16,10 +17,23 @@ namespace Mocassin.Benchmarks;
 public static class Program
 {
     /// <summary>
-    /// Runs the symmetry benchmarks.
+    /// Runs the benchmarks, or the one-shot simulation-package budget workload.
     /// </summary>
-    /// <param name="args">BenchmarkDotNet arguments.</param>
-    public static void Main(string[] args) => BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+    /// <param name="args">BenchmarkDotNet arguments, or <c>--simulation-package-budget [output.json]</c>.</param>
+    /// <returns>0 on success.</returns>
+    public static int Main(string[] args)
+    {
+        ArgumentNullException.ThrowIfNull(args);
+        if (args.Length > 0 &&
+            string.Equals(args[0], "--simulation-package-budget", StringComparison.Ordinal))
+        {
+            var output = args.Length > 1 ? args[1] : "simulation-package-budget.json";
+            return SimulationPackageBudget.RunAsync(output).GetAwaiter().GetResult();
+        }
+
+        BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args);
+        return 0;
+    }
 }
 
 /// <summary>
