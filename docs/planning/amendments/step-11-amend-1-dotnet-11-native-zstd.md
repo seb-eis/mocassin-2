@@ -231,6 +231,14 @@ tasks). The fix has a real dimension source and an explicit orphan-row fallback:
 Until that fix lands, no page claims the lattice path is bounded by the verification options, and the
 `03-quality-strategy.md` §9.9 bomb claim is corrected to name the lattice exception.
 
+**Resolved (2026-11-15)** by the Step 11 fix feature `fix-lattice-decode-guard` (squash `SQUASH_PLACEHOLDER`).
+`PackageReader.ReadLatticesAsync` now derives each lattice bound from the referencing job's `lattice_a/b/c` and
+the referenced model payload's `position_count` with overflow-safe arithmetic, always caps it by the new
+`PackageVerificationOptions.MaxLatticePayloadBytes` (default 512 MiB), and uses that cap for an orphan lattice
+row. The bomb test asserts `PKG004` for a referenced frame above the derived bound and for an orphan frame above
+the cap, and a legitimate 40×40×40 lattice still verifies. No format, payload, signature, or diagnostic code
+changed.
+
 **Round-trip self-check.** The writer's existing decode-before-insert self-check uses the new decoder, so the
 new path is exercised on every payload it writes.
 
@@ -836,7 +844,7 @@ package payloads. No domain doubles.
 | Reference harness cannot be verified without the GPL reference clone | Retarget it; verify when the clone exists; if unavailable before the freeze, record it as a Step 29 item, not as verified |
 | Rollback after integration | Part A is complete; the feature branch stays unmerged until the full gates and Part B-adjacent checks pass; post-integration rollback uses a fix branch before the audit freeze and is recorded |
 | The level-3 decode ratio is inside host/JIT noise | The owner-approved small-payload rule gates absolutes (≤0.15 µs) and throughput (≥100 MB/s) below 8 KiB, and keeps the relative ≤10 % rule for ≥8 KiB; the measured worst absolute penalty is 0.06319 µs (controlled) / 0.05689 µs (default JIT) (§9.1) |
-| Decoder relaxation accepts foreign frames | `TryGetMaxDecompressedLength` rejects non-Zstd input, the model/job guards bound the allocation, and the writer always declares the exact size. The lattice read path is **not** yet bounded by a verification option (§4); it is routed to a Step 11 fix feature with a bomb test, and no page claims otherwise until it lands |
+| Decoder relaxation accepts foreign frames | `TryGetMaxDecompressedLength` rejects non-Zstd input, the model/job guards bound the allocation, and the writer always declares the exact size. The lattice read path is bounded by the derived per-job bound and `MaxLatticePayloadBytes` (implemented by `fix-lattice-decode-guard`, `SQUASH_PLACEHOLDER`); the bomb test covers a referenced row and an orphan row |
 
 ## Dependencies
 

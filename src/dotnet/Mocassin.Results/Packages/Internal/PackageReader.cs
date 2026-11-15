@@ -143,7 +143,9 @@ internal static class PackageReader
             }
 
             var models = await ReadModelsAsync(connection, options, cancellationToken).ConfigureAwait(false);
-            var lattices = await ReadLatticesAsync(connection, options, cancellationToken).ConfigureAwait(false);
+            var positionCounts = ReadModelPositionCounts(models);
+            var lattices = await ReadLatticesAsync(connection, options, positionCounts, cancellationToken)
+                .ConfigureAwait(false);
             var jobs = await ReadJobsAsync(connection, options, cancellationToken).ConfigureAwait(false);
             return new PackageReadResult(
                 schema.Info,
@@ -259,24 +261,55 @@ internal static class PackageReader
         return models.ToImmutable();
     }
 
+    private static Dictionary<long, long> ReadModelPositionCounts(ImmutableArray<PackageModelRecord> models)
+    {
+        var counts = new Dictionary<long, long>();
+        foreach (var model in models)
+        {
+            if (model.Decoded is { } payload && payload.Structure.PositionCount > 0)
+            {
+                counts[model.ModelId] = payload.Structure.PositionCount;
+            }
+        }
+
+        return counts;
+    }
+
+    /// <summary>
+    /// Reads each lattice within a bound derived from its referencing job and model.
+    /// </summary>
+    /// <remarks>
+    /// A referenced lattice is bounded by <c>4 × a × b × c × position_count</c> from the job's
+    /// <c>lattice_a/b/c</c> columns and the referenced model payload's <c>position_count</c>, capped by
+    /// <see cref="PackageVerificationOptions.MaxLatticePayloadBytes"/>. An orphan lattice row (no referencing
+    /// job), or one whose model payload did not decode, uses that cap as its fallback, so an unreferenced or
+    /// malformed row can never force an unbounded allocation.
+    /// </remarks>
     private static async Task<ImmutableArray<PackageLatticeRecord>> ReadLatticesAsync(
         SqliteConnection connection,
         PackageVerificationOptions options,
+        IReadOnlyDictionary<long, long> modelPositionCounts,
         CancellationToken cancellationToken)
     {
+        var bounds = await ReadLatticeBoundsAsync(connection, options, modelPositionCounts, cancellationToken)
+            .ConfigureAwait(false);
         var lattices = ImmutableArray.CreateBuilder<PackageLatticeRecord>();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT lattice_id, signature, format_version, payload FROM lattices ORDER BY lattice_id;";
         await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
         while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
+            var latticeId = reader.GetInt64(0);
             var payload = (byte[])reader[3];
+            var maxDecompressedBytes = bounds.TryGetValue(latticeId, out var bound)
+                ? bound
+                : options.MaxLatticePayloadBytes;
             var decoded = PackagePayloadDecoder.TryDecode<LatticePayload>(
                 payload,
-                int.MaxValue,
+                maxDecompressedBytes,
                 out var error);
             lattices.Add(new PackageLatticeRecord(
-                reader.GetInt64(0),
+                latticeId,
                 reader.GetString(1),
                 reader.GetInt32(2),
                 payload,
@@ -285,6 +318,43 @@ internal static class PackageReader
         }
 
         return lattices.ToImmutable();
+    }
+
+    /// <summary>
+    /// Computes the per-lattice bound from every referencing job; the tightest job wins.
+    /// </summary>
+    private static async Task<Dictionary<long, long>> ReadLatticeBoundsAsync(
+        SqliteConnection connection,
+        PackageVerificationOptions options,
+        IReadOnlyDictionary<long, long> modelPositionCounts,
+        CancellationToken cancellationToken)
+    {
+        var bounds = new Dictionary<long, long>();
+        await using var command = connection.CreateCommand();
+        command.CommandText = "SELECT lattice_id, model_id, lattice_a, lattice_b, lattice_c FROM jobs;";
+        await using var reader = await command.ExecuteReaderAsync(cancellationToken).ConfigureAwait(false);
+        while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
+        {
+            var latticeId = reader.GetInt64(0);
+            var modelId = reader.GetInt64(1);
+            if (!modelPositionCounts.TryGetValue(modelId, out var positionCount))
+            {
+                continue;
+            }
+
+            var bound = LatticePayloadBound.Compute(
+                reader.GetInt64(2),
+                reader.GetInt64(3),
+                reader.GetInt64(4),
+                positionCount,
+                options.MaxLatticePayloadBytes);
+            if (!bounds.TryGetValue(latticeId, out var existing) || bound < existing)
+            {
+                bounds[latticeId] = bound;
+            }
+        }
+
+        return bounds;
     }
 
     private static async Task<ImmutableArray<PackageJobRecord>> ReadJobsAsync(

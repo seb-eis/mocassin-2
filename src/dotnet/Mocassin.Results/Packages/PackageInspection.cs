@@ -104,4 +104,16 @@ public sealed record PackageVerificationReport(
 public sealed record PackageVerificationOptions(
     long MaxModelPayloadBytes = 512L * 1024 * 1024,
     long MaxJobPayloadBytes = 8L * 1024 * 1024,
-    long AdvisorySizeBytes = 2L * 1024 * 1024 * 1024);
+    long AdvisorySizeBytes = 2L * 1024 * 1024 * 1024)
+{
+    /// <summary>
+    /// Gets the hard cap on a decompressed lattice payload, and the fallback bound for a lattice row that no
+    /// job references.
+    /// </summary>
+    /// <remarks>
+    /// A referenced lattice is normally bounded more tightly from its job's <c>lattice_a/b/c</c> columns and the
+    /// model payload's <c>position_count</c> (see <c>PackageReader</c>); this cap is always applied on top. An
+    /// unreferenced (orphan) lattice row has no dimension source and uses this cap directly.
+    /// </remarks>
+    public long MaxLatticePayloadBytes { get; init; } = 512L * 1024 * 1024;
+}

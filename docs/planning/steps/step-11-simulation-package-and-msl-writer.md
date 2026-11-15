@@ -677,10 +677,11 @@ Checks, in order (each produces one `PackageVerificationCheck` and zero or one `
 3. Every job references an existing model and lattice; `job_id` is unique, positive, and ascending; the
    `(collection_index, config_index, job_index)` triple is unique; names are non-empty.
 4. Every payload decodes within the explicit decompressed-size bound: model and job from
-   `PackageVerificationOptions`. The lattice bound (`4 × a × b × c × position_count`, capped at the signed
-   32-bit index limit) is **pending** the `fix-lattice-decode-guard` fix feature — the read-only reader currently
-   passes `int.MaxValue` (amendment 1 §4) — so no page claims the lattice path is bounded until that fix lands.
-   Every payload's `format_version` matches the column.
+   `PackageVerificationOptions`. A lattice is bounded by `4 × a × b × c × position_count` from its referencing
+   `jobs` row (`lattice_a/b/c`) and the referenced model payload's `position_count`, and is always capped by
+   `PackageVerificationOptions.MaxLatticePayloadBytes`; an orphan lattice row (no referencing job), or one whose
+   model payload did not decode, uses that cap as its fallback. Every payload's `format_version` matches the
+   column.
 5. Model payload invariants: pair-table lengths are `particle_count²`; cluster occupation/energy/mapping lengths
    agree; `defect_background.Length == position_count × particle_count`; environment pair entries have
    `target_position < position_count`; cluster `byte_position < site_count`; `tracker_order` is a non-empty
@@ -906,12 +907,11 @@ Two options, for the human owner's start-gate decision:
       Integrated as `00753e7` after the `Ready with notes` acceptance.
 - [x] Capture the pre-amendment `.msl` compatibility fixture and the golden codec frames with the net10 writer
       before the retarget (amendment §9.4–§9.5), and commit them with the amendment feature (`e2b00ea`).
-- [ ] Close the lattice decode-bound gap found by review A1-10 in a Step 11 fix feature
+- [x] Close the lattice decode-bound gap found by review A1-10 in a Step 11 fix feature
       (`feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard`): derive the bound from the
       referencing `jobs` row (`lattice_a/b/c`) and the model payload's `position_count`, apply it in
       `PackageReader.ReadLatticesAsync`, bound an orphan lattice row (no referencing job) with an explicit
-      `MaxLatticePayloadBytes` option and report it as a package-structure finding, and add the lattice bomb
-      test before the audit freeze.
+      `MaxLatticePayloadBytes` option, and add the lattice bomb test. Squashed as `SQUASH_PLACEHOLDER`.
 
 ## Acceptance criteria
 

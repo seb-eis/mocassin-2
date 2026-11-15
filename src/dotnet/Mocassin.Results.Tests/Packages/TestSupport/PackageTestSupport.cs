@@ -126,6 +126,36 @@ internal static class PackageTestSupport
         return MessagePackSerializer.Deserialize<ModelPayload>(destination.AsMemory(0, written));
     }
 
+    /// <summary>Replaces one lattice payload with a controlled frame.</summary>
+    public static async Task WriteLatticePayloadAsync(string path, long latticeId, byte[] payload)
+    {
+        await using var connection = await OpenReadWriteAsync(path);
+        await using var command = connection.CreateCommand();
+        command.CommandText = "UPDATE lattices SET payload = $payload WHERE lattice_id = $id;";
+        command.Parameters.Add("$payload", SqliteType.Blob).Value = payload;
+        command.Parameters.Add("$id", SqliteType.Integer).Value = latticeId;
+        await command.ExecuteNonQueryAsync();
+    }
+
+    /// <summary>Inserts an unreferenced lattice row for a controlled frame.</summary>
+    public static async Task InsertLatticeRowAsync(
+        string path,
+        long latticeId,
+        string signature,
+        byte[] payload)
+    {
+        await using var connection = await OpenReadWriteAsync(path);
+        await using var command = connection.CreateCommand();
+        command.CommandText = """
+            INSERT INTO lattices (lattice_id, signature, format_version, payload)
+            VALUES ($id, $signature, 1, $payload);
+            """;
+        command.Parameters.Add("$id", SqliteType.Integer).Value = latticeId;
+        command.Parameters.Add("$signature", SqliteType.Text).Value = signature;
+        command.Parameters.Add("$payload", SqliteType.Blob).Value = payload;
+        await command.ExecuteNonQueryAsync();
+    }
+
     /// <summary>Reads a scalar from a read-only package.</summary>
     public static async Task<long> ReadInt64Async(string path, string sql)
     {
