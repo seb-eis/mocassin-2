@@ -23,8 +23,8 @@ generation with charge compensation.
 | --- | --- | --- | --- |
 | 1 | Job template model and persistence | `feature/step-10-job-templates/job-template-model` | Done |
 | 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done |
-| 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | In progress |
-| 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Proposed |
+| 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | Done |
+| 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | In progress |
 | 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Proposed |
 | 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Proposed |
 | 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Proposed |
@@ -39,7 +39,8 @@ not create the step branch and does not mark the step `In progress`.
 | --- | --- | --- | --- | --- | --- |
 | `job-template-model` | `feature/step-10-job-templates/job-template-model` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` — reported green by the feature-1 agent | — | `c8d5269` |
 | `settings-inheritance-and-validation` | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done | See outcome below | — | `a7fc120` |
-| `job-expansion-and-seeds` | `feature/step-10-job-templates/job-expansion-and-seeds` | In progress | See outcome below | — | — |
+| `job-expansion-and-seeds` | `feature/step-10-job-templates/job-expansion-and-seeds` | Done | `all --require` green; see outcome below | — | `a6435bf` |
+| `supercell-generation` | `feature/step-10-job-templates/supercell-generation` | In progress | See outcome below | — | — |
 
 Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
 job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
@@ -135,7 +136,50 @@ Recorded deviations and limitations:
   `ProjectValidator`.
 - Seed equality in the expansion tests is asserted by content because `ImmutableArray<byte>` compares by
   reference; the golden vectors themselves are asserted as lowercase hex strings.
-- Feature 3 is recorded as `In progress`; it is not marked Done before the squash merge.
+- Feature 3 was squash-merged into `step/10-job-templates` as `a6435bf` (`step-10: add deterministic job
+  expansion and seeds`). The squash was validated locally; no per-feature CI run was triggered.
+
+#### Feature 4 outcome and deviations
+
+`supercell-generation` adds `ProjectHasher.ComputeParticles` and `ProjectHasher.ComputeLattice`, the
+`LatticeRequestHasher` projection, `LatticeSeedDeriver`, the deterministic `LatticeSampler`, `GeneratedLattice`,
+`SupercellGenerationResult`, and `SupercellGenerator` to their documented locations. The generator validates
+`A`/`B`/`C` in `1..256` and the 500,000-position hard cap (`JOB004`), warns above 100,000 positions (`JOB014`),
+replicates the base unit cell in row-major order, and defaults stable sites to the first particle of the
+authored particle set and unstable sites to compiled void index `0`. It derives and returns the lattice-request
+hash and lattice seed but does not apply dopings, charge compensation, optimizers, or previews.
+
+The accepted synthetic vector reproduces request hash
+`5719de5efea8b57ef6960229bf2248de0da3bb497c2f29507d1742157f878295` and lattice seed
+`a497141d26d005eb5caa17025b3c1e3564f31f8d46518a7a36d311623be464d2`. The sampler vector reproduces the
+documented `[1, 7, 2]` selection.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET build reports 0 warnings/0 errors; Core 682, Symmetry 223, Compilation 96, Packages 291, Cli 7,
+  App 1, Contracts 15, Results 1, and Architecture 1 tests passed; `dotnet format` is clean; the NuGet licence
+  policy covers 51 packages with no vulnerable packages; ApiCompat is compatible with the checked-in baseline;
+  the Rust workspace tests are green; the Python package reports 3 passed tests; Zensical strict, DocFX
+  (0 warnings/0 errors), and rustdoc are clean; 18 contract artifacts are current; 505 source files carry SPDX
+  headers; no secret patterns were found; and cargo-deny advisories/bans/licenses/sources are OK.
+- Focused feature tests: the 40 `LatticeRequestHasherTests`, `LatticeSeedDeriverTests`, `LatticeSamplerTests`,
+  and `SupercellGeneratorTests` cases and the 5 `ProjectHasherLatticeTests` cases all pass.
+
+Recorded deviations and limitations:
+
+- Feature 4 generates only the base lattice. Sequential doping, truncation, charge compensation, the
+  `DopingReport`/`DopingInfo`, the `JOB010`–`JOB012`/`JOB016` outcomes, optimizers, the preview service, and the
+  CLI path remain in features 5–7.
+- The request hash resolves doping priorities because they are part of the projection. A request that references
+  an unknown doping returns `JOB006` from the generator instead of hashing an invalid request; fractional doping
+  validation and application remain in feature 5.
+- The generator throws `InvalidOperationException` for a compiled model that is inconsistent with the project
+  (no P1 positions, an unusable stable-site particle set, or a particle index that does not fit the byte
+  lattice). That is a contract violation, not user data.
+- `GeneratedLattice` carries only the size, position count, and particle bytes. Feature 5 extends it with the
+  doping report and summary.
+- Feature 4 is recorded as `In progress`; it is not marked Done before the squash merge.
 - No per-feature CI run was triggered.
 
 ## Goal

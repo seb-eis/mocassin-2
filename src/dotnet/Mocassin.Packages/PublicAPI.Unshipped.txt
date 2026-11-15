@@ -736,3 +736,62 @@ static Mocassin.Packages.Jobs.JobSeedDeriver.IsCanonicalHexSeed(string? seedText
 static Mocassin.Packages.Jobs.JobSeedDeriver.ResolveSeedText(string? collectionSeed, string? simulationSeed, string? projectSeed) -> string?
 static Mocassin.Packages.Jobs.JobTemplateExpander.Expand(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Ids.JobTemplateId templateId) -> Mocassin.Packages.Jobs.JobExpansionResult!
 static Mocassin.Packages.Jobs.JobTemplateExpander.Expand(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.Jobs.JobTemplate! template) -> Mocassin.Packages.Jobs.JobExpansionResult!
+Mocassin.Packages.Jobs.GeneratedLattice
+Mocassin.Packages.Jobs.GeneratedLattice.<Clone>$() -> Mocassin.Packages.Jobs.GeneratedLattice!
+Mocassin.Packages.Jobs.GeneratedLattice.Deconstruct(out int SizeA, out int SizeB, out int SizeC, out int PositionCount, out System.Collections.Immutable.ImmutableArray<byte> Particles) -> void
+Mocassin.Packages.Jobs.GeneratedLattice.Equals(Mocassin.Packages.Jobs.GeneratedLattice? other) -> bool
+Mocassin.Packages.Jobs.GeneratedLattice.GeneratedLattice(int SizeA, int SizeB, int SizeC, int PositionCount, System.Collections.Immutable.ImmutableArray<byte> Particles) -> void
+Mocassin.Packages.Jobs.GeneratedLattice.Particles.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Packages.Jobs.GeneratedLattice.Particles.init -> void
+Mocassin.Packages.Jobs.GeneratedLattice.PositionCount.get -> int
+Mocassin.Packages.Jobs.GeneratedLattice.PositionCount.init -> void
+Mocassin.Packages.Jobs.GeneratedLattice.SizeA.get -> int
+Mocassin.Packages.Jobs.GeneratedLattice.SizeA.init -> void
+Mocassin.Packages.Jobs.GeneratedLattice.SizeB.get -> int
+Mocassin.Packages.Jobs.GeneratedLattice.SizeB.init -> void
+Mocassin.Packages.Jobs.GeneratedLattice.SizeC.get -> int
+Mocassin.Packages.Jobs.GeneratedLattice.SizeC.init -> void
+Mocassin.Packages.Jobs.LatticeRequestHasher
+Mocassin.Packages.Jobs.LatticeSampler
+Mocassin.Packages.Jobs.LatticeSampler.LatticeSampler(System.ReadOnlySpan<byte> seed) -> void
+Mocassin.Packages.Jobs.LatticeSampler.NextBounded(ulong upper) -> ulong
+Mocassin.Packages.Jobs.LatticeSampler.NextUInt64() -> ulong
+Mocassin.Packages.Jobs.LatticeSampler.SampleWithoutReplacement(System.ReadOnlySpan<int> candidates, int count) -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Packages.Jobs.LatticeSeedDeriver
+Mocassin.Packages.Jobs.SupercellGenerationResult
+Mocassin.Packages.Jobs.SupercellGenerationResult.<Clone>$() -> Mocassin.Packages.Jobs.SupercellGenerationResult!
+Mocassin.Packages.Jobs.SupercellGenerationResult.Deconstruct(out Mocassin.Packages.Jobs.GeneratedLattice? Lattice, out string? LatticeRequestHash, out System.Collections.Immutable.ImmutableArray<byte> LatticeSeed, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Packages.Jobs.SupercellGenerationResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Jobs.SupercellGenerationResult.Diagnostics.init -> void
+Mocassin.Packages.Jobs.SupercellGenerationResult.Equals(Mocassin.Packages.Jobs.SupercellGenerationResult? other) -> bool
+Mocassin.Packages.Jobs.SupercellGenerationResult.IsSuccess.get -> bool
+Mocassin.Packages.Jobs.SupercellGenerationResult.Lattice.get -> Mocassin.Packages.Jobs.GeneratedLattice?
+Mocassin.Packages.Jobs.SupercellGenerationResult.Lattice.init -> void
+Mocassin.Packages.Jobs.SupercellGenerationResult.LatticeRequestHash.get -> string?
+Mocassin.Packages.Jobs.SupercellGenerationResult.LatticeRequestHash.init -> void
+Mocassin.Packages.Jobs.SupercellGenerationResult.LatticeSeed.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Packages.Jobs.SupercellGenerationResult.LatticeSeed.init -> void
+Mocassin.Packages.Jobs.SupercellGenerationResult.SupercellGenerationResult(Mocassin.Packages.Jobs.GeneratedLattice? Lattice, string? LatticeRequestHash, System.Collections.Immutable.ImmutableArray<byte> LatticeSeed, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Packages.Jobs.SupercellGenerator
+const Mocassin.Packages.Jobs.LatticeRequestHasher.Domain = "mocassin/lattice-request/v1" -> string!
+const Mocassin.Packages.Jobs.LatticeSampler.RandomDomain = "mocassin/lattice-rng/v1" -> string!
+const Mocassin.Packages.Jobs.LatticeSampler.SeedByteLength = 32 -> int
+const Mocassin.Packages.Jobs.LatticeSeedDeriver.LatticeDomain = "mocassin/lattice/v1" -> string!
+const Mocassin.Packages.Jobs.LatticeSeedDeriver.SeedByteLength = 32 -> int
+const Mocassin.Packages.Jobs.SupercellGenerator.MaximumCellCount = 256 -> int
+const Mocassin.Packages.Jobs.SupercellGenerator.MaximumPositions = 500000 -> int
+const Mocassin.Packages.Jobs.SupercellGenerator.MinimumCellCount = 1 -> int
+const Mocassin.Packages.Jobs.SupercellGenerator.PositionWarningThreshold = 100000 -> int
+override Mocassin.Packages.Jobs.GeneratedLattice.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.GeneratedLattice.GetHashCode() -> int
+override Mocassin.Packages.Jobs.GeneratedLattice.ToString() -> string!
+override Mocassin.Packages.Jobs.SupercellGenerationResult.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.SupercellGenerationResult.GetHashCode() -> int
+override Mocassin.Packages.Jobs.SupercellGenerationResult.ToString() -> string!
+static Mocassin.Packages.Jobs.GeneratedLattice.operator !=(Mocassin.Packages.Jobs.GeneratedLattice? left, Mocassin.Packages.Jobs.GeneratedLattice? right) -> bool
+static Mocassin.Packages.Jobs.GeneratedLattice.operator ==(Mocassin.Packages.Jobs.GeneratedLattice? left, Mocassin.Packages.Jobs.GeneratedLattice? right) -> bool
+static Mocassin.Packages.Jobs.LatticeRequestHasher.Compute(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.Jobs.LatticeRequest! request, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> dopings) -> string!
+static Mocassin.Packages.Jobs.LatticeSeedDeriver.DeriveLatticeSeed(System.ReadOnlySpan<byte> jobSeed, System.ReadOnlySpan<byte> latticeRequestHash) -> System.Collections.Immutable.ImmutableArray<byte>
+static Mocassin.Packages.Jobs.SupercellGenerationResult.operator !=(Mocassin.Packages.Jobs.SupercellGenerationResult? left, Mocassin.Packages.Jobs.SupercellGenerationResult? right) -> bool
+static Mocassin.Packages.Jobs.SupercellGenerationResult.operator ==(Mocassin.Packages.Jobs.SupercellGenerationResult? left, Mocassin.Packages.Jobs.SupercellGenerationResult? right) -> bool
+static Mocassin.Packages.Jobs.SupercellGenerator.Generate(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Packages.Jobs.JobDescriptor! job, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> Mocassin.Packages.Jobs.SupercellGenerationResult!

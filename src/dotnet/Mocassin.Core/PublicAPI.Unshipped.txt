@@ -1900,6 +1900,8 @@ Mocassin.Core.Diagnostics.DiagnosticDescriptor.Deconstruct(out string! Code, out
 static Mocassin.Core.Diagnostics.CoreDiagnosticCatalog.Descriptors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
 Mocassin.Core.Diagnostics.DiagnosticDescriptor.DiagnosticDescriptor(string! Code, Mocassin.Core.Diagnostics.DiagnosticSeverity DefaultSeverity, string! Owner, string! Title, string! Help, string! DocumentationAnchor) -> void
 static Mocassin.Core.Project.ProjectHasher.ComputeSimulationSelection(Mocassin.Core.Project.Project! project) -> string!
+static Mocassin.Core.Project.ProjectHasher.ComputeParticles(Mocassin.Core.Project.Project! project) -> string!
+static Mocassin.Core.Project.ProjectHasher.ComputeLattice(Mocassin.Core.Project.Project! project) -> string!
 Mocassin.Core.Diagnostics.ParameterizationDiagnosticCatalog
 Mocassin.Core.Diagnostics.ParameterizationDiagnosticCodes
 Mocassin.Core.Editing.ParameterizationTemplateEditResult

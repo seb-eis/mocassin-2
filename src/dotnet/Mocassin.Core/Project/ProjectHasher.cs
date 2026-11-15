@@ -85,6 +85,50 @@ public static class ProjectHasher
     }
 
     /// <summary>
+    /// Computes the SHA-256 hash of the canonical particle and particle-set definitions.
+    /// </summary>
+    /// <param name="project">The project whose particle section is hashed.</param>
+    /// <returns>A lowercase hexadecimal SHA-256 digest.</returns>
+    /// <remarks>
+    /// The projection covers <c>particles</c> and <c>particleSets</c> only. Both arrays are sorted by identifier
+    /// before hashing, so authored array order never changes the digest. The order inside one particle set is
+    /// semantic and is preserved. This is the particle half of the Step 10 lattice-request hash.
+    /// </remarks>
+    public static string ComputeParticles(Project project)
+    {
+        ArgumentNullException.ThrowIfNull(project);
+        var projection = new ModelDefinition
+        {
+            Particles = project.Model.Particles,
+            ParticleSets = project.Model.ParticleSets,
+        };
+        var bytes = ProjectJson.SerializeCanonicalModel(projection);
+        return Convert.ToHexStringLower(SHA256.HashData(bytes));
+    }
+
+    /// <summary>
+    /// Computes the SHA-256 hash of the canonical lattice definition.
+    /// </summary>
+    /// <param name="project">The project whose lattice section is hashed.</param>
+    /// <returns>A lowercase hexadecimal SHA-256 digest.</returns>
+    /// <remarks>
+    /// The projection covers <c>occupationExchanges</c> and <c>dopings</c> only. Exchanges are sorted by
+    /// identifier and dopings by priority and then identifier before hashing. This is the lattice half of the
+    /// Step 10 lattice-request hash; runtime doping fractions are not part of it.
+    /// </remarks>
+    public static string ComputeLattice(Project project)
+    {
+        ArgumentNullException.ThrowIfNull(project);
+        var projection = new ModelDefinition
+        {
+            OccupationExchanges = project.Model.OccupationExchanges,
+            Dopings = project.Model.Dopings,
+        };
+        var bytes = ProjectJson.SerializeCanonicalModel(projection);
+        return Convert.ToHexStringLower(SHA256.HashData(bytes));
+    }
+
+    /// <summary>
     /// Computes the SHA-256 hash of the canonical simulation active-transition selection.
     /// </summary>
     /// <param name="project">The project to hash.</param>
