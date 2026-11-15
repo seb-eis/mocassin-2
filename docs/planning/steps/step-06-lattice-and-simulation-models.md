@@ -270,13 +270,15 @@ public enum ExecutionFlags
 - KMC:
   - `PreRunMcsp` is the relaxation/normalization pre-run; 0 disables it. The original used −1 as the disabled
     sentinel; the new format uses 0 so the contract field can stay unsigned.
-  - `ElectricFieldDirection` is a fractional vector; the solver normalizes it to Cartesian. A zero vector with
+  - `ElectricFieldDirection` is a fractional vector. Step 11 converts it to the normalized Cartesian unit
+    vector stored in the `.msl` job payload, and the solver consumes that vector (Step 15). A zero vector with
     a non-zero modulus is invalid (`SIM007`).
   - `NormalizationEnergyEv` null means no normalization (the original default 0); `0.0` is accepted and
     canonicalizes to null, and a positive value enables fixed normalization.
-  - `MaxAttemptFrequencyHz` null means use the maximum from the transition rules; a positive value rescales
-    all frequencies while preserving ratios. This is a simulation-level default for Step 10's KMC job
-    configuration (the original job `BaseFrequency`).
+  - `MaxAttemptFrequencyHz` null means use the maximum from the transition rules; a positive value is the job's
+    maximum attempt frequency. The model's absolute rule frequencies are not rescaled: Step 16 derives a
+    per-job normalization/pre-check factor from `frequency_hz` and this value (Step 09 §5, data contracts §3.3).
+    This is a simulation-level default for Step 10's KMC job configuration (the original job `BaseFrequency`).
 - MMC:
   - `BreakTolerance` 0 disables the equilibrium break check.
   - Sample lengths/intervals and the result sample are MCSP counts.

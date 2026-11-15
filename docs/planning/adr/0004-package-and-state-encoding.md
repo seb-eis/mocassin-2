@@ -25,7 +25,9 @@ read efficiently by .NET and optionally by Rust/Python. Requirements:
   separate `.msr` store (ADR 0011).
 - Compiled model payloads are **Zstd-compressed MessagePack maps** with snake_case keys.
 - Per-job payloads (settings, seed, optimizers) and content-addressed lattices are Zstd+MessagePack.
-- Common compiled models are stored once per `model_signature` and referenced by jobs.
+- Common compiled models are stored once per parameterization signature (`models.signature`, ADR 0010) and
+  referenced by jobs; the compiled-model identity (`model_signature`) travels in the payload and in the lattice
+  signature.
 - SQLite stores metadata in typed columns for querying; the solver reads one model row and one job row.
 
 ### Result state (`.mcs`)

@@ -64,7 +64,10 @@ pub struct ParameterizedModel {
     pub format_version: u32,
     pub signature: String,          // Step 09 parameterization signature
     pub model_signature: String,    // Step 08 compiled-model signature
-    pub particles: ParticleTable,
+    pub symmetry_contract_version: String,
+    pub space_group_data_version: String,
+    pub space_group_data_sha256: String,
+    pub particle: ParticleTable,    // payload key `particle`; index 0 is void
     pub structure: StructureModel,
     pub energy: EnergyModel,
     pub transitions: TransitionModel,
@@ -77,7 +80,7 @@ pub struct JumpRule {
     pub state0: StateCode,
     pub state1: StateCode,
     pub state2: StateCode,
-    pub frequency_hz: f64,          // absolute Step 09 value; signed
+    pub frequency_hz: f64,          // absolute non-negative Step 09 value
     pub charge_transport_vector: [f64; 3],
     pub static_correction: Option<[f64; 3]>,
     pub tracker_order: [u8; 8],

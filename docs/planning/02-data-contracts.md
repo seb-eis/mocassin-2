@@ -113,7 +113,19 @@ projection is a fixed six-field MessagePack array:
   pre-release signature-layout exception authorizes this finalization: no released `.msl` exists, and the
   entry is closed with golden vectors and the Python checker in Step 09 feature 2.
 
-The two signatures are deliberately distinct; see §3.3.
+The lattice signature is a five-field canonical projection, finalized in Step 11 under the same pre-release
+exception:
+
+```text
+[formatVersion(uint64), modelSignature(string), latticeSize([uint64 × 3]),
+ positionCount(uint64), particles(bin)]
+```
+
+- `modelSignature` binds the compiled particle-index space; `particles` is the row-major initial lattice byte
+  array. The doping summary and build metadata are excluded, so identical lattices deduplicate across jobs.
+- A reader re-encodes the projection from the lattice payload plus the referenced model's `model_signature`.
+
+The signatures are deliberately distinct; see §3.3.
 
 ## 2. Project file (`.mocprj`, JSON)
 
@@ -766,7 +778,10 @@ CREATE TABLE schema_info (
 );
 -- rows: ('format_version','1'), ('app_version','x.y.z'), ('created_utc','…'),
 --       ('project_id','…'), ('generator','mocassin .NET x.y.z'),
---       ('job_selection','all' | '1-100,250')
+--       ('job_selection','all' | '1-100,250'),
+--       ('symmetry_contract_version','symmetry-1'),
+--       ('space_group_data_version','spglib-2.8.0/catalog-1'),
+--       ('space_group_data_sha256','…')
 
 CREATE TABLE models (
     model_id       INTEGER PRIMARY KEY,
@@ -799,8 +814,6 @@ CREATE TABLE jobs (
     pre_run_mcsp      INTEGER NOT NULL DEFAULT 0,
     time_limit_s      INTEGER,
     min_success_rate  REAL,
-    norm_factor       REAL,
-    base_frequency_hz REAL,
     lattice_a         INTEGER NOT NULL,
     lattice_b         INTEGER NOT NULL,
     lattice_c         INTEGER NOT NULL,
@@ -820,14 +833,25 @@ CREATE INDEX ix_jobs_collection  ON jobs(collection_name, config_name);
 Rules:
 
 - `job_id` is a deterministic 1-based integer assigned at build time in template order
-  (collection index, config index, job index) and never reused within a package.
+  (collection index, config index, job index) and never reused within a package. A partial build keeps the full
+  expansion's IDs and may therefore leave gaps; `job_id` is always unique and ascending in template order.
 - The writer always sets the denormalized columns from the resolved job payload; SQL defaults (including
-  `write_out_count DEFAULT 100`) are fallbacks only.
+  `write_out_count DEFAULT 100`) are fallbacks only. `created_utc` is build metadata rather than a payload copy,
+  so verification checks the copy relationship only for the payload-derived columns.
 - The published package has no `results` table. Results live in `.msr` (section 3.6).
-- The database uses `application_id`/`user_version` pragmas in addition to `schema_info` for tooling.
+- `application_id` is `0x4D4F4353` (`"MOCS"`) and `user_version` mirrors the package format version (`1`); both
+  are set in addition to `schema_info` for tooling.
 - The solver opens the package read-only (`SQLITE_OPEN_READONLY`) and never writes it.
-- `schema_info` includes `format_version`, `app_version`, `created_utc`, `project_id`, `generator`, and
-  `job_selection`.
+- `schema_info` includes `format_version`, `app_version`, `created_utc`, `project_id`, `generator`,
+  `job_selection`, and the three symmetry provenance rows. Every model in one package shares the same symmetry
+  provenance.
+- The package format version, the model/job/lattice payload versions, and `CompiledModel.FormatVersion` are
+  independent version domains. Version 1 writers write `1` for each; a change in any one of them is a change to
+  that domain only.
+- Version 1 writes exactly one `models` row per package. The foreign key stays in the schema so a later version
+  can store several parameterizations of one compiled model.
+- Derived solver values are not columns: Step 16 derives attempt-frequency factors from the payload's absolute
+  `jump_rules[].frequency_hz` and the job's `max_attempt_frequency_hz`.
 
 ### 3.3 Compiled model payload
 
@@ -852,15 +876,19 @@ MessagePack map with snake_case keys. Top-level:
   `ParticleId`, never by preview array position.
 - `signature` is the Step 09 parameterization signature and the `models.signature` uniqueness key;
   `model_signature` is the Step 08 compiled-model signature used by parameterization templates and inspection.
+- The parameterization projection is re-encodable from this payload (applied tables plus absolute rule
+  frequencies). The model projection is **not** re-encodable from it: it signs stable IDs and derived
+  classification data that are inspection-only. Readers therefore treat `model_signature` as an identity
+  string, and the writer cross-checks it against `ParameterizedModel.ModelSignature` at write time.
 - The Step 08 `model-v1` and Step 09 `parameterization-v1` projections are finalized once before the first
   released `.msl`; ADR 0010 records the pre-release signature-layout exception for both.
   `signatures.model.status = "final"` and `signatures.parameterization.status = "final"` are not release
   markers. A value-only parameterization change changes `signature` but not `model_signature`.
 - The model-signature projection includes the symmetry contract version and the catalog data version and
   checksum, so a rule or catalog change invalidates parameterizations.
-- `model_signature` is additive before the first released `.msl`. `format_version` stays `1` because no released
-  package exists, matching the pre-release additive-v1 precedent; the manifest entry, schema, and fixtures are
-  added with the Step 11 writer and Step 08 signature feature.
+- `model_signature` is additive before the first released `.msl`. All payload versions stay `1` because no
+  released package exists, matching the pre-release additive-v1 precedent; Step 11 adds the manifest payload
+  entries, the generated schema, and the package fixtures.
 - The payload is the parameterized form. Step 08's internal `CompiledModel` is not the persisted DTO; Step 11
   maps `CompiledModel` + the Contracts `ParameterizationValues` to this payload. The build-time
   `ParameterizedModel` used by Steps 10–11 lives in `Mocassin.Packages.Parameterization` and wraps
@@ -889,8 +917,10 @@ MessagePack map with snake_case keys. Top-level:
 - `position_count = Pcount`.
 - `site_index` identifies the reference site; reference sites are sorted by `CellSiteId` during compilation,
   so the index is stable for a given structure. It is not the P index.
-- `positions` are in ascending `P` order; `particle_ids` is the allowed particle index list for the owning
-  site.
+- `positions` are in ascending `P` order. `vector4` is the full encoded position `[cellA, cellB, cellC, P]`
+  with base positions `[0,0,0,P]`. `particle_ids` is the ascending list of compiled particle indices set in
+  `AllowedParticleMask`, including void (`0`) when the position may be empty; consumers reconstruct the mask
+  from it.
 - `environments` is indexed by position. Each entry carries `selection_particle_mask:u64`, pair links,
   cluster links, and `update_particle_ids`. A pair link is `{target_position:u32, energy_id:u32}`; a cluster
   link is `{cluster_id:u32, byte_position:u8}` used for incremental occupation-code updates.
@@ -929,7 +959,10 @@ MessagePack map with snake_case keys. Top-level:
 - Cluster `object_id` is the stable cluster energy identity
   `SHA-256("mocassin/cluster-energy-id/v1" || clusterId || centerSiteId || canonical geometry hash)`.
   `occupation_codes` are sorted ascending; `particle_table_mapping` holds one row per allowed center particle
-  in ascending compiled particle index; energies are eV and default to `0.0` until Step 09 applies values.
+  in ascending compiled particle index.
+- Pair and cluster energies are the **applied** Step 09 values in compiled table/occupation order, never the
+  compiler's zero defaults. `defect_background` is likewise the resolved background, not the authored sparse
+  site-energy list.
 - Pair shells use the `1 fm` distance bucket. Candidate enumeration uses a `cutoff + 1 fm` margin and includes
   shells with `bucket <= cutoffBucket`.
 - Minimum-image and radial-search results always carry the cell offset; no implicit wrapping is allowed.
@@ -938,13 +971,16 @@ MessagePack map with snake_case keys. Top-level:
 
 | Key | Type | Meaning |
 | --- | --- | --- |
-| `jump_collections` | array | `{object_id, kind, transition_id, mobile_particle_mask:u64, rule_ids:[u32], direction_ids:[u32]}` |
+| `jump_collections` | array | `{kind, transition_id, mobile_particle_mask:u64, rule_ids:[u32], direction_ids:[u32]}` |
 | `jump_directions` | array | `{object_id, position_id, collection_id, path:[i32;4], movement:[[f64;3]], path_vector:[f64;3], length, is_inverse}` |
 | `jump_rules` | array | `{rule_id, collection_id, state0:u64, state1:u64, state2:u64, frequency_hz:f64, charge_transport_vector:[f64;3], static_correction, tracker_order:[u8;8]}` |
 | `jump_count` | array | `[position][particle] -> u32` |
-| `jump_mapping` | array | `[position][particle][relative] -> direction index` |
-| `static_tracker_mapping` | array | `[position][particle] -> tracker offset` |
-| `global_tracker_mapping` | array | `[collection][particle] -> tracker index` |
+| `jump_mapping` | array | Flat `u32` concatenation in `[position][particle][relative]` order; offsets are the prefix sums of `jump_count` |
+| `static_tracker_mapping` | array | Dense `[position][particle] -> i32` tracker offset, `-1` when none |
+| `global_tracker_mapping` | array | Dense `[collection][particle] -> i32` tracker index, `-1` when none |
+
+- A collection is identified by its dense array index and its authored `transition_id`; it has no separate
+  stable `object_id`. A direction's `object_id` is the compiled `CompiledJumpDirection.ObjectId`.
 
 - `rule_id` is a dense `u32` assigned by canonical collection order, then `(state0, state1, state2)` and the
   representative direction; stable rule geometry IDs are inspection-only and are not persisted.
@@ -978,9 +1014,13 @@ MessagePack map with snake_case keys. Top-level:
 | `tracker_models` | array | Global/static tracker definitions and indices; empty/absent for MMC |
 
 - `tracker_models` are definitions only. Global trackers are `(collection, particle)`; static trackers are
-  `(position, particle)` per cell. Step 18 owns mutable values, mobile-tracker assignment, and `.mcs` output.
-- Derived solver intent (`UseDualDofCorrection`, `UsePrerun`, kind) is not a model-payload field. Step 10
-  carries it on the job descriptor and Step 11 composes the job `flags` word.
+  `(position, particle)` per cell, and their indices match `global_tracker_mapping`/`static_tracker_mapping`.
+  Step 18 owns mutable values, mobile-tracker assignment, and `.mcs` output.
+- `default_settings.flags` contains only the authored bits (`noSaving`, `noJumpLogging`, `useFastExp`,
+  `deterministic`). Derived intent (`UseDualDofCorrection`, `UsePrerun`, kind) is not a model-payload field:
+  Step 10 carries it on the job descriptor and Step 11 composes the job `flags` word.
+- `default_settings.field_direction` is the normalized Cartesian unit vector, using the same conversion as the
+  job payload, so the model and job settings never disagree on the coordinate space.
 - Runtime default settings are not part of `model_signature`; they are job-expansion inputs and are excluded
   from the template-invalidating signature.
 
@@ -1000,16 +1040,16 @@ Exact array lengths and invariants are validated by `mocassin-msl` before the so
 | `time_limit_s` | u64? | `null` = no wall-clock limit |
 | `min_success_rate` | f64? | MCS/s; `null` or 0 disables the rate abort |
 | `electric_field_vm` | f64 | |
-| `electric_field_direction` | `[f64;3]` | Normalized Cartesian direction |
+| `electric_field_direction` | `[f64;3]` | Normalized Cartesian unit vector, derived from the authored fractional direction with the compiled cell vectors (`fa·a + fb·b + fc·c`) and then normalized. A zero modulus stores the normalized authored direction when non-zero and `(1,0,0)` when the authored vector is also zero. The solver consumes this vector directly. |
 | `normalization_energy_ev` | f64? | `null` = no normalization; `0.0` canonicalizes to `null` |
 | `max_attempt_frequency_hz` | f64? | Job-level maximum used for normalization/pre-check factor derivation; `null` = maximum of the model's absolute `jump_rules.frequency_hz` values. It does not replace or rescale the persisted model frequencies. |
 | `break_tolerance` | f64? | MMC only; 0 disables the break check |
 | `break_sample_length_mcsp` | u64? | MMC only |
 | `break_sample_interval_mcsp` | u64? | MMC only |
 | `result_sample_mcsp` | u64? | MMC only |
-| `flags` | u32 | `SolverJobFlags` word: bit 0 `noSaving`, bit 1 `noJumpLogging`, bit 2 `useFastExp`, bit 3 `deterministic`, bit 4 `useDualDofCorrection`, bit 5 `usePrerun`, bit 6 `kmcSimulation`, bit 7 `mmcSimulation` |
-| `selection_optimizers` | array | `{position_id:u32, particle_id:u8}`; `position_id` is the canonical P1 position index |
-| `extensions` | array | `{id: string, config: map}` for optional solver routines; canonical JSON |
+| `flags` | u32 | `SolverJobFlags` word: bit 0 `noSaving`, bit 1 `noJumpLogging`, bit 2 `useFastExp`, bit 3 `deterministic`, bit 4 `useDualDofCorrection`, bit 5 `usePrerun`, bit 6 `kmcSimulation`, bit 7 `mmcSimulation`. Step 11 composes it with `SolverJobFlagsMapper.Compose` from the authored flags, the job kind, the KMC pre-run, and the descriptor's dual-DOF intent. |
+| `selection_optimizers` | array | `{position_id:u32, particle_id:u8}`; `position_id` is the canonical P1 position index; entries are sorted by `(position_id, particle_id)` |
+| `extensions` | array | `{id: string, config_json: string}` for optional solver routines; `config_json` is the UTF-8 canonical JSON text of the authored config, sorted by `id`, preserved verbatim for numeric tokens |
 | `instruction` | string? | Advanced/legacy free-text instruction |
 | `doping_info` | string | Machine-readable `v1:{dopingId}:{priority}:{requestedPrimary}:{appliedPrimary}:{appliedDependent}:{effectiveFraction:R}` entries joined by `;`; `dopingId` is a lowercase hyphenated GUID; empty when no doping values are configured |
 
@@ -1021,7 +1061,12 @@ The lattice itself is stored once in the `lattices` table and referenced by the 
 | `lattice_size` | `[u32;3]` | Supercell a,b,c |
 | `position_count` | u32 | P1 positions per unit cell |
 | `lattice` | `u8[]` | Initial particle index per linearized position; length = a*b*c*position_count |
-| `doping_info` | string | Applied-doping summary in the job-payload format; identifies each doping and its counts |
+
+The lattice payload is only the initial state: it has no doping summary, because the same particle array must
+dedupe across jobs and the job payload and `jobs.doping_info` column already record the applied doping
+provenance. The lattice signature projection (ADR 0010) binds the payload `format_version`, the referenced
+model's `model_signature`, `lattice_size`, `position_count`, and `lattice`; it excludes build metadata and the
+doping summary.
 
 The `lattice` array uses row-major cell order. With cell indices `a ∈ [0,A)`, `b ∈ [0,B)`, `c ∈ [0,C)` and
 canonical P1 position `P ∈ [0,position_count)`:
@@ -1040,9 +1085,11 @@ sparse `background_overrides` map without changing the base layout.
 
 The `.msl` is immutable after a successful build:
 
-1. Build in a temporary file in the target directory. WAL may be used during the build.
+1. Build in a temporary file named `<target>.msl.tmp-<pid>-<random>` in the target directory. WAL may be used
+   during the build.
 2. Run `PRAGMA wal_checkpoint(TRUNCATE)`, switch to `PRAGMA journal_mode=DELETE`, and close the database.
-3. `fsync` the file, then atomically rename it to the final `.msl` path.
+3. Hash the finished file for the build result, `fsync` the file and the containing directory, then atomically
+   rename it to the final `.msl` path. There is no `.bak` file: atomic replacement is the safety guarantee.
 4. Never modify the published file. `collect` writes `.msr`; it does not update `.msl`.
 
 A published `.msl` must be readable without `-wal` or `-shm` files. This makes it safe on read-only media and

@@ -130,8 +130,10 @@ Rules:
   `.msl` writing. Parameterization follows the same direction: the persisted template and value records are in
   `Core`, the applied `ParameterizationValues` and signature projection are in `Contracts`, and the factory,
   apply, validation, diff, and rebase services are in `Packages`. `Compilation` never sees a template or an
-  energy/frequency value.
-- `Results` depends on `Core` + `Contracts` (not `Packages`) and owns `.msl`/`.msr`/`.mcs` reading and evaluation.
+  energy/frequency value. `.msl` structural reading and verification live in `Results`, so one reader serves
+  the build CLI, evaluation, and external tools.
+- `Results` depends on `Core` + `Contracts` (not `Packages`) and owns `.msl`/`.msr`/`.mcs` reading, structural
+  package inspection/verification, collection, and evaluation.
 - `Cli` depends on `Packages` + `Results`; it may launch the Rust solver.
 - `App` is the composition root and references views, view models, and rendering. Views reference view models;
   view models depend on public library APIs and never reference views or controls.
@@ -144,9 +146,9 @@ Rules:
 | `Mocassin.Core` | IDs, units, primitive geometry (`Fractional3`, `Cartesian3`, `Vector4I`), persisted symmetry vocabulary (`AxisSetting`, `OriginChoice`), catalog-derived `CrystalSystem`, model objects (`SpaceGroupRef`, `CellParameters`, `CellSite`, `StructureModel`), parameterization template records, project aggregate, diagnostics, validation contracts, undo/redo primitives | File I/O, SQL, UI, solver data, catalog-dependent preview/validation, applied parameterization values |
 | `Mocassin.Symmetry` | Space-group catalog, `SpaceGroupSetting`, `SymmetryOperation`, exact operations, cell geometry transforms, unit-cell encoding, orbit/permutation reduction, structure preview, catalog-dependent structure validation | Model semantics, persistence, Core model ownership |
 | `Mocassin.Compilation` | P1 extension, environment sampling, interaction discovery, transition rule generation, index assignment, compiled model | Job templates, supercells, parameterization values, site-energy background, I/O |
-| `Mocassin.Contracts` | Package/results/state DTOs (`ParameterizationValues`, compiled-model payload, job/lattice payloads, `.mcs` document types, job-folder/solver/event contracts), the parameterization signature projection, schema versions, manifest reader | Build logic, SQL, UI, solver execution |
+| `Mocassin.Contracts` | Package/results/state DTOs (`ParameterizationValues`, compiled-model payload, job/lattice payloads, `.mcs` document types, job-folder/solver/event contracts), the parameterization and lattice signature projections, schema versions, package diagnostic descriptors, manifest reader | Build logic, SQL, UI, solver execution |
 | `Mocassin.Packages` | Project JSON persistence, composed project validation (Core + Symmetry + `PROJ034`), parameterization factory/apply/validation/rebase, job-template expansion, supercell/doping generation and preview, package encoding, immutable `.msl` writing | Solver execution, UI, `.msl`/`.msr` reading |
-| `Mocassin.Results` | `.msl`/`.msr`/`.mcs` parsing, result collection, evaluation queries, derived quantities, exporters | Simulation execution, package building/writing |
+| `Mocassin.Results` | `.msl` structural reading/inspection/verification, `.msr`/`.mcs` parsing, result collection, evaluation queries, derived quantities, exporters | Simulation execution, package building/writing |
 | `Mocassin.Cli` | Command parsing, orchestration, process launch, progress/logging | Scientific algorithms |
 | `Mocassin.App*` | Presentation, commands, navigation, dialogs | Scientific algorithms |
 | `Mocassin.Rendering` | GPU abstraction, scene graph, picking, camera, overlays | Model validation |
