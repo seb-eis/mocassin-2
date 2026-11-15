@@ -388,6 +388,7 @@ Date: 2026-11-15
 | R2-4 | Closed — §6 item 4 now states that `jump_collections` has no `object_id` and none is added; only `jump_directions.object_id` is retained. | Step agent (start gate) | this commit |
 | R2-5 | Closed — the request `Step summary` now records the 3.8–4.2 pw estimate, the four-week-trigger overrun, and the single-step exception/start-gate choice. | Step agent (start gate) | this commit |
 | R2-6 | Closed — the `PublicAPI.Unshipped.txt`/ApiCompat task now names Contracts, Core (`JobExtension.ToCanonicalJson`), Symmetry (`PairInteractionPreview.EquivalentImages`), Compilation, Packages, and Results. | Step agent (start gate) | this commit |
+| R2-8 | Closed — the payload unknown-key policy is now `formats.package.payloads.unknownFields = "ignore"` in the manifest; `generate.py` derives each payload object's `additionalProperties` from it, while `formats.package.unknownFields = "reject"` remains the SQLite row-schema policy. Nothing is hard-coded in the generator. | Step agent (feature 2) | `9b754af` |
 
 Resolution notes:
 
