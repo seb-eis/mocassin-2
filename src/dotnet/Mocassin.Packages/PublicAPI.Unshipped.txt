@@ -736,15 +736,54 @@ static Mocassin.Packages.Jobs.JobSeedDeriver.IsCanonicalHexSeed(string? seedText
 static Mocassin.Packages.Jobs.JobSeedDeriver.ResolveSeedText(string? collectionSeed, string? simulationSeed, string? projectSeed) -> string?
 static Mocassin.Packages.Jobs.JobTemplateExpander.Expand(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Ids.JobTemplateId templateId) -> Mocassin.Packages.Jobs.JobExpansionResult!
 static Mocassin.Packages.Jobs.JobTemplateExpander.Expand(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.Jobs.JobTemplate! template) -> Mocassin.Packages.Jobs.JobExpansionResult!
+Mocassin.Packages.Jobs.DopingApplication
+Mocassin.Packages.Jobs.DopingApplication.<Clone>$() -> Mocassin.Packages.Jobs.DopingApplication!
+Mocassin.Packages.Jobs.DopingApplication.AppliedDependent.get -> int
+Mocassin.Packages.Jobs.DopingApplication.AppliedDependent.init -> void
+Mocassin.Packages.Jobs.DopingApplication.AppliedPrimary.get -> int
+Mocassin.Packages.Jobs.DopingApplication.AppliedPrimary.init -> void
+Mocassin.Packages.Jobs.DopingApplication.AvailablePrimary.get -> int
+Mocassin.Packages.Jobs.DopingApplication.AvailablePrimary.init -> void
+Mocassin.Packages.Jobs.DopingApplication.Deconstruct(out Mocassin.Core.Ids.DopingId DopingId, out int Priority, out int AvailablePrimary, out int RequestedPrimary, out int AppliedPrimary, out int AppliedDependent, out double EffectiveFraction) -> void
+Mocassin.Packages.Jobs.DopingApplication.DopingApplication(Mocassin.Core.Ids.DopingId DopingId, int Priority, int AvailablePrimary, int RequestedPrimary, int AppliedPrimary, int AppliedDependent, double EffectiveFraction) -> void
+Mocassin.Packages.Jobs.DopingApplication.DopingId.get -> Mocassin.Core.Ids.DopingId
+Mocassin.Packages.Jobs.DopingApplication.DopingId.init -> void
+Mocassin.Packages.Jobs.DopingApplication.EffectiveFraction.get -> double
+Mocassin.Packages.Jobs.DopingApplication.EffectiveFraction.init -> void
+Mocassin.Packages.Jobs.DopingApplication.Equals(Mocassin.Packages.Jobs.DopingApplication? other) -> bool
+Mocassin.Packages.Jobs.DopingApplication.Priority.get -> int
+Mocassin.Packages.Jobs.DopingApplication.Priority.init -> void
+Mocassin.Packages.Jobs.DopingApplication.RequestedPrimary.get -> int
+Mocassin.Packages.Jobs.DopingApplication.RequestedPrimary.init -> void
+Mocassin.Packages.Jobs.DopingReport
+Mocassin.Packages.Jobs.DopingReport.<Clone>$() -> Mocassin.Packages.Jobs.DopingReport!
+Mocassin.Packages.Jobs.DopingReport.Applications.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.DopingApplication!>
+Mocassin.Packages.Jobs.DopingReport.Applications.init -> void
+Mocassin.Packages.Jobs.DopingReport.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.DopingApplication!> Applications, out int TotalPositions, out double TotalChargeBefore, out double TotalChargeAfter, out bool IsChargeNeutral) -> void
+Mocassin.Packages.Jobs.DopingReport.DopingReport(System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Jobs.DopingApplication!> Applications, int TotalPositions, double TotalChargeBefore, double TotalChargeAfter, bool IsChargeNeutral) -> void
+Mocassin.Packages.Jobs.DopingReport.Equals(Mocassin.Packages.Jobs.DopingReport? other) -> bool
+Mocassin.Packages.Jobs.DopingReport.IsChargeNeutral.get -> bool
+Mocassin.Packages.Jobs.DopingReport.IsChargeNeutral.init -> void
+Mocassin.Packages.Jobs.DopingReport.ToDopingInfo() -> string!
+Mocassin.Packages.Jobs.DopingReport.TotalChargeAfter.get -> double
+Mocassin.Packages.Jobs.DopingReport.TotalChargeAfter.init -> void
+Mocassin.Packages.Jobs.DopingReport.TotalChargeBefore.get -> double
+Mocassin.Packages.Jobs.DopingReport.TotalChargeBefore.init -> void
+Mocassin.Packages.Jobs.DopingReport.TotalPositions.get -> int
+Mocassin.Packages.Jobs.DopingReport.TotalPositions.init -> void
 Mocassin.Packages.Jobs.GeneratedLattice
 Mocassin.Packages.Jobs.GeneratedLattice.<Clone>$() -> Mocassin.Packages.Jobs.GeneratedLattice!
-Mocassin.Packages.Jobs.GeneratedLattice.Deconstruct(out int SizeA, out int SizeB, out int SizeC, out int PositionCount, out System.Collections.Immutable.ImmutableArray<byte> Particles) -> void
+Mocassin.Packages.Jobs.GeneratedLattice.Deconstruct(out int SizeA, out int SizeB, out int SizeC, out int PositionCount, out System.Collections.Immutable.ImmutableArray<byte> Particles, out Mocassin.Packages.Jobs.DopingReport! Report, out string! DopingInfo) -> void
 Mocassin.Packages.Jobs.GeneratedLattice.Equals(Mocassin.Packages.Jobs.GeneratedLattice? other) -> bool
-Mocassin.Packages.Jobs.GeneratedLattice.GeneratedLattice(int SizeA, int SizeB, int SizeC, int PositionCount, System.Collections.Immutable.ImmutableArray<byte> Particles) -> void
+Mocassin.Packages.Jobs.GeneratedLattice.GeneratedLattice(int SizeA, int SizeB, int SizeC, int PositionCount, System.Collections.Immutable.ImmutableArray<byte> Particles, Mocassin.Packages.Jobs.DopingReport! Report, string! DopingInfo) -> void
 Mocassin.Packages.Jobs.GeneratedLattice.Particles.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Packages.Jobs.GeneratedLattice.DopingInfo.get -> string!
+Mocassin.Packages.Jobs.GeneratedLattice.DopingInfo.init -> void
 Mocassin.Packages.Jobs.GeneratedLattice.Particles.init -> void
 Mocassin.Packages.Jobs.GeneratedLattice.PositionCount.get -> int
 Mocassin.Packages.Jobs.GeneratedLattice.PositionCount.init -> void
+Mocassin.Packages.Jobs.GeneratedLattice.Report.get -> Mocassin.Packages.Jobs.DopingReport!
+Mocassin.Packages.Jobs.GeneratedLattice.Report.init -> void
 Mocassin.Packages.Jobs.GeneratedLattice.SizeA.get -> int
 Mocassin.Packages.Jobs.GeneratedLattice.SizeA.init -> void
 Mocassin.Packages.Jobs.GeneratedLattice.SizeB.get -> int
@@ -773,6 +812,7 @@ Mocassin.Packages.Jobs.SupercellGenerationResult.LatticeSeed.get -> System.Colle
 Mocassin.Packages.Jobs.SupercellGenerationResult.LatticeSeed.init -> void
 Mocassin.Packages.Jobs.SupercellGenerationResult.SupercellGenerationResult(Mocassin.Packages.Jobs.GeneratedLattice? Lattice, string? LatticeRequestHash, System.Collections.Immutable.ImmutableArray<byte> LatticeSeed, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
 Mocassin.Packages.Jobs.SupercellGenerator
+const Mocassin.Packages.Jobs.DopingReport.ChargeNeutralityToleranceElementary = 1E-06 -> double
 const Mocassin.Packages.Jobs.LatticeRequestHasher.Domain = "mocassin/lattice-request/v1" -> string!
 const Mocassin.Packages.Jobs.LatticeSampler.RandomDomain = "mocassin/lattice-rng/v1" -> string!
 const Mocassin.Packages.Jobs.LatticeSampler.SeedByteLength = 32 -> int
@@ -782,12 +822,22 @@ const Mocassin.Packages.Jobs.SupercellGenerator.MaximumCellCount = 256 -> int
 const Mocassin.Packages.Jobs.SupercellGenerator.MaximumPositions = 500000 -> int
 const Mocassin.Packages.Jobs.SupercellGenerator.MinimumCellCount = 1 -> int
 const Mocassin.Packages.Jobs.SupercellGenerator.PositionWarningThreshold = 100000 -> int
+override Mocassin.Packages.Jobs.DopingApplication.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.DopingApplication.GetHashCode() -> int
+override Mocassin.Packages.Jobs.DopingApplication.ToString() -> string!
+override Mocassin.Packages.Jobs.DopingReport.Equals(object? obj) -> bool
+override Mocassin.Packages.Jobs.DopingReport.GetHashCode() -> int
+override Mocassin.Packages.Jobs.DopingReport.ToString() -> string!
 override Mocassin.Packages.Jobs.GeneratedLattice.Equals(object? obj) -> bool
 override Mocassin.Packages.Jobs.GeneratedLattice.GetHashCode() -> int
 override Mocassin.Packages.Jobs.GeneratedLattice.ToString() -> string!
 override Mocassin.Packages.Jobs.SupercellGenerationResult.Equals(object? obj) -> bool
 override Mocassin.Packages.Jobs.SupercellGenerationResult.GetHashCode() -> int
 override Mocassin.Packages.Jobs.SupercellGenerationResult.ToString() -> string!
+static Mocassin.Packages.Jobs.DopingApplication.operator !=(Mocassin.Packages.Jobs.DopingApplication? left, Mocassin.Packages.Jobs.DopingApplication? right) -> bool
+static Mocassin.Packages.Jobs.DopingApplication.operator ==(Mocassin.Packages.Jobs.DopingApplication? left, Mocassin.Packages.Jobs.DopingApplication? right) -> bool
+static Mocassin.Packages.Jobs.DopingReport.operator !=(Mocassin.Packages.Jobs.DopingReport? left, Mocassin.Packages.Jobs.DopingReport? right) -> bool
+static Mocassin.Packages.Jobs.DopingReport.operator ==(Mocassin.Packages.Jobs.DopingReport? left, Mocassin.Packages.Jobs.DopingReport? right) -> bool
 static Mocassin.Packages.Jobs.GeneratedLattice.operator !=(Mocassin.Packages.Jobs.GeneratedLattice? left, Mocassin.Packages.Jobs.GeneratedLattice? right) -> bool
 static Mocassin.Packages.Jobs.GeneratedLattice.operator ==(Mocassin.Packages.Jobs.GeneratedLattice? left, Mocassin.Packages.Jobs.GeneratedLattice? right) -> bool
 static Mocassin.Packages.Jobs.LatticeRequestHasher.Compute(Mocassin.Core.Project.Project! project, Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Core.Model.Jobs.LatticeRequest! request, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.DopingValue!> dopings) -> string!

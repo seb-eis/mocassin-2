@@ -24,8 +24,8 @@ generation with charge compensation.
 | 1 | Job template model and persistence | `feature/step-10-job-templates/job-template-model` | Done |
 | 2 | Settings inheritance and validation | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done |
 | 3 | Job expansion and deterministic seeds | `feature/step-10-job-templates/job-expansion-and-seeds` | Done |
-| 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | In progress |
-| 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Proposed |
+| 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Done |
+| 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | In progress |
 | 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Proposed |
 | 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Proposed |
 | 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | Proposed |
@@ -40,7 +40,8 @@ not create the step branch and does not mark the step `In progress`.
 | `job-template-model` | `feature/step-10-job-templates/job-template-model` | Done | `dotnet`, `structure`, `api`, `contracts`, `docs` — reported green by the feature-1 agent | — | `c8d5269` |
 | `settings-inheritance-and-validation` | `feature/step-10-job-templates/settings-inheritance-and-validation` | Done | See outcome below | — | `a7fc120` |
 | `job-expansion-and-seeds` | `feature/step-10-job-templates/job-expansion-and-seeds` | Done | `all --require` green; see outcome below | — | `a6435bf` |
-| `supercell-generation` | `feature/step-10-job-templates/supercell-generation` | In progress | See outcome below | — | — |
+| `supercell-generation` | `feature/step-10-job-templates/supercell-generation` | Done | `all --require` green; see outcome below | — | `8ae41e8` |
+| `doping-and-charge-compensation` | `feature/step-10-job-templates/doping-and-charge-compensation` | In progress | See outcome below | — | — |
 
 Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
 job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
@@ -177,9 +178,68 @@ Recorded deviations and limitations:
 - The generator throws `InvalidOperationException` for a compiled model that is inconsistent with the project
   (no P1 positions, an unusable stable-site particle set, or a particle index that does not fit the byte
   lattice). That is a contract violation, not user data.
-- `GeneratedLattice` carries only the size, position count, and particle bytes. Feature 5 extends it with the
-  doping report and summary.
-- Feature 4 is recorded as `In progress`; it is not marked Done before the squash merge.
+- `GeneratedLattice` carried only the size, position count, and particle bytes at feature completion. Feature 5
+  extends it with the doping report and summary.
+- Feature 4 was squash-merged into `step/10-job-templates` as `8ae41e8` (`step-10: add deterministic supercell
+  generation`). The squash was validated locally; no per-feature CI run was triggered.
+
+#### Feature 5 outcome and deviations
+
+`doping-and-charge-compensation` completes the build-time lattice generator with sequential doping, truncation,
+charge compensation, and the doping report. It adds `DopingApplication` and `DopingReport` (with
+`ChargeNeutralityToleranceElementary = 1e-6` and the canonical `ToDopingInfo` formatting), extends
+`GeneratedLattice` with `Report` and `DopingInfo`, and adds the internal `DopingApplier` that `SupercellGenerator`
+runs after base replication.
+
+The applier resolves each requested doping and applies it to the current lattice in ascending resolved priority.
+It counts the primary source particle on the exchange site in the current lattice, computes
+`floor(fraction × available)` with finite `[0,1]` validation (`JOB005`), and records `JOB010` only when a positive
+fraction has no source particle and `JOB011` whenever the effective fraction differs from the request. A
+compensating doping computes `Δq_p` and `Δq_d` from the compiled particles, scans `n_p` downward from the
+requested count, and accepts the first pair whose `n_p × (−Δq_p/Δq_d)` is integral within `1e-6` and fits the
+dependent source population. An unrealizable or unbalanced pair is `JOB012` and returns no lattice. Primary and
+dependent positions are sampled without replacement with one `LatticeSampler` stream per generated lattice; the
+dependent source positions are recomputed after the primary application. Same-site dopings see only the particles
+that previous applications left behind. A non-neutral final lattice caused by an applied uncompensated charged
+doping is `JOB016`; a non-neutral base lattice is reported through `TotalChargeBefore`/`IsChargeNeutral` without a
+diagnostic.
+
+After the dopings, the generator verifies the final lattice against the compiled structure: unstable positions
+must hold the void index and stable positions must hold a particle in their compiled allowed-particle mask.
+`DopingInfo` is `v1:{dopingId:D}:{priority}:{requested}:{appliedPrimary}:{appliedDependent}:{effectiveFraction:R}`
+entries joined by `;` in priority order, empty only when no doping was requested.
+
+The 23 new `DopingApplicationTests` cases cover 0 %, 100 %, tiny-cell truncation, request/priority ordering,
+same-site sequences, integer and fractional compensation ratios, dependent capacity limits, impossible
+compensation, `JOB016` for non-compensated and mixed configs, a pre-existing non-neutral base,
+`JOB010`/`JOB011`/`JOB005`, the exact `DopingInfo` form, deterministic repeat generation, and the single shared
+sampler stream.
+
+Local gates on the feature branch:
+
+- `./tools/verify.sh dotnet` — exit 0; build 0 warnings/0 errors; Core 682, Symmetry 223, Compilation 96,
+  Packages 314, Cli 7, App 1, Contracts 15, Results 1, and Architecture 1 tests passed; `dotnet format` clean.
+- `./tools/verify.sh all --require` — exit 0 (`Closeout gate completed with required checks enabled.`).
+  The .NET, Public API/dependency, Rust, Python, documentation, and contracts/policy stages all passed: the
+  NuGet licence policy covers 51 packages with no vulnerable packages, ApiCompat is compatible with the
+  checked-in baseline, the Rust workspace tests are green, the Python package reports 3 passed tests, Zensical
+  strict/DocFX/rustdoc are clean, 18 contract artifacts are current, 508 source files carry SPDX headers, no
+  secret patterns were found in 854 tracked text files, and cargo-deny advisories/bans/licenses/sources are OK.
+
+Recorded deviations and limitations:
+
+- The final-lattice scan checks site masks and unstable-site voids. "Doping counts match the report" is
+  guaranteed at application time rather than re-derived afterwards, because a later same-site doping can consume
+  particles produced by an earlier application; the report is an application log, not a final population
+  snapshot.
+- `JOB010` and `JOB011` can both appear for an unrealizable doping, because a positive request with no source
+  particle also differs from the effective fraction of zero. The design defines no mutual exclusion.
+- The generator throws `InvalidOperationException` for a project/compiled-model inconsistency (a requested
+  doping or exchange that does not resolve, a particle index that does not fit the byte lattice, or a final
+  lattice that violates the compiled site mask). These are contract violations, not user data.
+- Doping zones and concentration gradients are not placed; the sequential model is the documented limitation.
+- Optimizers, the preview service, the CLI path, and the operator/acceptance documentation remain in features
+  6–8.
 - No per-feature CI run was triggered.
 
 ## Goal
