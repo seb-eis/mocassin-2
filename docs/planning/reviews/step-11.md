@@ -389,6 +389,7 @@ Date: 2026-11-15
 | R2-5 | Closed — the request `Step summary` now records the 3.8–4.2 pw estimate, the four-week-trigger overrun, and the single-step exception/start-gate choice. | Step agent (start gate) | this commit |
 | R2-6 | Closed — the `PublicAPI.Unshipped.txt`/ApiCompat task now names Contracts, Core (`JobExtension.ToCanonicalJson`), Symmetry (`PairInteractionPreview.EquivalentImages`), Compilation, Packages, and Results. | Step agent (start gate) | this commit |
 | R2-8 | Closed — the payload unknown-key policy is now `formats.package.payloads.unknownFields = "ignore"` in the manifest; `generate.py` derives each payload object's `additionalProperties` from it, while `formats.package.unknownFields = "reject"` remains the SQLite row-schema policy. Nothing is hard-coded in the generator. | Step agent (feature 2) | `9b754af` |
+| R2-7 | Closed — the file fsync uses `FileStream.Flush(true)`; the containing-directory fsync uses a minimal Unix libc `open`/`fsync`/`close` interop (`DllImport`, `UnmanagedType.LPUTF8Str`, `SetLastError`, `CharSet.Ansi`). Windows has no equivalent directory-durability primitive in this path, so it skips the directory call and relies on the file fsync plus atomic replace. This is a §3.13 platform trigger: the closeout must dispatch the manual Windows platform job; macOS uses the same Unix path exercised on Ubuntu, so it is optional/manual. | Step agent (feature 3) | `c0d8d64` |
 
 Resolution notes:
 
