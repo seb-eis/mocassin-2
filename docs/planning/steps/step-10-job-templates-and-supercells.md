@@ -28,7 +28,7 @@ generation with charge compensation.
 | 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Done |
 | 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Done |
 | 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Done |
-| 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | In progress |
+| 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | Done |
 
 The feature list is a design proposal. It is approved once by the human owner together with the design verdict; it does
 not create the step branch and does not mark the step `In progress`.
@@ -44,7 +44,7 @@ not create the step branch and does not mark the step `In progress`.
 | `doping-and-charge-compensation` | `feature/step-10-job-templates/doping-and-charge-compensation` | Done | `all --require` green; see outcome below | — | `b35e5dc` |
 | `lattice-preview-service` | `feature/step-10-job-templates/lattice-preview-service` | Done | `all --require` green; see outcome below | — | `a95511e` |
 | `selection-optimizers-and-build-preview` | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Done | See feature 7 outcome below | — | `cd1e830` |
-| `documentation-parity-and-closeout` | `feature/step-10-job-templates/documentation-parity-and-closeout` | In progress | See feature 8 outcome below | — | — |
+| `documentation-parity-and-closeout` | `feature/step-10-job-templates/documentation-parity-and-closeout` | Done | `docs --require` and `all --require` green; see feature 8 outcome below | — | `057a85c` |
 
 Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
 job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
@@ -389,7 +389,7 @@ matched the catalog; the documentation-drift test remains the check.
 
 The parity matrix now marks the Step 10 job, optimizer, lattice/doping, cap, and preview rows with their
 implemented/partial state and remaining editor or later-step owners. The Step 10 page feature log records the
-squash commits for features 1–7 and the outstanding closeout state.
+squash commits for features 1–8.
 
 Local gates on the feature branch (after `dotnet restore Mocassin.slnx` and
 `dotnet build Mocassin.slnx -c Release`):
@@ -415,7 +415,8 @@ Recorded deviations and limitations:
   build outputs. A clean `dotnet restore` plus Release build removed them; both gates are green with no
   toolchain or configuration change.
 - `build-preview-v1` remains an interim report shape until Step 12 formalises the build report.
-- Feature 8 is not marked `Done` until the orchestrator squash-merges it; no per-feature CI run was triggered.
+- Feature 8 was squash-merged into `step/10-job-templates` as `057a85c`
+  (`step-10: complete documentation, parity, and closeout`); no per-feature CI run was triggered.
 
 **Closeout evidence:** the orchestrator creates `docs/planning/closeout/step-10.json` after the single closeout CI run and records the audited commit, CI `head_sha`, `main` SHA at freeze, and merge candidate. Do not create it with placeholder hashes.
 
