@@ -73,7 +73,7 @@ decision will be made.
 | Electric field direction in `.msl` | Job and model default settings store the normalized Cartesian unit vector derived from the authored fractional direction; the solver consumes it directly (Step 15) | [Step 11](steps/step-11-simulation-package-and-msl-writer.md) / [`02-data-contracts.md`](02-data-contracts.md) §3.4 |
 | Package build-stage validation | Step 11 adds no `IValidationStage`; package size/dedup are build-report warnings that Step 12 maps to build output | [Step 11](steps/step-11-simulation-package-and-msl-writer.md) / [Step 12](steps/step-12-build-orchestration-and-cli.md) |
 | `.msl` stable columns | `norm_factor`/`base_frequency_hz` are removed (no build-time value; Step 16 derives factors); `application_id = 0x4D4F4353`, `user_version` mirrors `format_version`; one model row per package in v1 | [Step 11](steps/step-11-simulation-package-and-msl-writer.md) / [`02-data-contracts.md`](02-data-contracts.md) §3.2 |
-| .NET toolchain and payload codec | Repository targets `net11.0` on SDK `11.0.100` (`latestPatch`, no prerelease); the `.msl` payload codec is the in-box `System.IO.Compression` Zstandard API with one one-shot encoding path and quality = `PackageBuildOptions.CompressionLevel` (1..19); `ZstdSharp.Port` is removed; no `.msl`, signature, summary, or solver-contract change | [Step 11 amendment 1](amendments/step-11-amend-1-dotnet-11-native-zstd.md) / [ADR 0010](adr/0010-canonical-messagepack-signatures.md) |
+| .NET toolchain and payload codec | Repository targets `net11.0` on SDK `11.0.100` (`latestPatch`, no prerelease); the `.msl` payload codec is the in-box `System.IO.Compression` Zstandard API with one one-shot encoding path and quality = `PackageBuildOptions.CompressionLevel` (1..19); `ZstdSharp.Port` is removed; `Microsoft.NET.Test.Sdk` moves to `18.12.0` for net11 compatibility; no `.msl`, signature, summary, or solver-contract change | [Step 11 amendment 1](amendments/step-11-amend-1-dotnet-11-native-zstd.md) / [ADR 0010](adr/0010-canonical-messagepack-signatures.md) |
 
 ## 3. Gated decisions
 
@@ -88,6 +88,7 @@ decision will be made.
 | Step 11 sizing | Step 11 start gate | Approve the 3.8–4.2 pw single-step exception or split 11A (schema/model/verifier) and 11B (jobs/fixtures/closeout) | Single-step exception, matching the Step 09 precedent |
 | SDK feature band | After Step 11 is merged | Whether to move from the `11.0.1xx` band to a later feature band (`latestPatch` → `latestFeature` or a new pin); a feature band can change analyzers and generated code | Stay on `11.0.100`/`11.0.1xx`; any move is an explicit recorded change |
 | Native Zstandard rollback | Step 11 amendment 1 benchmark gate | Whether the native codec meets the real-payload and 10⁴-job thresholds, or the repository keeps `net10.0` + `ZstdSharp.Port` | Roll back to the unamended toolchain, drop the feature branch, and record the measurements here |
+| Development image build | Step 11 closeout | Build `opencode:mocassin` from the amended containerfile (SDK 11.0.100 only) and record the image reference/digest, or record the accepted risk with the missing evidence | Owner-accepted risk: record "image not built" in `docs/planning/closeout/step-11.json` `notes` and the audit record; no page claims the image was built |
 
 ## 4. Deferred scope
 

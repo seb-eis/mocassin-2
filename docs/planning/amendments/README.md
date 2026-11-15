@@ -111,7 +111,7 @@ If the parent step is already merged or tagged:
 | `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-1-public-math` | [Review](../reviews/step-02-amend-1.md) | `dbf5691`; audit `6341b56` |
 | `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | [Review](../reviews/step-02-amend-2.md) | `dbf5691`; audit `6341b56` |
 | `step-08-amend-1` (`canonical-projection`) | 08 — Model Compilation Pipeline | **Integrated** | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` | [Review](../reviews/step-08-amend-1.md) | `28e741f`; audit passed with notes; merged and tagged `step-08` |
-| `step-11-amend-1` (`dotnet-11-native-zstd`) | 11 — Simulation Package and `.msl` Writer | **Planned** | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | [Review](../reviews/step-11-amend-1.md) — ready for review | Not yet integrated; the parent audit has not started |
+| `step-11-amend-1` (`dotnet-11-native-zstd`) | 11 — Simulation Package and `.msl` Writer | **Planned** | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | [Review](../reviews/step-11-amend-1.md) — ready for review; owner decisions recorded | Not yet integrated; the parent audit has not started |
 
 `step-02-amend-1` covers the public generic math layer (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`,
 `Matrix4<T>`) and the replacement of the temporary `CellGeometry` array-based inverse. See

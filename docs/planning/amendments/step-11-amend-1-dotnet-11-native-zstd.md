@@ -6,8 +6,8 @@
 | --- | --- |
 | Amendment ID | `step-11-amend-1` |
 | Parent step | 11 — Simulation Package and `.msl` Writer |
-| Status | Planned |
-| Branch | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` |
+| Status | Planned (design re-frozen for review; owner decisions recorded 2026-11-15) |
+| Branch | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` (planned; created only after the design verdict) |
 | Design review | `docs/planning/reviews/step-11-amend-1.md` |
 | Parent audit | `docs/planning/audits/step-11.md` |
 | Integration commit | — |
@@ -222,14 +222,15 @@ Verified file inventory. Counts are from the frozen design commit, not estimates
 | --- | --- | --- |
 | SDK pin | `global.json` | `version` → `11.0.100`, `rollForward` → `latestPatch`, `allowPrerelease` stays `false` |
 | Target framework | `Directory.Build.props` | `<TargetFramework>net11.0</TargetFramework>` (covers **21** solution projects) |
-| Target framework | `tools/reference/Mocassin.ReferenceHarness/Mocassin.ReferenceHarness.csproj` | explicit `net11.0` (outside `Mocassin.slnx`) |
+| Target framework | `tools/reference/Mocassin.ReferenceHarness/Mocassin.ReferenceHarness.csproj` | explicit `net11.0`; retargeted **now** with the rest (owner decision); the project is outside `Mocassin.slnx` and is verified when the GPL reference clone is available |
 | ApiCompat gate | `tools/check-api-compat.sh` | baseline directory, reference-pack glob, current-assembly path → `net11.0` |
 | ApiCompat gate | `tools/update-api-baseline.sh` | destination and `obj/Release/net11.0/ref` path |
 | ApiCompat baseline | `tests/contracts/api-baseline/net10.0/` | rename to `net11.0/` and regenerate the **9** assemblies listed in `tools/api-projects.txt` |
 | ApiCompat tool | `.config/dotnet-tools.json` | `microsoft.dotnet.apicompat.tool` `10.0.403` → `11.0.100` |
 | Docs API | `tools/docfx/docfx.json` | 9 assembly paths and `TargetFramework` → `net11.0` |
 | CI | `.github/workflows/ci.yml`, `benchmark.yml`, `docs.yml` | **no literal SDK version exists**; all three use `global-json-file: global.json`. Verify `actions/setup-dotnet@v6` installs 11.0.100 at the closeout run |
-| Image | `docs/opencode/mocassin.containerfile` | install `11.0.100` only; keep the `COPY global.json` pin assertion; `ReportGenerator` `5.5.12` → `5.6.0`; DocFX unchanged |
+| Image | `docs/opencode/mocassin.containerfile` | install `11.0.100` only (the .NET 10 install is removed); keep the `COPY global.json` pin assertion; `ReportGenerator` `5.5.12` → `5.6.0`; DocFX unchanged. The image build is deferred to closeout as an accepted risk (§7) |
+| Test tooling | `Directory.Packages.props` | `Microsoft.NET.Test.Sdk` `18.11.0` → `18.12.0` (owner-accepted net11 compatibility bump, §6 verification items) |
 | Packages | `Directory.Packages.props` | remove the `ZstdSharp.Port` version |
 | Packages | `Mocassin.Packages.csproj`, `Mocassin.Results.csproj` | remove the `ZstdSharp.Port` reference |
 | Codec | `PayloadEncoder.cs`, `PackagePayloadDecoder.cs` | native encode/decode (sections 2–4) |
@@ -267,6 +268,14 @@ Verification items that are gates, not assumptions:
   `has the following vulnerable packages` when a vulnerability exists; `tools/verify.sh` and `ci.yml` grep that
   exact phrase. Both places must be checked together if it changed.
 - The Avalonia XAML compiler and the `PublicAPI` analyzers run cleanly under SDK 11.
+- `Microsoft.NET.Test.Sdk` is `18.12.0`. The `18.11.0` run under net11.0 passed but printed
+  `VSTEST_ARTIFACTS_DIRECTORY … this is most likely caused by an outdated Microsoft.NET.Test.Sdk package
+  reference`. After the bump the full suite must run and coverage must be collected; the warning is expected to
+  disappear, and if it persists it is re-checked and recorded as a benign test-host message, not suppressed.
+- `tools/reference/Mocassin.ReferenceHarness` builds against `net11.0` whenever the GPL reference clone is
+  present (`MOCASSIN_REFERENCE_WORK`/`ReferenceRoot`). It is not in `Mocassin.slnx`, so the solution gate does
+  not cover it; if the clone is unavailable before the audit freeze, the verification is recorded as an
+  unresolved Step 29 item.
 
 ### 7. Container final form
 
@@ -276,29 +285,33 @@ Verification items that are gates, not assumptions:
   The `COPY global.json` step stays: it makes the image fail if the pin and the SDK ever drift.
 - `docfx` stays `2.81.0` (the package ships `tools/net11.0/any`; with only the 11.0.0 runtime installed the tool
   host selects it).
-- `dotnet-reportgenerator-globaltool` moves `5.5.12` → `5.6.0`: `5.5.12` ships at most a `net10.0` tool asset, so
-  it needs the .NET 10 runtime that this amendment removes; `5.6.0` ships `tools/net11.0/any`. This is the one
+- `dotnet-reportgenerator-globaltool` moves `5.5.12` → `5.6.0`, **accepted by the owner**. `5.5.12` ships at most a
+  `net10.0` tool asset, so it needs the .NET 10 runtime that this amendment removes; `5.6.0` ships
+  `tools/net11.0/any`, which removes the .NET 10 runtime dependence from the image toolchain. This is the one
   tool bump the runtime removal forces.
-- The image build itself is **unverified in this environment** (no OCI builder). See the open question.
+- **Image build: deferred to closeout as an accepted risk (owner decision).** There is no OCI/podman builder in
+  the agent environment, so `opencode:mocassin` is **not** built from the amended containerfile and must not be
+  described as build-verified. The accepted risk, its owner, the missing evidence, and the closeout check are
+  recorded in the risks table; at closeout the evidence file `docs/planning/closeout/step-11.json` `notes`
+  records either a built image reference/digest (if the owner builds it) or "image not built — accepted risk",
+  and the Step 11 audit record carries the accepted risk. `python tools/check_closeout_evidence.py
+  docs/planning/closeout/step-11.json` must still pass; `platform_ci` covers the Windows/macOS runs, not the
+  image.
 
 ### 8. `docs/dotnet-11-container` disposition
 
-The pushed branch `docs/dotnet-11-container` (`9ab4bb8`) installs 10.0.403 **and** 11.0.100 and asserts both.
-That is exactly the interim state the amendment replaces.
+**Decision: superseded (owner, 2026-11-15).** The pushed branch `docs/dotnet-11-container` (`9ab4bb8`) is not
+merged. It installs 10.0.403 **and** 11.0.100 and asserts both, which is exactly the interim state this
+amendment replaces.
 
-Options:
-
-1. **Supersede (recommended).** Do not merge `docs/dotnet-11-container`. The amendment feature branch carries the
-   final single-SDK containerfile, including the `11.0.100` install line, the `COPY global.json` pin check, and
-   the `--list-sdks` assertions taken from that commit. Delete the branch only with owner approval.
-2. **Fold in.** Merge `docs/dotnet-11-container` to `main` first, then have the amendment remove the .NET 10
-   install. Creates a main commit that is reverted days later and makes the amendment's containerfile diff
-   harder to read.
-3. **Land first as supporting tooling.** Justified only if someone needs SDK 11 on `main` before the amendment.
-   Nothing does: no repository file requires 11 until the amendment lands.
-
-Recommendation: option 1. The decision is the owner's (it is a merge decision), so it is recorded as an open
-question rather than assumed.
+- The amendment feature branch carries the final single-SDK containerfile: 11.0.100 only, the `.NET 10` install
+  removed.
+- Carry-over from `9ab4bb8`: the `11.0.100` install line and pin, the `COPY global.json /opt/mocassin-sdk-pin/global.json`
+  step, the `dotnet --list-sdks` assertions, and the `dotnet --version` pin check — all reused, with the
+  `10.0.403` half deleted. The `11.0.100` install line is not re-derived.
+- After the amendment is integrated, `docs/dotnet-11-container` is deleted **unmerged** (local and remote) as an
+  explicit cleanup step of the integration. It is not deleted before integration, so its commit remains
+  available until the replacement is on the step branch.
 
 ### 9. Benchmark gate
 
@@ -418,7 +431,12 @@ vice versa.
       comparison reports no breaking changes; `PublicAPI.*.txt` is unchanged; `verify.sh api` is green.
 - [ ] `./tools/verify.sh all --require` passes on the amendment branch.
 - [ ] The containerfile installs 11.0.100 only and asserts it; ReportGenerator 5.6.0 and DocFX 2.81.0 resolve;
-      the image build is verified by the owner or recorded as unavailable.
+      the image build is **not** claimed as verified — it is deferred to closeout as an accepted risk (see Risks
+      and the owner decisions).
+- [ ] `Microsoft.NET.Test.Sdk` is `18.12.0`; the suite runs and coverage is collected; the
+      `VSTEST_ARTIFACTS_DIRECTORY` message is gone or re-checked and recorded as benign.
+- [ ] `tools/reference/Mocassin.ReferenceHarness` is retargeted to `net11.0` and builds whenever the GPL reference
+      clone is available; otherwise the verification gap is recorded for Step 29.
 - [ ] Toolchain documentation is updated and `./tools/verify.sh docs` is green.
 - [ ] Parent step page, amendment index, status dashboard, and open decisions reflect the amendment state.
 
@@ -467,7 +485,8 @@ codec comparison uses the real package payloads. No domain doubles.
 | .NET 11 is five days old (GA 2026-11-10); servicing fixes and behaviour changes are unknown | Pin `11.0.100` with `latestPatch`; one closeout CI run; the retarget is a single revertible commit; rollback restores net10 |
 | A tool or package is not net11-ready | Verified before acceptance: DocFX 2.81.0 `net11.0` asset, apicompat 11.0.100, ReportGenerator 5.6.0 `net11.0` asset, Avalonia 12.1.6 + MessagePack + Sqlite + xunit probe on net11. Remaining risk is the full build, covered by the migration gate |
 | Windows/macOS break | Windows is already a required §3.13 platform gate (R2-7); the codec adds no native P/Invoke of our own. Dispatch the Windows platform job; macOS stays manual/optional as recorded |
-| Image build cannot be verified here (no OCI builder) | The containerfile change is small and assertion-checked; the owner builds it, or the audit records the risk. Do not claim the image is verified until it is |
+| Image build cannot be executed in this environment (no OCI/podman builder) | **Accepted risk, owner: human owner.** Missing evidence: the amended `opencode:mocassin` image was never built, so the containerfile's install/assertion block is unproven. Closeout check: `docs/planning/closeout/step-11.json` `notes` records either a built image reference/digest or "image not built — accepted risk", the Step 11 audit record carries the risk, and `tools/check_closeout_evidence.py` still passes. The containerfile is not described as build-verified anywhere |
+| `Microsoft.NET.Test.Sdk` 18.11.0 prints a `VSTEST_ARTIFACTS_DIRECTORY` warning on net11.0 | Bumped to 18.12.0 (owner-accepted); the suite and coverage must run, the warning is expected to disappear, and if it persists it is re-checked and recorded as benign rather than suppressed |
 | Cross-SDK-patch determinism | Signatures and summaries exclude compressed bytes; fixtures compare canonical summaries; CI installs the exact pin |
 | ApiCompat baseline churn hides an API change | One-time cross-TFM comparison (`net10.0` baseline vs `net11.0` build) plus an unchanged `PublicAPI.*.txt`; any real delta is a finding, not a refresh |
 | New analyzer/language diagnostics under SDK 11 break `warnings-as-errors` | The migration feature fixes or justifies each diagnostic; no blanket suppression; `all --require` is the gate |
@@ -484,8 +503,9 @@ codec comparison uses the real package payloads. No domain doubles.
 - Feature 7 must not generate the checked-in `.msl` fixture or the canonical-summary golden before this
   amendment is integrated; otherwise the fixture is produced on a toolchain that is immediately replaced.
 - No dependency on Steps 12/13/20 changes: the reader contract and the solver contract are unchanged.
-- Owner decisions required before implementation: the `docs/dotnet-11-container` disposition, the image-build
-  verification path, and the ReportGenerator bump (see open questions).
+- Owner decisions: **recorded 2026-11-15** (see Owner decisions). The `docs/dotnet-11-container` disposition, the
+  image-build path, the ReportGenerator bump, the Test SDK bump, and the ReferenceHarness retarget are decided;
+  no owner decision blocks implementation.
 - Part A of the benchmark gate must pass before the design review can accept the amendment for implementation.
 
 ## Integration
@@ -506,23 +526,19 @@ codec comparison uses the real package payloads. No domain doubles.
 - Tag: `step-11` (on the combined merged commit)
 - Post-merge fallback required: no
 
-## Open questions for the owner
+## Owner decisions (recorded 2026-11-15)
 
-1. **`docs/dotnet-11-container`.** Supersede the branch and carry its single-SDK content into the amendment
-   feature branch (recommended), merge it to `main` first and remove the .NET 10 install in the amendment, or
-   leave it unmerged but undeleted? The recommendation avoids a main commit that is reverted within days.
-2. **Image build verification.** There is no OCI builder in this environment, so the final containerfile is
-   unverified. Options: the owner builds `opencode:mocassin` before the design review accepts the amendment; or
-   the build moves to the closeout and, if unavailable, is recorded as an accepted risk in the audit. The
-   second option keeps the design gate moving but leaves the image claim unproven until closeout.
-3. **ReportGenerator 5.6.0.** Removing the .NET 10 runtime forces `dotnet-reportgenerator-globaltool` from
-   `5.5.12` to `5.6.0` (the first release with a `net11.0` tool asset). Accept this as a required tooling bump,
-   or keep `5.5.12` and the .NET 10 runtime in the image (which contradicts "remove .NET 10")? The amendment
-   assumes the bump.
-4. **Microsoft.NET.Test.Sdk.** `18.11.0` passes on net11.0 in the probe but prints a benign
-   `VSTEST_ARTIFACTS_DIRECTORY` warning. Keep it (no unrelated upgrade) and revisit only if the full suite
-   misbehaves, or bump to `18.12.0` as a compatibility fix? The amendment keeps `18.11.0`.
-5. **Reference harness.** `tools/reference/Mocassin.ReferenceHarness` targets `net10.0` explicitly and is not in
-   `Mocassin.slnx`; it needs the GPL reference clone to build. Retarget it to `net11.0` and record "verified when
-   the clone is available", or leave it out of scope until Step 29? The amendment retargets it for consistency
-   and records the verification gap.
+The five questions this page raised were answered by the human owner. They are decisions, not options; the
+design above is updated to match, and no open question remains for this amendment.
+
+| # | Question | Decision | Consequence in the design |
+| --- | --- | --- | --- |
+| 1 | `docs/dotnet-11-container` disposition | **Superseded.** The amendment's containerfile (11 only, .NET 10 removed) replaces it; the branch is deleted unmerged after integration. | §8; the `11.0.100` install line, `COPY global.json` pin check, and `--list-sdks` assertions are carried over verbatim; the branch is not merged |
+| 2 | Image build verification | **Deferred to closeout as an accepted risk.** The containerfile is not build-verified here. | §7 and the Risks table; owner, missing evidence, and the closeout check are named; no page claims the image was built |
+| 3 | ReportGenerator 5.6.0 | **Accepted.** `5.5.12` has no `net11.0` tool asset. | §7; the .NET 10 runtime dependence is removed from the image toolchain |
+| 4 | Microsoft.NET.Test.Sdk | **Bumped to 18.12.0.** | §6 verification items and Risks; the suite and coverage must run, and the `VSTEST_ARTIFACTS_DIRECTORY` message is expected to disappear or be re-checked and recorded as benign |
+| 5 | ReferenceHarness | **Retargeted now** to `net11.0`. | §6; the project is outside `Mocassin.slnx` and is verified when the GPL reference clone is available, otherwise the gap is a Step 29 item |
+
+Residual items that are **not** owner decisions and remain gates: Part A of the benchmark gate before
+acceptance, Part B before the audit freeze, and the image-build evidence (or the named accepted risk) in the
+closeout evidence file.
