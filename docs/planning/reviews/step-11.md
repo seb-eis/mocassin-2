@@ -37,7 +37,7 @@ Step page: [`Step 11 — Simulation Package and .msl Writer`](../steps/step-11-s
 | Phase | C. Compilation |
 | Depends on | 08, 09, 10 |
 | Delivers | The immutable `.msl` v1 package: schema, publication barrier, model/job/lattice payload DTOs and encoding, content-addressed lattices, streamed job insertion, a read-only inspector/verifier, and the checked-in contract fixtures |
-| Sizing | 3.5–4.0 person-weeks, seven features; within the roadmap §3.1 four-week / roughly 6–8 feature trigger |
+| Sizing | 3.8–4.2 person-weeks, seven features; the upper bound exceeds the roadmap §3.1 four-week trigger, so the request presents the single-step exception (recommended, as for Step 09) and the 11A/11B split alternative |
 
 ## Design decisions reviewed
 
@@ -357,12 +357,12 @@ Findings and resolutions:
 ## Human approval
 
 - [ ] Accepted: Ready for implementation
-- [ ] Accepted: Ready with notes
+- [x] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-15
 
 ## Resolution status
 
@@ -382,6 +382,12 @@ Date:
 | n-3 | Closed — the `usePrerun` check is qualified by kind (KMC only, iff `pre_run_mcsp > 0`; MMC requires it clear and `pre_run_mcsp = 0`). | Planner | `f04bd3c` |
 | n-4 | Closed — the verifier checks only payload-derived columns and checks authored/build metadata for presence/format/uniqueness. | Planner | `f04bd3c` |
 | n-5 | Closed in design — feature 3/6 records the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges; verification owner is the step agent at implementation. | Step agent | `f04bd3c` |
+| R2-1 | Closed — the Step 13 page has a balanced fence around the `JumpRule` and `JobPackage` blocks, and the `### 3. .msl reader` section renders again. | Step agent (start gate) | this commit |
+| R2-2 | Closed — the `PairLink.offset` comment now reads “periodic image offset from the source cell”, matching the one-entry-per-image contract. | Step agent (start gate) | this commit |
+| R2-3 | Closed — Step 11 check 5 and the tracker acceptance line now state only what the payload proves: `tracker_order` non-empty, sentinel/index bounds, and length within the documented bound; the writer keeps the representative-path-length assertion, and the shell-representative presence check is dropped because the payload carries no marker. | Step agent (start gate) | this commit |
+| R2-4 | Closed — §6 item 4 now states that `jump_collections` has no `object_id` and none is added; only `jump_directions.object_id` is retained. | Step agent (start gate) | this commit |
+| R2-5 | Closed — the request `Step summary` now records the 3.8–4.2 pw estimate, the four-week-trigger overrun, and the single-step exception/start-gate choice. | Step agent (start gate) | this commit |
+| R2-6 | Closed — the `PublicAPI.Unshipped.txt`/ApiCompat task now names Contracts, Core (`JobExtension.ToCanonicalJson`), Symmetry (`PairInteractionPreview.EquivalentImages`), Compilation, Packages, and Results. | Step agent (start gate) | this commit |
 
 Resolution notes:
 

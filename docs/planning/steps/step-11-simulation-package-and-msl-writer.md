@@ -8,21 +8,27 @@ read-only inspection/verification library for the build CLI.
 
 ## Implementation status
 
-- **Status:** Not started
-- **Step branch:** —
+- **Status:** In progress
+- **Step branch:** `step/11-simulation-package-and-msl-writer`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required after `Changes required` at `8ac8590` — [record](../reviews/step-11.md)
-- **Feature list:** Proposed 2026-11-15 (seven features; awaiting start-gate approval)
+- **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
+- **Feature list:** Approved 2026-11-15 (seven features)
 - **Last updated:** 2026-11-15
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Pending | — | — | — |
+| 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Pending | — | — | — |
+| 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Pending | — | — | — |
+| 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Pending | — | — | — |
+| 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Pending | — | — | — |
+| 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Pending | — | — | — |
+| 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Pending | — | — | — |
 
-### Proposed feature list
+### Approved feature list
 
 | # | Feature | Branch | Planned scope |
 | --- | --- | --- | --- |
@@ -34,8 +40,9 @@ read-only inspection/verification library for the build CLI.
 | 6 | Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Read-only `MslPackageInspector`/`PackageVerifier` in `Mocassin.Results.Packages`; bounded decode; `PKG001`–`PKG010`; `package-summary-v1`; reports; corruption/truncation/decompression-bomb tests |
 | 7 | Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Checked-in `.msl` fixtures plus `package-summary-v1` goldens and extracted payloads; the 10⁴-job budget evidence; reference/developer pages; parity and status updates; closeout evidence and audit request |
 
-The feature list is a design proposal. It is approved once by the human owner together with the design verdict;
-it does not create the step branch and does not mark the step `In progress`.
+The feature list was approved once by the human owner together with the `Ready with notes` design verdict on
+2026-11-15. That approval created the step branch and marks the step `In progress`; individual features are
+squash-merged without a further approval.
 
 ### Feature log
 
@@ -381,10 +388,13 @@ Checks, in order (each produces one `PackageVerificationCheck` and zero or one `
    limit) and its payload `format_version` matches the column.
 5. Model payload invariants: pair-table lengths are `particle_count²`; cluster occupation/energy/mapping lengths
    agree; `defect_background.Length == position_count × particle_count`; environment pair entries have
-   `target_position < position_count`; cluster `byte_position < site_count`; `tracker_order.Length` equals the
-   rule's node count and non-sentinel values are below `global_tracker_count`; `jump_count`/`jump_mapping`/
-   tracker-mapping lengths match the declared dimensions; pair entries within one environment are unique by
-   `(target_position, offset)` and the shell representative is present; every particle index is below
+   `target_position < position_count`; cluster `byte_position < site_count`; `tracker_order` is a non-empty
+   array whose non-sentinel values are below `global_tracker_count` and whose length is within the documented
+   path-node bound (the payload carries no independent node count or representative marker, so the writer's
+   `length == representative path length` assertion is not re-provable by the verifier); `jump_count`/
+   `jump_mapping`/tracker-mapping lengths match the declared dimensions; pair entries within one environment
+   are unique by `(target_position, offset)` (the shell representative is not identifiable from the payload,
+   because `distance_bucket_fm` and any symmetry reference are not persisted); every particle index is below
    `particle_count`; no NaN/Inf in required numeric fields.
 6. The model's parameterization projection re-encodes to `models.signature` and the payload's `signature` from
    the stored absolute `frequency_hz` values — never from a factor × maximum. `model_signature` is a 64-hex
@@ -448,7 +458,7 @@ the same feature as the code that needs it, with regenerated artifacts and fixtu
    Fixture descriptors and the generated constants are regenerated.
 3. The undefined `jobs.norm_factor` and `jobs.base_frequency_hz` columns are removed from the manifest and the
    SQL contract.
-4. `jump_collections.object_id` is removed from §3.3: it has no compiled source and the dense index plus
+4. `jump_collections` has no `object_id` field, and §3.3 does not add one: the dense index plus
    `transition_id` already identify a collection. `jump_directions.object_id` stays (its compiled source is
    `CompiledJumpDirection.ObjectId`).
 5. The lattice payload drops `doping_info`; the job payload and `jobs.doping_info` keep the canonical summary.
@@ -576,7 +586,10 @@ Two options, for the human owner's start-gate decision:
 - [ ] Add checked-in `.msl` fixtures, canonical summaries, extracted payloads, and regeneration command.
 - [ ] Add the lattice projection golden vectors and `verify.sh contracts` checker.
 - [ ] Add the `Mocassin.Benchmarks/SimulationPackage` benchmark and record the 10⁴-job budget.
-- [ ] Update `PublicAPI.Unshipped.txt` and the ApiCompat baseline for all three projects.
+- [ ] Update `PublicAPI.Unshipped.txt` and the ApiCompat baseline for `Mocassin.Contracts`, `Mocassin.Core`
+      (the new `JobExtension.ToCanonicalJson`), `Mocassin.Symmetry` (the new
+      `PairInteractionPreview.EquivalentImages`), `Mocassin.Compilation`, `Mocassin.Packages`, and
+      `Mocassin.Results`.
 - [ ] Record the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges.
 - [ ] Write the documentation named below and update parity/status.
 
@@ -597,8 +610,10 @@ Two options, for the human owner's start-gate decision:
       one `CompiledPairLink` per image and the writer maps it one-to-one, Step 14's target expansion
       (`cell + offset` wrapped, `target_position`) reproduces the compiled minimum-image link for every pair
       table, and a multi-image shell (for example a six-image nearest-neighbour shell) is fully present.
-- [ ] `tracker_order.Length` equals the rule's path-node count, and Step 13's reader loads it as a variable
-      `u8[]` with `0xFF` for non-mobile nodes; Step 18's mobile-tracker permutation follows the same indices.
+- [ ] The writer asserts `tracker_order.Length` equals the representative direction's path-node count; the
+      verifier proves the payload-checkable part (non-empty, non-sentinel values below `global_tracker_count`,
+      length within the documented bound), and Step 13's reader loads it as a variable `u8[]` with `0xFF` for
+      non-mobile nodes; Step 18's mobile-tracker permutation follows the same indices.
 - [ ] `PKG001`–`PKG010` are documented with severities and anchors, `PKG` descriptors are composed into
       `DiagnosticCatalog.Default`, and `Mocassin.Results` still references only `Core` and `Contracts`.
 - [ ] The checked-in `.msl` fixture's `package-summary-v1` golden matches a rebuild after normalizing

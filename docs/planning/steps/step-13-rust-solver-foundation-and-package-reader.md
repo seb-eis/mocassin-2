@@ -88,7 +88,7 @@ pub struct JumpRule {
 
 pub struct PairLink {
     pub target_position: PositionId,
-    pub offset: [i32; 3],           // representative relative cell image
+    pub offset: [i32; 3],           // periodic image offset from the source cell
     pub pair_id: u32,               // shared pair table index
 }
 
@@ -112,6 +112,7 @@ pub struct EnvironmentModel {
 - `tracker_order` is variable-length: `tracker_order.len()` equals the representative direction's `path.len()`
   (the state-code node count); entries are global tracker indices below `global_tracker_count` or `0xFF`.
 
+```rust
 pub struct JobPackage {
     pub job_id: u32,
     pub kind: SimulationKind,
