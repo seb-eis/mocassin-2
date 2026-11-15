@@ -272,6 +272,66 @@ is no `mocassin parameterize` CLI; Step 12 owns `compile` and `build --parameter
 Step 10 adds an optional `CompiledModel` to `ValidationContext` for its own `JOB` build stage. Step 09 remains
 stage-free; Step 12 registers the Step 10 stage only after compilation.
 
+## Build-side SHA-256 streams (Step 10)
+
+Job and lattice generation must be deterministic across platforms without pulling the solver's ChaCha12
+implementation into the build. The build derives a 32-byte job seed with SHA-256 over the master seed and the
+fixed-width `u32_le` collection/configuration/job indices plus a terminal domain string. The lattice seed hashes
+the job seed with the lattice-request hash, which is parameterization-independent so a runtime or energy edit
+does not change a lattice for the same job.
+
+The deterministic sampler is a SHA-256 counter DRBG: `SHA-256("mocassin/lattice-rng/v1" || seed || u64_le(counter))`
+supplies each 64-bit block. `NextBounded` uses Lemire's multiply-and-reject method with a 128-bit intermediate,
+and sampling without replacement is an in-place Fisher–Yates shuffle over candidates sorted by ascending linear
+index. The implementation is explicit and platform-independent: no `System.Random`, no time, no second hash
+algorithm, and no new NuGet dependency. ADR 0005's ChaCha12 stream remains the solver's stream; the build never
+shares it. Golden vectors pin the job seed, lattice seed, and the `[1, 7, 2]` sampler selection.
+
+The build never creates or persists a seed. Rebuilding from the same project and job coordinates reproduces the
+seed, so no seed becomes stale when a template is copied or a run is restarted.
+
+## `ValidationContext.CompiledModel` (Step 10)
+
+`ValidationContext` gains an optional `CompiledModel?` property, defaulting to `null`. It is additive: the load,
+model, cross-domain, and feasibility stages never need it, and `validate` keeps `RunBuildStage = false`. The
+Step 10 `JobTemplateValidationStage` runs only when `RunBuildStage` is true, a compiled model is supplied, and
+earlier stages have no error. It first delegates to the Core structural validator, then runs the compiled-bound
+checks (total position count and job limit, optimizer removes-all, doping/compensation/neutrality outcomes).
+
+This is deliberately not a second validation pipeline. The Build stage remains the only extension point, the
+Core structural validator remains available to `validate` without a compiled model, and Step 12 owns the
+`ValidationContext` construction and stage registration. A model that is missing or stale relative to the
+project is a caller contract problem, not a user-data diagnostic.
+
+## Packages/Compilation boundary (Step 10)
+
+`Mocassin.Compilation` stays a pure model compiler. It does not know about job templates, lattice requests,
+doping fractions, job counts, seeds, or selection optimizers, and it does not reference `Mocassin.Contracts`.
+The typed job templates live in `Mocassin.Core.Model.Jobs`; expansion, supercell generation, the preview
+service, and the optimizer plan live in `Mocassin.Packages.Jobs`, which references `Core`, `Compilation`, and
+`Contracts`.
+
+This preserves the architecture's `Packages -> Compilation` direction and keeps the compiled model reusable for
+every job and lattice. Step 11 is the only package-payload mapper: it composes a `JobDescriptor` and its
+`GeneratedLattice` into the `.msl` job and lattice payloads, including `SolverJobFlags` and `DopingInfo`. Step 10
+does not write a package and does not add a `.msl` schema version bump; `doping_info` is a pre-implementation
+contract extension recorded in the Step 10 page.
+
+## Optimizer dual-DOF rule (Step 10)
+
+The compiled intent starts with `UseDualDofCorrection = Kind == Kmc`, matching the original job builder. A
+selection optimizer removes a `(position, particle)` start option at every canonical P1 image of the target
+site, but it never removes the particle from the lattice and never mutates the compiled model or its masks.
+
+For each compiled environment, the resolver checks whether an optimizer target lies on a position with that
+environment index and whether the particle is allowed there. The flag is cleared only when at least one
+optimizer exists **and every** environment is reduced. A mixed, partial, or no-optimizer case keeps the flag, and
+MMC keeps it clear. This reproduces the original `JumpSelectionOptimizer.Run` accumulation rule
+(`isReducedMask |= optimizedMask == originalMask`) and is covered by tests for one, some, and all environments
+reduced. The `JOB009` removes-all check uses the compiled jump-count table and the active KMC collections'
+mobile masks; when that table is unavailable the plan reports a precise limitation rather than claiming the
+check ran.
+
 ## Derived solver intent
 
 `CompiledSolverIntent` carries `Kind`, `UsePrerun = Kmc && PreRunMcsp > 0`, and

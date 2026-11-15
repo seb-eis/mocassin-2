@@ -150,6 +150,82 @@ public interface IModelCompiler
   through a documented and tested selection-optimizer rule. Step 10 copies the intent to `JobDescriptor`;
   Step 11 composes the `SolverJobFlags` word. `Mocassin.Compilation` never references `SolverJobFlags`.
 
+### Job expansion and supercells (Step 10)
+
+Job expansion and lattice generation are build-time steps after compilation and parameterization. They live in
+`Mocassin.Packages.Jobs`, not in `Mocassin.Compilation`: the compiler never sees a job template, a doping
+fraction, a lattice request, or an optimizer, which keeps the `Packages -> Compilation` dependency direction
+intact.
+
+```text
+validated project + CompiledModel
+  → expand collections/configurations/duplicates
+  → resolve effective settings
+  → assign 1-based JobIds and job seeds
+  → resolve selection-optimizer targets and dual-DOF intent
+  → derive lattice request hash and lattice seed
+  → generate the base supercell and apply dopings
+  → DopingReport + compact DopingInfo
+```
+
+`JobTemplateExpander.Expand(project, compiledModel, template)` resolves each collection by `SimulationId` and
+keeps authored collection/configuration order. The effective job count is `jobCountPerConfig` or the compiled
+simulation default. Every configuration is resolved and validated before the first descriptor is emitted, so
+invalid data returns diagnostics and an empty list, never a partial expansion. The resulting `JobDescriptor`
+carries the job/collection/configuration/duplicate indices, authored names, simulation id and compiled index,
+kind, dual-DOF flag, resolved settings, lattice request, dopings, compiled optimizers, and 32-byte seed. Step 11
+maps a descriptor plus its `GeneratedLattice` to the `.msl` job and lattice payloads.
+
+Seeds are derived, never stored. The master seed text is the first non-empty of the collection seed, the
+simulation seed, and the project master seed. A 64-character lowercase hexadecimal text decodes to 32 bytes;
+every other text is hashed with `SHA-256("mocassin/seed-text/v1" || UTF8(text))`. The job seed is
+`SHA-256(master[32] || u32_le(collection) || u32_le(config) || u32_le(job) || UTF8("mocassin/job/v1"))`.
+`JobSeedDeriverTests` pins the two documented golden vectors, so Step 13 can reproduce the same bytes.
+
+The lattice seed is `SHA-256("mocassin/lattice/v1" || job_seed[32] || lattice_request_hash[32])`. The request
+hash is deliberately parameterization-independent: it covers the structure hash, the canonical particle and
+particle-set projection, the canonical occupation-exchange/doping projection, the cell counts, the requested
+fractions in ascending resolved priority, and the symmetry catalog/contract versions. It excludes
+temperatures, energies, frequencies, transitions, and other runtime settings, so a simulation-only edit does
+not change a job's lattice. `LatticeRequestHasherTests`, `LatticeSeedDeriverTests`, and `LatticeSamplerTests`
+pin the request hash, lattice seed, and sampler vectors.
+
+The build-side sampler is a deterministic SHA-256 counter stream:
+
+```text
+block_i = SHA-256("mocassin/lattice-rng/v1" || lattice_seed[32] || u64_le(counter++))
+next_u64 = little_endian_u64(block_i[0..8])
+```
+
+`NextBounded(upper)` uses Lemire's 64-bit multiply-and-reject method with a 128-bit intermediate. Sampling
+without replacement is an in-place Fisher–Yates shuffle over candidate positions sorted by ascending linear
+index. This is a build-only stream; the ADR 0005 ChaCha12 solver stream is unchanged.
+
+`SupercellGenerator` replicates the compiled P1 cell in row-major order,
+`index = ((a * B + b) * C + c) * position_count + P`, defaults a stable site to the first particle of its
+authored set and an unstable site to compiled void index `0`, then applies dopings sequentially in ascending
+priority to the current lattice. Each application counts the remaining source population, truncates
+`floor(fraction × available)`, and, when compensation is active, searches the primary count downward until the
+dependent count is an integer within the named `1e-6` tolerance and fits the dependent population. The
+dependent application always follows the primary and recomputes its candidate positions. Same-site dopings see
+only what earlier applications left. The final scan checks site masks and unstable-site voids; user-data
+failures return diagnostics and no lattice, while a project/compiled-model mismatch is a contract violation
+and throws.
+
+A `DopingReport` carries each application's requested/available/applied counts and effective fraction, plus
+the total charge before/after and the neutrality flag. `DopingInfo` is its compact persisted form:
+`v1:{dopingId}:{priority}:{requested}:{appliedPrimary}:{appliedDependent}:{effectiveFraction:R}`, joined by `;`
+in priority order and empty only when no doping is configured. The full report stays build-time/preview data.
+
+`LatticePreviewService` shares the same generator with the build through an internal overload. It returns the
+request echo, the identical `DopingReport`, and per-site remaining populations; unknown dopings, invalid
+fractions, invalid supercells, and impossible compensation return `null` plus diagnostics and are never
+partially built or cached. `TryCreateJobCountPreview` reports the simulation default, effective collection
+count, and whole-template total without generating a lattice. The cache is instance-scoped, thread-safe, and
+bounded to eight entries and 256 MiB of estimated payload with LRU eviction; its key combines the project model
+hash, lattice-request hash, canonical doping list, space-group data version/SHA-256, and symmetry contract
+version.
+
 ### Selection optimizers (Step 10)
 
 `Mocassin.Packages.Jobs.Optimization.SelectionOptimizerResolver` turns each authored `(siteId, particleId)`

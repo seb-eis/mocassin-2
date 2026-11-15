@@ -85,10 +85,20 @@ the full package-building command and the `--jobs`, `--parallel`, `--force`, and
 The command previews:
 
 - the selected template, its collections, configurations, and total expanded job count;
-- each collection's compiled dual-degree-of-freedom flag and selection-optimizer target/removed-start count;
-- each configuration's lattice size, generated position count, requested and applied doping counts, charge
-  before and after doping, and neutrality;
+- each collection's job count, compiled dual-degree-of-freedom flag, and selection-optimizer
+  target/removed-start count;
+- each configuration's lattice size, generated position count, job count, requested and applied doping counts,
+  effective fraction, charge before and after doping, and neutrality;
 - the validation, compilation, expansion, and preview diagnostics, including `JOB` warnings.
+
+The preview generates **one lattice per configuration**, not one per duplicate job. The per-configuration job
+count still reflects duplicate expansion, and lattice diagnostics are deduplicated in the report. Seeds are
+derived from the template and project in the same way as a real build; the preview never creates or persists a
+seed and never records generated particle positions.
+
+`--template` takes the job-template GUID, not an index or a name. It is required when the project has more than
+one template; a project with exactly one template may omit it. A project with no template is a validation error
+(exit 1), and an unknown template identifier is reported as a `PROJ010` unknown-reference diagnostic.
 
 Exit codes follow `validate`:
 

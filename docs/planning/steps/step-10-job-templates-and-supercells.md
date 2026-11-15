@@ -27,8 +27,8 @@ generation with charge compensation.
 | 4 | Supercell generation | `feature/step-10-job-templates/supercell-generation` | Done |
 | 5 | Doping and charge compensation | `feature/step-10-job-templates/doping-and-charge-compensation` | Done |
 | 6 | Lattice preview service | `feature/step-10-job-templates/lattice-preview-service` | Done |
-| 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | In progress |
-| 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | Proposed |
+| 7 | Selection optimizers and build preview | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Done |
+| 8 | Documentation, parity, and closeout | `feature/step-10-job-templates/documentation-parity-and-closeout` | In progress |
 
 The feature list is a design proposal. It is approved once by the human owner together with the design verdict; it does
 not create the step branch and does not mark the step `In progress`.
@@ -43,7 +43,8 @@ not create the step branch and does not mark the step `In progress`.
 | `supercell-generation` | `feature/step-10-job-templates/supercell-generation` | Done | `all --require` green; see outcome below | — | `8ae41e8` |
 | `doping-and-charge-compensation` | `feature/step-10-job-templates/doping-and-charge-compensation` | Done | `all --require` green; see outcome below | — | `b35e5dc` |
 | `lattice-preview-service` | `feature/step-10-job-templates/lattice-preview-service` | Done | `all --require` green; see outcome below | — | `a95511e` |
-| `selection-optimizers-and-build-preview` | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | In progress | See feature 7 outcome below | — | — |
+| `selection-optimizers-and-build-preview` | `feature/step-10-job-templates/selection-optimizers-and-build-preview` | Done | See feature 7 outcome below | — | `cd1e830` |
+| `documentation-parity-and-closeout` | `feature/step-10-job-templates/documentation-parity-and-closeout` | In progress | See feature 8 outcome below | — | — |
 
 Feature 1 was squash-merged as `c8d5269` (`step-10: add job template model and persistence`). It added the typed
 job-template records, project JSON/manifest/schema persistence, canonical extension ordering, and the
@@ -371,7 +372,52 @@ Recorded deviations and limitations:
   not yet a manifest-owned report; Step 12 may formalize the full build report.
 - The preview generates one lattice per configuration, not per duplicate job. Lattice diagnostics are
   deduplicated in the report while the per-configuration job count still reflects the duplicate expansion.
-- Feature 7 is not marked `Done`; it has not been squash-merged and no per-feature CI run was triggered.
+- Feature 7 was squash-merged into `step/10-job-templates` as `cd1e830`
+  (`step-10: add selection optimizers and build preview`). The squash was validated locally; no per-feature CI
+  run was triggered.
+
+#### Feature 8 outcome and deviations
+
+`documentation-parity-and-closeout` completes the Step 10 documentation set, parity entries, and the closeout
+record. It adds `docs/user-guide/job-templates.md`; updates the lattice guide with generation, truncation,
+same-site sequencing, compensation, neutrality, preview, and row-major layout; documents the job-template JSON,
+canonical ordering, extension bounds, seed derivation, and limits; documents the preview CLI and no-write
+guarantee; and records the build pipeline and design decisions for the SHA-256 stream,
+`ValidationContext.CompiledModel`, the Packages/Compilation boundary, and the optimizer dual-DOF rule. The
+`zensical.toml` navigation and user-guide index link the new page. `docs/reference/diagnostics.md` already
+matched the catalog; the documentation-drift test remains the check.
+
+The parity matrix now marks the Step 10 job, optimizer, lattice/doping, cap, and preview rows with their
+implemented/partial state and remaining editor or later-step owners. The Step 10 page feature log records the
+squash commits for features 1–7 and the outstanding closeout state.
+
+Local gates on the feature branch (after `dotnet restore Mocassin.slnx` and
+`dotnet build Mocassin.slnx -c Release`):
+
+- `./tools/verify.sh docs --require` — exit 0. Math conventions OK (157 files), documentation links OK (160
+  files), Zensical strict build `No issues found`, DocFX 376 documented files with 0 warnings/0 errors, and
+  rustdoc clean; the combined site is built in `site/`.
+- `./tools/verify.sh all --require` — exit 0. .NET build 0 warnings and 1,394 tests passed across the nine
+  test projects; ApiCompat and NuGet audit clean; Rust `fmt`, `clippy`, and tests clean; Python 3 passed; the
+  documentation gate as above; 31 contract/policy tests, SPDX headers in 522 source files, no secret patterns,
+  and `cargo-deny` reporting advisories, bans, licences, and sources all `ok`.
+- No per-feature CI run was triggered.
+
+Recorded deviations and limitations:
+
+- The feature does not dispatch closeout CI, create `docs/planning/closeout/step-10.json`, or create
+  `docs/planning/audits/step-10.md`. The orchestrator owns those steps after this branch is integrated.
+- The GUI documentation describes the intended Step 25/26 surfaces as planned; the pages do not claim those
+  editors exist in Step 10.
+- The job-template guide links to the CLI reference page without a fragment: the repository link checker and
+  Zensical derive different heading slugs for `mocassin build --preview` because of the `--` token.
+- An earlier DocFX run reported three `InvalidAssemblyReference` warnings for MessagePack against stale
+  build outputs. A clean `dotnet restore` plus Release build removed them; both gates are green with no
+  toolchain or configuration change.
+- `build-preview-v1` remains an interim report shape until Step 12 formalises the build report.
+- Feature 8 is not marked `Done` until the orchestrator squash-merges it; no per-feature CI run was triggered.
+
+**Closeout evidence:** the orchestrator creates `docs/planning/closeout/step-10.json` after the single closeout CI run and records the audited commit, CI `head_sha`, `main` SHA at freeze, and merge candidate. Do not create it with placeholder hashes.
 
 ## Goal
 
@@ -941,46 +987,47 @@ exception is needed.
 
 ## Implementation tasks
 
-- [ ] Implement typed job-template/collection/config records, `JobSettings`, extensions, and inheritance.
-- [ ] Move `JobTemplate` into `Mocassin.Core.Model.Jobs`, add typed IDs, and update JSON/PublicAPI/ApiCompat.
-- [ ] Implement project JSON canonicalization, manifest/schema, and persistence round-trip.
-- [ ] Implement job expansion, deterministic IDs, master/job seed derivation, and structural limits.
-- [ ] Implement supercell generation with sequential doping, truncation, charge compensation, and the report.
-- [ ] Implement the deterministic SHA-256 counter sampler and golden vectors.
-- [ ] Implement `ILatticePreviewService`, `LatticePreview`, and `JobCountPreview` over the same generator as the
+- [x] Implement typed job-template/collection/config records, `JobSettings`, extensions, and inheritance.
+- [x] Move `JobTemplate` into `Mocassin.Core.Model.Jobs`, add typed IDs, and update JSON/PublicAPI/ApiCompat.
+- [x] Implement project JSON canonicalization, manifest/schema, and persistence round-trip.
+- [x] Implement job expansion, deterministic IDs, master/job seed derivation, and structural limits.
+- [x] Implement supercell generation with sequential doping, truncation, charge compensation, and the report.
+- [x] Implement the deterministic SHA-256 counter sampler and golden vectors.
+- [x] Implement `ILatticePreviewService`, `LatticePreview`, and `JobCountPreview` over the same generator as the
   build; cover the try/failure boundary, request echo, per-site populations, bounded cache, and preview/build
   report equality.
-- [ ] Implement selection optimizers, P1 image mapping, `UseDualDofCorrection`, and their validation.
-- [ ] Implement the Core structural validator and the Packages compiled-bound Build stage.
-- [ ] Implement `mocassin build --preview` (no package write) and register the build stage in Step 12.
-- [ ] Add ceria temperature/doping sweep samples.
-- [ ] Add tests for edge cases (0 %, 100 %, tiny cells, NaN/Inf, impossible compensation, same-site sequence).
+- [x] Implement selection optimizers, P1 image mapping, `UseDualDofCorrection`, and their validation.
+- [x] Implement the Core structural validator and the Packages compiled-bound Build stage.
+- [ ] Implement `mocassin build --preview` (no package write) and register the build stage in Step 12
+  (preview path done; Step 12 still owns the build-stage registration).
+- [x] Add ceria temperature/doping sweep samples.
+- [x] Add tests for edge cases (0 %, 100 %, tiny cells, NaN/Inf, impossible compensation, same-site sequence).
 
 ## Acceptance criteria
 
-- [ ] The ceria KMC sample expands to the expected number of jobs with deterministic IDs.
-- [ ] For a 10×10×10 ceria cell and 1 % Ce doping, the applied counts and vacancy compensation are correct.
-- [ ] A requested fraction that cannot be realized is adjusted downward and reported.
-- [ ] An impossible charge compensation fails with `JOB012`.
-- [ ] The lattice preview echoes the request, reports requested/applied counts, per-site remaining populations,
+- [x] The ceria KMC sample expands to the expected number of jobs with deterministic IDs.
+- [x] For a 10×10×10 ceria cell and 1 % Ce doping, the applied counts and vacancy compensation are correct.
+- [x] A requested fraction that cannot be realized is adjusted downward and reported.
+- [x] An impossible charge compensation fails with `JOB012`.
+- [x] The lattice preview echoes the request, reports requested/applied counts, per-site remaining populations,
   total charge before/after, and neutrality, and matches the generated lattice's report for the same request.
-- [ ] The preview returns `null` plus diagnostics for an unknown doping, a non-finite or out-of-range
+- [x] The preview returns `null` plus diagnostics for an unknown doping, a non-finite or out-of-range
   fraction, an invalid supercell, or impossible compensation; it never returns a partial preview.
-- [ ] The job-count preview reports the default, effective, and total job counts without generating lattices.
-- [ ] Same job descriptor + seed produces an identical lattice across runs and OSes, and the documented
+- [x] The job-count preview reports the default, effective, and total job counts without generating lattices.
+- [x] Same job descriptor + seed produces an identical lattice across runs and OSes, and the documented
   job-seed/lattice-seed/sampler golden vectors match.
-- [ ] Changing a simulation-only setting does not change the lattice for the same job.
-- [ ] A same-site sequential doping applies to the particles remaining after earlier dopings.
-- [ ] A non-compensated charged lattice (including a mixed compensated/non-compensated config) is permitted
+- [x] Changing a simulation-only setting does not change the lattice for the same job.
+- [x] A same-site sequential doping applies to the particles remaining after earlier dopings.
+- [x] A non-compensated charged lattice (including a mixed compensated/non-compensated config) is permitted
   with `JOB016` when `IsChargeNeutral` is false; an unrealizable/unbalanced compensated pair is `JOB012`.
   `IsChargeNeutral` uses `1e-6 × max(1, total_positions)` and never fails a pre-existing base charge by itself.
-- [ ] `validate` reports structural `JOB001`–`JOB008`, the `JOB009` reference check, `JOB015`, `JOB017`,
+- [x] `validate` reports structural `JOB001`–`JOB008`, the `JOB009` reference check, `JOB015`, `JOB017`,
   `JOB018`, and `JOB020` without a compiled model; `JOB009`'s removes-all check and the other compiled-bound
   codes require the build stage.
-- [ ] The 99,999-job cap and the structural count caps fail with `JOB019`/`JOB020`.
-- [ ] Optimizers remove only start options at every P1 image of the target site, never lattice particles, and
+- [x] The 99,999-job cap and the structural count caps fail with `JOB019`/`JOB020`.
+- [x] Optimizers remove only start options at every P1 image of the target site, never lattice particles, and
   clear dual-DOF only under the documented all-masks rule.
-- [ ] Documentation written
+- [x] Documentation written
 
 ## Documentation
 
