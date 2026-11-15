@@ -157,6 +157,7 @@ run_contracts() {
   fi
   python tools/contracts/check_model_projection.py
   python tools/contracts/check_parameterization_projection.py
+  python tools/contracts/check_lattice_projection.py
   if [[ -f tools/symmetry/requirements.txt ]]; then
     python -m pip install -r tools/symmetry/requirements.txt
   fi

@@ -1,0 +1,8 @@
+{
+  "fixtureFormat": "canonical-projection-v1",
+  "id": "lattice-ceria-2x2x2",
+  "descriptor": "lattice-v1",
+  "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
+  "signatureHex": "2b132c6cb08a0ce0a08830a1ee465227fc99507e84995a394b94de1be0e8c2db",
+  "projectionSha256": "d9617a224104a70c8652ae49aaa0ced7487b2156864f4f07ea8b925a0f1cf4f8"
+}

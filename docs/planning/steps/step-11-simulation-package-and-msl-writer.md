@@ -20,7 +20,7 @@ read-only inspection/verification library for the build CLI.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Pending | — | — | — |
+| 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | recorded in the follow-up status commit |
 | 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Pending | — | — | — |
 | 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Pending | — | — | — |
 | 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Pending | — | — | — |
@@ -48,6 +48,30 @@ squash-merged without a further approval.
 
 Filled during implementation. Each squash records the branch, local gates, and the squash commit; no CI runs
 per feature.
+
+#### Feature 1 — Package contracts and lattice signature
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature`
+- **Squash commit:** recorded in the follow-up status commit.
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (build, all solution tests including 37 Contracts and 375
+  Packages tests, format); `./tools/verify.sh structure` exit 0; `./tools/verify.sh api` exit 0;
+  `./tools/verify.sh contracts` exit 0 (contract artifacts current, model 5 / parameterization 4 / lattice 2
+  projection fixtures, process consistency, 37 tool tests, SPDX, secrets, cargo-deny).
+- **Step CI:** not run — feature branches do not trigger CI; the closeout run is the only step-branch run.
+- **Diff summary:** added `Mocassin.Contracts.Packages` payload DTOs for the model, structure, energy,
+  transition, simulation, job, and lattice payloads with explicit snake_case MessagePack keys; added
+  `PackageFormatConstants`, `LatticeSignatureV1`, and the `PKG001`–`PKG010` descriptors; added Contracts and
+  Packages tests (DTO shape, MessagePack keys, projection and validation, real compiler/`SupercellGenerator`
+  lattice vectors); added two checked-in lattice projection vectors and
+  `tools/contracts/check_lattice_projection.py`, wired into `verify.sh contracts`; extended the manifest
+  signature-vector list and regenerated the contract artifacts; refreshed `PublicAPI.Unshipped.txt` and the
+  Contracts ApiCompat baseline.
+- **Known limitations / follow-ups:** the generated `signatures.lattice` descriptor is still the Step 00
+  skeleton with `dopingInfo`; feature 2 finalizes it and the checker then cross-validates the final descriptor.
+  The lattice vectors bind the current `modelSignature`, so feature 4's per-image pair-link change must
+  regenerate them with the Step 08/09 vectors. The `PKG` descriptors are not yet composed into
+  `DiagnosticCatalog.Default`; that belongs to the schema/verification features.
+- **Parity:** no parity-matrix row is completed by this contract-only feature.
 
 ## Goal
 
@@ -568,7 +592,7 @@ Two options, for the human owner's start-gate decision:
 
 ## Implementation tasks
 
-- [ ] Add the Contracts package DTOs, payload constants, `LatticeSignatureV1`, and `PKG` descriptors.
+- [x] Add the Contracts package DTOs, payload constants, `LatticeSignatureV1`, and `PKG` descriptors.
 - [ ] Finalize `signatures.lattice` and add `formats.package.payloads`; extend the generator and regenerate.
 - [ ] Implement schema creation, pragmas, `application_id`/`user_version`, and `schema_info`.
 - [ ] Implement the model payload mapper and the write-time parameterization re-encode.
@@ -584,7 +608,7 @@ Two options, for the human owner's start-gate decision:
 - [ ] Add the `PKG` descriptors to Contracts and compose them into `DiagnosticCatalog.Default`; confirm
       `Mocassin.Results` does not reference `Mocassin.Packages`.
 - [ ] Add checked-in `.msl` fixtures, canonical summaries, extracted payloads, and regeneration command.
-- [ ] Add the lattice projection golden vectors and `verify.sh contracts` checker.
+- [x] Add the lattice projection golden vectors and `verify.sh contracts` checker.
 - [ ] Add the `Mocassin.Benchmarks/SimulationPackage` benchmark and record the 10⁴-job budget.
 - [ ] Update `PublicAPI.Unshipped.txt` and the ApiCompat baseline for `Mocassin.Contracts`, `Mocassin.Core`
       (the new `JobExtension.ToCanonicalJson`), `Mocassin.Symmetry` (the new

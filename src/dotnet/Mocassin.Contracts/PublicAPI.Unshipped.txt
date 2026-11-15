@@ -1,41 +1,409 @@
 #nullable enable
-Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.Solver.SolverJobFlags.Deterministic = 8 -> Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.Solver.SolverJobFlags.KmcSimulation = 64 -> Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.Solver.SolverJobFlags.MmcSimulation = 128 -> Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.Solver.SolverJobFlags.NoJumpLogging = 2 -> Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.Solver.SolverJobFlags.NoSaving = 1 -> Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.Solver.SolverJobFlags.None = 0 -> Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.Solver.SolverJobFlags.UseDualDofCorrection = 16 -> Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.Solver.SolverJobFlags.UseFastExp = 4 -> Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.Solver.SolverJobFlags.UsePrerun = 32 -> Mocassin.Contracts.Solver.SolverJobFlags
-Mocassin.Contracts.ContractVersions
-const Mocassin.Contracts.ContractVersions.ManifestVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.EventsEncoding = "jsonl" -> string!
 const Mocassin.Contracts.ContractVersions.EventsSchemaVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.JobFolderEncoding = "directory" -> string!
 const Mocassin.Contracts.ContractVersions.JobFolderFormatVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.ManifestVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.MmcfeEncoding = "sqlite" -> string!
+const Mocassin.Contracts.ContractVersions.MmcfeFileExtension = ".db" -> string!
 const Mocassin.Contracts.ContractVersions.MmcfeFormatVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.PackageEncoding = "sqlite" -> string!
+const Mocassin.Contracts.ContractVersions.PackageFileExtension = ".msl" -> string!
 const Mocassin.Contracts.ContractVersions.PackageFormatVersion = 1 -> int
-const Mocassin.Contracts.ContractVersions.ResultsFormatVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.ProjectEncoding = "utf-8-json" -> string!
+const Mocassin.Contracts.ContractVersions.ProjectFileExtension = ".mocprj" -> string!
 const Mocassin.Contracts.ContractVersions.ProjectSchemaVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.ResultsEncoding = "sqlite" -> string!
+const Mocassin.Contracts.ContractVersions.ResultsFileExtension = ".msr" -> string!
+const Mocassin.Contracts.ContractVersions.ResultsFormatVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.SolverEncoding = "utf-8-json" -> string!
+const Mocassin.Contracts.ContractVersions.SolverFileName = "solver.json" -> string!
+const Mocassin.Contracts.ContractVersions.SolverFormat = "mocassin.solver" -> string!
 const Mocassin.Contracts.ContractVersions.SolverFormatVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.StateEncoding = "messagepack" -> string!
+const Mocassin.Contracts.ContractVersions.StateFileExtension = ".mcs" -> string!
+const Mocassin.Contracts.ContractVersions.StateFormat = "mocassin.mcs" -> string!
 const Mocassin.Contracts.ContractVersions.StateFormatVersion = 1 -> int
 const Mocassin.Contracts.ContractVersions.ValidationReportVersion = 1 -> int
-const Mocassin.Contracts.ContractVersions.EventsEncoding = "jsonl" -> string!
-const Mocassin.Contracts.ContractVersions.JobFolderEncoding = "directory" -> string!
-const Mocassin.Contracts.ContractVersions.MmcfeFileExtension = ".db" -> string!
-const Mocassin.Contracts.ContractVersions.MmcfeEncoding = "sqlite" -> string!
-const Mocassin.Contracts.ContractVersions.PackageFileExtension = ".msl" -> string!
-const Mocassin.Contracts.ContractVersions.ProjectFileExtension = ".mocprj" -> string!
-const Mocassin.Contracts.ContractVersions.PackageEncoding = "sqlite" -> string!
-const Mocassin.Contracts.ContractVersions.ProjectEncoding = "utf-8-json" -> string!
-const Mocassin.Contracts.ContractVersions.ResultsFileExtension = ".msr" -> string!
-const Mocassin.Contracts.ContractVersions.SolverFormat = "mocassin.solver" -> string!
-const Mocassin.Contracts.ContractVersions.ResultsEncoding = "sqlite" -> string!
-const Mocassin.Contracts.ContractVersions.SolverFileName = "solver.json" -> string!
-const Mocassin.Contracts.ContractVersions.SolverEncoding = "utf-8-json" -> string!
-const Mocassin.Contracts.ContractVersions.StateFormat = "mocassin.mcs" -> string!
-const Mocassin.Contracts.ContractVersions.StateFileExtension = ".mcs" -> string!
-const Mocassin.Contracts.ContractVersions.StateEncoding = "messagepack" -> string!
+const Mocassin.Contracts.Packages.LatticeSignatureV1.Domain = "mocassin/lattice-signature/v1" -> string!
+const Mocassin.Contracts.Packages.LatticeSignatureV1.FormatVersion = 1 -> ulong
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.AdvisorySize = "PKG009" -> string!
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.ColumnMismatch = "PKG007" -> string!
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.InvalidPayload = "PKG004" -> string!
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.InvalidReference = "PKG006" -> string!
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.MissingSchemaElement = "PKG003" -> string!
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.NotImmutable = "PKG008" -> string!
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.OutOfBounds = "PKG010" -> string!
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.SignatureMismatch = "PKG005" -> string!
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.UnreadableDatabase = "PKG001" -> string!
+const Mocassin.Contracts.Packages.PackageDiagnosticCodes.UnsupportedSchema = "PKG002" -> string!
+const Mocassin.Contracts.Packages.PackageFormatConstants.JobPayloadFormatVersion = 1 -> uint
+const Mocassin.Contracts.Packages.PackageFormatConstants.LatticePayloadFormatVersion = 1 -> uint
+const Mocassin.Contracts.Packages.PackageFormatConstants.ModelPayloadFormatVersion = 1 -> uint
+const Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.Domain = "mocassin/parameterization-signature/v1" -> string!
+const Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.FormatVersion = 1 -> ulong
+Mocassin.Contracts.ContractVersions
+Mocassin.Contracts.Packages.ClusterLinkPayload
+Mocassin.Contracts.Packages.ClusterLinkPayload.<Clone>$() -> Mocassin.Contracts.Packages.ClusterLinkPayload!
+Mocassin.Contracts.Packages.ClusterLinkPayload.BytePosition.get -> byte
+Mocassin.Contracts.Packages.ClusterLinkPayload.BytePosition.init -> void
+Mocassin.Contracts.Packages.ClusterLinkPayload.ClusterId.get -> uint
+Mocassin.Contracts.Packages.ClusterLinkPayload.ClusterId.init -> void
+Mocassin.Contracts.Packages.ClusterLinkPayload.ClusterLinkPayload(uint ClusterId, byte BytePosition) -> void
+Mocassin.Contracts.Packages.ClusterLinkPayload.Deconstruct(out uint ClusterId, out byte BytePosition) -> void
+Mocassin.Contracts.Packages.ClusterLinkPayload.Equals(Mocassin.Contracts.Packages.ClusterLinkPayload? other) -> bool
+Mocassin.Contracts.Packages.ClusterTablePayload
+Mocassin.Contracts.Packages.ClusterTablePayload.<Clone>$() -> Mocassin.Contracts.Packages.ClusterTablePayload!
+Mocassin.Contracts.Packages.ClusterTablePayload.ClusterTablePayload(string! ObjectId, System.Collections.Immutable.ImmutableArray<ulong> OccupationCodes, System.Collections.Immutable.ImmutableArray<double> Energies, System.Collections.Immutable.ImmutableArray<byte> ParticleTableMapping) -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.Deconstruct(out string! ObjectId, out System.Collections.Immutable.ImmutableArray<ulong> OccupationCodes, out System.Collections.Immutable.ImmutableArray<double> Energies, out System.Collections.Immutable.ImmutableArray<byte> ParticleTableMapping) -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.Energies.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Packages.ClusterTablePayload.Energies.init -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.Equals(Mocassin.Contracts.Packages.ClusterTablePayload? other) -> bool
+Mocassin.Contracts.Packages.ClusterTablePayload.ObjectId.get -> string!
+Mocassin.Contracts.Packages.ClusterTablePayload.ObjectId.init -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.OccupationCodes.get -> System.Collections.Immutable.ImmutableArray<ulong>
+Mocassin.Contracts.Packages.ClusterTablePayload.OccupationCodes.init -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.ParticleTableMapping.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Contracts.Packages.ClusterTablePayload.ParticleTableMapping.init -> void
+Mocassin.Contracts.Packages.EnergyPayload
+Mocassin.Contracts.Packages.EnergyPayload.<Clone>$() -> Mocassin.Contracts.Packages.EnergyPayload!
+Mocassin.Contracts.Packages.EnergyPayload.ClusterTables.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ClusterTablePayload!>
+Mocassin.Contracts.Packages.EnergyPayload.ClusterTables.init -> void
+Mocassin.Contracts.Packages.EnergyPayload.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.PairTablePayload!> PairTables, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ClusterTablePayload!> ClusterTables, out System.Collections.Immutable.ImmutableArray<double> DefectBackground) -> void
+Mocassin.Contracts.Packages.EnergyPayload.DefectBackground.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Packages.EnergyPayload.DefectBackground.init -> void
+Mocassin.Contracts.Packages.EnergyPayload.EnergyPayload(System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.PairTablePayload!> PairTables, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ClusterTablePayload!> ClusterTables, System.Collections.Immutable.ImmutableArray<double> DefectBackground) -> void
+Mocassin.Contracts.Packages.EnergyPayload.Equals(Mocassin.Contracts.Packages.EnergyPayload? other) -> bool
+Mocassin.Contracts.Packages.EnergyPayload.PairTables.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.PairTablePayload!>
+Mocassin.Contracts.Packages.EnergyPayload.PairTables.init -> void
+Mocassin.Contracts.Packages.EnvironmentPayload
+Mocassin.Contracts.Packages.EnvironmentPayload.<Clone>$() -> Mocassin.Contracts.Packages.EnvironmentPayload!
+Mocassin.Contracts.Packages.EnvironmentPayload.Clusters.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ClusterLinkPayload!>
+Mocassin.Contracts.Packages.EnvironmentPayload.Clusters.init -> void
+Mocassin.Contracts.Packages.EnvironmentPayload.Deconstruct(out ulong SelectionParticleMask, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.PairLinkPayload!> Pairs, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ClusterLinkPayload!> Clusters, out System.Collections.Immutable.ImmutableArray<byte> UpdateParticleIds) -> void
+Mocassin.Contracts.Packages.EnvironmentPayload.EnvironmentPayload(ulong SelectionParticleMask, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.PairLinkPayload!> Pairs, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ClusterLinkPayload!> Clusters, System.Collections.Immutable.ImmutableArray<byte> UpdateParticleIds) -> void
+Mocassin.Contracts.Packages.EnvironmentPayload.Equals(Mocassin.Contracts.Packages.EnvironmentPayload? other) -> bool
+Mocassin.Contracts.Packages.EnvironmentPayload.Pairs.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.PairLinkPayload!>
+Mocassin.Contracts.Packages.EnvironmentPayload.Pairs.init -> void
+Mocassin.Contracts.Packages.EnvironmentPayload.SelectionParticleMask.get -> ulong
+Mocassin.Contracts.Packages.EnvironmentPayload.SelectionParticleMask.init -> void
+Mocassin.Contracts.Packages.EnvironmentPayload.UpdateParticleIds.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Contracts.Packages.EnvironmentPayload.UpdateParticleIds.init -> void
+Mocassin.Contracts.Packages.ExtensionPayload
+Mocassin.Contracts.Packages.ExtensionPayload.<Clone>$() -> Mocassin.Contracts.Packages.ExtensionPayload!
+Mocassin.Contracts.Packages.ExtensionPayload.ConfigJson.get -> string!
+Mocassin.Contracts.Packages.ExtensionPayload.ConfigJson.init -> void
+Mocassin.Contracts.Packages.ExtensionPayload.Deconstruct(out string! Id, out string! ConfigJson) -> void
+Mocassin.Contracts.Packages.ExtensionPayload.Equals(Mocassin.Contracts.Packages.ExtensionPayload? other) -> bool
+Mocassin.Contracts.Packages.ExtensionPayload.ExtensionPayload(string! Id, string! ConfigJson) -> void
+Mocassin.Contracts.Packages.ExtensionPayload.Id.get -> string!
+Mocassin.Contracts.Packages.ExtensionPayload.Id.init -> void
+Mocassin.Contracts.Packages.JobPayload
+Mocassin.Contracts.Packages.JobPayload.<Clone>$() -> Mocassin.Contracts.Packages.JobPayload!
+Mocassin.Contracts.Packages.JobPayload.BreakSampleIntervalMcsp.get -> ulong?
+Mocassin.Contracts.Packages.JobPayload.BreakSampleIntervalMcsp.init -> void
+Mocassin.Contracts.Packages.JobPayload.BreakSampleLengthMcsp.get -> ulong?
+Mocassin.Contracts.Packages.JobPayload.BreakSampleLengthMcsp.init -> void
+Mocassin.Contracts.Packages.JobPayload.BreakTolerance.get -> double?
+Mocassin.Contracts.Packages.JobPayload.BreakTolerance.init -> void
+Mocassin.Contracts.Packages.JobPayload.Deconstruct(out uint FormatVersion, out uint SimulationIndex, out string! Kind, out double TemperatureK, out ulong TargetMcsp, out uint WriteOutCount, out ulong PreRunMcsp, out ulong? TimeLimitS, out double? MinSuccessRate, out double ElectricFieldVm, out System.Collections.Immutable.ImmutableArray<double> ElectricFieldDirection, out double? NormalizationEnergyEv, out double? MaxAttemptFrequencyHz, out double? BreakTolerance, out ulong? BreakSampleLengthMcsp, out ulong? BreakSampleIntervalMcsp, out ulong? ResultSampleMcsp, out uint Flags, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.SelectionOptimizerPayload!> SelectionOptimizers, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ExtensionPayload!> Extensions, out string? Instruction, out string! DopingInfo) -> void
+Mocassin.Contracts.Packages.JobPayload.DopingInfo.get -> string!
+Mocassin.Contracts.Packages.JobPayload.DopingInfo.init -> void
+Mocassin.Contracts.Packages.JobPayload.ElectricFieldDirection.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Packages.JobPayload.ElectricFieldDirection.init -> void
+Mocassin.Contracts.Packages.JobPayload.ElectricFieldVm.get -> double
+Mocassin.Contracts.Packages.JobPayload.ElectricFieldVm.init -> void
+Mocassin.Contracts.Packages.JobPayload.Equals(Mocassin.Contracts.Packages.JobPayload? other) -> bool
+Mocassin.Contracts.Packages.JobPayload.Extensions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ExtensionPayload!>
+Mocassin.Contracts.Packages.JobPayload.Extensions.init -> void
+Mocassin.Contracts.Packages.JobPayload.Flags.get -> uint
+Mocassin.Contracts.Packages.JobPayload.Flags.init -> void
+Mocassin.Contracts.Packages.JobPayload.FormatVersion.get -> uint
+Mocassin.Contracts.Packages.JobPayload.FormatVersion.init -> void
+Mocassin.Contracts.Packages.JobPayload.Instruction.get -> string?
+Mocassin.Contracts.Packages.JobPayload.Instruction.init -> void
+Mocassin.Contracts.Packages.JobPayload.JobPayload(uint FormatVersion, uint SimulationIndex, string! Kind, double TemperatureK, ulong TargetMcsp, uint WriteOutCount, ulong PreRunMcsp, ulong? TimeLimitS, double? MinSuccessRate, double ElectricFieldVm, System.Collections.Immutable.ImmutableArray<double> ElectricFieldDirection, double? NormalizationEnergyEv, double? MaxAttemptFrequencyHz, double? BreakTolerance, ulong? BreakSampleLengthMcsp, ulong? BreakSampleIntervalMcsp, ulong? ResultSampleMcsp, uint Flags, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.SelectionOptimizerPayload!> SelectionOptimizers, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ExtensionPayload!> Extensions, string? Instruction, string! DopingInfo) -> void
+Mocassin.Contracts.Packages.JobPayload.Kind.get -> string!
+Mocassin.Contracts.Packages.JobPayload.Kind.init -> void
+Mocassin.Contracts.Packages.JobPayload.MaxAttemptFrequencyHz.get -> double?
+Mocassin.Contracts.Packages.JobPayload.MaxAttemptFrequencyHz.init -> void
+Mocassin.Contracts.Packages.JobPayload.MinSuccessRate.get -> double?
+Mocassin.Contracts.Packages.JobPayload.MinSuccessRate.init -> void
+Mocassin.Contracts.Packages.JobPayload.NormalizationEnergyEv.get -> double?
+Mocassin.Contracts.Packages.JobPayload.NormalizationEnergyEv.init -> void
+Mocassin.Contracts.Packages.JobPayload.PreRunMcsp.get -> ulong
+Mocassin.Contracts.Packages.JobPayload.PreRunMcsp.init -> void
+Mocassin.Contracts.Packages.JobPayload.ResultSampleMcsp.get -> ulong?
+Mocassin.Contracts.Packages.JobPayload.ResultSampleMcsp.init -> void
+Mocassin.Contracts.Packages.JobPayload.SelectionOptimizers.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.SelectionOptimizerPayload!>
+Mocassin.Contracts.Packages.JobPayload.SelectionOptimizers.init -> void
+Mocassin.Contracts.Packages.JobPayload.SimulationIndex.get -> uint
+Mocassin.Contracts.Packages.JobPayload.SimulationIndex.init -> void
+Mocassin.Contracts.Packages.JobPayload.TargetMcsp.get -> ulong
+Mocassin.Contracts.Packages.JobPayload.TargetMcsp.init -> void
+Mocassin.Contracts.Packages.JobPayload.TemperatureK.get -> double
+Mocassin.Contracts.Packages.JobPayload.TemperatureK.init -> void
+Mocassin.Contracts.Packages.JobPayload.TimeLimitS.get -> ulong?
+Mocassin.Contracts.Packages.JobPayload.TimeLimitS.init -> void
+Mocassin.Contracts.Packages.JobPayload.WriteOutCount.get -> uint
+Mocassin.Contracts.Packages.JobPayload.WriteOutCount.init -> void
+Mocassin.Contracts.Packages.JumpCollectionPayload
+Mocassin.Contracts.Packages.JumpCollectionPayload.<Clone>$() -> Mocassin.Contracts.Packages.JumpCollectionPayload!
+Mocassin.Contracts.Packages.JumpCollectionPayload.Deconstruct(out string! Kind, out string! TransitionId, out ulong MobileParticleMask, out System.Collections.Immutable.ImmutableArray<uint> RuleIds, out System.Collections.Immutable.ImmutableArray<uint> DirectionIds) -> void
+Mocassin.Contracts.Packages.JumpCollectionPayload.DirectionIds.get -> System.Collections.Immutable.ImmutableArray<uint>
+Mocassin.Contracts.Packages.JumpCollectionPayload.DirectionIds.init -> void
+Mocassin.Contracts.Packages.JumpCollectionPayload.Equals(Mocassin.Contracts.Packages.JumpCollectionPayload? other) -> bool
+Mocassin.Contracts.Packages.JumpCollectionPayload.JumpCollectionPayload(string! Kind, string! TransitionId, ulong MobileParticleMask, System.Collections.Immutable.ImmutableArray<uint> RuleIds, System.Collections.Immutable.ImmutableArray<uint> DirectionIds) -> void
+Mocassin.Contracts.Packages.JumpCollectionPayload.Kind.get -> string!
+Mocassin.Contracts.Packages.JumpCollectionPayload.Kind.init -> void
+Mocassin.Contracts.Packages.JumpCollectionPayload.MobileParticleMask.get -> ulong
+Mocassin.Contracts.Packages.JumpCollectionPayload.MobileParticleMask.init -> void
+Mocassin.Contracts.Packages.JumpCollectionPayload.RuleIds.get -> System.Collections.Immutable.ImmutableArray<uint>
+Mocassin.Contracts.Packages.JumpCollectionPayload.RuleIds.init -> void
+Mocassin.Contracts.Packages.JumpCollectionPayload.TransitionId.get -> string!
+Mocassin.Contracts.Packages.JumpCollectionPayload.TransitionId.init -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload
+Mocassin.Contracts.Packages.JumpDirectionPayload.<Clone>$() -> Mocassin.Contracts.Packages.JumpDirectionPayload!
+Mocassin.Contracts.Packages.JumpDirectionPayload.CollectionId.get -> uint
+Mocassin.Contracts.Packages.JumpDirectionPayload.CollectionId.init -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.Deconstruct(out string! ObjectId, out uint PositionId, out uint CollectionId, out System.Collections.Immutable.ImmutableArray<int> Path, out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> Movement, out System.Collections.Immutable.ImmutableArray<double> PathVector, out double Length, out bool IsInverse) -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.Equals(Mocassin.Contracts.Packages.JumpDirectionPayload? other) -> bool
+Mocassin.Contracts.Packages.JumpDirectionPayload.IsInverse.get -> bool
+Mocassin.Contracts.Packages.JumpDirectionPayload.IsInverse.init -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.JumpDirectionPayload(string! ObjectId, uint PositionId, uint CollectionId, System.Collections.Immutable.ImmutableArray<int> Path, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> Movement, System.Collections.Immutable.ImmutableArray<double> PathVector, double Length, bool IsInverse) -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.Length.get -> double
+Mocassin.Contracts.Packages.JumpDirectionPayload.Length.init -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.Movement.get -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>>
+Mocassin.Contracts.Packages.JumpDirectionPayload.Movement.init -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.ObjectId.get -> string!
+Mocassin.Contracts.Packages.JumpDirectionPayload.ObjectId.init -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.Path.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Contracts.Packages.JumpDirectionPayload.Path.init -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.PathVector.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Packages.JumpDirectionPayload.PathVector.init -> void
+Mocassin.Contracts.Packages.JumpDirectionPayload.PositionId.get -> uint
+Mocassin.Contracts.Packages.JumpDirectionPayload.PositionId.init -> void
+Mocassin.Contracts.Packages.JumpRulePayload
+Mocassin.Contracts.Packages.JumpRulePayload.<Clone>$() -> Mocassin.Contracts.Packages.JumpRulePayload!
+Mocassin.Contracts.Packages.JumpRulePayload.ChargeTransportVector.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Packages.JumpRulePayload.ChargeTransportVector.init -> void
+Mocassin.Contracts.Packages.JumpRulePayload.CollectionId.get -> uint
+Mocassin.Contracts.Packages.JumpRulePayload.CollectionId.init -> void
+Mocassin.Contracts.Packages.JumpRulePayload.Deconstruct(out uint RuleId, out uint CollectionId, out ulong State0, out ulong State1, out ulong State2, out double FrequencyHz, out System.Collections.Immutable.ImmutableArray<double> ChargeTransportVector, out System.Collections.Immutable.ImmutableArray<double>? StaticCorrection, out System.Collections.Immutable.ImmutableArray<byte> TrackerOrder) -> void
+Mocassin.Contracts.Packages.JumpRulePayload.Equals(Mocassin.Contracts.Packages.JumpRulePayload? other) -> bool
+Mocassin.Contracts.Packages.JumpRulePayload.FrequencyHz.get -> double
+Mocassin.Contracts.Packages.JumpRulePayload.FrequencyHz.init -> void
+Mocassin.Contracts.Packages.JumpRulePayload.JumpRulePayload(uint RuleId, uint CollectionId, ulong State0, ulong State1, ulong State2, double FrequencyHz, System.Collections.Immutable.ImmutableArray<double> ChargeTransportVector, System.Collections.Immutable.ImmutableArray<double>? StaticCorrection, System.Collections.Immutable.ImmutableArray<byte> TrackerOrder) -> void
+Mocassin.Contracts.Packages.JumpRulePayload.RuleId.get -> uint
+Mocassin.Contracts.Packages.JumpRulePayload.RuleId.init -> void
+Mocassin.Contracts.Packages.JumpRulePayload.State0.get -> ulong
+Mocassin.Contracts.Packages.JumpRulePayload.State0.init -> void
+Mocassin.Contracts.Packages.JumpRulePayload.State1.get -> ulong
+Mocassin.Contracts.Packages.JumpRulePayload.State1.init -> void
+Mocassin.Contracts.Packages.JumpRulePayload.State2.get -> ulong
+Mocassin.Contracts.Packages.JumpRulePayload.State2.init -> void
+Mocassin.Contracts.Packages.JumpRulePayload.StaticCorrection.get -> System.Collections.Immutable.ImmutableArray<double>?
+Mocassin.Contracts.Packages.JumpRulePayload.StaticCorrection.init -> void
+Mocassin.Contracts.Packages.JumpRulePayload.TrackerOrder.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Contracts.Packages.JumpRulePayload.TrackerOrder.init -> void
+Mocassin.Contracts.Packages.LatticePayload
+Mocassin.Contracts.Packages.LatticePayload.<Clone>$() -> Mocassin.Contracts.Packages.LatticePayload!
+Mocassin.Contracts.Packages.LatticePayload.Deconstruct(out uint FormatVersion, out System.Collections.Immutable.ImmutableArray<uint> LatticeSize, out uint PositionCount, out System.Collections.Immutable.ImmutableArray<byte> Lattice) -> void
+Mocassin.Contracts.Packages.LatticePayload.Equals(Mocassin.Contracts.Packages.LatticePayload? other) -> bool
+Mocassin.Contracts.Packages.LatticePayload.FormatVersion.get -> uint
+Mocassin.Contracts.Packages.LatticePayload.FormatVersion.init -> void
+Mocassin.Contracts.Packages.LatticePayload.Lattice.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Contracts.Packages.LatticePayload.Lattice.init -> void
+Mocassin.Contracts.Packages.LatticePayload.LatticePayload(uint FormatVersion, System.Collections.Immutable.ImmutableArray<uint> LatticeSize, uint PositionCount, System.Collections.Immutable.ImmutableArray<byte> Lattice) -> void
+Mocassin.Contracts.Packages.LatticePayload.LatticeSize.get -> System.Collections.Immutable.ImmutableArray<uint>
+Mocassin.Contracts.Packages.LatticePayload.LatticeSize.init -> void
+Mocassin.Contracts.Packages.LatticePayload.PositionCount.get -> uint
+Mocassin.Contracts.Packages.LatticePayload.PositionCount.init -> void
+Mocassin.Contracts.Packages.LatticeSignatureV1
+Mocassin.Contracts.Packages.ModelPayload
+Mocassin.Contracts.Packages.ModelPayload.<Clone>$() -> Mocassin.Contracts.Packages.ModelPayload!
+Mocassin.Contracts.Packages.ModelPayload.Deconstruct(out uint FormatVersion, out string! Signature, out string! ModelSignature, out string! SymmetryContractVersion, out string! SpaceGroupDataVersion, out string! SpaceGroupDataSha256, out Mocassin.Contracts.Packages.ParticlePayload! Particle, out Mocassin.Contracts.Packages.StructurePayload! Structure, out Mocassin.Contracts.Packages.EnergyPayload! Energy, out Mocassin.Contracts.Packages.TransitionPayload! Transitions, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.SimulationPayload!> Simulations) -> void
+Mocassin.Contracts.Packages.ModelPayload.Energy.get -> Mocassin.Contracts.Packages.EnergyPayload!
+Mocassin.Contracts.Packages.ModelPayload.Energy.init -> void
+Mocassin.Contracts.Packages.ModelPayload.Equals(Mocassin.Contracts.Packages.ModelPayload? other) -> bool
+Mocassin.Contracts.Packages.ModelPayload.FormatVersion.get -> uint
+Mocassin.Contracts.Packages.ModelPayload.FormatVersion.init -> void
+Mocassin.Contracts.Packages.ModelPayload.ModelPayload(uint FormatVersion, string! Signature, string! ModelSignature, string! SymmetryContractVersion, string! SpaceGroupDataVersion, string! SpaceGroupDataSha256, Mocassin.Contracts.Packages.ParticlePayload! Particle, Mocassin.Contracts.Packages.StructurePayload! Structure, Mocassin.Contracts.Packages.EnergyPayload! Energy, Mocassin.Contracts.Packages.TransitionPayload! Transitions, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.SimulationPayload!> Simulations) -> void
+Mocassin.Contracts.Packages.ModelPayload.ModelSignature.get -> string!
+Mocassin.Contracts.Packages.ModelPayload.ModelSignature.init -> void
+Mocassin.Contracts.Packages.ModelPayload.Particle.get -> Mocassin.Contracts.Packages.ParticlePayload!
+Mocassin.Contracts.Packages.ModelPayload.Particle.init -> void
+Mocassin.Contracts.Packages.ModelPayload.Signature.get -> string!
+Mocassin.Contracts.Packages.ModelPayload.Signature.init -> void
+Mocassin.Contracts.Packages.ModelPayload.Simulations.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.SimulationPayload!>
+Mocassin.Contracts.Packages.ModelPayload.Simulations.init -> void
+Mocassin.Contracts.Packages.ModelPayload.SpaceGroupDataSha256.get -> string!
+Mocassin.Contracts.Packages.ModelPayload.SpaceGroupDataSha256.init -> void
+Mocassin.Contracts.Packages.ModelPayload.SpaceGroupDataVersion.get -> string!
+Mocassin.Contracts.Packages.ModelPayload.SpaceGroupDataVersion.init -> void
+Mocassin.Contracts.Packages.ModelPayload.Structure.get -> Mocassin.Contracts.Packages.StructurePayload!
+Mocassin.Contracts.Packages.ModelPayload.Structure.init -> void
+Mocassin.Contracts.Packages.ModelPayload.SymmetryContractVersion.get -> string!
+Mocassin.Contracts.Packages.ModelPayload.SymmetryContractVersion.init -> void
+Mocassin.Contracts.Packages.ModelPayload.Transitions.get -> Mocassin.Contracts.Packages.TransitionPayload!
+Mocassin.Contracts.Packages.ModelPayload.Transitions.init -> void
+Mocassin.Contracts.Packages.PackageDiagnosticCodes
+Mocassin.Contracts.Packages.PackageDiagnosticDescriptors
+Mocassin.Contracts.Packages.PackageFormatConstants
+Mocassin.Contracts.Packages.PairLinkPayload
+Mocassin.Contracts.Packages.PairLinkPayload.<Clone>$() -> Mocassin.Contracts.Packages.PairLinkPayload!
+Mocassin.Contracts.Packages.PairLinkPayload.Deconstruct(out uint TargetPosition, out System.Collections.Immutable.ImmutableArray<int> Offset, out uint EnergyId) -> void
+Mocassin.Contracts.Packages.PairLinkPayload.EnergyId.get -> uint
+Mocassin.Contracts.Packages.PairLinkPayload.EnergyId.init -> void
+Mocassin.Contracts.Packages.PairLinkPayload.Equals(Mocassin.Contracts.Packages.PairLinkPayload? other) -> bool
+Mocassin.Contracts.Packages.PairLinkPayload.Offset.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Contracts.Packages.PairLinkPayload.Offset.init -> void
+Mocassin.Contracts.Packages.PairLinkPayload.PairLinkPayload(uint TargetPosition, System.Collections.Immutable.ImmutableArray<int> Offset, uint EnergyId) -> void
+Mocassin.Contracts.Packages.PairLinkPayload.TargetPosition.get -> uint
+Mocassin.Contracts.Packages.PairLinkPayload.TargetPosition.init -> void
+Mocassin.Contracts.Packages.PairTablePayload
+Mocassin.Contracts.Packages.PairTablePayload.<Clone>$() -> Mocassin.Contracts.Packages.PairTablePayload!
+Mocassin.Contracts.Packages.PairTablePayload.Deconstruct(out string! ObjectId, out System.Collections.Immutable.ImmutableArray<double> Energies) -> void
+Mocassin.Contracts.Packages.PairTablePayload.Energies.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Packages.PairTablePayload.Energies.init -> void
+Mocassin.Contracts.Packages.PairTablePayload.Equals(Mocassin.Contracts.Packages.PairTablePayload? other) -> bool
+Mocassin.Contracts.Packages.PairTablePayload.ObjectId.get -> string!
+Mocassin.Contracts.Packages.PairTablePayload.ObjectId.init -> void
+Mocassin.Contracts.Packages.PairTablePayload.PairTablePayload(string! ObjectId, System.Collections.Immutable.ImmutableArray<double> Energies) -> void
+Mocassin.Contracts.Packages.ParticlePayload
+Mocassin.Contracts.Packages.ParticlePayload.<Clone>$() -> Mocassin.Contracts.Packages.ParticlePayload!
+Mocassin.Contracts.Packages.ParticlePayload.Charges.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Packages.ParticlePayload.Charges.init -> void
+Mocassin.Contracts.Packages.ParticlePayload.Count.get -> uint
+Mocassin.Contracts.Packages.ParticlePayload.Count.init -> void
+Mocassin.Contracts.Packages.ParticlePayload.Deconstruct(out System.Collections.Immutable.ImmutableArray<double> Charges, out System.Collections.Immutable.ImmutableArray<string!> Symbols, out System.Collections.Immutable.ImmutableArray<bool> IsVacancy, out uint Count) -> void
+Mocassin.Contracts.Packages.ParticlePayload.Equals(Mocassin.Contracts.Packages.ParticlePayload? other) -> bool
+Mocassin.Contracts.Packages.ParticlePayload.IsVacancy.get -> System.Collections.Immutable.ImmutableArray<bool>
+Mocassin.Contracts.Packages.ParticlePayload.IsVacancy.init -> void
+Mocassin.Contracts.Packages.ParticlePayload.ParticlePayload(System.Collections.Immutable.ImmutableArray<double> Charges, System.Collections.Immutable.ImmutableArray<string!> Symbols, System.Collections.Immutable.ImmutableArray<bool> IsVacancy, uint Count) -> void
+Mocassin.Contracts.Packages.ParticlePayload.Symbols.get -> System.Collections.Immutable.ImmutableArray<string!>
+Mocassin.Contracts.Packages.ParticlePayload.Symbols.init -> void
+Mocassin.Contracts.Packages.PositionPayload
+Mocassin.Contracts.Packages.PositionPayload.<Clone>$() -> Mocassin.Contracts.Packages.PositionPayload!
+Mocassin.Contracts.Packages.PositionPayload.Deconstruct(out System.Collections.Immutable.ImmutableArray<int> Vector4, out uint SiteIndex, out bool Stable, out System.Collections.Immutable.ImmutableArray<byte> ParticleIds) -> void
+Mocassin.Contracts.Packages.PositionPayload.Equals(Mocassin.Contracts.Packages.PositionPayload? other) -> bool
+Mocassin.Contracts.Packages.PositionPayload.ParticleIds.get -> System.Collections.Immutable.ImmutableArray<byte>
+Mocassin.Contracts.Packages.PositionPayload.ParticleIds.init -> void
+Mocassin.Contracts.Packages.PositionPayload.PositionPayload(System.Collections.Immutable.ImmutableArray<int> Vector4, uint SiteIndex, bool Stable, System.Collections.Immutable.ImmutableArray<byte> ParticleIds) -> void
+Mocassin.Contracts.Packages.PositionPayload.SiteIndex.get -> uint
+Mocassin.Contracts.Packages.PositionPayload.SiteIndex.init -> void
+Mocassin.Contracts.Packages.PositionPayload.Stable.get -> bool
+Mocassin.Contracts.Packages.PositionPayload.Stable.init -> void
+Mocassin.Contracts.Packages.PositionPayload.Vector4.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Contracts.Packages.PositionPayload.Vector4.init -> void
+Mocassin.Contracts.Packages.SelectionOptimizerPayload
+Mocassin.Contracts.Packages.SelectionOptimizerPayload.<Clone>$() -> Mocassin.Contracts.Packages.SelectionOptimizerPayload!
+Mocassin.Contracts.Packages.SelectionOptimizerPayload.Deconstruct(out uint PositionId, out byte ParticleId) -> void
+Mocassin.Contracts.Packages.SelectionOptimizerPayload.Equals(Mocassin.Contracts.Packages.SelectionOptimizerPayload? other) -> bool
+Mocassin.Contracts.Packages.SelectionOptimizerPayload.ParticleId.get -> byte
+Mocassin.Contracts.Packages.SelectionOptimizerPayload.ParticleId.init -> void
+Mocassin.Contracts.Packages.SelectionOptimizerPayload.PositionId.get -> uint
+Mocassin.Contracts.Packages.SelectionOptimizerPayload.PositionId.init -> void
+Mocassin.Contracts.Packages.SelectionOptimizerPayload.SelectionOptimizerPayload(uint PositionId, byte ParticleId) -> void
+Mocassin.Contracts.Packages.SimulationPayload
+Mocassin.Contracts.Packages.SimulationPayload.<Clone>$() -> Mocassin.Contracts.Packages.SimulationPayload!
+Mocassin.Contracts.Packages.SimulationPayload.Deconstruct(out string! Id, out string! Kind, out System.Collections.Immutable.ImmutableArray<uint> JumpCollectionIds, out Mocassin.Contracts.Packages.SimulationSettingsPayload! DefaultSettings, out Mocassin.Contracts.Packages.TrackerModelPayload! TrackerModels) -> void
+Mocassin.Contracts.Packages.SimulationPayload.DefaultSettings.get -> Mocassin.Contracts.Packages.SimulationSettingsPayload!
+Mocassin.Contracts.Packages.SimulationPayload.DefaultSettings.init -> void
+Mocassin.Contracts.Packages.SimulationPayload.Equals(Mocassin.Contracts.Packages.SimulationPayload? other) -> bool
+Mocassin.Contracts.Packages.SimulationPayload.Id.get -> string!
+Mocassin.Contracts.Packages.SimulationPayload.Id.init -> void
+Mocassin.Contracts.Packages.SimulationPayload.JumpCollectionIds.get -> System.Collections.Immutable.ImmutableArray<uint>
+Mocassin.Contracts.Packages.SimulationPayload.JumpCollectionIds.init -> void
+Mocassin.Contracts.Packages.SimulationPayload.Kind.get -> string!
+Mocassin.Contracts.Packages.SimulationPayload.Kind.init -> void
+Mocassin.Contracts.Packages.SimulationPayload.SimulationPayload(string! Id, string! Kind, System.Collections.Immutable.ImmutableArray<uint> JumpCollectionIds, Mocassin.Contracts.Packages.SimulationSettingsPayload! DefaultSettings, Mocassin.Contracts.Packages.TrackerModelPayload! TrackerModels) -> void
+Mocassin.Contracts.Packages.SimulationPayload.TrackerModels.get -> Mocassin.Contracts.Packages.TrackerModelPayload!
+Mocassin.Contracts.Packages.SimulationPayload.TrackerModels.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload
+Mocassin.Contracts.Packages.SimulationSettingsPayload.<Clone>$() -> Mocassin.Contracts.Packages.SimulationSettingsPayload!
+Mocassin.Contracts.Packages.SimulationSettingsPayload.BreakSampleIntervalMcsp.get -> ulong?
+Mocassin.Contracts.Packages.SimulationSettingsPayload.BreakSampleIntervalMcsp.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.BreakSampleLengthMcsp.get -> ulong?
+Mocassin.Contracts.Packages.SimulationSettingsPayload.BreakSampleLengthMcsp.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.BreakTolerance.get -> double?
+Mocassin.Contracts.Packages.SimulationSettingsPayload.BreakTolerance.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.Deconstruct(out double TemperatureK, out ulong TargetMcsp, out uint WriteOutCount, out ulong PreRunMcsp, out ulong? TimeLimitS, out double? MinSuccessRate, out double ElectricFieldVm, out System.Collections.Immutable.ImmutableArray<double> ElectricFieldDirection, out double? NormalizationEnergyEv, out double? MaxAttemptFrequencyHz, out double? BreakTolerance, out ulong? BreakSampleLengthMcsp, out ulong? BreakSampleIntervalMcsp, out ulong? ResultSampleMcsp, out uint Flags) -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.ElectricFieldDirection.get -> System.Collections.Immutable.ImmutableArray<double>
+Mocassin.Contracts.Packages.SimulationSettingsPayload.ElectricFieldDirection.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.ElectricFieldVm.get -> double
+Mocassin.Contracts.Packages.SimulationSettingsPayload.ElectricFieldVm.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.Equals(Mocassin.Contracts.Packages.SimulationSettingsPayload? other) -> bool
+Mocassin.Contracts.Packages.SimulationSettingsPayload.Flags.get -> uint
+Mocassin.Contracts.Packages.SimulationSettingsPayload.Flags.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.MaxAttemptFrequencyHz.get -> double?
+Mocassin.Contracts.Packages.SimulationSettingsPayload.MaxAttemptFrequencyHz.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.MinSuccessRate.get -> double?
+Mocassin.Contracts.Packages.SimulationSettingsPayload.MinSuccessRate.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.NormalizationEnergyEv.get -> double?
+Mocassin.Contracts.Packages.SimulationSettingsPayload.NormalizationEnergyEv.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.PreRunMcsp.get -> ulong
+Mocassin.Contracts.Packages.SimulationSettingsPayload.PreRunMcsp.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.ResultSampleMcsp.get -> ulong?
+Mocassin.Contracts.Packages.SimulationSettingsPayload.ResultSampleMcsp.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.SimulationSettingsPayload(double TemperatureK, ulong TargetMcsp, uint WriteOutCount, ulong PreRunMcsp, ulong? TimeLimitS, double? MinSuccessRate, double ElectricFieldVm, System.Collections.Immutable.ImmutableArray<double> ElectricFieldDirection, double? NormalizationEnergyEv, double? MaxAttemptFrequencyHz, double? BreakTolerance, ulong? BreakSampleLengthMcsp, ulong? BreakSampleIntervalMcsp, ulong? ResultSampleMcsp, uint Flags) -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.TargetMcsp.get -> ulong
+Mocassin.Contracts.Packages.SimulationSettingsPayload.TargetMcsp.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.TemperatureK.get -> double
+Mocassin.Contracts.Packages.SimulationSettingsPayload.TemperatureK.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.TimeLimitS.get -> ulong?
+Mocassin.Contracts.Packages.SimulationSettingsPayload.TimeLimitS.init -> void
+Mocassin.Contracts.Packages.SimulationSettingsPayload.WriteOutCount.get -> uint
+Mocassin.Contracts.Packages.SimulationSettingsPayload.WriteOutCount.init -> void
+Mocassin.Contracts.Packages.StructurePayload
+Mocassin.Contracts.Packages.StructurePayload.<Clone>$() -> Mocassin.Contracts.Packages.StructurePayload!
+Mocassin.Contracts.Packages.StructurePayload.CellVectorsAng.get -> System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>>
+Mocassin.Contracts.Packages.StructurePayload.CellVectorsAng.init -> void
+Mocassin.Contracts.Packages.StructurePayload.Deconstruct(out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> CellVectorsAng, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.PositionPayload!> Positions, out uint PositionCount, out uint SiteCount, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.EnvironmentPayload!> Environments, out System.Collections.Immutable.ImmutableArray<int> InteractionRange, out uint StaticTrackersPerCell, out uint GlobalTrackerCount) -> void
+Mocassin.Contracts.Packages.StructurePayload.Environments.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.EnvironmentPayload!>
+Mocassin.Contracts.Packages.StructurePayload.Environments.init -> void
+Mocassin.Contracts.Packages.StructurePayload.Equals(Mocassin.Contracts.Packages.StructurePayload? other) -> bool
+Mocassin.Contracts.Packages.StructurePayload.GlobalTrackerCount.get -> uint
+Mocassin.Contracts.Packages.StructurePayload.GlobalTrackerCount.init -> void
+Mocassin.Contracts.Packages.StructurePayload.InteractionRange.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Contracts.Packages.StructurePayload.InteractionRange.init -> void
+Mocassin.Contracts.Packages.StructurePayload.PositionCount.get -> uint
+Mocassin.Contracts.Packages.StructurePayload.PositionCount.init -> void
+Mocassin.Contracts.Packages.StructurePayload.Positions.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.PositionPayload!>
+Mocassin.Contracts.Packages.StructurePayload.Positions.init -> void
+Mocassin.Contracts.Packages.StructurePayload.SiteCount.get -> uint
+Mocassin.Contracts.Packages.StructurePayload.SiteCount.init -> void
+Mocassin.Contracts.Packages.StructurePayload.StaticTrackersPerCell.get -> uint
+Mocassin.Contracts.Packages.StructurePayload.StaticTrackersPerCell.init -> void
+Mocassin.Contracts.Packages.StructurePayload.StructurePayload(System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> CellVectorsAng, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.PositionPayload!> Positions, uint PositionCount, uint SiteCount, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.EnvironmentPayload!> Environments, System.Collections.Immutable.ImmutableArray<int> InteractionRange, uint StaticTrackersPerCell, uint GlobalTrackerCount) -> void
+Mocassin.Contracts.Packages.TrackerModelPayload
+Mocassin.Contracts.Packages.TrackerModelPayload.<Clone>$() -> Mocassin.Contracts.Packages.TrackerModelPayload!
+Mocassin.Contracts.Packages.TrackerModelPayload.Deconstruct(out System.Collections.Immutable.ImmutableArray<uint> GlobalTrackerIndices, out System.Collections.Immutable.ImmutableArray<uint> StaticTrackerIndices) -> void
+Mocassin.Contracts.Packages.TrackerModelPayload.Equals(Mocassin.Contracts.Packages.TrackerModelPayload? other) -> bool
+Mocassin.Contracts.Packages.TrackerModelPayload.GlobalTrackerIndices.get -> System.Collections.Immutable.ImmutableArray<uint>
+Mocassin.Contracts.Packages.TrackerModelPayload.GlobalTrackerIndices.init -> void
+Mocassin.Contracts.Packages.TrackerModelPayload.StaticTrackerIndices.get -> System.Collections.Immutable.ImmutableArray<uint>
+Mocassin.Contracts.Packages.TrackerModelPayload.StaticTrackerIndices.init -> void
+Mocassin.Contracts.Packages.TrackerModelPayload.TrackerModelPayload(System.Collections.Immutable.ImmutableArray<uint> GlobalTrackerIndices, System.Collections.Immutable.ImmutableArray<uint> StaticTrackerIndices) -> void
+Mocassin.Contracts.Packages.TransitionPayload
+Mocassin.Contracts.Packages.TransitionPayload.<Clone>$() -> Mocassin.Contracts.Packages.TransitionPayload!
+Mocassin.Contracts.Packages.TransitionPayload.Deconstruct(out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.JumpCollectionPayload!> JumpCollections, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.JumpDirectionPayload!> JumpDirections, out System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.JumpRulePayload!> JumpRules, out System.Collections.Immutable.ImmutableArray<uint> JumpCount, out System.Collections.Immutable.ImmutableArray<uint> JumpMapping, out System.Collections.Immutable.ImmutableArray<int> StaticTrackerMapping, out System.Collections.Immutable.ImmutableArray<int> GlobalTrackerMapping) -> void
+Mocassin.Contracts.Packages.TransitionPayload.Equals(Mocassin.Contracts.Packages.TransitionPayload? other) -> bool
+Mocassin.Contracts.Packages.TransitionPayload.GlobalTrackerMapping.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Contracts.Packages.TransitionPayload.GlobalTrackerMapping.init -> void
+Mocassin.Contracts.Packages.TransitionPayload.JumpCollections.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.JumpCollectionPayload!>
+Mocassin.Contracts.Packages.TransitionPayload.JumpCollections.init -> void
+Mocassin.Contracts.Packages.TransitionPayload.JumpCount.get -> System.Collections.Immutable.ImmutableArray<uint>
+Mocassin.Contracts.Packages.TransitionPayload.JumpCount.init -> void
+Mocassin.Contracts.Packages.TransitionPayload.JumpDirections.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.JumpDirectionPayload!>
+Mocassin.Contracts.Packages.TransitionPayload.JumpDirections.init -> void
+Mocassin.Contracts.Packages.TransitionPayload.JumpMapping.get -> System.Collections.Immutable.ImmutableArray<uint>
+Mocassin.Contracts.Packages.TransitionPayload.JumpMapping.init -> void
+Mocassin.Contracts.Packages.TransitionPayload.JumpRules.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.JumpRulePayload!>
+Mocassin.Contracts.Packages.TransitionPayload.JumpRules.init -> void
+Mocassin.Contracts.Packages.TransitionPayload.StaticTrackerMapping.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Contracts.Packages.TransitionPayload.StaticTrackerMapping.init -> void
+Mocassin.Contracts.Packages.TransitionPayload.TransitionPayload(System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.JumpCollectionPayload!> JumpCollections, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.JumpDirectionPayload!> JumpDirections, System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.JumpRulePayload!> JumpRules, System.Collections.Immutable.ImmutableArray<uint> JumpCount, System.Collections.Immutable.ImmutableArray<uint> JumpMapping, System.Collections.Immutable.ImmutableArray<int> StaticTrackerMapping, System.Collections.Immutable.ImmutableArray<int> GlobalTrackerMapping) -> void
 Mocassin.Contracts.Parameterization.ParameterizationSignatureV1
 Mocassin.Contracts.Parameterization.ParameterizationValues
 Mocassin.Contracts.Parameterization.ParameterizationValues.<Clone>$() -> Mocassin.Contracts.Parameterization.ParameterizationValues!
@@ -50,11 +418,127 @@ Mocassin.Contracts.Parameterization.ParameterizationValues.SiteEnergies.get -> S
 Mocassin.Contracts.Parameterization.ParameterizationValues.SiteEnergies.init -> void
 Mocassin.Contracts.Parameterization.ParameterizationValues.TransitionRuleFrequencies.get -> System.Collections.Immutable.ImmutableArray<double>
 Mocassin.Contracts.Parameterization.ParameterizationValues.TransitionRuleFrequencies.init -> void
-const Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.Domain = "mocassin/parameterization-signature/v1" -> string!
-const Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.FormatVersion = 1 -> ulong
+Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.Deterministic = 8 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.KmcSimulation = 64 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.MmcSimulation = 128 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.NoJumpLogging = 2 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.None = 0 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.NoSaving = 1 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.UseDualDofCorrection = 16 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.UseFastExp = 4 -> Mocassin.Contracts.Solver.SolverJobFlags
+Mocassin.Contracts.Solver.SolverJobFlags.UsePrerun = 32 -> Mocassin.Contracts.Solver.SolverJobFlags
+override Mocassin.Contracts.Packages.ClusterLinkPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.ClusterLinkPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.ClusterLinkPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.ClusterTablePayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.ClusterTablePayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.ClusterTablePayload.ToString() -> string!
+override Mocassin.Contracts.Packages.EnergyPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.EnergyPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.EnergyPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.EnvironmentPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.EnvironmentPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.EnvironmentPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.ExtensionPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.ExtensionPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.ExtensionPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.JobPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.JobPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.JobPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.JumpCollectionPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.JumpCollectionPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.JumpCollectionPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.JumpDirectionPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.JumpDirectionPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.JumpDirectionPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.JumpRulePayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.JumpRulePayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.JumpRulePayload.ToString() -> string!
+override Mocassin.Contracts.Packages.LatticePayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.LatticePayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.LatticePayload.ToString() -> string!
+override Mocassin.Contracts.Packages.ModelPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.ModelPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.ModelPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.PairLinkPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.PairLinkPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.PairLinkPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.PairTablePayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.PairTablePayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.PairTablePayload.ToString() -> string!
+override Mocassin.Contracts.Packages.ParticlePayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.ParticlePayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.ParticlePayload.ToString() -> string!
+override Mocassin.Contracts.Packages.PositionPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.PositionPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.PositionPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.SelectionOptimizerPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.SelectionOptimizerPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.SelectionOptimizerPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.SimulationPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.SimulationPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.SimulationPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.SimulationSettingsPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.SimulationSettingsPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.SimulationSettingsPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.StructurePayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.StructurePayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.StructurePayload.ToString() -> string!
+override Mocassin.Contracts.Packages.TrackerModelPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.TrackerModelPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.TrackerModelPayload.ToString() -> string!
+override Mocassin.Contracts.Packages.TransitionPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.TransitionPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.TransitionPayload.ToString() -> string!
 override Mocassin.Contracts.Parameterization.ParameterizationValues.Equals(object? obj) -> bool
 override Mocassin.Contracts.Parameterization.ParameterizationValues.GetHashCode() -> int
 override Mocassin.Contracts.Parameterization.ParameterizationValues.ToString() -> string!
+static Mocassin.Contracts.Packages.ClusterLinkPayload.operator !=(Mocassin.Contracts.Packages.ClusterLinkPayload? left, Mocassin.Contracts.Packages.ClusterLinkPayload? right) -> bool
+static Mocassin.Contracts.Packages.ClusterLinkPayload.operator ==(Mocassin.Contracts.Packages.ClusterLinkPayload? left, Mocassin.Contracts.Packages.ClusterLinkPayload? right) -> bool
+static Mocassin.Contracts.Packages.ClusterTablePayload.operator !=(Mocassin.Contracts.Packages.ClusterTablePayload? left, Mocassin.Contracts.Packages.ClusterTablePayload? right) -> bool
+static Mocassin.Contracts.Packages.ClusterTablePayload.operator ==(Mocassin.Contracts.Packages.ClusterTablePayload? left, Mocassin.Contracts.Packages.ClusterTablePayload? right) -> bool
+static Mocassin.Contracts.Packages.EnergyPayload.operator !=(Mocassin.Contracts.Packages.EnergyPayload? left, Mocassin.Contracts.Packages.EnergyPayload? right) -> bool
+static Mocassin.Contracts.Packages.EnergyPayload.operator ==(Mocassin.Contracts.Packages.EnergyPayload? left, Mocassin.Contracts.Packages.EnergyPayload? right) -> bool
+static Mocassin.Contracts.Packages.EnvironmentPayload.operator !=(Mocassin.Contracts.Packages.EnvironmentPayload? left, Mocassin.Contracts.Packages.EnvironmentPayload? right) -> bool
+static Mocassin.Contracts.Packages.EnvironmentPayload.operator ==(Mocassin.Contracts.Packages.EnvironmentPayload? left, Mocassin.Contracts.Packages.EnvironmentPayload? right) -> bool
+static Mocassin.Contracts.Packages.ExtensionPayload.operator !=(Mocassin.Contracts.Packages.ExtensionPayload? left, Mocassin.Contracts.Packages.ExtensionPayload? right) -> bool
+static Mocassin.Contracts.Packages.ExtensionPayload.operator ==(Mocassin.Contracts.Packages.ExtensionPayload? left, Mocassin.Contracts.Packages.ExtensionPayload? right) -> bool
+static Mocassin.Contracts.Packages.JobPayload.operator !=(Mocassin.Contracts.Packages.JobPayload? left, Mocassin.Contracts.Packages.JobPayload? right) -> bool
+static Mocassin.Contracts.Packages.JobPayload.operator ==(Mocassin.Contracts.Packages.JobPayload? left, Mocassin.Contracts.Packages.JobPayload? right) -> bool
+static Mocassin.Contracts.Packages.JumpCollectionPayload.operator !=(Mocassin.Contracts.Packages.JumpCollectionPayload? left, Mocassin.Contracts.Packages.JumpCollectionPayload? right) -> bool
+static Mocassin.Contracts.Packages.JumpCollectionPayload.operator ==(Mocassin.Contracts.Packages.JumpCollectionPayload? left, Mocassin.Contracts.Packages.JumpCollectionPayload? right) -> bool
+static Mocassin.Contracts.Packages.JumpDirectionPayload.operator !=(Mocassin.Contracts.Packages.JumpDirectionPayload? left, Mocassin.Contracts.Packages.JumpDirectionPayload? right) -> bool
+static Mocassin.Contracts.Packages.JumpDirectionPayload.operator ==(Mocassin.Contracts.Packages.JumpDirectionPayload? left, Mocassin.Contracts.Packages.JumpDirectionPayload? right) -> bool
+static Mocassin.Contracts.Packages.JumpRulePayload.operator !=(Mocassin.Contracts.Packages.JumpRulePayload? left, Mocassin.Contracts.Packages.JumpRulePayload? right) -> bool
+static Mocassin.Contracts.Packages.JumpRulePayload.operator ==(Mocassin.Contracts.Packages.JumpRulePayload? left, Mocassin.Contracts.Packages.JumpRulePayload? right) -> bool
+static Mocassin.Contracts.Packages.LatticePayload.operator !=(Mocassin.Contracts.Packages.LatticePayload? left, Mocassin.Contracts.Packages.LatticePayload? right) -> bool
+static Mocassin.Contracts.Packages.LatticePayload.operator ==(Mocassin.Contracts.Packages.LatticePayload? left, Mocassin.Contracts.Packages.LatticePayload? right) -> bool
+static Mocassin.Contracts.Packages.LatticeSignatureV1.Compute(string! modelSignature, Mocassin.Contracts.Packages.LatticePayload! payload) -> string!
+static Mocassin.Contracts.Packages.LatticeSignatureV1.ComputeProjection(string! modelSignature, Mocassin.Contracts.Packages.LatticePayload! payload) -> byte[]!
+static Mocassin.Contracts.Packages.ModelPayload.operator !=(Mocassin.Contracts.Packages.ModelPayload? left, Mocassin.Contracts.Packages.ModelPayload? right) -> bool
+static Mocassin.Contracts.Packages.ModelPayload.operator ==(Mocassin.Contracts.Packages.ModelPayload? left, Mocassin.Contracts.Packages.ModelPayload? right) -> bool
+static Mocassin.Contracts.Packages.PackageDiagnosticDescriptors.All.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
+static Mocassin.Contracts.Packages.PairLinkPayload.operator !=(Mocassin.Contracts.Packages.PairLinkPayload? left, Mocassin.Contracts.Packages.PairLinkPayload? right) -> bool
+static Mocassin.Contracts.Packages.PairLinkPayload.operator ==(Mocassin.Contracts.Packages.PairLinkPayload? left, Mocassin.Contracts.Packages.PairLinkPayload? right) -> bool
+static Mocassin.Contracts.Packages.PairTablePayload.operator !=(Mocassin.Contracts.Packages.PairTablePayload? left, Mocassin.Contracts.Packages.PairTablePayload? right) -> bool
+static Mocassin.Contracts.Packages.PairTablePayload.operator ==(Mocassin.Contracts.Packages.PairTablePayload? left, Mocassin.Contracts.Packages.PairTablePayload? right) -> bool
+static Mocassin.Contracts.Packages.ParticlePayload.operator !=(Mocassin.Contracts.Packages.ParticlePayload? left, Mocassin.Contracts.Packages.ParticlePayload? right) -> bool
+static Mocassin.Contracts.Packages.ParticlePayload.operator ==(Mocassin.Contracts.Packages.ParticlePayload? left, Mocassin.Contracts.Packages.ParticlePayload? right) -> bool
+static Mocassin.Contracts.Packages.PositionPayload.operator !=(Mocassin.Contracts.Packages.PositionPayload? left, Mocassin.Contracts.Packages.PositionPayload? right) -> bool
+static Mocassin.Contracts.Packages.PositionPayload.operator ==(Mocassin.Contracts.Packages.PositionPayload? left, Mocassin.Contracts.Packages.PositionPayload? right) -> bool
+static Mocassin.Contracts.Packages.SelectionOptimizerPayload.operator !=(Mocassin.Contracts.Packages.SelectionOptimizerPayload? left, Mocassin.Contracts.Packages.SelectionOptimizerPayload? right) -> bool
+static Mocassin.Contracts.Packages.SelectionOptimizerPayload.operator ==(Mocassin.Contracts.Packages.SelectionOptimizerPayload? left, Mocassin.Contracts.Packages.SelectionOptimizerPayload? right) -> bool
+static Mocassin.Contracts.Packages.SimulationPayload.operator !=(Mocassin.Contracts.Packages.SimulationPayload? left, Mocassin.Contracts.Packages.SimulationPayload? right) -> bool
+static Mocassin.Contracts.Packages.SimulationPayload.operator ==(Mocassin.Contracts.Packages.SimulationPayload? left, Mocassin.Contracts.Packages.SimulationPayload? right) -> bool
+static Mocassin.Contracts.Packages.SimulationSettingsPayload.operator !=(Mocassin.Contracts.Packages.SimulationSettingsPayload? left, Mocassin.Contracts.Packages.SimulationSettingsPayload? right) -> bool
+static Mocassin.Contracts.Packages.SimulationSettingsPayload.operator ==(Mocassin.Contracts.Packages.SimulationSettingsPayload? left, Mocassin.Contracts.Packages.SimulationSettingsPayload? right) -> bool
+static Mocassin.Contracts.Packages.StructurePayload.operator !=(Mocassin.Contracts.Packages.StructurePayload? left, Mocassin.Contracts.Packages.StructurePayload? right) -> bool
+static Mocassin.Contracts.Packages.StructurePayload.operator ==(Mocassin.Contracts.Packages.StructurePayload? left, Mocassin.Contracts.Packages.StructurePayload? right) -> bool
+static Mocassin.Contracts.Packages.TrackerModelPayload.operator !=(Mocassin.Contracts.Packages.TrackerModelPayload? left, Mocassin.Contracts.Packages.TrackerModelPayload? right) -> bool
+static Mocassin.Contracts.Packages.TrackerModelPayload.operator ==(Mocassin.Contracts.Packages.TrackerModelPayload? left, Mocassin.Contracts.Packages.TrackerModelPayload? right) -> bool
+static Mocassin.Contracts.Packages.TransitionPayload.operator !=(Mocassin.Contracts.Packages.TransitionPayload? left, Mocassin.Contracts.Packages.TransitionPayload? right) -> bool
+static Mocassin.Contracts.Packages.TransitionPayload.operator ==(Mocassin.Contracts.Packages.TransitionPayload? left, Mocassin.Contracts.Packages.TransitionPayload? right) -> bool
 static Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.Compute(string! modelSignature, Mocassin.Contracts.Parameterization.ParameterizationValues! values) -> string!
 static Mocassin.Contracts.Parameterization.ParameterizationSignatureV1.ComputeProjection(string! modelSignature, Mocassin.Contracts.Parameterization.ParameterizationValues! values) -> byte[]!
 static Mocassin.Contracts.Parameterization.ParameterizationValues.operator !=(Mocassin.Contracts.Parameterization.ParameterizationValues? left, Mocassin.Contracts.Parameterization.ParameterizationValues? right) -> bool

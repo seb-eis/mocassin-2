@@ -3511,6 +3511,26 @@
           "projectionSha256": "a958f0b4731611bab0d63b2b839eb1c026d6266c61e429da7de4d982cac0c6ce",
           "modelSignature": "6d49e4d2ce5bdc4ed1f5383ce8bd07666938c1e8ab0b981520d53b7386c404f0",
           "description": "Real apply of the checked-in P1 chiral template over the generated P1 link-change fixture; parameterization-chiral-p1.json"
+        },
+        {
+          "id": "lattice-ceria-1x1x1",
+          "signature": "lattice",
+          "domainPrefix": "mocassin/lattice-signature/v1",
+          "projectionType": "LatticeSignatureV1",
+          "signatureHex": "0d8327cda4f8d6b4637208894c350b2c5e1686548d951b4326fb59eeeab4a42a",
+          "projectionSha256": "26fa83e7528be7951d18c5d4721b317a1165babd889abda71c1c4e75dd24d62d",
+          "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
+          "description": "Real ceria supercell from the real compiler and supercell generator; lattice-ceria-1x1x1.json"
+        },
+        {
+          "id": "lattice-ceria-2x2x2",
+          "signature": "lattice",
+          "domainPrefix": "mocassin/lattice-signature/v1",
+          "projectionType": "LatticeSignatureV1",
+          "signatureHex": "2b132c6cb08a0ce0a08830a1ee465227fc99507e84995a394b94de1be0e8c2db",
+          "projectionSha256": "d9617a224104a70c8652ae49aaa0ced7487b2156864f4f07ea8b925a0f1cf4f8",
+          "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
+          "description": "Real ceria supercell from the real compiler and supercell generator; lattice-ceria-2x2x2.json"
         }
       ]
     },
