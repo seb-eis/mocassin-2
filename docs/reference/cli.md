@@ -133,9 +133,9 @@ mocassin build <project.mocprj> [-o <project.msl>]
                 [--warnings-as-errors] [--quiet] [--json]
 ```
 
-The build loads, selects a recipe, compiles, validates with the compiled model, parameterizes, expands the
-complete job template, generates the selected lattices and job payloads, writes the package, publishes it
-atomically, and verifies it.
+The build loads, selects a recipe, validates the project, compiles, validates the job templates with the
+compiled model, parameterizes, expands the complete job template, generates the selected lattices and job
+payloads, writes the package, publishes it atomically, and verifies it.
 
 ### Recipe selection
 
@@ -197,16 +197,17 @@ configuration, optimizer, lattice, doping, and charge data. `--preview` rejects 
 ### Progress, cancellation, and warnings
 
 ```text
-[1/9] Loading project…              done (42 ms)
-[2/9] Selecting build recipe…       Ceria temperature sweep → implicit default (3 ms)
-[3/9] Compiling model…              done (610 ms)
-[4/9] Validating…                   0 errors, 2 warnings (18 ms)
-[5/9] Parameterizing…               implicit default, signature a9e0… (12 ms)
-[6/9] Expanding jobs…               6 jobs (4 ms)
-[7/9] Generating and writing jobs…  [##########] 6/6 (1.4 s)
-[8/9] Publishing…                   ceria.msl (2.1 MB, sha256 55f9…) (12 ms)
-[9/9] Verifying package…            valid, 10 checks (40 ms)
-Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
+[1/10] Loading project…               done (42 ms)
+[2/10] Selecting build recipe…        Ceria temperature sweep → implicit default (3 ms)
+[3/10] Validating project…            0 errors, 2 warnings (18 ms)
+[4/10] Compiling model…               done (610 ms)
+[5/10] Validating job templates…      0 errors, 0 warnings (4 ms)
+[6/10] Parameterizing…                implicit default, signature a9e0… (12 ms)
+[7/10] Expanding jobs…                6 jobs (4 ms)
+[8/10] Generating and writing jobs…   [##########] 6/6 (1.4 s)
+[9/10] Publishing…                    ceria.msl (2.1 MB, sha256 55f9…) (12 ms)
+[10/10] Verifying package…            valid, 10 checks (40 ms)
+Package written: work/ceria.msl (2.1 MB, 6 jobs, selection all)
 ```
 
 - Progress is throttled and shows an ETA from a rolling average. The final progress of a stage is always

@@ -9,13 +9,14 @@ solver never reads `.mocprj`. The format and its verification rules are in
 
 | Stage | What happens |
 | --- | --- |
-| Load and validate | Read the `.mocprj`, migrate it if needed, and run the project validation pipeline. Build only proceeds without error diagnostics. |
+| Load and validate | Read the `.mocprj`, migrate it if needed, and run the project validation pipeline (load/model/cross-domain/feasibility). Build only proceeds without error diagnostics. |
 | Compile | `ModelCompiler` produces the immutable compiled model (positions, sites, pair/cluster links, transitions, simulations) and its Step 08 signature. |
+| Validate job templates | The build stage runs the compiled-bound job-template, position, optimizer, and doping checks with the compiled model. |
 | Parameterize | `ParameterizationService` applies the selected parameterization, or the implicit default when the project defines none, and produces the applied tables and the Step 09 signature that becomes `models.signature`. |
 | Expand jobs | `JobTemplateExpander` resolves collections and configurations in authored order and emits deterministic job descriptors with 1-based, gap-free job IDs and a 32-byte seed per job. |
 | Generate supercells | `SupercellGenerator` applies the requested supercell size and doping, and reports the applied versus requested fractions. |
-| Write | `SimulationPackageWriter` inserts the model row, then streams each job: lattice payload (content-addressed and deduplicated), job payload, and the payload-derived columns, in batches. |
-| Verify and publish | The writer decodes every payload it writes as a self-check, then checkpoints, fsyncs, hashes, and atomically renames the temp file to the target. |
+| Write and publish | `SimulationPackageWriter` inserts the model row, then streams each job: lattice payload (content-addressed and deduplicated), job payload, and the payload-derived columns, in batches. It decodes every payload it writes as a self-check, then checkpoints, fsyncs, hashes, and atomically renames the temp file to the target. |
+| Verify | The CLI runs the read-only package verifier after publication and reports the ordered `PKG` checks. |
 
 ## Options
 

@@ -242,12 +242,13 @@ public enum BuildStage
 {
     Load = 0,
     Select = 1,
-    Compile = 2,
-    Validate = 3,
-    Parameterize = 4,
-    ExpandJobs = 5,
-    GenerateAndWriteJobs = 6,
-    Publish = 7,
+    Validate = 2,
+    Compile = 3,
+    ValidateBuild = 4,
+    Parameterize = 5,
+    ExpandJobs = 6,
+    GenerateAndWriteJobs = 7,
+    Publish = 8,
 }
 
 public enum BuildStatus { Succeeded = 0, Failed = 1, Cancelled = 2 }
@@ -292,19 +293,22 @@ public sealed record BuildResult(
 ```text
 1  Load            ProjectStore.LoadAsync(ValidateOnLoad = false)
 2  Select          build template / job template / parameterization, output path
-3  Compile         IModelCompiler.Compile (pure, cancellation-aware)
-4  Validate        ProjectValidationPipeline.Validate with the compiled model and RunBuildStage = true
-5  Parameterize    IParameterizationService.Validate, then Apply (or the implicit default)
-6  ExpandJobs      JobTemplateExpander.Expand over the complete template
-7  Generate+Write  JobSelection filter; parallel SupercellGenerator + serialized package writes
-8  Publish         ISimulationPackageWriter.CompleteAsync (checkpoint, fsync, atomic rename)
+3  Validate        ProjectValidationPipeline.Validate, RunBuildStage = false (stages 1–4)
+4  Compile         IModelCompiler.Compile (pure, cancellation-aware)
+5  ValidateBuild   ProjectValidationPipeline.Validate, RunBuildStage = true, with the compiled model
+6  Parameterize    IParameterizationService.Validate, then Apply (or the implicit default)
+7  ExpandJobs      JobTemplateExpander.Expand over the complete template
+8  Generate+Write  JobSelection filter; parallel SupercellGenerator + serialized package writes
+9  Publish         ISimulationPackageWriter.CompleteAsync (checkpoint, fsync, atomic rename)
 ```
 
-- **Compile before validate** is deliberate and matches the Step 10 preview path:
-  `JobTemplateValidationStage` needs `ValidationContext.CompiledModel` to run the compiled-bound job checks.
-  Compilation is defensive: an invalid project fails with `CMP001` and the source diagnostics, which the
-  validation stage would emit again; the merged report deduplicates exact `(code, path, message)` triples.
-  The step does not add a second validation entry point or change the Step 07 pipeline.
+- **Validate, compile, then validate the build stage.** The pre-compile call runs load/model/cross-domain/
+  feasibility and fails a model error with exit 1 before paying for a compile. The post-compile call runs the
+  same pipeline with `RunBuildStage = true` and the compiled model, so `JobTemplateValidationStage` can run
+  its compiled-bound job, position, optimizer, and doping checks. The second call re-runs stages 1–4, which
+  were already clean; the ceria cost is below the Step 07 200 ms budget and the report deduplicates exact
+  `(code, path, message)` triples. This uses the existing pipeline entry point and adds no second validation
+  API.
 - `validate` never compiles and never runs the build stage; `build` and `build --preview` do.
 - Selection runs before compilation so a missing or ambiguous template fails without paying for a compile.
 - Expansion runs over the **complete** template before `--jobs` filtering, so IDs, seeds, and lattice
@@ -315,7 +319,7 @@ public sealed record BuildResult(
 - Cancellation is checked at every stage boundary, before each job, and inside the compiler/writer where
   their APIs already accept a token.
 - Errors stop the build. Warnings are collected, emitted as events, and reported at the end.
-- `--preview` runs stages 1–6, evaluates the selected configurations through `ILatticePreviewService`, and
+- `--preview` runs stages 1–7, evaluates the selected configurations through `ILatticePreviewService`, and
   stops; it never generates duplicate-job lattices, opens a writer, or creates a file.
 - Post-publication verification is **not** a pipeline stage: it is composed by the caller (CLI or GUI) with
   `IPackageVerifier` so `Mocassin.Packages` does not gain a dependency on `Mocassin.Results`.
@@ -453,21 +457,22 @@ Human mode writes stage/progress lines to **stderr** and the final summary to **
 keeps stdout scriptable and matches the `--json` split.
 
 ```text
-[1/9] Loading project…              done (42 ms)
-[2/9] Selecting build recipe…       Ceria temperature sweep → implicit default (3 ms)
-[3/9] Compiling model…              done (610 ms)
-[4/9] Validating…                   0 errors, 2 warnings (18 ms)
-[5/9] Parameterizing…               implicit default, signature a9e0… (12 ms)
-[6/9] Expanding jobs…               6 jobs (4 ms)
-[7/9] Generating and writing jobs…  [##########] 6/6 (1.4 s)
-[8/9] Publishing…                   ceria.msl (2.1 MB, sha256 55f9…) (12 ms)
-[9/9] Verifying package…            valid, 10 checks (40 ms)
+[1/10] Loading project…               done (42 ms)
+[2/10] Selecting build recipe…        Ceria temperature sweep → implicit default (3 ms)
+[3/10] Validating project…            0 errors, 2 warnings (18 ms)
+[4/10] Compiling model…               done (610 ms)
+[5/10] Validating job templates…      0 errors, 0 warnings (4 ms)
+[6/10] Parameterizing…                implicit default, signature a9e0… (12 ms)
+[7/10] Expanding jobs…                6 jobs (4 ms)
+[8/10] Generating and writing jobs…   [##########] 6/6 (1.4 s)
+[9/10] Publishing…                    ceria.msl (2.1 MB, sha256 55f9…) (12 ms)
+[10/10] Verifying package…            valid, 10 checks (40 ms)
 Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
 ```
 
-- The full build has nine rendered steps: the eight pipeline stages plus the CLI’s verification stage.
-  `--preview` skips `Publish` and `Verify` and renders seven steps, ending with a “Previewing configurations”
-  line; the renderer computes the denominator from the plan, not a constant.
+- The full build has ten rendered steps: nine pipeline stages plus the CLI’s verification stage.
+  `--preview` skips `GenerateAndWriteJobs`, `Publish`, and `Verify` and renders eight steps, ending with a
+  “Previewing configurations” line; the renderer computes the denominator from the plan, not a constant.
 - The `GenerateAndWriteJobs` line is the only bar; it reports `completed/total` selected jobs and the
   current `JobId` or collection/config name.
 - ETA is computed by `ProgressEstimator` from a rolling window of at least 8 and at most 64
@@ -595,8 +600,9 @@ shape: `templateId`, `templateName`, `totalJobs`, and `collections[]` with `id`,
 `totalChargeAfter`, `isChargeNeutral`, `dopings[]`). Previews also report `estimatedPackageBytes` as an
 advisory lower-bound estimate; it is not a correctness or size guarantee.
 
-`timings` uses the lower-case stage names `load`, `select`, `compile`, `validate`, `parameterize`, `expand`,
-`generate`, `publish`, and `verify`, in that order, omitting stages that did not run.
+`timings` uses the lower-case stage names `load`, `select`, `validate`, `compile`, `validateBuild`,
+`parameterize`, `expand`, `generate`, `publish`, and `verify`, in that order, omitting stages that did not
+run.
 
 ### 12.3 Selection object
 
@@ -1084,8 +1090,10 @@ namespace rules apply.
   replaced. `clean --dry-run` remains and means “list only”.
 - **Exit code 5 is reserved.** `build` is all-or-nothing and never publishes a partial package. Future
   multi-job commands share the code.
-- **Compile precedes the full validation pipeline** because the build stage needs the compiled model. The
-  pipeline runs once with `RunBuildStage = true`; it does not add a second validation entry point.
+- **Validate, compile, then validate the build stage.** The pre-compile `Validate(... RunBuildStage = false)`
+  call fails model errors with exit 1 before a compile; the post-compile call runs the same pipeline with
+  `RunBuildStage = true` and the compiled model for the build stage. The repeated stages 1–4 are cheap and the
+  report deduplicates exact diagnostics; no second validation entry point is added.
 - **`build --preview` uses the build exit-code table**, replacing the Step 10 interim mapping. The preview
   report is `build-v1` with `mode = "preview"`.
 - **`build-preview-v1` is retired** and becomes `build-v1` preview mode. It was never manifest-registered.
