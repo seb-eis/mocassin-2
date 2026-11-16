@@ -21,6 +21,7 @@ the command’s options and exits 0. An unknown command exits 2.
 
 Options use `--name value` or `--name=value`; `-o value` is the short output option. A flag takes no value.
 `--` ends option parsing so a path beginning with `-` can be passed. Option names are case-sensitive.
+Numbers use invariant culture: `--parallel` accepts `1..256` and `--older-than` accepts `0..36500`.
 
 `--quiet` suppresses human progress. With `--json`, it also suppresses the `build.stage`, `build.progress`,
 and `log` JSON-Lines events; diagnostics and the final report remain. It never suppresses errors.
