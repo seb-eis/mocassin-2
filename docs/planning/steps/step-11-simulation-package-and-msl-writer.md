@@ -8,21 +8,22 @@ read-only inspection/verification library for the build CLI.
 
 ## Implementation status
 
-- **Status:** Awaiting approval
-- **Step branch:** `step/11-simulation-package-and-msl-writer`
+- **Status:** Done
+- **Step branch:** `step/11-simulation-package-and-msl-writer` (merged and deleted)
 - **Step CI:** round 2 at X2 `4197166`: [Ubuntu closeout
   green](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) and [focused Windows platform gate
   green](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) — [closeout
   evidence](../closeout/step-11.json). Round-1 evidence at `e94d975` remains
   [43935118095](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095) /
-  [43935661973](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973)
-- **Main merge:** — (main `bca66373c68485d08ac78c0259577887726879d1` merged into the step branch as
-  `b44022ab2353e2f4394793ba3d023718a578753c`; main was green at the freeze)
-- **Step tag:** —
+  [43935661973](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973). Automatic main CI
+  [`43948410478`](https://github.com/seb-eis/mocassin-2/actions/runs/43948410478) is green at the merge commit.
+- **Main merge:** `84ceb76eaa3e14c7cbe42c7ccbdc9842611891bc` (`--no-ff`, 2026-11-16); the merge-commit main CI
+  run is green.
+- **Step tag:** `step-11` (annotated) on `84ceb76eaa3e14c7cbe42c7ccbdc9842611891bc`
 - **Audit:** `Passed with notes` — [record](../audits/step-11.md). Round 1 returned `Passed with notes` at
   `e94d975`; round 2 verified the X2 `4197166` fixes and returned `Passed with notes` at request tip
   `d7b654c` (`fda68e6` record). The human owner accepted the remaining Notes N-1, N-4, and N-6 on 2026-11-16
-  and confirmed the merge and tag; status is `Awaiting approval`.
+  and approved the merge and tag; the step is merged and tagged.
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
@@ -416,6 +417,11 @@ per feature.
 - **Parity:** no new row; the Step 11 rows were confirmed final for this step and the remaining `Partial` /
   `Improvement` rows name their later steps (12, 14, 18, 26), with Step 13 named as the Rust reader for the
   `.msl` fixture.
+- **Merge and tag (2026-11-16):** audit round 2 returned `Passed with notes` at X2; the owner accepted the
+  remaining Notes N-1, N-4, and N-6. The step merged into `main` with `--no-ff` as
+  `84ceb76eaa3e14c7cbe42c7ccbdc9842611891bc`; automatic main CI
+  [`43948410478`](https://github.com/seb-eis/mocassin-2/actions/runs/43948410478) is green at the merge commit;
+  the annotated `step-11` tag is pushed; the step branch is deleted locally and remotely.
 
 #### X2 — Audit-minor fixes and re-audit request
 
