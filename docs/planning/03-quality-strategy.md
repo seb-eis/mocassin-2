@@ -466,7 +466,10 @@ solver with the same binary, platform, package, and seed.
   same arrays; results must agree within floating-point tolerance.
 - **Fuzzing**: `cargo-fuzz` on the Rust `.msl`, `.mcs`, and extension-config readers; SharpFuzz on the .NET
   project JSON, `.msr`, `solver.json`, event, and MMCFE readers; Hypothesis on the Python readers. Crashes and
-  OOMs are release blockers.
+  OOMs are release blockers. The Step 11 `.msl` verifier's nightly mutation/fuzz harness is **deferred to
+  Step 29** (owner: Step 29 implementor) and lands with the SharpFuzz targets and the nightly fuzz job; until
+  then Step 11 proves the fixed truncation, corrupt-frame, wrong-signature, foreign-key, and
+  decompression-bound cases and claims no fuzz run.
 
 Contract tests use files produced by the real writers and never share reader/writer code across languages.
 

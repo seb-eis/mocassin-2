@@ -56,6 +56,20 @@ public sealed class PackageVerifierTests
     }
 
     [Fact]
+    public async Task Pkg002MalformedFormatVersion()
+    {
+        using var temp = new TemporaryDirectory();
+        var built = await PackageTestSupport.BuildAsync(temp.Path);
+        await MutateAsync(built.Path, "UPDATE schema_info SET value = 'one' WHERE key = 'format_version';");
+
+        var report = await new PackageVerifier().VerifyAsync(built.Path, standard);
+
+        Assert.False(report.IsValid);
+        Assert.Contains(report.Diagnostics, static diagnostic => diagnostic.Code == "PKG002");
+        Assert.DoesNotContain(report.Diagnostics, static diagnostic => diagnostic.Code == "PKG003");
+    }
+
+    [Fact]
     public async Task Pkg003MissingSchemaElement()
     {
         using var temp = new TemporaryDirectory();
@@ -66,6 +80,34 @@ public sealed class PackageVerifierTests
 
         Assert.False(report.IsValid);
         Assert.Contains(report.Diagnostics, static diagnostic => diagnostic.Code == "PKG003");
+    }
+
+    [Fact]
+    public async Task Pkg003MalformedProjectId()
+    {
+        using var temp = new TemporaryDirectory();
+        var built = await PackageTestSupport.BuildAsync(temp.Path);
+        await MutateAsync(built.Path, "UPDATE schema_info SET value = 'not-a-guid' WHERE key = 'project_id';");
+
+        var report = await new PackageVerifier().VerifyAsync(built.Path, standard);
+
+        Assert.False(report.IsValid);
+        Assert.Contains(report.Diagnostics, static diagnostic => diagnostic.Code == "PKG003");
+        Assert.DoesNotContain(report.Diagnostics, static diagnostic => diagnostic.Code == "PKG002");
+    }
+
+    [Fact]
+    public async Task Pkg003MalformedCreatedUtc()
+    {
+        using var temp = new TemporaryDirectory();
+        var built = await PackageTestSupport.BuildAsync(temp.Path);
+        await MutateAsync(built.Path, "UPDATE schema_info SET value = 'yesterday' WHERE key = 'created_utc';");
+
+        var report = await new PackageVerifier().VerifyAsync(built.Path, standard);
+
+        Assert.False(report.IsValid);
+        Assert.Contains(report.Diagnostics, static diagnostic => diagnostic.Code == "PKG003");
+        Assert.DoesNotContain(report.Diagnostics, static diagnostic => diagnostic.Code == "PKG002");
     }
 
     [Fact]

@@ -19,9 +19,9 @@ namespace Mocassin.Packages.SimulationPackage;
 /// <remarks>
 /// The writer builds in <c>&lt;target&gt;.tmp-&lt;pid&gt;-&lt;random&gt;</c> beside the target, uses WAL and
 /// batch commits during the build, and publishes through a checkpoint, <c>journal_mode=DELETE</c>, a file
-/// hash, a file fsync, a containing-directory fsync on Unix, and an atomic replace. The public payload-encoder
-/// methods are completed in Step 11 features 4 and 5; this feature exposes the schema and publication barrier
-/// and its contract-typed internal row seam.
+/// hash, a file fsync, a containing-directory fsync on Unix, and an atomic replace. The public
+/// <see cref="WriteModelAsync"/> and <see cref="WriteJobAsync"/> methods map the compiled model and expanded
+/// job, encode and decode the payload, verify the decoded signature, and insert the contract-typed rows.
 /// </remarks>
 public sealed class SimulationPackageWriter : ISimulationPackageWriter
 {
@@ -138,10 +138,9 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
 
     /// <inheritdoc />
     /// <remarks>
-    /// The map/encode path lands in Step 11 feature 4. Feature 3 covers the schema and publication barrier
-    /// through <see cref="WriteModelRowAsync"/>.
+    /// Maps the parameterized model to the model payload, encodes, decodes, and re-checks the decoded
+    /// parameterization signature and compiled-model signature before inserting the row.
     /// </remarks>
-    /// <exception cref="NotSupportedException">The model payload encoder is not part of this feature yet.</exception>
     public async Task WriteModelAsync(ParameterizedModel model, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(model);
@@ -190,10 +189,9 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
 
     /// <inheritdoc />
     /// <remarks>
-    /// The map/encode path lands in Step 11 feature 5. Feature 3 covers the schema and publication barrier
-    /// through <see cref="WriteJobRowAsync"/>.
+    /// Maps and encodes the generated lattice and the expanded job descriptor, decodes each payload to verify
+    /// its signature and settings, then inserts or reuses the lattice row and inserts the job row.
     /// </remarks>
-    /// <exception cref="NotSupportedException">The job payload encoder is not part of this feature yet.</exception>
     public async Task WriteJobAsync(JobPackage job, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(job);
@@ -336,7 +334,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
     }
 
     /// <summary>
-    /// Writes the model row and the <c>schema_info</c> rows. This is the feature-3 seam for the payload encoder.
+    /// Writes the already-encoded model row and the <c>schema_info</c> rows.
     /// </summary>
     /// <param name="model">The contract-typed model row.</param>
     /// <param name="cancellationToken">Cancels the operation.</param>
@@ -397,8 +395,7 @@ public sealed class SimulationPackageWriter : ISimulationPackageWriter
     }
 
     /// <summary>
-    /// Writes one job row and inserts or reuses its lattice row. This is the feature-3 seam for the payload
-    /// encoder.
+    /// Writes one already-encoded job row and inserts or reuses its lattice row.
     /// </summary>
     /// <param name="job">The contract-typed job row.</param>
     /// <param name="cancellationToken">Cancels the operation before the insert.</param>

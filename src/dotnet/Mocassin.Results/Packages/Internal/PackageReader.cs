@@ -199,7 +199,7 @@ internal static class PackageReader
 
         if (!Guid.TryParse(values["project_id"], out var projectId))
         {
-            return (null, PackageDiagnosticCodes.UnsupportedSchema, "schema_info.project_id is not a GUID.");
+            return (null, PackageDiagnosticCodes.MissingSchemaElement, "schema_info.project_id is not a GUID.");
         }
 
         if (!DateTimeOffset.TryParse(
@@ -208,7 +208,7 @@ internal static class PackageReader
                 DateTimeStyles.AssumeUniversal | DateTimeStyles.AdjustToUniversal,
                 out var createdUtc))
         {
-            return (null, PackageDiagnosticCodes.UnsupportedSchema, "schema_info.created_utc is not a timestamp.");
+            return (null, PackageDiagnosticCodes.MissingSchemaElement, "schema_info.created_utc is not a timestamp.");
         }
 
         if (string.IsNullOrWhiteSpace(values["app_version"]) ||

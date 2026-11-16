@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MIT
 
 using System.Collections.Immutable;
+using System.Text;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.Data.Sqlite;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Contracts.Packages;
@@ -323,9 +325,43 @@ public sealed class JobAndLatticePayloadEncodingTests
         Assert.Empty(temp.TemporaryFiles());
     }
 
-    private static Scenario Load()
+    [Theory]
+    [InlineData(0.0, null)]
+    [InlineData(0.25, 0.25)]
+    public void AuthoredNormalizationEnergyIsCanonicalizedInTheJobPayload(
+        double authored,
+        double? expected)
     {
-        var (project, compiled) = ParameterizationTestSupport.LoadAndCompile(sample);
+        var project = LoadWithCollectionNormalizationEnergy(authored);
+        var scenario = Load(project);
+
+        var job = scenario.Jobs[0];
+        Assert.Equal(authored, job.Descriptor.Settings.NormalizationEnergyEv);
+        var payload = JobPayloadMapper.Map(
+            job.Descriptor,
+            scenario.Applied.CompiledModel.Structure.CellVectors,
+            job.Lattice.DopingInfo);
+        var decoded = PayloadEncoder.DecodeJob(new PayloadEncoder(3).EncodeJob(payload));
+
+        Assert.Equal(expected, payload.NormalizationEnergyEv);
+        Assert.Equal(expected, decoded.NormalizationEnergyEv);
+    }
+
+    private static Project LoadWithCollectionNormalizationEnergy(double value)
+    {
+        var node = JsonNode.Parse(File.ReadAllText(RepositoryPaths.Combine(sample)))!;
+        var collection = node["jobTemplates"]![0]!["collections"]![0]!;
+        var settings = collection["baseSettings"] as JsonObject ?? new JsonObject();
+        collection["baseSettings"] = settings;
+        settings["normalizationEnergyEv"] = JsonValue.Create(value);
+        return ProjectJson.Deserialize(Encoding.UTF8.GetBytes(node.ToJsonString()));
+    }
+
+    private static Scenario Load() => Load(ParameterizationTestSupport.LoadProject(sample));
+
+    private static Scenario Load(Project project)
+    {
+        var compiled = ParameterizationTestSupport.Compile(project);
         var applied = new ParameterizationService().Apply(project, compiled, template: null).Model!;
         var expansion = JobTemplateExpander.Expand(project, compiled, project.JobTemplates.Single());
         Assert.True(

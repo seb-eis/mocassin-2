@@ -8,15 +8,17 @@ read-only inspection/verification library for the build CLI.
 
 ## Implementation status
 
-- **Status:** In audit
+- **Status:** In audit — re-audit
 - **Step branch:** `step/11-simulation-package-and-msl-writer`
-- **Step CI:** [Ubuntu closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095) and
-  [focused Windows platform gate green](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973) at
-  `e94d975` — [closeout evidence](../closeout/step-11.json)
+- **Step CI:** round-1 evidence at `e94d975`: [Ubuntu closeout
+  green](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095) and [focused Windows platform gate
+  green](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973); the round-2 X2 runs are recorded in
+  [closeout evidence](../closeout/step-11.json)
 - **Main merge:** — (main `bca66373c68485d08ac78c0259577887726879d1` merged into the step branch as
   `b44022ab2353e2f4394793ba3d023718a578753c`; main was green at the freeze)
 - **Step tag:** —
-- **Audit:** Ready for audit — [request](../audits/step-11.md)
+- **Audit:** Re-audit required — [record](../audits/step-11.md); round 1 returned `Passed with notes` at
+  `e94d975`, and the five Minor findings are fixed on X2
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
@@ -36,6 +38,7 @@ read-only inspection/verification library for the build CLI.
 | A1-fix Lattice decode guard | `feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `25a3787` |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `e25811f` (fixtures/Part B/docs); `0ae05a4` (Windows canonical JSON) |
 | Closeout | `feature/step-11-simulation-package-and-msl-writer/closeout` | Squashed | `docs --require`, `policy --require` exit 0 | Ubuntu closeout and Windows platform gate green | `e94d975` |
+| X2 Audit-minor fixes | `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` | Squashed | `all --require` exit 0 | Ubuntu closeout and Windows platform gate re-run at X2 | X2 (recorded in Y2) |
 
 ### Approved feature list
 
@@ -336,14 +339,15 @@ per feature.
   Architecture 1), format clean; NuGet licence policy OK (52 packages), no vulnerable packages, ApiCompat
   clean for 9 assemblies; Rust fmt/clippy/test; Python 3 tests and package build; strict Zensical build,
   DocFX 0 warnings / 0 errors, rustdoc; contract artifacts current (19 files; model 5 / parameterization 4 /
-  lattice 2 projection fixtures), space-group catalog current (274 settings), process consistency, 45 tool
-  tests, SPDX 600 source files, 979 secret-scanned files, cargo-deny clean. The running dev image predates
+  lattice 2 projection fixtures), space-group catalog current (274 settings), process consistency, 58 tool
+  tests, SPDX 601 source files, 982 secret-scanned files, cargo-deny clean. The running dev image predates
   amendment 1 and exposes only SDK 10.0.403 (`dotnet --list-sdks`); the containerfile already pins 11.0.100
   only. The pinned SDK was therefore installed under `/tmp/opencode/dotnet11`, and the gate ran on **SDK
   11.0.100 / runtime 11.0.0** from that root; no repository file changed. The follow-up bookkeeping commit
   re-ran `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require` with the same SDK root:
-  both exit 0, and the policy run re-confirmed the 19 contract files, 274 settings, 45 tool tests, 600 SPDX
-  files, and 979 secret-scanned files above.
+  both exit 0, and the policy run re-confirmed the 19 contract files, 274 settings, 58 tool tests, 601 SPDX
+  files, and 982 secret-scanned files above (the b44022a main merge brought the CI-platform-gate tool test and
+  the CI-fix files; N-3 refreshed these counts).
 - **Step CI:** not run — no per-feature CI; the single Ubuntu closeout dispatch is still pending.
 - **Diff summary:** added the checked-in `.msl` v1 fixture `tests/contracts/packages/msl-v1/` (98,304-byte
   package, SHA-256 line, `package-summary-v1.json`, 13 extracted payloads (six job, six lattice, one model)
@@ -408,6 +412,36 @@ per feature.
 - **Parity:** no new row; the Step 11 rows were confirmed final for this step and the remaining `Partial` /
   `Improvement` rows name their later steps (12, 14, 18, 26), with Step 13 named as the Rust reader for the
   `.msl` fixture.
+
+#### X2 — Audit-minor fixes and re-audit request
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` (from the step branch at
+  `20ea7f5`, the audit record tip).
+- **Squash commit:** X2 (recorded in Y2; a commit cannot contain its own hash).
+- **Local gates:** `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh all --require`
+  exit 0 on 2026-11-16 — build 0 warnings / 0 errors; **1,528** .NET tests pass (App 1, Contracts 37, Cli 17,
+  Symmetry 223, Results 42, Core 685, Compilation 96, Packages 426, Architecture 1; +9 from the audited tree);
+  format clean; ApiCompat clean; NuGet licence/vulnerability policy OK; structure; contracts/policy (19
+  artifacts, 58 tool tests, SPDX 603 files, 982 secret-scanned files); Rust fmt/clippy/test; Python 3 tests and
+  package build; strict Zensical, DocFX, rustdoc, and site build.
+- **Step CI:** re-dispatched at X2: Ubuntu closeout (`platforms=ubuntu`) and the focused Windows platform gate
+  (`platforms=windows`); run IDs and `head_sha` are recorded in [closeout evidence](../closeout/step-11.json) and Y2.
+- **Diff summary:** F-1 refreshed the stale feature-3 remarks and removed the `NotSupportedException` tags from
+  `SimulationPackageWriter` and the three internal row records (no behaviour change). F-2 closed the deferred
+  explicit-parameterization criterion with two real end-to-end packages
+  (`ExplicitParameterizationPackageTests`). F-3 canonicalizes an authored `normalizationEnergyEv: 0.0` (and
+  `-0.0`) to `null` in `JobPayloadMapper.Map`, keeps a non-zero override, and adds the authored-value regression
+  theory. F-4 added the two promised FsCheck property tests (`PayloadPropertyTests`) and records the nightly
+  `.msl` fuzz harness as an explicit Step 29 deferral. F-5 returns `PKG003` for a malformed `schema_info`
+  `project_id`/`created_utc` and keeps `PKG002` for application id/user version/format version, with tests for
+  both malformed values plus a malformed `format_version` `PKG002` case. N-2, N-3, and N-5 documentation
+  corrections are in this commit/Y2.
+- **Known limitations / follow-ups:** the explicit-parameterization evidence is split across the two checked-in
+  samples because no single sample has energy tables, transitions, and a job template; the package job is a
+  hand-constructed descriptor (the same seam Step 12 drives). The nightly fuzz harness remains Step 29 work
+  (named owner). N-1 (directory-fsync ordering after rename) and N-4 (`AGENTS.md` §1 drift) remain recorded
+  follow-ups owned by the design/contract owner and the next documentation change respectively.
+- **Parity:** no new parity row; the `.msl` v1 format/fixtures row stays `Done`.
 
 ### Deviations and accepted risks
 
@@ -1057,13 +1091,15 @@ Two options, for the human owner's start-gate decision:
 - [x] A package built from `samples/jobs/ceria-temperature-sweep.mocprj` (six jobs, `parameterizations: []`)
       uses the implicit default parameterization, opens read-only, and contains one model row, the expected
       job rows, and the expected lattice rows.
-- [ ] A package built with an explicit in-test parameterization stores the applied pair/group/site/frequency
+- [x] A package built with an explicit in-test parameterization stores the applied pair/group/site/frequency
       values, not compiled defaults, and `models.signature` equals `ParameterizedModel.Signature`.
-      **Unchecked — follow-up owner: Step 12.** No end-to-end package is built from an explicit in-test
-      parameterization template. The model-payload tests exercise the write-time re-encode against real
-      `ParameterizationValues` and the sample `.msl` fixture uses the implicit default parameterization
-      (`parameterizations: []`). Step 12's build acceptance with a template-backed parameterization closes this
-      item.
+      **Closed by `ExplicitParameterizationPackageTests` (X2).** No checked-in sample carries energy pair/group
+      tables, transition rules, and a job template at once, so the criterion is proven by two real packages:
+      `samples/parameterizations/ceria-parameters.mocprj` with a fully explicit template for the pair, group, and
+      site values, and `samples/simulations/ceria-kmc.mocprj` with an explicit absolute rule frequency. Both
+      assert the stored payload values equal the applied `ParameterizationValues`, that the authored values are
+      absent from the implicit-default model, and that `models.signature` and the payload signature equal
+      `ParameterizedModel.Signature`. The audit's F-2 is resolved; Step 12 keeps its CLI acceptance separately.
 - [x] The published package has no `results` table, needs no `-wal`/`-shm` files, and reports
       `application_id = 0x4D4F4353` and `user_version = 1`.
 - [x] Every job references a valid model and lattice; `job_id` is unique and ascending; a partial build leaves
@@ -1071,9 +1107,10 @@ Two options, for the human owner's start-gate decision:
 - [x] `verify` re-encodes the parameterization signature from the payload's absolute `frequency_hz` values and
       re-encodes the lattice signature from the particle array and the referenced `model_signature`.
 - [x] Every environment pair entry is one row per periodic image with its relative `offset`; the compiler emits
-      one `CompiledPairLink` per image and the writer maps it one-to-one, Step 14's target expansion
-      (`cell + offset` wrapped, `target_position`) reproduces the compiled minimum-image link for every pair
-      table, and a multi-image shell (for example a six-image nearest-neighbour shell) is fully present.
+      one `CompiledPairLink` per image and the writer maps it one-to-one, and a multi-image shell (for example a
+      six-image nearest-neighbour shell) is fully present. (The Step 14 target-expansion equivalence
+      (`cell + offset` wrapped, `target_position`) is a Step 14 cross-step acceptance test, not a Step 11
+      deliverable; the implementation task below records that ownership. N-5 corrected this wording.)
 - [ ] The writer asserts `tracker_order.Length` equals the representative direction's path-node count; the
       verifier proves the payload-checkable part (non-empty, non-sentinel values below `global_tracker_count`,
       length within the documented bound), and Step 13's reader loads it as a variable `u8[]` with `0xFF` for
@@ -1141,10 +1178,10 @@ At this point, document the simulation package:
 | Verification | PR-fast | Each `PKG001`–`PKG010` fires on its corrupt/truncated/inconsistent fixture with the documented severity |
 | Diagnostic ownership | PR-fast | `PKG` descriptors appear in `DiagnosticCatalog.Default` and the docs page; `Mocassin.Results` has no `Mocassin.Packages` reference |
 | Decode bounds | PR-fast | A Zstd bomb or oversized count produces `PKG004`, not OOM |
-| Property: payload round-trip | PR-fast | Arbitrary valid compiled/parameterized models encode and decode to the same logical values |
-| Property: signature stability | PR-fast | Normalized `-0.0`, shuffled map order, and a different Zstd level do not change the signature |
+| Property: payload round-trip | PR-fast | Arbitrary valid compiled/parameterized models encode and decode to the same logical values (`PayloadPropertyTests.ArbitraryParameterizedModelsEncodeAndDecodeToTheSameLogicalPayload`, FsCheck over sparse explicit templates at Zstd levels 1, 3, and 19) |
+| Property: signature stability | PR-fast | Normalized `-0.0`, shuffled map order, and a different Zstd level do not change the signature (`PayloadPropertyTests.SignatureIsStableUnderNegativeZeroShuffledOrderAndCompressionLevel`) |
 | Cross-language fixture | PR-medium | The checked-in `.msl` and extracted model payload are accepted by the Step 13 reader and drive Step 14's link expansion and Step 15's pair deltas unchanged |
-| Corruption/fuzz | Nightly | Mutated `.msl` files never crash or over-allocate the verifier |
+| Corruption/fuzz | Nightly | Mutated `.msl` files never crash or over-allocate the verifier — **deferred to Step 29** (owner: Step 29 implementor) with the SharpFuzz `.msl` target and its nightly job; Step 11 ships the fixed truncation/corrupt-frame/wrong-signature/foreign-key/decompression-bound cases, and the deferral is recorded in [quality strategy §10](../03-quality-strategy.md) and [testing and parity](../../development/testing-and-parity.md). **No fuzz run is claimed.** |
 | Performance | Nightly/release | 10⁴ jobs under 10 min / 2 GB; model payload under 50 MB; ≥ 100 jobs/s insertion |
 
 Every test declares its tier. Tests use the real compiler, parameterizer, expander, generator, and writer; no

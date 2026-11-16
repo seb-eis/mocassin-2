@@ -3,7 +3,7 @@
 namespace Mocassin.Packages.SimulationPackage.Internal;
 
 /// <summary>
-/// The contract-typed model row handed to the writer before the payload encoder of Step 11 feature 4 exists.
+/// The contract-typed model row inserted by the writer after the payload is encoded and checked.
 /// </summary>
 /// <param name="Signature">The Step 09 parameterization signature and <c>models.signature</c> key.</param>
 /// <param name="FormatVersion">The encoded model-payload format version.</param>

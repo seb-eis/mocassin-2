@@ -3,7 +3,7 @@
 namespace Mocassin.Packages.SimulationPackage.Internal;
 
 /// <summary>
-/// The contract-typed lattice row handed to the writer before the payload encoder of Step 11 feature 5 exists.
+/// The contract-typed lattice row inserted by the writer after the payload is encoded and checked.
 /// </summary>
 /// <param name="Signature">The Step 11 lattice signature and <c>lattices.signature</c> key.</param>
 /// <param name="FormatVersion">The encoded lattice-payload format version.</param>

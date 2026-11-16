@@ -3,12 +3,11 @@
 namespace Mocassin.Packages.SimulationPackage.Internal;
 
 /// <summary>
-/// The contract-typed job row handed to the writer before the payload encoder of Step 11 feature 5 exists.
+/// The contract-typed job row inserted by the writer after the payload is encoded and checked.
 /// </summary>
 /// <remarks>
-/// The columns mirror the payload-derived and authored/build values of the <c>jobs</c> table. The payload
-/// encoders of features 4/5 build this record from the real descriptor and lattice; feature 3 exercises the
-/// schema and publication barrier through it.
+/// The columns mirror the payload-derived and authored/build values of the <c>jobs</c> table. The writer
+/// builds this record from the real descriptor and generated lattice.
 /// </remarks>
 /// <param name="JobId">The 1-based deterministic job identifier.</param>
 /// <param name="ModelSignature">The referenced model signature.</param>

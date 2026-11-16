@@ -56,7 +56,7 @@ internal static class JobPayloadMapper
             settings.MinSuccessRate,
             settings.ElectricFieldModulusVm,
             FieldDirectionConverter.ToCartesianUnit(settings.ElectricFieldDirection, cellVectors),
-            settings.NormalizationEnergyEv,
+            CanonicalNormalizationEnergy(settings.NormalizationEnergyEv),
             settings.MaxAttemptFrequencyHz,
             settings.BreakTolerance,
             NonNegative(settings.BreakSampleLengthMcsp, nameof(settings.BreakSampleLengthMcsp)),
@@ -71,6 +71,13 @@ internal static class JobPayloadMapper
 
     private static string MapKind(SimulationKind kind) =>
         kind == SimulationKind.Kmc ? "kmc" : "mmc";
+
+    /// <summary>
+    /// Canonicalizes the authored normalization energy: <c>null</c> means no normalization, and a zero value
+    /// (including negative zero) is stored as <see langword="null"/> — an explicit non-zero override is kept.
+    /// </summary>
+    private static double? CanonicalNormalizationEnergy(double? value) =>
+        value is 0.0 ? null : value;
 
     private static ImmutableArray<SelectionOptimizerPayload> MapOptimizers(
         ImmutableArray<CompiledSelectionOptimizer> optimizers)
