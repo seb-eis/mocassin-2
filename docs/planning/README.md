@@ -2,7 +2,7 @@
 
 This directory is the working plan for rebuilding MOCASSIN on a modern, cross-platform stack:
 
-- **.NET 10 / C#** for the model-building system, simulation-package builder, result evaluation, and CLI.
+- **.NET 11 / C#** for the model-building system, simulation-package builder, result evaluation, and CLI.
 - **Avalonia UI / C# MVVM** for the desktop application.
 - **Rust** for the Monte Carlo solver.
 

@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+using System.Collections.Immutable;
+using Mocassin.Core.Geometry;
 using Mocassin.Core.Ids;
 
 namespace Mocassin.Symmetry.Energy;
@@ -16,6 +18,10 @@ namespace Mocassin.Symmetry.Energy;
 /// <param name="DistanceAngstrom">The minimum-image distance in ångström.</param>
 /// <param name="IsChiral">Whether the inverse direction is a distinct chiral partner.</param>
 /// <param name="ChiralPartnerGeometryId">The inverse geometry identifier when chiral.</param>
+/// <param name="EquivalentImages">
+/// Every periodic image in the shell, including the representative. The package emits one payload pair link per
+/// element; an empty or default array falls back to the representative image for source compatibility.
+/// </param>
 public sealed record PairInteractionPreview(
     string GeometryId,
     string EnergyId,
@@ -25,4 +31,5 @@ public sealed record PairInteractionPreview(
     int PartnerP,
     double DistanceAngstrom,
     bool IsChiral,
-    string? ChiralPartnerGeometryId);
+    string? ChiralPartnerGeometryId,
+    ImmutableArray<Vector4I> EquivalentImages = default);

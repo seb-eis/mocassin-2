@@ -27,6 +27,7 @@ public static class CompiledModelJson
     private static readonly JsonSerializerOptions options = new()
     {
         WriteIndented = true,
+        NewLine = "\n",
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
     };
 

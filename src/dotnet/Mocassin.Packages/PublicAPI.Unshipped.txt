@@ -980,3 +980,89 @@ static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.operator !=(Mo
 static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.operator ==(Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan? left, Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan? right) -> bool
 static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan.WithoutOptimizers(bool useDualDofCorrection) -> Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan!
 static Mocassin.Packages.Jobs.Optimization.SelectionOptimizerResolver.Resolve(Mocassin.Compilation.Compiler.CompiledModel! model, Mocassin.Compilation.Simulations.CompiledSimulation! simulation, Mocassin.Core.Ids.JobCollectionId collectionId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Jobs.SelectionOptimizer!> optimizers, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> Mocassin.Packages.Jobs.Optimization.SelectionOptimizerPlan!
+Mocassin.Packages.SimulationPackage.ISimulationPackageWriter
+Mocassin.Packages.SimulationPackage.ISimulationPackageWriter.CompleteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.SimulationPackage.PackageWriteResult!>!
+Mocassin.Packages.SimulationPackage.ISimulationPackageWriter.WriteJobAsync(Mocassin.Packages.SimulationPackage.JobPackage! job, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Mocassin.Packages.SimulationPackage.ISimulationPackageWriter.WriteModelAsync(Mocassin.Packages.Parameterization.ParameterizedModel! model, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Mocassin.Packages.SimulationPackage.JobPackage
+Mocassin.Packages.SimulationPackage.JobPackage.<Clone>$() -> Mocassin.Packages.SimulationPackage.JobPackage!
+Mocassin.Packages.SimulationPackage.JobPackage.Deconstruct(out Mocassin.Packages.Jobs.JobDescriptor! Descriptor, out Mocassin.Packages.Jobs.GeneratedLattice! Lattice) -> void
+Mocassin.Packages.SimulationPackage.JobPackage.Descriptor.get -> Mocassin.Packages.Jobs.JobDescriptor!
+Mocassin.Packages.SimulationPackage.JobPackage.Descriptor.init -> void
+Mocassin.Packages.SimulationPackage.JobPackage.Equals(Mocassin.Packages.SimulationPackage.JobPackage? other) -> bool
+Mocassin.Packages.SimulationPackage.JobPackage.JobPackage(Mocassin.Packages.Jobs.JobDescriptor! Descriptor, Mocassin.Packages.Jobs.GeneratedLattice! Lattice) -> void
+Mocassin.Packages.SimulationPackage.JobPackage.Lattice.get -> Mocassin.Packages.Jobs.GeneratedLattice!
+Mocassin.Packages.SimulationPackage.JobPackage.Lattice.init -> void
+Mocassin.Packages.SimulationPackage.PackageBuildOptions
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.<Clone>$() -> Mocassin.Packages.SimulationPackage.PackageBuildOptions!
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.AdvisorySizeBytes.get -> long
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.AdvisorySizeBytes.init -> void
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.BatchSize.get -> int
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.BatchSize.init -> void
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.CompressionLevel.get -> int
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.CompressionLevel.init -> void
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.Equals(Mocassin.Packages.SimulationPackage.PackageBuildOptions? other) -> bool
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.Overwrite.get -> bool
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.Overwrite.init -> void
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.PackageBuildOptions() -> void
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.Vacuum.get -> bool
+Mocassin.Packages.SimulationPackage.PackageBuildOptions.Vacuum.init -> void
+Mocassin.Packages.SimulationPackage.PackageBuildRequest
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.<Clone>$() -> Mocassin.Packages.SimulationPackage.PackageBuildRequest!
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.CreatedUtc.get -> System.DateTimeOffset
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.CreatedUtc.init -> void
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.Deconstruct(out string! TargetPath, out System.Guid ProjectId, out string! JobSelection, out System.DateTimeOffset CreatedUtc) -> void
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.Equals(Mocassin.Packages.SimulationPackage.PackageBuildRequest? other) -> bool
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.JobSelection.get -> string!
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.JobSelection.init -> void
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.PackageBuildRequest(string! TargetPath, System.Guid ProjectId, string! JobSelection, System.DateTimeOffset CreatedUtc) -> void
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.ProjectId.get -> System.Guid
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.ProjectId.init -> void
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.TargetPath.get -> string!
+Mocassin.Packages.SimulationPackage.PackageBuildRequest.TargetPath.init -> void
+Mocassin.Packages.SimulationPackage.PackageWriteResult
+Mocassin.Packages.SimulationPackage.PackageWriteResult.<Clone>$() -> Mocassin.Packages.SimulationPackage.PackageWriteResult!
+Mocassin.Packages.SimulationPackage.PackageWriteResult.Deconstruct(out string! Path, out string! Sha256, out int JobCount, out int ModelCount, out int LatticeCount, out long SizeBytes, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Warnings) -> void
+Mocassin.Packages.SimulationPackage.PackageWriteResult.Equals(Mocassin.Packages.SimulationPackage.PackageWriteResult? other) -> bool
+Mocassin.Packages.SimulationPackage.PackageWriteResult.JobCount.get -> int
+Mocassin.Packages.SimulationPackage.PackageWriteResult.JobCount.init -> void
+Mocassin.Packages.SimulationPackage.PackageWriteResult.LatticeCount.get -> int
+Mocassin.Packages.SimulationPackage.PackageWriteResult.LatticeCount.init -> void
+Mocassin.Packages.SimulationPackage.PackageWriteResult.ModelCount.get -> int
+Mocassin.Packages.SimulationPackage.PackageWriteResult.ModelCount.init -> void
+Mocassin.Packages.SimulationPackage.PackageWriteResult.PackageWriteResult(string! Path, string! Sha256, int JobCount, int ModelCount, int LatticeCount, long SizeBytes, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Warnings) -> void
+Mocassin.Packages.SimulationPackage.PackageWriteResult.Path.get -> string!
+Mocassin.Packages.SimulationPackage.PackageWriteResult.Path.init -> void
+Mocassin.Packages.SimulationPackage.PackageWriteResult.Sha256.get -> string!
+Mocassin.Packages.SimulationPackage.PackageWriteResult.Sha256.init -> void
+Mocassin.Packages.SimulationPackage.PackageWriteResult.SizeBytes.get -> long
+Mocassin.Packages.SimulationPackage.PackageWriteResult.SizeBytes.init -> void
+Mocassin.Packages.SimulationPackage.PackageWriteResult.Warnings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.SimulationPackage.PackageWriteResult.Warnings.init -> void
+Mocassin.Packages.SimulationPackage.SimulationPackageWriter
+Mocassin.Packages.SimulationPackage.SimulationPackageWriter.CompleteAsync(System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.SimulationPackage.PackageWriteResult!>!
+Mocassin.Packages.SimulationPackage.SimulationPackageWriter.DisposeAsync() -> System.Threading.Tasks.ValueTask
+Mocassin.Packages.SimulationPackage.SimulationPackageWriter.WriteJobAsync(Mocassin.Packages.SimulationPackage.JobPackage! job, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+Mocassin.Packages.SimulationPackage.SimulationPackageWriter.WriteModelAsync(Mocassin.Packages.Parameterization.ParameterizedModel! model, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task!
+override Mocassin.Packages.SimulationPackage.JobPackage.Equals(object? obj) -> bool
+override Mocassin.Packages.SimulationPackage.JobPackage.GetHashCode() -> int
+override Mocassin.Packages.SimulationPackage.JobPackage.ToString() -> string!
+override Mocassin.Packages.SimulationPackage.PackageBuildOptions.Equals(object? obj) -> bool
+override Mocassin.Packages.SimulationPackage.PackageBuildOptions.GetHashCode() -> int
+override Mocassin.Packages.SimulationPackage.PackageBuildOptions.ToString() -> string!
+override Mocassin.Packages.SimulationPackage.PackageBuildRequest.Equals(object? obj) -> bool
+override Mocassin.Packages.SimulationPackage.PackageBuildRequest.GetHashCode() -> int
+override Mocassin.Packages.SimulationPackage.PackageBuildRequest.ToString() -> string!
+override Mocassin.Packages.SimulationPackage.PackageWriteResult.Equals(object? obj) -> bool
+override Mocassin.Packages.SimulationPackage.PackageWriteResult.GetHashCode() -> int
+override Mocassin.Packages.SimulationPackage.PackageWriteResult.ToString() -> string!
+static Mocassin.Packages.SimulationPackage.JobPackage.operator !=(Mocassin.Packages.SimulationPackage.JobPackage? left, Mocassin.Packages.SimulationPackage.JobPackage? right) -> bool
+static Mocassin.Packages.SimulationPackage.JobPackage.operator ==(Mocassin.Packages.SimulationPackage.JobPackage? left, Mocassin.Packages.SimulationPackage.JobPackage? right) -> bool
+static Mocassin.Packages.SimulationPackage.PackageBuildOptions.operator !=(Mocassin.Packages.SimulationPackage.PackageBuildOptions? left, Mocassin.Packages.SimulationPackage.PackageBuildOptions? right) -> bool
+static Mocassin.Packages.SimulationPackage.PackageBuildOptions.operator ==(Mocassin.Packages.SimulationPackage.PackageBuildOptions? left, Mocassin.Packages.SimulationPackage.PackageBuildOptions? right) -> bool
+static Mocassin.Packages.SimulationPackage.PackageBuildRequest.operator !=(Mocassin.Packages.SimulationPackage.PackageBuildRequest? left, Mocassin.Packages.SimulationPackage.PackageBuildRequest? right) -> bool
+static Mocassin.Packages.SimulationPackage.PackageBuildRequest.operator ==(Mocassin.Packages.SimulationPackage.PackageBuildRequest? left, Mocassin.Packages.SimulationPackage.PackageBuildRequest? right) -> bool
+static Mocassin.Packages.SimulationPackage.PackageWriteResult.operator !=(Mocassin.Packages.SimulationPackage.PackageWriteResult? left, Mocassin.Packages.SimulationPackage.PackageWriteResult? right) -> bool
+static Mocassin.Packages.SimulationPackage.PackageWriteResult.operator ==(Mocassin.Packages.SimulationPackage.PackageWriteResult? left, Mocassin.Packages.SimulationPackage.PackageWriteResult? right) -> bool
+static Mocassin.Packages.SimulationPackage.SimulationPackageWriter.Create(Mocassin.Packages.SimulationPackage.PackageBuildRequest! request, Mocassin.Packages.SimulationPackage.PackageBuildOptions! options) -> Mocassin.Packages.SimulationPackage.ISimulationPackageWriter!
+Mocassin.Packages.SimulationPackage.PackageWriteResult.LatticeReuseFactor.get -> double

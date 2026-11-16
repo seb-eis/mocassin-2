@@ -1,0 +1,289 @@
+{
+  "format": "mocassin.codec-goldens",
+  "formatVersion": 1,
+  "codec": "ZstdSharp.Port 0.8.8",
+  "capturedAt": "2026-11-15",
+  "capturedFromCommit": "aa481143aff254e0a7faf2828e7dc150c2d82833",
+  "toolchain": "dotnet SDK 10.0.403 / runtime 10.0.14; zstd CLI 1.5.7",
+  "note": "Pre-amendment ZstdSharp frames for the real .msl payloads. The in-box .NET 11 Zstandard encoder produced byte-identical frames at the same level on the measured runtime (2026-11-15); that equivalence is an observation, not a format contract (ADR 0010, data contracts \u00a73.5). Re-capture the bytes with a recorded note if a later runtime patch changes them; the level->Quality mapping does not change.",
+  "payloads": [
+    {
+      "id": "sample-job-2",
+      "kind": "job",
+      "origin": "sample",
+      "rawBytes": 544,
+      "rawSha256": "c9cd9fe27b983707d57c02e9c2665335660bff9a7b6ae4926eb86a26599ab022",
+      "path": "payloads/sample-job-2.bin"
+    },
+    {
+      "id": "sample-job-4",
+      "kind": "job",
+      "origin": "sample",
+      "rawBytes": 536,
+      "rawSha256": "62fe70d6714bd420e7339312a56b0586370b6d92a931aec2f77661d37b5bd105",
+      "path": "payloads/sample-job-4.bin"
+    },
+    {
+      "id": "sample-job-5",
+      "kind": "job",
+      "origin": "sample",
+      "rawBytes": 517,
+      "rawSha256": "7a1e48dd6c8912975d18bb7b0de01d91e479771e176333aa9a090b2314adca95",
+      "path": "payloads/sample-job-5.bin"
+    },
+    {
+      "id": "sample-job-6",
+      "kind": "job",
+      "origin": "sample",
+      "rawBytes": 509,
+      "rawSha256": "29cc8d4d9cee0c41be4b71787a4ea5920a41d20689b50c256bd24f92d4086459",
+      "path": "payloads/sample-job-6.bin"
+    },
+    {
+      "id": "sample-lattice-1",
+      "kind": "lattice",
+      "origin": "sample",
+      "rawBytes": 925,
+      "rawSha256": "cf5de83a816d1ab4738887265309e9691fb2edbe4b74acfc86fe17db43a547de",
+      "path": "payloads/sample-lattice-1.bin"
+    },
+    {
+      "id": "sample-lattice-2",
+      "kind": "lattice",
+      "origin": "sample",
+      "rawBytes": 925,
+      "rawSha256": "5db23cdad7e08f8d0d579ab5fe3227527ad859cb5e285e040fe8555d91aef50c",
+      "path": "payloads/sample-lattice-2.bin"
+    },
+    {
+      "id": "sample-lattice-3",
+      "kind": "lattice",
+      "origin": "sample",
+      "rawBytes": 2109,
+      "rawSha256": "22c7a5ccdb1be852b88f8f301620283046ba76b198905383fcf6170f3576b706",
+      "path": "payloads/sample-lattice-3.bin"
+    },
+    {
+      "id": "sample-lattice-4",
+      "kind": "lattice",
+      "origin": "sample",
+      "rawBytes": 2109,
+      "rawSha256": "24eb2504410c67ad4cf404cb2a2ac7f8b6972822b71226dc9d4c151d77745501",
+      "path": "payloads/sample-lattice-4.bin"
+    },
+    {
+      "id": "sample-lattice-5",
+      "kind": "lattice",
+      "origin": "sample",
+      "rawBytes": 925,
+      "rawSha256": "f72c39af9112f691dbe22d98658b9a68bb7e82a26d8ef63fcd73f4c35e17f08f",
+      "path": "payloads/sample-lattice-5.bin"
+    },
+    {
+      "id": "sample-lattice-6",
+      "kind": "lattice",
+      "origin": "sample",
+      "rawBytes": 2109,
+      "rawSha256": "4c7659d905830ed04034081dce9edabb348e29c718adbb9a765db6c6b124337b",
+      "path": "payloads/sample-lattice-6.bin"
+    },
+    {
+      "id": "sample-model-1",
+      "kind": "model",
+      "origin": "sample",
+      "rawBytes": 3475,
+      "rawSha256": "066e9f3e069e379802c7135f6ab5c4a4c01ac5fa08aa658c0b335aa5ba8a4180",
+      "path": "payloads/sample-model-1.bin"
+    },
+    {
+      "id": "supplementary-lattice-1",
+      "kind": "lattice",
+      "origin": "supplementary",
+      "rawBytes": 256063,
+      "rawSha256": "42fbc111fe666c98b09959794fc8f7ccb3013ce1a87f348f94fe97667e2803be",
+      "path": "payloads/supplementary-lattice-1.bin"
+    }
+  ],
+  "frames": [
+    {
+      "payloadId": "sample-job-2",
+      "level": 3,
+      "bytes": 408,
+      "sha256": "e5f83795d9b94959571d45c48808b27a30fdaa1e237ca67d87c4d34e04aac5d4",
+      "path": "golden/sample-job-2-l3.zst"
+    },
+    {
+      "payloadId": "sample-job-2",
+      "level": 9,
+      "bytes": 407,
+      "sha256": "5ecb8d6a1f993345a3c910120c201c68c67b5f829bfaa721b27aa7e33a6b3d88",
+      "path": "golden/sample-job-2-l9.zst"
+    },
+    {
+      "payloadId": "sample-job-4",
+      "level": 3,
+      "bytes": 408,
+      "sha256": "32d0a610e3be924488ecdab651337336d891e2860a983164b268cee5c8cd95fd",
+      "path": "golden/sample-job-4-l3.zst"
+    },
+    {
+      "payloadId": "sample-job-4",
+      "level": 9,
+      "bytes": 408,
+      "sha256": "26a3925ff4220837292bcb50b3d9674d5df4ea889a127a3726d2acc960105d89",
+      "path": "golden/sample-job-4-l9.zst"
+    },
+    {
+      "payloadId": "sample-job-5",
+      "level": 3,
+      "bytes": 391,
+      "sha256": "d5eedf17a840326d815f78705c864e48a62a09281d448271c496056c61ace7e0",
+      "path": "golden/sample-job-5-l3.zst"
+    },
+    {
+      "payloadId": "sample-job-5",
+      "level": 9,
+      "bytes": 387,
+      "sha256": "b95070f98c90f85713c108473a08497a362ba03af26824124b5e53a3786976ff",
+      "path": "golden/sample-job-5-l9.zst"
+    },
+    {
+      "payloadId": "sample-job-6",
+      "level": 3,
+      "bytes": 391,
+      "sha256": "21edcad1da1a08ae23586eb2a3f0d0d20bde8eed6731ca4b86087681da8b6c37",
+      "path": "golden/sample-job-6-l3.zst"
+    },
+    {
+      "payloadId": "sample-job-6",
+      "level": 9,
+      "bytes": 387,
+      "sha256": "a63f83d5dfd6873d5f1fc6542c81c68a0aa251e2736e0db491098b46a106709f",
+      "path": "golden/sample-job-6-l9.zst"
+    },
+    {
+      "payloadId": "sample-lattice-1",
+      "level": 3,
+      "bytes": 90,
+      "sha256": "4fa927345c29bf08c432398c2a6597f66532496a989ffeedb01b68a29a6ec7f8",
+      "path": "golden/sample-lattice-1-l3.zst"
+    },
+    {
+      "payloadId": "sample-lattice-1",
+      "level": 9,
+      "bytes": 90,
+      "sha256": "497887de51c8bdbdd0c06e375e69fe58b5203a0937cdff43b506ae8a79359ec0",
+      "path": "golden/sample-lattice-1-l9.zst"
+    },
+    {
+      "payloadId": "sample-lattice-2",
+      "level": 3,
+      "bytes": 90,
+      "sha256": "719a56f8cc08f62ddb9b8abba71615c15ea7296cfcdc0bc72469efff19972f5b",
+      "path": "golden/sample-lattice-2-l3.zst"
+    },
+    {
+      "payloadId": "sample-lattice-2",
+      "level": 9,
+      "bytes": 90,
+      "sha256": "fcf5187b182b3224d4019a47f926e0664649046f65660f66f9c7df080b5ed9dc",
+      "path": "golden/sample-lattice-2-l9.zst"
+    },
+    {
+      "payloadId": "sample-lattice-3",
+      "level": 3,
+      "bytes": 151,
+      "sha256": "6833f0a7aaf9a9766d9e2c2c3e61d0170a09add360d0f7628af1a5913991bc3b",
+      "path": "golden/sample-lattice-3-l3.zst"
+    },
+    {
+      "payloadId": "sample-lattice-3",
+      "level": 9,
+      "bytes": 131,
+      "sha256": "e40a17cb0e544f4d9b5b40aa420fd686c55aa19a5b323f73fd4eb0fb23a85cd4",
+      "path": "golden/sample-lattice-3-l9.zst"
+    },
+    {
+      "payloadId": "sample-lattice-4",
+      "level": 3,
+      "bytes": 143,
+      "sha256": "b9e2d2990bfefcd1bfa082643d36cf01d2c3bbc48e02eaf735c439869a00ca24",
+      "path": "golden/sample-lattice-4-l3.zst"
+    },
+    {
+      "payloadId": "sample-lattice-4",
+      "level": 9,
+      "bytes": 138,
+      "sha256": "4dcee2fb32e9afb2f73ee8878fd1fcad2b189dcac40f0fa83a6878bf2ef77813",
+      "path": "golden/sample-lattice-4-l9.zst"
+    },
+    {
+      "payloadId": "sample-lattice-5",
+      "level": 3,
+      "bytes": 92,
+      "sha256": "ca552bab130bc97e469fade83cb2580a3566e2b2edd668fbf4f8f5ae65942857",
+      "path": "golden/sample-lattice-5-l3.zst"
+    },
+    {
+      "payloadId": "sample-lattice-5",
+      "level": 9,
+      "bytes": 91,
+      "sha256": "3196a807812f9ae6c440f52ed52dcad4a38c8eacfb30be5114a1b63e9ee82521",
+      "path": "golden/sample-lattice-5-l9.zst"
+    },
+    {
+      "payloadId": "sample-lattice-6",
+      "level": 3,
+      "bytes": 159,
+      "sha256": "d5ea702d5a2f2e57dceb71bea0cbdfaaa36ba3560288b7b750f66d9ffa14b9d4",
+      "path": "golden/sample-lattice-6-l3.zst"
+    },
+    {
+      "payloadId": "sample-lattice-6",
+      "level": 9,
+      "bytes": 149,
+      "sha256": "222cc7ea1b77549c99e2beaf45deb4fb306b250611cde995ac0a781860bf872a",
+      "path": "golden/sample-lattice-6-l9.zst"
+    },
+    {
+      "payloadId": "sample-model-1",
+      "level": 3,
+      "bytes": 1415,
+      "sha256": "1dc0bf3b5c82b1146c3ee2db85863e035bff8761cfedaa10047569dd21fc943f",
+      "path": "golden/sample-model-1-l3.zst"
+    },
+    {
+      "payloadId": "sample-model-1",
+      "level": 9,
+      "bytes": 1387,
+      "sha256": "4b7e6106efcc23f56eb07d8462d0c09ef9bc9e9320a370fba31339874172400b",
+      "path": "golden/sample-model-1-l9.zst"
+    },
+    {
+      "payloadId": "supplementary-lattice-1",
+      "level": 3,
+      "bytes": 2857,
+      "sha256": "fd639d3bc36cec738e8a00a0ed5b0dc5fa07bd5c711b7667a9171bbacf11575a",
+      "path": "golden/supplementary-lattice-1-l3.zst"
+    },
+    {
+      "payloadId": "supplementary-lattice-1",
+      "level": 9,
+      "bytes": 2597,
+      "sha256": "fa48e72e80d8b37397902aa50d3f4146a02885937f37385e4638e775a7f0b77b",
+      "path": "golden/supplementary-lattice-1-l9.zst"
+    }
+  ],
+  "seedVector": {
+    "payloadId": "sample-model-1",
+    "rawBytes": 3475,
+    "level3": {
+      "bytes": 1415,
+      "sha256": "1dc0bf3b5c82b1146c3ee2db85863e035bff8761cfedaa10047569dd21fc943f"
+    },
+    "level9": {
+      "bytes": 1387,
+      "sha256": "4b7e6106efcc23f56eb07d8462d0c09ef9bc9e9320a370fba31339874172400b"
+    }
+  }
+}

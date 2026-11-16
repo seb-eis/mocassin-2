@@ -50,8 +50,8 @@ public sealed class GoldenSampleTests
     }
 
     [Theory]
-    [InlineData("samples/ceria/ceria.mocprj", false, "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003")]
-    [InlineData("samples/barium-zirconate/barium-zirconate.mocprj", false, "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2")]
+    [InlineData("samples/ceria/ceria.mocprj", false, "a9e0a45aec33294202b59fdb17c82335121d292ca96f579c479b85898cd0d113")]
+    [InlineData("samples/barium-zirconate/barium-zirconate.mocprj", false, "5e62f9dd602110edc5007ad8eb384b0b25047a9205dfe3a5af9797e0f4e38b62")]
     [InlineData("samples/simulations/ceria-mmc.mocprj", true, "bf7fea8429d97cb35ccd3bd1424a1c97c073b98cca2feb458525ffef0e4bb214")]
     public async Task SampleCompilesToAStableSignature(string sample, bool addSimulation, string expectedSignature)
     {

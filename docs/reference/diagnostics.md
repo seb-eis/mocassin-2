@@ -84,6 +84,16 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 | [`PAR010`](#par010) | error | Step 03 — particle and structure models | An authored object reuses a reserved implicit-object identifier | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PAR011`](#par011) | error | Step 03 — particle and structure models | A particle-set name is empty or used more than once (case-insensitive) | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`PAR012`](#par012) | error | Step 03 — particle and structure models | A particle set contains the same particle identifier more than once | Review the referenced model object, correct the reported condition, and revalidate. |
+| [`PKG001`](#pkg001) | error | Step 11 — simulation package | The package is not a readable SQLite database | Rebuild the package and confirm that the file is a published .msl package; run SQLite integrity_check. |
+| [`PKG002`](#pkg002) | error | Step 11 — simulation package | The package schema or format version is missing or unsupported | Rebuild the package with a compatible mocassin release. |
+| [`PKG003`](#pkg003) | error | Step 11 — simulation package | A required schema element is missing or malformed | Rebuild the package; a published package must contain every required table, index, column, and schema-info row. |
+| [`PKG004`](#pkg004) | error | Step 11 — simulation package | A package payload cannot be decoded | Rebuild the package. The payload must be a standard Zstd frame containing a MessagePack map within its size bound. |
+| [`PKG005`](#pkg005) | error | Step 11 — simulation package | A stored signature does not match its payload projection | Rebuild the package with the same compiler and parameterization; the stored payload is inconsistent. |
+| [`PKG006`](#pkg006) | error | Step 11 — simulation package | A package reference or identifier is invalid | Rebuild the package and confirm unique ascending job ids and valid model/lattice foreign keys. |
+| [`PKG007`](#pkg007) | error | Step 11 — simulation package | A payload-derived job column disagrees with the payload | Rebuild the package; the denormalized columns must be copied from the resolved job payload. |
+| [`PKG008`](#pkg008) | error | Step 11 — simulation package | The package is not immutable | Publish results to a separate .msr store and republish the package without a results table or WAL sidecar. |
+| [`PKG009`](#pkg009) | warning | Step 11 — simulation package | The package exceeds the advisory size limit | Reduce duplicate jobs or supercell sizes, or rebuild with --compact compression. |
+| [`PKG010`](#pkg010) | error | Step 11 — simulation package | A package payload value is out of bounds | Rebuild the package; table lengths, indices, tracker order, and mappings must match the declared dimensions. |
 | [`PRM001`](#prm001) | error | Step 09 — parameterization templates | A template model signature does not match the compiled model | Rebase or recreate the template against the current compiled model. |
 | [`PRM002`](#prm002) | warning | Step 09 — parameterization templates | A template entry references an unknown key or disagrees with the current model | Remove the stale entry or rebase the template against the current model. |
 | [`PRM003`](#prm003) | warning | Step 09 — parameterization templates | Required pair, group, or kinetic-rule values are unset and defaults are applied | Set the missing values explicitly, or review the applied defaults before building. |
@@ -498,6 +508,46 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 ### PAR012
 
 **A particle set contains the same particle identifier more than once.** Review the referenced model object, correct the reported condition, and revalidate.
+
+### PKG001
+
+**The package is not a readable SQLite database.** Rebuild the package and confirm that the file is a published .msl package; run SQLite integrity_check.
+
+### PKG002
+
+**The package schema or format version is missing or unsupported.** Rebuild the package with a compatible mocassin release.
+
+### PKG003
+
+**A required schema element is missing or malformed.** Rebuild the package; a published package must contain every required table, index, column, and schema-info row.
+
+### PKG004
+
+**A package payload cannot be decoded.** Rebuild the package. The payload must be a standard Zstd frame containing a MessagePack map within its size bound.
+
+### PKG005
+
+**A stored signature does not match its payload projection.** Rebuild the package with the same compiler and parameterization; the stored payload is inconsistent.
+
+### PKG006
+
+**A package reference or identifier is invalid.** Rebuild the package and confirm unique ascending job ids and valid model/lattice foreign keys.
+
+### PKG007
+
+**A payload-derived job column disagrees with the payload.** Rebuild the package; the denormalized columns must be copied from the resolved job payload.
+
+### PKG008
+
+**The package is not immutable.** Publish results to a separate .msr store and republish the package without a results table or WAL sidecar.
+
+### PKG009
+
+**The package exceeds the advisory size limit.** Reduce duplicate jobs or supercell sizes, or rebuild with --compact compression.
+
+### PKG010
+
+**A package payload value is out of bounds.** Rebuild the package; table lengths, indices, tracker order, and mappings must match the declared dimensions.
 
 ### PRM001
 

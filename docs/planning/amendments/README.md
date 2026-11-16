@@ -111,6 +111,7 @@ If the parent step is already merged or tagged:
 | `step-02-amend-1` (`public-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-1-public-math` | [Review](../reviews/step-02-amend-1.md) | `dbf5691`; audit `6341b56` |
 | `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | [Review](../reviews/step-02-amend-2.md) | `dbf5691`; audit `6341b56` |
 | `step-08-amend-1` (`canonical-projection`) | 08 — Model Compilation Pipeline | **Integrated** | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` | [Review](../reviews/step-08-amend-1.md) | `28e741f`; audit passed with notes; merged and tagged `step-08` |
+| `step-11-amend-1` (`dotnet-11-native-zstd`) | 11 — Simulation Package and `.msl` Writer | **Integrated** | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | [Review](../reviews/step-11-amend-1.md) — `Ready with notes`, accepted 2026-11-15 | `00753e7`; the parent audit has not started |
 
 `step-02-amend-1` covers the public generic math layer (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`,
 `Matrix4<T>`) and the replacement of the temporary `CellGeometry` array-based inverse. See
@@ -118,3 +119,9 @@ If the parent step is already merged or tagged:
 
 `step-02-amend-2` enables KaTeX math rendering for the published documentation and replaces the Step 02
 monospace formula blocks. See [`step-02-amend-2-docs-math.md`](step-02-amend-2-docs-math.md).
+
+`step-11-amend-1` moves the repository to the .NET 11 toolchain and replaces the `ZstdSharp.Port` payload codec
+with the in-box `System.IO.Compression` Zstandard API, before the Step 11 audit freeze and before feature 7
+generates the checked-in `.msl` fixture. It is a toolchain and dependency change, not a `.msl` format, signature,
+or solver-contract change. See
+[`step-11-amend-1-dotnet-11-native-zstd.md`](step-11-amend-1-dotnet-11-native-zstd.md).

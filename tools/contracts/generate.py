@@ -28,6 +28,8 @@ REQUIRED_FORMATS = {
     "mmcfe",
 }
 REQUIRED_SIGNATURES = {"model", "parameterization", "lattice"}
+REQUIRED_PAYLOAD_KINDS = ("model", "job", "lattice")
+PAYLOAD_METADATA_KEYS = {"formatVersion", "unknownFields", "notes"}
 VALID_FIELD_TYPES = {
     "array",
     "bin",
@@ -171,6 +173,52 @@ def validate_fields(fields: list[dict[str, Any]], context: str, allow_empty: boo
         names.add(name)
 
 
+def validate_payloads(payloads: Any, context: str) -> None:
+    """Validate the optional package payload descriptor group."""
+    require(isinstance(payloads, dict), f"{context}.payloads: must be an object")
+    keys = set(payloads)
+    require(
+        keys - PAYLOAD_METADATA_KEYS == set(REQUIRED_PAYLOAD_KINDS),
+        f"{context}.payloads: must define exactly the model, job, and lattice payloads",
+    )
+    version = payloads.get("formatVersion")
+    require(
+        isinstance(version, int) and version >= 1,
+        f"{context}.payloads: formatVersion must be a positive integer",
+    )
+    require(
+        payloads.get("unknownFields") in {"reject", "ignore"},
+        f"{context}.payloads: unknownFields must be 'reject' or 'ignore'",
+    )
+    if "notes" in payloads:
+        require(isinstance(payloads["notes"], str), f"{context}.payloads: notes must be a string")
+
+    for kind in REQUIRED_PAYLOAD_KINDS:
+        descriptor = payloads[kind]
+        require(isinstance(descriptor, dict), f"{context}.payloads.{kind}: must be an object")
+        if "title" in descriptor:
+            require(isinstance(descriptor["title"], str), f"{context}.payloads.{kind}: title must be a string")
+        validate_fields(descriptor.get("fields", []), f"{context}.payloads.{kind}.fields")
+        version_fields = [
+            field
+            for field in descriptor["fields"]
+            if field["name"] == "format_version"
+        ]
+        require(
+            len(version_fields) == 1,
+            f"{context}.payloads.{kind}: must define a format_version field",
+        )
+        version_field = version_fields[0]
+        require(
+            version_field["type"] in {"uint64", "int64"},
+            f"{context}.payloads.{kind}.format_version: must be an integer type",
+        )
+        require(
+            version_field.get("enum") == [version],
+            f"{context}.payloads.{kind}.format_version: enum must be [{version}]",
+        )
+
+
 def validate_manifest(manifest: dict[str, Any]) -> None:
     """Validate the manifest envelope, formats, signatures, events, and fixtures."""
     require(manifest.get("manifestVersion") == 1, "manifestVersion must be 1")
@@ -218,6 +266,12 @@ def validate_manifest(manifest: dict[str, Any]) -> None:
                     and all(isinstance(item, str) and item for item in required_fields),
                     f"formats.{format_id}.events.{name}: requiredFields must be strings",
                 )
+        if "payloads" in descriptor:
+            require(
+                format_id == "package",
+                f"formats.{format_id}.payloads: only the package format may define payloads",
+            )
+            validate_payloads(descriptor["payloads"], f"formats.{format_id}")
 
     signatures = manifest.get("signatures")
     require(isinstance(signatures, dict), "signatures must be an object")
@@ -345,6 +399,10 @@ def _json_schema_type(field: dict[str, Any]) -> dict[str, Any]:
             item_schema = json_schema_type({"name": "item", "required": False, **field["itemItems"]})
         else:
             item_schema = json_schema_type({"type": item_type, "required": False})
+            if "itemAdditionalProperties" in field:
+                item_schema["additionalProperties"] = additional_properties_schema(
+                    field["itemAdditionalProperties"]
+                )
         if "itemEnum" in field:
             item_schema["enum"] = field["itemEnum"]
         schema = {
@@ -409,6 +467,44 @@ def schema_for_format(descriptor: dict[str, Any], manifest_version: int) -> dict
         schema["x-event-required-fields"] = {
             event["name"]: event["requiredFields"] for event in descriptor["events"]
         }
+    return schema
+
+
+def schema_for_payloads(payloads: dict[str, Any], manifest_version: int) -> dict[str, Any]:
+    """Build the separate package payload schema from the manifest payload descriptors.
+
+    The manifest's ``payloads.unknownFields`` policy drives ``additionalProperties`` for each payload object,
+    so the row schema's ``reject`` policy and the payload's forward-compatible ``ignore`` policy stay
+    independently manifest-owned. Nested maps and arrays are deliberately typed only as ``object``/``array``.
+    """
+    version = int(payloads["formatVersion"])
+    payload_additional = payloads["unknownFields"] == "ignore"
+    schema: dict[str, Any] = {
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "$id": f"https://mocassin.dev/schemas/package-payloads-v{version}.json",
+        "title": "Simulation package payloads",
+        "description": (
+            f"MOCASSIN contract manifest v{manifest_version}; generated from contracts/manifest.json. "
+            "Separate from the .msl SQLite row schema."
+        ),
+        "type": "object",
+        "additionalProperties": False,
+        "properties": {},
+        "required": [],
+    }
+    for kind in REQUIRED_PAYLOAD_KINDS:
+        descriptor = payloads[kind]
+        properties, required = field_properties(descriptor["fields"])
+        payload_schema: dict[str, Any] = {
+            "type": "object",
+            "properties": properties,
+            "required": required,
+            "additionalProperties": payload_additional,
+        }
+        if "title" in descriptor:
+            payload_schema["title"] = descriptor["title"]
+        schema["properties"][kind] = payload_schema
+        schema["required"].append(kind)
     return schema
 
 
@@ -515,6 +611,12 @@ def build_artifacts(manifest: dict[str, Any]) -> dict[Path, str]:
         artifacts[
             GENERATED_DIR / "schema" / f"{format_id}-v{version}.schema.json"
         ] = json_text(schema_for_format(descriptor, manifest["manifestVersion"]))
+        if "payloads" in descriptor:
+            payloads = descriptor["payloads"]
+            payload_version = int(payloads["formatVersion"])
+            artifacts[
+                GENERATED_DIR / "schema" / f"{format_id}-payloads-v{payload_version}.schema.json"
+            ] = json_text(schema_for_payloads(payloads, manifest["manifestVersion"]))
 
     for report_id, descriptor in manifest.get("reports", {}).items():
         version = format_version(descriptor)

@@ -249,7 +249,7 @@ reduction suites are nightly/release.
 - Diagnostics: every `CMP` code has a catalog descriptor, documentation anchor, and an emission test with
   severity, `ModelPath`, and hint.
 - Cancellation: a cancelled compile returns no partial model and leaves the project unchanged.
-- Performance on the benchmark laptop class (8 physical cores, 32 GB RAM, .NET 10 Release): ceria
+- Performance on the benchmark laptop class (8 physical cores, 32 GB RAM, .NET 11 Release): ceria
   `< 1 s`; a 10k-position model `< 30 s` and `< 2 GiB` managed memory; cancellation is checked between stages
   and top-level units, with atomic Symmetry calls documented as non-interruptible.
 
@@ -411,6 +411,15 @@ solver with the same binary, platform, package, and seed.
   signatures and an identical `package-summary-v1` projection (data contracts §3.5); only build metadata
   (`created_utc`, `app_version`, `generator`), size, payload byte hashes, and SQLite/Zstd implementation details
   may differ in the bytes. Byte-identical lattices insert once; a different particle array inserts a second row.
+- **Payload codec:** one fixed path — MessagePack, then a one-shot in-box `ZstandardEncoder` at
+  `PackageBuildOptions.CompressionLevel` (Zstd quality, identity mapping, 1..19) with `SetSourceLength` and
+  `isFinalBlock: true`. No dictionary, checksum, long-distance matching, streaming encoder, or custom framing.
+  Reads accept any valid standard frame, take the declared or upper-bound decompressed size, and check it against
+  the guard before allocating. Compressed bytes are an observation, not a contract (ADR 0010, data contracts
+  §3.5): the same logical input at the same level is byte-stable on one runtime patch and may change across
+  patches, while the canonical summary and signatures must not. The decode budget below 8 KiB is an **absolute**
+  ≤ 0.15 µs per payload plus ≥ 100 MB/s, because fixed reader overhead dominates; at or above 8 KiB the relative
+  ≤ +10 % rule applies (amendment 1 §9.1). The checked-in golden frames are the reproducible form of that mapping.
 - **Atomicity and failure injection:** cancellation, a simulated write/disk-full error, and a crash after
   writing the temp file leave an existing package untouched and produce no `-wal`/`-shm` files or partial
   package. The published file is only replaced by the fsynced atomic rename.
@@ -419,10 +428,17 @@ solver with the same binary, platform, package, and seed.
 - **Verification:** each `PKG001`–`PKG010` code has a corrupt, truncated, inconsistent, or injected-table
   fixture with its documented severity and docs anchor; a decompression bomb or an oversized declared count
   yields a diagnostic instead of an allocation; verification never throws for untrusted input and never mutates
-  the file. `PKG` descriptors are Contracts-owned; the verifier's project has no `Mocassin.Packages` reference.
+  the file. Model and job payloads are bounded by `PackageVerificationOptions`. A lattice payload is bounded by
+  `4 × a × b × c × position_count` from its referencing job and model, capped by
+  `PackageVerificationOptions.MaxLatticePayloadBytes`; an orphan lattice row uses that cap as its fallback, and a
+  lattice bomb produces `PKG004` without an unbounded allocation (`fix-lattice-decode-guard`, amendment 1 §4).
+  `PKG` descriptors are Contracts-owned; the verifier's project has no `Mocassin.Packages` reference.
 - **Fixtures:** a checked-in `.msl` produced by the real writer plus its canonical summary (normalized build
   metadata) and extracted model payload; the regeneration command is recorded and `verify.sh contracts` checks
-  the lattice projection vectors.
+  the lattice projection vectors. The amendment's `tests/contracts/packages/amend-1-net10/` compatibility package
+  is byte-fixed and never regenerated; `tests/contracts/packages/amend-1/` holds the pre-amendment codec goldens
+  and follows the byte-recording rule (re-capture the bytes with a note; never regenerate signatures or the
+  summary).
 - **Tiers and performance:** mapping/signature/atomicity/verification tests are PR-fast; the cross-language
   `.msl` read is PR-medium with Step 13; fuzzing and the 10⁴-job build are nightly/release. The writer targets
   `< 10 min`/`< 2 GB` for 10⁴ small jobs, `< 50 MB` for a complex model payload, and `>= 100` job inserts/s.
@@ -450,7 +466,10 @@ solver with the same binary, platform, package, and seed.
   same arrays; results must agree within floating-point tolerance.
 - **Fuzzing**: `cargo-fuzz` on the Rust `.msl`, `.mcs`, and extension-config readers; SharpFuzz on the .NET
   project JSON, `.msr`, `solver.json`, event, and MMCFE readers; Hypothesis on the Python readers. Crashes and
-  OOMs are release blockers.
+  OOMs are release blockers. The Step 11 `.msl` verifier's nightly mutation/fuzz harness is **deferred to
+  Step 29** (owner: Step 29 implementor) and lands with the SharpFuzz targets and the nightly fuzz job; until
+  then Step 11 proves the fixed truncation, corrupt-frame, wrong-signature, foreign-key, and
+  decompression-bound cases and claims no fuzz run.
 
 Contract tests use files produced by the real writers and never share reader/writer code across languages.
 
@@ -488,7 +507,7 @@ Contract tests use files produced by the real writers and never share reader/wri
 10. License/header check and dependency audit
 
 Matrix: automatic runs use `ubuntu-latest` only. Step closeout and `main` use path-filtered jobs. Windows and
-macOS are manual platform gates. .NET 10 SDK; stable Rust; Python 3.13 automatic (3.11/3.12 manual/nightly).
+macOS are manual platform gates. .NET 11 SDK; stable Rust; Python 3.13 automatic (3.11/3.12 manual/nightly).
 Cache NuGet, Cargo, pip, and the SQLite build.
 
 ### Nightly
@@ -527,7 +546,7 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | GUI cold start | < 2 s |
 | Open/save typical project | < 500 ms |
 | 3D viewport (10⁵ atoms) | ≥ 30 FPS on integrated GPU |
-| P1 expansion (64 P1 positions, 20×20×20 = 512,000 positions) | < 1 s mean on `ubuntu-latest`, .NET 10 Release |
+| P1 expansion (64 P1 positions, 20×20×20 = 512,000 positions) | < 1 s mean on `ubuntu-latest`, .NET 11 Release |
 | Structure preview (ceria and barium zirconate) | < 100 ms mean on `linux-x64-github-ubuntu-latest-dotnet10` |
 
 Benchmarks:

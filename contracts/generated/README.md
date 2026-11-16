@@ -12,6 +12,7 @@ Do not edit these files by hand. Run the generator instead.
 | `schema/events-v1.schema.json` | Generated contract artifact |
 | `schema/jobFolder-v1.schema.json` | Generated contract artifact |
 | `schema/mmcfe-v1.schema.json` | Generated contract artifact |
+| `schema/package-payloads-v1.schema.json` | Generated contract artifact |
 | `schema/package-v1.schema.json` | Generated contract artifact |
 | `schema/project-v1.schema.json` | Generated contract artifact |
 | `schema/results-v1.schema.json` | Generated contract artifact |

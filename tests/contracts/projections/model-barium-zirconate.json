@@ -2,6 +2,6 @@
   "fixtureFormat": "canonical-projection-v1",
   "id": "model-barium-zirconate",
   "descriptor": "model-v1",
-  "signatureHex": "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2",
-  "projectionSha256": "d22dd9ab6ac5361e8ce30fd4f31f3412bf2ad57e664cb7f7c69323b1981cf322"
+  "signatureHex": "5e62f9dd602110edc5007ad8eb384b0b25047a9205dfe3a5af9797e0f4e38b62",
+  "projectionSha256": "aac09be8e416c6e176a03d8e34234e118367a8416c88d58242a8f3283eaadbcc"
 }

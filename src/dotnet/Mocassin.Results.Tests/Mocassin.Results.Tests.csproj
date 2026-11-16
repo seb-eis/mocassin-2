@@ -24,6 +24,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="../Mocassin.Packages/Mocassin.Packages.csproj" />
     <ProjectReference Include="../Mocassin.Results/Mocassin.Results.csproj" />
   </ItemGroup>
 </Project>

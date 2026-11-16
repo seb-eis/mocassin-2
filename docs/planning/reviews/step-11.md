@@ -366,6 +366,11 @@ Date: 2026-11-15
 
 ## Resolution status
 
+> Amendment: [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11 toolchain and
+> native Zstandard — is a late design change to this step, planned while the step is still active and before the
+> audit freeze. Its focused design review is [`step-11-amend-1.md`](step-11-amend-1.md). It does not reopen any
+> finding above.
+
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
 | M-1 | Closed in design — environment pair entries are now one row per periodic image with `{target_position, offset, energy_id}`; the compiler emits one `CompiledPairLink` per image from `PairShell.EquivalentImages` (exposed additively on `PairInteractionPreview`), so the existing four-field model-signature link projection signs every runtime image. The model-signature values change for multi-image shells, so the Step 08/09 signature fixtures and sample `modelSignature` values are regenerated. Step 08/13/14/15 and the data contract are aligned. The cross-step Symmetry/Compilation change needs start-gate/owner approval and an ApiCompat refresh. | Planner; owner for the cross-step change; step agent implements | `f04bd3c` |
@@ -388,6 +393,10 @@ Date: 2026-11-15
 | R2-4 | Closed — §6 item 4 now states that `jump_collections` has no `object_id` and none is added; only `jump_directions.object_id` is retained. | Step agent (start gate) | this commit |
 | R2-5 | Closed — the request `Step summary` now records the 3.8–4.2 pw estimate, the four-week-trigger overrun, and the single-step exception/start-gate choice. | Step agent (start gate) | this commit |
 | R2-6 | Closed — the `PublicAPI.Unshipped.txt`/ApiCompat task now names Contracts, Core (`JobExtension.ToCanonicalJson`), Symmetry (`PairInteractionPreview.EquivalentImages`), Compilation, Packages, and Results. | Step agent (start gate) | this commit |
+| R2-8 | Closed — the payload unknown-key policy is now `formats.package.payloads.unknownFields = "ignore"` in the manifest; `generate.py` derives each payload object's `additionalProperties` from it, while `formats.package.unknownFields = "reject"` remains the SQLite row-schema policy. Nothing is hard-coded in the generator. | Step agent (feature 2) | `9b754af` |
+| R2-7 | Closed — the file fsync uses `FileStream.Flush(true)`; the containing-directory fsync uses a minimal Unix libc `open`/`fsync`/`close` interop (`DllImport`, `UnmanagedType.LPUTF8Str`, `SetLastError`, `CharSet.Ansi`). Windows has no equivalent directory-durability primitive in this path, so it skips the directory call and relies on the file fsync plus atomic replace. This is a §3.13 platform trigger: the closeout must dispatch the manual Windows platform job; macOS uses the same Unix path exercised on Ubuntu, so it is optional/manual. | Step agent (feature 3) | `c0d8d64` |
+| R2-3 | Closed — the verifier no longer asserts "the shell representative is present" (the payload carries no representative marker or `distance_bucket_fm`) and no longer claims an independent tracker node count. It checks `tracker_order` non-empty, length within the documented ten six-bit node slots, and non-sentinel values below `global_tracker_count`; the writer retains the representative-path-length assertion. No new payload field was invented. | Step agent (feature 6) | `cbe345f` |
+| R2-9 | Closed — `DiagnosticCatalogTests.DefaultIsTheUnionOfTheDomainCatalogsAndStep07Codes` now includes `PackageDiagnosticDescriptors.All`, and `DiagnosticDocumentationTests` covers the ten new PKG codes and headings. | Step agent (feature 6) | `cbe345f` |
 
 Resolution notes:
 

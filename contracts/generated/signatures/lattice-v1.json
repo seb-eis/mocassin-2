@@ -5,8 +5,8 @@
   "domainSeparator": "0x00",
   "hash": "sha256",
   "projectionType": "LatticeSignatureV1",
-  "status": "skeleton",
-  "notes": "Section-level projection established in Step 00; field-level signed types are finalized in Step 11.",
+  "status": "final",
+  "notes": "Final Step 11 lattice projection: domain-separated five-field MessagePack array over the lattice payload format version, the referenced compiled-model signature, the supercell size, the P1 position count, and the row-major particle array. Build metadata and the doping summary are excluded, so byte-identical initial lattices deduplicate across jobs.",
   "fields": [
     {
       "name": "formatVersion",
@@ -33,11 +33,6 @@
     {
       "name": "particles",
       "type": "bin",
-      "required": true
-    },
-    {
-      "name": "dopingInfo",
-      "type": "string",
       "required": true
     }
   ]

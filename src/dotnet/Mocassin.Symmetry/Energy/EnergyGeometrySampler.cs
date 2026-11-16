@@ -196,7 +196,8 @@ public sealed class EnergyGeometrySampler : IEnergyGeometrySampler
                 candidate.Shell.Representative.P,
                 candidate.Shell.DistanceAngstrom,
                 isChiral,
-                partnerId));
+                partnerId,
+                candidate.Shell.EquivalentImages));
         }
 
         pairs =

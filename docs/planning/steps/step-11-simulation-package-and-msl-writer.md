@@ -8,25 +8,41 @@ read-only inspection/verification library for the build CLI.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** Awaiting approval
 - **Step branch:** `step/11-simulation-package-and-msl-writer`
-- **Step CI:** —
-- **Main merge:** —
+- **Step CI:** round 2 at X2 `4197166`: [Ubuntu closeout
+  green](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) and [focused Windows platform gate
+  green](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) — [closeout
+  evidence](../closeout/step-11.json). Round-1 evidence at `e94d975` remains
+  [43935118095](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095) /
+  [43935661973](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973)
+- **Main merge:** — (main `bca66373c68485d08ac78c0259577887726879d1` merged into the step branch as
+  `b44022ab2353e2f4394793ba3d023718a578753c`; main was green at the freeze)
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** `Passed with notes` — [record](../audits/step-11.md). Round 1 returned `Passed with notes` at
+  `e94d975`; round 2 verified the X2 `4197166` fixes and returned `Passed with notes` at request tip
+  `d7b654c` (`fda68e6` record). The human owner accepted the remaining Notes N-1, N-4, and N-6 on 2026-11-16
+  and confirmed the merge and tag; status is `Awaiting approval`.
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
+- **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
+  toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
+  2026-11-15 ([record](../reviews/step-11-amend-1.md))
 - **Feature list:** Approved 2026-11-15 (seven features)
-- **Last updated:** 2026-11-15
+- **Last updated:** 2026-11-16
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Pending | — | — | — |
-| 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Pending | — | — | — |
-| 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Pending | — | — | — |
-| 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Pending | — | — | — |
-| 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Pending | — | — | — |
-| 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Pending | — | — | — |
-| 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Pending | — | — | — |
+| 1 Package contracts and lattice signature | `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature` | Squashed | `dotnet`, `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `eb8513d` |
+| 2 Package manifest and schema | `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `9b754af` |
+| 3 SQLite schema and publication barrier | `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `c0d8d64` |
+| 4 Model payload encoding | `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `bdafaa4` |
+| 5 Job and lattice payload encoding | `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `4fe6225` |
+| 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `cbe345f` |
+| A1 .NET 11 toolchain and native Zstandard | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | Squashed | `all --require` exit 0; one-time cross-TFM ApiCompat 9/9 | Not run (no per-feature CI) | `00753e7` |
+| A1-fix Lattice decode guard | `feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `25a3787` |
+| 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `e25811f` (fixtures/Part B/docs); `0ae05a4` (Windows canonical JSON) |
+| Closeout | `feature/step-11-simulation-package-and-msl-writer/closeout` | Squashed | `docs --require`, `policy --require` exit 0 | Ubuntu closeout and Windows platform gate green | `e94d975` |
+| X2 Audit-minor fixes | `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` | Squashed | `all --require` exit 0 | Ubuntu closeout and Windows platform gate green at X2 | `4197166` |
 
 ### Approved feature list
 
@@ -48,6 +64,456 @@ squash-merged without a further approval.
 
 Filled during implementation. Each squash records the branch, local gates, and the squash commit; no CI runs
 per feature.
+
+#### Feature 1 — Package contracts and lattice signature
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/package-contracts-and-lattice-signature`
+- **Squash commit:** `eb8513d` (`step-11: add the .msl payload contracts and lattice signature`).
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (build, all solution tests including 37 Contracts and 375
+  Packages tests, format); `./tools/verify.sh structure` exit 0; `./tools/verify.sh api` exit 0;
+  `./tools/verify.sh contracts` exit 0 (contract artifacts current, model 5 / parameterization 4 / lattice 2
+  projection fixtures, process consistency, 37 tool tests, SPDX, secrets, cargo-deny).
+- **Step CI:** not run — feature branches do not trigger CI; the closeout run is the only step-branch run.
+- **Diff summary:** added `Mocassin.Contracts.Packages` payload DTOs for the model, structure, energy,
+  transition, simulation, job, and lattice payloads with explicit snake_case MessagePack keys; added
+  `PackageFormatConstants`, `LatticeSignatureV1`, and the `PKG001`–`PKG010` descriptors; added Contracts and
+  Packages tests (DTO shape, MessagePack keys, projection and validation, real compiler/`SupercellGenerator`
+  lattice vectors); added two checked-in lattice projection vectors and
+  `tools/contracts/check_lattice_projection.py`, wired into `verify.sh contracts`; extended the manifest
+  signature-vector list and regenerated the contract artifacts; refreshed `PublicAPI.Unshipped.txt` and the
+  Contracts ApiCompat baseline.
+- **Known limitations / follow-ups:** the Contracts DTOs use MessagePack annotations through the existing
+  `Mocassin.Compilation` package reference; the payload-encoder feature adds the explicit MessagePack
+  reference when it lands. The generated `signatures.lattice` descriptor is still the Step 00
+  skeleton with `dopingInfo`; feature 2 finalizes it and the checker then cross-validates the final descriptor.
+  The lattice vectors bind the current `modelSignature`, so feature 4's per-image pair-link change must
+  regenerate them with the Step 08/09 vectors. The `PKG` descriptors are not yet composed into
+  `DiagnosticCatalog.Default`; that belongs to the schema/verification features.
+- **Parity:** no parity-matrix row is completed by this contract-only feature.
+
+#### Feature 2 — Package manifest and schema
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/package-manifest-and-schema`
+- **Squash commit:** `9b754af` (`step-11: finalize the package payload manifest and schema`).
+- **Local gates:** `./tools/verify.sh contracts` exit 0 (contract artifacts current at 19 files, model 5 /
+  parameterization 4 / lattice 2 projection fixtures, process consistency, 45 tool tests, SPDX 545 files,
+  secrets, cargo-deny); `./tools/verify.sh dotnet` exit 0 (all solution tests including 382 Packages tests);
+  `./tools/verify.sh structure` exit 0; `./tools/verify.sh api` exit 0; `./tools/verify.sh docs` exit 0.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Diff summary:** finalized `signatures.lattice` to the five-field `LatticeSignatureV1` projection with
+  `status: final` and no `dopingInfo`; added `formats.package.payloads` with the top-level model/job/lattice
+  payload descriptors and their `format_version` values; extended `generate.py` to validate payload descriptors
+  and emit the separate `contracts/generated/schema/package-payloads-v1.schema.json` (row schema unchanged);
+  expressed the payload unknown-key policy as `formats.package.payloads.unknownFields = "ignore"` so the
+  generator derives `additionalProperties` from the manifest (R2-8); removed `jobs.norm_factor` /
+  `jobs.base_frequency_hz`; added the missing `jobs.write_out_count` column required by data contracts §3.2;
+  kept `jump_directions.object_id` and did not add `jump_collections.object_id`; regenerated all 19 generated
+  artifacts; added Python generator/descriptor tests and C# payload-schema-vs-DTO/descriptor tests; updated
+  `docs/reference/file-layout.md`.
+- **Known limitations / follow-ups:** the payload schema deliberately types nested maps and arrays only as
+  `object`/`array` at the fidelity the manifest entry uses; the full payload field list remains in data contracts
+  §3.3–§3.4 and the DTOs. No previous-major `.msl` fixture exists; the current-only fixture policy starts at v2.
+  `write_out_count` was a pre-existing manifest drift against the already-frozen data contract, not a new shape
+  decision.
+- **Parity:** no parity-matrix row is completed by this contract-only feature.
+
+#### Feature 3 — SQLite schema and publication barrier
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/sqlite-schema-and-publication`
+- **Squash commit:** `c0d8d64` (`step-11: add the SQLite schema and publication barrier`).
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests including **399** Packages tests,
+  format clean); `./tools/verify.sh structure` exit 0; `./tools/verify.sh api` exit 0 (NuGet licence policy OK
+  for **57** packages, ApiCompat clean); `./tools/verify.sh contracts` exit 0 (19 artifacts current, projection
+  fixtures, 45 tool tests, SPDX 560 files, secrets, cargo-deny); `./tools/verify.sh docs` exit 0.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Licence result (n-5):** `Microsoft.Data.Sqlite/10.0.14` and `Microsoft.Data.Sqlite.Core/10.0.14` are **MIT**;
+  the transitive `SQLitePCLRaw.*/2.1.13` packages are **Apache-2.0**; all are on the allow-list
+  (`check_nuget_licenses.py`: `NuGet licence policy OK (57 packages)`). `ZstdSharp.Port` is not referenced yet;
+  its licence result is recorded when feature 4 adds the encoder.
+- **Diff summary:** added `Mocassin.Packages.SimulationPackage` with `PackageBuildRequest` (including the
+  explicit `TargetPath` clarification), `PackageBuildOptions`, `PackageWriteResult`, `JobPackage`,
+  `ISimulationPackageWriter`, and `SimulationPackageWriter`; created the exact v1 SQLite schema
+  (`schema_info`/`models`/`lattices`/`jobs` plus the two indices, `application_id=0x4D4F4353`,
+  `user_version=1`), build pragmas (`page_size=8192`, WAL, `synchronous=NORMAL`, `foreign_keys=ON`,
+  `temp_store=MEMORY`), batch commits, checkpoint + `journal_mode=DELETE`, optional `VACUUM`, and
+  `PRAGMA optimize`; implemented temp-file creation and cleanup, SHA-256 of the published bytes, file fsync,
+  Unix directory fsync, atomic rename, `PKG009` advisory warning, and failure/cancellation cleanup; added the
+  contract-typed internal `PackageModelRow`/`PackageLatticeRow`/`PackageJobRow` seams for features 4/5 and 17
+  real-SQLite tests; added `Microsoft.Data.Sqlite` to `Mocassin.Packages`, refreshed `PublicAPI.Unshipped.txt`
+  and the Packages ApiCompat baseline; documented the atomic publication in `docs/reference/file-layout.md`.
+- **R2-7 resolution:** the file fsync uses `FileStream.Flush(true)`; the containing-directory fsync uses a
+  minimal Unix libc `open`/`fsync`/`close` interop (`DllImport`, `UnmanagedType.LPUTF8Str`, `SetLastError`,
+  `CharSet.Ansi`). .NET has no managed directory-fsync API. Windows has no equivalent directory-durability
+  primitive in this path, so the Windows branch skips the directory call and relies on the file fsync plus atomic
+  replace. This is the solution's first platform-specific native code and a §3.13 trigger: the closeout must
+  dispatch the manual **Windows** platform job; the macOS Unix path is the same code exercised on Ubuntu, so a
+  macOS run is optional/manual. If the Windows run is unavailable, it is an accepted risk in the audit.
+- **Known limitations / follow-ups:** `WriteModelAsync`/`WriteJobAsync` are the public encode paths and throw
+  `NotSupportedException` until features 4/5 fill them; feature 3 exercises the schema/publication barrier
+  through the contract-typed internal row seam. `PRAGMA optimize` creates SQLite's internal `sqlite_stat1`
+  table, which is not a contract table and is ignored by the schema test. The Windows directory-fsync skip and
+  the required Windows closeout run are recorded above.
+- **Parity:** no parity-matrix row is completed by this schema/publication feature; the package writer rows stay
+  `Planned` until the encoders, fixtures, and CLI integration land.
+
+#### Feature 4 — Model payload encoding
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/model-payload-encoding`
+- **Squash commit:** `bdafaa4` (`step-11: encode the parameterized model payload`).
+- **Local gates:** `./tools/verify.sh all --require` exit 0 after the format fixes — .NET build 0 warnings and all
+  solution tests (407 Packages tests, 96 Compilation, 223 Symmetry, 37 Contracts, 683 Core, 17 Cli, 1 Results,
+  1 App, 1 Architecture); NuGet licence policy OK (**58** packages); ApiCompat clean after refreshing the
+  `Mocassin.Symmetry` and `Mocassin.Contracts` baselines; Rust fmt/clippy/test; Python pytest and package build;
+  docs strict build; contract artifacts current, model 5 / parameterization 4 / lattice 2 projection fixtures,
+  process consistency, 45 tool tests, SPDX, secrets, cargo-deny.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Diff summary:** added the additive `PairInteractionPreview.EquivalentImages` field and made
+  `PairCompilationStage` emit one `CompiledPairLink` per `PairShell.EquivalentImages` element (representative
+  included), so the existing four-field model-signature link projection signs every runtime image; added the
+  real `ParameterizedModel` → `ModelPayload` mappers (`ModelPayloadMapper`, `StructurePayloadMapper`,
+  `EnergyPayloadMapper`, `TransitionPayloadMapper`, `SimulationPayloadMapper`, `FieldDirectionConverter`),
+  the Zstd+MessagePack `PayloadEncoder` with a decompressed-size guard, and the `WriteModelAsync` write-time
+  parameterization re-encode; added `MessagePack` and `ZstdSharp.Port` references to `Mocassin.Packages`;
+  added 8 model-payload tests (round-trip, signature re-encode, one-to-one per-image links, multi-image
+  expansion, tracker order, determinism, decode guard, field direction) and a writer integration test; refreshed
+  `PublicAPI.Unshipped.txt` and the `Mocassin.Symmetry`/`Mocassin.Contracts` ApiCompat baselines; updated the
+  Step 09 golden-signature note.
+- **Regenerated vectors (old → new):**
+  - `model-barium-zirconate`: `c0fd836e…` → `5e62f9dd…`.
+  - `parameterization-barium-zirconate`: `a7f6ebd9…` → `828a5494…` (`modelSignature` → `5e62f9dd…`).
+  - `parameterization-ceria`: `cac3b231…` → `8f86a7f9…` (`modelSignature` → `a9e0a45a…`).
+  - `parameterization-chiral-p1`: `ac5b381e…` → `51263129…` (`modelSignature` `6d49e4d2…` → `ca44ca89…`).
+  - `lattice-ceria-1x1x1`: `0d8327cd…` → `55f9e076…` (`modelSignature` → `a9e0a45a…`).
+  - `lattice-ceria-2x2x2`: `2b132c6c…` → `d8bd1660…` (`modelSignature` → `a9e0a45a…`).
+  - Sample/template `modelSignature` values: ceria parameters `3cee4758…` → `a9e0a45a…`; barium-zirconate
+    parameters `c0fd836e…` → `5e62f9dd…`; `project-chiral-p1.mocprj` regenerated to `ca44ca89…`.
+  - `model-ceria-kmc`, `model-ceria-mmc`, `model-vehicle5`, `model-interstitialcy5`, and their parameterization
+    vectors are unchanged because those compiled models have no multi-image pair shells.
+  - Commands: `MOCASSIN_UPDATE_GOLDENS=1 dotnet test` for `ProjectionFixtureTests`,
+    `ParameterizationGoldenFixtureTests`, `ParameterizationChiralFixtureTests`, and
+    `LatticeProjectionFixtureTests`; then the manifest vector metadata was refreshed from the generated fixture
+    metadata and `python tools/contracts/generate.py` regenerated `signature-vectors.json` and
+    `contracts/generated/fixtures/descriptors.json`.
+- **Licence result (n-5):** `ZstdSharp.Port/0.8.8` is **MIT**; `MessagePack/3.1.12` is **MIT**; the transitive
+  `SQLitePCLRaw.*`/`Microsoft.Data.Sqlite` edges remain MIT/Apache-2.0. `check_nuget_licenses.py`:
+  `NuGet licence policy OK (58 packages)`.
+- **Known limitations / follow-ups:** `WriteJobAsync` and the job/lattice payload encoders remain feature 5; the
+  Step 14 runtime `cell + offset` expansion test is the cross-step acceptance test. The model signature is an
+  identity string and is not re-encoded from the payload; the writer checks the decoded parameterization
+  projection and the compiled-model identity instead.
+- **Parity:** no parity-matrix row is completed by the model payload feature; the package writer rows stay
+  `Planned` until job/lattice encoding, verification, fixtures, and CLI integration land.
+
+#### Feature 5 — Job and lattice payload encoding
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/job-and-lattice-encoding`
+- **Squash commit:** `4fe6225` (`step-11: encode the generated lattices and expanded jobs`).
+- **Local gates:** `./tools/verify.sh all --require` exit 0 — .NET build 0 warnings and all solution tests
+  (414 Packages, 685 Core, 223 Symmetry, 96 Compilation, 37 Contracts, 17 Cli, 1 Results, 1 App,
+  1 Architecture); NuGet licence policy OK (58 packages); ApiCompat clean after refreshing the
+  `Mocassin.Core` and `Mocassin.Packages` baselines; Rust fmt/clippy/test; Python pytest and package build;
+  docs strict build; contract artifacts current, projection fixtures, process consistency, 45 tool tests, SPDX,
+  secrets, cargo-deny.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Diff summary:** added `LatticePayloadMapper` (flat row-major particles, dimensions, five-field signature)
+  and `JobPayloadMapper` (resolved settings, `SolverJobFlagsMapper.Compose`, normalized Cartesian field,
+  compiled optimizers, canonical extension JSON, doping summary); extended `PayloadEncoder` with job/lattice
+  Zstd+MessagePack round-trips and decompressed-size guards; implemented `WriteJobAsync` with real generated
+  lattices and descriptors, content-addressed lattice insert/dedup, payload-derived columns, strictly ascending
+  job ids (gaps preserved), batching/cancellation, and `LatticeReuseFactor`; added the public
+  `JobExtension.ToCanonicalJson()` helper reusing the project canonicalizer; added 8 real-sample
+  encoding/dedup/columns/job-id/cancellation tests and 2 canonical-JSON tests; refreshed
+  `PublicAPI.Unshipped.txt` and the Core/Packages ApiCompat baselines; updated the step page/status.
+- **Dedup and ids:** the six-job `samples/jobs/ceria-temperature-sweep.mocprj` builds six distinct lattices
+  (1.0 reuse factor); an identical-lattice pair plus one different lattice yields 2 rows and a 1.5 reuse
+  factor; a 1/3 job-id pair preserves the gap.
+- **Licence result:** no new reference edge in this feature; the feature-3/4 `Microsoft.Data.Sqlite`,
+  `MessagePack`, and `ZstdSharp.Port` results stand (MIT/Apache-2.0; 58 packages OK).
+- **Known limitations / follow-ups:** Step 12 owns the user-facing progress surface; the writer streams one
+  job at a time and honors cancellation. Step 6 owns the verifier and fixtures; Step 7 owns the checked-in
+  `.msl` fixture, benchmark, and canonical-summary golden.
+- **Parity:** no parity-matrix row is completed by this encoding feature; the package writer rows stay
+  `Planned` until verification, fixtures, and CLI integration land.
+
+#### Feature 6 — Package verification and inspection
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/package-verification`
+- **Squash commit:** `cbe345f` (`step-11: add package verification and inspection`).
+- **Local gates:** `./tools/verify.sh all --require` exit 0 — .NET build 0 warnings and all solution tests
+  (415 Packages, 18 Results, 685 Core, 223 Symmetry, 96 Compilation, 37 Contracts, 17 Cli, 1 App,
+  1 Architecture); NuGet licence policy OK (58 packages); ApiCompat clean after refreshing the
+  `Mocassin.Contracts`/`Mocassin.Results` baselines; Rust fmt/clippy/test; Python pytest and package build;
+  docs strict build; contract artifacts current, projection fixtures, process consistency, 45 tool tests, SPDX,
+  secrets, cargo-deny.
+- **Step CI:** not run — feature branches do not trigger CI.
+- **Diff summary:** added `Mocassin.Results.Packages` with `IMslPackageInspector`/`MslPackageInspector`,
+  `IPackageVerifier`/`PackageVerifier`, `PackageInspection`, `PackageVerificationReport`,
+  `PackageVerificationOptions`, and `package-summary-v1`; added a read-only `PackageReader`, bounded
+  Zstd+MessagePack decoder, payload invariant checks, and the ordered `PKG001`–`PKG010` engine; composed
+  `PackageDiagnosticDescriptors.All` into `DiagnosticCatalog.Default` and documented every PKG code; added 18
+  real-package tests covering inspection, summary determinism, read-only/no-WAL, and every PKG code; refreshed
+  `PublicAPI.Unshipped.txt` and the Contracts/Results ApiCompat baselines.
+- **`PKG` evidence:** `PKG001` text file; `PKG002` `application_id=0`; `PKG003` dropped
+  `ix_jobs_temperature`; `PKG004` `X'0102'` model payload; `PKG005` wrong model signature and wrong lattice
+  signature; `PKG006` job `model_id=999` with FK off; `PKG007` changed `temperature_k`; `PKG008` `results`
+  table and a `-wal` sidecar; `PKG009` advisory size 1 (warning only, `IsValid` true); `PKG010` model
+  position `site_index=999`. Every failing fixture is a real SQLite package built by the real writer.
+- **R2-3 closure:** the verifier no longer asserts "the shell representative is present" or an independent
+  tracker-order node count. `tracker_order` is checked as non-empty, length ≤ the documented ten six-bit
+  node slots, with non-sentinel values below `global_tracker_count`; the writer retains the
+  representative-path-length assertion. No new payload field was invented.
+- **R2-9 closure:** `DiagnosticCatalogTests.DefaultIsTheUnionOfTheDomainCatalogsAndStep07Codes` now includes
+  `PackageDiagnosticDescriptors.All`; `DiagnosticDocumentationTests` covers the ten new PKG codes and headings.
+- **Licence result (n-5):** `Mocassin.Results` now references `Microsoft.Data.Sqlite` (MIT),
+  `MessagePack` (MIT), and `ZstdSharp.Port` (MIT); transitive `SQLitePCLRaw` remains Apache-2.0.
+  `check_nuget_licenses.py`: `NuGet licence policy OK (58 packages)`.
+- **Known limitations / follow-ups:** `inspect`/`verify` CLI wiring and PKG→exit-code mapping are Step 12;
+  the checked-in `.msl` fixture, canonical-summary golden, and benchmark are Step 7/feature 7.
+- **Parity:** the package inspection/verification row remains `Improvement` because the Step 12 CLI half is
+  still pending; the read-only library half is complete.
+
+#### A1 — .NET 11 toolchain and native Zstandard
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd`
+- **Squash commit:** `00753e7` (`step-11: retarget to .NET 11 and replace the payload codec`). Feature commits:
+  `e2b00ea` pre-amendment fixture and codec goldens (net10 writer), `b0f189e` retarget, `771c28b` codec swap,
+  `1f7f61a` amended-tree evidence. Approval commit on the step branch: `683b7c4`.
+- **Local gates:** `./tools/verify.sh all --require` exit 0 — build and 1,506 tests (0 failed, 0 warnings),
+  format, `api`, `structure`, `contracts` (19 artifacts current; 5/4/2 projections), `policy` (NuGet licences
+  52 packages, 9 ApiCompat comparisons, SPDX 593 files, secrets 965 files, cargo-deny), Rust, Python, and the
+  strict docs build (DocFX 0 warnings/0 errors). One-time cross-TFM ApiCompat: 9/9 assemblies report "no
+  breaking changes"; `PublicAPI.*.txt` unchanged.
+- **Step CI:** not run — feature branches do not trigger CI; the closeout run is the only step-branch run.
+- **Diff summary:** `global.json` to SDK `11.0.100`/`latestPatch`; all 21 solution projects plus the reference
+  harness to `net11.0`; `Microsoft.NET.Test.Sdk 18.12.0`; ApiCompat tool `11.0.100` and the baseline renamed and
+  regenerated at `tests/contracts/api-baseline/net11.0/`; DocFX paths/metadata and the containerfile (11.0.100
+  only, exact-count assertions, ReportGenerator 5.6.0, carried-over `COPY global.json` pin); the eight active
+  documentation pages plus the parity row and the bug-report placeholder; `ZstdSharp.Port` removed and the
+  payload codec replaced by the one-shot in-box `ZstandardEncoder`/`ZstandardDecoder` (writer, reader, and test
+  support); three analyzer adaptations required by SDK 11 (`CA1517` read-only span, two `CA2026` `JsonElement`
+  conversions); the pre-amendment `.msl` fixture, 12 raw payloads, and 24 golden frames checked in with tests.
+- **Authorization:** the human owner authorized the `.NET 11` stack/convention update in `AGENTS.md` §1/§8 as
+  part of the approved amendment (2026-11-15); the change is factual toolchain wording, not a process-rule change.
+- **Cross-version evidence:** the `net10.0` fixture verifies on `net11.0` and its canonical summary matches the
+  golden (PR-fast). The reverse check (net10 build at `e2b00ea` reading a net11-written package) reported
+  `IsValid=true`, 10 checks, 0 diagnostics, and the same summary SHA-256 `60c95e1b…`; the net11 writer
+  reproduced the net10 package SHA-256 `053e4c8f…` because the payload frames are byte-identical.
+- **Part A re-run:** refined gate PASS in both the controlled and default-JIT runs; size 0.000 % (24/24
+  byte-identical goldens), encode worst +4.12 %, worst small-payload decode +0.1055 µs (≤ 0.15 µs), ≥ 8 KiB
+  decode +2.08 % (≤ +10 %), throughput ≥ 297 MB/s (≥ 100), 240/240 checks.
+- **Known limitations / follow-ups:** the container image was not built (owner-accepted risk, deferred to
+  closeout); the `VSTEST_ARTIFACTS_DIRECTORY` message persists because `/run/user/1000` is absent here and is
+  recorded as benign; the ReferenceHarness builds on `net11.0` with the GPL clone copied outside the repository
+  and `-p:NuGetAudit=false` (the clone's legacy packages carry audit warnings; one RID warning), and it remains
+  outside the solution gate; `fix-lattice-decode-guard` remains a separate fix feature before the audit freeze;
+  Part B is feature 7; the superseded `docs/dotnet-11-container` branch (`9ab4bb8`) is still present and is
+  removed as closeout cleanup.
+- **Parity:** the `.NET 11` row in `appendix-b-parity-matrix.md` §10 is now `Implemented`.
+
+#### A1-fix — Lattice decode guard
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard`
+- **Squash commit:** `25a3787` (`step-11: bound the read-only lattice decode guard`); feature commit `bc9eaed`.
+- **Local gates:** `./tools/verify.sh all --require` exit 0 — build and 1,514 tests (0 failed, 0 warnings),
+  format, `api`, `structure`, `contracts`, `policy`, Rust, Python, and the strict docs build.
+- **Diff summary:** the read-only reader no longer passes `int.MaxValue` to the lattice decoder.
+  `PackageReader.ReadLatticesAsync` builds a per-lattice bound from the referencing `jobs` row
+  (`lattice_id`, `model_id`, `lattice_a/b/c`) and the decoded model payload's `structure.position_count`, and
+  decodes each lattice with it. `LatticePayloadBound.Compute` applies `4 × a × b × c × position_count` with
+  `checked` arithmetic and falls back to the cap on invalid or overflowing dimensions.
+  `PackageVerificationOptions.MaxLatticePayloadBytes` (init property, default 512 MiB) is the hard cap and the
+  orphan-lattice fallback; `PublicAPI.Unshipped.txt` records the addition. Tests: four bound unit tests and four
+  real-SQLite integration tests — a referenced lattice frame above the derived 3,456-byte bound yields `PKG004`
+  with that guard in the message; an orphan frame above a 4,096-byte cap yields `PKG004`; an orphan within the
+  cap still decodes; a legitimate 40×40×40 (256,000-position) lattice verifies. No `.msl` format, payload,
+  signature, or diagnostic code changed; `Mocassin.Results` still references only `Core + Contracts`.
+- **Known limitation:** a legitimate lattice whose decompressed payload exceeds the 512 MiB default (about
+  134M positions at the writer's 4× factor) needs a raised `MaxLatticePayloadBytes`; the option is per call.
+- **Resolves:** A1-10 / R2-01 (the amendment review's routed residual minor).
+
+#### Feature 7 — Fixtures, performance, documentation, and closeout
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; follow-up
+  `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json`.
+- **Squash commits:** `e25811f` (`step-11: add fixtures, the Part B budget, and closeout documentation`) and
+  `0ae05a4` (`step-11: make canonical JSON newlines platform-independent`).
+- **Local gates:** `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh all
+  --require` exit 0 on 2026-11-16 — .NET build 0 warnings / 0 errors and **1,519** tests passing
+  (App 1, Contracts 37, Cli 17, Symmetry 223, Results 39, Core 685, Packages 420, Compilation 96,
+  Architecture 1), format clean; NuGet licence policy OK (52 packages), no vulnerable packages, ApiCompat
+  clean for 9 assemblies; Rust fmt/clippy/test; Python 3 tests and package build; strict Zensical build,
+  DocFX 0 warnings / 0 errors, rustdoc; contract artifacts current (19 files; model 5 / parameterization 4 /
+  lattice 2 projection fixtures), space-group catalog current (274 settings), process consistency, 58 tool
+  tests, SPDX 601 source files, 982 secret-scanned files, cargo-deny clean. The running dev image predates
+  amendment 1 and exposes only SDK 10.0.403 (`dotnet --list-sdks`); the containerfile already pins 11.0.100
+  only. The pinned SDK was therefore installed under `/tmp/opencode/dotnet11`, and the gate ran on **SDK
+  11.0.100 / runtime 11.0.0** from that root; no repository file changed. The follow-up bookkeeping commit
+  re-ran `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require` with the same SDK root:
+  both exit 0, and the policy run re-confirmed the 19 contract files, 274 settings, 58 tool tests, 601 SPDX
+  files, and 982 secret-scanned files above (the b44022a main merge brought the CI-platform-gate tool test and
+  the CI-fix files; N-3 refreshed these counts).
+- **Step CI:** not run — no per-feature CI; the single Ubuntu closeout dispatch is still pending.
+- **Diff summary:** added the checked-in `.msl` v1 fixture `tests/contracts/packages/msl-v1/` (98,304-byte
+  package, SHA-256 line, `package-summary-v1.json`, 13 extracted payloads (six job, six lattice, one model)
+  plus `payloads/index.json`, and a README with provenance and regeneration) and the env-gated
+  `RegeneratePackageFixture` test; added
+  `PackageFixtureBuilder` test support and five `PackageFixtureTests` covering verification, the canonical
+  summary, the package hash, the payload index, and rebuild reproducibility; added the one-shot
+  `SimulationPackageBudget` runner and the `SimulationPackageBuildBenchmarks` BenchmarkDotNet case with the
+  `--simulation-package-budget` entry point; wrote `docs/reference/msl-format.md`, `docs/user-guide/building.md`,
+  and the `file-layout.md`/`architecture.md`/`testing-and-parity.md`/reference-index/nav updates; updated the
+  parity matrix. The follow-up commit pins `NewLine = "\n"` in the canonical-JSON writers, the package-summary
+  builder, the benchmark output, and the affected fixture tests so the Windows and Ubuntu goldens agree.
+- **Part B evidence:** `tests/reference/bench/step-11-package-budget.json` records both runs on the real ceria
+  sample (10 collections × 1,000 jobs at 10×10×10, level 3). The net11 run (SDK 11.0.100, runtime 11.0.0, at
+  `8745a64`) took **3.874 s** wall clock, inserted **5,853 jobs/s**, produced a **10,051,584-byte** package with
+  a **1,415-byte** model payload at **118,263,808-byte** peak RSS; the mandatory net10 reference (SDK 10.0.403,
+  runtime 10.0.14, at `e2b00ea`) took **4.028 s**, **5,230 jobs/s**, the same **10,051,584-byte** package, and
+  **119,119,872-byte** peak RSS. The comparison is −3.82 % wall clock, 0 % package size, +11.92 % insertion
+  rate, and −0.72 % peak RSS, with `verdict: pass` against the 600 s / +5 % / 2 GiB / +3 % / 100 jobs/s /
+  50 MiB budgets. The package SHA-256 differs only because `schema_info.app_version` carries each build's
+  informational version; the payload bytes are codec-identical and the size is equal.
+- **Parity:** `.msl` v1 format and fixtures is now `Done`; create/overwrite package stays `Partial` (the Step 12
+  CLI remains) and package inspection/verification stays `Improvement` (the Step 12 `inspect`/`verify` commands
+  remain). No other row is completed by feature 7.
+- **Known limitations / follow-ups:** the checked-in fixture's `app_version`/`generator` are test-host
+  informational values and are excluded from the canonical summary; re-running the env-gated regeneration is
+  the intended update path if a runtime patch changes the package bytes. The Part B measurement is one local
+  run; the Windows focused platform gate is still required before the audit because feature 3 added native
+  directory fsync. Step 13's cross-language reader acceptance is a Step 13 test and has not run yet. The two
+  unchecked acceptance criteria (an explicit in-test parameterization package, and Step 13/18 consumption of
+  the variable-length `tracker_order`) are not feature-7 work; the writer-side tracker assertion is
+  implemented.
+- **Closeout readiness:** `origin/main` (`286e10c`) was an ancestor of the feature-7 tip; the step branch was 35
+  commits ahead at that tip (`0ae05a4`). The closeout sequence below completed the remaining items.
+- **Closeout sequence:** the owner-approved `fix/ci-platform-gate` CI fix merged into `main` as `bca6637`
+  (`--no-ff`); main CI failed attempt 1 only on the shared-runner `TenThousandPositionModelCompilesWithinTheBudget`
+  flake, the owner accepted it and authorized the re-run, and attempt 2 was green. Main `bca6637` then merged into
+  the step branch as `b44022a`, and
+  `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh all --require` passed
+  on that integration tree (1,519 .NET tests, Rust, Python, docs, contracts/policy). The closeout feature then
+  filled the status, parity, deviations, and closeout record; the run IDs and the evidence commit are recorded
+  in `docs/planning/closeout/step-11.json`.
+
+#### Closeout
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/closeout` (from `b44022a`).
+- **Squash commit:** `e94d975` (`step-11: complete closeout status, parity, and deviations`).
+- **Local gates:** `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh docs
+  --require` and `./tools/verify.sh policy --require` — both exit 0 (2026-11-16).
+- **Step CI:** the single Ubuntu closeout run
+  [`43935118095`](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095)
+  (`platforms=ubuntu`, `force_all=false`) is green at `e94d975`; the .NET, contracts/policy, and public-API jobs
+  ran and Rust/Python were skipped by their path filters (this step changes neither). The focused Windows
+  platform gate [`43935661973`](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973)
+  (`platforms=windows`) is green at `e94d975`; the Windows job built the solution and passed
+  `Mocassin.Packages.Tests` and `Mocassin.Results.Tests`. Both runs and `head_sha` are in the closeout evidence.
+- **Diff summary:** updated this page (status `In audit`, closeout link, feature log, deviations, acceptance
+  notes), the status dashboard, and the final Step 11 parity rows; added the closeout evidence and the audit
+  request in the following documentation-only commit. No code, test, contract, or fixture changed.
+- **Known limitations:** the two acceptance criteria below remain unchecked with their follow-up owners
+  (Step 12; Steps 13 and 18); the container image remains unbuilt under the accepted risk.
+- **Parity:** no new row; the Step 11 rows were confirmed final for this step and the remaining `Partial` /
+  `Improvement` rows name their later steps (12, 14, 18, 26), with Step 13 named as the Rust reader for the
+  `.msl` fixture.
+
+#### X2 — Audit-minor fixes and re-audit request
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` (from the step branch at
+  `20ea7f5`, the audit record tip).
+- **Squash commit:** X2 `419716678cacf6ad2c50ee379e1d2e7342bbf13b` (`step-11: fix the five audit minors and
+  close the property-test gaps`).
+- **Local gates:** `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh all --require`
+  exit 0 on 2026-11-16 — build 0 warnings / 0 errors; **1,528** .NET tests pass (App 1, Contracts 37, Cli 17,
+  Symmetry 223, Results 42, Core 685, Compilation 96, Packages 426, Architecture 1; +9 from the audited tree);
+  format clean; ApiCompat clean; NuGet licence/vulnerability policy OK; structure; contracts/policy (19
+  artifacts, 58 tool tests, SPDX 603 files, 984 secret-scanned files); Rust fmt/clippy/test; Python 3 tests and
+  package build; strict Zensical, DocFX, rustdoc, and site build.
+- **Step CI:** Ubuntu closeout [`43944825353`](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353)
+  and focused Windows platform gate
+  [`43944396192`](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192), both green at X2; the
+  first Ubuntu dispatch (`43944373820`) was cancelled by the Windows dispatch through the shared `ci-<ref>`
+  concurrency group and was re-dispatched sequentially (process history, not a red gate). Both run IDs and
+  `head_sha` are recorded in [closeout evidence](../closeout/step-11.json).
+- **Diff summary:** F-1 refreshed the stale feature-3 remarks and removed the `NotSupportedException` tags from
+  `SimulationPackageWriter` and the three internal row records (no behaviour change). F-2 closed the deferred
+  explicit-parameterization criterion with two real end-to-end packages
+  (`ExplicitParameterizationPackageTests`). F-3 canonicalizes an authored `normalizationEnergyEv: 0.0` (and
+  `-0.0`) to `null` in `JobPayloadMapper.Map`, keeps a non-zero override, and adds the authored-value regression
+  theory. F-4 added the two promised FsCheck property tests (`PayloadPropertyTests`) and records the nightly
+  `.msl` fuzz harness as an explicit Step 29 deferral. F-5 returns `PKG003` for a malformed `schema_info`
+  `project_id`/`created_utc` and keeps `PKG002` for application id/user version/format version, with tests for
+  both malformed values plus a malformed `format_version` `PKG002` case. N-2, N-3, and N-5 documentation
+  corrections are in this commit/Y2.
+- **Known limitations / follow-ups:** the explicit-parameterization evidence is split across the two checked-in
+  samples because no single sample has energy tables, transitions, and a job template; the package job is a
+  hand-constructed descriptor (the same seam Step 12 drives). The nightly fuzz harness remains Step 29 work
+  (named owner). N-1 (directory-fsync ordering after rename) and N-4 (`AGENTS.md` §1 drift) remain recorded
+  follow-ups owned by the design/contract owner and the next documentation change respectively.
+- **Parity:** no new parity row; the `.msl` v1 format/fixtures row stays `Done`.
+
+### Deviations and accepted risks
+
+1. **`.NET 11` wording in `AGENTS.md` (owner-authorized, 2026-11-15).** Amendment 1 retargets the solution to
+   .NET 11. The owner authorized the factual `AGENTS.md` §1 and §8 toolchain wording change as part of that
+   approved amendment; it is a wording correction, not a process-rule change. See
+   [amendment 1](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) and its
+   [design review](../reviews/step-11-amend-1.md).
+2. **Container image not built (accepted risk, owner 2026-11-15).** There is no OCI/podman builder in the agent
+   environment, so `docs/opencode/mocassin.containerfile` is not build-verified. It pins SDK 11.0.100 only and
+   asserts the `global.json` pin; the closeout CI resolves the same pin through `actions/setup-dotnet`, and the
+   local gates ran on the pinned SDK under `/tmp/opencode/dotnet11`. The missing image evidence is recorded in
+   the closeout evidence notes and the audit request; no page describes the image as built.
+3. **Part A small-payload gate refinement (owner-approved).** Below 8 KiB the codec comparison uses an absolute
+   decode penalty of ≤ 0.15 µs, throughput ≥ 100 MB/s, and ≤ +10 % relative decode at or above 8 KiB, instead of
+   a relative-only decode threshold that fixed reader overhead dominates at small sizes. Part A passed on 12
+   real payloads: 24/24 golden frames byte-identical, size 0.000 %, worst encode +4.12 %, worst small-payload
+   decode +0.1055 µs, ≥ 8 KiB decode +2.08 %, throughput ≥ 297 MB/s, 240/240 threshold checks. The rule is
+   recorded in [amendment 1 §9.1](../amendments/step-11-amend-1-dotnet-11-native-zstd.md).
+4. **Main-CI performance flake re-run (owner-accepted 2026-11-16).** The main CI run for the CI platform-gate
+   merge `bca6637` failed attempt 1 only at
+   `Mocassin.Compilation.Tests.Compiler.CompilationPerformanceTests.TenThousandPositionModelCompilesWithinTheBudget`
+   (30.134 s against the documented `< 30 s` budget) on the shared runner; the diff was workflow, CI-policy, and
+   tool-test files only. The owner accepted the miss as a shared-runner flake and authorized a re-run; attempt 2
+   was green for all six jobs, and a local focused run of the test passed in about one second. No test,
+   threshold, or workflow file was changed.
+
+
+### Amendment 1 — .NET 11 toolchain and native Zstandard
+
+Feature 7 waited until [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) was reviewed
+and integrated. The amendment moves the repository from `net10.0` to `net11.0` and replaces the
+`ZstdSharp.Port` payload codec with the in-box `System.IO.Compression` Zstandard API.
+
+Design-review state: round 1 returned `Changes required` at `06774ee`; the re-review returned `Ready with notes`
+at `17e723c`, accepted by the human owner on 2026-11-15. The amendment is **integrated** as `00753e7` after a
+feature branch that captured the pre-amendment `.msl` compatibility fixture and the golden codec frames with the
+still-net10 writer (`e2b00ea`), retargeted the repository (`b0f189e`), and replaced the codec (`771c28b`). Part A
+of the benchmark gate is **complete** (2026-11-15, amendment §9.1), and re-confirmed on the amended tree after
+the swap, under the owner-approved small-payload rule (absolute decode penalty ≤ 0.15 µs below 8 KiB,
+≥ 100 MB/s throughput, ≤ +10 % relative at or above 8 KiB).
+
+Design consequences recorded here so the parent design stays coherent:
+
+- §3 and §6 item 14: the payload codec is the in-box `ZstandardEncoder`/`ZstandardDecoder` with a single
+  one-shot encoding path. The third-party `ZstdSharp.Port` reference edge disappears; the
+  `Microsoft.Data.Sqlite` edge and its MIT licence result remain. No `.msl` format, payload version, canonical
+  signature, or solver contract changes.
+- §2: `PackageBuildOptions.CompressionLevel` keeps its name, default, and 1..19 range and maps by identity to the
+  native Zstd `Quality`.
+- §7: performance targets are measured on .NET 11 Release builds.
+- Feature 7 generates the checked-in `.msl` fixture, the `package-summary-v1` golden, the extracted payloads, and
+  the 10⁴-job benchmark **once**, on the amended toolchain. The one deliberate exception is the amendment's
+  pre-amendment compatibility fixture and golden frames, captured with the net10 writer **before** the retarget
+  so the net11 reader and the quality-mapping test have a real pre-switch reference.
+- The amendment's benchmark gate has two parts: Part A (real-payload codec comparison) is complete and recorded
+  in the amendment page; Part B (10⁴ jobs) runs before the audit freeze against a mandatory net10 reference, with
+  a documented absolute fallback and a recorded rollback rule that no longer depends on byte identity.
+- Byte identity is an observation, not a correctness or rollback threshold: signatures and `package-summary-v1`
+  are logical projections, and only byte-capturing artifacts are re-captured if a runtime patch changes frames.
+- The lattice decode-bound gap found in the review (the read-only reader passes `int.MaxValue`) is **not** fixed
+  by this amendment; it is a Step 11 fix feature (`fix-lattice-decode-guard`) before the audit freeze, with a
+  lattice bomb test. Until it lands, no page claims the lattice path is bounded by `PackageVerificationOptions`.
 
 ## Goal
 
@@ -176,6 +642,7 @@ package) and removes the ambiguity of which model a job references.
 public sealed record JobPackage(JobDescriptor Descriptor, GeneratedLattice Lattice);
 
 public sealed record PackageBuildRequest(
+    string TargetPath,            // final .msl path; temp file is written beside it
     Guid ProjectId,
     string JobSelection,          // "all" or "1-100,250"; validated non-empty
     DateTimeOffset CreatedUtc);   // supplied, never read from the clock
@@ -183,7 +650,7 @@ public sealed record PackageBuildRequest(
 public sealed record PackageBuildOptions
 {
     public bool Overwrite { get; init; }
-    public int CompressionLevel { get; init; } = 3;   // 1..19
+    public int CompressionLevel { get; init; } = 3;   // Zstd quality, 1..19 (amendment 1)
     public bool Vacuum { get; init; }
     public int BatchSize { get; init; } = 500;
     public long AdvisorySizeBytes { get; init; } = 2L * 1024 * 1024 * 1024;
@@ -209,6 +676,11 @@ public interface ISimulationPackageWriter : IAsyncDisposable
 `SimulationPackageWriter.Create(PackageBuildRequest request, PackageBuildOptions options)` is the factory
 (`Mocassin.Packages` has no DI container yet; the module marker stays a marker). Every call performs bounded
 synchronous SQLite/encode work on the caller's task; there is no fake `Task.Run`.
+
+Implementation clarification: `PackageBuildRequest` carries the final `TargetPath`; the design's pipeline and
+`PackageWriteResult.Path` require it, and the frozen snippet omitted it. The temporary build file is
+`<target>.tmp-<pid>-<random>`, which is `<name>.msl.tmp-*` for a `.msl` target and matches the `.gitignore`
+pattern.
 
 Pipeline:
 
@@ -239,8 +711,10 @@ The writer never holds all jobs or lattices in memory. `WriteJobAsync` requires 
 
 All payloads are MessagePack maps with snake_case keys, encoded with `MessagePack-CSharp` using explicit
 `[Key("...")]` names (no contractless resolver) and `MessagePackSecurity.UntrustedData`, then compressed with a
-standard Zstd frame (`ZstdSharp.Port`; no dictionaries, no custom framing). Readers ignore unknown keys within
-the current major and reject an unsupported `format_version`.
+standard Zstd frame (in-box `System.IO.Compression.ZstandardEncoder`/`ZstandardDecoder` under .NET 11, one
+one-shot encoding path, quality = `PackageBuildOptions.CompressionLevel`; see
+[amendment 1](../amendments/step-11-amend-1-dotnet-11-native-zstd.md); no dictionaries, no custom framing).
+Readers ignore unknown keys within the current major and reject an unsupported `format_version`.
 
 - **Model payload** — the §3.3 map. `format_version = 1` is the payload-encoding version, independent of
   `CompiledModel.FormatVersion`. The mapping is mechanical and one-way:
@@ -383,9 +857,12 @@ Checks, in order (each produces one `PackageVerificationCheck` and zero or one `
    are present.
 3. Every job references an existing model and lattice; `job_id` is unique, positive, and ascending; the
    `(collection_index, config_index, job_index)` triple is unique; names are non-empty.
-4. Every payload decodes within the explicit decompressed-size bound (model/job from
-   `PackageVerificationOptions`; lattice `4 × a × b × c × position_count`, capped at the signed 32-bit index
-   limit) and its payload `format_version` matches the column.
+4. Every payload decodes within the explicit decompressed-size bound: model and job from
+   `PackageVerificationOptions`. A lattice is bounded by `4 × a × b × c × position_count` from its referencing
+   `jobs` row (`lattice_a/b/c`) and the referenced model payload's `position_count`, and is always capped by
+   `PackageVerificationOptions.MaxLatticePayloadBytes`; an orphan lattice row (no referencing job), or one whose
+   model payload did not decode, uses that cap as its fallback. Every payload's `format_version` matches the
+   column.
 5. Model payload invariants: pair-table lengths are `particle_count²`; cluster occupation/energy/mapping lengths
    agree; `defect_background.Length == position_count × particle_count`; environment pair entries have
    `target_position < position_count`; cluster `byte_position < site_count`; `tracker_order` is a non-empty
@@ -490,7 +967,9 @@ the same feature as the code that needs it, with regenerated artifacts and fixtu
     owned with `DiagnosticCatalog.Default` composing them in `Mocassin.Packages`.
 14. Adding `ZstdSharp.Port` and `Microsoft.Data.Sqlite` references to `Mocassin.Packages`/`Mocassin.Results` is a
     new package-reference edge; the feature that adds it records the MIT licence result from
-    `check_nuget_licenses.py` and the `policy` gate.
+    `check_nuget_licenses.py` and the `policy` gate. **Superseded by amendment 1:** the payload codec is the
+    in-box `System.IO.Compression` Zstandard API, so `ZstdSharp.Port` is removed and only the
+    `Microsoft.Data.Sqlite` edge remains. The historical licence results in the feature log are retained.
 
 Fixture consequences: regenerate `contracts/generated/**`, add `tests/contracts/projections/lattice/*.bin`
 vectors and their metadata, extend `tests/contracts/signature-vectors.json`, add
@@ -500,7 +979,7 @@ current+previous policy, and this step records the current-only fixture layout s
 
 ### 7. Bounds, performance, and failure behaviour
 
-Targets (benchmark laptop class, .NET 10 Release):
+Targets (benchmark laptop class, .NET 11 Release):
 
 - 10,000 small jobs (10×10×10 ceria, ~1,000 positions) in under 10 minutes and under 2 GB peak RSS.
 - Model payload under 50 MB for a complex model.
@@ -515,6 +994,17 @@ per model/job, latices one at a time, and `jump`/tracker arrays are written as f
 Failure behaviour: a cancelled or failed build deletes the temp file and leaves an existing package intact; a
 disk-full/IO error surfaces as `IOException` and deletes the temp file; the published file is only ever
 replaced by the atomic rename after the file and directory are synced.
+
+**Directory fsync and platform consequence (R2-7).** The file is flushed with
+`FileStream.Flush(flushToDisk: true)`. .NET has no managed directory-fsync API, so the containing-directory
+flush uses a minimal Unix libc `open`/`fsync`/`close` interop (`DllImport` with
+`UnmanagedType.LPUTF8Str`, `SetLastError`, and `CharSet.Ansi`). Windows has no equivalent directory-durability
+primitive in this path; the Windows branch skips the directory call and relies on the file fsync plus the atomic
+replace, which is the documented Windows guarantee. This is the solution's first platform-specific native code
+and a `AGENTS.md` §3.13 trigger: the step closeout must dispatch the manual **Windows** platform job
+(`platforms=windows` or `all`) to compile and exercise the Windows branch. macOS uses the same Unix libc path
+exercised on Ubuntu, so a macOS run is optional/manual, not required. If the Windows run is unavailable at
+closeout, it is recorded as an accepted risk in the audit.
 
 ### 8. Build integration and step boundaries
 
@@ -568,87 +1058,114 @@ Two options, for the human owner's start-gate decision:
 
 ## Implementation tasks
 
-- [ ] Add the Contracts package DTOs, payload constants, `LatticeSignatureV1`, and `PKG` descriptors.
-- [ ] Finalize `signatures.lattice` and add `formats.package.payloads`; extend the generator and regenerate.
-- [ ] Implement schema creation, pragmas, `application_id`/`user_version`, and `schema_info`.
-- [ ] Implement the model payload mapper and the write-time parameterization re-encode.
-- [ ] Persist the environment pair-link `offset` and the variable-length `tracker_order`, with the writer
-      contract assertions and Step 14 expansion tests.
-- [ ] Implement the lattice payload/signature and content-addressed dedup.
-- [ ] Implement the job payload mapper, `SolverJobFlags` composition, Cartesian field conversion, optimizer
+- [x] Add the Contracts package DTOs, payload constants, `LatticeSignatureV1`, and `PKG` descriptors.
+- [x] Finalize `signatures.lattice` and add `formats.package.payloads`; extend the generator and regenerate.
+- [x] Implement schema creation, pragmas, `application_id`/`user_version`, and `schema_info`.
+- [x] Implement the model payload mapper and the write-time parameterization re-encode.
+- [x] Persist the environment pair-link `offset` and the variable-length `tracker_order`, with the writer
+      contract assertions; the Step 14 consumer expansion is its own cross-step acceptance test.
+- [x] Implement the lattice payload/signature and content-addressed dedup.
+- [x] Implement the job payload mapper, `SolverJobFlags` composition, Cartesian field conversion, optimizer
       mapping, extension JSON, and payload-derived columns.
-- [ ] Implement batching, streaming, progress/cancellation, and bounded memory.
-- [ ] Implement the temp file, fsync of file and directory, atomic rename, and failure cleanup.
-- [ ] Implement the read-only inspector/verifier with the `package-summary-v1` projection, bounded decoding,
+- [x] Implement batching, streaming, progress/cancellation, and bounded memory. (The writer streams and
+      honors cancellation; Step 12 owns the user-facing progress surface.)
+- [x] Implement the temp file, fsync of file and directory, atomic rename, and failure cleanup.
+- [x] Implement the read-only inspector/verifier with the `package-summary-v1` projection, bounded decoding,
       and `PKG001`–`PKG010`.
-- [ ] Add the `PKG` descriptors to Contracts and compose them into `DiagnosticCatalog.Default`; confirm
+- [x] Add the `PKG` descriptors to Contracts and compose them into `DiagnosticCatalog.Default`; confirm
       `Mocassin.Results` does not reference `Mocassin.Packages`.
-- [ ] Add checked-in `.msl` fixtures, canonical summaries, extracted payloads, and regeneration command.
-- [ ] Add the lattice projection golden vectors and `verify.sh contracts` checker.
-- [ ] Add the `Mocassin.Benchmarks/SimulationPackage` benchmark and record the 10⁴-job budget.
-- [ ] Update `PublicAPI.Unshipped.txt` and the ApiCompat baseline for `Mocassin.Contracts`, `Mocassin.Core`
+- [x] Add checked-in `.msl` fixtures, canonical summaries, extracted payloads, and regeneration command: `tests/contracts/packages/msl-v1/` with `package-summary-v1.json`, `payloads/index.json`, and the env-gated `RegeneratePackageFixture` test; the net10 compatibility fixture and codec goldens stay.
+- [x] Add the lattice projection golden vectors and `verify.sh contracts` checker.
+- [x] Add the `Mocassin.Benchmarks/SimulationPackage` benchmark and record the 10⁴-job budget: the one-shot budget runner and a BenchmarkDotNet case, with the net10 reference run recorded in `tests/reference/bench/step-11-package-budget.json`.
+- [x] Update `PublicAPI.Unshipped.txt` and the ApiCompat baseline for `Mocassin.Contracts`, `Mocassin.Core`
       (the new `JobExtension.ToCanonicalJson`), `Mocassin.Symmetry` (the new
       `PairInteractionPreview.EquivalentImages`), `Mocassin.Compilation`, `Mocassin.Packages`, and
-      `Mocassin.Results`.
-- [ ] Record the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges.
-- [ ] Write the documentation named below and update parity/status.
+      `Mocassin.Results`. Refreshed by features 1–6, amendment 1, and `fix-lattice-decode-guard`; the only
+      later addition is `PackageVerificationOptions.MaxLatticePayloadBytes`.
+- [x] Record the MIT licence result for the new `ZstdSharp.Port`/`Microsoft.Data.Sqlite` reference edges.
+- [x] Write the documentation named below and update parity/status.
+- [x] Review and integrate [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) (.NET 11
+      toolchain and native Zstandard) before feature 7 generates the fixtures and before the audit freeze.
+      Integrated as `00753e7` after the `Ready with notes` acceptance.
+- [x] Capture the pre-amendment `.msl` compatibility fixture and the golden codec frames with the net10 writer
+      before the retarget (amendment §9.4–§9.5), and commit them with the amendment feature (`e2b00ea`).
+- [x] Close the lattice decode-bound gap found by review A1-10 in a Step 11 fix feature
+      (`feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard`): derive the bound from the
+      referencing `jobs` row (`lattice_a/b/c`) and the model payload's `position_count`, apply it in
+      `PackageReader.ReadLatticesAsync`, bound an orphan lattice row (no referencing job) with an explicit
+      `MaxLatticePayloadBytes` option, and add the lattice bomb test. Squashed as `25a3787`.
 
 ## Acceptance criteria
 
-- [ ] A package built from `samples/jobs/ceria-temperature-sweep.mocprj` (six jobs, `parameterizations: []`)
+- [x] A package built from `samples/jobs/ceria-temperature-sweep.mocprj` (six jobs, `parameterizations: []`)
       uses the implicit default parameterization, opens read-only, and contains one model row, the expected
       job rows, and the expected lattice rows.
-- [ ] A package built with an explicit in-test parameterization stores the applied pair/group/site/frequency
+- [x] A package built with an explicit in-test parameterization stores the applied pair/group/site/frequency
       values, not compiled defaults, and `models.signature` equals `ParameterizedModel.Signature`.
-- [ ] The published package has no `results` table, needs no `-wal`/`-shm` files, and reports
+      **Closed by `ExplicitParameterizationPackageTests` (X2).** No checked-in sample carries energy pair/group
+      tables, transition rules, and a job template at once, so the criterion is proven by two real packages:
+      `samples/parameterizations/ceria-parameters.mocprj` with a fully explicit template for the pair, group, and
+      site values, and `samples/simulations/ceria-kmc.mocprj` with an explicit absolute rule frequency. Both
+      assert the stored payload values equal the applied `ParameterizationValues`, that the authored values are
+      absent from the implicit-default model, and that `models.signature` and the payload signature equal
+      `ParameterizedModel.Signature`. The audit's F-2 is resolved; Step 12 keeps its CLI acceptance separately.
+- [x] The published package has no `results` table, needs no `-wal`/`-shm` files, and reports
       `application_id = 0x4D4F4353` and `user_version = 1`.
-- [ ] Every job references a valid model and lattice; `job_id` is unique and ascending; a partial build leaves
+- [x] Every job references a valid model and lattice; `job_id` is unique and ascending; a partial build leaves
       gaps exactly as recorded in `job_selection`.
-- [ ] `verify` re-encodes the parameterization signature from the payload's absolute `frequency_hz` values and
+- [x] `verify` re-encodes the parameterization signature from the payload's absolute `frequency_hz` values and
       re-encodes the lattice signature from the particle array and the referenced `model_signature`.
-- [ ] Every environment pair entry is one row per periodic image with its relative `offset`; the compiler emits
-      one `CompiledPairLink` per image and the writer maps it one-to-one, Step 14's target expansion
-      (`cell + offset` wrapped, `target_position`) reproduces the compiled minimum-image link for every pair
-      table, and a multi-image shell (for example a six-image nearest-neighbour shell) is fully present.
+- [x] Every environment pair entry is one row per periodic image with its relative `offset`; the compiler emits
+      one `CompiledPairLink` per image and the writer maps it one-to-one, and a multi-image shell (for example a
+      six-image nearest-neighbour shell) is fully present. (The Step 14 target-expansion equivalence
+      (`cell + offset` wrapped, `target_position`) is a Step 14 cross-step acceptance test, not a Step 11
+      deliverable; the implementation task below records that ownership. N-5 corrected this wording.)
 - [ ] The writer asserts `tracker_order.Length` equals the representative direction's path-node count; the
       verifier proves the payload-checkable part (non-empty, non-sentinel values below `global_tracker_count`,
       length within the documented bound), and Step 13's reader loads it as a variable `u8[]` with `0xFF` for
       non-mobile nodes; Step 18's mobile-tracker permutation follows the same indices.
-- [ ] `PKG001`–`PKG010` are documented with severities and anchors, `PKG` descriptors are composed into
+      **Unchecked — follow-up owners: Steps 13 and 18.** The writer assertion and the verifier's payload-checkable
+      part are implemented and tested, but the Rust reader (Step 13) and the mobile-tracker permutation
+      (Step 18) do not exist yet, so the cross-language half of this criterion cannot be met in Step 11.
+- [x] `PKG001`–`PKG010` are documented with severities and anchors, `PKG` descriptors are composed into
       `DiagnosticCatalog.Default`, and `Mocassin.Results` still references only `Core` and `Contracts`.
-- [ ] The checked-in `.msl` fixture's `package-summary-v1` golden matches a rebuild after normalizing
-      `created_utc`, `app_version`, `generator`, size, and payload byte hashes.
-- [ ] Two jobs whose lattices are byte-identical share one `lattices` row; a different particle array does not.
-- [ ] Rebuilding the same project produces identical model/lattice signatures and an identical canonical
-      summary; stored bytes may differ only in build metadata.
-- [ ] The job `flags` word equals `SolverJobFlagsMapper.Compose(...)` and contains exactly one kind bit.
-- [ ] The job `electric_field_direction` is a unit vector equal to the compiled cell transform of the authored
+- [x] The checked-in `.msl` fixture's `package-summary-v1` golden matches a rebuild after normalizing
+      `created_utc`, `app_version`, `generator`, size, and payload byte hashes (`PackageFixtureTests`).
+- [x] Two jobs whose lattices are byte-identical share one `lattices` row; a different particle array does not.
+- [x] Rebuilding the same project produces identical model/lattice signatures and an identical canonical
+      summary; stored bytes may differ only in build metadata (`PackageFixtureTests.RebuildReproducesTheFixtureSummary`).
+- [x] The job `flags` word equals `SolverJobFlagsMapper.Compose(...)` and contains exactly one kind bit.
+- [x] The job `electric_field_direction` is a unit vector equal to the compiled cell transform of the authored
       fractional direction (tested on a non-orthogonal cell).
-- [ ] `extensions[].config_json` is byte-equal to the project canonical JSON for the same config, including a
+- [x] `extensions[].config_json` is byte-equal to the project canonical JSON for the same config, including a
       number token above 2^53.
-- [ ] A cancelled build leaves no temp file and does not modify an existing package.
-- [ ] A simulated disk-full/write error leaves the previous package intact.
-- [ ] `verify` detects a truncated payload, a corrupt Zstd frame, a wrong signature, a missing FK, a wrong
+- [x] A cancelled build leaves no temp file and does not modify an existing package.
+- [x] A simulated disk-full/write error leaves the previous package intact.
+- [x] `verify` detects a truncated payload, a corrupt Zstd frame, a wrong signature, a missing FK, a wrong
       payload-derived column, a stray `-wal`, and an injected `results` table, each with the expected `PKG` code.
-- [ ] 10⁴ small jobs build within the time/size budget.
-- [ ] No EF Core, no native structs, no custom binary header, and no results table.
-- [ ] Documentation written
+- [x] 10⁴ small jobs build within the time/size budget (amended: 3.87 s, 10.05 MB, 118 MB peak RSS, 5,853 jobs/s; net10 reference: 4.03 s, equal size, 119 MB, 5,230 jobs/s).
+- [x] No EF Core, no native structs, no custom binary header, and no results table.
+- [x] Documentation written
 
 ## Documentation
 
 At this point, document the simulation package:
 
-- `docs/reference/msl-format.md` — SQLite schema, `application_id`/`user_version`, content-addressed
+- [x] `docs/reference/msl-format.md` — SQLite schema, `application_id`/`user_version`, content-addressed
   models/lattices, model/job/lattice payloads (including the pair-link `offset` and variable-length
   `tracker_order`), `package-summary-v1`, versioning, and verification checks (new page plus a nav entry in
   `zensical.toml` and `docs/reference/index.md`).
-- `docs/reference/file-layout.md` — package location, immutable package rules, `.msr` sidecar, atomic-write and
-  temp-file behaviour, the checked-in fixture layout, and the generated `package-payloads-v1.schema.json`.
-- `docs/reference/diagnostics.md` — `PKG001`–`PKG010` with severity, owner, and help text.
-- `docs/development/architecture.md` — `Mocassin.Packages` writer versus `Mocassin.Results` reader boundary, the
-  Contracts-owned `PKG` descriptors, and the payload mapping.
-- `docs/development/testing-and-parity.md` — package fixture regeneration and the `.msl` test tiers.
-- No user-guide build page: `docs/user-guide/building.md` belongs to Step 12, which owns the build CLI.
+- [x] `docs/reference/file-layout.md` — package location, immutable package rules, the separate `.msr` store,
+  atomic-write and temp-file behaviour, the checked-in fixture layout, and the generated
+  `package-payloads-v1.schema.json`.
+- [x] `docs/reference/diagnostics.md` — `PKG001`–`PKG010` with severity, owner, and help text (feature 6).
+- [x] `docs/development/architecture.md` — `Mocassin.Packages` writer versus `Mocassin.Results` reader boundary,
+  the Contracts-owned `PKG` descriptors, the payload mapping, and the .NET 11/native-zstd toolchain.
+- [x] `docs/development/testing-and-parity.md` — package fixture regeneration and the `.msl` test tiers.
+- [x] `docs/user-guide/building.md` — the build pipeline, options, reproducibility, atomic publication, and the
+  Step 12 CLI status. The owner directed that this page be written in feature 7 even though the original design
+  deferred the CLI-facing page to Step 12; it describes the implemented pipeline and marks the command as
+  Step 12 work.
 
 ## Tests
 
@@ -670,10 +1187,10 @@ At this point, document the simulation package:
 | Verification | PR-fast | Each `PKG001`–`PKG010` fires on its corrupt/truncated/inconsistent fixture with the documented severity |
 | Diagnostic ownership | PR-fast | `PKG` descriptors appear in `DiagnosticCatalog.Default` and the docs page; `Mocassin.Results` has no `Mocassin.Packages` reference |
 | Decode bounds | PR-fast | A Zstd bomb or oversized count produces `PKG004`, not OOM |
-| Property: payload round-trip | PR-fast | Arbitrary valid compiled/parameterized models encode and decode to the same logical values |
-| Property: signature stability | PR-fast | Normalized `-0.0`, shuffled map order, and a different Zstd level do not change the signature |
+| Property: payload round-trip | PR-fast | Arbitrary valid compiled/parameterized models encode and decode to the same logical values (`PayloadPropertyTests.ArbitraryParameterizedModelsEncodeAndDecodeToTheSameLogicalPayload`, FsCheck over sparse explicit templates at Zstd levels 1, 3, and 19) |
+| Property: signature stability | PR-fast | Normalized `-0.0`, shuffled map order, and a different Zstd level do not change the signature (`PayloadPropertyTests.SignatureIsStableUnderNegativeZeroShuffledOrderAndCompressionLevel`) |
 | Cross-language fixture | PR-medium | The checked-in `.msl` and extracted model payload are accepted by the Step 13 reader and drive Step 14's link expansion and Step 15's pair deltas unchanged |
-| Corruption/fuzz | Nightly | Mutated `.msl` files never crash or over-allocate the verifier |
+| Corruption/fuzz | Nightly | Mutated `.msl` files never crash or over-allocate the verifier — **deferred to Step 29** (owner: Step 29 implementor) with the SharpFuzz `.msl` target and its nightly job; Step 11 ships the fixed truncation/corrupt-frame/wrong-signature/foreign-key/decompression-bound cases, and the deferral is recorded in [quality strategy §10](../03-quality-strategy.md) and [testing and parity](../../development/testing-and-parity.md). **No fuzz run is claimed.** |
 | Performance | Nightly/release | 10⁴ jobs under 10 min / 2 GB; model payload under 50 MB; ≥ 100 jobs/s insertion |
 
 Every test declares its tier. Tests use the real compiler, parameterizer, expander, generator, and writer; no

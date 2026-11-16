@@ -369,9 +369,9 @@ public sealed class ParameterizationApplyTests
             service.Describe(project, model));
     }
 
-    private const string ceriaTemplateSignature = "cac3b231e667164fa7dfd4daa7b326dbc5e23bde17fe30873f775f7f77975042";
+    private const string ceriaTemplateSignature = "8f86a7f92b55e0d045a381576f6f19016391815b93c0867040d82d0f65f0dbff";
 
-    private const string bariumZirconateTemplateSignature = "a7f6ebd97ea336308360949e4fe703bb1c88220a545e9f9db06f009cd6d32b9d";
+    private const string bariumZirconateTemplateSignature = "828a54944a9873e5b00b09db8f368240e4c7d7729088476bd4d481a5da46e07f";
 
     private static double ApplyPairValue(
         Mocassin.Core.Project.Project project,

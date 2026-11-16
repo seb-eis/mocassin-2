@@ -497,7 +497,6 @@ Mocassin.Symmetry.Energy.PairInteractionPreview.CenterP.get -> int
 Mocassin.Symmetry.Energy.PairInteractionPreview.CenterP.init -> void
 Mocassin.Symmetry.Energy.PairInteractionPreview.ChiralPartnerGeometryId.get -> string?
 Mocassin.Symmetry.Energy.PairInteractionPreview.ChiralPartnerGeometryId.init -> void
-Mocassin.Symmetry.Energy.PairInteractionPreview.Deconstruct(out string! GeometryId, out string! EnergyId, out Mocassin.Core.Ids.CellSiteId SiteAId, out int CenterP, out Mocassin.Core.Ids.CellSiteId SiteBId, out int PartnerP, out double DistanceAngstrom, out bool IsChiral, out string? ChiralPartnerGeometryId) -> void
 Mocassin.Symmetry.Energy.PairInteractionPreview.DistanceAngstrom.get -> double
 Mocassin.Symmetry.Energy.PairInteractionPreview.DistanceAngstrom.init -> void
 Mocassin.Symmetry.Energy.PairInteractionPreview.EnergyId.get -> string!
@@ -507,7 +506,6 @@ Mocassin.Symmetry.Energy.PairInteractionPreview.GeometryId.get -> string!
 Mocassin.Symmetry.Energy.PairInteractionPreview.GeometryId.init -> void
 Mocassin.Symmetry.Energy.PairInteractionPreview.IsChiral.get -> bool
 Mocassin.Symmetry.Energy.PairInteractionPreview.IsChiral.init -> void
-Mocassin.Symmetry.Energy.PairInteractionPreview.PairInteractionPreview(string! GeometryId, string! EnergyId, Mocassin.Core.Ids.CellSiteId SiteAId, int CenterP, Mocassin.Core.Ids.CellSiteId SiteBId, int PartnerP, double DistanceAngstrom, bool IsChiral, string? ChiralPartnerGeometryId) -> void
 Mocassin.Symmetry.Energy.PairInteractionPreview.PartnerP.get -> int
 Mocassin.Symmetry.Energy.PairInteractionPreview.PartnerP.init -> void
 Mocassin.Symmetry.Energy.PairInteractionPreview.SiteAId.get -> Mocassin.Core.Ids.CellSiteId
@@ -568,3 +566,7 @@ Mocassin.Symmetry.Diagnostics.SymmetryDiagnosticCatalog
 static Mocassin.Symmetry.Diagnostics.SymmetryDiagnosticCatalog.Descriptors.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
 Mocassin.Symmetry.Transitions.TransitionPathResolver.TryResolvePoint(Mocassin.Core.Geometry.Fractional3 point, out Mocassin.Core.Model.Transitions.ResolvedPathPosition? position, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
 Mocassin.Symmetry.Transitions.TransitionPathResolver.TryResolvePath(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Fractional3> points, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Model.Transitions.ResolvedPathPosition!> positions, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> diagnostics) -> bool
+Mocassin.Symmetry.Energy.PairInteractionPreview.EquivalentImages.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I>
+Mocassin.Symmetry.Energy.PairInteractionPreview.EquivalentImages.init -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.Deconstruct(out string! GeometryId, out string! EnergyId, out Mocassin.Core.Ids.CellSiteId SiteAId, out int CenterP, out Mocassin.Core.Ids.CellSiteId SiteBId, out int PartnerP, out double DistanceAngstrom, out bool IsChiral, out string? ChiralPartnerGeometryId, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I> EquivalentImages) -> void
+Mocassin.Symmetry.Energy.PairInteractionPreview.PairInteractionPreview(string! GeometryId, string! EnergyId, Mocassin.Core.Ids.CellSiteId SiteAId, int CenterP, Mocassin.Core.Ids.CellSiteId SiteBId, int PartnerP, double DistanceAngstrom, bool IsChiral, string? ChiralPartnerGeometryId, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I> EquivalentImages = default(System.Collections.Immutable.ImmutableArray<Mocassin.Core.Geometry.Vector4I>)) -> void

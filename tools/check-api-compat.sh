@@ -7,14 +7,14 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-BASELINE_DIR="$ROOT/tests/contracts/api-baseline/net10.0"
+BASELINE_DIR="$ROOT/tests/contracts/api-baseline/net11.0"
 PROJECTS_FILE="$ROOT/tools/api-projects.txt"
 DOTNET_EXE="$(command -v dotnet)"
 DOTNET_ROOT="$(dirname "$(readlink -f "$DOTNET_EXE")")"
-REF_PACK="$(find "$DOTNET_ROOT/packs/Microsoft.NETCore.App.Ref" -path '*/ref/net10.0' -type d | sort -V | tail -1)"
+REF_PACK="$(find "$DOTNET_ROOT/packs/Microsoft.NETCore.App.Ref" -path '*/ref/net11.0' -type d | sort -V | tail -1)"
 
 if [[ -z "$REF_PACK" ]]; then
-  echo "error: could not locate the .NET 10 reference pack under $DOTNET_ROOT/packs" >&2
+  echo "error: could not locate the .NET 11 reference pack under $DOTNET_ROOT/packs" >&2
   exit 1
 fi
 
@@ -51,7 +51,7 @@ for name in "${projects[@]}"; do
     exit 1
   fi
 
-  current="$ROOT/src/dotnet/$name/bin/Release/net10.0/$name.dll"
+  current="$ROOT/src/dotnet/$name/bin/Release/net11.0/$name.dll"
   if [[ ! -f "$current" ]]; then
     echo "error: missing current assembly $current; run dotnet build -c Release first" >&2
     exit 1

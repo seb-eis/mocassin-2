@@ -82,7 +82,7 @@ nightly-only assets.
 
 ## 5. Code style
 
-- .NET: .NET 10, nullable enabled, implicit usings, warnings as errors, XML docs for public APIs.
+- .NET: .NET 11, nullable enabled, implicit usings, warnings as errors, XML docs for public APIs.
 - Code structure: follow [`docs/development/code-structure.md`](docs/development/code-structure.md); group files
   by domain concept, keep the project root for entry points, and run `./tools/verify.sh structure`.
 - Rust: stable Rust, edition 2024, `rustfmt`, `clippy`, no `unsafe` without a `// SAFETY:` comment and a test.

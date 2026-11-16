@@ -2301,3 +2301,4 @@ const Mocassin.Core.Diagnostics.JobDiagnosticCodes.UnrealizedDoping = "JOB010" -
 static Mocassin.Core.Diagnostics.JobDiagnosticCodes.HelpFor(string! code) -> string?
 Mocassin.Core.Model.Jobs.JobSettingsValidator
 static Mocassin.Core.Model.Jobs.JobSettingsValidator.Validate(Mocassin.Core.Model.Jobs.JobSettings? settings, Mocassin.Core.Model.Simulations.SimulationKind? kind, Mocassin.Core.Diagnostics.ModelPath! path, bool validateKindApplicability = true) -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Core.Model.Jobs.JobExtension.ToCanonicalJson() -> string!

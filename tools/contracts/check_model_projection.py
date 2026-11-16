@@ -55,6 +55,9 @@ def encode_field(field: dict, value) -> bytes:
         if value is None:
             return b"\xc0"
         return string(value)
+    if kind == "bin":
+        data = bytes(value)
+        return b"\xc6" + struct.pack(">I", len(data)) + data
     if kind == "array":
         items = field.get("items", "object")
         return array_header(len(value)) + b"".join(encode_item(field, items, item) for item in value)

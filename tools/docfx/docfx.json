@@ -5,15 +5,15 @@
         {
           "src": "../../src/dotnet",
           "files": [
-            "Mocassin.Core/bin/Release/net10.0/Mocassin.Core.dll",
-            "Mocassin.Symmetry/bin/Release/net10.0/Mocassin.Symmetry.dll",
-            "Mocassin.Compilation/bin/Release/net10.0/Mocassin.Compilation.dll",
-            "Mocassin.Contracts/bin/Release/net10.0/Mocassin.Contracts.dll",
-            "Mocassin.Packages/bin/Release/net10.0/Mocassin.Packages.dll",
-            "Mocassin.Results/bin/Release/net10.0/Mocassin.Results.dll",
-            "Mocassin.App.ViewModels/bin/Release/net10.0/Mocassin.App.ViewModels.dll",
-            "Mocassin.App.Views/bin/Release/net10.0/Mocassin.App.Views.dll",
-            "Mocassin.Rendering/bin/Release/net10.0/Mocassin.Rendering.dll"
+            "Mocassin.Core/bin/Release/net11.0/Mocassin.Core.dll",
+            "Mocassin.Symmetry/bin/Release/net11.0/Mocassin.Symmetry.dll",
+            "Mocassin.Compilation/bin/Release/net11.0/Mocassin.Compilation.dll",
+            "Mocassin.Contracts/bin/Release/net11.0/Mocassin.Contracts.dll",
+            "Mocassin.Packages/bin/Release/net11.0/Mocassin.Packages.dll",
+            "Mocassin.Results/bin/Release/net11.0/Mocassin.Results.dll",
+            "Mocassin.App.ViewModels/bin/Release/net11.0/Mocassin.App.ViewModels.dll",
+            "Mocassin.App.Views/bin/Release/net11.0/Mocassin.App.Views.dll",
+            "Mocassin.Rendering/bin/Release/net11.0/Mocassin.Rendering.dll"
           ],
           "exclude": [
             "**/obj/**"
@@ -22,7 +22,7 @@
       ],
       "dest": "../../artifacts/docfx/api",
       "properties": {
-        "TargetFramework": "net10.0"
+        "TargetFramework": "net11.0"
       }
     }
   ],

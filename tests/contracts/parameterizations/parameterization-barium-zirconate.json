@@ -3,8 +3,8 @@
   "id": "parameterization-barium-zirconate",
   "source": "samples/parameterizations/barium-zirconate-parameters.mocprj",
   "templateName": "Barium zirconate parameters",
-  "modelSignature": "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2",
-  "signatureHex": "a7f6ebd97ea336308360949e4fe703bb1c88220a545e9f9db06f009cd6d32b9d",
+  "modelSignature": "5e62f9dd602110edc5007ad8eb384b0b25047a9205dfe3a5af9797e0f4e38b62",
+  "signatureHex": "828a54944a9873e5b00b09db8f368240e4c7d7729088476bd4d481a5da46e07f",
   "pairTables": [
     [
       0,

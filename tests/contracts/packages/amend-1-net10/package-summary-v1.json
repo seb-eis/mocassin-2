@@ -1,0 +1,253 @@
+{
+  "format": "mocassin.package-summary",
+  "formatVersion": 1,
+  "schema": {
+    "formatVersion": 1,
+    "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c00",
+    "jobSelection": "all",
+    "symmetryContractVersion": "symmetry-1",
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395"
+  },
+  "models": [
+    {
+      "signature": "1845b70e82320d75f768b33d1a9a46a8ae6170c33ad96013317f89fe9189a74b",
+      "modelSignature": "92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60",
+      "payloadFormatVersion": 1,
+      "particleCount": 5,
+      "positionCount": 4,
+      "siteCount": 4,
+      "environmentCount": 4,
+      "pairTableCount": 0,
+      "clusterTableCount": 0,
+      "collectionCount": 1,
+      "ruleCount": 4
+    }
+  ],
+  "lattices": [
+    {
+      "signature": "126400b5ab33bf3f19c8804bb09643fed9c1f5bb70b72ee60d0907a8d5d93fdc",
+      "latticeSize": [
+        8,
+        8,
+        8
+      ],
+      "positionCount": 4,
+      "latticeLength": 2048
+    },
+    {
+      "signature": "2f0bb53551ed4abf0a358b3375dddcda27ac645d1522bd30094811123b2c33d3",
+      "latticeSize": [
+        6,
+        6,
+        6
+      ],
+      "positionCount": 4,
+      "latticeLength": 864
+    },
+    {
+      "signature": "5235318fd379fe2f0977e8061869ad7e266ae42bcca35d60da4e4fedd98ab84a",
+      "latticeSize": [
+        6,
+        6,
+        6
+      ],
+      "positionCount": 4,
+      "latticeLength": 864
+    },
+    {
+      "signature": "880b6eac79e9e920b6ea448c15f21b06be772f4bad774f12ea45c07420d25845",
+      "latticeSize": [
+        6,
+        6,
+        6
+      ],
+      "positionCount": 4,
+      "latticeLength": 864
+    },
+    {
+      "signature": "ed688990f40a444649ec6883cdb7ad0510e62beaa3a93b1d378bb4f12ab20784",
+      "latticeSize": [
+        8,
+        8,
+        8
+      ],
+      "positionCount": 4,
+      "latticeLength": 2048
+    },
+    {
+      "signature": "f860010a48c96d688c6a881a313a3d92d99cc57040e91bf6742ee43d1b00cf4d",
+      "latticeSize": [
+        8,
+        8,
+        8
+      ],
+      "positionCount": 4,
+      "latticeLength": 2048
+    }
+  ],
+  "jobs": [
+    {
+      "jobId": 1,
+      "modelSignature": "92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60",
+      "latticeSignature": "880b6eac79e9e920b6ea448c15f21b06be772f4bad774f12ea45c07420d25845",
+      "kind": "kmc",
+      "collectionName": "T773",
+      "configName": "x001",
+      "collectionIndex": 0,
+      "configIndex": 0,
+      "jobIndex": 0,
+      "temperatureK": 773,
+      "electricFieldVm": 10000000,
+      "targetMcsp": 150,
+      "writeOutCount": 100,
+      "preRunMcsp": 250,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        6,
+        6,
+        6
+      ],
+      "dopingInfo": "v1:018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c07:0:2:2:1:0.009259259259259259",
+      "flags": 114,
+      "seedHex": "979cab2a2e9a07b2cbbd3e7c0aae5b568118cd84cf6f5e7be22720bdb43e4170"
+    },
+    {
+      "jobId": 2,
+      "modelSignature": "92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60",
+      "latticeSignature": "2f0bb53551ed4abf0a358b3375dddcda27ac645d1522bd30094811123b2c33d3",
+      "kind": "kmc",
+      "collectionName": "T773",
+      "configName": "x001",
+      "collectionIndex": 0,
+      "configIndex": 0,
+      "jobIndex": 1,
+      "temperatureK": 773,
+      "electricFieldVm": 10000000,
+      "targetMcsp": 150,
+      "writeOutCount": 100,
+      "preRunMcsp": 250,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        6,
+        6,
+        6
+      ],
+      "dopingInfo": "v1:018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c07:0:2:2:1:0.009259259259259259",
+      "flags": 114,
+      "seedHex": "b65c7b1ce8b4581e7663c44d91926b2de45b4f6f3aad4386097a1dc3a69b549c"
+    },
+    {
+      "jobId": 3,
+      "modelSignature": "92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60",
+      "latticeSignature": "ed688990f40a444649ec6883cdb7ad0510e62beaa3a93b1d378bb4f12ab20784",
+      "kind": "kmc",
+      "collectionName": "T773",
+      "configName": "x002",
+      "collectionIndex": 0,
+      "configIndex": 1,
+      "jobIndex": 0,
+      "temperatureK": 773,
+      "electricFieldVm": 10000000,
+      "targetMcsp": 200,
+      "writeOutCount": 100,
+      "preRunMcsp": 250,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        8,
+        8,
+        8
+      ],
+      "dopingInfo": "v1:018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c07:0:10:10:5:0.01953125",
+      "flags": 114,
+      "seedHex": "1b590d47e969c6a73299ae617578999bd9efc715d134a31934b41a64e456f7e9"
+    },
+    {
+      "jobId": 4,
+      "modelSignature": "92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60",
+      "latticeSignature": "126400b5ab33bf3f19c8804bb09643fed9c1f5bb70b72ee60d0907a8d5d93fdc",
+      "kind": "kmc",
+      "collectionName": "T773",
+      "configName": "x002",
+      "collectionIndex": 0,
+      "configIndex": 1,
+      "jobIndex": 1,
+      "temperatureK": 773,
+      "electricFieldVm": 10000000,
+      "targetMcsp": 200,
+      "writeOutCount": 100,
+      "preRunMcsp": 250,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        8,
+        8,
+        8
+      ],
+      "dopingInfo": "v1:018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c07:0:10:10:5:0.01953125",
+      "flags": 114,
+      "seedHex": "267eef6ad68811f42075a21cb3186f3ac6ede06cad143863d10c747eb2c0fa02"
+    },
+    {
+      "jobId": 5,
+      "modelSignature": "92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60",
+      "latticeSignature": "5235318fd379fe2f0977e8061869ad7e266ae42bcca35d60da4e4fedd98ab84a",
+      "kind": "kmc",
+      "collectionName": "T973",
+      "configName": "x001",
+      "collectionIndex": 1,
+      "configIndex": 0,
+      "jobIndex": 0,
+      "temperatureK": 973,
+      "electricFieldVm": 10000000,
+      "targetMcsp": 200,
+      "writeOutCount": 100,
+      "preRunMcsp": 250,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        6,
+        6,
+        6
+      ],
+      "dopingInfo": "v1:018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c07:0:2:2:1:0.009259259259259259",
+      "flags": 114,
+      "seedHex": "9e4288025caeb14dc793666fb13ec0e016c5bb489bc9a2d4d820776be3371b27"
+    },
+    {
+      "jobId": 6,
+      "modelSignature": "92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60",
+      "latticeSignature": "f860010a48c96d688c6a881a313a3d92d99cc57040e91bf6742ee43d1b00cf4d",
+      "kind": "kmc",
+      "collectionName": "T973",
+      "configName": "x002",
+      "collectionIndex": 1,
+      "configIndex": 1,
+      "jobIndex": 0,
+      "temperatureK": 973,
+      "electricFieldVm": 10000000,
+      "targetMcsp": 200,
+      "writeOutCount": 100,
+      "preRunMcsp": 250,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        8,
+        8,
+        8
+      ],
+      "dopingInfo": "v1:018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c07:0:15:14:7:0.02734375",
+      "flags": 114,
+      "seedHex": "c28ca546217f39f5d954480f447d07e1724fc8416a8cd9c6e1dbfd47de00a60d"
+    }
+  ],
+  "counts": {
+    "modelCount": 1,
+    "latticeCount": 6,
+    "jobCount": 6,
+    "latticeReuseFactor": 1
+  }
+}

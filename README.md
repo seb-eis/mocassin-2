@@ -13,7 +13,7 @@ developed by Sebastian Eisele and Steffen Neitzel-Grieshammer at Forschungszentr
 
 | Component | Technology |
 | --- | --- |
-| Model building system | C# / .NET 10, platform-portable class libraries and CLI |
+| Model building system | C# / .NET 11, platform-portable class libraries and CLI |
 | Desktop GUI | C# / Avalonia UI, MVVM, cross-platform (Windows, Linux, macOS) |
 | Solver | Rust, native cross-platform binaries |
 | Shared contracts | Versioned JSON project files, immutable SQLite packages, SQLite results stores, MessagePack state files |
@@ -37,7 +37,7 @@ directly on a workstation; opencode is not required.
 
 | Tool | Required version | Used for |
 | --- | --- | --- |
-| .NET SDK | `10.0.403` (pinned in `global.json`) | Libraries, CLI, Avalonia app, tests |
+| .NET SDK | `11.0.100` (pinned in `global.json`) | Libraries, CLI, Avalonia app, tests |
 | Rust stable | `1.99.1` with `rustfmt` and `clippy` | Solver workspace |
 | Python | `3.11`–`3.13` | Python package, docs, contract tooling |
 | Zensical | `0.1.1` (pinned in `tools/docs/requirements.txt`) | Narrative documentation |

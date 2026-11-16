@@ -120,11 +120,17 @@ internal sealed class PairCompilationStage : ICompilationStage
                 candidate.Preview.DistanceAngstrom,
                 candidate.Preview.IsChiral,
                 candidate.Preview.ChiralPartnerGeometryId));
-            links[candidate.Preview.CenterP].Add(new CompiledPairLink(
-                tableIndex,
-                candidate.Preview.PartnerP,
-                candidate.Offset,
-                candidate.DistanceBucketFm));
+            var images = candidate.Preview.EquivalentImages.IsDefaultOrEmpty
+                ? [candidate.Offset]
+                : candidate.Preview.EquivalentImages;
+            foreach (var image in images)
+            {
+                links[candidate.Preview.CenterP].Add(new CompiledPairLink(
+                    tableIndex,
+                    image.P,
+                    image,
+                    candidate.DistanceBucketFm));
+            }
         }
 
         var positions = context.Structure.Positions

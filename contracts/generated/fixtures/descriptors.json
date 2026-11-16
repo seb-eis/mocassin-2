@@ -14,7 +14,8 @@
         "projectionType": "ModelSignatureV1",
         "signatureHex": "812a7a77a8b78993cf8c475061fbf071fea27082569f154737ed12eb3d64a314",
         "inspectionJsonSha256": "e2b4be280cf91724446b35e91e312765efe249c368919c91ffef45f2d476c162",
-        "description": "samples/simulations/ceria-kmc.mocprj with a KMC simulation referencing the first kinetic transition"
+        "description": "samples/simulations/ceria-kmc.mocprj with a KMC simulation referencing the first kinetic transition",
+        "projectionSha256": "0ed799ab5447befca61a4fdf147c511eda2977e7e5461a3db1e2ee9dac51e784"
       },
       {
         "id": "model-vehicle5",
@@ -22,7 +23,8 @@
         "domainPrefix": "mocassin/model-signature/v1",
         "projectionType": "ModelSignatureV1",
         "signatureHex": "56b5d908194a5a006ba62daa21105edf48b42b529a755e6e694fe35a786eee69",
-        "description": "samples/transitions/vehicle5.mocprj with a KMC simulation referencing the corrected forward vehicle transition"
+        "description": "samples/transitions/vehicle5.mocprj with a KMC simulation referencing the corrected forward vehicle transition",
+        "projectionSha256": "b3548c7894134058f00e0670832f8009beb489ebcde90710bf46cda9628b7dbc"
       },
       {
         "id": "model-interstitialcy5",
@@ -30,7 +32,8 @@
         "domainPrefix": "mocassin/model-signature/v1",
         "projectionType": "ModelSignatureV1",
         "signatureHex": "e2b8255b09f136519f8febff410721029592bdcac0ee220e2d59dd887c82c798",
-        "description": "samples/transitions/interstitialcy5.mocprj with a KMC simulation referencing the forward interstitialcy transition"
+        "description": "samples/transitions/interstitialcy5.mocprj with a KMC simulation referencing the forward interstitialcy transition",
+        "projectionSha256": "c9d3981abe3fe0409cf1ec6ca86a707df18f0a7823fb95b2abb20291abb71ab7"
       },
       {
         "id": "model-ceria-mmc",
@@ -38,24 +41,26 @@
         "domainPrefix": "mocassin/model-signature/v1",
         "projectionType": "ModelSignatureV1",
         "signatureHex": "bf7fea8429d97cb35ccd3bd1424a1c97c073b98cca2feb458525ffef0e4bb214",
-        "description": "model-ceria-mmc"
+        "description": "model-ceria-mmc",
+        "projectionSha256": "2b0b7388a030edaf0518440e898e74f879dac98cb0a53c1fcbecdd44b84b0000"
       },
       {
         "id": "model-barium-zirconate",
         "signature": "model",
         "domainPrefix": "mocassin/model-signature/v1",
         "projectionType": "ModelSignatureV1",
-        "signatureHex": "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2",
-        "description": "model-barium-zirconate"
+        "signatureHex": "5e62f9dd602110edc5007ad8eb384b0b25047a9205dfe3a5af9797e0f4e38b62",
+        "description": "model-barium-zirconate",
+        "projectionSha256": "aac09be8e416c6e176a03d8e34234e118367a8416c88d58242a8f3283eaadbcc"
       },
       {
         "id": "parameterization-barium-zirconate",
         "signature": "parameterization",
         "domainPrefix": "mocassin/parameterization-signature/v1",
         "projectionType": "ParameterizationSignatureV1",
-        "signatureHex": "a7f6ebd97ea336308360949e4fe703bb1c88220a545e9f9db06f009cd6d32b9d",
-        "projectionSha256": "3dbc1b8cf790d39a542155997148c272344e804b4c0cdea89bed68520ad3f6c1",
-        "modelSignature": "c0fd836e32aa888c5ad9a4537fa18f3e2a86c9ff76f702ed4dcf143c289e03d2",
+        "signatureHex": "828a54944a9873e5b00b09db8f368240e4c7d7729088476bd4d481a5da46e07f",
+        "projectionSha256": "0e959303182a5e80598950ff361913d2b19b67cc130d7a5ab2658b1d60a2cdde",
+        "modelSignature": "5e62f9dd602110edc5007ad8eb384b0b25047a9205dfe3a5af9797e0f4e38b62",
         "description": "Real apply of the checked-in barium-zirconate template over the compiled sample; parameterization-barium-zirconate.json"
       },
       {
@@ -73,9 +78,9 @@
         "signature": "parameterization",
         "domainPrefix": "mocassin/parameterization-signature/v1",
         "projectionType": "ParameterizationSignatureV1",
-        "signatureHex": "cac3b231e667164fa7dfd4daa7b326dbc5e23bde17fe30873f775f7f77975042",
-        "projectionSha256": "e8bd8daf9a72ef53356914939eeb4fc71e10af9e0a7c22773bed5c5d656b9fd1",
-        "modelSignature": "3cee47582fabf954a4b2d176d87ed25a79905f96a21a430fef6d9b6ccd6e6003",
+        "signatureHex": "8f86a7f92b55e0d045a381576f6f19016391815b93c0867040d82d0f65f0dbff",
+        "projectionSha256": "e8ac06febc0977cffba505569581524ffb65c64415502b9b58bddb12c9a4a3ae",
+        "modelSignature": "a9e0a45aec33294202b59fdb17c82335121d292ca96f579c479b85898cd0d113",
         "description": "Real apply of the checked-in ceria template over the compiled sample; parameterization-ceria.json"
       },
       {
@@ -83,10 +88,30 @@
         "signature": "parameterization",
         "domainPrefix": "mocassin/parameterization-signature/v1",
         "projectionType": "ParameterizationSignatureV1",
-        "signatureHex": "ac5b381e8acaf8489f30d95b687b42637bc50719f1a7f23006735336523f474b",
-        "projectionSha256": "a958f0b4731611bab0d63b2b839eb1c026d6266c61e429da7de4d982cac0c6ce",
-        "modelSignature": "6d49e4d2ce5bdc4ed1f5383ce8bd07666938c1e8ab0b981520d53b7386c404f0",
+        "signatureHex": "51263129e0faf8fe9e58ceba0d05cbb1d241a436e012551a4bf1ef032260f1e8",
+        "projectionSha256": "6b1f068be210b20bad9267efe2f509976deaf75cae119773d87dfe7d8acea254",
+        "modelSignature": "ca44ca89b6a0238b20d5c8ce9ee7556b8acd3547f4adf2c631963d3ee30afc92",
         "description": "Real apply of the checked-in P1 chiral template over the generated P1 link-change fixture; parameterization-chiral-p1.json"
+      },
+      {
+        "id": "lattice-ceria-1x1x1",
+        "signature": "lattice",
+        "domainPrefix": "mocassin/lattice-signature/v1",
+        "projectionType": "LatticeSignatureV1",
+        "signatureHex": "55f9e07623e85abc466e619221d7e2cc9fdadb68138c9c180c276a048f07c153",
+        "projectionSha256": "75c4fffc3ca001c0210176861521b4159b3b542236f5f95d96e056e2d3dcee72",
+        "modelSignature": "a9e0a45aec33294202b59fdb17c82335121d292ca96f579c479b85898cd0d113",
+        "description": "Real ceria supercell from the real compiler and supercell generator; lattice-ceria-1x1x1.json"
+      },
+      {
+        "id": "lattice-ceria-2x2x2",
+        "signature": "lattice",
+        "domainPrefix": "mocassin/lattice-signature/v1",
+        "projectionType": "LatticeSignatureV1",
+        "signatureHex": "d8bd1660b6f4f3bd75c543e0471f0aabdfaf38707b6ec85a890efdc0dd45dd9c",
+        "projectionSha256": "5719bbc816d08a2c565dabc13f9549c851288ce46f3885e00a25fffc88d59295",
+        "modelSignature": "a9e0a45aec33294202b59fdb17c82335121d292ca96f579c479b85898cd0d113",
+        "description": "Real ceria supercell from the real compiler and supercell generator; lattice-ceria-2x2x2.json"
       }
     ]
   },
