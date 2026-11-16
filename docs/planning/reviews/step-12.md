@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `a6cf22aafbaa3ea3272bf6665bb7eac990b88e63` |
+| Reviewed commit | `80b3f7fd99f0140b1dad5650851d1aaa3c4ac0b8` |
 | Docs branch | `docs/step-12-design` |
 | Review date | 2026-11-16 |
 | Reviewer | — |
