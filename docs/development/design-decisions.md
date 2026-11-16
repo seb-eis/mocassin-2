@@ -417,7 +417,15 @@ and a single `--json` shape for both paths. `build-preview-v1` was never manifes
 loses a published contract.
 
 JSON-Lines events stay on stderr and the final report on stdout. Step 12 adds the additive `build.stage` event
-and optional `stage`/`current`/`etaS` fields; the events schema version stays 1.
+and optional `stage`/`current`/`etaS` fields; the events schema version stays 1. The manifest records required
+event fields only; optional fields are documented in the data contract and asserted by the CLI event tests.
+
+`BuildResult` carries a `BuildIdentity` (project ID, model/document hashes, model/parameterization
+signatures) and a failure kind. The CLI, not the library, maps the result to an exit code; `Io` is separate
+from `Load` so project/output/disk failures map to 3 while parse/content/validation failures map to 1. The
+library reports cancellation as a status and the CLI adds `CLI006`; no CLI-specific diagnostic leaks into the
+GUI-facing pipeline. `build-v1` deliberately has no package-size estimate: a preview is size-neutral, and a
+full build’s measured `package.sizeBytes` is authoritative.
 
 ## Build template versus job template (Step 12)
 

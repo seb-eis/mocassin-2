@@ -1609,7 +1609,10 @@ event is one JSON object on one line with `schemaVersion = 1` and a stable `even
 
 - `build.started` is emitted after job expansion, when the selected total is known. `build.finished` is
   emitted exactly once at the end, including for a failure before `build.started` or for cancellation.
-- `build.stage` was added in Step 12; it is an additive event within `schemaVersion = 1`.
+- `build.stage` was added in Step 12; it is an additive event within `schemaVersion = 1`. The manifest event
+  descriptor records required fields only (`stage`, `status`); the optional `ms`, `stage`, `current`, `etaS`,
+  `published`, and `path` fields are documented here and asserted by the CLI event tests. Step 12 does not add
+  an `optionalFields` manifest key or change the generated `events-v1` schema shape.
 - `build.progress.completed` is monotonic within one stream; `total` is the selected job count. Progress is
   throttled by the writer of the stream, so consumers must not expect one event per job.
 - `--quiet` suppresses `build.stage`, `build.progress`, and `log`; `build.started`, `build.finished`, and
@@ -1774,6 +1777,12 @@ Diagnostics are ordered by severity, code, domain, object ID, property, and mess
 `(code, path, message)` duplicates are removed. Domain codes (`PROJ`, `STR`, `TRN`, `ENM`, `SIM`, `CMP`,
 `PRM`, `JOB`, `PKG`) keep their meaning. CLI-only failures use `CLI001`–`CLI009`.
 
+Every recognised command emits one report for every outcome, including a usage error before any work. The
+shared envelope is always populated; command-specific fields are present but `null`, `0`, `false`, `[]`, or
+`"skipped"`. `required` in the generated schema means “present”, not “non-null”: report descriptors mark
+payload objects, strings, and identities nullable, and nested objects are present with null fields. This is
+why a usage error with `--json` validates against the same schema as a successful run.
+
 #### 5.7.3 `build-v1`
 
 `build-v1` replaces the Step 10 interim `build-preview-v1` and covers both full builds and previews:
@@ -1786,11 +1795,11 @@ Diagnostics are ordered by severity, code, domain, object ID, property, and mess
 | `documentHash` | string or null | yes | Step 01 canonical document hash. |
 | `modelSignature` | string or null | yes | Step 08 compiled-model signature. |
 | `parameterizationSignature` | string or null | yes | Step 09 `models.signature`; null when parameterization did not run. |
-| `selection` | object | yes | `buildTemplate` (`id`, `name`, nullable), `jobTemplate` (`id`, `name`), `parameterization` (`id`, `name`, `implicitDefault`), `outputName` (string or null). |
-| `jobSelection` | object | yes | `expression`, `expandedCount`, `selectedCount`. |
-| `timings` | array | yes | `[{ "stage": string, "ms": number }]` in pipeline order: `load`, `select`, `validate`, `compile`, `validateBuild`, `parameterize`, `expand`, `generate`, `publish`, `verify`; omitted stages are absent. |
-| `package` | object or null | yes | `path`, `sha256`, `sizeBytes`, `jobCount`, `modelCount`, `latticeCount`, `latticeReuseFactor`, `published`; null in preview. |
-| `preview` | object or null | yes | Step 10 preview payload (`templateId`, `templateName`, `totalJobs`, `estimatedPackageBytes`, `collections[]`); null in a full build. |
+| `selection` | object or null | yes | `buildTemplate` (`id`, `name`, nullable), `jobTemplate` (`id`, `name`), `parameterization` (`id`, `name`, `implicitDefault`), `outputName` (string or null); null before selection or on a usage error. |
+| `jobSelection` | object or null | yes | `expression`, `expandedCount`, `selectedCount`; null before expansion, and `expression` is null on a usage error. |
+| `timings` | array | yes | `[{ "stage": string, "ms": number }]` in pipeline order: `load`, `select`, `validate`, `compile`, `validateBuild`, `parameterize`, `expand`, `preview`, `generate`, `publish`, `verify`; omitted stages are absent. `preview` and `verify` are caller-composed, not pipeline stages. |
+| `package` | object or null | yes | `path`, `sha256`, `sizeBytes`, `jobCount`, `modelCount`, `latticeCount`, `latticeReuseFactor`, `published`; null in preview and before publication. |
+| `preview` | object or null | yes | Step 10 preview payload (`templateId`/`templateName` of the effective **job** template, `totalJobs`, `collections[]`); null in a full build and before preview evaluation. |
 | `verification` | string enum `passed`, `failed`, `skipped` | yes | Post-publication verification result. |
 
 - `ok`/`exitCode` follow the build table: 0 success, 1 validation/lattice/package-invalid, 2 usage, 3 I/O,
@@ -1800,7 +1809,8 @@ Diagnostics are ordered by severity, code, domain, object ID, property, and mess
   `preview` is null.
 - A cancellation after publication leaves `package.published = true`, `verification = "skipped"`, and
   `exitCode = 6`.
-- `estimatedPackageBytes` is an advisory lower-bound estimate, not a size guarantee.
+- `build-v1` carries no package-size estimate. `package.sizeBytes` is the authoritative measured size after a
+  build; a preview is size-neutral. A future estimate needs its own formula and contract decision.
 
 #### 5.7.4 Other report payloads
 

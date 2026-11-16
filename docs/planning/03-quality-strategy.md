@@ -462,7 +462,8 @@ solver with the same binary, platform, package, and seed.
 - **Pipeline:** the ceria job sample builds through the real compiler, parameterizer, expander, generator, and
   writer. Partial selection keeps full-expansion IDs and omits unselected rows. `--parallel 1` and `N`
   produce identical signatures, job rows, and `package-summary-v1`. Failure kinds map to the documented exit
-  codes.
+  codes; `BuildResult.Identity` supplies the report’s project/model/document hashes and model/parameterization
+  signatures, including on an early failure or cancellation.
 - **Atomicity and cancellation:** an existing package is byte-identical after a failed/cancelled build; no
   temp file remains; a cancellation after publication leaves a valid package and exits 6. Failure injection
   covers a writer error and a disk-full-like `IOException`.

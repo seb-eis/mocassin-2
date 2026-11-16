@@ -262,9 +262,16 @@ public enum BuildStatus { Succeeded = 0, Failed = 1, Cancelled = 2 }
 
 public enum BuildFailureKind
 {
-    None = 0, Load, TemplateSelection, Compilation, Validation, Parameterization,
+    None = 0, Io, Load, TemplateSelection, Compilation, Validation, Parameterization,
     JobExpansion, LatticeGeneration, PackageWrite, Internal,
 }
+
+public sealed record BuildIdentity(
+    Guid? ProjectId,
+    string? ModelHash,
+    string? DocumentHash,
+    string? ModelSignature,
+    string? ParameterizationSignature);
 
 public abstract record BuildEvent;
 public sealed record BuildStarted(int ExpandedJobCount, int SelectedJobCount) : BuildEvent;
@@ -279,6 +286,7 @@ public sealed record BuildFinished(BuildResult Result) : BuildEvent;
 public sealed record BuildResult(
     BuildStatus Status,
     BuildFailureKind Failure,
+    BuildIdentity Identity,
     ImmutableArray<Diagnostic> Diagnostics,
     BuildSelection? Selection,
     JobSelectionResult? JobSelection,
@@ -299,26 +307,49 @@ public sealed record JobSelectionResult(string Expression, ImmutableArray<int> J
 ```
 
 - `BuildFailureKind.None` accompanies `Succeeded` and `Cancelled`; the CLI maps the kind, not the library,
-  to an exit code.
+  to an exit code. `Io` covers project/output/disk and writer I/O; `Load` covers a parse, content, or
+  load-time validation failure. The CLI uses the diagnostic code to distinguish `PROJ010` (unknown template
+  reference, exit 1) from `CLI004` (ambiguous or wrong-kind selection, exit 2).
+- `BuildResult.Identity` is the authoritative source for the `build-v1` `projectId`, `modelHash`,
+  `documentHash`, `modelSignature`, and `parameterizationSignature` fields. Each value stays `null` until its
+  stage has run, so an early failure or cancellation still produces a valid report; the CLI never recomputes
+  a hash or signature for the report.
 - `BuildResult.Diagnostics` is deduplicated, deterministically sorted, and authoritative. The
-  `BuildDiagnostic` events are for live feedback and are not the report source.
+  `BuildDiagnostic` events are for live feedback and are not the report source. The library does not add
+  CLI-only diagnostics such as `CLI006`; the CLI composes those into the report.
 - `BuildResult.Package` carries the Step 11 `PackageWriteResult` (path, SHA-256, counts, size, advisory
-  warnings).
+  warnings). The `build-v1` `package.published` flag is `Package is not null`; a post-publication
+  cancellation therefore reports `published = true` with the package object intact.
+- `BuildRequest.CreatedUtc` is the build timestamp; `null` means `BuildOptions.TimeProvider.GetUtcNow()`.
+  The CLI passes `null`; tests pass a fixed value for determinism.
+- `BuildOptions.TimeProvider` is the clock used for progress timestamps, ETA, and the default build
+  timestamp; `null` means `TimeProvider.System`. `BuildOptions.EventChannelCapacity` is test-tunable and is
+  not a CLI option.
 - The library never chooses an exit code, prints to the console, or reads `Environment.ExitCode`.
 
 ### 6.2 Ordered stages
 
 ```text
-1  Load            ProjectStore.LoadAsync(ValidateOnLoad = false)
+1  Load            new ProjectStore(options: new ProjectStoreOptions { ValidateOnLoad = false })
+                     .LoadAsync(projectPath)                  // load diagnostics, no model validation
 2  Select          build template / job template / parameterization, output path
-3  Validate        ProjectValidationPipeline.Validate, RunBuildStage = false (stages 1–4)
+3  Validate        ProjectValidationPipeline.Validate(
+                     project, loadResult.Diagnostics,
+                     new ValidationOptions { RunBuildStage = false })   // stages 1–4
 4  Compile         IModelCompiler.Compile (pure, cancellation-aware)
-5  ValidateBuild   ProjectValidationPipeline.Validate, RunBuildStage = true, with the compiled model
+5  ValidateBuild   ProjectValidationPipeline.Validate(
+                     project, loadResult.Diagnostics,
+                     new ValidationOptions { RunBuildStage = true },
+                     compiledModel)                            // stages 1–5
 6  Parameterize    IParameterizationService.Validate, then Apply (or the implicit default)
 7  ExpandJobs      JobTemplateExpander.Expand over the complete template
 8  Generate+Write  JobSelection filter; parallel SupercellGenerator + serialized package writes
 9  Publish         ISimulationPackageWriter.CompleteAsync (checkpoint, fsync, atomic rename)
 ```
+
+- The build uses `LoadAsync` plus `Validate(project, loadDiagnostics, ...)`, not `ValidateFileAsync`, so the
+  project is loaded exactly once. `mocassin validate` keeps `ValidateFileAsync`, which constructs the same
+  `ValidateOnLoad = false` store internally.
 
 - **Validate, compile, then validate the build stage.** The pre-compile call runs load/model/cross-domain/
   feasibility and fails a model error with exit 1 before paying for a compile. The post-compile call runs the
@@ -341,6 +372,9 @@ public sealed record JobSelectionResult(string Expression, ImmutableArray<int> J
   stops; it never generates duplicate-job lattices, opens a writer, or creates a file.
 - Post-publication verification is **not** a pipeline stage: it is composed by the caller (CLI or GUI) with
   `IPackageVerifier` so `Mocassin.Packages` does not gain a dependency on `Mocassin.Results`.
+- `--preview`’s configuration evaluation and the post-publication verification are also caller-composed. They
+  are reported as the `preview` and `verify` timing entries, but they are not `BuildStage` values and never
+  appear in the pipeline event stream as stages.
 
 ### 6.3 Event delivery and backpressure
 
@@ -519,6 +553,26 @@ Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
   exits 1 (or 3 for a package-write failure). It never publishes a package that silently omits requested
   jobs. Exit 5 exists for future multi-job commands that process independent jobs; it is recorded here so
   Steps 19/20 share one table.
+- The CLI maps a `BuildResult` in one documented place; the library never supplies an exit code:
+
+  | `BuildResult` | Exit |
+  | --- | ---: |
+  | `Status = Succeeded` | 0 |
+  | `Status = Cancelled` | 6 |
+  | `Failure = Io`, or `PackageWrite` caused by an `IOException`/`UnauthorizedAccessException` | 3 |
+  | `Failure = Load` | 1 |
+  | `Failure = TemplateSelection` with any `CLI004` diagnostic | 2 |
+  | `Failure = TemplateSelection` with only a `PROJ010` diagnostic | 1 |
+  | `Failure = Validation`, `JobExpansion`, or `LatticeGeneration` | 1 |
+  | `Failure = Compilation` or `Parameterization` | 4 |
+  | `Failure = Internal`, or any unhandled exception at the command boundary | 10 |
+
+  A promoted parameterization warning is reported as `Failure = Parameterization`, because the promotion
+  happens before `Apply` writes anything. A post-publication verification failure is not a `BuildResult`
+  failure: the CLI keeps `Status = Succeeded` (or `Cancelled`), sets `verification = "failed"`, and exits 1.
+- `CLI006` is composed by the CLI, not by the pipeline. The library reports `Status = Cancelled` with
+  `Failure = None`; the CLI adds the `CLI006` info diagnostic to the report and exits 6. The GUI consumes the
+  same status without a CLI-specific diagnostic.
 - `validate` keeps its Step 07 contract (0/1/2/3) and its `validation-v1` report. The other commands use
   the table above; `build --preview` adopts the build table (compile/parameterization errors become 4), which
   replaces the Step 10 interim preview mapping.
@@ -591,6 +645,15 @@ Every report shares:
 - Numbers use invariant shortest round-trip formatting; JSON uses camelCase and two-space indentation.
 - A future field is additive within `schemaVersion = 1`; an unknown field is ignored by consumers.
 
+**Usage-error and early-failure reports.** Every recognised command emits one report for every outcome,
+including a usage error before any work starts. The shared envelope is always populated; every
+command-specific field is still present but `null`, `0`, `false`, `[]`, or `"skipped"` as its type allows.
+`required` in the generated schema means “present”, not “non-null”: the report descriptors mark payload
+objects, strings, and identities nullable, and their nested objects are present with null fields. For
+`build-v1`, `mode` defaults to `build`, `selection` and `jobSelection` are `null`, `timings` is `[]`,
+`package` and `preview` are `null`, and `verification` is `skipped`. This is why a usage error with `--json`
+is schema-valid rather than a shortened envelope.
+
 ### 12.2 `build-v1`
 
 `build-v1` replaces the Step 10 interim `build-preview-v1`. It has one schema for both modes:
@@ -603,24 +666,25 @@ Every report shares:
 | `documentHash` | string or null | yes | Step 01 canonical document hash. |
 | `modelSignature` | string or null | yes | Step 08 compiled-model signature. |
 | `parameterizationSignature` | string or null | yes | Step 09 `models.signature`, null when parameterization did not run. |
-| `selection` | object | yes | Effective recipe (§12.3). |
-| `jobSelection` | object | yes | `{ expression, expandedCount, selectedCount }`. |
-| `timings` | array | yes | `[{ stage, ms }]` in pipeline order, plus `verify` when run. |
-| `package` | object or null | yes | Published package summary; null in preview. |
-| `preview` | object or null | yes | Step 10 preview payload; null in full build. |
+| `selection` | object or null | yes | Effective recipe (§12.3); null before selection or on a usage error. |
+| `jobSelection` | object or null | yes | `{ expression, expandedCount, selectedCount }`; null before expansion, and `expression` is null on a usage error. |
+| `timings` | array | yes | `[{ stage, ms }]` in pipeline order, plus `preview` in preview mode and `verify` in a full build. |
+| `package` | object or null | yes | Published package summary; null in preview and before publication. |
+| `preview` | object or null | yes | Step 10 preview payload; null in a full build and before preview evaluation. |
 | `verification` | string enum `passed`, `failed`, `skipped` | yes | Post-publication verification result. |
 
 `package` fields: `path`, `sha256`, `sizeBytes`, `jobCount`, `modelCount`, `latticeCount`,
-`latticeReuseFactor`, and `published` (true unless a pre-publication failure). `preview` keeps the Step 10
-shape: `templateId`, `templateName`, `totalJobs`, and `collections[]` with `id`, `name`, `simulationId`,
-`kind`, `useDualDofCorrection`, `jobCount`, `configCount`, `optimizers[]`, and `configs[]`
-(`id`, `name`, `jobCount`, `cellA`, `cellB`, `cellC`, `positionCount`, `totalChargeBefore`,
-`totalChargeAfter`, `isChargeNeutral`, `dopings[]`). Previews also report `estimatedPackageBytes` as an
-advisory lower-bound estimate; it is not a correctness or size guarantee.
+`latticeReuseFactor`, and `published` (`Package is not null`; false before publication). `preview` keeps the
+Step 10 shape: `templateId` and `templateName` (the effective **job** template), `totalJobs`, and
+`collections[]` with `id`, `name`, `simulationId`, `kind`, `useDualDofCorrection`, `jobCount`, `configCount`,
+`optimizers[]`, and `configs[]` (`id`, `name`, `jobCount`, `cellA`, `cellB`, `cellC`, `positionCount`,
+`totalChargeBefore`, `totalChargeAfter`, `isChargeNeutral`, `dopings[]`). `build-v1` does not carry a
+package-size estimate; after a full build, `package.sizeBytes` is the authoritative measured size, and a
+preview is explicitly size-neutral.
 
 `timings` uses the lower-case stage names `load`, `select`, `validate`, `compile`, `validateBuild`,
-`parameterize`, `expand`, `generate`, `publish`, and `verify`, in that order, omitting stages that did not
-run.
+`parameterize`, `expand`, `preview`, `generate`, `publish`, and `verify`, in that order, omitting stages that
+did not run. `preview` and `verify` are caller-composed and are not pipeline `BuildStage` values.
 
 ### 12.3 Selection object
 
@@ -675,6 +739,11 @@ schema version remains 1 because the change is additive.
 - `build.started` is emitted after expansion; `build.finished` is emitted even when the run fails before
   `build.started`.
 - `build.progress.completed` is monotonic within a stream; `total` is the selected job count.
+- The events manifest records **required fields only**. The optional fields (`ms`, `stage`, `current`,
+  `etaS`, `published`, `path`) are documented here and in `02-data-contracts.md` §5.5 and asserted by the CLI
+  event tests; Step 12 does not add an `optionalFields` manifest key, so the generated `events-v1` schema keeps
+  its `x-event-required-fields` shape. Adding a required field is a versioned contract change; adding an
+  optional field is additive.
 - Consumers ignore unknown events and fields. Ordering is guaranteed within one stream.
 - `--quiet` suppresses `build.stage`, `build.progress`, and `log`; `diagnostic`,
   `build.started`, and `build.finished` remain.
@@ -800,7 +869,9 @@ useful message.
 | Second signal | The handler is released and the process terminates with the platform default. |
 
 - A cancelled build never returns a partial `BuildResult` with `Status = Succeeded`.
-- `BuildResult.Diagnostics` includes `CLI006` info; the report `ok` is false and `exitCode` is 6.
+- The library returns `Status = Cancelled` and `Failure = None`, with whatever identity/selection/package
+  fields it reached; it does not add a CLI diagnostic. The CLI adds the `CLI006` info to the report
+  diagnostics, sets `ok = false`, and exits 6.
 - A partial **selection** (`--jobs`) is not a cancellation or a partial success; it is a successful build of
   a recorded subset.
 
@@ -967,8 +1038,11 @@ namespace rules apply.
   change and is not part of this step.
 - Regenerate `contracts/generated/schema/*.schema.json`, `contracts/generated/constants/**`, and
   `contracts/generated/fixtures/descriptors.json`. `./tools/verify.sh contracts` checks freshness.
-- Add `build.stage` to `formats.events.events` and document the optional `stage`/`current`/`etaS` fields.
-  The events schema version stays 1 because the change is additive.
+- Add `build.stage` with required `stage`/`status` to `formats.events.events`. The events schema version stays
+  1 because the change is additive. The manifest records required fields only; the optional `ms`, `stage`,
+  `current`, `etaS`, `published`, and `path` fields are documented in §12.5 and `02-data-contracts.md` §5.5
+  and exercised by the CLI event tests. Step 12 does not add an `optionalFields` manifest key or change the
+  generator’s event-schema shape.
 - Add `tests/contracts/events-v1.jsonl` with a real build sequence (started, stage, progress, diagnostic,
   finished). The CLI test validates each line against the generated `events-v1` schema metadata and the
   event required-field table.
@@ -1027,17 +1101,26 @@ namespace rules apply.
 
 ### 18.3 Parity rows
 
-- `Headless mocassin validate` → Done (07/12), with the full command surface in 12.
-- `Headless mocassin compile` → Done (12).
-- `Build template selection` → Partial (12/26): CLI done, UI in 26.
-- `Build preview (no package write)` → Done (10/12): `build-v1` preview mode replaces `build-preview-v1`.
-- `Create/overwrite package` → Partial (11/12/26): CLI done, UI in 26.
-- `Package inspection/verification` → Done (12) for the CLI.
-- `Build progress/cancel/log` → Partial (12/26): CLI done, UI in 26.
-- `mocassin parameterize CLI` → Replaced (12), with `compile`/`build --parameterization`.
-- `Create new project` → Partial (01/12/23): CLI `new` in 12, creation UI in 23.
-- New rows: `CLI doctor` (Improvement, 12) and `Clean job folders (dry run)` (Partial, 12/28).
-- `CLI + format reference` → Partial (07/12/30).
+These are the **intended** transitions, applied to `appendix-b-parity-matrix.md` in feature 7 after the
+acceptance criteria pass. The design-freeze commit updates the Step column and notes to include 12 but does
+not mark an unimplemented feature `Done`; only a passing acceptance test may do that.
+
+- `Headless mocassin validate` stays `Partial` (07/12) until feature 3; the full command surface then makes
+  it `Done`.
+- `Headless mocassin compile` stays `Planned` (12) until feature 4; it becomes `Done`.
+- `Build template selection` stays `Partial` (12/26) after feature 3: CLI done, UI in 26.
+- `Build preview (no package write)` stays `Done` (10/12): the preview exists from Step 10; feature 3 replaces
+  `build-preview-v1` with `build-v1` preview mode.
+- `Create/overwrite package` stays `Partial` (11/12/26): CLI done after feature 3, UI in 26.
+- `Package inspection/verification` stays `Improvement` (11/12): the Step 11 inspector/verifier exists; the
+  CLI wrapper lands in feature 5.
+- `Build progress/cancel/log` stays `Planned` (12/26) until feature 3; then `Partial` (CLI done, UI in 26).
+- `mocassin parameterize CLI` stays `Replaced` (12), with `compile`/`build --parameterization`.
+- `Create new project` stays `Planned` (01/12/23) until feature 4; then `Partial` (CLI `new`, creation UI in 23).
+- New rows: `CLI doctor` (`Planned`, 12; becomes `Improvement` after feature 6) and `Clean job folders (dry
+  run)` (`Planned`, 12/28; becomes `Partial` after feature 6).
+- `CLI + format reference` stays `Partial` (07/12/30): the reference grows in feature 7, formats complete in
+  30.
 
 ## 19. Implementation tasks
 
@@ -1106,6 +1189,19 @@ namespace rules apply.
   canonical summary.
 - **`--dry-run` on `build` is retired; `--preview` is the no-write mode.** The old step-page bullet is
   replaced. `clean --dry-run` remains and means “list only”.
+- **`BuildResult` carries the report identity.** `BuildIdentity` supplies `projectId`, `modelHash`,
+  `documentHash`, `modelSignature`, and `parameterizationSignature`; the CLI never recomputes them. Each value
+  is null until its stage has run, so an early failure still produces a complete report.
+- **`BuildFailureKind.Io` is separate from `Load`.** `Io` covers project/output/disk and writer I/O and maps
+  to exit 3; `Load` covers parse/content/validation failures and maps to exit 1. The CLI distinguishes the
+  `PROJ010` unknown-template reference (exit 1) from the `CLI004` selection error (exit 2) by diagnostic code.
+- **Cancellation is a status, not a CLI diagnostic.** The pipeline returns `Status = Cancelled`; the CLI adds
+  `CLI006` to the report and exits 6. The GUI consumes the status without a CLI-specific diagnostic.
+- **`build-v1` has no package-size estimate.** `estimatedPackageBytes` is dropped: Step 10 did not emit it, a
+  preview is size-neutral, and `package.sizeBytes` is the authoritative measured size after a build. A future
+  estimate needs its own formula and contract decision.
+- **`preview` and `verify` are caller-composed timings.** They appear in `build-v1.timings` and the rendered
+  steps but are not `BuildStage` values and never appear as pipeline stage events.
 - **Exit code 5 is reserved.** `build` is all-or-nothing and never publishes a partial package. Future
   multi-job commands share the code.
 - **Validate, compile, then validate the build stage.** The pre-compile `Validate(... RunBuildStage = false)`

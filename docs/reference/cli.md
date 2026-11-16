@@ -53,8 +53,9 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 ```
 
 The command loads the project read-only. It never writes, acquires the editing lock, migrates in place, or
-mutates the model. The load and model stages run exactly once: the CLI uses a `ProjectStore` with
-`ValidateOnLoad = false` and passes the result to `ProjectValidationPipeline.ValidateFileAsync`.
+mutates the model. The load and model stages run exactly once: the command calls
+`ProjectValidationPipeline.ValidateFileAsync`, which loads through a `ProjectStore` whose `ValidateOnLoad` is
+`false` and runs the model stage once.
 
 | Option | Meaning |
 | --- | --- |
@@ -255,8 +256,8 @@ Package written: work/ceria.msl (2.1 MB, 6 jobs, selection all)
 }
 ```
 
-In preview mode `package` is `null` and `preview` carries the lattice/doping report. `estimatedPackageBytes`
-in the preview object is an advisory estimate, not a guarantee. A cancellation after publication leaves
+In preview mode `package` is `null` and `preview` carries the lattice/doping report. A preview is size-neutral;
+only a full build reports a measured `package.sizeBytes`. A cancellation after publication leaves
 `published: true` and `verification: "skipped"`.
 
 ## `mocassin inspect`

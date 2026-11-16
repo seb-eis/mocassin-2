@@ -68,14 +68,18 @@ produces diagnostics, not a crash. A package with any error-severity `PKG` code 
 The full workflow is available without the GUI:
 
 ```sh
-mocassin new ceria-job -o work
-mocassin validate work/ceria-job.mocprj
-mocassin build work/ceria-job.mocprj -o work/ceria-job.msl
-mocassin inspect work/ceria-job.msl
-mocassin verify work/ceria-job.msl
+# Create and validate a model starter.
+mocassin new ceria-model -o work --template ceria
+mocassin validate work/ceria-model.mocprj
+
+# Build, inspect, and verify the ceria job sample.
+mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o work/ceria.msl
+mocassin inspect work/ceria.msl
+mocassin verify work/ceria.msl
 ```
 
-A useful ceria job sample is `samples/jobs/ceria-temperature-sweep.mocprj`; the model-only
+A newly created project is a model starter with no job template; add a job template (Step 10/26) before
+building it. A useful ceria job sample is `samples/jobs/ceria-temperature-sweep.mocprj`; the model-only
 `samples/ceria/ceria.mocprj` has no job template and cannot expand jobs.
 
 ### Recipe selection
