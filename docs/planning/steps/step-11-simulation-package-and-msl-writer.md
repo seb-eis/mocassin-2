@@ -8,12 +8,14 @@ read-only inspection/verification library for the build CLI.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** In audit
 - **Step branch:** `step/11-simulation-package-and-msl-writer`
-- **Step CI:** —
-- **Main merge:** —
+- **Step CI:** Ubuntu closeout run and focused Windows platform gate dispatched on the closeout squash (run IDs
+  recorded with the closeout evidence commit) — evidence: `docs/planning/closeout/step-11.json`
+- **Main merge:** — (main `bca66373c68485d08ac78c0259577887726879d1` merged into the step branch as
+  `b44022ab2353e2f4394793ba3d023718a578753c`; main was green at the freeze)
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Ready for audit — request committed with the closeout evidence (`docs/planning/audits/step-11.md`)
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
@@ -32,6 +34,7 @@ read-only inspection/verification library for the build CLI.
 | A1 .NET 11 toolchain and native Zstandard | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | Squashed | `all --require` exit 0; one-time cross-TFM ApiCompat 9/9 | Not run (no per-feature CI) | `00753e7` |
 | A1-fix Lattice decode guard | `feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `25a3787` |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `e25811f` (fixtures/Part B/docs); `0ae05a4` (Windows canonical JSON) |
+| Closeout | `feature/step-11-simulation-package-and-msl-writer/closeout` | Squashed | `docs --require`, `policy --require` exit 0 | Ubuntu closeout and Windows platform gate dispatched on the closeout squash | Recorded with the closeout evidence commit |
 
 ### Approved feature list
 
@@ -372,14 +375,60 @@ per feature.
   unchecked acceptance criteria (an explicit in-test parameterization package, and Step 13/18 consumption of
   the variable-length `tracker_order`) are not feature-7 work; the writer-side tracker assertion is
   implemented.
-- **Closeout readiness:** `origin/main` (`286e10c`) is an ancestor of the feature-7 tip; the step branch was 35
-  commits ahead at that tip (`0ae05a4`). Remaining before the audit request: merge the owner-approved
-  `fix/ci-platform-gate` CI fix into `main` (the branch is active in a separate worktree, so its tip may move;
-  the merge commit is the reference), merge the updated `main` into this step branch and
-  re-run the full gate, fill `docs/planning/closeout/step-11.json`, dispatch the single Ubuntu closeout run,
-  dispatch the focused Windows platform gate (`platforms=windows`), then create
-  `docs/planning/audits/step-11.md` and request the audit. No closeout JSON or audit record has been created
-  from placeholder values.
+- **Closeout readiness:** `origin/main` (`286e10c`) was an ancestor of the feature-7 tip; the step branch was 35
+  commits ahead at that tip (`0ae05a4`). The closeout sequence below completed the remaining items.
+- **Closeout sequence:** the owner-approved `fix/ci-platform-gate` CI fix merged into `main` as `bca6637`
+  (`--no-ff`); main CI failed attempt 1 only on the shared-runner `TenThousandPositionModelCompilesWithinTheBudget`
+  flake, the owner accepted it and authorized the re-run, and attempt 2 was green. Main `bca6637` then merged into
+  the step branch as `b44022a`, and
+  `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh all --require` passed
+  on that integration tree (1,519 .NET tests, Rust, Python, docs, contracts/policy). The closeout feature then
+  filled the status, parity, deviations, and closeout record; the run IDs and the evidence commit are recorded
+  in `docs/planning/closeout/step-11.json`.
+
+#### Closeout
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/closeout` (from `b44022a`).
+- **Squash commit:** recorded with the closeout evidence commit.
+- **Local gates:** `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh docs
+  --require` and `./tools/verify.sh policy --require` — both exit 0 (2026-11-16).
+- **Step CI:** the single Ubuntu closeout run (`platforms=ubuntu`, `force_all=false`) and the mandatory focused
+  Windows platform gate (`platforms=windows`) were dispatched on the closeout squash; IDs, `head_sha`, and
+  results are in the closeout evidence.
+- **Diff summary:** updated this page (status `In audit`, closeout link, feature log, deviations, acceptance
+  notes), the status dashboard, and the final Step 11 parity rows; added the closeout evidence and the audit
+  request in the following documentation-only commit. No code, test, contract, or fixture changed.
+- **Known limitations:** the two acceptance criteria below remain unchecked with their follow-up owners; the
+  container image remains unbuilt under the accepted risk.
+- **Parity:** no new row; the Step 11 rows were confirmed final for this step and the remaining `Partial` /
+  `Improvement` rows name their later steps (12, 13, 14, 18, 26).
+
+### Deviations and accepted risks
+
+1. **`.NET 11` wording in `AGENTS.md` (owner-authorized, 2026-11-15).** Amendment 1 retargets the solution to
+   .NET 11. The owner authorized the factual `AGENTS.md` §1 and §8 toolchain wording change as part of that
+   approved amendment; it is a wording correction, not a process-rule change. See
+   [amendment 1](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) and its
+   [design review](../reviews/step-11-amend-1.md).
+2. **Container image not built (accepted risk, owner 2026-11-15).** There is no OCI/podman builder in the agent
+   environment, so `docs/opencode/mocassin.containerfile` is not build-verified. It pins SDK 11.0.100 only and
+   asserts the `global.json` pin; the closeout CI resolves the same pin through `actions/setup-dotnet`, and the
+   local gates ran on the pinned SDK under `/tmp/opencode/dotnet11`. The missing image evidence is recorded in
+   the closeout evidence notes and the audit request; no page describes the image as built.
+3. **Part A small-payload gate refinement (owner-approved).** Below 8 KiB the codec comparison uses an absolute
+   decode penalty of ≤ 0.15 µs, throughput ≥ 100 MB/s, and ≤ +10 % relative decode at or above 8 KiB, instead of
+   a relative-only decode threshold that fixed reader overhead dominates at small sizes. Part A passed on 12
+   real payloads: 24/24 golden frames byte-identical, size 0.000 %, worst encode +4.12 %, worst small-payload
+   decode +0.1055 µs, ≥ 8 KiB decode +2.08 %, throughput ≥ 297 MB/s, 240/240 threshold checks. The rule is
+   recorded in [amendment 1 §9.1](../amendments/step-11-amend-1-dotnet-11-native-zstd.md).
+4. **Main-CI performance flake re-run (owner-accepted 2026-11-16).** The main CI run for the CI platform-gate
+   merge `bca6637` failed attempt 1 only at
+   `Mocassin.Compilation.Tests.Compiler.CompilationPerformanceTests.TenThousandPositionModelCompilesWithinTheBudget`
+   (30.134 s against the documented `< 30 s` budget) on the shared runner; the diff was workflow, CI-policy, and
+   tool-test files only. The owner accepted the miss as a shared-runner flake and authorized a re-run; attempt 2
+   was green for all six jobs, and a local focused run of the test passed in about one second. No test,
+   threshold, or workflow file was changed.
+
 
 ### Amendment 1 — .NET 11 toolchain and native Zstandard
 
@@ -1004,6 +1053,11 @@ Two options, for the human owner's start-gate decision:
       job rows, and the expected lattice rows.
 - [ ] A package built with an explicit in-test parameterization stores the applied pair/group/site/frequency
       values, not compiled defaults, and `models.signature` equals `ParameterizedModel.Signature`.
+      **Unchecked — follow-up owner: Step 12.** No end-to-end package is built from an explicit in-test
+      parameterization template. The model-payload tests exercise the write-time re-encode against real
+      `ParameterizationValues` and the sample `.msl` fixture uses the implicit default parameterization
+      (`parameterizations: []`). Step 12's build acceptance with a template-backed parameterization closes this
+      item.
 - [x] The published package has no `results` table, needs no `-wal`/`-shm` files, and reports
       `application_id = 0x4D4F4353` and `user_version = 1`.
 - [x] Every job references a valid model and lattice; `job_id` is unique and ascending; a partial build leaves
@@ -1018,6 +1072,9 @@ Two options, for the human owner's start-gate decision:
       verifier proves the payload-checkable part (non-empty, non-sentinel values below `global_tracker_count`,
       length within the documented bound), and Step 13's reader loads it as a variable `u8[]` with `0xFF` for
       non-mobile nodes; Step 18's mobile-tracker permutation follows the same indices.
+      **Unchecked — follow-up owners: Steps 13 and 18.** The writer assertion and the verifier's payload-checkable
+      part are implemented and tested, but the Rust reader (Step 13) and the mobile-tracker permutation
+      (Step 18) do not exist yet, so the cross-language half of this criterion cannot be met in Step 11.
 - [x] `PKG001`–`PKG010` are documented with severities and anchors, `PKG` descriptors are composed into
       `DiagnosticCatalog.Default`, and `Mocassin.Results` still references only `Core` and `Contracts`.
 - [x] The checked-in `.msl` fixture's `package-summary-v1` golden matches a rebuild after normalizing

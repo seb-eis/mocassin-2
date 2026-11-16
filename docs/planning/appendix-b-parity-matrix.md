@@ -141,16 +141,16 @@ Status legend:
 | Job collections/configs | Y | Done | 10 | Typed Core records, project JSON/manifest, authored-order expansion, and structural `JOB` validation |
 | Base + config overrides | Y | Partial | 10/26 | Correct simulation → collection → config inheritance, kind checks, and extension replacement in 10; editor UI in 26 |
 | Job duplicates/multiplier | Y | Done | 10 | `jobCountPerConfig`/simulation default, 1-based IDs, per-duplicate seeds |
-| Selection optimizers | Y | Partial | 10/11/14/26 | P1 image expansion, dual-DOF rule, and `JOB009` reference check in 10; `.msl` encoding in 11; runtime removal in 14; editor UI in 26 |
+| Selection optimizers | Y | Partial | 10/11/14/26 | P1 image expansion, dual-DOF rule, and `JOB009` reference check in 10; `.msl` encoding in 11; runtime removal in 14; editor UI in 26. Partial until Step 14. |
 | Lattice size + doping values | Y | Partial | 10/26 | Deterministic supercell, dopings, truncation, compensation, and preview in 10; editor UI in 26 |
 | Build template selection | Y | Partial | 10/12/26 | `build --preview --template` selection in 10; full build command in 12; UI in 26 |
 | Build preview (no package write) | Y | Done | 10 | Shared `ILatticePreviewService`, `build-preview-v1`, and CLI path; never opens or writes `.msl` |
-| Create/overwrite package | Y | Partial | 11/12/26 | Immutable `.msl` v1 writer, verifier, fixtures, and atomic publication in 11; full build command and `--force` in 12; build UI in 26 |
+| Create/overwrite package | Y | Partial | 11/12/26 | Immutable `.msl` v1 writer, verifier, fixtures, and atomic publication in 11; full build command and `--force` in 12; build UI in 26. Partial until Step 12. |
 | Append to existing package | N | Deferred | post-1.0 | Not required; rebuild is safer |
 | 99,999-job cap | Y | Done | 10 | Hard cap `JOB019`; warning `JOB013` above 10k |
 | Build progress/cancel/log | Y | Planned | 12/26 | |
-| Package inspection/verification | Y | Improvement | 11/12 | Read-only inspector/verifier, `PKG` diagnostics, `package-summary-v1`, and fixtures in 11; `inspect`/`verify` CLI in 12 |
-| `.msl` v1 format and fixtures | Y | Done | 11 | Schema, content-addressed payloads, canonical summary, verification, checked-in `msl-v1` fixture, and the pre-switch compatibility fixture |
+| Package inspection/verification | Y | Improvement | 11/12 | Read-only inspector/verifier, `PKG` diagnostics, `package-summary-v1`, and fixtures in 11; `inspect`/`verify` CLI in 12. Improvement until Step 12. |
+| `.msl` v1 format and fixtures | Y | Done | 11 | Schema, content-addressed payloads, canonical summary, verification, checked-in `msl-v1` fixture, and the pre-switch compatibility fixture. The Rust reader that consumes the fixture is Step 13. |
 | Build history | N | Improvement | 26 | |
 
 ## 7. Solver
