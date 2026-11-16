@@ -375,8 +375,8 @@ only if code, tests, or configuration change.
 
 Round-2 resolutions for the five Minor findings and the three documentation-only Notes. The fixes are in the
 feature squash X2 `419716678cacf6ad2c50ee379e1d2e7342bbf13b`; the evidence/resolution commit Y2 is docs-only.
-N-1 and N-4 remain recorded follow-ups with their owners. No reviewer-authored finding, evidence, or verdict
-text was altered.
+N-2, N-3, and N-5 were corrected; N-1, N-4, and the round-2 Note N-6 were explicitly accepted by the human owner
+on 2026-11-16 as recorded in the rows below. No reviewer-authored finding, evidence, or verdict text was altered.
 
 | Finding | Status | Resolution | Owner | Commit |
 | --- | --- | --- | --- | --- |
@@ -390,41 +390,72 @@ text was altered.
 | N-5 | Corrected | The checked pair-expansion criterion no longer bundles the Step 14 target-expansion consumer test; it records that half as a Step 14 cross-step acceptance test owned by that step. | Step agent (implementor) | X2 `4197166` |
 | N-1 | Open — follow-up | Directory fsync after the atomic rename requires a contract/ADR correction; recorded as a future design/contract change, not a Step 11 deviation. | Design/contract owner | Future contract/ADR |
 | N-4 | Open — follow-up | `AGENTS.md` §1 status text predates Step 11 and is not touched by an audit-minor fix; owned by the next documentation change. | Orchestrator/next documentation change | Future docs change |
+| N-1 | Accepted (owner) | Human owner accepted the remaining Note on 2026-11-16: the pre-rename directory-fsync ordering stays as recorded, and the post-rename fsync remains a future contract/ADR correction. Accepted residual risk, no Step 11 code change. | Human owner | W (this acceptance commit) |
+| N-4 | Accepted (owner) | Human owner accepted the remaining Note on 2026-11-16: `AGENTS.md` §1 drift remains a future documentation change and is not a Step 11 gate item. | Human owner | W (this acceptance commit) |
+| N-6 | Accepted (owner) | Human owner accepted the round-2 traceability Note on 2026-11-16: the F-4 fuzz deferral still names the SharpFuzz `.msl` target and nightly job, and adding the `Mocassin.Results` `.msl` verifier target to Step 29's fuzzing list remains owned by the Step 29 implementor. Accepted residual risk; no Step 11 code change. | Human owner; Step 29 implementor (follow-up) | W (this acceptance commit) |
 
 ## Approval summary
 
 The step agent completes this section before a merge, tag, or Blocker/Major waiver request. It must cover the
 full history, not only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — merge `step/11-simulation-package-and-msl-writer` into
+      `main` with `--no-ff` and tag `step-11`; audited commit X2 `4197166`, request tip Y2 `d7b654c`, acceptance
+      commit W.
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
+- [x] Final CI and documentation-build results recorded
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| Step 11 design review | 2026-11-15 | `f04bd3cb5f424bff0e4f8d736d84185370775308` | Planning auditor (fresh context) | Ready with notes — accepted |
+| Amendment 1 design review | 2026-11-15 | `17e723cae686c15bdfa7e61fc648d7d1da8086ef` | Planning auditor (fresh context) | Ready with notes — accepted |
+| Audit round 1 | 2026-11-16 | `e94d975ffe953561a56bd7850f39e073e603b9ea` (request tip `4d1af4e`) | DeepSeek V4.1 Flash 1017 (fresh independent auditor) | Passed with notes |
+| Audit round 2 | 2026-11-16 | `419716678cacf6ad2c50ee379e1d2e7342bbf13b` (request tip `d7b654c`) | Fresh independent auditor (`fda68e6` record) | Passed with notes |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| F-1 | Minor | Stale feature-3 writer XML remarks and `NotSupportedException` tags | Remarks/tags removed and row summaries refreshed | X2 `4197166` | Closed |
+| F-2 | Minor | Deferred explicit-parameterization criterion had no tracked closure | Two real explicit-parameterization packages and `models.signature` assertions; criterion marked done | X2 `4197166` | Closed |
+| F-3 | Minor | `normalization_energy_ev` `0.0` not canonicalized to `null` | Mapper canonicalizes zero/non-zero and a regression theory authors both values | X2 `4197166` | Closed |
+| F-4 | Minor | Property/fuzz test-plan rows had no tests | FsCheck round-trip and signature-stability properties added; nightly fuzz deferred to Step 29 with a named owner | X2 `4197166`; Step 29 (fuzz) | Closed (property) / deferred (fuzz) |
+| F-5 | Minor | Malformed `schema_info` values returned `PKG002` | Malformed `project_id`/`created_utc` return `PKG003`; `PKG002` kept for format/app id/user version with tests | X2 `4197166` | Closed |
+| N-1 | Note | Directory fsync precedes the atomic rename | Accepted by owner; future contract/ADR correction | W | Accepted |
+| N-2 | Note | Closeout note overstated the evidence checker | Note rewritten; checker range and manual X2..Y2 delta recorded | Y2 `d7b654c` | Corrected |
+| N-3 | Note | Stale step-page gate counts | Refreshed to 58 tool tests, 601→603 SPDX, 982→984 secret-scanned | X2 `4197166` | Corrected |
+| N-4 | Note | Pre-existing `AGENTS.md` §1 status drift | Accepted by owner as a future documentation change | W | Accepted |
+| N-5 | Note | Pair-expansion criterion bundled a Step 14 test | Criterion reworded; Step 14 ownership recorded | X2 `4197166` | Corrected |
+| N-6 | Note | Fuzz deferral did not name the .NET `.msl` verifier target in Step 29 | Accepted by owner; Step 29 implementor adds the target | W | Accepted |
+
+Accepted notes and waivers: N-1, N-4, and N-6 are explicitly accepted by the human owner on 2026-11-16 as
+residual risk/follow-up; N-2, N-3, and N-5 were corrected in X2/Y2. No Blocker or Major finding was ever raised,
+and no waiver of a Blocker/Major is requested.
+
+Residual risks and follow-ups: nightly `.msl` fuzz harness (Step 29 implementor); post-rename directory fsync
+contract/ADR correction (design/contract owner); `AGENTS.md` §1 status text (next documentation change); the
+container image is not build-verified (accepted 2026-11-15); macOS is not run because the Unix path runs on
+Ubuntu. `main` `bca6637` is unchanged and an ancestor of the audit/request tip, so no merge-tree run applies.
+
+Final gates: `all --require` exit 0 on X2 (1,528 .NET tests, 58 tool tests, 603 SPDX, 984 secret-scanned, Rust,
+Python, docs); closeout evidence checker exit 0; Ubuntu closeout run `43944825353` and Windows platform run
+`43944396192` green at X2. Round 2 verdict `Passed with notes` with no Blocker/Major.
 
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (orchestrator handoff)
+Date: 2026-11-16
 
 ## Audit rounds
 

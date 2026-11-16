@@ -58,7 +58,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Done | `step/08-model-compilation-pipeline` (merged and deleted) | `step-08` | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43578897490) | `f91fc63` | `step-08` | Passed with notes at `28e741f` (`f97b2c4`) | Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — accepted 2026-11-13 |
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Done | `step/09-parameterization-templates` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43639561778) | `ef2f335` | `step-09` | Passed with notes at `916bae1` (`3aeacb1`) — accepted 2026-11-14 | Ready with notes at `26d6a0e` (round 4) — accepted 2026-11-14 |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Done | `step/10-job-templates` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43709029767) at `945dddf` | `945dddf` | `step-10` | Passed with notes at `c10e6d7` — accepted 2026-11-15 | Ready for implementation at `c5454af` — accepted 2026-11-14 |
-| 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | In audit — re-audit | `step/11-simulation-package-and-msl-writer` | Audit-minor fixes — squashed (`4197166`) | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) / [Windows platform green](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) at `4197166` | — | — | Re-audit required (round 1 Passed with notes at `e94d975`) | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)) |
+| 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Awaiting approval | `step/11-simulation-package-and-msl-writer` | Audit-minor fixes — squashed (`4197166`) | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) / [Windows platform green](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) at `4197166` | — | — | Passed with notes — round 2 at `4197166` (`fda68e6`); N-1/N-4/N-6 accepted 2026-11-16 | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)) |
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -136,9 +136,10 @@ round 1 returned `Passed with notes` at `e94d975` with five Minor findings (F-1�
 are squashed as X2 `4197166`; the full local gate is green, the Ubuntu closeout
 [`43944825353`](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) and Windows platform gate
 [`43944396192`](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) are green at X2, and
-`docs/planning/closeout/step-11.json` binds X2 and `main` `bca6637`. The audit record
-`docs/planning/audits/step-11.md` is `Re-audit required`; the branch is frozen at the Y2 evidence commit and the
-re-audit is pending. N-1 (directory-fsync order) and N-4 (`AGENTS.md` §1 drift) remain recorded follow-ups.
+`docs/planning/closeout/step-11.json` binds X2 and `main` `bca6637`. Audit round 2 (`fda68e6`) returned
+`Passed with notes` at request tip `d7b654c` with no Blocker or Major. The human owner accepted the remaining
+Notes N-1 (directory-fsync order), N-4 (`AGENTS.md` §1 drift), and N-6 (Step 29 fuzz-target traceability) on
+2026-11-16 and confirmed the merge and tag; the step is `Awaiting approval`.
 
 ## Cross-cutting phase checkpoints
 

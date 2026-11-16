@@ -8,7 +8,7 @@ read-only inspection/verification library for the build CLI.
 
 ## Implementation status
 
-- **Status:** In audit — re-audit
+- **Status:** Awaiting approval
 - **Step branch:** `step/11-simulation-package-and-msl-writer`
 - **Step CI:** round 2 at X2 `4197166`: [Ubuntu closeout
   green](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) and [focused Windows platform gate
@@ -19,8 +19,10 @@ read-only inspection/verification library for the build CLI.
 - **Main merge:** — (main `bca66373c68485d08ac78c0259577887726879d1` merged into the step branch as
   `b44022ab2353e2f4394793ba3d023718a578753c`; main was green at the freeze)
 - **Step tag:** —
-- **Audit:** Re-audit required — [record](../audits/step-11.md); round 1 returned `Passed with notes` at
-  `e94d975`, and the five Minor findings are fixed on X2
+- **Audit:** `Passed with notes` — [record](../audits/step-11.md). Round 1 returned `Passed with notes` at
+  `e94d975`; round 2 verified the X2 `4197166` fixes and returned `Passed with notes` at request tip
+  `d7b654c` (`fda68e6` record). The human owner accepted the remaining Notes N-1, N-4, and N-6 on 2026-11-16
+  and confirmed the merge and tag; status is `Awaiting approval`.
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
