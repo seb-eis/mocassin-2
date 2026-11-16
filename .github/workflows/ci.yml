@@ -4,10 +4,21 @@ name: CI
 # The step closeout run is a single manual dispatch on the step branch. There
 # are no per-feature or per-push step-branch runs.
 #
-# Windows and macOS are manual. Select them with the `platforms` input when
-# platform-specific code appears. macOS stays fully manual until there is
-# macOS-specific behaviour to validate.
+# The Ubuntu run is the full gate: the complete .NET test suite with coverage,
+# the format check, Rust, Python, contracts/policy, and public API
+# compatibility.
 #
+# Windows and macOS are manual platform gates and are deliberately focused.
+# They build the solution, then run only the package-writer and results-reader
+# test projects (`Mocassin.Packages.Tests`, `Mocassin.Results.Tests`), which
+# cover the platform-sensitive behaviour: P/Invoke directory fsync, atomic
+# rename, temporary-file handling, and the SQLite reader's path and locking
+# behaviour. A platform gate does not repeat the boilerplate suite, coverage,
+# or the format check, and it never starts the Rust, Python, contracts, or
+# API-compatibility jobs; those are Ubuntu-only. `platforms=windows` therefore
+# runs one Windows job, not Windows plus an implicit Ubuntu job.
+#
+# macOS stays fully manual until there is macOS-specific behaviour to validate.
 # Documentation has its own manual workflow in `docs.yml`.
 on:
   push:
@@ -16,7 +27,7 @@ on:
   workflow_dispatch:
     inputs:
       platforms:
-        description: "Platforms for .NET and Rust"
+        description: "Platform gate: ubuntu is the full suite, windows/macos the focused platform tests"
         type: choice
         options:
           - ubuntu
@@ -143,10 +154,13 @@ jobs:
             api=true
           fi
 
+          # Ubuntu is the full gate. A platform gate targets exactly the
+          # selected runners; it never implies an Ubuntu run, so the focused
+          # Windows/macOS job is the only thing that is billed.
           case "$PLATFORMS" in
             ubuntu) os='["ubuntu-latest"]' ;;
-            windows) os='["ubuntu-latest","windows-latest"]' ;;
-            macos) os='["ubuntu-latest","macos-latest"]' ;;
+            windows) os='["windows-latest"]' ;;
+            macos) os='["macos-latest"]' ;;
             all) os='["ubuntu-latest","windows-latest","macos-latest"]' ;;
             *)
               echo "Invalid platforms input: ${PLATFORMS}" >&2
@@ -174,6 +188,8 @@ jobs:
       # gates must be allowed to finish so the Windows/macOS result is visible.
       fail-fast: ${{ github.event_name == 'push' }}
       matrix:
+        # `changes` yields only the selected platform: `windows` is Windows
+        # alone, `all` is the three-platform sweep.
         os: ${{ fromJSON(needs.changes.outputs.os) }}
     steps:
       - uses: actions/checkout@v7
@@ -193,18 +209,33 @@ jobs:
         run: dotnet build Mocassin.slnx -c Release --no-restore
 
       - name: Test with coverage
+        if: matrix.os == 'ubuntu-latest'
         run: >
           dotnet test Mocassin.slnx -c Release --no-build
           --logger trx
           --collect:"XPlat Code Coverage"
           --results-directory artifacts/test-results
 
+      # Platform gates are a focused check, not a second full run: only the
+      # projects that exercise OS-specific file, path, and locking behaviour.
+      - name: Platform tests - package writer
+        if: matrix.os != 'ubuntu-latest'
+        run: >
+          dotnet test src/dotnet/Mocassin.Packages.Tests/Mocassin.Packages.Tests.csproj
+          -c Release --no-build
+
+      - name: Platform tests - results reader
+        if: matrix.os != 'ubuntu-latest'
+        run: >
+          dotnet test src/dotnet/Mocassin.Results.Tests/Mocassin.Results.Tests.csproj
+          -c Release --no-build
+
       - name: Format
         if: matrix.os == 'ubuntu-latest'
         run: dotnet format Mocassin.slnx --verify-no-changes --no-restore
 
-      - name: Upload test results and coverage
-        if: failure()
+      - name: Upload test results
+        if: failure() && matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@v7
         with:
           name: dotnet-test-results-${{ matrix.os }}
@@ -215,15 +246,13 @@ jobs:
           if-no-files-found: ignore
 
   rust:
-    name: Rust (${{ matrix.os }})
+    name: Rust
     needs: changes
+    # Rust is platform-neutral so far and the platform gate is a .NET gate:
+    # the Rust job always runs on Ubuntu, never on the selected platform.
     if: needs.changes.outputs.rust == 'true'
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
-    strategy:
-      fail-fast: ${{ github.event_name == 'push' }}
-      matrix:
-        os: ${{ fromJSON(needs.changes.outputs.os) }}
     steps:
       - uses: actions/checkout@v7
 
@@ -245,7 +274,6 @@ jobs:
         run: cargo test --manifest-path src/rust/Cargo.toml --workspace
 
       - name: Release build
-        if: matrix.os == 'ubuntu-latest'
         run: cargo build --manifest-path src/rust/Cargo.toml --workspace --release
 
   python:
