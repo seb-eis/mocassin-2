@@ -295,7 +295,7 @@ Verified file inventory. Counts are from the frozen design commit, not estimates
 | ApiCompat tool | `.config/dotnet-tools.json` | `microsoft.dotnet.apicompat.tool` `10.0.403` → `11.0.100` |
 | Docs API | `tools/docfx/docfx.json` | 9 assembly paths and `TargetFramework` → `net11.0` |
 | CI | `.github/workflows/ci.yml`, `benchmark.yml`, `docs.yml` | **no literal SDK version exists**; all three use `global-json-file: global.json`. Verify `actions/setup-dotnet@v6` installs 11.0.100 at the closeout run |
-| Image | `docs/opencode/mocassin.containerfile` | install `11.0.100` only (the .NET 10 install is removed); **carry over** the `COPY global.json` pin step and its assertion block from `9ab4bb8` (the current containerfile has no such step); `ReportGenerator` `5.5.12` → `5.6.0`; DocFX unchanged. The image build is deferred to closeout as an accepted risk (§7) |
+| Image | `docs/opencode/mocassin.containerfile` | install `11.0.100` only (the .NET 10 install is removed); **carry over** the `COPY global.json` pin step and its assertion block from `9ab4bb8` (the current containerfile has no such step); `ReportGenerator` `5.5.12` → `5.6.0`; DocFX unchanged. The image build is deferred to closeout as an accepted risk (§7). **Correction 2026-11-16:** the copied-pin step was removed after the image build failed with the opencode-container context; the image has no `COPY`/`ADD` step (§7) |
 | Test tooling | `Directory.Packages.props` | `Microsoft.NET.Test.Sdk` `18.11.0` → `18.12.0` (owner-accepted net11 compatibility bump, §6 verification items) |
 | Packages | `Directory.Packages.props` | remove the `ZstdSharp.Port` version |
 | Packages | `Mocassin.Packages.csproj`, `Mocassin.Results.csproj` | remove the `ZstdSharp.Port` reference |
@@ -405,6 +405,21 @@ test "$(command -v dotnet)" = "$DOTNET_ROOT/dotnet"
   The exact-count check is the primary negative evidence; the `10.` grep is a belt-and-braces guard against a
   base-image SDK. The `COPY global.json` step is **carried over from `9ab4bb8`** (it does not exist in the
   current containerfile): it makes the image fail if the pin and the SDK ever drift.
+
+**Post-implementation correction (2026-11-16).** The `COPY global.json /opt/mocassin-sdk-pin/global.json` step
+and the `test "$(cd /opt/mocassin-sdk-pin && dotnet --version)" = "11.0.100"` assertion are **removed** from
+`docs/opencode/mocassin.containerfile`. The opencode-container Makefile builds the image with its own repository
+as the context, which has no `global.json`; Podman failed at that `COPY`, so the image could not be built at all.
+The image now has **no `COPY`/`ADD` step and no build-context dependency** and builds from any directory. The
+self-contained assertions above remain: `dotnet --version`, `dotnet --list-sdks`, the exact count of 1, the
+positive `11.0.100` grep, the negative `10.` grep, and the `$DOTNET_ROOT/dotnet` path. With only 11.0.100
+installed, `dotnet --version` proves the pin resolves; no `global.json` is duplicated into the image.
+`global.json` (`11.0.100`, `latestPatch`) stays as the repository pin for local and CI resolution. The owner
+rebuilt `opencode:mocassin` successfully from `fix/container-build-context` on 2026-11-16. The change is
+recorded under `fix/container-build-context` in the parent step page's deviation 2. This note corrects the
+design text above; the reviewer-authored [design review](../reviews/step-11-amend-1.md) and the
+[audit record](../audits/step-11.md) are unchanged.
+
 - `docfx` stays `2.81.0` (the package ships `tools/net11.0/any`; with only the 11.0.0 runtime installed the tool
   host selects it).
 - `dotnet-reportgenerator-globaltool` moves `5.5.12` → `5.6.0`, **accepted by the owner**. `5.5.12` ships at most a
@@ -430,7 +445,9 @@ amendment replaces.
   removed.
 - Carry-over from `9ab4bb8`: the `11.0.100` install line and pin, the `COPY global.json /opt/mocassin-sdk-pin/global.json`
   step, the `dotnet --list-sdks` assertions, and the `dotnet --version` pin check — all reused, with the
-  `10.0.403` half deleted. The `11.0.100` install line is not re-derived.
+  `10.0.403` half deleted. The `11.0.100` install line is not re-derived. **Post-implementation correction
+  (2026-11-16):** the `COPY global.json` step and its `/opt/mocassin-sdk-pin` assertion were removed because the
+  opencode-container build context has no `global.json`; see §7 for the replacement and the reason.
 - After the amendment is integrated, `docs/dotnet-11-container` is deleted **unmerged** (local and remote) as an
   explicit cleanup step of the integration. It is not deleted before integration, so its commit remains
   available until the replacement is on the step branch.
@@ -730,6 +747,8 @@ change, and vice versa; and the pre-switch evidence is captured before either ca
       +9 are the amendment's codec/golden and decoder-bound tests) with 0 failures.
 - [x] `global.json` pins `11.0.100` with `latestPatch`; `dotnet --version` resolves to `11.0.100` locally. The
       containerfile carries the exact-count and pin assertions; CI resolves the same pin from `global.json`.
+      **Correction 2026-11-16:** the copied-`global.json` assertion was removed; the self-contained exact-count,
+      positive `11.0.100`, negative `10.`, and `dotnet --version` checks remain (§7).
 - [x] No `ZstdSharp` reference remains in `Directory.Packages.props`, any `.csproj`, or any source file
       (`grep` is empty); `check_nuget_licenses.py` reports **52** packages (was 58) and the policy gate is green.
 - [x] Model, job, and lattice payloads encode and decode only through the in-box API, and the existing

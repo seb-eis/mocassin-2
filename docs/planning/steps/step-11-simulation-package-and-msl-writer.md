@@ -29,6 +29,8 @@ read-only inspection/verification library for the build CLI.
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
   2026-11-15 ([record](../reviews/step-11-amend-1.md))
 - **Feature list:** Approved 2026-11-15 (seven features)
+- **Post-implementation correction:** `fix/container-build-context` (2026-11-16) removed the containerfile's
+  `COPY global.json` pin step after the image build failed with the opencode-container context; see deviation 2.
 - **Last updated:** 2026-11-16
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -288,7 +290,8 @@ per feature.
 - **Diff summary:** `global.json` to SDK `11.0.100`/`latestPatch`; all 21 solution projects plus the reference
   harness to `net11.0`; `Microsoft.NET.Test.Sdk 18.12.0`; ApiCompat tool `11.0.100` and the baseline renamed and
   regenerated at `tests/contracts/api-baseline/net11.0/`; DocFX paths/metadata and the containerfile (11.0.100
-  only, exact-count assertions, ReportGenerator 5.6.0, carried-over `COPY global.json` pin); the eight active
+  only, exact-count assertions, ReportGenerator 5.6.0; the originally carried-over `COPY global.json` pin was
+  removed after the image build failed with the opencode-container context, see deviation 2); the eight active
   documentation pages plus the parity row and the bug-report placeholder; `ZstdSharp.Port` removed and the
   payload codec replaced by the one-shot in-box `ZstandardEncoder`/`ZstandardDecoder` (writer, reader, and test
   support); three analyzer adaptations required by SDK 11 (`CA1517` read-only span, two `CA2026` `JsonElement`
@@ -465,11 +468,22 @@ per feature.
    approved amendment; it is a wording correction, not a process-rule change. See
    [amendment 1](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) and its
    [design review](../reviews/step-11-amend-1.md).
-2. **Container image not built (accepted risk, owner 2026-11-15).** There is no OCI/podman builder in the agent
+2. **Container image not built; copied-pin step removed after a build failure (accepted risk, owner
+   2026-11-15; post-implementation correction 2026-11-16).** There is no OCI/podman builder in the agent
    environment, so `docs/opencode/mocassin.containerfile` is not build-verified. It pins SDK 11.0.100 only and
-   asserts the `global.json` pin; the closeout CI resolves the same pin through `actions/setup-dotnet`, and the
-   local gates ran on the pinned SDK under `/tmp/opencode/dotnet11`. The missing image evidence is recorded in
-   the closeout evidence notes and the audit request; no page describes the image as built.
+   its assertion block is self-contained. The amendment originally carried over the `COPY global.json
+   /opt/mocassin-sdk-pin/global.json` step so the pin could be asserted inside the image. The opencode-container
+   Makefile builds with its own repository as the context, which contains no `global.json`, so Podman failed at
+   that `COPY` and the image could not be built at all. `fix/container-build-context` removed the `COPY` and the
+   `/opt/mocassin-sdk-pin` assertion: the image now has **no `COPY`/`ADD` step and no build-context
+   dependency**, so it builds from any directory, including that Makefile. The exact-count (1), positive
+   `11.0.100`, negative `10.`, `dotnet --version`, and `DOTNET_ROOT/dotnet` assertions remain; with only
+   11.0.100 installed, `dotnet --version` proves the pin resolves, and no `global.json` is duplicated into the
+   image. `global.json` stays the repository pin for local and CI resolution. The closeout CI resolves the same
+   pin through `actions/setup-dotnet`, and the local gates ran on the pinned SDK under `/tmp/opencode/dotnet11`.
+   The missing image evidence is recorded in the closeout evidence notes and the audit request; no page
+   describes the image as built. The owner rebuilt `opencode:mocassin` successfully from this branch on
+   2026-11-16, which is the build verification.
 3. **Part A small-payload gate refinement (owner-approved).** Below 8 KiB the codec comparison uses an absolute
    decode penalty of ≤ 0.15 µs, throughput ≥ 100 MB/s, and ≤ +10 % relative decode at or above 8 KiB, instead of
    a relative-only decode threshold that fixed reader overhead dominates at small sizes. Part A passed on 12
