@@ -58,7 +58,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Done | `step/08-model-compilation-pipeline` (merged and deleted) | `step-08` | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43578897490) | `f91fc63` | `step-08` | Passed with notes at `28e741f` (`f97b2c4`) | Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — accepted 2026-11-13 |
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Done | `step/09-parameterization-templates` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43639561778) | `ef2f335` | `step-09` | Passed with notes at `916bae1` (`3aeacb1`) — accepted 2026-11-14 | Ready with notes at `26d6a0e` (round 4) — accepted 2026-11-14 |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Done | `step/10-job-templates` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43709029767) at `945dddf` | `945dddf` | `step-10` | Passed with notes at `c10e6d7` — accepted 2026-11-15 | Ready for implementation at `c5454af` — accepted 2026-11-14 |
-| 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | In progress | `step/11-simulation-package-and-msl-writer` | 7 — held; [amendment 1](amendments/step-11-amend-1-dotnet-11-native-zstd.md) integrated (`00753e7`); lattice guard fix (`25a3787`) | — | — | — | Not requested | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)) |
+| 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | In progress | `step/11-simulation-package-and-msl-writer` | 7 — squashed (`e25811f`, `0ae05a4`); closeout pending | — | — | — | Not requested | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)) |
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -124,9 +124,10 @@ annotated `step-10` tag is pushed. The step branch was deleted. The replacement 
 `c10e6d7`; the earlier [`43699356371`](https://github.com/seb-eis/mocassin-2/actions/runs/43699356371) at
 `f2a364d` is process history. R2-1 (performance test-plan deferral) and R2-2 (canonical-JSON contract
 reconciliation) are recorded and accepted, with R2-3–R2-5 as Notes. Step 11 — Simulation Package and `.msl`
-Writer is next. Its round-1 design review returned `Changes required` at `8ac8590` (M-1 pair-link offset, M-2
-variable-length `tracker_order`, M-3 `PKG` descriptor composition, plus Minors and Notes); the design was revised
-and is `Re-review required`. The step remains `Not started`.
+Writer is `In progress`. The design and amendment 1 are accepted; features 1–6, amendment 1 (`00753e7`), and
+the lattice decode guard (`25a3787`) are squashed. Feature 7 (fixtures, the Part B budget, and documentation) is
+squashed as `e25811f` and `0ae05a4`; the closeout JSON, the single Ubuntu closeout run, the focused Windows
+platform gate, and the independent audit are still pending.
 
 ## Cross-cutting phase checkpoints
 

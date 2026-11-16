@@ -19,7 +19,7 @@ read-only inspection/verification library for the build CLI.
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
   2026-11-15 ([record](../reviews/step-11-amend-1.md))
 - **Feature list:** Approved 2026-11-15 (seven features)
-- **Last updated:** 2026-11-15
+- **Last updated:** 2026-11-16
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -31,7 +31,7 @@ read-only inspection/verification library for the build CLI.
 | 6 Package verification and inspection | `feature/step-11-simulation-package-and-msl-writer/package-verification` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `cbe345f` |
 | A1 .NET 11 toolchain and native Zstandard | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | Squashed | `all --require` exit 0; one-time cross-TFM ApiCompat 9/9 | Not run (no per-feature CI) | `00753e7` |
 | A1-fix Lattice decode guard | `feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `25a3787` |
-| 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs` | Held (after amendment 1) | — | — | — |
+| 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `e25811f` (fixtures/Part B/docs); `0ae05a4` (Windows canonical JSON) |
 
 ### Approved feature list
 
@@ -320,9 +320,63 @@ per feature.
   134M positions at the writer's 4× factor) needs a raised `MaxLatticePayloadBytes`; the option is per call.
 - **Resolves:** A1-10 / R2-01 (the amendment review's routed residual minor).
 
+#### Feature 7 — Fixtures, performance, documentation, and closeout
+
+- **Branch:** `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; follow-up
+  `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json`.
+- **Squash commits:** `e25811f` (`step-11: add fixtures, the Part B budget, and closeout documentation`) and
+  `0ae05a4` (`step-11: make canonical JSON newlines platform-independent`).
+- **Local gates:** `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh all
+  --require` exit 0 on 2026-11-16 — .NET build 0 warnings / 0 errors and **1,519** tests passing
+  (App 1, Contracts 37, Cli 17, Symmetry 223, Results 39, Core 685, Packages 420, Compilation 96,
+  Architecture 1), format clean; NuGet licence policy OK (52 packages), no vulnerable packages, ApiCompat
+  clean for 9 assemblies; Rust fmt/clippy/test; Python 3 tests and package build; strict Zensical build,
+  DocFX 0 warnings / 0 errors, rustdoc; contract artifacts current (19 files; model 5 / parameterization 4 /
+  lattice 2 projection fixtures), space-group catalog current (274 settings), process consistency, 45 tool
+  tests, SPDX 600 source files, 979 secret-scanned files, cargo-deny clean. The session's dev image had only
+  SDK 10.0.403, so the pinned 11.0.100 SDK was installed under `/tmp/opencode/dotnet11` for the gate; no
+  repository file changed.
+- **Step CI:** not run — no per-feature CI; the single Ubuntu closeout dispatch is still pending.
+- **Diff summary:** added the checked-in `.msl` v1 fixture `tests/contracts/packages/msl-v1/` (98,304-byte
+  package, SHA-256 line, `package-summary-v1.json`, 12 extracted payloads plus `payloads/index.json`, and a
+  README with provenance and regeneration) and the env-gated `RegeneratePackageFixture` test; added
+  `PackageFixtureBuilder` test support and five `PackageFixtureTests` covering verification, the canonical
+  summary, the package hash, the payload index, and rebuild reproducibility; added the one-shot
+  `SimulationPackageBudget` runner and the `SimulationPackageBuildBenchmarks` BenchmarkDotNet case with the
+  `--simulation-package-budget` entry point; wrote `docs/reference/msl-format.md`, `docs/user-guide/building.md`,
+  and the `file-layout.md`/`architecture.md`/`testing-and-parity.md`/reference-index/nav updates; updated the
+  parity matrix. The follow-up commit pins `NewLine = "\n"` in the canonical-JSON writers, the package-summary
+  builder, the benchmark output, and the affected fixture tests so the Windows and Ubuntu goldens agree.
+- **Part B evidence:** `tests/reference/bench/step-11-package-budget.json` records both runs on the real ceria
+  sample (10 collections × 1,000 jobs at 10×10×10, level 3). The net11 run (SDK 11.0.100, runtime 11.0.0, at
+  `8745a64`) took **3.874 s** wall clock, inserted **5,853 jobs/s**, produced a **10,051,584-byte** package with
+  a **1,415-byte** model payload at **118,263,808-byte** peak RSS; the mandatory net10 reference (SDK 10.0.403,
+  runtime 10.0.14, at `e2b00ea`) took **4.028 s**, **5,230 jobs/s**, the same **10,051,584-byte** package, and
+  **119,119,872-byte** peak RSS. The comparison is −3.82 % wall clock, 0 % package size, +11.92 % insertion
+  rate, and −0.72 % peak RSS, with `verdict: pass` against the 600 s / +5 % / 2 GiB / +3 % / 100 jobs/s /
+  50 MiB budgets. The package SHA-256 differs only because `schema_info.app_version` carries each build's
+  informational version; the payload bytes are codec-identical and the size is equal.
+- **Parity:** `.msl` v1 format and fixtures is now `Done`; create/overwrite package stays `Partial` (the Step 12
+  CLI remains) and package inspection/verification stays `Improvement` (the Step 12 `inspect`/`verify` commands
+  remain). No other row is completed by feature 7.
+- **Known limitations / follow-ups:** the checked-in fixture's `app_version`/`generator` are test-host
+  informational values and are excluded from the canonical summary; re-running the env-gated regeneration is
+  the intended update path if a runtime patch changes the package bytes. The Part B measurement is one local
+  run; the Windows focused platform gate is still required before the audit because feature 3 added native
+  directory fsync. Step 13's cross-language reader acceptance is a Step 13 test and has not run yet. The two
+  unchecked acceptance criteria (an explicit in-test parameterization package, and Step 13/18 consumption of
+  the variable-length `tracker_order`) are not feature-7 work; the writer-side tracker assertion is
+  implemented.
+- **Closeout readiness:** `origin/main` (`286e10c`) is an ancestor of the feature-7 tip; the step branch is 35
+  commits ahead. Remaining before the audit request: merge the owner-approved `fix/ci-platform-gate`
+  (`6946e61`) CI fix into `main`, merge the updated `main` into this step branch and re-run the full gate, fill
+  `docs/planning/closeout/step-11.json`, dispatch the single Ubuntu closeout run, dispatch the focused Windows
+  platform gate (`platforms=windows`), then create `docs/planning/audits/step-11.md` and request the audit. No
+  closeout JSON or audit record has been created from placeholder values.
+
 ### Amendment 1 — .NET 11 toolchain and native Zstandard
 
-Feature 7 is held until [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) is reviewed
+Feature 7 waited until [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) was reviewed
 and integrated. The amendment moves the repository from `net10.0` to `net11.0` and replaces the
 `ZstdSharp.Port` payload codec with the in-box `System.IO.Compression` Zstandard API.
 
