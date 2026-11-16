@@ -20,7 +20,10 @@
 #   cd opencode-container
 #   make base
 #
-# Then build this image from the MOCASSIN repository root:
+# Then build this image. It has no COPY/ADD step and no build-context
+# requirement, so the build works from any directory and with any
+# context, including the opencode-container Makefile. For example, from
+# the MOCASSIN repository root:
 #
 #   podman build -f docs/opencode/mocassin.containerfile -t opencode:mocassin .
 #
@@ -108,8 +111,9 @@ RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \
 
 # --------------------------------------------------
 # .NET SDK: user-local, pinned patch version.
-# The repository pin lives in global.json (11.0.100);
-# the image installs that SDK only.
+# The image installs 11.0.100 and nothing else, so
+# `dotnet --version` resolves the same pin as the
+# repository's global.json without copying it in.
 # --------------------------------------------------
 RUN curl -fsSL https://dot.net/v1/dotnet-install.sh -o /tmp/dotnet-install.sh \
     && bash /tmp/dotnet-install.sh \
@@ -171,15 +175,9 @@ RUN cargo install cargo-binstall --version 1.26.2 --locked \
     && install_tool flamegraph@0.6.15
 
 # --------------------------------------------------
-# Repository SDK pin. Copied only so that the check
-# below resolves global.json exactly as the repository
-# does. The build context must be the repository root
-# (see the build command in the header).
-# --------------------------------------------------
-COPY global.json /opt/mocassin-sdk-pin/global.json
-
-# --------------------------------------------------
 # Verification as the runtime user.
+# Self-contained: no repository file is copied in, so
+# the checks prove the image contents on their own.
 # --------------------------------------------------
 RUN set -eux; \
     dotnet --version; \
@@ -187,7 +185,6 @@ RUN set -eux; \
     test "$(dotnet --list-sdks | wc -l)" -eq 1; \
     dotnet --list-sdks | grep -qE '^11\.0\.100 \['; \
     ! dotnet --list-sdks | grep -qE '^10\.'; \
-    test "$(cd /opt/mocassin-sdk-pin && dotnet --version)" = "11.0.100"; \
     test "$(command -v dotnet)" = "$DOTNET_ROOT/dotnet"; \
     test -x "$HOME/.dotnet/tools/docfx"; \
     rustc --version; \

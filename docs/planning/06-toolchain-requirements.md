@@ -187,6 +187,9 @@ podman build -f docs/opencode/mocassin.containerfile -t opencode:mocassin .
 The resulting `opencode:mocassin` image is the base for the MOCASSIN coding agent. The same requirements can be
 installed directly on a workstation or another container if opencode is not used.
 
+The containerfile has no `COPY`/`ADD` step, so it does not depend on the build context: the `.` above is
+conventional, and the same file builds from any directory or from the opencode-container Makefile.
+
 | Tier | Contents | Approx. addition over `opencode:base` (opencode-container) |
 | --- | --- | --- |
 | **Tier 1 — implementation** | .NET SDK, stable Rust, Python/venv, GUI/headless libs, Zensical/mkdocstrings, DocFX, Python test tools, `cargo-deny`, `cargo-llvm-cov`, `linux-perf` | ~3.2–3.7 GB installed |
