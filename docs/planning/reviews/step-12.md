@@ -575,3 +575,165 @@ question lacks the decision-register row the Step 11 precedent uses.
 gate until the preview data path is designed (and its `BuildResult`/`IBuildPipeline` surface fixed) and the
 Minors are either resolved or explicitly accepted. M-1 is a cross-step interface gap that Step 26 shares, so it
 is not an implementation detail for feature 3.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author or implement any part of the Step 12 design and have no shared
+conversation with the planner, implementor, orchestrator, or the round-1 reviewer. I received only the frozen
+commit `05b7297172f9f87453b3ffc23d06801035da7a2c`, the record HEAD
+`7a70ec36617be221234bbbded06cbb782776e3d0`, the request record, and the required commands/scope. No desired
+verdict or summary was supplied. I read the repository at the frozen commit, the full round-1 record, the
+design/contract/architecture/quality/roadmap/decision pages, and the `src/` and `contracts/` types the design
+cites; the review was read-only apart from this record.
+
+The design under review is `05b7297172f9f87453b3ffc23d06801035da7a2c`. The record HEAD
+`7a70ec36617be221234bbbded06cbb782776e3d0` is the step agent's documentation-only resolution/status commit on
+top of it: `git diff --name-status 05b7297 7a70ec3` returns `M docs/planning/reviews/step-12.md` only. The
+resolution commit itself is documentation-only: `git show --stat 05b7297` changes 12 documentation files
+(+516/−221) and no code, test, configuration, or contract file. The round-1 `Findings`, `Finding details`,
+`Evidence`, and `### Review round 1` text is unchanged; the only pre-round-2 edits to the record are the request
+`Reviewed commit` cell, the `Record state` marker, and the `Resolution status` table.
+
+#### Commands and results
+
+- `git rev-parse HEAD` (review worktree) → `05b7297172f9f87453b3ffc23d06801035da7a2c`; the record worktree was
+  then switched to `7a70ec36617be221234bbbded06cbb782776e3d0`.
+- `git diff --name-status 80b3f7f 05b7297` → 12 documentation files and the record only; no `src/`,
+  `contracts/`, `tests/`, `tools/`, or configuration file. `git diff --name-status 05b7297 7a70ec3` →
+  `M docs/planning/reviews/step-12.md` only.
+- `./tools/verify.sh docs --require` → first run exit 255: in a fresh worktree with no Release assemblies
+  DocFX reported “No .NET API project detected” (2 warnings). After `policy` built the Release assemblies, the
+  re-run → exit 0: math OK (165 files); links OK (168 files); Zensical strict `No issues found`; DocFX
+  `Build succeeded` 0 warnings / 0 errors; rustdoc OK.
+- `./tools/verify.sh policy --require` → exit 0. ApiCompat clean for 9 assemblies; NuGet licence/vulnerability
+  policy OK; contract artifacts current (19 files); model/parameterization/lattice projections OK
+  (5/4/2 fixtures); space-group catalog current (274 settings, sha256
+  `1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395`); process consistency OK; 58 Python tool
+  tests OK; SPDX headers in 603 source files; no secret patterns in 985 tracked text files; cargo-deny
+  advisories/bans/licenses/sources OK; final line `Closeout gate completed with required checks enabled.`
+- `python tools/check_doc_math.py` → `Documentation math conventions OK (165 files scanned).`
+- Interface re-checks against the frozen tree (read-only):
+  `ILatticePreviewService.TryCreatePreview(Project, CompiledModel, LatticeRequest, ImmutableArray<DopingValue>,
+  out ...)`; `LatticePreview.Report` exposes `TotalPositions`, `TotalChargeBefore`, `TotalChargeAfter`, and
+  `IsChargeNeutral`; `ProjectStore.LoadAsync` and `IModelCompiler.Compile`;
+  `ProjectValidationPipeline.Validate(project, loadDiagnostics, options, compiledModel, cancellationToken)`;
+  `ValidationOptions.WarningsAsErrors`; `ParameterizationOptions` has no warning flag;
+  `IParameterizationService.Validate` returns `ImmutableArray<Diagnostic>`; `SelectionOptimizerResolver.Resolve`;
+  `RunBuildStages` returns when `buildStages.Length == 0`; `Mocassin.Packages.csproj` has no `Results` edge;
+  `Mocassin.Cli.csproj` references `Results` and reaches `Compilation` transitively; both `Mocassin.Packages`
+  and `Mocassin.Cli` declare `InternalsVisibleTo` for their test assemblies; `DiagnosticCatalog.Default`
+  composes descriptor sets and the docs-drift regex `\b[A-Z]{3,4}\d{3}\b` accepts `CLI001`;
+  `tools/contracts/generate.py` pins `manifestVersion == 1` and maps each `reports` entry through
+  `REPORT_CONSTANTS`; the structure checker counts only `*.cs` files.
+
+#### Re-check of the request checklists
+
+I re-read every item in the three request checklists and re-checked it against the frozen docs and code. The
+round-1 marks and inline notes remain accurate as history; the items whose notes cited M-1, m-1–m-9, and
+n-1–n-9 are now satisfied by the resolution commit. I did not change any item text.
+
+#### M-1 closure
+
+M-1 is closed. The preview data path is now producible from the declared surface with one load and one compile:
+
+- `IBuildPipeline.BuildAsync`/`BuildToCompletionAsync` still take only `BuildRequest`, and `BuildResult` now
+  carries `BuildPreview? Preview` (step page §6.1). `BuildPreview` and its collection/config/optimizer/doping
+  records are public and match the payload `build-v1.preview` already required.
+- The pipeline owns the evaluation: §6.2 places “Preview … BuildPreviewBuilder over the selected descriptors”
+  after expansion and `--jobs` filtering and before `Generate+Write`, and stores the typed result in
+  `BuildResult.Preview`. §6.1/§20 state it is evaluated inside the pipeline; §12.2 and the data contract
+  §5.7.3 say `preview` is a direct projection of `BuildResult.Preview`, that the `preview` timing comes from
+  `BuildPreview.Elapsed`, and that the CLI does not reload, recompile, or call the service again. §16.1 places
+  the only mapping implementation in `Internal/BuildPreviewBuilder.cs`; the CLI’s `BuildPreviewMapper` projects
+  the payload.
+- The inputs are in hand at that point: `ProjectStore.LoadAsync` returns the project (stage 1) and
+  `IModelCompiler.Compile` returns `CompilationResult.Model` (stage 4);
+  `ILatticePreviewService.TryCreatePreview` takes exactly `Project` + `CompiledModel` + the job’s lattice
+  request/dopings, and `SelectionOptimizerResolver.Resolve` supplies the optimizers.
+  `JobTemplateValidationStage` already has a constructor overload taking the shared `ILatticePreviewService`, so
+  the shared-instance claim is consistent with the existing type.
+- The GUI-reuse claim is now consistent: §1 and §25 say Step 26 receives the same typed `BuildPreview` from the
+  same library pipeline, and the data contract, `cli.md`, and `building.md` use the same wording. The former
+  “caller-composed preview” statements are gone; only `verify` remains caller-composed, and §6.2/§12.2/§20 say
+  so explicitly.
+
+No second preview implementation remains in the design. `BuildPreviewBuilder` is internal to
+`Mocassin.Packages.Build`, so the CLI and GUI consume only `BuildResult.Preview`.
+
+#### Closure of round-1 findings
+
+| Finding | Round-2 status | Evidence verified in the frozen docs/code |
+| --- | --- | --- |
+| M-1 (Major) | **Closed** | Step page §6.1 `BuildResult.Preview`/`BuildPreview` types and the “single preview output” bullet; §6.2 preview stage; §12.2 `preview` projection and timing; §16.1 `BuildPreviewBuilder`; §20/§25 GUI reuse; data contract §5.7.3. `ILatticePreviewService.cs:36-40` needs `Project`+`CompiledModel`, both available to the pipeline. |
+| m-1 (Minor) | **Closed** | `BuildRequest.Options` exists (§6.1), the pipeline reads it per call (§6.3), §20 records it as the only injection point, and §23 has the “Options injection” test. `Mocassin.Packages` has `InternalsVisibleTo("Mocassin.Packages.Tests")` for the internal test constructor. |
+| m-2 (Minor) | **Closed** | §11.1 table now has rows for `JobSelection`, `Preview`, `PackageWrite` with/without a `PKG` cause, and `None`/`Failed`; the classification paragraph maps load kinds and writer exceptions. §23 “Exit codes” pins every `BuildFailureKind`/status. |
+| m-3 (Minor) | **Closed** | §6.2 sets `ValidationOptions.WarningsAsErrors` on both calls; §13.3 post-filters parameterization diagnostics to `Failure = Parameterization`. `ValidationOptions.WarningsAsErrors` exists; `ParameterizationOptions` has no warning flag; `IParameterizationService.Validate` returns diagnostics. |
+| m-4 (Minor) | **Closed** | §6.2 uses `loadDiagnostics:`, `options:`, `compiledModel:`, `cancellationToken:` and passes the token; the signature is `(project, loadDiagnostics, options, compiledModel, cancellationToken)`. Aligns with accepted Step 10 R2-5. |
+| m-5 (Minor) | **Closed; residual Note R2-1** | §5.1 limits the one-report guarantee to `validate` and the seven report-backed commands; §12.1/§12.4/§13.7/§13.9/§22 and data contract §5.7.2/§5.7.4 define the reserved-command and `clean --json` behaviour. The closing sentence of data contract §5.7.6 still says “All commands…”, recorded as R2-1. |
+| m-6 (Minor) | **Closed** | §5.1/§10/§12.5, `cli.md`, and data contract §5.5 all state that `--json` makes stderr JSON Lines only and suppresses human progress; `--quiet` adds stage/progress/log suppression. |
+| m-7 (Minor) | **Closed** | Roadmap §3 row and §3.1 exception; `05-open-decisions.md` resolved rows for sizing/`--template`/ceria/report registration; step page §2/§21. No split; the 2.25 pw contingency is retained. |
+| m-8 (Minor) | **Closed** | §6.2 constructs `ProjectValidationPipeline(additionalStages: [new JobTemplateValidationStage(previewService)])` and states the registration is mandatory; §20 repeats it; `design-decisions.md` no longer claims Step 12 adds a Build stage; the `RunBuildStages` no-op is verified. |
+| m-9 (Minor) | **Closed** | §13.6/§16.2/§18.2/§23 define the internal `IDoctorCheck`/`DoctorCheckResult` seam and injectable check list; `Mocassin.Cli` has `InternalsVisibleTo("Mocassin.Cli.Tests")`; `ISolverProbe` remains the only process boundary. |
+| n-1 (Note) | **Closed** | §6.2/§12.5 and data contract §5.5 state that stage events precede `build.started` and define it as “job generation begins”; §23 “Events” asserts the ordering. |
+| n-2 (Note) | **Closed; editorial Note R2-2** | `cli.md` now links to `diagnostics.md` instead of duplicating the table; §18.1 names the drift-checked page (but lists it twice, R2-2). |
+| n-3 (Note) | **Closed** | `cli.md` scopes `--json` to `validate` and the seven report-backed commands and restores the `validate` “Human output” section with the Step 07 stability statement. |
+| n-4 (Note) | **Closed** | `errors.md` separates `JOB004` (500,000 positions), `JOB008` (1–1000 per-configuration jobs), and `JOB019` (99,999 total jobs). |
+| n-5 (Note) | **Closed** | `BuildOptions.TimeProvider` is non-null with a `TimeProvider.System` default; the “null means `TimeProvider.System`” sentence is gone from §6.1/§6.3. |
+| n-6 (Note) | **Closed** | Data contract §6 and step page §12.5 say the CLI validator accepts the fixture now and the Step 26 GUI parser will accept it when it exists. |
+| n-7 (Note) | **Closed** | §6.1/§16.3 say `PublicAPI.Unshipped.txt` is updated and the ApiCompat baseline only for an intentional rebaseline. |
+| n-8 (Note) | **Closed** | §5.1 defines the unconditional next-token rule and the `--jobs -1`/`--parallel -1`/`-o -file` cases; `cli.md` repeats it; §23 “Parser/help” tests it. |
+| n-9 (Note) | **Closed** | §16.5 adds `Mocassin.Packages/Projects/Templates/` with `ProjectTemplate`/`ProjectTemplateFactory`/`Assets`, the namespace, the `PublicAPI.Unshipped.txt` obligation, and the test folder; `code-structure.md` repeats it; the structure checker counts only `.cs` files and the depth is 3. |
+
+No round-1 finding is left open. The four owner decisions are recorded as decided in step page §21 and the
+`05-open-decisions.md` resolved rows: 3.0–4.0 pw with seven features, no split, the 2.25 pw contingency, and
+the roadmap/register exception; `--template` as the build-template id with `--job-template` for job templates;
+the ceria starter with the model-hash freshness test and `blank` retained; and `compiled-inspection-v1`/
+`package-summary-v1` kept as canonical projections with no new CLI report ids. I found no silent re-scoping of
+any of the four.
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Note** | **R2-1 — The data contract’s closing report-scope sentence still claims every recognised command prints a report with `--json`, contradicting the new m-5 scope.** | `docs/planning/02-data-contracts.md:1864-1865`; contrast `:1786-1793` (§5.7.2), step page §5.1/§13.9, and `cli.md:8`. |
+| **Note** | **R2-2 — §18.1 lists `docs/reference/diagnostics.md` twice.** | Step page `:1235`, `:1257-1258`. |
+| **Note** | **R2-3 — The implementation-status sizing cross-reference says “`04-roadmap.md` §3.1 and §2”, but the exception is in roadmap §3/§3.1 and §2 is the step page’s own sizing section.** | Step page `:15-16`; contrast `:74-76`, `:1253`, `:1449-1451`; `04-roadmap.md:68`, `:114-123`. |
+| **Note** | **R2-4 — §15 says the shared `BuildPreviewBuilder` comes “from `Mocassin.Packages.Jobs`/`Projects.Validation`”, while §16.1 places it in `Mocassin.Packages/Build/Internal/`.** | Step page `:1038-1040`; contrast `:1061`, `:1067`, `:1072-1073`. |
+
+**R2-1.** The m-5 resolution correctly limits the one-report guarantee to `validate` and the seven
+report-backed commands in the step page, `cli.md`, and data contract §5.7.2/§5.7.4. However, the last sentence
+of data contract §5.7.6 still reads “All commands print exactly one report object with `--json`, including
+usage errors, once the command name is recognised.” `completion`, `--help`, `--version`, and the reserved
+commands are recognised commands that do not accept `--json` and emit no report. Limit the sentence to
+`validate` and the seven report-backed commands (or say “every command that accepts `--json`”). No start block;
+the operative sections are correct.
+
+**R2-2.** The feature-1 documentation list in §18.1 contains a `docs/reference/diagnostics.md` bullet at
+`:1235` (“`CLI001`–`CLI009` rows and headings, included in the docs-drift test”) and a second at `:1257-1258`
+(the link/row addition). Remove one so the plan has one owner bullet for the page. No start block.
+
+**R2-3.** The implementation-status block says “`04-roadmap.md` §3.1 and §2 record it.” The roadmap exception is
+in §3 (step-estimate row) and §3.1 (recorded-exception paragraph); roadmap §2 is the phase overview. The same
+page correctly says “`04-roadmap.md` §3 and §3.1” at §2, §18.1, and §20. Use the same reference (or name the
+step page §2 explicitly). No start block.
+
+**R2-4.** §15 says `Mocassin.Packages.Build` uses “the shared `BuildPreviewBuilder` from
+`Mocassin.Packages.Jobs`/`Projects.Validation`”. §16.1 lists `Internal/BuildPreviewBuilder.cs` under
+`Mocassin.Packages/Build/`. The builder is in the same assembly either way, so this is a placement/ownership
+wording issue, not a dependency question; name `Build` for the builder and `Jobs`/`Projects.Validation` for the
+service and stage. No start block.
+
+#### Verdict
+
+**Ready with notes.** M-1 is closed: the preview payload is produced once, inside the pipeline, from the single
+`ProjectStore.LoadAsync` and the single `IModelCompiler.Compile`, and is returned as the public typed
+`BuildResult.Preview` that both the CLI and Step 26 project. All nine Minor findings and all nine round-1 Notes
+are resolved in the frozen documents, and the four owner decisions are recorded as decided without re-scoping.
+No Blocker or Major remains. Four editorial/consistency Notes (R2-1–R2-4) remain; none affects a cross-step
+interface, a testable guarantee, or the start gate. The human owner may accept them as notes or ask for a small
+documentation-only cleanup before the start gate.
+
+Follow-up owner: Step agent/planner for the four documentation-only Notes; the human owner approves the verdict
+and the start gate.
