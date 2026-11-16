@@ -238,6 +238,13 @@ public sealed record BuildRequest
     public DateTimeOffset? CreatedUtc { get; init; }
 }
 
+public sealed record BuildOptions
+{
+    public TimeSpan ProgressInterval { get; init; } = TimeSpan.FromMilliseconds(100);
+    public TimeProvider TimeProvider { get; init; } = TimeProvider.System;
+    public int EventChannelCapacity { get; init; } = 256;   // tests may lower it
+}
+
 public enum BuildStage
 {
     Load = 0,
@@ -278,6 +285,17 @@ public sealed record BuildResult(
     PackageWriteResult? Package,
     ImmutableArray<BuildStageTiming> Timings,
     TimeSpan Elapsed);
+
+public sealed record BuildStageTiming(BuildStage Stage, TimeSpan Elapsed);
+
+public sealed record BuildSelection(
+    BuildTemplate? BuildTemplate,
+    JobTemplate JobTemplate,
+    ParameterizationTemplate? Parameterization,
+    bool ImplicitDefaultParameterization,
+    string? OutputName);
+
+public sealed record JobSelectionResult(string Expression, ImmutableArray<int> JobIds, int ExpandedCount);
 ```
 
 - `BuildFailureKind.None` accompanies `Succeeded` and `Cancelled`; the CLI maps the kind, not the library,
