@@ -333,13 +333,18 @@ per feature.
   clean for 9 assemblies; Rust fmt/clippy/test; Python 3 tests and package build; strict Zensical build,
   DocFX 0 warnings / 0 errors, rustdoc; contract artifacts current (19 files; model 5 / parameterization 4 /
   lattice 2 projection fixtures), space-group catalog current (274 settings), process consistency, 45 tool
-  tests, SPDX 600 source files, 979 secret-scanned files, cargo-deny clean. The session's dev image had only
-  SDK 10.0.403, so the pinned 11.0.100 SDK was installed under `/tmp/opencode/dotnet11` for the gate; no
-  repository file changed.
+  tests, SPDX 600 source files, 979 secret-scanned files, cargo-deny clean. The running dev image predates
+  amendment 1 and exposes only SDK 10.0.403 (`dotnet --list-sdks`); the containerfile already pins 11.0.100
+  only. The pinned SDK was therefore installed under `/tmp/opencode/dotnet11`, and the gate ran on **SDK
+  11.0.100 / runtime 11.0.0** from that root; no repository file changed. The follow-up bookkeeping commit
+  re-ran `./tools/verify.sh docs --require` and `./tools/verify.sh policy --require` with the same SDK root:
+  both exit 0, and the policy run re-confirmed the 19 contract files, 274 settings, 45 tool tests, 600 SPDX
+  files, and 979 secret-scanned files above.
 - **Step CI:** not run — no per-feature CI; the single Ubuntu closeout dispatch is still pending.
 - **Diff summary:** added the checked-in `.msl` v1 fixture `tests/contracts/packages/msl-v1/` (98,304-byte
-  package, SHA-256 line, `package-summary-v1.json`, 12 extracted payloads plus `payloads/index.json`, and a
-  README with provenance and regeneration) and the env-gated `RegeneratePackageFixture` test; added
+  package, SHA-256 line, `package-summary-v1.json`, 13 extracted payloads (six job, six lattice, one model)
+  plus `payloads/index.json`, and a README with provenance and regeneration) and the env-gated
+  `RegeneratePackageFixture` test; added
   `PackageFixtureBuilder` test support and five `PackageFixtureTests` covering verification, the canonical
   summary, the package hash, the payload index, and rebuild reproducibility; added the one-shot
   `SimulationPackageBudget` runner and the `SimulationPackageBuildBenchmarks` BenchmarkDotNet case with the
@@ -367,12 +372,13 @@ per feature.
   unchecked acceptance criteria (an explicit in-test parameterization package, and Step 13/18 consumption of
   the variable-length `tracker_order`) are not feature-7 work; the writer-side tracker assertion is
   implemented.
-- **Closeout readiness:** `origin/main` (`286e10c`) is an ancestor of the feature-7 tip; the step branch is 35
-  commits ahead. Remaining before the audit request: merge the owner-approved `fix/ci-platform-gate`
-  (`6946e61`) CI fix into `main`, merge the updated `main` into this step branch and re-run the full gate, fill
-  `docs/planning/closeout/step-11.json`, dispatch the single Ubuntu closeout run, dispatch the focused Windows
-  platform gate (`platforms=windows`), then create `docs/planning/audits/step-11.md` and request the audit. No
-  closeout JSON or audit record has been created from placeholder values.
+- **Closeout readiness:** `origin/main` (`286e10c`) is an ancestor of the feature-7 tip; the step branch was 35
+  commits ahead at that tip (`0ae05a4`). Remaining before the audit request: merge the owner-approved
+  `fix/ci-platform-gate` (`6946e61`) CI fix into `main`, merge the updated `main` into this step branch and
+  re-run the full gate, fill `docs/planning/closeout/step-11.json`, dispatch the single Ubuntu closeout run,
+  dispatch the focused Windows platform gate (`platforms=windows`), then create
+  `docs/planning/audits/step-11.md` and request the audit. No closeout JSON or audit record has been created
+  from placeholder values.
 
 ### Amendment 1 — .NET 11 toolchain and native Zstandard
 
