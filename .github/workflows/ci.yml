@@ -14,9 +14,11 @@ name: CI
 # cover the platform-sensitive behaviour: P/Invoke directory fsync, atomic
 # rename, temporary-file handling, and the SQLite reader's path and locking
 # behaviour. A platform gate does not repeat the boilerplate suite, coverage,
-# or the format check, and it never starts the Rust, Python, contracts, or
-# API-compatibility jobs; those are Ubuntu-only. `platforms=windows` therefore
-# runs one Windows job, not Windows plus an implicit Ubuntu job.
+# or the format check. The Rust, Python, contracts, and API-compatibility jobs
+# are Ubuntu-only by job condition: they run on a `push` to `main` or when
+# `platforms` is `ubuntu`/`all`, never for `windows` or `macos`.
+# `platforms=windows` therefore runs the short Ubuntu `changes` job plus one
+# Windows job, not the Ubuntu suite.
 #
 # macOS stays fully manual until there is macOS-specific behaviour to validate.
 # Documentation has its own manual workflow in `docs.yml`.
@@ -248,9 +250,10 @@ jobs:
   rust:
     name: Rust
     needs: changes
-    # Rust is platform-neutral so far and the platform gate is a .NET gate:
-    # the Rust job always runs on Ubuntu, never on the selected platform.
-    if: needs.changes.outputs.rust == 'true'
+    # Rust is platform-neutral so far and the platform gate is a .NET gate.
+    # The job is Ubuntu-only: a Windows/macOS dispatch must not start it even
+    # when the Rust paths changed.
+    if: needs.changes.outputs.rust == 'true' && (github.event_name == 'push' || inputs.platforms == 'ubuntu' || inputs.platforms == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -279,7 +282,7 @@ jobs:
   python:
     name: Python (${{ matrix.python-version }})
     needs: changes
-    if: needs.changes.outputs.python == 'true'
+    if: needs.changes.outputs.python == 'true' && (github.event_name == 'push' || inputs.platforms == 'ubuntu' || inputs.platforms == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -327,7 +330,7 @@ jobs:
   contracts:
     name: Contracts and policy
     needs: changes
-    if: needs.changes.outputs.contracts == 'true'
+    if: needs.changes.outputs.contracts == 'true' && (github.event_name == 'push' || inputs.platforms == 'ubuntu' || inputs.platforms == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -384,7 +387,7 @@ jobs:
   api-compat:
     name: Public API compatibility
     needs: changes
-    if: needs.changes.outputs.api == 'true'
+    if: needs.changes.outputs.api == 'true' && (github.event_name == 'push' || inputs.platforms == 'ubuntu' || inputs.platforms == 'all')
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
