@@ -1455,10 +1455,13 @@ mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
 - `evaluate` requires a `.msr` store (or an explicit `--results` path) in addition to the package.
 - `collect --external-states` stores large `.mcs` files next to `.msr` with relative paths/hashes.
 - `clean` removes job folders and/or result rows only with an explicit selection and confirmation; `--dry-run`
-  reports what would be removed. Step 12 implements **only** the dry run; deletion is Step 28.
+  reports what would be removed. Step 12 implements **only** the dry run; deletion is Step 28. With `--json`,
+  a missing `--dry-run` is a usage error that still emits `clean-v1` with `dryRun = false`, `removedCount = 0`,
+  and `CLI008`; it never deletes.
 - `completion` prints a shell completion script generated from the CLI command table. It is convenience
-  output, not a versioned JSON contract.
-- Reserved commands are recognised and exit `2` with a stable `CLI008` diagnostic and the owning step.
+  output, not a versioned JSON contract, and it does not accept `--json`.
+- Reserved commands are recognised and exit `2` with a stable `CLI008` diagnostic and the owning step. They
+  do not accept `--json` and emit no report.
 
 
 ### 5.2 `mocassin-sim` (Rust)
@@ -1594,7 +1597,7 @@ event is one JSON object on one line with `schemaVersion = 1` and a stable `even
 
 | Event | Required fields | Meaning |
 | --- | --- | --- |
-| `build.started` | `total` | Build began; `total` is the selected job count, known after expansion |
+| `build.started` | `total` | Job generation began; `total` is the selected job count, known after expansion |
 | `build.stage` | `stage`, `status` | A pipeline stage started or completed; `ms` is optional on completion |
 | `build.progress` | `completed`, `total` | Build progress; `stage`, `current`, and `etaS` are optional |
 | `build.finished` | `exitCode`, `wallTimeS` | Build ended; `published` is optional; emitted once for every recognised run |
@@ -1607,16 +1610,19 @@ event is one JSON object on one line with `schemaVersion = 1` and a stable `even
 | `diagnostic` | `code`, `severity`, `message` | Structured diagnostic; `path` optional |
 | `log` | `level`, `message` | Human log forwarded as JSON |
 
-- `build.started` is emitted after job expansion, when the selected total is known. `build.finished` is
-  emitted exactly once at the end, including for a failure before `build.started` or for cancellation.
+- `build.started` is emitted after job expansion, when the selected total is known. The `build.stage` events
+  for load/select/validate/compile/validateBuild/parameterize/expand therefore precede it; consumers must not
+  require `build.started` to be the first line. `build.finished` is emitted exactly once at the end,
+  including for a failure before `build.started` or for cancellation.
 - `build.stage` was added in Step 12; it is an additive event within `schemaVersion = 1`. The manifest event
   descriptor records required fields only (`stage`, `status`); the optional `ms`, `stage`, `current`, `etaS`,
   `published`, and `path` fields are documented here and asserted by the CLI event tests. Step 12 does not add
   an `optionalFields` manifest key or change the generated `events-v1` schema shape.
 - `build.progress.completed` is monotonic within one stream; `total` is the selected job count. Progress is
   throttled by the writer of the stream, so consumers must not expect one event per job.
-- `--quiet` suppresses `build.stage`, `build.progress`, and `log`; `build.started`, `build.finished`, and
-  `diagnostic` remain.
+- `--json` makes stderr JSON Lines only; human stage/progress lines are suppressed whether or not `--quiet`
+  is used. `--quiet` additionally suppresses `build.stage`, `build.progress`, and `log`; `build.started`,
+  `build.finished`, and `diagnostic` remain.
 - Consumers ignore unknown events and unknown fields.
 - Ordering is guaranteed within one stream; `jobId` is present for per-job events.
 - stdout remains reserved for the human statistics dump or a single final JSON object.
@@ -1777,11 +1783,14 @@ Diagnostics are ordered by severity, code, domain, object ID, property, and mess
 `(code, path, message)` duplicates are removed. Domain codes (`PROJ`, `STR`, `TRN`, `ENM`, `SIM`, `CMP`,
 `PRM`, `JOB`, `PKG`) keep their meaning. CLI-only failures use `CLI001`–`CLI009`.
 
-Every recognised command emits one report for every outcome, including a usage error before any work. The
-shared envelope is always populated; command-specific fields are present but `null`, `0`, `false`, `[]`, or
-`"skipped"`. `required` in the generated schema means “present”, not “non-null”: report descriptors mark
-payload objects, strings, and identities nullable, and nested objects are present with null fields. This is
-why a usage error with `--json` validates against the same schema as a successful run.
+`validate` and each report-backed command emit one report for every outcome, including a usage error before
+any work. `completion`, `--help`, `--version`, and the reserved commands do not accept `--json` and emit no
+report. The shared envelope is always populated; command-specific fields are present but `null`, `0`,
+`false`, `[]`, or `"skipped"`. `required` in the generated schema means “present”, not “non-null”: report
+descriptors mark payload objects, strings, and identities nullable, and nested objects are present with null
+fields. This is why a usage error with `--json` validates against the same schema as a successful run.
+`clean --json` without `--dry-run` is a usage error that still uses `clean-v1` with `dryRun = false`,
+`removedCount = 0`, and `CLI008`.
 
 #### 5.7.3 `build-v1`
 
@@ -1797,9 +1806,9 @@ why a usage error with `--json` validates against the same schema as a successfu
 | `parameterizationSignature` | string or null | yes | Step 09 `models.signature`; null when parameterization did not run. |
 | `selection` | object or null | yes | `buildTemplate` (`id`, `name`, nullable), `jobTemplate` (`id`, `name`), `parameterization` (`id`, `name`, `implicitDefault`), `outputName` (string or null); null before selection or on a usage error. |
 | `jobSelection` | object or null | yes | `expression`, `expandedCount`, `selectedCount`; null before expansion, and `expression` is null on a usage error. |
-| `timings` | array | yes | `[{ "stage": string, "ms": number }]` in pipeline order: `load`, `select`, `validate`, `compile`, `validateBuild`, `parameterize`, `expand`, `preview`, `generate`, `publish`, `verify`; omitted stages are absent. `preview` and `verify` are caller-composed, not pipeline stages. |
+| `timings` | array | yes | `[{ "stage": string, "ms": number }]` in pipeline order: `load`, `select`, `validate`, `compile`, `validateBuild`, `parameterize`, `expand`, `preview`, `generate`, `publish`, `verify`; omitted stages are absent. `preview` is produced inside the pipeline from `BuildPreview.Elapsed`; `verify` is caller-composed; neither is a pipeline `BuildStage`. |
 | `package` | object or null | yes | `path`, `sha256`, `sizeBytes`, `jobCount`, `modelCount`, `latticeCount`, `latticeReuseFactor`, `published`; null in preview and before publication. |
-| `preview` | object or null | yes | Step 10 preview payload (`templateId`/`templateName` of the effective **job** template, `totalJobs`, `collections[]`); null in a full build and before preview evaluation. |
+| `preview` | object or null | yes | Direct projection of `BuildResult.Preview` (`jobTemplateId`/`jobTemplateName` of the effective **job** template, `totalJobs`, `collections[]`); null in a full build and before preview evaluation. |
 | `verification` | string enum `passed`, `failed`, `skipped` | yes | Post-publication verification result. |
 
 - `ok`/`exitCode` follow the build table: 0 success, 1 validation/lattice/package-invalid, 2 usage, 3 I/O,
@@ -1821,7 +1830,7 @@ why a usage error with `--json` validates against the same schema as a successfu
 | `inspect-v1` | `package` with the Step 11 `PackageInspection` fields: `formatVersion`, `appVersion`, `createdUtc`, `projectId`, `generator`, `jobSelection`, `symmetryContractVersion`, `spaceGroupDataVersion`, `spaceGroupDataSha256`, `models[]` (`signature`, `modelSignature`, `payloadFormatVersion`, `payloadBytes`), `latticeCount`, `jobCount`, `collections[]` (`kind`, `collectionName`, `configName`, `jobCount`), `minTemperatureK`, `maxTemperatureK`, `minElectricFieldVm`, `maxElectricFieldVm`, `sizeBytes`, `latticeReuseFactor` |
 | `verify-v1` | `valid`, `checks[]` (`code`, `passed`, `message`), `diagnostics[]`, `package` (the same object as `inspect-v1`) |
 | `doctor-v1` | `healthy`, `checks[]` (`name`, `status` enum `ok`/`warn`/`fail`, `message`, optional `detail`), `environment` (`framework`, `os`, `architecture`, `sqliteVersion`, `catalogVersion`, `catalogSha256`, `solverPath`, `solverVersion`) |
-| `clean-v1` | `dryRun` (true in Step 12), `packagePath`, `directory`, `jobSelection`, `jobCount`, `folders[]` (`path`, `jobId`, `lastWriteUtc`, `sizeBytes`), `totalBytes`, `olderThanDays` (nullable), `removedCount` (0 in Step 12) |
+| `clean-v1` | `dryRun` (the requested mode), `packagePath`, `directory`, `jobSelection`, `jobCount`, `folders[]` (`path`, `jobId`, `lastWriteUtc`, `sizeBytes`), `totalBytes`, `olderThanDays` (nullable), `removedCount`. `--dry-run` is the only supported mode (`dryRun = true`, `removedCount = 0`); without it, `dryRun = false`, `removedCount = 0`, `CLI008`, exit 2, and no deletion. |
 
 `compiled-inspection-v1` and `package-summary-v1` remain canonical inspection projections rather than new
 CLI report ids: `compile -o` writes the former, and `inspect-v1`/`verify-v1` embed the latter’s data.
@@ -1868,8 +1877,9 @@ errors, once the command name is recognised.
   readers; previous-major fixtures are retained for the compatibility window.
 - `tests/contracts/job-folder/` contains a real solver job folder with `solver.json`, `run.mcs`, `prerun.mcs`,
   logs, and an optional `mmcfe.db`; .NET and Python parse them.
-- `tests/contracts/events-v1.jsonl` is accepted by the GUI event parser and the CLI schema validator; Step 12
-  adds a real build sequence (started, stage, progress, diagnostic, finished).
+- `tests/contracts/events-v1.jsonl` is accepted by the CLI schema validator; the Step 26 GUI event parser
+  will accept it when that parser exists. Step 12 adds a real build sequence (started, stage, progress,
+  diagnostic, finished).
 - The `build-v1`, `new-project-v1`, `compile-v1`, `inspect-v1`, `verify-v1`, `doctor-v1`, and `clean-v1`
   reports are validated against their generated schemas using real CLI output; `validation-v1` keeps its
   existing schema test. Usage-error reports are validated too.

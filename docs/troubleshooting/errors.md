@@ -81,7 +81,7 @@ you want the final summary.
 | Exit `3`, `CLI003` | The `.msl` target already exists | Choose a new path or pass `--force`; without it the existing package is untouched. |
 | Exit `2`, `CLI004` | No build template/job template/parameterization selected, or several candidates | Pass `--template` (build template), `--job-template`, or `--parameterization` with one of the listed IDs. |
 | Exit `2`, `CLI005` | Malformed or out-of-range `--jobs` | Use `all`, `N`, or `A-B`, with 1-based IDs within the expanded count; zero, descending, and empty selections are rejected. |
-| Exit `1`, `JOB004`/`JOB008`/`JOB019` | Supercell or job-count limit | Reduce the cell size or job count; the caps are 500,000 positions and 99,999 jobs. |
+| Exit `1`, `JOB004`/`JOB008`/`JOB019` | Supercell or job-count limit | `JOB004` is the 500,000-position cap, `JOB008` is the 1–1000 per-configuration job count, and `JOB019` is the 99,999 total-job cap; reduce the cell size or job count. |
 | Exit `1`, `JOB012` | A compensated doping pair cannot be realized | Change the doping fractions, the dependent exchange, or the cell size. |
 | Exit `1`, `PRM001` | The selected parameterization targets a different model signature | Rebase the template against the current compiled model, or build with the implicit default. |
 | Exit `4`, `PRM` warning promoted | `--warnings-as-errors` turned a parameterization warning into a failure | Fix the reported values/template, or drop the flag knowingly. |

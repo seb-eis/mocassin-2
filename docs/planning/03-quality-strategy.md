@@ -468,13 +468,21 @@ solver with the same binary, platform, package, and seed.
   temp file remains; a cancellation after publication leaves a valid package and exits 6. Failure injection
   covers a writer error and a disk-full-like `IOException`.
 - **Preview:** `--preview` never creates or modifies a `.msl`, reports `mode = "preview"`, `package = null`,
-  and the same lattice/doping counts as the build; compile errors exit 4.
+  and the same lattice/doping counts as the build; compile errors exit 4. `BuildResult.Preview` is produced
+  once by the pipeline’s shared `BuildPreviewBuilder`; the CLI/Step 26 projection does not reload, recompile,
+  or call a second preview service, and `build-v1.preview` equals the typed payload.
+- **Options and seams:** `BuildRequest.Options` supplies the clock, throttle, and channel capacity; tests use
+  a fixed clock. `doctor` injects `IDoctorCheck` outcomes for pass/warn/fail; only the solver probe launches a
+  process.
 - **Warnings:** validation warnings exit 1 under `--warnings-as-errors`; promoted parameterization warnings
   exit 4; an unflagged build succeeds; `CMP`/`PKG` warnings stay warnings.
-- **Reports:** every `--json` report validates against its generated schema, including usage errors;
-  `build-v1` covers build and preview modes; diagnostics use the `validation-v1` element shape.
-- **Events:** JSON-Lines `build.started`/`build.stage`/`build.progress`/`build.finished` ordering,
-  `build.finished` exactly once, `--quiet` suppression, and `tests/contracts/events-v1.jsonl` acceptance.
+- **Reports:** every `--json` report for `validate` and the seven report-backed commands validates against its
+  generated schema, including usage errors; `build-v1` covers build and preview modes; `clean --json` without
+  `--dry-run` reports `CLI008`; `completion`/help/version/reserved commands emit no report; diagnostics use the
+  `validation-v1` element shape.
+- **Events:** `build.stage` events precede `build.started`; JSON-Lines `build.started`/`build.stage`/
+  `build.progress`/`build.finished` ordering; `build.finished` exactly once; `--json` leaves stderr
+  JSONL-only; `--quiet` suppression; `tests/contracts/events-v1.jsonl` acceptance.
 - **Inspect/verify:** valid, corrupt, truncated, and missing packages; `PKG` diagnostics; exit 0/1/3.
 - **New/compile:** blank and ceria templates produce valid projects with fresh identity and seed; the embedded
   ceria template’s model hash equals the sample; `compile -o` writes a re-readable

@@ -312,7 +312,10 @@ compiled-bound checks:
   shared `LatticePreviewService`, so validation and generation cannot diverge.
 
 `mocassin build --preview` compiles the project first and then calls the pipeline with the compiled model and
-`RunBuildStage = true`; Step 12's full build reuses the same pipeline wiring and appends its own Build stages.
+`RunBuildStage = true`; Step 12's full build constructs the same pipeline with
+`additionalStages: [new JobTemplateValidationStage(previewService)]`. It adds no new Build stage, and a
+default `ProjectValidationPipeline` with `RunBuildStage = true` is a silent no-op, so the registration is
+mandatory and tested.
 This is deliberately not a second validation pipeline. The Build stage remains the only extension point, the
 Core structural validator remains available to `validate` without a compiled model, and a model that is missing
 or stale relative to the project is a caller contract problem, not a user-data diagnostic.
@@ -426,6 +429,14 @@ from `Load` so project/output/disk failures map to 3 while parse/content/validat
 library reports cancellation as a status and the CLI adds `CLI006`; no CLI-specific diagnostic leaks into the
 GUI-facing pipeline. `build-v1` deliberately has no package-size estimate: a preview is size-neutral, and a
 full build’s measured `package.sizeBytes` is authoritative.
+
+`BuildResult.Preview` is the single preview output. The pipeline evaluates the preview after expansion with
+the shared `BuildPreviewBuilder`/`ILatticePreviewService` and returns a typed `BuildPreview`; the CLI and
+Step 26 map it and never reload, recompile, or run a second preview. A separate `PreviewAsync` was rejected
+because it would create two orchestration paths for the same work. `BuildRequest.Options` is the only clock/
+throttle/channel injection point. The report guarantee is limited to `validate` and the seven report-backed
+commands: `completion`, help/version, and reserved commands do not accept `--json`; `clean --json` without
+`--dry-run` still emits `clean-v1` with `CLI008`. `--json` makes stderr JSONL-only.
 
 ## Build template versus job template (Step 12)
 

@@ -107,8 +107,9 @@ records the canonical selection (`1-3,7`; `all` for a full build) in `schema_inf
 ### Preview
 
 `mocassin build ceria.mocprj --preview` runs validation, compilation, parameterization, and expansion, then
-reports each collection, configuration, optimizer, lattice size, and doping outcome. It never creates or
-modifies a `.msl`.
+evaluates the selected configurations through the same pipeline preview builder that the GUI uses and reports
+each collection, configuration, optimizer, lattice size, and doping outcome. It never creates or modifies a
+`.msl`; the report is a projection of the library’s typed preview result, not a second evaluation.
 
 ### Progress and cancellation
 

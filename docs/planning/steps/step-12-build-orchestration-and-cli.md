@@ -9,11 +9,11 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** Not started — design review requested; no step branch yet.
-- **Design review:** Ready for review — [record](../reviews/step-12.md)
+- **Status:** Not started — round-1 design corrections complete; re-review pending; no step branch yet.
+- **Design review:** Re-review required — [record](../reviews/step-12.md)
 - **Feature list:** Proposed 2026-11-16 (seven features); awaiting one owner approval with the design verdict.
-- **Sizing:** 3.0–4.0 person-weeks, seven features; the roadmap row says 1–3 pw. No §3.1 split is proposed;
-  the delta and the contingency are recorded in §2.
+- **Sizing:** Owner-approved 3.0–4.0 person-weeks single-step exception, seven features, no split, with the
+  2.25 pw contingency; `04-roadmap.md` §3.1 and §2 record it.
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
@@ -71,10 +71,11 @@ Roadmap §3.1 check:
 
 **No split is proposed.** Splitting into 12A (CLI shell + build) and 12B (auxiliary commands + docs) would
 leave a CLI without `inspect`, `verify`, `doctor`, or `clean --dry-run`, which is a worse deliverable for the
-solver team and would add a roadmap step and change the Phase C closeout. The owner must nevertheless accept
-the 3.0–4.0 pw estimate at the design/start gate. **Contingency:** if features 1–3 exceed 2.25 pw, stop and
-ask the owner to re-open the split before starting feature 4. The estimate is not a licence to exceed four
-weeks.
+solver team and would add a roadmap step and change the Phase C closeout. **Owner decision (2026-11-16):**
+the 3.0–4.0 pw single-step exception, seven features, and no split are accepted; `04-roadmap.md` §3 and §3.1
+record the exception and `05-open-decisions.md` records the resolved decision (Step 09 precedent).
+**Contingency:** if features 1–3 exceed 2.25 pw, stop and ask the owner to re-open the split before starting
+feature 4. The estimate is not a licence to exceed four weeks.
 
 ## 3. Original reference
 
@@ -169,16 +170,22 @@ mocassin clean ...       # deletion, Step 28
   short flags are not supported. `--` ends option parsing so a path beginning with `-` can be passed.
 - Option names are case-sensitive. Numbers use invariant culture. `--parallel` accepts `1..256`; `--older-than`
   accepts `0..36500`.
-- A value that starts with `-` is still a value when the option requires one; only a following option token
-  starts a new option. A missing value is `CLI001`/exit 2.
+- An option that requires a value consumes the next token unconditionally; it is never reclassified as an
+  option. `--name=value` is the only other form. A missing next token is `CLI001`/exit 2. Therefore
+  `--jobs -1` is the value `-1` (rejected by `CLI005`), `--parallel -1` is `-1` (range error), and
+  `-o -file` names the path `-file`. `--` still ends option parsing for a positional path.
 - The parser validates arity and option applicability before loading anything. Command handlers receive a
   typed parsed object; they do not re-parse `string[]`.
-- `--json` is a per-command option, not a global prefix. A recognised command with `--json` prints exactly
-  one JSON report for every outcome, including usage errors. An unknown command prints human usage to stderr
-  and exits 2; there is no command report for it.
-- `--quiet` suppresses human progress and the JSON-Lines `build.stage`, `build.progress`, and `log` events;
-  diagnostics, the final report, and `build.started`/`build.finished` remain. `--quiet` does not suppress
-  errors.
+- `--json` is a per-command option, not a global prefix. `validate` and the seven `reports`-backed commands
+  (`new`, `compile`, `build`, `inspect`, `verify`, `doctor`, `clean`) print exactly one schema-valid report
+  for every outcome, including a usage error. `completion`, `--help`, `--version`, and the reserved commands
+  (`simulate`, `collect`, `evaluate`, `export`, and full `clean`) do not accept `--json`; they print human
+  usage/diagnostic text to stderr and exit 2 (or 0 for help/version), with no report. An unknown command is
+  the same: human usage, exit 2, no report.
+- `--json` switches stderr to JSON Lines only: human stage/progress lines are suppressed whenever `--json` is
+  set, whether or not `--quiet` is used. `--quiet` additionally suppresses the `build.stage`,
+  `build.progress`, and `log` events; diagnostics, `build.started`, `build.finished`, and the final report
+  remain. `--quiet` does not suppress errors.
 - `--version` prints the assembly informational version and the runtime description, then exits 0.
 - `completion` output is convenience text and is not a versioned JSON contract.
 
@@ -210,7 +217,8 @@ The orchestration lives in `Mocassin.Packages.Build` (namespace `Mocassin.Packag
 - `Mocassin.Packages` already owns project persistence, parameterization, job expansion, supercells, and the
   `.msl` writer. Build orchestration is the sequencing of those capabilities.
 
-Public surface (XML-documented; added to `PublicAPI.Unshipped.txt` and the ApiCompat baseline):
+Public surface (XML-documented; added to `PublicAPI.Unshipped.txt`; the ApiCompat baseline is refreshed
+only if an intentional rebaseline is recorded):
 
 ```csharp
 namespace Mocassin.Packages.Build;
@@ -236,6 +244,7 @@ public sealed record BuildRequest
     public int MaxDegreeOfParallelism { get; init; } = Environment.ProcessorCount;
     public bool WarningsAsErrors { get; init; }
     public DateTimeOffset? CreatedUtc { get; init; }
+    public BuildOptions Options { get; init; } = new();
 }
 
 public sealed record BuildOptions
@@ -262,8 +271,8 @@ public enum BuildStatus { Succeeded = 0, Failed = 1, Cancelled = 2 }
 
 public enum BuildFailureKind
 {
-    None = 0, Io, Load, TemplateSelection, Compilation, Validation, Parameterization,
-    JobExpansion, LatticeGeneration, PackageWrite, Internal,
+    None = 0, Io, Load, TemplateSelection, JobSelection, Compilation, Validation, Parameterization,
+    JobExpansion, LatticeGeneration, Preview, PackageWrite, Internal,
 }
 
 public sealed record BuildIdentity(
@@ -272,6 +281,53 @@ public sealed record BuildIdentity(
     string? DocumentHash,
     string? ModelSignature,
     string? ParameterizationSignature);
+
+public sealed record BuildPreview(
+    string JobTemplateId,
+    string JobTemplateName,
+    int TotalJobs,
+    ImmutableArray<BuildPreviewCollection> Collections,
+    TimeSpan Elapsed);
+
+public sealed record BuildPreviewCollection(
+    string Id,
+    string Name,
+    string SimulationId,
+    string Kind,
+    bool UseDualDofCorrection,
+    int JobCount,
+    int ConfigCount,
+    ImmutableArray<BuildPreviewOptimizer> Optimizers,
+    ImmutableArray<BuildPreviewConfig> Configs);
+
+public sealed record BuildPreviewOptimizer(
+    string SiteId,
+    string ParticleId,
+    int TargetCount,
+    int? RemovedStartOptions);
+
+public sealed record BuildPreviewConfig(
+    string Id,
+    string Name,
+    int JobCount,
+    int CellA,
+    int CellB,
+    int CellC,
+    int PositionCount,
+    double TotalChargeBefore,
+    double TotalChargeAfter,
+    bool IsChargeNeutral,
+    ImmutableArray<BuildPreviewDoping> Dopings);
+
+public sealed record BuildPreviewDoping(
+    string DopingId,
+    int Priority,
+    double RequestedFraction,
+    int AvailablePrimary,
+    int RequestedPrimary,
+    int AppliedPrimary,
+    int AppliedDependent,
+    double EffectiveFraction);
 
 public abstract record BuildEvent;
 public sealed record BuildStarted(int ExpandedJobCount, int SelectedJobCount) : BuildEvent;
@@ -290,6 +346,7 @@ public sealed record BuildResult(
     ImmutableArray<Diagnostic> Diagnostics,
     BuildSelection? Selection,
     JobSelectionResult? JobSelection,
+    BuildPreview? Preview,
     PackageWriteResult? Package,
     ImmutableArray<BuildStageTiming> Timings,
     TimeSpan Elapsed);
@@ -306,25 +363,42 @@ public sealed record BuildSelection(
 public sealed record JobSelectionResult(string Expression, ImmutableArray<int> JobIds, int ExpandedCount);
 ```
 
-- `BuildFailureKind.None` accompanies `Succeeded` and `Cancelled`; the CLI maps the kind, not the library,
-  to an exit code. `Io` covers project/output/disk and writer I/O; `Load` covers a parse, content, or
-  load-time validation failure. The CLI uses the diagnostic code to distinguish `PROJ010` (unknown template
-  reference, exit 1) from `CLI004` (ambiguous or wrong-kind selection, exit 2).
+- `BuildFailureKind.None` accompanies `Succeeded` and `Cancelled`. `Io` covers project/output/disk and writer
+  I/O; `Load` covers a parse, content, or load-time validation failure; `JobSelection` covers a malformed,
+  empty, or out-of-range `--jobs` expression; `Preview` covers a preview evaluation that returns invalid
+  lattice/doping data. The CLI uses the diagnostic code to distinguish `PROJ010` (unknown template reference,
+  exit 1) from `CLI004` (ambiguous or wrong-kind selection, exit 2) and `CLI005` (job selection, exit 2).
 - `BuildResult.Identity` is the authoritative source for the `build-v1` `projectId`, `modelHash`,
   `documentHash`, `modelSignature`, and `parameterizationSignature` fields. Each value stays `null` until its
   stage has run, so an early failure or cancellation still produces a valid report; the CLI never recomputes
   a hash or signature for the report.
+- **`BuildResult.Preview` is the single preview output.** When `BuildRequest.Preview` is true, the pipeline
+  evaluates the selected configurations **inside the pipeline**, after expansion and `--jobs` filtering, with
+  the injected `ILatticePreviewService` and the same mapping code that produces the Step 10 preview. The
+  result is a typed `BuildPreview` payload (job template, total, collections/configs/optimizers/dopings,
+  elapsed time); it is `null` in a full build. The CLI and Step 26 GUI map this payload to their own views;
+  neither reloads the project nor recompiles the model, and no second preview implementation exists. A
+  preview-evaluation error is `BuildFailureKind.Preview` and exit 1.
+- `BuildPreview.Elapsed` is the preview evaluation time. The `build-v1` `preview` timing entry comes from it;
+  it is not a `BuildStage`, emits no `build.stage` event, and is not part of `BuildResult.Timings` (which lists
+  pipeline stages only).
 - `BuildResult.Diagnostics` is deduplicated, deterministically sorted, and authoritative. The
   `BuildDiagnostic` events are for live feedback and are not the report source. The library does not add
   CLI-only diagnostics such as `CLI006`; the CLI composes those into the report.
 - `BuildResult.Package` carries the Step 11 `PackageWriteResult` (path, SHA-256, counts, size, advisory
   warnings). The `build-v1` `package.published` flag is `Package is not null`; a post-publication
   cancellation therefore reports `published = true` with the package object intact.
-- `BuildRequest.CreatedUtc` is the build timestamp; `null` means `BuildOptions.TimeProvider.GetUtcNow()`.
+- `BuildRequest.CreatedUtc` is the build timestamp; `null` means `request.Options.TimeProvider.GetUtcNow()`.
   The CLI passes `null`; tests pass a fixed value for determinism.
-- `BuildOptions.TimeProvider` is the clock used for progress timestamps, ETA, and the default build
-  timestamp; `null` means `TimeProvider.System`. `BuildOptions.EventChannelCapacity` is test-tunable and is
-  not a CLI option.
+- `BuildRequest.Options` is the only configuration injection point for `ProgressInterval`, `TimeProvider`, and
+  the test-tunable `EventChannelCapacity`. The pipeline reads `request.Options` at the start of each call; it
+  does not read ambient/static configuration and has no options constructor.
+- `BuildPipeline` is constructed with production services by default: a `LatticePreviewService`, a
+  `ModelCompiler`, a `ParameterizationService`, and a `ProjectValidationPipeline` built with
+  `additionalStages: [new JobTemplateValidationStage(previewService)]`. The same preview service instance is
+  shared by the build-stage validation and the preview builder. The production constructor never runs
+  `RunBuildStage = true` on a default pipeline, where it would be a silent no-op. An internal constructor
+  accepts the services for real-object tests.
 - The library never chooses an exit code, prints to the console, or reads `Environment.ExitCode`.
 
 ### 6.2 Ordered stages
@@ -333,23 +407,40 @@ public sealed record JobSelectionResult(string Expression, ImmutableArray<int> J
 1  Load            new ProjectStore(options: new ProjectStoreOptions { ValidateOnLoad = false })
                      .LoadAsync(projectPath)                  // load diagnostics, no model validation
 2  Select          build template / job template / parameterization, output path
-3  Validate        ProjectValidationPipeline.Validate(
-                     project, loadResult.Diagnostics,
-                     new ValidationOptions { RunBuildStage = false })   // stages 1–4
-4  Compile         IModelCompiler.Compile (pure, cancellation-aware)
-5  ValidateBuild   ProjectValidationPipeline.Validate(
-                     project, loadResult.Diagnostics,
-                     new ValidationOptions { RunBuildStage = true },
-                     compiledModel)                            // stages 1–5
-6  Parameterize    IParameterizationService.Validate, then Apply (or the implicit default)
-7  ExpandJobs      JobTemplateExpander.Expand over the complete template
-8  Generate+Write  JobSelection filter; parallel SupercellGenerator + serialized package writes
+3  Validate        validationPipeline.Validate(
+                     project: project,
+                     loadDiagnostics: loadResult.Diagnostics,
+                     options: new ValidationOptions {
+                         RunBuildStage = false,
+                         WarningsAsErrors = request.WarningsAsErrors },
+                     cancellationToken: cancellationToken)    // stages 1–4
+4  Compile         IModelCompiler.Compile(project, options, cancellationToken)
+5  ValidateBuild   validationPipeline.Validate(
+                     project: project,
+                     loadDiagnostics: loadResult.Diagnostics,
+                     options: new ValidationOptions {
+                         RunBuildStage = true,
+                         WarningsAsErrors = request.WarningsAsErrors },
+                     compiledModel: compilation.Model,
+                     cancellationToken: cancellationToken)    // stages 1–5
+6  Parameterize    IParameterizationService.Validate, then Apply (or the implicit default);
+                     promote warnings per §13.3
+7  ExpandJobs      JobTemplateExpander.Expand over the complete template; apply JobSelection
+   Preview         (request.Preview only) BuildPreviewBuilder over the selected descriptors; stop
+8  Generate+Write  parallel SupercellGenerator + serialized package writes
 9  Publish         ISimulationPackageWriter.CompleteAsync (checkpoint, fsync, atomic rename)
 ```
 
 - The build uses `LoadAsync` plus `Validate(project, loadDiagnostics, ...)`, not `ValidateFileAsync`, so the
   project is loaded exactly once. `mocassin validate` keeps `ValidateFileAsync`, which constructs the same
   `ValidateOnLoad = false` store internally.
+- `validationPipeline` is constructed as
+  `new ProjectValidationPipeline(additionalStages: [new JobTemplateValidationStage(previewService)])`, using
+  the same `previewService` instance as the preview builder. This registration is mandatory: a default
+  `ProjectValidationPipeline` has no Build stage, so `RunBuildStage = true` alone is a silent no-op.
+- Both `Validate` calls use named arguments (`loadDiagnostics:`, `options:`, `compiledModel:`,
+  `cancellationToken:`) so the optional compiled model cannot be mistaken for the token, and the build token
+  reaches validation. This follows the accepted Step 10 audit note R2-5.
 
 - **Validate, compile, then validate the build stage.** The pre-compile call runs load/model/cross-domain/
   feasibility and fails a model error with exit 1 before paying for a compile. The post-compile call runs the
@@ -363,28 +454,33 @@ public sealed record JobSelectionResult(string Expression, ImmutableArray<int> J
 - Expansion runs over the **complete** template before `--jobs` filtering, so IDs, seeds, and lattice
   requests are identical to a full build.
 - `BuildStarted` is emitted after expansion, when both counts are known. `BuildFinished` is emitted exactly
-  once in a `finally`, including for early load/selection failures and cancellation.
+  once in a `finally`, including for early load/selection failures and cancellation. Consequently, the
+  `build.stage` events for load/select/validate/compile/validateBuild/parameterize/expand precede
+  `build.started`; `build.started` means “job generation starts and the selected total is known”, not “the
+  process started”. Consumers must accept stage events before it (§12.5).
 - Stage events are emitted for every started/completed stage; a skipped stage after a failure is not emitted.
-- Cancellation is checked at every stage boundary, before each job, and inside the compiler/writer where
-  their APIs already accept a token.
+- Cancellation is checked at every stage boundary, before each job, and inside the compiler, validation,
+  parameterization, preview, and writer calls that accept a token.
 - Errors stop the build. Warnings are collected, emitted as events, and reported at the end.
-- `--preview` runs stages 1–7, evaluates the selected configurations through `ILatticePreviewService`, and
-  stops; it never generates duplicate-job lattices, opens a writer, or creates a file.
+- `--preview` runs stages 1–7, then evaluates the selected configurations inside the pipeline through
+  `BuildPreviewBuilder`/`ILatticePreviewService`, stores the typed result in `BuildResult.Preview`, and stops.
+  It never generates duplicate-job lattices, opens a writer, or creates a file. The preview evaluation emits
+  no `build.stage` event; its time is `BuildPreview.Elapsed`.
 - Post-publication verification is **not** a pipeline stage: it is composed by the caller (CLI or GUI) with
-  `IPackageVerifier` so `Mocassin.Packages` does not gain a dependency on `Mocassin.Results`.
-- `--preview`’s configuration evaluation and the post-publication verification are also caller-composed. They
-  are reported as the `preview` and `verify` timing entries, but they are not `BuildStage` values and never
-  appear in the pipeline event stream as stages.
+  `IPackageVerifier` so `Mocassin.Packages` does not gain a dependency on `Mocassin.Results`. The `verify`
+  timing is therefore caller-composed and is not in `BuildResult.Timings`.
 
 ### 6.3 Event delivery and backpressure
 
-- The pipeline writes events to a bounded `Channel<BuildEvent>` (capacity 256, `FullMode = Wait`). A slow
-  consumer slows the build instead of silently losing a completion or diagnostic event.
-- Progress is throttled by `BuildOptions.ProgressInterval` (default 100 ms) using the injected
-  `TimeProvider`; the last progress for a stage is always emitted. A 10⁴-job build therefore emits roughly
-  10 events per second, not 10⁴.
-- `BuildOptions` also carries the progress interval, the channel capacity (test-only), and the
-  `TimeProvider`; the defaults are production values. A null `TimeProvider` means `TimeProvider.System`.
+- The pipeline writes events to a bounded `Channel<BuildEvent>` whose capacity is
+  `request.Options.EventChannelCapacity` (default 256, `FullMode = Wait`). A slow consumer slows the build
+  instead of silently losing a completion or diagnostic event.
+- Progress is throttled by `request.Options.ProgressInterval` (default 100 ms) using
+  `request.Options.TimeProvider`; the last progress for a stage is always emitted. A 10⁴-job build therefore
+  emits roughly 10 events per second, not 10⁴.
+- `BuildOptions` is always reached through `BuildRequest.Options`; the defaults are production values, and
+  tests set a fixed clock, a lower capacity, or a longer interval on the request. There is no ambient clock or
+  static configuration.
 - The CLI and GUI consume `IAsyncEnumerable<BuildEvent>`; `BuildToCompletionAsync` is a convenience that
   drains the stream and returns the final result.
 
@@ -484,6 +580,11 @@ campaign script stays stable across partial and full builds.
 `build --preview` also accepts `--jobs`; it filters the previewed jobs and reports `expandedCount` and
 `selectedCount`. A preview never changes `job_selection` because it never writes.
 
+The CLI pre-validates the selection syntax before loading for a fast error; the pipeline parses
+`BuildRequest.JobSelection` again after expansion, where the expanded count is known. A malformed, empty, or
+out-of-range selection from either path is `CLI005` and `BuildFailureKind.JobSelection`, exit 2; the pipeline
+never generates or writes an unselected job.
+
 ## 9. Output, overwrite, compact, and publication
 
 - `build` refuses an existing target unless `--force` is given: `CLI003`, exit 3, and the existing file is
@@ -525,14 +626,16 @@ Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
 - The full build has ten rendered steps: nine pipeline stages plus the CLI’s verification stage.
   `--preview` skips `GenerateAndWriteJobs`, `Publish`, and `Verify` and renders eight steps, ending with a
   “Previewing configurations” line; the renderer computes the denominator from the plan, not a constant.
+  The preview line’s elapsed time is `BuildResult.Preview.Elapsed`, not a `BuildStage`.
 - The `GenerateAndWriteJobs` line is the only bar; it reports `completed/total` selected jobs and the
   current `JobId` or collection/config name.
 - ETA is computed by `ProgressEstimator` from a rolling window of at least 8 and at most 64
-  `(elapsed, completed)` samples, using the injected `TimeProvider`. It is display-only and never enters a
+  `(elapsed, completed)` samples, using `request.Options.TimeProvider`. It is display-only and never enters a
   report field that affects reproducibility; the JSON event may carry `etaS` as an advisory number.
-- Progress is throttled to `BuildOptions.ProgressInterval`; the final progress of a stage is always emitted.
-- `--quiet` suppresses the human stage/progress lines and the JSON-Lines `build.stage`, `build.progress`, and
-  `log` events. It never suppresses diagnostics, the final result, or errors.
+- Progress is throttled to `request.Options.ProgressInterval`; the final progress of a stage is always emitted.
+- `--json` suppresses all human stage/progress lines and makes stderr JSON Lines only. `--quiet` additionally
+  suppresses `build.stage`, `build.progress`, and `log`; neither option suppresses diagnostics, the final
+  result, or errors.
 
 ## 11. Errors, exit codes, and `CLI` diagnostics
 
@@ -549,34 +652,45 @@ Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
 | 6 | Cancelled by the user | `build`/`build --preview` before or after publication |
 | 10 | Unexpected internal error | any command after an unhandled exception |
 
-- `build` is **all-or-nothing**: if a selected job fails lattice generation, the build writes nothing and
-  exits 1 (or 3 for a package-write failure). It never publishes a package that silently omits requested
+- `build` is **all-or-nothing**: if a selected job fails lattice generation or preview evaluation, the build
+  writes nothing and exits 1; I/O failures exit 3; compilation and parameterization failures exit 4; an
+  unexpected writer or internal failure exits 10. It never publishes a package that silently omits requested
   jobs. Exit 5 exists for future multi-job commands that process independent jobs; it is recorded here so
   Steps 19/20 share one table.
-- The CLI maps a `BuildResult` in one documented place; the library never supplies an exit code:
+- The CLI maps every `BuildResult` in one documented place; the library never supplies an exit code:
 
   | `BuildResult` | Exit |
   | --- | ---: |
   | `Status = Succeeded` | 0 |
   | `Status = Cancelled` | 6 |
-  | `Failure = Io`, or `PackageWrite` caused by an `IOException`/`UnauthorizedAccessException` | 3 |
+  | `Failure = None` with `Status = Failed` (contract violation) | 10 |
+  | `Failure = Io` | 3 |
   | `Failure = Load` | 1 |
   | `Failure = TemplateSelection` with any `CLI004` diagnostic | 2 |
   | `Failure = TemplateSelection` with only a `PROJ010` diagnostic | 1 |
-  | `Failure = Validation`, `JobExpansion`, or `LatticeGeneration` | 1 |
+  | `Failure = JobSelection` with any `CLI005` diagnostic | 2 |
+  | `Failure = Validation`, `JobExpansion`, `LatticeGeneration`, or `Preview` | 1 |
   | `Failure = Compilation` or `Parameterization` | 4 |
+  | `Failure = PackageWrite` with a `PKG` error diagnostic | 1 |
+  | `Failure = PackageWrite` with no I/O or `PKG` error cause | 10 |
   | `Failure = Internal`, or any unhandled exception at the command boundary | 10 |
 
-  A promoted parameterization warning is reported as `Failure = Parameterization`, because the promotion
-  happens before `Apply` writes anything. A post-publication verification failure is not a `BuildResult`
-  failure: the CLI keeps `Status = Succeeded` (or `Cancelled`), sets `verification = "failed"`, and exits 1.
+  The pipeline classifies `ProjectLoadFailureKind.NotFound`/`TooLarge`/`Io` as `Failure = Io` and
+  `InvalidContent` as `Failure = Load`. It classifies a writer `IOException`/`UnauthorizedAccessException` as
+  `Io`, other writer exceptions as `Internal`, and reserves `PackageWrite` for a writer-returned `PKG` error
+  (none in v1; the row above keeps the mapping total). A promoted parameterization warning is
+  `Failure = Parameterization`, because promotion happens before the writer opens. A post-publication
+  verification failure is not a `BuildResult` failure: the CLI keeps `Status = Succeeded` (or `Cancelled`),
+  sets `verification = "failed"`, and exits 1.
 - `CLI006` is composed by the CLI, not by the pipeline. The library reports `Status = Cancelled` with
   `Failure = None`; the CLI adds the `CLI006` info diagnostic to the report and exits 6. The GUI consumes the
   same status without a CLI-specific diagnostic.
 - `validate` keeps its Step 07 contract (0/1/2/3) and its `validation-v1` report. The other commands use
   the table above; `build --preview` adopts the build table (compile/parameterization errors become 4), which
   replaces the Step 10 interim preview mapping.
-- Usage errors with `--json` still print one command report with `ok: false` and `exitCode: 2`.
+- Usage errors with `--json` print one command report with `ok: false` and `exitCode: 2` for `validate` and
+  the seven `reports`-backed commands. `completion`, `--help`, `--version`, and reserved commands do not
+  accept `--json` and print no report (§5.1).
 - A missing project file is 3 for `build`/`compile`/`validate`; an unparseable project is 1. A missing
   `.msl` is 3 for `inspect`/`verify`; a readable-but-corrupt `.msl` is 1 with `PKG`/`CLI009` diagnostics.
 - An unexpected exception is caught at the command boundary, mapped to `CLI007`/exit 10, and prints the
@@ -645,8 +759,9 @@ Every report shares:
 - Numbers use invariant shortest round-trip formatting; JSON uses camelCase and two-space indentation.
 - A future field is additive within `schemaVersion = 1`; an unknown field is ignored by consumers.
 
-**Usage-error and early-failure reports.** Every recognised command emits one report for every outcome,
-including a usage error before any work starts. The shared envelope is always populated; every
+**Usage-error and early-failure reports.** `validate` and each report-backed command emit one report for every
+outcome, including a usage error before any work starts. `completion`, `--help`, `--version`, and the reserved
+commands do not accept `--json` and never emit a report (§5.1). The shared envelope is always populated; every
 command-specific field is still present but `null`, `0`, `false`, `[]`, or `"skipped"` as its type allows.
 `required` in the generated schema means “present”, not “non-null”: the report descriptors mark payload
 objects, strings, and identities nullable, and their nested objects are present with null fields. For
@@ -670,21 +785,26 @@ is schema-valid rather than a shortened envelope.
 | `jobSelection` | object or null | yes | `{ expression, expandedCount, selectedCount }`; null before expansion, and `expression` is null on a usage error. |
 | `timings` | array | yes | `[{ stage, ms }]` in pipeline order, plus `preview` in preview mode and `verify` in a full build. |
 | `package` | object or null | yes | Published package summary; null in preview and before publication. |
-| `preview` | object or null | yes | Step 10 preview payload; null in a full build and before preview evaluation. |
+| `preview` | object or null | yes | Direct projection of `BuildResult.Preview`; null in a full build and before preview evaluation. |
 | `verification` | string enum `passed`, `failed`, `skipped` | yes | Post-publication verification result. |
 
 `package` fields: `path`, `sha256`, `sizeBytes`, `jobCount`, `modelCount`, `latticeCount`,
-`latticeReuseFactor`, and `published` (`Package is not null`; false before publication). `preview` keeps the
-Step 10 shape: `templateId` and `templateName` (the effective **job** template), `totalJobs`, and
-`collections[]` with `id`, `name`, `simulationId`, `kind`, `useDualDofCorrection`, `jobCount`, `configCount`,
-`optimizers[]`, and `configs[]` (`id`, `name`, `jobCount`, `cellA`, `cellB`, `cellC`, `positionCount`,
-`totalChargeBefore`, `totalChargeAfter`, `isChargeNeutral`, `dopings[]`). `build-v1` does not carry a
-package-size estimate; after a full build, `package.sizeBytes` is the authoritative measured size, and a
-preview is explicitly size-neutral.
+`latticeReuseFactor`, and `published` (`Package is not null`; false before publication). `preview` is the
+typed `BuildPreview` payload: `jobTemplateId`/`jobTemplateName` (the effective **job** template), `totalJobs`,
+and `collections[]` with `id`, `name`, `simulationId`, `kind`, `useDualDofCorrection`, `jobCount`,
+`configCount`, `optimizers[]`, and `configs[]` (`id`, `name`, `jobCount`, `cellA`, `cellB`, `cellC`,
+`positionCount`, `totalChargeBefore`, `totalChargeAfter`, `isChargeNeutral`, `dopings[]`). The CLI maps this
+payload field-for-field; it does not reload the project, recompile the model, or call the preview service
+again. `build-v1` does not carry a package-size estimate; after a full build, `package.sizeBytes` is the
+authoritative measured size, and a preview is explicitly size-neutral.
 
 `timings` uses the lower-case stage names `load`, `select`, `validate`, `compile`, `validateBuild`,
 `parameterize`, `expand`, `preview`, `generate`, `publish`, and `verify`, in that order, omitting stages that
-did not run. `preview` and `verify` are caller-composed and are not pipeline `BuildStage` values.
+did not run. `preview` comes from `BuildResult.Preview.Elapsed` and is produced inside the pipeline; `verify`
+is caller-composed. Neither is a pipeline `BuildStage` or a stage event. `BuildPreview.TotalJobs` is the
+selected previewed job count and its collections/configs reflect only selected jobs;
+`jobSelection.expandedCount` is the complete expansion and `jobSelection.selectedCount` matches
+`TotalJobs`.
 
 ### 12.3 Selection object
 
@@ -717,15 +837,17 @@ did not run. `preview` and `verify` are caller-composed and are not pipeline `Bu
 - `doctor-v1`: `healthy`, `checks[]` (`name`, `status` enum `ok`/`warn`/`fail`, `message`, optional
   `detail`), and `environment` (`framework`, `os`, `architecture`, `sqliteVersion`, `catalogVersion`,
   `catalogSha256`, `solverPath`, `solverVersion`).
-- `clean-v1`: `dryRun` (always true in Step 12), `packagePath`, `directory`, `jobSelection`, `jobCount`,
+- `clean-v1`: `dryRun` (the requested mode), `packagePath`, `directory`, `jobSelection`, `jobCount`,
   `folders[]` (`path`, `jobId`, `lastWriteUtc`, `sizeBytes`), `totalBytes`, `olderThanDays`, and
-  `removedCount` (always 0).
+  `removedCount`. With `--dry-run` (the only supported mode) `dryRun = true` and `removedCount = 0`; without
+  it, the command is a usage error: `dryRun = false`, `removedCount = 0`, `CLI008`, exit 2, and no deletion
+  ever occurs in Step 12.
 
 ### 12.5 JSON Lines events
 
-`--json` emits JSON-Lines events on **stderr** and exactly one report object on **stdout**. Every line has
-`schemaVersion = 1` and a stable `event` name. Step 12 adds one event and optional fields; the `events`
-schema version remains 1 because the change is additive.
+`--json` makes **stderr JSON Lines only** — human stage/progress lines are suppressed — and emits exactly one
+report object on **stdout**. Every line has `schemaVersion = 1` and a stable `event` name. Step 12 adds one
+event and optional fields; the `events` schema version remains 1 because the change is additive.
 
 | Event | Required fields | Optional fields | Meaning |
 | --- | --- | --- | --- |
@@ -737,7 +859,9 @@ schema version remains 1 because the change is additive.
 | `log` | `level`, `message` | — | Forwarded human log. |
 
 - `build.started` is emitted after expansion; `build.finished` is emitted even when the run fails before
-  `build.started`.
+  `build.started`. The `build.stage` events for load/select/validate/compile/validateBuild/parameterize/expand
+  therefore precede `build.started`; consumers must not require `build.started` to be the first line.
+  `build.started` means “job generation begins and the selected total is known”, not “the process started”.
 - `build.progress.completed` is monotonic within a stream; `total` is the selected job count.
 - The events manifest records **required fields only**. The optional fields (`ms`, `stage`, `current`,
   `etaS`, `published`, `path`) are documented here and in `02-data-contracts.md` §5.5 and asserted by the CLI
@@ -745,10 +869,10 @@ schema version remains 1 because the change is additive.
   its `x-event-required-fields` shape. Adding a required field is a versioned contract change; adding an
   optional field is additive.
 - Consumers ignore unknown events and fields. Ordering is guaranteed within one stream.
-- `--quiet` suppresses `build.stage`, `build.progress`, and `log`; `diagnostic`,
-  `build.started`, and `build.finished` remain.
-- `tests/contracts/events-v1.jsonl` gains a real build sequence; the CLI schema test and the future GUI parser
-  accept it.
+- With `--json`, human stderr output is already suppressed; `--quiet` additionally suppresses `build.stage`,
+  `build.progress`, and `log`; `diagnostic`, `build.started`, and `build.finished` remain.
+- `tests/contracts/events-v1.jsonl` gains a real build sequence; the CLI schema test accepts it now, and the
+  Step 26 GUI event parser will accept it when that parser exists.
 
 ## 13. Commands
 
@@ -762,7 +886,9 @@ schema version remains 1 because the change is additive.
   must have the same canonical **model** hash; a freshness test enforces it. The sample is a model starter,
   not a buildable job sample.
 - Templates live in `Mocassin.Packages.Projects.Templates` as embedded `.mocprj` resources and are exposed by
-  `ProjectTemplateFactory` so Step 23’s creation UI uses the same assets.
+  `ProjectTemplateFactory` so Step 23’s creation UI uses the same assets. The folder, its files, and the
+  `PublicAPI.Unshipped.txt` entries are part of the §16.5 layout/public-API plan. The owner approved shipping
+  the ceria starter with the model-hash freshness test on 2026-11-16; `blank` remains.
 - `name` is a display name and a file stem: trim it, strip one `.mocprj` suffix, reject empty values, path
   separators, `..`, control characters, and platform-invalid characters (`: * ? " < > |`), and cap it at 128
   characters. A rejected name is `CLI001`/exit 2.
@@ -782,16 +908,21 @@ schema version remains 1 because the change is additive.
 
 ### 13.3 `build` and `build --preview`
 
-- `build` runs §6 and writes/verifies the package. `--preview` stops before lattice generation and package
-  writing and emits `build-v1` with `mode = "preview"`, `package = null`, `preview` populated, and
-  `verification = "skipped"`.
+- `build` runs §6 and writes/verifies the package. `--preview` runs stages 1–7 and the pipeline’s preview
+  evaluation, then emits `build-v1` with `mode = "preview"`, `package = null`, `preview` projected from
+  `BuildResult.Preview`, and `verification = "skipped"`. It never generates duplicate-job lattices, opens a
+  writer, or creates a file.
 - `--preview` still compiles, validates, parameterizes, expands, and evaluates the selected configurations,
-  so the preview exercises the same selection and parameterization path as the build.
-- `--warnings-as-errors` promotes validation-stage warnings (including `JOB` structural warnings) to exit 1
-  and parameterization warnings to exit 4. Compile (`CMP`) and writer (`PKG`) warnings stay warnings; they
-  are reported, not promoted. A promoted parameterization warning fails before `Apply` writes anything.
+  so the preview exercises the same selection and parameterization path as the build. The CLI only projects
+  the typed `BuildPreview` payload; it does not reload, recompile, or re-evaluate.
+- `--warnings-as-errors` is plumbed as `ValidationOptions.WarningsAsErrors` on both validation calls and
+  promotes validation-stage warnings (including `JOB` structural warnings) to exit 1. `ParameterizationOptions`
+  has no warning flag, so the pipeline inspects the `Validate`/`Apply` diagnostics and fails with
+  `Failure = Parameterization` (exit 4) before the writer opens if any parameterization warning is present.
+  Compile (`CMP`) and writer (`PKG`) warnings stay warnings; they are reported, not promoted.
 - After `CompleteAsync`, the command runs `IPackageVerifier.VerifyAsync` with default options. Verification
   errors exit 1 and are reported as `PKG` diagnostics; the published file remains (it is already atomic).
+- With `--json`, stderr is JSON Lines only; human progress is suppressed without needing `--quiet`.
 - The command installs a first-signal cancellation handler for SIGINT (`Console.CancelKeyPress`) and, on
   Unix, SIGTERM (`PosixSignalRegistration`). The first signal requests cancellation; a second signal is left
   to the default handler. The token is passed to the pipeline and writer.
@@ -830,14 +961,21 @@ Checks, in order:
    configured-but-broken solver is `fail`.
 
 - `healthy` is true when no check is `fail`; warnings do not fail the command. Exit 0/1.
-- The solver probe is the only process boundary; it uses an `ISolverProbe` seam so tests do not launch a
+- Every check implements an internal `IDoctorCheck` seam (`Name`, `RunAsync` returning
+  `DoctorCheckResult(name, status, message, detail)`). `DoctorCommand` takes an optional
+  `IEnumerable<IDoctorCheck>`; production uses the seven real checks, and tests inject passing/warning/failing
+  checks to exercise the healthy, warning-only, and failure reports without spoofing the OS. The runtime,
+  SQLite, permission, disk, catalog, and template checks are real in the healthy CI path; failure injection
+  replaces the check, not the operating system.
+- The solver check is the only process boundary; it uses an `ISolverProbe` seam so tests do not launch a
   process, and the real probe has a 5 s timeout.
 - `doctor` must exit 0 on CI. The solver check is deliberately a warning until Step 19.
 
 ### 13.7 `clean --dry-run`
 
 - Step 12 implements **only** the dry run. Without `--dry-run` the command exits 2 with `CLI008` and a
-  pointer to Step 28; no file or row is ever deleted in this step.
+  pointer to Step 28; no file or row is ever deleted in this step. With `--json` it still emits one
+  `clean-v1` report with `dryRun = false`, `removedCount = 0`, and the `CLI008` diagnostic.
 - `--dir` defaults to the package’s directory. The command lists `Job%05d` directories in that directory,
   optionally filtered by `--older-than <days>` using each directory’s last-write time, and reports their
   paths, IDs, timestamps, and sizes.
@@ -850,18 +988,21 @@ Checks, in order:
 
 - `completion bash|zsh|fish|powershell` prints a completion script generated from the command table. It is
   convenience output, not a stable contract; tests only assert that every command and long option appears.
-- An unknown shell is `CLI001`/exit 2.
+  `completion` does not accept `--json` and emits no report.
+- An unknown shell is `CLI001`/exit 2 with human output.
 
 ### 13.9 Reserved commands
 
 `simulate`, `collect`, `evaluate`, `export`, and full `clean` are recognised by the parser and exit 2 with
 `CLI008` and the owning step. They are not silently treated as unknown commands, so scripts fail with a
-useful message.
+useful message. They do not accept `--json` and print no report; the one-report guarantee covers `validate`
+and the seven `reports`-backed commands only.
 
 ## 14. Cancellation and partial-build behaviour
 
 | Point of cancellation | Behaviour |
 | --- | --- |
+| During load/select/validation/compile/parameterize/expansion/preview | The token reaches `Validate`, the compiler, the parameterizer, the expander, and the preview builder; no writer exists. Exit 6; `CLI006`. |
 | Before the writer opens | No temp file; exit 6; diagnostics `CLI006`. |
 | During lattice generation or job writes | Writer disposal deletes the temp file; an existing package is untouched; exit 6. |
 | During `CompleteAsync` before the rename | The writer’s own cancellation path deletes the temp file; an existing package is untouched; exit 6. |
@@ -894,6 +1035,9 @@ Mocassin.Cli ──► Mocassin.Packages ──► Mocassin.Contracts ──► 
   `Results -> Packages` edge.
 - `Mocassin.Cli -> Mocassin.Compilation` becomes an explicit project reference for `compile`; it is the same
   dependency the current preview already uses transitively. The CLI still owns no scientific algorithm.
+- `Mocassin.Packages.Build` uses `ILatticePreviewService`, `JobTemplateValidationStage`, and the shared
+  `BuildPreviewBuilder` from `Mocassin.Packages.Jobs`/`Projects.Validation`; it needs no new project reference.
+  One preview-service instance is shared by the build-stage validation and the preview evaluation.
 - No new third-party package is added. `System.Threading.Channels` and `System.Text.Json` are in-box;
   `JsonSchema.Net` is added only to the CLI test project (already centrally versioned) for schema validation.
 - `Microsoft.Data.Sqlite` reaches the CLI transitively through `Packages` for the `doctor` SQLite check; it is
@@ -914,15 +1058,19 @@ Mocassin.Packages/Build/
   BuildSelection.cs
   BuildSelectionResolver.cs
   BuildPathResolver.cs
+  BuildPreview.cs               # BuildPreview + collection/config/optimizer/doping records
   JobSelection.cs               # parsed selection + normal form
   ProgressEstimator.cs
   Internal/
     BuildScheduler.cs           # parallel generation + ordered serialization
     BuildDiagnosticMerger.cs
+    BuildPreviewBuilder.cs      # shared preview mapping over ILatticePreviewService
 ```
 
 Namespace `Mocassin.Packages.Build` and `Mocassin.Packages.Build.Internal`. Depth 2. Each folder stays well
 under 20 files and 800 lines; `BuildPipeline` is split into stage helpers if it approaches the limit.
+`BuildPreview.cs` follows the existing multi-record `PackageInspection.cs` precedent; `BuildPreviewBuilder`
+is the only preview-mapping implementation, used by the pipeline and therefore by both the CLI and Step 26.
 
 ### 16.2 `Mocassin.Cli`
 
@@ -957,7 +1105,7 @@ Mocassin.Cli/
     BuildCommand.cs
     PreviewCommand.cs           # removed when feature 3 folds preview into BuildCommand
     BuildReport.cs
-    BuildPreviewData.cs
+    BuildPreviewMapper.cs       # maps BuildResult.Preview to build-v1.preview
     BuildReportWriter.cs
     BuildEventWriter.cs
     BuildProgressRenderer.cs
@@ -974,6 +1122,8 @@ Mocassin.Cli/
   Doctor/
     DoctorCommand.cs
     DoctorReport.cs
+    IDoctorCheck.cs             # Name + RunAsync -> DoctorCheckResult
+    DoctorCheckResult.cs
     Checks/
       RuntimeCheck.cs
       SqliteCheck.cs
@@ -997,7 +1147,10 @@ Mocassin.Cli/
   `Doctor/Checks` (depth 2). Files stay under 800 lines; the build command is split into a command, a
   report writer, an event writer, and a renderer.
 - `PreviewCommand` and the `build-preview-v1` DTOs are removed or folded into `BuildCommand`/`BuildReport`
-  during feature 3; no second report shape survives.
+  during feature 3; no second report shape survives. `BuildPreviewMapper` projects the library payload; it
+  does not evaluate anything.
+- `DoctorCommand` takes an optional `IEnumerable<IDoctorCheck>`; the seam is internal to the CLI and the test
+  assembly uses `InternalsVisibleTo`. The `Doctor/Checks` folder reset keeps the file count under 20.
 
 ### 16.3 `Mocassin.Contracts/Cli`
 
@@ -1008,25 +1161,44 @@ Mocassin.Contracts/Cli/
 ```
 
 Namespace `Mocassin.Contracts.Cli`. These are the only new Contracts files; they follow the `PKG`
-precedent. `PublicAPI.Unshipped.txt` and the Contracts ApiCompat baseline are refreshed.
+precedent. `PublicAPI.Unshipped.txt` is updated; the Contracts ApiCompat baseline is refreshed only if an
+intentional rebaseline is recorded (additive API does not require one).
 
 ### 16.4 Tests
 
 ```text
-Mocassin.Packages.Tests/Build/          # pipeline, selection, job selection, scheduler, cancellation
-Mocassin.Cli.Tests/CommandLine/         # parser, help, completions, usage
-Mocassin.Cli.Tests/Build/               # build/preview, reports, events, exit codes
+Mocassin.Packages.Tests/Build/            # pipeline, selection, job selection, scheduler, cancellation, preview
+Mocassin.Packages.Tests/Projects/Templates/ # embedded template freshness and identity
+Mocassin.Cli.Tests/CommandLine/           # parser, help, completions, usage
+Mocassin.Cli.Tests/Build/                 # build/preview, reports, events, exit codes
 Mocassin.Cli.Tests/Compile/
 Mocassin.Cli.Tests/Inspect/
 Mocassin.Cli.Tests/Verify/
 Mocassin.Cli.Tests/Doctor/
 Mocassin.Cli.Tests/Clean/
 Mocassin.Cli.Tests/NewProject/
-Mocassin.Cli.Tests/Validation/          # existing regression tests
+Mocassin.Cli.Tests/Validation/            # existing regression tests
 ```
 
 The test root keeps `RepositoryPaths.cs` and the existing files; the 20-file root limit and folder
 namespace rules apply.
+
+### 16.5 `Mocassin.Packages/Projects/Templates`
+
+```text
+Mocassin.Packages/Projects/Templates/
+  ProjectTemplate.cs
+  ProjectTemplateFactory.cs
+  Assets/
+    blank.mocprj
+    ceria.mocprj
+```
+
+Namespace `Mocassin.Packages.Projects.Templates`. `ProjectTemplate` and `ProjectTemplateFactory` are public
+and XML-documented in `PublicAPI.Unshipped.txt`; the two `.mocprj` files are embedded resources and do not
+count toward the 20-`.cs`-file or 800-line limits. The folder is depth 2, and `Assets/` holds only the
+embedded templates. Step 23's creation UI uses the same factory; a freshness test compares the embedded
+ceria asset's canonical model hash with `samples/ceria/ceria.mocprj`.
 
 ## 17. Contract manifest, schemas, and fixtures
 
@@ -1078,8 +1250,12 @@ namespace rules apply.
 - `docs/planning/02-data-contracts.md` — §5.1 command surface, §5.5 events, new §5.7 reports, §3.2
   `job_selection` normal form, and §6 fixtures.
 - `docs/planning/03-quality-strategy.md` — the CLI/build test tier and §9.10.
-- `docs/planning/05-open-decisions.md` — resolved rows and the gated `--template` confirmation.
+- `docs/planning/04-roadmap.md` — the Step 12 owner-approved 3.0–4.0 pw exception in §3 and §3.1.
+- `docs/planning/05-open-decisions.md` — the resolved sizing, `--template`, ceria-asset, and report-registration
+  decisions.
 - `docs/planning/appendix-b-parity-matrix.md` — the rows in §18.3.
+- `docs/reference/diagnostics.md` — the `CLI001`–`CLI009` rows and headings, added with the Contracts
+  descriptors; `docs/reference/cli.md` links to that drift-checked table instead of duplicating it.
 - The step page, status dashboard, and closeout evidence as required by the normal process.
 
 ### 18.2 Test tiers
@@ -1090,11 +1266,16 @@ namespace rules apply.
 | PR-medium | Real `.msl` round-trip with the Step 13 reader once it exists; cross-platform path handling; larger sample matrix |
 | Nightly/release | 10⁴-job build + verify under 10 min / 2 GB; real solver probe; Windows/macOS platform gate when cancellation/process/path behaviour is touched |
 
-- Test doubles are limited to the true boundaries: `TimeProvider`, the solver process probe, console
-  cancellation, and failure injection for write/disk errors. Build orchestration, selection, expansion,
-  lattice generation, writing, inspection, and verification use real objects and real SQLite files.
+- Test doubles are limited to the true boundaries: `TimeProvider` (through `BuildRequest.Options`), the
+  solver process probe, the `IDoctorCheck` list for doctor failure injection, console cancellation, and
+  failure injection for write/disk errors. Build orchestration, selection, expansion, lattice generation,
+  preview, writing, inspection, and verification use real objects and real SQLite files.
 - A CLI test calls `CliApplication.RunAsync(args, stdout, stderr, cancellationToken)` with `StringWriter`s;
-  it asserts exit code, stdout/stderr, files, and JSON, not private call counts.
+  it asserts exit code, stdout/stderr, files, and JSON, not private call counts. It also asserts that
+  `--json` leaves stderr JSONL-only and that `completion`/help/version/reserved commands never emit a report.
+- The preview test asserts `BuildResult.Preview` is populated from the same `BuildPreviewBuilder`/service
+  instance as the build-stage validation, that the CLI mapping adds no second evaluation, and that
+  `build-v1.preview` equals the typed payload.
 - The 10⁴-job evidence reuses the Step 11 workload generator pattern (a synthetic project from the ceria job
   sample) and records time, peak RSS, package size, and verification result in the step page and closeout
   evidence.
@@ -1136,25 +1317,37 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 2 — Build orchestration core
 
-- [ ] Add `Mocassin.Packages.Build` request/options/result/failure/stage/event types and `IBuildPipeline`.
+- [ ] Add `Mocassin.Packages.Build` request/options/result/failure/stage/event/preview types and
+      `IBuildPipeline`; `BuildRequest.Options` is the only options injection point.
 - [ ] Implement the ordered pipeline, the bounded event channel, progress throttling, and stage timings.
+- [ ] Construct the validation pipeline with `JobTemplateValidationStage(previewService)`; use named
+      `Validate` arguments and pass the token.
+- [ ] Implement the shared `BuildPreviewBuilder` and set `BuildResult.Preview`; never reload or recompile for
+      preview.
+- [ ] Plumb `WarningsAsErrors` into `ValidationOptions` and the parameterization diagnostic check.
 - [ ] Implement build/job-template/parameterization selection and output-path resolution.
 - [ ] Implement `JobSelection` parsing, normalization, and the `JobSelectionResult` projection.
 - [ ] Implement the parallel generation + serialized write scheduler and cancellation.
-- [ ] Add real-project pipeline tests for ceria, preview, partial selection, parallel determinism,
-      cancellation, and every failure kind.
+- [ ] Add real-project pipeline tests for ceria, preview payload, partial selection, parallel determinism,
+      cancellation, every failure kind, and the options injection.
 
 ### Feature 3 — Build and preview command
 
-- [ ] Implement `build` and fold `--preview` into it; retire `build-preview-v1`.
+- [ ] Implement `build` and fold `--preview` into it; map `BuildResult.Preview` and retire
+      `build-preview-v1`.
 - [ ] Implement `--jobs`, `--parallel`, `--force`, `--compact`, `--warnings-as-errors`, `--quiet`, `--json`.
-- [ ] Implement human progress/ETA and JSON-Lines events; install the signal handler.
-- [ ] Implement post-publication verification and the `build-v1` report.
+- [ ] Implement human progress/ETA and JSON-Lines events; make `--json` suppress human stderr; install the
+      signal handler.
+- [ ] Implement post-publication verification and the `build-v1` report, including the `preview` timing from
+      `BuildPreview.Elapsed`.
+- [ ] Implement the report-backed scope: one report for `validate` and the seven report ids; no report for
+      `completion`/help/version/reserved commands; `clean --json` without `--dry-run` reports `CLI008`.
 - [ ] Add the sample build/verify, partial, force, cancel, compact, warnings, exit-code, and schema tests.
 
 ### Feature 4 — Project and compile commands
 
-- [ ] Add embedded blank/ceria templates, `ProjectTemplateFactory`, and fresh-identity cloning.
+- [ ] Add `Mocassin.Packages/Projects/Templates/` with the embedded blank/ceria assets,
+      `ProjectTemplateFactory`, fresh-identity cloning, and the `PublicAPI.Unshipped.txt` entries.
 - [ ] Implement `new` with name validation, safe create, and the `new-project-v1` report.
 - [ ] Implement `compile` with `-o` `compiled-inspection-v1`, the `compile-v1` report, and exit mapping.
 - [ ] Add template freshness, `new` validation, and compile success/failure tests.
@@ -1167,9 +1360,11 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 6 — Doctor and dry-run clean
 
-- [ ] Implement `doctor` checks, the solver probe seam, the `doctor-v1` report, and healthy-CI behaviour.
-- [ ] Implement `clean --dry-run` with `--dir`/`--older-than`, no deletion, and the `clean-v1` report.
-- [ ] Add healthy, injected-failure, warning-only, and no-deletion tests.
+- [ ] Implement `doctor` checks through `IDoctorCheck`, the solver probe seam, the `doctor-v1` report, and
+      healthy-CI behaviour.
+- [ ] Implement `clean --dry-run` with `--dir`/`--older-than`, no deletion, and the `clean-v1` report,
+      including the `--json`-without-`--dry-run` `CLI008` report.
+- [ ] Add healthy, injected-check-failure, warning-only, and no-deletion tests.
 
 ### Feature 7 — Documentation, parity, and closeout
 
@@ -1182,8 +1377,8 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 - **`--template` means build template; `--job-template` means job template.** Step 12’s command surface and
   §7 define this. The Step 10 preview used `--template` for a job template; that interim meaning is replaced.
-  A job-template ID passed to `--template` gets `CLI004` and a hint. This is a CLI-contract change on a
-  pre-release surface; the owner confirms it at the start gate (§21).
+  A job-template ID passed to `--template` gets `CLI004` and a hint. The owner accepted this surface on
+  2026-11-16 (§21).
 - **`--compact` = Zstd quality 9 + `VACUUM`.** Step 11’s page says `--compact` runs `VACUUM`; its amendment
   and the user guide use level 9. Both are honoured as one size preset. It never changes signatures or the
   canonical summary.
@@ -1200,8 +1395,38 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - **`build-v1` has no package-size estimate.** `estimatedPackageBytes` is dropped: Step 10 did not emit it, a
   preview is size-neutral, and `package.sizeBytes` is the authoritative measured size after a build. A future
   estimate needs its own formula and contract decision.
-- **`preview` and `verify` are caller-composed timings.** They appear in `build-v1.timings` and the rendered
-  steps but are not `BuildStage` values and never appear as pipeline stage events.
+- **`BuildResult.Preview` is the single preview output.** The pipeline evaluates the preview after expansion
+  and before lattice generation, using the injected `ILatticePreviewService` and the shared
+  `BuildPreviewBuilder`; the typed `BuildPreview` carries the collections/configs/optimizers/dopings and its
+  `Elapsed` time. The CLI and Step 26 GUI map it; neither reloads, recompiles, nor runs a second preview
+  implementation. A separate `IBuildPipeline.PreviewAsync` was rejected: it would create two orchestration
+  entry points and duplicate the load/compile/selection path for no additional capability.
+- **`preview` is pipeline-composed; `verify` is caller-composed.** Both appear in `build-v1.timings` and the
+  rendered steps, but neither is a `BuildStage` value or a stage event. `preview` comes from
+  `BuildPreview.Elapsed`; `verify` is appended by the CLI after publication.
+- **`BuildRequest.Options` is the only options injection point.** `ProgressInterval`, `TimeProvider`, and the
+  test-tunable channel capacity are read from the request, not an ambient/static configuration or a pipeline
+  constructor. `BuildOptions.TimeProvider` is non-null with a `TimeProvider.System` default.
+- **Every `BuildResult` maps to an exit code.** The table in §11.1 covers every failure kind, including
+  `JobSelection`, `Preview`, a `PackageWrite` without an I/O cause, and the `Failure = None`/`Failed`
+  contract violation. The pipeline maps load `NotFound`/`TooLarge`/`Io` to `Io` and `InvalidContent` to `Load`.
+- **`JobTemplateValidationStage` is mandatory.** The pipeline constructs the validation pipeline with
+  `additionalStages: [new JobTemplateValidationStage(previewService)]`; `RunBuildStage = true` on a default
+  pipeline is a silent no-op. The stage shares the preview service with the preview builder.
+- **`--warnings-as-errors` plumbing.** Both validation calls set `ValidationOptions.WarningsAsErrors`; because
+  `ParameterizationOptions` has no warning flag, the pipeline inspects the returned parameterization
+  diagnostics and fails with `Failure = Parameterization` before the writer opens. `CMP`/`PKG` warnings stay
+  warnings.
+- **Named `Validate` arguments and the token.** Both calls use `loadDiagnostics:`, `options:`,
+  `compiledModel:`, and `cancellationToken:` and pass the build token, following the accepted Step 10 audit
+  note R2-5.
+- **Report scope is explicit.** `validate` and the seven report ids emit one report per outcome; `completion`,
+  `--help`, `--version`, and reserved commands do not accept `--json` and emit none. `clean --json` without
+  `--dry-run` emits a `clean-v1` report with `dryRun = false`, `removedCount = 0`, and `CLI008`.
+- **`--json` makes stderr JSON Lines only.** Human progress is suppressed whenever `--json` is set; `--quiet`
+  additionally suppresses stage/progress/log events.
+- **`doctor` uses an `IDoctorCheck` seam.** Production runs the seven real checks; tests inject the check list
+  to exercise pass/warn/fail without spoofing the OS. The solver process boundary keeps `ISolverProbe`.
 - **Exit code 5 is reserved.** `build` is all-or-nothing and never publishes a partial package. Future
   multi-job commands share the code.
 - **Validate, compile, then validate the build stage.** The pre-compile `Validate(... RunBuildStage = false)`
@@ -1221,22 +1446,28 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - **`quickstart.md`/`first-project.md` are Step 30 pages.** Step 12 puts the first-run commands in
   `docs/getting-started/index.md`; the step page’s old documentation list is reconciled to the pages that
   exist.
+- **Sizing is an owner-approved exception.** The 3.0–4.0 pw estimate, seven features, and no split were
+  accepted on 2026-11-16 with the 2.25 pw contingency. `04-roadmap.md` §3 and §3.1 record the exception and
+  `05-open-decisions.md` records the resolved decision (Step 09 precedent).
+- **The ceria starter and canonical projections are accepted.** `new --template ceria` ships the embedded
+  model starter with the model-hash freshness test; `blank` remains. `compiled-inspection-v1` and
+  `package-summary-v1` stay canonical projections with no new CLI report ids until Step 30.
+- **Additive API wording.** New public members update `PublicAPI.Unshipped.txt`; the ApiCompat baseline is
+  refreshed only for an intentional rebaseline, not merely because an additive member was added.
 
-## 21. Decisions requiring owner confirmation
+## 21. Owner decisions (recorded 2026-11-16)
 
-1. **`--template` semantics.** Confirm `--template <buildTemplateId>` + `--job-template <jobTemplateId>` +
-   `--parameterization <id>` as the final surface (recommended), rather than keeping `--template` as the job
-   template and adding `--build-template`. The recommendation matches the Step 12 command surface and the
-   data-contract `BuildTemplate`; the alternative would rename the option in the step page and contracts.
-2. **Sizing.** Accept the 3.0–4.0 pw estimate with seven features and no split, with the 2.25 pw contingency
-   in §2. The roadmap row says 1–3 pw; the delta is the added report contracts and auxiliary commands.
-3. **`new --template ceria` asset.** Confirm that embedding a copy of the ceria model sample in the CLI
-   (fresh identity; model-hash freshness test against `samples/ceria/ceria.mocprj`) is acceptable, or defer
-   `--template ceria` to Step 31 packaging and ship only `blank` in Step 12. The recommended choice keeps
-   the documented `new --template blank|ceria` surface working now.
-4. **Report registration.** Confirm that `compiled-inspection-v1` and `package-summary-v1` stay canonical
-   projections rather than new CLI report ids until Step 30. The recommended choice avoids two more schemas
-   now and does not weaken the build/inspect/verify contracts.
+These decisions were made by the human owner after round 1 and are not open for re-litigation in round 2.
+
+1. **`--template` semantics — accepted.** `--template <buildTemplateId>` selects a build template;
+   `--job-template <id>` selects a job template; `--parameterization <id>` overrides the recipe. The Step 10
+   interim meaning of `--template` as a job template is replaced.
+2. **Sizing — accepted.** 3.0–4.0 pw, seven features, no split, with the 2.25 pw contingency in §2. The
+   roadmap row and §3.1 record the owner-approved single-step exception (Step 09 precedent).
+3. **`new --template ceria` — accepted.** Ship the embedded ceria starter with the model-hash freshness test;
+   keep `blank`. The asset is MIT-authored project data, not copied GPL content.
+4. **Report registration — accepted.** `compiled-inspection-v1` and `package-summary-v1` remain canonical
+   projections; no new CLI report ids until Step 30.
 
 ## 22. Acceptance criteria
 
@@ -1256,9 +1487,15 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
       original file is byte-identical.
 - [ ] Cancelling before publication leaves no temp file and preserves an existing package; cancelling after
       publication leaves the package and exits 6.
-- [ ] `--json` prints exactly one schema-valid report with `exitCode` for every recognised command and
-      outcome; JSON-Lines events validate against the `events` contract; `--quiet` suppresses progress only.
-- [ ] `build --preview` writes no package, reports `mode = "preview"`, and exits with the build table.
+- [ ] `--json` prints exactly one schema-valid report with `exitCode` for `validate` and the seven
+      report-backed commands, including usage errors; `completion`, help/version, and reserved commands emit
+      no report; `--json` leaves stderr JSONL-only; JSON-Lines events validate against the `events` contract;
+      `--quiet` additionally suppresses stage/progress/log events.
+- [ ] `build --preview` writes no package, reports `mode = "preview"`, projects `BuildResult.Preview`, and
+      exits with the build table. The same payload is available to a library caller (Step 26) without a
+      reload, recompile, or CLI reference.
+- [ ] `clean --json` without `--dry-run` emits a `clean-v1` report with `dryRun = false`, `removedCount = 0`,
+      and `CLI008`, and deletes nothing.
 - [ ] `new --template blank` and `new --template ceria` create valid projects with fresh identity and seed;
       `compile -o` writes a `compiled-inspection-v1` document; `inspect`/`verify` read a real package.
 - [ ] `doctor` exits 0 on CI; a missing solver is a warning. `clean --dry-run` lists only and never deletes.
@@ -1271,24 +1508,25 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 | Test | Assertion | Tier |
 | --- | --- | --- |
-| Parser/help | Commands, long/short options, `--opt=value`, `--`, missing values, unknown options, help exit 0, unknown command exit 2 | PR-fast |
-| Exit codes | Each failure class maps to the documented code; exit 5 is never emitted by `build` | PR-fast |
+| Parser/help | Commands, long/short options, `--opt=value`, `--`, missing values, unknown options, help exit 0, unknown command exit 2; `--jobs -1`, `--parallel -1`, and `-o -file` tokenize as values | PR-fast |
+| Exit codes | Every `BuildFailureKind`/status maps to the documented code, including `JobSelection`, `Preview`, `PackageWrite` without an I/O cause, and `None`/`Failed`; exit 5 is never emitted by `build` | PR-fast |
+| Options injection | `BuildRequest.Options` reaches the clock, throttle, and channel capacity; a fixed clock makes progress/ETA deterministic | PR-fast |
 | Selection | Auto-select, multiple build templates, multiple job templates, multiple parameterizations, overrides, unknown IDs, wrong-kind ID | PR-fast |
 | Job selection | Grammar, normalization, dedup/merge, full-selection = `all`, range/gap errors, `inspect` metadata | PR-fast |
 | Build | Ceria job sample builds, verifies, counts/signatures match, `job_selection = "all"` | PR-fast |
 | Partial | Selected IDs, gaps, stable IDs vs full build, unselected lattices absent | PR-fast |
-| Preview | No file, `mode = "preview"`, collections/configs/dopings, `--jobs` filter, compile errors exit 4 | PR-fast |
+| Preview | No file, `mode = "preview"`, `BuildResult.Preview` from the shared builder, collections/configs/dopings, `--jobs` filter, no reload/recompile, a library caller gets the same payload, compile errors exit 4 | PR-fast |
 | Force | Existing target exit 3; `--force` replaces; failed `--force` leaves the original intact | PR-fast |
 | Cancellation | Token before/after publication; temp cleanup; existing package intact; exit 6 | PR-fast |
 | Parallel | `--parallel 1` = `--parallel 4` signatures/summary; ascending job rows | PR-fast |
 | Compact | Quality 9 + VACUUM mapping; signatures/summary unchanged; package verifies | PR-fast |
 | Warnings | Validation warnings exit 1; promoted `PRM` warnings exit 4; unflagged build succeeds | PR-fast |
-| JSON | Each report validates against its generated schema; usage errors still print one object; JSON-Lines schema | PR-fast |
-| Events | `build.started`/`stage`/`progress`/`finished` ordering, `finished` exactly once, `--quiet` suppression | PR-fast |
+| JSON | Each report validates against its generated schema; usage errors still print one object; `clean --json` without `--dry-run` reports `CLI008`; `completion`/help/version/reserved commands emit no report; JSON-Lines schema | PR-fast |
+| Events | `build.stage` events precede `build.started`; `build.started`/`progress`/`finished` ordering; `finished` exactly once; `--json` leaves stderr JSONL-only; `--quiet` suppresses stage/progress/log | PR-fast |
 | New/compile | Blank/ceria identity, name validation, safe create, inspection output, `CMP` exit 4 | PR-fast |
 | Inspect/verify | Valid, corrupt, truncated, missing; `PKG` diagnostics; exit codes | PR-fast |
-| Doctor | Healthy CI, injected runtime/SQLite/permission/disk/catalog/template failures, solver warning | PR-fast (fake probe) |
-| Clean | Dry run lists only; no deletion; `.msl` untouched; `--older-than`; `--results` reserved | PR-fast |
+| Doctor | Healthy CI; injected `IDoctorCheck` pass/warn/fail lists cover runtime/SQLite/permission/disk/catalog/template outcomes; solver warning | PR-fast (check seam + fake probe) |
+| Clean | Dry run lists only; no deletion; `.msl` untouched; `--older-than`; `--results` reserved; `--json` without `--dry-run` reports `CLI008` | PR-fast |
 | Validate regression | Human/JSON output and exit codes unchanged | PR-fast |
 | Performance | 10⁴ jobs build + verify under 10 min / 2 GB; ceria 100 jobs < 5 s | Nightly/release |
 
@@ -1297,10 +1535,14 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 | Risk | Mitigation |
 | --- | --- |
 | CLI and GUI diverge | Both consume `Mocassin.Packages.Build` and the same event stream; the CLI is formatting only |
+| Preview data path diverges or forces a reload/recompile | The pipeline owns `BuildResult.Preview` through the shared `BuildPreviewBuilder`; the CLI/GUI map the typed payload; a test asserts one evaluation and no second service |
+| Build-stage validation silently skipped | The pipeline constructs `ProjectValidationPipeline` with `JobTemplateValidationStage` and shares the preview service; a test asserts the compiled-bound `JOB` checks run |
+| `--warnings-as-errors` silently unplumbed | `ValidationOptions.WarningsAsErrors` on both calls; parameterization diagnostics are post-filtered; tests pin exit 1/4 |
 | Partial builds confuse IDs | Full-expansion IDs, normalized `job_selection`, `inspect` shows the expression |
 | Progress overhead | 10 Hz throttle, bounded channel, final-event guarantee |
 | Parser complexity | One table, one parser, exhaustive tests, generated help/completions |
 | Silent warnings | Report summary, `--warnings-as-errors` for validation/parameterization |
+| Doctor checks not deterministic | `IDoctorCheck` seam injects pass/warn/fail checks; real checks run in the healthy CI path |
 | 10⁴-job verification cost | Measure; if verification breaches the budget, record a reduced post-build check and leave full verification to `mocassin verify` (deviation, not silent) |
 | `--force` destroys a good package before verification | Atomic publication plus write-time self-checks; `--force` is explicit; verification failure is reported with the package left in place |
 | `new --template ceria` asset drift | Embedded template model hash equals `samples/ceria/ceria.mocprj`; freshness test |
@@ -1315,4 +1557,5 @@ The CLI can create, validate, compile, build, preview, inspect, verify, and diag
 with stable full-expansion job IDs, normalized partial selections, progress and cancellation, atomic
 replacement, a verified package, schema-valid JSON/JSON-Lines output, a healthy `doctor`, a non-destructive
 `clean --dry-run`, and complete documentation/parity/closeout evidence. The GUI can call the same build
-pipeline without referencing the CLI.
+pipeline without referencing the CLI and receives the same typed `BuildPreview` payload; there is no second
+preview or build implementation.

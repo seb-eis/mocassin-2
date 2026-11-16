@@ -5,8 +5,10 @@ compiles models, builds immutable `.msl` packages, inspects and verifies package
 and previews cleanup. Results collection, evaluation, and solver execution arrive in later steps; the parser
 recognises those commands and tells you which step owns them.
 
-Every command has a stable exit code and, with `--json`, exactly one machine-readable report. Human progress
-goes to stderr; the final result goes to stdout.
+Every command has a stable exit code. `validate` and the seven `reports`-backed commands (`new`, `compile`,
+`build`, `inspect`, `verify`, `doctor`, `clean`) print exactly one machine-readable report with `--json`;
+`completion`, `--help`, `--version`, and the reserved commands do not accept `--json`. Human progress goes to
+stderr; with `--json` stderr is JSON Lines only. The final report or human result goes to stdout.
 
 ## Global options
 
@@ -23,8 +25,13 @@ Options use `--name value` or `--name=value`; `-o value` is the short output opt
 `--` ends option parsing so a path beginning with `-` can be passed. Option names are case-sensitive.
 Numbers use invariant culture: `--parallel` accepts `1..256` and `--older-than` accepts `0..36500`.
 
-`--quiet` suppresses human progress. With `--json`, it also suppresses the `build.stage`, `build.progress`,
-and `log` JSON-Lines events; diagnostics and the final report remain. It never suppresses errors.
+An option that requires a value consumes the next token unconditionally; it is never reclassified as an
+option. `--name=value` is the only other form. Therefore `--jobs -1` is the value `-1` (rejected as a range
+error), `--parallel -1` is `-1` (range error), and `-o -file` names the path `-file`.
+
+`--json` makes stderr JSON Lines only and suppresses human progress, whether or not `--quiet` is used.
+`--quiet` additionally suppresses the `build.stage`, `build.progress`, and `log` JSON-Lines events;
+diagnostics, `build.started`, `build.finished`, and the final report remain. Neither option suppresses errors.
 
 `MOCASSIN_DEBUG=1` includes a stack trace for an unexpected internal error. `MOCASSIN_SIM` names the solver
 executable that `doctor` probes (the solver arrives in a later step).
@@ -78,6 +85,12 @@ templates that need a compiled model are reported by `mocassin build` after comp
 
 A usage error with `--json` still prints one report with `exitCode: 2`, `valid: false`, and null identity
 fields.
+
+### Human output
+
+The default output is a stable table with severity, code, message, object/property path, and the per-instance
+hint, followed by the raw summary, an optional statistics table, and the policy-adjusted result. Step 12 does
+not change this format.
 
 ### `validation-v1` report
 
@@ -190,11 +203,12 @@ mocassin build <project.mocprj> --preview [--template <buildTemplateId>] [--job-
                 [--parameterization <id>] [--jobs <range>] [--json]
 ```
 
-`--preview` runs the same load/select/compile/validate/parameterize/expand path and evaluates the selected
-configurations through the shared lattice-preview service, but it generates no duplicate-job lattices, opens
-no writer, and creates no file. It reports `mode: "preview"`, `package: null`, and the per-collection
-configuration, optimizer, lattice, doping, and charge data. `--preview` rejects `-o`, `--force`, and
-`--compact`.
+`--preview` runs the same load/select/compile/validate/parameterize/expand path and the pipeline’s shared
+preview builder, but it generates no duplicate-job lattices, opens no writer, and creates no file. The typed
+`BuildPreview` result is the same payload a library caller (Step 26) receives; the CLI only projects it into
+`build-v1.preview`, without a reload, recompile, or second evaluation. It reports `mode: "preview"`,
+`package: null`, and the per-collection configuration, optimizer, lattice, doping, and charge data.
+`--preview` rejects `-o`, `--force`, and `--compact`.
 
 ### Progress, cancellation, and warnings
 
@@ -319,8 +333,10 @@ optionally filtered by age, and reports their paths, IDs, timestamps, and sizes.
 read-only to report its `jobSelection` and `jobCount`.
 
 `--dry-run` is required in this release; without it the command exits 2 and points to the deletion command.
-No file, folder, `.msl`, or `.msr` is ever removed. `--results` is reserved for the results-store step.
-`--json` prints `clean-v1` with `dryRun: true`, the folder list, total bytes, and `removedCount: 0`.
+With `--json`, that usage error still emits one `clean-v1` report with `dryRun: false`, `removedCount: 0`, and
+`CLI008`. No file, folder, `.msl`, or `.msr` is ever removed. `--results` is reserved for the results-store
+step. With `--dry-run`, `--json` prints `clean-v1` with `dryRun: true`, the folder list, total bytes, and
+`removedCount: 0`.
 
 ## `mocassin completion`
 
@@ -349,32 +365,21 @@ versioned contract. An unknown shell exits 2.
 | 6 | Cancelled by the user. |
 | 10 | Unexpected internal error. |
 
-`validate` uses only 0/1/2/3. A usage error with `--json` prints exactly one report with `exitCode: 2` for a
-recognised command.
+`validate` uses only 0/1/2/3. A usage error with `--json` prints exactly one report with `exitCode: 2` for
+`validate` and the seven report-backed commands. `completion`, `--help`, `--version`, and reserved commands do
+not accept `--json` and print no report.
 
 ## `CLI` diagnostics
 
-CLI-only failures have stable codes; domain failures keep their own codes.
-
-| Code | Meaning |
-| --- | --- |
-| `CLI001` | Usage or argument error. |
-| `CLI002` | I/O failure with no domain diagnostic. |
-| `CLI003` | Output exists and overwrite was not requested. |
-| `CLI004` | Build/job-template/parameterization selection is missing, ambiguous, or the wrong kind. |
-| `CLI005` | `--jobs` is malformed, empty, or out of range. |
-| `CLI006` | Cancelled by the user. |
-| `CLI007` | Unexpected internal error. |
-| `CLI008` | Command or option reserved for a later step. |
-| `CLI009` | The package cannot be inspected or read; run `verify` for detail. |
-
-The full catalog, including `PROJ`, `STR`, `TRN`, `ENM`, `SIM`, `CMP`, `PRM`, `JOB`, and `PKG`, is in the
-[diagnostics reference](diagnostics.md).
+CLI-only failures have stable `CLI001`–`CLI009` codes; domain failures keep their own codes. The normative,
+drift-checked table (including `PROJ`, `STR`, `TRN`, `ENM`, `SIM`, `CMP`, `PRM`, `JOB`, `PKG`, and the CLI
+codes) is in the [diagnostics reference](diagnostics.md); this page does not duplicate it.
 
 ## JSON Lines events
 
-With `--json`, build progress is emitted as JSON Lines on **stderr**; the single report object stays on
-stdout. Every line has `schemaVersion: 1` and a stable `event` name.
+With `--json`, build progress is emitted as JSON Lines on **stderr** and human progress is suppressed, so
+stderr is JSONL-only; the single report object stays on stdout. Every line has `schemaVersion: 1` and a stable
+`event` name.
 
 ```json
 {"schemaVersion":1,"event":"build.started","total":6}
