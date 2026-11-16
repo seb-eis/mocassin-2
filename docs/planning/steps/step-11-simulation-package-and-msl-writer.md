@@ -10,10 +10,12 @@ read-only inspection/verification library for the build CLI.
 
 - **Status:** In audit — re-audit
 - **Step branch:** `step/11-simulation-package-and-msl-writer`
-- **Step CI:** round-1 evidence at `e94d975`: [Ubuntu closeout
-  green](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095) and [focused Windows platform gate
-  green](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973); the round-2 X2 runs are recorded in
-  [closeout evidence](../closeout/step-11.json)
+- **Step CI:** round 2 at X2 `4197166`: [Ubuntu closeout
+  green](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) and [focused Windows platform gate
+  green](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) — [closeout
+  evidence](../closeout/step-11.json). Round-1 evidence at `e94d975` remains
+  [43935118095](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095) /
+  [43935661973](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973)
 - **Main merge:** — (main `bca66373c68485d08ac78c0259577887726879d1` merged into the step branch as
   `b44022ab2353e2f4394793ba3d023718a578753c`; main was green at the freeze)
 - **Step tag:** —
@@ -38,7 +40,7 @@ read-only inspection/verification library for the build CLI.
 | A1-fix Lattice decode guard | `feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `25a3787` |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `e25811f` (fixtures/Part B/docs); `0ae05a4` (Windows canonical JSON) |
 | Closeout | `feature/step-11-simulation-package-and-msl-writer/closeout` | Squashed | `docs --require`, `policy --require` exit 0 | Ubuntu closeout and Windows platform gate green | `e94d975` |
-| X2 Audit-minor fixes | `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` | Squashed | `all --require` exit 0 | Ubuntu closeout and Windows platform gate re-run at X2 | X2 (recorded in Y2) |
+| X2 Audit-minor fixes | `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` | Squashed | `all --require` exit 0 | Ubuntu closeout and Windows platform gate green at X2 | `4197166` |
 
 ### Approved feature list
 
@@ -417,15 +419,20 @@ per feature.
 
 - **Branch:** `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` (from the step branch at
   `20ea7f5`, the audit record tip).
-- **Squash commit:** X2 (recorded in Y2; a commit cannot contain its own hash).
+- **Squash commit:** X2 `419716678cacf6ad2c50ee379e1d2e7342bbf13b` (`step-11: fix the five audit minors and
+  close the property-test gaps`).
 - **Local gates:** `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh all --require`
   exit 0 on 2026-11-16 — build 0 warnings / 0 errors; **1,528** .NET tests pass (App 1, Contracts 37, Cli 17,
   Symmetry 223, Results 42, Core 685, Compilation 96, Packages 426, Architecture 1; +9 from the audited tree);
   format clean; ApiCompat clean; NuGet licence/vulnerability policy OK; structure; contracts/policy (19
-  artifacts, 58 tool tests, SPDX 603 files, 982 secret-scanned files); Rust fmt/clippy/test; Python 3 tests and
+  artifacts, 58 tool tests, SPDX 603 files, 984 secret-scanned files); Rust fmt/clippy/test; Python 3 tests and
   package build; strict Zensical, DocFX, rustdoc, and site build.
-- **Step CI:** re-dispatched at X2: Ubuntu closeout (`platforms=ubuntu`) and the focused Windows platform gate
-  (`platforms=windows`); run IDs and `head_sha` are recorded in [closeout evidence](../closeout/step-11.json) and Y2.
+- **Step CI:** Ubuntu closeout [`43944825353`](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353)
+  and focused Windows platform gate
+  [`43944396192`](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192), both green at X2; the
+  first Ubuntu dispatch (`43944373820`) was cancelled by the Windows dispatch through the shared `ci-<ref>`
+  concurrency group and was re-dispatched sequentially (process history, not a red gate). Both run IDs and
+  `head_sha` are recorded in [closeout evidence](../closeout/step-11.json).
 - **Diff summary:** F-1 refreshed the stale feature-3 remarks and removed the `NotSupportedException` tags from
   `SimulationPackageWriter` and the three internal row records (no behaviour change). F-2 closed the deferred
   explicit-parameterization criterion with two real end-to-end packages

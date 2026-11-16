@@ -323,10 +323,12 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Passed with notes — round 1 audited `e94d975ffe953561a56bd7850f39e073e603b9ea` (request tip
-`4d1af4eb7cfc4060b4692b703b166fb4202622ed` is the docs-only record parent) and found no Blocker or Major.
-Five Minor findings (F-1–F-5) and five Notes (N-1–N-5) remain and require explicit human-owner acceptance.
-`Passed with notes` is a record state and the round-1 verdict; it does not authorize the merge or tag.
+**State:** Re-audit required — round 1 audited `e94d975ffe953561a56bd7850f39e073e603b9ea` (request tip
+`4d1af4eb7cfc4060b4692b703b166fb4202622ed` is the docs-only record parent) and returned `Passed with notes`
+with no Blocker or Major. Round-2 fixes for F-1–F-5 and N-2/N-3/N-5 are applied in X2
+`419716678cacf6ad2c50ee379e1d2e7342bbf13b`; N-1 and N-4 remain recorded follow-ups. The branch is frozen at the
+Y2 evidence commit for re-audit. `Passed with notes` remains the round-1 verdict; it does not authorize the
+merge or tag.
 
 `Re-audit required` is a record state, not a verdict.
 
@@ -372,12 +374,23 @@ only if code, tests, or configuration change.
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
+Round-2 resolutions for the five Minor findings and the three documentation-only Notes. The fixes are in the
+feature squash X2 `419716678cacf6ad2c50ee379e1d2e7342bbf13b`; the evidence/resolution commit Y2 is docs-only.
+N-1 and N-4 remain recorded follow-ups with their owners. No reviewer-authored finding, evidence, or verdict
+text was altered.
 
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
+| Finding | Status | Resolution | Owner | Commit |
+| --- | --- | --- | --- | --- |
+| F-1 | Fixed | Removed the stale feature-3 remarks and both `NotSupportedException` tags from `SimulationPackageWriter` (class, `WriteModelAsync`, `WriteJobAsync`) and refreshed the three internal row-record summaries; no behaviour change. | Step agent (implementor) | X2 `4197166` |
+| F-2 | Fixed | Added `ExplicitParameterizationPackageTests`: two real packages built with explicit parameterizations (the `ceria-parameters` sample for pair/group/site, the `ceria-kmc` sample for an absolute rule frequency) assert the stored payload values equal the applied `ParameterizationValues`, the authored values are absent from the implicit-default model, and `models.signature`/payload signature equal `ParameterizedModel.Signature`. The acceptance criterion is marked done with the split-sample rationale recorded on the step page. | Step agent (implementor) | X2 `4197166` |
+| F-3 | Fixed | `JobPayloadMapper.Map` canonicalizes an authored `normalizationEnergyEv` of `0.0`/`-0.0` to `null` and keeps a non-zero override; a regression theory authors `0.0` (→ `null`) and `0.25` (→ `0.25`) through the project JSON, resolver, mapper, and encoder round-trip. | Step agent (implementor) | X2 `4197166` |
+| F-4 | Fixed (property tests) / deferred (fuzz) | Added `PayloadPropertyTests`: an FsCheck property over sparse explicit templates and Zstd levels 1/3/19 proves lossless logical round-trip, and a property proves signature stability under `-0.0`, shuffled sparse-map order, a reordered MessagePack payload map, and the Zstd level. The nightly `.msl` corruption/fuzz harness is explicitly deferred to **Step 29** (owner: Step 29 implementor) and recorded in the step page, quality strategy §10, and testing-and-parity; no fuzz run is claimed. | Step agent (implementor); Step 29 implementor (fuzz) | X2 `4197166`; Step 29 (fuzz) |
+| F-5 | Fixed | Malformed `schema_info.project_id` and `created_utc` now return `MissingSchemaElement` (`PKG003`); `PKG002` remains for application id/user version/`format_version`, with a new malformed-`format_version` test alongside the existing application-id test. | Step agent (implementor) | X2 `4197166` |
+| N-2 | Corrected | Closeout note rewritten: the checker compares `audit_commit..merge_candidate` (X2..X2, empty) and does not validate the later commit; the X2..Y2 docs-only delta is verified manually and recorded. | Step agent (implementor) | Y2 (this evidence commit) |
+| N-3 | Corrected | Step-page final-gate counts refreshed to the audited-tree values (58 tool tests, 601 SPDX files, 982 secret-scanned files on `e94d975`); X2 adds two test files, so the X2 gate records 58 tool tests, 603 SPDX files, and 984 secret-scanned files. | Step agent (implementor) | X2 `4197166` |
+| N-5 | Corrected | The checked pair-expansion criterion no longer bundles the Step 14 target-expansion consumer test; it records that half as a Step 14 cross-step acceptance test owned by that step. | Step agent (implementor) | X2 `4197166` |
+| N-1 | Open — follow-up | Directory fsync after the atomic rename requires a contract/ADR correction; recorded as a future design/contract change, not a Step 11 deviation. | Design/contract owner | Future contract/ADR |
+| N-4 | Open — follow-up | `AGENTS.md` §1 status text predates Step 11 and is not touched by an audit-minor fix; owned by the next documentation change. | Orchestrator/next documentation change | Future docs change |
 
 ## Approval summary
 

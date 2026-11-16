@@ -1,26 +1,28 @@
 {
   "step": "step-11",
-  "audit_commit": "e94d975ffe953561a56bd7850f39e073e603b9ea",
+  "audit_commit": "419716678cacf6ad2c50ee379e1d2e7342bbf13b",
   "closeout_ci": {
-    "run_id": "43935118095",
-    "head_sha": "e94d975ffe953561a56bd7850f39e073e603b9ea"
+    "run_id": "43944825353",
+    "head_sha": "419716678cacf6ad2c50ee379e1d2e7342bbf13b"
   },
   "main_sha_at_freeze": "bca66373c68485d08ac78c0259577887726879d1",
-  "merge_candidate": "e94d975ffe953561a56bd7850f39e073e603b9ea",
+  "merge_candidate": "419716678cacf6ad2c50ee379e1d2e7342bbf13b",
   "merge_tree_ci": {
     "run_id": "",
     "head_sha": ""
   },
-  "platform_ci": "Windows: CI workflow_dispatch run 43935661973 at e94d975ffe953561a56bd7850f39e073e603b9ea (platforms=windows) - green; the focused Mocassin.Packages.Tests and Mocassin.Results.Tests platform jobs passed",
+  "platform_ci": "Windows: CI workflow_dispatch run 43944396192 at 419716678cacf6ad2c50ee379e1d2e7342bbf13b (platforms=windows) - green; the focused Mocassin.Packages.Tests and Mocassin.Results.Tests platform jobs passed",
   "tag": "",
   "notes": [
-    "Closeout CI run 43935118095 is the single Ubuntu dispatch (workflow_dispatch, platforms=ubuntu, force_all=false) for the audited commit e94d975ffe953561a56bd7850f39e073e603b9ea. The run is green; the .NET, contracts/policy, and public-API jobs ran, and Rust and Python were skipped by their path filters because this step changes no Rust or Python paths. The full local gate (all --require) passed on the same tree.",
-    "Platform CI run 43935661973 is the mandatory focused Windows gate at e94d975ffe953561a56bd7850f39e073e603b9ea (workflow_dispatch, platforms=windows). The Windows .NET job built the solution and ran Mocassin.Packages.Tests and Mocassin.Results.Tests; both passed. The Ubuntu-only jobs were skipped by job condition. Trigger: the new Unix directory-fsync interop in the package writer.",
-    "main bca66373c68485d08ac78c0259577887726879d1 was merged into the step branch as b44022ab2353e2f4394793ba3d023718a578753c and is an ancestor of the audited commit; no merge-tree run is required.",
-    "The closeout evidence and audit request are added by the immediately following documentation-only commit. A commit cannot contain its own SHA, so merge_candidate records the audited commit e94d975ffe953561a56bd7850f39e073e603b9ea; the later documentation-only commit changes no code, and tools/check_closeout_evidence.py validates that delta.",
+    "Round-2 closeout CI run 43944825353 is the single Ubuntu dispatch (workflow_dispatch, platforms=ubuntu, force_all=false) at audited commit 419716678cacf6ad2c50ee379e1d2e7342bbf13b (X2). It is green; the .NET, contracts/policy, and public-API jobs ran, and Rust and Python were skipped by their path filters because this step changes no Rust or Python paths. The full local gate (all --require, exit 0) passed on the same tree.",
+    "Platform CI run 43944396192 is the round-2 focused Windows gate at 419716678cacf6ad2c50ee379e1d2e7342bbf13b (workflow_dispatch, platforms=windows). The Windows .NET job built the solution and ran Mocassin.Packages.Tests and Mocassin.Results.Tests; both passed. The Ubuntu-only jobs were skipped by job condition.",
+    "Both round-2 dispatches share the ci-${{ github.ref }} concurrency group, so the first Ubuntu dispatch (run 43944373820) was cancelled by the Windows dispatch that followed it. The Windows run was allowed to finish green (43944396192), and the Ubuntu closeout was then re-dispatched and is the green run 43944825353 above. The cancelled run is process history, not a red gate.",
+    "main bca66373c68485d08ac78c0259577887726879d1 was merged into the step branch as b44022ab2353e2f4394793ba3d023718a578753c and remains an ancestor of the audited commit; main has not moved, so no merge-tree run applies.",
+    "N-2 corrected (round 2): a commit cannot contain its own SHA, so audit_commit, closeout_ci.head_sha, and merge_candidate all record the code commit 419716678cacf6ad2c50ee379e1d2e7342bbf13b (X2). tools/check_closeout_evidence.py therefore compares an empty X2..X2 delta and does not itself validate any later commit. The actual documentation-only delta from X2 to the evidence commit Y2 is verified manually with git diff --name-status X2..Y2 and contains only docs/planning paths (this evidence file, the audit record, the step page, and the status dashboard). No code, test, contract, or configuration file changes after X2.",
     "Container image not built - accepted risk (owner decision 2026-11-15). There is no OCI/podman builder in the agent environment, so docs/opencode/mocassin.containerfile is not build-verified. It pins SDK 11.0.100 and asserts global.json; closeout CI resolves the same pin through actions/setup-dotnet, and the local gates ran on SDK 11.0.100 from /tmp/opencode/dotnet11. No page claims the image is built.",
     "Amendment 1 Part A is complete under the owner-approved small-payload rule: 24/24 golden frames byte-identical, size delta 0.000 %, worst small-payload decode +0.1055 us (<= 0.15 us), >= 8 KiB decode +2.08 % (<= +10 %), throughput >= 297 MB/s (>= 100), 240/240 threshold checks. Part B recorded 3.874 s, 10,051,584 bytes, 118,263,808-byte peak RSS, 5,853 jobs/s against the net10 reference.",
     "Main CI attempt 1 for bca6637 failed only on the shared-runner TenThousandPositionModelCompilesWithinTheBudget test (30.134 s against the documented < 30 s budget); the owner accepted the miss as a flake and authorized a re-run, and attempt 2 was green for all six jobs. A local focused run passed in about one second. No test, threshold, or workflow file changed.",
+    "Round 2 fixes the five audit Minor findings (F-1..F-5) and the documentation-only Notes N-2/N-3/N-5 in commit X2; the property tests and the explicit-parameterization end-to-end tests are added there. The nightly .msl fuzz harness is deferred to Step 29 with a named owner in the step page, quality strategy, and testing-and-parity page; no fuzz run is claimed.",
     "Cleanup: fix/ci-platform-gate and the superseded docs/dotnet-11-container branch were deleted locally and remotely (the latter unmerged), and the mocassin-dotnet11 worktree was removed. No step branch, tag, or step-to-main merge is part of this freeze."
   ]
 }
