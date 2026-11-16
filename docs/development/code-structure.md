@@ -62,6 +62,36 @@ Mocassin.Symmetry/
   SpaceGroups/
 ```
 
+### 2.1 `Mocassin.Cli` layout (Step 12)
+
+The CLI is a command-domain project, not a `Commands/` bucket. Each command area owns its command, report
+types, and human/JSON writer:
+
+```text
+Mocassin.Cli/
+  Program.cs
+  AssemblyInfo.cs
+  CommandLine/            # parser, command table, help, completions, exit codes
+  CommandLine/Reports/    # shared diagnostic/envelope DTOs and writers
+  Diagnostics/            # CLI diagnostic construction
+  NewProject/
+  Compile/
+  Build/
+  Validation/
+  Inspect/
+  Verify/
+  Doctor/                 # checks split into Doctor/Checks/ when needed
+  Clean/
+```
+
+- Folders are PascalCase command/domain concepts. `Commands/`, `Handlers/`, and `Output/` are not allowed;
+  `CommandLine/Reports` names the shared report concept, and each command folder owns its own output.
+- Namespaces match folders (`Mocassin.Cli.CommandLine`, `Mocassin.Cli.Build`, `Mocassin.Cli.Doctor.Checks`).
+- The 20-file and 800-line limits apply per folder and file. `Doctor/Checks/` resets the count; a large
+  `BuildCommand` is split into a command, report writer, event writer, and progress renderer.
+- `Mocassin.Packages/Build/` follows the same rules: concept files at depth 1 and an `Internal/` subfolder
+  only for scheduler/diagnostic-merger seams.
+
 ## 3. Folder names and ownership
 
 Folder names are PascalCase domain nouns. A folder should answer “which concept owns this code?”

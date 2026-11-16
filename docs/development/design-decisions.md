@@ -378,6 +378,91 @@ and the full CLI. This avoids a second parser/orchestration path and keeps the c
 validation, file output, and exit-code policy. The data contract's `compile` command is implemented in
 Step 12.
 
+## Build orchestration home (Step 12)
+
+Build orchestration lives in `Mocassin.Packages.Build`, not in `Mocassin.Cli` and not in
+`Mocassin.Compilation`. The CLI and the Avalonia build UI must consume one pipeline and one typed event
+stream; the CLI only parses, formats, and maps outcomes to exit codes. `Mocassin.Compilation` stays a pure
+synchronous compiler with no project loading, templates, jobs, or package I/O. `Mocassin.Packages` already
+owns every stage the pipeline sequences, so no new project is needed.
+
+`Mocassin.Packages` does not reference `Mocassin.Results`. Post-publication verification is composed by the
+caller with `IPackageVerifier`; this preserves the one-reader rule and avoids a writer-to-reader project edge.
+
+## Hand-written CLI parser (Step 12)
+
+The CLI uses one hand-written parser over a command table. The repository already had hand-written
+`validate` and `build --preview` parsers; a table-driven replacement gives one path, generated help and
+completions, and no new package dependency or trimming/AOT risk. `System.CommandLine` remains a viable future
+replacement, but adopting it now would require a dependency review and a parser-behaviour migration that the
+step does not need.
+
+## CLI exit codes and diagnostics (Step 12)
+
+The .NET CLI uses `0` success, `1` validation/model/package-invalid/unhealthy-doctor, `2` usage, `3` I/O,
+`4` compilation/parameterization, `5` reserved partial success, `6` cancelled, and `10` unexpected internal.
+`validate` keeps its Step 07 0/1/2/3 subset. `build` is all-or-nothing, so it never emits `5`; a selected job
+that fails lattice generation aborts the whole package.
+
+CLI-only failures use `CLI001`–`CLI009` descriptors in `Mocassin.Contracts.Cli`, composed into the default
+diagnostic catalog like the `PKG` descriptors. Domain failures keep `PROJ`/`STR`/`TRN`/`ENM`/`SIM`/`CMP`/
+`PRM`/`JOB`/`PKG` codes; the CLI never rewrites a domain diagnostic.
+
+## CLI reports and `build-v1` (Step 12)
+
+`mocassin validate --json` keeps `validation-v1`. Every other command prints exactly one report object with
+`--json`; each report is a manifest-owned `reports` descriptor with its own `schemaVersion` and generated
+schema. `build-v1` replaces the Step 10 interim `build-preview-v1`: one schema, `mode = build` or `preview`,
+and a single `--json` shape for both paths. `build-preview-v1` was never manifest-registered, so no consumer
+loses a published contract.
+
+JSON-Lines events stay on stderr and the final report on stdout. Step 12 adds the additive `build.stage` event
+and optional `stage`/`current`/`etaS` fields; the events schema version stays 1.
+
+## Build template versus job template (Step 12)
+
+`--template` selects a `BuildTemplate` (job template + parameterization + output name); `--job-template`
+selects a job template directly; `--parameterization` overrides the recipe. The Step 10 preview used
+`--template` for a job template; that pre-release meaning is replaced so the option matches the authored
+build-template concept and the `BuildTemplate` record. A job-template ID passed to `--template` is a usage
+error with a hint.
+
+## Job selection normalization (Step 12)
+
+`--jobs` is applied after the complete template expansion, so IDs, seeds, and lattice requests are the
+full-expansion values. The writer records a canonical normal form — `all`, or sorted, deduplicated, merged
+ranges such as `1-3,5,7-9` — not the user's text. Equivalent selections therefore produce identical
+`schema_info.job_selection` and package content. Unselected jobs are absent and leave gaps; they are never
+renumbered.
+
+## `--compact` preset (Step 12)
+
+`--compact` is one size preset: Zstd quality `9` plus `VACUUM` before publication. The Step 11 page named
+`VACUUM`; its amendment and the user guide named quality `9`. Both are honoured. It changes compressed bytes
+and file size only; payload content, signatures, job IDs, and `package-summary-v1` are unchanged.
+
+## Cancellation after publication (Step 12)
+
+Cancellation before the writer’s atomic rename deletes the temp file and preserves any existing package.
+Cancellation after the rename cannot roll back a valid published artifact, so the package remains, the report
+sets `published = true` and `verification = "skipped"`, and the command exits `6`. A second signal is left to
+the platform default.
+
+## Clean dry-run scope (Step 12)
+
+Step 12 implements only `clean --dry-run`: it lists `Job%05d` folders, optionally filtered by age, and never
+deletes a file, folder, package, or results row. Full deletion and `.msr` cleanup are Step 28. The dry run is
+the safety-relevant half and gives operators a preview before the destructive command exists.
+
+## CLI project templates (Step 12)
+
+`new --template blank|ceria` clones an embedded project template from
+`Mocassin.Packages.Projects.Templates` with a fresh UUIDv7, master seed, name, and timestamps. The ceria
+template is a copy of the model-definition sample, not a buildable job sample; a freshness test compares its
+canonical model hash with `samples/ceria/ceria.mocprj`. Step 23’s creation UI uses the same factory and
+assets.
+
+
 ## Charge-transport field convention
 
 The compiler stores a per-rule Cartesian charge transport vector as the difference of the charge-weighted

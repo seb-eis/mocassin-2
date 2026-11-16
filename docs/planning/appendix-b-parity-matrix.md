@@ -15,7 +15,7 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Create new project | Y | Planned | 01/23 | Blank, ceria, and barium-zirconate skeletons in 01/03; creation UI in 23 |
+| Create new project | Y | Partial | 01/12/23 | Blank and ceria skeletons in 01/03; CLI `new` templates in 12; creation UI in 23 |
 | Open/save/close project | Y | Planned | 01/23 | Atomic writes, lock, autosave store in 01; lifecycle UI in 23 |
 | Recent files | N | Improvement | 23 | Workspace model |
 | Multiple projects per file | N | Replaced | 23 | One project per file; workspace of open files |
@@ -30,7 +30,7 @@ Status legend:
 | Cross-domain validation pipeline | Y | Implemented | 07 | Load/model/cross-domain/feasibility; no post-validation mutation |
 | Stable diagnostic catalog | Y | Implemented | 07 | Codes, owners, severities, paths, hints; docs-drift checked |
 | Model statistics and feasibility | Y | Implemented | 07 | Counts, rule/memory estimates, buildability warnings |
-| Headless `mocassin validate` | Y | Partial | 07/12 | `validate` implemented; Step 12 extends the command surface |
+| Headless `mocassin validate` | Y | Done | 07/12 | `validation-v1`, diagnostics, statistics, and exit codes in 07; the full command surface in 12 |
 | `validation-v1` report | Y | Implemented | 07 | Sorted diagnostics, summary, optional statistics; schema checked |
 | GUI diagnostic navigation | Y | Planned | 07/24/25 | `ModelPath` navigation and stats panels |
 
@@ -115,7 +115,7 @@ Status legend:
 | Compilation diagnostics/report | Y | Done | 08 | `CMP` catalog, counts, timings, input hashes, cache statistics |
 | Compilation stage cache | N | Done | 08 | Content-hash keys; per-compilation default, optional caller cache |
 | Compiled-model JSON inspection | N | Done | 08/12 | `compiled-inspection-v1`; `mocassin compile` in 12 |
-| Headless `mocassin compile` | Y | Planned | 12 | Step 08 library only; Step 12 owns the command |
+| Headless `mocassin compile` | Y | Done | 12 | `compiled-inspection-v1` output plus the `compile-v1` summary and exit codes |
 
 ## 6. Simulations, templates, and builds
 
@@ -137,19 +137,21 @@ Status legend:
 | Site energy overrides in template | N | Done | 09 | Original limitation removed; reset-to-model |
 | `PRM` diagnostics | N | Done | 09 | Structural Core checks + compiled-bound Packages checks; docs-drift checked |
 | Checked-in golden templates | N | Done | 09 | Ceria and barium-zirconate templates; applied values and signatures regenerated through the real compiler/apply path |
-| `mocassin parameterize` CLI | N | Replaced | 12 | Step 12 owns `compile`/`build --parameterization`; no separate command |
+| `mocassin parameterize` CLI | N | Replaced | 12 | Step 12 ships `compile` and `build --parameterization`; no separate command |
 | Job collections/configs | Y | Done | 10 | Typed Core records, project JSON/manifest, authored-order expansion, and structural `JOB` validation |
 | Base + config overrides | Y | Partial | 10/26 | Correct simulation → collection → config inheritance, kind checks, and extension replacement in 10; editor UI in 26 |
 | Job duplicates/multiplier | Y | Done | 10 | `jobCountPerConfig`/simulation default, 1-based IDs, per-duplicate seeds |
 | Selection optimizers | Y | Partial | 10/11/14/26 | P1 image expansion, dual-DOF rule, and `JOB009` reference check in 10; `.msl` encoding in 11; runtime removal in 14; editor UI in 26. Partial until Step 14. |
 | Lattice size + doping values | Y | Partial | 10/26 | Deterministic supercell, dopings, truncation, compensation, and preview in 10; editor UI in 26 |
-| Build template selection | Y | Partial | 10/12/26 | `build --preview --template` selection in 10; full build command in 12; UI in 26 |
-| Build preview (no package write) | Y | Done | 10 | Shared `ILatticePreviewService`, `build-preview-v1`, and CLI path; never opens or writes `.msl` |
-| Create/overwrite package | Y | Partial | 11/12/26 | Immutable `.msl` v1 writer, verifier, fixtures, and atomic publication in 11; full build command and `--force` in 12; build UI in 26. Partial until Step 12. |
+| Build template selection | Y | Partial | 12/26 | Build/job-template/parameterization selection, overrides, ambiguity listing, and the implicit default in 12; UI in 26 |
+| Build preview (no package write) | Y | Done | 10/12 | Shared `ILatticePreviewService`; `build-v1` preview mode in 12; never opens or writes `.msl` |
+| Create/overwrite package | Y | Partial | 11/12/26 | Immutable `.msl` v1 writer, verifier, fixtures, and atomic publication in 11; full `build`, `--force`, partial jobs, and verification in 12; build UI in 26 |
 | Append to existing package | N | Deferred | post-1.0 | Not required; rebuild is safer |
 | 99,999-job cap | Y | Done | 10 | Hard cap `JOB019`; warning `JOB013` above 10k |
-| Build progress/cancel/log | Y | Planned | 12/26 | |
-| Package inspection/verification | Y | Improvement | 11/12 | Read-only inspector/verifier, `PKG` diagnostics, `package-summary-v1`, and fixtures in 11; `inspect`/`verify` CLI in 12. Improvement until Step 12. |
+| Build progress/cancel/log | Y | Partial | 12/26 | Typed stage/progress event stream, JSON-Lines events, Ctrl+C/SIGTERM cancellation, and temp cleanup in 12; UI in 26 |
+| Package inspection/verification | Y | Improvement | 11/12 | Read-only inspector/verifier, `PKG` diagnostics, `package-summary-v1`, fixtures in 11; CLI `inspect`/`verify` in 12 |
+| CLI `doctor` | N | Improvement | 12 | Runtime, SQLite, write/disk, catalog, template, and optional solver checks; healthy CI run |
+| Clean job folders (dry run) | Y | Partial | 12/28 | `clean --dry-run` listing only in 12; deletion and `.msr` cleanup in 28 |
 | `.msl` v1 format and fixtures | Y | Done | 11 | Schema, content-addressed payloads, canonical summary, verification, checked-in `msl-v1` fixture, and the pre-switch compatibility fixture. The Rust reader that consumes the fixture is Step 13. |
 | Build history | N | Improvement | 26 | |
 
@@ -265,7 +267,7 @@ Status legend:
 | User guide + physics | Y | Partial | 03–07/30 | Model-definition pages exist; Step 30 completes cross-cutting content |
 | Developer architecture guide | Y | Partial | 00–07/30 | Architecture, compilation pipeline, testing, and workflow pages exist; Step 30 completes |
 | Tutorials | Y | Planned | 30 | Ceria, BaZrO3, vehicle, HPC, analysis |
-| CLI + format reference | Y | Partial | 30/07 | `validate`, diagnostics, and project references in 07; full CLI/formats in 30 |
+| CLI + format reference | Y | Partial | 07/12/30 | `validate`, diagnostics, and project references in 07; full CLI reference in 12; formats and documentation completion in 30 |
 | Troubleshooting + FAQ | Y | Planned | 30 | |
 | Performance + HPC guide | Y | Planned | 30 | |
 | Contributing + dev workflow | Y | Implemented | 00 | Branches, review gates, local gates, and evidence playbook |

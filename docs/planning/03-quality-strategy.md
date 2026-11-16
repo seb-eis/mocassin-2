@@ -115,7 +115,7 @@ Property tests are required for the following, using brute-force or analytic ora
 | Results store | `.msr` package binding, package-signature mismatch rejection, idempotent collection, previous-major read |
 | Job contracts | `solver.json`, job-folder paths, event stream, and `mmcfe.db` round-trip and reject malformed input |
 | Evaluation | MSD/diffusion/mobility/conductivity identities on analytic random walks; non-negativity; unit consistency; empty and single-particle cases |
-| CLI / parsing | Range parsing, partial selections, exit codes, JSON schema; no crash on arbitrary arguments |
+| CLI / parsing | Job-range parsing and normalization, full-expansion ID stability, partial selections, exit codes, report schema, JSON-Lines ordering; no crash on arbitrary arguments |
 | Python reader | Valid document round-trip; malformed/truncated/future-version rejection; aggregation invariants match the .NET implementation |
 
 Property tests assert invariants, not a specific internal sequence. A failing case must be reproducible from the
@@ -131,7 +131,8 @@ These interfaces get end-to-end acceptance coverage with real objects and real f
 4. Rust solver CLI → `.mcs` → .NET reader/evaluation and Python reader/evaluation.
 5. Evaluation API formulas against analytic toy systems and shared formula vectors.
 6. Avalonia commands against real project documents and view models.
-7. CLI `build`/`simulate`/`collect`/`evaluate` workflows.
+7. CLI `build`/`simulate`/`collect`/`evaluate` workflows; the Step 12 build/preview/inspect/verify path uses
+   real projects, real SQLite packages, and the real writer/verifier.
 8. Contract-manifest drift checks across C#, Rust, Python, and generated fixtures.
 
 Each acceptance test should fail for a user-visible reason, not because an internal mock was not called.
@@ -163,6 +164,10 @@ Tests must declare their tier. A PR-fast test may not depend on a nightly-only a
 
 The Step 02 catalog/group-law and golden symmetry tests are PR-fast. The 20×20×20 expansion and full random
 reduction suites are nightly/release.
+
+The Step 12 CLI parser, selection, build/preview, partial, cancellation, force, inspect, verify, new, compile,
+doctor (fake process probe), clean dry-run, and JSON schema tests are PR-fast. The 10⁴-job build + verify and
+the real solver probe are nightly/release. The real `.msl` cross-language read is PR-medium with Step 13.
 
 ## 9. Domain test strategy
 
@@ -443,6 +448,46 @@ solver with the same binary, platform, package, and seed.
   `.msl` read is PR-medium with Step 13; fuzzing and the 10⁴-job build are nightly/release. The writer targets
   `< 10 min`/`< 2 GB` for 10⁴ small jobs, `< 50 MB` for a complex model payload, and `>= 100` job inserts/s.
 
+### 9.10 Build orchestration and `mocassin` CLI
+
+- **Parser:** every command, long/short option, `--opt=value`, `--`, missing value, unknown option, duplicate
+  option, and conflicting option has a focused test. Help and completions are generated from the command
+  table; a test asserts every command/option appears. No arbitrary `string[]` crashes or throws.
+- **Selection:** build-template/job-template/parameterization precedence is table-driven; one/two/many cases,
+  explicit overrides, wrong-kind IDs, unknown IDs, and the implicit default all have tests. The selected
+  effective IDs, not the authored recipe, are reported.
+- **Job selection:** the grammar, canonical normalization, dedup/merge, `all`, range gaps, zero/negative/
+  descending/empty/out-of-range errors are property-tested; the normal form is idempotent, and equivalent
+  selections produce identical `job_selection` metadata and package summaries.
+- **Pipeline:** the ceria job sample builds through the real compiler, parameterizer, expander, generator, and
+  writer. Partial selection keeps full-expansion IDs and omits unselected rows. `--parallel 1` and `N`
+  produce identical signatures, job rows, and `package-summary-v1`. Failure kinds map to the documented exit
+  codes.
+- **Atomicity and cancellation:** an existing package is byte-identical after a failed/cancelled build; no
+  temp file remains; a cancellation after publication leaves a valid package and exits 6. Failure injection
+  covers a writer error and a disk-full-like `IOException`.
+- **Preview:** `--preview` never creates or modifies a `.msl`, reports `mode = "preview"`, `package = null`,
+  and the same lattice/doping counts as the build; compile errors exit 4.
+- **Warnings:** validation warnings exit 1 under `--warnings-as-errors`; promoted parameterization warnings
+  exit 4; an unflagged build succeeds; `CMP`/`PKG` warnings stay warnings.
+- **Reports:** every `--json` report validates against its generated schema, including usage errors;
+  `build-v1` covers build and preview modes; diagnostics use the `validation-v1` element shape.
+- **Events:** JSON-Lines `build.started`/`build.stage`/`build.progress`/`build.finished` ordering,
+  `build.finished` exactly once, `--quiet` suppression, and `tests/contracts/events-v1.jsonl` acceptance.
+- **Inspect/verify:** valid, corrupt, truncated, and missing packages; `PKG` diagnostics; exit 0/1/3.
+- **New/compile:** blank and ceria templates produce valid projects with fresh identity and seed; the embedded
+  ceria template’s model hash equals the sample; `compile -o` writes a re-readable
+  `compiled-inspection-v1`; `CMP` errors exit 4.
+- **Doctor:** a healthy CI run; injected runtime/SQLite/permission/disk/catalog/template failures; a missing
+  solver is a warning; a configured broken solver is a failure. The process probe is faked in PR-fast tests.
+- **Clean:** `--dry-run` lists only; no file, folder, `.msl`, or `.msr` is removed; `--older-than` filters;
+  `--results` and deletion are reserved.
+- **`validate` regression:** the human table, `validation-v1` JSON, and 0/1/2/3 exit codes are unchanged by the
+  parser/report refactor.
+- **Tiers and performance:** the above are PR-fast with the fake solver probe; the 10⁴-job build + verify and
+  the real solver probe are nightly/release. The Step 12 evidence records time, peak RSS, package size, and
+  verification result against the Step 11 budget (< 10 min, < 2 GB).
+
 ## 10. Contract tests
 
 - **Project JSON**: .NET writes fixtures; a JSON Schema validator checks them in CI.
@@ -539,6 +584,9 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | Parameterization signature throughput (Step 09) | >= 100 MB/s single-threaded, streaming |
 | Build compiled model (ceria, 100 jobs) | < 5 s on a 4-core laptop |
 | Build 10⁴ small jobs | < 10 min, < 2 GB peak RSS |
+| CLI `build` ceria job sample (6 jobs) + verify | < 3 s warm on the benchmark laptop class |
+| CLI `build` 10⁴ small jobs + verify | < 10 min, < 2 GB peak RSS |
+| CLI `doctor` | < 2 s |
 | Load `.msl` and start job | < 100 ms |
 | KMC throughput (ceria 10×10×10, 1 transition set) | ≥ 80 % of original C solver per core |
 | MMC throughput (same) | ≥ 80 % of original C solver per core |
