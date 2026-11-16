@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `4a245bd3f9a9b2c6899226c8ee2927c2a89ab229` |
+| Reviewed commit | `a6cf22aafbaa3ea3272bf6665bb7eac990b88e63` |
 | Docs branch | `docs/step-12-design` |
 | Review date | 2026-11-16 |
 | Reviewer | — |
@@ -85,8 +85,13 @@ Step page: [`Step 12 — Build Orchestration and mocassin CLI`](../steps/step-12
       rolling window, and `--quiet` suppression without hiding diagnostics.
 - [ ] **Error model.** The 0/1/2/3/4/5/6/10 table, exit 5 being reserved, the `--warnings-as-errors` scope,
       and the `CLI001`–`CLI009` descriptors in Contracts.
+- [ ] **Build-result identity and failure mapping.** `BuildIdentity` supplies the report’s project/model/
+      document hashes and signatures; `Io` is separate from `Load`; the documented table maps every
+      `BuildResult` to an exit code; cancellation is a library status with `CLI006` composed by the CLI; and
+      `build-v1` carries no package-size estimate. Verify the report fields and exit codes agree.
 - [ ] **JSON reports.** The seven `reports` descriptors, the shared envelope, `build-v1` fields, the
-      replacement of `build-preview-v1`, and the one-object/one-exit-code guarantee.
+      replacement of `build-preview-v1`, the usage-error nullability rule, and the one-object/one-exit-code
+      guarantee.
 - [ ] **Commands.** `new` (embedded templates, fresh identity, safe create), `compile` (`-o` inspection,
       `compile-v1`), `inspect`/`verify` wrappers, `doctor` checks and solver warning, `clean --dry-run`
       scope, completions, and reserved commands.
