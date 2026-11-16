@@ -1788,7 +1788,7 @@ Diagnostics are ordered by severity, code, domain, object ID, property, and mess
 | `parameterizationSignature` | string or null | yes | Step 09 `models.signature`; null when parameterization did not run. |
 | `selection` | object | yes | `buildTemplate` (`id`, `name`, nullable), `jobTemplate` (`id`, `name`), `parameterization` (`id`, `name`, `implicitDefault`), `outputName` (string or null). |
 | `jobSelection` | object | yes | `expression`, `expandedCount`, `selectedCount`. |
-| `timings` | array | yes | `[{ "stage": string, "ms": number }]` in pipeline order, plus `verify` when run. |
+| `timings` | array | yes | `[{ "stage": string, "ms": number }]` in pipeline order: `load`, `select`, `validate`, `compile`, `validateBuild`, `parameterize`, `expand`, `generate`, `publish`, `verify`; omitted stages are absent. |
 | `package` | object or null | yes | `path`, `sha256`, `sizeBytes`, `jobCount`, `modelCount`, `latticeCount`, `latticeReuseFactor`, `published`; null in preview. |
 | `preview` | object or null | yes | Step 10 preview payload (`templateId`, `templateName`, `totalJobs`, `estimatedPackageBytes`, `collections[]`); null in a full build. |
 | `verification` | string enum `passed`, `failed`, `skipped` | yes | Post-publication verification result. |
