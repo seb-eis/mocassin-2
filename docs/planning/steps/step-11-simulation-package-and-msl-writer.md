@@ -374,7 +374,8 @@ per feature.
   implemented.
 - **Closeout readiness:** `origin/main` (`286e10c`) is an ancestor of the feature-7 tip; the step branch was 35
   commits ahead at that tip (`0ae05a4`). Remaining before the audit request: merge the owner-approved
-  `fix/ci-platform-gate` (`6946e61`) CI fix into `main`, merge the updated `main` into this step branch and
+  `fix/ci-platform-gate` CI fix into `main` (the branch is active in a separate worktree, so its tip may move;
+  the merge commit is the reference), merge the updated `main` into this step branch and
   re-run the full gate, fill `docs/planning/closeout/step-11.json`, dispatch the single Ubuntu closeout run,
   dispatch the focused Windows platform gate (`platforms=windows`), then create
   `docs/planning/audits/step-11.md` and request the audit. No closeout JSON or audit record has been created
