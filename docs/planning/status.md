@@ -187,6 +187,12 @@ early-warning signal for the next cross-cutting review.
   only at closeout and on `main`.
 - Step 02 received a post-development maintenance update on 2026-11-08: `Mocassin.Symmetry` namespaces were
   aligned with their folders; the public API break is accepted; the `step-02` tag remains at `dbf5691`.
+- Step 11 received a maintenance fix on 2026-11-16: `fix/container-build-context` (`889e085`, rebuild note
+  `7552208`) removed the containerfile's `COPY global.json` pin step, so the image has no `COPY`/`ADD`
+  instruction and no build-context dependency. The owner rebuilt `opencode:mocassin` successfully from that
+  branch on 2026-11-16; the merge into `main` is `f5a52e3` (`--no-ff`, `[skip ci]`). No CI run was dispatched
+  for the merge: the change is documentation/containerfile-only and the owner's rebuild is the verification.
+  The `step-11` tag is unchanged.
 - Milestones M0–M3 were backfilled on 2026-11-12 with annotated tags on the existing step merge commits:
   `milestone-m0` → `47a9a90`, `milestone-m1` → `7b4a994`, `milestone-m2` → `dbf5691`, `milestone-m3` →
   `3ed558a`. Tags were pushed to `origin`; no step tag was moved.
