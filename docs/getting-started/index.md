@@ -47,9 +47,9 @@ mocassin new my-project -o work
 mocassin validate work/my-project.mocprj
 
 # Build a real package from the ceria job sample and verify it.
-mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o /tmp/ceria.msl
-mocassin verify /tmp/ceria.msl
-mocassin inspect /tmp/ceria.msl
+mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o work/ceria.msl
+mocassin verify work/ceria.msl
+mocassin inspect work/ceria.msl
 ```
 
 `--jobs 1-3` builds a stable subset of the full expansion; `--preview` reports the job, lattice, and doping

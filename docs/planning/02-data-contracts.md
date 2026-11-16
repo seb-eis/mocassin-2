@@ -1820,6 +1820,8 @@ CLI report ids: `compile -o` writes the former, and `inspect-v1`/`verify-v1` emb
 
 - Every report starts at `schemaVersion = 1`; additive fields keep the version. A breaking change increments
   the report’s own version and adds a new generated schema.
+- The contract manifest’s `manifestVersion` stays `1`: `tools/contracts/generate.py` pins it, and the new
+  report and event entries are additive. Each report carries its own `schemaVersion = 1`.
 - `build-preview-v1` is retired. It was never a manifest-owned report; the Step 10 tests move to
   `build-v1` with `mode = "preview"`.
 - Real CLI output is validated against the generated schema in PR-fast tests, and

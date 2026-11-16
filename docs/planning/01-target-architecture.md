@@ -109,7 +109,7 @@ Mocassin.Packages  Mocassin.Results
    ▲             ▲
    └──── Mocassin.Cli ────┘
              │
-             └──► Mocassin.Compilation (read-only `compile` consumer)
+             └──► Mocassin.Compilation (read-only compile consumer)
              ▲
 Mocassin.App ──► Mocassin.App.Views ──► Mocassin.App.ViewModels
      │                                      │

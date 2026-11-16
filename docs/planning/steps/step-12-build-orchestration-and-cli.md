@@ -465,9 +465,9 @@ keeps stdout scriptable and matches the `--json` split.
 Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
 ```
 
-- The stage count is `8` pipeline stages plus the CLI’s verification stage; `--preview` has no publish or
-  verify lines and shows `9` stages? **No:** preview skips `Publish` and `Verify`, so it labels the run
-  `[n/7]` using the stages it will run. The renderer computes the denominator from the plan, not a constant.
+- The full build has nine rendered steps: the eight pipeline stages plus the CLI’s verification stage.
+  `--preview` skips `Publish` and `Verify` and renders seven steps, ending with a “Previewing configurations”
+  line; the renderer computes the denominator from the plan, not a constant.
 - The `GenerateAndWriteJobs` line is the only bar; it reports `completed/total` selected jobs and the
   current `JobId` or collection/config name.
 - ETA is computed by `ProgressEstimator` from a rolling window of at least 8 and at most 64
@@ -594,6 +594,9 @@ shape: `templateId`, `templateName`, `totalJobs`, and `collections[]` with `id`,
 (`id`, `name`, `jobCount`, `cellA`, `cellB`, `cellC`, `positionCount`, `totalChargeBefore`,
 `totalChargeAfter`, `isChargeNeutral`, `dopings[]`). Previews also report `estimatedPackageBytes` as an
 advisory lower-bound estimate; it is not a correctness or size guarantee.
+
+`timings` uses the lower-case stage names `load`, `select`, `compile`, `validate`, `parameterize`, `expand`,
+`generate`, `publish`, and `verify`, in that order, omitting stages that did not run.
 
 ### 12.3 Selection object
 
@@ -857,7 +860,7 @@ Mocassin.Cli/
     CompileReport.cs
   Build/
     BuildCommand.cs
-    PreviewCommand.cs           # thin adapter kept until feature 3 folds it into BuildCommand
+    PreviewCommand.cs           # removed when feature 3 folds preview into BuildCommand
     BuildReport.cs
     BuildPreviewData.cs
     BuildReportWriter.cs
@@ -935,6 +938,9 @@ namespace rules apply.
 - Add the seven `reports` descriptors to `contracts/manifest.json` from §12.1, with `schemaVersion = 1`,
   `unknownFields = "ignore"`, and explicit field/type/required/enum descriptors. `tools/contracts/generate.py`
   gains the matching `REPORT_CONSTANTS` entries.
+- The manifest’s own `manifestVersion` stays `1`. `generate.py` pins it, and the new report/event entries are
+  additive; each report carries its own `schemaVersion = 1`. A `manifestVersion` bump would be a generator
+  change and is not part of this step.
 - Regenerate `contracts/generated/schema/*.schema.json`, `contracts/generated/constants/**`, and
   `contracts/generated/fixtures/descriptors.json`. `./tools/verify.sh contracts` checks freshness.
 - Add `build.stage` to `formats.events.events` and document the optional `stage`/`current`/`etaS` fields.
