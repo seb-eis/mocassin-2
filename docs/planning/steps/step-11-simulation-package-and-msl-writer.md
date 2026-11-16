@@ -10,12 +10,13 @@ read-only inspection/verification library for the build CLI.
 
 - **Status:** In audit
 - **Step branch:** `step/11-simulation-package-and-msl-writer`
-- **Step CI:** Ubuntu closeout run and focused Windows platform gate dispatched on the closeout squash (run IDs
-  recorded with the closeout evidence commit) — evidence: `docs/planning/closeout/step-11.json`
+- **Step CI:** [Ubuntu closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095) and
+  [focused Windows platform gate green](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973) at
+  `e94d975` — [closeout evidence](../closeout/step-11.json)
 - **Main merge:** — (main `bca66373c68485d08ac78c0259577887726879d1` merged into the step branch as
   `b44022ab2353e2f4394793ba3d023718a578753c`; main was green at the freeze)
 - **Step tag:** —
-- **Audit:** Ready for audit — request committed with the closeout evidence (`docs/planning/audits/step-11.md`)
+- **Audit:** Ready for audit — [request](../audits/step-11.md)
 - **Design review:** Ready with notes — accepted 2026-11-15 (record `32411c9`) — [record](../reviews/step-11.md)
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
@@ -34,7 +35,7 @@ read-only inspection/verification library for the build CLI.
 | A1 .NET 11 toolchain and native Zstandard | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | Squashed | `all --require` exit 0; one-time cross-TFM ApiCompat 9/9 | Not run (no per-feature CI) | `00753e7` |
 | A1-fix Lattice decode guard | `feature/step-11-simulation-package-and-msl-writer/fix-lattice-decode-guard` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `25a3787` |
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `e25811f` (fixtures/Part B/docs); `0ae05a4` (Windows canonical JSON) |
-| Closeout | `feature/step-11-simulation-package-and-msl-writer/closeout` | Squashed | `docs --require`, `policy --require` exit 0 | Ubuntu closeout and Windows platform gate dispatched on the closeout squash | Recorded with the closeout evidence commit |
+| Closeout | `feature/step-11-simulation-package-and-msl-writer/closeout` | Squashed | `docs --require`, `policy --require` exit 0 | Ubuntu closeout and Windows platform gate green | `e94d975` |
 
 ### Approved feature list
 
@@ -389,19 +390,24 @@ per feature.
 #### Closeout
 
 - **Branch:** `feature/step-11-simulation-package-and-msl-writer/closeout` (from `b44022a`).
-- **Squash commit:** recorded with the closeout evidence commit.
+- **Squash commit:** `e94d975` (`step-11: complete closeout status, parity, and deviations`).
 - **Local gates:** `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh docs
   --require` and `./tools/verify.sh policy --require` — both exit 0 (2026-11-16).
-- **Step CI:** the single Ubuntu closeout run (`platforms=ubuntu`, `force_all=false`) and the mandatory focused
-  Windows platform gate (`platforms=windows`) were dispatched on the closeout squash; IDs, `head_sha`, and
-  results are in the closeout evidence.
+- **Step CI:** the single Ubuntu closeout run
+  [`43935118095`](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095)
+  (`platforms=ubuntu`, `force_all=false`) is green at `e94d975`; the .NET, contracts/policy, and public-API jobs
+  ran and Rust/Python were skipped by their path filters (this step changes neither). The focused Windows
+  platform gate [`43935661973`](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973)
+  (`platforms=windows`) is green at `e94d975`; the Windows job built the solution and passed
+  `Mocassin.Packages.Tests` and `Mocassin.Results.Tests`. Both runs and `head_sha` are in the closeout evidence.
 - **Diff summary:** updated this page (status `In audit`, closeout link, feature log, deviations, acceptance
   notes), the status dashboard, and the final Step 11 parity rows; added the closeout evidence and the audit
   request in the following documentation-only commit. No code, test, contract, or fixture changed.
-- **Known limitations:** the two acceptance criteria below remain unchecked with their follow-up owners; the
-  container image remains unbuilt under the accepted risk.
+- **Known limitations:** the two acceptance criteria below remain unchecked with their follow-up owners
+  (Step 12; Steps 13 and 18); the container image remains unbuilt under the accepted risk.
 - **Parity:** no new row; the Step 11 rows were confirmed final for this step and the remaining `Partial` /
-  `Improvement` rows name their later steps (12, 13, 14, 18, 26).
+  `Improvement` rows name their later steps (12, 14, 18, 26), with Step 13 named as the Rust reader for the
+  `.msl` fixture.
 
 ### Deviations and accepted risks
 

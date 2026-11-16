@@ -58,7 +58,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 08 | [Model Compilation Pipeline](steps/step-08-model-compilation-pipeline.md) | C. Compilation | Done | `step/08-model-compilation-pipeline` (merged and deleted) | `step-08` | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43538703111) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43578897490) | `f91fc63` | `step-08` | Passed with notes at `28e741f` (`f97b2c4`) | Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — accepted 2026-11-13 |
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Done | `step/09-parameterization-templates` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43639561778) | `ef2f335` | `step-09` | Passed with notes at `916bae1` (`3aeacb1`) — accepted 2026-11-14 | Ready with notes at `26d6a0e` (round 4) — accepted 2026-11-14 |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Done | `step/10-job-templates` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43709029767) at `945dddf` | `945dddf` | `step-10` | Passed with notes at `c10e6d7` — accepted 2026-11-15 | Ready for implementation at `c5454af` — accepted 2026-11-14 |
-| 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | In audit | `step/11-simulation-package-and-msl-writer` | Closeout — squashed; Ubuntu closeout and Windows platform gate dispatched on the closeout squash | — | — | — | Ready for audit | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)) |
+| 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | In audit | `step/11-simulation-package-and-msl-writer` | Closeout — squashed (`e94d975`) | [closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095) / [Windows platform green](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973) at `e94d975` | — | — | Ready for audit | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)) |
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Not started | — | — | — | — | — | Not requested | Not requested |
 | 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -129,9 +129,11 @@ lattice decode guard (`25a3787`), and feature 7 (fixtures, the Part B budget, an
 `0ae05a4`) are squashed. The owner-approved CI platform-gate fix merged into `main` as `bca6637`; main CI failed
 attempt 1 only on the shared-runner 30 s compilation-budget flake, the owner accepted it and authorized the
 re-run, and attempt 2 is green. Main `bca6637` merged into the step branch as `b44022a`, the full local gate
-passed on that tree, and the closeout squash is dispatched for the single Ubuntu closeout run and the focused
-Windows platform gate. The evidence commit records both runs, the closeout evidence, and the audit request; the
-independent audit is pending.
+passed on that tree, and the closeout squash `e94d975` is green on the single Ubuntu closeout run
+[`43935118095`](https://github.com/seb-eis/mocassin-2/actions/runs/43935118095) and the focused Windows platform
+gate [`43935661973`](https://github.com/seb-eis/mocassin-2/actions/runs/43935661973). The closeout evidence
+`docs/planning/closeout/step-11.json` binds `e94d975` and `main` `bca6637`, and the audit request is
+`docs/planning/audits/step-11.md`; the independent audit is pending.
 
 ## Cross-cutting phase checkpoints
 
