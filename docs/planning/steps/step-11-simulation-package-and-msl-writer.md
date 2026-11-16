@@ -482,7 +482,8 @@ per feature.
    image. `global.json` stays the repository pin for local and CI resolution. The closeout CI resolves the same
    pin through `actions/setup-dotnet`, and the local gates ran on the pinned SDK under `/tmp/opencode/dotnet11`.
    The missing image evidence is recorded in the closeout evidence notes and the audit request; no page
-   describes the image as built. Rebuilding `opencode:mocassin` is the owner's verification step.
+   describes the image as built. The owner rebuilt `opencode:mocassin` successfully from this branch on
+   2026-11-16, which is the build verification.
 3. **Part A small-payload gate refinement (owner-approved).** Below 8 KiB the codec comparison uses an absolute
    decode penalty of ≤ 0.15 µs, throughput ≥ 100 MB/s, and ≤ +10 % relative decode at or above 8 KiB, instead of
    a relative-only decode threshold that fixed reader overhead dominates at small sizes. Part A passed on 12

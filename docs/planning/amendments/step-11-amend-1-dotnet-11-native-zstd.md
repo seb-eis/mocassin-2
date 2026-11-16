@@ -414,7 +414,8 @@ The image now has **no `COPY`/`ADD` step and no build-context dependency** and b
 self-contained assertions above remain: `dotnet --version`, `dotnet --list-sdks`, the exact count of 1, the
 positive `11.0.100` grep, the negative `10.` grep, and the `$DOTNET_ROOT/dotnet` path. With only 11.0.100
 installed, `dotnet --version` proves the pin resolves; no `global.json` is duplicated into the image.
-`global.json` (`11.0.100`, `latestPatch`) stays as the repository pin for local and CI resolution. The change is
+`global.json` (`11.0.100`, `latestPatch`) stays as the repository pin for local and CI resolution. The owner
+rebuilt `opencode:mocassin` successfully from `fix/container-build-context` on 2026-11-16. The change is
 recorded under `fix/container-build-context` in the parent step page's deviation 2. This note corrects the
 design text above; the reviewer-authored [design review](../reviews/step-11-amend-1.md) and the
 [audit record](../audits/step-11.md) are unchanged.
