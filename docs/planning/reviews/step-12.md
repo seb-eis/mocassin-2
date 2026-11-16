@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `80b3f7fd99f0140b1dad5650851d1aaa3c4ac0b8` |
+| Reviewed commit | `05b7297172f9f87453b3ffc23d06801035da7a2c` |
 | Docs branch | `docs/step-12-design` |
 | Review date | 2026-11-16 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation |
@@ -432,10 +432,11 @@ its file list, and the `PublicAPI.Unshipped.txt` obligation so the structure pol
 
 ## Record state
 
-**State:** Changes required — round 1 audited the design freeze
+**State:** Re-review required — round 1 audited the design freeze
 `80b3f7fd99f0140b1dad5650851d1aaa3c4ac0b8`; the request tip
-`0d466e8d7f78b1da19e56130d570140105bc429f` adds only this record. One Major and nine Minor findings remain;
-no Blocker.
+`0d466e8d7f78b1da19e56130d570140105bc429f` adds only that record. Round 1 found one Major and nine Minor
+findings and no Blocker. The step agent resolved them at `05b7297172f9f87453b3ffc23d06801035da7a2c`; a fresh
+reviewer re-reviews that commit.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -498,12 +499,33 @@ Date:
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
+The step agent owns this section. The round-1 reviewer text above is unchanged. All design fixes are docs-only
+and are in `05b7297172f9f87453b3ffc23d06801035da7a2c`; no code, test, configuration, or contract file changed.
 
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
+| Finding | Status | Owner | Commit | Resolution |
+| --- | --- | --- | --- | --- |
+| M-1 (Major) | Fixed | Planner | `05b7297` | The pipeline now owns the preview data path: `BuildResult.Preview` carries a typed `BuildPreview` produced after expansion by the shared `BuildPreviewBuilder` over the injected `ILatticePreviewService`; the CLI and Step 26 map it without reload, recompile, or a second evaluation. `BuildPreview.Elapsed` feeds the `preview` timing. A separate `PreviewAsync` was rejected because it would create two orchestration paths for the same work. Step page §6.1/§6.2/§12.2, §16.1, §23; data contract §5.7.3. |
+| m-1 (Minor) | Fixed | Planner | `05b7297` | `BuildRequest.Options` is the only injection point for `ProgressInterval`, `TimeProvider`, and the test-tunable `EventChannelCapacity`; the pipeline reads it per call and has no options constructor or ambient configuration. Step page §6.1/§6.3/§19/§23. |
+| m-2 (Minor) | Fixed | Planner | `05b7297` | The exit mapping now covers every failure kind/status combination: `JobSelection` (`CLI005`) → 2, `Preview` → 1, `PackageWrite` with a `PKG` error → 1 and without an I/O/`PKG` cause → 10, `None`/`Failed` → 10. Writer I/O is classified as `Io`; load `NotFound`/`TooLarge`/`Io` → `Io`, `InvalidContent` → `Load`. Step page §11.1/§23. |
+| m-3 (Minor) | Fixed | Planner | `05b7297` | Both validation calls set `ValidationOptions.WarningsAsErrors = request.WarningsAsErrors`; because `ParameterizationOptions` has no warning flag, the pipeline inspects the returned parameterization diagnostics and fails with `Failure = Parameterization` before the writer opens. Only validation/parameterization warnings are promoted; `CMP`/`PKG` stay warnings. Step page §6.2/§13.3/§20. |
+| m-4 (Minor) | Fixed | Planner | `05b7297` | Both `Validate` calls use `loadDiagnostics:`, `options:`, `compiledModel:`, and `cancellationToken:` and pass the build token, following Step 10 audit R2-5. Step page §6.2/§14. |
+| m-5 (Minor) | Fixed | Planner | `05b7297` | The one-report guarantee is limited to `validate` and the seven report-backed commands. `completion`, help/version, and reserved commands do not accept `--json` and emit no report; `clean --json` without `--dry-run` emits `clean-v1` with `dryRun = false`, `removedCount = 0`, and `CLI008`, and deletes nothing. Step page §5.1/§12.1/§12.4/§13.7/§13.9/§22; data contract §5.7.2/§5.7.4. |
+| m-6 (Minor) | Fixed | Planner | `05b7297` | `--json` now makes stderr JSON Lines only and suppresses human progress; `--quiet` additionally suppresses stage/progress/log events. Step page §5.1/§10/§12.5; `cli.md`; data contract §5.5. |
+| m-7 (Minor) | Fixed | Planner | `05b7297` | The owner accepted 3.0–4.0 pw, seven features, no split, with the 2.25 pw contingency. `04-roadmap.md` §3/§3.1 records the Step 12 exception; `05-open-decisions.md` adds the resolved sizing, `--template`, ceria-asset, and report-registration rows; step page §2/§21 record the decisions. |
+| m-8 (Minor) | Fixed | Planner | `05b7297` | The pipeline now constructs `ProjectValidationPipeline(additionalStages: [new JobTemplateValidationStage(previewService)])` and shares the preview service; a default pipeline with `RunBuildStage = true` is documented as a silent no-op. `design-decisions.md` no longer claims Step 12 adds a Build stage. Step page §6.2/§16.1/§20. |
+| m-9 (Minor) | Fixed | Planner | `05b7297` | Every doctor check implements the internal `IDoctorCheck` seam; `DoctorCommand` accepts an injected check list, production uses the seven real checks, and tests inject pass/warn/fail outcomes. The solver process boundary keeps `ISolverProbe`. Step page §13.6/§16.2/§18.2/§23. |
+| n-1 (Note) | Fixed | Planner | `05b7297` | Documented that `build.stage` events for load/select/validate/compile/validateBuild/parameterize/expand precede `build.started`, which means “job generation begins”; consumers must accept stage events before it. Step page §12.5; data contract §5.5. |
+| n-2 (Note) | Fixed | Planner | `05b7297` | The duplicate `CLI` table in `cli.md` is replaced by a link to the drift-checked diagnostics reference; feature 1 adds the rows there with the Contracts descriptors. Step page §18.1. |
+| n-3 (Note) | Fixed | Planner | `05b7297` | The overbroad `cli.md` sentence now scopes `--json` to `validate` and the seven report-backed commands; the `validate` human-output section is restored with the Step 07 stability statement. |
+| n-4 (Note) | Fixed | Planner | `05b7297` | The troubleshooting row separates `JOB004` (500,000 positions), `JOB008` (1–1000 per-configuration jobs), and `JOB019` (99,999 total jobs). |
+| n-5 (Note) | Fixed | Planner | `05b7297` | `BuildOptions.TimeProvider` is non-null with a `TimeProvider.System` default; the unreachable null sentence is removed. Step page §6.1/§6.3. |
+| n-6 (Note) | Fixed | Planner | `05b7297` | The data-contract fixture text now says the Step 26 GUI parser will accept `events-v1.jsonl`; the CLI schema validator accepts it now. Data contract §6. |
+| n-7 (Note) | Fixed | Planner | `05b7297` | Additive API updates `PublicAPI.Unshipped.txt`; the ApiCompat baseline is refreshed only for an intentional rebaseline. Step page §6.1/§16.3. |
+| n-8 (Note) | Fixed | Planner | `05b7297` | The parser rule now consumes the next token unconditionally for a value-taking option; `--jobs -1`, `--parallel -1`, and `-o -file` are specified and tested. Step page §5.1/§23; `cli.md`. |
+| n-9 (Note) | Fixed | Planner | `05b7297` | `Mocassin.Packages/Projects/Templates/` is added to the layout plan with its files, embedded assets, namespace, public-API obligation, and test folder. Step page §13.1/§16.5; `code-structure.md`. |
+
+No finding is deliberately left open. The four owner decisions are recorded in step page §21 and the resolved
+rows in `05-open-decisions.md`; they are not re-opened in round 2.
 
 ## Review rounds
 
