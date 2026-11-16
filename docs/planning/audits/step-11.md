@@ -323,14 +323,13 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-audit required — round 1 audited `e94d975ffe953561a56bd7850f39e073e603b9ea` (request tip
+**State:** Passed with notes — round 1 audited `e94d975ffe953561a56bd7850f39e073e603b9ea` (request tip
 `4d1af4eb7cfc4060b4692b703b166fb4202622ed` is the docs-only record parent) and returned `Passed with notes`
-with no Blocker or Major. Round-2 fixes for F-1–F-5 and N-2/N-3/N-5 are applied in X2
-`419716678cacf6ad2c50ee379e1d2e7342bbf13b`; N-1 and N-4 remain recorded follow-ups. The branch is frozen at the
-Y2 evidence commit for re-audit. `Passed with notes` remains the round-1 verdict; it does not authorize the
-merge or tag.
-
-`Re-audit required` is a record state, not a verdict.
+with no Blocker or Major. Round 2 audited the fix commit X2
+`419716678cacf6ad2c50ee379e1d2e7342bbf13b` at the Y2 request tip
+`d7b654c2b29562a7fff257d1297019cc5fbf6b26` and closed F-1–F-5 and N-2/N-3/N-5. N-1, N-4, and the round-2
+note N-6 remain recorded follow-ups; no Blocker or Major remains. The branch is frozen at Y2. `Passed with
+notes` is the current verdict; it does not authorize the merge or tag.
 
 ## Reviewer independence
 
@@ -487,3 +486,114 @@ the two unchecked acceptance criteria are explicitly disclosed and owned by Step
 that Step 12 does not yet list the first one); the full gate and both CI runs are green; and no Blocker or Major
 remains. The human owner must accept the five Minors and five Notes before merge. This record is evidence and does
 not authorize the merge or tag.
+
+### Audit round 2
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author or implement Step 11, its amendment, the round-1 record, or the round-2
+fixes, and I have no shared conversation with the planner, step agent/implementor, or orchestrator. I received
+only the frozen commits, the audit request, and the required commands/scope; no desired verdict or summary was
+supplied. The audit was read-only apart from this record. I read the repository, the X2 code/test diff, the
+round-1 findings and resolutions, the closeout evidence, the step page, and the CI run data directly.
+
+The frozen branch is `step/11-simulation-package-and-msl-writer` at Y2
+`d7b654c2b29562a7fff257d1297019cc5fbf6b26` (record parent), which is exactly `origin/step/11-simulation-package-and-msl-writer`;
+the working tree is clean. The audited code commit is X2 `419716678cacf6ad2c50ee379e1d2e7342bbf13b`
+(`head_sha` of both round-2 CI runs). `git diff --name-status X2..Y2` contains only
+`docs/planning/audits/step-11.md`, `docs/planning/closeout/step-11.json`, `docs/planning/status.md`, and the Step 11
+page; a `git diff --name-only X2..Y2 | grep -v '^docs/planning/'` finds nothing, so the executed tree is X2. `main`
+and `origin/main` are still `bca66373c68485d08ac78c0259577887726879d1`; it is an ancestor of X2 and has not moved,
+so no merge-tree run applies. There is no `step-11` tag locally or on `origin`, no step-to-main merge, and no
+surviving `fix-audit-minors` or other Step 11 feature branch.
+
+#### Commands and results
+
+- `python tools/check_closeout_evidence.py docs/planning/closeout/step-11.json` → `Closeout evidence: OK` (exit 0).
+  The evidence binds `audit_commit = closeout_ci.head_sha = merge_candidate = X2`, the replacement closeout run
+  `43944825353`, the Windows run in `platform_ci`, `main_sha_at_freeze = bca6637`, and an empty X2..X2 delta. The
+  later X2..Y2 docs-only delta is disclosed in note[5] and was verified manually, as required by N-2.
+- `DOTNET_ROOT=/tmp/opencode/dotnet11 PATH=/tmp/opencode/dotnet11:$PATH ./tools/verify.sh all --require` → exit 0,
+  "Closeout gate completed with required checks enabled." on SDK `11.0.100`. Project test totals: App 1,
+  Contracts 37, Cli 17, Symmetry 223, Results 42, Core 685, Compilation 96, Packages 426, Architecture 1 — **1,528
+  passed, 0 failed/skipped** (+9 over round 1); build 0 warnings/0 errors and `dotnet format` clean; ApiCompat
+  compatible for nine assemblies; 52 NuGet packages, no vulnerable packages; `git diff --check` clean; Rust
+  fmt/clippy/tests; Python 3 tests and wheel/sdist; strict Zensical, DocFX 0 warnings/0 errors, rustdoc, site;
+  19 contract artifacts current; space-group catalog current (274 settings); 58 tool tests; SPDX 603 files; 984
+  secret-scanned files; cargo-deny advisories/bans/licenses/sources ok.
+- Targeted new tests: `dotnet test src/dotnet/Mocassin.Packages.Tests ... --filter
+  "FullyQualifiedName~ExplicitParameterizationPackageTests|FullyQualifiedName~PayloadPropertyTests|FullyQualifiedName~AuthoredNormalizationEnergy"`
+  → 6 passed (2 explicit-package facts, 2 FsCheck properties, 2 normalization-theory cases).
+  `dotnet test src/dotnet/Mocassin.Results.Tests ... --filter "FullyQualifiedName~PackageVerifierTests.Pkg00"` →
+  14 passed, including the two malformed-`schema_info` cases and the malformed-`format_version` case.
+- GitHub Actions API: closeout run `43944825353` is `success` at X2 (`workflow_dispatch`, `platforms=ubuntu`);
+  `Detect changes`, `.NET (ubuntu-latest)`, `Contracts and policy`, and `Public API compatibility` succeeded;
+  Rust and Python were skipped by path filters; the Ubuntu platform-test steps were correctly skipped.
+  Windows run `43944396192` is `success` at X2 (`platforms=windows`); the `windows-latest` build succeeded and
+  the `Platform tests - package writer` and `Platform tests - results reader` steps both succeeded. Run
+  `43944373820` is the cancelled first Ubuntu dispatch recorded in the evidence as superseded process history.
+- Diff review (`git diff 20ea7f5..X2`, the X2 commit): `SimulationPackageWriter.cs` (F-1), the three
+  `Internal/*Row.cs` summaries (F-1), `JobPayloadMapper.cs` (F-3), `PackageReader.cs` (F-5),
+  `ExplicitParameterizationPackageTests.cs`, `PayloadPropertyTests.cs`, `JobAndLatticePayloadEncodingTests.cs`,
+  `PackageVerifierTests.cs`, and the Step 11 page / quality strategy / testing-and-parity documentation. The
+  earlier `e94d975..20ea7f5` range is the round-1 audit record/evidence (documentation only). No project file,
+  contract manifest, generated artifact, workflow, or unrelated code changed. `git grep` for the stale feature-3 remarks,
+  `NotSupportedException`, and "before the payload encoder" over the package writer returns nothing.
+
+#### Findings
+
+- **F-1 — closed.** The class remarks now describe the real map/encode/decode/write path, both
+  `NotSupportedException` tags are gone, and the three internal row summaries say "after the payload is encoded
+  and checked". A focused grep finds no feature-3/4/5 wording, no `NotSupportedException`, and no pre-encoder
+  text in the writer. DocFX/API analyzers remain clean in the full gate.
+- **F-2 — closed.** `ExplicitParameterizationPackageTests` builds two real packages through
+  `SimulationPackageWriter` and reads the `models` row back from the published SQLite file. The pair/group/site
+  case asserts the stored payload values equal the applied `ParameterizationValues`, the authored values are
+  absent from the implicit-default model, and the stored and payload signatures equal `ParameterizedModel.Signature`;
+  the frequency case does the same for an absolute rule frequency. The split-sample rationale is recorded on the
+  step page and the acceptance criterion is now correctly checked. The evidence is real-object end-to-end, not a
+  unit seam.
+- **F-3 — closed.** `JobPayloadMapper.Map` canonicalizes an authored `normalizationEnergyEv` of zero to `null` and
+  preserves a non-zero override; the theory authors `0.0`/`0.25` through the real project JSON, resolver, mapper,
+  and payload encode/decode path, asserting the resolved descriptor keeps `0.0` while the payload and decoded
+  payload store `null`, and `0.25` is preserved. The `value is 0.0` pattern also matches IEEE `-0.0`; the property
+  test exercises `-0.0` in the signature projection. Negative zero is not separately authored in this theory, but
+  the behaviour is covered by the language semantics and the signature property; this is an observation, not a
+  defect.
+- **F-4 — closed (property tests) with an explicit deferral (fuzz).** `PayloadPropertyTests` is real FsCheck
+  (`FsCheck.Xunit` `[Property]`, `MaxTest = 12`), not an example-based rename: it varies sparse explicit
+  templates, round-trips canonical MessagePack at Zstd levels 1/3/19, and proves signature stability under
+  `-0.0`, shuffled template maps, a reordered real MessagePack payload map, and the compression level. The
+  nightly `.msl` fuzz harness is explicitly deferred to Step 29 (owner: Step 29 implementor) in the Step 11 page,
+  quality strategy §10, and testing-and-parity, and no fuzz run is claimed. Round-2 note N-6 below records a
+  traceability improvement for that deferral.
+- **F-5 — closed.** `PackageReader` now returns `MissingSchemaElement` (`PKG003`) for a malformed
+  `schema_info.project_id` and `created_utc`; `format_version` remains `PKG002` (`UnsupportedSchema`). Both
+  malformed `PKG003` values have dedicated tests (each also asserts the other code is absent), the existing
+  missing-key `PKG003` test still passes, and the new malformed-`format_version` `PKG002` test passes.
+- **N-2 — corrected.** The closeout note now states that the checker compares the empty X2..X2 range and that the
+  X2..Y2 delta is verified manually; the manual check confirms a docs/planning-only delta. **N-3 — corrected.**
+  The step page's X2 gate counts (1,528 tests, 58 tool tests, 603 SPDX, 984 secret-scanned) match this gate
+  exactly. **N-5 — corrected.** The checked pair-expansion criterion no longer bundles the Step 14 consumer test,
+  and the implementation task records that cross-step ownership.
+- **N-1 — still open (Note).** The directory fsync remains before the atomic rename and the contract/ADR still
+  records that order; owner: design/contract owner, future contract/ADR. **N-4 — still open (Note).** `AGENTS.md`
+  §1 still carries the pre-existing Steps 00–07 status text; owner: orchestrator/next documentation change.
+- **N-6 — round-2 Note (new).** The F-4 fuzz deferral names "the SharpFuzz `.msl` target and its nightly job", but
+  Step 29's fuzzing list names only the `.msl` reader under cargo-fuzz (Rust) and SharpFuzz for `.msr`, not the
+  .NET `Mocassin.Results` `.msl` verifier that the deferred harness mutates. Adding that target to Step 29's
+  fuzzing list would give the deferral the same explicit tracked closure point F-2 now has. Owner: Step 29
+  implementor. This does not affect the Step 11 gate or the correctness of the shipped verifier.
+- No Blocker or Major finding remains. The fixes are confined to the five Minors and the documentation Notes;
+  no hidden scope, no new dependency, no contract/version change, and no scientific or format change was
+  introduced. The Y2 delta is documentation-only.
+
+#### Verdict
+
+**Passed with notes** at `419716678cacf6ad2c50ee379e1d2e7342bbf13b` (request tip Y2 `d7b654c`). Round-2
+verification confirms F-1–F-5 and N-2/N-3/N-5 are genuinely closed by X2, that the refreshed closeout evidence
+binds X2, closeout run `43944825353`, Windows run `43944396192`, and `main` `bca6637`, and that both CI runs are
+green at X2 with the Windows package-writer and results-reader steps actually executed. The full `all --require`
+gate and the evidence checker are green on the audited tree. N-1, N-4, and the new traceability note N-6 remain
+recorded follow-ups with named owners; they are non-blocking. The human owner must explicitly accept the Notes
+before merge; this record is evidence and does not authorize the merge or tag.
