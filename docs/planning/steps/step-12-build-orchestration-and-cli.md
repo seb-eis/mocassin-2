@@ -54,7 +54,8 @@ implemented and squashed. Feature rows stay empty until then.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs`, `aot` exit 0 (AOT CLI evidence: 62 trim diagnostics from `Mocassin.Core`, not a gate) | Not run (no per-feature CI) | Recorded with feature 2 |
+| 1 CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs`, `aot` exit 0 (AOT CLI evidence: 62 trim diagnostics from `Mocassin.Core`, not a gate) | Not run (no per-feature CI) | `517ae27` |
+| 2 Build orchestration core | `feature/step-12-build-orchestration-and-cli/build-orchestration-core` | Squashed | `dotnet` (494 Packages tests, 68 new), `structure`, `api` exit 0 | Not run (no per-feature CI) | Recorded with feature 3 |
 
 ### Deviations and accepted risks
 
@@ -64,11 +65,15 @@ implemented and squashed. Feature rows stay empty until then.
    outside the planner's write scope. The edits were factual status cells for the accepted design, no code,
    contract, or verdict text changed, and the step agent (owner of this record) accepts the deviation with no
    corrective action. Future design branches leave status cells to the step agent.
-2. **Preview option semantics during the feature-1 transition (owner decision, 2026-11-17).** `build --preview`
-   is now parsed by the shared graph with the final option names: `--job-template` selects the interim preview
-   job template, and `--template` is the build-template option. Preview rejects `--template` with `CLI004`/2
-   until feature 3 folds preview into the full build. The Step 10 `--template`-as-job-template spelling is
-   retired now rather than at feature 3; the existing preview tests moved to `--job-template`.
+2. **Preview option semantics during the feature-1 transition (recorded owner decision; direct-question
+   process deviation).** The recorded owner decision of 2026-11-17 is that `--template` names a build template
+   and `--job-template` names a job template (§7.1, §20); that decision is implemented. During feature 1 the
+   implementor used the session question mechanism to ask for the interim preview option spelling and received
+   "final names now". `AGENTS.md` §3.8/§7 routes decisions through the orchestrator, so asking outside that
+   route is recorded as a process deviation (owner: step agent; no action required; future design questions go
+   through the orchestrator). `build --preview` now uses `--job-template`; `--template` is the build-template
+   option and preview rejects it with `CLI004`/2 until feature 3 folds preview into the full build. The Step 10
+   `--template`-as-job-template spelling is retired now rather than at feature 3.
 3. **Interim command placeholders (feature 1 only).** `new`, `compile`, `inspect`, `verify`, `doctor`, and
    `clean` are defined in the command graph but return `CLI008`/2 with the owning Step 12 feature until
    features 4–6 implement them. `build` without `--preview` does the same until feature 3. Those interim
@@ -85,6 +90,19 @@ implemented and squashed. Feature rows stay empty until then.
 5. **Only `linux-x64` AOT is exercised.** Windows/macOS AOT, the `System.CommandLine` `netstandard2.0` asset,
    and the real CLI native image are untested. The smoke host carries the representative command/option/argument
    shape and the `CLI001` remap.
+6. **The Step 10 CLI preview projection remains until feature 3 (M-1 interim duplication).** Feature 2 adds the
+   single library preview implementation (`BuildPreviewBuilder` and `BuildResult.Preview`) and pins its payload
+   against the Step 10 observable values. The CLI still uses its interim `PreviewCommand` projection and
+   `build-preview-v1`; rewiring it to `BuildResult.Preview` and retiring the old report is feature 3, as the
+   owner scoped. Until then two preview mappings exist and must not diverge; the library tests pin the payload.
+7. **Two failure kinds are defensive in v1.** `LatticeGeneration` is normally caught earlier by the registered
+   build-stage validation, and `PackageWrite` has no writer-returned `PKG` error in v1. Both values are
+   implemented and mapped by the design; they are not exercised end to end. Feature 3's writer fault injection
+   covers `PackageWrite` if the writer gains an error result.
+8. **Promoted parameterization warnings are implemented but not end-to-end tested.** The only buildable sample
+   carries unrelated model warnings (ENM017/ENM018), so `WarningsAsErrors` stops at `Validation` before the
+   parameterization stage. The stale-signature `Parameterization` failure is tested; feature 3's
+   `--warnings-as-errors` tests need a warning-free fixture or a targeted parameterization seam.
 
 ## 1. Goal
 
@@ -1597,18 +1615,18 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 2 — Build orchestration core
 
-- [ ] Add `Mocassin.Packages.Build` request/options/result/failure/stage/event/preview types and
+- [x] Add `Mocassin.Packages.Build` request/options/result/failure/stage/event/preview types and
       `IBuildPipeline`; `BuildRequest.Options` is the only options injection point.
-- [ ] Implement the ordered pipeline, the bounded event channel, progress throttling, and stage timings.
-- [ ] Construct the validation pipeline with `JobTemplateValidationStage(previewService)`; use named
+- [x] Implement the ordered pipeline, the bounded event channel, progress throttling, and stage timings.
+- [x] Construct the validation pipeline with `JobTemplateValidationStage(previewService)`; use named
       `Validate` arguments and pass the token.
-- [ ] Implement the shared `BuildPreviewBuilder` and set `BuildResult.Preview`; never reload or recompile for
+- [x] Implement the shared `BuildPreviewBuilder` and set `BuildResult.Preview`; never reload or recompile for
       preview.
-- [ ] Plumb `WarningsAsErrors` into `ValidationOptions` and the parameterization diagnostic check.
-- [ ] Implement build/job-template/parameterization selection and output-path resolution.
-- [ ] Implement `JobSelection` parsing, normalization, and the `JobSelectionResult` projection.
-- [ ] Implement the parallel generation + serialized write scheduler and cancellation.
-- [ ] Add real-project pipeline tests for ceria, preview payload, partial selection, parallel determinism,
+- [x] Plumb `WarningsAsErrors` into `ValidationOptions` and the parameterization diagnostic check.
+- [x] Implement build/job-template/parameterization selection and output-path resolution.
+- [x] Implement `JobSelection` parsing, normalization, and the `JobSelectionResult` projection.
+- [x] Implement the parallel generation + serialized write scheduler and cancellation.
+- [x] Add real-project pipeline tests for ceria, preview payload, partial selection, parallel determinism,
       cancellation, every failure kind, and the options injection.
 
 ### Feature 3 — Build and preview command
