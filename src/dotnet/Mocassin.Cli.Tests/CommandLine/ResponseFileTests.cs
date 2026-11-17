@@ -122,12 +122,13 @@ public sealed class ResponseFileTests
         var (exitCode, _, stderr) = await RunInAsync(
             directory.Path,
             "build",
-            ceria,
+            RepositoryPaths.Combine("samples", "jobs", "ceria-temperature-sweep.mocprj"),
             "--preview",
             "--jobs=@jobs.rsp");
 
         Assert.Equal(2, exitCode);
-        Assert.Contains("--jobs", stderr, StringComparison.Ordinal);
+        Assert.Contains("CLI005", stderr, StringComparison.Ordinal);
+        Assert.Contains("@jobs.rsp", stderr, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -14,9 +14,12 @@ public static class Program
     /// </summary>
     /// <param name="args">The command-line arguments.</param>
     /// <returns>The process exit code.</returns>
-    public static Task<int> Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        return new CliApplication().RunAsync(args, Console.Out, Console.Error);
+        using var signals = new CliSignalHandler();
+        return await new CliApplication()
+            .RunAsync(args, Console.Out, Console.Error, signals.Token)
+            .ConfigureAwait(false);
     }
 }

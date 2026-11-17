@@ -36,11 +36,11 @@ internal static class CliBinding
     /// <param name="parseResult">The successful parse result.</param>
     /// <param name="graph">The command graph that owns the symbols.</param>
     /// <returns>The typed request.</returns>
-    public static BuildRequest BindBuild(ParseResult parseResult, CliCommandGraph graph)
+    public static BuildCommandRequest BindBuild(ParseResult parseResult, CliCommandGraph graph)
     {
         ArgumentNullException.ThrowIfNull(parseResult);
         ArgumentNullException.ThrowIfNull(graph);
-        return new BuildRequest(
+        return new BuildCommandRequest(
             parseResult.GetRequiredValue(graph.BuildProject),
             parseResult.GetValue(graph.BuildJson),
             parseResult.GetValue(graph.BuildPreview),

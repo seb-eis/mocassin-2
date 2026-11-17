@@ -122,8 +122,8 @@ publication the new package remains and the command exits 6. Progress is throttl
 - An existing package is not replaced without `--force`.
 - `--compact` uses Zstd quality 9 plus `VACUUM`; it changes compressed bytes and size, not signatures or the
   canonical summary.
-- `--parallel <n>` controls compilation and lattice generation; package writes stay serialized in job order,
-  so `--parallel 1` and `--parallel N` produce the same logical package.
+- `--parallel <n>` controls compilation and lattice generation; omitting it uses the processor count. Package
+  writes stay serialized in job order, so `--parallel 1` and `--parallel N` produce the same logical package.
 
 ### Verification
 

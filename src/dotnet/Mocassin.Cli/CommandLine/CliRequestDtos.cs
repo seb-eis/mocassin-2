@@ -16,7 +16,7 @@ internal sealed record ValidateRequest(
     bool Statistics);
 
 /// <summary>
-/// The typed request of the <c>build</c> command, including its interim no-write preview mode.
+/// The typed request of the <c>build</c> and <c>build --preview</c> commands.
 /// </summary>
 /// <param name="ProjectPath">The project path.</param>
 /// <param name="Json">Whether the JSON report was requested.</param>
@@ -31,7 +31,7 @@ internal sealed record ValidateRequest(
 /// <param name="Force">Whether an existing package may be replaced.</param>
 /// <param name="WarningsAsErrors">Whether validation warnings are promoted to errors.</param>
 /// <param name="Quiet">Whether stage, progress, and log events are suppressed.</param>
-internal sealed record BuildRequest(
+internal sealed record BuildCommandRequest(
     string ProjectPath,
     bool Json,
     bool Preview,
@@ -45,11 +45,3 @@ internal sealed record BuildRequest(
     bool Force,
     bool WarningsAsErrors,
     bool Quiet);
-
-/// <summary>
-/// The typed request of the interim <c>build --preview</c> command.
-/// </summary>
-/// <param name="ProjectPath">The project path.</param>
-/// <param name="JobTemplateId">The selected job template ID, or <see langword="null"/>.</param>
-/// <param name="Json">Whether the JSON report was requested.</param>
-internal sealed record PreviewRequest(string ProjectPath, Guid? JobTemplateId, bool Json);

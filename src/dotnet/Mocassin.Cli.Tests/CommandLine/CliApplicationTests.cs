@@ -116,10 +116,11 @@ public sealed class CliApplicationTests
             "-file");
 
         Assert.Equal(2, jobsExit);
-        Assert.Contains("--jobs", jobsError, StringComparison.Ordinal);
+        Assert.Contains("CLI005", jobsError, StringComparison.Ordinal);
+        Assert.Contains("-1", jobsError, StringComparison.Ordinal);
         Assert.DoesNotContain("Required argument missing", jobsError, StringComparison.Ordinal);
         Assert.Equal(2, outputExit);
-        Assert.Contains("--output", outputError, StringComparison.Ordinal);
+        Assert.Contains("-o", outputError, StringComparison.Ordinal);
         Assert.DoesNotContain("Required argument missing", outputError, StringComparison.Ordinal);
     }
 

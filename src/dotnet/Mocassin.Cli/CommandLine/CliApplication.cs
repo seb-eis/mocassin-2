@@ -20,6 +20,7 @@ internal sealed class CliApplication
     };
 
     private readonly CliCommandGraph graph;
+    private readonly BuildCommand buildCommand;
 
     /// <summary>
     /// Initializes the application with the complete command graph.
@@ -34,9 +35,21 @@ internal sealed class CliApplication
     /// </summary>
     /// <param name="graph">The command graph.</param>
     public CliApplication(CliCommandGraph graph)
+        : this(graph, new BuildCommand())
+    {
+    }
+
+    /// <summary>
+    /// Initializes the application with explicit command seams for tests.
+    /// </summary>
+    /// <param name="graph">The command graph.</param>
+    /// <param name="buildCommand">The build command.</param>
+    internal CliApplication(CliCommandGraph graph, BuildCommand buildCommand)
     {
         ArgumentNullException.ThrowIfNull(graph);
+        ArgumentNullException.ThrowIfNull(buildCommand);
         this.graph = graph;
+        this.buildCommand = buildCommand;
     }
 
     /// <summary>
@@ -129,7 +142,11 @@ internal sealed class CliApplication
 
         if (ReferenceEquals(command, graph.BuildCommand))
         {
-            return RunBuildAsync(CliBinding.BindBuild(parseResult, graph), stdout, stderr, cancellationToken);
+            return buildCommand.RunAsync(
+                CliBinding.BindBuild(parseResult, graph),
+                stdout,
+                stderr,
+                cancellationToken);
         }
 
         if (ReferenceEquals(command, graph.NewCommand))
@@ -167,84 +184,6 @@ internal sealed class CliApplication
         return Task.FromResult(CliExitCode.Usage);
     }
 
-    private static async Task<int> RunBuildAsync(
-        BuildRequest request,
-        TextWriter stdout,
-        TextWriter stderr,
-        CancellationToken cancellationToken)
-    {
-        if (!request.Preview)
-        {
-            WriteUnavailable(stderr, "CLI008", "The 'build' command without --preview arrives with Step 12 feature 3.");
-            return CliExitCode.Usage;
-        }
-
-        if (request.OutputPath is not null)
-        {
-            return WritePreviewUsageError(stderr, "build --preview does not accept -o/--output.");
-        }
-
-        if (request.Force)
-        {
-            return WritePreviewUsageError(stderr, "build --preview does not accept --force.");
-        }
-
-        if (request.Compact)
-        {
-            return WritePreviewUsageError(stderr, "build --preview does not accept --compact.");
-        }
-
-        if (request.BuildTemplateId is not null)
-        {
-            var diagnostic = CliDiagnosticFactory.Selection(
-                "The --template option selects a build template, which arrives with Step 12 feature 3.",
-                "Use --job-template to select a job template for build --preview.");
-            stderr.WriteLine($"{diagnostic.Code}: {diagnostic.Message} {diagnostic.Hint}");
-            return CliExitCode.Usage;
-        }
-
-        if (request.ParameterizationId is not null)
-        {
-            return WritePreviewUsageError(stderr, "build --preview does not accept --parameterization in this feature.");
-        }
-
-        if (request.Jobs is not null)
-        {
-            return WritePreviewUsageError(stderr, "build --preview does not accept --jobs in this feature.");
-        }
-
-        if (request.Parallel != 0)
-        {
-            return WritePreviewUsageError(stderr, "build --preview does not accept --parallel in this feature.");
-        }
-
-        if (request.WarningsAsErrors)
-        {
-            return WritePreviewUsageError(
-                stderr,
-                "build --preview does not accept --warnings-as-errors in this feature.");
-        }
-
-        if (request.Quiet)
-        {
-            return WritePreviewUsageError(stderr, "build --preview does not accept --quiet in this feature.");
-        }
-
-        return await PreviewCommand.RunAsync(
-                new PreviewRequest(request.ProjectPath, request.JobTemplateId, request.Json),
-                stdout,
-                stderr,
-                cancellationToken)
-            .ConfigureAwait(false);
-    }
-
-    private static int WritePreviewUsageError(TextWriter stderr, string message)
-    {
-        var diagnostic = CliDiagnosticFactory.Usage(message);
-        stderr.WriteLine($"{diagnostic.Code}: {diagnostic.Message}");
-        return CliExitCode.Usage;
-    }
-
     private int WriteParseErrors(
         ParseResult parseResult,
         IReadOnlyList<string> tokens,
@@ -261,9 +200,11 @@ internal sealed class CliApplication
                 return CliExitCode.Usage;
             }
 
-            if (ReferenceEquals(command, graph.BuildCommand) && WantsPreview(tokens))
+            if (ReferenceEquals(command, graph.BuildCommand))
             {
-                PreviewCommand.WriteUsageReport(stdout, diagnostics);
+                BuildReportWriter.WriteJson(
+                    stdout,
+                    BuildReportFactory.UsageError(WantsPreview(tokens), diagnostics));
                 return CliExitCode.Usage;
             }
         }
@@ -294,10 +235,13 @@ internal sealed class CliApplication
                 return CliExitCode.Usage;
             }
 
-            if (string.Equals(command, CliCommandNames.Build, StringComparison.Ordinal)
-                && candidates.Contains("--preview", StringComparer.Ordinal))
+            if (string.Equals(command, CliCommandNames.Build, StringComparison.Ordinal))
             {
-                PreviewCommand.WriteUsageReport(stdout, diagnostics);
+                BuildReportWriter.WriteJson(
+                    stdout,
+                    BuildReportFactory.UsageError(
+                        candidates.Contains("--preview", StringComparer.Ordinal),
+                        diagnostics));
                 return CliExitCode.Usage;
             }
         }

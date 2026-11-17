@@ -28,7 +28,7 @@ flags take no value. A value beginning with `-` is accepted for a value-taking o
 `--parallel -1` reach the command as `-1` (and are rejected by range checks), and `-o -file` names the path
 `-file`. `--` ends option parsing so a path beginning with `-` can be passed. Option names are
 case-sensitive; combined short options are not supported. Numbers use invariant culture: `--parallel` accepts
-`1..256` and `--older-than` accepts `0..36500`. A parse error exits 2 with a `CLI001` diagnostic; the library's own parse-error exit code (1) is
+`1..256` (omitting it uses the processor count) and `--older-than` accepts `0..36500`. A parse error exits 2 with a `CLI001` diagnostic; the library's own parse-error exit code (1) is
 never exposed.
 
 `--json` makes stderr JSON Lines only and suppresses human progress, whether or not `--quiet` is used.

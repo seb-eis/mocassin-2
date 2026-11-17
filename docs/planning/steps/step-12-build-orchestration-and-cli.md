@@ -55,7 +55,8 @@ implemented and squashed. Feature rows stay empty until then.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs`, `aot` exit 0 (AOT CLI evidence: 62 trim diagnostics from `Mocassin.Core`, not a gate) | Not run (no per-feature CI) | `517ae27` |
-| 2 Build orchestration core | `feature/step-12-build-orchestration-and-cli/build-orchestration-core` | Squashed | `dotnet` (494 Packages tests, 68 new), `structure`, `api` exit 0 | Not run (no per-feature CI) | Recorded with feature 3 |
+| 2 Build orchestration core | `feature/step-12-build-orchestration-and-cli/build-orchestration-core` | Squashed | `dotnet` (494 Packages tests, 68 new), `structure`, `api` exit 0 | Not run (no per-feature CI) | `1dc9eeb` |
+| 3 Build and preview command | `feature/step-12-build-orchestration-and-cli/build-and-preview-command` | Squashed | `dotnet` (81 CLI tests), `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | Recorded with feature 4 |
 
 ### Deviations and accepted risks
 
@@ -90,19 +91,33 @@ implemented and squashed. Feature rows stay empty until then.
 5. **Only `linux-x64` AOT is exercised.** Windows/macOS AOT, the `System.CommandLine` `netstandard2.0` asset,
    and the real CLI native image are untested. The smoke host carries the representative command/option/argument
    shape and the `CLI001` remap.
-6. **The Step 10 CLI preview projection remains until feature 3 (M-1 interim duplication).** Feature 2 adds the
-   single library preview implementation (`BuildPreviewBuilder` and `BuildResult.Preview`) and pins its payload
-   against the Step 10 observable values. The CLI still uses its interim `PreviewCommand` projection and
-   `build-preview-v1`; rewiring it to `BuildResult.Preview` and retiring the old report is feature 3, as the
-   owner scoped. Until then two preview mappings exist and must not diverge; the library tests pin the payload.
+6. **The Step 10 CLI preview projection was removed in feature 3 (M-1 closed).** Feature 2 added the single
+   library preview implementation (`BuildPreviewBuilder` and `BuildResult.Preview`); feature 3 deleted
+   `PreviewCommand`, its DTOs, and `PreviewReportWriter`, and now projects `BuildResult.Preview` into
+   `build-v1.preview`. No interim preview mapping or `build-preview-v1` consumer remains.
 7. **Two failure kinds are defensive in v1.** `LatticeGeneration` is normally caught earlier by the registered
    build-stage validation, and `PackageWrite` has no writer-returned `PKG` error in v1. Both values are
    implemented and mapped by the design; they are not exercised end to end. Feature 3's writer fault injection
    covers `PackageWrite` if the writer gains an error result.
-8. **Promoted parameterization warnings are implemented but not end-to-end tested.** The only buildable sample
-   carries unrelated model warnings (ENM017/ENM018), so `WarningsAsErrors` stops at `Validation` before the
-   parameterization stage. The stale-signature `Parameterization` failure is tested; feature 3's
-   `--warnings-as-errors` tests need a warning-free fixture or a targeted parameterization seam.
+8. **Promoted parameterization warnings are covered by a command seam, not a real project.** The only
+   buildable sample carries unrelated model warnings (ENM017/ENM018), so `WarningsAsErrors` stops at
+   `Validation` before the parameterization stage. Feature 3 tests the real validation→exit-1 rule end to end
+   and the parameterization→exit-4 rule through a scripted `IBuildPipeline` that returns
+   `Failure = Parameterization`; the library promotion condition itself is not exercised by a project fixture.
+
+9. **Target pre-check order.** An explicit `-o` target is checked before any load. A default target derived
+   from a build template can only be resolved after the CLI loads the project and selects the recipe, so that
+   pre-check happens before the pipeline runs but after this one preflight load. The writer's
+   `PackageBuildOptions.Overwrite` remains the final race guard, and §7's "CLI passes the effective selection;
+   the pipeline repeats it defensively" describes the resulting two loads.
+10. **The signal handler lives in `Program`, not `BuildCommand`.** `CliSignalHandler` owns the first-signal
+    SIGINT/SIGTERM cancellation and the second-signal default termination; `BuildCommand` receives the token
+    through `CliApplication.RunAsync`, which keeps the command unit-testable. The observable behaviour matches
+    §13.3.
+11. **Only `build` and `validate` are report-backed in feature 3.** The other five report ids
+    (`new-project`, `compile`, `inspect`, `verify`, `doctor`, `clean`) still return their feature-4/5/6
+    placeholders and emit no report; their reports land with the commands. Reserved commands and
+    help/version still emit none.
 
 ## 1. Goal
 
@@ -1631,16 +1646,17 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 3 — Build and preview command
 
-- [ ] Implement `build` and fold `--preview` into it; map `BuildResult.Preview` and retire
+- [x] Implement `build` and fold `--preview` into it; map `BuildResult.Preview` and retire
       `build-preview-v1`.
-- [ ] Implement `--jobs`, `--parallel`, `--force`, `--compact`, `--warnings-as-errors`, `--quiet`, `--json`.
-- [ ] Implement human progress/ETA and JSON-Lines events; make `--json` suppress human stderr; install the
+- [x] Implement `--jobs`, `--parallel`, `--force`, `--compact`, `--warnings-as-errors`, `--quiet`, `--json`.
+- [x] Implement human progress/ETA and JSON-Lines events; make `--json` suppress human stderr; install the
       signal handler.
-- [ ] Implement post-publication verification and the `build-v1` report, including the `preview` timing from
+- [x] Implement post-publication verification and the `build-v1` report, including the `preview` timing from
       `BuildPreview.Elapsed`.
-- [ ] Implement the report-backed scope: one report for `validate` and the seven report ids; no report for
-      help/version/reserved commands; `clean --json` without `--dry-run` reports `CLI008`.
-- [ ] Add the sample build/verify, partial, force, cancel, compact, warnings, exit-code, and schema tests.
+- [x] Implement the report-backed scope for the commands that exist: one `build-v1` report for both build
+      modes and the unchanged `validation-v1`; no report for help/version/reserved commands. The five remaining
+      report ids land with features 4–6, and `clean --json` without `--dry-run` with feature 6.
+- [x] Add the sample build/verify, partial, force, cancel, compact, warnings, exit-code, and schema tests.
 
 ### Feature 4 — Project and compile commands
 
