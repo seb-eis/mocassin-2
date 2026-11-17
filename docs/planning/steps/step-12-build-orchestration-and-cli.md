@@ -12,8 +12,8 @@ UI consumes later.
 - **Status:** Not started — the design changed on 2026-11-17 (the hand-written parser is replaced by
   `System.CommandLine` 3.0.0, with bounded `@file` response files); a round-3 design re-review is pending; no
   step branch yet.
-- **Design review:** Re-review required — round 4 reviews `4f3683e` (design freeze); round 2 was
-  `Ready with notes` at `4ad40ac` (reviewed `05b7297`) — [record](../reviews/step-12.md) (round 1
+- **Design review:** Re-review required — the freeze and reviewed commit are recorded in the review record;
+  round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`) — [record](../reviews/step-12.md) (round 1
   `Changes required`; round 2 `Ready with notes`, R2-1–R2-4 open; round 3 `Ready with notes`,
   R3-1–R3-8 plus R2-2/R2-4 resolved; round 4 pending)
 - **Feature list:** Proposed 2026-11-16 (seven features); feature 1 revised 2026-11-17 (library adoption,
@@ -1658,11 +1658,13 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - **Parser: `System.CommandLine` 3.0.0, CLI-only, recorded in ADR 0015.** The human owner replaced the
   hand-written parser on 2026-11-17. The package is stable, MIT-licensed, centrally pinned, and has no
   transitive dependency for `net10.0+`; it is referenced only by `Mocassin.Cli`. The library owns
-  tokenization, arity, help/version, and `[suggest]`; the CLI owns the command graph, typed binding,
-  `CLI001` wording, and exit-code policy. Step page §5.2, §15, §16.2; [ADR 0015](../adr/0015-cli-parser-system-commandline.md).
+  command-line tokenization (after response-file expansion), arity, help, and `[suggest]`; the CLI owns the
+  command graph, typed binding, root `--version`, `CLI001` wording, and exit-code policy. Step page §5.2,
+  §15, §16.2; [ADR 0015](../adr/0015-cli-parser-system-commandline.md).
 - **Response files are bounded and CLI-owned.** `@file` is part of the Step 12 contract with the §5.3 syntax,
   path resolution, quoting, `#` comments, `--`/`--json` interaction, 1 MiB/4 MiB raw-byte/depth-8/10,000-token/32-file
-  limits, and `CLI001`/2 errors. The library's default reader is replaced; a library default is never the
+  limits, and `CLI001`/2 errors. The CLI owns tokenization and recursive expansion; the library hook is
+  disabled, and a library default is never the
   contract.
 - **Parse errors are exit 2, never the library's 1.** `CliApplication` reads `ParseResult.Errors`, emits
   `CLI001`, and returns 2; help/version return 0; handler results map through §11.1. A test pins the
