@@ -111,6 +111,14 @@ commits directly to `main` and never commits process or design changes without t
 - Record the role, assignment, and handoff in the step page or handoff card.
 - Ensure the request owner and the reviewer are different contexts. The orchestrator is the only spawner and
   must not be the reviewer.
+- Treat a failed, errored, or interrupted role-agent spawn as **possibly still running and partially applied**,
+  not as a no-op. A spawn that ends in a harness error (`Session.AgentNotFoundError`, a timeout, or a dropped
+  connection) may still have started the child, kept it alive, or run part of its assignment. Before
+  re-spawning, confirm that the earlier context has actually stopped and inspect the branch tip, the worktree,
+  and the working-tree status; never re-run a destructive or history-writing step (merge, squash, amend, reset,
+  branch deletion) blindly. Two live contexts on one branch can produce duplicate or conflicting commits, so
+  check for commits the previous context created before starting a replacement. Report the observed state in the
+  handoff. The known cause and the version-scoped mitigation are in §9.
 
 ## 7. Anti-patterns
 
@@ -151,3 +159,27 @@ rule is not enforceable; and the orchestrator cannot make even a handoff-card or
 to the step agent. A human can select another agent with the agent picker (shift+tab in the container) and bypass the binding
 entirely. Another harness ports
 the same four prompts; the binding is an adapter, not a second rule set.
+
+### OpenCode 2.3.0 cold-start spawn race (2026-11-17)
+
+On OpenCode 2.3.0 a fresh role-agent spawn can fail with
+`Session.AgentNotFoundError: Agent not found: "<role>"` even though the definitions in `.opencode/agents/` are
+valid and loaded; `opencode debug agents` lists all four agents. Durable evidence from
+`~/.local/share/opencode/log/opencode.log` recorded 20 such failures, each 0.57–0.80 s after a fresh
+`location services booted` line and 10–100 ms after the `agent.updated` event, with `ServerProcess.start` at the
+bottom of the stack. This is a cold-start race between server boot and the session drain, not a permission or
+definition error, and it can hit the parent (`orchestrator`) as well as a child. A failed spawn is therefore not a
+clean no-op: the child may have run part of the assignment, and its context may still be alive. In one
+engagement a context whose spawn reported `AgentNotFoundError` resumed later and committed to the same branch
+while its replacement was preparing a commit; the replacement found the earlier commit already at the branch tip,
+created from the same working tree. Confirming that the previous context has stopped, and checking the branch
+tip for commits it already created, is part of the §6 inspection rule.
+
+Mitigation until the image ships a fixed release:
+
+- load the agent registry before the first spawn, for example by running `opencode debug agents` after the
+  server boots;
+- prefer one long-lived service or session over repeated cold starts.
+
+Remove this note once a fixed OpenCode release is pinned in the image and the failure no longer reproduces. The
+§6 inspection rule is harness-independent and stays.
