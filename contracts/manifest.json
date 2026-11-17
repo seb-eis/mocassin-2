@@ -2,8 +2,8 @@
   "manifestVersion": 1,
   "project": "MOCASSIN",
   "description": "Machine-readable contract manifest for MOCASSIN project, package, results, state, job-folder, event, and MMCFE formats.",
-  "status": "step-10",
-  "notes": "Step 06 adds the flat occupationExchanges, dopings, and simulations model sections. The simulation DTO is a flat object with kind, the matching transition array, and a settings object; kind-specific fields are optional in the generated schema because the generator has no oneOf/discriminator support, and the validator rejects a mismatched shape. Nullable simulation settings use the manifest nullable flag. The lattice and simulation sections remain additive under project schema v1; the manifest status/notes and fixtures were updated at that step, and ADR 0009's version-bump rule resumes with the first released format. Step 07 adds the additive reports.validation validation-v1 report; the project schema remains v1 and the report is versioned separately. Step 10 extends the jobTemplates identity stub with collections, configurations, inheritable settings, lattice requests, dopings, selection optimizers, and opaque canonical extension configs; the project schema remains additive v1 and the new populated fixture is registered.",
+  "status": "step-12",
+  "notes": "Step 06 adds the flat occupationExchanges, dopings, and simulations model sections. The simulation DTO is a flat object with kind, the matching transition array, and a settings object; kind-specific fields are optional in the generated schema because the generator has no oneOf/discriminator support, and the validator rejects a mismatched shape. Nullable simulation settings use the manifest nullable flag. The lattice and simulation sections remain additive under project schema v1; the manifest status/notes and fixtures were updated at that step, and ADR 0009's version-bump rule resumes with the first released format. Step 07 adds the additive reports.validation validation-v1 report; the project schema remains v1 and the report is versioned separately. Step 10 extends the jobTemplates identity stub with collections, configurations, inheritable settings, lattice requests, dopings, selection optimizers, and opaque canonical extension configs; the project schema remains additive v1 and the new populated fixture is registered. Step 12 adds the seven command-report descriptors (build, new-project, compile, inspect, verify, doctor, clean) at schemaVersion 1, the additive build.stage event, and the events-v1 build-sequence fixture; validation-v1 is unchanged.",
   "formats": {
     "project": {
       "id": "project",
@@ -2475,6 +2475,13 @@
           ]
         },
         {
+          "name": "build.stage",
+          "requiredFields": [
+            "stage",
+            "status"
+          ]
+        },
+        {
           "name": "build.progress",
           "requiredFields": [
             "completed",
@@ -4245,6 +4252,2129 @@
               "required": true
             }
           ]
+        }
+      ]
+    },
+    "build": {
+      "id": "build",
+      "title": "Build report",
+      "schemaVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "build"
+          ]
+        },
+        {
+          "name": "ok",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "exitCode",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "object",
+          "required": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "errors",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "warnings",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "infos",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "diagnostics",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "severity",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "error",
+                "warning",
+                "info"
+              ]
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "path",
+              "type": "object",
+              "required": false,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "hint",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "related",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "mode",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "build",
+            "preview"
+          ]
+        },
+        {
+          "name": "projectId",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "modelHash",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "documentHash",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "modelSignature",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "parameterizationSignature",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "selection",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "buildTemplate",
+              "type": "object",
+              "required": true,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "jobTemplate",
+              "type": "object",
+              "required": true,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "parameterization",
+              "type": "object",
+              "required": true,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "implicitDefault",
+                  "type": "bool",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "outputName",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "jobSelection",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "expression",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "expandedCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "selectedCount",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "timings",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "stage",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "load",
+                "select",
+                "validate",
+                "compile",
+                "validateBuild",
+                "parameterize",
+                "expand",
+                "preview",
+                "generate",
+                "publish",
+                "verify"
+              ]
+            },
+            {
+              "name": "ms",
+              "type": "float64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "package",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "path",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "sha256",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "sizeBytes",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "jobCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "modelCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "latticeCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "latticeReuseFactor",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "published",
+              "type": "bool",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "preview",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "jobTemplateId",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "jobTemplateName",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "totalJobs",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "collections",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "id",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "name",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "simulationId",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "kind",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "useDualDofCorrection",
+                  "type": "bool",
+                  "required": true
+                },
+                {
+                  "name": "jobCount",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "configCount",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "optimizers",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "siteId",
+                      "type": "string",
+                      "required": true,
+                      "nullable": true
+                    },
+                    {
+                      "name": "particleId",
+                      "type": "string",
+                      "required": true,
+                      "nullable": true
+                    },
+                    {
+                      "name": "targetCount",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "removedStartOptions",
+                      "type": "int64",
+                      "required": false,
+                      "nullable": true
+                    }
+                  ]
+                },
+                {
+                  "name": "configs",
+                  "type": "array",
+                  "required": true,
+                  "items": "object",
+                  "itemAdditionalProperties": false,
+                  "itemFields": [
+                    {
+                      "name": "id",
+                      "type": "string",
+                      "required": true,
+                      "nullable": true
+                    },
+                    {
+                      "name": "name",
+                      "type": "string",
+                      "required": true,
+                      "nullable": true
+                    },
+                    {
+                      "name": "jobCount",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellA",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellB",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "cellC",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "positionCount",
+                      "type": "int64",
+                      "required": true
+                    },
+                    {
+                      "name": "totalChargeBefore",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "totalChargeAfter",
+                      "type": "float64",
+                      "required": true
+                    },
+                    {
+                      "name": "isChargeNeutral",
+                      "type": "bool",
+                      "required": true
+                    },
+                    {
+                      "name": "dopings",
+                      "type": "array",
+                      "required": true,
+                      "items": "object",
+                      "itemAdditionalProperties": false,
+                      "itemFields": [
+                        {
+                          "name": "dopingId",
+                          "type": "string",
+                          "required": true,
+                          "nullable": true
+                        },
+                        {
+                          "name": "priority",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "requestedFraction",
+                          "type": "float64",
+                          "required": true
+                        },
+                        {
+                          "name": "availablePrimary",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "requestedPrimary",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "appliedPrimary",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "appliedDependent",
+                          "type": "int64",
+                          "required": true
+                        },
+                        {
+                          "name": "effectiveFraction",
+                          "type": "float64",
+                          "required": true
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "verification",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "passed",
+            "failed",
+            "skipped"
+          ]
+        }
+      ]
+    },
+    "new-project": {
+      "id": "new-project",
+      "title": "New project report",
+      "schemaVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "newProject"
+          ]
+        },
+        {
+          "name": "ok",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "exitCode",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "object",
+          "required": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "errors",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "warnings",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "infos",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "diagnostics",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "severity",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "error",
+                "warning",
+                "info"
+              ]
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "path",
+              "type": "object",
+              "required": false,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "hint",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "related",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "projectPath",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "projectId",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "template",
+          "type": "string",
+          "required": false,
+          "nullable": true,
+          "enum": [
+            "blank",
+            "ceria"
+          ]
+        }
+      ]
+    },
+    "compile": {
+      "id": "compile",
+      "title": "Compile report",
+      "schemaVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "compile"
+          ]
+        },
+        {
+          "name": "ok",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "exitCode",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "object",
+          "required": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "errors",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "warnings",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "infos",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "diagnostics",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "severity",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "error",
+                "warning",
+                "info"
+              ]
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "path",
+              "type": "object",
+              "required": false,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "hint",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "related",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "projectId",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "modelHash",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "documentHash",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "modelSignature",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "compilerVersion",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "outputPath",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "outputSha256",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "counts",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "particleCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "positionCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "siteCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "environmentCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "pairTableCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "clusterTableCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "directionCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "ruleCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "simulationCount",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "cache",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "hits",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "misses",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "capacity",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "stages",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "ms",
+              "type": "float64",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    "inspect": {
+      "id": "inspect",
+      "title": "Inspect report",
+      "schemaVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "inspect"
+          ]
+        },
+        {
+          "name": "ok",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "exitCode",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "object",
+          "required": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "errors",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "warnings",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "infos",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "diagnostics",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "severity",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "error",
+                "warning",
+                "info"
+              ]
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "path",
+              "type": "object",
+              "required": false,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "hint",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "related",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "package",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "formatVersion",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "appVersion",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "createdUtc",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "projectId",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "generator",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "jobSelection",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "symmetryContractVersion",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "spaceGroupDataVersion",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "spaceGroupDataSha256",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "models",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "signature",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "modelSignature",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "payloadFormatVersion",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "payloadBytes",
+                  "type": "int64",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "latticeCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "jobCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "collections",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "kind",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "collectionName",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "configName",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "jobCount",
+                  "type": "int64",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "minTemperatureK",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "maxTemperatureK",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "minElectricFieldVm",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "maxElectricFieldVm",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "sizeBytes",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "latticeReuseFactor",
+              "type": "float64",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    "verify": {
+      "id": "verify",
+      "title": "Verify report",
+      "schemaVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "verify"
+          ]
+        },
+        {
+          "name": "ok",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "exitCode",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "object",
+          "required": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "errors",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "warnings",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "infos",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "diagnostics",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "severity",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "error",
+                "warning",
+                "info"
+              ]
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "path",
+              "type": "object",
+              "required": false,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "hint",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "related",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "valid",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "checks",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "passed",
+              "type": "bool",
+              "required": true
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "package",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "formatVersion",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "appVersion",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "createdUtc",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "projectId",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "generator",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "jobSelection",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "symmetryContractVersion",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "spaceGroupDataVersion",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "spaceGroupDataSha256",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "models",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "signature",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "modelSignature",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "payloadFormatVersion",
+                  "type": "int64",
+                  "required": true
+                },
+                {
+                  "name": "payloadBytes",
+                  "type": "int64",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "latticeCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "jobCount",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "collections",
+              "type": "array",
+              "required": true,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "kind",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "collectionName",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "configName",
+                  "type": "string",
+                  "required": true,
+                  "nullable": true
+                },
+                {
+                  "name": "jobCount",
+                  "type": "int64",
+                  "required": true
+                }
+              ]
+            },
+            {
+              "name": "minTemperatureK",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "maxTemperatureK",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "minElectricFieldVm",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "maxElectricFieldVm",
+              "type": "float64",
+              "required": true
+            },
+            {
+              "name": "sizeBytes",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "latticeReuseFactor",
+              "type": "float64",
+              "required": true
+            }
+          ]
+        }
+      ]
+    },
+    "doctor": {
+      "id": "doctor",
+      "title": "Doctor report",
+      "schemaVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "doctor"
+          ]
+        },
+        {
+          "name": "ok",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "exitCode",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "object",
+          "required": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "errors",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "warnings",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "infos",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "diagnostics",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "severity",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "error",
+                "warning",
+                "info"
+              ]
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "path",
+              "type": "object",
+              "required": false,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "hint",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "related",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "healthy",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "checks",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "name",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "status",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "ok",
+                "warn",
+                "fail"
+              ]
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "detail",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            }
+          ]
+        },
+        {
+          "name": "environment",
+          "type": "object",
+          "required": true,
+          "nullable": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "framework",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "os",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "architecture",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "sqliteVersion",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "catalogVersion",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "catalogSha256",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "solverPath",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "solverVersion",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            }
+          ]
+        }
+      ]
+    },
+    "clean": {
+      "id": "clean",
+      "title": "Clean report",
+      "schemaVersion": 1,
+      "unknownFields": "ignore",
+      "fields": [
+        {
+          "name": "schemaVersion",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "kind",
+          "type": "string",
+          "required": true,
+          "enum": [
+            "clean"
+          ]
+        },
+        {
+          "name": "ok",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "exitCode",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "summary",
+          "type": "object",
+          "required": true,
+          "additionalProperties": false,
+          "fields": [
+            {
+              "name": "errors",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "warnings",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "infos",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "diagnostics",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "code",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "severity",
+              "type": "string",
+              "required": true,
+              "enum": [
+                "error",
+                "warning",
+                "info"
+              ]
+            },
+            {
+              "name": "message",
+              "type": "string",
+              "required": true
+            },
+            {
+              "name": "path",
+              "type": "object",
+              "required": false,
+              "nullable": true,
+              "additionalProperties": false,
+              "fields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            },
+            {
+              "name": "hint",
+              "type": "string",
+              "required": false,
+              "nullable": true
+            },
+            {
+              "name": "related",
+              "type": "array",
+              "required": false,
+              "items": "object",
+              "itemAdditionalProperties": false,
+              "itemFields": [
+                {
+                  "name": "domain",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "objectId",
+                  "type": "string",
+                  "required": true
+                },
+                {
+                  "name": "property",
+                  "type": "string",
+                  "required": false,
+                  "nullable": true
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "dryRun",
+          "type": "bool",
+          "required": true
+        },
+        {
+          "name": "packagePath",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "directory",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "jobSelection",
+          "type": "string",
+          "required": true,
+          "nullable": true
+        },
+        {
+          "name": "jobCount",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "folders",
+          "type": "array",
+          "required": true,
+          "items": "object",
+          "itemAdditionalProperties": false,
+          "itemFields": [
+            {
+              "name": "path",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "jobId",
+              "type": "int64",
+              "required": true
+            },
+            {
+              "name": "lastWriteUtc",
+              "type": "string",
+              "required": true,
+              "nullable": true
+            },
+            {
+              "name": "sizeBytes",
+              "type": "int64",
+              "required": true
+            }
+          ]
+        },
+        {
+          "name": "totalBytes",
+          "type": "int64",
+          "required": true
+        },
+        {
+          "name": "olderThanDays",
+          "type": "int64",
+          "required": false,
+          "nullable": true
+        },
+        {
+          "name": "removedCount",
+          "type": "int64",
+          "required": true
         }
       ]
     }

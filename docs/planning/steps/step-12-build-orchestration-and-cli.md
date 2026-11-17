@@ -25,8 +25,8 @@ UI consumes later.
 - **Parser:** `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only reference); Native AOT smoke-verified on
   `net11.0`/`linux-x64`; bounded `@file` is part of the contract; no shell-completion command in Step 12
   (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
-- **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 from the design-merge commit
-  `eb31979`); no feature branch started yet.
+- **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 at `9d4d2ef`; its first parent
+  is the design-merge commit `eb31979`). Feature 1 is squashed into the step branch; see the feature log.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
@@ -50,9 +50,41 @@ created `step/12-build-orchestration-and-cli` and marked the step `In progress`.
 squash-merged without a further approval; each feature row and the log below are filled in when the feature is
 implemented and squashed. Feature rows stay empty until then.
 
+### Feature log
+
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| 1 CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs`, `aot` exit 0 (AOT CLI evidence: 62 trim diagnostics from `Mocassin.Core`, not a gate) | Not run (no per-feature CI) | Recorded with feature 2 |
+
+### Deviations and accepted risks
+
+1. **Planner edited step status before a step agent existed (accepted process deviation, 2026-11-17).** The
+   orchestrator directed the planner to update the step page's status block and the `status.md` dashboard cell
+   for Step 12 before a step agent was assigned. `AGENTS.md` §3.8 places step status and the status dashboard
+   outside the planner's write scope. The edits were factual status cells for the accepted design, no code,
+   contract, or verdict text changed, and the step agent (owner of this record) accepts the deviation with no
+   corrective action. Future design branches leave status cells to the step agent.
+2. **Preview option semantics during the feature-1 transition (owner decision, 2026-11-17).** `build --preview`
+   is now parsed by the shared graph with the final option names: `--job-template` selects the interim preview
+   job template, and `--template` is the build-template option. Preview rejects `--template` with `CLI004`/2
+   until feature 3 folds preview into the full build. The Step 10 `--template`-as-job-template spelling is
+   retired now rather than at feature 3; the existing preview tests moved to `--job-template`.
+3. **Interim command placeholders (feature 1 only).** `new`, `compile`, `inspect`, `verify`, `doctor`, and
+   `clean` are defined in the command graph but return `CLI008`/2 with the owning Step 12 feature until
+   features 4–6 implement them. `build` without `--preview` does the same until feature 3. Those interim
+   commands emit no JSON report, and `build --preview` still emits the Step 10 `build-preview-v1` report; the
+   one-report guarantee and `build-v1` arrive with feature 3. Preview also rejects the not-yet-wired build
+   options (`--jobs`, `--parallel`, `--force`, `--compact`, `--parameterization`, `--warnings-as-errors`,
+   `--quiet`, `-o`) with `CLI001`/2 instead of silently ignoring them.
+4. **Real `Mocassin.Cli` AOT publish is not clean (recorded evidence; Step 31 owner).** The required
+   `verify.sh aot` gate passes: the strict smoke host publishes with zero IL2xxx/IL3xxx warnings, the separate
+   positive control emits IL2026 and IL3050, and the native parse error exits 2 with `CLI001`. Publishing the
+   real CLI under the repository warnings-as-errors policy fails with 62 IL2026/IL3050 diagnostics
+   (31 each) from reflection-based JSON converters in `Mocassin.Core`; no CLI-specific trim warning was
+   reached. This is evidence, not a gate: Step 31 owns the platform matrix and the AOT/single-file decision.
+5. **Only `linux-x64` AOT is exercised.** Windows/macOS AOT, the `System.CommandLine` `netstandard2.0` asset,
+   and the real CLI native image are untested. The smoke host carries the representative command/option/argument
+   shape and the `CLI001` remap.
 
 ## 1. Goal
 
@@ -1530,33 +1562,33 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 1 — CLI shell, parser configuration, and report contracts
 
-- [ ] Add `System.CommandLine` 3.0.0 to central package management and reference it from `Mocassin.Cli`
+- [x] Add `System.CommandLine` 3.0.0 to central package management and reference it from `Mocassin.Cli`
       only; record the MIT/`requireLicenseAcceptance`/empty-transitive-graph review and the AOT evidence.
-- [ ] Define the `RootCommand` graph for `new`, `validate`, `compile`, `build` (including the interim
+- [x] Define the `RootCommand` graph for `new`, `validate`, `compile`, `build` (including the interim
       `--preview`), `inspect`, `verify`, `doctor`, `clean`, and the reserved commands; define options,
       arguments, arity, defaults, and validators.
-- [ ] Replace the Step 07 `validate` and Step 10 `build --preview` hand-written parsers with the shared graph;
+- [x] Replace the Step 07 `validate` and Step 10 `build --preview` hand-written parsers with the shared graph;
       keep `CliApplication.RunAsync(args, stdout, stderr, cancellationToken)` as the test entry point and keep
       the `validation-v1` output and the interim preview behaviour unchanged.
-- [ ] Bind a successful `ParseResult` to typed request records and dispatch to handlers; map `ParseResult.Errors`
+- [x] Bind a successful `ParseResult` to typed request records and dispatch to handlers; map `ParseResult.Errors`
       to `CLI001` and exit **2** (the library's own parse-error code is 1 and is never returned); map handler
       results through the exit-code table; keep help and version at exit 0.
-- [ ] Replace the library's default root `--version` action with the CLI action (assembly informational
+- [x] Replace the library's default root `--version` action with the CLI action (assembly informational
       version and runtime description); keep `--version` root-only and test that a subcommand `--version`
       is `CLI001`/2.
-- [ ] Add `CliExitCode`, the `CLI001`–`CLI009` descriptors in `Mocassin.Contracts.Cli`, and compose them into
+- [x] Add `CliExitCode`, the `CLI001`–`CLI009` descriptors in `Mocassin.Contracts.Cli`, and compose them into
       `DiagnosticCatalog.Default`.
-- [ ] Add the shared report diagnostic/envelope DTOs and writers; keep `validation-v1` byte-compatible.
-- [ ] Add the seven `reports` manifest descriptors and regenerate the contract artifacts.
-- [ ] Add `build.stage` to the events manifest and add `tests/contracts/events-v1.jsonl`.
-- [ ] Add parser-convention/usage/help/schema tests (arity, `--opt=value`, negative numbers, `--`,
+- [x] Add the shared report diagnostic/envelope DTOs and writers; keep `validation-v1` byte-compatible.
+- [x] Add the seven `reports` manifest descriptors and regenerate the contract artifacts.
+- [x] Add `build.stage` to the events manifest and add `tests/contracts/events-v1.jsonl`.
+- [x] Add parser-convention/usage/help/schema tests (arity, `--opt=value`, negative numbers, `--`,
       response-file behaviour, error text, exit codes) and the `validate` regression tests.
-- [ ] Implement `CliResponseFiles` as the CLI-owned tokenizer/expander with `SplitCommandLine`-equivalent
+- [x] Implement `CliResponseFiles` as the CLI-owned tokenizer/expander with `SplitCommandLine`-equivalent
       semantics, recursive flattening, and the §5.3 bounds; disable the library hook
       (`ResponseFileTokenReplacer = null`). Pin the golden cases (`a"b c"d` → `ab cd`, `a""b` → `ab`,
       `"a""b"` → `a` + `b`, `""`, unterminated quotes, `@`/`@@`, cwd-relative nesting), the `--`/`--json`
       interaction, and the missing/unreadable/directory/invalid/oversized `CLI001`/2 errors with tests.
-- [ ] Add the zero-warning AOT smoke host, the **separate** positive-control project, and the
+- [x] Add the zero-warning AOT smoke host, the **separate** positive-control project, and the
       `verify.sh aot` mode included in `verify.sh all`; give the control project a per-project
       warnings-as-errors opt-out so IL2026/IL3050 remain warnings, while the host stays strict; make missing
       clang/lld/ILCompiler a hard failure with a clear message (never a skip); include the `CLI001`/2 remap in

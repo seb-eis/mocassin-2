@@ -2,6 +2,8 @@
 
 using System.Collections.Immutable;
 using System.Globalization;
+using Mocassin.Cli.CommandLine;
+using Mocassin.Cli.Diagnostics;
 using Mocassin.Compilation.Compiler;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Core.Model.Jobs;
@@ -18,86 +20,39 @@ namespace Mocassin.Cli.Build;
 /// </summary>
 /// <remarks>
 /// The command loads, validates, compiles, expands, and previews the selected job template. It never opens or
-/// writes a <c>.msl</c> package and never calls the Step 11 writer. Step 12 owns the full build command and the
-/// package-writing options.
+/// writes a <c>.msl</c> package and never calls the Step 11 writer. Feature 3 folds this handler into the full
+/// build command and replaces <c>build-preview-v1</c> with <c>build-v1</c>.
 /// </remarks>
 internal static class PreviewCommand
 {
     private const int previewSchemaVersion = 1;
 
     /// <summary>
-    /// Parses and runs the command.
+    /// Runs the command.
     /// </summary>
-    /// <param name="arguments">The arguments after the command name, including <c>--preview</c>.</param>
+    /// <param name="request">The typed request.</param>
     /// <param name="stdout">The standard-output writer.</param>
     /// <param name="stderr">The standard-error writer.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The process exit code.</returns>
     public static async Task<int> RunAsync(
-        IReadOnlyList<string> arguments,
+        PreviewRequest request,
         TextWriter stdout,
-        TextWriter stderr)
+        TextWriter stderr,
+        CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(arguments);
+        ArgumentNullException.ThrowIfNull(request);
         ArgumentNullException.ThrowIfNull(stdout);
         ArgumentNullException.ThrowIfNull(stderr);
 
-        var json = false;
-        var preview = false;
-        var path = default(string);
-        Guid? templateId = null;
-        for (var index = 0; index < arguments.Count; index++)
-        {
-            var argument = arguments[index];
-            switch (argument)
-            {
-                case "--json":
-                    json = true;
-                    break;
-                case "--preview":
-                    preview = true;
-                    break;
-                case "--template":
-                    if (index + 1 >= arguments.Count ||
-                        arguments[index + 1].StartsWith('-') ||
-                        !Guid.TryParse(arguments[index + 1], out var parsedTemplate))
-                    {
-                        return WriteUsageError(json, stdout, stderr, "--template requires a job-template GUID.");
-                    }
-
-                    templateId = parsedTemplate;
-                    index++;
-                    break;
-                default:
-                    if (argument.StartsWith('-'))
-                    {
-                        return WriteUsageError(json, stdout, stderr, $"Unknown option '{argument}'.");
-                    }
-
-                    if (path is not null)
-                    {
-                        return WriteUsageError(json, stdout, stderr, "Exactly one project path is required.");
-                    }
-
-                    path = argument;
-                    break;
-            }
-        }
-
-        if (!preview)
-        {
-            return WriteUsageError(json, stdout, stderr, "The preview command requires --preview.");
-        }
-
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return WriteUsageError(json, stdout, stderr, "A project path is required.");
-        }
+        var json = request.Json;
+        var templateId = request.JobTemplateId;
 
         ProjectLoadResult load;
         try
         {
             load = await new ProjectStore(options: new ProjectStoreOptions { ValidateOnLoad = false })
-                .LoadAsync(path)
+                .LoadAsync(request.ProjectPath, cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception exception) when (exception is IOException
@@ -105,7 +60,7 @@ internal static class PreviewCommand
                                               or NotSupportedException
                                               or System.Security.SecurityException)
         {
-            var (ioReport, ioExitCode) = IoError(path, exception.Message);
+            var (ioReport, ioExitCode) = IoError(request.ProjectPath, exception.Message);
             Write(json, stdout, stderr, ioReport);
             return ioExitCode;
         }
@@ -119,7 +74,7 @@ internal static class PreviewCommand
         }
 
         var project = load.Project;
-        var compilation = new ModelCompiler().Compile(project);
+        var compilation = new ModelCompiler().Compile(project, cancellationToken: cancellationToken);
         if (!compilation.IsSuccess)
         {
             var report = Failure(1, compilation.Diagnostics);
@@ -133,7 +88,8 @@ internal static class PreviewCommand
                 project,
                 load.Diagnostics,
                 new ValidationOptions { RunBuildStage = true },
-                compilation.Model);
+                compilation.Model,
+                cancellationToken);
         if (validation.Diagnostics.Any(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error))
         {
             var report = Failure(1, validation.Diagnostics);
@@ -161,11 +117,12 @@ internal static class PreviewCommand
 
             if (templates.Length > 1)
             {
-                return WriteUsageError(
-                    json,
-                    stdout,
-                    stderr,
-                    "The project contains several job templates; select one with --template <jobTemplateId>.");
+                var report = Failure(
+                    2,
+                    [CliDiagnosticFactory.Selection(
+                        "The project contains several job templates; select one with --job-template <jobTemplateId>.")]);
+                Write(json, stdout, stderr, report);
+                return 2;
             }
         }
 
@@ -221,10 +178,22 @@ internal static class PreviewCommand
             Valid: true,
             ExitCode: 0,
             Summary(sorted, previewData),
-            sorted.Select(PreviewReportWriter.ToReportDiagnostic).ToArray(),
+            sorted.Select(CliDiagnosticFactory.ToReportDiagnostic).ToArray(),
             previewData);
         Write(json, stdout, stderr, successReport);
         return 0;
+    }
+
+    /// <summary>
+    /// Writes the interim preview report for a usage error raised before the handler runs.
+    /// </summary>
+    /// <param name="stdout">The standard-output writer.</param>
+    /// <param name="diagnostics">The usage diagnostics.</param>
+    public static void WriteUsageReport(TextWriter stdout, IReadOnlyList<Diagnostic> diagnostics)
+    {
+        ArgumentNullException.ThrowIfNull(stdout);
+        ArgumentNullException.ThrowIfNull(diagnostics);
+        PreviewReportWriter.WriteJson(stdout, Failure(2, diagnostics));
     }
 
     private static BuildPreviewData? TryCreatePreviewData(
@@ -365,7 +334,9 @@ internal static class PreviewCommand
         return builder.ToImmutable();
     }
 
-    private static BuildPreviewSummary Summary(ImmutableArray<Diagnostic> diagnostics, BuildPreviewData? preview) =>
+    private static BuildPreviewSummary Summary(
+        ImmutableArray<Diagnostic> diagnostics,
+        BuildPreviewData? preview) =>
         new(
             diagnostics.Count(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Error),
             diagnostics.Count(static diagnostic => diagnostic.Severity == DiagnosticSeverity.Warning),
@@ -374,9 +345,9 @@ internal static class PreviewCommand
             preview?.Collections.Count ?? 0,
             preview?.Collections.Sum(static collection => collection.Configs.Count) ?? 0);
 
-    private static BuildPreviewReport Failure(int exitCode, ImmutableArray<Diagnostic> diagnostics)
+    private static BuildPreviewReport Failure(int exitCode, IEnumerable<Diagnostic> diagnostics)
     {
-        var items = Deduplicate(diagnostics.IsDefault ? ImmutableArray<Diagnostic>.Empty : diagnostics);
+        var items = Deduplicate(diagnostics.ToImmutableArray());
         return new BuildPreviewReport(
             previewSchemaVersion,
             "buildPreview",
@@ -386,7 +357,7 @@ internal static class PreviewCommand
             Valid: false,
             exitCode,
             Summary(items, preview: null),
-            items.Select(PreviewReportWriter.ToReportDiagnostic).ToArray(),
+            items.Select(CliDiagnosticFactory.ToReportDiagnostic).ToArray(),
             null);
     }
 
@@ -401,18 +372,6 @@ internal static class PreviewCommand
         ProjectLoadFailureKind.NotFound or ProjectLoadFailureKind.TooLarge or ProjectLoadFailureKind.Io => 3,
         _ => 1,
     };
-
-    private static int WriteUsageError(bool json, TextWriter stdout, TextWriter stderr, string message)
-    {
-        stderr.WriteLine($"mocassin build --preview: {message}");
-        stderr.WriteLine("usage: mocassin build <project.mocprj> --preview [--template <jobTemplateId>] [--json]");
-        if (json)
-        {
-            PreviewReportWriter.WriteJson(stdout, Failure(2, []));
-        }
-
-        return 2;
-    }
 
     private static void Write(bool json, TextWriter stdout, TextWriter stderr, BuildPreviewReport report)
     {

@@ -3,7 +3,7 @@
 Every diagnostic emitted by project validation, model compilation, and the CLI has a stable code. The
 catalog below is generated from the same descriptors the application uses (`CoreDiagnosticCatalog`, including
 the Step 09 parameterization descriptors and the Step 10 job-template descriptors; `SymmetryDiagnosticCatalog`;
-the Step 08 compilation descriptors; and the Step 07 descriptors); a documentation-drift test fails when this
+the Step 08 compilation descriptors; the Step 07 descriptors; and the Step 12 CLI descriptors); a documentation-drift test fails when this
 page and the catalog disagree.
 Per-instance `hint` values are supplied by the producing rule and may be more specific.
 
@@ -21,6 +21,15 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 | [`CMP010`](#cmp010) | warning | Step 08 — model compilation pipeline | The advisory rule or table budget is exceeded | Review the model size; the hard compilation limit has not been exceeded. |
 | [`CMP011`](#cmp011) | error | Step 08 — model compilation pipeline | The compiled model cannot be signed | Check the compiled model for missing provenance or non-finite values. |
 | [`CMP012`](#cmp012) | warning | Step 08 — model compilation pipeline | A cached stage result failed its integrity check and was recomputed | No action is required; the compiler recomputed the affected stage. |
+| [`CLI001`](#cli001) | error | Step 12 — build orchestration and CLI | The command line is not valid | Correct the command line; see the command help and the response-file rules in the CLI reference. |
+| [`CLI002`](#cli002) | error | Step 12 — build orchestration and CLI | An input or output operation failed | Check the path, permissions, free disk space, and that the requested input exists. |
+| [`CLI003`](#cli003) | error | Step 12 — build orchestration and CLI | The output already exists and overwriting was not requested | Choose another output path or pass --force to replace the existing file. |
+| [`CLI004`](#cli004) | error | Step 12 — build orchestration and CLI | The build recipe selection is missing, ambiguous, or of the wrong kind | Pass an explicit --template, --job-template, or --parameterization ID, or make the project recipe unique. |
+| [`CLI005`](#cli005) | error | Step 12 — build orchestration and CLI | The job selection is malformed, empty, or out of range | Use "all" or a comma-separated list of 1-based job IDs and inclusive ascending ranges. |
+| [`CLI006`](#cli006) | info | Step 12 — build orchestration and CLI | The operation was cancelled | No action is required; rerun the command to complete it. |
+| [`CLI007`](#cli007) | error | Step 12 — build orchestration and CLI | An unexpected internal error occurred | Set MOCASSIN_DEBUG=1 to print a stack trace and report the failure. |
+| [`CLI008`](#cli008) | error | Step 12 — build orchestration and CLI | The command or option is reserved for a later step | Use the command or option in the step named in the message. |
+| [`CLI009`](#cli009) | error | Step 12 — build orchestration and CLI | The input cannot be inspected as a simulation package | Run "mocassin verify <package>" for package-specific detail, or rebuild the package. |
 | [`ENM001`](#enm001) | error | Step 05 — energy model | An environment cutoff is not positive and finite | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`ENM002`](#enm002) | warning | Step 05 — energy model | An environment cutoff exceeds half the smallest cell dimension | Review the referenced model object, correct the reported condition, and revalidate. |
 | [`ENM003`](#enm003) | error | Step 05 — energy model | A filter range is inverted or extends beyond the owning environment cutoff | Review the referenced model object, correct the reported condition, and revalidate. |
@@ -256,6 +265,42 @@ Per-instance `hint` values are supplied by the producing rule and may be more sp
 ### CMP012
 
 **A cached stage result failed its integrity check and was recomputed.** No action is required; the compiler recomputed the affected stage.
+
+### CLI001
+
+**The command line is not valid.** Correct the command line; see the command help and the response-file rules in the CLI reference.
+
+### CLI002
+
+**An input or output operation failed.** Check the path, permissions, free disk space, and that the requested input exists.
+
+### CLI003
+
+**The output already exists and overwriting was not requested.** Choose another output path or pass --force to replace the existing file.
+
+### CLI004
+
+**The build recipe selection is missing, ambiguous, or of the wrong kind.** Pass an explicit --template, --job-template, or --parameterization ID, or make the project recipe unique.
+
+### CLI005
+
+**The job selection is malformed, empty, or out of range.** Use "all" or a comma-separated list of 1-based job IDs and inclusive ascending ranges.
+
+### CLI006
+
+**The operation was cancelled.** No action is required; rerun the command to complete it.
+
+### CLI007
+
+**An unexpected internal error occurred.** Set MOCASSIN_DEBUG=1 to print a stack trace and report the failure.
+
+### CLI008
+
+**The command or option is reserved for a later step.** Use the command or option in the step named in the message.
+
+### CLI009
+
+**The input cannot be inspected as a simulation package.** Run "mocassin verify <package>" for package-specific detail, or rebuild the package.
 
 ### ENM001
 

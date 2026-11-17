@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net11.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>PositiveControl</AssemblyName>
+    <RootNamespace>PositiveControl</RootNamespace>
+    <IsPackable>false</IsPackable>
+    <PublishAot>true</PublishAot>
+    <TrimMode>full</TrimMode>
+    <TrimmerSingleWarn>false</TrimmerSingleWarn>
+    <SuppressTrimAnalysisWarnings>false</SuppressTrimAnalysisWarnings>
+    <SelfContained>true</SelfContained>
+    <RuntimeIdentifier>linux-x64</RuntimeIdentifier>
+    <!--
+      The control deliberately calls reflection-based JSON serialization. The per-project opt-out keeps
+      IL2026/IL3050 as warnings so the gate can prove the trim/AOT analyzers and the ILC warning channel are
+      active; the zero-warning smoke host keeps the repository's warnings-as-errors policy.
+    -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+    <WarningsNotAsErrors>IL2026;IL3050</WarningsNotAsErrors>
+  </PropertyGroup>
+
+</Project>

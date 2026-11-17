@@ -2,7 +2,8 @@
 
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using Mocassin.Cli.Build;
+using Mocassin.Cli.Tests.CommandLine;
+using Mocassin.Cli.Tests.TestSupport;
 
 namespace Mocassin.Cli.Tests.Build;
 
@@ -17,7 +18,7 @@ public sealed class PreviewCommandTests
     [Fact]
     public async Task SamplePreviewSucceedsAndWritesNoPackage()
     {
-        var (exitCode, stdout, stderr) = await Run(sample, "--preview");
+        var (exitCode, stdout, stderr) = await Run("build", sample, "--preview");
 
         Assert.Equal(0, exitCode);
         Assert.Equal(string.Empty, stderr);
@@ -32,7 +33,7 @@ public sealed class PreviewCommandTests
     [Fact]
     public async Task JsonPreviewReportsJobsDopingsAndOptimizers()
     {
-        var (exitCode, stdout, stderr) = await Run(sample, "--preview", "--json");
+        var (exitCode, stdout, stderr) = await Run("build", sample, "--preview", "--json");
 
         Assert.Equal(0, exitCode);
         Assert.Equal(string.Empty, stderr);
@@ -68,7 +69,7 @@ public sealed class PreviewCommandTests
         var path = directory.File("ceria.mocprj");
         await File.WriteAllBytesAsync(path, await File.ReadAllBytesAsync(sample));
 
-        var (exitCode, _, _) = await Run(path, "--preview");
+        var (exitCode, _, _) = await Run("build", path, "--preview");
 
         Assert.Equal(0, exitCode);
         Assert.Empty(Directory.GetFiles(directory.Path, "*.msl", SearchOption.AllDirectories));
@@ -88,7 +89,7 @@ public sealed class PreviewCommandTests
         };
         await File.WriteAllTextAsync(path, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
 
-        var (exitCode, stdout, _) = await Run(path, "--preview", "--json");
+        var (exitCode, stdout, _) = await Run("build", path, "--preview", "--json");
 
         Assert.Equal(1, exitCode);
         using var document = JsonDocument.Parse(stdout);
@@ -108,25 +109,34 @@ public sealed class PreviewCommandTests
         var path = directory.File("two-templates.mocprj");
         await File.WriteAllTextAsync(path, AddSecondTemplate(await File.ReadAllTextAsync(sample)));
 
-        var (exitCode, stdout, stderr) = await Run(path, "--preview", "--json");
+        var (exitCode, stdout, stderr) = await Run("build", path, "--preview", "--json");
 
         Assert.Equal(2, exitCode);
-        Assert.Contains("--template", stderr, StringComparison.Ordinal);
+        Assert.Contains("--job-template", stderr, StringComparison.Ordinal);
         using var document = JsonDocument.Parse(stdout);
         Assert.Equal(2, document.RootElement.GetProperty("exitCode").GetInt32());
         Assert.False(document.RootElement.GetProperty("valid").GetBoolean());
         Assert.Equal(JsonValueKind.Null, document.RootElement.GetProperty("preview").ValueKind);
+        Assert.Contains(
+            document.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            static diagnostic => diagnostic.GetProperty("code").GetString() == "CLI004");
     }
 
     [Fact]
-    public async Task ExplicitTemplateSelectionPreviewsOneTemplate()
+    public async Task ExplicitJobTemplateSelectionPreviewsOneTemplate()
     {
         using var directory = new TempDirectory();
         var path = directory.File("two-templates.mocprj");
         var (content, selected) = AddSecondTemplateWithId(await File.ReadAllTextAsync(sample));
         await File.WriteAllTextAsync(path, content);
 
-        var (exitCode, stdout, _) = await Run(path, "--preview", "--json", "--template", selected);
+        var (exitCode, stdout, _) = await Run(
+            "build",
+            path,
+            "--preview",
+            "--json",
+            "--job-template",
+            selected);
 
         Assert.Equal(0, exitCode);
         using var document = JsonDocument.Parse(stdout);
@@ -134,11 +144,21 @@ public sealed class PreviewCommandTests
     }
 
     [Fact]
-    public async Task UnknownTemplateIsAProj010Error()
+    public async Task BuildTemplateOptionIsRejectedByPreview()
+    {
+        var (exitCode, _, stderr) = await Run("build", sample, "--preview", "--template", Guid.NewGuid().ToString());
+
+        Assert.Equal(2, exitCode);
+        Assert.Contains("CLI004", stderr, StringComparison.Ordinal);
+        Assert.Contains("--job-template", stderr, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task UnknownJobTemplateIsAProj010Error()
     {
         var missing = Guid.NewGuid().ToString();
 
-        var (exitCode, stdout, _) = await Run(sample, "--preview", "--json", "--template", missing);
+        var (exitCode, stdout, _) = await Run("build", sample, "--preview", "--json", "--job-template", missing);
 
         Assert.Equal(1, exitCode);
         using var document = JsonDocument.Parse(stdout);
@@ -160,7 +180,7 @@ public sealed class PreviewCommandTests
         root["jobTemplates"] = new JsonArray();
         await File.WriteAllTextAsync(path, root.ToJsonString(new JsonSerializerOptions { WriteIndented = true }));
 
-        var (exitCode, stdout, _) = await Run(path, "--preview", "--json");
+        var (exitCode, stdout, _) = await Run("build", path, "--preview", "--json");
 
         Assert.Equal(1, exitCode);
         using var document = JsonDocument.Parse(stdout);
@@ -176,7 +196,11 @@ public sealed class PreviewCommandTests
     {
         using var directory = new TempDirectory();
 
-        var (exitCode, stdout, _) = await Run(directory.File("missing.mocprj"), "--preview", "--json");
+        var (exitCode, stdout, _) = await Run(
+            "build",
+            directory.File("missing.mocprj"),
+            "--preview",
+            "--json");
 
         Assert.Equal(3, exitCode);
         using var document = JsonDocument.Parse(stdout);
@@ -186,21 +210,16 @@ public sealed class PreviewCommandTests
     }
 
     [Fact]
-    public async Task UnknownOptionReturnsTwo()
+    public async Task BuildOnlyOptionsAreRejectedByPreview()
     {
-        var (exitCode, _, stderr) = await Run(sample, "--preview", "--parallel", "4");
+        var (exitCode, _, stderr) = await Run("build", sample, "--preview", "--parallel", "4");
 
         Assert.Equal(2, exitCode);
         Assert.Contains("--parallel", stderr, StringComparison.Ordinal);
     }
 
-    private static async Task<(int ExitCode, string Stdout, string Stderr)> Run(params string[] arguments)
-    {
-        using var stdout = new StringWriter();
-        using var stderr = new StringWriter();
-        var exitCode = await PreviewCommand.RunAsync(arguments, stdout, stderr);
-        return (exitCode, stdout.ToString(), stderr.ToString());
-    }
+    private static Task<(int ExitCode, string Stdout, string Stderr)> Run(params string[] arguments) =>
+        CliTestRunner.RunAsync(arguments);
 
     private static string AddSecondTemplate(string content)
     {
@@ -248,38 +267,6 @@ public sealed class PreviewCommandTests
                 }
 
                 break;
-        }
-    }
-
-    private sealed class TempDirectory : IDisposable
-    {
-        public TempDirectory()
-        {
-            Path = System.IO.Path.Combine(
-                System.IO.Path.GetTempPath(),
-                "mocassin-tests",
-                Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(Path);
-        }
-
-        public string Path { get; }
-
-        public string File(string name) => System.IO.Path.Combine(Path, name);
-
-        public void Dispose()
-        {
-            try
-            {
-                Directory.Delete(Path, recursive: true);
-            }
-            catch (IOException)
-            {
-                // Best-effort test cleanup.
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Best-effort test cleanup.
-            }
         }
     }
 }

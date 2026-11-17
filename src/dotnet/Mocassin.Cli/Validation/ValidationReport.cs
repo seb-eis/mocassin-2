@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.Cli.CommandLine.Reports;
+
 namespace Mocassin.Cli.Validation;
 
 /// <summary>
@@ -13,30 +15,9 @@ internal sealed record ValidationReport(
     string? DocumentHash,
     bool Valid,
     int ExitCode,
-    ValidationReportSummary Summary,
-    IReadOnlyList<ValidationReportDiagnostic> Diagnostics,
+    ReportSummary Summary,
+    IReadOnlyList<ReportDiagnostic> Diagnostics,
     ValidationReportStatistics? Statistics);
-
-/// <summary>
-/// Raw diagnostic counts in the validation report.
-/// </summary>
-internal sealed record ValidationReportSummary(int Errors, int Warnings, int Infos);
-
-/// <summary>
-/// One diagnostic in the validation report.
-/// </summary>
-internal sealed record ValidationReportDiagnostic(
-    string Code,
-    string Severity,
-    string Message,
-    ValidationReportPath? Path,
-    string? Hint,
-    IReadOnlyList<ValidationReportPath> Related);
-
-/// <summary>
-/// A navigable model path in the validation report.
-/// </summary>
-internal sealed record ValidationReportPath(string Domain, string ObjectId, string? Property);
 
 /// <summary>
 /// Model statistics in the validation report.

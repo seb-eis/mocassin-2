@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-using Mocassin.Cli.Validation;
+using Mocassin.Cli.CommandLine.Reports;
 
 namespace Mocassin.Cli.Build;
 
@@ -20,7 +20,7 @@ internal sealed record BuildPreviewReport(
     bool Valid,
     int ExitCode,
     BuildPreviewSummary Summary,
-    IReadOnlyList<ValidationReportDiagnostic> Diagnostics,
+    IReadOnlyList<ReportDiagnostic> Diagnostics,
     BuildPreviewData? Preview);
 
 /// <summary>

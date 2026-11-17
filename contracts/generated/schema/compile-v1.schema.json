@@ -1,0 +1,281 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/compile-v1.json",
+  "title": "Compile report",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "compile"
+      ]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "exitCode": {
+      "type": "integer"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "integer"
+        },
+        "warnings": {
+          "type": "integer"
+        },
+        "infos": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "errors",
+        "warnings",
+        "infos"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string"
+              },
+              "objectId": {
+                "type": "string"
+              },
+              "property": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "domain",
+              "objectId"
+            ],
+            "additionalProperties": false
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "objectId": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "domain",
+                "objectId"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "projectId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "modelHash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "documentHash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "modelSignature": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "compilerVersion": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "outputPath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "outputSha256": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "counts": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "particleCount": {
+          "type": "integer"
+        },
+        "positionCount": {
+          "type": "integer"
+        },
+        "siteCount": {
+          "type": "integer"
+        },
+        "environmentCount": {
+          "type": "integer"
+        },
+        "pairTableCount": {
+          "type": "integer"
+        },
+        "clusterTableCount": {
+          "type": "integer"
+        },
+        "directionCount": {
+          "type": "integer"
+        },
+        "ruleCount": {
+          "type": "integer"
+        },
+        "simulationCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "particleCount",
+        "positionCount",
+        "siteCount",
+        "environmentCount",
+        "pairTableCount",
+        "clusterTableCount",
+        "directionCount",
+        "ruleCount",
+        "simulationCount"
+      ],
+      "additionalProperties": false
+    },
+    "cache": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "hits": {
+          "type": "integer"
+        },
+        "misses": {
+          "type": "integer"
+        },
+        "capacity": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "hits",
+        "misses",
+        "capacity"
+      ],
+      "additionalProperties": false
+    },
+    "stages": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "ms": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "name",
+          "ms"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "ok",
+    "exitCode",
+    "summary",
+    "diagnostics",
+    "projectId",
+    "modelHash",
+    "documentHash",
+    "modelSignature",
+    "compilerVersion",
+    "outputPath",
+    "outputSha256",
+    "counts",
+    "cache",
+    "stages"
+  ]
+}

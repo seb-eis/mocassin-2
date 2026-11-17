@@ -1,0 +1,162 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/new-project-v1.json",
+  "title": "New project report",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "newProject"
+      ]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "exitCode": {
+      "type": "integer"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "integer"
+        },
+        "warnings": {
+          "type": "integer"
+        },
+        "infos": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "errors",
+        "warnings",
+        "infos"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string"
+              },
+              "objectId": {
+                "type": "string"
+              },
+              "property": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "domain",
+              "objectId"
+            ],
+            "additionalProperties": false
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "objectId": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "domain",
+                "objectId"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "projectPath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "projectId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "template": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "blank",
+        "ceria",
+        null
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "ok",
+    "exitCode",
+    "summary",
+    "diagnostics",
+    "projectPath",
+    "projectId"
+  ]
+}

@@ -6,7 +6,12 @@
     <AssemblyName>Mocassin.Cli</AssemblyName>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
     <IsPackable>false</IsPackable>
+    <ToolCommandName>mocassin</ToolCommandName>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="System.CommandLine" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="../Mocassin.Packages/Mocassin.Packages.csproj" />

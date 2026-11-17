@@ -3,6 +3,7 @@
 using System.Collections.Frozen;
 using System.Collections.Immutable;
 using Mocassin.Compilation.Diagnostics;
+using Mocassin.Contracts.Cli;
 using Mocassin.Contracts.Packages;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Packages.Projects.Validation.Diagnostics;
@@ -48,14 +49,16 @@ public sealed class DiagnosticCatalog
     }
 
     /// <summary>
-    /// Gets the default catalog, composed from the Core, Symmetry, Compilation, and Step 07 descriptors.
+    /// Gets the default catalog, composed from the Core, Symmetry, Compilation, package, Step 07, and CLI
+    /// descriptors.
     /// </summary>
     public static DiagnosticCatalog Default { get; } = new(
         CoreDiagnosticCatalog.Descriptors
             .Concat(SymmetryDiagnosticCatalog.Descriptors)
             .Concat(CompilationDiagnosticCatalog.Descriptors)
             .Concat(PackageDiagnosticDescriptors.All)
-            .Concat(Step07Descriptors.All));
+            .Concat(Step07Descriptors.All)
+            .Concat(CliDiagnosticDescriptors.All));
 
     /// <summary>
     /// Gets every registered descriptor, sorted by ordinal code.

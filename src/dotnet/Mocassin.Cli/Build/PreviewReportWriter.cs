@@ -2,8 +2,6 @@
 
 using System.Globalization;
 using System.Text.Json;
-using Mocassin.Cli.Validation;
-using Mocassin.Core.Diagnostics;
 
 namespace Mocassin.Cli.Build;
 
@@ -17,33 +15,6 @@ internal static class PreviewReportWriter
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true,
     };
-
-    /// <summary>
-    /// Converts a diagnostic to its report form.
-    /// </summary>
-    /// <param name="diagnostic">The diagnostic.</param>
-    /// <returns>The report diagnostic.</returns>
-    public static ValidationReportDiagnostic ToReportDiagnostic(Diagnostic diagnostic)
-    {
-        ArgumentNullException.ThrowIfNull(diagnostic);
-        return new ValidationReportDiagnostic(
-            diagnostic.Code,
-            SeverityName(diagnostic.Severity),
-            diagnostic.Message,
-            diagnostic.Path is null
-                ? null
-                : new ValidationReportPath(
-                    diagnostic.Path.Domain,
-                    diagnostic.Path.ObjectId.ToString("D", CultureInfo.InvariantCulture),
-                    diagnostic.Path.Property),
-            diagnostic.Hint,
-            diagnostic.Related
-                .Select(static path => new ValidationReportPath(
-                    path.Domain,
-                    path.ObjectId.ToString("D", CultureInfo.InvariantCulture),
-                    path.Property))
-                .ToArray());
-    }
 
     /// <summary>
     /// Writes the JSON report as exactly one object.
@@ -121,11 +92,4 @@ internal static class PreviewReportWriter
 
     private static string FormatNullable(int? value) =>
         value is null ? "unknown" : value.Value.ToString(CultureInfo.InvariantCulture);
-
-    private static string SeverityName(DiagnosticSeverity severity) => severity switch
-    {
-        DiagnosticSeverity.Error => "error",
-        DiagnosticSeverity.Warning => "warning",
-        _ => "info",
-    };
 }

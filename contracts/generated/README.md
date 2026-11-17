@@ -9,9 +9,15 @@ Do not edit these files by hand. Run the generator instead.
 | `constants/python/contract_versions.py` | Generated contract artifact |
 | `constants/rust/contract_versions.rs` | Generated contract artifact |
 | `fixtures/descriptors.json` | Generated contract artifact |
+| `schema/build-v1.schema.json` | Generated contract artifact |
+| `schema/clean-v1.schema.json` | Generated contract artifact |
+| `schema/compile-v1.schema.json` | Generated contract artifact |
+| `schema/doctor-v1.schema.json` | Generated contract artifact |
 | `schema/events-v1.schema.json` | Generated contract artifact |
+| `schema/inspect-v1.schema.json` | Generated contract artifact |
 | `schema/jobFolder-v1.schema.json` | Generated contract artifact |
 | `schema/mmcfe-v1.schema.json` | Generated contract artifact |
+| `schema/new-project-v1.schema.json` | Generated contract artifact |
 | `schema/package-payloads-v1.schema.json` | Generated contract artifact |
 | `schema/package-v1.schema.json` | Generated contract artifact |
 | `schema/project-v1.schema.json` | Generated contract artifact |
@@ -19,6 +25,7 @@ Do not edit these files by hand. Run the generator instead.
 | `schema/solver-v1.schema.json` | Generated contract artifact |
 | `schema/state-v1.schema.json` | Generated contract artifact |
 | `schema/validation-v1.schema.json` | Generated contract artifact |
+| `schema/verify-v1.schema.json` | Generated contract artifact |
 | `signatures/lattice-v1.json` | Generated contract artifact |
 | `signatures/model-v1.json` | Generated contract artifact |
 | `signatures/parameterization-v1.json` | Generated contract artifact |

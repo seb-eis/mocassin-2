@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: MIT
 
 using System.Text.Json;
-using Mocassin.Cli.Validation;
+using Mocassin.Cli.Tests.CommandLine;
+using Mocassin.Cli.Tests.TestSupport;
 
 namespace Mocassin.Cli.Tests.Validation;
 
@@ -12,6 +13,7 @@ public sealed class ValidateCommandTests
     public async Task CeriaJsonReportSatisfiesTheValidationSchema()
     {
         var (exitCode, stdout, stderr) = await Run(
+            "validate",
             RepositoryPaths.Combine("tests", "contracts", "project-ceria.mocprj"),
             "--json");
 
@@ -33,9 +35,11 @@ public sealed class ValidateCommandTests
     public async Task StatisticsAreOptInAndDoNotChangeTheResult()
     {
         var (plainExit, plainJson, _) = await Run(
+            "validate",
             RepositoryPaths.Combine("tests", "contracts", "project-simulations-populated.mocprj"),
             "--json");
         var (statsExit, statsJson, _) = await Run(
+            "validate",
             RepositoryPaths.Combine("tests", "contracts", "project-simulations-populated.mocprj"),
             "--json",
             "--stats");
@@ -62,9 +66,11 @@ public sealed class ValidateCommandTests
     public async Task WarningsAsErrorsChangesValidityAndExitCode()
     {
         var (relaxedExit, relaxedJson, _) = await Run(
+            "validate",
             RepositoryPaths.Combine("tests", "contracts", "project-simulations-populated.mocprj"),
             "--json");
         var (strictExit, strictJson, _) = await Run(
+            "validate",
             RepositoryPaths.Combine("tests", "contracts", "project-simulations-populated.mocprj"),
             "--json",
             "--warnings-as-errors");
@@ -83,9 +89,7 @@ public sealed class ValidateCommandTests
     {
         using var directory = new TempDirectory();
 
-        var (exitCode, stdout, _) = await Run(
-            directory.File("missing.mocprj"),
-            "--json");
+        var (exitCode, stdout, _) = await Run("validate", directory.File("missing.mocprj"), "--json");
 
         Assert.Equal(3, exitCode);
         AssertSchema(stdout);
@@ -105,7 +109,7 @@ public sealed class ValidateCommandTests
         var path = directory.File("malformed.mocprj");
         await File.WriteAllTextAsync(path, "{ not json");
 
-        var (exitCode, stdout, _) = await Run(path, "--json");
+        var (exitCode, stdout, _) = await Run("validate", path, "--json");
 
         Assert.Equal(1, exitCode);
         using var document = JsonDocument.Parse(stdout);
@@ -114,22 +118,37 @@ public sealed class ValidateCommandTests
     }
 
     [Fact]
-    public async Task UsageErrorReturnsTwoAndExactlyOneReport()
+    public async Task MissingArgumentReturnsTwoAndExactlyOneReportWithCli001()
     {
-        var (exitCode, stdout, stderr) = await Run("--json");
+        var (exitCode, stdout, _) = await Run("validate", "--json");
 
         Assert.Equal(2, exitCode);
-        Assert.Contains("usage:", stderr, StringComparison.Ordinal);
         AssertSchema(stdout);
         using var document = JsonDocument.Parse(stdout);
-        Assert.Equal(2, document.RootElement.GetProperty("exitCode").GetInt32());
-        Assert.Equal(0, document.RootElement.GetProperty("diagnostics").GetArrayLength());
+        var root = document.RootElement;
+        Assert.Equal(2, root.GetProperty("exitCode").GetInt32());
+        Assert.False(root.GetProperty("valid").GetBoolean());
+        var diagnostics = root.GetProperty("diagnostics");
+        Assert.Equal(1, diagnostics.GetArrayLength());
+        Assert.Equal("CLI001", diagnostics[0].GetProperty("code").GetString());
+        Assert.Contains("project", diagnostics[0].GetProperty("message").GetString()!, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task UnknownOptionReturnsTwoWithCli001AndNoReportWithoutACommand()
+    {
+        var (exitCode, stdout, _) = await Run("--json");
+
+        Assert.Equal(2, exitCode);
+        Assert.Equal(string.Empty, stdout);
     }
 
     [Fact]
     public async Task HumanOutputIsATableWithASummary()
     {
-        var (exitCode, stdout, _) = await Run(RepositoryPaths.Combine("tests", "contracts", "project-simulations-populated.mocprj"));
+        var (exitCode, stdout, _) = await Run(
+            "validate",
+            RepositoryPaths.Combine("tests", "contracts", "project-simulations-populated.mocprj"));
 
         Assert.Equal(0, exitCode);
         Assert.Contains("SEVERITY", stdout, StringComparison.Ordinal);
@@ -140,13 +159,8 @@ public sealed class ValidateCommandTests
         Assert.DoesNotContain("\"schemaVersion\"", stdout, StringComparison.Ordinal);
     }
 
-    private static async Task<(int ExitCode, string Stdout, string Stderr)> Run(params string[] arguments)
-    {
-        using var stdout = new StringWriter();
-        using var stderr = new StringWriter();
-        var exitCode = await ValidateCommand.RunAsync(arguments, stdout, stderr);
-        return (exitCode, stdout.ToString(), stderr.ToString());
-    }
+    private static Task<(int ExitCode, string Stdout, string Stderr)> Run(params string[] arguments) =>
+        CliTestRunner.RunAsync(arguments);
 
     private static void AssertSchema(string json)
     {
@@ -244,37 +258,5 @@ public sealed class ValidateCommandTests
             "null" => value.ValueKind == JsonValueKind.Null,
             _ => false,
         };
-    }
-
-    private sealed class TempDirectory : IDisposable
-    {
-        public TempDirectory()
-        {
-            Path = System.IO.Path.Combine(
-                System.IO.Path.GetTempPath(),
-                "mocassin-tests",
-                Guid.NewGuid().ToString("N"));
-            Directory.CreateDirectory(Path);
-        }
-
-        public string Path { get; }
-
-        public string File(string name) => System.IO.Path.Combine(Path, name);
-
-        public void Dispose()
-        {
-            try
-            {
-                Directory.Delete(Path, recursive: true);
-            }
-            catch (IOException)
-            {
-                // Best-effort test cleanup.
-            }
-            catch (UnauthorizedAccessException)
-            {
-                // Best-effort test cleanup.
-            }
-        }
     }
 }

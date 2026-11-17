@@ -2,6 +2,8 @@
 
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Mocassin.Cli.CommandLine.Reports;
+using Mocassin.Cli.Diagnostics;
 using Mocassin.Contracts;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Packages.Projects;
@@ -30,29 +32,11 @@ internal static class ValidationReportWriter
     {
         ArgumentNullException.ThrowIfNull(result);
         var exitCode = GetExitCode(result);
-        var summary = new ValidationReportSummary(
+        var diagnostics = CliDiagnosticFactory.ToReportDiagnostics(result.Diagnostics);
+        var summary = new ReportSummary(
             result.Summary.Errors,
             result.Summary.Warnings,
             result.Summary.Infos);
-        var diagnostics = result.Diagnostics
-            .Select(static diagnostic => new ValidationReportDiagnostic(
-                diagnostic.Code,
-                SeverityName(diagnostic.Severity),
-                diagnostic.Message,
-                diagnostic.Path is null
-                    ? null
-                    : new ValidationReportPath(
-                        diagnostic.Path.Domain,
-                        diagnostic.Path.ObjectId.ToString("D"),
-                        diagnostic.Path.Property),
-                diagnostic.Hint,
-                diagnostic.Related
-                    .Select(static path => new ValidationReportPath(
-                        path.Domain,
-                        path.ObjectId.ToString("D"),
-                        path.Property))
-                    .ToArray()))
-            .ToArray();
 
         var report = new ValidationReport(
             ContractVersions.ValidationReportVersion,
@@ -69,23 +53,26 @@ internal static class ValidationReportWriter
     }
 
     /// <summary>
-    /// Builds the report emitted for a usage error.
+    /// Builds the report emitted for a usage error, including the CLI-owned <c>CLI001</c> diagnostics.
     /// </summary>
+    /// <param name="diagnostics">The usage diagnostics.</param>
     /// <returns>The usage report and exit code <c>2</c>.</returns>
-    public static (ValidationReport Report, int ExitCode) UsageError() =>
-        (
-            new ValidationReport(
-                ContractVersions.ValidationReportVersion,
-                "validation",
-                null,
-                null,
-                null,
-                false,
-                2,
-                new ValidationReportSummary(0, 0, 0),
-                [],
-                null),
-            2);
+    public static ValidationReport UsageError(IReadOnlyList<Diagnostic> diagnostics)
+    {
+        ArgumentNullException.ThrowIfNull(diagnostics);
+        var reportDiagnostics = CliDiagnosticFactory.ToReportDiagnostics(diagnostics);
+        return new ValidationReport(
+            ContractVersions.ValidationReportVersion,
+            "validation",
+            null,
+            null,
+            null,
+            false,
+            2,
+            ReportEnvelope.Count(reportDiagnostics),
+            reportDiagnostics,
+            null);
+    }
 
     /// <summary>
     /// Builds the report emitted for an unclassified I/O failure.
@@ -102,8 +89,14 @@ internal static class ValidationReportWriter
                 null,
                 false,
                 3,
-                new ValidationReportSummary(1, 0, 0),
-                [new ValidationReportDiagnostic("PROJ002", "error", message, null, null, [])],
+                new ReportSummary(1, 0, 0),
+                [new ReportDiagnostic(
+                    "PROJ002",
+                    "error",
+                    message,
+                    null,
+                    null,
+                    [])],
                 null),
             3);
 
@@ -130,7 +123,7 @@ internal static class ValidationReportWriter
             var path = diagnostic.Path is null ? string.Empty : $" [{diagnostic.Path}]";
             var hint = string.IsNullOrWhiteSpace(diagnostic.Hint) ? string.Empty : $" Hint: {diagnostic.Hint}";
             writer.WriteLine(
-                $"{SeverityName(diagnostic.Severity).ToUpperInvariant(),-8}  {diagnostic.Code,-6}  {diagnostic.Message}{path}{hint}");
+                $"{CliDiagnosticFactory.SeverityName(diagnostic.Severity).ToUpperInvariant(),-8}  {diagnostic.Code,-6}  {diagnostic.Message}{path}{hint}");
         }
 
         writer.WriteLine();
@@ -192,11 +185,4 @@ internal static class ValidationReportWriter
             statistics.CellCountB,
             statistics.CellCountC,
             statistics.EstimatedPositions);
-
-    private static string SeverityName(DiagnosticSeverity severity) => severity switch
-    {
-        DiagnosticSeverity.Error => "error",
-        DiagnosticSeverity.Warning => "warning",
-        _ => "info",
-    };
 }
