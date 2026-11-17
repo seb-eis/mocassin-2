@@ -115,7 +115,7 @@ Property tests are required for the following, using brute-force or analytic ora
 | Results store | `.msr` package binding, package-signature mismatch rejection, idempotent collection, previous-major read |
 | Job contracts | `solver.json`, job-folder paths, event stream, and `mmcfe.db` round-trip and reject malformed input |
 | Evaluation | MSD/diffusion/mobility/conductivity identities on analytic random walks; non-negativity; unit consistency; empty and single-particle cases |
-| CLI / parsing | Job-range parsing and normalization, full-expansion ID stability, partial selections, exit codes, report schema, JSON-Lines ordering; no crash on arbitrary arguments |
+| CLI / parsing | Library parsing conventions (arity, `--opt=value`, negative values, `--`, response files), parse-error→`CLI001`/2 mapping, help/version 0, job-range parsing and normalization, full-expansion ID stability, partial selections, exit codes, report schema, JSON-Lines ordering; no crash on arbitrary arguments; AOT publish smoke check |
 | Python reader | Valid document round-trip; malformed/truncated/future-version rejection; aggregation invariants match the .NET implementation |
 
 Property tests assert invariants, not a specific internal sequence. A failing case must be reproducible from the
@@ -450,9 +450,18 @@ solver with the same binary, platform, package, and seed.
 
 ### 9.10 Build orchestration and `mocassin` CLI
 
-- **Parser:** every command, long/short option, `--opt=value`, `--`, missing value, unknown option, duplicate
-  option, and conflicting option has a focused test. Help and completions are generated from the command
-  table; a test asserts every command/option appears. No arbitrary `string[]` crashes or throws.
+- **Parser:** `System.CommandLine` 3.0.0 supplies tokenization, arity, and help/version. Tests pin the
+  conventions the CLI relies on: every command, long/short option, `--opt=value`, `--`, missing value,
+  unknown option, duplicate option, conflicting option, required option/argument, negative values
+  (`--jobs -1`, `--parallel -1`, `-o -file`), and response-file behaviour. A parse error is `CLI001`/exit 2
+  with CLI-owned wording naming the offending token; the library's default exit 1 is never returned; help and
+  version exit 0. No arbitrary `string[]` crashes or throws.
+- **AOT:** a minimal smoke host that references `System.CommandLine` 3.0.0 is published with
+  `-p:PublishAot=true -p:TrimMode=full -r linux-x64`; the check asserts zero IL2xxx/IL3xxx warnings, a
+  positive control emits IL2026/IL3050, and the native binary runs `--help`, `--version`, and one parse-error
+  case. The real `Mocassin.Cli` publish result is recorded as evidence; dependency-owned
+  `Microsoft.Data.Sqlite`/`MessagePack` warnings are attributed to Step 31. Only `linux-x64` is covered;
+  Windows/macOS AOT and the `netstandard2.0` asset are Step 31 platform gates.
 - **Selection:** build-template/job-template/parameterization precedence is table-driven; one/two/many cases,
   explicit overrides, wrong-kind IDs, unknown IDs, and the implicit default all have tests. The selected
   effective IDs, not the authored recipe, are reported.
@@ -478,7 +487,7 @@ solver with the same binary, platform, package, and seed.
   exit 4; an unflagged build succeeds; `CMP`/`PKG` warnings stay warnings.
 - **Reports:** every `--json` report for `validate` and the seven report-backed commands validates against its
   generated schema, including usage errors; `build-v1` covers build and preview modes; `clean --json` without
-  `--dry-run` reports `CLI008`; `completion`/help/version/reserved commands emit no report; diagnostics use the
+  `--dry-run` reports `CLI008`; help/version/reserved commands emit no report; diagnostics use the
   `validation-v1` element shape.
 - **Events:** `build.stage` events precede `build.started`; JSON-Lines `build.started`/`build.stage`/
   `build.progress`/`build.finished` ordering; `build.finished` exactly once; `--json` leaves stderr
@@ -493,9 +502,9 @@ solver with the same binary, platform, package, and seed.
   `--results` and deletion are reserved.
 - **`validate` regression:** the human table, `validation-v1` JSON, and 0/1/2/3 exit codes are unchanged by the
   parser/report refactor.
-- **Tiers and performance:** the above are PR-fast with the fake solver probe; the 10⁴-job build + verify and
-  the real solver probe are nightly/release. The Step 12 evidence records time, peak RSS, package size, and
-  verification result against the Step 11 budget (< 10 min, < 2 GB).
+- **Tiers and performance:** the above are PR-fast with the fake solver probe; the 10⁴-job build + verify,
+  the real solver probe, and the AOT publish smoke check are nightly/release. The Step 12 evidence records
+  time, peak RSS, package size, and verification result against the Step 11 budget (< 10 min, < 2 GB).
 
 ## 10. Contract tests
 

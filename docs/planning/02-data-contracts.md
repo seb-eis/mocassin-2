@@ -1418,7 +1418,6 @@ mocassin inspect <project.msl> [--json]
 mocassin verify <project.msl> [--json]
 mocassin doctor [--json]
 mocassin clean <project.msl> [--dir <dir>] [--older-than <days>] --dry-run [--json]
-mocassin completion <bash|zsh|fish|powershell>
 mocassin simulate <project.msl> --jobs <range> [--io <dir>] [--solver <path>]
                   [--parallel <n>] [--json]        # reserved, Step 19/27
 mocassin collect <project.msl> [--dir <dir>] [--results <file.msr>]
@@ -1458,10 +1457,17 @@ mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
   reports what would be removed. Step 12 implements **only** the dry run; deletion is Step 28. With `--json`,
   a missing `--dry-run` is a usage error that still emits `clean-v1` with `dryRun = false`, `removedCount = 0`,
   and `CLI008`; it never deletes.
-- `completion` prints a shell completion script generated from the CLI command table. It is convenience
-  output, not a versioned JSON contract, and it does not accept `--json`.
-- Reserved commands are recognised and exit `2` with a stable `CLI008` diagnostic and the owning step. They
-  do not accept `--json` and emit no report.
+- The CLI parser is `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only). It supplies tokenization, arity and
+  option applicability, `--name value`/`--name=value`, negative values such as `--jobs -1`, `--`, help/version
+  actions, and the `[suggest]` directive. The CLI owns the command graph, typed binding, `CLI001` wording, and
+  exit-code policy. The library's parse-error exit code (1) is never exposed: a parse error is `CLI001` and
+  exit `2`; help/version exit `0`. Response-file (`@file`) behaviour is pinned by a test so the accepted input
+  is documented.
+- `completion` is **not** a Step 12 command. `System.CommandLine` provides the `[suggest]` protocol for
+  `dotnet-suggest`, not shell-script generation; the directive is accepted but is not a contract, and shell
+  integration is a Step 31 packaging decision. Step 12 ships no completion output.
+- Reserved commands are defined in the command graph and exit `2` with a stable `CLI008` diagnostic and the
+  owning step. They do not accept `--json` and emit no report.
 
 
 ### 5.2 `mocassin-sim` (Rust)
@@ -1784,9 +1790,9 @@ Diagnostics are ordered by severity, code, domain, object ID, property, and mess
 `PRM`, `JOB`, `PKG`) keep their meaning. CLI-only failures use `CLI001`–`CLI009`.
 
 `validate` and each report-backed command emit one report for every outcome, including a usage error before
-any work. `completion`, `--help`, `--version`, and the reserved commands do not accept `--json` and emit no
-report. The shared envelope is always populated; command-specific fields are present but `null`, `0`,
-`false`, `[]`, or `"skipped"`. `required` in the generated schema means “present”, not “non-null”: report
+any work. `--help`, `--version`, and the reserved commands do not accept `--json` and emit no report. The
+shared envelope is always populated; command-specific fields are present but `null`, `0`, `false`, `[]`, or
+`"skipped"`. `required` in the generated schema means “present”, not “non-null”: report
 descriptors mark payload objects, strings, and identities nullable, and nested objects are present with null
 fields. This is why a usage error with `--json` validates against the same schema as a successful run.
 `clean --json` without `--dry-run` is a usage error that still uses `clean-v1` with `dryRun = false`,
@@ -1861,8 +1867,10 @@ CLI report ids: `compile -o` writes the former, and `inspect-v1`/`verify-v1` emb
 | 10 | Unexpected internal error |
 
 `validate` keeps its Step 07 0/1/2/3 contract. `build --preview` uses the build table above, replacing the
-Step 10 interim preview mapping. All commands print exactly one report object with `--json`, including usage
-errors, once the command name is recognised.
+Step 10 interim preview mapping. `validate` and every command that accepts `--json` print exactly one report
+object, including usage errors, once the command name is recognised; `--help`, `--version`, and reserved
+commands do not accept `--json` and emit no report. The parser's default parse-error exit code (1) is never
+exposed: the CLI maps it to `CLI001` and exit `2`.
 
 ## 6. Contract testing
 

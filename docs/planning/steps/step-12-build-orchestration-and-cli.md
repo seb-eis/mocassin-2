@@ -9,11 +9,18 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** Not started — round-2 design review recorded (`Ready with notes`); awaiting the owner's decision on the four open notes; no step branch yet.
-- **Design review:** Ready with notes — awaiting owner acceptance at `4ad40ac` (reviewed commit `05b7297`) — [record](../reviews/step-12.md) (round 1 `Changes required`; round 2 `Ready with notes`, open notes R2-1–R2-4)
-- **Feature list:** Proposed 2026-11-16 (seven features); awaiting one owner approval with the design verdict.
-- **Sizing:** Owner-approved 3.0–4.0 person-weeks single-step exception, seven features, no split, with the
-  2.25 pw contingency; `04-roadmap.md` §3.1 and §2 record it.
+- **Status:** Not started — the design changed on 2026-11-17 (the hand-written parser is replaced by
+  `System.CommandLine` 3.0.0); a round-3 design re-review is pending; no step branch yet.
+- **Design review:** Re-review required — the freeze and reviewed commit are recorded in the review record;
+  round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`) — [record](../reviews/step-12.md)
+  (round 1 `Changes required`; round 2 `Ready with notes`, R2-1–R2-4 open; round 3 pending)
+- **Feature list:** Proposed 2026-11-16 (seven features); feature 1 revised 2026-11-17 (library adoption, no
+  parser/help/completion writers); awaiting one owner approval with the design verdict.
+- **Sizing:** Revised 2026-11-17 to 2.75–3.75 person-weeks (was 3.0–4.0), still a single-step exception,
+  seven features, no split, with the 2.25 pw contingency. The revision is presented for owner confirmation at
+  the round-3 start gate; `04-roadmap.md` §3/§3.1 and `05-open-decisions.md` record it.
+- **Parser:** `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only reference); Native AOT smoke-verified on
+  `net11.0`/`linux-x64`; no shell-completion command in Step 12 (§5.2, §13.8).
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
@@ -25,7 +32,7 @@ UI consumes later.
 
 | # | Feature | Branch | Planned scope | Outcome | Order |
 | ---: | --- | --- | --- | --- | --- |
-| 1 | CLI shell and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | Command table, hand-written parser, help/version/completions, common option grammar, exit-code type, Contracts-owned `CLI` diagnostic descriptors, shared report DTOs/writers, the seven `reports` manifest descriptors and generated artifacts, parser/usage/schema tests; existing `validate` output preserved | One parser/help/completion path and seven manifest-registered report schemas; `validation-v1` output and exit codes unchanged | 1 |
+| 1 | CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | `System.CommandLine` 3.0.0 adoption (`RootCommand` graph, command/option/argument definitions, typed `ParseResult` binding), parse-error→`CLI001`/exit-2 mapping, help/version, common option definitions, exit-code type, Contracts-owned `CLI` diagnostic descriptors, shared report DTOs/writers, the seven `reports` manifest descriptors and generated artifacts, parser-convention/usage/schema tests, AOT publish smoke check; existing `validate` output and `build --preview` behaviour preserved | One library-defined command graph with stable exit codes and seven manifest-registered report schemas; `validation-v1` output unchanged; no `completion` command | 1 |
 | 2 | Build orchestration core | `feature/step-12-build-orchestration-and-cli/build-orchestration-core` | `Mocassin.Packages.Build`: `IBuildPipeline`, request/options/result/failure types, stage enum, event stream, selection resolver, `JobSelection` parser and normalizer, progress estimator, stage timings, cancellation, parallel lattice generation with serialized writes, real-project tests | A UI-independent pipeline with typed events, deterministic selection, identity/failure results, cancellation, and real-project tests | 2 |
 | 3 | Build and preview command | `feature/step-12-build-orchestration-and-cli/build-and-preview-command` | `build` and `build --preview`, `--jobs`, `--parallel`, `--force`, `--compact`, `--warnings-as-errors`, `--quiet`, `--json`/JSON-Lines, human progress, post-publication verification, Ctrl+C/SIGTERM handling, the sample build, partial/cancel/force/parallel/compact/exit-code/schema tests | `build` and `build --preview` write/verify a package or preview with progress, cancellation, and the documented exit codes | 3 |
 | 4 | Project and compile commands | `feature/step-12-build-orchestration-and-cli/project-and-compile-commands` | `new` (embedded blank and ceria templates, fresh identity, safe create), `compile` (load/validate/compile, optional `compiled-inspection-v1` output, summary report), tests | `new` creates a valid fresh project and `compile` reports/optionally writes the inspection document | 4 |
@@ -53,17 +60,20 @@ test packages before Step 13.
 
 ## 2. Sizing and split-trigger check
 
-**Estimate: 3.0–4.0 person-weeks** for one experienced implementor, including tests, documentation, and
-review. The roadmap row is **1–3 pw**; the design exceeds it by up to 1 pw because the command surface grew
-after the roadmap was written: Step 10 added the no-write preview, Step 11 added the read-only
-inspector/verifier, and Step 12 now owns seven JSON report contracts plus environment diagnosis.
+**Estimate: 2.75–3.75 person-weeks** (revised 2026-11-17 from 3.0–4.0) for one experienced implementor, including
+tests, documentation, and review. The roadmap row is **1–3 pw**; the design exceeds it because the command
+surface grew after the roadmap was written: Step 10 added the no-write preview, Step 11 added the read-only
+inspector/verifier, and Step 12 now owns seven JSON report contracts plus environment diagnosis. Feature 1 is
+smaller than in the round-2 design because `System.CommandLine` replaces the command table, hand-written parser,
+help writer, and completion writer with command definitions, `ParseResult` binding, parse-error mapping, and an
+AOT smoke check; the remaining six features are unchanged.
 
 Roadmap §3.1 check:
 
 - **Features:** seven, within the “roughly 6–8” range. Each feature has a distinct observable outcome.
-- **Duration:** the upper bound of 4.0 pw is at, not beyond, the “more than about four weeks” trigger.
+- **Duration:** the upper bound of 3.75 pw is below the “more than about four weeks” trigger.
 - **Acceptance stories:** one coherent story — a headless build CLI. The auxiliary commands reuse the same
-  parser, report envelope, and build primitives; they are not independent solver/contract work.
+  command graph, report envelope, and build primitives; they are not independent solver/contract work.
 - **Risk mix:** the step mixes low-risk command formatting with the high-risk package/publication path.
   That risk is owned by Steps 11 and 12 together and is why Step 12 follows Step 11 directly.
 - **Audit sitting:** seven features and one library surface are auditable in one sitting if the feature log
@@ -72,10 +82,11 @@ Roadmap §3.1 check:
 **No split is proposed.** Splitting into 12A (CLI shell + build) and 12B (auxiliary commands + docs) would
 leave a CLI without `inspect`, `verify`, `doctor`, or `clean --dry-run`, which is a worse deliverable for the
 solver team and would add a roadmap step and change the Phase C closeout. **Owner decision (2026-11-16):**
-the 3.0–4.0 pw single-step exception, seven features, and no split are accepted; `04-roadmap.md` §3 and §3.1
-record the exception and `05-open-decisions.md` records the resolved decision (Step 09 precedent).
-**Contingency:** if features 1–3 exceed 2.25 pw, stop and ask the owner to re-open the split before starting
-feature 4. The estimate is not a licence to exceed four weeks.
+the single-step exception, seven features, and no split were accepted at 3.0–4.0 pw; the parser decision on
+2026-11-17 revises the estimate to 2.75–3.75 pw and the revision is presented for owner confirmation at the
+round-3 start gate. `04-roadmap.md` §3/§3.1 and `05-open-decisions.md` record the exception and the revised
+figure. **Contingency:** if features 1–3 exceed 2.25 pw, stop and ask the owner to re-open the split before
+starting feature 4. The estimate is not a licence to exceed four weeks.
 
 ## 3. Original reference
 
@@ -96,7 +107,9 @@ feature 4. The estimate is not a licence to exceed four weeks.
 ### 4.1 In scope
 
 - One `mocassin` command surface for `new`, `validate`, `compile`, `build` (including `--preview`), `inspect`,
-  `verify`, `doctor`, `clean --dry-run`, `completion`, help, and version.
+  `verify`, `doctor`, `clean --dry-run`, help, and version.
+- One `System.CommandLine` command graph with typed `ParseResult` binding, stable `CLI001` usage errors, and
+  explicit mapping from parser/handler outcomes to this project's exit codes.
 - A shared, UI-independent build orchestration library with a typed stage/event stream, deterministic job
   selection, progress, cancellation, and parallel lattice generation.
 - `build`/`inspect`/`verify` package work through the Step 11 writer and the read-only inspector/verifier.
@@ -119,7 +132,11 @@ feature 4. The estimate is not a licence to exceed four weeks.
 - **No `.msr` or `.mcs` work.** No results store is created, read, or written.
 - **No package append.** `.msl` remains immutable; `--force` replaces, never appends.
 - **No legacy formats.** No `.mocprj`/`.msl`/`.mcs` legacy reader or writer.
-- **No new parser dependency.** The CLI uses one hand-written parser; `System.CommandLine` is not added.
+- **No parser framework in the library.** `System.CommandLine` is a CLI-only dependency; `Mocassin.Packages`,
+  `Mocassin.Contracts`, and `Mocassin.Results` never reference it, and no scientific or build logic moves into
+  command handlers.
+- **No shell-completion command or scripts.** `mocassin completion` is not part of Step 12; shell integration
+  is a Step 31 packaging decision (§5.2, §13.8).
 - **No new package-format or signature change.** `job_selection` already exists in the Step 11 writer and
   schema; `build-v1` is a CLI report, not a package field.
 - **No scientific algorithm in the CLI.** Selection, compilation, parameterization, expansion, lattice
@@ -151,13 +168,12 @@ mocassin inspect <project.msl> [--json]
 mocassin verify <project.msl> [--json]
 mocassin doctor [--json]
 mocassin clean <project.msl> [--dir <dir>] [--older-than <days>] --dry-run [--json]
-mocassin completion <bash|zsh|fish|powershell>
 
 mocassin --help
 mocassin --version
 mocassin <command> --help
 
-# Reserved; the parser recognises them and exits 2 with a clear "available in Step N" message.
+# Reserved; the command graph recognises them and exits 2 with a clear "available in Step N" message.
 mocassin simulate ...    # Step 19/27
 mocassin collect ...     # Step 20
 mocassin evaluate ...    # Step 21
@@ -165,20 +181,21 @@ mocassin export ...      # Step 21
 mocassin clean ...       # deletion, Step 28
 ```
 
-- `--help` and `--version` are global only before a command; after a command they are command help.
-- Options use `--name value` or `--name=value`; short options use `-o value`. Flags take no value. Combined
-  short flags are not supported. `--` ends option parsing so a path beginning with `-` can be passed.
-- Option names are case-sensitive. Numbers use invariant culture. `--parallel` accepts `1..256`; `--older-than`
-  accepts `0..36500`.
-- An option that requires a value consumes the next token unconditionally; it is never reclassified as an
-  option. `--name=value` is the only other form. A missing next token is `CLI001`/exit 2. Therefore
-  `--jobs -1` is the value `-1` (rejected by `CLI005`), `--parallel -1` is `-1` (range error), and
-  `-o -file` names the path `-file`. `--` still ends option parsing for a positional path.
-- The parser validates arity and option applicability before loading anything. Command handlers receive a
-  typed parsed object; they do not re-parse `string[]`.
+- `--help` and `--version` are provided by `System.CommandLine` actions: they are global only before a
+  command; after a command they are command help. Both exit 0; help output shows the executable name.
+- Options use the library's tokenizer: `--name value`, `--name=value`, and `-o value` are accepted; flags take
+  no value; option names are case-sensitive. Numbers use invariant culture. `--parallel` accepts `1..256`;
+  `--older-than` accepts `0..36500`.
+- The library treats a value beginning with `-` as the value when the option expects one. `--jobs -1`,
+  `--parallel -1`, and `-o -file` therefore reach the handlers as `-1`, `-1`, and `-file`; the first two are
+  rejected by `CLI005`/range checks, and the last names a path. `--` ends option parsing so a positional path
+  beginning with `-` can be passed. Feature 1 pins these conventions and the response-file (`@file`) behaviour
+  with tests; the library's exact error sentence is not a contract (§5.2).
+- `System.CommandLine` validates arity, required options/arguments, and option applicability before a handler
+  runs. Handlers receive typed values; they never re-parse `string[]`.
 - `--json` is a per-command option, not a global prefix. `validate` and the seven `reports`-backed commands
   (`new`, `compile`, `build`, `inspect`, `verify`, `doctor`, `clean`) print exactly one schema-valid report
-  for every outcome, including a usage error. `completion`, `--help`, `--version`, and the reserved commands
+  for every outcome, including a usage error. `--help`, `--version`, and the reserved commands
   (`simulate`, `collect`, `evaluate`, `export`, and full `clean`) do not accept `--json`; they print human
   usage/diagnostic text to stderr and exit 2 (or 0 for help/version), with no report. An unknown command is
   the same: human usage, exit 2, no report.
@@ -187,22 +204,67 @@ mocassin clean ...       # deletion, Step 28
   `build.progress`, and `log` events; diagnostics, `build.started`, `build.finished`, and the final report
   remain. `--quiet` does not suppress errors.
 - `--version` prints the assembly informational version and the runtime description, then exits 0.
-- `completion` output is convenience text and is not a versioned JSON contract.
+- Step 12 ships no `completion` command and no shell-completion scripts; the library's `[suggest]` directive is
+  accepted but is not a contract (§13.8).
 
 ### 5.2 Parser choice
 
-**Decision: one hand-written parser over a command table.** Reasons:
+**Decision: `System.CommandLine` 3.0.0, pinned in central package management and referenced only by
+`Mocassin.Cli`.** The human owner replaced the round-2 hand-written-parser decision on 2026-11-17 after an
+AOT/full-trim verification showed that the design's stated reason (an AOT/trimming risk) was wrong.
 
-- The repository already ships hand-written `validate` and `build --preview` parsers. A table-driven parser
-  replaces them with one path instead of keeping two.
-- No new NuGet dependency, no pre-release package, and no AOT/trimming surprise for a CLI that Step 31 may
-  publish as a single file.
-- Help and shell completions are generated from the same table, so they cannot drift from the parser.
-- The option grammar is small and stable; the tests in §13 cover it exhaustively.
+Owner-supplied verification (`aot-check`, 2026-11-17; `dotnet` `11.0.100`, app TFM `net11.0`, RID `linux-x64`,
+ILC `11.0.0`):
 
-`System.CommandLine` remains a viable future replacement. Adopting it now would require a dependency review,
-a licence/vulnerability entry, and a parser-behaviour migration; the step does not need it. If the owner
-prefers it, that is a recorded design change before feature 1 starts, not an implementation detail.
+- 3.0.0 is the current stable release and is MIT-licensed (SPDX expression). Its `net10.0` asset is the one
+  selected for `net11.0`; that asset declares `IsTrimmable` **and** `IsAotCompatible`. The `net10.0`
+  dependency group is empty, so `dotnet list package --include-transitive` resolves only `System.CommandLine`.
+  The `netstandard2.0` fallback pulls `System.Memory`; the repository targets `net11.0`, so that asset is not
+  used, and it is untested.
+- `dotnet publish -c Release -r linux-x64 -p:PublishAot=true -p:TrimMode=full` (also with
+  `TrimmerSingleWarn=false`, `InvariantGlobalization=false`, and with
+  `PublishTrimmed=true`/`TrimMode=full`) produced a native binary with **zero** IL2xxx/IL3xxx warnings. A
+  positive control that called `JsonSerializer.Serialize(new object())` emitted IL2026 ×2 and IL3050 ×2,
+  proving the trim/AOT analyzers and the ILC warning channel were active and not suppressed.
+- The native binary parsed `--name value` and `--name=value`, negative numbers, required and typed options;
+  printed help/version; reported parse errors with exit **1**; and answered the `[suggest]` directive the same
+  way as the JIT build. The package's `build/` target supplies
+  `System.CommandLine.ExecutableName`, so `--help` shows the executable name in the native binary.
+- The owner's review also cites the Microsoft Learn page updated 2025-12-04, which describes the library as
+  trim-friendly and AOT-capable.
+
+Consequences recorded in this design:
+
+- **Parse errors must be remapped.** `System.CommandLine` returns 1 for a parse error and 0 for its
+  help/version actions. The CLI never exposes the library's parse-error code: `CliApplication` inspects
+  `ParseResult.Errors`, emits `CLI001`, and returns **2**; help/version return 0; handler results map through
+  §11.1. The CLI owns the stable `CLI001` message and may keep the library text as a hint; tests assert the
+  CLI-owned text and the offending token, not the library's exact sentence.
+- **Completion is narrowed, not reimplemented.** 3.0.0 provides the `[suggest]` protocol consumed by
+  `dotnet-suggest`, not shell-script generation. `dotnet-suggest` is not installed in the development image,
+  and the verification observed `[suggest]` returning root-level tokens only at every tested command
+  position. Step 12 therefore ships **no `mocassin completion` command and no scripts**; the directive is
+  accepted but is not a contract, and shell integration is a Step 31 packaging decision (§13.8).
+- **AOT smoke test.** Feature 1 adds a minimal AOT smoke host under `tests/aot/` that references
+  `System.CommandLine` 3.0.0 and defines a representative command/option/argument shape. It is published for
+  `linux-x64` with `PublishAot=true`, `TrimMode=full`, and strict trim warnings; the check asserts zero
+  IL2xxx/IL3xxx warnings, runs the positive control (which must emit IL2026/IL3050), and runs the native
+  binary for `--help`, `--version`, and one parse-error case. The real `Mocassin.Cli` publish is also
+  attempted and recorded as closeout evidence, but it is **not** a pass/fail gate in Step 12:
+  `Microsoft.Data.Sqlite` and `MessagePack` are not verified for AOT, so dependency-owned warnings are
+  attributed and Step 31's gated decision owns the final platform matrix and the AOT/single-file choice. Only
+  `linux-x64` is exercised; Windows/macOS AOT and the `netstandard2.0` asset are untested.
+- **Executable name.** The CLI sets the root command name (and `ToolCommandName` where the package's build
+  target reads it) to `mocassin`, so help/usage and the native binary show `mocassin`, not `Mocassin.Cli`.
+  Feature 1 asserts it in the help test.
+- **Dependency policy.** The version is pinned in `Directory.Packages.props` at implementation time and is
+  referenced only by `Mocassin.Cli`. The NuGet licence gate covers the MIT expression;
+  `requireLicenseAcceptance=true` is package metadata and does not prompt in this repository's
+  non-interactive restore. No transitive package is added for `net10.0+`. The library is not added to
+  `Mocassin.Packages`, `Mocassin.Contracts`, `Mocassin.Results`, or any test project except through the CLI.
+
+The Step 07 `validate` and Step 10 `build --preview` hand-written parsers move onto the shared graph in
+feature 1; feature 3 folds preview into `build`.
 
 ## 6. Build pipeline and event stream
 
@@ -645,7 +707,7 @@ Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
 | ---: | --- | --- |
 | 0 | Success (warnings allowed unless promoted) | all commands |
 | 1 | Validation, model, package-invalid, or unhealthy-doctor result | `validate`, `build` validation/expansion/lattice/verification, `inspect` invalid package, `verify` invalid package, `doctor` fail |
-| 2 | Usage or argument error | parser, template/parameterization selection ambiguity, `--jobs` syntax/range, reserved command/option, preview with a write option |
+| 2 | Usage or argument error | parse errors mapped by `CliApplication`, template/parameterization selection ambiguity, `--jobs` syntax/range, reserved command/option, preview with a write option |
 | 3 | I/O error (project, output, disk, missing/unreadable input, existing target without `--force`) | load/save, writer, `new`, `compile -o`, `inspect`/`verify` missing file |
 | 4 | Compilation or parameterization error | `build`, `compile` `CMP`, `PRM` errors, promoted `PRM` warnings |
 | 5 | Partial success | **reserved for `simulate`/`collect`; not emitted by `build` in v1** |
@@ -688,9 +750,13 @@ Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
 - `validate` keeps its Step 07 contract (0/1/2/3) and its `validation-v1` report. The other commands use
   the table above; `build --preview` adopts the build table (compile/parameterization errors become 4), which
   replaces the Step 10 interim preview mapping.
+- `CLI001` is composed by the CLI for every parse error. `System.CommandLine` returns 1 from its default
+  invocation path; `CliApplication` never returns that value. It reads `ParseResult.Errors`, emits one
+  `CLI001` per error, writes human usage text (or the command report when `--json` applies) and returns 2.
+  Help and version are library actions and return 0. Handler results map through the table above.
 - Usage errors with `--json` print one command report with `ok: false` and `exitCode: 2` for `validate` and
-  the seven `reports`-backed commands. `completion`, `--help`, `--version`, and reserved commands do not
-  accept `--json` and print no report (§5.1).
+  the seven `reports`-backed commands. `--help`, `--version`, and reserved commands do not accept `--json`
+  and print no report (§5.1).
 - A missing project file is 3 for `build`/`compile`/`validate`; an unparseable project is 1. A missing
   `.msl` is 3 for `inspect`/`verify`; a readable-but-corrupt `.msl` is 1 with `PKG`/`CLI009` diagnostics.
 - An unexpected exception is caught at the command boundary, mapped to `CLI007`/exit 10, and prints the
@@ -718,6 +784,8 @@ docs-drift test covers them without a `Packages -> Cli` edge.
 Domain diagnostics keep their own codes: `PROJ` for load/save/reference errors, `STR`/`TRN`/`ENM`/`SIM`
 for validation, `CMP` for compilation, `PRM` for parameterization, `JOB` for job templates/expansion/lattice,
 and `PKG` for package verification. The CLI never rewrites a domain diagnostic into `CLIxxx`.
+`System.CommandLine` parse errors are the only source of `CLI001`; the CLI's message is the stable text and
+the library's sentence is an optional hint.
 
 Human errors include the stage, object path, a one-line message, and the descriptor hint. The final summary
 prints the raw error/warning/info counts and the exit code.
@@ -760,8 +828,8 @@ Every report shares:
 - A future field is additive within `schemaVersion = 1`; an unknown field is ignored by consumers.
 
 **Usage-error and early-failure reports.** `validate` and each report-backed command emit one report for every
-outcome, including a usage error before any work starts. `completion`, `--help`, `--version`, and the reserved
-commands do not accept `--json` and never emit a report (§5.1). The shared envelope is always populated; every
+outcome, including a usage error before any work starts. `--help`, `--version`, and the reserved commands do
+not accept `--json` and never emit a report (§5.1). The shared envelope is always populated; every
 command-specific field is still present but `null`, `0`, `false`, `[]`, or `"skipped"` as its type allows.
 `required` in the generated schema means “present”, not “non-null”: the report descriptors mark payload
 objects, strings, and identities nullable, and their nested objects are present with null fields. For
@@ -984,16 +1052,23 @@ Checks, in order:
 - `--results <file.msr>` is reserved for Step 20/28 and is `CLI008`/exit 2.
 - The `.msl`, `.msr`, and job folders are never modified.
 
-### 13.8 `completion`
+### 13.8 Shell completion (no command in Step 12)
 
-- `completion bash|zsh|fish|powershell` prints a completion script generated from the command table. It is
-  convenience output, not a stable contract; tests only assert that every command and long option appears.
-  `completion` does not accept `--json` and emits no report.
-- An unknown shell is `CLI001`/exit 2 with human output.
+- Step 12 does **not** ship `mocassin completion` and does not generate bash, zsh, fish, or PowerShell scripts.
+  `System.CommandLine` 3.0.0 provides the `[suggest]` protocol that `dotnet-suggest` consumes, not script
+  generation; `dotnet-suggest` is an external global tool and is not installed in the development image.
+- The `[suggest]` directive is accepted by the command graph (the library handles it before a handler), but it
+  is not a versioned contract and Step 12 makes no command-scoped suggestion guarantee: the verification
+  observed root-level tokens only at every tested position. A test only asserts that the directive is accepted
+  without an unhandled exception; it does not assert a suggestion set.
+- Shell integration, if any, is decided in Step 31 with the packaging/installation story (document
+  `dotnet-suggest`, ship registration snippets, or add generated scripts). This is a deferred packaging
+  decision, not a Step 12 acceptance criterion and not part of the command contract.
+- An unknown command remains an ordinary parse error: `CLI001`, exit 2, human usage, no report.
 
 ### 13.9 Reserved commands
 
-`simulate`, `collect`, `evaluate`, `export`, and full `clean` are recognised by the parser and exit 2 with
+`simulate`, `collect`, `evaluate`, `export`, and full `clean` are defined in the command graph and exit 2 with
 `CLI008` and the owning step. They are not silently treated as unknown commands, so scripts fail with a
 useful message. They do not accept `--json` and print no report; the one-report guarantee covers `validate`
 and the seven `reports`-backed commands only.
@@ -1038,8 +1113,11 @@ Mocassin.Cli ──► Mocassin.Packages ──► Mocassin.Contracts ──► 
 - `Mocassin.Packages.Build` uses `ILatticePreviewService`, `JobTemplateValidationStage`, and the shared
   `BuildPreviewBuilder` from `Mocassin.Packages.Jobs`/`Projects.Validation`; it needs no new project reference.
   One preview-service instance is shared by the build-stage validation and the preview evaluation.
-- No new third-party package is added. `System.Threading.Channels` and `System.Text.Json` are in-box;
-  `JsonSchema.Net` is added only to the CLI test project (already centrally versioned) for schema validation.
+- `System.CommandLine` 3.0.0 is the only new production package and is referenced by `Mocassin.Cli` only. It
+  adds no project edge and no transitive package for `net10.0+`; it is MIT-licensed, pinned centrally, and
+  AOT/trim-verified for `linux-x64` (§5.2). No library project may reference it.
+- `System.Threading.Channels` and `System.Text.Json` are in-box; `JsonSchema.Net` is added only to the CLI
+  test project (already centrally versioned) for schema validation.
 - `Microsoft.Data.Sqlite` reaches the CLI transitively through `Packages` for the `doctor` SQLite check; it is
   already a production dependency of the writer.
 
@@ -1079,14 +1157,10 @@ Mocassin.Cli/
   Program.cs                    # entry point + signal handler
   AssemblyInfo.cs
   CommandLine/
-    CliApplication.cs
-    CommandCatalog.cs
-    CommandDefinition.cs
-    OptionDefinition.cs
-    CommandLineParser.cs
-    ParsedCommand.cs
-    HelpWriter.cs
-    CompletionWriter.cs
+    CliApplication.cs           # RootCommand invocation, dispatch, exit-code policy
+    CliCommandGraph.cs          # command/option/argument definitions (the only command table)
+    CliBinding.cs               # ParseResult -> typed request records
+    CliParseErrors.cs           # parse errors -> CLI001 diagnostics + human usage
     CliExitCode.cs
     Reports/
       ReportDiagnostic.cs
@@ -1139,13 +1213,20 @@ Mocassin.Cli/
     CleanReport.cs
 ```
 
-- Folders are command **domains**, not a `Commands/` bucket. `CommandLine` owns parsing/help/completion and
-  shared output; `Diagnostics` owns CLI-specific diagnostic construction.
+- Folders are command **domains**, not a `Commands/` bucket. `CommandLine` owns the `System.CommandLine`
+  graph, `ParseResult` binding, parse-error mapping, exit-code policy, the library help/version actions, and
+  shared output; `Diagnostics` owns CLI-specific diagnostic construction. There is no hand-written parser,
+  `CommandCatalog`, `CommandDefinition`, `OptionDefinition`, `ParsedCommand`, `HelpWriter`, or
+  `CompletionWriter`.
 - Namespaces match folders: `Mocassin.Cli.CommandLine`, `Mocassin.Cli.CommandLine.Reports`,
   `Mocassin.Cli.Build`, `Mocassin.Cli.Doctor.Checks`, and so on.
 - Each folder stays under 20 direct `.cs` files; `Doctor/Checks` resets the count. The deepest path is
   `Doctor/Checks` (depth 2). Files stay under 800 lines; the build command is split into a command, a
   report writer, an event writer, and a renderer.
+- `CliApplication.RunAsync(args, stdout, stderr, cancellationToken)` remains the test entry point. It builds
+  or receives the `RootCommand`, maps `ParseResult.Errors` to `CLI001`/2, and dispatches the resolved handler;
+  handler results are mapped in one place. `CliBinding` converts a successful `ParseResult` into the typed
+  request record each handler takes.
 - `PreviewCommand` and the `build-preview-v1` DTOs are removed or folded into `BuildCommand`/`BuildReport`
   during feature 3; no second report shape survives. `BuildPreviewMapper` projects the library payload; it
   does not evaluate anything.
@@ -1169,7 +1250,7 @@ intentional rebaseline is recorded (additive API does not require one).
 ```text
 Mocassin.Packages.Tests/Build/            # pipeline, selection, job selection, scheduler, cancellation, preview
 Mocassin.Packages.Tests/Projects/Templates/ # embedded template freshness and identity
-Mocassin.Cli.Tests/CommandLine/           # parser, help, completions, usage
+Mocassin.Cli.Tests/CommandLine/           # library parsing conventions, parse-error mapping, help/version, usage
 Mocassin.Cli.Tests/Build/                 # build/preview, reports, events, exit codes
 Mocassin.Cli.Tests/Compile/
 Mocassin.Cli.Tests/Inspect/
@@ -1178,6 +1259,7 @@ Mocassin.Cli.Tests/Doctor/
 Mocassin.Cli.Tests/Clean/
 Mocassin.Cli.Tests/NewProject/
 Mocassin.Cli.Tests/Validation/            # existing regression tests
+tests/aot/                                # minimal System.CommandLine AOT smoke host + positive control
 ```
 
 The test root keeps `RepositoryPaths.cs` and the existing files; the 20-file root limit and folder
@@ -1231,7 +1313,8 @@ ceria asset's canonical model hash with `samples/ceria/ceria.mocprj`.
 ### 18.1 Documentation
 
 - `docs/reference/cli.md` — full command surface, options, selection rules, exit codes, `CLI` codes, report
-  ids and field families, JSON-Lines events, completions, reserved commands.
+  ids and field families, JSON-Lines events, parser conventions, reserved commands, and the completion
+  non-promise.
 - `docs/reference/diagnostics.md` — `CLI001`–`CLI009` rows and headings, included in the docs-drift test.
   These rows land in feature 1 **together with** the Contracts descriptors, because the existing drift test
   requires the page and `DiagnosticCatalog.Default` to agree at every commit; the design-only commit does not
@@ -1245,8 +1328,8 @@ ceria asset's canonical model hash with `samples/ceria/ceria.mocprj`.
   parameterization, package verification failures, cancellation, and `doctor` recovery.
 - `docs/development/code-structure.md` — the CLI folder plan and the command-domain rule.
 - `docs/development/design-decisions.md` — the decisions in §20.
-- `docs/planning/01-target-architecture.md` — CLI responsibilities, dependency edge, and the corrected exit
-  codes.
+- `docs/planning/01-target-architecture.md` — CLI responsibilities, the `System.CommandLine` technology
+  choice, dependency edge, and the corrected exit codes.
 - `docs/planning/02-data-contracts.md` — §5.1 command surface, §5.5 events, new §5.7 reports, §3.2
   `job_selection` normal form, and §6 fixtures.
 - `docs/planning/03-quality-strategy.md` — the CLI/build test tier and §9.10.
@@ -1262,17 +1345,17 @@ ceria asset's canonical model hash with `samples/ceria/ceria.mocprj`.
 
 | Tier | Coverage |
 | --- | --- |
-| PR-fast | Parser/help/completions; usage and exit-code mapping; `JobSelection` parsing/normalization; selection precedence; ceria sample build + verify; preview; partial selection; `--force`; cancellation (in-process token); parallel determinism; `--compact` option mapping; `new`/`compile`/`inspect`/`verify`/`doctor`/`clean --dry-run`; JSON schema validation; `validate` regression |
+| PR-fast | Library parsing conventions, parse-error→`CLI001`/2 mapping, help/version, usage and exit-code mapping; `JobSelection` parsing/normalization; selection precedence; ceria sample build + verify; preview; partial selection; `--force`; cancellation (in-process token); parallel determinism; `--compact` option mapping; `new`/`compile`/`inspect`/`verify`/`doctor`/`clean --dry-run`; JSON schema validation; `validate` regression |
 | PR-medium | Real `.msl` round-trip with the Step 13 reader once it exists; cross-platform path handling; larger sample matrix |
-| Nightly/release | 10⁴-job build + verify under 10 min / 2 GB; real solver probe; Windows/macOS platform gate when cancellation/process/path behaviour is touched |
+| Nightly/release | 10⁴-job build + verify under 10 min / 2 GB; real solver probe; AOT smoke host with the positive control, plus the recorded real-CLI publish result (§5.2); Windows/macOS platform gate when cancellation/process/path behaviour is touched |
 
 - Test doubles are limited to the true boundaries: `TimeProvider` (through `BuildRequest.Options`), the
   solver process probe, the `IDoctorCheck` list for doctor failure injection, console cancellation, and
   failure injection for write/disk errors. Build orchestration, selection, expansion, lattice generation,
   preview, writing, inspection, and verification use real objects and real SQLite files.
 - A CLI test calls `CliApplication.RunAsync(args, stdout, stderr, cancellationToken)` with `StringWriter`s;
-  it asserts exit code, stdout/stderr, files, and JSON, not private call counts. It also asserts that
-  `--json` leaves stderr JSONL-only and that `completion`/help/version/reserved commands never emit a report.
+  it asserts exit code, stdout/stderr, files, and JSON, not private call counts. It also asserts that `--json`
+  leaves stderr JSONL-only and that help/version/reserved commands never emit a report.
 - The preview test asserts `BuildResult.Preview` is populated from the same `BuildPreviewBuilder`/service
   instance as the build-stage validation, that the CLI mapping adds no second evaluation, and that
   `build-v1.preview` equals the typed payload.
@@ -1305,15 +1388,28 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ## 19. Implementation tasks
 
-### Feature 1 — CLI shell and report contracts
+### Feature 1 — CLI shell, parser configuration, and report contracts
 
-- [ ] Add the command table, parser, typed parsed command, help/version, and completion generation.
+- [ ] Add `System.CommandLine` 3.0.0 to central package management and reference it from `Mocassin.Cli`
+      only; record the MIT/`requireLicenseAcceptance`/empty-transitive-graph review and the AOT evidence.
+- [ ] Define the `RootCommand` graph for `new`, `validate`, `compile`, `build` (including the interim
+      `--preview`), `inspect`, `verify`, `doctor`, `clean`, and the reserved commands; define options,
+      arguments, arity, defaults, and validators.
+- [ ] Replace the Step 07 `validate` and Step 10 `build --preview` hand-written parsers with the shared graph;
+      keep `CliApplication.RunAsync(args, stdout, stderr, cancellationToken)` as the test entry point and keep
+      the `validation-v1` output and the interim preview behaviour unchanged.
+- [ ] Bind a successful `ParseResult` to typed request records and dispatch to handlers; map `ParseResult.Errors`
+      to `CLI001` and exit **2** (the library's own parse-error code is 1 and is never returned); map handler
+      results through the exit-code table; keep help and version at exit 0.
 - [ ] Add `CliExitCode`, the `CLI001`–`CLI009` descriptors in `Mocassin.Contracts.Cli`, and compose them into
       `DiagnosticCatalog.Default`.
 - [ ] Add the shared report diagnostic/envelope DTOs and writers; keep `validation-v1` byte-compatible.
 - [ ] Add the seven `reports` manifest descriptors and regenerate the contract artifacts.
 - [ ] Add `build.stage` to the events manifest and add `tests/contracts/events-v1.jsonl`.
-- [ ] Add parser/usage/help/completion/schema tests and the `validate` regression tests.
+- [ ] Add parser-convention/usage/help/schema tests (arity, `--opt=value`, negative numbers, `--`,
+      response-file behaviour, error text, exit codes) and the `validate` regression tests.
+- [ ] Add the minimal AOT smoke host and the positive control; attempt and record the real `Mocassin.Cli`
+      AOT publish; do not add a `completion` command.
 
 ### Feature 2 — Build orchestration core
 
@@ -1341,7 +1437,7 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - [ ] Implement post-publication verification and the `build-v1` report, including the `preview` timing from
       `BuildPreview.Elapsed`.
 - [ ] Implement the report-backed scope: one report for `validate` and the seven report ids; no report for
-      `completion`/help/version/reserved commands; `clean --json` without `--dry-run` reports `CLI008`.
+      help/version/reserved commands; `clean --json` without `--dry-run` reports `CLI008`.
 - [ ] Add the sample build/verify, partial, force, cancel, compact, warnings, exit-code, and schema tests.
 
 ### Feature 4 — Project and compile commands
@@ -1420,9 +1516,9 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - **Named `Validate` arguments and the token.** Both calls use `loadDiagnostics:`, `options:`,
   `compiledModel:`, and `cancellationToken:` and pass the build token, following the accepted Step 10 audit
   note R2-5.
-- **Report scope is explicit.** `validate` and the seven report ids emit one report per outcome; `completion`,
-  `--help`, `--version`, and reserved commands do not accept `--json` and emit none. `clean --json` without
-  `--dry-run` emits a `clean-v1` report with `dryRun = false`, `removedCount = 0`, and `CLI008`.
+- **Report scope is explicit.** `validate` and the seven report ids emit one report per outcome; help, version,
+  and reserved commands do not accept `--json` and emit none. `clean --json` without `--dry-run` emits a
+  `clean-v1` report with `dryRun = false`, `removedCount = 0`, and `CLI008`.
 - **`--json` makes stderr JSON Lines only.** Human progress is suppressed whenever `--json` is set; `--quiet`
   additionally suppresses stage/progress/log events.
 - **`doctor` uses an `IDoctorCheck` seam.** Production runs the seven real checks; tests inject the check list
@@ -1446,12 +1542,32 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - **`quickstart.md`/`first-project.md` are Step 30 pages.** Step 12 puts the first-run commands in
   `docs/getting-started/index.md`; the step page’s old documentation list is reconciled to the pages that
   exist.
-- **Sizing is an owner-approved exception.** The 3.0–4.0 pw estimate, seven features, and no split were
-  accepted on 2026-11-16 with the 2.25 pw contingency. `04-roadmap.md` §3 and §3.1 record the exception and
-  `05-open-decisions.md` records the resolved decision (Step 09 precedent).
+- **Sizing is an owner-approved exception, revised after the parser change.** The single-step exception, seven
+  features, no split, and the 2.25 pw contingency were accepted on 2026-11-16 at 3.0–4.0 pw. The
+  `System.CommandLine` decision on 2026-11-17 makes feature 1 smaller and revises the estimate to
+  2.75–3.75 pw; the revision is presented for owner confirmation at the round-3 start gate.
+  `04-roadmap.md` §3/§3.1 and `05-open-decisions.md` record the exception and the revised figure (Step 09
+  precedent).
 - **The ceria starter and canonical projections are accepted.** `new --template ceria` ships the embedded
   model starter with the model-hash freshness test; `blank` remains. `compiled-inspection-v1` and
   `package-summary-v1` stay canonical projections with no new CLI report ids until Step 30.
+- **Parser: `System.CommandLine` 3.0.0, CLI-only.** The human owner replaced the hand-written parser on
+  2026-11-17. The package is stable, MIT-licensed, centrally pinned, and has no transitive dependency for
+  `net10.0+`; it is referenced only by `Mocassin.Cli`. The library owns tokenization, arity, help/version,
+  and `[suggest]`; the CLI owns the command graph, typed binding, `CLI001` wording, and exit-code policy.
+  Step page §5.2, §15, §16.2.
+- **Parse errors are exit 2, never the library's 1.** `CliApplication` reads `ParseResult.Errors`, emits
+  `CLI001`, and returns 2; help/version return 0; handler results map through §11.1. A test pins the
+  library-default-1-to-2 translation. Step page §5.2/§11.1/§23.
+- **No `completion` command in Step 12.** `System.CommandLine` provides the `[suggest]` protocol, not scripts;
+  `dotnet-suggest` is not installed and the directive's command-scoped behaviour was not demonstrated. The
+  command is removed from the surface, the directive is accepted but not a contract, and shell integration is
+  Step 31 packaging. Step page §5.2/§13.8.
+- **AOT evidence is a dependency smoke test, not a platform promise.** Only `linux-x64` AOT was exercised. A
+  minimal smoke host with the same package version and a positive control guards the `System.CommandLine`
+  claim; the real CLI publish is recorded as evidence, not a Step 12 gate, because SQLite/MessagePack are
+  unverified. Windows/macOS AOT, the `netstandard2.0` asset, and the final AOT/single-file packaging choice
+  remain Step 31 gates. Step page §5.2/§18.2/§24.
 - **Additive API wording.** New public members update `PublicAPI.Unshipped.txt`; the ApiCompat baseline is
   refreshed only for an intentional rebaseline, not merely because an additive member was added.
 
@@ -1468,6 +1584,11 @@ These decisions were made by the human owner after round 1 and are not open for 
    keep `blank`. The asset is MIT-authored project data, not copied GPL content.
 4. **Report registration — accepted.** `compiled-inspection-v1` and `package-summary-v1` remain canonical
    projections; no new CLI report ids until Step 30.
+5. **Parser — replaced (2026-11-17).** Adopt `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only) and remove
+   the hand-written parser; the AOT/trimming reason for the earlier decision was disproved by the owner's
+   verification. Shell completion is narrowed to the library's `[suggest]` protocol; no `completion` command
+   is shipped in Step 12. The estimate is revised to 2.75–3.75 pw and is presented for confirmation with
+   this decision.
 
 ## 22. Acceptance criteria
 
@@ -1488,9 +1609,17 @@ These decisions were made by the human owner after round 1 and are not open for 
 - [ ] Cancelling before publication leaves no temp file and preserves an existing package; cancelling after
       publication leaves the package and exits 6.
 - [ ] `--json` prints exactly one schema-valid report with `exitCode` for `validate` and the seven
-      report-backed commands, including usage errors; `completion`, help/version, and reserved commands emit
-      no report; `--json` leaves stderr JSONL-only; JSON-Lines events validate against the `events` contract;
-      `--quiet` additionally suppresses stage/progress/log events.
+      report-backed commands, including usage errors; help/version and reserved commands emit no report;
+      `--json` leaves stderr JSONL-only; JSON-Lines events validate against the `events` contract; `--quiet`
+      additionally suppresses stage/progress/log events.
+- [ ] `mocassin --help`, `mocassin <command> --help`, and `mocassin --version` exit 0; a parse error exits
+      2 with `CLI001` and never exposes the library's default 1; `--jobs -1`, `--parallel -1`, and
+      `-o -file` reach the handlers as values; `--` ends option parsing; response-file behaviour is pinned
+      by a test.
+- [ ] The AOT smoke host publishes for `linux-x64` with `PublishAot=true` and `TrimMode=full` with zero
+      IL2xxx/IL3xxx warnings, the positive control emits IL2026/IL3050, and the native binary runs `--help`,
+      `--version`, and one parse-error case. The real `Mocassin.Cli` publish result is recorded as evidence;
+      dependency-owned warnings are attributed to Step 31 instead of failing Step 12.
 - [ ] `build --preview` writes no package, reports `mode = "preview"`, projects `BuildResult.Preview`, and
       exits with the build table. The same payload is available to a library caller (Step 26) without a
       reload, recompile, or CLI reference.
@@ -1508,7 +1637,7 @@ These decisions were made by the human owner after round 1 and are not open for 
 
 | Test | Assertion | Tier |
 | --- | --- | --- |
-| Parser/help | Commands, long/short options, `--opt=value`, `--`, missing values, unknown options, help exit 0, unknown command exit 2; `--jobs -1`, `--parallel -1`, and `-o -file` tokenize as values | PR-fast |
+| Parser/help | Library conventions: commands, long/short options, `--opt=value`, `--`, negative numbers (`--jobs -1`, `--parallel -1`, `-o -file`), missing values, unknown options, required options/arguments, duplicate/conflicting options, response-file behaviour; help/version exit 0; parse errors exit 2 with a CLI-owned `CLI001` message and the offending token; the library's default 1 is never returned | PR-fast |
 | Exit codes | Every `BuildFailureKind`/status maps to the documented code, including `JobSelection`, `Preview`, `PackageWrite` without an I/O cause, and `None`/`Failed`; exit 5 is never emitted by `build` | PR-fast |
 | Options injection | `BuildRequest.Options` reaches the clock, throttle, and channel capacity; a fixed clock makes progress/ETA deterministic | PR-fast |
 | Selection | Auto-select, multiple build templates, multiple job templates, multiple parameterizations, overrides, unknown IDs, wrong-kind ID | PR-fast |
@@ -1521,7 +1650,8 @@ These decisions were made by the human owner after round 1 and are not open for 
 | Parallel | `--parallel 1` = `--parallel 4` signatures/summary; ascending job rows | PR-fast |
 | Compact | Quality 9 + VACUUM mapping; signatures/summary unchanged; package verifies | PR-fast |
 | Warnings | Validation warnings exit 1; promoted `PRM` warnings exit 4; unflagged build succeeds | PR-fast |
-| JSON | Each report validates against its generated schema; usage errors still print one object; `clean --json` without `--dry-run` reports `CLI008`; `completion`/help/version/reserved commands emit no report; JSON-Lines schema | PR-fast |
+| JSON | Each report validates against its generated schema; usage errors still print one object; `clean --json` without `--dry-run` reports `CLI008`; help/version/reserved commands emit no report; JSON-Lines schema | PR-fast |
+| AOT smoke | The smoke host publishes with `PublishAot=true`/`TrimMode=full` with zero IL2xxx/IL3xxx warnings; the positive control emits IL2026/IL3050; the native binary parses and reports a parse error with exit 2. The real CLI publish result is recorded; dependency-owned warnings are attributed to Step 31 | Nightly/release |
 | Events | `build.stage` events precede `build.started`; `build.started`/`progress`/`finished` ordering; `finished` exactly once; `--json` leaves stderr JSONL-only; `--quiet` suppresses stage/progress/log | PR-fast |
 | New/compile | Blank/ceria identity, name validation, safe create, inspection output, `CMP` exit 4 | PR-fast |
 | Inspect/verify | Valid, corrupt, truncated, missing; `PKG` diagnostics; exit codes | PR-fast |
@@ -1540,7 +1670,11 @@ These decisions were made by the human owner after round 1 and are not open for 
 | `--warnings-as-errors` silently unplumbed | `ValidationOptions.WarningsAsErrors` on both calls; parameterization diagnostics are post-filtered; tests pin exit 1/4 |
 | Partial builds confuse IDs | Full-expansion IDs, normalized `job_selection`, `inspect` shows the expression |
 | Progress overhead | 10 Hz throttle, bounded channel, final-event guarantee |
-| Parser complexity | One table, one parser, exhaustive tests, generated help/completions |
+| Parser/library behaviour changes | Version pinned exactly (3.0.0); the command graph and typed binding are ours; parser-convention tests cover arity, `--opt=value`, negative values, `--`, response files, and error text; an upgrade is a recorded dependency change |
+| Library parse errors leak exit 1 | `CliApplication` maps `ParseResult.Errors` to `CLI001`/2 in one place and a test asserts the default 1 is never returned; help/version stay 0 |
+| System.CommandLine AOT regresses | Strict AOT smoke host with a positive control runs nightly/release; the real CLI publish is recorded and dependency-owned warnings are attributed; only `linux-x64` is proven, so Windows/macOS and SQLite/MessagePack stay Step 31 gates |
+| Completion promise overreaches | `completion` is removed from Step 12; `[suggest]` is accepted but not a contract; shell integration is a Step 31 packaging decision |
+| Duplicate/bespoke parser creeps back | Feature 1 deletes the Step 07/10 hand-written parsers; no library project references `System.CommandLine`; structure/API tests and review check the command graph is the only parse path |
 | Silent warnings | Report summary, `--warnings-as-errors` for validation/parameterization |
 | Doctor checks not deterministic | `IDoctorCheck` seam injects pass/warn/fail checks; real checks run in the healthy CI path |
 | 10⁴-job verification cost | Measure; if verification breaches the budget, record a reduced post-build check and leave full verification to `mocassin verify` (deviation, not silent) |

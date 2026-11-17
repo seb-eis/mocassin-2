@@ -261,6 +261,7 @@ The detailed file-sharing rules are in ADR 0011.
 | Model editor layout | Master-detail table/list + type-specific editor; Step 24 layout spike | No paid grid or third-party grid dependency; final layout chosen from owner-reviewed POCs |
 | DI/hosting | Microsoft.Extensions.* | Standard configuration, logging, DI, lifetime management |
 | JSON | System.Text.Json | Built-in, source-generated contexts, trimming/AOT friendly |
+| CLI parsing (.NET) | `System.CommandLine` 3.0.0 | Stable, MIT, CLI-only, no transitive dependency on `net10.0+`; AOT/trim-verified on `linux-x64`; typed binding and help/version without a hand-written parser. No shell-script generation; `[suggest]` is not a contract |
 | SQLite (.NET) | Microsoft.Data.Sqlite | Lightweight, no EF Core required for `.msl`/`.msr` |
 | SQLite (Rust) | `rusqlite` with `bundled` | Reproducible builds, no system dependency; reads `.msl` and `mmcfe.db` |
 | Package encoding | MessagePack + Zstd | Compact, schema-friendly, fast; shared conceptually with Rust |
@@ -348,7 +349,8 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
 - .NET CLI: `0` success, `1` validation/model/package-invalid/unhealthy-doctor, `2` usage error, `3` I/O
   error, `4` compilation/parameterization error, `5` partial success (reserved for multi-job commands;
   `build` is all-or-nothing), `6` cancelled, `10` unexpected internal error. `validate` keeps its Step 07
-  0/1/2/3 subset. See `02-data-contracts.md` §5.7.6.
+  0/1/2/3 subset. See `02-data-contracts.md` §5.7.6. The CLI parser library's own parse-error exit code (1)
+  is remapped to `CLI001`/2; help and version exit 0.
 - Rust solver: `0` completed, `10` invalid arguments, `11` package error, `12` model/data error,
   `13` numerical failure, `14` aborted by limit, `15` cancelled, `16` I/O error.
 - The GUI surfaces the same CLI codes for build/collect operations and the solver codes for solver failures,

@@ -65,7 +65,7 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 | 09 | Parameterization templates and signatures | 08 | 1–3 pw (owner-approved 3.4–4.4 pw single-step exception, 2026-11-14) |
 | 10 | Job templates, inheritance, supercell/doping generation | 06, 08, 09 | 3–4 pw |
 | 11 | Compiled package encoding and `.msl` v1 writer | 08–10 | 3–4 pw |
-| 12 | Build orchestration and `mocassin` CLI | 10, 11 | 1–3 pw (owner-approved 3.0–4.0 pw single-step exception, 2026-11-16) |
+| 12 | Build orchestration and `mocassin` CLI | 10, 11 | 1–3 pw (owner-approved 3.0–4.0 pw single-step exception, 2026-11-16; revised to 2.75–3.75 pw on 2026-11-17 after the `System.CommandLine` decision) |
 | 13 | Rust workspace, `mocassin-sim`, `.msl` reader, job model | 11 | 2–4 pw |
 | 14 | Simulation context initialization | 13 | 2–4 pw |
 | 15 | Energy engine and field terms | 14 | 3–5 pw |
@@ -111,15 +111,18 @@ a roadmap step and change the Step 09–12 dependency chain. This exception appl
 that exceeds the trigger must split or record a new owner-approved exception. The Step 09 row above and the
 Step 09 page record the same estimate and exception.
 
-**Recorded exception — Step 12 (2026-11-16).** The human owner approved Step 12 as a single step at a
-3.0–4.0 person-week estimate with seven features and a 2.25 pw contingency. The upper bound is at, not beyond,
-the four-week trigger; the step grew from the roadmap's 1–3 pw because Step 12 now owns the no-write preview
-report from Step 10, the read-only inspector/verifier CLI from Step 11, seven report contracts, and environment
-diagnosis. The 12A (CLI shell + build) / 12B (auxiliary commands + docs) split was considered and rejected
-because it would leave a CLI without `inspect`, `verify`, `doctor`, or `clean --dry-run`, add a roadmap step,
-and change the Phase C closeout. If features 1–3 exceed 2.25 pw, the step stops and asks the owner to re-open
-the split before feature 4. This exception applies only to Step 12; the Step 12 row above and the Step 12 page
-record the same estimate and exception.
+**Recorded exception — Step 12 (2026-11-16; revised 2026-11-17).** The human owner approved Step 12 as a
+single step at a 3.0–4.0 person-week estimate with seven features and a 2.25 pw contingency. The upper bound
+is at, not beyond, the four-week trigger; the step grew from the roadmap's 1–3 pw because Step 12 now owns the
+no-write preview report from Step 10, the read-only inspector/verifier CLI from Step 11, seven report
+contracts, and environment diagnosis. On 2026-11-17 the parser decision removed the hand-written parser, help
+writer, and completion writer and replaced them with `System.CommandLine` 3.0.0 adoption; the revised estimate
+is 2.75–3.75 pw and is presented for owner confirmation at the round-3 start gate. The 12A (CLI shell +
+build) / 12B (auxiliary commands + docs) split was considered and rejected because it would leave a CLI
+without `inspect`, `verify`, `doctor`, or `clean --dry-run`, add a roadmap step, and change the Phase C
+closeout. If features 1–3 exceed 2.25 pw, the step stops and asks the owner to re-open the split before
+feature 4. This exception applies only to Step 12; the Step 12 row above and the Step 12 page record the same
+estimate and exception.
 
 ## 4. Milestones
 

@@ -21,13 +21,13 @@ mocassin <command> --help
 `--version` prints the CLI assembly version and the runtime description. `--help` prints the command list or
 the command’s options and exits 0. An unknown command exits 2.
 
-Options use `--name value` or `--name=value`; `-o value` is the short output option. A flag takes no value.
-`--` ends option parsing so a path beginning with `-` can be passed. Option names are case-sensitive.
-Numbers use invariant culture: `--parallel` accepts `1..256` and `--older-than` accepts `0..36500`.
-
-An option that requires a value consumes the next token unconditionally; it is never reclassified as an
-option. `--name=value` is the only other form. Therefore `--jobs -1` is the value `-1` (rejected as a range
-error), `--parallel -1` is `-1` (range error), and `-o -file` names the path `-file`.
+Options use the standard `System.CommandLine` conventions: `--name value` or `--name=value`, `-o value`, and
+flags take no value. A value beginning with `-` is accepted for a value-taking option, so `--jobs -1` and
+`--parallel -1` reach the command as `-1` (and are rejected by range checks), and `-o -file` names the path
+`-file`. `--` ends option parsing so a path beginning with `-` can be passed. Option names are
+case-sensitive. Numbers use invariant culture: `--parallel` accepts `1..256` and `--older-than` accepts
+`0..36500`. A parse error exits 2 with a `CLI001` diagnostic; the library's own parse-error exit code (1) is
+never exposed.
 
 `--json` makes stderr JSON Lines only and suppresses human progress, whether or not `--quiet` is used.
 `--quiet` additionally suppresses the `build.stage`, `build.progress`, and `log` JSON-Lines events;
@@ -338,14 +338,13 @@ With `--json`, that usage error still emits one `clean-v1` report with `dryRun: 
 step. With `--dry-run`, `--json` prints `clean-v1` with `dryRun: true`, the folder list, total bytes, and
 `removedCount: 0`.
 
-## `mocassin completion`
+## Shell completion
 
-```text
-mocassin completion <bash|zsh|fish|powershell>
-```
-
-Prints a completion script generated from the command table. Completion output is convenience text, not a
-versioned contract. An unknown shell exits 2.
+Step 12 does **not** ship a `completion` command and does not generate bash, zsh, fish, or PowerShell
+scripts. The CLI is built on `System.CommandLine` 3.0.0, which provides the `[suggest]` protocol that
+`dotnet-suggest` consumes, not script generation. The directive is accepted but is not a contract, and its
+command-scoped behaviour is not promised in this release. Shell integration is a Step 31 packaging decision;
+until then, script the commands directly.
 
 ## Reserved commands
 
@@ -366,8 +365,9 @@ versioned contract. An unknown shell exits 2.
 | 10 | Unexpected internal error. |
 
 `validate` uses only 0/1/2/3. A usage error with `--json` prints exactly one report with `exitCode: 2` for
-`validate` and the seven report-backed commands. `completion`, `--help`, `--version`, and reserved commands do
-not accept `--json` and print no report.
+`validate` and the seven report-backed commands. `--help`, `--version`, and reserved commands do not accept
+`--json` and print no report. A parse error is always `CLI001`/2; the parser library's default exit code (1)
+is never exposed.
 
 ## `CLI` diagnostics
 

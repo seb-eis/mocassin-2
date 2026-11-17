@@ -401,7 +401,8 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
   result; `summary` keeps raw counts.
 - Step 07 adds a minimal hand-written command parser for `validate`. Step 12 extends the same command surface
   and may replace the parser behind it if the full CLI needs a framework. No new CLI dependency is required in
-  Step 07.
+  Step 07. (Step 12 does replace it with `System.CommandLine` 3.0.0; see the [Step 12
+  page](step-12-build-orchestration-and-cli.md) §5.2.)
 
 ### 8. GUI contract (steps 24–25)
 

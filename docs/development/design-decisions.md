@@ -392,13 +392,26 @@ owns every stage the pipeline sequences, so no new project is needed.
 `Mocassin.Packages` does not reference `Mocassin.Results`. Post-publication verification is composed by the
 caller with `IPackageVerifier`; this preserves the one-reader rule and avoids a writer-to-reader project edge.
 
-## Hand-written CLI parser (Step 12)
+## `System.CommandLine` for the CLI (Step 12)
 
-The CLI uses one hand-written parser over a command table. The repository already had hand-written
-`validate` and `build --preview` parsers; a table-driven replacement gives one path, generated help and
-completions, and no new package dependency or trimming/AOT risk. `System.CommandLine` remains a viable future
-replacement, but adopting it now would require a dependency review and a parser-behaviour migration that the
-step does not need.
+The CLI uses `System.CommandLine` 3.0.0 (MIT, pinned, referenced only by `Mocassin.Cli`). The owner replaced
+the round-2 hand-written-parser decision on 2026-11-17 after an AOT/full-trim verification: on
+`net11.0`/`linux-x64` with `PublishAot=true` and `TrimMode=full`, 3.0.0 produced zero IL2xxx/IL3xxx warnings,
+with a positive control proving the analyzers and ILC warning channel were active; the native binary parsed,
+validated, printed help/version, and reported parse errors like the JIT build. The `net10.0` asset declares
+`IsTrimmable` and `IsAotCompatible`, and the dependency graph is empty for `net10.0+`. The `netstandard2.0`
+fallback and Windows/macOS AOT are untested.
+
+The library owns tokenization, arity, help/version, and the `[suggest]` directive. The CLI owns the command
+graph, typed `ParseResult` binding, `CLI001` wording, and exit-code policy. The library's default parse-error
+exit code (1) is remapped to 2. Feature 1 adds a minimal AOT smoke host with the same package version and a
+positive control; the real CLI publish is recorded as evidence but is not a gate, because SQLite/MessagePack
+are unverified. Only `linux-x64` AOT is proven, so Step 31's packaging gate still owns the platform matrix and
+the AOT/single-file decision.
+
+No `completion` command is shipped: the library provides the `[suggest]` protocol for `dotnet-suggest`, not
+shell-script generation, and `dotnet-suggest` is not installed. Shell integration is a Step 31 packaging
+decision and is not part of the Step 12 contract.
 
 ## CLI exit codes and diagnostics (Step 12)
 
@@ -409,12 +422,14 @@ that fails lattice generation aborts the whole package.
 
 CLI-only failures use `CLI001`–`CLI009` descriptors in `Mocassin.Contracts.Cli`, composed into the default
 diagnostic catalog like the `PKG` descriptors. Domain failures keep `PROJ`/`STR`/`TRN`/`ENM`/`SIM`/`CMP`/
-`PRM`/`JOB`/`PKG` codes; the CLI never rewrites a domain diagnostic.
+`PRM`/`JOB`/`PKG` codes; the CLI never rewrites a domain diagnostic. A parser-library parse error is the only
+source of `CLI001`; it is mapped to exit 2, never the library's default 1, and the library's sentence is a hint
+rather than the stable message.
 
 ## CLI reports and `build-v1` (Step 12)
 
-`mocassin validate --json` keeps `validation-v1`. Every other command prints exactly one report object with
-`--json`; each report is a manifest-owned `reports` descriptor with its own `schemaVersion` and generated
+`mocassin validate --json` keeps `validation-v1`. Every report-backed command prints exactly one report object
+with `--json`; each report is a manifest-owned `reports` descriptor with its own `schemaVersion` and generated
 schema. `build-v1` replaces the Step 10 interim `build-preview-v1`: one schema, `mode = build` or `preview`,
 and a single `--json` shape for both paths. `build-preview-v1` was never manifest-registered, so no consumer
 loses a published contract.
