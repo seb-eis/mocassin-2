@@ -9,8 +9,8 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** Not started — round-1 design corrections complete; re-review pending; no step branch yet.
-- **Design review:** Re-review required — [record](../reviews/step-12.md)
+- **Status:** Not started — round-2 design review recorded (`Ready with notes`); awaiting the owner's decision on the four open notes; no step branch yet.
+- **Design review:** Ready with notes — awaiting owner acceptance at `4ad40ac` (reviewed commit `05b7297`) — [record](../reviews/step-12.md) (round 1 `Changes required`; round 2 `Ready with notes`, open notes R2-1–R2-4)
 - **Feature list:** Proposed 2026-11-16 (seven features); awaiting one owner approval with the design verdict.
 - **Sizing:** Owner-approved 3.0–4.0 person-weeks single-step exception, seven features, no split, with the
   2.25 pw contingency; `04-roadmap.md` §3.1 and §2 record it.
@@ -19,7 +19,7 @@ UI consumes later.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Last updated:** 2026-11-16
+- **Last updated:** 2026-11-17
 
 ### Proposed feature list
 
