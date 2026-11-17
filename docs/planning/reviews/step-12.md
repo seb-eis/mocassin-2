@@ -560,6 +560,18 @@ and are in `05b7297172f9f87453b3ffc23d06801035da7a2c`; no code, test, configurat
 No finding is deliberately left open. The four owner decisions are recorded in step page §21 and the resolved
 rows in `05-open-decisions.md`; they are not re-opened in round 2.
 
+### Round 5 resolutions — human-owner decisions (2026-11-17)
+
+The human owner accepted the round-5 verdict **`Ready with notes`** for the design frozen at
+`1b6af90c72a0c4ff77d50fd266e80738bd8490fb`. The reviewer's round-5 text, evidence, findings, and verdict are
+unchanged.
+
+| Finding | Disposition | Owner / follow-up |
+| --- | --- | --- |
+| R5-1 (Minor) | **Accepted as a Minor owned by feature 1.** The positive-control project opts out of warnings-as-errors with a per-project setting (`TreatWarningsAsErrors=false` or `WarningsNotAsErrors` for IL2026/IL3050), so the `aot` gate asserts IL2026 and IL3050 as **warnings**; the zero-warning host keeps the repository's strict policy. Feature 1 documents the exact setting when it starts. Step page §5.4 and the feature-1 task now state the approach. | Feature 1 (implementor) |
+| R5-2 (Note) | **Accepted as a Note.** The exact clang/ILCompiler version is the observed apt/NuGet resolution, not a containerfile pin. The `06` §9 manual checklist checks it; `verify.sh aot` hard-fails on absence, not on a version mismatch. Step page §5.4, `06-toolchain-requirements.md`, `05-open-decisions.md`, and ADR 0015 now state this. | Step agent/planner (recorded); feature 1 keeps the absence check |
+| R5-3 (Note) | **Accepted as a Note and confirmed as intended policy.** `aot` stays inside `verify.sh all`, so **every step closeout from Step 12 onward requires the Tier 1 toolchain** (clang/lld/ILCompiler). The consequence is stated in `06-toolchain-requirements.md` §3.2/§5/§8, step page §5.4, `03-quality-strategy.md`, `ci-policy.md`, `05-open-decisions.md`, and ADR 0015. | Step agent/planner (recorded); all future step closeouts |
+
 ## Review rounds
 
 Append each new round below. Never overwrite an earlier round.
@@ -1338,15 +1350,3 @@ before the start gate.
 
 Follow-up owner: step agent/planner for the R5-1 Minor and the R5-2/R5-3 Notes; the human owner approves the
 verdict and the start gate.
-
-#### Round 5 resolutions — human-owner decisions (2026-11-17)
-
-The human owner accepted the round-5 verdict **`Ready with notes`** for the design frozen at
-`1b6af90c72a0c4ff77d50fd266e80738bd8490fb`. The reviewer's round-5 text, evidence, findings, and verdict are
-unchanged.
-
-| Finding | Disposition | Owner / follow-up |
-| --- | --- | --- |
-| R5-1 (Minor) | **Accepted as a Minor owned by feature 1.** The positive-control project opts out of warnings-as-errors with a per-project setting (`TreatWarningsAsErrors=false` or `WarningsNotAsErrors` for IL2026/IL3050), so the `aot` gate asserts IL2026 and IL3050 as **warnings**; the zero-warning host keeps the repository's strict policy. Feature 1 documents the exact setting when it starts. Step page §5.4 and the feature-1 task now state the approach. | Feature 1 (implementor) |
-| R5-2 (Note) | **Accepted as a Note.** The exact clang/ILCompiler version is the observed apt/NuGet resolution, not a containerfile pin. The `06` §9 manual checklist checks it; `verify.sh aot` hard-fails on absence, not on a version mismatch. Step page §5.4, `06-toolchain-requirements.md`, `05-open-decisions.md`, and ADR 0015 now state this. | Step agent/planner (recorded); feature 1 keeps the absence check |
-| R5-3 (Note) | **Accepted as a Note and confirmed as intended policy.** `aot` stays inside `verify.sh all`, so **every step closeout from Step 12 onward requires the Tier 1 toolchain** (clang/lld/ILCompiler). The consequence is stated in `06-toolchain-requirements.md` §3.2/§5/§8, step page §5.4, `03-quality-strategy.md`, `ci-policy.md`, `05-open-decisions.md`, and ADR 0015. | Step agent/planner (recorded); all future step closeouts |
