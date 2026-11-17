@@ -69,3 +69,21 @@ internal sealed record CompileRequest(
     string ProjectPath,
     string? OutputPath,
     bool Json);
+
+/// <summary>
+/// The typed request of the <c>inspect</c> command.
+/// </summary>
+/// <param name="PackagePath">The package path.</param>
+/// <param name="Json">Whether the JSON report was requested.</param>
+internal sealed record InspectRequest(
+    string PackagePath,
+    bool Json);
+
+/// <summary>
+/// The typed request of the <c>verify</c> command.
+/// </summary>
+/// <param name="PackagePath">The package path.</param>
+/// <param name="Json">Whether the JSON report was requested.</param>
+internal sealed record VerifyRequest(
+    string PackagePath,
+    bool Json);

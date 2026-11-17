@@ -4,7 +4,9 @@ using System.CommandLine;
 using Mocassin.Cli.Build;
 using Mocassin.Cli.Compile;
 using Mocassin.Cli.Diagnostics;
+using Mocassin.Cli.Inspect;
 using Mocassin.Cli.NewProject;
+using Mocassin.Cli.Verify;
 using Mocassin.Cli.Validation;
 
 namespace Mocassin.Cli.CommandLine;
@@ -25,6 +27,8 @@ internal sealed class CliApplication
     private readonly BuildCommand buildCommand;
     private readonly NewProjectCommand newProjectCommand;
     private readonly CompileCommand compileCommand;
+    private readonly InspectCommand inspectCommand;
+    private readonly VerifyCommand verifyCommand;
 
     /// <summary>
     /// Initializes the application with the complete command graph.
@@ -52,7 +56,9 @@ internal sealed class CliApplication
         CliCommandGraph graph,
         BuildCommand buildCommand,
         NewProjectCommand? newProjectCommand = null,
-        CompileCommand? compileCommand = null)
+        CompileCommand? compileCommand = null,
+        InspectCommand? inspectCommand = null,
+        VerifyCommand? verifyCommand = null)
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(buildCommand);
@@ -60,6 +66,8 @@ internal sealed class CliApplication
         this.buildCommand = buildCommand;
         this.newProjectCommand = newProjectCommand ?? new NewProjectCommand();
         this.compileCommand = compileCommand ?? new CompileCommand();
+        this.inspectCommand = inspectCommand ?? new InspectCommand();
+        this.verifyCommand = verifyCommand ?? new VerifyCommand();
     }
 
     /// <summary>
@@ -177,10 +185,22 @@ internal sealed class CliApplication
                 cancellationToken);
         }
 
-        if (ReferenceEquals(command, graph.InspectCommand) || ReferenceEquals(command, graph.VerifyCommand))
+        if (ReferenceEquals(command, graph.InspectCommand))
         {
-            WriteUnavailable(command, stderr, "Step 12 feature 5");
-            return Task.FromResult(CliExitCode.Usage);
+            return inspectCommand.RunAsync(
+                CliBinding.BindInspect(parseResult, graph),
+                stdout,
+                stderr,
+                cancellationToken);
+        }
+
+        if (ReferenceEquals(command, graph.VerifyCommand))
+        {
+            return verifyCommand.RunAsync(
+                CliBinding.BindVerify(parseResult, graph),
+                stdout,
+                stderr,
+                cancellationToken);
         }
 
         if (ReferenceEquals(command, graph.DoctorCommand) || ReferenceEquals(command, graph.CleanCommand))
@@ -235,6 +255,18 @@ internal sealed class CliApplication
                 CompileReportWriter.WriteJson(stdout, CompileReportWriter.UsageError(diagnostics));
                 return CliExitCode.Usage;
             }
+
+            if (ReferenceEquals(command, graph.InspectCommand))
+            {
+                InspectReportWriter.WriteJson(stdout, InspectReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
+
+            if (ReferenceEquals(command, graph.VerifyCommand))
+            {
+                VerifyReportWriter.WriteJson(stdout, VerifyReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
         }
 
         CliParseErrors.WriteHuman(parseResult, graph, stderr);
@@ -282,6 +314,18 @@ internal sealed class CliApplication
             if (string.Equals(command, CliCommandNames.Compile, StringComparison.Ordinal))
             {
                 CompileReportWriter.WriteJson(stdout, CompileReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
+
+            if (string.Equals(command, CliCommandNames.Inspect, StringComparison.Ordinal))
+            {
+                InspectReportWriter.WriteJson(stdout, InspectReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
+
+            if (string.Equals(command, CliCommandNames.Verify, StringComparison.Ordinal))
+            {
+                VerifyReportWriter.WriteJson(stdout, VerifyReportWriter.UsageError(diagnostics));
                 return CliExitCode.Usage;
             }
         }

@@ -82,9 +82,10 @@ internal static class CliDiagnosticFactory
     /// Creates a <c>CLI009</c> not-a-package diagnostic.
     /// </summary>
     /// <param name="message">The human-readable message.</param>
+    /// <param name="hint">An optional actionable hint.</param>
     /// <returns>The diagnostic.</returns>
-    public static Diagnostic NotAPackage(string message) =>
-        new(CliDiagnosticCodes.NotAPackage, DiagnosticSeverity.Error, message);
+    public static Diagnostic NotAPackage(string message, string? hint = null) =>
+        new(CliDiagnosticCodes.NotAPackage, DiagnosticSeverity.Error, message, hint: hint);
 
     /// <summary>
     /// Converts a domain diagnostic to its report form.

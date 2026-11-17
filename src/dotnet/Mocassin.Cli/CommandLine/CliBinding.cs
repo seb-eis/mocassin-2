@@ -89,5 +89,35 @@ internal static class CliBinding
             parseResult.GetValue(graph.CompileJson));
     }
 
+    /// <summary>
+    /// Binds the <c>inspect</c> command.
+    /// </summary>
+    /// <param name="parseResult">The successful parse result.</param>
+    /// <param name="graph">The command graph that owns the symbols.</param>
+    /// <returns>The typed request.</returns>
+    public static InspectRequest BindInspect(ParseResult parseResult, CliCommandGraph graph)
+    {
+        ArgumentNullException.ThrowIfNull(parseResult);
+        ArgumentNullException.ThrowIfNull(graph);
+        return new InspectRequest(
+            parseResult.GetRequiredValue(graph.InspectPackage),
+            parseResult.GetValue(graph.InspectJson));
+    }
+
+    /// <summary>
+    /// Binds the <c>verify</c> command.
+    /// </summary>
+    /// <param name="parseResult">The successful parse result.</param>
+    /// <param name="graph">The command graph that owns the symbols.</param>
+    /// <returns>The typed request.</returns>
+    public static VerifyRequest BindVerify(ParseResult parseResult, CliCommandGraph graph)
+    {
+        ArgumentNullException.ThrowIfNull(parseResult);
+        ArgumentNullException.ThrowIfNull(graph);
+        return new VerifyRequest(
+            parseResult.GetRequiredValue(graph.VerifyPackage),
+            parseResult.GetValue(graph.VerifyJson));
+    }
+
     private static Guid? OptionalId(Guid value) => value == Guid.Empty ? null : value;
 }

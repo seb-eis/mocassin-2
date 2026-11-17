@@ -26,7 +26,7 @@ UI consumes later.
   `net11.0`/`linux-x64`; bounded `@file` is part of the contract; no shell-completion command in Step 12
   (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
 - **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 at `9d4d2ef`; its first parent
-  is the design-merge commit `eb31979`). Features 1–4 are squashed into the step branch; see the feature log.
+  is the design-merge commit `eb31979`). Features 1–5 are squashed into the step branch; see the feature log.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
@@ -57,7 +57,8 @@ implemented and squashed. Feature rows stay empty until then.
 | 1 CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs`, `aot` exit 0 (AOT CLI evidence: 62 trim diagnostics from `Mocassin.Core`, not a gate) | Not run (no per-feature CI) | `517ae27` |
 | 2 Build orchestration core | `feature/step-12-build-orchestration-and-cli/build-orchestration-core` | Squashed | `dotnet` (494 Packages tests, 68 new), `structure`, `api` exit 0 | Not run (no per-feature CI) | `1dc9eeb` |
 | 3 Build and preview command | `feature/step-12-build-orchestration-and-cli/build-and-preview-command` | Squashed | `dotnet` (81 CLI tests), `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `af7431b` |
-| 4 Project and compile commands | `feature/step-12-build-orchestration-and-cli/project-and-compile-commands` | Squashed | `dotnet` (121 CLI tests, 500 Packages tests including 6 template tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | Recorded with feature 5 |
+| 4 Project and compile commands | `feature/step-12-build-orchestration-and-cli/project-and-compile-commands` | Squashed | `dotnet` (121 CLI tests, 500 Packages tests including 6 template tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `e7564c0` |
+| 5 Package inspection commands | `feature/step-12-build-orchestration-and-cli/package-inspection-commands` | Squashed | `dotnet` (147 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | Recorded with feature 6 |
 
 ### Deviations and accepted risks
 
@@ -115,6 +116,10 @@ implemented and squashed. Feature rows stay empty until then.
     SIGINT/SIGTERM cancellation and the second-signal default termination; `BuildCommand` receives the token
     through `CliApplication.RunAsync`, which keeps the command unit-testable. The observable behaviour matches
     §13.3.
+13. **`inspect` is tolerant of non-fatal package defects.** The Step 11 inspector intentionally reports what
+    it can read; a corrupt payload or a wrong signature is a `verify` `PKG` finding. `inspect` maps only fatal
+    structure failures (`InvalidDataException`) to `CLI009`/1, matching §13.4. The missing, directory, and
+    unreadable pre-check is `CLI002`/3 and runs before the inspector opens the file.
 12. **`new`/`compile` path mappings.** A directory occupying the `new` target path is `CLI002`/3; the design
     specifies only the existing-file collision as `CLI003`/3. `compile -o` maps a directory target, a missing
     parent, or an invalid path to `CLI002`/3, following the §11 I/O rule. Neither case writes or replaces a
@@ -1673,9 +1678,9 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 5 — Package inspection commands
 
-- [ ] Implement `inspect` and `verify` over the Step 11 inspector/verifier.
-- [ ] Add `inspect-v1`/`verify-v1`, human output, and exit/`CLI009` mapping.
-- [ ] Add valid/corrupt/truncated/missing package and schema tests.
+- [x] Implement `inspect` and `verify` over the Step 11 inspector/verifier.
+- [x] Add `inspect-v1`/`verify-v1`, human output, and exit/`CLI009` mapping.
+- [x] Add valid/corrupt/truncated/missing package and schema tests.
 
 ### Feature 6 — Doctor and dry-run clean
 
