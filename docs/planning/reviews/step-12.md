@@ -461,13 +461,12 @@ its file list, and the `PublicAPI.Unshipped.txt` obligation so the structure pol
 
 ## Record state
 
-**State:** Re-review required — round 4 reviewed `d6c54029d487b2e87aaf6b62a7da3cf232ffd680` and returned
-`Ready with notes` with the R4-1–R4-4 Minors and R4-5–R4-7 Notes below. R3-1, R3-2, R3-3, R3-5, R3-7, R2-2,
-and R2-4 are closed; R3-4, R3-6, and R3-8 retain the R4-1–R4-4 residuals. The step agent resolved all of them
-in the new freeze `1b6af90c72a0c4ff77d50fd266e80738bd8490fb`; a fresh planning auditor re-reviews that commit.
-Rounds 1–4 and their reviewer text remain unchanged above and below.
+**State:** Ready with notes — round 5 reviewed `1b6af90c72a0c4ff77d50fd266e80738bd8490fb` and returned
+`Ready with notes`; R4-1–R4-7 are closed, and R5-1 (Minor) plus R5-2/R5-3 (Notes) are recorded in round 5 below
+for the human owner's acceptance. Rounds 1–4 and their reviewer text remain unchanged above; round 5 is
+appended below.
 
-`Re-review required` is a record state, not a verdict.
+`Ready with notes` is a verdict awaiting explicit human-owner acceptance, not a merge or start authorization.
 
 ## Reviewer independence
 
@@ -1200,3 +1199,137 @@ text, evidence, findings, verdict, and earlier rounds are unchanged. The new fre
 | R4-5 (Note) | Fixed | All contract pages now use “10,000 tokens contributed by response files”: step page §5.3, `reference/cli.md`, ADR 0015, `02-data-contracts.md` §5.1, `05-open-decisions.md`, `design-decisions.md`, and `03-quality-strategy.md`. |
 | R4-6 (Note) | Fixed | Step page §5.3 pins `x"y z` → `xy z` and `"x y` → no token; §23 and `reference/cli.md` carry the same exact cases. |
 | R4-7 (Note) | Fixed | Step page status block now records round 4 `Ready with notes` and the round-5 freeze, not a pending round-3 review. |
+
+### Review round 5
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
+planner, implementor, orchestrator, or the round-1–4 reviewers. I received only the frozen commit
+`1b6af90c72a0c4ff77d50fd266e80738bd8490fb`, the record HEAD
+`908e497d2882536f2cbf170a606b2f92aa89592a`, the request record, repository links, and the required
+commands/scope. No desired verdict or summary was supplied. I read the repository at the frozen commit, the full
+record including rounds 1–4, every document the freeze changes, `tools/verify.sh`, `.github/workflows/ci.yml`,
+`docs/opencode/mocassin.containerfile`, `Directory.Build.props`, and the `System.CommandLine` 3.0.0 and
+`Microsoft.DotNet.ILCompiler` 11.0.0 packages; the review was read-only apart from this record, and I committed
+only this file.
+
+The design under review is `1b6af90`. The freeze commit changes 11 documentation files (+162/−95) and no
+`src/`, `tests/`, `contracts/`, `tools/`, or configuration file:
+`git diff --name-only 1b6af90^ 1b6af90`. The record HEAD `908e497` is documentation/status-only on top of it:
+`git diff --name-status 1b6af90 908e497` returns `M docs/planning/reviews/step-12.md`,
+`M docs/planning/status.md`, and `M docs/planning/steps/step-12-build-orchestration-and-cli.md`; the step-page
+hunk changes only the `Design review` pointer (4 lines), and the status dashboard updates the round pointer
+(2 lines). No design text moved between the freeze and the record HEAD. Rounds 1–4 and the R2/R3/R4 reviewer text
+are unchanged; the post-freeze record changes are the appended `Round 4 resolutions` and the
+`Record state`/request pointer.
+
+#### Commands and results
+
+- `./tools/verify.sh policy --require` → exit 0. ApiCompat reported no breaking changes for 9 assemblies (its
+  unresolved `MessagePack`/`Microsoft.Data.Sqlite` notices are not failures); NuGet licence/vulnerability policy
+  OK; contract artifacts current (19 files); model/parameterization/lattice projections OK (5/4/2 fixtures);
+  space-group catalog current (274 settings, sha256
+  `1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395`); process consistency OK; 58 Python tool
+  tests OK; SPDX headers in 603 source files; no secret patterns in 986 tracked text files; cargo-deny
+  advisories/bans/licenses/sources OK; final line `Closeout gate completed with required checks enabled.`
+- `./tools/verify.sh docs --require` → exit 0. Math OK (166 files); links OK (169 files); Zensical strict
+  `No issues found`; DocFX `Build succeeded` with 0 warnings / 0 errors; rustdoc OK; site built.
+- `python tools/check_doc_math.py` → `Documentation math conventions OK (166 files scanned).` (exit 0).
+- Toolchain/image probes: `clang --version` → `Debian clang version 19.1.7 (3+b1)`; `ld.lld --version` →
+  `Debian LLD 19.1.7`; `llvm-config --version` → `19.1.7`; `dpkg` shows `clang-19`, `lld-19`, `llvm-19`
+  `1:19.1.7-3+b1`, and `zlib1g-dev 1:1.3.dfsg+really1.3.1-1+deb13u1`.
+  `docs/opencode/mocassin.containerfile:55,57` installs `clang lld llvm` and `zlib1g-dev` from apt
+  **without an explicit version pin**; it does not install `Microsoft.DotNet.ILCompiler`. The cache contains
+  `microsoft.dotnet.ilcompiler/11.0.0` and `runtime.linux-x64.microsoft.dotnet.ilcompiler/11.0.0`, restored by
+  the first AOT publish. So the design's "image already installs clang/lld/llvm 19.1.7" and
+  "ILCompiler 11.0.0 restored per publish" are true in this image; the 19.1.7 pin itself is Debian's, not the
+  containerfile's (R5-2).
+- `System.CommandLine` 3.0.0 probe (throwaway project in `/tmp/opencode/step12-r5/probe`, no repository file
+  created): `CommandLineParser.SplitCommandLine` returns `x"y z` → `xy z`, `"x y` → no token, `a"b c"d` →
+  `ab cd`, `a""b` → `ab`, `"a""b"` → `a` + `b`, `""` → one empty token. The default parse error is
+  `Unrecognized command or argument '--bogus'.` with exit **1**; root `--version` is present and exits 0; a
+  subcommand `--version` is an error and no subcommand `VersionOption` exists;
+  `ParserConfiguration.ResponseFileTokenReplacer` defaults non-null and can be set to `null`. These match
+  §5.2/§5.3.
+- AOT probes (throwaway projects under `/tmp/opencode/step12-r5`, no repository file created):
+  - A minimal `System.CommandLine` host with a mini `CliApplication` mapping `ParseResult.Errors` to
+    `CLI001` published with `PublishAot=true`, `TrimMode=full`, `TrimmerSingleWarn=false`,
+    `SuppressTrimAnalysisWarnings=false`, `SelfContained=true`, and `TreatWarningsAsErrors=true` → exit 0 with
+    zero IL2xxx/IL3xxx warnings; the native binary exits 0 for `--help` and `--version` and **2** for
+    `--bogus` with a `CLI001` line. The host/remap design is feasible.
+  - `JsonSerializer.Serialize(new object())` published with the same AOT settings (no warnings-as-errors
+    override) → exit 0 and emits both `warning IL2026` and `warning IL3050`; with
+    `-p:TreatWarningsAsErrors=true` → exit 1 with `Trim analysis error IL2026` and `AOT analysis error
+    IL3050`. This is R5-1.
+- Script/workflow inspection: `tools/verify.sh` has no `aot` mode or `run_aot` function; its `--require` flag is
+  read only in the cargo-deny branch (`tools/verify.sh:171-178`); the `all` case runs `dotnet`, `api`, `rust`,
+  `python`, `docs`, and `contracts` (`tools/verify.sh:182-188`). Adding `aot` to `all` therefore makes plain
+  `all` run it as well as `all --require`; the design says `aot` is fail-not-skip without `--require`, so it is
+  consistent, but "`all --require` treats it as required" is redundant (R5-3). `ci.yml` has no `verify.sh`
+  reference; its `dotnet` job runs restore/build/test/format (`ci.yml:207-237`), so the design's local-gate
+  statement is true.
+- Diff/closure checks: `git diff --name-status 1b6af90 908e497` (above); `git diff --name-only 1b6af90^
+  1b6af90` (11 docs); `git diff --name-only d6c5402 1b6af90` (docs only). R4-1–R4-7 were re-checked against the
+  frozen text and the probes below.
+
+#### Closure of R4-1–R4-7
+
+| Finding | Round-5 status | Evidence verified in the frozen docs/repository |
+| --- | --- | --- |
+| R4-1 (Minor) | **Closed** | The six stale summaries now say the library supplies help and the CLI supplies the root-only `--version` action: `03-quality-strategy.md:453`; `05-open-decisions.md:75`; `design-decisions.md:406`; `02-data-contracts.md:1460-1464` (also records root-only and subcommand `CLI001`/2); step page `:875` ("Help is the library action … the CLI root `--version` action returns 0; a subcommand `--version` is `CLI001`/2"); ADR 0015 `:26-27,42`. No "library owns/supplies help/version" sentence remains. |
+| R4-2 (Minor) | **Closed** | Step page §11.2 `:912-914` now says "`System.CommandLine` parse errors **and response-file failures** (missing, unreadable, invalid, or over-limit) are the sources of `CLI001`", agreeing with the response-file row in the same table and §5.3. The "only source" sentence is gone (no other occurrence in the frozen docs). |
+| R4-3 (Minor) | **Closed; R5-2/R5-3 are new notes** | `06-toolchain-requirements.md:68,114` mark clang/lld/llvm **Required**, `:70` zlib1g-dev **Required**, and `:196,204-205` Tier 1 with the closeout rationale; no other document treats them as optional (grep over `docs/`). The image installs clang/lld/llvm 19.1.7 and zlib1g-dev; ILCompiler 11.0.0 is restored per publish. Step page §5.4 `:357-386` defines `verify.sh aot`: separate zero-warning host and positive-control publishes, native `CLI001`/2, fail-not-skip, feature 1 adds the mode/hosts, feature 7 runs `all --require`; `ci-policy.md:53-56` and `03-quality-strategy.md:464-473,517` repeat the local/CI distinction. `tools/verify.sh` currently has no `aot` and gates only cargo-deny with `--require`; adding `aot` to `all` makes it unconditional, which the design states. `ci.yml` does not run `verify.sh`; confirmed. |
+| R4-4 (Minor) | **Closed; R5-1 is a new Minor** | Step page §5.4 `:366-373` and §23 `:1825` require the separate positive control and a native host whose mini `CliApplication` maps `ParseResult.Errors` to `CLI001`/2; the probe confirms the library default is 1 and a mini host can return 2, and the control emits IL2026/IL3050. The remaining warning-policy gap is R5-1. |
+| R4-5 (Note) | **Closed** | One phrase, "10,000 tokens contributed by response files", is used in step page §5.3 `:336` and §23 `:1811`, `reference/cli.md:60-61`, ADR 0015 `:31-32`, `02-data-contracts.md:1475-1476`, `05-open-decisions.md:76`, `design-decisions.md:419`, and `03-quality-strategy.md:467`. No "expanded tokens" remains. |
+| R4-6 (Note) | **Closed** | Step page §5.3 `:325-330` pins `"x y` → no token and `x"y z` → `xy z`; §23 `:1811` includes both in the golden-test list; `reference/cli.md:55-57` repeats both. The probe confirms `SplitCommandLine` produces those exact results. |
+| R4-7 (Note) | **Closed** | The step-page status block at the freeze says round 4 returned `Ready with notes` and the final fixes are frozen for round 5; its `Design review` bullet records rounds 2–4 and "round 5 pending" (`docs/planning/steps/step-12-build-orchestration-and-cli.md:12-19`). The status dashboard row at the record HEAD says "round 4 `Ready with notes` … round 5 pending" (`docs/planning/status.md:62` at `908e497`); no text still says round 3 or 4 is pending. (The frozen `status.md` still had the round-4-pending wording; the metadata-only `908e497` corrects it, which the record HEAD permits.) |
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R5-1 — The positive-control publish cannot emit the required IL2026/IL3050 *warnings* under the repository-wide `TreatWarningsAsErrors=true`; they become errors and `dotnet publish` exits 1.** | `Directory.Build.props:7`; step page §5.4 `:366-370` and §23 `:1825`; probe: same AOT publish of `JsonSerializer.Serialize(new object())` exits 0 with `warning IL2026`/`warning IL3050` when warnings are not errors, and exits 1 with `Trim analysis error IL2026`/`AOT analysis error IL3050` under `-p:TreatWarningsAsErrors=true`. |
+| **Note** | **R5-2 — The 19.1.7 toolchain pin is not in the containerfile; it is the current Debian apt resolution. ILCompiler is a NuGet restore, not an image install. The exact version is checked only by the manual §9 checklist, not by the containerfile build or the `aot` gate (which hard-fails on absence only).** | `docs/opencode/mocassin.containerfile:55,57`; `dpkg`/`clang`/`ld.lld` probes (19.1.7); `06-toolchain-requirements.md:68,70,114,196,204-205,207,219-232`; step page §5.4 `:374-378`. |
+| **Note** | **R5-3 — `aot` is in `verify.sh all`, the standard closeout command for every step, so the Tier 1 toolchain is required at every step closeout from Step 12; the toolchain tables say "Step 12 closeout, Steps 19, 29, 31" and the step page names only Step 12 and Step 31. The every-step consequence is implicit, not stated.** | `tools/verify.sh:182-188`; `AGENTS.md` §3.4; `06-toolchain-requirements.md:68,70,114`; step page §5.4 `:382-385`; `03-quality-strategy.md:517`. |
+
+**R5-1.** The zero-warning host and the positive control correctly have opposite warning policies: the host must
+be clean, while the control must produce warnings. The repository sets `TreatWarningsAsErrors=true`
+(`Directory.Build.props:7`), and `tests/aot/PositiveControl` is under the repository root, so it inherits that
+property. The probe shows the same call produces `warning IL2026` and `warning IL3050` with exit 0 when
+warnings are not errors, but produces `Trim analysis error IL2026` and `AOT analysis error IL3050` and exits 1
+with `-p:TreatWarningsAsErrors=true`. The design does not state that the control opts out (for example
+`-p:TreatWarningsAsErrors=false` or `<WarningsNotAsErrors>$(WarningsNotAsErrors);IL2026;IL3050</WarningsNotAsErrors>`
+in the control project). As written, the required `verify.sh aot` positive-control publish fails and the check
+cannot observe the warnings it requires. Fix the project/command warning policy in §5.4/§23 (and the control
+csproj) while keeping the host strict. Minor; docs/test-plan precision, not a start blocker.
+
+**R5-2.** The current image genuinely has `clang`/`lld`/`llvm` 19.1.7 and `zlib1g-dev`; the containerfile
+installs them from apt without a version pin, and `Microsoft.DotNet.ILCompiler` 11.0.0 is restored by the first
+AOT publish (the cache has `microsoft.dotnet.ilcompiler/11.0.0`). A rebuild against a different apt snapshot
+could change the compiler version, and `verify.sh aot` as specified fails only on **absence**, not a version
+mismatch; only the manual `06` §9 checklist asserts 19.1.7. Note; pin/assert the version in the containerfile
+or the `aot` gate if reproducibility at 19.1.7 is required.
+
+**R5-3.** Because `aot` joins `verify.sh all`, and `all --require` is the closeout gate for every step
+(`AGENTS.md` §3.4), the AOT toolchain is needed at every step closeout from Step 12 onward, not only the
+"Step 12 closeout, Steps 19, 29, 31" entries. The design should say that explicitly (or list "every step
+closeout from Step 12" in the toolchain tables). The owner's "keep the gate required" decision is otherwise
+recorded consistently in `05-open-decisions.md` (CLI AOT closeout gate row), `06`, `ci-policy.md`,
+`03-quality-strategy.md`, ADR 0015, and step page §5.4.
+
+#### Verdict
+
+**Ready with notes.** No Blocker or Major remains. R4-1–R4-7 are closed: the six help/version summaries, the
+`CLI001` source sentence, the toolchain/Tier 1 table, the separate positive control, the single 10,000-token
+wording, the two pinned tokenizer cases, and the status text all match the frozen design and the repository.
+The required `verify.sh aot` contract is implementable and honest about `--require`, feature ownership, and the
+closeout CI (which does not run `verify.sh`); the current script gates only cargo-deny and has no `aot` mode,
+and feature 1 adds it. One Minor (R5-1: the positive-control warnings become errors under the repo's
+warnings-as-errors policy) and two Notes (R5-2: 19.1.7 is not pinned in the containerfile; R5-3: `aot` in `all`
+makes the toolchain required at every step closeout) remain. None affects a cross-step interface or the start
+gate if the human owner accepts them; the owner may also ask for the small docs-only R5-1/R5-2 clarifications
+before the start gate.
+
+Follow-up owner: step agent/planner for the R5-1 Minor and the R5-2/R5-3 Notes; the human owner approves the
+verdict and the start gate.
