@@ -65,9 +65,9 @@ Required for Avalonia, screenshot tests, and the 3D viewer. Included in
 | --- | --- | --- | --- |
 | `linux-perf` | Required | Step 29 | Solver/CPU profiling and flamegraphs. In the default opencode container, `perf` is installed but blocked by `perf_event_paranoid=3` and `cap-drop=ALL`; use Valgrind/Callgrind or grant `PERFMON` explicitly. |
 | `valgrind` | Optional | Steps 13–19 | Native memory diagnostics; Miri is preferred for Rust. |
-| `clang`, `lld`, `llvm` | Required | Step 12 closeout, Steps 19, 29, 31 | **NativeAOT `aot` gate is required at closeout.** Image has clang/lld/llvm **19.1.7**; `Microsoft.DotNet.ILCompiler` **11.0.0** is restored per publish. Do not silently skip the gate when they are absent. |
+| `clang`, `lld`, `llvm` | Required | Every step closeout from Step 12; Steps 19, 29, 31 | **NativeAOT `aot` gate is required at every closeout from Step 12** because it is in `verify.sh all`. Image has clang/lld/llvm **19.1.7** (observed apt resolution, not a containerfile pin; `06` §9 checks it); `Microsoft.DotNet.ILCompiler` **11.0.0** is restored per publish. The gate fails on absence, not on a version mismatch; do not silently skip it. |
 | `libssl-dev` | Recommended | Steps 29, 31 | Cargo tool builds. |
-| `zlib1g-dev` | Required | Step 12 closeout, Steps 29, 31 | NativeAOT link prerequisite for the `aot` gate; the image installs it. |
+| `zlib1g-dev` | Required | Every step closeout from Step 12; Steps 29, 31 | NativeAOT link prerequisite for the `aot` gate; the image installs it. |
 
 ## 4. .NET / C#
 
@@ -111,7 +111,7 @@ the runtime's third-party notices, including the BSD-3-Clause zstd notice.
 | `cargo-nextest` 0.9.150 | Optional | All test tiers | Faster test execution. |
 | `cargo-flamegraph` | Optional | Step 29 | Flamegraphs; uses `perf`. |
 | `cargo-audit` 0.22.2 | Optional | Step 29 | Alternative to `cargo-deny`; do not run both as gates. |
-| `clang`/`lld`/`llvm` | Required | Step 12 closeout, Steps 19, 29, 31 | Shared with the required NativeAOT `aot` gate (clang/lld/llvm **19.1.7**); also used by fuzzing. |
+| `clang`/`lld`/`llvm` | Required | Every step closeout from Step 12; Steps 19, 29, 31 | Shared with the required NativeAOT `aot` gate (clang/lld/llvm **19.1.7**, observed apt resolution); also used by fuzzing. |
 | serde, rmp-serde, rusqlite, zstd, clap, thiserror, tracing, rand_chacha, proptest, criterion, insta | Project-local | Steps 13+ | Cargo dependencies; no image install. |
 
 ## 6. Python
@@ -193,7 +193,7 @@ conventional, and the same file builds from any directory or from the opencode-c
 
 | Tier | Contents | Approx. addition over `opencode:base` (opencode-container) |
 | --- | --- | --- |
-| **Tier 1 — implementation and required closeout** | .NET SDK, stable Rust, Python/venv, GUI/headless libs, Zensical/mkdocstrings, DocFX, Python test tools, `cargo-deny`, `cargo-llvm-cov`, `linux-perf`, `clang`/`lld`/`llvm` 19.1.7, `Microsoft.DotNet.ILCompiler` 11.0.0 (NuGet) | ~3.7–4.2 GB installed |
+| **Tier 1 — implementation and required closeout** | .NET SDK, stable Rust, Python/venv, GUI/headless libs, Zensical/mkdocstrings, DocFX, Python test tools, `cargo-deny`, `cargo-llvm-cov`, `linux-perf`, `clang`/`lld`/`llvm` 19.1.7, `Microsoft.DotNet.ILCompiler` 11.0.0 (NuGet). **Required at every step closeout from Step 12** because `aot` is in `verify.sh all` | ~3.7–4.2 GB installed |
 | **Tier 2 — fuzzing extras** | Nightly + Miri, `cargo-fuzz`, `cargo-insta`/`nextest`/`flamegraph` | ~0.1–0.5 GB installed |
 | **Release-only (optional)** | `syft`, `grype`, `cosign`, `gh`, `actionlint` | ~0.1–0.2 GB installed |
 
@@ -201,8 +201,10 @@ Approximate total for the full development image over `opencode:base`: **~4.0–
 **~1.5–2.0 GB compressed**. DocFX alone is about 300 MB installed; the .NET and Rust toolchains are the
 largest contributors.
 
-`clang`/`lld`/`llvm` and the `Microsoft.DotNet.ILCompiler` packages are Tier 1 because the `aot` gate is
-required at Step 12 closeout; the image already installs clang/lld/llvm 19.1.7.
+`clang`/`lld`/`llvm` and the `Microsoft.DotNet.ILCompiler` packages are Tier 1 because the `aot` gate is in
+`verify.sh all` and is required at **every step closeout from Step 12 onward**. The 19.1.7/11.0.0 versions are
+the observed apt/NuGet resolution, not a containerfile pin; the §9 checklist checks them. The image installs
+clang/lld/llvm 19.1.7, and the gate hard-fails on absence, not on a version mismatch.
 
 The committed `mocassin.containerfile` includes Tier 1 and Tier 2. Release-only tools stay commented until
 Step 31 so the image does not carry unreviewed signing/SBOM dependencies during core development.
@@ -229,7 +231,9 @@ Plus:
 
 - `dotnet --list-sdks` shows only `11.0.100`; `dotnet --version` resolves `11.0.100` from `global.json`.
 - `clang --version` and `ld.lld --version` report **19.1.7**; the first `verify.sh aot` publish restores
-  `Microsoft.DotNet.ILCompiler` **11.0.0**. These are required for the Step 12 closeout gate.
+  `Microsoft.DotNet.ILCompiler` **11.0.0**. These versions are the observed apt/NuGet resolution, checked here
+  rather than pinned in the containerfile. They are required for the `aot` gate at every step closeout from
+  Step 12; the gate hard-fails on absence, not on a version mismatch.
 - `dotnet tool list --global` shows DocFX and ReportGenerator.
 - `~/.dotnet/tools` is on `PATH`.
 - The venv at `/home/node/.venvs/mocassin` imports `zensical`, `mkdocstrings`, and the Python handler.

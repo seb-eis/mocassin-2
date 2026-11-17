@@ -407,12 +407,15 @@ The library owns command-line tokenization (after the CLI expands response files
 `[suggest]` directive. The CLI owns the root `--version` action, the command graph, typed `ParseResult`
 binding, `CLI001` wording, and exit-code policy. The library's default parse-error
 exit code (1) is remapped to 2. Feature 1 adds the required `verify.sh aot` gate: a zero-warning minimal host
-plus a **separate** positive control that must emit IL2026/IL3050, and a host parse-error case that exercises the
-`CLI001`/2 remap. clang/lld/ILCompiler are Tier 1 and missing tools hard-fail, never skip. The gate is local:
-feature 7 runs `verify.sh all --require` at closeout and records the output, but the closeout GitHub workflow
-does not run `verify.sh`. The real CLI publish is recorded as evidence, not a gate, because SQLite/MessagePack
-are unverified. Only `linux-x64` AOT is proven, so Step 31's packaging gate still owns the platform matrix and
-the AOT/single-file decision.
+plus a **separate** positive control that must emit IL2026/IL3050 (the control project opts out of
+warnings-as-errors for its own build; the host stays strict), and a host parse-error case that exercises the
+`CLI001`/2 remap. clang/lld/ILCompiler are Tier 1 and missing tools hard-fail, never skip; their versions are
+observed apt/NuGet resolutions checked by `06` §9, not a containerfile pin, and a version mismatch is not a gate
+failure. The gate is local: feature 7 runs `verify.sh all --require` at closeout and records the output, but the
+closeout GitHub workflow does not run `verify.sh`. Because `aot` is in `all`, every step closeout from Step 12
+requires the Tier 1 toolchain. The real CLI publish is recorded as evidence, not a gate, because
+SQLite/MessagePack are unverified. Only `linux-x64` AOT is proven, so Step 31's packaging gate still owns the
+platform matrix and the AOT/single-file decision.
 
 Response files (`@file`) are a CLI contract, not the library default. The CLI owns tokenization and recursive
 expansion and disables the library hook; the documented syntax and limits are 1 MiB of raw bytes per file,

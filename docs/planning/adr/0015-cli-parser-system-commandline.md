@@ -43,8 +43,11 @@ and completion maintenance.
   the root `--version` action instead of inheriting the library's version-only default.
 - MIT-licensed with no transitive dependency for `net10.0+`; the package is centrally pinned.
 - A required `verify.sh aot` gate publishes a zero-warning smoke host and a separate IL2026/IL3050 positive
-  control, and runs the host's `CLI001`/2 parse-error case. clang/lld/ILCompiler are Tier 1; the gate is local
-  (the closeout CI does not run `verify.sh`) and is fail-not-skip when the toolchain is absent.
+  control (the control project opts out of warnings-as-errors; the host stays strict), and runs the host's
+  `CLI001`/2 parse-error case. clang/lld/ILCompiler are Tier 1, so **every step closeout from Step 12** needs
+  them because `aot` is in `verify.sh all`; their 19.1.7/11.0.0 versions are observed apt/NuGet resolutions
+  checked by `06` §9, not a containerfile pin, and the gate fails on absence rather than a version mismatch. The
+  gate is local (the closeout CI does not run `verify.sh`) and is fail-not-skip when the toolchain is absent.
 - Response files are a documented, bounded contract rather than an accidental library default.
 
 **Negative and limits**

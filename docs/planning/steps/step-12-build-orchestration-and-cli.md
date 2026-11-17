@@ -9,16 +9,16 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** Not started — the design changed on 2026-11-17 (the hand-written parser is replaced by
-  `System.CommandLine` 3.0.0, with bounded `@file` response files and a required AOT closeout gate); round 4
-  returned `Ready with notes`; the final fixes are frozen for round 5; no step branch yet.
-- **Design review:** Re-review required — round 5 reviews `1b6af90` (design freeze); round 2 was
-  `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was `Ready with notes` at
-  `d211584` (reviewed `6b15f9d`), and round 4 was `Ready with notes` at `f548d26` (reviewed `d6c5402`)
-  — [record](../reviews/step-12.md) (R2-1–R2-4, R3-1–R3-8, and R4-1–R4-7 resolved; round 5 pending)
+- **Status:** Not started — the design was accepted by the human owner on 2026-11-17 (`Ready with notes` at
+  `1b6af90`); implementation start is awaiting owner approval; no step branch yet.
+- **Design review:** Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` — round 5
+  reviewed `1b6af90`; round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was
+  `Ready with notes` at `d211584` (reviewed `6b15f9d`), and round 4 was `Ready with notes` at `f548d26`
+  (reviewed `d6c5402`) — [record](../reviews/step-12.md) (R2-1–R2-4, R3-1–R3-8, R4-1–R4-7, and R5-1–R5-3
+  recorded; implementation start awaiting owner approval)
 - **Feature list:** Proposed 2026-11-16 (seven features); feature 1 revised 2026-11-17 (library adoption,
-  bounded response files, no parser/help/completion writers); awaiting one owner approval with the design
-  verdict.
+  bounded response files, no parser/help/completion writers); the design verdict is accepted, and the
+  feature-list/start approval is pending.
 - **Sizing:** Owner-approved 2026-11-17 at 2.75–3.75 person-weeks (was 3.0–4.0), still a single-step
   exception, seven features, no split, with the 2.25 pw contingency; `04-roadmap.md` §3/§3.1 and
   `05-open-decisions.md` record it.
@@ -364,26 +364,31 @@ through the hook. The CLI pre-expands instead, which also makes file/token/byte 
   `SuppressTrimAnalysisWarnings=false`, and `SelfContained=true`. The publish must complete with **zero**
   IL2xxx/IL3xxx warnings. A warning, a nonzero publish, or a missing publication is a hard failure.
 - **Positive control.** A **separate** project, `tests/aot/PositiveControl`, deliberately calls
-  `JsonSerializer.Serialize(new object())` and is published with the same AOT settings. The check requires at
-  least one IL2026 and one IL3050 warning from that publish. The positive control is never merged into the
-  zero-warning host: the two publishes are separate checks and both are required, because the control proves
-  the analyzers and ILC warning channel are active while the host proves the dependency is clean.
+  `JsonSerializer.Serialize(new object())` and is published with the same AOT settings. The control project
+  opts out of the repository warnings-as-errors policy for its own build (`TreatWarningsAsErrors=false` or
+  `WarningsNotAsErrors` for IL2026/IL3050), so those diagnostics remain **warnings**; the zero-warning host
+  keeps the repository policy. The check requires at least one IL2026 and one IL3050 warning from the control
+  publish. The positive control is never merged into the zero-warning host: the two publishes are separate
+  checks and both are required, because the control proves the analyzers and ILC warning channel are active
+  while the host proves the dependency is clean. Feature 1 documents the exact per-project setting.
 - **Native smoke run.** The host includes a mini `CliApplication` that maps `ParseResult.Errors` to `CLI001`
   and exit **2**, then runs the native binary for `--help`, `--version`, and a deliberate parse error. The
   parse-error case must exit 2; the library default 1 is not accepted.
 - **Prerequisites and failure policy.** clang/lld **19.1.7** and the `Microsoft.DotNet.ILCompiler` **11.0.0**
-  packages (restored on the first publish) are required. If a compiler is absent, `verify.sh aot` exits
-  nonzero with a message such as `aot: required tool 'clang' not found; install clang/lld 19.1.7 (Tier 1
-  image)`; if the ILCompiler restore fails, it reports `Microsoft.DotNet.ILCompiler 11.0.0 could not be
-  restored; check the NuGet feed/cache`. It never skips, never returns success, and never downgrades to a JIT
-  run.
+  packages (restored on the first publish) are required. These versions are the observed apt/NuGet resolution,
+  not a containerfile pin; the `06` §9 checklist asserts them. The gate hard-fails on **absence**, not on a
+  different version. If a compiler is absent, `verify.sh aot` exits nonzero with a message such as
+  `aot: required tool 'clang' not found; install clang/lld 19.1.7 (Tier 1 image)`; if the ILCompiler restore
+  fails, it reports `Microsoft.DotNet.ILCompiler 11.0.0 could not be restored; check the NuGet feed/cache`. It
+  never skips, never returns success, and never downgrades to a JIT run.
 - **`--require`.** `aot` is part of `verify.sh all`; `all --require` treats it as required and fails if the
   mode or a prerequisite is unavailable. `verify.sh aot` itself is also fail-not-skip without `--require`.
 - **Execution.** `./tools/verify.sh all --require` is a **local** closeout gate; the closeout GitHub workflow
   runs restore/build/test/format and does **not** run `tools/verify.sh` or `aot`. Feature 1 adds the mode and
   the two hosts; feature 7 runs the command at Step 12 closeout and records its output in the closeout
-  evidence. The Step 31 release gate runs the same local command. CI does not confirm the AOT result; that is
-  a recorded limitation, not a silent pass.
+  evidence. **Because `aot` is inside `verify.sh all`, every step closeout from Step 12 onward requires the
+  Tier 1 toolchain (clang/lld/ILCompiler), not only Step 12 and Step 31.** The Step 31 release gate runs the
+  same local command. CI does not confirm the AOT result; that is a recorded limitation, not a silent pass.
 
 ## 6. Build pipeline and event stream
 
@@ -1480,7 +1485,7 @@ ceria asset's canonical model hash with `samples/ceria/ceria.mocprj`.
 | PR-fast | Library parsing conventions, parse-error→`CLI001`/2 mapping, help/version, usage and exit-code mapping; response-file syntax, limits, `--`/`--json` interaction, and errors; `JobSelection` parsing/normalization; selection precedence; ceria sample build + verify; preview; partial selection; `--force`; cancellation (in-process token); parallel determinism; `--compact` option mapping; `new`/`compile`/`inspect`/`verify`/`doctor`/`clean --dry-run`; JSON schema validation; `validate` regression |
 | PR-medium | Real `.msl` round-trip with the Step 13 reader once it exists; cross-platform path handling; larger sample matrix |
 | Nightly/release | 10⁴-job build + verify under 10 min / 2 GB; real solver probe; Windows/macOS platform gate when cancellation/process/path behaviour is touched |
-| Closeout/release (local) | `./tools/verify.sh aot` (part of `all`): zero-warning smoke-host publish, separate positive-control publish, native parse-error exit 2; required and fail-not-skip; feature 7 runs `all --require` at Step 12 closeout and records the output. The closeout GitHub workflow does not run `verify.sh`, so this is a local gate, not a CI confirmation (§5.4) |
+| Closeout/release (local) | `./tools/verify.sh aot` (part of `all`): zero-warning smoke-host publish, separate positive-control publish, native parse-error exit 2; required and fail-not-skip; feature 7 runs `all --require` at Step 12 closeout and records the output. Because `aot` is in `all`, every step closeout from Step 12 requires the Tier 1 toolchain. The closeout GitHub workflow does not run `verify.sh`, so this is a local gate, not a CI confirmation (§5.4) |
 
 - Test doubles are limited to the true boundaries: `TimeProvider` (through `BuildRequest.Options`), the
   solver process probe, the `IDoctorCheck` list for doctor failure injection, console cancellation, and
@@ -1550,9 +1555,11 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
       `"a""b"` → `a` + `b`, `""`, unterminated quotes, `@`/`@@`, cwd-relative nesting), the `--`/`--json`
       interaction, and the missing/unreadable/directory/invalid/oversized `CLI001`/2 errors with tests.
 - [ ] Add the zero-warning AOT smoke host, the **separate** positive-control project, and the
-      `verify.sh aot` mode included in `verify.sh all`; make missing clang/lld/ILCompiler a hard failure with a
-      clear message (never a skip); include the `CLI001`/2 remap in the host's parse-error case; attempt and
-      record the real `Mocassin.Cli` AOT publish; do not add a `completion` command.
+      `verify.sh aot` mode included in `verify.sh all`; give the control project a per-project
+      warnings-as-errors opt-out so IL2026/IL3050 remain warnings, while the host stays strict; make missing
+      clang/lld/ILCompiler a hard failure with a clear message (never a skip); include the `CLI001`/2 remap in
+      the host's parse-error case; attempt and record the real `Mocassin.Cli` AOT publish; do not add a
+      `completion` command.
 
 ### Feature 2 — Build orchestration core
 

@@ -468,13 +468,16 @@ solver with the same binary, platform, package, and seed.
   directory/invalid-UTF-8/oversized → `CLI001`/2 (not `CLI002`/3). The library default is not the contract.
 - **AOT:** `verify.sh aot` publishes a minimal `System.CommandLine` 3.0.0 host with
   `-p:PublishAot=true -p:TrimMode=full -r linux-x64` and asserts zero IL2xxx/IL3xxx warnings, then publishes a
-  **separate** positive control that must emit IL2026 and IL3050. The native host includes the `CLI001`/2
-  remap, so its parse-error case exits 2. Missing clang/lld/ILCompiler is a hard failure with a clear message,
-  never a skip. The real `Mocassin.Cli` publish is recorded as evidence; dependency-owned
-  `Microsoft.Data.Sqlite`/`MessagePack` warnings are attributed to Step 31. `aot` is part of `verify.sh all`
-  and is a **local** closeout gate: feature 1 adds the mode/hosts, feature 7 runs `all --require` at Step 12
-  closeout and records the output; the closeout GitHub workflow does not run `verify.sh`. It is not a
-  scheduled nightly job. Only `linux-x64` is covered; Windows/macOS AOT and the `netstandard2.0` asset are
+  **separate** positive control that must emit IL2026 and IL3050. The control project opts out of
+  warnings-as-errors for its own build so those remain warnings; the host stays strict. The native host includes
+  the `CLI001`/2 remap, so its parse-error case exits 2. Missing clang/lld/ILCompiler is a hard failure with a
+  clear message, never a skip; the versions are observed apt/NuGet resolutions checked by `06` §9, not a
+  containerfile pin, and a version mismatch is not a gate failure. The real `Mocassin.Cli` publish is recorded
+  as evidence; dependency-owned `Microsoft.Data.Sqlite`/`MessagePack` warnings are attributed to Step 31.
+  `aot` is part of `verify.sh all` and is a **local** closeout gate: feature 1 adds the mode/hosts, feature 7
+  runs `all --require` at Step 12 closeout and records the output; the closeout GitHub workflow does not run
+  `verify.sh`. Because it is in `all`, **every step closeout from Step 12 requires the Tier 1 toolchain**. It is
+  not a scheduled nightly job. Only `linux-x64` is covered; Windows/macOS AOT and the `netstandard2.0` asset are
   Step 31 platform gates.
 - **Selection:** build-template/job-template/parameterization precedence is table-driven; one/two/many cases,
   explicit overrides, wrong-kind IDs, unknown IDs, and the implicit default all have tests. The selected
