@@ -12,8 +12,8 @@ UI consumes later.
 - **Status:** Not started — the design changed on 2026-11-17 (the hand-written parser is replaced by
   `System.CommandLine` 3.0.0, with bounded `@file` response files and a required AOT closeout gate); round 4
   returned `Ready with notes`; the final fixes are frozen for round 5; no step branch yet.
-- **Design review:** Re-review required — the freeze and reviewed commit are recorded in the review record;
-  round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was `Ready with notes` at
+- **Design review:** Re-review required — round 5 reviews `1b6af90` (design freeze); round 2 was
+  `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was `Ready with notes` at
   `d211584` (reviewed `6b15f9d`), and round 4 was `Ready with notes` at `f548d26` (reviewed `d6c5402`)
   — [record](../reviews/step-12.md) (R2-1–R2-4, R3-1–R3-8, and R4-1–R4-7 resolved; round 5 pending)
 - **Feature list:** Proposed 2026-11-16 (seven features); feature 1 revised 2026-11-17 (library adoption,
