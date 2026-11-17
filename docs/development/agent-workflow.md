@@ -218,6 +218,9 @@ Stop before proceeding when:
 - the original behaviour is unclear;
 - the change would cross from one step into another;
 - tests reveal a contradiction in the plan;
+- a role-agent spawn fails, errors, or is interrupted — stop, confirm the earlier context has stopped, and
+  verify the branch tip, worktree, and working-tree status before re-spawning; the failed spawn may be partially
+  applied or still live and writing ([`orchestration.md`](orchestration.md) §6 and §9);
 - the working tree is on `main` or a step branch with feature work;
 - the next action would merge, tag, push `main`, or delete a shared branch.
 
