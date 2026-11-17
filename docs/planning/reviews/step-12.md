@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `4f3683e9bcdf38868fb5f282f95d096462602a99` |
+| Reviewed commit | `d6c54029d487b2e87aaf6b62a7da3cf232ffd680` |
 | Docs branch | `docs/step-12-design` |
 | Review date | 2026-11-16 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation |
@@ -29,7 +29,7 @@ risk was wrong. On 2026-11-17 the owner also confirmed the revised 2.75–3.75 p
 publish is evidence, not a gate), added bounded `@file` response files as a Step 12 contract, and requested
 [ADR 0015](../adr/0015-cli-parser-system-commandline.md). Round 3 returned `Ready with notes` at `d211584`
 (reviewed `6b15f9d`); the step agent resolved R3-1–R3-8 and the two open round-2 Notes (R2-2, R2-4) in the new
-freeze `4f3683e9bcdf38868fb5f282f95d096462602a99`. The freeze rewrites §5.2, adds §5.3 (CLI-owned response-file
+freeze `d6c54029d487b2e87aaf6b62a7da3cf232ffd680`. The freeze rewrites §5.2, adds §5.3 (CLI-owned response-file
 tokenization), rewrites feature 1, the command surface, layout, tests, risks, and acceptance criteria; maps
 library parse errors (default exit 1) to `CLI001`/2; specifies root-only `--version`; and adds the linux-x64
 AOT smoke check in `verify.sh all`. `validation-v1`, the exit-code table,
@@ -462,7 +462,7 @@ its file list, and the `PublicAPI.Unshipped.txt` obligation so the structure pol
 `Changes required`; round 2 reviewed `05b7297172f9f87453b3ffc23d06801035da7a2c` and returned `Ready with
 notes` with R2-1–R2-4 still open; round 3 reviewed `6b15f9d1630aa5d86830d76fab9a561308e8d4e3` and returned
 `Ready with notes` with R3-1–R3-8 plus R2-2/R2-4. The step agent resolved all of them in the new freeze
-`4f3683e9bcdf38868fb5f282f95d096462602a99`; a fresh planning auditor re-reviews that commit. Rounds 1–3 and
+`d6c54029d487b2e87aaf6b62a7da3cf232ffd680`; a fresh planning auditor re-reviews that commit. Rounds 1–3 and
 their text remain unchanged above and below.
 
 `Re-review required` is a record state, not a verdict.
@@ -964,7 +964,7 @@ verdict and the start gate.
 
 The step agent/planner fixed every round-3 finding and the two still-open round-2 Notes in a documentation-only
 change. The reviewer's round-3 text, evidence, findings, verdict, and the earlier rounds are unchanged. The
-new freeze is `4f3683e9bcdf38868fb5f282f95d096462602a99`.
+new freeze is `d6c54029d487b2e87aaf6b62a7da3cf232ffd680`.
 
 | Finding | Status | Resolution |
 | --- | --- | --- |
