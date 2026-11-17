@@ -23,12 +23,15 @@ and completion maintenance.
 
 1. Use `System.CommandLine` 3.0.0, pinned in central package management and referenced only by `Mocassin.Cli`.
 2. The CLI owns the command graph, typed `ParseResult` binding, `CLI001` wording, and exit-code policy. The
-   library supplies tokenization, arity, help/version, and the `[suggest]` directive.
-3. Remap the library's parse-error exit code (1) to `CLI001`/exit 2; help and version remain 0.
-4. Support response files (`@file`) as part of the Step 12 CLI contract. The library's default reader is
-   replaced by a bounded reader with documented syntax and CLI-owned limits: 1 MiB per file, 4 MiB total,
-   nesting depth 8, 10,000 expanded tokens, and 32 files. Missing, unreadable, invalid, or oversized files are
-   `CLI001`/exit 2, not `CLI002`/3. The user-facing contract is in the step page §5.3 and `reference/cli.md`.
+   library supplies command-line tokenization (after response-file expansion), arity, help, and the
+   `[suggest]` directive; the CLI supplies the root `--version` action.
+3. Remap the library's parse-error exit code (1) to `CLI001`/exit 2. Help and root `--version` remain 0;
+   `--version` is not inherited by subcommands, so `mocassin <command> --version` is `CLI001`/2.
+4. Support response files (`@file`) as part of the Step 12 CLI contract. The CLI owns response-file
+   tokenization and recursive expansion; the library's response-file hook is disabled. Limit 1 MiB of raw
+   bytes per file, 4 MiB of raw response-file bytes across the command line, nesting depth 8, 10,000 expanded
+   tokens, and 32 files. Missing, unreadable, invalid, or oversized files are `CLI001`/exit 2, not
+   `CLI002`/3. The user-facing contract is in the step page §5.3 and `reference/cli.md`.
 5. Ship no `completion` command or shell scripts in Step 12. The library provides the `[suggest]` protocol for
    `dotnet-suggest`, not script generation; shell integration is deferred to Step 31 packaging.
 
@@ -38,7 +41,9 @@ and completion maintenance.
 
 - One maintained command graph; tokenization and help/version are not reimplemented.
 - MIT-licensed with no transitive dependency for `net10.0+`; the package is centrally pinned.
-- A minimal AOT smoke host with a positive control guards the dependency claim.
+- A minimal AOT smoke host with a positive control guards the dependency claim; it runs through
+  `verify.sh aot` in `verify.sh all` at every step closeout and the Step 31 release gate, not a scheduled
+  nightly.
 - Response files are a documented, bounded contract rather than an accidental library default.
 
 **Negative and limits**

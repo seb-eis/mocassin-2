@@ -457,17 +457,21 @@ solver with the same binary, platform, package, and seed.
   `CLI001`/exit 2 with CLI-owned wording naming
   the offending token; the library's default exit 1 is never returned; help and version exit 0. No arbitrary
   `string[]` crashes or throws.
-- **Response files:** `@file` syntax, double-quote grouping and empty quotes, literal single quotes and
-  backslash, `#` comments only at line start, recursive references, cwd-relative paths, `@` literal and no
-  escape, `--` stops expansion, `--input=@file` literal, `--input @file` token-expanded before arity,
-  `--json` inside/outside the file, 1 MiB/4 MiB/depth-8/10,000-token/32-file limits, and missing/unreadable/
+- **Response files:** `@file` syntax, double-quote grouping and empty quotes, golden tokenizer cases
+  `a"b c"d` → `ab cd`, `a""b` → `ab`, `"a""b"` → `a` + `b`, `""` → empty, unterminated-quote discard/keep,
+  literal single quotes and backslash, `#` comments only at line start, recursive references, cwd-relative
+  paths, `@` literal and no escape, `--` stops expansion, `--input=@file` literal, `--input @file`
+  token-expanded before arity, `--json` inside/outside the file, 1 MiB of raw bytes per file / 4 MiB of raw
+  response-file bytes across the command line / depth 8 / 10,000 tokens / 32 files, and missing/unreadable/
   directory/invalid-UTF-8/oversized → `CLI001`/2 (not `CLI002`/3). The library default is not the contract.
 - **AOT:** a minimal smoke host that references `System.CommandLine` 3.0.0 is published with
   `-p:PublishAot=true -p:TrimMode=full -r linux-x64`; the check asserts zero IL2xxx/IL3xxx warnings, a
   positive control emits IL2026/IL3050, and the native binary runs `--help`, `--version`, and one parse-error
   case. The real `Mocassin.Cli` publish result is recorded as evidence; dependency-owned
-  `Microsoft.Data.Sqlite`/`MessagePack` warnings are attributed to Step 31. Only `linux-x64` is covered;
-  Windows/macOS AOT and the `netstandard2.0` asset are Step 31 platform gates.
+  `Microsoft.Data.Sqlite`/`MessagePack` warnings are attributed to Step 31. The check is a `verify.sh aot`
+  mode included in `verify.sh all`, so it runs at every step closeout and the Step 31 release gate; it is not
+  a scheduled nightly job. Only `linux-x64` is covered; Windows/macOS AOT and the `netstandard2.0` asset are
+  Step 31 platform gates.
 - **Selection:** build-template/job-template/parameterization precedence is table-driven; one/two/many cases,
   explicit overrides, wrong-kind IDs, unknown IDs, and the implicit default all have tests. The selected
   effective IDs, not the authored recipe, are reported.
@@ -508,9 +512,11 @@ solver with the same binary, platform, package, and seed.
   `--results` and deletion are reserved.
 - **`validate` regression:** the human table, `validation-v1` JSON, and 0/1/2/3 exit codes are unchanged by the
   parser/report refactor.
-- **Tiers and performance:** the above are PR-fast with the fake solver probe; the 10⁴-job build + verify,
-  the real solver probe, and the AOT publish smoke check are nightly/release. The Step 12 evidence records
-  time, peak RSS, package size, and verification result against the Step 11 budget (< 10 min, < 2 GB).
+- **Tiers and performance:** the above are PR-fast with the fake solver probe; the 10⁴-job build + verify
+  and the real solver probe are nightly/release. The AOT smoke check is a `verify.sh aot` mode included in
+  `verify.sh all`, so it runs at every step closeout and the Step 31 release gate, not nightly. The Step 12
+  evidence records time, peak RSS, package size, and verification result against the Step 11 budget
+  (< 10 min, < 2 GB).
 
 ## 10. Contract tests
 

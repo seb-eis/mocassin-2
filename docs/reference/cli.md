@@ -7,7 +7,7 @@ recognises those commands and tells you which step owns them.
 
 Every command has a stable exit code. `validate` and the seven `reports`-backed commands (`new`, `compile`,
 `build`, `inspect`, `verify`, `doctor`, `clean`) print exactly one machine-readable report with `--json`;
-`completion`, `--help`, `--version`, and the reserved commands do not accept `--json`. Human progress goes to
+`--help`, `--version`, and the reserved commands do not accept `--json`. Human progress goes to
 stderr; with `--json` stderr is JSON Lines only. The final report or human result goes to stdout.
 
 ## Global options
@@ -18,8 +18,10 @@ mocassin --version
 mocassin <command> --help
 ```
 
-`--version` prints the CLI assembly version and the runtime description. `--help` prints the command list or
-the command’s options and exits 0. An unknown command exits 2.
+`--version` is root-only and prints the CLI assembly informational version and the runtime description, then
+exits 0. It is not inherited by subcommands: `mocassin <command> --version` is an unrecognized option and exits
+2 with `CLI001`. `--help` prints the command list or the command’s options and exits 0. An unknown command exits
+2.
 
 Options use the standard `System.CommandLine` conventions: `--name value` or `--name=value`, `-o value`, and
 flags take no value. A value beginning with `-` is accepted for a value-taking option, so `--jobs -1` and
@@ -41,22 +43,29 @@ executable that `doctor` probes (the solver arrives in a later step).
 A token that starts with `@` and has at least one more character is a response-file reference. The rest of the
 token is the path, resolved against the current working directory (not the containing response file). `@` alone
 is a literal argument. There is no escape sequence: `@@name` refers to a file named `@name`. Quote a path that
-contains spaces as one token, for example `@"my file.rsp"`.
+contains spaces as one token, for example `@"my file.rsp"`. The CLI expands and tokenizes response files itself
+before `System.CommandLine` parses the resulting token list.
 
-Files are UTF-8 (an optional BOM is accepted); invalid UTF-8 or a NUL byte exits 2 with `CLI001`. Each line is
-a token stream: Unicode whitespace separates tokens; double quotes group whitespace and are removed; single
-quotes and backslashes are literal; a line whose first non-whitespace character is `#` is ignored; `#` elsewhere
-is literal. Double quotes do not span lines; an unterminated quote that begins a token discards it, and one
-inside a token keeps the token without the quote. A token in a file that starts with `@` is another response
-file.
+Files are UTF-8 (an optional BOM is accepted); invalid UTF-8 or a NUL byte exits 2 with `CLI001`. LF, CRLF,
+and CR line endings are accepted; each line is a token stream. Unicode whitespace separates tokens. Double
+quotes group whitespace and are removed; an empty quoted token (`""`) is preserved as an empty argument. Single
+quotes and backslashes are literal, and there is no escape for a double quote inside a quoted token. Quotes
+inside a token concatenate the parts (`a"b c"d` becomes `ab cd`; `a""b` becomes `ab`); a quote pair that starts
+a token followed immediately by another starts a separate token (`"a""b"` becomes `a` and `b`). A line whose
+first non-whitespace character is `#` is ignored; `#` elsewhere is literal. Double quotes do not span lines; an
+unterminated quote that begins a token discards it, and one inside a token keeps the token without the quote. A
+token in a file that starts with `@` is another response file.
 
-Limits: **1 MiB per file, 4 MiB total, nesting depth 8, 10,000 expanded tokens, and 32 response files**.
-Missing, unreadable, invalid, or oversized files exit 2 with `CLI001`; they are usage errors, not `CLI002`/3.
+Limits: **1 MiB of raw bytes per file, 4 MiB of raw response-file bytes across the command line, nesting depth
+8, 10,000 expanded tokens, and 32 response files**. Missing, unreadable, invalid, or oversized files exit 2 with
+`CLI001`; they are usage errors, not `CLI002`/3.
 
-`@file` before `--` is expanded; after `--` it is a literal argument. `--input=@file` is literal.
-`--input @file` expands before option arity checking, so a multi-token file in a single-value position is a
-usage error. A `--json` inside a file is honored; if a file cannot be read, a `--json` inside it cannot be
-known, so put `--json` on the command line if you need a report for that failure.
+`@file` before `--` is expanded; after `--` it is a literal argument. `--name=@value` is the before-`--` form of
+a literal `@`-leading option value; `--input=@file` is literal, while `--input @file` expands before option
+arity checking, so a multi-token file in a single-value position is a usage error. A `--json` inside a file is
+honored. If a file cannot be read, a `--json` inside it cannot be known, so put `--json` on the command line if
+you need a report; a report is produced only when a command is recognised outside the failed file
+(`mocassin <command> @missing --json`), while `mocassin @missing --json` prints human usage and no report.
 
 ## `mocassin new`
 

@@ -403,17 +403,19 @@ help/version, and reported parse errors like the JIT build. The `net10.0` asset 
 `IsAotCompatible`, and the dependency graph is empty for `net10.0+`. The `netstandard2.0` fallback and
 Windows/macOS AOT are untested.
 
-The library owns tokenization, arity, help/version, and the `[suggest]` directive. The CLI owns the command
-graph, typed `ParseResult` binding, `CLI001` wording, and exit-code policy. The library's default parse-error
+The library owns command-line tokenization (after the CLI expands response files), arity, help/version, and
+the `[suggest]` directive. The CLI owns the command graph, typed `ParseResult` binding, `CLI001` wording, and
+exit-code policy. The library's default parse-error
 exit code (1) is remapped to 2. Feature 1 adds a minimal AOT smoke host with the same package version and a
 positive control; the real CLI publish is recorded as evidence but is not a gate, because SQLite/MessagePack
 are unverified. Only `linux-x64` AOT is proven, so Step 31's packaging gate still owns the platform matrix and
 the AOT/single-file decision.
 
-Response files (`@file`) are a CLI contract, not the library default. A bounded reader replaces
-`ParserConfiguration.ResponseFileTokenReplacer` with the documented syntax and limits (1 MiB per file, 4 MiB
-total, depth 8, 10,000 tokens, 32 files), and missing/unreadable/invalid/oversized files are `CLI001`/2, not
-`CLI002`/3. The full contract is the step page §5.3 and `reference/cli.md`.
+Response files (`@file`) are a CLI contract, not the library default. The CLI owns tokenization and recursive
+expansion and disables the library hook; the documented syntax and limits are 1 MiB of raw bytes per file,
+4 MiB of raw response-file bytes across the command line, depth 8, 10,000 tokens, and 32 files. Missing,
+unreadable, invalid, or oversized files are `CLI001`/2, not `CLI002`/3. The full contract is the step page §5.3
+and `reference/cli.md`.
 
 No `completion` command is shipped: the owner decided on 2026-11-17 to remove it. The library provides the
 `[suggest]` protocol for `dotnet-suggest`, not shell-script generation, and `dotnet-suggest` is not installed.
@@ -456,7 +458,7 @@ the shared `BuildPreviewBuilder`/`ILatticePreviewService` and returns a typed `B
 Step 26 map it and never reload, recompile, or run a second preview. A separate `PreviewAsync` was rejected
 because it would create two orchestration paths for the same work. `BuildRequest.Options` is the only clock/
 throttle/channel injection point. The report guarantee is limited to `validate` and the seven report-backed
-commands: `completion`, help/version, and reserved commands do not accept `--json`; `clean --json` without
+commands: help/version and reserved commands do not accept `--json`; `clean --json` without
 `--dry-run` still emits `clean-v1` with `CLI008`. `--json` makes stderr JSONL-only.
 
 ## Build template versus job template (Step 12)

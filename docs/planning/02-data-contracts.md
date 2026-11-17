@@ -1457,7 +1457,7 @@ mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
   reports what would be removed. Step 12 implements **only** the dry run; deletion is Step 28. With `--json`,
   a missing `--dry-run` is a usage error that still emits `clean-v1` with `dryRun = false`, `removedCount = 0`,
   and `CLI008`; it never deletes.
-- The CLI parser is `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only; [ADR 0015](adr/0015-cli-parser-system-commandline.md)). It supplies tokenization, arity and
+- The CLI parser is `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only; [ADR 0015](adr/0015-cli-parser-system-commandline.md)). It supplies command-line tokenization (after the CLI expands response files), arity and
   option applicability, `--name value`/`--name=value`, negative values such as `--jobs -1`, `--`, help/version
   actions, and the `[suggest]` directive. The CLI owns the command graph, typed binding, `CLI001` wording, and
   exit-code policy. The library's parse-error exit code (1) is never exposed: a parse error is `CLI001` and
@@ -1465,15 +1465,18 @@ mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
   short options are separate tokens.
 - **Response files.** A token that starts with `@` and has at least one more character is a response-file
   reference; the remainder is the path, resolved against the process working directory, not the containing
-  file. `@` alone is a literal argument; `@@name` names a file `@name`; there is no escape. Files are UTF-8
+  file. The CLI owns tokenization and recursive expansion; the library's response-file hook is disabled. `@`
+  alone is a literal argument; `@@name` names a file `@name`; there is no escape. Files are UTF-8
   (optional BOM); invalid UTF-8 or NUL is `CLI001`/2. Lines are tokenized individually: Unicode whitespace
   separates, double quotes group and are removed, single quotes and backslashes are literal, `#` is a comment
   only as the first non-whitespace character of a line, and quotes do not span lines (an unterminated quote
   that begins a token discards it; one inside a token keeps the token without the quote). A `@file` token
-  inside a file is expanded recursively. Limits: **1 MiB per file, 4 MiB total, depth 8, 10,000 tokens, 32 files**.
+  inside a file is expanded recursively. Limits: **1 MiB of raw bytes per file, 4 MiB of raw response-file
+  bytes across the command line, depth 8, 10,000 tokens, 32 files**.
   `@file` before `--` expands; after `--` it is literal. `--input=@file` is literal; `--input @file` expands
   before arity checking, so a multi-token file in a single-value position is a usage error. `--json` inside a
-  file is honored; a `--json` inside a file that failed to read cannot enable a report. Missing, unreadable,
+  file is honored; a `--json` inside a file that failed to read cannot enable a report, and no report is
+  emitted without a recognised command. Missing, unreadable,
   invalid, or oversized files are `CLI001`/2, not `CLI002`/3. The full contract is the step page §5.3 and
   `docs/reference/cli.md`.
 - `completion` is **not** a Step 12 command. The owner decided on 2026-11-17 to remove it:
