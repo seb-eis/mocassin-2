@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `8af67f8b03fb83fbfec4cb89135b34e885f7a1c3` |
+| Reviewed commit | `6b15f9d1630aa5d86830d76fab9a561308e8d4e3` |
 | Docs branch | `docs/step-12-design` |
 | Review date | 2026-11-16 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation |
@@ -24,14 +24,17 @@ Step page: [`Step 12 — Build Orchestration and mocassin CLI`](../steps/step-12
 
 **Design change since round 2 (2026-11-17).** The human owner replaced the round-2 hand-written-parser
 decision with `System.CommandLine` 3.0.0 after an AOT/full-trim verification showed the stated AOT/trimming
-risk was wrong. The new freeze `8af67f8b03fb83fbfec4cb89135b34e885f7a1c3` rewrites §5.2, feature 1, the
-command surface, layout, tests, risks, and acceptance criteria; removes the `completion` command; maps library
-parse errors (default exit 1) to `CLI001`/2; adds a linux-x64 AOT publish smoke check; and revises the sizing
-to 2.75–3.75 pw. `validation-v1`, the exit-code table, `--json`/JSON-Lines, the seven reports, `--jobs`/
-`job_selection`, atomic `--force`, and cancellation are unchanged. Rounds 1–2, their findings, and the R2-1–R2-4
-notes are unchanged below; the `Reviewed commit` cell and this note point the request at the new freeze.
-Round 3 should review the new freeze, not re-open the accepted features 2–7 unless the parser change touched
-them.
+risk was wrong. On 2026-11-17 the owner also confirmed the revised 2.75–3.75 pw sizing, removed
+`mocassin completion` from Step 12, confirmed the minimal AOT smoke host as feature 1's gate (the real CLI
+publish is evidence, not a gate), added bounded `@file` response files as a Step 12 contract, and requested
+[ADR 0015](../adr/0015-cli-parser-system-commandline.md). The new freeze
+`6b15f9d1630aa5d86830d76fab9a561308e8d4e3` rewrites §5.2, adds §5.3 (response files), rewrites feature 1,
+the command surface, layout, tests, risks, and acceptance criteria; maps library parse errors (default exit
+1) to `CLI001`/2; and adds the linux-x64 AOT smoke check. `validation-v1`, the exit-code table,
+`--json`/JSON-Lines, the seven reports, `--jobs`/`job_selection`, atomic `--force`, and cancellation are
+unchanged. Rounds 1–2, their findings, and the R2-1–R2-4 notes are unchanged below; the `Reviewed commit`
+cell and this note point the request at the new freeze. Round 3 should review the new freeze, not re-open the
+accepted features 2–7 unless the parser/response-file change touched them.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the design and
 > completed this request, and relays the verdict and owner decisions. The planner and step agent update the
@@ -46,8 +49,8 @@ them.
 | --- | --- |
 | Phase | C. Compilation |
 | Depends on | 10, 11 (both `Done`, merged and tagged) |
-| Delivers | A headless `mocassin` CLI and the shared `Mocassin.Packages.Build` orchestration: create/validate/compile/build/preview/inspect/verify/doctor/clean-dry-run, build-template and parameterization selection, partial `--jobs` builds with `job_selection` metadata, atomic replacement, progress/cancellation, JSON reports and JSON-Lines events, `CLI` diagnostics, and the `build-v1` report that supersedes `build-preview-v1` |
-| Sizing | 2.75–3.75 person-weeks (revised 2026-11-17 from 3.0–4.0), seven features; roadmap §3.1 says 1–3 pw. The request presents the delta, the revision, and a 2.25 pw contingency, and asks the owner to accept the estimate without a split |
+| Delivers | A headless `mocassin` CLI and the shared `Mocassin.Packages.Build` orchestration: create/validate/compile/build/preview/inspect/verify/doctor/clean-dry-run, build-template and parameterization selection, partial `--jobs` builds with `job_selection` metadata, atomic replacement, progress/cancellation, bounded `@file` response files, JSON reports and JSON-Lines events, `CLI` diagnostics, and the `build-v1` report that supersedes `build-preview-v1` |
+| Sizing | 2.75–3.75 person-weeks (owner-approved 2026-11-17; was 3.0–4.0), seven features; roadmap §3.1 says 1–3 pw. The request presents the delta, the approval, and a 2.25 pw contingency, and records the no-split decision |
 
 ## Design decisions reviewed
 
@@ -85,11 +88,16 @@ them.
 
 ### Step-specific decisions
 
-- [x] **Parser.** `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only); typed command graph and `ParseResult`
-      binding, parse errors mapped to `CLI001`/2, help/version 0, no `completion` command, AOT smoke check.
-      Verify the library's tokenization (arity, `--opt=value`, negative values, `--`, response files) and the
+- [x] **Parser.** `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only; ADR 0015); typed command graph and
+      `ParseResult` binding, parse errors mapped to `CLI001`/2, help/version 0, no `completion` command, AOT
+      smoke check. Verify the library's tokenization (arity, `--opt=value`, negative values, `--`) and the
       usage-error reports. — Reviewed; the command table and grammar are defined; n-8 records the ambiguous
       `-`-value rule.
+- [ ] **Response files.** `@file` is part of the Step 12 contract: documented syntax (UTF-8, double-quote
+      grouping, `#` comments only at line start, recursion, cwd-relative paths), CLI-owned limits
+      (1 MiB/4 MiB/depth 8/10,000 tokens/32 files), `--`/`--json` interaction, and `CLI001`/2 for
+      missing/unreadable/invalid/oversized files. Feature 1 implements and tests it; ADR 0015 records it.
+      Verify the step page §5.3, data contracts §5.1, `cli.md`, tests, and acceptance agree.
 - [x] **Build orchestration home.** `Mocassin.Packages.Build`, consumed by CLI and GUI; `Mocassin.Packages`
       does not reference `Mocassin.Results`; post-publication verification is caller-composed. Verify no
       project-graph contradiction. — Reviewed; the graph is acyclic and the verification split is sound.
@@ -449,7 +457,7 @@ its file list, and the `PublicAPI.Unshipped.txt` obligation so the structure pol
 **State:** Re-review required — round 1 reviewed `80b3f7fd99f0140b1dad5650851d1aaa3c4ac0b8` and returned
 `Changes required`; round 2 reviewed `05b7297172f9f87453b3ffc23d06801035da7a2c` and returned `Ready with
 notes` with R2-1–R2-4 still open. The design changed on 2026-11-17 (the hand-written parser was replaced by
-`System.CommandLine` 3.0.0) and is frozen at `8af67f8b03fb83fbfec4cb89135b34e885f7a1c3`; a fresh planning
+`System.CommandLine` 3.0.0) and is frozen at `6b15f9d1630aa5d86830d76fab9a561308e8d4e3`; a fresh planning
 auditor re-reviews that commit. Rounds 1–2 and their text remain unchanged above and below.
 
 `Re-review required` is a record state, not a verdict.
