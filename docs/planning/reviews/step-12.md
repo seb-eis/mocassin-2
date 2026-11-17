@@ -458,14 +458,12 @@ its file list, and the `PublicAPI.Unshipped.txt` obligation so the structure pol
 
 ## Record state
 
-**State:** Re-review required — round 1 reviewed `80b3f7fd99f0140b1dad5650851d1aaa3c4ac0b8` and returned
-`Changes required`; round 2 reviewed `05b7297172f9f87453b3ffc23d06801035da7a2c` and returned `Ready with
-notes` with R2-1–R2-4 still open; round 3 reviewed `6b15f9d1630aa5d86830d76fab9a561308e8d4e3` and returned
-`Ready with notes` with R3-1–R3-8 plus R2-2/R2-4. The step agent resolved all of them in the new freeze
-`d6c54029d487b2e87aaf6b62a7da3cf232ffd680`; a fresh planning auditor re-reviews that commit. Rounds 1–3 and
-their text remain unchanged above and below.
+**State:** Ready with notes — round 4 reviewed `d6c54029d487b2e87aaf6b62a7da3cf232ffd680` and returned
+`Ready with notes` with the R4-1–R4-4 Minors and R4-5–R4-7 Notes below. R3-1, R3-2, R3-3, R3-5, R3-7, R2-2,
+and R2-4 are closed; R3-4, R3-6, and R3-8 retain the R4-1–R4-4 residuals. The step agent may add resolutions
+without altering the round-4 reviewer text. Rounds 1–4 and their reviewer text remain unchanged above and below.
 
-`Re-review required` is a record state, not a verdict.
+`Ready with notes` is a verdict; the human owner accepts or rejects it.
 
 ## Reviewer independence
 
@@ -978,3 +976,207 @@ new freeze is `d6c54029d487b2e87aaf6b62a7da3cf232ffd680`.
 | R3-8 (Note) | Fixed | The AOT smoke host runs through a new `verify.sh aot` mode included in `verify.sh all`, so it runs at every step closeout and the Step 31 release gate, and on a `System.CommandLine` version-change branch. It is no longer labelled nightly; no scheduled run is claimed. Step page §5.2/§18.2/§19/§22/§23/§24, `03-quality-strategy.md`, and ADR 0015. |
 | R2-2 (Note) | Fixed | The duplicate `docs/reference/diagnostics.md` bullet was merged into one §18.1 bullet with the drift-test and link wording. |
 | R2-4 (Note) | Fixed | Step page §15 now says `BuildPreviewBuilder` comes from `Mocassin.Packages.Build.Internal`, while `ILatticePreviewService`/`JobTemplateValidationStage` come from `Jobs`/`Projects.Validation`; §16.1 already places the builder in `Build/Internal`. |
+
+### Review round 4
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
+planner, implementor, orchestrator, or the round-1/2/3 reviewers. I received only the frozen commit
+`d6c54029d487b2e87aaf6b62a7da3cf232ffd680`, the record HEAD
+`778824f81c1c11f1ec68eeeeec199c7eb896d002`, the request record, repository links, and the required
+commands/scope. No desired verdict or summary was supplied. I read the repository at the frozen commit, the full
+record including rounds 1–3, every document the freeze changes, and the resolved `System.CommandLine` 3.0.0
+assembly; the review was read-only apart from this record.
+
+The design under review is `d6c5402`. The record HEAD `778824f` is three documentation-only commits on top of
+it: `git diff --name-status d6c5402 778824f` returns `M docs/planning/reviews/step-12.md`,
+`M docs/planning/status.md`, and `M docs/planning/steps/step-12-build-orchestration-and-cli.md`; the step-page
+hunk changes only the `Design review` status bullet (2 lines), and the record/status hunks point at the freeze
+and the pending round. No design text moved between the freeze and the record HEAD. The design delta
+`6b15f9d..d6c5402` is nine documentation files (record, step page, data contract, quality strategy, open
+decisions, design decisions, ADR 0015, `reference/cli.md`, status); no `src/`, `tests/`, `contracts/`, `tools/`,
+or configuration file changed.
+
+Rounds 1–3 and the R2/R3 reviewer text are unchanged. `git diff d211584 d6c5402 -- docs/planning/reviews/step-12.md`
+changes only the request `Reviewed commit`/note, the two request-owned checklist items R3-5 corrected, the
+`Record state` line, and the appended `Round 3 resolutions`; the round-1–3 `Findings`, `Finding details`,
+`Evidence`, and verdict text are byte-identical.
+
+#### Commands and results
+
+- `./tools/verify.sh policy --require` → exit 0. ApiCompat found no breaking changes for 9 assemblies (its usual
+  unresolved `MessagePack`/`Microsoft.Data.Sqlite` reference notices are not failures); NuGet
+  licence/vulnerability policy OK; contract artifacts current (19 files); model/parameterization/lattice
+  projections OK (5/4/2 fixtures); space-group catalog current (274 settings, sha256
+  `1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395`); process consistency OK; 58 Python tool
+  tests OK; SPDX headers in 603 source files; no secret patterns in 986 tracked text files; cargo-deny OK;
+  final line `Closeout gate completed with required checks enabled.`
+- `./tools/verify.sh docs --require` → exit 0. Math OK (166 files); links OK (169 files); Zensical strict
+  `No issues found`; DocFX `Build succeeded` with 0 warnings / 0 errors; rustdoc OK; site built.
+- `python tools/check_doc_math.py` → `Documentation math conventions OK (166 files scanned).`
+- Read-only probe of `System.CommandLine` 3.0.0 from the local NuGet cache (throwaway projects in
+  `/tmp/opencode`; no repository file was created or changed):
+  - `CommandLineParser.SplitCommandLine(string)` is `public static`; `Tokenize`/`TryReadResponseFile`/`SplitLine`
+    on `System.CommandLine.Parsing.StringExtensions` are non-public.
+  - `SplitCommandLine` returns the §5.3 golden cases: `a"b c"d` → `ab cd`; `"a""b"` → `a` + `b`; `a""b` → `ab`;
+    `""` → one empty token; `x"y z` → `xy z`; a leading unterminated quote is discarded; `abc "unterminated`
+    → `abc`; `'a b'` → `'a` + `b'`; `a\b` → `a\b`.
+  - `ParserConfiguration.ResponseFileTokenReplacer` defaults to a non-null delegate and can be set to `null`;
+    with `null`, `@rf/a.rsp`, `@` and `@@rf/a.rsp` are left literal with no exception. With the default, `@file`
+    expands recursively; `-- @file` is literal; `@rf/a.rsp` after `--` is literal; `--input=@file` is literal;
+    `--input @file` expands into multiple tokens; a `#` line is ignored; a nested reference resolves against the
+    cwd; a self-reference stack-overflows the library (confirming the depth bound must be CLI-owned).
+  - `VersionOption` is a public `Option` with a settable `Action`; the default root `--version` prints `1.0.0`
+    and exits 0; `run --version` is `Unrecognized command or argument '--version'.`; `--bogus` exits 1. The
+    design's CLI action replacement is therefore implementable, and the CLI remap is required for exit 2.
+  - `dotnet publish -c Release -r linux-x64 -p:PublishAot=true -p:TrimMode=full -p:TrimmerSingleWarn=false` on
+    a minimal `System.CommandLine` host → exit 0; clang/lld and `Microsoft.DotNet.ILCompiler` 11.0.0 are present
+    in the image. The native binary prints `1.0.0` for the default `--version`, shows help with exit 0, and
+    returns 1 for a parse error.
+- Diff/closure checks: `git diff --name-status d6c5402 778824f` (above); `git diff d211584 d6c5402 -- record`
+  (above); `git diff --name-status 6b15f9d d6c5402` (nine documentation files). R2-2 and R2-4 were re-checked
+  against the frozen text: §18.1 has one `docs/reference/diagnostics.md` bullet, and §15 names
+  `Mocassin.Packages.Build.Internal` for the builder.
+
+#### Consistency of the changed decisions
+
+**R3-1 is closed.** The operative documents agree that the CLI owns response-file tokenization and recursive
+expansion: step page §5.2/§5.3/§16.2, data contract §5.1, `reference/cli.md`, `design-decisions.md`,
+`05-open-decisions.md`, and ADR 0015 decision 4 all say `CliResponseFiles` pre-expands the raw argument list and
+`CliApplication` parses the flat list with `ParserConfiguration.ResponseFileTokenReplacer = null`; the library
+default is never the contract. The bounds are CLI-enforced (1 MiB raw per file, 4 MiB raw response-file bytes
+across the command line, depth 8, 10,000 response-file tokens, 32 files), the risk table records the
+self-reference/depth guarantee, and the golden cases match the library's observable `SplitCommandLine` semantics
+(listed above). One implementor nuance: `CommandLineParser.SplitCommandLine` is public, so `CliResponseFiles`
+may call it rather than write a second tokenizer; the design's "helpers internal" sentence is true of
+`SplitLine`/`Tokenize` and of the hook's inability to see depth, but the public method is the exact tokenizer the
+golden cases pin. This is an implementation choice, not an open design question.
+
+**R3-4 is only partially closed (R4-1).** The operative sections are correct: step page §5.1/§5.2,
+`reference/cli.md`, and ADR 0015 decisions 2–3 say the CLI replaces the library's root `VersionOption` action,
+prints the assembly informational version and runtime description, keeps `--version` root-only, and maps
+`mocassin <command> --version` to `CLI001`/2. The probe confirms the replacement is implementable and the
+library default is 1/root-only. However, several summaries still say the library owns/supplies help/version:
+`03-quality-strategy.md:453` ("supplies ... help/version"), `05-open-decisions.md:75` ("library owns ...
+help/version"), `design-decisions.md:406` (same), `02-data-contracts.md:1461` ("help/version actions"; it also
+does not record the root-only/`CLI001` rule), step page §11.1 `:842` ("Help and version are library actions"),
+and ADR 0015:42 ("help/version are not reimplemented"). They contradict the step page/ADR decision and could lead
+an implementor to keep the default.
+
+**R3-6 is only partially closed (R4-2).** The `CLI001` descriptor now names library parse errors and response
+file missing/unreadable/invalid/oversized errors in step page §11.2, data contract §5.1/§5.7.6,
+`reference/cli.md`, and `05-open-decisions.md`. The report rule is stated consistently: step page
+§5.1/§11.1/§22, data contract §5.7.6 ("once the command name is recognised"), and `reference/cli.md` exclude
+`--help`/`--version`/reserved commands and the `mocassin @missing --json` case; no report is produced without a
+recognised command. But step page §11.2 `:878` still says "`System.CommandLine` parse errors are the only source
+of `CLI001`", contradicting the response-file `CLI001` class in the same table and §5.3.
+
+**R3-8 is only partially closed (R4-3, R4-4).** The design names feature 1 as the owner of the
+`verify.sh aot` mode and includes it in `verify.sh all`; the AOT publish is feasible in this image. But the
+required gate is not fully specified. `tools/verify.sh` has no `aot` mode yet (feature 1 adds it) and `--require`
+currently gates only `cargo-deny`; `06-toolchain-requirements.md:68` still marks `clang`/`lld`/`llvm` Optional,
+Tier 2, "Steps 19, 29, 31" and `zlib1g-dev` Recommended for Steps 29/31; the design does not say whether a
+missing clang/ILCompiler/network fails `verify.sh all --require` or skips; and the closeout CI job does not
+invoke `tools/verify.sh` (it runs restore/build/test/format), so the gate is local-only and the closeout CI
+cannot confirm it. The smoke-test row also expects the native binary to "report a parse error with exit 2",
+while the minimal host's library default is 1; the design does not say the host replicates the CLI remap, and
+the positive control cannot share the zero-warning publish without a separate project/configuration.
+
+**No stale design statement remains.** No document still specifies a hand-written parser, a `completion`
+command, the 3.0–4.0 pw figure as the current estimate, or an unenforceable response-file hook. The remaining
+"hand-written parser" mentions are historical ("replaced the round-2 hand-written-parser decision", "there is
+no hand-written parser", "deletes the Step 07/10 hand-written parsers"); `completion` appears only in the
+explicit removal statements (§13.8, `reference/cli.md:372-377`, `design-decisions.md:420`,
+`05-open-decisions.md:77`, ADR 0015 decision 5); the 3.0–4.0 pw figure survives only as the historical decision
+record (§2/§20/§21, roadmap §3/§3.1, `05-open-decisions.md:83`), while the current estimate is 2.75–3.75 pw;
+and the response-file hook is disabled, not used as the contract.
+
+#### Closure of the round-3 findings and round-2 notes
+
+| Finding | Round-4 status | Evidence |
+| --- | --- | --- |
+| R3-1 (Minor) | **Closed** | Step page §5.2/§5.3/§16.2; data contract §5.1; `reference/cli.md`; `design-decisions.md`; `05-open-decisions.md`; ADR 0015 decision 4. CLI pre-expansion, hook disabled, CLI-owned bounds, golden cases match `SplitCommandLine`. |
+| R3-2 (Minor) | **Closed** | No stale `completion` command remains; `reference/cli.md:372-377` and `design-decisions.md:420` are explicit removal statements, and §13.8/data contract/`05-open-decisions.md` agree. |
+| R3-3 (Minor) | **Closed** | Step page §5.3 and `reference/cli.md` both make `--name=@value` the literal before-`--` form and `--name @value` the response-file reference; the probe confirms `--input=@file` is literal. |
+| R3-4 (Minor) | **Partially closed — R4-1** | Operative step page §5.1/§5.2, `reference/cli.md`, and ADR 0015 decisions 2–3 are correct; the summaries listed in R4-1 still say library-owned help/version, and step page §11.1 still says version is a library action. |
+| R3-5 (Note) | **Closed** | Step page §18.1 now says 2.75–3.75 pw; the old 3.0–4.0 figure survives only as the historical decision record in §2/§20/§21, the roadmap, and `05-open-decisions.md`. |
+| R3-6 (Note) | **Partially closed — R4-2** | Descriptor and report rule agree in step page §11.2/§5.3, data contract §5.1/§5.7.6, `reference/cli.md`, and `05-open-decisions.md`; step page §11.2 `:878` still says parse errors are the only source of `CLI001`. |
+| R3-7 (Note) | **Closed** | `reference/cli.md` carries the quoting/concatenation/empty-quote/line-ending/`#` rules and the 4 MiB wording; residual 10,000-token scope wording is R4-5. |
+| R3-8 (Note) | **Partially closed — R4-3, R4-4** | Feature 1 owns `verify.sh aot` in `verify.sh all`; the required gate's toolchain/absence/CI policy and the smoke-host exit-2/positive-control details are not specified. |
+| R2-2 (Note) | **Closed** | Step page §18.1 has one `docs/reference/diagnostics.md` bullet with the drift-test and link wording. |
+| R2-4 (Note) | **Closed** | Step page §15 names `Mocassin.Packages.Build.Internal` for the builder; §16.1 places it in `Build/Internal`. |
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R4-1 — R3-4 residual: the library-default help/version wording survives in four summaries and one step-page sentence.** | `03-quality-strategy.md:453`; `05-open-decisions.md:75`; `design-decisions.md:406`; `02-data-contracts.md:1461`; step page §11.1 `:842`; ADR 0015:42. Contrast step page §5.1/§5.2, `reference/cli.md:21-23`, ADR 0015 decisions 2–3. |
+| **Minor** | **R4-2 — R3-6 residual: step page §11.2 says parse errors are the "only source" of `CLI001`, contradicting the response-file `CLI001` scope in the same table and §5.3.** | Step page `:878`; contrast `:844` and `:865`; data contract §5.1/§5.7.6; `reference/cli.md:49-61`; `05-open-decisions.md:80`. |
+| **Minor** | **R4-3 — R3-8 residual: the required `verify.sh aot` gate has no documented toolchain, absence, or CI policy; `verify.sh all --require` can fail on a documented Tier 1 environment or skip, and the closeout CI does not run `tools/verify.sh`.** | Step page §5.2/§19/§22/§23/§24; `tools/verify.sh` (no `aot` mode; `--require` gates only `cargo-deny`); `06-toolchain-requirements.md:68` (clang/lld/llvm Optional, Tier 2, Steps 19/29/31; zlib1g-dev Recommended Steps 29/31); `.github/workflows/ci.yml` (dotnet job: restore/build/test/format only); `ci-policy.md:53`. |
+| **Minor** | **R4-4 — R3-8 residual: the AOT smoke test expects the native minimal host to report a parse error with exit 2 (the CLI remap), while the library default is 1; the positive control's separation from the zero-warning publish is unstated.** | Step page §23 `:1781`; §5.2 `:268-277`; the AOT probe prints `1.0.0` for `--version` and returns 1 for `--bogus`; `03-quality-strategy.md:467-470`. |
+| **Note** | **R4-5 — The 10,000-token limit's scope is worded differently across the contract pages.** | Step page §5.3 `:334` ("10,000 tokens contributed by response files"); `reference/cli.md:60` and ADR 0015:32 ("10,000 expanded tokens"); data contract `:1475`, `05-open-decisions.md:76`, and `design-decisions.md:416` ("10,000 tokens"). |
+| **Note** | **R4-6 — The unterminated-quote "keep" rule is not pinned to an exact token, so the golden test is ambiguous for text before an unterminated quote.** | Step page §5.3 `:326-329`; §23 `:1767` ("unterminated-quote discard/keep rule"); observed `x"y z` → `xy z`, `"x y` → discarded. |
+| **Note** | **R4-7 — The step-page status line still says "a round-3 design re-review is pending" after round 3 is complete.** | Step page `:12-14`; contrast the `Design review` bullet `:15-19` (round 4 reviews `d6c5402`). |
+
+#### Finding details
+
+**R4-1.** The decision is clear in the operative sections, but the decision register and developer summary still
+say the library owns help/version (`05-open-decisions.md:75`, `design-decisions.md:406`), the quality strategy
+says the library supplies help/version (`03-quality-strategy.md:453`), the data contract says it supplies
+"help/version actions" and never records the root-only/`CLI001` rule (`02-data-contracts.md:1461`), step page
+§11.1 says "Help and version are library actions" (`:842`), and ADR 0015's positive consequence says
+"help/version are not reimplemented" (`:42`) although decision 2 makes the CLI supply the root version action.
+An implementor reading the register could leave the library default, print `1.0.0` instead of the informational
+version/runtime description, and fail the step-page §22 acceptance test. Change the summaries to "the library
+supplies help; the CLI supplies the root `--version` action" (and the data contract to record the root-only
+`CLI001`/2 rule), or narrow ADR 0015's consequence. Minor; docs-only.
+
+**R4-2.** `CLI001` is defined as "library parse error, ... or a response file that is missing, unreadable,
+invalid, or over its size/nesting/token limit" in step page §11.2 `:865`, and §5.3/data contract/`reference/cli.md`
+make response-file failures `CLI001`/2. The following sentence, "`System.CommandLine` parse errors are the only
+source of `CLI001`" (`:878`), is false. Change it to name both sources (or delete "only"). Minor; docs-only.
+
+**R4-3.** The design's closeout gate is `./tools/verify.sh all --require`, and feature 1 adds `aot` to `all`.
+The current `verify.sh` has no `aot` mode; its `--require` branch only fails when `cargo-deny` is absent, and
+the other checks run unconditionally. NativeAOT needs clang/lld (and the ILCompiler package/network on a fresh
+cache); `06-toolchain-requirements.md:68` still calls clang/lld/llvm Optional and Tier 2 for Steps 19/29/31.
+The design does not say what `aot` does when those are absent. If it runs unconditionally, `all --require` fails
+on a documented Tier 1 environment; if it skips, the required gate is silently skipped, which `ci-policy.md:53`
+forbids. The closeout CI job does not invoke `tools/verify.sh`, so the aot gate is local-only and the closeout
+CI cannot confirm it. Make the NativeAOT prerequisites required for Step 12 (and update
+`06-toolchain-requirements.md`/the image), define fail-not-skip with `--require`, and state that the closeout CI
+does not run the local gate (or add an aot job). Minor, but a finding because it can make the required gate
+unrunnable or silently skipped.
+
+**R4-4.** The smoke host is described as "minimal" and only references `System.CommandLine`; the probe shows the
+library's default parse error exits 1, while the AOT test row expects exit 2 (`:1781`). To satisfy the row, the
+host must include the `CLI001`/2 remap (a mini `CliApplication`) or the test must expect 1 and leave the remap to
+`Mocassin.Cli.Tests`. Separately, the check asserts zero IL2xxx/IL3xxx warnings and also requires the positive
+control to emit IL2026/IL3050; those cannot be the same publish, so the design should name the separate
+positive-control project/configuration. Minor; test-plan precision.
+
+**R4-5.** The step page's "10,000 tokens contributed by response files" is the clear scope. `reference/cli.md`
+and ADR 0015 say "10,000 expanded tokens", which could include command-line tokens, and the data contract/
+decision pages say "10,000 tokens". Pick one phrase (response-file tokens) in all six places. Note.
+
+**R4-6.** §5.3 says "a token that had unquoted text before the quote is kept without the quote" and §23 says
+"unterminated-quote discard/keep rule", but neither pins whether the rest of the line after the opening quote is
+kept. The library's observed output is `x"y z` → `xy z` and `"x y` → discarded. Add those two golden cases so an
+independent tokenizer cannot choose `x` only or treat the quote as an error. Note.
+
+**R4-7.** The implementation-status bullet at `:12-14` still says "a round-3 design re-review is pending" while
+the `Design review` bullet at `:15-19` says round 4 reviews `d6c5402`. Update the status line after round 4.
+Note.
+
+#### Verdict
+
+**Ready with notes.** No Blocker or Major remains. R3-1, R3-2, R3-3, R3-5, R3-7, R2-2, and R2-4 are closed;
+the R3-1 CLI-owned response-file design is internally consistent, enforces the specified bounds, and its golden
+tokenizer cases match the library's observed `SplitCommandLine` behaviour. R3-4, R3-6, and R3-8 are only
+partially resolved: their operative sections are correct, but the R4-1–R4-4 Minors and R4-5–R4-7 Notes remain.
+None affects a cross-step interface or the start gate if the human owner accepts the notes; the owner may also
+require the small documentation-only cleanup (and the R4-3 toolchain/CI statement) before the start gate.
+
+Follow-up owner: step agent/planner for the documentation-only findings and the AOT gate statement; the human
+owner approves the verdict and the start gate.
