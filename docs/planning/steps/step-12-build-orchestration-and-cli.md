@@ -9,30 +9,31 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** Not started — the design was accepted by the human owner on 2026-11-17 (`Ready with notes` at
-  `1b6af90`); implementation start is awaiting owner approval; no step branch yet.
+- **Status:** In progress — implementation start was approved by the human owner on 2026-11-17 together with
+  the seven-feature list; the design was accepted at `1b6af90` (`Ready with notes`).
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` — round 5
   reviewed `1b6af90`; round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was
   `Ready with notes` at `d211584` (reviewed `6b15f9d`), and round 4 was `Ready with notes` at `f548d26`
   (reviewed `d6c5402`) — [record](../reviews/step-12.md) (R2-1–R2-4, R3-1–R3-8, R4-1–R4-7, and R5-1–R5-3
-  recorded; implementation start awaiting owner approval)
-- **Feature list:** Proposed 2026-11-16 (seven features); feature 1 revised 2026-11-17 (library adoption,
-  bounded response files, no parser/help/completion writers); the design verdict is accepted, and the
-  feature-list/start approval is pending.
+  resolved and closed)
+- **Feature list:** **Approved by the human owner 2026-11-17** — seven features (proposed 2026-11-16; feature 1
+  revised 2026-11-17 for the library adoption, bounded response files, and no parser/help/completion
+  writers); feature rows stay empty until a branch is implemented and squash-merged.
 - **Sizing:** Owner-approved 2026-11-17 at 2.75–3.75 person-weeks (was 3.0–4.0), still a single-step
   exception, seven features, no split, with the 2.25 pw contingency; `04-roadmap.md` §3/§3.1 and
   `05-open-decisions.md` record it.
 - **Parser:** `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only reference); Native AOT smoke-verified on
   `net11.0`/`linux-x64`; bounded `@file` is part of the contract; no shell-completion command in Step 12
   (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
-- **Step branch:** —
+- **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 from the design-merge commit
+  `eb31979`); no feature branch started yet.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
 - **Last updated:** 2026-11-17
 
-### Proposed feature list
+### Approved feature list
 
 | # | Feature | Branch | Planned scope | Outcome | Order |
 | ---: | --- | --- | --- | --- | --- |
@@ -44,9 +45,10 @@ UI consumes later.
 | 6 | Doctor and dry-run clean | `feature/step-12-build-orchestration-and-cli/doctor-and-dry-run-clean` | `doctor` checks and report, `clean --dry-run` listing, healthy-CI test, injected-failure tests, no-deletion test | `doctor` is green on CI and `clean --dry-run` lists without deleting anything | 6 |
 | 7 | Documentation, parity, and closeout | `feature/step-12-build-orchestration-and-cli/documentation-parity-and-closeout` | CLI/user/troubleshooting/diagnostics/dev pages, parity rows, 10⁴-job evidence, closeout evidence, audit request, full local gate | The documentation, parity, evidence, and audit request are complete and the full local gate is green | 7 |
 
-The list is a proposal. It is approved once by the human owner together with the design verdict; that approval
-creates `step/12-build-orchestration-and-cli` and marks the step `In progress`. Individual features are then
-squash-merged without a further approval.
+The list below was **approved by the human owner on 2026-11-17** together with the design verdict. That approval
+created `step/12-build-orchestration-and-cli` and marked the step `In progress`. Individual features are
+squash-merged without a further approval; each feature row and the log below are filled in when the feature is
+implemented and squashed. Feature rows stay empty until then.
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
