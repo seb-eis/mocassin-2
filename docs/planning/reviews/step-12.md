@@ -93,11 +93,12 @@ accepted features 2–7 unless the parser/response-file change touched them.
       smoke check. Verify the library's tokenization (arity, `--opt=value`, negative values, `--`) and the
       usage-error reports. — Reviewed; the command table and grammar are defined; n-8 records the ambiguous
       `-`-value rule.
-- [ ] **Response files.** `@file` is part of the Step 12 contract: documented syntax (UTF-8, double-quote
+- [x] **Response files.** `@file` is part of the Step 12 contract: documented syntax (UTF-8, double-quote
       grouping, `#` comments only at line start, recursion, cwd-relative paths), CLI-owned limits
       (1 MiB/4 MiB/depth 8/10,000 tokens/32 files), `--`/`--json` interaction, and `CLI001`/2 for
       missing/unreadable/invalid/oversized files. Feature 1 implements and tests it; ADR 0015 records it.
-      Verify the step page §5.3, data contracts §5.1, `cli.md`, tests, and acceptance agree.
+      Verify the step page §5.3, data contracts §5.1, `cli.md`, tests, and acceptance agree. — Reviewed in
+      round 3; see R3-1, R3-3, R3-6, and R3-7.
 - [x] **Build orchestration home.** `Mocassin.Packages.Build`, consumed by CLI and GUI; `Mocassin.Packages`
       does not reference `Mocassin.Results`; post-publication verification is caller-composed. Verify no
       project-graph contradiction. — Reviewed; the graph is acyclic and the verification split is sound.
@@ -147,6 +148,7 @@ accepted features 2–7 unless the parser/response-file change touched them.
       — Reviewed; `generate.py` supports additive report/event descriptors and pins `manifestVersion = 1`.
 - [x] **Sizing and feature list.** Seven features, 3.0–4.0 pw, the 2.25 pw contingency, and the owner
       decisions in §21. — Reviewed; m-7 records the missing decision-register row and the stale roadmap row.
+      Round 3 re-checked the current design at 2.75–3.75 pw; the item text records the round-1 figure (R3-5).
 
 ## Dependency and interface checks
 
@@ -759,3 +761,198 @@ documentation-only cleanup before the start gate.
 
 Follow-up owner: Step agent/planner for the four documentation-only Notes; the human owner approves the verdict
 and the start gate.
+
+### Review round 3
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author or implement the reviewed work and have no shared conversation with the
+planner, implementor, orchestrator, or the round-1/round-2 reviewers. I received only the frozen commit
+`6b15f9d1630aa5d86830d76fab9a561308e8d4e3`, the record HEAD
+`2e18144d89534734e3929b1ccc2bf7ceb1c867e4`, the request record, repository links, and the required
+commands/scope. No desired verdict or summary was supplied. I read the repository at the frozen commit, the full
+record including rounds 1–2, every document the freeze changes, and the resolved `System.CommandLine` 3.0.0
+assembly; the review was read-only apart from this record.
+
+The design under review is `6b15f9d`. The record HEAD `2e18144` is two documentation-only commits on top of it:
+`git diff --name-status 6b15f9d 2e18144` returns `M docs/planning/reviews/step-12.md`,
+`M docs/planning/status.md`, and `M docs/planning/steps/step-12-build-orchestration-and-cli.md`. The non-record
+hunks change only the status row's freeze pointer (from the intermediate `8af67f8` to `6b15f9d`) and the
+step-page `Design review` bullet; no design text moved between the freeze and the record HEAD.
+
+The design delta `05b7297..6b15f9d` (round-2 freeze to round-3 freeze) is 15 documentation files: the Step 12
+page, `02-data-contracts.md`, `reference/cli.md`, `03-quality-strategy.md`, `01-target-architecture.md`,
+`design-decisions.md`, `05-open-decisions.md`, `04-roadmap.md`, `code-structure.md`, `status.md`, the Step 07
+page, the record, the new ADR 0015, and two process pages (`agent-workflow.md`, `orchestration.md`) that came
+from the merged `main`. No `src/`, `tests/`, `contracts/`, `tools/`, or configuration file changed. Rounds 1–2,
+the findings table, the finding details, and the round-2 text are unchanged; the record diff only updates the
+request top/step summary, `Record state`, the resolution table, and appends round 2.
+
+#### Commands and results
+
+- `./tools/verify.sh policy --require` → exit 0. ApiCompat clean for 9 assemblies; NuGet licence/vulnerability
+  policy OK; contract artifacts current (19 files); model/parameterization/lattice projections OK (5/4/2
+  fixtures); space-group catalog current (274 settings, sha256
+  `1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395`); process consistency OK; 58 Python tool
+  tests OK; SPDX headers in 603 source files; no secret patterns in 986 tracked text files; cargo-deny
+  advisories/bans/licenses/sources OK; final line `Closeout gate completed with required checks enabled.`
+- `./tools/verify.sh docs --require` → exit 0. Math OK (166 files); links OK (169 files); Zensical strict
+  `No issues found`; DocFX `Build succeeded.` (0 warnings / 0 errors); rustdoc OK; site built.
+- `python tools/check_doc_math.py` → `Documentation math conventions OK (166 files scanned).`
+- Read-only probe of the resolved package (a throwaway console app in `/tmp/opencode`, referencing
+  `System.CommandLine` 3.0.0 `lib/net10.0/System.CommandLine.dll`; no repository file was created or changed):
+  - Assembly version `3.0.0.0`. `ParserConfiguration` has `EnablePosixBundling` (default `true`) and
+    `ResponseFileTokenReplacer` of type `TryReplaceToken` (`bool Invoke(string, out IReadOnlyList<string>?,
+    out string?)`). `System.CommandLine.Parsing.StringExtensions` (with `Tokenize`, `TryReadResponseFile`, and
+    `SplitLine`) is `NotPublic`, so the tokenizer is not callable by the CLI.
+  - Default parse errors return 1; `--help` and `--version` return 0; `run --version` is
+    `Unrecognized command or argument '--version'.`; the default version action prints only the version string.
+  - `@rsp` expands before `--`; `-- @rsp` leaves `@rsp` literal; a `--` inside a response file stops expansion
+    for the tokens after it (with a custom replacer, the replacer is not called for a later `@token`); `@` alone
+    is literal; `@@name` calls the replacer with `@name`; `--input=@file` is literal; a nested `@file` is
+    resolved against the working directory, not the containing file; the replacer is called recursively for
+    `@` tokens returned by a previous replacement.
+  - Tokenizer examples match §5.3: `a"b c"d` becomes `ab cd`; `"a""b"` becomes `a` and `b`; `a""b` becomes
+    `ab`; `""` is an empty argument; `x"y z` becomes `xy z`; a token starting with an unterminated quote is
+    discarded.
+  - `--jobs -1`, `--parallel -1`, and `-o -file` bind as values; with `EnablePosixBundling = false`, `-abc` is
+    one unrecognized token, not a bundle.
+- Diff and closure checks: `git diff --name-status 05b7297 6b15f9d` (above); `git diff 6b15f9d 2e18144` (above);
+  `git diff 05b7297 6b15f9d -- docs/planning/reviews/step-12.md` adds round 2 and changes only the request,
+  record state, and resolution sections. R2-1–R2-4 were re-checked against the frozen text (below).
+
+#### Consistency of the changed decisions
+
+The parser choice and version agree across the step page §5.2/§15/§16.2/§20, ADR 0015, `02-data-contracts.md`
+§5.1/§5.7.6, `reference/cli.md`, `03-quality-strategy.md` §9.10, `01-target-architecture.md` §2/§7.3/ADR table,
+`design-decisions.md`, `05-open-decisions.md`, `04-roadmap.md`, `code-structure.md`, and the Step 07 page:
+`System.CommandLine` 3.0.0, MIT, centrally pinned, referenced only by `Mocassin.Cli`, no transitive package for
+`net10.0+`, library-supplied command-line tokenization/arity/help/version, and CLI-owned command graph, typed
+binding, `CLI001` wording, and exit-code policy.
+
+The parse-error remap agrees in every place it appears: `ParseResult.Errors` → `CLI001`/2, help/version 0, and
+the library's default 1 never exposed (step page §5.1/§5.2/§11.1/§22, data contract §5.1/§5.7.6, `cli.md`,
+ADR 0015 decision 3, `01-target-architecture.md` §7.3, `03-quality-strategy.md` §9.10, `design-decisions.md`).
+The exit table is unchanged apart from row 2 naming parse and response-file errors.
+
+The AOT gate scope agrees: the minimal `tests/aot/` smoke host with a positive control is the gate; only
+`linux-x64` is proven; the real CLI publish is recorded as evidence and dependency-owned SQLite/MessagePack
+warnings are attributed to Step 31; Windows/macOS AOT, the `netstandard2.0` asset, and the AOT/single-file
+decision remain Step 31 gates (step page §5.2/§18.2/§22, ADR 0015, quality §9.10, `05-open-decisions.md` AOT
+row, `01-target-architecture.md`).
+
+The sizing agrees on 2.75–3.75 pw, seven features, no split, and the 2.25 pw contingency (step page §2/§21,
+roadmap §3/§3.1, `05-open-decisions.md`, request step summary). The old 3.0–4.0 figure survives only where
+R3-5 records it.
+
+The preserved contracts are untouched by this delta: `validation-v1` (feature 1 keeps it byte-compatible; no
+schema edit), the exit table's 0/1/2/3/4/5/6/10 semantics, `--json`/JSON Lines, the seven `reports` ids,
+`--jobs`/`job_selection`, atomic `--force`, and cancellation. The only data-contract edits are the §5.1 parser
+and response-file bullets, the §5.7.2 `completion` removal, and the §5.7.6 report-scope/parse-error paragraph.
+
+#### `@file` contract
+
+The contract is specific and mostly implementable and testable. The recursive expansion, cwd-relative path
+resolution, the `@`/`@@`/no-escape rules, the `--` boundaries, the `--input=@file` versus `--input @file`
+split, the `--json` rules, the five limits, and the `CLI001`/2 error class are all pinned by acceptance
+criteria and test rows; the probe above confirms the library's tokenizer and `--` behaviour that §5.3
+describes. Four details need correction before implementation: the reader/tokenizer ownership (R3-1), the
+literal `@`-leading option-value sentence (R3-3), and the published-reference and error-report precision
+(R3-6, R3-7).
+
+#### Closure of the round-2 notes
+
+| Note | Round-3 status | Evidence |
+| --- | --- | --- |
+| R2-1 (data-contract report scope) | **Closed** | `02-data-contracts.md:1884-1888` now limits the guarantee to `validate` and every command that accepts `--json`, and excludes help/version/reserved commands; matches §5.7.2, `reference/cli.md:389-392`, and step page §5.1/§13.9. |
+| R2-2 (duplicate `diagnostics.md` bullet) | **Open** | Step page `:1382` and `:1406` still contain one `docs/reference/diagnostics.md` bullet each. |
+| R2-3 (roadmap cross-reference) | **Closed** | Step page `:21-23` now cites `04-roadmap.md` §3/§3.1 and `05-open-decisions.md`; no §2 reference. |
+| R2-4 (`BuildPreviewBuilder` placement) | **Open** | Step page `:1177` still says the builder comes from `Mocassin.Packages.Jobs`/`Projects.Validation`; §16.1 `:1208`/`:1213` place it in `Mocassin.Packages/Build/Internal/`. |
+
+R2-1 is genuinely closed; R2-2 and R2-4 are documentation-only Notes and were already Notes in round 2, not
+start blockers.
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R3-1 — The bounded-reader story names `ResponseFileTokenReplacer`, but that hook cannot tokenize file content or observe nesting depth; the design says the library supplies tokenization while the CLI reader must reimplement it.** | Step page `:257-261` ("bounded `ResponseFileTokenReplacer`"), `:285-288` (library token-level expansion; CLI-owned contract), `:300-310` (quoting rules and depth 8), `:1227` (`CliResponseFiles` reader + syntax); ADR 0015 `:26`, `:28-31`, `:39`; `05-open-decisions.md:75`; `design-decisions.md:406`; `02-data-contracts.md:1460`; probe: `StringExtensions`/`Tokenize`/`TryReadResponseFile` are `NotPublic`, and `TryReplaceToken` receives one token and no depth. |
+| **Minor** | **R3-2 — Two documents still describe `completion` as an existing command, contradicting its removal.** | `reference/cli.md:10` ("`completion`, `--help`, `--version` ... do not accept `--json`"); `design-decisions.md:459` ("`completion`, help/version, and reserved commands ..."); contrast `cli.md:363-370`, step page `:214`/`:1117-1131`, data contract `:1479-1482`, `05-open-decisions.md:77`. |
+| **Minor** | **R3-3 — §5.3 says a literal option value beginning with `@` cannot be written before `--`, while the same section makes `--input=@file` literal; the first sentence is false.** | Step page `:292-293`; contrast `:319-321`; probe: `--input=@rsp1.rsp` binds the literal value `@rsp1.rsp`. |
+| **Minor** | **R3-4 — `--version` is said to be a library action and to print the runtime description, but the library's default action prints only the version and is root-only; the design does not say the CLI customizes it.** | Step page `:190` (library actions; "after a command they are command help"), `:213` (assembly informational version and runtime description); probe: default `--version` printed `1.0.0`; `run --version` was `Unrecognized command or argument '--version'.` |
+| **Note** | **R3-5 — The old 3.0–4.0 pw figure survives in the step page's documentation plan and in two round-1 request items.** | Step page `:1400`; record `:149` (sizing) and `:137` ("completions"); contrast step page `:21`/`:66`/`:88`, roadmap `:68`/`:115-123`, `05-open-decisions.md:83`. |
+| **Note** | **R3-6 — The `CLI001` descriptor text does not name parse or response-file errors, and the expansion-failure report guarantee is unqualified although it needs a recognised command.** | Step page `:837` (descriptor examples), `:769`/`:812-815` (response-file errors are `CLI001`), `:1701-1702` ("a `--json` on the command line still produces the command report"); data contract `:1884-1888` ("once the command name is recognised"); `cli.md:56-59`; `mocassin @missing --json` has no recognised command. |
+| **Note** | **R3-7 — The published `cli.md` response-file section omits quoting/line-ending rules that §5.3 and the test plan pin, although the data contract calls both pages the full contract; the 4 MiB wording also differs.** | `cli.md:39-59` (no empty-quote, concatenation/`"a""b"`, or CR/CRLF rule; "4 MiB total"); step page `:297-310` (`""`, `a"b c"d`, `"a""b"`, LF/CRLF/CR, "4 MiB across the command line"); data contract `:1477-1478`. |
+| **Note** | **R3-8 — The AOT smoke check is assigned to `Nightly/release`, but the project has no scheduled nightly and the design names no hook that runs it after Step 12.** | Step page `:1416`, `:1739`, `:1762`; `03-quality-strategy.md:511-513`; `AGENTS.md` §3.13 (Nightly is manual-only); the Step 12 acceptance criterion `:1703-1706` runs it at closeout. |
+
+#### Finding details
+
+**R3-1.** The design correctly says the library's default reader is replaced, and the probe confirms that a
+custom `ResponseFileTokenReplacer` is invoked for `@file` tokens before `--`, that the library recurses into
+replacement tokens, and that a `--` inside an expanded file stops later expansion. What the public hook cannot
+do is (a) tokenize the file content — `StringExtensions.Tokenize`/`TryReadResponseFile`/`SplitLine` are
+internal — and (b) know the current nesting depth — `TryReplaceToken(string token, out IReadOnlyList<string>
+replacementTokens, out string? errorMessage)` carries no depth or position, and the library decides when to
+recurse. Therefore the depth-8 limit and the "self-reference fails at the depth bound" risk mitigation require
+`CliResponseFiles` to recurse and flatten itself, which means it must implement the quoting/whitespace rules (a
+second tokenizer) in addition to replacing the reader. State that explicitly: either the CLI owns
+response-file tokenization and recursive expansion and the library only parses the resulting token list, or the
+CLI accepts library-driven recursion and bounds files/tokens/bytes, not depth. The current text says both "the
+library supplies tokenization" and "the CLI owns the syntax", and names only the replacer.
+
+**R3-2.** The removal is recorded in ADR 0015 decision 5, step page §13.8, data contract §5.1, and
+`05-open-decisions.md` (CLI shell completion row), so the decision itself is consistent. The two stale
+sentences are in the published CLI reference and the developer decision page; both still name `completion` as
+a command that "does not accept `--json`". Replace them with the help/version/reserved list.
+
+**R3-3.** The first bullet says a literal option value beginning with `@` "cannot be written before `--`; use a
+positional argument after `--`, or avoid the leading `@`." That contradicts the later `--input=@file` rule:
+`--name=@value` is a token that does not start with `@`, so it is literal (probe: `--input=@rsp1.rsp` bound
+`@rsp1.rsp`). Change the sentence to allow `--name=@value` before `--`, or drop it.
+
+**R3-4.** The library's built-in `--version` action prints the version string only and is added to the root
+command; it is not inherited by subcommands (`run --version` is an unrecognized argument and exit 1 before the
+CLI remap). The step page promises the assembly informational version and the runtime description, and says
+help/version after a command are "command help". Either state that feature 1 replaces the root `VersionOption`
+action with a CLI-owned action that adds the runtime description and that `--version` after a command is a
+`CLI001`/2 parse error, or narrow the promised output.
+
+**R3-5.** Step page `:1400` is part of the current documentation plan and should say 2.75–3.75 pw (or "both
+figures"). The request's round-1 checklist items at `:149` and `:137` are request-owned text; add an inline
+note rather than editing the item, or accept them as history. My notes above mark the response-file item and
+the sizing item, but the item text is unchanged.
+
+**R3-6.** `CLI001`'s descriptor text lists "unknown command or option, missing value, conflicting options,
+invalid option combination"; the new classes (library parse errors, response-file missing/unreadable/invalid/
+oversized) are `CLI001` per §11.1 and the data contract but are not named in the descriptor that
+`docs/reference/diagnostics.md` will publish. Separately, the acceptance sentence says a `--json` on the
+command line "still produces the command report for an expansion failure"; that holds only when a command name
+is recognised outside the failed file. Limit it to `mocassin <command> @missing --json` (as the data contract
+already does).
+
+**R3-7.** §5.3 is detailed enough to implement and test; `cli.md` is the user-facing page and says less. The
+data contract calls both "the full contract", so a reader cannot tell whether the omitted cases are
+intentional. Either add the omitted quoting/line-ending rules to `cli.md` or name §5.3 as normative and
+`cli.md` as a summary. Also align "4 MiB total" with "4 MiB across the command line" and say whether the limit
+counts raw file bytes or expanded tokens.
+
+**R3-8.** The acceptance criterion makes the smoke check a Step 12 closeout activity, so it will run once. The
+risk table and test tier say "nightly/release", but `AGENTS.md` §3.13 keeps Nightly manual and there is no
+scheduled run; after Step 12 the dependency claim has no recurring guard. Name the command that runs it (for
+example a `tools/verify.sh` target invoked at closeout and before a `System.CommandLine` version change) or
+record it as a manual Step 31 gate, and keep the "recorded evidence, not a gate" distinction for the real CLI
+publish.
+
+#### Verdict
+
+**Ready with notes.** No Blocker or Major remains. The parser/version, the parse-error → `CLI001`/2 remap, the
+AOT gate scope, and the sizing agree across the step page, the data contract, `cli.md`, the quality strategy,
+the architecture page, the decision pages, the roadmap, the structure page, and ADR 0015; the preserved
+contracts (`validation-v1`, the exit table, `--json`/JSON Lines, the seven reports, `--jobs`, atomic `--force`,
+cancellation) are unchanged; and R2-1 is genuinely closed by the data-contract edit. Four Minor findings
+(R3-1–R3-4) and four Notes (R3-5–R3-8) remain, plus the two still-open round-2 Notes R2-2 and R2-4. All are
+documentation/precision issues; none blocks the start gate if the human owner accepts them. The human owner may
+accept the notes or ask for a small documentation-only cleanup before the start gate.
+
+Follow-up owner: step agent/planner for the documentation-only Minors and Notes; the human owner approves the
+verdict and the start gate.
