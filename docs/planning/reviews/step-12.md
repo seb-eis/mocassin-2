@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `6b15f9d1630aa5d86830d76fab9a561308e8d4e3` |
+| Reviewed commit | `4f3683e9bcdf38868fb5f282f95d096462602a99` |
 | Docs branch | `docs/step-12-design` |
 | Review date | 2026-11-16 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation |
@@ -27,13 +27,15 @@ decision with `System.CommandLine` 3.0.0 after an AOT/full-trim verification sho
 risk was wrong. On 2026-11-17 the owner also confirmed the revised 2.75–3.75 pw sizing, removed
 `mocassin completion` from Step 12, confirmed the minimal AOT smoke host as feature 1's gate (the real CLI
 publish is evidence, not a gate), added bounded `@file` response files as a Step 12 contract, and requested
-[ADR 0015](../adr/0015-cli-parser-system-commandline.md). The new freeze
-`6b15f9d1630aa5d86830d76fab9a561308e8d4e3` rewrites §5.2, adds §5.3 (response files), rewrites feature 1,
-the command surface, layout, tests, risks, and acceptance criteria; maps library parse errors (default exit
-1) to `CLI001`/2; and adds the linux-x64 AOT smoke check. `validation-v1`, the exit-code table,
+[ADR 0015](../adr/0015-cli-parser-system-commandline.md). Round 3 returned `Ready with notes` at `d211584`
+(reviewed `6b15f9d`); the step agent resolved R3-1–R3-8 and the two open round-2 Notes (R2-2, R2-4) in the new
+freeze `4f3683e9bcdf38868fb5f282f95d096462602a99`. The freeze rewrites §5.2, adds §5.3 (CLI-owned response-file
+tokenization), rewrites feature 1, the command surface, layout, tests, risks, and acceptance criteria; maps
+library parse errors (default exit 1) to `CLI001`/2; specifies root-only `--version`; and adds the linux-x64
+AOT smoke check in `verify.sh all`. `validation-v1`, the exit-code table,
 `--json`/JSON-Lines, the seven reports, `--jobs`/`job_selection`, atomic `--force`, and cancellation are
-unchanged. Rounds 1–2, their findings, and the R2-1–R2-4 notes are unchanged below; the `Reviewed commit`
-cell and this note point the request at the new freeze. Round 3 should review the new freeze, not re-open the
+unchanged. Rounds 1–3, their findings, and the R2-1–R2-4 notes are unchanged below; the `Reviewed commit`
+cell and this note point the request at the new freeze. Round 4 should review the new freeze, not re-open the
 accepted features 2–7 unless the parser/response-file change touched them.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the design and
@@ -95,7 +97,7 @@ accepted features 2–7 unless the parser/response-file change touched them.
       `-`-value rule.
 - [x] **Response files.** `@file` is part of the Step 12 contract: documented syntax (UTF-8, double-quote
       grouping, `#` comments only at line start, recursion, cwd-relative paths), CLI-owned limits
-      (1 MiB/4 MiB/depth 8/10,000 tokens/32 files), `--`/`--json` interaction, and `CLI001`/2 for
+      (1 MiB/4 MiB raw-byte/depth 8/10,000 tokens/32 files), `--`/`--json` interaction, and `CLI001`/2 for
       missing/unreadable/invalid/oversized files. Feature 1 implements and tests it; ADR 0015 records it.
       Verify the step page §5.3, data contracts §5.1, `cli.md`, tests, and acceptance agree. — Reviewed in
       round 3; see R3-1, R3-3, R3-6, and R3-7.
@@ -136,7 +138,7 @@ accepted features 2–7 unless the parser/response-file change touched them.
       guarantee. — Reviewed; m-5 (reserved commands) and n-2.
 - [x] **Commands.** `new` (embedded templates, fresh identity, safe create), `compile` (`-o` inspection,
       `compile-v1`), `inspect`/`verify` wrappers, `doctor` checks and solver warning, `clean --dry-run`
-      scope, completions, and reserved commands. — Reviewed; m-5, m-9, n-3, n-4.
+      scope, and reserved commands; no `completion` command in Step 12. — Reviewed; m-5, m-9, n-3, n-4.
 - [x] **Cancellation.** Pre-publication temp cleanup, existing-package preservation, post-publication
       behaviour, signal handling, and the second-signal rule. — Reviewed; consistent with the Step 11 writer;
       m-4 records that validation does not receive the token.
@@ -146,7 +148,7 @@ accepted features 2–7 unless the parser/response-file change touched them.
 - [x] **Contract artifacts.** The `reports`/`events` manifest additions, `REPORT_CONSTANTS`, generated
       schemas/constants/descriptors, `events-v1.jsonl`, and the `verify.sh contracts` freshness check.
       — Reviewed; `generate.py` supports additive report/event descriptors and pins `manifestVersion = 1`.
-- [x] **Sizing and feature list.** Seven features, 3.0–4.0 pw, the 2.25 pw contingency, and the owner
+- [x] **Sizing and feature list.** Seven features, 2.75–3.75 pw, the 2.25 pw contingency, and the owner
       decisions in §21. — Reviewed; m-7 records the missing decision-register row and the stale roadmap row.
       Round 3 re-checked the current design at 2.75–3.75 pw; the item text records the round-1 figure (R3-5).
 
@@ -458,9 +460,10 @@ its file list, and the `PublicAPI.Unshipped.txt` obligation so the structure pol
 
 **State:** Re-review required — round 1 reviewed `80b3f7fd99f0140b1dad5650851d1aaa3c4ac0b8` and returned
 `Changes required`; round 2 reviewed `05b7297172f9f87453b3ffc23d06801035da7a2c` and returned `Ready with
-notes` with R2-1–R2-4 still open. The design changed on 2026-11-17 (the hand-written parser was replaced by
-`System.CommandLine` 3.0.0) and is frozen at `6b15f9d1630aa5d86830d76fab9a561308e8d4e3`; a fresh planning
-auditor re-reviews that commit. Rounds 1–2 and their text remain unchanged above and below.
+notes` with R2-1–R2-4 still open; round 3 reviewed `6b15f9d1630aa5d86830d76fab9a561308e8d4e3` and returned
+`Ready with notes` with R3-1–R3-8 plus R2-2/R2-4. The step agent resolved all of them in the new freeze
+`4f3683e9bcdf38868fb5f282f95d096462602a99`; a fresh planning auditor re-reviews that commit. Rounds 1–3 and
+their text remain unchanged above and below.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -956,3 +959,22 @@ accept the notes or ask for a small documentation-only cleanup before the start 
 
 Follow-up owner: step agent/planner for the documentation-only Minors and Notes; the human owner approves the
 verdict and the start gate.
+
+#### Round 3 resolutions
+
+The step agent/planner fixed every round-3 finding and the two still-open round-2 Notes in a documentation-only
+change. The reviewer's round-3 text, evidence, findings, verdict, and the earlier rounds are unchanged. The
+new freeze is `4f3683e9bcdf38868fb5f282f95d096462602a99`.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| R3-1 (Minor) | Fixed | The CLI now owns response-file tokenization and recursive expansion. `CliResponseFiles` tokenizes with `SplitCommandLine`-equivalent semantics, flattens nested references itself, and enforces depth/token/file/byte bounds; `CliApplication` parses the flattened list with `ParserConfiguration.ResponseFileTokenReplacer = null`. The step page §5.3 states why the public hook cannot be used (internal tokenizer, no depth signal) and requires golden tokenizer tests. ADR 0015, decision 4, `design-decisions.md`, `05-open-decisions.md`, and `02-data-contracts.md` §5.1 agree. |
+| R3-4 (Minor) | Fixed | `--version` is specified as root-only and CLI-owned: the library's default root `VersionOption` action is replaced by a CLI action that prints the assembly informational version and runtime description; `mocassin <command> --version` is `CLI001`/2. Step page §5.1/§5.2/§19/§22/§23, `reference/cli.md`, and ADR 0015 decision 2–3. |
+| R3-2 (Minor) | Fixed | Removed the remaining `completion` mentions from `docs/reference/cli.md` (report-scope sentence) and `docs/development/design-decisions.md` (report-guarantee sentence). The only remaining mentions are the explicit removal statements. |
+| R3-3 (Minor) | Fixed | Step page §5.3 now says `--name=@value` is the before-`--` form of a literal `@`-leading option value; the space-separated `--name @value` form is the response-file reference. `reference/cli.md` repeats it. |
+| R3-5 (Note) | Fixed | Step page §18.1 now says 2.75–3.75 pw; the two round-1 request checklist items (commands no longer list completions; sizing says 2.75–3.75 pw) were corrected without touching reviewer-authored text. |
+| R3-6 (Note) | Fixed | The `CLI001` descriptor now names library parse errors and response-file missing/unreadable/invalid/oversized errors. Step page §5.3/§11.1/§22 and `reference/cli.md` now say a report is produced only when a command is recognised outside the failed file; `mocassin @missing --json` emits no report. `05-open-decisions.md` repeats the `CLI001` scope. |
+| R3-7 (Note) | Fixed | `reference/cli.md` now carries the §5.3 quoting, concatenation, empty-quote, line-ending, and `#` rules. Both pages use “4 MiB of raw response-file bytes across the command line”; the per-file limit is raw bytes, and the 10,000-token limit is separate. |
+| R3-8 (Note) | Fixed | The AOT smoke host runs through a new `verify.sh aot` mode included in `verify.sh all`, so it runs at every step closeout and the Step 31 release gate, and on a `System.CommandLine` version-change branch. It is no longer labelled nightly; no scheduled run is claimed. Step page §5.2/§18.2/§19/§22/§23/§24, `03-quality-strategy.md`, and ADR 0015. |
+| R2-2 (Note) | Fixed | The duplicate `docs/reference/diagnostics.md` bullet was merged into one §18.1 bullet with the drift-test and link wording. |
+| R2-4 (Note) | Fixed | Step page §15 now says `BuildPreviewBuilder` comes from `Mocassin.Packages.Build.Internal`, while `ILatticePreviewService`/`JobTemplateValidationStage` come from `Jobs`/`Projects.Validation`; §16.1 already places the builder in `Build/Internal`. |
