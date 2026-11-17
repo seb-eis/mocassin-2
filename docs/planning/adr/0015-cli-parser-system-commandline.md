@@ -29,9 +29,9 @@ and completion maintenance.
    `--version` is not inherited by subcommands, so `mocassin <command> --version` is `CLI001`/2.
 4. Support response files (`@file`) as part of the Step 12 CLI contract. The CLI owns response-file
    tokenization and recursive expansion; the library's response-file hook is disabled. Limit 1 MiB of raw
-   bytes per file, 4 MiB of raw response-file bytes across the command line, nesting depth 8, 10,000 expanded
-   tokens, and 32 files. Missing, unreadable, invalid, or oversized files are `CLI001`/exit 2, not
-   `CLI002`/3. The user-facing contract is in the step page §5.3 and `reference/cli.md`.
+   bytes per file, 4 MiB of raw response-file bytes across the command line, nesting depth 8, 10,000 tokens
+   contributed by response files, and 32 files. Missing, unreadable, invalid, or oversized files are
+   `CLI001`/exit 2, not `CLI002`/3. The user-facing contract is in the step page §5.3 and `reference/cli.md`.
 5. Ship no `completion` command or shell scripts in Step 12. The library provides the `[suggest]` protocol for
    `dotnet-suggest`, not script generation; shell integration is deferred to Step 31 packaging.
 
@@ -39,11 +39,12 @@ and completion maintenance.
 
 **Positive**
 
-- One maintained command graph; tokenization and help/version are not reimplemented.
+- One maintained command graph; command-line tokenization and help are not reimplemented, and the CLI supplies
+  the root `--version` action instead of inheriting the library's version-only default.
 - MIT-licensed with no transitive dependency for `net10.0+`; the package is centrally pinned.
-- A minimal AOT smoke host with a positive control guards the dependency claim; it runs through
-  `verify.sh aot` in `verify.sh all` at every step closeout and the Step 31 release gate, not a scheduled
-  nightly.
+- A required `verify.sh aot` gate publishes a zero-warning smoke host and a separate IL2026/IL3050 positive
+  control, and runs the host's `CLI001`/2 parse-error case. clang/lld/ILCompiler are Tier 1; the gate is local
+  (the closeout CI does not run `verify.sh`) and is fail-not-skip when the toolchain is absent.
 - Response files are a documented, bounded contract rather than an accidental library default.
 
 **Negative and limits**

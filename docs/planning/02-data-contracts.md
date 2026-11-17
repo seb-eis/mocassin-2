@@ -1458,11 +1458,12 @@ mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
   a missing `--dry-run` is a usage error that still emits `clean-v1` with `dryRun = false`, `removedCount = 0`,
   and `CLI008`; it never deletes.
 - The CLI parser is `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only; [ADR 0015](adr/0015-cli-parser-system-commandline.md)). It supplies command-line tokenization (after the CLI expands response files), arity and
-  option applicability, `--name value`/`--name=value`, negative values such as `--jobs -1`, `--`, help/version
-  actions, and the `[suggest]` directive. The CLI owns the command graph, typed binding, `CLI001` wording, and
-  exit-code policy. The library's parse-error exit code (1) is never exposed: a parse error is `CLI001` and
-  exit `2`; help/version exit `0`. POSIX short-option bundling is disabled (`EnablePosixBundling = false`);
-  short options are separate tokens.
+  option applicability, `--name value`/`--name=value`, negative values such as `--jobs -1`, `--`, the help
+  action, and the `[suggest]` directive; the CLI supplies the root `--version` action. The CLI owns the
+  command graph, typed binding, `CLI001` wording, and exit-code policy. The library's parse-error exit code
+  (1) is never exposed: a parse error is `CLI001` and exit `2`; help and root `--version` exit `0`, while
+  `mocassin <command> --version` is `CLI001`/2. POSIX short-option bundling is disabled
+  (`EnablePosixBundling = false`); short options are separate tokens.
 - **Response files.** A token that starts with `@` and has at least one more character is a response-file
   reference; the remainder is the path, resolved against the process working directory, not the containing
   file. The CLI owns tokenization and recursive expansion; the library's response-file hook is disabled. `@`
@@ -1472,7 +1473,7 @@ mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
   only as the first non-whitespace character of a line, and quotes do not span lines (an unterminated quote
   that begins a token discards it; one inside a token keeps the token without the quote). A `@file` token
   inside a file is expanded recursively. Limits: **1 MiB of raw bytes per file, 4 MiB of raw response-file
-  bytes across the command line, depth 8, 10,000 tokens, 32 files**.
+  bytes across the command line, depth 8, 10,000 tokens contributed by response files, 32 files**.
   `@file` before `--` expands; after `--` it is literal. `--input=@file` is literal; `--input @file` expands
   before arity checking, so a multi-token file in a single-value position is a usage error. `--json` inside a
   file is honored; a `--json` inside a file that failed to read cannot enable a report, and no report is

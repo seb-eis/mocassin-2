@@ -51,7 +51,10 @@ where seven would have sufficed — about 74 minutes of re-dispatch overhead. St
 | Nightly | manual placeholder; no schedule until real suites exist | — | — |
 
 Before closeout, run `./tools/verify.sh all --require`. A skipped required gate is not a pass, and `cargo-deny`
-must be installed for the closeout run. Record the closeout CI run ID, `head_sha`, and the closeout evidence file
+must be installed for the closeout run. The `aot` gate is part of `all` and hard-fails, with a clear message,
+if clang/lld/ILCompiler is absent; it never silently skips. The closeout GitHub workflow runs
+restore/build/test/format and does **not** run `tools/verify.sh`, so the local command and its recorded output
+are the evidence for the local gates. Record the closeout CI run ID, `head_sha`, and the closeout evidence file
 described in [`closeout/README.md`](closeout/README.md).
 
 There are **no per-feature and no per-push step-branch CI runs**. Feature branches are validated locally with

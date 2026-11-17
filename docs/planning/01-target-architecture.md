@@ -261,7 +261,7 @@ The detailed file-sharing rules are in ADR 0011.
 | Model editor layout | Master-detail table/list + type-specific editor; Step 24 layout spike | No paid grid or third-party grid dependency; final layout chosen from owner-reviewed POCs |
 | DI/hosting | Microsoft.Extensions.* | Standard configuration, logging, DI, lifetime management |
 | JSON | System.Text.Json | Built-in, source-generated contexts, trimming/AOT friendly |
-| CLI parsing (.NET) | `System.CommandLine` 3.0.0 | Stable, MIT, CLI-only, no transitive dependency on `net10.0+`; AOT/trim-verified on `linux-x64`; typed binding and help/version without a hand-written parser. Bounded `@file` response files are CLI-owned. No shell-script generation; `[suggest]` is not a contract |
+| CLI parsing (.NET) | `System.CommandLine` 3.0.0 | Stable, MIT, CLI-only, no transitive dependency on `net10.0+`; AOT/trim-verified on `linux-x64`; typed binding and the library help action without a hand-written parser; the CLI supplies the root-only `--version` action. Bounded `@file` response files are CLI-owned. No shell-script generation; `[suggest]` is not a contract |
 | SQLite (.NET) | Microsoft.Data.Sqlite | Lightweight, no EF Core required for `.msl`/`.msr` |
 | SQLite (Rust) | `rusqlite` with `bundled` | Reproducible builds, no system dependency; reads `.msl` and `mmcfe.db` |
 | Package encoding | MessagePack + Zstd | Compact, schema-friendly, fast; shared conceptually with Rust |

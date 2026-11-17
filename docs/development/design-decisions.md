@@ -403,17 +403,20 @@ help/version, and reported parse errors like the JIT build. The `net10.0` asset 
 `IsAotCompatible`, and the dependency graph is empty for `net10.0+`. The `netstandard2.0` fallback and
 Windows/macOS AOT are untested.
 
-The library owns command-line tokenization (after the CLI expands response files), arity, help/version, and
-the `[suggest]` directive. The CLI owns the command graph, typed `ParseResult` binding, `CLI001` wording, and
-exit-code policy. The library's default parse-error
-exit code (1) is remapped to 2. Feature 1 adds a minimal AOT smoke host with the same package version and a
-positive control; the real CLI publish is recorded as evidence but is not a gate, because SQLite/MessagePack
+The library owns command-line tokenization (after the CLI expands response files), arity, help, and the
+`[suggest]` directive. The CLI owns the root `--version` action, the command graph, typed `ParseResult`
+binding, `CLI001` wording, and exit-code policy. The library's default parse-error
+exit code (1) is remapped to 2. Feature 1 adds the required `verify.sh aot` gate: a zero-warning minimal host
+plus a **separate** positive control that must emit IL2026/IL3050, and a host parse-error case that exercises the
+`CLI001`/2 remap. clang/lld/ILCompiler are Tier 1 and missing tools hard-fail, never skip. The gate is local:
+feature 7 runs `verify.sh all --require` at closeout and records the output, but the closeout GitHub workflow
+does not run `verify.sh`. The real CLI publish is recorded as evidence, not a gate, because SQLite/MessagePack
 are unverified. Only `linux-x64` AOT is proven, so Step 31's packaging gate still owns the platform matrix and
 the AOT/single-file decision.
 
 Response files (`@file`) are a CLI contract, not the library default. The CLI owns tokenization and recursive
 expansion and disables the library hook; the documented syntax and limits are 1 MiB of raw bytes per file,
-4 MiB of raw response-file bytes across the command line, depth 8, 10,000 tokens, and 32 files. Missing,
+4 MiB of raw response-file bytes across the command line, depth 8, 10,000 tokens contributed by response files, and 32 files. Missing,
 unreadable, invalid, or oversized files are `CLI001`/2, not `CLI002`/3. The full contract is the step page §5.3
 and `reference/cli.md`.
 

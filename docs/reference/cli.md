@@ -53,11 +53,12 @@ quotes and backslashes are literal, and there is no escape for a double quote in
 inside a token concatenate the parts (`a"b c"d` becomes `ab cd`; `a""b` becomes `ab`); a quote pair that starts
 a token followed immediately by another starts a separate token (`"a""b"` becomes `a` and `b`). A line whose
 first non-whitespace character is `#` is ignored; `#` elsewhere is literal. Double quotes do not span lines; an
-unterminated quote that begins a token discards it, and one inside a token keeps the token without the quote. A
-token in a file that starts with `@` is another response file.
+unterminated quote that begins a token discards it (`"x y` gives no token), and one inside a token keeps the
+token with the rest of the line and the quote removed (`x"y z` gives `xy z`). A token in a file that starts
+with `@` is another response file.
 
 Limits: **1 MiB of raw bytes per file, 4 MiB of raw response-file bytes across the command line, nesting depth
-8, 10,000 expanded tokens, and 32 response files**. Missing, unreadable, invalid, or oversized files exit 2 with
+8, 10,000 tokens contributed by response files, and 32 response files**. Missing, unreadable, invalid, or oversized files exit 2 with
 `CLI001`; they are usage errors, not `CLI002`/3.
 
 `@file` before `--` is expanded; after `--` it is a literal argument. `--name=@value` is the before-`--` form of

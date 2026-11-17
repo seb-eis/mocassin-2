@@ -115,7 +115,7 @@ Property tests are required for the following, using brute-force or analytic ora
 | Results store | `.msr` package binding, package-signature mismatch rejection, idempotent collection, previous-major read |
 | Job contracts | `solver.json`, job-folder paths, event stream, and `mmcfe.db` round-trip and reject malformed input |
 | Evaluation | MSD/diffusion/mobility/conductivity identities on analytic random walks; non-negativity; unit consistency; empty and single-particle cases |
-| CLI / parsing | Library parsing conventions (arity, `--opt=value`, negative values, `--`), bounded response files (syntax, limits, `--`/`--json` interaction, `CLI001`/2 errors), parse-error→`CLI001`/2 mapping, help/version 0, job-range parsing and normalization, full-expansion ID stability, partial selections, exit codes, report schema, JSON-Lines ordering; no crash on arbitrary arguments; AOT publish smoke check |
+| CLI / parsing | Library parsing conventions (arity, `--opt=value`, negative values, `--`), bounded response files (syntax, limits, `--`/`--json` interaction, `CLI001`/2 errors), parse-error→`CLI001`/2 mapping, help and root `--version` 0, subcommand `--version` `CLI001`/2, job-range parsing and normalization, full-expansion ID stability, partial selections, exit codes, report schema, JSON-Lines ordering; no crash on arbitrary arguments; required local AOT closeout gate |
 | Python reader | Valid document round-trip; malformed/truncated/future-version rejection; aggregation invariants match the .NET implementation |
 
 Property tests assert invariants, not a specific internal sequence. A failing case must be reproducible from the
@@ -450,27 +450,31 @@ solver with the same binary, platform, package, and seed.
 
 ### 9.10 Build orchestration and `mocassin` CLI
 
-- **Parser:** `System.CommandLine` 3.0.0 supplies tokenization, arity, and help/version. Tests pin the
+- **Parser:** `System.CommandLine` 3.0.0 supplies command-line tokenization, arity, and help; the CLI
+  supplies the root `--version` action. Tests pin the
   conventions the CLI relies on: every command, long/short option, `--opt=value`, `--`, missing value,
   unknown option, duplicate option, conflicting option, required option/argument, negative values
   (`--jobs -1`, `--parallel -1`, `-o -file`), and no POSIX short-option bundling. A parse error is
   `CLI001`/exit 2 with CLI-owned wording naming
-  the offending token; the library's default exit 1 is never returned; help and version exit 0. No arbitrary
+  the offending token; the library's default exit 1 is never returned; help and root `--version` exit 0, and a
+  subcommand `--version` is `CLI001`/2. No arbitrary
   `string[]` crashes or throws.
 - **Response files:** `@file` syntax, double-quote grouping and empty quotes, golden tokenizer cases
   `a"b c"d` → `ab cd`, `a""b` → `ab`, `"a""b"` → `a` + `b`, `""` → empty, unterminated-quote discard/keep,
   literal single quotes and backslash, `#` comments only at line start, recursive references, cwd-relative
   paths, `@` literal and no escape, `--` stops expansion, `--input=@file` literal, `--input @file`
   token-expanded before arity, `--json` inside/outside the file, 1 MiB of raw bytes per file / 4 MiB of raw
-  response-file bytes across the command line / depth 8 / 10,000 tokens / 32 files, and missing/unreadable/
+  response-file bytes across the command line / depth 8 / 10,000 tokens contributed by response files / 32 files, and missing/unreadable/
   directory/invalid-UTF-8/oversized → `CLI001`/2 (not `CLI002`/3). The library default is not the contract.
-- **AOT:** a minimal smoke host that references `System.CommandLine` 3.0.0 is published with
-  `-p:PublishAot=true -p:TrimMode=full -r linux-x64`; the check asserts zero IL2xxx/IL3xxx warnings, a
-  positive control emits IL2026/IL3050, and the native binary runs `--help`, `--version`, and one parse-error
-  case. The real `Mocassin.Cli` publish result is recorded as evidence; dependency-owned
-  `Microsoft.Data.Sqlite`/`MessagePack` warnings are attributed to Step 31. The check is a `verify.sh aot`
-  mode included in `verify.sh all`, so it runs at every step closeout and the Step 31 release gate; it is not
-  a scheduled nightly job. Only `linux-x64` is covered; Windows/macOS AOT and the `netstandard2.0` asset are
+- **AOT:** `verify.sh aot` publishes a minimal `System.CommandLine` 3.0.0 host with
+  `-p:PublishAot=true -p:TrimMode=full -r linux-x64` and asserts zero IL2xxx/IL3xxx warnings, then publishes a
+  **separate** positive control that must emit IL2026 and IL3050. The native host includes the `CLI001`/2
+  remap, so its parse-error case exits 2. Missing clang/lld/ILCompiler is a hard failure with a clear message,
+  never a skip. The real `Mocassin.Cli` publish is recorded as evidence; dependency-owned
+  `Microsoft.Data.Sqlite`/`MessagePack` warnings are attributed to Step 31. `aot` is part of `verify.sh all`
+  and is a **local** closeout gate: feature 1 adds the mode/hosts, feature 7 runs `all --require` at Step 12
+  closeout and records the output; the closeout GitHub workflow does not run `verify.sh`. It is not a
+  scheduled nightly job. Only `linux-x64` is covered; Windows/macOS AOT and the `netstandard2.0` asset are
   Step 31 platform gates.
 - **Selection:** build-template/job-template/parameterization precedence is table-driven; one/two/many cases,
   explicit overrides, wrong-kind IDs, unknown IDs, and the implicit default all have tests. The selected
@@ -513,10 +517,10 @@ solver with the same binary, platform, package, and seed.
 - **`validate` regression:** the human table, `validation-v1` JSON, and 0/1/2/3 exit codes are unchanged by the
   parser/report refactor.
 - **Tiers and performance:** the above are PR-fast with the fake solver probe; the 10⁴-job build + verify
-  and the real solver probe are nightly/release. The AOT smoke check is a `verify.sh aot` mode included in
-  `verify.sh all`, so it runs at every step closeout and the Step 31 release gate, not nightly. The Step 12
-  evidence records time, peak RSS, package size, and verification result against the Step 11 budget
-  (< 10 min, < 2 GB).
+  and the real solver probe are nightly/release. The AOT smoke check is the **local** `verify.sh aot` mode
+  included in `verify.sh all`; feature 7 runs it at Step 12 closeout and records the output. The closeout
+  GitHub workflow does not run `verify.sh`, so the AOT gate is not a CI confirmation. The Step 12 evidence
+  records time, peak RSS, package size, and verification result against the Step 11 budget (< 10 min, < 2 GB).
 
 ## 10. Contract tests
 

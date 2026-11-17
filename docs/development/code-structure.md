@@ -87,8 +87,9 @@ Mocassin.Cli/
 - Folders are PascalCase command/domain concepts. `Commands/`, `Handlers/`, and `Output/` are not allowed;
   `CommandLine/Reports` names the shared report concept, and each command folder owns its own output.
 - `CommandLine` owns the `System.CommandLine` command graph, typed `ParseResult` binding, parse-error mapping,
-  help/version (library actions), and exit-code policy. There is no hand-written parser, `CommandCatalog`,
-  `CommandDefinition`, `OptionDefinition`, `ParsedCommand`, `HelpWriter`, or `CompletionWriter`.
+  the library help action, the CLI root `--version` action, and exit-code policy. There is no hand-written
+  parser, `CommandCatalog`, `CommandDefinition`, `OptionDefinition`, `ParsedCommand`, `HelpWriter`, or
+  `CompletionWriter`.
 - Namespaces match folders (`Mocassin.Cli.CommandLine`, `Mocassin.Cli.Build`, `Mocassin.Cli.Doctor.Checks`).
 - The 20-file and 800-line limits apply per folder and file. `Doctor/Checks/` resets the count; a large
   `BuildCommand` is split into a command, report writer, event writer, and progress renderer. `Doctor` owns
