@@ -28,8 +28,9 @@ flags take no value. A value beginning with `-` is accepted for a value-taking o
 `--parallel -1` reach the command as `-1` (and are rejected by range checks), and `-o -file` names the path
 `-file`. `--` ends option parsing so a path beginning with `-` can be passed. Option names are
 case-sensitive; combined short options are not supported. Numbers use invariant culture: `--parallel` accepts
-`1..256` (omitting it uses the processor count) and `--older-than` accepts `0..36500`. A parse error exits 2 with a `CLI001` diagnostic; the library's own parse-error exit code (1) is
-never exposed.
+`1..256`; omitting it uses the processor count, while an explicit `--parallel 0` is a range error, not a
+synonym for the default. `--older-than` accepts `0..36500`. A parse error exits 2 with a `CLI001` diagnostic;
+the library's own parse-error exit code (1) is never exposed.
 
 `--json` makes stderr JSON Lines only and suppresses human progress, whether or not `--quiet` is used.
 `--quiet` additionally suppresses the `build.stage`, `build.progress`, and `log` JSON-Lines events;
@@ -84,7 +85,9 @@ the directory is created if missing.
 
 `name` is both the display name and the file stem. It is trimmed, one `.mocprj` suffix is removed, and path
 separators, `..`, control characters, and `: * ? " < > |` are rejected. The command never replaces an
-existing project: a collision exits 3.
+existing project: an existing target file is `CLI003`/3. A directory occupying `<dir>/<name>.mocprj` and an
+invalid output path are I/O failures, `CLI002`/3. The embedded blank and ceria assets are compiled resources,
+so creation needs no template directory or network access.
 
 ## `mocassin validate`
 
@@ -162,9 +165,11 @@ Loads, validates, and compiles the model. It never applies a parameterization, e
 package.
 
 - `-o` writes the canonical `compiled-inspection-v1` document atomically. It replaces an existing derived
-  file; a directory target exits 3.
+  file; a directory target, a missing parent directory, or an invalid path is `CLI002`/3.
 - `--json` prints a `compile-v1` summary with the model and document hashes, the compiled-model signature,
-  compiler version, counts, cache statistics, stage timings, and diagnostics.
+  compiler version, counts, cache statistics, stage timings, and diagnostics. `stages[]` reports the ten
+  compiler stages in order: `resolve`, `structure`, `environments`, `pairs`, `clusters`, `rules`, `encoding`,
+  `indexing`, `signing`, and `report`; `report` always runs, even when an earlier stage fails.
 - Validation errors exit 1 before compilation; `CMP` compile errors exit 4.
 - Without `-o`, the inspection document is not written; the command still reports the summary.
 
@@ -207,6 +212,11 @@ payloads, writes the package, publishes it atomically, and verifies it.
 - `-o` sets the package path. Without it, a build template’s output name is used; without a build template,
   `<project-file-stem>.msl` is written next to the project. A build-template output name is a file-name stem;
   separators and `..` are rejected.
+- An explicit `-o` target is checked before any load: an existing package without `--force` is `CLI003`/3,
+  and an invalid or impossible target is `CLI002`/3, so no build work starts. A target derived from a build
+  template’s output name needs the recipe, so the CLI performs a preflight load and selection, checks the
+  derived target, and then hands the project to the build pipeline, which loads it again for the build. The
+  writer’s overwrite guard remains the final race check.
 - An existing package is never replaced unless `--force` is given. Without it, the command exits 3 and the
   existing file is untouched.
 - Publication is atomic: the writer builds in a temp file beside the target, checkpoints, fsyncs, and renames.
@@ -317,8 +327,15 @@ Read-only inspection through the shared package inspector. It prints the package
 job and lattice counts, collections, temperature and electric-field ranges, size, lattice reuse factor, and
 the recorded `jobSelection`. It never opens the package writable and never needs `-wal`/`-shm` files.
 
-`--json` prints `inspect-v1` with a `package` object containing those fields. A missing file exits 3; an
-unreadable package exits 1 with a hint to run `mocassin verify`.
+Inspection is deliberately tolerant of non-fatal defects: it reports the metadata it can still read, so a
+corrupt payload or a wrong signature is diagnosed by `mocassin verify` rather than blocking inspection. This
+is an intended improvement over the original model builder, whose build/read failures appeared only as text
+in a log console. Only a fatal structure failure makes the package uninspectable. A missing file, a directory,
+or an unreadable path is `CLI002`/3 and is checked before the inspector opens the file.
+
+`--json` prints `inspect-v1` with a `package` object containing those fields. A fatal structure failure is
+`CLI009`/1 with a hint to run `mocassin verify`; `CLI009` means “this input cannot be inspected as a
+simulation package”, not “the package is corrupt in some payload”.
 
 ## `mocassin verify`
 
@@ -335,8 +352,9 @@ never mutates the package and never writes a results store.
 | `1` | The package is invalid; `PKG` diagnostics explain why. |
 | `3` | The file is missing or cannot be read. |
 
-`--json` prints `verify-v1` with `valid`, `checks[]`, `diagnostics[]`, and the same `package` object as
-`inspect`.
+`--json` prints `verify-v1` with `valid`, `checks[]`, and the same `package` object as `inspect`. The report
+has one `diagnostics[]` array, the shared envelope; it carries the `PKG` findings. There is no second
+payload-local diagnostics array.
 
 ## `mocassin doctor`
 
@@ -348,7 +366,14 @@ Checks the .NET runtime, OS and architecture, SQLite availability and version, w
 space in the current directory, the embedded symmetry catalog version and checksum, the embedded project
 templates, and an optional solver.
 
+The checks run in a fixed order: `runtime`, `sqlite`, `write-permission`, `disk-space`, `symmetry-catalog`,
+`project-templates`, and `solver`.
+
+- Free space below **100 MiB** is a `warn`, not a failure: the threshold is advisory and the command stays
+  healthy. The code names the check `disk-space` and reports the free bytes.
 - A missing solver is a **warning** until the solver ships; a configured but broken solver is a failure.
+- A check that throws is recorded as a `fail` with the exception type and message; it never aborts the
+  command, so the report stays schema-valid.
 - The command exits 0 when no check fails; warnings do not fail it. It exits 1 when a check fails.
 - `--json` prints `doctor-v1` with `healthy`, `checks[]` (`name`, `status`, `message`, optional `detail`), and
   the environment (`framework`, `os`, `architecture`, `sqliteVersion`, `catalogVersion`, `catalogSha256`,
@@ -364,11 +389,13 @@ Step 12 implements only the dry run. It lists `Job%05d` folders in `--dir` (defa
 optionally filtered by age, and reports their paths, IDs, timestamps, and sizes. The package is opened
 read-only to report its `jobSelection` and `jobCount`.
 
-`--dry-run` is required in this release; without it the command exits 2 and points to the deletion command.
-With `--json`, that usage error still emits one `clean-v1` report with `dryRun: false`, `removedCount: 0`, and
-`CLI008`. No file, folder, `.msl`, or `.msr` is ever removed. `--results` is reserved for the results-store
-step. With `--dry-run`, `--json` prints `clean-v1` with `dryRun: true`, the folder list, total bytes, and
-`removedCount: 0`.
+`--dry-run` is required in this release; without it the command exits 2 with `CLI008` and points to the
+deletion command. The refused run is still read-only: it lists the same `Job%05d` folders it would remove,
+and with `--json` it emits one `clean-v1` report with `dryRun: false`, the listing, `removedCount: 0`, and
+`CLI008`. `--results` is reserved for the results-store step; it also exits 2 with `CLI008` and a minimal
+`clean-v1` report (no package inspection and an empty listing). No file, folder, `.msl`, `.msr`, or `.mcs` is
+ever removed by either path. With `--dry-run`, `--json` prints `clean-v1` with `dryRun: true`, the folder
+list, total bytes, and `removedCount: 0`.
 
 ## Shell completion
 

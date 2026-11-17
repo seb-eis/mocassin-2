@@ -41,6 +41,38 @@ All measured values are far below the design targets (< 20 ms create, < 50 ms ap
 The synthetic large-model case is a separate PR-medium/nightly guard; these numbers describe the checked-in
 samples only.
 
+## Package build (Step 12)
+
+The Step 12 acceptance workload is a synthetic 10,000-job project derived from
+`samples/jobs/ceria-temperature-sweep.mocprj`: two collections, ten configurations each, `500` jobs per
+configuration, mixed `6×6×6`/`8×8×8` ceria cells, no GUI. The command was:
+
+```sh
+dotnet src/dotnet/Mocassin.Cli/bin/Release/net11.0/Mocassin.Cli.dll \
+  build /tmp/opencode/10k.mocprj -o /tmp/opencode/10k.msl --json
+```
+
+Measured on the AMD Ryzen 7 7840U (16 logical cores), Debian GNU/Linux 13, Linux 6.12, .NET 11.0.100 / runtime
+11.0.0, Release build. Wall clock and peak RSS were captured around the child process with
+`resource.getrusage(RUSAGE_CHILDREN).ru_maxrss`; the number is the whole `dotnet` process, not an isolated
+allocation measurement.
+
+| Metric | Result |
+| --- | ---: |
+| Jobs / configs | 10,000 / 20 |
+| Wall time, full build + built-in verification | 3.76 s |
+| Peak RSS | 151,820 KB (~148 MiB) |
+| Package size | 9,625,600 bytes (~9.2 MiB) |
+| Job selection | `all`, expanded and selected 10,000 |
+| Lattice count / reuse factor | 9,998 / 1.0002 |
+| Post-build verification | passed, 10 checks, 0 diagnostics |
+| Standalone `mocassin verify` | 1.21 s, 135,624 KB peak RSS, valid |
+
+Stage timings from the report were load `2.6 ms`, select `0.5 ms`, validate `204.4 ms`, compile `89.6 ms`,
+build-stage validate `21.7 ms`, parameterize `13.4 ms`, expand `22.2 ms`, generate `2113.9 ms`, publish
+`16.8 ms`, and verify `796.0 ms`. The full-build budget (< 10 min, < 2 GB) is met with wide margin; the
+acceptance evidence and exact command are also recorded in the Step 12 page.
+
 ## HPC
 
 The solver is a process-per-job design. SLURM/PBS templates and a runner are added in Step 19. Job folders

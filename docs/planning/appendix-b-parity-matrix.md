@@ -15,7 +15,7 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Create new project | Y | Planned | 01/12/23 | Blank, ceria, and barium-zirconate skeletons in 01/03; CLI `new` templates planned in 12; creation UI in 23 |
+| Create new project | Y | Partial | 01/12/23 | Blank, ceria, and barium-zirconate skeletons in 01/03; headless `mocassin new --template blank|ceria` with fresh identity and embedded assets in 12; creation UI in 23 |
 | Open/save/close project | Y | Planned | 01/23 | Atomic writes, lock, autosave store in 01; lifecycle UI in 23 |
 | Recent files | N | Improvement | 23 | Workspace model |
 | Multiple projects per file | N | Replaced | 23 | One project per file; workspace of open files |
@@ -30,7 +30,7 @@ Status legend:
 | Cross-domain validation pipeline | Y | Implemented | 07 | Load/model/cross-domain/feasibility; no post-validation mutation |
 | Stable diagnostic catalog | Y | Implemented | 07 | Codes, owners, severities, paths, hints; docs-drift checked |
 | Model statistics and feasibility | Y | Implemented | 07 | Counts, rule/memory estimates, buildability warnings |
-| Headless `mocassin validate` | Y | Partial | 07/12 | `validation-v1`, diagnostics, statistics, and exit codes in 07; Step 12 adds the full command surface |
+| Headless `mocassin validate` | Y | Done | 07/12 | `validation-v1`, diagnostics, statistics, and exit codes in 07; the complete CLI command surface, shared report family, and parser conventions in 12 |
 | `validation-v1` report | Y | Implemented | 07 | Sorted diagnostics, summary, optional statistics; schema checked |
 | GUI diagnostic navigation | Y | Planned | 07/24/25 | `ModelPath` navigation and stats panels |
 
@@ -115,7 +115,7 @@ Status legend:
 | Compilation diagnostics/report | Y | Done | 08 | `CMP` catalog, counts, timings, input hashes, cache statistics |
 | Compilation stage cache | N | Done | 08 | Content-hash keys; per-compilation default, optional caller cache |
 | Compiled-model JSON inspection | N | Done | 08/12 | `compiled-inspection-v1`; `mocassin compile` in 12 |
-| Headless `mocassin compile` | Y | Planned | 12 | Step 08 library only; Step 12 adds the `compiled-inspection-v1` output, `compile-v1` summary, and exit codes |
+| Headless `mocassin compile` | Y | Done | 12 | `compiled-inspection-v1` output with `-o`, `compile-v1` summary with the ten compiler stages, cache statistics, and exit codes |
 
 ## 6. Simulations, templates, and builds
 
@@ -137,21 +137,21 @@ Status legend:
 | Site energy overrides in template | N | Done | 09 | Original limitation removed; reset-to-model |
 | `PRM` diagnostics | N | Done | 09 | Structural Core checks + compiled-bound Packages checks; docs-drift checked |
 | Checked-in golden templates | N | Done | 09 | Ceria and barium-zirconate templates; applied values and signatures regenerated through the real compiler/apply path |
-| `mocassin parameterize` CLI | N | Replaced | 12 | Step 12 adds `compile` and `build --parameterization`; no separate command |
+| `mocassin parameterize` CLI | N | Replaced | 12 | `compile` and `build --parameterization` select, validate, apply, and rebase templates; no separate command |
 | Job collections/configs | Y | Done | 10 | Typed Core records, project JSON/manifest, authored-order expansion, and structural `JOB` validation |
 | Base + config overrides | Y | Partial | 10/26 | Correct simulation → collection → config inheritance, kind checks, and extension replacement in 10; editor UI in 26 |
 | Job duplicates/multiplier | Y | Done | 10 | `jobCountPerConfig`/simulation default, 1-based IDs, per-duplicate seeds |
 | Selection optimizers | Y | Partial | 10/11/14/26 | P1 image expansion, dual-DOF rule, and `JOB009` reference check in 10; `.msl` encoding in 11; runtime removal in 14; editor UI in 26. Partial until Step 14. |
 | Lattice size + doping values | Y | Partial | 10/26 | Deterministic supercell, dopings, truncation, compensation, and preview in 10; editor UI in 26 |
-| Build template selection | Y | Partial | 10/12/26 | `build --preview --template` selection in 10; Step 12 adds build/job-template/parameterization selection, overrides, ambiguity listing, and the implicit default; UI in 26 |
-| Build preview (no package write) | Y | Done | 10/12 | Shared `ILatticePreviewService`, `build-preview-v1`, and CLI path in 10; Step 12 replaces the report with `build-v1` preview mode; never opens or writes `.msl` |
-| Create/overwrite package | Y | Partial | 11/12/26 | Immutable `.msl` v1 writer, verifier, fixtures, and atomic publication in 11; Step 12 adds full `build`, `--force`, partial jobs, and verification; build UI in 26 |
+| Build template selection | Y | Partial | 12/26 | `--template` selects a build template; `--job-template` and `--parameterization` override it; ambiguity lists IDs and names; the implicit parameterization default is applied when none exists; selection UI in 26 |
+| Build preview (no package write) | Y | Done | 10/12 | Shared `ILatticePreviewService` and `BuildPreviewBuilder`; the CLI projects `BuildResult.Preview` into `build-v1` preview mode, never opens or writes `.msl`, and rejects `-o`/`--force`/`--compact` |
+| Create/overwrite package | Y | Partial | 11/12/26 | Immutable `.msl` v1 writer, verifier, fixtures, and atomic publication in 11; full `build`, `--force`, partial jobs with stable full-expansion IDs, and post-publication verification in 12; build UI in 26 |
 | Append to existing package | N | Deferred | post-1.0 | Not required; rebuild is safer |
 | 99,999-job cap | Y | Done | 10 | Hard cap `JOB019`; warning `JOB013` above 10k |
-| Build progress/cancel/log | Y | Planned | 12/26 | Step 12 adds the typed stage/progress event stream, JSON-Lines events, Ctrl+C/SIGTERM cancellation, and temp cleanup; UI in 26 |
-| Package inspection/verification | Y | Improvement | 11/12 | Read-only inspector/verifier, `PKG` diagnostics, `package-summary-v1`, fixtures in 11; Step 12 adds the CLI `inspect`/`verify` |
-| CLI `doctor` | N | Planned | 12 | Step 12 adds runtime, SQLite, write/disk, catalog, template, and optional solver checks with a healthy CI run |
-| Clean job folders (dry run) | Y | Planned | 12/28 | Step 12 adds the `clean --dry-run` listing; deletion and `.msr` cleanup in 28 |
+| Build progress/cancel/log | Y | Partial | 12/26 | Typed stage/progress event stream, throttled JSON-Lines events, Ctrl+C/SIGTERM cancellation with temp cleanup and package preservation in 12; build UI in 26 |
+| Package inspection/verification | Y | Improvement | 11/12 | Read-only inspector/verifier, `PKG` diagnostics, `package-summary-v1`, fixtures in 11; CLI `inspect`/`verify` with `inspect-v1`/`verify-v1`, tolerant inspection, and exit/`CLI009` mapping in 12 |
+| CLI `doctor` | N | Improvement | 12 | Seven ordered checks (runtime, SQLite, write permission, disk, symmetry catalog, project templates, optional solver), `doctor-v1`, warning/failure semantics, and a healthy CI run; the original had no environment diagnosis |
+| Clean job folders (dry run) | Y | Partial | 12/28 | `clean --dry-run` lists `Job%05d` folders with age filtering and sizes, reports `clean-v1`, and never deletes; a no-dry-run request is refused with `CLI008`; deletion and `.msr` cleanup in 28 |
 | `.msl` v1 format and fixtures | Y | Done | 11 | Schema, content-addressed payloads, canonical summary, verification, checked-in `msl-v1` fixture, and the pre-switch compatibility fixture. The Rust reader that consumes the fixture is Step 13. |
 | Build history | N | Improvement | 26 | |
 
@@ -267,7 +267,7 @@ Status legend:
 | User guide + physics | Y | Partial | 03–07/30 | Model-definition pages exist; Step 30 completes cross-cutting content |
 | Developer architecture guide | Y | Partial | 00–07/30 | Architecture, compilation pipeline, testing, and workflow pages exist; Step 30 completes |
 | Tutorials | Y | Planned | 30 | Ceria, BaZrO3, vehicle, HPC, analysis |
-| CLI + format reference | Y | Partial | 07/12/30 | `validate`, diagnostics, and project references in 07; Step 12 adds the full CLI reference; formats and documentation completion in 30 |
+| CLI + format reference | Y | Partial | 07/12/30 | `validate`, diagnostics, and project references in 07; the full CLI command/option/report/event/exit-code reference and troubleshooting entries in 12; formats and documentation completion in 30 |
 | Troubleshooting + FAQ | Y | Planned | 30 | |
 | Performance + HPC guide | Y | Planned | 30 | |
 | Contributing + dev workflow | Y | Implemented | 00 | Branches, review gates, local gates, and evidence playbook |

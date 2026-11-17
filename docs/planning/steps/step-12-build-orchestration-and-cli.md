@@ -76,15 +76,11 @@ implemented and squashed. Feature rows stay empty until then.
    "final names now". `AGENTS.md` §3.8/§7 routes decisions through the orchestrator, so asking outside that
    route is recorded as a process deviation (owner: step agent; no action required; future design questions go
    through the orchestrator). `build --preview` now uses `--job-template`; `--template` is the build-template
-   option and preview rejects it with `CLI004`/2 until feature 3 folds preview into the full build. The Step 10
-   `--template`-as-job-template spelling is retired now rather than at feature 3.
-3. **Interim command placeholders (feature 1 only).** `new`, `compile`, `inspect`, `verify`, `doctor`, and
-   `clean` are defined in the command graph but return `CLI008`/2 with the owning Step 12 feature until
-   features 4–6 implement them. `build` without `--preview` does the same until feature 3. Those interim
-   commands emit no JSON report, and `build --preview` still emits the Step 10 `build-preview-v1` report; the
-   one-report guarantee and `build-v1` arrive with feature 3. Preview also rejects the not-yet-wired build
-   options (`--jobs`, `--parallel`, `--force`, `--compact`, `--parameterization`, `--warnings-as-errors`,
-   `--quiet`, `-o`) with `CLI001`/2 instead of silently ignoring them.
+   option and returns `CLI004`/2 when given a job-template ID.
+3. **Interim command placeholders (feature 1 only; historical).** During feature 1, `new`, `compile`,
+   `inspect`, `verify`, `doctor`, and `clean` were defined but returned `CLI008`/2 until features 4–6
+   implemented them. No placeholder survives: all seven report-backed commands now dispatch to real handlers,
+   and only `simulate`, `collect`, `evaluate`, `export`, and full `clean` remain reserved.
 4. **Real `Mocassin.Cli` AOT publish is not clean (recorded evidence; Step 31 owner).** The required
    `verify.sh aot` gate passes: the strict smoke host publishes with zero IL2xxx/IL3xxx warnings, the separate
    positive control emits IL2026 and IL3050, and the native parse error exits 2 with `CLI001`. Publishing the
@@ -102,12 +98,15 @@ implemented and squashed. Feature rows stay empty until then.
    build-stage validation, and `PackageWrite` has no writer-returned `PKG` error in v1. Both values are
    implemented and mapped by the design; they are not exercised end to end. Feature 3's writer fault injection
    covers `PackageWrite` if the writer gains an error result.
-8. **Promoted parameterization warnings are covered by a command seam, not a real project.** The only
-   buildable sample carries unrelated model warnings (ENM017/ENM018), so `WarningsAsErrors` stops at
-   `Validation` before the parameterization stage. Feature 3 tests the real validation→exit-1 rule end to end
-   and the parameterization→exit-4 rule through a scripted `IBuildPipeline` that returns
-   `Failure = Parameterization`; the library promotion condition itself is not exercised by a project fixture.
-
+8. **Promoted parameterization warnings now have a real end-to-end fixture (closed in feature 7).** Feature 3
+   covered the validation→exit-1 rule with the real sample and the parameterization→exit-4 rule through a
+   scripted `IBuildPipeline`. Feature 7 adds `tests/contracts/project-parameterization-warning.mocprj`, a clean
+   buildable ceria variant with explicit `2.5 Å` energy environments, no dopings in its single job config, and a
+   deliberately unset explicit parameterization. It validates with zero warnings, so
+   `build --warnings-as-errors` reaches `parameterize` and exits 4 with `PRM003`/`PRM006`; without the flag the
+   same fixture builds, publishes, and verifies. `BuildParameterizationWarningTests` pins the fixture’s
+   warning-free validation, both outcomes, and the fact that the failed build writes no package. The scripted
+   seam test remains as the mapping guard.
 9. **Target pre-check order.** An explicit `-o` target is checked before any load. A default target derived
    from a build template can only be resolved after the CLI loads the project and selects the recipe, so that
    pre-check happens before the pipeline runs but after this one preflight load. The writer's
@@ -117,6 +116,18 @@ implemented and squashed. Feature rows stay empty until then.
     SIGINT/SIGTERM cancellation and the second-signal default termination; `BuildCommand` receives the token
     through `CliApplication.RunAsync`, which keeps the command unit-testable. The observable behaviour matches
     §13.3.
+11. **`new`/`compile` path mappings.** A directory occupying the `new` target path is `CLI002`/3; the design
+    specifies only the existing-file collision as `CLI003`/3. `compile -o` maps a directory target, a missing
+    parent, or an invalid path to `CLI002`/3, following the §11 I/O rule. Neither case writes or replaces a
+    file. The same rule applies to `build -o`.
+12. **`inspect` is tolerant of non-fatal package defects.** The Step 11 inspector intentionally reports what
+    it can read; a corrupt payload or a wrong signature is a `verify` `PKG` finding. `inspect` maps only fatal
+    structure failures (`InvalidDataException`) to `CLI009`/1, matching §13.4. The missing, directory, and
+    unreadable path pre-check is `CLI002`/3 and runs before the inspector opens the file. This is an intended
+    improvement over the original model builder, whose failures appeared only in a log console.
+13. **`verify-v1` has one diagnostics array.** The `PKG` findings are the shared envelope’s `diagnostics[]`;
+    `checks[]` is the ordered check list. The data contract and CLI reference were reconciled to this in
+    feature 7; there is no second payload-local array.
 14. **`doctor` disk-space threshold.** Free space below 100 MiB is a warning, not a failure; the design lists
     the check without a threshold. The command stays healthy unless a check reports `fail`.
 15. **`clean` report content outside the supported mode.** The no-dry-run report still lists the folders it
@@ -124,18 +135,6 @@ implemented and squashed. Feature rows stay empty until then.
     report without inspecting the package. Both exit 2 and delete nothing.
 16. **A throwing doctor check is a failing check.** The command records `fail` with the exception type and
     keeps the report schema-valid instead of aborting; the design does not define this failure mode.
-13. **`inspect` is tolerant of non-fatal package defects.** The Step 11 inspector intentionally reports what
-    it can read; a corrupt payload or a wrong signature is a `verify` `PKG` finding. `inspect` maps only fatal
-    structure failures (`InvalidDataException`) to `CLI009`/1, matching §13.4. The missing, directory, and
-    unreadable pre-check is `CLI002`/3 and runs before the inspector opens the file.
-12. **`new`/`compile` path mappings.** A directory occupying the `new` target path is `CLI002`/3; the design
-    specifies only the existing-file collision as `CLI003`/3. `compile -o` maps a directory target, a missing
-    parent, or an invalid path to `CLI002`/3, following the §11 I/O rule. Neither case writes or replaces a
-    file.
-11. **Only `build` and `validate` are report-backed in feature 3.** The other five report ids
-    (`new-project`, `compile`, `inspect`, `verify`, `doctor`, `clean`) still return their feature-4/5/6
-    placeholders and emit no report; their reports land with the commands. Reserved commands and
-    help/version still emit none.
 
 ## 1. Goal
 
@@ -1895,6 +1894,44 @@ These decisions are recorded by date and are not open for re-litigation in round
       `JobId`.
 - [ ] The CLI builds and verifies 10⁴ jobs without the GUI within the Step 11 budget (< 10 min, < 2 GB).
 - [ ] Documentation written (§18.1).
+
+### Acceptance evidence (2026-11-17)
+
+All commands ran from the repository root with the Release CLI
+`src/dotnet/Mocassin.Cli/bin/Release/net11.0/Mocassin.Cli.dll` on the AMD Ryzen 7 7840U (16 logical cores),
+Debian GNU/Linux 13, Linux 6.12, .NET 11.0.100 / runtime 11.0.0. This is a recorded acceptance run, not a
+benchmark; the performance page carries the same workload with method and stage timings.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Validate the ceria model | `mocassin validate samples/ceria/ceria.mocprj` | exit 0, 0 errors / 0 warnings / 0 infos, `valid`; human table unchanged |
+| Build the job sample | `mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o /tmp/opencode/ceria-sample.msl --json` | exit 0, `jobSelection = all`, 6 jobs, 98,304 bytes, `verification = passed` |
+| Verify the sample package | `mocassin verify /tmp/opencode/ceria-sample.msl --json` | exit 0, `valid`, 10 checks, 0 diagnostics |
+| Partial selection | `mocassin build … --jobs 1-3 --json` | exit 0, `expression = 1-3`, 3 jobs; full build reports `all`, 6 jobs; both verify |
+| Malformed selections | `--jobs 0`, `--jobs -1`, `--jobs 3-1`, `--jobs 99` | exit 2 with `CLI005` in each case; no package is written |
+| Cancellation | SIGINT 0.8 s into a 10,000-job `--force` build whose target already held a valid package | exit 6, `CLI006`, `published = false`, existing package SHA-256 unchanged, no `*.tmp-*` file left |
+| JSON schemas | the report schema assertion used by the CLI tests (`JsonSchemaAssert`) over every `--json` invocation | each report validates against its generated schema; parse/usage errors still emit one object |
+| Doctor | `mocassin doctor --json` | exit 0, `healthy = true`; `solver` is `warn` because `mocassin-sim` is not on `PATH` |
+| 10⁴ jobs | see below | 10,000 jobs built and verified in 3.76 s with 151,820 KB peak RSS |
+
+**10⁴-job workload.** The synthetic project is a copy of `samples/jobs/ceria-temperature-sweep.mocprj` with
+each collection expanded to ten configurations and `jobCountPerConfig = 500`, giving **20 configurations ×
+500 = 10,000 jobs**. Four configs × 2,500 would exceed `JOB008` (1–1000 per-configuration jobs). Mixed
+`6×6×6`/`8×8×8` ceria cells, no GUI. The command was:
+
+```sh
+dotnet src/dotnet/Mocassin.Cli/bin/Release/net11.0/Mocassin.Cli.dll \
+  build /tmp/opencode/10k.mocprj -o /tmp/opencode/10k.msl --json
+```
+
+Result: exit 0, `jobSelection = all` (10,000 expanded / 10,000 selected), `verification = passed`, package
+9,625,600 bytes (~9.2 MiB), 9,998 lattices with reuse factor 1.0002, 7 warnings, 0 errors. Wall time was
+**3.76 s** and peak RSS **151,820 KB (~148 MiB)** for the whole `dotnet` child process
+(`resource.getrusage(RUSAGE_CHILDREN).ru_maxrss`). A standalone `mocassin verify` took 1.21 s with 135,624 KB
+peak RSS and returned `valid` with 10 checks. The budget is < 10 min and < 2 GB. Stage timings were load 2.6 ms,
+select 0.5 ms, validate 204.4 ms, compile 89.6 ms, build-stage validate 21.7 ms, parameterize 13.4 ms, expand
+22.2 ms, generate 2,113.9 ms, publish 16.8 ms, verify 796.0 ms.
+
 
 ## 23. Tests
 

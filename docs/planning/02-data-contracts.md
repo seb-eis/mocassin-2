@@ -1446,8 +1446,9 @@ mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
   and reports `build-v1` with `mode = "preview"`. `--preview` rejects `-o`, `--force`, and `--compact`.
 - `--compact` is the size preset: Zstd quality `9` plus `VACUUM` before publication. It changes compressed
   bytes and file size, never payload content, signatures, or the canonical summary.
-- `--parallel` controls compilation and lattice generation concurrency; package writes are serialized in
-  ascending `job_id` order, and output is independent of the degree.
+- `--parallel` accepts `1..256` and controls compilation and lattice generation concurrency; omitting it uses
+  the processor count, and an explicit `--parallel 0` is a usage error rather than a shorthand for the
+  default. Package writes are serialized in ascending `job_id` order, and output is independent of the degree.
 - `simulate` launches `mocassin-sim` per job and captures stdout/stderr. It does not modify the `.msl`.
 - `collect` reads `Job%05d/solver.json`, `run.mcs`, `prerun.mcs`, and logs, validates them, and writes the
   `.msr` results store. The default is `<package>.msr`; `--results` overrides it.
@@ -1816,6 +1817,12 @@ fields. This is why a usage error with `--json` validates against the same schem
 `clean --json` without `--dry-run` is a usage error that still uses `clean-v1` with `dryRun = false`,
 `removedCount = 0`, and `CLI008`.
 
+`CLI002`/3 covers an input/output path failure, including a directory passed where a file is required, a
+missing parent directory, or a missing/unreadable input; the path is checked before the command opens a
+package. `CLI009`/1 means the input cannot be inspected as a package. `inspect` is tolerant of non-fatal
+payload and signature defects, so those are reported by `verify`; only a fatal structure failure is
+`CLI009`.
+
 #### 5.7.3 `build-v1`
 
 `build-v1` replaces the Step 10 interim `build-preview-v1` and covers both full builds and previews:
@@ -1850,11 +1857,11 @@ fields. This is why a usage error with `--json` validates against the same schem
 | Report | Payload fields |
 | --- | --- |
 | `new-project-v1` | `projectPath`, `projectId`, `template` (`blank`/`ceria`) |
-| `compile-v1` | `projectId`, `modelHash`, `documentHash`, `modelSignature`, `compilerVersion`, `outputPath` (nullable), `outputSha256` (nullable), `counts` (particle, position, site, environment, pair-table, cluster-table, direction, rule, and simulation counts), `cache` (`hits`, `misses`, `capacity`), `stages[]` (`name`, `ms`) |
+| `compile-v1` | `projectId`, `modelHash`, `documentHash`, `modelSignature`, `compilerVersion`, `outputPath` (nullable), `outputSha256` (nullable), `counts` (particle, position, site, environment, pair-table, cluster-table, direction, rule, and simulation counts), `cache` (`hits`, `misses`, `capacity`), `stages[]` (`name`, `ms`) with the ten stages `resolve`, `structure`, `environments`, `pairs`, `clusters`, `rules`, `encoding`, `indexing`, `signing`, `report`; `report` always runs |
 | `inspect-v1` | `package` with the Step 11 `PackageInspection` fields: `formatVersion`, `appVersion`, `createdUtc`, `projectId`, `generator`, `jobSelection`, `symmetryContractVersion`, `spaceGroupDataVersion`, `spaceGroupDataSha256`, `models[]` (`signature`, `modelSignature`, `payloadFormatVersion`, `payloadBytes`), `latticeCount`, `jobCount`, `collections[]` (`kind`, `collectionName`, `configName`, `jobCount`), `minTemperatureK`, `maxTemperatureK`, `minElectricFieldVm`, `maxElectricFieldVm`, `sizeBytes`, `latticeReuseFactor` |
-| `verify-v1` | `valid`, `checks[]` (`code`, `passed`, `message`), `diagnostics[]`, `package` (the same object as `inspect-v1`) |
-| `doctor-v1` | `healthy`, `checks[]` (`name`, `status` enum `ok`/`warn`/`fail`, `message`, optional `detail`), `environment` (`framework`, `os`, `architecture`, `sqliteVersion`, `catalogVersion`, `catalogSha256`, `solverPath`, `solverVersion`) |
-| `clean-v1` | `dryRun` (the requested mode), `packagePath`, `directory`, `jobSelection`, `jobCount`, `folders[]` (`path`, `jobId`, `lastWriteUtc`, `sizeBytes`), `totalBytes`, `olderThanDays` (nullable), `removedCount`. `--dry-run` is the only supported mode (`dryRun = true`, `removedCount = 0`); without it, `dryRun = false`, `removedCount = 0`, `CLI008`, exit 2, and no deletion. |
+| `verify-v1` | `valid`, `checks[]` (`code`, `passed`, `message`), `package` (the same object as `inspect-v1`). The `PKG` findings are the shared envelope’s `diagnostics[]`; there is no second payload-local diagnostics array. |
+| `doctor-v1` | `healthy`, `checks[]` (`name`, `status` enum `ok`/`warn`/`fail`, `message`, optional `detail`), `environment` (`framework`, `os`, `architecture`, `sqliteVersion`, `catalogVersion`, `catalogSha256`, `solverPath`, `solverVersion`). Checks run in the order `runtime`, `sqlite`, `write-permission`, `disk-space`, `symmetry-catalog`, `project-templates`, `solver`; free space below 100 MiB is `warn`, and a throwing check is recorded as `fail`. |
+| `clean-v1` | `dryRun` (the requested mode), `packagePath`, `directory`, `jobSelection`, `jobCount`, `folders[]` (`path`, `jobId`, `lastWriteUtc`, `sizeBytes`), `totalBytes`, `olderThanDays` (nullable), `removedCount`. `--dry-run` is the only supported mode (`dryRun = true`, `removedCount = 0`). Without it, the report still carries the read-only folder listing with `dryRun = false`, `removedCount = 0`, `CLI008`, and exit 2. The reserved `--results` option emits a minimal report with no package inspection and an empty listing, also `CLI008`/2. Neither path deletes anything. |
 
 `compiled-inspection-v1` and `package-summary-v1` remain canonical inspection projections rather than new
 CLI report ids: `compile -o` writes the former, and `inspect-v1`/`verify-v1` embed the latter’s data.

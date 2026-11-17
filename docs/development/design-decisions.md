@@ -508,7 +508,33 @@ the safety-relevant half and gives operators a preview before the destructive co
 `Mocassin.Packages.Projects.Templates` with a fresh UUIDv7, master seed, name, and timestamps. The ceria
 template is a copy of the model-definition sample, not a buildable job sample; a freshness test compares its
 canonical model hash with `samples/ceria/ceria.mocprj`. Step 23’s creation UI uses the same factory and
-assets.
+assets. The assets are embedded resources, so `new` needs no template directory, network, or install layout.
+
+## CLI auxiliary commands (Step 12)
+
+- `compile` reports the ten compiler stages (`resolve` through `report`) and writes the derived
+  `compiled-inspection-v1` document only with `-o`. A directory target, missing parent, or invalid path is
+  `CLI002`/3; the command never truncates or replaces a project.
+- `inspect` deliberately tolerates non-fatal package defects and reports the metadata it can read. Payload
+  corruption and signature mismatches are `verify` findings. Only a fatal structure failure is `CLI009`/1.
+  This is an intended improvement over the original model builder, where build/read failures appeared as text
+  in a log console and no read-only inspection existed. A missing, directory, or unreadable path is checked
+  before the inspector opens the file and is `CLI002`/3.
+- `verify-v1` uses the shared envelope’s single `diagnostics[]` for `PKG` findings; `checks[]` is the ordered
+  check list, not a second diagnostics channel.
+- `doctor` runs the seven named checks in a fixed order. Free space below 100 MiB is a warning, not a failure,
+  because the value is advisory and would otherwise make healthy CI hosts dependent on their disk size. A
+  throwing check becomes a reported `fail` with its exception type, so one defective check cannot suppress the
+  rest of the diagnosis.
+- `clean` without `--dry-run` is refused with `CLI008`/2 but still performs the read-only listing, so an
+  operator can inspect the selection before Step 28 adds deletion. The reserved `--results` option emits a
+  minimal report without opening the package. No deletion code exists in Step 12.
+- Failure injection is limited to true boundaries and command seams: the `IDoctorCheck` list and
+  `ISolverProbe` for doctor outcomes, the project-template factory and `TimeProvider` for `new`, the inspector
+  and verifier seams for package failures, and a scripted `IBuildPipeline` for unreachable failure kinds.
+  Build orchestration, selection, expansion, lattice generation, preview, writing, inspection, and verification
+  use real objects and real SQLite files. A real project fixture also exercises a promoted compiled-bound
+  parameterization warning end to end (`PRM003`/`PRM006` → exit 4), so that rule is no longer seam-only.
 
 
 ## Charge-transport field convention
