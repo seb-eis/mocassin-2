@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `d6c54029d487b2e87aaf6b62a7da3cf232ffd680` |
+| Reviewed commit | `1b6af90c72a0c4ff77d50fd266e80738bd8490fb` |
 | Docs branch | `docs/step-12-design` |
 | Review date | 2026-11-16 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation |
@@ -28,15 +28,18 @@ risk was wrong. On 2026-11-17 the owner also confirmed the revised 2.75–3.75 p
 `mocassin completion` from Step 12, confirmed the minimal AOT smoke host as feature 1's gate (the real CLI
 publish is evidence, not a gate), added bounded `@file` response files as a Step 12 contract, and requested
 [ADR 0015](../adr/0015-cli-parser-system-commandline.md). Round 3 returned `Ready with notes` at `d211584`
-(reviewed `6b15f9d`); the step agent resolved R3-1–R3-8 and the two open round-2 Notes (R2-2, R2-4) in the new
-freeze `d6c54029d487b2e87aaf6b62a7da3cf232ffd680`. The freeze rewrites §5.2, adds §5.3 (CLI-owned response-file
-tokenization), rewrites feature 1, the command surface, layout, tests, risks, and acceptance criteria; maps
-library parse errors (default exit 1) to `CLI001`/2; specifies root-only `--version`; and adds the linux-x64
-AOT smoke check in `verify.sh all`. `validation-v1`, the exit-code table,
+(reviewed `6b15f9d`); the step agent resolved R3-1–R3-8 and the two open round-2 Notes (R2-2, R2-4). Round 4
+returned `Ready with notes` at `f548d26` (reviewed `d6c5402`); the step agent resolved R4-1–R4-7 in the new
+freeze `1b6af90c72a0c4ff77d50fd266e80738bd8490fb`. The owner also confirmed the AOT policy: the gate is
+required, clang/lld/ILCompiler are Tier 1, and `verify.sh all --require` is a local closeout gate because the
+closeout CI does not run `verify.sh`. The freeze rewrites §5.2, adds §5.3 (CLI-owned response-file tokenization)
+and §5.4 (required AOT gate), rewrites feature 1, the command surface, layout, tests, risks, and acceptance
+criteria; maps library parse errors (default exit 1) to `CLI001`/2; specifies root-only `--version`; and adds
+the linux-x64 `verify.sh aot` gate. `validation-v1`, the exit-code table,
 `--json`/JSON-Lines, the seven reports, `--jobs`/`job_selection`, atomic `--force`, and cancellation are
-unchanged. Rounds 1–3, their findings, and the R2-1–R2-4 notes are unchanged below; the `Reviewed commit`
-cell and this note point the request at the new freeze. Round 4 should review the new freeze, not re-open the
-accepted features 2–7 unless the parser/response-file change touched them.
+unchanged. Rounds 1–4, their findings, and the R2-1–R2-4 notes are unchanged below; the `Reviewed commit`
+cell and this note point the request at the new freeze. Round 5 should review the new freeze, not re-open the
+accepted features 2–7 unless the parser/response-file/AOT change touched them.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the design and
 > completed this request, and relays the verdict and owner decisions. The planner and step agent update the
@@ -458,12 +461,13 @@ its file list, and the `PublicAPI.Unshipped.txt` obligation so the structure pol
 
 ## Record state
 
-**State:** Ready with notes — round 4 reviewed `d6c54029d487b2e87aaf6b62a7da3cf232ffd680` and returned
+**State:** Re-review required — round 4 reviewed `d6c54029d487b2e87aaf6b62a7da3cf232ffd680` and returned
 `Ready with notes` with the R4-1–R4-4 Minors and R4-5–R4-7 Notes below. R3-1, R3-2, R3-3, R3-5, R3-7, R2-2,
-and R2-4 are closed; R3-4, R3-6, and R3-8 retain the R4-1–R4-4 residuals. The step agent may add resolutions
-without altering the round-4 reviewer text. Rounds 1–4 and their reviewer text remain unchanged above and below.
+and R2-4 are closed; R3-4, R3-6, and R3-8 retain the R4-1–R4-4 residuals. The step agent resolved all of them
+in the new freeze `1b6af90c72a0c4ff77d50fd266e80738bd8490fb`; a fresh planning auditor re-reviews that commit.
+Rounds 1–4 and their reviewer text remain unchanged above and below.
 
-`Ready with notes` is a verdict; the human owner accepts or rejects it.
+`Re-review required` is a record state, not a verdict.
 
 ## Reviewer independence
 
@@ -1180,3 +1184,19 @@ require the small documentation-only cleanup (and the R4-3 toolchain/CI statemen
 
 Follow-up owner: step agent/planner for the documentation-only findings and the AOT gate statement; the human
 owner approves the verdict and the start gate.
+
+#### Round 4 resolutions
+
+The step agent/planner fixed every round-4 finding in a documentation-only change. The reviewer's round-4
+text, evidence, findings, verdict, and earlier rounds are unchanged. The new freeze is
+`1b6af90c72a0c4ff77d50fd266e80738bd8490fb`.
+
+| Finding | Status | Resolution |
+| --- | --- | --- |
+| R4-1 (Minor) | Fixed | Aligned the six stale help/version summaries: `03-quality-strategy.md` §9.10, `05-open-decisions.md` parser row, `design-decisions.md`, `02-data-contracts.md` §5.1, step page §11.1/§5.2/§16.2/§20, and ADR 0015 now say the library supplies help and the CLI supplies the root-only `--version` action; subcommand `--version` is `CLI001`/2. |
+| R4-2 (Minor) | Fixed | Step page §11.2 now names both `CLI001` sources: library parse errors and response-file missing/unreadable/invalid/over-limit failures. |
+| R4-3 (Minor) | Fixed | Step page §5.4 specifies the required local `verify.sh aot` gate: zero-warning host publish, separate positive-control publish, native `CLI001`/2 parse-error case, hard failure with a clear message when clang/lld/ILCompiler is absent (never a skip), and `all --require` treating it as required. `06-toolchain-requirements.md` makes clang/lld/llvm 19.1.7, ILCompiler 11.0.0, and zlib1g-dev Tier 1; feature 1 owns the mode/hosts and feature 7 runs `all --require` at closeout. `ci-policy.md`, `03-quality-strategy.md`, ADR 0015, `05-open-decisions.md`, and the step page state that `verify.sh` is local and the closeout GitHub workflow does not run it. |
+| R4-4 (Minor) | Fixed | The smoke host includes a mini `CliApplication` that maps `ParseResult.Errors` to `CLI001`/2, so the native parse-error case exits 2. The zero-warning host and the positive control are separate projects/publishes; both are required, and the control must emit IL2026 and IL3050. Step page §5.4/§22/§23 and `03-quality-strategy.md`. |
+| R4-5 (Note) | Fixed | All contract pages now use “10,000 tokens contributed by response files”: step page §5.3, `reference/cli.md`, ADR 0015, `02-data-contracts.md` §5.1, `05-open-decisions.md`, `design-decisions.md`, and `03-quality-strategy.md`. |
+| R4-6 (Note) | Fixed | Step page §5.3 pins `x"y z` → `xy z` and `"x y` → no token; §23 and `reference/cli.md` carry the same exact cases. |
+| R4-7 (Note) | Fixed | Step page status block now records round 4 `Ready with notes` and the round-5 freeze, not a pending round-3 review. |
