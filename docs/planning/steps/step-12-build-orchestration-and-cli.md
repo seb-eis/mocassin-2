@@ -10,17 +10,20 @@ UI consumes later.
 ## Implementation status
 
 - **Status:** Not started — the design changed on 2026-11-17 (the hand-written parser is replaced by
-  `System.CommandLine` 3.0.0); a round-3 design re-review is pending; no step branch yet.
-- **Design review:** Re-review required — round 3 reviews `8af67f8` (design freeze); round 2 was
-  `Ready with notes` at `4ad40ac` (reviewed `05b7297`) — [record](../reviews/step-12.md) (round 1
-  `Changes required`; round 2 `Ready with notes`, R2-1–R2-4 open; round 3 pending)
-- **Feature list:** Proposed 2026-11-16 (seven features); feature 1 revised 2026-11-17 (library adoption, no
-  parser/help/completion writers); awaiting one owner approval with the design verdict.
-- **Sizing:** Revised 2026-11-17 to 2.75–3.75 person-weeks (was 3.0–4.0), still a single-step exception,
-  seven features, no split, with the 2.25 pw contingency. The revision is presented for owner confirmation at
-  the round-3 start gate; `04-roadmap.md` §3/§3.1 and `05-open-decisions.md` record it.
+  `System.CommandLine` 3.0.0, with bounded `@file` response files); a round-3 design re-review is pending; no
+  step branch yet.
+- **Design review:** Re-review required — the freeze and reviewed commit are recorded in the review record;
+  round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`) — [record](../reviews/step-12.md)
+  (round 1 `Changes required`; round 2 `Ready with notes`, R2-1–R2-4 open; round 3 pending)
+- **Feature list:** Proposed 2026-11-16 (seven features); feature 1 revised 2026-11-17 (library adoption,
+  bounded response files, no parser/help/completion writers); awaiting one owner approval with the design
+  verdict.
+- **Sizing:** Owner-approved 2026-11-17 at 2.75–3.75 person-weeks (was 3.0–4.0), still a single-step
+  exception, seven features, no split, with the 2.25 pw contingency; `04-roadmap.md` §3/§3.1 and
+  `05-open-decisions.md` record it.
 - **Parser:** `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only reference); Native AOT smoke-verified on
-  `net11.0`/`linux-x64`; no shell-completion command in Step 12 (§5.2, §13.8).
+  `net11.0`/`linux-x64`; bounded `@file` is part of the contract; no shell-completion command in Step 12
+  (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
 - **Step branch:** —
 - **Step CI:** —
 - **Main merge:** —
@@ -32,7 +35,7 @@ UI consumes later.
 
 | # | Feature | Branch | Planned scope | Outcome | Order |
 | ---: | --- | --- | --- | --- | --- |
-| 1 | CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | `System.CommandLine` 3.0.0 adoption (`RootCommand` graph, command/option/argument definitions, typed `ParseResult` binding), parse-error→`CLI001`/exit-2 mapping, help/version, common option definitions, exit-code type, Contracts-owned `CLI` diagnostic descriptors, shared report DTOs/writers, the seven `reports` manifest descriptors and generated artifacts, parser-convention/usage/schema tests, AOT publish smoke check; existing `validate` output and `build --preview` behaviour preserved | One library-defined command graph with stable exit codes and seven manifest-registered report schemas; `validation-v1` output unchanged; no `completion` command | 1 |
+| 1 | CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | `System.CommandLine` 3.0.0 adoption (`RootCommand` graph, command/option/argument definitions, typed `ParseResult` binding), parse-error→`CLI001`/exit-2 mapping, bounded `@file` response files with documented syntax/limits/errors, help/version, common option definitions, exit-code type, Contracts-owned `CLI` diagnostic descriptors, shared report DTOs/writers, the seven `reports` manifest descriptors and generated artifacts, parser-convention/response-file/usage/schema tests, AOT publish smoke check; existing `validate` output and `build --preview` behaviour preserved | One library-defined command graph with stable exit codes and seven manifest-registered report schemas; `validation-v1` output unchanged; bounded response files; no `completion` command | 1 |
 | 2 | Build orchestration core | `feature/step-12-build-orchestration-and-cli/build-orchestration-core` | `Mocassin.Packages.Build`: `IBuildPipeline`, request/options/result/failure types, stage enum, event stream, selection resolver, `JobSelection` parser and normalizer, progress estimator, stage timings, cancellation, parallel lattice generation with serialized writes, real-project tests | A UI-independent pipeline with typed events, deterministic selection, identity/failure results, cancellation, and real-project tests | 2 |
 | 3 | Build and preview command | `feature/step-12-build-orchestration-and-cli/build-and-preview-command` | `build` and `build --preview`, `--jobs`, `--parallel`, `--force`, `--compact`, `--warnings-as-errors`, `--quiet`, `--json`/JSON-Lines, human progress, post-publication verification, Ctrl+C/SIGTERM handling, the sample build, partial/cancel/force/parallel/compact/exit-code/schema tests | `build` and `build --preview` write/verify a package or preview with progress, cancellation, and the documented exit codes | 3 |
 | 4 | Project and compile commands | `feature/step-12-build-orchestration-and-cli/project-and-compile-commands` | `new` (embedded blank and ceria templates, fresh identity, safe create), `compile` (load/validate/compile, optional `compiled-inspection-v1` output, summary report), tests | `new` creates a valid fresh project and `compile` reports/optionally writes the inspection document | 4 |
@@ -82,11 +85,12 @@ Roadmap §3.1 check:
 **No split is proposed.** Splitting into 12A (CLI shell + build) and 12B (auxiliary commands + docs) would
 leave a CLI without `inspect`, `verify`, `doctor`, or `clean --dry-run`, which is a worse deliverable for the
 solver team and would add a roadmap step and change the Phase C closeout. **Owner decision (2026-11-16):**
-the single-step exception, seven features, and no split were accepted at 3.0–4.0 pw; the parser decision on
-2026-11-17 revises the estimate to 2.75–3.75 pw and the revision is presented for owner confirmation at the
-round-3 start gate. `04-roadmap.md` §3/§3.1 and `05-open-decisions.md` record the exception and the revised
-figure. **Contingency:** if features 1–3 exceed 2.25 pw, stop and ask the owner to re-open the split before
-starting feature 4. The estimate is not a licence to exceed four weeks.
+the single-step exception, seven features, and no split were accepted at 3.0–4.0 pw. **Owner decision
+(2026-11-17):** the parser decision revises the estimate to 2.75–3.75 pw and the owner approved that revised
+figure with the same single-step exception, seven features, no split, and 2.25 pw contingency.
+`04-roadmap.md` §3/§3.1 and `05-open-decisions.md` record both decisions. **Contingency:** if features 1–3
+exceed 2.25 pw, stop and ask the owner to re-open the split before starting feature 4. The estimate is not a
+licence to exceed four weeks.
 
 ## 3. Original reference
 
@@ -110,6 +114,8 @@ starting feature 4. The estimate is not a licence to exceed four weeks.
   `verify`, `doctor`, `clean --dry-run`, help, and version.
 - One `System.CommandLine` command graph with typed `ParseResult` binding, stable `CLI001` usage errors, and
   explicit mapping from parser/handler outcomes to this project's exit codes.
+- Bounded response files (`@file`) with a documented syntax, CLI-owned size/nesting limits, and stable
+  `CLI001`/2 errors.
 - A shared, UI-independent build orchestration library with a typed stage/event stream, deterministic job
   selection, progress, cancellation, and parallel lattice generation.
 - `build`/`inspect`/`verify` package work through the Step 11 writer and the read-only inspector/verifier.
@@ -135,8 +141,8 @@ starting feature 4. The estimate is not a licence to exceed four weeks.
 - **No parser framework in the library.** `System.CommandLine` is a CLI-only dependency; `Mocassin.Packages`,
   `Mocassin.Contracts`, and `Mocassin.Results` never reference it, and no scientific or build logic moves into
   command handlers.
-- **No shell-completion command or scripts.** `mocassin completion` is not part of Step 12; shell integration
-  is a Step 31 packaging decision (§5.2, §13.8).
+- **No shell-completion command or scripts.** Step 12 does not ship `mocassin completion`; that removal is the
+  owner's decision of 2026-11-17. Shell integration is deferred to Step 31 packaging (§5.2, §13.8).
 - **No new package-format or signature change.** `job_selection` already exists in the Step 11 writer and
   schema; `build-v1` is a CLI report, not a package field.
 - **No scientific algorithm in the CLI.** Selection, compilation, parameterization, expansion, lattice
@@ -184,13 +190,14 @@ mocassin clean ...       # deletion, Step 28
 - `--help` and `--version` are provided by `System.CommandLine` actions: they are global only before a
   command; after a command they are command help. Both exit 0; help output shows the executable name.
 - Options use the library's tokenizer: `--name value`, `--name=value`, and `-o value` are accepted; flags take
-  no value; option names are case-sensitive. Numbers use invariant culture. `--parallel` accepts `1..256`;
-  `--older-than` accepts `0..36500`.
+  no value; option names are case-sensitive. Combined short options are not supported: the CLI sets
+  `ParserConfiguration.EnablePosixBundling = false`, so `-abc` is not a bundle. Numbers use invariant culture.
+  `--parallel` accepts `1..256`; `--older-than` accepts `0..36500`.
 - The library treats a value beginning with `-` as the value when the option expects one. `--jobs -1`,
   `--parallel -1`, and `-o -file` therefore reach the handlers as `-1`, `-1`, and `-file`; the first two are
   rejected by `CLI005`/range checks, and the last names a path. `--` ends option parsing so a positional path
-  beginning with `-` can be passed. Feature 1 pins these conventions and the response-file (`@file`) behaviour
-  with tests; the library's exact error sentence is not a contract (§5.2).
+  beginning with `-` can be passed. Feature 1 pins these conventions with tests; the library's exact error
+  sentence is not a contract (§5.2). Response files are specified in §5.3.
 - `System.CommandLine` validates arity, required options/arguments, and option applicability before a handler
   runs. Handlers receive typed values; they never re-parse `string[]`.
 - `--json` is a per-command option, not a global prefix. `validate` and the seven `reports`-backed commands
@@ -204,14 +211,15 @@ mocassin clean ...       # deletion, Step 28
   `build.progress`, and `log` events; diagnostics, `build.started`, `build.finished`, and the final report
   remain. `--quiet` does not suppress errors.
 - `--version` prints the assembly informational version and the runtime description, then exits 0.
-- Step 12 ships no `completion` command and no shell-completion scripts; the library's `[suggest]` directive is
-  accepted but is not a contract (§13.8).
+- Step 12 ships no `completion` command and no shell-completion scripts; this is the owner's decision of
+  2026-11-17. The library's `[suggest]` directive is accepted but is not a contract (§13.8).
 
 ### 5.2 Parser choice
 
 **Decision: `System.CommandLine` 3.0.0, pinned in central package management and referenced only by
-`Mocassin.Cli`.** The human owner replaced the round-2 hand-written-parser decision on 2026-11-17 after an
-AOT/full-trim verification showed that the design's stated reason (an AOT/trimming risk) was wrong.
+`Mocassin.Cli`; recorded in [ADR 0015](../adr/0015-cli-parser-system-commandline.md).** The human owner
+replaced the round-2 hand-written-parser decision on 2026-11-17 after an AOT/full-trim verification showed
+that the design's stated reason (an AOT/trimming risk) was wrong.
 
 Owner-supplied verification (`aot-check`, 2026-11-17; `dotnet` `11.0.100`, app TFM `net11.0`, RID `linux-x64`,
 ILC `11.0.0`):
@@ -240,11 +248,17 @@ Consequences recorded in this design:
   `ParseResult.Errors`, emits `CLI001`, and returns **2**; help/version return 0; handler results map through
   §11.1. The CLI owns the stable `CLI001` message and may keep the library text as a hint; tests assert the
   CLI-owned text and the offending token, not the library's exact sentence.
-- **Completion is narrowed, not reimplemented.** 3.0.0 provides the `[suggest]` protocol consumed by
+- **Completion is removed.** `System.CommandLine` 3.0.0 provides the `[suggest]` protocol consumed by
   `dotnet-suggest`, not shell-script generation. `dotnet-suggest` is not installed in the development image,
   and the verification observed `[suggest]` returning root-level tokens only at every tested command
-  position. Step 12 therefore ships **no `mocassin completion` command and no scripts**; the directive is
-  accepted but is not a contract, and shell integration is a Step 31 packaging decision (§13.8).
+  position. **Owner decision (2026-11-17): Step 12 ships no `mocassin completion` command and no scripts.**
+  The directive is accepted but is not a contract; shell integration is deferred to Step 31 packaging
+  (§13.8).
+- **Response files are a CLI contract.** The library's default reader is replaced by a bounded reader so
+  `@file` is supported with documented syntax, size/nesting limits, and stable errors rather than an
+  accidental library default (§5.3). `CliApplication` builds one `ParserConfiguration` with
+  `EnablePosixBundling = false` and the bounded `ResponseFileTokenReplacer`. Feature 1 implements and tests
+  it; the library's default behaviour is never the contract.
 - **AOT smoke test.** Feature 1 adds a minimal AOT smoke host under `tests/aot/` that references
   `System.CommandLine` 3.0.0 and defines a representative command/option/argument shape. It is published for
   `linux-x64` with `PublishAot=true`, `TrimMode=full`, and strict trim warnings; the check asserts zero
@@ -265,6 +279,51 @@ Consequences recorded in this design:
 
 The Step 07 `validate` and Step 10 `build --preview` hand-written parsers move onto the shared graph in
 feature 1; feature 3 folds preview into `build`.
+
+### 5.3 Response files
+
+Step 12 supports response files as part of the CLI contract. The syntax is the library's token-level `@file`
+expansion, but the CLI replaces the library's default reader with a bounded reader so untrusted input cannot
+exhaust memory or recurse without limit. The contract below is owned by the CLI and pinned by tests; it is not
+"whatever the library does".
+
+- **Reference token.** A token whose first character is `@` and whose length is at least 2 is a response-file
+  reference. The path is the rest of the token. `@` alone is a literal argument. There is no escape sequence:
+  `@@name` refers to a file named `@name`. A literal option value beginning with `@` cannot be written before
+  `--`; use a positional argument after `--`, or avoid the leading `@`.
+- **Path.** The path is used as written, relative to the process working directory — **not** relative to the
+  containing response file. Absolute paths are allowed. `~` and environment variables are not expanded. A path
+  containing spaces must be one token, for example `@"my file.rsp"` or `@"dir/my file.rsp"`.
+- **File content.** UTF-8, with an optional UTF-8 BOM. Invalid UTF-8 or a NUL byte is `CLI001`/2. Lines are read
+  individually; LF, CRLF, and CR line endings are accepted. Each line is trimmed; an empty line, or a line whose
+  first non-whitespace character is `#`, is ignored. `#` anywhere else is a literal character, not a comment.
+- **Tokenization.** Tokens are separated by Unicode whitespace. Double quotes group whitespace and are removed;
+  an empty quoted token (`""`) is preserved as an empty argument. Single quotes and backslashes are literal;
+  there is no escape for a double quote inside a quoted token. Double quotes do not span lines. An unterminated
+  quote is **not** an error: a token that begins with the quote is discarded, and a token that had unquoted text
+  before the quote is kept without the quote. Quotes inside a token are removed and concatenate the parts
+  (`a"b c"d` becomes `ab cd`); a quote pair that starts a token followed immediately by another quote pair
+  starts a separate token (`"a""b"` becomes `a` and `b`). A token in a file that starts with `@` is another
+  response-file reference, expanded recursively.
+- **Bounds.** At most **1 MiB per file**, **4 MiB across the command line**, **nesting depth 8**, **10,000
+  tokens contributed by response files**, and **32 response files**. A limit breach is `CLI001`/2 and names the
+  file and the limit. These constants are CLI-owned, tested, and not a library default.
+- **Errors.** A missing file is `CLI001`/2 (`Response file '<path>' was not found.`). An unreadable file, a
+  directory, or an I/O failure is `CLI001`/2 (`Response file '<path>' could not be read: <reason>.`). Invalid
+  text or a limit breach is `CLI001`/2. These are usage errors, not `CLI002`/3: they occur while building the
+  command line, before any command work. The diagnostic has no `path` object; the message names the path as
+  written.
+- **`--`.** A `@file` token before `--` is expanded. `--` ends option parsing and response-file expansion:
+  every later token, including `@file`, is a literal argument. A `--` inside a response file has the same
+  effect for the tokens that follow it, including later tokens from that file.
+- **Option position.** Expansion is token-level and happens before arity validation. `--input @file` replaces
+  the option value with every token from the file, so a multi-token file in a single-value option position is
+  a usage error. `--input=@file` is not expanded because the token does not start with `@`.
+- **`--json`.** A `--json` inside a response file is an ordinary option and enables the normal report and
+  JSON-Lines rules. If expansion fails, report mode is decided from `--json` in the raw process arguments
+  before `--`, or in tokens from response files that expanded successfully before the failure; a `--json`
+  inside the file that could not be read cannot be known and does not enable a report. A response-file error
+  emits no JSON-Lines build events.
 
 ## 6. Build pipeline and event stream
 
@@ -707,7 +766,7 @@ Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
 | ---: | --- | --- |
 | 0 | Success (warnings allowed unless promoted) | all commands |
 | 1 | Validation, model, package-invalid, or unhealthy-doctor result | `validate`, `build` validation/expansion/lattice/verification, `inspect` invalid package, `verify` invalid package, `doctor` fail |
-| 2 | Usage or argument error | parse errors mapped by `CliApplication`, template/parameterization selection ambiguity, `--jobs` syntax/range, reserved command/option, preview with a write option |
+| 2 | Usage or argument error | parse errors mapped by `CliApplication`, response-file expansion errors, template/parameterization selection ambiguity, `--jobs` syntax/range, reserved command/option, preview with a write option |
 | 3 | I/O error (project, output, disk, missing/unreadable input, existing target without `--force`) | load/save, writer, `new`, `compile -o`, `inspect`/`verify` missing file |
 | 4 | Compilation or parameterization error | `build`, `compile` `CMP`, `PRM` errors, promoted `PRM` warnings |
 | 5 | Partial success | **reserved for `simulate`/`collect`; not emitted by `build` in v1** |
@@ -754,6 +813,9 @@ Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
   invocation path; `CliApplication` never returns that value. It reads `ParseResult.Errors`, emits one
   `CLI001` per error, writes human usage text (or the command report when `--json` applies) and returns 2.
   Help and version are library actions and return 0. Handler results map through the table above.
+- Response-file errors are usage errors: a missing, unreadable, invalid, or oversized response file is
+  `CLI001`/2, not `CLI002`/3, because it is part of the command line and occurs before command dispatch. The
+  `--json` report rule for an expansion failure is in §5.3.
 - Usage errors with `--json` print one command report with `ok: false` and `exitCode: 2` for `validate` and
   the seven `reports`-backed commands. `--help`, `--version`, and reserved commands do not accept `--json`
   and print no report (§5.1).
@@ -1054,16 +1116,17 @@ Checks, in order:
 
 ### 13.8 Shell completion (no command in Step 12)
 
-- Step 12 does **not** ship `mocassin completion` and does not generate bash, zsh, fish, or PowerShell scripts.
-  `System.CommandLine` 3.0.0 provides the `[suggest]` protocol that `dotnet-suggest` consumes, not script
-  generation; `dotnet-suggest` is an external global tool and is not installed in the development image.
+- **Owner decision (2026-11-17): Step 12 ships no `mocassin completion` command and no bash, zsh, fish, or
+  PowerShell scripts.** `System.CommandLine` 3.0.0 provides the `[suggest]` protocol that `dotnet-suggest`
+  consumes, not script generation; `dotnet-suggest` is an external global tool and is not installed in the
+  development image.
 - The `[suggest]` directive is accepted by the command graph (the library handles it before a handler), but it
   is not a versioned contract and Step 12 makes no command-scoped suggestion guarantee: the verification
   observed root-level tokens only at every tested position. A test only asserts that the directive is accepted
   without an unhandled exception; it does not assert a suggestion set.
-- Shell integration, if any, is decided in Step 31 with the packaging/installation story (document
-  `dotnet-suggest`, ship registration snippets, or add generated scripts). This is a deferred packaging
-  decision, not a Step 12 acceptance criterion and not part of the command contract.
+- Shell integration is deferred to **Step 31 packaging**, where the installation story can decide whether to
+  document `dotnet-suggest`, ship registration snippets, or add generated scripts. It is not a Step 12
+  acceptance criterion and not part of the command contract.
 - An unknown command remains an ordinary parse error: `CLI001`, exit 2, human usage, no report.
 
 ### 13.9 Reserved commands
@@ -1161,6 +1224,7 @@ Mocassin.Cli/
     CliCommandGraph.cs          # command/option/argument definitions (the only command table)
     CliBinding.cs               # ParseResult -> typed request records
     CliParseErrors.cs           # parse errors -> CLI001 diagnostics + human usage
+    CliResponseFiles.cs         # bounded @file reader + syntax/limits
     CliExitCode.cs
     Reports/
       ReportDiagnostic.cs
@@ -1217,7 +1281,7 @@ Mocassin.Cli/
   graph, `ParseResult` binding, parse-error mapping, exit-code policy, the library help/version actions, and
   shared output; `Diagnostics` owns CLI-specific diagnostic construction. There is no hand-written parser,
   `CommandCatalog`, `CommandDefinition`, `OptionDefinition`, `ParsedCommand`, `HelpWriter`, or
-  `CompletionWriter`.
+  `CompletionWriter`. `CliResponseFiles` is the only response-file reader and replaces the library default.
 - Namespaces match folders: `Mocassin.Cli.CommandLine`, `Mocassin.Cli.CommandLine.Reports`,
   `Mocassin.Cli.Build`, `Mocassin.Cli.Doctor.Checks`, and so on.
 - Each folder stays under 20 direct `.cs` files; `Doctor/Checks` resets the count. The deepest path is
@@ -1313,8 +1377,8 @@ ceria asset's canonical model hash with `samples/ceria/ceria.mocprj`.
 ### 18.1 Documentation
 
 - `docs/reference/cli.md` — full command surface, options, selection rules, exit codes, `CLI` codes, report
-  ids and field families, JSON-Lines events, parser conventions, reserved commands, and the completion
-  non-promise.
+  ids and field families, JSON-Lines events, parser conventions, response files, reserved commands, and the
+  completion non-promise.
 - `docs/reference/diagnostics.md` — `CLI001`–`CLI009` rows and headings, included in the docs-drift test.
   These rows land in feature 1 **together with** the Contracts descriptors, because the existing drift test
   requires the page and `DiagnosticCatalog.Default` to agree at every commit; the design-only commit does not
@@ -1334,8 +1398,10 @@ ceria asset's canonical model hash with `samples/ceria/ceria.mocprj`.
   `job_selection` normal form, and §6 fixtures.
 - `docs/planning/03-quality-strategy.md` — the CLI/build test tier and §9.10.
 - `docs/planning/04-roadmap.md` — the Step 12 owner-approved 3.0–4.0 pw exception in §3 and §3.1.
-- `docs/planning/05-open-decisions.md` — the resolved sizing, `--template`, ceria-asset, and report-registration
-  decisions.
+- `docs/planning/05-open-decisions.md` — the resolved parser/response-file/completion decisions, the revised
+  sizing, `--template`, ceria-asset, and report-registration decisions.
+- `docs/planning/adr/0015-cli-parser-system-commandline.md` — the parser, parse-error remap, bounded `@file`,
+  and no-completion decision (design record; feature 1 updates it only for a recorded deviation).
 - `docs/planning/appendix-b-parity-matrix.md` — the rows in §18.3.
 - `docs/reference/diagnostics.md` — the `CLI001`–`CLI009` rows and headings, added with the Contracts
   descriptors; `docs/reference/cli.md` links to that drift-checked table instead of duplicating it.
@@ -1345,7 +1411,7 @@ ceria asset's canonical model hash with `samples/ceria/ceria.mocprj`.
 
 | Tier | Coverage |
 | --- | --- |
-| PR-fast | Library parsing conventions, parse-error→`CLI001`/2 mapping, help/version, usage and exit-code mapping; `JobSelection` parsing/normalization; selection precedence; ceria sample build + verify; preview; partial selection; `--force`; cancellation (in-process token); parallel determinism; `--compact` option mapping; `new`/`compile`/`inspect`/`verify`/`doctor`/`clean --dry-run`; JSON schema validation; `validate` regression |
+| PR-fast | Library parsing conventions, parse-error→`CLI001`/2 mapping, help/version, usage and exit-code mapping; response-file syntax, limits, `--`/`--json` interaction, and errors; `JobSelection` parsing/normalization; selection precedence; ceria sample build + verify; preview; partial selection; `--force`; cancellation (in-process token); parallel determinism; `--compact` option mapping; `new`/`compile`/`inspect`/`verify`/`doctor`/`clean --dry-run`; JSON schema validation; `validate` regression |
 | PR-medium | Real `.msl` round-trip with the Step 13 reader once it exists; cross-platform path handling; larger sample matrix |
 | Nightly/release | 10⁴-job build + verify under 10 min / 2 GB; real solver probe; AOT smoke host with the positive control, plus the recorded real-CLI publish result (§5.2); Windows/macOS platform gate when cancellation/process/path behaviour is touched |
 
@@ -1408,6 +1474,10 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - [ ] Add `build.stage` to the events manifest and add `tests/contracts/events-v1.jsonl`.
 - [ ] Add parser-convention/usage/help/schema tests (arity, `--opt=value`, negative numbers, `--`,
       response-file behaviour, error text, exit codes) and the `validate` regression tests.
+- [ ] Implement the bounded response-file reader and wire it through
+      `ParserConfiguration.ResponseFileTokenReplacer`; pin the §5.3 syntax, path resolution, quoting,
+      `#` comments, `--`/`--json` interaction, 1 MiB/4 MiB/depth-8/10,000-token/32-file limits, and the
+      missing/unreadable/invalid/oversized `CLI001`/2 errors with tests.
 - [ ] Add the minimal AOT smoke host and the positive control; attempt and record the real `Mocassin.Cli`
       AOT publish; do not add a `completion` command.
 
@@ -1542,27 +1612,30 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - **`quickstart.md`/`first-project.md` are Step 30 pages.** Step 12 puts the first-run commands in
   `docs/getting-started/index.md`; the step page’s old documentation list is reconciled to the pages that
   exist.
-- **Sizing is an owner-approved exception, revised after the parser change.** The single-step exception, seven
-  features, no split, and the 2.25 pw contingency were accepted on 2026-11-16 at 3.0–4.0 pw. The
-  `System.CommandLine` decision on 2026-11-17 makes feature 1 smaller and revises the estimate to
-  2.75–3.75 pw; the revision is presented for owner confirmation at the round-3 start gate.
-  `04-roadmap.md` §3/§3.1 and `05-open-decisions.md` record the exception and the revised figure (Step 09
-  precedent).
+- **Sizing is an owner-approved exception, revised and re-approved after the parser change.** The
+  single-step exception, seven features, no split, and the 2.25 pw contingency were accepted on 2026-11-16 at
+  3.0–4.0 pw. The `System.CommandLine` decision on 2026-11-17 makes feature 1 smaller; the owner approved the
+  revised 2.75–3.75 pw figure on 2026-11-17 with the same exception and contingency. `04-roadmap.md`
+  §3/§3.1 and `05-open-decisions.md` record both decisions (Step 09 precedent).
 - **The ceria starter and canonical projections are accepted.** `new --template ceria` ships the embedded
   model starter with the model-hash freshness test; `blank` remains. `compiled-inspection-v1` and
   `package-summary-v1` stay canonical projections with no new CLI report ids until Step 30.
-- **Parser: `System.CommandLine` 3.0.0, CLI-only.** The human owner replaced the hand-written parser on
-  2026-11-17. The package is stable, MIT-licensed, centrally pinned, and has no transitive dependency for
-  `net10.0+`; it is referenced only by `Mocassin.Cli`. The library owns tokenization, arity, help/version,
-  and `[suggest]`; the CLI owns the command graph, typed binding, `CLI001` wording, and exit-code policy.
-  Step page §5.2, §15, §16.2.
+- **Parser: `System.CommandLine` 3.0.0, CLI-only, recorded in ADR 0015.** The human owner replaced the
+  hand-written parser on 2026-11-17. The package is stable, MIT-licensed, centrally pinned, and has no
+  transitive dependency for `net10.0+`; it is referenced only by `Mocassin.Cli`. The library owns
+  tokenization, arity, help/version, and `[suggest]`; the CLI owns the command graph, typed binding,
+  `CLI001` wording, and exit-code policy. Step page §5.2, §15, §16.2; [ADR 0015](../adr/0015-cli-parser-system-commandline.md).
+- **Response files are bounded and CLI-owned.** `@file` is part of the Step 12 contract with the §5.3 syntax,
+  path resolution, quoting, `#` comments, `--`/`--json` interaction, 1 MiB/4 MiB/depth-8/10,000-token/32-file
+  limits, and `CLI001`/2 errors. The library's default reader is replaced; a library default is never the
+  contract.
 - **Parse errors are exit 2, never the library's 1.** `CliApplication` reads `ParseResult.Errors`, emits
   `CLI001`, and returns 2; help/version return 0; handler results map through §11.1. A test pins the
   library-default-1-to-2 translation. Step page §5.2/§11.1/§23.
-- **No `completion` command in Step 12.** `System.CommandLine` provides the `[suggest]` protocol, not scripts;
-  `dotnet-suggest` is not installed and the directive's command-scoped behaviour was not demonstrated. The
-  command is removed from the surface, the directive is accepted but not a contract, and shell integration is
-  Step 31 packaging. Step page §5.2/§13.8.
+- **No `completion` command in Step 12 — owner decision (2026-11-17).** `System.CommandLine` provides the
+  `[suggest]` protocol, not scripts; `dotnet-suggest` is not installed and the directive's command-scoped
+  behaviour was not demonstrated. The command is removed from the surface, the directive is accepted but not
+  a contract, and shell integration is deferred to Step 31 packaging. Step page §5.2/§13.8.
 - **AOT evidence is a dependency smoke test, not a platform promise.** Only `linux-x64` AOT was exercised. A
   minimal smoke host with the same package version and a positive control guards the `System.CommandLine`
   claim; the real CLI publish is recorded as evidence, not a Step 12 gate, because SQLite/MessagePack are
@@ -1571,24 +1644,30 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - **Additive API wording.** New public members update `PublicAPI.Unshipped.txt`; the ApiCompat baseline is
   refreshed only for an intentional rebaseline, not merely because an additive member was added.
 
-## 21. Owner decisions (recorded 2026-11-16)
+## 21. Owner decisions
 
-These decisions were made by the human owner after round 1 and are not open for re-litigation in round 2.
+These decisions are recorded by date and are not open for re-litigation in round 3. Items 1–4 were made on
+2026-11-16 after round 1; items 5–7 were made on 2026-11-17 after the round-2 notes.
 
-1. **`--template` semantics — accepted.** `--template <buildTemplateId>` selects a build template;
-   `--job-template <id>` selects a job template; `--parameterization <id>` overrides the recipe. The Step 10
-   interim meaning of `--template` as a job template is replaced.
-2. **Sizing — accepted.** 3.0–4.0 pw, seven features, no split, with the 2.25 pw contingency in §2. The
-   roadmap row and §3.1 record the owner-approved single-step exception (Step 09 precedent).
-3. **`new --template ceria` — accepted.** Ship the embedded ceria starter with the model-hash freshness test;
-   keep `blank`. The asset is MIT-authored project data, not copied GPL content.
-4. **Report registration — accepted.** `compiled-inspection-v1` and `package-summary-v1` remain canonical
-   projections; no new CLI report ids until Step 30.
+1. **`--template` semantics — accepted (2026-11-16).** `--template <buildTemplateId>` selects a build
+   template; `--job-template <id>` selects a job template; `--parameterization <id>` overrides the recipe.
+   The Step 10 interim meaning of `--template` as a job template is replaced.
+2. **Sizing — accepted (2026-11-16), revised and re-approved (2026-11-17).** 3.0–4.0 pw was accepted with
+   seven features, no split, and the 2.25 pw contingency. After the parser change the owner approved
+   2.75–3.75 pw with the same exception, features, no split, and contingency. The roadmap row and §3.1
+   record both.
+3. **`new --template ceria` — accepted (2026-11-16).** Ship the embedded ceria starter with the model-hash
+   freshness test; keep `blank`. The asset is MIT-authored project data, not copied GPL content.
+4. **Report registration — accepted (2026-11-16).** `compiled-inspection-v1` and `package-summary-v1` remain
+   canonical projections; no new CLI report ids until Step 30.
 5. **Parser — replaced (2026-11-17).** Adopt `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only) and remove
    the hand-written parser; the AOT/trimming reason for the earlier decision was disproved by the owner's
-   verification. Shell completion is narrowed to the library's `[suggest]` protocol; no `completion` command
-   is shipped in Step 12. The estimate is revised to 2.75–3.75 pw and is presented for confirmation with
-   this decision.
+   verification. [ADR 0015](../adr/0015-cli-parser-system-commandline.md) records the decision.
+6. **Completion — removed (2026-11-17).** Step 12 ships no `mocassin completion` command and no shell
+   scripts. The library's `[suggest]` protocol is accepted but is not a contract; shell integration is
+   deferred to Step 31 packaging.
+7. **Response files — supported and bounded (2026-11-17).** `@file` is part of the Step 12 CLI contract with
+   the §5.3 syntax and CLI-owned limits; feature 1 implements and tests it, and ADR 0015 records it.
 
 ## 22. Acceptance criteria
 
@@ -1614,8 +1693,13 @@ These decisions were made by the human owner after round 1 and are not open for 
       additionally suppresses stage/progress/log events.
 - [ ] `mocassin --help`, `mocassin <command> --help`, and `mocassin --version` exit 0; a parse error exits
       2 with `CLI001` and never exposes the library's default 1; `--jobs -1`, `--parallel -1`, and
-      `-o -file` reach the handlers as values; `--` ends option parsing; response-file behaviour is pinned
-      by a test.
+      `-o -file` reach the handlers as values; `--` ends option parsing.
+- [ ] `@file` response files follow §5.3: quoting/whitespace and `#` comment rules, recursive references,
+      cwd-relative paths, `@` literal and no escape, `@file` before `--` expanded and after `--` literal,
+      `--input=@file` literal, `--input @file` token-expanded before arity, `--json` inside a file honored,
+      and the 1 MiB/4 MiB/depth-8/10,000-token/32-file limits enforced. Missing, unreadable, invalid, or
+      oversized files exit 2 with `CLI001`, not `CLI002`/3; a `--json` on the command line still produces the
+      command report for an expansion failure.
 - [ ] The AOT smoke host publishes for `linux-x64` with `PublishAot=true` and `TrimMode=full` with zero
       IL2xxx/IL3xxx warnings, the positive control emits IL2026/IL3050, and the native binary runs `--help`,
       `--version`, and one parse-error case. The real `Mocassin.Cli` publish result is recorded as evidence;
@@ -1637,7 +1721,8 @@ These decisions were made by the human owner after round 1 and are not open for 
 
 | Test | Assertion | Tier |
 | --- | --- | --- |
-| Parser/help | Library conventions: commands, long/short options, `--opt=value`, `--`, negative numbers (`--jobs -1`, `--parallel -1`, `-o -file`), missing values, unknown options, required options/arguments, duplicate/conflicting options, response-file behaviour; help/version exit 0; parse errors exit 2 with a CLI-owned `CLI001` message and the offending token; the library's default 1 is never returned | PR-fast |
+| Parser/help | Library conventions: commands, long/short options, `--opt=value`, `--`, negative numbers (`--jobs -1`, `--parallel -1`, `-o -file`), missing values, unknown options, required options/arguments, duplicate/conflicting options, no POSIX short-option bundling; help/version exit 0; parse errors exit 2 with a CLI-owned `CLI001` message and the offending token; the library's default 1 is never returned | PR-fast |
+| Response files | `@file` with spaces/tabs/CRLF, double-quote grouping and empty quotes, unterminated-quote discard/keep rule, literal single quotes/backslash, `#` only at line start, recursive references, cwd-relative paths, `@` literal, `@@` no escape, `--` stops expansion, `--input=@file` literal, `--input @file` multi-token arity error, `--json` inside/outside, 1 MiB/4 MiB/depth-8/10,000-token/32-file limits, missing/unreadable/directory/invalid-UTF-8/oversized → `CLI001`/2 not `CLI002`/3 | PR-fast |
 | Exit codes | Every `BuildFailureKind`/status maps to the documented code, including `JobSelection`, `Preview`, `PackageWrite` without an I/O cause, and `None`/`Failed`; exit 5 is never emitted by `build` | PR-fast |
 | Options injection | `BuildRequest.Options` reaches the clock, throttle, and channel capacity; a fixed clock makes progress/ETA deterministic | PR-fast |
 | Selection | Auto-select, multiple build templates, multiple job templates, multiple parameterizations, overrides, unknown IDs, wrong-kind ID | PR-fast |
@@ -1672,8 +1757,10 @@ These decisions were made by the human owner after round 1 and are not open for 
 | Progress overhead | 10 Hz throttle, bounded channel, final-event guarantee |
 | Parser/library behaviour changes | Version pinned exactly (3.0.0); the command graph and typed binding are ours; parser-convention tests cover arity, `--opt=value`, negative values, `--`, response files, and error text; an upgrade is a recorded dependency change |
 | Library parse errors leak exit 1 | `CliApplication` maps `ParseResult.Errors` to `CLI001`/2 in one place and a test asserts the default 1 is never returned; help/version stay 0 |
+| Response files exhaust memory or recurse | The library's unbounded reader is replaced by a bounded reader: 1 MiB/file, 4 MiB total, depth 8, 10,000 tokens, 32 files; a self-reference fails at the depth bound instead of hanging; the library's `UnauthorizedAccessException` path is caught and mapped to `CLI001`/2 |
+| Response-file syntax drifts from the contract | The CLI owns the reader; tests pin quoting, whitespace, `#`, nesting, path resolution, `--`/`--json`, and the limits; the library default is not the contract |
 | System.CommandLine AOT regresses | Strict AOT smoke host with a positive control runs nightly/release; the real CLI publish is recorded and dependency-owned warnings are attributed; only `linux-x64` is proven, so Windows/macOS and SQLite/MessagePack stay Step 31 gates |
-| Completion promise overreaches | `completion` is removed from Step 12; `[suggest]` is accepted but not a contract; shell integration is a Step 31 packaging decision |
+| Completion promise overreaches | The owner removed `completion` from Step 12 on 2026-11-17; `[suggest]` is accepted but not a contract; shell integration is deferred to Step 31 packaging |
 | Duplicate/bespoke parser creeps back | Feature 1 deletes the Step 07/10 hand-written parsers; no library project references `System.CommandLine`; structure/API tests and review check the command graph is the only parse path |
 | Silent warnings | Report summary, `--warnings-as-errors` for validation/parameterization |
 | Doctor checks not deterministic | `IDoctorCheck` seam injects pass/warn/fail checks; real checks run in the healthy CI path |
@@ -1689,7 +1776,7 @@ These decisions were made by the human owner after round 1 and are not open for 
 
 The CLI can create, validate, compile, build, preview, inspect, verify, and diagnose a project end to end,
 with stable full-expansion job IDs, normalized partial selections, progress and cancellation, atomic
-replacement, a verified package, schema-valid JSON/JSON-Lines output, a healthy `doctor`, a non-destructive
-`clean --dry-run`, and complete documentation/parity/closeout evidence. The GUI can call the same build
+replacement, a verified package, schema-valid JSON/JSON-Lines output, documented and bounded response files, a
+healthy `doctor`, a non-destructive `clean --dry-run`, and complete documentation/parity/closeout evidence. The GUI can call the same build
 pipeline without referencing the CLI and receives the same typed `BuildPreview` payload; there is no second
 preview or build implementation.

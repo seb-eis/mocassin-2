@@ -25,8 +25,8 @@ Options use the standard `System.CommandLine` conventions: `--name value` or `--
 flags take no value. A value beginning with `-` is accepted for a value-taking option, so `--jobs -1` and
 `--parallel -1` reach the command as `-1` (and are rejected by range checks), and `-o -file` names the path
 `-file`. `--` ends option parsing so a path beginning with `-` can be passed. Option names are
-case-sensitive. Numbers use invariant culture: `--parallel` accepts `1..256` and `--older-than` accepts
-`0..36500`. A parse error exits 2 with a `CLI001` diagnostic; the library's own parse-error exit code (1) is
+case-sensitive; combined short options are not supported. Numbers use invariant culture: `--parallel` accepts
+`1..256` and `--older-than` accepts `0..36500`. A parse error exits 2 with a `CLI001` diagnostic; the library's own parse-error exit code (1) is
 never exposed.
 
 `--json` makes stderr JSON Lines only and suppresses human progress, whether or not `--quiet` is used.
@@ -35,6 +35,28 @@ diagnostics, `build.started`, `build.finished`, and the final report remain. Nei
 
 `MOCASSIN_DEBUG=1` includes a stack trace for an unexpected internal error. `MOCASSIN_SIM` names the solver
 executable that `doctor` probes (the solver arrives in a later step).
+
+## Response files
+
+A token that starts with `@` and has at least one more character is a response-file reference. The rest of the
+token is the path, resolved against the current working directory (not the containing response file). `@` alone
+is a literal argument. There is no escape sequence: `@@name` refers to a file named `@name`. Quote a path that
+contains spaces as one token, for example `@"my file.rsp"`.
+
+Files are UTF-8 (an optional BOM is accepted); invalid UTF-8 or a NUL byte exits 2 with `CLI001`. Each line is
+a token stream: Unicode whitespace separates tokens; double quotes group whitespace and are removed; single
+quotes and backslashes are literal; a line whose first non-whitespace character is `#` is ignored; `#` elsewhere
+is literal. Double quotes do not span lines; an unterminated quote that begins a token discards it, and one
+inside a token keeps the token without the quote. A token in a file that starts with `@` is another response
+file.
+
+Limits: **1 MiB per file, 4 MiB total, nesting depth 8, 10,000 expanded tokens, and 32 response files**.
+Missing, unreadable, invalid, or oversized files exit 2 with `CLI001`; they are usage errors, not `CLI002`/3.
+
+`@file` before `--` is expanded; after `--` it is a literal argument. `--input=@file` is literal.
+`--input @file` expands before option arity checking, so a multi-token file in a single-value position is a
+usage error. A `--json` inside a file is honored; if a file cannot be read, a `--json` inside it cannot be
+known, so put `--json` on the command line if you need a report for that failure.
 
 ## `mocassin new`
 
@@ -341,10 +363,10 @@ step. With `--dry-run`, `--json` prints `clean-v1` with `dryRun: true`, the fold
 ## Shell completion
 
 Step 12 does **not** ship a `completion` command and does not generate bash, zsh, fish, or PowerShell
-scripts. The CLI is built on `System.CommandLine` 3.0.0, which provides the `[suggest]` protocol that
-`dotnet-suggest` consumes, not script generation. The directive is accepted but is not a contract, and its
-command-scoped behaviour is not promised in this release. Shell integration is a Step 31 packaging decision;
-until then, script the commands directly.
+scripts; this is the owner's decision of 2026-11-17. The CLI is built on `System.CommandLine` 3.0.0, which
+provides the `[suggest]` protocol that `dotnet-suggest` consumes, not script generation. The directive is
+accepted but is not a contract, and its command-scoped behaviour is not promised in this release. Shell
+integration is deferred to Step 31 packaging; until then, script the commands directly.
 
 ## Reserved commands
 

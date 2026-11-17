@@ -1457,15 +1457,29 @@ mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
   reports what would be removed. Step 12 implements **only** the dry run; deletion is Step 28. With `--json`,
   a missing `--dry-run` is a usage error that still emits `clean-v1` with `dryRun = false`, `removedCount = 0`,
   and `CLI008`; it never deletes.
-- The CLI parser is `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only). It supplies tokenization, arity and
+- The CLI parser is `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only; [ADR 0015](adr/0015-cli-parser-system-commandline.md)). It supplies tokenization, arity and
   option applicability, `--name value`/`--name=value`, negative values such as `--jobs -1`, `--`, help/version
   actions, and the `[suggest]` directive. The CLI owns the command graph, typed binding, `CLI001` wording, and
   exit-code policy. The library's parse-error exit code (1) is never exposed: a parse error is `CLI001` and
-  exit `2`; help/version exit `0`. Response-file (`@file`) behaviour is pinned by a test so the accepted input
-  is documented.
-- `completion` is **not** a Step 12 command. `System.CommandLine` provides the `[suggest]` protocol for
-  `dotnet-suggest`, not shell-script generation; the directive is accepted but is not a contract, and shell
-  integration is a Step 31 packaging decision. Step 12 ships no completion output.
+  exit `2`; help/version exit `0`. POSIX short-option bundling is disabled (`EnablePosixBundling = false`);
+  short options are separate tokens.
+- **Response files.** A token that starts with `@` and has at least one more character is a response-file
+  reference; the remainder is the path, resolved against the process working directory, not the containing
+  file. `@` alone is a literal argument; `@@name` names a file `@name`; there is no escape. Files are UTF-8
+  (optional BOM); invalid UTF-8 or NUL is `CLI001`/2. Lines are tokenized individually: Unicode whitespace
+  separates, double quotes group and are removed, single quotes and backslashes are literal, `#` is a comment
+  only as the first non-whitespace character of a line, and quotes do not span lines (an unterminated quote
+  that begins a token discards it; one inside a token keeps the token without the quote). A `@file` token
+  inside a file is expanded recursively. Limits: **1 MiB per file, 4 MiB total, depth 8, 10,000 tokens, 32 files**.
+  `@file` before `--` expands; after `--` it is literal. `--input=@file` is literal; `--input @file` expands
+  before arity checking, so a multi-token file in a single-value position is a usage error. `--json` inside a
+  file is honored; a `--json` inside a file that failed to read cannot enable a report. Missing, unreadable,
+  invalid, or oversized files are `CLI001`/2, not `CLI002`/3. The full contract is the step page §5.3 and
+  `docs/reference/cli.md`.
+- `completion` is **not** a Step 12 command. The owner decided on 2026-11-17 to remove it:
+  `System.CommandLine` provides the `[suggest]` protocol for `dotnet-suggest`, not shell-script generation;
+  the directive is accepted but is not a contract, and shell integration is deferred to Step 31 packaging.
+  Step 12 ships no completion output.
 - Reserved commands are defined in the command graph and exit `2` with a stable `CLI008` diagnostic and the
   owning step. They do not accept `--json` and emit no report.
 
@@ -1870,7 +1884,8 @@ CLI report ids: `compile -o` writes the former, and `inspect-v1`/`verify-v1` emb
 Step 10 interim preview mapping. `validate` and every command that accepts `--json` print exactly one report
 object, including usage errors, once the command name is recognised; `--help`, `--version`, and reserved
 commands do not accept `--json` and emit no report. The parser's default parse-error exit code (1) is never
-exposed: the CLI maps it to `CLI001` and exit `2`.
+exposed: the CLI maps it to `CLI001` and exit `2`. Response-file errors (missing, unreadable, invalid, or
+oversized `@file`) are the same usage class: `CLI001`/2, not `CLI002`/3.
 
 ## 6. Contract testing
 

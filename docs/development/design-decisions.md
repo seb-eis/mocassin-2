@@ -394,13 +394,14 @@ caller with `IPackageVerifier`; this preserves the one-reader rule and avoids a 
 
 ## `System.CommandLine` for the CLI (Step 12)
 
-The CLI uses `System.CommandLine` 3.0.0 (MIT, pinned, referenced only by `Mocassin.Cli`). The owner replaced
-the round-2 hand-written-parser decision on 2026-11-17 after an AOT/full-trim verification: on
-`net11.0`/`linux-x64` with `PublishAot=true` and `TrimMode=full`, 3.0.0 produced zero IL2xxx/IL3xxx warnings,
-with a positive control proving the analyzers and ILC warning channel were active; the native binary parsed,
-validated, printed help/version, and reported parse errors like the JIT build. The `net10.0` asset declares
-`IsTrimmable` and `IsAotCompatible`, and the dependency graph is empty for `net10.0+`. The `netstandard2.0`
-fallback and Windows/macOS AOT are untested.
+The CLI uses `System.CommandLine` 3.0.0 (MIT, pinned, referenced only by `Mocassin.Cli`); the decision is
+recorded in ADR 0015 in `docs/planning/adr/`. The owner replaced the round-2
+hand-written-parser decision on 2026-11-17 after an AOT/full-trim verification: on `net11.0`/`linux-x64` with
+`PublishAot=true` and `TrimMode=full`, 3.0.0 produced zero IL2xxx/IL3xxx warnings, with a positive control
+proving the analyzers and ILC warning channel were active; the native binary parsed, validated, printed
+help/version, and reported parse errors like the JIT build. The `net10.0` asset declares `IsTrimmable` and
+`IsAotCompatible`, and the dependency graph is empty for `net10.0+`. The `netstandard2.0` fallback and
+Windows/macOS AOT are untested.
 
 The library owns tokenization, arity, help/version, and the `[suggest]` directive. The CLI owns the command
 graph, typed `ParseResult` binding, `CLI001` wording, and exit-code policy. The library's default parse-error
@@ -409,9 +410,14 @@ positive control; the real CLI publish is recorded as evidence but is not a gate
 are unverified. Only `linux-x64` AOT is proven, so Step 31's packaging gate still owns the platform matrix and
 the AOT/single-file decision.
 
-No `completion` command is shipped: the library provides the `[suggest]` protocol for `dotnet-suggest`, not
-shell-script generation, and `dotnet-suggest` is not installed. Shell integration is a Step 31 packaging
-decision and is not part of the Step 12 contract.
+Response files (`@file`) are a CLI contract, not the library default. A bounded reader replaces
+`ParserConfiguration.ResponseFileTokenReplacer` with the documented syntax and limits (1 MiB per file, 4 MiB
+total, depth 8, 10,000 tokens, 32 files), and missing/unreadable/invalid/oversized files are `CLI001`/2, not
+`CLI002`/3. The full contract is the step page §5.3 and `reference/cli.md`.
+
+No `completion` command is shipped: the owner decided on 2026-11-17 to remove it. The library provides the
+`[suggest]` protocol for `dotnet-suggest`, not shell-script generation, and `dotnet-suggest` is not installed.
+Shell integration is deferred to Step 31 packaging and is not part of the Step 12 contract.
 
 ## CLI exit codes and diagnostics (Step 12)
 

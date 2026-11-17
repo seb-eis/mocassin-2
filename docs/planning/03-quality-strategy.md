@@ -115,7 +115,7 @@ Property tests are required for the following, using brute-force or analytic ora
 | Results store | `.msr` package binding, package-signature mismatch rejection, idempotent collection, previous-major read |
 | Job contracts | `solver.json`, job-folder paths, event stream, and `mmcfe.db` round-trip and reject malformed input |
 | Evaluation | MSD/diffusion/mobility/conductivity identities on analytic random walks; non-negativity; unit consistency; empty and single-particle cases |
-| CLI / parsing | Library parsing conventions (arity, `--opt=value`, negative values, `--`, response files), parse-error→`CLI001`/2 mapping, help/version 0, job-range parsing and normalization, full-expansion ID stability, partial selections, exit codes, report schema, JSON-Lines ordering; no crash on arbitrary arguments; AOT publish smoke check |
+| CLI / parsing | Library parsing conventions (arity, `--opt=value`, negative values, `--`), bounded response files (syntax, limits, `--`/`--json` interaction, `CLI001`/2 errors), parse-error→`CLI001`/2 mapping, help/version 0, job-range parsing and normalization, full-expansion ID stability, partial selections, exit codes, report schema, JSON-Lines ordering; no crash on arbitrary arguments; AOT publish smoke check |
 | Python reader | Valid document round-trip; malformed/truncated/future-version rejection; aggregation invariants match the .NET implementation |
 
 Property tests assert invariants, not a specific internal sequence. A failing case must be reproducible from the
@@ -453,9 +453,15 @@ solver with the same binary, platform, package, and seed.
 - **Parser:** `System.CommandLine` 3.0.0 supplies tokenization, arity, and help/version. Tests pin the
   conventions the CLI relies on: every command, long/short option, `--opt=value`, `--`, missing value,
   unknown option, duplicate option, conflicting option, required option/argument, negative values
-  (`--jobs -1`, `--parallel -1`, `-o -file`), and response-file behaviour. A parse error is `CLI001`/exit 2
-  with CLI-owned wording naming the offending token; the library's default exit 1 is never returned; help and
-  version exit 0. No arbitrary `string[]` crashes or throws.
+  (`--jobs -1`, `--parallel -1`, `-o -file`), and no POSIX short-option bundling. A parse error is
+  `CLI001`/exit 2 with CLI-owned wording naming
+  the offending token; the library's default exit 1 is never returned; help and version exit 0. No arbitrary
+  `string[]` crashes or throws.
+- **Response files:** `@file` syntax, double-quote grouping and empty quotes, literal single quotes and
+  backslash, `#` comments only at line start, recursive references, cwd-relative paths, `@` literal and no
+  escape, `--` stops expansion, `--input=@file` literal, `--input @file` token-expanded before arity,
+  `--json` inside/outside the file, 1 MiB/4 MiB/depth-8/10,000-token/32-file limits, and missing/unreadable/
+  directory/invalid-UTF-8/oversized → `CLI001`/2 (not `CLI002`/3). The library default is not the contract.
 - **AOT:** a minimal smoke host that references `System.CommandLine` 3.0.0 is published with
   `-p:PublishAot=true -p:TrimMode=full -r linux-x64`; the check asserts zero IL2xxx/IL3xxx warnings, a
   positive control emits IL2026/IL3050, and the native binary runs `--help`, `--version`, and one parse-error
