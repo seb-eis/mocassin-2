@@ -87,3 +87,26 @@ internal sealed record InspectRequest(
 internal sealed record VerifyRequest(
     string PackagePath,
     bool Json);
+
+/// <summary>
+/// The typed request of the <c>doctor</c> command.
+/// </summary>
+/// <param name="Json">Whether the JSON report was requested.</param>
+internal sealed record DoctorRequest(bool Json);
+
+/// <summary>
+/// The typed request of the <c>clean</c> command.
+/// </summary>
+/// <param name="PackagePath">The package path.</param>
+/// <param name="Directory">The job-folder directory, or <see langword="null"/> for the package directory.</param>
+/// <param name="OlderThanDays">The optional age filter in days; zero means no filter.</param>
+/// <param name="DryRun">Whether the dry-run listing was requested.</param>
+/// <param name="Results">The reserved results-store path, or <see langword="null"/>.</param>
+/// <param name="Json">Whether the JSON report was requested.</param>
+internal sealed record CleanRequest(
+    string PackagePath,
+    string? Directory,
+    int OlderThanDays,
+    bool DryRun,
+    string? Results,
+    bool Json);

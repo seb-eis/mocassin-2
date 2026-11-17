@@ -119,5 +119,37 @@ internal static class CliBinding
             parseResult.GetValue(graph.VerifyJson));
     }
 
+    /// <summary>
+    /// Binds the <c>doctor</c> command.
+    /// </summary>
+    /// <param name="parseResult">The successful parse result.</param>
+    /// <param name="graph">The command graph that owns the symbols.</param>
+    /// <returns>The typed request.</returns>
+    public static DoctorRequest BindDoctor(ParseResult parseResult, CliCommandGraph graph)
+    {
+        ArgumentNullException.ThrowIfNull(parseResult);
+        ArgumentNullException.ThrowIfNull(graph);
+        return new DoctorRequest(parseResult.GetValue(graph.DoctorJson));
+    }
+
+    /// <summary>
+    /// Binds the <c>clean</c> command.
+    /// </summary>
+    /// <param name="parseResult">The successful parse result.</param>
+    /// <param name="graph">The command graph that owns the symbols.</param>
+    /// <returns>The typed request.</returns>
+    public static CleanRequest BindClean(ParseResult parseResult, CliCommandGraph graph)
+    {
+        ArgumentNullException.ThrowIfNull(parseResult);
+        ArgumentNullException.ThrowIfNull(graph);
+        return new CleanRequest(
+            parseResult.GetRequiredValue(graph.CleanPackage),
+            parseResult.GetValue(graph.CleanDirectory),
+            parseResult.GetValue(graph.CleanOlderThan),
+            parseResult.GetValue(graph.CleanDryRun),
+            parseResult.GetValue(graph.CleanResults),
+            parseResult.GetValue(graph.CleanJson));
+    }
+
     private static Guid? OptionalId(Guid value) => value == Guid.Empty ? null : value;
 }

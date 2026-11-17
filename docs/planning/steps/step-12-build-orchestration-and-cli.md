@@ -26,7 +26,7 @@ UI consumes later.
   `net11.0`/`linux-x64`; bounded `@file` is part of the contract; no shell-completion command in Step 12
   (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
 - **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 at `9d4d2ef`; its first parent
-  is the design-merge commit `eb31979`). Features 1–5 are squashed into the step branch; see the feature log.
+  is the design-merge commit `eb31979`). Features 1–6 are squashed into the step branch; see the feature log.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
@@ -58,7 +58,8 @@ implemented and squashed. Feature rows stay empty until then.
 | 2 Build orchestration core | `feature/step-12-build-orchestration-and-cli/build-orchestration-core` | Squashed | `dotnet` (494 Packages tests, 68 new), `structure`, `api` exit 0 | Not run (no per-feature CI) | `1dc9eeb` |
 | 3 Build and preview command | `feature/step-12-build-orchestration-and-cli/build-and-preview-command` | Squashed | `dotnet` (81 CLI tests), `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `af7431b` |
 | 4 Project and compile commands | `feature/step-12-build-orchestration-and-cli/project-and-compile-commands` | Squashed | `dotnet` (121 CLI tests, 500 Packages tests including 6 template tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `e7564c0` |
-| 5 Package inspection commands | `feature/step-12-build-orchestration-and-cli/package-inspection-commands` | Squashed | `dotnet` (147 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | Recorded with feature 6 |
+| 5 Package inspection commands | `feature/step-12-build-orchestration-and-cli/package-inspection-commands` | Squashed | `dotnet` (147 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `85d8d41` |
+| 6 Doctor and dry-run clean | `feature/step-12-build-orchestration-and-cli/doctor-and-dry-run-clean` | Squashed | `dotnet` (168 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | Recorded with feature 7 |
 
 ### Deviations and accepted risks
 
@@ -116,6 +117,13 @@ implemented and squashed. Feature rows stay empty until then.
     SIGINT/SIGTERM cancellation and the second-signal default termination; `BuildCommand` receives the token
     through `CliApplication.RunAsync`, which keeps the command unit-testable. The observable behaviour matches
     §13.3.
+14. **`doctor` disk-space threshold.** Free space below 100 MiB is a warning, not a failure; the design lists
+    the check without a threshold. The command stays healthy unless a check reports `fail`.
+15. **`clean` report content outside the supported mode.** The no-dry-run report still lists the folders it
+    would remove (read-only) and adds `CLI008`; the reserved `--results` option emits a minimal `clean-v1`
+    report without inspecting the package. Both exit 2 and delete nothing.
+16. **A throwing doctor check is a failing check.** The command records `fail` with the exception type and
+    keeps the report schema-valid instead of aborting; the design does not define this failure mode.
 13. **`inspect` is tolerant of non-fatal package defects.** The Step 11 inspector intentionally reports what
     it can read; a corrupt payload or a wrong signature is a `verify` `PKG` finding. `inspect` maps only fatal
     structure failures (`InvalidDataException`) to `CLI009`/1, matching §13.4. The missing, directory, and
@@ -1684,11 +1692,11 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 6 — Doctor and dry-run clean
 
-- [ ] Implement `doctor` checks through `IDoctorCheck`, the solver probe seam, the `doctor-v1` report, and
+- [x] Implement `doctor` checks through `IDoctorCheck`, the solver probe seam, the `doctor-v1` report, and
       healthy-CI behaviour.
-- [ ] Implement `clean --dry-run` with `--dir`/`--older-than`, no deletion, and the `clean-v1` report,
+- [x] Implement `clean --dry-run` with `--dir`/`--older-than`, no deletion, and the `clean-v1` report,
       including the `--json`-without-`--dry-run` `CLI008` report.
-- [ ] Add healthy, injected-check-failure, warning-only, and no-deletion tests.
+- [x] Add healthy, injected-check-failure, warning-only, and no-deletion tests.
 
 ### Feature 7 — Documentation, parity, and closeout
 

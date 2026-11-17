@@ -161,16 +161,6 @@ public sealed class CliApplicationTests
     }
 
     [Fact]
-    public async Task UnimplementedCommandReportsCli008AndExitsTwo()
-    {
-        var (exitCode, _, stderr) = await RunAsync("doctor");
-
-        Assert.Equal(2, exitCode);
-        Assert.Contains("CLI008", stderr, StringComparison.Ordinal);
-        Assert.Contains("feature 6", stderr, StringComparison.Ordinal);
-    }
-
-    [Fact]
     public async Task EverySubcommandRejectsRootOnlyVersion()
     {
         foreach (var command in new[] { "new", "build", "compile", "inspect", "verify", "doctor", "clean" })

@@ -2,8 +2,10 @@
 
 using System.CommandLine;
 using Mocassin.Cli.Build;
+using Mocassin.Cli.Clean;
 using Mocassin.Cli.Compile;
 using Mocassin.Cli.Diagnostics;
+using Mocassin.Cli.Doctor;
 using Mocassin.Cli.Inspect;
 using Mocassin.Cli.NewProject;
 using Mocassin.Cli.Verify;
@@ -29,6 +31,8 @@ internal sealed class CliApplication
     private readonly CompileCommand compileCommand;
     private readonly InspectCommand inspectCommand;
     private readonly VerifyCommand verifyCommand;
+    private readonly DoctorCommand doctorCommand;
+    private readonly CleanCommand cleanCommand;
 
     /// <summary>
     /// Initializes the application with the complete command graph.
@@ -58,7 +62,9 @@ internal sealed class CliApplication
         NewProjectCommand? newProjectCommand = null,
         CompileCommand? compileCommand = null,
         InspectCommand? inspectCommand = null,
-        VerifyCommand? verifyCommand = null)
+        VerifyCommand? verifyCommand = null,
+        DoctorCommand? doctorCommand = null,
+        CleanCommand? cleanCommand = null)
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(buildCommand);
@@ -68,6 +74,8 @@ internal sealed class CliApplication
         this.compileCommand = compileCommand ?? new CompileCommand();
         this.inspectCommand = inspectCommand ?? new InspectCommand();
         this.verifyCommand = verifyCommand ?? new VerifyCommand();
+        this.doctorCommand = doctorCommand ?? new DoctorCommand();
+        this.cleanCommand = cleanCommand ?? new CleanCommand();
     }
 
     /// <summary>
@@ -203,10 +211,22 @@ internal sealed class CliApplication
                 cancellationToken);
         }
 
-        if (ReferenceEquals(command, graph.DoctorCommand) || ReferenceEquals(command, graph.CleanCommand))
+        if (ReferenceEquals(command, graph.DoctorCommand))
         {
-            WriteUnavailable(command, stderr, "Step 12 feature 6");
-            return Task.FromResult(CliExitCode.Usage);
+            return doctorCommand.RunAsync(
+                CliBinding.BindDoctor(parseResult, graph),
+                stdout,
+                stderr,
+                cancellationToken);
+        }
+
+        if (ReferenceEquals(command, graph.CleanCommand))
+        {
+            return cleanCommand.RunAsync(
+                CliBinding.BindClean(parseResult, graph),
+                stdout,
+                stderr,
+                cancellationToken);
         }
 
         var owner = command.Name switch
@@ -265,6 +285,18 @@ internal sealed class CliApplication
             if (ReferenceEquals(command, graph.VerifyCommand))
             {
                 VerifyReportWriter.WriteJson(stdout, VerifyReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
+
+            if (ReferenceEquals(command, graph.DoctorCommand))
+            {
+                DoctorReportWriter.WriteJson(stdout, DoctorReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
+
+            if (ReferenceEquals(command, graph.CleanCommand))
+            {
+                CleanReportWriter.WriteJson(stdout, CleanReportWriter.UsageError(diagnostics));
                 return CliExitCode.Usage;
             }
         }
@@ -328,6 +360,18 @@ internal sealed class CliApplication
                 VerifyReportWriter.WriteJson(stdout, VerifyReportWriter.UsageError(diagnostics));
                 return CliExitCode.Usage;
             }
+
+            if (string.Equals(command, CliCommandNames.Doctor, StringComparison.Ordinal))
+            {
+                DoctorReportWriter.WriteJson(stdout, DoctorReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
+
+            if (string.Equals(command, CliCommandNames.Clean, StringComparison.Ordinal))
+            {
+                CleanReportWriter.WriteJson(stdout, CleanReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
         }
 
         stderr.WriteLine($"{diagnostics[0].Code}: {diagnostics[0].Message}");
@@ -356,12 +400,6 @@ internal sealed class CliApplication
 
     private static bool WantsPreview(IReadOnlyList<string> tokens) =>
         tokens.TakeWhile(static token => token != "--").Contains("--preview", StringComparer.Ordinal);
-
-    private static void WriteUnavailable(Command command, TextWriter stderr, string feature) =>
-        WriteUnavailable(
-            stderr,
-            "CLI008",
-            $"The '{command.Name}' command arrives with {feature}.");
 
     private static void WriteReserved(Command command, TextWriter stderr, string owner) =>
         WriteUnavailable(stderr, "CLI008", $"The '{command.Name}' command is reserved for {owner}.");
