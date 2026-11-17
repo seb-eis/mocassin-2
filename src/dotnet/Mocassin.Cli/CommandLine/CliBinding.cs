@@ -56,5 +56,38 @@ internal static class CliBinding
             parseResult.GetValue(graph.BuildQuiet));
     }
 
+    /// <summary>
+    /// Binds the <c>new</c> command.
+    /// </summary>
+    /// <param name="parseResult">The successful parse result.</param>
+    /// <param name="graph">The command graph that owns the symbols.</param>
+    /// <returns>The typed request.</returns>
+    public static NewProjectRequest BindNewProject(ParseResult parseResult, CliCommandGraph graph)
+    {
+        ArgumentNullException.ThrowIfNull(parseResult);
+        ArgumentNullException.ThrowIfNull(graph);
+        return new NewProjectRequest(
+            parseResult.GetRequiredValue(graph.NewName),
+            parseResult.GetValue(graph.NewOutput),
+            parseResult.GetValue(graph.NewTemplate) ?? "blank",
+            parseResult.GetValue(graph.NewJson));
+    }
+
+    /// <summary>
+    /// Binds the <c>compile</c> command.
+    /// </summary>
+    /// <param name="parseResult">The successful parse result.</param>
+    /// <param name="graph">The command graph that owns the symbols.</param>
+    /// <returns>The typed request.</returns>
+    public static CompileRequest BindCompile(ParseResult parseResult, CliCommandGraph graph)
+    {
+        ArgumentNullException.ThrowIfNull(parseResult);
+        ArgumentNullException.ThrowIfNull(graph);
+        return new CompileRequest(
+            parseResult.GetRequiredValue(graph.CompileProject),
+            parseResult.GetValue(graph.CompileOutput),
+            parseResult.GetValue(graph.CompileJson));
+    }
+
     private static Guid? OptionalId(Guid value) => value == Guid.Empty ? null : value;
 }

@@ -15,6 +15,11 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Projects/Templates/Assets/blank.mocprj" />
+    <EmbeddedResource Include="Projects/Templates/Assets/ceria.mocprj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Mocassin.Compilation/Mocassin.Compilation.csproj" />
     <ProjectReference Include="../Mocassin.Contracts/Mocassin.Contracts.csproj" />
     <ProjectReference Include="../Mocassin.Core/Mocassin.Core.csproj" />

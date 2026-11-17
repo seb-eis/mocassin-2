@@ -1519,3 +1519,27 @@ static Mocassin.Packages.Build.JobSelectionResult.operator ==(Mocassin.Packages.
 virtual Mocassin.Packages.Build.BuildEvent.EqualityContract.get -> System.Type!
 virtual Mocassin.Packages.Build.BuildEvent.Equals(Mocassin.Packages.Build.BuildEvent? other) -> bool
 virtual Mocassin.Packages.Build.BuildEvent.PrintMembers(System.Text.StringBuilder! builder) -> bool
+Mocassin.Packages.Projects.Templates.ProjectTemplate
+Mocassin.Packages.Projects.Templates.ProjectTemplate.<Clone>$() -> Mocassin.Packages.Projects.Templates.ProjectTemplate!
+Mocassin.Packages.Projects.Templates.ProjectTemplate.CreateProject(string! name, System.DateTimeOffset createdUtc) -> Mocassin.Core.Project.Project!
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Deconstruct(out Mocassin.Packages.Projects.Templates.ProjectTemplateKind Kind, out string! DisplayName, out Mocassin.Core.Project.Project! Project) -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplate.DisplayName.get -> string!
+Mocassin.Packages.Projects.Templates.ProjectTemplate.DisplayName.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Equals(Mocassin.Packages.Projects.Templates.ProjectTemplate? other) -> bool
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Kind.get -> Mocassin.Packages.Projects.Templates.ProjectTemplateKind
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Kind.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Project.get -> Mocassin.Core.Project.Project!
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Project.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplate.ProjectTemplate(Mocassin.Packages.Projects.Templates.ProjectTemplateKind Kind, string! DisplayName, Mocassin.Core.Project.Project! Project) -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplateFactory
+Mocassin.Packages.Projects.Templates.ProjectTemplateKind
+Mocassin.Packages.Projects.Templates.ProjectTemplateKind.Blank = 0 -> Mocassin.Packages.Projects.Templates.ProjectTemplateKind
+Mocassin.Packages.Projects.Templates.ProjectTemplateKind.Ceria = 1 -> Mocassin.Packages.Projects.Templates.ProjectTemplateKind
+override Mocassin.Packages.Projects.Templates.ProjectTemplate.Equals(object? obj) -> bool
+override Mocassin.Packages.Projects.Templates.ProjectTemplate.GetHashCode() -> int
+override Mocassin.Packages.Projects.Templates.ProjectTemplate.ToString() -> string!
+static Mocassin.Packages.Projects.Templates.ProjectTemplate.operator !=(Mocassin.Packages.Projects.Templates.ProjectTemplate? left, Mocassin.Packages.Projects.Templates.ProjectTemplate? right) -> bool
+static Mocassin.Packages.Projects.Templates.ProjectTemplate.operator ==(Mocassin.Packages.Projects.Templates.ProjectTemplate? left, Mocassin.Packages.Projects.Templates.ProjectTemplate? right) -> bool
+static Mocassin.Packages.Projects.Templates.ProjectTemplateFactory.All.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Templates.ProjectTemplate!>
+static Mocassin.Packages.Projects.Templates.ProjectTemplateFactory.CreateProject(Mocassin.Packages.Projects.Templates.ProjectTemplateKind kind, string! name, System.DateTimeOffset createdUtc) -> Mocassin.Core.Project.Project!
+static Mocassin.Packages.Projects.Templates.ProjectTemplateFactory.Get(Mocassin.Packages.Projects.Templates.ProjectTemplateKind kind) -> Mocassin.Packages.Projects.Templates.ProjectTemplate!

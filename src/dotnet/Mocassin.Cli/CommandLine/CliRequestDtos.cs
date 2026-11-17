@@ -45,3 +45,27 @@ internal sealed record BuildCommandRequest(
     bool Force,
     bool WarningsAsErrors,
     bool Quiet);
+
+/// <summary>
+/// The typed request of the <c>new</c> command.
+/// </summary>
+/// <param name="Name">The requested project name and file stem.</param>
+/// <param name="OutputDirectory">The output directory, or <see langword="null"/> for the current directory.</param>
+/// <param name="Template">The template name: <c>blank</c> or <c>ceria</c>.</param>
+/// <param name="Json">Whether the JSON report was requested.</param>
+internal sealed record NewProjectRequest(
+    string Name,
+    string? OutputDirectory,
+    string Template,
+    bool Json);
+
+/// <summary>
+/// The typed request of the <c>compile</c> command.
+/// </summary>
+/// <param name="ProjectPath">The project path.</param>
+/// <param name="OutputPath">The inspection output path, or <see langword="null"/>.</param>
+/// <param name="Json">Whether the JSON report was requested.</param>
+internal sealed record CompileRequest(
+    string ProjectPath,
+    string? OutputPath,
+    bool Json);

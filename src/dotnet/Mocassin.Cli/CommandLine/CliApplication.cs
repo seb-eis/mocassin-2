@@ -2,7 +2,9 @@
 
 using System.CommandLine;
 using Mocassin.Cli.Build;
+using Mocassin.Cli.Compile;
 using Mocassin.Cli.Diagnostics;
+using Mocassin.Cli.NewProject;
 using Mocassin.Cli.Validation;
 
 namespace Mocassin.Cli.CommandLine;
@@ -21,6 +23,8 @@ internal sealed class CliApplication
 
     private readonly CliCommandGraph graph;
     private readonly BuildCommand buildCommand;
+    private readonly NewProjectCommand newProjectCommand;
+    private readonly CompileCommand compileCommand;
 
     /// <summary>
     /// Initializes the application with the complete command graph.
@@ -44,12 +48,18 @@ internal sealed class CliApplication
     /// </summary>
     /// <param name="graph">The command graph.</param>
     /// <param name="buildCommand">The build command.</param>
-    internal CliApplication(CliCommandGraph graph, BuildCommand buildCommand)
+    internal CliApplication(
+        CliCommandGraph graph,
+        BuildCommand buildCommand,
+        NewProjectCommand? newProjectCommand = null,
+        CompileCommand? compileCommand = null)
     {
         ArgumentNullException.ThrowIfNull(graph);
         ArgumentNullException.ThrowIfNull(buildCommand);
         this.graph = graph;
         this.buildCommand = buildCommand;
+        this.newProjectCommand = newProjectCommand ?? new NewProjectCommand();
+        this.compileCommand = compileCommand ?? new CompileCommand();
     }
 
     /// <summary>
@@ -151,14 +161,20 @@ internal sealed class CliApplication
 
         if (ReferenceEquals(command, graph.NewCommand))
         {
-            WriteUnavailable(command, stderr, "Step 12 feature 4");
-            return Task.FromResult(CliExitCode.Usage);
+            return newProjectCommand.RunAsync(
+                CliBinding.BindNewProject(parseResult, graph),
+                stdout,
+                stderr,
+                cancellationToken);
         }
 
         if (ReferenceEquals(command, graph.CompileCommand))
         {
-            WriteUnavailable(command, stderr, "Step 12 feature 4");
-            return Task.FromResult(CliExitCode.Usage);
+            return compileCommand.RunAsync(
+                CliBinding.BindCompile(parseResult, graph),
+                stdout,
+                stderr,
+                cancellationToken);
         }
 
         if (ReferenceEquals(command, graph.InspectCommand) || ReferenceEquals(command, graph.VerifyCommand))
@@ -207,6 +223,18 @@ internal sealed class CliApplication
                     BuildReportFactory.UsageError(WantsPreview(tokens), diagnostics));
                 return CliExitCode.Usage;
             }
+
+            if (ReferenceEquals(command, graph.NewCommand))
+            {
+                NewProjectReportWriter.WriteJson(stdout, NewProjectReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
+
+            if (ReferenceEquals(command, graph.CompileCommand))
+            {
+                CompileReportWriter.WriteJson(stdout, CompileReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
         }
 
         CliParseErrors.WriteHuman(parseResult, graph, stderr);
@@ -242,6 +270,18 @@ internal sealed class CliApplication
                     BuildReportFactory.UsageError(
                         candidates.Contains("--preview", StringComparer.Ordinal),
                         diagnostics));
+                return CliExitCode.Usage;
+            }
+
+            if (string.Equals(command, CliCommandNames.New, StringComparison.Ordinal))
+            {
+                NewProjectReportWriter.WriteJson(stdout, NewProjectReportWriter.UsageError(diagnostics));
+                return CliExitCode.Usage;
+            }
+
+            if (string.Equals(command, CliCommandNames.Compile, StringComparison.Ordinal))
+            {
+                CompileReportWriter.WriteJson(stdout, CompileReportWriter.UsageError(diagnostics));
                 return CliExitCode.Usage;
             }
         }

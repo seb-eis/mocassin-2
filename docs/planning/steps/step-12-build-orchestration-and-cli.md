@@ -26,7 +26,7 @@ UI consumes later.
   `net11.0`/`linux-x64`; bounded `@file` is part of the contract; no shell-completion command in Step 12
   (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
 - **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 at `9d4d2ef`; its first parent
-  is the design-merge commit `eb31979`). Feature 1 is squashed into the step branch; see the feature log.
+  is the design-merge commit `eb31979`). Features 1–4 are squashed into the step branch; see the feature log.
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
@@ -56,7 +56,8 @@ implemented and squashed. Feature rows stay empty until then.
 | --- | --- | --- | --- | --- | --- |
 | 1 CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs`, `aot` exit 0 (AOT CLI evidence: 62 trim diagnostics from `Mocassin.Core`, not a gate) | Not run (no per-feature CI) | `517ae27` |
 | 2 Build orchestration core | `feature/step-12-build-orchestration-and-cli/build-orchestration-core` | Squashed | `dotnet` (494 Packages tests, 68 new), `structure`, `api` exit 0 | Not run (no per-feature CI) | `1dc9eeb` |
-| 3 Build and preview command | `feature/step-12-build-orchestration-and-cli/build-and-preview-command` | Squashed | `dotnet` (81 CLI tests), `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | Recorded with feature 4 |
+| 3 Build and preview command | `feature/step-12-build-orchestration-and-cli/build-and-preview-command` | Squashed | `dotnet` (81 CLI tests), `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `af7431b` |
+| 4 Project and compile commands | `feature/step-12-build-orchestration-and-cli/project-and-compile-commands` | Squashed | `dotnet` (121 CLI tests, 500 Packages tests including 6 template tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | Recorded with feature 5 |
 
 ### Deviations and accepted risks
 
@@ -114,6 +115,10 @@ implemented and squashed. Feature rows stay empty until then.
     SIGINT/SIGTERM cancellation and the second-signal default termination; `BuildCommand` receives the token
     through `CliApplication.RunAsync`, which keeps the command unit-testable. The observable behaviour matches
     §13.3.
+12. **`new`/`compile` path mappings.** A directory occupying the `new` target path is `CLI002`/3; the design
+    specifies only the existing-file collision as `CLI003`/3. `compile -o` maps a directory target, a missing
+    parent, or an invalid path to `CLI002`/3, following the §11 I/O rule. Neither case writes or replaces a
+    file.
 11. **Only `build` and `validate` are report-backed in feature 3.** The other five report ids
     (`new-project`, `compile`, `inspect`, `verify`, `doctor`, `clean`) still return their feature-4/5/6
     placeholders and emit no report; their reports land with the commands. Reserved commands and
@@ -1660,11 +1665,11 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 4 — Project and compile commands
 
-- [ ] Add `Mocassin.Packages/Projects/Templates/` with the embedded blank/ceria assets,
+- [x] Add `Mocassin.Packages/Projects/Templates/` with the embedded blank/ceria assets,
       `ProjectTemplateFactory`, fresh-identity cloning, and the `PublicAPI.Unshipped.txt` entries.
-- [ ] Implement `new` with name validation, safe create, and the `new-project-v1` report.
-- [ ] Implement `compile` with `-o` `compiled-inspection-v1`, the `compile-v1` report, and exit mapping.
-- [ ] Add template freshness, `new` validation, and compile success/failure tests.
+- [x] Implement `new` with name validation, safe create, and the `new-project-v1` report.
+- [x] Implement `compile` with `-o` `compiled-inspection-v1`, the `compile-v1` report, and exit mapping.
+- [x] Add template freshness, `new` validation, and compile success/failure tests.
 
 ### Feature 5 — Package inspection commands
 
