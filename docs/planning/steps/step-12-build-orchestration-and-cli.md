@@ -11,9 +11,9 @@ UI consumes later.
 
 - **Status:** Not started — the design changed on 2026-11-17 (the hand-written parser is replaced by
   `System.CommandLine` 3.0.0); a round-3 design re-review is pending; no step branch yet.
-- **Design review:** Re-review required — the freeze and reviewed commit are recorded in the review record;
-  round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`) — [record](../reviews/step-12.md)
-  (round 1 `Changes required`; round 2 `Ready with notes`, R2-1–R2-4 open; round 3 pending)
+- **Design review:** Re-review required — round 3 reviews `8af67f8` (design freeze); round 2 was
+  `Ready with notes` at `4ad40ac` (reviewed `05b7297`) — [record](../reviews/step-12.md) (round 1
+  `Changes required`; round 2 `Ready with notes`, R2-1–R2-4 open; round 3 pending)
 - **Feature list:** Proposed 2026-11-16 (seven features); feature 1 revised 2026-11-17 (library adoption, no
   parser/help/completion writers); awaiting one owner approval with the design verdict.
 - **Sizing:** Revised 2026-11-17 to 2.75–3.75 person-weeks (was 3.0–4.0), still a single-step exception,
