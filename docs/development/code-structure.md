@@ -62,6 +62,45 @@ Mocassin.Symmetry/
   SpaceGroups/
 ```
 
+### 2.1 `Mocassin.Cli` layout (Step 12)
+
+The CLI is a command-domain project, not a `Commands/` bucket. Each command area owns its command, report
+types, and human/JSON writer:
+
+```text
+Mocassin.Cli/
+  Program.cs
+  AssemblyInfo.cs
+  CommandLine/            # System.CommandLine graph, typed binding, parse-error mapping, help/version, exit codes
+  CommandLine/Reports/    # shared diagnostic/envelope DTOs and writers
+  Diagnostics/            # CLI diagnostic construction
+  NewProject/
+  Compile/
+  Build/
+  Validation/
+  Inspect/
+  Verify/
+  Doctor/                 # checks split into Doctor/Checks/ when needed
+  Clean/
+```
+
+- Folders are PascalCase command/domain concepts. `Commands/`, `Handlers/`, and `Output/` are not allowed;
+  `CommandLine/Reports` names the shared report concept, and each command folder owns its own output.
+- `CommandLine` owns the `System.CommandLine` command graph, typed `ParseResult` binding, parse-error mapping,
+  the library help action, the CLI root `--version` action, and exit-code policy. There is no hand-written
+  parser, `CommandCatalog`, `CommandDefinition`, `OptionDefinition`, `ParsedCommand`, `HelpWriter`, or
+  `CompletionWriter`.
+- Namespaces match folders (`Mocassin.Cli.CommandLine`, `Mocassin.Cli.Build`, `Mocassin.Cli.Doctor.Checks`).
+- The 20-file and 800-line limits apply per folder and file. `Doctor/Checks/` resets the count; a large
+  `BuildCommand` is split into a command, report writer, event writer, and progress renderer. `Doctor` owns
+  the internal `IDoctorCheck`/`DoctorCheckResult` seam so tests inject outcomes.
+- `Mocassin.Packages/Build/` follows the same rules: concept files at depth 1 and an `Internal/` subfolder
+  for the scheduler, diagnostic-merger, and shared `BuildPreviewBuilder` seams. `BuildPreview.cs` is a
+  multi-record concept file following the `PackageInspection.cs` precedent.
+- `Mocassin.Packages/Projects/Templates/` owns `ProjectTemplate`, `ProjectTemplateFactory`, and the embedded
+  `Assets/blank.mocprj`/`Assets/ceria.mocprj` resources. The `.mocprj` assets are not counted as `.cs` files;
+  the public factory and template records are XML-documented and listed in `PublicAPI.Unshipped.txt`.
+
 ## 3. Folder names and ownership
 
 Folder names are PascalCase domain nouns. A folder should answer “which concept owns this code?”

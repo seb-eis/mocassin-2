@@ -108,6 +108,8 @@ Mocassin.Contracts
 Mocassin.Packages  Mocassin.Results
    ▲             ▲
    └──── Mocassin.Cli ────┘
+             │
+             └──► Mocassin.Compilation (read-only compile consumer)
              ▲
 Mocassin.App ──► Mocassin.App.Views ──► Mocassin.App.ViewModels
      │                                      │
@@ -126,18 +128,23 @@ Rules:
 - `Compilation` depends on `Core` + `Symmetry`; it has no I/O and no UI.
 - `Contracts` depends on `Compilation`; it owns versioned package/state DTOs and schema constants and does not
   depend on `Packages` or `Results`.
-- `Packages` depends on `Compilation` + `Contracts`; it owns project serialization, templates, supercells, and
-  `.msl` writing. Parameterization follows the same direction: the persisted template and value records are in
-  `Core`, the applied `ParameterizationValues` and signature projection are in `Contracts`, and the factory,
-  apply, validation, diff, and rebase services are in `Packages`. `Compilation` never sees a template or an
-  energy/frequency value. `.msl` structural reading and verification live in `Results`, so one reader serves
-  the build CLI, evaluation, and external tools.
+- `Packages` depends on `Compilation` + `Contracts`; it owns project serialization, templates, supercells,
+  `.msl` writing, and build orchestration. Parameterization follows the same direction: the persisted template
+  and value records are in `Core`, the applied `ParameterizationValues` and signature projection are in
+  `Contracts`, and the factory, apply, validation, diff, and rebase services are in `Packages`. `Compilation`
+  never sees a template or an energy/frequency value. `.msl` structural reading and verification live in
+  `Results`, so one reader serves the build CLI, evaluation, and external tools. `Packages` does not reference
+  `Results`; post-build verification is composed by the caller.
 - `Results` depends on `Core` + `Contracts` (not `Packages`) and owns `.msl`/`.msr`/`.mcs` reading, structural
   package inspection/verification, collection, and evaluation.
-- Package-verification diagnostics (`PKG`) are Contracts-owned descriptors. `Packages` composes them into its
-  `DiagnosticCatalog` for the docs-drift check and build-side lookup; `Results` constructs its diagnostics from
-  the same descriptors and must not reference `Mocassin.Packages` or its catalog.
-- `Cli` depends on `Packages` + `Results`; it may launch the Rust solver.
+- Package-verification diagnostics (`PKG`) are Contracts-owned descriptors. CLI diagnostics (`CLI`) are also
+  Contracts-owned so `Packages` composes them into its `DiagnosticCatalog` for the docs-drift check and the
+  CLI constructs them without a reverse edge. `Results` constructs its diagnostics from the same descriptors
+  and must not reference `Mocassin.Packages` or its catalog.
+- `Cli` depends on `Packages` + `Results`; it may launch the Rust solver. It also references
+  `Mocassin.Compilation` read-only for `mocassin compile` and the `compiled-inspection-v1` writer. It owns
+  command parsing, build sequencing, progress rendering, JSON/report formatting, and exit-code policy only.
+
 - `App` is the composition root and references views, view models, and rendering. Views reference view models;
   view models depend on public library APIs and never reference views or controls.
 - `Rendering` is independent of the project model; it consumes render primitives.
@@ -149,10 +156,10 @@ Rules:
 | `Mocassin.Core` | IDs, units, primitive geometry (`Fractional3`, `Cartesian3`, `Vector4I`), persisted symmetry vocabulary (`AxisSetting`, `OriginChoice`), catalog-derived `CrystalSystem`, model objects (`SpaceGroupRef`, `CellParameters`, `CellSite`, `StructureModel`), parameterization template records, project aggregate, diagnostics, validation contracts, undo/redo primitives | File I/O, SQL, UI, solver data, catalog-dependent preview/validation, applied parameterization values |
 | `Mocassin.Symmetry` | Space-group catalog, `SpaceGroupSetting`, `SymmetryOperation`, exact operations, cell geometry transforms, unit-cell encoding, orbit/permutation reduction, structure preview, catalog-dependent structure validation | Model semantics, persistence, Core model ownership |
 | `Mocassin.Compilation` | P1 extension, environment sampling, interaction discovery, transition rule generation, index assignment, compiled model | Job templates, supercells, parameterization values, site-energy background, I/O |
-| `Mocassin.Contracts` | Package/results/state DTOs (`ParameterizationValues`, compiled-model payload, job/lattice payloads, `.mcs` document types, job-folder/solver/event contracts), the parameterization and lattice signature projections, schema versions, package diagnostic descriptors, manifest reader | Build logic, SQL, UI, solver execution |
-| `Mocassin.Packages` | Project JSON persistence, composed project validation (Core + Symmetry + `PROJ034`), parameterization factory/apply/validation/rebase, job-template expansion, supercell/doping generation and preview, package encoding, immutable `.msl` writing | Solver execution, UI, `.msl`/`.msr` reading |
+| `Mocassin.Contracts` | Package/results/state DTOs (`ParameterizationValues`, compiled-model payload, job/lattice payloads, `.mcs` document types, job-folder/solver/event contracts), the parameterization and lattice signature projections, schema versions, package and CLI diagnostic descriptors, manifest reader | Build logic, SQL, UI, solver execution |
+| `Mocassin.Packages` | Project JSON persistence, composed project validation (Core + Symmetry + `PROJ034`), parameterization factory/apply/validation/rebase, job-template expansion, supercell/doping generation and preview, package encoding, immutable `.msl` writing, build orchestration (stage sequencing, selection, progress events, job selection, and the typed `BuildPreview` payload) | Solver execution, UI, `.msl`/`.msr` reading, post-publication verification |
 | `Mocassin.Results` | `.msl` structural reading/inspection/verification, `.msr`/`.mcs` parsing, result collection, evaluation queries, derived quantities, exporters | Simulation execution, package building/writing |
-| `Mocassin.Cli` | Command parsing, orchestration, process launch, progress/logging | Scientific algorithms |
+| `Mocassin.Cli` | Command parsing, build/preview/compile/inspect/verify/doctor/clean sequencing, mapping the library’s `BuildResult.Preview`, process launch, progress/logging, JSON reports, exit-code policy | Scientific algorithms, package encoding/decoding, verification logic, a second preview implementation |
 | `Mocassin.App*` | Presentation, commands, navigation, dialogs | Scientific algorithms |
 | `Mocassin.Rendering` | GPU abstraction, scene graph, picking, camera, overlays | Model validation |
 
@@ -254,6 +261,7 @@ The detailed file-sharing rules are in ADR 0011.
 | Model editor layout | Master-detail table/list + type-specific editor; Step 24 layout spike | No paid grid or third-party grid dependency; final layout chosen from owner-reviewed POCs |
 | DI/hosting | Microsoft.Extensions.* | Standard configuration, logging, DI, lifetime management |
 | JSON | System.Text.Json | Built-in, source-generated contexts, trimming/AOT friendly |
+| CLI parsing (.NET) | `System.CommandLine` 3.0.0 | Stable, MIT, CLI-only, no transitive dependency on `net10.0+`; AOT/trim-verified on `linux-x64`; typed binding and the library help action without a hand-written parser; the CLI supplies the root-only `--version` action. Bounded `@file` response files are CLI-owned. No shell-script generation; `[suggest]` is not a contract |
 | SQLite (.NET) | Microsoft.Data.Sqlite | Lightweight, no EF Core required for `.msl`/`.msr` |
 | SQLite (Rust) | `rusqlite` with `bundled` | Reproducible builds, no system dependency; reads `.msl` and `mmcfe.db` |
 | Package encoding | MessagePack + Zstd | Compact, schema-friendly, fast; shared conceptually with Rust |
@@ -338,11 +346,16 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
 
 ### 7.3 Error handling and exit codes
 
-- .NET CLI: `0` success, `1` validation/model error, `2` usage error, `3` I/O error, `4` solver failure,
-  `5` partial success (some jobs failed).
+- .NET CLI: `0` success, `1` validation/model/package-invalid/unhealthy-doctor, `2` usage error, `3` I/O
+  error, `4` compilation/parameterization error, `5` partial success (reserved for multi-job commands;
+  `build` is all-or-nothing), `6` cancelled, `10` unexpected internal error. `validate` keeps its Step 07
+  0/1/2/3 subset. See `02-data-contracts.md` §5.7.6. The CLI parser library's own parse-error exit code (1)
+  is remapped to `CLI001`/2; help and version exit 0. Response-file (`@file`) errors are usage errors
+  (`CLI001`/2), not I/O errors (`CLI002`/3).
 - Rust solver: `0` completed, `10` invalid arguments, `11` package error, `12` model/data error,
   `13` numerical failure, `14` aborted by limit, `15` cancelled, `16` I/O error.
-- The GUI surfaces the same codes and a human-readable abort reason.
+- The GUI surfaces the same CLI codes for build/collect operations and the solver codes for solver failures,
+  plus a human-readable abort reason.
 
 ### 7.4 Logging and observability
 
@@ -390,7 +403,7 @@ boundaries. There is no server component and no remote telemetry.
 | `.mcs` state | `format` + `formatVersion` | Current major only; old states require the release that wrote them |
 | `solver.json` | `format` + `formatVersion` | Current and previous major |
 | MMCFE log DB | `format_version` | Current and previous major |
-| CLI JSON/events | `schemaVersion` | Additive changes only within a major version |
+| CLI JSON/events | `schemaVersion` | One version per report id and for the event stream; additive changes only within a major version |
 | .NET libraries | NuGet SemVer | No breaking public API within a major; `ApiCompat` gate |
 | Python package | `__version__` + declared format range | New format major requires a package major; wheel per release |
 
@@ -412,3 +425,4 @@ boundaries. There is no server component and no remote telemetry.
 | [0012](adr/0012-transport-and-msd-definitions.md) | Origin-based MSD and per-species transport definitions |
 | [0013](adr/0013-format-compatibility-and-api-versioning.md) | Format compatibility and public API versioning |
 | [0014](adr/0014-extension-abi-and-trust-boundary.md) | Extension ABI and in-process trust boundary |
+| [0015](adr/0015-cli-parser-system-commandline.md) | `System.CommandLine` 3.0.0 for the CLI; parse-error remap; bounded `@file`; no completion command |

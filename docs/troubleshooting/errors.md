@@ -70,6 +70,31 @@ the **Added**, **Removed**, **Matched**, and **Changed** (geometry-change) slots
 | A rebase report says every value was dropped | The `Reset` strategy discards all values but keeps the template identity and headers | Apply the intended values again. Use `ParameterizationFactory.Create` instead if a genuinely new template is wanted. |
 | `PRM009` appears after a successful rebase | The rebase report is informational | Inspect the copied, defaulted, dropped, and ambiguous counts before committing the template. |
 
+## Build and CLI failures
+
+A build runs load → select → compile → validate → parameterize → expand → generate/write → publish → verify.
+Read the first error; later stages are skipped. Human progress goes to stderr, so redirect stdout only when
+you want the final summary.
+
+| Symptom | Likely cause | Fix |
+| --- | --- | --- |
+| Exit `3`, `CLI003` | The `.msl` target already exists | Choose a new path or pass `--force`; without it the existing package is untouched. |
+| Exit `2`, `CLI004` | No build template/job template/parameterization selected, or several candidates | Pass `--template` (build template), `--job-template`, or `--parameterization` with one of the listed IDs. |
+| Exit `2`, `CLI005` | Malformed or out-of-range `--jobs` | Use `all`, `N`, or `A-B`, with 1-based IDs within the expanded count; zero, descending, and empty selections are rejected. |
+| Exit `1`, `JOB004`/`JOB008`/`JOB019` | Supercell or job-count limit | `JOB004` is the 500,000-position cap, `JOB008` is the 1–1000 per-configuration job count, and `JOB019` is the 99,999 total-job cap; reduce the cell size or job count. |
+| Exit `1`, `JOB012` | A compensated doping pair cannot be realized | Change the doping fractions, the dependent exchange, or the cell size. |
+| Exit `1`, `PRM001` | The selected parameterization targets a different model signature | Rebase the template against the current compiled model, or build with the implicit default. |
+| Exit `4`, `PRM` warning promoted | `--warnings-as-errors` turned a parameterization warning into a failure | Fix the reported values/template, or drop the flag knowingly. |
+| Exit `4`, `CMP` error | The compiler rejected a transition, geometry, conservation, or limit | Correct the model object named by the path; `CMP006` means a configured limit was exceeded. |
+| Exit `1`, `PKG` after a build | The published package failed verification | Keep the package for diagnosis, run `mocassin verify <pkg>` for the checks, and fix the model/template before rebuilding. |
+| Exit `6`, `CLI006` | The build was cancelled | A pre-publication cancel deletes the temp file and preserves an existing package; a post-publication cancel leaves the valid package. |
+| Exit `2`, `CLI008` | `simulate`, `collect`, `evaluate`, `export`, full `clean`, or `--results` was used | Those commands arrive in later steps; `clean --dry-run` is the only cleanup available now. |
+| `doctor` exits 1 | Runtime, SQLite, write permission, disk space, catalog, or template check failed | Fix the failing check; a missing solver is only a warning until the solver step. |
+
+`mocassin build --preview` uses the same selection and exit codes but never writes a package. `mocassin inspect`
+shows a package’s recorded `jobSelection`, counts, and signatures; `mocassin verify` runs the ordered `PKG`
+checks.
+
 ## Statistics
 
 `--stats` adds advisory counts and estimates. Statistics are non-null whenever they can be computed, even when

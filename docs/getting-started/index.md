@@ -35,6 +35,27 @@ zensical build --strict
 The combined build copies generated DocFX and rustdoc output into `site/api/dotnet` and `site/api/rust` when
 those projects and crates exist.
 
+## Create, validate, and build
+
+The headless CLI is the quickest way to prove the toolchain:
+
+```sh
+# Create a blank project, or use --template ceria for the ceria model starter.
+mocassin new my-project -o work
+
+# Validate the project read-only.
+mocassin validate work/my-project.mocprj
+
+# Build a real package from the ceria job sample and verify it.
+mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o work/ceria.msl
+mocassin verify work/ceria.msl
+mocassin inspect work/ceria.msl
+```
+
+`--jobs 1-3` builds a stable subset of the full expansion; `--preview` reports the job, lattice, and doping
+counts without writing. The full command surface, JSON reports, and exit codes are in the
+[CLI reference](../reference/cli.md); the workflow is in [Building a package](../user-guide/building.md).
+
 ## Next steps
 
 - Read the [user guide](../user-guide/index.md) for the scientific workflow.

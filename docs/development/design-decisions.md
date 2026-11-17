@@ -312,7 +312,10 @@ compiled-bound checks:
   shared `LatticePreviewService`, so validation and generation cannot diverge.
 
 `mocassin build --preview` compiles the project first and then calls the pipeline with the compiled model and
-`RunBuildStage = true`; Step 12's full build reuses the same pipeline wiring and appends its own Build stages.
+`RunBuildStage = true`; Step 12's full build constructs the same pipeline with
+`additionalStages: [new JobTemplateValidationStage(previewService)]`. It adds no new Build stage, and a
+default `ProjectValidationPipeline` with `RunBuildStage = true` is a silent no-op, so the registration is
+mandatory and tested.
 This is deliberately not a second validation pipeline. The Build stage remains the only extension point, the
 Core structural validator remains available to `validate` without a compiled model, and a model that is missing
 or stale relative to the project is a caller contract problem, not a user-data diagnostic.
@@ -377,6 +380,136 @@ Step 08 ships the library and a pure canonical JSON inspection writer only. Step
 and the full CLI. This avoids a second parser/orchestration path and keeps the compiler free of loading,
 validation, file output, and exit-code policy. The data contract's `compile` command is implemented in
 Step 12.
+
+## Build orchestration home (Step 12)
+
+Build orchestration lives in `Mocassin.Packages.Build`, not in `Mocassin.Cli` and not in
+`Mocassin.Compilation`. The CLI and the Avalonia build UI must consume one pipeline and one typed event
+stream; the CLI only parses, formats, and maps outcomes to exit codes. `Mocassin.Compilation` stays a pure
+synchronous compiler with no project loading, templates, jobs, or package I/O. `Mocassin.Packages` already
+owns every stage the pipeline sequences, so no new project is needed.
+
+`Mocassin.Packages` does not reference `Mocassin.Results`. Post-publication verification is composed by the
+caller with `IPackageVerifier`; this preserves the one-reader rule and avoids a writer-to-reader project edge.
+
+## `System.CommandLine` for the CLI (Step 12)
+
+The CLI uses `System.CommandLine` 3.0.0 (MIT, pinned, referenced only by `Mocassin.Cli`); the decision is
+recorded in ADR 0015 in `docs/planning/adr/`. The owner replaced the round-2
+hand-written-parser decision on 2026-11-17 after an AOT/full-trim verification: on `net11.0`/`linux-x64` with
+`PublishAot=true` and `TrimMode=full`, 3.0.0 produced zero IL2xxx/IL3xxx warnings, with a positive control
+proving the analyzers and ILC warning channel were active; the native binary parsed, validated, printed
+help/version, and reported parse errors like the JIT build. The `net10.0` asset declares `IsTrimmable` and
+`IsAotCompatible`, and the dependency graph is empty for `net10.0+`. The `netstandard2.0` fallback and
+Windows/macOS AOT are untested.
+
+The library owns command-line tokenization (after the CLI expands response files), arity, help, and the
+`[suggest]` directive. The CLI owns the root `--version` action, the command graph, typed `ParseResult`
+binding, `CLI001` wording, and exit-code policy. The library's default parse-error
+exit code (1) is remapped to 2. Feature 1 adds the required `verify.sh aot` gate: a zero-warning minimal host
+plus a **separate** positive control that must emit IL2026/IL3050 (the control project opts out of
+warnings-as-errors for its own build; the host stays strict), and a host parse-error case that exercises the
+`CLI001`/2 remap. clang/lld/ILCompiler are Tier 1 and missing tools hard-fail, never skip; their versions are
+observed apt/NuGet resolutions checked by `06` §9, not a containerfile pin, and a version mismatch is not a gate
+failure. The gate is local: feature 7 runs `verify.sh all --require` at closeout and records the output, but the
+closeout GitHub workflow does not run `verify.sh`. Because `aot` is in `all`, every step closeout from Step 12
+requires the Tier 1 toolchain. The real CLI publish is recorded as evidence, not a gate, because
+SQLite/MessagePack are unverified. Only `linux-x64` AOT is proven, so Step 31's packaging gate still owns the
+platform matrix and the AOT/single-file decision.
+
+Response files (`@file`) are a CLI contract, not the library default. The CLI owns tokenization and recursive
+expansion and disables the library hook; the documented syntax and limits are 1 MiB of raw bytes per file,
+4 MiB of raw response-file bytes across the command line, depth 8, 10,000 tokens contributed by response files, and 32 files. Missing,
+unreadable, invalid, or oversized files are `CLI001`/2, not `CLI002`/3. The full contract is the step page §5.3
+and `reference/cli.md`.
+
+No `completion` command is shipped: the owner decided on 2026-11-17 to remove it. The library provides the
+`[suggest]` protocol for `dotnet-suggest`, not shell-script generation, and `dotnet-suggest` is not installed.
+Shell integration is deferred to Step 31 packaging and is not part of the Step 12 contract.
+
+## CLI exit codes and diagnostics (Step 12)
+
+The .NET CLI uses `0` success, `1` validation/model/package-invalid/unhealthy-doctor, `2` usage, `3` I/O,
+`4` compilation/parameterization, `5` reserved partial success, `6` cancelled, and `10` unexpected internal.
+`validate` keeps its Step 07 0/1/2/3 subset. `build` is all-or-nothing, so it never emits `5`; a selected job
+that fails lattice generation aborts the whole package.
+
+CLI-only failures use `CLI001`–`CLI009` descriptors in `Mocassin.Contracts.Cli`, composed into the default
+diagnostic catalog like the `PKG` descriptors. Domain failures keep `PROJ`/`STR`/`TRN`/`ENM`/`SIM`/`CMP`/
+`PRM`/`JOB`/`PKG` codes; the CLI never rewrites a domain diagnostic. A parser-library parse error is the only
+source of `CLI001`; it is mapped to exit 2, never the library's default 1, and the library's sentence is a hint
+rather than the stable message.
+
+## CLI reports and `build-v1` (Step 12)
+
+`mocassin validate --json` keeps `validation-v1`. Every report-backed command prints exactly one report object
+with `--json`; each report is a manifest-owned `reports` descriptor with its own `schemaVersion` and generated
+schema. `build-v1` replaces the Step 10 interim `build-preview-v1`: one schema, `mode = build` or `preview`,
+and a single `--json` shape for both paths. `build-preview-v1` was never manifest-registered, so no consumer
+loses a published contract.
+
+JSON-Lines events stay on stderr and the final report on stdout. Step 12 adds the additive `build.stage` event
+and optional `stage`/`current`/`etaS` fields; the events schema version stays 1. The manifest records required
+event fields only; optional fields are documented in the data contract and asserted by the CLI event tests.
+
+`BuildResult` carries a `BuildIdentity` (project ID, model/document hashes, model/parameterization
+signatures) and a failure kind. The CLI, not the library, maps the result to an exit code; `Io` is separate
+from `Load` so project/output/disk failures map to 3 while parse/content/validation failures map to 1. The
+library reports cancellation as a status and the CLI adds `CLI006`; no CLI-specific diagnostic leaks into the
+GUI-facing pipeline. `build-v1` deliberately has no package-size estimate: a preview is size-neutral, and a
+full build’s measured `package.sizeBytes` is authoritative.
+
+`BuildResult.Preview` is the single preview output. The pipeline evaluates the preview after expansion with
+the shared `BuildPreviewBuilder`/`ILatticePreviewService` and returns a typed `BuildPreview`; the CLI and
+Step 26 map it and never reload, recompile, or run a second preview. A separate `PreviewAsync` was rejected
+because it would create two orchestration paths for the same work. `BuildRequest.Options` is the only clock/
+throttle/channel injection point. The report guarantee is limited to `validate` and the seven report-backed
+commands: help/version and reserved commands do not accept `--json`; `clean --json` without
+`--dry-run` still emits `clean-v1` with `CLI008`. `--json` makes stderr JSONL-only.
+
+## Build template versus job template (Step 12)
+
+`--template` selects a `BuildTemplate` (job template + parameterization + output name); `--job-template`
+selects a job template directly; `--parameterization` overrides the recipe. The Step 10 preview used
+`--template` for a job template; that pre-release meaning is replaced so the option matches the authored
+build-template concept and the `BuildTemplate` record. A job-template ID passed to `--template` is a usage
+error with a hint.
+
+## Job selection normalization (Step 12)
+
+`--jobs` is applied after the complete template expansion, so IDs, seeds, and lattice requests are the
+full-expansion values. The writer records a canonical normal form — `all`, or sorted, deduplicated, merged
+ranges such as `1-3,5,7-9` — not the user's text. Equivalent selections therefore produce identical
+`schema_info.job_selection` and package content. Unselected jobs are absent and leave gaps; they are never
+renumbered.
+
+## `--compact` preset (Step 12)
+
+`--compact` is one size preset: Zstd quality `9` plus `VACUUM` before publication. The Step 11 page named
+`VACUUM`; its amendment and the user guide named quality `9`. Both are honoured. It changes compressed bytes
+and file size only; payload content, signatures, job IDs, and `package-summary-v1` are unchanged.
+
+## Cancellation after publication (Step 12)
+
+Cancellation before the writer’s atomic rename deletes the temp file and preserves any existing package.
+Cancellation after the rename cannot roll back a valid published artifact, so the package remains, the report
+sets `published = true` and `verification = "skipped"`, and the command exits `6`. A second signal is left to
+the platform default.
+
+## Clean dry-run scope (Step 12)
+
+Step 12 implements only `clean --dry-run`: it lists `Job%05d` folders, optionally filtered by age, and never
+deletes a file, folder, package, or results row. Full deletion and `.msr` cleanup are Step 28. The dry run is
+the safety-relevant half and gives operators a preview before the destructive command exists.
+
+## CLI project templates (Step 12)
+
+`new --template blank|ceria` clones an embedded project template from
+`Mocassin.Packages.Projects.Templates` with a fresh UUIDv7, master seed, name, and timestamps. The ceria
+template is a copy of the model-definition sample, not a buildable job sample; a freshness test compares its
+canonical model hash with `samples/ceria/ceria.mocprj`. Step 23’s creation UI uses the same factory and
+assets.
+
 
 ## Charge-transport field convention
 
