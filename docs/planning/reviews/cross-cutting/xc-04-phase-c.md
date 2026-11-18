@@ -830,7 +830,7 @@ feeds the Step 16 design
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
 | XC04-F1 | Fixed at `73bb608` — Step 08 `Current feature` set to `—` | Orchestrator/step agent | `73bb6083b27bfb1af2d0460fc464b64dee31f89e` |
-| XC04-F2 | Fixed at `73bb608` — all Step 08 implementation-task and acceptance boxes ticked with evidence; m1 residual annotated and owned | Step agent/planner | `73bb6083b27bfb1af2d0460fc464b64dee31f89e` |
+| XC04-F2 | Fixed at `73bb608` — Step 08 implementation-task and acceptance boxes ticked with evidence; the cross-platform determinism criterion stays open with owner Step 29 (accepted audit N2, Windows/macOS not run); m1 residual annotated and owned | Step agent/planner | `73bb6083b27bfb1af2d0460fc464b64dee31f89e` |
 | XC04-F3 | Fixed at `73bb608` — reverse rows `Done` with tests; dependent-rule residual reassigned from Step 16 (not charged with compiler dependent rules) to the Step 29 §9 release gate, which owns parity-matrix closure; `§5` row updated | Planner / Step 29 release gate | `73bb6083b27bfb1af2d0460fc464b64dee31f89e` |
 | XC04-F4 | Fixed at `73bb608` — Step 09 and Step 11 notes added to `contracts/manifest.json`; 26 generated artifacts checked current | Contracts/planner | `73bb6083b27bfb1af2d0460fc464b64dee31f89e` |
 | XC04-F5 | Fixed at `73bb608` — `step-11.tag = "step-11"`; `step-12` note records merge `ec2e04a` and tag `step-12`; checker passes | Step agent | `73bb6083b27bfb1af2d0460fc464b64dee31f89e` |
