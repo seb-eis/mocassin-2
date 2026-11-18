@@ -9,9 +9,9 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** **Awaiting approval** — audit round 2 returned `Passed with notes` at `07851d8`; the human owner
-  accepted it on 2026-11-18 and approved the merge and `step-12` tag. Merge/tag are pending; the design was
-  accepted at `1b6af90` (`Ready with notes`).
+- **Status:** **Done** — merged into `main` as `ec2e04a6b45fa14d9a88a9bd0eac9310949de69e` on 2026-11-18 and
+  tagged `step-12`; main CI is green. Audit round 2 returned `Passed with notes` at `07851d8`, accepted by the
+  human owner on 2026-11-18; the design was accepted at `1b6af90` (`Ready with notes`).
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` — round 5
   reviewed `1b6af90`; round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was
   `Ready with notes` at `d211584` (reviewed `6b15f9d`), and round 4 was `Ready with notes` at `f548d26`
@@ -32,8 +32,9 @@ UI consumes later.
 - **Step CI:** [Ubuntu 44377851616](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) and
   [Windows 44378270028](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) — both green at
   `07851d8376c3426d40d07ae70d8e939469648ceb`
-- **Main merge:** — (approved by the human owner 2026-11-18; pending)
-- **Step tag:** —
+- **Main merge:** `ec2e04a6b45fa14d9a88a9bd0eac9310949de69e` (`--no-ff`, 2026-11-18); main CI
+  [44381922313](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) is green at that merge commit.
+- **Step tag:** `step-12` (annotated, points to `ec2e04a`; pushed).
 - **Audit:** Round 1 `Fixes required` at `9e1997d`; round 2 **`Passed with notes`** at `07851d8`
   ([record](../audits/step-12.md)), accepted by the human owner 2026-11-18. F-9/N-4 were corrected in a docs-only
   commit; N-5 (macOS gate not run) is an accepted risk.
