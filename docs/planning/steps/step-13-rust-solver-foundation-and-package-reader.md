@@ -1227,7 +1227,7 @@ layout, reader limits, and exit-code mapping are step-level decisions recorded h
 contracts/architecture. **n-1 is an open owner choice**, not a decision made by this freeze:
 
 - **Option A — data-contract decision note (current design).** Keep the 64-byte `rngState` layout in
-  [`02-data-contracts.md`](02-data-contracts.md) §4.3/§4.5. The field already existed and was documented as
+  [`02-data-contracts.md`](../02-data-contracts.md) §4.3/§4.5. The field already existed and was documented as
   “length/algorithm documented in Step 13”; no schema version bump is needed. Lower process overhead; the
   contract page is the durable record.
 - **Option B — short ADR.** Add an ADR (for example ADR 0016, “ChaCha12 RNG state layout”) recording the
