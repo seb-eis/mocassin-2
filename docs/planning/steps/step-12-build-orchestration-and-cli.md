@@ -9,8 +9,8 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** In audit — features 1–7 are squashed, the full local gate is green at `9e1997d`, and the
-  independent audit is requested; the design was accepted at `1b6af90` (`Ready with notes`).
+- **Status:** In audit — round-1 audit fixes are squashed at `07851d8`, the full local gate is green, and a
+  re-audit is requested; the design was accepted at `1b6af90` (`Ready with notes`).
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` — round 5
   reviewed `1b6af90`; round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was
   `Ready with notes` at `d211584` (reviewed `6b15f9d`), and round 4 was `Ready with notes` at `f548d26`
@@ -26,13 +26,16 @@ UI consumes later.
   `net11.0`/`linux-x64`; bounded `@file` is part of the contract; no shell-completion command in Step 12
   (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
 - **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 at `9d4d2ef`; its first parent
-  is the design-merge commit `eb31979`). Features 1–7 are squashed into the step branch; see the feature log.
-- **Step CI:** [run 44370563073](https://github.com/seb-eis/mocassin-2/actions/runs/44370563073) — green at
-  `9e1997d270ae79d8ad2cd2357529a08e158401fb` (the single Ubuntu closeout dispatch)
+  is the design-merge commit `eb31979`). Features 1–7 and the round-1 audit fixes are squashed into the step
+  branch; see the feature log.
+- **Step CI:** [Ubuntu 44377851616](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) and
+  [Windows 44378270028](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) — both green at
+  `07851d8376c3426d40d07ae70d8e939469648ceb`
 - **Main merge:** — (owner approval pending)
 - **Step tag:** —
-- **Audit:** Requested 2026-11-18 — `Ready for audit` ([record](../audits/step-12.md); audited commit
-  `9e1997d270ae79d8ad2cd2357529a08e158401fb`)
+- **Audit:** Round 1 returned `Fixes required` at `9e1997d`; fixes applied and **re-audit requested**
+  ([record](../audits/step-12.md); state `Re-audit required`; audited commit
+  `07851d8376c3426d40d07ae70d8e939469648ceb`)
 - **Last updated:** 2026-11-18
 
 ### Approved feature list
@@ -63,6 +66,7 @@ implemented and squashed. Feature rows stay empty until then.
 | 5 Package inspection commands | `feature/step-12-build-orchestration-and-cli/package-inspection-commands` | Squashed | `dotnet` (147 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `85d8d41` |
 | 6 Doctor and dry-run clean | `feature/step-12-build-orchestration-and-cli/doctor-and-dry-run-clean` | Squashed | `dotnet` (168 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `a2c6178` |
 | 7 Documentation, parity, and closeout | `feature/step-12-build-orchestration-and-cli/documentation-parity-and-closeout` | Squashed | `dotnet` (171 CLI tests), `docs`, `structure`, `api`, `contracts` exit 0; full `all --require` exit 0 (AOT passed) | Closeout run 44370563073 green at `9e1997d` | `7d17c22` |
+| 8 Audit round-1 fixes | `feature/step-12-build-orchestration-and-cli/fix-audit-round-1` | Squashed | `dotnet` (200 CLI tests), `structure`, `api`, `contracts`, `docs` exit 0; full `all --require` exit 0 (AOT passed) | Ubuntu 44377851616 and Windows 44378270028 green at `07851d8` | `07851d8` |
 
 ### Deviations and accepted risks
 
@@ -1716,6 +1720,28 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
       output in the closeout evidence; record that the closeout GitHub workflow does not run `verify.sh`.
 - [x] Fill the closeout evidence, set the audit request, and run `./tools/verify.sh all --require`.
 - [x] Update the step page feature log and status.
+
+### Audit round 1 remediation
+
+- **F-1:** the platform workflow now runs `Mocassin.Cli.Tests`; `CliSignalHandlerTests` exercises the guarded
+  handler, and the Windows gate (`44378270028`) ran the CLI signal/probe step successfully.
+- **F-2:** `build -o` pre-checks a directory target, missing parent, or invalid path as `CLI002`/3 before
+  loading; a derived target is checked after selection; `new -o ""` is `CLI002`/3; `new` still creates a
+  missing output directory, now documented and tested.
+- **F-3:** `JobSelection.ValidateSyntax` rejects malformed grammar before load; range checks stay in `Parse`
+  after expansion.
+- **F-4:** response-file expansion drops every token from a top-level file that fails, so a command only
+  inside the failed file emits no report; a command outside it still does.
+- **F-5:** the 62 real-CLI AOT diagnostics are recorded as first-party
+  `Mocassin.Core/Project/ProjectJson.cs` IL2026/IL3050; Step 31 ownership is explicit.
+- **F-6:** `BuildCancellationTests` covers cancellation during post-publication verification, and
+  `InspectCommandTests` covers corrupt-payload and wrong-signature tolerance.
+- **F-7:** `BuildExitMapperTests` covers every failure kind/status, `PackageWrite` with/without a `PKG`
+  error, `None`/`Failed`, and exit 5 never being emitted.
+- **F-8:** `Mocassin.Cli` has an explicit `Mocassin.Compilation` project reference.
+- **N-1/N-2:** ETA placement is documented as CLI-owned (`BuildEtaEstimator`), and `log` is marked reserved
+  with its fixture line removed; N-3 is accepted without change.
+- The audit record carries the per-finding resolution table.
 
 ## 20. Reconciliations and recorded decisions
 

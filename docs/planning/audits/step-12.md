@@ -338,13 +338,16 @@ Evidence file: `docs/planning/closeout/step-12.json`
   The data contracts and CLI reference were reconciled to the implemented code in feature 7.
 - **AOT and platform gates.** `aot` is part of `all --require`; the required smoke host publishes with zero
   trim warnings, the positive control emits IL2026/IL3050, and the native parse error exits 2. The real
-  `Mocassin.Cli` publish emits 62 IL2026/IL3050 diagnostics from `Mocassin.Core` and is recorded as evidence,
-  not a gate; Step 31 owns the AOT/single-file decision. No Windows/macOS run is planned for this step because
-  it adds no new platform-specific code beyond the Step 11 native fsync path; platform CI is `not run`.
-- **Closeout CI policy.** The closeout dispatch is the only step-branch CI run. The GitHub workflow does not run
+  `Mocassin.Cli` publish emits 62 first-party `Mocassin.Core/Project/ProjectJson.cs` IL2026/IL3050
+  diagnostics and is recorded as evidence, not a gate; Step 31 owns the AOT/single-file decision. The focused
+  Windows platform gate run `44378270028` at `07851d8376c3426d40d07ae70d8e939469648ceb` is green: it built the
+  solution and ran `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, and `Mocassin.Cli.Tests`, including the
+  CLI signal/probe step. macOS remains manual because this step adds no macOS-specific behaviour.
+- **Closeout CI policy.** The two closeout dispatches are the only step-branch CI runs: Ubuntu `44377851616`
+  and the focused Windows gate `44378270028`, both at the audited commit. The GitHub workflow does not run
   `tools/verify.sh`; the local `all --require` output is the gate evidence, and the closeout CI confirms the
-  same tree through the repository's CI jobs. Rust and Python jobs may be skipped by their path filters because
-  this step changes neither.
+  same tree through the repository's CI jobs. Rust and Python jobs may be skipped by their path filters when a
+  dispatch is focused on a platform; the Ubuntu run executes them.
 - **Docs-only closeout delta.** The closeout evidence, this audit request, the feature log, and the dashboard
   status are documentation-only commits after the audited code commit; they contain no code, test, contract,
   or configuration change. The closeout evidence binds the audited commit, the merge candidate, and the `main`
@@ -372,7 +375,7 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Fixes required
+**State:** Re-audit required
 
 `Re-audit required` is a record state, not a verdict.
 
@@ -400,7 +403,17 @@ Follow-up issue/step: Step 12 re-audit after the platform-gate/evidence fix and 
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| F-1 | Fixed | Step agent | `07851d8` — `.github/workflows/ci.yml` platform job now runs `Mocassin.Cli.Tests`; `CliSignalHandlerTests` installs/disposes the guarded handler on the current platform; Windows run `44378270028` is green and its `Platform tests - CLI signal and probe paths` step succeeded |
+| F-2 | Fixed | Step agent | `07851d8` — explicit `build -o` targets are pre-checked before load (directory, missing parent, invalid path → `CLI002`/3; existing file without `--force` → `CLI003`/3); derived targets are checked after selection; `new -o ""` is `CLI002`/3; `new` still creates a missing output directory, now documented and tested |
+| F-3 | Fixed | Step agent | `07851d8` — `JobSelection.ValidateSyntax` pre-validates grammar before load; range checks remain in `Parse` after expansion |
+| F-4 | Fixed | Step agent | `07851d8` — `CliResponseFiles.Expand` drops every token contributed by a top-level file that fails, including nested failures; a command outside the failed file still produces a report |
+| F-5 | Fixed | Step agent | `07851d8` — evidence, step page, and quality-strategy wording identify the 62 diagnostics as first-party `Mocassin.Core/Project/ProjectJson.cs` IL2026/IL3050; Step 31 ownership is explicit |
+| F-6 | Fixed | Step agent | `07851d8` — `BuildCancellationTests` cancels during a blocked post-publication verifier (exit 6, `published = true`, `verification = skipped`, package retained); `NonFatalPayloadAndSignatureDefectsStillInspect` covers inspect tolerance and `PKG004`/`PKG005` |
+| F-7 | Fixed | Step agent | `07851d8` — `BuildExitMapperTests` covers every failure kind/status, `PackageWrite` with/without a `PKG` error, `None`/`Failed`, and asserts exit 5 is never emitted |
+| F-8 | Fixed | Step agent | `07851d8` — `Mocassin.Cli.csproj` has an explicit `Mocassin.Compilation` project reference; structure and API gates pass |
+| N-1 | Fixed | Step agent | `07851d8` — §10 and §16.2/code-structure name `Mocassin.Cli.Build.BuildEtaEstimator`; the library `ProgressEstimator` only throttles |
+| N-2 | Fixed | Step agent | `07851d8` — `log` is marked reserved in the CLI reference, data contract, and step page; its fixture line is removed and no producer is claimed |
+| N-3 | Accepted | Step agent | No action; the N-2 merge-candidate convention is retained (`merge_candidate = 07851d8`, docs-only delta verified manually) |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
