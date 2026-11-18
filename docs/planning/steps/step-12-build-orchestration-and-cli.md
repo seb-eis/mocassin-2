@@ -1702,7 +1702,7 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 - [x] Write the pages in §18.1 and update the parity rows in §18.3.
 - [x] Record the 10⁴-job evidence and the acceptance runs.
-- [ ] Run `./tools/verify.sh all --require` including the `aot` gate at Step 12 closeout and record the AOT
+- [x] Run `./tools/verify.sh all --require` including the `aot` gate at Step 12 closeout and record the AOT
       output in the closeout evidence; record that the closeout GitHub workflow does not run `verify.sh`.
 - [ ] Fill the closeout evidence, set the audit request, and run `./tools/verify.sh all --require`.
 - [ ] Update the step page feature log and status.
@@ -1876,7 +1876,7 @@ These decisions are recorded by date and are not open for re-litigation in round
       command report for an expansion failure only when a command is recognised outside the failed file
       (`mocassin <command> @missing --json`); `mocassin @missing --json` has no recognised command and emits
       no report.
-- [ ] `./tools/verify.sh aot` passes: the smoke host publishes for `linux-x64` with `PublishAot=true` and
+- [x] `./tools/verify.sh aot` passes: the smoke host publishes for `linux-x64` with `PublishAot=true` and
       `TrimMode=full` with zero IL2xxx/IL3xxx warnings, the separate positive control emits IL2026 and IL3050,
       and the native binary runs `--help`, `--version`, and one parse-error case that exits 2 through the
       host's `CLI001` remap. Missing clang/lld/ILCompiler is a hard failure with a clear message, never a
