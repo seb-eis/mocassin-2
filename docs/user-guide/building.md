@@ -120,6 +120,8 @@ publication the new package remains and the command exits 6. Progress is throttl
 ### Replacement and size
 
 - An existing package is not replaced without `--force`.
+- The target's parent directory must exist; `build -o` does not create it. A directory target, a missing
+  parent, or an invalid path is `CLI002`/3 before any load.
 - `--compact` uses Zstd quality 9 plus `VACUUM`; it changes compressed bytes and size, not signatures or the
   canonical summary.
 - `--parallel <n>` controls compilation and lattice generation (`1..256`); omitting it uses the processor

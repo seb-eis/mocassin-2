@@ -121,6 +121,70 @@ public static class JobSelection
     }
 
     /// <summary>
+    /// Validates only the grammar of a selection expression, without an expanded count.
+    /// </summary>
+    /// <remarks>
+    /// The CLI uses this before loading a project for a fast usage error. Range checks need the complete
+    /// template expansion and remain in <see cref="Parse"/>.
+    /// </remarks>
+    /// <param name="expression">The selection expression.</param>
+    /// <returns>The parse error, or <see langword="null"/> when the syntax is valid.</returns>
+    /// <exception cref="ArgumentNullException"><paramref name="expression"/> is <see langword="null"/>.</exception>
+    public static string? ValidateSyntax(string expression)
+    {
+        ArgumentNullException.ThrowIfNull(expression);
+        var text = expression.Trim();
+        if (text.Length == 0)
+        {
+            return "The job selection is empty.";
+        }
+
+        if (string.Equals(text, "all", StringComparison.Ordinal))
+        {
+            return null;
+        }
+
+        foreach (var rawItem in text.Split(','))
+        {
+            var item = rawItem.Trim();
+            if (item.Length == 0)
+            {
+                return "The job selection contains an empty item.";
+            }
+
+            var dash = item.IndexOf('-');
+            if (dash < 0)
+            {
+                if (!TryParseId(item, out _))
+                {
+                    return $"'{item}' is not a valid 1-based job id.";
+                }
+
+                continue;
+            }
+
+            if (item.IndexOf('-', dash + 1) >= 0)
+            {
+                return $"'{item}' is not a valid job range.";
+            }
+
+            var startText = item[..dash].Trim();
+            var endText = item[(dash + 1)..].Trim();
+            if (!TryParseId(startText, out var start) || !TryParseId(endText, out var end))
+            {
+                return $"'{item}' is not a valid job range.";
+            }
+
+            if (start > end)
+            {
+                return $"The job range '{item}' is descending.";
+            }
+        }
+
+        return null;
+    }
+
+    /// <summary>
     /// Builds the canonical expression of a sorted, unique id sequence.
     /// </summary>
     /// <param name="ids">The sorted ids.</param>

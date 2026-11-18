@@ -33,8 +33,9 @@ synonym for the default. `--older-than` accepts `0..36500`. A parse error exits 
 the library's own parse-error exit code (1) is never exposed.
 
 `--json` makes stderr JSON Lines only and suppresses human progress, whether or not `--quiet` is used.
-`--quiet` additionally suppresses the `build.stage`, `build.progress`, and `log` JSON-Lines events;
-diagnostics, `build.started`, `build.finished`, and the final report remain. Neither option suppresses errors.
+`--quiet` additionally suppresses the `build.stage` and `build.progress` JSON-Lines events (`log` is
+reserved and has no producer in this release); diagnostics, `build.started`, `build.finished`, and the final
+report remain. Neither option suppresses errors.
 
 `MOCASSIN_DEBUG=1` includes a stack trace for an unexpected internal error. `MOCASSIN_SIM` names the solver
 executable that `doctor` probes (the solver arrives in a later step).
@@ -213,7 +214,8 @@ payloads, writes the package, publishes it atomically, and verifies it.
   `<project-file-stem>.msl` is written next to the project. A build-template output name is a file-name stem;
   separators and `..` are rejected.
 - An explicit `-o` target is checked before any load: an existing package without `--force` is `CLI003`/3,
-  and an invalid or impossible target is `CLI002`/3, so no build work starts. A target derived from a build
+  and a directory target, a missing parent directory, or an invalid path is `CLI002`/3, so no build work
+  starts. The missing parent is not created; create the directory first. A target derived from a build
   template’s output name needs the recipe, so the CLI performs a preflight load and selection, checks the
   derived target, and then hands the project to the build pipeline, which loads it again for the build. The
   writer’s overwrite guard remains the final race check.
@@ -228,7 +230,9 @@ payloads, writes the package, publishes it atomically, and verifies it.
 ### Job selection
 
 `--jobs` accepts `all`, `1-100`, `1,3,5`, and mixed forms. IDs are 1-based and refer to the complete template
-expansion. The command normalizes the selection:
+expansion. The CLI validates the grammar before loading the project, so a malformed expression is `CLI005`/2
+without any build work; out-of-range IDs need the expanded count and are rejected after expansion. The command
+normalizes the selection:
 
 - a full selection becomes `all`;
 - duplicates, overlaps, and adjacent ranges are merged and sorted (`1,2,3,5` becomes `1-3,5`);
@@ -455,7 +459,8 @@ stderr is JSONL-only; the single report object stays on stdout. Every line has `
 | `build.progress` | `completed`, `total` (optional `stage`, `current`, `etaS`) |
 | `build.finished` | `exitCode`, `wallTimeS` (emitted exactly once) |
 | `diagnostic` | `code`, `severity`, `message` (optional `path`) |
-| `log` | `level`, `message` |
+| `log` (reserved) | `level`, `message` |
 
-Consumers ignore unknown events and fields. `--quiet` suppresses `build.stage`, `build.progress`, and `log`;
-`build.started`, `build.finished`, and `diagnostic` remain.
+Consumers ignore unknown events and fields. `log` is reserved: the schema accepts it, but Step 12 emits no
+`log` events; `--quiet` still names it so the future producer keeps the documented suppression. `--quiet`
+suppresses `build.stage` and `build.progress`; `build.started`, `build.finished`, and `diagnostic` remain.

@@ -83,20 +83,41 @@ internal sealed class BuildCommand
         var started = timeProvider.GetTimestamp();
         var events = request.Json ? new BuildEventWriter(stderr, request.Quiet) : null;
 
-        if (!request.Preview && request.OutputPath is not null && !request.Force)
+        if (request.Jobs is not null)
         {
-            var explicitTarget = TryFullPath(request.OutputPath);
-            if (explicitTarget is not null && File.Exists(explicitTarget))
+            var selectionError = JobSelection.ValidateSyntax(request.Jobs);
+            if (selectionError is not null)
             {
-                var existing = SyntheticFailure(
+                return WriteUsageError(
+                    request,
+                    stdout,
+                    stderr,
+                    [CliDiagnosticFactory.JobSelection(selectionError)]);
+            }
+        }
+
+        if (!request.Preview && request.OutputPath is not null)
+        {
+            var targetDiagnostic = ValidateTarget(request.OutputPath, request.Force);
+            if (targetDiagnostic is not null)
+            {
+                var invalidTarget = SyntheticFailure(
                     project: null,
                     BuildFailureKind.Io,
-                    []);
+                    [targetDiagnostic]);
                 return Finish(
                     request,
                     stdout,
                     stderr,
-                    new BuildOutcome(existing, request, null, explicitTarget, true, false, TimeSpan.Zero, []),
+                    new BuildOutcome(
+                        invalidTarget,
+                        request,
+                        null,
+                        TryFullPath(request.OutputPath),
+                        OutputExists: targetDiagnostic.Code == "CLI003",
+                        false,
+                        TimeSpan.Zero,
+                        []),
                     "skipped",
                     diagnosticsRendered: false,
                     events,
@@ -195,18 +216,30 @@ internal sealed class BuildCommand
                     started);
             }
 
-            if (!request.Force && targetPath is not null && File.Exists(targetPath))
+            if (targetPath is not null)
             {
-                var synthetic = SyntheticFailure(project, BuildFailureKind.Io, []);
-                return Finish(
-                    request,
-                    stdout,
-                    stderr,
-                    new BuildOutcome(synthetic, request, project, targetPath, true, false, TimeSpan.Zero, []),
-                    "skipped",
-                    diagnosticsRendered: false,
-                    events,
-                    started);
+                var targetDiagnostic = ValidateTarget(targetPath, request.Force);
+                if (targetDiagnostic is not null)
+                {
+                    var synthetic = SyntheticFailure(project, BuildFailureKind.Io, [targetDiagnostic]);
+                    return Finish(
+                        request,
+                        stdout,
+                        stderr,
+                        new BuildOutcome(
+                            synthetic,
+                            request,
+                            project,
+                            targetPath,
+                            OutputExists: targetDiagnostic.Code == "CLI003",
+                            false,
+                            TimeSpan.Zero,
+                            []),
+                        "skipped",
+                        diagnosticsRendered: false,
+                        events,
+                        started);
+                }
             }
         }
 
@@ -456,6 +489,43 @@ internal sealed class BuildCommand
             BuildFailureKind.Io,
         _ => BuildFailureKind.Load,
     };
+
+    private static Diagnostic? ValidateTarget(string path, bool force)
+    {
+        var fullPath = TryFullPath(path);
+        if (fullPath is null)
+        {
+            return CliDiagnosticFactory.Io($"The output path '{path}' is not valid.");
+        }
+
+        if (Directory.Exists(fullPath))
+        {
+            return CliDiagnosticFactory.Io($"The output path '{fullPath}' is an existing directory.");
+        }
+
+        string? parent;
+        try
+        {
+            parent = Path.GetDirectoryName(fullPath);
+        }
+        catch (Exception exception) when (exception is ArgumentException
+                                              or NotSupportedException
+                                              or PathTooLongException)
+        {
+            return CliDiagnosticFactory.Io($"The output path '{path}' is not valid: {exception.Message}");
+        }
+
+        if (string.IsNullOrEmpty(parent) || !Directory.Exists(parent))
+        {
+            return CliDiagnosticFactory.Io(
+                $"The output directory '{parent}' does not exist; create it first.");
+        }
+
+        return !force && File.Exists(fullPath)
+            ? CliDiagnosticFactory.OutputExists(
+                $"The package '{fullPath}' already exists. Pass --force to replace it.")
+            : null;
+    }
 
     private static string? TryFullPath(string path)
     {

@@ -239,6 +239,7 @@ class PlatformGateTests(unittest.TestCase):
             [
                 "src/dotnet/Mocassin.Packages.Tests/Mocassin.Packages.Tests.csproj",
                 "src/dotnet/Mocassin.Results.Tests/Mocassin.Results.Tests.csproj",
+                "src/dotnet/Mocassin.Cli.Tests/Mocassin.Cli.Tests.csproj",
             ],
         )
         for relative in focused:

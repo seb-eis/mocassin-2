@@ -95,7 +95,7 @@ internal static class BuildReportFactory
             null,
             null,
             null,
-            null,
+            new BuildReportJobSelection(null, 0, 0),
             [],
             null,
             null,

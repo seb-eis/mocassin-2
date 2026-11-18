@@ -116,11 +116,18 @@ internal sealed class NewProjectCommand
                                               or NotSupportedException
                                               or PathTooLongException)
         {
-            return Task.FromResult(WriteUsageError(
+            return Task.FromResult(WriteReport(
                 request,
                 stdout,
                 stderr,
-                [CliDiagnosticFactory.Usage($"The output directory '{request.OutputDirectory}' is not valid.")]));
+                Failure(
+                    CliExitCode.Io,
+                    null,
+                    null,
+                    templateName,
+                    [CliDiagnosticFactory.Io(
+                        $"The output path '{request.OutputDirectory}' is not valid: {exception.Message}")]),
+                diagnosticsRendered: false));
         }
 
         if (File.Exists(targetPath))

@@ -120,6 +120,36 @@ public sealed class InspectCommandTests
             static diagnostic => diagnostic.GetProperty("code").GetString() == "CLI009");
     }
 
+    [Theory]
+    [InlineData("UPDATE models SET payload = x'0001020304';", "PKG004")]
+    [InlineData("UPDATE models SET signature = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa';", "PKG005")]
+    public async Task NonFatalPayloadAndSignatureDefectsStillInspect(string sql, string verifyCode)
+    {
+        using var directory = new TempDirectory();
+        var package = await PackageTestSupport.CreateAsync(directory.Path);
+        PackageTestSupport.Execute(package, sql);
+
+        var (exitCode, stdout, stderr) = await CliTestRunner.RunAsync("inspect", package, "--json");
+
+        Assert.Equal(0, exitCode);
+        Assert.Equal(string.Empty, stderr);
+        JsonSchemaAssert.Matches("inspect-v1", stdout);
+        using var document = JsonDocument.Parse(stdout);
+        var root = document.RootElement;
+        Assert.True(root.GetProperty("ok").GetBoolean());
+        Assert.Equal("inspect", root.GetProperty("kind").GetString());
+        Assert.True(root.GetProperty("package").GetProperty("jobCount").GetInt32() > 0);
+        Assert.True(root.GetProperty("package").GetProperty("latticeCount").GetInt32() > 0);
+
+        var (verifyExit, verifyStdout, _) = await CliTestRunner.RunAsync("verify", package, "--json");
+        Assert.Equal(1, verifyExit);
+        using var verify = JsonDocument.Parse(verifyStdout);
+        Assert.False(verify.RootElement.GetProperty("valid").GetBoolean());
+        Assert.Contains(
+            verify.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            diagnostic => diagnostic.GetProperty("code").GetString() == verifyCode);
+    }
+
     [Fact]
     public async Task ATruncatedPackageIsCli009()
     {

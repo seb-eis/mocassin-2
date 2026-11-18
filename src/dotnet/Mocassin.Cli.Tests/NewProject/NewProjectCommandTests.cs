@@ -273,6 +273,35 @@ public sealed class NewProjectCommandTests
         Assert.Empty(Directory.GetFiles(directory.Path));
     }
 
+    [Fact]
+    public async Task AnEmptyOutputDirectoryIsCli002AndExitThree()
+    {
+        var (exitCode, stdout, _) = await RunAsync("new", "EmptyTarget", "-o", "", "--json");
+
+        Assert.Equal(3, exitCode);
+        JsonSchemaAssert.Matches("new-project-v1", stdout);
+        using var report = JsonDocument.Parse(stdout);
+        Assert.Contains(
+            report.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            static diagnostic => diagnostic.GetProperty("code").GetString() == "CLI002");
+    }
+
+    [Fact]
+    public async Task AMissingOutputDirectoryIsCreated()
+    {
+        using var directory = new TempDirectory();
+        var output = System.IO.Path.Combine(directory.Path, "missing", "nested");
+
+        var (exitCode, stdout, _) = await RunAsync("new", "Nested", "-o", output, "--json");
+
+        Assert.Equal(0, exitCode);
+        Assert.True(File.Exists(System.IO.Path.Combine(output, "Nested.mocprj")));
+        using var report = JsonDocument.Parse(stdout);
+        Assert.Equal(
+            System.IO.Path.Combine(output, "Nested.mocprj"),
+            report.RootElement.GetProperty("projectPath").GetString());
+    }
+
     private static Task<(int ExitCode, string Stdout, string Stderr)> RunAsync(params string[] arguments) =>
         CliTestRunner.RunAsync(arguments);
 }

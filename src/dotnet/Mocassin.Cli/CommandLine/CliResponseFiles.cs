@@ -64,7 +64,20 @@ internal static class CliResponseFiles
 
                 if (TryGetReference(token, out var path))
                 {
-                    state.ExpandFile(path, depth: 1, tokens);
+                    var start = tokens.Count;
+                    try
+                    {
+                        state.ExpandFile(path, depth: 1, tokens);
+                    }
+                    catch
+                    {
+                        // The contract recognises a command only outside the file that failed to expand.
+                        // Drop every token contributed by that top-level file (including nested ones) so a
+                        // partial expansion cannot masquerade as a command-line command.
+                        tokens.RemoveRange(start, tokens.Count - start);
+                        throw;
+                    }
+
                     continue;
                 }
 

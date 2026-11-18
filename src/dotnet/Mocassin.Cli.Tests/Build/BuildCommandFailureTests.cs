@@ -55,6 +55,99 @@ public sealed class BuildCommandFailureTests
     }
 
     [Fact]
+    public async Task AnExplicitDirectoryTargetIsCli002BeforeLoading()
+    {
+        using var directory = new TempDirectory();
+        var target = System.IO.Path.Combine(directory.Path, "target.msl");
+        Directory.CreateDirectory(target);
+
+        var (exitCode, stdout, _) = await RunAsync(
+            "build",
+            CliTestProject.SamplePath,
+            "-o",
+            target,
+            "--json");
+
+        Assert.Equal(3, exitCode);
+        JsonSchemaAssert.Matches("build-v1", stdout);
+        using var report = JsonDocument.Parse(stdout);
+        Assert.Equal(3, report.RootElement.GetProperty("exitCode").GetInt32());
+        Assert.Contains(
+            report.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            static diagnostic => diagnostic.GetProperty("code").GetString() == "CLI002");
+        Assert.Empty(report.RootElement.GetProperty("timings").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task AMissingTargetParentIsCli002AndIsNotCreated()
+    {
+        using var directory = new TempDirectory();
+        var parent = System.IO.Path.Combine(directory.Path, "missing", "nested");
+        var target = System.IO.Path.Combine(parent, "package.msl");
+
+        var (exitCode, stdout, _) = await RunAsync(
+            "build",
+            CliTestProject.SamplePath,
+            "-o",
+            target,
+            "--json");
+
+        Assert.Equal(3, exitCode);
+        using var report = JsonDocument.Parse(stdout);
+        Assert.Contains(
+            report.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            static diagnostic => diagnostic.GetProperty("code").GetString() == "CLI002");
+        Assert.Empty(report.RootElement.GetProperty("timings").EnumerateArray());
+        Assert.False(Directory.Exists(parent));
+        Assert.False(File.Exists(target));
+    }
+
+    [Fact]
+    public async Task MalformedJobSelectionIsRejectedBeforeProjectLoad()
+    {
+        using var directory = new TempDirectory();
+        var missingProject = System.IO.Path.Combine(directory.Path, "missing.mocprj");
+
+        var (exitCode, stdout, _) = await RunAsync(
+            "build",
+            missingProject,
+            "--jobs",
+            "1,,2",
+            "--json");
+
+        Assert.Equal(2, exitCode);
+        JsonSchemaAssert.Matches("build-v1", stdout);
+        using var report = JsonDocument.Parse(stdout);
+        Assert.Contains(
+            report.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            static diagnostic => diagnostic.GetProperty("code").GetString() == "CLI005");
+        Assert.DoesNotContain(
+            report.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            static diagnostic => diagnostic.GetProperty("code").GetString() == "PROJ002");
+        Assert.Empty(report.RootElement.GetProperty("timings").EnumerateArray());
+    }
+
+    [Fact]
+    public async Task OutOfRangeJobSelectionNeedsTheProjectLoadAndExpansion()
+    {
+        using var directory = new TempDirectory();
+        var missingProject = System.IO.Path.Combine(directory.Path, "missing.mocprj");
+
+        var (exitCode, stdout, _) = await RunAsync(
+            "build",
+            missingProject,
+            "--jobs",
+            "99",
+            "--json");
+
+        Assert.Equal(3, exitCode);
+        using var report = JsonDocument.Parse(stdout);
+        Assert.DoesNotContain(
+            report.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            static diagnostic => diagnostic.GetProperty("code").GetString() == "CLI005");
+    }
+
+    [Fact]
     public async Task WarningsAsErrorsPromotesValidationWarningsToExitOne()
     {
         var (exitCode, stdout, _) = await RunAsync(

@@ -260,6 +260,40 @@ public sealed class ResponseFileTests
         Assert.Contains("token limit", stdout + stderr, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task ACommandOnlyInsideTheFailedFileEmitsNoReport()
+    {
+        using var directory = new TempDirectory();
+        await File.WriteAllTextAsync(
+            Path.Combine(directory.Path, "partial.rsp"),
+            "build\n@missing-inside.rsp\n");
+
+        var (exitCode, stdout, stderr) = await RunInAsync(directory.Path, "@partial.rsp", "--json");
+
+        Assert.Equal(2, exitCode);
+        Assert.Equal(string.Empty, stdout);
+        Assert.Contains("CLI001", stderr, StringComparison.Ordinal);
+        Assert.Contains("missing-inside.rsp", stderr, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task ACommandOutsideTheFailedFileStillEmitsAReport()
+    {
+        using var directory = new TempDirectory();
+        await File.WriteAllTextAsync(Path.Combine(directory.Path, "build.rsp"), "build\n");
+
+        var (exitCode, stdout, stderr) = await RunInAsync(
+            directory.Path,
+            "@build.rsp",
+            "@missing.rsp",
+            "--json");
+
+        Assert.Equal(2, exitCode);
+        Assert.Equal(string.Empty, stderr);
+        Assert.Contains("\"kind\": \"build\"", stdout, StringComparison.Ordinal);
+        Assert.Contains("CLI001", stdout, StringComparison.Ordinal);
+    }
+
     private static Task<(int ExitCode, string Stdout, string Stderr)> RunAsync(params string[] arguments) =>
         CliTestRunner.RunAsync(arguments);
 

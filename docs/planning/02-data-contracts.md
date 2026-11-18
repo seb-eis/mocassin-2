@@ -1633,7 +1633,7 @@ event is one JSON object on one line with `schemaVersion = 1` and a stable `even
 | `collect.progress` | `completed`, `total`, `jobId` | Collection progress |
 | `collect.finished` | `collected`, `skipped`, `failed` | Collection ended |
 | `diagnostic` | `code`, `severity`, `message` | Structured diagnostic; `path` optional |
-| `log` | `level`, `message` | Human log forwarded as JSON |
+| `log` | `level`, `message` | Reserved for a forwarded human log; Step 12 has no producer, and the event fixture does not include it. |
 
 - `build.started` is emitted after job expansion, when the selected total is known. The `build.stage` events
   for load/select/validate/compile/validateBuild/parameterize/expand therefore precede it; consumers must not
@@ -1646,7 +1646,8 @@ event is one JSON object on one line with `schemaVersion = 1` and a stable `even
 - `build.progress.completed` is monotonic within one stream; `total` is the selected job count. Progress is
   throttled by the writer of the stream, so consumers must not expect one event per job.
 - `--json` makes stderr JSON Lines only; human stage/progress lines are suppressed whether or not `--quiet`
-  is used. `--quiet` additionally suppresses `build.stage`, `build.progress`, and `log`; `build.started`,
+  is used. `--quiet` additionally suppresses `build.stage` and `build.progress`; `log` is reserved and has no
+  Step 12 producer. `build.started`,
   `build.finished`, and `diagnostic` remain.
 - Consumers ignore unknown events and unknown fields.
 - Ordering is guaranteed within one stream; `jobId` is present for per-job events.

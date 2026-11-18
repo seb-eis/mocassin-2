@@ -1514,6 +1514,7 @@ static Mocassin.Packages.Build.BuildStarted.operator !=(Mocassin.Packages.Build.
 static Mocassin.Packages.Build.BuildStarted.operator ==(Mocassin.Packages.Build.BuildStarted? left, Mocassin.Packages.Build.BuildStarted? right) -> bool
 static Mocassin.Packages.Build.JobSelection.Normalize(System.Collections.Generic.IReadOnlyList<int>! ids) -> string!
 static Mocassin.Packages.Build.JobSelection.Parse(string! expression, int expandedCount) -> Mocassin.Packages.Build.JobSelectionResult!
+static Mocassin.Packages.Build.JobSelection.ValidateSyntax(string! expression) -> string?
 static Mocassin.Packages.Build.JobSelectionResult.operator !=(Mocassin.Packages.Build.JobSelectionResult? left, Mocassin.Packages.Build.JobSelectionResult? right) -> bool
 static Mocassin.Packages.Build.JobSelectionResult.operator ==(Mocassin.Packages.Build.JobSelectionResult? left, Mocassin.Packages.Build.JobSelectionResult? right) -> bool
 virtual Mocassin.Packages.Build.BuildEvent.EqualityContract.get -> System.Type!

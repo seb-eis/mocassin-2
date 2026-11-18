@@ -103,14 +103,17 @@ job plus one Windows job with the runner's multiplier and nothing else.
 - Ubuntu: `dotnet restore` → `dotnet build Mocassin.slnx -c Release` → full
   `dotnet test Mocassin.slnx` with coverage → `dotnet format --verify-no-changes`.
 - Windows/macOS: `dotnet restore` → `dotnet build Mocassin.slnx -c Release` → only
-  `Mocassin.Packages.Tests` and `Mocassin.Results.Tests`. No coverage, no format check, no full-suite run.
+  `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, and `Mocassin.Cli.Tests`. No coverage, no format check,
+  no full-suite run.
 
 **Rationale.** The platform gate exists because of P/Invoke directory `fsync`, atomic rename and temporary-file
-handling in the package writer, and the SQLite reader's path, case-sensitivity, and file-locking behaviour. Those
-tests live in `Mocassin.Packages.Tests` and `Mocassin.Results.Tests`. The remaining projects (core kernel,
-symmetry, compilation, contracts, CLI, view models, architecture policy) are platform-neutral unit and property
-tests whose result cannot differ by OS; running them again on Windows spends minutes without new information.
-The full suite and the coverage collection stay on Ubuntu, where the closeout evidence is produced.
+handling in the package writer, the SQLite reader's path, case-sensitivity, and file-locking behaviour, and the
+CLI's guarded `Console.CancelKeyPress`/SIGTERM path plus its Windows `mocassin-sim.exe` probe selection. Those
+tests live in `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, and `Mocassin.Cli.Tests`. The remaining
+projects (core kernel, symmetry, compilation, contracts, view models, architecture policy) are platform-neutral
+unit and property tests whose result cannot differ by OS; running them again on Windows spends minutes without
+new information. The full suite and the coverage collection stay on Ubuntu, where the closeout evidence is
+produced.
 
 Note on current content: the SQLite reader tests arrive with Step 11, so on `main` at the time of this split
 `Mocassin.Results.Tests` holds only a smoke test. The gate still builds the whole solution and runs the full
