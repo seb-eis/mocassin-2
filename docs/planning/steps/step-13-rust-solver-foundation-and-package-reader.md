@@ -16,16 +16,16 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 - **Audit:** Not requested
 - **Design review:** Re-review required — round 1 returned `Changes required`; the new freeze is recorded in
   [`docs/planning/reviews/step-13.md`](../reviews/step-13.md)
-- **Feature list:** Proposed, seven features; owner approval requested once with the start gate
-- **Sizing:** 3.5–4.5 person-weeks including 1.0 pw contingency; the four-week trigger is exceeded and the
-  single-step/split decision is owner-gated in §13
+- **Feature list:** Approved by the human owner on 2026-11-18 — seven features
+- **Sizing:** Owner-approved on 2026-11-18 at **4.5 person-weeks** (3.5 pw base + 1.0 pw contingency) as a
+  §3.1 single-step exception, no split; the 13A/13B split was considered and rejected. See §13.
 - **Last updated:** 2026-11-18
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | — | — | — | — | — | — |
 
-### Proposed feature list (owner approval requested)
+### Approved feature list (owner, 2026-11-18)
 
 | # | Feature | Branch | Planned scope | Outcome |
 | --- | --- | --- | --- | --- |
@@ -37,9 +37,10 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 6 | Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Rust tests over `tests/contracts/packages/msl-v1/`, `amend-1-net10/`, projection `.bin` vectors, raw payloads, and `rng-vectors.json`; a new real-writer populated pair/cluster + MMC fixture; proptest mutation/truncation suite; `cargo-fuzz` scan/decode/package targets and a time-boxed run | The .NET-written packages and projection vectors are consumed byte-for-byte; populated and MMC payload→signature paths pass; mutation tests and the fuzz run find no panic/OOM |
 | 7 | Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Load and RNG Criterion benches plus same-runner-class baselines; `solver-architecture.md`, `msl-format.md`, `cli.md`, `testing-and-parity.md`, Rust layout docs; parity/status/closeout evidence (`docs/planning/closeout/step-13.json`) and the audit request | Load `< 100 ms` on the fixture and the RNG budgets are recorded with the environment; documentation builds strictly; `check_closeout_evidence.py` passes and the audit request is complete |
 
-The feature list is approved once by the human owner together with the design-review verdict. That approval
-creates the step branch and marks the step `In progress`; individual features are squash-merged without a
-further approval.
+The human owner approved this list and the 4.5 pw single-step exception on 2026-11-18. That approval covers
+every feature; individual features are squash-merged without a further approval. The step branch is created
+from the reviewed `main` commit after the design verdict is accepted. If features 1–3 exceed 2.0 pw, the step
+agent stops and reports to the orchestrator before feature 4.
 
 ## Goal
 
@@ -1160,7 +1161,7 @@ commit, and raw timings in `tests/reference/bench/step-13-load.json` and a same-
 | CLI contract drift | `cli.md` freezes the dry-run format and exit codes; golden test and doc-drift check; no `--json` yet |
 | `--seed` misuse | Documented as debugging; recorded only as a hash; production uses the package seed |
 | Fuzz toolchain unavailable | Nightly + `cargo-fuzz` are Tier 2; run the time-boxed targets; if unavailable, record the accepted risk and keep the PR-fast mutation suite |
-| Step size | Base 3.5 pw + 1.0 pw contingency = 4.5 pw, beyond the four-week trigger; owner must choose the single-step exception or 13A/13B split (§13) |
+| Step size | 4.5 pw owner-approved single-step exception; no split; guard: stop before feature 4 if features 1–3 exceed 2.0 pw (§13) |
 
 ### 12. Dependencies and interfaces
 
@@ -1188,58 +1189,49 @@ No unresolved cross-step interface question remains. The only deliberate asymmet
 
 ### 13. Sizing and split-trigger check
 
-- **Honest estimate:** base implementation **3.5 person-weeks** (feature breakdown below) plus **1.0 pw risk
-  contingency = 4.5 pw**. The four-week §3.1 trigger is **exceeded**; the earlier “3.0–4.0 pw, no split” claim
-  was arithmetically wrong and is withdrawn.
+- **Estimate:** **4.5 person-weeks** = 3.5 pw base implementation + 1.0 pw risk contingency. The upper bound
+  exceeds the four-week §3.1 trigger. The earlier “3.0–4.0 pw, no split” claim was arithmetically wrong and is
+  withdrawn.
+- **Owner decision (2026-11-18):** approved as a **single step at 4.5 pw** under the §3.1 single-step exception,
+  following the Step 09/12 precedent, with **no split**.
 - **Breakdown:** feature 1 ≈ 0.3 pw; feature 2 ≈ 0.5 pw; feature 3 ≈ 0.7 pw; feature 4 ≈ 1.0 pw (adds the
   scientific-invariant checks); feature 5 ≈ 0.3 pw; feature 6 ≈ 0.5 pw (adds the populated pair/cluster + MMC
   fixture); feature 7 ≈ 0.5 pw; ~0.2 pw integration; 1.0 pw contingency. Total 4.5 pw.
 - **§3.1 triggers:** seven features is inside the 6–8 range, but the upper estimate is beyond four weeks. The
   audit is still a bounded new-crate/reader review.
-- **Owner decision required (do not decide unilaterally):**
-  - **Option A — single-step exception.** Approve Step 13 as one step at 4.5 pw, following the Step 09/12
-    precedent. Keeps one coherent contract and one closeout; the owner accepts the four-week exception.
-  - **Option B — split 13A/13B.** `13A — Rust solver foundation and bounded reader` (workspace/types/RNG/
-    bounded reader + payload DTOs + the populated/MMC fixture; roughly 3.0–3.5 pw) and `13B — Model/job
-    mapping, signatures, and dry-run CLI` (validation/M-2 checks, signature re-encoding, dry-run, fuzz,
-    benchmarks, docs, closeout; roughly 1.5–2.0 pw). 13B depends on 13A; 13A's acceptance would be library
-    tests plus the raw-payload/projection gates, and the CLI acceptance would move to 13B. Both parts are
-    under four weeks.
-- **Guard:** if features 1–3 exceed 2.0 pw, stop and ask the owner to choose the split before feature 4.
-- **Owner approval:** the feature list, the Option A/B choice, and (if A) the 4.5 pw single-step exception are
-  approved once with the design verdict at the start gate. They are not re-approved per feature.
+- **13A/13B split — considered and rejected (owner, 2026-11-18).** `13A` (workspace/types/RNG/bounded reader +
+  fixture, ~3.0–3.5 pw) and `13B` (mapping/M-2/signatures/dry-run/fuzz/benchmarks/docs/closeout, ~1.5–2.0 pw)
+  would separate the reader from its CLI acceptance, duplicate fixture/closeout work, add a roadmap step, and
+  change the Phase D closeout. The seven features form one coherent reader/RNG/CLI contract. The split is
+  withdrawn.
+- **Guard:** if features 1–3 exceed **2.0 pw**, the step agent stops and reports to the orchestrator before
+  feature 4. Do not silently absorb the overrun.
+- **Owner approval:** the feature list and the 4.5 pw single-step exception are approved once with the design
+  verdict at the start gate. They are not re-approved per feature.
 
 ### 14. Decisions recorded and owner input
 
 | Decision | Record |
 | --- | --- |
 | ChaCha12, SHA-256 derivation, job-level parallelism unchanged | ADR 0005 |
-| RNG state is a 64-byte first-party `RngStateV1`; `rngAlgorithm = "chacha12-v1"` | This page §4.3; data contracts §4.3/§4.5 |
+| RNG state is a 64-byte first-party `RngStateV1`; `rngAlgorithm = "chacha12-v1"`; the layout and the state/layout-change-is-format-breaking rule are recorded as a **data-contract decision note**, not an ADR, with no schema bump | This page §4.3; [`02-data-contracts.md`](../02-data-contracts.md) §4.3/§4.5 |
 | Stored payloads use smallest-width integers; fixed width is canonical-projection only | This page §2.1; data contracts §3.3 |
 | `.msl` v1 lattice payload is a MessagePack array of `u8`; the canonical projection uses `bin` | This page §2.1/§3.6; `msl-format.md` |
 | Solver reader bounds and the no-`integrity_check` split with `mocassin verify` | This page §3.3/§3.1; data contracts §3.4 |
 | Solver exit codes 0/10–16; parse errors remap to 10; dry-run is write-free | This page §3.7/§5; architecture §7.3 (canonical) |
 | RNG performance budget and 10 % same-runner-class regression rule | This page §4.5; quality strategy §13; `tests/reference/bench/baselines.json` |
-| Seven features; base 3.5 pw + 1.0 pw contingency = 4.5 pw; Option A single-step exception or Option B 13A/13B split | This page §13; owner decision at the start gate |
+| Seven features; 4.5 pw single-step exception; no split; 13A/13B considered and rejected | This page §13; owner-approved 2026-11-18 |
 
-**New ADRs:** none are created by this freeze. ADR 0005 stands; this step implements it. The `RngStateV1`
-layout, reader limits, and exit-code mapping are step-level decisions recorded here and in the data
-contracts/architecture. **n-1 is an open owner choice**, not a decision made by this freeze:
+**New ADRs:** none. ADR 0005 stands; this step implements it. The `RngStateV1` layout is recorded as the
+data-contract decision note in [`02-data-contracts.md`](../02-data-contracts.md) §4.3/§4.5: the field already
+existed and was documented as “length/algorithm documented in Step 13”, so no schema version bump is needed.
+The same note carries the `chacha12-v1` binding and the rule that a change to the draw semantics, the 64-byte
+layout, or the algorithm id is format-breaking. The reader limits and exit-code mapping are step-level
+decisions recorded here, in the data contracts, and in the architecture.
 
-- **Option A — data-contract decision note (current design).** Keep the 64-byte `rngState` layout in
-  [`02-data-contracts.md`](../02-data-contracts.md) §4.3/§4.5. The field already existed and was documented as
-  “length/algorithm documented in Step 13”; no schema version bump is needed. Lower process overhead; the
-  contract page is the durable record.
-- **Option B — short ADR.** Add an ADR (for example ADR 0016, “ChaCha12 RNG state layout”) recording the
-  64-byte layout and the algorithm-id rule as a format decision. More durable for a persisted artifact, at the
-  cost of a new ADR and an explicit review; no schema change either way.
-
-The planner does not choose between A and B. The owner should choose before the start gate; if B, the ADR is
-added in the same design branch and the review request is updated.
-
-**Owner decisions requested at the start gate:** approve the seven-feature list, choose Option A or B for the
-sizing/split decision (4.5 pw single-step exception or 13A/13B split), choose n-1 Option A or B, and accept the
-design-review verdict. No other owner decision is open.
+**Owner decisions requested at the start gate:** accept the design-review verdict; the sizing (4.5 pw
+single-step exception, no split) and n-1 (data-contract note, no ADR) are already decided by the owner on
+2026-11-18. No other owner decision is open.
 
 ## Implementation tasks
 
