@@ -12,7 +12,7 @@
     "head_sha": ""
   },
   "platform_ci": "Windows: CI workflow_dispatch run 43944396192 at 419716678cacf6ad2c50ee379e1d2e7342bbf13b (platforms=windows) - green; the focused Mocassin.Packages.Tests and Mocassin.Results.Tests platform jobs passed",
-  "tag": "",
+  "tag": "step-11",
   "notes": [
     "Round-2 closeout CI run 43944825353 is the single Ubuntu dispatch (workflow_dispatch, platforms=ubuntu, force_all=false) at audited commit 419716678cacf6ad2c50ee379e1d2e7342bbf13b (X2). It is green; the .NET, contracts/policy, and public-API jobs ran, and Rust and Python were skipped by their path filters because this step changes no Rust or Python paths. The full local gate (all --require, exit 0) passed on the same tree.",
     "Platform CI run 43944396192 is the round-2 focused Windows gate at 419716678cacf6ad2c50ee379e1d2e7342bbf13b (workflow_dispatch, platforms=windows). The Windows .NET job built the solution and ran Mocassin.Packages.Tests and Mocassin.Results.Tests; both passed. The Ubuntu-only jobs were skipped by job condition.",

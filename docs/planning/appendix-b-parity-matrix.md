@@ -68,9 +68,9 @@ Status legend:
 | 5-site 2-species vehicle | Y | Partial | 04/08 | Model, path validation, preview, and sample in 04; unidirectional rules in 08 |
 | 6-site 2-species vehicle | Y | Partial | 04/08 | Model, path validation, and preview in 04; unidirectional rules in 08 |
 | Charge transfer/polaron hop | Y | Partial | 04/08 | Homogeneous charge-state groups and sample in 04; conservation/rules in 08 |
-| Reverse rule generation (2/3-site) | Y | Planned | 08 | Auto-inverse for `Metropolis2`/`Migration3`; explicit reverse stays separate |
-| No reverse for complex mechanisms | Y | Planned | 08 | `GeneratesReverse` validated in 04; no auto-inverse in 08 |
-| Dependent/hidden rules | Y | Planned | 08 | Symmetry-equivalent start instances; deduplicated and counted |
+| Reverse rule generation (2/3-site) | Y | Done | 08 | Auto-inverse for `Metropolis2`/`Migration3`; `CeriaKineticMigrationCompilesForwardAndInverseRules` and `MetropolisExchangeCompilesForwardAndInverseRulesWithoutState1`; explicit reverse stays separate |
+| No reverse for complex mechanisms | Y | Done | 08 | `CorrectedVehicleCompilesUnidirectionalRules`, `CorrectedInterstitialcyCompilesWithASpectatorCentre`, and `ExplicitReverseCompilationTests`; `GeneratesReverse` validated in 04 |
+| Dependent/hidden rules | Y | Partial | 08/29 | Explicit deduplication and dependent/hidden counts exist; equivalent-start orbit reduction and `DependentRules` emission are the accepted Step 08 audit m1 gap. Step 29's release gate requires every required parity item to be implemented or explicitly deferred (roadmap M12; Step 29 §9). |
 | Reference path editing/preview | Y | Partial | 04/24 | Preview API in 04; editor UI in 24 |
 | Ambiguity detection | Y | Improvement | 08 | Compile-time `CMP004` with both identities |
 | Transition rule count preview | N | Improvement | 24 | Step 07 statistics are advisory; Step 08 is authoritative |
@@ -106,7 +106,7 @@ Status legend:
 | Auto-sampled pair tables | Y | Done | 08 | Shares Step 05 sampling/reduction kernel; canonical shell order |
 | Chiral pair linking in compiled tables | Y | Done | 08/09 | Shared `EnergyId`; one table/value per chiral pair |
 | Cluster tables and occupation codes | Y | Done | 08 | Point-group canonicalization; 6-bit codes; expansion maps |
-| Forward/inverse/dependent rules | Y | Partial | 08 | Auto-inverse only for `Metropolis2`/`Migration3`; dependent instances for symmetry-equivalent starts |
+| Forward/inverse/dependent rules | Y | Partial | 08/29 | Forward and inverse rules are Done and tested; dependent instances for symmetry-equivalent starts remain open as Step 08 audit m1, owned by the Step 29 release gate (see §3) |
 | Mass/charge conservation filtering | Y | Done | 08 | Rejected counts reported; charge-transfer symbols balanced |
 | Rule ambiguity detection | Y | Done | 08 | Compile-time `CMP004`; original failed at runtime |
 | Unreferenced transition warning | N | Done | 08 | `CMP009` |
