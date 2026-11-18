@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `11f089fe708908d92d166dd83738955d5149f245` |
+| Reviewed commit | `9263949589c449b063e7501f5ab254ed9bf09d7f` |
 | Docs branch | `docs/step-13-design` |
 | Review date | 2026-11-18 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
@@ -369,7 +369,7 @@ Date:
 ## Resolution status
 
 Round-1 reviewer text, findings, evidence, and verdict are unchanged. The design was corrected on
-`docs/step-13-design` at freeze `11f089fe708908d92d166dd83738955d5149f245`; this request-record update is a
+`docs/step-13-design` at freeze `9263949589c449b063e7501f5ab254ed9bf09d7f`; this request-record update is a
 documentation-only follow-up. No code, test, configuration, contract, or generated artifact changed.
 
 | Finding | Status | Owner | Commit | Resolution |
