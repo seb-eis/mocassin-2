@@ -16,7 +16,8 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 - **Audit:** Not requested
 - **Design review:** Re-review required — round 1 returned `Changes required`; the new freeze is recorded in
   [`docs/planning/reviews/step-13.md`](../reviews/step-13.md)
-- **Feature list:** Approved by the human owner on 2026-11-18 — seven features
+- **Feature list:** Seven features proposed; the owner approved the 4.5 pw single-step sizing on 2026-11-18.
+  The design verdict and start gate remain pending.
 - **Sizing:** Owner-approved on 2026-11-18 at **4.5 person-weeks** (3.5 pw base + 1.0 pw contingency) as a
   §3.1 single-step exception, no split; the 13A/13B split was considered and rejected. See §13.
 - **Last updated:** 2026-11-18
@@ -25,7 +26,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | --- | --- | --- | --- | --- | --- |
 | — | — | — | — | — | — |
 
-### Approved feature list (owner, 2026-11-18)
+### Proposed feature list (sizing approved 2026-11-18; start gate pending)
 
 | # | Feature | Branch | Planned scope | Outcome |
 | --- | --- | --- | --- | --- |
@@ -37,10 +38,10 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 6 | Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Rust tests over `tests/contracts/packages/msl-v1/`, `amend-1-net10/`, projection `.bin` vectors, raw payloads, and `rng-vectors.json`; a new real-writer populated pair/cluster + MMC fixture; proptest mutation/truncation suite; `cargo-fuzz` scan/decode/package targets and a time-boxed run | The .NET-written packages and projection vectors are consumed byte-for-byte; populated and MMC payload→signature paths pass; mutation tests and the fuzz run find no panic/OOM |
 | 7 | Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Load and RNG Criterion benches plus same-runner-class baselines; `solver-architecture.md`, `msl-format.md`, `cli.md`, `testing-and-parity.md`, Rust layout docs; parity/status/closeout evidence (`docs/planning/closeout/step-13.json`) and the audit request | Load `< 100 ms` on the fixture and the RNG budgets are recorded with the environment; documentation builds strictly; `check_closeout_evidence.py` passes and the audit request is complete |
 
-The human owner approved this list and the 4.5 pw single-step exception on 2026-11-18. That approval covers
-every feature; individual features are squash-merged without a further approval. The step branch is created
-from the reviewed `main` commit after the design verdict is accepted. If features 1–3 exceed 2.0 pw, the step
-agent stops and reports to the orchestrator before feature 4.
+The owner approved the 4.5 pw single-step sizing on 2026-11-18; the design verdict and start-gate approval of
+this feature list remain pending. Once the start gate is approved, individual features are squash-merged without
+a further approval. The step branch is created from the reviewed `main` commit after the design verdict is
+accepted. If features 1–3 exceed 2.0 pw, the step agent stops and reports to the orchestrator before feature 4.
 
 ## Goal
 
