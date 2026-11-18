@@ -1,0 +1,25 @@
+{
+  "step": "step-12",
+  "audit_commit": "9e1997d270ae79d8ad2cd2357529a08e158401fb",
+  "closeout_ci": {
+    "run_id": "44370563073",
+    "head_sha": "9e1997d270ae79d8ad2cd2357529a08e158401fb"
+  },
+  "main_sha_at_freeze": "9d4d2ef2fdc484daf6da73c14773b1767ee74183",
+  "merge_candidate": "9e1997d270ae79d8ad2cd2357529a08e158401fb",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "platform_ci": "not run",
+  "tag": "",
+  "notes": [
+    "Closeout CI run 44370563073 is the single Ubuntu dispatch (workflow_dispatch, platforms=ubuntu, force_all=false) at audited commit 9e1997d270ae79d8ad2cd2357529a08e158401fb. It is green: Detect changes, Contracts and policy, .NET (ubuntu-latest), and Public API compatibility succeeded; Rust and Python were skipped by their path filters because this step changes neither. The workflow does not run tools/verify.sh.",
+    "The full local gate ./tools/verify.sh all --require exited 0 on the same tree: 1,756 .NET tests passed (App 1, Contracts 37, Symmetry 223, Results 42, Core 685, Compilation 96, Cli 171, Packages 500, Architecture 1), dotnet format clean, Public API/ApiCompat compatible, 58 contract/policy tool tests, Rust unit tests, Python pytest, Zensical/DocFX/rustdoc strict, SPDX/secret/licence/advisory checks, and AOT passed. The AOT gate recorded the real Mocassin.Cli publish failure with 62 dependency-owned IL2xxx/IL3xxx diagnostics as evidence, not a gate; the strict smoke host and the IL2026/IL3050 positive control passed.",
+    "Documentation-only delta after the audited commit contains docs/planning/closeout/step-12.json, docs/planning/audits/step-12.md, the step page status/feature log, and docs/planning/status.md. It contains no code, test, contract, or configuration change; the audited code tree is 9e1997d.",
+    "main at freeze is 9d4d2ef2fdc484daf6da73c14773b1767ee74183, which is already an ancestor of the step branch; no merge-tree CI is required. No tag exists and no merge into main has been performed; owner approval is required.",
+    "Platform CI is 'not run': Step 12 adds no new platform-specific code beyond the Step 11 native fsync path. The Step 11 Windows gate at 419716678cacf6ad2c50ee379e1d2e7342bbf13b remains the platform evidence. macOS remains manual.",
+    "The 10,000-job acceptance workload (20 configurations x 500 jobs; four configurations x 2,500 would exceed JOB008) built and verified in 3.76 s wall time with 151,820 KB peak RSS, produced a 9,625,600-byte package, and standalone verify was valid in 1.21 s. The step page records the exact command and the performance page records the method and stage timings.",
+    "The promoted compiled-bound parameterization warning rule is covered end to end by tests/contracts/project-parameterization-warning.mocprj and BuildParameterizationWarningTests (warning-free validation; build --warnings-as-errors exits 4 with PRM003/PRM006; the same fixture builds and verifies without the flag). The earlier scripted-pipeline mapping test remains."
+  ]
+}

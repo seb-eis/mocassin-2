@@ -9,8 +9,8 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** In progress — implementation start was approved by the human owner on 2026-11-17 together with
-  the seven-feature list; the design was accepted at `1b6af90` (`Ready with notes`).
+- **Status:** In audit — features 1–7 are squashed, the full local gate is green at `9e1997d`, and the
+  independent audit is requested; the design was accepted at `1b6af90` (`Ready with notes`).
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` — round 5
   reviewed `1b6af90`; round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was
   `Ready with notes` at `d211584` (reviewed `6b15f9d`), and round 4 was `Ready with notes` at `f548d26`
@@ -27,10 +27,12 @@ UI consumes later.
   (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
 - **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 at `9d4d2ef`; its first parent
   is the design-merge commit `eb31979`). Features 1–7 are squashed into the step branch; see the feature log.
-- **Step CI:** — (closeout dispatch pending)
-- **Main merge:** —
+- **Step CI:** [run 44370563073](https://github.com/seb-eis/mocassin-2/actions/runs/44370563073) — green at
+  `9e1997d270ae79d8ad2cd2357529a08e158401fb` (the single Ubuntu closeout dispatch)
+- **Main merge:** — (owner approval pending)
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Requested 2026-11-18 — `Ready for audit` ([record](../audits/step-12.md); audited commit
+  `9e1997d270ae79d8ad2cd2357529a08e158401fb`)
 - **Last updated:** 2026-11-18
 
 ### Approved feature list
@@ -60,7 +62,7 @@ implemented and squashed. Feature rows stay empty until then.
 | 4 Project and compile commands | `feature/step-12-build-orchestration-and-cli/project-and-compile-commands` | Squashed | `dotnet` (121 CLI tests, 500 Packages tests including 6 template tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `e7564c0` |
 | 5 Package inspection commands | `feature/step-12-build-orchestration-and-cli/package-inspection-commands` | Squashed | `dotnet` (147 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `85d8d41` |
 | 6 Doctor and dry-run clean | `feature/step-12-build-orchestration-and-cli/doctor-and-dry-run-clean` | Squashed | `dotnet` (168 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `a2c6178` |
-| 7 Documentation, parity, and closeout | `feature/step-12-build-orchestration-and-cli/documentation-parity-and-closeout` | Squashed | `dotnet` (171 CLI tests), `docs`, `structure`, `api`, `contracts` exit 0; full `all --require` pending closeout | Not run (no per-feature CI) | `7d17c22` |
+| 7 Documentation, parity, and closeout | `feature/step-12-build-orchestration-and-cli/documentation-parity-and-closeout` | Squashed | `dotnet` (171 CLI tests), `docs`, `structure`, `api`, `contracts` exit 0; full `all --require` exit 0 (AOT passed) | Closeout run 44370563073 green at `9e1997d` | `7d17c22` |
 
 ### Deviations and accepted risks
 
@@ -1704,8 +1706,8 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - [x] Record the 10⁴-job evidence and the acceptance runs.
 - [x] Run `./tools/verify.sh all --require` including the `aot` gate at Step 12 closeout and record the AOT
       output in the closeout evidence; record that the closeout GitHub workflow does not run `verify.sh`.
-- [ ] Fill the closeout evidence, set the audit request, and run `./tools/verify.sh all --require`.
-- [ ] Update the step page feature log and status.
+- [x] Fill the closeout evidence, set the audit request, and run `./tools/verify.sh all --require`.
+- [x] Update the step page feature log and status.
 
 ## 20. Reconciliations and recorded decisions
 
