@@ -13,9 +13,9 @@
 | Review ID | XC-04 |
 | Checkpoint | Phase C — Compilation and build (Steps 08–12) |
 | Type | Repository-wide combined review: policies and planning, architecture and design status (including original-design fidelity), and documentation status |
-| Target commit | `dcbf4995e91e4a1dc5e9a8c7f61a8204182b3342` (`main`; Step 12 merged as `ec2e04a`, tagged `step-12`) |
+| Target commit | `2127f0f88bcc2f43e3cf5fe7f7d321e28e0069e1` (`main`; Phase C checkpoint hygiene: status correction, Phase C drift check, `milestone-m4`/`milestone-m5` backfill, and self-building docs gate) |
 | Branch | `docs/xc-04-phase-c` (docs-only; committed with `[skip ci]`; not pushed, merged, or tagged by the planner) |
-| Request commit | The docs-only request commit on `docs/xc-04-phase-c`; its only delta from the target is this record plus the two status restatements in the review registry and dashboard |
+| Request commit | The docs-only commits on `docs/xc-04-phase-c` (the initial request, the merge of `main`, and the re-freeze edit); `git diff --stat 2127f0f..HEAD` shows only this record plus the two status restatements in the review registry and dashboard |
 | Request owner | Planner (request, scope, and checklist); the Phase C step agent owns remediation and resolutions |
 | Orchestrator (implementor) | OpenCode Phase C orchestrating agent |
 | Review initiated by | Human owner |
@@ -101,16 +101,16 @@ Boundaries:
 
 ## Required evidence sources and commands
 
-The reviewer must inspect the repository at `dcbf4995e91e4a1dc5e9a8c7f61a8204182b3342` directly. A summary
-from the orchestrator, the request owner, or this page is not evidence. The request commit adds only this
-record and status restatements; `git diff --stat dcbf499..HEAD` must show no Phase C code, test, contract, or
-configuration change. If it does, stop and report it.
+The reviewer must inspect the repository at `2127f0f88bcc2f43e3cf5fe7f7d321e28e0069e1` directly. A summary
+from the orchestrator, the request owner, or this page is not evidence. The request commits add only this
+record and the two status restatements; `git diff --stat 2127f0f..HEAD` must show no Phase C code, test,
+contract, or configuration change. If it does, stop and report it.
 
 ### Sources the reviewer must inspect
 
 | Area | Sources |
 | --- | --- |
-| Phase C status and records | `docs/planning/status.md`; step pages `step-08`–`step-12`; `docs/planning/reviews/step-08.md`–`step-12.md`; `docs/planning/reviews/step-11-amend-1.md`; `docs/planning/audits/step-08.md`–`step-12.md`; `docs/planning/closeout/step-08.json`–`step-12.json`; `docs/planning/amendments/step-11-amend-1-dotnet-11-native-zstd.md` |
+| Phase C status and records | `docs/planning/status.md`; step pages `step-08`–`step-12`; `docs/planning/reviews/step-08.md`–`step-12.md`; `docs/planning/reviews/step-11-amend-1.md`; `docs/planning/audits/step-08.md`–`step-12.md`; `docs/planning/closeout/step-08.json`–`step-12.json`; `docs/planning/amendments/step-11-amend-1-dotnet-11-native-zstd.md`; `docs/planning/drift-checks/2026-11-18-phase-c.md` |
 | Decisions and contracts | ADRs `0009`–`0015`; `docs/planning/02-data-contracts.md` §§1–3.5, §5.1, §5.6–§5.7, §6; `docs/planning/05-open-decisions.md`; `contracts/manifest.json`; `contracts/generated/**`; `tests/contracts/**` |
 | Architecture | `docs/planning/01-target-architecture.md`; `docs/development/architecture.md`; `docs/development/compilation-pipeline.md`; `docs/development/design-decisions.md`; `docs/development/code-structure.md`; every `*.csproj` |
 | Process and CI | `AGENTS.md` §3; `docs/development/orchestration.md` (especially §§6–9 and the OpenCode cold-start note); `docs/development/agent-workflow.md`; `docs/planning/ci-policy.md`; `.github/workflows/ci.yml`, `docs.yml`, `benchmark.yml`, `nightly.yml`; `.opencode/agents/`; `opencode.json`; `tools/verify.sh`; `tools/structure-policy.json`; `src/dotnet/Mocassin.Architecture.Tests/` |
@@ -127,9 +127,9 @@ command with a narrative.
 | 1 | `git status --short`; `git log --oneline --decorate -30`; `git tag --list`; `git for-each-ref refs/tags --format='%(refname:short) %(objecttype)'` | Frozen state, clean tree, annotated Phase C tags |
 | 2 | `git rev-list --parents -n1 step-08^{}` … `step-12^{}`; `git merge-base --is-ancestor <tag>^{} main` | Every Phase C tag is an annotated two-parent `--no-ff` merge on `main` |
 | 3 | `git branch -a`; `git ls-remote --heads origin` | No stale Phase C step/feature branches locally or remotely |
-| 4 | `git diff --stat dcbf499..HEAD` | The request commit is docs-only and scoped to this checkpoint |
+| 4 | `git diff --stat 2127f0f..HEAD` | The request commits are docs-only and scoped to this checkpoint |
 | 5 | `./tools/verify.sh all --require` | Full Phase C gate: .NET build/test/format, API/ApiCompat, Rust, Python, docs, contracts/policy, and the required AOT gate |
-| 6 | `./tools/verify.sh docs --require` | `check_doc_math.py`, `check_docs_links.py`, strict Zensical, DocFX, and rustdoc |
+| 6 | `./tools/verify.sh docs --require` | `check_doc_math.py`, `check_docs_links.py`, strict Zensical, DocFX, and rustdoc; the stage builds the solution in Release when the DocFX inputs are absent, so no manual pre-build is required |
 | 7 | `./tools/verify.sh policy --require` | NuGet licence/vulnerability policy, ApiCompat, manifest/symmetry/projection drift, process consistency, tool tests, SPDX, secrets, `cargo-deny` |
 | 8 | `python tools/check_docs_links.py`; `python tools/check_doc_math.py` | Link and math-delimiter checks with file counts |
 | 9 | `./tools/docs/build-docs.sh` | Full documentation build; then confirm `site/planning` is absent and generated API pages exist |
@@ -382,16 +382,24 @@ Context for the reviewer, not findings and not a verdict. Each note names someth
 durable record at the frozen commit; the reviewer decides whether it is acceptable, a finding, or out of
 scope. This list is not exhaustive and must not limit the review.
 
-- **S-1 — Phase C status text lags in several root/status pages.** At `dcbf499`, `AGENTS.md` §1, `README.md`,
-  `docs/index.md`, and `docs/development/index.md` still describe Phase B as complete and Step 08 as next,
-  while `status.md` records Steps 08–12 as done and Step 13 as next. Step 11's audit note N-4 recorded an
-  earlier version of this drift as an accepted future documentation change.
-- **S-2 — No Phase C drift-check record.** The drift-check table in `status.md` contains only the
-  `2026-11-12` Phase B record; `AGENTS.md` §3.14 and the cross-cutting README §7 require a drift check before
-  each phase boundary.
-- **S-3 — Milestones M4 and M5 are not tagged.** The roadmap says M4 follows Step 08 and M5 follows Step 12,
-  and that later milestones are tagged when reached; `git tag` lists only `milestone-m0`–`m3`, and no
-  deferral is recorded.
+- **S-1 — Phase C status text (remediated before the freeze).** At the previous freeze `dcbf499`, `AGENTS.md`
+  §1, `README.md`, `docs/index.md`, and `docs/development/index.md` still described Phase B as complete and
+  Step 08 as next. The checkpoint-hygiene branch fixed all four at `2127f0f`: `AGENTS.md` §1 now records Phase
+  C complete (Steps 00–12, `step-08`–`step-12` tagged), `XC-04` in progress, and Step 13 next after the
+  checkpoint gate; the three public pages say the same. Evidence: drift record
+  [`2026-11-18-phase-c.md`](../../drift-checks/2026-11-18-phase-c.md) PC-01/PC-02, fixed on the maintenance
+  branch. Residual: the reviewer rechecks the merged `main` text against the tags and dashboard.
+- **S-2 — Phase C drift check (remediated before the freeze).** At `dcbf499` the drift-check table contained
+  only the `2026-11-12` Phase B record. The Phase C drift check now exists at
+  [`2026-11-18-phase-c.md`](../../drift-checks/2026-11-18-phase-c.md), checked at `dcbf499` and recording two
+  Major (PC-01, PC-02) and five Minor findings (PC-03–PC-07), all fixed on the maintenance branch before this
+  freeze. Residual: the reviewer confirms the record is present, its findings are disposed of, and its
+  "Notes for XC-04" are addressed; the drift record itself is not a gate and does not replace this review.
+- **S-3 — Milestones M4 and M5 (remediated before the freeze).** At `dcbf499` only `milestone-m0`–`m3` were
+  tagged. Annotated `milestone-m4` → `f91fc63` (Step 08 merge) and `milestone-m5` → `ec2e04a` (Step 12 merge)
+  were created and pushed on 2026-11-18; the drift record PC-06 and the roadmap/status pages record the
+  backfill. Residual: the reviewer verifies both tags are annotated, point at the correct merges, and did not
+  move a step tag.
 - **S-4 — Step 08 accepted residuals.** The audit records accepted items including m1 (equivalent-start orbit
   reduction/dependent rules unimplemented; the parity matrix keeps "Dependent/hidden rules" at `Planned` and
   "Forward/inverse/dependent rules" at `Partial`), R3-1 (descriptor-binding/cluster-fixture coverage), R3-2
@@ -405,9 +413,13 @@ scope. This list is not exhaustive and must not limit the review.
   `Mocassin.Core` trim diagnostics and is recorded as evidence, not a gate; only `linux-x64` AOT is
   exercised; the macOS platform gate was not run (N-5, accepted risk); Step 31 owns the AOT/single-file
   decision.
-- **S-7 — Step 10 performance deferral.** R2-1 records that the `< 10 s` / `< 1 GiB` generation targets are
-  deferred to Step 29/release performance work; Step 10 claims only the 30 s expansion smoke bound. The Step
-  12 10⁴-job run is separate evidence and passed its budget.
+- **S-7 — Documentation gate self-build (remediated before the freeze).** At the previous freeze the docs gate
+  failed on a tree without a Release build because DocFX could not resolve the dependency assemblies (`XC-03`
+  DOC-08). At `2127f0f`, `tools/verify.sh docs` builds the solution in Release when the DocFX inputs are
+  absent, `verify.sh all` reuses the .NET stage instead of building twice, and `tools/docs/build-docs.sh` /
+  `.ps1` build when the inputs are missing (drift record PC-07). Residual: the drift record notes that the
+  PowerShell path was updated for parity but not executed on Linux; the reviewer verifies it on a Windows run
+  or records the platform gap. No manual pre-build is required for the bash docs gate.
 - **S-8 — Process deviations around orchestration.** The two Step 12 deviations are recorded in the step page
   (planner status edit before a step agent existed; direct owner question during feature 1);
   `docs/development/orchestration.md` §8 also records the earlier Step 10 feature-1 squash by the
@@ -428,6 +440,9 @@ scope. This list is not exhaustive and must not limit the review.
   `build.stage` event, and the `CLI001`–`CLI009` descriptors landed in one step. Check the manifest,
   generated schemas, CLI reference, diagnostics page, and tests agree; this is a large contract surface for
   one step even though every individual item has an owner.
+- **S-13 — Step 10 performance deferral.** R2-1 records that the `< 10 s` / `< 1 GiB` generation targets are
+  deferred to Step 29/release performance work; Step 10 claims only the 30 s expansion smoke bound. The Step
+  12 10⁴-job run is separate evidence and passed its budget.
 
 ## Record state
 
