@@ -314,7 +314,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
 
 ## Reviewer independence
 
@@ -725,3 +725,237 @@ human owner records an explicit decision on the alteration) and the request reco
 verdict would be **Ready with notes**, subject to m-14, m-15, and n-15 being fixed or explicitly accepted and
 n-14/ the status hygiene (m-7/n-9) being recorded. I did not edit the earlier round, the design docs, or any
 other file.
+
+### Re-review round 4
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author, design, or implement the reviewed work and have no shared conversation with
+the planner, implementor, the round-1/round-2/round-3 reviewers, or the orchestrator. I reviewed the design at the
+frozen commit `b9cda113f61bb80aab9b02c9ead7b49446be52c8` and the record at the request HEAD
+`cd59e5cd803d76158abd5c1069333c0a7f7b7c82`.
+
+Frozen-state delta:
+
+- `git diff --name-status 0fff07d b9cda11` lists exactly seven documentation files: `testing-and-parity.md`,
+  `03-quality-strategy.md`, `reviews/step-13.md`, and the Step 08/13/14/16 pages. No code, test, configuration,
+  contract, fixture, generated artifact, projection, writer, or DTO changed, so the round-1/round-2 signature
+  reproduction still applies; I repeated it independently below anyway.
+- `git diff --name-status b9cda11 cd59e5c` is only `M docs/planning/reviews/step-13.md`; `git show --stat
+  cd59e5c` is one file (18 insertions, 6 deletions). The record commit's parent is the frozen commit.
+- The round-3 repair (`cd59e5c`) is the round-4 request: the round-2 restoration, owner-side request/resolution
+  fields, and one separator difference recorded under R3-1. The design tree under review is exactly `b9cda11`.
+
+I did not tick or annotate the request checklists: round 1's marks and inline notes are earlier-reviewer text and
+are append-only, so the round-4 scope is recorded here instead. The only file I edited is this record; `site/`,
+`target/`, `artifacts/`, and `bin/`/`obj/` are ignored build products. I ran the reads and gates in a detached
+worktree at `cd59e5c`; this record commit is made on `docs/step-13-design`, the branch under review. I set
+`Record state` to `Ready with notes` to reflect this round's verdict; `Human approval` remains the owner's
+section and is untouched.
+
+#### Commands and results
+
+- `./tools/verify.sh docs --require` → exit 0. `Documentation math conventions OK (171 files scanned)`,
+  `Documentation links OK (174 files scanned)`, Zensical strict build `No issues found`, DocFX `0 warning(s) /
+  0 error(s)`, `cargo doc --workspace --no-deps` succeeded, `Closeout gate completed with required checks
+  enabled.`
+- `./tools/verify.sh policy --require` → exit 0. ApiCompat no breaking changes for every project; contract
+  artifacts current (26 files); model projection 5/5, parameterization projection 4/4, lattice projection 2/2;
+  space-group catalog 274 settings, sha256 `1f3bf67d…`; process consistency OK; 58 tool tests OK; SPDX headers in
+  706 files; no secret patterns in 1,110 files; `advisories ok, bans ok, licenses ok, sources ok`.
+- `python3 tools/check_doc_math.py` → exit 0, 171 files scanned, no delimiter warnings.
+- Read-only SQLite on `tests/contracts/packages/msl-v1/ceria-temperature-sweep.msl`: `application_id = 1297040211`
+  (`0x4D4F4353`), `user_version = 1`, one model row (`format_version = 1`, signature `1845b70e…`), job 1
+  `target_mcsp = 150` and `flags = 114`.
+- Independent Python re-encode from the raw payloads, including the domain prefix and the `0x00` separator: the
+  six-field parameterization projection hashes to
+  `1845b70e82320d75f768b33d1a9a46a8ae6170c33ad96013317f89fe9189a74b` and the five-field lattice projection to
+  `880b6eac79e9e920b6ea448c15f21b06be772f4bad774f12ea45c07420d25845`; both equal the stored
+  `models.signature`/`lattices.signature` and the payload's own `signature`.
+- Raw-byte checks: `lattice-1.bin` carries the lattice as array16 `dc 03 60` at offset 58 (864 `u8`), not `bin`;
+  `job-1.bin` stores `target_mcsp = 150` as `cc 96`.
+- Independent re-implementation of the M-3 union check on `model-1.bin` (below): all four real rules pass, and the
+  negative case is rejected.
+- Read-only source inspection of `TransitionRuleHelpers.ComputeTransport`/`MassConserved`/`ChargeConserved`,
+  `CanonicalProjectionWriter`, `LatticeSignatureV1`, `ParameterizationSignatureV1`,
+  `StructureCompilationStage.BuildMask`, `EncodingCompilationStage.BuildMappings`,
+  `TransitionPayloadMapper`, the payload DTOs, and `PayloadEncoder`/`PackageInspection` bounds.
+
+#### R3-1 record-integrity verification (independent)
+
+I extracted and hashed the sections straight from the commits; I did not rely on the repair note.
+
+- **Round 1 + round 2.** `git show aa825cd:docs/planning/reviews/step-13.md` versus the same file at `cd59e5c`,
+  taking the byte range from `### Review round 1` to the next section boundary (end of file at `aa825cd`,
+  `### Re-review round 3` at HEAD): **24,218 bytes, sha256
+  `5c5490400a754a190fd1e27ac5fbd8feb58da029b559fcd0b0115decc69713eb` in both**. Byte-identical.
+- **Round 1 alone.** Versus its own record commit `9fc4ff7`: identical except the blank separator line that
+  precedes the round-2 heading (not reviewer text).
+- **Round 3.** Section `### Re-review round 3` to end of file at `89978cf` and `cd59e5c`: **16,994 bytes, sha256
+  `911af721e08ef9a72225e967c8c429b93f0c3120047edbd9e26f290e9e04ae1e` in both**. Byte-identical, including the R3-1
+  finding text and verdict.
+- **Repair-note placement.** The note is in `## Resolution status` (record lines 376–382), before
+  `## Review rounds` (line 424). It is outside every reviewer round and names the overwritten commit `798b917`
+  and the restoration source `aa825cd` correctly.
+- **Owner-side delta.** `git diff 89978cf cd59e5c -- docs/planning/reviews/step-13.md` contains exactly: the
+  `Reviewed commit` cell (`0fff07d`→`b9cda11`), `Record state`, the `Resolution status` freeze SHA, the repair
+  note, five resolution rows (R3-1, m-14, m-15, n-14, n-15), the round-2 restoration, and one removed blank
+  separator line before `### Re-review round 3` (n-18). No other owner-side field changed, and no reviewer text
+  other than the verbatim restoration changed.
+- **Internal consistency.** The restored round-2 sentence now reads
+  `9263949589c449b063e7501f5ab254ed9bf09d7f` (round 2's own reviewed commit), matching the record HEAD
+  `f8aa70f` stated in the same paragraph. The round-2 text no longer contradicts its own history.
+
+**R3-1 is closed.** The record is append-only from `aa825cd` onward and the earlier corrupted text at `798b917` is
+no longer the record's content. The repair is itself an edit to an earlier round, but it is a verbatim restoration
+of the original reviewer text and is exactly the remediation round 3 specified; the human owner may still wish to
+record the original `798b917` violation in the approval report. The one residual blemish is the removed separator
+line (n-18), not reviewer text.
+
+#### m-14 — exact per-direction occupation check moved to Step 16
+
+The mechanism is sound and now sits where the information exists:
+
+- **Step 13** assigns the exact check to Step 16 and states why: the v1 rule carries no representative direction,
+  Step 16 owns the selected direction and the `StateCode0`→rule lookup (§3.5 lines 679–687; risk row line 1184;
+  interface lines 1200–1206; task line 1300).
+- **Step 14** keeps context/pools/per-direction jump status and explicitly does not resolve a rule to a selected
+  direction; it forbids an every-(rule, direction)-pair check because that would reject a rule valid only along
+  its own direction (lines 147–153). No Step 14 assignment remains: a search for the check finds only the
+  ownership paragraph, Step 13/16, `testing-and-parity.md` line 65, `03-quality-strategy.md` line 557, and the
+  historical reviewer text.
+- **Step 16** runs the check after the rule is found and before any energy work, validates every **non-void**
+  particle of `state0`/`state1`/`state2` at each resolved path node against that position's allowed mask, exempts
+  void, and makes a mismatch a model/data error (exit 12), not `SiteBlocked` (lines 122–128). Because the masks do
+  not list void and the selected direction's path is known, the check is exact; it is applied only to the selected
+  pair, so a rule valid only along its own direction is not rejected.
+- The runtime mask exists: `Position.allowed_mask` is reconstructed from the non-void `particle_ids` (Step 13
+  lines 270, 628, 1055; data contract lines 936–940), and the reader's union check uses the same masks.
+- **Consistency.** Step 16's acceptance item (lines 258–260) and test-table row (line 286) exercise the check
+  (invalid state particle rejected, void exempt, own-direction-only rule accepted, mismatch exit 12);
+  `testing-and-parity.md` and `03-quality-strategy.md` now say Step 16/15. The exit code matches the canonical
+  table (12 = model/data).
+- The Step 16 paragraph still says “This is the Step 14/16 assignment recorded in Step 13” (line 128); the
+  paragraph itself is unambiguous, but the label is an editorial leftover (n-17).
+
+#### m-15 — the “every writer-valid payload” claim is now a `ReaderLimits` envelope
+
+- Step 13 lines 572–578 replace the universal sentence with: within the documented `ReaderLimits` envelope
+  (positions/P1/particles/rules/directions/collections/tables/links/paths/extensions/simulations and the 512M
+  element budget) a payload within the 512 MiB guard is readable; the direction/collection/table/link/
+  extension/simulation caps are solver caps with no .NET writer equivalent; a writer-valid package above one is
+  rejected and needs a raised `ReaderLimits`; and the page explicitly says not to claim every writer package is
+  readable.
+- The enumerated caps really are the reader's: they match the `ReaderLimits` table (lines 546–567). The payload
+  byte guards and depth are message-format guards, not typed-allocation caps, so their omission from the
+  parenthetical does not overstate anything.
+- The mirrors no longer carry the universal claim: `02-data-contracts.md` §3.4 lists the same caps as “allocation
+  caps” and says a raised writer limit needs a raised `ReaderLimits`; `msl-format.md` lines 199–205 and
+  `solver-architecture.md` lines 100–113 do the same. A search for “writer-valid”/“every package”/“every payload”
+  finds only the scoped Step 13 sentence and the per-field budget rows.
+- Residual precision: `max_model_elements` is 512,000,000 while 512 MiB is 536,870,912 bytes, so “one element per
+  byte at the 512 MiB model guard” is not exact (n-16). It is conservative in practice because a writer-valid
+  model payload spends several bytes per element on keys, headers, and `float64` values; the conclusion is
+  unaffected.
+
+#### n-14 — Step 13 fixture criterion is testable and separated from the Step 16 check
+
+- Step 13 lines 1094–1101 require the populated/MMC package to have non-empty pair/cluster tables, an MMC job, a
+  **non-trivial per-node mask difference** (at least one node where one direction in a collection admits a
+  particle another does not), and **at least one direction mapped into a different symmetry-equivalent start
+  bucket**. Its Step 13 tests cover the union check and equivalent-start mapping; the exact per-direction check is
+  a separate Step 16 test that consumes the same fixture. The acceptance row (line 1133) and test table
+  (line 1354) repeat the callable criteria.
+- It is testable from the payload: the mask difference is a comparison of
+  `positions[direction.path[i].P].particle_ids` across two directions of one collection; the equivalent-start
+  mapping is a `jump_mapping` bucket whose position differs from the mapped direction's `position_id`. Both are
+  plain payload facts, not inferred geometry.
+- The requirement is necessary rather than decorative: my decode of `msl-v1` gives `particle_ids` `[3,4]` at P0
+  and `[1,2]` at P1–P3, so the collection union is the trivial `{1,2}` at every node; `msl-v1` cannot exercise a
+  differing mask. The fixture does not exist at the freeze (`tests/contracts/packages/` has only `amend-1`,
+  `amend-1-net10`, `msl-v1`), so this remains a design commitment with a committed-sample fallback.
+
+#### n-15 — node-wise formula; stale code XML comments assigned to Step 13 feature 4
+
+- Step 08 §8.4 now states the node-wise endpoint-moment formula
+  `Σ_i (q(S2[i]) − q(S0[i])) · x_i` with `x_i = Cell.ToCartesian(absolute path node i)`, explains the
+  charge-state change at a fixed site, and adds a fixed-site test. This matches
+  `TransitionRuleHelpers.ComputeTransport` exactly (skip unchanged nodes, `charge2 − charge0` times the absolute
+  node position).
+- `02-data-contracts.md` lines 1028–1033 and the Step 15 page (lines 107–112) already use the node-wise form;
+  `compilation-pipeline.md` and `design-decisions.md` state the node-wise form first and mention the
+  particle-identity sum only as the balanced-count identity, so they do not contradict the writer.
+- The stale code comments are unchanged and correctly out of scope for the docs branch:
+  `TransitionPayloadDtos.cs:95` and `CompiledTransitionModel.cs:65` still say “particle-identity” (last touched
+  `bdafaa4`), `b9cda11` touches no source file, and the fix is assigned to Step 13 feature 4 (row line 36,
+  acceptance “source comments match the contract”) and the task list (line 1271).
+- Editorial: Step 08 line 451 calls the two C# files “The Rust `TransitionPayloadDtos.cs` and
+  `CompiledTransitionModel.cs`”; both are .NET files (n-17).
+
+#### Closure of the earlier findings
+
+| Finding | Round-3 status | Round-4 status | Verification |
+| --- | --- | --- | --- |
+| **R3-1** | Major (record integrity) | **Closed** | Round-1+2 sections byte-identical to `aa825cd`; round-3 section byte-identical to `89978cf`; repair note outside reviewer text; the repair commit changes only owner fields plus the verbatim restoration; round-2 frozen-state sentence restored to `9263949`. |
+| **M-1** | Closed | **Still closed** | One canonical table in `01-target-architecture.md` §7.3 (0, 5, 10–16; 13 = numerical failure or internal invariant, caught panic included); `cli.md` 470–485, `solver-architecture.md` 175–178, `02-data-contracts.md` 1560–1563 (points at §7.3), Step 13 832–846, Step 19 100–114 mirror it; no code has two meanings. |
+| **M-2** | Closed | **Still closed** | Step 13 §3.5 checks the non-void symbol multiset, charge within `1e-9`, `path_vector`/`length` against `movement` and the cell vectors, and zero transport when no node changes charge — all matching `TransitionRuleHelpers`; the full positional formula is a Step 15 assignment with the trust-boundary rationale. |
+| **M-3** | Closed | **Still closed; re-implemented** | Union check on `model-1.bin`: union `{1,2}` at every node; the four rules (`s0` `[2,0,1]`/`[1,0,2]`, `s1` `[0,1,0]`, `s2` `[1,0,2]`/`[2,0,1]`) all pass with void exempt; particle 3 is outside the union, so a rule carrying it is rejected (non-vacuous); a collection with no directions is declared invalid; void is never in `particle_ids` (`StructureCompilationStage.BuildMask` rejects index 0). |
+| **m-11** | Closed | **Still closed** | `EncodingCompilationStage.BuildMappings` inserts a direction into every `EquivalentStartPositions` bucket (and the MMC second `state0` particle); the payload has no equivalent-start field; the narrowed reader check still rejects out-of-range/duplicate/dangling entries. |
+| **m-12** | Closed | **Still closed (n-16 wording)** | 512M element budget with per-field caps; the raised `max_rules`/`max_positions` rule needs a raised `ReaderLimits`; the “one element per byte” wording is imprecise (n-16). |
+| **m-13** | Closed | **Still closed** | Exit 5 = batch partial success in architecture §7.3, `cli.md`, `solver-architecture.md`, the data contract, Step 13, and Step 19; Step 19's batch policy uses it (line 131). |
+| **m-14** | Minor (open) | **Closed** | Check moved to Step 16 with the selected-direction mechanism (above); Step 14 assignment removed; acceptance/tests consistent. |
+| **m-15** | Minor (open) | **Closed** | Universal claim replaced by the `ReaderLimits` envelope; caps verified against the reader table and the mirror pages; no mirror keeps the old claim. |
+| **n-10** | Closed | **Still closed** | Request checklist says 4.5 pw owner-approved, §3.1 single-step exception, no split, 13A/13B rejected, 2.0 pw guard; request summary and step page agree. |
+| **n-11** | Closed | **Still closed** | `02-data-contracts.md` 936–940: non-void `particle_ids`, `BuildMask` reason, void is the empty occupation. |
+| **n-12** | Partially closed | **Closed (n-17 editorial)** | Contract and Step 15 use the node-wise formula; Step 08 §8.4 now matches the writer (above). |
+| **n-13** | Closed | **Still closed** | `serde_bytes` is in the crate table (line 132) and manifest; `max_rules` is the default `CompilationOptions.MaxRuleCount` (`init`) with the raised-`ReaderLimits` rule in the step page, data contract, `solver-architecture.md`, and `msl-format.md`. |
+| **n-14** | Note (open) | **Closed** | Fixture criterion separated from the Step 16 check and made testable (above). |
+| **n-15** | Note (open) | **Closed (n-17 editorial)** | Node-wise formula in Step 08 §8.4; code comments assigned to feature 4 and untouched on the docs branch. |
+| **m-7 / n-9** | Deferred | **Still open — hygiene** | `status.md:63` still has Step 13 “Not started”/“Not requested”; the Active-work paragraph (`status.md:85–90`) still says XC04-F1–F5 must merge before the gate opens, while the step page says the gate is open. Step-agent-owned and fixed at the start gate; not edited by the reviewer. |
+
+#### Format, signature, and cross-document re-check
+
+- **Stored vs canonical encoding.** `lattice-1.bin` stores the lattice as a MessagePack array16 of `u8`
+  (`dc 03 60` at offset 58, 864 values), and `job-1.bin` stores `target_mcsp` as `cc 96`; the canonical
+  projection instead forces array32/str32/bin32 (`0xdd`/`0xdb`/`0xc6`) and fixed `uint64`/`float64`
+  (`0xcf`/`0xcb`) with 12-decimal half-away-from-zero quantization (`CanonicalProjectionWriter`).
+- **Independent reproduction.** The parameterization signature `1845b70e…` and lattice signature `880b6eac…`
+  re-encode from the raw payloads (domain + `0x00` included) and equal the stored rows and the payload signature.
+- **No format change in this round.** No writer, DTO, projection, fixture, manifest, or schema changed between
+  `0fff07d` and `b9cda11`; the projection gates pass 5/5, 4/4, 2/2.
+- **Cross-document agreement.** The `msl-format.md` “readers accept both forms” statement matches Step 13 §2.1
+  (line 213), which accepts the lattice as an array or a `bin`; the exit table, the `ReaderLimits` caps, the
+  RNG state layout, and the fixture/test rows agree across the pages named above.
+- **One contradiction found.** `solver-architecture.md` lines 155–156 says a change to the **derivation** is
+  format-breaking and needs a new ADR **and a new algorithm id**, while Step 13 §4.3 lines 941–946 and
+  `05-open-decisions.md` line 90 split seed/fork derivation (reproducibility-contract change, ADR/version note,
+  no state-layout change) from draw semantics/state layout/algorithm id (new id + ADR). This is m-16.
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **m-16 — `solver-architecture.md` does not mirror the n-2 format-breaking split.** The page says “Changing the cipher, derivation, draw semantics, or state layout is format-breaking and needs a new ADR and a new algorithm id.” Step 13 §4.3 and the `05-open-decisions.md` note say only draw semantics, the state layout, or the algorithm id require a new algorithm id; a seed/fork derivation change is a reproducibility-contract change (ADR/version note) that does not change the 64-byte state layout. An implementer reading only the development page would over-scope a derivation change. | `docs/development/solver-architecture.md:155-156`; Step 13 page lines 941–946 and line 916; `docs/planning/05-open-decisions.md:90`; ADR 0005. |
+| **Note** | **n-16 — The element-budget rationale is arithmetically short.** `max_model_elements` is 512,000,000 but 512 MiB is 536,870,912 bytes, so “one element per byte at the 512 MiB model guard” does not literally cover a hypothetical document of 536M single-byte elements. A writer-valid model payload spends several bytes per element on map keys, headers, and `float64` values, so the cap is far above any real payload and the “512 MiB writer-valid payload fits” test row holds; suggest “covers the writer-valid payload with headroom” instead of “one element per byte”. | Step 13 page line 551 and §3.3; `PayloadEncoder.DefaultMaxModelPayloadBytes = 512L * 1024 * 1024`; `PackageInspection.MaxModelPayloadBytes`; `CompilationOptions.MaxRuleCount`. |
+| **Note** | **n-17 — Two editorial leftovers in the m-14/n-15 edits.** (a) Step 08 §8.4 says “The Rust `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` XML comments…”; both are .NET files under `Mocassin.Contracts`/`Mocassin.Compilation`, not Rust. (b) Step 16's new paragraph ends “This is the Step 14/16 assignment recorded in Step 13”; the assignment is Step 16 only, and the paragraph already says Step 14 does not have the pair. Neither changes the design. | `docs/planning/steps/step-08-model-compilation-pipeline.md:451`; `docs/planning/steps/step-16-kmc-engine.md:128`; file locations `src/dotnet/Mocassin.Contracts/Packages/TransitionPayloadDtos.cs`, `src/dotnet/Mocassin.Compilation/Transitions/CompiledTransitionModel.cs`. |
+| **Note** | **n-18 — The repair removed the blank separator line before `### Re-review round 3`.** `89978cf` had `status-dashboard fix.` + blank line + `### Re-review round 3`; `cd59e5c` has the heading directly after the paragraph. The round-2 section was restored to `aa825cd` verbatim (which ended at that paragraph), so the separator was consumed. No reviewer text changed and the heading still renders (ATX headings interrupt paragraphs), but the append boundary is no longer byte-identical to `89978cf`. | `git show 89978cf:docs/planning/reviews/step-13.md` lines 586–588 versus `cd59e5c` lines 599–600; `git diff 89978cf cd59e5c`. |
+
+#### Verdict
+
+**Ready with notes.** No Blocker or Major remains. R3-1 is genuinely repaired — the round-1/round-2 text is
+byte-identical to `aa825cd` (24,218 bytes, same SHA-256), the round-3 text is byte-identical to `89978cf`
+(16,994 bytes, same SHA-256), and the repair note sits outside the reviewer rounds. M-1, M-2, and M-3 remain
+closed, and I re-implemented the M-3 union check against the real payload (four rules pass; the negative case is
+rejected). m-11, m-12, m-13, n-10–n-13 remain closed, and the round-3 fixes m-14 (Step 16 owns the selected
+direction and runs the check after rule lookup, before energy work; void exempt; mismatch exit 12; only the
+selected pair is checked), m-15 (the claim is now the documented `ReaderLimits` envelope, and no mirror keeps the
+old universal claim), n-14 (the fixture criterion is separated from the Step 16 test and is measurable from the
+payload), and n-15 (Step 08 §8.4 matches `TransitionRuleHelpers.ComputeTransport`; the stale XML comments are
+assigned to Step 13 feature 4 and untouched) are real. The stored-vs-canonical encoding, the lattice
+array-versus-`bin` split, and both stored signatures hold independently.
+
+Only Minors/Notes remain: m-16 (the `solver-architecture.md` derivation/new-algorithm-id wording contradicts the
+n-2 split) and n-16–n-18 (element-budget arithmetic, two editorial labels, one record separator line). The human
+owner must accept them explicitly; the design may start once that acceptance is recorded. The status-dashboard
+drift (m-7/n-9) remains step-agent hygiene for the start gate. I did not edit any earlier round, the design docs,
+or any other file.
