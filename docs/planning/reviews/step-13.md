@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `0ae61a41e5860889535ac78e8c239015ed2ffa13` |
+| Reviewed commit | `113b5467c931e7970ea6b2ca9c3db4c1ed32b41f` |
 | Docs branch | `docs/step-13-design` |
 | Review date | 2026-11-18 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
@@ -369,31 +369,31 @@ Date:
 ## Resolution status
 
 Round-1 reviewer text, findings, evidence, and verdict are unchanged. The design was corrected on
-`docs/step-13-design` at freeze `0ae61a41e5860889535ac78e8c239015ed2ffa13`; this request-record update is a
+`docs/step-13-design` at freeze `113b5467c931e7970ea6b2ca9c3db4c1ed32b41f`; this request-record update is a
 documentation-only follow-up. No code, test, configuration, contract, or generated artifact changed.
 
 | Finding | Status | Owner | Commit | Resolution |
 | --- | --- | --- | --- | --- |
-| **M-1** | Fixed | Planner | `0ae61a4` | One canonical solver table in `01-target-architecture.md` §7.3: 0 completed, 10 invalid arguments, 11 package, 12 model/data, 13 numerical failure **or internal invariant violation (caught panic)**, 14 limit abort, 15 cancelled, 16 I/O. `cli.md`, `solver-architecture.md`, `02-data-contracts.md`, Step 19, and the Step 13 page mirror it; panic now exits 13, not 10. Feature 5 adds a doc-drift check for the rows. |
-| **M-2** | Fixed + assigned | Planner | `0ae61a4` | Reader now checks allowed occupations per path node (state1 skipped for MMC), per-rule non-void symbol multiset and charge conservation (`1e-9`), `path_vector`/`length` against `movement` and the cell vectors, and zero transport when no node changes charge. The full positional `Σ Δq x` formula is assigned to Step 15 in the Step 15 page with the trust-boundary rationale (v1 payload has no fractional P1 coordinates); the residual risk is recorded. A populated/MMC fixture exercises the paths. |
-| **m-1** | Fixed | Planner | `0ae61a4` | Cross-check now separates job columns vs job payload, `lattice_a/b/c` vs lattice payload, `models`/`lattices` `format_version` vs their payloads. A job's resolved settings are explicitly not compared with `simulations[].default_settings` (fixture 150 vs default 200); the data contract says the same. |
-| **m-2** | Fixed | Planner | `0ae61a4` | Limits aligned with the .NET build: 500,000 positions (`SupercellGenerator.MaximumPositions`), 10,000 P1 positions (`UnitCellVectorEncoder.MaxP1Positions`), 1M rules (`CompilationOptions.MaxRuleCount`); directions 1M. A future writer that raises a limit must raise `ReaderLimits` in the same release. |
-| **m-3** | Fixed | Planner | `0ae61a4` | `fork` now states `stream_le64` (8 bytes) and `word_pos_le128` (16 bytes), domain 1..255 bytes, and `next_bounded` returns half-open `[0, upper)`; the extension `config_hash` is the 32-byte SHA-256 of UTF-8 `config_json`. |
-| **m-4** | Fixed | Planner | `0ae61a4` | The RNG/load baseline is a same-runner-class entry in `tests/reference/bench/baselines.json`; the 10 % rule is measured only against that class. Step 13 records the first entry; Step 29 automates the regression. |
-| **m-5** | Fixed | Planner | `0ae61a4` | New real-writer `tests/contracts/packages/step-13-populated/` package with non-empty pair/cluster tables and an MMC job, canonical summary, extracted payloads, README, and regeneration command. It is a test artifact, not a schema change; feature 6 builds it from a committed sample. |
-| **m-6** | Fixed (owner-gated) | Planner | `0ae61a4` | Honest arithmetic: 3.5 pw base + 1.0 pw contingency = 4.5 pw, beyond the four-week trigger. The no-split claim is withdrawn. §13 records Option A (single-step exception) and Option B (13A/13B split); the owner must choose. |
+| **M-1** | Fixed | Planner | `113b546` | One canonical solver table in `01-target-architecture.md` §7.3: 0 completed, 10 invalid arguments, 11 package, 12 model/data, 13 numerical failure **or internal invariant violation (caught panic)**, 14 limit abort, 15 cancelled, 16 I/O. `cli.md`, `solver-architecture.md`, `02-data-contracts.md`, Step 19, and the Step 13 page mirror it; panic now exits 13, not 10. Feature 5 adds a doc-drift check for the rows. |
+| **M-2** | Fixed + assigned | Planner | `113b546` | Reader now checks allowed occupations per path node (state1 skipped for MMC), per-rule non-void symbol multiset and charge conservation (`1e-9`), `path_vector`/`length` against `movement` and the cell vectors, and zero transport when no node changes charge. The full positional `Σ Δq x` formula is assigned to Step 15 in the Step 15 page with the trust-boundary rationale (v1 payload has no fractional P1 coordinates); the residual risk is recorded. A populated/MMC fixture exercises the paths. |
+| **m-1** | Fixed | Planner | `113b546` | Cross-check now separates job columns vs job payload, `lattice_a/b/c` vs lattice payload, `models`/`lattices` `format_version` vs their payloads. A job's resolved settings are explicitly not compared with `simulations[].default_settings` (fixture 150 vs default 200); the data contract says the same. |
+| **m-2** | Fixed | Planner | `113b546` | Limits aligned with the .NET build: 500,000 positions (`SupercellGenerator.MaximumPositions`), 10,000 P1 positions (`UnitCellVectorEncoder.MaxP1Positions`), 1M rules (`CompilationOptions.MaxRuleCount`); directions 1M. A future writer that raises a limit must raise `ReaderLimits` in the same release. |
+| **m-3** | Fixed | Planner | `113b546` | `fork` now states `stream_le64` (8 bytes) and `word_pos_le128` (16 bytes), domain 1..255 bytes, and `next_bounded` returns half-open `[0, upper)`; the extension `config_hash` is the 32-byte SHA-256 of UTF-8 `config_json`. |
+| **m-4** | Fixed | Planner | `113b546` | The RNG/load baseline is a same-runner-class entry in `tests/reference/bench/baselines.json`; the 10 % rule is measured only against that class. Step 13 records the first entry; Step 29 automates the regression. |
+| **m-5** | Fixed | Planner | `113b546` | New real-writer `tests/contracts/packages/step-13-populated/` package with non-empty pair/cluster tables and an MMC job, canonical summary, extracted payloads, README, and regeneration command. It is a test artifact, not a schema change; feature 6 builds it from a committed sample. |
+| **m-6** | Fixed (owner-gated) | Planner | `113b546` | Honest arithmetic: 3.5 pw base + 1.0 pw contingency = 4.5 pw, beyond the four-week trigger. The no-split claim is withdrawn. §13 records Option A (single-step exception) and Option B (13A/13B split); the owner must choose. |
 | **m-7** | Deferred | Step agent | — | Status-dashboard drift is step-agent-owned per AGENTS §3.8; the planner did not edit `status.md`. It is fixed at the start gate when the step branch is created. |
-| **m-8** | Fixed | Planner | `0ae61a4` | The existing `mocassin-cli → mocassin-solver` edge stays for the future run path and is shown in the architecture/step page/solver-architecture graphs; Step 13's inspection path calls `mocassin-msl`/`mocassin-rng` directly and does not call the placeholder solver. |
-| **m-9** | Fixed | Planner | `0ae61a4` | `models.format_version` and `lattices.format_version` are cross-checked against their payloads; the job payload version is checked on decode. A schema/version test covers a mismatched column. |
-| **m-10** | Fixed | Planner | `0ae61a4` | Closeout plan names `docs/planning/closeout/step-13.json` and `python tools/check_closeout_evidence.py`, binding the audited commit, closeout CI `head_sha`, `main` SHA at freeze, and merge candidate, in §8, the tasks, and the acceptance criteria. |
+| **m-8** | Fixed | Planner | `113b546` | The existing `mocassin-cli → mocassin-solver` edge stays for the future run path and is shown in the architecture/step page/solver-architecture graphs; Step 13's inspection path calls `mocassin-msl`/`mocassin-rng` directly and does not call the placeholder solver. |
+| **m-9** | Fixed | Planner | `113b546` | `models.format_version` and `lattices.format_version` are cross-checked against their payloads; the job payload version is checked on decode. A schema/version test covers a mismatched column. |
+| **m-10** | Fixed | Planner | `113b546` | Closeout plan names `docs/planning/closeout/step-13.json` and `python tools/check_closeout_evidence.py`, binding the audited commit, closeout CI `head_sha`, `main` SHA at freeze, and merge candidate, in §8, the tasks, and the acceptance criteria. |
 | **n-1** | Open (owner choice) | Human owner | — | Not decided by the planner. Option A keeps the 64-byte layout in `02-data-contracts.md` §4.3/§4.5 as the decision note (no schema bump); Option B adds a short ADR recording the persisted layout and algorithm-id rule. Both are recorded in the Step 13 page §14 and the gated decision register. |
-| **n-2** | Fixed | Planner | `0ae61a4` | Format-breaking scope split: draw semantics/state layout/algorithm id = new id + ADR; seed/fork derivation = reproducibility-contract change (ADR/version note) without a state-layout change. |
-| **n-3** | Fixed | Planner | `0ae61a4` | `RngStateV1` explicitly carries the raw 32-byte key by design; `.mcs` is seed-sensitive, never log `rngState`/key, expose only `seedHash`. Recorded in the step page and data contract. |
-| **n-4** | Fixed | Planner | `0ae61a4` | `docs/reference/msl-format.md` model row now lists both `signature` (parameterization) and `model_signature` (compiled identity). |
-| **n-5** | Fixed | Planner | `0ae61a4` | Dry-run `settings:` line is documented as resolved job settings/composed flags, not simulation defaults; the fixture 150 vs 200 example is recorded in the step page and `cli.md`. |
-| **n-6** | Fixed | Planner | `0ae61a4` | Depth justification corrected: the model nests five container levels; cap 8 leaves headroom. |
-| **n-7** | Fixed | Planner | `0ae61a4` | `03-quality-strategy.md` no longer points at `04-roadmap.md` for RNG budgets; it points at §13 and the step page. |
-| **n-8** | Fixed | Planner | `0ae61a4` | The 100 ms claim is scoped to the ceria fixture; a large payload is guard-bounded but not promised at 100 ms. |
+| **n-2** | Fixed | Planner | `113b546` | Format-breaking scope split: draw semantics/state layout/algorithm id = new id + ADR; seed/fork derivation = reproducibility-contract change (ADR/version note) without a state-layout change. |
+| **n-3** | Fixed | Planner | `113b546` | `RngStateV1` explicitly carries the raw 32-byte key by design; `.mcs` is seed-sensitive, never log `rngState`/key, expose only `seedHash`. Recorded in the step page and data contract. |
+| **n-4** | Fixed | Planner | `113b546` | `docs/reference/msl-format.md` model row now lists both `signature` (parameterization) and `model_signature` (compiled identity). |
+| **n-5** | Fixed | Planner | `113b546` | Dry-run `settings:` line is documented as resolved job settings/composed flags, not simulation defaults; the fixture 150 vs 200 example is recorded in the step page and `cli.md`. |
+| **n-6** | Fixed | Planner | `113b546` | Depth justification corrected: the model nests five container levels; cap 8 leaves headroom. |
+| **n-7** | Fixed | Planner | `113b546` | `03-quality-strategy.md` no longer points at `04-roadmap.md` for RNG budgets; it points at §13 and the step page. |
+| **n-8** | Fixed | Planner | `113b546` | The 100 ms claim is scoped to the ceria fixture; a large payload is guard-bounded but not promised at 100 ms. |
 
 The step agent fills any further status after the next verdict. Do not alter the reviewer-authored findings,
 evidence, or verdict.
