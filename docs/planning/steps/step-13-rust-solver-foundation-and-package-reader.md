@@ -14,8 +14,8 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required — round 1 returned `Changes required`; the new freeze is recorded in
-  [`docs/planning/reviews/step-13.md`](../reviews/step-13.md)
+- **Design review:** Re-review required — rounds 1–3 returned `Changes required`; the current freeze and
+  resolutions are recorded in [`docs/planning/reviews/step-13.md`](../reviews/step-13.md)
 - **Feature list:** Seven features proposed; the owner approved the 4.5 pw single-step sizing on 2026-11-18.
   The design verdict and start gate remain pending.
 - **Sizing:** Owner-approved on 2026-11-18 at **4.5 person-weeks** (3.5 pw base + 1.0 pw contingency) as a
@@ -33,7 +33,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 1 | Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Crate boundaries and dependency edges (the existing CLI→solver edge stays for the future run path); `mocassin-types` payload DTOs, typed IDs, runtime model/job/lattice types, `ReaderLimits`, `PackageError`/exit-code model; `mocassin-sim` `clap` skeleton, logging, `--version`, parse-error remap; DTO key/decode tests | `cargo test` green; the crate graph matches §1; the CLI parses and rejects options with stable exit codes |
 | 2 | RNG streams and state | `feature/step-13-rust-solver-foundation-and-package-reader/rng-streams-and-state` | SHA-256 seed derivation; ChaCha12 wrapper over `rand_chacha`; `next_u32`/`next_u64`/`next_f64`/`next_bounded`/`fork`; 64-byte `RngStateV1`; golden vectors; Criterion draw/refill benchmark | Seed derivation matches the Step 10 vectors; draw/state goldens pass; the budget is measured and recorded |
 | 3 | `.msl` reader and bounded decode | `feature/step-13-rust-solver-foundation-and-package-reader/msl-reader-and-bounded-decode` | Read-only `rusqlite` open; schema/application-id/version/provenance checks; Zstd frame handling; MessagePack scan and typed decode; lattice bound; one-model cache; structured errors | The real `.msl` fixture opens read-only and yields raw payloads; malformed/truncated/bomb payloads fail cleanly |
-| 4 | Model/job mapping and signatures | `feature/step-13-rust-solver-foundation-and-package-reader/model-job-mapping-and-signatures` | Payload → validated runtime model/job; every index/length/finite/kind invariant; mass/charge conservation, state/path/movement checks, and the documented transport-vector split; canonical projection writer; parameterization and lattice signature re-encoding; column/version/payload cross-check | A ceria job becomes a fully validated `JobPackage`; both stored signatures are reproduced from the payload; a mutated index, state, movement, or value is rejected |
+| 4 | Model/job mapping and signatures | `feature/step-13-rust-solver-foundation-and-package-reader/model-job-mapping-and-signatures` | Payload → validated runtime model/job; every index/length/finite/kind invariant; mass/charge conservation, state/path/movement checks, and the documented transport-vector split; canonical projection writer; parameterization and lattice signature re-encoding; column/version/payload cross-check; fix the `TransitionPayloadDtos.cs`/`CompiledTransitionModel.cs` XML comments to the node-wise endpoint-moment formula | A ceria job becomes a fully validated `JobPackage`; both stored signatures are reproduced from the payload; a mutated index, state, movement, or value is rejected; source comments match the contract |
 | 5 | Dry-run CLI and logging | `feature/step-13-rust-solver-foundation-and-package-reader/dry-run-cli-and-logging` | `--db`/`--job`/`--io`/`--seed`/`--threads`/`--jump-log-max-ev`/`--log-*`/`--dry-run`; write-free summary; unified exit mapping; tracing human/JSON; panic containment; solver exit-code drift check | `mocassin-sim --dry-run` reports the documented summary and exits 0; the summary counts equal `inspect-v1` for the fixture; no file is written; the exit-code rows match architecture §7.3 |
 | 6 | Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Rust tests over `tests/contracts/packages/msl-v1/`, `amend-1-net10/`, projection `.bin` vectors, raw payloads, and `rng-vectors.json`; a new real-writer populated pair/cluster + MMC fixture; proptest mutation/truncation suite; `cargo-fuzz` scan/decode/package targets and a time-boxed run | The .NET-written packages and projection vectors are consumed byte-for-byte; populated and MMC payload→signature paths pass; mutation tests and the fuzz run find no panic/OOM |
 | 7 | Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Load and RNG Criterion benches plus same-runner-class baselines; `solver-architecture.md`, `msl-format.md`, `cli.md`, `testing-and-parity.md`, Rust layout docs; parity/status/closeout evidence (`docs/planning/closeout/step-13.json`) and the audit request | Load `< 100 ms` on the fixture and the RNG budgets are recorded with the environment; documentation builds strictly; `check_closeout_evidence.py` passes and the audit request is complete |
@@ -569,8 +569,13 @@ jobs row (columns + model_id/lattice_id)
 - The position and P1 defaults are hard .NET build limits; `max_rules` matches the **default**
   `CompilationOptions.MaxRuleCount` (1,000,000), which is an `init` option a caller can raise. A package built
   with a raised rule limit, or with a future writer that raises a position/P1 limit, needs a raised
-  `ReaderLimits` in the same release. With the default writer limits and the 512M element budget, every
-  writer-valid payload within the 512 MiB guard is readable.
+  `ReaderLimits` in the same release.
+- **Envelope, not a universal guarantee (m-15).** Within the documented `ReaderLimits` envelope
+  (positions/P1/particles/rules/directions/collections/tables/links/paths/extensions/simulations and the 512M
+  element budget), every payload within the 512 MiB guard is readable. The direction/collection/table/link/
+  extension/simulation caps are solver caps with no .NET writer equivalent; a writer-valid package above one of
+  them is rejected with a clear error and requires a raised `ReaderLimits`. Do not claim that every package the
+  writer can produce is readable.
 - The lattice guard is `4 * a * b * c * position_count` in checked `u64`, capped by
   `max_lattice_payload_bytes`. The factor 4 covers the MessagePack array-of-`u8` encoding. The expected particle
   array is exactly `a*b*c*position_count` bytes.
@@ -677,9 +682,9 @@ checks the rule-level invariants that do not require project-side geometry:
   non-void node particle, require it to be in the **union of the allowed masks of the rule's collection at the
   same node index**. A rule has no stored representative direction (`JumpRulePayload` has no direction index;
   Step 11 R2-3 records the missing marker), so the union is the only payload-supported path source. A collection
-  with no directions is invalid. The **exact per-direction** occupation check is assigned to **Step 14**, which
-  owns direction/context links; it must validate the state particle against the target position's mask. The
-  residual risk is recorded in §11 and the Step 14 interface.
+  with no directions is invalid. The **exact per-direction** occupation check is assigned to **Step 16**, which
+  owns the selected direction/rule lookup; it validates the state particle against the resolved path position's
+  mask. The residual risk is recorded in §11 and the Step 16 interface.
 - **Mass conservation.** For each rule, the multiset of non-void particle **symbols** in `state0` must equal the
   multiset in `state2`. Symbols come from the particle table; this is the same rule as
   `TransitionRuleHelpers.MassConserved`.
@@ -1087,11 +1092,12 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
   "mocassin.rng-vectors"`, `formatVersion = 1`, and `algorithm = "chacha12-v1"`. It is not added to
   `contracts/manifest.json`, because it is not a package/state/job/event contract and no writer emits it.
 - The new `step-13-populated` package is built by the real .NET writer from a committed sample that has
-  non-empty pair and cluster tables and an MMC job; it carries its own canonical summary, extracted payloads,
-  README, and regeneration command. Its tests cover the remaining void-exempt collection-union occupation check
-  and symmetry-equivalent-start mappings, plus the Step 14 exact-direction check. It is a test artifact, not a
-  schema change. If no existing sample combines both, feature 6 adds a small sample under `samples/` and builds
-  the package from it; do not hand-author the
+  non-empty pair and cluster tables, an MMC job, **a non-trivial per-node mask difference** (at least one node
+  where one direction in a collection admits a particle another direction does not), and **at least one
+  direction mapped into a different symmetry-equivalent start bucket**. Its Step 13 tests cover the void-exempt
+  collection-union check and equivalent-start mapping; the exact per-direction check is a separate Step 16 test
+  that consumes the same fixture. It is a test artifact, not a schema change. If no existing sample combines
+  these, feature 6 adds a small sample under `samples/` and builds the package from it; do not hand-author the
   `.msl`.
 - Fixtures are produced by the real writers and never hand-edited. The Step 11 regeneration command remains the
   `.msl` update path; the pre-amendment package is byte-fixed.
@@ -1124,12 +1130,12 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
 | --- | --- | --- |
 | Reader acceptance | the `msl-v1` fixture opens read-only; the dry-run counts/signatures equal the canonical summary for job 1 | PR-medium |
 | Reader compatibility | the `amend-1-net10` fixture opens and yields the same logical summary | PR-medium |
-| Populated/MMC acceptance | the new real-writer package has non-empty pair/cluster tables and an MMC job; both signatures re-encode; MMC kind/break fields validate | PR-medium |
+| Populated/MMC acceptance | the new real-writer package has non-empty pair/cluster tables, an MMC job, a non-trivial per-node mask difference, and an equivalent-start mapping; both signatures re-encode; MMC kind/break fields validate | PR-medium |
 | Schema/version | wrong application id, user version, future `format_version`, missing table/column, malformed `schema_info`; `models`/`lattices` `format_version` columns match their payloads | PR-fast |
 | Decode | every raw payload decodes; unknown keys are ignored; minimum-width integers, array `lattice`, `null` optionals | PR-fast |
 | Bounds | truncated frame, oversized declared size, decompression bomb, element-budget/depth violation fail without OOM | PR-fast |
 | Validation | each invalid index/length/NaN/kind/flag/tracker case returns the documented error | PR-fast |
-| Occupation | void is exempt; every non-void state particle is in the collection-union mask; the four `msl-v1` rules pass; exact per-direction occupation is a Step 14 test | PR-fast |
+| Occupation | void is exempt; every non-void state particle is in the collection-union mask; the four `msl-v1` rules pass; exact per-direction occupation is a Step 16 test | PR-fast |
 | Equivalent starts | a direction mapped into another symmetry-equivalent start bucket is accepted; the reader does not require `direction.position_id == position` | PR-fast |
 | Element budget | a 512 MiB writer-valid payload is within 512M elements; the 1M-rule/16M-link caps are per-field; a raised `MaxRuleCount` needs a raised `ReaderLimits` | PR-fast |
 | Conservation | each rule preserves the non-void particle-symbol multiset and charge within `1e-9`; a mutated state/particle is rejected | PR-fast |
@@ -1175,7 +1181,7 @@ commit, and raw timings in `tests/reference/bench/step-13-load.json` and a same-
 | SQLite/Zstd build issues | `rusqlite` bundled; workspace cache; the `zstd` crate is already a dependency |
 | Reader too strict and rejects a valid future package | Supported range `1..=1` is explicit; a future major is rejected with a clear message; `ReaderLimits` is overridable |
 | Reader too permissive and accepts a corrupt package | Semantic pass plus signature re-encode; mass/charge/movement checks; `mocassin verify` remains the full check |
-| Per-direction occupation is not fully reader-verifiable (M-3) | v1 payload has no rule→representative-direction marker; reader exempts void and checks the collection-union mask, Step 14 validates the resolved direction/node mask. Residual risk recorded in §3.5/§12 and the Step 14 page |
+| Per-direction occupation is not fully reader-verifiable (M-3) | v1 payload has no rule→representative-direction marker; reader exempts void and checks the collection-union mask, Step 16 validates the resolved direction/node mask. Residual risk recorded in §3.5/§12 and the Step 16 page |
 | `charge_transport_vector` positional formula is not reader-verifiable | Reader checks finite/zero-consistency; Step 15 owns the field-term bound/use; v1 payload has no fractional P1 coordinates. Residual risk recorded in §3.5 and the Step 15 interface; a future `.msl` can add positions or sign the vector |
 | CLI contract drift | `cli.md` freezes the dry-run format and exit codes; golden test and doc-drift check; no `--json` yet |
 | `--seed` misuse | Documented as debugging; recorded only as a hash; production uses the package seed |
@@ -1194,9 +1200,9 @@ commit, and raw timings in `tests/reference/bench/step-13-load.json` and a same-
 - **Step 12 (Done):** the solver exit-code table (0, 5, 10–16; 5 reserved for Step 19 batch) and the `mocassin simulate` reservation. Step 13
   implements the solver side only.
 - **Step 14 (next):** consumes `JobPackage`, `ParameterizedModel`, `InitialLattice`, `EnvironmentModel`, `Rng`,
-  and `DirectionPool`; owns supercell expansion, links, pools, jump status, energy runtime, and resume. It also
-  validates the exact per-direction state/position occupation that the v1 payload cannot prove to Step 13
-  (M-3). Step 13 must not implement context initialization.
+  and `DirectionPool`; owns supercell expansion, links, pools, jump status, energy runtime, resume, and building
+  the context. Step 16 validates the exact per-direction state/position occupation that the v1 payload cannot
+  prove to Step 13 (M-3). Step 13 must not implement context initialization.
 - **Step 15:** owns the field term and the residual `charge_transport_vector` trust boundary; Step 13 validates
   finite/zero-consistency but cannot recompute the positional formula from the v1 payload. The Step 15 page
   records the assignment and must reject a non-finite field result.
@@ -1262,6 +1268,8 @@ single-step exception, no split) and n-1 (data-contract note, no ADR) are alread
 - [ ] Create the `mocassin-msl` read-only open, schema/version/provenance checks, Zstd frame handling, bounded
       MessagePack scan, typed decode, and the model cache.
 - [ ] Implement the payload → runtime mapping and every index/length/finite/kind/tracker validation.
+- [ ] Fix the `TransitionPayloadDtos.cs`/`CompiledTransitionModel.cs` XML comments to the node-wise
+      endpoint-moment charge-transport formula (feature 4; source docs only).
 - [ ] Implement the M-2 scientific checks: allowed occupations, mass/charge conservation, movement/path-vector
       consistency, and the zero-consistency transport-vector check; record the Step 15 assignment for the full
       positional formula.
@@ -1290,7 +1298,7 @@ single-step exception, no split) and n-1 (data-contract note, no ADR) are alread
       the cell-vector sum of `movement` and `length` matches its norm; a no-charge-change rule has a zero
       transport vector. Void is exempt from the occupation check; every non-void state particle is accepted by
       the collection-union mask and all four `msl-v1` rules pass; exact per-direction occupation is recorded as
-      a Step 14 assignment. The full positional transport formula is recorded as a Step 15 assignment with the
+      a Step 16 assignment. The full positional transport formula is recorded as a Step 15 assignment with the
       trust-boundary rationale.
 - [ ] A symmetry-equivalent-start direction mapped into another start bucket is accepted; the reader does not
       require `direction.position_id == position`.
@@ -1343,7 +1351,7 @@ At this point, write:
 | Validation | Bad indices, lengths, kinds, flags, trackers, finite values, signatures |
 | Conservation | Per-rule symbol multiset and charge; mutated state/particle rejected |
 | Movement/transport | `path_vector`/`length` vs `movement`; zero transport when no charge changes |
-| Populated/MMC | Real populated pair/cluster + MMC package validates and re-encodes both signatures |
+| Populated/MMC | Real populated pair/cluster + MMC package with a non-trivial mask difference and equivalent-start mapping validates and re-encodes both signatures |
 | Signatures | Parameterization/lattice re-encode, `.bin` vectors, mutation detection |
 | RNG | Derivation/draw/state golden vectors, bounded uniformity, double range, fork separation |
 | CLI | Dry-run output, exit codes 0/5/10–16 (5 reserved), logging, parse-error remap, write-free |

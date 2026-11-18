@@ -555,7 +555,7 @@ solver with the same binary, platform, package, and seed.
   `1e-9`; `path_vector`/`length` match the cell-vector sum of `movement`; a no-charge-change rule has a zero
   transport vector. Void is exempt from the occupation check; a non-void state particle must be in the
   collection-union mask, and the real `msl-v1` rules must pass. The exact per-direction occupation check and the
-  full positional `charge_transport_vector` formula are recorded Step 14/15 assignments because the v1 payload
+  full positional `charge_transport_vector` formula are recorded Step 16/15 assignments because the v1 payload
   has no representative-direction marker or fractional P1 coordinates; the trust boundary and residual risk are
   documented in the Step 13 design.
 - **Equivalent starts:** a direction mapped into another symmetry-equivalent start bucket is accepted; the

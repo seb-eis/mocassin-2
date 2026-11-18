@@ -119,6 +119,13 @@ impl KmcEngine<'_> {
   - lookup is O(1)/O(log R), not a linear scan;
   - if multiple rules share `StateCode0`, the compiler must have rejected ambiguity; the solver asserts.
 - If no rule matches, the cycle is `SiteBlocked`.
+- **Exact occupation precheck (Step 13 M-3 assignment).** After the rule is found and before any energy work,
+  validate every non-void particle in the rule's `state0`/`state1`/`state2` at each path node against the
+  resolved path position's allowed mask. Void is the empty occupation and is always allowed; the masks do not
+  list void. A mismatch is a model/data error (exit 12), not `SiteBlocked` and not a silent skip. Because the
+  selected direction and its path are known here, the check is exact and does not reject a rule that is valid
+  only along its own direction. This is the Step 14/16 assignment recorded in Step 13; Step 14 builds the
+  context/pools but does not have the rule→selected-direction pair.
 
 ### 4. Frequency pre-check
 
@@ -248,6 +255,8 @@ impl KmcEngine<'_> {
 
 - [ ] A single-barrier system reproduces the analytic residence time within 1 %.
 - [ ] A 3-site migration runs to completion and conserves mass/charge.
+- [ ] The exact per-direction occupation precheck rejects a deliberately invalid state particle at the selected
+      direction's path position; void is exempt; a rule valid only along its own direction is not rejected.
 - [ ] All six outcomes are exercised by targeted fixtures.
 - [ ] Normalization converges and `K_norm` is stable.
 - [ ] Pre-run reset zeroes time/counters/trackers but preserves `RawMax`.
@@ -274,6 +283,7 @@ At this point, document KMC:
 | Acceptance | A real package runs a short KMC job within the analytic toy selection/time bounds |
 | Residence time | Matches `1/(ν exp(-ΔE/kT))` |
 | Selection | Uniform over directions; pool updates |
+| Occupation precheck | Exact rule/direction state particle check; void exempt; own-direction-only rule accepted; mismatch is exit 12 |
 | Outcomes | Forced barriers produce each outcome |
 | Normalization | `K_auto`, `K_fix`, combined |
 | Pre-run | Reset + RawMax preservation |

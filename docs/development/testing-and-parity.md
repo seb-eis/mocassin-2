@@ -62,7 +62,7 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - The reader checks mass/charge conservation per rule, `path_vector`/`length` against `movement` and the cell
   vectors, and the zero-transport rule when no charge changes. Void is exempt from the occupation check; a
   non-void state particle must be in the collection-union mask, and the real `msl-v1` rules must pass. The exact
-  per-direction occupation check and the full positional transport formula are recorded Step 14/15 assignments
+  per-direction occupation check and the full positional transport formula are recorded Step 16/15 assignments
   because the v1 payload has no representative-direction marker or fractional P1 coordinates.
 - `jump_mapping` accepts a direction in any symmetry-equivalent start bucket; the reader does not require
   `direction.position_id == position`.
