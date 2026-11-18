@@ -782,62 +782,82 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 
 ## Implementation tasks
 
-- [ ] `compiler-core`: add `IModelCompiler`, `ModelCompiler`, `CompilationOptions`, `CompilationResult`,
+- [x] `compiler-core`: add `IModelCompiler`, `ModelCompiler`, `CompilationOptions`, `CompilationResult`,
   `CompilationStatus`, stage/result records, cancellation, option validation, and the stage orchestrator.
-- [ ] `structure-and-pair-compilation`: resolve the structure, build the P1 context, sample environments and
+  **Done — squash `1deb182`; closeout suite 999 tests.**
+- [x] `structure-and-pair-compilation`: resolve the structure, build the P1 context, sample environments and
   pairs with the shared Step 05 kernel, allocate pair tables, and compile chiral/shared energy links.
-- [ ] `cluster-compilation`: resolve cluster geometry, call `ClusterReduction`, allocate canonical cluster
-  tables, build expansion maps, and link cluster byte positions.
-- [ ] `transition-rule-compilation`: expand directions, build S0/S1/S2, conservation filtering,
+  **Done — squash `4280773`; P1/pair/chiral tests in `Mocassin.Compilation.Tests`.**
+- [x] `cluster-compilation`: resolve cluster geometry, call `ClusterReduction`, allocate canonical cluster
+  tables, build expansion maps, and link cluster byte positions. **Done — squash `dee2034`; canonical
+  permutation/expansion tests.**
+- [x] `transition-rule-compilation`: expand directions, build S0/S1/S2, conservation filtering,
   forward/inverse/dependent rules, deduplication, ambiguity detection, rule IDs, and charge transport
   vectors. Add the additive public `TransitionPathResolver.TryResolvePoint`/`TryResolvePath` API and Step 04
-  path-resolver tests; do not duplicate private nearest-image logic.
-- [ ] `simulation-encoding`: build collections, directions, rules, jump count/mapping, tracker
+  path-resolver tests; do not duplicate private nearest-image logic. **Done — squash `26366aa`; forward and
+  inverse rules are covered by `TransitionCompilationTests`, explicit reverse transitions by
+  `ExplicitReverseCompilationTests`, and unidirectional complex mechanisms by `ComplexMechanismTests`.
+  Residual: equivalent-start orbit reduction and `DependentRules` emission are the accepted audit m1 gap,
+  assigned to Step 29 (§9 release gate: every required parity item implemented or explicitly deferred).**
+- [x] `simulation-encoding`: build collections, directions, rules, jump count/mapping, tracker
   definitions/mappings, MMC interaction range, selection-optimizer resolution, and derived solver intent.
-- [ ] `indexing-signatures-caching`: dense index assignment, stable IDs, canonical model-signature projection,
-  stage cache, invalidation, and `CompiledModelJson`.
-- [ ] `compile-diagnostics-and-report`: `CMP` codes, `CompilationDiagnosticCatalog`, report/counts/timings,
-  docs anchors, catalog completeness, and per-code tests.
-- [ ] `golden-models-and-closeout`: ceria/BaZrO₃/vehicle/interstitialcy golden compiled models and signature
+  **Done — squash `fde55fd`; encoding/intent tests.**
+- [x] `indexing-signatures-caching`: dense index assignment, stable IDs, canonical model-signature projection,
+  stage cache, invalidation, and `CompiledModelJson`. **Done — squash `10966cf`; signature/cache/inspection
+  tests.**
+- [x] `compile-diagnostics-and-report`: `CMP` codes, `CompilationDiagnosticCatalog`, report/counts/timings,
+  docs anchors, catalog completeness, and per-code tests. **Done — squash `6c59163`; `CMP001`–`CMP012`
+  catalog/emission tests.**
+- [x] `golden-models-and-closeout`: ceria/BaZrO₃/vehicle/interstitialcy golden compiled models and signature
   vectors, performance and cancellation tests, parity-matrix/status/docs closeout, and the audit request.
   Add a `Mocassin.Compilation` project reference and `Compilation/` benchmarks to `Mocassin.Benchmarks`, or
-  record a different harness if the benchmark project is not the right fit.
-- [ ] Finalize the existing `signatures.model` (`ModelSignatureV1`/`model-v1`) manifest types and golden
+  record a different harness if the benchmark project is not the right fit. **Done — squash `86348bf`;
+  closeout CI `43538703111` and audit record `Passed with notes` at `28e741f`.**
+- [x] Finalize the existing `signatures.model` (`ModelSignatureV1`/`model-v1`) manifest types and golden
   vector in `indexing-signatures-caching`; do not add a second signature entry. Step 11 reuses it for the
-  stored payload and cross-language checks.
-- [ ] Add SPDX headers, `PublicAPI.Unshipped.txt` entries, and ApiCompat updates for every new public type,
+  stored payload and cross-language checks. **Done — squash `10966cf`; `model-v1` golden vectors are current
+  and Step 11 reuses the entry.**
+- [x] Add SPDX headers, `PublicAPI.Unshipped.txt` entries, and ApiCompat updates for every new public type,
   including the additive `Mocassin.Symmetry.TransitionPathResolver.TryResolvePoint`/`TryResolvePath` members and
-  the new `Mocassin.Compilation` public surface.
-- [ ] Update `docs/reference/diagnostics.md`, `docs/development/compilation-pipeline.md`,
+  the new `Mocassin.Compilation` public surface. **Done — `./tools/verify.sh api` and the SPDX check are green
+  at closeout.**
+- [x] Update `docs/reference/diagnostics.md`, `docs/development/compilation-pipeline.md`,
   `docs/development/architecture.md`, `docs/development/design-decisions.md`, `docs/planning/03-quality-strategy.md`,
-  `docs/development/testing-and-parity.md`, and the parity matrix in the same features.
+  `docs/development/testing-and-parity.md`, and the parity matrix in the same features. **Done — `docs` gate
+  green at closeout; dependent-rule status corrected in the XC-04 maintenance pass.**
 
 ## Acceptance criteria
 
-- [ ] Ceria compiles to the expected P1 positions, pair sets/tables, cluster sets, and oxygen migration rules.
-- [ ] A 2-site MMC model compiles forward and inverse exchange rules.
-- [ ] A 3-site migration compiles forward and inverse rules, including a chiral case, and keeps the KMC
+- [x] Ceria compiles to the expected P1 positions, pair sets/tables, cluster sets, and oxygen migration rules.
+- [x] A 2-site MMC model compiles forward and inverse exchange rules.
+- [x] A 3-site migration compiles forward and inverse rules, including a chiral case, and keeps the KMC
   dual-DOF default.
-- [ ] A 5-site vehicle compiles unidirectional rules only, with no automatic inverse; as a KMC simulation it
+- [x] A 5-site vehicle compiles unidirectional rules only, with no automatic inverse; as a KMC simulation it
   keeps the dual-DOF default unless a documented Step 10 optimizer rule clears it.
-- [ ] Rule generation enforces unstable positions void in S0/S2, stable positions void in S1, and the
+- [x] Rule generation enforces unstable positions void in S0/S2, stable positions void in S1, and the
   documented mass/charge conservation rules; rejected counts are reported.
-- [ ] Charge transport vectors give `qΔx` for a single charge, the correct vacancy sign, zero for an
+- [x] Charge transport vectors give `qΔx` for a single charge, the correct vacancy sign, zero for an
   identical-ion exchange, and non-zero for a distinct-charge exchange or a non-collinear multi-site path.
-- [ ] Rule ambiguity is detected as `CMP004` with both conflicting transitions/rules.
-- [ ] Every compiled direction/rule is reachable through `jump_count`/`jump_mapping`; every selectable
+- [x] Rule ambiguity is detected as `CMP004` with both conflicting transitions/rules.
+- [x] Every compiled direction/rule is reachable through `jump_count`/`jump_mapping`; every selectable
   `(position, particle, relative slot)` has at most one rule for its `state0`.
-- [ ] Tracker definitions/mappings are emitted for KMC and absent for MMC; a 3-site migration's
+- [x] Tracker definitions/mappings are emitted for KMC and absent for MMC; a 3-site migration's
   `tracker_order` follows particle identity.
-- [ ] `CompiledModel.ModelSignature` is stable across recompilation, excludes runtime settings and
+- [x] `CompiledModel.ModelSignature` is stable across recompilation, excludes runtime settings and
   parameterization values, and changes exactly when compiled geometry/rules/encoding changes.
-- [ ] Compiling the same project twice yields byte-identical `CompiledModelJson` and signature on Ubuntu,
+- [x] Compiling the same project twice yields byte-identical `CompiledModelJson` and signature on Ubuntu,
   Windows, and macOS.
-- [ ] Stage caches reuse unaffected stages after a single-domain edit and never change the output.
-- [ ] Ceria compiles in `< 1 s`; a 10k-position model compiles in `< 30 s` with `< 2 GiB` managed memory.
-- [ ] Cancellation returns no partial model and leaves the project unchanged.
-- [ ] Every `CMP` code has a catalog descriptor, documentation anchor, and emission test.
-- [ ] Documentation written.
+- [x] Stage caches reuse unaffected stages after a single-domain edit and never change the output.
+- [x] Ceria compiles in `< 1 s`; a 10k-position model compiles in `< 30 s` with `< 2 GiB` managed memory.
+- [x] Cancellation returns no partial model and leaves the project unchanged.
+- [x] Every `CMP` code has a catalog descriptor, documentation anchor, and emission test.
+- [x] Documentation written.
+
+**Completion evidence (2026-11-18):** every criterion was exercised by the 999-test closeout suite and the
+Step 08 audit; the audit returned `Passed with notes` at `28e741f` after the closeout CI run `43538703111` and
+the `f91fc63` merge. The feature log above records the squash commit for each task. The only open residual is
+audit finding m1 (equivalent-start orbit reduction / `DependentRules` emission), which is accepted for Step 08
+and assigned to the Step 29 release gate (see the parity matrix); it does not make any ticked criterion false.
 
 ## Documentation
 
