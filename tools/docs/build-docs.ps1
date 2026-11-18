@@ -19,6 +19,26 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 if ((Test-Path "Mocassin.slnx") -and (Test-Path "tools/docfx/docfx.json") -and
     (Get-Command dotnet -ErrorAction SilentlyContinue)) {
+    # DocFX loads the Release assemblies. Build the solution when they are absent; an existing Release
+    # build is reused.
+    $docfxInputs = @(
+        "src/dotnet/Mocassin.Core/bin/Release/net11.0/Mocassin.Core.dll",
+        "src/dotnet/Mocassin.Symmetry/bin/Release/net11.0/Mocassin.Symmetry.dll",
+        "src/dotnet/Mocassin.Compilation/bin/Release/net11.0/Mocassin.Compilation.dll",
+        "src/dotnet/Mocassin.Contracts/bin/Release/net11.0/Mocassin.Contracts.dll",
+        "src/dotnet/Mocassin.Packages/bin/Release/net11.0/Mocassin.Packages.dll",
+        "src/dotnet/Mocassin.Results/bin/Release/net11.0/Mocassin.Results.dll",
+        "src/dotnet/Mocassin.App.ViewModels/bin/Release/net11.0/Mocassin.App.ViewModels.dll",
+        "src/dotnet/Mocassin.App.Views/bin/Release/net11.0/Mocassin.App.Views.dll",
+        "src/dotnet/Mocassin.Rendering/bin/Release/net11.0/Mocassin.Rendering.dll"
+    )
+    $buildRequired = $docfxInputs | Where-Object { -not (Test-Path $_) }
+    if ($buildRequired) {
+        Write-Host "==> .NET Release build (DocFX input)"
+        & dotnet build "Mocassin.slnx" -c Release
+        if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    }
+
     Write-Host "==> DocFX"
     & dotnet tool restore
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }

@@ -83,8 +83,9 @@ python tools/check-no-secrets.py
 zensical build --strict
 ```
 
-`./tools/verify.sh docs` alone builds Zensical and rustdoc, but DocFX needs the .NET Release assemblies. Run
-`./tools/verify.sh all` (which builds first) or build the solution before a standalone docs run.
+`./tools/verify.sh docs` builds the .NET Release assemblies DocFX needs when they are absent, then builds
+Zensical, DocFX, and rustdoc. `./tools/verify.sh all` reuses the build from its .NET stage, so the solution is
+not built twice.
 
 Feature branches are validated locally; CI runs only at step closeout and on `main`. Report the commands and
 their results, including the exit status. Code layout follows

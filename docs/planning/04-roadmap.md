@@ -37,14 +37,14 @@ G Release and documentation
 | F. GUI | 23–28 | Full Avalonia application | A user can complete the whole workflow in the GUI |
 | G. Release and documentation | 29–31 | Parity, documentation, packaging | Release gates pass, the docs site builds, and artifacts ship |
 
-Each phase is also gated by the three cross-cutting reviews in
-[`reviews/cross-cutting/`](reviews/cross-cutting/README.md): policies and planning, architecture and design
-status, and documentation status. The policies and planning review starts first; architecture/design and
-documentation may run in parallel. The next phase's first step design review may not start until all three
-verdicts are accepted by the human owner, or a review is explicitly waived with a recorded reason. The
-architecture and design review also explicitly checks original-design fidelity: the intended corrections,
-the ported original strengths, and any regression. Phase B uses `XC-01`–`XC-03`, Phase C uses
-`XC-04`–`XC-06`, and so on.
+Each phase is also gated by the cross-cutting reviews in
+[`reviews/cross-cutting/`](reviews/cross-cutting/README.md). Phase A was waived. Phase B used three separate
+reviews: policies and planning, architecture and design status, and documentation status (`XC-01`–`XC-03`).
+From Phase C, each phase gets one combined review: `XC-04` for Phase C (compilation and build), `XC-05` for
+Phase D (solver), and so on. The next phase's first step design review may not start until the combined verdict
+is accepted by the human owner, or the review is explicitly waived with a recorded reason. The architecture
+and design section also explicitly checks original-design fidelity: the intended corrections, the ported
+original strengths, and any regression.
 
 ## 3. Step estimates and dependencies
 
@@ -149,7 +149,9 @@ See [`AGENTS.md`](../../AGENTS.md) section 3.7 for tag rules.
 
 M0–M3 were backfilled on 2026-11-12 on the existing step merge commits (`milestone-m0` → `47a9a90`,
 `milestone-m1` → `7b4a994`, `milestone-m2` → `dbf5691`, `milestone-m3` → `3ed558a`) after the Phase B
-checkpoint identified the missing tags. Later milestones are tagged when they are reached.
+checkpoint identified the missing tags. M4 and M5 were backfilled on 2026-11-18 on the Step 08 and Step 12
+merge commits (`milestone-m4` → `f91fc63`, `milestone-m5` → `ec2e04a`). Later milestones are tagged when they
+are reached.
 
 ## 5. Parallel work plan
 
