@@ -8,16 +8,15 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 
 ## Implementation status
 
-- **Status:** Not started — design frozen; implementation waits for the start gate
-- **Step branch:** — (created from the reviewed `main` commit after approval)
+- **Status:** Not started — design accepted `Ready with notes`; implementation start held by the owner
+- **Step branch:** — (not created; implementation start held)
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Re-review required — rounds 1–3 returned `Changes required`; the current freeze and
-  resolutions are recorded in [`docs/planning/reviews/step-13.md`](../reviews/step-13.md)
-- **Feature list:** Seven features proposed; the owner approved the 4.5 pw single-step sizing on 2026-11-18.
-  The design verdict and start gate remain pending.
+- **Design review:** Ready with notes — accepted by the human owner on 2026-11-18 for freeze
+  `b9cda11`; implementation start is held. See [`docs/planning/reviews/step-13.md`](../reviews/step-13.md).
+- **Feature list:** Approved by the human owner on 2026-11-18 (seven features); implementation start held.
 - **Sizing:** Owner-approved on 2026-11-18 at **4.5 person-weeks** (3.5 pw base + 1.0 pw contingency) as a
   §3.1 single-step exception, no split; the 13A/13B split was considered and rejected. See §13.
 - **Last updated:** 2026-11-18
@@ -26,7 +25,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | --- | --- | --- | --- | --- | --- |
 | — | — | — | — | — | — |
 
-### Proposed feature list (sizing approved 2026-11-18; start gate pending)
+### Approved feature list (owner, 2026-11-18; implementation start held)
 
 | # | Feature | Branch | Planned scope | Outcome |
 | --- | --- | --- | --- | --- |
@@ -38,10 +37,11 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 6 | Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Rust tests over `tests/contracts/packages/msl-v1/`, `amend-1-net10/`, projection `.bin` vectors, raw payloads, and `rng-vectors.json`; a new real-writer populated pair/cluster + MMC fixture; proptest mutation/truncation suite; `cargo-fuzz` scan/decode/package targets and a time-boxed run | The .NET-written packages and projection vectors are consumed byte-for-byte; populated and MMC payload→signature paths pass; mutation tests and the fuzz run find no panic/OOM |
 | 7 | Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Load and RNG Criterion benches plus same-runner-class baselines; `solver-architecture.md`, `msl-format.md`, `cli.md`, `testing-and-parity.md`, Rust layout docs; parity/status/closeout evidence (`docs/planning/closeout/step-13.json`) and the audit request | Load `< 100 ms` on the fixture and the RNG budgets are recorded with the environment; documentation builds strictly; `check_closeout_evidence.py` passes and the audit request is complete |
 
-The owner approved the 4.5 pw single-step sizing on 2026-11-18; the design verdict and start-gate approval of
-this feature list remain pending. Once the start gate is approved, individual features are squash-merged without
-a further approval. The step branch is created from the reviewed `main` commit after the design verdict is
-accepted. If features 1–3 exceed 2.0 pw, the step agent stops and reports to the orchestrator before feature 4.
+The human owner approved this seven-feature list and the 4.5 pw single-step sizing on 2026-11-18 and accepted
+the design as `Ready with notes`. **Implementation start is held by the owner**: no step branch is created, no
+merge into `main` is performed, no `step/13` tag is created, and the status dashboard stays step-agent-owned.
+Individual features will be squash-merged without a further approval once implementation is authorized. If
+features 1–3 exceed 2.0 pw, the step agent stops and reports to the orchestrator before feature 4.
 
 ## Goal
 
@@ -1232,8 +1232,9 @@ No unresolved cross-step interface question remains. The only deliberate asymmet
   withdrawn.
 - **Guard:** if features 1–3 exceed **2.0 pw**, the step agent stops and reports to the orchestrator before
   feature 4. Do not silently absorb the overrun.
-- **Owner approval:** the feature list and the 4.5 pw single-step exception are approved once with the design
-  verdict at the start gate. They are not re-approved per feature.
+- **Owner approval:** the feature list and the 4.5 pw single-step exception were approved by the human owner on
+  2026-11-18; the design review is accepted `Ready with notes`. Implementation start is **held** and requires a
+  separate owner authorization. The decisions are not re-approved per feature.
 
 ### 14. Decisions recorded and owner input
 
@@ -1255,9 +1256,9 @@ The same note carries the `chacha12-v1` binding and the rule that a change to th
 layout, or the algorithm id is format-breaking. The reader limits and exit-code mapping are step-level
 decisions recorded here, in the data contracts, and in the architecture.
 
-**Owner decisions requested at the start gate:** accept the design-review verdict; the sizing (4.5 pw
-single-step exception, no split) and n-1 (data-contract note, no ADR) are already decided by the owner on
-2026-11-18. No other owner decision is open.
+**Owner decisions:** the design verdict (`Ready with notes`), the seven-feature list, the 4.5 pw single-step
+exception, and n-1 (data-contract note, no ADR) are accepted by the owner on 2026-11-18. **Implementation start
+is held**; a separate owner authorization is required. No other design decision is open.
 
 ## Implementation tasks
 

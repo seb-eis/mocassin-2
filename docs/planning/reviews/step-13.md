@@ -314,7 +314,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready with notes
+**State:** Ready with notes — accepted by the human owner 2026-11-18; implementation start held by the owner
 
 ## Reviewer independence
 
@@ -360,12 +360,22 @@ Findings and resolutions:
 ## Human approval
 
 - [ ] Accepted: Ready for implementation
-- [ ] Accepted: Ready with notes
+- [x] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-18
+
+Accepted verdict: **Ready with notes** for the design frozen at
+`b9cda113f61bb80aab9b02c9ead7b49446be52c8`. The seven-feature list and the owner-approved **4.5 pw
+single-step exception** (3.5 pw base + 1.0 pw contingency, no split) are approved. m-16 and n-16 are accepted
+and assigned to **feature 7** (documentation sweep); n-17 is accepted and assigned to **feature 7** (both
+editorial leftovers); n-18 needs no action. The reviewer's findings, evidence, and verdict are unchanged.
+
+**Implementation start is held by the owner.** This acceptance is not a start authorization: no `step/13-…`
+branch is created, no merge into `main` is performed, no `step/13` tag is created, and the status dashboard
+remains step-agent-owned and unchanged. A separate owner approval is required to start implementation.
 
 ## Resolution status
 
@@ -417,6 +427,10 @@ text, including its R3-1 finding, is unchanged.
 | **m-15** | Fixed | Planner | `b9cda11` | Replaced the universal "every writer-valid payload" claim with the documented `ReaderLimits` envelope: positions/P1/rules/directions/collections/tables/links/paths/extensions/simulations and 512M elements are solver caps; a writer-valid package above one is rejected and needs a raised `ReaderLimits`. |
 | **n-14** | Fixed | Planner | `b9cda11` | Separated the Step 13 fixture criterion from the Step 16 exact check. The populated/MMC fixture must have non-empty tables, an MMC job, a non-trivial per-node mask difference, and an equivalent-start mapping; Step 13 tests the void-exempt union and mapping, Step 16 consumes the same fixture for the exact check. |
 | **n-15** | Fixed + assigned | Planner | `b9cda11` | Step 08 §8.4 and the contract now use the node-wise endpoint-moment formula. The `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` XML-doc corrections are assigned to Step 13 feature 4 (code), not edited on this docs branch; the feature scope and task record it. |
+| **m-16** | Accepted — assigned | Human owner / feature 7 | feature 7 | `docs/development/solver-architecture.md` RNG wording does not mirror the n-2 split. Accepted as a Minor and assigned to the feature-7 documentation sweep; no design change on this docs branch. |
+| **n-16** | Accepted — assigned | Human owner / feature 7 | feature 7 | Element-budget “one element per byte” arithmetic is imprecise. Accepted and assigned to the feature-7 documentation sweep; the 512M cap and tests remain as designed. |
+| **n-17** | Accepted — assigned | Human owner / feature 7 | feature 7 | Both editorial leftovers (Step 08 “Rust … .cs” label and Step 16 “Step 14/16” label) are accepted and assigned to the feature-7 documentation sweep. |
+| **n-18** | Accepted — no action | Human owner | — | The removed separator line before `### Re-review round 3` is accepted with no action; reviewer text is unchanged and the heading renders. |
 
 The step agent fills any further status after the next verdict. Do not alter the reviewer-authored findings,
 evidence, or verdict.
