@@ -343,8 +343,8 @@ Evidence file: `docs/planning/closeout/step-12.json`
   Windows platform gate recorded in the closeout evidence is green: it built the solution and ran
   `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, and `Mocassin.Cli.Tests`, including the CLI signal/probe
   step. macOS remains manual because this step adds no macOS-specific behaviour.
-- **Closeout CI policy.** The two closeout dispatches recorded in the closeout evidence (Ubuntu and the focused
-  Windows gate) are the only step-branch CI runs. The GitHub workflow does not run `tools/verify.sh`; the local
+- **Closeout CI policy.** The two round-2 closeout dispatches recorded in the closeout evidence (Ubuntu and the
+  focused Windows gate) are the only new step-branch CI runs for this re-audit. The GitHub workflow does not run `tools/verify.sh`; the local
   `all --require` output is the gate evidence, and the closeout CI confirms the same tree through the
   repository's CI jobs. Rust and Python jobs may be skipped by their path filters when a dispatch is focused on
   a platform; the Ubuntu run executes them.
