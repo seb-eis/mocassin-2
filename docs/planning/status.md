@@ -84,8 +84,10 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 
 Phase C — Compilation and build (Steps 08–12) is complete and tagged: `step-08` through `step-12`, with Step 08
 merged as `f91fc63` and Step 12 as `ec2e04a` (both `--no-ff`). The Phase C cross-cutting checkpoint `XC-04`
-(combined policies/planning, architecture/design, and documentation review) is in progress; it has not yet
-returned a verdict. Step 13 — Rust Solver Foundation and Package Reader is next after the checkpoint gate.
+(combined policies/planning, architecture/design, and documentation review) passed with notes at `2127f0f`
+and was accepted by the human owner on 2026-11-18 (record `c6ea396`); XC04-F1–F5 are assigned to a
+documentation maintenance branch to be merged before the gate opens to Step 13. Step 13 — Rust Solver Foundation
+and Package Reader follows once that branch is merged.
 Milestones M4 and M5 were backfilled on 2026-11-18 as annotated tags `milestone-m4` → `f91fc63` (Step 08 merge)
 and `milestone-m5` → `ec2e04a` (Step 12 merge).
 
@@ -177,7 +179,7 @@ These reviews do not create step branches or tags and do not replace step audits
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
 | B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12; merged `e48d9ca`, main CI `43311424938` green |
-| C. Compilation and build | 08–12 | `XC-04` combined | In progress — combined review at the Phase C checkpoint; no verdict yet |
+| C. Compilation and build | 08–12 | `XC-04` combined | Passed with notes — accepted 2026-11-18 at `2127f0f` (record `c6ea396`) |
 | D. Solver | 13–19 | `XC-05` combined | Planned |
 | E. Results | 20–22 | `XC-06` combined | Planned |
 | F. GUI | 23–28 | `XC-07` combined | Planned |
