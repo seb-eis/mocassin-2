@@ -170,7 +170,7 @@ These reviews do not create step branches or tags and do not replace step audits
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
 | B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12; merged `e48d9ca`, main CI `43311424938` green |
-| C. Compilation and build | 08–12 | `XC-04` combined | Planned |
+| C. Compilation and build | 08–12 | `XC-04` combined | Ready for review at `dcbf499` |
 | D. Solver | 13–19 | `XC-05` combined | Planned |
 | E. Results | 20–22 | `XC-06` combined | Planned |
 | F. GUI | 23–28 | `XC-07` combined | Planned |

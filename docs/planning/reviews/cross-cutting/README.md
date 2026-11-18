@@ -27,19 +27,20 @@ Review IDs are globally sequential and are never reused. From Phase C, each phas
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
 | B. Model definition | 03–07 | `XC-01` policies and planning, `XC-02` architecture and design, `XC-03` documentation (historical) | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12; merged `e48d9ca`, main CI `43311424938` green |
-| C. Compilation and build | 08–12 | `XC-04` combined | Planned |
+| C. Compilation and build | 08–12 | `XC-04` combined | Ready for review at `dcbf499` |
 | D. Solver | 13–19 | `XC-05` combined | Planned |
 | E. Results | 20–22 | `XC-06` combined | Planned |
 | F. GUI | 23–28 | `XC-07` combined | Planned |
 | G. Release and documentation | 29–31 | `XC-08` combined | Planned |
 
-The first checkpoint records:
+The checkpoints record:
 
 | ID | Record | Status |
 | --- | --- | --- |
 | `XC-01` | [`xc-01-policies-and-planning.md`](xc-01-policies-and-planning.md) | Passed with notes at `81fba45`; remediation through `84781f8`; accepted 2026-11-12; merged `e48d9ca` |
 | `XC-02` | [`xc-02-architecture-and-design.md`](xc-02-architecture-and-design.md) | Passed with notes — round 4 at `84781f8` (record `4660e0a`); accepted 2026-11-12; merged `e48d9ca` |
 | `XC-03` | [`xc-03-documentation-status.md`](xc-03-documentation-status.md) | Passed with notes at `81fba45`; remediation through `84781f8`; accepted 2026-11-12; merged `e48d9ca` |
+| `XC-04` | [`xc-04-phase-c.md`](xc-04-phase-c.md) | Ready for review at `dcbf499` (Phase C: Steps 08–12) |
 
 `XC-01` starts first. Once it is underway, `XC-02` and `XC-03` may run in parallel.
 
