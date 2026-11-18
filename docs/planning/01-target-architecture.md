@@ -167,27 +167,42 @@ Rules:
 
 ```text
 mocassin-cli
-   ▲
-mocassin-solver ──► mocassin-state
-   ▲      ▲              ▲
-   │      └──► mocassin-rng
-   ├──► mocassin-msl
+   ├──► mocassin-msl ──► mocassin-types
+   ├──► mocassin-rng
    ├──► mocassin-types
-   └──► mocassin-extension
+   └──► mocassin-solver (placeholder in Step 13)
+              │
+              ├──► mocassin-state
+              ├──► mocassin-rng
+              ├──► mocassin-msl
+              ├──► mocassin-types
+              └──► mocassin-extension
 ```
 
 | Crate | Responsibility |
 | --- | --- |
-| `mocassin-types` | `serde` structs for the compiled package and state metadata; no I/O |
-| `mocassin-msl` | Read `.msl` SQLite, verify schema version and model signature, decode model/job payloads |
-| `mocassin-rng` | Deterministic, platform-independent RNG streams; seed derivation per job |
+| `mocassin-types` | `serde` payload DTOs for the compiled package and state metadata, typed dense IDs, the validated runtime model/job/lattice types, `ReaderLimits`; no I/O |
+| `mocassin-msl` | Read `.msl` SQLite read-only, verify schema/version/provenance and model/lattice signatures, boundedly decode model/job/lattice payloads, re-encode canonical projections |
+| `mocassin-rng` | Deterministic, platform-independent ChaCha12 streams; SHA-256 seed derivation; bounded draws; 64-byte `RngStateV1` |
 | `mocassin-solver` | Simulation context, energy engine, KMC, MMC, trackers, statistics |
 | `mocassin-state` | MessagePack `.mcs` schema, writer, and reader |
 | `mocassin-extension` | Stable extension trait plus C ABI for optional custom routines |
-| `mocassin-cli` | `mocassin-sim` argument parsing, logging, signal handling, exit codes |
+| `mocassin-cli` | `mocassin-sim` argument parsing, logging, signal handling, dry-run inspection, exit codes |
 
 The solver core must be usable as a library without the CLI, so tests and future embedding (e.g. a
-long-running worker) do not need to spawn processes.
+long-running worker) do not need to spawn processes. The CLI uses `mocassin-msl` and `mocassin-rng` directly
+for the inspection path; there is only one package-reader implementation.
+
+Rules:
+
+- `mocassin-types` has no SQLite, Zstd, tracing, CLI, or file I/O dependency; it is the shared vocabulary for
+  the reader, CLI, and engine.
+- `mocassin-msl` is the only crate that opens SQLite, decodes Zstd/MessagePack, and re-encodes canonical
+  projections. It never writes a database.
+- `mocassin-rng` is the only crate that names `rand_chacha` state APIs. The `RngStateV1` bytes are a
+  first-party format, not a third-party memory layout.
+- `Package` is not `Sync`; keep one package per thread/process, and a future batch worker opens its own
+  package/connection.
 
 ## 5. Runtime data flow
 
@@ -227,9 +242,14 @@ Results store (.msr, SQLite) ──► .NET evaluation API ──► tables/plot
 ### 5.2 Determinism and seeds
 
 - A project has an optional master seed. Each job derives a stable 256-bit seed from
-  `(master_seed, purpose, collection_index, config_index, job_index)` using a documented hash (SHA-256).
+  `(master_seed, domain, collection_index, config_index, job_index)` using a documented hash (SHA-256); the
+  job domain is the fixed `mocassin/job/v1` string.
 - The solver uses ChaCha12 (or a later documented PRNG) seeded from that value, with separate streams for
-  lattice generation and simulation.
+  lattice generation and simulation. Step 13 fixes the derivation byte order, the `chacha12-v1` draw
+  semantics, and the 64-byte `RngStateV1` resume blob.
+- The simulation stream is continuous across a KMC pre-run and its main run; the pre-run state carries the RNG
+  state the main run resumes. Extensions receive a domain-separated fork so optional draws cannot perturb the
+  core trajectory.
 - Supercell generation uses its own deterministic stream, so changing simulation settings does not change
   the generated lattice for the same job coordinates.
 - Same package + same solver version + same platform must reproduce the same state content (excluding
@@ -353,7 +373,8 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
   is remapped to `CLI001`/2; help and version exit 0. Response-file (`@file`) errors are usage errors
   (`CLI001`/2), not I/O errors (`CLI002`/3).
 - Rust solver: `0` completed, `10` invalid arguments, `11` package error, `12` model/data error,
-  `13` numerical failure, `14` aborted by limit, `15` cancelled, `16` I/O error.
+  `13` numerical failure, `14` aborted by limit, `15` cancelled, `16` I/O error. Parse errors (unknown option,
+  bad enum value, missing value) are `10`, not the parser library's default; help and `--version` exit 0.
 - The GUI surfaces the same CLI codes for build/collect operations and the solver codes for solver failures,
   plus a human-readable abort reason.
 
@@ -385,6 +406,8 @@ boundaries. There is no server component and no remote telemetry.
   containment, a GUI warning, and a `--no-extensions` option.
 - Reject path traversal, symlinks, and zip-slip in job-folder, import, and deploy paths before writing.
 - Bound Zstd decompression and MessagePack array/map sizes; reject decompression bombs before allocation.
+  The Rust reader additionally enforces a non-allocating MessagePack element budget, nesting-depth limit, and
+  per-field count caps before typed decoding (Step 13 §3.3–§3.4).
 - Open SQLite inputs read-only and validate schema/version before trusting page content.
 - Remote-deploy credentials come from an agent/key store and are never written to a project or log.
 - Atomic file writes: write to a temporary file in the same directory, fsync, rename. `.msl` and `.msr`

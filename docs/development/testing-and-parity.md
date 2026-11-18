@@ -47,6 +47,26 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - The canonical summary is the golden. Package bytes are recorded by SHA-256 and compared only as an observation,
   because a runtime patch may change compressed bytes without changing the logical content.
 
+## Rust solver foundation (Step 13)
+
+- The checked-in `tests/contracts/packages/msl-v1/` package is read by the Rust reader; the dry-run counts and
+  signatures must equal the canonical summary for the same job. The byte-fixed `amend-1-net10/` package is read
+  the same way. Both reads are PR-medium.
+- The Rust test decodes the raw payloads in `tests/contracts/packages/msl-v1/payloads/`, which catches field-name,
+  minimum-width-integer, `null` optional, and array-vs-`bin` lattice drift without a .NET dependency.
+- The Rust canonical writer re-encodes every `tests/contracts/projections/parameterization/*.bin` and
+  `.../lattice/*.bin` vector and must reproduce the bytes and the domain hash. This is PR-fast.
+- `tests/contracts/rng-vectors.json` freezes seed derivation, draw streams, bounded draws, forks, and the
+  `RngStateV1` round-trip. A changed algorithm, draw order, or state layout fails the vector test.
+- A proptest suite truncates and mutates the real payloads; it asserts no panic, no unbounded allocation, and a
+  structured error. The `cargo-fuzz` targets `payload_scan`, `payload_decode`, and `package_open` start from the
+  same seeds and run time-boxed at closeout. Step 29 extends fuzzing to `.mcs` and extension configs.
+- Load and RNG benchmarks are recorded in `tests/reference/bench/step-13-*.json` with the toolchain, CPU class,
+  and commit. The ceria load budget is `< 100 ms` and peak RSS `< 64 MiB`; the RNG budgets are in the Step 13
+  page §4.5. A regression above 10 % fails the release gate.
+- Tests use real files, real SQLite, and the real checked-in packages. There are no mocks in the reader; the only
+  process boundary is the CLI exit-code test, which runs the built binary.
+
 ## Test tiers
 
 | Tier | Contents | Target |

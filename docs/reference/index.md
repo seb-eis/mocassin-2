@@ -11,7 +11,8 @@ Reference material for the CLI, file formats, diagnostics, and repository toolin
 - [Transitions](transitions.md) — transition fields, semantic ordering, path matching, preview, and the `TRN` diagnostics.
 - [Energy](energy.md) — environments, filters, clusters, site energies, ordering, limits, `GeometryId`/`EnergyId`.
 - [CLI](cli.md) — the full `mocassin` command surface (`new`, `validate`, `compile`, `build`, `inspect`,
-  `verify`, `doctor`, `clean --dry-run`), options, exit codes, JSON reports, and JSON-Lines events.
+  `verify`, `doctor`, `clean --dry-run`), the `mocassin-sim` solver foundation, options, exit codes, JSON
+  reports, and JSON-Lines events.
 - **Formats** — the [immutable `.msl` package](msl-format.md) is defined here; the `.msr` results store, `.mcs`
   state, job folders, and `solver.json` are added with Steps 18 and 20.
 - [Diagnostics](diagnostics.md) — every stable diagnostic code with its severity, owner, and help.

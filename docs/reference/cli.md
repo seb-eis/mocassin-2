@@ -401,6 +401,85 @@ and with `--json` it emits one `clean-v1` report with `dryRun: false`, the listi
 ever removed by either path. With `--dry-run`, `--json` prints `clean-v1` with `dryRun: true`, the folder
 list, total bytes, and `removedCount: 0`.
 
+## `mocassin-sim` (Rust solver)
+
+```text
+mocassin-sim --db <project.msl> --job <id> [--io <dir>]
+             [--stdout <file>] [--seed <hex32>] [--threads <n>]
+             [--extension <path>] [--no-extensions] [--jump-log-max-ev <f64>]
+             [--log-level <error|warn|info|debug|trace>]
+             [--log-format human|json] [--dry-run] [--version]
+```
+
+`mocassin-sim` is a separate process that consumes only the immutable `.msl` package. It never reads project
+JSON and never writes `.msl` or `.msr`. This release implements the inspection path; the simulation engines,
+job-folder output, batch mode, and extensions arrive in Steps 14–19.
+
+### Options
+
+| Option | Meaning |
+| --- | --- |
+| `--db <path>` | Required `.msl` package. Opened read-only. |
+| `--job <id>` | Required 1-based job id. An unknown id is a usage error. |
+| `--io <dir>` | Job folder for a future run. Accepted but not created in this release. |
+| `--dry-run` | Load, validate, and print the summary; write nothing; exit 0. Required in this release. |
+| `--stdout <file>` | Reserved for the run statistics dump. Rejected with `--dry-run`. |
+| `--seed <hex32>` | Exactly 64 hex characters; overrides the effective seed for debugging. Only the seed hash is printed. |
+| `--threads <n>` | `1..=256`; accepted and validated, unused until Step 19. |
+| `--extension <path>` | Rejected until the extension ABI lands (Step 19). |
+| `--no-extensions` | Accepted; no-op in this release. Conflicts with `--extension`. |
+| `--jump-log-max-ev <f64>` | Finite and `> 0`; accepted, unused until Step 18. |
+| `--log-level` | `error`, `warn`, `info`, `debug`, or `trace`; default `info`. |
+| `--log-format` | `human` or `json`; default `human`. Logs go to stderr. |
+| `--version` | Print the solver version; exit 0. |
+
+### Dry run
+
+`--dry-run` opens the package read-only, validates the schema, model, lattice, and job, and prints one line per
+group:
+
+```text
+mocassin-sim 0.1.0 dry-run
+package: <path>
+schema: format_version=1 project_id=<uuid> job_selection=all
+model: signature=<64hex> model_signature=<64hex> particles=5 positions=4 sites=4 environments=4 pair_tables=0 cluster_tables=0
+lattice: signature=<64hex> size=6x6x6 length=864
+job: id=1 kind=kmc simulation_index=0
+settings: temperature_k=773 target_mcsp=150 write_out_count=100 pre_run_mcsp=250 time_limit_s=31536000 min_success_rate=null electric_field_vm=10000000 flags=0x72
+transitions: collections=1 directions=2 rules=4
+trackers: global=2 static_per_cell=16
+rng: algorithm=chacha12-v1 seed_hash=<64hex>
+validation: ok
+```
+
+The counts and signatures equal the canonical package summary (`inspect-v1`/`package-summary-v1`) for the same
+job. Build metadata (`app_version`, `created_utc`, `generator`) is not printed. The dry run creates no
+directory, no log file, and no job folder; `--stdout` is therefore a usage error.
+
+Without `--dry-run`, this release loads and validates the job and exits 10 with
+`unsupported: simulation engines are implemented in Steps 14–19`. It does not create `--io`, write a state, or
+claim success.
+
+### Logging and streams
+
+stdout is the human report. Structured logs and errors go to stderr through `tracing`; `--log-format json`
+emits one JSON object per record. `RUST_LOG` is not consulted, so `--log-level` is the only filter.
+
+### Solver exit codes
+
+| Code | Meaning |
+| ---: | --- |
+| 0 | Completed (including a successful dry run). |
+| 10 | Invalid arguments, unknown job, unsupported option, extension requested. |
+| 11 | Package error: unusable SQLite, schema/version mismatch, missing element, invalid frame, decode/scan/size error. |
+| 12 | Model/data error: signature mismatch, invalid index/length/value, column/payload mismatch. |
+| 13 | Numerical failure. |
+| 14 | Aborted by a configured limit. |
+| 15 | Cancelled. |
+| 16 | I/O error: missing or unreadable path. |
+
+Parse errors are remapped to 10, not the parser library's default. Help and `--version` exit 0.
+
 ## Shell completion
 
 Step 12 does **not** ship a `completion` command and does not generate bash, zsh, fish, or PowerShell

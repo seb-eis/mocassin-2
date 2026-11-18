@@ -906,6 +906,15 @@ MessagePack map with snake_case keys. Top-level:
   compiled order. It does not include stable ID strings, so Step 13 can re-encode it from this payload without
   persisting the inspection-only `rule_geometry_id`. A value-only change changes `signature` but not
   `model_signature`; a geometry/rules/catalog change changes both.
+- **Stored encoding vs canonical projection.** The stored payload is a normal MessagePack map written by
+  `MessagePack-CSharp`; integers use the writer's smallest-width encoding (for example `cc 96` for
+  `target_mcsp = 150`, or a positive fixint for a small `u32`). ADR 0010's fixed-width `uint64`/`int64` rule
+  applies only to the canonical signature projection, not to the stored map. A reader accepts every integer
+  width for the target type and never re-encodes the stored payload.
+- **Lattice payload encoding.** The lattice payload's `lattice` member is a MessagePack **array** of `u8` in
+  v1 (the .NET writer serializes `ImmutableArray<byte>` as an array, not `bin`). The canonical lattice
+  projection encodes the same particles as `bin`. A reader normalizes both representations; a writer emits the
+  array form.
 
 `structure` fields:
 
@@ -1102,6 +1111,38 @@ The same layout is used by Step 10's generator/preview, the `.msl` writer, and t
 The solver derives the site-energy background from the compiled model's `[position][particle]` table repeated
 over the supercell. Per-job background overrides are not part of version 1; a future extension can add a
 sparse `background_overrides` map without changing the base layout.
+
+#### Solver read bounds (`mocassin-msl`)
+
+The Rust solver reads one job and never runs the ten-check `mocassin verify` suite. It validates only what it
+consumes, with explicit limits that are checked before allocation:
+
+| Limit | Default | Rule |
+| --- | ---: | --- |
+| Model payload | 512 MiB | Same guard as the .NET verifier |
+| Job payload | 8 MiB | Same guard as the .NET verifier |
+| Lattice payload | 512 MiB | Capped by `PackageVerificationOptions.MaxLatticePayloadBytes` semantics |
+| Model MessagePack elements | 16,000,000 | Non-allocating scan budget |
+| Job MessagePack elements | 1,000,000 | Non-allocating scan budget |
+| MessagePack depth | 8 | The schema's deepest document is four levels |
+| Positions (`A*B*C*P`) | 100,000,000 | Also bounded by the signed 32-bit linear-index limit |
+| P1 positions per cell | 1,000,000 | |
+| Particles | 64 | Six-bit state codes and the 63-custom-particle limit |
+| Rules / directions / collections | 10M / 10M / 4,096 | Allocation caps |
+| Pair / cluster tables | 1M / 1M | Allocation caps |
+| Pair links | 16M total, 65,536 per position | Allocation caps |
+| Path nodes / tracker entries | 10 | Six bits per node in a `u64` |
+| Extensions / simulations | 256 / 4,096 | Allocation caps |
+
+- The lattice guard is `4 × a × b × c × position_count` in checked `u64`, capped by the lattice byte limit.
+- The reader decompresses only after the Zstd frame's declared size (or a bounded streaming read when no size
+  is declared) is checked against the guard. It then scans the MessagePack structure without allocating per
+  element, checks declared lengths against the remaining bytes, and only then decodes into typed structures.
+- The reader does not run `PRAGMA integrity_check` and does not mirror the `PKG` diagnostics; `mocassin verify`
+  remains the full structural check. The solver requires the tables and columns it reads, the package identity,
+  the supported version, the provenance rows, and the payload invariants in Step 13 §3.5.
+- The reader opens `SQLITE_OPEN_READONLY`, sets `query_only=ON` and `foreign_keys=ON`, and never writes the
+  package. `jobs.seed` must be exactly 32 bytes.
 
 ### 3.5 Publication and read-only guarantees
 
@@ -1317,8 +1358,8 @@ alignment scheme, or checksum trailer.
 | `totalGoal` | uint64 | Main-run target cycles; 0 for MMC |
 | `latticeEnergyEv` | f64 | Current total lattice energy in eV |
 | `flags` | uint64 | Solver state flags |
-| `rngAlgorithm` | string | `"chacha12-v1"` (versioned with the state format) |
-| `rngState` | bin | Opaque, versioned PRNG state needed for exact resume; length/algorithm documented in Step 13 |
+| `rngAlgorithm` | string | `"chacha12-v1"`; bound to the 64-byte `RngStateV1` layout in Step 13 §4.3 |
+| `rngState` | bin | 64-byte `RngStateV1` blob for exact resume: magic `MCR1`, version 1, 64-bit stream, 128-bit word position, 32-byte key; layout owned by Step 13, algorithm by ADR 0005 |
 | `abortReason` | string | `running`, `prerun`, `completed`, `equilibrium`, `timeLimit`, `rateLimit`, `cancelled`, `error` |
 | `seedHash` | string | SHA-256 hash of the job seed (not the raw seed) |
 | `units` | map | `{ "energy": "eV", "time": "s", "length": "angstrom", "tracker": "fractional" }` |
@@ -1388,6 +1429,9 @@ A reader must:
 9. Reject NaN/Inf where the schema requires a finite value (energies, times, factors).
 10. Ignore unknown fields; reject duplicate map keys where the decoder exposes them.
 11. Reject an encoded document above the configured size cap.
+12. Require `rngAlgorithm = "chacha12-v1"` and a `rngState` of exactly 64 bytes for this format version; reject
+    an unknown algorithm, a bad magic/version, or a different length. A new algorithm is a new state-format
+    major.
 
 The collector and `.msr` readers verify `run_state_sha256` before storing or evaluating a state.
 
@@ -1492,17 +1536,26 @@ mocassin clean <project.msl> [--results <file.msr>] [--dir <dir>]
 ### 5.2 `mocassin-sim` (Rust)
 
 ```text
-mocassin-sim --db <project.msl> --job <id> --io <dir>
+mocassin-sim --db <project.msl> --job <id> [--io <dir>]
              [--stdout <file>] [--seed <hex32>] [--threads <n>]
              [--extension <path>] [--no-extensions] [--jump-log-max-ev <f64>]
              [--log-level <error|warn|info|debug|trace>]
              [--log-format human|json] [--dry-run] [--version]
 ```
 
-- `--io` is created if missing. The solver writes `run.mcs` (and `prerun.mcs` for KMC) there.
+- `--io` is required for a run and created if missing. A dry run needs no `--io` and does not create it.
 - `--stdout` redirects the human statistics dump; otherwise it goes to stdout.
 - The solver never writes to the `.msl` or `.msr`; `collect` writes the `.msr`.
 - Exit codes are defined in [`01-target-architecture.md`](01-target-architecture.md#73-error-handling-and-exit-codes).
+- **Step 13 scope.** Step 13 implements the inspection path only: `--db`, `--job`, `--dry-run`, `--seed`,
+  `--log-level`, `--log-format`, `--version`, and the validated-but-unused `--threads`/`--jump-log-max-ev`.
+  `--dry-run` is write-free: it does not create `--io`, does not write a log file, and rejects `--stdout` as a
+  usage error. Without `--dry-run` it exits 10 with a stable “simulation engines are implemented in Steps
+  14–19” message until Step 16. `--extension` is rejected until Step 19; `--no-extensions` is accepted.
+  Step 13 has no `--json`, `batch`, `--validate-only`, `--no-state`, or `--log-file`; those are Step 19.
+- Parse errors are mapped to exit 10 (invalid arguments), not the parser library's default; help and `--version`
+  exit 0. A dry-run success exits 0; a package/schema/decode error exits 11; a signature/index/model error exits
+  12; an I/O error exits 16.
 
 ### 5.3 Job folder and `solver.json`
 
@@ -1908,6 +1961,14 @@ oversized `@file`) are the same usage class: `CLI001`/2, not `CLI002`/3.
   reader emits a canonical JSON summary of metadata, counters, tracker counts, and histogram totals.
 - `tests/contracts/signature-vectors.json` contains canonical projection bytes and expected SHA-256 digests
   for the model, parameterization, and lattice types.
+- `tests/contracts/projections/parameterization/*.bin` and `.../lattice/*.bin` are re-encoded byte-for-byte by
+  the Rust projection writer from Step 13 on; the Rust test reads the `.bin` vector, decodes the fixed-width
+  arrays, re-encodes them, and compares the bytes and the domain hash.
+- `tests/contracts/rng-vectors.json` freezes the Step 13 `chacha12-v1` job/lattice seed derivation, draw
+  streams, bounded draws, forks, and the 64-byte `RngStateV1` round-trip. It is a test-vector document
+  (`format = "mocassin.rng-vectors"`), not a runtime format and not a manifest entry.
+- `tests/contracts/packages/msl-v1/` also carries the Rust CLI's `dry-run-v1.txt` golden; the counts and
+  signatures in it must equal the canonical package summary for the same job.
 - `tests/contracts/package-v1.msl` and `package-v1.msr` are produced by the real writers and read by all
   readers; previous-major fixtures are retained for the compatibility window.
 - `tests/contracts/job-folder/` contains a real solver job folder with `solver.json`, `run.mcs`, `prerun.mcs`,

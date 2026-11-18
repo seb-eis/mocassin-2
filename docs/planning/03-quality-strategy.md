@@ -114,6 +114,7 @@ Property tests are required for the following, using brute-force or analytic ora
 | Package / state | Encode → decode identity for all fields and versions; unknown fields ignored / unknown major version rejected; truncated input fails cleanly; checksum verification |
 | Results store | `.msr` package binding, package-signature mismatch rejection, idempotent collection, previous-major read |
 | Job contracts | `solver.json`, job-folder paths, event stream, and `mmcfe.db` round-trip and reject malformed input |
+| RNG and seeds | Job/lattice seed derivation matches the Step 10 vectors; bounded draws are unbiased (chi-square) and never modulo; doubles stay in `[0,1)`; forks are domain-separated; the 64-byte state round-trips and resumes at block boundaries and mid-block |
 | Evaluation | MSD/diffusion/mobility/conductivity identities on analytic random walks; non-negativity; unit consistency; empty and single-particle cases |
 | CLI / parsing | Library parsing conventions (arity, `--opt=value`, negative values, `--`), bounded response files (syntax, limits, `--`/`--json` interaction, `CLI001`/2 errors), parse-error→`CLI001`/2 mapping, help and root `--version` 0, subcommand `--version` `CLI001`/2, job-range parsing and normalization, full-expansion ID stability, partial selections, exit codes, report schema, JSON-Lines ordering; no crash on arbitrary arguments; required local AOT closeout gate |
 | Python reader | Valid document round-trip; malformed/truncated/future-version rejection; aggregation invariants match the .NET implementation |
@@ -144,8 +145,8 @@ Coverage is a diagnostic, not the headline target.
 - **Required:** critical-path coverage for the interfaces in §6 and property/invariant coverage for the
   algorithms in §5.
 - **Retained:** line/branch coverage reports for `Mocassin.Core`, `Mocassin.Symmetry`, `Mocassin.Compilation`,
-  `Mocassin.Contracts`, `Mocassin.Packages`, `Mocassin.Results`, `mocassin-solver`, and `mocassin-state`,
-  reviewed for untested branches.
+  `Mocassin.Contracts`, `Mocassin.Packages`, `Mocassin.Results`, `mocassin-types`, `mocassin-msl`,
+  `mocassin-rng`, `mocassin-solver`, and `mocassin-state`, reviewed for untested branches.
 - **Not a gate:** a global percentage target. It rewards call-count tests and punishes small, honest modules.
 - **Mutation testing (recommended, not blocking at first):** `Stryker.NET` and `cargo-mutants` for symmetry,
   compilation, energy, state encoding, and evaluation. Surviving mutants in critical code are triaged.
@@ -168,6 +169,12 @@ reduction suites are nightly/release.
 The Step 12 CLI parser, selection, build/preview, partial, cancellation, force, inspect, verify, new, compile,
 doctor (fake process probe), clean dry-run, and JSON schema tests are PR-fast. The 10⁴-job build + verify and
 the real solver probe are nightly/release. The real `.msl` cross-language read is PR-medium with Step 13.
+
+The Step 13 payload DTO, projection-vector, RNG golden, state round-trip/resume, dry-run golden, and
+mutation/truncation tests are PR-fast. Reading the real `msl-v1` and `amend-1-net10` packages is PR-medium
+because it is the cross-language contract gate. The time-boxed `cargo-fuzz` run, the Criterion load benchmark,
+and the RNG draw/refill benchmark are nightly/manual evidence; the step records the commands and results at
+closeout.
 
 ## 9. Domain test strategy
 
@@ -528,6 +535,38 @@ solver with the same binary, platform, package, and seed.
   GitHub workflow does not run `verify.sh`, so the AOT gate is not a CI confirmation. The Step 12 evidence
   records time, peak RSS, package size, and verification result against the Step 11 budget (< 10 min, < 2 GB).
 
+### 9.11 Rust solver foundation and package reader (Step 13)
+
+- **Boundary:** the Rust solver reads only the immutable `.msl` and CLI arguments; it never reads project JSON
+  and never writes `.msl`/`.msr`.
+- **Reader acceptance:** the checked-in `msl-v1` package and the byte-fixed `amend-1-net10` package open
+  read-only; the dry-run counts/signatures equal the canonical package summary for the same job. This is the
+  first .NET-writer → Rust-reader contract run and is PR-medium.
+- **Bounded decode:** a non-allocating MessagePack scan enforces the byte, element, depth, and per-field count
+  limits before typed decode. Tests cover truncated frames, oversized declared sizes, decompression bombs,
+  element-budget violations, duplicate known keys, trailing bytes, and malformed `schema_info`. No unbounded
+  allocation or panic is acceptable.
+- **Validation:** every particle/position/site/environment/pair/cluster/collection/direction/rule/tracker
+  index and length; state-code node values; `tracker_order` length against the collection path; jump-count
+  prefix sums; kind/flag consistency; finite values; normalized field direction; lattice length and particle
+  indices.
+- **Signatures:** the parameterization and lattice projections re-encode from the payload with the ADR 0010
+  fixed-width writer, the C# quantization expression, and the domain prefix. The checked-in `.bin` vectors
+  round-trip byte-identically. `model_signature` is an identity string, never re-encoded.
+- **RNG:** seed derivation matches the Step 10 vectors; ChaCha12 draw goldens; Lemire bounded draws; 53-bit
+  doubles; domain-separated forks; the 64-byte `RngStateV1` round-trip and mid-block resume. The RNG benchmark
+  records draws/s, refill cost, state round-trip, and fork cost against the documented budget; a >10 %
+  regression is a release failure.
+- **CLI:** the dry-run golden, exit codes 0/10/11/12/16, parse-error remap, help/version, logging formats, and
+  the write-free guarantee. `--stdout` with `--dry-run` is a usage error; no job folder or log file is created.
+- **Fuzzing:** `payload_scan`, `payload_decode`, and `package_open` targets start from the real payload/package
+  seeds; a time-boxed run is recorded at closeout. Step 29 extends fuzzing to `.mcs` and extension configs.
+- **Performance:** ceria job load `< 100 ms` (release, warm) and peak RSS `< 64 MiB`; the RNG budgets in
+  `04-roadmap.md`/the step page. The environment (CPU class, Rust version, commit) is recorded with the raw
+  numbers.
+- **Tiers:** DTO/projection/RNG/state/CLI/mutation tests are PR-fast; the real-package read is PR-medium;
+  fuzzing and the benchmarks are nightly/manual.
+
 ## 10. Contract tests
 
 - **Project JSON**: .NET writes fixtures; a JSON Schema validator checks them in CI.
@@ -536,6 +575,10 @@ solver with the same binary, platform, package, and seed.
 - **Canonical signatures**: `tests/contracts/signature-vectors.json` fixes the canonical MessagePack
   projection bytes and SHA-256 digests for model, parameterization, and lattice. C# and Rust must reproduce
   them; a serializer change must not change a signature.
+- **Rust projection re-encode**: the Rust reader decodes each `.bin` parameterization/lattice projection with a
+  strict fixed-width reader, re-encodes it, and must match the bytes and the domain hash.
+- **RNG vectors**: `tests/contracts/rng-vectors.json` freezes the `chacha12-v1` derivation, draw, bounded-draw,
+  fork, and `RngStateV1` round-trip behavior. It is a test-vector document, not a runtime format.
 - **Results store**: `collect` writes `.msr`; .NET and Python read it. A `.msr` with the wrong package
   signature/version is rejected.
 - **State file**: Rust writes a MessagePack `.mcs` for a synthetic small run; .NET and Python read it and emit
@@ -628,6 +671,10 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | CLI `build` 10⁴ small jobs + verify | < 10 min, < 2 GB peak RSS |
 | CLI `doctor` | < 2 s |
 | Load `.msl` and start job | < 100 ms |
+| `mocassin-sim --dry-run`, ceria fixture (Step 13) | < 250 ms end to end, < 64 MiB peak RSS |
+| ChaCha12 `next_u32` (Step 13) | ≥ 250 M draws/s single-threaded, release, benchmark laptop class |
+| ChaCha12 `next_f64` / `next_bounded` (Step 13) | ≥ 120 M / ≥ 200 M calls/s |
+| RNG state export + import / 64-word refill (Step 13) | ≤ 500 ns / ≤ 250 ns |
 | KMC throughput (ceria 10×10×10, 1 transition set) | ≥ 80 % of original C solver per core |
 | MMC throughput (same) | ≥ 80 % of original C solver per core |
 | Memory (20×20×20, 63 particles) | < 2 GB |

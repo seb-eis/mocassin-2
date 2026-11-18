@@ -38,6 +38,8 @@ The detailed architecture is in the internal plan; the repository layout is summ
 - [Design decisions](design-decisions.md) — stable IDs, explicit units, canonical hashing, locking, and schema ownership.
 - [Compilation pipeline](compilation-pipeline.md) — symmetry, transitions, energy, lattice/simulation input, and how
   Step 10/11 consume it.
+- [Solver architecture](solver-architecture.md) — Rust crates, bounded `.msl` reader, runtime model, RNG streams,
+  and the `mocassin-sim` foundation.
 - [Contributing](contributing.md) — branches, review gates, local quality gates, tests, and docs-as-code.
 - [Agent workflow](agent-workflow.md) — context handoff, prompts, evidence reports, and diff review.
 - [Orchestration and role delegation](orchestration.md) — orchestrator role, spawning, and handoff rules.
@@ -51,7 +53,7 @@ The detailed architecture is in the internal plan; the repository layout is summ
 Steps 00–12 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, the
 symmetry/geometry kernels, the particle/structure/transition/energy models, the lattice/simulation models,
 validation, diagnostics, and model statistics, and the Phase C compilation pipeline (compiled model,
-parameterization, job templates and supercells, immutable `.msl` package, and the `mocassin` CLI). Phase C
-implementation is complete at the `step-12` tag; the Phase C cross-cutting checkpoint `XC-04` is in progress,
-and Step 13 — Rust Solver Foundation and Package Reader follows the checkpoint gate. The solver and GUI are added in later
-phases. Do not treat placeholder pages as implemented features.
+parameterization, job templates and supercells, immutable `.msl` package, and the `mocassin` CLI). The Phase C
+cross-cutting checkpoint `XC-04` was accepted with notes on 2026-11-18, so the gate to Step 13 is open. Step 13
+— Rust Solver Foundation and Package Reader — is in design review; the solver and GUI are added in later phases.
+Do not treat placeholder pages as implemented features.

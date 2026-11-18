@@ -102,6 +102,47 @@ Mocassin.Cli/
   `Assets/blank.mocprj`/`Assets/ceria.mocprj` resources. The `.mocprj` assets are not counted as `.cs` files;
   the public factory and template records are XML-documented and listed in `PublicAPI.Unshipped.txt`.
 
+### 2.2 Rust workspace layout (Step 13)
+
+The Rust workspace is rooted at `src/rust/Cargo.toml`; crates live under `crates/`. The same lobby rule applies:
+
+```text
+crates/mocassin-msl/
+  Cargo.toml
+  README.md
+  src/lib.rs               # crate entry: module declarations, re-exports, crate docs
+  src/package.rs           # SQLite open/schema/job queries
+  src/scan.rs              # bounded MessagePack scan
+  src/decode.rs            # Zstd frame handling + rmp-serde decode
+  src/validate.rs          # typed index/length/finite checks
+  src/projection.rs        # canonical projection writer + signatures
+  src/error.rs
+  tests/reader_acceptance.rs
+  benches/load.rs
+  fuzz/                    # cargo-fuzz package, excluded from the workspace
+```
+
+Rules:
+
+- Crate roots contain only `Cargo.toml`, `README.md`, `src/lib.rs` (library) or `src/main.rs` (binary), and the
+  `tests/`, `benches/`, and `fuzz/` directories. Everything else lives in a concept module.
+- Module names are snake_case and name the domain concept (`package`, `scan`, `decode`, `validate`,
+  `projection`, `seed`, `stream`, `state`, `dry_run`). `utils`, `helpers`, `common`, `models`, `traits`, and
+  `misc` are forbidden.
+- A module directory (`src/scan/mod.rs` plus submodules) is allowed inside a named concept; `internal` is a
+  visibility choice, not a folder.
+- Keep files below 800 lines and concept modules below 20 direct files; split by sub-concept, not by type kind.
+- Unit tests live beside the private helper; public acceptance/property tests live in `tests/`; shared fixture
+  helpers live in `tests/support/`. There is no root-file limit for Rust tests.
+- Criterion benchmarks live in `benches/` and are named after the measured path (`draws.rs`, `load.rs`).
+- The fuzz crate lives under the crate it exercises and is excluded from the workspace; it is not part of the
+  normal `cargo test` build.
+- Public items carry doc comments; `missing_docs` is denied by the workspace lint. Every new source file starts
+  with `SPDX-License-Identifier: MIT`.
+- Enforcement in Step 13 is `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`,
+  `cargo test --workspace`, and review. A mechanical Rust layout test is deferred to Step 29; do not add a
+  second structure tool now.
+
 ## 3. Folder names and ownership
 
 Folder names are PascalCase domain nouns. A folder should answer “which concept owns this code?”
