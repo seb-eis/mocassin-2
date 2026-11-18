@@ -59,7 +59,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 09 | [Parameterization Templates](steps/step-09-parameterization-templates.md) | C. Compilation | Done | `step/09-parameterization-templates` (merged and deleted) | — | [replacement closeout green](https://github.com/seb-eis/mocassin-2/actions/runs/43634322838) / [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43639561778) | `ef2f335` | `step-09` | Passed with notes at `916bae1` (`3aeacb1`) — accepted 2026-11-14 | Ready with notes at `26d6a0e` (round 4) — accepted 2026-11-14 |
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Done | `step/10-job-templates` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43709029767) at `945dddf` | `945dddf` | `step-10` | Passed with notes at `c10e6d7` — accepted 2026-11-15 | Ready for implementation at `c5454af` — accepted 2026-11-14 |
 | 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Done | `step/11-simulation-package-and-msl-writer` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43948410478) at `84ceb76`; [closeout](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) / [Windows platform](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) at `4197166` | `84ceb76` | `step-11` | Passed with notes — round 2 at `4197166` (`fda68e6`); N-1/N-4/N-6 accepted 2026-11-16 | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)) |
-| 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Done | `step/12-build-orchestration-and-cli` (merged and deleted) | `fix-audit-round-1` (squashed) | [Ubuntu](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) / [Windows](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) closeout green at `07851d8`; [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) | `ec2e04a` | `step-12` | [Passed with notes](audits/step-12.md) at `07851d8` — accepted by the human owner 2026-11-18; F-9/N-4 fixed, N-5 accepted risk | Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` ([record](reviews/step-12.md); round 5; R5-1–R5-3 resolved); implementation started 2026-11-17 |
+| 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Done | `step/12-build-orchestration-and-cli` (merged and deleted) | — | [Ubuntu](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) / [Windows](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) closeout green at `07851d8`; [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) | `ec2e04a` | `step-12` | [Passed with notes](audits/step-12.md) at `07851d8` — accepted by the human owner 2026-11-18; F-9/N-4 fixed, N-5 accepted risk | Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` ([record](reviews/step-12.md); round 5; R5-1–R5-3 resolved); implementation started 2026-11-17 |
 | 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 15 | [Energy Engine](steps/step-15-energy-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -81,6 +81,14 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 31 | [Packaging and Release](steps/step-31-packaging-and-release.md) | G. Release and documentation | Not started | — | — | — | — | — | Not requested | Not requested |
 
 ## Active work
+
+Phase C — Compilation and build (Steps 08–12) is complete and tagged: `step-08` through `step-12`, with Step 08
+merged as `f91fc63` and Step 12 as `ec2e04a` (both `--no-ff`). The Phase C cross-cutting checkpoint `XC-04`
+(combined policies/planning, architecture/design, and documentation review) is ready for review at
+`2127f0f`; it has not yet returned a verdict. Step 13 — Rust Solver Foundation and Package Reader is next after
+the checkpoint gate.
+Milestones M4 and M5 were backfilled on 2026-11-18 as annotated tags `milestone-m4` → `f91fc63` (Step 08 merge)
+and `milestone-m5` → `ec2e04a` (Step 12 merge).
 
 Phase B — Model definition (Steps 03–07) is complete. Step 07 is merged as `3ed558a`, tagged `step-07`, and
 its main CI run [`43293189634`](https://github.com/seb-eis/mocassin-2/actions/runs/43293189634) is green; the
@@ -170,7 +178,7 @@ These reviews do not create step branches or tags and do not replace step audits
 | --- | --- | --- | --- |
 | A. Foundations | 00–02 | Waived — process introduced after completion | — |
 | B. Model definition | 03–07 | `XC-01` [policies and planning](reviews/cross-cutting/xc-01-policies-and-planning.md), `XC-02` [architecture and design](reviews/cross-cutting/xc-02-architecture-and-design.md), `XC-03` [documentation](reviews/cross-cutting/xc-03-documentation-status.md) | All three Passed with notes at `84781f8` — accepted by human owner 2026-11-12; merged `e48d9ca`, main CI `43311424938` green |
-| C. Compilation and build | 08–12 | `XC-04` combined | Ready for review at `dcbf499` |
+| C. Compilation and build | 08–12 | `XC-04` combined | Ready for review at `2127f0f` |
 | D. Solver | 13–19 | `XC-05` combined | Planned |
 | E. Results | 20–22 | `XC-06` combined | Planned |
 | F. GUI | 23–28 | `XC-07` combined | Planned |
@@ -187,6 +195,7 @@ early-warning signal for the next cross-cutting review.
 | Date | Commit | Checked by | Result | Findings / links |
 | --- | --- | --- | --- | --- |
 | 2026-11-12 | `38a22d2` | Fresh independent drift-check context (OpenCode subagent) | Drift found — 3 Major, 9 Minor, 3 Note; Major status/documentation drift remediated before checkpoint freeze | [2026-11-12-phase-b.md](drift-checks/2026-11-12-phase-b.md) |
+| 2026-11-18 | `dcbf499` | Phase C maintenance worktree (implementor; not a fresh reviewer) | Drift found — 2 Major, 5 Minor; all findings fixed on the maintenance branch; PowerShell docs path and Windows verification left for `XC-04` | [2026-11-18-phase-c.md](drift-checks/2026-11-18-phase-c.md) |
 
 ## Notes
 
@@ -208,4 +217,7 @@ early-warning signal for the next cross-cutting review.
 - Milestones M0–M3 were backfilled on 2026-11-12 with annotated tags on the existing step merge commits:
   `milestone-m0` → `47a9a90`, `milestone-m1` → `7b4a994`, `milestone-m2` → `dbf5691`, `milestone-m3` →
   `3ed558a`. Tags were pushed to `origin`; no step tag was moved.
+- Milestones M4 and M5 were backfilled on 2026-11-18 with annotated tags on the existing step merge commits:
+  `milestone-m4` → `f91fc63` (Step 08, first compiled model) and `milestone-m5` → `ec2e04a` (Step 12, first
+  package). Tags were pushed to `origin`; no existing tag was moved or deleted.
 - Tag names record completed checkpoints; they do not replace this dashboard.

@@ -4,10 +4,13 @@ A modern, cross-platform reimplementation of **MOCASSIN** (*Monte Carlo for Soli
 Markov-chain Monte Carlo suite for defect thermodynamics and transport in crystalline solids originally
 developed by Sebastian Eisele and Steffen Neitzel-Grieshammer at Forschungszentrum Jülich / RWTH Aachen.
 
-> **Status: Phase B complete.** Steps 00–07 are complete: repository/toolchain and CI; the immutable domain
+> **Status: Phase C complete.** Steps 00–12 are complete: repository/toolchain and CI; the immutable domain
 > kernel and `.mocprj` format; symmetry and geometry; the particle, structure, transition, energy, lattice, and
-> simulation models; and validation, diagnostics, and model statistics. Step 08 — Model Compilation Pipeline is
-> next. The solver, results API, and GUI arrive in later phases.
+> simulation models; validation, diagnostics, and model statistics; and the Phase C compilation pipeline
+> (compiled model, parameterization, job templates and supercells, immutable `.msl` package, and build
+> orchestration with the `mocassin` CLI). Steps 08–12 are tagged. The Phase C cross-cutting checkpoint `XC-04`
+> is in progress; Step 13 — Rust Solver Foundation and Package Reader follows the checkpoint gate. The solver,
+> results API, and GUI arrive in later phases.
 
 ## Target stack
 

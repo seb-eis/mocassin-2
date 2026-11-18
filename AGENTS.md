@@ -8,11 +8,13 @@ This is a modern, cross-platform reimplementation of **MOCASSIN** (*Monte Carlo 
 the fixed-lattice MMC/KMC simulation suite for defects and transport in crystalline solids originally developed
 at Forschungszentrum Jülich / RWTH Aachen.
 
-**Current state: Phase B is complete.** Steps 00–07 are complete — repository/toolchain and CI; domain kernel
+**Current state: Phase C is complete.** Steps 00–12 are complete — repository/toolchain and CI; domain kernel
 and project format; symmetry/geometry; the particle, structure, transition, energy, lattice, and simulation
-models; and validation, diagnostics, and model statistics. The .NET solution, Rust workspace skeleton, Python
-package, and documentation toolchain exist. Step 08 — Model Compilation Pipeline is next. Do not claim that a
-feature is implemented until code and tests exist.
+models; validation, diagnostics, and model statistics; and the Phase C compilation pipeline (compiled model,
+parameterization, job templates and supercells, immutable `.msl` package, and build orchestration with the
+`mocassin` CLI). Steps 08–12 are merged into `main` and tagged. The Phase C cross-cutting checkpoint `XC-04` is
+in progress. Step 13 — Rust Solver Foundation and Package Reader is next after the checkpoint gate. Do not
+claim that a feature is implemented until code and tests exist.
 
 **Orchestration:** every engagement is coordinated by one orchestrator agent. The human owner interacts only
 with the orchestrator and does not spawn role agents directly. The orchestrator spawns planners, design
