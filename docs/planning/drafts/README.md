@@ -39,5 +39,6 @@ design reviews, audits, ADRs, or step pages, and nothing in this directory autho
 | [LLM assistant and OpenCode integration](llm-assistant.md) | Under discussion | Steps 23, 28, 30 | Avalonia WebView, security model, Step 30/31 |
 | [NaSICON reference sample: Na₃Zr₂Si₂PO₁₂](nasicon-reference-sample.md) | Under discussion | Step 29, `samples/`, `tests/reference/` | Step 29, ADR 0005, MOCASSIN paper |
 | [Analytically solvable diffusion test cases](analytic-diffusion-testcases.md) | Under discussion | Step 29, `tests/reference/` | Step 29, ADR 0005, Eisele dissertation |
+| [Supercell position limit](supercell-position-limit.md) | Under discussion | Steps 10, 13, 14/15/18, 29 | Step 10 `JOB004`/`JOB014`, Step 13 `ReaderLimits`, `02-data-contracts.md` |
 
 Use [`draft-template.md`](draft-template.md) when starting a new draft.
