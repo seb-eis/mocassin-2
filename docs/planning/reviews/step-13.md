@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `113b5467c931e7970ea6b2ca9c3db4c1ed32b41f` |
+| Reviewed commit | `11f089fe708908d92d166dd83738955d5149f245` |
 | Docs branch | `docs/step-13-design` |
 | Review date | 2026-11-18 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
@@ -43,7 +43,7 @@ freeze.
 | Phase | D. Solver |
 | Depends on | 11 (`Done`, merged and tagged; Phase C `XC-04` accepted 2026-11-18, so the gate is open) |
 | Delivers | A Rust workspace with typed package structures, a validated read-only `.msl` reader with bounded Zstd/MessagePack decode, canonical parameterization/lattice signature re-encoding, SHA-256 seed derivation with ChaCha12 streams and a 64-byte `RngStateV1`, a `mocassin-sim` CLI skeleton with structured logging and a write-free `--dry-run` inspector, and the first .NET↔Rust contract fixtures. No Monte Carlo physics. |
-| Sizing | Base 3.5 person-weeks + 1.0 pw contingency = 4.5 pw; the four-week §3.1 trigger is exceeded. The owner must choose Option A (single-step 4.5 pw exception) or Option B (13A/13B split). Seven features. |
+| Sizing | Owner-approved 2026-11-18 as a single step at **4.5 pw** (3.5 pw base + 1.0 pw contingency) under the §3.1 single-step exception, seven features, **no split**; 13A/13B considered and rejected. Guard: stop before feature 4 if features 1–3 exceed 2.0 pw. |
 
 ## Design decisions reviewed
 
@@ -369,7 +369,7 @@ Date:
 ## Resolution status
 
 Round-1 reviewer text, findings, evidence, and verdict are unchanged. The design was corrected on
-`docs/step-13-design` at freeze `113b5467c931e7970ea6b2ca9c3db4c1ed32b41f`; this request-record update is a
+`docs/step-13-design` at freeze `11f089fe708908d92d166dd83738955d5149f245`; this request-record update is a
 documentation-only follow-up. No code, test, configuration, contract, or generated artifact changed.
 
 | Finding | Status | Owner | Commit | Resolution |
@@ -381,12 +381,12 @@ documentation-only follow-up. No code, test, configuration, contract, or generat
 | **m-3** | Fixed | Planner | `113b546` | `fork` now states `stream_le64` (8 bytes) and `word_pos_le128` (16 bytes), domain 1..255 bytes, and `next_bounded` returns half-open `[0, upper)`; the extension `config_hash` is the 32-byte SHA-256 of UTF-8 `config_json`. |
 | **m-4** | Fixed | Planner | `113b546` | The RNG/load baseline is a same-runner-class entry in `tests/reference/bench/baselines.json`; the 10 % rule is measured only against that class. Step 13 records the first entry; Step 29 automates the regression. |
 | **m-5** | Fixed | Planner | `113b546` | New real-writer `tests/contracts/packages/step-13-populated/` package with non-empty pair/cluster tables and an MMC job, canonical summary, extracted payloads, README, and regeneration command. It is a test artifact, not a schema change; feature 6 builds it from a committed sample. |
-| **m-6** | Fixed (owner-gated) | Planner | `113b546` | Honest arithmetic: 3.5 pw base + 1.0 pw contingency = 4.5 pw, beyond the four-week trigger. The no-split claim is withdrawn. §13 records Option A (single-step exception) and Option B (13A/13B split); the owner must choose. |
+| **m-6** | Fixed (owner-approved) | Planner | `11f089f` | Honest arithmetic: 3.5 pw base + 1.0 pw contingency = 4.5 pw, beyond the four-week trigger. The no-split claim is withdrawn. Owner approved 2026-11-18: single step at 4.5 pw as a §3.1 exception, no split; 13A/13B considered and rejected; guard: stop before feature 4 if features 1–3 exceed 2.0 pw. Recorded in `04-roadmap.md`, `05-open-decisions.md`, and step page §13. |
 | **m-7** | Deferred | Step agent | — | Status-dashboard drift is step-agent-owned per AGENTS §3.8; the planner did not edit `status.md`. It is fixed at the start gate when the step branch is created. |
 | **m-8** | Fixed | Planner | `113b546` | The existing `mocassin-cli → mocassin-solver` edge stays for the future run path and is shown in the architecture/step page/solver-architecture graphs; Step 13's inspection path calls `mocassin-msl`/`mocassin-rng` directly and does not call the placeholder solver. |
 | **m-9** | Fixed | Planner | `113b546` | `models.format_version` and `lattices.format_version` are cross-checked against their payloads; the job payload version is checked on decode. A schema/version test covers a mismatched column. |
 | **m-10** | Fixed | Planner | `113b546` | Closeout plan names `docs/planning/closeout/step-13.json` and `python tools/check_closeout_evidence.py`, binding the audited commit, closeout CI `head_sha`, `main` SHA at freeze, and merge candidate, in §8, the tasks, and the acceptance criteria. |
-| **n-1** | Open (owner choice) | Human owner | — | Not decided by the planner. Option A keeps the 64-byte layout in `02-data-contracts.md` §4.3/§4.5 as the decision note (no schema bump); Option B adds a short ADR recording the persisted layout and algorithm-id rule. Both are recorded in the Step 13 page §14 and the gated decision register. |
+| **n-1** | Resolved | Human owner / planner | `11f089f` | Owner decision 2026-11-18: **data-contract note only, no ADR**. The 64-byte `rngState` layout, the `chacha12-v1` binding, and the state/layout-change-is-format-breaking rule live in `02-data-contracts.md` §4.3/§4.5; no schema bump. The ADR option is removed from the step page and the gated register. |
 | **n-2** | Fixed | Planner | `113b546` | Format-breaking scope split: draw semantics/state layout/algorithm id = new id + ADR; seed/fork derivation = reproducibility-contract change (ADR/version note) without a state-layout change. |
 | **n-3** | Fixed | Planner | `113b546` | `RngStateV1` explicitly carries the raw 32-byte key by design; `.mcs` is seed-sensitive, never log `rngState`/key, expose only `seedHash`. Recorded in the step page and data contract. |
 | **n-4** | Fixed | Planner | `113b546` | `docs/reference/msl-format.md` model row now lists both `signature` (parameterization) and `model_signature` (compiled identity). |
