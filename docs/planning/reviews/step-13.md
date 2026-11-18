@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `0fff07df5e0e009394df5989c4500f9b9cd1b733` |
+| Reviewed commit | `b9cda113f61bb80aab9b02c9ead7b49446be52c8` |
 | Docs branch | `docs/step-13-design` |
 | Review date | 2026-11-18 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
@@ -314,7 +314,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 ## Reviewer independence
 
@@ -370,8 +370,16 @@ Date:
 ## Resolution status
 
 Round-1 reviewer text, findings, evidence, and verdict are unchanged. The design was corrected on
-`docs/step-13-design` at freeze `0fff07df5e0e009394df5989c4500f9b9cd1b733`; this request-record update is a
+`docs/step-13-design` at freeze `b9cda113f61bb80aab9b02c9ead7b49446be52c8`; this request-record update is a
 documentation-only follow-up. No code, test, configuration, contract, or generated artifact changed.
+
+**Record-repair note (round 3, R3-1).** The request commit `798b917` overwrote the round-2 reviewer's
+"Independence and frozen state" sentence from `9263949589c449b063e7501f5ab254ed9bf09d7f` to
+`0fff07df5e0e009394df5989c4500f9b9cd1b733`. The round-2 section has been restored **verbatim** from
+`aa825cd`; a diff of the round-1 and round-2 review sections between `aa825cd` and this record is empty. Cause: a
+global replacement used when updating the request `Reviewed commit` cell. Future request edits touch only owner
+fields — the Request table, `Record state`, and `Resolution status` — and never reviewer round text. Round 3's
+text, including its R3-1 finding, is unchanged.
 
 | Finding | Status | Owner | Commit | Resolution |
 | --- | --- | --- | --- | --- |
@@ -395,7 +403,7 @@ documentation-only follow-up. No code, test, configuration, contract, or generat
 | **n-6** | Fixed | Planner | `113b546` | Depth justification corrected: the model nests five container levels; cap 8 leaves headroom. |
 | **n-7** | Fixed | Planner | `113b546` | `03-quality-strategy.md` no longer points at `04-roadmap.md` for RNG budgets; it points at §13 and the step page. |
 | **n-8** | Fixed | Planner | `113b546` | The 100 ms claim is scoped to the ceria fixture; a large payload is guard-bounded but not promised at 100 ms. |
-| **M-3** | Fixed | Planner | `0fff07d` | Replaced the unimplementable node-mask check: void is exempt (the writer never puts it in `particle_ids`), and non-void state particles are checked against the union of the rule collection's direction masks at the same node; a collection with no directions is invalid. Exact per-direction occupation is assigned to Step 14 (no rule→representative-direction marker in v1; Step 11 R2-3). The real `msl-v1` rules pass; the populated/MMC fixture exercises the remaining check. |
+| **M-3** | Fixed | Planner | `0fff07d` | Replaced the unimplementable node-mask check: void is exempt (the writer never puts it in `particle_ids`), and non-void state particles are checked against the union of the rule collection's direction masks at the same node; a collection with no directions is invalid. Exact per-direction occupation is assigned to Step 16 after the selected direction/rule lookup (no rule→representative-direction marker in v1; Step 11 R2-3). The real `msl-v1` rules pass; the populated/MMC fixture exercises the remaining reader check and feeds the Step 16 exact check. |
 | **m-11** | Fixed | Planner | `0fff07d` | `jump_mapping` no longer requires `direction.position_id == bucket_position`; equivalent-start mappings are accepted because `EquivalentStartPositions` is not persisted. Range/collection/uniqueness checks remain; exact equivalence is a Step 08 writer invariant and Step 14 consumes the mapping as authored. |
 | **m-12** | Fixed | Planner | `0fff07d` | `max_model_elements` raised to 512,000,000 (one element per byte at the 512 MiB guard), covering 1M rules and 16M links; per-field caps still bound typed decode. The `max_rules` default is 1M because `MaxRuleCount` is an `init` option; a raised writer limit needs a raised `ReaderLimits`. |
 | **m-13** | Fixed | Planner | `0fff07d` | Added solver exit `5` = batch partial success (at least one job failed, others completed), reserved until Step 19, to the canonical table and every mirror; it shares the .NET partial-success meaning but is not otherwise reused. |
@@ -404,6 +412,11 @@ documentation-only follow-up. No code, test, configuration, contract, or generat
 | **n-11** | Fixed | Planner | `0fff07d` | `02-data-contracts.md` now says `particle_ids` lists non-void compiled particles only; void is the empty occupation and is not evidence of disallowance. |
 | **n-12** | Fixed | Planner | `0fff07d` | Replaced the particle-identity `Σ q_p Δx_p` text with the writer's node-wise `Σ_node (q(S2,node)-q(S0,node))·x(path node)` in the data contract and Step 15 page. |
 | **n-13** | Fixed | Planner | `0fff07d` | `mocassin-types` dependency row now includes `serde_bytes`; `max_rules` is described as the default `CompilationOptions.MaxRuleCount` (`init`, callers can raise it), not a hard cap, with a raised `ReaderLimits` required. |
+| **R3-1** | Fixed | Planner | `b9cda11` | Restored the round-2 "Independence and frozen state" section verbatim from `aa825cd`; the round-1+round-2 section diff between `aa825cd` and this record is empty. The repair note above records the cause and the owner-field-only rule; round 3's text is unchanged. |
+| **m-14** | Fixed | Planner | `b9cda11` | Moved the exact per-direction occupation check from Step 14 to Step 16, which owns the selected direction/rule lookup. Step 16 performs a conditional precheck only for the selected rule/direction pair after `state0` lookup; Step 14 builds context/pools and does not check every (rule, direction) pair. Step 16 page, tests, and acceptance updated; Step 14 assignment removed. |
+| **m-15** | Fixed | Planner | `b9cda11` | Replaced the universal "every writer-valid payload" claim with the documented `ReaderLimits` envelope: positions/P1/rules/directions/collections/tables/links/paths/extensions/simulations and 512M elements are solver caps; a writer-valid package above one is rejected and needs a raised `ReaderLimits`. |
+| **n-14** | Fixed | Planner | `b9cda11` | Separated the Step 13 fixture criterion from the Step 16 exact check. The populated/MMC fixture must have non-empty tables, an MMC job, a non-trivial per-node mask difference, and an equivalent-start mapping; Step 13 tests the void-exempt union and mapping, Step 16 consumes the same fixture for the exact check. |
+| **n-15** | Fixed + assigned | Planner | `b9cda11` | Step 08 §8.4 and the contract now use the node-wise endpoint-moment formula. The `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` XML-doc corrections are assigned to Step 13 feature 4 (code), not edited on this docs branch; the feature scope and task record it. |
 
 The step agent fills any further status after the next verdict. Do not alter the reviewer-authored findings,
 evidence, or verdict.
@@ -472,7 +485,7 @@ human owner.
 I am a fresh context. I did not author, design, or implement the reviewed work and have no shared conversation
 with the planner, implementor, round-1 reviewer, or orchestrator. I read the repository at the record HEAD
 `f8aa70f1714cc5c436b4446448a804e6e15ebb54` and re-checked the design at the reviewed commit
-`0fff07df5e0e009394df5989c4500f9b9cd1b733`.
+`9263949589c449b063e7501f5ab254ed9bf09d7f`.
 
 Frozen-state delta: `git diff --name-status 9263949 f8aa70f` is only
 `M docs/planning/reviews/step-13.md` (the metadata-only record update). `git diff --name-status 306238a 9263949`
@@ -584,7 +597,6 @@ path. The design is not ready for implementation until M-3 is corrected (and the
 explicitly accepted). The format, RNG, CLI, and crate-boundary decisions remain sound; no code, test,
 configuration, contract, or generated artifact changed in the round-2 delta. m-7 remains open as a step-agent
 status-dashboard fix.
-
 ### Re-review round 3
 
 #### Independence and frozen state
