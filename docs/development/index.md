@@ -48,8 +48,10 @@ The detailed architecture is in the internal plan; the repository layout is summ
 
 ## Current phase
 
-Steps 00–07 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, the
-symmetry/geometry kernels, the particle/structure/transition/energy models, the lattice/simulation models, and
-validation, diagnostics, and model statistics. Phase B is closed at the `step-07` tag; Step 08 — Model
-Compilation Pipeline is next. The solver and GUI are added in later phases. Do not treat placeholder pages as
-implemented features.
+Steps 00–12 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, the
+symmetry/geometry kernels, the particle/structure/transition/energy models, the lattice/simulation models,
+validation, diagnostics, and model statistics, and the Phase C compilation pipeline (compiled model,
+parameterization, job templates and supercells, immutable `.msl` package, and the `mocassin` CLI). Phase C
+implementation is complete at the `step-12` tag; the Phase C cross-cutting checkpoint `XC-04` is in progress,
+and Step 13 — Rust Solver Foundation and Package Reader follows the checkpoint gate. The solver and GUI are added in later
+phases. Do not treat placeholder pages as implemented features.

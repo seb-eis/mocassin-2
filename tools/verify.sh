@@ -42,6 +42,7 @@ mode="all"
 require_closeout=false
 closeout_requested=false
 list_modes=false
+solution_release_built=false
 
 for arg in "$@"; do
   case "$arg" in
@@ -108,6 +109,7 @@ run_dotnet() {
   echo "== .NET =="
   dotnet restore Mocassin.slnx
   dotnet build Mocassin.slnx -c Release --no-restore
+  solution_release_built=true
   dotnet test Mocassin.slnx -c Release --no-build
   dotnet format Mocassin.slnx --verify-no-changes --no-restore
 }
@@ -115,6 +117,7 @@ run_dotnet() {
 run_api() {
   echo "== Public API and dependency gates =="
   dotnet build Mocassin.slnx -c Release
+  solution_release_built=true
   dotnet tool restore
   python tools/contracts/check_nuget_licenses.py
   output="$(dotnet list Mocassin.slnx package --vulnerable --include-transitive)"
@@ -146,6 +149,13 @@ run_python() {
 
 run_docs() {
   echo "== Documentation =="
+  # DocFX consumes the Release assemblies. Build them when this mode runs on its own; `all` already built
+  # them in the .NET stage, so this step is skipped there and the build is never duplicated.
+  if [[ "$solution_release_built" != "true" && -f Mocassin.slnx ]] && command -v dotnet >/dev/null 2>&1; then
+    echo "== .NET Release build (DocFX input) =="
+    dotnet build Mocassin.slnx -c Release
+    solution_release_built=true
+  fi
   python tools/check_doc_math.py
   python tools/check_docs_links.py
   ./tools/docs/build-docs.sh

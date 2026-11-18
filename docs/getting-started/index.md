@@ -33,7 +33,7 @@ zensical build --strict
 ```
 
 The combined build copies generated DocFX and rustdoc output into `site/api/dotnet` and `site/api/rust` when
-those projects and crates exist.
+those projects and crates exist, and it builds the .NET Release assemblies automatically when DocFX needs them.
 
 ## Create, validate, and build
 
