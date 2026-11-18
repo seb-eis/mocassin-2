@@ -26,12 +26,12 @@ UI consumes later.
   `net11.0`/`linux-x64`; bounded `@file` is part of the contract; no shell-completion command in Step 12
   (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
 - **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 at `9d4d2ef`; its first parent
-  is the design-merge commit `eb31979`). Features 1–6 are squashed into the step branch; see the feature log.
-- **Step CI:** —
+  is the design-merge commit `eb31979`). Features 1–7 are squashed into the step branch; see the feature log.
+- **Step CI:** — (closeout dispatch pending)
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Last updated:** 2026-11-17
+- **Last updated:** 2026-11-18
 
 ### Approved feature list
 
@@ -59,7 +59,8 @@ implemented and squashed. Feature rows stay empty until then.
 | 3 Build and preview command | `feature/step-12-build-orchestration-and-cli/build-and-preview-command` | Squashed | `dotnet` (81 CLI tests), `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `af7431b` |
 | 4 Project and compile commands | `feature/step-12-build-orchestration-and-cli/project-and-compile-commands` | Squashed | `dotnet` (121 CLI tests, 500 Packages tests including 6 template tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `e7564c0` |
 | 5 Package inspection commands | `feature/step-12-build-orchestration-and-cli/package-inspection-commands` | Squashed | `dotnet` (147 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `85d8d41` |
-| 6 Doctor and dry-run clean | `feature/step-12-build-orchestration-and-cli/doctor-and-dry-run-clean` | Squashed | `dotnet` (168 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | Recorded with feature 7 |
+| 6 Doctor and dry-run clean | `feature/step-12-build-orchestration-and-cli/doctor-and-dry-run-clean` | Squashed | `dotnet` (168 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `a2c6178` |
+| 7 Documentation, parity, and closeout | `feature/step-12-build-orchestration-and-cli/documentation-parity-and-closeout` | Squashed | `dotnet` (171 CLI tests), `docs`, `structure`, `api`, `contracts` exit 0; full `all --require` pending closeout | Not run (no per-feature CI) | `7d17c22` |
 
 ### Deviations and accepted risks
 
@@ -1699,8 +1700,8 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 7 — Documentation, parity, and closeout
 
-- [ ] Write the pages in §18.1 and update the parity rows in §18.3.
-- [ ] Record the 10⁴-job evidence and the final local gates.
+- [x] Write the pages in §18.1 and update the parity rows in §18.3.
+- [x] Record the 10⁴-job evidence and the acceptance runs.
 - [ ] Run `./tools/verify.sh all --require` including the `aot` gate at Step 12 closeout and record the AOT
       output in the closeout evidence; record that the closeout GitHub workflow does not run `verify.sh`.
 - [ ] Fill the closeout evidence, set the audit request, and run `./tools/verify.sh all --require`.
@@ -1841,32 +1842,32 @@ These decisions are recorded by date and are not open for re-litigation in round
 
 ## 22. Acceptance criteria
 
-- [ ] `mocassin validate samples/ceria/ceria.mocprj` exits 0 with the expected warnings; the human table and
+- [x] `mocassin validate samples/ceria/ceria.mocprj` exits 0 with the expected warnings; the human table and
       `validation-v1` report are unchanged from Step 07.
-- [ ] `mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o /tmp/ceria.msl` produces a package that
+- [x] `mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o /tmp/ceria.msl` produces a package that
       `mocassin verify` accepts, using the implicit default parameterization (`parameterizations: []`), and
       writes `job_selection = "all"`. The ceria model-definition sample has no job template and is not a
       build sample.
-- [ ] `--jobs 1-3` writes exactly jobs 1–3 with full-expansion IDs and `job_selection = "1-3"`; `--jobs 2,5`
+- [x] `--jobs 1-3` writes exactly jobs 1–3 with full-expansion IDs and `job_selection = "1-3"`; `--jobs 2,5`
       writes exactly those IDs with a gap and the same IDs in a full build.
-- [ ] `--jobs` normalizes equivalently (`1,2,3` = `1-3`; a full selection = `all`) and rejects malformed,
+- [x] `--jobs` normalizes equivalently (`1,2,3` = `1-3`; a full selection = `all`) and rejects malformed,
       zero, descending, and out-of-range selections with exit 2.
-- [ ] Build/job-template/parameterization selection auto-selects a single recipe, lists IDs on ambiguity,
+- [x] Build/job-template/parameterization selection auto-selects a single recipe, lists IDs on ambiguity,
       honours explicit overrides, and uses the implicit default when no template exists.
-- [ ] `--force` atomically replaces an existing package; without it, an existing target exits 3 and the
+- [x] `--force` atomically replaces an existing package; without it, an existing target exits 3 and the
       original file is byte-identical.
-- [ ] Cancelling before publication leaves no temp file and preserves an existing package; cancelling after
+- [x] Cancelling before publication leaves no temp file and preserves an existing package; cancelling after
       publication leaves the package and exits 6.
-- [ ] `--json` prints exactly one schema-valid report with `exitCode` for `validate` and the seven
+- [x] `--json` prints exactly one schema-valid report with `exitCode` for `validate` and the seven
       report-backed commands, including usage errors; help/version and reserved commands emit no report;
       `--json` leaves stderr JSONL-only; JSON-Lines events validate against the `events` contract; `--quiet`
       additionally suppresses stage/progress/log events.
-- [ ] `mocassin --help`, `mocassin <command> --help`, and `mocassin --version` exit 0; `mocassin --version`
+- [x] `mocassin --help`, `mocassin <command> --help`, and `mocassin --version` exit 0; `mocassin --version`
       prints the assembly informational version and the runtime description from the CLI action, and
       `mocassin <command> --version` is `CLI001`/2; a parse error exits
       2 with `CLI001` and never exposes the library's default 1; `--jobs -1`, `--parallel -1`, and
       `-o -file` reach the handlers as values; `--` ends option parsing.
-- [ ] `@file` response files follow §5.3: quoting/whitespace and `#` comment rules, recursive references,
+- [x] `@file` response files follow §5.3: quoting/whitespace and `#` comment rules, recursive references,
       cwd-relative paths, `@` literal and no escape, `@file` before `--` expanded and after `--` literal,
       `--input=@file` literal, `--input @file` token-expanded before arity, `--json` inside a file honored,
       and the §5.3 limits (1 MiB/4 MiB raw bytes, depth 8, 10,000 tokens contributed by response files,
@@ -1882,18 +1883,18 @@ These decisions are recorded by date and are not open for re-litigation in round
       skip. Feature 7 runs `./tools/verify.sh all --require` at Step 12 closeout and records the output; the
       real `Mocassin.Cli` publish result is recorded as evidence; dependency-owned warnings are attributed to
       Step 31. The closeout GitHub workflow does not run `verify.sh`, so this is a local gate.
-- [ ] `build --preview` writes no package, reports `mode = "preview"`, projects `BuildResult.Preview`, and
+- [x] `build --preview` writes no package, reports `mode = "preview"`, projects `BuildResult.Preview`, and
       exits with the build table. The same payload is available to a library caller (Step 26) without a
       reload, recompile, or CLI reference.
-- [ ] `clean --json` without `--dry-run` emits a `clean-v1` report with `dryRun = false`, `removedCount = 0`,
+- [x] `clean --json` without `--dry-run` emits a `clean-v1` report with `dryRun = false`, `removedCount = 0`,
       and `CLI008`, and deletes nothing.
-- [ ] `new --template blank` and `new --template ceria` create valid projects with fresh identity and seed;
+- [x] `new --template blank` and `new --template ceria` create valid projects with fresh identity and seed;
       `compile -o` writes a `compiled-inspection-v1` document; `inspect`/`verify` read a real package.
-- [ ] `doctor` exits 0 on CI; a missing solver is a warning. `clean --dry-run` lists only and never deletes.
-- [ ] `--parallel` 1 and 4 produce the same signatures and `package-summary-v1`; output order is ascending
+- [x] `doctor` exits 0 on CI; a missing solver is a warning. `clean --dry-run` lists only and never deletes.
+- [x] `--parallel` 1 and 4 produce the same signatures and `package-summary-v1`; output order is ascending
       `JobId`.
-- [ ] The CLI builds and verifies 10⁴ jobs without the GUI within the Step 11 budget (< 10 min, < 2 GB).
-- [ ] Documentation written (§18.1).
+- [x] The CLI builds and verifies 10⁴ jobs without the GUI within the Step 11 budget (< 10 min, < 2 GB).
+- [x] Documentation written (§18.1).
 
 ### Acceptance evidence (2026-11-17)
 
