@@ -6,7 +6,7 @@
     "head_sha": "9e1997d270ae79d8ad2cd2357529a08e158401fb"
   },
   "main_sha_at_freeze": "9d4d2ef2fdc484daf6da73c14773b1767ee74183",
-  "merge_candidate": "e6c403a94d3b0a2ec1bad1286b109ba0226b2d3f",
+  "merge_candidate": "9e1997d270ae79d8ad2cd2357529a08e158401fb",
   "merge_tree_ci": {
     "run_id": "",
     "head_sha": ""
@@ -21,6 +21,6 @@
     "Platform CI is 'not run': Step 12 adds no new platform-specific code beyond the Step 11 native fsync path. The Step 11 Windows gate at 419716678cacf6ad2c50ee379e1d2e7342bbf13b remains the platform evidence. macOS remains manual.",
     "The 10,000-job acceptance workload (20 configurations x 500 jobs; four configurations x 2,500 would exceed JOB008) built and verified in 3.76 s wall time with 151,820 KB peak RSS, produced a 9,625,600-byte package, and standalone verify was valid in 1.21 s. The step page records the exact command and the performance page records the method and stage timings.",
     "The promoted compiled-bound parameterization warning rule is covered end to end by tests/contracts/project-parameterization-warning.mocprj and BuildParameterizationWarningTests (warning-free validation; build --warnings-as-errors exits 4 with PRM003/PRM006; the same fixture builds and verifies without the flag). The earlier scripted-pipeline mapping test remains.",
-    "merge_candidate is the first documentation-only closeout commit e6c403a94d3b0a2ec1bad1286b109ba0226b2d3f (closeout evidence, audit request, step page, dashboard). The commit that records this field is a docs-only follow-up; no code, test, contract, or configuration change exists after the audited commit."
+    "merge_candidate follows the Step 11 N-2 convention: a commit cannot contain its own SHA, so audit_commit, closeout_ci.head_sha, and merge_candidate all record the audited code commit 9e1997d270ae79d8ad2cd2357529a08e158401fb. The actual documentation-only delta from that commit to the evidence/audit/status commit is verified manually with git diff --name-status 9e1997d..HEAD and contains only docs/planning paths (closeout evidence, audit request, step page, and status dashboard). No code, test, contract, or configuration file changes after the audited commit."
   ]
 }
