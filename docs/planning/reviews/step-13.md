@@ -313,7 +313,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Changes required
 
 ## Reviewer independence
 
@@ -454,3 +454,123 @@ signature re-encoding, RNG derivation/state, dry-run format, and both required g
 independently reproduced the two stored signatures from the real payloads. The design is not ready for
 implementation until M-1 and M-2 are corrected and the Minors are either fixed or explicitly accepted by the
 human owner.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author, design, or implement the reviewed work and have no shared conversation
+with the planner, implementor, round-1 reviewer, or orchestrator. I read the repository at the record HEAD
+`f8aa70f1714cc5c436b4446448a804e6e15ebb54` and re-checked the design at the reviewed commit
+`9263949589c449b063e7501f5ab254ed9bf09d7f`.
+
+Frozen-state delta: `git diff --name-status 9263949 f8aa70f` is only
+`M docs/planning/reviews/step-13.md` (the metadata-only record update). `git diff --name-status 306238a 9263949`
+is docs only: `solver-architecture.md`, `testing-and-parity.md`, `01-target-architecture.md`,
+`02-data-contracts.md`, `03-quality-strategy.md`, `04-roadmap.md`, `05-open-decisions.md`, the Step 13/15/19
+pages, `cli.md`, and `msl-format.md`. No code, test, configuration, contract, generated artifact, or design
+page outside the review scope changed. The reviewed design tree is `9263949`; this record commit is a
+documentation-only child of `f8aa70f`.
+
+I re-read `AGENTS.md` §3/§8–§12, `docs/planning/reviews/README.md`, the full record, the Step 13 page, the
+Step 11/12 records, Step 10/14/15/16/18/19/20 pages, ADRs 0002/0004/0005/0010/0011/0013/0014,
+`02-data-contracts.md`, `01-target-architecture.md`, `03-quality-strategy.md`, `04-roadmap.md` §3/§3.1,
+`05-open-decisions.md`, `code-structure.md` §2.2, `solver-architecture.md`, `testing-and-parity.md`,
+`msl-format.md`, `cli.md`, `status.md`, the parity matrix, the Rust workspace/crates, and the .NET writer,
+compiler, verifier, and payload DTOs named in round 1.
+
+#### Commands and results
+
+- `python3 tools/check_doc_math.py` → exit 0, 171 files, no delimiter warnings.
+- `./tools/verify.sh docs --require` → exit 0; math/link checks, Zensical strict build, DocFX, and
+  `cargo doc --workspace --no-deps` all clean; `Closeout gate completed with required checks enabled`.
+- `./tools/verify.sh policy --require` → exit 0; NuGet licence/vulnerability audit, ApiCompat for every project
+  (no breaking changes), contract artifacts current (26 files), model projection 5/5, parameterization 4/4,
+  lattice 2/2, space-group catalog `1f3bf67d…`, process consistency OK, 58 tool tests OK, SPDX in 706 files, no
+  secret patterns in 1,110 files, `cargo-deny` advisories/bans/licenses/sources OK.
+- Independent read-only SQLite queries and MessagePack decode of the `msl-v1` fixture (`models`, `lattices`,
+  `jobs`, `payloads/model-1.bin`, `job-1.bin`, `lattice-1.bin`). The only write is this record; `site/`,
+  `target/`, and `artifacts/` are ignored build products.
+
+I did not re-run the full .NET/Rust test suites because the frozen delta contains no code, test, or
+configuration; the design gate is `docs` + `policy` + the contract/projection checks inside `policy`, all of
+which pass.
+
+#### Format and signature reproduction (independent)
+
+- Stored integers are smallest-width, canonical widths are fixed: `job-1.bin` stores `target_mcsp = 150` as
+  `cc 96` and `format_version` as `01`; the canonical writer forces `0xdd` array32, `0xdb` str32, `0xc6` bin32,
+  `0xcf` uint64, `0xd3` int64, and `0xcb` float64 (`CanonicalProjectionWriter.cs`).
+- The v1 lattice payload is an array, not `bin`: `lattice-1.bin` stores the `lattice` value as
+  `dc 03 60` (array16, 864 `u8`) and the lattice projection uses `bin32` (`LatticeSignatureV1.cs`).
+- I re-encoded both canonical projections in Python from the raw payload bytes: the six-field
+  parameterization projection (array32/6, uint64 1, str32 `model_signature`, empty pair/cluster tables, the
+  20-value `defect_background`, four rule frequencies, 12-decimal quantization) hashes to
+  `1845b70e82320d75f768b33d1a9a46a8ae6170c33ad96013317f89fe9189a74b`, equal to `models.signature` and the
+  payload's `signature`. The five-field lattice projection (array32/5, uint64 1, str32 `model_signature`,
+  array32/3 sizes, uint64 position count, bin32 particles) hashes to
+  `880b6eac79e9e920b6ea448c15f21b06be772f4bad774f12ea45c07420d25845`, equal to the job 1 `lattices.signature`.
+  This proves §3.6 is implementable from the stored payload without a .NET dependency.
+
+#### Closure of the round-1 findings
+
+| Finding | Round-1 severity | Round-2 status | Verification |
+| --- | --- | --- | --- |
+| **M-1** | Major | **Closed** | `01-target-architecture.md` §7.3 (lines 377–383) is the single canonical table: 0, 10, 11, 12, 13 (numerical failure **or internal invariant violation**, caught panic included), 14, 15, 16. `cli.md` lines 470–486, `solver-architecture.md` lines 175–178, `02-data-contracts.md` lines 1549–1561, the Step 13 page §3.7 lines 811–832, and Step 19 lines 100–113 mirror it; Step 19 adds only 17/18 and says “do not redefine 13 as numerical only”. The step page maps a caught panic to **13** (lines 1004–1006), not 10. No code in the 0/10–16 table has two meanings. |
+| **M-2** | Major | **Not fully closed — new M-3** | Mass conservation, charge conservation, `path_vector`/`length`, the zero-transport rule, and the Step 15 assignment are sound and match the .NET writer (details below). The new **allowed-occupation** check is not implementable from the v1 payload and rejects the only real fixture (M-3). |
+| **m-1** | Minor | Closed | Step page §3.2 lines 527–540 separates job columns vs job payload, `lattice_a/b/c` vs the lattice payload, and `models`/`lattices` `format_version` vs their payloads; a job's resolved settings are explicitly not compared with `simulations[].default_settings` (fixture job 1 `target_mcsp = 150`, simulation 0 default 200). `02-data-contracts.md` lines 1047–1050 adds the same rule. |
+| **m-2** | Minor | Closed for the named limits; new m-12 for the element budget | Step page §3.3 lines 569–571 aligns positions 500,000 (`SupercellGenerator.MaximumPositions = 500_000`), P1 positions 10,000 (`UnitCellVectorEncoder.MaxP1Positions = 10_000`), and rules 1,000,000 (`CompilationOptions.MaxRuleCount = 1_000_000`); directions 1,000,000. The `.NET` constants were re-read. The model **element** budget is not aligned (m-12). |
+| **m-3** | Minor | Closed | Step page lines 893–899 states `stream_le64` (8 bytes), `word_pos_le128` (16 bytes), domain 1..255 bytes, half-open `[0, upper)`, and the 32-byte SHA-256 `config_hash` of the UTF-8 `config_json` (line 936–938). |
+| **m-4** | Minor | Closed | Step page §4.5 lines 965–968 and §10 lines 1146–1147 name the same-runner-class entry in `tests/reference/bench/baselines.json`; `03-quality-strategy.md` lines 562–575 repeats it. The 10 % rule is class-relative, not cross-machine. |
+| **m-5** | Minor | Closed in design; fixture is a Step 13 deliverable | §7 table and feature 6 add `tests/contracts/packages/step-13-populated/` with non-empty pair/cluster tables and an MMC job, built by the real writer from a committed sample; §7 lines 1077–1081 say to add a small sample under `samples/` if none combines both. The fixture is not present at the freeze (`tests/contracts/packages/` has only `msl-v1`, `amend-1`, `amend-1-net10`), so this is a design commitment, not evidence. It must exercise the fixed M-3 check when built. |
+| **m-6** | Minor | Closed | Owner-approved 2026-11-18 at **4.5 pw** (3.5 base + 1.0 contingency), single-step exception, no split, 13A/13B considered and rejected, guard “stop before feature 4 if features 1–3 exceed 2.0 pw”. Recorded consistently in `04-roadmap.md` §3.1 (row and exception paragraph), `05-open-decisions.md` line 91, and the Step 13 page status block + §13. No unqualified no-split claim remains: the exception and guard are recorded. The request checklist still carries the old 3.0–4.0 pw text (n-10). |
+| **m-7** | Minor | **Open — deferred to the step agent** | `status.md` line 63 still has Step 13 “Not started”/“Not requested”; the Active work paragraph (lines 85–90) still says XC04-F1–F5 must merge before the gate opens to Step 13, while the step page says the design review is `Re-review required` and Phase C/XC-04 is accepted (F1–F5 fixed at `73bb608`). Step-agent-owned; hygiene only (n-9). |
+| **m-8** | Minor | Closed | The architecture graph (lines 170–178), `solver-architecture.md` (lines 17–46), and the Step 13 page §1 (lines 143–161) all show the existing `mocassin-cli → mocassin-solver` edge for the future run path, with the inspection path calling `mocassin-msl`/`mocassin-rng` directly. `src/rust/crates/mocassin-cli/Cargo.toml` declares `mocassin-solver`. |
+| **m-9** | Minor | Closed | Step page §3.2 lines 531–532 cross-checks `models.format_version`/`lattices.format_version` against their payloads and checks the job payload version on decode; the Step 13 test table line 1114 adds the schema/version test. |
+| **m-10** | Minor | Closed | Step page §8 (lines 1098–1101), the task list (line 1261–1262), and acceptance criteria name `docs/planning/closeout/step-13.json` and `python tools/check_closeout_evidence.py` with the audited commit, closeout CI `head_sha`, `main` SHA at freeze, and merge candidate. |
+| **n-1** | Note | Closed | Owner decision 2026-11-18: data-contract note only, no ADR. The gated register row is removed; `05-open-decisions.md` line 90 records the resolved decision, and `02-data-contracts.md` lines 1364–1365/1435 plus Step 13 page §4.3/§14 carry the layout, `chacha12-v1` binding, key-by-design rule, and format-breaking rule. |
+| **n-2** | Note | Closed | Step page lines 924–929 split draw semantics/state layout/algorithm id (new id + ADR) from seed/fork derivation (reproducibility-contract change without a state-layout change). |
+| **n-3** | Note | Closed | Step page lines 914–917 and `02-data-contracts.md` line 1365 state the raw 32-byte key is in the state by design, `.mcs` is seed-sensitive, and only `seedHash` may be logged. |
+| **n-4** | Note | Closed | `msl-format.md` line 130 lists both `signature` (parameterization) and `model_signature` (compiled identity). |
+| **n-5** | Note | Closed | Step page lines 1025–1027 and `cli.md` state the `settings:` line is the resolved job settings/flags, not `simulations[].default_settings`; the 150 vs 200 fixture is named. |
+| **n-6** | Note | Closed | Step page line 553 and `02-data-contracts.md` line 1130 correct the depth justification to five container levels with cap 8. |
+| **n-7** | Note | Closed | `03-quality-strategy.md` line 574 points at §13 and the step page, not `04-roadmap.md`, for the RNG budgets. |
+| **n-8** | Note | Closed | Step page lines 499–500 and 1144–1145 and `03-quality-strategy.md` lines 573–575 scope the 100 ms claim to the ceria fixture; a large payload is guard-bounded, not promised at 100 ms. |
+
+**M-2 detail that is sound.** The mass check matches `TransitionRuleHelpers.MassConserved` (non-void symbol
+multiset, `state0` vs `state2`); the charge check matches `ChargeConserved` (`1e-9` absolute, void omitted).
+`CellGeometry.ToCartesian` is `fA·a + fB·b + fC·c` with A/B/C as columns, which matches the Step 13 `Σ movement`
+formula and the payload's `cell_vectors_ang`; the 1e-9 relative/absolute tolerance absorbs the writer's
+12-decimal `PathVector` quantization (`IndexingCompilationStage.Quantize`). The zero-transport rule matches
+`ComputeTransport` (it adds nothing when `q(state0[node]) == q(state2[node])`). The Step 15 assignment is
+recorded in the Step 15 page and has a sound rationale: `PositionPayload.Vector4` is
+`[cellA, cellB, cellC, P]` and `StructurePayloadMapper.MapPosition` never writes a fractional P1 coordinate, so
+`Σ Δq·x` cannot be recomputed from the package; the residual trust boundary is recorded in §3.5, §11, §12, and
+the Step 15 page. The new populated/MMC fixture is the right vehicle for the non-empty and MMC paths, but it
+does not exist at the freeze and must be built with the corrected rule check.
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Major** | **M-3 — The new M-2 allowed-occupation check is not implementable from the v1 payload and rejects the only real fixture.** Step page lines 669–672 require every `state0`/`state1`/`state2` node particle to be in `positions[path[node].P].allowed_mask`, with “Void is particle 0”. The writer never includes void in `particle_ids`: `StructureCompilationStage.BuildMask` rejects a particle set entry with compiled index 0; the fixture has `particle_ids = [3,4]` at P0 and `[1,2]` at P1/P2/P3, so no position allows void. Yet every one of the four `msl-v1` rules carries void at path nodes: rule 0 is `state0=[2,0,1]`, `state1=[0,1,0]`, `state2=[1,0,2]` on path P `[1,2,3]`; rules 1–3 are the same/reversed. A literal check fails 4/4 rules (P2 void in `state0`/`state2`, P1/P3 void in `state1`). Separately, a rule has no stored representative path: `JumpRulePayload` has no direction index, `CompiledJumpRule.DirectionIndex`/`DirectionIndices` are dropped by `TransitionPayloadMapper`, and the Step 11 review R2-3 already records that the payload carries no representative-direction marker. Therefore `positions[path[node].P]` has no defined `path` for a rule. The check must at least exempt void (or check only non-void particles) and define the path source; the current text is a material design contradiction. | Step page §3.5 lines 669–672; `src/dotnet/Mocassin.Compilation/Structure/StructureCompilationStage.cs:127-131` (`index == 0` rejected); `tests/contracts/packages/msl-v1/payloads/model-1.bin` (decoded positions and rules); `src/dotnet/Mocassin.Contracts/Packages/TransitionPayloadDtos.cs:103`; `src/dotnet/Mocassin.Packages/SimulationPackage/Payloads/TransitionPayloadMapper.cs:91-107`; `src/dotnet/Mocassin.Compilation/Transitions/CompiledTransitionModel.cs:74-75`; `docs/planning/reviews/step-11.md:392` (R2-3); `02-data-contracts.md:936` (“including void … when the position may be empty”) is wrong for the current writer. |
+| **Minor** | **m-11 — The `jump_mapping` check rejects a valid package with symmetry-equivalent start positions.** Step page lines 657–659 require a mapped direction's `position_id` to equal the bucket position. `EncodingCompilationStage.BuildMappings` inserts a direction into the buckets of every `direction.EquivalentStartPositions` entry, and `TransitionCompilationStage.AddDraft` populates that set when the same relative path resolves at another start P. The payload does not store `EquivalentStartPositions`, so a valid package can have a direction whose `position_id` differs from the bucket position. Narrow the check (accept an equivalent-start witness from `jump_mapping`) or record why equivalent starts cannot occur in v1. | Step page lines 657–659; `src/dotnet/Mocassin.Compilation/Simulations/EncodingCompilationStage.cs:202-250`; `src/dotnet/Mocassin.Compilation/Transitions/TransitionCompilationStage.cs:480-482`; `TransitionPayloadDtos.cs:71-89` (no equivalent-start field). |
+| **Minor** | **m-12 — `max_model_elements` 16,000,000 is not aligned with the reader's own rule/link caps or with a writer-valid 512 MiB payload.** One `JumpRulePayload` map has nine keys/values plus nested arrays; 1,000,000 rules alone exceed 16M elements, and 16M pair links are far more than 16M elements. The writer's model-payload guard is 512 MiB (`PayloadEncoder.DefaultMaxModelPayloadBytes`), and a 512 MiB MessagePack document can carry far more than 16M elements, so the writer can produce a payload above the element cap. The step page's claim that “every package the current writer can produce is readable” (lines 569–571) is therefore not met for the element budget. Raise/derive the element cap or state explicitly that it is a deliberate tighter solver limit (and then do not make the “every package” claim). | Step page §3.3 line 551 and lines 569–571; `src/dotnet/Mocassin.Packages/SimulationPackage/Payloads/PayloadEncoder.cs:22`; `src/dotnet/Mocassin.Compilation/Compiler/CompilationOptions.cs:36`; `TransitionPayloadDtos.cs:103-122`. |
+| **Minor** | **m-13 — Step 19's batch policy uses solver exit 5, which is not in the canonical solver table.** The Step 19 exit table (lines 100–113) mirrors 0/10–16 and adds 17/18, but the batch failure policy (line 130) says “exit 5 if any failed”. 5 is the .NET partial-success code, not a solver code; `01-target-architecture.md` §7.3 says the solver table is separate and must not reuse the .NET table. This is the one remaining “code with two meanings” in the solver docs, outside the round-1 M-1 scope. | `docs/planning/steps/step-19-solver-cli-hpc-and-extensions.md:100-113,130`; `01-target-architecture.md:369-383`. |
+| **Note** | **n-9 — The status dashboard is still stale (m-7).** `status.md` line 63 has Step 13 “Not started”/“Not requested”, and the Active work paragraph (lines 85–90) still says XC04-F1–F5 are assigned to a maintenance branch to be merged before the gate opens to Step 13, although the XC-04 record says F1–F5 are fixed at `73bb608` and accepted 2026-11-18. Step-agent-owned; fix at the start gate. | `docs/planning/status.md:63,85-90`; `docs/planning/reviews/cross-cutting/xc-04-phase-c.md:832-836`. |
+| **Note** | **n-10 — The request checklist and the step-page “seven features” wording still carry the pre-decision text.** The request's “Sizing and feature list” checklist item still says “3.0–4.0 pw … owner approval at the start gate”; the reconciled decision is 4.5 pw and the owner approved the sizing. The step page now correctly says “Seven features proposed; the owner approved the 4.5 pw single-step sizing … start gate pending”, but the request Step summary still reads “Owner-approved … seven features”. The request owner should refresh its own item text/status; the reviewer may not edit it. | `docs/planning/reviews/step-13.md` checklist item (round-1 text) and Step summary line 46; step page lines 19–22; `04-roadmap.md` §3.1; `05-open-decisions.md:91`. |
+| **Note** | **n-11 — `02-data-contracts.md` line 936 is factually wrong about `particle_ids` and void.** It says `particle_ids` includes void “when the position may be empty”, but `StructureCompilationStage.BuildMask` rejects a particle-set entry with compiled index 0, and the fixture has no void in any mask. Correct the contract text; this is the same root cause as M-3. | `02-data-contracts.md:936`; `StructureCompilationStage.cs:127-131`; `model-1.bin` positions. |
+| **Note** | **n-12 — The data-contract and DTO descriptions of `charge_transport_vector` differ from the .NET writer for charge-state changes.** The contract says the particle-identity sum `Σ q_p (x_p(S2) − x_p(S0))`; `TransitionRuleHelpers.ComputeTransport` computes the node-wise endpoint-moment difference `Σ (q(S2,node) − q(S0,node))·x(node)`, which is not the same when a particle changes charge at a fixed site. Step 13's Step 15 assignment uses the node form (`Σ Δq·x`), which matches the writer; reconcile the contract text so Step 15 does not implement the wrong formula. Pre-existing text, not introduced by this freeze. | `02-data-contracts.md:1023`; `src/dotnet/Mocassin.Compilation/Transitions/TransitionRuleHelpers.cs:54-108`; `TransitionPayloadDtos.cs:92-95` (XML doc); Step 13 page lines 682–688; Step 15 page trust-boundary paragraph. |
+| **Note** | **n-13 — Two small dependency/limit wording issues.** The Step 13 crate table says `mocassin-types` depends on `serde`; the manifest also has `serde_bytes` (an existing workspace crate, so the “no new external crate” claim still holds). `CompilationOptions.MaxRuleCount` is an `init` option with a 1,000,000 default, not a hard compile-time cap; a caller that raises it can produce a package above `ReaderLimits.max_rules`. State the default/override rule explicitly. | Step 13 page §1 table line 132; `src/rust/crates/mocassin-types/Cargo.toml`; `CompilationOptions.cs:36`; Step 13 page lines 557,569–571. |
+
+#### Verdict
+
+**Changes required.** M-1 is genuinely closed: one canonical solver table, mirrored in every named document,
+with a caught panic mapped to 13. The m-1–m-6 (m-2 for the named limits; m-12 covers the element budget),
+m-8–m-10 and n-1–n-8 fixes are real, and the format/signature claims hold independently. M-2 is mostly
+resolved, but its new allowed-occupation check (M-3) is a material design contradiction: the writer never puts
+void in `particle_ids`, the real fixture carries void at path nodes, and a rule has no stored representative
+path. The design is not ready for implementation until M-3 is corrected (and the new Minors are fixed or
+explicitly accepted). The format, RNG, CLI, and crate-boundary decisions remain sound; no code, test,
+configuration, contract, or generated artifact changed in the round-2 delta. m-7 remains open as a step-agent
+status-dashboard fix.
