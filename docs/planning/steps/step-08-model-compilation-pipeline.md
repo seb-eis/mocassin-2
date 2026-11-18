@@ -845,8 +845,11 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
   `tracker_order` follows particle identity.
 - [x] `CompiledModel.ModelSignature` is stable across recompilation, excludes runtime settings and
   parameterization values, and changes exactly when compiled geometry/rules/encoding changes.
-- [x] Compiling the same project twice yields byte-identical `CompiledModelJson` and signature on Ubuntu,
+- [ ] Compiling the same project twice yields byte-identical `CompiledModelJson` and signature on Ubuntu,
   Windows, and macOS.
+  **Open — accepted audit note N2:** Ubuntu determinism is verified, but Windows/macOS were not run under the
+  manual platform policy. Step 29's three-OS CI acceptance criterion closes this; the accepted risk is carried
+  in the approval summary.
 - [x] Stage caches reuse unaffected stages after a single-domain edit and never change the output.
 - [x] Ceria compiles in `< 1 s`; a 10k-position model compiles in `< 30 s` with `< 2 GiB` managed memory.
 - [x] Cancellation returns no partial model and leaves the project unchanged.
