@@ -187,7 +187,7 @@ mocassin-cli
 | `mocassin-solver` | Simulation context, energy engine, KMC, MMC, trackers, statistics |
 | `mocassin-state` | MessagePack `.mcs` schema, writer, and reader |
 | `mocassin-extension` | Stable extension trait plus C ABI for optional custom routines |
-| `mocassin-cli` | `mocassin-sim` argument parsing, logging, signal handling, dry-run inspection, exit codes |
+| `mocassin-cli` | `mocassin-sim` argument parsing, logging, signal handling, dry-run inspection, future run path, exit codes |
 
 The solver core must be usable as a library without the CLI, so tests and future embedding (e.g. a
 long-running worker) do not need to spawn processes. The CLI uses `mocassin-msl` and `mocassin-rng` directly
@@ -201,6 +201,8 @@ Rules:
   projections. It never writes a database.
 - `mocassin-rng` is the only crate that names `rand_chacha` state APIs. The `RngStateV1` bytes are a
   first-party format, not a third-party memory layout.
+- The CLI keeps its existing `mocassin-solver` dependency for the future run path; Step 13's inspection path
+  calls `mocassin-msl`/`mocassin-rng` directly and does not call the placeholder solver.
 - `Package` is not `Sync`; keep one package per thread/process, and a future batch worker opens its own
   package/connection.
 
@@ -373,8 +375,12 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
   is remapped to `CLI001`/2; help and version exit 0. Response-file (`@file`) errors are usage errors
   (`CLI001`/2), not I/O errors (`CLI002`/3).
 - Rust solver: `0` completed, `10` invalid arguments, `11` package error, `12` model/data error,
-  `13` numerical failure, `14` aborted by limit, `15` cancelled, `16` I/O error. Parse errors (unknown option,
-  bad enum value, missing value) are `10`, not the parser library's default; help and `--version` exit 0.
+  `13` numerical failure **or internal invariant violation** (a caught panic is reported here), `14` aborted by
+  limit, `15` cancelled, `16` I/O error. Parse errors (unknown option, bad enum value, missing value) are `10`,
+  not the parser library's default; help and `--version` exit 0.
+- The solver table is the `mocassin-sim` process contract. It is separate from the .NET `mocassin` table; do not
+  reuse the .NET table for solver exit codes. `docs/reference/cli.md` and the Step 13 page mirror this table and
+  must not redefine a code.
 - The GUI surfaces the same CLI codes for build/collect operations and the solver codes for solver failures,
   plus a human-readable abort reason.
 

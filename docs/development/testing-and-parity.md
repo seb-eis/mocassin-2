@@ -51,19 +51,29 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 
 - The checked-in `tests/contracts/packages/msl-v1/` package is read by the Rust reader; the dry-run counts and
   signatures must equal the canonical summary for the same job. The byte-fixed `amend-1-net10/` package is read
-  the same way. Both reads are PR-medium.
-- The Rust test decodes the raw payloads in `tests/contracts/packages/msl-v1/payloads/`, which catches field-name,
-  minimum-width-integer, `null` optional, and array-vs-`bin` lattice drift without a .NET dependency.
+  the same way. A new `tests/contracts/packages/step-13-populated/` package, built by the real writer from a
+  sample with non-empty pair/cluster tables and an MMC job, exercises the populated parameterization and MMC
+  paths. All reads are PR-medium.
+- The Rust test decodes the raw payloads in `tests/contracts/packages/msl-v1/payloads/` and the populated
+  package's extracted payloads, which catches field-name, minimum-width-integer, `null` optional, and
+  array-vs-`bin` lattice drift without a .NET dependency.
 - The Rust canonical writer re-encodes every `tests/contracts/projections/parameterization/*.bin` and
   `.../lattice/*.bin` vector and must reproduce the bytes and the domain hash. This is PR-fast.
+- The reader checks mass/charge conservation per rule, the state/particle allowed masks, `path_vector`/`length`
+  against `movement` and the cell vectors, and the zero-transport rule when no charge changes. The full
+  positional transport formula is a recorded Step 15 assignment because the v1 payload has no fractional P1
+  coordinates.
 - `tests/contracts/rng-vectors.json` freezes seed derivation, draw streams, bounded draws, forks, and the
   `RngStateV1` round-trip. A changed algorithm, draw order, or state layout fails the vector test.
 - A proptest suite truncates and mutates the real payloads; it asserts no panic, no unbounded allocation, and a
   structured error. The `cargo-fuzz` targets `payload_scan`, `payload_decode`, and `package_open` start from the
   same seeds and run time-boxed at closeout. Step 29 extends fuzzing to `.mcs` and extension configs.
 - Load and RNG benchmarks are recorded in `tests/reference/bench/step-13-*.json` with the toolchain, CPU class,
-  and commit. The ceria load budget is `< 100 ms` and peak RSS `< 64 MiB`; the RNG budgets are in the Step 13
-  page §4.5. A regression above 10 % fails the release gate.
+  and commit, plus a same-runner-class entry in `tests/reference/bench/baselines.json`. The ceria load budget is
+  `< 100 ms` and peak RSS `< 64 MiB` (fixture budget, not a 512 MiB-package promise); the RNG budgets are in the
+  Step 13 page §4.5. A >10 % same-class regression fails the release gate.
+- The solver exit-code rows in the CLI/architecture/step page are compared by a doc-drift check; the canonical
+  meanings are architecture §7.3, including `13` numerical/internal invariant and `14` limit abort.
 - Tests use real files, real SQLite, and the real checked-in packages. There are no mocks in the reader; the only
   process boundary is the CLI exit-code test, which runs the built binary.
 

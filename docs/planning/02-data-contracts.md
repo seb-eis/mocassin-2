@@ -1047,6 +1047,9 @@ MessagePack map with snake_case keys. Top-level:
 - `tracker_models` are definitions only. Global trackers are `(collection, particle)`; static trackers are
   `(position, particle)` per cell, and their indices match `global_tracker_mapping`/`static_tracker_mapping`.
   Step 18 owns mutable values, mobile-tracker assignment, and `.mcs` output.
+- `default_settings` is the model's build-time default. A job's resolved payload settings are authoritative and
+  need not equal the referenced simulation's defaults; the fixture's job 1 has `target_mcsp = 150` while
+  simulation 0's default is 200. Readers must not reject that difference.
 - `default_settings.flags` contains only the authored bits (`noSaving`, `noJumpLogging`, `useFastExp`,
   `deterministic`). Derived intent (`UseDualDofCorrection`, `UsePrerun`, kind) is not a model-payload field:
   Step 10 carries it on the job descriptor and Step 11 composes the job `flags` word.
@@ -1124,11 +1127,11 @@ consumes, with explicit limits that are checked before allocation:
 | Lattice payload | 512 MiB | Capped by `PackageVerificationOptions.MaxLatticePayloadBytes` semantics |
 | Model MessagePack elements | 16,000,000 | Non-allocating scan budget |
 | Job MessagePack elements | 1,000,000 | Non-allocating scan budget |
-| MessagePack depth | 8 | The schema's deepest document is four levels |
-| Positions (`A*B*C*P`) | 100,000,000 | Also bounded by the signed 32-bit linear-index limit |
-| P1 positions per cell | 1,000,000 | |
+| MessagePack depth | 8 | The model nests five container levels (map → structure → positions → position → `particle_ids` → scalar); 8 leaves headroom |
+| Positions (`A*B*C*P`) | 500,000 | Matches `SupercellGenerator.MaximumPositions`; also ≤ the signed 32-bit linear-index limit |
+| P1 positions per cell | 10,000 | Matches `UnitCellVectorEncoder.MaxP1Positions` |
 | Particles | 64 | Six-bit state codes and the 63-custom-particle limit |
-| Rules / directions / collections | 10M / 10M / 4,096 | Allocation caps |
+| Rules / directions / collections | 1M / 1M / 4,096 | Rule cap matches `CompilationOptions.MaxRuleCount`; the others are allocation caps |
 | Pair / cluster tables | 1M / 1M | Allocation caps |
 | Pair links | 16M total, 65,536 per position | Allocation caps |
 | Path nodes / tracker entries | 10 | Six bits per node in a `u64` |
@@ -1359,7 +1362,7 @@ alignment scheme, or checksum trailer.
 | `latticeEnergyEv` | f64 | Current total lattice energy in eV |
 | `flags` | uint64 | Solver state flags |
 | `rngAlgorithm` | string | `"chacha12-v1"`; bound to the 64-byte `RngStateV1` layout in Step 13 §4.3 |
-| `rngState` | bin | 64-byte `RngStateV1` blob for exact resume: magic `MCR1`, version 1, 64-bit stream, 128-bit word position, 32-byte key; layout owned by Step 13, algorithm by ADR 0005 |
+| `rngState` | bin | 64-byte `RngStateV1` blob for exact resume: magic `MCR1`, version 1, 64-bit stream, 128-bit word position, 32-byte key; layout owned by Step 13, algorithm by ADR 0005. The blob carries the raw key by design: treat `.mcs` as seed-sensitive and never log it |
 | `abortReason` | string | `running`, `prerun`, `completed`, `equilibrium`, `timeLimit`, `rateLimit`, `cancelled`, `error` |
 | `seedHash` | string | SHA-256 hash of the job seed (not the raw seed) |
 | `units` | map | `{ "energy": "eV", "time": "s", "length": "angstrom", "tracker": "fractional" }` |
@@ -1546,7 +1549,9 @@ mocassin-sim --db <project.msl> --job <id> [--io <dir>]
 - `--io` is required for a run and created if missing. A dry run needs no `--io` and does not create it.
 - `--stdout` redirects the human statistics dump; otherwise it goes to stdout.
 - The solver never writes to the `.msl` or `.msr`; `collect` writes the `.msr`.
-- Exit codes are defined in [`01-target-architecture.md`](01-target-architecture.md#73-error-handling-and-exit-codes).
+- Exit codes are the canonical solver table in [`01-target-architecture.md`](01-target-architecture.md#73-error-handling-and-exit-codes):
+  `0` completed, `10` invalid arguments, `11` package, `12` model/data, `13` numerical/internal invariant,
+  `14` limit abort, `15` cancelled, `16` I/O. Parse errors are `10`; help and `--version` are `0`.
 - **Step 13 scope.** Step 13 implements the inspection path only: `--db`, `--job`, `--dry-run`, `--seed`,
   `--log-level`, `--log-format`, `--version`, and the validated-but-unused `--threads`/`--jump-log-max-ev`.
   `--dry-run` is write-free: it does not create `--io`, does not write a log file, and rejects `--stdout` as a
@@ -1969,6 +1974,9 @@ oversized `@file`) are the same usage class: `CLI001`/2, not `CLI002`/3.
   (`format = "mocassin.rng-vectors"`), not a runtime format and not a manifest entry.
 - `tests/contracts/packages/msl-v1/` also carries the Rust CLI's `dry-run-v1.txt` golden; the counts and
   signatures in it must equal the canonical package summary for the same job.
+- `tests/contracts/packages/step-13-populated/` is a second real-writer `.msl` with non-empty pair/cluster
+  tables and an MMC job, its canonical summary, and extracted payloads. It is a test artifact, not a schema
+  change; the implementor adds it from a committed sample with the standard regeneration command.
 - `tests/contracts/package-v1.msl` and `package-v1.msr` are produced by the real writers and read by all
   readers; previous-major fixtures are retained for the compatibility window.
 - `tests/contracts/job-folder/` contains a real solver job folder with `solver.json`, `run.mcs`, `prerun.mcs`,

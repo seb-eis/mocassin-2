@@ -540,8 +540,9 @@ solver with the same binary, platform, package, and seed.
 - **Boundary:** the Rust solver reads only the immutable `.msl` and CLI arguments; it never reads project JSON
   and never writes `.msl`/`.msr`.
 - **Reader acceptance:** the checked-in `msl-v1` package and the byte-fixed `amend-1-net10` package open
-  read-only; the dry-run counts/signatures equal the canonical package summary for the same job. This is the
-  first .NET-writer → Rust-reader contract run and is PR-medium.
+  read-only; the dry-run counts/signatures equal the canonical package summary for the same job. A new
+  real-writer populated pair/cluster + MMC package exercises the non-empty parameterization and MMC paths. This
+  is the first .NET-writer → Rust-reader contract run and is PR-medium.
 - **Bounded decode:** a non-allocating MessagePack scan enforces the byte, element, depth, and per-field count
   limits before typed decode. Tests cover truncated frames, oversized declared sizes, decompression bombs,
   element-budget violations, duplicate known keys, trailing bytes, and malformed `schema_info`. No unbounded
@@ -549,21 +550,29 @@ solver with the same binary, platform, package, and seed.
 - **Validation:** every particle/position/site/environment/pair/cluster/collection/direction/rule/tracker
   index and length; state-code node values; `tracker_order` length against the collection path; jump-count
   prefix sums; kind/flag consistency; finite values; normalized field direction; lattice length and particle
-  indices.
+  indices; `models`/`lattices` `format_version` columns against their payloads.
+- **Scientific invariants:** each rule preserves the non-void particle-symbol multiset and charge within
+  `1e-9`; `path_vector`/`length` match the cell-vector sum of `movement`; a no-charge-change rule has a zero
+  transport vector. The full positional `charge_transport_vector` formula is a recorded Step 15 assignment
+  because the v1 payload has no fractional P1 coordinates; the trust boundary and residual risk are documented
+  in the Step 13 design.
 - **Signatures:** the parameterization and lattice projections re-encode from the payload with the ADR 0010
   fixed-width writer, the C# quantization expression, and the domain prefix. The checked-in `.bin` vectors
   round-trip byte-identically. `model_signature` is an identity string, never re-encoded.
 - **RNG:** seed derivation matches the Step 10 vectors; ChaCha12 draw goldens; Lemire bounded draws; 53-bit
   doubles; domain-separated forks; the 64-byte `RngStateV1` round-trip and mid-block resume. The RNG benchmark
   records draws/s, refill cost, state round-trip, and fork cost against the documented budget; a >10 %
-  regression is a release failure.
-- **CLI:** the dry-run golden, exit codes 0/10/11/12/16, parse-error remap, help/version, logging formats, and
-  the write-free guarantee. `--stdout` with `--dry-run` is a usage error; no job folder or log file is created.
+  regression is measured only against the same-runner-class entry in
+  `tests/reference/bench/baselines.json` and is a release failure.
+- **CLI:** the dry-run golden, exit codes 0/10–16 with the architecture §7.3 meanings, parse-error remap,
+  help/version, logging formats, and the write-free guarantee. `--stdout` with `--dry-run` is a usage error; no
+  job folder or log file is created. A doc-drift check compares the solver rows in `cli.md`,
+  `solver-architecture.md`, and the step page with architecture §7.3.
 - **Fuzzing:** `payload_scan`, `payload_decode`, and `package_open` targets start from the real payload/package
   seeds; a time-boxed run is recorded at closeout. Step 29 extends fuzzing to `.mcs` and extension configs.
-- **Performance:** ceria job load `< 100 ms` (release, warm) and peak RSS `< 64 MiB`; the RNG budgets in
-  `04-roadmap.md`/the step page. The environment (CPU class, Rust version, commit) is recorded with the raw
-  numbers.
+- **Performance:** ceria job load `< 100 ms` (release, warm) and peak RSS `< 64 MiB` are fixture budgets, not a
+  promise for a 512 MiB package. The RNG budgets are in §13 and the step page; the environment (CPU class, Rust
+  version, commit) is recorded with the raw numbers and the same-class `baselines.json` entry.
 - **Tiers:** DTO/projection/RNG/state/CLI/mutation tests are PR-fast; the real-package read is PR-medium;
   fuzzing and the benchmarks are nightly/manual.
 
@@ -675,6 +684,10 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | ChaCha12 `next_u32` (Step 13) | ≥ 250 M draws/s single-threaded, release, benchmark laptop class |
 | ChaCha12 `next_f64` / `next_bounded` (Step 13) | ≥ 120 M / ≥ 200 M calls/s |
 | RNG state export + import / 64-word refill (Step 13) | ≤ 500 ns / ≤ 250 ns |
+
+Step 13 records the load and RNG measurements as same-runner-class entries in
+`tests/reference/bench/baselines.json`; the 100 ms/250 ms values are fixture budgets, not a promise for a
+512 MiB package.
 | KMC throughput (ceria 10×10×10, 1 transition set) | ≥ 80 % of original C solver per core |
 | MMC throughput (same) | ≥ 80 % of original C solver per core |
 | Memory (20×20×20, 63 particles) | < 2 GB |

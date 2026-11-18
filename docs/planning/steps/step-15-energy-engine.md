@@ -114,6 +114,12 @@ barrier_backward = (s1 - s2) - field
     `-0.5 q E·Δx/kT`; a vacancy hop carries the correct sign because the ion moves once and the void has no
     charge. An identical-ion exchange has zero net charge transport; a distinct-charge exchange does not.
   - `direction.path_vector` is display/tracking only and is not used to derive the field.
+- **Trust boundary (Step 13 assignment).** `rule.charge_transport_vector` comes from the untrusted `.msl` and is
+  not covered by the parameterization signature. Step 13 validates that it is finite and zero when no node
+  changes charge, but cannot recompute the full `Σ Δq x` formula because the v1 payload carries no fractional P1
+  coordinates (only `vector4 = [0,0,0,P]` and the fractional movements). Step 15 owns the field term and must
+  reject a non-finite result and record the residual risk; a future `.msl` can add fractional positions or sign
+  the transport vector. Do not silently clamp or recompute a different vector.
 - `rule.charge_transport_vector` is three `f64` components; zero field yields zero.
 
 ### 3. S2 computation

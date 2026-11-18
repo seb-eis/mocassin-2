@@ -453,8 +453,10 @@ validation: ok
 ```
 
 The counts and signatures equal the canonical package summary (`inspect-v1`/`package-summary-v1`) for the same
-job. Build metadata (`app_version`, `created_utc`, `generator`) is not printed. The dry run creates no
-directory, no log file, and no job folder; `--stdout` is therefore a usage error.
+job. Build metadata (`app_version`, `created_utc`, `generator`) is not printed. The `settings:` line is the
+**resolved job settings** and composed flags, not the model's `simulations[].default_settings`; the fixture's
+job target is 150 while simulation 0's default is 200. The dry run creates no directory, no log file, and no
+job folder; `--stdout` is therefore a usage error.
 
 Without `--dry-run`, this release loads and validates the job and exits 10 with
 `unsupported: simulation engines are implemented in Steps 14–19`. It does not create `--io`, write a state, or
@@ -467,13 +469,16 @@ emits one JSON object per record. `RUST_LOG` is not consulted, so `--log-level` 
 
 ### Solver exit codes
 
+The canonical table is the internal target architecture §7.3; this table mirrors it. It is the
+`mocassin-sim` process contract, not the .NET `mocassin` table.
+
 | Code | Meaning |
 | ---: | --- |
 | 0 | Completed (including a successful dry run). |
 | 10 | Invalid arguments, unknown job, unsupported option, extension requested. |
 | 11 | Package error: unusable SQLite, schema/version mismatch, missing element, invalid frame, decode/scan/size error. |
 | 12 | Model/data error: signature mismatch, invalid index/length/value, column/payload mismatch. |
-| 13 | Numerical failure. |
+| 13 | Numerical failure or internal invariant violation (including a caught panic). |
 | 14 | Aborted by a configured limit. |
 | 15 | Cancelled. |
 | 16 | I/O error: missing or unreadable path. |

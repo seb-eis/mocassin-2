@@ -127,7 +127,7 @@ The full field list is in `contracts/generated/schema/package-payloads-v1.schema
 
 | Payload | Contents |
 | --- | --- |
-| Model | `format_version`, `model_signature`, particles, structure (positions, sites, cell vectors, environments with **one pair entry per periodic image** and its relative integer `offset`), energy (pair/cluster tables, site energies, defect background), transitions (jump collections, rules with variable-length `tracker_order` and `0xFF` sentinels), simulations |
+| Model | `format_version`, `signature` (parameterization), `model_signature` (compiled identity), particles, structure (positions, sites, cell vectors, environments with **one pair entry per periodic image** and its relative integer `offset`), energy (pair/cluster tables, site energies, defect background), transitions (jump collections, rules with variable-length `tracker_order` and `0xFF` sentinels), simulations |
 | Lattice | `format_version`, `lattice_size` (`[a,b,c]`), `position_count`, and the particle array (`a·b·c·position_count` bytes, row-major per the index rule; a MessagePack array of `u8` in v1, not `bin`) |
 | Job | `format_version`, simulation index, kind, resolved settings (temperature, field modulus and Cartesian unit direction, MCSP targets, sampling, attempt frequency, normalization energy, tolerances, time limits), the composed `flags` word, compiled selection optimizers, canonical extension JSON, and `doping_info` |
 
@@ -197,9 +197,11 @@ rule applies only to the canonical projection. The lattice member is a MessagePa
 canonical lattice projection uses `bin`. Readers accept both forms.
 
 Default solver limits are 512 MiB per model/lattice payload, 8 MiB per job payload, 16M model / 1M job
-MessagePack elements, depth 8, 100M total positions, 1M P1 positions per cell, 64 particles, 10M
+MessagePack elements, depth 8, 500,000 total positions, 10,000 P1 positions per cell, 64 particles, 1M
 rules/directions, 4,096 collections/simulations, 1M pair/cluster tables, 16M pair links, 10 path nodes, and
-256 extensions. A future package major version, a payload above a guard, or a document that exceeds a budget is
+256 extensions. The position/P1/rule limits match the current .NET build limits; a future writer that raises
+them must raise `ReaderLimits` in the same release. A future package major version, a payload above a guard, or
+a document that exceeds a budget is
 rejected with an actionable message before unbounded allocation. See
 [Solver architecture](../development/solver-architecture.md) for the crate view and the full limit table.
 

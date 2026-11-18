@@ -14,10 +14,11 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for review — request [`docs/planning/reviews/step-13.md`](../reviews/step-13.md);
-  the frozen commit is recorded in the request record
+- **Design review:** Re-review required — round 1 returned `Changes required`; the new freeze is recorded in
+  [`docs/planning/reviews/step-13.md`](../reviews/step-13.md)
 - **Feature list:** Proposed, seven features; owner approval requested once with the start gate
-- **Sizing:** 3.0–4.0 person-weeks; the §3.1 check and the no-split recommendation are in §13
+- **Sizing:** 3.5–4.5 person-weeks including 1.0 pw contingency; the four-week trigger is exceeded and the
+  single-step/split decision is owner-gated in §13
 - **Last updated:** 2026-11-18
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -28,13 +29,13 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 
 | # | Feature | Branch | Planned scope | Outcome |
 | --- | --- | --- | --- | --- |
-| 1 | Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Crate boundaries and dependency edges; `mocassin-types` payload DTOs, typed IDs, runtime model/job/lattice types, `ReaderLimits`, `PackageError`/exit-code model; `mocassin-sim` `clap` skeleton, logging, `--version`, parse-error remap; DTO key/decode tests | `cargo test` green; the crate graph matches §1; the CLI parses and rejects options with stable exit codes |
+| 1 | Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Crate boundaries and dependency edges (the existing CLI→solver edge stays for the future run path); `mocassin-types` payload DTOs, typed IDs, runtime model/job/lattice types, `ReaderLimits`, `PackageError`/exit-code model; `mocassin-sim` `clap` skeleton, logging, `--version`, parse-error remap; DTO key/decode tests | `cargo test` green; the crate graph matches §1; the CLI parses and rejects options with stable exit codes |
 | 2 | RNG streams and state | `feature/step-13-rust-solver-foundation-and-package-reader/rng-streams-and-state` | SHA-256 seed derivation; ChaCha12 wrapper over `rand_chacha`; `next_u32`/`next_u64`/`next_f64`/`next_bounded`/`fork`; 64-byte `RngStateV1`; golden vectors; Criterion draw/refill benchmark | Seed derivation matches the Step 10 vectors; draw/state goldens pass; the budget is measured and recorded |
 | 3 | `.msl` reader and bounded decode | `feature/step-13-rust-solver-foundation-and-package-reader/msl-reader-and-bounded-decode` | Read-only `rusqlite` open; schema/application-id/version/provenance checks; Zstd frame handling; MessagePack scan and typed decode; lattice bound; one-model cache; structured errors | The real `.msl` fixture opens read-only and yields raw payloads; malformed/truncated/bomb payloads fail cleanly |
-| 4 | Model/job mapping and signatures | `feature/step-13-rust-solver-foundation-and-package-reader/model-job-mapping-and-signatures` | Payload → validated runtime model/job; every index/length/finite/kind invariant; canonical projection writer; parameterization and lattice signature re-encoding; column/payload cross-check | A ceria job becomes a fully validated `JobPackage`; both stored signatures are reproduced from the payload; a mutated value is rejected |
-| 5 | Dry-run CLI and logging | `feature/step-13-rust-solver-foundation-and-package-reader/dry-run-cli-and-logging` | `--db`/`--job`/`--io`/`--seed`/`--threads`/`--jump-log-max-ev`/`--log-*`/`--dry-run`; write-free summary; exit mapping; tracing human/JSON; panic containment | `mocassin-sim --dry-run` reports the documented summary and exits 0; the summary counts equal `inspect-v1` for the fixture; no file is written |
-| 6 | Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Rust tests over `tests/contracts/packages/msl-v1/`, `amend-1-net10/`, projection `.bin` vectors, raw payloads, and `rng-vectors.json`; proptest mutation/truncation suite; `cargo-fuzz` scan/decode/package targets and a time-boxed run | The .NET-written package and projection vectors are consumed byte-for-byte; mutation tests and the fuzz run find no panic/OOM |
-| 7 | Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Load and RNG Criterion benches plus recorded budgets; `solver-architecture.md`, `msl-format.md`, `cli.md`, `testing-and-parity.md`, Rust layout docs; parity/status/closeout evidence and the audit request | Load `< 100 ms` and the RNG budgets are recorded with the environment; documentation builds strictly; closeout evidence and audit request are complete |
+| 4 | Model/job mapping and signatures | `feature/step-13-rust-solver-foundation-and-package-reader/model-job-mapping-and-signatures` | Payload → validated runtime model/job; every index/length/finite/kind invariant; mass/charge conservation, state/path/movement checks, and the documented transport-vector split; canonical projection writer; parameterization and lattice signature re-encoding; column/version/payload cross-check | A ceria job becomes a fully validated `JobPackage`; both stored signatures are reproduced from the payload; a mutated index, state, movement, or value is rejected |
+| 5 | Dry-run CLI and logging | `feature/step-13-rust-solver-foundation-and-package-reader/dry-run-cli-and-logging` | `--db`/`--job`/`--io`/`--seed`/`--threads`/`--jump-log-max-ev`/`--log-*`/`--dry-run`; write-free summary; unified exit mapping; tracing human/JSON; panic containment; solver exit-code drift check | `mocassin-sim --dry-run` reports the documented summary and exits 0; the summary counts equal `inspect-v1` for the fixture; no file is written; the exit-code rows match architecture §7.3 |
+| 6 | Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Rust tests over `tests/contracts/packages/msl-v1/`, `amend-1-net10/`, projection `.bin` vectors, raw payloads, and `rng-vectors.json`; a new real-writer populated pair/cluster + MMC fixture; proptest mutation/truncation suite; `cargo-fuzz` scan/decode/package targets and a time-boxed run | The .NET-written packages and projection vectors are consumed byte-for-byte; populated and MMC payload→signature paths pass; mutation tests and the fuzz run find no panic/OOM |
+| 7 | Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Load and RNG Criterion benches plus same-runner-class baselines; `solver-architecture.md`, `msl-format.md`, `cli.md`, `testing-and-parity.md`, Rust layout docs; parity/status/closeout evidence (`docs/planning/closeout/step-13.json`) and the audit request | Load `< 100 ms` on the fixture and the RNG budgets are recorded with the environment; documentation builds strictly; `check_closeout_evidence.py` passes and the audit request is complete |
 
 The feature list is approved once by the human owner together with the design-review verdict. That approval
 creates the step branch and marks the step `In progress`; individual features are squash-merged without a
@@ -132,7 +133,7 @@ foundation crates and leaves the physics crates as placeholders.
 | `mocassin-solver` | Placeholder API; Step 13 re-exports the foundation types only | `mocassin-types`, `mocassin-msl`, `mocassin-rng`, `mocassin-state`, `mocassin-extension` | Steps 14–19 |
 | `mocassin-state` | Placeholder; no `.mcs` schema in Step 13 | `mocassin-types`, `serde`, `rmp-serde` | Step 18 |
 | `mocassin-extension` | Placeholder; no ABI in Step 13 | `thiserror` | Step 19 |
-| `mocassin-cli` | `mocassin-sim` parser, logging, version, dry-run, exit mapping | `mocassin-msl`, `mocassin-rng`, `mocassin-types`, `clap`, `thiserror`, `tracing`, `tracing-subscriber` | Step 19 completes the command |
+| `mocassin-cli` | `mocassin-sim` parser, logging, version, dry-run, exit mapping; the future run path | `mocassin-msl`, `mocassin-rng`, `mocassin-types`, `mocassin-solver` (existing edge, placeholder), `clap`, `thiserror`, `tracing`, `tracing-subscriber` | Step 19 completes the command |
 
 Dependency direction:
 
@@ -140,7 +141,8 @@ Dependency direction:
 mocassin-cli
    ├──► mocassin-msl ──► mocassin-types
    ├──► mocassin-rng
-   └──► mocassin-types
+   ├──► mocassin-types
+   └──► mocassin-solver (existing placeholder edge; used by the future run path)
 mocassin-solver (placeholder) ──► types, msl, rng, state, extension
 ```
 
@@ -152,8 +154,9 @@ Rules:
   projections. It never writes a database.
 - `mocassin-rng` is the only crate that names `rand_chacha` state methods. No other crate depends on the RNG
   crate's internal representation; the `RngStateV1` bytes are a first-party contract.
-- The CLI calls `mocassin-msl` and `mocassin-rng` directly. It never reaches into `mocassin-solver` for the
-  inspection path, so Step 13 has one package-reader implementation.
+- The CLI keeps its existing `mocassin-solver` edge because the Step 16/19 run path will use the solver library.
+  Step 13's inspection path calls `mocassin-msl` and `mocassin-rng` directly and does not call the placeholder
+  solver; there is still one package-reader implementation.
 - `Package` holds a `rusqlite::Connection` and is not `Sync`. Keep one package per thread/process; a future
   batch worker opens its own `Package`; Step 13 is single-process/single-job.
 - No new external crate. `criterion`, `proptest`, and `insta` stay dev-dependencies; the fuzz crate is outside
@@ -491,7 +494,8 @@ pub struct ExtensionConfig {
    deterministic summary or golden.
 8. Do **not** run `PRAGMA integrity_check` or mirror the ten `PKG` checks. Those are `mocassin verify`'s job.
    The solver verifies only what it reads: identity, schema, references, payload decode, invariants, signatures,
-   and column/payload consistency. This keeps a large package's load inside the 100 ms budget.
+   and column/payload consistency. This keeps the normal fixture path within the 100 ms budget; a large payload
+   is bounded by the guards but may take proportionally longer.
 9. Never expose a writable connection and never write a database. A read-only package on `0444` media must open
    normally, with no `-wal`/`-shm` sidecar.
 
@@ -518,10 +522,18 @@ jobs row (columns + model_id/lattice_id)
   process, so the cache is a test/short-batch convenience, not a shared global.
 - `job_ids()` returns the ascending ids for error messages and tests. Step 19 may add a range selector.
 - A missing job id is `JobNotFound` and maps to exit 10 (invalid arguments), not a package error.
-- Column/payload cross-check: `kind`, `temperature_k`, `target_mcsp`, `write_out_count`, `pre_run_mcsp`,
-  `time_limit_s`, `min_success_rate`, `electric_field_vm`, `lattice_a/b/c`, `flags`, and `doping_info` must
-  equal the job payload/model values. Authored metadata (`collection_name`, `config_name`, indices, `seed`,
-  `created_utc`) is checked for presence/format only.
+- Column/payload cross-check:
+  - `kind`, `temperature_k`, `target_mcsp`, `write_out_count`, `pre_run_mcsp`, `time_limit_s`,
+    `min_success_rate`, `electric_field_vm`, `flags`, and `doping_info` must equal the **job payload**.
+  - `lattice_a`/`lattice_b`/`lattice_c` must equal the **lattice payload's** `lattice_size`, not the job payload.
+  - `models.format_version` must equal the model payload's `format_version`; `lattices.format_version` must
+    equal the lattice payload's `format_version`; the job payload's `format_version` is checked on decode.
+  - `models.signature` and `lattices.signature` must equal the recomputed projections.
+  - Authored metadata (`collection_name`, `config_name`, the three indices, `seed`, `created_utc`) is checked
+    for presence/format only.
+- A job's resolved settings are **not** required to equal the referenced `simulations[].default_settings`. The
+  simulation defaults are build-time defaults; the job payload is authoritative. The ceria fixture is the
+  counter-example: job 1 has `target_mcsp = 150` while simulation 0's default is 200.
 - `jobs.seed` must be exactly 32 bytes. `lattices.signature` is compared with the recomputed lattice
   projection; `models.signature` with the recomputed parameterization projection.
 
@@ -536,13 +548,13 @@ jobs row (columns + model_id/lattice_id)
 | `max_lattice_payload_bytes` | 512 MiB | Matches the .NET verifier's lattice cap |
 | `max_model_elements` | 16,000,000 | Bounds decoder allocation independent of payload bytes |
 | `max_job_elements` | 1,000,000 | Small fixed schema |
-| `max_messagepack_depth` | 8 | The schema's deepest document is four levels |
-| `max_positions` | 100,000,000 | Documented solver cap; total linear index still ≤ `i32::MAX` |
-| `max_position_count` (P) | 1,000,000 | P1 positions per cell |
+| `max_messagepack_depth` | 8 | The model nests map → structure → positions → position → `particle_ids` → scalar (five container levels); 8 leaves headroom |
+| `max_positions` | 500,000 | Matches `SupercellGenerator.MaximumPositions`; total linear index still ≤ `i32::MAX` |
+| `max_position_count` (P) | 10,000 | Matches `UnitCellVectorEncoder.MaxP1Positions` |
 | `max_particles` | 64 | 6-bit state code and the 63-custom-particle limit |
-| `max_rules` | 10,000,000 | Step 13 allocation cap |
-| `max_directions` | 10,000,000 | Step 13 allocation cap |
-| `max_collections` | 4,096 | Step 13 allocation cap |
+| `max_rules` | 1,000,000 | Matches `CompilationOptions.MaxRuleCount` |
+| `max_directions` | 1,000,000 | Same order as the rule cap; Step 13 allocation cap |
+| `max_collections` | 4,096 | Step 13 allocation cap; no .NET equivalent |
 | `max_pair_tables` | 1,000,000 | Step 13 allocation cap |
 | `max_cluster_tables` | 1,000,000 | Step 13 allocation cap |
 | `max_pair_links` | 16,000,000 | Total environment links |
@@ -552,6 +564,9 @@ jobs row (columns + model_id/lattice_id)
 | `max_extensions` | 256 | Job payload |
 | `max_simulations` | 4,096 | Model payload |
 
+- The position, P1, and rule defaults are aligned with the current .NET build limits, so every package the
+  current writer can produce is readable. A future writer that raises those limits must raise `ReaderLimits`
+  in the same release; the solver never silently accepts a package above a documented build limit.
 - The lattice guard is `4 * a * b * c * position_count` in checked `u64`, capped by
   `max_lattice_payload_bytes`. The factor 4 covers the MessagePack array-of-`u8` encoding. The expected particle
   array is exactly `a*b*c*position_count` bytes.
@@ -644,10 +659,44 @@ The typed pass checks, per section:
   `< static_trackers_per_cell`. `global_tracker_mapping.len() == collection_count * particle_count`; each value
   is `-1` or `< global_tracker_count`.
 
+**Scientific invariants (M-2)**
+
+The `.msl` is untrusted and the parameterization signature covers only energies/frequencies, so the reader
+checks the rule-level invariants that do not require project-side geometry:
+
+- **Allowed occupations.** Decode `state0`, `state1`, and `state2` into `path_len` six-bit nodes. For every
+  node, the particle index must be in the allowed-particle mask of the node's `path` position
+  (`positions[path[node].P].allowed_mask`). Void is particle 0. For MMC, `state1` is zero and ignored; do not
+  apply the allowed-mask check to it.
+- **Mass conservation.** For each rule, the multiset of non-void particle **symbols** in `state0` must equal the
+  multiset in `state2`. Symbols come from the particle table; this is the same rule as
+  `TransitionRuleHelpers.MassConserved`.
+- **Charge conservation.** `|Σ q(state0) - Σ q(state2)| <= 1e-9`, using the particle charges and omitting void;
+  this is `TransitionRuleHelpers.ChargeConserved`.
+- **Movement and path vector.** `path_vector` must equal `Σ_i (movement_i.a * a + movement_i.b * b +
+  movement_i.c * c)` using `cell_vectors_ang`, and `length` must equal `|path_vector|`, both within
+  `1e-9 * max(1, |path_vector|)`. `path_vector` must also match the sum of the per-node movements the writer
+  emitted; a changed movement or path vector is rejected.
+- **Charge-transport vector.** The vector must be finite and, when no node changes charge (`q(state0[node]) ==
+  q(state2[node])` for every node), its norm must be `<= 1e-9`. The full positional formula
+  `Σ Δq * x(path node)` is **assigned to Step 15**: the v1 payload carries no fractional coordinates for P1
+  positions (only `vector4 = [0,0,0,P]` and the fractional movements), so it cannot be recomputed from the
+  package alone. Step 15 owns the field term and must bound/validate the vector's use; the residual risk is
+  recorded in §11 and the Step 15 interface. A future `.msl` format can add the fractional positions or sign
+  the transport vector; that is a format change, not a Step 13 change.
+- **Direction/rule ordering.** A direction's `path[0]` must be `[0, 0, 0, position_id]`; a rule's
+  `collection_id` must own a direction with the same `path_len`; a rule's `tracker_order` length must match that
+  path length. This catches a mismatched rule/direction pair even when the indices are in range.
+
+If a check needs a tolerance, use the documented absolute/relative tolerance and a fixture with a deliberately
+changed value; do not silently accept a mismatch.
+
 **Simulations and job**
 
 - `simulation_index < simulations.len()`; the job kind, row kind, and simulation kind agree; kind strings are
-  exactly `"kmc"` or `"mmc"`.
+  exactly `"kmc"` or `"mmc"`. The job's resolved settings are validated in their own right and are **not**
+  required to equal `simulations[simulation_index].default_settings` (the fixture's job target is 150, the
+  simulation default is 200).
 - `jump_collection_ids` are unique and in range; the referenced collections have the simulation's kind.
 - `tracker_models.global_tracker_indices` are sorted, unique, and `< global_tracker_count`;
   `static_tracker_indices` are sorted, unique, and `< static_trackers_per_cell`; both are empty for MMC.
@@ -757,15 +806,28 @@ pub enum PackageError {
 `PackageError` is wrapped in `Context { job_id: Option<u32>, model_id: i64, section: &'static str, source }`
 so every diagnostic names the job/model and section. `kind()` unwraps the context for exit mapping.
 
+The **canonical solver exit-code table is [`01-target-architecture.md`](../01-target-architecture.md) §7.3**:
+`0` completed; `10` invalid arguments; `11` package error; `12` model/data error; `13` numerical failure or
+internal invariant violation (including a caught panic); `14` aborted by a limit; `15` cancelled; `16` I/O
+error. The solver table is the `mocassin-sim` process contract; it is not the .NET `mocassin` table, and a
+consumer must select the table by process.
+
+Mapping in this reader/CLI:
+
 | Error class | Exit |
 | --- | ---: |
 | Success (dry run) | 0 |
 | Invalid arguments, unknown job, unsupported option, extension requested | 10 |
 | Package/schema/frame/decode/scan/size error | 11 |
 | Signature, index, length, value, column mismatch | 12 |
-| RNG state/internal invariant failure | 13 |
+| RNG state/internal invariant failure, caught panic | 13 |
+| Run aborted by a configured limit (reserved in Step 13) | 14 |
 | Cancelled (reserved; not emitted in Step 13) | 15 |
 | I/O error (missing/unreadable path) | 16 |
+
+Feature 5 adds a documentation drift check that the solver rows in `docs/reference/cli.md`,
+`docs/development/solver-architecture.md`, and this page match the architecture §7.3 table exactly (code and
+meaning); if a script is not justified, the closeout records the manual comparison.
 
 ### 4. RNG
 
@@ -823,15 +885,16 @@ impl Rng {
 | `next_u32` | 1 | Uniform `u32` |
 | `next_u64` | 2 | Low word first, then high word |
 | `next_f64` | 2 | `(next_u64() >> 11) as f64 * 2^-53`, in `[0,1)` |
-| `next_bounded(u)` | 1 per attempt | Lemire multiply-and-reject; `upper == 0` returns 0 and consumes nothing |
+| `next_bounded(u)` | 1 per attempt | Lemire multiply-and-reject; returns `[0, u)`; `upper == 0` returns 0 and consumes nothing |
 | `fork(domain)` | 0 (parent) | New stream from a SHA-256 derivation |
 
 - `next_bounded` is unbiased: `m = (u32 as u64) * (upper as u64)`, `l = m as u32`; reject while
-  `l < (upper.wrapping_neg() % upper)`. Never use modulo.
+  `l < (upper.wrapping_neg() % upper)`. Never use modulo. The result is half-open: `0 <= result < upper`.
 - `fork(domain)` hashes
-  `"mocassin/rng-fork/v1" || 0x00 || key[32] || stream_le || word_pos_le || domain` and returns a new `Rng`
-  from the 32-byte digest with `stream = 0`, `word_pos = 0`. The parent is not advanced. `domain` must be
-  non-empty and at most 255 bytes; the derivation is part of the format.
+  `"mocassin/rng-fork/v1" || 0x00 || key[32] || stream_le64 || word_pos_le128 || domain` and returns a new
+  `Rng` from the 32-byte digest with `stream = 0`, `word_pos = 0`. The parent is not advanced. `domain` must be
+  non-empty and at most 255 bytes; the widths are 8 bytes for `stream` and 16 bytes for `word_pos`, both
+  little-endian. The derivation is part of the reproducibility contract.
 - The solver never uses `thread_rng`, a time seed, or an OS random source.
 
 #### 4.3 `RngStateV1` (64 bytes)
@@ -847,23 +910,30 @@ impl Rng {
 | 32 | 32 | ChaCha12 key / seed (`[u8; 32]`) |
 
 - `export_state` records the key, stream, and the current `word_pos`; it does not expose the crate's buffered
-  block or memory layout.
+  block or memory layout. **The state carries the raw 32-byte key by design**, so a `.mcs` is as sensitive as
+  the seed: never log `rngState` or the key, and expose only `seedHash` in logs/summaries. A future `.mcs`
+  consumer must treat the key as secret material, not as a leak or a checksum.
 - `from_state` validates the magic, version, and a `word_pos` whose block counter (`word_pos / 16`) fits the
   crate's 64-bit counter (so `word_pos < 2^68`); it reconstructs the cipher and resumes at the exact 32-bit
   word. Mid-block resume repopulates the buffer, so the next draw is identical to an uninterrupted stream.
 - Round-trip tests must resume at word positions 0, 15, 16, 17, 1000, and a position after a `fork`.
 - The `.mcs` reader (Step 18/20) rejects a different `rngAlgorithm`, a `rngState` length other than 64, or a
-  bad magic/version. `rngAlgorithm` is part of the state format; changing the cipher, derivation, draw
-  semantics, or this layout is format-breaking and requires a new ADR and an algorithm id such as
-  `chacha12-v2`.
+  bad magic/version.
+- **Format-breaking scope (n-2).** A change to the ChaCha12 **draw semantics** (word consumption, `next_f64`
+  construction, `next_bounded` algorithm), the **64-byte state layout**, or the algorithm id is a state-format
+  break: new algorithm id such as `chacha12-v2` plus a new ADR. A change to the **seed derivation** or
+  **fork derivation** changes reproducibility for new runs but not the state layout; it is still a
+  reproducibility-contract change and needs an ADR/version note because it changes every derived job seed.
+  A change to the **`fork` domain** or `config_hash` construction is in the reproducibility-contract group.
 
 #### 4.4 Streams and determinism
 
 - **Simulation stream:** one continuous stream for the whole trajectory. A KMC pre-run and its main run share
   the stream because the state is continuous; `prerun.mcs` carries the `RngStateV1` that the main run resumes.
   Do not fork between pre-run and run.
-- **Extension stream:** each extension gets `rng.fork(b"extension:" || id || 0x00 || config_hash)`; optional
-  extension draws cannot perturb the core trajectory.
+- **Extension stream:** each extension gets
+  `rng.fork(b"extension:" || id_bytes || 0x00 || config_hash[32])`, where `config_hash` is the 32-byte
+  SHA-256 of the UTF-8 `config_json`; optional extension draws cannot perturb the core trajectory.
 - **Lattice stream:** build-side only, in .NET Step 10. Rust exposes `derive_lattice_seed` for vectors and
   verification but never generates a lattice.
 - Same package + same binary + same platform + same effective seed ⇒ identical draws and state content.
@@ -890,8 +960,10 @@ release, on the benchmark laptop class:
 - The refill measurement compares a cold `from_seed` + 64 draws with a warm 64-draw loop, or uses
   `set_word_pos` at block boundaries; the recorded method and raw numbers go to
   `tests/reference/bench/step-13-rng.json`.
-- A regression above 10 % against the recorded baseline fails the release gate (`03-quality-strategy.md` §13).
-  Step 13 records the baseline; Step 29 owns the automated regression job.
+- The baseline is recorded in `tests/reference/bench/baselines.json` as a **same-runner-class** entry (OS, CPU
+  class, Rust version, commit), next to the raw `step-13-rng.json`. A 10 % regression is measured only against
+  that class; never compare absolute timings across machines. Step 13 records the first RNG/load baseline;
+  Step 29 owns the automated same-class regression job.
 - If a budget is missed, profile first. Do not change the algorithm or draw semantics; those are format
   decisions under ADR 0005. A genuine algorithm change is a new ADR and a format version.
 
@@ -927,8 +999,9 @@ mocassin-sim --db <project.msl> --job <id> [--io <dir>]
 - Parse errors (including unknown options, a bad enum value, or `--dry-run --stdout`) are remapped from
   `clap`'s default exit 2 to exit 10 with a CLI-owned `error: ...` line. Help and `--version` exit 0.
 - `RUST_LOG` is not consulted; `--log-level` is the only filter so scripts get deterministic output.
-- A panic in the inspection path is caught at `main`, logged as an internal error, and exits 10. The dry-run
-  path writes nothing, so a caught panic cannot leave a partial file.
+- A panic in the inspection path is caught at `main`, logged as an internal error, and exits **13** (numerical
+  failure or internal invariant violation). The dry-run path writes nothing, so a caught panic cannot leave a
+  partial file.
 
 **Dry-run output.** One line per group, stable order, invariant formatting, stdout (unless `--stdout` is
 rejected):
@@ -947,6 +1020,9 @@ rng: algorithm=chacha12-v1 seed_hash=<64hex>
 validation: ok
 ```
 
+- The `settings:` line prints the **resolved job settings** and the composed flags, not
+  `simulations[].default_settings`. The fixture's job 1 has `target_mcsp = 150` while simulation 0's default
+  is 200; that difference is expected.
 - The model/lattice/job counts and signatures must equal `inspect-v1`/`package-summary-v1` for the same job.
 - `app_version`, `created_utc`, and `generator` are not printed; they are build metadata.
 - No `--json` in Step 13. The human format is frozen in `docs/reference/cli.md`; a machine report is Step 19.
@@ -978,13 +1054,15 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
 | --- | --- | --- | --- | --- |
 | `.msl` v1 package + summary | `tests/contracts/packages/msl-v1/` | .NET Step 11 writer | Rust reader, dry-run | PR-medium |
 | Pre-amendment package | `tests/contracts/packages/amend-1-net10/` | .NET Step 11 writer (net10) | Rust reader | PR-medium |
-| Raw model/job/lattice payloads | `tests/contracts/packages/msl-v1/payloads/` | .NET writer | Rust scan/decode | PR-fast |
+| Populated pair/cluster + MMC package + summary | `tests/contracts/packages/step-13-populated/` | .NET real writer from a checked-in sample | Rust reader, signature and MMC paths | PR-medium |
+| Raw model/job/lattice payloads | `tests/contracts/packages/msl-v1/payloads/` and the populated package's extracted payloads | .NET writer | Rust scan/decode | PR-fast |
 | Parameterization projection vectors | `tests/contracts/projections/parameterization/*.bin` | .NET Step 09 | Rust projection reader/writer | PR-fast |
 | Lattice projection vectors | `tests/contracts/projections/lattice/*.bin` | .NET Step 11 | Rust projection reader/writer | PR-fast |
 | Signature metadata | `tests/contracts/signature-vectors.json` | .NET | Rust test reads ids/digests | PR-fast |
 | RNG vectors | `tests/contracts/rng-vectors.json` | Rust (frozen once) | Rust RNG tests | PR-fast |
 | Dry-run golden | `tests/contracts/packages/msl-v1/dry-run-v1.txt` | Rust CLI | Rust CLI test | PR-fast |
 | Load/RNG bench evidence | `tests/reference/bench/step-13-*.json` | Criterion runner | closeout evidence | Nightly/release |
+| Same-class baseline entry | `tests/reference/bench/baselines.json` | Criterion runner | 10 % regression gate | Nightly/release |
 | Fuzz corpus | `src/rust/crates/mocassin-msl/fuzz/corpus/` | Rust + fixture seeds | fuzz targets | Nightly |
 
 - **Round-trip meaning.** Rust never writes `.msl`. The contract is: .NET writes, Rust reads and validates; the
@@ -994,6 +1072,11 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
 - `rng-vectors.json` is a test-vector document, not a runtime format; it has `format =
   "mocassin.rng-vectors"`, `formatVersion = 1`, and `algorithm = "chacha12-v1"`. It is not added to
   `contracts/manifest.json`, because it is not a package/state/job/event contract and no writer emits it.
+- The new `step-13-populated` package is built by the real .NET writer from a committed sample that has
+  non-empty pair and cluster tables and an MMC job; it carries its own canonical summary, extracted payloads,
+  README, and regeneration command. It is a test artifact, not a schema change. If no existing sample combines
+  both, feature 6 adds a small sample under `samples/` and builds the package from it; do not hand-author the
+  `.msl`.
 - Fixtures are produced by the real writers and never hand-edited. The Step 11 regeneration command remains the
   `.msl` update path; the pre-amendment package is byte-fixed.
 - A failed fixture comparison is a contract failure, not a test flake.
@@ -1010,10 +1093,13 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
 - **Update** `docs/development/testing-and-parity.md`: Step 13 fixtures, tiers, property/mutation tests, fuzzing,
   and the load/RNG budgets.
 - **Update** `docs/development/code-structure.md`: the Rust workspace layout rules.
-- **Update** parity/status/step page/closeout. Rust API docs are generated by `cargo doc --workspace --no-deps`
-  with `missing_docs = deny`; the site's `/api/rust/` link already exists. The implementor adds the new page to
-  `zensical.toml` navigation in feature 7 (configuration is implementation-owned; the planner does not edit
-  it).
+- **Update** parity/status/step page/closeout. **Closeout evidence:** `docs/planning/closeout/step-13.json`,
+  created from [`_template.json`](../closeout/_template.json) and checked with
+  `python tools/check_closeout_evidence.py docs/planning/closeout/step-13.json`. It binds the audited commit,
+  the closeout CI `head_sha`, the `main` SHA at freeze, and the merge candidate. Rust API docs are generated by
+  `cargo doc --workspace --no-deps` with `missing_docs = deny`; the site's `/api/rust/` link already exists. The
+  implementor adds the new page to `zensical.toml` navigation in feature 7 (configuration is
+  implementation-owned; the planner does not edit it).
 - No hand-written API reference page; public Rust items carry doc comments.
 
 ### 9. Test plan
@@ -1022,19 +1108,23 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
 | --- | --- | --- |
 | Reader acceptance | the `msl-v1` fixture opens read-only; the dry-run counts/signatures equal the canonical summary for job 1 | PR-medium |
 | Reader compatibility | the `amend-1-net10` fixture opens and yields the same logical summary | PR-medium |
-| Schema/version | wrong application id, user version, future `format_version`, missing table/column, malformed `schema_info` | PR-fast |
+| Populated/MMC acceptance | the new real-writer package has non-empty pair/cluster tables and an MMC job; both signatures re-encode; MMC kind/break fields validate | PR-medium |
+| Schema/version | wrong application id, user version, future `format_version`, missing table/column, malformed `schema_info`; `models`/`lattices` `format_version` columns match their payloads | PR-fast |
 | Decode | every raw payload decodes; unknown keys are ignored; minimum-width integers, array `lattice`, `null` optionals | PR-fast |
 | Bounds | truncated frame, oversized declared size, decompression bomb, element-budget/depth violation fail without OOM | PR-fast |
 | Validation | each invalid index/length/NaN/kind/flag/tracker case returns the documented error | PR-fast |
+| Conservation | each rule preserves the non-void particle-symbol multiset and charge within `1e-9`; a mutated state/particle is rejected | PR-fast |
+| Movement/transport | `path_vector` equals the cell-vector sum of `movement`; `length` equals its norm; a no-charge-change rule has a zero transport vector; a mutated movement/path vector is rejected | PR-fast |
 | Signatures | parameterization and lattice re-encode from the payload; every `.bin` vector round-trips byte-identically; a mutated value is rejected | PR-fast |
 | RNG derivation | job/lattice seed vectors match Step 10 | PR-fast |
-| RNG draws | 16-word streams, `next_u64`, `next_f64` range, `next_bounded` goldens and uniformity, `fork` separation | PR-fast |
+| RNG draws | 16-word streams, `next_u64`, `next_f64` range, `next_bounded` goldens/uniformity and half-open range, `fork` separation and widths | PR-fast |
 | RNG state | 64-byte round-trip; resume at 0/15/16/17/1000; mid-block continuation equals the uninterrupted stream | PR-fast |
-| CLI | dry-run golden; exit 0/10/11/12/16; parse-error remap; help/version; `--stdout` conflict; no files written | PR-fast |
+| CLI | dry-run golden; exit 0/10/11/12/13/14/15/16; parse-error remap; help/version; `--stdout` conflict; no files written | PR-fast |
+| Exit-code drift | the solver rows in `cli.md`, `solver-architecture.md`, and the step page match architecture §7.3 code-for-code | PR-fast (script) or closeout manual |
 | Property/mutation | random truncations and byte mutations of real payloads never panic or exceed the limits | PR-fast |
 | Read-only | `0444` package opens; no `-wal`/`-shm`; no write API | PR-fast |
 | Fuzz | `payload_scan`, `payload_decode`, `package_open` run time-boxed with no crash/OOM | Nightly/manual |
-| Performance | ceria job load `< 100 ms`; RNG budgets; environment recorded | Nightly/release |
+| Performance | ceria job load `< 100 ms`; RNG budgets; same-class baseline recorded | Nightly/release |
 
 No mocks: the tests use real SQLite files, real checked-in packages, real raw payloads, and a real temporary
 directory. The only process boundary is the CLI exit-code test, which runs the built binary.
@@ -1049,8 +1139,10 @@ directory. The only process boundary is the CLI exit-code test, which runs the b
 | RNG | §4.5 |
 
 The load budget covers the schema checks, one model decode, one lattice decode, one job decode, validation, and
-two signature re-encodes. The benchmark records the toolchain, CPU class, commit, and raw timings in
-`tests/reference/bench/step-13-load.json`.
+two signature re-encodes. It is a **fixture budget**, not a promise for a 512 MiB package: a large payload is
+bounded by the guard but may take proportionally longer. The benchmark records the toolchain, CPU class,
+commit, and raw timings in `tests/reference/bench/step-13-load.json` and a same-class entry in
+`tests/reference/bench/baselines.json`.
 
 ### 11. Risks and mitigations
 
@@ -1063,11 +1155,12 @@ two signature re-encodes. The benchmark records the toolchain, CPU class, commit
 | `rand_chacha` API change | Pin the workspace version; only `mocassin-rng` touches the state APIs; the byte layout is first-party |
 | SQLite/Zstd build issues | `rusqlite` bundled; workspace cache; the `zstd` crate is already a dependency |
 | Reader too strict and rejects a valid future package | Supported range `1..=1` is explicit; a future major is rejected with a clear message; `ReaderLimits` is overridable |
-| Reader too permissive and accepts a corrupt package | Semantic pass plus signature re-encode; `mocassin verify` remains the full check |
-| CLI contract drift | `cli.md` freezes the dry-run format and exit codes; golden test; no `--json` yet |
+| Reader too permissive and accepts a corrupt package | Semantic pass plus signature re-encode; mass/charge/movement checks; `mocassin verify` remains the full check |
+| `charge_transport_vector` positional formula is not reader-verifiable | Reader checks finite/zero-consistency; Step 15 owns the field-term bound/use; v1 payload has no fractional P1 coordinates. Residual risk recorded in §3.5 and the Step 15 interface; a future `.msl` can add positions or sign the vector |
+| CLI contract drift | `cli.md` freezes the dry-run format and exit codes; golden test and doc-drift check; no `--json` yet |
 | `--seed` misuse | Documented as debugging; recorded only as a hash; production uses the package seed |
 | Fuzz toolchain unavailable | Nightly + `cargo-fuzz` are Tier 2; run the time-boxed targets; if unavailable, record the accepted risk and keep the PR-fast mutation suite |
-| Step size | Seven features, 3.0–4.0 pw; 1.0 pw contingency; stop and ask if features 1–3 exceed 2.0 pw |
+| Step size | Base 3.5 pw + 1.0 pw contingency = 4.5 pw, beyond the four-week trigger; owner must choose the single-step exception or 13A/13B split (§13) |
 
 ### 12. Dependencies and interfaces
 
@@ -1083,6 +1176,9 @@ two signature re-encodes. The benchmark records the toolchain, CPU class, commit
 - **Step 14 (next):** consumes `JobPackage`, `ParameterizedModel`, `InitialLattice`, `EnvironmentModel`, `Rng`,
   and `DirectionPool`; owns supercell expansion, links, pools, jump status, energy runtime, and resume. Step 13
   must not implement those.
+- **Step 15:** owns the field term and the residual `charge_transport_vector` trust boundary; Step 13 validates
+  finite/zero-consistency but cannot recompute the positional formula from the v1 payload. The Step 15 page
+  records the assignment and must reject a non-finite field result.
 - **Step 18/20:** consume `RngStateV1` and `seed_hash`; `.mcs` `rngAlgorithm`/`rngState` are bound to §4.3.
 - **Step 19:** completes the CLI (`batch`, `--validate-only`, `--no-state`, `--log-file`, extensions, HPC).
 - **Step 29:** extends fuzzing to `.mcs`/extension configs and owns automated benchmark regression.
@@ -1092,17 +1188,26 @@ No unresolved cross-step interface question remains. The only deliberate asymmet
 
 ### 13. Sizing and split-trigger check
 
-- **Estimate:** 3.0–4.0 person-weeks (roadmap §3 says 2–4 pw), including tests, documentation, review, fuzzing,
-  and closeout.
-- **Breakdown:** feature 1 ≈ 0.3 pw; feature 2 ≈ 0.5 pw; feature 3 ≈ 0.7 pw; feature 4 ≈ 0.9 pw; feature 5 ≈
-  0.3 pw; feature 6 ≈ 0.4 pw; feature 7 ≈ 0.4 pw; ~0.5 pw integration/contingency (1.0 pw total contingency).
-- **§3.1 triggers:** seven features is inside the 6–8 range; the outcomes are one coherent contract (foundation
-  → reader → RNG → CLI) and one acceptance story; the audit is a bounded new-crate/reader review. The upper
-  bound is at, not beyond, the four-week trigger. No split is recommended; a 13A/13B split would leave either a
-  reader without a CLI acceptance or an RNG without a consumer.
-- **Guard:** if features 1–3 exceed 2.0 pw, stop and ask the owner to re-open the split before feature 4.
-- **Owner approval:** the feature list and this sizing are approved once with the design verdict at the start
-  gate. They are not re-approved per feature.
+- **Honest estimate:** base implementation **3.5 person-weeks** (feature breakdown below) plus **1.0 pw risk
+  contingency = 4.5 pw**. The four-week §3.1 trigger is **exceeded**; the earlier “3.0–4.0 pw, no split” claim
+  was arithmetically wrong and is withdrawn.
+- **Breakdown:** feature 1 ≈ 0.3 pw; feature 2 ≈ 0.5 pw; feature 3 ≈ 0.7 pw; feature 4 ≈ 1.0 pw (adds the
+  scientific-invariant checks); feature 5 ≈ 0.3 pw; feature 6 ≈ 0.5 pw (adds the populated pair/cluster + MMC
+  fixture); feature 7 ≈ 0.5 pw; ~0.2 pw integration; 1.0 pw contingency. Total 4.5 pw.
+- **§3.1 triggers:** seven features is inside the 6–8 range, but the upper estimate is beyond four weeks. The
+  audit is still a bounded new-crate/reader review.
+- **Owner decision required (do not decide unilaterally):**
+  - **Option A — single-step exception.** Approve Step 13 as one step at 4.5 pw, following the Step 09/12
+    precedent. Keeps one coherent contract and one closeout; the owner accepts the four-week exception.
+  - **Option B — split 13A/13B.** `13A — Rust solver foundation and bounded reader` (workspace/types/RNG/
+    bounded reader + payload DTOs + the populated/MMC fixture; roughly 3.0–3.5 pw) and `13B — Model/job
+    mapping, signatures, and dry-run CLI` (validation/M-2 checks, signature re-encoding, dry-run, fuzz,
+    benchmarks, docs, closeout; roughly 1.5–2.0 pw). 13B depends on 13A; 13A's acceptance would be library
+    tests plus the raw-payload/projection gates, and the CLI acceptance would move to 13B. Both parts are
+    under four weeks.
+- **Guard:** if features 1–3 exceed 2.0 pw, stop and ask the owner to choose the split before feature 4.
+- **Owner approval:** the feature list, the Option A/B choice, and (if A) the 4.5 pw single-step exception are
+  approved once with the design verdict at the start gate. They are not re-approved per feature.
 
 ### 14. Decisions recorded and owner input
 
@@ -1113,16 +1218,28 @@ No unresolved cross-step interface question remains. The only deliberate asymmet
 | Stored payloads use smallest-width integers; fixed width is canonical-projection only | This page §2.1; data contracts §3.3 |
 | `.msl` v1 lattice payload is a MessagePack array of `u8`; the canonical projection uses `bin` | This page §2.1/§3.6; `msl-format.md` |
 | Solver reader bounds and the no-`integrity_check` split with `mocassin verify` | This page §3.3/§3.1; data contracts §3.4 |
-| Solver exit codes 0/10–16; parse errors remap to 10; dry-run is write-free | This page §3.7/§5; architecture §7.3 |
-| RNG performance budget and 10 % regression rule | This page §4.5; quality strategy §13 |
-| Seven features, 3.0–4.0 pw, no split | This page §13; owner approval at the start gate |
+| Solver exit codes 0/10–16; parse errors remap to 10; dry-run is write-free | This page §3.7/§5; architecture §7.3 (canonical) |
+| RNG performance budget and 10 % same-runner-class regression rule | This page §4.5; quality strategy §13; `tests/reference/bench/baselines.json` |
+| Seven features; base 3.5 pw + 1.0 pw contingency = 4.5 pw; Option A single-step exception or Option B 13A/13B split | This page §13; owner decision at the start gate |
 
-**New ADRs:** none. ADR 0005 stands; this step implements it. The `RngStateV1` layout, reader limits, and
-exit-code mapping are step-level decisions recorded here and in the data contracts/architecture, not
-format-version changes.
+**New ADRs:** none are created by this freeze. ADR 0005 stands; this step implements it. The `RngStateV1`
+layout, reader limits, and exit-code mapping are step-level decisions recorded here and in the data
+contracts/architecture. **n-1 is an open owner choice**, not a decision made by this freeze:
 
-**Owner decisions requested at the start gate:** approve the seven-feature list, the 3.0–4.0 pw sizing with no
-split, and the design-review verdict. No other owner decision is open.
+- **Option A — data-contract decision note (current design).** Keep the 64-byte `rngState` layout in
+  [`02-data-contracts.md`](02-data-contracts.md) §4.3/§4.5. The field already existed and was documented as
+  “length/algorithm documented in Step 13”; no schema version bump is needed. Lower process overhead; the
+  contract page is the durable record.
+- **Option B — short ADR.** Add an ADR (for example ADR 0016, “ChaCha12 RNG state layout”) recording the
+  64-byte layout and the algorithm-id rule as a format decision. More durable for a persisted artifact, at the
+  cost of a new ADR and an explicit review; no schema change either way.
+
+The planner does not choose between A and B. The owner should choose before the start gate; if B, the ADR is
+added in the same design branch and the review request is updated.
+
+**Owner decisions requested at the start gate:** approve the seven-feature list, choose Option A or B for the
+sizing/split decision (4.5 pw single-step exception or 13A/13B split), choose n-1 Option A or B, and accept the
+design-review verdict. No other owner decision is open.
 
 ## Implementation tasks
 
@@ -1133,24 +1250,38 @@ split, and the design-review verdict. No other owner decision is open.
 - [ ] Create the `mocassin-msl` read-only open, schema/version/provenance checks, Zstd frame handling, bounded
       MessagePack scan, typed decode, and the model cache.
 - [ ] Implement the payload → runtime mapping and every index/length/finite/kind/tracker validation.
+- [ ] Implement the M-2 scientific checks: allowed occupations, mass/charge conservation, movement/path-vector
+      consistency, and the zero-consistency transport-vector check; record the Step 15 assignment for the full
+      positional formula.
 - [ ] Implement the canonical projection writer, quantization, and the parameterization/lattice signature
       re-encoding.
-- [ ] Implement the `mocassin-sim` parser, logging, `--version`, dry-run summary, exit mapping, and panic
-      containment.
+- [ ] Implement the `mocassin-sim` parser, logging, `--version`, dry-run summary, unified exit mapping, panic
+      containment, and the exit-code drift check.
 - [ ] Implement the data-oriented base structures (lattice, positions, environments, tables, pools, jump-status
       container).
-- [ ] Add the cross-language fixtures, RNG vectors, dry-run golden, property/mutation tests, and fuzz targets.
+- [ ] Add the cross-language fixtures (including the populated pair/cluster + MMC package), RNG vectors,
+      dry-run golden, property/mutation tests, and fuzz targets.
 - [ ] Run the time-boxed fuzz targets and record the result.
-- [ ] Record the load and RNG benchmarks and compare against the budgets.
+- [ ] Record the load and RNG benchmarks and add the same-runner-class baseline entry.
 - [ ] Write `solver-architecture.md` and update `msl-format.md`, `cli.md`, `testing-and-parity.md`, and
       `code-structure.md`; add the nav entry.
-- [ ] Update the parity matrix, status, step page, and closeout evidence; request the audit.
+- [ ] Update the parity matrix, status, step page, and `docs/planning/closeout/step-13.json`; run
+      `python tools/check_closeout_evidence.py`; request the audit.
 
 ## Acceptance criteria
 
 - [ ] `mocassin-sim --db tests/contracts/packages/msl-v1/ceria-temperature-sweep.msl --job 1 --dry-run` exits 0
       and prints the documented summary; every count/signature equals the canonical summary for job 1.
-- [ ] The `amend-1-net10` package also opens and validates.
+- [ ] The `amend-1-net10` package also opens and validates; the populated pair/cluster + MMC package validates
+      and both signatures re-encode.
+- [ ] Each rule preserves the non-void particle-symbol multiset and charge within `1e-9`; `path_vector` matches
+      the cell-vector sum of `movement` and `length` matches its norm; a no-charge-change rule has a zero
+      transport vector. The full positional transport formula is recorded as a Step 15 assignment with the
+      trust-boundary rationale.
+- [ ] `models.format_version`/`lattices.format_version` columns match their payloads; the job settings are not
+      compared with `simulations[].default_settings`.
+- [ ] The solver exit-code rows in `cli.md`, `solver-architecture.md`, and this page match architecture §7.3
+      code-for-code.
 - [ ] Future package/payload versions and corrupt, truncated, oversized, or bomb payloads are rejected with the
       documented error/exit class, before unbounded allocation.
 - [ ] A changed frequency, energy, site background, or lattice particle is detected by the parameterization or
@@ -1158,9 +1289,10 @@ split, and the design-review verdict. No other owner decision is open.
 - [ ] Every index/length/finite/kind/tracker invariant in §3.5 is validated; malformed input never panics.
 - [ ] Seed derivation matches the Step 10 vectors; RNG golden vectors, bounded draws, `[0,1)` doubles,
       domain-separated forks, and the 64-byte state round-trip/resume all pass.
-- [ ] The RNG draw/refill benchmark meets §4.5 and the numbers are recorded with the environment.
+- [ ] The RNG draw/refill benchmark meets §4.5 and the numbers are recorded with the environment in the
+      same-runner-class `tests/reference/bench/baselines.json` entry.
 - [ ] Loading the ceria job takes `< 100 ms` (release, warm, benchmark laptop class) and the measurement is
-      recorded.
+      recorded as a fixture budget, not a large-package promise.
 - [ ] The reader opens `0444` packages read-only, needs no `-wal`/`-shm`, and has no write API.
 - [ ] The time-boxed fuzz run finds no panic/OOM; the PR-fast mutation/property suite passes.
 - [ ] `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, and `cargo test --workspace`
@@ -1177,7 +1309,9 @@ At this point, write:
 - `docs/reference/cli.md` — `mocassin-sim` arguments, `--dry-run`, stdout/stderr, logging, and exit codes.
 - `docs/development/testing-and-parity.md` — contract fixtures, tiers, property tests, fuzzing, and budgets.
 - `docs/development/code-structure.md` — the Rust workspace layout.
-- `docs/planning/appendix-b-parity-matrix.md`, `docs/planning/status.md`, this page, and the closeout evidence.
+- `docs/planning/appendix-b-parity-matrix.md`, `docs/planning/status.md`, this page,
+  `docs/planning/closeout/step-13.json` (checked with `python tools/check_closeout_evidence.py`), and the audit
+  request.
 - Rust API docs via `cargo doc --workspace --no-deps`; no hand-written API reference.
 
 ## Tests
@@ -1189,11 +1323,15 @@ At this point, write:
 | Schema | Application-id/user-version/format/provenance checks |
 | Decode | MessagePack/Zstd round-trip, unknown keys, minimum-width integers, array/`bin` lattice |
 | Validation | Bad indices, lengths, kinds, flags, trackers, finite values, signatures |
+| Conservation | Per-rule symbol multiset and charge; mutated state/particle rejected |
+| Movement/transport | `path_vector`/`length` vs `movement`; zero transport when no charge changes |
+| Populated/MMC | Real populated pair/cluster + MMC package validates and re-encodes both signatures |
 | Signatures | Parameterization/lattice re-encode, `.bin` vectors, mutation detection |
 | RNG | Derivation/draw/state golden vectors, bounded uniformity, double range, fork separation |
-| CLI | Dry-run output, exit codes, logging, parse-error remap, write-free |
+| CLI | Dry-run output, exit codes 0/10–16, logging, parse-error remap, write-free |
+| Exit-code drift | Solver rows match architecture §7.3 |
 | Fuzz | No panic/OOM on malformed input |
-| Performance | Load time and RNG budgets |
+| Performance | Load time and RNG budgets with same-class baseline |
 | Read-only | `0444` package opens; write attempt fails; no WAL |
 
 ## Risks and mitigations
