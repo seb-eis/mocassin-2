@@ -1,74 +1,51 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.Cli.CommandLine;
 using Mocassin.Packages.Projects.Validation;
 
 namespace Mocassin.Cli.Validation;
 
 /// <summary>
-/// Implements the <c>mocassin validate</c> command surface.
+/// Implements the <c>mocassin validate</c> command.
 /// </summary>
+/// <remarks>
+/// The command graph owns parsing, arity, and usage errors. This handler runs the Step 07 validation pipeline
+/// and keeps the <c>validation-v1</c> report and the 0/1/2/3 exit-code contract unchanged.
+/// </remarks>
 internal static class ValidateCommand
 {
     /// <summary>
-    /// Parses and runs the command.
+    /// Runs the command.
     /// </summary>
-    /// <param name="arguments">The arguments after the command name.</param>
+    /// <param name="request">The typed request.</param>
     /// <param name="stdout">The standard-output writer.</param>
     /// <param name="stderr">The standard-error writer.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The process exit code.</returns>
     public static async Task<int> RunAsync(
-        IReadOnlyList<string> arguments,
+        ValidateRequest request,
         TextWriter stdout,
-        TextWriter stderr)
+        TextWriter stderr,
+        CancellationToken cancellationToken = default)
     {
-        var json = arguments.Contains("--json", StringComparer.Ordinal);
-        var path = default(string);
-        var statistics = false;
-        var warningsAsErrors = false;
-        foreach (var argument in arguments)
-        {
-            switch (argument)
-            {
-                case "--json":
-                    break;
-                case "--stats":
-                    statistics = true;
-                    break;
-                case "--warnings-as-errors":
-                    warningsAsErrors = true;
-                    break;
-                default:
-                    if (argument.StartsWith('-'))
-                    {
-                        return WriteUsageError(json, stdout, stderr, $"Unknown option '{argument}'.");
-                    }
-
-                    if (path is not null)
-                    {
-                        return WriteUsageError(json, stdout, stderr, "Exactly one project path is required.");
-                    }
-
-                    path = argument;
-                    break;
-            }
-        }
-
-        if (string.IsNullOrWhiteSpace(path))
-        {
-            return WriteUsageError(json, stdout, stderr, "A project path is required.");
-        }
+        ArgumentNullException.ThrowIfNull(request);
+        ArgumentNullException.ThrowIfNull(stdout);
+        ArgumentNullException.ThrowIfNull(stderr);
 
         var options = new ValidationOptions
         {
-            IncludeStatistics = statistics,
-            WarningsAsErrors = warningsAsErrors,
+            IncludeStatistics = request.Statistics,
+            WarningsAsErrors = request.WarningsAsErrors,
         };
 
         ValidationResult result;
         try
         {
             result = await new ProjectValidationPipeline()
-                .ValidateFileAsync(path, options: options)
+                .ValidateFileAsync(
+                    request.ProjectPath,
+                    options: options,
+                    cancellationToken: cancellationToken)
                 .ConfigureAwait(false);
         }
         catch (Exception exception) when (exception is IOException
@@ -77,8 +54,8 @@ internal static class ValidateCommand
                                               or System.Security.SecurityException)
         {
             var (ioReport, ioExitCode) = ValidationReportWriter.IoError(
-                $"Could not read project '{path}': {exception.Message}");
-            if (json)
+                $"Could not read project '{request.ProjectPath}': {exception.Message}");
+            if (request.Json)
             {
                 ValidationReportWriter.WriteJson(stdout, ioReport);
             }
@@ -91,7 +68,7 @@ internal static class ValidateCommand
         }
 
         var (report, exitCode) = ValidationReportWriter.FromResult(result);
-        if (json)
+        if (request.Json)
         {
             ValidationReportWriter.WriteJson(stdout, report);
         }
@@ -101,19 +78,5 @@ internal static class ValidateCommand
         }
 
         return exitCode;
-    }
-
-    private static int WriteUsageError(bool json, TextWriter stdout, TextWriter stderr, string message)
-    {
-        stderr.WriteLine($"mocassin validate: {message}");
-        stderr.WriteLine("usage: mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]");
-        if (json)
-        {
-            var (report, exitCode) = ValidationReportWriter.UsageError();
-            ValidationReportWriter.WriteJson(stdout, report);
-            return exitCode;
-        }
-
-        return 2;
     }
 }

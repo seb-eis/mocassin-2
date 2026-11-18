@@ -120,10 +120,13 @@ publication the new package remains and the command exits 6. Progress is throttl
 ### Replacement and size
 
 - An existing package is not replaced without `--force`.
+- The target's parent directory must exist; `build -o` does not create it. A directory target, a missing
+  parent, or an invalid path is `CLI002`/3 before any load.
 - `--compact` uses Zstd quality 9 plus `VACUUM`; it changes compressed bytes and size, not signatures or the
   canonical summary.
-- `--parallel <n>` controls compilation and lattice generation; package writes stay serialized in job order,
-  so `--parallel 1` and `--parallel N` produce the same logical package.
+- `--parallel <n>` controls compilation and lattice generation (`1..256`); omitting it uses the processor
+  count, while `--parallel 0` is a range error. Package writes stay serialized in job order, so `--parallel 1`
+  and `--parallel N` produce the same logical package.
 
 ### Verification
 
@@ -148,9 +151,10 @@ See the [CLI reference](../reference/cli.md) for every command, option, report, 
 
 ## Sizing guidance
 
-The measured reference workload (10,000 jobs at 10×10×10 ceria, about 1,000 positions) builds in a few seconds
-and produces a package of roughly 10 MB with about 120 MB peak RSS on the benchmark laptop class; the full budget
-and the net10 comparison are in the Step 11 benchmark evidence. Packages grow with the number of distinct
+The Step 12 reference workload (10,000 mixed 6×6×6/8×8×8 ceria jobs) built and verified in 3.76 s with about
+148 MiB peak RSS and a 9.2 MiB package on the AMD Ryzen 7 7840U development host; the method and stage timings
+are on the [performance page](../performance/index.md). The earlier Step 11 evidence used a 10×10×10 workload
+and is kept for comparison. Packages grow with the number of distinct
 lattices, the supercell volume, and the model tables. The writer reports the lattice reuse factor and an advisory
 size warning. If a campaign is too large, reduce duplicate campaigns, use a smaller supercell, choose
 `--compact`, or move derived results to the `.msr` store.

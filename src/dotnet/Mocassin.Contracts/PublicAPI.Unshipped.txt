@@ -544,3 +544,22 @@ Mocassin.Contracts.Packages.JumpDirectionPayload.Path.get -> System.Collections.
 Mocassin.Contracts.Packages.JumpDirectionPayload.Deconstruct(out string! ObjectId, out uint PositionId, out uint CollectionId, out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<int>> Path, out System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> Movement, out System.Collections.Immutable.ImmutableArray<double> PathVector, out double Length, out bool IsInverse) -> void
 Mocassin.Contracts.Packages.JumpDirectionPayload.JumpDirectionPayload(string! ObjectId, uint PositionId, uint CollectionId, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<int>> Path, System.Collections.Immutable.ImmutableArray<System.Collections.Immutable.ImmutableArray<double>> Movement, System.Collections.Immutable.ImmutableArray<double> PathVector, double Length, bool IsInverse) -> void
 const Mocassin.Contracts.Packages.PackageFormatConstants.ApplicationId = 1297040211 -> long
+Mocassin.Contracts.Cli.CliDiagnosticCodes
+const Mocassin.Contracts.Cli.CliDiagnosticCodes.Cancelled = "CLI006" -> string!
+const Mocassin.Contracts.Cli.CliDiagnosticCodes.Internal = "CLI007" -> string!
+const Mocassin.Contracts.Cli.CliDiagnosticCodes.Io = "CLI002" -> string!
+const Mocassin.Contracts.Cli.CliDiagnosticCodes.JobSelection = "CLI005" -> string!
+const Mocassin.Contracts.Cli.CliDiagnosticCodes.NotAPackage = "CLI009" -> string!
+const Mocassin.Contracts.Cli.CliDiagnosticCodes.OutputExists = "CLI003" -> string!
+const Mocassin.Contracts.Cli.CliDiagnosticCodes.Reserved = "CLI008" -> string!
+const Mocassin.Contracts.Cli.CliDiagnosticCodes.Selection = "CLI004" -> string!
+const Mocassin.Contracts.Cli.CliDiagnosticCodes.Usage = "CLI001" -> string!
+Mocassin.Contracts.Cli.CliDiagnosticDescriptors
+static Mocassin.Contracts.Cli.CliDiagnosticDescriptors.All.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.DiagnosticDescriptor!>
+const Mocassin.Contracts.ContractVersions.BuildReportVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.CleanReportVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.CompileReportVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.DoctorReportVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.InspectReportVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.NewProjectReportVersion = 1 -> int
+const Mocassin.Contracts.ContractVersions.VerifyReportVersion = 1 -> int

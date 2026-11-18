@@ -24,6 +24,7 @@ Modes:
   docs       Strict documentation build, link check, DocFX, and Rust docs
   contracts  Contract/symmetry drift, process consistency, licence headers,
              secret scan, and cargo-deny
+  aot        Native AOT smoke host, positive control, and CLI evidence
   policy     API and contracts/policy checks (api + contracts)
 
 Options:
@@ -44,7 +45,7 @@ list_modes=false
 
 for arg in "$@"; do
   case "$arg" in
-    all|dotnet|api|structure|rust|python|docs|contracts|policy)
+    all|dotnet|api|structure|rust|python|docs|contracts|aot|policy)
       mode="$arg"
       ;;
     --require)
@@ -76,7 +77,7 @@ fi
 if [[ "$list_modes" == "true" ]]; then
   echo "Mode: $mode"
   case "$mode" in
-    all) echo "  dotnet, api, rust, python, docs, contracts" ;;
+    all) echo "  dotnet, api, rust, python, docs, contracts, aot" ;;
     dotnet) echo "  restore, build, test, format" ;;
     api) echo "  licence/vulnerability audit, ApiCompat" ;;
     structure) echo "  architecture structure test" ;;
@@ -84,6 +85,7 @@ if [[ "$list_modes" == "true" ]]; then
     python) echo "  pytest, package build" ;;
     docs) echo "  math check, link check, strict site build, DocFX/rustdoc" ;;
     contracts) echo "  manifest/symmetry drift, process consistency, SPDX, secrets, cargo-deny" ;;
+    aot) echo "  zero-warning AOT smoke host, IL2026/IL3050 positive control, native smoke run, CLI evidence" ;;
     policy) echo "  api + contracts" ;;
   esac
   exit 0
@@ -178,6 +180,123 @@ run_contracts() {
   fi
 }
 
+run_aot() {
+  echo "== AOT =="
+  # Fail-not-skip: clang/lld are Tier 1 tools and every closeout from Step 12 needs them.
+  for tool in clang ld.lld; do
+    if ! command -v "$tool" >/dev/null 2>&1; then
+      echo "aot: required tool '$tool' not found; install clang/lld 19.1.7 (Tier 1 image)" >&2
+      exit 1
+    fi
+  done
+
+  local aot_root="artifacts/aot"
+  rm -rf "$aot_root"
+  mkdir -p "$aot_root"
+  local smoke_project="tests/aot/SystemCommandLineSmoke/SystemCommandLineSmoke.csproj"
+  local control_project="tests/aot/PositiveControl/PositiveControl.csproj"
+  local smoke_out="$aot_root/smoke"
+  local control_out="$aot_root/control"
+  local smoke_log="$aot_root/system-commandline-smoke.log"
+  local control_log="$aot_root/positive-control.log"
+
+  # A clean build is required: an incremental publish would suppress the warnings the positive control
+  # must emit and could reuse a stale native image.
+  dotnet clean "$smoke_project" -c Release -r linux-x64 >/dev/null 2>&1 || true
+  dotnet clean "$control_project" -c Release -r linux-x64 >/dev/null 2>&1 || true
+
+  if ! dotnet publish "$smoke_project" -c Release -r linux-x64 \
+      -p:PublishAot=true -p:TrimMode=full -p:TrimmerSingleWarn=false \
+      -p:SuppressTrimAnalysisWarnings=false -p:SelfContained=true \
+      -o "$smoke_out" >"$smoke_log" 2>&1; then
+    if grep -q "ILCompiler" "$smoke_log"; then
+      echo "aot: Microsoft.DotNet.ILCompiler 11.0.0 could not be restored; check the NuGet feed/cache" >&2
+    fi
+    tail -40 "$smoke_log" >&2
+    echo "aot: the zero-warning smoke host failed to publish" >&2
+    exit 1
+  fi
+
+  if grep -Eq "warning IL[23][0-9]{3}" "$smoke_log"; then
+    echo "aot: the smoke host emitted trim/AOT warnings:" >&2
+    grep -E "warning IL[23][0-9]{3}" "$smoke_log" >&2
+    exit 1
+  fi
+
+  local smoke_binary="$smoke_out/SystemCommandLineSmoke"
+  if [[ ! -x "$smoke_binary" ]]; then
+    echo "aot: the native smoke binary was not produced at $smoke_binary" >&2
+    exit 1
+  fi
+
+  if ! dotnet publish "$control_project" -c Release -r linux-x64 \
+      -p:PublishAot=true -p:TrimMode=full -p:TrimmerSingleWarn=false \
+      -p:SuppressTrimAnalysisWarnings=false -p:SelfContained=true \
+      -o "$control_out" >"$control_log" 2>&1; then
+    if grep -q "ILCompiler" "$control_log"; then
+      echo "aot: Microsoft.DotNet.ILCompiler 11.0.0 could not be restored; check the NuGet feed/cache" >&2
+    fi
+    tail -40 "$control_log" >&2
+    echo "aot: the positive-control project failed to publish" >&2
+    exit 1
+  fi
+
+  if ! grep -q "IL2026" "$control_log" || ! grep -q "IL3050" "$control_log"; then
+    echo "aot: the positive control did not emit both IL2026 and IL3050; the trim/AOT analyzers are not active" >&2
+    exit 1
+  fi
+
+  local help_log="$aot_root/smoke-help.txt"
+  local version_log="$aot_root/smoke-version.txt"
+  local parse_log="$aot_root/smoke-parse-error.txt"
+  if ! "$smoke_binary" --help >"$help_log" 2>&1; then
+    echo "aot: the native smoke host failed '--help'" >&2
+    exit 1
+  fi
+  if ! grep -q "Usage:" "$help_log"; then
+    echo "aot: the native smoke host did not print usage for '--help'" >&2
+    exit 1
+  fi
+  if ! "$smoke_binary" --version >"$version_log" 2>&1; then
+    echo "aot: the native smoke host failed '--version'" >&2
+    exit 1
+  fi
+
+  local parse_exit=0
+  "$smoke_binary" validate x --bogus >"$parse_log" 2>&1 || parse_exit=$?
+  if [[ "$parse_exit" -ne 2 ]]; then
+    echo "aot: the native smoke parse-error case exited $parse_exit; expected 2 (CLI001)" >&2
+    exit 1
+  fi
+  if ! grep -q "CLI001" "$parse_log"; then
+    echo "aot: the native smoke parse-error case did not emit CLI001" >&2
+    exit 1
+  fi
+
+  # The real CLI publish is evidence, not a gate: Microsoft.Data.Sqlite and MessagePack are not verified for
+  # Native AOT. Step 31 owns the platform matrix and the AOT/single-file decision.
+  local cli_log="$aot_root/mocassin-cli.log"
+  if dotnet publish src/dotnet/Mocassin.Cli/Mocassin.Cli.csproj -c Release -r linux-x64 \
+      -p:PublishAot=true -p:TrimMode=full -p:TrimmerSingleWarn=false \
+      -p:SuppressTrimAnalysisWarnings=false -p:SelfContained=true \
+      -o "$aot_root/mocassin-cli" >"$cli_log" 2>&1; then
+    local cli_warnings
+    cli_warnings="$(grep -cE "warning IL[23][0-9]{3}" "$cli_log" || true)"
+    echo "aot evidence: Mocassin.Cli published with $cli_warnings IL2xxx/IL3xxx warning(s); not a gate" >&2
+    echo "aot evidence: log $cli_log"
+  else
+    if grep -q "ILCompiler" "$cli_log"; then
+      echo "aot: Microsoft.DotNet.ILCompiler 11.0.0 could not be restored; check the NuGet feed/cache" >&2
+      exit 1
+    fi
+    local cli_diagnostics
+    cli_diagnostics="$(grep -cE "(warning|error) IL[23][0-9]{3}" "$cli_log" || true)"
+    echo "aot evidence: Mocassin.Cli publish failed with $cli_diagnostics IL2xxx/IL3xxx diagnostic(s); recorded as evidence, not a gate (log $cli_log)" >&2
+  fi
+
+  echo "== AOT passed =="
+}
+
 case "$mode" in
   all)
     run_dotnet
@@ -186,6 +305,7 @@ case "$mode" in
     run_python
     run_docs
     run_contracts
+    run_aot
     ;;
   dotnet) run_dotnet ;;
   api) run_api ;;
@@ -194,6 +314,7 @@ case "$mode" in
   python) run_python ;;
   docs) run_docs ;;
   contracts) run_contracts ;;
+  aot) run_aot ;;
   policy)
     run_api
     run_contracts

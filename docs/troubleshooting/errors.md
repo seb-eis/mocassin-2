@@ -88,8 +88,10 @@ you want the final summary.
 | Exit `4`, `CMP` error | The compiler rejected a transition, geometry, conservation, or limit | Correct the model object named by the path; `CMP006` means a configured limit was exceeded. |
 | Exit `1`, `PKG` after a build | The published package failed verification | Keep the package for diagnosis, run `mocassin verify <pkg>` for the checks, and fix the model/template before rebuilding. |
 | Exit `6`, `CLI006` | The build was cancelled | A pre-publication cancel deletes the temp file and preserves an existing package; a post-publication cancel leaves the valid package. |
-| Exit `2`, `CLI008` | `simulate`, `collect`, `evaluate`, `export`, full `clean`, or `--results` was used | Those commands arrive in later steps; `clean --dry-run` is the only cleanup available now. |
-| `doctor` exits 1 | Runtime, SQLite, write permission, disk space, catalog, or template check failed | Fix the failing check; a missing solver is only a warning until the solver step. |
+| Exit `2`, `CLI008` | `simulate`, `collect`, `evaluate`, `export`, full `clean`, or `--results` was used | Those commands arrive in later steps; `clean --dry-run` is the only cleanup available now. A refused `clean` still lists folders read-only and deletes nothing. |
+| Exit `3`, `CLI002` | A directory was passed where a file is expected, or (`build -o`/`compile -o`) a parent directory is missing | Pass a file path. `build`/`compile` do not create a missing parent; `new` intentionally creates a missing output directory and exits 0. |
+| Exit `1`, `CLI009` from `inspect` | The input cannot be inspected as a package (fatal structure failure) | Run `mocassin verify <pkg>` for package-specific findings, or rebuild. A non-fatal payload or signature defect is reported by `verify`, not by `inspect`. |
+| `doctor` exits 1 | Runtime, SQLite, write permission, disk space, catalog, or template check failed | Fix the failing check; a missing solver is only a warning until the solver step, and free space below 100 MiB is only a warning. A check that throws is reported as `fail` with its exception type. |
 
 `mocassin build --preview` uses the same selection and exit codes but never writes a package. `mocassin inspect`
 shows a package’s recorded `jobSelection`, counts, and signatures; `mocassin verify` runs the ordered `PKG`

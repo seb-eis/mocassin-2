@@ -92,8 +92,9 @@ Mocassin.Cli/
   `CompletionWriter`.
 - Namespaces match folders (`Mocassin.Cli.CommandLine`, `Mocassin.Cli.Build`, `Mocassin.Cli.Doctor.Checks`).
 - The 20-file and 800-line limits apply per folder and file. `Doctor/Checks/` resets the count; a large
-  `BuildCommand` is split into a command, report writer, event writer, and progress renderer. `Doctor` owns
-  the internal `IDoctorCheck`/`DoctorCheckResult` seam so tests inject outcomes.
+  `BuildCommand` is split into a command, report writer/factory, exit mapper, event writer, progress renderer,
+  and the CLI-owned `BuildEtaEstimator` (the library `ProgressEstimator` only throttles). `Doctor` owns the
+  internal `IDoctorCheck`/`DoctorCheckResult` seam so tests inject outcomes.
 - `Mocassin.Packages/Build/` follows the same rules: concept files at depth 1 and an `Internal/` subfolder
   for the scheduler, diagnostic-merger, and shared `BuildPreviewBuilder` seams. `BuildPreview.cs` is a
   multi-record concept file following the `PackageInspection.cs` precedent.

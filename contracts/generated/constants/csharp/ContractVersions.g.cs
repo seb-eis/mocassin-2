@@ -84,6 +84,27 @@ public static class ContractVersions
     /// <summary>Result state document encoding.</summary>
     public const string StateEncoding = "messagepack";
 
+    /// <summary>Build report version.</summary>
+    public const int BuildReportVersion = 1;
+
+    /// <summary>Clean report version.</summary>
+    public const int CleanReportVersion = 1;
+
+    /// <summary>Compile report version.</summary>
+    public const int CompileReportVersion = 1;
+
+    /// <summary>Doctor report version.</summary>
+    public const int DoctorReportVersion = 1;
+
+    /// <summary>Inspect report version.</summary>
+    public const int InspectReportVersion = 1;
+
+    /// <summary>New project report version.</summary>
+    public const int NewProjectReportVersion = 1;
+
     /// <summary>Validation report version.</summary>
     public const int ValidationReportVersion = 1;
+
+    /// <summary>Verify report version.</summary>
+    public const int VerifyReportVersion = 1;
 }

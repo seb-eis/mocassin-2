@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 
-using Mocassin.Cli.Build;
-using Mocassin.Cli.Validation;
+using Mocassin.Cli.CommandLine;
 
 namespace Mocassin.Cli;
 
@@ -15,36 +14,12 @@ public static class Program
     /// </summary>
     /// <param name="args">The command-line arguments.</param>
     /// <returns>The process exit code.</returns>
-    public static Task<int> Main(string[] args)
+    public static async Task<int> Main(string[] args)
     {
         ArgumentNullException.ThrowIfNull(args);
-        if (args.Length > 0 && string.Equals(args[0], "build", StringComparison.Ordinal))
-        {
-            if (args.Contains("--preview", StringComparer.Ordinal))
-            {
-                return PreviewCommand.RunAsync(args[1..], Console.Out, Console.Error);
-            }
-
-            Console.Error.WriteLine("usage: mocassin build <project.mocprj> --preview [--template <jobTemplateId>] [--json]");
-            Console.Error.WriteLine("The full package build arrives with Step 12.");
-            return Task.FromResult(2);
-        }
-
-        if (args.Length == 0 || !string.Equals(args[0], "validate", StringComparison.Ordinal))
-        {
-            var json = args.Contains("--json", StringComparer.Ordinal);
-            Console.Error.WriteLine("usage: mocassin <command> [options]");
-            Console.Error.WriteLine("commands: validate, build --preview");
-            if (json)
-            {
-                var (report, exitCode) = ValidationReportWriter.UsageError();
-                ValidationReportWriter.WriteJson(Console.Out, report);
-                return Task.FromResult(exitCode);
-            }
-
-            return Task.FromResult(2);
-        }
-
-        return ValidateCommand.RunAsync(args[1..], Console.Out, Console.Error);
+        using var signals = new CliSignalHandler();
+        return await new CliApplication()
+            .RunAsync(args, Console.Out, Console.Error, signals.Token)
+            .ConfigureAwait(false);
     }
 }

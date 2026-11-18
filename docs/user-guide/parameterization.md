@@ -4,8 +4,9 @@ A parameterization template supplies the numerical values that a compiled model 
 energies, cluster energies, site energies, and kinetic attempt frequencies. The model defines geometry and
 semantics; the template defines the values that are applied to it.
 
-Step 09 provides the library API. The graphical parameterization editor and bulk import/export are Step 26;
-the `mocassin` build commands that select a template are Step 12.
+Step 09 provides the library API. The `mocassin build` command selects a template with `--parameterization`
+or through a build template and applies it after compilation. The graphical parameterization editor and bulk
+import/export are Step 26.
 
 ## What a template contains
 
@@ -39,9 +40,9 @@ canonical ordering, and limits.
 
 ## Creating a template
 
-Template creation is a library workflow in Step 09; the `mocassin` CLI and the graphical editor are later
-steps. The factory consumes the same project snapshot that produced the compiled model, because the summary
-sees the authored site-energy background:
+Template creation is a library workflow (`ParameterizationFactory`); the graphical editor is a later step.
+The factory consumes the same project snapshot that produced the compiled model, because the summary sees the
+authored site-energy background:
 
 ```csharp
 var project = await store.LoadAsync("samples/ceria/ceria.mocprj");
@@ -165,8 +166,8 @@ mutates a template or project.
 ## Applying a template
 
 `ParameterizationService.Apply` composes the compiled model and the applied values into a build-time
-`ParameterizedModel`. It is a library operation; Step 12 calls it after compilation, and the graphical editor
-is a later step.
+`ParameterizedModel`. It is a library operation; the build pipeline (`mocassin build`) calls it after
+compilation, and the graphical editor is a later step.
 
 ```csharp
 var service = new ParameterizationService();

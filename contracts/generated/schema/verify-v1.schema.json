@@ -1,0 +1,340 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/verify-v1.json",
+  "title": "Verify report",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "verify"
+      ]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "exitCode": {
+      "type": "integer"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "integer"
+        },
+        "warnings": {
+          "type": "integer"
+        },
+        "infos": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "errors",
+        "warnings",
+        "infos"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string"
+              },
+              "objectId": {
+                "type": "string"
+              },
+              "property": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "domain",
+              "objectId"
+            ],
+            "additionalProperties": false
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "objectId": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "domain",
+                "objectId"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "valid": {
+      "type": "boolean"
+    },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "passed": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "code",
+          "passed",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "package": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "formatVersion": {
+          "type": "integer"
+        },
+        "appVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "createdUtc": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "projectId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "generator": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "jobSelection": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "symmetryContractVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spaceGroupDataVersion": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "spaceGroupDataSha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "models": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "signature": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "modelSignature": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "payloadFormatVersion": {
+                "type": "integer"
+              },
+              "payloadBytes": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "signature",
+              "modelSignature",
+              "payloadFormatVersion",
+              "payloadBytes"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "latticeCount": {
+          "type": "integer"
+        },
+        "jobCount": {
+          "type": "integer"
+        },
+        "collections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "kind": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "collectionName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "configName": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "jobCount": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "kind",
+              "collectionName",
+              "configName",
+              "jobCount"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "minTemperatureK": {
+          "type": "number"
+        },
+        "maxTemperatureK": {
+          "type": "number"
+        },
+        "minElectricFieldVm": {
+          "type": "number"
+        },
+        "maxElectricFieldVm": {
+          "type": "number"
+        },
+        "sizeBytes": {
+          "type": "integer"
+        },
+        "latticeReuseFactor": {
+          "type": "number"
+        }
+      },
+      "required": [
+        "formatVersion",
+        "appVersion",
+        "createdUtc",
+        "projectId",
+        "generator",
+        "jobSelection",
+        "symmetryContractVersion",
+        "spaceGroupDataVersion",
+        "spaceGroupDataSha256",
+        "models",
+        "latticeCount",
+        "jobCount",
+        "collections",
+        "minTemperatureK",
+        "maxTemperatureK",
+        "minElectricFieldVm",
+        "maxElectricFieldVm",
+        "sizeBytes",
+        "latticeReuseFactor"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "ok",
+    "exitCode",
+    "summary",
+    "diagnostics",
+    "valid",
+    "checks",
+    "package"
+  ]
+}

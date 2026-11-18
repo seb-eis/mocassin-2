@@ -9,12 +9,14 @@ name: CI
 # compatibility.
 #
 # Windows and macOS are manual platform gates and are deliberately focused.
-# They build the solution, then run only the package-writer and results-reader
-# test projects (`Mocassin.Packages.Tests`, `Mocassin.Results.Tests`), which
-# cover the platform-sensitive behaviour: P/Invoke directory fsync, atomic
-# rename, temporary-file handling, and the SQLite reader's path and locking
-# behaviour. A platform gate does not repeat the boilerplate suite, coverage,
-# or the format check. The Rust, Python, contracts, and API-compatibility jobs
+# They build the solution, then run the package-writer, results-reader, and CLI
+# test projects (`Mocassin.Packages.Tests`, `Mocassin.Results.Tests`,
+# `Mocassin.Cli.Tests`), which cover the platform-sensitive behaviour: P/Invoke
+# directory fsync, atomic rename, temporary-file handling, the SQLite reader's
+# path and locking behaviour, and the guarded Ctrl+C/SIGTERM signal path plus
+# the Windows `mocassin-sim.exe` probe selection. A platform gate does not
+# repeat the boilerplate suite, coverage, or the format check. The Rust,
+# Python, contracts, and API-compatibility jobs
 # are Ubuntu-only by job condition: they run on a `push` to `main` or when
 # `platforms` is `ubuntu`/`all`, never for `windows` or `macos`.
 # `platforms=windows` therefore runs the short Ubuntu `changes` job plus one
@@ -230,6 +232,12 @@ jobs:
         if: matrix.os != 'ubuntu-latest'
         run: >
           dotnet test src/dotnet/Mocassin.Results.Tests/Mocassin.Results.Tests.csproj
+          -c Release --no-build
+
+      - name: Platform tests - CLI signal and probe paths
+        if: matrix.os != 'ubuntu-latest'
+        run: >
+          dotnet test src/dotnet/Mocassin.Cli.Tests/Mocassin.Cli.Tests.csproj
           -c Release --no-build
 
       - name: Format

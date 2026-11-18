@@ -7,6 +7,10 @@ Versioned cross-language fixtures for the formats defined in
   (`ProjectJson.SerializeToUtf8Bytes`); includes the Step 01 envelope fixtures plus the Step 03–07
   particle/structure, symmetry-metadata, transition, energy, lattice/simulation, and validation-report
   fixtures; mirrored by the `samples/blank` and `samples/ceria` files;
+- `project-parameterization-warning.mocprj` — a clean buildable ceria variant with a deliberately unset
+  explicit parameterization. It validates with zero warnings and exercises the promoted compiled-bound
+  parameterization warning (`PRM003`/`PRM006` → exit 4) end to end; see
+  `BuildParameterizationWarningTests`;
 - `model-*.msgpack.zst` — compiled model payloads written by .NET and read by Rust;
 - `package-*.msl`, `package-*.msr` — package/results stores written by the real writers;
 - `state-*.mcs` — state documents written by Rust and read by .NET/Python;

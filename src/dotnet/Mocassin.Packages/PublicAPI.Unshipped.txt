@@ -1066,3 +1066,481 @@ static Mocassin.Packages.SimulationPackage.PackageWriteResult.operator !=(Mocass
 static Mocassin.Packages.SimulationPackage.PackageWriteResult.operator ==(Mocassin.Packages.SimulationPackage.PackageWriteResult? left, Mocassin.Packages.SimulationPackage.PackageWriteResult? right) -> bool
 static Mocassin.Packages.SimulationPackage.SimulationPackageWriter.Create(Mocassin.Packages.SimulationPackage.PackageBuildRequest! request, Mocassin.Packages.SimulationPackage.PackageBuildOptions! options) -> Mocassin.Packages.SimulationPackage.ISimulationPackageWriter!
 Mocassin.Packages.SimulationPackage.PackageWriteResult.LatticeReuseFactor.get -> double
+Mocassin.Packages.Build.BuildDiagnostic
+Mocassin.Packages.Build.BuildDiagnostic.BuildDiagnostic(Mocassin.Core.Diagnostics.Diagnostic! Diagnostic) -> void
+Mocassin.Packages.Build.BuildDiagnostic.Deconstruct(out Mocassin.Core.Diagnostics.Diagnostic! Diagnostic) -> void
+Mocassin.Packages.Build.BuildDiagnostic.Diagnostic.get -> Mocassin.Core.Diagnostics.Diagnostic!
+Mocassin.Packages.Build.BuildDiagnostic.Diagnostic.init -> void
+Mocassin.Packages.Build.BuildDiagnostic.Equals(Mocassin.Packages.Build.BuildDiagnostic? other) -> bool
+Mocassin.Packages.Build.BuildEvent
+Mocassin.Packages.Build.BuildEvent.BuildEvent() -> void
+Mocassin.Packages.Build.BuildEvent.BuildEvent(Mocassin.Packages.Build.BuildEvent! original) -> void
+Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.Compilation = 5 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.Internal = 12 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.Io = 1 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.JobExpansion = 8 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.JobSelection = 4 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.LatticeGeneration = 9 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.Load = 2 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.None = 0 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.PackageWrite = 11 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.Parameterization = 7 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.Preview = 10 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.TemplateSelection = 3 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFailureKind.Validation = 6 -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildFinished
+Mocassin.Packages.Build.BuildFinished.BuildFinished(Mocassin.Packages.Build.BuildResult! Result) -> void
+Mocassin.Packages.Build.BuildFinished.Deconstruct(out Mocassin.Packages.Build.BuildResult! Result) -> void
+Mocassin.Packages.Build.BuildFinished.Equals(Mocassin.Packages.Build.BuildFinished? other) -> bool
+Mocassin.Packages.Build.BuildFinished.Result.get -> Mocassin.Packages.Build.BuildResult!
+Mocassin.Packages.Build.BuildFinished.Result.init -> void
+Mocassin.Packages.Build.BuildIdentity
+Mocassin.Packages.Build.BuildIdentity.<Clone>$() -> Mocassin.Packages.Build.BuildIdentity!
+Mocassin.Packages.Build.BuildIdentity.BuildIdentity(System.Guid? ProjectId, string? ModelHash, string? DocumentHash, string? ModelSignature, string? ParameterizationSignature) -> void
+Mocassin.Packages.Build.BuildIdentity.Deconstruct(out System.Guid? ProjectId, out string? ModelHash, out string? DocumentHash, out string? ModelSignature, out string? ParameterizationSignature) -> void
+Mocassin.Packages.Build.BuildIdentity.DocumentHash.get -> string?
+Mocassin.Packages.Build.BuildIdentity.DocumentHash.init -> void
+Mocassin.Packages.Build.BuildIdentity.Equals(Mocassin.Packages.Build.BuildIdentity? other) -> bool
+Mocassin.Packages.Build.BuildIdentity.ModelHash.get -> string?
+Mocassin.Packages.Build.BuildIdentity.ModelHash.init -> void
+Mocassin.Packages.Build.BuildIdentity.ModelSignature.get -> string?
+Mocassin.Packages.Build.BuildIdentity.ModelSignature.init -> void
+Mocassin.Packages.Build.BuildIdentity.ParameterizationSignature.get -> string?
+Mocassin.Packages.Build.BuildIdentity.ParameterizationSignature.init -> void
+Mocassin.Packages.Build.BuildIdentity.ProjectId.get -> System.Guid?
+Mocassin.Packages.Build.BuildIdentity.ProjectId.init -> void
+Mocassin.Packages.Build.BuildLog
+Mocassin.Packages.Build.BuildLog.BuildLog(string! Level, string! Message) -> void
+Mocassin.Packages.Build.BuildLog.Deconstruct(out string! Level, out string! Message) -> void
+Mocassin.Packages.Build.BuildLog.Equals(Mocassin.Packages.Build.BuildLog? other) -> bool
+Mocassin.Packages.Build.BuildLog.Level.get -> string!
+Mocassin.Packages.Build.BuildLog.Level.init -> void
+Mocassin.Packages.Build.BuildLog.Message.get -> string!
+Mocassin.Packages.Build.BuildLog.Message.init -> void
+Mocassin.Packages.Build.BuildOptions
+Mocassin.Packages.Build.BuildOptions.<Clone>$() -> Mocassin.Packages.Build.BuildOptions!
+Mocassin.Packages.Build.BuildOptions.BuildOptions() -> void
+Mocassin.Packages.Build.BuildOptions.Equals(Mocassin.Packages.Build.BuildOptions? other) -> bool
+Mocassin.Packages.Build.BuildOptions.EventChannelCapacity.get -> int
+Mocassin.Packages.Build.BuildOptions.EventChannelCapacity.init -> void
+Mocassin.Packages.Build.BuildOptions.ProgressInterval.get -> System.TimeSpan
+Mocassin.Packages.Build.BuildOptions.ProgressInterval.init -> void
+Mocassin.Packages.Build.BuildOptions.TimeProvider.get -> System.TimeProvider!
+Mocassin.Packages.Build.BuildOptions.TimeProvider.init -> void
+Mocassin.Packages.Build.BuildPathResolver
+Mocassin.Packages.Build.BuildPipeline
+Mocassin.Packages.Build.BuildPipeline.BuildAsync(Mocassin.Packages.Build.BuildRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Mocassin.Packages.Build.BuildEvent!>!
+Mocassin.Packages.Build.BuildPipeline.BuildPipeline() -> void
+Mocassin.Packages.Build.BuildPipeline.BuildToCompletionAsync(Mocassin.Packages.Build.BuildRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.Build.BuildResult!>!
+Mocassin.Packages.Build.BuildPreview
+Mocassin.Packages.Build.BuildPreview.<Clone>$() -> Mocassin.Packages.Build.BuildPreview!
+Mocassin.Packages.Build.BuildPreview.BuildPreview(string! JobTemplateId, string! JobTemplateName, int TotalJobs, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewCollection!> Collections, System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildPreview.Collections.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewCollection!>
+Mocassin.Packages.Build.BuildPreview.Collections.init -> void
+Mocassin.Packages.Build.BuildPreview.Deconstruct(out string! JobTemplateId, out string! JobTemplateName, out int TotalJobs, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewCollection!> Collections, out System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildPreview.Elapsed.get -> System.TimeSpan
+Mocassin.Packages.Build.BuildPreview.Elapsed.init -> void
+Mocassin.Packages.Build.BuildPreview.Equals(Mocassin.Packages.Build.BuildPreview? other) -> bool
+Mocassin.Packages.Build.BuildPreview.JobTemplateId.get -> string!
+Mocassin.Packages.Build.BuildPreview.JobTemplateId.init -> void
+Mocassin.Packages.Build.BuildPreview.JobTemplateName.get -> string!
+Mocassin.Packages.Build.BuildPreview.JobTemplateName.init -> void
+Mocassin.Packages.Build.BuildPreview.TotalJobs.get -> int
+Mocassin.Packages.Build.BuildPreview.TotalJobs.init -> void
+Mocassin.Packages.Build.BuildPreviewCollection
+Mocassin.Packages.Build.BuildPreviewCollection.<Clone>$() -> Mocassin.Packages.Build.BuildPreviewCollection!
+Mocassin.Packages.Build.BuildPreviewCollection.BuildPreviewCollection(string! Id, string! Name, string! SimulationId, string! Kind, bool UseDualDofCorrection, int JobCount, int ConfigCount, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewOptimizer!> Optimizers, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewConfig!> Configs) -> void
+Mocassin.Packages.Build.BuildPreviewCollection.ConfigCount.get -> int
+Mocassin.Packages.Build.BuildPreviewCollection.ConfigCount.init -> void
+Mocassin.Packages.Build.BuildPreviewCollection.Configs.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewConfig!>
+Mocassin.Packages.Build.BuildPreviewCollection.Configs.init -> void
+Mocassin.Packages.Build.BuildPreviewCollection.Deconstruct(out string! Id, out string! Name, out string! SimulationId, out string! Kind, out bool UseDualDofCorrection, out int JobCount, out int ConfigCount, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewOptimizer!> Optimizers, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewConfig!> Configs) -> void
+Mocassin.Packages.Build.BuildPreviewCollection.Equals(Mocassin.Packages.Build.BuildPreviewCollection? other) -> bool
+Mocassin.Packages.Build.BuildPreviewCollection.Id.get -> string!
+Mocassin.Packages.Build.BuildPreviewCollection.Id.init -> void
+Mocassin.Packages.Build.BuildPreviewCollection.JobCount.get -> int
+Mocassin.Packages.Build.BuildPreviewCollection.JobCount.init -> void
+Mocassin.Packages.Build.BuildPreviewCollection.Kind.get -> string!
+Mocassin.Packages.Build.BuildPreviewCollection.Kind.init -> void
+Mocassin.Packages.Build.BuildPreviewCollection.Name.get -> string!
+Mocassin.Packages.Build.BuildPreviewCollection.Name.init -> void
+Mocassin.Packages.Build.BuildPreviewCollection.Optimizers.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewOptimizer!>
+Mocassin.Packages.Build.BuildPreviewCollection.Optimizers.init -> void
+Mocassin.Packages.Build.BuildPreviewCollection.SimulationId.get -> string!
+Mocassin.Packages.Build.BuildPreviewCollection.SimulationId.init -> void
+Mocassin.Packages.Build.BuildPreviewCollection.UseDualDofCorrection.get -> bool
+Mocassin.Packages.Build.BuildPreviewCollection.UseDualDofCorrection.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig
+Mocassin.Packages.Build.BuildPreviewConfig.<Clone>$() -> Mocassin.Packages.Build.BuildPreviewConfig!
+Mocassin.Packages.Build.BuildPreviewConfig.BuildPreviewConfig(string! Id, string! Name, int JobCount, int CellA, int CellB, int CellC, int PositionCount, double TotalChargeBefore, double TotalChargeAfter, bool IsChargeNeutral, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewDoping!> Dopings) -> void
+Mocassin.Packages.Build.BuildPreviewConfig.CellA.get -> int
+Mocassin.Packages.Build.BuildPreviewConfig.CellA.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.CellB.get -> int
+Mocassin.Packages.Build.BuildPreviewConfig.CellB.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.CellC.get -> int
+Mocassin.Packages.Build.BuildPreviewConfig.CellC.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.Deconstruct(out string! Id, out string! Name, out int JobCount, out int CellA, out int CellB, out int CellC, out int PositionCount, out double TotalChargeBefore, out double TotalChargeAfter, out bool IsChargeNeutral, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewDoping!> Dopings) -> void
+Mocassin.Packages.Build.BuildPreviewConfig.Dopings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildPreviewDoping!>
+Mocassin.Packages.Build.BuildPreviewConfig.Dopings.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.Equals(Mocassin.Packages.Build.BuildPreviewConfig? other) -> bool
+Mocassin.Packages.Build.BuildPreviewConfig.Id.get -> string!
+Mocassin.Packages.Build.BuildPreviewConfig.Id.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.IsChargeNeutral.get -> bool
+Mocassin.Packages.Build.BuildPreviewConfig.IsChargeNeutral.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.JobCount.get -> int
+Mocassin.Packages.Build.BuildPreviewConfig.JobCount.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.Name.get -> string!
+Mocassin.Packages.Build.BuildPreviewConfig.Name.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.PositionCount.get -> int
+Mocassin.Packages.Build.BuildPreviewConfig.PositionCount.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.TotalChargeAfter.get -> double
+Mocassin.Packages.Build.BuildPreviewConfig.TotalChargeAfter.init -> void
+Mocassin.Packages.Build.BuildPreviewConfig.TotalChargeBefore.get -> double
+Mocassin.Packages.Build.BuildPreviewConfig.TotalChargeBefore.init -> void
+Mocassin.Packages.Build.BuildPreviewDoping
+Mocassin.Packages.Build.BuildPreviewDoping.<Clone>$() -> Mocassin.Packages.Build.BuildPreviewDoping!
+Mocassin.Packages.Build.BuildPreviewDoping.AppliedDependent.get -> int
+Mocassin.Packages.Build.BuildPreviewDoping.AppliedDependent.init -> void
+Mocassin.Packages.Build.BuildPreviewDoping.AppliedPrimary.get -> int
+Mocassin.Packages.Build.BuildPreviewDoping.AppliedPrimary.init -> void
+Mocassin.Packages.Build.BuildPreviewDoping.AvailablePrimary.get -> int
+Mocassin.Packages.Build.BuildPreviewDoping.AvailablePrimary.init -> void
+Mocassin.Packages.Build.BuildPreviewDoping.BuildPreviewDoping(string! DopingId, int Priority, double RequestedFraction, int AvailablePrimary, int RequestedPrimary, int AppliedPrimary, int AppliedDependent, double EffectiveFraction) -> void
+Mocassin.Packages.Build.BuildPreviewDoping.Deconstruct(out string! DopingId, out int Priority, out double RequestedFraction, out int AvailablePrimary, out int RequestedPrimary, out int AppliedPrimary, out int AppliedDependent, out double EffectiveFraction) -> void
+Mocassin.Packages.Build.BuildPreviewDoping.DopingId.get -> string!
+Mocassin.Packages.Build.BuildPreviewDoping.DopingId.init -> void
+Mocassin.Packages.Build.BuildPreviewDoping.EffectiveFraction.get -> double
+Mocassin.Packages.Build.BuildPreviewDoping.EffectiveFraction.init -> void
+Mocassin.Packages.Build.BuildPreviewDoping.Equals(Mocassin.Packages.Build.BuildPreviewDoping? other) -> bool
+Mocassin.Packages.Build.BuildPreviewDoping.Priority.get -> int
+Mocassin.Packages.Build.BuildPreviewDoping.Priority.init -> void
+Mocassin.Packages.Build.BuildPreviewDoping.RequestedFraction.get -> double
+Mocassin.Packages.Build.BuildPreviewDoping.RequestedFraction.init -> void
+Mocassin.Packages.Build.BuildPreviewDoping.RequestedPrimary.get -> int
+Mocassin.Packages.Build.BuildPreviewDoping.RequestedPrimary.init -> void
+Mocassin.Packages.Build.BuildPreviewOptimizer
+Mocassin.Packages.Build.BuildPreviewOptimizer.<Clone>$() -> Mocassin.Packages.Build.BuildPreviewOptimizer!
+Mocassin.Packages.Build.BuildPreviewOptimizer.BuildPreviewOptimizer(string! SiteId, string! ParticleId, int TargetCount, int? RemovedStartOptions) -> void
+Mocassin.Packages.Build.BuildPreviewOptimizer.Deconstruct(out string! SiteId, out string! ParticleId, out int TargetCount, out int? RemovedStartOptions) -> void
+Mocassin.Packages.Build.BuildPreviewOptimizer.Equals(Mocassin.Packages.Build.BuildPreviewOptimizer? other) -> bool
+Mocassin.Packages.Build.BuildPreviewOptimizer.ParticleId.get -> string!
+Mocassin.Packages.Build.BuildPreviewOptimizer.ParticleId.init -> void
+Mocassin.Packages.Build.BuildPreviewOptimizer.RemovedStartOptions.get -> int?
+Mocassin.Packages.Build.BuildPreviewOptimizer.RemovedStartOptions.init -> void
+Mocassin.Packages.Build.BuildPreviewOptimizer.SiteId.get -> string!
+Mocassin.Packages.Build.BuildPreviewOptimizer.SiteId.init -> void
+Mocassin.Packages.Build.BuildPreviewOptimizer.TargetCount.get -> int
+Mocassin.Packages.Build.BuildPreviewOptimizer.TargetCount.init -> void
+Mocassin.Packages.Build.BuildProgress
+Mocassin.Packages.Build.BuildProgress.BuildProgress(Mocassin.Packages.Build.BuildStage Stage, int Completed, int Total, string? Current, System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildProgress.Completed.get -> int
+Mocassin.Packages.Build.BuildProgress.Completed.init -> void
+Mocassin.Packages.Build.BuildProgress.Current.get -> string?
+Mocassin.Packages.Build.BuildProgress.Current.init -> void
+Mocassin.Packages.Build.BuildProgress.Deconstruct(out Mocassin.Packages.Build.BuildStage Stage, out int Completed, out int Total, out string? Current, out System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildProgress.Elapsed.get -> System.TimeSpan
+Mocassin.Packages.Build.BuildProgress.Elapsed.init -> void
+Mocassin.Packages.Build.BuildProgress.Equals(Mocassin.Packages.Build.BuildProgress? other) -> bool
+Mocassin.Packages.Build.BuildProgress.Stage.get -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildProgress.Stage.init -> void
+Mocassin.Packages.Build.BuildProgress.Total.get -> int
+Mocassin.Packages.Build.BuildProgress.Total.init -> void
+Mocassin.Packages.Build.BuildRequest
+Mocassin.Packages.Build.BuildRequest.<Clone>$() -> Mocassin.Packages.Build.BuildRequest!
+Mocassin.Packages.Build.BuildRequest.BuildRequest() -> void
+Mocassin.Packages.Build.BuildRequest.BuildTemplateId.get -> Mocassin.Core.Ids.BuildTemplateId?
+Mocassin.Packages.Build.BuildRequest.BuildTemplateId.init -> void
+Mocassin.Packages.Build.BuildRequest.Compact.get -> bool
+Mocassin.Packages.Build.BuildRequest.Compact.init -> void
+Mocassin.Packages.Build.BuildRequest.CreatedUtc.get -> System.DateTimeOffset?
+Mocassin.Packages.Build.BuildRequest.CreatedUtc.init -> void
+Mocassin.Packages.Build.BuildRequest.Equals(Mocassin.Packages.Build.BuildRequest? other) -> bool
+Mocassin.Packages.Build.BuildRequest.JobSelection.get -> string!
+Mocassin.Packages.Build.BuildRequest.JobSelection.init -> void
+Mocassin.Packages.Build.BuildRequest.JobTemplateId.get -> Mocassin.Core.Ids.JobTemplateId?
+Mocassin.Packages.Build.BuildRequest.JobTemplateId.init -> void
+Mocassin.Packages.Build.BuildRequest.MaxDegreeOfParallelism.get -> int
+Mocassin.Packages.Build.BuildRequest.MaxDegreeOfParallelism.init -> void
+Mocassin.Packages.Build.BuildRequest.Options.get -> Mocassin.Packages.Build.BuildOptions!
+Mocassin.Packages.Build.BuildRequest.Options.init -> void
+Mocassin.Packages.Build.BuildRequest.Overwrite.get -> bool
+Mocassin.Packages.Build.BuildRequest.Overwrite.init -> void
+Mocassin.Packages.Build.BuildRequest.ParameterizationId.get -> Mocassin.Core.Ids.ParameterizationId?
+Mocassin.Packages.Build.BuildRequest.ParameterizationId.init -> void
+Mocassin.Packages.Build.BuildRequest.Preview.get -> bool
+Mocassin.Packages.Build.BuildRequest.Preview.init -> void
+Mocassin.Packages.Build.BuildRequest.ProjectPath.get -> string!
+Mocassin.Packages.Build.BuildRequest.ProjectPath.init -> void
+Mocassin.Packages.Build.BuildRequest.TargetPath.get -> string?
+Mocassin.Packages.Build.BuildRequest.TargetPath.init -> void
+Mocassin.Packages.Build.BuildRequest.WarningsAsErrors.get -> bool
+Mocassin.Packages.Build.BuildRequest.WarningsAsErrors.init -> void
+Mocassin.Packages.Build.BuildResult
+Mocassin.Packages.Build.BuildResult.<Clone>$() -> Mocassin.Packages.Build.BuildResult!
+Mocassin.Packages.Build.BuildResult.BuildResult(Mocassin.Packages.Build.BuildStatus Status, Mocassin.Packages.Build.BuildFailureKind Failure, Mocassin.Packages.Build.BuildIdentity! Identity, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics, Mocassin.Packages.Build.BuildSelection? Selection, Mocassin.Packages.Build.JobSelectionResult? JobSelection, Mocassin.Packages.Build.BuildPreview? Preview, Mocassin.Packages.SimulationPackage.PackageWriteResult? Package, System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildStageTiming!> Timings, System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildResult.Deconstruct(out Mocassin.Packages.Build.BuildStatus Status, out Mocassin.Packages.Build.BuildFailureKind Failure, out Mocassin.Packages.Build.BuildIdentity! Identity, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics, out Mocassin.Packages.Build.BuildSelection? Selection, out Mocassin.Packages.Build.JobSelectionResult? JobSelection, out Mocassin.Packages.Build.BuildPreview? Preview, out Mocassin.Packages.SimulationPackage.PackageWriteResult? Package, out System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildStageTiming!> Timings, out System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Build.BuildResult.Diagnostics.init -> void
+Mocassin.Packages.Build.BuildResult.Elapsed.get -> System.TimeSpan
+Mocassin.Packages.Build.BuildResult.Elapsed.init -> void
+Mocassin.Packages.Build.BuildResult.Equals(Mocassin.Packages.Build.BuildResult? other) -> bool
+Mocassin.Packages.Build.BuildResult.Failure.get -> Mocassin.Packages.Build.BuildFailureKind
+Mocassin.Packages.Build.BuildResult.Failure.init -> void
+Mocassin.Packages.Build.BuildResult.Identity.get -> Mocassin.Packages.Build.BuildIdentity!
+Mocassin.Packages.Build.BuildResult.Identity.init -> void
+Mocassin.Packages.Build.BuildResult.JobSelection.get -> Mocassin.Packages.Build.JobSelectionResult?
+Mocassin.Packages.Build.BuildResult.JobSelection.init -> void
+Mocassin.Packages.Build.BuildResult.Package.get -> Mocassin.Packages.SimulationPackage.PackageWriteResult?
+Mocassin.Packages.Build.BuildResult.Package.init -> void
+Mocassin.Packages.Build.BuildResult.Preview.get -> Mocassin.Packages.Build.BuildPreview?
+Mocassin.Packages.Build.BuildResult.Preview.init -> void
+Mocassin.Packages.Build.BuildResult.Selection.get -> Mocassin.Packages.Build.BuildSelection?
+Mocassin.Packages.Build.BuildResult.Selection.init -> void
+Mocassin.Packages.Build.BuildResult.Status.get -> Mocassin.Packages.Build.BuildStatus
+Mocassin.Packages.Build.BuildResult.Status.init -> void
+Mocassin.Packages.Build.BuildResult.Timings.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Build.BuildStageTiming!>
+Mocassin.Packages.Build.BuildResult.Timings.init -> void
+Mocassin.Packages.Build.BuildSelection
+Mocassin.Packages.Build.BuildSelection.<Clone>$() -> Mocassin.Packages.Build.BuildSelection!
+Mocassin.Packages.Build.BuildSelection.BuildSelection(Mocassin.Core.Model.BuildTemplate? BuildTemplate, Mocassin.Core.Model.Jobs.JobTemplate! JobTemplate, Mocassin.Core.Model.ParameterizationTemplate? Parameterization, bool ImplicitDefaultParameterization, string? OutputName) -> void
+Mocassin.Packages.Build.BuildSelection.BuildTemplate.get -> Mocassin.Core.Model.BuildTemplate?
+Mocassin.Packages.Build.BuildSelection.BuildTemplate.init -> void
+Mocassin.Packages.Build.BuildSelection.Deconstruct(out Mocassin.Core.Model.BuildTemplate? BuildTemplate, out Mocassin.Core.Model.Jobs.JobTemplate! JobTemplate, out Mocassin.Core.Model.ParameterizationTemplate? Parameterization, out bool ImplicitDefaultParameterization, out string? OutputName) -> void
+Mocassin.Packages.Build.BuildSelection.Equals(Mocassin.Packages.Build.BuildSelection? other) -> bool
+Mocassin.Packages.Build.BuildSelection.ImplicitDefaultParameterization.get -> bool
+Mocassin.Packages.Build.BuildSelection.ImplicitDefaultParameterization.init -> void
+Mocassin.Packages.Build.BuildSelection.JobTemplate.get -> Mocassin.Core.Model.Jobs.JobTemplate!
+Mocassin.Packages.Build.BuildSelection.JobTemplate.init -> void
+Mocassin.Packages.Build.BuildSelection.OutputName.get -> string?
+Mocassin.Packages.Build.BuildSelection.OutputName.init -> void
+Mocassin.Packages.Build.BuildSelection.Parameterization.get -> Mocassin.Core.Model.ParameterizationTemplate?
+Mocassin.Packages.Build.BuildSelection.Parameterization.init -> void
+Mocassin.Packages.Build.BuildSelectionResolveResult
+Mocassin.Packages.Build.BuildSelectionResolveResult.<Clone>$() -> Mocassin.Packages.Build.BuildSelectionResolveResult!
+Mocassin.Packages.Build.BuildSelectionResolveResult.BuildSelectionResolveResult(Mocassin.Packages.Build.BuildSelection? Selection, System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Packages.Build.BuildSelectionResolveResult.Deconstruct(out Mocassin.Packages.Build.BuildSelection? Selection, out System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!> Diagnostics) -> void
+Mocassin.Packages.Build.BuildSelectionResolveResult.Diagnostics.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Core.Diagnostics.Diagnostic!>
+Mocassin.Packages.Build.BuildSelectionResolveResult.Diagnostics.init -> void
+Mocassin.Packages.Build.BuildSelectionResolveResult.Equals(Mocassin.Packages.Build.BuildSelectionResolveResult? other) -> bool
+Mocassin.Packages.Build.BuildSelectionResolveResult.IsSuccess.get -> bool
+Mocassin.Packages.Build.BuildSelectionResolveResult.Selection.get -> Mocassin.Packages.Build.BuildSelection?
+Mocassin.Packages.Build.BuildSelectionResolveResult.Selection.init -> void
+Mocassin.Packages.Build.BuildSelectionResolver
+Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStage.Compile = 3 -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStage.ExpandJobs = 6 -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStage.GenerateAndWriteJobs = 7 -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStage.Load = 0 -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStage.Parameterize = 5 -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStage.Publish = 8 -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStage.Select = 1 -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStage.Validate = 2 -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStage.ValidateBuild = 4 -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStageCompleted
+Mocassin.Packages.Build.BuildStageCompleted.BuildStageCompleted(Mocassin.Packages.Build.BuildStage Stage, System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildStageCompleted.Deconstruct(out Mocassin.Packages.Build.BuildStage Stage, out System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildStageCompleted.Elapsed.get -> System.TimeSpan
+Mocassin.Packages.Build.BuildStageCompleted.Elapsed.init -> void
+Mocassin.Packages.Build.BuildStageCompleted.Equals(Mocassin.Packages.Build.BuildStageCompleted? other) -> bool
+Mocassin.Packages.Build.BuildStageCompleted.Stage.get -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStageCompleted.Stage.init -> void
+Mocassin.Packages.Build.BuildStageStarted
+Mocassin.Packages.Build.BuildStageStarted.BuildStageStarted(Mocassin.Packages.Build.BuildStage Stage) -> void
+Mocassin.Packages.Build.BuildStageStarted.Deconstruct(out Mocassin.Packages.Build.BuildStage Stage) -> void
+Mocassin.Packages.Build.BuildStageStarted.Equals(Mocassin.Packages.Build.BuildStageStarted? other) -> bool
+Mocassin.Packages.Build.BuildStageStarted.Stage.get -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStageStarted.Stage.init -> void
+Mocassin.Packages.Build.BuildStageTiming
+Mocassin.Packages.Build.BuildStageTiming.<Clone>$() -> Mocassin.Packages.Build.BuildStageTiming!
+Mocassin.Packages.Build.BuildStageTiming.BuildStageTiming(Mocassin.Packages.Build.BuildStage Stage, System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildStageTiming.Deconstruct(out Mocassin.Packages.Build.BuildStage Stage, out System.TimeSpan Elapsed) -> void
+Mocassin.Packages.Build.BuildStageTiming.Elapsed.get -> System.TimeSpan
+Mocassin.Packages.Build.BuildStageTiming.Elapsed.init -> void
+Mocassin.Packages.Build.BuildStageTiming.Equals(Mocassin.Packages.Build.BuildStageTiming? other) -> bool
+Mocassin.Packages.Build.BuildStageTiming.Stage.get -> Mocassin.Packages.Build.BuildStage
+Mocassin.Packages.Build.BuildStageTiming.Stage.init -> void
+Mocassin.Packages.Build.BuildStarted
+Mocassin.Packages.Build.BuildStarted.BuildStarted(int ExpandedJobCount, int SelectedJobCount) -> void
+Mocassin.Packages.Build.BuildStarted.Deconstruct(out int ExpandedJobCount, out int SelectedJobCount) -> void
+Mocassin.Packages.Build.BuildStarted.Equals(Mocassin.Packages.Build.BuildStarted? other) -> bool
+Mocassin.Packages.Build.BuildStarted.ExpandedJobCount.get -> int
+Mocassin.Packages.Build.BuildStarted.ExpandedJobCount.init -> void
+Mocassin.Packages.Build.BuildStarted.SelectedJobCount.get -> int
+Mocassin.Packages.Build.BuildStarted.SelectedJobCount.init -> void
+Mocassin.Packages.Build.BuildStatus
+Mocassin.Packages.Build.BuildStatus.Cancelled = 2 -> Mocassin.Packages.Build.BuildStatus
+Mocassin.Packages.Build.BuildStatus.Failed = 1 -> Mocassin.Packages.Build.BuildStatus
+Mocassin.Packages.Build.BuildStatus.Succeeded = 0 -> Mocassin.Packages.Build.BuildStatus
+Mocassin.Packages.Build.IBuildPipeline
+Mocassin.Packages.Build.IBuildPipeline.BuildAsync(Mocassin.Packages.Build.BuildRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Collections.Generic.IAsyncEnumerable<Mocassin.Packages.Build.BuildEvent!>!
+Mocassin.Packages.Build.IBuildPipeline.BuildToCompletionAsync(Mocassin.Packages.Build.BuildRequest! request, System.Threading.CancellationToken cancellationToken = default(System.Threading.CancellationToken)) -> System.Threading.Tasks.Task<Mocassin.Packages.Build.BuildResult!>!
+Mocassin.Packages.Build.JobSelection
+Mocassin.Packages.Build.JobSelectionResult
+Mocassin.Packages.Build.JobSelectionResult.<Clone>$() -> Mocassin.Packages.Build.JobSelectionResult!
+Mocassin.Packages.Build.JobSelectionResult.Deconstruct(out string! Expression, out System.Collections.Immutable.ImmutableArray<int> JobIds, out int ExpandedCount, out string? Error) -> void
+Mocassin.Packages.Build.JobSelectionResult.Equals(Mocassin.Packages.Build.JobSelectionResult? other) -> bool
+Mocassin.Packages.Build.JobSelectionResult.Error.get -> string?
+Mocassin.Packages.Build.JobSelectionResult.Error.init -> void
+Mocassin.Packages.Build.JobSelectionResult.ExpandedCount.get -> int
+Mocassin.Packages.Build.JobSelectionResult.ExpandedCount.init -> void
+Mocassin.Packages.Build.JobSelectionResult.Expression.get -> string!
+Mocassin.Packages.Build.JobSelectionResult.Expression.init -> void
+Mocassin.Packages.Build.JobSelectionResult.IsValid.get -> bool
+Mocassin.Packages.Build.JobSelectionResult.JobIds.get -> System.Collections.Immutable.ImmutableArray<int>
+Mocassin.Packages.Build.JobSelectionResult.JobIds.init -> void
+Mocassin.Packages.Build.JobSelectionResult.JobSelectionResult(string! Expression, System.Collections.Immutable.ImmutableArray<int> JobIds, int ExpandedCount, string? Error) -> void
+Mocassin.Packages.Build.JobSelectionResult.SelectedCount.get -> int
+abstract Mocassin.Packages.Build.BuildEvent.<Clone>$() -> Mocassin.Packages.Build.BuildEvent!
+override Mocassin.Packages.Build.BuildDiagnostic.<Clone>$() -> Mocassin.Packages.Build.BuildDiagnostic!
+override Mocassin.Packages.Build.BuildDiagnostic.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildDiagnostic.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildDiagnostic.ToString() -> string!
+override Mocassin.Packages.Build.BuildEvent.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildEvent.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildEvent.ToString() -> string!
+override Mocassin.Packages.Build.BuildFinished.<Clone>$() -> Mocassin.Packages.Build.BuildFinished!
+override Mocassin.Packages.Build.BuildFinished.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildFinished.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildFinished.ToString() -> string!
+override Mocassin.Packages.Build.BuildIdentity.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildIdentity.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildIdentity.ToString() -> string!
+override Mocassin.Packages.Build.BuildLog.<Clone>$() -> Mocassin.Packages.Build.BuildLog!
+override Mocassin.Packages.Build.BuildLog.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildLog.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildLog.ToString() -> string!
+override Mocassin.Packages.Build.BuildOptions.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildOptions.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildOptions.ToString() -> string!
+override Mocassin.Packages.Build.BuildPreview.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildPreview.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildPreview.ToString() -> string!
+override Mocassin.Packages.Build.BuildPreviewCollection.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildPreviewCollection.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildPreviewCollection.ToString() -> string!
+override Mocassin.Packages.Build.BuildPreviewConfig.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildPreviewConfig.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildPreviewConfig.ToString() -> string!
+override Mocassin.Packages.Build.BuildPreviewDoping.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildPreviewDoping.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildPreviewDoping.ToString() -> string!
+override Mocassin.Packages.Build.BuildPreviewOptimizer.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildPreviewOptimizer.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildPreviewOptimizer.ToString() -> string!
+override Mocassin.Packages.Build.BuildProgress.<Clone>$() -> Mocassin.Packages.Build.BuildProgress!
+override Mocassin.Packages.Build.BuildProgress.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildProgress.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildProgress.ToString() -> string!
+override Mocassin.Packages.Build.BuildRequest.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildRequest.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildRequest.ToString() -> string!
+override Mocassin.Packages.Build.BuildResult.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildResult.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildResult.ToString() -> string!
+override Mocassin.Packages.Build.BuildSelection.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildSelection.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildSelection.ToString() -> string!
+override Mocassin.Packages.Build.BuildSelectionResolveResult.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildSelectionResolveResult.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildSelectionResolveResult.ToString() -> string!
+override Mocassin.Packages.Build.BuildStageCompleted.<Clone>$() -> Mocassin.Packages.Build.BuildStageCompleted!
+override Mocassin.Packages.Build.BuildStageCompleted.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildStageCompleted.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildStageCompleted.ToString() -> string!
+override Mocassin.Packages.Build.BuildStageStarted.<Clone>$() -> Mocassin.Packages.Build.BuildStageStarted!
+override Mocassin.Packages.Build.BuildStageStarted.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildStageStarted.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildStageStarted.ToString() -> string!
+override Mocassin.Packages.Build.BuildStageTiming.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildStageTiming.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildStageTiming.ToString() -> string!
+override Mocassin.Packages.Build.BuildStarted.<Clone>$() -> Mocassin.Packages.Build.BuildStarted!
+override Mocassin.Packages.Build.BuildStarted.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.BuildStarted.GetHashCode() -> int
+override Mocassin.Packages.Build.BuildStarted.ToString() -> string!
+override Mocassin.Packages.Build.JobSelectionResult.Equals(object? obj) -> bool
+override Mocassin.Packages.Build.JobSelectionResult.GetHashCode() -> int
+override Mocassin.Packages.Build.JobSelectionResult.ToString() -> string!
+override sealed Mocassin.Packages.Build.BuildDiagnostic.Equals(Mocassin.Packages.Build.BuildEvent? other) -> bool
+override sealed Mocassin.Packages.Build.BuildFinished.Equals(Mocassin.Packages.Build.BuildEvent? other) -> bool
+override sealed Mocassin.Packages.Build.BuildLog.Equals(Mocassin.Packages.Build.BuildEvent? other) -> bool
+override sealed Mocassin.Packages.Build.BuildProgress.Equals(Mocassin.Packages.Build.BuildEvent? other) -> bool
+override sealed Mocassin.Packages.Build.BuildStageCompleted.Equals(Mocassin.Packages.Build.BuildEvent? other) -> bool
+override sealed Mocassin.Packages.Build.BuildStageStarted.Equals(Mocassin.Packages.Build.BuildEvent? other) -> bool
+override sealed Mocassin.Packages.Build.BuildStarted.Equals(Mocassin.Packages.Build.BuildEvent? other) -> bool
+static Mocassin.Packages.Build.BuildDiagnostic.operator !=(Mocassin.Packages.Build.BuildDiagnostic? left, Mocassin.Packages.Build.BuildDiagnostic? right) -> bool
+static Mocassin.Packages.Build.BuildDiagnostic.operator ==(Mocassin.Packages.Build.BuildDiagnostic? left, Mocassin.Packages.Build.BuildDiagnostic? right) -> bool
+static Mocassin.Packages.Build.BuildEvent.operator !=(Mocassin.Packages.Build.BuildEvent? left, Mocassin.Packages.Build.BuildEvent? right) -> bool
+static Mocassin.Packages.Build.BuildEvent.operator ==(Mocassin.Packages.Build.BuildEvent? left, Mocassin.Packages.Build.BuildEvent? right) -> bool
+static Mocassin.Packages.Build.BuildFinished.operator !=(Mocassin.Packages.Build.BuildFinished? left, Mocassin.Packages.Build.BuildFinished? right) -> bool
+static Mocassin.Packages.Build.BuildFinished.operator ==(Mocassin.Packages.Build.BuildFinished? left, Mocassin.Packages.Build.BuildFinished? right) -> bool
+static Mocassin.Packages.Build.BuildIdentity.Empty.get -> Mocassin.Packages.Build.BuildIdentity!
+static Mocassin.Packages.Build.BuildIdentity.operator !=(Mocassin.Packages.Build.BuildIdentity? left, Mocassin.Packages.Build.BuildIdentity? right) -> bool
+static Mocassin.Packages.Build.BuildIdentity.operator ==(Mocassin.Packages.Build.BuildIdentity? left, Mocassin.Packages.Build.BuildIdentity? right) -> bool
+static Mocassin.Packages.Build.BuildLog.operator !=(Mocassin.Packages.Build.BuildLog? left, Mocassin.Packages.Build.BuildLog? right) -> bool
+static Mocassin.Packages.Build.BuildLog.operator ==(Mocassin.Packages.Build.BuildLog? left, Mocassin.Packages.Build.BuildLog? right) -> bool
+static Mocassin.Packages.Build.BuildOptions.operator !=(Mocassin.Packages.Build.BuildOptions? left, Mocassin.Packages.Build.BuildOptions? right) -> bool
+static Mocassin.Packages.Build.BuildOptions.operator ==(Mocassin.Packages.Build.BuildOptions? left, Mocassin.Packages.Build.BuildOptions? right) -> bool
+static Mocassin.Packages.Build.BuildPathResolver.TryResolve(string! projectPath, string? targetPath, Mocassin.Core.Model.BuildTemplate? buildTemplate, out string? path, out string? error) -> bool
+static Mocassin.Packages.Build.BuildPreview.operator !=(Mocassin.Packages.Build.BuildPreview? left, Mocassin.Packages.Build.BuildPreview? right) -> bool
+static Mocassin.Packages.Build.BuildPreview.operator ==(Mocassin.Packages.Build.BuildPreview? left, Mocassin.Packages.Build.BuildPreview? right) -> bool
+static Mocassin.Packages.Build.BuildPreviewCollection.operator !=(Mocassin.Packages.Build.BuildPreviewCollection? left, Mocassin.Packages.Build.BuildPreviewCollection? right) -> bool
+static Mocassin.Packages.Build.BuildPreviewCollection.operator ==(Mocassin.Packages.Build.BuildPreviewCollection? left, Mocassin.Packages.Build.BuildPreviewCollection? right) -> bool
+static Mocassin.Packages.Build.BuildPreviewConfig.operator !=(Mocassin.Packages.Build.BuildPreviewConfig? left, Mocassin.Packages.Build.BuildPreviewConfig? right) -> bool
+static Mocassin.Packages.Build.BuildPreviewConfig.operator ==(Mocassin.Packages.Build.BuildPreviewConfig? left, Mocassin.Packages.Build.BuildPreviewConfig? right) -> bool
+static Mocassin.Packages.Build.BuildPreviewDoping.operator !=(Mocassin.Packages.Build.BuildPreviewDoping? left, Mocassin.Packages.Build.BuildPreviewDoping? right) -> bool
+static Mocassin.Packages.Build.BuildPreviewDoping.operator ==(Mocassin.Packages.Build.BuildPreviewDoping? left, Mocassin.Packages.Build.BuildPreviewDoping? right) -> bool
+static Mocassin.Packages.Build.BuildPreviewOptimizer.operator !=(Mocassin.Packages.Build.BuildPreviewOptimizer? left, Mocassin.Packages.Build.BuildPreviewOptimizer? right) -> bool
+static Mocassin.Packages.Build.BuildPreviewOptimizer.operator ==(Mocassin.Packages.Build.BuildPreviewOptimizer? left, Mocassin.Packages.Build.BuildPreviewOptimizer? right) -> bool
+static Mocassin.Packages.Build.BuildProgress.operator !=(Mocassin.Packages.Build.BuildProgress? left, Mocassin.Packages.Build.BuildProgress? right) -> bool
+static Mocassin.Packages.Build.BuildProgress.operator ==(Mocassin.Packages.Build.BuildProgress? left, Mocassin.Packages.Build.BuildProgress? right) -> bool
+static Mocassin.Packages.Build.BuildRequest.operator !=(Mocassin.Packages.Build.BuildRequest? left, Mocassin.Packages.Build.BuildRequest? right) -> bool
+static Mocassin.Packages.Build.BuildRequest.operator ==(Mocassin.Packages.Build.BuildRequest? left, Mocassin.Packages.Build.BuildRequest? right) -> bool
+static Mocassin.Packages.Build.BuildResult.operator !=(Mocassin.Packages.Build.BuildResult? left, Mocassin.Packages.Build.BuildResult? right) -> bool
+static Mocassin.Packages.Build.BuildResult.operator ==(Mocassin.Packages.Build.BuildResult? left, Mocassin.Packages.Build.BuildResult? right) -> bool
+static Mocassin.Packages.Build.BuildSelection.operator !=(Mocassin.Packages.Build.BuildSelection? left, Mocassin.Packages.Build.BuildSelection? right) -> bool
+static Mocassin.Packages.Build.BuildSelection.operator ==(Mocassin.Packages.Build.BuildSelection? left, Mocassin.Packages.Build.BuildSelection? right) -> bool
+static Mocassin.Packages.Build.BuildSelectionResolveResult.operator !=(Mocassin.Packages.Build.BuildSelectionResolveResult? left, Mocassin.Packages.Build.BuildSelectionResolveResult? right) -> bool
+static Mocassin.Packages.Build.BuildSelectionResolveResult.operator ==(Mocassin.Packages.Build.BuildSelectionResolveResult? left, Mocassin.Packages.Build.BuildSelectionResolveResult? right) -> bool
+static Mocassin.Packages.Build.BuildSelectionResolver.Resolve(Mocassin.Core.Project.Project! project, Mocassin.Packages.Build.BuildRequest! request) -> Mocassin.Packages.Build.BuildSelectionResolveResult!
+static Mocassin.Packages.Build.BuildStageCompleted.operator !=(Mocassin.Packages.Build.BuildStageCompleted? left, Mocassin.Packages.Build.BuildStageCompleted? right) -> bool
+static Mocassin.Packages.Build.BuildStageCompleted.operator ==(Mocassin.Packages.Build.BuildStageCompleted? left, Mocassin.Packages.Build.BuildStageCompleted? right) -> bool
+static Mocassin.Packages.Build.BuildStageStarted.operator !=(Mocassin.Packages.Build.BuildStageStarted? left, Mocassin.Packages.Build.BuildStageStarted? right) -> bool
+static Mocassin.Packages.Build.BuildStageStarted.operator ==(Mocassin.Packages.Build.BuildStageStarted? left, Mocassin.Packages.Build.BuildStageStarted? right) -> bool
+static Mocassin.Packages.Build.BuildStageTiming.operator !=(Mocassin.Packages.Build.BuildStageTiming? left, Mocassin.Packages.Build.BuildStageTiming? right) -> bool
+static Mocassin.Packages.Build.BuildStageTiming.operator ==(Mocassin.Packages.Build.BuildStageTiming? left, Mocassin.Packages.Build.BuildStageTiming? right) -> bool
+static Mocassin.Packages.Build.BuildStarted.operator !=(Mocassin.Packages.Build.BuildStarted? left, Mocassin.Packages.Build.BuildStarted? right) -> bool
+static Mocassin.Packages.Build.BuildStarted.operator ==(Mocassin.Packages.Build.BuildStarted? left, Mocassin.Packages.Build.BuildStarted? right) -> bool
+static Mocassin.Packages.Build.JobSelection.Normalize(System.Collections.Generic.IReadOnlyList<int>! ids) -> string!
+static Mocassin.Packages.Build.JobSelection.Parse(string! expression, int expandedCount) -> Mocassin.Packages.Build.JobSelectionResult!
+static Mocassin.Packages.Build.JobSelection.ValidateSyntax(string! expression) -> string?
+static Mocassin.Packages.Build.JobSelectionResult.operator !=(Mocassin.Packages.Build.JobSelectionResult? left, Mocassin.Packages.Build.JobSelectionResult? right) -> bool
+static Mocassin.Packages.Build.JobSelectionResult.operator ==(Mocassin.Packages.Build.JobSelectionResult? left, Mocassin.Packages.Build.JobSelectionResult? right) -> bool
+virtual Mocassin.Packages.Build.BuildEvent.EqualityContract.get -> System.Type!
+virtual Mocassin.Packages.Build.BuildEvent.Equals(Mocassin.Packages.Build.BuildEvent? other) -> bool
+virtual Mocassin.Packages.Build.BuildEvent.PrintMembers(System.Text.StringBuilder! builder) -> bool
+Mocassin.Packages.Projects.Templates.ProjectTemplate
+Mocassin.Packages.Projects.Templates.ProjectTemplate.<Clone>$() -> Mocassin.Packages.Projects.Templates.ProjectTemplate!
+Mocassin.Packages.Projects.Templates.ProjectTemplate.CreateProject(string! name, System.DateTimeOffset createdUtc) -> Mocassin.Core.Project.Project!
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Deconstruct(out Mocassin.Packages.Projects.Templates.ProjectTemplateKind Kind, out string! DisplayName, out Mocassin.Core.Project.Project! Project) -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplate.DisplayName.get -> string!
+Mocassin.Packages.Projects.Templates.ProjectTemplate.DisplayName.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Equals(Mocassin.Packages.Projects.Templates.ProjectTemplate? other) -> bool
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Kind.get -> Mocassin.Packages.Projects.Templates.ProjectTemplateKind
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Kind.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Project.get -> Mocassin.Core.Project.Project!
+Mocassin.Packages.Projects.Templates.ProjectTemplate.Project.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplate.ProjectTemplate(Mocassin.Packages.Projects.Templates.ProjectTemplateKind Kind, string! DisplayName, Mocassin.Core.Project.Project! Project) -> void
+Mocassin.Packages.Projects.Templates.ProjectTemplateFactory
+Mocassin.Packages.Projects.Templates.ProjectTemplateKind
+Mocassin.Packages.Projects.Templates.ProjectTemplateKind.Blank = 0 -> Mocassin.Packages.Projects.Templates.ProjectTemplateKind
+Mocassin.Packages.Projects.Templates.ProjectTemplateKind.Ceria = 1 -> Mocassin.Packages.Projects.Templates.ProjectTemplateKind
+override Mocassin.Packages.Projects.Templates.ProjectTemplate.Equals(object? obj) -> bool
+override Mocassin.Packages.Projects.Templates.ProjectTemplate.GetHashCode() -> int
+override Mocassin.Packages.Projects.Templates.ProjectTemplate.ToString() -> string!
+static Mocassin.Packages.Projects.Templates.ProjectTemplate.operator !=(Mocassin.Packages.Projects.Templates.ProjectTemplate? left, Mocassin.Packages.Projects.Templates.ProjectTemplate? right) -> bool
+static Mocassin.Packages.Projects.Templates.ProjectTemplate.operator ==(Mocassin.Packages.Projects.Templates.ProjectTemplate? left, Mocassin.Packages.Projects.Templates.ProjectTemplate? right) -> bool
+static Mocassin.Packages.Projects.Templates.ProjectTemplateFactory.All.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Templates.ProjectTemplate!>
+static Mocassin.Packages.Projects.Templates.ProjectTemplateFactory.CreateProject(Mocassin.Packages.Projects.Templates.ProjectTemplateKind kind, string! name, System.DateTimeOffset createdUtc) -> Mocassin.Core.Project.Project!
+static Mocassin.Packages.Projects.Templates.ProjectTemplateFactory.Get(Mocassin.Packages.Projects.Templates.ProjectTemplateKind kind) -> Mocassin.Packages.Projects.Templates.ProjectTemplate!

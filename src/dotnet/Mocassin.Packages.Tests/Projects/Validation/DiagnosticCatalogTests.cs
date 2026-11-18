@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using Mocassin.Compilation.Diagnostics;
+using Mocassin.Contracts.Cli;
 using Mocassin.Contracts.Packages;
 using Mocassin.Core.Diagnostics;
 using Mocassin.Packages.Projects.Validation;
@@ -13,12 +14,13 @@ namespace Mocassin.Packages.Tests.Projects.Validation;
 public sealed class DiagnosticCatalogTests
 {
     [Fact]
-    public void DefaultIsTheUnionOfTheDomainCatalogsAndStep07Codes()
+    public void DefaultIsTheUnionOfTheDomainCliAndStep07Catalogs()
     {
         var expected = CoreDiagnosticCatalog.Descriptors
             .Concat(SymmetryDiagnosticCatalog.Descriptors)
             .Concat(CompilationDiagnosticCatalog.Descriptors)
             .Concat(PackageDiagnosticDescriptors.All)
+            .Concat(CliDiagnosticDescriptors.All)
             .Select(static descriptor => descriptor.Code)
             .Concat(Step07Codes())
             .Order(StringComparer.Ordinal)

@@ -13,6 +13,7 @@
       "type": "string",
       "enum": [
         "build.started",
+        "build.stage",
         "build.progress",
         "build.finished",
         "sim.started",
@@ -33,6 +34,10 @@
   "x-event-required-fields": {
     "build.started": [
       "total"
+    ],
+    "build.stage": [
+      "stage",
+      "status"
     ],
     "build.progress": [
       "completed",

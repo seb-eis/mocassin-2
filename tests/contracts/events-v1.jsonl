@@ -1,0 +1,22 @@
+{"schemaVersion":1,"event":"build.stage","stage":"load","status":"started"}
+{"schemaVersion":1,"event":"build.stage","stage":"load","status":"completed","ms":18.4}
+{"schemaVersion":1,"event":"build.stage","stage":"select","status":"started"}
+{"schemaVersion":1,"event":"build.stage","stage":"select","status":"completed","ms":0.6}
+{"schemaVersion":1,"event":"build.stage","stage":"validate","status":"started"}
+{"schemaVersion":1,"event":"build.stage","stage":"validate","status":"completed","ms":41.2}
+{"schemaVersion":1,"event":"build.stage","stage":"compile","status":"started"}
+{"schemaVersion":1,"event":"build.stage","stage":"compile","status":"completed","ms":212.9}
+{"schemaVersion":1,"event":"build.stage","stage":"validateBuild","status":"started"}
+{"schemaVersion":1,"event":"build.stage","stage":"validateBuild","status":"completed","ms":12.1}
+{"schemaVersion":1,"event":"build.stage","stage":"parameterize","status":"started"}
+{"schemaVersion":1,"event":"build.stage","stage":"parameterize","status":"completed","ms":3.7}
+{"schemaVersion":1,"event":"build.stage","stage":"expand","status":"started"}
+{"schemaVersion":1,"event":"build.stage","stage":"expand","status":"completed","ms":1.9}
+{"schemaVersion":1,"event":"build.started","total":6}
+{"schemaVersion":1,"event":"build.stage","stage":"generate","status":"started"}
+{"schemaVersion":1,"event":"build.progress","stage":"generate","completed":3,"total":6,"current":"job-00003","etaS":0.4}
+{"schemaVersion":1,"event":"build.progress","stage":"generate","completed":6,"total":6,"current":"job-00006","etaS":0.0}
+{"schemaVersion":1,"event":"build.stage","stage":"generate","status":"completed","ms":842.5}
+{"schemaVersion":1,"event":"diagnostic","code":"JOB011","severity":"warning","message":"Doping applied the effective fraction 0.02734375 instead of the requested 0.03.","path":{"domain":"project","objectId":"018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c00","property":"jobTemplates[0].collections[0].configs[0].dopings[0]"}}
+{"schemaVersion":1,"event":"build.stage","stage":"verify","status":"completed","ms":31.8}
+{"schemaVersion":1,"event":"build.finished","exitCode":0,"wallTimeS":1.42,"published":true}

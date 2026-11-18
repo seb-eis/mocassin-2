@@ -9,8 +9,9 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** In progress — implementation start was approved by the human owner on 2026-11-17 together with
-  the seven-feature list; the design was accepted at `1b6af90` (`Ready with notes`).
+- **Status:** **Awaiting approval** — audit round 2 returned `Passed with notes` at `07851d8`; the human owner
+  accepted it on 2026-11-18 and approved the merge and `step-12` tag. Merge/tag are pending; the design was
+  accepted at `1b6af90` (`Ready with notes`).
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` — round 5
   reviewed `1b6af90`; round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was
   `Ready with notes` at `d211584` (reviewed `6b15f9d`), and round 4 was `Ready with notes` at `f548d26`
@@ -25,13 +26,18 @@ UI consumes later.
 - **Parser:** `System.CommandLine` 3.0.0 (MIT, pinned, CLI-only reference); Native AOT smoke-verified on
   `net11.0`/`linux-x64`; bounded `@file` is part of the contract; no shell-completion command in Step 12
   (§5.2, §5.3, §13.8; [ADR 0015](../adr/0015-cli-parser-system-commandline.md)).
-- **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 from the design-merge commit
-  `eb31979`); no feature branch started yet.
-- **Step CI:** —
-- **Main merge:** —
+- **Step branch:** `step/12-build-orchestration-and-cli` (created 2026-11-17 at `9d4d2ef`; its first parent
+  is the design-merge commit `eb31979`). Features 1–7 and the round-1 audit fixes are squashed into the step
+  branch; see the feature log.
+- **Step CI:** [Ubuntu 44377851616](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) and
+  [Windows 44378270028](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) — both green at
+  `07851d8376c3426d40d07ae70d8e939469648ceb`
+- **Main merge:** — (approved by the human owner 2026-11-18; pending)
 - **Step tag:** —
-- **Audit:** Not requested
-- **Last updated:** 2026-11-17
+- **Audit:** Round 1 `Fixes required` at `9e1997d`; round 2 **`Passed with notes`** at `07851d8`
+  ([record](../audits/step-12.md)), accepted by the human owner 2026-11-18. F-9/N-4 were corrected in a docs-only
+  commit; N-5 (macOS gate not run) is an accepted risk.
+- **Last updated:** 2026-11-18
 
 ### Approved feature list
 
@@ -50,9 +56,95 @@ created `step/12-build-orchestration-and-cli` and marked the step `In progress`.
 squash-merged without a further approval; each feature row and the log below are filled in when the feature is
 implemented and squashed. Feature rows stay empty until then.
 
+### Feature log
+
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| 1 CLI shell, parser configuration, and report contracts | `feature/step-12-build-orchestration-and-cli/cli-shell-and-report-contracts` | Squashed | `dotnet`, `structure`, `api`, `contracts`, `docs`, `aot` exit 0 (AOT CLI evidence: 62 trim diagnostics from `Mocassin.Core`, not a gate) | Not run (no per-feature CI) | `517ae27` |
+| 2 Build orchestration core | `feature/step-12-build-orchestration-and-cli/build-orchestration-core` | Squashed | `dotnet` (494 Packages tests, 68 new), `structure`, `api` exit 0 | Not run (no per-feature CI) | `1dc9eeb` |
+| 3 Build and preview command | `feature/step-12-build-orchestration-and-cli/build-and-preview-command` | Squashed | `dotnet` (81 CLI tests), `structure`, `api`, `contracts`, `docs` exit 0 | Not run (no per-feature CI) | `af7431b` |
+| 4 Project and compile commands | `feature/step-12-build-orchestration-and-cli/project-and-compile-commands` | Squashed | `dotnet` (121 CLI tests, 500 Packages tests including 6 template tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `e7564c0` |
+| 5 Package inspection commands | `feature/step-12-build-orchestration-and-cli/package-inspection-commands` | Squashed | `dotnet` (147 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `85d8d41` |
+| 6 Doctor and dry-run clean | `feature/step-12-build-orchestration-and-cli/doctor-and-dry-run-clean` | Squashed | `dotnet` (168 CLI tests), `structure`, `api`, `contracts` exit 0 | Not run (no per-feature CI) | `a2c6178` |
+| 7 Documentation, parity, and closeout | `feature/step-12-build-orchestration-and-cli/documentation-parity-and-closeout` | Squashed | `dotnet` (171 CLI tests), `docs`, `structure`, `api`, `contracts` exit 0; full `all --require` exit 0 (AOT passed) | Closeout run 44370563073 green at `9e1997d` | `7d17c22` |
+| 8 Audit round-1 fixes | `feature/step-12-build-orchestration-and-cli/fix-audit-round-1` | Squashed | `dotnet` (200 CLI tests), `structure`, `api`, `contracts`, `docs` exit 0; full `all --require` exit 0 (AOT passed) | Ubuntu 44377851616 and Windows 44378270028 green at `07851d8` | `07851d8` |
+
+### Deviations and accepted risks
+
+1. **Planner edited step status before a step agent existed (accepted process deviation, 2026-11-17).** The
+   orchestrator directed the planner to update the step page's status block and the `status.md` dashboard cell
+   for Step 12 before a step agent was assigned. `AGENTS.md` §3.8 places step status and the status dashboard
+   outside the planner's write scope. The edits were factual status cells for the accepted design, no code,
+   contract, or verdict text changed, and the step agent (owner of this record) accepts the deviation with no
+   corrective action. Future design branches leave status cells to the step agent.
+2. **Preview option semantics during the feature-1 transition (recorded owner decision; direct-question
+   process deviation).** The recorded owner decision of 2026-11-17 is that `--template` names a build template
+   and `--job-template` names a job template (§7.1, §20); that decision is implemented. During feature 1 the
+   implementor used the session question mechanism to ask for the interim preview option spelling and received
+   "final names now". `AGENTS.md` §3.8/§7 routes decisions through the orchestrator, so asking outside that
+   route is recorded as a process deviation (owner: step agent; no action required; future design questions go
+   through the orchestrator). `build --preview` now uses `--job-template`; `--template` is the build-template
+   option and returns `CLI004`/2 when given a job-template ID.
+3. **Interim command placeholders (feature 1 only; historical).** During feature 1, `new`, `compile`,
+   `inspect`, `verify`, `doctor`, and `clean` were defined but returned `CLI008`/2 until features 4–6
+   implemented them. No placeholder survives: all seven report-backed commands now dispatch to real handlers,
+   and only `simulate`, `collect`, `evaluate`, `export`, and full `clean` remain reserved.
+4. **Real `Mocassin.Cli` AOT publish is not clean (recorded evidence; Step 31 owner).** The required
+   `verify.sh aot` gate passes: the strict smoke host publishes with zero IL2xxx/IL3xxx warnings, the separate
+   positive control emits IL2026 and IL3050, and the native parse error exits 2 with `CLI001`. Publishing the
+   real CLI under the repository warnings-as-errors policy fails with 62 IL2026/IL3050 diagnostics
+   (31 each) from reflection-based JSON converters in `Mocassin.Core`; no CLI-specific trim warning was
+   reached. This is evidence, not a gate: Step 31 owns the platform matrix and the AOT/single-file decision.
+5. **Only `linux-x64` AOT is exercised.** Windows/macOS AOT, the `System.CommandLine` `netstandard2.0` asset,
+   and the real CLI native image are untested. The smoke host carries the representative command/option/argument
+   shape and the `CLI001` remap.
+6. **The Step 10 CLI preview projection was removed in feature 3 (M-1 closed).** Feature 2 added the single
+   library preview implementation (`BuildPreviewBuilder` and `BuildResult.Preview`); feature 3 deleted
+   `PreviewCommand`, its DTOs, and `PreviewReportWriter`, and now projects `BuildResult.Preview` into
+   `build-v1.preview`. No interim preview mapping or `build-preview-v1` consumer remains.
+7. **Two failure kinds are defensive in v1.** `LatticeGeneration` is normally caught earlier by the registered
+   build-stage validation, and `PackageWrite` has no writer-returned `PKG` error in v1. Both values are
+   implemented and mapped by the design; they are not exercised end to end. Feature 3's writer fault injection
+   covers `PackageWrite` if the writer gains an error result.
+8. **Promoted parameterization warnings now have a real end-to-end fixture (closed in feature 7).** Feature 3
+   covered the validation→exit-1 rule with the real sample and the parameterization→exit-4 rule through a
+   scripted `IBuildPipeline`. Feature 7 adds `tests/contracts/project-parameterization-warning.mocprj`, a clean
+   buildable ceria variant with explicit `2.5 Å` energy environments, no dopings in its single job config, and a
+   deliberately unset explicit parameterization. It validates with zero warnings, so
+   `build --warnings-as-errors` reaches `parameterize` and exits 4 with `PRM003`/`PRM006`; without the flag the
+   same fixture builds, publishes, and verifies. `BuildParameterizationWarningTests` pins the fixture’s
+   warning-free validation, both outcomes, and the fact that the failed build writes no package. The scripted
+   seam test remains as the mapping guard.
+9. **Target pre-check order.** An explicit `-o` target is checked before any load: an existing file without
+   `--force` is `CLI003`/3, and a directory target, a missing parent, or an invalid path is `CLI002`/3. A
+   default target derived from a build template can only be resolved after the CLI loads the project and
+   selects the recipe, so that check happens before the pipeline runs but after this one preflight load. The
+   writer's `PackageBuildOptions.Overwrite` remains the final race guard, and §7's "CLI passes the effective
+   selection; the pipeline repeats it defensively" describes the resulting two loads.
+10. **The signal handler lives in `Program`, not `BuildCommand`.** `CliSignalHandler` owns the first-signal
+    SIGINT/SIGTERM cancellation and the second-signal default termination; `BuildCommand` receives the token
+    through `CliApplication.RunAsync`, which keeps the command unit-testable. The observable behaviour matches
+    §13.3.
+11. **`new`/`compile`/`build` path mappings.** A directory occupying the `new` target path, an empty or
+    invalid output path, and an unwritable output directory are `CLI002`/3; an existing target file is
+    `CLI003`/3. `new` creates a missing output directory (documented and tested); `compile -o` and
+    `build -o` do not create a missing parent and map it to `CLI002`/3 before the build starts. Neither case
+    writes or replaces a file.
+12. **`inspect` is tolerant of non-fatal package defects.** The Step 11 inspector intentionally reports what
+    it can read; a corrupt payload or a wrong signature is a `verify` `PKG` finding. `inspect` maps only fatal
+    structure failures (`InvalidDataException`) to `CLI009`/1, matching §13.4. The missing, directory, and
+    unreadable path pre-check is `CLI002`/3 and runs before the inspector opens the file. This is an intended
+    improvement over the original model builder, whose failures appeared only in a log console.
+13. **`verify-v1` has one diagnostics array.** The `PKG` findings are the shared envelope’s `diagnostics[]`;
+    `checks[]` is the ordered check list. The data contract and CLI reference were reconciled to this in
+    feature 7; there is no second payload-local array.
+14. **`doctor` disk-space threshold.** Free space below 100 MiB is a warning, not a failure; the design lists
+    the check without a threshold. The command stays healthy unless a check reports `fail`.
+15. **`clean` report content outside the supported mode.** The no-dry-run report still lists the folders it
+    would remove (read-only) and adds `CLI008`; the reserved `--results` option emits a minimal `clean-v1`
+    report without inspecting the package. Both exit 2 and delete nothing.
+16. **A throwing doctor check is a failing check.** The command records `fail` with the exception type and
+    keeps the report schema-valid instead of aborting; the design does not define this failure mode.
 
 ## 1. Goal
 
@@ -274,8 +366,11 @@ Consequences recorded in this design:
   IL2xxx/IL3xxx warnings, runs the separate positive control (which must emit IL2026/IL3050), and runs the
   native binary for `--help`, `--version`, and one parse-error case. The real `Mocassin.Cli` publish is also
   attempted and recorded as closeout evidence, but it is **not** a pass/fail gate in Step 12:
-  `Microsoft.Data.Sqlite` and `MessagePack` are not verified for AOT, so dependency-owned warnings are
-  attributed and Step 31's gated decision owns the final platform matrix and the AOT/single-file choice. Only
+  `Microsoft.Data.Sqlite` and `MessagePack` are not verified for AOT, and the 62 real-CLI diagnostics are
+  first-party `Mocassin.Core` reflection-based JSON converters (`ProjectJson.cs` 16,
+  `ModelDefinitionJsonConverter.cs` 16, `StructureModelJsonConverter.cs` 14, `SimulationJsonConverter.cs` 12,
+  `TransitionRefJsonConverter.cs` 4; 31 × IL2026 + 31 × IL3050), not dependency warnings.
+  Step 31's gated decision owns the final platform matrix and the AOT/single-file choice. Only
   `linux-x64` is exercised; Windows/macOS AOT and the `netstandard2.0` asset are untested. Feature 1 adds the
   `./tools/verify.sh aot` mode and the two hosts; feature 7 runs `./tools/verify.sh all --require` at closeout
   and records the AOT output. The gate is **required and fail-not-skip**, but it is local: the closeout GitHub
@@ -777,7 +872,8 @@ never generates or writes an unselected job.
 
 - `build` refuses an existing target unless `--force` is given: `CLI003`, exit 3, and the existing file is
   left byte-identical. The CLI checks before loading; the writer’s `PackageBuildOptions.Overwrite` is the
-  final guard against a race.
+  final guard against a race. A directory target, a missing parent, or an invalid path is `CLI002`/3 before
+  loading; the parent is never created.
 - `--force` maps to `Overwrite = true`. The writer builds in `<target>.tmp-<pid>-<random>` and publishes by
   checkpoint, `journal_mode=DELETE`, file fsync, Unix directory fsync, and atomic rename. A failure or
   cancellation before publication deletes the temp file and preserves the previous package.
@@ -817,9 +913,11 @@ Package written: /tmp/ceria.msl (2.1 MB, 6 jobs, selection all)
   The preview line’s elapsed time is `BuildResult.Preview.Elapsed`, not a `BuildStage`.
 - The `GenerateAndWriteJobs` line is the only bar; it reports `completed/total` selected jobs and the
   current `JobId` or collection/config name.
-- ETA is computed by `ProgressEstimator` from a rolling window of at least 8 and at most 64
-  `(elapsed, completed)` samples, using `request.Options.TimeProvider`. It is display-only and never enters a
-  report field that affects reproducibility; the JSON event may carry `etaS` as an advisory number.
+- ETA is computed by the CLI's `Mocassin.Cli.Build.BuildEtaEstimator` from a rolling window of at least 8 and
+  at most 64 `(elapsed, completed)` samples, using `request.Options.TimeProvider`. The library
+  `Mocassin.Packages.Build.ProgressEstimator` owns only the throttle; a library consumer (Step 26) computes or
+  injects its own estimate. The ETA is display-only and never enters a report field that affects
+  reproducibility; the JSON event may carry `etaS` as an advisory number.
 - Progress is throttled to `request.Options.ProgressInterval`; the final progress of a stage is always emitted.
 - `--json` suppresses all human stage/progress lines and makes stderr JSON Lines only. `--quiet` additionally
   suppresses `build.stage`, `build.progress`, and `log`; neither option suppresses diagnostics, the final
@@ -1057,7 +1155,7 @@ event and optional fields; the `events` schema version remains 1 because the cha
 | `build.progress` | `completed`, `total` | `stage`, `current`, `etaS` | Throttled job progress. |
 | `build.finished` | `exitCode`, `wallTimeS` | `published` | Final outcome; emitted exactly once. |
 | `diagnostic` | `code`, `severity`, `message` | `path` | One structured diagnostic. |
-| `log` | `level`, `message` | — | Forwarded human log. |
+| `log` | `level`, `message` | — | Reserved; no Step 12 producer. |
 
 - `build.started` is emitted after expansion; `build.finished` is emitted even when the run fails before
   `build.started`. The `build.stage` events for load/select/validate/compile/validateBuild/parameterize/expand
@@ -1242,8 +1340,8 @@ Mocassin.Cli ──► Mocassin.Packages ──► Mocassin.Contracts ──► 
 - `Mocassin.Contracts.Cli` owns the `CLI` descriptors; `Mocassin.Packages` composes them into
   `DiagnosticCatalog.Default`; `Mocassin.Cli` constructs the diagnostics. There is no `Packages -> Cli` or
   `Results -> Packages` edge.
-- `Mocassin.Cli -> Mocassin.Compilation` becomes an explicit project reference for `compile`; it is the same
-  dependency the current preview already uses transitively. The CLI still owns no scientific algorithm.
+- `Mocassin.Cli -> Mocassin.Compilation` is an explicit project reference for `compile`; it was previously
+  reached transitively through `Mocassin.Packages`. The CLI still owns no scientific algorithm.
 - `Mocassin.Packages.Build` uses the shared `BuildPreviewBuilder` from `Mocassin.Packages.Build.Internal` and
   `ILatticePreviewService`/`JobTemplateValidationStage` from `Mocassin.Packages.Jobs`/`Projects.Validation`;
   it needs no new project reference.
@@ -1313,12 +1411,14 @@ Mocassin.Cli/
     CompileReport.cs
   Build/
     BuildCommand.cs
-    PreviewCommand.cs           # removed when feature 3 folds preview into BuildCommand
     BuildReport.cs
+    BuildReportFactory.cs
+    BuildExitMapper.cs          # the single BuildFailureKind/status -> exit-code mapping
     BuildPreviewMapper.cs       # maps BuildResult.Preview to build-v1.preview
     BuildReportWriter.cs
     BuildEventWriter.cs
     BuildProgressRenderer.cs
+    BuildEtaEstimator.cs        # CLI-owned 8-64 sample ETA; the library only throttles
   Validation/
     ValidateCommand.cs
     ValidationReport.cs
@@ -1530,33 +1630,33 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 1 — CLI shell, parser configuration, and report contracts
 
-- [ ] Add `System.CommandLine` 3.0.0 to central package management and reference it from `Mocassin.Cli`
+- [x] Add `System.CommandLine` 3.0.0 to central package management and reference it from `Mocassin.Cli`
       only; record the MIT/`requireLicenseAcceptance`/empty-transitive-graph review and the AOT evidence.
-- [ ] Define the `RootCommand` graph for `new`, `validate`, `compile`, `build` (including the interim
+- [x] Define the `RootCommand` graph for `new`, `validate`, `compile`, `build` (including the interim
       `--preview`), `inspect`, `verify`, `doctor`, `clean`, and the reserved commands; define options,
       arguments, arity, defaults, and validators.
-- [ ] Replace the Step 07 `validate` and Step 10 `build --preview` hand-written parsers with the shared graph;
+- [x] Replace the Step 07 `validate` and Step 10 `build --preview` hand-written parsers with the shared graph;
       keep `CliApplication.RunAsync(args, stdout, stderr, cancellationToken)` as the test entry point and keep
       the `validation-v1` output and the interim preview behaviour unchanged.
-- [ ] Bind a successful `ParseResult` to typed request records and dispatch to handlers; map `ParseResult.Errors`
+- [x] Bind a successful `ParseResult` to typed request records and dispatch to handlers; map `ParseResult.Errors`
       to `CLI001` and exit **2** (the library's own parse-error code is 1 and is never returned); map handler
       results through the exit-code table; keep help and version at exit 0.
-- [ ] Replace the library's default root `--version` action with the CLI action (assembly informational
+- [x] Replace the library's default root `--version` action with the CLI action (assembly informational
       version and runtime description); keep `--version` root-only and test that a subcommand `--version`
       is `CLI001`/2.
-- [ ] Add `CliExitCode`, the `CLI001`–`CLI009` descriptors in `Mocassin.Contracts.Cli`, and compose them into
+- [x] Add `CliExitCode`, the `CLI001`–`CLI009` descriptors in `Mocassin.Contracts.Cli`, and compose them into
       `DiagnosticCatalog.Default`.
-- [ ] Add the shared report diagnostic/envelope DTOs and writers; keep `validation-v1` byte-compatible.
-- [ ] Add the seven `reports` manifest descriptors and regenerate the contract artifacts.
-- [ ] Add `build.stage` to the events manifest and add `tests/contracts/events-v1.jsonl`.
-- [ ] Add parser-convention/usage/help/schema tests (arity, `--opt=value`, negative numbers, `--`,
+- [x] Add the shared report diagnostic/envelope DTOs and writers; keep `validation-v1` byte-compatible.
+- [x] Add the seven `reports` manifest descriptors and regenerate the contract artifacts.
+- [x] Add `build.stage` to the events manifest and add `tests/contracts/events-v1.jsonl`.
+- [x] Add parser-convention/usage/help/schema tests (arity, `--opt=value`, negative numbers, `--`,
       response-file behaviour, error text, exit codes) and the `validate` regression tests.
-- [ ] Implement `CliResponseFiles` as the CLI-owned tokenizer/expander with `SplitCommandLine`-equivalent
+- [x] Implement `CliResponseFiles` as the CLI-owned tokenizer/expander with `SplitCommandLine`-equivalent
       semantics, recursive flattening, and the §5.3 bounds; disable the library hook
       (`ResponseFileTokenReplacer = null`). Pin the golden cases (`a"b c"d` → `ab cd`, `a""b` → `ab`,
       `"a""b"` → `a` + `b`, `""`, unterminated quotes, `@`/`@@`, cwd-relative nesting), the `--`/`--json`
       interaction, and the missing/unreadable/directory/invalid/oversized `CLI001`/2 errors with tests.
-- [ ] Add the zero-warning AOT smoke host, the **separate** positive-control project, and the
+- [x] Add the zero-warning AOT smoke host, the **separate** positive-control project, and the
       `verify.sh aot` mode included in `verify.sh all`; give the control project a per-project
       warnings-as-errors opt-out so IL2026/IL3050 remain warnings, while the host stays strict; make missing
       clang/lld/ILCompiler a hard failure with a clear message (never a skip); include the `CLI001`/2 remap in
@@ -1565,63 +1665,91 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 
 ### Feature 2 — Build orchestration core
 
-- [ ] Add `Mocassin.Packages.Build` request/options/result/failure/stage/event/preview types and
+- [x] Add `Mocassin.Packages.Build` request/options/result/failure/stage/event/preview types and
       `IBuildPipeline`; `BuildRequest.Options` is the only options injection point.
-- [ ] Implement the ordered pipeline, the bounded event channel, progress throttling, and stage timings.
-- [ ] Construct the validation pipeline with `JobTemplateValidationStage(previewService)`; use named
+- [x] Implement the ordered pipeline, the bounded event channel, progress throttling, and stage timings.
+- [x] Construct the validation pipeline with `JobTemplateValidationStage(previewService)`; use named
       `Validate` arguments and pass the token.
-- [ ] Implement the shared `BuildPreviewBuilder` and set `BuildResult.Preview`; never reload or recompile for
+- [x] Implement the shared `BuildPreviewBuilder` and set `BuildResult.Preview`; never reload or recompile for
       preview.
-- [ ] Plumb `WarningsAsErrors` into `ValidationOptions` and the parameterization diagnostic check.
-- [ ] Implement build/job-template/parameterization selection and output-path resolution.
-- [ ] Implement `JobSelection` parsing, normalization, and the `JobSelectionResult` projection.
-- [ ] Implement the parallel generation + serialized write scheduler and cancellation.
-- [ ] Add real-project pipeline tests for ceria, preview payload, partial selection, parallel determinism,
+- [x] Plumb `WarningsAsErrors` into `ValidationOptions` and the parameterization diagnostic check.
+- [x] Implement build/job-template/parameterization selection and output-path resolution.
+- [x] Implement `JobSelection` parsing, normalization, and the `JobSelectionResult` projection.
+- [x] Implement the parallel generation + serialized write scheduler and cancellation.
+- [x] Add real-project pipeline tests for ceria, preview payload, partial selection, parallel determinism,
       cancellation, every failure kind, and the options injection.
 
 ### Feature 3 — Build and preview command
 
-- [ ] Implement `build` and fold `--preview` into it; map `BuildResult.Preview` and retire
+- [x] Implement `build` and fold `--preview` into it; map `BuildResult.Preview` and retire
       `build-preview-v1`.
-- [ ] Implement `--jobs`, `--parallel`, `--force`, `--compact`, `--warnings-as-errors`, `--quiet`, `--json`.
-- [ ] Implement human progress/ETA and JSON-Lines events; make `--json` suppress human stderr; install the
+- [x] Implement `--jobs`, `--parallel`, `--force`, `--compact`, `--warnings-as-errors`, `--quiet`, `--json`.
+- [x] Implement human progress/ETA and JSON-Lines events; make `--json` suppress human stderr; install the
       signal handler.
-- [ ] Implement post-publication verification and the `build-v1` report, including the `preview` timing from
+- [x] Implement post-publication verification and the `build-v1` report, including the `preview` timing from
       `BuildPreview.Elapsed`.
-- [ ] Implement the report-backed scope: one report for `validate` and the seven report ids; no report for
-      help/version/reserved commands; `clean --json` without `--dry-run` reports `CLI008`.
-- [ ] Add the sample build/verify, partial, force, cancel, compact, warnings, exit-code, and schema tests.
+- [x] Implement the report-backed scope for the commands that exist: one `build-v1` report for both build
+      modes and the unchanged `validation-v1`; no report for help/version/reserved commands. The five remaining
+      report ids land with features 4–6, and `clean --json` without `--dry-run` with feature 6.
+- [x] Add the sample build/verify, partial, force, cancel, compact, warnings, exit-code, and schema tests.
 
 ### Feature 4 — Project and compile commands
 
-- [ ] Add `Mocassin.Packages/Projects/Templates/` with the embedded blank/ceria assets,
+- [x] Add `Mocassin.Packages/Projects/Templates/` with the embedded blank/ceria assets,
       `ProjectTemplateFactory`, fresh-identity cloning, and the `PublicAPI.Unshipped.txt` entries.
-- [ ] Implement `new` with name validation, safe create, and the `new-project-v1` report.
-- [ ] Implement `compile` with `-o` `compiled-inspection-v1`, the `compile-v1` report, and exit mapping.
-- [ ] Add template freshness, `new` validation, and compile success/failure tests.
+- [x] Implement `new` with name validation, safe create, and the `new-project-v1` report.
+- [x] Implement `compile` with `-o` `compiled-inspection-v1`, the `compile-v1` report, and exit mapping.
+- [x] Add template freshness, `new` validation, and compile success/failure tests.
 
 ### Feature 5 — Package inspection commands
 
-- [ ] Implement `inspect` and `verify` over the Step 11 inspector/verifier.
-- [ ] Add `inspect-v1`/`verify-v1`, human output, and exit/`CLI009` mapping.
-- [ ] Add valid/corrupt/truncated/missing package and schema tests.
+- [x] Implement `inspect` and `verify` over the Step 11 inspector/verifier.
+- [x] Add `inspect-v1`/`verify-v1`, human output, and exit/`CLI009` mapping.
+- [x] Add valid/corrupt/truncated/missing package and schema tests.
 
 ### Feature 6 — Doctor and dry-run clean
 
-- [ ] Implement `doctor` checks through `IDoctorCheck`, the solver probe seam, the `doctor-v1` report, and
+- [x] Implement `doctor` checks through `IDoctorCheck`, the solver probe seam, the `doctor-v1` report, and
       healthy-CI behaviour.
-- [ ] Implement `clean --dry-run` with `--dir`/`--older-than`, no deletion, and the `clean-v1` report,
+- [x] Implement `clean --dry-run` with `--dir`/`--older-than`, no deletion, and the `clean-v1` report,
       including the `--json`-without-`--dry-run` `CLI008` report.
-- [ ] Add healthy, injected-check-failure, warning-only, and no-deletion tests.
+- [x] Add healthy, injected-check-failure, warning-only, and no-deletion tests.
 
 ### Feature 7 — Documentation, parity, and closeout
 
-- [ ] Write the pages in §18.1 and update the parity rows in §18.3.
-- [ ] Record the 10⁴-job evidence and the final local gates.
-- [ ] Run `./tools/verify.sh all --require` including the `aot` gate at Step 12 closeout and record the AOT
+- [x] Write the pages in §18.1 and update the parity rows in §18.3.
+- [x] Record the 10⁴-job evidence and the acceptance runs.
+- [x] Run `./tools/verify.sh all --require` including the `aot` gate at Step 12 closeout and record the AOT
       output in the closeout evidence; record that the closeout GitHub workflow does not run `verify.sh`.
-- [ ] Fill the closeout evidence, set the audit request, and run `./tools/verify.sh all --require`.
-- [ ] Update the step page feature log and status.
+- [x] Fill the closeout evidence, set the audit request, and run `./tools/verify.sh all --require`.
+- [x] Update the step page feature log and status.
+
+### Audit round 1 remediation
+
+- **F-1:** the platform workflow now runs `Mocassin.Cli.Tests`; `CliSignalHandlerTests` exercises the guarded
+  handler, and the Windows gate (`44378270028`) ran the CLI signal/probe step successfully.
+- **F-2:** `build -o` pre-checks a directory target, missing parent, or invalid path as `CLI002`/3 before
+  loading; a derived target is checked after selection; `new -o ""` is `CLI002`/3; `new` still creates a
+  missing output directory, now documented and tested.
+- **F-3:** `JobSelection.ValidateSyntax` rejects malformed grammar before load; range checks stay in `Parse`
+  after expansion.
+- **F-4:** response-file expansion drops every token from a top-level file that fails, so a command only
+  inside the failed file emits no report; a command outside it still does.
+- **F-5/F-9:** the 62 real-CLI AOT diagnostics are recorded as first-party `Mocassin.Core` reflection-based
+  JSON converters, distributed across `ProjectJson.cs` 16, `ModelDefinitionJsonConverter.cs` 16,
+  `StructureModelJsonConverter.cs` 14, `SimulationJsonConverter.cs` 12, and `TransitionRefJsonConverter.cs` 4;
+  Step 31 ownership is explicit.
+- **F-6:** `BuildCancellationTests` covers cancellation during post-publication verification, and
+  `InspectCommandTests` covers corrupt-payload and wrong-signature tolerance.
+- **F-7:** `BuildExitMapperTests` covers every failure kind/status, `PackageWrite` with/without a `PKG`
+  error, `None`/`Failed`, and exit 5 never being emitted.
+- **F-8:** `Mocassin.Cli` has an explicit `Mocassin.Compilation` project reference.
+- **N-1/N-2:** ETA placement is documented as CLI-owned (`BuildEtaEstimator`), and `log` is marked reserved
+  with its fixture line removed; N-3 is accepted without change.
+- **F-9/N-4 (round 2):** the AOT evidence now records the verified five-file distribution for the 62 first-party
+  `Mocassin.Core` diagnostics; the missing-parent `CLI002`/3 rule is scoped to `build`/`compile`, while `new`
+  creates a missing output directory. N-5 (macOS gate not run) is accepted by the human owner as a residual risk.
+- The audit record carries the per-finding resolution and approval tables.
 
 ## 20. Reconciliations and recorded decisions
 
@@ -1758,32 +1886,32 @@ These decisions are recorded by date and are not open for re-litigation in round
 
 ## 22. Acceptance criteria
 
-- [ ] `mocassin validate samples/ceria/ceria.mocprj` exits 0 with the expected warnings; the human table and
+- [x] `mocassin validate samples/ceria/ceria.mocprj` exits 0 with the expected warnings; the human table and
       `validation-v1` report are unchanged from Step 07.
-- [ ] `mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o /tmp/ceria.msl` produces a package that
+- [x] `mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o /tmp/ceria.msl` produces a package that
       `mocassin verify` accepts, using the implicit default parameterization (`parameterizations: []`), and
       writes `job_selection = "all"`. The ceria model-definition sample has no job template and is not a
       build sample.
-- [ ] `--jobs 1-3` writes exactly jobs 1–3 with full-expansion IDs and `job_selection = "1-3"`; `--jobs 2,5`
+- [x] `--jobs 1-3` writes exactly jobs 1–3 with full-expansion IDs and `job_selection = "1-3"`; `--jobs 2,5`
       writes exactly those IDs with a gap and the same IDs in a full build.
-- [ ] `--jobs` normalizes equivalently (`1,2,3` = `1-3`; a full selection = `all`) and rejects malformed,
+- [x] `--jobs` normalizes equivalently (`1,2,3` = `1-3`; a full selection = `all`) and rejects malformed,
       zero, descending, and out-of-range selections with exit 2.
-- [ ] Build/job-template/parameterization selection auto-selects a single recipe, lists IDs on ambiguity,
+- [x] Build/job-template/parameterization selection auto-selects a single recipe, lists IDs on ambiguity,
       honours explicit overrides, and uses the implicit default when no template exists.
-- [ ] `--force` atomically replaces an existing package; without it, an existing target exits 3 and the
+- [x] `--force` atomically replaces an existing package; without it, an existing target exits 3 and the
       original file is byte-identical.
-- [ ] Cancelling before publication leaves no temp file and preserves an existing package; cancelling after
+- [x] Cancelling before publication leaves no temp file and preserves an existing package; cancelling after
       publication leaves the package and exits 6.
-- [ ] `--json` prints exactly one schema-valid report with `exitCode` for `validate` and the seven
+- [x] `--json` prints exactly one schema-valid report with `exitCode` for `validate` and the seven
       report-backed commands, including usage errors; help/version and reserved commands emit no report;
       `--json` leaves stderr JSONL-only; JSON-Lines events validate against the `events` contract; `--quiet`
       additionally suppresses stage/progress/log events.
-- [ ] `mocassin --help`, `mocassin <command> --help`, and `mocassin --version` exit 0; `mocassin --version`
+- [x] `mocassin --help`, `mocassin <command> --help`, and `mocassin --version` exit 0; `mocassin --version`
       prints the assembly informational version and the runtime description from the CLI action, and
       `mocassin <command> --version` is `CLI001`/2; a parse error exits
       2 with `CLI001` and never exposes the library's default 1; `--jobs -1`, `--parallel -1`, and
       `-o -file` reach the handlers as values; `--` ends option parsing.
-- [ ] `@file` response files follow §5.3: quoting/whitespace and `#` comment rules, recursive references,
+- [x] `@file` response files follow §5.3: quoting/whitespace and `#` comment rules, recursive references,
       cwd-relative paths, `@` literal and no escape, `@file` before `--` expanded and after `--` literal,
       `--input=@file` literal, `--input @file` token-expanded before arity, `--json` inside a file honored,
       and the §5.3 limits (1 MiB/4 MiB raw bytes, depth 8, 10,000 tokens contributed by response files,
@@ -1792,49 +1920,89 @@ These decisions are recorded by date and are not open for re-litigation in round
       command report for an expansion failure only when a command is recognised outside the failed file
       (`mocassin <command> @missing --json`); `mocassin @missing --json` has no recognised command and emits
       no report.
-- [ ] `./tools/verify.sh aot` passes: the smoke host publishes for `linux-x64` with `PublishAot=true` and
+- [x] `./tools/verify.sh aot` passes: the smoke host publishes for `linux-x64` with `PublishAot=true` and
       `TrimMode=full` with zero IL2xxx/IL3xxx warnings, the separate positive control emits IL2026 and IL3050,
       and the native binary runs `--help`, `--version`, and one parse-error case that exits 2 through the
       host's `CLI001` remap. Missing clang/lld/ILCompiler is a hard failure with a clear message, never a
       skip. Feature 7 runs `./tools/verify.sh all --require` at Step 12 closeout and records the output; the
-      real `Mocassin.Cli` publish result is recorded as evidence; dependency-owned warnings are attributed to
-      Step 31. The closeout GitHub workflow does not run `verify.sh`, so this is a local gate.
-- [ ] `build --preview` writes no package, reports `mode = "preview"`, projects `BuildResult.Preview`, and
+      real `Mocassin.Cli` publish result is recorded as evidence: 62 first-party `Mocassin.Core`
+      reflection-based JSON diagnostics (16 `ProjectJson.cs`, 16 `ModelDefinitionJsonConverter.cs`,
+      14 `StructureModelJsonConverter.cs`, 12 `SimulationJsonConverter.cs`, 4 `TransitionRefJsonConverter.cs`;
+      31 × IL2026 + 31 × IL3050), with Step 31 owning the AOT/single-file decision. The closeout GitHub workflow does not run `verify.sh`, so this is a local gate.
+- [x] `build --preview` writes no package, reports `mode = "preview"`, projects `BuildResult.Preview`, and
       exits with the build table. The same payload is available to a library caller (Step 26) without a
       reload, recompile, or CLI reference.
-- [ ] `clean --json` without `--dry-run` emits a `clean-v1` report with `dryRun = false`, `removedCount = 0`,
+- [x] `clean --json` without `--dry-run` emits a `clean-v1` report with `dryRun = false`, `removedCount = 0`,
       and `CLI008`, and deletes nothing.
-- [ ] `new --template blank` and `new --template ceria` create valid projects with fresh identity and seed;
+- [x] `new --template blank` and `new --template ceria` create valid projects with fresh identity and seed;
       `compile -o` writes a `compiled-inspection-v1` document; `inspect`/`verify` read a real package.
-- [ ] `doctor` exits 0 on CI; a missing solver is a warning. `clean --dry-run` lists only and never deletes.
-- [ ] `--parallel` 1 and 4 produce the same signatures and `package-summary-v1`; output order is ascending
+- [x] `doctor` exits 0 on CI; a missing solver is a warning. `clean --dry-run` lists only and never deletes.
+- [x] `--parallel` 1 and 4 produce the same signatures and `package-summary-v1`; output order is ascending
       `JobId`.
-- [ ] The CLI builds and verifies 10⁴ jobs without the GUI within the Step 11 budget (< 10 min, < 2 GB).
-- [ ] Documentation written (§18.1).
+- [x] The CLI builds and verifies 10⁴ jobs without the GUI within the Step 11 budget (< 10 min, < 2 GB).
+- [x] Documentation written (§18.1).
+
+### Acceptance evidence (2026-11-17)
+
+All commands ran from the repository root with the Release CLI
+`src/dotnet/Mocassin.Cli/bin/Release/net11.0/Mocassin.Cli.dll` on the AMD Ryzen 7 7840U (16 logical cores),
+Debian GNU/Linux 13, Linux 6.12, .NET 11.0.100 / runtime 11.0.0. This is a recorded acceptance run, not a
+benchmark; the performance page carries the same workload with method and stage timings.
+
+| Check | Command | Result |
+| --- | --- | --- |
+| Validate the ceria model | `mocassin validate samples/ceria/ceria.mocprj` | exit 0, 0 errors / 0 warnings / 0 infos, `valid`; human table unchanged |
+| Build the job sample | `mocassin build samples/jobs/ceria-temperature-sweep.mocprj -o /tmp/opencode/ceria-sample.msl --json` | exit 0, `jobSelection = all`, 6 jobs, 98,304 bytes, `verification = passed` |
+| Verify the sample package | `mocassin verify /tmp/opencode/ceria-sample.msl --json` | exit 0, `valid`, 10 checks, 0 diagnostics |
+| Partial selection | `mocassin build … --jobs 1-3 --json` | exit 0, `expression = 1-3`, 3 jobs; full build reports `all`, 6 jobs; both verify |
+| Malformed selections | `--jobs 0`, `--jobs -1`, `--jobs 3-1`, `--jobs 99` | exit 2 with `CLI005` in each case; no package is written |
+| Cancellation | SIGINT 0.8 s into a 10,000-job `--force` build whose target already held a valid package | exit 6, `CLI006`, `published = false`, existing package SHA-256 unchanged, no `*.tmp-*` file left |
+| JSON schemas | the report schema assertion used by the CLI tests (`JsonSchemaAssert`) over every `--json` invocation | each report validates against its generated schema; parse/usage errors still emit one object |
+| Doctor | `mocassin doctor --json` | exit 0, `healthy = true`; `solver` is `warn` because `mocassin-sim` is not on `PATH` |
+| 10⁴ jobs | see below | 10,000 jobs built and verified in 3.76 s with 151,820 KB peak RSS |
+
+**10⁴-job workload.** The synthetic project is a copy of `samples/jobs/ceria-temperature-sweep.mocprj` with
+each collection expanded to ten configurations and `jobCountPerConfig = 500`, giving **20 configurations ×
+500 = 10,000 jobs**. Four configs × 2,500 would exceed `JOB008` (1–1000 per-configuration jobs). Mixed
+`6×6×6`/`8×8×8` ceria cells, no GUI. The command was:
+
+```sh
+dotnet src/dotnet/Mocassin.Cli/bin/Release/net11.0/Mocassin.Cli.dll \
+  build /tmp/opencode/10k.mocprj -o /tmp/opencode/10k.msl --json
+```
+
+Result: exit 0, `jobSelection = all` (10,000 expanded / 10,000 selected), `verification = passed`, package
+9,625,600 bytes (~9.2 MiB), 9,998 lattices with reuse factor 1.0002, 7 warnings, 0 errors. Wall time was
+**3.76 s** and peak RSS **151,820 KB (~148 MiB)** for the whole `dotnet` child process
+(`resource.getrusage(RUSAGE_CHILDREN).ru_maxrss`). A standalone `mocassin verify` took 1.21 s with 135,624 KB
+peak RSS and returned `valid` with 10 checks. The budget is < 10 min and < 2 GB. Stage timings were load 2.6 ms,
+select 0.5 ms, validate 204.4 ms, compile 89.6 ms, build-stage validate 21.7 ms, parameterize 13.4 ms, expand
+22.2 ms, generate 2,113.9 ms, publish 16.8 ms, verify 796.0 ms.
+
 
 ## 23. Tests
 
 | Test | Assertion | Tier |
 | --- | --- | --- |
 | Parser/help | Library conventions: commands, long/short options, `--opt=value`, `--`, negative numbers (`--jobs -1`, `--parallel -1`, `-o -file`), missing values, unknown options, required options/arguments, duplicate/conflicting options, no POSIX short-option bundling; help and root `--version` exit 0; root-only `--version` prints version + runtime and a subcommand `--version` is `CLI001`/2; parse errors exit 2 with a CLI-owned `CLI001` message and the offending token; the library's default 1 is never returned | PR-fast |
-| Response files | `@file` with spaces/tabs/CRLF, double-quote grouping and empty quotes, golden tokenizer cases `a"b c"d` → `ab cd`, `a""b` → `ab`, `"a""b"` → `a` + `b`, `""` → empty token, `x"y z` → `xy z`, `"x y` → no token, literal single quotes/backslash, `#` only at line start, recursive references, cwd-relative paths, `@` literal, `@@` no escape, `--` stops expansion, `--input=@file` literal, `--input @file` multi-token arity error, `--json` inside/outside, 1 MiB/4 MiB raw bytes, depth 8, 10,000 tokens contributed by response files, 32 files, missing/unreadable/directory/invalid-UTF-8/oversized → `CLI001`/2 not `CLI002`/3 | PR-fast |
-| Exit codes | Every `BuildFailureKind`/status maps to the documented code, including `JobSelection`, `Preview`, `PackageWrite` without an I/O cause, and `None`/`Failed`; exit 5 is never emitted by `build` | PR-fast |
+| Response files | `@file` with spaces/tabs/CRLF, double-quote grouping and empty quotes, golden tokenizer cases `a"b c"d` → `ab cd`, `a""b` → `ab`, `"a""b"` → `a` + `b`, `""` → empty token, `x"y z` → `xy z`, `"x y` → no token, literal single quotes/backslash, `#` only at line start, recursive references, cwd-relative paths, `@` literal, `@@` no escape, `--` stops expansion, `--input=@file` literal, `--input @file` multi-token arity error, `--json` inside/outside, 1 MiB/4 MiB raw bytes, depth 8, 10,000 tokens contributed by response files, 32 files, missing/unreadable/directory/invalid-UTF-8/oversized → `CLI001`/2 not `CLI002`/3; a command contributed by the failed file emits no report, while a command outside it still does | PR-fast |
+| Exit codes | Every `BuildFailureKind`/status maps to the documented code, including `JobSelection`, `Preview`, `PackageWrite` with and without a `PKG` error, and `None`/`Failed`; exit 5 is never emitted by `build`; unit tests exercise the mapper directly | PR-fast |
 | Options injection | `BuildRequest.Options` reaches the clock, throttle, and channel capacity; a fixed clock makes progress/ETA deterministic | PR-fast |
 | Selection | Auto-select, multiple build templates, multiple job templates, multiple parameterizations, overrides, unknown IDs, wrong-kind ID | PR-fast |
-| Job selection | Grammar, normalization, dedup/merge, full-selection = `all`, range/gap errors, `inspect` metadata | PR-fast |
+| Job selection | Grammar pre-validation before load, normalization, dedup/merge, full-selection = `all`, range/gap errors after expansion, `inspect` metadata | PR-fast |
 | Build | Ceria job sample builds, verifies, counts/signatures match, `job_selection = "all"` | PR-fast |
 | Partial | Selected IDs, gaps, stable IDs vs full build, unselected lattices absent | PR-fast |
 | Preview | No file, `mode = "preview"`, `BuildResult.Preview` from the shared builder, collections/configs/dopings, `--jobs` filter, no reload/recompile, a library caller gets the same payload, compile errors exit 4 | PR-fast |
 | Force | Existing target exit 3; `--force` replaces; failed `--force` leaves the original intact | PR-fast |
-| Cancellation | Token before/after publication; temp cleanup; existing package intact; exit 6 | PR-fast |
+| Cancellation | Token before publication deletes the temp file and preserves the package; a blocking verifier cancels after publication and proves `published = true`, `verification = skipped`, and exit 6 with the package retained | PR-fast |
 | Parallel | `--parallel 1` = `--parallel 4` signatures/summary; ascending job rows | PR-fast |
 | Compact | Quality 9 + VACUUM mapping; signatures/summary unchanged; package verifies | PR-fast |
 | Warnings | Validation warnings exit 1; promoted `PRM` warnings exit 4; unflagged build succeeds | PR-fast |
 | JSON | Each report validates against its generated schema; usage errors still print one object; `clean --json` without `--dry-run` reports `CLI008`; help/version/reserved commands emit no report; JSON-Lines schema | PR-fast |
-| AOT smoke | `./tools/verify.sh aot`: the host publishes with `PublishAot=true`/`TrimMode=full` with zero IL2xxx/IL3xxx warnings; the separate positive control emits IL2026 and IL3050; the native host includes the `CLI001`/2 remap and a parse error exits 2; missing clang/lld/ILCompiler is a hard failure, never a skip. Feature 7 runs `all --require` at Step 12 closeout; the real CLI publish result is recorded, dependency-owned warnings are attributed to Step 31, and the closeout CI does not run `verify.sh` | Closeout (local) |
-| Events | `build.stage` events precede `build.started`; `build.started`/`progress`/`finished` ordering; `finished` exactly once; `--json` leaves stderr JSONL-only; `--quiet` suppresses stage/progress/log | PR-fast |
+| AOT smoke | `./tools/verify.sh aot`: the host publishes with `PublishAot=true`/`TrimMode=full` with zero IL2xxx/IL3xxx warnings; the separate positive control emits IL2026 and IL3050; the native host includes the `CLI001`/2 remap and a parse error exits 2; missing clang/lld/ILCompiler is a hard failure, never a skip. Feature 7 runs `all --require` at Step 12 closeout; the real CLI publish result is recorded as 62 first-party `Mocassin.Core` diagnostics, Step 31 owns the AOT decision, and the closeout CI does not run `verify.sh` | Closeout (local) |
+| Events | `build.stage` events precede `build.started`; `build.started`/`progress`/`finished` ordering; `finished` exactly once; `--json` leaves stderr JSONL-only; `--quiet` suppresses stage/progress and `log` remains reserved | PR-fast |
 | New/compile | Blank/ceria identity, name validation, safe create, inspection output, `CMP` exit 4 | PR-fast |
-| Inspect/verify | Valid, corrupt, truncated, missing; `PKG` diagnostics; exit codes | PR-fast |
+| Inspect/verify | Valid, corrupt, truncated, missing; `PKG` diagnostics; exit codes; `inspect` still succeeds on a corrupt payload and a wrong signature while `verify` reports `PKG004`/`PKG005` | PR-fast |
 | Doctor | Healthy CI; injected `IDoctorCheck` pass/warn/fail lists cover runtime/SQLite/permission/disk/catalog/template outcomes; solver warning | PR-fast (check seam + fake probe) |
 | Clean | Dry run lists only; no deletion; `.msl` untouched; `--older-than`; `--results` reserved; `--json` without `--dry-run` reports `CLI008` | PR-fast |
 | Validate regression | Human/JSON output and exit codes unchanged | PR-fast |
@@ -1854,7 +2022,7 @@ These decisions are recorded by date and are not open for re-litigation in round
 | Library parse errors leak exit 1 | `CliApplication` maps `ParseResult.Errors` to `CLI001`/2 in one place and a test asserts the default 1 is never returned; help/version stay 0 |
 | Response files exhaust memory or recurse | The CLI owns tokenization and recursive expansion (the library hook cannot see depth); 1 MiB of raw bytes per file, 4 MiB of raw response-file bytes across the command line, depth 8, 10,000 tokens contributed by response files, 32 files; a self-reference fails at the depth bound instead of hanging; the CLI reader catches the unreadable/directory cases and maps them to `CLI001`/2 |
 | Response-file syntax drifts from the contract | The CLI owns the reader; tests pin quoting, whitespace, `#`, nesting, path resolution, `--`/`--json`, and the limits; the library default is not the contract |
-| System.CommandLine AOT regresses | The required `verify.sh aot` gate publishes the zero-warning host and the separate positive control, runs the native parse-error case, and hard-fails when clang/lld/ILCompiler is absent (no silent skip). It is a local closeout gate; the closeout CI does not run `verify.sh`. The real CLI publish is recorded and dependency-owned warnings are attributed; only `linux-x64` is proven, so Windows/macOS and SQLite/MessagePack stay Step 31 gates |
+| System.CommandLine AOT regresses | The required `verify.sh aot` gate publishes the zero-warning host and the separate positive control, runs the native parse-error case, and hard-fails when clang/lld/ILCompiler is absent (no silent skip). It is a local closeout gate; the closeout CI does not run `verify.sh`. The real CLI publish is recorded as 62 first-party `Mocassin.Core` reflection-based JSON diagnostics (16 `ProjectJson.cs`, 16 `ModelDefinitionJsonConverter.cs`, 14 `StructureModelJsonConverter.cs`, 12 `SimulationJsonConverter.cs`, 4 `TransitionRefJsonConverter.cs`); Step 31 owns the AOT/single-file decision. Only `linux-x64` is proven, so Windows/macOS and SQLite/MessagePack stay Step 31 gates |
 | Completion promise overreaches | The owner removed `completion` from Step 12 on 2026-11-17; `[suggest]` is accepted but not a contract; shell integration is deferred to Step 31 packaging |
 | Duplicate/bespoke parser creeps back | Feature 1 deletes the Step 07/10 hand-written parsers; no library project references `System.CommandLine`; structure/API tests and review check the command graph is the only parse path |
 | Silent warnings | Report summary, `--warnings-as-errors` for validation/parameterization |

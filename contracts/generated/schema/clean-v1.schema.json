@@ -1,0 +1,214 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/clean-v1.json",
+  "title": "Clean report",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "clean"
+      ]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "exitCode": {
+      "type": "integer"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "integer"
+        },
+        "warnings": {
+          "type": "integer"
+        },
+        "infos": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "errors",
+        "warnings",
+        "infos"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string"
+              },
+              "objectId": {
+                "type": "string"
+              },
+              "property": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "domain",
+              "objectId"
+            ],
+            "additionalProperties": false
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "objectId": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "domain",
+                "objectId"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "dryRun": {
+      "type": "boolean"
+    },
+    "packagePath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "directory": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "jobSelection": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "jobCount": {
+      "type": "integer"
+    },
+    "folders": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "jobId": {
+            "type": "integer"
+          },
+          "lastWriteUtc": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer"
+          }
+        },
+        "required": [
+          "path",
+          "jobId",
+          "lastWriteUtc",
+          "sizeBytes"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "totalBytes": {
+      "type": "integer"
+    },
+    "olderThanDays": {
+      "type": [
+        "integer",
+        "null"
+      ]
+    },
+    "removedCount": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "ok",
+    "exitCode",
+    "summary",
+    "diagnostics",
+    "dryRun",
+    "packagePath",
+    "directory",
+    "jobSelection",
+    "jobCount",
+    "folders",
+    "totalBytes",
+    "removedCount"
+  ]
+}

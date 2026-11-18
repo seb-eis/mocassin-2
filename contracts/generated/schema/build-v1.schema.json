@@ -1,0 +1,623 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://mocassin.dev/schemas/build-v1.json",
+  "title": "Build report",
+  "description": "MOCASSIN contract manifest v1; generated from contracts/manifest.json.",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "schemaVersion": {
+      "type": "integer"
+    },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "build"
+      ]
+    },
+    "ok": {
+      "type": "boolean"
+    },
+    "exitCode": {
+      "type": "integer"
+    },
+    "summary": {
+      "type": "object",
+      "properties": {
+        "errors": {
+          "type": "integer"
+        },
+        "warnings": {
+          "type": "integer"
+        },
+        "infos": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "errors",
+        "warnings",
+        "infos"
+      ],
+      "additionalProperties": false
+    },
+    "diagnostics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "severity": {
+            "type": "string",
+            "enum": [
+              "error",
+              "warning",
+              "info"
+            ]
+          },
+          "message": {
+            "type": "string"
+          },
+          "path": {
+            "type": [
+              "object",
+              "null"
+            ],
+            "properties": {
+              "domain": {
+                "type": "string"
+              },
+              "objectId": {
+                "type": "string"
+              },
+              "property": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              }
+            },
+            "required": [
+              "domain",
+              "objectId"
+            ],
+            "additionalProperties": false
+          },
+          "hint": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "related": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "objectId": {
+                  "type": "string"
+                },
+                "property": {
+                  "type": [
+                    "string",
+                    "null"
+                  ]
+                }
+              },
+              "required": [
+                "domain",
+                "objectId"
+              ],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "code",
+          "severity",
+          "message"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "build",
+        "preview"
+      ]
+    },
+    "projectId": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "modelHash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "documentHash": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "modelSignature": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "parameterizationSignature": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "selection": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "buildTemplate": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "jobTemplate": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            }
+          },
+          "required": [
+            "id",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        "parameterization": {
+          "type": [
+            "object",
+            "null"
+          ],
+          "properties": {
+            "id": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "name": {
+              "type": [
+                "string",
+                "null"
+              ]
+            },
+            "implicitDefault": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "id",
+            "name",
+            "implicitDefault"
+          ],
+          "additionalProperties": false
+        },
+        "outputName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      },
+      "required": [
+        "buildTemplate",
+        "jobTemplate",
+        "parameterization",
+        "outputName"
+      ],
+      "additionalProperties": false
+    },
+    "jobSelection": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "expression": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "expandedCount": {
+          "type": "integer"
+        },
+        "selectedCount": {
+          "type": "integer"
+        }
+      },
+      "required": [
+        "expression",
+        "expandedCount",
+        "selectedCount"
+      ],
+      "additionalProperties": false
+    },
+    "timings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "stage": {
+            "type": "string",
+            "enum": [
+              "load",
+              "select",
+              "validate",
+              "compile",
+              "validateBuild",
+              "parameterize",
+              "expand",
+              "preview",
+              "generate",
+              "publish",
+              "verify"
+            ]
+          },
+          "ms": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "stage",
+          "ms"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "package": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "path": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sha256": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "sizeBytes": {
+          "type": "integer"
+        },
+        "jobCount": {
+          "type": "integer"
+        },
+        "modelCount": {
+          "type": "integer"
+        },
+        "latticeCount": {
+          "type": "integer"
+        },
+        "latticeReuseFactor": {
+          "type": "number"
+        },
+        "published": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "sizeBytes",
+        "jobCount",
+        "modelCount",
+        "latticeCount",
+        "latticeReuseFactor",
+        "published"
+      ],
+      "additionalProperties": false
+    },
+    "preview": {
+      "type": [
+        "object",
+        "null"
+      ],
+      "properties": {
+        "jobTemplateId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "jobTemplateName": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "totalJobs": {
+          "type": "integer"
+        },
+        "collections": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "name": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "simulationId": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "kind": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "useDualDofCorrection": {
+                "type": "boolean"
+              },
+              "jobCount": {
+                "type": "integer"
+              },
+              "configCount": {
+                "type": "integer"
+              },
+              "optimizers": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "siteId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "particleId": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "targetCount": {
+                      "type": "integer"
+                    },
+                    "removedStartOptions": {
+                      "type": [
+                        "integer",
+                        "null"
+                      ]
+                    }
+                  },
+                  "required": [
+                    "siteId",
+                    "particleId",
+                    "targetCount"
+                  ],
+                  "additionalProperties": false
+                }
+              },
+              "configs": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "name": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "jobCount": {
+                      "type": "integer"
+                    },
+                    "cellA": {
+                      "type": "integer"
+                    },
+                    "cellB": {
+                      "type": "integer"
+                    },
+                    "cellC": {
+                      "type": "integer"
+                    },
+                    "positionCount": {
+                      "type": "integer"
+                    },
+                    "totalChargeBefore": {
+                      "type": "number"
+                    },
+                    "totalChargeAfter": {
+                      "type": "number"
+                    },
+                    "isChargeNeutral": {
+                      "type": "boolean"
+                    },
+                    "dopings": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "dopingId": {
+                            "type": [
+                              "string",
+                              "null"
+                            ]
+                          },
+                          "priority": {
+                            "type": "integer"
+                          },
+                          "requestedFraction": {
+                            "type": "number"
+                          },
+                          "availablePrimary": {
+                            "type": "integer"
+                          },
+                          "requestedPrimary": {
+                            "type": "integer"
+                          },
+                          "appliedPrimary": {
+                            "type": "integer"
+                          },
+                          "appliedDependent": {
+                            "type": "integer"
+                          },
+                          "effectiveFraction": {
+                            "type": "number"
+                          }
+                        },
+                        "required": [
+                          "dopingId",
+                          "priority",
+                          "requestedFraction",
+                          "availablePrimary",
+                          "requestedPrimary",
+                          "appliedPrimary",
+                          "appliedDependent",
+                          "effectiveFraction"
+                        ],
+                        "additionalProperties": false
+                      }
+                    }
+                  },
+                  "required": [
+                    "id",
+                    "name",
+                    "jobCount",
+                    "cellA",
+                    "cellB",
+                    "cellC",
+                    "positionCount",
+                    "totalChargeBefore",
+                    "totalChargeAfter",
+                    "isChargeNeutral",
+                    "dopings"
+                  ],
+                  "additionalProperties": false
+                }
+              }
+            },
+            "required": [
+              "id",
+              "name",
+              "simulationId",
+              "kind",
+              "useDualDofCorrection",
+              "jobCount",
+              "configCount",
+              "optimizers",
+              "configs"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "jobTemplateId",
+        "jobTemplateName",
+        "totalJobs",
+        "collections"
+      ],
+      "additionalProperties": false
+    },
+    "verification": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed",
+        "skipped"
+      ]
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "ok",
+    "exitCode",
+    "summary",
+    "diagnostics",
+    "mode",
+    "projectId",
+    "modelHash",
+    "documentHash",
+    "modelSignature",
+    "parameterizationSignature",
+    "selection",
+    "jobSelection",
+    "timings",
+    "package",
+    "preview",
+    "verification"
+  ]
+}

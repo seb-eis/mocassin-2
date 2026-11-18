@@ -43,7 +43,14 @@ VALID_FIELD_TYPES = {
     "uint64",
 }
 REPORT_CONSTANTS = {
+    "build": "BuildReportVersion",
+    "clean": "CleanReportVersion",
+    "compile": "CompileReportVersion",
+    "doctor": "DoctorReportVersion",
+    "inspect": "InspectReportVersion",
+    "new-project": "NewProjectReportVersion",
     "validation": "ValidationReportVersion",
+    "verify": "VerifyReportVersion",
 }
 FORMAT_CONSTANTS = {
     "project": "ProjectSchemaVersion",
