@@ -553,9 +553,15 @@ solver with the same binary, platform, package, and seed.
   indices; `models`/`lattices` `format_version` columns against their payloads.
 - **Scientific invariants:** each rule preserves the non-void particle-symbol multiset and charge within
   `1e-9`; `path_vector`/`length` match the cell-vector sum of `movement`; a no-charge-change rule has a zero
-  transport vector. The full positional `charge_transport_vector` formula is a recorded Step 15 assignment
-  because the v1 payload has no fractional P1 coordinates; the trust boundary and residual risk are documented
-  in the Step 13 design.
+  transport vector. Void is exempt from the occupation check; a non-void state particle must be in the
+  collection-union mask, and the real `msl-v1` rules must pass. The exact per-direction occupation check and the
+  full positional `charge_transport_vector` formula are recorded Step 14/15 assignments because the v1 payload
+  has no representative-direction marker or fractional P1 coordinates; the trust boundary and residual risk are
+  documented in the Step 13 design.
+- **Equivalent starts:** a direction mapped into another symmetry-equivalent start bucket is accepted; the
+  reader does not require `direction.position_id == position`.
+- **Element budget:** 512M model elements covers a writer-valid 512 MiB payload; the 1M-rule/16M-link caps are
+  per-field, and a raised `CompilationOptions.MaxRuleCount` requires a raised `ReaderLimits`.
 - **Signatures:** the parameterization and lattice projections re-encode from the payload with the ADR 0010
   fixed-width writer, the C# quantization expression, and the domain prefix. The checked-in `.bin` vectors
   round-trip byte-identically. `model_signature` is an identity string, never re-encoded.
@@ -564,7 +570,7 @@ solver with the same binary, platform, package, and seed.
   records draws/s, refill cost, state round-trip, and fork cost against the documented budget; a >10 %
   regression is measured only against the same-runner-class entry in
   `tests/reference/bench/baselines.json` and is a release failure.
-- **CLI:** the dry-run golden, exit codes 0/10–16 with the architecture §7.3 meanings, parse-error remap,
+- **CLI:** the dry-run golden, exit codes 0/5/10–16 with the architecture §7.3 meanings (5 reserved for Step 19 batch), parse-error remap,
   help/version, logging formats, and the write-free guarantee. `--stdout` with `--dry-run` is a usage error; no
   job folder or log file is created. A doc-drift check compares the solver rows in `cli.md`,
   `solver-architecture.md`, and the step page with architecture §7.3.

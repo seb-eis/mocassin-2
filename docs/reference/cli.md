@@ -475,6 +475,7 @@ The canonical table is the internal target architecture §7.3; this table mirror
 | Code | Meaning |
 | ---: | --- |
 | 0 | Completed (including a successful dry run). |
+| 5 | Partial success for multi-job/batch commands (at least one job failed, others completed); reserved until Step 19. |
 | 10 | Invalid arguments, unknown job, unsupported option, extension requested. |
 | 11 | Package error: unusable SQLite, schema/version mismatch, missing element, invalid frame, decode/scan/size error. |
 | 12 | Model/data error: signature mismatch, invalid index/length/value, column/payload mismatch. |

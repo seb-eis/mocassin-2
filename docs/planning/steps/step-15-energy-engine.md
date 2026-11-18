@@ -105,8 +105,10 @@ barrier_backward = (s1 - s2) - field
 - The state codes are packed particle IDs in path order; decode with bounds checks.
 - For MMC, S1 is unused; `s0` and `s2` are the two-site energies.
 - The field input is the per-rule Cartesian **charge transport vector** compiled in Step 08:
-  - `rule.charge_transport_vector = Σ_p q_p * (x_p(S2) - x_p(S0))`, summed over moving particle
-    identities; each particle contributes once, and void contributes nothing.
+  - `rule.charge_transport_vector = Σ_node (q(S2,node) − q(S0,node)) · x(path node)`, in e·Å. It is the
+    node-wise endpoint-moment difference, not a particle-identity pairing; a node with unchanged charge
+    contributes nothing, and void carries no charge. It also covers a particle that changes charge at a fixed
+    site (for example A⁻ → A).
   - `ê` is the unit field direction; `|E|` is the field modulus and `kT` the thermal energy.
   - `field = -0.5 * (|E| / kT) * (rule.charge_transport_vector · ê)`, using the same Å/V/m scale as the
     existing field convention.

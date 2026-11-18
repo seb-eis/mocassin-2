@@ -59,10 +59,15 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   array-vs-`bin` lattice drift without a .NET dependency.
 - The Rust canonical writer re-encodes every `tests/contracts/projections/parameterization/*.bin` and
   `.../lattice/*.bin` vector and must reproduce the bytes and the domain hash. This is PR-fast.
-- The reader checks mass/charge conservation per rule, the state/particle allowed masks, `path_vector`/`length`
-  against `movement` and the cell vectors, and the zero-transport rule when no charge changes. The full
-  positional transport formula is a recorded Step 15 assignment because the v1 payload has no fractional P1
-  coordinates.
+- The reader checks mass/charge conservation per rule, `path_vector`/`length` against `movement` and the cell
+  vectors, and the zero-transport rule when no charge changes. Void is exempt from the occupation check; a
+  non-void state particle must be in the collection-union mask, and the real `msl-v1` rules must pass. The exact
+  per-direction occupation check and the full positional transport formula are recorded Step 14/15 assignments
+  because the v1 payload has no representative-direction marker or fractional P1 coordinates.
+- `jump_mapping` accepts a direction in any symmetry-equivalent start bucket; the reader does not require
+  `direction.position_id == position`.
+- The model-element budget is 512M, covering a writer-valid 512 MiB payload; the 1M-rule/16M-link caps are
+  per-field, and a caller that raises `CompilationOptions.MaxRuleCount` must raise `ReaderLimits`.
 - `tests/contracts/rng-vectors.json` freezes seed derivation, draw streams, bounded draws, forks, and the
   `RngStateV1` round-trip. A changed algorithm, draw order, or state layout fails the vector test.
 - A proptest suite truncates and mutates the real payloads; it asserts no panic, no unbounded allocation, and a

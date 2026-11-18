@@ -374,13 +374,15 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
   0/1/2/3 subset. See `02-data-contracts.md` §5.7.6. The CLI parser library's own parse-error exit code (1)
   is remapped to `CLI001`/2; help and version exit 0. Response-file (`@file`) errors are usage errors
   (`CLI001`/2), not I/O errors (`CLI002`/3).
-- Rust solver: `0` completed, `10` invalid arguments, `11` package error, `12` model/data error,
+- Rust solver: `0` completed, `5` partial success for multi-job/batch commands (at least one job failed,
+  others completed; reserved until Step 19), `10` invalid arguments, `11` package error, `12` model/data error,
   `13` numerical failure **or internal invariant violation** (a caught panic is reported here), `14` aborted by
   limit, `15` cancelled, `16` I/O error. Parse errors (unknown option, bad enum value, missing value) are `10`,
   not the parser library's default; help and `--version` exit 0.
 - The solver table is the `mocassin-sim` process contract. It is separate from the .NET `mocassin` table; do not
-  reuse the .NET table for solver exit codes. `docs/reference/cli.md` and the Step 13 page mirror this table and
-  must not redefine a code.
+  reuse the .NET table for solver exit codes. `5` is the one intentional shared meaning (partial success for
+  multi-job/batch), and it is reserved until Step 19. `docs/reference/cli.md` and the Step 13 page mirror this
+  table and must not redefine a code.
 - The GUI surfaces the same CLI codes for build/collect operations and the solver codes for solver failures,
   plus a human-readable abort reason.
 

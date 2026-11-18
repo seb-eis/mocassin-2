@@ -933,9 +933,11 @@ MessagePack map with snake_case keys. Top-level:
 - `site_index` identifies the reference site; reference sites are sorted by `CellSiteId` during compilation,
   so the index is stable for a given structure. It is not the P index.
 - `positions` are in ascending `P` order. `vector4` is the full encoded position `[cellA, cellB, cellC, P]`
-  with base positions `[0,0,0,P]`. `particle_ids` is the ascending list of compiled particle indices set in
-  `AllowedParticleMask`, including void (`0`) when the position may be empty; consumers reconstruct the mask
-  from it.
+  with base positions `[0,0,0,P]`. `particle_ids` is the ascending list of **non-void** compiled particle
+  indices set in `AllowedParticleMask`; the writer does not include void (`0`)
+  (`StructureCompilationStage.BuildMask` rejects compiled index 0). Void is the empty occupation and is not
+  evidence that the position is disallowed; consumers must not reject a state merely because void is absent
+  from `particle_ids`.
 - `environments` is indexed by position. Each entry carries `selection_particle_mask:u64`, `pairs`,
   `clusters`, and `update_particle_ids`. A pair link is
   `{target_position:u32, offset:[i32;3], energy_id:u32}` and there is **one entry per periodic image**:
@@ -1022,10 +1024,12 @@ MessagePack map with snake_case keys. Top-level:
   and is not part of the model signature. Step 08's internal default is not a second runtime source.
 - `movement` is the authoritative fractional displacement per path node. `path_vector` is the Cartesian net
   displacement, obtained by converting each movement with the cell geometry and summing; `length` is its
-  magnitude. `charge_transport_vector` is the particle-identity sum
-  `Σ_p q_p * (x_p(S2) - x_p(S0))` in e·Å and is the exact field input; a particle that moves contributes once,
-  void contributes nothing. Step 15 computes `field = -0.5*(|E|/kT)*(charge_transport_vector·ê)`. A direction
-  has no stored field scalar. `static_correction` is `null`/NaN in v1 (dynamic S2).
+  magnitude. `charge_transport_vector` is the node-wise endpoint-moment difference
+  `Σ_node (q(S2,node) - q(S0,node)) * x(path node)` in e·Å and is the exact field input; a node whose charge is
+  unchanged contributes nothing, and void carries no charge. This is not the particle-identity pairing formula:
+  it also covers a particle that changes charge at a fixed site (for example A⁻ → A). Step 15 computes
+  `field = -0.5*(|E|/kT)*(charge_transport_vector·ê)`. A direction has no stored field scalar.
+  `static_correction` is `null`/NaN in v1 (dynamic S2).
 - `tracker_order[i]` is the compiled **global tracker index** that follows the mobile particle at path node `i`,
   or the sentinel `0xFF` for a non-mobile node. Its length is exactly the rule's path-node count (the
   representative direction's `path` length and the state-code node count); it is a variable-length `u8[]`, not
@@ -1033,6 +1037,10 @@ MessagePack map with snake_case keys. Top-level:
   signature also projects. Tracker mappings are definitions; Step 18 owns the values and updates.
 - Within one collection, `state0` maps to at most one rule; the compiler rejects ambiguity. A direction is
   listed in `jump_mapping` only when at least one rule can start from that `(position, particle)`.
+- A direction is mapped into every symmetry-equivalent start bucket, not only its representative
+  `direction.position_id`. `EquivalentStartPositions` is not persisted, so a reader must not require
+  `direction.position_id == bucket_position`; it validates range, collection, and uniqueness, and Step 14
+  consumes the mapping as authored. The exact equivalent-start relation is a Step 08 writer invariant.
 
 `simulations` fields:
 
@@ -1125,13 +1133,13 @@ consumes, with explicit limits that are checked before allocation:
 | Model payload | 512 MiB | Same guard as the .NET verifier |
 | Job payload | 8 MiB | Same guard as the .NET verifier |
 | Lattice payload | 512 MiB | Capped by `PackageVerificationOptions.MaxLatticePayloadBytes` semantics |
-| Model MessagePack elements | 16,000,000 | Non-allocating scan budget |
+| Model MessagePack elements | 512,000,000 | Non-allocating scan budget; one element per byte at the model guard. Per-field caps bound typed decode |
 | Job MessagePack elements | 1,000,000 | Non-allocating scan budget |
 | MessagePack depth | 8 | The model nests five container levels (map → structure → positions → position → `particle_ids` → scalar); 8 leaves headroom |
 | Positions (`A*B*C*P`) | 500,000 | Matches `SupercellGenerator.MaximumPositions`; also ≤ the signed 32-bit linear-index limit |
 | P1 positions per cell | 10,000 | Matches `UnitCellVectorEncoder.MaxP1Positions` |
 | Particles | 64 | Six-bit state codes and the 63-custom-particle limit |
-| Rules / directions / collections | 1M / 1M / 4,096 | Rule cap matches `CompilationOptions.MaxRuleCount`; the others are allocation caps |
+| Rules / directions / collections | 1M / 1M / 4,096 | `max_rules` defaults to the `CompilationOptions.MaxRuleCount` default (1,000,000), an `init` option callers can raise; raise `ReaderLimits` with it. The others are allocation caps |
 | Pair / cluster tables | 1M / 1M | Allocation caps |
 | Pair links | 16M total, 65,536 per position | Allocation caps |
 | Path nodes / tracker entries | 10 | Six bits per node in a `u64` |
@@ -1550,8 +1558,9 @@ mocassin-sim --db <project.msl> --job <id> [--io <dir>]
 - `--stdout` redirects the human statistics dump; otherwise it goes to stdout.
 - The solver never writes to the `.msl` or `.msr`; `collect` writes the `.msr`.
 - Exit codes are the canonical solver table in [`01-target-architecture.md`](01-target-architecture.md#73-error-handling-and-exit-codes):
-  `0` completed, `10` invalid arguments, `11` package, `12` model/data, `13` numerical/internal invariant,
-  `14` limit abort, `15` cancelled, `16` I/O. Parse errors are `10`; help and `--version` are `0`.
+  `0` completed, `5` batch partial success (reserved until Step 19), `10` invalid arguments, `11` package,
+  `12` model/data, `13` numerical/internal invariant, `14` limit abort, `15` cancelled, `16` I/O. Parse errors
+  are `10`; help and `--version` are `0`.
 - **Step 13 scope.** Step 13 implements the inspection path only: `--db`, `--job`, `--dry-run`, `--seed`,
   `--log-level`, `--log-format`, `--version`, and the validated-but-unused `--threads`/`--jump-log-max-ev`.
   `--dry-run` is write-free: it does not create `--io`, does not write a log file, and rejects `--stdout` as a

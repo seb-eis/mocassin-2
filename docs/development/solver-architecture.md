@@ -99,12 +99,12 @@ to `mocassin verify`; the solver checks only the data it consumes. The package f
 | Limit | Default |
 | --- | ---: |
 | Model / job / lattice payload | 512 MiB / 8 MiB / 512 MiB |
-| Model / job MessagePack elements | 16,000,000 / 1,000,000 |
+| Model / job MessagePack elements | 512,000,000 / 1,000,000 |
 | MessagePack depth | 8 (the model nests five container levels) |
 | Total positions (`A*B*C*P`) | 500,000 (matches `SupercellGenerator.MaximumPositions`; also ≤ signed 32-bit linear index) |
 | P1 positions per cell | 10,000 (matches `UnitCellVectorEncoder.MaxP1Positions`) |
 | Particles | 64 |
-| Rules / directions / collections | 1M / 1M / 4,096 (rule cap matches `CompilationOptions.MaxRuleCount`) |
+| Rules / directions / collections | 1M / 1M / 4,096 (`max_rules` matches the default `CompilationOptions.MaxRuleCount`, an `init` option; raise `ReaderLimits` if raised) |
 | Pair / cluster tables | 1,000,000 each |
 | Pair links | 16M total, 65,536 per position |
 | Path nodes / tracker entries | 10 |
@@ -172,10 +172,10 @@ mocassin-sim --db <project.msl> --job <id> --dry-run [--seed <hex32>] [--log-lev
 - A non-dry-run invocation is a usage error until the simulation engines land; Step 16 enables a run and Step 19
   completes the option surface (`batch`, `--validate-only`, `--no-state`, `--log-file`, extensions).
 - Logs go to stderr (`tracing`, human or JSON). stdout is reserved for the human report.
-- Exit codes (canonical definition: internal target architecture §7.3): 0 success, 10 invalid arguments,
-  11 package error, 12 model/data error, 13 numerical failure or internal invariant violation (including a
-  caught panic), 14 limit abort, 15 cancelled, 16 I/O. Parse errors are remapped to 10; help and `--version`
-  exit 0.
+- Exit codes (canonical definition: internal target architecture §7.3): 0 success, 5 partial success for
+  multi-job/batch (reserved until Step 19), 10 invalid arguments, 11 package error, 12 model/data error,
+  13 numerical failure or internal invariant violation (including a caught panic), 14 limit abort, 15 cancelled,
+  16 I/O. Parse errors are remapped to 10; help and `--version` exit 0.
 
 The full command reference is in the [CLI reference](../reference/cli.md).
 

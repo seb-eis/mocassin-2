@@ -196,12 +196,13 @@ Stored payload integers use MessagePack's smallest-width encoding; the fixed-wid
 rule applies only to the canonical projection. The lattice member is a MessagePack array of `u8` in v1; the
 canonical lattice projection uses `bin`. Readers accept both forms.
 
-Default solver limits are 512 MiB per model/lattice payload, 8 MiB per job payload, 16M model / 1M job
+Default solver limits are 512 MiB per model/lattice payload, 8 MiB per job payload, 512M model elements / 1M job
 MessagePack elements, depth 8, 500,000 total positions, 10,000 P1 positions per cell, 64 particles, 1M
 rules/directions, 4,096 collections/simulations, 1M pair/cluster tables, 16M pair links, 10 path nodes, and
-256 extensions. The position/P1/rule limits match the current .NET build limits; a future writer that raises
-them must raise `ReaderLimits` in the same release. A future package major version, a payload above a guard, or
-a document that exceeds a budget is
+256 extensions. The position/P1 limits match the .NET build constants; the 1M rule limit matches the default
+`CompilationOptions.MaxRuleCount` (`init`, so a caller can raise it). A package built with a raised limit, or a
+future writer that raises a position/P1 limit, must raise `ReaderLimits` in the same release. A future package
+major version, a payload above a guard, or a document that exceeds a budget is
 rejected with an actionable message before unbounded allocation. See
 [Solver architecture](../development/solver-architecture.md) for the crate view and the full limit table.
 

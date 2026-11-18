@@ -129,7 +129,7 @@ foundation crates and leaves the physics crates as placeholders.
 
 | Crate | Step 13 content | Depends on | Later owner |
 | --- | --- | --- | --- |
-| `mocassin-types` | Payload DTOs, typed IDs, validated runtime model, `JobPackage`, `InitialLattice`, `JobSettings`, `SolverJobFlags`, `ReaderLimits`; no I/O | `serde` | Steps 14–18 add runtime fields |
+| `mocassin-types` | Payload DTOs, typed IDs, validated runtime model, `JobPackage`, `InitialLattice`, `JobSettings`, `SolverJobFlags`, `ReaderLimits`; no I/O | `serde`, `serde_bytes` (existing workspace crate) | Steps 14–18 add runtime fields |
 | `mocassin-msl` | Read-only SQLite reader, schema checks, bounded Zstd/MessagePack decode, scan, validation, canonical projection and signature re-encoding | `mocassin-types`, `rusqlite`, `rmp-serde`, `zstd`, `sha2`, `thiserror`, `tracing` | Step 19 adds batch selection; Step 20 does not use it |
 | `mocassin-rng` | SHA-256 derivation, ChaCha12 wrapper, draw methods, `RngStateV1`, golden vectors, Criterion bench | `rand`, `rand_chacha`, `sha2`, `thiserror` | Steps 16/18 consume it |
 | `mocassin-solver` | Placeholder API; Step 13 re-exports the foundation types only | `mocassin-types`, `mocassin-msl`, `mocassin-rng`, `mocassin-state`, `mocassin-extension` | Steps 14–19 |
@@ -548,13 +548,13 @@ jobs row (columns + model_id/lattice_id)
 | `max_model_payload_bytes` | 512 MiB | Matches the .NET verifier's model guard |
 | `max_job_payload_bytes` | 8 MiB | Matches the .NET verifier's job guard |
 | `max_lattice_payload_bytes` | 512 MiB | Matches the .NET verifier's lattice cap |
-| `max_model_elements` | 16,000,000 | Bounds decoder allocation independent of payload bytes |
+| `max_model_elements` | 512,000,000 | Non-allocating scan budget; one element per byte at the 512 MiB model guard, so the whole writer-valid payload is covered. Per-field caps bound typed decode |
 | `max_job_elements` | 1,000,000 | Small fixed schema |
 | `max_messagepack_depth` | 8 | The model nests map → structure → positions → position → `particle_ids` → scalar (five container levels); 8 leaves headroom |
 | `max_positions` | 500,000 | Matches `SupercellGenerator.MaximumPositions`; total linear index still ≤ `i32::MAX` |
 | `max_position_count` (P) | 10,000 | Matches `UnitCellVectorEncoder.MaxP1Positions` |
 | `max_particles` | 64 | 6-bit state code and the 63-custom-particle limit |
-| `max_rules` | 1,000,000 | Matches `CompilationOptions.MaxRuleCount` |
+| `max_rules` | 1,000,000 | Matches the **default** `CompilationOptions.MaxRuleCount`; that option is `init`, so raise `ReaderLimits` if raised |
 | `max_directions` | 1,000,000 | Same order as the rule cap; Step 13 allocation cap |
 | `max_collections` | 4,096 | Step 13 allocation cap; no .NET equivalent |
 | `max_pair_tables` | 1,000,000 | Step 13 allocation cap |
@@ -566,9 +566,11 @@ jobs row (columns + model_id/lattice_id)
 | `max_extensions` | 256 | Job payload |
 | `max_simulations` | 4,096 | Model payload |
 
-- The position, P1, and rule defaults are aligned with the current .NET build limits, so every package the
-  current writer can produce is readable. A future writer that raises those limits must raise `ReaderLimits`
-  in the same release; the solver never silently accepts a package above a documented build limit.
+- The position and P1 defaults are hard .NET build limits; `max_rules` matches the **default**
+  `CompilationOptions.MaxRuleCount` (1,000,000), which is an `init` option a caller can raise. A package built
+  with a raised rule limit, or with a future writer that raises a position/P1 limit, needs a raised
+  `ReaderLimits` in the same release. With the default writer limits and the 512M element budget, every
+  writer-valid payload within the 512 MiB guard is readable.
 - The lattice guard is `4 * a * b * c * position_count` in checked `u64`, capped by
   `max_lattice_payload_bytes`. The factor 4 covers the MessagePack array-of-`u8` encoding. The expected particle
   array is exactly `a*b*c*position_count` bytes.
@@ -655,8 +657,11 @@ The typed pass checks, per section:
 - `tracker_order.len()` equals the collection's common path length; every non-sentinel value is
   `< global_tracker_count`; the sentinel is `0xFF`.
 - `jump_count.len() == position_count * particle_count`; `sum(jump_count) == jump_mapping.len()`; each mapped
-  direction exists, its `position_id` equals the position, and its `collection_id` is in range; duplicates and
-  out-of-range values are rejected.
+  direction exists and its `collection_id` is in range; duplicates and out-of-range values are rejected. Do
+  **not** require the mapped direction's `position_id` to equal the bucket position: the writer maps a direction
+  into every symmetry-equivalent start bucket, and `EquivalentStartPositions` is not persisted. Exact
+  equivalent-start equivalence is a Step 08 writer invariant; Step 14 consumes the mapping as authored and
+  records the residual risk.
 - `static_tracker_mapping.len() == position_count * particle_count`; each value is `-1` or
   `< static_trackers_per_cell`. `global_tracker_mapping.len() == collection_count * particle_count`; each value
   is `-1` or `< global_tracker_count`.
@@ -666,10 +671,15 @@ The typed pass checks, per section:
 The `.msl` is untrusted and the parameterization signature covers only energies/frequencies, so the reader
 checks the rule-level invariants that do not require project-side geometry:
 
-- **Allowed occupations.** Decode `state0`, `state1`, and `state2` into `path_len` six-bit nodes. For every
-  node, the particle index must be in the allowed-particle mask of the node's `path` position
-  (`positions[path[node].P].allowed_mask`). Void is particle 0. For MMC, `state1` is zero and ignored; do not
-  apply the allowed-mask check to it.
+- **Allowed occupations (narrowed, M-3).** Decode `state0`, `state1`, and `state2` into `path_len` six-bit
+  nodes. **Exempt void (particle 0) from the mask check**: the writer never includes void in `particle_ids`
+  (`StructureCompilationStage.BuildMask` rejects compiled index 0), and void is the empty occupation. For every
+  non-void node particle, require it to be in the **union of the allowed masks of the rule's collection at the
+  same node index**. A rule has no stored representative direction (`JumpRulePayload` has no direction index;
+  Step 11 R2-3 records the missing marker), so the union is the only payload-supported path source. A collection
+  with no directions is invalid. The **exact per-direction** occupation check is assigned to **Step 14**, which
+  owns direction/context links; it must validate the state particle against the target position's mask. The
+  residual risk is recorded in §11 and the Step 14 interface.
 - **Mass conservation.** For each rule, the multiset of non-void particle **symbols** in `state0` must equal the
   multiset in `state2`. Symbols come from the particle table; this is the same rule as
   `TransitionRuleHelpers.MassConserved`.
@@ -681,11 +691,11 @@ checks the rule-level invariants that do not require project-side geometry:
   emitted; a changed movement or path vector is rejected.
 - **Charge-transport vector.** The vector must be finite and, when no node changes charge (`q(state0[node]) ==
   q(state2[node])` for every node), its norm must be `<= 1e-9`. The full positional formula
-  `Σ Δq * x(path node)` is **assigned to Step 15**: the v1 payload carries no fractional coordinates for P1
-  positions (only `vector4 = [0,0,0,P]` and the fractional movements), so it cannot be recomputed from the
-  package alone. Step 15 owns the field term and must bound/validate the vector's use; the residual risk is
-  recorded in §11 and the Step 15 interface. A future `.msl` format can add the fractional positions or sign
-  the transport vector; that is a format change, not a Step 13 change.
+  `Σ_node (q(state2[node]) - q(state0[node])) * x(path node)` is **assigned to Step 15**: the v1 payload carries
+  no fractional coordinates for P1 positions (only `vector4 = [0,0,0,P]` and the fractional movements), so it
+  cannot be recomputed from the package alone. Step 15 owns the field term and must bound/validate the vector's
+  use; the residual risk is recorded in §11 and the Step 15 interface. A future `.msl` format can add the
+  fractional positions or sign the transport vector; that is a format change, not a Step 13 change.
 - **Direction/rule ordering.** A direction's `path[0]` must be `[0, 0, 0, position_id]`; a rule's
   `collection_id` must own a direction with the same `path_len`; a rule's `tracker_order` length must match that
   path length. This catches a mismatched rule/direction pair even when the indices are in range.
@@ -809,7 +819,8 @@ pub enum PackageError {
 so every diagnostic names the job/model and section. `kind()` unwraps the context for exit mapping.
 
 The **canonical solver exit-code table is [`01-target-architecture.md`](../01-target-architecture.md) §7.3**:
-`0` completed; `10` invalid arguments; `11` package error; `12` model/data error; `13` numerical failure or
+`0` completed; `5` partial success (multi-job/batch; at least one job failed, others completed; reserved until
+Step 19); `10` invalid arguments; `11` package error; `12` model/data error; `13` numerical failure or
 internal invariant violation (including a caught panic); `14` aborted by a limit; `15` cancelled; `16` I/O
 error. The solver table is the `mocassin-sim` process contract; it is not the .NET `mocassin` table, and a
 consumer must select the table by process.
@@ -819,6 +830,7 @@ Mapping in this reader/CLI:
 | Error class | Exit |
 | --- | ---: |
 | Success (dry run) | 0 |
+| Batch partial success (reserved; Step 19) | 5 |
 | Invalid arguments, unknown job, unsupported option, extension requested | 10 |
 | Package/schema/frame/decode/scan/size error | 11 |
 | Signature, index, length, value, column mismatch | 12 |
@@ -1076,8 +1088,10 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
   `contracts/manifest.json`, because it is not a package/state/job/event contract and no writer emits it.
 - The new `step-13-populated` package is built by the real .NET writer from a committed sample that has
   non-empty pair and cluster tables and an MMC job; it carries its own canonical summary, extracted payloads,
-  README, and regeneration command. It is a test artifact, not a schema change. If no existing sample combines
-  both, feature 6 adds a small sample under `samples/` and builds the package from it; do not hand-author the
+  README, and regeneration command. Its tests cover the remaining void-exempt collection-union occupation check
+  and symmetry-equivalent-start mappings, plus the Step 14 exact-direction check. It is a test artifact, not a
+  schema change. If no existing sample combines both, feature 6 adds a small sample under `samples/` and builds
+  the package from it; do not hand-author the
   `.msl`.
 - Fixtures are produced by the real writers and never hand-edited. The Step 11 regeneration command remains the
   `.msl` update path; the pre-amendment package is byte-fixed.
@@ -1115,13 +1129,16 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
 | Decode | every raw payload decodes; unknown keys are ignored; minimum-width integers, array `lattice`, `null` optionals | PR-fast |
 | Bounds | truncated frame, oversized declared size, decompression bomb, element-budget/depth violation fail without OOM | PR-fast |
 | Validation | each invalid index/length/NaN/kind/flag/tracker case returns the documented error | PR-fast |
+| Occupation | void is exempt; every non-void state particle is in the collection-union mask; the four `msl-v1` rules pass; exact per-direction occupation is a Step 14 test | PR-fast |
+| Equivalent starts | a direction mapped into another symmetry-equivalent start bucket is accepted; the reader does not require `direction.position_id == position` | PR-fast |
+| Element budget | a 512 MiB writer-valid payload is within 512M elements; the 1M-rule/16M-link caps are per-field; a raised `MaxRuleCount` needs a raised `ReaderLimits` | PR-fast |
 | Conservation | each rule preserves the non-void particle-symbol multiset and charge within `1e-9`; a mutated state/particle is rejected | PR-fast |
 | Movement/transport | `path_vector` equals the cell-vector sum of `movement`; `length` equals its norm; a no-charge-change rule has a zero transport vector; a mutated movement/path vector is rejected | PR-fast |
 | Signatures | parameterization and lattice re-encode from the payload; every `.bin` vector round-trips byte-identically; a mutated value is rejected | PR-fast |
 | RNG derivation | job/lattice seed vectors match Step 10 | PR-fast |
 | RNG draws | 16-word streams, `next_u64`, `next_f64` range, `next_bounded` goldens/uniformity and half-open range, `fork` separation and widths | PR-fast |
 | RNG state | 64-byte round-trip; resume at 0/15/16/17/1000; mid-block continuation equals the uninterrupted stream | PR-fast |
-| CLI | dry-run golden; exit 0/10/11/12/13/14/15/16; parse-error remap; help/version; `--stdout` conflict; no files written | PR-fast |
+| CLI | dry-run golden; exit 0/10/11/12/13/14/15/16, with 5 reserved for Step 19 batch and not emitted; parse-error remap; help/version; `--stdout` conflict; no files written | PR-fast |
 | Exit-code drift | the solver rows in `cli.md`, `solver-architecture.md`, and the step page match architecture §7.3 code-for-code | PR-fast (script) or closeout manual |
 | Property/mutation | random truncations and byte mutations of real payloads never panic or exceed the limits | PR-fast |
 | Read-only | `0444` package opens; no `-wal`/`-shm`; no write API | PR-fast |
@@ -1158,6 +1175,7 @@ commit, and raw timings in `tests/reference/bench/step-13-load.json` and a same-
 | SQLite/Zstd build issues | `rusqlite` bundled; workspace cache; the `zstd` crate is already a dependency |
 | Reader too strict and rejects a valid future package | Supported range `1..=1` is explicit; a future major is rejected with a clear message; `ReaderLimits` is overridable |
 | Reader too permissive and accepts a corrupt package | Semantic pass plus signature re-encode; mass/charge/movement checks; `mocassin verify` remains the full check |
+| Per-direction occupation is not fully reader-verifiable (M-3) | v1 payload has no rule→representative-direction marker; reader exempts void and checks the collection-union mask, Step 14 validates the resolved direction/node mask. Residual risk recorded in §3.5/§12 and the Step 14 page |
 | `charge_transport_vector` positional formula is not reader-verifiable | Reader checks finite/zero-consistency; Step 15 owns the field-term bound/use; v1 payload has no fractional P1 coordinates. Residual risk recorded in §3.5 and the Step 15 interface; a future `.msl` can add positions or sign the vector |
 | CLI contract drift | `cli.md` freezes the dry-run format and exit codes; golden test and doc-drift check; no `--json` yet |
 | `--seed` misuse | Documented as debugging; recorded only as a hash; production uses the package seed |
@@ -1173,11 +1191,12 @@ commit, and raw timings in `tests/reference/bench/step-13-load.json` and a same-
   vectors and verification; the package seed remains authoritative.
 - **Step 09/08 (Done):** the six-field parameterization projection, the five-field lattice projection, the
   fixed-width canonical encoding, and the `.bin` vectors. Rust reproduces them.
-- **Step 12 (Done):** the solver exit-code table (0, 10–16) and the `mocassin simulate` reservation. Step 13
+- **Step 12 (Done):** the solver exit-code table (0, 5, 10–16; 5 reserved for Step 19 batch) and the `mocassin simulate` reservation. Step 13
   implements the solver side only.
 - **Step 14 (next):** consumes `JobPackage`, `ParameterizedModel`, `InitialLattice`, `EnvironmentModel`, `Rng`,
-  and `DirectionPool`; owns supercell expansion, links, pools, jump status, energy runtime, and resume. Step 13
-  must not implement those.
+  and `DirectionPool`; owns supercell expansion, links, pools, jump status, energy runtime, and resume. It also
+  validates the exact per-direction state/position occupation that the v1 payload cannot prove to Step 13
+  (M-3). Step 13 must not implement context initialization.
 - **Step 15:** owns the field term and the residual `charge_transport_vector` trust boundary; Step 13 validates
   finite/zero-consistency but cannot recompute the positional formula from the v1 payload. The Step 15 page
   records the assignment and must reject a non-finite field result.
@@ -1219,7 +1238,7 @@ No unresolved cross-step interface question remains. The only deliberate asymmet
 | Stored payloads use smallest-width integers; fixed width is canonical-projection only | This page §2.1; data contracts §3.3 |
 | `.msl` v1 lattice payload is a MessagePack array of `u8`; the canonical projection uses `bin` | This page §2.1/§3.6; `msl-format.md` |
 | Solver reader bounds and the no-`integrity_check` split with `mocassin verify` | This page §3.3/§3.1; data contracts §3.4 |
-| Solver exit codes 0/10–16; parse errors remap to 10; dry-run is write-free | This page §3.7/§5; architecture §7.3 (canonical) |
+| Solver exit codes 0/5/10–16; parse errors remap to 10; dry-run is write-free | This page §3.7/§5; architecture §7.3 (canonical) |
 | RNG performance budget and 10 % same-runner-class regression rule | This page §4.5; quality strategy §13; `tests/reference/bench/baselines.json` |
 | Seven features; 4.5 pw single-step exception; no split; 13A/13B considered and rejected | This page §13; owner-approved 2026-11-18 |
 
@@ -1269,12 +1288,18 @@ single-step exception, no split) and n-1 (data-contract note, no ADR) are alread
       and both signatures re-encode.
 - [ ] Each rule preserves the non-void particle-symbol multiset and charge within `1e-9`; `path_vector` matches
       the cell-vector sum of `movement` and `length` matches its norm; a no-charge-change rule has a zero
-      transport vector. The full positional transport formula is recorded as a Step 15 assignment with the
+      transport vector. Void is exempt from the occupation check; every non-void state particle is accepted by
+      the collection-union mask and all four `msl-v1` rules pass; exact per-direction occupation is recorded as
+      a Step 14 assignment. The full positional transport formula is recorded as a Step 15 assignment with the
       trust-boundary rationale.
+- [ ] A symmetry-equivalent-start direction mapped into another start bucket is accepted; the reader does not
+      require `direction.position_id == position`.
+- [ ] A 512 MiB writer-valid payload is within the 512M model-element budget; the 1M-rule/16M-link caps are
+      per-field, and a raised `MaxRuleCount` requires a raised `ReaderLimits`.
 - [ ] `models.format_version`/`lattices.format_version` columns match their payloads; the job settings are not
       compared with `simulations[].default_settings`.
 - [ ] The solver exit-code rows in `cli.md`, `solver-architecture.md`, and this page match architecture §7.3
-      code-for-code.
+      code-for-code, including reserved 5 (batch partial success) and 13/14/15.
 - [ ] Future package/payload versions and corrupt, truncated, oversized, or bomb payloads are rejected with the
       documented error/exit class, before unbounded allocation.
 - [ ] A changed frequency, energy, site background, or lattice particle is detected by the parameterization or
@@ -1321,7 +1346,7 @@ At this point, write:
 | Populated/MMC | Real populated pair/cluster + MMC package validates and re-encodes both signatures |
 | Signatures | Parameterization/lattice re-encode, `.bin` vectors, mutation detection |
 | RNG | Derivation/draw/state golden vectors, bounded uniformity, double range, fork separation |
-| CLI | Dry-run output, exit codes 0/10–16, logging, parse-error remap, write-free |
+| CLI | Dry-run output, exit codes 0/5/10–16 (5 reserved), logging, parse-error remap, write-free |
 | Exit-code drift | Solver rows match architecture §7.3 |
 | Fuzz | No panic/OOM on malformed input |
 | Performance | Load time and RNG budgets with same-class baseline |

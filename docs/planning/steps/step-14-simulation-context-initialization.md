@@ -144,6 +144,12 @@ impl SimulationContext {
   reference different pair tables. Do not reconstruct the image from the target index.
 - Validate at load: `target_position < P`, `|offset|` fits the `i32` arithmetic used for the cell add, and the
   resulting target index is in `[0, A*B*C*P)`.
+- **Occupation check assigned from Step 13 (M-3).** The v1 payload stores no rule→representative-direction
+  marker (`EquivalentStartPositions` and `CompiledJumpRule.DirectionIndex` are not persisted), so Step 13 can
+  only exempt void and check non-void state particles against the union of the collection's masks. When Step 14
+  resolves the actual direction/path for a context, it must validate every `state0`/`state1`/`state2` particle
+  at each path node against the resolved target position's allowed mask (void is always the empty occupation;
+  do not require void in `particle_ids`). A mismatch is a model/data error, not a silent skip.
 - Build links as CSR:
   - `link_offsets: Vec<u32>` length `P+1`;
   - `links: Vec<Link>` with `target_position_offset`, `pair_id`, `cluster_start`, `cluster_len`;
