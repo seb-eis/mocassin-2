@@ -338,8 +338,10 @@ Evidence file: `docs/planning/closeout/step-12.json`
   The data contracts and CLI reference were reconciled to the implemented code in feature 7.
 - **AOT and platform gates.** `aot` is part of `all --require`; the required smoke host publishes with zero
   trim warnings, the positive control emits IL2026/IL3050, and the native parse error exits 2. The real
-  `Mocassin.Cli` publish emits 62 first-party `Mocassin.Core/Project/ProjectJson.cs` IL2026/IL3050
-  diagnostics and is recorded as evidence, not a gate; Step 31 owns the AOT/single-file decision. The focused
+  `Mocassin.Cli` publish emits 62 first-party `Mocassin.Core` reflection-based JSON diagnostics
+  (`ProjectJson.cs` 16, `ModelDefinitionJsonConverter.cs` 16, `StructureModelJsonConverter.cs` 14,
+  `SimulationJsonConverter.cs` 12, `TransitionRefJsonConverter.cs` 4; 31 × IL2026 + 31 × IL3050) and is
+  recorded as evidence, not a gate; Step 31 owns the AOT/single-file decision. The focused
   Windows platform gate recorded in the closeout evidence is green: it built the solution and ran
   `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, and `Mocassin.Cli.Tests`, including the CLI signal/probe
   step. macOS remains manual because this step adds no macOS-specific behaviour.
@@ -411,13 +413,16 @@ Follow-up issue/step: Step 12 re-audit after the platform-gate/evidence fix and 
 | F-2 | Fixed | Step agent | `07851d8` — explicit `build -o` targets are pre-checked before load (directory, missing parent, invalid path → `CLI002`/3; existing file without `--force` → `CLI003`/3); derived targets are checked after selection; `new -o ""` is `CLI002`/3; `new` still creates a missing output directory, now documented and tested |
 | F-3 | Fixed | Step agent | `07851d8` — `JobSelection.ValidateSyntax` pre-validates grammar before load; range checks remain in `Parse` after expansion |
 | F-4 | Fixed | Step agent | `07851d8` — `CliResponseFiles.Expand` drops every token contributed by a top-level file that fails, including nested failures; a command outside the failed file still produces a report |
-| F-5 | Fixed | Step agent | `07851d8` — evidence, step page, and quality-strategy wording identify the 62 diagnostics as first-party `Mocassin.Core/Project/ProjectJson.cs` IL2026/IL3050; Step 31 ownership is explicit |
+| F-5 | Fixed | Step agent | `07851d8` — evidence, step page, and quality-strategy wording identify the 62 diagnostics as first-party `Mocassin.Core` reflection converters; Step 31 ownership is explicit. F-9 corrects the per-file distribution |
 | F-6 | Fixed | Step agent | `07851d8` — `BuildCancellationTests` cancels during a blocked post-publication verifier (exit 6, `published = true`, `verification = skipped`, package retained); `NonFatalPayloadAndSignatureDefectsStillInspect` covers inspect tolerance and `PKG004`/`PKG005` |
 | F-7 | Fixed | Step agent | `07851d8` — `BuildExitMapperTests` covers every failure kind/status, `PackageWrite` with/without a `PKG` error, `None`/`Failed`, and asserts exit 5 is never emitted |
 | F-8 | Fixed | Step agent | `07851d8` — `Mocassin.Cli.csproj` has an explicit `Mocassin.Compilation` project reference; structure and API gates pass |
 | N-1 | Fixed | Step agent | `07851d8` — §10 and §16.2/code-structure name `Mocassin.Cli.Build.BuildEtaEstimator`; the library `ProgressEstimator` only throttles |
 | N-2 | Fixed | Step agent | `07851d8` — `log` is marked reserved in the CLI reference, data contract, and step page; its fixture line is removed and no producer is claimed |
 | N-3 | Accepted | Step agent | No action; the N-2 merge-candidate convention is retained (`merge_candidate = 07851d8`, docs-only delta verified manually) |
+| F-9 | Fixed | Step agent | Docs-only correction 2026-11-18 — closeout note 2, step page §5.2/§22/§23/§24, and `03-quality-strategy.md` now record the verified distribution: `ProjectJson.cs` 16, `ModelDefinitionJsonConverter.cs` 16, `StructureModelJsonConverter.cs` 14, `SimulationJsonConverter.cs` 12, `TransitionRefJsonConverter.cs` 4 (31 × IL2026 + 31 × IL3050), all first-party `Mocassin.Core`; Step 31 owner |
+| N-4 | Fixed | Step agent | Docs-only correction 2026-11-18 — `docs/troubleshooting/errors.md` and `02-data-contracts.md` scope the missing-parent `CLI002`/3 rule to `build -o`/`compile -o`; `new` creates a missing output directory and exits 0 |
+| N-5 | Accepted risk | Human owner 2026-11-18 | macOS platform gate not run. The Windows gate at `07851d8` exercises the CLI signal/probe path; `PosixSignalRegistration` and the non-Windows probe path run on Linux; macOS remains in the Step 31 platform matrix |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -427,35 +432,49 @@ verdict.
 The step agent completes this section before a merge, tag, or Blocker/Major waiver request. It must cover the
 full history, not only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — accept `Passed with notes` at `07851d8` and merge/tag Step 12
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale — N-3 convention and N-5 macOS risk accepted by the human owner 2026-11-18
+- [x] Residual risks, deferred items, and follow-up owners recorded — N-5 owner: Step 31 platform matrix
+- [x] Explicit no-Blocker/no-Major statement — no Blocker or Major finding remains; F-9/N-4 are fixed, N-5 is the accepted residual risk
+- [x] Final CI and documentation-build results recorded — Ubuntu `44377851616` and Windows `44378270028` green at `07851d8`; full local `all --require` exit 0; strict docs build green after the F-9/N-4 correction
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-18 | `9e1997d` | DeepSeek V4.1 Flash 1017 (fresh auditor) | Fixes required |
+| 2 | 2026-11-18 | `07851d8` (request tip `18c83fb`) | DeepSeek V4.1 Flash 1017 | Passed with notes — accepted by the human owner 2026-11-18 |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| F-1 | Major | Platform CI absent and false rationale | Platform job runs `Mocassin.Cli.Tests`; Windows gate green with CLI signal/probe step | `07851d8` | Closed |
+| F-2 | Minor | `build -o` path behaviour vs docs | Pre-check directory/missing parent/invalid path before load; `new -o ""` aligned; tests | `07851d8` | Closed |
+| F-3 | Minor | Missing `--jobs` fast pre-validation | `JobSelection.ValidateSyntax` before load; range checks after expansion | `07851d8` | Closed |
+| F-4 | Minor | Failed response file still emitted a report | Failed top-level file contributes no tokens; tests | `07851d8` | Closed |
+| F-5 | Minor | AOT diagnostics called dependency-owned | First-party `Mocassin.Core` wording; Step 31 ownership | `07851d8` | Closed |
+| F-6 | Minor | Missing post-publication cancellation/inspect tests | Blocking-verifier cancellation and real corrupt-payload/signature inspect tests | `07851d8` | Closed |
+| F-7 | Minor | Exit-mapper test overclaim | Full mapper unit tests including exit 5 never emitted | `07851d8` | Closed |
+| F-8 | Minor | Implicit `Cli -> Compilation` reference | Explicit project reference | `07851d8` | Closed |
+| F-9 | Minor | AOT file attribution wrong for 46 diagnostics | Verified five-file distribution recorded in evidence and docs | Docs-only 2026-11-18 | Closed |
+| N-1 | Note | ETA ownership | CLI `BuildEtaEstimator` documented; library only throttles | `07851d8` | Closed |
+| N-2 | Note | Unused `log` event | Marked reserved; fixture line removed | `07851d8` | Closed |
+| N-3 | Note | Merge-candidate convention | Step 11 N-2 convention retained | `07851d8` | Accepted |
+| N-4 | Note | Missing-parent rule over-generalized | Scoped to `build`/`compile`; `new` documented as creating | Docs-only 2026-11-18 | Closed |
+| N-5 | Note | macOS platform gate not run | Accepted risk; Windows gate + Linux POSIX path | Docs-only 2026-11-18 | Accepted |
 
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-18
 
 ## Audit rounds
 

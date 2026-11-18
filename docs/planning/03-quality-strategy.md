@@ -473,9 +473,10 @@ solver with the same binary, platform, package, and seed.
   the `CLI001`/2 remap, so its parse-error case exits 2. Missing clang/lld/ILCompiler is a hard failure with a
   clear message, never a skip; the versions are observed apt/NuGet resolutions checked by `06` §9, not a
   containerfile pin, and a version mismatch is not a gate failure. The real `Mocassin.Cli` publish is recorded
-  as evidence: the 62 real-CLI diagnostics are first-party `Mocassin.Core/Project/ProjectJson.cs` reflection
-  converters, and Step 31 owns the AOT/single-file decision. `Microsoft.Data.Sqlite`/`MessagePack` remain
-  unverified for AOT.
+  as evidence: the 62 real-CLI diagnostics are first-party `Mocassin.Core` reflection-based JSON converters
+  (`ProjectJson.cs` 16, `ModelDefinitionJsonConverter.cs` 16, `StructureModelJsonConverter.cs` 14,
+  `SimulationJsonConverter.cs` 12, `TransitionRefJsonConverter.cs` 4; 31 × IL2026 + 31 × IL3050), and Step 31
+  owns the AOT/single-file decision. `Microsoft.Data.Sqlite`/`MessagePack` remain unverified for AOT.
   `aot` is part of `verify.sh all` and is a **local** closeout gate: feature 1 adds the mode/hosts, feature 7
   runs `all --require` at Step 12 closeout and records the output; the closeout GitHub workflow does not run
   `verify.sh`. Because it is in `all`, **every step closeout from Step 12 requires the Tier 1 toolchain**. It is

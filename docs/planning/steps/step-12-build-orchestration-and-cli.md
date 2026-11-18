@@ -9,8 +9,9 @@ UI consumes later.
 
 ## Implementation status
 
-- **Status:** In audit — round-1 audit fixes are squashed at `07851d8`, the full local gate is green, and a
-  re-audit is requested; the design was accepted at `1b6af90` (`Ready with notes`).
+- **Status:** **Awaiting approval** — audit round 2 returned `Passed with notes` at `07851d8`; the human owner
+  accepted it on 2026-11-18 and approved the merge and `step-12` tag. Merge/tag are pending; the design was
+  accepted at `1b6af90` (`Ready with notes`).
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` — round 5
   reviewed `1b6af90`; round 2 was `Ready with notes` at `4ad40ac` (reviewed `05b7297`), round 3 was
   `Ready with notes` at `d211584` (reviewed `6b15f9d`), and round 4 was `Ready with notes` at `f548d26`
@@ -31,11 +32,11 @@ UI consumes later.
 - **Step CI:** [Ubuntu 44377851616](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) and
   [Windows 44378270028](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) — both green at
   `07851d8376c3426d40d07ae70d8e939469648ceb`
-- **Main merge:** — (owner approval pending)
+- **Main merge:** — (approved by the human owner 2026-11-18; pending)
 - **Step tag:** —
-- **Audit:** Round 1 returned `Fixes required` at `9e1997d`; fixes applied and **re-audit requested**
-  ([record](../audits/step-12.md); state `Re-audit required`; audited commit
-  `07851d8376c3426d40d07ae70d8e939469648ceb`)
+- **Audit:** Round 1 `Fixes required` at `9e1997d`; round 2 **`Passed with notes`** at `07851d8`
+  ([record](../audits/step-12.md)), accepted by the human owner 2026-11-18. F-9/N-4 were corrected in a docs-only
+  commit; N-5 (macOS gate not run) is an accepted risk.
 - **Last updated:** 2026-11-18
 
 ### Approved feature list
@@ -366,7 +367,9 @@ Consequences recorded in this design:
   native binary for `--help`, `--version`, and one parse-error case. The real `Mocassin.Cli` publish is also
   attempted and recorded as closeout evidence, but it is **not** a pass/fail gate in Step 12:
   `Microsoft.Data.Sqlite` and `MessagePack` are not verified for AOT, and the 62 real-CLI diagnostics are
-  first-party `Mocassin.Core/Project/ProjectJson.cs` reflection-based JSON converters, not dependency warnings.
+  first-party `Mocassin.Core` reflection-based JSON converters (`ProjectJson.cs` 16,
+  `ModelDefinitionJsonConverter.cs` 16, `StructureModelJsonConverter.cs` 14, `SimulationJsonConverter.cs` 12,
+  `TransitionRefJsonConverter.cs` 4; 31 × IL2026 + 31 × IL3050), not dependency warnings.
   Step 31's gated decision owns the final platform matrix and the AOT/single-file choice. Only
   `linux-x64` is exercised; Windows/macOS AOT and the `netstandard2.0` asset are untested. Feature 1 adds the
   `./tools/verify.sh aot` mode and the two hosts; feature 7 runs `./tools/verify.sh all --require` at closeout
@@ -1732,8 +1735,10 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
   after expansion.
 - **F-4:** response-file expansion drops every token from a top-level file that fails, so a command only
   inside the failed file emits no report; a command outside it still does.
-- **F-5:** the 62 real-CLI AOT diagnostics are recorded as first-party
-  `Mocassin.Core/Project/ProjectJson.cs` IL2026/IL3050; Step 31 ownership is explicit.
+- **F-5/F-9:** the 62 real-CLI AOT diagnostics are recorded as first-party `Mocassin.Core` reflection-based
+  JSON converters, distributed across `ProjectJson.cs` 16, `ModelDefinitionJsonConverter.cs` 16,
+  `StructureModelJsonConverter.cs` 14, `SimulationJsonConverter.cs` 12, and `TransitionRefJsonConverter.cs` 4;
+  Step 31 ownership is explicit.
 - **F-6:** `BuildCancellationTests` covers cancellation during post-publication verification, and
   `InspectCommandTests` covers corrupt-payload and wrong-signature tolerance.
 - **F-7:** `BuildExitMapperTests` covers every failure kind/status, `PackageWrite` with/without a `PKG`
@@ -1741,7 +1746,10 @@ not mark an unimplemented feature `Done`; only a passing acceptance test may do 
 - **F-8:** `Mocassin.Cli` has an explicit `Mocassin.Compilation` project reference.
 - **N-1/N-2:** ETA placement is documented as CLI-owned (`BuildEtaEstimator`), and `log` is marked reserved
   with its fixture line removed; N-3 is accepted without change.
-- The audit record carries the per-finding resolution table.
+- **F-9/N-4 (round 2):** the AOT evidence now records the verified five-file distribution for the 62 first-party
+  `Mocassin.Core` diagnostics; the missing-parent `CLI002`/3 rule is scoped to `build`/`compile`, while `new`
+  creates a missing output directory. N-5 (macOS gate not run) is accepted by the human owner as a residual risk.
+- The audit record carries the per-finding resolution and approval tables.
 
 ## 20. Reconciliations and recorded decisions
 
@@ -1917,9 +1925,10 @@ These decisions are recorded by date and are not open for re-litigation in round
       and the native binary runs `--help`, `--version`, and one parse-error case that exits 2 through the
       host's `CLI001` remap. Missing clang/lld/ILCompiler is a hard failure with a clear message, never a
       skip. Feature 7 runs `./tools/verify.sh all --require` at Step 12 closeout and records the output; the
-      real `Mocassin.Cli` publish result is recorded as evidence: 62 first-party
-      `Mocassin.Core/Project/ProjectJson.cs` IL2026/IL3050 diagnostics, with Step 31 owning the AOT/single-file
-      decision. The closeout GitHub workflow does not run `verify.sh`, so this is a local gate.
+      real `Mocassin.Cli` publish result is recorded as evidence: 62 first-party `Mocassin.Core`
+      reflection-based JSON diagnostics (16 `ProjectJson.cs`, 16 `ModelDefinitionJsonConverter.cs`,
+      14 `StructureModelJsonConverter.cs`, 12 `SimulationJsonConverter.cs`, 4 `TransitionRefJsonConverter.cs`;
+      31 × IL2026 + 31 × IL3050), with Step 31 owning the AOT/single-file decision. The closeout GitHub workflow does not run `verify.sh`, so this is a local gate.
 - [x] `build --preview` writes no package, reports `mode = "preview"`, projects `BuildResult.Preview`, and
       exits with the build table. The same payload is available to a library caller (Step 26) without a
       reload, recompile, or CLI reference.
@@ -2013,7 +2022,7 @@ select 0.5 ms, validate 204.4 ms, compile 89.6 ms, build-stage validate 21.7 ms,
 | Library parse errors leak exit 1 | `CliApplication` maps `ParseResult.Errors` to `CLI001`/2 in one place and a test asserts the default 1 is never returned; help/version stay 0 |
 | Response files exhaust memory or recurse | The CLI owns tokenization and recursive expansion (the library hook cannot see depth); 1 MiB of raw bytes per file, 4 MiB of raw response-file bytes across the command line, depth 8, 10,000 tokens contributed by response files, 32 files; a self-reference fails at the depth bound instead of hanging; the CLI reader catches the unreadable/directory cases and maps them to `CLI001`/2 |
 | Response-file syntax drifts from the contract | The CLI owns the reader; tests pin quoting, whitespace, `#`, nesting, path resolution, `--`/`--json`, and the limits; the library default is not the contract |
-| System.CommandLine AOT regresses | The required `verify.sh aot` gate publishes the zero-warning host and the separate positive control, runs the native parse-error case, and hard-fails when clang/lld/ILCompiler is absent (no silent skip). It is a local closeout gate; the closeout CI does not run `verify.sh`. The real CLI publish is recorded as 62 first-party `Mocassin.Core/Project/ProjectJson.cs` diagnostics; Step 31 owns the AOT/single-file decision. Only `linux-x64` is proven, so Windows/macOS and SQLite/MessagePack stay Step 31 gates |
+| System.CommandLine AOT regresses | The required `verify.sh aot` gate publishes the zero-warning host and the separate positive control, runs the native parse-error case, and hard-fails when clang/lld/ILCompiler is absent (no silent skip). It is a local closeout gate; the closeout CI does not run `verify.sh`. The real CLI publish is recorded as 62 first-party `Mocassin.Core` reflection-based JSON diagnostics (16 `ProjectJson.cs`, 16 `ModelDefinitionJsonConverter.cs`, 14 `StructureModelJsonConverter.cs`, 12 `SimulationJsonConverter.cs`, 4 `TransitionRefJsonConverter.cs`); Step 31 owns the AOT/single-file decision. Only `linux-x64` is proven, so Windows/macOS and SQLite/MessagePack stay Step 31 gates |
 | Completion promise overreaches | The owner removed `completion` from Step 12 on 2026-11-17; `[suggest]` is accepted but not a contract; shell integration is deferred to Step 31 packaging |
 | Duplicate/bespoke parser creeps back | Feature 1 deletes the Step 07/10 hand-written parsers; no library project references `System.CommandLine`; structure/API tests and review check the command graph is the only parse path |
 | Silent warnings | Report summary, `--warnings-as-errors` for validation/parameterization |

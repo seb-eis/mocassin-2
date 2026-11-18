@@ -1819,8 +1819,8 @@ fields. This is why a usage error with `--json` validates against the same schem
 `removedCount = 0`, and `CLI008`.
 
 `CLI002`/3 covers an input/output path failure, including a directory passed where a file is required, a
-missing parent directory, or a missing/unreadable input; the path is checked before the command opens a
-package. `CLI009`/1 means the input cannot be inspected as a package. `inspect` is tolerant of non-fatal
+missing parent directory for `build -o`/`compile -o`, or a missing/unreadable input; the path is checked before
+the command opens a package. `new` intentionally creates a missing output directory and exits 0. `CLI009`/1 means the input cannot be inspected as a package. `inspect` is tolerant of non-fatal
 payload and signature defects, so those are reported by `verify`; only a fatal structure failure is
 `CLI009`.
 
