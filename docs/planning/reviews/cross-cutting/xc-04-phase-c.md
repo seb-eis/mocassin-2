@@ -794,7 +794,7 @@ scope. This list is not exhaustive and must not limit the review.
 
 ## Record state
 
-**State:** Passed with notes — round 1 (no Blocker/Major; five Minor and two Note findings)
+**State:** Passed with notes — accepted by the human owner 2026-11-18
 
 `Re-review required` is a record state, not a verdict.
 
@@ -829,20 +829,26 @@ feeds the Step 16 design
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| XC04-F1 | Open — Minor | Orchestrator/step agent | — |
-| XC04-F2 | Open — Minor | Step agent/planner | — |
-| XC04-F3 | Open — Minor | Planner / Step 16 design | — |
-| XC04-F4 | Open — Minor | Contracts/planner | — |
-| XC04-F5 | Open — Minor | Step agent | — |
+| XC04-F1 | Accepted — assigned to docs maintenance branch before the Step 13 gate | Orchestrator/step agent | — |
+| XC04-F2 | Accepted — assigned to docs maintenance branch before the Step 13 gate | Step agent/planner | — |
+| XC04-F3 | Accepted — assigned to docs maintenance branch before the Step 13 gate | Planner / Step 16 design | — |
+| XC04-F4 | Accepted — assigned to docs maintenance branch before the Step 13 gate | Contracts/planner | — |
+| XC04-F5 | Accepted — assigned to docs maintenance branch before the Step 13 gate | Step agent | — |
 | XC04-N1 | Accepted follow-up (carried from XC-01) | Security/tooling owner / planner | — |
 | XC04-N2 | Accepted platform gap | Documentation/CI owner | — |
 
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Sebastian Eisele (human owner)
+Date: 2026-11-18
+
+Owner acceptance: the human owner accepted the reviewer's `Passed with notes` verdict on 2026-11-18 without
+changing the findings, evidence, or verdict text. **XC04-F1–F5** are accepted and assigned to a documentation
+maintenance branch that must be merged before the Phase C gate opens to Step 13. **XC04-N1** and **XC04-N2**
+are accepted notes with their existing owners (security/tooling owner and planner for N1; documentation/CI
+owner for N2); no additional action is required for the phase gate.
