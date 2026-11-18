@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `9263949589c449b063e7501f5ab254ed9bf09d7f` |
+| Reviewed commit | `0fff07df5e0e009394df5989c4500f9b9cd1b733` |
 | Docs branch | `docs/step-13-design` |
 | Review date | 2026-11-18 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
@@ -139,8 +139,9 @@ freeze.
       — Reviewed; the pages exist and `./tools/verify.sh docs --require` passes. The dashboard is stale (m-7),
       the closeout file/checker is not named (m-10), and `03-quality-strategy.md` points at `04-roadmap.md` for
       the RNG budgets (n-7).
-- [x] **Sizing and feature list.** Seven features, 3.0–4.0 pw, 1.0 pw contingency, §3.1 check, no split, the
-      "stop if features 1–3 exceed 2.0 pw" guard, and the owner approval at the start gate.
+- [x] **Sizing and feature list.** Seven features, 4.5 pw owner-approved 2026-11-18 (3.5 pw base + 1.0 pw
+      contingency), §3.1 single-step exception, no split; 13A/13B considered and rejected; the
+      "stop if features 1–3 exceed 2.0 pw" guard.
       — Reviewed. Seven features is inside the 6–8 range; the roadmap row is 2–4 pw. The feature breakdown sums
       to 3.5 pw and the claimed 1.0 pw contingency would make 4.5 pw, beyond the four-week trigger (m-6).
 
@@ -313,7 +314,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required
+**State:** Re-review required
 
 ## Reviewer independence
 
@@ -369,7 +370,7 @@ Date:
 ## Resolution status
 
 Round-1 reviewer text, findings, evidence, and verdict are unchanged. The design was corrected on
-`docs/step-13-design` at freeze `9263949589c449b063e7501f5ab254ed9bf09d7f`; this request-record update is a
+`docs/step-13-design` at freeze `0fff07df5e0e009394df5989c4500f9b9cd1b733`; this request-record update is a
 documentation-only follow-up. No code, test, configuration, contract, or generated artifact changed.
 
 | Finding | Status | Owner | Commit | Resolution |
@@ -394,6 +395,15 @@ documentation-only follow-up. No code, test, configuration, contract, or generat
 | **n-6** | Fixed | Planner | `113b546` | Depth justification corrected: the model nests five container levels; cap 8 leaves headroom. |
 | **n-7** | Fixed | Planner | `113b546` | `03-quality-strategy.md` no longer points at `04-roadmap.md` for RNG budgets; it points at §13 and the step page. |
 | **n-8** | Fixed | Planner | `113b546` | The 100 ms claim is scoped to the ceria fixture; a large payload is guard-bounded but not promised at 100 ms. |
+| **M-3** | Fixed | Planner | `0fff07d` | Replaced the unimplementable node-mask check: void is exempt (the writer never puts it in `particle_ids`), and non-void state particles are checked against the union of the rule collection's direction masks at the same node; a collection with no directions is invalid. Exact per-direction occupation is assigned to Step 14 (no rule→representative-direction marker in v1; Step 11 R2-3). The real `msl-v1` rules pass; the populated/MMC fixture exercises the remaining check. |
+| **m-11** | Fixed | Planner | `0fff07d` | `jump_mapping` no longer requires `direction.position_id == bucket_position`; equivalent-start mappings are accepted because `EquivalentStartPositions` is not persisted. Range/collection/uniqueness checks remain; exact equivalence is a Step 08 writer invariant and Step 14 consumes the mapping as authored. |
+| **m-12** | Fixed | Planner | `0fff07d` | `max_model_elements` raised to 512,000,000 (one element per byte at the 512 MiB guard), covering 1M rules and 16M links; per-field caps still bound typed decode. The `max_rules` default is 1M because `MaxRuleCount` is an `init` option; a raised writer limit needs a raised `ReaderLimits`. |
+| **m-13** | Fixed | Planner | `0fff07d` | Added solver exit `5` = batch partial success (at least one job failed, others completed), reserved until Step 19, to the canonical table and every mirror; it shares the .NET partial-success meaning but is not otherwise reused. |
+| **n-9** | Deferred | Step agent | — | Same status-dashboard finding as m-7; `status.md` is step-agent-owned and is fixed at the start gate. Not edited by the planner. |
+| **n-10** | Fixed (owner text) | Planner | `0fff07d` | Refreshed the request checklist item to the recorded 4.5 pw owner-approved sizing, single-step exception, no split, and the 2.0 pw guard; reviewer text is unchanged. |
+| **n-11** | Fixed | Planner | `0fff07d` | `02-data-contracts.md` now says `particle_ids` lists non-void compiled particles only; void is the empty occupation and is not evidence of disallowance. |
+| **n-12** | Fixed | Planner | `0fff07d` | Replaced the particle-identity `Σ q_p Δx_p` text with the writer's node-wise `Σ_node (q(S2,node)-q(S0,node))·x(path node)` in the data contract and Step 15 page. |
+| **n-13** | Fixed | Planner | `0fff07d` | `mocassin-types` dependency row now includes `serde_bytes`; `max_rules` is described as the default `CompilationOptions.MaxRuleCount` (`init`, callers can raise it), not a hard cap, with a raised `ReaderLimits` required. |
 
 The step agent fills any further status after the next verdict. Do not alter the reviewer-authored findings,
 evidence, or verdict.
@@ -462,7 +472,7 @@ human owner.
 I am a fresh context. I did not author, design, or implement the reviewed work and have no shared conversation
 with the planner, implementor, round-1 reviewer, or orchestrator. I read the repository at the record HEAD
 `f8aa70f1714cc5c436b4446448a804e6e15ebb54` and re-checked the design at the reviewed commit
-`9263949589c449b063e7501f5ab254ed9bf09d7f`.
+`0fff07df5e0e009394df5989c4500f9b9cd1b733`.
 
 Frozen-state delta: `git diff --name-status 9263949 f8aa70f` is only
 `M docs/planning/reviews/step-13.md` (the metadata-only record update). `git diff --name-status 306238a 9263949`
