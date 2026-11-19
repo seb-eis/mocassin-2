@@ -24,7 +24,21 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| 1 Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (32 tests + 1 doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-2 row update |
+
+**Feature 1 scope note (orchestrator-approved split, 2026-11-19).** The approved feature row lists payload DTOs,
+runtime model/job/lattice types, and the `PackageError`/exit-code model. The step agent implemented the
+feature-1 slice the orchestrator assigned: the workspace/lint baseline, the typed IDs, `ReaderLimits`, the
+settings and composed job-flag types, and the exit-code/error-class model. Payload DTOs, the runtime model,
+`JobPackage`, `InitialLattice`, and `PackageError` stay with the features that decode, map, and classify the
+payload (features 3 and 4), because they need `rmp-serde`, Zstd, and `rusqlite` and are only testable against the
+real payload fixtures. The feature-log gate column records this slice. No design decision changed.
+
+The exit-code model lives in `mocassin-types` rather than in the CLI: both `mocassin-msl` (feature 3) and
+`mocassin-cli` (feature 5) must classify failures with the same table, and the types crate has no I/O
+dependency. `ErrorClass` is plain data with hand-written `Display`/`Error` impls; `mocassin-types` keeps the
+`serde`/`serde_bytes`-only dependency set from §1, and the `thiserror` boundary rule applies to the crates that
+define real errors (`mocassin-msl`, `mocassin-rng`, `mocassin-cli`).
 
 ### Approved feature list (owner, 2026-11-18; implementation authorized 2026-11-19)
 
