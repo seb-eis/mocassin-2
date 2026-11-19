@@ -112,7 +112,7 @@
     "environment": "local container, AMD Ryzen 7 7840U, Rust 1.99.1, Criterion 0.8.2, Debian GNU/Linux 13, bench profile, single-threaded",
     "recorded": {
       "date": "2026-11-19",
-      "sourceCommit": "21a659f3cc5fff2435aa20cef2274da57f9eb1e0",
+      "sourceCommit": "54820f258bccfa021b8efd16e5248f9432656dda",
       "nextU32Nanoseconds": 1.364,
       "nextU64Nanoseconds": 2.2899,
       "nextF64Nanoseconds": 2.5457,

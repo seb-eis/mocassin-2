@@ -25,7 +25,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (32 tests + 1 doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `9474638dd5917047e6afc66d60c1b8f9e791f630` |
-| 2 RNG streams and state | `feature/step-13-rust-solver-foundation-and-package-reader/rng-streams-and-state` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (19 unit + 10 vector + 7 property tests in `mocassin-rng`), `cargo build --release`, `cargo bench --no-run`, one full bench run, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-3 row update |
+| 2 RNG streams and state | `feature/step-13-rust-solver-foundation-and-package-reader/rng-streams-and-state` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (19 unit + 10 vector + 7 property tests in `mocassin-rng`), `cargo build --release`, `cargo bench --no-run`, one full bench run, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `54820f258bccfa021b8efd16e5248f9432656dda` |
 
 **Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
 row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
@@ -41,8 +41,9 @@ dependency. `ErrorClass` is plain data with hand-written `Display`/`Error` impls
 `serde`/`serde_bytes`-only dependency set from §1, and the `thiserror` boundary rule applies to the crates that
 define real errors (`mocassin-msl`, `mocassin-rng`, `mocassin-cli`).
 
-**Feature 2 RNG evidence.** `tests/reference/bench/step-13-rng.json` records the run at `21a659f` with the raw
-Criterion log `step-13-rng-2026-11-19.txt`, and `tests/reference/bench/baselines.json` gains the first
+**Feature 2 RNG evidence.** `tests/reference/bench/step-13-rng.json` records the run measured on the tree
+squashed as `54820f2` with the raw Criterion log `step-13-rng-2026-11-19.txt`, and
+`tests/reference/bench/baselines.json` gains the first
 `runnerClass = linux-x64-local-container-amd-ryzen-7-7840u-rust-1.99.1` entry. The 10 % rule is applied only
 within that class: a release candidate fails when the median of the identical Criterion benchmark is more than
 1.10 × the recorded median. Absolute timings are never compared across CPUs, operating systems, or Rust
