@@ -314,7 +314,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready with notes — accepted by the human owner 2026-11-18; implementation start held by the owner
+**State:** Ready with notes — accepted by the human owner 2026-11-18; implementation hold lifted 2026-11-19
 
 ## Reviewer independence
 
@@ -373,9 +373,9 @@ single-step exception** (3.5 pw base + 1.0 pw contingency, no split) are approve
 and assigned to **feature 7** (documentation sweep); n-17 is accepted and assigned to **feature 7** (both
 editorial leftovers); n-18 needs no action. The reviewer's findings, evidence, and verdict are unchanged.
 
-**Implementation start is held by the owner.** This acceptance is not a start authorization: no `step/13-…`
-branch is created, no merge into `main` is performed, no `step/13` tag is created, and the status dashboard
-remains step-agent-owned and unchanged. A separate owner approval is required to start implementation.
+**Implementation hold lifted 2026-11-19 — implementation authorized.** The human owner lifted the hold on
+2026-11-19. The step agent creates the step branch and updates the step page/status next; this record edit does
+not merge into `main`, create the step tag, or touch `status.md`.
 
 ## Resolution status
 
