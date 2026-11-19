@@ -25,6 +25,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (32 tests + 1 doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `9474638dd5917047e6afc66d60c1b8f9e791f630` |
+| 2 RNG streams and state | `feature/step-13-rust-solver-foundation-and-package-reader/rng-streams-and-state` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (19 unit + 10 vector + 7 property tests in `mocassin-rng`), `cargo build --release`, `cargo bench --no-run`, one full bench run, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-3 row update |
 
 **Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
 row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
@@ -39,6 +40,24 @@ The exit-code model lives in `mocassin-types` rather than in the CLI: both `moca
 dependency. `ErrorClass` is plain data with hand-written `Display`/`Error` impls; `mocassin-types` keeps the
 `serde`/`serde_bytes`-only dependency set from §1, and the `thiserror` boundary rule applies to the crates that
 define real errors (`mocassin-msl`, `mocassin-rng`, `mocassin-cli`).
+
+**Feature 2 RNG evidence.** `tests/reference/bench/step-13-rng.json` records the run at `21a659f` with the raw
+Criterion log `step-13-rng-2026-11-19.txt`, and `tests/reference/bench/baselines.json` gains the first
+`runnerClass = linux-x64-local-container-amd-ryzen-7-7840u-rust-1.99.1` entry. The 10 % rule is applied only
+within that class: a release candidate fails when the median of the identical Criterion benchmark is more than
+1.10 × the recorded median. Absolute timings are never compared across CPUs, operating systems, or Rust
+versions; a different runner records its own entry. Step 29 owns the automated same-class regression job; the
+manual benchmark gate re-verifies the declared class.
+
+Measured medians (single-threaded, release): `next_u32` 1.364 ns (733 M draws/s, budget ≥ 250 M), `next_u64`
+2.290 ns (437 M/s, ≥ 150 M), `next_f64` 2.546 ns (393 M/s, ≥ 120 M), `next_bounded(2/10/1024)` 1.747–1.759 ns
+(569–572 M calls/s, ≥ 200 M), 64-word refill 75.4 ns (3.40 GB/s, ≤ 250 ns), state export+restore 123.4 ns
+(≤ 500 ns), 32-byte fork 113.1 ns (≤ 1 µs). Every budget is met; measured draws/call is 1.00.
+
+The golden vectors currently live in `crates/mocassin-rng/tests/vectors.rs`, produced by an independent
+ChaCha12 implementation and cross-checked against the Step 10 seed vectors. The shared
+`tests/contracts/rng-vectors.json` document stays with feature 6, whose fixture harness owns the cross-language
+JSON artifacts; feature 2 freezes the same values in code so the algorithm cannot drift before then.
 
 ### Approved feature list (owner, 2026-11-18; implementation authorized 2026-11-19)
 
