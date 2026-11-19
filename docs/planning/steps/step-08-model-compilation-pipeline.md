@@ -425,25 +425,32 @@ For each direction, enumerate the state-change combinations from the chain group
 #### 8.4 Charge-transport field convention
 
 Step 08 supplies a per-rule **charge transport vector**; it does not collapse the field work into a scalar.
-The vector is computed from particle identities, not by summing per-node movements, so a vacancy hop and a
-symmetric exchange cannot double-count or cancel spuriously:
+The vector is the difference of the charge-weighted endpoint moments at each path node, not a particle-identity
+pairing sum. This is exact for a charge-state change at a fixed site (for example A⁻ → A), where the particle
+does not move but its charge changes:
 
 ```text
-For each particle p present in S0 or S2 at a path node:
-  displacement_p = Cell.ToCartesian(x_p(S2) - x_p(S0))   (Å; void has no entry)
-chargeTransportVector = Σ_p q_p * displacement_p          (e·Å)
-pathVector            = Σ_i Cell.ToCartesian(movement_i)  (Å; display/tracking only)
+For each path node i:
+  deltaCharge_i = q(S2[i]) - q(S0[i])                      (void has charge 0)
+  x_i           = Cell.ToCartesian(absolute path node i)    (Å)
+chargeTransportVector = Σ_i deltaCharge_i * x_i             (e·Å)
+pathVector            = Σ_i Cell.ToCartesian(movement_i)    (Å; display/tracking only)
 field                 = -0.5 * (|E| / kT) * (chargeTransportVector · ê)
 ```
 
-The particle-identity mapping is the same mapping used to derive `tracker_order`: a particle that moves from
-node `i` to node `j` contributes once, not once per node. For a single charge `q` moving by `Δx`, the vector is
-`qΔx`. For a vacancy hop, the ion moves once and the void contributes nothing, so the sign is correct and the
-value cannot cancel. For an exchange of two identical ions the net charge transport is zero; for an exchange of
-different charges it is non-zero. The dot product is exact for non-collinear multi-site mechanisms.
-`pathVector` is display/tracking only and is not used to derive the field. The Å/V/m unit conversion is applied
-by Step 15's existing field convention. Tests pin a single charge, a vacancy, an identical-ion exchange
-(zero), a distinct-charge exchange (non-zero), and a non-collinear multi-site path.
+A node whose charge is unchanged contributes nothing; void contributes no charge. For a single charge `q`
+moving by `Δx`, the vector is `qΔx`. For a vacancy hop, the ion moves once and the void contributes nothing, so
+the sign is correct. For an exchange of two identical ions the net charge transport is zero; for an exchange of
+different charges it is non-zero. A particle that changes charge at a fixed node contributes through the
+endpoint-moment difference even though its movement is zero. The dot product is exact for non-collinear
+multi-site mechanisms. `pathVector` is display/tracking only and is not used to derive the field. The Å/V/m unit
+conversion is applied by Step 15's existing field convention. Tests pin a single charge, a vacancy, an
+identical-ion exchange (zero), a distinct-charge exchange (non-zero), a charge-state change at a fixed site, and
+a non-collinear multi-site path.
+
+The Rust `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` XML comments still say “particle-identity”;
+that source-doc correction is assigned to Step 13 feature 4 (which touches the transition payloads), not to
+this planning change.
 
 ### 9. Simulation encoding and derived solver intent
 

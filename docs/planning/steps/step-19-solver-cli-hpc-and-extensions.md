@@ -99,15 +99,19 @@ mocassin-sim batch --db <project.msl> --jobs <range|file>
 | Exit | Meaning |
 | ---: | --- |
 | 0 | Completed |
+| 5 | Partial success (batch: at least one job failed, others completed) |
 | 10 | Invalid arguments |
 | 11 | Package/schema error |
 | 12 | Model/data inconsistency |
-| 13 | Numerical failure |
+| 13 | Numerical failure or internal invariant violation |
 | 14 | Aborted by limit (time/rate/equilibrium) |
 | 15 | Cancelled |
 | 16 | I/O error |
 | 17 | Extension error |
 | 18 | Already completed |
+
+- Codes 0, 5, and 10–16 are the canonical Step 13/architecture table; Step 19 adds 17 (extension error) and
+  18 (already completed) and uses 5 for batch partial success. Do not redefine 13 as “numerical only”.
 
 - `SIGINT`/`SIGTERM` request a graceful stop:
   - finish the current cycle/block;

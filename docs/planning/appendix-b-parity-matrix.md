@@ -159,6 +159,8 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
+| Package reader and solver foundation | Y | Planned | 13 | Read-only `.msl` reader, bounded decode, typed job/model, canonical signature re-encode, `mocassin-sim --dry-run`; no physics until 14–19 |
+| Deterministic RNG and seed derivation | Y | Planned | 13 | ChaCha12, SHA-256 job/lattice derivation, Lemire bounded draws, 64-byte `RngStateV1`, golden vectors; replaces the PCG32 defects |
 | MMC engine | Y | Planned | 17 | |
 | KMC engine | Y | Planned | 16 | |
 | Rejection KMC selection | Y | Planned | 16 | Uniform over directions |
@@ -249,7 +251,7 @@ Status legend:
 | --- | :---: | --- | --- | --- |
 | .NET 11 | Y | Implemented | 00/11 | Retargeted by amendment 1 |
 | Avalonia cross-platform | Y | Planned | 23 | |
-| Rust solver | Y | Planned | 13 | |
+| Rust solver | Y | Planned | 13 | Workspace, read-only package reader, ChaCha12 RNG, and `mocassin-sim --dry-run` land in 13; engines and state in 14–19 |
 | Windows support | Y | Planned | 31 | |
 | Linux support | Y | Planned | 31 | |
 | macOS support | Y | Planned | 31 | |
@@ -261,7 +263,7 @@ Status legend:
 | Unit/property/contract tests | Y | Implemented | 03–07 | Suite green; Step 29 adds statistical parity and fuzzing |
 | Statistical parity suite | Y | Planned | 29 | |
 | Performance benchmarks | Y | Planned | 29 | |
-| Fuzzing | Y | Planned | 13/29 | |
+| Fuzzing | Y | Planned | 13/29 | Step 13 adds `mocassin-msl` scan/decode/package targets and a time-boxed run; Step 29 extends to `.mcs`/extension configs and the nightly job |
 | Docs skeleton + build/CI | Y | Implemented | 00/30 | Zensical, navigation, build scripts, and planning exclusion; Step 30 completes content |
 | Standalone docs completion (Zensical) | Y | Partial | 30 | Site builds strictly; completion, audit, and publication in 30 |
 | User guide + physics | Y | Partial | 03–07/30 | Model-definition pages exist; Step 30 completes cross-cutting content |
@@ -275,7 +277,7 @@ Status legend:
 | Glossary, notation, units | Y | Planned | 30 | |
 | Examples + publications | Y | Planned | 30 | |
 | .NET API reference (DocFX) | Y | Partial | 00/30 | Generated `/api/dotnet/`; Step 30 finalizes coverage and publication |
-| Rust API reference (rustdoc) | Y | Partial | 00/13/30 | Skeleton crates only; the public API grows from Step 13 |
+| Rust API reference (rustdoc) | Y | Partial | 00/13/30 | Skeleton crates only; the public API grows from Step 13; Step 30 finalizes coverage and publication |
 | Python API reference (mkdocstrings) | Y | Planned | 22/30 | `/api/python/` |
 | MIT + original GPL attribution/notices | Y | Implemented | 00 | `LICENSE`, `NOTICE.md`, and SPDX headers |
 | Legacy file migration | N | Out of scope | — | Owner decision |

@@ -66,7 +66,7 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 | 10 | Job templates, inheritance, supercell/doping generation | 06, 08, 09 | 3–4 pw |
 | 11 | Compiled package encoding and `.msl` v1 writer | 08–10 | 3–4 pw |
 | 12 | Build orchestration and `mocassin` CLI | 10, 11 | 1–3 pw (owner-approved 3.0–4.0 pw single-step exception, 2026-11-16; owner-approved 2.75–3.75 pw on 2026-11-17 after the `System.CommandLine` decision) |
-| 13 | Rust workspace, `mocassin-sim`, `.msl` reader, job model | 11 | 2–4 pw |
+| 13 | Rust workspace, `mocassin-sim`, `.msl` reader, job model | 11 | 2–4 pw (owner-approved 4.5 pw single-step exception, 2026-11-18) |
 | 14 | Simulation context initialization | 13 | 2–4 pw |
 | 15 | Energy engine and field terms | 14 | 3–5 pw |
 | 16 | KMC engine, pre-run, normalization, time | 15 | 4–6 pw |
@@ -123,6 +123,15 @@ rejected because it would leave a CLI without `inspect`, `verify`, `doctor`, or 
 roadmap step, and change the Phase C closeout. If features 1–3 exceed 2.25 pw, the step stops and asks the
 owner to re-open the split before feature 4. This exception applies only to Step 12; the Step 12 row above and
 the Step 12 page record the same estimate and exception.
+
+**Recorded exception — Step 13 (2026-11-18).** The human owner approved Step 13 as a single step at a
+**4.5 person-week** estimate: 3.5 pw base implementation plus 1.0 pw risk contingency. The upper bound exceeds
+the four-week trigger. The 13A/13B split was considered and rejected: it would separate the bounded reader
+from its CLI acceptance and the populated/MMC fixture work, duplicate fixture and closeout effort, add a
+roadmap step, and change the Phase D closeout; the seven features form one coherent reader/RNG/CLI contract.
+The exception is single-step only. Guard: if features 1–3 exceed 2.0 pw, the step agent stops and reports to
+the orchestrator before feature 4. The Step 13 row above and the Step 13 page record the same estimate and
+exception; `05-open-decisions.md` records the resolved sizing and the rejected split.
 
 ## 4. Milestones
 

@@ -105,8 +105,10 @@ barrier_backward = (s1 - s2) - field
 - The state codes are packed particle IDs in path order; decode with bounds checks.
 - For MMC, S1 is unused; `s0` and `s2` are the two-site energies.
 - The field input is the per-rule Cartesian **charge transport vector** compiled in Step 08:
-  - `rule.charge_transport_vector = Σ_p q_p * (x_p(S2) - x_p(S0))`, summed over moving particle
-    identities; each particle contributes once, and void contributes nothing.
+  - `rule.charge_transport_vector = Σ_node (q(S2,node) − q(S0,node)) · x(path node)`, in e·Å. It is the
+    node-wise endpoint-moment difference, not a particle-identity pairing; a node with unchanged charge
+    contributes nothing, and void carries no charge. It also covers a particle that changes charge at a fixed
+    site (for example A⁻ → A).
   - `ê` is the unit field direction; `|E|` is the field modulus and `kT` the thermal energy.
   - `field = -0.5 * (|E| / kT) * (rule.charge_transport_vector · ê)`, using the same Å/V/m scale as the
     existing field convention.
@@ -114,6 +116,12 @@ barrier_backward = (s1 - s2) - field
     `-0.5 q E·Δx/kT`; a vacancy hop carries the correct sign because the ion moves once and the void has no
     charge. An identical-ion exchange has zero net charge transport; a distinct-charge exchange does not.
   - `direction.path_vector` is display/tracking only and is not used to derive the field.
+- **Trust boundary (Step 13 assignment).** `rule.charge_transport_vector` comes from the untrusted `.msl` and is
+  not covered by the parameterization signature. Step 13 validates that it is finite and zero when no node
+  changes charge, but cannot recompute the full `Σ Δq x` formula because the v1 payload carries no fractional P1
+  coordinates (only `vector4 = [0,0,0,P]` and the fractional movements). Step 15 owns the field term and must
+  reject a non-finite result and record the residual risk; a future `.msl` can add fractional positions or sign
+  the transport vector. Do not silently clamp or recompute a different vector.
 - `rule.charge_transport_vector` is three `f64` components; zero field yields zero.
 
 ### 3. S2 computation

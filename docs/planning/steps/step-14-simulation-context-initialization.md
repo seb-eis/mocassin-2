@@ -144,6 +144,13 @@ impl SimulationContext {
   reference different pair tables. Do not reconstruct the image from the target index.
 - Validate at load: `target_position < P`, `|offset|` fits the `i32` arithmetic used for the cell add, and the
   resulting target index is in `[0, A*B*C*P)`.
+- **Occupation check ownership (Step 13 M-3).** The v1 payload stores no rule→representative-direction marker
+  (`EquivalentStartPositions` and `CompiledJumpRule.DirectionIndex` are not persisted), so Step 13 can only
+  exempt void and check non-void state particles against the union of the collection's masks. Step 14 builds the
+  context, pools, and per-direction jump status but does not resolve a rule to a selected direction; the exact
+  per-direction occupation precheck is performed in Step 16 after the direction is selected and the rule is
+  looked up. Do not add an every-(rule, direction)-pair check here; it would falsely reject a rule valid only
+  along its own direction.
 - Build links as CSR:
   - `link_offsets: Vec<u32>` length `P+1`;
   - `links: Vec<Link>` with `target_position_offset`, `pair_id`, `cluster_start`, `cluster_len`;

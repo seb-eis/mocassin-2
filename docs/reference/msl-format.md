@@ -127,8 +127,8 @@ The full field list is in `contracts/generated/schema/package-payloads-v1.schema
 
 | Payload | Contents |
 | --- | --- |
-| Model | `format_version`, `model_signature`, particles, structure (positions, sites, cell vectors, environments with **one pair entry per periodic image** and its relative integer `offset`), energy (pair/cluster tables, site energies, defect background), transitions (jump collections, rules with variable-length `tracker_order` and `0xFF` sentinels), simulations |
-| Lattice | `format_version`, `lattice_size` (`[a,b,c]`), `position_count`, and the particle array (`a·b·c·position_count` bytes, row-major per the index rule) |
+| Model | `format_version`, `signature` (parameterization), `model_signature` (compiled identity), particles, structure (positions, sites, cell vectors, environments with **one pair entry per periodic image** and its relative integer `offset`), energy (pair/cluster tables, site energies, defect background), transitions (jump collections, rules with variable-length `tracker_order` and `0xFF` sentinels), simulations |
+| Lattice | `format_version`, `lattice_size` (`[a,b,c]`), `position_count`, and the particle array (`a·b·c·position_count` bytes, row-major per the index rule; a MessagePack array of `u8` in v1, not `bin`) |
 | Job | `format_version`, simulation index, kind, resolved settings (temperature, field modulus and Cartesian unit direction, MCSP targets, sampling, attempt frequency, normalization energy, tolerances, time limits), the composed `flags` word, compiled selection optimizers, canonical extension JSON, and `doping_info` |
 
 `flags` has exactly one kind bit (KMC or MMC); the remaining bits encode `usePrerun` and
@@ -165,6 +165,46 @@ must never be generated from a hand-edited package.
   produces the same canonical summary as an equivalent new build. The checked-in
   [`amend-1-net10`](https://github.com/seb-eis/mocassin-2/tree/main/tests/contracts/packages/amend-1-net10)
   fixture proves it on every test run.
+
+## Solver read path (Step 13)
+
+The Rust solver opens the package read-only and validates only what it consumes. It does not run the ten-check
+verifier; `mocassin verify` remains the full structural check.
+
+1. **Open.** `SQLITE_OPEN_READONLY` with no URI handling, `query_only=ON`, `foreign_keys=ON`, and a bounded
+   `busy_timeout`. A missing/unreadable path is an I/O error; a corrupt database is a package error.
+2. **Identity.** Require `application_id = 0x4D4F4353`, `user_version = 1`, and
+   `schema_info.format_version = 1`. Require the `schema_info`, `models`, `lattices`, and `jobs` tables and the
+   columns the reader uses. Read the provenance rows and require them to equal the model payload's
+   `symmetry_contract_version`, `space_group_data_version`, and `space_group_data_sha256`.
+3. **Decode.** Every payload is one standard Zstd frame. The reader checks the declared decompressed size (or
+   streams with a hard limit when no size is declared) against a byte guard before allocating. It then scans
+   the MessagePack document without allocating per element, enforcing the element budget, nesting depth,
+   declared-length-vs-remaining-bytes, duplicate known keys, and per-field count caps. Only then does it decode
+   into typed structures.
+4. **Validate.** Every particle/position/site/environment/pair/cluster/collection/direction/rule/tracker index
+   and length; state-code node values; `tracker_order` length; jump-count prefix sums; kind and flag
+   consistency; finite values; normalized field direction; lattice length and particle indices.
+5. **Signatures.** The reader re-encodes the six-field parameterization projection and the five-field lattice
+   projection with the ADR 0010 fixed-width writer, the C# 12-decimal quantization expression, and the domain
+   prefix. It compares both to the stored signatures. `model_signature` is an identity string and is not
+   re-encoded.
+6. **Job.** The job row's payload-derived columns are compared with the payload; `seed` must be 32 bytes. The
+   result is a validated `JobPackage` for Step 14.
+
+Stored payload integers use MessagePack's smallest-width encoding; the fixed-width `uint64`/`int64`/`float64`
+rule applies only to the canonical projection. The lattice member is a MessagePack array of `u8` in v1; the
+canonical lattice projection uses `bin`. Readers accept both forms.
+
+Default solver limits are 512 MiB per model/lattice payload, 8 MiB per job payload, 512M model elements / 1M job
+MessagePack elements, depth 8, 500,000 total positions, 10,000 P1 positions per cell, 64 particles, 1M
+rules/directions, 4,096 collections/simulations, 1M pair/cluster tables, 16M pair links, 10 path nodes, and
+256 extensions. The position/P1 limits match the .NET build constants; the 1M rule limit matches the default
+`CompilationOptions.MaxRuleCount` (`init`, so a caller can raise it). A package built with a raised limit, or a
+future writer that raises a position/P1 limit, must raise `ReaderLimits` in the same release. A future package
+major version, a payload above a guard, or a document that exceeds a budget is
+rejected with an actionable message before unbounded allocation. See
+[Solver architecture](../development/solver-architecture.md) for the crate view and the full limit table.
 
 ## Verification and immutability
 
