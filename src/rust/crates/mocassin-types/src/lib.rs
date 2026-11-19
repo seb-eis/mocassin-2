@@ -8,14 +8,15 @@
 //! the [`ExitCode`] values defined here.
 //!
 //! The Step 13 feature 1 slice provides the dense typed IDs, [`ReaderLimits`], the settings and composed job
-//! flag types, and the canonical solver exit codes 0/5/10–16. Payload DTOs and the validated runtime model are
-//! added by the reader/mapping features that decode and check them.
+//! flag types, and the canonical solver exit codes 0/5/10–16. The [`payload`] module mirrors the `.msl` v1
+//! payload maps; the validated runtime model is added by the reader/mapping features that decode and check them.
 
 #![forbid(unsafe_op_in_unsafe_fn)]
 
 pub mod exit;
 pub mod ids;
 pub mod limits;
+pub mod payload;
 pub mod settings;
 
 pub use exit::{ErrorClass, ExitCode, UnknownExitCode};

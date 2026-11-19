@@ -26,6 +26,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | --- | --- | --- | --- | --- | --- |
 | 1 Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (32 tests + 1 doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `9474638dd5917047e6afc66d60c1b8f9e791f630` |
 | 2 RNG streams and state | `feature/step-13-rust-solver-foundation-and-package-reader/rng-streams-and-state` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (19 unit + 10 vector + 7 property tests in `mocassin-rng`), `cargo build --release`, `cargo bench --no-run`, one full bench run, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `54820f258bccfa021b8efd16e5248f9432656dda` |
+| 3 `.msl` reader and bounded decode | `feature/step-13-rust-solver-foundation-and-package-reader/msl-reader-and-bounded-decode` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (44 `mocassin-msl` tests: 4 unit, 15 hostile, 12 schema, 5 decode, 8 acceptance), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-4 row update |
 
 **Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
 row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
@@ -59,6 +60,36 @@ The golden vectors currently live in `crates/mocassin-rng/tests/vectors.rs`, pro
 ChaCha12 implementation and cross-checked against the Step 10 seed vectors. The shared
 `tests/contracts/rng-vectors.json` document stays with feature 6, whose fixture harness owns the cross-language
 JSON artifacts; feature 2 freezes the same values in code so the algorithm cannot drift before then.
+
+**Feature 3 reader evidence.** `Package::open_readonly` opens the SQLite file with
+`SQLITE_OPEN_READONLY | SQLITE_OPEN_NO_MUTEX`, sets `query_only`/`foreign_keys`/a 2 s busy timeout, checks
+`application_id`, `user_version`, `schema_info` (nine keys, `format_version`, duplicate rows), and the used
+tables/columns. Payloads are decompressed with the byte guard, scanned by the bounded MessagePack walk, then
+decoded into the `mocassin-types::payload` DTOs; the lattice guard is `a*b*c*position_count` (checked, ≤
+`max_positions`, ≤ `i32::MAX`, `4×` ≤ `max_lattice_payload_bytes`). The model cache is keyed by
+`(model_id, signature)` and shared through `Arc`; the reader returns `LoadedJob` (row + job DTO + model DTO +
+lattice DTO) and `load_model`/`job_ids` for inspection. Runtime mapping, index/finite/scientific validation, and
+canonical signature re-encoding remain feature 4.
+
+- **Real packages:** both `msl-v1` and `amend-1-net10` open and load all six jobs; the model/lattice signatures,
+  counts, settings, and lattice lengths match `package-summary-v1`; the amended package yields the same logical
+  summary. A `0444` copy opens with no `-wal`/`-shm` sidecars. Repeated `load_job` calls share one model `Arc`.
+- **Hostile matrix (all clean package errors, no panic/OOM):** duplicate known key, missing required key,
+  non-map document, trailing bytes, truncated payload, declared array length beyond the input, 20-level nesting,
+  element-budget violation, lowered depth limit, 4 MiB decompression bomb (declared size rejected before
+  allocation), content-size-less frame streamed with a hard limit, truncated/empty frames, oversized supercell,
+  lattice count mismatch, and a particle above `u8::MAX`.
+- **Schema matrix:** wrong `application_id`, future `user_version`, future `schema_info.format_version`, missing
+  key, duplicate key, renamed table, renamed column, `models`/`lattices` `format_version` column mismatch,
+  corrupt model/job payloads, and empty/non-database files.
+- **Measured decode (indicative, release, local container):** open 1.18 ms, cold `load_job` 346 µs, warm
+  `load_job` 92 µs for the ceria fixture (864-particle lattice, model cached). The formal load benchmark and the
+  `< 100 ms` fixture budget evidence are feature 7.
+- **Deviations/notes:** an identity/`schema_info` failure maps to `InvalidSchemaInfo` (package class 11) because
+  the design's error enum has no separate identity variant; `job_ids()` has an internal one-million-row safety
+  cap (the writer caps at 99,999); payload `format_version` mismatches are rejected during decode as
+  `SchemaVersion` (the model-class re-check remains part of feature 4); signature and column/payload checks other
+  than `format_version` are feature 4.
 
 ### Approved feature list (owner, 2026-11-18; implementation authorized 2026-11-19)
 
