@@ -8,8 +8,8 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 
 ## Implementation status
 
-- **Status:** Not started — implementation authorized 2026-11-19; the step agent creates the step branch next
-- **Step branch:** — (not created yet; the step agent creates it next)
+- **Status:** In progress — implementation started 2026-11-19
+- **Step branch:** `step/13-rust-solver-foundation-and-package-reader`
 - **Step CI:** —
 - **Main merge:** —
 - **Step tag:** —
@@ -39,11 +39,10 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 7 | Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Load and RNG Criterion benches plus same-runner-class baselines; `solver-architecture.md`, `msl-format.md`, `cli.md`, `testing-and-parity.md`, Rust layout docs; parity/status/closeout evidence (`docs/planning/closeout/step-13.json`) and the audit request | Load `< 100 ms` on the fixture and the RNG budgets are recorded with the environment; documentation builds strictly; `check_closeout_evidence.py` passes and the audit request is complete |
 
 The human owner approved this seven-feature list and the 4.5 pw single-step sizing on 2026-11-18, accepted the
-design as `Ready with notes`, and lifted the implementation hold on 2026-11-19. Implementation is authorized;
-the step agent creates the step branch and updates the status dashboard next. This page edit does not create
-the branch, merge into `main`, or create the `step/13` tag. Individual features are squash-merged without a
-further approval once implementation starts. If features 1–3 exceed 2.0 pw, the step agent stops and reports to
-the orchestrator before feature 4.
+design as `Ready with notes`, and lifted the implementation hold on 2026-11-19. The design merged into `main`
+as `056d8c1` and the step branch was created from that commit. Implementation is in progress; individual
+features are squash-merged without a further approval. If features 1–3 exceed 2.0 pw, the step agent stops and
+reports to the orchestrator before feature 4.
 
 ## Goal
 
@@ -1236,7 +1235,7 @@ No unresolved cross-step interface question remains. The only deliberate asymmet
   feature 4. Do not silently absorb the overrun.
 - **Owner approval:** the feature list and the 4.5 pw single-step exception were approved by the human owner on
   2026-11-18; the design review is accepted `Ready with notes`. The implementation hold was lifted on
-  2026-11-19 and implementation is authorized; the step agent creates the step branch next. The decisions are
+  2026-11-19, the design merged as `056d8c1`, and the step branch is created from it. The decisions are
   not re-approved per feature.
 
 ### 14. Decisions recorded and owner input
@@ -1261,8 +1260,8 @@ decisions recorded here, in the data contracts, and in the architecture.
 
 **Owner decisions:** the design verdict (`Ready with notes`), the seven-feature list, the 4.5 pw single-step
 exception, and n-1 (data-contract note, no ADR) are accepted by the owner on 2026-11-18. The implementation hold
-was lifted on 2026-11-19 and implementation is authorized; the step agent creates the step branch next. No other
-design decision is open.
+was lifted on 2026-11-19, the design merged into `main` as `056d8c1`, and the step branch was created from that
+commit. No other design decision is open.
 
 ## Implementation tasks
 

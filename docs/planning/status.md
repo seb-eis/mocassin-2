@@ -60,7 +60,7 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 | 10 | [Job Templates and Supercell Generation](steps/step-10-job-templates-and-supercells.md) | C. Compilation | Done | `step/10-job-templates` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43709029767) at `945dddf` | `945dddf` | `step-10` | Passed with notes at `c10e6d7` — accepted 2026-11-15 | Ready for implementation at `c5454af` — accepted 2026-11-14 |
 | 11 | [Simulation Package and `.msl` Writer](steps/step-11-simulation-package-and-msl-writer.md) | C. Compilation | Done | `step/11-simulation-package-and-msl-writer` (merged and deleted) | — | [main green](https://github.com/seb-eis/mocassin-2/actions/runs/43948410478) at `84ceb76`; [closeout](https://github.com/seb-eis/mocassin-2/actions/runs/43944825353) / [Windows platform](https://github.com/seb-eis/mocassin-2/actions/runs/43944396192) at `4197166` | `84ceb76` | `step-11` | Passed with notes — round 2 at `4197166` (`fda68e6`); N-1/N-4/N-6 accepted 2026-11-16 | Ready with notes — accepted 2026-11-15 ([record](reviews/step-11.md)); amendment 1 `Ready with notes` — accepted 2026-11-15 ([record](reviews/step-11-amend-1.md)) |
 | 12 | [Build Orchestration and `mocassin` CLI](steps/step-12-build-orchestration-and-cli.md) | C. Compilation | Done | `step/12-build-orchestration-and-cli` (merged and deleted) | — | [Ubuntu](https://github.com/seb-eis/mocassin-2/actions/runs/44377851616) / [Windows](https://github.com/seb-eis/mocassin-2/actions/runs/44378270028) closeout green at `07851d8`; [main green](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) | `ec2e04a` | `step-12` | [Passed with notes](audits/step-12.md) at `07851d8` — accepted by the human owner 2026-11-18; F-9/N-4 fixed, N-5 accepted risk | Ready with notes — **accepted by the human owner 2026-11-17** at `1b6af90` ([record](reviews/step-12.md); round 5; R5-1–R5-3 resolved); implementation started 2026-11-17 |
-| 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
+| 13 | [Rust Solver Foundation and Package Reader](steps/step-13-rust-solver-foundation-and-package-reader.md) | D. Solver | In progress | `step/13-rust-solver-foundation-and-package-reader` | — | — | — | — | Not requested | Ready with notes — accepted by the human owner 2026-11-18 at `b9cda11`; hold lifted 2026-11-19 |
 | 14 | [Simulation Context Initialization](steps/step-14-simulation-context-initialization.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 15 | [Energy Engine](steps/step-15-energy-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
 | 16 | [Kinetic Monte Carlo Engine](steps/step-16-kmc-engine.md) | D. Solver | Not started | — | — | — | — | — | Not requested | Not requested |
@@ -85,9 +85,10 @@ The `Design review` column uses the statuses defined in [`reviews/README.md`](re
 Phase C — Compilation and build (Steps 08–12) is complete and tagged: `step-08` through `step-12`, with Step 08
 merged as `f91fc63` and Step 12 as `ec2e04a` (both `--no-ff`). The Phase C cross-cutting checkpoint `XC-04`
 (combined policies/planning, architecture/design, and documentation review) passed with notes at `2127f0f`
-and was accepted by the human owner on 2026-11-18 (record `c6ea396`); XC04-F1–F5 are assigned to a
-documentation maintenance branch to be merged before the gate opens to Step 13. Step 13 — Rust Solver Foundation
-and Package Reader follows once that branch is merged.
+and was accepted by the human owner on 2026-11-18 (record `c6ea396`); the XC04-F1–F5 remediation merged into
+`main` as `4c08cd3`. Step 13 — Rust Solver Foundation and Package Reader is **In progress**: its design merged
+as `056d8c1`, the step branch is `step/13-rust-solver-foundation-and-package-reader`, and features 1–7 are
+being squash-merged into it.
 Milestones M4 and M5 were backfilled on 2026-11-18 as annotated tags `milestone-m4` → `f91fc63` (Step 08 merge)
 and `milestone-m5` → `ec2e04a` (Step 12 merge).
 
@@ -163,7 +164,8 @@ and approved the merge and tag. The closeout gates are green at `07851d8`: Ubunt
 with `--no-ff` as `ec2e04a6b45fa14d9a88a9bd0eac9310949de69e`; automatic main CI
 [`44381922313`](https://github.com/seb-eis/mocassin-2/actions/runs/44381922313) is green at that merge commit;
 the annotated `step-12` tag is pushed; and the step branch is deleted locally and remotely. Step 13 — Rust
-Solver Foundation and Package Reader is next.
+Solver Foundation and Package Reader is **In progress** on `step/13-rust-solver-foundation-and-package-reader`
+from the design merge `056d8c1`.
 
 ## Cross-cutting phase checkpoints
 
