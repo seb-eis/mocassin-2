@@ -24,15 +24,15 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (32 tests + 1 doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-2 row update |
+| 1 Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (32 tests + 1 doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `9474638dd5917047e6afc66d60c1b8f9e791f630` |
 
-**Feature 1 scope note (orchestrator-approved split, 2026-11-19).** The approved feature row lists payload DTOs,
-runtime model/job/lattice types, and the `PackageError`/exit-code model. The step agent implemented the
-feature-1 slice the orchestrator assigned: the workspace/lint baseline, the typed IDs, `ReaderLimits`, the
-settings and composed job-flag types, and the exit-code/error-class model. Payload DTOs, the runtime model,
-`JobPackage`, `InitialLattice`, and `PackageError` stay with the features that decode, map, and classify the
-payload (features 3 and 4), because they need `rmp-serde`, Zstd, and `rusqlite` and are only testable against the
-real payload fixtures. The feature-log gate column records this slice. No design decision changed.
+**Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
+row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
+delivers the workspace/lint baseline, the typed IDs, `ReaderLimits`, the settings and composed job-flag types,
+and the exit-code/error-class model. Payload DTOs, the runtime model types, `JobPackage`, `InitialLattice`, and
+`PackageError` move to **features 3–4**, where `rmp-serde`, Zstd, `rusqlite`, and the real payload fixtures
+exist. The owner accepted this resequencing on 2026-11-19; no design decision changed and the overall feature
+list is unchanged.
 
 The exit-code model lives in `mocassin-types` rather than in the CLI: both `mocassin-msl` (feature 3) and
 `mocassin-cli` (feature 5) must classify failures with the same table, and the types crate has no I/O
