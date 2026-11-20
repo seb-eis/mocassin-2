@@ -28,6 +28,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 2 RNG streams and state | `feature/step-13-rust-solver-foundation-and-package-reader/rng-streams-and-state` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (19 unit + 10 vector + 7 property tests in `mocassin-rng`), `cargo build --release`, `cargo bench --no-run`, one full bench run, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `54820f258bccfa021b8efd16e5248f9432656dda` |
 | 3 `.msl` reader and bounded decode | `feature/step-13-rust-solver-foundation-and-package-reader/msl-reader-and-bounded-decode` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (44 `mocassin-msl` tests: 4 unit, 15 hostile, 12 schema, 5 decode, 8 acceptance), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `70f443181d269ca5547f7216f005f1f39c664b1f` |
 | 4 Model/job mapping and signatures | `feature/step-13-rust-solver-foundation-and-package-reader/model-job-mapping-and-signatures` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (111 `mocassin-msl` tests: 65 mapping unit, 15 hostile, 12 schema, 5 decode, 9 acceptance, 5 signature), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `087856b73033d20d5607d8dadedf9ee6da6746ca` |
+| 5 Dry-run CLI and logging | `feature/step-13-rust-solver-foundation-and-package-reader/dry-run-cli-and-logging` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (27 CLI tests: 8 parser unit, 15 process, 4 exit-code drift), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-6 row update |
 
 **Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
 row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
@@ -130,6 +131,30 @@ the validated `Arc<ParameterizedModel>`.
   the real writer satisfies; the union check intentionally does not enforce the exact per-direction mask
   (Step 16 assignment); the full positional transport formula remains Step 15's; `LoadedJob` was removed in
   favour of `JobPackage`.
+
+**Feature 5 CLI evidence.** `mocassin-sim` implements the Step 13 inspection surface with `clap`:
+`--db`, `--job`, `--io`, `--seed`, `--threads`, `--extension`, `--no-extensions`,
+`--jump-log-max-ev`, `--log-level`, `--log-format`, `--dry-run`, and `--version`. Logs go to stderr in
+human or JSON form; stdout is reserved for the summary; `RUST_LOG` is not consulted. The dry run prints exactly
+the frozen format; job 1 of the ceria fixture reports the parameterization signature `1845b70e…`, the model
+identity `92cf375e…`, the lattice signature `880b6eac…`, `6x6x6 length=864`, the resolved settings
+(`target_mcsp=150`, `flags=0x72`), and `seed_hash=7a92d9422dd2e67335cfca29239ec8c4d6a42a8a7f2f0ceb1068a33295a9687c`.
+
+- **Observed process exit codes:** dry run 0; help/version 0; missing/unknown/bad option values, unknown job,
+  extension request, and a non-dry-run invocation 10; corrupt package 11; stored-signature mismatch 12;
+  deliberate panic 13; missing path or directory 16. Codes 5, 14, and 15 are reserved and not emitted.
+- **No-write proof:** a run with `--io <dir> --dry-run` leaves the temporary directory containing only the
+  package copy; the `--io` directory is not created, and no `-wal`/`-shm` sidecar appears. Without `--dry-run`
+  the job is still loaded and validated, then the command exits 10 without creating anything.
+- **Panic containment:** the inspection path runs inside `catch_unwind`; a panic logs an internal error and exits
+  13. A debug-only `MOCASSIN_SIM_TEST_PANIC` hook exercises the path in the process test.
+- **Drift check:** `crates/mocassin-cli/tests/exit_code_drift.rs` extracts the codes/meanings from architecture
+  §7.3, the `cli.md` solver table, the `solver-architecture.md` paragraph, and the Step 13 §3.7 table and
+  compares them with `ExitCode`; `cli.md` was corrected to state that `--stdout` is not accepted in Step 13.
+- **Deviations/notes:** `--stdout` is not implemented in Step 13 (any use is a parse error, exit 10; the run-dump
+  option is Step 19 work); `--extension` is rejected with exit 10 until the ABI lands; `--threads` and
+  `--jump-log-max-ev` are validated and unused; the CLI keeps its `mocassin-solver` dependency for the future run
+  path. No batch, `--json`, `--validate-only`, `--no-state`, or `--log-file` surface is added.
 
 ### Approved feature list (owner, 2026-11-18; implementation authorized 2026-11-19)
 

@@ -405,7 +405,7 @@ list, total bytes, and `removedCount: 0`.
 
 ```text
 mocassin-sim --db <project.msl> --job <id> [--io <dir>]
-             [--stdout <file>] [--seed <hex32>] [--threads <n>]
+             [--seed <hex32>] [--threads <n>]
              [--extension <path>] [--no-extensions] [--jump-log-max-ev <f64>]
              [--log-level <error|warn|info|debug|trace>]
              [--log-format human|json] [--dry-run] [--version]
@@ -423,7 +423,7 @@ job-folder output, batch mode, and extensions arrive in Steps 14–19.
 | `--job <id>` | Required 1-based job id. An unknown id is a usage error. |
 | `--io <dir>` | Job folder for a future run. Accepted but not created in this release. |
 | `--dry-run` | Load, validate, and print the summary; write nothing; exit 0. Required in this release. |
-| `--stdout <file>` | Reserved for the run statistics dump. Rejected with `--dry-run`. |
+| `--stdout <file>` | Reserved for the run statistics dump (Step 19). Not accepted in this release; any use is an invalid-argument error (10). |
 | `--seed <hex32>` | Exactly 64 hex characters; overrides the effective seed for debugging. Only the seed hash is printed. |
 | `--threads <n>` | `1..=256`; accepted and validated, unused until Step 19. |
 | `--extension <path>` | Rejected until the extension ABI lands (Step 19). |

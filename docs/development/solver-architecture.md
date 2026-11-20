@@ -174,7 +174,7 @@ mocassin-sim --db <project.msl> --job <id> --dry-run [--seed <hex32>] [--log-lev
 - Logs go to stderr (`tracing`, human or JSON). stdout is reserved for the human report.
 - Exit codes (canonical definition: internal target architecture §7.3): 0 success, 5 partial success for
   multi-job/batch (reserved until Step 19), 10 invalid arguments, 11 package error, 12 model/data error,
-  13 numerical failure or internal invariant violation (including a caught panic), 14 limit abort, 15 cancelled,
+  13 numerical failure or internal invariant violation (including a caught panic), 14 aborted by a configured limit, 15 cancelled,
   16 I/O. Parse errors are remapped to 10; help and `--version` exit 0.
 
 The full command reference is in the [CLI reference](../reference/cli.md).
