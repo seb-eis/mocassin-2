@@ -19,18 +19,19 @@ those are Step 23B.
 
 ## Implementation status
 
-- **Status:** Not started — design frozen for review; no step branch exists
-- **Step branch:** — (created from the reviewed `main` commit after the start gate)
-- **Step CI:** —
+- **Status:** In progress
+- **Step branch:** `step/23a-workspace-and-project-lifecycle`
+- **Step CI:** — (no CI runs until closeout)
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for review — the design freeze is the commit that introduces this page; the request
-  record `docs/planning/reviews/step-23a.md` carries the frozen SHA
-- **Feature list:** Proposed (five features) — requires the single owner approval described in
-  [`AGENTS.md` §3.2](../../../AGENTS.md)
+- **Design review:** Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe`
+  ([record](../reviews/step-23a.md), round 3 record commit `b6a472c`). Notes n-12/n-13 are corrected in
+  feature 5.
+- **Feature list:** Approved by the human owner 2026-11-20 (five features; the list below is the approved
+  scope)
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; the class and one-paragraph
-  justification are in §18. **Owner acceptance of the class is required at the start gate** (§3.1); a further
+  justification are in §18. The human owner accepted the class at the start gate on 2026-11-20; a further
   split is not proposed and §18 states why.
 - **Last updated:** 2026-11-20
 
@@ -38,7 +39,7 @@ those are Step 23B.
 | --- | --- | --- | --- | --- | --- |
 | — | — | — | — | — | — |
 
-### Proposed feature list (requires one owner approval)
+### Approved feature list (owner-approved 2026-11-20)
 
 Each branch is `feature/step-23a-workspace-and-project-lifecycle/<slug>` from the step branch. Every feature
 depends only on the features above it and on the merged 01/03–07/12 libraries; 23A has no task from 23B.
