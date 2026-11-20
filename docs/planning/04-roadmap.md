@@ -187,9 +187,9 @@ audit surface without stranding either half.
   interface or test-matrix breadth. Under this section, each half therefore needs **explicit owner acceptance as
   a High unit at its own start gate**. The acceptance is recorded on each step page (§18 for 23A, §16 for 23B)
   when it is given; no time waiver is involved.
-- A further split is not proposed. Host/workspace versus settings/lifecycle would leave a shell that cannot open
-  a project or settings with no consumer; editing versus recovery would leave autosave without a dirty state or
-  validation without an editing surface.
+- A further split is not proposed. Host/workspace versus settings/lifecycle would leave either a shell that
+  cannot open a project or settings/lifecycle code without a host to run in; editing versus recovery would leave
+  autosave without a dirty state or validation without an editing surface.
 - The same change updated the step index, §3 forecasts, the dependency graph (§2/§3), and **Step 24's dependency
   to 23B**; Steps 25–28 keep their existing chains, and milestone M10 (after 26) is unaffected.
 

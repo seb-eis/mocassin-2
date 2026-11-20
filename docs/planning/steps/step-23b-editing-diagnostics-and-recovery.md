@@ -43,7 +43,7 @@ order is the implementation order; 23B adds no shell, workspace, settings, or li
 | 1 | Edit pipeline and undo/redo | `edit-pipeline-and-undo-redo` | `ProjectEditCoordinator` per project over `ProjectDocument`; `Apply`/`Undo`/`Redo`; bounded undo depth; `ProjectChanged`; rejected-edit diagnostics; the Project Overview metadata editor (name/description/author/notes, one undo entry per committed field) | Undo/redo crosses the save point correctly in both directions; a rejected edit changes nothing and reports diagnostics; the coordinator is the only write path |
 | 2 | Validation surface | `validation-surface` | `ValidationCoordinator` over `ProjectValidationPipeline` (in-memory entry seeded with the session's load diagnostics, `ValidationOptions.Default`), 300 ms debounce, stale-result discard, status-bar validity item, Problems channel with severity/code/text filters, sorting, help anchors, `Related` navigation, revalidate, edit diagnostics, on-demand statistics in the Overview | A load/migration fixture populates the `Load` stage and reaches Problems; a clean load leaves it `Skipped`; a stale result is discarded; no double validation on open |
 | 3 | Dirty state, autosave, crash recovery | `dirty-autosave-and-recovery` | Save-point-correct dirty tracking and markers, unsaved-changes prompts, `AutosaveScheduler` over `TimeProvider`, `.autosave` sidecar, untitled-project recovery in `recovery/`, recovery prompt, Reload/Recover/Discard/Keep operations, unclean-exit session restore, retention, bounded asynchronous crash-recovery writer | Autosave writes only dirty documents and deletes its file on save; a simulated crash leaves a recoverable snapshot; recovery restores the exact in-memory project; recovery files are swept after 7 days and sidecars are not |
-| 4 | 23B tests, documentation, and closeout | `tests-docs-and-closeout` | Harness extension, dirty/save-point/autosave/recovery/validation/crash tests, the 23B documentation column (§12), parity/status updates, `closeout/step-23b.json`, and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; closeout evidence validates; the audit request is complete |
+| 4 | 23B tests, documentation, and closeout | `tests-docs-and-closeout` | Harness extension, dirty/save-point/autosave/recovery/validation/crash tests, the 23B documentation column (§12), parity/status updates, `closeout/step-23b.json` (`"step": "step-23b"`), and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; closeout evidence validates once the `step-NN[a-z]` tooling prerequisite has landed; the audit request is complete |
 
 ## Goal
 
@@ -226,6 +226,11 @@ operations take a `CancellationToken` and never block; the crash path is asynchr
 
 ### 9. Settings additions (no schema bump)
 
+The base document is **23A §6.1**, which is normative for `format`, `schemaVersion`, every v1 key and nesting
+level, defaults, the unknown-key/migration policy, the 4 MiB cap, the source-generated
+`AppSettingsJsonContext`, and the atomic write/fsync discipline. 23B adds exactly two top-level objects to that
+same v1 document and changes no existing key:
+
 ```json
 {
   "autosave": { "enabled": true, "intervalMinutes": 5 },
@@ -234,9 +239,25 @@ operations take a `CancellationToken` and never block; the crash path is asynchr
 }
 ```
 
-Added to the 23A v1 document with **no** `schemaVersion` bump, per the additive-field rule: missing means
-default, unknown fields are ignored, and the writer still emits `format`/`schemaVersion`. `recovery/` becomes
-active in the app-data layout.
+| Key | Type | Default | Rule |
+| --- | --- | --- | --- |
+| `autosave.enabled` | boolean | `true` | Autosave on/off |
+| `autosave.intervalMinutes` | integer | `5` | 1–60 inclusive; out of range falls back to `5` with a warning |
+| `session.openProjects` | array of string | `[]` | Paths of the projects open at the last shutdown; missing paths are reported and skipped on restore |
+| `session.activeProject` | string or null | `null` | Path of the active project, or null |
+| `session.cleanExit` | boolean | `true` | Written `false` while running and set `true` on a clean shutdown; a stale `false` triggers the restore offer |
+| `session.savedUtc` | string or null | `null` | ISO-8601 UTC time the session block was written |
+
+Details that follow from the base shape:
+
+- **No `schemaVersion` bump.** Missing keys mean the defaults above, unknown keys stay ignored, and the writer
+  still emits `format`/`schemaVersion`. A 23A document without `autosave`/`session` loads unchanged.
+- **No new top-level key beyond these two.** No other v1 key changes type, meaning, or default.
+- `layout.activeConsoleChannel` may now persist `"problems"` in addition to `"application"`; the 23A
+  unknown-channel fallback still applies.
+- `recovery/` becomes active in the app-data layout; the 4 MiB cap and atomic write/fsync discipline are
+  inherited unchanged.
+- The document remains application-local and is **not** in `contracts/manifest.json`.
 
 ### 10. Library changes owned by this step
 
@@ -349,13 +370,18 @@ and that the `ProjectDocument` additions are still additive after 23A merged.
 ### 18. Closeout and audit plan
 
 - **Feature 4 is the only closeout feature.** It owns the 23B documentation column, parity/status updates,
-  `docs/planning/closeout/step-23b.json`, and the audit request.
+  `docs/planning/closeout/step-23b.json` (`"step": "step-23b"`), and the audit request.
 - **Before the freeze:** all four features are squash-merged; current `main` is merged; `./tools/verify.sh all
   --require` passes on the integration tree; one closeout `CI` dispatch (Ubuntu) is recorded, with the Windows
   platform dispatch and the macOS manual gate as for 23A.
+- **Closeout identity and prerequisite (M-1):** the evidence file is `docs/planning/closeout/step-23b.json`, its
+  `step` field is exactly `"step-23b"`, the tag is `step-23b`, and the audit record is
+  `docs/planning/audits/step-23b.md`. There is no `step-23` alias. `tools/check_closeout_evidence.py` must first
+  accept `^step-\d{2}[a-z]$` (checker, tests, README and template), which is a separate tooling change landing
+  before either closeout; 23B does not work around it.
 - **Evidence and audit:** the same canonical closeout evidence and fresh-auditor process as 23A, with
   `audits/step-23b.md` created on demand at that point, not pre-seeded. Merge with `--no-ff` and tag `step-23b`
-  only after a `Passed` audit, owner approval, and a green automatic `main` CI run.
+  only after a `Passed` audit, owner approval, the tooling prerequisite, and a green automatic `main` CI run.
 - **Design review:** 23B has no review record yet. One is created from the template when the step is scheduled;
   this page is refrozen at that point and the record carries the freeze SHA.
 - **Dashboard:** the step agent updates the `23B` row when the step starts; the planner does not edit
@@ -388,7 +414,8 @@ and that the `ProjectDocument` additions are still additive after 23A merged.
 - [ ] Recovery files are swept after 7 days; sidecars are never swept; unclean-exit session restore works.
 - [ ] The `autosave`/`session` settings fields round-trip without a schema bump and older documents still load.
 - [ ] No unhandled exception kills the process silently, and the crash dialog reports recovery results.
-- [ ] `./tools/verify.sh all --require` passes, the strict docs build passes, and closeout evidence validates.
+- [ ] `./tools/verify.sh all --require` passes, the strict docs build passes, and `closeout/step-23b.json` with
+      `"step": "step-23b"` validates once the `step-NN[a-z]` checker support has landed.
 - [ ] Documentation written (§12), and no page claims a later step's capability.
 
 ## Documentation

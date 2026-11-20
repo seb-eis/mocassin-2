@@ -49,7 +49,7 @@ depends only on the features above it and on the merged 01/03–07/12 libraries;
 | 2 | Workspace: documents, navigation, commands | `workspace-documents-and-navigation` | `DocumentViewModel`/`DocumentKey`/`DocumentCollectionViewModel`, tab strip (title, tooltip, reorder, close, overflow; the dirty marker is added by 23B), `INavigationService` with bounded history, `INavigationTargetProvider` registry, project-scoped keys, project switcher, project explorer, welcome document, read-only Project Overview and Project JSON documents, command catalog, menus, status items, command palette, framework-neutral gesture descriptors, shortcut cheat sheet | Tabs open/activate/reuse/close and back/forward work; an unknown navigation domain produces a console notice, never an exception; the palette lists every registered command with its platform gesture; every primary action is reachable by keyboard |
 | 3 | Settings, theming, accessibility | `settings-theming-and-accessibility` | `mocassin.settings` v1 model, validator, migrations, source-generated JSON context, and the atomic+fsync+size-capped store (store in `Mocassin.App`, model/pure logic in ViewModels), app-data layout, settings dialog (reset, open config folder, clear logs/cache), theme/density/font-scale/high-contrast/reduce-motion applier in Views, persisted last directories and log level, accessibility metadata | Settings round-trip, defaults-on-invalid, unknown-field tolerance, future-major rejection, migration, and failed/oversized-write safety pass on real files; the theme/density/contrast switch applies without restart; primary controls expose names/roles |
 | 4 | Project session lifecycle | `project-session-lifecycle` | `ProjectSession`/`IProjectSessionService` over `ProjectStore` **configured with `ValidateOnLoad = false`** and retaining `ProjectLoadResult.Diagnostics` on the session; new via `ProjectTemplateFactory` + shared `ProjectPathRules`; open/open-or-activate/save/save-as/close/reload; recents; locks and read-only mode; external-change detection; multi-project workspace; window close; a read-only Project Overview with project identity and file metadata (editing is 23B) | New → save → close → reopen is content-identical; save-as migrates the lock; a second session opens read-only; an external change or a deleted file is detected before any overwrite; the store never validates and the load diagnostics are retained for 23B |
-| 5 | 23A tests, documentation, and closeout | `tests-docs-and-closeout` | Avalonia headless harness, `ManualTimeProvider`/inline dispatcher/recording dialog/stub picker/real App-layer settings-store test support, visual baselines in three themes, accessibility-tree assertions, platform checklist, the 23A documentation column (§14), parity/status updates, `docs/planning/closeout/step-23a.json`, and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; `check_closeout_evidence.py` validates; the audit request is complete |
+| 5 | 23A tests, documentation, and closeout | `tests-docs-and-closeout` | Avalonia headless harness, `ManualTimeProvider`/inline dispatcher/recording dialog/stub picker/real App-layer settings-store test support, visual baselines in three themes, accessibility-tree assertions, platform checklist, the 23A documentation column (§14), parity/status updates, `docs/planning/closeout/step-23a.json` (`"step": "step-23a"`), and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; `check_closeout_evidence.py` validates once the `step-NN[a-z]` tooling prerequisite has landed; the audit request is complete |
 
 The owner approves this list once at the start gate; individual features are then squash-merged without further
 approval. 23B is not part of this list and must not appear in a 23A branch.
@@ -198,7 +198,7 @@ is split into a ViewModels contract plus an implementation in `Mocassin.App` or 
 | Settings document | `AppSettings`, `LayoutState`, `PathState`, `AppSettingsValidator`, `SettingsMigration`, `AppSettingsJsonContext`, `IAppSettingsStore` | `AppSettingsStore` in `Mocassin.App` (atomic write, fsync, size cap, app-data path) |
 | External-change probe | `IProjectFileProbe` (length, last-write UTC, content bytes) and the pure `FileStamp` comparison | `ProjectFileProbe` in `Mocassin.App` |
 | Theme/density/contrast/motion | `ThemeSelection`, `Density`, `ThemeService` state + `IThemeApplier` | `AvaloniaThemeApplier` + resource dictionaries in `Mocassin.App.Views` |
-| App-data root | `AppDataOverride` (parsed `--data-dir`/`MOCASSIN_DATA_DIR`) | `AppPaths` resolves `<LocalApplicationData>/Mocassin` and its subfolders from `Environment.SpecialFolder` in `Mocassin.App` |
+| App-data root | `AppDataOverride` is a pure value only | `AppStartupOptions` parses `--data-dir` and reads `MOCASSIN_DATA_DIR`; `AppPaths` resolves `<LocalApplicationData>/Mocassin` and its subfolders from `Environment.SpecialFolder`. Both types and the environment read live in `Mocassin.App`; ViewModels never reads the environment |
 | Picker and dispatcher | `IStorageService`, `IUiDispatcher` | `AvaloniaStorageService`, `AvaloniaUiDispatcher` in `Mocassin.App.Views` |
 
 **The I/O token test and its limits.** A structure test scans `Mocassin.App.ViewModels/**/*.cs` after stripping
@@ -374,22 +374,26 @@ internal enum ProjectSessionOutcome
 {
     Created, Opened, Activated, OpenedReadOnly, Saved, Reloaded, Closed,
     NotFound, TooLarge, Io, InvalidContent,          // mirrors ProjectLoadFailureKind
-    Locked, UnsavedChanges, SaveFailed, Canceled,
+    Locked, SaveFailed, Canceled,
+    UnsavedChanges,                                   // reserved for 23B; never produced in 23A
 }
 ```
 
 - **Services never prompt.** `IProjectSessionService` returns a typed `ProjectSessionResult` covering success,
   the four load failures mapped one-to-one from `ProjectLoadResult.FailureKind` (`NotFound`, `TooLarge` for the
   64 MiB `MaxDocumentBytes` limit, `Io`, `InvalidContent`), `Locked`, `SaveFailed`, and `Canceled`, plus the
-  diagnostics. The shell owns every dialog. There is no second store abstraction.
+  diagnostics. `UnsavedChanges` is defined now as a reserved outcome so the result type does not change shape
+  in 23B; 23A never produces it because no document is editable, and 23B adds the prompt that does. The shell
+  owns every dialog. There is no second store abstraction.
 - **Store configuration.** The single `ProjectStore` is constructed with
   `new ProjectStoreOptions { ValidateOnLoad = false }`. The load result's `ProjectLoadResult.Diagnostics` are
   retained on the session as `LoadDiagnostics` and handed to 23B's validation pipeline; 23A runs no validation
   and never calls `ProjectValidationPipeline` (the M-1 double-validation contract is completed in 23B).
 - **New**: `ProjectTemplateFactory.CreateProject(kind, name, utcNow)` — the same factory as `mocassin new` —
   after validating the name **and target path** with the shared `ProjectPathRules` (§12). Step 23A ships exactly
-  the kinds `ProjectTemplateKind` defines today (`blank`, `ceria`) with the CLI's display names. An existing
-  target is refused with the same decision and message as the CLI's `CLI003` case.
+  the kinds `ProjectTemplateKind` defines today (`blank`, `ceria`) with the CLI's display names. For **New
+  only**, an existing target is refused with the same decision and message as the CLI's `CLI003` case; New never
+  overwrites.
 - **Open/Activate**: picker, recent list, or drag-and-drop of a `.mocprj`. `OpenAsync` creates a session or
   returns a load failure; opening an already-open path calls `ActivateAsync` and never creates a second session.
   The picker starts in `paths.lastOpenDirectory` and updates it on success.
@@ -397,7 +401,9 @@ internal enum ProjectSessionOutcome
   store the returned value as `ProjectSession.LastWritten` for the file stamp and displayed timestamp, refresh
   the file stamp, and close the "save as" dialog state. 23B adds sidecar deletion.
 - **Save As**: acquire the new lock before releasing the old one; on success update the session path, recent
-  list, file stamp, and document display data. A target that another session has open is refused.
+  list, file stamp, and document display data. A target that another session has open is refused. Unlike New,
+  Save As to an existing on-disk file is allowed once the OS picker's overwrite confirmation is accepted; the
+  store replaces the file atomically.
 - **Reload**: re-read the file and replace the session's `ProjectDocument` with a fresh instance over the
   reloaded value (23A has no undo history to discard), refresh the stamp and `LoadDiagnostics`. Used by the
   external-change flow and by "Reload" in the File menu.
@@ -429,7 +435,7 @@ internal enum ProjectSessionOutcome
 - Settings live in `<app-data>/Mocassin.Settings.json`; the root is `<LocalApplicationData>/Mocassin`
   (`%LOCALAPPDATA%`, `~/.local/share`, `~/Library/Application Support`), overridable by
   `--data-dir`/`MOCASSIN_DATA_DIR`. Subfolders: `logs/`, `cache/` (reserved for Step 27), `recovery/` (reserved;
-  23B is the first writer).
+  23B is the first writer). The document shape is normative in §6.1.
 - Validation on load: an unknown enum, out-of-range number, or malformed entry falls back to the default for
   that field and logs a warning; a document whose `format` is wrong or whose `schemaVersion` is a future major
   is not loaded and **not overwritten** (defaults, banner, "Save as new file"). Unknown fields are tolerated and
@@ -452,6 +458,71 @@ internal enum ProjectSessionOutcome
   added by 23B with the `autosave` settings block. "Clear logs and cache" deletes only
   `logs/` and `cache/` files that are not the active log, and reports bytes freed; no project, package, results,
   or job-folder path is touched.
+
+#### 6.1 `mocassin.settings` v1 (normative)
+
+`Mocassin.Settings.json` is application-local and single-consumer. It is **not** in `contracts/manifest.json`,
+has no cross-language fixtures, and is not a public format; [`docs/reference/file-layout.md`](../../reference/file-layout.md)
+mirrors this section for users, but this section is the normative design shape. 23B adds two objects to the same
+v1 document additively (§23B §9) with **no** `schemaVersion` bump.
+
+```json
+{
+  "format": "mocassin.settings",
+  "schemaVersion": 1,
+  "theme": "system",
+  "accent": null,
+  "density": "comfortable",
+  "fontScale": 1.0,
+  "highContrast": false,
+  "reduceMotion": false,
+  "culture": "en",
+  "logging": { "level": "information" },
+  "ui": { "confirmOnExternalChange": true, "showWelcomeOnStart": true },
+  "paths": { "lastOpenDirectory": null, "lastSaveDirectory": null, "lastFolderDirectory": null },
+  "recentFiles": [],
+  "layout": { "leftWidth": 260, "rightWidth": 320, "consoleHeight": 180,
+              "leftVisible": true, "rightVisible": true, "consoleVisible": true,
+              "activeConsoleChannel": "application" }
+}
+```
+
+| Key | Type | Default | Rule |
+| --- | --- | --- | --- |
+| `format` | string | — (required) | Must equal `"mocassin.settings"`; any other value makes the document invalid and it is not loaded or overwritten |
+| `schemaVersion` | integer | `1` | Current major is `1`; a value above the current major is rejected without overwriting; a lower value is migrated |
+| `theme` | string enum | `"system"` | `system` / `light` / `dark` |
+| `accent` | string or null | `null` | One of the small fixed palette keys; `null` means the Fluent default |
+| `density` | string enum | `"comfortable"` | `comfortable` / `compact` |
+| `fontScale` | number | `1.0` | 0.85–1.5 inclusive; outside the range falls back to `1.0` with a warning |
+| `highContrast` | boolean | `false` | Uses the app-owned high-contrast dictionary |
+| `reduceMotion` | boolean | `false` | Disables non-essential transitions |
+| `culture` | string | `"en"` | BCP-47 tag used for number/date formatting; the UI text stays invariant English (localization is deferred) |
+| `logging.level` | string enum | `"information"` | `trace` / `debug` / `information` / `warning` / `error` / `fatal` |
+| `ui.confirmOnExternalChange` | boolean | `true` | Ask before reloading after an external modification |
+| `ui.showWelcomeOnStart` | boolean | `true` | Open the welcome document on a fresh start |
+| `paths.lastOpenDirectory` | string or null | `null` | Last accepted open-picker directory |
+| `paths.lastSaveDirectory` | string or null | `null` | Last accepted save-picker directory |
+| `paths.lastFolderDirectory` | string or null | `null` | Last accepted folder-picker directory (export, config folder) |
+| `recentFiles` | array of objects | `[]` | At most 10 entries `{ "path": string, "lastOpenedUtc": ISO-8601 UTC }`, de-duplicated by path, newest first |
+| `layout.leftWidth` / `rightWidth` / `consoleHeight` | integer (px) | `260` / `320` / `180` | Clamped to 160–600 / 160–800 / 80–600; an out-of-range value falls back to the default |
+| `layout.leftVisible` / `rightVisible` / `consoleVisible` | boolean | `true` | Panel visibility |
+| `layout.activeConsoleChannel` | string | `"application"` | Channel id; an unknown id falls back to the first available channel. 23B may persist `"problems"` |
+
+There are no other keys or nesting levels in v1; any object not listed is unknown (see the rules below).
+
+**Read and migration policy.** Unknown properties are **ignored** (the settings reader does not use
+`JsonUnmappedMemberHandling.Disallow`, unlike the strict `.mocprj` reader) and are dropped on the next write. A
+missing key takes its default. A value with the wrong type, an unknown enum member, or an out-of-range number
+falls back to that field's default and writes one warning to the log. A malformed or unreadable document loads
+all defaults, shows a banner, and is not overwritten. Migrations are pure functions in `SettingsMigration`
+keyed by `schemaVersion` and are idempotent; version 1 is the first version, so the v1 migration is the identity.
+
+**Size and write discipline.** `MaxSettingsBytes = 4 MiB` bounds the serialized document and `recentFiles` is
+capped at 10 entries; a larger document is rejected as invalid and is not loaded, so a corrupt or hostile file
+cannot exhaust memory. Writing serialises through the source-generated `AppSettingsJsonContext` to UTF-8 without
+BOM, 2-space indent, `\n` line endings, writes a sibling temp file, flushes and `Flush(flushToDisk: true)`, then
+replaces the target. A failed or interrupted write leaves the previous file intact.
 
 ### 7. Dialogs, pickers, consoles, and notifications
 
@@ -634,10 +705,57 @@ One additive, behaviour-preserving change:
 | --- | --- | --- | --- |
 | `ProjectPathRules.NormalizeName/ValidateTarget` + `NewProjectCommand` refactor to call it | `Mocassin.Packages.Projects.Templates` and `Mocassin.Cli.NewProject` | `File > New` must enforce exactly the CLI's name **and target-path** rules (trimmed name, `.mocprj` suffix, length, separators, `..`, control and reserved characters, existing target, directory creation); duplicating them guarantees drift | New public helper; CLI codes, exit codes, file behaviour, and message text stay identical, and **new CLI tests pin the exact message text** moved into the helper |
 
-The CLI refactor is a behaviour-preserving move: `NewProjectCommand` keeps `CLI001`/2 usage errors, `CLI002`/3
-I/O errors, `CLI003`/3 existing-target errors, its exit codes, and its JSON report. The helper is listed in
-`Mocassin.Packages`' `PublicAPI.Unshipped.txt`; no baseline refresh is expected. No other library change is
-allowed in 23A; if one appears necessary, the step agent stops and records an amendment.
+**API (n-7).** The helper separates pure name rules from the file-system check so the CLI and the GUI share one
+decision without either doing I/O in the UI or duplicating the rules:
+
+```csharp
+namespace Mocassin.Packages.Projects.Templates;
+
+public enum ProjectPathFailure
+{
+    None, EmptyName, NameTooLong, PathSeparator, ParentDirectory, ControlCharacter,
+    ReservedCharacter, InvalidTargetPath, ExistingTarget, IoFailure,
+}
+
+public readonly record struct ProjectNameResult(
+    bool IsSuccess, string Name, ProjectPathFailure Failure, string? Message);
+
+public readonly record struct ProjectTargetResult(
+    bool IsSuccess, string FullPath, ProjectPathFailure Failure, string? Message);
+
+// The only file-system fact the caller supplies; every other input is pure.
+public enum ProjectTargetState { Absent, File, Directory }
+
+public static class ProjectPathRules
+{
+    // Pure: trims, removes one ".mocprj" suffix, enforces length <= 128, rejects separators, "..",
+    // control characters and : * ? " < > |. No I/O. On failure Name is the trimmed input for the message.
+    public static ProjectNameResult NormalizeName(string? rawName);
+
+    // Pure: combines the directory with the normalized name, rejects an empty/invalid directory string,
+    // and maps File -> ExistingTarget and Directory -> IoFailure.
+    public static ProjectTargetResult ValidateTarget(
+        string? directory, ProjectNameResult name, ProjectTargetState targetState);
+
+    // One message per failure, used verbatim by the CLI and the GUI; optional detail is appended.
+    public static string GetMessage(ProjectPathFailure failure, string? detail = null);
+}
+```
+
+**CLI mapping.** `NewProjectCommand` keeps its current observable behaviour:
+
+| Helper result | CLI diagnostic / exit |
+| --- | --- |
+| `NormalizeName` failure (`EmptyName`, `NameTooLong`, `PathSeparator`, `ParentDirectory`, `ControlCharacter`, `ReservedCharacter`) | `CLI001` usage error, exit `2` |
+| `ValidateTarget` `InvalidTargetPath` (empty or syntactically invalid directory) | `CLI001` usage error, exit `2` |
+| `ValidateTarget` `ExistingTarget` (`targetState == File`) | `CLI003` output-exists, exit `3` |
+| `ValidateTarget` `IoFailure` (`targetState == Directory`) or a `Directory.CreateDirectory` failure | `CLI002` I/O, exit `3` |
+
+The CLI continues to call `File.Exists`/`Directory.Exists`/`Directory.CreateDirectory` itself and passes only
+the resulting `ProjectTargetState` into the pure helper; the GUI does the same through its picker. Message text moves into
+`GetMessage` and new `Mocassin.Cli.Tests` cases pin each failure message, so the extraction cannot reword the
+CLI. The helper is listed in `Mocassin.Packages`' `PublicAPI.Unshipped.txt`; no baseline refresh is expected. No
+other library change is allowed in 23A; if one appears necessary, the step agent stops and records an amendment.
 
 ### 13. Dependency and interface checks (parallel track)
 
@@ -704,7 +822,7 @@ tests. No fake `Project`, no fake JSON, no fake store.
 | Reload/external change | PR-fast | A changed file prompts Reload; a deleted file offers Save As/Close; no silent overwrite; reload replaces the document and clears the old value |
 | Locks/read-only | PR-fast | A second session opens read-only with a banner; Save is disabled; save-as acquires the new lock; a stale lock is reclaimed per store policy |
 | Recent files | PR-fast | Order, de-duplication, missing-file disable/remove, persistence across restart |
-| Settings | PR-fast | Round-trip through the real `AppSettingsStore`; defaults on invalid field; unknown field ignored; future major rejected and file not overwritten; migration idempotent; a failed/oversized write leaves the previous file intact; last directories persist and update |
+| Settings | PR-fast | Every §6.1 key round-trips through the real `AppSettingsStore` and takes its documented default when missing; a wrong type/unknown enum/out-of-range value falls back to the default with a warning; unknown keys are ignored; a future major is rejected without overwriting; migration is idempotent; the 4 MiB cap rejects an oversized document; a failed write leaves the previous file intact; last directories persist and update |
 | Name/path rules | PR-fast | GUI and CLI produce the same message and decision for every rejected name/path case via `ProjectPathRules` |
 | Navigation | PR-fast | Open/reuse by key, activate, close, back/forward, unknown domain notice, provider registration per project scope |
 | Command catalog/palette | PR-fast | Every shell command appears with its platform gesture; `CanExecute` disables menu and palette together; `primary` resolves to Ctrl/Meta |
@@ -765,8 +883,8 @@ outcome is one coherent workspace story.
 
 **Owner acceptance is required** for this High step at the start gate, per [`04-roadmap.md`](../04-roadmap.md)
 §3.1. **No further split is proposed:** splitting host/workspace from settings/lifecycle would leave either a
-shell that cannot open a project or settings with no consumer; both halves would be unusable alone, so the extra
-step would add overhead without reducing the audit surface.
+shell that cannot open a project or settings/lifecycle code **without a host to run in**; both halves would be
+unusable alone, so the extra step would add overhead without reducing the audit surface.
 
 ### 19. Decisions recorded and owner input
 
@@ -777,7 +895,7 @@ step would add overhead without reducing the audit surface.
 | The recovery types (`IRecoveryStore`, `CrashRecoveryWriter`, `recovery/` writes) are 23B; 23A's crash dialog has no recovery action | This page §1/§8 |
 | Visibility: existing markers/`Program` stay public; 23A adds public `App : Application` (not ApiCompat-checked); all other new types are `internal` | This page §1/§10; [`01-target-architecture.md`](../01-target-architecture.md) §3.2 |
 | The I/O token test is a bounded tripwire with whole-identifier matching, `using static` detection, a positive control, and a documented limitation | This page §1/§15; [`code-structure.md`](../../development/code-structure.md) §2.3 |
-| `mocassin.settings` v1 is application-local, versioned, migratable, not in `contracts/manifest.json`; `autosave`/`session` are added additively by 23B | This page §6; [`docs/reference/file-layout.md`](../../reference/file-layout.md) |
+| `mocassin.settings` v1 is application-local, versioned, migratable, not in `contracts/manifest.json`; the normative field table and example are §6.1; `autosave`/`session` are added additively by 23B with no schema bump | This page §6.1; [`docs/reference/file-layout.md`](../../reference/file-layout.md) |
 | One global tab strip with project-scoped document keys and a project switcher | This page §3/§5 |
 | Dialogs are an in-shell overlay; no `MsBox.Avalonia`, no new control package | This page §7; ADR 0003 |
 | App-data root `<LocalApplicationData>/Mocassin` with `logs/`, `cache/`, `recovery/` (reserved); override via `--data-dir`/`MOCASSIN_DATA_DIR` | This page §6 |
@@ -785,13 +903,15 @@ step would add overhead without reducing the audit surface.
 | `Model`/`Build`/`Run` menus appear only when a later step contributes items | This page §4 |
 | Screenshot pixel comparison is Ubuntu-only; other platforms are manual evidence | This page §15 |
 | One additive library change (`ProjectPathRules` + CLI refactor) and no others | This page §12 |
-| Complexity class High with the dimension table; owner acceptance requested; no further split | This page §18 |
+| Complexity class High with the dimension table; owner acceptance requested; no further split (settings/lifecycle needs the host) | This page §18 |
+| Closeout identity is `step-23a` in both the evidence `step` field and the tag; the `step-NN[a-z]` checker/README/template support is a prerequisite landing before closeout; no `step-23` alias | This page §20 |
+| `ProjectPathRules` splits pure name/directory rules from a caller-supplied `ProjectTargetState`, with `GetMessage` owning the text the CLI and GUI share | This page §12 |
 
 **Verification items** (confirmed by the named feature; not guessed here):
 
 | ID | Question | Feature | Fallback |
 | --- | --- | --- | --- |
-| V-1 | Exact Avalonia 12.1.6 `AppBuilder`/headless setup and whether `UseSkia()` is available for screenshot rendering | 1/5 | Add an explicit `Avalonia.Skia` reference at the pinned version and record the dependency delta |
+| V-1 | Exact Avalonia 12.1.6 `AppBuilder`/headless setup and whether `UseSkia()` is available for screenshot rendering | 1/5 | Add `Avalonia.Skia` at the pinned version to **`Mocassin.App.Tests` only** (test-only; Skia is reachable through `Avalonia.Desktop` but a headless screenshot host should not rely on that), and record it as a test-only dependency. Production stays on the already-pinned Avalonia packages; no production package is added |
 | V-2 | Whether Avalonia 12.1.6 exposes a platform high-contrast variant/resource dictionary | 3 | Ship the app-owned `HighContrast.axaml` and select it from settings only |
 | V-3 | Whether the pinned `Serilog.Sinks.File` supports `retainedFileSizeLimitBytes` | 1 | Implement `LogRetention` as an explicit startup sweep |
 | V-4 | `IStorageProvider` "save as" behaviour per OS (filter, overwrite confirmation) | 4 | Own filtering and confirmation in `IStorageService` and document the per-OS behaviour |
@@ -812,10 +932,18 @@ CLI contract changes.
   23A introduces GUI code, which is a platform-specific trigger in `AGENTS.md` §3.13, the closeout evidence also
   includes one `platforms=windows` dispatch; macOS remains a manual platform gate. Record the run URLs/IDs and the
   full `head_sha`.
-- **Evidence:** `docs/planning/closeout/step-23a.json`, created from the template, binding the audited commit, the
+- **Closeout identity (M-1).** The evidence file is `docs/planning/closeout/step-23a.json` and its `step` field is
+  exactly `"step-23a"`; the tag is `step-23a` and the audit record is `docs/planning/audits/step-23a.md`. There is
+  **no** `step-23` alias, and the superseded unsplit `step-23` identity stays unused.
+- **Tooling prerequisite (M-1).** `tools/check_closeout_evidence.py` currently accepts only `^step-\d{2}$`
+  (`STEP_RE`) and rejects a letter suffix. A separate tooling change extends the checker, its tests, and the
+  closeout README/template to `^step-\d{2}[a-z]$` with a letter-suffix positive case. That change must land
+  **before either 23A or 23B closeout**; until it does, `python tools/check_closeout_evidence.py` cannot accept
+  `step-23a` and the closeout gate must not be claimed. The design does not work around it.
+- **Evidence:** `docs/planning/closeout/step-23a.json`, created from the template, binds the audited commit, the
   closeout CI `head_sha`, the `main` SHA at freeze, and the merge candidate; `python
-  tools/check_closeout_evidence.py` must pass. The platform-gate and screenshot results are cited from the step
-  page feature log.
+  tools/check_closeout_evidence.py` must pass once the tooling prerequisite has landed. The platform-gate and
+  screenshot results are cited from the step page feature log.
 - **Audit:** a fresh out-of-context auditor reviews the frozen branch and writes `docs/planning/audits/step-23a.md`
   (created on demand from the template — no pre-seeded record). The auditor commits only that file; the step
   agent adds resolutions and status afterwards without altering reviewer text.
@@ -843,7 +971,8 @@ CLI contract changes.
       platform checklist, the 23A documentation column, parity/status updates, `closeout/step-23a.json`, audit.
 - [ ] Add the `ProjectPathRules` change with its tests (including CLI message pinning) and the
       `PublicAPI.Unshipped.txt` entry; verify no App `PublicAPI.*`/baseline changes.
-- [ ] Run `python tools/check_closeout_evidence.py` and request the audit.
+- [ ] Run `python tools/check_closeout_evidence.py` after the `step-NN[a-z]` checker/template/README change has
+      landed, and request the audit (`step-23a`).
 
 ## Acceptance criteria
 
@@ -852,8 +981,8 @@ CLI contract changes.
 - [ ] The app starts with a welcome document; the shell regions, menu bar, and status bar render.
 - [ ] A project can be created from both embedded templates, opened, inspected, saved, closed, and reopened;
       reopening yields identical content through the real store.
-- [ ] Save-as works and migrates the lock; an already-open path activates its session; an existing target is
-      refused with the CLI's message.
+- [ ] Save-as works and migrates the lock; an already-open path activates its session; **New** refuses an
+      existing target with the CLI's message, while Save As to an existing file follows the picker confirmation.
 - [ ] The composed `ProjectStore` has `ValidateOnLoad = false` and retains `ProjectLoadResult.Diagnostics`; no
       validation pipeline is registered or called in 23A.
 - [ ] Reload and external-change detection behave as designed; no silent overwrite is possible.
@@ -864,7 +993,8 @@ CLI contract changes.
       platform gestures; `Model`/`Build`/`Run` menus do not appear.
 - [ ] Accessibility names/roles are present on the primary controls; the accessibility-tree assertions pass.
 - [ ] No unhandled exception kills the process silently; the crash dialog and log entry are verified.
-- [ ] `./tools/verify.sh all --require` passes, the strict docs build passes, and closeout evidence validates.
+- [ ] `./tools/verify.sh all --require` passes, the strict docs build passes, and `closeout/step-23a.json` with
+      `"step": "step-23a"` validates once the `step-NN[a-z]` checker support has landed.
 - [ ] Documentation written (§14), and no page claims a 23B or later capability.
 
 ## Documentation
