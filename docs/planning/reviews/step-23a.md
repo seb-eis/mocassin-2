@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `34d036dacbce3b7536549c3a4f9ea1f65dc2d5d5` |
+| Reviewed commit | `b9c56fe1351fd2f9d13d60d7ed5b989f3287fc12` |
 | Docs branch | `docs/step-23-design` |
 | Review date | 2026-11-20 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh planning auditor |
@@ -42,6 +42,16 @@ addresses n-1–n-7. **Round-1 reviewer text — Evidence, Findings, Reviewer in
 report — is byte-identical to `c65b1a1`**; only request-owned fields (this note, the `Reviewed commit` cell, the
 `Record state` line, and the `Resolution status` section) changed. The round-1 findings and verdict remain
 unchanged as history.
+
+**Refreeze note (round 3, 2026-11-20).** Round 2 returned `Ready with notes` on freeze `34d036d` for m-4 and
+n-8–n-11 (n-1 deferred). The owner asked for those notes to be fixed before the start gate, and the design was
+refrozen at `b9c56fe1351fd2f9d13d60d7ed5b989f3287fc12`. The refreeze reserves `InvalidTargetPath` for the GUI and
+keeps the CLI's empty-output-directory `CLI002`/3 behaviour and pinned test unchanged (m-4), scopes the §15 test
+row to New (n-8), makes §6.1's `file-layout.md` reference future tense (n-9), uses the lowercase `23a`/`23b`
+status-row ids matching the landed process checker (n-10), and states that every new type other than `App` is
+internal while `App` is the only new public App type and `Program` is pre-existing (n-11). **Round-1 and round-2
+reviewer text is byte-identical to `c65b1a1` and `8a6678b`**; only request-owned fields (this note, the
+`Reviewed commit` cell, the `Record state` line, and the `Resolution status` section) changed.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the design and
 > completed this request, and relays the verdict and owner decisions. The planner and step agent update the
@@ -216,14 +226,14 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready with notes — round 2 reviewed the refrozen design at
-`34d036dacbce3b7536549c3a4f9ea1f65dc2d5d5` and returned `Ready with notes`. M-1, M-2, and m-3 are closed; n-1 is
-deferred to the step agent; n-2, n-3, n-5, and n-6 are closed; n-4 and n-7 are substantively closed with the
-residuals recorded as n-8 and m-4. The new Minor (m-4) and Notes (n-8–n-11) are recorded in
-`### Re-review round 2` below for the human owner's explicit acceptance. Round 1 and its reviewer text remain
+**State:** Re-review required — round 1 returned `Changes required` on freeze `219f784` (M-1, M-2, m-3,
+n-1–n-7); round 2 returned `Ready with notes` on freeze `34d036d` (m-4, n-8–n-11; n-1 deferred). At the owner's
+request, the remaining notes are fixed and the design is refrozen at
+`b9c56fe1351fd2f9d13d60d7ed5b989f3287fc12`; the findings are resolved or explicitly dispositioned in
+`Resolution status` below, and the refrozen design awaits a round-3 review. Earlier findings and verdicts remain
 unchanged as history.
 
-`Ready with notes` is a verdict awaiting explicit human-owner acceptance, not a merge or start authorization.
+`Re-review required` is a record state, not a verdict.
 
 ## Reviewer independence
 
@@ -294,6 +304,18 @@ configuration, contract, or generated artifact changed.
 | **n-5** | Fixed | Planner | `34d036d` | 23A §18 and `04-roadmap.md` §3.1 now say the settings/lifecycle half would be **without a host to run in**, not "without a consumer"; the no-further-split conclusion is unchanged. |
 | **n-6** | Fixed | Planner | `34d036d` | V-1's fallback now adds `Avalonia.Skia` at the pinned version to **`Mocassin.App.Tests` only**, as a test-only dependency for the headless screenshot host; production keeps the already-pinned Avalonia packages and the "no new production package" claim stands. |
 | **n-7** | Fixed | Planner | `34d036d` | §12 defines `ProjectPathFailure`, `ProjectNameResult`, `ProjectTargetResult`, `ProjectTargetState`, and `ProjectPathRules.NormalizeName/ValidateTarget/GetMessage`, with pure rules and one caller-supplied file-system fact. It maps `NormalizeName`/invalid-directory failures to `CLI001`/2, `ExistingTarget` (`File`) to `CLI003`/3, and `Directory`/creation failure to `CLI002`/3, and keeps the new CLI message-pinning tests. |
+
+**Round-3 corrections to earlier rows.** The round-1 n-4 row's claim that the §15 test row was scoped like the
+§5 rule was inaccurate; n-8 below corrects it. The round-1 n-7 mapping for `InvalidTargetPath` changed a CLI
+behaviour; m-4 below corrects it. Those rows are kept as history; the rows below supersede the affected claims.
+
+| Finding | Status | Owner | Commit | Resolution |
+| --- | --- | --- | --- | --- |
+| **m-4** | Fixed | Planner | `b9c56fe` | `ProjectPathFailure.InvalidTargetPath` is now documented as **GUI-only** (empty/invalid directory chosen in a picker; inline message and picker re-open). The CLI never produces it: it validates and normalises its output path before calling the helper, keeps the empty/invalid output directory as `CLI002` I/O with exit `3`, and `AnEmptyOutputDirectoryIsCli002AndExitThree` stays unchanged. The mapping table no longer maps `InvalidTargetPath` to `CLI001`/2; the CLI codes, exit codes, and messages are unchanged, and the new message-pinning tests cover only the failures the helper produces. §19's decision row records the GUI-only reservation. |
+| **n-8** | Fixed | Planner | `b9c56fe` | The §15 "New/open/save/close" row now reads "**New** refuses an existing target, while Save As to an existing file follows the picker confirmation", matching §5 and the acceptance criterion. |
+| **n-9** | Fixed | Planner | `b9c56fe` | §6.1 now says `docs/reference/file-layout.md` **will mirror** the section once the 23A documentation column lands (§14), and that at this freeze the page has no settings/app-data section. No present-tense content claim remains. |
+| **n-10** | Fixed | Planner | `b9c56fe` | §20 (23A) and §18 (23B) now instruct the step agent to add the lowercase **`23a`**/**`23b`** status rows, matching `check_process_consistency.py`'s `\d{2}[a-z]?` parser, and state that page titles/prose keep `23A`/`23B`. No uppercase/lowercase mismatch is left in the dashboard instruction. |
+| **n-11** | Fixed | Planner | `b9c56fe` | §1, §10, and feature 1's done-when now say every new type **other than `App`** is internal, `App` is the only new public App type, and `Program` is pre-existing. `code-structure.md` §2.3 uses the same wording. The no-ApiCompat/no-baseline substance is unchanged. |
 
 The step agent fills any further status after the next verdict. Do not alter the reviewer-authored findings,
 evidence, or verdict.
