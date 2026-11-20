@@ -9,6 +9,7 @@ using Mocassin.Core.Geometry;
 using Mocassin.Core.Ids;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
+using Mocassin.Symmetry.SpaceGroups;
 using Mocassin.Symmetry.Transitions;
 using static Mocassin.Compilation.Transitions.TransitionRuleHelpers;
 
@@ -72,12 +73,15 @@ internal sealed partial class TransitionCompilationStage : ICompilationStage
 
         var warnings = new DiagnosticBag();
         AddUnusedTransitionWarnings(context, works, warnings);
+        var pureTranslations = context.Setting!.Operations
+            .Where(static operation => operation.Linear == Int3x3.Identity)
+            .ToImmutableArray();
         var drafts = new List<DirectionDraft>();
         var inverseByForward = new Dictionary<string, string>(StringComparer.Ordinal);
         foreach (var work in works)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            if (!TryBuildDirections(context, resolver, work, drafts, inverseByForward, out var diagnostics))
+            if (!TryBuildDirections(context, resolver, work, drafts, inverseByForward, pureTranslations, out var diagnostics))
             {
                 return CompilationFailure.FromSource(
                     context,
@@ -367,12 +371,13 @@ internal sealed partial class TransitionCompilationStage : ICompilationStage
         TransitionWork work,
         List<DirectionDraft> drafts,
         Dictionary<string, string> inverseByForward,
+        ImmutableArray<SymmetryOperation> pureTranslations,
         out ImmutableArray<Diagnostic> diagnostics)
     {
         var bag = new DiagnosticBag();
         var setting = context.Setting!;
         var encoder = resolver.Encoder;
-        var forwardDrafts = new List<DirectionDraft>();
+        var forwardPaths = new List<RawForwardPath>();
         if (work.IsKinetic)
         {
             var transition = context.Project.Find(new KineticTransitionId(work.Transition.Id))!;
@@ -394,7 +399,7 @@ internal sealed partial class TransitionCompilationStage : ICompilationStage
                     continue;
                 }
 
-                AddDraft(context, drafts, forwardDrafts, work, resolved, IsInverse: false, forwardKey: null);
+                AddForwardDraft(context, drafts, forwardPaths, work, resolved, pureTranslations);
             }
         }
         else
@@ -427,22 +432,31 @@ internal sealed partial class TransitionCompilationStage : ICompilationStage
                     continue;
                 }
 
-                AddDraft(context, drafts, forwardDrafts, work, [resolvedA, resolvedB], IsInverse: false, forwardKey: null);
+                AddForwardDraft(context, drafts, forwardPaths, work, [resolvedA, resolvedB], pureTranslations);
             }
         }
 
         if (work.Chain.GeneratesReverse)
         {
-            foreach (var forward in forwardDrafts)
+            // Generate the reverse for every raw forward path, not only for each merged direction, so that
+            // translation-equivalent reverse starts are collected on the reverse direction as well.
+            foreach (var forward in forwardPaths)
             {
-                var reverse = forward.Reverse();
-                var key = reverse.Key;
-                if (drafts.All(draft => !string.Equals(draft.Key, key, StringComparison.Ordinal)))
+                var reverseAbsolute = forward.Absolute.Reverse().ToArray();
+                var reverseStability = forward.Stability.Reverse().ToArray();
+                var reverse = AddDraft(
+                    context,
+                    drafts,
+                    work,
+                    reverseAbsolute,
+                    reverseStability,
+                    IsInverse: true,
+                    forward.Representative.Key,
+                    pureTranslations);
+                if (reverse is not null)
                 {
-                    drafts.Add(reverse);
+                    inverseByForward[forward.Representative.Key] = reverse.Key;
                 }
-
-                inverseByForward[forward.Key] = key;
             }
         }
 
@@ -450,22 +464,74 @@ internal sealed partial class TransitionCompilationStage : ICompilationStage
         return !bag.HasErrors;
     }
 
-    private static void AddDraft(
+    private static void AddForwardDraft(
         CompilationContext context,
-        List<DirectionDraft> all,
-        List<DirectionDraft> forward,
+        List<DirectionDraft> drafts,
+        List<RawForwardPath> forwardPaths,
         TransitionWork work,
         ImmutableArray<ResolvedPathPosition> resolved,
-        bool IsInverse,
-        string? forwardKey)
+        ImmutableArray<SymmetryOperation> pureTranslations)
     {
         if (resolved.IsDefaultOrEmpty)
         {
             return;
         }
 
-        var start = resolved[0].Encoding;
         var absolute = resolved.Select(static position => position.Encoding).ToArray();
+        var stability = resolved.Select(static position => position.Stability).ToArray();
+        var draft = AddDraft(
+            context,
+            drafts,
+            work,
+            absolute,
+            stability,
+            IsInverse: false,
+            forwardKey: null,
+            pureTranslations);
+        if (draft is not null)
+        {
+            forwardPaths.Add(new RawForwardPath(draft, absolute, stability));
+        }
+    }
+
+    private static DirectionDraft? AddDraft(
+        CompilationContext context,
+        List<DirectionDraft> all,
+        TransitionWork work,
+        Vector4I[] absolute,
+        SiteStability[] stability,
+        bool IsInverse,
+        string? forwardKey,
+        ImmutableArray<SymmetryOperation> pureTranslations)
+    {
+        if (absolute.Length == 0)
+        {
+            return null;
+        }
+
+        var start = absolute[0];
+        var existing = all.FirstOrDefault(draft =>
+            draft.CollectionIndex == work.CollectionIndex &&
+            draft.IsInverse == IsInverse &&
+            IsTranslationEquivalent(context, draft, absolute, pureTranslations));
+        if (existing is not null)
+        {
+            // The compiled direction is an orbit representative; its equivalent starts are mapped into
+            // every matching jump_mapping bucket. Keep the representative start in the set as well, but
+            // leave the set empty for a single-start direction so existing signatures are unchanged.
+            if (!existing.EquivalentStarts.Contains(existing.StartP))
+            {
+                existing.EquivalentStarts.Add(existing.StartP);
+            }
+
+            if (!existing.EquivalentStarts.Contains(start.P))
+            {
+                existing.EquivalentStarts.Add(start.P);
+            }
+
+            return existing;
+        }
+
         var relative = absolute
             .Select(encoding => new Vector4I(
                 encoding.A - start.A,
@@ -474,17 +540,6 @@ internal sealed partial class TransitionCompilationStage : ICompilationStage
                 encoding.P))
             .ToArray();
         var key = DirectionKey(work.CollectionIndex, relative, IsInverse);
-        var existing = all.FirstOrDefault(draft => string.Equals(draft.Key, key, StringComparison.Ordinal));
-        if (existing is not null)
-        {
-            if (!existing.EquivalentStarts.Contains(resolved[0].P))
-            {
-                existing.EquivalentStarts.Add(resolved[0].P);
-            }
-
-            return;
-        }
-
         var draft = new DirectionDraft(
             work.CollectionIndex,
             work.Transition,
@@ -493,16 +548,80 @@ internal sealed partial class TransitionCompilationStage : ICompilationStage
             IsInverse,
             absolute,
             relative,
-            resolved[0].P,
-            resolved.Select(static position => position.Stability).ToArray(),
+            start.P,
+            stability,
             key,
             forwardKey);
         all.Add(draft);
-        if (!IsInverse)
-        {
-            forward.Add(draft);
-        }
+        return draft;
     }
+
+    /// <summary>
+    /// Determines whether two expanded paths are the same jump direction modulo a pure lattice translation
+    /// of the centered space-group setting.
+    /// </summary>
+    /// <remarks>
+    /// The rule is exact and conservative:
+    /// <list type="number">
+    /// <item>the fractional displacement sequence <c>x(i) - x(0)</c> must match (this is what makes the
+    /// relative jump geometry identical, including its periodic image);</item>
+    /// <item>the start positions must be related by an operation of the setting whose linear part is the
+    /// identity, i.e. a centering/lattice translation.</item>
+    /// </list>
+    /// A path that cannot be proven equivalent stays a distinct direction; equivalent starts are never inferred
+    /// from a rotational or mirror image, because that would change the relative path and therefore the jump
+    /// direction in the P1 frame.
+    /// </remarks>
+    private static bool IsTranslationEquivalent(
+        CompilationContext context,
+        DirectionDraft existing,
+        Vector4I[] absolute,
+        ImmutableArray<SymmetryOperation> pureTranslations)
+    {
+        if (existing.Absolute.Length != absolute.Length)
+        {
+            return false;
+        }
+
+        var encoder = context.Encoder!;
+        var existingStart = encoder.Decode(existing.Absolute[0]);
+        var candidateStart = encoder.Decode(absolute[0]);
+        for (var node = 0; node < absolute.Length; node++)
+        {
+            var existingDisplacement = Displacement(encoder.Decode(existing.Absolute[node]), existingStart);
+            var candidateDisplacement = Displacement(encoder.Decode(absolute[node]), candidateStart);
+            if (!NearlyEqual(existingDisplacement, candidateDisplacement))
+            {
+                return false;
+            }
+        }
+
+        foreach (var operation in pureTranslations)
+        {
+            var image = operation.Transform(existingStart);
+            if (encoder.TryIndexOf(image, out var mapped) && mapped == absolute[0].P)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static Fractional3 Displacement(Fractional3 point, Fractional3 start) =>
+        new(point.A - start.A, point.B - start.B, point.C - start.C);
+
+    private static bool NearlyEqual(Fractional3 left, Fractional3 right) =>
+        Math.Abs(left.A - right.A) <= translationEquivalenceTolerance &&
+        Math.Abs(left.B - right.B) <= translationEquivalenceTolerance &&
+        Math.Abs(left.C - right.C) <= translationEquivalenceTolerance;
+
+    private const double translationEquivalenceTolerance = 1e-9;
+
+    private readonly record struct RawForwardPath(
+        DirectionDraft Representative,
+        Vector4I[] Absolute,
+        SiteStability[] Stability);
 
     private static bool TryGenerateForwardRules(
         CompilationContext context,
