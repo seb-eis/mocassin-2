@@ -448,7 +448,7 @@ conversion is applied by Step 15's existing field convention. Tests pin a single
 identical-ion exchange (zero), a distinct-charge exchange (non-zero), a charge-state change at a fixed site, and
 a non-collinear multi-site path.
 
-The Rust `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` XML comments still say “particle-identity”;
+The `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` XML comments still say “particle-identity”;
 that source-doc correction is assigned to Step 13 feature 4 (which touches the transition payloads), not to
 this planning change.
 

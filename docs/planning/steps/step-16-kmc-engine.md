@@ -124,7 +124,7 @@ impl KmcEngine<'_> {
   resolved path position's allowed mask. Void is the empty occupation and is always allowed; the masks do not
   list void. A mismatch is a model/data error (exit 12), not `SiteBlocked` and not a silent skip. Because the
   selected direction and its path are known here, the check is exact and does not reject a rule that is valid
-  only along its own direction. This is the Step 14/16 assignment recorded in Step 13; Step 14 builds the
+  only along its own direction. This is the Step 16 assignment recorded in Step 13; Step 14 builds the
   context/pools but does not have the rule→selected-direction pair.
 
 ### 4. Frequency pre-check

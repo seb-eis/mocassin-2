@@ -152,26 +152,39 @@ single-threaded.
 - Resume: `RngStateV1` is a 64-byte blob with magic `MCR1`, version 1, a 64-bit stream, a 128-bit word
   position, and the 32-byte key. `rngAlgorithm = "chacha12-v1"` is bound to it. Export/import resumes at the
   exact 32-bit word, including mid-block.
-- Changing the cipher, derivation, draw semantics, or state layout is format-breaking and needs a new ADR and a
-  new algorithm id.
+- Changing the draw semantics (word consumption, `next_f64` construction, or `next_bounded`), the 64-byte
+  state layout, or the algorithm id is format-breaking: it needs a new ADR and a new algorithm id
+  (`chacha12-v2`). Changing the seed or fork derivation changes reproducibility for new runs but not the state
+  layout; it still needs an ADR or version note.
 
-The RNG benchmark measures draws per second, 64-word refill cost, state round-trip, and fork cost. The budgets
-are recorded in the Step 13 design and the test evidence; a regression above 10 % fails the release gate.
+The RNG benchmark measures draws per second, 64-word refill cost, state round-trip, and fork cost. The Step 13
+medians (AMD Ryzen 7 7840U, release) are `next_u32` 733 M/s, `next_u64` 437 M/s, `next_f64` 393 M/s,
+`next_bounded` 569-572 M/s, 64-word refill 75.4 ns, state round-trip 123.4 ns, and 32-byte fork 113.1 ns;
+every §4.5 budget is met. The structured evidence is `tests/reference/bench/step-13-rng.json`, the raw log is
+`step-13-rng-2026-11-19.txt`, and the `rustRng` entry in `baselines.json` is the same-runner-class baseline. A
+regression above 10 % on that class fails the release gate.
 
 ## CLI foundation
 
 Step 13 implements the inspection path:
 
 ```text
-mocassin-sim --db <project.msl> --job <id> --dry-run [--seed <hex32>] [--log-level ...] [--log-format ...]
+mocassin-sim --db <project.msl> --job <id> --dry-run [--io <dir>] [--seed <hex32>] [--threads <n>]
+             [--extension <path>] [--no-extensions] [--jump-log-max-ev <f64>]
+             [--log-level ...] [--log-format ...]
 ```
 
 - `--dry-run` loads, validates, and prints a stable summary (schema, model/lattice/job counts and signatures,
   settings, transition/tracker counts, RNG algorithm and seed hash). It writes nothing: it does not create the
-  I/O directory, does not write a log file, and rejects `--stdout`.
+  I/O directory, does not write a log file, and does not accept `--stdout` (any use is an invalid-argument
+  error; the run-dump option is Step 19 work).
+- `--io` is accepted and never created; `--threads` and `--jump-log-max-ev` are validated but unused; an
+  `--extension` request is rejected with exit 10 until the Step 19 ABI; `--no-extensions` is a no-op.
 - A non-dry-run invocation is a usage error until the simulation engines land; Step 16 enables a run and Step 19
   completes the option surface (`batch`, `--validate-only`, `--no-state`, `--log-file`, extensions).
-- Logs go to stderr (`tracing`, human or JSON). stdout is reserved for the human report.
+- Logs go to stderr (`tracing`, human or JSON; `--log-level` is the only filter and `RUST_LOG` is not
+  consulted). stdout is reserved for the human report. A panic in the inspection path is caught and exits 13,
+  never 10.
 - Exit codes (canonical definition: internal target architecture §7.3): 0 success, 5 partial success for
   multi-job/batch (reserved until Step 19), 10 invalid arguments, 11 package error, 12 model/data error,
   13 numerical failure or internal invariant violation (including a caught panic), 14 aborted by a configured limit, 15 cancelled,

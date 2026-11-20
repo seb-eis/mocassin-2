@@ -61,6 +61,7 @@ nav = [
       { "Architecture" = "development/architecture.md" },
       { "Code structure" = "development/code-structure.md" },
       { "Compilation pipeline" = "development/compilation-pipeline.md" },
+      { "Solver architecture" = "development/solver-architecture.md" },
       { "Design decisions" = "development/design-decisions.md" },
       { "Contributing" = "development/contributing.md" },
       { "Orchestration" = "development/orchestration.md" },

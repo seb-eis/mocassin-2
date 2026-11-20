@@ -73,6 +73,33 @@ build-stage validate `21.7 ms`, parameterize `13.4 ms`, expand `22.2 ms`, genera
 `16.8 ms`, and verify `796.0 ms`. The full-build budget (< 10 min, < 2 GB) is met with wide margin; the
 acceptance evidence and exact command are also recorded in the Step 12 page.
 
+## Solver package load (Step 13)
+
+The solver reader is benchmarked with Criterion in `src/rust/crates/mocassin-msl/benches/load.rs`. The command is:
+
+```sh
+cargo bench --manifest-path src/rust/Cargo.toml -p mocassin-msl --bench load
+```
+
+It opens `tests/contracts/packages/msl-v1/ceria-temperature-sweep.msl` read-only, loads job 1 with an empty model
+cache (cold), and loads job 1 again with the model cached (warm). Measured on the local container class
+(AMD Ryzen 7 7840U, Debian GNU/Linux 13, Rust 1.99.1, Criterion 0.8.2, release, single-threaded):
+
+| Measurement | Median |
+| --- | ---: |
+| Open the package (connection, pragmas, identity/schema checks) | 171.1 µs |
+| Open + cold `load_job(1)` (model, lattice, job, both signatures) | 343.1 µs |
+| Warm `load_job(1)` (model cached) | 71.1 µs |
+
+All three are far below the `< 100 ms` load target. That target is a **ceria-fixture budget**, not a promise for
+a 512 MiB package: the reader's `ReaderLimits` bound the large-package path, and a large payload may take
+proportionally longer. The raw Criterion log is
+[`tests/reference/bench/step-13-load-2026-11-20.txt`](../../tests/reference/bench/step-13-load-2026-11-20.txt);
+the structured evidence and the same-runner-class baseline are
+[`step-13-load.json`](../../tests/reference/bench/step-13-load.json) and the `rustLoad` entry in
+[`baselines.json`](../../tests/reference/bench/baselines.json). The RNG draw/refill/state numbers and their
+baseline are in [`step-13-rng.json`](../../tests/reference/bench/step-13-rng.json) and the `rustRng` entry.
+
 ## HPC
 
 The solver is a process-per-job design. SLURM/PBS templates and a runner are added in Step 19. Job folders

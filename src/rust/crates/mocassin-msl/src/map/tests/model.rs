@@ -50,6 +50,32 @@ fn a_collection_union_admits_a_particle_only_one_direction_allows() {
 }
 
 #[test]
+fn a_direction_may_be_mapped_into_another_start_bucket() {
+    let mut payload = model_dto();
+    // Bucket 6 (position 1, particle 1) and bucket 16 (position 3, particle 1) each have one direction.
+    // Swap them so each bucket refers to a direction whose representative start is the other position.
+    payload.transitions.jump_mapping[0] = 1;
+    payload.transitions.jump_mapping[2] = 0;
+
+    let model = map_ok(&payload);
+    let particle_count = model.counts.particle_count as usize;
+    let direction_at_bucket = |bucket: usize| -> usize {
+        let start = model.transitions.jump_offsets[bucket] as usize;
+        model.transitions.jump_mapping[start] as usize
+    };
+    let bucket_six = 6;
+    let bucket_sixteen = 16;
+    assert_ne!(
+        model.transitions.directions[direction_at_bucket(bucket_six)].position_id,
+        (bucket_six / particle_count) as u32
+    );
+    assert_ne!(
+        model.transitions.directions[direction_at_bucket(bucket_sixteen)].position_id,
+        (bucket_sixteen / particle_count) as u32
+    );
+}
+
+#[test]
 fn a_particle_outside_the_union_is_rejected_even_when_mass_and_charge_hold() {
     let mut payload = model_dto();
     payload.transitions.jump_rules[0].state0 =

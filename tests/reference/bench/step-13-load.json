@@ -1,0 +1,43 @@
+{
+  "step": "step-13",
+  "part": "Feature 7 — package open and job load benchmark",
+  "generatedAtUtc": "2026-11-20T19:53:52Z",
+  "sourceCommit": "feature-7 tree; replaced with the audited commit at closeout",
+  "command": "cargo bench --manifest-path src/rust/Cargo.toml -p mocassin-msl --bench load",
+  "rawResults": "tests/reference/bench/step-13-load-2026-11-20.txt",
+  "fixture": {
+    "package": "tests/contracts/packages/msl-v1/ceria-temperature-sweep.msl",
+    "jobs": 6,
+    "lattice": "6x6x6",
+    "positions": 4,
+    "particles": 864
+  },
+  "toolchain": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "1.99.1 (5f94df478 2026-08-27)",
+    "criterion": "0.8.2",
+    "profile": "bench (release, opt-level 3, single-threaded)"
+  },
+  "environment": {
+    "runnerClass": "linux-x64-local-container-amd-ryzen-7-7840u-rust-1.99.1",
+    "os": "Debian GNU/Linux 13 (trixie), Linux 6.12.116+deb13-rt-amd64 x86_64",
+    "cpu": "AMD Ryzen 7 7840U w/ Radeon 780M Graphics",
+    "logicalCpus": 16
+  },
+  "budget": {
+    "loadMilliseconds": 100,
+    "scope": "ceria fixture, release, benchmark laptop class; not a 512 MiB-package promise"
+  },
+  "measurements": {
+    "openMicroseconds": 171.09,
+    "coldLoadJobMicroseconds": 343.08,
+    "warmLoadJobMicroseconds": 71.075,
+    "targetMet": true
+  },
+  "notes": [
+    "open measures Package::open_readonly including the read-only connection, pragmas, identity/schema checks, and schema_info; the connection is dropped by the benchmark harness.",
+    "cold_load_job_1 measures open + load_job(1): schema checks, model decode/mapping/parameterization signature, lattice decode/mapping/signature, job decode/mapping, and column checks.",
+    "warm_load_job_1 measures load_job(1) with the decoded model already in the package cache.",
+    "All three medians are far below the < 100 ms fixture budget. A 512 MiB payload is bounded by ReaderLimits but may take proportionally longer; the budget is not a large-package promise."
+  ]
+}

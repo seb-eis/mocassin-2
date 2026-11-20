@@ -639,6 +639,7 @@ dependencies = [
 name = "mocassin-msl"
 version = "0.1.0"
 dependencies = [
+ "criterion",
  "mocassin-types",
  "proptest",
  "rmp-serde",
