@@ -195,7 +195,7 @@ Rules:
   (`IThemeApplier`, `IStorageService`, `IUiDispatcher`). A source-token test in the architecture suite enforces
   the ban, so the rule is checkable rather than aspirational.
 - The GUI never references `Mocassin.Cli`. Behaviour the GUI needs must live in a library; the CLI and the GUI
-  share `ProjectStore`, `ProjectTemplateFactory`, `ProjectNameRules`, `ProjectDocument`, and the validation
+  share `ProjectStore`, `ProjectTemplateFactory`, `ProjectPathRules`, `ProjectDocument`, and the validation
   pipeline.
 - One writer per project: a `ProjectEditCoordinator` over the Step 01 `ProjectDocument`. View models never
   mutate a `Project` or a domain object, never compute a project hash, and never build a `ProjectChange`.
@@ -207,6 +207,13 @@ Rules:
 - Contribution seams (navigation providers, explorer nodes, inspector content, menu items, console channels,
   status-bar items) are explicit interfaces in `Mocassin.App.ViewModels`, registered in the composition root.
   No assembly scanning, no reflection-based discovery, no service locator.
+- **Visibility (Step 23).** Every new App type is `internal`, with `InternalsVisibleTo("Mocassin.App.Tests")` for
+  the tests. The pre-existing public types stay public and are the only exceptions:
+  `AppViewModelsModule`/`AppViewsModule` (module markers listed in `PublicAPI.Shipped.txt` and checked by
+  ApiCompat) and `Program`/`App` (process/Avalonia entry points; `Mocassin.App` is not an ApiCompat project).
+  Step 23 adds or removes no public App type, so the App `PublicAPI.*` lists and
+  `tests/contracts/api-baseline/net11.0/Mocassin.App.*.dll` are unchanged. Adding a public App type or making a
+  marker internal is an owner-approved public-API change with a baseline refresh.
 - A later step adds a provider and a registration call; it does not edit the shell. If a later step needs a new
   seam, it adds the interface, registers it, and records the change in its own step page.
 

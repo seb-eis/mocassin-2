@@ -15,7 +15,7 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Create new project | Y | Partial | 01/12/23 | Blank, ceria, and barium-zirconate skeletons in 01/03; headless `mocassin new` with `--template blank` or `--template ceria`, fresh identity, and embedded assets in 12; creation UI in 23 using the same `ProjectTemplateFactory` and shared `ProjectNameRules` |
+| Create new project | Y | Partial | 01/12/23 | Blank, ceria, and barium-zirconate skeletons in 01/03; headless `mocassin new` with `--template blank` or `--template ceria`, fresh identity, and embedded assets in 12; creation UI in 23 using the same `ProjectTemplateFactory` and shared `ProjectPathRules` |
 | Open/save/close project | Y | Planned | 01/23 | Atomic writes, lock, autosave store in 01; lifecycle UI, read-only lock mode, save-as lock migration, and external-change detection in 23 |
 | Recent files | N | Improvement | 23 | Settings-persisted list (max 10), missing-file handling, clear action |
 | Multiple projects per file | N | Replaced | 23 | One project per file; workspace of open files with one tab strip and a project switcher |

@@ -207,10 +207,19 @@ Rules:
   temporary workspace, headless app builder, fixtures); `Visual/Baselines/` holds the screenshot PNGs. Test
   root files stay within the 20-file limit. Persistence tests use the real App-layer stores against a temporary
   data directory, not the in-memory ones.
-- Every type in the three App projects is `internal`; `InternalsVisibleTo("Mocassin.App.Tests")` gives the test
-  project access. Steps 24–28 edit these same assemblies, so no public surface is needed and the `PublicAPI.*`
-  files stay unchanged. If a later step genuinely needs a separate assembly, it records an amendment; it does
-  not widen the surface silently.
+- Every **new** type in the three App projects is `internal`; `InternalsVisibleTo("Mocassin.App.Tests")` gives
+  the test project access. The only public types are the pre-existing `AppViewModelsModule`/`AppViewsModule`
+  markers (in `PublicAPI.Shipped.txt`, baselined, ApiCompat-checked) and the `Mocassin.App` process/Avalonia
+  entry points (`Program`, `App`; not an ApiCompat project). Steps 24–28 edit these same assemblies, so no new
+  public surface is needed and the `PublicAPI.*` files and App baselines stay unchanged. Making a marker
+  internal or adding a public App type is an owner-approved public-API change with a baseline refresh; if a
+  later step genuinely needs a separate assembly, it records an amendment.
+- The I/O token test is exact, not a bare-word grep: after stripping comments and string literals, a
+  `Mocassin.App.ViewModels/**/*.cs` file must not contain `System.IO`, `File.`/`FileInfo`,
+  `Directory.`/`DirectoryInfo`, `Path.Combine`/`Path.Get`, `FileStream`, `StreamReader`, `StreamWriter`,
+  `Environment.`, `Avalonia`, `Dispatcher.UIThread`, `Application.Current`, or `ResourceDictionary`.
+  `IUiDispatcher` and bare `Dispatcher`/`Application` identifiers are permitted, and a positive control proves
+  the scanner reports a seeded violation.
 
 ## 3. Folder names and ownership
 

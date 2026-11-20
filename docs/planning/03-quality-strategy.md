@@ -651,6 +651,11 @@ Step 23 establishes the harness that Steps 24–28 extend.
   the view-level tests drive the real overlay), `IStorageService` (the OS picker), `IUiDispatcher` (the
   UI-thread boundary), `TimeProvider`, and in-memory `IAppSettingsStore`/`IRecoveryStore` for non-persistence
   tests only.
+- **Architecture guards.** The App-project architecture test checks direct `.csproj` references and runs the
+  exact I/O token scan described in the Step 23 page §1/§20 (comments and string literals stripped,
+  `IUiDispatcher`/`Dispatcher` and bare `Application` permitted) with a positive control, so the guard cannot
+  pass by matching nothing. The `Load`-stage test covers both a load/migration fixture (`Completed`/`Failed`) and
+  a clean fixture (`Skipped`, count 0).
 - **Tiers.** Shell view-model, lifecycle, dirty/save-point, autosave, recovery, lock, external-change, settings
   migration, undo/redo, validation (including the `Load`-stage/load-diagnostic contract), navigation, palette,
   dialog, and primary accessibility tests are **PR-fast**. Headless view rendering and the screenshot set are
