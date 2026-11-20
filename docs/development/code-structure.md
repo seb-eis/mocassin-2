@@ -149,38 +149,50 @@ The Avalonia track is split so that view models stay UI-framework-free and the c
 place that resolves DI.
 
 ```text
-src/dotnet/Mocassin.App/
+src/dotnet/Mocassin.App/                 # composition root + app-local I/O
   Program.cs
   App.axaml
   App.axaml.cs
   ViewLocator.cs
   AssemblyInfo.cs
   Composition/     # AppHost, service registration, startup options, app paths, logging setup, log retention
-  Startup/         # startup coordination, recovery scan presenter, crash handler
+  Settings/        # AppSettingsStore, settings paths, write policy (atomic + fsync + size cap)
+  Recovery/        # RecoveryStore, CrashRecoveryWriter, recovery scan
+  Files/           # ProjectFileProbe, file-stamp provider
+  Startup/         # startup coordination, recovery prompt presenter, crash handler
 
-src/dotnet/Mocassin.App.ViewModels/
-  Shell/           # shell/region/status-bar view models, window state
+src/dotnet/Mocassin.App.ViewModels/      # no Avalonia, no System.IO
+  Shell/           # shell/region/status-bar view models, window state, placement resolver
   Documents/       # document model, keys, tab collection, welcome
   Documents/Project/  # project overview, project JSON, metadata editing
-  Projects/        # project session, session service, file stamps, external change, recovery, recents
+  Projects/        # project session, session service, outcomes, stamps, external change, recents
   Scheduling/      # autosave scheduler and debouncer
   Editing/         # project edit coordinator, edit diagnostics, project-changed event
   Diagnostics/     # validation coordinator, problems, diagnostic items, validation state
-  Navigation/      # navigation service/contracts, history, project target provider, explorer-node seam
-  Settings/        # settings model, service, migration, validation, theme service, layout/session state
-  Commands/        # command catalog, shell command, gestures, menu/console/status contribution seams, palette
+  Navigation/      # navigation service/contracts, history, project target provider, explorer/inspector seams
+  Settings/        # settings model, validator, migrations, JSON context, store/theme contracts, state
+  Recovery/        # recovery store contract and retention policy (pure)
+  Commands/        # command catalog, shell command, gesture descriptors, contribution seams, palette
   Consoles/        # console channels, entries, console service
-  Dialogs/         # dialog/picker/progress contracts and view models
+  Dialogs/         # dialog/picker/dispatcher/progress contracts and view models
 
 src/dotnet/Mocassin.App.Views/
   Shell/  Documents/  Navigation/  Consoles/  Settings/  Dialogs/  Controls/  Themes/
+  Theming/         # AvaloniaThemeApplier and theme resource dictionaries
+  Platform/        # AvaloniaStorageService, AvaloniaUiDispatcher, key-binding binder
 ```
 
 Rules:
 
-- `Mocassin.App.ViewModels` has no Avalonia, view, or control reference. Dialogs, pickers, the UI dispatcher,
-  and clocks are interfaces in this project; their Avalonia implementations live in `Mocassin.App.Views` or
-  `Mocassin.App`. An architecture test enforces the reference direction and the absence of view types.
+- `Mocassin.App.ViewModels` has no Avalonia, view, or control reference, and no `System.IO`/`Environment`/
+  `Application`/resource-dictionary use. Dialogs, pickers, the UI dispatcher, clocks, the settings/recovery
+  stores, the file probe, and the theme applier are interfaces in this project; their implementations live in
+  `Mocassin.App` (settings, recovery, file probe, paths) or `Mocassin.App.Views` (picker, dispatcher, theme,
+  key binding). An architecture test enforces the direct-reference direction, the absence of view types, and a
+  source-token ban on the file-system/UI tokens.
+- Library APIs that perform I/O (`ProjectStore`, `ProjectValidationPipeline`, `ProjectTemplateFactory`) are
+  allowed in view models because they are the same public contracts the CLI uses; re-implementing their file
+  access is what the rule forbids.
 - `Mocassin.App` keeps only `Program.cs`, `App.axaml`, `App.axaml.cs`, `ViewLocator.cs`, and `AssemblyInfo.cs`
   at the root; everything else lives in `Composition/` or `Startup/`. `App.axaml.cs` and `ViewLocator.cs` are
   the framework-mandated root files already permitted by the policy.
@@ -191,8 +203,14 @@ Rules:
 - The 20-file/800-line limits and the single-type file rule apply unchanged. A file that would need several
   types is split, or uses one of the permitted multi-type suffixes from `tools/structure-policy.json`.
 - Test support for the UI track lives in `Mocassin.App.Tests/TestSupport/` (manual clock, inline dispatcher,
-  recording dialog service, stub storage service, temporary workspace, headless app builder, fixtures);
-  `Visual/Baselines/` holds the screenshot PNGs. Test root files stay within the 20-file limit.
+  recording dialog service, stub storage service, in-memory settings/recovery stores for non-persistence tests,
+  temporary workspace, headless app builder, fixtures); `Visual/Baselines/` holds the screenshot PNGs. Test
+  root files stay within the 20-file limit. Persistence tests use the real App-layer stores against a temporary
+  data directory, not the in-memory ones.
+- Every type in the three App projects is `internal`; `InternalsVisibleTo("Mocassin.App.Tests")` gives the test
+  project access. Steps 24–28 edit these same assemblies, so no public surface is needed and the `PublicAPI.*`
+  files stay unchanged. If a later step genuinely needs a separate assembly, it records an amendment; it does
+  not widen the surface silently.
 
 ## 3. Folder names and ownership
 

@@ -644,13 +644,19 @@ Step 23 establishes the harness that Steps 24–28 extend.
   `Avalonia.Headless` and `Avalonia.Headless.XUnit` packages at the pinned Avalonia 12.1.6 version (test-only,
   no product dependency, no new licence surface). No other package is added; a `ManualTimeProvider` and an
   inline UI dispatcher are written in test support rather than adopting a fake-clock package.
-- **Real objects everywhere.** Tests use the real `ProjectStore`, real temporary directories, real `Project`
-  values, the real validation pipeline, and the real dialog overlay. Fakes are limited to the true boundaries:
-  `IDialogService` (view-model-level tests only — the view-level tests drive the real overlay),
-  `IStorageService` (the OS picker), `IUiDispatcher` (the UI-thread boundary), and `TimeProvider`.
+- **Real objects everywhere.** Tests use the real `ProjectStore` (with `ValidateOnLoad = false` and the load
+  diagnostics seeded into the validation pipeline), real temporary directories, real `Project` values, the real
+  validation pipeline, the real dialog overlay, and the real App-layer settings/recovery stores when the test is
+  about persistence. Fakes are limited to the true boundaries: `IDialogService` (view-model-level tests only —
+  the view-level tests drive the real overlay), `IStorageService` (the OS picker), `IUiDispatcher` (the
+  UI-thread boundary), `TimeProvider`, and in-memory `IAppSettingsStore`/`IRecoveryStore` for non-persistence
+  tests only.
 - **Tiers.** Shell view-model, lifecycle, dirty/save-point, autosave, recovery, lock, external-change, settings
-  migration, undo/redo, validation, navigation, palette, dialog, and primary accessibility tests are
-  **PR-fast**. Headless view rendering and the screenshot set are **PR-medium**. Platform runs are manual.
+  migration, undo/redo, validation (including the `Load`-stage/load-diagnostic contract), navigation, palette,
+  dialog, and primary accessibility tests are **PR-fast**. Headless view rendering and the screenshot set are
+  **PR-medium**. Platform runs are manual. PR-fast tests assert functionality, ordering, and asynchrony, never an
+  absolute duration; timing is recorded as non-gating evidence on a benchmark or manual run (§13/§21 of the
+  Step 23 page).
 - **Screenshots.** Baselines are generated and compared on `ubuntu-latest` only, with a fixed headless render
   scale and a documented tolerance and regeneration command. Windows/macOS screenshots are manual platform-gate
   evidence and are not pixel-compared: text rendering differs per platform, so a cross-OS pixel gate would be a

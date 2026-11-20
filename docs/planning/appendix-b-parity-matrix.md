@@ -223,7 +223,7 @@ Status legend:
 | Shell/tree/tabs/console/status | Y | Planned | 23 | Regions, document tabs, project switcher/explorer, Problems/Application consoles, populated status bar |
 | Project lifecycle | Y | Planned | 23 | New/open/save/save-as/close, recents, locks, read-only, external-change detection |
 | Undo/redo | N | Improvement | 23 | Single per-project stack over `ProjectDocument`, bounded, save-point correct |
-| Model validator/problems | Y | Partial | 23/07 | Status indicator, Problems channel, and navigable `ModelPath` targets in 23; domain providers and full stats panels in 24/25 |
+| Model validator/problems | Y | Partial | 23/07 | Status indicator, Problems channel (including the load/migration diagnostics on open), filters, help anchors, revalidate, and navigable `ModelPath` targets in 23; domain providers and full stats panels in 24/25 |
 | Command palette and shortcut cheat sheet | N | Improvement | 23 | Searchable command catalog with platform gestures |
 | Application settings and logging | N | Improvement | 23 | Versioned `mocassin.settings` v1 with migration and retention; structured rolling logs; replaces the original XML settings file |
 | Crash recovery dialog | N | Improvement | 23 | Global exception boundary, log entry, recovery snapshot, "open log folder" |

@@ -23,13 +23,20 @@ documentation. No model editors, no build UI, no 3D, no run monitoring.
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** Ready for review — the design freeze is the commit that introduces this page; the review
-  request and frozen SHA are recorded in the follow-up record `docs/planning/reviews/step-23.md`
-- **Feature list:** Proposed (eight features) — requires the single owner approval described in
-  [`AGENTS.md` §3.2](../../../AGENTS.md)
-- **Sizing:** 3.75–4.5 person-weeks (base ≈3.75 pw + 0.75 pw contingency). The upper bound exceeds the
-  four-week §3.1 trigger, so this design is presented with a **requested single-step exception** and a clean
-  23A/23B split line at feature 5. The owner decides at the start gate; see §23.
+- **Design review:** Round 1 returned `Changes required` on the first freeze `9916166` (findings M-1–M-3,
+  m-1–m-11, n-1–n-8, recorded in `docs/planning/reviews/step-23.md`). The design was refrozen after the
+  complexity-sizing rule landed; the round-1 findings are resolved in this revision and the record state is
+  `Re-review required`. The round-2 freeze is the commit that introduces this revision; the request record
+  carries its SHA.
+- **Feature list:** Proposed (eight dependency-ordered features, grouped 1–4 / 5–8 for the split decision) —
+  requires the single owner approval described in [`AGENTS.md` §3.2](../../../AGENTS.md)
+- **Complexity class:** **High** — assessed against the seven §3.1 dimensions on 2026-11-20; the highest
+  dimension is High on cross-step interfaces, test-matrix breadth, independent acceptance stories, and evidence
+  size. Class, evidence, and justification are recorded in §23.
+- **Split decision:** **Pending owner decision at the start gate.** §23 proposes a dependency-clean split after
+  feature 4 (23A = features 1–4, 23B = features 5–8) and recommends it; the alternative is owner acceptance of
+  the step as one High unit, with the acceptance case and risk guard recorded in §23. Person-weeks are a
+  non-gating forecast (roadmap §3.1); no time waiver is requested.
 - **Last updated:** 2026-11-20
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
@@ -38,22 +45,31 @@ documentation. No model editors, no build UI, no 3D, no run monitoring.
 
 ### Proposed feature list (requires one owner approval)
 
-Each branch is `feature/step-23-avalonia-shell-and-project-lifecycle/<slug>` from the step branch.
+Each branch is `feature/step-23-avalonia-shell-and-project-lifecycle/<slug>` from the step branch. The order is
+the implementation order: every feature depends only on the features above it, on the merged library surfaces of
+01/03–07/12, and on nothing from Steps 13–22. The claimed split boundary (after feature 4) is therefore
+dependency-clean: 23B builds on 23A and 23A contains no task from 23B. The earlier draft inverted this — features
+3–6 needed the dialog/picker/Problems surface that only a later feature delivered, which round 1 recorded as
+M-2; the reorder below is the fix, and the dialog/picker/console/notification/progress surfaces now land in
+feature 1.
 
-| # | Feature | Slug | Planned scope | Done when |
-| --- | --- | --- | --- | --- |
-| 1 | Shell host, composition, and logging | `shell-host-and-composition` | Avalonia app project (`Program`, `App.axaml(.cs)`, `ViewLocator`), `IHost` composition root, explicit service registration, `TimeProvider`/`IUiDispatcher` boundaries, Serilog file+console logging with retention, global exception handlers, `--project`/`--log-level`/`--data-dir` startup options, shell window skeleton with the four regions and splitters, welcome document, `Code structure` layout for the App projects | The app starts headless and renders the shell; DI resolves every registered service; a deliberately thrown unhandled exception is logged and reported instead of killing the process silently; `Mocassin.App.ViewModels` has no Avalonia reference (architecture test) |
-| 2 | Document model, tabs, navigation, command palette | `documents-navigation-and-commands` | `DocumentViewModel`/`DocumentKey`/`DocumentCollectionViewModel`, tab strip with dirty marker/reorder/close/overflow, `INavigationService` with history, `INavigationTargetProvider` registry, project-scoped document keys, project switcher, project explorer tree, the read-only Project Overview document (editable metadata) and Project JSON document, menu/status/console contribution registries, command catalog and command palette (`Ctrl+Shift+P`) | Open/activate/reuse/close tabs and back/forward work against real project documents; an unknown navigation domain produces a non-blocking console notice, never an exception; the palette lists every registered command with its gesture |
-| 3 | Settings, theming, shortcuts, accessibility | `settings-theming-and-accessibility` | `mocassin.settings` v1 (parse/validate/migrate/atomic write, unknown fields ignored, future major rejected), app-data layout, settings dialog (reset, open config folder, clear logs/cache), light/dark/system theme, accent, density, font scale, high-contrast path, reduce-motion, shortcut catalog with platform primary modifier, accessible names/roles/help text on every shell control, Help → shortcut cheat sheet and application diagnostics | Settings round-trip, migration, defaults-on-invalid, and unknown-field tolerance are covered by real-file tests; every shell command is reachable by keyboard; the accessibility tree exposes names/roles for the primary controls |
-| 4 | Project session lifecycle | `project-session-lifecycle` | `ProjectSession`/`IProjectSessionService` over `ProjectStore`: new from `ProjectTemplateFactory` with shared `ProjectNameRules`, open, save, save-as, close, recent files, lock acquisition and read-only banner, external-modification detection, multi-project workspace, unsaved-changes prompts, window-close coordination | New → edit → save → close → reopen yields an identical project through the real store; a second instance opens read-only; a modified file on disk is detected before overwrite |
-| 5 | Dirty state, autosave, recovery | `dirty-autosave-and-recovery` | Save-point-correct dirty tracking, title markers, autosave scheduler over `TimeProvider` with the `.autosave` sidecar for saved projects and `recovery/` snapshots for untitled documents, recovery prompt on open/startup, unclean-exit session restore, retention (logs 14 days/100 MB, recovery 7 days) | Autosave writes only dirty documents; a simulated crash leaves a recoverable snapshot; recovery restores the exact in-memory project; a clean save deletes the sidecar |
-| 6 | Edit pipeline and undo/redo | `edit-pipeline-and-undo-redo` | Single `ProjectEditCoordinator` per project over `ProjectDocument`: `Apply`/`Undo`/`Redo` commands, bounded undo depth, project-changed event, stale-result-guarded background validation, transient edit diagnostics, metadata editing in the Project Overview document | Undo/redo crosses the save point correctly in both directions; a rejected edit leaves the document clean and shows diagnostics; a stale validation result is discarded |
-| 7 | Dialogs, consoles, and error boundaries | `dialogs-consoles-and-errors` | In-shell `IDialogService` overlay host (confirm/choose/prompt/error/progress/crash), `IStorageService` over Avalonia `IStorageProvider`, Problems channel bound to validation, Application log channel, notification/progress surface, crash dialog with "open log folder" and "write recovery files" | Dialog and console flows run against the real overlay in headless tests; only the OS file picker is substituted; a crash report contains the project path and stack trace |
-| 8 | Test harness, documentation, and closeout | `tests-docs-and-closeout` | Avalonia headless harness, `ManualTimeProvider`/inline dispatcher/recording dialog/stub picker test support, visual baselines in three themes, accessibility-tree assertions, manual platform checklist, the six documentation pages plus reference/dev updates, parity/status/closeout evidence and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; closeout evidence validates; the audit request is complete |
+| # | Grp | Feature | Slug | Planned scope | Done when |
+| --- | --- | --- | --- | --- | --- |
+| 1 | A | Host, composition, boundaries, and surfaces | `app-host-and-boundaries` | Avalonia app project (`Program`, `App.axaml(.cs)`, `ViewLocator`), `IHost` composition root, explicit registration, `TimeProvider`/`IUiDispatcher`, Serilog file+console logging with retention, `--project`/`--log-level`/`--data-dir` startup options, shell window with the four regions and splitters, menu/status skeleton, the in-shell `IDialogService` overlay host (confirm/choose/prompt/error/crash *view*), `IStorageService` pickers with last-directory state, console host with the Application channel, notification host, progress surface, global exception handlers (log + crash dialog; recovery writing behind `IRecoveryWriter` with a null implementation until feature 7), internal-only type rule | The app starts and renders the shell headless; DI resolves every registered service; a dialog round-trips through the real overlay; a forced unhandled exception is logged and reported, not silently fatal; `Mocassin.App.ViewModels` has no Avalonia/`System.IO` use (architecture test) |
+| 2 | A | Workspace: documents, navigation, commands | `workspace-documents-and-navigation` | `DocumentViewModel`/`DocumentKey`/`DocumentCollectionViewModel`, tab strip (dirty marker slot, reorder, close, overflow), `INavigationService` with bounded history, `INavigationTargetProvider` registry, project-scoped keys, project switcher, project explorer, welcome document, read-only Project Overview (metadata form present, editing wired in feature 5) and Project JSON documents, command catalog, menus, status items, command palette, shortcut catalog with the framework-neutral gesture type | Tabs open/activate/reuse/close and back/forward work; an unknown navigation domain produces a console notice, never an exception; the palette lists every registered command with its platform gesture |
+| 3 | A | Settings, theming, accessibility | `settings-theming-and-accessibility` | `mocassin.settings` v1 model, validator, migrations, source-generated JSON context, and the atomic+fsync+size-capped store (store in `Mocassin.App`, model/pure logic in ViewModels), app-data layout, settings dialog (reset, open config folder, clear logs/cache), theme/density/font-scale/high-contrast/reduce-motion applier in Views, shortcut cheat sheet, accessible names/roles/help text on shell controls | Settings round-trip, defaults-on-invalid, unknown-field tolerance, future-major rejection, and migration pass on real files; the theme/density/contrast switch applies without restart; primary controls expose names/roles |
+| 4 | A | Project session lifecycle | `project-session-lifecycle` | `ProjectSession`/`IProjectSessionService` over `ProjectStore` **configured with `ValidateOnLoad = false`** and seeded with `ProjectLoadResult.Diagnostics`; new via `ProjectTemplateFactory` + shared `ProjectPathRules`; open/open-or-activate/save/save-as/close/reload; recents; locks and read-only mode; external-change detection; multi-project workspace; unsaved-changes and window-close coordination; 23A documentation (installation, quickstart, first-project, ui-architecture) | New → save → close → reopen is content-identical; a second session opens read-only; an external change is detected before overwrite; the first validation carries the load diagnostics and the `Load` stage is not skipped |
+| 5 | B | Edit pipeline and undo/redo | `edit-pipeline-and-undo-redo` | Single `ProjectEditCoordinator` per project over `ProjectDocument`: `Apply`/`Undo`/`Redo`, bounded depth, `ProjectChanged`, rejected-edit diagnostics, metadata editing in the Project Overview document (one undo entry per committed field) | Undo/redo crosses the save point correctly in both directions; a rejected edit changes nothing and reports diagnostics; the coordinator is the only write path |
+| 6 | B | Validation surface | `validation-surface` | `ValidationCoordinator` over `ProjectValidationPipeline` (in-memory entry with the stored load diagnostics, `ValidationOptions.Default`), 300 ms debounce, stale-result discard, status-bar indicator, Problems channel with severity/code/text filters, sorting, help anchors, `Related` navigation, revalidate, edit diagnostics, on-demand statistics | Load/migration diagnostics reach Problems on open; a stale result is discarded; double-click navigates through a registered provider and produces a notice otherwise; no double validation on open |
+| 7 | B | Dirty state, autosave, crash recovery | `dirty-autosave-and-recovery` | Save-point-correct dirty tracking and markers, `AutosaveScheduler` over `TimeProvider`, `.autosave` sidecar for saved projects, recovery store for untitled projects (implementation in `Mocassin.App`), recovery prompt, Reload/Recover/Discard/Keep operations, unclean-exit session restore, retention (logs 14 days/100 MB, recovery 7 days), asynchronous crash-recovery writes with a bounded budget | Autosave writes only dirty documents and deletes its file on save; a simulated crash leaves a recoverable snapshot; recovery restores the exact in-memory project; recovery files are swept after 7 days and sidecars are not |
+| 8 | B | Tests, documentation, and closeout | `tests-docs-and-closeout` | Avalonia headless harness, `ManualTimeProvider`/inline dispatcher/recording dialog/stub picker/App-boundary store fakes, visual baselines in three themes, accessibility-tree assertions, platform checklist, the remaining documentation pages and navigation, parity/status/closeout evidence and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; closeout evidence validates; the audit request is complete |
 
-The feature list is proposed, not approved. The owner approves it once, together with the sizing decision in
-§23; individual features are then squash-merged without further approval. Features 1–4 are a clean 23A
-boundary and features 5–8 a clean 23B boundary if the owner prefers to split.
+The feature list is proposed, not approved. The owner approves it once at the start gate, together with the
+split decision in §23; individual features are then squash-merged without further approval. **If the owner
+approves the split**, 23A is features 1–4 plus its documentation and its own closeout evidence (added to feature
+4), and 23B is features 5–8 with feature 8 as its closeout; the roadmap step index, dependency graph, and the
+Step 24 dependency are updated in the same change. **If the owner accepts one unit**, features 1–8 run in order
+under one step branch and one closeout.
 
 ## Goal
 
@@ -180,9 +196,9 @@ public sealed class App : Application
   `AddMocassinViewModels`, `AddMocassinViews`). There is no assembly scanning, no reflection-based discovery,
   and no service locator. Later steps add their own `AddMocassinEditors/…` calls in `App` (§18).
 - Lifetimes:
-  - singleton: `AppPaths`, `ISettingsService`, `ILoggerFactory`, `TimeProvider`, `IUiDispatcher`,
-    `IDialogService`, `IStorageService`, `IConsoleService`, `ICommandCatalog`, `IProjectSessionService`,
-    `INavigationService`, `ShellViewModel`, the shell window;
+  - singleton: `AppPaths`, `IAppSettingsStore`, `ISettingsService`, `ILoggerFactory`, `TimeProvider`,
+    `IUiDispatcher`, `IDialogService`, `IStorageService`, `IConsoleService`, `ICommandCatalog`,
+    `IProjectSessionService`, `INavigationService`, `ShellViewModel`, the shell window;
   - created per project by `ProjectSessionService` with explicit constructor arguments (not a DI scope):
     `ProjectSession`, `ProjectDocument`, `ProjectEditor`, `ProjectEditCoordinator`, the validation
     coordinator, and the project-scoped view models.
@@ -192,10 +208,31 @@ public sealed class App : Application
 
 ```text
 Mocassin.App        -> App.Views -> App.ViewModels -> Packages / Results / Contracts / Core
-        \-> Avalonia, Microsoft.Extensions.*, Serilog
-Mocassin.App.ViewModels -> CommunityToolkit.Mvvm only; no Avalonia, no views, no controls
-Mocassin.App.Views      -> Avalonia controls; no scientific logic; no direct Packages calls
+        \-> Avalonia, Microsoft.Extensions.*, Serilog, System.IO
+Mocassin.App.ViewModels -> CommunityToolkit.Mvvm + public library APIs; no Avalonia, no views, no controls,
+                           no System.IO, no Environment.SpecialFolder, no resource dictionaries
+Mocassin.App.Views      -> Avalonia controls and resource dictionaries; no scientific logic; no direct
+                           Packages calls; no persistence decisions
 ```
+
+**The I/O boundary (round-1 M-3).** `Mocassin.App.ViewModels` may call public library APIs that perform I/O —
+`ProjectStore`, `ProjectValidationPipeline`, `ProjectTemplateFactory` — because those are the shared contracts
+the CLI uses. It may not touch the file system, the environment, the theme, or the dispatcher directly. App-local
+state that is not a library contract is split into a ViewModels contract plus an implementation in
+`Mocassin.App` or `Mocassin.App.Views`:
+
+| Concern | ViewModels (contract/state/pure logic) | Implementation |
+| --- | --- | --- |
+| Settings document | `AppSettings`, `LayoutState`, `SessionState`, `AppSettingsValidator`, `SettingsMigration`, `AppSettingsJsonContext`, `IAppSettingsStore` (read/write the document) | `AppSettingsStore` in `Mocassin.App` (atomic write, fsync, size cap, app-data path) |
+| Recovery snapshots | `IRecoveryStore` (list/write/delete), `RecoveryCandidate`, retention policy | `RecoveryStore` in `Mocassin.App` |
+| External-change probe | `IProjectFileProbe` (length, last-write UTC, content bytes) and the pure `FileStamp` comparison | `ProjectFileProbe` in `Mocassin.App` (`FileInfo`/`File.ReadAllBytesAsync`) |
+| Theme/density/contrast/motion | `ThemeSelection`, `Density`, `ThemeService` state + `IThemeApplier` | `AvaloniaThemeApplier` + resource dictionaries in `Mocassin.App.Views` |
+| App-data root | `AppDataOverride` (the parsed `--data-dir`/`MOCASSIN_DATA_DIR` value) | `AppPaths` resolves `<LocalApplicationData>/Mocassin` and its subfolders from `Environment.SpecialFolder` in `Mocassin.App` |
+
+The rule is testable without an analyzer: a structure test scans `Mocassin.App.ViewModels/**/*.cs` for
+`System.IO`, `File.`, `Directory.`, `Environment.SpecialFolder`, `Avalonia`, `Dispatcher`, and `ResourceDictionary`
+and fails on a match outside an allow-list of comments; the only permitted I/O in that project is through the
+library APIs above. This is the wording the architecture test uses (§20, "Architecture" row).
 
 `Mocassin.App.ViewModels` already references `Mocassin.Packages`, `Mocassin.Results`, and (transitively)
 `Mocassin.Core`. Step 23 uses `Packages` and `Core` only; the `Results` reference stays in the project graph
@@ -238,8 +275,10 @@ the GUI needs must live in a library.
   settings file cannot produce an unusable window. When the persisted size is invalid, the default is used and
   the file is repaired on the next save.
 - Window title binds `"<project name><*> — MOCASSIN"` for the active document, or `"MOCASSIN"` with no
-  project. Minimum window size 900×600. The window restores size/state from settings; a monitor that no longer
-  exists falls back to the primary screen (verified in feature 1, §24).
+  project. Minimum window size 900×600. The window restores size/state from settings; a saved placement whose
+  bounds do not intersect any current screen falls back to the primary screen. Feature 1 covers it with a
+  headless view-model test over the placement resolver, because a real monitor topology cannot be simulated
+  headless (verification item V-5).
 - **Not in this step:** no splash window. The original splash existed because it built a database-backed
   library synchronously; the new startup is short, and a splash would add a second window to headless tests.
   The welcome document covers the loading/empty state. Recorded as a deliberate deviation in §24.
@@ -329,52 +368,93 @@ public interface INavigationTargetProvider
 - The project switcher lists open projects with their dirty marker and path; activating one activates its last
   active document. Closing a project closes its documents after the unsaved-changes prompt.
 
-**Contribution seams** (all in `Mocassin.App.ViewModels`, all registered explicitly in the composition root):
+**Contribution seams** (all in `Mocassin.App.ViewModels` as `internal` types, all registered explicitly in the
+composition root; Steps 24–28 edit these same assemblies, so `internal` is sufficient and the public API stays
+empty — see §15):
 
 ```csharp
-public interface IInspectorContributor { object? CreateInspector(object selection); }
-public interface IExplorerNodeProvider { IEnumerable<ExplorerNode> CreateNodes(ProjectSession session); }
-public interface IMenuItemProvider { IEnumerable<ShellCommand> CreateMenuItems(string menu); }
-public interface IConsoleChannelProvider { IEnumerable<ConsoleChannelViewModel> CreateChannels(); }
-public interface IStatusBarItemProvider { IEnumerable<StatusBarItemViewModel> CreateItems(); }
+internal interface IInspectorContributor { object? CreateInspector(InspectorSelection selection); }
+internal interface IExplorerNodeProvider { IEnumerable<ExplorerNode> CreateNodes(ProjectSession session); }
+internal interface IMenuItemProvider { IEnumerable<ShellCommand> CreateMenuItems(MenuKind menu); }
+internal interface IConsoleChannelProvider { IEnumerable<ConsoleChannelViewModel> CreateChannels(); }
+internal interface IStatusBarItemProvider { IEnumerable<StatusBarItemViewModel> CreateItems(); }
 ```
 
-Step 23 registers the `project` navigation domain, the project-level explorer nodes, the Problems and
-Application console channels, the shell menus, and the validation/status items. Every seam returns plain view
-models or commands; no seam takes an Avalonia type, so later steps stay headless-testable. The shell validates
-at startup that no two providers claim the same navigation domain and that no provider is registered twice.
+`InspectorSelection` is the shell's typed selection value, not `object` (round-1 n-3): it carries the active
+`DocumentKey`, the project id, the selected `ModelPath` list (authoritative objects and properties), and an
+optional domain tag. The shell builds it from the document and the group/list selection, validates that every
+path belongs to the owning project, and hands it to the single inspector contributor that claims the tag. An
+unclaimed tag shows the neutral empty state; it is never passed an arbitrary object graph.
+
+`ExplorerNode` is a small immutable node record (key, label, icon key, `ModelPath?`, children, command), and
+`StatusBarItemViewModel` is the base for the version, progress, validation, dirty, and autosave slots. Both are
+listed in §15 with the other types that earlier drafts named but did not place (round-1 m-8).
+
+Step 23 registers the `project` navigation domain, the project-level explorer nodes, the Application console
+channel, the shell menus, and the shell status items; feature 6 adds the Problems channel binding. Every seam
+returns plain view models, records, or commands; no seam takes an Avalonia type, so later steps stay
+headless-testable. The shell validates at startup that no two providers claim the same navigation domain or the
+same inspector tag and that no provider is registered twice.
 
 ### 5. Project lifecycle
 
 ```csharp
-// Mocassin.App.ViewModels/Projects
-public interface IProjectSessionService
+// Mocassin.App.ViewModels/Projects (internal)
+internal interface IProjectSessionService
 {
     IReadOnlyList<ProjectSession> Sessions { get; }
     ProjectSession? ActiveSession { get; }
+
     Task<ProjectSessionResult> CreateAsync(ProjectTemplateKind kind, string name, string path, CancellationToken cancellationToken = default);
     Task<ProjectSessionResult> OpenAsync(string path, CancellationToken cancellationToken = default);
+    Task<ProjectSessionResult> ActivateAsync(string path, CancellationToken cancellationToken = default);
     Task<ProjectSessionResult> SaveAsync(ProjectSession session, CancellationToken cancellationToken = default);
     Task<ProjectSessionResult> SaveAsAsync(ProjectSession session, string path, CancellationToken cancellationToken = default);
+    Task<ProjectSessionResult> ReloadAsync(ProjectSession session, CancellationToken cancellationToken = default);
     Task<CloseSessionResult> CloseAsync(ProjectSession session, CancellationToken cancellationToken = default);
+
     Task<RecoveryScanResult> ScanRecoveryAsync(CancellationToken cancellationToken = default);
+    Task<ProjectSessionResult> RecoverAsync(ProjectSession session, RecoveryCandidate candidate, CancellationToken cancellationToken = default);
+    Task DiscardRecoveryAsync(RecoveryCandidate candidate, CancellationToken cancellationToken = default);
+}
+
+internal enum ProjectSessionOutcome
+{
+    Created, Opened, Activated, OpenedReadOnly, Saved, Reloaded, Recovered, Closed,
+    NotFound, InvalidContent, IoFailure, Locked, UnsavedChanges, SaveFailed, Canceled,
 }
 ```
 
-- **Services never prompt.** `IProjectSessionService` returns typed results (`Created`, `Opened`,
-  `OpenedReadOnly`, `Saved`, `SaveFailed`, `UnsavedChanges`, `Locked`, `Canceled`, with diagnostics); the
-  shell layer owns every dialog. This keeps the service headless-testable and prevents a message box from
-  appearing inside library-like code. This also replaces the step page's earlier `IProjectStore` service
-  interface: the concrete `ProjectStore` is injected as the persistence API; there is no second store
-  abstraction.
+- **Services never prompt.** `IProjectSessionService` returns a typed `ProjectSessionResult`, whose
+  `ProjectSessionOutcome` covers success, the three load failures (`NotFound`, `InvalidContent`, `IoFailure`,
+  mapped from `ProjectLoadResult.FailureKind`, round-1 n-2), `Locked`, `UnsavedChanges`, `SaveFailed`, and
+  `Canceled`, plus the diagnostics. The shell layer owns every dialog. This keeps the service
+  headless-testable and prevents a message box from appearing inside library-like code. This also replaces the
+  step page's earlier `IProjectStore` service interface: the concrete `ProjectStore` is injected as the
+  persistence API; there is no second store abstraction.
+- **Store configuration (round-1 M-1).** The single `ProjectStore` instance registered in the composition root
+  is constructed with `new ProjectStoreOptions { ValidateOnLoad = false }`. The load result's
+  `ProjectLoadResult.Diagnostics` are stored on the session as `LoadDiagnostics` and passed as
+  `loadDiagnostics` to every `ProjectValidationPipeline.Validate` call (§8). There is therefore exactly one
+  validation per load: the store does not validate, and the pipeline's `Load` stage is populated instead of
+  skipped. `ProjectStore.ValidateOnLoad = true` (the default) is never used by the GUI; a test asserts the
+  option value and that a migration/load diagnostic reaches the Problems list.
+- **Operations.** `OpenAsync` opens a new session or returns `Locked`/load failures; `ActivateAsync` activates
+  an existing session for an already-open path and is what the open path, recents, and drag-and-drop call
+  (round-1 m-10); `ReloadAsync` re-reads the file and replaces the session's `ProjectDocument` with a fresh
+  instance over the reloaded value, which discards the old undo/redo stacks because they no longer describe the
+  file's content, then refreshes the stamp and the load diagnostics; the recovery operations (§6) are
+  `RecoverAsync` and `DiscardRecoveryAsync`.
 - **New**: uses `ProjectTemplateFactory.CreateProject(kind, name, utcNow)` — the same factory as
-  `mocassin new` — after validating the name and target path with the shared `ProjectNameRules` (§16). Step 23
-  ships exactly the kinds `ProjectTemplateKind` defines today (`blank`, `ceria`) with the same display names as
-  the CLI, so the two surfaces cannot drift; a later starter kind appears in both automatically because the
-  factory is shared. An existing target is refused with the same rule as the CLI's `CLI003` case (never
-  replace).
+  `mocassin new` — after validating the name **and the target path** with the shared `ProjectPathRules` (§16:
+  name normalisation, invalid characters, length, existing target, directory creation). Step 23 ships exactly
+  the kinds `ProjectTemplateKind` defines today (`blank`, `ceria`) with the same display names as the CLI, so
+  the two surfaces cannot drift; a later starter kind appears in both automatically because the factory is
+  shared. An existing target is refused with the same rule as the CLI's `CLI003` case (never replace), and the
+  shared helper returns the message the CLI prints, so the GUI cannot invent a different one (round-1 n-6).
 - **Open**: picker / recent list / drag-and-drop onto the window. Drag-and-drop is restricted to `.mocprj`
-  files (and directories are ignored), because accepting arbitrary paths would be a new trust surface.
+  files (and directories are ignored), because accepting arbitrary paths would be a new trust surface. The
+  picker starts in the last-used directory from settings (§17) and updates it on success.
 - **Save**: `ProjectStore.SaveAsync(current, path)`; on success call `ProjectDocument.MarkSaved()` (no-arg,
   §7) and store the returned value as `ProjectSession.LastWritten` for the file stamp and the displayed
   timestamp; delete the `.autosave` sidecar and the untitled recovery snapshot; refresh `modifiedUtc` display.
@@ -382,7 +462,8 @@ public interface IProjectSessionService
   before releasing the old one; if the new lock cannot be acquired, keep the old path and report), update the
   session path, recent list, file stamp, and document keys' display data. Undo history is preserved.
 - **Close**: if dirty, the shell prompts Save/Discard/Cancel; then dispose the lock, delete an orphaned
-  sidecar only if it is ours and the document was saved, and close the project's documents.
+  sidecar only if it is ours and the document was saved, and close the project's documents. A read-only session
+  closes without a prompt and without deleting another session's sidecar.
 - **Recent files**: at most 10 entries `{path, lastOpenedUtc}` in settings; de-duplicated by full path
   (case-insensitive on Windows/macOS, ordinal on Linux — decided by `OperatingSystem.IsWindows()/IsMacOS()`);
   a missing entry renders disabled with a "Remove from list" action and is never auto-removed silently;
@@ -440,11 +521,13 @@ public interface IProjectSessionService
   Autosave never clears dirty state and never updates the save point. On successful save, the sidecar or
   recovery file is deleted.
 - **Recovery** on open or startup: if a sidecar exists and its content differs from the saved file, offer
-  Recover / Discard / Decide later. Recovering loads the sidecar, builds a `ProjectDocument` with the saved
-  file value as the clean point (`ProjectDocument.CreateRecovered`, §16), and leaves the document dirty; the
-  next save writes the main file and deletes the sidecar. Discarding deletes it. "Decide later" keeps it and
-  reappears next time. Untitled recovery files are listed in the same startup flow and open as dirty untitled
-  documents that prompt for a path on first save.
+  Recover / Discard / Decide later through `IProjectSessionService.RecoverAsync`/`DiscardRecoveryAsync`
+  (round-1 m-10). Recovering loads the sidecar, builds a `ProjectDocument` with the saved file value as the
+  clean point (`ProjectDocument.CreateRecovered`, §16), and leaves the document dirty; the next save writes the
+  main file and deletes the sidecar. Discarding deletes it. "Decide later" keeps it and reappears next time.
+  Untitled recovery files are listed in the same startup flow and open as dirty untitled documents that prompt
+  for a path on first save. The scan itself goes through `IRecoveryStore` (implementation in `Mocassin.App`,
+  §1), never `System.IO` in the view-model project.
 - **Read-only sessions never write**: a project opened without a lock does not autosave, does not write a
   recovery file, and does not run the external-change prompt; its only write paths are Save As and Close. This
   prevents a second instance from leaving files beside a project another instance owns.
@@ -459,8 +542,14 @@ public interface IProjectSessionService
   `cleanExit` flag written on a clean shutdown. If the previous run ended uncleanly, startup offers
   "Restore session and recover changes" after the recovery scan. Restoring opens the listed projects that
   still exist and reports the ones that do not.
-- **Crash**: the crash dialog offers "Write recovery files" (synchronous sidecar/recovery writes for all dirty
-  sessions, best-effort with per-session reporting), "Open log folder", and "Exit". No automatic restart.
+- **Crash**: the crash dialog offers "Write recovery files", "Open log folder", and "Exit". Writing is
+  asynchronous (the store exposes only async writes) and bounded: `CrashRecoveryWriter` starts the snapshot
+  writes for every dirty session, awaits them with a 2 s budget (`Task.WhenAny` against a
+  `CancellationTokenSource` timeout), and reports per-session success, timeout, or failure in the dialog. There
+  is no `.Result`, `GetAwaiter().GetResult()`, or other sync-over-async call on this path (round-1 m-11). If the
+  budget expires, the log records the unfinished sessions and the app exits without claiming they were saved.
+  No automatic restart. Until feature 7 implements the writer, feature 1 registers a null `IRecoveryWriter`
+  whose button reports "no recovery snapshots in this build"; it is a seam, not a dead control.
 
 ### 7. Edit pipeline and undo/redo
 
@@ -502,14 +591,23 @@ public sealed partial class ProjectEditCoordinator : ObservableObject
   or Enter), with descriptions such as "Rename project" and "Edit project notes". Typing does not create an
   entry per keystroke. An empty project name is refused by `ProjectValidator` and surfaces as an inline error.
 - Performance: dirty state is computed on change and cached — never on every binding read. A hash of the ceria
-  sample must stay well below the 500 ms open/save budget; the actual figure is recorded in feature 6.
+  sample must stay well below the 500 ms open/save budget; the actual figure is recorded as non-gating evidence
+  at feature 7 closeout (§21).
 
 ### 8. Validation and diagnostics surface
 
-- The shell consumes `ProjectValidationPipeline` exactly as Step 07 §8 requires: `Validate(project)` with
-  `ValidationOptions.Default` (no statistics, no build stage) and a `CancellationToken`, debounced 300 ms
-  after the last `ProjectChanged`. It does not call domain validators and does not let `ProjectStore` validate
-  on load.
+- The shell consumes `ProjectValidationPipeline` exactly as Step 07 §8 defines, in the **in-memory** form:
+  `pipeline.Validate(project, loadDiagnostics: session.LoadDiagnostics, ValidationOptions.Default, compiledModel:
+  null, cancellationToken)` — no statistics, no build stage — debounced 300 ms after the last `ProjectChanged`.
+  `session.LoadDiagnostics` is `ProjectLoadResult.Diagnostics` captured at open (and again at Reload/Recover).
+  The store is configured with `ValidateOnLoad = false` (§5), so:
+  - the store never validates, and no domain validator is called twice;
+  - the pipeline's `Load` stage is populated from the load diagnostics instead of being skipped, so
+    migration/`PROJ` load diagnostics reach the status bar and Problems;
+  - `ValidateFileAsync` is not used by the GUI, because the GUI already holds the parsed project and must not
+    read the file a second time.
+  This is the round-1 M-1 correction. A test asserts the store option, that the `Load` stage contains the load
+  diagnostics on open, and that no diagnostic is duplicated.
 - Validation runs off the UI thread on an immutable snapshot. When the result arrives, it is applied only if
   the current document hash equals the snapshot hash; otherwise it is discarded as stale. A newer edit
   cancels the previous run.
@@ -522,36 +620,52 @@ public sealed partial class ProjectEditCoordinator : ObservableObject
     menu; "Revalidate" re-runs with cancellation and a timestamp; the operation never mutates the project;
   - document-level: an error banner in the Project Overview whose entries navigate to Problems.
 - Statistics are opt-in: the Project Overview requests `IncludeStatistics = true` and computes them in the
-  background, cached by document hash, because `/stats` is budgeted at < 2 s for ceria while live validation is
-  < 200 ms.
+  background, cached by document hash. The Step 07 budgets (`/stats` < 2 s, live validation < 200 ms for
+  ceria) are design budgets, not PR-fast assertions (round-1 m-4, §21).
 - Diagnostics are never invented in the UI: no new codes, no re-worded messages. Help links map `Code` to the
   documented anchor when one exists; an unknown code renders unlinked.
 - Step 07 §8 assigns "the panels and commands" to Steps 24–25. Step 23 builds the status indicator, the
-  Problems list, the navigation plumbing, and the revalidate command because the shell needs them for its own
-  acceptance, and Steps 24/25 add the editor side of each navigation target plus the statistics panels. This is
-  the same contract delivered earlier in part, not a change to it.
+  Problems list with its filters/sort/help anchors/related navigation/revalidate, the navigation plumbing, and
+  the on-demand statistics panel header because the shell needs them for its own acceptance; Steps 24/25 add the
+  editor side of each navigation target and the per-domain statistics navigation. This is the same contract
+  delivered earlier in part, not a change to it. Feature 6 is the single owning feature for this whole surface
+  (round-1 n-4), so no part of it is orphaned across features 2, 6, and 7.
 - One settings file per data directory: a second application instance sharing the same data directory is not
   coordinated, so the last writer wins for settings. This is accepted for a single-user desktop app and is
   documented; project files are protected by their own lock, which is the part that matters.
 
 ### 9. Settings, theming, density, and accessibility
 
+- **Where the pieces live (round-1 M-3).** The settings *model*, the pure validator/migrations, the
+  source-generated `AppSettingsJsonContext`, the `IAppSettingsStore` contract, and `ISettingsService`
+  (the state machine the view models observe) are in `Mocassin.App.ViewModels`. The file store
+  (`AppSettingsStore`) is in `Mocassin.App`: it resolves the app-data path, reads and writes the document
+  atomically, applies the size cap, and owns `Environment.SpecialFolder`/`Path.Combine`. The theme *applier*
+  (`AvaloniaThemeApplier` and the resource dictionaries) is in `Mocassin.App.Views`. `Mocassin.App.ViewModels`
+  contains no `System.IO`, no `Environment.SpecialFolder`, no `Application`, and no resource dictionaries
+  (§1, and the architecture test in §20).
 - Settings live in `<app-data>/Mocassin.Settings.json`; the app-data root is
   `<LocalApplicationData>/Mocassin` (`%LOCALAPPDATA%`, `~/.local/share`, `~/Library/Application Support`),
   overridable by `--data-dir`/`MOCASSIN_DATA_DIR`. Subfolders: `logs/`, `cache/` (reserved for Step 27),
-  `recovery/`. Paths are built with `Path.Combine`/`Environment.SpecialFolder`; no separators are hard-coded.
-  The format is specified in §17.
+  `recovery/`. No separator is hard-coded; the App-layer store builds every path. The format is specified in
+  §17.
 - The settings service validates on load: an unknown enum, out-of-range number, or malformed entry falls back
   to the default for that field and logs a warning; a document whose `format` is wrong or whose
   `schemaVersion` is a *future major* is not loaded and **not overwritten** (the app starts with defaults,
   shows a banner, and Save Settings becomes "Save as new file"). Unknown fields are tolerated on read and are
   not preserved when the file is rewritten, so a newer minor writer cannot corrupt an older reader; older
   documents are migrated by pure functions.
-- Theme: `system` (follows `Application.RequestedThemeVariant` default), `light`, `dark`. Accent overrides the
-  Fluent accent resources; a null accent uses the Fluent default. Density: `comfortable` (default) or
-  `compact`, implemented as an app resource dictionary that overrides spacing/size tokens; font scale
-  0.85–1.5 multiplies the base font sizes (text stays scalable, no fixed pixel heights). Reduce motion
-  disables non-essential transitions.
+- **Write discipline (round-1 m-6).** The store writes through the same atomic protocol as the project file:
+  serialise with the source-generated `AppSettingsJsonContext` to UTF-8 without BOM, write a sibling temp file,
+  flush and `Flush(flushToDisk: true)`, then replace the target; a failed write leaves the previous file
+  intact. It rejects a document above `MaxSettingsBytes = 4 MiB` (a corrupt or hostile file cannot exhaust
+  memory) and a `recentFiles` list above its documented cap. It never writes on a failed load of a
+  forward-versioned file.
+- Theme: the applier maps `ThemeSelection` (`system`/`light`/`dark`) to `Application.RequestedThemeVariant`,
+  overrides the Fluent accent resources when an accent is selected, and swaps the density resource dictionary
+  (`comfortable` default, `compact`) and the font-scale token set (0.85–1.5, applied to font sizes, not fixed
+  pixel heights). Reduce motion disables non-essential transitions. The applier is the only code that touches
+  theme resources; `ThemeService` in ViewModels only holds the selection and raises a change.
 - High contrast: a dedicated app-owned resource dictionary with WCAG-verified pairs, selectable in settings and
   also followed when the platform requests a high-contrast variant if Avalonia exposes it (verification item
   V-2). Do not assume a Fluent high-contrast dictionary exists in 12.1.6.
@@ -562,11 +676,15 @@ public sealed partial class ProjectEditCoordinator : ObservableObject
   with the font-scale setting. Tab headers, splitters (with keyboard resize), the console list, the explorer
   tree, and the palette are the risk points and are covered by the accessibility assertions in §20.
 - The settings dialog is a real view: theme (radio), accent (a small fixed palette, not a full colour picker),
-  density, font scale (slider with live preview), high contrast, reduce motion, autosave enable/interval,
-  confirm-on-external-change, recent-file list with clear, and buttons Reset to defaults / Open config folder /
-  Clear logs and cache / Close. Reset asks for confirmation and never deletes projects.
+  density, font scale (slider with live preview), high contrast, reduce motion, autosave enable/interval
+  (feature 7), confirm-on-external-change, recent-file list with clear, and buttons Reset to defaults / Open
+  config folder / Clear logs and cache / Close. Reset asks for confirmation and never deletes projects. The
+  dialog is a view over `SettingsViewModel`; the confirmation and the folder opening go through
+  `IDialogService`/the App layer, not through `System.IO` in the view model.
 - "Clear logs and cache" deletes only files under `logs/` and `cache/` that are not the currently open log
-  file, and reports how many bytes were freed. No project, package, result, or job-folder path is touched.
+  file, and reports how many bytes were freed. No project, package, result, or job-folder path is touched. The
+  sweep is an App-layer operation behind an interface, so it is testable against a real temporary data
+  directory.
 
 ### 10. Keyboard, commands, menus, and the command palette
 
@@ -574,22 +692,27 @@ public sealed partial class ProjectEditCoordinator : ObservableObject
   `ICommandCatalog` aggregates commands registered by the shell and by the active document. Commands are
   `IAsyncRelayCommand`s with cancellation; `CanExecute` is the single source of truth for menu, palette,
   toolbar, and key binding state, so a disabled command is visibly disabled everywhere.
-- Key gestures: `primary` means `Ctrl` on Windows/Linux and `Meta` (`Cmd`) on macOS, resolved once from
-  `OperatingSystem`. The menu renders the platform gesture text; the palette shows it in a column.
-- Shortcuts (Step 23 set):
+- **Gesture type (round-1 m-7).** `Gesture` is the framework-neutral record
+  `KeyGestureDescriptor(ModifierKeys Modifiers, KeyName Key)` with a `ModifierKeys` flags enum
+  (`Primary`, `Shift`, `Alt`, `Control`, `Meta`). `Primary` means `Control` on Windows/Linux and `Meta` on macOS
+  and is resolved once from `OperatingSystem` in the key-binding layer. `Mocassin.App.Views` converts the
+  descriptor to an Avalonia `KeyGesture`/`KeyBinding`; the view-model project never names an Avalonia key type.
+  The display text and the cheat sheet are produced from the same descriptor per platform, so the table below
+  uses `primary` uniformly and cannot drift from the macOS binding.
+- Shortcuts (Step 23 set); `primary` is platform-resolved as above:
 
 | Action | Shortcut |
 | --- | --- |
-| New / Open / Save / Save As / Close document | `Ctrl+N` / `Ctrl+O` / `Ctrl+S` / `Ctrl+Shift+S` / `Ctrl+W` |
-| Undo / Redo | `Ctrl+Z` / `Ctrl+Y` and `Ctrl+Shift+Z` |
-| Command palette | `Ctrl+Shift+P` |
-| Find in document | `Ctrl+F` |
-| Next / previous document, document 1–9 | `Ctrl+Tab` / `Ctrl+Shift+Tab`, `Ctrl+1..9` |
+| New / Open / Save / Save As / Close document | `primary+N` / `primary+O` / `primary+S` / `primary+Shift+S` / `primary+W` |
+| Undo / Redo | `primary+Z` / `primary+Y` and `primary+Shift+Z` |
+| Command palette | `primary+Shift+P` |
+| Find in document | `primary+F` |
+| Next / previous document, document 1–9 | `primary+Tab` / `primary+Shift+Tab`, `primary+1..9` |
 | Back / forward navigation | `Alt+Left` / `Alt+Right` |
-| Settings / shortcut cheat sheet | `Ctrl+,` / `F1` |
+| Settings / shortcut cheat sheet | `primary+,` / `F1` |
 | Toggle left / centre / right region, console | `Alt+1` / `Alt+2` / `Alt+3`, `Alt+0` |
-| Validate now | `Ctrl+Shift+V` (Step 26 adds `F5` build and `F6` run) |
-| Quit | `primary+Q` (macOS) / `Alt+F4` (Windows/Linux, window manager) |
+| Validate now | `primary+Shift+V` (Step 26 adds `F5` build and `F6` run) |
+| Quit | `primary+Q` (macOS) / window-manager close on Windows and Linux |
 
 - Menus: `File`, `Edit`, `View`, `Tools`, `Help` are always present. `Model`, `Build`, and `Run` headers are
   contributed by `IMenuItemProvider` and appear **only** when they contain at least one enabled item, so
@@ -634,8 +757,10 @@ public interface IStorageService
   path is exercised in headless tests without a real window. This replaces `MessageBox` and avoids adding
   `MsBox.Avalonia`; an in-app overlay also matches ADR 0003's "no new UI control dependency".
 - `IStorageService` is the only UI-boundary abstraction that needs a test fake: it wraps Avalonia's
-  `IStorageProvider` (`TopLevel.StorageProvider`), returns plain strings, remembers the last directory per
-  operation in settings, and never leaks Avalonia types into view models.
+  `IStorageProvider` (`TopLevel.StorageProvider`) in `Mocassin.App.Views`, returns plain strings, reads and
+  updates the last directory per operation from settings (`paths.lastOpenDirectory`, `paths.lastSaveDirectory`,
+  `paths.lastFolderDirectory`, §17 — round-1 m-5), and never leaks Avalonia types into view models. A null
+  return means "cancelled", never an error.
 - Progress: one `IProgressDialog` per long operation with a determinate or indeterminate bar, a status line,
   cancellation, and a details expander. Step 23 uses it for open/validate-statistics/save-all; Step 26 reuses
   it for builds. Only one progress operation is shown at a time; the status bar carries the same state in a
@@ -658,9 +783,10 @@ public interface IStorageService
 
 - `Microsoft.Extensions.Logging` with Serilog sinks: a date-suffixed rolling file in
   `<app-data>/logs/mocassin-<date>.log` (daily rolling, minimum level from settings, console sink only in Debug
-  builds). Structured properties
-  include project id, document key, operation, and duration where applicable. No credentials, no remote sinks,
-  no telemetry.
+  builds). Structured properties include project id, document key, operation, and duration where applicable.
+  The log sink owns record timestamps; `TimeProvider` is injected for document/autosave/stamp time, not for
+  logging (round-1 n-7). Tests assert log level, scope, and message, not sink timestamps. No credentials, no
+  remote sinks, no telemetry.
 - Retention: 14 days or 100 MB, whichever comes first. The Serilog file sink is configured with a daily
   rolling interval and a retained file count of 14; the size cap uses the sink's retained-size option if it is
   available in the pinned version and otherwise an explicit startup sweep (`LogRetention`) that deletes the
@@ -687,7 +813,8 @@ public interface IStorageService
 | Validation result, statistics cache | per-session `ValidationCoordinator` (subscribes to `ProjectChanged`) | memory |
 | Open projects, paths, locks, file stamps | `ProjectSession` | lock file; paths in settings |
 | Documents, tabs, active document | `DocumentCollectionViewModel`/`ShellViewModel` | open paths in settings |
-| Panel sizes, visibility, theme, density, recent files | `ShellViewModel`/settings region VMs | `Mocassin.Settings.json` |
+| Panel sizes, visibility, theme selection, density, recent files, last directories | `ShellViewModel`/settings region VMs (state only) | `Mocassin.Settings.json`, written by `AppSettingsStore` |
+| Settings/recovery file bytes, app-data paths, theme resources, dispatcher | `Mocassin.App` (`AppSettingsStore`, `RecoveryStore`, `ProjectFileProbe`) and `Mocassin.App.Views` (`AvaloniaThemeApplier`) | the file system / Avalonia |
 | Per-project view state (camera, visibility, styles) | later steps | project `viewSettings` |
 
 Rules:
@@ -695,6 +822,11 @@ Rules:
 - No scientific logic in any view model: no arithmetic on energies/geometry, no unit conversion, no
   validation rules, no JSON parsing, no hashing beyond calling the coordinator. View models translate between
   library values and observable properties.
+- No direct I/O in `Mocassin.App.ViewModels` (round-1 M-3): library APIs (`ProjectStore`,
+  `ProjectValidationPipeline`, `ProjectTemplateFactory`) are allowed, `System.IO`, `Environment`,
+  `Application`, and resource dictionaries are not. App-local files go through `IAppSettingsStore`,
+  `IRecoveryStore`, and `IProjectFileProbe`; theme changes go through `IThemeApplier`. The architecture test
+  in §20 enforces the token ban.
 - UI state that must persist goes to app settings (app-scoped) or the project `viewSettings`
   (document-scoped). No ad-hoc state files. Step 23 writes nothing to `viewSettings`.
 - All `ProjectDocument` mutations happen on the UI thread. Validation runs on the thread pool over an
@@ -702,22 +834,30 @@ Rules:
 - `IUiDispatcher` (ViewModels) abstracts `Dispatcher.UIThread` for the few callbacks that arrive off-thread
   (timers, file checks, background validation completion). Tests use an inline implementation; that is a
   UI-thread boundary fake, which the mocks policy allows.
-- `TimeProvider` is injected everywhere time is read or scheduled (`ProjectStore`, autosave, stamps,
-  logging timestamps). No `DateTime.Now`, no `Task.Delay` in production code.
+- `TimeProvider` is injected everywhere time is read or scheduled (`ProjectStore`, autosave, file stamps,
+  session/retention decisions). Log record timestamps come from the logging sink, not from an injected clock
+  (round-1 n-7). No `DateTime.Now`, no `Task.Delay` in production code.
 - Long operations take a `CancellationToken`, report `IProgress<T>`, and never block the UI thread. No
-  sync-over-async, no `Dispatcher.UIThread.Invoke` from a command body.
+  sync-over-async, no `Dispatcher.UIThread.Invoke` from a command body. This includes the crash path: the
+  recovery writer awaits with a bounded budget instead of blocking (round-1 m-11, §6).
 - One writer per project: the coordinator. One owner per open project: the session. One collection owns the
   tab set.
 
 ### 14. View-model and view contracts
 
 - `Mocassin.App.ViewModels` is UI-framework-free (`ObservableObject`, `IAsyncRelayCommand`,
-  `ObservableValidator`) and holds every view model, dialog contract, navigation contract, session service,
-  and settings model. It references `CommunityToolkit.Mvvm` only.
+  `ObservableValidator`) and holds every view model, dialog/picker/dispatcher contract, navigation contract,
+  session service, edit and validation coordinator, settings model and pure settings/recovery logic, and the
+  command catalog. It references `CommunityToolkit.Mvvm` and the public library APIs; it has no Avalonia
+  reference and no `System.IO` use (round-1 M-3, §1).
 - `Mocassin.App.Views` holds `UserControl`s/`Window`s, the `DialogHost`, the shell window, the region views,
-  the console/problems views, the settings dialog view, and the resource dictionaries. Views bind to view
-  models; a view never calls a library or contains scientific logic. Code-behind is limited to view-only
-  concerns (focus management, drag-reorder plumbing, splitter keyboard handling).
+  the console/problems views, the settings dialog view, the palette, the theme/density/high-contrast resource
+  dictionaries, and the `AvaloniaThemeApplier`. Views bind to view models; a view never calls a library or
+  contains scientific logic. Code-behind is limited to view-only concerns (focus management, drag-reorder
+  plumbing, splitter keyboard handling).
+- `Mocassin.App` holds `Program`, `App.axaml(.cs)`, `ViewLocator`, the composition root, and the app-local I/O
+  implementations that ViewModels must not own: `AppSettingsStore`, `RecoveryStore`, `ProjectFileProbe`,
+  `AppPaths`, and the log-retention sweep.
 - `Mocassin.App` holds `Program`, `App.axaml(.cs)`, `ViewLocator`, and the composition root. `ViewLocator`
   maps a view-model type to `Mocassin.App.Views.<same path minus "ViewModels">.<TypeName minus "ViewModel">View`
   by convention, with three safeguards: the type must live in `Mocassin.App.ViewModels` (or a later
@@ -739,28 +879,37 @@ step): project roots hold only entry points/metadata, folders are concept-named,
 src/dotnet/Mocassin.App/
   Program.cs  App.axaml  App.axaml.cs  ViewLocator.cs  AssemblyInfo.cs
   Composition/     AppHost.cs  AppServiceRegistration.cs  AppStartupOptions.cs  AppPaths.cs  LoggingSetup.cs  LogRetention.cs
-  Startup/         StartupCoordinator.cs  RecoveryScanPresenter.cs  CrashHandler.cs
+  Settings/        AppSettingsStore.cs  AppSettingsPaths.cs  SettingsWritePolicy.cs
+  Recovery/        RecoveryStore.cs  CrashRecoveryWriter.cs  RecoveryScan.cs
+  Files/           ProjectFileProbe.cs  FileStampProvider.cs
+  Startup/         StartupCoordinator.cs  RecoveryPromptPresenter.cs  CrashHandler.cs
 
 src/dotnet/Mocassin.App.ViewModels/
   Shell/           ShellViewModel.cs  ShellRegionsViewModel.cs  StatusBarViewModel.cs  ShellWindowState.cs
+                   StatusBarItemViewModel.cs  WindowPlacementResolver.cs  IUiDispatcher.cs
   Documents/       DocumentViewModel.cs  DocumentKey.cs  DocumentCollectionViewModel.cs  WelcomeDocumentViewModel.cs
   Documents/Project/ ProjectOverviewViewModel.cs  ProjectJsonViewModel.cs  ProjectMetadataEditViewModel.cs
   Projects/        ProjectSession.cs  ProjectSessionService.cs  IProjectSessionService.cs  ProjectSessionResult.cs
-                   CloseSessionResult.cs  ProjectFileStamp.cs  ExternalChangeDetector.cs  RecoveryService.cs
-                   RecentFilesViewModel.cs
+                   ProjectSessionOutcome.cs  CloseSessionResult.cs  RecoveryScanResult.cs  RecoveryCandidate.cs
+                   FileStamp.cs  ExternalChangeDetector.cs  RecentFilesViewModel.cs
   Scheduling/      AutosaveScheduler.cs  Debouncer.cs
   Editing/         ProjectEditCoordinator.cs  EditDiagnosticSet.cs  ProjectChangedEventArgs.cs
   Diagnostics/     ValidationCoordinator.cs  ProblemsViewModel.cs  DiagnosticItemViewModel.cs  ValidationState.cs
   Navigation/      INavigationService.cs  NavigationService.cs  INavigationTargetProvider.cs  NavigationIntent.cs
                    NavigationHistory.cs  ProjectNavigationTargetProvider.cs  IExplorerNodeProvider.cs
+                   ExplorerNode.cs  InspectorSelection.cs  IInspectorContributor.cs
   Settings/        AppSettings.cs  ISettingsService.cs  SettingsService.cs  SettingsMigration.cs  AppSettingsValidator.cs
-                   SettingsViewModel.cs  ThemeService.cs  LayoutState.cs  SessionState.cs
-  Commands/        ShellCommand.cs  ICommandCatalog.cs  CommandCatalog.cs  KeyGestureCatalog.cs  IMenuItemProvider.cs
+                   AppSettingsJsonContext.cs  IAppSettingsStore.cs  SettingsViewModel.cs  ThemeService.cs
+                   ThemeSelection.cs  IThemeApplier.cs  LayoutState.cs  SessionState.cs  PathState.cs
+  Recovery/        IRecoveryStore.cs  RecoveryRetentionPolicy.cs
+  Commands/        ShellCommand.cs  ICommandCatalog.cs  CommandCatalog.cs  KeyGestureDescriptor.cs
+                   ModifierKeys.cs  KeyName.cs  KeyGestureCatalog.cs  IMenuItemProvider.cs  MenuKind.cs
                    IConsoleChannelProvider.cs  IStatusBarItemProvider.cs  CommandPaletteViewModel.cs
   Consoles/        ConsoleViewModel.cs  ConsoleChannelViewModel.cs  ConsoleEntryViewModel.cs  IConsoleService.cs
-  Dialogs/         IDialogService.cs  IStorageService.cs  IProgressDialog.cs  DialogViewModel.cs  DialogRequest.cs
-                   ConfirmDialogRequest.cs  ChoiceDialogRequest.cs  TextPromptRequest.cs  ErrorDialogRequest.cs
-                   ProgressDialogRequest.cs  DialogChoice.cs
+                   ConsoleService.cs
+  Dialogs/         IDialogService.cs  IStorageService.cs  IProgressDialog.cs  DialogViewModel.cs
+                   DialogRequest.cs  ConfirmDialogRequest.cs  ChoiceDialogRequest.cs  TextPromptRequest.cs
+                   ErrorDialogRequest.cs  ProgressDialogRequest.cs  DialogChoice.cs
 
 src/dotnet/Mocassin.App.Views/
   Shell/           ShellWindow.axaml(.cs)  ShellView.axaml(.cs)  MenuBarView  StatusBarView  ProjectSwitcherView
@@ -771,17 +920,29 @@ src/dotnet/Mocassin.App.Views/
   Dialogs/         DialogHost  ConfirmDialogView  ChoiceDialogView  PromptDialogView  ErrorDialogView
                    ProgressDialogView  CrashDialogView  CommandPaletteView
   Controls/        SplitterHost  NotificationHost
+  Theming/         AvaloniaThemeApplier.cs  ThemeResources.axaml
   Themes/          Density.axaml  HighContrast.axaml  Accent.axaml  Metrics.axaml
+  Platform/        AvaloniaStorageService.cs  AvaloniaUiDispatcher.cs  ViewKeyBindingBinder.cs
 
 src/dotnet/Mocassin.App.Tests/
   TestSupport/     ManualTimeProvider.cs  InlineUiDispatcher.cs  RecordingDialogService.cs  StubStorageService.cs
-                   TempWorkspace.cs  HeadlessAppBuilder.cs  ProjectFixtures.cs
+                   InMemoryAppSettingsStore.cs  InMemoryRecoveryStore.cs  TempWorkspace.cs  HeadlessAppBuilder.cs
+                   ProjectFixtures.cs
   ViewModels/…  Views/…  Visual/…  Visual/Baselines/…
 ```
 
 No `Internal/` folder is added at a project root (`Internal` is nested-only per the structure policy); the
 debouncer and autosave scheduler live in `Scheduling/`, and any other helper lives in the concept folder that
 owns it.
+
+**Visibility and PublicAPI (round-1 m-8).** Every type in the three App projects is `internal`. The shell, its
+services, and the contribution seams are consumed by Steps 24–28, which edit these same assemblies; no later
+step needs a public type from them. `Mocassin.App.Tests` gets access through
+`[assembly: InternalsVisibleTo("Mocassin.App.Tests")]` in each project's `AssemblyInfo.cs`. Consequently
+`PublicAPI.Shipped.txt`/`PublicAPI.Unshipped.txt` stay unchanged for `Mocassin.App*`, and the `PublicApiAnalyzers`
+references in those projects stay satisfied with empty lists. The only public API added by this step is the
+Core/Packages surface in §16, listed in those projects' `PublicAPI.Unshipped.txt`. If a later step needs a
+separate assembly, that is a recorded amendment, not an implicit public surface.
 
 - The `Mocassin.App.ViewModels.csproj` gains `CommunityToolkit.Mvvm`; `Mocassin.App.csproj` gains
   `Avalonia`, `Avalonia.Desktop`, `Avalonia.Fonts.Inter`, `Avalonia.Themes.Fluent`, `Microsoft.Extensions.*`,
@@ -798,17 +959,23 @@ owns it.
 Four additive, behaviour-preserving changes. All are small, land with their own tests, and are listed in the
 `PublicAPI.Unshipped.txt` of `Mocassin.Core`/`Mocassin.Packages`. Because every change is additive, no ApiCompat
 baseline refresh is expected; if `./tools/verify.sh api` reports a removed or changed member, the change is
-wrong and must be redesigned rather than baselined away.
+wrong and must be redesigned rather than baselined away. `Mocassin.App*` adds no public API (§15).
 
 | Change | Where | Why the shell cannot own it | Contract effect |
 | --- | --- | --- | --- |
 | `ProjectDocument.MaxUndoDepth` (init-only, default 200; oldest entries dropped) | `Mocassin.Core.Editing` | The stack lives in the document; a UI-level bound would duplicate or shadow the stack | Additive property; no signature change; default preserves Step 01 behaviour |
 | `ProjectDocument.CreateRecovered(Project current, Project lastSaved, ProjectEditor? editor = null)` | `Mocassin.Core.Editing` | Recovery needs a clean point different from the current value; `MarkSaved(value)` overwrites both | Additive static factory; existing constructors unchanged |
 | `ProjectStore.WriteAutosaveToPathAsync(Project, string autosavePath, CancellationToken)` | `Mocassin.Packages.Projects` | Untitled projects have no project path to derive `<path>.autosave` from; re-implementing the atomic JSON write in the app would duplicate Step 01 | Additive overload; reuses `AutosaveFailed`; existing sidecar API unchanged |
-| `ProjectNameRules.Normalize/Validate` + `NewProjectCommand` refactor to call it | `Mocassin.Packages.Projects.Templates` and `Mocassin.Cli.NewProject` | `File > New` must enforce exactly the CLI's name/path rules; duplicating them in the app guarantees drift | New public helper; CLI output and `CLI003`/3 behaviour must remain byte-identical (existing CLI tests pin the messages) |
+| `ProjectPathRules.NormalizeName/ValidateTarget` + `NewProjectCommand` refactor to call it | `Mocassin.Packages.Projects.Templates` and `Mocassin.Cli.NewProject` | `File > New` must enforce exactly the CLI's name **and target-path** rules (trimmed name, `.mocprj` suffix, length, separators, `..`, control and reserved characters, existing target, directory creation); duplicating them in the app guarantees drift | New public helper; CLI codes, exit codes, and file behaviour must remain identical, and **new CLI regression tests pin the exact message text** moved into the helper, so the extraction cannot silently reword it (round-1 m-3) |
 
 No other library change is allowed in this step. If implementing a feature appears to need a fifth change, the
 step agent stops and records an amendment rather than editing a library ad hoc.
+
+The CLI refactor is a **behaviour-preserving move**, not a rewrite: `NewProjectCommand` keeps its `CLI001`/2
+usage errors, `CLI002`/3 I/O errors, `CLI003`/3 existing-target error, its exit codes, and its JSON report.
+The new tests are added to `Mocassin.Cli.Tests` for the message text of each rejected name/path case, because
+the existing tests assert only the code and exit code (round-1 m-3), and the GUI tests assert that the GUI shows
+the same message for the same input.
 
 ### 17. Settings file format (`mocassin.settings` v1)
 
@@ -829,19 +996,24 @@ migrations, forward-compatible reading.
   "highContrast": false,
   "reduceMotion": false,
   "culture": "en",
-  "autosave": { "enabled": true, "intervalMinutes": 5 },
   "logging": { "level": "information" },
   "ui": { "confirmOnExternalChange": true, "showWelcomeOnStart": true },
+  "paths": { "lastOpenDirectory": "/work", "lastSaveDirectory": "/work", "lastFolderDirectory": "/work" },
   "recentFiles": [ { "path": "/work/ceria.mocprj", "lastOpenedUtc": "2026-11-20T10:00:00Z" } ],
-  "session": { "openProjects": ["/work/ceria.mocprj"], "activeProject": "/work/ceria.mocprj",
-               "cleanExit": true, "savedUtc": "2026-11-20T10:00:00Z" },
   "layout": { "leftWidth": 260, "rightWidth": 320, "consoleHeight": 180,
               "leftVisible": true, "rightVisible": true, "consoleVisible": true,
-              "activeConsoleChannel": "problems" }
+              "activeConsoleChannel": "problems" },
+  "autosave": { "enabled": true, "intervalMinutes": 5 },
+  "session": { "openProjects": ["/work/ceria.mocprj"], "activeProject": "/work/ceria.mocprj",
+               "cleanExit": true, "savedUtc": "2026-11-20T10:00:00Z" }
 }
 ```
 
-- Written atomically (temp + rename), UTF-8 without BOM, 2-space indent, `\n` line endings.
+- Written atomically: serialise through the source-generated `AppSettingsJsonContext` to UTF-8 without BOM,
+  2-space indent, `\n` line endings; write a sibling temp file, flush and `Flush(flushToDisk: true)`, then
+  replace the target (round-1 m-6). A failed or interrupted write leaves the previous file intact.
+- `MaxSettingsBytes = 4 MiB` bounds the document (and `recentFiles` is capped at 10 entries); a larger file is
+  rejected as invalid, not loaded, so a corrupt or hostile settings file cannot exhaust memory.
 - Reading: `format` must equal `mocassin.settings`; `schemaVersion` above the current major is rejected without
   overwriting; unknown properties are ignored; each field is validated and falls back to its default with a
   logged warning.
@@ -849,6 +1021,8 @@ migrations, forward-compatible reading.
 - **Step 23 ships only fields it consumes.** Later steps add fields additively (missing = default) without a
   schema bump; a bump is required only for a breaking change (renamed/removed field or changed meaning).
   Solver path, package output, and results directories are deliberately absent until Steps 26/28 consume them.
+  `paths` is owned by feature 3/4, and `autosave`/`session` by feature 7: under an approved split, 23B adds those
+  two objects to the same v1 document with **no schema bump**, which is exactly the additive rule in action.
 - The window size/state and splitter positions are app-scoped, so they live here, not in `viewSettings`.
   Nothing in this step writes `viewSettings`.
 
@@ -858,10 +1032,10 @@ migrations, forward-compatible reading.
 
 | Capability | Library API | What the shell owns |
 | --- | --- | --- |
-| Load/save/migrate/lock/autosave | `ProjectStore`, `ProjectStoreOptions`, `ProjectLoadResult`, `ProjectSaveResult`, `ProjectLockResult`, `ProjectFileLock` | prompts, paths, recent list, file stamps, read-only mode, scheduling |
+| Load/save/migrate/lock/autosave | `ProjectStore` **with `ProjectStoreOptions { ValidateOnLoad = false }`**, `ProjectLoadResult` (project + `Diagnostics` + `FailureKind`), `ProjectSaveResult`, `ProjectLockResult`, `ProjectFileLock`, `ProjectStore.GetAutosavePath/AcquireLockAsync` | prompts, paths, recent list, load-diagnostic retention, file stamps, read-only mode, scheduling |
 | Project value and editing | `Project`, `ProjectDocument`, `ProjectEditor`, `ProjectChange`, `ProjectEditResult`, `ProjectHasher`, `ProjectJson` | commands, dirty presentation, undo/redo wiring |
-| Templates | `ProjectTemplateFactory`, `ProjectTemplate`, `ProjectTemplateKind` | the New dialog, name/path validation via `ProjectNameRules`, recent/list wiring |
-| Validation | `ProjectValidationPipeline`, `ValidationResult`, `ValidationOptions`, `DiagnosticSummary`, `ModelStatisticsService` | debounce, staleness guard, Problems surface, navigation |
+| Templates | `ProjectTemplateFactory`, `ProjectTemplate`, `ProjectTemplateKind` | the New dialog, name/path validation via `ProjectPathRules`, recent/list wiring |
+| Validation | `ProjectValidationPipeline.Validate(project, loadDiagnostics, …)`, `ValidationResult`, `ValidationOptions`, `DiagnosticSummary`, `ModelStatisticsService` | the `Load` stage seeding, debounce, staleness guard, Problems surface, navigation |
 | Diagnostics | `Diagnostic`, `DiagnosticSeverity`, `ModelPath`, catalog codes | severity icons, filters, help anchors, navigation targets |
 | Settings/logging | `TimeProvider`, `Microsoft.Extensions.*`, Serilog | the whole settings and logging policy |
 
@@ -894,13 +1068,13 @@ no second template definition, no second lock, no second hash, no second diagnos
 
 | Page | Content | Written in |
 | --- | --- | --- |
-| `docs/getting-started/installation.md` | prerequisites, per-OS install, first launch, data-dir location, GPU-free operation | feature 1/8 |
-| `docs/getting-started/quickstart.md` | create/open → inspect → validate → save/recover; what the editors add later | feature 4/8 |
-| `docs/getting-started/first-project.md` | guided first project: templates, workspace, tabs, undo, autosave, recovery | feature 5/8 |
-| `docs/user-guide/projects.md` | lifecycle reference: new/open/save/save-as/close, recents, locks, read-only, external changes, undo/redo, settings, recovery, retention | features 4–6 |
-| `docs/development/ui-architecture.md` | composition root, dependency direction, document/navigation model, state ownership, threading, contribution seams, test harness, theming/a11y, settings format | features 1–3, finalized in 8 |
+| `docs/getting-started/installation.md` | prerequisites, per-OS install, first launch, data-dir location, GPU-free operation | feature 1, completed in 4 |
+| `docs/getting-started/quickstart.md` | create/open → inspect → validate → save/recover; what the editors add later | feature 4, completed in 8 |
+| `docs/getting-started/first-project.md` | guided first project: templates, workspace, tabs, undo, autosave, recovery | feature 4, completed in 8 |
+| `docs/user-guide/projects.md` | lifecycle reference: new/open/save/save-as/close/reload, recents, locks, read-only, external changes, undo/redo, settings, recovery, retention | features 4–7 |
+| `docs/development/ui-architecture.md` | composition root, dependency direction and the I/O boundary, document/navigation model, state ownership, threading, contribution seams, test harness, theming/a11y, settings format | features 1–3, finalized in 8 |
 | `docs/troubleshooting/installation.md` | startup failures, missing display/Wayland nuance, unwritable data dir, corrupt settings, locked project, recovery prompts | feature 8 |
-| `docs/reference/file-layout.md` | app-data layout, `Mocassin.Settings.json` field table and example, retention rules | feature 3/8 |
+| `docs/reference/file-layout.md` | app-data layout, `Mocassin.Settings.json` field table and example, retention rules | feature 3, extended in 7 |
 | `docs/development/index.md`, `docs/user-guide/index.md`, `docs/troubleshooting/index.md`, `zensical.toml` | navigation entries for the new pages (required for the strict build) | feature 8 |
 | `docs/development/testing-and-parity.md` | UI harness, tiers, screenshot policy | feature 8 |
 
@@ -911,25 +1085,31 @@ must be regenerated from the real app; a placeholder is not acceptable.
 
 Harness: `Mocassin.App.Tests` uses Avalonia headless for view tests and plain xUnit for view-model tests.
 Real objects everywhere: real `ProjectStore`, real temporary directories, real `Project` values, real
-validation pipeline, real dialog overlay. Permitted fakes are exactly the true boundaries: `IDialogService`
-(for view-model-level tests only), `IStorageService`, `IUiDispatcher`, and `TimeProvider`. No fake `Project`,
-no fake validator, no fake store, no fake JSON.
+validation pipeline, real dialog overlay, and the real `AppSettingsStore`/`RecoveryStore`/`ProjectFileProbe`
+against a temporary data directory where the test is about file behaviour. Permitted fakes are exactly the true
+boundaries: `IDialogService` (view-model-level tests only), `IStorageService`, `IUiDispatcher`, `TimeProvider`,
+and in-memory `IAppSettingsStore`/`IRecoveryStore` **only** for tests that are not about persistence (the
+persistence tests use the real App-layer stores). No fake `Project`, no fake validator, no fake store, no fake
+JSON.
 
 | Area | Tier | Assertion |
 | --- | --- | --- |
 | Startup/composition | PR-fast | `AddMocassinApp` resolves every registered service; the shell view model constructs; the shell renders in headless without a display; duplicate navigation-provider registration fails fast |
-| Architecture | PR-fast | `Mocassin.App.ViewModels` has no reference to Avalonia/`Mocassin.App.Views`; no view type is referenced from a view model; `Mocassin.App` does not reference `Mocassin.Cli`/`Mocassin.Compilation` |
+| Architecture | PR-fast | **Direct** project references only (read from the `.csproj`, not the transitive assembly graph): `Mocassin.App.ViewModels` has no direct Avalonia or `Mocassin.App.Views` reference, and `Mocassin.App` has no direct `Mocassin.Cli` or `Mocassin.Compilation` reference (the `App → Packages → Compilation` transitive edge is expected and allowed — round-1 m-9). A source-token scan fails on `System.IO`, `File.`, `Directory.`, `Environment.SpecialFolder`, `Avalonia`, `Dispatcher`, or `ResourceDictionary` in `Mocassin.App.ViewModels/**/*.cs` (round-1 M-3) |
+| Window placement | PR-fast | A saved placement that intersects no current screen resolves to the primary screen; a saved placement that intersects one is kept (round-1 n-5) |
 | New/open/save/close | PR-fast | New from both templates creates a file the store reopens; save → close → open is content-identical; save-as migrates the lock and preserves undo history; an existing target is refused |
 | Dirty/save point | PR-fast | `*` appears and clears; save → undo → redo is clean; save → edit → undo is clean; undo below the save point is dirty |
 | Autosave | PR-fast | Only dirty documents are written; the interval comes from `TimeProvider`; save and autosave never interleave; a clean save deletes the sidecar/recovery file |
-| Recovery | PR-fast | A simulated crash leaves a sidecar; startup offers recovery; Recover produces a dirty document whose content equals the snapshot; Discard deletes; retention removes only old recovery files |
+| Recovery | PR-fast | A simulated crash leaves a sidecar; startup offers recovery; `RecoverAsync` produces a dirty document whose content equals the snapshot; `DiscardRecoveryAsync` deletes; `ReloadAsync` replaces the document and clears the stacks; retention removes only old recovery files; the crash writer completes within its budget or reports the timeout without blocking |
 | Untitled recovery | PR-fast | An untitled dirty project writes `<app-data>/recovery/<projectId>.mocprj.autosave` and is offered at next start |
 | Locks/read-only | PR-fast | A second session opens read-only with a banner; edit/save are disabled; save-as acquires the new lock; a stale lock is reclaimed per store policy |
 | External change | PR-fast | Clean + changed file → prompt and reload; dirty + changed file → no silent overwrite; unchanged file → no prompt |
 | Recent files | PR-fast | Order, de-duplication, missing-file disable/remove, persistence across restart |
-| Settings | PR-fast | Round-trip; defaults on invalid field; unknown field ignored; future major rejected and file not overwritten; migration is idempotent |
+| Settings | PR-fast | Round-trip through the real `AppSettingsStore`; defaults on invalid field; unknown field ignored; future major rejected and file not overwritten; migration is idempotent; a failed/oversized write leaves the previous file intact; last directories persist and are updated by the picker |
+| Name/path rules | PR-fast | GUI and CLI produce the same message and decision for every rejected name/path case (invalid characters, `..`, over-length, existing target), via the shared `ProjectPathRules` (round-1 m-3/n-6) |
 | Undo/redo | PR-fast | Multi-step apply/undo/redo through the Project Overview document on the shared project stack (the cross-editor proof is Step 24); bounded depth drops the oldest entry; redo is cleared by a new edit |
 | Rejected edit | PR-fast | Validation failure leaves the project and dirty state unchanged and surfaces diagnostics |
+| Validation contract (M-1) | PR-fast | The composed `ProjectStore` has `ValidateOnLoad == false`; on open the pipeline's `Load` stage carries `ProjectLoadResult.Diagnostics` and is not `Skipped`; a migration/load diagnostic reaches the Problems list; no diagnostic is duplicated; `ValidateFileAsync` is not used by the GUI |
 | Validation surface | PR-fast | Debounce coalesces edits; a stale result is discarded; counts and codes match `ValidationResult`; navigation targets are requested for double-click |
 | Navigation | PR-fast | Open/reuse by key, activate, close, back/forward, unknown domain notice, provider registration per project scope |
 | Command catalog/palette | PR-fast | Every shell command appears with its gesture; `CanExecute` disables menu and palette together; `primary` resolves to Ctrl/Meta as designed |
@@ -949,19 +1129,27 @@ and is recorded in §24.
 Tier declaration uses the existing `[Trait("Tier", "PR-fast"|"PR-medium")]` convention; screenshots and any
 longer matrix use `PR-medium`. No new test infrastructure or package beyond the Avalonia headless packages.
 
-### 21. Performance budgets
+### 21. Performance expectations (non-gating)
 
-| Scenario | Budget | Evidence |
-| --- | --- | --- |
-| Cold start (empty session, warm file cache) | < 2 s | manual release measurement recorded with OS/CPU; not a CI gate |
-| Open the ceria sample | < 500 ms | PR-fast test with a stopwatch over the real store, asserted on the same runner |
-| Save the ceria sample | < 500 ms | same |
-| Live validation (ceria, no statistics) | < 200 ms (Step 07 budget) | PR-fast test |
-| Statistics (ceria) | < 2 s (Step 07 budget) | background only, PR-medium |
-| Shell render (headless) | < 100 ms | PR-medium smoke assertion, generous threshold |
-| Autosave write (ceria) | < 500 ms, non-blocking | PR-fast test with `ManualTimeProvider` |
+No absolute wall-clock timing is asserted in a PR-fast test (round-1 m-4). The quality strategy allows absolute
+comparisons only on the same runner class, and the tier table puts performance in nightly/release. Step 23
+therefore separates *budgets* (design targets used to judge a manual or nightly measurement) from *assertions*
+(a behaviour that fails the build):
 
-No benchmark harness is added; `Mocassin.Benchmarks` may later include save/load. Numbers are recorded in the
+| Scenario | Design budget | How it is observed | Gated? |
+| --- | --- | --- | --- |
+| Cold start (empty session, warm file cache) | < 2 s | manual release measurement recorded with OS/CPU | no |
+| Open the ceria sample | < 500 ms | recorded measurement on the benchmark runner and in the feature log | no |
+| Save the ceria sample | < 500 ms | same | no |
+| Live validation (ceria, no statistics) | < 200 ms (Step 07 budget) | recorded measurement at feature 6 closeout | no |
+| Statistics (ceria) | < 2 s (Step 07 budget) | recorded measurement; statistics are opt-in and off the UI thread | no |
+| Shell render (headless) | < 100 ms | a generous hang-guard timeout in the headless view test (seconds, not a perf assertion) | only as a hang guard |
+| Autosave write (ceria) | < 500 ms, non-blocking | functional test asserts that the UI thread is not blocked and that the write completes; timing is recorded | functional only |
+
+The PR-fast suite asserts functionality, ordering, and that long operations are asynchronous; it does not assert
+a duration. If a measurement later needs to become a gate, it is added as a same-runner-class benchmark entry
+with a noise floor, per `03-quality-strategy.md` §13, not as an absolute stopwatch assertion. No benchmark
+harness is added in this step; `Mocassin.Benchmarks` may include save/load later. Numbers are recorded in the
 step page feature log at closeout.
 
 ### 22. Risks and mitigations
@@ -981,30 +1169,72 @@ step page feature log at closeout.
 | Test flakiness (timers, screenshots) | `ManualTimeProvider` for scheduling; no real sleeps; screenshot tolerance and Linux-only pixel comparison |
 | Settings corrupt/forward-versioned file | Never overwrite on read failure; banner + "save as new"; defaults with logged warnings |
 
-### 23. Sizing and split-trigger check
+### 23. Complexity class and split decision
 
-- **Estimate:** 3.75–4.5 person-weeks. Base ≈3.75 pw (feature 1 ≈0.5, feature 2 ≈0.55, feature 3 ≈0.55,
-  feature 4 ≈0.55, feature 5 ≈0.4, feature 6 ≈0.4, feature 7 ≈0.35, feature 8 ≈0.45, integration ≈0.1) plus
-  0.75 pw contingency for the Avalonia/platform unknowns.
-- **§3.1 triggers:** eight features is at the top of the "6–8" range; the audit is a bounded shell review and
-  can be read in one sitting. The upper estimate (**4.5 pw**) is **beyond the four-week trigger**, so this
-  step does not fit the default size.
-- **Requested decision (owner, start gate):** either
-  1. approve a **single-step exception** at 3.75–4.5 pw with eight features and no split, following the
-     Step 09/12/13 precedent and recording the exception in [`04-roadmap.md`](../04-roadmap.md) §3.1 and
-     [`05-open-decisions.md`](../05-open-decisions.md) §3; or
-  2. split into **23A** (features 1–4: shell, documents/navigation, settings/theming/a11y, project lifecycle,
-     ≈2.15 pw) and **23B** (features 5–8: dirty/autosave/recovery, edit pipeline, dialogs/consoles, tests/docs/
-     closeout, ≈1.6 pw + contingency). A split adds one roadmap step and makes Step 24 depend on 23B; the
-     Phase F plan and the Phase F cross-cutting checkpoint would be updated accordingly.
-- **Recommendation:** the single-step exception. The eight features form one coherent shell + lifecycle
-  contract; a split would leave 23A with an unusable app (no autosave/recovery/dialogs) and duplicate test and
-  closeout effort. This mirrors the rejected splits in Steps 12 and 13.
-- **Guard:** if features 1–4 exceed **2.2 pw**, the step agent stops and reports to the orchestrator before
-  feature 5.
-- **No owner approval is recorded yet.** The design is complete under either choice; features 1–4 are exactly
-  23A. The orchestrator must obtain the sizing decision and the feature-list approval at the start gate
-  before any branch is created (AGENTS §3.2, §3.9 step 7).
+Assessed on 2026-11-20 against [`04-roadmap.md`](../04-roadmap.md) §3.1, after the complexity rule replaced the
+person-week trigger. The class is the **highest** dimension, not an average.
+
+| Dimension | Class | Evidence |
+| --- | --- | --- |
+| Contracts, formats, and public surfaces | **Medium** | One new app-local versioned file (`mocassin.settings` v1, single consumer, not in the manifest) and four additive library APIs in Core/Packages. No change to `.mocprj`, `.msl`, `.msr`, `.mcs`, signatures, CLI reports/exit codes, or diagnostic codes |
+| New dependencies | **Medium** | No new production package: Avalonia 12.1.6, CommunityToolkit.Mvvm, Microsoft.Extensions.*, and Serilog are already pinned. Two first-party test-only Avalonia headless packages (same pinned version), plus a possible explicit `Avalonia.Skia` reference (V-1). All confined to the isolated App projects |
+| Cross-step interfaces | **High** | The document model, navigation/explorer/inspector/menu/console/status seams, session and edit coordinator, and dialog/picker contracts are consumed by Steps 24, 25, 26, 27, and 28. A late change rewrites editor code in five later steps |
+| Irreversibility | **Medium** | The settings format and additive APIs are shipped surfaces but reversible by a migration or a new overload; no scientific, signature, or persisted project contract changes. The seam *shape* is the least reversible part and is covered by the cross-step row |
+| Test-matrix breadth and failure modes | **High** | Headless view-model, headless view, screenshot, accessibility-tree, manual platform (Windows/macOS), file-I/O lifecycle/recovery, settings migration, UI-thread/staleness, and a new test harness; failures include path case/separators, timers, locks, crash handling, and platform gesture mapping |
+| Independent acceptance stories | **High** | Three stories the owner could accept or reject separately: (a) the workspace shell renders, navigates, and is keyboard/accessible; (b) project lifecycle is trustworthy (new/open/save/save-as/close/reload/recents/locks/external change); (c) editing safety and diagnostics (undo/redo, dirty/save point, autosave/recovery, validation surface) |
+| Evidence size for a fresh auditor | **High** | Eight features, a new application project plus a headless harness and screenshot baselines, four library changes, six documentation pages, and a design page of roughly 1,400 lines; the diff spans App/ViewModels/Views/Tests plus Core/Packages |
+
+**Class: High.** *Justification (normative record):* Step 23 is High because it introduces a cross-step
+interface surface that five later GUI steps consume, spans a broad test matrix with platform-specific failure
+modes and a new headless/screenshot/accessibility harness, delivers three independent acceptance stories, and
+produces an evidence set an auditor cannot realistically hold in one sitting; its contract and dependency
+dimensions are only Medium because the settings file is app-local and no production package is added.
+
+#### Split decision
+
+The rule splits a High step unless the owner accepts it as one unit. **The planner proposes a split after
+feature 4 and recommends it**, because the boundary is dependency-clean and the two halves are independently
+demonstrable:
+
+| Group | Features | Acceptable outcome on its own |
+| --- | --- | --- |
+| **23A — Workspace and project lifecycle** | 1–4 plus the 23A documentation and closeout | Create/open/navigate/save/save-as/close/reload with recents, locks, read-only mode, and external-change detection; settings, theme, density and accessibility in place; keyboard-operable shell |
+| **23B — Editing safety, diagnostics, and closeout** | 5–8 | Project metadata editing with undo/redo; live validation with navigable Problems and on-demand statistics; save-point-correct dirty state; autosave and crash recovery; the shared harness, screenshots, and the final closeout |
+
+- **Dependency-clean:** after the M-2 reorder, every feature depends only on lower-numbered features; 23A
+  contains no task from 23B, and 23B needs nothing that 23A does not deliver (the dialog/picker/console/
+  notification/progress surfaces are in feature 1). The 23B features do not require the 23A closeout.
+- **Cost of the split:** one new roadmap step and dependency edge (Step 24 would depend on 23B), a Phase F index
+  and milestone update, two closeout evidence files, and a duplicated (small) documentation sweep. The shared
+  harness is built once in 23A and extended in 23B, not duplicated.
+- **Why not split at a different line:** splitting before lifecycle (e.g. features 1–3) leaves an app that cannot
+  open a project, so it has no acceptance story; splitting inside 23B (edit vs recovery) strands dirty tracking
+  without an edit surface or recovery without dirty state.
+
+#### Alternative: owner acceptance of the High step as one unit
+
+If the owner prefers one unit to avoid the extra step, dependency edge, and duplicated closeout, §3.1 allows an
+explicit acceptance recorded here and in the roadmap. The case for one unit is: Step 24 needs the whole shell
+anyway (documents, navigation, edit coordinator, validation, recovery), the harness and screenshot baselines are
+shared across all eight features, and the three acceptance stories are delivered under one step branch and one
+audit rather than two. The case against is the evidence size above: the auditor must hold the whole UI
+foundation, the harness, four library changes, and the docs at once.
+
+**Risk guard if accepted as one unit:** the step agent stops and reports to the orchestrator before feature 5 if
+any of the following holds — the headless/screenshot harness (feature 1–2) is not green on Ubuntu; the M-1
+validation contract cannot be demonstrated with a real load diagnostic; or the M-3 I/O boundary cannot be
+enforced by the architecture test without an allow-list that defeats it. In any of those cases the step is
+re-cut before more code lands, because the later features would build on an unproven foundation.
+
+#### Recording and status
+
+- The class and this paragraph are the record required by §3.1. They are repeated in the implementation-status
+  block; the §3 table stays a non-gating forecast.
+- **No owner decision is recorded yet.** The owner chooses split or one-unit acceptance at the start gate; if
+  the split is approved, the roadmap index, dependency graph, §3 forecasts, Phase F milestone, and the Step 24
+  dependency are updated in the same change, and each half records its own closeout evidence.
+- This replaces the previous person-week framing entirely: there is no time-waiver request, no contingency
+  arithmetic, and no person-week guard. The §3 row remains a scheduling forecast only.
 
 ### 24. Decisions recorded and owner input
 
@@ -1024,6 +1254,12 @@ step page feature log at closeout.
 | Screenshot pixel comparison is Ubuntu-only; other platforms are manual evidence | This page §20 |
 | Untitled-project recovery lives in `recovery/`; saved-project autosave stays the Step 01 sidecar; sidecars are never swept by retention | This page §6 |
 | Four additive library changes and no others | This page §16 |
+| Complexity class **High** with the dimension table and justification; split proposed after feature 4 and recommended; one-unit acceptance case and risk guard recorded | This page §23; [`04-roadmap.md`](../04-roadmap.md) §3.1 |
+| UI I/O boundary: ViewModels may call library APIs that do I/O but never `System.IO`/`Environment`/`Application`/resource dictionaries; app-local settings, recovery, file probing, and theming are implemented in `App`/`Views` behind ViewModels contracts, enforced by a source-token test | This page §1/§13/§15; [`01-target-architecture.md`](../01-target-architecture.md) §3.2; [`code-structure.md`](../../development/code-structure.md) §2.3 |
+| Validation is the in-memory pipeline entry with `ValidateOnLoad = false` and the stored load diagnostics; no double validation, no skipped `Load` stage | This page §5/§8/§20 |
+| Session operations include `Activate`, `Reload`, `Recover`, and `DiscardRecovery`; outcomes include `NotFound`/`InvalidContent`/`IoFailure` | This page §5/§6 |
+| Key gestures are described by a framework-neutral `KeyGestureDescriptor` with a `Primary` modifier; only the Views layer binds Avalonia gestures | This page §10 |
+| Every App-project type is `internal` with `InternalsVisibleTo` for tests; `Mocassin.App*` adds no public API | This page §15 |
 
 **Verification items** (must be confirmed by the named feature; not guessed here):
 
@@ -1033,47 +1269,53 @@ step page feature log at closeout.
 | V-2 | Whether Avalonia 12.1.6 exposes a platform high-contrast theme variant/resource dictionary | 3 | Ship the app-owned `HighContrast.axaml` and select it from settings only |
 | V-3 | Whether the pinned `Serilog.Sinks.File` supports `retainedFileSizeLimitBytes` | 1 | Implement `LogRetention` as an explicit startup sweep |
 | V-4 | `IStorageProvider` picker behaviour for "save as" on each OS (extension filter, overwrite confirmation) | 4 | Own filtering and confirmation in `IStorageService` and document the per-OS behaviour |
+| V-5 | Whether a saved window placement can be validated headlessly against a real monitor topology | 1 | Test the pure `WindowPlacementResolver` against synthetic screen rectangles and record the real multi-monitor check as manual platform-gate evidence |
 
 **New ADRs:** none. ADR 0003 (Avalonia/MVVM/DI) and ADR 0006 (3D, untouched) stand; ADR 0008 and 0011/0013 are
 not affected. The shell decisions are step-level and are recorded here, in the architecture, the quality
 strategy, the open-decisions page, and the code-structure page.
 
-**Owner input required at the start gate:** the sizing decision (§23), the eight-feature list, and the
-acknowledgement of the two test-only Avalonia headless packages and the four additive library changes in §16.
-No public *format*, manifest, or CLI contract changes.
+**Owner input required at the start gate:** the complexity-class decision (§23: split as recommended, or
+accept one High unit with the recorded guard), the eight-feature list, and the acknowledgement of the two
+test-only Avalonia headless packages and the four additive library changes in §16. No public *format*, manifest,
+or CLI contract changes, and no time waiver is requested.
 
 ## Implementation tasks
 
-- [ ] Create the Avalonia app project shell: `Program`, `App`, `ViewLocator`, `AppHost`, service registration,
-      startup options, logging, retention, and global exception handlers.
-- [ ] Implement the shell layout, regions, splitters, panel visibility, layout persistence, menu bar, and status
-      bar.
-- [ ] Implement the document model, tab strip, welcome document, Project Overview and Project JSON documents,
-      and the project switcher.
-- [ ] Implement `INavigationService`, history, the navigation-target registry, the explorer node seam, and the
-      unknown-domain notice.
-- [ ] Implement the command catalog, menus, shortcut catalog with the platform primary modifier, and the command
-      palette.
-- [ ] Implement `ProjectSessionService` and `ProjectSession`: new/open/save/save-as/close, recents, locks,
-      read-only mode, external-change detection, multi-project workspace, and window-close coordination.
-- [ ] Implement dirty state, save-point handling, the autosave scheduler, recovery, unclean-exit session
-      restore, and retention.
-- [ ] Implement `ProjectEditCoordinator` with apply/undo/redo, bounded depth, `ProjectChanged`, and stale-guard
-      validation; implement metadata editing in the Project Overview document.
-- [ ] Implement the validation surface: status bar, Problems channel, diagnostic navigation, statistics on
-      demand, and edit diagnostics.
-- [ ] Implement `mocassin.settings` v1 with validation, migration, atomic write, the settings dialog, app-data
-      layout, theme/density/font-scale/high-contrast/reduce-motion, and clear-cache/logs.
-- [ ] Implement `IDialogService` and the overlay dialog host, `IStorageService`, progress, notifications, the
-      console channels, and the crash dialog.
-- [ ] Implement accessibility metadata and the keyboard pass across shell controls; add the cheat sheet and
-      application diagnostics.
-- [ ] Add the four library changes in §16 with their tests and `PublicAPI.Unshipped.txt` entries.
-- [ ] Add the headless test harness, view-model tests, view tests, accessibility assertions, screenshot
-      baselines, and the manual platform checklist.
-- [ ] Write the six documentation pages plus the reference/dev/nav updates; update the parity matrix, status,
-      step page, and `docs/planning/closeout/step-23.json`; run
-      `python tools/check_closeout_evidence.py`; request the audit.
+Tasks are grouped by the feature that owns them and follow that order (feature 1 first). The dialog/picker/
+console/notification/progress surfaces, the settings I/O split, and the validation contract are prerequisites,
+not follow-ups.
+
+- [ ] **1 — Host and boundaries.** Create the Avalonia app project: `Program`, `App`, `ViewLocator`, `AppHost`,
+      service registration, startup options, logging + retention, global exception handlers, shell window with
+      regions/splitters/menu/status skeleton, the dialog overlay host, pickers, console host with the
+      Application channel, notifications, and the progress surface.
+- [ ] **2 — Workspace.** Document model, tab strip, welcome document, Project Overview (read-only) and Project
+      JSON documents, project switcher; `INavigationService` with history, target registry, explorer seam, and
+      the unknown-domain notice; command catalog, menus, status items, framework-neutral gesture descriptors,
+      and the command palette.
+- [ ] **3 — Settings, theming, accessibility.** `mocassin.settings` v1 model/validator/migrations/source-generated
+      context, the App-layer atomic+fsync+size-capped store, app-data layout, settings dialog, theme/density/
+      font-scale/high-contrast/reduce-motion applier, cheat sheet, and accessibility metadata.
+- [ ] **4 — Project lifecycle.** `ProjectSessionService`/`ProjectSession` with the `ValidateOnLoad = false`
+      store and stored load diagnostics; new via `ProjectPathRules`; open/activate/save/save-as/close/reload;
+      recents; locks and read-only mode; external-change detection; multi-project workspace; window close; the
+      23A documentation pages.
+- [ ] **5 — Edit pipeline.** `ProjectEditCoordinator` with apply/undo/redo, bounded depth, `ProjectChanged`,
+      rejected-edit diagnostics, and metadata editing in the Project Overview document.
+- [ ] **6 — Validation surface.** `ValidationCoordinator` over the in-memory pipeline entry with the load
+      diagnostics, debounce, stale guard, status bar, Problems channel (filters, sort, help anchors, related
+      navigation, revalidate), edit diagnostics, and on-demand statistics.
+- [ ] **7 — Dirty/autosave/recovery.** Save point and markers, autosave scheduler, sidecar and recovery store,
+      recovery prompt, reload/recover/discard/keep operations, session restore, retention, and the bounded
+      asynchronous crash-recovery writer.
+- [ ] **8 — Tests, documentation, closeout.** Headless harness and test support, view-model and view tests,
+      accessibility and screenshot baselines, platform checklist, the remaining docs and navigation, parity/
+      status updates, closeout evidence, and the audit request.
+- [ ] Add the four library changes in §16 with their tests (including the CLI message-pinning tests) and
+      `PublicAPI.Unshipped.txt` entries.
+- [ ] Update `docs/planning/closeout/step-23.json` (or one file per step if the split is approved); run
+      `python tools/check_closeout_evidence.py`.
 
 ## Acceptance criteria
 
@@ -1084,19 +1326,25 @@ No public *format*, manifest, or CLI contract changes.
 - [ ] The app starts with a welcome document; the shell regions, menu bar, and status bar render.
 - [ ] A project can be created from both embedded templates, opened, edited (metadata), saved, closed, and
       reopened; reopening yields identical content through the real store.
-- [ ] Save-as works, preserves undo history, and migrates the lock.
+- [ ] Save-as works, preserves undo history, and migrates the lock; reload replaces the document and clears the
+      undo/redo stacks.
+- [ ] The composed `ProjectStore` has `ValidateOnLoad = false`; opening a project seeds the pipeline's `Load`
+      stage with `ProjectLoadResult.Diagnostics`; a migration/load diagnostic is visible in Problems and no
+      diagnostic is duplicated (M-1).
 - [ ] Dirty state is correct across save, undo, and redo, including both crossings of the save point.
 - [ ] Autosave writes only dirty documents and deletes its file on a successful save; crash recovery restores a
-      dirty document for both saved and untitled projects.
+      dirty document for both saved and untitled projects; the crash path completes within its budget or reports
+      the timeout without blocking.
 - [ ] Recent files, locks, read-only mode, and external-change detection behave as designed; no silent
       overwrite is possible.
 - [ ] Undo/redo works through the single project stack and is bounded; a rejected edit changes nothing.
 - [ ] Validation diagnostics appear in the status bar and Problems channel with code, severity, and path;
       double-click navigates through a registered provider and produces a non-blocking notice otherwise.
-- [ ] Settings round-trip, validate, migrate, ignore unknown fields, and reject a future major without
-      overwriting; the settings dialog performs reset, open-folder, and clear-logs/cache safely.
-- [ ] Every primary action is reachable by keyboard alone; the palette lists the shell commands with gestures;
-      `Model`/`Build`/`Run` menus do not appear.
+- [ ] Settings round-trip through the real store, validate, migrate, ignore unknown fields, reject a future
+      major without overwriting, and survive a failed/oversized write; the settings dialog performs reset,
+      open-folder, and clear-logs/cache safely; last directories persist.
+- [ ] Every primary action is reachable by keyboard alone; the palette lists the shell commands with their
+      platform gestures; `Model`/`Build`/`Run` menus do not appear.
 - [ ] Accessibility names/roles are present on the primary controls; the accessibility-tree assertions pass.
 - [ ] No unhandled exception kills the process silently; the crash dialog and log entry are verified.
 - [ ] Headless tests pass on Linux in CI; the Windows/macOS platform-gate results are recorded.
@@ -1137,4 +1385,6 @@ The Avalonia shell provides a reliable, keyboard-accessible workspace with corre
 save-point handling, autosave and crash recovery, a single-project undo/redo pipeline, a live validation
 surface, versioned settings, structured logging, and a crash boundary — with no editors, build UI, 3D, or run
 monitoring — and every acceptance criterion, test tier, documentation page, parity/status update, and closeout
-evidence is complete.
+evidence is complete. The complexity class and split decision required by [`04-roadmap.md`](../04-roadmap.md)
+§3.1 are recorded in §23 and approved by the owner at the start gate; a split adds the 23A/23B roadmap entries
+and separate closeout evidence before either half starts.

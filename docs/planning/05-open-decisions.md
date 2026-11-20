@@ -105,6 +105,7 @@ decision will be made.
 | Autosave and recovery scope | Saved projects use the Step 01 `<file>.autosave` sidecar; untitled projects use `<app-data>/recovery/<projectId>.mocprj.autosave` through an additive `ProjectStore` overload; recovery files are swept after 7 days, sidecars next to user files are never swept | [Step 23](steps/step-23-avalonia-shell-and-project-lifecycle.md) §6 |
 | UI evidence policy | Headless view-model tests are PR-fast, headless view tests and screenshot baselines are PR-medium on Ubuntu only, Windows/macOS screenshots and smoke checks are manual platform-gate evidence; screenshot text rendering is never pixel-compared across OSes | [Step 23](steps/step-23-avalonia-shell-and-project-lifecycle.md) §20 / [`03-quality-strategy.md`](03-quality-strategy.md) §11.1 |
 | Menu and feature-surface contribution | `Model`/`Build`/`Run` menus appear only when a later step contributes at least one item; the shell never shows dead commands or placeholder editors | [Step 23](steps/step-23-avalonia-shell-and-project-lifecycle.md) §10 |
+| UI I/O boundary | `Mocassin.App.ViewModels` may call library APIs that do I/O (`ProjectStore`, `ProjectValidationPipeline`, `ProjectTemplateFactory`) but never `System.IO`, `Environment`, `Application`, or resource dictionaries; app-local settings, recovery, file probing, and theming are implemented in `App`/`Views` behind ViewModels contracts, enforced by a source-token architecture test | [Step 23](steps/step-23-avalonia-shell-and-project-lifecycle.md) §1/§13/§15 / [`01-target-architecture.md`](01-target-architecture.md) §3.2 / [`code-structure.md`](../development/code-structure.md) §2.3 |
 
 ## 3. Gated decisions
 
@@ -120,7 +121,7 @@ decision will be made.
 | SDK feature band | After Step 11 is merged | Whether to move from the `11.0.1xx` band to a later feature band (`latestPatch` → `latestFeature` or a new pin); a feature band can change analyzers and generated code | Stay on `11.0.100`/`11.0.1xx`; any move is an explicit recorded change |
 | Native Zstandard rollback | Step 11 amendment 1 Part A/Part B thresholds and correctness gates | Part A passed under the refined rule (2026-11-15). A Part A or Part B threshold breach or a correctness failure can still trigger rollback; a regression in the implemented codec is a Part A threshold breach even though the Part A measurement passed | Roll back to the unamended toolchain, drop the feature branch, and record the measurements here |
 | Development image build | Step 11 closeout | Build `opencode:mocassin` from the amended containerfile (SDK 11.0.100 only) and record the image reference/digest, or record the accepted risk with the missing evidence | Owner-accepted risk: record "image not built" in `docs/planning/closeout/step-11.json` `notes` and the audit record; no page claims the image was built |
-| Step 23 sizing | Step 23 start gate | Approve the 3.75–4.5 pw single-step exception with eight features, or split into 23A (features 1–4, ≈2.15 pw) and 23B (features 5–8, ≈1.6 pw + contingency). The upper bound exceeds the four-week §3.1 trigger | Single-step exception, following the Step 09/12/13 precedent, with a stop-and-report guard before feature 5 if features 1–4 exceed 2.2 pw |
+| Step 23 complexity class and split | Step 23 start gate | Step 23 is class **High** (§3.1 dimensions and justification on the step page §23). Approve the proposed dependency-clean split after feature 4 (23A = features 1–4, 23B = features 5–8), or accept the step as one High unit with the recorded case and risk guard | Split as recommended; one-unit acceptance is allowed by §3.1 and keeps Step 24's single dependency |
 
 ## 4. Deferred scope
 
@@ -150,9 +151,9 @@ The following are the only topics still expected to need an explicit owner decis
 4. **AOT/single-file CLI** if dependency constraints make it feasible.
 5. **Model editor layout** after the Step 24 POC spike (choose ListBox table, TreeView, TabControl,
    SplitView, custom TableView, or custom matrix).
-6. **Step 23 sizing** at the GUI-track start gate: the single-step exception (3.75–4.5 pw, eight features) or
-   the 23A/23B split. This is a process decision, not a technical one; the design is complete under either
-   choice. See the Step 23 page §23.
+6. **Step 23 complexity class and split** at the GUI-track start gate: class **High**, with the proposed
+   23A/23B split after feature 4 or acceptance as one High unit under §3.1. This is a process decision; the
+   technical design is complete under either choice. See the Step 23 page §23.
 
 Everything else is either resolved above or specified in the data contracts, architecture, or step pages.
 When a decision is made, add an ADR (if expensive to reverse) and update this page.

@@ -86,7 +86,7 @@ comparability and planning, not as a sizing gate.
 | 20 | `.mcs` reader, `.msr` collection, evaluation API | 18, 11 | 2–4 pw |
 | 21 | Analysis queries, plots, exports | 20 | 2–3 pw |
 | 22 | Python `.mcs` reader, basic evaluations, pytest, mkdocstrings | 18, 20 | 2–3 pw |
-| 23 | Avalonia shell, project lifecycle, undo/redo | 01, 03–07, 12 | 3–5 pw (design estimate 3.75–4.5 pw; owner sizing decision at the Step 23 start gate — see the Step 23 page §23) |
+| 23 | Avalonia shell, project lifecycle, undo/redo | 01, 03–07, 12 | 3–5 pw forecast (non-gating). Complexity class **High**; split decision at the Step 23 start gate — see the Step 23 page §23 |
 | 24 | Particle, structure, transition editors | 23, 03, 04 | 4–6 pw |
 | 25 | Energy, lattice, simulation editors | 24, 05, 06 | 3–5 pw |
 | 26 | Parameterization, job templates, build/deploy UI | 25, 09–12 | 4–6 pw |

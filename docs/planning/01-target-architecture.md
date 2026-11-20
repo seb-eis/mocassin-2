@@ -178,15 +178,22 @@ Mocassin.App  ──►  Mocassin.App.Views  ──►  Mocassin.App.ViewModels 
 
 | Project | Owns | Must not own |
 | --- | --- | --- |
-| `Mocassin.App` | `Program`, `App`, `ViewLocator`, the composition root (`AppHost`, registration, startup options, app paths, logging setup, crash boundary), startup coordination | View models, views, or scientific logic |
-| `Mocassin.App.ViewModels` | Shell and region view models, document model, navigation service and target registry, project session and edit coordinator, validation coordinator, settings model/service, command catalog and palette, dialog/picker/console contracts, all virtualization of library values for binding | Any Avalonia or control type, views, direct file I/O outside the library APIs, scientific algorithms, a second store/validator/hash/catalog |
-| `Mocassin.App.Views` | Shell window and views, region hosts, dialog overlay host, console/problems views, settings and palette views, theme/density/high-contrast resource dictionaries | Library calls, scientific logic, persistence decisions |
+| `Mocassin.App` | `Program`, `App`, `ViewLocator`, the composition root (`AppHost`, registration, startup options, app paths, logging setup, crash boundary), startup coordination, and the app-local I/O implementations: the settings store, the recovery store, the project file probe, and log retention | View models, views, or scientific logic |
+| `Mocassin.App.ViewModels` | Shell and region view models, document model, navigation service and target registry, project session and edit coordinator, validation coordinator, settings model and pure validator/migrations, recovery/theme contracts, command catalog and palette, dialog/picker/dispatcher contracts, all virtualization of library values for binding | Any Avalonia or control type, views, `System.IO`/`Environment`/`Application`/resource dictionaries, scientific algorithms, a second store/validator/hash/catalog |
+| `Mocassin.App.Views` | Shell window and views, region hosts, dialog overlay host, console/problems views, settings and palette views, theme/density/high-contrast resource dictionaries, the theme applier, the storage-picker and dispatcher implementations | Library calls, scientific logic, persistence decisions |
 
 Rules:
 
 - `Mocassin.App.ViewModels` references `CommunityToolkit.Mvvm` and the public libraries only; it has no
   Avalonia, view, or control reference. `Mocassin.App.Views` may use controls but never constructs domain
   state. `Mocassin.App` is the only project that resolves the DI container.
+- **I/O boundary (Step 23).** `Mocassin.App.ViewModels` may call public library APIs that perform I/O
+  (`ProjectStore`, `ProjectValidationPipeline`, `ProjectTemplateFactory`) because those are the contracts the
+  CLI also uses. It must not use `System.IO`, `Environment`, `Application`, or resource dictionaries. App-local
+  files and theme application go through ViewModels contracts implemented in `Mocassin.App`
+  (`IAppSettingsStore`, `IRecoveryStore`, `IProjectFileProbe`, `AppPaths`) and `Mocassin.App.Views`
+  (`IThemeApplier`, `IStorageService`, `IUiDispatcher`). A source-token test in the architecture suite enforces
+  the ban, so the rule is checkable rather than aspirational.
 - The GUI never references `Mocassin.Cli`. Behaviour the GUI needs must live in a library; the CLI and the GUI
   share `ProjectStore`, `ProjectTemplateFactory`, `ProjectNameRules`, `ProjectDocument`, and the validation
   pipeline.
