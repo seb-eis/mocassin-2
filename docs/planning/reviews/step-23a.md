@@ -18,7 +18,7 @@
 | Reviewed commit | `219f78445353218a772cbed3470c748523d0521d` |
 | Docs branch | `docs/step-23-design` |
 | Review date | 2026-11-20 |
-| Reviewer | — |
+| Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh planning auditor |
 
 Step page: [`Step 23A — Workspace and Project Lifecycle`](../steps/step-23a-workspace-and-project-lifecycle.md)
 
@@ -51,106 +51,154 @@ design-reviewed and not started**. The superseded unsplit record is
 
 ## Design decisions reviewed
 
-- [ ] Step page design decisions — goal, scope, non-goals, shell/regions, document model, navigation and
+- [x] Step page design decisions — goal, scope, non-goals, shell/regions, document model, navigation and
       contribution seams, project lifecycle, settings/theming/accessibility, dialogs/consoles, logging and crash
       boundary, state ownership, view-model/view contracts and visibility, folder layout, the one library change,
       the settings format, the 23B boundary, documentation, tests, performance, risks, and the class.
-- [ ] Data contracts and format changes — the application-local `mocassin.settings` v1 and its exclusion from
+- [x] Data contracts and format changes — the application-local `mocassin.settings` v1 and its exclusion from
       `contracts/manifest.json`; no change to `.mocprj`, `.msl`, `.msr`, `.mcs`, CLI reports/exit codes,
-      diagnostics codes, or signatures.
-- [ ] Architecture and module boundaries — `01-target-architecture.md` §3.2 (App/ViewModels/Views ownership, the
+      diagnostics codes, or signatures. — see M-2.
+- [x] Architecture and module boundaries — `01-target-architecture.md` §3.2 (App/ViewModels/Views ownership, the
       I/O boundary, visibility), §3.1, and the UI-thread row in §5.3.
-- [ ] ADRs and open decisions — ADR 0003/0006/0008, the resolved rows in `05-open-decisions.md`, and the class
+- [x] ADRs and open decisions — ADR 0003/0006/0008, the resolved rows in `05-open-decisions.md`, and the class
       acceptance gate.
-- [ ] Quality strategy and test plan — `03-quality-strategy.md` §6/§8/§11.1 and the page's §15 test table with
+- [x] Quality strategy and test plan — `03-quality-strategy.md` §6/§8/§11.1 and the page's §15 test table with
       tiers.
-- [ ] Parity matrix and documentation plan — the 23A rows and the §14 documentation column.
-- [ ] Licensing and provenance — no new product dependency beyond the pinned Avalonia/CommunityToolkit/Serilog/
+- [x] Parity matrix and documentation plan — the 23A rows and the §14 documentation column.
+- [x] Licensing and provenance — no new product dependency beyond the pinned Avalonia/CommunityToolkit/Serilog/
       Microsoft.Extensions stack; two test-only first-party Avalonia headless packages; no GPL code or data.
-- [ ] Post-implementation audit plan — implementation-status block, feature log, `closeout/step-23a.json`, the
-      platform gate, and the audit request.
+- [x] Post-implementation audit plan — implementation-status block, feature log, `closeout/step-23a.json`, the
+      platform gate, and the audit request. — see M-1.
 
 ### Step-specific decisions
 
-- [ ] **Split boundary.** 23A contains features 1–5 (host/boundaries, workspace, settings/theming/a11y,
+- [x] **Split boundary.** 23A contains features 1–5 (host/boundaries, workspace, settings/theming/a11y,
       lifecycle, tests/docs/closeout) and no 23B task; 23B needs nothing from 23A beyond delivered code. Verify
-      the feature table and §13 seam table against the 23B page.
-- [ ] **Composition and lifetimes.** `AppHost`/explicit registration; `Program`/`App` are the only public entry
+      the feature table and §13 seam table against the 23B page. — checked; no 23B task.
+- [x] **Composition and lifetimes.** `AppHost`/explicit registration; `Program`/`App` are the only public entry
       points; the single `ProjectStore` is registered with `ValidateOnLoad = false` and its load diagnostics are
       retained; 23A does not construct the validation pipeline; per-project objects are created by the session
-      service, not by DI scopes.
-- [ ] **Visibility (m-18).** Existing public `AppViewModelsModule`/`AppViewsModule` and `Program` stay public and
+      service, not by DI scopes. — store ValidateOnLoad=false; pipeline is 23B.
+- [x] **Visibility (m-18).** Existing public `AppViewModelsModule`/`AppViewsModule` and `Program` stay public and
       baselined; 23A **adds** `public sealed class App : Application` and the `App.axaml(.cs)` files, which are
       not in an ApiCompat project and need no baseline; every other new type is `internal` with
-      `InternalsVisibleTo`. Verify no `PublicAPI.*` or App baseline change is required.
-- [ ] **I/O boundary and token test (m-13/n-15).** The exact token list, whole-identifier matching,
+      `InternalsVisibleTo`. Verify no `PublicAPI.*` or App baseline change is required. — m-18 resolved; App is added, baselines unchanged.
+- [x] **I/O boundary and token test (m-13/n-15).** The exact token list, whole-identifier matching,
       `using static` detection, the permitted `IUiDispatcher`/`Dispatcher` and bare `Application`, the positive
       control, and the stated limitation (a tripwire, not a compiler guarantee) agree across §1/§15, `01` §3.2,
-      `code-structure` §2.3, and `03` §11.1.
-- [ ] **Document model and workspace.** Tab model, project-scoped keys, read-only Overview/JSON documents,
+      `code-structure` §2.3, and `03` §11.1. — m-13/n-15 resolved; tripwire limitation stated.
+- [x] **Document model and workspace.** Tab model, project-scoped keys, read-only Overview/JSON documents,
       unknown-domain notice, command catalog/palette, and the deferred dirty marker.
-- [ ] **Project lifecycle.** New via `ProjectPathRules`; open/activate/save/save-as/close/reload; recents;
+- [x] **Project lifecycle.** New via `ProjectPathRules`; open/activate/save/save-as/close/reload; recents;
       locks/read-only; external-change and deleted-file handling; no unsaved prompt in 23A (nothing is
       editable); multi-project workspace.
-- [ ] **Settings, theming, accessibility.** v1 schema (no `autosave`/`session`), write discipline, migrations,
+- [x] **Settings, theming, accessibility.** v1 schema (no `autosave`/`session`), write discipline, migrations,
       app-data layout, theme/density/font-scale/high-contrast/reduce-motion, last directories, log level, WCAG
-      2.2 AA and its test coverage.
-- [ ] **Dialogs, consoles, logging, crash.** In-shell overlay, picker contract, Application channel only,
+      2.2 AA and its test coverage. — see M-2.
+- [x] **Dialogs, consoles, logging, crash.** In-shell overlay, picker contract, Application channel only,
       notifications/progress, Serilog retention, the three handlers, and the crash dialog **without** a recovery
-      action (n-14: no `IRecoveryWriter`/`IRecoveryStore` in 23A).
-- [ ] **State ownership and threading.** The state table, no scientific logic in view models, UI-thread
+      action (n-14: no `IRecoveryWriter`/`IRecoveryStore` in 23A). — n-14 resolved.
+- [x] **State ownership and threading.** The state table, no scientific logic in view models, UI-thread
       confinement, `IUiDispatcher`/`TimeProvider` boundaries, no `Task.Delay`.
-- [ ] **Library change.** `ProjectPathRules` + CLI refactor: additive, behaviour-preserving, CLI codes/exit
-      codes/messages identical, new message-pinning tests, `PublicAPI.Unshipped.txt` entry, no baseline refresh.
-- [ ] **Parallel-track interface.** 23A consumes only 01/03–07/12; no `Compilation`/`Results`/`Cli`/solver API;
+- [x] **Library change.** `ProjectPathRules` + CLI refactor: additive, behaviour-preserving, CLI codes/exit
+      codes/messages identical, new message-pinning tests, `PublicAPI.Unshipped.txt` entry, no baseline refresh. — see n-7.
+- [x] **Parallel-track interface.** 23A consumes only 01/03–07/12; no `Compilation`/`Results`/`Cli`/solver API;
       the seams are sufficient for 23B and Steps 24–28, and 23B is the only in-flight successor.
-- [ ] **Complexity class.** The seven-dimension table, the High class and its normative justification, the
+- [x] **Complexity class.** The seven-dimension table, the High class and its normative justification, the
       Medium dimensions' evidence, and the statement that owner acceptance is required and no further split is
-      proposed.
+      proposed. — class High, owner acceptance outstanding (n-5).
 
 ## Dependency and interface checks
 
-- [ ] Step 01 is `Done` and its `ProjectStore`/`ProjectDocument`/`ProjectHasher`/`ProjectJson` contracts are
+- [x] Step 01 is `Done` and its `ProjectStore`/`ProjectDocument`/`ProjectHasher`/`ProjectJson` contracts are
       stable. Verify `ProjectStoreOptions`, `ProjectLoadResult.Diagnostics`/`FailureKind`, `ProjectFileLock`, the
       save/lock/autosave API surface, and the canonical document hash including `modifiedUtc`.
-- [ ] Step 03–06 editing helpers and the `Project` value model support the read-only documents without a new
+- [x] Step 03–06 editing helpers and the `Project` value model support the read-only documents without a new
       API.
-- [ ] Step 07's validation contract is deferred correctly: 23A registers no pipeline and runs no validation; the
+- [x] Step 07's validation contract is deferred correctly: 23A registers no pipeline and runs no validation; the
       store is configured `ValidateOnLoad = false` and the load diagnostics are retained for 23B. Verify this is
-      consistent with Step 07 §8 and does not leave a gap.
-- [ ] Step 12's `ProjectTemplateFactory`/`ProjectTemplateKind` and the CLI name/path rules are the only creation
+      consistent with Step 07 §8 and does not leave a gap. — ValidateOnLoad=false; no pipeline; diagnostics retained; m-14 resolved in 23B.
+- [x] Step 12's `ProjectTemplateFactory`/`ProjectTemplateKind` and the CLI name/path rules are the only creation
       path, and the `ProjectPathRules` extraction keeps the CLI's `CLI001`/`CLI002`/`CLI003` codes, exit codes,
       file behaviour, and messages unchanged.
-- [ ] Step 23B is `Not started`/not design-reviewed, depends on 23A, and needs only 23A deliverables; no 23B
-      item is hidden in 23A.
-- [ ] Steps 13–22 are not required: no design element depends on their types, packages, or behaviour.
-- [ ] Format, versioning, and migration impact is confined to the application-local settings file; the project,
-      package, results, and state formats and the contract manifest are untouched.
+- [x] Step 23B is `Not started`/not design-reviewed, depends on 23A, and needs only 23A deliverables; no 23B
+      item is hidden in 23A. — no hidden task; n-2.
+- [x] Steps 13–22 are not required: no design element depends on their types, packages, or behaviour. — checked; no 13–22 use.
+- [x] Format, versioning, and migration impact is confined to the application-local settings file; the project,
+      package, results, and state formats and the contract manifest are untouched. — settings only; see M-2.
 
 ## Standard design-review checklist
 
-- [ ] Scope, non-goals, and acceptance criteria are explicit and testable
-- [ ] Complexity class and split decision are recorded and justified per
+- [x] Scope, non-goals, and acceptance criteria are explicit and testable — checked; acceptance wording n-4.
+- [x] Complexity class and split decision are recorded and justified per
       [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers)
-- [ ] Design decisions are complete and internally consistent
-- [ ] Required tests, property tests, golden fixtures, and performance targets are defined
-- [ ] Documentation, status, parity, and audit updates are planned
-- [ ] Licensing, provenance, and dependency checks are resolved
-- [ ] Risks and mitigations are realistic
-- [ ] Code layout and namespace plan follow the structure policy
-- [ ] No hidden scope, stale placeholders, or unowned decisions
+- [x] Design decisions are complete and internally consistent — checked; M-1/M-2, m-3.
+- [x] Required tests, property tests, golden fixtures, and performance targets are defined
+- [x] Documentation, status, parity, and audit updates are planned — planned; M-1 and n-1.
+- [x] Licensing, provenance, and dependency checks are resolved
+- [x] Risks and mitigations are realistic
+- [x] Code layout and namespace plan follow the structure policy
+- [x] No hidden scope, stale placeholders, or unowned decisions — checked; n-2.
 
 ## Evidence
 
+Reviewed the frozen design at `219f78445353218a772cbed3470c748523d0521d`; record HEAD
+`7caa94d146aa5abdc1f92246686d205dd4917855` (the request's documentation-only follow-up that fills the
+`Reviewed commit` cell). `git diff --name-status 219f784 7caa94d` is exactly
+`M docs/planning/reviews/step-23a.md`; the worktree was clean before this record edit.
+
 Files reviewed:
 
+- `AGENTS.md` §3, §8–§12; `docs/planning/reviews/README.md`; `docs/planning/audits/README.md`;
+  `docs/planning/closeout/README.md`, `_template.json`, and `tools/check_closeout_evidence.py` with its tests.
+- The 23A request record, the 23A and 23B step pages (all sections), the superseded `step-23` record and page,
+  and `04-roadmap.md` §3.1/§3/§5.
+- `01-target-architecture.md` §3.2, `03-quality-strategy.md` §11.1, `05-open-decisions.md`,
+  `code-structure.md` §2.3, `appendix-b-parity-matrix.md`, `status.md`, `docs/reference/file-layout.md`, and
+  `06-toolchain-requirements.md`.
+- Step 01 `ProjectStore`/`ProjectStoreOptions`/`ProjectLoadFailureKind`/`ProjectStoreResults`/`ProjectFileLock`,
+  `ProjectDocument`, `ProjectHasher`, `ProjectJson`; Step 07 `ProjectValidationPipeline`; Step 12
+  `ProjectTemplateFactory`/`ProjectTemplate` and `NewProjectCommand`/`NewProjectCommandTests`; the App project
+  files, `Program`, `AppViewModelsModule`, `AppViewsModule`, `PublicAPI.*`, `tools/api-projects.txt`, the App API
+  baselines, and `Directory.Packages.props`.
+
 Commands run:
+
+- `./tools/verify.sh docs --require` — pass; "Closeout gate completed with required checks enabled." (strict
+  Zensical build, DocFX, rustdoc).
+- `./tools/verify.sh policy --require` — pass; "Public API is compatible with the checked-in baseline";
+  ApiCompat reports no breaking changes for `Mocassin.App.ViewModels`/`Mocassin.App.Views`; contract artifacts
+  current (26 files); process consistency OK; 58 tool tests OK; SPDX headers present in 706 files; secret scan;
+  cargo-deny advisories/bans/licenses/sources OK.
+- `python tools/check_doc_math.py` — pass, 176 files scanned.
+- `git status --porcelain` — empty before this record edit; `git diff --name-status 219f784 7caa94d` —
+  `M docs/planning/reviews/step-23a.md` only.
+- `git ls-files src/dotnet/Mocassin.App` — only `Mocassin.App.csproj` and `Program.cs`, so `App.axaml(.cs)` is
+  added as the design says.
+- `python` check of the closeout regex: `STEP_RE.match("step-23a")` is `False`; `step-23` is `True`.
+- `grep`/`cat` inspection of `ProjectStoreOptions` (`ValidateOnLoad = true` by default), `ProjectLoadFailureKind`
+  (`None`, `NotFound`, `TooLarge`, `Io`, `InvalidContent`), `ProjectStore.LoadBytesCore` (validator only when
+  `ValidateOnLoad`), `ProjectValidationPipeline.Validate` (in-memory entry; `Load` stage `Skipped` with no
+  diagnostics), `ProjectDocument.MarkSaved()`/`MarkSaved(Project)`, `ProjectHasher.ComputeDocument`
+  (`ProjectCanonicalizer` includes `modifiedUtc`), `ProjectTemplateKind` (`Blank`, `Ceria`), and
+  `NewProjectCommand`'s `CLI001`/`CLI002`/`CLI003` mapping.
+- Read-only inspection of the `05-open-decisions.md` link defects: 13 occurrences of `...md))` on lines 43 and
+  98–109.
 
 ## Findings
 
 | Severity | Finding | Evidence |
 | --- | --- | --- |
-| — | — | — |
+| **Major** | **M-1 — The 23A closeout plan cannot pass the closeout-evidence checker: `closeout/step-23a.json` is a `step-23a` identity but `tools/check_closeout_evidence.py` accepts only `^step-\d{2}$`.** The 23A feature-5 done-when, §20, implementation tasks, and acceptance criterion require `python tools/check_closeout_evidence.py` to pass; the 23B page repeats `closeout/step-23b.json`. `STEP_RE.match("step-23a")` and `"step-23b"` are false. The split must either define the closeout `step` value as `step-23` (and document the tag/audit distinction) or update `STEP_RE`, the closeout README/template example, and `tools/tests/test_closeout_evidence.py` with a letter-suffix positive case. | `tools/check_closeout_evidence.py:20,65-66`; `tools/tests/test_closeout_evidence.py` (`test_invalid_step_identifier` only tests `wp-03`); 23A page lines 52, 815-817, 843, 846, 867; 23B page lines 46, 352, 391; `docs/planning/closeout/README.md` says `step-NN`. The frozen acceptance "closeout evidence validates" is unattainable as written. |
+| **Major** | **M-2 — The `mocassin.settings` v1 document schema was dropped in the split.** The 23A page §6 now gives the settings behavior and names fields in prose, but no longer defines the v1 `format`/`schemaVersion` document shape, key names/nesting, defaults, or a JSON example; the superseded unsplit design's §17 had the full v1 example. 23B §9 adds `autosave`/`session` to "the 23A v1 document" with no schema bump, so the base shape is a dependency. The request's data-contract item and feature 3's v1 model/validator/migrations/JSON context need the shape for implementation and the round-trip/migration tests. Add the v1 example/field table to the 23A page (or a normative design page linked from it) before implementation, or state that a checked-in `file-layout.md` schema is normative and must match. | 23A page §6 lines 422-454 (prose only; no JSON/field table); §14 line 683 defers the field table to implementation; 23B page §9 lines 227-239; `05-open-decisions.md` row 102; superseded `step-23` page §17 (git `4b5fa44`) for the lost example. |
+| **Minor** | **m-3 — `05-open-decisions.md` has 13 malformed `...md))` links introduced by the split.** The rendered page shows a stray `)` after each 23A/23B link. The strict docs build passes because this is valid text, not a broken link. | `05-open-decisions.md` lines 43 and 98-109; `grep -c 'step-23[ab].*md))'` = 13; `git show 219f784 -- docs/planning/05-open-decisions.md` shows the single-`)` links replaced with `))`. |
+| **Note** | **n-1 — `status.md` still lists only the superseded Step 23 row.** 23A §20 defers the `23A`/`23B` rows to the step agent at start. Record them before implementation so the dashboard does not point at the superseded page. | `status.md:73`; 23A page §20 lines 824-826; the split commit updated the README/roadmap/parity but not `status.md`. |
+| **Note** | **n-2 — `ProjectSessionOutcome.UnsavedChanges` is present in 23A but never produced.** 23A has no editable document and no unsaved prompt; mark the value reserved for 23B or add it with 23B. It is a seam, not hidden 23B work. | 23A page §5 lines 373-379 and line 404 ("23A has no unsaved-changes prompt"); 23B page §4 adds the prompt. |
+| **Note** | **n-3 — The §1 I/O-boundary table says `AppDataOverride` is "parsed `--data-dir`/`MOCASSIN_DATA_DIR`" in ViewModels while `Environment` is banned there.** §1's `AppStartupOptions` bullet puts the env read in App. Clarify that `AppDataOverride` is a pure value and `MOCASSIN_DATA_DIR` is read in `AppStartupOptions`/`AppPaths`. | 23A page §1 table line 201 and the `AppStartupOptions` bullet lines 156-159; §1 token ban lines 204-213. |
+| **Note** | **n-4 — The acceptance criterion "an existing target is refused" is ambiguous after the Save-as clause.** §5 refuses an existing target for New and refuses another session's open path for Save As; a Save As to an existing on-disk file is the picker's overwrite-confirmed path. Scope the acceptance wording to New. | 23A page §5 lines 389-400 and acceptance line 855; test-plan row "New/open/save/close" line 703. |
+| **Note** | **n-5 — The no-further-split rationale's wording is imprecise, though the conclusion is sound.** §18/roadmap say "host/workspace versus settings/lifecycle would leave ... settings with no consumer"; the settings/lifecycle half would lack the host, not a consumer. The conclusion (no clean split) still holds. | 23A page §18 lines 766-769; `04-roadmap.md` §3.1 lines 191-194. |
+| **Note** | **n-6 — V-1's fallback adds an explicit `Avalonia.Skia` reference without saying whether it is test-only or production.** `Avalonia.Desktop` already brings Skia transitively; state the project and keep the "no new production package" claim and the test-only package boundary explicit. | 23A page §15 V-1 line 794; §18 line 753; §11 line 627. |
+| **Note** | **n-7 — `ProjectPathRules.NormalizeName/ValidateTarget` has no signature or result shape in the design.** The page says the helper returns the CLI message; define whether it returns a result record with a reason enum/message, how `ValidateTarget` separates pure name rules from file-system checks, and how `NewProjectCommand` maps the result to `CLI001/2/3`. The one additive library API is otherwise scoped and the message-pinning plan is sound. | 23A page §12 lines 629-640; request record §12 lines 103-104; current `NewProjectCommand.TryNormalizeName` and path checks. |
 
 Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
 verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
@@ -158,7 +206,7 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready for review
+**State:** Changes required — round 1 reviewed the frozen design at `219f78445353218a772cbed3470c748523d0521d` (record HEAD `7caa94d`) and returned `Changes required` for M-1 and M-2; see `Review round 1`.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -171,11 +219,11 @@ the auditor's findings, evidence, or verdict.
 
 - [ ] Ready for implementation
 - [ ] Ready with notes
-- [ ] Changes required
+- [x] Changes required
 - [ ] Waived
 
-Follow-up owner:
-Follow-up step:
+Follow-up owner: planner/step agent — resolve M-1 and M-2 (and the Minor/Notes), then re-freeze and request a re-review.
+Follow-up step: 23A — design re-review at the next freeze commit; earlier rounds stay in this record.
 
 ## Approval summary
 
@@ -230,8 +278,51 @@ Append each new round below. Never overwrite an earlier round.
 
 #### Independence and frozen state
 
+I am a fresh context. I did not author, design, or implement the reviewed work and have no shared conversation
+with the planner, implementor, the earlier Step 23 reviewers, or the orchestrator. I reviewed the frozen design
+at `219f78445353218a772cbed3470c748523d0521d` and the record HEAD `7caa94d146aa5abdc1f92246686d205dd4917855`
+(the request's documentation-only follow-up that fills the `Reviewed commit` cell). `git diff --name-status
+219f784 7caa94d` is exactly `M docs/planning/reviews/step-23a.md`; the worktree was clean before this record
+edit, so the only repository file changed by this round is this record.
+
 #### Commands and results
+
+- `./tools/verify.sh docs --require` — pass; "Closeout gate completed with required checks enabled."
+- `./tools/verify.sh policy --require` — pass; "Public API is compatible with the checked-in baseline";
+  ApiCompat for both App assemblies, contract artifacts current (26 files), process consistency, 58 tool tests,
+  SPDX, secret scan, and cargo-deny all pass.
+- `python tools/check_doc_math.py` — pass, 176 files scanned.
+- `git status --porcelain` — empty before this edit; `git diff --name-status 219f784 7caa94d` — the record only.
+- `STEP_RE.match("step-23a")` / `"step-23b"` — `False`; `"step-23"` — `True`; see M-1.
+- `grep -c "step-23[ab].*md))" docs/planning/05-open-decisions.md` — 13; see m-3.
+- Read-only inspection of the Step 01/07/12 APIs and the App projects confirmed `ValidateOnLoad = true` by
+  default, `TooLarge` in `ProjectLoadFailureKind`, the in-memory `Validate` signature and `Load`-stage
+  semantics, `MarkSaved()`/`MarkSaved(Project)`, `ComputeDocument` including `modifiedUtc`, `Blank`/`Ceria`,
+  and the `CLI001`/`CLI002`/`CLI003` mapping.
 
 #### Findings
 
+**M-1 (Major).** The 23A/23B closeout plan uses `closeout/step-23a.json` / `step-23b.json`, but
+`tools/check_closeout_evidence.py` accepts only `^step-\d{2}$`, so the required evidence cannot validate. The
+split must define the closeout `step` value as `step-23` (with the tag/audit distinction documented) or update
+the checker, README/template, and tool tests. This is the same contract in both halves.
+
+**M-2 (Major).** The `mocassin.settings` v1 schema was dropped in the split. The 23A page §6 describes the
+fields and behavior but no longer defines the document shape, key names/nesting, defaults, or a JSON example;
+the old unsplit §17 had it and 23B §9 adds `autosave`/`session` to the base document. Restore the v1
+example/field table in the 23A design (or a normative linked page) before implementation.
+
+**m-3 (Minor).** `05-open-decisions.md` has 13 `...md))` links from the split; the rendered page shows a stray
+`)`. The strict docs build passes; fix the links.
+
+**Notes.** n-1 status dashboard row; n-2 unused `UnsavedChanges`; n-3 `AppDataOverride`/`Environment` wording;
+n-4 acceptance "existing target" ambiguity; n-5 no-further-split wording; n-6 V-1 `Avalonia.Skia` scope;
+n-7 `ProjectPathRules` signature. Details and evidence are in the top-level `## Findings` table.
+
 #### Verdict
+
+**Changes required.** The split is dependency-clean, the Step 07 validation contract is correct, the visibility
+and I/O-boundary claims match the repository, the public-API/ApiCompat claim is true, the class-High
+justification is honest, and the five-feature/acceptance/test/documentation/closeout structure is present. The
+step cannot start as frozen because M-1 makes the closeout gate unattainable and M-2 leaves the settings v1
+document shape undefined. The human owner decides the next freeze; the earlier rounds stay in this record.
