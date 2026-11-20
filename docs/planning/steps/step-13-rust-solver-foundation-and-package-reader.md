@@ -8,12 +8,12 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 
 ## Implementation status
 
-- **Status:** In progress — implementation started 2026-11-19
+- **Status:** **In audit** — all seven features are squashed; the closeout evidence and audit request were recorded 2026-11-20
 - **Step branch:** `step/13-rust-solver-foundation-and-package-reader`
-- **Step CI:** —
+- **Step CI:** [Ubuntu 44807199574](https://github.com/seb-eis/mocassin-2/actions/runs/44807199574) — green at `45eb181656380ce258d20c8c4183727c62d9cc1a` (single closeout dispatch)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** **Ready for audit** — [record](../audits/step-13.md); [closeout evidence](../closeout/step-13.json)
 - **Design review:** Ready with notes — accepted by the human owner on 2026-11-18 for freeze `b9cda11`;
   implementation hold lifted 2026-11-19. See [`docs/planning/reviews/step-13.md`](../reviews/step-13.md).
 - **Feature list:** Approved by the human owner on 2026-11-18 (seven features); implementation authorized
@@ -30,7 +30,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 4 Model/job mapping and signatures | `feature/step-13-rust-solver-foundation-and-package-reader/model-job-mapping-and-signatures` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (111 `mocassin-msl` tests: 65 mapping unit, 15 hostile, 12 schema, 5 decode, 9 acceptance, 5 signature), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `087856b73033d20d5607d8dadedf9ee6da6746ca` |
 | 5 Dry-run CLI and logging | `feature/step-13-rust-solver-foundation-and-package-reader/dry-run-cli-and-logging` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (27 CLI tests: 8 parser unit, 15 process, 4 exit-code drift), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `b2474efdda044f4802cffdab9dd84bd1d42492be` |
 | 6 Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (RNG vectors 5, projection round-trips 2, populated fixture 2, mutation properties 5; .NET RNG-vector 1, populated-fixture 6), `cargo build --release`, fuzz compile + 5 s runs, `structure`, `docs --require`, `contracts`, `dotnet build`/`format` all exit 0 | Not run (no per-feature CI) | `c0ea5472aafdbf4e680de8cebfce4616b99b70bd` |
-| 7 Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `all --require`, `docs --require`, `contracts`, `structure`, `dotnet build`/`format`, the load bench, and the closeout CI run at the audited commit | Not run (no per-feature CI) | Recorded by the closeout evidence commit |
+| 7 Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Squashed | `all --require` exit 0; `docs --require`, `contracts`, `structure`, `dotnet build`/`format`, and the load bench pass | Closeout run 44807199574 green at `45eb181` | `45eb181656380ce258d20c8c4183727c62d9cc1a` |
 
 **Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
 row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
@@ -239,8 +239,12 @@ the closeout/audit evidence.
   and the Rust API reference remains `Partial` until Step 30. No solver row is marked Done.
 - **Correction:** feature 6 had left `proptest` in `mocassin-msl`'s `[dependencies]`; it is now dev-only, as the
   step page's dev-crate rule requires. No production dependency was added.
-- **Closeout:** `docs/planning/closeout/step-13.json`, the closeout CI run, `all --require`, and the audit record
-  are recorded in the docs-only evidence commit after the closeout CI run; see `docs/planning/audits/step-13.md`.
+- **Closeout:** `./tools/verify.sh all --require` exited 0 on `45eb181` (AOT green; the known 62
+  IL2xxx/IL3xxx `Mocassin.Cli` publish diagnostics remain recorded evidence). The single Ubuntu closeout CI
+  dispatch [44807199574](https://github.com/seb-eis/mocassin-2/actions/runs/44807199574) is green at
+  `45eb181656380ce258d20c8c4183727c62d9cc1a`. `docs/planning/closeout/step-13.json` passes
+  `python tools/check_closeout_evidence.py`; `docs/planning/audits/step-13.md` is `Ready for audit` with the
+  fixture limitation flagged. No tag or merge has been performed.
 
 **Feature-6 fixture deviation (decided in feature 7).** No minimal real project produced the per-node mask
 difference or the equivalent-start mapping; the limitation is recorded above with the exact compiler/verifier
@@ -1511,7 +1515,7 @@ commit. No other design decision is open.
 - [x] Record the load and RNG benchmarks and add the same-runner-class baseline entry.
 - [x] Write `solver-architecture.md` and update `msl-format.md`, `cli.md`, `testing-and-parity.md`, and
       `code-structure.md`; add the nav entry.
-- [ ] Update the parity matrix, status, step page, and `docs/planning/closeout/step-13.json`; run
+- [x] Update the parity matrix, status, step page, and `docs/planning/closeout/step-13.json`; run
       `python tools/check_closeout_evidence.py`; request the audit.
 
 ## Acceptance criteria

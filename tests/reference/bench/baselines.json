@@ -141,7 +141,7 @@
     "environment": "local container, AMD Ryzen 7 7840U, Rust 1.99.1, Criterion 0.8.2, Debian GNU/Linux 13, bench profile, single-threaded",
     "recorded": {
       "date": "2026-11-20",
-      "sourceCommit": "replaced with the audited commit at closeout",
+      "sourceCommit": "45eb181656380ce258d20c8c4183727c62d9cc1a",
       "openMicroseconds": 171.09,
       "coldLoadJobMicroseconds": 343.08,
       "warmLoadJobMicroseconds": 71.075,

@@ -2,7 +2,7 @@
   "step": "step-13",
   "part": "Feature 7 — package open and job load benchmark",
   "generatedAtUtc": "2026-11-20T19:53:52Z",
-  "sourceCommit": "feature-7 tree; replaced with the audited commit at closeout",
+  "sourceCommit": "45eb181656380ce258d20c8c4183727c62d9cc1a",
   "command": "cargo bench --manifest-path src/rust/Cargo.toml -p mocassin-msl --bench load",
   "rawResults": "tests/reference/bench/step-13-load-2026-11-20.txt",
   "fixture": {
