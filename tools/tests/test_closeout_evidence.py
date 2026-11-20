@@ -62,10 +62,16 @@ class CloseoutEvidenceTests(unittest.TestCase):
         errors = check(self.root, path)
         self.assertTrue(any("does not resolve" in error for error in errors))
 
+    def test_split_step_identifiers(self) -> None:
+        for step in ("step-23a", "step-23b", "step-00z"):
+            with self.subTest(step=step):
+                self.assertEqual(check(self.root, self.evidence(step=step)), [])
+
     def test_invalid_step_identifier(self) -> None:
-        path = self.evidence(step="wp-03")
-        errors = check(self.root, path)
-        self.assertTrue(any("step-NN" in error for error in errors))
+        for step in ("wp-03", "step-23aa", "step-023", "step-23A", "step-23x?", "step-3a"):
+            with self.subTest(step=step):
+                errors = check(self.root, self.evidence(step=step))
+                self.assertTrue(any("step-NN" in error for error in errors))
 
     def test_mismatched_closeout_sha(self) -> None:
         path = self.evidence(closeout_ci={"run_id": "123", "head_sha": self.docs})

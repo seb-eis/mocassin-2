@@ -17,7 +17,8 @@ import sys
 from pathlib import Path
 
 SHA_RE = re.compile(r"^[0-9a-f]{40}$")
-STEP_RE = re.compile(r"^step-\d{2}$")
+# A step is `step-NN`, or `step-NN[a-z]` for a split step (for example `step-23a`).
+STEP_RE = re.compile(r"^step-\d{2}[a-z]?$")
 DOC_PREFIXES = ("docs/",)
 DOC_FILES = ("AGENTS.md", "README.md", "CONTRIBUTING.md", "SECURITY.md")
 
@@ -63,7 +64,7 @@ def check(root: Path, evidence_path: Path) -> list[str]:
         return errors
 
     if not STEP_RE.match(str(data["step"])):
-        errors.append(f"step is not a step-NN identifier: {data['step']!r}")
+        errors.append(f"step is not a step-NN or step-NN[a-z] identifier: {data['step']!r}")
 
     audit = data["audit_commit"]
     closeout = data["closeout_ci"]
