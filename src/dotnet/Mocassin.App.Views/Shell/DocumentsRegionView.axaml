@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Shell"
              xmlns:documents="using:Mocassin.App.ViewModels.Documents"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Shell.DocumentsRegionView"
              x:DataType="vm:ShellViewModel">
   <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
@@ -13,6 +14,7 @@
           <StackPanel Orientation="Horizontal" Spacing="8">
             <TextBlock Text="{Binding Title}" ToolTip.Tip="{Binding ToolTip}" VerticalAlignment="Center" />
             <Button Content="×"
+                    automation:AutomationProperties.Name="Close document"
                     Command="{Binding CloseCommand}"
                     Padding="4,0"
                     FontSize="12"

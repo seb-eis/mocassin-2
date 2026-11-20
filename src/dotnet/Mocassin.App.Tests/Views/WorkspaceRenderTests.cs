@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.VisualTree;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +37,18 @@ public sealed class WorkspaceRenderTests
                     Assert.Equal(DocumentKinds.Welcome, welcome.Key.Kind);
                     Assert.NotEmpty(window.GetVisualDescendants().OfType<TabControl>());
                     Assert.NotEmpty(window.GetVisualDescendants().OfType<WelcomeDocumentView>());
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<ListBox>(),
+                        control => AutomationProperties.GetName(control) == "Open projects");
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<TreeView>(),
+                        control => AutomationProperties.GetName(control) == "Project explorer");
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<TextBox>(),
+                        control => AutomationProperties.GetName(control) == "Application console filter");
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<ComboBox>(),
+                        control => AutomationProperties.GetName(control) == "Theme");
 
                     var entry = await ProjectFixtures.LoadCeriaAsync();
                     shell.Workspace.Add(entry);
@@ -55,6 +68,31 @@ public sealed class WorkspaceRenderTests
                     Assert.Single(shell.Documents.Documents);
 
                     await shell.Documents.CloseAllAsync();
+                    Assert.Empty(shell.Documents.Documents);
+                    Assert.Null(shell.Documents.ActiveDocument);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TheWelcomeDocumentCanBeDisabledBySettings() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                File.WriteAllText(
+                    workspace.Combine("Mocassin.Settings.json"),
+                    """{"format":"mocassin.settings","ui":{"showWelcomeOnStart":false}}""");
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
                     Assert.Empty(shell.Documents.Documents);
                     Assert.Null(shell.Documents.ActiveDocument);
                 }

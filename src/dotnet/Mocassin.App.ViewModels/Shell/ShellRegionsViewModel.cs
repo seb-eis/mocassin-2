@@ -18,6 +18,15 @@ internal sealed partial class ShellRegionsViewModel : ObservableObject
     [ObservableProperty]
     private bool isConsoleVisible = true;
 
+    [ObservableProperty]
+    private double leftWidth = 260;
+
+    [ObservableProperty]
+    private double rightWidth = 320;
+
+    [ObservableProperty]
+    private double consoleHeight = 180;
+
     /// <summary>
     /// Toggles the projects region.
     /// </summary>

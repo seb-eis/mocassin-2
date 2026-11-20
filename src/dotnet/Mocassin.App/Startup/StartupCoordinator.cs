@@ -4,6 +4,7 @@ using Avalonia;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mocassin.App.Composition;
+using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.Views.Shell;
 
 namespace Mocassin.App.Startup;
@@ -42,6 +43,10 @@ internal sealed partial class StartupCoordinator : IDisposable
             application.DataTemplates.Add(new ViewLocator(loggerFactory.CreateLogger<ViewLocator>()));
 
             host.Services.GetRequiredService<CrashHandler>().Install();
+            var settingsService = host.Services.GetRequiredService<ISettingsService>();
+            var themeApplier = host.Services.GetRequiredService<IThemeApplier>();
+            themeApplier.Apply(settingsService.Current);
+            settingsService.Changed += (_, updated) => themeApplier.Apply(updated);
             var window = host.Services.GetRequiredService<ShellWindow>();
             var startupLogger = loggerFactory.CreateLogger<StartupCoordinator>();
             LogShellStarted(startupLogger, host.Paths.RootDirectory);

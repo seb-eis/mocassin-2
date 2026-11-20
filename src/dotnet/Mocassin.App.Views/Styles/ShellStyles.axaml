@@ -4,6 +4,9 @@
     <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
     <Setter Property="FontSize" Value="12" />
   </Style>
+  <Style Selector="TextBlock">
+    <Setter Property="FontSize" Value="{DynamicResource Mocassin.BodyFontSize}" />
+  </Style>
   <Style Selector="Menu">
     <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
   </Style>

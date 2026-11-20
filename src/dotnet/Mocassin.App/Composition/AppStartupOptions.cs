@@ -32,6 +32,11 @@ internal sealed record AppStartupOptions
     public LogLevel LogLevel { get; init; } = LogLevel.Information;
 
     /// <summary>
+    /// Gets a value indicating whether <c>--log-level</c> was explicitly supplied.
+    /// </summary>
+    public bool IsLogLevelSpecified { get; init; }
+
+    /// <summary>
     /// Gets the optional application-data override.
     /// </summary>
     public string? DataDirectory { get; init; }
@@ -51,6 +56,7 @@ internal sealed record AppStartupOptions
         string? projectPath = null;
         string? dataDirectory = null;
         var logLevel = LogLevel.Information;
+        var logLevelSpecified = false;
 
         for (var index = 0; index < args.Count; index++)
         {
@@ -85,6 +91,7 @@ internal sealed record AppStartupOptions
                         return false;
                     }
 
+                    logLevelSpecified = true;
                     break;
 
                 default:
@@ -99,6 +106,7 @@ internal sealed record AppStartupOptions
             ProjectPath = projectPath,
             DataDirectory = dataDirectory,
             LogLevel = logLevel,
+            IsLogLevelSpecified = logLevelSpecified,
         };
         errorMessage = null;
         return true;

@@ -2,6 +2,7 @@
 
 using Avalonia.Platform.Storage;
 using Mocassin.App.ViewModels.Dialogs;
+using Mocassin.App.ViewModels.Settings;
 
 namespace Mocassin.App.Views.Platform;
 
@@ -15,6 +16,17 @@ internal sealed class AvaloniaStorageService : IStorageService
         Patterns = ["*.mocprj"],
         MimeTypes = ["application/json"],
     };
+
+    private readonly ISettingsService settings;
+
+    /// <summary>
+    /// Initializes the picker service.
+    /// </summary>
+    /// <param name="settings">The settings service used for the last directories.</param>
+    public AvaloniaStorageService(ISettingsService settings)
+    {
+        this.settings = settings;
+    }
 
     /// <summary>
     /// Gets or sets the platform storage provider.
@@ -35,14 +47,25 @@ internal sealed class AvaloniaStorageService : IStorageService
                 Title = "Open MOCASSIN project",
                 AllowMultiple = false,
                 FileTypeFilter = [projectFileType],
+                SuggestedStartLocation = await GetStartFolderAsync(
+                    settings.Current.Paths.LastOpenDirectory,
+                    cancellationToken),
             });
 
         cancellationToken.ThrowIfCancellationRequested();
-        return files.Count == 0 ? null : files[0].TryGetLocalPath();
+        var path = files.Count == 0 ? null : files[0].TryGetLocalPath();
+        if (path is not null)
+        {
+            await UpdateLastDirectoryAsync(path, PathKind.Open);
+        }
+
+        return path;
     }
 
     /// <inheritdoc />
-    public async Task<string?> PickSaveProjectAsync(string suggestedName, CancellationToken cancellationToken = default)
+    public async Task<string?> PickSaveProjectAsync(
+        string suggestedName,
+        CancellationToken cancellationToken = default)
     {
         if (StorageProvider is null)
         {
@@ -56,10 +79,19 @@ internal sealed class AvaloniaStorageService : IStorageService
                 SuggestedFileName = suggestedName,
                 DefaultExtension = "mocprj",
                 FileTypeChoices = [projectFileType],
+                SuggestedStartLocation = await GetStartFolderAsync(
+                    settings.Current.Paths.LastSaveDirectory,
+                    cancellationToken),
             });
 
         cancellationToken.ThrowIfCancellationRequested();
-        return file?.TryGetLocalPath();
+        var path = file?.TryGetLocalPath();
+        if (path is not null)
+        {
+            await UpdateLastDirectoryAsync(path, PathKind.Save);
+        }
+
+        return path;
     }
 
     /// <inheritdoc />
@@ -75,9 +107,63 @@ internal sealed class AvaloniaStorageService : IStorageService
             {
                 Title = "Select folder",
                 AllowMultiple = false,
+                SuggestedStartLocation = await GetStartFolderAsync(
+                    settings.Current.Paths.LastFolderDirectory,
+                    cancellationToken),
             });
 
         cancellationToken.ThrowIfCancellationRequested();
-        return folders.Count == 0 ? null : folders[0].TryGetLocalPath();
+        var path = folders.Count == 0 ? null : folders[0].TryGetLocalPath();
+        if (path is not null)
+        {
+            await UpdateLastDirectoryAsync(path, PathKind.Folder);
+        }
+
+        return path;
+    }
+
+    private async Task<IStorageFolder?> GetStartFolderAsync(
+        string? directory,
+        CancellationToken cancellationToken)
+    {
+        if (StorageProvider is null || string.IsNullOrWhiteSpace(directory))
+        {
+            return null;
+        }
+
+        cancellationToken.ThrowIfCancellationRequested();
+        try
+        {
+            return await StorageProvider.TryGetFolderFromPathAsync(new Uri(directory));
+        }
+        catch (UriFormatException)
+        {
+            return null;
+        }
+    }
+
+    private async Task UpdateLastDirectoryAsync(string path, PathKind kind)
+    {
+        var directory = Path.GetDirectoryName(path);
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            return;
+        }
+
+        var paths = settings.Current.Paths;
+        var updated = kind switch
+        {
+            PathKind.Open => paths with { LastOpenDirectory = directory },
+            PathKind.Save => paths with { LastSaveDirectory = directory },
+            _ => paths with { LastFolderDirectory = directory },
+        };
+        await settings.UpdateAsync(settings.Current with { Paths = updated });
+    }
+
+    private enum PathKind
+    {
+        Open,
+        Save,
+        Folder,
     }
 }

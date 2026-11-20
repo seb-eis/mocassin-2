@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Commands"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Commands.CommandPaletteView"
              x:DataType="vm:CommandPaletteViewModel">
   <Grid Background="#66000000">
@@ -15,10 +16,12 @@
             Padding="12">
       <Grid RowDefinitions="Auto,*" RowSpacing="8">
         <TextBox x:Name="SearchBox"
+                 automation:AutomationProperties.Name="Command palette search"
                  Text="{Binding SearchText}"
                  PlaceholderText="Type a command"
                  KeyDown="OnSearchKeyDown" />
         <ListBox Grid.Row="1"
+                 automation:AutomationProperties.Name="Filtered commands"
                  ItemsSource="{Binding Results}"
                  SelectedItem="{Binding SelectedCommand}"
                  DoubleTapped="OnListDoubleTapped">

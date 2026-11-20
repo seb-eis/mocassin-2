@@ -12,6 +12,8 @@ using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Notifications;
 using Mocassin.App.ViewModels.Projects;
+using Mocassin.App.ViewModels.Settings;
+using Mocassin.App.ViewModels.Settings.Dialog;
 using Mocassin.App.ViewModels.Shell;
 
 namespace Mocassin.App.Tests.Composition;
@@ -50,6 +52,31 @@ public sealed class AppHostTests
         Assert.NotNull(host.Services.GetRequiredService<IProjectWorkspace>());
         Assert.NotNull(host.Services.GetRequiredService<ProjectExplorerViewModel>());
         Assert.NotNull(host.Services.GetRequiredService<IClipboardService>());
+        Assert.NotNull(host.Services.GetRequiredService<IAppSettingsStore>());
+        Assert.NotNull(host.Services.GetRequiredService<ISettingsService>());
+        Assert.NotNull(host.Services.GetRequiredService<ISettingsEnvironment>());
+        Assert.NotNull(host.Services.GetRequiredService<IThemeApplier>());
+        Assert.NotNull(host.Services.GetRequiredService<SettingsViewModel>());
+    }
+
+    [Fact]
+    public void TheSettingsLogLevelIsAppliedAtStartup()
+    {
+        using var workspace = new TempWorkspace();
+        File.WriteAllText(
+            workspace.Combine("Mocassin.Settings.json"),
+            """{"format":"mocassin.settings","logging":{"level":"error"}}""");
+        var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+        var logger = host.Services.GetRequiredService<ILoggerFactory>().CreateLogger("startup-test");
+#pragma warning disable CA1848 // Test-only markers verify the configured file level.
+        logger.LogInformation("information-marker");
+        logger.LogError("error-marker");
+#pragma warning restore CA1848
+        host.Dispose();
+
+        var log = File.ReadAllText(Directory.GetFiles(workspace.Combine("logs"), "mocassin-*.log").Single());
+        Assert.DoesNotContain("information-marker", log, StringComparison.Ordinal);
+        Assert.Contains("error-marker", log, StringComparison.Ordinal);
     }
 
     [Fact]

@@ -4,6 +4,7 @@
         xmlns:dialogs="using:Mocassin.App.Views.Dialogs"
         xmlns:notifications="using:Mocassin.App.Views.Notifications"
         xmlns:commands="using:Mocassin.App.Views.Commands"
+        xmlns:settings="using:Mocassin.App.Views.Settings"
         xmlns:vm="using:Mocassin.App.ViewModels.Shell"
         x:Class="Mocassin.App.Views.Shell.ShellWindow"
         x:DataType="vm:ShellViewModel"
@@ -20,6 +21,9 @@
     </Grid>
     <Grid IsVisible="{Binding IsCheatSheetOpen}">
       <commands:ShortcutCheatSheetView DataContext="{Binding Shortcuts}" />
+    </Grid>
+    <Grid IsVisible="{Binding Settings.IsOpen}">
+      <settings:SettingsDialogView DataContext="{Binding Settings}" />
     </Grid>
     <dialogs:DialogHost x:Name="DialogOverlay" />
     <notifications:NotificationHostView x:Name="NotificationOverlay"

@@ -21,10 +21,12 @@ internal sealed partial class StatusBarViewModel : ObservableObject
         ActiveDocument = new StatusBarItemViewModel("No document");
         Project = new StatusBarItemViewModel("No project");
         VersionItem = new StatusBarItemViewModel(version, "Application version");
+        Appearance = new StatusBarItemViewModel("System · Comfortable", "Theme and density");
         var items = new ObservableCollection<StatusBarItemViewModel>
         {
             ActiveDocument,
             Project,
+            Appearance,
             VersionItem,
         };
         if (providers is not null)
@@ -59,6 +61,11 @@ internal sealed partial class StatusBarViewModel : ObservableObject
     public StatusBarItemViewModel Project { get; }
 
     /// <summary>
+    /// Gets the appearance item.
+    /// </summary>
+    public StatusBarItemViewModel Appearance { get; }
+
+    /// <summary>
     /// Gets the version item.
     /// </summary>
     public StatusBarItemViewModel VersionItem { get; }
@@ -79,4 +86,10 @@ internal sealed partial class StatusBarViewModel : ObservableObject
     /// </summary>
     /// <param name="text">The project text.</param>
     public void SetProject(string? text) => Project.Text = text ?? "No project";
+
+    /// <summary>
+    /// Updates the appearance item.
+    /// </summary>
+    /// <param name="text">The appearance text.</param>
+    public void SetAppearance(string text) => Appearance.Text = text;
 }

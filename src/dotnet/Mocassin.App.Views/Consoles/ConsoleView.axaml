@@ -1,16 +1,19 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Consoles"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Consoles.ConsoleView"
              x:DataType="vm:ConsoleViewModel">
   <Grid RowDefinitions="Auto,*">
     <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="12,4">
       <TextBlock Text="{Binding ActiveChannel.Title}" VerticalAlignment="Center" FontWeight="SemiBold" />
       <TextBox Grid.Column="1"
+               automation:AutomationProperties.Name="Application console filter"
                Margin="12,0"
                PlaceholderText="Filter the application console"
                Text="{Binding ActiveChannel.FilterText}" />
-      <Button Grid.Column="2" Content="Clear" Command="{Binding ActiveChannel.ClearCommand}" />
+      <Button Grid.Column="2" Content="Clear"
+                automation:AutomationProperties.Name="Clear application console" Command="{Binding ActiveChannel.ClearCommand}" />
     </Grid>
     <ListBox Grid.Row="1"
              ItemsSource="{Binding ActiveChannel.VisibleEntries}"

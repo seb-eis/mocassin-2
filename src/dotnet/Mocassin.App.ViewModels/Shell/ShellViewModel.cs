@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mocassin.App.ViewModels.Commands;
@@ -7,6 +8,8 @@ using Mocassin.App.ViewModels.Consoles;
 using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Projects;
+using Mocassin.App.ViewModels.Settings;
+using Mocassin.App.ViewModels.Settings.Dialog;
 
 namespace Mocassin.App.ViewModels.Shell;
 
@@ -18,6 +21,9 @@ internal sealed partial class ShellViewModel : ObservableObject
     private static readonly MenuKind[] menuOrder = [MenuKind.File, MenuKind.Edit, MenuKind.View, MenuKind.Help];
 
     private readonly IShellLifetime lifetime;
+    private readonly ISettingsService settings;
+    private readonly IConsoleService consoleService;
+    private bool applyingLayout;
     private readonly AsyncRelayCommand backCommand;
     private readonly AsyncRelayCommand forwardCommand;
     private readonly AsyncRelayCommand closeActiveCommand;
@@ -53,6 +59,8 @@ internal sealed partial class ShellViewModel : ObservableObject
     /// <param name="commands">The command catalog.</param>
     /// <param name="menuProvider">The menu contribution provider.</param>
     /// <param name="platform">The platform used to format gestures.</param>
+    /// <param name="settings">The application settings.</param>
+    /// <param name="settingsDialog">The settings dialog state.</param>
     public ShellViewModel(
         IConsoleService consoleService,
         IEnumerable<IConsoleChannelProvider> consoleChannels,
@@ -66,7 +74,9 @@ internal sealed partial class ShellViewModel : ObservableObject
         ProjectExplorerViewModel explorer,
         ICommandCatalog commands,
         IMenuItemProvider menuProvider,
-        GesturePlatform platform)
+        GesturePlatform platform,
+        ISettingsService settings,
+        SettingsViewModel settingsDialog)
     {
         Regions = regions;
         StatusBar = statusBar;
@@ -78,6 +88,9 @@ internal sealed partial class ShellViewModel : ObservableObject
         Explorer = explorer;
         Commands = commands;
         Platform = platform;
+        this.settings = settings;
+        this.consoleService = consoleService;
+        Settings = settingsDialog;
         Console = new ConsoleViewModel(consoleService, consoleChannels);
 
         backCommand = new AsyncRelayCommand(() => Navigation.GoBackAsync(), () => Navigation.CanGoBack);
@@ -92,9 +105,28 @@ internal sealed partial class ShellViewModel : ObservableObject
         documents.ActiveDocumentChanged += OnActiveDocumentChanged;
         workspace.ActiveProjectChanged += OnActiveProjectChanged;
         navigation.HistoryChanged += OnHistoryChanged;
+        settings.Changed += OnSettingsChanged;
+        Regions.PropertyChanged += OnRegionPropertyChanged;
+        ApplySettings(settings.Current);
+
+        if (settings.LoadResult.IsFatal)
+        {
+            consoleService.Write(
+                ConsoleSeverity.Warning,
+                "settings",
+                settings.LoadResult.FatalMessage ?? "The settings file was rejected; defaults are active.");
+        }
+
+        foreach (var warning in settings.LoadResult.Warnings)
+        {
+            consoleService.Write(ConsoleSeverity.Warning, "settings", warning);
+        }
 
         consoleService.Write(ConsoleSeverity.Information, "shell", "MOCASSIN shell started.");
-        documents.OpenOrActivate(new WelcomeDocumentViewModel(ShowShortcutsCommand));
+        if (settings.Current.Ui.ShowWelcomeOnStart)
+        {
+            documents.OpenOrActivate(new WelcomeDocumentViewModel(ShowShortcutsCommand));
+        }
         UpdateActiveDocument();
         UpdateActiveProject();
     }
@@ -165,6 +197,11 @@ internal sealed partial class ShellViewModel : ObservableObject
     public GesturePlatform Platform { get; }
 
     /// <summary>
+    /// Gets the settings dialog state.
+    /// </summary>
+    public SettingsViewModel Settings { get; }
+
+    /// <summary>
     /// Gets the text shown when the documents region is empty.
     /// </summary>
     public string EmptyDocumentText { get; } = "No document is open.";
@@ -231,6 +268,13 @@ internal sealed partial class ShellViewModel : ObservableObject
             MenuKind.View,
             new KeyGestureDescriptor("0", GestureModifier.Alt),
             Regions.ToggleConsoleCommand);
+        catalog.Add(
+            "view.settings",
+            "Settings…",
+            "View",
+            MenuKind.View,
+            new KeyGestureDescriptor("OemComma", GestureModifier.Primary),
+            new RelayCommand(() => Settings.Open()));
         catalog.Add(
             "view.palette",
             "Command Palette",
@@ -351,6 +395,67 @@ internal sealed partial class ShellViewModel : ObservableObject
     }
 
     private void OnActiveProjectChanged(object? sender, EventArgs e) => UpdateActiveProject();
+
+    private void OnSettingsChanged(object? sender, AppSettings updated) => ApplySettings(updated);
+
+    private void OnRegionPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
+    {
+        if (applyingLayout)
+        {
+            return;
+        }
+
+        if (e.PropertyName is nameof(ShellRegionsViewModel.IsProjectsVisible)
+            or nameof(ShellRegionsViewModel.IsInspectorVisible)
+            or nameof(ShellRegionsViewModel.IsConsoleVisible)
+            or nameof(ShellRegionsViewModel.LeftWidth)
+            or nameof(ShellRegionsViewModel.RightWidth)
+            or nameof(ShellRegionsViewModel.ConsoleHeight))
+        {
+            _ = PersistLayoutAsync();
+        }
+    }
+
+    private void ApplySettings(AppSettings value)
+    {
+        StatusBar.SetAppearance(
+            string.Create(
+                CultureInfo.InvariantCulture,
+                $"{value.Theme} · {value.Density} · {value.FontScale:0.00}×"));
+        applyingLayout = true;
+        Regions.IsProjectsVisible = value.Layout.LeftVisible;
+        Regions.IsInspectorVisible = value.Layout.RightVisible;
+        Regions.IsConsoleVisible = value.Layout.ConsoleVisible;
+        Regions.LeftWidth = value.Layout.LeftWidth;
+        Regions.RightWidth = value.Layout.RightWidth;
+        Regions.ConsoleHeight = value.Layout.ConsoleHeight;
+        Console.ActiveChannel =
+            Console.Channels.FirstOrDefault(channel => channel.Id == value.Layout.ActiveConsoleChannel)
+            ?? Console.Channels.FirstOrDefault();
+        applyingLayout = false;
+    }
+
+    private async Task PersistLayoutAsync()
+    {
+        var layout = new LayoutSettings
+        {
+            LeftVisible = Regions.IsProjectsVisible,
+            RightVisible = Regions.IsInspectorVisible,
+            ConsoleVisible = Regions.IsConsoleVisible,
+            LeftWidth = (int)Math.Round(Regions.LeftWidth),
+            RightWidth = (int)Math.Round(Regions.RightWidth),
+            ConsoleHeight = (int)Math.Round(Regions.ConsoleHeight),
+            ActiveConsoleChannel = Console.ActiveChannel?.Id ?? SettingsDefaults.DefaultConsoleChannel,
+        };
+        var result = await settings.UpdateAsync(settings.Current with { Layout = layout });
+        if (!result.IsSuccess)
+        {
+            consoleService.Write(
+                ConsoleSeverity.Warning,
+                "settings",
+                result.Message ?? "The layout could not be saved.");
+        }
+    }
 
     private void OnHistoryChanged(object? sender, EventArgs e)
     {

@@ -3,6 +3,7 @@
              xmlns:vm="using:Mocassin.App.ViewModels.Shell"
              xmlns:projects="using:Mocassin.App.ViewModels.Projects"
              xmlns:navigation="using:Mocassin.App.ViewModels.Navigation"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Shell.ProjectsRegionView"
              x:DataType="vm:ShellViewModel">
   <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
@@ -11,6 +12,7 @@
     <Grid RowDefinitions="Auto,Auto,*,Auto,*">
       <TextBlock Text="Projects" FontWeight="SemiBold" Margin="12,10,12,4" />
       <ListBox Grid.Row="1"
+               automation:AutomationProperties.Name="Open projects"
                ItemsSource="{Binding Workspace.ProjectsInternal}"
                SelectedItem="{Binding Workspace.ActiveProject}"
                MaxHeight="180"
@@ -29,6 +31,7 @@
 
       <TextBlock Grid.Row="2" Text="Explorer" FontWeight="SemiBold" Margin="12,4,12,4" />
       <TreeView Grid.Row="3"
+                automation:AutomationProperties.Name="Project explorer"
                 x:Name="ExplorerTree"
                 ItemsSource="{Binding Explorer.Nodes}"
                 SelectedItem="{Binding Explorer.SelectedNode}"
@@ -43,6 +46,7 @@
       </TreeView>
 
       <Button Grid.Row="4"
+              automation:AutomationProperties.Name="Open selected project node"
               Content="Open selected"
               Command="{Binding Explorer.OpenSelectedCommand}"
               HorizontalAlignment="Left"

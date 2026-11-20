@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Mocassin.App.Settings;
 using Mocassin.App.Startup;
 using Mocassin.App.ViewModels.Commands;
 using Mocassin.App.ViewModels.Consoles;
@@ -10,10 +11,13 @@ using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Notifications;
 using Mocassin.App.ViewModels.Projects;
+using Mocassin.App.ViewModels.Settings;
+using Mocassin.App.ViewModels.Settings.Dialog;
 using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Dialogs;
 using Mocassin.App.Views.Platform;
 using Mocassin.App.Views.Shell;
+using Mocassin.App.Views.Theming;
 
 namespace Mocassin.App.Composition;
 
@@ -31,6 +35,7 @@ internal static class AppServiceRegistration
     {
         services.AddSingleton<IShellLifetime, AppShellLifetime>();
         services.AddSingleton<CrashHandler>();
+        services.AddSingleton<ISettingsEnvironment, SettingsEnvironment>();
         var platform = OperatingSystem.IsMacOS()
             ? GesturePlatform.MacOS
             : OperatingSystem.IsWindows() ? GesturePlatform.Windows : GesturePlatform.Linux;
@@ -46,6 +51,7 @@ internal static class AppServiceRegistration
     public static IServiceCollection AddMocassinViewModels(this IServiceCollection services)
     {
         services.AddSingleton<IConsoleService, ConsoleService>();
+        services.AddSingleton<SettingsViewModel>();
         services.AddSingleton<IConsoleChannelProvider, ApplicationConsoleChannelProvider>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<ProgressService>();
@@ -76,6 +82,7 @@ internal static class AppServiceRegistration
         services.AddSingleton<IStorageService>(provider => provider.GetRequiredService<AvaloniaStorageService>());
         services.AddSingleton<AvaloniaClipboardService>();
         services.AddSingleton<IClipboardService>(provider => provider.GetRequiredService<AvaloniaClipboardService>());
+        services.AddSingleton<IThemeApplier, AvaloniaThemeApplier>();
         services.AddSingleton<DialogService>();
         services.AddSingleton<IDialogService>(provider => provider.GetRequiredService<DialogService>());
         return services;
@@ -101,7 +108,9 @@ internal static class AppServiceRegistration
             provider.GetRequiredService<ProjectExplorerViewModel>(),
             provider.GetRequiredService<ICommandCatalog>(),
             provider.GetRequiredService<IMenuItemProvider>(),
-            provider.GetRequiredService<GesturePlatform>()));
+            provider.GetRequiredService<GesturePlatform>(),
+            provider.GetRequiredService<ISettingsService>(),
+            provider.GetRequiredService<SettingsViewModel>()));
         services.AddSingleton<ShellWindow>();
         return services;
     }
