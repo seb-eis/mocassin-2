@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `9916166a664f0a588e82eb8dbfc1097bc4949845` |
+| Reviewed commit | `1b82fde744d02cfdb92cecbdad5a5165d62e8b9c` |
 | Docs branch | `docs/step-23-design` |
 | Review date | 2026-11-20 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh planning auditor |
@@ -31,6 +31,17 @@ contains the rewritten Step 23 page and the reconciled
 documentation-only follow-up so the freeze SHA can be written; no design content changed between the freeze and
 this record. The freeze contains no code, test, configuration, contract, generated file, or status-dashboard
 edit.
+
+**Refreeze note (round 2, 2026-11-20).** Round 1 is historical: it reviewed the first freeze `9916166` under the
+previous person-week sizing rule. After it returned `Changes required`, `main` adopted the complexity-class rule
+([`04-roadmap.md`](../04-roadmap.md) §3.1) and this design was refrozen at
+`1b82fde744d02cfdb92cecbdad5a5165d62e8b9c`. The refreeze applies the new rule (class **High**, dimension
+evidence, and a proposed dependency-clean split in §23), resolves M-1–M-3 and every Minor/Note in the
+`Resolution status` section below, and reorders the feature list so the claimed 23A/23B boundary is
+dependency-clean. **Round-1 reviewer text — Evidence, Findings, Reviewer independence, Verdict, and the round-1
+report — is byte-identical to `94cfe46`**; only the request-owned fields (this note, the `Reviewed commit` cell,
+the Step summary row, the request checklists, the `Record state` line, and the `Resolution status` section)
+changed. The round-1 findings and verdict are kept intact as history.
 
 **Parallel-track note.** The human owner started the GUI track in parallel with the solver step (Step 13) on
 2026-11-20. The design deliberately consumes only the library surfaces of Steps 01–07 and 12. Reviewers should
@@ -55,7 +66,7 @@ prepared. This is an acknowledged bookkeeping gap, not a design change.
 | Phase | F. GUI (first step) |
 | Depends on | 01, 03, 04, 05, 06, 07, 12 — all `Done`, merged, and tagged. **Not** dependent on 02/08–11 and not on Steps 13–22 |
 | Delivers | The Avalonia application shell, composition root, document/navigation model, project open/create/save/save-as/close with recents, locks and external-change detection, dirty tracking, autosave and crash recovery, the single-project edit pipeline with undo/redo, the validation/problems surface, versioned application settings, theming/density/accessibility, keyboard shortcuts, dialogs and in-app consoles, structured logging with a crash boundary, the headless test harness, and the shell/project documentation. No editors, build UI, 3D, or run monitoring |
-| Sizing | Design estimate **3.75–4.5 pw**, eight features. The upper bound exceeds the four-week §3.1 trigger, so §23 requests an owner decision: a recorded single-step exception, or a 23A/23B split at feature 5. **No owner approval is recorded yet.** Guard: stop and report before feature 5 if features 1–4 exceed 2.2 pw |
+| Complexity and split | Class **High** (four of the seven §3.1 dimensions are High: cross-step interfaces, test-matrix breadth, independent acceptance stories, evidence size). §23 proposes a dependency-clean split after feature 4 (23A = features 1–4; 23B = features 5–8) and recommends it; owner acceptance as one unit is allowed with the recorded case and risk guard. **No owner decision is recorded yet.** Person-weeks are a non-gating forecast; no time waiver is requested |
 
 ## Design decisions reviewed
 
@@ -147,6 +158,12 @@ prepared. This is an acknowledged bookkeeping gap, not a design change.
       23A/23B boundary, the recommendation, and the fact that the owner decision is still outstanding. — checked;
       see M-2 and m-1/m-2.
 
+- [ ] **Complexity class and split decision (round 2).** §23's seven-dimension table, the High class and
+      its normative justification, the proposed split after feature 4, the dependency-clean argument, the
+      one-unit acceptance case and risk guard, and the fact that the owner decision is still outstanding.
+      Verify no person-week figure is used as a gate and that the class is the highest dimension, not an
+      average. — Added for round 2; it supersedes the person-week item above for the refrozen design.
+
 ## Dependency and interface checks
 
 - [x] Step 01 is `Done` and its `ProjectStore`, `ProjectDocument`, `ProjectEditor`, `ProjectHasher`, and
@@ -186,6 +203,9 @@ prepared. This is an acknowledged bookkeeping gap, not a design change.
 - [x] Risks and mitigations are realistic — checked.
 - [x] Code layout and namespace plan follow the structure policy — checked; see M-3 and m-8.
 - [x] No hidden scope, stale placeholders, or unowned decisions — checked; see M-2, n-1, n-4.
+- [ ] Complexity class and split decision are recorded and justified per
+      [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers) — added for round 2 by
+      the 2026-11-20 template change; round 1 predates it.
 
 ## Evidence
 
@@ -303,8 +323,11 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required — round 1 reviewed `9916166a664f0a588e82eb8dbfc1097bc4949845`; M-1–M-3 are
-Majors and m-1–m-11 plus n-1–n-8 are recorded below for resolution or explicit acceptance.
+**State:** Re-review required — round 1 returned `Changes required` on the first freeze
+`9916166a664f0a588e82eb8dbfc1097bc4949845` (M-1–M-3 Majors; m-1–m-11 and n-1–n-8 recorded for resolution). The
+design was refrozen at `1b82fde744d02cfdb92cecbdad5a5165d62e8b9c` after the complexity-sizing rule landed; the
+findings are resolved or explicitly dispositioned in `Resolution status` below, and the refrozen design awaits a
+fresh round-2 review. Round-1 findings and verdict remain unchanged as history.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -362,9 +385,50 @@ Date:
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
+Round-1 reviewer text, findings, evidence, and verdict are unchanged. The design was corrected on
+`docs/step-23-design` at the round-2 freeze `1b82fde744d02cfdb92cecbdad5a5165d62e8b9c`; this record update is a
+documentation-only follow-up. No code, test, configuration, contract, or generated artifact changed.
+
+| Finding | Status | Owner | Commit | Resolution |
+| --- | --- | --- | --- | --- |
+| **M-1** | Fixed | Planner | `1b82fde` | §5/§8/§18 now specify the single `ProjectStore` with `ProjectStoreOptions { ValidateOnLoad = false }`, the in-memory `Validate(project, loadDiagnostics: ProjectLoadResult.Diagnostics, ValidationOptions.Default, null, ct)` entry, and the consequences: no double validation, no skipped `Load` stage, load/migration diagnostics in the status bar and Problems. Feature 4/6 scope, the §20 test table, and the acceptance criteria carry a PR-fast test for the option, the populated `Load` stage, no duplicates, and that `ValidateFileAsync` is unused by the GUI. |
+| **M-2** | Fixed | Planner | `1b82fde` | The feature list was reordered so every feature depends only on lower-numbered ones: feature 1 now delivers the dialog overlay, pickers, dispatcher, console host/Application channel, notifications, and progress; feature 2 the workspace; feature 3 settings/theme/a11y; feature 4 lifecycle; feature 5 edit/undo; feature 6 the single-owned validation surface; feature 7 dirty/autosave/recovery; feature 8 tests/docs/closeout. The 23A/23B boundary after feature 4 is dependency-clean and §23 argues it; the §23 recommendation no longer concedes an unusable 23A. `§8`'s surface is mapped to feature 6 (also resolves n-4). |
+| **M-3** | Fixed | Planner | `1b82fde` | The app-local I/O and Avalonia-touching services moved out of the Avalonia-free project. §1 now has an explicit I/O-boundary table: ViewModels keeps `AppSettings`/validator/migrations/`AppSettingsJsonContext`/`IAppSettingsStore`/`IRecoveryStore`/`IProjectFileProbe`/`ThemeSelection`/`IThemeApplier`; `Mocassin.App` implements `AppSettingsStore`, `RecoveryStore`, `ProjectFileProbe`, `AppPaths`, log retention; `Mocassin.App.Views` implements `AvaloniaThemeApplier`, `AvaloniaStorageService`, `AvaloniaUiDispatcher`, key binding. §13/§14/§15, `01-target-architecture.md` §3.2, and `code-structure.md` §2.3 were updated with the same rule, and a source-token architecture test (no `System.IO`/`Environment`/`Application`/resource dictionaries in ViewModels) enforces it. |
+| **m-1** | Superseded | Planner | `1b82fde` | Person-week arithmetic and contingency allocation are gone: the design no longer records a pw estimate, and §23 records the complexity class instead. No arithmetic remains to correct. |
+| **m-2** | Superseded | Planner | `1b82fde` | The 2.2 pw stop guard is removed with the time rule. The one-unit branch of §23 has a trigger-based risk guard (harness not green, M-1 not demonstrable, M-3 unenforceable), not a time guard. |
+| **m-3** | Fixed | Planner | `1b82fde` | The inaccurate "existing CLI tests pin the messages" claim is replaced: §16 states the existing tests pin codes/exit codes only, and the refactor adds new `Mocassin.Cli.Tests` cases that pin the exact message text of every rejected name/path case. A GUI test asserts the GUI shows the same message for the same input through the shared helper. |
+| **m-4** | Fixed | Planner | `1b82fde` | §21 is rewritten: no absolute duration is asserted in a PR-fast test. Design budgets are recorded as non-gating evidence; PR-fast asserts functionality, ordering, and asynchrony; the only timing in a test is a generous hang guard. `03-quality-strategy.md` §11.1 states the same rule. |
+| **m-5** | Fixed | Planner | `1b82fde` | §17 adds `paths.lastOpenDirectory`, `paths.lastSaveDirectory`, and `paths.lastFolderDirectory`; §11 and §5 require the picker to read and update them; the §20 settings test covers persistence and update. |
+| **m-6** | Fixed | Planner | `1b82fde` | §9/§17 now specify the source-generated `AppSettingsJsonContext`, the temp-file + `Flush(flushToDisk: true)` + replace protocol, `MaxSettingsBytes = 4 MiB`, the `recentFiles` cap, and that a failed/oversized write leaves the previous file intact. An App-layer store makes it testable. |
+| **m-7** | Fixed | Planner | `1b82fde` | §10 defines the framework-neutral `KeyGestureDescriptor(ModifierKeys, KeyName)` with a `Primary` modifier; the shortcut table uses `primary` uniformly; only `Mocassin.App.Views` converts to Avalonia `KeyGesture`/`KeyBinding` and renders the per-platform text. |
+| **m-8** | Fixed | Planner | `1b82fde` | §15 now lists `IInspectorContributor`, `InspectorSelection`, `ExplorerNode`, `StatusBarItemViewModel`, `ConsoleService`, `IUiDispatcher`, `AppSettingsStore`, `RecoveryStore`, `ProjectFileProbe`, `AvaloniaThemeApplier`, `AvaloniaStorageService`, `AvaloniaUiDispatcher`, and the gesture types. All App-project types are `internal` with `InternalsVisibleTo("Mocassin.App.Tests")`, so `PublicAPI.*` for `Mocassin.App*` stays unchanged; §15/§16 state the rule. |
+| **m-9** | Fixed | Planner | `1b82fde` | The §20 architecture row now checks **direct** project references read from the `.csproj` files, not the transitive assembly graph, and explicitly allows the expected `App → Packages → Compilation` edge. |
+| **m-10** | Fixed | Planner | `1b82fde` | §5 now defines `ActivateAsync` (already-open path), `ReloadAsync` (fresh `ProjectDocument`, stacks discarded), `RecoverAsync`, and `DiscardRecoveryAsync`, and the outcome enum covers them; §6 and the §20 recovery test use the operations. |
+| **m-11** | Fixed | Planner | `1b82fde` | The crash path is asynchronous: `CrashRecoveryWriter` starts the snapshot writes, awaits them with a 2 s budget, reports per-session success/timeout/failure, and never uses `.Result`/`GetAwaiter().GetResult()`. §13 repeats the no-sync-over-async rule for this path. |
+| **n-1** | Deferred | Step agent | — | The status dashboard is step-agent-owned (AGENTS §3.8); the planner did not edit it. The step page and this record still flag it for the start gate. |
+| **n-2** | Fixed | Planner | `1b82fde` | The `ProjectSessionOutcome` enum now includes `NotFound`, `InvalidContent`, and `IoFailure`, mapped from `ProjectLoadResult.FailureKind`, in addition to `Locked`/`UnsavedChanges`/`SaveFailed`/`Canceled`. |
+| **n-3** | Fixed | Planner | `1b82fde` | `IInspectorContributor.CreateInspector(InspectorSelection)` replaces the `object selection` signature. `InspectorSelection` carries the document key, project id, validated `ModelPath` list, and domain tag; unclaimed tags render the empty state. |
+| **n-4** | Fixed | Planner | `1b82fde` | The whole §8 surface (status indicator, Problems filters/sort/help anchors/related navigation/revalidate, edit diagnostics, on-demand statistics) is owned by feature 6; §8 and the feature table say so, and no part is orphaned across features. |
+| **n-5** | Fixed | Planner | `1b82fde` | The dangling "verified in feature 1, §24" is replaced by the pure `WindowPlacementResolver` rule (intersection with a current screen, else primary), a PR-fast placement test, and verification item V-5 for the real multi-monitor check in the manual platform gate. |
+| **n-6** | Fixed | Planner | `1b82fde` | The shared helper is now `ProjectPathRules` (name **and** target path: separators, `..`, length, reserved characters, existing target, directory creation), used by `File > New` and by `NewProjectCommand` (§16). |
+| **n-7** | Fixed | Planner | `1b82fde` | `TimeProvider` is scoped to document/autosave/stamp/session/retention time; log record timestamps come from the Serilog sink, and tests assert level/scope/message rather than sink timestamps. |
+| **n-8** | Superseded | Planner | `1b82fde` | The "audit can be read in one sitting" judgement is removed. The evidence-size dimension now rates the step **High** and drives the split recommendation in §23, so no inline claim is needed. |
+
+**Record-integrity note (round 2).** This update changed only request-owned fields: the `Reviewed commit` cell,
+this refreeze note, the Step summary row, the request checklists (two items appended for the new template), the
+`Record state` line, and this section. The reviewer-authored `Evidence`, `Findings`, `Reviewer independence`,
+`Verdict`, and `Review round 1` text is byte-identical to `94cfe46`. No global replacement was used: the
+`Reviewed commit` cell was changed by matching its exact old cell string only. The extraction is reproducible
+with `git show 94cfe46:docs/planning/reviews/step-23.md` and line-anchored section extraction; the SHA-256 values
+are identical in both files:
+
+| Section | Extent | SHA-256 |
+| --- | --- | --- |
+| Evidence, Findings, Finding details | `## Evidence` to `## Record state` | `74f4c21a42564c3238ce9051a23e15f3183e5ea47ad08c65b98eb93d42bc3047` |
+| Reviewer independence and Verdict | `## Reviewer independence` to `## Human approval` | `7b16d7d90f8afdead99bd3781b386da7641ee15ae400254b3883b9c9f0778f0f` |
+| Review round 1 | `## Review rounds` to EOF | `adedebdb4a0ba8a4420a44b40104d79ddc4761b93e7d5194aea146e2daf0daea` |
+
+Findings and verdict above are round 1's and are not re-scored here.
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
