@@ -1255,7 +1255,10 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
   collection-union check and equivalent-start mapping; the exact per-direction check is a separate Step 16 test
   that consumes the same fixture. It is a test artifact, not a schema change. If no existing sample combines
   these, feature 6 adds a small sample under `samples/` and builds the package from it; do not hand-author the
-  `.msl`.
+  `.msl`. **Amended:** the real fixture carries the mask difference; the equivalent-start half is impossible
+  with the current Step 08 compiler and is recorded in
+  [`step-13-amend-1`](../amendments/step-13-amend-1-fixture-properties.md), with synthetic reader coverage and
+  a Step 16 re-plan.
 - Fixtures are produced by the real writers and never hand-edited. The Step 11 regeneration command remains the
   `.msl` update path; the pre-amendment package is byte-fixed.
 - A failed fixture comparison is a contract failure, not a test flake.
