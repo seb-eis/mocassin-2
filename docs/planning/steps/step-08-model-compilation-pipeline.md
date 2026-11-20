@@ -68,6 +68,39 @@ keep their explicit reverse transitions, and have pinned signatures. The charge 
 from the charge-weighted endpoint moments, which reproduces the intended field contribution for single
 charges, vacancies, charge-state changes, and non-collinear paths.
 
+### Maintenance note — translation-equivalent starts (2026-11-20)
+
+Branch `fix/step-08-equivalent-start-mapping` (commits `1899421`, `85e27b2`) closes the non-format part of
+audit finding m1: a centered space group no longer emits one direction per centering image. Two expanded
+paths are merged into one direction only when (a) their fractional displacement sequence `x(i) - x(0)` matches
+and (b) their start positions are related by a setting operation whose linear part is the identity, i.e. a
+centering/lattice translation. Rotational or mirror images stay distinct directions because they change the
+relative path in the P1 frame; an unproven relation is never merged. The merged direction records every start
+in `EquivalentStartPositions` (including the representative), and `EncodingCompilationStage.BuildMappings`
+maps it into every matching `jump_mapping` bucket. Single-start directions keep the empty list representation,
+so existing compiled-model signatures and the `msl-v1`/`amend-1-net10` canonical summaries are unchanged.
+
+Regression: `samples/simulations/centered-exchange.mocprj` is a minimal C-centered MMC project with eight P1
+positions. `EquivalentStartCompilationTests` asserts two forward and two inverse directions, two equivalent
+starts per direction, distinct rotational variants, and cross-bucket `jump_mapping`; it also pins the empty
+single-start representation. `PackageFixtureTests.RebuildReproducesTheFixtureSummary` and
+`PreAmendmentCanonicalSummaryMatchesTheCheckedInGolden` pass unchanged, so the `msl-v1` and `amend-1-net10`
+model signatures and canonical summaries are not regenerated.
+
+Local gates (2026-11-20, exit 0 for every command): `./tools/verify.sh dotnet` (98 Compilation, 501 Packages,
+223 Symmetry, 42 Results, 685 Core, 200 Cli, 37 Contracts, 1 App, 1 Architecture tests; build 0 warnings and
+`dotnet format` clean), `./tools/verify.sh structure` (1/1), `./tools/verify.sh api` (public API compatible),
+`./tools/verify.sh contracts` (26 artifacts current, projection fixtures current, 58 tool tests, SPDX/secrets/
+cargo-deny OK), and `./tools/verify.sh docs` (links, math, strict site, DocFX, and rustdoc OK). No CI was
+dispatched; feature branches do not trigger CI.
+
+The Step 11 verifier observation (`PackageVerificationChecks` bounds `cluster.byte_position` by the
+reference-site count instead of the cluster node slot) is **not** part of this fix and remains deferred to the
+Step 11 maintenance work recorded in the `step-13-amend-1`
+(`docs/planning/amendments/step-13-amend-1-fixture-properties.md` on the Step 13 branch) "Step 11 verifier
+observation" section. General rotational orbit reduction and `DependentRules` emission remain the Step 29
+parity item.
+
 ## Goal
 
 This is the scientific heart of the model builder. The compiler must be deterministic, explainable,

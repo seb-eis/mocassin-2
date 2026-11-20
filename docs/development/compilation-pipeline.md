@@ -97,12 +97,17 @@ public interface IModelCompiler
 - `TransitionPathResolver` resolves the authored reference path to canonical `(P, cell offset)` positions.
   Point/path expansion uses the additive public `TryResolvePoint`/`TryResolvePath` API; the compiler does not
   duplicate the private nearest-image or tie logic.
-- Expand every setting operation, re-resolve with `TryResolvePath`, deduplicate exact relative encodings, and
-  reduce by the start position's `G0`. The canonical representative is the lexicographically smallest relative
-  path.
+- Expand every setting operation, re-resolve with `TryResolvePath`, and deduplicate exact relative encodings
+  (including the `G0` images that leave the relative path unchanged). Then merge paths that are the same jump
+  direction up to a pure lattice translation of the centered setting: the fractional displacement sequence
+  `x(i) - x(0)` must match, and the start positions must be related by a setting operation whose linear part is
+  the identity. Rotational or mirror images stay distinct directions because they change the relative path in
+  the P1 frame. The representative is a deterministic catalog-order expansion; every merged start is recorded
+  in `EquivalentStartPositions`.
 - A direction stores the representative start P, relative path encodings, per-node fractional movement, the
-  Cartesian path vector/length, and an inverse flag. The direction stores no field scalar; the rule carries the
-  Cartesian charge transport vector used by Step 15.
+  Cartesian path vector/length, and an inverse flag. It records every translation-equivalent start in
+  `EquivalentStartPositions`; a single-start direction keeps the empty list so its signature is unchanged. The
+  direction stores no field scalar; the rule carries the Cartesian charge transport vector used by Step 15.
 - For each direction, enumerate state-change combinations:
   - stable nodes: donor in S0, acceptor in S2;
   - unstable nodes: void in S0/S2, transition species in S1;
@@ -112,10 +117,12 @@ public interface IModelCompiler
   the carrier-symbol multiset across the full path. Report rejected counts by reason.
 - Forward rules are emitted for every accepted combination. Inverse rules are emitted only for
   `GeneratesReverse` chains (`Metropolis2`, `Migration3`) and never for an authored explicit reverse
-  transition. Dependent rules are symmetry-equivalent instances required at other start positions. They are
-  deduplicated by the full rule outcome
-  `(state0, state1, state2, movement, chargeTransportVector, trackerOrder)`; two directions may share one
-  rule only when every outcome field is identical.
+  transition. Translation-equivalent starts are represented on the same direction and do not create duplicate
+  rule instances. Dependent rules are the remaining symmetry-equivalent instances required at other start
+  positions; they are deduplicated by the full rule outcome
+  `(state0, state1, state2, movement, chargeTransportVector, trackerOrder)`, and two directions may share one
+  rule only when every outcome field is identical. General rotational orbit reduction and dependent-rule
+  emission remain the Step 29 parity item.
 - Rule lookup is guaranteed unambiguous: within one collection, a `state0` maps to at most one rule. A
   collision with a different outcome is `CMP004`.
 - Rule IDs in the payload are dense `u32`; stable rule geometry IDs are domain-separated SHA-256 strings used

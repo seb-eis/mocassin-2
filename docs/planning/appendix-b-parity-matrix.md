@@ -106,7 +106,7 @@ Status legend:
 | Auto-sampled pair tables | Y | Done | 08 | Shares Step 05 sampling/reduction kernel; canonical shell order |
 | Chiral pair linking in compiled tables | Y | Done | 08/09 | Shared `EnergyId`; one table/value per chiral pair |
 | Cluster tables and occupation codes | Y | Done | 08 | Point-group canonicalization; 6-bit codes; expansion maps |
-| Forward/inverse/dependent rules | Y | Partial | 08/29 | Forward and inverse rules are Done and tested; dependent instances for symmetry-equivalent starts remain open as Step 08 audit m1, owned by the Step 29 release gate (see §3) |
+| Forward/inverse/dependent rules | Y | Partial | 08/29 | Forward and inverse rules are Done and tested. Translation-equivalent starts in a centered group now merge into one direction with multiple `EquivalentStartPositions` and cross-bucket `jump_mapping` (2026-11-20 maintenance fix). General rotational orbit reduction and `DependentRules` emission remain open as Step 08 audit m1, owned by the Step 29 release gate (see §3) |
 | Mass/charge conservation filtering | Y | Done | 08 | Rejected counts reported; charge-transfer symbols balanced |
 | Rule ambiguity detection | Y | Done | 08 | Compile-time `CMP004`; original failed at runtime |
 | Unreferenced transition warning | N | Done | 08 | `CMP009` |
