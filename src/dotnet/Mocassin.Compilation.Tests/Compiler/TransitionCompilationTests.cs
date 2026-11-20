@@ -171,6 +171,104 @@ public sealed class SpectatorMovementTests
 }
 
 /// <summary>
+/// Covers translation-equivalent starts in a centered space-group setting.
+/// </summary>
+[Trait("Tier", "PR-fast")]
+public sealed class EquivalentStartCompilationTests
+{
+    [Fact]
+    public async Task CenteredGroupMergesTranslationEquivalentStartsAndMapsEveryBucket()
+    {
+        var project = await StageTestSupport.LoadProjectAsync("samples/simulations/centered-exchange.mocprj");
+
+        var result = new ModelCompiler().Compile(project);
+
+        Assert.True(result.IsSuccess, string.Join(Environment.NewLine, result.Diagnostics.Select(static item => item.ToString())));
+        var transitions = result.Model!.Transitions;
+
+        // Four C-centering images for each of the two reference sites.
+        Assert.Equal(8, transitions.PositionCount);
+
+        // Two rotational variants per direction sense. The two centering images of each variant are merged,
+        // so the compiler emits two forward and two inverse directions instead of one per image.
+        Assert.Equal(4, transitions.DirectionCount);
+        Assert.Equal(2, transitions.Directions.Count(static direction => !direction.IsInverse));
+        Assert.Equal(8, transitions.RuleCount);
+
+        foreach (var direction in transitions.Directions)
+        {
+            Assert.Equal(2, direction.EquivalentStartPositions.Length);
+            Assert.Equal(
+                direction.EquivalentStartPositions.Length,
+                direction.EquivalentStartPositions.Distinct().Count());
+            Assert.Contains(direction.PositionId, direction.EquivalentStartPositions);
+        }
+
+        // The two forward variants are genuinely different paths and must not be merged by the translation
+        // reduction.
+        var forward = transitions.Directions.Where(static direction => !direction.IsInverse).ToArray();
+        Assert.Equal(2, forward.Select(static direction => direction.ObjectId).Distinct().Count());
+        Assert.NotEqual(forward[0].Movement[0].C, forward[1].Movement[0].C);
+
+        // The encoded jump_mapping must place at least one direction in a bucket whose position is not the
+        // direction's representative position_id. This is the property Step 13/16 consume.
+        var crossBucket = CrossBucketMappings(transitions);
+        Assert.NotEmpty(crossBucket);
+
+        // Every equivalent start bucket carries the direction for each mobile particle with a rule.
+        foreach (var direction in transitions.Directions)
+        {
+            foreach (var start in direction.EquivalentStartPositions)
+            {
+                for (var particle = 1; particle < transitions.ParticleCount; particle++)
+                {
+                    var bucket = (start * transitions.ParticleCount) + particle;
+                    Assert.True(
+                        transitions.JumpCounts[bucket] > 0,
+                        $"Direction {direction.Index} is missing from bucket (position {start}, particle {particle}).");
+                    var mapped = Enumerable.Range(0, transitions.JumpCounts[bucket])
+                        .Select(slot => transitions.JumpMappings[transitions.JumpOffsets[bucket] + slot])
+                        .ToArray();
+                    Assert.Contains(direction.Index, mapped);
+                }
+            }
+        }
+    }
+
+    [Fact]
+    public async Task SingleStartDirectionKeepsTheEmptyEquivalentStartRepresentation()
+    {
+        var project = await StageTestSupport.LoadProjectAsync("samples/simulations/ceria-kmc.mocprj");
+
+        var result = new ModelCompiler().Compile(project);
+
+        Assert.True(result.IsSuccess, string.Join(Environment.NewLine, result.Diagnostics.Select(static item => item.ToString())));
+        Assert.All(
+            result.Model!.Transitions.Directions,
+            static direction => Assert.Empty(direction.EquivalentStartPositions));
+    }
+
+    private static (int Position, int Direction)[] CrossBucketMappings(CompiledTransitionModel transitions)
+    {
+        var mappings = new List<(int Position, int Direction)>();
+        for (var bucket = 0; bucket < transitions.JumpCounts.Length; bucket++)
+        {
+            var position = bucket / transitions.ParticleCount;
+            for (var slot = 0; slot < transitions.JumpCounts[bucket]; slot++)
+            {
+                var direction = transitions.JumpMappings[transitions.JumpOffsets[bucket] + slot];
+                if (transitions.Directions[direction].PositionId != position)
+                {
+                    mappings.Add((position, direction));
+                }
+            }
+        }
+
+        return [.. mappings];
+    }
+}
+
+/// <summary>
 /// Covers explicit reverse transitions compiled alongside their forward partner.
 /// </summary>
 [Trait("Tier", "PR-fast")]

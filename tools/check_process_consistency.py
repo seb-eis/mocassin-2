@@ -99,7 +99,8 @@ VERDICT_FILES = (
 )
 
 VERDICT_STATES = ("Re-review required", "Re-audit required")
-AUDIT_RE = re.compile(r"^docs/planning/audits/step-(\d{2})\.md$")
+STEP_ID_RE = re.compile(r"\d{2}[a-z]?")
+AUDIT_RE = re.compile(r"^docs/planning/audits/step-(\d{2}[a-z]?)\.md$")
 GATE_RE = re.compile(r"GATE_[A-Z_]+")
 
 
@@ -172,7 +173,7 @@ def check_unused_audit_records(root: Path) -> list[str]:
     step_status: dict[str, str] = {}
     for line in status.splitlines():
         cells = [cell.strip() for cell in line.strip().strip("|").split("|")]
-        if len(cells) >= 4 and len(cells[0]) == 2 and cells[0].isdigit():
+        if len(cells) >= 4 and STEP_ID_RE.fullmatch(cells[0]):
             step_status[cells[0]] = cells[3]
 
     errors: list[str] = []

@@ -6,13 +6,24 @@ commit, the closeout CI run, the `main` SHA used for the integration tree, and t
 ## When to create it
 
 Create `docs/planning/closeout/step-NN.json` from `_template.json` when the step reaches closeout, before the
-independent audit. Do not pre-seed files for steps that have not started.
+independent audit. A split step uses `step-NN[a-z].json`, for example `step-23a.json`. Do not pre-seed files for
+steps that have not started.
+
+## Step ID form
+
+A step ID is `step-NN` or, for a split step, `step-NN` followed by one lowercase letter: `step-23a`, `step-23b`.
+The letter is not a sub-index (`step-23aa` is invalid) and uppercase (`step-23A`) is invalid. The rule exists
+because Step 23 was split into Step 23A and Step 23B; the suffix gives each part a distinct evidence file, audit
+record, status row, and tag without renumbering the later steps. The rule home is
+[`tools/check_closeout_evidence.py`](../../../tools/check_closeout_evidence.py) for the evidence check and
+[`tools/check_process_consistency.py`](../../../tools/check_process_consistency.py) for audit records and status
+rows.
 
 ## Required fields
 
 | Field | Meaning |
 | --- | --- |
-| `step` | Step ID, for example `step-03`. |
+| `step` | Step ID, for example `step-03`, or `step-23a` for a split step. |
 | `audit_commit` | Full 40-character SHA of the commit the auditor reviews. |
 | `closeout_ci` | Closeout CI run ID and the full `head_sha` the run checked. |
 | `main_sha_at_freeze` | Full SHA of `main` that was merged into the step branch before the freeze. |

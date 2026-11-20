@@ -5,7 +5,6 @@ using System.Globalization;
 using Mocassin.Core.Geometry;
 using Mocassin.Core.Model.Structure;
 using Mocassin.Core.Model.Transitions;
-using static Mocassin.Compilation.Transitions.TransitionRuleHelpers;
 
 namespace Mocassin.Compilation.Transitions;
 
@@ -62,31 +61,6 @@ internal sealed class DirectionDraft
     public int Index { get; set; }
 
     public List<int> EquivalentStarts { get; } = [];
-
-    public DirectionDraft Reverse()
-    {
-        var reversed = Absolute.Reverse().ToArray();
-        var start = reversed[0];
-        var relative = reversed
-            .Select(encoding => new Vector4I(
-                encoding.A - start.A,
-                encoding.B - start.B,
-                encoding.C - start.C,
-                encoding.P))
-            .ToArray();
-        return new DirectionDraft(
-            CollectionIndex,
-            Transition,
-            Chain,
-            IsKinetic,
-            isInverse: true,
-            reversed,
-            relative,
-            start.P,
-            Stability.Reverse().ToArray(),
-            DirectionKey(CollectionIndex, relative, isInverse: true),
-            Key);
-    }
 }
 
 internal sealed record TransitionWork(
