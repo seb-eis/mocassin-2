@@ -1186,7 +1186,7 @@ event and optional fields; the `events` schema version remains 1 because the cha
   must have the same canonical **model** hash; a freshness test enforces it. The sample is a model starter,
   not a buildable job sample.
 - Templates live in `Mocassin.Packages.Projects.Templates` as embedded `.mocprj` resources and are exposed by
-  `ProjectTemplateFactory` so Step 23’s creation UI uses the same assets. The folder, its files, and the
+  `ProjectTemplateFactory` so Step 23A’s creation UI uses the same assets. The folder, its files, and the
   `PublicAPI.Unshipped.txt` entries are part of the §16.5 layout/public-API plan. The owner approved shipping
   the ceria starter with the model-hash freshness test on 2026-11-16; `blank` remains.
 - `name` is a display name and a file stem: trim it, strip one `.mocprj` suffix, reject empty values, path
@@ -1518,7 +1518,7 @@ Mocassin.Packages/Projects/Templates/
 Namespace `Mocassin.Packages.Projects.Templates`. `ProjectTemplate` and `ProjectTemplateFactory` are public
 and XML-documented in `PublicAPI.Unshipped.txt`; the two `.mocprj` files are embedded resources and do not
 count toward the 20-`.cs`-file or 800-line limits. The folder is depth 2, and `Assets/` holds only the
-embedded templates. Step 23's creation UI uses the same factory; a freshness test compares the embedded
+embedded templates. Step 23A's creation UI uses the same factory; a freshness test compares the embedded
 ceria asset's canonical model hash with `samples/ceria/ceria.mocprj`.
 
 ## 17. Contract manifest, schemas, and fixtures

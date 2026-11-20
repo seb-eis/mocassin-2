@@ -15,24 +15,25 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Create new project | Y | Partial | 01/12/23 | Blank, ceria, and barium-zirconate skeletons in 01/03; headless `mocassin new --template blank|ceria` with fresh identity and embedded assets in 12; creation UI in 23 |
-| Open/save/close project | Y | Planned | 01/23 | Atomic writes, lock, autosave store in 01; lifecycle UI in 23 |
-| Recent files | N | Improvement | 23 | Workspace model |
-| Multiple projects per file | N | Replaced | 23 | One project per file; workspace of open files |
-| Duplicate/delete project in a library | N | Replaced | 23 | File-level duplicate/delete; no DB library |
-| Autosave/recovery | N | Improvement | 01/23 | `.autosave` store in 01; timer/recovery prompt in 23 |
-| Dirty tracking/unsaved prompt | Y | Planned | 01/23 | Document hash and dirty state in 01; prompt in 23 |
-| Undo/redo | N | Improvement | 01/23 | Core stacks in 01; UI in 23 |
+| Create new project | Y | Partial | 01/12/23A | Blank, ceria, and barium-zirconate skeletons in 01/03; headless `mocassin new` with `--template blank` or `--template ceria`, fresh identity, and embedded assets in 12; creation UI in 23A using the same `ProjectTemplateFactory` and shared `ProjectPathRules` |
+| Open/save/close project | Y | Planned | 01/23A | Atomic writes and lock store in 01; lifecycle UI, read-only lock mode, save-as lock migration, reload, and external-change detection in 23A |
+| Recent files | N | Improvement | 23A | Settings-persisted list (max 10), missing-file handling, clear action |
+| Multiple projects per file | N | Replaced | 23A | One project per file; workspace of open files with one tab strip and a project switcher |
+| Duplicate/delete project in a library | N | Replaced | 23A | File-level duplicate/delete; no DB library |
+| Autosave/recovery | N | Improvement | 01/23B | `.autosave` sidecar store in 01; scheduler, recovery prompt, untitled-project recovery in `recovery/`, and retention in 23B |
+| Dirty tracking/unsaved prompt | Y | Planned | 01/23B | Document hash and dirty state in 01; content-based save point, title/tab markers, batch prompt in 23B |
+| Undo/redo | N | Improvement | 01/23B | Core stacks in 01; shell commands, save-point handling, bounded depth, and per-project isolation in 23B |
 | Project schema versioning/migration | Y | Planned | 01 | v1 pipeline implemented; migration fixtures added per version |
 | Stable project hash | Y | Done | 01/03/09 | Model/document SHA-256 in 01; structure hash in 03; compiled and parameterization signatures in 08/09 |
 | Legacy `.mocprj` read/write | N | Out of scope | — | ADR 0001 |
-| Project data viewer (JSON/XML) | N | Replaced | 23 | JSON view/debug export |
+| Project data viewer (JSON/XML) | N | Replaced | 23A | Read-only Project JSON document with copy and debug export |
+| Project metadata editing (name/description/author/notes) | Y | Planned | 23B | Project Overview editor; undoable through the shared edit pipeline |
 | Cross-domain validation pipeline | Y | Implemented | 07 | Load/model/cross-domain/feasibility; no post-validation mutation |
 | Stable diagnostic catalog | Y | Implemented | 07 | Codes, owners, severities, paths, hints; docs-drift checked |
 | Model statistics and feasibility | Y | Implemented | 07 | Counts, rule/memory estimates, buildability warnings |
 | Headless `mocassin validate` | Y | Done | 07/12 | `validation-v1`, diagnostics, statistics, and exit codes in 07; the complete CLI command surface, shared report family, and parser conventions in 12 |
 | `validation-v1` report | Y | Implemented | 07 | Sorted diagnostics, summary, optional statistics; schema checked |
-| GUI diagnostic navigation | Y | Planned | 07/24/25 | `ModelPath` navigation and stats panels |
+| GUI diagnostic navigation | Y | Planned | 07/23B/24/25 | `ModelPath` navigation and the target registry in 23A; status indicator, Problems channel, and error banner in 23B; domain providers and stats panels in 24/25 |
 
 ## 2. Particles and structure
 
@@ -218,11 +219,15 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Cross-platform app | Y | Planned | 23 | Windows/Linux/macOS |
-| Shell/tree/tabs/console/status | Y | Planned | 23 | |
-| Project lifecycle | Y | Planned | 23 | |
-| Undo/redo | N | Improvement | 23 | |
-| Model validator/problems | Y | Partial | 23/07 | Navigable validation result and paths; UI in 23 |
+| Cross-platform app | Y | Planned | 23A | Windows/Linux/macOS; Ubuntu automated, Windows/macOS platform gate and manual smoke checklist |
+| Shell/tree/tabs/console/status | Y | Planned | 23A | Regions, document tabs, project switcher/explorer, Application console, populated status bar; Problems channel in 23B |
+| Project lifecycle | Y | Planned | 23A | New/open/save/save-as/close/reload, recents, locks, read-only, external-change detection |
+| Undo/redo | N | Improvement | 23B | Single per-project stack over `ProjectDocument`, bounded, save-point correct |
+| Model validator/problems | Y | Partial | 23B/07 | Status indicator, Problems channel (including the load/migration diagnostics on open, conditional `Load` stage), filters, help anchors, revalidate, and navigable `ModelPath` targets in 23B; domain providers and full stats panels in 24/25 |
+| Command palette and shortcut cheat sheet | N | Improvement | 23A | Searchable command catalog with platform gestures |
+| Application settings and logging | N | Improvement | 23A/23B | Versioned `mocassin.settings` v1 with migration and retention in 23A; `autosave`/`session` additive fields in 23B; structured rolling logs replace the original XML settings file |
+| Crash recovery dialog | N | Improvement | 23A/23B | Global exception boundary, log entry, and "open log folder" in 23A; recovery snapshot and the recovery action in 23B |
+| Application diagnostics | N | Improvement | 23A | App-side environment report (distinct from CLI `doctor`) |
 | Particle/set editor | Y | Planned | 24 | |
 | Structure editor | Y | Planned | 24 | |
 | Transition editor | Y | Planned | 24 | |
@@ -241,7 +246,7 @@ Status legend:
 | MMCFE UI | Y | Planned | 28 | |
 | Lattice recycle tool | Y | Planned | 28 | |
 | Remote deploy | N | Deferred | post-1.0 | Local + HPC scripts first |
-| Accessibility/high contrast | N | Improvement | 23 | |
+| Accessibility/high contrast | N | Improvement | 23A | |
 | Numeric expression input | Y | Planned | 24/25 | |
 | Localization | N | Deferred | post-1.0 | Invariant first; resources ready |
 
@@ -250,7 +255,7 @@ Status legend:
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
 | .NET 11 | Y | Implemented | 00/11 | Retargeted by amendment 1 |
-| Avalonia cross-platform | Y | Planned | 23 | |
+| Avalonia cross-platform | Y | Planned | 23A | |
 | Rust solver | Y | Planned | 13 | Workspace, read-only package reader, ChaCha12 RNG, and `mocassin-sim --dry-run` land in 13; engines and state in 14–19 |
 | Windows support | Y | Planned | 31 | |
 | Linux support | Y | Planned | 31 | |
@@ -309,4 +314,9 @@ Status legend:
 | Asymmetric correlation matrix | Full symmetric matrix | 20 |
 | MMC zero-energy break check aborts immediately | Guard below 1e-12 eV; normal behavior unchanged | 17 |
 | Reflection/service-locator model layer | Immutable domain + explicit compiler | 01/08 |
-| No undo/redo, no run monitor, no charts | Added | 23/28 |
+| No undo/redo, no run monitor, no charts | Added | 23B/28 |
+| Settings in `Documents/Mocassin` XML, hard-coded symmetry path | Versioned app-data settings, no hard-coded paths | 23A |
+| `Console.WriteLine` logging, `MessageBox` dialogs | Structured rolling logs, in-shell dialogs, console channels | 23A |
+| No dirty prompt, autosave, or crash recovery | Content-based dirty state, autosave, recovery flow | 01/23B |
+| Detached library copy missed duplicates/deletes | One project per file; file-level duplicate/delete | 23A |
+| Status bar present but empty | Populated status bar | 23A |
