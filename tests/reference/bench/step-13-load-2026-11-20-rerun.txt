@@ -1,0 +1,38 @@
+   Compiling mocassin-types v0.1.0 (/workspace/src/rust/crates/mocassin-types)
+   Compiling criterion v0.8.2
+   Compiling proptest v1.12.0
+   Compiling mocassin-msl v0.1.0 (/workspace/src/rust/crates/mocassin-msl)
+    Finished `bench` profile [optimized] target(s) in 10.28s
+     Running benches/load.rs (src/rust/target/release/deps/load-eaf81048f4675408)
+Gnuplot not found, using plotters backend
+Benchmarking msl_load/open
+Benchmarking msl_load/open: Warming up for 3.0000 s
+Benchmarking msl_load/open: Collecting 100 samples in estimated 5.4611 s (20k iterations)
+Benchmarking msl_load/open: Analyzing
+msl_load/open           time:   [248.18 µs 270.98 µs 297.64 µs]
+                        change: [+65.192% +75.651% +87.747%] (p = 0.00 < 0.05)
+                        Performance has regressed.
+Found 4 outliers among 100 measurements (4.00%)
+  4 (4.00%) high mild
+Benchmarking msl_load/cold_load_job_1
+Benchmarking msl_load/cold_load_job_1: Warming up for 3.0000 s
+Benchmarking msl_load/cold_load_job_1: Collecting 100 samples in estimated 5.6216 s (15k iterations)
+Benchmarking msl_load/cold_load_job_1: Analyzing
+msl_load/cold_load_job_1
+                        time:   [348.45 µs 351.35 µs 354.41 µs]
+                        change: [+0.3000% +1.9107% +3.5066%] (p = 0.02 < 0.05)
+                        Change within noise threshold.
+Found 8 outliers among 100 measurements (8.00%)
+  8 (8.00%) high mild
+Benchmarking msl_load/warm_load_job_1
+Benchmarking msl_load/warm_load_job_1: Warming up for 3.0000 s
+Benchmarking msl_load/warm_load_job_1: Collecting 100 samples in estimated 5.0049 s (71k iterations)
+Benchmarking msl_load/warm_load_job_1: Analyzing
+msl_load/warm_load_job_1
+                        time:   [66.899 µs 68.045 µs 69.437 µs]
+                        change: [−1.1853% +0.8422% +3.1796%] (p = 0.48 > 0.05)
+                        No change in performance detected.
+Found 4 outliers among 100 measurements (4.00%)
+  3 (3.00%) high mild
+  1 (1.00%) high severe
+

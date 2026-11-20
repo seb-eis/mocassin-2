@@ -49,6 +49,7 @@ Do not use an amendment for:
 | **Integrated** | The amendment is squash-merged into the parent step branch. |
 | **Audited** | The parent audit passed at the combined commit. |
 | **Merged** | The parent step was merged and tagged. |
+| **Withdrawn** | The change is no longer needed; the resolving reason and commit are recorded in the amendment page. |
 | **Waived** | The human owner explicitly accepted that no amendment review is required. |
 
 ## 4. Required sequence
@@ -112,6 +113,7 @@ If the parent step is already merged or tagged:
 | `step-02-amend-2` (`docs-math`) | 02 — Symmetry and Geometry | **Integrated** | `feature/step-02-symmetry-and-geometry/amend-2-docs-math` | [Review](../reviews/step-02-amend-2.md) | `dbf5691`; audit `6341b56` |
 | `step-08-amend-1` (`canonical-projection`) | 08 — Model Compilation Pipeline | **Integrated** | `feature/step-08-model-compilation-pipeline/amend-1-canonical-projection` | [Review](../reviews/step-08-amend-1.md) | `28e741f`; audit passed with notes; merged and tagged `step-08` |
 | `step-11-amend-1` (`dotnet-11-native-zstd`) | 11 — Simulation Package and `.msl` Writer | **Integrated** | `feature/step-11-simulation-package-and-msl-writer/amend-1-dotnet-11-native-zstd` | [Review](../reviews/step-11-amend-1.md) — `Ready with notes`, accepted 2026-11-15 | `00753e7`; the parent audit has not started |
+| `step-13-amend-1` (`fixture-properties`) | 13 — Rust Solver Foundation and Package Reader | **Withdrawn** — resolved by the Step 08 fix `1f5b473` | `feature/step-13-rust-solver-foundation-and-package-reader/fix-audit-round-1` (historical) | — (withdrawn; no review requested) | Audit round 1 `Fixes required`; F-1 resolved by `step-13-centered`; re-audit pending |
 
 `step-02-amend-1` covers the public generic math layer (`Vector3<T>`, `Vector4<T>`, `Matrix3<T>`,
 `Matrix4<T>`) and the replacement of the temporary `CellGeometry` array-based inverse. See
@@ -119,6 +121,11 @@ If the parent step is already merged or tagged:
 
 `step-02-amend-2` enables KaTeX math rendering for the published documentation and replaces the Step 02
 monospace formula blocks. See [`step-02-amend-2-docs-math.md`](step-02-amend-2-docs-math.md).
+
+`step-13-amend-1` is **withdrawn**: the Step 08 fix `1f5b473` produces translation-equivalent starts, and the
+real-writer `step-13-centered` fixture now carries both the cross-bucket `jump_mapping` and the per-node mask
+difference. The amendment is retained for history; its Step 11 verifier observation remains a separate deferred
+item. See [`step-13-amend-1-fixture-properties.md`](step-13-amend-1-fixture-properties.md).
 
 `step-11-amend-1` moves the repository to the .NET 11 toolchain and replaces the `ZstdSharp.Port` payload codec
 with the in-box `System.IO.Compression` Zstandard API, before the Step 11 audit freeze and before feature 7

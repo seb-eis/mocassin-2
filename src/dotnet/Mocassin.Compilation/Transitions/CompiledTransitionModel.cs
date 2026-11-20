@@ -62,7 +62,10 @@ public sealed record CompiledJumpDirection(
 /// <param name="State1">The state-1 code, six bits per node.</param>
 /// <param name="State2">The state-2 code, six bits per node.</param>
 /// <param name="Movement">The per-node fractional movement.</param>
-/// <param name="ChargeTransportVector">The particle-identity Cartesian charge transport vector in e·Å.</param>
+/// <param name="ChargeTransportVector">
+/// The node-wise endpoint-moment difference in e·Å:
+/// <c>Σ_node (q(state2[node]) − q(state0[node])) · x(node)</c>.
+/// </param>
 /// <param name="StaticCorrection">The optional static S2 correction; <see langword="null"/> in v1.</param>
 /// <param name="TrackerOrder">The per-node global tracker index, or <c>0xFF</c> for a non-mobile node.</param>
 /// <param name="IsInverse">Whether the rule was generated as an automatic inverse.</param>

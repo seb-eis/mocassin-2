@@ -1,0 +1,47 @@
+   Compiling syn v2.0.119
+   Compiling alloca v0.4.0
+   Compiling rmp v0.8.15
+   Compiling serde_bytes v0.11.19
+   Compiling rand v0.10.3
+   Compiling mocassin-types v0.1.0 (/workspace/src/rust/crates/mocassin-types)
+   Compiling rmp-serde v1.3.1
+   Compiling proptest v1.12.0
+   Compiling zerocopy-derive v0.8.63
+   Compiling tracing-attributes v0.1.31
+   Compiling tracing v0.1.44
+   Compiling mocassin-msl v0.1.0 (/workspace/src/rust/crates/mocassin-msl)
+   Compiling zerocopy v0.8.63
+   Compiling half v2.7.1
+   Compiling ciborium-ll v0.2.2
+   Compiling ciborium v0.2.2
+   Compiling criterion v0.8.2
+    Finished `bench` profile [optimized] target(s) in 13.08s
+     Running benches/load.rs (src/rust/target/release/deps/load-66813eed74f3928f)
+Gnuplot not found, using plotters backend
+Benchmarking msl_load/open
+Benchmarking msl_load/open: Warming up for 3.0000 s
+Benchmarking msl_load/open: Collecting 100 samples in estimated 5.4827 s (30k iterations)
+Benchmarking msl_load/open: Analyzing
+msl_load/open           time:   [168.96 µs 171.09 µs 173.68 µs]
+Found 11 outliers among 100 measurements (11.00%)
+  8 (8.00%) high mild
+  3 (3.00%) high severe
+Benchmarking msl_load/cold_load_job_1
+Benchmarking msl_load/cold_load_job_1: Warming up for 3.0000 s
+Benchmarking msl_load/cold_load_job_1: Collecting 100 samples in estimated 5.0923 s (15k iterations)
+Benchmarking msl_load/cold_load_job_1: Analyzing
+msl_load/cold_load_job_1
+                        time:   [338.45 µs 343.08 µs 348.41 µs]
+Found 4 outliers among 100 measurements (4.00%)
+  1 (1.00%) high mild
+  3 (3.00%) high severe
+Benchmarking msl_load/warm_load_job_1
+Benchmarking msl_load/warm_load_job_1: Warming up for 3.0000 s
+Benchmarking msl_load/warm_load_job_1: Collecting 100 samples in estimated 5.2485 s (76k iterations)
+Benchmarking msl_load/warm_load_job_1: Analyzing
+msl_load/warm_load_job_1
+                        time:   [69.940 µs 71.075 µs 72.256 µs]
+Found 6 outliers among 100 measurements (6.00%)
+  5 (5.00%) high mild
+  1 (1.00%) high severe
+

@@ -1,0 +1,79 @@
+    Finished `bench` profile [optimized] target(s) in 0.06s
+     Running benches/draws.rs (src/rust/target/release/deps/draws-48e84a8a0d3de909)
+Gnuplot not found, using plotters backend
+Benchmarking rng/next_u32
+Benchmarking rng/next_u32: Warming up for 3.0000 s
+Benchmarking rng/next_u32: Collecting 100 samples in estimated 5.0000 s (3.4B iterations)
+Benchmarking rng/next_u32: Analyzing
+rng/next_u32            time:   [1.3563 ns 1.3640 ns 1.3722 ns]
+                        thrpt:  [728.77 Melem/s 733.15 Melem/s 737.31 Melem/s]
+Found 11 outliers among 100 measurements (11.00%)
+  8 (8.00%) high mild
+  3 (3.00%) high severe
+Benchmarking rng/next_u64
+Benchmarking rng/next_u64: Warming up for 3.0000 s
+Benchmarking rng/next_u64: Collecting 100 samples in estimated 5.0000 s (2.2B iterations)
+Benchmarking rng/next_u64: Analyzing
+rng/next_u64            time:   [2.2758 ns 2.2899 ns 2.3036 ns]
+                        thrpt:  [434.10 Melem/s 436.70 Melem/s 439.41 Melem/s]
+Found 2 outliers among 100 measurements (2.00%)
+  1 (1.00%) high mild
+  1 (1.00%) high severe
+Benchmarking rng/next_f64
+Benchmarking rng/next_f64: Warming up for 3.0000 s
+Benchmarking rng/next_f64: Collecting 100 samples in estimated 5.0000 s (2.0B iterations)
+Benchmarking rng/next_f64: Analyzing
+rng/next_f64            time:   [2.5337 ns 2.5457 ns 2.5570 ns]
+                        thrpt:  [391.09 Melem/s 392.83 Melem/s 394.68 Melem/s]
+Found 3 outliers among 100 measurements (3.00%)
+  3 (3.00%) high mild
+Benchmarking rng/next_bounded_2
+Benchmarking rng/next_bounded_2: Warming up for 3.0000 s
+Benchmarking rng/next_bounded_2: Collecting 100 samples in estimated 5.0000 s (2.8B iterations)
+Benchmarking rng/next_bounded_2: Analyzing
+rng/next_bounded_2      time:   [1.7378 ns 1.7470 ns 1.7558 ns]
+                        thrpt:  [569.54 Melem/s 572.40 Melem/s 575.43 Melem/s]
+Found 2 outliers among 100 measurements (2.00%)
+  2 (2.00%) high severe
+Benchmarking rng/next_bounded_10
+Benchmarking rng/next_bounded_10: Warming up for 3.0000 s
+Benchmarking rng/next_bounded_10: Collecting 100 samples in estimated 5.0000 s (2.8B iterations)
+Benchmarking rng/next_bounded_10: Analyzing
+rng/next_bounded_10     time:   [1.7496 ns 1.7587 ns 1.7679 ns]
+                        thrpt:  [565.66 Melem/s 568.61 Melem/s 571.57 Melem/s]
+Found 3 outliers among 100 measurements (3.00%)
+  2 (2.00%) high mild
+  1 (1.00%) high severe
+Benchmarking rng/next_bounded_1024
+Benchmarking rng/next_bounded_1024: Warming up for 3.0000 s
+Benchmarking rng/next_bounded_1024: Collecting 100 samples in estimated 5.0000 s (2.8B iterations)
+Benchmarking rng/next_bounded_1024: Analyzing
+rng/next_bounded_1024   time:   [1.7380 ns 1.7472 ns 1.7560 ns]
+                        thrpt:  [569.48 Melem/s 572.35 Melem/s 575.38 Melem/s]
+Found 2 outliers among 100 measurements (2.00%)
+  2 (2.00%) high mild
+Benchmarking rng/refill_64_words
+Benchmarking rng/refill_64_words: Warming up for 3.0000 s
+Benchmarking rng/refill_64_words: Collecting 100 samples in estimated 5.0001 s (66M iterations)
+Benchmarking rng/refill_64_words: Analyzing
+rng/refill_64_words     time:   [74.714 ns 75.385 ns 76.060 ns]
+                        thrpt:  [841.44 Melem/s 848.98 Melem/s 856.60 Melem/s]
+Found 2 outliers among 100 measurements (2.00%)
+  1 (1.00%) high mild
+  1 (1.00%) high severe
+Benchmarking rng/state_round_trip
+Benchmarking rng/state_round_trip: Warming up for 3.0000 s
+Benchmarking rng/state_round_trip: Collecting 100 samples in estimated 5.0003 s (44M iterations)
+Benchmarking rng/state_round_trip: Analyzing
+rng/state_round_trip    time:   [122.23 ns 123.44 ns 124.59 ns]
+                        thrpt:  [8.0262 Melem/s 8.1013 Melem/s 8.1816 Melem/s]
+Benchmarking rng/fork_32_bytes
+Benchmarking rng/fork_32_bytes: Warming up for 3.0000 s
+Benchmarking rng/fork_32_bytes: Collecting 100 samples in estimated 5.0001 s (42M iterations)
+Benchmarking rng/fork_32_bytes: Analyzing
+rng/fork_32_bytes       time:   [112.53 ns 113.14 ns 113.74 ns]
+                        thrpt:  [8.7921 Melem/s 8.8388 Melem/s 8.8866 Melem/s]
+Found 2 outliers among 100 measurements (2.00%)
+  1 (1.00%) high mild
+  1 (1.00%) high severe
+

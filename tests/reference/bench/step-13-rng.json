@@ -1,0 +1,101 @@
+{
+  "step": "step-13",
+  "part": "Feature 2 — RNG draw, refill, state, and fork benchmark",
+  "generatedAtUtc": "2026-11-19T22:30:00Z",
+  "sourceCommit": "54820f258bccfa021b8efd16e5248f9432656dda",
+  "command": "cargo bench --manifest-path src/rust/Cargo.toml -p mocassin-rng --bench draws",
+  "rawResults": "tests/reference/bench/step-13-rng-2026-11-19.txt",
+  "algorithm": "chacha12-v1",
+  "seedHex": "5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a",
+  "forkDomainHex": "4141414141414141414141414141414141414141414141414141414141414141",
+  "toolchain": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "1.99.1 (5f94df478 2026-08-27)",
+    "criterion": "0.8.2",
+    "profile": "bench (release, opt-level 3, single-threaded)"
+  },
+  "environment": {
+    "runnerClass": "linux-x64-local-container-amd-ryzen-7-7840u-rust-1.99.1",
+    "os": "Debian GNU/Linux 13 (trixie), Linux 6.12.116+deb13-rt-amd64 x86_64",
+    "cpu": "AMD Ryzen 7 7840U w/ Radeon 780M Graphics",
+    "logicalCpus": 16
+  },
+  "budgets": {
+    "next_u32": { "minimumDrawsPerSecond": 250000000, "maximumNanoseconds": 4.0 },
+    "next_u64": { "minimumDrawsPerSecond": 150000000, "maximumNanoseconds": 6.666667 },
+    "next_f64": { "minimumDrawsPerSecond": 120000000, "maximumNanoseconds": 8.333333 },
+    "next_bounded": { "minimumCallsPerSecond": 200000000, "maximumNanoseconds": 5.0, "maximumDrawsPerCall": 1.01 },
+    "refill64Words": { "maximumNanoseconds": 250.0, "minimumEffectiveGigabytesPerSecond": 1.0 },
+    "stateRoundTrip": { "maximumNanoseconds": 500.0 },
+    "fork32Bytes": { "maximumNanoseconds": 1000.0 }
+  },
+  "measurements": {
+    "next_u32": {
+      "medianNanoseconds": 1.3640,
+      "medianDrawsPerSecond": 733150000,
+      "budget": ">= 250 M draws/s",
+      "targetMet": true
+    },
+    "next_u64": {
+      "medianNanoseconds": 2.2899,
+      "medianDrawsPerSecond": 436700000,
+      "budget": ">= 150 M draws/s",
+      "targetMet": true
+    },
+    "next_f64": {
+      "medianNanoseconds": 2.5457,
+      "medianDrawsPerSecond": 392830000,
+      "budget": ">= 120 M draws/s",
+      "targetMet": true
+    },
+    "next_bounded_2": {
+      "medianNanoseconds": 1.7470,
+      "medianCallsPerSecond": 572400000,
+      "budget": ">= 200 M calls/s, <= 1.01 draws/call",
+      "targetMet": true
+    },
+    "next_bounded_10": {
+      "medianNanoseconds": 1.7587,
+      "medianCallsPerSecond": 568610000,
+      "budget": ">= 200 M calls/s, <= 1.01 draws/call",
+      "targetMet": true
+    },
+    "next_bounded_1024": {
+      "medianNanoseconds": 1.7472,
+      "medianCallsPerSecond": 572350000,
+      "budget": ">= 200 M calls/s, <= 1.01 draws/call",
+      "targetMet": true
+    },
+    "refill_64_words": {
+      "medianNanoseconds": 75.385,
+      "medianWordsPerSecond": 848980000,
+      "effectiveGigabytesPerSecond": 3.396,
+      "budget": "<= 250 ns per 64 words, >= 1 GB/s",
+      "targetMet": true
+    },
+    "state_round_trip": {
+      "medianNanoseconds": 123.44,
+      "budget": "<= 500 ns export + restore",
+      "targetMet": true
+    },
+    "fork_32_bytes": {
+      "medianNanoseconds": 113.14,
+      "budget": "<= 1 us for a 32-byte domain",
+      "targetMet": true
+    }
+  },
+  "drawsPerCall": {
+    "method": "tests/properties.rs::bounded_draws_consume_close_to_one_word_per_call",
+    "upper": 10,
+    "calls": 100000,
+    "wordsConsumed": 100000,
+    "maximumAllowed": 101000,
+    "targetMet": true
+  },
+  "notes": [
+    "The expected draw and state vectors were produced by an independent ChaCha12 implementation and frozen in crates/mocassin-rng/tests/vectors.rs.",
+    "Criterion stores its own baseline in target/criterion; this file is the checked-in evidence, and the same-runner-class entry in baselines.json is the comparison baseline.",
+    "The recorded source commit is the squash merge of the feature branch that produced this tree; the measured rng sources are identical to the benchmark run.",
+    "A 10 % regression is measured only against the matching runner class. Absolute timings are never compared across CPUs or operating systems."
+  ]
+}

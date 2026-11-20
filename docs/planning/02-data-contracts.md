@@ -1985,9 +1985,15 @@ oversized `@file`) are the same usage class: `CLI001`/2, not `CLI002`/3.
   streams, bounded draws, forks, and the 64-byte `RngStateV1` round-trip. It is a test-vector document
   (`format = "mocassin.rng-vectors"`), not a runtime format and not a manifest entry.
 - `tests/contracts/packages/msl-v1/` also carries the Rust CLI's `dry-run-v1.txt` golden; the counts and
-  signatures in it must equal the canonical package summary for the same job.
+  signatures in it must equal the canonical package summary for the same job. The file uses `{package}` and
+  `{version}` placeholders, which the CLI test substitutes with the canonical fixture path and the crate version.
 - `tests/contracts/packages/step-13-populated/` is a second real-writer `.msl` with non-empty pair/cluster
-  tables and an MMC job, its canonical summary, and extracted payloads. It is a test artifact, not a schema
+  tables, an MMC job, and a non-trivial per-node mask difference, its canonical summary, and extracted payloads.
+- `tests/contracts/packages/step-13-centered/` is the C-centered real-writer `.msl` from
+  `samples/step-13-centered/step-13-centered.mocprj`: its `jump_mapping` contains translation-equivalent
+  cross-bucket entries and its extended B set gives a per-node mask difference. It carries the canonical
+  summary and extracted payloads and is the F-1 fixture for the reader/Step 16 exact check.
+  Both are test artifacts, not a schema
   change; the implementor adds it from a committed sample with the standard regeneration command.
 - `tests/contracts/package-v1.msl` and `package-v1.msr` are produced by the real writers and read by all
   readers; previous-major fixtures are retained for the compatibility window.

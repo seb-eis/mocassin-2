@@ -16,7 +16,7 @@ Step 10 job expansion, Step 11 `.msl` writer, and Step 12 build orchestration.
 - **Step tag:** `step-08`
 - **Audit:** Passed with notes (round 4, `f97b2c4`) — [record](../audits/step-08.md); accepted by the human owner 2026-11-14
 - **Design review:** Ready for implementation at `b84ceadda1ba8b1715592a4f6884d76bc7c36fed` — [review record](../reviews/step-08.md) `195451021031272af96ee1b2ca600d4c8cd83c2c`; accepted by the human owner 2026-11-13
-- **Last updated:** 2026-11-20 (maintenance note)
+- **Last updated:** 2026-11-20 (maintenance notes)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -105,6 +105,28 @@ Step 11 maintenance work recorded in the `step-13-amend-1`
 (`docs/planning/amendments/step-13-amend-1-fixture-properties.md` on the Step 13 branch) "Step 11 verifier
 observation" section. General rotational orbit reduction and `DependentRules` emission remain the Step 29
 parity item.
+
+### Maintenance note — CI compilation budget smoke bound (2026-11-20)
+
+Branch `fix/compile-budget-smoke-bound` raises only the gating assertion in
+`TenThousandPositionModelCompilesWithinTheBudget` from `< 30 s` to `< 90 s`, with a comment that points at the
+benchmark-class target in §13.4. No production code, no other threshold, and no test semantics changed.
+
+Evidence (2026-11-20, .NET 11 Release, Ryzen 7 7840U, 16 cores, pre-fix `b2cebac` versus post-fix `1f5b473`):
+the 10k compile takes 0.35–0.62 s in both trees (`CompilationReport` stage timings; `Pairs` ~273 ms and
+`Encoding` ~131 ms dominate, the rule stage is ~35 ms and performs no transition work because the test model has
+no simulation), with identical 143.2 MiB allocation, and the test method takes 0.93 s (pre-fix median) versus
+0.95 s (post-fix median). Under the CI command shape (`dotnet test Mocassin.slnx`, `XPlat Code Coverage`,
+pinned to two cores) the same test takes 8.3–8.6 s. CI observes 30.1 s (2026-11-16, before the fix), 31.3 s
+(`fe48dc8`, pre-fix tree) and 35.9 s (`ce00f8e`), so the miss is runner load, not the equivalent-start fix:
+`TransitionEquivalentStarts.IsEquivalent` is invoked zero times for this project. 90 s is ~2.5x the worst
+observed duration and still catches an order-of-magnitude regression.
+
+Local gates (2026-11-20, exit 0 for every command): `./tools/verify.sh dotnet` (98 Compilation, 503 Packages,
+223 Symmetry, 42 Results, 685 Core, 200 Cli, 37 Contracts, 1 App, 1 Architecture tests; build 0 warnings and
+`dotnet format` clean), `./tools/verify.sh structure` (1/1), and `./tools/verify.sh docs` (math 172 files, links
+175 files, Zensical strict, DocFX, and rustdoc clean). No CI was dispatched; maintenance branches do not trigger
+CI.
 
 ## Goal
 
@@ -490,7 +512,7 @@ conversion is applied by Step 15's existing field convention. Tests pin a single
 identical-ion exchange (zero), a distinct-charge exchange (non-zero), a charge-state change at a fixed site, and
 a non-collinear multi-site path.
 
-The Rust `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` XML comments still say “particle-identity”;
+The `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` XML comments still say “particle-identity”;
 that source-doc correction is assigned to Step 13 feature 4 (which touches the transition payloads), not to
 this planning change.
 
@@ -815,6 +837,10 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
 - no per-feature CI; run `Mocassin.Benchmarks/Compilation` locally and record the hardware and result in the
   step page.
 
+The 10k `< 30 s` figure is the benchmark-class target above. The gating CI test asserts a 90 s runner-class
+smoke bound because the shared 2-vCPU runner measures 31–36 s for the same compile; the measured target stays a
+local benchmark result, following the Step 10 `TenThousandSmallJobsExpandWithinTheDocumentedBudget` precedent.
+
 ### 14. `mocassin compile` ownership and JSON inspection
 
 - **Step 08 ships a library and test harness only. Step 12 owns `mocassin compile` and the full CLI.** This
@@ -901,6 +927,7 @@ Benchmark laptop class: 8 physical x86-64 cores, 32 GB RAM, SSD, .NET 10 Release
   in the approval summary.
 - [x] Stage caches reuse unaffected stages after a single-domain edit and never change the output.
 - [x] Ceria compiles in `< 1 s`; a 10k-position model compiles in `< 30 s` with `< 2 GiB` managed memory.
+  The gating test asserts a 90 s shared-runner smoke bound for the 10k compile (§13.4).
 - [x] Cancellation returns no partial model and leaves the project unchanged.
 - [x] Every `CMP` code has a catalog descriptor, documentation anchor, and emission test.
 - [x] Documentation written.
@@ -952,7 +979,7 @@ and assigned to the Step 29 release gate (see the parity matrix); it does not ma
 | Cache | Recording cache proves the invalidation graph after a one-domain edit |
 | Diagnostics | Every `CMP` code has severity/path/hint/catalog/docs coverage |
 | Cancellation | Cancelled compile returns no model and does not mutate the project |
-| Performance | Ceria `< 1 s`; 10k-position model `< 30 s`, `< 2 GiB` |
+| Performance | Ceria `< 1 s`; 10k-position model `< 30 s`, `< 2 GiB` (benchmark class; the gating test is a 90 s shared-runner smoke bound, §13.4) |
 
 ## Risks and mitigations
 
