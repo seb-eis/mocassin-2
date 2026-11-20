@@ -14,6 +14,7 @@
   "platform_ci": "not run",
   "tag": "",
   "notes": [
-    "Replace every zero SHA and placeholder before running tools/check_closeout_evidence.py."
+    "Replace every zero SHA and placeholder before running tools/check_closeout_evidence.py.",
+    "Step IDs are step-NN, or step-NN[a-z] for a split step (for example step-23a); see README.md."
   ]
 }

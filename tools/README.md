@@ -36,6 +36,7 @@ Before a step closeout:
 ```sh
 ./tools/verify.sh all --require
 python tools/check_closeout_evidence.py docs/planning/closeout/step-NN.json
+# split step: docs/planning/closeout/step-NN[a-z].json, for example step-23a.json
 ```
 
 `--require` makes a skipped required check a failure. `cargo-deny` must be installed for a closeout run. The

@@ -55,6 +55,22 @@ class ProcessConsistencyTests(unittest.TestCase):
 
         self.assertTrue(any("step-07.md" in error for error in errors))
 
+    def test_pre_seeded_audit_for_not_started_split_step_is_reported(self) -> None:
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            status = root / "docs/planning/status.md"
+            status.parent.mkdir(parents=True)
+            status.write_text(
+                "| 23a | Step | Phase | Not started | — | — | — | — | — | Not requested | Not requested |\n",
+                encoding="utf-8",
+            )
+            audit = root / "docs/planning/audits/step-23a.md"
+            audit.parent.mkdir(parents=True)
+            audit.write_text("# Audit\n", encoding="utf-8")
+            errors = check_unused_audit_records(root)
+
+        self.assertTrue(any("step-23a.md" in error for error in errors))
+
     def test_missing_in_audit_status_is_reported(self) -> None:
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
