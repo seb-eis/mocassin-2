@@ -2,13 +2,13 @@
 
 //! The compiled transition section of the model payload.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// The compiled transitions.
 ///
 /// `jump_count` is in `[position][particle]` order and `jump_mapping` is the flat concatenation in
 /// `[position][particle][relative]` order.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct TransitionPayload {
     /// The compiled jump collections in dense index order.
@@ -28,7 +28,7 @@ pub struct TransitionPayload {
 }
 
 /// One compiled jump collection.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct JumpCollectionPayload {
     /// The simulation kind that owns the collection (`"kmc"` or `"mmc"`).
@@ -44,7 +44,7 @@ pub struct JumpCollectionPayload {
 }
 
 /// One compiled jump-direction representative.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct JumpDirectionPayload {
     /// The stable compiled direction identity.
@@ -66,7 +66,7 @@ pub struct JumpDirectionPayload {
 }
 
 /// One compiled jump rule.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct JumpRulePayload {
     /// The dense persisted rule index.

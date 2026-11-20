@@ -2,10 +2,10 @@
 
 //! The compiled simulation encodings of the model payload.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// One compiled simulation encoding.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct SimulationPayload {
     /// The stable project simulation identifier.
@@ -21,7 +21,7 @@ pub struct SimulationPayload {
 }
 
 /// The compiled runtime-default settings of one simulation.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct SimulationSettingsPayload {
     /// The temperature in kelvin.
@@ -57,7 +57,7 @@ pub struct SimulationSettingsPayload {
 }
 
 /// The global and static tracker index lists of one compiled simulation.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct TrackerModelPayload {
     /// The global tracker indices referenced by the simulation.

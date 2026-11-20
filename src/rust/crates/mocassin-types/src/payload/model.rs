@@ -2,7 +2,7 @@
 
 //! The compiled-model payload and its particle/structure sections.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 use super::energy::EnergyPayload;
 use super::simulation::SimulationPayload;
@@ -13,7 +13,7 @@ use super::transition::TransitionPayload;
 /// `signature` is the Step 09 parameterization signature and the `models.signature` key; `model_signature` is
 /// the Step 08 compiled-model identity string. `format_version` is the payload-encoding version, independent of
 /// the package schema version.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ModelPayload {
     /// The payload-encoding version.
@@ -41,7 +41,7 @@ pub struct ModelPayload {
 }
 
 /// The compiled particle table. Index zero is void.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ParticlePayload {
     /// Particle charges in elementary-charge units, indexed by compiled particle index.
@@ -55,7 +55,7 @@ pub struct ParticlePayload {
 }
 
 /// The compiled structure section.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct StructurePayload {
     /// The Cartesian `a`, `b`, and `c` cell vectors in ångström.
@@ -77,7 +77,7 @@ pub struct StructurePayload {
 }
 
 /// One canonical P1 position.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct PositionPayload {
     /// The full encoded position `[cellA, cellB, cellC, P]`; base positions are `[0, 0, 0, P]`.
@@ -91,7 +91,7 @@ pub struct PositionPayload {
 }
 
 /// The interaction environment of one compiled environment index.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct EnvironmentPayload {
     /// The selectable compiled-particle mask.
@@ -105,7 +105,7 @@ pub struct EnvironmentPayload {
 }
 
 /// One periodic partner image linked from a position.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct PairLinkPayload {
     /// The partner canonical P1 index.
@@ -117,7 +117,7 @@ pub struct PairLinkPayload {
 }
 
 /// One cluster-table link from a position.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ClusterLinkPayload {
     /// The shared cluster-table index.

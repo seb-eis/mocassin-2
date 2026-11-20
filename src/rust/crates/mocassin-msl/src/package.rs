@@ -16,12 +16,11 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 
-use mocassin_types::ReaderLimits;
-use mocassin_types::payload::{JobPayload, LatticePayload, ModelPayload};
+use mocassin_types::{JobPackage, ParameterizedModel, ReaderLimits};
 use rusqlite::{Connection, OpenFlags, OptionalExtension};
 
-use crate::decode;
 use crate::error::{PackageContext, PackageError};
+use crate::{decode, map, projection};
 
 /// The SQLite `application_id` of a `.msl` package (`"MOCS"`).
 pub const APPLICATION_ID: u32 = 0x4D4F_4353;
@@ -126,77 +125,61 @@ pub struct Package {
     connection: Connection,
     limits: ReaderLimits,
     schema: SchemaInfo,
-    model_cache: RefCell<HashMap<(u32, String), Arc<ModelPayload>>>,
+    model_cache: RefCell<HashMap<(u32, String), Arc<ParameterizedModel>>>,
 }
 
 /// One `jobs` row with the joined model/lattice signatures.
 ///
-/// The decoded payloads live in [`LoadedJob`]; this row is the stored column view that the later mapping stage
-/// cross-checks.
+/// Internal to the reader: the public result of [`Package::load_job`] is the validated
+/// [`mocassin_types::JobPackage`].
 #[derive(Debug, Clone, PartialEq)]
-pub struct JobRow {
+pub(crate) struct JobRow {
     /// The job id.
-    pub job_id: u32,
+    pub(crate) job_id: u32,
     /// The SQLite model row id.
-    pub model_id: u32,
+    pub(crate) model_id: u32,
     /// The SQLite lattice row id.
-    pub lattice_id: u32,
+    pub(crate) lattice_id: u32,
     /// The `models.signature` of the referenced model.
-    pub model_signature: String,
+    pub(crate) model_signature: String,
     /// The `lattices.signature` of the referenced lattice.
-    pub lattice_signature: String,
+    pub(crate) lattice_signature: String,
     /// The row kind (`"kmc"` or `"mmc"`).
-    pub kind: String,
+    pub(crate) kind: String,
     /// The authored collection name.
-    pub collection_name: String,
+    pub(crate) collection_name: String,
     /// The authored configuration name.
-    pub config_name: String,
+    pub(crate) config_name: String,
     /// The zero-based collection index.
-    pub collection_index: u32,
+    pub(crate) collection_index: u32,
     /// The zero-based configuration index.
-    pub config_index: u32,
+    pub(crate) config_index: u32,
     /// The zero-based duplicate index.
-    pub job_index: u32,
+    pub(crate) job_index: u32,
     /// The row temperature in kelvin.
-    pub temperature_k: f64,
+    pub(crate) temperature_k: f64,
     /// The row electric-field modulus in V/m.
-    pub electric_field_vm: f64,
+    pub(crate) electric_field_vm: f64,
     /// The row target MCSP.
-    pub target_mcsp: u64,
+    pub(crate) target_mcsp: u64,
     /// The row write-out count.
-    pub write_out_count: u32,
+    pub(crate) write_out_count: u32,
     /// The row KMC pre-run MCSP.
-    pub pre_run_mcsp: u64,
+    pub(crate) pre_run_mcsp: u64,
     /// The row wall-clock limit, or `None`.
-    pub time_limit_s: Option<u64>,
+    pub(crate) time_limit_s: Option<u64>,
     /// The row minimum success rate, or `None`.
-    pub min_success_rate: Option<f64>,
+    pub(crate) min_success_rate: Option<f64>,
     /// The row supercell size `[a, b, c]`.
-    pub lattice_size: [u32; 3],
+    pub(crate) lattice_size: [u32; 3],
     /// The authored doping summary.
-    pub doping_info: String,
+    pub(crate) doping_info: String,
     /// The composed solver flag word.
-    pub flags: u32,
+    pub(crate) flags: u32,
     /// The 32-byte effective seed.
-    pub seed: [u8; 32],
+    pub(crate) seed: [u8; 32],
     /// The row creation timestamp (build metadata).
-    pub created_utc: String,
-}
-
-/// One decoded job plus the model and lattice it references.
-///
-/// The later mapping stage turns this into a validated `JobPackage`; this type guarantees only that the
-/// payloads were bounded, decoded, and version-checked.
-#[derive(Debug)]
-pub struct LoadedJob {
-    /// The stored job row.
-    pub row: JobRow,
-    /// The decoded job payload.
-    pub job: JobPayload,
-    /// The decoded model payload, shared through the package cache.
-    pub model: Arc<ModelPayload>,
-    /// The decoded initial lattice.
-    pub lattice: LatticePayload,
+    pub(crate) created_utc: String,
 }
 
 impl fmt::Debug for Package {
@@ -301,60 +284,91 @@ impl Package {
         Ok(ids)
     }
 
-    /// Loads and decodes one model, using the package cache.
+    /// Loads, maps, and verifies one model, using the package cache.
+    ///
+    /// The parameterization signature is recomputed from the payload and compared with both the row and the
+    /// payload identity.
     ///
     /// # Errors
     ///
-    /// Returns a structured error when the model row is absent, the payload is corrupt, or the payload version
-    /// is unsupported.
-    pub fn load_model(&self, model_id: u32) -> Result<Arc<ModelPayload>, PackageContext> {
+    /// Returns a structured error when the model row is absent, the payload is corrupt, a model invariant is
+    /// violated, or a stored signature disagrees with the recomputed one.
+    pub fn load_model(&self, model_id: u32) -> Result<Arc<ParameterizedModel>, PackageContext> {
         self.load_model_at(model_id, None)
     }
 
-    /// Loads one job with its model and lattice.
+    /// Loads and validates one job as a [`JobPackage`].
     ///
-    /// Full payload-to-runtime mapping, index validation, and signature verification belong to the next step;
-    /// this method guarantees the bounded decode and the stored format-version cross-checks.
+    /// The reader decodes the job, model, and lattice payloads inside their limits, maps them onto the runtime
+    /// types, validates every index/length/finite/kind/tracker invariant and the scientific invariants, checks
+    /// the stored columns against the payloads, and recomputes both signatures.
     ///
     /// # Errors
     ///
     /// Returns [`PackageError::JobNotFound`] for an unknown id and a structured package/model error for a
-    /// corrupt payload.
-    pub fn load_job(&self, job_id: u32) -> Result<LoadedJob, PackageContext> {
+    /// corrupt payload, an invariant violation, or a signature mismatch.
+    pub fn load_job(&self, job_id: u32) -> Result<JobPackage, PackageContext> {
         let job_context = |error: PackageError| PackageContext::new(Some(job_id), -1, "job", error);
-
         let raw = self.read_job_row(job_id).map_err(job_context)?;
         let (row, compressed_job) = JobRow::from_raw(raw).map_err(job_context)?;
 
         let model = self.load_model_at(row.model_id, Some(job_id))?;
-        let lattice = self.load_lattice(&row, Some(job_id))?;
 
-        let context = |error: PackageError| {
+        let lattice_context = |error: PackageError| {
+            PackageContext::new(Some(job_id), i64::from(row.model_id), "lattice", error)
+        };
+        let (lattice_format_version, compressed_lattice) = self
+            .read_lattice_row(row.lattice_id)
+            .map_err(lattice_context)?;
+        let lattice_payload = decode::decompress_payload(
+            "lattice",
+            &compressed_lattice,
+            self.limits.max_lattice_payload_bytes,
+        )
+        .map_err(lattice_context)?;
+        let lattice_payload = decode::decode_lattice_payload(&lattice_payload, &self.limits)
+            .map_err(lattice_context)?;
+        check_format_version(
+            "lattices.format_version",
+            lattice_format_version,
+            lattice_payload.format_version,
+        )
+        .map_err(lattice_context)?;
+
+        let lattice =
+            map::lattice_from_payload(&lattice_payload, &model, row.lattice_signature.clone())
+                .map_err(lattice_context)?;
+        let recomputed = projection::lattice_signature(&model.model_signature, &lattice);
+        if recomputed != row.lattice_signature {
+            return Err(lattice_context(PackageError::SignatureMismatch {
+                what: "lattices.signature",
+                expected: row.lattice_signature.clone(),
+                actual: recomputed,
+            }));
+        }
+
+        let job_context = |error: PackageError| {
             PackageContext::new(Some(job_id), i64::from(row.model_id), "job", error)
         };
-        let payload =
+        let compressed_job =
             decode::decompress_payload("job", &compressed_job, self.limits.max_job_payload_bytes)
-                .map_err(context)?;
-        let job = decode::decode_job_payload(&payload, &self.limits).map_err(context)?;
+                .map_err(job_context)?;
+        let job_payload =
+            decode::decode_job_payload(&compressed_job, &self.limits).map_err(job_context)?;
 
-        Ok(LoadedJob {
-            row,
-            job,
-            model,
-            lattice,
-        })
+        map::job_from_payload(&job_payload, &row, model, lattice).map_err(job_context)
     }
 
     fn load_model_at(
         &self,
         model_id: u32,
         job_id: Option<u32>,
-    ) -> Result<Arc<ModelPayload>, PackageContext> {
+    ) -> Result<Arc<ParameterizedModel>, PackageContext> {
         let context =
             |error: PackageError| PackageContext::new(job_id, i64::from(model_id), "model", error);
 
         let (signature, format_version) = self.read_model_meta(model_id).map_err(context)?;
-        let key = (model_id, signature);
+        let key = (model_id, signature.clone());
 
         if let Some(cached) = self.model_cache.borrow().get(&key) {
             return Ok(Arc::clone(cached));
@@ -364,7 +378,9 @@ impl Package {
         let payload =
             decode::decompress_payload("model", &compressed, self.limits.max_model_payload_bytes)
                 .map_err(context)?;
-        let model = decode::decode_model_payload(&payload, &self.limits).map_err(context)?;
+        let payload_dto = decode::decode_model_payload(&payload, &self.limits).map_err(context)?;
+        let model =
+            map::model_from_payload(&payload_dto, &self.schema, &self.limits).map_err(context)?;
 
         check_format_version(
             "models.format_version",
@@ -373,40 +389,27 @@ impl Package {
         )
         .map_err(context)?;
 
+        let recomputed = projection::parameterization_signature(&model).map_err(context)?;
+        if recomputed != signature {
+            return Err(context(PackageError::SignatureMismatch {
+                what: "models.signature",
+                expected: signature,
+                actual: recomputed,
+            }));
+        }
+        if recomputed != model.signature {
+            return Err(context(PackageError::SignatureMismatch {
+                what: "models payload signature",
+                expected: model.signature.clone(),
+                actual: recomputed,
+            }));
+        }
+
         let model = Arc::new(model);
         self.model_cache
             .borrow_mut()
             .insert(key, Arc::clone(&model));
         Ok(model)
-    }
-
-    fn load_lattice(
-        &self,
-        row: &JobRow,
-        job_id: Option<u32>,
-    ) -> Result<LatticePayload, PackageContext> {
-        let context = |error: PackageError| {
-            PackageContext::new(job_id, i64::from(row.model_id), "lattice", error)
-        };
-
-        let (format_version, compressed) =
-            self.read_lattice_row(row.lattice_id).map_err(context)?;
-        let payload = decode::decompress_payload(
-            "lattice",
-            &compressed,
-            self.limits.max_lattice_payload_bytes,
-        )
-        .map_err(context)?;
-        let lattice = decode::decode_lattice_payload(&payload, &self.limits).map_err(context)?;
-
-        check_format_version(
-            "lattices.format_version",
-            format_version,
-            lattice.format_version,
-        )
-        .map_err(context)?;
-
-        Ok(lattice)
     }
 
     fn read_model_meta(&self, model_id: u32) -> Result<(String, i64), PackageError> {

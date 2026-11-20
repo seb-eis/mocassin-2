@@ -27,6 +27,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 1 Workspace, types, and error model | `feature/step-13-rust-solver-foundation-and-package-reader/workspace-types-and-errors` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (32 tests + 1 doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `9474638dd5917047e6afc66d60c1b8f9e791f630` |
 | 2 RNG streams and state | `feature/step-13-rust-solver-foundation-and-package-reader/rng-streams-and-state` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (19 unit + 10 vector + 7 property tests in `mocassin-rng`), `cargo build --release`, `cargo bench --no-run`, one full bench run, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `54820f258bccfa021b8efd16e5248f9432656dda` |
 | 3 `.msl` reader and bounded decode | `feature/step-13-rust-solver-foundation-and-package-reader/msl-reader-and-bounded-decode` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (44 `mocassin-msl` tests: 4 unit, 15 hostile, 12 schema, 5 decode, 8 acceptance), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `70f443181d269ca5547f7216f005f1f39c664b1f` |
+| 4 Model/job mapping and signatures | `feature/step-13-rust-solver-foundation-and-package-reader/model-job-mapping-and-signatures` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (111 `mocassin-msl` tests: 65 mapping unit, 15 hostile, 12 schema, 5 decode, 9 acceptance, 5 signature), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-5 row update |
 
 **Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
 row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
@@ -67,9 +68,9 @@ JSON artifacts; feature 2 freezes the same values in code so the algorithm canno
 tables/columns. Payloads are decompressed with the byte guard, scanned by the bounded MessagePack walk, then
 decoded into the `mocassin-types::payload` DTOs; the lattice guard is `a*b*c*position_count` (checked, ≤
 `max_positions`, ≤ `i32::MAX`, `4×` ≤ `max_lattice_payload_bytes`). The model cache is keyed by
-`(model_id, signature)` and shared through `Arc`; the reader returns `LoadedJob` (row + job DTO + model DTO +
-lattice DTO) and `load_model`/`job_ids` for inspection. Runtime mapping, index/finite/scientific validation, and
-canonical signature re-encoding remain feature 4.
+`(model_id, signature)` and shared through `Arc`; the feature-3 reader returned the interim `LoadedJob` (row +
+job DTO + model DTO + lattice DTO) and `load_model`/`job_ids` for inspection. Feature 4 replaced `LoadedJob`
+with the validated `JobPackage`.
 
 - **Real packages:** both `msl-v1` and `amend-1-net10` open and load all six jobs; the model/lattice signatures,
   counts, settings, and lattice lengths match `package-summary-v1`; the amended package yields the same logical
@@ -90,6 +91,45 @@ canonical signature re-encoding remain feature 4.
   cap (the writer caps at 99,999); payload `format_version` mismatches are rejected during decode as
   `SchemaVersion` (the model-class re-check remains part of feature 4); signature and column/payload checks other
   than `format_version` are feature 4.
+
+**Feature 4 mapping and signature evidence.** The runtime types live in `mocassin-types::runtime`
+(`ParameterizedModel`, `ParticleTable`, `StructureModel`, `Position`, `EnvironmentModel`, `PairLink`,
+`ClusterLink`, `EnergyModel`, `PairTable`, `ClusterTable`, `TransitionModel`, `JumpCollection`,
+`JumpDirection`, `JumpRule`, `SimulationModel`, `TrackerModels`, `InitialLattice`, `JobPackage`,
+`SelectionOptimizer`, `ExtensionConfig`, `ModelCounts`). The mapping and validation live in
+`mocassin-msl::map`/`validate`; `Package::load_job` now returns a validated `JobPackage` and `load_model` returns
+the validated `Arc<ParameterizedModel>`.
+
+- **Signatures:** the canonical writer (`projection.rs`) reproduces the .NET parameterization signature
+  `1845b70e82320d75f768b33d1a9a46a8ae6170c33ad96013317f89fe9189a74b` (model identity
+  `92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60`) and the lattice signatures
+  `880b6eac…` (job 1, 6×6×6) and `ed688990…` (job 3, 8×8×8) for both `msl-v1` and `amend-1-net10`. The
+  recomputed values are compared with the payload identity and the stored row; a changed defect-background
+  value, a wrong row signature, or a changed payload `signature` field is `SignatureMismatch` (model class 12),
+  distinct from a corrupt frame (`InvalidFrame`, package class 11).
+- **Invariant matrix (each rejected with model class 12, no panic):** particle count/array lengths/void charge;
+  provenance and 64-hex identities; base-position vector, site index, ascending/in-range particle ids, masks;
+  site count, interaction range, static-tracker formula; pair target/offset/energy id, cluster id/byte position,
+  update-id ordering; pair-table length/finiteness, cluster order/slots/high bits/mapping; defect-background
+  length; collection rule/direction ids; direction position/collection, path length, node positions, movement
+  finiteness, path start, path-vector/length agreement; rule id, state ranges and high bits, frequency,
+  transport and static-correction finiteness, tracker length/index; jump-count/mapping lengths, bucket
+  duplicates, static/global tracker ranges; simulation kinds, collection kinds, tracker lists, settings ranges,
+  normalization, KMC-only break fields, authored flag bits. MMC is covered by a synthetic valid model and the
+  `state1 == 0`, empty-tracker, and no-pre-run rules.
+- **M-3 union:** void is exempt, and a synthetic mask difference (one direction admits a particle the other does
+  not) is accepted by the collection union, while a particle outside the union is rejected even when mass and
+  charge hold.
+- **Job/column checks:** `jobs` vs payload for kind, temperature, field, target/pre-run/write-out/time limit,
+  success rate, flags, doping; `lattice_a/b/c` vs the lattice payload; `models`/`lattices` `format_version`;
+  optimizer order/range; extension order; settings ranges and composed flag word.
+- **Source-doc correction:** the stale `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` comments now
+  state the node-wise endpoint-moment formula (`Σ_node (q(state2[node]) − q(state0[node])) · x(node)`).
+- **Deviations/notes:** `DirectionPool`/`JumpStatus` are Step 14 runtime state and were not added (feature 4's
+  approved scope ends at the validated model/job); cluster `object_id` values are required to be 64-hex, which
+  the real writer satisfies; the union check intentionally does not enforce the exact per-direction mask
+  (Step 16 assignment); the full positional transport formula remains Step 15's; `LoadedJob` was removed in
+  favour of `JobPackage`.
 
 ### Approved feature list (owner, 2026-11-18; implementation authorized 2026-11-19)
 

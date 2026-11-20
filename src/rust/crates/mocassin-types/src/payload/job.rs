@@ -2,13 +2,13 @@
 
 //! The resolved job payload.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// The `.msl` job payload.
 ///
 /// The job payload is authoritative for a job's resolved settings. It is not required to equal the referenced
 /// simulation's `default_settings`.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct JobPayload {
     /// The payload-encoding version.
@@ -58,7 +58,7 @@ pub struct JobPayload {
 }
 
 /// One compiled KMC selection optimizer entry.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct SelectionOptimizerPayload {
     /// The canonical P1 position index.
@@ -68,7 +68,7 @@ pub struct SelectionOptimizerPayload {
 }
 
 /// One opaque solver-extension configuration.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ExtensionPayload {
     /// The stable extension identifier.

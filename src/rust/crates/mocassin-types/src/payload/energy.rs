@@ -2,10 +2,10 @@
 
 //! The applied energy section of the model payload.
 
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
 
 /// The applied energy values of a model payload.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct EnergyPayload {
     /// The applied pair-energy tables in ascending compiled table order.
@@ -17,7 +17,7 @@ pub struct EnergyPayload {
 }
 
 /// One applied pair-energy table.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct PairTablePayload {
     /// The shared stable pair-energy identity.
@@ -27,7 +27,7 @@ pub struct PairTablePayload {
 }
 
 /// One applied cluster-energy table.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct ClusterTablePayload {
     /// The stable cluster-energy identity.

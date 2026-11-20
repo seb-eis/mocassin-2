@@ -5,13 +5,13 @@
 use core::fmt;
 
 use serde::de::{SeqAccess, Visitor};
-use serde::{Deserialize, Deserializer};
+use serde::{Deserialize, Deserializer, Serialize};
 
 /// The `.msl` initial-lattice payload.
 ///
 /// The payload is only the initial state; the pointer order is the documented row-major
 /// `index = ((a * B + b) * C + c) * position_count + P`.
-#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub struct LatticePayload {
     /// The payload-encoding version.
