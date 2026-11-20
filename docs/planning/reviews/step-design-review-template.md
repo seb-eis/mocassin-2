@@ -58,6 +58,8 @@ Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
 ## Standard design-review checklist
 
 - [ ] Scope, non-goals, and acceptance criteria are explicit and testable
+- [ ] Complexity class and split decision are recorded and justified per
+      [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers)
 - [ ] Design decisions are complete and internally consistent
 - [ ] Required tests, property tests, golden fixtures, and performance targets are defined
 - [ ] Documentation, status, parity, and audit updates are planned

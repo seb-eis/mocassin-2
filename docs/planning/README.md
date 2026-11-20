@@ -105,6 +105,9 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
   Zensical build, so do not use `\(...\)` or `\[...\]`; `python tools/check_doc_math.py` reports violations.
 - Every step has an explicit **Done when** section. A step is not complete because code exists; its
   acceptance criteria and tests must pass.
+- Step pages record a complexity class and split decision per
+  [`04-roadmap.md` §3.1](04-roadmap.md#31-step-sizing-and-split-triggers) at design time; person-week figures
+  are non-gating forecasts.
 - Contracts in [`02-data-contracts.md`](02-data-contracts.md) change only through an ADR and a schema
   version bump.
 - Independent reviewers write their evidence, findings, and verdict directly into the durable review or audit

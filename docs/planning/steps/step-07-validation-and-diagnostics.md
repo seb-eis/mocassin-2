@@ -502,6 +502,10 @@ mocassin validate <project.mocprj> [--json] [--warnings-as-errors] [--stats]
 
 ## Sizing
 
+> **Post-audit process annotation (2026-11-20):** this sizing record was recorded under the previous
+> time-based rule and is superseded by [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers)
+> from 2026-11-20. The original text, decisions, and evidence are retained unchanged.
+
 The seven-row feature list (six features plus closeout) matches the roadmap's 2–3 person-week estimate and is
 below the 6–8-feature split trigger in `04-roadmap.md` §3.1. No split is proposed; the closeout feature carries
 the status, parity, and audit updates.

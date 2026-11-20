@@ -1059,6 +1059,10 @@ domain folder. No `Utils/`, `Helpers/`, or `Common/` folder is introduced.
 
 ### 10. Sizing
 
+> **Post-audit process annotation (2026-11-20):** this sizing record was recorded under the previous
+> time-based rule and is superseded by [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers)
+> from 2026-11-20. The original text, decisions, and evidence are retained unchanged.
+
 Roadmap estimate: **3–4 person-weeks**. This design estimated **3.5–4.0 pw** before the review, which already
 exceeded the roadmap row while staying at the four-week trigger. Correcting M-1 adds the additive
 compiler/preview image-list field, its tests, and the ApiCompat baseline refresh (about 0.2–0.3 pw), so the
