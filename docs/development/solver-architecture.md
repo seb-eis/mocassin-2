@@ -5,9 +5,9 @@ package (`.msl`) and command-line arguments. It never reads project JSON and nev
 Results are written as per-job state files, which a separate `mocassin collect` command stores in the `.msr`
 sidecar.
 
-This page describes the Step 13 foundation: the crate graph, the package-reader pipeline, the runtime data
-model, the RNG streams, and the CLI skeleton. Steps 14–19 add the simulation context, energy engine, KMC/MMC
-loops, tracking, state writing, and the production CLI.
+This page describes the Step 13 foundation and the Step 14 simulation context: the crate graph, the
+package-reader pipeline, the runtime data model, the context build, the RNG streams, and the CLI skeleton.
+Steps 15–19 add the energy engine, KMC/MMC loops, tracking, state writing, and the production CLI.
 
 ## Crate graph
 
@@ -147,6 +147,63 @@ The reader produces the types Step 14 consumes:
 Hot data uses flat arrays, `u32`/`u8` indices, and `u64` masks. `HashMap` is not used in a per-cycle structure.
 The model cache may use a hash map; it is not a hot path. All hot arrays are allocated at load/initialization;
 Step 14 owns the no-allocation-in-cycle proof.
+
+## Simulation context (Step 14)
+
+`mocassin_solver::context::SimulationContext::initialize(job, options, cancel)` builds the runtime state once per
+job from the validated `JobPackage`. It performs no I/O, never re-reads the package, and allocates every hot
+array once. Later steps consume it read-only or through the documented update helpers; they do not add fields.
+
+```text
+SimulationContext
+├── job: JobPackage                 shared Arc<ParameterizedModel> + lattice + settings + seed
+├── dimensions [A,B,C,P], pc        checked index/wrap helpers
+├── lattice                         particles, flags (stable/mobile/tracker), mobile tracker ids
+├── links                           compact per-P1 pair-link CSR (offset image, pair id, cluster association)
+├── clusters                        instances, memberships, occupation codes/ids, per-centre energies
+├── energy                          site table, site+pair environment vectors (kT), field scale
+├── pools                           KMC direction-count pools, selectable count, slot maps
+├── jumps                           KMC per-(P1,direction) sender/receiver links + cluster touches
+├── trackers                        mobile/static index space and the mobile-position mapping
+├── counters, goals, normalization  zeroed counters, MCSP goals/block size, K_fix/K_auto/K_norm/dof/dt
+├── rng, time_s, lattice_energy_ev  effective stream, simulated time, exact initial total energy
+└── origin, limits                  fresh/resumed, ContextLimits
+```
+
+**Links.** The payload stores one pair link per periodic image *per canonical P1 position*, so the runtime CSR is
+keyed by P1 position, not by supercell cell: a link keeps `{target_position, offset:[i32;3], pair_id}` and the
+absolute target is `wrap(cell + offset) * P + target_position` at use. This is translation-invariant, keeps the
+link memory independent of the supercell size, and is the reason a 500k-position lattice stays bounded. Links
+are sorted by `pair_id`, then target, then offset, which fixes the f64 summation order.
+
+**Clusters.** A cluster link's `byte_position` is the environment's own slot (slot `0` = centre). The runtime
+keeps one instance per cluster table, one membership per participating P1 position, a base occupation code per
+instance and cell with the centre particle in slot `0`, and a per-centre energy vector. Cluster interactions are
+counted once at the centre, so they are kept out of the site+pair vector and the total uses
+`Σ site + 0.5 × Σ pair + Σ cluster`. The v1 payload does not persist member cell offsets; the context derives
+them only from a unique centre→member pair image and fails closed otherwise (OD-1 in the internal
+open-decisions register).
+
+**Jump status.** One status per `(P1 position, direction)` (`status = direction * P + position`). The path is
+resolved from the direction's relative node encodings with node `0` replaced by the selected position, so a
+direction mapped into a symmetry-equivalent start bucket is applied at the selected bucket. For every ordered
+sender/receiver path-node pair with a sender link to the receiver, a `JumpLink { sender_path_id, link_id }`
+records the relative sender link. The receiver filter is the compiled structural stability, not the initial
+particle, and the bound is `L*(L-1) ≤ 90` with an invariant error instead of the original's unchecked 56-entry
+buffer. Cluster touches record the instances whose code changes, so the energy engine can add the centres' S0/S2
+terms.
+
+**Goals, normalization, resume.** `mobile_count` is the number of non-void positions (passive species included);
+`prerun = pre_run_mcsp × mobile_count`, `main = target_mcsp × mobile_count`, `total` rounded up to a multiple of
+100, block = `max(1, total/100)`. `K_fix = exp(E_norm/kT)`, `K_auto = 1/RawMax`, `K_norm = K_fix × K_auto`,
+`dt = dof × K_norm/(nu_max × selectable)`, where `nu_max` is the job cap or the maximum active rule frequency
+(the original's build-time value is not persisted). Resume takes a plain `ResumeState`, validates it against the
+package/job/lattice, re-derives the mobile mapping, preserves `RawMax`, and returns a distinct outcome for a
+completed state. The `.mcs` decode is Step 18's.
+
+**Memory.** `MemoryReport` reports every arena in bytes; `ContextLimits` rejects a job that cannot be
+represented before allocating. The 10×10×10 acceptance fixture is budgeted at `< 100 ms` and `≤ 64 MiB` of
+context memory; the limits bound the 500k-position case.
 
 ## RNG
 

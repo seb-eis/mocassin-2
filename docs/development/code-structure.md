@@ -143,6 +143,39 @@ Rules:
   `cargo test --workspace`, and review. A mechanical Rust layout test is deferred to Step 29; do not add a
   second structure tool now.
 
+Step 14 adds the first real `mocassin-solver` modules. The context is one domain concept with sub-concepts; the
+crate root stays an entry point:
+
+```text
+crates/mocassin-solver/
+  Cargo.toml
+  README.md
+  src/lib.rs                     # crate entry: module declarations, re-exports, crate docs
+  src/context/mod.rs             # SimulationContext, InitOutcome, the phase pipeline
+  src/context/dimensions.rs      # [A,B,C,P], checked index/wrap helpers
+  src/context/lattice.rs         # particle/flag/tracker SoA arenas
+  src/context/links.rs           # compact per-P1 link CSR + target resolution
+  src/context/clusters.rs        # instances, memberships, codes, code ids
+  src/context/energy.rs          # site table, site+pair vectors, per-centre cluster energy, initial total
+  src/context/pools.rs           # DirectionPool population and swap-remove helpers
+  src/context/jumps.rs           # per-(P1,direction) jump status + path resolution
+  src/context/goals.rs           # counters, goals, normalization, dt
+  src/context/resume.rs          # ResumeState/ResumePhase validation
+  src/context/limits.rs          # ContextLimits, MemoryReport
+  src/context/error.rs
+  tests/context_acceptance.rs
+  tests/allocation.rs            # own test binary with the counting global allocator
+  benches/context.rs
+```
+
+- `context/` is the concept; the submodules name the data they own, not a type kind. `energy` here is the
+  *runtime tables and vectors*, not the Step 15 delta engine; Step 15 adds `energy/` as its own concept module.
+- No `utils`/`helpers`/`common` module. The index/wrap helpers live in `dimensions.rs` because they are the
+  dimension contract.
+- Keep every file below 800 lines and the `context/` directory below 20 direct files; split by sub-concept if a
+  file grows.
+- Public items carry doc comments; every new file starts with `SPDX-License-Identifier: MIT`.
+
 ### 2.3 `Mocassin.App*` layout (Steps 23A/23B)
 
 The Avalonia track is split so that view models stay UI-framework-free and the composition root stays the only

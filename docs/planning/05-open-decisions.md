@@ -126,6 +126,9 @@ decision will be made.
 | Development image build | Step 11 closeout | Build `opencode:mocassin` from the amended containerfile (SDK 11.0.100 only) and record the image reference/digest, or record the accepted risk with the missing evidence | Owner-accepted risk: record "image not built" in `docs/planning/closeout/step-11.json` `notes` and the audit record; no page claims the image was built |
 | 23A complexity class | 23A start gate | 23A is class **High** on cross-step interfaces and test-matrix breadth; accept it as one High unit per §3.1, or propose a further split | Accept; no further split is viable (host/workspace versus settings/lifecycle leaves unusable halves) |
 | 23B complexity class | 23B start gate | 23B is class **High** on cross-step interface and test-matrix breadth; accept it as one High unit per §3.1, or propose a further split | Accept; no further split is viable (editing versus recovery strands autosave/validation) |
+| Step 14 complexity class | Step 14 start gate | Step 14 is class **High** on cross-step interfaces, behavioural irreversibility, and test-matrix breadth; accept it as one High unit per §3.1, or split context skeleton from acceptance | Accept as one High unit; the boundaries would leave Step 15 a half-context or duplicate the fixtures/benchmark evidence and both halves stay High |
+| Cluster member cell offsets in `.msl` v1 (OD-1) | Step 14 start gate (accept the limitation) and a future `.msl` revision (fix) | The v1 cluster link persists `{cluster_id, byte_position}` only; the member's relative cell offset is not persisted and the payload has no fractional P1 coordinates, so a cross-image cluster cannot be reconstructed. Step 14's design fails closed: use the unique centre→member pair image, reject zero/multiple images. Decide whether to accept the limitation (reject a writer-valid cross-image cluster) or require a payload revision now | Accept the v1 limitation with the fail-closed rule and a clear error; the permanent fix is a future `.msl` payload field (member offset or fractional P1 positions) with its own decision, amendment, fixtures, and version handling |
+| Site/pair/cluster energy accounting (OD-2) | Step 14 start gate | The original computes `0.5 * Σ(env energy)` where the environment energy already contains the site background and (replicated) cluster terms, so it halves the site and cluster contributions. The plan's physics page says a cluster contributes only at its centre. Step 14 initializes the exact total (site once, pair ×0.5, cluster once at the centre) and Step 15 continues with that decomposition. Confirm the documented deviation | Accept the exact accounting and the recorded deviation D-3 (hand-computed test + Step 29 parity); do not reintroduce the uniform 0.5 factor |
 
 ## 4. Deferred scope
 
@@ -158,6 +161,9 @@ The following are the only topics still expected to need an explicit owner decis
 6. **23A complexity class** at the GUI-track start gate: accept 23A as one High unit under §3.1 (no further
    split is viable). The **split decision itself is resolved** (owner, 2026-11-20); **23B's class acceptance**
    happens at its own start gate. See the 23A page §18 and the 23B page §16.
+7. **Step 14 complexity class** and the two solver-context decision rows at the Step 14 start gate: accept the
+   High unit (no split), the v1 cluster-geometry limitation (OD-1), and the exact site/pair/cluster accounting
+   (OD-2). See the Step 14 page §4/§6.4/§7.4 and the gated rows above.
 
 Everything else is either resolved above or specified in the data contracts, architecture, or step pages.
 When a decision is made, add an ADR (if expensive to reverse) and update this page.

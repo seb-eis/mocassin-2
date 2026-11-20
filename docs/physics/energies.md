@@ -27,8 +27,9 @@ Pair sampling applies the centre stabilizer \(G_0\) to group symmetry-equivalent
 geometry has a stable `GeometryId`; the shared energy-table identity is the `EnergyId`.
 
 The pair contribution for a sampled pair is the table value for its particle pair. The 0.5 factor and the
-total-lattice-energy convention belong to the solver energy engine in Step 15; the project model defines the
-interaction geometry, not the summation convention.
+total-lattice-energy convention are defined in [Total lattice energy](#total-lattice-energy-solver-runtime)
+and implemented by the context initialization (Step 14) and the energy engine (Step 15); the project model
+defines the interaction geometry, not the summation convention.
 
 ## Cluster contributions
 
@@ -62,6 +63,29 @@ orbit relationship explicit instead of silently forcing symmetry.
 
 In a P1 model every directed pair is its own orbit; the shared identity still applies where an inverse
 geometry exists. Unstable–stable pairs are asymmetric by nature and do not have a chiral partner.
+
+## Total lattice energy (solver runtime)
+
+The solver counts each contribution exactly once:
+
+$$
+U = \sum_{\text{stable } e} E_\text{site}(P(e), p(e))
+  + \tfrac{1}{2} \sum_{\text{stable } e} E_\text{pair}(e, p(e))
+  + \sum_{\text{cluster centres } c} E_\text{cluster}(c, p(c)).
+$$
+
+The site background is counted once per environment; a pair is counted from both ends, hence the \(1/2\); a
+cluster is counted once, at its centre, because the cluster energy is a function of the full occupation tuple
+whose slot 0 is the centre particle. The environment energy vector a transition path sums over therefore holds
+the site and pair parts only; the cluster part is a separate per-centre term and must be added for every centre
+whose code changes.
+
+The original solver used `0.5 * Σ_stable E[environment]`, where the environment energy already contained the
+site background and a cluster term replicated at every member. That halved the site and cluster contributions.
+The new solver keeps the documented per-centre convention instead; the deviation is recorded in the Step 14
+design (D-3) and covered by a hand-computed test and the Step 29 parity work. Energies are in kT inside the
+solver and converted to eV only at output boundaries; the initial total is computed once at context
+initialization (Step 14) and maintained incrementally by the energy engine (Step 15).
 
 ## Units
 

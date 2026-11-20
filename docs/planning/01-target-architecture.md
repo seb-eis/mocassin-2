@@ -264,6 +264,22 @@ Rules:
 - `Package` is not `Sync`; keep one package per thread/process, and a future batch worker opens its own
   package/connection.
 
+### 4.1 Solver context build (Step 14)
+
+The solver builds one **simulation context** per job from the validated `JobPackage`; it never re-reads the
+package and never reads project JSON. Initialization is pure, single-threaded, and allocation-bounded: every
+hot array is sized once and no hot structure grows during a run. The context holds the lattice and environment
+arenas, a **translation-compact per-P1 neighbour-link CSR** (one link list per canonical P1 position, with the
+periodic image stored as a relative cell offset and the absolute target resolved at use), the cluster
+instances/memberships/codes, the site+pair environment energy vectors and the per-centre cluster energy vectors,
+the KMC selection pools and per-`(P1, direction)` jump status, the tracker index space, counters, goals,
+normalization, the RNG, and the resume hook. The energy engine (Step 15) owns deltas; the KMC/MMC engines
+(Steps 16/17) own selection, acceptance, time, and aborts; Step 18 owns tracker values and `.mcs`.
+
+Cluster interactions are counted once at their centre, and the site background once; only pair interactions are
+summed from both ends and corrected by the 0.5 factor. The original's uniform `0.5 × Σ` also halved the site and
+cluster contributions; that is recorded as a corrected convention, not reproduced.
+
 ## 5. Runtime data flow
 
 ```text

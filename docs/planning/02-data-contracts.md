@@ -955,6 +955,12 @@ MessagePack map with snake_case keys. Top-level:
   - `distance_bucket_fm` is not stored in the package: the pair table index is the energy identity, and the
     bucket remains signed in the compiled link and used by parameterization/inspection.
 - A cluster link is `{cluster_id:u32, byte_position:u8}` used for incremental occupation-code updates.
+  `byte_position` is **the environment's own site slot** in that cluster (slot `0` is the centre); it mirrors
+  the compiled `CompiledClusterLink(ClusterTableIndex, SiteSlot)`. It is not the slot of the pair target and not
+  a local link index. The member's **relative cell offset is not persisted**: the writer stores only the
+  canonical `P` index and the slot. A solver therefore cannot reconstruct a cluster image in general; it must
+  fail closed for a cluster whose member has zero or several periodic images (Step 14 §6.4, OD-1). The centre of
+  a cluster table is the unique environment whose link carries slot `0`.
 - `interaction_range` is the MMC local-update cube `[maxCellA, maxCellB, maxCellC, 0]`, derived from the
   maximum stable/unstable cutoff and the cell interplanar spacings plus one boundary cell.
 - `static_trackers_per_cell = position_count * (particle_count - 1)`; void (index 0) has no tracker.
@@ -986,11 +992,17 @@ MessagePack map with snake_case keys. Top-level:
 - Chiral partners share one `object_id` (the shared `EnergyId`) and one energy table. Each direction keeps its
   own `GeometryId` and records the inverse direction's `ChiralPartnerGeometryId`.
 - Cluster occupation codes use 6 bits per site, site 0 in the least significant bits, up to 9 sites; unused
-  high bits are zero. Codes are canonical under the induced site-permutation group.
+  high bits are zero. Codes are canonical under the induced site-permutation group. **Slot 0 is the centre
+  particle**: every code encodes the full occupation tuple including the centre, so the energy table is 1-D over
+  the ascending codes and has no centre-particle row.
 - Cluster `object_id` is the stable cluster energy identity
   `SHA-256("mocassin/cluster-energy-id/v1" || clusterId || centerSiteId || canonical geometry hash)`.
-  `occupation_codes` are sorted ascending; `particle_table_mapping` holds one row per allowed center particle
-  in ascending compiled particle index.
+  `occupation_codes` are sorted ascending; `energies` is aligned with `occupation_codes`;
+  `particle_table_mapping` is the **ascending list of allowed centre particles** (the particles that may appear
+  in slot 0), not a `[particle] -> row` map. A particle absent from the list has no cluster contribution.
+- A cluster interaction is counted **once, at its centre** (see [`docs/physics/energies.md`](../physics/energies.md)).
+  A solver must keep the cluster term separate from the site/pair environment sum; folding it into a
+  `0.5 × Σ` total halves it.
 - Pair and cluster energies are the **applied** Step 09 values in compiled table/occupation order, never the
   compiler's zero defaults. `defect_background` is likewise the resolved background, not the authored sparse
   site-energy list.

@@ -91,19 +91,27 @@ impl EnergyEngine<'_> {
 
 Given a direction with path positions `p_0..p_L-1` and a rule with state codes `S0,S1,S2`:
 
-```text
-s0 = Σ_i E[p_i][S0_i]
-raw_s1 = Σ_{i=1..L-1} E[p_i][S1_i]     // p_0 contributes zero
-s2 = energy after applying the state change
-conf = s2 - s0
-s1 = s0 + raw_s1 + 0.5 * conf
-field = -0.5 * (|E| / kT) * (rule.charge_transport_vector · ê)
-barrier_forward = (s1 - s0) + field
-barrier_backward = (s1 - s2) - field
-```
+$$
+\begin{aligned}
+s_0 &= \sum_i E[p_i][S0_i] + \sum_{c} C[c][S0_c] \\
+\mathrm{raw}\,s_1 &= \sum_{i=1}^{L-1} E[p_i][S1_i] \qquad (p_0\text{ contributes zero}) \\
+s_2 &= \text{energy after applying the state change} \\
+\mathrm{conf} &= s_2 - s_0 \\
+s_1 &= s_0 + \mathrm{raw}\,s_1 + \tfrac{1}{2}\,\mathrm{conf} \\
+\mathrm{field} &= -\tfrac{1}{2}\,(|E|/kT)\,(\text{transport vector}\cdot\hat{e}) \\
+\mathrm{barrier\_forward} &= (s_1 - s_0) + \mathrm{field} \\
+\mathrm{barrier\_backward} &= (s_1 - s_2) - \mathrm{field}
+\end{aligned}
+$$
 
+- `E[env][p]` is the **site+pair** environment vector built by Step 14; `C[centre][p]` is the separate
+  per-centre cluster energy. Cluster interactions are counted once at their centre, so every centre whose code
+  changes because of the transition must be added to both `s0` and `s2`; Step 14 precomputes the touched
+  instances per `(P1 position, direction)` (`ClusterTouch`), and the sum must not double-count a centre that is
+  also a path node (`E` does not contain the cluster term, so there is no double count).
 - The state codes are packed particle IDs in path order; decode with bounds checks.
-- For MMC, S1 is unused; `s0` and `s2` are the two-site energies.
+- For MMC, S1 is unused; `s0` and `s2` are the two-site site+pair energies plus the affected centres'
+  cluster terms.
 - The field input is the per-rule Cartesian **charge transport vector** compiled in Step 08:
   - `rule.charge_transport_vector = Σ_node (q(S2,node) − q(S0,node)) · x(path node)`, in e·Å. It is the
     node-wise endpoint-moment difference, not a particle-identity pairing; a node with unchanged charge
@@ -111,7 +119,9 @@ barrier_backward = (s1 - s2) - field
     site (for example A⁻ → A).
   - `ê` is the unit field direction; `|E|` is the field modulus and `kT` the thermal energy.
   - `field = -0.5 * (|E| / kT) * (rule.charge_transport_vector · ê)`, using the same Å/V/m scale as the
-    existing field convention.
+    existing field convention. Step 14 precomputes `field_scale = |E| * 1e-10 / kT_eV` in `e·Å` per eV
+    (V/m → eV/Å) and the normalized direction; use them rather than re-deriving the constant, so the unit chain
+    lives in one place.
   - This is exact for non-collinear multi-site paths. For a single charge `q` moving by `Δx`, it reduces to
     `-0.5 q E·Δx/kT`; a vacancy hop carries the correct sign because the ion moves once and the void has no
     charge. An identical-ion exchange has zero net charge transport; a distinct-charge exchange does not.
@@ -130,11 +140,13 @@ Two modes:
 
 **Dynamic (default in v1)**
 
-1. Back up the current particle ids of all path positions and affected neighbors.
+1. Back up the current particle ids of all path positions and affected neighbors, and the current codes of the
+   touched cluster instances.
 2. Apply the state change to the path positions (without updating pools/trackers).
-3. Apply energy deltas to every linked neighbor (pair and cluster).
-4. Read `s2 = Σ_i E[p_i][S2_i]`.
-5. Restore the backup and energies.
+3. Apply energy deltas to every linked neighbor (pair), and update every touched cluster instance's code and its
+   centre's cluster energy.
+4. Read `s2 = Σ_i E[p_i][S2_i] + Σ_{touched centres} C[centre][S2 centre]`.
+5. Restore the backup and energies (including the touched codes and centre energies).
 
 - The backup/restore must be exact and allocation-free; use small fixed arrays for path positions and a
   scratch buffer for affected environments.
@@ -154,29 +166,39 @@ Two modes:
 
 When a position changes from particle `old` to `new`:
 
-- For each link `(target, pair_id)` — the links built by Step 14 from the payload's
-  `{target_position, offset, energy_id}` pair entries, so each target already resolves its periodic image:
+- For each link `(target, pair_id)` — the links built by Step 14 as a translation-compact per-P1 CSR from the
+  payload's `{target_position, offset, energy_id}` pair entries. The link index is relative to the centre's P1
+  position; the absolute receiver is `wrap(centre_cell + offset) * P + target_position`, resolved by the
+  Step 14 helper, not reconstructed from the target index.
   `energy[target][center_particle] += pair_table[pair_id][center][new] - pair_table[pair_id][center][old]`
   for every center particle that the target supports.
 - For each cluster link `(cluster_id, code_byte)`:
   - update the cluster code bytes at the recorded byte position;
   - look up the new code id;
-  - `energy[target][center_particle] += cluster_table[cluster_id][center_row][new_code] -
-   cluster_table[cluster_id][center_row][old_code]`.
+  - `cluster_energy[centre][centre_particle] += cluster_table[cluster_id][new_code] -
+   cluster_table[cluster_id][old_code]` for every allowed centre particle. The cluster term is applied to the
+    **centre's** separate cluster vector, not to the site+pair `energy`.
 - Cluster code lookup:
   - codes are sorted; use binary search for > 8 codes, linear for small tables;
   - missing codes are a data error (should not happen for valid occupations).
+- Cluster table layout (Step 14 contract): one energy per occupation code, slot 0 = centre particle, no centre
+  row; `particle_table_mapping` is the ascending allowed centre-particle list. A wrong member offset or a
+  missing code is rejected at context initialization, not silently skipped.
 - Skip zero deltas early (`old == new` or table difference == 0).
 - Optional 3D pair-delta tables: `delta[old][new][center]`; use only if profiling shows a win and memory is
   acceptable.
 
 ### 5. Lattice energy
 
-- `lattice_energy_ev = 0.5 * Σ_{stable env} energy[env][current_particle] * kT_to_eV`.
-- The 0.5 factor corrects pair double counting.
-- Cluster contributions are counted once at their center; the engine documents this and tests it.
-- After every accepted transition, update the lattice energy incrementally by the accepted `ΔE` rather than
-  recomputing the full sum. Periodically (or before saving) recompute and assert consistency in debug builds.
+- The initial total is computed by Step 14; the engine continues with the same exact decomposition:
+  `U = Σ_stable site[P][particle] + 0.5 * Σ_stable pair[env][current] + Σ_centres cluster[centre][current]`,
+  converted to eV with `kT_to_ev`.
+- The 0.5 factor corrects pair double counting only. The site background is counted once and a cluster once at
+  its centre; do not apply the 0.5 factor to them (the original did, and it is a recorded correction; see
+  [`docs/physics/energies.md`](../../physics/energies.md) and the Step 14 design D-3).
+- After every accepted transition, update the lattice energy incrementally by the exact accepted `ΔE` rather
+  than recomputing the full sum. Periodically (or before saving) recompute and assert consistency in debug
+  builds using the context's full-recomputation helper.
 - MMC abort uses the change in lattice energy and the accepted `ΔE` samples.
 
 ### 6. State application
