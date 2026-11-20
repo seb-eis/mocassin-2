@@ -331,8 +331,9 @@ per-node mask difference); the earlier
 [`step-13-amend-1`](../amendments/step-13-amend-1-fixture-properties.md) is **Withdrawn — resolved by
 `1f5b473`** and retained for history. The re-audit can verify the real cross-bucket and mask assertions. N-4's
 merge-tree obligation is satisfied by merging `main` `1f5b473` (`b8c7cca`) and the compile-budget smoke bound
-`4973d02` (`64def37`) before the closeout run; the run covers the merged tree. The final audited commit is the
-tip immediately before that run; the following evidence/status commit is docs-only.
+`4973d02` (`64def37`) before the closeout run; the run covers the merged tree. The audited commit is
+`31281210f64552ca3bb704512d028a1d28499650`; closeout CI run `44831177039` is green at that commit, and the
+following evidence/status commit is docs-only.
 
 `Fixes required` is the round-1 verdict; `Re-audit required` is the current record state, not a verdict.
 

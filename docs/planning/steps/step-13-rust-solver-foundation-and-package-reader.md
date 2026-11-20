@@ -8,9 +8,9 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 
 ## Implementation status
 
-- **Status:** **In audit (re-audit required)** — all seven features and the round-1 fixes are squashed; F-1 is closed by `ce00f8e` and the C-centered fixture; the closeout CI will run on the merged tree
+- **Status:** **In audit (re-audit required)** — all seven features and the round-1 fixes are squashed; F-1 is closed by `ce00f8e` and the C-centered fixture; the closeout CI is green at `3128121`
 - **Step branch:** `step/13-rust-solver-foundation-and-package-reader`
-- **Step CI:** pending the re-audit closeout dispatch at the final audited commit (the previous run 44815711484 was green at `020e70a`, before the F-1 centered fixture)
+- **Step CI:** [Ubuntu 44831177039](https://github.com/seb-eis/mocassin-2/actions/runs/44831177039) — green at `31281210f64552ca3bb704512d028a1d28499650` (re-audit closeout dispatch on the final merged tree)
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** **Re-audit required** — round 1 returned `Fixes required`; resolutions are recorded in [the audit record](../audits/step-13.md) and [closeout evidence](../closeout/step-13.json). F-1 is now closed by the real-writer `step-13-centered` fixture and the Step 08 fix `1f5b473`; the earlier `step-13-amend-1` is withdrawn.
@@ -20,7 +20,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
   2026-11-19.
 - **Sizing:** Owner-approved on 2026-11-18 at **4.5 person-weeks** (3.5 pw base + 1.0 pw contingency) as a
   §3.1 single-step exception, no split; the 13A/13B split was considered and rejected. See §13.
-- **Last updated:** 2026-11-20 (F-1 closed; final re-audit merge)
+- **Last updated:** 2026-11-20 (F-1 closed; final re-audit CI green)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -32,7 +32,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 6 Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (RNG vectors 5, projection round-trips 2, populated fixture 2, mutation properties 5; .NET RNG-vector 1, populated-fixture 6), `cargo build --release`, fuzz compile + 5 s runs, `structure`, `docs --require`, `contracts`, `dotnet build`/`format` all exit 0 | Not run (no per-feature CI) | `c0ea5472aafdbf4e680de8cebfce4616b99b70bd` |
 | 7 Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Squashed | `all --require` exit 0; `docs --require`, `contracts`, `structure`, `dotnet build`/`format`, and the load bench pass | Closeout run 44809489478 green at `fe48dc8` | `45eb181656380ce258d20c8c4183727c62d9cc1a` |
 | Fix 1 Audit round-1 remediation | `feature/step-13-rust-solver-foundation-and-package-reader/fix-audit-round-1` | Squashed | `all --require` exit 0 (AOT green; real CLI publish fails with 62 IL2xxx/IL3xxx as recorded evidence), `cargo fmt/clippy/test/build`, `structure`, `docs --require`, `contracts`, `dotnet build`/`format`, 7 populated-fixture tests, load bench rerun | Re-audit closeout run 44815711484 green at `020e70a` | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
-| Fix 2 F-1 C-centered equivalent-start fixture | `feature/step-13-rust-solver-foundation-and-package-reader/fix-f1-centered-fixture` | Squashed | `all --require` exit 0 on the final `4973d02` merge (AOT green), Rust `centered_fixture` 3, .NET populated+centered fixture 14, `contracts` 60, `structure`, `docs --require` | Pending the re-audit closeout dispatch | `ce00f8edd7012a513a20b8c85d94c9e639bd12c5` |
+| Fix 2 F-1 C-centered equivalent-start fixture | `feature/step-13-rust-solver-foundation-and-package-reader/fix-f1-centered-fixture` | Squashed | `all --require` exit 0 on the final `4973d02` merge (AOT green), Rust `centered_fixture` 3, .NET populated+centered fixture 14, `contracts` 60, `structure`, `docs --require` | Re-audit closeout run 44831177039 green at `3128121` | `ce00f8edd7012a513a20b8c85d94c9e639bd12c5` |
 
 **Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
 row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
