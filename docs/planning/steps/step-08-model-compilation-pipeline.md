@@ -70,9 +70,10 @@ charges, vacancies, charge-state changes, and non-collinear paths.
 
 ### Maintenance note — translation-equivalent starts (2026-11-20)
 
-Branch `fix/step-08-equivalent-start-mapping` (commits `1899421`, `85e27b2`) closes the non-format part of
-audit finding m1: a centered space group no longer emits one direction per centering image. Two expanded
-paths are merged into one direction only when (a) their fractional displacement sequence `x(i) - x(0)` matches
+Branch `fix/step-08-equivalent-start-mapping` (commits `1899421`, `85e27b2`, `4f5059e`) addresses the
+centered-group half of audit finding m1: a centered space group no longer emits one direction per centering
+image. Two expanded paths are merged into one direction only when (a) their fractional displacement sequence
+`x(i) - x(0)` matches
 and (b) their start positions are related by a setting operation whose linear part is the identity, i.e. a
 centering/lattice translation. Rotational or mirror images stay distinct directions because they change the
 relative path in the P1 frame; an unproven relation is never merged. The merged direction records every start
