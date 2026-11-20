@@ -218,7 +218,7 @@ early-warning signal for the next cross-cutting review.
   for the merge: the change is documentation/containerfile-only and the owner's rebuild is the verification.
   The `step-11` tag is unchanged.
 - Step 08 received a maintenance fix on 2026-11-20 on branch `fix/step-08-equivalent-start-mapping` (commits
-  `1899421`, `85e27b2`), pending owner approval. A centered group now emits one direction with every
+  `1899421`, `85e27b2`, `4f5059e`), pending owner approval. A centered group now emits one direction with every
   translation-equivalent start and a cross-bucket `jump_mapping`; the `msl-v1`/`amend-1-net10` canonical
   summaries are unchanged. The `step-08` tag and merge are unchanged.
 - Milestones M0–M3 were backfilled on 2026-11-12 with annotated tags on the existing step merge commits:
