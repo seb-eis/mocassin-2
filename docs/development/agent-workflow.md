@@ -87,7 +87,9 @@ Before implementation:
 - [ ] Dependencies are complete.
 - [ ] The pre-implementation design review is `Ready for implementation`.
 - [ ] The step page, acceptance criteria, tests, and risks were read.
-- [ ] The step is within its size and split trigger, or the split is recorded.
+- [ ] The step page records its complexity class and split decision per
+      `docs/planning/04-roadmap.md` §3.1 (internal planning), or the split is recorded with the owner
+      acceptance for a High step.
 - [ ] A complete feature-branch list was proposed and approved once.
 - [ ] The step branch was created from current `main`.
 - [ ] The step was marked `In progress` in the step page and dashboard.

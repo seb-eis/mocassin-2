@@ -89,6 +89,8 @@ does not spawn a reviewer directly. The spawner must not be the reviewer.
 ## 5. What the review must cover
 
 - Step scope, non-goals, and testable acceptance criteria.
+- Complexity class and split decision, recorded and justified per
+  [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers).
 - All design decisions are recorded and internally consistent.
 - Cross-step interfaces, types, formats, and data versions are defined.
 - Dependencies are complete and their contracts are stable.

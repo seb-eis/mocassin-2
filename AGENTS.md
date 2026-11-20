@@ -595,6 +595,7 @@ Each rule has one normative home. Summaries link to it; do not copy it into a se
 | Orchestrator role and delegation | `docs/development/orchestration.md` |
 | Design review and audit records | `docs/planning/reviews/README.md` and `docs/planning/audits/README.md` |
 | Cross-cutting phase reviews | `docs/planning/reviews/cross-cutting/README.md` |
+| Step sizing, complexity class, and split triggers | `docs/planning/04-roadmap.md` §3.1 |
 | Drift checks | `docs/development/drift-checks.md` |
 | Agent security | `docs/development/agent-security.md` |
 | Incident and rollback | `docs/development/incident-and-rollback.md` |
@@ -837,9 +838,11 @@ approval-report, and diff-review templates.
 
 ### 7.2 Step sizing and split triggers
 
-A step must be small enough to audit in one sitting. The size ranges and split triggers are in
-[`docs/planning/04-roadmap.md` §3.1](docs/planning/04-roadmap.md#31-step-sizing-and-split-triggers). Split before
-implementation, not during the audit.
+A step must be small enough that a fresh auditor can read its diff, tests, and evidence in one sitting. Sizing
+is judged by the **complexity class** (Low / Medium / High) and the split triggers in
+[`docs/planning/04-roadmap.md` §3.1](docs/planning/04-roadmap.md#31-step-sizing-and-split-triggers); the
+person-week figures in §3 are non-gating forecasts for scheduling. Record the class and a one-paragraph
+justification on the step page at design time. Split before implementation, not during the audit.
 
 ## 8. Coding conventions
 
