@@ -149,7 +149,35 @@
     ]
   },
   "parameterizations": [],
-  "jobTemplates": [],
+  "jobTemplates": [
+    {
+      "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c10",
+      "name": "Centered exchange job",
+      "collections": [
+        {
+          "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c11",
+          "name": "C1000",
+          "simulationId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f71",
+          "baseSettings": {
+            "temperatureK": 1000.0
+          },
+          "jobCountPerConfig": 1,
+          "configs": [
+            {
+              "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c12",
+              "name": "x001",
+              "lattice": {
+                "a": 2,
+                "b": 2,
+                "c": 2
+              },
+              "dopings": []
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "buildTemplates": [],
   "viewSettings": {
     "camera": {
