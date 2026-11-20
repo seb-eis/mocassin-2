@@ -456,3 +456,124 @@ obligation.
 **Fixes required.** The reader/RNG/CLI implementation is strong and the acceptance checks mostly pass, but
 F-1 is an explicit reviewed design/test commitment that is not met and was not amended, and several narrow
 correctness/documentation gaps remain. No Blocker was found.
+
+### Audit round 2
+
+#### Independence and frozen state
+
+I am a fresh, independent auditor. I did not design, implement, review, or coordinate this work and have no
+shared conversation with the planner, the implementors, the round-1 auditor, or the orchestrator. I received
+only the frozen commit, the request record, the repository, and the required commands/scope; no desired verdict
+or summary was supplied. I read the repository and the code myself rather than relying on the resolutions. The
+audit was read-only apart from this record: I edited and committed only `docs/planning/audits/step-13.md` and did
+not merge, tag, push `main`, delete branches, change code/tests/configuration/design docs, or fix a finding.
+
+The audited commit is `31281210f64552ca3bb704512d028a1d28499650`; the record parent is the request tip
+`9f56fb2ff424d11c4bb8fe89a80dd25249603538`. `git diff --name-status 3128121..9f56fb2` is exactly four files:
+`docs/planning/audits/step-13.md`, `docs/planning/closeout/step-13.json`, `docs/planning/status.md`, and the
+Step 13 page. `git diff --name-only 3128121..9f56fb2 -- . ':(exclude)docs/planning'` is empty, so no code, test,
+configuration, contract, or generated artifact changed after the audited commit. The working tree was clean
+before the record edit.
+
+`main` `4973d028b7da7aef95a8621d86607ce06a823211` is an ancestor of the audited commit through the merge
+`64def3702e23bdaf0c48838314408ea471f7c924` (parents `ce00f8e`, `4973d02`), created 22:40:22 UTC; closeout run
+`44831177039` was created 22:42:46 UTC. The Step 08 fix `1f5b4737b3247b418034005e0b32d9ebaa0c74dd` (`main~3`)
+is also an ancestor, merged as `b8c7cca`. The closeout CI run `44831177039` is `success` at `3128121`
+(`workflow_dispatch`, Ubuntu); `Detect changes`, `Contracts and policy`, `Public API compatibility`, `.NET
+(ubuntu-latest)`, and `Rust` succeeded, and `Python` was skipped by its path filter. The branch run list has six
+runs: the superseded green `44807199574` (`45eb181`), the failed `44808204483` (`fe48dc8`), the green
+`44809489478` (`fe48dc8`), the green `44815711484` (`020e70a`), the failed `44826826251` (`ce00f8e`), and the
+green `44831177039` (`3128121`). `44826826251` failed only the `.NET` job's "Test with coverage" step; the
+public annotation carries only exit code 1, and the superseded run is explained by the shared-runner
+compile-budget test (35.9 s against 30 s, recorded in the Step 08 maintenance note), fixed on `main` by `4973d02`
+(90 s smoke bound) and merged by `64def37` before the audited run. The 90 s change is an accepted test-budget
+change with its rationale in Step 08 §13.4; Step 10's own 30 s bound is unchanged and flagged.
+
+Round-1 text integrity. `git diff a8a2289..9f56fb2 -- docs/planning/audits/step-13.md` touches only the
+step-agent-owned `Record state` and `Resolution status` sections (and removes the unused empty template table).
+The `Evidence`, `Findings`, `Verdict`, and `### Audit round 1` sections are byte-identical between `a8a2289` and
+`9f56fb2` (SHA-256 of the round-1 section `9f773c8a…`, of the evidence block `790a05d0…`, and of the findings
+block `d0baa78b…` in both commits). The step and standard checklist boxes remain as round 1 marked them; I
+re-verified every item and record the round-2 evidence here.
+
+#### Round-1 finding closure
+
+| Finding | Closure | Round-2 evidence |
+| --- | --- | --- |
+| **F-1** | **Closed — the reviewed design requirement is genuinely met; no limitation acceptance is needed.** | `tests/contracts/packages/step-13-centered/` is a real-writer package: `CenteredPackageFixtureBuilder` drives `ProjectJson → ModelCompiler → ParameterizationService → JobTemplateExpander → SupercellGenerator → SimulationPackageWriter`, and `RebuildReproducesTheFixtureSummary` rebuilds it and compares the canonical summary. Decoding `payloads/model-1.bin` independently shows 8 P1 positions, 4 directions, and cross-bucket entries `2→6`, `3→7`, `4→0`, `5→1`; node 0 of the MMC collection maps directions to allowed particle sets `[1,2]` and `[1,2,3]`. The Rust `centered_fixture` (3 tests) and .NET `CenteredPackageFixtureTests` (7 tests) assert both properties, and the .NET fixture test verifies the package hash and payload index. `1f5b473` is on `main` (`main~3`) and was merged as `b8c7cca`. The amendment header, the amendments index, the step page, and the closeout evidence all say **Withdrawn — resolved by `1f5b473`**; no owner acceptance is outstanding. Step 16 consumes the centered fixture for its exact check. |
+| **F-2** | Closed. | `tests/contracts/packages/msl-v1/dry-run-v1.txt` exists and is read by `cli.rs::golden` (the test passes with `{package}`/`{version}` substitution). |
+| **F-3** | Closed. | `tests/projections.rs` decodes the `.bin` vectors into runtime types and re-encodes with the production `mocassin_msl::{parameterization,lattice}_projection`/`_signature` functions; it also reads `tests/contracts/signature-vectors.json` and checks the id/signature/projection-hash/model-signature fields. The 2 projection tests pass. |
+| **F-4** | Closed. | `read_job_row` distinguishes an absent job (10) from an existing job row whose model/lattice row is absent (`PackageError::DanglingReference`, `ErrorClass::Package`, exit 11); `a_job_referencing_a_missing_model_or_lattice_is_a_package_error` covers both mutations. I deleted `models` from a copy of the real fixture and observed exit 11 with `job 1 references a missing model or lattice row`. |
+| **F-5** | Closed. | `every_per_field_count_cap_is_enforced` lowers each of `max_rules`, `max_directions`, `max_collections`, `max_pair_tables`, `max_cluster_tables`, `max_pair_links`, `max_pair_links_per_position`, and `max_cluster_links_per_position`, expects a reader-limit rejection for each, and accepts the same payload with raised limits. |
+| **F-6** | Closed. | `DirectionPool`, `JumpStatus`, and `JumpLink` are public type-only containers in `mocassin-types::runtime`; their invariant tests (empty pool, member count/slot map, CSR start/end/monotonicity) pass. Step 14 populates them. |
+| **F-7** | Closed. | `Package::load_job_with_seed` replaces `JobPackage.seed` after validation; the CLI calls it with `cli.seed` and prints `job.seed`; `the_seed_override_is_the_effective_job_seed` asserts the override and the default, and `the_seed_override_is_reported_by_hash` observes `seed_hash=66687aad…` for the zero seed. |
+| **F-8** | **Closed — the inverse check is the correct correction.** | `ResolveCompilationStage.BuildParticles` writes the void particle with `IsVacancy: false`; the decoded `step-13-populated` and `step-13-centered` payloads both carry `charges[0] == 0`, `is_vacancy[0] == false`, and `Vc` as the authored vacancy (`is_vacancy == true`). The reader requires non-empty symmetry/space-group provenance and rejects `is_vacancy[0] == true`; the original `== true` requirement would have rejected every real package. Both checks have unit tests (`empty_payload_and_schema_provenance_is_rejected`, `the_particle_table_is_checked`). |
+| **N-1** | Closed. | The step page, the closeout evidence, and the Step 13 evidence say the real `Mocassin.Cli` AOT publish **fails** with 62 diagnostics (`artifacts/aot/mocassin-cli.log`: 31 `IL2026` + 31 `IL3050`); the strict smoke host and positive control pass. Step 31 owns the decision. |
+| **N-2** | Closed. | `serde_bytes` (`mocassin-types`), `tracing` (`mocassin-msl`), and `thiserror` (`mocassin-cli`) are no longer declared; `tracing`/`thiserror` remain only where used; `Cargo.lock` loses three entries; `cargo-deny` advisories/bans/licenses/sources pass. |
+| **N-3** | Closed / flagged. | The same-class rerun (open 271.0 µs / cold 351.4 µs / warm 68.0 µs) is recorded in `step-13-load.json` and the raw log; the baseline is explicitly boundary-calibrated for Step 29 and the 10 % rule is not relaxed. My own `all --require` run did not re-run the benchmark; the code and baseline are unchanged from the reviewed tree. |
+| **N-4** | Closed. | `main` `1f5b473` (`b8c7cca`) and `4973d02` (`64def37`) are merged before the closeout run; the green run at `3128121` covers the merged tree, so the merge-tree rule is satisfied without a separate merge-tree run. |
+
+#### Commands and results
+
+All commands were run in an isolated worktree at `3128121`, except the closeout/link/process checks that were
+also re-run at the request tip `9f56fb2`.
+
+- `./tools/verify.sh all --require` → exit 0, "Closeout gate completed with required checks enabled."
+  .NET: 1,805 passed, 0 failed (App 1, Contracts 37, Symmetry 223, Results 56, Core 685, Compilation 98, Cli 200,
+  Packages 504, Architecture 1); build, test, format clean. Rust: fmt, clippy `-D warnings`, workspace tests,
+  and release build clean (129 `mocassin-msl` tests including 3 centered-fixture, 16 hostile, 13 schema, 5
+  mutation; 27 CLI, 41 RNG, 38 types, 1 solver, 1 state, 1 extension, plus doctest). Python: 3 passed; sdist and
+  wheel built. Documentation: math and 176-file link check OK, Zensical strict, DocFX, and rustdoc clean.
+  Contracts: 26 artifacts current, projection checks 5/5, 4/4, 2/2, space-group catalog current, process
+  consistency OK, 60 tool tests, SPDX headers in 780 files, 1,216 secret-scanned files, cargo-deny OK. AOT: the
+  smoke host and positive control pass; the real `Mocassin.Cli` publish fails with 62 first-party
+  IL2xxx/IL3xxx diagnostics, recorded as evidence, not a gate.
+- `./tools/verify.sh structure` at `9f56fb2` → exit 0 (Architecture 1 passed); `check_process_consistency.py`,
+  `check_docs_links.py` (181 files), and `check_doc_math.py` (178 files) at `9f56fb2` → OK.
+- `python tools/check_closeout_evidence.py docs/planning/closeout/step-13.json` at `9f56fb2` → "Closeout
+  evidence: OK" (exit 0); `git diff --check` clean.
+- Release CLI (`cargo build -p mocassin-cli --release`, exit 0) dry runs over all four real packages
+  (`msl-v1`, `amend-1-net10`, `step-13-populated`, `step-13-centered`) → exit 0 with `validation: ok`. The
+  `msl-v1` output is byte-for-byte the `dry-run-v1.txt` golden (signatures `1845b70e…`/`92cf375e…`, lattice
+  `880b6eac…`, `6x6x6 length=864`, `target_mcsp=150`, `flags=0x72`, `seed_hash=7a92d942…`). The centered
+  package reports 4 particles, 8 positions, 1 collection, 4 directions, 8 rules, MMC, `2x2x2 length=64`; the
+  populated package reports 4/3/6/1/2/4/8, KMC job 1 and MMC job 2, `2x2x2 length=24`.
+- Exit codes: help/version 0, usage 10, unknown job 10, non-dry-run 10, missing path 16; corrupt payload 11 and
+  signature mismatch 12 through the CLI test suite; the debug-build `MOCASSIN_SIM_TEST_PANIC` case 13 passes.
+- Read-only/bounds: a `0444` copy opened and dry-ran with no `-wal`/`-shm` sidecar and no directory/log write;
+  the hostile suite (16 tests) covers truncation, bombs, scan/depth/count violations, and dangling references;
+  mutation 5 and schema 13 pass.
+- Focused tests: `dotnet test … --filter "CenteredPackageFixtureTests|PopulatedPackageFixtureTests"` → 14
+  passed; `RngVectorsTests` → 1 passed.
+- Independent fuzz run (`cargo +nightly fuzz run --target x86_64-unknown-linux-gnu <target> --
+  -max_total_time=5`): `payload_scan` 194,069 runs, `payload_decode` 153,410, `package_open` 6,662; no crash,
+  timeout, or OOM in the logs.
+- I decoded the real `step-13-centered`/`-populated` payloads with `msgpack` to confirm the cross-bucket
+  `jump_mapping`, the per-node masks, the particle table, and the non-empty provenance independently of the
+  tests.
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **F-9 — The Step 13 page and the status dashboard still present the superseded round-1 closeout as current.** The Step 13 page's feature-7 closeout paragraph says the re-audit run `44815711484` is "green at `020e70a`, the audited commit and merge candidate", and that `main` `ec301a4` was merged as `d327e74`; the status dashboard's "Active work" paragraph repeats `44815711484`/`020e70a` and says `step-13-amend-1` awaits owner acceptance. The authoritative closeout evidence and the page's own status block/row name `44831177039` at `3128121`, `main` `4973d02` merged as `64def37`, and the amendments index records the amendment as Withdrawn. The stale text is docs-only but is exactly the step-page/dashboard accuracy the audit must verify; fix it in the docs-only resolution/status commit. | `docs/planning/steps/step-13-rust-solver-foundation-and-package-reader.md:172-180`; `docs/planning/status.md:90-94`; compare `docs/planning/closeout/step-13.json:2-9` and the Step 13 status block at `:11-16`, plus the status row at `status.md:63`, which are current. |
+| **Note** | **N-5 — The Step 08 maintenance note still says "pending owner approval" although the fix is on `main`.** `status.md` describes `1899421`/`85e27b2`/`4f5059e` as pending, but the `--no-ff` merge `1f5b473` (`main~3`) is on `main` and is an ancestor of this audit. Update the maintenance note when the owner records the approval; this is outside Step 13's code but is part of the F-1 provenance narrative. | `docs/planning/status.md:222-225`; `git name-rev 1f5b473` → `main~3`; `git show -s --format=%P 1f5b473` shows parents `b2cebac` (main) and `fcd03b0`. |
+| **Note** | **N-6 — The withdrawn amendment's retained body still reads as pending.** The header, the Withdrawal section, the amendments index, the step page, and the closeout evidence say Withdrawn, but the retained Scope/Integration text still says "owner acceptance pending" and the acceptance checkboxes are unchecked. The history should be retained; mark the body historical or add a one-line pointer so a reader does not think the owner must accept it. | `docs/planning/amendments/step-13-amend-1-fixture-properties.md:1-10, 85-95, 195-215, 228-232`. |
+| **Note** | **N-7 — The round-1 request's "Known notes for the auditor" were not refreshed.** They still say the populated fixture does not carry the properties, `DirectionPool` was not added, the AOT stage "emits" diagnostics, and the benchmark tree is `fe48dc8`. The step-agent-owned request text should be marked historical or refreshed; the resolution and record-state sections already carry the current closure. I did not edit the request text. | `docs/planning/audits/step-13.md:271-300`. |
+
+#### Verdict
+
+- [ ] Passed
+- [x] Passed with notes
+- [ ] Fixes required
+- [ ] Waived
+
+**Passed with notes.** The audited implementation is sound and every round-1 finding is closed materially, not
+reworded: F-1 is met by a reproducible real-writer C-centered package with cross-bucket equivalent starts and a
+per-node mask difference (no limitation acceptance is needed); F-2–F-8 are verified in the code and tests; N-1–N-4
+are verified. The full closeout gate, the closeout-evidence checker, the dry-run acceptance on all four real
+packages, the focused fixture/RNG tests, the hostile/mutation suites, and a fresh time-boxed fuzz run all pass;
+CI `44831177039` is green at the audited commit and the merged-tree rule is satisfied. The only new issue is the
+docs-only F-9 (Minor), with N-5–N-7 as notes. No Blocker or Major remains. The human owner should accept
+F-9/N-5–N-7 (or the step agent should correct the stale text in the permitted docs-only resolution/status
+commit) before the merge; no code, test, configuration, contract, or design change is required.
