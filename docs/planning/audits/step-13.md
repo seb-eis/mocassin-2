@@ -372,15 +372,6 @@ amendment that accepts synthetic coverage and re-plans the Step 16 exact-check f
 rule for `main` `ec301a43`, record the new evidence, and request a re-audit.
 Follow-up issue/step: Step 13 re-audit; Step 16 fixture/exact-check follow-up.
 
-## Resolution status
-
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
-
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
-
 ## Approval summary
 
 The step agent completes this section before a merge, tag, or Blocker/Major waiver request. It must cover the
