@@ -8,19 +8,19 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 
 ## Implementation status
 
-- **Status:** **In audit** — all seven features are squashed; the closeout evidence and audit request were recorded 2026-11-20
+- **Status:** **In audit (re-audit required)** — all seven features are squashed; audit round 1 fixes are squashed as `020e70a` and the evidence is rebound to that commit
 - **Step branch:** `step/13-rust-solver-foundation-and-package-reader`
-- **Step CI:** [Ubuntu 44809489478](https://github.com/seb-eis/mocassin-2/actions/runs/44809489478) — green at `fe48dc850f7bbb7a7527abe8450e7937ebb0befe` (replacement closeout dispatch; the first attempt 44808204483 failed only on the owner-accepted shared-runner performance flake)
+- **Step CI:** [Ubuntu 44815711484](https://github.com/seb-eis/mocassin-2/actions/runs/44815711484) — green at `020e70ad4efcb06f79607cfeb7c75e370147cdd9` (re-audit closeout dispatch on the merged remediation tree)
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** **Ready for audit** — [record](../audits/step-13.md); [closeout evidence](../closeout/step-13.json)
+- **Audit:** **Re-audit required** — round 1 returned `Fixes required`; resolutions are recorded in [the audit record](../audits/step-13.md) and [closeout evidence](../closeout/step-13.json). The `step-13-amend-1` amendment is awaiting owner acceptance.
 - **Design review:** Ready with notes — accepted by the human owner on 2026-11-18 for freeze `b9cda11`;
   implementation hold lifted 2026-11-19. See [`docs/planning/reviews/step-13.md`](../reviews/step-13.md).
 - **Feature list:** Approved by the human owner on 2026-11-18 (seven features); implementation authorized
   2026-11-19.
 - **Sizing:** Owner-approved on 2026-11-18 at **4.5 person-weeks** (3.5 pw base + 1.0 pw contingency) as a
   §3.1 single-step exception, no split; the 13A/13B split was considered and rejected. See §13.
-- **Last updated:** 2026-11-20
+- **Last updated:** 2026-11-20 (re-audit remediation)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -31,6 +31,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 5 Dry-run CLI and logging | `feature/step-13-rust-solver-foundation-and-package-reader/dry-run-cli-and-logging` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (27 CLI tests: 8 parser unit, 15 process, 4 exit-code drift), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `b2474efdda044f4802cffdab9dd84bd1d42492be` |
 | 6 Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (RNG vectors 5, projection round-trips 2, populated fixture 2, mutation properties 5; .NET RNG-vector 1, populated-fixture 6), `cargo build --release`, fuzz compile + 5 s runs, `structure`, `docs --require`, `contracts`, `dotnet build`/`format` all exit 0 | Not run (no per-feature CI) | `c0ea5472aafdbf4e680de8cebfce4616b99b70bd` |
 | 7 Performance evidence, documentation, and closeout | `feature/step-13-rust-solver-foundation-and-package-reader/performance-docs-and-closeout` | Squashed | `all --require` exit 0; `docs --require`, `contracts`, `structure`, `dotnet build`/`format`, and the load bench pass | Closeout run 44809489478 green at `fe48dc8` | `45eb181656380ce258d20c8c4183727c62d9cc1a` |
+| Fix 1 Audit round-1 remediation | `feature/step-13-rust-solver-foundation-and-package-reader/fix-audit-round-1` | Squashed | `all --require` exit 0 (AOT green; real CLI publish fails with 62 IL2xxx/IL3xxx as recorded evidence), `cargo fmt/clippy/test/build`, `structure`, `docs --require`, `contracts`, `dotnet build`/`format`, 7 populated-fixture tests, load bench rerun | Re-audit closeout run 44815711484 green at `020e70a` | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
 
 **Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
 row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
@@ -171,17 +172,15 @@ the closeout/audit evidence.
   and the Rust API reference remains `Partial` until Step 30. No solver row is marked Done.
 - **Correction:** feature 6 had left `proptest` in `mocassin-msl`'s `[dependencies]`; it is now dev-only, as the
   step page's dev-crate rule requires. No production dependency was added.
-- **Closeout:** `./tools/verify.sh all --require` exited 0 on the code tree at `45eb181` (AOT green; the real
-  `Mocassin.Cli` AOT publish **fails** with 62 IL2xxx/IL3xxx diagnostics, recorded as non-gating evidence). The first closeout dispatch at the
-  audited tip (44808204483) failed only on the known shared-runner performance test
-  `TenThousandPositionModelCompilesWithinTheBudget` (31.3088447 s vs < 30 s); the owner accepted it with the
-  Step 11 precedent and authorized one replacement. The replacement
-  [44809489478](https://github.com/seb-eis/mocassin-2/actions/runs/44809489478) is green at
-  `fe48dc850f7bbb7a7527abe8450e7937ebb0befe`, which is the audited commit and merge candidate; it adds only the
-  two benchmark-provenance fields and docs on top of the locally gated code tree.
+- **Closeout:** `./tools/verify.sh all --require` exited 0 on the remediation tree (AOT green; the real
+  `Mocassin.Cli` AOT publish **fails** with 62 IL2xxx/IL3xxx diagnostics, recorded as non-gating evidence). The
+  re-audit closeout run
+  [44815711484](https://github.com/seb-eis/mocassin-2/actions/runs/44815711484) is green at
+  `020e70ad4efcb06f79607cfeb7c75e370147cdd9`, the audited commit and merge candidate. `main` `ec301a4` was
+  merged as `d327e74` before the freeze; the run covers the merged tree.
   `docs/planning/closeout/step-13.json` passes
-  `python tools/check_closeout_evidence.py`; `docs/planning/audits/step-13.md` is `Ready for audit` with the
-  fixture limitation flagged. No tag or merge has been performed.
+  `python tools/check_closeout_evidence.py`; `docs/planning/audits/step-13.md` is `Re-audit required` with the
+  F-1 amendment and the F-8 correction flagged. No tag or merge has been performed.
 
 ### Approved feature list (owner, 2026-11-18; implementation authorized 2026-11-19)
 

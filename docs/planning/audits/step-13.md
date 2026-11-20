@@ -324,12 +324,13 @@ auditor's findings, evidence, or verdict.
 
 **State:** Re-audit required
 
-The Step 13 remediation is on `feature/step-13-rust-solver-foundation-and-package-reader/fix-audit-round-1`.
-F-2–F-8 and N-1–N-3 are fixed in that branch; F-1's real-writer mask difference is delivered and the
-equivalent-start limitation is recorded in [`step-13-amend-1`](../amendments/step-13-amend-1-fixture-properties.md),
-which is **Proposed and awaiting owner acceptance**. The re-audit must not pass until the owner accepts the
-amendment. N-4's merge-tree obligation is satisfied by merging current `main` (`ec301a4`) before the replacement
-closeout CI run.
+The Step 13 remediation was squashed as `020e70ad4efcb06f79607cfeb7c75e370147cdd9` on the parent step branch. F-2–F-8 and N-1–N-3 are fixed;
+F-1's real-writer mask difference is delivered and the equivalent-start limitation is recorded in
+[`step-13-amend-1`](../amendments/step-13-amend-1-fixture-properties.md), which is **Proposed and awaiting owner
+acceptance**. The re-audit must not pass until the owner accepts the amendment. N-4's merge-tree obligation is
+satisfied by merging current `main` (`ec301a4`) as `d327e74` before the replacement closeout CI run
+44815711484, which is green at the audited commit. The audited commit is `020e70ad4efcb06f79607cfeb7c75e370147cdd9`; the following evidence/status
+commit is docs-only.
 
 `Fixes required` is the round-1 verdict; `Re-audit required` is the current record state, not a verdict.
 
@@ -337,18 +338,18 @@ closeout CI run.
 
 | Finding | Status | Resolution | Commit |
 | --- | --- | --- | --- |
-| F-1 | **Partially resolved; amendment proposed** | Real-writer per-node mask difference delivered and tested (Rust `.NET`); equivalent-start mapping is impossible with the Step 08 compiler and is covered synthetically. `step-13-amend-1` requests owner acceptance and records the Step 08 compiler / Step 11 verifier follow-ups. The P-1 `PKG010` claim is not reproducible (plain P-1 variant verifies, 6 positions). n-14's equivalent-start half is not claimed as met. | remediation squash (closeout evidence) |
-| F-2 | Fixed | `tests/contracts/packages/msl-v1/dry-run-v1.txt` is the checked-in golden; the CLI test reads it with `{package}`/`{version}` placeholders. | remediation squash |
-| F-3 | Fixed | `tests/projections.rs` builds the runtime model/lattice and calls the production `mocassin_msl::projection` encoder; it also reads `tests/contracts/signature-vectors.json` and checks id/signature/digest fields. | remediation squash |
-| F-4 | Fixed | `PackageError::DanglingReference` (package class, exit 11) for a job row whose model/lattice row is absent; mutated real-fixture tests cover both. | remediation squash |
-| F-5 | Fixed | `every_per_field_count_cap_is_enforced` exercises rules, directions, collections, pair/cluster tables, and both link caps with lowered limits and accepts the same payload with raised limits. | remediation squash |
-| F-6 | Fixed | `DirectionPool`, `JumpStatus`, and `JumpLink` are type-only containers with invariant tests; Step 14 populates them. | remediation squash |
-| F-7 | Fixed | `Package::load_job_with_seed` writes the override into `JobPackage.seed`; the CLI uses it and `the_seed_override_is_the_effective_job_seed` covers the field. | remediation squash |
-| F-8 | **Corrected, not as stated** | Non-empty provenance is enforced. `is_vacancy[0] == true` is rejected because the Step 08 writer marks the void particle `false`; requiring `true` would reject every real package (both checked-in models carry `false`). The correction is recorded in the step page and amendment risk table. | remediation squash |
-| N-1 | Fixed | The step page, closeout evidence, and parity/evidence wording say the real `Mocassin.Cli` AOT publish **fails** with 62 IL2xxx/IL3xxx diagnostics; the strict smoke host and positive control remain green. | remediation squash |
-| N-2 | Fixed | Removed the unused `serde_bytes` (`mocassin-types`), `tracing` (`mocassin-msl`), and `thiserror` (`mocassin-cli`) declarations; `tracing`/`thiserror` stay only where used. | remediation squash |
-| N-3 | Fixed / flagged | A same-class load rerun (open 271.0 µs / cold 351.4 µs / warm 68.0 µs) is recorded; the baseline is flagged boundary-calibrated for Step 29. The 10 % rule is not relaxed. | remediation squash |
-| N-4 | Fixed | Current `main` (`ec301a4`, complexity-sizing rule) is merged before the replacement closeout CI; the run covers the merged tree. | merge commit |
+| F-1 | **Partially resolved; amendment proposed** | Real-writer per-node mask difference delivered and tested (Rust `.NET`); equivalent-start mapping is impossible with the Step 08 compiler and is covered synthetically. `step-13-amend-1` requests owner acceptance and records the Step 08 compiler / Step 11 verifier follow-ups. The P-1 `PKG010` claim is not reproducible (plain P-1 variant verifies, 6 positions). n-14's equivalent-start half is not claimed as met. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` (mask difference + amendment draft) |
+| F-2 | Fixed | `tests/contracts/packages/msl-v1/dry-run-v1.txt` is the checked-in golden; the CLI test reads it with `{package}`/`{version}` placeholders. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| F-3 | Fixed | `tests/projections.rs` builds the runtime model/lattice and calls the production `mocassin_msl::projection` encoder; it also reads `tests/contracts/signature-vectors.json` and checks id/signature/digest fields. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| F-4 | Fixed | `PackageError::DanglingReference` (package class, exit 11) for a job row whose model/lattice row is absent; mutated real-fixture tests cover both. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| F-5 | Fixed | `every_per_field_count_cap_is_enforced` exercises rules, directions, collections, pair/cluster tables, and both link caps with lowered limits and accepts the same payload with raised limits. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| F-6 | Fixed | `DirectionPool`, `JumpStatus`, and `JumpLink` are type-only containers with invariant tests; Step 14 populates them. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| F-7 | Fixed | `Package::load_job_with_seed` writes the override into `JobPackage.seed`; the CLI uses it and `the_seed_override_is_the_effective_job_seed` covers the field. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| F-8 | **Corrected, not as stated** | Non-empty provenance is enforced. `is_vacancy[0] == true` is rejected because the Step 08 writer marks the void particle `false`; requiring `true` would reject every real package (both checked-in models carry `false`). The correction is recorded in the step page and amendment risk table. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| N-1 | Fixed | The step page, closeout evidence, and parity/evidence wording say the real `Mocassin.Cli` AOT publish **fails** with 62 IL2xxx/IL3xxx diagnostics; the strict smoke host and positive control remain green. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| N-2 | Fixed | Removed the unused `serde_bytes` (`mocassin-types`), `tracing` (`mocassin-msl`), and `thiserror` (`mocassin-cli`) declarations; `tracing`/`thiserror` stay only where used. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| N-3 | Fixed / flagged | A same-class load rerun (open 271.0 µs / cold 351.4 µs / warm 68.0 µs) is recorded; the baseline is flagged boundary-calibrated for Step 29. The 10 % rule is not relaxed. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
+| N-4 | Fixed | Current `main` (`ec301a4`, complexity-sizing rule) is merged before the replacement closeout CI; the run covers the merged tree. | `d327e74` (main `ec301a4` merge; ancestor of the audited commit) |
 
 The resolution table is documentation-only after the audited code commit; the re-audit should verify the
 code/tests and the amendment decision.
