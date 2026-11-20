@@ -1094,6 +1094,10 @@ The Step 10 performance test is a non-flaky expansion smoke bound. Measured gene
 peak-memory targets (< 10 s and < 1 GiB on the reference runner) are explicitly deferred to Step 29/release
 performance work.
 
+`TenThousandSmallJobsExpandWithinTheDocumentedBudget` keeps its own 30 s bound (unchanged). It has the same
+shared-runner exposure as the Step 08 10k compile test, which now asserts a 90 s smoke bound; adjust this bound
+the same way if it flakes on CI.
+
 ## Risks and mitigations
 
 | Risk | Mitigation |
