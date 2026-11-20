@@ -226,14 +226,14 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required — round 1 returned `Changes required` on freeze `219f784` (M-1, M-2, m-3,
-n-1–n-7); round 2 returned `Ready with notes` on freeze `34d036d` (m-4, n-8–n-11; n-1 deferred). At the owner's
-request, the remaining notes are fixed and the design is refrozen at
-`b9c56fe1351fd2f9d13d60d7ed5b989f3287fc12`; the findings are resolved or explicitly dispositioned in
-`Resolution status` below, and the refrozen design awaits a round-3 review. Earlier findings and verdicts remain
-unchanged as history.
+**State:** Ready with notes — round 1 returned `Changes required` on freeze `219f784` (M-1, M-2, m-3,
+n-1–n-7); round 2 returned `Ready with notes` on freeze `34d036d` (m-4, n-8–n-11; n-1 deferred); round 3
+returned `Ready with notes` on freeze `b9c56fe`, with m-4 and n-8–n-11 closed and two new wording Notes
+(n-12, n-13). The findings are resolved or explicitly dispositioned in `Resolution status` below; the design
+awaits the human owner's explicit acceptance at the start gate. Earlier findings and verdicts remain unchanged
+as history.
 
-`Re-review required` is a record state, not a verdict.
+`Ready with notes` is a record state and a verdict here; it is not an approval, and the human owner still decides.
 
 ## Reviewer independence
 
@@ -488,3 +488,145 @@ The remaining material issue is the **Minor** m-4 (the `ProjectPathRules` CLI ma
 the deferred n-1. None is a Blocker or Major. The human owner must explicitly accept these notes, or ask for the
 small corrections, before the start gate; this review does not create the step branch, mark the step
 `In progress`, or authorize implementation.
+
+### Re-review round 3
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author, design, or implement the reviewed work and have no shared conversation
+with the planner, implementors, the earlier reviewers, or the orchestrator. I received only the frozen commit
+`b9c56fe1351fd2f9d13d60d7ed5b989f3287fc12`, the record HEAD `f43ff8e`, the request record, repository links, and
+the required commands/scope. No desired verdict or summary was supplied, and this round was asked to check the
+round-2 notes (m-4, n-8–n-11) and re-confirm readiness, no more.
+
+The design under review is `b9c56fe`. The record HEAD is `f43ff8e` on `docs/step-23-design`;
+`git diff --name-status b9c56fe f43ff8e` returns `M docs/planning/reviews/step-23a.md` only, and
+`git show --stat f43ff8e` is that one file (+29/−7). The freeze `b9c56fe` changes three documentation files
+(`docs/development/code-structure.md`, the 23A page, the 23B page) and no code, test, configuration, contract,
+generated, status-dashboard, or parity file. The freeze→HEAD delta is therefore the documented
+documentation-only request/status commit that `reviews/README.md` §8.1 permits.
+
+Record integrity. Extracting the round bodies by heading from `git show <rev>:docs/planning/reviews/step-23a.md`:
+the `### Re-review round 2` body (to EOF) is byte-identical between `8a6678b` and HEAD; the `### Review round 1`
+body is byte-identical to `c65b1a1` except for one blank separator line added when round 2 was appended (the
+unified diff is a single added empty line). The `## Evidence`..`## Record state`,
+`## Reviewer independence`..`## Verdict`, and `## Verdict`..`## Approval summary` extractions are byte-identical
+to `c65b1a1`. The `Reviewed commit` cell (record line 18) is exactly
+`b9c56fe1351fd2f9d13d60d7ed5b989f3287fc12`. No earlier round text was rewritten.
+
+I re-checked the request's decision and dependency checklists against the refrozen design; the existing marks
+and inline notes remain appropriate.
+
+#### Commands and results
+
+- `./tools/verify.sh docs --require` — pass; final line "Closeout gate completed with required checks enabled."
+  (strict Zensical build, DocFX, rustdoc).
+- `./tools/verify.sh policy --require` — pass; "Public API is compatible with the checked-in baseline"
+  (`Mocassin.App.ViewModels`/`App.Views`/`Rendering` report no breaking changes), "Contract artifacts are current
+  (26 files)", "Process consistency: OK", 58 tool tests OK, "SPDX headers present in 706 source files", no secret
+  patterns in 1115 tracked text files, cargo-deny advisories/bans/licenses/sources OK; final line "Closeout gate
+  completed with required checks enabled."
+- `python tools/check_doc_math.py` — pass: "Documentation math conventions OK (176 files scanned)."
+- `git status --porcelain` — empty before this record edit.
+
+**m-4.** Current CLI: `NewProjectCommand.cs:112-131` wraps `Path.GetFullPath`/`Path.Combine` and maps
+`ArgumentException`/`NotSupportedException`/`PathTooLongException` to `CliExitCode.Io` (3) and
+`CliDiagnosticFactory.Io` (CLI002) with "The output path '…' is not valid: …" (line 129).
+`NewProjectCommandTests.AnEmptyOutputDirectoryIsCli002AndExitThree` (lines 277-287) runs `new … -o ""` and asserts
+exit `3` and a `CLI002` diagnostic. The design agrees across all four sites: the mapping-table row (line 757)
+says `InvalidTargetPath` is "not produced by the CLI"; the `ValidateTarget` comment (lines 738-740) says GUI-only
+and that the CLI keeps `CLI002`/3; §12 prose (lines 759-766) says the CLI normalises its output path before the
+helper and never changes a CLI code, exit code, or message; §19 (line 918) says the same. The enum member itself
+carries no separate comment; the `ValidateTarget` comment is the documented site and agrees with the table, §12,
+and §19. Nothing in the design routes the CLI's empty/invalid output directory through `InvalidTargetPath`, so
+the CLI's observable behaviour is unchanged.
+
+**n-8.** The §15 "New/open/save/close" row (line 831) now reads "**New** refuses an existing target, while Save As
+to an existing file follows the picker confirmation", matching §5 (lines 394-401) and the acceptance criterion
+(996-997).
+
+**n-9.** §6.1 (lines 465-468) now says `docs/reference/file-layout.md` "**will mirror** this section for users
+once the 23A documentation column lands (§14); at this design freeze that page has no settings/app-data
+section". `docs/reference/file-layout.md` headings are "Generated artifacts", "Simulation packages", "Atomic
+package publication", and "Planning docs" only. The §19 record row links the page as the future mirror, not as
+present content.
+
+**n-10.** §20 (lines 962-965) now instructs lowercase `23a`/`23b` rows "matching `check_process_consistency.py`'s
+`\d{2}[a-z]?` step-id parser", and 23B §18 (lines 387-388) says the same. On `main` (`b2cebac`),
+`STEP_ID_RE = re.compile(r"\d{2}[a-z]?")` (line 102) and
+`AUDIT_RE = re.compile(r"^docs/planning/audits/step-(\d{2}[a-z]?)\.md$")` (line 103); the added process test uses a
+`| 23a |` status row. The instruction now matches the landed parser.
+
+**n-11.** §1 (lines 218-220), §10 (lines 635-638), feature 1's done-when (line 48), and `code-structure.md` §2.3
+(lines 211-212) all state that every new type other than `App` is `internal`, that `App` is the only new public
+App type, and that `Program` is pre-existing. `src/dotnet/Mocassin.App` still contains only
+`Mocassin.App.csproj` and `Program.cs`; `Mocassin.App` is absent from `tools/api-projects.txt`; the App
+`PublicAPI.*` and baseline files are unchanged.
+
+**M-1 re-confirmation.** The design's closeout identity is `closeout/step-23a.json`/`step-23b.json`, `"step"` =
+`step-23a`/`step-23b`, tags `step-23a`/`step-23b`, audit records `audits/step-23a.md`/`step-23b.md`, with no
+`step-23` alias (§20 lines 945-952; feature 5 line 52; acceptance lines 1007-1008). The prerequisite landed on
+`main` as `b2cebac` ("tools: accept letter-suffixed step IDs in closeout evidence"): `tools/check_closeout_evidence.py`
+line 21 is `STEP_RE = re.compile(r"^step-\d{2}[a-z]?$")`; the tests add positive `step-23a`/`step-23b`/`step-00z`
+and negative `step-23aa`/`step-023`/`step-23A`/`step-3a` cases while the default unsuffixed `step-03` case still
+passes; `closeout/README.md` documents `step-NN` or `step-NN` plus one lowercase letter. `b2cebac` is on `main` but
+is not an ancestor of the design branch (merge base `ec301a4`), so the branch's own checker is still
+`^step-\d{2}$` and the design's "must land before either closeout" wording is accurate. M-1 stays closed.
+
+**M-2 re-confirmation.** §6.1 (lines 463-513) remains the normative v1 shape: the full JSON example; a field
+table covering `format`, `schemaVersion`, `theme`, `accent`, `density`, `fontScale`, `highContrast`,
+`reduceMotion`, `culture`, `logging.level`, `ui.confirmOnExternalChange`, `ui.showWelcomeOnStart`, `paths.*`,
+`recentFiles`, and `layout.*` with defaults and ranges; the unknown/missing/wrong-type/future-major/migration
+policy; the 4 MiB cap and 10-entry recent list; `AppSettingsJsonContext`; and temp+fsync+replace. 23B §9 cites it
+as the additive base. M-2 stays closed.
+
+**Dependency cleanliness, class, features, scope.** `status.md` rows 01, 03, 04, 05, 06, 07, and 12 are `Done`
+with tags. The design uses only Step 01 (`ProjectStore`/`ProjectDocument`/`ProjectHasher`/`ProjectJson`), the
+03–06 value model and editing helpers, Step 07's validation contract (deferred, `ValidateOnLoad = false`), and
+Step 12's `ProjectTemplateFactory`/`ProjectPathRules` extraction. No `Compilation`, `Results`, `Cli`, or solver
+API is introduced; `Mocassin.App`'s project references to `Contracts`, `Packages`, `Results`, and `Rendering`
+are pre-existing and unused by 23A. The class is **High** with the seven-dimension table and the owner-acceptance
+requirement (§18), the five features are as listed (lines 45-52), and no 23B task and no Step 24–28 scope
+appears in 23A's features, implementation tasks, acceptance criteria, or documentation plan.
+
+#### Finding closure
+
+| Finding | Prior severity | Round-3 status | Evidence |
+| --- | --- | --- | --- |
+| **m-4** | Minor | **Closed** | `InvalidTargetPath` is documented as GUI-only in the `ValidateTarget` comment, the mapping table, §12, and §19; the CLI keeps its own `Path.GetFullPath` guard with `CLI002`/3 and its message, and `AnEmptyOutputDirectoryIsCli002AndExitThree` still pins exit 3/`CLI002`. The CLI's observable behaviour is unchanged. Residual wording: n-13. |
+| **n-8** | Note | **Closed** | The §15 row (line 831), §5, and the acceptance criterion all scope the existing-target refusal to **New** and describe Save As as picker-confirmed. |
+| **n-9** | Note | **Closed** | §6.1 uses future tense and states the page has no settings section at this freeze; `file-layout.md` has no such section. |
+| **n-10** | Note | **Closed** | §20 and 23B §18 instruct lowercase `23a`/`23b` rows matching `STEP_ID_RE = \d{2}[a-z]?` and `AUDIT_RE` on `main`. |
+| **n-11** | Note | **Closed** | §1, §10, feature 1, and `code-structure.md` §2.3 use the corrected wording; `App` is the only new public App type and `Program` is pre-existing. |
+| **n-1** | Note | **Deferred, unchanged** | `status.md` still shows the unsplit `23` row; it stays step-agent-owned and §20 records the `23a`/`23b` replacement at start. Not a design blocker. |
+| **M-1** | Major | **Re-confirmed closed** | Closeout identity is consistent across 23A/23B; the `step-NN[a-z]?` prerequisite landed as `b2cebac` on `main` and is not yet an ancestor of the design branch, as the design says. |
+| **M-2** | Major | **Re-confirmed closed** | §6.1 is the complete normative v1 shape; 23B references it and adds only `autosave`/`session`. |
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Note** | **n-12 — The design states the tooling prerequisite target as `^step-\d{2}[a-z]$`, but the landed checker uses `^step-\d{2}[a-z]?$` and must keep accepting unsuffixed `step-NN` IDs.** §20 (line 950) says the change extends `STEP_RE` "to `^step-\d{2}[a-z]$`", and 23B §18 (line 380) says the checker "must first accept `^step-\d{2}[a-z]$`". The landed `b2cebac` regex makes the suffix optional (`[a-z]?`), and its default `step-03` test still passes because unsuffixed IDs remain valid for steps 00–12; a literal required-suffix regex would fail every existing closeout file. The prerequisite itself is satisfied and this does not affect 23A's closeout, but the design should describe the pattern as `^step-\d{2}[a-z]?$` (or "the optional single lowercase suffix") so a future reader does not narrow the checker. | 23A page line 950; 23B page line 380; `tools/check_closeout_evidence.py:21` and `tools/tests/test_closeout_evidence.py` at `b2cebac`; `docs/planning/closeout/README.md` "Step ID form"; `05-open-decisions.md` "Split step IDs" on `main`. |
+| **Note** | **n-13 — The design says the CLI's empty-output-directory message "stays pinned by `AnEmptyOutputDirectoryIsCli002AndExitThree`", but that test pins only exit `3` and the `CLI002` code, not the message text.** §12 (line 766) treats the message as unchanged *and* pinned by the named test; the test asserts `Assert.Equal(3, exitCode)` and a `CLI002` diagnostic only. The message is produced by the CLI's own `Path.GetFullPath` catch (line 129), outside the helper, so the refactor leaves it untouched and the behaviour risk is nil; the gap is in the stated evidence, not the design's behaviour. Either say the message is unchanged because the path-parse catch is not part of the extraction, or add a message assertion to the CLI tests. | 23A page lines 759-766; `NewProjectCommandTests.cs:277-287`; `NewProjectCommand.cs:112-131`; §12 mapping table line 757. |
+
+Severity values: **Blocker**, **Major**, **Minor**, **Note**. The planning auditor writes the findings and
+verdict directly. The step agent adds resolutions in the separate `Resolution status` section without altering
+the auditor's findings, evidence, or verdict.
+
+#### Verdict
+
+**Ready with notes.** m-4 is fixed without changing the CLI: `InvalidTargetPath` is GUI-only in the enum comment,
+the mapping table, §12, and §19, and the CLI's `CLI002`/3 empty-output-directory behaviour and pinned test are
+untouched. n-8–n-11 are fixed and their sites agree: the §15 row scopes refusal to New, §6.1 uses future tense for
+`file-layout.md`, the dashboard instruction uses lowercase `23a`/`23b` matching the landed parser, and the
+visibility wording distinguishes the new public `App` from the pre-existing `Program`. The record's rounds 1–2 are
+intact and the `Reviewed commit` cell is the freeze.
+
+No Blocker, Major, or Minor remains. Two Notes are recorded (n-12: the design's stated target regex is narrower
+than the landed `^step-\d{2}[a-z]?$`; n-13: the CLI empty-output-directory message is not actually pinned by the
+named test). Both are wording/evidence-accuracy items with no effect on the implementable contract; the
+`step-NN[a-z]?` prerequisite has already landed and the CLI path stays unchanged. The split is dependency-clean,
+the Step 07 contract is correct, class High is justified, the five features contain no 23B/24–28 scope, and the
+required gates pass. The human owner must explicitly accept n-12 and n-13 (or ask for the two sentences to be
+corrected) before the start gate; this review does not create the step branch, mark the step `In progress`, or
+authorize implementation.
