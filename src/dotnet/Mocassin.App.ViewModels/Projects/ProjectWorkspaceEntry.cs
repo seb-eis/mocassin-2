@@ -6,13 +6,22 @@ using Mocassin.Core.Project;
 namespace Mocassin.App.ViewModels.Projects;
 
 /// <summary>
-/// A loaded project shown in the workspace. Step 23A feature 4 creates entries from project sessions; the
-/// entry carries only display and navigation state.
+/// A project shown in the workspace. Feature 4 wraps a <see cref="ProjectSession"/>; the feature-2 constructor
+/// remains for standalone documents and tests.
 /// </summary>
 internal sealed class ProjectWorkspaceEntry
 {
     /// <summary>
-    /// Initializes a workspace entry.
+    /// Initializes a workspace entry from a session.
+    /// </summary>
+    /// <param name="session">The project session.</param>
+    public ProjectWorkspaceEntry(ProjectSession session)
+    {
+        Session = session ?? throw new ArgumentNullException(nameof(session));
+    }
+
+    /// <summary>
+    /// Initializes a standalone workspace entry from a loaded project.
     /// </summary>
     /// <param name="project">The loaded immutable project.</param>
     /// <param name="path">The project file path.</param>
@@ -25,51 +34,56 @@ internal sealed class ProjectWorkspaceEntry
         DateTimeOffset? lastWrittenUtc = null,
         bool isReadOnly = false,
         string? lockPath = null)
+        : this(ProjectSession.CreateStandalone(project, path, lastWrittenUtc, isReadOnly, lockPath))
     {
-        Project = project ?? throw new ArgumentNullException(nameof(project));
-        Path = path;
-        LastWrittenUtc = lastWrittenUtc;
-        IsReadOnly = isReadOnly;
-        LockPath = lockPath;
     }
+
+    /// <summary>
+    /// Gets the project session.
+    /// </summary>
+    public ProjectSession Session { get; }
 
     /// <summary>
     /// Gets the project id.
     /// </summary>
-    public Guid Id => Project.Metadata.ProjectId;
+    public Guid Id => Session.Id;
 
     /// <summary>
     /// Gets the project name.
     /// </summary>
-    public string Name => Project.Metadata.Name;
+    public string Name => Session.Name;
 
     /// <summary>
     /// Gets the project file path.
     /// </summary>
-    public string Path { get; }
+    public string Path => Session.Path;
 
     /// <summary>
     /// Gets the immutable project value.
     /// </summary>
-    public Project Project { get; }
+    public Project Project => Session.Project;
 
     /// <summary>
     /// Gets the last successful write time.
     /// </summary>
-    public DateTimeOffset? LastWrittenUtc { get; }
+    public DateTimeOffset? LastWrittenUtc => Session.LastWrittenUtc;
 
     /// <summary>
     /// Gets a value indicating whether the project is open read-only.
     /// </summary>
-    public bool IsReadOnly { get; }
+    public bool IsReadOnly => Session.IsReadOnly;
 
     /// <summary>
-    /// Gets the optional lock path.
+    /// Gets the lock path.
     /// </summary>
-    public string? LockPath { get; }
+    public string? LockPath => Session.LockPath;
 
     /// <summary>
     /// Gets or sets the last document that was active in this project.
     /// </summary>
-    public DocumentKey? LastDocumentKey { get; set; }
+    public DocumentKey? LastDocumentKey
+    {
+        get => Session.LastDocumentKey;
+        set => Session.LastDocumentKey = value;
+    }
 }

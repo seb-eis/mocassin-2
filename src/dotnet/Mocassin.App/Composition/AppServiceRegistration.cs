@@ -2,6 +2,7 @@
 
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Mocassin.App.Files;
 using Mocassin.App.Settings;
 using Mocassin.App.Startup;
 using Mocassin.App.ViewModels.Commands;
@@ -13,6 +14,8 @@ using Mocassin.App.ViewModels.Notifications;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.ViewModels.Settings.Dialog;
+using Mocassin.Packages.Projects;
+using Mocassin.Packages.Projects.Validation;
 using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Dialogs;
 using Mocassin.App.Views.Platform;
@@ -36,6 +39,12 @@ internal static class AppServiceRegistration
         services.AddSingleton<IShellLifetime, AppShellLifetime>();
         services.AddSingleton<CrashHandler>();
         services.AddSingleton<ISettingsEnvironment, SettingsEnvironment>();
+        services.AddSingleton<IProjectFileProbe, ProjectFileProbe>();
+        services.AddSingleton(provider => new ProjectStore(
+            provider.GetRequiredService<TimeProvider>(),
+            new ProjectStoreOptions { ValidateOnLoad = false }));
+        services.AddSingleton<ProjectValidationPipeline>();
+        services.AddSingleton<IProjectSessionService, ProjectSessionService>();
         var platform = OperatingSystem.IsMacOS()
             ? GesturePlatform.MacOS
             : OperatingSystem.IsWindows() ? GesturePlatform.Windows : GesturePlatform.Linux;
@@ -110,7 +119,11 @@ internal static class AppServiceRegistration
             provider.GetRequiredService<IMenuItemProvider>(),
             provider.GetRequiredService<GesturePlatform>(),
             provider.GetRequiredService<ISettingsService>(),
-            provider.GetRequiredService<SettingsViewModel>()));
+            provider.GetRequiredService<SettingsViewModel>(),
+            provider.GetRequiredService<IProjectSessionService>(),
+            provider.GetRequiredService<IStorageService>(),
+            provider.GetRequiredService<IDialogService>(),
+            provider.GetRequiredService<AppStartupOptions>().ProjectPath));
         services.AddSingleton<ShellWindow>();
         return services;
     }

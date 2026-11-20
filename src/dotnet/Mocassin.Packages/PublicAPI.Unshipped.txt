@@ -1544,3 +1544,59 @@ static Mocassin.Packages.Projects.Templates.ProjectTemplate.operator ==(Mocassin
 static Mocassin.Packages.Projects.Templates.ProjectTemplateFactory.All.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Packages.Projects.Templates.ProjectTemplate!>
 static Mocassin.Packages.Projects.Templates.ProjectTemplateFactory.CreateProject(Mocassin.Packages.Projects.Templates.ProjectTemplateKind kind, string! name, System.DateTimeOffset createdUtc) -> Mocassin.Core.Project.Project!
 static Mocassin.Packages.Projects.Templates.ProjectTemplateFactory.Get(Mocassin.Packages.Projects.Templates.ProjectTemplateKind kind) -> Mocassin.Packages.Projects.Templates.ProjectTemplate!
+Mocassin.Packages.Projects.Templates.ProjectNameResult
+Mocassin.Packages.Projects.Templates.ProjectNameResult.Deconstruct(out bool IsSuccess, out string! Name, out Mocassin.Packages.Projects.Templates.ProjectPathFailure Failure, out string? Message) -> void
+Mocassin.Packages.Projects.Templates.ProjectNameResult.Equals(Mocassin.Packages.Projects.Templates.ProjectNameResult other) -> bool
+Mocassin.Packages.Projects.Templates.ProjectNameResult.Failure.get -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectNameResult.Failure.init -> void
+Mocassin.Packages.Projects.Templates.ProjectNameResult.IsSuccess.get -> bool
+Mocassin.Packages.Projects.Templates.ProjectNameResult.IsSuccess.init -> void
+Mocassin.Packages.Projects.Templates.ProjectNameResult.Message.get -> string?
+Mocassin.Packages.Projects.Templates.ProjectNameResult.Message.init -> void
+Mocassin.Packages.Projects.Templates.ProjectNameResult.Name.get -> string!
+Mocassin.Packages.Projects.Templates.ProjectNameResult.Name.init -> void
+Mocassin.Packages.Projects.Templates.ProjectNameResult.ProjectNameResult() -> void
+Mocassin.Packages.Projects.Templates.ProjectNameResult.ProjectNameResult(bool IsSuccess, string! Name, Mocassin.Packages.Projects.Templates.ProjectPathFailure Failure, string? Message) -> void
+Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.ControlCharacter = 5 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.EmptyName = 1 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.ExistingTarget = 8 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.InvalidTargetPath = 7 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.IoFailure = 9 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.NameTooLong = 2 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.None = 0 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.ParentDirectory = 4 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.PathSeparator = 3 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathFailure.ReservedCharacter = 6 -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectPathRules
+Mocassin.Packages.Projects.Templates.ProjectTargetResult
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.Deconstruct(out bool IsSuccess, out string! FullPath, out Mocassin.Packages.Projects.Templates.ProjectPathFailure Failure, out string? Message) -> void
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.Equals(Mocassin.Packages.Projects.Templates.ProjectTargetResult other) -> bool
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.Failure.get -> Mocassin.Packages.Projects.Templates.ProjectPathFailure
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.Failure.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.FullPath.get -> string!
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.FullPath.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.IsSuccess.get -> bool
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.IsSuccess.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.Message.get -> string?
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.Message.init -> void
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.ProjectTargetResult() -> void
+Mocassin.Packages.Projects.Templates.ProjectTargetResult.ProjectTargetResult(bool IsSuccess, string! FullPath, Mocassin.Packages.Projects.Templates.ProjectPathFailure Failure, string? Message) -> void
+Mocassin.Packages.Projects.Templates.ProjectTargetState
+Mocassin.Packages.Projects.Templates.ProjectTargetState.Absent = 0 -> Mocassin.Packages.Projects.Templates.ProjectTargetState
+Mocassin.Packages.Projects.Templates.ProjectTargetState.Directory = 2 -> Mocassin.Packages.Projects.Templates.ProjectTargetState
+Mocassin.Packages.Projects.Templates.ProjectTargetState.File = 1 -> Mocassin.Packages.Projects.Templates.ProjectTargetState
+const Mocassin.Packages.Projects.Templates.ProjectPathRules.MaxNameLength = 128 -> int
+override Mocassin.Packages.Projects.Templates.ProjectNameResult.GetHashCode() -> int
+override Mocassin.Packages.Projects.Templates.ProjectTargetResult.GetHashCode() -> int
+static Mocassin.Packages.Projects.Templates.ProjectNameResult.operator !=(Mocassin.Packages.Projects.Templates.ProjectNameResult left, Mocassin.Packages.Projects.Templates.ProjectNameResult right) -> bool
+static Mocassin.Packages.Projects.Templates.ProjectNameResult.operator ==(Mocassin.Packages.Projects.Templates.ProjectNameResult left, Mocassin.Packages.Projects.Templates.ProjectNameResult right) -> bool
+static Mocassin.Packages.Projects.Templates.ProjectPathRules.GetMessage(Mocassin.Packages.Projects.Templates.ProjectPathFailure failure, string? detail = null) -> string!
+static Mocassin.Packages.Projects.Templates.ProjectPathRules.NormalizeName(string? rawName) -> Mocassin.Packages.Projects.Templates.ProjectNameResult
+static Mocassin.Packages.Projects.Templates.ProjectPathRules.ValidateTarget(string? directory, Mocassin.Packages.Projects.Templates.ProjectNameResult name, Mocassin.Packages.Projects.Templates.ProjectTargetState targetState) -> Mocassin.Packages.Projects.Templates.ProjectTargetResult
+static Mocassin.Packages.Projects.Templates.ProjectTargetResult.operator !=(Mocassin.Packages.Projects.Templates.ProjectTargetResult left, Mocassin.Packages.Projects.Templates.ProjectTargetResult right) -> bool
+static Mocassin.Packages.Projects.Templates.ProjectTargetResult.operator ==(Mocassin.Packages.Projects.Templates.ProjectTargetResult left, Mocassin.Packages.Projects.Templates.ProjectTargetResult right) -> bool
+~override Mocassin.Packages.Projects.Templates.ProjectNameResult.Equals(object obj) -> bool
+~override Mocassin.Packages.Projects.Templates.ProjectNameResult.ToString() -> string
+~override Mocassin.Packages.Projects.Templates.ProjectTargetResult.Equals(object obj) -> bool
+~override Mocassin.Packages.Projects.Templates.ProjectTargetResult.ToString() -> string

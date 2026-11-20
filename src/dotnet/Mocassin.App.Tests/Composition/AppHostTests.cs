@@ -14,6 +14,8 @@ using Mocassin.App.ViewModels.Notifications;
 using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.ViewModels.Settings.Dialog;
+using Mocassin.Packages.Projects;
+using Mocassin.Packages.Projects.Validation;
 using Mocassin.App.ViewModels.Shell;
 
 namespace Mocassin.App.Tests.Composition;
@@ -57,6 +59,9 @@ public sealed class AppHostTests
         Assert.NotNull(host.Services.GetRequiredService<ISettingsEnvironment>());
         Assert.NotNull(host.Services.GetRequiredService<IThemeApplier>());
         Assert.NotNull(host.Services.GetRequiredService<SettingsViewModel>());
+        Assert.NotNull(host.Services.GetRequiredService<IProjectSessionService>());
+        Assert.False(host.Services.GetRequiredService<ProjectStore>().Options.ValidateOnLoad);
+        Assert.NotNull(host.Services.GetRequiredService<ProjectValidationPipeline>());
     }
 
     [Fact]

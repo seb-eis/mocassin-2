@@ -8,6 +8,7 @@ using Mocassin.App.Composition;
 using Mocassin.App.Tests.TestSupport;
 using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Navigation;
+using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Documents;
 using Mocassin.App.Views.Shell;
@@ -70,6 +71,72 @@ public sealed class WorkspaceRenderTests
                     await shell.Documents.CloseAllAsync();
                     Assert.Empty(shell.Documents.Documents);
                     Assert.Null(shell.Documents.ActiveDocument);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TheProjectArgumentOpensAtStartup() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                var target = workspace.Combine("startup.mocprj");
+                File.Copy(RepositoryPaths.Combine("samples", "ceria", "ceria.mocprj"), target);
+                using var host = AppHost.Build(
+                    new AppStartupOptions { DataDirectory = workspace.Path, ProjectPath = target });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    await shell.StartupProjectTask;
+                    var session = host.Services.GetRequiredService<IProjectSessionService>().ActiveSession;
+                    Assert.NotNull(session);
+                    Assert.Equal(session.Id, shell.Workspace.ActiveProject!.Id);
+                    Assert.Contains(
+                        shell.Documents.Documents,
+                        document => document.Key.ScopeId == session.Id);
+                }
+                finally
+                {
+                    var sessions = host.Services.GetRequiredService<IProjectSessionService>();
+                    if (sessions.ActiveSession is { } active)
+                    {
+                        await sessions.CloseAsync(active);
+                    }
+
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task AMissingStartupProjectDoesNotPreventStartup() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(
+                    new AppStartupOptions
+                    {
+                        DataDirectory = workspace.Path,
+                        ProjectPath = workspace.Combine("missing.mocprj"),
+                    });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    await shell.StartupProjectTask;
+                    Assert.Null(host.Services.GetRequiredService<IProjectSessionService>().ActiveSession);
+                    Assert.Contains(
+                        shell.Console.ActiveChannel!.VisibleEntries,
+                        entry => entry.Severity >= Mocassin.App.ViewModels.Consoles.ConsoleSeverity.Warning);
                 }
                 finally
                 {

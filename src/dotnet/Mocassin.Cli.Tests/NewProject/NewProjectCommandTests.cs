@@ -179,6 +179,55 @@ public sealed class NewProjectCommandTests
     }
 
     [Fact]
+    public async Task TheExistingTargetMessageIsPinned()
+    {
+        using var directory = new TempDirectory();
+        var path = System.IO.Path.Combine(directory.Path, "Taken.mocprj");
+        await File.WriteAllTextAsync(path, "original");
+
+        var (exitCode, stdout, _) = await RunAsync("new", "Taken", "-o", directory.Path, "--json");
+
+        Assert.Equal(3, exitCode);
+        using var report = JsonDocument.Parse(stdout);
+        Assert.Contains(
+            report.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            diagnostic => diagnostic.GetProperty("message").GetString()
+                == $"The project '{path}' already exists. Choose another name or directory.");
+    }
+
+    [Fact]
+    public async Task TheDirectoryTargetMessageIsPinned()
+    {
+        using var directory = new TempDirectory();
+        var path = System.IO.Path.Combine(directory.Path, "Taken.mocprj");
+        Directory.CreateDirectory(path);
+
+        var (exitCode, stdout, _) = await RunAsync("new", "Taken", "-o", directory.Path, "--json");
+
+        Assert.Equal(3, exitCode);
+        using var report = JsonDocument.Parse(stdout);
+        Assert.Contains(
+            report.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            diagnostic => diagnostic.GetProperty("message").GetString()
+                == $"The project path '{path}' is an existing directory.");
+    }
+
+    [Fact]
+    public async Task TheReservedCharacterMessageIsPinned()
+    {
+        using var directory = new TempDirectory();
+
+        var (exitCode, stdout, _) = await RunAsync("new", "name:bad", "-o", directory.Path, "--json");
+
+        Assert.Equal(2, exitCode);
+        using var report = JsonDocument.Parse(stdout);
+        Assert.Contains(
+            report.RootElement.GetProperty("diagnostics").EnumerateArray(),
+            diagnostic => diagnostic.GetProperty("message").GetString()
+                == "The project name must not contain the character ':'.");
+    }
+
+    [Fact]
     public async Task ADirectoryAtTheProjectPathIsAnIoError()
     {
         using var directory = new TempDirectory();

@@ -9,10 +9,14 @@
                FontSize="16"
                Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
                HorizontalAlignment="Center" />
-    <TextBlock Text="Project creation and opening are provided by the project lifecycle feature."
+    <TextBlock Text="Create a project from a starter or open an existing .mocprj file."
                TextWrapping="Wrap"
                TextAlignment="Center"
                Margin="0,12,0,0" />
+    <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+      <Button Content="New project" Command="{Binding NewProjectCommand}" />
+      <Button Content="Open project" Command="{Binding OpenProjectCommand}" />
+    </StackPanel>
     <Button Content="Keyboard shortcuts"
             Command="{Binding ShowShortcutsCommand}"
             HorizontalAlignment="Center" />

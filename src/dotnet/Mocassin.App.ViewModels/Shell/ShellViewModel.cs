@@ -5,9 +5,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mocassin.App.ViewModels.Commands;
 using Mocassin.App.ViewModels.Consoles;
+using Mocassin.App.ViewModels.Dialogs;
+using Mocassin.App.ViewModels.Dialogs.Requests;
 using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Projects;
+using Mocassin.Packages.Projects.Templates;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.ViewModels.Settings.Dialog;
 
@@ -27,6 +30,14 @@ internal sealed partial class ShellViewModel : ObservableObject
     private readonly AsyncRelayCommand backCommand;
     private readonly AsyncRelayCommand forwardCommand;
     private readonly AsyncRelayCommand closeActiveCommand;
+    private readonly AsyncRelayCommand saveProjectCommand;
+    private readonly AsyncRelayCommand saveAsProjectCommand;
+    private readonly AsyncRelayCommand closeProjectCommand;
+    private readonly AsyncRelayCommand reloadProjectCommand;
+    private readonly IProjectSessionService sessions;
+    private readonly IStorageService storage;
+    private readonly IDialogService dialogs;
+    private readonly string? startupProjectPath;
 
     [ObservableProperty]
     private string windowTitle = "MOCASSIN";
@@ -61,6 +72,10 @@ internal sealed partial class ShellViewModel : ObservableObject
     /// <param name="platform">The platform used to format gestures.</param>
     /// <param name="settings">The application settings.</param>
     /// <param name="settingsDialog">The settings dialog state.</param>
+    /// <param name="sessions">The project session service.</param>
+    /// <param name="storage">The picker service.</param>
+    /// <param name="dialogs">The dialog service.</param>
+    /// <param name="startupProjectPath">The optional project path from the startup options.</param>
     public ShellViewModel(
         IConsoleService consoleService,
         IEnumerable<IConsoleChannelProvider> consoleChannels,
@@ -76,7 +91,11 @@ internal sealed partial class ShellViewModel : ObservableObject
         IMenuItemProvider menuProvider,
         GesturePlatform platform,
         ISettingsService settings,
-        SettingsViewModel settingsDialog)
+        SettingsViewModel settingsDialog,
+        IProjectSessionService sessions,
+        IStorageService storage,
+        IDialogService dialogs,
+        string? startupProjectPath)
     {
         Regions = regions;
         StatusBar = statusBar;
@@ -90,12 +109,20 @@ internal sealed partial class ShellViewModel : ObservableObject
         Platform = platform;
         this.settings = settings;
         this.consoleService = consoleService;
+        this.sessions = sessions;
+        this.storage = storage;
+        this.dialogs = dialogs;
+        this.startupProjectPath = startupProjectPath;
         Settings = settingsDialog;
         Console = new ConsoleViewModel(consoleService, consoleChannels);
 
         backCommand = new AsyncRelayCommand(() => Navigation.GoBackAsync(), () => Navigation.CanGoBack);
         forwardCommand = new AsyncRelayCommand(() => Navigation.GoForwardAsync(), () => Navigation.CanGoForward);
         closeActiveCommand = new AsyncRelayCommand(CloseActiveAsync, () => Documents.ActiveDocument is not null);
+        saveProjectCommand = new AsyncRelayCommand(SaveProjectAsync, () => sessions.ActiveSession is not null);
+        saveAsProjectCommand = new AsyncRelayCommand(SaveAsProjectAsync, () => sessions.ActiveSession is not null);
+        closeProjectCommand = new AsyncRelayCommand(CloseProjectAsync, () => sessions.ActiveSession is not null);
+        reloadProjectCommand = new AsyncRelayCommand(ReloadProjectAsync, () => sessions.ActiveSession is not null);
 
         RegisterCommands(commands);
         Palette = new CommandPaletteViewModel(commands, () => IsPaletteOpen = false);
@@ -125,7 +152,12 @@ internal sealed partial class ShellViewModel : ObservableObject
         consoleService.Write(ConsoleSeverity.Information, "shell", "MOCASSIN shell started.");
         if (settings.Current.Ui.ShowWelcomeOnStart)
         {
-            documents.OpenOrActivate(new WelcomeDocumentViewModel(ShowShortcutsCommand));
+            documents.OpenOrActivate(new WelcomeDocumentViewModel(ShowShortcutsCommand, NewProjectCommand, OpenProjectCommand));
+        }
+
+        if (!string.IsNullOrWhiteSpace(startupProjectPath))
+        {
+            StartupProjectTask = OpenProjectPathAsync(startupProjectPath);
         }
         UpdateActiveDocument();
         UpdateActiveProject();
@@ -202,6 +234,11 @@ internal sealed partial class ShellViewModel : ObservableObject
     public SettingsViewModel Settings { get; }
 
     /// <summary>
+    /// Gets the startup project-open task. It is completed when no project was supplied.
+    /// </summary>
+    internal Task StartupProjectTask { get; private set; } = Task.CompletedTask;
+
+    /// <summary>
     /// Gets the text shown when the documents region is empty.
     /// </summary>
     public string EmptyDocumentText { get; } = "No document is open.";
@@ -268,6 +305,42 @@ internal sealed partial class ShellViewModel : ObservableObject
             MenuKind.View,
             new KeyGestureDescriptor("0", GestureModifier.Alt),
             Regions.ToggleConsoleCommand);
+        catalog.Add(
+            "project.new",
+            "New Project…",
+            "Project",
+            MenuKind.File,
+            new KeyGestureDescriptor("N", GestureModifier.Primary),
+            NewProjectCommand);
+        catalog.Add(
+            "project.open",
+            "Open Project…",
+            "Project",
+            MenuKind.File,
+            new KeyGestureDescriptor("O", GestureModifier.Primary),
+            OpenProjectCommand);
+        catalog.Add(
+            "project.save",
+            "Save Project",
+            "Project",
+            MenuKind.File,
+            new KeyGestureDescriptor("S", GestureModifier.Primary),
+            saveProjectCommand);
+        catalog.Add(
+            "project.saveAs",
+            "Save Project As…",
+            "Project",
+            MenuKind.File,
+            new KeyGestureDescriptor("S", GestureModifier.Primary | GestureModifier.Shift),
+            saveAsProjectCommand);
+        catalog.Add("project.close", "Close Project", "Project", MenuKind.File, null, closeProjectCommand);
+        catalog.Add(
+            "project.reload",
+            "Reload Project",
+            "Project",
+            MenuKind.File,
+            new KeyGestureDescriptor("F5"),
+            reloadProjectCommand);
         catalog.Add(
             "view.settings",
             "Settings…",
@@ -394,7 +467,14 @@ internal sealed partial class ShellViewModel : ObservableObject
         closeActiveCommand.NotifyCanExecuteChanged();
     }
 
-    private void OnActiveProjectChanged(object? sender, EventArgs e) => UpdateActiveProject();
+    private void OnActiveProjectChanged(object? sender, EventArgs e)
+    {
+        UpdateActiveProject();
+        saveProjectCommand.NotifyCanExecuteChanged();
+        saveAsProjectCommand.NotifyCanExecuteChanged();
+        closeProjectCommand.NotifyCanExecuteChanged();
+        reloadProjectCommand.NotifyCanExecuteChanged();
+    }
 
     private void OnSettingsChanged(object? sender, AppSettings updated) => ApplySettings(updated);
 
@@ -457,6 +537,134 @@ internal sealed partial class ShellViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Creates a project from a template.
+    /// </summary>
+    [RelayCommand]
+    private async Task NewProjectAsync(CancellationToken cancellationToken)
+    {
+        var directory = await storage.PickFolderAsync(cancellationToken);
+        if (string.IsNullOrWhiteSpace(directory))
+        {
+            return;
+        }
+
+        var name = await dialogs.PromptAsync(
+            new TextPromptRequest("New project", "Enter the project name.", Watermark: "Project name"),
+            cancellationToken);
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return;
+        }
+
+        var template = await dialogs.ChooseAsync(
+            new ChoiceDialogRequest(
+                "Project template",
+                "Choose the starter for the new project.",
+                [
+                    new DialogChoice("blank", "Blank", IsDefault: true),
+                    new DialogChoice("ceria", "Ceria"),
+                ]),
+            cancellationToken);
+        if (template.Kind != DialogResultKind.ChoiceSelected)
+        {
+            return;
+        }
+
+        var kind = string.Equals(template.ChoiceId, "ceria", StringComparison.Ordinal)
+            ? ProjectTemplateKind.Ceria
+            : ProjectTemplateKind.Blank;
+        await ApplySessionResultAsync(
+            await sessions.CreateAsync(kind, name, directory, cancellationToken),
+            cancellationToken);
+    }
+
+    /// <summary>
+    /// Opens a project with the picker.
+    /// </summary>
+    [RelayCommand]
+    private async Task OpenProjectAsync(CancellationToken cancellationToken)
+    {
+        var path = await storage.PickOpenProjectAsync(cancellationToken);
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            await OpenProjectPathAsync(path);
+        }
+    }
+
+    private async Task OpenProjectPathAsync(string path)
+    {
+        await ApplySessionResultAsync(await sessions.OpenAsync(path), CancellationToken.None);
+    }
+
+    private async Task SaveProjectAsync()
+    {
+        if (sessions.ActiveSession is { } session)
+        {
+            await ApplySessionResultAsync(await sessions.SaveAsync(session), CancellationToken.None);
+        }
+    }
+
+    private async Task SaveAsProjectAsync()
+    {
+        if (sessions.ActiveSession is not { } session)
+        {
+            return;
+        }
+
+        var path = await storage.PickSaveProjectAsync(session.Name + ".mocprj");
+        if (!string.IsNullOrWhiteSpace(path))
+        {
+            await ApplySessionResultAsync(await sessions.SaveAsAsync(session, path), CancellationToken.None);
+        }
+    }
+
+    private async Task CloseProjectAsync()
+    {
+        if (sessions.ActiveSession is { } session)
+        {
+            foreach (var document in Documents.Documents.Where(document => document.Key.ScopeId == session.Id).ToArray())
+            {
+                await Documents.CloseAsync(document);
+            }
+
+            await ApplySessionResultAsync(await sessions.CloseAsync(session), CancellationToken.None);
+        }
+    }
+
+    private async Task ReloadProjectAsync()
+    {
+        if (sessions.ActiveSession is { } session)
+        {
+            await ApplySessionResultAsync(await sessions.ReloadAsync(session), CancellationToken.None);
+        }
+    }
+
+    private async Task ApplySessionResultAsync(ProjectSessionResult result, CancellationToken cancellationToken)
+    {
+        if (!result.IsSuccess)
+        {
+            consoleService.Write(
+                ConsoleSeverity.Warning,
+                "project",
+                result.Message ?? $"The project operation ended with {result.Outcome}.");
+            return;
+        }
+
+        if (result.Outcome == ProjectSessionOutcome.Closed)
+        {
+            return;
+        }
+
+        if (result.Session is { } session)
+        {
+            await Navigation.NavigateToAsync(
+                new Mocassin.Core.Diagnostics.ModelPath("project", session.Id, "overview"),
+                NavigationIntent.Activate,
+                cancellationToken);
+        }
+    }
+
     private void OnHistoryChanged(object? sender, EventArgs e)
     {
         backCommand.NotifyCanExecuteChanged();
@@ -500,7 +708,10 @@ internal sealed partial class ShellViewModel : ObservableObject
     private void UpdateActiveProject()
     {
         var project = Workspace.ActiveProject;
-        StatusBar.SetProject(project is null ? "No project" : $"{project.Name} — {project.Path}");
+        StatusBar.SetProject(
+            project is null
+                ? "No project"
+                : $"{project.Name} — {project.Path}{(project.IsReadOnly ? " (read-only)" : string.Empty)}");
         if (project?.LastDocumentKey is { } key)
         {
             _ = Navigation.ActivateAsync(key);
