@@ -143,7 +143,7 @@ Split a step before implementation when any of these holds:
 
 - the step is **High** complexity, unless the owner accepts it as one unit (see below);
 - it has **more than one independent acceptance story** — distinct outcomes that could be delivered, approved,
-  or rejected separately (several acceptance criteria inside one story do not count);
+  or rejected separately (several acceptance criteria inside one story do not count as separate stories);
 - it mixes risks, for example low-risk documentation or tooling with high-risk format, security, or solver work;
 - it has more than roughly **6–8 features**, or features with unrelated outcomes;
 - a fresh auditor could not read the diff, tests, and evidence in one sitting.

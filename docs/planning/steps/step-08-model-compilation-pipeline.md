@@ -121,6 +121,10 @@ hash maps, and makes ambiguity a hard compile error rather than a runtime surpri
 - Any mutation of the project, any file I/O, and any dependency on `Mocassin.Packages`,
   `Mocassin.Contracts`, `Mocassin.Results`, or `Mocassin.Cli`.
 
+> **Post-audit process annotation (2026-11-20):** this sizing record was recorded under the previous
+> time-based rule and is superseded by [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers)
+> from 2026-11-20. The original text, decisions, and evidence are retained unchanged.
+
 **Sizing and owner waiver.** The roadmap estimate is 4–6 person-weeks. The feature list has eight rows,
 including the documentation-only closeout. This meets the roadmap §3.1 split trigger (more than about four
 weeks or roughly 6–8 features). The human owner reviewed the design-review finding M5 on 2026-11-12 and

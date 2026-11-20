@@ -994,6 +994,10 @@ produce a half-written `.msl`.
 
 ### 12. Feature sizing
 
+> **Post-audit process annotation (2026-11-20):** this sizing record was recorded under the previous
+> time-based rule and is superseded by [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers)
+> from 2026-11-20. The original text, decisions, and evidence are retained unchanged.
+
 The roadmap estimate is **3–4 person-weeks**, within the four-week split trigger. The eight features above are
 the complete implementation list and are owner-approved. Eight is within the roadmap's "roughly 6–8" feature
 range; the features have distinct, testable outcomes and are not merged, so no 10A/10B split or further owner
