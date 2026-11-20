@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `219f78445353218a772cbed3470c748523d0521d` |
+| Reviewed commit | `34d036dacbce3b7536549c3a4f9ea1f65dc2d5d5` |
 | Docs branch | `docs/step-23-design` |
 | Review date | 2026-11-20 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh planning auditor |
@@ -32,6 +32,16 @@ for one sitting. The human owner approved the split on 2026-11-20 into **23A** (
 diagnostics, recovery). 23A contains no 23B task; 23B depends on 23A and defines its own design but is **not
 design-reviewed and not started**. The superseded unsplit record is
 [`step-23.md`](step-23.md), closed as superseded with its rounds unchanged.
+
+**Refreeze note (round 2, 2026-11-20).** Round 1 returned `Changes required` on freeze `219f784` for M-1 and
+M-2, with m-3 and Notes n-1–n-7. The design was refrozen at
+`34d036dacbce3b7536549c3a4f9ea1f65dc2d5d5`. The refreeze states the exact closeout identities (`step-23a` /
+`step-23b`) and the `step-NN[a-z]` tooling prerequisite (M-1), restores the normative `mocassin.settings` v1
+shape in 23A §6.1 with 23B referencing it (M-2), fixes the malformed `05-open-decisions.md` links (m-3), and
+addresses n-1–n-7. **Round-1 reviewer text — Evidence, Findings, Reviewer independence, Verdict, and the round-1
+report — is byte-identical to `c65b1a1`**; only request-owned fields (this note, the `Reviewed commit` cell, the
+`Record state` line, and the `Resolution status` section) changed. The round-1 findings and verdict remain
+unchanged as history.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the design and
 > completed this request, and relays the verdict and owner decisions. The planner and step agent update the
@@ -206,7 +216,11 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required — round 1 reviewed the frozen design at `219f78445353218a772cbed3470c748523d0521d` (record HEAD `7caa94d`) and returned `Changes required` for M-1 and M-2; see `Review round 1`.
+**State:** Re-review required — round 1 returned `Changes required` on freeze
+`219f78445353218a772cbed3470c748523d0521d` for M-1 and M-2 plus m-3/n-1–n-7. The design is refrozen at
+`34d036dacbce3b7536549c3a4f9ea1f65dc2d5d5`; the findings are resolved or explicitly dispositioned in
+`Resolution status` below, and the refrozen design awaits a round-2 review. Round-1 findings and verdict remain
+unchanged as history.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -263,12 +277,25 @@ Date:
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
+Round-1 reviewer text is unchanged. The design was corrected on `docs/step-23-design` at freeze
+`34d036dacbce3b7536549c3a4f9ea1f65dc2d5d5`; this record update is a documentation-only follow-up. No code, test,
+configuration, contract, or generated artifact changed.
 
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
+| Finding | Status | Owner | Commit | Resolution |
+| --- | --- | --- | --- | --- |
+| **M-1** | Fixed in design | Planner | `34d036d` | 23A §20 and 23B §18 now state the exact identity: evidence file `closeout/step-23a.json` / `step-23b.json`, `"step"` = `"step-23a"` / `"step-23b"`, tag `step-23a` / `step-23b`, audit record `audits/step-23a.md` / `step-23b.md`, and no `step-23` alias. They record that `tools/check_closeout_evidence.py` currently accepts only `^step-\d{2}$` and that a separate tooling change extending the checker, its tests, and the closeout README/template to `^step-\d{2}[a-z]$` (with a letter-suffix positive case) must land **before either closeout**. Feature 4/5 done-when and the acceptance criteria say "validates once the prerequisite has landed" instead of claiming it today. The design does not work around the checker. |
+| **M-2** | Fixed in design | Planner | `34d036d` | 23A §6.1 is a new normative section: the full v1 JSON example, a field table with every key and nesting level (`format`, `schemaVersion`, `theme`, `accent`, `density`, `fontScale`, `highContrast`, `reduceMotion`, `culture`, `logging.level`, `ui.*`, `paths.*`, `recentFiles[]`, `layout.*`), defaults and ranges, the unknown-key/missing-key/wrong-type policy, the future-major refusal without overwrite, pure-function migrations, the 4 MiB cap and 10-entry recent list, the source-generated `AppSettingsJsonContext`, and the temp+fsync+replace protocol. It states the file is app-local and not in `contracts/manifest.json`; `file-layout.md` mirrors it. 23B §9 now references 23A §6.1 as the normative base and lists only its two additive objects (`autosave`, `session`) with types/defaults/ranges, no schema bump, and the `"problems"` channel value. |
+| **m-3** | Fixed | Planner | `34d036d` | The 13 malformed `...md))` links (20 link instances on lines 43 and 98–109) in `05-open-decisions.md` are corrected to single-`)` links; `grep -c "md))"` is now 0. |
+| **n-1** | Deferred | Step agent | — | `status.md` remains step-agent-owned per `AGENTS.md` §3.8; the planner did not edit it. 23A §20 states the required `23A`/`23B` row replacement and that the step agent performs it at start. |
+| **n-2** | Fixed | Planner | `34d036d` | `ProjectSessionOutcome.UnsavedChanges` is marked in the enum and in §5 as reserved for 23B and never produced in 23A, so the result type does not change shape later without hidden 23B work. |
+| **n-3** | Fixed | Planner | `34d036d` | §1's table now says `AppDataOverride` is a pure value; `AppStartupOptions` parses `--data-dir` and reads `MOCASSIN_DATA_DIR`, and `AppPaths` resolves the root — both in `Mocassin.App`, never in ViewModels. |
+| **n-4** | Fixed | Planner | `34d036d` | §5 scopes "an existing target is refused" to **New only** and states that Save As to an existing file follows the picker's overwrite confirmation and the store's atomic replace. The acceptance criterion and test row are scoped the same way. |
+| **n-5** | Fixed | Planner | `34d036d` | 23A §18 and `04-roadmap.md` §3.1 now say the settings/lifecycle half would be **without a host to run in**, not "without a consumer"; the no-further-split conclusion is unchanged. |
+| **n-6** | Fixed | Planner | `34d036d` | V-1's fallback now adds `Avalonia.Skia` at the pinned version to **`Mocassin.App.Tests` only**, as a test-only dependency for the headless screenshot host; production keeps the already-pinned Avalonia packages and the "no new production package" claim stands. |
+| **n-7** | Fixed | Planner | `34d036d` | §12 defines `ProjectPathFailure`, `ProjectNameResult`, `ProjectTargetResult`, `ProjectTargetState`, and `ProjectPathRules.NormalizeName/ValidateTarget/GetMessage`, with pure rules and one caller-supplied file-system fact. It maps `NormalizeName`/invalid-directory failures to `CLI001`/2, `ExistingTarget` (`File`) to `CLI003`/3, and `Directory`/creation failure to `CLI002`/3, and keeps the new CLI message-pinning tests. |
+
+The step agent fills any further status after the next verdict. Do not alter the reviewer-authored findings,
+evidence, or verdict.
 
 ## Review rounds
 
