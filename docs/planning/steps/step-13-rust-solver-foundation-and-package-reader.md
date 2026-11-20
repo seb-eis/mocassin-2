@@ -169,15 +169,16 @@ the closeout/audit evidence.
   and the Rust API reference remains `Partial` until Step 30. No solver row is marked Done.
 - **Correction:** feature 6 had left `proptest` in `mocassin-msl`'s `[dependencies]`; it is now dev-only, as the
   step page's dev-crate rule requires. No production dependency was added.
-- **Closeout:** `./tools/verify.sh all --require` exited 0 on the remediation tree (AOT green; the real
+- **Closeout:** `./tools/verify.sh all --require` exited 0 on the merged tree (AOT green; the real
   `Mocassin.Cli` AOT publish **fails** with 62 IL2xxx/IL3xxx diagnostics, recorded as non-gating evidence). The
-  re-audit closeout run
-  [44815711484](https://github.com/seb-eis/mocassin-2/actions/runs/44815711484) is green at
-  `020e70ad4efcb06f79607cfeb7c75e370147cdd9`, the audited commit and merge candidate. `main` `ec301a4` was
-  merged as `d327e74` before the freeze; the run covers the merged tree.
-  `docs/planning/closeout/step-13.json` passes
-  `python tools/check_closeout_evidence.py`; `docs/planning/audits/step-13.md` is `Re-audit required` with the
-  F-1 amendment and the F-8 correction flagged. No tag or merge has been performed.
+  final closeout run
+  [44831177039](https://github.com/seb-eis/mocassin-2/actions/runs/44831177039) is green at
+  `31281210f64552ca3bb704512d028a1d28499650`, the audited commit and merge candidate. `main`
+  `4973d028b7da7aef95a8621d86607ce06a823211` was merged as `64def37` (and `1f5b473` as `b8c7cca`) before the
+  run; the run covers the merged tree. `docs/planning/closeout/step-13.json` passes
+  `python tools/check_closeout_evidence.py`; `docs/planning/audits/step-13.md` is **Passed with notes**,
+  accepted by the owner on 2026-11-20. The `step-13-amend-1` amendment is **Withdrawn — resolved by
+  `1f5b473`**. No tag or merge has been performed yet.
 
 ### Approved feature list (owner, 2026-11-18; implementation authorized 2026-11-19)
 

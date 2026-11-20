@@ -27,10 +27,13 @@ entries. The real-writer [`step-13-centered`](../../../tests/contracts/packages/
 fixture derived from `samples/step-13-centered/step-13-centered.mocprj` (itself derived from the C-centered
 sample) now carries **both** the translation-equivalent start mapping and the per-node mask difference. The
 Rust and .NET fixture tests assert the cross-bucket mapping and the mask difference. This amendment no longer
-requests owner acceptance for synthetic coverage; it is retained for history.
+previously requested owner acceptance for synthetic coverage; it is withdrawn and retained for history.
 
 The Step 11 verifier observation (`byte_position >= site_count` is a cluster-slot-vs-site-index contract
 mismatch) remains a separate deferred maintenance item and is not part of this withdrawal.
+
+The sections below are the retained historical proposal. All "pending owner acceptance" language is
+superseded by this withdrawal; no owner acceptance is required.
 
 ## Rationale
 
@@ -61,12 +64,12 @@ verifier's `byte_position >= site_count` check is independently inconsistent wit
 (`byte_position` is the cluster slot, not a site index), but no valid package tripped it in this spike.
 
 This is a design/test-fixture deviation plus a compiler defect that is outside Step 13's write scope. It must be
-recorded and accepted before the parent audit can pass.
+recorded. The amendment is withdrawn; no acceptance is required.
 
 ## Scope
 
 - Record the delivered per-node mask-difference property and its real-writer evidence.
-- Request owner acceptance of **synthetic coverage** for the equivalent-start mapping in Step 13, with the
+- Historical request: synthetic coverage for the equivalent-start mapping in Step 13, with the
   real-writer property deferred to a Step 08 maintenance fix.
 - Re-plan the Step 16 exact per-direction check to consume either a synthetic vector or the fixture built after
   the Step 08 fix.
@@ -109,9 +112,9 @@ equivalent-start property is deferred until the Step 08 compiler can produce it.
 
 `TransitionCompilationStage` should merge symmetry-equivalent starts even when the P1 start index differs, or
 `DirectionKey` should exclude the start `P` from the equivalence test. The current code makes
-`EquivalentStartPositions` dead for different starts. Proposed owner: a **Step 08 maintenance fix**
-(`fix/step-08-equivalent-start-mapping`), with Step 29 responsible for the statistical/parity acceptance after
-the fix and Step 16 re-planning its exact-check fixture. The fix needs a transition-compiler regression test
+`EquivalentStartPositions` dead for different starts. **Resolved** by the Step 08 maintenance fix
+`1f5b473` (`fix/step-08-equivalent-start-mapping`), with Step 29 responsible for the statistical/parity
+acceptance after the fix and Step 16 re-planning its exact-check fixture. The fix needs a transition-compiler regression test
 that produces a direction under a different start bucket.
 
 ### Step 11 verifier observation
@@ -120,7 +123,7 @@ that produces a direction under a different start bucket.
 `ClusterLinkPayload` define `byte_position` as the cluster slot (`0` is the centre), bounded by the cluster node
 count, not by the reference-site count. The check should use the cluster table's node count (or the documented
 `< 10` slot bound). No valid package in this repository currently trips it because duplicate-site clusters fail
-earlier with `CLI007`, so this is a latent defect, not a reproduced failure. Proposed owner: a **Step 11
+earlier with `CLI007`, so this is a latent defect, not a reproduced failure. Deferred owner: a **Step 11
 maintenance fix**, with Step 29 including it in the verifier parity sweep.
 
 ## Reproduction evidence
@@ -177,18 +180,19 @@ recorded as a latent contract mismatch rather than a reproduced valid-package re
 
 ## Temporary implementation and migration
 
-The synthetic equivalent-start tests are temporary acceptance evidence until the compiler fix lands. They are
-not removed by this amendment. The Step 16 fixture plan is updated to name the compiler fix as a dependency; it
+The synthetic equivalent-start tests were temporary acceptance evidence until the compiler fix landed. The fix
+is `1f5b473`, and the real-writer `step-13-centered` fixture now covers the property; the synthetic tests remain
+as focused reader assertions. The Step 16 fixture plan is updated to name the compiler fix as a dependency; it
 must not claim the real equivalent-start property before the fix.
 
 ## Acceptance criteria
 
 - [ ] The real-writer populated fixture carries the non-trivial per-node mask difference, and the Rust and .NET
       fixture tests assert it. *(Delivered in the Step 13 remediation branch.)*
-- [ ] The owner accepts synthetic coverage for the equivalent-start mapping in Step 13.
-- [ ] The Step 08 compiler defect is recorded with a proposed maintenance owner and a regression-test
+- [x] **Withdrawn** — no owner acceptance is required; the property is met by `1f5b473` and the centered fixture.
+- [x] The Step 08 compiler defect is fixed by `1f5b473`, with a regression test on `main`.
       requirement.
-- [ ] The Step 11 verifier `byte_position` check is recorded with a proposed maintenance owner.
+- [x] The Step 11 verifier `byte_position` check is recorded as a deferred maintenance item.
 - [ ] The Step 16 exact per-direction fixture plan is re-pointed at the compiler fix or a synthetic vector.
 - [ ] No `.msl` schema, field, or version change is introduced.
 
@@ -205,14 +209,14 @@ must not claim the real equivalent-start property before the fix.
 
 - [x] The fixture README and sample README record the delivered property and the limitation.
 - [x] The Step 13 page and audit resolution link this amendment.
-- [ ] The Step 16 page records the re-planned exact-check fixture dependency (owner acceptance pending).
-- [ ] Status, parity, and the Step 08/11 defect notes are updated after owner acceptance.
+- [x] The Step 16 page records the centered fixture as its exact-check dependency; no owner acceptance is required.
+- [x] Status, parity, and the Step 08/11 defect notes are updated; the Step 08 fix is on `main` and the Step 11 item is deferred.
 
 ## Risks and mitigations
 
 | Risk | Mitigation |
 | --- | --- |
-| Step 13 closes without a real equivalent-start package. | The reader contract is covered synthetically; the Step 08 maintenance fix and Step 16 re-plan are recorded, and Step 29 verifies parity. The owner must accept this explicitly. |
+| Step 13 closes without a real equivalent-start package. | Resolved by the Step 08 fix `1f5b473` and the real-writer `step-13-centered` fixture; the synthetic reader tests remain focused assertions. |
 | The `--seed`/mask fixture changes alter stored signatures. | The fixture is a test artifact; the summary, payload index, SHA-256, and both fixture tests are regenerated together and verified. No schema version changes. |
 | The P-1 `PKG010` claim is repeated without evidence. | The step page and both fixture READMEs are corrected: a plain P-1 variant verifies; the residual verifier check is recorded as latent with its source path. |
 | A later writer changes `is_vacancy[0]`. | The reader now rejects `is_vacancy[0] == true` (the writer's void particle is not an authored vacancy); the check is documented and tested. |
@@ -221,13 +225,13 @@ must not claim the real equivalent-start property before the fix.
 
 - Parent step status: In audit / re-audit remediation. The parent step branch is not merged or tagged.
 - Required features/contracts: Step 08 transition compilation, Step 11 package verifier, Step 16 KMC engine.
-- Parent audit is already running; this amendment is proposed before the re-audit freeze.
+- Historical: the parent audit was running when this amendment was proposed; it is withdrawn before the merge.
 
 ## Integration
 
 - Branch: `feature/step-13-rust-solver-foundation-and-package-reader/fix-audit-round-1`
 - Parent step branch: `step/13-rust-solver-foundation-and-package-reader`
-- Approval: owner acceptance pending
+- Approval: withdrawn; resolved by `1f5b473`; no acceptance required
 - Squash commit: —
 - Parent audit request updated: —
 - Combined frozen commit: —

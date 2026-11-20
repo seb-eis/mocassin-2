@@ -88,10 +88,12 @@ merged as `f91fc63` and Step 12 as `ec2e04a` (both `--no-ff`). The Phase C cross
 (combined policies/planning, architecture/design, and documentation review) passed with notes at `2127f0f`
 and was accepted by the human owner on 2026-11-18 (record `c6ea396`); the XC04-F1–F5 remediation merged into
 `main` as `4c08cd3`. Step 13 — Rust Solver Foundation and Package Reader is **In audit** with a re-audit required:
-its design merged as `056d8c1`, features 1–7 and the audit round-1 remediation are squashed into
-`step/13-rust-solver-foundation-and-package-reader`, and the replacement closeout CI run
-[44815711484](https://github.com/seb-eis/mocassin-2/actions/runs/44815711484) is green at `020e70a`. The audit
-record is [Re-audit required](audits/step-13.md); `step-13-amend-1` awaits owner acceptance.
+its design merged as `056d8c1`, features 1–7 and the round-1 remediation are squashed into
+`step/13-rust-solver-foundation-and-package-reader`, and the final closeout CI run
+[44831177039](https://github.com/seb-eis/mocassin-2/actions/runs/44831177039) is green at `3128121`. `main`
+`4973d02` was merged as `64def37` (and `1f5b473` as `b8c7cca`) before the audited run. The audit record is
+[Passed with notes](audits/step-13.md), accepted by the owner on 2026-11-20; `step-13-amend-1` is **Withdrawn —
+resolved by `1f5b473`**.
 Milestones M4 and M5 were backfilled on 2026-11-18 as annotated tags `milestone-m4` → `f91fc63` (Step 08 merge)
 and `milestone-m5` → `ec2e04a` (Step 12 merge).
 
@@ -221,9 +223,11 @@ early-warning signal for the next cross-cutting review.
   for the merge: the change is documentation/containerfile-only and the owner's rebuild is the verification.
   The `step-11` tag is unchanged.
 - Step 08 received a maintenance fix on 2026-11-20 on branch `fix/step-08-equivalent-start-mapping` (commits
-  `1899421`, `85e27b2`, `4f5059e`), pending owner approval. A centered group now emits one direction with every
-  translation-equivalent start and a cross-bucket `jump_mapping`; the `msl-v1`/`amend-1-net10` canonical
-  summaries are unchanged. The `step-08` tag and merge are unchanged.
+  `1899421`, `85e27b2`, `4f5059e`), merged into `main` as `1f5b473` with the owner's approval. A centered group
+  now emits one direction with every translation-equivalent start and a cross-bucket `jump_mapping`; the
+  `msl-v1`/`amend-1-net10` canonical summaries are unchanged. The `step-08` tag and merge are unchanged.
+  Step 13's `step-13-centered` fixture consumes the fixed compiler; the later `4973d02` smoke bound is a
+  separate shared-runner test-budget change.
 - Milestones M0–M3 were backfilled on 2026-11-12 with annotated tags on the existing step merge commits:
   `milestone-m0` → `47a9a90`, `milestone-m1` → `7b4a994`, `milestone-m2` → `dbf5691`, `milestone-m3` →
   `3ed558a`. Tags were pushed to `origin`; no step tag was moved.

@@ -270,34 +270,40 @@ this record.
 
 ## Known notes for the auditor
 
-- **Fixture limitation (flag).** The real populated fixture does not carry the design's per-node mask
-  difference or equivalent-start mapping. The writer rejects a mixed particle set on a transition node with
-  `CMP004` ("Two rules in collection 0 share state0 ... with different outcomes") and an MMC mixed-set exchange
-  with `CMP004`/`CMP005`; a P-1 variant compiles the KMC collection but fails the verifier with `PKG010`
-  ("Environment 3 has a cluster link out of range"). No checked-in project combines a centered space group with
-  transitions. The reader semantics are covered by the synthetic tests named on the step page and in the
-  fixture READMEs; n-14 is not claimed as met. Please review the deviation and decide whether it is acceptable
-  for Step 13 or needs a follow-up.
-- `DirectionPool` and the jump-status container are Step 14 runtime state and were not added; the implementation
-  task is marked partial.
+These notes describe the final state at the audited commit `3128121`; they replace the round-1 notes that
+described the then-current limitation.
+
+- **F-1 is closed, not waived.** The real-writer `tests/contracts/packages/step-13-centered/` package (derived
+  from the Step 08 C-centered sample after the compiler fix `1f5b473`) carries both the per-node mask difference
+  and translation-equivalent cross-bucket `jump_mapping` entries. The populated fixture keeps its own mask
+  difference and KMC/MMC/pair/cluster coverage. The earlier `step-13-amend-1` is **Withdrawn — resolved by
+  `1f5b473`**; no limitation acceptance is outstanding.
+- `DirectionPool`, `JumpStatus`, and `JumpLink` are type-only containers with invariant tests; Step 14 populates
+  them. The implementation task is complete.
 - The 512 MiB model-element budget is verified by arithmetic and the `ReaderLimits`/scan tests; no 512 MiB
-  fixture is materialized.
+  fixture is materialized. `every_per_field_count_cap_is_enforced` covers the per-field caps and raised limits.
 - Platform CI was not run; Step 13 adds no platform-specific code. The Ubuntu closeout run and the local
   `all --require` gate are the evidence.
-- The AOT stage records the known Step 12 evidence: publishing the real `Mocassin.Cli` still emits 62
+- The AOT stage records the known Step 12 evidence: the real `Mocassin.Cli` publish **fails** with 62
   IL2xxx/IL3xxx diagnostics from reflection-based JSON converters in `Mocassin.Core`; the strict smoke host and
-  positive control pass, and the AOT gate is green.
-- The two benchmark `sourceCommit` provenance fields are part of the audited tree at `fe48dc8`, so no file
-  outside `docs/` changes after the closeout CI run. The earlier green run at `45eb181` (44807199574) and the
-  failed first dispatch at `fe48dc8` (44808204483, the known shared-runner performance flake: 31.3088447 s
-  against < 30 s for `TenThousandPositionModelCompilesWithinTheBudget`, owner-accepted with the Step 11
-  precedent) are superseded by the replacement run 44809489478 at `fe48dc8`, which is the closeout gate.
+  positive control pass, so the AOT gate is green and the decision remains Step 31 work.
+- Closeout: audited commit `3128121`, CI run `44831177039` is green at that commit. `main` `4973d02` (the
+  shared-runner smoke bound) was merged as `64def37`; `main` `1f5b473` (the Step 08 fix) was merged as
+  `b8c7cca`. The failed run `44826826251` at `ce00f8e` failed only the shared-runner
+  `TenThousandPositionModelCompilesWithinTheBudget` test (35.9 s against 30 s); `4973d02` adds a 90 s smoke
+  bound, Step 10's 30 s test is unchanged and flagged, and the final run is green.
+- The load baseline is boundary-calibrated for Step 29: the recorded medians are open 171.1 µs / cold
+  343.1 µs / warm 71.1 µs; a same-class rerun measured open 271.0 µs / cold 351.4 µs / warm 68.0 µs. The 10 %
+  rule is not relaxed.
 - Feature 6 had left `proptest` in `mocassin-msl`'s production dependencies; feature 7 moved it to
-  dev-dependencies.
-- The populated package has one deduplicated lattice row (both jobs use the same 2x2x2 lattice) and four
-  extracted payloads, not six; the fixture README records the shape.
+  dev-dependencies. The unused `serde_bytes`, `tracing` (in `mocassin-msl`), and `thiserror` (in
+  `mocassin-cli`) declarations are removed.
+- The populated package has one deduplicated lattice row and four extracted payloads; the centered package has
+  one lattice and three extracted payloads. Both READMEs record the shape.
 - The `--stdout` option is deliberately not accepted in Step 13 (usage error 10); the run-dump option is
   Step 19 work. The fuzz build uses `x86_64-unknown-linux-gnu` because the musl target is not installed.
+- Deferred items unchanged: the Step 11 verifier `byte_position` observation, Step 29 continuous fuzzing and
+  the quiet-run load baseline, and Step 31's AOT decision.
 
 ## Findings
 
@@ -322,7 +328,7 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Passed with notes — audit round 2 (no Blocker/Major; F-9 Minor and N-5…N-7 Notes pending owner acceptance)
+**State:** Passed with notes — accepted by the owner on 2026-11-20; F-9/N-5–N-7 fixed in the docs-only resolution commit; deferred items unchanged
 
 The first remediation was squashed as `020e70ad4efcb06f79607cfeb7c75e370147cdd9`; the F-1 closure was
 squashed as `ce00f8edd7012a513a20b8c85d94c9e639bd12c5` after the Step 08 fix `1f5b473`. F-2–F-8 and N-1–N-3 are
@@ -354,6 +360,10 @@ pending owner acceptance of F-9 and N-5…N-7.
 | N-2 | Fixed | Removed the unused `serde_bytes` (`mocassin-types`), `tracing` (`mocassin-msl`), and `thiserror` (`mocassin-cli`) declarations; `tracing`/`thiserror` stay only where used. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
 | N-3 | Fixed / flagged | A same-class load rerun (open 271.0 µs / cold 351.4 µs / warm 68.0 µs) is recorded; the baseline is flagged boundary-calibrated for Step 29. The 10 % rule is not relaxed. | `020e70ad4efcb06f79607cfeb7c75e370147cdd9` |
 | N-4 | Fixed | `main` `1f5b473` (Step 08 equivalent-start fix) and `4973d02` (shared-runner smoke bound) are merged before the closeout run; the run covers the merged tree. | `64def37` (main `4973d02` merge; `b8c7cca` merged `1f5b473`) |
+| F-9 | **Fixed** | The Step 13 page feature-7 closeout paragraph and the dashboard "Active work" paragraph now name audited `3128121`, run `44831177039`, `main` `4973d02` merged as `64def37`, and the withdrawn amendment (`1f5b473`). | docs-only resolution commit |
+| N-5 | **Fixed** | The Step 08 maintenance note now says the fix is merged into `main` as `1f5b473`; "pending owner approval" is removed. | docs-only resolution commit |
+| N-6 | **Fixed** | The withdrawn amendment's retained body is explicitly historical; "owner acceptance pending" is corrected to withdrawn/resolved and the Step 11 item remains deferred. | docs-only resolution commit |
+| N-7 | **Fixed** | The round-1 "Known notes for the auditor" are refreshed to the final state (F-1 closed by the centered fixture, containers added, AOT publish fails, closeout at `3128121`). | docs-only resolution commit |
 
 The resolution table is documentation-only after the audited code commit; the re-audit should verify the
 code/tests and the amendment decision.
@@ -381,35 +391,45 @@ Follow-up issue/step: Step 13 re-audit; Step 16 fixture/exact-check follow-up.
 The step agent completes this section before a merge, tag, or Blocker/Major waiver request. It must cover the
 full history, not only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded — merge `step-13` at `3128121`.
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict).
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status).
+- [x] Accepted notes and waivers recorded with rationale.
+- [x] Residual risks, deferred items, and follow-up owners recorded.
+- [x] Explicit no-Blocker/no-Major statement: none remains; F-9 and N-5–N-7 are fixed in the docs-only commit.
+- [x] Final CI and documentation-build results recorded: closeout run `44831177039` green at `3128121`;
+  `./tools/verify.sh all --require` and `docs --require` green on the merged tree.
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-20 | `fe48dc8` (record `a8a2289`) | DeepSeek V4.1 Flash 1017 (fresh) | Fixes required |
+| 2 | 2026-11-20 | `3128121` (record `0d3c2d8`, correction `c3f6a32`) | Fresh independent auditor | Passed with notes |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| F-1 | Major | Real-writer fixture lacked the n-14 properties and no amendment existed | `step-13-centered` fixture after `1f5b473`; amendment withdrawn | `ce00f8e` | Closed |
+| F-2…F-8 | Minor | Golden, projection, dangling reference, caps, containers, seed, vacancy check | Fixed and tested | `020e70a`, `ce00f8e` | Closed |
+| N-1…N-4 | Note | AOT wording, unused deps, load baseline, merge-tree | Fixed/flagged | `020e70a`, `64def37` | Closed |
+| F-9 | Minor | Stale round-1 closeout text on the step page/dashboard | Corrected to `3128121`/`44831177039`/`4973d02`/`64def37` | docs-only commit | Fixed |
+| N-5…N-7 | Note | Step 08 pending note, amendment body, round-1 known notes | Corrected/refreshed | docs-only commit | Fixed |
 
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-20
+
+F-9/N-5–N-7 are fixed in the docs-only resolution commit; no code, test, configuration, contract, or design
+change is required. Deferred items are unchanged: the Step 11 verifier `byte_position` observation, Step 29
+continuous fuzzing and the quiet-run load baseline, and Step 31's AOT decision.
 
 ## Audit rounds
 
