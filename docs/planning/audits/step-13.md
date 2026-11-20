@@ -322,7 +322,7 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-audit required
+**State:** Passed with notes — audit round 2 (no Blocker/Major; F-9 Minor and N-5…N-7 Notes pending owner acceptance)
 
 The first remediation was squashed as `020e70ad4efcb06f79607cfeb7c75e370147cdd9`; the F-1 closure was
 squashed as `ce00f8edd7012a513a20b8c85d94c9e639bd12c5` after the Step 08 fix `1f5b473`. F-2–F-8 and N-1–N-3 are
@@ -335,7 +335,8 @@ merge-tree obligation is satisfied by merging `main` `1f5b473` (`b8c7cca`) and t
 `31281210f64552ca3bb704512d028a1d28499650`; closeout CI run `44831177039` is green at that commit, and the
 following evidence/status commit is docs-only.
 
-`Fixes required` is the round-1 verdict; `Re-audit required` is the current record state, not a verdict.
+`Fixes required` is the round-1 verdict; `Passed with notes` is the round-2 verdict and the current record state,
+pending owner acceptance of F-9 and N-5…N-7.
 
 ## Resolution status
 
