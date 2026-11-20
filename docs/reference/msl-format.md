@@ -189,7 +189,9 @@ verifier; `mocassin verify` remains the full structural check.
    projection with the ADR 0010 fixed-width writer, the C# 12-decimal quantization expression, and the domain
    prefix. It compares both to the stored signatures. `model_signature` is an identity string and is not
    re-encoded.
-6. **Job.** The job row's payload-derived columns are compared with the payload; `seed` must be 32 bytes. The
+6. **Job.** The job row's payload-derived columns are compared with the payload; `seed` must be 32 bytes. A job
+   row whose model or lattice row is absent is a package-class error (exit 11). An optional `--seed` override
+   replaces `JobPackage.seed` after validation. The
    result is a validated `JobPackage` for Step 14.
 
 Stored payload integers use MessagePack's smallest-width encoding; the fixed-width `uint64`/`int64`/`float64`

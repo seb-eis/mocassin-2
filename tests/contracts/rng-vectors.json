@@ -1,0 +1,162 @@
+{
+  "format": "mocassin.rng-vectors",
+  "formatVersion": 1,
+  "algorithm": "chacha12-v1",
+  "domains": {
+    "jobSeed": "mocassin/job/v1",
+    "latticeSeed": "mocassin/lattice/v1",
+    "rngFork": "mocassin/rng-fork/v1"
+  },
+  "source": "Step 13 feature 6 cross-language RNG vectors; expected values cross-checked against an independent ChaCha12 implementation and the Step 10 .NET seed vectors.",
+  "seeds": {
+    "masterHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "job": [
+      {
+        "collection": 0,
+        "config": 0,
+        "job": 0,
+        "expectedHex": "884a9517b16620af2257945215f5552c1f5af0580ed2c911456b1a29a4f54ce7"
+      },
+      {
+        "collection": 1,
+        "config": 2,
+        "job": 3,
+        "expectedHex": "172da959820807561e234261342a48e26076c59e1af34a01487919d16a7daccf"
+      }
+    ],
+    "lattice": [
+      {
+        "jobSeedHex": "b6d2d1614b2b819445764523ef5613a47b7712a218e303d1a3d2cdb4f71a5c2e",
+        "requestHashHex": "5719de5efea8b57ef6960229bf2248de0da3bb497c2f29507d1742157f878295",
+        "expectedHex": "a497141d26d005eb5caa17025b3c1e3564f31f8d46518a7a36d311623be464d2"
+      }
+    ],
+    "seedHash": [
+      {
+        "seedHex": "0000000000000000000000000000000000000000000000000000000000000000",
+        "expectedHex": "66687aadf862bd776c8fc18b8e9f8e20089714856ee233b3902a591d0d5f2925"
+      }
+    ]
+  },
+  "draws": {
+    "seedHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "first16U32": [
+      "fff931f2",
+      "5ec67ad1",
+      "25f30544",
+      "aa40e9d7",
+      "1f601349",
+      "bc46bec2",
+      "c3cac3e9",
+      "361a1ad9",
+      "08b34059",
+      "9f7c85c2",
+      "54e2d629",
+      "9ad42885",
+      "0a1b2b61",
+      "165d76e6",
+      "fbae85e5",
+      "79883646"
+    ],
+    "first8U64": [
+      "5ec67ad1fff931f2",
+      "aa40e9d725f30544",
+      "bc46bec21f601349",
+      "361a1ad9c3cac3e9",
+      "9f7c85c208b34059",
+      "9ad4288554e2d629",
+      "165d76e60a1b2b61",
+      "79883646fbae85e5"
+    ],
+    "first4F64": [
+      0.37021606089544856,
+      0.6650530004753357,
+      0.7354544853145628,
+      0.2113358289387106
+    ],
+    "bounded": {
+      "2": [
+        1,
+        0,
+        0,
+        1,
+        0,
+        1,
+        1,
+        0
+      ],
+      "10": [
+        9,
+        3,
+        1,
+        6,
+        1,
+        7,
+        7,
+        2
+      ],
+      "1024": [
+        1023,
+        379,
+        151,
+        681,
+        125,
+        753,
+        783,
+        216
+      ]
+    },
+    "bufferBoundaryAfter62": [
+      "5a253879",
+      "4b626621",
+      "56e96aa5",
+      "5d537674"
+    ]
+  },
+  "fork": {
+    "seedHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "stream": 0,
+    "wordPos": 0,
+    "domainHex": "4141414141414141414141414141414141414141414141414141414141414141",
+    "childFirst8U32": [
+      "989d10fe",
+      "83826b54",
+      "67039c18",
+      "54f61693",
+      "d07a991d",
+      "dd54e406",
+      "c5f379e9",
+      "0957e3ba"
+    ]
+  },
+  "state": {
+    "seedHex": "000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "drawsBeforeExport": 17,
+    "stateHex": "4d43523101000000000000000000000011000000000000000000000000000000000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+    "next8U32": [
+      "e0723b83",
+      "52155cdb",
+      "4683d13d",
+      "eb0c8e35",
+      "48641b2e",
+      "32309d04",
+      "1685ee7e",
+      "a35ec622"
+    ],
+    "nonzeroStream": {
+      "stream": 7,
+      "wordPos": 21,
+      "stateHex": "4d43523101000000070000000000000015000000000000000000000000000000000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f",
+      "next8U32": [
+        "7d9122fe",
+        "2f4cf32a",
+        "1b02bdf7",
+        "2c383c16",
+        "1f4585ee",
+        "57e5f4cb",
+        "85e84032",
+        "dc206c88"
+      ]
+    }
+  }
+}

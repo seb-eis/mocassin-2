@@ -405,7 +405,7 @@ list, total bytes, and `removedCount: 0`.
 
 ```text
 mocassin-sim --db <project.msl> --job <id> [--io <dir>]
-             [--stdout <file>] [--seed <hex32>] [--threads <n>]
+             [--seed <hex32>] [--threads <n>]
              [--extension <path>] [--no-extensions] [--jump-log-max-ev <f64>]
              [--log-level <error|warn|info|debug|trace>]
              [--log-format human|json] [--dry-run] [--version]
@@ -423,8 +423,8 @@ job-folder output, batch mode, and extensions arrive in Steps 14–19.
 | `--job <id>` | Required 1-based job id. An unknown id is a usage error. |
 | `--io <dir>` | Job folder for a future run. Accepted but not created in this release. |
 | `--dry-run` | Load, validate, and print the summary; write nothing; exit 0. Required in this release. |
-| `--stdout <file>` | Reserved for the run statistics dump. Rejected with `--dry-run`. |
-| `--seed <hex32>` | Exactly 64 hex characters; overrides the effective seed for debugging. Only the seed hash is printed. |
+| `--stdout <file>` | Reserved for the run statistics dump (Step 19). Not accepted in this release; any use is an invalid-argument error (10). |
+| `--seed <hex32>` | Exactly 64 hex characters; replaces `JobPackage.seed` for this process (debugging/reproduction). Only the seed hash is printed. |
 | `--threads <n>` | `1..=256`; accepted and validated, unused until Step 19. |
 | `--extension <path>` | Rejected until the extension ABI lands (Step 19). |
 | `--no-extensions` | Accepted; no-op in this release. Conflicts with `--extension`. |
@@ -477,7 +477,7 @@ The canonical table is the internal target architecture §7.3; this table mirror
 | 0 | Completed (including a successful dry run). |
 | 5 | Partial success for multi-job/batch commands (at least one job failed, others completed); reserved until Step 19. |
 | 10 | Invalid arguments, unknown job, unsupported option, extension requested. |
-| 11 | Package error: unusable SQLite, schema/version mismatch, missing element, invalid frame, decode/scan/size error. |
+| 11 | Package error: unusable SQLite, schema/version mismatch, missing element, a job row referencing a missing model or lattice row, invalid frame, decode/scan/size error. |
 | 12 | Model/data error: signature mismatch, invalid index/length/value, column/payload mismatch. |
 | 13 | Numerical failure or internal invariant violation (including a caught panic). |
 | 14 | Aborted by a configured limit. |

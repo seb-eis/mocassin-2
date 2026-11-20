@@ -160,8 +160,8 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Package reader and solver foundation | Y | Planned | 13 | Read-only `.msl` reader, bounded decode, typed job/model, canonical signature re-encode, `mocassin-sim --dry-run`; no physics until 14–19 |
-| Deterministic RNG and seed derivation | Y | Planned | 13 | ChaCha12, SHA-256 job/lattice derivation, Lemire bounded draws, 64-byte `RngStateV1`, golden vectors; replaces the PCG32 defects |
+| Package reader and solver foundation | Y | Done | 13 | Read-only `.msl` reader, bounded decode, validated runtime model/job/lattice, canonical signature re-encode, `mocassin-sim --dry-run`; real `msl-v1`, `amend-1-net10`, populated/MMC, and C-centered packages. The populated fixture carries the per-node mask difference; the C-centered fixture carries the real cross-bucket equivalent-start mapping and a mask difference. No physics until 14–19 |
+| Deterministic RNG and seed derivation | Y | Done | 13 | ChaCha12, SHA-256 job/lattice derivation, Lemire bounded draws, 64-byte `RngStateV1`, cross-language golden vectors; replaces the PCG32 defects |
 | MMC engine | Y | Planned | 17 | |
 | KMC engine | Y | Planned | 16 | |
 | Rejection KMC selection | Y | Planned | 16 | Uniform over directions |
@@ -256,7 +256,7 @@ Status legend:
 | --- | :---: | --- | --- | --- |
 | .NET 11 | Y | Implemented | 00/11 | Retargeted by amendment 1 |
 | Avalonia cross-platform | Y | Planned | 23A | |
-| Rust solver | Y | Planned | 13 | Workspace, read-only package reader, ChaCha12 RNG, and `mocassin-sim --dry-run` land in 13; engines and state in 14–19 |
+| Rust solver | Y | Partial | 13–19 | Step 13 delivers the workspace, read-only package reader, validated runtime model/job, ChaCha12 RNG, signatures, the real populated/C-centered fixtures, and `mocassin-sim --dry-run`; engines, tracking, state, and the production CLI remain in 14–19 |
 | Windows support | Y | Planned | 31 | |
 | Linux support | Y | Planned | 31 | |
 | macOS support | Y | Planned | 31 | |
@@ -267,8 +267,8 @@ Status legend:
 | CI on three OSes | Y | Partial | 00/07 | Ubuntu automatic on `main`; Windows and macOS manual until platform-specific code appears |
 | Unit/property/contract tests | Y | Implemented | 03–07 | Suite green; Step 29 adds statistical parity and fuzzing |
 | Statistical parity suite | Y | Planned | 29 | |
-| Performance benchmarks | Y | Planned | 29 | |
-| Fuzzing | Y | Planned | 13/29 | Step 13 adds `mocassin-msl` scan/decode/package targets and a time-boxed run; Step 29 extends to `.mcs`/extension configs and the nightly job |
+| Performance benchmarks | Y | Partial | 13/29 | Step 13 records the load and RNG medians plus same-runner-class baselines; Step 29 owns the automated regression job |
+| Fuzzing | Y | Partial | 13/29 | Step 13 adds `mocassin-msl` scan/decode/package targets and a recorded 5 s-per-target run; Step 29 extends to `.mcs`/extension configs and the nightly job |
 | Docs skeleton + build/CI | Y | Implemented | 00/30 | Zensical, navigation, build scripts, and planning exclusion; Step 30 completes content |
 | Standalone docs completion (Zensical) | Y | Partial | 30 | Site builds strictly; completion, audit, and publication in 30 |
 | User guide + physics | Y | Partial | 03–07/30 | Model-definition pages exist; Step 30 completes cross-cutting content |
@@ -282,7 +282,7 @@ Status legend:
 | Glossary, notation, units | Y | Planned | 30 | |
 | Examples + publications | Y | Planned | 30 | |
 | .NET API reference (DocFX) | Y | Partial | 00/30 | Generated `/api/dotnet/`; Step 30 finalizes coverage and publication |
-| Rust API reference (rustdoc) | Y | Partial | 00/13/30 | Skeleton crates only; the public API grows from Step 13; Step 30 finalizes coverage and publication |
+| Rust API reference (rustdoc) | Y | Partial | 00/13/30 | The Step 13 public API is documented and `cargo doc` is clean; Step 30 finalizes coverage and publication |
 | Python API reference (mkdocstrings) | Y | Planned | 22/30 | `/api/python/` |
 | MIT + original GPL attribution/notices | Y | Implemented | 00 | `LICENSE`, `NOTICE.md`, and SPDX headers |
 | Legacy file migration | N | Out of scope | — | Owner decision |

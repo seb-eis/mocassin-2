@@ -92,7 +92,10 @@ public sealed record JumpDirectionPayload(
 /// <param name="State2">The state-2 code.</param>
 /// <param name="FrequencyHz">The absolute applied attempt frequency in hertz.</param>
 /// <param name="ChargeTransportVector">
-/// The particle-identity charge transport vector <c>Σ q_p · (x_p(S2) − x_p(S0))</c> in e·Å.
+/// The node-wise endpoint-moment difference
+/// <c>Σ_node (q(state2[node]) − q(state0[node])) · x(path_node)</c> in e·Å, where <c>x</c> is the Cartesian
+/// position of the decoded path node. It is independent of how equal particles are paired and is not derived
+/// from <c>Movement</c>.
 /// </param>
 /// <param name="StaticCorrection">The optional static S2 correction; <see langword="null"/> in v1.</param>
 /// <param name="TrackerOrder">
