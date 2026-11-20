@@ -5,9 +5,13 @@ using Microsoft.Extensions.Logging;
 using Mocassin.App.Composition;
 using Mocassin.App.Startup;
 using Mocassin.App.Tests.TestSupport;
+using Mocassin.App.ViewModels.Commands;
 using Mocassin.App.ViewModels.Consoles;
 using Mocassin.App.ViewModels.Dialogs;
+using Mocassin.App.ViewModels.Documents;
+using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Notifications;
+using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Shell;
 
 namespace Mocassin.App.Tests.Composition;
@@ -34,6 +38,18 @@ public sealed class AppHostTests
         Assert.NotNull(host.Services.GetRequiredService<IShellLifetime>());
         Assert.NotNull(host.Services.GetRequiredService<IShellLauncher>());
         Assert.NotNull(host.Services.GetRequiredService<CrashHandler>());
+        Assert.NotNull(host.Services.GetRequiredService<GestureFormatter>());
+        Assert.NotNull(host.Services.GetRequiredService<ICommandCatalog>());
+        Assert.NotNull(host.Services.GetRequiredService<IMenuItemProvider>());
+        Assert.NotNull(host.Services.GetRequiredService<INavigationService>());
+        Assert.NotNull(host.Services.GetRequiredService<INavigationTargetProvider>());
+        Assert.NotNull(host.Services.GetRequiredService<IExplorerNodeProvider>());
+        Assert.NotNull(host.Services.GetRequiredService<IConsoleChannelProvider>());
+        Assert.NotNull(host.Services.GetRequiredService<DocumentCollectionViewModel>());
+        Assert.NotNull(host.Services.GetRequiredService<WorkspaceViewModel>());
+        Assert.NotNull(host.Services.GetRequiredService<IProjectWorkspace>());
+        Assert.NotNull(host.Services.GetRequiredService<ProjectExplorerViewModel>());
+        Assert.NotNull(host.Services.GetRequiredService<IClipboardService>());
     }
 
     [Fact]

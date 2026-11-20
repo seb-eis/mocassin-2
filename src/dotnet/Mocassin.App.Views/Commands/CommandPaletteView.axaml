@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Commands"
+             x:Class="Mocassin.App.Views.Commands.CommandPaletteView"
+             x:DataType="vm:CommandPaletteViewModel">
+  <Grid Background="#66000000">
+    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+            BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
+            BorderThickness="1"
+            CornerRadius="6"
+            Width="620"
+            MaxHeight="460"
+            VerticalAlignment="Top"
+            Margin="0,120,0,0"
+            Padding="12">
+      <Grid RowDefinitions="Auto,*" RowSpacing="8">
+        <TextBox x:Name="SearchBox"
+                 Text="{Binding SearchText}"
+                 PlaceholderText="Type a command"
+                 KeyDown="OnSearchKeyDown" />
+        <ListBox Grid.Row="1"
+                 ItemsSource="{Binding Results}"
+                 SelectedItem="{Binding SelectedCommand}"
+                 DoubleTapped="OnListDoubleTapped">
+          <ListBox.ItemTemplate>
+            <DataTemplate x:DataType="vm:ShellCommand">
+              <Grid ColumnDefinitions="*,Auto">
+                <StackPanel>
+                  <TextBlock Text="{Binding Title}" />
+                  <TextBlock Text="{Binding Description}"
+                             Classes="caption"
+                             IsVisible="{Binding Description, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                </StackPanel>
+                <TextBlock Grid.Column="1" Text="{Binding GestureText}" Classes="caption" />
+              </Grid>
+            </DataTemplate>
+          </ListBox.ItemTemplate>
+        </ListBox>
+      </Grid>
+    </Border>
+  </Grid>
+</UserControl>

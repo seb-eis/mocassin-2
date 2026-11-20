@@ -4,6 +4,7 @@ using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Microsoft.Extensions.Logging;
 using Mocassin.App.ViewModels;
+using Mocassin.App.Views;
 
 namespace Mocassin.App;
 
@@ -50,7 +51,7 @@ internal sealed partial class ViewLocator : IDataTemplate
             viewName = viewName[..^"ViewModel".Length] + "View";
         }
 
-        var viewType = typeof(ViewLocator).Assembly.GetType(viewName, throwOnError: false);
+        var viewType = typeof(AppViewsModule).Assembly.GetType(viewName, throwOnError: false);
         if (viewType is null || !typeof(Control).IsAssignableFrom(viewType))
         {
             if (logger is not null)

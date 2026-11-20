@@ -17,9 +17,20 @@ internal sealed partial class ConsoleViewModel : ObservableObject
     /// Initializes a new console view model.
     /// </summary>
     /// <param name="consoleService">The console service that owns the channels.</param>
-    public ConsoleViewModel(IConsoleService consoleService)
+    /// <param name="providers">The optional channel providers.</param>
+    public ConsoleViewModel(
+        IConsoleService consoleService,
+        IEnumerable<IConsoleChannelProvider>? providers = null)
     {
-        Channels = new ObservableCollection<ConsoleChannelViewModel>(consoleService.Channels);
+        var channels = providers is null
+            ? consoleService.Channels.ToList()
+            : providers.SelectMany(provider => provider.CreateChannels()).ToList();
+        if (!channels.Contains(consoleService.ApplicationChannel))
+        {
+            channels.Insert(0, consoleService.ApplicationChannel);
+        }
+
+        Channels = new ObservableCollection<ConsoleChannelViewModel>(channels);
         ActiveChannel = Channels.FirstOrDefault();
     }
 

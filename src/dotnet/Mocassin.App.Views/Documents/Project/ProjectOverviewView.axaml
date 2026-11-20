@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Documents.Project"
+             x:Class="Mocassin.App.Views.Documents.Project.ProjectOverviewView"
+             x:DataType="vm:ProjectOverviewViewModel">
+  <ScrollViewer>
+    <StackPanel Spacing="12" Margin="20">
+      <TextBlock Text="{Binding Name}" FontSize="24" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding FilePath}"
+                 Classes="caption"
+                 TextWrapping="Wrap" />
+      <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+              BorderThickness="1"
+              CornerRadius="4"
+              Padding="12">
+        <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
+          <TextBlock Grid.Row="0" Grid.Column="0" Text="Project id" FontWeight="SemiBold" />
+          <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProjectIdText}" TextWrapping="Wrap" />
+          <TextBlock Grid.Row="1" Grid.Column="0" Text="Description" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding Description}" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="2" Grid.Column="0" Text="Author" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding Author}" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="3" Grid.Column="0" Text="Notes" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding Notes}" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="4" Grid.Column="0" Text="Created" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding CreatedUtcText}" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="5" Grid.Column="0" Text="Modified" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="5" Grid.Column="1" Text="{Binding ModifiedUtcText}" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="6" Grid.Column="0" Text="Last saved" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="6" Grid.Column="1" Text="{Binding LastSavedText}" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="7" Grid.Column="0" Text="Schema version" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="7" Grid.Column="1" Text="{Binding SchemaVersionText}" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="8" Grid.Column="0" Text="Symmetry" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="8" Grid.Column="1" Text="{Binding SymmetryText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="9" Grid.Column="0" Text="State" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="9" Grid.Column="1" Text="{Binding LockStateText}" TextWrapping="Wrap" Margin="0,4,0,0" />
+          <TextBlock Grid.Row="10" Grid.Column="0" Text="Master seed" FontWeight="SemiBold" Margin="0,4,0,0" />
+          <StackPanel Grid.Row="10" Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+            <TextBlock Text="{Binding MasterSeed}" TextWrapping="Wrap" MaxWidth="460" />
+            <Button Content="Copy" Command="{Binding CopyMasterSeedCommand}" />
+          </StackPanel>
+        </Grid>
+      </Border>
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="Copy path" Command="{Binding CopyPathCommand}" />
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

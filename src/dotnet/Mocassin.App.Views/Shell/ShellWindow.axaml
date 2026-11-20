@@ -3,6 +3,7 @@
         xmlns:shell="using:Mocassin.App.Views.Shell"
         xmlns:dialogs="using:Mocassin.App.Views.Dialogs"
         xmlns:notifications="using:Mocassin.App.Views.Notifications"
+        xmlns:commands="using:Mocassin.App.Views.Commands"
         xmlns:vm="using:Mocassin.App.ViewModels.Shell"
         x:Class="Mocassin.App.Views.Shell.ShellWindow"
         x:DataType="vm:ShellViewModel"
@@ -14,6 +15,12 @@
         WindowStartupLocation="CenterScreen">
   <Grid>
     <shell:ShellView />
+    <Grid IsVisible="{Binding IsPaletteOpen}">
+      <commands:CommandPaletteView DataContext="{Binding Palette}" />
+    </Grid>
+    <Grid IsVisible="{Binding IsCheatSheetOpen}">
+      <commands:ShortcutCheatSheetView DataContext="{Binding Shortcuts}" />
+    </Grid>
     <dialogs:DialogHost x:Name="DialogOverlay" />
     <notifications:NotificationHostView x:Name="NotificationOverlay"
                                        HorizontalAlignment="Right"

@@ -3,9 +3,13 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Startup;
+using Mocassin.App.ViewModels.Commands;
 using Mocassin.App.ViewModels.Consoles;
 using Mocassin.App.ViewModels.Dialogs;
+using Mocassin.App.ViewModels.Documents;
+using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Notifications;
+using Mocassin.App.ViewModels.Projects;
 using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Dialogs;
 using Mocassin.App.Views.Platform;
@@ -27,6 +31,10 @@ internal static class AppServiceRegistration
     {
         services.AddSingleton<IShellLifetime, AppShellLifetime>();
         services.AddSingleton<CrashHandler>();
+        var platform = OperatingSystem.IsMacOS()
+            ? GesturePlatform.MacOS
+            : OperatingSystem.IsWindows() ? GesturePlatform.Windows : GesturePlatform.Linux;
+        services.AddSingleton(typeof(GesturePlatform), platform);
         return services;
     }
 
@@ -38,8 +46,19 @@ internal static class AppServiceRegistration
     public static IServiceCollection AddMocassinViewModels(this IServiceCollection services)
     {
         services.AddSingleton<IConsoleService, ConsoleService>();
+        services.AddSingleton<IConsoleChannelProvider, ApplicationConsoleChannelProvider>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<ProgressService>();
+        services.AddSingleton<GestureFormatter>();
+        services.AddSingleton<ICommandCatalog, CommandCatalog>();
+        services.AddSingleton<IMenuItemProvider, ShellMenuProvider>();
+        services.AddSingleton<WorkspaceViewModel>();
+        services.AddSingleton<IProjectWorkspace>(provider => provider.GetRequiredService<WorkspaceViewModel>());
+        services.AddSingleton<DocumentCollectionViewModel>();
+        services.AddSingleton<INavigationTargetProvider, ProjectNavigationTargetProvider>();
+        services.AddSingleton<INavigationService, NavigationService>();
+        services.AddSingleton<IExplorerNodeProvider, ProjectExplorerNodeProvider>();
+        services.AddSingleton<ProjectExplorerViewModel>();
         return services;
     }
 
@@ -55,6 +74,8 @@ internal static class AppServiceRegistration
         services.AddSingleton<IShellLauncher>(provider => provider.GetRequiredService<AvaloniaShellLauncher>());
         services.AddSingleton<AvaloniaStorageService>();
         services.AddSingleton<IStorageService>(provider => provider.GetRequiredService<AvaloniaStorageService>());
+        services.AddSingleton<AvaloniaClipboardService>();
+        services.AddSingleton<IClipboardService>(provider => provider.GetRequiredService<AvaloniaClipboardService>());
         services.AddSingleton<DialogService>();
         services.AddSingleton<IDialogService>(provider => provider.GetRequiredService<DialogService>());
         return services;
@@ -69,10 +90,18 @@ internal static class AppServiceRegistration
     {
         services.AddSingleton(provider => new ShellViewModel(
             provider.GetRequiredService<IConsoleService>(),
+            provider.GetServices<IConsoleChannelProvider>(),
             new ShellRegionsViewModel(),
-            new StatusBarViewModel(GetVersion()),
+            new StatusBarViewModel(GetVersion(), provider.GetServices<IStatusBarItemProvider>()),
             provider.GetRequiredService<ProgressService>(),
-            provider.GetRequiredService<IShellLifetime>()));
+            provider.GetRequiredService<IShellLifetime>(),
+            provider.GetRequiredService<DocumentCollectionViewModel>(),
+            provider.GetRequiredService<WorkspaceViewModel>(),
+            provider.GetRequiredService<INavigationService>(),
+            provider.GetRequiredService<ProjectExplorerViewModel>(),
+            provider.GetRequiredService<ICommandCatalog>(),
+            provider.GetRequiredService<IMenuItemProvider>(),
+            provider.GetRequiredService<GesturePlatform>()));
         services.AddSingleton<ShellWindow>();
         return services;
     }

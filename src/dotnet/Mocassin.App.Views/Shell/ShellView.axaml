@@ -5,17 +5,7 @@
              x:Class="Mocassin.App.Views.Shell.ShellView"
              x:DataType="vm:ShellViewModel">
   <Grid RowDefinitions="Auto,*,Auto">
-    <Menu Grid.Row="0">
-      <MenuItem Header="_File">
-        <MenuItem Header="E_xit" Command="{Binding ExitCommand}" />
-      </MenuItem>
-      <MenuItem Header="_View">
-        <MenuItem Header="Projects" Command="{Binding Regions.ToggleProjectsCommand}" />
-        <MenuItem Header="Inspector" Command="{Binding Regions.ToggleInspectorCommand}" />
-        <MenuItem Header="Console" Command="{Binding Regions.ToggleConsoleCommand}" />
-      </MenuItem>
-      <MenuItem Header="_Help" />
-    </Menu>
+    <Menu Grid.Row="0" x:Name="MainMenu" />
 
     <Grid Grid.Row="1" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
       <shell:ProjectsRegionView Grid.Column="0"
