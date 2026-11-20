@@ -9,6 +9,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Avalonia.Fonts.Inter" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Sinks.Console" Condition="'$(Configuration)' == 'Debug'" />
+    <PackageReference Include="Serilog.Sinks.File" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="../Mocassin.App.ViewModels/Mocassin.App.ViewModels.csproj" />
     <ProjectReference Include="../Mocassin.App.Views/Mocassin.App.Views.csproj" />
     <ProjectReference Include="../Mocassin.Contracts/Mocassin.Contracts.csproj" />

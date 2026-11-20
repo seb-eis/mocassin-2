@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:overlay="using:Mocassin.App.ViewModels.Dialogs"
+             x:Class="Mocassin.App.Views.Dialogs.ConfirmDialogView"
+             x:DataType="overlay:ConfirmDialogViewModel">
+  <StackPanel Spacing="12">
+    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button Content="{Binding CancelText}" Command="{Binding CancelCommand}" IsCancel="True" />
+      <Button Content="{Binding ConfirmText}" Command="{Binding ConfirmCommand}" IsDefault="True" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

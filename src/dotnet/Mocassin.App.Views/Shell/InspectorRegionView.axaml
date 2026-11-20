@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Mocassin.App.Views.Shell.InspectorRegionView">
+  <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+          BorderThickness="1,0,0,0"
+          Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+    <Grid RowDefinitions="Auto,*">
+      <TextBlock Text="Inspector"
+                 FontWeight="SemiBold"
+                 Margin="12,10" />
+      <TextBlock Grid.Row="1"
+                 Text="Nothing is selected."
+                 TextWrapping="Wrap"
+                 Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                 Margin="12,0,12,12" />
+    </Grid>
+  </Border>
+</UserControl>

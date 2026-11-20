@@ -1,0 +1,30 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Shell"
+             x:Class="Mocassin.App.Views.Shell.StatusBarView"
+             x:DataType="vm:ShellViewModel">
+  <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+          BorderThickness="0,1,0,0"
+          Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
+          Padding="12,4">
+    <Grid ColumnDefinitions="Auto,Auto,*,Auto">
+      <TextBlock Text="{Binding StatusBar.ApplicationName}" FontWeight="SemiBold" />
+      <TextBlock Grid.Column="1"
+                 Text="{Binding StatusBar.ActiveDocumentText}"
+                 Margin="16,0,0,0"
+                 Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+      <ProgressBar Grid.Column="2"
+                   HorizontalAlignment="Stretch"
+                   Margin="16,2"
+                   Height="4"
+                   Minimum="0"
+                   Maximum="1"
+                   Value="{Binding Progress.Fraction, TargetNullValue=0}"
+                   IsIndeterminate="{Binding Progress.IsIndeterminate}"
+                   IsVisible="{Binding Progress.IsActive}" />
+      <TextBlock Grid.Column="3"
+                 Text="{Binding StatusBar.Version}"
+                 Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+    </Grid>
+  </Border>
+</UserControl>

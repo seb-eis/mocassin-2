@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:Mocassin.App.ViewModels.Notifications"
+             x:Class="Mocassin.App.Views.Notifications.NotificationHostView"
+             x:DataType="vm:INotificationService">
+  <ItemsControl ItemsSource="{Binding Notifications}">
+    <ItemsControl.ItemTemplate>
+      <DataTemplate x:DataType="vm:NotificationViewModel">
+        <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
+                BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
+                BorderThickness="1"
+                CornerRadius="4"
+                Padding="10,8"
+                Margin="0,4,0,0"
+                MaxWidth="380">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="{Binding Message}" TextWrapping="Wrap" VerticalAlignment="Center" />
+            <Button Grid.Column="1"
+                    Content="×"
+                    Command="{Binding CloseCommand}"
+                    Margin="8,0,0,0"
+                    Padding="6,0" />
+          </Grid>
+        </Border>
+      </DataTemplate>
+    </ItemsControl.ItemTemplate>
+  </ItemsControl>
+</UserControl>

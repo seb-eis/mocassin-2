@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Avalonia.Headless" />
     <PackageReference Include="coverlet.collector">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -26,5 +27,6 @@
   <ItemGroup>
     <ProjectReference Include="../Mocassin.App/Mocassin.App.csproj" />
     <ProjectReference Include="../Mocassin.App.ViewModels/Mocassin.App.ViewModels.csproj" />
+    <ProjectReference Include="../Mocassin.App.Views/Mocassin.App.Views.csproj" />
   </ItemGroup>
 </Project>
