@@ -23,6 +23,7 @@ decision will be made.
 | Format lifetime | `.msl`/`.msr` current + previous major; `.mcs` current-only; SemVer for public APIs | [ADR 0013](adr/0013-format-compatibility-and-api-versioning.md) |
 | Extension boundary | C ABI, panic containment, opt-in in-process loading, versioned host table | [ADR 0014](adr/0014-extension-abi-and-trust-boundary.md) |
 | Contract manifest | `contracts/manifest.json` plus generated checks/fixtures | [ADR 0009](adr/0009-contract-manifest-and-contracts-library.md) |
+| Split step IDs | A split step uses `step-NN[a-z]` (`step-23a`, `step-23b`) in closeout evidence, audit records, status rows, and tags; the optional single lowercase letter is the only allowed suffix. Step 23 was split into 23A and 23B, so the suffix avoids renumbering later steps. | [Closeout evidence](closeout/README.md) |
 | Project persistence | `ProjectStore` in `Mocassin.Packages`, not `Core` | [Step 01](steps/step-01-domain-kernel-and-project-format.md) |
 | Primitive geometry | `Fractional3`/`Cartesian3`/`Vector4I` in `Core.Geometry`; public generic `Vector3<T>`/`Vector4<T>`/`Matrix3<T>`/`Matrix4<T>`; `Int3x3` for exact integer symmetry | [Step 02](steps/step-02-symmetry-and-geometry.md) |
 | Space-group catalog | spglib as the sole source; 274-setting compatibility subset; committed canonical JSON, dev-only generator, CI drift check, checksum, and BSD-3-Clause attribution | [Step 02](steps/step-02-symmetry-and-geometry.md) |

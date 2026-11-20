@@ -1040,7 +1040,10 @@ MessagePack map with snake_case keys. Top-level:
 - A direction is mapped into every symmetry-equivalent start bucket, not only its representative
   `direction.position_id`. `EquivalentStartPositions` is not persisted, so a reader must not require
   `direction.position_id == bucket_position`; it validates range, collection, and uniqueness, and Step 14
-  consumes the mapping as authored. The exact equivalent-start relation is a Step 08 writer invariant.
+  consumes the mapping as authored. The Step 08 writer invariant is: starts are equivalent when they are
+  related by a setting operation whose linear part is the identity (a centering/lattice translation) and the
+  direction's fractional displacement sequence `x(i) - x(0)` is unchanged. Rotational or mirror images are
+  distinct directions, not equivalent starts.
 
 `simulations` fields:
 
