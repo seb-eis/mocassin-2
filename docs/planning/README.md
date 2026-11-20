@@ -89,7 +89,8 @@ items are tracked in [`05-open-decisions.md`](05-open-decisions.md).
 | E. Results | [20](steps/step-20-state-reader-and-evaluation-api.md) | `.mcs` reader, `.msr` collection, evaluation API |
 | E. Results | [21](steps/step-21-analysis-plots-and-reports.md) | Analysis queries, plots, CSV/JSON reports |
 | E. Results | [22](steps/step-22-python-analysis-api.md) | Python `.mcs`/`.msr` reader, basic evaluations, pytest, mkdocstrings |
-| F. GUI | [23](steps/step-23-avalonia-shell-and-project-lifecycle.md) | Avalonia shell, navigation, project lifecycle, undo/redo |
+| F. GUI | [23A](steps/step-23a-workspace-and-project-lifecycle.md) | Avalonia workspace, navigation, settings, project lifecycle |
+| F. GUI | [23B](steps/step-23b-editing-diagnostics-and-recovery.md) | Editing/undo, validation surface, dirty state, autosave, recovery |
 | F. GUI | [24](steps/step-24-model-editors-particle-structure-transitions.md) | Particle, structure, and transition editors |
 | F. GUI | [25](steps/step-25-model-editors-energy-lattice-simulations.md) | Energy, lattice, and simulation editors |
 | F. GUI | [26](steps/step-26-parameterization-job-templates-and-build-ui.md) | Parameterization, job templates, build/deploy UI |

@@ -143,6 +143,90 @@ Rules:
   `cargo test --workspace`, and review. A mechanical Rust layout test is deferred to Step 29; do not add a
   second structure tool now.
 
+### 2.3 `Mocassin.App*` layout (Steps 23A/23B)
+
+The Avalonia track is split so that view models stay UI-framework-free and the composition root stays the only
+place that resolves DI. **23A** creates the host, workspace, settings, and lifecycle folders; **23B** adds the
+editing, diagnostics, recovery, and scheduling folders.
+
+```text
+src/dotnet/Mocassin.App/                 # composition root + app-local I/O
+  Program.cs
+  App.axaml
+  App.axaml.cs
+  ViewLocator.cs
+  AssemblyInfo.cs
+  Composition/     # 23A: AppHost, service registration, startup options, app paths, logging setup, log retention
+  Settings/        # 23A: AppSettingsStore, settings write policy (atomic + fsync + size cap)
+  Files/           # 23A: ProjectFileProbe, file-stamp provider
+  Startup/         # 23A: startup coordination, crash handler, placement resolver
+  Recovery/        # 23B: RecoveryStore, CrashRecoveryWriter, recovery scan
+
+src/dotnet/Mocassin.App.ViewModels/      # no Avalonia, no System.IO
+  Shell/           # 23A: shell/region/status-bar view models, window state, placement resolver
+  Documents/       # 23A: document model, keys, tab collection, welcome
+  Documents/Project/  # 23A: project overview, project JSON; 23B: metadata editor
+  Projects/        # 23A: project session, session service, outcomes, stamps, external change, recents
+  Navigation/      # 23A: navigation service/contracts, history, target provider, explorer/inspector seams
+  Settings/        # 23A: settings model, validator, migrations, JSON context, store/theme contracts, state
+  Editing/         # 23B: project edit coordinator, edit diagnostics, project-changed event
+  Diagnostics/     # 23B: validation coordinator, problems, diagnostic items, validation state
+  Recovery/        # 23B: recovery store contract, candidates, retention policy (pure)
+  Scheduling/      # 23B: autosave scheduler and debouncer
+  Commands/        # command catalog, shell command, gesture descriptors, contribution seams, palette
+  Consoles/        # console channels, entries, console service
+  Dialogs/         # dialog/picker/dispatcher/progress contracts and view models
+
+src/dotnet/Mocassin.App.Views/
+  Shell/  Documents/  Navigation/  Consoles/  Settings/  Dialogs/  Controls/  Themes/
+  Theming/         # AvaloniaThemeApplier and theme resource dictionaries
+  Platform/        # AvaloniaStorageService, AvaloniaUiDispatcher, key-binding binder
+```
+
+Rules:
+
+- `Mocassin.App.ViewModels` has no Avalonia, view, or control reference, and no `System.IO`/`Environment`/
+  `Application`/resource-dictionary use. Dialogs, pickers, the UI dispatcher, clocks, the settings/recovery
+  stores, the file probe, and the theme applier are interfaces in this project; their implementations live in
+  `Mocassin.App` (settings, recovery, file probe, paths) or `Mocassin.App.Views` (picker, dispatcher, theme,
+  key binding). An architecture test enforces the direct-reference direction, the absence of view types, and a
+  source-token ban on the file-system/UI tokens.
+- Library APIs that perform I/O (`ProjectStore`, `ProjectValidationPipeline`, `ProjectTemplateFactory`) are
+  allowed in view models because they are the same public contracts the CLI uses; re-implementing their file
+  access is what the rule forbids.
+- `Mocassin.App` keeps only `Program.cs`, `App.axaml`, `App.axaml.cs`, `ViewLocator.cs`, and `AssemblyInfo.cs`
+  at the root; everything else lives in `Composition/` or `Startup/`. `App.axaml.cs` and `ViewLocator.cs` are
+  the framework-mandated root files already permitted by the policy.
+- `Mocassin.App.Views` owns controls and resource dictionaries. Code-behind is limited to view-only concerns
+  (focus, splitter keyboard handling, drag-reorder plumbing); no library calls and no scientific logic.
+- Folder names are concept nouns. `Services/`, `Helpers/`, `Common/`, `ViewModels/`, and `Views/` buckets are
+  not added inside `Mocassin.App.ViewModels`; the area folder is the concept.
+- The 20-file/800-line limits and the single-type file rule apply unchanged. A file that would need several
+  types is split, or uses one of the permitted multi-type suffixes from `tools/structure-policy.json`.
+- Test support for the UI track lives in `Mocassin.App.Tests/TestSupport/` (manual clock, inline dispatcher,
+  recording dialog service, stub storage service, in-memory settings/recovery stores for non-persistence tests,
+  temporary workspace, headless app builder, fixtures); `Visual/Baselines/` holds the screenshot PNGs. Test
+  root files stay within the 20-file limit. Persistence tests use the real App-layer stores against a temporary
+  data directory, not the in-memory ones.
+- Every **new** type in the three App projects **other than `App`** is `internal`;
+  `InternalsVisibleTo("Mocassin.App.Tests")` gives the test project access. `App` is the only new public App
+  type; `Program` is pre-existing. The public exceptions are the pre-existing `AppViewModelsModule`/`AppViewsModule`
+  markers (in `PublicAPI.Shipped.txt`, baselined, ApiCompat-checked) and `Mocassin.App.Program`; 23A **adds**
+  `public sealed class App : Application` with `App.axaml(.cs)`, and `Mocassin.App` is not an ApiCompat project
+  (no `PublicAPI` list, no baseline), so that addition is not a compatibility change. The ApiCompat-checked App
+  assemblies (`Mocassin.App.ViewModels`, `Mocassin.App.Views`) keep their `PublicAPI.*` and
+  `tests/contracts/api-baseline/net11.0/*.dll` unchanged. Making a marker internal or adding a public type to an
+  ApiCompat project is an owner-approved public-API change with a baseline refresh; if a later step genuinely
+  needs a separate assembly, it records an amendment.
+- The I/O token test uses whole-identifier matching (negative lookbehind, so `LastOpenDirectory.Trim` does not
+  match `Directory.`), strips comments and string literals, and detects `using static System.IO` /
+  `using static System.Environment`. A `Mocassin.App.ViewModels/**/*.cs` file must not contain `System.IO`,
+  `File.`/`FileInfo`, `Directory.`/`DirectoryInfo`, `Path.Combine`/`Path.Get`, `FileStream`, `StreamReader`,
+  `StreamWriter`, `Environment.`, `Avalonia`, `Dispatcher.UIThread`, `Application.Current`, or
+  `ResourceDictionary`. `IUiDispatcher` and bare `Dispatcher`/`Application` identifiers are permitted, and a
+  positive control proves the scanner reports a seeded violation. The scan is a tripwire, not a compiler
+  guarantee; the direct-reference check and review remain the primary enforcement.
+
 ## 3. Folder names and ownership
 
 Folder names are PascalCase domain nouns. A folder should answer “which concept owns this code?”

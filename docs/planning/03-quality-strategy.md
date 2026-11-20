@@ -30,7 +30,7 @@ important for exact formulas and edge cases, but they are not the centre of the 
 | Property / invariant | High | Symmetry, compilation, rules, supercells, round-trips, state math, parsing | FsCheck, `proptest`, Hypothesis (Python) | Every PR |
 | Golden / toy integration | High | Real ceria/BaZrO₃/vehicle/interstitialcy models; tiny build → simulate → collect → evaluate runs | xUnit + CLI + Rust + SQLite | Every PR (short) / nightly (long) |
 | Unit | Selective | Exact formulas, boundary conditions, parsers, small value types | xUnit, Rust `#[test]`, pytest | Every PR |
-| UI (headless) | Moderate | Real view models and project objects; commands, validation, navigation | xUnit + Avalonia headless | Every PR (subset) / nightly (screenshots) |
+| UI (headless) | Moderate | Real view models and project objects; commands, validation, navigation | xUnit + Avalonia headless | Every PR (view models) / PR-medium (views) / nightly (full screenshot matrix) |
 | Statistical / performance | Nightly / release | Parity ensembles, long runs, fuzzing, benchmarks | Custom harness, Criterion, BenchmarkDotNet | Nightly / release |
 
 Rules of thumb:
@@ -131,7 +131,11 @@ These interfaces get end-to-end acceptance coverage with real objects and real f
 3. `.msl` writer → Rust reader → canonical summary; `.msl` writer → Python/analysis reader where applicable.
 4. Rust solver CLI → `.mcs` → .NET reader/evaluation and Python reader/evaluation.
 5. Evaluation API formulas against analytic toy systems and shared formula vectors.
-6. Avalonia commands against real project documents and view models.
+6. Avalonia commands against real project documents and view models. **Step 23A** proves
+   create/open/inspect/save/reopen/reload, locks, read-only mode, external-change handling, and settings
+   migration through the real store and the real dialog overlay. **Step 23B** proves metadata editing with
+   undo/redo, save-point dirty handling, the validation surface, autosave, and crash recovery on the same
+   harness.
 7. CLI `build`/`simulate`/`collect`/`evaluate` workflows; the Step 12 build/preview/inspect/verify path uses
    real projects, real SQLite packages, and the real writer/verifier.
 8. Contract-manifest drift checks across C#, Rust, Python, and generated fixtures.
@@ -633,6 +637,48 @@ Contract tests use files produced by the real writers and never share reader/wri
   navigation — not through mock verification.
 - Manual smoke checklist per release: create project, add each object type, validate, parameterize, build,
   run a tiny job, collect, plot, save/reopen.
+
+### 11.1 Steps 23A/23B harness and tiers
+
+Step 23A establishes the harness that 23B and Steps 24–28 extend; 23B adds the Problems/validation and
+recovery fixtures.
+
+- **Projects.** `Mocassin.App.Tests` references the app, view models, and views. It adds the first-party
+  `Avalonia.Headless` and `Avalonia.Headless.XUnit` packages at the pinned Avalonia 12.1.6 version (test-only,
+  no product dependency, no new licence surface). No other package is added; a `ManualTimeProvider` and an
+  inline UI dispatcher are written in test support rather than adopting a fake-clock package.
+- **Real objects everywhere.** Tests use the real `ProjectStore` (with `ValidateOnLoad = false` and the load
+  diagnostics seeded into the validation pipeline), real temporary directories, real `Project` values, the real
+  validation pipeline, the real dialog overlay, and the real App-layer settings/recovery stores when the test is
+  about persistence. Fakes are limited to the true boundaries: `IDialogService` (view-model-level tests only —
+  the view-level tests drive the real overlay), `IStorageService` (the OS picker), `IUiDispatcher` (the
+  UI-thread boundary), `TimeProvider`, and in-memory `IAppSettingsStore`/`IRecoveryStore` for non-persistence
+  tests only.
+- **Architecture guards.** The App-project architecture test checks direct `.csproj` references and runs the I/O
+  token scan described in the 23A page §1/§15: comments and string literals stripped, whole-identifier matching
+  (so `LastOpenDirectory.Trim` does not match), `using static System.IO`/`System.Environment` detected,
+  `IUiDispatcher`/`Dispatcher` and bare `Application` permitted, and a positive control so the guard cannot pass
+  by matching nothing. The scan is a tripwire; the direct-reference check and review remain the primary
+  enforcement. The 23B `Load`-stage test covers both a load/migration fixture (`Completed`/`Failed`) and a clean
+  fixture (`Skipped`, count 0).
+- **Tiers.** 23A: shell view-model, lifecycle, reload/locks/read-only/external-change, settings migration,
+  navigation, palette, dialog, and primary accessibility tests. 23B: edit/undo, dirty/save-point, autosave,
+  recovery, and validation (including the `Load`-stage/load-diagnostic contract) tests. Both sets are
+  **PR-fast**. Headless view rendering and the screenshot set are
+  **PR-medium**. Platform runs are manual. PR-fast tests assert functionality, ordering, and asynchrony, never an
+  absolute duration; timing is recorded as non-gating evidence on a benchmark or manual run (§13/§16 of the
+  23A page, §14 of the 23B page).
+- **Screenshots.** Baselines are generated and compared on `ubuntu-latest` only, with a fixed headless render
+  scale and a documented tolerance and regeneration command. Windows/macOS screenshots are manual platform-gate
+  evidence and are not pixel-compared: text rendering differs per platform, so a cross-OS pixel gate would be a
+  permanent false failure. Screenshots stay out of the wall-clock gate and never block a PR-fast run.
+- **Accessibility.** Primary shell controls are asserted in the PR-fast set (names, roles, help text, no
+  icon-only control without a name, tab order). The full visual-tree sweep is PR-medium.
+- **Timers.** No `Task.Delay` and no real sleeps in tests; autosave and recovery are driven by `ManualTimeProvider`
+  and the scheduler's injectable interval.
+- **Determinism.** Headless tests run with invariant culture, a fixed render scale, and no network. A test that
+  needs a time zone, case-sensitivity rule, or path separator states it explicitly instead of relying on the
+  host.
 
 ## 12. CI pipeline
 

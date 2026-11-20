@@ -686,7 +686,7 @@ dependency.
 - Lock and autosave files are ignored by Git.
 
 The application layer decides when to autosave. `ProjectDocument` exposes `IsAutosaveDue` and
-`MarkAutosaved`; the UI timer belongs to Step 23.
+`MarkAutosaved`; the UI timer belongs to Step 23B.
 
 ## Editing
 
