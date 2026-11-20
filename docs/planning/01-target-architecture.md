@@ -163,6 +163,46 @@ Rules:
 | `Mocassin.App*` | Presentation, commands, navigation, dialogs | Scientific algorithms |
 | `Mocassin.Rendering` | GPU abstraction, scene graph, picking, camera, overlays | Model validation |
 
+### 3.2 UI composition and state ownership (Step 23)
+
+The Avalonia track is a consumer of the same public library APIs as the CLI. Step 23 fixes its composition,
+dependency direction, and state ownership; Steps 24–28 add editors, build UI, 3D, and run monitoring through
+registration seams without changing the shell.
+
+```text
+Mocassin.App  ──►  Mocassin.App.Views  ──►  Mocassin.App.ViewModels  ──►  Packages / Results / Contracts / Core
+      │                                                                  (public library APIs only)
+      ├──► Avalonia, Microsoft.Extensions.*, Serilog
+      └──► Mocassin.Rendering (unused until Step 27)
+```
+
+| Project | Owns | Must not own |
+| --- | --- | --- |
+| `Mocassin.App` | `Program`, `App`, `ViewLocator`, the composition root (`AppHost`, registration, startup options, app paths, logging setup, crash boundary), startup coordination | View models, views, or scientific logic |
+| `Mocassin.App.ViewModels` | Shell and region view models, document model, navigation service and target registry, project session and edit coordinator, validation coordinator, settings model/service, command catalog and palette, dialog/picker/console contracts, all virtualization of library values for binding | Any Avalonia or control type, views, direct file I/O outside the library APIs, scientific algorithms, a second store/validator/hash/catalog |
+| `Mocassin.App.Views` | Shell window and views, region hosts, dialog overlay host, console/problems views, settings and palette views, theme/density/high-contrast resource dictionaries | Library calls, scientific logic, persistence decisions |
+
+Rules:
+
+- `Mocassin.App.ViewModels` references `CommunityToolkit.Mvvm` and the public libraries only; it has no
+  Avalonia, view, or control reference. `Mocassin.App.Views` may use controls but never constructs domain
+  state. `Mocassin.App` is the only project that resolves the DI container.
+- The GUI never references `Mocassin.Cli`. Behaviour the GUI needs must live in a library; the CLI and the GUI
+  share `ProjectStore`, `ProjectTemplateFactory`, `ProjectNameRules`, `ProjectDocument`, and the validation
+  pipeline.
+- One writer per project: a `ProjectEditCoordinator` over the Step 01 `ProjectDocument`. View models never
+  mutate a `Project` or a domain object, never compute a project hash, and never build a `ProjectChange`.
+- App-scoped UI state (theme, density, layout, recent files, session) is stored in the application settings
+  file; document-scoped view state (camera, visibility, per-object style) is stored in the project
+  `viewSettings`. There are no ad-hoc UI state files.
+- Shell state is UI-thread confined. Project edits happen on the UI thread; validation runs on an immutable
+  snapshot off-thread and is applied only when it is not stale.
+- Contribution seams (navigation providers, explorer nodes, inspector content, menu items, console channels,
+  status-bar items) are explicit interfaces in `Mocassin.App.ViewModels`, registered in the composition root.
+  No assembly scanning, no reflection-based discovery, no service locator.
+- A later step adds a provider and a registration call; it does not edit the shell. If a later step needs a new
+  seam, it adds the interface, registers it, and records the change in its own step page.
+
 ## 4. Rust workspace
 
 ```text
@@ -262,7 +302,7 @@ Results store (.msr, SQLite) ──► .NET evaluation API ──► tables/plot
 
 | Area | Policy |
 | --- | --- |
-| UI thread | View-model property changes and command state updates happen on the UI thread. Background work returns through the dispatcher; no blocking waits in commands. |
+| UI thread | View-model property changes and command state updates happen on the UI thread. Project edits (`ProjectEditCoordinator` → `ProjectDocument`) are UI-thread confined; validation runs off-thread over an immutable snapshot and is applied only when its document hash is still current. Background work returns through the dispatcher; no blocking waits in commands. |
 | Build | Bounded `Parallel.ForEachAsync`/worker pool; immutable inputs; per-stage caches are thread-safe; cancellation stops scheduling new work. |
 | Solver | One process per job. Monte Carlo trajectories are sequential; job-level parallelism only. The GUI run queue caps concurrent processes. |
 | Project files | One writer per project via `.mocprj.lock`; readers use an immutable snapshot; autosave is atomic. |

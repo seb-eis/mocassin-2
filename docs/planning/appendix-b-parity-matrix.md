@@ -15,24 +15,25 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Create new project | Y | Partial | 01/12/23 | Blank, ceria, and barium-zirconate skeletons in 01/03; headless `mocassin new --template blank|ceria` with fresh identity and embedded assets in 12; creation UI in 23 |
-| Open/save/close project | Y | Planned | 01/23 | Atomic writes, lock, autosave store in 01; lifecycle UI in 23 |
-| Recent files | N | Improvement | 23 | Workspace model |
-| Multiple projects per file | N | Replaced | 23 | One project per file; workspace of open files |
+| Create new project | Y | Partial | 01/12/23 | Blank, ceria, and barium-zirconate skeletons in 01/03; headless `mocassin new` with `--template blank` or `--template ceria`, fresh identity, and embedded assets in 12; creation UI in 23 using the same `ProjectTemplateFactory` and shared `ProjectNameRules` |
+| Open/save/close project | Y | Planned | 01/23 | Atomic writes, lock, autosave store in 01; lifecycle UI, read-only lock mode, save-as lock migration, and external-change detection in 23 |
+| Recent files | N | Improvement | 23 | Settings-persisted list (max 10), missing-file handling, clear action |
+| Multiple projects per file | N | Replaced | 23 | One project per file; workspace of open files with one tab strip and a project switcher |
 | Duplicate/delete project in a library | N | Replaced | 23 | File-level duplicate/delete; no DB library |
-| Autosave/recovery | N | Improvement | 01/23 | `.autosave` store in 01; timer/recovery prompt in 23 |
-| Dirty tracking/unsaved prompt | Y | Planned | 01/23 | Document hash and dirty state in 01; prompt in 23 |
-| Undo/redo | N | Improvement | 01/23 | Core stacks in 01; UI in 23 |
+| Autosave/recovery | N | Improvement | 01/23 | `.autosave` sidecar store in 01; scheduler, recovery prompt, untitled-project recovery in `recovery/`, and retention in 23 |
+| Dirty tracking/unsaved prompt | Y | Planned | 01/23 | Document hash and dirty state in 01; content-based save point, title/tab markers, batch prompt in 23 |
+| Undo/redo | N | Improvement | 01/23 | Core stacks in 01; shell commands, save-point handling, bounded depth, and per-project isolation in 23 |
 | Project schema versioning/migration | Y | Planned | 01 | v1 pipeline implemented; migration fixtures added per version |
 | Stable project hash | Y | Done | 01/03/09 | Model/document SHA-256 in 01; structure hash in 03; compiled and parameterization signatures in 08/09 |
 | Legacy `.mocprj` read/write | N | Out of scope | — | ADR 0001 |
-| Project data viewer (JSON/XML) | N | Replaced | 23 | JSON view/debug export |
+| Project data viewer (JSON/XML) | N | Replaced | 23 | Read-only Project JSON document with copy and debug export |
+| Project metadata editing (name/description/author/notes) | Y | Planned | 23 | Project Overview document; undoable through the shared edit pipeline |
 | Cross-domain validation pipeline | Y | Implemented | 07 | Load/model/cross-domain/feasibility; no post-validation mutation |
 | Stable diagnostic catalog | Y | Implemented | 07 | Codes, owners, severities, paths, hints; docs-drift checked |
 | Model statistics and feasibility | Y | Implemented | 07 | Counts, rule/memory estimates, buildability warnings |
 | Headless `mocassin validate` | Y | Done | 07/12 | `validation-v1`, diagnostics, statistics, and exit codes in 07; the complete CLI command surface, shared report family, and parser conventions in 12 |
 | `validation-v1` report | Y | Implemented | 07 | Sorted diagnostics, summary, optional statistics; schema checked |
-| GUI diagnostic navigation | Y | Planned | 07/24/25 | `ModelPath` navigation and stats panels |
+| GUI diagnostic navigation | Y | Planned | 07/23/24/25 | `ModelPath` navigation, status indicator, Problems channel, and the target registry in 23; domain providers and stats panels in 24/25 |
 
 ## 2. Particles and structure
 
@@ -218,11 +219,15 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Cross-platform app | Y | Planned | 23 | Windows/Linux/macOS |
-| Shell/tree/tabs/console/status | Y | Planned | 23 | |
-| Project lifecycle | Y | Planned | 23 | |
-| Undo/redo | N | Improvement | 23 | |
-| Model validator/problems | Y | Partial | 23/07 | Navigable validation result and paths; UI in 23 |
+| Cross-platform app | Y | Planned | 23 | Windows/Linux/macOS; Ubuntu automated, Windows/macOS platform gate and manual smoke checklist |
+| Shell/tree/tabs/console/status | Y | Planned | 23 | Regions, document tabs, project switcher/explorer, Problems/Application consoles, populated status bar |
+| Project lifecycle | Y | Planned | 23 | New/open/save/save-as/close, recents, locks, read-only, external-change detection |
+| Undo/redo | N | Improvement | 23 | Single per-project stack over `ProjectDocument`, bounded, save-point correct |
+| Model validator/problems | Y | Partial | 23/07 | Status indicator, Problems channel, and navigable `ModelPath` targets in 23; domain providers and full stats panels in 24/25 |
+| Command palette and shortcut cheat sheet | N | Improvement | 23 | Searchable command catalog with platform gestures |
+| Application settings and logging | N | Improvement | 23 | Versioned `mocassin.settings` v1 with migration and retention; structured rolling logs; replaces the original XML settings file |
+| Crash recovery dialog | N | Improvement | 23 | Global exception boundary, log entry, recovery snapshot, "open log folder" |
+| Application diagnostics | N | Improvement | 23 | App-side environment report (distinct from CLI `doctor`) |
 | Particle/set editor | Y | Planned | 24 | |
 | Structure editor | Y | Planned | 24 | |
 | Transition editor | Y | Planned | 24 | |
@@ -310,3 +315,8 @@ Status legend:
 | MMC zero-energy break check aborts immediately | Guard below 1e-12 eV; normal behavior unchanged | 17 |
 | Reflection/service-locator model layer | Immutable domain + explicit compiler | 01/08 |
 | No undo/redo, no run monitor, no charts | Added | 23/28 |
+| Settings in `Documents/Mocassin` XML, hard-coded symmetry path | Versioned app-data settings, no hard-coded paths | 23 |
+| `Console.WriteLine` logging, `MessageBox` dialogs | Structured rolling logs, in-shell dialogs, console channels | 23 |
+| No dirty prompt, autosave, or crash recovery | Content-based dirty state, autosave, recovery flow | 01/23 |
+| Detached library copy missed duplicates/deletes | One project per file; file-level duplicate/delete | 23 |
+| Status bar present but empty | Populated status bar | 23 |

@@ -143,6 +143,57 @@ Rules:
   `cargo test --workspace`, and review. A mechanical Rust layout test is deferred to Step 29; do not add a
   second structure tool now.
 
+### 2.3 `Mocassin.App*` layout (Step 23)
+
+The Avalonia track is split so that view models stay UI-framework-free and the composition root stays the only
+place that resolves DI.
+
+```text
+src/dotnet/Mocassin.App/
+  Program.cs
+  App.axaml
+  App.axaml.cs
+  ViewLocator.cs
+  AssemblyInfo.cs
+  Composition/     # AppHost, service registration, startup options, app paths, logging setup, log retention
+  Startup/         # startup coordination, recovery scan presenter, crash handler
+
+src/dotnet/Mocassin.App.ViewModels/
+  Shell/           # shell/region/status-bar view models, window state
+  Documents/       # document model, keys, tab collection, welcome
+  Documents/Project/  # project overview, project JSON, metadata editing
+  Projects/        # project session, session service, file stamps, external change, recovery, recents
+  Scheduling/      # autosave scheduler and debouncer
+  Editing/         # project edit coordinator, edit diagnostics, project-changed event
+  Diagnostics/     # validation coordinator, problems, diagnostic items, validation state
+  Navigation/      # navigation service/contracts, history, project target provider, explorer-node seam
+  Settings/        # settings model, service, migration, validation, theme service, layout/session state
+  Commands/        # command catalog, shell command, gestures, menu/console/status contribution seams, palette
+  Consoles/        # console channels, entries, console service
+  Dialogs/         # dialog/picker/progress contracts and view models
+
+src/dotnet/Mocassin.App.Views/
+  Shell/  Documents/  Navigation/  Consoles/  Settings/  Dialogs/  Controls/  Themes/
+```
+
+Rules:
+
+- `Mocassin.App.ViewModels` has no Avalonia, view, or control reference. Dialogs, pickers, the UI dispatcher,
+  and clocks are interfaces in this project; their Avalonia implementations live in `Mocassin.App.Views` or
+  `Mocassin.App`. An architecture test enforces the reference direction and the absence of view types.
+- `Mocassin.App` keeps only `Program.cs`, `App.axaml`, `App.axaml.cs`, `ViewLocator.cs`, and `AssemblyInfo.cs`
+  at the root; everything else lives in `Composition/` or `Startup/`. `App.axaml.cs` and `ViewLocator.cs` are
+  the framework-mandated root files already permitted by the policy.
+- `Mocassin.App.Views` owns controls and resource dictionaries. Code-behind is limited to view-only concerns
+  (focus, splitter keyboard handling, drag-reorder plumbing); no library calls and no scientific logic.
+- Folder names are concept nouns. `Services/`, `Helpers/`, `Common/`, `ViewModels/`, and `Views/` buckets are
+  not added inside `Mocassin.App.ViewModels`; the area folder is the concept.
+- The 20-file/800-line limits and the single-type file rule apply unchanged. A file that would need several
+  types is split, or uses one of the permitted multi-type suffixes from `tools/structure-policy.json`.
+- Test support for the UI track lives in `Mocassin.App.Tests/TestSupport/` (manual clock, inline dispatcher,
+  recording dialog service, stub storage service, temporary workspace, headless app builder, fixtures);
+  `Visual/Baselines/` holds the screenshot PNGs. Test root files stay within the 20-file limit.
+
 ## 3. Folder names and ownership
 
 Folder names are PascalCase domain nouns. A folder should answer “which concept owns this code?”
