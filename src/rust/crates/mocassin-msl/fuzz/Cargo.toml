@@ -1,0 +1,36 @@
+[package]
+name = "mocassin-msl-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2024"
+
+[package.metadata]
+cargo-fuzz = true
+
+[workspace]
+
+[dependencies]
+libfuzzer-sys = "0.4"
+mocassin-msl = { path = ".." }
+mocassin-types = { path = "../../mocassin-types" }
+
+[[bin]]
+name = "payload_scan"
+path = "fuzz_targets/payload_scan.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "payload_decode"
+path = "fuzz_targets/payload_decode.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "package_open"
+path = "fuzz_targets/package_open.rs"
+test = false
+doc = false
+bench = false

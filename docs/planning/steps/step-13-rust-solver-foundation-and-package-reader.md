@@ -29,6 +29,7 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 | 3 `.msl` reader and bounded decode | `feature/step-13-rust-solver-foundation-and-package-reader/msl-reader-and-bounded-decode` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (44 `mocassin-msl` tests: 4 unit, 15 hostile, 12 schema, 5 decode, 8 acceptance), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `70f443181d269ca5547f7216f005f1f39c664b1f` |
 | 4 Model/job mapping and signatures | `feature/step-13-rust-solver-foundation-and-package-reader/model-job-mapping-and-signatures` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (111 `mocassin-msl` tests: 65 mapping unit, 15 hostile, 12 schema, 5 decode, 9 acceptance, 5 signature), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `087856b73033d20d5607d8dadedf9ee6da6746ca` |
 | 5 Dry-run CLI and logging | `feature/step-13-rust-solver-foundation-and-package-reader/dry-run-cli-and-logging` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (27 CLI tests: 8 parser unit, 15 process, 4 exit-code drift), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `b2474efdda044f4802cffdab9dd84bd1d42492be` |
+| 6 Cross-language fixtures, property tests, and fuzzing | `feature/step-13-rust-solver-foundation-and-package-reader/cross-language-fixtures-and-fuzzing` | Squashed | `cargo fmt --check`, `cargo clippy -- -D warnings`, `cargo test` (RNG vectors 5, projection round-trips 2, populated fixture 2, mutation properties 5; .NET RNG-vector 1, populated-fixture 6), `cargo build --release`, fuzz compile + 5 s runs, `structure`, `docs --require`, `contracts`, `dotnet build`/`format` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-7 row update |
 
 **Feature 1 resequencing (orchestrator-directed sequence, owner-accepted 2026-11-19).** The approved feature
 row lists payload DTOs, runtime model/job/lattice types, and the `PackageError`/exit-code model. Feature 1
@@ -155,6 +156,50 @@ identity `92cf375e…`, the lattice signature `880b6eac…`, `6x6x6 length=864`,
   option is Step 19 work); `--extension` is rejected with exit 10 until the ABI lands; `--threads` and
   `--jump-log-max-ev` are validated and unused; the CLI keeps its `mocassin-solver` dependency for the future run
   path. No batch, `--json`, `--validate-only`, `--no-state`, or `--log-file` surface is added.
+
+**Feature 6 fixture and fuzzing evidence.** The cross-language artifacts are checked in under
+`tests/contracts/`:
+
+- **`rng-vectors.json`** (3,895 bytes) freezes the `chacha12-v1` domain strings, two job-seed vectors, the
+  lattice-seed vector, the seed hash, the first 16 words / 8 `u64`s / 4 `f64`s, the bounded draws (2/10/1024),
+  the 64-word boundary, the fork child, and the 64-byte state round-trip including the nonzero-stream case.
+  Five Rust tests in `mocassin-rng/tests/rng_vectors.rs` read the file through a tiny test-only JSON reader;
+  `Mocassin.Packages.Tests/Jobs/RngVectorsTests.cs` asserts the same job/lattice/seed-hash projections from
+  .NET. Draws, forks, and state are Rust-only because the .NET side does not implement ChaCha12.
+- **Projection vectors:** `mocassin-msl/tests/projections.rs` decodes all four parameterization and two lattice
+  `.bin` vectors with a strict fixed-width reader, re-encodes them byte-identically, and re-checks the sidecar
+  `projectionSha256` and domain signature. The acceptance tests additionally reproduce the stored
+  `msl-v1`/`amend-1-net10` signatures and the populated fixture's signatures.
+- **Populated fixture:** `samples/step-13-populated/step-13-populated.mocprj` is a small P1 ceria-derived
+  mechanism with one KMC migration and one MMC O/V exchange and a two-collection job template.
+  `tests/contracts/packages/step-13-populated/` holds the real-writer package (98,304 bytes; SHA-256 recorded),
+  `package-summary-v1.json` (2,710 bytes), and four raw payloads (`model-1.bin` 6,518, `lattice-1.bin` 85,
+  `job-1.bin` 446, `job-2.bin` 447; `index.json` 1,530). The model has 3 particles, 3 positions, **6 pair
+  tables and 1 cluster table**, 2 collections, and 8 rules; jobs 1/2 are KMC/MMC; both stored signatures are
+  reproduced. `mocassin-msl/tests/populated_fixture.rs` maps both jobs and decodes the raw payloads;
+  `PopulatedPackageFixtureTests` verifies the package, summary, hash, payload index, and a rebuilding
+  reproducibility check, and gates regeneration with `MOCASSIN_REGENERATE_POPULATED_FIXTURE=1`.
+- **Property/mutation suite:** five proptest properties (24 cases each) truncate and mutate the real model/job
+  payloads, feed arbitrary bytes to the scan/decode entry points, and mutate SQLite pages of a real package
+  copy; every case must return a structured error or a successful read, never panic or exceed the limits.
+- **Fuzzing:** the excluded `crates/mocassin-msl/fuzz` workspace has `payload_scan`, `payload_decode`, and
+  `package_open` targets seeded from the real model/job/lattice payloads and the real `.msl`. On
+  2026-11-20 (`x86_64-unknown-linux-gnu`, nightly, 5 s per target) the runs executed 186,312 / 158,648 / 6,535
+  inputs with zero crashes and peak RSS below 420 MiB. Continuous/nightly fuzzing and crash triage are Step 29
+  work; no scheduled job is added.
+
+**Deviations/notes:**
+1. The populated fixture does **not** carry the per-node mask difference or the equivalent-start mapping the
+   design asked for. The model builder rejects a mixed particle set on a transition node with `CMP004` (and an
+   MMC exchange with `CMP005`); the P-1 variant compiles the KMC collection but fails the verifier's cluster-link
+   check (`PKG010`). Both fixture READMEs record this. The union check's positive/negative cases and the
+   reader's acceptance of a direction mapped to another bucket are covered by the synthetic mapping tests; the
+   real populated fixture covers the populated pair/cluster tables, both simulation kinds, and the real-writer
+   payload/signature paths.
+2. The fuzz build used the `x86_64-unknown-linux-gnu` target because the musl target is not installed;
+   `cargo-fuzz` otherwise defaults to musl. `libfuzzer-sys` is confined to the excluded fuzz workspace; no
+   production dependency or root lockfile entry changes.
+3. Both populated jobs share one 2x2x2 lattice, so the package has one lattice row (deduplicated), not two.
 
 ### Approved feature list (owner, 2026-11-18; implementation authorized 2026-11-19)
 

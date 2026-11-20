@@ -1,0 +1,43 @@
+{
+  "format": "mocassin.package-payloads",
+  "formatVersion": 1,
+  "note": "Raw MessagePack payloads extracted from step-13-populated.msl (real .NET writer). The compressed frames live in the .msl; the .msl SHA-256 is in step-13-populated.sha256.",
+  "payloads": [
+    {
+      "kind": "job",
+      "index": 1,
+      "path": "job-1.bin",
+      "compressedBytes": 330,
+      "compressedSha256": "1c00e53409a701ba2c444b9c840cc8c19b2664786ebc467e30756f8d10e83724",
+      "rawBytes": 446,
+      "rawSha256": "734a6bc097d85c0babbcc4cbd893db6479a9c54cca3de68634167720887dc393"
+    },
+    {
+      "kind": "job",
+      "index": 2,
+      "path": "job-2.bin",
+      "compressedBytes": 335,
+      "compressedSha256": "0fc7a2ffb734a072d1a42d2a94f9ee66554042208ae6f8fe7eb1f8dbd3eb9fed",
+      "rawBytes": 447,
+      "rawSha256": "5d3a65831881b4607c647b467e980eadb3803b0bd477ee16db66fe51dd0d8ed9"
+    },
+    {
+      "kind": "lattice",
+      "index": 1,
+      "path": "lattice-1.bin",
+      "compressedBytes": 76,
+      "compressedSha256": "2100f455be3e5ece6831ca554044d924515afd4aadd25a4e0a2b0e3950a519fa",
+      "rawBytes": 85,
+      "rawSha256": "281dd969513c49271cf966b3cadab16d42fdf1cd6e262f1a1ea705aa1a1585a7"
+    },
+    {
+      "kind": "model",
+      "index": 1,
+      "path": "model-1.bin",
+      "compressedBytes": 2045,
+      "compressedSha256": "0fb0ce20045aa61c649c81e5727a1bb47a894b8c53406c2ab3f111ffeb949a16",
+      "rawBytes": 6518,
+      "rawSha256": "e6a6a8600248cd45b29f31dc576a2f58dbc1889e1fd629f928bd57ba54001f96"
+    }
+  ]
+}
