@@ -21,6 +21,7 @@ public sealed class ParameterizationSampleCoverageTests
     [InlineData("samples/lattice/ceria-reduction.mocprj")]
     [InlineData("samples/parameterizations/ceria-parameters.mocprj")]
     [InlineData("samples/parameterizations/barium-zirconate-parameters.mocprj")]
+    [InlineData("samples/simulations/centered-exchange.mocprj")]
     [InlineData("samples/simulations/ceria-kmc.mocprj")]
     [InlineData("samples/simulations/ceria-mmc.mocprj")]
     [InlineData("samples/transitions/ceria-kmc.mocprj")]
