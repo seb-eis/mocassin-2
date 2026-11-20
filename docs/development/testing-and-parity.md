@@ -55,12 +55,14 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   from `samples/step-13-populated/step-13-populated.mocprj` (4 particles, 3 positions, 6 pair tables, 1 cluster
   table, 2 collections, 8 rules, one KMC and one MMC job), exercises the populated parameterization and MMC
   paths. The extended O2 `{O, Vc, H}` set gives the fixture a **non-trivial per-node mask difference** at KMC
-  node 0 and MMC nodes 0/1; the Rust and .NET tests assert it. An equivalent-start mapping is impossible with
-  the current Step 08 compiler (`DirectionKey` includes the start `P`, so `EquivalentStartPositions` can never
-  differ from the representative start); the reader accepts a cross-bucket direction through the synthetic
-  mapping test. The earlier P-1 `PKG010` note is not reproducible (a plain P-1 variant verifies). This is
-  recorded in the Step 13 page, both fixture READMEs, and amendment `step-13-amend-1`. All reads are
-  PR-medium.
+  node 0 and MMC nodes 0/1; the Rust and .NET tests assert it.
+- `tests/contracts/packages/step-13-centered/step-13-centered.msl` is the real-writer F-1 fixture, derived
+  from the Step 08 C-centered sample after the compiler fix `1f5b473`. It has 4 particles, 8 P1 positions, 2
+  sites, 4 pair tables, one MMC collection, 4 directions, and 8 rules. The real `jump_mapping` contains
+  cross-bucket entries (bucket position 2 maps direction 3 with `position_id` 6, and so on), and the extended B
+  set gives a per-node mask difference. The Rust `centered_fixture` tests and .NET
+  `CenteredPackageFixtureTests` assert both properties, the payloads, and rebuild reproducibility. All reads
+  are PR-medium.
 - The Rust test decodes the raw payloads in `tests/contracts/packages/msl-v1/payloads/` and the populated
   package's extracted payloads, which catches field-name, minimum-width-integer, `null` optional, and
   array-vs-`bin` lattice drift without a .NET dependency.
@@ -75,9 +77,9 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   per-direction occupation check and the full positional transport formula are recorded Step 16/15 assignments
   because the v1 payload has no representative-direction marker or fractional P1 coordinates.
 - `jump_mapping` accepts a direction in any symmetry-equivalent start bucket; the reader does not require
-  `direction.position_id == position`. The real populated fixture has no equivalent-start mapping (see above),
-  so this acceptance is exercised by the synthetic mapping tests; the exact per-direction occupation check
-  remains Step 16's.
+  `direction.position_id == position`. The `step-13-centered` real-writer package exercises cross-bucket
+  entries, and the synthetic `a_direction_may_be_mapped_into_another_start_bucket` test remains the focused
+  reader assertion; the exact per-direction occupation check remains Step 16's.
 - The model-element budget is 512M, covering a writer-valid 512 MiB payload; the 1M-rule/16M-link caps are
   per-field, and a caller that raises `CompilationOptions.MaxRuleCount` must raise `ReaderLimits`.
   `every_per_field_count_cap_is_enforced` exercises the rules, directions, collections, pair/cluster tables, and

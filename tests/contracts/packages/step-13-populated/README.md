@@ -55,32 +55,19 @@ The command rebuilds the package, the `package-summary-v1` golden, the SHA-256 l
 rebuilds once more to prove the logical content is reproducible. Package bytes are a writer+runtime artifact;
 signatures and the canonical summary are the logical contract.
 
-## Fixture properties and limits
+## Fixture properties
 
 The fixture carries the **non-trivial per-node mask difference** the Step 13 design requires (see the shape
-above). It does **not** carry an equivalent-start mapping (`jump_mapping` bucket position different from
-`direction.position_id`). That property is blocked by the Step 08 transition compiler, not by this fixture's
-construction:
+above). The **translation-equivalent start mapping** is carried by the separate real-writer
+[`step-13-centered`](../step-13-centered/README.md) fixture, derived from the Step 08 C-centered sample after
+the compiler fix `1f5b473`; that package has cross-bucket `jump_mapping` entries and also carries a per-node mask
+difference. Keeping this populated fixture separate preserves its KMC/MMC and populated pair/cluster coverage
+without weakening either property.
 
-- `TransitionCompilationStage.AddDraft` builds `DirectionKey` from the relative path, and the first relative
-  component is `(0, 0, 0, start.P)`. Two drafts can therefore merge only when they have the same start `P`;
-  `EquivalentStartPositions` can never contain a position different from the representative start, so
-  `EncodingCompilationStage.BuildMappings` never places a direction in a different start bucket.
-- The checked-in Fm-3m `msl-v1` ceria package (two directions) and a P-1 variant of this sample (six positions,
-  plain `spaceGroup.number = 2` change, verified `ok`) both show no cross-bucket mapping. The P-1 `PKG010`
-  claim recorded during feature 6 is **not reproducible**: that P-1 build verifies, and no checked-in P-1
-  artifact ever produced `PKG010`.
-- The verifier's `byte_position >= site_count` check is also inconsistent with the payload contract, which
-  defines `byte_position` as the cluster **slot** (`0` is the centre), not a site index. No valid package in this
-  repository trips it because duplicate-site clusters currently fail earlier with `CLI007`; it is recorded as a
-  latent Step 11 verifier defect, not a Step 13 fix.
+The reader acceptance for an equivalent-start bucket is also covered by the synthetic
+`a_direction_may_be_mapped_into_another_start_bucket` test and the collection-union tests in
+`src/rust/crates/mocassin-msl/src/map/tests/`. Step 16 consumes the `step-13-centered` package for its exact
+per-direction check.
 
-The reader acceptance for an equivalent-start bucket is covered by the synthetic
-`a_direction_may_be_mapped_into_another_start_bucket` test, plus the collection-union tests in
-`src/rust/crates/mocassin-msl/src/map/tests/`. The Step 13 amendment
-[`step-13-amend-1`](../../../../docs/planning/amendments/step-13-amend-1-fixture-properties.md) records the
-requested acceptance of that limitation and the compiler/verifier defect owners. Step 16 must re-plan its
-exact per-direction fixture against the compiler fix.
-
-The fixture still covers the populated pair/cluster tables, both simulation kinds, the real-writer payload and
+The fixture covers the populated pair/cluster tables, both simulation kinds, the real-writer payload and
 signature paths, and the MMC validation rules.

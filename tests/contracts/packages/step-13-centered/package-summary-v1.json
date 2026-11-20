@@ -1,0 +1,73 @@
+{
+  "format": "mocassin.package-summary",
+  "formatVersion": 1,
+  "schema": {
+    "formatVersion": 1,
+    "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c62",
+    "jobSelection": "all",
+    "symmetryContractVersion": "symmetry-1",
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395"
+  },
+  "models": [
+    {
+      "signature": "0740daff9ba08ff94148ce9ec4e908e0ccfe724da654d5499d27a1d56cc39e60",
+      "modelSignature": "d160d1d37d4071e0109bae71fc9a2ff4e0e03a4e48c8e39fdabf2bada5ac4e49",
+      "payloadFormatVersion": 1,
+      "particleCount": 4,
+      "positionCount": 8,
+      "siteCount": 2,
+      "environmentCount": 8,
+      "pairTableCount": 4,
+      "clusterTableCount": 0,
+      "collectionCount": 1,
+      "ruleCount": 8
+    }
+  ],
+  "lattices": [
+    {
+      "signature": "9be91a8e78e64ad257c54243a290ff846426ec86afe68f3c4500545f56146dfb",
+      "latticeSize": [
+        2,
+        2,
+        2
+      ],
+      "positionCount": 8,
+      "latticeLength": 64
+    }
+  ],
+  "jobs": [
+    {
+      "jobId": 1,
+      "modelSignature": "d160d1d37d4071e0109bae71fc9a2ff4e0e03a4e48c8e39fdabf2bada5ac4e49",
+      "latticeSignature": "9be91a8e78e64ad257c54243a290ff846426ec86afe68f3c4500545f56146dfb",
+      "kind": "mmc",
+      "collectionName": "C1000",
+      "configName": "x001",
+      "collectionIndex": 0,
+      "configIndex": 0,
+      "jobIndex": 0,
+      "temperatureK": 1000,
+      "electricFieldVm": 0,
+      "targetMcsp": 100,
+      "writeOutCount": 10,
+      "preRunMcsp": 0,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        2,
+        2,
+        2
+      ],
+      "dopingInfo": "",
+      "flags": 128,
+      "seedHex": "426cfebf844ead7ff1261cffd3ef1b73f02def76095bc6a170b1764499ecbe18"
+    }
+  ],
+  "counts": {
+    "modelCount": 1,
+    "latticeCount": 1,
+    "jobCount": 1,
+    "latticeReuseFactor": 1
+  }
+}

@@ -159,7 +159,7 @@ Status legend:
 
 | Feature | Req | Status | Step | Notes |
 | --- | :---: | --- | --- | --- |
-| Package reader and solver foundation | Y | Done | 13 | Read-only `.msl` reader, bounded decode, validated runtime model/job/lattice, canonical signature re-encode, `mocassin-sim --dry-run`; real `msl-v1`, `amend-1-net10`, and populated/MMC packages. The populated fixture carries the per-node mask difference; equivalent-start coverage is synthetic pending the Step 08 compiler fix (amendment `step-13-amend-1`). No physics until 14–19 |
+| Package reader and solver foundation | Y | Done | 13 | Read-only `.msl` reader, bounded decode, validated runtime model/job/lattice, canonical signature re-encode, `mocassin-sim --dry-run`; real `msl-v1`, `amend-1-net10`, populated/MMC, and C-centered packages. The populated fixture carries the per-node mask difference; the C-centered fixture carries the real cross-bucket equivalent-start mapping and a mask difference. No physics until 14–19 |
 | Deterministic RNG and seed derivation | Y | Done | 13 | ChaCha12, SHA-256 job/lattice derivation, Lemire bounded draws, 64-byte `RngStateV1`, cross-language golden vectors; replaces the PCG32 defects |
 | MMC engine | Y | Planned | 17 | |
 | KMC engine | Y | Planned | 16 | |

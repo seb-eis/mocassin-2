@@ -6,17 +6,31 @@
 | --- | --- |
 | Amendment ID | `step-13-amend-1` |
 | Parent step | 13 — Rust Solver Foundation and Package Reader |
-| Status | Proposed |
+| Status | Withdrawn — resolved by the Step 08 fix `1f5b473` |
 | Branch | `feature/step-13-rust-solver-foundation-and-package-reader/fix-audit-round-1` (draft only; no amendment implementation branch yet) |
-| Design review | — (not requested; owner acceptance is required before the audit can pass) |
+| Design review | — (withdrawn; no review requested) |
 | Parent audit | [`docs/planning/audits/step-13.md`](../audits/step-13.md) |
 | Integration commit | — |
 | Combined audit commit | — |
 | Tag | `step-13` |
 | Date | 2026-11-20 |
-| Owner | Human owner (approval pending) |
+| Owner | — (withdrawn; no acceptance required) |
 
 Parent step page: [`Step 13 — Rust Solver Foundation and Package Reader`](../steps/step-13-rust-solver-foundation-and-package-reader.md)
+
+## Withdrawal
+
+**Withdrawn — resolved by the Step 08 fix `1f5b473`.** The Step 08 maintenance commit changes
+`TransitionCompilationStage` so translation-equivalent starts are merged and `EquivalentStartPositions` can
+contain a different P1 start; `EncodingCompilationStage.BuildMappings` then emits cross-bucket `jump_mapping`
+entries. The real-writer [`step-13-centered`](../../../tests/contracts/packages/step-13-centered/README.md)
+fixture derived from `samples/step-13-centered/step-13-centered.mocprj` (itself derived from the C-centered
+sample) now carries **both** the translation-equivalent start mapping and the per-node mask difference. The
+Rust and .NET fixture tests assert the cross-bucket mapping and the mask difference. This amendment no longer
+requests owner acceptance for synthetic coverage; it is retained for history.
+
+The Step 11 verifier observation (`byte_position >= site_count` is a cluster-slot-vs-site-index contract
+mismatch) remains a separate deferred maintenance item and is not part of this withdrawal.
 
 ## Rationale
 

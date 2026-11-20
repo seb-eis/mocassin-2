@@ -16,18 +16,15 @@ The project is derived from `tests/contracts/project-energy-populated.mocprj`; i
 metropolis transition, whose unstable `U1` site is rejected by the model rules (`TRN016`). It also adds explicit
 simulations and a job template so the package contains jobs.
 
-## Fixture properties and limits
+## Fixture properties
 
-The extended O2 set provides the **non-trivial per-node mask difference** the design asks for. The sample
-cannot provide an **equivalent-start mapping**: `TransitionCompilationStage.DirectionKey` includes the start
-`P`, so `EquivalentStartPositions` can only ever repeat the representative start and `BuildMappings` never
-places a direction in a different bucket. The checked-in Fm-3m `msl-v1` package and a plain P-1 variant of
-this sample both show no cross-bucket mapping; the P-1 variant builds and verifies, so the earlier P-1
-`PKG010` note is not reproducible. The Step 13 amendment
-[`step-13-amend-1`](../../docs/planning/amendments/step-13-amend-1-fixture-properties.md) records the
-requested acceptance of the synthetic coverage and the Step 08 compiler defect owner. The reader acceptance
-is covered by the synthetic mapping tests in `src/rust/crates/mocassin-msl/src/map/tests`; Step 16 re-plans
-its exact per-direction fixture against the compiler fix.
+The extended O2 set provides the **non-trivial per-node mask difference** the design asks for. The
+**translation-equivalent start mapping** is carried by the separate real-writer
+[`step-13-centered`](../step-13-centered/README.md) fixture, derived from the Step 08 C-centered sample after
+the compiler fix `1f5b473`. That package has cross-bucket `jump_mapping` entries and also carries a per-node
+mask difference, so Step 13 has a real package for both properties without weakening this sample's KMC/MMC and
+populated pair/cluster coverage.
 
-The fixture still covers the populated pair/cluster tables, both simulation kinds, the real-writer payload and
-signature paths, and the MMC validation rules.
+The reader acceptance for a cross-bucket direction is also covered by the synthetic mapping tests in
+`src/rust/crates/mocassin-msl/src/map/tests`; Step 16 consumes the centered fixture for its exact
+per-direction check.
