@@ -22,15 +22,16 @@
 
 Step page: [`Step 23 — Avalonia Shell and Project Lifecycle`](../steps/step-23-avalonia-shell-and-project-lifecycle.md)
 
-**Freeze note.** The reviewed commit `9916166a664f0a588e82eb8dbfc1097bc4949845` is the design freeze. It
-contains the rewritten Step 23 page and the reconciled
+**Freeze note (round 1).** The first freeze was `9916166a664f0a588e82eb8dbfc1097bc4949845`; round 2 reviews
+`1b82fde744d02cfdb92cecbdad5a5165d62e8b9c` (see the refreeze note below). The first freeze contains the rewritten
+Step 23 page and the reconciled
 [`01-target-architecture.md`](../01-target-architecture.md) §3.2, [`03-quality-strategy.md`](../03-quality-strategy.md)
 §11.1, [`04-roadmap.md`](../04-roadmap.md) §3/§5, [`05-open-decisions.md`](../05-open-decisions.md),
 [`appendix-b-parity-matrix.md`](../appendix-b-parity-matrix.md), and
 [`docs/development/code-structure.md`](../../development/code-structure.md) §2.3. This request record is a
-documentation-only follow-up so the freeze SHA can be written; no design content changed between the freeze and
-this record. The freeze contains no code, test, configuration, contract, generated file, or status-dashboard
-edit.
+documentation-only follow-up so the freeze SHA can be written; no design content changed between the first
+freeze and its request record. Neither freeze contains a code, test, configuration, contract, generated-file, or
+status-dashboard edit.
 
 **Refreeze note (round 2, 2026-11-20).** Round 1 is historical: it reviewed the first freeze `9916166` under the
 previous person-week sizing rule. After it returned `Changes required`, `main` adopted the complexity-class rule
@@ -49,8 +50,8 @@ check that §18 contains no assumption about Steps 13–22 and that the seams ar
 
 **Known follow-up owned by the step agent.** `docs/planning/status.md` row 23 still shows
 `Design review: Not requested`. The planner may not edit step status ([`AGENTS.md` §3.8](../../../AGENTS.md)), so
-the step agent updates the dashboard cell to `Ready for review` with this record when the start gate is
-prepared. This is an acknowledged bookkeeping gap, not a design change.
+the step agent updates the dashboard cell to the current design-review state with this record when the start
+gate is prepared. This is an acknowledged bookkeeping gap, not a design change.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the design and
 > completed this request, and relays the verdict and owner decisions. The planner and step agent update the
