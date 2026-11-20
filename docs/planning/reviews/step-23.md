@@ -419,7 +419,9 @@ documentation-only follow-up. No code, test, configuration, contract, or generat
 this refreeze note, the Step summary row, the request checklists (two items appended for the new template), the
 `Record state` line, and this section. The reviewer-authored `Evidence`, `Findings`, `Reviewer independence`,
 `Verdict`, and `Review round 1` text is byte-identical to `94cfe46`. No global replacement was used: the
-`Reviewed commit` cell was changed by matching its exact old cell string only. The extraction is reproducible
+`Reviewed commit` cell was changed by matching its exact old cell string only. The round-1 freeze-note preamble
+and the known-follow-up paragraph are request-owned and were reworded to distinguish the two freezes and to stop
+naming a single dashboard state. The extraction is reproducible
 with `git show 94cfe46:docs/planning/reviews/step-23.md` and line-anchored section extraction; the SHA-256 values
 are identical in both files:
 
