@@ -204,3 +204,37 @@ fn an_empty_or_non_database_file_is_a_package_error() {
     let error = open_error(&junk);
     assert_eq!(error.kind(), ErrorClass::Package);
 }
+
+#[test]
+fn a_job_referencing_a_missing_model_or_lattice_is_a_package_error() {
+    for (label, sql, what) in [
+        (
+            "dangling-model",
+            "PRAGMA foreign_keys = OFF; DELETE FROM models;",
+            "model",
+        ),
+        (
+            "dangling-lattice",
+            "PRAGMA foreign_keys = OFF; DELETE FROM lattices;",
+            "lattice",
+        ),
+    ] {
+        let (_temp, path) = mutated(label, sql);
+        let package = Package::open_readonly(&path, ReaderLimits::default())
+            .expect("the schema still opens without the referenced row");
+        let error = package
+            .load_job(1)
+            .expect_err("a dangling job reference must not load");
+        assert!(matches!(
+            error.source,
+            PackageError::DanglingReference { job_id: 1, .. }
+        ));
+        assert_eq!(error.source.kind(), ErrorClass::Package);
+        assert_eq!(error.source.exit_code(), ExitCode::PackageError);
+        assert_eq!(
+            error.source.to_string(),
+            "job 1 references a missing model or lattice row"
+        );
+        assert!(!what.is_empty());
+    }
+}

@@ -252,3 +252,21 @@ fn the_fixture_directories_are_present() {
             .is_file()
     );
 }
+
+#[test]
+fn the_seed_override_is_the_effective_job_seed() {
+    let package = open_msl_v1();
+    let package_seed = package.load_job(1).expect("the job maps").seed;
+    let override_seed = [0x5A_u8; 32];
+
+    let job = package
+        .load_job_with_seed(1, Some(override_seed))
+        .expect("the job maps with an override");
+    assert_eq!(job.seed, override_seed);
+    assert_ne!(job.seed, package_seed);
+
+    let default_job = package
+        .load_job(1)
+        .expect("the job maps without an override");
+    assert_eq!(default_job.seed, package_seed);
+}

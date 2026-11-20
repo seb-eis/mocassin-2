@@ -4,7 +4,7 @@
   "projectId": "018f4c9a-7f6b-7c3a-9d2e-0000000020a0",
   "masterSeed": "0000000000000000000000000000000000000000000000000000000000000005",
   "name": "Step 13 populated package fixture",
-  "description": "A small P1 ceria-derived mechanism with non-empty pair and cluster tables, one KMC and one MMC job, and the real-writer package that the Rust reader consumes.",
+  "description": "A small P1 ceria-derived mechanism with non-empty pair and cluster tables, a per-node mask difference from the extended O2 particle set, one KMC and one MMC job, and the real-writer package that the Rust reader consumes.",
   "createdUtc": "2026-11-20T00:00:00Z",
   "modifiedUtc": "2026-11-20T00:00:00Z",
   "model": {
@@ -22,6 +22,13 @@
         "symbol": "Vc",
         "charge": 0,
         "isVacancy": true
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f12",
+        "name": "Proton",
+        "symbol": "H",
+        "charge": 1,
+        "isVacancy": false
       }
     ],
     "particleSets": [
@@ -31,6 +38,15 @@
         "particleIds": [
           "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f10",
           "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f11"
+        ]
+      },
+      {
+        "id": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f14",
+        "name": "Oxygen site extended",
+        "particleIds": [
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f10",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f11",
+          "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f12"
         ]
       }
     ],
@@ -80,7 +96,7 @@
             0.25,
             0.25
           ],
-          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f13",
+          "particleSetId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f14",
           "stability": "stable"
         }
       ],
@@ -272,6 +288,10 @@
           {
             "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f10",
             "energyEv": 0.1
+          },
+          {
+            "particleId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d8f12",
+            "energyEv": 0.2
           }
         ]
       }

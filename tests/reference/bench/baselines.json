@@ -147,7 +147,10 @@
       "warmLoadJobMicroseconds": 71.075,
       "targetMet": true
     },
-    "evidenceStatus": "First load baseline recorded locally at the feature-7 tree. The declared runner class is re-measured by the manual benchmark gate on release candidates; Step 29 owns the automated same-class regression job.",
-    "ciJob": "benchmark (workflow_dispatch)"
+    "evidenceStatus": "Boundary-calibrated for Step 29. The first quiet-run load baseline is retained; repeated same-class runs on the shared container varied open by +10.4% (auditor) and +58% (step-agent rerun) while cold/warm stayed within ~3%. The 10% comparison rule is not relaxed; a release candidate must re-baseline on a quiet runner, and Step 29 owns the automated same-class regression job.",
+    "ciJob": "benchmark (workflow_dispatch)",
+    "reruns": [
+      "tests/reference/bench/step-13-load-2026-11-20-rerun.txt"
+    ]
   }
 }

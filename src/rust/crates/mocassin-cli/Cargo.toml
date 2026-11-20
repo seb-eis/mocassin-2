@@ -23,7 +23,6 @@ mocassin-msl.workspace = true
 mocassin-rng.workspace = true
 mocassin-types.workspace = true
 clap.workspace = true
-thiserror.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
 

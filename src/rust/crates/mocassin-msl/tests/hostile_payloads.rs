@@ -201,3 +201,101 @@ fn a_lattice_particle_above_a_byte_is_rejected() {
         .expect_err("a particle above u8::MAX is rejected");
     expect_package_error(&error);
 }
+
+#[test]
+fn every_per_field_count_cap_is_enforced() {
+    let bytes = fs::read(support::fixture_file(
+        "step-13-populated/payloads",
+        "model-1.bin",
+    ))
+    .expect("read the populated model payload");
+    let defaults = ReaderLimits::default();
+    assert!(
+        decode_model_payload(&bytes, &defaults).is_ok(),
+        "the fixture is within the documented defaults"
+    );
+
+    let cases = [
+        (
+            "jump rules",
+            ReaderLimits {
+                max_rules: 7,
+                ..defaults
+            },
+        ),
+        (
+            "jump directions",
+            ReaderLimits {
+                max_directions: 3,
+                ..defaults
+            },
+        ),
+        (
+            "jump collections",
+            ReaderLimits {
+                max_collections: 1,
+                ..defaults
+            },
+        ),
+        (
+            "pair tables",
+            ReaderLimits {
+                max_pair_tables: 5,
+                ..defaults
+            },
+        ),
+        (
+            "cluster tables",
+            ReaderLimits {
+                max_cluster_tables: 0,
+                ..defaults
+            },
+        ),
+        (
+            "pair-link total",
+            ReaderLimits {
+                max_pair_links: 5,
+                ..defaults
+            },
+        ),
+        (
+            "pair links per position",
+            ReaderLimits {
+                max_pair_links_per_position: 1,
+                ..defaults
+            },
+        ),
+        (
+            "cluster links per position",
+            ReaderLimits {
+                max_cluster_links_per_position: 0,
+                ..defaults
+            },
+        ),
+    ];
+
+    for (field, limits) in cases {
+        let error = decode_model_payload(&bytes, &limits)
+            .expect_err("the lowered cap must reject the fixture");
+        assert!(
+            error.to_string().contains(field) && error.to_string().contains("reader limit"),
+            "{field}: {error}"
+        );
+    }
+
+    let raised = ReaderLimits {
+        max_rules: 8,
+        max_directions: 4,
+        max_collections: 2,
+        max_pair_tables: 6,
+        max_cluster_tables: 1,
+        max_pair_links: 6,
+        max_pair_links_per_position: 2,
+        max_cluster_links_per_position: 1,
+        ..defaults
+    };
+    assert!(
+        decode_model_payload(&bytes, &raised).is_ok(),
+        "raised limits must accept the same payload"
+    );
+}

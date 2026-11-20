@@ -151,6 +151,15 @@ pub enum PackageError {
         job_id: u32,
     },
 
+    /// A job row references a model or lattice row that is absent.
+    #[error("job {job_id} references a missing {what} row")]
+    DanglingReference {
+        /// The job whose reference is dangling.
+        job_id: u32,
+        /// The missing section, for example `"model"` or `"lattice"`.
+        what: &'static str,
+    },
+
     /// The requested option or package feature is not supported by this solver version.
     #[error("unsupported: {0}")]
     Unsupported(String),
@@ -170,7 +179,8 @@ impl PackageError {
             | Self::PayloadTooLarge { .. }
             | Self::ElementBudgetExceeded { .. }
             | Self::Scan { .. }
-            | Self::Decode { .. } => ErrorClass::Package,
+            | Self::Decode { .. }
+            | Self::DanglingReference { .. } => ErrorClass::Package,
             Self::SignatureMismatch { .. }
             | Self::InvalidIndex { .. }
             | Self::LengthMismatch { .. }

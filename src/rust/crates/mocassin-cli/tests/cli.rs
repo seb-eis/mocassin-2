@@ -31,20 +31,14 @@ fn canonical_fixture() -> String {
 }
 
 fn golden(package: &str) -> String {
-    format!(
-        "mocassin-sim {} dry-run\n\
-         package: {package}\n\
-         schema: format_version=1 project_id=018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9c00 job_selection=all\n\
-         model: signature=1845b70e82320d75f768b33d1a9a46a8ae6170c33ad96013317f89fe9189a74b model_signature=92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60 particles=5 positions=4 sites=4 environments=4 pair_tables=0 cluster_tables=0\n\
-         lattice: signature=880b6eac79e9e920b6ea448c15f21b06be772f4bad774f12ea45c07420d25845 size=6x6x6 length=864\n\
-         job: id=1 kind=kmc simulation_index=0\n\
-         settings: temperature_k=773 target_mcsp=150 write_out_count=100 pre_run_mcsp=250 time_limit_s=31536000 min_success_rate=null electric_field_vm=10000000 flags=0x72\n\
-         transitions: collections=1 directions=2 rules=4\n\
-         trackers: global=2 static_per_cell=16\n\
-         rng: algorithm=chacha12-v1 seed_hash=7a92d9422dd2e67335cfca29239ec8c4d6a42a8a7f2f0ceb1068a33295a9687c\n\
-         validation: ok\n",
-        env!("CARGO_PKG_VERSION")
+    let template = fs::read_to_string(
+        Path::new(env!("CARGO_MANIFEST_DIR"))
+            .join("../../../../tests/contracts/packages/msl-v1/dry-run-v1.txt"),
     )
+    .expect("read the checked-in dry-run golden");
+    template
+        .replace("{package}", package)
+        .replace("{version}", env!("CARGO_PKG_VERSION"))
 }
 
 fn mutate(label: &str, sql: &str) -> (TempDir, PathBuf) {

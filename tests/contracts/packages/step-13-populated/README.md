@@ -18,18 +18,22 @@ kinds. It is the populated/MMC acceptance fixture for the Rust reader and mappin
 
 The package has one model, one lattice, and two jobs (`1` KMC, `2` MMC), `format_version = 1`,
 `application_id = MOCS`, `user_version = 1`, no `results` table, and no `-wal`/`-shm` sidecar. The model has
-3 particles, 3 P1 positions, 6 pair tables, 1 cluster table, 2 collections, and 8 rules; the lattice is
-2×2×2 with 24 particles.
+4 particles (`∅`, `O`, `Vc`, `H`), 3 P1 positions, 6 pair tables, 1 cluster table, 2 collections, and 8 rules;
+the lattice is 2×2×2 with 24 particles. The extended O2 particle set `{O, Vc, H}` gives the package a
+**non-trivial per-node mask difference**: at node 0 of the KMC collection the forward direction (O1,
+`{O, Vc}`) does not admit `H`, while the reverse direction (O2, `{O, Vc, H}`) does; the MMC collection has
+the same difference at nodes 0 and 1.
 
-- **Model signature:** `7a23241c57dc8fce177e1ea98c8db3dd054b30ac3cd7db46dc7ac051fbafa5a6`
-- **Model identity:** `7036aac84de8044e34f2a7431b50bf97687d8e39aabbbb5327cc6b9e8dcd81a9`
-- **Lattice signature:** `cc146e07bbf21c133cc99372e56210b648baf29fae9dbf1c0d22dd3a63065597`
+- **Model signature:** `abbd7062c53dd66a42009c52ffd7169e75645d78dac3c4cf7d5f94f7bddb2e79`
+- **Model identity:** `f0dd41980d90e803a00f726e588f2895852d15f9fa7f658965b5c91495b94ba0`
+- **Lattice signature:** `eee85b1aa92041b00cba7362acf930627a75becf077eb8dc9c4d90a7f3993475`
 
 ## Provenance
 
 - **Source project:** `samples/step-13-populated/step-13-populated.mocprj` (a small P1 ceria-derived mechanism
   with stable/unstable oxygen environments, a three-site migration-edge cluster, one KMC migration simulation,
-  one MMC O/V exchange simulation, and a two-collection job template at 2×2×2).
+  one MMC O/V exchange simulation, an extended O2 particle set that creates the per-node mask difference, and a
+  two-collection job template at 2×2×2).
 - **Build path:** `ProjectJson` → `ModelCompiler` → `ParameterizationService` → `JobTemplateExpander` →
   `SupercellGenerator` → `SimulationPackageWriter`, with `PackageBuildOptions` defaults and
   `created_utc = 2026-11-20T00:00:00Z`.
@@ -51,20 +55,32 @@ The command rebuilds the package, the `package-summary-v1` golden, the SHA-256 l
 rebuilds once more to prove the logical content is reproducible. Package bytes are a writer+runtime artifact;
 signatures and the canonical summary are the logical contract.
 
-## Intentional limits
+## Fixture properties and limits
 
-The model builder rejects two properties the Step 13 design originally asked this fixture to carry:
+The fixture carries the **non-trivial per-node mask difference** the Step 13 design requires (see the shape
+above). It does **not** carry an equivalent-start mapping (`jump_mapping` bucket position different from
+`direction.position_id`). That property is blocked by the Step 08 transition compiler, not by this fixture's
+construction:
 
-- **A non-trivial per-node mask difference** would need a particle set on one transition node that differs from
-  the other direction's node. A mixed set on a migration endpoint is rejected with `CMP004` (the same start
-  state then has two outcomes), and a mixed MMC exchange fails the same rule. The union check's positive and
-  negative cases are covered by the synthetic payload mutations in
-  `src/rust/crates/mocassin-msl/src/map/tests/`.
-- **An equivalent-start mapping** needs a symmetry operation that maps a path onto itself with an identical
-  relative encoding. The checked-in P1 and P-1 variants do not produce one (the P-1 build also fails the
-  verifier's cluster-link check, `PKG010`). The reader never requires a mapped direction's
-  `position_id` to equal the bucket position; that acceptance is covered by the synthetic mapping tests and
-  remains a Step 16 interface check.
+- `TransitionCompilationStage.AddDraft` builds `DirectionKey` from the relative path, and the first relative
+  component is `(0, 0, 0, start.P)`. Two drafts can therefore merge only when they have the same start `P`;
+  `EquivalentStartPositions` can never contain a position different from the representative start, so
+  `EncodingCompilationStage.BuildMappings` never places a direction in a different start bucket.
+- The checked-in Fm-3m `msl-v1` ceria package (two directions) and a P-1 variant of this sample (six positions,
+  plain `spaceGroup.number = 2` change, verified `ok`) both show no cross-bucket mapping. The P-1 `PKG010`
+  claim recorded during feature 6 is **not reproducible**: that P-1 build verifies, and no checked-in P-1
+  artifact ever produced `PKG010`.
+- The verifier's `byte_position >= site_count` check is also inconsistent with the payload contract, which
+  defines `byte_position` as the cluster **slot** (`0` is the centre), not a site index. No valid package in this
+  repository trips it because duplicate-site clusters currently fail earlier with `CLI007`; it is recorded as a
+  latent Step 11 verifier defect, not a Step 13 fix.
+
+The reader acceptance for an equivalent-start bucket is covered by the synthetic
+`a_direction_may_be_mapped_into_another_start_bucket` test, plus the collection-union tests in
+`src/rust/crates/mocassin-msl/src/map/tests/`. The Step 13 amendment
+[`step-13-amend-1`](../../../../docs/planning/amendments/step-13-amend-1-fixture-properties.md) records the
+requested acceptance of that limitation and the compiler/verifier defect owners. Step 16 must re-plan its
+exact per-direction fixture against the compiler fix.
 
 The fixture still covers the populated pair/cluster tables, both simulation kinds, the real-writer payload and
 signature paths, and the MMC validation rules.

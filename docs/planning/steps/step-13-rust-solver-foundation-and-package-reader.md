@@ -89,132 +89,62 @@ with the validated `JobPackage`.
 - **Measured decode (indicative, release, local container):** open 1.18 ms, cold `load_job` 346 µs, warm
   `load_job` 92 µs for the ceria fixture (864-particle lattice, model cached). The formal load benchmark and the
   `< 100 ms` fixture budget evidence are feature 7.
-- **Deviations/notes:** an identity/`schema_info` failure maps to `InvalidSchemaInfo` (package class 11) because
-  the design's error enum has no separate identity variant; `job_ids()` has an internal one-million-row safety
-  cap (the writer caps at 99,999); payload `format_version` mismatches are rejected during decode as
-  `SchemaVersion` (the model-class re-check remains part of feature 4); signature and column/payload checks other
-  than `format_version` are feature 4.
-
-**Feature 4 mapping and signature evidence.** The runtime types live in `mocassin-types::runtime`
-(`ParameterizedModel`, `ParticleTable`, `StructureModel`, `Position`, `EnvironmentModel`, `PairLink`,
-`ClusterLink`, `EnergyModel`, `PairTable`, `ClusterTable`, `TransitionModel`, `JumpCollection`,
-`JumpDirection`, `JumpRule`, `SimulationModel`, `TrackerModels`, `InitialLattice`, `JobPackage`,
-`SelectionOptimizer`, `ExtensionConfig`, `ModelCounts`). The mapping and validation live in
-`mocassin-msl::map`/`validate`; `Package::load_job` now returns a validated `JobPackage` and `load_model` returns
-the validated `Arc<ParameterizedModel>`.
-
-- **Signatures:** the canonical writer (`projection.rs`) reproduces the .NET parameterization signature
-  `1845b70e82320d75f768b33d1a9a46a8ae6170c33ad96013317f89fe9189a74b` (model identity
-  `92cf375eb1cc9bf6efaac33430fa3d44660ad8a7b355d3976441ce7c1d683e60`) and the lattice signatures
-  `880b6eac…` (job 1, 6×6×6) and `ed688990…` (job 3, 8×8×8) for both `msl-v1` and `amend-1-net10`. The
-  recomputed values are compared with the payload identity and the stored row; a changed defect-background
-  value, a wrong row signature, or a changed payload `signature` field is `SignatureMismatch` (model class 12),
-  distinct from a corrupt frame (`InvalidFrame`, package class 11).
-- **Invariant matrix (each rejected with model class 12, no panic):** particle count/array lengths/void charge;
-  provenance and 64-hex identities; base-position vector, site index, ascending/in-range particle ids, masks;
-  site count, interaction range, static-tracker formula; pair target/offset/energy id, cluster id/byte position,
-  update-id ordering; pair-table length/finiteness, cluster order/slots/high bits/mapping; defect-background
-  length; collection rule/direction ids; direction position/collection, path length, node positions, movement
-  finiteness, path start, path-vector/length agreement; rule id, state ranges and high bits, frequency,
-  transport and static-correction finiteness, tracker length/index; jump-count/mapping lengths, bucket
-  duplicates, static/global tracker ranges; simulation kinds, collection kinds, tracker lists, settings ranges,
-  normalization, KMC-only break fields, authored flag bits. MMC is covered by a synthetic valid model and the
-  `state1 == 0`, empty-tracker, and no-pre-run rules.
-- **M-3 union:** void is exempt, and a synthetic mask difference (one direction admits a particle the other does
-  not) is accepted by the collection union, while a particle outside the union is rejected even when mass and
-  charge hold.
-- **Job/column checks:** `jobs` vs payload for kind, temperature, field, target/pre-run/write-out/time limit,
-  success rate, flags, doping; `lattice_a/b/c` vs the lattice payload; `models`/`lattices` `format_version`;
-  optimizer order/range; extension order; settings ranges and composed flag word.
-- **Source-doc correction:** the stale `TransitionPayloadDtos.cs` and `CompiledTransitionModel.cs` comments now
-  state the node-wise endpoint-moment formula (`Σ_node (q(state2[node]) − q(state0[node])) · x(node)`).
-- **Deviations/notes:** `DirectionPool`/`JumpStatus` are Step 14 runtime state and were not added (feature 4's
-  approved scope ends at the validated model/job); cluster `object_id` values are required to be 64-hex, which
-  the real writer satisfies; the union check intentionally does not enforce the exact per-direction mask
-  (Step 16 assignment); the full positional transport formula remains Step 15's; `LoadedJob` was removed in
-  favour of `JobPackage`.
-
-**Feature 5 CLI evidence.** `mocassin-sim` implements the Step 13 inspection surface with `clap`:
-`--db`, `--job`, `--io`, `--seed`, `--threads`, `--extension`, `--no-extensions`,
-`--jump-log-max-ev`, `--log-level`, `--log-format`, `--dry-run`, and `--version`. Logs go to stderr in
-human or JSON form; stdout is reserved for the summary; `RUST_LOG` is not consulted. The dry run prints exactly
-the frozen format; job 1 of the ceria fixture reports the parameterization signature `1845b70e…`, the model
-identity `92cf375e…`, the lattice signature `880b6eac…`, `6x6x6 length=864`, the resolved settings
-(`target_mcsp=150`, `flags=0x72`), and `seed_hash=7a92d9422dd2e67335cfca29239ec8c4d6a42a8a7f2f0ceb1068a33295a9687c`.
-
-- **Observed process exit codes:** dry run 0; help/version 0; missing/unknown/bad option values, unknown job,
-  extension request, and a non-dry-run invocation 10; corrupt package 11; stored-signature mismatch 12;
-  deliberate panic 13; missing path or directory 16. Codes 5, 14, and 15 are reserved and not emitted.
-- **No-write proof:** a run with `--io <dir> --dry-run` leaves the temporary directory containing only the
-  package copy; the `--io` directory is not created, and no `-wal`/`-shm` sidecar appears. Without `--dry-run`
-  the job is still loaded and validated, then the command exits 10 without creating anything.
-- **Panic containment:** the inspection path runs inside `catch_unwind`; a panic logs an internal error and exits
-  13. A debug-only `MOCASSIN_SIM_TEST_PANIC` hook exercises the path in the process test.
-- **Drift check:** `crates/mocassin-cli/tests/exit_code_drift.rs` extracts the codes/meanings from architecture
-  §7.3, the `cli.md` solver table, the `solver-architecture.md` paragraph, and the Step 13 §3.7 table and
-  compares them with `ExitCode`; `cli.md` was corrected to state that `--stdout` is not accepted in Step 13.
-- **Deviations/notes:** `--stdout` is not implemented in Step 13 (any use is a parse error, exit 10; the run-dump
-  option is Step 19 work); `--extension` is rejected with exit 10 until the ABI lands; `--threads` and
-  `--jump-log-max-ev` are validated and unused; the CLI keeps its `mocassin-solver` dependency for the future run
-  path. No batch, `--json`, `--validate-only`, `--no-state`, or `--log-file` surface is added.
-
-**Feature 6 fixture and fuzzing evidence.** The cross-language artifacts are checked in under
-`tests/contracts/`:
-
-- **`rng-vectors.json`** (3,895 bytes) freezes the `chacha12-v1` domain strings, two job-seed vectors, the
-  lattice-seed vector, the seed hash, the first 16 words / 8 `u64`s / 4 `f64`s, the bounded draws (2/10/1024),
-  the 64-word boundary, the fork child, and the 64-byte state round-trip including the nonzero-stream case.
-  Five Rust tests in `mocassin-rng/tests/rng_vectors.rs` read the file through a tiny test-only JSON reader;
-  `Mocassin.Packages.Tests/Jobs/RngVectorsTests.cs` asserts the same job/lattice/seed-hash projections from
-  .NET. Draws, forks, and state are Rust-only because the .NET side does not implement ChaCha12.
-- **Projection vectors:** `mocassin-msl/tests/projections.rs` decodes all four parameterization and two lattice
-  `.bin` vectors with a strict fixed-width reader, re-encodes them byte-identically, and re-checks the sidecar
-  `projectionSha256` and domain signature. The acceptance tests additionally reproduce the stored
-  `msl-v1`/`amend-1-net10` signatures and the populated fixture's signatures.
-- **Populated fixture:** `samples/step-13-populated/step-13-populated.mocprj` is a small P1 ceria-derived
-  mechanism with one KMC migration and one MMC O/V exchange and a two-collection job template.
-  `tests/contracts/packages/step-13-populated/` holds the real-writer package (98,304 bytes; SHA-256 recorded),
-  `package-summary-v1.json` (2,710 bytes), and four raw payloads (`model-1.bin` 6,518, `lattice-1.bin` 85,
-  `job-1.bin` 446, `job-2.bin` 447; `index.json` 1,530). The model has 3 particles, 3 positions, **6 pair
-  tables and 1 cluster table**, 2 collections, and 8 rules; jobs 1/2 are KMC/MMC; both stored signatures are
-  reproduced. `mocassin-msl/tests/populated_fixture.rs` maps both jobs and decodes the raw payloads;
-  `PopulatedPackageFixtureTests` verifies the package, summary, hash, payload index, and a rebuilding
-  reproducibility check, and gates regeneration with `MOCASSIN_REGENERATE_POPULATED_FIXTURE=1`.
-- **Property/mutation suite:** five proptest properties (24 cases each) truncate and mutate the real model/job
-  payloads, feed arbitrary bytes to the scan/decode entry points, and mutate SQLite pages of a real package
-  copy; every case must return a structured error or a successful read, never panic or exceed the limits.
-- **Fuzzing:** the excluded `crates/mocassin-msl/fuzz` workspace has `payload_scan`, `payload_decode`, and
-  `package_open` targets seeded from the real model/job/lattice payloads and the real `.msl`. On
-  2026-11-20 (`x86_64-unknown-linux-gnu`, nightly, 5 s per target) the runs executed 186,312 / 158,648 / 6,535
-  inputs with zero crashes and peak RSS below 420 MiB. Continuous/nightly fuzzing and crash triage are Step 29
-  work; no scheduled job is added.
-
-**Deviations/notes:**
-1. **Accepted limitation pending audit — the populated fixture does not carry the design's per-node mask
-   difference or equivalent-start mapping; n-14 is not claimed as met.** The writer/compiler cannot produce the
-   two configurations within a valid package:
-   - A **mask difference** needs two directions whose node masks differ. A mixed particle set on a migration
-     endpoint is rejected by the compiler with `CMP004` ("Two rules in collection 0 share state0 12290 with
-     different outcomes ..."), and a mixed MMC exchange is rejected with `CMP004`/`CMP005`
-     ("produced no valid rules after conservation filtering"). The writer therefore refuses the only mechanisms
-     that would create a non-void mask difference between directions.
-   - An **equivalent-start mapping** needs a symmetry operation that maps a path onto itself with an identical
-     relative encoding; the compiler merges drafts by `(collection, relative path, inverse)` in
-     `TransitionCompilationStage.AddDraft`, which primitive groups (P1 and the checked-in P-1/225 variants) do
-     not satisfy. A P-1 variant does compile the KMC collection, but its package fails the verifier with
-     `PKG010` ("Environment 3 has a cluster link out of range"), and no checked-in sample/contract project
-     combines a centered group with transitions.
-   The real populated fixture therefore covers the populated pair/cluster tables, both simulation kinds, and the
-   real-writer payload/signature paths only. The reader semantics are covered by synthetic tests:
-   `map::tests::model::a_collection_union_admits_a_particle_only_one_direction_allows` (positive union case),
-   `a_particle_outside_the_union_is_rejected_even_when_mass_and_charge_hold` (negative), and
-   `a_direction_may_be_mapped_into_another_start_bucket` (a direction whose representative position differs from
-   the bucket position is accepted). The limitation is recorded in both fixture READMEs and is flagged for the
-   audit; do not read the populated/MMC test row as satisfying the mask/equivalent-start criterion.
-2. The fuzz build used the `x86_64-unknown-linux-gnu` target because the musl target is not installed;
+- **Deviations/notes:**
+1. **Amended fixture properties (audit F-1; draft [`step-13-amend-1`](../amendments/step-13-amend-1-fixture-properties.md)).**
+   The real-writer populated fixture now carries the **non-trivial per-node mask difference**: the O2 site has
+   the extended `{O, Vc, H}` set while O1 and U1 keep `{O, Vc}`, so node 0 of the KMC collection and nodes 0/1
+   of the MMC collection admit `H` in one direction but not the other. The Rust and .NET fixture tests assert
+   it. The **equivalent-start mapping** is impossible with the current Step 08 compiler:
+   `TransitionCompilationStage.DirectionKey` includes the start `P`, so `EquivalentStartPositions` can only
+   repeat the representative start and `EncodingCompilationStage.BuildMappings` never places a direction in a
+   different bucket. The checked-in Fm-3m `msl-v1` package and a P-1 variant of this sample show no cross-bucket
+   mapping. The reader acceptance is synthetic
+   (`map::tests::model::a_direction_may_be_mapped_into_another_start_bucket`, plus the union positive/negative
+   tests). The P-1 `PKG010` claim from feature 6 is **not reproducible**: a plain P-1 variant builds, verifies,
+   and publishes six positions; the verifier's `byte_position >= site_count` check is a latent contract
+   mismatch (the field is a cluster slot, not a site index) but no valid package in the repository trips it.
+   The amendment requests owner acceptance of the synthetic coverage and records the Step 08 compiler and Step 11
+   verifier follow-ups; Step 16 must re-plan its exact per-direction fixture against the compiler fix. The
+   equivalent-start half of n-14 is **not claimed as met**.
+2. **Audit F-8 correction.** The audit's `is_vacancy[0] == true` check is inconsistent with the Step 08
+   compiler: `ResolveCompilationStage` writes the void particle with `IsVacancy: false`, and both checked-in
+   packages carry `false`. The reader therefore rejects `is_vacancy[0] == true` (void is not an authored
+   vacancy), requires the provenance strings to be non-empty, and keeps `charges[0] == 0`. The re-audit should
+   review this correction.
+3. The fuzz build used the `x86_64-unknown-linux-gnu` target because the musl target is not installed;
    `cargo-fuzz` otherwise defaults to musl. `libfuzzer-sys` is confined to the excluded fuzz workspace; no
    production dependency or root lockfile entry changes.
-3. Both populated jobs share one 2x2x2 lattice, so the package has one lattice row (deduplicated), not two.
+4. Both populated jobs share one 2x2x2 lattice, so the package has one lattice row (deduplicated), not two.
+
+
+**Audit round 1 remediation (F-1–F-8, N-1–N-4).** The remediation branch
+`feature/step-13-rust-solver-foundation-and-package-reader/fix-audit-round-1` records:
+
+- **F-1:** the real fixture now carries the per-node mask difference (both Rust and .NET tests); the
+  equivalent-start property is impossible with the current Step 08 compiler and is requested through
+  [`step-13-amend-1`](../amendments/step-13-amend-1-fixture-properties.md) (owner acceptance pending). The P-1
+  `PKG010` claim is not reproducible; the Step 08 compiler and Step 11 verifier follow-ups are recorded.
+- **F-2:** `tests/contracts/packages/msl-v1/dry-run-v1.txt` is the checked-in CLI golden and the CLI test reads
+  it (with `{package}`/`{version}` placeholders).
+- **F-3:** `tests/projections.rs` now decodes the `.bin` vectors into the runtime types and re-encodes with the
+  production `mocassin_msl::projection` encoder; the test also reads `tests/contracts/signature-vectors.json`
+  and checks the id/signature/digest fields.
+- **F-4:** a job row whose model or lattice row is absent is `PackageError::DanglingReference` (exit 11), with a
+  mutated-fixture test for both cases.
+- **F-5:** the per-field caps and raised-limit behaviour are covered by
+  `every_per_field_count_cap_is_enforced`.
+- **F-6:** `DirectionPool` and `JumpStatus`/`JumpLink` are type-only containers with invariant tests.
+- **F-7:** `Package::load_job_with_seed` writes the override into `JobPackage.seed`; the CLI passes `--seed`
+  there, and `the_seed_override_is_the_effective_job_seed` covers it.
+- **F-8:** provenance strings must be non-empty; `is_vacancy[0] == true` is rejected because the Step 08 writer
+  marks the void particle `false` (the audit claim is corrected in the deviations above).
+- **N-1:** the evidence and page now say the real CLI AOT publish **fails** with 62 IL2xxx/IL3xxx diagnostics.
+- **N-2:** the unused `serde_bytes`, `tracing` (in `mocassin-msl`), and `thiserror` (in `mocassin-cli`)
+  declarations are removed; `tracing` and `thiserror` stay only where used.
+- **N-3:** a same-class load rerun is recorded and the baseline is flagged boundary-calibrated for Step 29; the
+  10% rule is not relaxed.
+- **N-4:** current `main` (`ec301a4`) is merged before the remediation freeze; the replacement closeout CI runs
+  on the merged tree.
 
 **Feature 7 performance, documentation, and closeout evidence.** The final feature adds the load/decode
 benchmark, reconciles the documentation with the implemented behaviour, records the parity rows, and prepares
@@ -223,9 +153,11 @@ the closeout/audit evidence.
 - **Load benchmark:** `src/rust/crates/mocassin-msl/benches/load.rs` measures open, cold `load_job(1)`, and warm
   `load_job(1)` on the ceria fixture. Medians on the local runner class (AMD Ryzen 7 7840U, Rust 1.99.1,
   release): **open 171.1 µs, cold job 343.1 µs, warm job 71.1 µs**, all far below the `< 100 ms` fixture budget.
-  The budget is scoped to the ceria fixture, not a 512 MiB package. Evidence:
-  `tests/reference/bench/step-13-load.json`, the raw `step-13-load-2026-11-20.txt`, and the `rustLoad` entry in
-  `baselines.json`. The RNG numbers remain `next_u32` 733 M/s, `next_u64` 437 M/s, `next_f64` 393 M/s,
+  A same-class rerun on the busy container measured open 271.0 µs / cold 351.4 µs / warm 68.0 µs; the open
+  variance (+58%) is environment noise, and the baseline is explicitly **boundary-calibrated for Step 29** (the
+  auditor saw +10.4%). The 10% rule is not relaxed. The budget is scoped to the ceria fixture, not a 512 MiB
+  package. Evidence: `tests/reference/bench/step-13-load.json` (with the rerun), the raw
+  `step-13-load-2026-11-20*.txt` files, and the `rustLoad` entry in `baselines.json`. The RNG numbers remain `next_u32` 733 M/s, `next_u64` 437 M/s, `next_f64` 393 M/s,
   `next_bounded` 569–572 M/s, refill 75.4 ns, state 123.4 ns, fork 113.1 ns.
 - **Documentation:** `solver-architecture.md` (RNG format-breaking split from m-16, full CLI surface, load
   evidence, exact `--stdout`/`--extension` behaviour), `msl-format.md` (solver read path), `cli.md` (Step 13
@@ -239,8 +171,8 @@ the closeout/audit evidence.
   and the Rust API reference remains `Partial` until Step 30. No solver row is marked Done.
 - **Correction:** feature 6 had left `proptest` in `mocassin-msl`'s `[dependencies]`; it is now dev-only, as the
   step page's dev-crate rule requires. No production dependency was added.
-- **Closeout:** `./tools/verify.sh all --require` exited 0 on the code tree at `45eb181` (AOT green; the known 62
-  IL2xxx/IL3xxx `Mocassin.Cli` publish diagnostics remain recorded evidence). The first closeout dispatch at the
+- **Closeout:** `./tools/verify.sh all --require` exited 0 on the code tree at `45eb181` (AOT green; the real
+  `Mocassin.Cli` AOT publish **fails** with 62 IL2xxx/IL3xxx diagnostics, recorded as non-gating evidence). The first closeout dispatch at the
   audited tip (44808204483) failed only on the known shared-runner performance test
   `TenThousandPositionModelCompilesWithinTheBudget` (31.3088447 s vs < 30 s); the owner accepted it with the
   Step 11 precedent and authorized one replacement. The replacement
@@ -250,11 +182,6 @@ the closeout/audit evidence.
   `docs/planning/closeout/step-13.json` passes
   `python tools/check_closeout_evidence.py`; `docs/planning/audits/step-13.md` is `Ready for audit` with the
   fixture limitation flagged. No tag or merge has been performed.
-
-**Feature-6 fixture deviation (decided in feature 7).** No minimal real project produced the per-node mask
-difference or the equivalent-start mapping; the limitation is recorded above with the exact compiler/verifier
-diagnostics and is flagged for the audit. The synthetic union and cross-bucket tests are the acceptance evidence
-for the reader semantics.
 
 ### Approved feature list (owner, 2026-11-18; implementation authorized 2026-11-19)
 
@@ -1361,7 +1288,7 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
 | --- | --- | --- |
 | Reader acceptance | the `msl-v1` fixture opens read-only; the dry-run counts/signatures equal the canonical summary for job 1 | PR-medium |
 | Reader compatibility | the `amend-1-net10` fixture opens and yields the same logical summary | PR-medium |
-| Populated/MMC acceptance | the new real-writer package has non-empty pair/cluster tables, an MMC job, a non-trivial per-node mask difference, and an equivalent-start mapping; both signatures re-encode; MMC kind/break fields validate | PR-medium |
+| Populated/MMC acceptance | the new real-writer package has non-empty pair/cluster tables, an MMC job, and a non-trivial per-node mask difference; both signatures re-encode; MMC kind/break fields validate. The equivalent-start mapping is synthetic in Step 13 (Step 08 compiler defect; amendment `step-13-amend-1`) | PR-medium |
 | Schema/version | wrong application id, user version, future `format_version`, missing table/column, malformed `schema_info`; `models`/`lattices` `format_version` columns match their payloads | PR-fast |
 | Decode | every raw payload decodes; unknown keys are ignored; minimum-width integers, array `lattice`, `null` optionals | PR-fast |
 | Bounds | truncated frame, oversized declared size, decompression bomb, element-budget/depth violation fail without OOM | PR-fast |
@@ -1511,9 +1438,9 @@ commit. No other design decision is open.
       re-encoding.
 - [x] Implement the `mocassin-sim` parser, logging, `--version`, dry-run summary, unified exit mapping, panic
       containment, and the exit-code drift check.
-- [ ] Implement the data-oriented base structures (lattice, positions, environments, tables, pools, jump-status
-      container). *Partial: lattice/positions/environments/tables are delivered; `DirectionPool` and the
-      jump-status container are Step 14 runtime state and were not added (feature-4 note).*
+- [x] Implement the data-oriented base structures (lattice, positions, environments, tables, pools, jump-status
+      container). `DirectionPool` and the `JumpStatus`/`JumpLink` containers are type-only definitions with
+      their invariants tested; Step 14 populates them.
 - [x] Add the cross-language fixtures (including the populated pair/cluster + MMC package), RNG vectors,
       dry-run golden, property/mutation tests, and fuzz targets.
 - [x] Run the time-boxed fuzz targets and record the result.
@@ -1536,10 +1463,14 @@ commit. No other design decision is open.
       a Step 16 assignment. The full positional transport formula is recorded as a Step 15 assignment with the
       trust-boundary rationale.
 - [x] A symmetry-equivalent-start direction mapped into another start bucket is accepted; the reader does not
-      require `direction.position_id == position`.
+      require `direction.position_id == position`. The real-writer property is blocked by the Step 08 compiler
+      defect recorded in [`step-13-amend-1`](../amendments/step-13-amend-1-fixture-properties.md); the synthetic
+      mapping test is the Step 13 evidence.
 - [x] A 512 MiB writer-valid payload is within the 512M model-element budget; the 1M-rule/16M-link caps are
       per-field, and a raised `MaxRuleCount` requires a raised `ReaderLimits`. *The budget is verified by the
-      documented arithmetic and the `ReaderLimits`/scan tests; no 512 MiB fixture is materialized.*
+      documented arithmetic and the `ReaderLimits`/scan tests; no 512 MiB fixture is materialized. The
+      `every_per_field_count_cap_is_enforced` test exercises rules, directions, collections, pair/cluster
+      tables, and both link caps with lowered limits and a raised-limit acceptance.*
 - [x] `models.format_version`/`lattices.format_version` columns match their payloads; the job settings are not
       compared with `simulations[].default_settings`.
 - [x] The solver exit-code rows in `cli.md`, `solver-architecture.md`, and this page match architecture §7.3
@@ -1587,7 +1518,7 @@ At this point, write:
 | Validation | Bad indices, lengths, kinds, flags, trackers, finite values, signatures |
 | Conservation | Per-rule symbol multiset and charge; mutated state/particle rejected |
 | Movement/transport | `path_vector`/`length` vs `movement`; zero transport when no charge changes |
-| Populated/MMC | Real populated pair/cluster + MMC package with a non-trivial mask difference and equivalent-start mapping validates and re-encodes both signatures |
+| Populated/MMC | Real populated pair/cluster + MMC package with a non-trivial per-node mask difference validates and re-encodes both signatures; the synthetic cross-bucket test covers the equivalent-start reader contract (amendment `step-13-amend-1`) |
 | Signatures | Parameterization/lattice re-encode, `.bin` vectors, mutation detection |
 | RNG | Derivation/draw/state golden vectors, bounded uniformity, double range, fork separation |
 | CLI | Dry-run output, exit codes 0/5/10–16 (5 reserved), logging, parse-error remap, write-free |

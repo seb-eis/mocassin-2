@@ -70,8 +70,9 @@ jobs row
    `SQLITE_OPEN_READONLY`, `query_only=ON`, `foreign_keys=ON`, and a bounded busy timeout. A `0444` package on
    read-only media opens normally and needs no `-wal`/`-shm` sidecar.
 2. **Identity.** `application_id` (`0x4D4F4353`), `user_version` (1), and `schema_info.format_version` (1) must
-   match. The reader requires the tables and columns it uses and the nine `schema_info` keys, and checks the
-   symmetry/space-group provenance against the model payload.
+   match. The reader requires the tables and columns it uses and the nine `schema_info` keys. The model
+   provenance strings must be **non-empty** and then equal the `schema_info` rows; an empty payload and empty
+   schema values are rejected rather than accepted as a matching pair.
 3. **Decode.** Each payload is one standard Zstd frame. The reader checks the declared decompressed size (or
    streams with a hard limit when none is declared) against a byte guard before allocating. The MessagePack
    scan walks the document without allocating per element and rejects an element budget, depth, declared length,
@@ -79,7 +80,9 @@ jobs row
 4. **Validate.** Every index and length in the particle, structure, environment, energy, transition, simulation,
    job, and lattice sections is checked; NaN/Inf is rejected where the schema requires a finite value; state
    codes and tracker entries are checked against the particle count and path length; jump-count prefix sums,
-   kind bits, and normalized field directions are checked. Each rule must preserve the non-void particle-symbol
+   kind bits, and normalized field directions are checked. The particle table requires index 0 to be void with
+   zero charge and `is_vacancy == false` (the Step 08 writer marks the synthetic void particle as not an
+   authored vacancy); a `true` flag at index 0 is rejected. Each rule must preserve the non-void particle-symbol
    multiset and charge within `1e-9`; `path_vector`/`length` must match the per-node movements and the cell
    vectors; a no-charge-change rule must have a zero transport vector. The full positional
    `charge_transport_vector` formula is assigned to Step 15 because the v1 payload has no fractional P1
@@ -87,8 +90,12 @@ jobs row
 5. **Signatures.** The six-field parameterization projection and the five-field lattice projection are
    re-encoded with the fixed-width canonical writer and compared with the stored signatures. The compiled-model
    signature is an identity string and is not re-encoded.
-6. **Job.** The job row's payload-derived columns must equal the payload values; the seed must be 32 bytes. The
-   result is a validated `JobPackage`.
+6. **Job.** The job row's payload-derived columns must equal the payload values; the seed must be 32 bytes. A
+   job row whose `model_id` or `lattice_id` row is absent is a package-class error (exit 11), not
+   `JobNotFound` (exit 10). The result is a validated `JobPackage`.
+7. **Effective seed.** The package seed is written into `JobPackage.seed`; an optional `--seed` override is
+   passed through `Package::load_job_with_seed`, which replaces that field after validation. A Step 14 consumer
+   always reads the effective seed from `JobPackage.seed`, matching design §2.3.
 
 The reader does **not** run `PRAGMA integrity_check` and does **not** mirror the `PKG` diagnostics. Those belong
 to `mocassin verify`; the solver checks only the data it consumes. The package format and its fields are in the
@@ -129,6 +136,11 @@ The reader produces the types Step 14 consumes:
   eV to kT.
 - Transitions keep collections, directions, rules, `jump_count`, the derived prefix-sum `jump_offsets`,
   `jump_mapping`, and the tracker mappings. `tracker_order` is variable-length with a `0xFF` sentinel.
+- `DirectionPool`: `direction_count`, flat `(PositionId, ParticleId)` members, and the caller-indexed
+  `slot_of` map; Step 14 populates it and performs the deterministic swap-remove. `JumpStatus` is the CSR
+  container (`offsets: Vec<u32>`, `links: Vec<JumpLink>`), with `JumpLink` carrying the sender path id and the
+  affected environment-link id; Step 14 computes the entries. Both containers are type-only in Step 13 and have
+  invariant tests (`JumpStatus::is_valid`).
 - `JobPackage`: job id, kind, shared model, initial lattice, settings, effective seed, optimizers, extensions,
   instruction, and doping summary.
 

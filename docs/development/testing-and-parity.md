@@ -52,20 +52,23 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - The checked-in `tests/contracts/packages/msl-v1/` package is read by the Rust reader; the dry-run counts and
   signatures must equal the canonical summary for the same job. The byte-fixed `amend-1-net10/` package is read
   the same way. `tests/contracts/packages/step-13-populated/step-13-populated.msl`, built by the real writer
-  from `samples/step-13-populated/step-13-populated.mocprj` (3 particles, 3 positions, 6 pair tables, 1 cluster
+  from `samples/step-13-populated/step-13-populated.mocprj` (4 particles, 3 positions, 6 pair tables, 1 cluster
   table, 2 collections, 8 rules, one KMC and one MMC job), exercises the populated parameterization and MMC
-  paths. The fixture's real-writer model does not carry the design's per-node mask difference or an
-  equivalent-start mapping: the compiler rejects a mixed particle set on a transition node (`CMP004`/`CMP005`)
-  and the P-1 variant fails the verifier's cluster-link check (`PKG010`). The reader's union semantics and its
-  acceptance of a direction mapped into another bucket are covered by synthetic mapping tests; the real fixture
-  covers the populated/MMC/signature paths. This limitation is recorded in the Step 13 page and the fixture
-  READMEs. All reads are PR-medium.
+  paths. The extended O2 `{O, Vc, H}` set gives the fixture a **non-trivial per-node mask difference** at KMC
+  node 0 and MMC nodes 0/1; the Rust and .NET tests assert it. An equivalent-start mapping is impossible with
+  the current Step 08 compiler (`DirectionKey` includes the start `P`, so `EquivalentStartPositions` can never
+  differ from the representative start); the reader accepts a cross-bucket direction through the synthetic
+  mapping test. The earlier P-1 `PKG010` note is not reproducible (a plain P-1 variant verifies). This is
+  recorded in the Step 13 page, both fixture READMEs, and amendment `step-13-amend-1`. All reads are
+  PR-medium.
 - The Rust test decodes the raw payloads in `tests/contracts/packages/msl-v1/payloads/` and the populated
   package's extracted payloads, which catches field-name, minimum-width-integer, `null` optional, and
   array-vs-`bin` lattice drift without a .NET dependency.
-- The Rust canonical writer decodes every `tests/contracts/projections/parameterization/*.bin` and
-  `.../lattice/*.bin` vector with a strict fixed-width reader, re-encodes it, and must reproduce the bytes, the
-  projection SHA-256, and the domain signature. This is PR-fast.
+- `tests/projections.rs` decodes every `tests/contracts/projections/parameterization/*.bin` and
+  `.../lattice/*.bin` vector with a strict fixed-width reader, builds the runtime model/lattice, and re-encodes
+  with the **production** `mocassin_msl::projection` functions. It must reproduce the bytes, the projection
+  SHA-256, and the domain signature, and it reads `tests/contracts/signature-vectors.json` to check the
+  id/signature/digest entries. This is PR-fast.
 - The reader checks mass/charge conservation per rule, `path_vector`/`length` against `movement` and the cell
   vectors, and the zero-transport rule when no charge changes. Void is exempt from the occupation check; a
   non-void state particle must be in the collection-union mask, and the real `msl-v1` rules must pass. The exact
@@ -77,6 +80,8 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   remains Step 16's.
 - The model-element budget is 512M, covering a writer-valid 512 MiB payload; the 1M-rule/16M-link caps are
   per-field, and a caller that raises `CompilationOptions.MaxRuleCount` must raise `ReaderLimits`.
+  `every_per_field_count_cap_is_enforced` exercises the rules, directions, collections, pair/cluster tables, and
+  both link caps with lowered limits, then accepts the same payload with raised limits.
 - `tests/contracts/rng-vectors.json` freezes the domain strings, seed derivation, draw streams, bounded draws,
   forks, and the `RngStateV1` round-trip, including a nonzero-stream resume. Rust reads the document; a .NET
   test asserts the job/lattice/seed-hash projections from the same file. A changed algorithm, draw order, or
@@ -91,8 +96,13 @@ or SQLite. Prefer real temporary directories and real files produced by the real
   and commit, plus the `rustLoad`/`rustRng` same-runner-class entries in
   `tests/reference/bench/baselines.json`. The ceria load medians are open 171.1 us, cold job 343.1 us, and warm
   job 71.1 us against the `< 100 ms` fixture budget (not a 512 MiB-package promise; peak RSS is not measured by
-  the Criterion bench). The RNG budgets are in the Step 13 page §4.5. A >10 % same-class regression fails the
-  release gate.
+  the Criterion bench). A same-class rerun on the busy container measured open 271.0 us / cold 351.4 us / warm
+  68.0 us; the open variance is environment noise, so the baseline is flagged **boundary-calibrated for Step 29**
+  (the auditor saw +10.4 %). The 10 % rule is not relaxed. The RNG budgets are in the Step 13 page §4.5.
+- The reader rejects a job row whose model or lattice row is absent as a package-class error (exit 11), applies
+  `--seed` through `Package::load_job_with_seed` so `JobPackage.seed` is the effective seed, requires non-empty
+  provenance strings, and rejects `is_vacancy[0] == true` (the writer marks the void particle `false`). Each has
+  a fixture-mutation or real-package test.
 - The solver exit-code rows in the CLI/architecture/step page are compared by a doc-drift check; the canonical
   meanings are architecture §7.3, including `13` numerical/internal invariant and `14` limit abort.
 - Tests use real files, real SQLite, and the real checked-in packages. There are no mocks in the reader; the only

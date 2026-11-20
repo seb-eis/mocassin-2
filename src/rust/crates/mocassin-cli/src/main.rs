@@ -85,7 +85,7 @@ fn inspect(cli: &Cli) -> ExitCode {
         }
     };
 
-    let job = match package.load_job(cli.job) {
+    let job = match package.load_job_with_seed(cli.job, cli.seed) {
         Ok(job) => job,
         Err(context) => {
             eprintln!("error: {context}");
@@ -100,10 +100,6 @@ fn inspect(cli: &Cli) -> ExitCode {
         return ExitCode::InvalidArguments;
     }
 
-    let effective_seed = cli.seed.unwrap_or(job.seed);
-    print!(
-        "{}",
-        dry_run::summary(&cli.db, &package, &job, &effective_seed)
-    );
+    print!("{}", dry_run::summary(&cli.db, &package, &job, &job.seed));
     ExitCode::Completed
 }

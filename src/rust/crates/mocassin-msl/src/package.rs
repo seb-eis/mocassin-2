@@ -305,9 +305,27 @@ impl Package {
     ///
     /// # Errors
     ///
-    /// Returns [`PackageError::JobNotFound`] for an unknown id and a structured package/model error for a
-    /// corrupt payload, an invariant violation, or a signature mismatch.
+    /// Returns [`PackageError::JobNotFound`] for an unknown id, a package error for a job row that references
+    /// a missing model or lattice row, and a structured model error for a corrupt payload, an invariant
+    /// violation, or a signature mismatch.
     pub fn load_job(&self, job_id: u32) -> Result<JobPackage, PackageContext> {
+        self.load_job_with_seed(job_id, None)
+    }
+
+    /// Loads and validates one job, applying an optional process-local seed override.
+    ///
+    /// The override replaces [`JobPackage::seed`] after the package payload has been validated, so a Step 14
+    /// consumer reads the effective seed from the same field as the package-provided seed. The seed is not
+    /// re-validated against the package signature because it is deliberately process-local.
+    ///
+    /// # Errors
+    ///
+    /// Returns the same errors as [`Package::load_job`].
+    pub fn load_job_with_seed(
+        &self,
+        job_id: u32,
+        seed_override: Option<[u8; 32]>,
+    ) -> Result<JobPackage, PackageContext> {
         let job_context = |error: PackageError| PackageContext::new(Some(job_id), -1, "job", error);
         let raw = self.read_job_row(job_id).map_err(job_context)?;
         let (row, compressed_job) = JobRow::from_raw(raw).map_err(job_context)?;
@@ -356,7 +374,12 @@ impl Package {
         let job_payload =
             decode::decode_job_payload(&compressed_job, &self.limits).map_err(job_context)?;
 
-        map::job_from_payload(&job_payload, &row, model, lattice).map_err(job_context)
+        let mut job =
+            map::job_from_payload(&job_payload, &row, model, lattice).map_err(job_context)?;
+        if let Some(seed) = seed_override {
+            job.seed = seed;
+        }
+        Ok(job)
     }
 
     fn load_model_at(
@@ -455,7 +478,8 @@ impl Package {
     }
 
     fn read_job_row(&self, job_id: u32) -> Result<RawJobRow, PackageError> {
-        self.connection
+        let row = self
+            .connection
             .query_row(JOB_ROW_SQL, [i64::from(job_id)], |row| {
                 Ok(RawJobRow {
                     job_id: row.get(0)?,
@@ -486,8 +510,28 @@ impl Package {
                     created_utc: row.get(25)?,
                 })
             })
-            .optional()?
-            .ok_or(PackageError::JobNotFound { job_id })
+            .optional()?;
+
+        if let Some(row) = row {
+            return Ok(row);
+        }
+
+        let job_exists = self
+            .connection
+            .query_row(
+                "SELECT 1 FROM jobs WHERE job_id = ?1",
+                [i64::from(job_id)],
+                |_| Ok(()),
+            )
+            .optional()?;
+        if job_exists.is_some() {
+            Err(PackageError::DanglingReference {
+                job_id,
+                what: "model or lattice",
+            })
+        } else {
+            Err(PackageError::JobNotFound { job_id })
+        }
     }
 }
 

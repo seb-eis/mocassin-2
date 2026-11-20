@@ -11,10 +11,10 @@
   },
   "models": [
     {
-      "signature": "7a23241c57dc8fce177e1ea98c8db3dd054b30ac3cd7db46dc7ac051fbafa5a6",
-      "modelSignature": "7036aac84de8044e34f2a7431b50bf97687d8e39aabbbb5327cc6b9e8dcd81a9",
+      "signature": "abbd7062c53dd66a42009c52ffd7169e75645d78dac3c4cf7d5f94f7bddb2e79",
+      "modelSignature": "f0dd41980d90e803a00f726e588f2895852d15f9fa7f658965b5c91495b94ba0",
       "payloadFormatVersion": 1,
-      "particleCount": 3,
+      "particleCount": 4,
       "positionCount": 3,
       "siteCount": 3,
       "environmentCount": 3,
@@ -26,7 +26,7 @@
   ],
   "lattices": [
     {
-      "signature": "cc146e07bbf21c133cc99372e56210b648baf29fae9dbf1c0d22dd3a63065597",
+      "signature": "eee85b1aa92041b00cba7362acf930627a75becf077eb8dc9c4d90a7f3993475",
       "latticeSize": [
         2,
         2,
@@ -39,8 +39,8 @@
   "jobs": [
     {
       "jobId": 1,
-      "modelSignature": "7036aac84de8044e34f2a7431b50bf97687d8e39aabbbb5327cc6b9e8dcd81a9",
-      "latticeSignature": "cc146e07bbf21c133cc99372e56210b648baf29fae9dbf1c0d22dd3a63065597",
+      "modelSignature": "f0dd41980d90e803a00f726e588f2895852d15f9fa7f658965b5c91495b94ba0",
+      "latticeSignature": "eee85b1aa92041b00cba7362acf930627a75becf077eb8dc9c4d90a7f3993475",
       "kind": "kmc",
       "collectionName": "kmc",
       "configName": "c1",
@@ -65,8 +65,8 @@
     },
     {
       "jobId": 2,
-      "modelSignature": "7036aac84de8044e34f2a7431b50bf97687d8e39aabbbb5327cc6b9e8dcd81a9",
-      "latticeSignature": "cc146e07bbf21c133cc99372e56210b648baf29fae9dbf1c0d22dd3a63065597",
+      "modelSignature": "f0dd41980d90e803a00f726e588f2895852d15f9fa7f658965b5c91495b94ba0",
+      "latticeSignature": "eee85b1aa92041b00cba7362acf930627a75becf077eb8dc9c4d90a7f3993475",
       "kind": "mmc",
       "collectionName": "mmc",
       "configName": "c1",

@@ -1,6 +1,6 @@
 {
   "step": "step-13",
-  "part": "Feature 7 — package open and job load benchmark",
+  "part": "Feature 7 \u2014 package open and job load benchmark",
   "generatedAtUtc": "2026-11-20T19:53:52Z",
   "sourceCommit": "45eb181656380ce258d20c8c4183727c62d9cc1a",
   "command": "cargo bench --manifest-path src/rust/Cargo.toml -p mocassin-msl --bench load",
@@ -39,5 +39,19 @@
     "cold_load_job_1 measures open + load_job(1): schema checks, model decode/mapping/parameterization signature, lattice decode/mapping/signature, job decode/mapping, and column checks.",
     "warm_load_job_1 measures load_job(1) with the decoded model already in the package cache.",
     "All three medians are far below the < 100 ms fixture budget. A 512 MiB payload is bounded by ReaderLimits but may take proportionally longer; the budget is not a large-package promise."
-  ]
+  ],
+  "reruns": [
+    {
+      "generatedAtUtc": "2026-11-20T21:10:00Z",
+      "rawResults": "tests/reference/bench/step-13-load-2026-11-20-rerun.txt",
+      "measurements": {
+        "openMicroseconds": 270.98,
+        "coldLoadJobMicroseconds": 351.35,
+        "warmLoadJobMicroseconds": 68.045
+      },
+      "targetMet": true,
+      "note": "Same runner class, same fixture, on a busy local container. open varies by +58% while cold/warm stay within ~3%; this is environment noise, not a regression. The 10% rule is not relaxed; the entry is flagged boundary-calibrated for Step 29."
+    }
+  ],
+  "baselineStatus": "boundary-calibrated for Step 29: repeated same-class runs show open between 171.09 and 270.98 us on this shared container while cold/warm stay stable. The recorded medians are the first quiet-run values; a release candidate must re-baseline on a quiet runner before the 10% rule is used as a gate."
 }

@@ -3,6 +3,7 @@
 using System.Security.Cryptography;
 using System.Text.Json;
 using Mocassin.Results.Packages;
+using Mocassin.Results.Packages.Internal;
 using Mocassin.Results.Tests.Packages.TestSupport;
 
 namespace Mocassin.Results.Tests.Packages;
@@ -46,6 +47,7 @@ public sealed class PopulatedPackageFixtureTests
         using var golden = JsonDocument.Parse(File.ReadAllText(
             Path.Combine(FixtureDirectory, TestSupport.PopulatedPackageFixtureBuilder.SummaryFileName)));
         var model = golden.RootElement.GetProperty("models")[0];
+        Assert.Equal(4, model.GetProperty("particleCount").GetInt32());
         Assert.Equal(6, model.GetProperty("pairTableCount").GetInt32());
         Assert.Equal(1, model.GetProperty("clusterTableCount").GetInt32());
 
@@ -53,6 +55,40 @@ public sealed class PopulatedPackageFixtureTests
         Assert.Equal(2, jobs.Length);
         Assert.Contains(jobs, static job => job.GetProperty("kind").GetString() == "kmc");
         Assert.Contains(jobs, static job => job.GetProperty("kind").GetString() == "mmc");
+    }
+
+    [Fact]
+    public async Task FixtureCarriesANonTrivialPerNodeMaskDifference()
+    {
+        var path = Path.Combine(FixtureDirectory, TestSupport.PopulatedPackageFixtureBuilder.PackageFileName);
+        var read = await PackageReader.ReadAsync(path, new PackageVerificationOptions(), CancellationToken.None);
+        var model = Assert.Single(read.Models).Decoded;
+        Assert.NotNull(model);
+        Assert.Equal(4u, model.Particle.Count);
+        Assert.Equal("∅,O,Vc,H", string.Join(',', model.Particle.Symbols));
+
+        var found = false;
+        foreach (var collection in model.Transitions.JumpCollections)
+        {
+            var directions = collection.DirectionIds
+                .Select(id => model.Transitions.JumpDirections[(int)id])
+                .ToArray();
+            var nodes = directions.Max(static direction => direction.Path.Length);
+            for (var node = 0; node < nodes; node++)
+            {
+                var masks = directions
+                    .Where(direction => node < direction.Path.Length)
+                    .Select(direction => model.Structure.Positions[direction.Path[node][3]].ParticleIds)
+                    .Select(static ids => string.Join(',', ids))
+                    .Distinct(StringComparer.Ordinal)
+                    .Count();
+                found |= masks > 1;
+            }
+        }
+
+        Assert.True(
+            found,
+            "The real-writer populated fixture must carry at least one per-node mask difference.");
     }
 
     [Fact]

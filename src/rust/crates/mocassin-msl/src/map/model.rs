@@ -27,6 +27,15 @@ pub(crate) fn model_from_payload(
 ) -> Result<ParameterizedModel, PackageError> {
     require_hex64("model.signature", &payload.signature)?;
     require_hex64("model.model_signature", &payload.model_signature)?;
+    if payload.symmetry_contract_version.is_empty()
+        || payload.space_group_data_version.is_empty()
+        || payload.space_group_data_sha256.is_empty()
+    {
+        return Err(PackageError::InvalidValue {
+            what: "model provenance",
+            detail: "the payload symmetry/space-group provenance must be non-empty".to_owned(),
+        });
+    }
     if payload.symmetry_contract_version != schema.symmetry_contract_version
         || payload.space_group_data_version != schema.space_group_data_version
         || payload.space_group_data_sha256 != schema.space_group_data_sha256
@@ -147,6 +156,12 @@ fn map_particles(payload: &ParticlePayload) -> Result<ParticleTable, PackageErro
         return Err(PackageError::InvalidValue {
             what: "particle.charges",
             detail: "index 0 is void and must carry zero charge".to_owned(),
+        });
+    }
+    if payload.is_vacancy[0] {
+        return Err(PackageError::InvalidValue {
+            what: "particle.is_vacancy",
+            detail: "index 0 is void and is not an authored vacancy".to_owned(),
         });
     }
     for symbol in &payload.symbols {

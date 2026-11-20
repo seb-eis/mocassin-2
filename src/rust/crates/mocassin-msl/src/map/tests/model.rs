@@ -522,6 +522,11 @@ fn the_particle_table_is_checked() {
     assert!(error.to_string().contains("void"), "{error}");
 
     let error = rejected(|payload| {
+        payload.particle.is_vacancy[0] = true;
+    });
+    assert!(error.to_string().contains("vacancy"), "{error}");
+
+    let error = rejected(|payload| {
         payload.particle.charges[1] = f64::NAN;
     });
     assert!(error.to_string().contains("finite"), "{error}");
@@ -546,6 +551,27 @@ fn provenance_must_match_schema_info() {
         payload.space_group_data_sha256 = "a".repeat(64);
     });
     assert!(error.to_string().contains("provenance"), "{error}");
+
+    let error = rejected(|payload| {
+        payload.symmetry_contract_version.clear();
+    });
+    assert!(error.to_string().contains("non-empty"), "{error}");
+}
+
+#[test]
+fn empty_payload_and_schema_provenance_is_rejected() {
+    let mut schema = schema();
+    schema.symmetry_contract_version.clear();
+    schema.space_group_data_version.clear();
+    schema.space_group_data_sha256.clear();
+    let mut payload = model_dto();
+    payload.symmetry_contract_version.clear();
+    payload.space_group_data_version.clear();
+    payload.space_group_data_sha256.clear();
+
+    let error = model_from_payload(&payload, &schema, &limits())
+        .expect_err("empty provenance must not satisfy the match by being empty on both sides");
+    assert!(error.to_string().contains("non-empty"), "{error}");
 }
 
 #[test]

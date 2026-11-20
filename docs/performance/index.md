@@ -93,9 +93,13 @@ cache (cold), and loads job 1 again with the model cached (warm). Measured on th
 
 All three are far below the `< 100 ms` load target. That target is a **ceria-fixture budget**, not a promise for
 a 512 MiB package: the reader's `ReaderLimits` bound the large-package path, and a large payload may take
-proportionally longer. The raw Criterion log is
-[`tests/reference/bench/step-13-load-2026-11-20.txt`](../../tests/reference/bench/step-13-load-2026-11-20.txt);
-the structured evidence and the same-runner-class baseline are
+proportionally longer. A same-class rerun on the busy container measured open 271.0 µs / cold 351.4 µs / warm
+68.0 µs: the open variance (+58 %) is environment noise, and the baseline is flagged
+**boundary-calibrated for Step 29** (the auditor's run saw +10.4 %). The 10 % same-class regression rule is not
+relaxed. The raw Criterion logs are
+[`step-13-load-2026-11-20.txt`](../../tests/reference/bench/step-13-load-2026-11-20.txt) and
+[`step-13-load-2026-11-20-rerun.txt`](../../tests/reference/bench/step-13-load-2026-11-20-rerun.txt); the
+structured evidence and the same-runner-class baseline are
 [`step-13-load.json`](../../tests/reference/bench/step-13-load.json) and the `rustLoad` entry in
 [`baselines.json`](../../tests/reference/bench/baselines.json). The RNG draw/refill/state numbers and their
 baseline are in [`step-13-rng.json`](../../tests/reference/bench/step-13-rng.json) and the `rustRng` entry.

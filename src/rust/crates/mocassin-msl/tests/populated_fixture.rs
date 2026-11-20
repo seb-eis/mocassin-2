@@ -28,7 +28,7 @@ fn the_populated_package_maps_both_simulation_kinds() {
 
     let kmc = package.load_job(1).expect("the KMC job maps");
     assert_eq!(kmc.kind, SimulationKind::Kmc);
-    assert_eq!(kmc.model.counts.particle_count, 3);
+    assert_eq!(kmc.model.counts.particle_count, 4);
     assert_eq!(kmc.model.counts.position_count, 3);
     assert_eq!(kmc.model.counts.pair_table_count, 6);
     assert_eq!(kmc.model.counts.cluster_table_count, 1);
@@ -37,15 +37,15 @@ fn the_populated_package_maps_both_simulation_kinds() {
     assert_eq!(kmc.model.counts.rule_count, 8);
     assert_eq!(
         kmc.model.signature,
-        "7a23241c57dc8fce177e1ea98c8db3dd054b30ac3cd7db46dc7ac051fbafa5a6"
+        "abbd7062c53dd66a42009c52ffd7169e75645d78dac3c4cf7d5f94f7bddb2e79"
     );
     assert_eq!(
         kmc.model.model_signature,
-        "7036aac84de8044e34f2a7431b50bf97687d8e39aabbbb5327cc6b9e8dcd81a9"
+        "f0dd41980d90e803a00f726e588f2895852d15f9fa7f658965b5c91495b94ba0"
     );
     assert_eq!(
         kmc.lattice.signature,
-        "cc146e07bbf21c133cc99372e56210b648baf29fae9dbf1c0d22dd3a63065597"
+        "eee85b1aa92041b00cba7362acf930627a75becf077eb8dc9c4d90a7f3993475"
     );
     assert_eq!(kmc.lattice.lattice_size, [2, 2, 2]);
     assert_eq!(kmc.lattice.len(), 24);
@@ -58,7 +58,7 @@ fn the_populated_package_maps_both_simulation_kinds() {
             .energy
             .pair_tables
             .iter()
-            .all(|table| table.energies.len() == 9)
+            .all(|table| table.energies.len() == 16)
     );
     assert_eq!(kmc.model.energy.cluster_tables.len(), 1);
     assert!(
@@ -66,8 +66,8 @@ fn the_populated_package_maps_both_simulation_kinds() {
             .occupation_codes
             .is_empty()
     );
-    assert_eq!(kmc.model.energy.defect_background.len(), 9);
-    assert_eq!(kmc.model.transitions.jump_offsets.len(), 10);
+    assert_eq!(kmc.model.energy.defect_background.len(), 12);
+    assert_eq!(kmc.model.transitions.jump_offsets.len(), 13);
 
     let mmc = package.load_job(2).expect("the MMC job maps");
     assert_eq!(mmc.kind, SimulationKind::Mmc);
@@ -101,6 +101,46 @@ fn the_populated_package_maps_both_simulation_kinds() {
 }
 
 #[test]
+fn the_populated_fixture_has_a_per_node_mask_difference() {
+    let package = Package::open_readonly(package_path(), ReaderLimits::default())
+        .expect("the populated fixture opens");
+    let job = package.load_job(1).expect("the KMC job maps");
+    let model = &job.model;
+    let mut differing = Vec::new();
+
+    for collection in &model.transitions.collections {
+        let node_count = collection
+            .direction_ids
+            .iter()
+            .map(|direction| {
+                model.transitions.directions[direction.get() as usize]
+                    .path
+                    .len()
+            })
+            .max()
+            .unwrap_or(0);
+        for node in 0..node_count {
+            let mut masks = Vec::new();
+            for direction in &collection.direction_ids {
+                let path = &model.transitions.directions[direction.get() as usize].path;
+                if let Some(encoding) = path.get(node) {
+                    let position = encoding[3] as usize;
+                    masks.push(model.structure.positions[position].allowed_mask);
+                }
+            }
+            if masks.windows(2).any(|pair| pair[0] != pair[1]) {
+                differing.push((collection.kind, node, masks));
+            }
+        }
+    }
+
+    assert!(
+        !differing.is_empty(),
+        "the real-writer fixture must carry at least one per-node mask difference"
+    );
+}
+
+#[test]
 fn the_populated_raw_payloads_decode() {
     let limits = ReaderLimits::default();
 
@@ -109,7 +149,7 @@ fn the_populated_raw_payloads_decode() {
         &limits,
     )
     .expect("the populated model payload decodes");
-    assert_eq!(model.particle.count, 3);
+    assert_eq!(model.particle.count, 4);
     assert_eq!(model.structure.position_count, 3);
     assert_eq!(model.energy.pair_tables.len(), 6);
     assert_eq!(model.energy.cluster_tables.len(), 1);
@@ -118,12 +158,13 @@ fn the_populated_raw_payloads_decode() {
             .energy
             .pair_tables
             .iter()
-            .all(|table| table.energies.len() == 9)
+            .all(|table| table.energies.len() == 16)
     );
     assert_eq!(model.transitions.jump_collections.len(), 2);
     assert_eq!(model.transitions.jump_directions.len(), 4);
     assert_eq!(model.transitions.jump_rules.len(), 8);
     assert_eq!(model.simulations.len(), 2);
+    assert_eq!(model.particle.symbols, ["∅", "O", "Vc", "H"]);
 
     let kmc = decode_job_payload(
         &fs::read(raw_payload("job-1.bin")).expect("read the KMC payload"),

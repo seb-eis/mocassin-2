@@ -623,7 +623,6 @@ dependencies = [
  "mocassin-solver",
  "mocassin-types",
  "rusqlite",
- "thiserror",
  "tracing",
  "tracing-subscriber",
 ]
@@ -646,7 +645,6 @@ dependencies = [
  "rusqlite",
  "sha2",
  "thiserror",
- "tracing",
  "zstd",
 ]
 
@@ -692,7 +690,6 @@ name = "mocassin-types"
 version = "0.1.0"
 dependencies = [
  "serde",
- "serde_bytes",
 ]
 
 [[package]]

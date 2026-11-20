@@ -125,7 +125,10 @@ impl KmcEngine<'_> {
   list void. A mismatch is a model/data error (exit 12), not `SiteBlocked` and not a silent skip. Because the
   selected direction and its path are known here, the check is exact and does not reject a rule that is valid
   only along its own direction. This is the Step 16 assignment recorded in Step 13; Step 14 builds the
-  context/pools but does not have the rule→selected-direction pair.
+  context/pools but does not have the rule→selected-direction pair. The real-writer equivalent-start fixture
+  planned in Step 13 is blocked by the Step 08 `DirectionKey`/`EquivalentStartPositions` defect recorded in
+  [`step-13-amend-1`](../amendments/step-13-amend-1-fixture-properties.md); Step 16 uses a synthetic vector
+  until that maintenance fix lands, and the amendment records the re-plan.
 
 ### 4. Frequency pre-check
 

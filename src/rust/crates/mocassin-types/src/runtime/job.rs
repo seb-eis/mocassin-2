@@ -20,7 +20,10 @@ pub struct JobPackage {
     pub lattice: InitialLattice,
     /// The resolved job settings.
     pub settings: JobSettings,
-    /// The effective seed; `--seed` overrides are process-local and applied by the CLI.
+    /// The effective seed after an optional process-local `--seed` override.
+    ///
+    /// The CLI threads the override through `mocassin_msl::Package::load_job_with_seed`, so a Step 14
+    /// consumer always reads the effective value from this field.
     pub seed: [u8; 32],
     /// The KMC start options removed from the selection pool.
     pub optimizers: Vec<SelectionOptimizer>,
