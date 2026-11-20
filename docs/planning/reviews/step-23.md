@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `1b82fde744d02cfdb92cecbdad5a5165d62e8b9c` |
+| Reviewed commit | `4b5fa44c14bd5a3f145203eb81a1b8b5a5f71993` |
 | Docs branch | `docs/step-23-design` |
 | Review date | 2026-11-20 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh planning auditor |
@@ -43,6 +43,17 @@ dependency-clean. **Round-1 reviewer text — Evidence, Findings, Reviewer indep
 report — is byte-identical to `94cfe46`**; only the request-owned fields (this note, the `Reviewed commit` cell,
 the Step summary row, the request checklists, the `Record state` line, and the `Resolution status` section)
 changed. The round-1 findings and verdict are kept intact as history.
+
+**Refreeze note (round 3, 2026-11-20).** Round 2 (`36efc80`) is historical: it reviewed freeze `1b82fde`,
+confirmed M-1–M-3 in substance, and returned `Changes required` on M-4 plus m-12–m-17 and n-9–n-13. This design
+was refrozen at `4b5fa44c14bd5a3f145203eb81a1b8b5a5f71993`. The refreeze keeps the two existing public App module
+markers and entry points, corrects the internal-visibility text (M-4), mirrors `ProjectLoadFailureKind` exactly
+(m-12), replaces the I/O token list with an exact, positively controlled one (m-13), scopes the `Load`-stage claim
+to load-diagnostic fixtures (m-14), finishes the `ProjectPathRules` rename (m-15), replaces the integrity values
+with a reproducible check (m-16), and splits the 23A/23B documentation scope (m-17); n-9–n-13 are fixed. **Round-1
+and round-2 reviewer text is byte-identical to `94cfe46` and `36efc80` respectively**; only request-owned fields
+(this note, the `Reviewed commit` cell, the request checklists, `Record state`, and `Resolution status`) changed.
+The earlier rounds' findings and verdicts remain intact as history.
 
 **Parallel-track note.** The human owner started the GUI track in parallel with the solver step (Step 13) on
 2026-11-20. The design deliberately consumes only the library surfaces of Steps 01–07 and 12. Reviewers should
@@ -326,11 +337,11 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required — round 1 returned `Changes required` on `9916166a664f0a588e82eb8dbfc1097bc4949845`
-(M-1–M-3 Majors; m-1–m-11 and n-1–n-8). The design was refrozen at
-`1b82fde744d02cfdb92cecbdad5a5165d62e8b9c`; round 2 confirmed M-1–M-3 are substantially resolved but found a
-new Major (M-4) and several Minor/Note items (see `Re-review round 2`). Round-1 findings and verdict remain
-unchanged as history.
+**State:** Re-review required — rounds 1 and 2 returned `Changes required` (round 1 on `1b82fde`'s
+predecessor `9916166` for M-1–M-3 and m-1–m-11/n-1–n-8; round 2 on `1b82fde` for M-4 and m-12–m-17/n-9–n-13).
+The design is refrozen at `4b5fa44c14bd5a3f145203eb81a1b8b5a5f71993`; all findings are resolved or explicitly
+dispositioned in `Resolution status`, and the refrozen design awaits a fresh round-3 review. Earlier findings and
+verdicts remain unchanged as history.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -417,21 +428,69 @@ documentation-only follow-up. No code, test, configuration, contract, or generat
 | **n-7** | Fixed | Planner | `1b82fde` | `TimeProvider` is scoped to document/autosave/stamp/session/retention time; log record timestamps come from the Serilog sink, and tests assert level/scope/message rather than sink timestamps. |
 | **n-8** | Superseded | Planner | `1b82fde` | The "audit can be read in one sitting" judgement is removed. The evidence-size dimension now rates the step **High** and drives the split recommendation in §23, so no inline claim is needed. |
 
-**Record-integrity note (round 2).** This update changed only request-owned fields: the `Reviewed commit` cell,
-this refreeze note, the Step summary row, the request checklists (two items appended for the new template), the
-`Record state` line, and this section. The reviewer-authored `Evidence`, `Findings`, `Reviewer independence`,
-`Verdict`, and `Review round 1` text is byte-identical to `94cfe46`. No global replacement was used: the
-`Reviewed commit` cell was changed by matching its exact old cell string only. The round-1 freeze-note preamble
-and the known-follow-up paragraph are request-owned and were reworded to distinguish the two freezes and to stop
-naming a single dashboard state. The extraction is reproducible
-with `git show 94cfe46:docs/planning/reviews/step-23.md` and line-anchored section extraction; the SHA-256 values
-are identical in both files:
+**Round-2 corrections to the rows above.** The m-8 row's "all App types are `internal`" claim and the n-2 row's
+outcome list were incomplete; the M-4 and m-12 rows below supersede them. The round-1 rows are kept as history
+and are otherwise accurate.
 
-| Section | Extent | SHA-256 |
+| Finding | Status | Owner | Commit | Resolution |
+| --- | --- | --- | --- | --- |
+| **M-4** | Fixed | Planner | `4b5fa44` | Kept the existing public markers. §14/§15/§16 now say: every **new** App type is `internal` with `InternalsVisibleTo("Mocassin.App.Tests")`; the only public App types are the pre-existing `AppViewModelsModule`/`AppViewsModule` markers (in `PublicAPI.Shipped.txt`, baselined in `tests/contracts/api-baseline/net11.0/`, ApiCompat-checked) and the `Program`/`App` entry points (`Mocassin.App` is not in `tools/api-projects.txt`). Step 23 adds or removes no public App type, so `PublicAPI.*` and the two App baselines stay unchanged and `./tools/verify.sh policy` runs unmodified. `01-target-architecture.md` §3.2, `code-structure.md` §2.3, and `05-open-decisions.md` record the same rule; §15 lists the marker files as retained. No baseline refresh is proposed. |
+| **m-12** | Fixed | Planner | `4b5fa44` | `ProjectSessionOutcome` now mirrors `ProjectLoadFailureKind` one-to-one: `NotFound`, `TooLarge` (the 64 MiB `MaxDocumentBytes` rejection), `Io` (OS/sharing failure), `InvalidContent`. The mapping is a pure switch with no silent fallback to `Io`, and §5 names each case. |
+| **m-13** | Fixed | Planner | `4b5fa44` | The token test is exact and positively controlled. After stripping comments and string literals, `Mocassin.App.ViewModels/**/*.cs` must not contain `System.IO`, `File.`/`FileInfo`, `Directory.`/`DirectoryInfo`, `Path.Combine`/`Path.Get`, `FileStream`, `StreamReader`, `StreamWriter`, `Environment.`, `Avalonia`, `Dispatcher.UIThread`, `Application.Current`, or `ResourceDictionary`. `IUiDispatcher`/bare `Dispatcher` and bare `Application` are permitted and named; a positive control feeds a seeded violation and asserts it is reported. §1/§20, `01` §3.2, `code-structure` §2.3, and quality §11.1 say the same thing. |
+| **m-14** | Fixed | Planner | `4b5fa44` | §8, §20, feature 4, and the acceptance criterion now state that the `Load` stage is `Completed`/`Failed` only when `ProjectLoadResult.Diagnostics` is non-empty, and correctly `Skipped` with count 0 for a clean current-version load (Step 07 §2). The test covers both fixtures and the no-duplicate rule. |
+| **m-15** | Fixed | Planner | `4b5fa44` | `01-target-architecture.md` §3.2 and the parity-matrix "Create new project" row now say `ProjectPathRules`. No `ProjectNameRules` remains outside reviewer history. |
+| **m-16** | Fixed | Planner | `4b5fa44` | The non-reproducing values were removed. The note below defines the exact extents, normalizes trailing newlines, and gives a copy-paste Python snippet with the four resulting hashes; the extracted sections diff empty against `94cfe46` (round 1) and `36efc80` (round 2). |
+| **m-17** | Fixed | Planner | `4b5fa44` | §19 is now a 23A/23B column table scoped to each half's capabilities. `quickstart.md` and `first-project.md` are scoped to create/open/inspect/save/reopen, recents, locks, reload, templates, workspace, tabs, settings; validation, editing, undo, autosave, and recovery sections are listed as 23B completions. `projects.md`, `ui-architecture.md`, `troubleshooting/installation.md`, and `file-layout.md` are split the same way; feature 4/8 and §23 use the columns. |
+| **n-9** | Fixed | Planner | `4b5fa44` | §14's two consecutive `Mocassin.App` bullets are merged into one; the `ViewLocator` safeguards and the I/O implementations are in the same bullet. |
+| **n-10** | Fixed | Planner | `4b5fa44` | §1's lifetime list now registers one `ProjectStore` constructed with `ProjectStoreOptions { ValidateOnLoad = false }`, one `ProjectValidationPipeline` (documented stateless/thread-safe), and the settings/recovery/probe singletons; both library services are constructor-injected into `ProjectSessionService`, and the M-1 test resolves the registered store to assert its options. |
+| **n-11** | Fixed | Planner | `4b5fa44` | §1's prose now states the direct `Mocassin.Contracts`, `Mocassin.Packages`, and `Mocassin.Results` references plus the transitive `Mocassin.Core`, matching the `.csproj`. |
+| **n-12** | Fixed | Planner | `4b5fa44` | The internal rule is scoped to new types; `Program`/`App` are named entry-point exceptions and `Mocassin.App` is not an ApiCompat project. Same correction as M-4. |
+| **n-13** | Fixed | Planner | `4b5fa44` | Feature 1 now uses an in-memory/default last-directory seam and the default log level; feature 3 wires both to the persisted settings model. Both remain inside 23A, so the split boundary is unchanged and the dependency is explicit. |
+
+**Record-integrity note (rounds 1–2, corrected for m-16).** This update changed only request-owned fields: the
+`Reviewed commit` cell, the refreeze notes, the Step summary row, the request checklists, the `Record state` line,
+the round-1 freeze-note preamble/known-follow-up wording, and this `Resolution status` section (including the
+round-2 additions). No global replacement was used: the `Reviewed commit` cell was changed by matching its exact
+old cell string only.
+
+The reviewer-owned sections are byte-identical to their source commits. The check is reproducible with this
+snippet, run from the repository root; it extracts each extent from the source commit and from this file, anchors
+on whole heading lines (so the heading strings quoted here cannot match), strips only trailing newlines (so the
+separator before the next heading does not matter), hashes both, and asserts equality:
+
+```python
+import hashlib, subprocess
+def sec(t, a, b=None):
+    # line anchors, so the heading strings quoted in this note do not match
+    i = t.index("\n" + a + "\n") + 1
+    j = len(t) if b is None else t.index("\n" + b + "\n", i) + 1
+    return t[i:j].rstrip("\n")
+head = open("docs/planning/reviews/step-23.md", encoding="utf-8").read()
+old1 = subprocess.check_output(["git", "show", "94cfe46:docs/planning/reviews/step-23.md"]).decode()
+old2 = subprocess.check_output(["git", "show", "36efc80:docs/planning/reviews/step-23.md"]).decode()
+checks = [
+    ("evidence",        sec(old1, "## Evidence", "## Record state"),                    sec(head, "## Evidence", "## Record state")),
+    ("independence",    sec(old1, "## Reviewer independence", "## Human approval"),      sec(head, "## Reviewer independence", "## Human approval")),
+    ("round1",          sec(old1, "### Review round 1"),                                 sec(head, "### Review round 1", "### Re-review round 2")),
+    ("round2",          sec(old2, "### Re-review round 2"),                              sec(head, "### Re-review round 2")),
+]
+for name, old, new in checks:
+    print(name, hashlib.sha256(old.encode()).hexdigest(), old == new)
+```
+
+At the round-3 freeze `4b5fa44` the output is (all `True`):
+
+| Extent | SHA-256 | Identical to |
 | --- | --- | --- |
-| Evidence, Findings, Finding details | `## Evidence` to `## Record state` | `74f4c21a42564c3238ce9051a23e15f3183e5ea47ad08c65b98eb93d42bc3047` |
-| Reviewer independence and Verdict | `## Reviewer independence` to `## Human approval` | `7b16d7d90f8afdead99bd3781b386da7641ee15ae400254b3883b9c9f0778f0f` |
-| Review round 1 | `## Review rounds` to EOF | `adedebdb4a0ba8a4420a44b40104d79ddc4761b93e7d5194aea146e2daf0daea` |
+| `## Evidence` → `## Record state` | `cb66633b04c5b48de5f71bf6965cb27a509610e4041590e0a6996f4341fe2669` | `94cfe46` |
+| `## Reviewer independence` → `## Human approval` | `6fefdb545c04e7a854f8cb8cf92c31ef821faa000ed01373a921cd8bde07cd3b` | `94cfe46` |
+| `### Review round 1` → next round heading | `becc4ed4a5a77845a62ad8e07da189ab0720203bc6a9221ad5d4a88d5859c605` | `94cfe46` |
+| `### Re-review round 2` → EOF | `101fff9b74de4c60bbfb10dac273314ccbbdc25fffa9a397dc1851c3828e2aa7` | `36efc80` |
+
+The earlier round-2 note listed values produced with an unstated extent (they included the blank line before the
+end heading and therefore did not reproduce); those values are removed, and the identity conclusion was and is
+correct. A future round should compare its predecessor's section with the same snippet, ending that extent at the
+new round heading.
 
 Findings and verdict above are round 1's and are not re-scored here.
 
