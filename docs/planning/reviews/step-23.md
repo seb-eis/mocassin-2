@@ -337,13 +337,13 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required — rounds 1 and 2 returned `Changes required` (round 1 on `1b82fde`'s
-predecessor `9916166` for M-1–M-3 and m-1–m-11/n-1–n-8; round 2 on `1b82fde` for M-4 and m-12–m-17/n-9–n-13).
-The design is refrozen at `4b5fa44c14bd5a3f145203eb81a1b8b5a5f71993`; all findings are resolved or explicitly
-dispositioned in `Resolution status`, and the refrozen design awaits a fresh round-3 review. Earlier findings and
+**State:** Ready with notes — round 3 at record `f9c922e` (frozen design `4b5fa44`) closed M-4 in substance and
+closed m-12, m-13, m-15, m-16, m-17, and n-9–n-13; m-14 remains partly closed (two duplicate unconditional
+`Load`-stage sentences), and round 3 adds m-18 plus Notes n-14/n-15. The human owner must explicitly accept these
+notes, the feature list, and the §23 split decision. Rounds 1 and 2 returned `Changes required`; their findings and
 verdicts remain unchanged as history.
 
-`Re-review required` is a record state, not a verdict.
+`Ready with notes` is a verdict; the human owner's acceptance is still required for the start gate.
 
 ## Reviewer independence
 
@@ -708,4 +708,171 @@ verdict remains as history; the owner decides the next freeze.
 
 Follow-up owner: planner/step agent — resolve M-4 and the Minors/Notes, then re-freeze.
 Follow-up step: 23 — design re-review at the next freeze commit; earlier rounds stay in this record.
+
+### Re-review round 3
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author, design, or implement the reviewed work and have no shared conversation with
+the planner, implementor, the round-1 or round-2 reviewer, or the orchestrator. I reviewed the repository at record
+HEAD `f9c922eb10444d0a66fa97bf88797c1d72b29cff` and the frozen design at
+`4b5fa44c14bd5a3f145203eb81a1b8b5a5f71993`. `git diff --name-status 4b5fa44 f9c922e` is exactly
+`M docs/planning/reviews/step-23.md`; `git diff --name-status 36efc80 4b5fa44` is the six design/docs files
+(`docs/development/code-structure.md`, `docs/planning/01-target-architecture.md`,
+`docs/planning/03-quality-strategy.md`, `docs/planning/05-open-decisions.md`,
+`docs/planning/appendix-b-parity-matrix.md`, and the Step 23 page) and no code, test, configuration, contract,
+generated file, PublicAPI list, or API baseline. The worktree was clean before this record edit, so the only
+repository file changed by this round is this record.
+
+#### Record integrity (m-16)
+
+I ran the snippet in the `Resolution status` note verbatim from the worktree root. The four extents reproduce
+exactly, and every comparison is `True`:
+
+| Extent | SHA-256 | Identical to |
+| --- | --- | --- |
+| `## Evidence` → `## Record state` | `cb66633b04c5b48de5f71bf6965cb27a509610e4041590e0a6996f4341fe2669` | `94cfe46` |
+| `## Reviewer independence` → `## Human approval` | `6fefdb545c04e7a854f8cb8cf92c31ef821faa000ed01373a921cd8bde07cd3b` | `94cfe46` |
+| `### Review round 1` → the next round heading | `becc4ed4a5a77845a62ad8e07da189ab0720203bc6a9221ad5d4a88d5859c605` | `94cfe46` |
+| `### Re-review round 2` → EOF (or `### Re-review round 3` after this append) | `101fff9b74de4c60bbfb10dac273314ccbbdc25fffa9a397dc1851c3828e2aa7` | `36efc80` |
+
+The round-1 and round-2 reviewer-owned text is therefore byte-identical to `94cfe46` and `36efc80` respectively.
+The earlier round-2 note's non-reproducing values are gone; the corrected note's extents, trailing-newline
+normalization, and hashes all reproduce. m-16 is closed.
+
+#### Commands and results
+
+Run in `/tmp/opencode/step-23-review-r3` at `f9c922e` (the review worktree; no repository file changed apart from
+this record):
+
+- `./tools/verify.sh docs --require` — pass; the closeout gate completed with required checks enabled (strict
+  Zensical build, DocFX, rustdoc).
+- `./tools/verify.sh policy --require` — pass; "Public API is compatible with the checked-in baseline". ApiCompat
+  reported "ran successfully without finding any breaking changes" for `Mocassin.App.ViewModels` and
+  `Mocassin.App.Views`; contract artifacts current (26 files), projection checks, process consistency, 58 tool
+  tests, SPDX headers, secret scan, and cargo-deny all passed.
+- `python3 tools/check_doc_math.py` — pass, 173 files scanned.
+- `git status --porcelain` — empty before this record edit.
+- Read-only inspection of `AGENTS.md` §3/§8–§12; `docs/planning/reviews/README.md`; the full record; the Step 23
+  page (all sections); `04-roadmap.md` §3.1; `01-target-architecture.md` §3.2; `03-quality-strategy.md` §11.1;
+  `05-open-decisions.md`; `code-structure.md` §2.3; `appendix-b-parity-matrix.md`; `status.md` row 23;
+  `src/dotnet/Mocassin.Packages/Projects/{ProjectLoadFailureKind,ProjectStoreOptions,ProjectStore}.cs`;
+  `src/dotnet/Mocassin.Packages/Projects/Validation/ProjectValidationPipeline.cs`;
+  `src/dotnet/Mocassin.Core/Editing/ProjectDocument.cs`;
+  `src/dotnet/Mocassin.Packages/Projects/Templates/ProjectTemplateFactory.cs` and `ProjectTemplate.cs`;
+  `src/dotnet/Mocassin.App*/**` project files, marker types, `PublicAPI.*`, and `Program.cs`;
+  `tools/api-projects.txt`; the App API baselines; and the Step 01/07/12 tests and CLI rules.
+
+#### Closure — M-4
+
+**M-4 is resolved in substance.** The repository has `public static class AppViewModelsModule` and
+`public static class AppViewsModule`; each appears in its project's `PublicAPI.Shipped.txt`, both
+`tests/contracts/api-baseline/net11.0/Mocassin.App.ViewModels.dll` and `Mocassin.App.Views.dll` are checked in,
+and `tools/api-projects.txt` lists both projects. `Mocassin.App` is not listed there, has no `PublicAPI.*` files,
+and its only current source type is the public `Program`. The freeze touches none of these files, and
+`./tools/verify.sh policy` passes ApiCompat for both App assemblies without a baseline refresh. The design now
+scopes the internal rule to new types, names the markers and entry points as the public exceptions, and keeps
+`PublicAPI.Shipped/Unshipped` and both baselines unchanged. No new public App type is added to an ApiCompat
+project.
+
+Residual wording (recorded as **m-18** below): `Mocassin.App/App.axaml(.cs)` does not exist at the freeze
+(`git ls-files src/dotnet/Mocassin.App` returns only `Mocassin.App.csproj` and `Program.cs`), so `App` is added by
+Step 23, not pre-existing. The design's "the ones that already existed" and "adds or removes no public type in
+the App projects" are therefore inaccurate for `Mocassin.App`; the compatibility claim itself is still true
+because `Mocassin.App` is not an ApiCompat project.
+
+#### Closure — m-12
+
+The real enum is `ProjectLoadFailureKind { None, NotFound, TooLarge, Io, InvalidContent }`, and
+`ProjectStoreOptions.MaxDocumentBytes` defaults to `64L * 1024L * 1024L` (64 MiB). `ProjectStore.LoadFromPathAsync`
+returns `TooLarge` for a document above that limit, `Io` for an OS/sharing failure, `NotFound` for a missing file,
+and `InvalidContent` for parse/schema/migration failures. The refrozen `ProjectSessionOutcome` contains
+`NotFound`, `TooLarge`, `Io`, and `InvalidContent` alongside the success/lock/save outcomes, and the design states
+the mapping is a pure switch with no silent fallback to `Io`. The four failure kinds mirror the real enum exactly
+(the success outcomes cover `None`). m-12 is closed.
+
+#### Closure — m-13
+
+The refrozen rule is an exact token list, not the old bare-word scan: after stripping `//` and `/* */` comments and
+string literals, `Mocassin.App.ViewModels/**/*.cs` must not contain `System.IO`, `File.`/`FileInfo`,
+`Directory.`/`DirectoryInfo`, `Path.Combine`/`Path.Get`, `FileStream`, `StreamReader`, `StreamWriter`,
+`Environment.`, `Avalonia`, `Dispatcher.UIThread`, `Application.Current`, or `ResourceDictionary`. `IUiDispatcher`
+and bare `Dispatcher`/`Application` identifiers are explicitly permitted, so the permitted ViewModels type
+`IUiDispatcher` and every view model that injects it no longer false-positive. The list catches `System.IO`,
+`Environment.SpecialFolder`/`Environment.CurrentDirectory`, `Application.Current`, and `ResourceDictionary`; the
+positive control feeds a seeded violation through the same scanner and asserts it is reported. m-13 is closed for
+the named tokens and permitted usages; the substring nature of `File.`/`Directory.` is a residual Note (n-15).
+
+#### Closure — m-14
+
+The real pipeline confirms the corrected semantics: `ProjectValidationPipeline.ValidateCore` adds
+`StageExecution.Skipped(ValidationStage.Load)` when `loadDiagnostics` is empty, and adds `Completed` (or `Failed`
+when an error is present) when it is non-empty. `ProjectStore.LoadBytesCore` returns empty diagnostics for a clean
+current-version load, so a clean load is correctly `Skipped` with count 0. The refrozen §8, §20, feature 4, and
+the acceptance criterion all state this, and the test covers both a load/migration fixture and a clean fixture.
+**m-14 is only partly closed:** two duplicate unconditional sentences remain. The §5 store-configuration bullet
+(lines 448–454) still says "the pipeline's `Load` stage is populated instead of skipped", and the §24 decisions
+table (line 1305) still says "no skipped `Load` stage". Both are false for a clean load and contradict §8/§20 and
+Step 07 §2. Severity **Minor**; correct or scope the two duplicate statements.
+
+#### Closure — m-15, m-17, and n-9–n-13
+
+| Item | Status | Round-3 check |
+| --- | --- | --- |
+| m-15 | Closed | `grep -rn "ProjectNameRules"` over the repository finds no occurrence outside this review record (reviewer history only); `01-target-architecture.md` §3.2 and the parity-matrix "Create new project" row now say `ProjectPathRules`. |
+| m-17 | Closed | §19 is a 23A/23B column table. `installation.md` is scoped to 23A; `quickstart.md`, `first-project.md`, `projects.md`, `ui-architecture.md`, `troubleshooting/installation.md`, and `file-layout.md` name their 23A content and 23B completions. Feature 4 writes the 23A column; feature 8 writes the 23B column and navigation. No page ships a 23B capability as 23A. |
+| n-9 | Closed | §14 has one merged `Mocassin.App` bullet with the entry points, `App.axaml(.cs)`, `ViewLocator` safeguards, composition root, and the I/O implementations (`AppSettingsStore`, `RecoveryStore`, `ProjectFileProbe`, `AppPaths`, log retention). |
+| n-10 | Closed | §1 registers one `ProjectStore` constructed with `new ProjectStoreOptions { ValidateOnLoad = false }`, one stateless/thread-safe `ProjectValidationPipeline`, and the settings/recovery/probe singletons, and injects the store and pipeline into `ProjectSessionService`. The M-1 test can resolve the store because `ProjectStore.Options` is public. |
+| n-11 | Closed | `Mocassin.App.ViewModels.csproj` directly references `Mocassin.Contracts`, `Mocassin.Packages`, and `Mocassin.Results`; `Mocassin.Packages` and `Mocassin.Results` reference `Mocassin.Core`, so the design's "direct Contracts/Packages/Results, transitive Core" matches the project file. |
+| n-12 | Closed | The internal rule is scoped to new types; `Program` and `App` are named entry-point exceptions, and `Mocassin.App` is correctly described as not an ApiCompat project. The `App` "pre-existing" wording is m-18. |
+| n-13 | Closed | Feature 1 uses an in-memory/default last-directory seam and the default log level; feature 3 wires both to the persisted settings model. Both remain inside 23A, so the split boundary is unchanged. |
+
+#### Complexity, dependencies, scope, and parity
+
+Class **High** still holds. Four of the seven §3.1 dimensions are High (cross-step interfaces, test-matrix
+breadth, independent acceptance stories, evidence size), the class is the highest dimension rather than an average,
+and §23 records concrete evidence (five consuming GUI steps, a new application project plus a headless/screenshot/
+accessibility harness, three independent acceptance stories, eight features, four library changes, six
+documentation pages, and a ~1,400-line design page). No person-week figure is used as a gate: the §3 forecast is
+explicitly non-gating, §23's guard is the harness/M-1/M-3 trigger, and the step page says "no time waiver is
+requested". The split after feature 4 is dependency-clean for the code (23A features 1–4; 23B features 5–8; 23B
+needs only 23A's delivered surfaces), and the owner decision is correctly recorded as outstanding. m-17 and n-13
+were the only documentation/ordering residuals; both are closed.
+
+The dependencies are limited to the merged library surfaces of Steps 01, 03–07, and 12; those step pages show
+`Done` in `status.md`. No Step 13–22 API is consumed: §18's consumed table contains only `ProjectStore`,
+`ProjectDocument`, `ProjectEditor`, `ProjectTemplateFactory`, `ProjectValidationPipeline`, and related
+Step 01–07/12 types. The two new packages are the first-party test-only `Avalonia.Headless` and
+`Avalonia.Headless.XUnit` (same pinned version, MIT-covered), and the four library changes
+(`ProjectDocument.MaxUndoDepth`, `ProjectDocument.CreateRecovered`, `ProjectStore.WriteAutosaveToPathAsync`, and
+`ProjectPathRules.NormalizeName/ValidateTarget` plus the CLI refactor) are additive; `ProjectDocument` and
+`ProjectStore` still have their current surface, and `ProjectTemplateKind` still has `Blank`/`Ceria`. The parity
+rows name Step 23 truthfully as `Planned`/`Partial`, and the documentation plan creates the missing pages during
+implementation rather than linking to absent files. No hidden Steps 24–28 implementation is present: the design
+provides contribution seams, not editors, build UI, 3D, or run monitoring. `status.md` row 23 still says
+`Not started`/`Not requested`; this is the known step-agent bookkeeping follow-up (n-1), not a design change.
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **m-18 — The "pre-existing `Program`/`App`" and "adds or removes no public type in the App projects" wording is inaccurate for `Mocassin.App`.** | `git ls-files src/dotnet/Mocassin.App` returns only `Mocassin.App.csproj` and `Program.cs`; there is no `App.axaml(.cs)` or `App` class at the freeze. Step 23 adds `public sealed class App : Application` (§1) and the `App.axaml(.cs)` files (§15). The compatibility claim is still true because `Mocassin.App` is not in `tools/api-projects.txt` and has no `PublicAPI`/baseline, but the "already existed" and "no public type added" statements should be corrected. |
+| **Note** | **n-14 — `IRecoveryWriter` is named in feature 1 and §6 but is not defined in §1/§15.** | Feature 1 and §6 say feature 1 registers a null `IRecoveryWriter` until feature 7; §1 and §15 define `IRecoveryStore` (list/write/delete) and `CrashRecoveryWriter`, not `IRecoveryWriter`. Align the name or state that it is the write half of `IRecoveryStore`. |
+| **Note** | **n-15 — The token list is a substring scan, not a complete lexical ban.** | §1/§20 ban `File.`/`Directory.`/`Environment.` but not the bare identifiers; `using static System.Environment;` or `using static System.IO.File;` can evade the scan, and a property access such as `LastOpenDirectory.Trim()` can match `Directory.`. The named permitted usages (`IUiDispatcher`/`Dispatcher`, bare `Application`) are safe; this is an observation about the guard's limits, not a false-positive on the design's permitted code. |
+
+#### Verdict
+
+**Ready with notes.** The round-2 Major M-4 is resolved in substance: the existing public App markers and the
+`Program` entry point are documented exceptions, new types are internal, and `PublicAPI.Shipped/Unshipped` and both
+App ApiCompat baselines are unchanged and pass `./tools/verify.sh policy`. m-12, m-13, m-15, m-16, m-17, and
+n-9–n-13 are closed; the complexity class and split are sound and the owner decision remains outstanding. The
+remaining findings are Minor/Note only: the m-14 residual (two duplicate unconditional `Load`-stage sentences),
+m-18 (`App` is added, not pre-existing), n-14 (`IRecoveryWriter` naming), and n-15 (token-scan limits), plus the
+known n-1 dashboard bookkeeping. The human owner must explicitly accept these notes and the start gate (including
+the §23 split decision); if the owner requires every round-2 Minor to be fully closed, correct the two m-14
+sentences and the m-18 wording and re-review that small diff.
+
+Follow-up owner: planner/step agent — correct the m-14 duplicate sentences, the m-18 wording, and the
+`IRecoveryWriter` name; the owner accepts the notes and the start gate.
+Follow-up step: 23 — start gate after owner acceptance; earlier rounds stay in this record.
 
