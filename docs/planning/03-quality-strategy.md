@@ -131,9 +131,11 @@ These interfaces get end-to-end acceptance coverage with real objects and real f
 3. `.msl` writer → Rust reader → canonical summary; `.msl` writer → Python/analysis reader where applicable.
 4. Rust solver CLI → `.mcs` → .NET reader/evaluation and Python reader/evaluation.
 5. Evaluation API formulas against analytic toy systems and shared formula vectors.
-6. Avalonia commands against real project documents and view models. The Step 23 shell proves
-   create/open/edit-metadata/save/reopen, save-point dirty handling, autosave, crash recovery, locks,
-   read-only mode, and settings migration through the real store and the real dialog overlay.
+6. Avalonia commands against real project documents and view models. **Step 23A** proves
+   create/open/inspect/save/reopen/reload, locks, read-only mode, external-change handling, and settings
+   migration through the real store and the real dialog overlay. **Step 23B** proves metadata editing with
+   undo/redo, save-point dirty handling, the validation surface, autosave, and crash recovery on the same
+   harness.
 7. CLI `build`/`simulate`/`collect`/`evaluate` workflows; the Step 12 build/preview/inspect/verify path uses
    real projects, real SQLite packages, and the real writer/verifier.
 8. Contract-manifest drift checks across C#, Rust, Python, and generated fixtures.
@@ -636,9 +638,10 @@ Contract tests use files produced by the real writers and never share reader/wri
 - Manual smoke checklist per release: create project, add each object type, validate, parameterize, build,
   run a tiny job, collect, plot, save/reopen.
 
-### 11.1 Step 23 harness and tiers
+### 11.1 Steps 23A/23B harness and tiers
 
-Step 23 establishes the harness that Steps 24–28 extend.
+Step 23A establishes the harness that 23B and Steps 24–28 extend; 23B adds the Problems/validation and
+recovery fixtures.
 
 - **Projects.** `Mocassin.App.Tests` references the app, view models, and views. It adds the first-party
   `Avalonia.Headless` and `Avalonia.Headless.XUnit` packages at the pinned Avalonia 12.1.6 version (test-only,
@@ -651,17 +654,20 @@ Step 23 establishes the harness that Steps 24–28 extend.
   the view-level tests drive the real overlay), `IStorageService` (the OS picker), `IUiDispatcher` (the
   UI-thread boundary), `TimeProvider`, and in-memory `IAppSettingsStore`/`IRecoveryStore` for non-persistence
   tests only.
-- **Architecture guards.** The App-project architecture test checks direct `.csproj` references and runs the
-  exact I/O token scan described in the Step 23 page §1/§20 (comments and string literals stripped,
-  `IUiDispatcher`/`Dispatcher` and bare `Application` permitted) with a positive control, so the guard cannot
-  pass by matching nothing. The `Load`-stage test covers both a load/migration fixture (`Completed`/`Failed`) and
-  a clean fixture (`Skipped`, count 0).
-- **Tiers.** Shell view-model, lifecycle, dirty/save-point, autosave, recovery, lock, external-change, settings
-  migration, undo/redo, validation (including the `Load`-stage/load-diagnostic contract), navigation, palette,
-  dialog, and primary accessibility tests are **PR-fast**. Headless view rendering and the screenshot set are
+- **Architecture guards.** The App-project architecture test checks direct `.csproj` references and runs the I/O
+  token scan described in the 23A page §1/§15: comments and string literals stripped, whole-identifier matching
+  (so `LastOpenDirectory.Trim` does not match), `using static System.IO`/`System.Environment` detected,
+  `IUiDispatcher`/`Dispatcher` and bare `Application` permitted, and a positive control so the guard cannot pass
+  by matching nothing. The scan is a tripwire; the direct-reference check and review remain the primary
+  enforcement. The 23B `Load`-stage test covers both a load/migration fixture (`Completed`/`Failed`) and a clean
+  fixture (`Skipped`, count 0).
+- **Tiers.** 23A: shell view-model, lifecycle, reload/locks/read-only/external-change, settings migration,
+  navigation, palette, dialog, and primary accessibility tests. 23B: edit/undo, dirty/save-point, autosave,
+  recovery, and validation (including the `Load`-stage/load-diagnostic contract) tests. Both sets are
+  **PR-fast**. Headless view rendering and the screenshot set are
   **PR-medium**. Platform runs are manual. PR-fast tests assert functionality, ordering, and asynchrony, never an
-  absolute duration; timing is recorded as non-gating evidence on a benchmark or manual run (§13/§21 of the
-  Step 23 page).
+  absolute duration; timing is recorded as non-gating evidence on a benchmark or manual run (§13/§16 of the
+  23A page, §14 of the 23B page).
 - **Screenshots.** Baselines are generated and compared on `ubuntu-latest` only, with a fixed headless render
   scale and a documented tolerance and regeneration command. Windows/macOS screenshots are manual platform-gate
   evidence and are not pixel-compared: text rendering differs per platform, so a cross-OS pixel gate would be a

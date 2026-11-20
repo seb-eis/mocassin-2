@@ -17,9 +17,10 @@ E Results                                                                       
 22 ◄── 21 ◄── 20 ◄────────────────────────────────────────────────────────────────────────────────────── 19
 
 F GUI
-23 ──► 24 ──► 25 ──► 26 ──► 27 ──► 28
-       │           │
-       └───────────┴────────────► (can start after 01, consume 08/09/10/11/20 as they land)
+23A ──► 23B ──► 24 ──► 25 ──► 26 ──► 27 ──► 28
+                │           │
+                └───────────┴────────────► (23A can start after 01/03–07/12; later steps consume
+                                           08/09/10/11/20 as they land)
 
 G Release and documentation
 29 ──► 30 ──► 31
@@ -34,7 +35,7 @@ G Release and documentation
 | C. Compilation and build | 08–12 | Compiled model, templates, supercells, `.msl` | A valid `.msl` with N jobs is produced from a project |
 | D. Solver | 13–19 | Rust KMC/MMC, tracking, state, CLI | A job runs to completion and writes a valid `.mcs` |
 | E. Results | 20–22 | Reader, evaluation, analysis, Python API | Results can be evaluated from .NET and Python |
-| F. GUI | 23–28 | Full Avalonia application | A user can complete the whole workflow in the GUI |
+| F. GUI | 23A–28 | Full Avalonia application | A user can complete the whole workflow in the GUI |
 | G. Release and documentation | 29–31 | Parity, documentation, packaging | Release gates pass, the docs site builds, and artifacts ship |
 
 Each phase is also gated by the cross-cutting reviews in
@@ -86,8 +87,9 @@ comparability and planning, not as a sizing gate.
 | 20 | `.mcs` reader, `.msr` collection, evaluation API | 18, 11 | 2–4 pw |
 | 21 | Analysis queries, plots, exports | 20 | 2–3 pw |
 | 22 | Python `.mcs` reader, basic evaluations, pytest, mkdocstrings | 18, 20 | 2–3 pw |
-| 23 | Avalonia shell, project lifecycle, undo/redo | 01, 03–07, 12 | 3–5 pw forecast (non-gating). Complexity class **High**; split decision at the Step 23 start gate — see the Step 23 page §23 |
-| 24 | Particle, structure, transition editors | 23, 03, 04 | 4–6 pw |
+| 23A | Avalonia workspace and project lifecycle | 01, 03–07, 12 | 2–3 pw forecast (non-gating). Complexity class **High**; owner acceptance at the 23A start gate — see the [23A page](steps/step-23a-workspace-and-project-lifecycle.md) §18 |
+| 23B | Editing, diagnostics, and recovery | 23A | 1.5–2.5 pw forecast (non-gating). Complexity class **High**; owner acceptance at the 23B start gate — see the [23B page](steps/step-23b-editing-diagnostics-and-recovery.md) §16 |
+| 24 | Particle, structure, transition editors | 23B, 03, 04 | 4–6 pw |
 | 25 | Energy, lattice, simulation editors | 24, 05, 06 | 3–5 pw |
 | 26 | Parameterization, job templates, build/deploy UI | 25, 09–12 | 4–6 pw |
 | 27 | 3D viewer and visualization | 24, 03–05 | 4–6 pw |
@@ -166,6 +168,30 @@ and in this section. The request states the class, the dimensions that make it H
 than it saves (for example, it would duplicate fixtures, separate an API from its acceptance test, or reopen a
 frozen phase boundary), and the guard that stops the step if the risk materialises. This is an acceptance of a
 complexity class, not a waiver of a time estimate.
+
+#### Recorded split — Step 23 (2026-11-20)
+
+The owner split **Step 23** into **23A** (workspace and project lifecycle) and **23B** (editing, diagnostics, and
+recovery) under the complexity rule. The unsplit step was class **High** on four dimensions (cross-step
+interfaces, test-matrix breadth, three independent acceptance stories, and an evidence set too large for one
+audit sitting); the boundary after the workspace/lifecycle features is dependency-clean, so the split reduces the
+audit surface without stranding either half.
+
+- **23A** is class **High** on cross-step interfaces and test-matrix breadth; its contracts, dependencies,
+  irreversibility, acceptance-story count, and evidence size are Medium. It defines the interface surface that
+  23B and Steps 24–28 consume.
+- **23B** is class **High** on cross-step interfaces and test-matrix breadth; its contracts, dependencies,
+  irreversibility, acceptance-story count, and evidence size are Medium. It defines the edit/validation
+  interfaces that Steps 24–27 consume.
+- **Neither half is Low or Medium**: the split reduced the evidence size and the acceptance-story count, not the
+  interface or test-matrix breadth. Under this section, each half therefore needs **explicit owner acceptance as
+  a High unit at its own start gate**. The acceptance is recorded on each step page (§18 for 23A, §16 for 23B)
+  when it is given; no time waiver is involved.
+- A further split is not proposed. Host/workspace versus settings/lifecycle would leave a shell that cannot open
+  a project or settings with no consumer; editing versus recovery would leave autosave without a dirty state or
+  validation without an editing surface.
+- The same change updated the step index, §3 forecasts, the dependency graph (§2/§3), and **Step 24's dependency
+  to 23B**; Steps 25–28 keep their existing chains, and milestone M10 (after 26) is unaffected.
 
 #### Historical exceptions (previous time-based rule)
 
@@ -249,11 +275,12 @@ produced by the real writer. Steps 13→14→15→16→17→18→19, then 29.
 
 ### Track C — UI (Avalonia)
 
-Starts after steps 01, 03–07, and 12 with the shell and project lifecycle (23); the owner started this track in
-parallel with the solver track (Step 13) on 2026-11-20. Step 23 consumes only the merged library surfaces of
-01/03–07/12 and defines the registration seams that later GUI steps plug into; it must not assume Steps 13–22
-exist. Steps 24–25 consume the model APIs as they land, then 09–12 for 26, then 20–21 for 28. Step 27 (3D)
-starts after 24 and runs in parallel.
+Starts after steps 01, 03–07, and 12 with the workspace and project lifecycle (**23A**), then the editing,
+diagnostics, and recovery half (**23B**); the owner started this track in parallel with the solver track
+(Step 13) on 2026-11-20 and split Step 23 into 23A/23B on the same date (see §3.1). 23A consumes only the merged
+library surfaces of 01/03–07/12 and defines the registration seams; 23B fills them and adds the edit/validation
+surface; neither assumes Steps 13–22 exist. Steps 24–25 consume the model APIs as they land, then 09–12 for 26,
+then 20–21 for 28. Step 27 (3D) starts after 24 and runs in parallel.
 
 ### Track D — Documentation
 

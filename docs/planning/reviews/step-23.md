@@ -6,6 +6,15 @@
 > and `[skip ci]`. Do not edit the request scope, checklist item text, resolutions, code, tests, configuration,
 > status dashboard, step page, or any other file.
 
+> **Record closure (2026-11-20, outside reviewer text).** The human owner split the step this record reviews into
+> [`23A`](../steps/step-23a-workspace-and-project-lifecycle.md) and
+> [`23B`](../steps/step-23b-editing-diagnostics-and-recovery.md). Round 3 returned `Ready with notes` on the
+> unsplit design at freeze `4b5fa44` (record `f9c922e`); that verdict, every round, and every finding remain
+> unchanged below and are **closed as superseded** by the split, not re-scored. The remaining round-3 Minor/Note
+> items (m-14, m-18, n-14, n-15) are carried into the split: the `Load`-stage and `App`/visibility wording is
+> corrected on the 23A/23B pages, and the recovery type naming and token-scan limits are resolved there. The
+> 23A design is reviewed in [`step-23a.md`](step-23a.md); 23B has no review record until it is scheduled.
+
 ## Request
 
 | Field | Value |
