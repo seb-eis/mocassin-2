@@ -1,12 +1,12 @@
 {
   "step": "step-13",
-  "audit_commit": "45eb181656380ce258d20c8c4183727c62d9cc1a",
+  "audit_commit": "fe48dc850f7bbb7a7527abe8450e7937ebb0befe",
   "closeout_ci": {
-    "run_id": "44807199574",
-    "head_sha": "45eb181656380ce258d20c8c4183727c62d9cc1a"
+    "run_id": "44809489478",
+    "head_sha": "fe48dc850f7bbb7a7527abe8450e7937ebb0befe"
   },
   "main_sha_at_freeze": "bd0d94e667a0ed68280b637af93a852f7b502b3d",
-  "merge_candidate": "45eb181656380ce258d20c8c4183727c62d9cc1a",
+  "merge_candidate": "fe48dc850f7bbb7a7527abe8450e7937ebb0befe",
   "merge_tree_ci": {
     "run_id": "",
     "head_sha": ""
@@ -14,11 +14,12 @@
   "platform_ci": "not run",
   "tag": "",
   "notes": [
-    "Closeout CI is the single Ubuntu workflow_dispatch run 44807199574 at 45eb181656380ce258d20c8c4183727c62d9cc1a (workflow_dispatch, platforms=ubuntu, force_all=false). It completed successfully; the path-filtered .NET, Rust, Python, contracts, and API jobs that matched the step's changes ran. No per-feature or per-push CI was used.",
+    "Closeout CI is the single Ubuntu workflow_dispatch run 44809489478 at fe48dc850f7bbb7a7527abe8450e7937ebb0befe (workflow_dispatch, platforms=ubuntu, force_all=false). It completed successfully; the .NET, Rust, contracts, and API jobs ran, and Python was skipped by its path filter. No per-feature or per-push CI was used.",
+    "Replacement-run record: the first dispatch at the same tip, run 44808204483, failed only on the known shared-runner performance test Mocassin.Compilation.Tests.Compiler.CompilationPerformanceTests.TenThousandPositionModelCompilesWithinTheBudget (31.3088447 s against the documented < 30 s budget; 95/96 Compilation tests passed and every other job was green). The human owner accepted this as the same shared-runner flake recorded for Step 11 (30.134 s, accepted, re-run green) and authorized one replacement dispatch. Run 44809489478 is the gate; no further run was dispatched.",
     "The full local gate ./tools/verify.sh all --require exited 0 on the same tree ('Closeout gate completed with required checks enabled.'). The AOT stage recorded the known Step 12 evidence: publishing the real Mocassin.Cli still emits 62 IL2xxx/IL3xxx diagnostics from reflection-based JSON converters in Mocassin.Core; the strict AOT smoke host and its positive control pass, so the gate is green and the finding remains Step 31 work.",
     "main bd0d94e667a0ed68280b637af93a852f7b502b3d was merged into the step branch before the freeze (git merge main reported 'Already up to date'; main is an ancestor of the audited commit) and has not moved since. No merge-tree CI run applies.",
     "Platform CI not run: Step 13 adds only Rust library/CLI code, SQLite/Zstd/MessagePack reading, fixtures, and documentation. It adds no P/Invoke, LibraryImport, native library, RID-specific package, Windows/macOS path/case/locking behaviour, or GUI code. Ubuntu is the only affected platform; the absence of Windows/macOS runs is an accepted risk recorded for the audit.",
-    "N-2 merge-candidate convention (Step 11): a commit cannot contain its own SHA, so audit_commit, closeout_ci.head_sha, and merge_candidate all record the code commit 45eb181656380ce258d20c8c4183727c62d9cc1a. The following documentation/evidence commit changes only docs/planning and the two benchmark-provenance fields in tests/reference/bench/step-13-load.json and tests/reference/bench/baselines.json; it changes no code, test, contract, or configuration file. check_closeout_evidence.py therefore compares an empty 45eb181..45eb181 delta; the docs/evidence-only delta is verified manually and recorded here.",
+    "N-2 merge-candidate convention (Step 11): a commit cannot contain its own SHA, so audit_commit, closeout_ci.head_sha, and merge_candidate all record the audited code/evidence tip fe48dc850f7bbb7a7527abe8450e7937ebb0befe. The two benchmark-provenance fields (tests/reference/bench/step-13-load.json and tests/reference/bench/baselines.json) are part of this audited tree, so no file outside docs/ changes after the closeout CI run. The following docs-only commit changes only docs/planning; check_closeout_evidence.py therefore compares an empty fe48dc8..fe48dc8 delta, and the actual documentation-only delta is verified manually.",
     "Known limitation flagged for the audit: the real populated fixture (tests/contracts/packages/step-13-populated) does not carry the design's per-node mask difference or equivalent-start mapping. The writer rejects a mixed particle set on a transition node with CMP004/CMP005; the P-1 variant compiles the KMC collection but fails the verifier's cluster-link check (PKG010); no checked-in project combines a centered group with transitions. The reader semantics are covered by the synthetic tests map::tests::model::a_collection_union_admits_a_particle_only_one_direction_allows, a_particle_outside_the_union_is_rejected_even_when_mass_and_charge_hold, void_nodes_are_exempt_from_the_union_check, and a_direction_may_be_mapped_into_another_start_bucket. The limitation is recorded in the step page and both fixture READMEs; n-14 is not claimed as met.",
     "The 512 MiB model-element budget is verified by the documented arithmetic and the ReaderLimits/scan tests; no 512 MiB fixture is materialized. DirectionPool and the jump-status container remain Step 14 runtime state and were not added; the step page records the partial implementation-task note.",
     "Feature 6 had left proptest in mocassin-msl's production dependencies; feature 7 moved it to dev-dependencies. No production dependency was added. The load benchmark medians are open 171.1 us, cold job 343.1 us, and warm job 71.1 us; RNG medians are next_u32 733 M/s, next_u64 437 M/s, next_f64 393 M/s, bounded 569-572 M/s, refill 75.4 ns, state 123.4 ns, fork 113.1 ns. Evidence is in tests/reference/bench/step-13-load.json and step-13-rng.json with the rustLoad/rustRng same-runner-class baseline entries.",

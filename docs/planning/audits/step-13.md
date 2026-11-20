@@ -142,9 +142,11 @@ Evidence file: `docs/planning/closeout/step-13.json`
 - The AOT stage records the known Step 12 evidence: publishing the real `Mocassin.Cli` still emits 62
   IL2xxx/IL3xxx diagnostics from reflection-based JSON converters in `Mocassin.Core`; the strict smoke host and
   positive control pass, and the AOT gate is green.
-- The benchmark `sourceCommit` provenance fields were completed in the docs/evidence commit after the closeout
-  CI run because a commit cannot contain its own SHA; the measured tree is the audited commit's tree. No code,
-  test, contract, or configuration file changed after the CI run.
+- The two benchmark `sourceCommit` provenance fields are part of the audited tree at `fe48dc8`, so no file
+  outside `docs/` changes after the closeout CI run. The earlier green run at `45eb181` (44807199574) and the
+  failed first dispatch at `fe48dc8` (44808204483, the known shared-runner performance flake: 31.3088447 s
+  against < 30 s for `TenThousandPositionModelCompilesWithinTheBudget`, owner-accepted with the Step 11
+  precedent) are superseded by the replacement run 44809489478 at `fe48dc8`, which is the closeout gate.
 - Feature 6 had left `proptest` in `mocassin-msl`'s production dependencies; feature 7 moved it to
   dev-dependencies.
 - The populated package has one deduplicated lattice row (both jobs use the same 2x2x2 lattice) and four
