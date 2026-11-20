@@ -384,8 +384,8 @@ and that the `ProjectDocument` additions are still additive after 23A merged.
   only after a `Passed` audit, owner approval, the tooling prerequisite, and a green automatic `main` CI run.
 - **Design review:** 23B has no review record yet. One is created from the template when the step is scheduled;
   this page is refrozen at that point and the record carries the freeze SHA.
-- **Dashboard:** the step agent updates the `23B` row when the step starts; the planner does not edit
-  `status.md`.
+- **Dashboard:** the step agent adds the lowercase `23b` row (matching `check_process_consistency.py`'s
+  `\d{2}[a-z]?` parser) when the step starts; the planner does not edit `status.md`.
 
 ## Implementation tasks
 

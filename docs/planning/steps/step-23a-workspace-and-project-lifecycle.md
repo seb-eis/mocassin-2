@@ -45,7 +45,7 @@ depends only on the features above it and on the merged 01/03–07/12 libraries;
 
 | # | Feature | Slug | Planned scope | Done when |
 | --- | --- | --- | --- | --- |
-| 1 | Host, composition, boundaries, and surfaces | `app-host-and-boundaries` | Avalonia app project (`Program`, `App.axaml(.cs)`, `ViewLocator`), `IHost` composition root, explicit registration, `TimeProvider`/`IUiDispatcher`, Serilog file+console logging with retention, `--project`/`--log-level`/`--data-dir` startup options, shell window with the four regions and splitters, menu/status skeleton, the in-shell `IDialogService` overlay host (confirm/choose/prompt/error/crash view), `IStorageService` pickers with an in-memory/default last-directory seam (feature 3 wires persistence), console host with the Application channel at the default log level (feature 3 wires the settings level), notification host, progress surface, global exception handlers (log + crash dialog with "open log folder"/"exit"; the recovery-writing action is added by 23B), the internal-visibility rule with the documented public exceptions | The app starts and renders the shell headless; DI resolves every registered service; a dialog round-trips through the real overlay; a forced unhandled exception is logged and reported; `Mocassin.App.ViewModels` has no Avalonia/`System.IO` use per the exact token test; `App`/`Program` are the only new public App types and are not ApiCompat-checked |
+| 1 | Host, composition, boundaries, and surfaces | `app-host-and-boundaries` | Avalonia app project (`Program`, `App.axaml(.cs)`, `ViewLocator`), `IHost` composition root, explicit registration, `TimeProvider`/`IUiDispatcher`, Serilog file+console logging with retention, `--project`/`--log-level`/`--data-dir` startup options, shell window with the four regions and splitters, menu/status skeleton, the in-shell `IDialogService` overlay host (confirm/choose/prompt/error/crash view), `IStorageService` pickers with an in-memory/default last-directory seam (feature 3 wires persistence), console host with the Application channel at the default log level (feature 3 wires the settings level), notification host, progress surface, global exception handlers (log + crash dialog with "open log folder"/"exit"; the recovery-writing action is added by 23B), the internal-visibility rule with the documented public exceptions | The app starts and renders the shell headless; DI resolves every registered service; a dialog round-trips through the real overlay; a forced unhandled exception is logged and reported; `Mocassin.App.ViewModels` has no Avalonia/`System.IO` use per the exact token test; `App` is the only new public App type (`Program` is pre-existing) and neither is ApiCompat-checked |
 | 2 | Workspace: documents, navigation, commands | `workspace-documents-and-navigation` | `DocumentViewModel`/`DocumentKey`/`DocumentCollectionViewModel`, tab strip (title, tooltip, reorder, close, overflow; the dirty marker is added by 23B), `INavigationService` with bounded history, `INavigationTargetProvider` registry, project-scoped keys, project switcher, project explorer, welcome document, read-only Project Overview and Project JSON documents, command catalog, menus, status items, command palette, framework-neutral gesture descriptors, shortcut cheat sheet | Tabs open/activate/reuse/close and back/forward work; an unknown navigation domain produces a console notice, never an exception; the palette lists every registered command with its platform gesture; every primary action is reachable by keyboard |
 | 3 | Settings, theming, accessibility | `settings-theming-and-accessibility` | `mocassin.settings` v1 model, validator, migrations, source-generated JSON context, and the atomic+fsync+size-capped store (store in `Mocassin.App`, model/pure logic in ViewModels), app-data layout, settings dialog (reset, open config folder, clear logs/cache), theme/density/font-scale/high-contrast/reduce-motion applier in Views, persisted last directories and log level, accessibility metadata | Settings round-trip, defaults-on-invalid, unknown-field tolerance, future-major rejection, migration, and failed/oversized-write safety pass on real files; the theme/density/contrast switch applies without restart; primary controls expose names/roles |
 | 4 | Project session lifecycle | `project-session-lifecycle` | `ProjectSession`/`IProjectSessionService` over `ProjectStore` **configured with `ValidateOnLoad = false`** and retaining `ProjectLoadResult.Diagnostics` on the session; new via `ProjectTemplateFactory` + shared `ProjectPathRules`; open/open-or-activate/save/save-as/close/reload; recents; locks and read-only mode; external-change detection; multi-project workspace; window close; a read-only Project Overview with project identity and file metadata (editing is 23B) | New → save → close → reopen is content-identical; save-as migrates the lock; a second session opens read-only; an external change or a deleted file is detected before any overwrite; the store never validates and the load diagnostics are retained for 23B |
@@ -216,7 +216,8 @@ limitation.
 `Mocassin.App.Views.AppViewsModule` (module markers listed in `PublicAPI.Shipped.txt`, baselined under
 `tests/contracts/api-baseline/net11.0/`, checked by ApiCompat) and `Mocassin.App.Program` (the existing entry
 point; `Mocassin.App` is not in `tools/api-projects.txt` and has no public-API baseline or list). Every **new**
-type is `internal`, with `[assembly: InternalsVisibleTo("Mocassin.App.Tests")]`.
+type **other than `App`** is `internal`, with `[assembly: InternalsVisibleTo("Mocassin.App.Tests")]`. `App` is
+the only new public App type; `Program` is pre-existing.
 
 Round-3 m-18: `Mocassin.App` currently contains only `Mocassin.App.csproj` and `Program.cs`. 23A **adds**
 `App.axaml`, `App.axaml.cs`, and `public sealed class App : Application`; that type is new, but it is not part of
@@ -462,9 +463,10 @@ internal enum ProjectSessionOutcome
 #### 6.1 `mocassin.settings` v1 (normative)
 
 `Mocassin.Settings.json` is application-local and single-consumer. It is **not** in `contracts/manifest.json`,
-has no cross-language fixtures, and is not a public format; [`docs/reference/file-layout.md`](../../reference/file-layout.md)
-mirrors this section for users, but this section is the normative design shape. 23B adds two objects to the same
-v1 document additively (§23B §9) with **no** `schemaVersion` bump.
+has no cross-language fixtures, and is not a public format. [`docs/reference/file-layout.md`](../../reference/file-layout.md)
+**will mirror** this section for users once the 23A documentation column lands (§14); at this design freeze that
+page has no settings/app-data section. This section is the normative design shape. 23B adds two objects to the
+same v1 document additively (§23B §9) with **no** `schemaVersion` bump.
 
 ```json
 {
@@ -630,9 +632,10 @@ Rules:
 - **Visibility (M-4/m-18).** The existing public `AppViewModelsModule`/`AppViewsModule` markers and the
   `Mocassin.App.Program` entry point stay public. 23A adds `public sealed class App : Application` and the
   `App.axaml(.cs)` files; `Mocassin.App` is not an ApiCompat project and has no `PublicAPI`/baseline, so this is
-  not a compatibility change. Every new type in the three projects is `internal` with
-  `InternalsVisibleTo("Mocassin.App.Tests")`; the ApiCompat-checked App assemblies (`Mocassin.App.ViewModels`,
-  `Mocassin.App.Views`) keep their `PublicAPI.*` and baselines unchanged.
+  not a compatibility change. Every new type **other than `App`** is `internal` with
+  `InternalsVisibleTo("Mocassin.App.Tests")`; `App` is the only new public App type and `Program` is
+  pre-existing. The ApiCompat-checked App assemblies (`Mocassin.App.ViewModels`, `Mocassin.App.Views`) keep
+  their `PublicAPI.*` and baselines unchanged.
 - Every view model is constructed with explicit dependencies; no `Application.Current` lookups, no static
   service access, no view references, no `System.Windows.*`.
 - Observable properties are source-generated (`[ObservableProperty]`); commands use `[RelayCommand]`.
@@ -732,8 +735,9 @@ public static class ProjectPathRules
     // control characters and : * ? " < > |. No I/O. On failure Name is the trimmed input for the message.
     public static ProjectNameResult NormalizeName(string? rawName);
 
-    // Pure: combines the directory with the normalized name, rejects an empty/invalid directory string,
-    // and maps File -> ExistingTarget and Directory -> IoFailure.
+    // Pure: combines the directory with the normalized name and maps File -> ExistingTarget and
+    // Directory -> IoFailure. InvalidTargetPath is GUI-only (an empty/invalid directory chosen in a
+    // picker); the CLI keeps its own empty-output-directory error (CLI002/3) and never produces it.
     public static ProjectTargetResult ValidateTarget(
         string? directory, ProjectNameResult name, ProjectTargetState targetState);
 
@@ -742,20 +746,26 @@ public static class ProjectPathRules
 }
 ```
 
-**CLI mapping.** `NewProjectCommand` keeps its current observable behaviour:
+**CLI mapping.** `NewProjectCommand` keeps its current observable behaviour. `InvalidTargetPath` is listed for
+completeness even though the CLI never produces it:
 
 | Helper result | CLI diagnostic / exit |
 | --- | --- |
 | `NormalizeName` failure (`EmptyName`, `NameTooLong`, `PathSeparator`, `ParentDirectory`, `ControlCharacter`, `ReservedCharacter`) | `CLI001` usage error, exit `2` |
-| `ValidateTarget` `InvalidTargetPath` (empty or syntactically invalid directory) | `CLI001` usage error, exit `2` |
 | `ValidateTarget` `ExistingTarget` (`targetState == File`) | `CLI003` output-exists, exit `3` |
 | `ValidateTarget` `IoFailure` (`targetState == Directory`) or a `Directory.CreateDirectory` failure | `CLI002` I/O, exit `3` |
+| `ValidateTarget` `InvalidTargetPath` | **not produced by the CLI.** GUI-only: an empty or invalid directory chosen in the picker shows an inline message and opens the picker again |
 
 The CLI continues to call `File.Exists`/`Directory.Exists`/`Directory.CreateDirectory` itself and passes only
-the resulting `ProjectTargetState` into the pure helper; the GUI does the same through its picker. Message text moves into
-`GetMessage` and new `Mocassin.Cli.Tests` cases pin each failure message, so the extraction cannot reword the
-CLI. The helper is listed in `Mocassin.Packages`' `PublicAPI.Unshipped.txt`; no baseline refresh is expected. No
-other library change is allowed in 23A; if one appears necessary, the step agent stops and records an amendment.
+the resulting `ProjectTargetState` into the pure helper; the GUI does the same through its picker. The CLI's
+**empty or syntactically invalid output directory** keeps its existing behaviour — `CLI002` I/O, exit `3`, pinned
+by `AnEmptyOutputDirectoryIsCli002AndExitThree` — because the CLI validates and normalises its output path before
+it calls the helper. The helper's `InvalidTargetPath` is therefore reserved for the GUI and never changes a CLI
+code, exit code, or message. `GetMessage` owns the text for the failures the helper produces, and new
+`Mocassin.Cli.Tests` cases pin each of those messages so the extraction cannot reword the CLI; the CLI's existing
+empty-output-directory message stays unchanged and stays pinned by `AnEmptyOutputDirectoryIsCli002AndExitThree`.
+The helper is listed in `Mocassin.Packages'` `PublicAPI.Unshipped.txt`; no baseline refresh is expected. No other
+library change is allowed in 23A; if one appears necessary, the step agent stops and records an amendment.
 
 ### 13. Dependency and interface checks (parallel track)
 
@@ -818,7 +828,7 @@ tests. No fake `Project`, no fake JSON, no fake store.
 | Startup/composition | PR-fast | `AddMocassinApp` resolves every registered service; the shell view model constructs and renders headless; duplicate navigation-provider registration fails fast; the registered `ProjectStore` has `ValidateOnLoad == false` |
 | Architecture | PR-fast | **Direct** `.csproj` references only: `Mocassin.App.ViewModels` has no direct Avalonia/`Mocassin.App.Views` reference; `Mocassin.App` has no direct `Mocassin.Cli`/`Mocassin.Compilation` reference (the `App → Packages → Compilation` transitive edge is allowed). Exact I/O token test with whole-identifier lookbehind, `using static` detection, and a positive control (§1/n-15) |
 | Window placement | PR-fast | A saved placement that intersects no current screen resolves to the primary screen; one that intersects is kept (V-5) |
-| New/open/save/close | PR-fast | New from both templates creates a file the store reopens; save → close → open is content-identical; save-as migrates the lock; an already-open path activates; an existing target is refused |
+| New/open/save/close | PR-fast | New from both templates creates a file the store reopens; save → close → open is content-identical; save-as migrates the lock; an already-open path activates; **New** refuses an existing target, while Save As to an existing file follows the picker confirmation |
 | Reload/external change | PR-fast | A changed file prompts Reload; a deleted file offers Save As/Close; no silent overwrite; reload replaces the document and clears the old value |
 | Locks/read-only | PR-fast | A second session opens read-only with a banner; Save is disabled; save-as acquires the new lock; a stale lock is reclaimed per store policy |
 | Recent files | PR-fast | Order, de-duplication, missing-file disable/remove, persistence across restart |
@@ -905,7 +915,7 @@ unusable alone, so the extra step would add overhead without reducing the audit 
 | One additive library change (`ProjectPathRules` + CLI refactor) and no others | This page §12 |
 | Complexity class High with the dimension table; owner acceptance requested; no further split (settings/lifecycle needs the host) | This page §18 |
 | Closeout identity is `step-23a` in both the evidence `step` field and the tag; the `step-NN[a-z]` checker/README/template support is a prerequisite landing before closeout; no `step-23` alias | This page §20 |
-| `ProjectPathRules` splits pure name/directory rules from a caller-supplied `ProjectTargetState`, with `GetMessage` owning the text the CLI and GUI share | This page §12 |
+| `ProjectPathRules` splits pure name/directory rules from a caller-supplied `ProjectTargetState`; `InvalidTargetPath` is GUI-only, and the CLI keeps its existing empty-output-directory `CLI002`/3 behaviour and messages | This page §12 |
 
 **Verification items** (confirmed by the named feature; not guessed here):
 
@@ -950,8 +960,9 @@ CLI contract changes.
 - **Merge and tag:** only after a `Passed` audit and owner approval, merge with `--no-ff` and tag `step-23a` after
   the automatic `main` CI run is green.
 - **Dashboard:** `docs/planning/status.md` is step-agent-owned. When the step starts, the step agent replaces the
-  superseded `23` row with `23A` and `23B` rows and records 23A as `In progress`; the planner does not edit the
-  dashboard.
+  superseded `23` row with **`23a`** and **`23b`** rows — lowercase, matching `check_process_consistency.py`'s
+  `\d{2}[a-z]?` step-id parser — and records `23a` as `In progress`; the planner does not edit the dashboard.
+  Page titles and prose keep the `23A`/`23B` spelling.
 
 ## Implementation tasks
 

@@ -208,8 +208,9 @@ Rules:
   temporary workspace, headless app builder, fixtures); `Visual/Baselines/` holds the screenshot PNGs. Test
   root files stay within the 20-file limit. Persistence tests use the real App-layer stores against a temporary
   data directory, not the in-memory ones.
-- Every **new** type in the three App projects is `internal`; `InternalsVisibleTo("Mocassin.App.Tests")` gives
-  the test project access. The public exceptions are the pre-existing `AppViewModelsModule`/`AppViewsModule`
+- Every **new** type in the three App projects **other than `App`** is `internal`;
+  `InternalsVisibleTo("Mocassin.App.Tests")` gives the test project access. `App` is the only new public App
+  type; `Program` is pre-existing. The public exceptions are the pre-existing `AppViewModelsModule`/`AppViewsModule`
   markers (in `PublicAPI.Shipped.txt`, baselined, ApiCompat-checked) and `Mocassin.App.Program`; 23A **adds**
   `public sealed class App : Application` with `App.axaml(.cs)`, and `Mocassin.App` is not an ApiCompat project
   (no `PublicAPI` list, no baseline), so that addition is not a compatibility change. The ApiCompat-checked App
