@@ -159,11 +159,12 @@ gate is prepared. This is an acknowledged bookkeeping gap, not a design change.
       23A/23B boundary, the recommendation, and the fact that the owner decision is still outstanding. — checked;
       see M-2 and m-1/m-2.
 
-- [ ] **Complexity class and split decision (round 2).** §23's seven-dimension table, the High class and
+- [x] **Complexity class and split decision (round 2).** §23's seven-dimension table, the High class and
       its normative justification, the proposed split after feature 4, the dependency-clean argument, the
       one-unit acceptance case and risk guard, and the fact that the owner decision is still outstanding.
       Verify no person-week figure is used as a gate and that the class is the highest dimension, not an
       average. — Added for round 2; it supersedes the person-week item above for the refrozen design.
+      — Round 2 checked; see the complexity-class check in `Re-review round 2`.
 
 ## Dependency and interface checks
 
@@ -204,9 +205,10 @@ gate is prepared. This is an acknowledged bookkeeping gap, not a design change.
 - [x] Risks and mitigations are realistic — checked.
 - [x] Code layout and namespace plan follow the structure policy — checked; see M-3 and m-8.
 - [x] No hidden scope, stale placeholders, or unowned decisions — checked; see M-2, n-1, n-4.
-- [ ] Complexity class and split decision are recorded and justified per
+- [x] Complexity class and split decision are recorded and justified per
       [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers) — added for round 2 by
       the 2026-11-20 template change; round 1 predates it.
+      — Round 2 checked; the class is High (the highest dimension) and no pw figure is a gate.
 
 ## Evidence
 
@@ -324,11 +326,11 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required — round 1 returned `Changes required` on the first freeze
-`9916166a664f0a588e82eb8dbfc1097bc4949845` (M-1–M-3 Majors; m-1–m-11 and n-1–n-8 recorded for resolution). The
-design was refrozen at `1b82fde744d02cfdb92cecbdad5a5165d62e8b9c` after the complexity-sizing rule landed; the
-findings are resolved or explicitly dispositioned in `Resolution status` below, and the refrozen design awaits a
-fresh round-2 review. Round-1 findings and verdict remain unchanged as history.
+**State:** Changes required — round 1 returned `Changes required` on `9916166a664f0a588e82eb8dbfc1097bc4949845`
+(M-1–M-3 Majors; m-1–m-11 and n-1–n-8). The design was refrozen at
+`1b82fde744d02cfdb92cecbdad5a5165d62e8b9c`; round 2 confirmed M-1–M-3 are substantially resolved but found a
+new Major (M-4) and several Minor/Note items (see `Re-review round 2`). Round-1 findings and verdict remain
+unchanged as history.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -487,3 +489,164 @@ Notes are observations for the planner/step agent.
 **Changes required.** The design is unusually complete, the parallel-track interface is sound, the save-point
 analysis is correct, and both required policy/docs gates pass. It is not ready for implementation until M-1–M-3
 are corrected and the Minors are either fixed or explicitly accepted by the human owner.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a fresh context. I did not author, design, or implement the reviewed work and have no shared conversation
+with the planner, implementor, round-1 reviewer, or orchestrator. I reviewed the repository at record HEAD
+`562bf0e6b8c5cbe32357557efcf06ea26ee49f12` and the frozen design at
+`1b82fde744d02cfdb92cecbdad5a5165d62e8b9c`. `git diff --name-status 1b82fde 562bf0e` reports exactly
+`M docs/planning/reviews/step-23.md`; the freeze-to-head delta is the record only, and the request's
+`Reviewed commit` cell is `1b82fde`. The branch is `docs/step-23-design` at `562bf0e`; round 1's record commit
+is `94cfe46`. The worktree was clean before this record edit; no repository file outside this record was
+modified.
+
+#### Record integrity
+
+I extracted the round-1 reviewer-owned sections from `git show 94cfe46:docs/planning/reviews/step-23.md` and
+from the reviewed record at `562bf0e` (before this round-2 append; the `## Review rounds` extent is the
+pre-append content) with line-anchored `awk` ranges and compared the bytes:
+
+| Section | Extent used | 94cfe46 SHA-256 | 562bf0e SHA-256 | Result |
+| --- | --- | --- | --- | --- |
+| Evidence, Findings, Finding details | `## Evidence` to `## Record state` | `94f94652470bff170246f280c081ccfd25c9c9d0ca5502f7275fb22e9e9a896b` | same | byte-identical |
+| Reviewer independence and Verdict | `## Reviewer independence` to `## Human approval` | `d911b8f4a073fd630f9e9240ce3779f727049e4b32a2fa573b33d2e03b84778c` | same | byte-identical |
+| Review round 1 | `## Review rounds` to EOF | `36c496df3b1ec4f618b7e36232e92ee75322ef9f95b50cfefed931a65364b7d5` | same | byte-identical |
+
+`diff` of each pair is empty, so the round-1 reviewer text is byte-identical to `94cfe46`. The
+`Record-integrity note (round 2)` lists different values (`74f4c…`, `7b16d…`, `adede…`) for the same extents;
+those values do not reproduce with the stated extents or with several reasonable variants, although the
+identity conclusion itself is correct. This is recorded as m-16.
+
+#### Commands and results
+
+Run in `/tmp/opencode/step-23-review-r2` at `562bf0e` (the review worktree; no repository file changed apart
+from this record):
+
+- `./tools/verify.sh docs --require` — pass; the closeout gate completed with required checks enabled
+  (math/link checks, strict Zensical build, DocFX, rustdoc).
+- `./tools/verify.sh policy --require` — pass; the closeout gate completed with required checks enabled
+  (NuGet licence/vulnerability audit, ApiCompat, contract artifacts, projections, catalog, process consistency,
+  tool tests, SPDX headers, secret scan, cargo-deny).
+- `python tools/check_doc_math.py` — pass, 173 files scanned.
+- `git diff --name-status 1b82fde 562bf0e` — `M docs/planning/reviews/step-23.md` only.
+- Read-only inspection of `AGENTS.md` §3, §8–§12; `docs/planning/reviews/README.md`; the Step 23 page (all
+  sections); `04-roadmap.md` §3/§3.1/§5; `01-target-architecture.md` §3.2; `03-quality-strategy.md` §11.1;
+  `05-open-decisions.md`; `code-structure.md` §2.3; `appendix-b-parity-matrix.md`; `status.md` row 23;
+  `step-07-validation-and-diagnostics.md` §2/§8; ADR 0003/0006; `Directory.Packages.props`;
+  `src/dotnet/Mocassin.Packages/Projects/{ProjectStore,ProjectStoreOptions,ProjectStoreResults,ProjectLoadFailureKind,ProjectFileLock}.cs`;
+  `src/dotnet/Mocassin.Packages/Projects/Validation/ProjectValidationPipeline.cs`;
+  `src/dotnet/Mocassin.Core/Editing/ProjectDocument.cs`;
+  `src/dotnet/Mocassin.Core/Project/{Project,ProjectCanonicalizer}.cs`;
+  `src/dotnet/Mocassin.Packages/Projects/Templates/ProjectTemplateFactory.cs`;
+  `src/dotnet/Mocassin.Cli/NewProject/NewProjectCommand.cs` and
+  `src/dotnet/Mocassin.Cli.Tests/NewProject/NewProjectCommandTests.cs`;
+  `src/dotnet/Mocassin.App*` project files, `AppViewModelsModule.cs`, `AppViewsModule.cs`,
+  `PublicAPI.Shipped.txt`, and `Program.cs`; `tools/api-projects.txt`, `tools/check-api-compat.sh`, and
+  `tests/contracts/api-baseline/net11.0/Mocassin.App.*.dll`.
+
+#### Finding closure — M-1, M-2, M-3
+
+**M-1 is resolved in substance.** The refreeze specifies the single `ProjectStore` with
+`ProjectStoreOptions { ValidateOnLoad = false }` (§5/§8/§18), the in-memory
+`ProjectValidationPipeline.Validate(project, loadDiagnostics: session.LoadDiagnostics,
+ValidationOptions.Default, compiledModel: null, cancellationToken)` call (§8), no `ValidateFileAsync` use by the
+GUI, and a PR-fast test plus acceptance criterion (§20, acceptance criteria). I verified this against the real
+code: `ProjectStoreOptions.ValidateOnLoad` defaults to `true`; `ProjectStore.LoadBytesCore` calls the validator
+only when it is true; `ProjectLoadResult.Diagnostics` exists; and the real public `Validate` signature is
+`(Project, ImmutableArray<Diagnostic> loadDiagnostics = default, ValidationOptions? options = null,
+CompiledModel? compiledModel = null, CancellationToken cancellationToken = default)`, which matches the design
+call. There is no double validation and no second validator. Residual **m-14**: the "`Load` stage is not
+`Skipped`" wording is only true when `ProjectLoadResult.Diagnostics` is non-empty; a clean load correctly yields
+`Skipped` per Step 07 §2 because `LoadBytesCore` returns empty diagnostics.
+
+**M-2 is resolved for the code boundary.** The feature list is dependency-ordered: feature 1 delivers the
+dialog overlay, pickers, dispatcher, console host/Application channel, notifications, and progress; feature 2
+the workspace; feature 3 settings/theme/accessibility; feature 4 lifecycle; feature 5 edit/undo; feature 6 the
+whole §8 validation surface; feature 7 dirty/autosave/recovery; feature 8 tests/docs/closeout. Every feature
+uses only lower-numbered features plus the merged 01/03–07/12 libraries, and 23B (5–8) needs nothing from 23A
+beyond its delivered code; 23A (1–4) contains no 23B code task. Residual **m-17** (23A's documentation set
+includes pages whose §19 content covers 23B capabilities) and **n-13** (feature 1's picker last-directory state
+and settings-sourced log level are wired against feature 3's settings model; clarify the in-memory/default
+seam). Neither inverts the 23A/23B code boundary.
+
+**M-3 is resolved for placement.** §1's I/O-boundary table, §13, §14, §15, `01-target-architecture.md` §3.2,
+and `code-structure.md` §2.3 agree: view models keep contracts/state/pure logic and call only the shared
+library APIs; `Mocassin.App` implements `AppSettingsStore`, `RecoveryStore`, `ProjectFileProbe`, `AppPaths`, and
+log retention; `Mocassin.App.Views` implements `AvaloniaThemeApplier`, `AvaloniaStorageService`,
+`AvaloniaUiDispatcher`, and key binding. The §15 lists place these consistently and no
+`System.IO`/`Environment.SpecialFolder`/`Application`/resource-dictionary implementation remains in view
+models. Residual **m-13**: the source-token test as specified would fail on the permitted `IUiDispatcher` (the
+token `Dispatcher` occurs in its name and in every view model that uses it) and does not ban `Environment` /
+`Application` as broadly as §1/§13/§14 and the architecture/code-structure pages state. Refine the tokens or
+document the allow-list; otherwise the test cannot be both green and enforcing.
+
+#### Closure of the round-1 Minors and Notes
+
+| Item | Status | Round-2 check |
+| --- | --- | --- |
+| m-1 | Superseded | No person-week arithmetic or contingency remains; §23 is class/evidence/split only. |
+| m-2 | Superseded | No pw stop guard; the one-unit guard is trigger-based (harness, M-1, M-3). |
+| m-3 | Fixed | §16 now says the existing tests pin codes/exit codes only and adds new CLI message-text tests; `NewProjectCommandTests` still asserts only codes/exit codes. |
+| m-4 | Fixed | §21 and quality §11.1 remove absolute PR-fast durations; budgets are non-gating evidence. |
+| m-5 | Fixed | §17 has `paths.lastOpenDirectory`/`lastSaveDirectory`/`lastFolderDirectory`; §11 and §20 use them. |
+| m-6 | Fixed | §9/§17 add `AppSettingsJsonContext`, temp + `Flush(flushToDisk: true)` + replace, `MaxSettingsBytes = 4 MiB`, the `recentFiles` cap, and the failed/oversized-write guarantee. |
+| m-7 | Fixed | §10 defines `KeyGestureDescriptor` with `Primary`; the table uses `primary`; only Views binds Avalonia. |
+| m-8 | Partly fixed | The named types are listed; the PublicAPI claim is superseded by M-4 (existing public markers). |
+| m-9 | Fixed | §20 checks direct `.csproj` references and explicitly allows the expected `App → Packages → Compilation` edge. |
+| m-10 | Fixed | §5 adds `ActivateAsync`, `ReloadAsync`, `RecoverAsync`, `DiscardRecoveryAsync` and outcomes; residual m-12 for `TooLarge`. |
+| m-11 | Fixed | §6/§13 make the crash path asynchronous with a 2 s budget; no `.Result`/`GetAwaiter().GetResult()`. |
+| n-1 | Deferred | `status.md` row 23 still says `Not started`/`Not requested`; the record and step page flag the step-agent follow-up. |
+| n-2 | Partly fixed | The outcome enum adds `NotFound`/`InvalidContent`/`IoFailure`; `TooLarge` is still missing — m-12. |
+| n-3 | Fixed | `IInspectorContributor.CreateInspector(InspectorSelection)` and the typed selection record. |
+| n-4 | Fixed | Feature 6 owns the whole §8 surface; §8 and the feature table say so. |
+| n-5 | Fixed | The dangling reference is replaced by `WindowPlacementResolver`, a PR-fast test, and V-5. |
+| n-6 | Partly fixed | `ProjectPathRules` is the helper in §16/§5/§20, but architecture §3.2 and the parity matrix still say `ProjectNameRules` — m-15. |
+| n-7 | Fixed | `TimeProvider` is scoped to document/autosave/stamp/session/retention; Serilog owns log timestamps. |
+| n-8 | Superseded | The "one sitting" claim is gone; evidence size is a High dimension and drives the split. |
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Major** | **M-4 — The "every App type internal / `PublicAPI.*` unchanged / no ApiCompat baseline refresh" claim contradicts the existing public App marker types and the checked-in App API baselines.** | Step 23 §15: "Every type in the three App projects is `internal` … Consequently `PublicAPI.Shipped.txt`/`PublicAPI.Unshipped.txt` stay unchanged for `Mocassin.App*`, and the `PublicApiAnalyzers` references in those projects stay satisfied with empty lists." §14 repeats "Every type … is `internal`"; §16 says "Because every change is additive, no ApiCompat baseline refresh is expected"; §1 nevertheless shows `public static class Program` and `public sealed class App`. Repository: `src/dotnet/Mocassin.App.ViewModels/AppViewModelsModule.cs` declares `public static class AppViewModelsModule` and `PublicAPI.Shipped.txt` lists it; `src/dotnet/Mocassin.App.Views/AppViewsModule.cs` declares `public static class AppViewsModule` and its `PublicAPI.Shipped.txt` lists it; `tests/contracts/api-baseline/net11.0/Mocassin.App.ViewModels.dll` and `Mocassin.App.Views.dll` are checked in; `tools/api-projects.txt` lists both, and `./tools/verify.sh policy` runs ApiCompat for both. Making the markers internal/removing them must change the shipped lists and refresh the baseline (a deliberate, non-additive public-API change); keeping them public contradicts the "every type internal" rule. Fix: state the disposition (remove/replace the markers and record the intentional `PublicAPI`/ApiCompat update, or keep them as the documented public exceptions) and align §14/§15/§16 and the api-gate plan. |
+| **Minor** | **m-12 — The `ProjectSessionOutcome` enum still does not cover `ProjectLoadFailureKind.TooLarge` (n-2 incomplete).** | Step 23 §5 says "the three load failures (`NotFound`, `InvalidContent`, `IoFailure`, mapped from `ProjectLoadResult.FailureKind`)"; `ProjectLoadFailureKind` has `None`, `NotFound`, `TooLarge`, `Io`, `InvalidContent`; `ProjectStore.LoadFromPathAsync` returns `TooLarge` for a file over `MaxDocumentBytes` (64 MiB) and `Io` for I/O failures. The outcome list and mapping must include all four or state the mapping explicitly. |
+| **Minor** | **m-13 — The source-token architecture test as specified is neither green on the permitted code nor a complete enforcement of the stated rule.** | Step 23 §1/§20 scan for `System.IO`, `File.`, `Directory.`, `Environment.SpecialFolder`, `Avalonia`, `Dispatcher`, and `ResourceDictionary`. §15 places `Shell/IUiDispatcher.cs` in `Mocassin.App.ViewModels` and view models reference `IUiDispatcher`, so the `Dispatcher` token matches permitted code. The list bans only `Environment.SpecialFolder`, not `Environment`, and has no `Application` token, while §1/§13/§14, architecture §3.2, and code-structure §2.3 ban `Environment` and `Application`. Refine to e.g. `Dispatcher.UIThread`/`Avalonia.Application`/`Environment.` or state an allow-list for `IUiDispatcher`; otherwise the test cannot both pass and enforce the rule. |
+| **Minor** | **m-14 — The "`Load` stage is not `Skipped`" requirement is true only for a load/migration fixture; a clean load is correctly `Skipped`.** | Step 23 §8 and §20 (and feature 4's done-when) say the `Load` stage is "populated … instead of being skipped" and "is not `Skipped`"; the acceptance criterion seeds it from `ProjectLoadResult.Diagnostics`. Step 07 §2 says the in-memory `Load` stage is `Skipped` with count 0 when the caller supplies no load diagnostics, and `Completed`/`Failed` when it does. `ProjectStore.LoadBytesCore` returns empty diagnostics for a clean current-version load; only migration/load diagnostics make the stage non-skipped. The M-1 fix (pass `ProjectLoadResult.Diagnostics` + `ValidateOnLoad = false`) is right; scope the assertion to a fixture with a load/migration diagnostic and state the clean-load behaviour. |
+| **Minor** | **m-15 — The `ProjectNameRules` → `ProjectPathRules` rename is incomplete (n-6).** | Step 23 §16 and the resolution say the shared helper is `ProjectPathRules`; `01-target-architecture.md` §3.2 still says the CLI and GUI share `ProjectNameRules`, and `appendix-b-parity-matrix.md` row "Create new project" still says `ProjectNameRules`; `grep` finds no `ProjectNameRules` type in `src/dotnet`. |
+| **Minor** | **m-16 — The record-integrity note's SHA-256 values do not reproduce.** | My independent extraction of the three stated extents gives `94f946…`, `d911b8…`, and `36c496…` (all identical between `94cfe46` and `562bf0e`); the note lists `74f4c…`, `7b16d…`, and `adede…`. The byte-identity conclusion is correct; the listed hashes should be corrected or removed. |
+| **Minor** | **m-17 — The 23A documentation set names pages whose planned content covers 23B capabilities.** | §23 says 23A contains no task from 23B; the feature table's 23A documentation set includes `quickstart.md` and `first-project.md`, whose §19 content includes validate, save/recover, undo, autosave, and recovery (features 5–7, 23B). Under the split, either scope those pages to 23A or complete their 23B sections in 23B. |
+| **Note** | **n-9 — §14 contains two consecutive `Mocassin.App` bullets that both enumerate `Program`, `App.axaml(.cs)`, `ViewLocator`, and the composition root.** | Step 23 §14 lines 858–865; the second bullet adds the `ViewLocator` safeguards. Merge them. |
+| **Note** | **n-10 — The §1 singleton list omits `ProjectStore` (and does not say where `ProjectValidationPipeline` is constructed) although §5 relies on the single store.** | Step 23 §1 lifetime list vs §5 ("The single `ProjectStore` instance registered in the composition root") and §8 (pipeline use). Add the store to the registration/lifetime list so the M-1 test can resolve the configured store, and state the pipeline's lifetime. |
+| **Note** | **n-11 — §1's prose omits the direct `Mocassin.Contracts` reference that the current `Mocassin.App.ViewModels.csproj` has.** | Step 23 §1 says the project "already references `Mocassin.Packages`, `Mocassin.Results`, and (transitively) `Mocassin.Core`"; `Mocassin.App.ViewModels.csproj` also references `Mocassin.Contracts` directly, and the dependency diagram includes Contracts. Align the prose. |
+| **Note** | **n-12 — §1 shows public `Program`/`App` types while §15 says every App type is internal.** | Step 23 §1 code snippets vs §15 "Every type in the three App projects is `internal`." Scope the internal rule to the library projects or state the entry-point exceptions; this is the same cluster as M-4. |
+| **Note** | **n-13 — Feature 1's picker last-directory state and settings-sourced log level depend on feature 3's settings model.** | Feature 1 scope ("`IStorageService` pickers with last-directory state"; logging with the settings minimum level) vs feature 3 (settings model/store). Clarify that feature 1 uses in-memory/default state and feature 3 wires persistence, or move the persistence detail to feature 3; both are inside 23A, so this is not a 23A/23B inversion. |
+
+#### Complexity class check
+
+Class **High** is honest: four of the seven §3.1 dimensions are High (cross-step interfaces, test-matrix
+breadth, independent acceptance stories, evidence size), the class is the highest dimension rather than an
+average, and §23 cites concrete evidence (five consuming GUI steps, a new application project plus a
+headless/screenshot/accessibility harness, three independent acceptance stories, eight features, four library
+changes, six documentation pages, and a ~1,400-line design page). No person-week figure is a gate: §23 says the
+split decision is trigger-based, the §3 forecast is explicitly non-gating, and the one-unit guard is the
+harness/M-1/M-3 trigger, not a time guard. The split after feature 4 is dependency-clean for the code, and the
+one-unit case and risk guard are recorded; the owner decision is correctly still outstanding. Residual m-17 and
+n-13 are documentation/ordering details, not a class problem.
+
+#### Verdict
+
+**Changes required.** The refreeze resolves the round-1 Majors M-1–M-3 in substance: the validation contract
+matches the real `ProjectStore`/`ProjectValidationPipeline` signatures, the feature list is dependency-ordered
+with a clean 23A/23B code boundary, and the I/O boundary is placed correctly. It is not ready for implementation
+because of the new Major **M-4**: the "every App type internal / `PublicAPI.*` unchanged / no ApiCompat baseline
+refresh" claim contradicts the existing public `AppViewModelsModule`/`AppViewsModule` types, their
+`PublicAPI.Shipped.txt` entries, and the App API baselines that `./tools/verify.sh policy` checks. The Minor
+items m-12–m-17 and Notes n-9–n-13 should be fixed or explicitly accepted together with M-4. The round-1
+verdict remains as history; the owner decides the next freeze.
+
+Follow-up owner: planner/step agent — resolve M-4 and the Minors/Notes, then re-freeze.
+Follow-up step: 23 — design re-review at the next freeze commit; earlier rounds stay in this record.
+
