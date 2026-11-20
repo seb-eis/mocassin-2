@@ -12,7 +12,7 @@
     "head_sha": ""
   },
   "platform_ci": "not run",
-  "tag": "",
+  "tag": "step-13",
   "notes": [
     "Closeout CI is the single Ubuntu workflow_dispatch run 44831177039 at 31281210f64552ca3bb704512d028a1d28499650 (workflow_dispatch, platforms=ubuntu, force_all=false). It completed successfully; the .NET, Rust, Contracts/policy, and Public API jobs passed, and Python was skipped by its path filter. No per-feature or per-push CI was used. Earlier dispatches (44807199574, 44808204483, 44809489478, 44815711484, 44826826251) are superseded by this audited commit.",
     "The full local gate ./tools/verify.sh all --require exited 0 on the same tree ('Closeout gate completed with required checks enabled.'). AOT is green: the strict smoke host and positive control pass, and the real Mocassin.Cli publish FAILS with 62 IL2xxx/IL3xxx diagnostics from reflection-based JSON converters in Mocassin.Core (31 IL2026 + 31 IL3050). The failure is recorded as non-gating evidence; Step 31 owns the AOT decision.",
@@ -25,6 +25,7 @@
     "The 512 MiB model-element budget is verified by the documented arithmetic and the ReaderLimits/scan tests; no 512 MiB fixture is materialized. every_per_field_count_cap_is_enforced exercises the rules, directions, collections, pair/cluster tables, and both link caps with lowered limits and accepts the same payload with raised limits.",
     "The load baseline is boundary-calibrated for Step 29: the original medians are open 171.1 us, cold 343.1 us, warm 71.1 us; the auditor measured open 188.83 us (+10.4%) and the same-class rerun measured open 270.98 us / cold 351.35 us / warm 68.045 us. The open variance is environment noise; cold/warm stay stable. The 10% rule is not relaxed, and Step 29 owns the quiet-run re-baseline and automated regression job. The rustLoad sourceCommit remains 45eb181, the tree that produced the original baseline; the rerun is recorded in step-13-load.json and the benchmark/reader code is unchanged.",
     "Feature 6 had left proptest in mocassin-msl's production dependencies; feature 7 moved it to dev-dependencies. The remediation also removes the unused serde_bytes (mocassin-types), tracing (mocassin-msl), and thiserror (mocassin-cli) declarations. No production dependency was added.",
-    "No tag exists and no merge into main has been performed. The step branch is frozen at the audited commit; the audit record is docs/planning/audits/step-13.md and its state is Re-audit required. The F-1 amendment is withdrawn."
+    "Merged into main as 2613a0dcbc3ddbfe4bb5b54f47821d3ffa951789 (--no-ff, 2026-11-20) and tagged step-13 on that merge commit; the automatic main CI run 44834521989 is green at the merge SHA. The step branch was deleted locally and remotely. The audited commit remains 3128121 and the tag points to the merge commit.",
+    "Audit round 2 passed with notes at 3128121 (record 0d3c2d8; correction c3f6a32). The owner accepted Passed with notes on 2026-11-20. F-9/N-5-N-7 were fixed in the docs-only notes commit a118add before the merge; no code, test, configuration, contract, or design change followed the audited commit. The deferred items are unchanged: the Step 11 verifier byte_position observation, Step 29 continuous fuzzing and the quiet-run load baseline, and Step 31 AOT decision."
   ]
 }

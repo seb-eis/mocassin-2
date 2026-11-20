@@ -8,19 +8,19 @@ a write-free `--dry-run` job inspector, and the first .NET↔Rust contract fixtu
 
 ## Implementation status
 
-- **Status:** **In audit (re-audit required)** — all seven features and the round-1 fixes are squashed; F-1 is closed by `ce00f8e` and the C-centered fixture; the closeout CI is green at `3128121`
-- **Step branch:** `step/13-rust-solver-foundation-and-package-reader`
-- **Step CI:** [Ubuntu 44831177039](https://github.com/seb-eis/mocassin-2/actions/runs/44831177039) — green at `31281210f64552ca3bb704512d028a1d28499650` (re-audit closeout dispatch on the final merged tree)
-- **Main merge:** —
-- **Step tag:** —
-- **Audit:** **Re-audit required** — round 1 returned `Fixes required`; resolutions are recorded in [the audit record](../audits/step-13.md) and [closeout evidence](../closeout/step-13.json). F-1 is now closed by the real-writer `step-13-centered` fixture and the Step 08 fix `1f5b473`; the earlier `step-13-amend-1` is withdrawn.
+- **Status:** **Done** — merged into `main` as `2613a0dcbc3ddbfe4bb5b54f47821d3ffa951789` (`--no-ff`) and tagged `step-13` on 2026-11-20
+- **Step branch:** `step/13-rust-solver-foundation-and-package-reader` (merged and deleted)
+- **Step CI:** [closeout 44831177039](https://github.com/seb-eis/mocassin-2/actions/runs/44831177039) green at `31281210f64552ca3bb704512d028a1d28499650`; [main 44834521989](https://github.com/seb-eis/mocassin-2/actions/runs/44834521989) green at `2613a0d`
+- **Main merge:** `2613a0dcbc3ddbfe4bb5b54f47821d3ffa951789` (`--no-ff`, 2026-11-20)
+- **Step tag:** `step-13` → `2613a0dcbc3ddbfe4bb5b54f47821d3ffa951789`
+- **Audit:** **Passed with notes** — accepted by the human owner on 2026-11-20; round-1/round-2 resolutions and the F-9/N-5–N-7 notes fix are in [the audit record](../audits/step-13.md). The `step-13-amend-1` amendment is **Withdrawn — resolved by `1f5b473`**.
 - **Design review:** Ready with notes — accepted by the human owner on 2026-11-18 for freeze `b9cda11`;
   implementation hold lifted 2026-11-19. See [`docs/planning/reviews/step-13.md`](../reviews/step-13.md).
 - **Feature list:** Approved by the human owner on 2026-11-18 (seven features); implementation authorized
   2026-11-19.
 - **Sizing:** Owner-approved on 2026-11-18 at **4.5 person-weeks** (3.5 pw base + 1.0 pw contingency) as a
   §3.1 single-step exception, no split; the 13A/13B split was considered and rejected. See §13.
-- **Last updated:** 2026-11-20 (F-1 closed; final re-audit CI green)
+- **Last updated:** 2026-11-20 (merged and tagged `step-13`)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
