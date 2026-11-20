@@ -143,7 +143,7 @@ format change, while older readers still round-trip it unchanged. Nested style v
   reclaimed; active locks are reported as `PROJ031`.
 - Lock release checks the token before deleting, so a session cannot remove another session's lock.
 - Autosave is an explicit `ProjectStore.WriteAutosaveAsync` operation. `ProjectDocument` exposes
-  `IsAutosaveDue` and `MarkAutosaved`; the UI timer is added in Step 23.
+  `IsAutosaveDue` and `MarkAutosaved`; the UI timer is added in Step 23B.
 - Autosave does not update `modifiedUtc`; only a real save does.
 
 ## Synchronous, pure compiler (Step 08)
@@ -507,7 +507,7 @@ the safety-relevant half and gives operators a preview before the destructive co
 `new --template blank|ceria` clones an embedded project template from
 `Mocassin.Packages.Projects.Templates` with a fresh UUIDv7, master seed, name, and timestamps. The ceria
 template is a copy of the model-definition sample, not a buildable job sample; a freshness test compares its
-canonical model hash with `samples/ceria/ceria.mocprj`. Step 23’s creation UI uses the same factory and
+canonical model hash with `samples/ceria/ceria.mocprj`. Step 23A’s creation UI uses the same factory and
 assets. The assets are embedded resources, so `new` needs no template directory, network, or install layout.
 
 ## CLI auxiliary commands (Step 12)

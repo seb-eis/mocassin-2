@@ -254,7 +254,7 @@ Plus:
 - [Step 13](steps/step-13-rust-solver-foundation-and-package-reader.md) — fuzzing starts.
 - [Step 19](steps/step-19-solver-cli-hpc-and-extensions.md) — extension ABI.
 - [Step 22](steps/step-22-python-analysis-api.md) — Python package/docs.
-- [Steps 23–28](steps/step-23-avalonia-shell-and-project-lifecycle.md) — GUI, 3D, screenshots.
+- [Steps 23A–28](steps/step-23a-workspace-and-project-lifecycle.md) — GUI, 3D, screenshots.
 - [Step 29](steps/step-29-validation-parity-and-performance.md) — fuzzing, coverage, profiling.
 - [Step 30](steps/step-30-standalone-documentation.md) — combined docs site.
 - [Step 31](steps/step-31-packaging-and-release.md) — packaging, SBOM, signing.

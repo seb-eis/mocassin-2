@@ -91,7 +91,7 @@ mocassin-sim batch --db <project.msl> --jobs <range|file>
   asks for confirmation before deleting job folders or `.msr` rows.
 - Before a long run, the queue/CLI checks free space and warns at 90 % usage; it does not delete anything
   automatically.
-- Temporary files are cleaned on failure. Autosave/recovery and log retention follow the Step 23 defaults.
+- Temporary files are cleaned on failure. Log retention follows the Step 23A defaults; autosave/recovery follow Step 23B.
 - `.msr` archives and job folders are user data; no background cleanup runs in the GUI or CLI.
 
 ### 3. Exit codes and signals
