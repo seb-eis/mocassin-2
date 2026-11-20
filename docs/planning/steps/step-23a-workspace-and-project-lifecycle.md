@@ -38,6 +38,7 @@ those are Step 23B.
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 | `app-host-and-boundaries` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `13945b1` |
+| 2 | `documents-navigation-and-commands` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `75d95de` |
 
 ### Approved feature list (owner-approved 2026-11-20)
 
