@@ -51,6 +51,16 @@ original strengths, and any regression.
 Estimates are in **person-weeks (pw)** for an experienced developer familiar with the domain. They include
 tests, documentation, and review, not project management. Ranges reflect uncertainty.
 
+The pw figures are **forecasts, not gates**. They exist to schedule work, compare alternatives, and size the
+parallel tracks. A step is not split, deferred, or refused because a forecast exceeds a threshold, and no
+approval depends on a pw number. Whether a step must be split is decided by the complexity class and split
+triggers in §3.1.
+
+The forecasts were calibrated for human capacity. Implementation is now largely agent-driven, so wall-clock
+duration is not the binding constraint on a step. What makes a step hard to review and integrate is its
+contract, dependency, and evidence surface, not its calendar length. The pw figures are retained for
+comparability and planning, not as a sizing gate.
+
 | Step | Outcome | Depends on | Estimate |
 | --- | --- | --- | --- |
 | 00 | Repository, solution/workspace, CI, ADRs, docs skeleton, fixtures | — | 2–3 pw |
@@ -86,23 +96,85 @@ tests, documentation, and review, not project management. Ranges reflect uncerta
 | 30 | Documentation completion: coverage, cross-cutting pages, APIs, tutorials, publish | 19, 21, 22, 28 | 3–5 pw |
 | 31 | Packaging, docs artifact, Python package, samples, release | 22, 29, 30 | 2–4 pw |
 
-**Total:** roughly 81–124 person-weeks (about 1.6–2.4 person-years). With three experienced developers working
-in parallel on model/compiler, solver, UI, and documentation, the calendar estimate is **10–13 months** including
-integration, documentation, and release hardening. A single developer should expect **20–26 months**.
+**Total:** roughly 81–124 person-weeks of forecast effort (about 1.6–2.4 person-years). This is a planning
+baseline for scheduling, staffing, and comparing alternatives, not a delivery commitment or a gate. With three
+developers working in parallel on model/compiler, solver, UI, and documentation, the calendar forecast is
+**10–13 months** including integration, documentation, and release hardening; as a single-developer forecast,
+**20–26 months**. Agent-driven implementation can compress the calendar without changing the effort basis in
+this table.
+
+Complexity classes are recorded per step on the step page (§3.1), not in this table; the table stays a forecast
+of effort.
 
 ### 3.1 Step sizing and split triggers
 
-A step should be small enough to audit in one sitting and large enough to deliver a coherent outcome. Split a
-step before implementation when:
+A step must be small enough that a fresh auditor can read its diff, tests, and evidence in one sitting, and
+large enough to deliver one coherent outcome. Size is judged by a **complexity class**, not by elapsed time.
+The pw figures in §3 are forecasts and never trigger a split.
 
-- it has more than roughly 6–8 features, or features with unrelated outcomes;
-- it is expected to take more than about four weeks for one implementor;
-- it has multiple independent acceptance stories;
-- it mixes low-risk documentation or tooling with high-risk contract, security, or solver work;
-- the audit cannot be read in one sitting.
+#### Complexity dimensions
 
-Record the size estimate and the split trigger in the step page at design time. If a step grows past the
-trigger, split it and update this roadmap before continuing.
+Classify the step at design time against seven dimensions:
+
+| Dimension | Question |
+| --- | --- |
+| Contracts, formats, and public surfaces | Does the step change a versioned contract, format, schema, public API, or CLI surface? How many, and how widely are they consumed? |
+| New dependencies | Does it add a library, toolchain, native component, or cross-language dependency? How hard would it be to remove later? |
+| Cross-step interfaces | Does it define an interface that later steps consume? How many later steps depend on it, and how expensive is a late change? |
+| Irreversibility | Does it make a decision that is hard to reverse after merge: a format, signature, published behaviour, or scientific convention? |
+| Test-matrix breadth and failure modes | How many test layers are required (unit, property, golden, contract, cross-language, statistical, performance)? How many distinct failure modes and platform paths? |
+| Independent acceptance stories | How many outcomes could be demonstrated, approved, or rejected separately by the owner? |
+| Evidence size for a fresh auditor | How much diff, fixture, benchmark, and test output must one auditor hold at once to verify the step? |
+
+#### Classes
+
+| Class | Meaning |
+| --- | --- |
+| **Low** | One narrow surface; no versioned contract, format, or public-API change; no new dependency, or a contained dev-only one; no new cross-step interface; easily reversed; one or two test layers and few failure modes; one acceptance story; a small audit surface. |
+| **Medium** | At most one versioned contract, format, or public-surface change, or one contained new dependency, or one cross-step interface with few consumers; reversible with a recorded decision; two or three test layers; still one acceptance story; an audit a fresh reader can complete in one sitting. |
+| **High** | Any of: a format or signature change; a new dependency with lock-in or platform impact; a cross-step interface that several later steps consume; an irreversible decision; a broad test matrix including cross-language, statistical, or performance layers; more than one independent acceptance story; an evidence set too large for one audit sitting. |
+
+The class is the **highest** dimension, not an average. One irreversible format change makes the step High even
+if every other dimension is small.
+
+#### Split triggers
+
+Split a step before implementation when any of these holds:
+
+- the step is **High** complexity, unless the owner accepts it as one unit (see below);
+- it has **more than one independent acceptance story** — distinct outcomes that could be delivered, approved,
+  or rejected separately (several acceptance criteria inside one story do not count);
+- it mixes risks, for example low-risk documentation or tooling with high-risk format, security, or solver work;
+- it has more than roughly **6–8 features**, or features with unrelated outcomes;
+- a fresh auditor could not read the diff, tests, and evidence in one sitting.
+
+If a step is split, update the step index, the dependency graph, the §3 forecasts, and any affected milestone
+before the design review freezes. Do not split during the audit.
+
+#### Recording the class
+
+Record the class and a one-paragraph justification on the step page at design time, before the design review.
+The paragraph names the dimensions that drive the class, states the split decision, and for a High step gives
+either the owner acceptance or the split plan. If the class changes during design — a new format, dependency, or
+cross-step interface appears — re-record it before the design freezes. The step page is the source of record;
+§3's table stays a forecast and does not carry the class.
+
+#### Owner acceptance of a High step
+
+A High-complexity step may proceed as one unit only with an explicit owner decision, recorded on the step page
+and in this section. The request states the class, the dimensions that make it High, why a split would cost more
+than it saves (for example, it would duplicate fixtures, separate an API from its acceptance test, or reopen a
+frozen phase boundary), and the guard that stops the step if the risk materialises. This is an acceptance of a
+complexity class, not a waiver of a time estimate.
+
+#### Historical exceptions (previous time-based rule)
+
+The three exceptions below were approved under the previous **four-week** time trigger. They are historical
+records: their pw figures, split rationales, and guard conditions are unchanged, and their step pages,
+design-review records, and audit records are not rewritten or re-reviewed. This section does not re-open them,
+and Step 13 continues in progress under its 2026-11-18 decision. The complexity rule applies to step designs
+frozen on or after 2026-11-20; a step approved under the time rule keeps its recorded decision, including any
+guard and its already-approved status.
 
 **Recorded exception — Step 09 (2026-11-14).** The human owner approved Step 09 as a single step at an honest
 3.4–4.4 person-week estimate. The upper bound exceeds the four-week trigger. The 09A/09B split was considered

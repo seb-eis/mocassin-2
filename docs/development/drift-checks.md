@@ -43,7 +43,8 @@ Blocker/Major drift. Use [`docs/planning/drift-checks/_template.md`](https://git
 - [ ] Public APIs, formats, schemas, and compatibility promises match the current code.
 - [ ] Generated artifacts and fixtures are current.
 - [ ] ADRs and open decisions have owners and current status.
-- [ ] No step has grown beyond its size or split trigger without a recorded decision.
+- [ ] No step has grown beyond its recorded complexity class or split trigger without a recorded decision
+      (`docs/planning/04-roadmap.md` §3.1).
 
 ### Documentation
 
