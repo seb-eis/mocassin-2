@@ -68,6 +68,11 @@ internal enum ProjectSessionOutcome
     Locked,
 
     /// <summary>
+    /// The New target already exists. New never overwrites.
+    /// </summary>
+    ExistingTarget,
+
+    /// <summary>
     /// The save failed.
     /// </summary>
     SaveFailed,

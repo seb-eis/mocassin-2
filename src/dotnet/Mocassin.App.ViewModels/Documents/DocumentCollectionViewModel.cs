@@ -122,6 +122,22 @@ internal sealed partial class DocumentCollectionViewModel : ObservableObject
     }
 
     /// <summary>
+    /// Activates the document at a zero-based index, used by Ctrl+1..9.
+    /// </summary>
+    /// <param name="index">The zero-based index.</param>
+    /// <returns><see langword="true"/> when a document was activated.</returns>
+    public bool ActivateIndex(int index)
+    {
+        if (index < 0 || index >= Documents.Count)
+        {
+            return false;
+        }
+
+        ActiveDocument = Documents[index];
+        return true;
+    }
+
+    /// <summary>
     /// Moves a document to a new index for drag reordering.
     /// </summary>
     /// <param name="fromIndex">The current index.</param>

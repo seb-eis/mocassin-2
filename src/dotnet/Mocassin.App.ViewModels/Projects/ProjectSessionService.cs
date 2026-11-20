@@ -84,7 +84,7 @@ internal sealed class ProjectSessionService : IProjectSessionService
         {
             return target.Failure switch
             {
-                ProjectPathFailure.ExistingTarget => Failure(ProjectSessionOutcome.Locked, target.Message),
+                ProjectPathFailure.ExistingTarget => Failure(ProjectSessionOutcome.ExistingTarget, target.Message),
                 ProjectPathFailure.InvalidTargetPath => Failure(ProjectSessionOutcome.Io, target.Message),
                 ProjectPathFailure.IoFailure => Failure(ProjectSessionOutcome.Io, target.Message),
                 _ => Failure(ProjectSessionOutcome.InvalidContent, target.Message),

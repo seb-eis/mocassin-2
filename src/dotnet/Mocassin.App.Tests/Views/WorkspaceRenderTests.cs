@@ -2,6 +2,8 @@
 
 using Avalonia.Automation;
 using Avalonia.Controls;
+using Avalonia.Headless;
+using Avalonia.Input;
 using Avalonia.VisualTree;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Composition;
@@ -71,6 +73,38 @@ public sealed class WorkspaceRenderTests
                     await shell.Documents.CloseAllAsync();
                     Assert.Empty(shell.Documents.Documents);
                     Assert.Null(shell.Documents.ActiveDocument);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task CtrlNumberActivatesATab() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    var entry = await ProjectFixtures.LoadCeriaAsync();
+                    shell.Workspace.Add(entry);
+                    await shell.Navigation.NavigateToAsync(
+                        new ModelPath("project", entry.Id, "overview"),
+                        NavigationIntent.Activate);
+                    await shell.Navigation.NavigateToAsync(
+                        new ModelPath("project", entry.Id, "json"),
+                        NavigationIntent.Activate);
+
+                    window.KeyPress(Key.D2, RawInputModifiers.Control, PhysicalKey.Digit2, "2");
+
+                    Assert.Equal(DocumentKinds.ProjectOverview, shell.Documents.ActiveDocument!.Key.Kind);
                 }
                 finally
                 {

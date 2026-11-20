@@ -82,6 +82,32 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - Tests use real files, real SQLite, and the real checked-in packages. There are no mocks in the reader; the only
   process boundary is the CLI exit-code test, which runs the built binary.
 
+## Avalonia workspace (Step 23A)
+
+- `Mocassin.App.Tests` references the app, view models, and views and uses the first-party `Avalonia.Headless`
+  package for UI-thread dispatch and rendering. The repository uses xunit 2; `Avalonia.Headless.XUnit` 12.1.6
+  depends on xunit v3, so it is not referenced. Tests drive `HeadlessUnitTestSession` directly and run without a
+  display.
+- Real objects are used wherever possible: real temporary directories, the real `ProjectStore` with
+  `ValidateOnLoad = false`, the real validation pipeline, real `Project` values, the real settings store, and
+  the real in-shell dialog overlay. Test doubles are limited to the true boundaries: dialogs in view-model tests,
+  pickers, clipboard, dispatcher, `TimeProvider`, and in-memory settings stores for non-persistence tests.
+- Composition tests resolve every registered service and prove the composed `ProjectStore` has
+  `ValidateOnLoad == false`; the session test proves one validation call with store diagnostics (clean load
+  `Skipped`, diagnostics `Completed`/`Failed`).
+- Project lifecycle tests use real files and locks: create/open/save/save-as/close/reload, existing-target refusal
+  for New, read-only lock handling, lock migration on Save As, external modification/deletion, recents and last
+  directories, `--project` startup, and undo→redo across a save point.
+- Settings tests cover the source-generated round-trip, defaults, unknown/missing/wrong-type/future-major,
+  migration idempotence, the 4 MiB cap, atomic/failed writes, theme resources, settings-dialog validation, log
+  level at startup, and recent/last-directory persistence.
+- The architecture test checks direct project references and runs the view-model I/O token tripwire with a
+  positive control. Headless a11y assertions check automation names on the primary shell controls.
+- Tab drag-reorder is not wired in the Avalonia tab strip; the document collection's `Move` API and the
+  keyboard, middle-click, and context-menu close paths are tested. The limitation is recorded in the step page.
+- Screenshot baselines, the full accessibility-tree sweep, and the Windows/macOS platform checklist remain
+  PR-medium/closeout platform evidence; no pixel comparison runs on Windows/macOS.
+
 ## Test tiers
 
 | Tier | Contents | Target |

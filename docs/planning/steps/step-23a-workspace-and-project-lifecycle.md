@@ -42,6 +42,27 @@ those are Step 23B.
 | 3 | `settings-theming-and-accessibility` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `d0bca73` |
 | 4 | `project-session-lifecycle` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `a17482a` |
 
+### Recorded implementation deviations and limitations (feature 5)
+
+These are the accepted deviations from the approved design and the limitations the auditor must examine. They
+are recorded here rather than left implicit.
+
+| # | Deviation / limitation | Status and rationale |
+| --- | --- | --- |
+| 1 | `Avalonia.Headless.XUnit` is not used | Avalonia 12.1.6 requires xunit v3; the repository uses xunit 2.9.3. The suite uses first-party `Avalonia.Headless` with a direct `HeadlessUnitTestSession`, so headless tests still run without a display. The package list in the design is superseded for this test-only dependency. |
+| 2 | ANGLE licence exception | `Avalonia.Desktop` pulls the Windows `Avalonia.Angle.Windows.Natives` runtime (BSD-3-Clause, shipped as a licence file). `tools/contracts/check_nuget_licenses.py` records an exact-version, reviewed exception. No other dependency policy change. |
+| 3 | InternalsVisibleTo includes `Mocassin.App` and `Mocassin.App.Views` | Required for the composition root to construct internal view-model/view implementations and for compiled XAML bindings to internal types. The public-surface rule is unchanged: only `App` is a new public application type; module markers and `Program` are pre-existing. |
+| 4 | Feature 2 deferred New/Open/Recent and JSON export | Feature 4 implemented New/Open/Recent recording. **Project JSON “Save a copy…” export remains deferred**; the document supports copy only. |
+| 5 | Tab keyboard and drag support | `Ctrl+1`–`Ctrl+9`, `Ctrl+Tab`/`Ctrl+Shift+Tab`, `Ctrl+W`, middle-click close, the close button, and the tab context menu are implemented and tested. **Drag-reorder is not wired**: the Avalonia `TabControl` has no built-in drag-reorder gesture, and adding a custom tab-strip control (with accessible keyboard equivalent) is later GUI polish. `DocumentCollectionViewModel.Move` exists for that follow-up. |
+| 6 | New existing-target outcome | The original implementation reused `ProjectSessionOutcome.Locked` because the enum lacked an existing-target value. Feature 5 adds internal `ExistingTarget`, returns it from New, and tests the message/code preservation. |
+| 7 | Save As to the current path | A Save As to the session’s current path is treated as a lock conflict rather than a plain save; the picker normally prevents this. |
+| 8 | External-change filter | The session compares length + last-write UTC (the design’s cheap filter), not a fresh content hash. Save refuses a modified/deleted file; Reload and Save As are the recovery paths. |
+| 9 | `CreateAsync` path meaning | The session service `CreateAsync(kind, name, directory)` takes a target **directory**; the design did not distinguish a directory from a full file path. |
+| 10 | Workspace seam | `ProjectWorkspaceEntry` now wraps a `ProjectSession`; the feature-2 standalone constructor is retained for tests. The session is the live owner of project/load/lock state. |
+| 11 | Layout width feedback | Region visibility and stored widths are applied from settings; manual GridSplitter resizing does not feed back into settings yet. |
+| 12 | Application diagnostics report | The crash boundary and structured log exist; the “Help → Application diagnostics” report is deferred to a later diagnostics/UI step. |
+| 13 | Step 07 validation pass | The design originally said 23A never calls `ProjectValidationPipeline`; feature 4 performs exactly one internal load-validation pass with the store diagnostics. See §5.1. No validation UI is added; 23B owns the surface. |
+
 ### Approved feature list (owner-approved 2026-11-20)
 
 Each branch is `feature/step-23a-workspace-and-project-lifecycle/<slug>` from the step branch. Every feature
@@ -95,9 +116,10 @@ prompt, no validation panel, and no autosave or recovery.
   use from the UI, no `ProjectEditCoordinator`, no undo/redo (Step 23B and Steps 24–25).
 - **No dirty state, unsaved-changes prompt, autosave, or crash recovery.** A 23A document cannot be modified, so
   closing never prompts; `ProjectDocument` is only the value holder and the save-point bookkeeper (Step 23B).
-- **No validation surface.** No `ProjectValidationPipeline` registration, no status-bar validity indicator, no
-  Problems channel, no statistics panel, no diagnostic navigation targets (Step 23B). Step 07's pipeline is
-  consumed in 23B.
+- **No validation surface.** No status-bar validity indicator, no Problems channel, no statistics panel, and no
+  diagnostic navigation targets (Step 23B). *Original design only:* no `ProjectValidationPipeline` construction.
+  The implemented feature-4 session performs one internal load-validation pass; see the recorded post-design
+  deviation in §5.1. No validation UI is added.
 - **No recovery types.** `IRecoveryStore`, `RecoveryStore`, `CrashRecoveryWriter`, and the `recovery/` writes are
   23B (n-14 resolved by scoping). 23A's app-data layout reserves the directory but writes nothing to it.
 - **No model, parameterization, job-template, build, deploy, 3D, run-monitoring, results, or analysis UI**
@@ -173,7 +195,8 @@ public sealed class App : Application
   - singleton library service: one `ProjectStore` constructed with
     `new ProjectStoreOptions { ValidateOnLoad = false }`, constructor-injected into `ProjectSessionService`. The
     store is the only project persistence path; the session retains `ProjectLoadResult.Diagnostics` for 23B.
-    23B registers the `ProjectValidationPipeline`; 23A does not construct it.
+    *Original design only:* 23A does not construct the pipeline. The implemented feature-4 session registers it
+    for the single internal load-validation pass described in §5.1; 23B owns every validation surface.
   - created per project by `ProjectSessionService` with explicit constructor arguments (not a DI scope):
     `ProjectSession`, `ProjectDocument`, the project-scoped view models. 23B adds the edit coordinator.
 - Dependency direction (enforced by the architecture test, §15):
@@ -392,8 +415,11 @@ internal enum ProjectSessionOutcome
   owns every dialog. There is no second store abstraction.
 - **Store configuration.** The single `ProjectStore` is constructed with
   `new ProjectStoreOptions { ValidateOnLoad = false }`. The load result's `ProjectLoadResult.Diagnostics` are
-  retained on the session as `LoadDiagnostics` and handed to 23B's validation pipeline; 23A runs no validation
-  and never calls `ProjectValidationPipeline` (the M-1 double-validation contract is completed in 23B).
+  retained on the session as `LoadDiagnostics` and handed to 23B's validation surface. *Original design:* 23A
+  runs no validation and never calls `ProjectValidationPipeline`. **Implemented feature-4 deviation:** the session
+  calls the in-memory pipeline exactly once with the store load diagnostics (the M-1 contract), which makes the
+  `Load` stage `Skipped` for a clean load and `Completed`/`Failed` when diagnostics exist. No second validation
+  occurs and no validation surface is added; see §5.1.
 - **New**: `ProjectTemplateFactory.CreateProject(kind, name, utcNow)` — the same factory as `mocassin new` —
   after validating the name **and target path** with the shared `ProjectPathRules` (§12). Step 23A ships exactly
   the kinds `ProjectTemplateKind` defines today (`blank`, `ceria`) with the CLI's display names. For **New
@@ -429,6 +455,25 @@ internal enum ProjectSessionOutcome
   unsaved-changes flow and no `cleanExit`/session block in 23A; 23B adds both with its dirty-state work.
 - **`--project` at startup**: a missing, unreadable, or invalid path does not prevent startup; the shell
   reports the failure in the Application console and a notification and continues with the welcome flow.
+
+### 5.1 Post-design implementation deviation — one internal load-validation pass
+
+**Recorded 2026-11-20 for feature 4.** The original design text in §1, §5, §13, and the non-goals says that 23A
+does not construct or call `ProjectValidationPipeline` and that 23B owns the M-1 contract. During feature 4 the
+owner required the Step 07 contract to be exercised in the session lifecycle, so the implementation does the
+following instead:
+
+- `ProjectStore` is still registered with `ValidateOnLoad = false`, so the store never validates.
+- `ProjectSessionService` loads the file once, retains `ProjectLoadResult.Diagnostics` as
+  `ProjectSession.LoadDiagnostics`, and calls `ProjectValidationPipeline.Validate(project, loadDiagnostics)`
+  exactly once on open, create, and reload.
+- The `Load` stage is therefore `Skipped` (count 0) for a clean load and `Completed` or `Failed` when the store
+  produced diagnostics. There is no second validation and no skipped `Load` stage.
+- The result is retained on the session as `Validation` for 23B to consume. No status-bar validity item, Problems
+  channel, statistics panel, or editable diagnostics surface is added in 23A.
+
+This deviation is intentional and tested; it does not add 23B UI scope. Feature 5 records it in the audit request
+and the final step page. The original design rationale above is retained rather than silently rewritten.
 
 ### 6. Settings, theming, density, and accessibility
 
@@ -781,8 +826,9 @@ library change is allowed in 23A; if one appears necessary, the step agent stops
 | Settings/logging | `TimeProvider`, `Microsoft.Extensions.*`, Serilog | the whole settings and logging policy |
 
 The shell does not re-implement these: no second JSON reader/writer, no second template definition, no second
-lock, no second hash, no second `ProjectStore` wrapper interface. 23A **does not** construct or call
-`ProjectValidationPipeline`; that is 23B's contract (M-1).
+lock, no second hash, no second `ProjectStore` wrapper interface. *Original design only:* 23A does not construct
+or call `ProjectValidationPipeline`. The implemented feature-4 session performs exactly one internal load
+validation pass; the validation *surface* remains 23B's contract (M-1). See §5.1.
 
 **23B is the only successor step for the 23A seams; Steps 24–28 consume them too.**
 

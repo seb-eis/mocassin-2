@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using Avalonia.Controls;
+using Avalonia.Interactivity;
 using Mocassin.App.ViewModels.Commands;
 using Mocassin.App.ViewModels.Notifications;
 using Mocassin.App.ViewModels.Shell;
@@ -36,6 +37,7 @@ internal sealed partial class ShellWindow : Window
         InitializeComponent();
         DataContext = viewModel;
         ViewKeyBindingBinder.Apply(this, commands, platform);
+        AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
         dialogs.Host = DialogOverlay;
         NotificationOverlay.DataContext = notifications;
 

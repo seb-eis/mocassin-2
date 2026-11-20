@@ -66,6 +66,7 @@ public sealed class ProjectSessionServiceTests
         var second = await context.Service.CreateAsync(ProjectTemplateKind.Ceria, "Taken", temp.Path);
 
         Assert.False(second.IsSuccess);
+        Assert.Equal(ProjectSessionOutcome.ExistingTarget, second.Outcome);
         Assert.Contains("already exists", second.Message, StringComparison.Ordinal);
         Assert.Equal(original, await File.ReadAllTextAsync(first.Session.Path));
         await context.Service.CloseAsync(first.Session);

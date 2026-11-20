@@ -1,5 +1,11 @@
 # Getting Started
 
+## Start here
+
+- [Installation](installation.md) — prerequisites, build, first launch, and application-data locations.
+- [Quickstart](quickstart.md) — create, open, inspect, save, and close a project.
+- [Your first project](first-project.md) — starters, workspace regions, tabs, commands, and keyboard shortcuts.
+
 ## Prerequisites
 
 | Tool | Version | Purpose |

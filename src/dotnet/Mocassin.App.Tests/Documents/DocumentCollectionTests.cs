@@ -85,6 +85,21 @@ public sealed class DocumentCollectionTests
     }
 
     [Fact]
+    public async Task ActivateIndexSelectsADocument()
+    {
+        var entry = await ProjectFixtures.LoadCeriaAsync();
+        var documents = new DocumentCollectionViewModel();
+        var overview = new ProjectOverviewViewModel(entry, new RecordingClipboardService());
+        var json = new ProjectJsonViewModel(entry, new RecordingClipboardService());
+        documents.OpenOrActivate(overview);
+        documents.OpenOrActivate(json);
+
+        Assert.True(documents.ActivateIndex(0));
+        Assert.Same(overview, documents.ActiveDocument);
+        Assert.False(documents.ActivateIndex(5));
+    }
+
+    [Fact]
     public async Task MoveReordersDocuments()
     {
         var entry = await ProjectFixtures.LoadCeriaAsync();
