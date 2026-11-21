@@ -475,7 +475,7 @@ Run from `/workspace` on 2026-11-21.
 | `python tools/check_doc_math.py` | `Documentation math conventions OK (199 files scanned).` |
 | `dotnet format Mocassin.slnx --verify-no-changes --no-restore` | Clean. |
 
-The App suite grew from 267 to 277 tests. The new coverage is `ThemeContrastTests` (7), `ConsoleTabsTests` (5), `WelcomeCentringTests` (1), the defaults-revision reader/store cases, the reset-layout test, the region/console-tab accessibility checks, the Validation-label checks, and the 1.5x compact clipping check.
+The App suite now passes 277/277 tests (250 test methods at the design freeze `d446079`). The new coverage includes `ThemeContrastTests` (7), `ConsoleTabsTests` (5), `WelcomeCentringTests` (1), the defaults-revision reader/store cases, the reset-layout test, the region/console-tab accessibility checks, the Validation-label checks, the colour-literal scan, and the 1.5x compact clipping check.
 
 ### 12.2 Screenshots
 
