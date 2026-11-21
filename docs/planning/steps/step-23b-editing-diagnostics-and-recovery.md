@@ -18,7 +18,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 
 ## Implementation status
 
-- **Status:** **In progress** — design accepted; features 1–2 squashed (`bb048ad`/`90d9f73`, `77c1b9c`); feature 3 in progress
+- **Status:** **In progress** — design accepted; features 1–3 squashed (`bb048ad`/`90d9f73`, `77c1b9c`, `97c42ec`); feature 4 next
 - **Step branch:** `step/23b-editing-diagnostics-and-recovery`
 - **Step CI:** — (local gates only; the single closeout `CI` run is dispatched at closeout)
 - **Main merge:** —
@@ -41,7 +41,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad`; test fix `90d9f73` |
 | 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c`; refresh fix `d4badd0`; undo/redo commands `eb50095` |
-| 3 | Dirty state, autosave, crash recovery | `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery` | In progress | — | — | — |
+| 3 | Dirty state, autosave, crash recovery | `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `97c42ec` |
 | 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
 
 ### Approved feature list (owner-approved 2026-11-21)
@@ -123,6 +123,45 @@ seam fills in §1.
   recovery, dialogs, the published documentation column, fixtures, and closeout are features 3–4. The Problems
   channel and status item show the active project only, as designed. No App public API changed; the console
   channel selector and status glyph are internal view-model/view additions.
+
+#### Feature 3 — dirty state, autosave, and crash recovery (squashed `97c42ec`)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery`; deleted after the
+  squash. Feature commit `3dd58de`, squash `97c42ec`.
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 211 App tests, 0 warnings,
+  `dotnet format` clean); `./tools/verify.sh structure` exit 0 (9 architecture tests); `./tools/verify.sh api`
+  exit 0 (no baseline break); `./tools/verify.sh docs` exit 0. **No CI run** was triggered.
+- **Diff summary:** `ProjectDocument.CreateRecovered` (additive Core API, `PublicAPI.Unshipped.txt`);
+  save-point dirty markers in the window title, tab, project switcher, and status bar; Save/Discard/Cancel close,
+  reload, and exit prompts with `IsClosing` cleared on cancel; per-session `SemaphoreSlim` gate; `AutosaveScheduler`
+  with `TimeProvider` ticks, dirty-only sidecar writes, fallback to `recovery/`, and status item;
+  `IRecoveryStore`/`RecoveryStore` with bounded manifests, candidates, seven-day sweep, and sidecar detection;
+  `PendingRecovery` preservation on clean close, first-edit clear (no-op edits do not clear), return-to-clean and
+  clean-close cleanup; Recover/Discard/Keep flows with validation and `LoadDiagnostics` set before `Replaced`;
+  unclean-exit restore and clean-exit setting; `CrashRecoveryWriter` (2 s budget, async, no sync-over-async) and
+  the crash-dialog recovery action; additive `autosave`/`session` settings with no schema bump and the settings
+  dialog autosave control. The shell/session logic is split into `ShellEditCommands`, `ShellMenuFactory`,
+  `ShellLifecycleCoordinator`, `ShellProjectOperations`, and `ProjectRecoveryDetector` to keep the files within
+  the 800-line and 20-file structure limits.
+- **Tests:** real temp-file coverage for dirty/save-point transitions; close/reload/exit Save/Discard/Cancel;
+  autosave dirty-only/interval/save cleanup/read-only/closing/busy gates; return-to-clean and clean-close
+  sidecar cleanup; pending-candidate preservation and first-edit/no-op behavior; recovery detection/comparison,
+  validation ordering, Discard, timestamp-only suppression, missing paths, sidecar/manifest candidates, and
+  sweep retention; crash writer success/timeout/dialog; settings round-trip/clamp/defaults; headless dirty markers
+  and autosave controls.
+- **Deviations / limitations:**
+  - The close/exit prompt is per project; there is no "apply to all" batch choice (a design word, not a
+    functional gap in the Save/Discard/Cancel contract). Recorded as a limitation.
+  - A missing main project file is reported by session restore and by `ListRecoveryAsync`; the ordinary Open path
+    reports the load failure but does not show a separate snapshot-path/discard dialog. Recorded as a limitation.
+  - The dead-UI crash path writes no recovery files (document snapshots are UI-thread-confined); the crash dialog
+    reports per-session results and disables Exit while writing.
+  - Recovery detection loads manifest snapshots to enforce the m-5 content comparison; this is bounded and only
+    runs on open.
+  - The autosave failure-to-`recovery/` fallback is implemented but not failure-injected in a PR-fast test.
+  - `autosave`/`session` live in `Settings/Blocks/` and remain application-local with no schema bump.
+- **Known limitations:** the platform recovery/autosave prompt is a manual Windows/macOS gate; the documentation
+  column, parity/status closeout, fixtures, and audit request are feature 4.
 
 ### Inherited 23A deviations and how 23B respects them
 
@@ -880,12 +919,12 @@ section. They are scope/class approvals, not a design verdict.
       read-only refusal, and the Overview metadata editor.
 - [x] Implement `ValidationCoordinator` from the retained result, the validity status item, the Problems channel
       (filters, sort, help anchors, related navigation, revalidate), edit diagnostics, and on-demand statistics.
-- [ ] Implement dirty state, the save point, markers, unsaved-changes prompts, the autosave scheduler, the
+- [x] Implement dirty state, the save point, markers, unsaved-changes prompts, the autosave scheduler, the
       sidecar and `recovery/` fallback, the recovery prompt, Reload/Recover/Discard/Keep, session restore, and
       retention.
-- [ ] Implement `IRecoveryStore`, `RecoveryStore` (App), `CrashRecoveryWriter`, and the crash-dialog recovery
+- [x] Implement `IRecoveryStore`, `RecoveryStore` (App), `CrashRecoveryWriter`, and the crash-dialog recovery
       action.
-- [ ] Add the two Core changes with tests and `PublicAPI.Unshipped.txt` entries; verify no App or Packages API
+- [x] Add the two Core changes with tests and `PublicAPI.Unshipped.txt` entries; verify no App or Packages API
       change.
 - [ ] Add the 23B tests, documentation column, parity/status updates, `closeout/step-23b.json`, and request the
       audit.
@@ -898,20 +937,20 @@ section. They are scope/class approvals, not a design verdict.
       navigates through a registered provider and produces a notice otherwise; the retained load/migration
       result reaches Problems and a clean load leaves the `Load` stage `Skipped`; opening does not run a second
       validation or a statistics run; the help map matches the documented anchors.
-- [ ] Dirty state is correct across save, undo, and redo; closing with unsaved changes prompts; Cancel closes
+- [x] Dirty state is correct across save, undo, and redo; closing with unsaved changes prompts; Cancel closes
       nothing and leaves autosave running; Discard and discard-reload delete the sidecar/recovery file; a return
       to the save point or a clean close deletes the sidecar, except a deferred sidecar candidate, which
       survives until Recover/Discard and is cleared by the first accepted content change (a no-op same-hash
       edit does not clear it, n-12); a deferred `recovery/` candidate remains subject to the 7-day sweep.
-- [ ] Autosave writes only dirty documents and deletes its file on save; save/autosave/close/reload/recovery do
+- [x] Autosave writes only dirty documents and deletes its file on save; save/autosave/close/reload/recovery do
       not interleave; a simulated crash leaves a `recovery/` snapshot; recovery restores a dirty document equal
       to the snapshot, updates `LoadDiagnostics`, and recomputes validation before the `Replaced` event; a
       timestamp-only snapshot is not offered; the crash path completes within its budget or reports the timeout.
-- [ ] Recovery candidates include the sidecar source; the newest valid candidate wins; recovery files are swept
+- [x] Recovery candidates include the sidecar source; the newest valid candidate wins; recovery files are swept
       after 7 days; sidecars are never swept; unclean-exit session restore works; missing project files are
       reported without an untitled session.
-- [ ] The `autosave`/`session` settings fields round-trip without a schema bump and older documents still load.
-- [ ] No unhandled exception kills the process silently, and the crash dialog reports recovery results; the
+- [x] The `autosave`/`session` settings fields round-trip without a schema bump and older documents still load.
+- [x] No unhandled exception kills the process silently, and the crash dialog reports recovery results; the
       dead-UI path is documented.
 - [ ] `./tools/verify.sh all --require` passes, the strict docs build passes, and `closeout/step-23b.json` with
       `"step": "step-23b"` validates.
