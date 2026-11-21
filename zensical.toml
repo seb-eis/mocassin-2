@@ -69,6 +69,7 @@ nav = [
       { "Architecture" = "development/architecture.md" },
       { "UI architecture" = "development/ui-architecture.md" },
       { "UI interaction contract" = "development/ui-interaction-contract.md" },
+      { "UI visual contract" = "development/ui-visual-contract.md" },
       { "Code structure" = "development/code-structure.md" },
       { "Compilation pipeline" = "development/compilation-pipeline.md" },
       { "Solver architecture" = "development/solver-architecture.md" },

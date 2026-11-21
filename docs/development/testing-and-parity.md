@@ -171,17 +171,21 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 - Tab drag-reorder is not wired in the Avalonia tab strip; `Ctrl+1..9`, `Ctrl+Tab`/`Ctrl+Shift+Tab`, `Ctrl+W`,
   middle-click close, the close button, and the context menu are tested. The drag limitation is recorded in the
   step page.
-- Screenshot baselines are checked in at `src/dotnet/Mocassin.App.Tests/Visual/Baselines/` for light, dark, and
-  high contrast. Linux compares them with a documented 5 % pixel tolerance; Windows/macOS do not pixel-compare.
-  Regenerate with `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference environment.
+- Screenshot baselines are checked in at `src/dotnet/Mocassin.App.Tests/Visual/Baselines/` for light, dark,
+  high contrast, light/dark Validation, and light/dark Settings. The shell captures show the welcome document and
+  the two console tabs at 1000 × 700; high contrast keeps compact density. Linux compares them with a documented
+  5 % pixel tolerance; Windows/macOS do not pixel-compare. Regenerate with
+  `MOCASSIN_REGENERATE_VISUAL_BASELINES=1` on the Linux reference environment.
 - The accessibility sweep asserts an accessible name on every primary interactive control type in the real
   shell, the expected automation role for the menu, tabs, project lists, explorer, and console filter, and a
   deterministic Tab order. The Xvfb harness captures the real X11 window for light, dark, high-contrast,
   workspace, dialog, and lifecycle steps; see [Platform checklist](platform-checklist.md) for the command and
   the recorded run. That is automated evidence, not a manual checklist.
-- Appearance resources carry their effect through the merged `HighContrast.axaml`/`Density.axaml`
-  dictionaries, the padding/min-height/border keys, the `Mocassin.Transitions` resource (empty when reduce
-  motion is on), and `SystemAccentColor`. Redundant flag-only resources were removed rather than left dead.
+- Appearance resources carry their effect through `Themes/Palette.axaml`, the merged
+  `HighContrast.axaml`/`Density.axaml` dictionaries, the typography/spacing/shape keys, the
+  `Mocassin.Transitions` resource (empty when reduce motion is on), and `SystemAccentColor`/`OnAccentBrush`.
+  `ThemeContrastTests` resolves every role and Fluent key in both themes and the default fallback, computes the
+  WCAG pairs, and covers high-contrast/density precedence and every optional accent.
 
 ## Avalonia editing, diagnostics, and recovery (Step 23B)
 
@@ -197,7 +201,7 @@ validation result, or fake project store. `ShellTestHost` composes the productio
   committed metadata field, name rules, and JSON refresh.
 - **Validation surface.** Retained-result/no-open-validation, 300 ms debounce, rapid-edit coalescing,
   version/snapshot stale discard, explicit revalidate, statistics one-run/cache, no open-time statistics, both
-  `Load`-stage fixtures, Problems filters/sort/edit diagnostics/navigation/help/`Related`, and the status item.
+  `Load`-stage fixtures, Validation filters/sort/edit diagnostics/navigation/help/`Related`, and the status item.
 - **Dirty, autosave, and the gate.** Dirty-only sidecar writes, interval/due gating, save cleanup, read-only/
   closing/busy skipping, return-to-clean and clean-close cleanup, and saved `IsClosing` cancellation. The
   scheduler is called directly after advancing `ManualTimeProvider`; no real sleep is used. The dispatcher and
@@ -236,7 +240,8 @@ baselines remain PR-medium on Ubuntu only.
   `ShellLayoutFractions` helpers are covered for degenerate and out-of-range input.
 - **Settings migration.** The reader/store tests cover a pre-fix document with `leftWidth`/`rightWidth`/
   `consoleHeight`, the one-time 1200 × 800 conversion, the absence of pixel keys after a rewrite, and an
-  idempotent second load.
+  idempotent second load. They also cover the additive `layout.defaultsRevision` upgrade (never-dragged versus
+  custom fractions), invalid revision fallback, the written marker, and **View → Reset Layout** persistence.
 - **Overlays.** `ShellInteractionTests` covers the palette search focus and result-list `Escape`, `Enter` with
   no results versus one result, the cheat-sheet Close focus, settings `Escape` discarding edits, settings
   `Enter` saving, dialog initial focus (`Cancel`, text box, choice list, progress container), progress
@@ -245,8 +250,31 @@ baselines remain PR-medium on Ubuntu only.
   markers and the dialog title automation name. `AccessibilityTests` checks the overlay root names and a Tab
   order that stays inside the open layer. The explorer `Enter`, Problems `Enter`, and Overview field `Enter`
   regression tests are PR-fast.
-- **Screenshots.** The light, dark, and high-contrast baselines are regenerated once because the default fractions
-  change the 1000 × 700 capture. The comparison tolerance is unchanged.
+- **Screenshots.** The seven baselines (light, dark, high contrast, light/dark Validation, light/dark Settings)
+  are regenerated for the refreshed palette, card chrome, console tabs, and layout. The comparison tolerance is
+  unchanged.
+
+## GUI visual refresh (2026-11-21)
+
+The bounded visual refresh keeps the same headless harness and adds token, contrast, tab, layout, centring, and
+screenshot coverage.
+
+- **Palette and contrast.** `ThemeContrastTests` resolves every `Mocassin.*` role in light, dark, and the default
+  fallback, asserts every curated Fluent key, checks high-contrast and compact-density precedence, computes the
+  WCAG pairs from the visual contract, and checks a contrast-safe `OnAccentBrush` for every optional accent.
+- **Console tabs.** `ConsoleTabsTests` asserts the fixed `Console`/`Validation` order, the real Validation content,
+  arrow/click selection, the `Enter` no-op, the absent close/reorder controls, the persisted tab across a real
+  restart, and the unknown-id fallback. The old `Console channel` combo is asserted absent.
+- **Welcome centring.** `WelcomeCentringTests` measures the rendered label centre against the button centre for
+  the three main buttons and the recent Open/Remove buttons in light/dark and comfortable/compact.
+- **Layout and migration.** The layout tests cover the new defaults, the defaults-revision upgrade, the preserved
+  custom layout, the idempotent reload, and **View → Reset Layout** leaving the active console tab alone.
+- **Accessibility and density.** The sweep adds the four region-card names, the `Console tabs` strip and its
+  headers, the Validation automation names, a colour-literal view scan, and a 1.5× compact-density clipping
+  check for primary labels and dialog buttons.
+- **Screenshots.** The seven Linux baselines are regenerated for the refresh and reviewed against the visual
+  contract; the comparison normalizes the actual frame through a PNG round-trip so the baseline and capture use
+  the same channel order.
 
 ## Test tiers
 

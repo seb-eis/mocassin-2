@@ -2,16 +2,11 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Shell"
              xmlns:consoles="using:Mocassin.App.Views.Consoles"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Shell.ConsoleRegionView"
              x:DataType="vm:ShellViewModel">
-  <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-          BorderThickness="0,1,0,0"
-          Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-    <Grid RowDefinitions="Auto,*">
-      <TextBlock Text="Console"
-                 FontWeight="SemiBold"
-                 Margin="12,8" />
-      <consoles:ConsoleView Grid.Row="1" DataContext="{Binding Console}" />
-    </Grid>
+  <Border Classes="region-card"
+          automation:AutomationProperties.Name="Console panel">
+    <consoles:ConsoleView DataContext="{Binding Console}" />
   </Border>
 </UserControl>

@@ -1,16 +1,12 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Mocassin.App.Views.Dialogs.DialogHost">
-  <Grid x:Name="Root" IsVisible="False" Background="#66000000">
-    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-            BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-            BorderThickness="1"
-            CornerRadius="6"
+  <Grid x:Name="Root" IsVisible="False" Background="{DynamicResource Mocassin.OverlayScrim}">
+    <Border Classes="overlay-card"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             MinWidth="360"
-            MaxWidth="640"
-            Padding="20">
+            MaxWidth="640">
       <ContentControl x:Name="DialogContent" Focusable="True" FocusAdorner="{x:Null}" />
     </Border>
   </Grid>

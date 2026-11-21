@@ -175,6 +175,16 @@ internal static class AppSettingsJsonReader
                 SettingsDefaults.DefaultConsoleFraction,
                 warnings);
 
+        // The pixel migration above runs first and is unchanged. The defaults-revision migration then upgrades
+        // only a never-dragged layout; any custom fraction is treated as user intent and preserved.
+        if (ReadDefaultsRevision(element, warnings) < SettingsDefaults.DefaultsRevision
+            && IsLegacyDefaultLayout(leftFraction, rightFraction, consoleFraction))
+        {
+            leftFraction = SettingsDefaults.DefaultLeftFraction;
+            rightFraction = SettingsDefaults.DefaultRightFraction;
+            consoleFraction = SettingsDefaults.DefaultConsoleFraction;
+        }
+
         return new LayoutSettings
         {
             LeftFraction = leftFraction,
@@ -190,7 +200,32 @@ internal static class AppSettingsJsonReader
                     warnings,
                     allowNull: false)
                 ?? SettingsDefaults.DefaultConsoleChannel,
+            DefaultsRevision = SettingsDefaults.DefaultsRevision,
         };
+    }
+
+    private static bool IsLegacyDefaultLayout(double left, double right, double console) =>
+        Math.Abs(left - SettingsDefaults.LegacyDefaultLeftFraction) <= SettingsDefaults.FractionTolerance
+        && Math.Abs(right - SettingsDefaults.LegacyDefaultRightFraction) <= SettingsDefaults.FractionTolerance
+        && Math.Abs(console - SettingsDefaults.LegacyDefaultConsoleFraction) <= SettingsDefaults.FractionTolerance;
+
+    private static int ReadDefaultsRevision(JsonElement element, List<string> warnings)
+    {
+        if (element.ValueKind != JsonValueKind.Object
+            || !element.TryGetProperty("defaultsRevision", out var revisionElement))
+        {
+            return SettingsDefaults.LegacyDefaultsRevision;
+        }
+
+        if (revisionElement.ValueKind != JsonValueKind.Number
+            || !revisionElement.TryGetInt32(out var revision)
+            || revision < 0)
+        {
+            warnings.Add("'defaultsRevision' is not a non-negative integer; the legacy layout revision was used.");
+            return SettingsDefaults.LegacyDefaultsRevision;
+        }
+
+        return revision;
     }
 
     private static double ReadFraction(

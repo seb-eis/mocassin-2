@@ -5,7 +5,7 @@
              x:Class="Mocassin.App.Views.Dialogs.ChoiceDialogView"
              x:DataType="overlay:ChoiceDialogViewModel">
   <StackPanel Spacing="12">
-    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="{DynamicResource Mocassin.TitleFontSize}" LineHeight="{DynamicResource Mocassin.TitleLineHeight}" Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}" TextWrapping="Wrap" />
     <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
     <ListBox ItemsSource="{Binding Choices}"
              SelectedItem="{Binding SelectedChoice}"
@@ -19,7 +19,7 @@
     </ListBox>
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
       <Button Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />
-      <Button Content="Continue" Command="{Binding ConfirmCommand}" IsDefault="True" />
+      <Button Content="Continue" Command="{Binding ConfirmCommand}" Classes="accent" IsDefault="True" />
     </StackPanel>
   </StackPanel>
 </UserControl>

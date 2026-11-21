@@ -15,7 +15,7 @@ and general help. The per-instance message and `hint` usually name the exact obj
 
 ## Desktop validation, autosave, and recovery
 
-The desktop Problems channel uses the same diagnostic codes and the published anchors as the CLI; it does not
+The desktop Validation tab (internally the Problems channel) uses the same diagnostic codes and the published anchors as the CLI; it does not
 invent codes or reword messages. The read-only edit refusal is an app-level message, not a diagnostic code.
 
 | Symptom | Likely cause | Fix |

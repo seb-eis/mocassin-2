@@ -4,17 +4,18 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Commands.ShortcutCheatSheetView"
              x:DataType="vm:ShortcutCheatSheetViewModel">
-  <Grid Background="#66000000" automation:AutomationProperties.Name="Keyboard shortcuts">
-    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-            BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-            BorderThickness="1"
-            CornerRadius="6"
+  <Grid Background="{DynamicResource Mocassin.OverlayScrim}"
+        automation:AutomationProperties.Name="Keyboard shortcuts">
+    <Border Classes="overlay-card"
             Width="640"
             MaxHeight="620"
-            VerticalAlignment="Center"
-            Padding="16">
+            VerticalAlignment="Center">
       <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
-        <TextBlock Text="Keyboard shortcuts" FontSize="18" FontWeight="SemiBold" />
+        <TextBlock Text="Keyboard shortcuts"
+                   FontSize="{DynamicResource Mocassin.TitleFontSize}"
+                   LineHeight="{DynamicResource Mocassin.TitleLineHeight}"
+                   FontWeight="SemiBold"
+                   Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}" />
         <ScrollViewer Grid.Row="1">
           <ItemsControl ItemsSource="{Binding Groups}">
             <ItemsControl.ItemTemplate>
@@ -40,6 +41,7 @@
                 x:Name="CloseButton"
                 Content="Close"
                 Command="{Binding CloseCommand}"
+                Classes="accent"
                 IsDefault="True"
                 IsCancel="True"
                 HorizontalAlignment="Right" />

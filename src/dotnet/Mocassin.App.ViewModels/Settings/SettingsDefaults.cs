@@ -55,17 +55,47 @@ internal static class SettingsDefaults
     /// <summary>
     /// The default left panel fraction.
     /// </summary>
-    public const double DefaultLeftFraction = 260d / LegacyDesignWidth;
+    public const double DefaultLeftFraction = 0.20d;
 
     /// <summary>
     /// The default right panel fraction.
     /// </summary>
-    public const double DefaultRightFraction = 320d / LegacyDesignWidth;
+    public const double DefaultRightFraction = 0.22d;
 
     /// <summary>
     /// The default console fraction.
     /// </summary>
-    public const double DefaultConsoleFraction = 180d / LegacyDesignHeight;
+    public const double DefaultConsoleFraction = 0.32d;
+
+    /// <summary>
+    /// The pre-refresh left panel fraction used to detect a never-dragged layout.
+    /// </summary>
+    public const double LegacyDefaultLeftFraction = 260d / LegacyDesignWidth;
+
+    /// <summary>
+    /// The pre-refresh right panel fraction used to detect a never-dragged layout.
+    /// </summary>
+    public const double LegacyDefaultRightFraction = 320d / LegacyDesignWidth;
+
+    /// <summary>
+    /// The pre-refresh console fraction used to detect a never-dragged layout.
+    /// </summary>
+    public const double LegacyDefaultConsoleFraction = 180d / LegacyDesignHeight;
+
+    /// <summary>
+    /// The current layout defaults revision written by the settings writer.
+    /// </summary>
+    public const int DefaultsRevision = 1;
+
+    /// <summary>
+    /// The layout revision assumed when the document has no marker.
+    /// </summary>
+    public const int LegacyDefaultsRevision = 0;
+
+    /// <summary>
+    /// The tolerance used when comparing persisted fractions with the pre-refresh defaults.
+    /// </summary>
+    public const double FractionTolerance = 1e-6;
 
     /// <summary>
     /// The minimum persisted side-panel fraction.

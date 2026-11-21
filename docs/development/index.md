@@ -38,6 +38,8 @@ The detailed architecture is in the internal plan; the repository layout is summ
   navigation, sessions, settings, and the headless test harness.
 - [UI interaction contract](ui-interaction-contract.md) — proportional panel layout, overlay focus and
   modality, and the `Enter`/`Escape` mapping for the shell, dialogs, and future editors.
+- [UI visual contract](ui-visual-contract.md) — token palette, typography, card chrome, interaction states,
+  console tabs, and the contrast/focus floor for both themes.
 - [Code structure](code-structure.md) — folder ownership, file naming, limits, and the structure test.
 - [Design decisions](design-decisions.md) — stable IDs, explicit units, canonical hashing, locking, and schema ownership.
 - [Compilation pipeline](compilation-pipeline.md) — symmetry, transitions, energy, lattice/simulation input, and how

@@ -1,18 +1,18 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Shell"
-             xmlns:shell="using:Mocassin.App.Views.Shell"
              x:Class="Mocassin.App.Views.Shell.StatusBarView"
              x:DataType="vm:ShellViewModel">
-  <UserControl.Resources>
-    <shell:StatusBarSeverityToBrushConverter x:Key="StatusBarSeverityBrush" />
-  </UserControl.Resources>
-  <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-          BorderThickness="0,1,0,0"
-          Background="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}"
-          Padding="12,4">
+  <Border Background="{DynamicResource Mocassin.StatusBarBackground}"
+          Padding="12,2"
+          MinHeight="{DynamicResource Mocassin.StatusBarHeight}">
     <Grid ColumnDefinitions="Auto,*,Auto">
-      <TextBlock Text="{Binding StatusBar.ApplicationName}" FontWeight="SemiBold" Margin="0,0,16,0" />
+      <TextBlock Text="{Binding StatusBar.ApplicationName}"
+                 FontWeight="SemiBold"
+                 FontSize="{DynamicResource Mocassin.CaptionFontSize}"
+                 Foreground="{DynamicResource Mocassin.StatusBarForeground}"
+                 VerticalAlignment="Center"
+                 Margin="0,0,16,0" />
       <ItemsControl Grid.Column="1" ItemsSource="{Binding StatusBar.Items}">
         <ItemsControl.ItemsPanel>
           <ItemsPanelTemplate>
@@ -21,12 +21,14 @@
         </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="vm:StatusBarItemViewModel">
-            <StackPanel Orientation="Horizontal" Spacing="4">
+            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
               <TextBlock Text="{Binding Glyph}"
-                         Foreground="{Binding Severity, Converter={StaticResource StatusBarSeverityBrush}}" />
+                         FontSize="{DynamicResource Mocassin.CaptionFontSize}"
+                         Foreground="{DynamicResource Mocassin.StatusBarForeground}" />
               <TextBlock Text="{Binding Text}"
                          ToolTip.Tip="{Binding ToolTip}"
-                         Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                         FontSize="{DynamicResource Mocassin.CaptionFontSize}"
+                         Foreground="{DynamicResource Mocassin.StatusBarForeground}" />
             </StackPanel>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
@@ -39,6 +41,8 @@
                    Maximum="1"
                    Value="{Binding Progress.Fraction, TargetNullValue=0}"
                    IsIndeterminate="{Binding Progress.IsIndeterminate}"
+                   Background="Transparent"
+                   Foreground="{DynamicResource Mocassin.StatusBarForeground}"
                    IsVisible="{Binding Progress.IsActive}" />
     </Grid>
   </Border>

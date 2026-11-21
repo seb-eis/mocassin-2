@@ -5,7 +5,8 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Shell.DocumentsRegionView"
              x:DataType="vm:ShellViewModel">
-  <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+  <Border Classes="region-card"
+          automation:AutomationProperties.Name="Documents panel">
     <TabControl automation:AutomationProperties.Name="Document tabs"
                 ItemsSource="{Binding Documents.Documents}"
                 SelectedItem="{Binding Documents.ActiveDocument}"
@@ -22,8 +23,8 @@
             <Button Content="×"
                     automation:AutomationProperties.Name="Close document"
                     Command="{Binding CloseCommand}"
-                    Padding="4,0"
-                    FontSize="12"
+                    Classes="compact"
+                    FontSize="{DynamicResource Mocassin.CaptionFontSize}"
                     Background="Transparent"
                     BorderThickness="0"
                     ToolTip.Tip="Close document" />

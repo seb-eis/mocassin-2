@@ -21,7 +21,7 @@ internal sealed class ConsoleService : IConsoleService
     {
         this.dispatcher = dispatcher;
         this.timeProvider = timeProvider;
-        ApplicationChannel = new ConsoleChannelViewModel("application", "Application");
+        ApplicationChannel = new ConsoleChannelViewModel("application", "Application", "Console");
     }
 
     /// <inheritdoc />

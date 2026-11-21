@@ -148,6 +148,7 @@ internal sealed partial class ShellViewModel : ObservableObject
         navigation.HistoryChanged += OnHistoryChanged;
         settings.Changed += OnSettingsChanged;
         Regions.PropertyChanged += OnRegionPropertyChanged;
+        Console.PropertyChanged += OnConsolePropertyChanged;
         ApplySettings(settings.Current);
 
         if (settings.LoadResult.IsFatal)
@@ -359,6 +360,13 @@ internal sealed partial class ShellViewModel : ObservableObject
             MenuKind.View,
             new KeyGestureDescriptor("0", GestureModifier.Alt),
             Regions.ToggleConsoleCommand);
+        catalog.Add(
+            "view.resetLayout",
+            "Reset Layout",
+            "View",
+            MenuKind.View,
+            null,
+            ResetLayoutCommand);
         catalog.Add(
             "project.new",
             "New Project…",

@@ -94,6 +94,55 @@ public sealed class AppSettingsStoreTests
     }
 
     [Fact]
+    public async Task TheDefaultsRevisionIsWrittenAndSurvivesARewrite()
+    {
+        using var workspace = new TempWorkspace();
+        var paths = new AppPaths(workspace.Path);
+        paths.EnsureDirectories();
+        var store = new AppSettingsStore(paths);
+        var layout = new LayoutSettings
+        {
+            LeftFraction = 0.24,
+            RightFraction = 0.18,
+            ConsoleFraction = 0.36,
+            DefaultsRevision = SettingsDefaults.DefaultsRevision,
+        };
+
+        Assert.True((await store.SaveAsync(new AppSettings { Layout = layout })).IsSuccess);
+        var first = store.Load();
+        var json = await File.ReadAllTextAsync(paths.SettingsFile);
+        Assert.Contains("\"defaultsRevision\": 1", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"leftWidth\"", json, StringComparison.Ordinal);
+        Assert.Equal(layout, first.Settings.Layout);
+
+        var service = new SettingsService(store, first);
+        Assert.True((await service.UpdateAsync(service.Current)).IsSuccess);
+        Assert.Equal(first.Settings.Layout, store.Load().Settings.Layout);
+    }
+
+    [Fact]
+    public async Task AnOldDefaultLayoutIsUpgradedWhenTheRealStoreWritesItBack()
+    {
+        using var workspace = new TempWorkspace();
+        var paths = new AppPaths(workspace.Path);
+        Directory.CreateDirectory(paths.RootDirectory);
+        await File.WriteAllTextAsync(
+            paths.SettingsFile,
+            """{"format":"mocassin.settings","layout":{"leftFraction":0.21666666666666667,"rightFraction":0.26666666666666666,"consoleFraction":0.225}}""");
+        var store = new AppSettingsStore(paths);
+
+        var loaded = store.Load();
+        Assert.Equal(SettingsDefaults.DefaultLeftFraction, loaded.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultRightFraction, loaded.Settings.Layout.RightFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultConsoleFraction, loaded.Settings.Layout.ConsoleFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultsRevision, loaded.Settings.Layout.DefaultsRevision);
+
+        var service = new SettingsService(store, loaded);
+        Assert.True((await service.UpdateAsync(service.Current)).IsSuccess);
+        Assert.Equal(loaded.Settings.Layout, store.Load().Settings.Layout);
+    }
+
+    [Fact]
     public void AnOversizedFileIsRejectedWithoutBeingOverwritten()
     {
         using var workspace = new TempWorkspace();

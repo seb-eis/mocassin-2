@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 
+using System.ComponentModel;
 using System.Globalization;
+using CommunityToolkit.Mvvm.Input;
 using Mocassin.App.ViewModels.Consoles;
 using Mocassin.App.ViewModels.Settings;
 
@@ -37,6 +39,39 @@ internal sealed partial class ShellViewModel
     /// Gets the pending layout-persistence task; tests await it before disposing the data directory.
     /// </summary>
     internal Task PendingLayoutPersist => pendingLayoutPersist;
+
+    private void OnConsolePropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (!applyingLayout && e.PropertyName is nameof(ConsoleViewModel.ActiveChannel))
+        {
+            ScheduleLayoutPersist();
+        }
+    }
+
+    /// <summary>
+    /// Restores the refreshed default fractions and every region's visibility through the normal persist path.
+    /// Theme, density, recent files, and the active console tab are not reset.
+    /// </summary>
+    [RelayCommand]
+    internal void ResetLayout()
+    {
+        applyingLayout = true;
+        try
+        {
+            Regions.IsProjectsVisible = true;
+            Regions.IsInspectorVisible = true;
+            Regions.IsConsoleVisible = true;
+            Regions.LeftFraction = SettingsDefaults.DefaultLeftFraction;
+            Regions.RightFraction = SettingsDefaults.DefaultRightFraction;
+            Regions.ConsoleFraction = SettingsDefaults.DefaultConsoleFraction;
+        }
+        finally
+        {
+            applyingLayout = false;
+        }
+
+        ScheduleLayoutPersist();
+    }
 
     private void ScheduleLayoutPersist()
     {

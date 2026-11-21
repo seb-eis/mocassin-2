@@ -22,6 +22,9 @@ namespace Mocassin.App.Tests.Views;
 [Trait("Tier", "PR-fast")]
 public sealed class ShellLayoutTests
 {
+    private static readonly string[] regionNames =
+        ["Projects panel", "Documents panel", "Inspector panel", "Console panel"];
+
     [Fact]
     public Task TheDefaultFractionsFillTheWorkspaceAtTheDesignSize() =>
         HeadlessSession.DispatchAsync(
@@ -261,6 +264,37 @@ public sealed class ShellLayoutTests
             });
 
     [Fact]
+    public Task RegionCardsUseTheCardRadiusBorderAndGap() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    foreach (var name in regionNames)
+                    {
+                        var card = window.GetVisualDescendants()
+                            .OfType<Border>()
+                            .Single(border => AutomationProperties.GetName(border) == name);
+                        Assert.Equal(new CornerRadius(6), card.CornerRadius);
+                        Assert.Equal(new Thickness(1), card.BorderThickness);
+                    }
+
+                    var workspaceGrid = Find<Grid>(window, "WorkspaceGrid");
+                    Assert.Equal(new Thickness(6), workspaceGrid.Margin);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
     public Task SplittersAreFocusableNamedAndResizeBySixteenPixels() =>
         HeadlessSession.DispatchAsync(
             async () =>
@@ -336,6 +370,58 @@ public sealed class ShellLayoutTests
                     Assert.DoesNotContain("\"leftWidth\"", json, StringComparison.Ordinal);
                     Assert.DoesNotContain("\"rightWidth\"", json, StringComparison.Ordinal);
                     Assert.DoesNotContain("\"consoleHeight\"", json, StringComparison.Ordinal);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task ResetLayoutRestoresTheDefaultsAndLeavesTheActiveConsoleTabAlone() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    Drag(window, Find<GridSplitter>(window, "ProjectsSplitter"), new Vector(120, 0));
+                    HeadlessSession.Pump(window);
+                    shell.Regions.ToggleConsoleCommand.Execute(null);
+                    shell.Console.ActiveChannel = shell.Console.Channels.Single(channel => channel.Id == "problems");
+                    HeadlessSession.Pump(window);
+                    await shell.PendingLayoutPersist;
+
+                    shell.ResetLayoutCommand.Execute(null);
+                    HeadlessSession.Pump(window);
+                    await shell.PendingLayoutPersist;
+
+                    Assert.Equal(SettingsDefaults.DefaultLeftFraction, shell.Regions.LeftFraction, 10);
+                    Assert.Equal(SettingsDefaults.DefaultRightFraction, shell.Regions.RightFraction, 10);
+                    Assert.Equal(SettingsDefaults.DefaultConsoleFraction, shell.Regions.ConsoleFraction, 10);
+                    Assert.True(shell.Regions.IsProjectsVisible);
+                    Assert.True(shell.Regions.IsInspectorVisible);
+                    Assert.True(shell.Regions.IsConsoleVisible);
+                    Assert.Equal("problems", shell.Console.ActiveChannel?.Id);
+
+                    var loaded = new AppSettingsStore(host.Paths).Load();
+                    Assert.False(loaded.IsFatal);
+                    Assert.Equal(SettingsDefaults.DefaultLeftFraction, loaded.Settings.Layout.LeftFraction, 10);
+                    Assert.Equal(SettingsDefaults.DefaultRightFraction, loaded.Settings.Layout.RightFraction, 10);
+                    Assert.Equal(SettingsDefaults.DefaultConsoleFraction, loaded.Settings.Layout.ConsoleFraction, 10);
+                    Assert.True(loaded.Settings.Layout.LeftVisible);
+                    Assert.True(loaded.Settings.Layout.RightVisible);
+                    Assert.True(loaded.Settings.Layout.ConsoleVisible);
+                    Assert.Equal("problems", loaded.Settings.Layout.ActiveConsoleChannel);
+                    Assert.Equal(SettingsDefaults.DefaultsRevision, loaded.Settings.Layout.DefaultsRevision);
+                    var json = await File.ReadAllTextAsync(host.Paths.SettingsFile);
+                    Assert.Contains("\"defaultsRevision\": 1", json, StringComparison.Ordinal);
                 }
                 finally
                 {

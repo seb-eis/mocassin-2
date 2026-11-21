@@ -77,6 +77,17 @@ Panel proportions, overlay focus, and the `Enter`/`Escape` mapping are normative
 only one overlay layer is interactive at a time, and every overlay captures and restores focus. Editors added
 in Steps 24–28 must follow that page.
 
+## Visual contract
+
+The colour roles, typography, spacing, shape, state treatment, surface chrome, and accessibility floor are
+normative in [UI visual contract](ui-visual-contract.md). Views consume the `Mocassin.*` tokens rather than
+literal colours. `Themes/Palette.axaml` owns the light, dark, and default role dictionaries and the curated Fluent
+12.1.6 keys; `Themes/HighContrast.axaml` and `Themes/Density.axaml` remain merged dictionaries added by
+`AvaloniaThemeApplier`, so they override the palette. `App.axaml` keeps only theme-independent typography,
+spacing, shape, and transition fallbacks. The contract also owns the two fixed console tabs and the welcome-page
+button alignment rule. The interaction contract remains the home for layout behaviour, focus, and keys, including
+the new default fractions, the `layout.defaultsRevision` migration, and **View → Reset Layout**.
+
 ## Navigation and commands
 
 `INavigationService` opens documents and navigates `ModelPath` targets through registered
@@ -105,7 +116,7 @@ its documents with 200. Metadata editing is one `Apply` per committed field, not
 
 The Overview metadata form uses `ProjectPathRules` for the project name before applying the edit. A structural
 validation failure leaves the project, stacks, save point, and dirty state unchanged and shows the inline error;
-the Problems channel receives the same diagnostics with source `edit`. A read-only session returns the app-level
+the Validation tab (internally the Problems channel) receives the same diagnostics with source `edit`. A read-only session returns the app-level
 `EditApplyOutcome.ReadOnly` message and never emits a diagnostic code.
 
 Undo/redo are exposed in the Edit menu (`Ctrl+Z`/`Ctrl+Y`), follow the active project, and are disabled for a
@@ -121,7 +132,7 @@ an immutable snapshot, and applies the result only when the captured document ve
 A newer edit cancels the previous run; a late result is discarded. Statistics are an explicit Overview action,
 cached per immutable snapshot, and are never requested on open.
 
-The status bar shows a text glyph and severity plus the validation text. The Problems console channel follows
+The status bar shows a text glyph and severity plus the validation text. The Validation console tab follows
 the active project, shows severity/code/message/path/source, supports severity/code/text/source filters and
 sorting, navigates via `INavigationService` on double-click/Enter, opens catalog help anchors, and offers the
 `Related` paths. Diagnostics are never invented in the UI; an unknown code is rendered unlinked.

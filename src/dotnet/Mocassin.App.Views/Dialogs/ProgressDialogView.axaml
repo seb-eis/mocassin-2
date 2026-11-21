@@ -6,7 +6,7 @@
              x:DataType="overlay:ProgressDialogViewModel"
              dialogs:DialogFocus.InitialFocus="Container">
   <StackPanel Spacing="12">
-    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="{DynamicResource Mocassin.TitleFontSize}" LineHeight="{DynamicResource Mocassin.TitleLineHeight}" Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}" TextWrapping="Wrap" />
     <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" />
     <ProgressBar Minimum="0" Maximum="1"
                  Value="{Binding Fraction, TargetNullValue=0}"

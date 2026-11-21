@@ -1,17 +1,24 @@
 // SPDX-License-Identifier: MIT
 
+using System.Globalization;
+using System.Text.RegularExpressions;
 using Avalonia.Automation;
 using Avalonia.Automation.Peers;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.Media;
 using Avalonia.VisualTree;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Composition;
 using Mocassin.App.Tests.TestSupport;
+using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.ViewModels.Shell;
+using Mocassin.App.Views.Consoles;
+using Mocassin.App.Views.Documents;
 using Mocassin.App.Views.Settings;
 using Mocassin.App.Views.Shell;
+using Mocassin.App.Views.Theming;
 
 namespace Mocassin.App.Tests.Visual;
 
@@ -21,6 +28,9 @@ namespace Mocassin.App.Tests.Visual;
 [Trait("Tier", "PR-fast")]
 public sealed class AccessibilityTests
 {
+    private static readonly string[] regionNames =
+        ["Projects panel", "Documents panel", "Inspector panel", "Console panel"];
+
     [Fact]
     public Task EveryPrimaryInteractiveControlHasAnAccessibleName() =>
         HeadlessSession.DispatchAsync(
@@ -165,6 +175,163 @@ public sealed class AccessibilityTests
                     window.Close();
                 }
             });
+
+    [Fact]
+    public Task RegionCardsAndTheConsoleTabStripExposeTheirNames() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var borders = window.GetVisualDescendants().OfType<Border>().ToList();
+                    foreach (var name in regionNames)
+                    {
+                        Assert.Contains(borders, border => AutomationProperties.GetName(border) == name);
+                    }
+
+                    var console = window.GetVisualDescendants()
+                        .OfType<TabControl>()
+                        .Single(control => AutomationProperties.GetName(control) == "Console tabs");
+                    var tabs = console.GetVisualDescendants().OfType<TabItem>().ToList();
+                    Assert.Equal(["Console", "Validation"], tabs.Select(tab => tab.Header?.ToString()).ToList());
+                    Assert.All(tabs, tab => Assert.False(string.IsNullOrWhiteSpace(tab.Header?.ToString())));
+                    Assert.DoesNotContain(
+                        window.GetVisualDescendants().OfType<ComboBox>(),
+                        control => AutomationProperties.GetName(control) == "Console channel");
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TheValidationContentUsesValidationLabelsAndAutomationNames() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    shell.Console.ActiveChannel = shell.Console.Channels.Single(channel => channel.Id == "problems");
+                    HeadlessSession.Pump(window);
+                    Assert.Single(window.GetVisualDescendants().OfType<ProblemsView>());
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<TextBox>(),
+                        control => AutomationProperties.GetName(control) == "Validation text filter");
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<ListBox>(),
+                        control => AutomationProperties.GetName(control) == "Validation entries");
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<ComboBox>(),
+                        control => AutomationProperties.GetName(control) == "Validation severity filter");
+                    Assert.DoesNotContain(
+                        window.GetVisualDescendants().OfType<TextBlock>(),
+                        control => control.Text?.StartsWith("Problems —", StringComparison.Ordinal) == true);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task PrimaryLabelsDoNotClipAtOneAndAHalfScaleInCompactDensity() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                File.WriteAllText(
+                    Path.Combine(workspace.Path, "Mocassin.Settings.json"),
+                    """{"format":"mocassin.settings","fontScale":1.5,"density":"compact"}""");
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                new AvaloniaThemeApplier().Apply(
+                    AppSettings.Default with { FontScale = 1.5, Density = Density.Compact, Theme = ThemeSelection.Light });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    shell.Settings.Open();
+                    HeadlessSession.Pump(window);
+
+                    var labels = new List<TextBlock>();
+                    labels.AddRange(window.GetVisualDescendants().OfType<StatusBarView>().SelectMany(view => view.GetVisualDescendants().OfType<TextBlock>()));
+                    labels.AddRange(
+                        window.GetVisualDescendants()
+                            .OfType<TabControl>()
+                            .SelectMany(control => control.GetVisualDescendants().OfType<TabItem>())
+                            .SelectMany(tab => tab.GetVisualDescendants().OfType<TextBlock>()));
+                    labels.AddRange(
+                        window.GetVisualDescendants()
+                            .OfType<SettingsDialogView>()
+                            .SelectMany(view => view.GetVisualDescendants().OfType<Button>())
+                            .SelectMany(button => button.GetVisualDescendants().OfType<TextBlock>()));
+                    labels.AddRange(window.GetVisualDescendants().OfType<WelcomeDocumentView>().First()
+                        .GetVisualDescendants().OfType<Button>().SelectMany(button => button.GetVisualDescendants().OfType<TextBlock>()));
+
+                    var checkedLabels = 0;
+                    foreach (var label in labels.Where(label => !string.IsNullOrWhiteSpace(label.Text))
+                                 .Where(label => label.IsEffectivelyVisible)
+                                 .Where(label => label.TextWrapping == TextWrapping.NoWrap)
+                                 .Where(label => label.TextTrimming == TextTrimming.None))
+                    {
+                        var formatted = new FormattedText(
+                            label.Text!,
+                            CultureInfo.CurrentCulture,
+                            FlowDirection.LeftToRight,
+                            new Typeface(label.FontFamily, label.FontStyle, label.FontWeight),
+                            label.FontSize,
+                            label.Foreground);
+                        Assert.True(
+                            label.Bounds.Width + 0.5 >= formatted.Width,
+                            $"'{label.Text}' is clipped horizontally ({label.Bounds.Width:F1} < {formatted.Width:F1}).");
+                        Assert.True(
+                            label.Bounds.Height + 0.5 >= formatted.Height,
+                            $"'{label.Text}' is clipped vertically ({label.Bounds.Height:F1} < {formatted.Height:F1}).");
+                        checkedLabels++;
+                    }
+
+                    Assert.True(checkedLabels >= 8, $"Only {checkedLabels} primary labels were checked.");
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public void ViewXamlUsesTokensInsteadOfColourLiterals()
+    {
+        var views = RepositoryPaths.Combine("src", "dotnet", "Mocassin.App.Views");
+        var app = RepositoryPaths.Combine("src", "dotnet", "Mocassin.App", "App.axaml");
+        var files = Directory.EnumerateFiles(views, "*.axaml", SearchOption.AllDirectories)
+            .Where(path => !path.Contains(Path.Combine("Themes", string.Empty), StringComparison.Ordinal))
+            .Where(path => !path.Contains(Path.Combine("Styles", string.Empty), StringComparison.Ordinal))
+            .Append(app);
+        foreach (var file in files)
+        {
+            var text = File.ReadAllText(file);
+            var literal = Regex.Match(text, "#[0-9A-Fa-f]{6,8}");
+            Assert.False(
+                literal.Success,
+                $"{file} contains the colour literal {literal.Value}; use a Mocassin.* role.");
+        }
+    }
 
     [Fact]
     public Task TabOrderIsDeterministic() =>

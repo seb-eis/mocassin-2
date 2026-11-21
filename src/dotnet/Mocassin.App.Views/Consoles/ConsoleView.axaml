@@ -6,29 +6,24 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Consoles.ConsoleView"
              x:DataType="vm:ConsoleViewModel">
-  <Grid RowDefinitions="Auto,*">
-    <ComboBox Grid.Row="0"
+  <TabControl x:Name="ConsoleTabs"
+              automation:AutomationProperties.Name="Console tabs"
               ItemsSource="{Binding Channels}"
-              SelectedItem="{Binding ActiveChannel}"
-              automation:AutomationProperties.Name="Console channel"
-              HorizontalAlignment="Left"
-              Margin="12,6,0,2"
-              MinWidth="140">
-      <ComboBox.ItemTemplate>
-        <DataTemplate x:DataType="vm:ConsoleChannelViewModel">
-          <TextBlock Text="{Binding Title}" />
-        </DataTemplate>
-      </ComboBox.ItemTemplate>
-    </ComboBox>
-    <ContentControl Grid.Row="1" Content="{Binding ActiveChannel}">
-      <ContentControl.DataTemplates>
-        <DataTemplate DataType="diagnostics:ProblemsChannelViewModel">
-          <consoles:ProblemsView />
-        </DataTemplate>
-        <DataTemplate DataType="vm:ConsoleChannelViewModel">
-          <consoles:ApplicationConsoleView />
-        </DataTemplate>
-      </ContentControl.DataTemplates>
-    </ContentControl>
-  </Grid>
+              SelectedItem="{Binding ActiveChannel, Mode=TwoWay}"
+              TabStripPlacement="Top"
+              KeyDown="OnTabsKeyDown">
+    <TabControl.ItemTemplate>
+      <DataTemplate x:DataType="vm:ConsoleChannelViewModel">
+        <TextBlock Text="{Binding TabTitle}" />
+      </DataTemplate>
+    </TabControl.ItemTemplate>
+    <TabControl.DataTemplates>
+      <DataTemplate DataType="diagnostics:ProblemsChannelViewModel">
+        <consoles:ProblemsView />
+      </DataTemplate>
+      <DataTemplate DataType="vm:ConsoleChannelViewModel">
+        <consoles:ApplicationConsoleView />
+      </DataTemplate>
+    </TabControl.DataTemplates>
+  </TabControl>
 </UserControl>

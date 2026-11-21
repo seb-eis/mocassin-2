@@ -486,7 +486,7 @@ public sealed class ShellInteractionTests
 
                     var list = window.GetVisualDescendants()
                         .OfType<ListBox>()
-                        .Single(control => AutomationProperties.GetName(control) == "Problem entries");
+                        .Single(control => AutomationProperties.GetName(control) == "Validation entries");
                     var item = Assert.Single(problems.Items);
                     Assert.True(item.CanNavigate);
                     Assert.True(item.NavigateCommand.CanExecute(null));

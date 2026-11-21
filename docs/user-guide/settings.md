@@ -78,11 +78,23 @@ The complete field table and example are in
 
 ## Appearance
 
-The theme variant follows the selection; `system` follows the platform. Accent keys map to fixed accessible
-colours. Font scale changes the base text size. Density, high contrast, and reduce motion are published as
-application resources for the shell styles; the full visual-tree sweep and screenshot baselines are a later
-accessibility/visual task, so this page does not claim pixel-verified high-contrast rendering. The settings and
-resources are applied by the shell, not by scientific code.
+The theme variant follows the selection; `system` follows the platform. Both themes use the shared `Mocassin.*`
+role palette from [UI visual contract](../development/ui-visual-contract.md): light is the Light+ equivalent,
+dark uses the owner-approved `#1e1e1e`/`#252526`/`#2d2d30` surfaces, and high contrast overrides every role and
+control resource with black, yellow, and white plus 2 px borders. Accent keys map to fixed accessible colours;
+the default and `blue` are `#007ACC`, and the app derives a contrast-safe foreground for every optional accent.
+Font scale changes every text token. Density changes spacing and control heights only.
+`AvaloniaThemeApplier` publishes the runtime values; the palette, density, and high-contrast dictionaries remain
+the declarative source. The appearance is applied by the shell, not by scientific code.
+
+## Layout defaults and reset
+
+The shell starts at 20 % projects, 22 % inspector, and 32 % console. These values are stored as fractions in the
+`layout` block and are also written with `layout.defaultsRevision`. A saved document from before the refresh is
+upgraded once when the document has no revision marker **and** all three fractions still equal the old 260/320/180
+look; a custom layout is preserved. **View → Reset Layout** restores the new default shares, shows every region,
+and persists them. It does not change the theme, density, recent files, or active console tab. See
+[Repository and file layout](../reference/file-layout.md#mocassinsettings-v1) for the exact fields.
 
 ## Logs
 

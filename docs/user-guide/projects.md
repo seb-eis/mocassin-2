@@ -83,7 +83,7 @@ the save point.
 
 The Overview also displays the validation banner and an explicit **Show/Hide statistics** action. Statistics are
 never computed on open; the first activation runs one validation/statistics pass and caches it for the current
-content. Validation runs automatically after edits with a 300 ms debounce; the Problems channel always shows the
+content. Validation runs automatically after edits with a 300 ms debounce; the Validation tab (internally the Problems channel) always shows the
 active project only.
 
 ## Dirty state and close
@@ -125,8 +125,8 @@ handling or a later discard (a dedicated missing-file recovery dialog is not pro
 
 Opening a project performs exactly one internal load-validation pass: the store loads with validation disabled,
 and the session passes `ProjectLoadResult.Diagnostics` to the shared validation pipeline. A clean load has a
-skipped `Load` stage; diagnostics produce a completed/failed `Load` stage. The status bar and Problems channel
+skipped `Load` stage; diagnostics produce a completed/failed `Load` stage. The status bar and Validation tab
 consume that retained result without running the pipeline again. Subsequent edits are validated off-thread with
-a 300 ms debounce and a stale-result guard. The Problems channel supports filters, sorting, help anchors,
+a 300 ms debounce and a stale-result guard. The Validation tab supports filters, sorting, help anchors,
 `Related` navigation, revalidate, and transient edit diagnostics; double-click/Enter navigates through the
 registered target provider or shows the normal “not available” notice.

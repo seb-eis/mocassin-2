@@ -28,11 +28,13 @@ internal partial class ConsoleChannelViewModel : ObservableObject
     /// Initializes a new console channel.
     /// </summary>
     /// <param name="id">The stable channel id.</param>
-    /// <param name="title">The channel title.</param>
-    public ConsoleChannelViewModel(string id, string title)
+    /// <param name="title">The content title.</param>
+    /// <param name="tabTitle">The presentation-only tab title; defaults to the content title.</param>
+    public ConsoleChannelViewModel(string id, string title, string? tabTitle = null)
     {
         Id = id;
         Title = title;
+        TabTitle = tabTitle ?? title;
     }
 
     /// <summary>
@@ -41,9 +43,20 @@ internal partial class ConsoleChannelViewModel : ObservableObject
     public string Id { get; }
 
     /// <summary>
-    /// Gets the channel title.
+    /// Gets the content title.
     /// </summary>
     public string Title { get; }
+
+    /// <summary>
+    /// Gets the presentation-only tab title. The persisted <see cref="Id"/> is never this value.
+    /// </summary>
+    public string TabTitle { get; }
+
+    /// <summary>
+    /// Returns the visible tab title so the tab automation peer announces the same label as the header.
+    /// </summary>
+    /// <returns>The visible tab title.</returns>
+    public override string ToString() => TabTitle;
 
     /// <summary>
     /// Gets the entries currently passing the filter.

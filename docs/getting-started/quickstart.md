@@ -24,11 +24,11 @@ recorded in the recent-file list and application settings.
 - **Projects** contains the project switcher and the project-level explorer (Overview and Data).
 - **Documents** contains the tab strip. Each project has its own Overview and Project JSON tabs.
 - **Inspector** shows a short summary for the active document.
-- **Console** shows the Application channel.
+- **Console** has the **Console** and **Validation** tabs. Console shows the application log; Validation shows the active project diagnostics.
 - **Status** shows the active document, project path/lock state, appearance, and version.
 
 The Overview edits the project name, description, author, and notes; the Edit menu provides Undo/Redo across the
-save point. The Problems console channel shows live validation results and lets you navigate to a model path.
+save point. The Validation tab shows live validation results and lets you navigate to a model path.
 The Project JSON document remains read-only; it is the canonical, indented project document and refreshes after
 content changes.
 
@@ -56,7 +56,8 @@ a new file.
 
 Choose **View → Settings…** (`Ctrl+,`) to change theme, accent, density, font scale, high contrast, reduced motion,
 the log level, external-change confirmation, the welcome document, and the recent-file list. Settings are saved
-atomically and applied without restarting the application.
+atomically and applied without restarting the application. **View → Reset Layout** restores the default panel
+proportions without touching the appearance settings.
 
 See [Settings and appearance](../user-guide/settings.md) and the
 [project lifecycle reference](../user-guide/projects.md).

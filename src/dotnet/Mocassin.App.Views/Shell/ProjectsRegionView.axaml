@@ -6,16 +6,20 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Shell.ProjectsRegionView"
              x:DataType="vm:ShellViewModel">
-  <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-          BorderThickness="0,0,1,0"
-          Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+  <Border Classes="region-card"
+          automation:AutomationProperties.Name="Projects panel">
     <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
-      <TextBlock Text="Projects" FontWeight="SemiBold" Margin="12,10,12,4" />
+      <TextBlock Text="Projects"
+                 FontWeight="SemiBold"
+                 Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}"
+                 Margin="{DynamicResource Mocassin.RegionHeaderPadding}" />
       <ListBox Grid.Row="1"
                automation:AutomationProperties.Name="Open projects"
                ItemsSource="{Binding Workspace.ProjectsInternal}"
                SelectedItem="{Binding Workspace.ActiveProject}"
                MaxHeight="180"
+               Background="Transparent"
+               BorderThickness="0"
                Margin="4,0,4,8">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="projects:ProjectWorkspaceEntry">
@@ -39,12 +43,18 @@
         </ListBox.ItemTemplate>
       </ListBox>
 
-      <TextBlock Grid.Row="2" Text="Explorer" FontWeight="SemiBold" Margin="12,4,12,4" />
+      <TextBlock Grid.Row="2"
+                 Text="Explorer"
+                 FontWeight="SemiBold"
+                 Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}"
+                 Margin="{DynamicResource Mocassin.RegionHeaderPadding}" />
       <TreeView Grid.Row="3"
                 automation:AutomationProperties.Name="Project explorer"
                 x:Name="ExplorerTree"
                 ItemsSource="{Binding Explorer.Nodes}"
                 SelectedItem="{Binding Explorer.SelectedNode}"
+                Background="Transparent"
+                BorderThickness="0"
                 Margin="4,0"
                 DoubleTapped="OnExplorerDoubleTapped">
         <TreeView.ItemTemplate>

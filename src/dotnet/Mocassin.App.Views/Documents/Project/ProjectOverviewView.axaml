@@ -4,12 +4,12 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Documents.Project.ProjectOverviewView"
              x:DataType="vm:ProjectOverviewViewModel">
-  <ScrollViewer>
+  <ScrollViewer Background="{DynamicResource Mocassin.WorkspaceBackground}">
     <StackPanel Spacing="12" Margin="20">
       <StackPanel Orientation="Horizontal" Spacing="12">
         <TextBox Text="{Binding NameDraft, Mode=TwoWay}"
                    x:Name="NameField"
-                   FontSize="24"
+                   FontSize="{DynamicResource Mocassin.TitleFontSize}"
                    FontWeight="SemiBold"
                    Width="420"
                    IsEnabled="{Binding CanEdit}"
@@ -19,19 +19,17 @@
                    KeyDown="OnFieldKeyDown" />
         <TextBlock Text="{Binding DirtyText}"
                    VerticalAlignment="Center"
-                   Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                   Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}" />
       </StackPanel>
       <TextBlock Text="{Binding NameError}"
                  IsVisible="{Binding HasNameError}"
-                 Foreground="#D32F2F"
+                 Foreground="{DynamicResource Mocassin.ErrorForeground}"
                  TextWrapping="Wrap" />
       <TextBlock Text="{Binding InlineError}"
                  IsVisible="{Binding HasInlineError}"
-                 Foreground="#D32F2F"
+                 Foreground="{DynamicResource Mocassin.ErrorForeground}"
                  TextWrapping="Wrap" />
-      <Border BorderBrush="#33D32F2F"
-              BorderThickness="1"
-              CornerRadius="4"
+      <Border Classes="banner-error"
               Padding="8"
               IsVisible="{Binding Validation.HasErrors}">
         <TextBlock Text="{Binding Validation.StatusText}"
@@ -41,13 +39,14 @@
       <TextBlock Text="This project is open read-only. Metadata cannot be changed."
                  IsVisible="{Binding IsReadOnly}"
                  TextWrapping="Wrap"
-                 Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                 Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}" />
       <TextBlock Text="{Binding FilePath}"
                  Classes="caption"
                  TextWrapping="Wrap" />
-      <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-              BorderThickness="1"
-              CornerRadius="4"
+      <Border Background="{DynamicResource Mocassin.CardBackground}"
+              BorderBrush="{DynamicResource Mocassin.BorderBrush}"
+              BorderThickness="{DynamicResource Mocassin.BorderThickness}"
+              CornerRadius="{DynamicResource Mocassin.RadiusCard}"
               Padding="12">
         <Grid ColumnDefinitions="180,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
           <TextBlock Grid.Row="0" Grid.Column="0" Text="Description" FontWeight="SemiBold" />
@@ -103,9 +102,10 @@
       <StackPanel Orientation="Horizontal" Spacing="8">
         <Button Content="Copy path" Command="{Binding CopyPathCommand}" automation:AutomationProperties.Name="Copy project path" />
       </StackPanel>
-      <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-              BorderThickness="1"
-              CornerRadius="4"
+      <Border Background="{DynamicResource Mocassin.CardBackground}"
+              BorderBrush="{DynamicResource Mocassin.BorderBrush}"
+              BorderThickness="{DynamicResource Mocassin.BorderThickness}"
+              CornerRadius="{DynamicResource Mocassin.RadiusCard}"
               Padding="12">
         <StackPanel Spacing="8">
           <StackPanel Orientation="Horizontal" Spacing="12">
@@ -114,7 +114,7 @@
                     automation:AutomationProperties.Name="Toggle statistics" />
             <TextBlock Text="{Binding Validation.LastCompletedText}"
                        VerticalAlignment="Center"
-                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
+                       Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}" />
           </StackPanel>
           <TextBlock Text="{Binding Validation.StatisticsText}"
                      IsVisible="{Binding Validation.IsStatisticsActive}"

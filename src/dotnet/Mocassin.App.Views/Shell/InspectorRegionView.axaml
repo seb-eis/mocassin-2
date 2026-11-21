@@ -1,23 +1,26 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Shell"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Shell.InspectorRegionView"
              x:DataType="vm:ShellViewModel">
-  <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
-          BorderThickness="1,0,0,0"
-          Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
+  <Border Classes="region-card"
+          automation:AutomationProperties.Name="Inspector panel">
     <Grid RowDefinitions="Auto,*">
-      <TextBlock Text="Inspector" FontWeight="SemiBold" Margin="12,10" />
+      <TextBlock Text="Inspector"
+                 FontWeight="SemiBold"
+                 Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}"
+                 Margin="{DynamicResource Mocassin.RegionHeaderPadding}" />
       <TextBlock Grid.Row="1"
                  Text="Nothing is selected."
                  TextWrapping="Wrap"
-                 Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
-                 Margin="12,0,12,12"
+                 Classes="caption"
+                 Margin="{DynamicResource Mocassin.RegionPadding}"
                  IsVisible="{Binding !HasInspectorContent}" />
       <ContentControl Grid.Row="1"
                       Content="{Binding InspectorContent}"
                       IsVisible="{Binding HasInspectorContent}"
-                      Margin="12,0,12,12" />
+                      Margin="{DynamicResource Mocassin.RegionPadding}" />
     </Grid>
   </Border>
 </UserControl>
