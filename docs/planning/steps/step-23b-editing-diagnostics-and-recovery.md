@@ -18,7 +18,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 
 ## Implementation status
 
-- **Status:** **In progress** — design accepted; features 1–2 squashed (`bb048ad`/`90d9f73`, `77c1b9c`); feature 3 next
+- **Status:** **In progress** — design accepted; features 1–2 squashed (`bb048ad`/`90d9f73`, `77c1b9c`); feature 3 in progress
 - **Step branch:** `step/23b-editing-diagnostics-and-recovery`
 - **Step CI:** — (local gates only; the single closeout `CI` run is dispatched at closeout)
 - **Main merge:** —
@@ -41,7 +41,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad`; test fix `90d9f73` |
 | 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c`; refresh fix `d4badd0`; undo/redo commands `eb50095` |
-| 3 | Dirty state, autosave, crash recovery | — | Planned | — | — | — |
+| 3 | Dirty state, autosave, crash recovery | `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery` | In progress | — | — | — |
 | 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
 
 ### Approved feature list (owner-approved 2026-11-21)

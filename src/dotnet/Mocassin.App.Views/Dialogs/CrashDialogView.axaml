@@ -1,6 +1,7 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:overlay="using:Mocassin.App.ViewModels.Dialogs"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Dialogs.CrashDialogView"
              x:DataType="overlay:CrashDialogViewModel">
   <StackPanel Spacing="12">
@@ -12,7 +13,14 @@
         <SelectableTextBlock Text="{Binding Details}" TextWrapping="Wrap" />
       </ScrollViewer>
     </Expander>
+    <TextBlock Text="{Binding RecoveryStatus}"
+               IsVisible="{Binding HasRecoveryStatus}"
+               TextWrapping="Wrap" />
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+      <Button Content="Write recovery files"
+              Command="{Binding WriteRecoveryFilesCommand}"
+              IsVisible="{Binding HasRecoverySnapshots}"
+              automation:AutomationProperties.Name="Write recovery files" />
       <Button Content="Open log folder" Command="{Binding OpenLogFolderCommand}"
               IsVisible="{Binding CanOpenLogFolder}" />
       <Button Content="Exit" Command="{Binding ExitCommand}" IsDefault="True" />

@@ -2,6 +2,8 @@
 
 using System.Collections.Immutable;
 
+using Mocassin.App.ViewModels.Settings.Blocks;
+
 namespace Mocassin.App.ViewModels.Settings;
 
 /// <summary>
@@ -70,6 +72,8 @@ internal static class AppSettingsValidator
         };
 
         var recent = NormalizeRecentFiles(settings.RecentFiles, warnings, ignoreCasePaths);
+        var autosave = NormalizeAutosave(settings.Autosave, warnings);
+        var session = NormalizeSession(settings.Session, warnings, ignoreCasePaths);
         var normalized = settings with
         {
             Format = SettingsDefaults.Format,
@@ -79,8 +83,70 @@ internal static class AppSettingsValidator
             Culture = string.IsNullOrWhiteSpace(settings.Culture) ? "en" : settings.Culture,
             Layout = normalizedLayout,
             RecentFiles = recent,
+            Autosave = autosave,
+            Session = session,
         };
         return (normalized, warnings);
+    }
+
+    private static AutosaveSettings NormalizeAutosave(AutosaveSettings autosave, List<string> warnings)
+    {
+        var interval = autosave.IntervalMinutes;
+        if (interval < SettingsDefaults.MinAutosaveIntervalMinutes
+            || interval > SettingsDefaults.MaxAutosaveIntervalMinutes)
+        {
+            warnings.Add(
+                $"The autosave interval is outside {SettingsDefaults.MinAutosaveIntervalMinutes}–{SettingsDefaults.MaxAutosaveIntervalMinutes}; the default was used.");
+            interval = SettingsDefaults.DefaultAutosaveIntervalMinutes;
+        }
+
+        return new AutosaveSettings { Enabled = autosave.Enabled, IntervalMinutes = interval };
+    }
+
+    private static SessionSettings NormalizeSession(
+        SessionSettings session,
+        List<string> warnings,
+        bool ignoreCasePaths)
+    {
+        var comparer = ignoreCasePaths ? StringComparer.OrdinalIgnoreCase : StringComparer.Ordinal;
+        var builder = ImmutableArray.CreateBuilder<string>();
+        var source = session.OpenProjects.IsDefault ? ImmutableArray<string>.Empty : session.OpenProjects;
+        foreach (var path in source)
+        {
+            if (string.IsNullOrWhiteSpace(path))
+            {
+                warnings.Add("A session open-project path was empty and was dropped.");
+                continue;
+            }
+
+            if (builder.Any(existing => comparer.Equals(existing, path)))
+            {
+                continue;
+            }
+
+            if (builder.Count >= SettingsDefaults.MaxOpenProjects)
+            {
+                warnings.Add($"session.openProjects was capped at {SettingsDefaults.MaxOpenProjects} entries.");
+                break;
+            }
+
+            builder.Add(path);
+        }
+
+        var active = session.ActiveProject;
+        if (active is not null && !builder.Any(path => comparer.Equals(path, active)))
+        {
+            warnings.Add("session.activeProject was not one of the open projects; it was cleared.");
+            active = null;
+        }
+
+        return new SessionSettings
+        {
+            OpenProjects = builder.ToImmutable(),
+            ActiveProject = active,
+            CleanExit = session.CleanExit,
+            SavedUtc = session.SavedUtc,
+        };
     }
 
     private static int InRange(int value, int minimum, int maximum, int fallback, string name, List<string> warnings)

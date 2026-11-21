@@ -50,6 +50,7 @@ Mocassin.Core.Editing.ProjectChange.ProjectChange(string! Description, Mocassin.
 Mocassin.Core.Editing.ProjectDocument
 Mocassin.Core.Editing.ProjectDocument.Apply(string! description, System.Func<Mocassin.Core.Project.Project!, Mocassin.Core.Project.Project!>! mutation) -> Mocassin.Core.Editing.ProjectEditResult!
 Mocassin.Core.Editing.ProjectDocument.CanRedo.get -> bool
+static Mocassin.Core.Editing.ProjectDocument.CreateRecovered(Mocassin.Core.Project.Project! current, Mocassin.Core.Project.Project! lastSaved, Mocassin.Core.Editing.ProjectEditor? editor = null, int maxUndoDepth = 0) -> Mocassin.Core.Editing.ProjectDocument!
 Mocassin.Core.Editing.ProjectDocument.CanUndo.get -> bool
 Mocassin.Core.Editing.ProjectDocument.IsAutosaveDue(System.DateTimeOffset now, System.TimeSpan interval) -> bool
 Mocassin.Core.Editing.ProjectDocument.IsDirty.get -> bool

@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 using Mocassin.App.ViewModels.Dialogs.Requests;
+using Mocassin.App.ViewModels.Recovery;
 
 namespace Mocassin.App.ViewModels.Dialogs;
 
@@ -45,9 +46,13 @@ internal interface IDialogService
     /// Shows the crash dialog.
     /// </summary>
     /// <param name="request">The crash request.</param>
+    /// <param name="recoverySnapshots">The dirty sessions captured before the dialog.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A task that completes when the crash dialog closes.</returns>
-    public Task ShowCrashAsync(CrashDialogRequest request, CancellationToken cancellationToken = default);
+    public Task ShowCrashAsync(
+        CrashDialogRequest request,
+        IReadOnlyList<CrashRecoverySnapshot>? recoverySnapshots = null,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Shows a progress surface for a long-running operation.

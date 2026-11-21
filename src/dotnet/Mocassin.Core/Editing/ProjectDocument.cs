@@ -175,6 +175,28 @@ public sealed class ProjectDocument
     }
 
     /// <summary>
+    /// Creates a document whose current value and clean point differ, for recovery.
+    /// </summary>
+    /// <param name="current">The recovered snapshot, which becomes the document value.</param>
+    /// <param name="lastSaved">The saved file value, which becomes the clean point.</param>
+    /// <param name="editor">Optional custom editor.</param>
+    /// <param name="maxUndoDepth">The optional undo bound; the GUI passes 200.</param>
+    /// <returns>A dirty document with empty undo and redo stacks.</returns>
+    /// <exception cref="ArgumentNullException">A project is <see langword="null"/>.</exception>
+    public static ProjectDocument CreateRecovered(
+        ProjectModel current,
+        ProjectModel lastSaved,
+        ProjectEditor? editor = null,
+        int maxUndoDepth = 0)
+    {
+        ArgumentNullException.ThrowIfNull(current);
+        ArgumentNullException.ThrowIfNull(lastSaved);
+        var document = new ProjectDocument(current, editor) { MaxUndoDepth = maxUndoDepth };
+        document.LastSavedProject = lastSaved;
+        return document;
+    }
+
+    /// <summary>
     /// Marks a persisted project value as the last saved value.
     /// </summary>
     /// <param name="savedProject">The project value returned by the store, including its updated timestamp.</param>

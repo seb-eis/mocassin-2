@@ -118,6 +118,72 @@ public sealed class ValidationSurfaceRenderTests
                     var focused = window.FocusManager?.GetFocusedElement() as TextBox;
                     Assert.NotNull(focused);
                     Assert.Equal("Project notes", AutomationProperties.GetName(focused));
+                    await host.Services.GetRequiredService<IProjectSessionService>().SaveAsync(session);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TheSettingsDialogShowsTheAutosaveControls() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    shell.Settings.Open();
+                    HeadlessSession.Pump(window);
+
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<CheckBox>(),
+                        control => AutomationProperties.GetName(control) == "Enable autosave");
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<TextBox>(),
+                        control => AutomationProperties.GetName(control) == "Autosave interval minutes");
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TheTabAndProjectSwitcherShowDirtyMarkers() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    var session = CreateDiagnosticSession();
+                    shell.Workspace.Add(new ProjectWorkspaceEntry(session));
+                    await shell.Navigation.NavigateToAsync(
+                        new ModelPath("project", session.Id, "overview"),
+                        NavigationIntent.Activate);
+                    session.EditCoordinator.Apply(
+                        "Rename",
+                        project => project with { Metadata = project.Metadata with { Name = "Renamed" } });
+                    HeadlessSession.Pump(window);
+
+                    Assert.StartsWith("* ", shell.WindowTitle, StringComparison.Ordinal);
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<TextBlock>(),
+                        control => AutomationProperties.GetName(control) == "Unsaved changes"
+                            && control.IsVisible);
+                    await host.Services.GetRequiredService<IProjectSessionService>().SaveAsync(session);
                 }
                 finally
                 {
@@ -162,6 +228,7 @@ public sealed class ValidationSurfaceRenderTests
                     redo.Command.Execute(null);
                     HeadlessSession.Pump(window);
                     Assert.Equal("Renamed", session.Name);
+                    await host.Services.GetRequiredService<IProjectSessionService>().SaveAsync(session);
                 }
                 finally
                 {

@@ -82,7 +82,7 @@ internal sealed partial class ProjectOverviewViewModel : DocumentViewModel, IIns
     /// <summary>
     /// Gets a value indicating whether the document differs from the save point.
     /// </summary>
-    public bool IsDirty => editor.IsDirty;
+    public override bool IsDirty => editor.IsDirty;
 
     /// <summary>
     /// Gets the dirty-state text.

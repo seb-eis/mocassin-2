@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.App.ViewModels.Recovery;
 using Mocassin.Packages.Projects.Templates;
 
 namespace Mocassin.App.ViewModels.Projects;
@@ -73,17 +74,70 @@ internal interface IProjectSessionService
     /// Reloads a session from disk.
     /// </summary>
     /// <param name="session">The session.</param>
+    /// <param name="discardChanges">Whether dirty changes may be discarded without a prompt.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The operation result.</returns>
-    public Task<ProjectSessionResult> ReloadAsync(ProjectSession session, CancellationToken cancellationToken = default);
+    public Task<ProjectSessionResult> ReloadAsync(
+        ProjectSession session,
+        bool discardChanges = false,
+        CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Closes a session and releases its lock.
     /// </summary>
     /// <param name="session">The session.</param>
+    /// <param name="discardChanges">Whether dirty changes may be discarded without a prompt.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The operation result.</returns>
-    public Task<ProjectSessionResult> CloseAsync(ProjectSession session, CancellationToken cancellationToken = default);
+    public Task<ProjectSessionResult> CloseAsync(
+        ProjectSession session,
+        bool discardChanges = false,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Applies one recovery candidate to a session.
+    /// </summary>
+    /// <param name="session">The target session.</param>
+    /// <param name="candidate">The candidate to recover.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The operation result.</returns>
+    public Task<ProjectSessionResult> RecoverAsync(
+        ProjectSession session,
+        RecoveryCandidate candidate,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Discards one recovery candidate.
+    /// </summary>
+    /// <param name="session">The target session.</param>
+    /// <param name="candidate">The candidate to discard.</param>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The operation result.</returns>
+    public Task<ProjectSessionResult> DiscardRecoveryAsync(
+        ProjectSession session,
+        RecoveryCandidate candidate,
+        CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Lists the valid recovery candidates in the application-local recovery directory.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The candidates, newest first.</returns>
+    public Task<IReadOnlyList<RecoveryCandidate>> ListRecoveryAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sweeps recovery files older than the retention.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>The number of deleted candidates.</returns>
+    public Task<int> SweepRecoveryAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Marks the current session and clean-exit state in the settings.
+    /// </summary>
+    /// <param name="cancellationToken">The cancellation token.</param>
+    /// <returns>A task that completes after the settings write attempt.</returns>
+    public Task MarkCleanExitAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
     /// Checks whether the project file changed outside the session.

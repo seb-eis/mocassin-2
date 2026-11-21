@@ -6,6 +6,7 @@ using Mocassin.Core.Editing;
 using Mocassin.App.ViewModels.Diagnostics;
 using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Editing;
+using Mocassin.App.ViewModels.Recovery;
 using Mocassin.Core.Project;
 using Mocassin.Packages.Projects;
 using Mocassin.Packages.Projects.Validation;
@@ -62,6 +63,31 @@ internal sealed class ProjectSession
     /// Gets the per-session live validation surface.
     /// </summary>
     public ValidationCoordinator ValidationCoordinator { get; }
+
+    /// <summary>
+    /// Gets the gate that serializes save, autosave, close, reload, and recovery.
+    /// </summary>
+    public SemaphoreSlim Gate { get; } = new(1, 1);
+
+    /// <summary>
+    /// Gets or sets a value indicating whether a close/reload is in progress.
+    /// </summary>
+    public bool IsClosing { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the deferred recovery candidate the user chose to keep for later.
+    /// </summary>
+    public RecoveryCandidate? PendingRecovery { get; internal set; }
+
+    /// <summary>
+    /// Gets or sets the newest recovery candidate offered after open/reload.
+    /// </summary>
+    public RecoveryCandidate? AvailableRecovery { get; internal set; }
+
+    /// <summary>
+    /// Gets a value indicating whether the document differs from the save point.
+    /// </summary>
+    public bool IsDirty => EditCoordinator.IsDirty;
 
     /// <summary>
     /// Gets the current immutable project.

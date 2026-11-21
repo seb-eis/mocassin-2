@@ -3,6 +3,8 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Files;
+using Mocassin.App.Recovery;
+using Mocassin.App.Scheduling;
 using Mocassin.App.Settings;
 using Mocassin.App.Startup;
 using Mocassin.App.ViewModels.Commands;
@@ -13,6 +15,8 @@ using Mocassin.App.ViewModels.Documents;
 using Mocassin.App.ViewModels.Navigation;
 using Mocassin.App.ViewModels.Notifications;
 using Mocassin.App.ViewModels.Projects;
+using Mocassin.App.ViewModels.Scheduling;
+using Mocassin.App.ViewModels.Recovery;
 using Mocassin.App.ViewModels.Settings;
 using Mocassin.App.ViewModels.Settings.Dialog;
 using Mocassin.Packages.Projects;
@@ -45,6 +49,10 @@ internal static class AppServiceRegistration
             provider.GetRequiredService<TimeProvider>(),
             new ProjectStoreOptions { ValidateOnLoad = false }));
         services.AddSingleton<ProjectValidationPipeline>();
+        services.AddSingleton<IRecoveryStore, RecoveryStore>();
+        services.AddSingleton<ICrashRecoveryWriter, CrashRecoveryWriter>();
+        services.AddSingleton<AutosaveScheduler>();
+        services.AddSingleton<AutosaveTimer>();
         services.AddSingleton<IProjectSessionService, ProjectSessionService>();
         var platform = OperatingSystem.IsMacOS()
             ? GesturePlatform.MacOS
@@ -66,6 +74,7 @@ internal static class AppServiceRegistration
         services.AddSingleton<ProblemsChannelViewModel>();
         services.AddSingleton<IConsoleChannelProvider, ProblemsChannelProvider>();
         services.AddSingleton<IStatusBarItemProvider, ValidationStatusItemProvider>();
+        services.AddSingleton<IStatusBarItemProvider, AutosaveStatusItemProvider>();
         services.AddSingleton<INotificationService, NotificationService>();
         services.AddSingleton<ProgressService>();
         services.AddSingleton<GestureFormatter>();

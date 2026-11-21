@@ -42,6 +42,9 @@ internal sealed partial class ProjectJsonViewModel : DocumentViewModel, IInspect
     public override string? ToolTip => entry.Path;
 
     /// <inheritdoc />
+    public override bool IsDirty => entry.Session.EditCoordinator.IsDirty;
+
+    /// <inheritdoc />
     public override Task OnClosingAsync(CancellationToken cancellationToken = default)
     {
         entry.Session.EditCoordinator.ProjectChanged -= OnProjectChanged;
@@ -63,6 +66,7 @@ internal sealed partial class ProjectJsonViewModel : DocumentViewModel, IInspect
 
         JsonText = ProjectJson.Serialize(entry.Project, indented: true);
         OnPropertyChanged(nameof(Title));
+        OnPropertyChanged(nameof(IsDirty));
     }
 
     /// <summary>

@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: MIT
 
+using Mocassin.App.Composition;
 using Mocassin.App.Files;
+using Mocassin.App.Recovery;
 using Mocassin.App.Tests.TestSupport;
 using Mocassin.App.ViewModels.Editing;
 using Mocassin.App.ViewModels.Projects;
@@ -117,6 +119,34 @@ public sealed class ProjectSessionServiceTests
     }
 
     [Fact]
+    public async Task SessionStateTracksOpenProjectsAndCleanExit()
+    {
+        var context = CreateContext(out _);
+        using var temp = new TempWorkspace();
+        var first = await context.Service.CreateAsync(ProjectTemplateKind.Blank, "First", temp.Path);
+        var firstSession = first.Session!;
+
+        Assert.Contains(firstSession.Path, context.Settings.Current.Session.OpenProjects);
+        Assert.Equal(firstSession.Path, context.Settings.Current.Session.ActiveProject);
+        Assert.False(context.Settings.Current.Session.CleanExit);
+        Assert.NotNull(context.Settings.Current.Session.SavedUtc);
+
+        await context.Service.MarkCleanExitAsync();
+        Assert.True(context.Settings.Current.Session.CleanExit);
+
+        var second = await context.Service.CreateAsync(ProjectTemplateKind.Blank, "Second", temp.Path);
+        Assert.Equal(2, context.Settings.Current.Session.OpenProjects.Length);
+        Assert.Equal(second.Session!.Path, context.Settings.Current.Session.ActiveProject);
+        Assert.False(context.Settings.Current.Session.CleanExit);
+
+        await context.Service.CloseAsync(second.Session);
+        Assert.Single(context.Settings.Current.Session.OpenProjects);
+        await context.Service.CloseAsync(firstSession);
+        Assert.Empty(context.Settings.Current.Session.OpenProjects);
+        Assert.Null(context.Settings.Current.Session.ActiveProject);
+    }
+
+    [Fact]
     public async Task AProjectSessionCreatesTheGuiCoordinatorWithTheGuiUndoBound()
     {
         var context = CreateContext(out _);
@@ -140,6 +170,8 @@ public sealed class ProjectSessionServiceTests
         var session = created.Session!;
         var oldPath = session.Path;
         var newPath = Path.Combine(temp.Path, "Moved.mocprj");
+        var oldSidecar = ProjectStore.GetAutosavePath(oldPath);
+        await File.WriteAllTextAsync(oldSidecar, "sidecar");
 
         var saved = await context.Service.SaveAsAsync(session, newPath);
 
@@ -148,6 +180,7 @@ public sealed class ProjectSessionServiceTests
         Assert.True(File.Exists(newPath));
         Assert.False(File.Exists(ProjectStore.GetLockPath(oldPath)));
         Assert.True(File.Exists(ProjectStore.GetLockPath(newPath)));
+        Assert.False(File.Exists(oldSidecar));
         Assert.Contains(
             context.Settings.Current.RecentFiles,
             file => string.Equals(file.Path, newPath, StringComparison.Ordinal));
@@ -319,7 +352,8 @@ public sealed class ProjectSessionServiceTests
                 new ProjectFileProbe(),
                 new WorkspaceViewModel(),
                 new SettingsService(new InMemorySettingsStore(), AppSettingsLoadResult.Missing()),
-                new ManualTimeProvider()));
+                new ManualTimeProvider(),
+                CreateRecoveryStore()));
 
         Assert.Contains("ValidateOnLoad", exception.Message, StringComparison.Ordinal);
     }
@@ -352,15 +386,27 @@ public sealed class ProjectSessionServiceTests
     {
         workspace = new WorkspaceViewModel();
         var time = timeProvider ?? new ManualTimeProvider();
+        var store = new ProjectStore(time, new ProjectStoreOptions { ValidateOnLoad = false });
         var service = new ProjectSessionService(
-            new ProjectStore(time, new ProjectStoreOptions { ValidateOnLoad = false }),
+            store,
             new ProjectValidationPipeline(),
             new ProjectFileProbe(),
             workspace,
             settings,
-            time);
+            time,
+            new RecoveryStore(CreatePaths(), store, time));
         return new Context(service, settings);
     }
+
+    private static RecoveryStore CreateRecoveryStore()
+    {
+        var time = new ManualTimeProvider();
+        var store = new ProjectStore(time, new ProjectStoreOptions { ValidateOnLoad = false });
+        return new RecoveryStore(CreatePaths(), store, time);
+    }
+
+    private static AppPaths CreatePaths() =>
+        new(Path.Combine(Path.GetTempPath(), "mocassin-app-tests", Guid.NewGuid().ToString("N")));
 
     private sealed record Context(ProjectSessionService Service, SettingsService Settings);
 }

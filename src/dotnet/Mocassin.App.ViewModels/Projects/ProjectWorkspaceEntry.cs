@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 
+using System.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using Mocassin.App.ViewModels.Documents;
+using Mocassin.App.ViewModels.Editing;
 using Mocassin.Core.Project;
 
 namespace Mocassin.App.ViewModels.Projects;
@@ -9,7 +12,7 @@ namespace Mocassin.App.ViewModels.Projects;
 /// A project shown in the workspace. Feature 4 wraps a <see cref="ProjectSession"/>; the feature-2 constructor
 /// remains for standalone documents and tests.
 /// </summary>
-internal sealed class ProjectWorkspaceEntry
+internal sealed partial class ProjectWorkspaceEntry : ObservableObject
 {
     /// <summary>
     /// Initializes a workspace entry from a session.
@@ -18,6 +21,7 @@ internal sealed class ProjectWorkspaceEntry
     public ProjectWorkspaceEntry(ProjectSession session)
     {
         Session = session ?? throw new ArgumentNullException(nameof(session));
+        Session.EditCoordinator.PropertyChanged += OnEditorPropertyChanged;
     }
 
     /// <summary>
@@ -74,6 +78,16 @@ internal sealed class ProjectWorkspaceEntry
     public bool IsReadOnly => Session.IsReadOnly;
 
     /// <summary>
+    /// Gets a value indicating whether the project has unsaved changes.
+    /// </summary>
+    public bool IsDirty => Session.EditCoordinator.IsDirty;
+
+    /// <summary>
+    /// Gets the dirty marker used by the project switcher.
+    /// </summary>
+    public string DirtyMarker => IsDirty ? "*" : string.Empty;
+
+    /// <summary>
     /// Gets the lock path.
     /// </summary>
     public string? LockPath => Session.LockPath;
@@ -95,5 +109,14 @@ internal sealed class ProjectWorkspaceEntry
     {
         get => Session.LastDocumentKey;
         set => Session.LastDocumentKey = value;
+    }
+
+    private void OnEditorPropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (e.PropertyName == nameof(ProjectEditCoordinator.IsDirty))
+        {
+            OnPropertyChanged(nameof(IsDirty));
+            OnPropertyChanged(nameof(DirtyMarker));
+        }
     }
 }

@@ -37,6 +37,32 @@ public sealed class SettingsViewModelTests
     }
 
     [Fact]
+    public async Task AutosaveSettingsRoundTripAndAnInvalidIntervalIsRejected()
+    {
+        var store = new InMemorySettingsStore();
+        var service = new SettingsService(store, AppSettingsLoadResult.Missing());
+        var dialog = new SettingsViewModel(service, new RecordingSettingsEnvironment())
+        {
+            IsOpen = true,
+            AutosaveEnabled = false,
+            AutosaveIntervalMinutes = 12,
+        };
+
+        await dialog.SaveCommand.ExecuteAsync(null);
+
+        Assert.False(dialog.IsOpen);
+        Assert.False(service.Current.Autosave.Enabled);
+        Assert.Equal(12, service.Current.Autosave.IntervalMinutes);
+
+        dialog.IsOpen = true;
+        dialog.AutosaveIntervalMinutes = 0;
+        await dialog.SaveCommand.ExecuteAsync(null);
+
+        Assert.True(dialog.IsOpen);
+        Assert.NotNull(dialog.ErrorMessage);
+    }
+
+    [Fact]
     public async Task AnOutOfRangeFontScaleIsRejectedBeforeWriting()
     {
         var store = new InMemorySettingsStore();

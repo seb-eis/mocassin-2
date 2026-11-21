@@ -219,6 +219,29 @@ public sealed class ProjectEditingTests
         Assert.False(document.CanUndo);
     }
 
+    [Fact]
+    public void CreateRecoveredUsesTheSnapshotAsTheDirtyCurrentValue()
+    {
+        var saved = CreateProject();
+        var snapshot = saved.WithModifiedUtc(createdAt.AddMinutes(5));
+
+        var document = ProjectDocument.CreateRecovered(snapshot, saved, maxUndoDepth: 200);
+
+        Assert.Same(snapshot, document.Project);
+        Assert.Same(saved, document.LastSavedProject);
+        Assert.True(document.IsDirty);
+        Assert.Equal(200, document.MaxUndoDepth);
+        Assert.False(document.CanUndo);
+        Assert.False(document.CanRedo);
+    }
+
+    [Fact]
+    public void CreateRecoveredRejectsNullProjects()
+    {
+        Assert.Throws<ArgumentNullException>(
+            () => ProjectDocument.CreateRecovered(CreateProject(), null!));
+    }
+
     private static ProjectModel CreateProject()
     {
         return new ProjectModel(

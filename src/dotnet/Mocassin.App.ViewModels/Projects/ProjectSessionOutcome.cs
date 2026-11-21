@@ -83,7 +83,17 @@ internal enum ProjectSessionOutcome
     Canceled,
 
     /// <summary>
-    /// Reserved for Step 23B; never produced in 23A.
+    /// The operation needs an unsaved-changes decision.
     /// </summary>
     UnsavedChanges,
+
+    /// <summary>
+    /// A recovery snapshot was applied.
+    /// </summary>
+    Recovered,
+
+    /// <summary>
+    /// A recovery snapshot was discarded.
+    /// </summary>
+    Discarded,
 }
