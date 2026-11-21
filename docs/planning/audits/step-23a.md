@@ -43,9 +43,13 @@ Step page: [`Step 23A — Workspace and Project Lifecycle`](../steps/step-23a-wo
 
 Copy the acceptance criteria from the step page, preserving their wording:
 
-- [ ] The projects build on all three target platforms; the headless suite starts the shell on Ubuntu
+- [x] The projects build on all three target platforms; the headless suite starts the shell on Ubuntu
       automatically; the Windows/macOS headless suite and the manual real-window checklist are recorded.
       — Ubuntu headless suite passes; no Windows/macOS run, no manual checklist (F-1).
+      Round 3: the three automated gates are green at `30dcf3e` (Ubuntu `44889193801`, Windows `44889462922`,
+      macOS `44889646766`) and both platform jobs run `Mocassin.App.Tests`. The manual real-window portion is
+      satisfied only through the recorded owner-accepted automated Xvfb substitution (R2-4 closed); residual
+      platform risk R3-5.
 - [x] The app starts with a welcome document; the shell regions, menu bar, and status bar render.
       — `ShellRenderTests`/`WorkspaceRenderTests` on the real headless window.
 - [x] A project can be created from both embedded templates, opened, inspected, saved, closed, and reopened;
@@ -80,7 +84,7 @@ Copy the acceptance criteria from the step page, preserving their wording:
       `UpdateAsync` refuses to write when `LoadResult.IsFatal`, `AFutureMajorFileIsNotOverwrittenByServiceUpdates`
       passes, and `ARealIoWriteFailureLeavesThePreviousFileIntact` now exercises a real read-only-directory
       failure; no banner/Save-as-new action exists, only the console and dialog status text (R2-7).
-- [ ] Every primary action is reachable by keyboard alone; the palette lists the shell commands with their
+- [x] Every primary action is reachable by keyboard alone; the palette lists the shell commands with their
       platform gestures; `Model`/`Build`/`Run` menus do not appear.
       — palette, gestures, and menu set verified; `Ctrl+1..9` has no production handler (`ActivateIndex` has no
       caller) and the docs claim it; the shell window's tunnel `AddHandler(KeyDownEvent, OnKeyDown, ...)` binds
@@ -89,31 +93,44 @@ Copy the acceptance criteria from the step page, preserving their wording:
       (synchronous probe: `Tab` no longer throws, `Ctrl+1` activates the first tab), but the shipped
       `CtrlNumberActivatesATab` asserts the wrong index and is vacuous under the async harness (R2-1), so the
       keyboard criterion is not yet evidenced by an effective test.
-- [ ] Accessibility names/roles are present on the primary controls; the accessibility-tree assertions pass.
+      Round 3: the corrected `CtrlNumberActivatesATab` passes (10 focused tests green) and fails when the
+      handler index is mutated, so the criterion is now evidenced by an effective test.
+- [x] Accessibility names/roles are present on the primary controls; the accessibility-tree assertions pass.
       — four automation names are asserted; there is no full accessibility-tree sweep and no role/order
       assertion (F-6). Round 2: an effective synchronous sweep now asserts an accessible name on every primary
       interactive control type, and the three screenshot baselines exercise contrast/density; roles and visual
       order are still not asserted (R2-7).
+      Round 3: `AccessibilityTests` additionally asserts automation control types for the menu, tabs, project
+      list, explorer, and console filter and a deterministic Tab order across two fresh windows; literal
+      visual-order equality is still not asserted (R2-7 Note).
 - [x] No unhandled exception kills the process silently; the crash dialog and log entry are verified.
       — `CrashHandlerTests`: critical log entry, crash dialog, exit 1; fatal path writes a crash report.
 - [x] `./tools/verify.sh all --require` passes, the strict docs build passes, and `closeout/step-23a.json` with
       `"step": "step-23a"` validates once the `step-NN[a-z]` checker support has landed.
       — local `all --require` exit 0; Zensical strict 0 warnings; checker OK.
+      Round 3: re-ran on `feb3ccb` (code identical to `30dcf3e`) — exit 0, Zensical "No issues found", DocFX
+      0 warnings/0 errors, rustdoc, ApiCompat, SPDX 1002 files, 1476-file secret scan, AOT gate passed with the
+      CLI's 62 recorded IL diagnostics; `check_closeout_evidence.py` OK.
 - [x] Documentation written (§14), and no page claims a 23B or later capability.
       — pages exist, but `docs/user-guide/workspace.md` claims `Ctrl+1..9` and a switcher that shows lock
       state/active document, and the settings pages claim a rejected document is never overwritten (F-2/F-4/F-5).
       Round 2: the claims are now true (keyboard handler, switcher fields, preserved future-major settings) and
       no page claims a 23B capability; stale placement-resolver lines in the development code-structure page
       remain (R2-6).
+      Round 3: no 23B capability claim remains; the remaining inaccurate status text is limited to R3-1…R3-3
+      (a stale audit-request note, two parity platform rows, and the step page's `bbc2d08` parenthetical).
 
 ## Standard audit checklist
 
-- [ ] Required tests from the step page pass.
+- [x] Required tests from the step page pass.
       — 107 App tests pass, but the §15 screenshot-baseline, full accessibility-tree, duplicate-provider,
       dialog choose/prompt/error/focus and stale-lock rows are absent or partial (F-6/F-8). Round 2: 115 App
       tests pass on the shipped harness, but eleven async headless bodies cannot fail (R2-1); with an awaited
       harness seven fail, including four dialog tests and the keyboard test. Screenshots, accessibility names,
       duplicate-provider, stale-lock, and real-I/O settings tests are effective.
+      Round 3: 121/121 App tests pass; the ten focused round-2 tests pass; targeted mutations (old harness,
+      missing overlay pump, off-by-one `Ctrl` index, capture-at-persist layout, renamed welcome automation
+      name) fail the corresponding tests, so the seven regressions are effective.
 - [x] Public/protected XML documentation policy is followed.
       — `Mocassin.App` has `GenerateDocumentationFile=false`; the public `App`/`Program` types are documented;
       PublicAPI analyzers are clean for the two ApiCompat App assemblies.
@@ -123,24 +140,38 @@ Copy the acceptance criteria from the step page, preserving their wording:
       (F-2/F-4/F-5). Round 2: dashboard/step page/feature log agree on the three runs at `008b133`; the recents
       and accessibility parity rows are corrected; stale placement-resolver lines remain in
       `docs/development/code-structure.md` (R2-6).
+      Round 3: dashboard/step page/feature log agree on the three runs at `30dcf3e`; the parity platform rows
+      still say "manual platform gate not yet run" and the audit request still says the Windows/macOS gates
+      were not run (R3-1/R3-2), and the step page's main-merge parenthetical names `bbc2d08` (R3-3). The
+      feature content is otherwise current.
 - [x] Closeout CI is green at the audited commit.
       — recorded run `44841374175` at `6901e76` (green); the run could not be re-queried here (no `gh`/network).
       The same commit passed `./tools/verify.sh all --require` locally. Round 2: replacement run `44849296444`
       is green at `008b133` (queried through the GitHub API), and the local `all --require` gate exits 0.
+      Round 3: re-queried `44889193801` — `success`, `workflow_dispatch`, `head_sha 30dcf3e…`, full Ubuntu
+      .NET suite plus Format; the local gate exits 0 on the audited tree.
 - [x] Closeout evidence matches the audited commit and the merge candidate.
       — `python tools/check_closeout_evidence.py` OK; `merge_candidate == audit_commit == closeout_ci.head_sha`.
       Round 2: the checker still passes and those three fields agree, but `main_sha_at_freeze` is `bbc2d08`
       while `main` is `eadfe13` (R2-3).
-- [ ] If `main` moved after the freeze, a merge-tree CI run or a re-audit is recorded.
+      Round 3: the checker passes and `audit_commit == closeout_ci.head_sha == merge_candidate == 30dcf3e`;
+      `main_sha_at_freeze = eadfe13` is an ancestor of the audited commit.
+- [x] If `main` moved after the freeze, a merge-tree CI run or a re-audit is recorded.
       — `main` is still `bbc2d08`, merged at `ff06139`; no merge-tree run is required. Round 2: **main has
       moved** to `eadfe13` (two docs/agent-config commits) and is not an ancestor of `008b133`; no merge-tree
       run is recorded, so the merge-tree rule applies (R2-3).
+      Round 3: `main` `eadfe13` is merged at `a584b20`; the audited commit `30dcf3e` is that merged tree and the
+      closeout run `44889193801` was dispatched at it, so the merge-tree rule is satisfied by the merged-tree
+      closeout run rather than a separate `merge_tree_ci` entry.
 - [x] Windows/macOS runs are recorded, or their absence is accepted because the step has no platform-specific
       code.
       — 23A adds a GUI and `OperatingSystem`/path-specific code, and step page §20 planned one
       `platforms=windows` dispatch; none is recorded (F-1). Round 2: Windows `44848841598` and macOS
       `44849147125` are green at `008b133`; both run `Mocassin.App.Tests` in the focused platform job and both
       run IDs are recorded in `platform_ci`. The manual real-window portion is still a template (R2-4).
+      Round 3: Windows `44889462922` and macOS `44889646766` are green at `30dcf3e`; the API shows the
+      "Platform tests - Avalonia headless workspace" step succeeded in both. The manual portion is the
+      owner-accepted automated Xvfb substitution (R2-4/R3-5).
 - [x] Format/version/fixture changes are documented and tested.
       — no `.mocprj`/`.msl`/`.msr`/`.mcs`/manifest change; `mocassin.settings` is app-local and absent from
       `contracts/manifest.json` (`SettingsContractTests`).
@@ -153,9 +184,14 @@ Copy the acceptance criteria from the step page, preserving their wording:
       docs; no 23B/24–28 code. The missing approved feature-5 items are recorded under F-6. Round 2: the fix
       delta is test-framework/settings/recents/theme/shell code plus tests and docs; no 23B type or editing
       surface appears. The post-squash branch commits are the recorded deviation 7 (R2-5).
+      Round 3: `30dcf3e` touches 22 files (test harness/meta-tests, five view tests, VM/view/theme settings,
+      docs); the five-file delta after it is documentation only. No 23B type appears.
 - [x] Branch, tag, and status hygiene are correct.
       — branch `step/23a-workspace-and-project-lifecycle`; no `step-23a` tag yet; dashboard/step page both
       `In audit`; `step-23a` identity accepted by the checker and process checker.
+      Round 3: `git tag --list 'step-23*'` is empty; the branch is not merged; dashboard and step page both say
+      Re-audit required at `30dcf3e`; the audited commit is the merged `eadfe13` tree and this record commit
+      will touch only this file.
 
 ## Evidence
 
@@ -289,6 +325,13 @@ a corrected harness makes seven of them fail), a real rapid-toggle layout defect
 unrecorded `main` move after the freeze (R2-3), and an unexecuted manual real-window checklist (R2-4). The
 branch must not merge until these are fixed and the closeout evidence is rebound.
 
+**Round 3 state:** Passed with notes — round 3 verified that R2-1, R2-2, and R2-3 are genuinely resolved (the
+seven exposed tests fail under targeted mutations; rapid toggles persist the final layout with no `.tmp`;
+`eadfe13` is merged into the audited tree and the evidence is rebound), and R2-4 is closed as a recorded,
+owner-accepted automated Xvfb substitution. Only three documentation-truthfulness Minors (R3-1…R3-3) and two
+residual-risk Notes (R3-4/R3-5) remain; the human owner must explicitly accept the notes before merge. No
+Blocker or Major remains.
+
 `Re-audit required` is a record state, not a verdict.
 
 ## Reviewer independence
@@ -297,6 +340,9 @@ branch must not merge until these are fixed and the closeout evidence is rebound
 > planner, implementor, or orchestrator.
 
 ## Verdict
+
+> **Current verdict (round 3): Passed with notes.** The checklist below is the round-1 verdict and is retained for
+> history; see `### Audit round 3` for the current findings and the owner-acceptance condition.
 
 - [ ] Passed
 - [ ] Passed with notes
@@ -572,3 +618,132 @@ real-window checklist is not recorded (R2-4). The owner must not approve a merge
 defect are fixed with effective tests, the merge-tree rule is satisfied (or a replacement closeout run is recorded
 for the merge candidate), and the manual checklist is executed or explicitly waived. This record is evidence, not
 authorization.
+
+### Audit round 3
+
+#### Independence and frozen state
+
+I am a fresh context. I did not design, implement, review, or coordinate this work and have no shared conversation
+with the planner, implementors, the round-1/round-2 auditors, or the orchestrator. I was given only the audited
+commit `30dcf3ed13dbd48cf2e8ed7c9aee349e1effacde`, the branch head `feb3ccb65b2ddf4c642bfbd17afdd22fab80b19b`,
+the round-1/round-2 record, the closeout evidence, and the required commands and scope; no desired verdict or
+summary was supplied. I did not author or implement the reviewed work.
+
+- Worktree `/home/node/worktrees/step-23a-audit-r3`, detached at `feb3ccb`, clean before this record edit.
+- `git diff --name-status 30dcf3e..feb3ccb` — five documentation files only:
+  `docs/planning/appendix-b-parity-matrix.md`, `docs/planning/audits/step-23a.md`,
+  `docs/planning/closeout/step-23a.json`, `docs/planning/status.md`, and the 23A step page. No code, test,
+  contract, or configuration delta; the audited code tree is `30dcf3e`.
+- `git rev-list --parents -n 1 30dcf3e` — parent `a584b20`, the merge of `main` `eadfe13` into the step branch;
+  `git merge-base --is-ancestor eadfe13 30dcf3e` is true. `main` and `origin/main` are still `eadfe13`.
+- `git tag --list 'step-23*'` is empty; the branch is not merged; no push to `main` was made.
+- Closeout evidence: `audit_commit = closeout_ci.head_sha = merge_candidate = 30dcf3e`;
+  `main_sha_at_freeze = eadfe13`; `merge_tree_ci` is empty because `30dcf3e` is itself the merged `main` tree and
+  the replacement Ubuntu closeout run was dispatched at it. The `step-NN[a-z]` checker accepts `step-23a`.
+
+#### Commands and results
+
+- `./tools/verify.sh all --require` on the frozen tree — **exit 0**, "Closeout gate completed with required checks
+  enabled." Contracts 37, Symmetry 223, Results 56, Core 685, Cli 203, Compilation 98, Packages 529, Architecture
+  7, and **App 121** tests, 0 failed. Zensical strict "No issues found"; DocFX build succeeded with 0 warnings/0
+  errors (464 models); rustdoc; ApiCompat compatible; 60 tool/policy tests OK; SPDX 1002 files; secret scan 1476
+  files; cargo-deny ok; AOT gate passed with the CLI's 62 recorded IL2xxx/IL3xxx diagnostics.
+- `python3 tools/check_closeout_evidence.py docs/planning/closeout/step-23a.json` — `Closeout evidence: OK` (0).
+- `python3 tools/tests/test_ci_platform_gate.py` — 13 tests OK; the pinned platform-gate list includes
+  `Mocassin.App.Tests`.
+- Focused App tests (`--filter` for `HeadlessSessionTests`, all `DialogOverlayTests`, the welcome test, the
+  `Ctrl` test, and the rapid-toggle test) — **10 passed, 0 failed**, on the Release build.
+- GitHub API queries (unauthenticated) against `seb-eis/mocassin-2`:
+  - Ubuntu `44889193801` — `success`, `workflow_dispatch`, `head_sha 30dcf3e…`, branch
+    `step/23a-workspace-and-project-lifecycle`; `.NET (ubuntu-latest)` ran "Test with coverage" (the full
+    solution, including `Mocassin.App.Tests`) and Format.
+  - Windows `44889462922` — `success`, `head_sha 30dcf3e…`; `.NET (windows-latest)` ran "Platform tests -
+    Avalonia headless workspace" (`Mocassin.App.Tests`) plus the package-writer, results-reader, and CLI
+    platform steps.
+  - macOS `44889646766` — `success`, `head_sha 30dcf3e…`; the same four platform steps, including the Avalonia
+    headless workspace.
+- Xvfb smoke re-run exactly as documented in `docs/development/platform-checklist.md`:
+  `xvfb-run -a -s "-screen 0 1280x800x24" env MOCASSIN_XVFB_CAPTURE="$PWD/artifacts/xvfb" dotnet test
+  src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Debug --filter "FullyQualifiedName~XvfbUiSmokeTests"`
+  — **1 passed**, exit 0, on Debian GNU/Linux 13 (trixie), kernel 6.12.116.13, .NET 11.0.0. It wrote seven
+  PNGs, `result.txt`, and `run.md`; the light/dark/high-contrast images differ and the live lifecycle steps
+  reported `Saved` and `Opened`. The run's hashes differ from the recorded ones (see R3-4); `artifacts/` is
+  ignored and untracked.
+- Mutation probes in a scratch worktree `/home/node/tmp/step-23a-probe-r3` (detached at `feb3ccb`, never
+  committed, removed afterwards):
+  - restoring the old `Dispatch<T>(Func<T>)` harness made both `HeadlessSessionTests` fail ("No exception was
+    thrown"), proving the meta-tests guard the awaited dispatch;
+  - with the fixed harness, removing the confirm-dialog `Pump` failed
+    `AConfirmationRoundTripsThroughTheRealOverlay` ("Sequence contains no matching element"); removing the pump
+    independently from the prompt, error, and focus tests failed `PromptAndChoiceDialogsRoundTrip`,
+    `ErrorDialogClosesWithoutThrowing`, and `FocusIsRestoredAfterADialog` with the same missing-control error,
+    so all four dialog regressions are effective;
+  - an off-by-one `Ctrl+1..9` index failed `CtrlNumberActivatesATab` (`Expected "project.overview", Actual
+    "project.json"`);
+  - restoring capture-at-persist plus the unsuppressed settings event failed
+    `RapidRegionTogglesCoalesceIntoTheLastPersistedLayout` at `Assert.True(...)`;
+  - renaming the welcome automation name failed `TheShellShowsTheWelcomeTabAndProjectNodes` (no matching named
+    control).
+  The seven tests exposed in round 2 are therefore effective, not merely green.
+- `git status --short` on the audit worktree is clean; no `.tmp` residue remains after the layout test.
+
+#### Round-2 finding closure
+
+| Finding | Round-2 severity | Round-3 status | Evidence |
+| --- | --- | --- | --- |
+| R2-1 | Blocker | **Closed** | `HeadlessSession.DispatchAsync(Func<Task>)` awaits the inner task through the `Func<Task<T>>` overload (`HeadlessSession.cs:44-51`); the two meta-tests fail under the old helper and pass here; the seven corrected tests pass and fail under the mutations above. The eleven async bodies now run under the awaited helper. |
+| R2-2 | Major | **Closed** | `ScheduleLayoutPersist` captures the target layout before queueing and `PersistLayoutAsync` suppresses the settings event caused by its own write; the regression asserts `True → False → True`, the persisted `LeftVisible`, and no `.tmp`; the reverted implementation fails it. Removing only the suppression still passes because capture-at-schedule already preserves the final persisted state; the test proves the user-visible last-write-wins outcome, which is the defect that was reported. |
+| R2-3 | Major | **Closed** | `main` `eadfe13` is merged at `a584b20`, the audited commit `30dcf3e` is that tree, and the evidence records `main_sha_at_freeze = eadfe13`. The checker passes and `eadfe13` is an ancestor of `30dcf3e`; the merged-tree closeout run replaces a separate `merge_tree_ci` entry. |
+| R2-4 | Major | **Closed as a recorded owner-accepted substitution** | The automated Xvfb harness runs the real shell on X11, captures seven images, asserts the theme/lifecycle outcomes, and is explicitly labelled automated rather than manual. The step page and `platform-checklist.md` record the owner's acceptance of the substitution on 2026-11-21. It does not provide a literal human checklist; residual risk R3-5. |
+| R2-5 | Minor | **Closed** | Step page deviation 7 records the owner's acceptance as an exception, not a precedent; all round-2 fixes are in the `fix-audit-round-2` squash `30dcf3e`; no history was rewritten. |
+| R2-6 | Minor | **Closed** | `docs/development/code-structure.md` no longer contains a placement-resolver reference; a repository grep finds the removed type only in audit/review history. |
+| R2-7 | Note | **Closed** | The five flag-only resources and the unused shell-foreground key are removed; `Mocassin.ControlPadding`, `ItemPadding`, `ControlMinHeight`, `BorderThickness`, `Transitions`, `ShellBackground`, `BodyFontSize`, and `SystemAccentColor` are written and consumed. `AccessibilityTests` asserts names, roles, and a deterministic Tab order; the settings dialog has error/status banners. Save-as-new remains not implemented and is recorded (residual note). |
+| R2-8 | Note | **Recorded** | The round-1 record was bundled into `657bc5f`; the record was not altered and the verdict was re-run. The history is not rewritten. |
+
+#### R2-4 substitution judgement
+
+The Xvfb harness is genuine automated real-window evidence for Linux X11: it starts the real `ShellWindow` via
+`AppHost.Build`, drives light/dark/high-contrast appearance, creates and opens the ceria template, saves, opens and
+confirms the real in-shell dialog, closes and reopens the project, and fails if an assertion or capture is missing.
+It is not a manual human checklist, and the page says so. The owner's acceptance is a recorded substitution/waiver
+of the manual portion, not a literal execution of it. That is sufficient to close R2-4 and to allow the owner to
+decide the merge, with the platform residual risk recorded as R3-5. It is not a precedent for later GUI steps to
+skip a human real-window pass without an explicit owner decision.
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **R3-1 — The audit request's known-notes still claim the Windows/macOS gates were not run.** The last bullet says "The Ubuntu closeout run is the only CI dispatch for this step. Windows/macOS platform gates are recorded as not run in the closeout evidence…". That contradicts the frozen evidence and the step page, which record three green runs including both platform jobs. | `docs/planning/audits/step-23a.md` "Known notes for the auditor", final bullet; `closeout/step-23a.json:14,18`; step page feature 6-fix. |
+| **Minor** | **R3-2 — The parity matrix's platform rows are stale.** "Windows/macOS manual platform gate not yet run" is false (both ran green at `30dcf3e`), and the GUI cross-platform row still promises a "manual smoke checklist" after the owner accepted the automated Xvfb substitution and the optional manual spot-check is explicitly not required for 23A. | `docs/planning/appendix-b-parity-matrix.md:222,258`; `docs/development/platform-checklist.md:29-34,84-87`; Windows `44889462922`, macOS `44889646766`. |
+| **Minor** | **R3-3 — The step page's status block still names `bbc2d08` as the merged `main`.** `main` is `eadfe13`, merged at `a584b20`; the R2-3 resolution and the evidence say so, but the status bullet still says "`bbc2d08` is merged into the step branch". A reader following the status block alone would check the wrong base. | Step page line 25 (`Implementation status`, "Main merge"); `git rev-parse main`; `a584b20^2`. |
+| **Note** | **R3-4 — The Xvfb image hashes are a one-run record and are not independently checkable.** The seven PNGs are written to the ignored `artifacts/xvfb/` and are not committed, so the recorded SHA-256 values cannot be re-derived. A fresh run is green and has the same seven-image structure and invariant assertions, but its sizes/hashes differ (project timestamps and rendering). This is a documented evidence limitation, not a failing test. | `docs/development/platform-checklist.md:69-82`; audit-worktree re-run at 2026-11-21T10:00Z; `.gitignore:artifacts/`; `git status` clean. |
+| **Note** | **R3-5 — The real-window substitution covers Linux X11 only.** The automated capture is one Linux desktop; Windows and macOS have green headless platform suites but no human or captured real-window pass. This is the residual risk of the owner-accepted R2-4 substitution, mitigated by the platform gates and recorded here for the merge decision. | `docs/development/platform-checklist.md:29-34,84-87`; closeout `platform_ci`; no real-window evidence for Windows/macOS. |
+
+#### Remaining recorded limitations (not regressions)
+
+The audit re-checked the limitations the orchestrator listed: tab drag-reorder is still not wired (step page
+deviation 5; `DocumentCollectionViewModel.Move` is the seam); window placement is not persisted and the dead
+resolver is gone (step page §2/F-9); the crash log still omits the active-project/last-command context (F-12,
+accepted); AOT remains CLI-only evidence with the 62 recorded diagnostics (F-14, accepted); "Save as new file" for a
+rejected future-major settings document is not implemented (the console and the settings banner report the
+preservation; R2-7 note); external-change detection keeps the documented length + last-write cheap filter; a
+read-only session still shows the acquisition time as unavailable (F-10 note). Each is recorded in the step page,
+the parity matrix, or the audit record; none is introduced or hidden by the round-2 fixes. No format, manifest,
+contract, or public-API change was introduced by the fix delta; the structure, ApiCompat, SPDX, secret-scan, and
+licence gates pass.
+
+#### Verdict
+
+**Passed with notes.** No Blocker or Major remains. Round 3 verified R2-1 (the awaited harness and the seven
+corrected tests are effective under mutation), R2-2 (last-write-wins layout, persisted `LeftVisible`, no `.tmp`),
+and R2-3 (`eadfe13` merged into the audited tree and the evidence rebound; the merged-tree closeout run satisfies
+the merge-tree rule). R2-4 is closed as the owner-accepted automated Xvfb substitution with the Linux-only residual
+risk recorded; R2-5…R2-8 are closed or recorded.
+
+The notes the human owner must explicitly accept are the three documentation-truthfulness Minors (R3-1 stale audit
+request, R3-2 stale parity platform rows, R3-3 stale step-page main-merge parenthetical) and the two residual-risk
+Notes (R3-4 uncommitted Xvfb hashes, R3-5 Linux-only real-window evidence). None of them is a correctness or
+acceptance failure: the code, tests, CI, closeout evidence, and gates are sound. This record is evidence, not
+authorization; the owner still decides the merge, and a resolution/status commit may correct the three minor text
+items without changing code.
