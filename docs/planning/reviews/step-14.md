@@ -15,10 +15,10 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `b6dc50361e749954480efa1d1559d987c10b4142` (round 2 freeze: design corrections after round 1) |
-| Previous reviewed commit | `7c7ff0de83a4ae4c5f9849650e0601c7238494b8` (round 1 freeze) |
+| Reviewed commit | `87be9dee6816aac4cc18c42de21b441f13827c88` (round 3 freeze: design corrections after round 2) |
+| Previous reviewed commits | `b6dc50361e749954480efa1d1559d987c10b4142` (round 2), `7c7ff0de83a4ae4c5f9849650e0601c7238494b8` (round 1) |
 | Docs branch | `docs/step-14-design` (from `main` = `bbc2d083ed96fa6e26526e335304107b20a7fdcb`, `step-13` merged and tagged) |
-| Review date | 2026-11-20 (round 1); re-review request 2026-11-21 |
+| Review date | 2026-11-20 (round 1); rounds 2 and 3 requested 2026-11-21 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
 
 Step page: [`Step 14 — Simulation Context Initialization`](../steps/step-14-simulation-context-initialization.md)
@@ -30,8 +30,12 @@ solver-architecture, and physics updates, plus the Step 15 interface reconciliat
 (`b6dc503`) applies the F-1…F-16 resolutions: the owner-major link CSR with an inverse routing index, the
 supercell selection-pool key space, the pre-allocation memory plan and derived-array caps, the receiver-major
 jump links, the repair of the resume, goal, memory, `nu_max`, `!Sync`, and crate-dependency issues, and the
-Step 15/16 interface reconciliation. No code, test, configuration, contract artifact, or generated file is part
-of either freeze.
+Step 15/16 interface reconciliation. The round-3 freeze (`87be9de`) applies the F-17…F-28 resolutions: the
+cluster runtime is one instance per slot-0 link with per-instance member-site geometry, the Step 16 text is
+reconciled (no `AttemptFrequencyModulus`, `total/100`, no lattice-signature check), the `KmcEngine`/`EnergyEngine`
+borrow composition is fixed, `nu_max` is exit 13, link-image arithmetic is `i64`, pool capacity is reserved, and
+the `plan == report`, original-storage, `linked(a,b)`, `MOBILE`, phase-count, and `pool_of` notes are resolved.
+No code, test, configuration, contract artifact, or generated file is part of any freeze.
 
 **No code exists yet.** Step 14 has no branch and no implementation. The design is judged on whether the runtime
 layout, the cross-step interfaces, the two gated decisions, the fixtures, the test/budget plan, and the
@@ -56,31 +60,35 @@ documentation plan are ready to implement.
 ## Design decisions reviewed
 
 - [x] **Context ownership and phasing.** One `SimulationContext` per job from the validated `JobPackage`; no
-      I/O, no package re-read, no interior mutability; the twelve-phase build order; `InitOutcome`
-      (`Ready`/`AlreadyCompleted`); `Send` but not `Sync`; the frozen accessor surface.
+      I/O, no package re-read, no interior mutability; the thirteen-step build order (phase 0 plus twelve);
+      `InitOutcome` (`Ready`/`AlreadyCompleted`); `Send` but not `Sync` with an explicit `!Sync` marker; the
+      frozen accessor surface.
 - [x] **Data layout and bounds.** `[A,B,C,P]` dimensions and the documented linear index; struct-of-arrays
       arenas; `u32`/`u8`/`u64`/`f64` choices; explicit energy stride; the `ContextLimits` table and the
       checked-arithmetic rule that a limit violation is exit 12, not a panic.
-- [x] **Neighbour links.** The translation-compact per-P1 CSR versus the original per-supercell link array;
-      `wrap(cell + offset) * P + target_position`; the deterministic sort (`pair_id`, target, offset) as a
-      reproducibility contract; the per-link cluster association; the reader-cap consistency.
+- [x] **Neighbour links.** The owner-major per-P1 link CSR plus the inverse routing index versus the original
+      per-supercell link array; `partner = wrap(owner_cell + offset) * P + partner_position` in `i64`; the
+      deterministic sort (`pair_id`, partner, offset) as a reproducibility contract; the per-link cluster
+      association; the reader-cap consistency.
 - [x] **Cluster runtime and the v1 geometry limitation (OD-1).** `byte_position` = the environment's own slot;
-      slot 0 = centre; instance/membership/code representation; code-existence validation; the unique-image rule
-      and the fail-closed rejection of zero/multiple images; the permanent fix as a future `.msl` revision.
+      one instance per slot-0 link (a table may centre on several P1 positions of its site); per-instance slot
+      geometry/codes/energies; the member-site image rule for multi-centre tables; code-existence validation; the
+      fail-closed rejection of absent/ambiguous images; the permanent fix as a future `.msl` revision.
 - [x] **Cluster table layout correction.** One energy per occupation code with slot 0 = centre particle;
       `particle_table_mapping` as the ascending allowed-centre list, not a `[u8; 64]` row map; the Step 15
       `[center_row][code]` wording replaced.
 - [x] **Energy runtime and initial lattice energy (OD-2).** eV→kT once; the site table separate from the
       site+pair vector; per-instance cluster energy; the exact total (site once, pair ×0.5, cluster once at the
       centre); the documented deviation from the original's uniform 0.5 and its hand-computed test.
-- [x] **Selection pools.** Direction-count buckets ascending; the `selection_particle_mask` condition; optimizer
-      removal and the re-add-after-change semantics; O(1) `slot_of`/`pool_of` swap-remove; `selectable_jump_count`
-      bounds; the `-1`/`0` collapse because the payload uses `u32`.
+- [x] **Selection pools.** Supercell-addressed members (`EnvId` + particle); direction-count buckets ascending;
+      the `selection_particle_mask` condition; optimizer removal and the re-add-after-change semantics; one
+      global slot map plus a per-P1 `pool_of`; per-pool reserved capacity; `selectable_jump_count` bounds; the
+      `-1`/`0` collapse because the payload uses `u32`.
 - [x] **KMC jump status.** Status identity `direction * P + position`; `resolve_node` with node 0 replaced by the
-      selected bucket (cross-bucket mapping); sender/receiver link collection with `link_id` relative to the
-      sender P1 list; the structural receiver filter (deviation from the original's initial-occupation filter);
-      the `L*(L-1) ≤ 90` derived bound; cluster touches per direction; the Step 16 exact-occupation data
-      interface.
+      selected bucket (cross-bucket mapping); receiver-major links (`sender_path_id`, `receiver_path_id`,
+      `link_id` into the receiver's list); the structural receiver filter (deviation from the original's
+      initial-occupation filter); the `L*(L-1) ≤ 90` derived bound and counting-pass caps; link-carried cluster
+      associations; the Step 16 exact-occupation data interface.
 - [x] **Goals, counters, tracker index space.** `mobile_count` = non-void positions (passive included);
       `prerun`/`main`/`total` and the round-up-to-100 block; the mobile/static index formulas; counters zeroed
       and tracker values deferred to Step 18; the zero-mobile/zero-selectable errors.
@@ -90,12 +98,13 @@ documentation plan are ready to implement.
 - [x] **Transport-formula input contract (Step 13 assignment).** `field_scale = |E|*1e-10/kT_eV` and the
       normalized direction; the stored `charge_transport_vector` used verbatim; no recomputation from
       movements; fractional P1 coordinates unavailable; the residual risk and future-format note.
-- [x] **Resume.** The plain `ResumeState`/`ResumePhase` input; no `mocassin-state` dependency; every validation;
-      the re-derived mobile mapping; `RawMax` preserved; `Completed` returns `AlreadyCompleted` and is never
-      resumed; exit mapping for a bad RNG state.
-- [x] **Errors, exits, determinism, cancellation.** The `ContextError` → exit 12/13/15 table; no `unwrap` on
-      package data; no hash iteration; fixed f64 summation order; no `rayon`; per-phase and every-4096
-      cancellation; `MemoryReport`.
+- [x] **Resume.** The plain `ResumeState`/`ResumePhase` input; no `mocassin-state` dependency; the parameterized
+      `.mcs` signature plus `seedHash` (no lattice signature); every validation; the re-derived mobile mapping;
+      `RawMax` preserved; `Completed` returns `AlreadyCompleted` and is never resumed; exit mapping for a bad RNG
+      state.
+- [x] **Errors, exits, determinism, cancellation.** The `ContextError` → exit 12/13/15 table (`nu_max` is 13);
+      the pre-allocation `MemoryPlan`; no `unwrap` on package data; no hash iteration; fixed f64 summation order;
+      no `rayon`; per-phase and every-4096 cancellation; `MemoryReport` on planned lengths.
 - [x] **Step 15/16/17/18/19 interfaces.** The §15 interface table and whether each consumer has what it needs;
       the Step 16 exact-occupation check ownership; the Step 18 tracker-value boundary; the Step 19 resume/CLI
       boundary; no hidden Step 14 physics.
@@ -103,9 +112,10 @@ documentation plan are ready to implement.
       breadth; one acceptance story; the no-split case; the six feature branches with their scopes and outcomes;
       the API-freeze guard; the roadmap §3.1 record and the owner-acceptance request.
 - [x] **Fixtures, tests, and budgets.** Reuse of `msl-v1`, `amend-1-net10`, `step-13-populated`,
-      `step-13-centered`; the new real-writer 10×10×10 fixture and why it is not a schema change; the
-      context-summary snapshot; the allocation test binary; the Criterion `context` benchmark and the
-      `rustContext` same-class baseline; the `< 100 ms`/`< 20 ms`/memory budgets; the nightly 500k stress.
+      `step-13-centered`; the new real-writer 10×10×10 fixture and the multi-centre cluster fixture (and why they
+      are not schema changes); the populated 10×10×10 clone measurement; the context-summary snapshot; the
+      allocation test binary; the Criterion `context` benchmark and the `rustContext` same-class baseline; the
+      `< 100 ms`/`< 20 ms`/memory budgets; the nightly 500k stress.
 - [x] **Documentation, parity, and closeout plan.** `solver-architecture.md`, `physics/energies.md`,
       `performance/index.md`, `troubleshooting/errors.md`, `testing-and-parity.md`, `msl-format.md`; the new
       parity row; the closeout evidence and audit sequence; the note that the status dashboard is
@@ -113,13 +123,15 @@ documentation plan are ready to implement.
 
 ## Known limitations and gated decisions
 
-- **OD-1 (gated, Step 14 start gate + future format revision).** The v1 cluster link does not persist the
-  member's relative cell offset and the payload has no fractional P1 coordinates. Step 14 derives the offset only
-  from a unique centre→member pair image and rejects zero or multiple images. A writer-valid cross-image cluster
-  is therefore rejected. The permanent fix is a future `.msl` payload field and needs its own decision,
+- **OD-1 (accepted 2026-11-20; extended 2026-11-21 for F-17).** The v1 cluster link does not persist the
+  member's relative cell offset and the payload has no fractional P1 coordinates. A cluster table can have one
+  slot-0 link per P1 position of its centre site, so Step 14 runs one instance per slot-0 link; a slot resolves
+  through the candidate position's unique link or, for a multi-centre table only, the member site's unique
+  image. An absent/ambiguous image, and a writer-valid cross-image cluster, are rejected with exit 12. The
+  permanent fix is a future `.msl` payload field (per-centre member offset) and needs its own decision,
   amendment, fixtures, and version handling. Recorded in the step page §6.4, the data contract §3.3, and
-  `05-open-decisions.md` §3.
-- **OD-2 (gated, Step 14 start gate).** The original applies its uniform 0.5 factor to the site and cluster
+  `05-open-decisions.md` §2.
+- **OD-2 (accepted 2026-11-20).** The original applies its uniform 0.5 factor to the site and cluster
   contributions as well as to pairs. Step 14 initializes the exact total (site once, pair ×0.5, cluster once at
   the centre), consistent with `physics/energies.md`, and Step 15 continues with that decomposition. The
   deviation is recorded with a hand-computed test and assigned to Step 29 parity.
@@ -133,7 +145,8 @@ documentation plan are ready to implement.
 - [x] Step 13 is `Done`, merged (`2613a0dcbc3ddbfe4bb5b54f47821d3ffa951789`) and tagged `step-13`, and the
       runtime types, fixture set, exit-code model, and reader contract that Step 14 consumes are stable. Verify
       the `JobPackage`/`ParameterizedModel`/`EnvironmentModel`/`EnergyModel`/`TransitionModel` fields the design
-      names, the `DirectionPool`/`JumpStatus` containers, and the real fixtures and their summaries.
+      names, the `JumpStatus`/`JumpLink` containers (and the retired `DirectionPool` placeholder), and the real
+      fixtures and their summaries.
       — *Reviewed. The fields exist and match the design; `DirectionPool` uses `(PositionId, ParticleId)` with
       `PositionId` = P1 (F-1), and `JumpLink.link_id` is described as the receiver’s environment link (F-2). The
       populated/centered fixtures and summaries are present.*
@@ -269,10 +282,10 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required — round 2 at record `e844a13` (frozen design `b6dc503`) closes F-1, F-2, and F-3 in substance and closes F-4–F-16 in the Step 14 freeze; it adds F-17 (Major, cluster instance per table) and the minor cross-step corrections F-18–F-22 plus notes F-23–F-28. The request owner set `Re-review required` after round 1; the reviewer-authored round-1 text, findings, and verdict remain unchanged as history.
-
-The request owner set `Re-review required` after applying the round-1 resolutions; the round-2 reviewer set the
-current state. The reviewer-authored round-1 text below is unchanged.
+**State:** Re-review required — round 3 request at `87be9de`. Round 2 accepted the round-1 Major redesigns and
+raised F-17 (Major, cluster instance cardinality) plus F-18…F-28; the round-3 freeze addresses all of them. The
+request owner sets this state; the reviewer-authored round-1/round-2 findings, evidence, and verdicts remain
+unchanged as history.
 
 ## Reviewer independence
 
@@ -293,19 +306,20 @@ Follow-up step: Step 14 — re-freeze the corrected design and append a fresh re
 
 The request owner (step agent or planner) completes this section before the orchestrator presents the approval
 request. It must cover the full history, not only the latest round. This section is prepared for the Step 14
-start gate; it is not a merge/tag/waiver request and makes no claim about round 2.
+start gate; it is not a merge/tag/waiver request and makes no claim about round 3.
 
 - [x] Requested decision and frozen commit recorded — re-review of the corrected design at
-      `b6dc50361e749954480efa1d1559d987c10b4142`; the start gate remains the owner's decision
-- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict) — round 1 recorded; round 2 is
-      pending a fresh reviewer and is listed as pending, not omitted
+      `87be9dee6816aac4cc18c42de21b441f13827c88`; the start gate remains the owner's decision
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict) — rounds 1 and 2 recorded;
+      round 3 is pending a fresh reviewer and is listed as pending, not omitted
 - [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status) — the reviewer's
-      table above and the resolutions below cover F-1…F-16
-- [x] Accepted notes and waivers recorded with rationale — OD-1 and OD-2 accepted 2026-11-20 (see below)
+      tables above and the resolutions below cover F-1…F-28
+- [x] Accepted notes and waivers recorded with rationale — OD-1 and OD-2 accepted 2026-11-20; OD-1 extended for
+      F-17 on 2026-11-21 (see below)
 - [ ] Residual risks, deferred items, and follow-up owners recorded — the step page §21/§23 and OD-1 carry them;
       the final list is completed at the start gate
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — pending round 2
-- [ ] Final CI and documentation-build results recorded — round-2 `docs`/`policy` results are recorded in the
+- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — pending round 3
+- [ ] Final CI and documentation-build results recorded — round-3 `docs`/`policy` results are recorded in the
       resolution section; the closeout CI belongs to the step, not this gate
 
 Round history:
@@ -313,7 +327,8 @@ Round history:
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-20 | `7c7ff0d` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
-| 2 | pending | `b6dc503` | pending fresh planning auditor | pending |
+| 2 | 2026-11-21 | `b6dc503` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
+| 3 | pending | `87be9de` | pending fresh planning auditor | pending |
 
 Findings and resolutions:
 
@@ -335,12 +350,25 @@ Findings and resolutions:
 | F-14 | Note | `LimitExceeded` 12 vs architecture 14 | Explicit 12-vs-14 distinction in the step page, architecture §7.3, and quality strategy | `b6dc503` | Addressed |
 | F-15 | Note | Unused solver dependencies | Feature 1 makes `mocassin-msl` dev-only and removes `mocassin-state`/`mocassin-extension`/`rayon` | `b6dc503` | Addressed (implementation task) |
 | F-16 | Note | `EnergyEngine` held `&SimulationContext` but mutated | Step 15 API uses `&mut SimulationContext` and `&mut self` | `b6dc503` | Addressed |
+| F-17 | Major | Cluster runtime was one instance per table; a writer-valid multi-position centre site was unrepresentable | One instance per slot-0 link (CSR; `K` = slot-0 link count), per-instance slot geometry/codes/energies, member-site image resolution, multi-centre fixture + ambiguity test, OD-1 extended | `87be9de` | Addressed |
+| F-18 | Minor | Step 16 still described `AttemptFrequencyModulus`, `max(1, total/100)`, and a lattice-signature check | Step 16 §6/§8/§9 reconciled with F-6/F-7/F-12 | `87be9de` | Addressed |
+| F-19 | Minor | `KmcEngine` would hold two mutable borrows of the context | `KmcEngine` holds `ctx` only; `EnergyEngine::new(&mut *self.ctx)` per call; Step 16 §1/§5 note | `87be9de` | Addressed |
+| F-20 | Minor | `nu_max` exit code inconsistent (12 vs 13) | Exit 13 (`NonFiniteFactor`) in §11.1, §13, and the quality strategy, with the classification rationale | `87be9de` | Addressed |
+| F-21 | Minor | `wrap(cell + offset)` used unchecked `i32` | `i64` `rem_euclid` with a checked cast; hostile `i32::MIN`/`i32::MAX` offset test | `87be9de` | Addressed |
+| F-22 | Minor | `SelectionPool.members` could reallocate on insert | Exact per-pool capacity reserved in the plan; debug assertion; zero-allocation criterion retained | `87be9de` | Addressed |
+| F-23 | Note | `plan == report` vs `Vec::capacity` | Report defined on planned lengths; capacity bytes are a separate diagnostic | `87be9de` | Addressed |
+| F-24 | Note | §9.2 parenthetical reversed the original's link storage | Wording corrected: the original stores the link on the changed/partner side pointing at the energy-changing centre; our `JumpLink` is the dual | `87be9de` | Addressed |
+| F-25 | Note | `linked(a,b)` named but undefined | Defined in §15 as an either-direction interaction test over `link_range`/`incoming` | `87be9de` | Addressed |
+| F-26 | Note | `MOBILE` static/passive assumption unconfirmed | Assumption stated (every non-void environment is `MOBILE`), test added, Step 29 parity owner | `87be9de` | Addressed |
+| F-27 | Note | "twelve-phase" vs 13 phases | Request summary and page use the thirteen-step build order (phase 0 plus twelve) | `87be9de` | Addressed |
+| F-28 | Note | `pool_of` comment typo | Comment says `key = P*pc + particle (P1 position)` | `87be9de` | Addressed |
 
 Accepted notes and waivers:
 
-- **OD-1 accepted (2026-11-20, owner):** the v1 cluster-link limitation stands, with slot 0 = `[0,0,0]`, the
-  unique centre→member link rule for slots `1..n`, fail-closed exit 12, and a named writer follow-up. No payload
-  revision now.
+- **OD-1 accepted (2026-11-20, owner) and extended 2026-11-21 for F-17:** the v1 cluster-link limitation stands
+  with one instance per slot-0 link, slot 0 = `[0,0,0]`, a slot resolved by the candidate position's unique link
+  or (multi-centre only) the member site's unique image, fail-closed exit 12 for an absent/ambiguous image, and a
+  named writer follow-up. No payload revision now.
 - **OD-2 accepted (2026-11-20, owner):** the exact accounting (site once, pair ×0.5, cluster once at the centre)
   stands; AGENTS §10 and `physics/energies.md` agree; Step 29 parity covers the deviation.
 - Both acceptances are recorded in `05-open-decisions.md` §2 and in the step page §§6.4 and 7.4.
@@ -375,6 +403,18 @@ Date:
 | F-14 | Resolved | Planner | Step 14 §13; `01-target-architecture.md` §7.3; quality strategy §9.12: exit 12 = context cannot be represented, exit 14 = run-time abort | `b6dc503` |
 | F-15 | Resolved (implementation task) | Planner | Step 14 §22; `solver-architecture.md` crate graph: `mocassin-msl` dev-only, `mocassin-state`/`mocassin-extension`/`rayon` removed in feature 1 and restored in Steps 18/19/29 | `b6dc503` |
 | F-16 | Resolved | Planner | Step 15 §1: `EnergyEngine<'a> { ctx: &'a mut SimulationContext }` and `&mut self` methods; `EnvId` accessors | `b6dc503` |
+| F-17 | Resolved | Planner | Step 14 §2/§6.2/§6.3/§6.4/§19: one instance per slot-0 link (CSR; `K` = slot-0 link count), per-instance `slot_start`/`slot_positions`/`slot_cells`/`codes`/`code_ids`/`energy`, member-site image resolution with the single-centre strict rule, plan table updated, multi-centre fixture + ambiguity test, OD-1 extended; Step 15 sums every instance at a path node | `87be9de` |
+| F-18 | Resolved | Planner | Step 16 §6 (no `AttemptFrequencyModulus`; `nu_max` from the job cap or derived maximum), §8 (`total/100`, no `max(1, …)`), §9 (parameterized signature + seed hash, no lattice signature) | `87be9de` |
+| F-19 | Resolved | Planner | Step 15 §1 `EnergyEngine::new`; Step 16 §1 stores only `ctx` and constructs a short-lived `EnergyEngine` per call; no double mutable borrow | `87be9de` |
+| F-20 | Resolved | Planner | Step 14 §11.1 `nu_max` → exit 13; §13 and quality strategy already 13; rationale (time-step denominator) stated | `87be9de` |
+| F-21 | Resolved | Planner | Step 14 §2/§6.1: `i64` add + `rem_euclid`, checked cast; hostile-offset test; solver-architecture and quality strategy updated | `87be9de` |
+| F-22 | Resolved | Planner | Step 14 §8: per-pool `with_capacity` from the plan's count, debug capacity assertion, zero-allocation criterion retained | `87be9de` |
+| F-23 | Resolved | Planner | Step 14 §2/§17 and solver-architecture: `MemoryReport` on planned lengths, `plan == report`, capacity bytes diagnostic, RSS separate | `87be9de` |
+| F-24 | Resolved | Planner | Step 14 §9.2 original-storage paragraph corrected (`LinkEnvironmentToSurroundings`/`TargetEnvironmentId`, `DistributeEnvironmentUpdate`, `BufferJumpLinksOfJumpPath`) | `87be9de` |
+| F-25 | Resolved | Planner | Step 14 §15 defines `linked(a,b)` (either direction, no synthesis, `link_range`/`incoming`); solver-architecture repeats it | `87be9de` |
+| F-26 | Resolved | Planner | Step 14 §3 states the assumption and the test; §19 adds the mobile-assumption row; Step 29 parity owner | `87be9de` |
+| F-27 | Resolved | Planner | Request summary says thirteen-step (phase 0 plus twelve); the page's phase list stays 0–12 | `87be9de` |
+| F-28 | Resolved | Planner | Step 14 §8 code-block comment fixed to `P*pc + particle (P1 position)` | `87be9de` |
 
 **Major redesign summary.**
 
@@ -394,6 +434,18 @@ Date:
   `(P*D+1)` jump offsets (with `max_status_count`), the counted jump links (`max_jump_links`), the inverse link
   index, the pool slot map, and the cluster geometry. Per-array caps plus `max_context_bytes` (1 GiB) reject
   with `LimitExceeded` (exit 12); `MemoryReport` must equal the plan.
+- **F-17 (cluster instances).** `ClusterCompilationStage` adds slot `0` to every P1 position of the centre site,
+  so the runtime now has one `ClusterInstance` per **slot-0 link**: `K` is that link count, `codes`/`code_ids`/
+  `energy` are `K*C`/`K*C`/`C*Σ mapping_len`, and the geometry is a flat CSR (`slot_start`, `slot_positions`,
+  `slot_cells`) with `centres` listing every instance at a position. A slot resolves first through the
+  candidate position's unique centre→member link (the strict single-centre rule), and only for a multi-centre
+  table falls back to the unique image of the slot's **member site**; an absent/ambiguous image is
+  `ClusterGeometry` (exit 12). The plan table, the centred-model multi-centre fixture, the ambiguity test, OD-1,
+  the data contract, and Step 15's per-instance cluster sum were updated.
+- **Cross-step Step 13 break.** The accepted placeholder retirement is recorded for the feature log: feature 4
+  removes `DirectionPool`, reshapes `JumpLink` (`sender_path_id`, `receiver_path_id`, `link_id`) and updates the
+  `mocassin-types` invariant tests; the public Rust API break is called out in Step 14 §22 and the feature table.
+  No `.msl`/manifest/signature/fixture change, and the `step-13` tag does not move.
 
 **Gate results for the corrected freeze.**
 
