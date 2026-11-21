@@ -151,11 +151,13 @@ or SQLite. Prefer real temporary directories and real files produced by the real
 ## Avalonia editing, diagnostics, and recovery (Step 23B, planned)
 
 Step 23B is design-frozen but not implemented. Its tests extend the 23A harness: the edit pipeline and
-save-point matrix, the retained `ProjectSession.Validation`/`Load`-stage fixtures, the Problems surface, dirty
-markers and prompts, the autosave tick, the `recovery/` crash snapshot and manifest, unclean-exit restore, and
-the 2 s crash-path budget. Tests use `ManualTimeProvider` and the scheduler's injectable tick instead of real
-sleeps, and the crash dialog's dead-UI path is asserted to write no recovery files. Screenshots and
-accessibility checks for the Problems channel, recovery prompt, and metadata form are PR-medium on Ubuntu only.
+save-point matrix, the retained `ProjectSession.Validation`/`Load`-stage fixtures, the Problems surface, the
+read-only outcome, the explicit statistics trigger, dirty markers and prompts, the autosave tick, the
+timestamp-normalized recovery comparison, the `recovery/` crash snapshot and manifest, unclean-exit restore,
+the per-session gate, and the 2 s crash-path budget. Tests use `ManualTimeProvider` and the scheduler's
+injectable tick instead of real sleeps, and the crash dialog's dead-UI path is asserted to write no recovery
+files. Screenshots and accessibility checks for the Problems channel, recovery prompt, and metadata form are
+PR-medium on Ubuntu only.
 
 ## Test tiers
 

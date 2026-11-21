@@ -667,8 +667,8 @@ recovery fixtures.
   fixture (`Skipped`, count 0).
 - **Tiers.** 23A: shell view-model, lifecycle, reload/locks/read-only/external-change, settings migration,
   navigation, palette, dialog, and primary accessibility tests. 23B: edit/undo, dirty/save-point, autosave,
-  recovery, and validation (including the `Load`-stage/load-diagnostic contract) tests. Both sets are
-  **PR-fast**. Headless view rendering and the screenshot set are
+  recovery, and validation (including the `Load`-stage/load-diagnostic contract), read-only outcome, explicit
+  statistics, timestamp-normalized recovery, and the per-session gate. Both sets are **PR-fast**. Headless view rendering and the screenshot set are
   **PR-medium**. Platform runs are manual. PR-fast tests assert functionality, ordering, and asynchrony, never an
   absolute duration; timing is recorded as non-gating evidence on a benchmark or manual run (§13/§16 of the
   23A page, §14 of the 23B page).

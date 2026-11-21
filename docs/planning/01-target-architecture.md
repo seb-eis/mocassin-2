@@ -205,7 +205,8 @@ Rules:
   pipeline.
 - One writer per project: Step 23B's `ProjectEditCoordinator` over the Step 01 `ProjectDocument`. View models
   never mutate a `Project` or a domain object, never compute a project hash, and never build a `ProjectChange`.
-  23A has no writer because nothing is editable.
+  23A has no writer because nothing is editable. A read-only session refuses edits with the app-level
+  `EditApplyOutcome.ReadOnly` message; this is not a Core diagnostic code.
 - Validation handoff: 23A performs one internal load-validation pass and retains `ProjectSession.Validation`;
   23B consumes that result as its initial state and does not revalidate on open. Revalidation after an edit is
   debounced, runs off-thread over an immutable snapshot, and is applied only when its document hash is current.
