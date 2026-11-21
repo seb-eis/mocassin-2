@@ -177,9 +177,34 @@ tip for commits it already created, is part of the §6 inspection rule.
 
 Mitigation until the image ships a fixed release:
 
-- load the agent registry before the first spawn, for example by running `opencode debug agents` after the
-  server boots;
+- warm the shared service before the first spawn with `opencode api get /api/info`; do not use
+  `opencode debug agents` for this, because it may start a standalone instance instead of contacting the running
+  service (see below);
 - prefer one long-lived service or session over repeated cold starts.
 
 Remove this note once a fixed OpenCode release is pinned in the image and the failure no longer reproduces. The
 §6 inspection rule is harness-independent and stays.
+
+### Persistent worktrees and container restarts
+
+**Observed behaviour.** The container itself restarts between turns. The hostname and the service PID change, and
+`/tmp` is wiped. Evidence: two consecutive incidents in which the hostname and the service PID changed and
+`/tmp/opencode` came back empty. A restart kills running subagents and loses their completion reports, so an
+agent's last message is not evidence that its work is durable.
+
+Rules for every role:
+
+- Worktrees live under `/home/node/worktrees/<name>`; scratch files live under `/home/node/tmp` or the
+  repository's gitignored `.tmp`. `/tmp` is for disposable artifacts only and is never the sole copy of state or
+  evidence.
+- Commit and push each feature or record before leaving work idle. Never rely on uncommitted work surviving a turn
+  boundary.
+- After an unexpected error or restart, verify the branch tip, the worktree registration, the working-tree status,
+  and any CI, merge, or tag state, then resume the same session. Never repeat a CI dispatch, merge, squash, tag,
+  or branch deletion on assumption.
+- Prune registrations for wiped worktree paths with `git worktree prune`.
+
+**Service version check.** After a restart, compare `opencode --version` with the `version` reported by
+`GET /api/info`. A mismatch has caused agent-resolution failures (`AgentNotFoundError`) and is fixed by restarting
+the service while it is idle. Warm the shared service with `opencode api get /api/info`, not
+`opencode debug agents`, which may start a standalone instance instead of contacting the running service.

@@ -28,4 +28,9 @@ convenient.
 The binding denies edits and limits you to the three role agents. Shell is not restricted, so do not use it to
 write files. Branch protection and the review/audit gates are the controls that do not depend on good behaviour.
 
+Worktrees and scratch state live under `/home/node/worktrees` and `/home/node/tmp`; `/tmp` is wiped when the
+container restarts. Commit and push durable work before leaving it idle. On an unexpected error or restart, verify
+the branch, worktree, and any CI/merge/tag state before retrying; never repeat an irreversible step on assumption.
+See [`orchestration.md`](../../docs/development/orchestration.md) §9.
+
 Start with `/step-start <NN-slug>` and finish with `/step-closeout <NN-slug>`.
