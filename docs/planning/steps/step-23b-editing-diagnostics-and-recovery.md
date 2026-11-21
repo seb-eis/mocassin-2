@@ -39,7 +39,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 
 | # | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- | --- |
-| 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad` |
+| 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad`; test fix `90d9f73` |
 | 2 | Validation surface | — | Planned | — | — | — |
 | 3 | Dirty state, autosave, crash recovery | — | Planned | — | — | — |
 | 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
@@ -62,11 +62,14 @@ seam fills in §1.
 #### Feature 1 — edit pipeline and undo/redo (squashed `bb048ad`)
 
 - **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo`; deleted after the
-  squash. Git operations: branch created from `929327e`, feature commit `c4ae50a`, squash `bb048ad`.
+  squash. Git operations: branch created from `929327e`, feature commit `c4ae50a`, squash `bb048ad`. A follow-up
+  `fix-feature-1-rejected-test` branch (deleted) is squashed as `90d9f73` and strengthens the rejected-edit test
+  to assert the redo stack and save point are unchanged.
 - **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 0 warnings, `dotnet format` clean);
   `./tools/verify.sh structure` exit 0 (7 architecture tests); `./tools/verify.sh api` exit 0 (no baseline
-  break); `./tools/verify.sh docs` exit 0 (link/math checks, DocFX, rustdoc, strict Zensical build). **No CI run**
-  was triggered; per-feature CI is not used.
+  break); `./tools/verify.sh docs` exit 0 (link/math checks, DocFX, rustdoc, strict Zensical build). The
+  follow-up fix re-ran `./tools/verify.sh dotnet` exit 0. **No CI run** was triggered; per-feature CI is not
+  used.
 - **Diff summary:** `ProjectDocument.MaxUndoDepth` (init-only; `0` unbounded, negative throws) with oldest-first
   trimming and a public-API entry; the app-level `ProjectEditCoordinator` with `EditApplyResult` /
   `EditApplyOutcome` (`Applied`/`Rejected`/`ReadOnly`), same-hash no-op with `Change == null` and no event,
