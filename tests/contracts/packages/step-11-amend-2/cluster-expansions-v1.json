@@ -1,0 +1,21 @@
+{
+  "format": "mocassin.cluster-expansions",
+  "formatVersion": 1,
+  "note": "Expected messagepack cluster expansion map for table 0 of step-11-amend-2.msl. The compiled particle order is 0 = void, 1 = Ce, 2 = O, 3 = Vc. The map is a superset of the enumerated raw codes; this symmetric fixture's allowed sets make it equal.",
+  "particleOrder": ["void", "Ce", "O", "Vc"],
+  "occupationCodes": [8322, 8323, 12418, 12419, 12482, 12483],
+  "expandedCodes": [8322, 8323, 8386, 8387, 12418, 12419, 12482, 12483],
+  "canonicalIndices": [0, 1, 2, 3, 2, 3, 4, 5],
+  "canonicalMappings": [
+    {
+      "rawCode": 8386,
+      "canonicalCode": 12418,
+      "canonicalIndex": 2
+    },
+    {
+      "rawCode": 8387,
+      "canonicalCode": 12419,
+      "canonicalIndex": 3
+    }
+  ]
+}

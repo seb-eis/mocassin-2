@@ -54,8 +54,12 @@ Mocassin.Contracts.Packages.ClusterLinkPayload.Deconstruct(out uint ClusterId, o
 Mocassin.Contracts.Packages.ClusterLinkPayload.Equals(Mocassin.Contracts.Packages.ClusterLinkPayload? other) -> bool
 Mocassin.Contracts.Packages.ClusterTablePayload
 Mocassin.Contracts.Packages.ClusterTablePayload.<Clone>$() -> Mocassin.Contracts.Packages.ClusterTablePayload!
-Mocassin.Contracts.Packages.ClusterTablePayload.ClusterTablePayload(string! ObjectId, System.Collections.Immutable.ImmutableArray<ulong> OccupationCodes, System.Collections.Immutable.ImmutableArray<double> Energies, System.Collections.Immutable.ImmutableArray<byte> ParticleTableMapping) -> void
-Mocassin.Contracts.Packages.ClusterTablePayload.Deconstruct(out string! ObjectId, out System.Collections.Immutable.ImmutableArray<ulong> OccupationCodes, out System.Collections.Immutable.ImmutableArray<double> Energies, out System.Collections.Immutable.ImmutableArray<byte> ParticleTableMapping) -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.ClusterTablePayload(string! ObjectId, System.Collections.Immutable.ImmutableArray<ulong> OccupationCodes, Mocassin.Contracts.Packages.CodeExpansionPayload? CodeExpansions, System.Collections.Immutable.ImmutableArray<double> Energies, System.Collections.Immutable.ImmutableArray<byte> ParticleTableMapping) -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.ClusterTablePayload(string! objectId, System.Collections.Immutable.ImmutableArray<ulong> occupationCodes, System.Collections.Immutable.ImmutableArray<double> energies, System.Collections.Immutable.ImmutableArray<byte> particleTableMapping) -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.CodeExpansions.get -> Mocassin.Contracts.Packages.CodeExpansionPayload?
+Mocassin.Contracts.Packages.ClusterTablePayload.CodeExpansions.init -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.Deconstruct(out string! ObjectId, out System.Collections.Immutable.ImmutableArray<ulong> OccupationCodes, out Mocassin.Contracts.Packages.CodeExpansionPayload? CodeExpansions, out System.Collections.Immutable.ImmutableArray<double> Energies, out System.Collections.Immutable.ImmutableArray<byte> ParticleTableMapping) -> void
+Mocassin.Contracts.Packages.ClusterTablePayload.Deconstruct(out string! objectId, out System.Collections.Immutable.ImmutableArray<ulong> occupationCodes, out System.Collections.Immutable.ImmutableArray<double> energies, out System.Collections.Immutable.ImmutableArray<byte> particleTableMapping) -> void
 Mocassin.Contracts.Packages.ClusterTablePayload.Energies.get -> System.Collections.Immutable.ImmutableArray<double>
 Mocassin.Contracts.Packages.ClusterTablePayload.Energies.init -> void
 Mocassin.Contracts.Packages.ClusterTablePayload.Equals(Mocassin.Contracts.Packages.ClusterTablePayload? other) -> bool
@@ -65,6 +69,15 @@ Mocassin.Contracts.Packages.ClusterTablePayload.OccupationCodes.get -> System.Co
 Mocassin.Contracts.Packages.ClusterTablePayload.OccupationCodes.init -> void
 Mocassin.Contracts.Packages.ClusterTablePayload.ParticleTableMapping.get -> System.Collections.Immutable.ImmutableArray<byte>
 Mocassin.Contracts.Packages.ClusterTablePayload.ParticleTableMapping.init -> void
+Mocassin.Contracts.Packages.CodeExpansionPayload
+Mocassin.Contracts.Packages.CodeExpansionPayload.<Clone>$() -> Mocassin.Contracts.Packages.CodeExpansionPayload!
+Mocassin.Contracts.Packages.CodeExpansionPayload.CanonicalIndices.get -> System.Collections.Immutable.ImmutableArray<uint>
+Mocassin.Contracts.Packages.CodeExpansionPayload.CanonicalIndices.init -> void
+Mocassin.Contracts.Packages.CodeExpansionPayload.CodeExpansionPayload(System.Collections.Immutable.ImmutableArray<ulong> ExpandedCodes, System.Collections.Immutable.ImmutableArray<uint> CanonicalIndices) -> void
+Mocassin.Contracts.Packages.CodeExpansionPayload.Deconstruct(out System.Collections.Immutable.ImmutableArray<ulong> ExpandedCodes, out System.Collections.Immutable.ImmutableArray<uint> CanonicalIndices) -> void
+Mocassin.Contracts.Packages.CodeExpansionPayload.Equals(Mocassin.Contracts.Packages.CodeExpansionPayload? other) -> bool
+Mocassin.Contracts.Packages.CodeExpansionPayload.ExpandedCodes.get -> System.Collections.Immutable.ImmutableArray<ulong>
+Mocassin.Contracts.Packages.CodeExpansionPayload.ExpandedCodes.init -> void
 Mocassin.Contracts.Packages.EnergyPayload
 Mocassin.Contracts.Packages.EnergyPayload.<Clone>$() -> Mocassin.Contracts.Packages.EnergyPayload!
 Mocassin.Contracts.Packages.EnergyPayload.ClusterTables.get -> System.Collections.Immutable.ImmutableArray<Mocassin.Contracts.Packages.ClusterTablePayload!>
@@ -431,6 +444,9 @@ override Mocassin.Contracts.Packages.ClusterLinkPayload.ToString() -> string!
 override Mocassin.Contracts.Packages.ClusterTablePayload.Equals(object? obj) -> bool
 override Mocassin.Contracts.Packages.ClusterTablePayload.GetHashCode() -> int
 override Mocassin.Contracts.Packages.ClusterTablePayload.ToString() -> string!
+override Mocassin.Contracts.Packages.CodeExpansionPayload.Equals(object? obj) -> bool
+override Mocassin.Contracts.Packages.CodeExpansionPayload.GetHashCode() -> int
+override Mocassin.Contracts.Packages.CodeExpansionPayload.ToString() -> string!
 override Mocassin.Contracts.Packages.EnergyPayload.Equals(object? obj) -> bool
 override Mocassin.Contracts.Packages.EnergyPayload.GetHashCode() -> int
 override Mocassin.Contracts.Packages.EnergyPayload.ToString() -> string!
@@ -495,6 +511,8 @@ static Mocassin.Contracts.Packages.ClusterLinkPayload.operator !=(Mocassin.Contr
 static Mocassin.Contracts.Packages.ClusterLinkPayload.operator ==(Mocassin.Contracts.Packages.ClusterLinkPayload? left, Mocassin.Contracts.Packages.ClusterLinkPayload? right) -> bool
 static Mocassin.Contracts.Packages.ClusterTablePayload.operator !=(Mocassin.Contracts.Packages.ClusterTablePayload? left, Mocassin.Contracts.Packages.ClusterTablePayload? right) -> bool
 static Mocassin.Contracts.Packages.ClusterTablePayload.operator ==(Mocassin.Contracts.Packages.ClusterTablePayload? left, Mocassin.Contracts.Packages.ClusterTablePayload? right) -> bool
+static Mocassin.Contracts.Packages.CodeExpansionPayload.operator !=(Mocassin.Contracts.Packages.CodeExpansionPayload? left, Mocassin.Contracts.Packages.CodeExpansionPayload? right) -> bool
+static Mocassin.Contracts.Packages.CodeExpansionPayload.operator ==(Mocassin.Contracts.Packages.CodeExpansionPayload? left, Mocassin.Contracts.Packages.CodeExpansionPayload? right) -> bool
 static Mocassin.Contracts.Packages.EnergyPayload.operator !=(Mocassin.Contracts.Packages.EnergyPayload? left, Mocassin.Contracts.Packages.EnergyPayload? right) -> bool
 static Mocassin.Contracts.Packages.EnergyPayload.operator ==(Mocassin.Contracts.Packages.EnergyPayload? left, Mocassin.Contracts.Packages.EnergyPayload? right) -> bool
 static Mocassin.Contracts.Packages.EnvironmentPayload.operator !=(Mocassin.Contracts.Packages.EnvironmentPayload? left, Mocassin.Contracts.Packages.EnvironmentPayload? right) -> bool

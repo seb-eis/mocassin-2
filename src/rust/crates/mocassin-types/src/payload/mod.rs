@@ -18,7 +18,7 @@ mod model;
 mod simulation;
 mod transition;
 
-pub use energy::{ClusterTablePayload, EnergyPayload, PairTablePayload};
+pub use energy::{ClusterTablePayload, CodeExpansionPayload, EnergyPayload, PairTablePayload};
 pub use job::{ExtensionPayload, JobPayload, SelectionOptimizerPayload};
 pub use lattice::LatticePayload;
 pub use model::{

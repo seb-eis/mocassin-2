@@ -106,7 +106,7 @@ Status legend:
 | P1-extended dense compiled model | Y | Done | 08 | Canonical P indices, dense particle/site/table indices, stable IDs |
 | Auto-sampled pair tables | Y | Done | 08 | Shares Step 05 sampling/reduction kernel; canonical shell order |
 | Chiral pair linking in compiled tables | Y | Done | 08/09 | Shared `EnergyId`; one table/value per chiral pair |
-| Cluster tables and occupation codes | Y | Done | 08 | Point-group canonicalization; 6-bit codes; expansion maps |
+| Cluster tables and occupation codes | Y | Done | 08/11.1 | Point-group canonicalization; 6-bit codes; the `.msl` cluster table carries the optional `code_expansions` raw-tuple resolution map (`step-11.1`), so the solver resolves a non-canonical tuple without a second symmetry pass; fail-closed absence for pre-map packages |
 | Forward/inverse/dependent rules | Y | Partial | 08/29 | Forward and inverse rules are Done and tested. Translation-equivalent starts in a centered group now merge into one direction with multiple `EquivalentStartPositions` and cross-bucket `jump_mapping` (2026-11-20 maintenance fix). General rotational orbit reduction and `DependentRules` emission remain open as Step 08 audit m1, owned by the Step 29 release gate (see §3) |
 | Mass/charge conservation filtering | Y | Done | 08 | Rejected counts reported; charge-transfer symbols balanced |
 | Rule ambiguity detection | Y | Done | 08 | Compile-time `CMP004`; original failed at runtime |

@@ -34,10 +34,10 @@
       "kind": "model",
       "index": 1,
       "path": "model-1.bin",
-      "compressedBytes": 2102,
-      "compressedSha256": "2e507a6120c41b7329bfd285da2a420045abc2bd3f0cff8cd813b1c69d66bae6",
-      "rawBytes": 7009,
-      "rawSha256": "8dc8cd21bacbf0ca38506aead5039ce7bde245364b618762eee4d259272a0398"
+      "compressedBytes": 2114,
+      "compressedSha256": "56c4f2255b6f2c275a7bdf1965237341afd10dc6f647a882c30b1927e0f754b4",
+      "rawBytes": 7026,
+      "rawSha256": "13624afc8dac1d147a37f9f2fda0722ef39243d0d7a7dcb10300a6f4ea6f44fa"
     }
   ]
 }

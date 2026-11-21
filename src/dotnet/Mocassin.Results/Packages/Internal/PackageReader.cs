@@ -245,9 +245,10 @@ internal static class PackageReader
         while (await reader.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             var payload = (byte[])reader[3];
-            var decoded = PackagePayloadDecoder.TryDecode<ModelPayload>(
+            var decoded = PackagePayloadDecoder.TryDecodeModel(
                 payload,
                 options.MaxModelPayloadBytes,
+                options.MaxClusterExpansionBytes,
                 out var error);
             models.Add(new PackageModelRecord(
                 reader.GetInt64(0),

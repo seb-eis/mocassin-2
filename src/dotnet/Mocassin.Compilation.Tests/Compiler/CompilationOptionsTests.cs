@@ -54,6 +54,32 @@ public sealed class CompilationOptionsTests
     }
 
     [Fact]
+    public void TheEnergyTableEstimateIncludesTheClusterExpansionMap()
+    {
+        var project = ProjectJson.Deserialize(File.ReadAllBytes(RepositoryPaths.Combine(
+            "samples/step-11-cluster-expansion/step-11-cluster-expansion.mocprj")));
+
+        // Table 0 has 6 canonical occupations and 8 expansion entries: 6 * 8 + 8 * 12 = 144 bytes.
+        var (prefix, prefixDiagnostics) = StageTestSupport.Run(
+            project,
+            new CompilationOptions { MaxEnergyTableBytes = 1_000_000 },
+            StageTestSupport.StructureAndPairStages());
+        Assert.DoesNotContain(
+            prefixDiagnostics,
+            static diagnostic => diagnostic.Code == "CMP006");
+
+        var rejected = new Mocassin.Compilation.Energy.ClusterCompilationStage().Execute(
+            prefix with { Options = prefix.Options with { MaxEnergyTableBytes = 143 } },
+            CancellationToken.None);
+        Assert.Contains(rejected.Diagnostics, static diagnostic => diagnostic.Code == "CMP006");
+
+        var accepted = new Mocassin.Compilation.Energy.ClusterCompilationStage().Execute(
+            prefix with { Options = prefix.Options with { MaxEnergyTableBytes = 144 } },
+            CancellationToken.None);
+        Assert.DoesNotContain(accepted.Diagnostics, static diagnostic => diagnostic.Code == "CMP006");
+    }
+
+    [Fact]
     public void OptionsAreImmutableValues()
     {
         var original = CompilationOptions.Default;

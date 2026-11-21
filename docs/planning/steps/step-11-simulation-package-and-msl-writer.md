@@ -28,8 +28,11 @@ read-only inspection/verification library for the build CLI.
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
   2026-11-15 ([record](../reviews/step-11-amend-1.md)). [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md)
-  — cluster occupation code expansion map — **Re-review required** after round 1 `Changes required`
-  ([record](../reviews/step-11-amend-2.md)); post-merge `step-11.1` process, `step-11` is not moved
+  — cluster occupation code expansion map — design review round 4 `Ready for implementation` at `bf273ff`
+  ([record](../reviews/step-11-amend-2.md)); post-merge implementation complete, audit
+  [`Passed with notes`](../audits/step-11-amend-2.md) accepted by the owner 2026-11-21, merged as `58c8e9a`
+  (automatic main CI [`44912274715`](https://github.com/seb-eis/mocassin-2/actions/runs/44912274715) green) and
+  tagged `step-11.1`; `step-11` is not moved
 - **Feature list:** Approved 2026-11-15 (seven features)
 - **Post-implementation correction:** `fix/container-build-context` (2026-11-16) removed the containerfile's
   `COPY global.json` pin step after the image build failed with the opencode-container context; see deviation 2.
@@ -48,7 +51,7 @@ read-only inspection/verification library for the build CLI.
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `e25811f` (fixtures/Part B/docs); `0ae05a4` (Windows canonical JSON) |
 | Closeout | `feature/step-11-simulation-package-and-msl-writer/closeout` | Squashed | `docs --require`, `policy --require` exit 0 | Ubuntu closeout and Windows platform gate green | `e94d975` |
 | X2 Audit-minor fixes | `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` | Squashed | `all --require` exit 0 | Ubuntu closeout and Windows platform gate green at X2 | `4197166` |
-| A2 Cluster code expansion map | `docs/step-11-amend-2` (design); `fix/step-11.1-cluster-code-expansion` (planned) | Re-review required — round 1 `Changes required` | — | — | — |
+| A2 Cluster code expansion map | `fix/step-11.1-cluster-code-expansion` | Merged and tagged `step-11.1` | `all --require` exit 0; `docs --require` exit 0 | Ubuntu closeout `44896189617`; main `44912274715` green | `58c8e9a` (`--no-ff` merge; tag `step-11.1`) |
 
 ### Approved feature list
 
@@ -463,6 +466,43 @@ per feature.
   (named owner). N-1 (directory-fsync ordering after rename) and N-4 (`AGENTS.md` §1 drift) remain recorded
   follow-ups owned by the design/contract owner and the next documentation change respectively.
 - **Parity:** no new parity row; the `.msl` v1 format/fixtures row stays `Done`.
+
+#### A2 — Cluster occupation code expansion map (`step-11.1`)
+
+- **Branch:** `fix/step-11.1-cluster-code-expansion` (maintenance branch from `main` at the design merge
+  `2f3a6fe`; no step branch).
+- **Design review:** round 4 `Ready for implementation` at `bf273ff`
+  ([record](../reviews/step-11-amend-2.md)); A2-07 and the `step-11.1` path owner-approved 2026-11-21.
+- **Scope:** the optional `code_expansions` member on every cluster table, the writer map, the .NET decode
+  pre-scan and verifier rules, the Rust payload/scan/lookup path, the new and regenerated fixtures, the sample,
+  and the documentation.
+- **Fixtures:** `step-11-amend-2` (8 raw → 6 canonical), `amend-2-pre-map` (byte-fixed non-singleton absence),
+  regenerated `step-13-populated` (singleton → `null`; summary/signatures unchanged), and unchanged
+  `msl-v1`/`step-13-centered`/`amend-1-net10` plus codec goldens.
+- **Forward read:** the parent `.NET` verifier and Rust reader at `bbc2d08` both open the new fixture and ignore
+  the unknown key (recorded in the amendment page).
+- **Local gates:** `./tools/verify.sh all --require` exit 0 on 2026-11-21 — .NET build 0 warnings / 0 errors;
+  **1,991** .NET tests pass (Contracts 38, Symmetry 223, Results 79, Core 685, Compilation 99, Cli 203,
+  Packages 536, Architecture 7, App 121), including the 40-case reduction-oracle property test and the
+  asymmetric-allowed-set superset case; `dotnet format` clean; ApiCompat and NuGet policy clean; Rust
+  `fmt`/`clippy`/`test` clean plus a release build; Python tests/build; contracts (26 artifacts current, 60
+  process tests, SPDX 1,011 files, secrets 1,499 files, cargo-deny); strict Zensical/DocFX/rustdoc; AOT evidence.
+- **CI:** one Ubuntu closeout dispatch
+  [`44896189617`](https://github.com/seb-eis/mocassin-2/actions/runs/44896189617) green at
+  `ef568beca62f6f51559460d01ba5627219e90345`; no per-feature CI; platform CI not run (no platform-conditional
+  code). Recorded in the [audit record](../audits/step-11-amend-2.md). The earlier run `44895491322` was
+  superseded when the A2-05 property test was added.
+- **Audit:** [separate post-merge audit](../audits/step-11-amend-2.md) — round 1 `Passed with notes` at
+  `ef568be` (A2A-01/A2A-02 Minor, A2A-03 Note); the owner accepted it on 2026-11-21 and the three findings are
+  fixed in the docs-only `b0e8898`. `step-11` stays tagged and is not moved.
+- **Integration:** merged into `main` with `--no-ff` as
+  `58c8e9afb68916aaa09d1105de5631659356cadf`; automatic main CI
+  [`44912274715`](https://github.com/seb-eis/mocassin-2/actions/runs/44912274715) is green at that commit; the
+  annotated `step-11.1` tag points to the merge commit, and the maintenance branch is deleted locally and
+  remotely.
+- **Known limitations / follow-ups:** Step 14 consumes `ClusterTable::lookup`; F-29's formal closure remains a
+  Step 14 gate. The sample uses a P-1 origin-shifted form of the ceria primary cluster to keep the KMC path
+  unambiguous; the cluster identities, offsets, and codes match.
 
 ### Deviations and accepted risks
 
@@ -1211,8 +1251,11 @@ runtime symmetry is added to the solver. Full design, fixtures, tests, and the `
 are in [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md).
 
 The Step 11 audit record and `docs/planning/closeout/step-11.json` are historical and are not rewritten. The
-amendment is audited separately at `docs/planning/audits/step-11-amend-2.md` and would be tagged `step-11.1`
-only after owner approval and a green `main` CI run.
+amendment is audited separately at `docs/planning/audits/step-11-amend-2.md`: round 1 returned
+`Passed with notes`, the owner accepted the verdict and the docs-only resolutions on 2026-11-21, and the
+amendment merged into `main` with `--no-ff` as `58c8e9a`. Automatic main CI
+[`44912274715`](https://github.com/seb-eis/mocassin-2/actions/runs/44912274715) is green at the merge commit, and
+the annotated `step-11.1` tag points to it; `step-11` is not moved. F-29's formal closure remains a Step 14 gate.
 
 ## Tests
 

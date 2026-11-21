@@ -2,6 +2,7 @@
 
 using System.IO.Compression;
 using MessagePack;
+using Mocassin.Contracts.Packages;
 
 namespace Mocassin.Results.Packages.Internal;
 
@@ -33,54 +34,113 @@ internal static class PackagePayloadDecoder
         long maxDecompressedBytes,
         out string? error)
     {
-        error = null;
-        if (payload.IsEmpty)
+        if (!TryDecompress(payload, maxDecompressedBytes, out var destination, out var written, out error))
         {
-            error = "The payload blob is empty.";
             return default;
         }
 
-        if (maxDecompressedBytes < 1)
-        {
-            error = "The decompressed-size guard is not positive.";
-            return default;
-        }
+        return Deserialize<TPayload>(destination.AsMemory(0, written), out error);
+    }
 
-        if (!ZstandardDecoder.TryGetMaxDecompressedLength(payload, out long bound))
+    /// <summary>
+    /// Decodes a model payload after applying the bounded cluster-expansion scan.
+    /// </summary>
+    /// <param name="payload">The compressed bytes.</param>
+    /// <param name="maxDecompressedBytes">The decompressed-size guard.</param>
+    /// <param name="maxClusterExpansionBytes">
+    /// The cumulative typed cluster-expansion budget, <c>Σ(8E + 4I)</c>.
+    /// </param>
+    /// <param name="error">The failure reason, or <see langword="null"/>.</param>
+    /// <returns>The decoded payload, or <see langword="null"/>.</returns>
+    public static ModelPayload? TryDecodeModel(
+        ReadOnlySpan<byte> payload,
+        long maxDecompressedBytes,
+        long maxClusterExpansionBytes,
+        out string? error)
+    {
+        if (!TryDecompress(payload, maxDecompressedBytes, out var destination, out var written, out error))
         {
-            error = "The payload is not a valid Zstd frame.";
-            return default;
-        }
-
-        if (bound > maxDecompressedBytes)
-        {
-            error = $"The payload declares {bound} decompressed bytes, above the {maxDecompressedBytes} guard.";
-            return default;
-        }
-
-        if (bound > Array.MaxLength)
-        {
-            error = $"The payload declares {bound} decompressed bytes, above the maximum array length.";
-            return default;
-        }
-
-        var destination = new byte[(int)bound];
-        if (!ZstandardDecoder.TryDecompress(payload, destination, out int written))
-        {
-            error = "The payload is not a valid Zstd frame.";
             return default;
         }
 
         try
         {
-            return MessagePackSerializer.Deserialize<TPayload>(
+            ClusterExpansionScan.Validate(
                 destination.AsMemory(0, written),
-                serializerOptions);
+                maxClusterExpansionBytes);
+        }
+        catch (Exception exception) when (
+            exception is MessagePackSerializationException or EndOfStreamException or
+                InvalidOperationException or OverflowException)
+        {
+            error = $"The model payload cluster expansion scan failed: {exception.Message}";
+            return default;
+        }
+
+        return Deserialize<ModelPayload>(destination.AsMemory(0, written), out error);
+    }
+
+    private static TPayload? Deserialize<TPayload>(ReadOnlyMemory<byte> payload, out string? error)
+    {
+        error = null;
+        try
+        {
+            return MessagePackSerializer.Deserialize<TPayload>(payload, serializerOptions);
         }
         catch (MessagePackSerializationException exception)
         {
             error = $"The payload is not a valid MessagePack map: {exception.Message}";
             return default;
         }
+    }
+
+    private static bool TryDecompress(
+        ReadOnlySpan<byte> payload,
+        long maxDecompressedBytes,
+        out byte[] destination,
+        out int written,
+        out string? error)
+    {
+        destination = [];
+        written = 0;
+        error = null;
+        if (payload.IsEmpty)
+        {
+            error = "The payload blob is empty.";
+            return false;
+        }
+
+        if (maxDecompressedBytes < 1)
+        {
+            error = "The decompressed-size guard is not positive.";
+            return false;
+        }
+
+        if (!ZstandardDecoder.TryGetMaxDecompressedLength(payload, out long bound))
+        {
+            error = "The payload is not a valid Zstd frame.";
+            return false;
+        }
+
+        if (bound > maxDecompressedBytes)
+        {
+            error = $"The payload declares {bound} decompressed bytes, above the {maxDecompressedBytes} guard.";
+            return false;
+        }
+
+        if (bound > Array.MaxLength)
+        {
+            error = $"The payload declares {bound} decompressed bytes, above the maximum array length.";
+            return false;
+        }
+
+        destination = new byte[(int)bound];
+        if (!ZstandardDecoder.TryDecompress(payload, destination, out written))
+        {
+            error = "The payload is not a valid Zstd frame.";
+            return false;
+        }
+
+        return true;
     }
 }

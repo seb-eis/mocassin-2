@@ -144,6 +144,7 @@ fn parameterized_model(value: &Value) -> (ParameterizedModel, String) {
             occupation_codes: Vec::new(),
             energies,
             particle_table_mapping: Vec::new(),
+            expansions: None,
         })
         .collect();
     let defect_background = doubles(&fields[4]);

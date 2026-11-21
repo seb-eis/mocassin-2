@@ -20,46 +20,59 @@ pub(crate) use model::scan_model;
 
 use crate::error::PackageError;
 
-/// Iterates a schema map, rejects duplicate known keys, requires every known key, and skips unknown keys.
+/// Iterates a schema map, rejects duplicate known keys, requires every required key, and skips unknown keys.
 ///
-/// `known.len()` must be at most 128; every schema map in the payload is far below that.
-pub(crate) fn scan_map<'a, F>(
+/// `required.len() + optional.len()` must be at most 128; every schema map in the payload is far below that.
+/// An optional key participates in the duplicate mask but is not required by the post-loop check.
+pub(crate) fn scan_map_optional<'a, F>(
     cursor: &mut Cursor<'a>,
-    known: &'static [&'static str],
+    required: &'static [&'static str],
+    optional: &'static [&'static str],
     mut handler: F,
 ) -> Result<(), PackageError>
 where
     F: FnMut(&mut Cursor<'a>, &'static str) -> Result<(), PackageError>,
 {
-    debug_assert!(known.len() <= 128, "the duplicate mask holds 128 keys");
+    debug_assert!(
+        required.len() + optional.len() <= 128,
+        "the duplicate mask holds 128 keys"
+    );
 
     let length = cursor.read_map_len()?;
     let mut seen: u128 = 0;
 
     for _ in 0..length {
         let key = cursor.read_str()?;
-        match known.iter().position(|candidate| *candidate == key) {
-            Some(index) => {
-                let bit = 1_u128 << index;
-                if seen & bit != 0 {
-                    return Err(cursor.scan_error(format!("duplicate key \"{key}\"")));
-                }
-                seen |= bit;
-                handler(cursor, known[index])?;
+        if let Some(index) = required.iter().position(|candidate| *candidate == key) {
+            let bit = 1_u128 << index;
+            if seen & bit != 0 {
+                return Err(cursor.scan_error(format!("duplicate key \"{key}\"")));
             }
-            None => cursor.skip_value()?,
+            seen |= bit;
+            handler(cursor, required[index])?;
+        } else if let Some(index) = optional.iter().position(|candidate| *candidate == key) {
+            let bit = 1_u128 << (required.len() + index);
+            if seen & bit != 0 {
+                return Err(cursor.scan_error(format!("duplicate key \"{key}\"")));
+            }
+            seen |= bit;
+            handler(cursor, optional[index])?;
+        } else {
+            cursor.skip_value()?;
         }
     }
 
     cursor.leave();
 
-    let required = if known.len() == 128 {
+    let required_mask = if required.is_empty() {
+        0
+    } else if required.len() == 128 {
         u128::MAX
     } else {
-        (1_u128 << known.len()) - 1
+        (1_u128 << required.len()) - 1
     };
-    if seen != required {
-        let missing = known
+    if seen & required_mask != required_mask {
+        let missing = required
             .iter()
             .enumerate()
             .find(|(index, _)| seen & (1_u128 << index) == 0)
@@ -69,6 +82,18 @@ where
     }
 
     Ok(())
+}
+
+/// Iterates a schema map, rejects duplicate known keys, requires every known key, and skips unknown keys.
+pub(crate) fn scan_map<'a, F>(
+    cursor: &mut Cursor<'a>,
+    known: &'static [&'static str],
+    handler: F,
+) -> Result<(), PackageError>
+where
+    F: FnMut(&mut Cursor<'a>, &'static str) -> Result<(), PackageError>,
+{
+    scan_map_optional(cursor, known, &[], handler)
 }
 
 /// Reads an array length, skips its values, and leaves the container.
@@ -124,5 +149,53 @@ pub(crate) fn kind_name(value: &str) -> Option<&'static str> {
         "kmc" => Some("kmc"),
         "mmc" => Some("mmc"),
         _ => None,
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Cursor, scan_map, scan_map_optional};
+
+    const NO_REQUIRED: &[&str] = &[];
+    const OPTIONAL_CODE_EXPANSIONS: &[&str] = &["code_expansions"];
+    const NESTED_KEYS: &[&str] = &["expanded_codes", "canonical_indices"];
+
+    fn write_string(bytes: &mut Vec<u8>, value: &str) {
+        assert!(value.len() < 32);
+        bytes.push(0xa0 | value.len() as u8);
+        bytes.extend_from_slice(value.as_bytes());
+    }
+
+    #[test]
+    fn a_duplicate_optional_key_is_rejected_at_scan_time() {
+        let mut bytes = vec![0x82];
+        write_string(&mut bytes, "code_expansions");
+        bytes.push(0xc0);
+        write_string(&mut bytes, "code_expansions");
+        bytes.push(0xc0);
+
+        let mut cursor = Cursor::new(&bytes, 100, 8, "model");
+        let error = scan_map_optional(
+            &mut cursor,
+            NO_REQUIRED,
+            OPTIONAL_CODE_EXPANSIONS,
+            |cursor, _| cursor.skip_value(),
+        )
+        .expect_err("the duplicate optional key is rejected");
+        assert!(error.to_string().contains("duplicate key"), "{error}");
+    }
+
+    #[test]
+    fn a_duplicate_nested_key_is_rejected_at_scan_time() {
+        let mut bytes = vec![0x82];
+        write_string(&mut bytes, "expanded_codes");
+        bytes.push(0xc0);
+        write_string(&mut bytes, "expanded_codes");
+        bytes.push(0xc0);
+
+        let mut cursor = Cursor::new(&bytes, 100, 8, "model");
+        let error = scan_map(&mut cursor, NESTED_KEYS, |cursor, _| cursor.skip_value())
+            .expect_err("the duplicate nested key is rejected");
+        assert!(error.to_string().contains("duplicate key"), "{error}");
     }
 }

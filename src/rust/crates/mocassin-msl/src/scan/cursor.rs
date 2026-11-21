@@ -192,6 +192,21 @@ impl<'a> Cursor<'a> {
         Ok(length)
     }
 
+    /// Consumes a nil marker and returns `true`, or leaves the cursor before a non-nil value and returns
+    /// `false`.
+    pub(crate) fn read_nil_marker(&mut self) -> Result<bool, PackageError> {
+        let marker = *self
+            .data
+            .get(self.position)
+            .ok_or_else(|| self.scan_error("unexpected end of input"))?;
+        if marker != 0xc0 {
+            return Ok(false);
+        }
+
+        let _ = self.marker()?;
+        Ok(true)
+    }
+
     /// Reads a particle array stored either as a MessagePack array of `u8` or as a binary value.
     ///
     /// Returns the declared particle count. Array elements are checked to fit a byte; binary contents are

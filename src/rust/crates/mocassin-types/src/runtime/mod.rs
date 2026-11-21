@@ -16,7 +16,7 @@ mod simulation;
 mod transition;
 
 pub use direction_pool::DirectionPool;
-pub use energy::{ClusterTable, EnergyModel, PairTable};
+pub use energy::{ClusterCodeLookup, ClusterExpansions, ClusterTable, EnergyModel, PairTable};
 pub use job::{ExtensionConfig, JobPackage, SelectionOptimizer};
 pub use jump_status::{JumpLink, JumpStatus};
 pub use lattice::InitialLattice;
