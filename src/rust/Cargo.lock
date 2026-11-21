@@ -664,12 +664,9 @@ dependencies = [
 name = "mocassin-solver"
 version = "0.1.0"
 dependencies = [
- "mocassin-extension",
  "mocassin-msl",
  "mocassin-rng",
- "mocassin-state",
  "mocassin-types",
- "rayon",
  "thiserror",
  "tracing",
 ]

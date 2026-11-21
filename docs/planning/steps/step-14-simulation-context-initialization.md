@@ -10,7 +10,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In progress (six feature branches approved; feature 1 next)
+- **Status:** In progress — feature 1 squashed; feature 2 next (six feature branches approved)
 - **Step branch:** `step/14-simulation-context-initialization`
 - **Step CI:** — (one closeout `workflow_dispatch`; no per-feature CI)
 - **Main merge:** —
@@ -31,11 +31,11 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (start gate: design accepted, step branch created)
+- **Last updated:** 2026-11-21 (feature 1 squashed; feature 2 next)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 Context skeleton, arenas, limits, errors | `feature/step-14-simulation-context-initialization/context-arenas-and-limits` | Planned | — | — | — |
+| 1 Context skeleton, arenas, limits, errors | `feature/step-14-simulation-context-initialization/context-arenas-and-limits` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (36 lib + 9 acceptance tests, 1 `Send` doctest, 1 `!Sync` compile-fail doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-2 row update |
 | 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Planned | — | — | — |
 | 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Planned | — | — | — |
 | 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Planned | — | — | — |
@@ -52,6 +52,31 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 | 4 | Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Supercell direction-count pools with reserved capacity; mask/optimizer application; `selectable_jump_count`; O(1) slot maps and update helpers; per-`(P1, direction)` receiver-major jump status with the structural filter, derived bound, link-carried cluster associations, and `resolve_node`; **retires `DirectionPool` / reshapes `JumpLink` (public Rust API break recorded, Step 13 invariant tests updated)** | Pool counts/removal/swap-remove are correct in several cells; jump links equal a naive receiver-major recomputation; a cross-bucket direction resolves at the selected bucket; `step-13-centered` passes |
 | 5 | Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Mobile/static tracker index space; goals/block size; counters; `K_fix`/`K_auto`/`K_norm`/`dof`/`nu_max`/`dt`; `ResumeState`/`ResumePhase` validation, re-derived mapping, `AlreadyCompleted` | Goal/normalization arithmetic matches the hand values; resume restores exactly and rejects mismatches; the MMC context has no pools/jump status/time |
 | 6 | Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | New 10×10×10 real-writer fixture and .NET rebuild test; new multi-centre cluster fixture from the centred sample; context-summary snapshots; allocation test; `context` Criterion benchmark and `rustContext` baseline; docs/parity/status/closeout | `< 100 ms`/`< 20 ms` and memory budgets measured on the recorded runner class; zero-allocation proof; docs build strictly; closeout evidence passes its checker; audit request complete |
+
+### Feature 1 evidence — context-arenas-and-limits
+
+- **Branch:** `feature/step-14-simulation-context-initialization/context-arenas-and-limits` (squashed; squash
+  commit recorded by the feature-2 row update).
+- **Scope delivered:** the `mocassin-solver` `context/` module layout (`mod`, `dimensions`, `error`, `goals`,
+  `jumps`, `lattice`, `limits`, `links`, `pools`), the `Dimensions`/`EnvId` index and `i64`-`rem_euclid` wrap
+  contract, `ContextLimits`, the phase-0 `MemoryPlan` with checked `u64` arithmetic and `LimitExceeded`/exit 12,
+  `MemoryReport` (`plan == report` on planned lengths; capacity is a diagnostic), the particle/flag/mobile-tracker
+  arenas, the zeroed counter block, the empty link/cluster/pool/jump containers, the phased pipeline with
+  boundary and 4096-environment cancellation, the error/exit mapping, and the `Send`/`!Sync` marker.
+- **Cargo:** `mocassin-msl` moved to `[dev-dependencies]`; `mocassin-state`, `mocassin-extension`, and `rayon`
+  removed as designed in §22. No new external crate.
+- **Tests:** index/wrap round-trip (including `i32::MIN`/`i32::MAX` offsets), dimension overflow and the
+  position/particle/total caps, `plan == report` equality, the ascending phase trace, pre-set cancellation,
+  the arena container sizes (`Link` 28 B, `ClusterInstance` 16 B, `PoolMember` 8 B), the exit mapping, and the
+  `msl-v1` ceria job (6×6×6, P=4, pc=5, 864 environments) building the skeleton context with flags, sequential
+  mobile tracker ids, zeroed counters, empty later-feature containers, and a matching memory report.
+- **Known limitations / deferred to later features:** links, clusters, energy vectors, pools, jump status,
+  goals/normalization/time `dt`, the tracker index space, and resume are type shells or absent; `MemoryPlan`
+  currently plans the lattice/environment and counter arrays and each later feature appends its own arrays and
+  enforces its own caps; `ContextOptions` currently carries only `limits` (feature 4 adds
+  `build_jump_status`/`apply_optimizers`, feature 5 adds `resume`). No public Rust API break in this feature
+  (`DirectionPool`/`JumpLink` are untouched until feature 4). No new fixture and no `.msl`/manifest/signature
+  change.
 
 ## Goal
 
@@ -1085,10 +1110,10 @@ row (§7.2). A link that is absent in both directions means the two environments
 
 ## 16. Implementation tasks
 
-- [ ] Create the `mocassin-solver` context module layout (§2.2 of `code-structure.md`) with the `ContextOptions`,
+- [x] Create the `mocassin-solver` context module layout (§2.2 of `code-structure.md`) with the `ContextOptions`,
       `ContextLimits`, `ContextError`, `MemoryPlan`/`MemoryReport`, `EnvId`, and `Dimensions`; make
       `Cargo.toml` match §22 (`mocassin-msl` dev-only; no `mocassin-state`, `mocassin-extension`, or `rayon`).
-- [ ] Implement the lattice/environment arenas, index/wrap helpers, flags, tracker id space, and cancellation.
+- [x] Implement the lattice/environment arenas, index/wrap helpers, flags, tracker id space, and cancellation.
 - [ ] Implement the memory plan (checked bytes for every derived array, per-array caps, total cap) and reject
       before the first allocation.
 - [ ] Implement the owner-major per-P1 link CSR, the inverse routing index (i64 `rem_euclid` resolution),
