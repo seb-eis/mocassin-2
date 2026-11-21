@@ -51,10 +51,10 @@ public sealed class ValidationSurfaceRenderTests
                     Assert.Single(window.GetVisualDescendants().OfType<ProblemsView>());
                     Assert.Contains(
                         window.GetVisualDescendants().OfType<ListBox>(),
-                        control => AutomationProperties.GetName(control) == "Problem entries");
+                        control => AutomationProperties.GetName(control) == "Validation entries");
                     Assert.Contains(
                         window.GetVisualDescendants().OfType<TextBox>(),
-                        control => AutomationProperties.GetName(control) == "Problems text filter");
+                        control => AutomationProperties.GetName(control) == "Validation text filter");
                     Assert.Contains(
                         window.GetVisualDescendants().OfType<Button>(),
                         control => AutomationProperties.GetName(control) == "Revalidate project");

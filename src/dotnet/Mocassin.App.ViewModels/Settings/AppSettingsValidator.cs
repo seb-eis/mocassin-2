@@ -78,6 +78,9 @@ internal static class AppSettingsValidator
             ActiveConsoleChannel = string.IsNullOrWhiteSpace(layout.ActiveConsoleChannel)
                 ? SettingsDefaults.DefaultConsoleChannel
                 : layout.ActiveConsoleChannel,
+            DefaultsRevision = layout.DefaultsRevision < SettingsDefaults.LegacyDefaultsRevision
+                ? SettingsDefaults.DefaultsRevision
+                : layout.DefaultsRevision,
         };
 
         var recent = NormalizeRecentFiles(settings.RecentFiles, warnings, ignoreCasePaths);

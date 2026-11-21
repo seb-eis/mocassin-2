@@ -42,4 +42,10 @@ internal sealed record LayoutSettings
     /// Gets the active console channel id.
     /// </summary>
     public string ActiveConsoleChannel { get; init; } = SettingsDefaults.DefaultConsoleChannel;
+
+    /// <summary>
+    /// Gets the layout defaults revision. The reader returns <see cref="SettingsDefaults.LegacyDefaultsRevision"/>
+    /// for an absent marker; a new programmatic document starts at the current revision.
+    /// </summary>
+    public int DefaultsRevision { get; init; } = SettingsDefaults.DefaultsRevision;
 }

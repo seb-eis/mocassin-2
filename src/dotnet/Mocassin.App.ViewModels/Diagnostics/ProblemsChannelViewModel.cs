@@ -57,7 +57,7 @@ internal sealed partial class ProblemsChannelViewModel : ConsoleChannelViewModel
         IProjectWorkspace workspace,
         INavigationService navigation,
         IShellLauncher launcher)
-        : base("problems", "Problems")
+        : base("problems", "Problems", "Validation")
     {
         this.workspace = workspace ?? throw new ArgumentNullException(nameof(workspace));
         this.navigation = navigation ?? throw new ArgumentNullException(nameof(navigation));
@@ -93,7 +93,7 @@ internal sealed partial class ProblemsChannelViewModel : ConsoleChannelViewModel
     /// <summary>
     /// Gets the channel header.
     /// </summary>
-    public string HeaderText => session is null ? "Problems — no project" : $"Problems — {session.Name}";
+    public string HeaderText => session is null ? "Validation — no project" : $"Validation — {session.Name}";
 
     /// <summary>
     /// Gets the validation summary text.

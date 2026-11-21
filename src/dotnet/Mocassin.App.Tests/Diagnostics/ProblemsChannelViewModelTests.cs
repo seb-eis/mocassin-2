@@ -35,7 +35,7 @@ public sealed class ProblemsChannelViewModelTests
         Assert.Equal(3, context.Channel.Items.Count);
         Assert.True(context.Channel.HasItems);
         Assert.Equal(DiagnosticSeverity.Error, context.Channel.Items[0].Severity);
-        Assert.Contains("Problems —", context.Channel.HeaderText, StringComparison.Ordinal);
+        Assert.Contains("Validation —", context.Channel.HeaderText, StringComparison.Ordinal);
         Assert.Equal("1 errors, 1 warnings, 1 infos", context.Channel.SummaryText);
     }
 

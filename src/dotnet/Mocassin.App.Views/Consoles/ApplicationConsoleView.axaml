@@ -4,7 +4,7 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Consoles.ApplicationConsoleView"
              x:DataType="vm:ConsoleChannelViewModel">
-  <Grid RowDefinitions="Auto,*">
+  <Grid RowDefinitions="Auto,*" Background="{DynamicResource Mocassin.WorkspaceBackground}">
     <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="12,4">
       <TextBlock Text="{Binding Title}" VerticalAlignment="Center" FontWeight="SemiBold" />
       <TextBox Grid.Column="1"
@@ -24,7 +24,7 @@
         <DataTemplate x:DataType="vm:ConsoleEntryViewModel">
           <Grid ColumnDefinitions="Auto,Auto,*">
             <TextBlock Text="{Binding TimestampUtc, StringFormat='{}{0:HH:mm:ss}'}"
-                       Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+                       Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}"
                        Margin="0,0,8,0" />
             <TextBlock Grid.Column="1"
                        Text="{Binding Severity}"

@@ -255,6 +255,102 @@ public sealed class AppSettingsReaderTests
     }
 
     [Fact]
+    public void AMissingLayoutUsesTheRefreshedDefaultsAndTheCurrentRevision()
+    {
+        var result = AppSettingsJsonReader.Read("""{"format":"mocassin.settings"}""");
+
+        Assert.Equal(SettingsDefaults.DefaultLeftFraction, result.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultRightFraction, result.Settings.Layout.RightFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultConsoleFraction, result.Settings.Layout.ConsoleFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultsRevision, result.Settings.Layout.DefaultsRevision);
+    }
+
+    [Fact]
+    public void ANeverDraggedLayoutIsUpgradedOnceToTheRefreshedDefaults()
+    {
+        var result = AppSettingsJsonReader.Read(
+            """{"format":"mocassin.settings","layout":{"leftFraction":0.21666666666666667,"rightFraction":0.26666666666666666,"consoleFraction":0.225}}""");
+
+        Assert.False(result.IsFatal);
+        Assert.Empty(result.Warnings);
+        Assert.Equal(SettingsDefaults.DefaultLeftFraction, result.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultRightFraction, result.Settings.Layout.RightFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultConsoleFraction, result.Settings.Layout.ConsoleFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultsRevision, result.Settings.Layout.DefaultsRevision);
+
+        var json = JsonSerializer.Serialize(result.Settings, AppSettingsJsonContext.Default.AppSettings);
+        Assert.Contains("\"defaultsRevision\": 1", json, StringComparison.Ordinal);
+        var again = AppSettingsJsonReader.Read(json);
+        Assert.Equal(result.Settings.Layout, again.Settings.Layout);
+    }
+
+    [Fact]
+    public void ACustomLayoutWithoutARevisionIsPreservedAndMarked()
+    {
+        var result = AppSettingsJsonReader.Read(
+            """{"format":"mocassin.settings","layout":{"leftFraction":0.25,"rightFraction":0.30,"consoleFraction":0.28}}""");
+
+        Assert.Equal(0.25, result.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(0.30, result.Settings.Layout.RightFraction, 10);
+        Assert.Equal(0.28, result.Settings.Layout.ConsoleFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultsRevision, result.Settings.Layout.DefaultsRevision);
+    }
+
+    [Fact]
+    public void ARevisionOneLayoutIsNeverAdjustedAgain()
+    {
+        var result = AppSettingsJsonReader.Read(
+            """{"format":"mocassin.settings","layout":{"defaultsRevision":1,"leftFraction":0.21666666666666667,"rightFraction":0.26666666666666666,"consoleFraction":0.225}}""");
+
+        Assert.Equal(260d / 1200d, result.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(320d / 1200d, result.Settings.Layout.RightFraction, 10);
+        Assert.Equal(180d / 800d, result.Settings.Layout.ConsoleFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultsRevision, result.Settings.Layout.DefaultsRevision);
+
+        var custom = AppSettingsJsonReader.Read(
+            """{"format":"mocassin.settings","layout":{"defaultsRevision":1,"leftFraction":0.30,"rightFraction":0.10,"consoleFraction":0.40}}""");
+        Assert.Equal(0.30, custom.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(0.10, custom.Settings.Layout.RightFraction, 10);
+        Assert.Equal(0.40, custom.Settings.Layout.ConsoleFraction, 10);
+    }
+
+    [Fact]
+    public void TheLegacyPixelDefaultsUpgradeToTheRefreshedDefaultsAfterThePixelMigration()
+    {
+        var result = AppSettingsJsonReader.Read(
+            """{"format":"mocassin.settings","layout":{"leftWidth":260,"rightWidth":320,"consoleHeight":180}}""");
+
+        Assert.Equal(SettingsDefaults.DefaultLeftFraction, result.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultRightFraction, result.Settings.Layout.RightFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultConsoleFraction, result.Settings.Layout.ConsoleFraction, 10);
+        Assert.Equal(SettingsDefaults.DefaultsRevision, result.Settings.Layout.DefaultsRevision);
+
+        var json = JsonSerializer.Serialize(result.Settings, AppSettingsJsonContext.Default.AppSettings);
+        Assert.DoesNotContain("\"leftWidth\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"rightWidth\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"consoleHeight\"", json, StringComparison.Ordinal);
+        Assert.Equal(result.Settings.Layout, AppSettingsJsonReader.Read(json).Settings.Layout);
+    }
+
+    [Fact]
+    public void AnInvalidRevisionWarnsAndRunsTheDefaultsMigration()
+    {
+        foreach (var value in new[] { "-2", "\"one\"", "1.5" })
+        {
+            var json = """{"format":"mocassin.settings","layout":{"defaultsRevision":__VALUE__,"leftFraction":0.21666666666666667,"rightFraction":0.26666666666666666,"consoleFraction":0.225}}"""
+                .Replace("__VALUE__", value, StringComparison.Ordinal);
+            var result = AppSettingsJsonReader.Read(json);
+
+            Assert.False(result.IsFatal);
+            Assert.Contains(result.Warnings, warning => warning.Contains("defaultsRevision", StringComparison.Ordinal));
+            Assert.Equal(SettingsDefaults.DefaultLeftFraction, result.Settings.Layout.LeftFraction, 10);
+            Assert.Equal(SettingsDefaults.DefaultRightFraction, result.Settings.Layout.RightFraction, 10);
+            Assert.Equal(SettingsDefaults.DefaultConsoleFraction, result.Settings.Layout.ConsoleFraction, 10);
+            Assert.Equal(SettingsDefaults.DefaultsRevision, result.Settings.Layout.DefaultsRevision);
+        }
+    }
+
+    [Fact]
     public void InvalidFractionsFallBackWithWarnings()
     {
         var result = AppSettingsJsonReader.Read(
