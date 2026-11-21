@@ -183,19 +183,27 @@ compact **inverse** CSR over partner P1 positions (`{owner_position, link_id}`).
 `site + Σ table[pair_id][p_owner][particle at partner]`. A change at `V` updates the vectors of every owner in
 `inverse(position(V))`, with the owner's table and the owner's row; the sender's table is never applied. This is
 the original's receiver-owned link list, expressed as a compact index instead of one copy per supercell cell, so
-500k positions stay bounded. Links are sorted by `pair_id`, then partner, then offset, which fixes the f64
+500k positions stay bounded. The image arithmetic (`owner_cell ± offset`) is evaluated in `i64` with
+`rem_euclid`, so an `i32::MAX` offset cannot overflow; the reader's offset bound is the only input check needed.
+Links are sorted by `pair_id`, then partner, then offset, which fixes the f64
 summation order. A missing reverse link means the payload has no interaction in that direction and is not an
 error.
 
-**Clusters.** A cluster link's `byte_position` is the environment's own slot (slot `0` = centre); the centre is
-the unique environment whose link carries slot `0`. The runtime keeps one instance per referenced table, a
-`centres` CSR over P1 positions, a base occupation code per instance and cell with the centre particle in slot
-`0`, and a per-centre energy vector. A slot's cluster association is attached to the centre's **forward link**
-whose partner is that member, so a change at the member updates the centre's code and centre energy through the
-same inverse index. Cluster interactions are counted once at the centre, so they are kept out of the site+pair
-vector and the total uses `Σ site + 0.5 × Σ pair + Σ cluster`. The v1 payload does not persist member cell
-offsets; the context derives them only from the unique centre→member link (slot 0 is `[0,0,0]` by definition)
-and fails closed otherwise (OD-1 in the internal open-decisions register).
+`linked(a, b)` (Step 17's local-update test) is true iff the payload has an interaction in either direction: owner
+`a` with partner `b`, or owner `b` with partner `a`. It is evaluated over `link_range(position(a))` and
+`incoming(a)`; it never synthesises a reverse link and is not an energy shortcut (the energy is the owner's row).
+
+**Clusters.** A cluster link's `byte_position` is the environment's own slot (slot `0` = a centre). A cluster
+table can have **more than one centre**: the writer adds slot `0` to every P1 position of the centre site, so the
+runtime keeps **one instance per slot-0 link** (not one per table). Each instance has its own slot geometry,
+occupation code, code id, and centre energy vector; a `centres` CSR over P1 positions lists the instances centred
+there (one per table centred on that position). A slot's cluster association is attached to the instance centre's
+**forward link** whose partner is that member, so a change at the member updates the instance's code and centre
+energy through the same inverse index. Cluster interactions are counted once at their centre, so they are kept out
+of the site+pair vector and the total uses `Σ site + 0.5 × Σ pair + Σ cluster`. The v1 payload does not persist
+the per-centre member offset; the context derives each instance's slot from the candidate position or, failing
+that, the unique image of the slot's **member site** (slot 0 is `[0,0,0]` by definition) and fails closed when the
+image is absent or ambiguous (OD-1 in the internal open-decisions register).
 
 **Jump status.** One status per `(P1 position, direction)` (`status = direction * P + position`). The path is
 resolved from the direction's relative node encodings with node `0` replaced by the selected position, so a
@@ -212,7 +220,8 @@ caps before allocation.
 100, block = `total/100`; a zero total is a data error. `K_fix = exp(E_norm/kT)`, `K_auto = 1/RawMax`,
 `K_norm = K_fix × K_auto`, `dt = dof × K_norm/(nu_max × selectable)`, where `nu_max` is the job cap or the maximum
 active rule frequency (the payload persists only the optional job cap, not the original's derived build-time
-modulus). Resume takes a plain `ResumeState` carrying the `.mcs` parameterized `modelSignature`, the `seedHash`,
+modulus; a zero/NaN `nu_max` is exit 13 with the other non-finite factors). Resume takes a plain `ResumeState`
+carrying the `.mcs` parameterized `modelSignature`, the `seedHash`,
 and the counters/time/state, validates it against the package/job, re-derives the mobile mapping, preserves
 `RawMax`, and returns a distinct outcome for a completed state. The `.mcs` has no lattice signature field, so
 none is required. The `.mcs` decode is Step 18's.
@@ -221,7 +230,8 @@ none is required. The `.mcs` decode is Step 18's.
 (lattice, site+pair vectors, site table, forward/inverse links, cluster assoc, cluster geometry/codes/code ids/
 centre energies, pool members + slot map, jump offsets/links, counters) and rejects against per-array caps and a
 1 GiB `max_context_bytes` total; `LimitExceeded` is exit 12, not the run-time limit exit 14. `MemoryReport`
-reports the allocated capacities and must equal the plan. The 10×10×10 real-writer fixture (table-free ceria) and
+reports each array's planned length (not allocator capacity) and equals the plan; summed capacity bytes are a
+separate diagnostic, and the benchmark records peak RSS. The 10×10×10 real-writer fixture (table-free ceria) and
 the populated-model 10×10×10 clone are both budgeted at `< 100 ms` and `≤ 64 MiB`; the clone is the pair/cluster
 measurement because the ceria model has no pair or cluster tables.
 

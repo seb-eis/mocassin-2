@@ -69,7 +69,10 @@ pub struct TransitionEnergies {
 
 pub struct EnergyEngine<'a> { ctx: &'a mut SimulationContext }
 
-impl EnergyEngine<'_> {
+impl<'a> EnergyEngine<'a> {
+    /// Borrows the context mutably for one evaluation; the view is zero-sized and allocation-free.
+    pub fn new(ctx: &'a mut SimulationContext) -> Self;
+
     pub fn transition_energies(
         &mut self,
         direction: &JumpDirection,
@@ -91,6 +94,12 @@ impl EnergyEngine<'_> {
   them. A shared `&SimulationContext` cannot express that. The context exposes no interior mutability; Step 14
   freezes the API with this signature (its `&mut` mutators for particles/flags/pools are the only writes).
   `environment_energy`/`lattice_energy_ev` take `&self` and are the read-only accessors.
+- **Composition with Step 16 (review F-19).** `EnergyEngine<'a>` owns the mutable context borrow, so a
+  `KmcEngine` must **not** hold both `ctx: &mut SimulationContext` and an `EnergyEngine<'a>`; that would be two
+  simultaneous mutable borrows. `KmcEngine` holds the context, and each energy call constructs a short-lived
+  view with `EnergyEngine::new(&mut *self.ctx)` (a reborrow, no allocation). Step 16 §1/§5 use this form.
+  Alternatively a later refactor can move the engine into `SimulationContext` methods; the `&mut` context rule
+  stays.
 - `env` is an `EnvId` (absolute supercell environment). `PositionId` remains the P1 index; do not pass it here.
 
 ### 2. Transition energies
@@ -111,17 +120,19 @@ s_1 &= s_0 + \mathrm{raw}\,s_1 + \tfrac{1}{2}\,\mathrm{conf} \\
 $$
 
 - `E[env][p]` is the **site+pair** owner vector built by Step 14; `C[c][p]` is the separate per-centre cluster
-  energy. Cluster interactions are counted once at their centre, so the `Σ_c` runs over the **path nodes that
-  are cluster centres** (`ctx.centres(position)`); a centre that is not a path node is not read during the
-  transition evaluation but is updated when the state is committed. There is no double count: `E` does not
-  contain the cluster term. Step 14 precomputes the centre index, not a per-direction touch table.
+  energy, indexed per **instance** (a table on a multi-position centre site has several instances). Cluster
+  interactions are counted once at their centre, so the `Σ_c` runs over **every instance centred at a path node**
+  (`ctx.centres(position)` yields one or more instances per position); an instance whose centre is not a path node
+  is not read during the transition evaluation but is updated when the state is committed. There is no double
+  count: `E` does not contain the cluster term. Step 14 precomputes the centre index, not a per-direction touch
+  table.
 - A cluster whose code depends on several path nodes is evaluated **once from the final state**: build the S2
   occupation code with `ctx.occupation_code(instance, centre_cell, overrides)` and look up the code id once.
   Do not mutate code bytes per jump link: an intermediate occupation tuple may not exist in the table (Step 14
   D-10).
 
 - The state codes are packed particle IDs in path order; decode with bounds checks.
-- For MMC, S1 is unused; `s0` and `s2` are the two-site site+pair energies plus the affected centres'
+- For MMC, S1 is unused; `s0` and `s2` are the two-site site+pair energies plus the affected instances'
   cluster terms.
 - The field input is the per-rule Cartesian **charge transport vector** compiled in Step 08:
   - `rule.charge_transport_vector = Σ_node (q(S2,node) − q(S0,node)) · x(path node)`, in e·Å. It is the
@@ -155,16 +166,16 @@ Two modes:
 2. Apply the state change to the path positions (without updating pools/trackers).
 3. Apply the pair deltas to every **owner** returned by `ctx.incoming(changed_env)` for each changed environment,
    using the owner's link and the owner's row (§4); the owner may or may not be a path node.
-4. Rebuild each affected centre's occupation code once from the final state, look up its code id, and read the
-   centre's cluster energy (§2).
-5. Read `s2 = Σ_i E[p_i][S2_i] + Σ_{path-node centres} C[centre][S2 centre]`.
-6. Restore the backup and energies (including the centres' codes and energies).
+4. Rebuild each affected instance's occupation code once from the final state, look up its code id, and read the
+   instance's cluster energy (§2).
+5. Read `s2 = Σ_i E[p_i][S2_i] + Σ_{instances centred at a path node} C[instance][S2 centre]`.
+6. Restore the backup and energies (including the instances' codes and energies).
 
 - The backup/restore must be exact and allocation-free; use small fixed arrays for path positions and a
   scratch buffer for affected environments.
 - If an owner is affected by multiple path positions, its pair deltas are applied sequentially; each pair link is
-  independent, so the result is order-independent. Clusters are not updated incrementally: each affected centre
-  is rebuilt once after all particle changes (§3 step 4), so there is no order effect and no missing intermediate
+  independent, so the result is order-independent. Clusters are not updated incrementally: each affected
+  instance is rebuilt once after all particle changes (§3 step 4), so there is no order effect and no missing intermediate
   code.
 
 **Static (optimization)**
@@ -196,10 +207,10 @@ to the other side transposes the pair table. The rule is the one in Step 14 §6.
 
   for every `p_owner` the owner supports (the whole `pc` vector is materialised, so this is every particle).
   The table and the row both belong to the owner; a reverse link is not required and must not be synthesised.
-- For each `ClusterAssoc { cluster_table, slot }` on `L`, the owner is the cluster centre: rebuild the centre's
-  occupation code with the new particle in `slot` (once, from the final state; Step 14 D-10), look up the code
-  id, and update `cluster_energy[instance, cell(owner), p_owner]` from the table for every allowed centre
-  particle. This is the original's `InvokeEnvironmentLinkClusterUpdates`/`InvokeLocalEnvironmentLinkClusterDeltas`
+- For each `ClusterAssoc { instance, slot }` on `L`, the owner is the instance's centre: rebuild the
+  instance's occupation code with the new particle in `slot` (once, from the final state; Step 14 D-10), look up
+  the code id, and update `cluster_energy[instance, cell(owner), p_owner]` from the table for every allowed
+  centre particle. This is the original's `InvokeEnvironmentLinkClusterUpdates`/`InvokeLocalEnvironmentLinkClusterDeltas`
   orientation.
 - Cluster code lookup: codes are sorted; use binary search for > 8 codes, linear for small tables; a missing code
   is a data error (should not happen for a valid final occupation).
@@ -208,7 +219,7 @@ to the other side transposes the pair table. The rule is the one in Step 14 §6.
   code is rejected at context initialization, not silently skipped.
 - Skip zero deltas early (`old == new` or table difference == 0).
 - Multiple changed environments may share an owner; the updates are independent per link and therefore
-  order-independent for pairs. For clusters, evaluate each affected centre once after all particle changes (§3)
+  order-independent for pairs. For clusters, evaluate each affected instance once after all particle changes (§3)
   so no order effect remains.
 - Optional 3D pair-delta tables: `delta[old][new][p_owner]`; use only if profiling shows a win and memory is
   acceptable.
@@ -237,7 +248,7 @@ to the other side transposes the pair table. The rule is the one in Step 14 §6.
     the departed and the arrived particle of each changed environment;
   - update every **owner** of a changed environment through `ctx.incoming(changed_env)` (pairs and link-carried
     cluster associations), exactly as in §4 — not only the path nodes;
-  - rebuild the affected centres' codes and energies once from the committed state (§3);
+  - rebuild the affected instances' codes and energies once from the committed state (§3);
   - update lattice energy by the accepted delta;
   - increment counters/trackers (step 18).
 - The order of these updates is fixed and documented; it must not depend on hash iteration. Particle changes are

@@ -966,8 +966,11 @@ MessagePack map with snake_case keys. Top-level:
   the compiled `CompiledClusterLink(ClusterTableIndex, SiteSlot)`. It is not the slot of the pair target and not
   a local link index. The member's **relative cell offset is not persisted**: the writer stores only the
   canonical `P` index and the slot. A solver therefore cannot reconstruct a cluster image in general; it must
-  fail closed for a cluster whose member has zero or several periodic images (Step 14 §6.4, OD-1). The centre of
-  a cluster table is the unique environment whose link carries slot `0`.
+  fail closed for a cluster whose member has zero or several periodic images (Step 14 §6.4, OD-1). A cluster
+  table may have **several centres**: the compiler adds slot `0` to every P1 position of the centre site, and
+  the solver instantiates one runtime cluster per slot-0 link (Step 14 §6.2/F-17). A slot `j > 0` identifies the
+  member **site** of that slot; the per-centre image is resolved from the centre's own pair links, and an absent
+  or ambiguous image is rejected.
 - `interaction_range` is the MMC local-update cube `[maxCellA, maxCellB, maxCellC, 0]`, derived from the
   maximum stable/unstable cutoff and the cell interplanar spacings plus one boundary cell.
 - `static_trackers_per_cell = position_count * (particle_count - 1)`; void (index 0) has no tracker.
