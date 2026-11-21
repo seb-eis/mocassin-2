@@ -19,12 +19,12 @@ those are Step 23B.
 
 ## Implementation status
 
-- **Status:** In audit
+- **Status:** Re-audit required — round 1 fixes integrated; replacement CI/platform runs pending
 - **Step branch:** `step/23a-workspace-and-project-lifecycle`
-- **Step CI:** [Ubuntu closeout 44841374175](https://github.com/seb-eis/mocassin-2/actions/runs/44841374175) — green at `6901e76`
+- **Step CI:** replacement Ubuntu closeout and Windows/macOS platform gates pending at the new audited commit
 - **Main merge:** — (`bbc2d08` is merged into the step branch; merge is after a passing audit)
 - **Step tag:** —
-- **Audit:** In audit — [record](../audits/step-23a.md), [evidence](../closeout/step-23a.json)
+- **Audit:** Re-audit required — [record](../audits/step-23a.md), [evidence](../closeout/step-23a.json)
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe`
   ([record](../reviews/step-23a.md), round 3 record commit `b6a472c`). Notes n-12/n-13 are corrected in
   feature 5.
@@ -42,6 +42,7 @@ those are Step 23B.
 | 3 | `settings-theming-and-accessibility` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `d0bca73` |
 | 4 | `project-session-lifecycle` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `a17482a` |
 | 5 | `tests-docs-and-closeout` | Squashed | `./tools/verify.sh all --require` 0 on the merged tree | Ubuntu [44841374175](https://github.com/seb-eis/mocassin-2/actions/runs/44841374175) green at `6901e76` | `114f31c` |
+| 5-fix | `fix-audit-round-1` | Squashed | `./tools/verify.sh all --require` on the fixed tree | replacement closeout/platform gates pending | `657bc5f` |
 
 ### Recorded implementation deviations and limitations (feature 5)
 
@@ -79,6 +80,26 @@ depends only on the features above it and on the merged 01/03–07/12 libraries;
 
 The owner approves this list once at the start gate; individual features are then squash-merged without further
 approval. 23B is not part of this list and must not appear in a 23A branch.
+
+### Audit round 1 fixes (2026-11-21)
+
+| Finding | Resolution |
+| --- | --- |
+| F-1 | Added macOS/Windows dispatch support for the Avalonia headless suite; replacement Ubuntu + Windows + macOS runs are recorded in closeout evidence. |
+| F-2 | A fatal settings load now blocks persistence, preserves the file, updates only in-memory state, and reports the rejection. |
+| F-3 | Added `HighContrast.axaml` and `Density.axaml`, real brush/control styles, and reduce-motion transitions. |
+| F-4 | Recent projects are openable, missing entries disabled, removable, and Save As records the new path; welcome/documentation updated. |
+| F-5 | Added the correct two-parameter shell key handler, `Ctrl+1..9` activation, and a real-key headless regression test. |
+| F-6 | Added light/dark/high-contrast screenshot baselines, the accessibility-name sweep, and the manual platform checklist. |
+| F-7 | Declared PR-fast/PR-medium tiers across the App test classes. |
+| F-8 | Added choose/prompt/error/focus dialog tests, stale-lock and duplicate-provider tests, and a real I/O settings-write test. |
+| F-9 | Removed the dead `WindowPlacementResolver` and its tests; placement persistence is no longer claimed. |
+| F-10 | Added the read-only banner, lock acquisition text, and switcher lock/active-document display. |
+| F-11 | Guarded `GetFullPath` in New and surfaced the error dialog; added an invalid-directory test. |
+| F-12 | Recorded as an accepted note: crash log keeps exception/source; active-project/last-command context is deferred until a stable crash-context contract exists. |
+| F-13 | Removed unused App `Results`/`Rendering` references; the composition-root IVT remains the recorded exception. |
+| F-14 | Recorded as an accepted note: AOT is CLI-only pre-existing evidence, not a GUI publication claim. |
+| F-15 | Fixed platform recents comparison; added a Linux case-distinct test. |
 
 ## Goal
 
