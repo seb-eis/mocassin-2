@@ -5,8 +5,10 @@
 Not dependent on Steps 08–11 or 13–22.
 **Delivers:** The single-project edit pipeline with undo/redo, the validation and Problems surface, dirty state
 and save-point handling, autosave, crash recovery, and unclean-exit session restore — on top of the 23A shell.
-**Status:** Design frozen for review; **not design-reviewed and not started.** No step branch exists. The
-review record is [`reviews/step-23b.md`](../reviews/step-23b.md).
+**Status:** **In progress.** The design was accepted by the human owner on 2026-11-21 as `Ready with notes`
+(round-4 freeze `a33711d`, record `c4ded0e`), class High and the four features were approved, and the step
+branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
+[`reviews/step-23b.md`](../reviews/step-23b.md).
 
 > **Split note.** Step 23 was split into **23A** and **23B** by the owner on 2026-11-20 (complexity class High,
 > three independent acceptance stories, oversized audit surface). 23B is the editing/diagnostics/recovery half.
@@ -16,24 +18,31 @@ review record is [`reviews/step-23b.md`](../reviews/step-23b.md).
 
 ## Implementation status
 
-- **Status:** Design ready for review — not started, no step branch
-- **Step branch:** —
-- **Step CI:** —
+- **Status:** **In progress** — design accepted, feature 1 in progress
+- **Step branch:** `step/23b-editing-diagnostics-and-recovery`
+- **Step CI:** — (local gates only; the single closeout `CI` run is dispatched at closeout)
 - **Main merge:** —
 - **Step tag:** —
 - **Audit:** Not requested
-- **Design review:** **Re-review required** — round 2 returned `Changes required`; the current freeze is in
-  [`reviews/step-23b.md`](../reviews/step-23b.md). The owner decisions of 2026-11-21 are recorded there and in
-  §17.2.
+- **Design review:** **Accepted `Ready with notes` by the human owner 2026-11-21** at the round-4 freeze
+  `a33711d` (record `c4ded0e`, round-4 verdict `Ready with notes`) — see
+  [`reviews/step-23b.md`](../reviews/step-23b.md).
 - **Feature list:** **Approved by the human owner 2026-11-21** (four features; the list below is the approved
   scope)
 - **Complexity class:** **High** (cross-step interfaces and test-matrix breadth; §16). **Approved by the human
   owner 2026-11-21 as one unit; no further split** (§16).
+- **Recorded limitation (m-14, owner-accepted 2026-11-21):** `recovery/` candidates keep the 7-day retention
+  sweep, so a deferred `RecoverySource.Crash`/`AutosaveFallback` candidate can expire before the next scan; only
+  `.autosave` sidecars next to a project are sweep-exempt. §4/§5/§6/§13 and `05-open-decisions.md` narrow the
+  "preserved until Recover or Discard" claim accordingly.
 - **Last updated:** 2026-11-21
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| 1 | Edit pipeline and undo/redo | — | Planned | — | — | — |
+| 2 | Validation surface | — | Planned | — | — | — |
+| 3 | Dirty state, autosave, crash recovery | — | Planned | — | — | — |
+| 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
 
 ### Approved feature list (owner-approved 2026-11-21)
 
@@ -211,7 +220,7 @@ internal sealed partial class ProjectEditCoordinator : ObservableObject
 | `ProjectOverviewViewModel` | refreshes identity/metadata/validation/statistics on `Edited`/`Undo`/`Redo`/`Saved`/`Replaced`; updates the inline error from `EditRejected` and the banner | document lifetime; unsubscribes in `OnClosingAsync` |
 | `ProjectJsonViewModel` | regenerates the canonical JSON on content changes (`Edited`/`Undo`/`Redo`/`Replaced`); skips `Saved` because the content did not change | document lifetime; unsubscribes in `OnClosingAsync` |
 | `ValidationCoordinator` | debounces and starts a validation run on content changes; seeds from `ProjectSession.Validation` on `Replaced`; caches statistics by document hash | session lifetime; resubscribes after `ReplaceDocument` |
-| `ProjectSessionService` (snapshot cleanup) | on `Edited`/`Undo`/`Redo`, clears `PendingRecovery` on the first edit and, when the document is clean and no candidate is pending, queues sidecar/recovery cleanup through the session gate. It ignores `Kind = Saved`/`Replaced` because those are raised while the non-reentrant gate is held and the save/reload/recovery paths own their own cleanup (n-10) | session lifetime; unsubscribes on close |
+| `ProjectSessionService` (snapshot cleanup) | on `Edited`/`Undo`/`Redo`, clears `PendingRecovery` on the first **accepted content change** (`EditApplyResult.Change` non-null, i.e. the project value actually differs; a no-op same-hash `Apply` does not clear it) and, when the document is clean and no candidate is pending, queues sidecar/recovery cleanup through the session gate. It ignores `Kind = Saved`/`Replaced` because those are raised while the non-reentrant gate is held and the save/reload/recovery paths own their own cleanup (n-10, n-12) | session lifetime; unsubscribes on close |
 | `ProblemsChannelViewModel` | appends `EditRejected` diagnostics with source `edit`; clears the `edit` source on the next successful content change | channel lifetime |
 | `AutosaveScheduler` | polls `IsDirty`/`IsAutosaveDue` on its tick; it does not need to subscribe | app lifetime |
 | Step 27 viewport | subscribes when it lands; no 23B code depends on it | later step |
@@ -427,9 +436,10 @@ prompts; the service never prompts.
   result (n-6/n-7). It builds the document with
   `ProjectDocument.CreateRecovered(snapshot, savedFile, maxUndoDepth: 200)`, replaces the document, and leaves it
   dirty. This recovery run uses the snapshot's diagnostics and **not** the saved file's `LoadDiagnostics`; it is
-  not the forbidden open-time second validation (m-7). The next save writes the main file and deletes the
-  snapshot. "Decide later" keeps it and the status bar shows "Recovery available". A snapshot for a different
-  project id is rejected.
+  not the forbidden open-time second validation (m-7). `RecoverAsync` consumes and clears `PendingRecovery`, so
+  the next save writes the main file and deletes the snapshot (n-11). "Decide later" keeps it (and its
+  `PendingRecovery` candidate) and the status bar shows "Recovery available"; `DiscardRecoveryAsync` clears the
+  candidate too. A snapshot for a different project id is rejected.
 - **Recovery comparison (m-5/M-2).** `RecoveryComparison.HasContentDifference(a, b)` normalizes both projects'
   `Metadata.ModifiedUtc` to a fixed sentinel and reads
   `ProjectDocument.CreateRecovered(normalizedA, normalizedB).IsDirty`. It never calls `ProjectHasher` and adds
@@ -576,11 +586,11 @@ Two additive Core changes; no Packages change and no App public surface change.
 
 | Seam | 23B edit |
 | --- | --- |
-| `ProjectSessionService.SaveAsync`/`SaveAsAsync` | call `MarkSaved()` (no-arg), delete the sidecar/recovery file on success, take the session gate; keep the stamp |
-| `ProjectSessionService.ProjectChanged` handler | clear `PendingRecovery` on the first `Edited`; on `Edited`/`Undo`/`Redo`, delete the sidecar/recovery snapshot when `!IsDirty` and no candidate is pending; queue through the gate and ignore `Saved`/`Replaced` (non-reentrant gate) (m-12, m-13, n-10) |
+| `ProjectSessionService.SaveAsync`/`SaveAsAsync` | call `MarkSaved()` (no-arg), delete the sidecar/recovery file **only when no deferred `PendingRecovery` candidate is pending**, take the session gate; keep the stamp (n-11) |
+| `ProjectSessionService.ProjectChanged` handler | clear `PendingRecovery` on the first **accepted content change** (`EditApplyResult.Change` non-null; a no-op same-hash edit does not clear it, n-12); on `Edited`/`Undo`/`Redo`, delete the sidecar/recovery snapshot when `!IsDirty` and no candidate is pending; queue through the gate and ignore `Saved`/`Replaced` (non-reentrant gate) (m-12, m-13, n-10) |
 | `ProjectSessionService.CloseAsync`/`ReloadAsync` | add the `discardChanges` guard, delete discarded sidecars/recovery files, take the session gate, set/clear `IsClosing` (m-3, m-10) |
 | `ProjectSessionService.OpenAsync`/`ActivateAsync` | write the settings `session` block (paths, active project, `cleanExit`) on open/activate; detect the sidecar `RecoveryCandidate` |
-| `ProjectSessionService.RecoverAsync`/`DiscardRecoveryAsync` | new operations; recompute `ProjectSession.Validation` for the recovered snapshot (m-7) |
+| `ProjectSessionService.RecoverAsync`/`DiscardRecoveryAsync` | new operations; both consume and clear `PendingRecovery` (the candidate is either recovered or discarded); recompute `ProjectSession.Validation` for the recovered snapshot (m-7, n-11) |
 | `ProjectSessionService` constructor | accept `IRecoveryStore` for discard/save/recovery file deletion and sidecar-candidate composition |
 | `ProjectSession` | own the `ProjectEditCoordinator`, `SemaphoreSlim`, `IsClosing`, `PendingRecovery`; create documents with `MaxUndoDepth = 200`; replace the document on reload/recovery |
 | `ProjectSession.CreateFromLoad`/schemas | construct the GUI document with `MaxUndoDepth = 200` and create the coordinator |
@@ -642,9 +652,9 @@ dispatcher, time, and the in-memory `IRecoveryStore`/`IAppSettingsStore` for non
 | Read-only | PR-fast | Every `Apply` on a read-only session returns `EditApplyOutcome.ReadOnly`, changes nothing, adds no `Diagnostic`/`PROJ031`, and the edit commands are disabled |
 | Validation surface | PR-fast | Debounce coalesces edits; a stale result is discarded by `DocumentHash`; counts/codes match `ValidationResult`; double-click requests the registered target; an unknown domain produces a notice; a metadata path focuses the Overview field; an unknown code is unlinked; the help map covers every catalog code (or the explicit unlinked set) and the launcher receives the anchored URI |
 | Statistics trigger | PR-fast | The Overview does not request statistics on open; the explicit toggle/command runs one `IncludeStatistics = true` pipeline and caches by document hash; a content change while the panel is active invalidates and reruns it |
-| Dirty/autosave | PR-fast | Only dirty writable documents are written; the interval comes from settings and the tick uses `IsAutosaveDue`; save/autosave/close/reload never interleave (tick skips busy/closing; close/reload await the gate); a clean save or explicit discard deletes the sidecar/recovery file; a discard-close and a discard-reload are not re-offered; a return to the save point and a clean close delete the sidecar (except a pending candidate, next row); an `UnsavedChanges` return/Cancel leaves `IsClosing` false; read-only sessions never write; a sidecar failure falls back to `recovery/` |
+| Dirty/autosave | PR-fast | Only dirty writable documents are written; the interval comes from settings and the tick uses `IsAutosaveDue`; save/autosave/close/reload never interleave (tick skips busy/closing; close/reload await the gate); a clean save or explicit discard deletes the sidecar/recovery file, **except that a successful save with a deferred `PendingRecovery` candidate preserves it** (n-11); a discard-close and a discard-reload are not re-offered; a return to the save point and a clean close delete the sidecar (except a pending candidate, next row); an `UnsavedChanges` return/Cancel leaves `IsClosing` false; read-only sessions never write; a sidecar failure falls back to `recovery/` |
 | Pending recovery / cleanup (m-13, m-14, n-10) | PR-fast | A deferred sidecar `PendingRecovery` candidate survives a clean close and is re-offered on reopen; a deferred `recovery/` candidate older than 7 days is deleted by the sweep (accepted limitation); the first accepted edit clears it; a later return-to-clean then deletes the sidecar; the `ProjectChanged` cleanup handler ignores `Saved`/`Replaced` and does not re-enter the non-reentrant gate (no deadlock); autosave resumes after a cancelled close |
-| Recovery | PR-fast | A simulated crash leaves a `recovery/` snapshot and manifest; startup offers recovery; a sidecar candidate has `RecoverySource.Sidecar` and the newest valid candidate wins; Recover yields a dirty document equal to the snapshot, updates `LoadDiagnostics`, and recomputes `Validation` before `ReplaceDocument` raises `Replaced`; a timestamp-only snapshot constructed directly is not offered; the save → edit → autosave → undo-to-clean → reopen trace leaves no sidecar and offers no recovery; Discard deletes; Reload replaces the document; retention removes only old recovery files; sidecars are never swept; a missing project file is reported without an untitled session; manifest 64 KiB/100-entry and snapshot 64 MiB caps are enforced |
+| Recovery | PR-fast | A simulated crash leaves a `recovery/` snapshot and manifest; startup offers recovery; a sidecar candidate has `RecoverySource.Sidecar` and the newest valid candidate wins; Recover yields a dirty document equal to the snapshot, updates `LoadDiagnostics`, and recomputes `Validation` before `ReplaceDocument` raises `Replaced`; `RecoverAsync` and `DiscardRecoveryAsync` both clear `PendingRecovery`, and after Recover the next save writes the main file and deletes the snapshot (n-11); a timestamp-only snapshot constructed directly is not offered; the save → edit → autosave → undo-to-clean → reopen trace leaves no sidecar and offers no recovery; Discard deletes; Reload replaces the document; retention removes only old recovery files; sidecars are never swept; a missing project file is reported without an untitled session; manifest 64 KiB/100-entry and snapshot 64 MiB caps are enforced |
 | Recovery comparison (M-2) | PR-fast | `RecoveryComparison` normalizes `ModifiedUtc` and reads `ProjectDocument.CreateRecovered(...).IsDirty`; the ViewModels source token scan/architecture test has no `ProjectHasher` use in `Mocassin.App.ViewModels`; a timestamp-only pair is not different |
 | Unclean exit | PR-fast | `cleanExit=false` offers restore; `cleanExit=true` does not; missing paths are reported; the active project is restored; a clean shutdown writes `true` |
 | Crash path | PR-fast | `Task.WhenAny(writes, Task.Delay(budget, timeProvider, cts.Token))` completes within budget or reports a timeout; a timeout cancels the writes; no blocking call; the dialog reports per-session results; a dead UI thread writes no recovery files |
@@ -671,7 +681,7 @@ PR-fast test; the only test time limit is a hang guard.
 | Crash-path hang | `Task.WhenAny(writes, Task.Delay(budget, timeProvider, cts.Token))` with a 2 s budget and per-session reporting; a timeout cancels the writes; no sync-over-async; dead-UI path writes no recovery files |
 | Recovery file corruption/path abuse | Manifest 64 KiB/100 entries and snapshot 64 MiB caps; real `ProjectStore` load path; manifest paths validated; sweep only known patterns |
 | Spurious timestamp-only recovery | `RecoveryComparison` normalizes only `Metadata.ModifiedUtc` and reads `ProjectDocument.IsDirty`; a return to the save point deletes the sidecar (m-12); the save-point `IsDirty` rule is unchanged |
-| Deferred recovery candidate lost on close | Clean-close/return-to-clean cleanup is skipped while `PendingRecovery` is non-null; the first edit clears it; test (m-13) |
+| Deferred recovery candidate lost on close | Clean-close/return-to-clean cleanup is skipped while `PendingRecovery` is non-null; the first accepted content change clears it (a no-op same-hash edit does not); test (m-13, n-12) |
 | Cleanup handler re-enters the gate | The handler ignores `Saved`/`Replaced` and queues `Edited`/`Undo`/`Redo` cleanup outside the non-reentrant gate (n-10) |
 | ViewModels hash boundary (M-2) | `RecoveryComparison` uses `ProjectDocument.CreateRecovered(...).IsDirty`; no `ProjectHasher` call in `Mocassin.App.ViewModels`; the token/architecture test guards it |
 | Missing project file | Reported as a limitation; no untitled session or new lifecycle path |
@@ -739,10 +749,10 @@ amendment before feature 2. **No further split is proposed.**
 | Problems shows the active project only; statistics are display-only in 23B | This page §3 |
 | Class High; owner acceptance at the start gate; no further split | This page §16 |
 
-Open items for the 23B start gate: confirm that the 23A seams proved sufficient in practice (no shell edit
-beyond the §11 list), that the two Core additions are still additive after 23A merged, and that the owner accepts
-the `MaxUndoDepth` GUI bound (default 0/unbounded, GUI sets 200), the app-level read-only refusal (no `PROJ031`
-reuse), and the no-untitled recovery scope.
+The 23B start-gate items were confirmed by the human owner on 2026-11-21 (§17.2): the 23A seams proved
+sufficient in practice (no shell edit beyond the §11 list), the two Core additions are still additive after 23A
+merged, and the owner accepted the `MaxUndoDepth` GUI bound (default 0/unbounded, GUI sets 200), the app-level
+read-only refusal (no `PROJ031` reuse), and the no-untitled recovery scope.
 
 #### 17.1 Owner questions for the start gate (n-9)
 
@@ -824,8 +834,8 @@ section. They are scope/class approvals, not a design verdict.
 - [ ] Dirty state is correct across save, undo, and redo; closing with unsaved changes prompts; Cancel closes
       nothing and leaves autosave running; Discard and discard-reload delete the sidecar/recovery file; a return
       to the save point or a clean close deletes the sidecar, except a deferred sidecar candidate, which
-      survives until Recover/Discard and is cleared by the first edit; a deferred `recovery/` candidate remains
-      subject to the 7-day sweep.
+      survives until Recover/Discard and is cleared by the first accepted content change (a no-op same-hash
+      edit does not clear it, n-12); a deferred `recovery/` candidate remains subject to the 7-day sweep.
 - [ ] Autosave writes only dirty documents and deletes its file on save; save/autosave/close/reload/recovery do
       not interleave; a simulated crash leaves a `recovery/` snapshot; recovery restores a dirty document equal
       to the snapshot, updates `LoadDiagnostics`, and recomputes validation before the `Replaced` event; a
