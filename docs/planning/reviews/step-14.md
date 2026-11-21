@@ -501,10 +501,11 @@ Date:
 
 **Gate results for the corrected freeze.**
 
-- `./tools/verify.sh docs --require` → exit 0; Zensical strict (182 link-scanned files), math check (179 files),
-  DocFX (0 warnings), rustdoc clean.
+- `./tools/verify.sh docs --require` → exit 0 on the round-4 freeze (merged with `main` `63cdd06`); Zensical
+  strict (194 link-scanned files, 191 math-checked files after the `main` merge), DocFX (0 warnings), rustdoc
+  clean.
 - `./tools/verify.sh policy --require` → exit 0; contracts current (26), projections 5/4/2, Space-group catalog
-  current, process consistency OK, 60 tool tests OK, SPDX headers 780 files, secret scan 1,217 files, ApiCompat
+  current, process consistency OK, 60 tool tests OK, SPDX headers 1,002 files, secret scan 1,479 files, ApiCompat
   and cargo-deny OK.
 - `git status --short` clean before the record edit; this record commit touches only
   `docs/planning/reviews/step-14.md`.
