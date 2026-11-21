@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
@@ -142,6 +143,70 @@ public sealed class DialogOverlayTests
                     HeadlessSession.Pump(window);
 
                     Assert.Same(focusTarget, window.FocusManager?.GetFocusedElement());
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TheErrorDialogFocusesCloseAndClosesOnEnterAndEscape() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var dialogs = host.Services.GetRequiredService<IDialogService>();
+                    var first = dialogs.ShowErrorAsync(new ErrorDialogRequest("Failure", "Something failed."));
+                    HeadlessSession.Pump(window);
+                    var close = window.GetVisualDescendants().OfType<Button>().Single(button => button.IsDefault);
+                    Assert.Same(close, window.FocusManager?.GetFocusedElement());
+
+                    window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+                    await first;
+
+                    var second = dialogs.ShowErrorAsync(new ErrorDialogRequest("Failure", "Something failed."));
+                    HeadlessSession.Pump(window);
+                    window.KeyPress(Key.Escape, RawInputModifiers.None, PhysicalKey.Escape, null);
+                    await second;
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TheDialogHostAnnouncesTheActiveTitleAndFocusesTheDeclaredTarget() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+
+                try
+                {
+                    var dialogs = host.Services.GetRequiredService<IDialogService>();
+                    var confirmation = dialogs.ConfirmAsync(new ConfirmDialogRequest("Delete", "Delete the item?"));
+                    HeadlessSession.Pump(window);
+
+                    var content = window.GetVisualDescendants()
+                        .OfType<ContentControl>()
+                        .Single(control => control.Name == "DialogContent");
+                    Assert.Equal("Delete", AutomationProperties.GetName(content));
+                    var cancel = window.GetVisualDescendants().OfType<Button>().Single(button => button.IsCancel);
+                    Assert.Same(cancel, window.FocusManager?.GetFocusedElement());
+
+                    window.KeyPress(Key.Escape, RawInputModifiers.None, PhysicalKey.Escape, null);
+                    Assert.False(await confirmation);
                 }
                 finally
                 {

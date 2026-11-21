@@ -40,28 +40,37 @@ internal static class AppSettingsValidator
         }
 
         var layout = settings.Layout;
+        var leftFraction = Fraction(
+            layout.LeftFraction,
+            SettingsDefaults.MinSideFraction,
+            SettingsDefaults.MaxSideFraction,
+            SettingsDefaults.DefaultLeftFraction,
+            "left fraction",
+            warnings);
+        var rightFraction = Fraction(
+            layout.RightFraction,
+            SettingsDefaults.MinSideFraction,
+            SettingsDefaults.MaxSideFraction,
+            SettingsDefaults.DefaultRightFraction,
+            "right fraction",
+            warnings);
+        if (leftFraction + rightFraction >= 1d)
+        {
+            warnings.Add("The left and right panel fractions leave no centre share; their defaults were used.");
+            leftFraction = SettingsDefaults.DefaultLeftFraction;
+            rightFraction = SettingsDefaults.DefaultRightFraction;
+        }
+
         var normalizedLayout = new LayoutSettings
         {
-            LeftWidth = InRange(
-                layout.LeftWidth,
-                SettingsDefaults.MinLeftWidth,
-                SettingsDefaults.MaxLeftWidth,
-                SettingsDefaults.DefaultLeftWidth,
-                "left width",
-                warnings),
-            RightWidth = InRange(
-                layout.RightWidth,
-                SettingsDefaults.MinRightWidth,
-                SettingsDefaults.MaxRightWidth,
-                SettingsDefaults.DefaultRightWidth,
-                "right width",
-                warnings),
-            ConsoleHeight = InRange(
-                layout.ConsoleHeight,
-                SettingsDefaults.MinConsoleHeight,
-                SettingsDefaults.MaxConsoleHeight,
-                SettingsDefaults.DefaultConsoleHeight,
-                "console height",
+            LeftFraction = leftFraction,
+            RightFraction = rightFraction,
+            ConsoleFraction = Fraction(
+                layout.ConsoleFraction,
+                SettingsDefaults.MinConsoleFraction,
+                SettingsDefaults.MaxConsoleFraction,
+                SettingsDefaults.DefaultConsoleFraction,
+                "console fraction",
                 warnings),
             LeftVisible = layout.LeftVisible,
             RightVisible = layout.RightVisible,
@@ -149,9 +158,15 @@ internal static class AppSettingsValidator
         };
     }
 
-    private static int InRange(int value, int minimum, int maximum, int fallback, string name, List<string> warnings)
+    private static double Fraction(
+        double value,
+        double minimum,
+        double maximum,
+        double fallback,
+        string name,
+        List<string> warnings)
     {
-        if (value < minimum || value > maximum)
+        if (!double.IsFinite(value) || value < minimum || value > maximum)
         {
             warnings.Add($"The {name} is outside {minimum}–{maximum}; the default was used.");
             return fallback;

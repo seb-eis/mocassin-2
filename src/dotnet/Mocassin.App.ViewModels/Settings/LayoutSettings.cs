@@ -3,24 +3,25 @@
 namespace Mocassin.App.ViewModels.Settings;
 
 /// <summary>
-/// Persisted shell layout.
+/// Persisted shell layout. The resizable regions store fractions rather than pixels so that a window resize
+/// keeps the ratio and the splitter's temporary pixel-valued stars are not durable.
 /// </summary>
 internal sealed record LayoutSettings
 {
     /// <summary>
-    /// Gets the left panel width.
+    /// Gets the left panel share of the workspace width.
     /// </summary>
-    public int LeftWidth { get; init; } = SettingsDefaults.DefaultLeftWidth;
+    public double LeftFraction { get; init; } = SettingsDefaults.DefaultLeftFraction;
 
     /// <summary>
-    /// Gets the right panel width.
+    /// Gets the right panel share of the workspace width.
     /// </summary>
-    public int RightWidth { get; init; } = SettingsDefaults.DefaultRightWidth;
+    public double RightFraction { get; init; } = SettingsDefaults.DefaultRightFraction;
 
     /// <summary>
-    /// Gets the console height.
+    /// Gets the console share of the documents plus console height.
     /// </summary>
-    public int ConsoleHeight { get; init; } = SettingsDefaults.DefaultConsoleHeight;
+    public double ConsoleFraction { get; init; } = SettingsDefaults.DefaultConsoleFraction;
 
     /// <summary>
     /// Gets a value indicating whether the projects region is visible.

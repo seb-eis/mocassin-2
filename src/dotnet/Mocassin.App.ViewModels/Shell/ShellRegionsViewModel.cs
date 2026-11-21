@@ -1,14 +1,19 @@
 // SPDX-License-Identifier: MIT
 
 using CommunityToolkit.Mvvm.ComponentModel;
+using Mocassin.App.ViewModels.Settings;
 
 namespace Mocassin.App.ViewModels.Shell;
 
 /// <summary>
-/// Holds the visibility of the four shell regions.
+/// Holds the visibility of the four shell regions and their proportional layout.
 /// </summary>
 internal sealed partial class ShellRegionsViewModel : ObservableObject
 {
+    private double leftFraction = SettingsDefaults.DefaultLeftFraction;
+    private double rightFraction = SettingsDefaults.DefaultRightFraction;
+    private double consoleFraction = SettingsDefaults.DefaultConsoleFraction;
+
     [ObservableProperty]
     private bool isProjectsVisible = true;
 
@@ -18,14 +23,66 @@ internal sealed partial class ShellRegionsViewModel : ObservableObject
     [ObservableProperty]
     private bool isConsoleVisible = true;
 
-    [ObservableProperty]
-    private double leftWidth = 260;
+    /// <summary>
+    /// Gets or sets the projects panel share of the workspace width.
+    /// </summary>
+    public double LeftFraction
+    {
+        get => leftFraction;
+        set
+        {
+            if (SetProperty(
+                    ref leftFraction,
+                    ShellLayoutFractions.ClampSide(value, SettingsDefaults.DefaultLeftFraction)))
+            {
+                OnPropertyChanged(nameof(CentreFraction));
+            }
+        }
+    }
 
-    [ObservableProperty]
-    private double rightWidth = 320;
+    /// <summary>
+    /// Gets or sets the inspector share of the workspace width.
+    /// </summary>
+    public double RightFraction
+    {
+        get => rightFraction;
+        set
+        {
+            if (SetProperty(
+                    ref rightFraction,
+                    ShellLayoutFractions.ClampSide(value, SettingsDefaults.DefaultRightFraction)))
+            {
+                OnPropertyChanged(nameof(CentreFraction));
+            }
+        }
+    }
 
-    [ObservableProperty]
-    private double consoleHeight = 180;
+    /// <summary>
+    /// Gets or sets the console share of the documents plus console height.
+    /// </summary>
+    public double ConsoleFraction
+    {
+        get => consoleFraction;
+        set
+        {
+            if (SetProperty(
+                    ref consoleFraction,
+                    ShellLayoutFractions.ClampConsole(value)))
+            {
+                OnPropertyChanged(nameof(DocumentsFraction));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the centre column share.
+    /// </summary>
+    public double CentreFraction => ShellLayoutFractions.Centre(LeftFraction, RightFraction);
+
+    /// <summary>
+    /// Gets the documents row share.
+    /// </summary>
+    public double DocumentsFraction => ShellLayoutFractions.Documents(ConsoleFraction);
 
     /// <summary>
     /// Toggles the projects region.

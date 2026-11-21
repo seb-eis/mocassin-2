@@ -9,6 +9,8 @@ using Avalonia.VisualTree;
 using Microsoft.Extensions.DependencyInjection;
 using Mocassin.App.Composition;
 using Mocassin.App.Tests.TestSupport;
+using Mocassin.App.ViewModels.Shell;
+using Mocassin.App.Views.Settings;
 using Mocassin.App.Views.Shell;
 
 namespace Mocassin.App.Tests.Visual;
@@ -84,6 +86,78 @@ public sealed class AccessibilityTests
                         var peer = ControlAutomationPeer.CreatePeerForElement(control);
                         Assert.NotNull(peer);
                         Assert.Equal(type, peer.GetAutomationControlType());
+                    }
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task OverlayRootsHaveAccessibleNames() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    shell.ShowPaletteCommand.Execute(null);
+                    HeadlessSession.Pump(window);
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<Grid>(),
+                        control => AutomationProperties.GetName(control) == "Command palette");
+                    shell.ClosePaletteCommand.Execute(null);
+
+                    shell.ShowShortcutsCommand.Execute(null);
+                    HeadlessSession.Pump(window);
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<Grid>(),
+                        control => AutomationProperties.GetName(control) == "Keyboard shortcuts");
+                    shell.CloseShortcutsCommand.Execute(null);
+
+                    shell.Settings.Open();
+                    HeadlessSession.Pump(window);
+                    Assert.Contains(
+                        window.GetVisualDescendants().OfType<Grid>(),
+                        control => AutomationProperties.GetName(control) == "Settings");
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TabOrderStaysInsideTheOpenLayer() =>
+        HeadlessSession.DispatchAsync(
+            () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    shell.Settings.Open();
+                    HeadlessSession.Pump(window);
+                    var layer = Assert.Single(window.GetVisualDescendants().OfType<SettingsDialogView>());
+
+                    for (var step = 0; step < 8; step++)
+                    {
+                        window.KeyPress(Key.Tab, RawInputModifiers.None, PhysicalKey.Tab, null);
+                        HeadlessSession.Pump(window);
+                        var focused = Assert.IsAssignableFrom<Control>(window.FocusManager?.GetFocusedElement());
+                        Assert.Contains(layer, focused.GetVisualAncestors());
                     }
                 }
                 finally

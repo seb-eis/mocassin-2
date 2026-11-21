@@ -61,11 +61,13 @@ internal sealed partial class CommandPaletteViewModel : ObservableObject
     private void ExecuteSelected()
     {
         var command = SelectedCommand;
-        close();
-        if (command?.CanExecute == true)
+        if (command is null || !command.CanExecute)
         {
-            command.Command.Execute(null);
+            return;
         }
+
+        close();
+        command.Command.Execute(null);
     }
 
     /// <summary>

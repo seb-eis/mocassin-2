@@ -14,37 +14,43 @@ internal sealed partial class CommandPaletteView : UserControl
     /// <summary>
     /// Initializes the view.
     /// </summary>
-    public CommandPaletteView()
+    public CommandPaletteView() => InitializeComponent();
+
+    /// <summary>
+    /// Focuses the search box and selects the existing query so the first keystroke replaces it.
+    /// </summary>
+    public void FocusSearch()
     {
-        InitializeComponent();
-        AttachedToVisualTree += (_, _) => SearchBox.Focus();
-        PropertyChanged += (_, args) =>
-        {
-            if (args.Property == IsVisibleProperty && IsVisible)
-            {
-                SearchBox.Focus();
-            }
-        };
+        SearchBox.Focus();
+        SearchBox.SelectAll();
     }
 
-    private void OnSearchKeyDown(object? sender, KeyEventArgs e)
+    private void OnRootKeyDown(object? sender, KeyEventArgs e)
     {
-        if (DataContext is not CommandPaletteViewModel palette)
+        if (e.Handled || DataContext is not CommandPaletteViewModel palette)
         {
             return;
         }
 
         if (e.Key == Key.Enter)
         {
-            e.Handled = true;
-            palette.ExecuteSelectedCommand.Execute(null);
+            // The palette root owns Enter so it works from the search box and the results list. The view model
+            // keeps the palette open when no command is selected.
+            e.Handled = palette.SelectedCommand is not null;
+            if (e.Handled)
+            {
+                palette.ExecuteSelectedCommand.Execute(null);
+            }
+
+            return;
         }
-        else if (e.Key == Key.Escape)
+
+        if (!SearchBox.IsFocused)
         {
-            e.Handled = true;
-            palette.CancelCommand.Execute(null);
+            return;
         }
-        else if (e.Key == Key.Down)
+
+        if (e.Key == Key.Down)
         {
             MoveSelection(palette, 1);
             e.Handled = true;

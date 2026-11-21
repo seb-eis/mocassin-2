@@ -36,6 +36,8 @@ The detailed architecture is in the internal plan; the repository layout is summ
 - [Architecture](architecture.md) — immutable domain kernel, dependency direction, project store/edit split.
 - [UI architecture](ui-architecture.md) — App/Views/ViewModels split, composition root, I/O boundary, documents,
   navigation, sessions, settings, and the headless test harness.
+- [UI interaction contract](ui-interaction-contract.md) — proportional panel layout, overlay focus and
+  modality, and the `Enter`/`Escape` mapping for the shell, dialogs, and future editors.
 - [Code structure](code-structure.md) — folder ownership, file naming, limits, and the structure test.
 - [Design decisions](design-decisions.md) — stable IDs, explicit units, canonical hashing, locking, and schema ownership.
 - [Compilation pipeline](compilation-pipeline.md) — symmetry, transitions, energy, lattice/simulation input, and how

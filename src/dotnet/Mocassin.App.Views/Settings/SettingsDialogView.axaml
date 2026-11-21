@@ -5,7 +5,7 @@
              xmlns:settings="using:Mocassin.App.ViewModels.Settings"
              x:Class="Mocassin.App.Views.Settings.SettingsDialogView"
              x:DataType="vm:SettingsViewModel">
-  <Grid Background="#66000000">
+  <Grid Background="#66000000" automation:AutomationProperties.Name="Settings">
     <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
             BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
             BorderThickness="1"
@@ -20,8 +20,12 @@
           <StackPanel Spacing="14">
             <Grid ColumnDefinitions="200,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
               <TextBlock Grid.Row="0" Text="Theme" VerticalAlignment="Center" />
-              <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding Themes}" SelectedItem="{Binding Theme}"
-                             automation:AutomationProperties.Name="Theme" />
+              <ComboBox Grid.Row="0"
+                        Grid.Column="1"
+                        x:Name="ThemeBox"
+                        ItemsSource="{Binding Themes}"
+                        SelectedItem="{Binding Theme}"
+                        automation:AutomationProperties.Name="Theme" />
               <TextBlock Grid.Row="1" Text="Accent" VerticalAlignment="Center" Margin="0,6,0,0" />
               <ComboBox Grid.Row="1" Grid.Column="1" ItemsSource="{Binding Accents}" SelectedItem="{Binding SelectedAccent}"
                              automation:AutomationProperties.Name="Accent" Margin="0,6,0,0" />

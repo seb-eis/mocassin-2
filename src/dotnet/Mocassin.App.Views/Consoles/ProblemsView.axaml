@@ -65,13 +65,13 @@
       <TextBlock Grid.Column="4" Text="Source" FontWeight="SemiBold" Width="90" />
     </Grid>
     <Grid Grid.Row="3">
-      <ListBox ItemsSource="{Binding Items}"
+      <ListBox x:Name="Entries"
+               ItemsSource="{Binding Items}"
                automation:AutomationProperties.Name="Problem entries"
                SelectionMode="Single"
                Background="Transparent"
                BorderThickness="0"
-               DoubleTapped="OnItemsDoubleTapped"
-               KeyDown="OnItemsKeyDown">
+               DoubleTapped="OnItemsDoubleTapped">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="vm:DiagnosticItemViewModel">
             <Grid ColumnDefinitions="66,80,*,220,90" ToolTip.Tip="{Binding Hint}">

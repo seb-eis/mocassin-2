@@ -9,7 +9,7 @@
   <Border BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}"
           BorderThickness="0,0,1,0"
           Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-    <Grid RowDefinitions="Auto,Auto,*,Auto,*">
+    <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
       <TextBlock Text="Projects" FontWeight="SemiBold" Margin="12,10,12,4" />
       <ListBox Grid.Row="1"
                automation:AutomationProperties.Name="Open projects"
@@ -46,8 +46,7 @@
                 ItemsSource="{Binding Explorer.Nodes}"
                 SelectedItem="{Binding Explorer.SelectedNode}"
                 Margin="4,0"
-                DoubleTapped="OnExplorerDoubleTapped"
-                KeyDown="OnExplorerKeyDown">
+                DoubleTapped="OnExplorerDoubleTapped">
         <TreeView.ItemTemplate>
           <TreeDataTemplate x:DataType="navigation:ExplorerNode" ItemsSource="{Binding ChildNodes}">
             <TextBlock Text="{Binding Label}" />

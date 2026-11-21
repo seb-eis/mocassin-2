@@ -2,6 +2,7 @@
 
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Mocassin.App.ViewModels.Shell;
 
 namespace Mocassin.App.Views.Shell;
@@ -14,7 +15,11 @@ internal sealed partial class ProjectsRegionView : UserControl
     /// <summary>
     /// Initializes the view.
     /// </summary>
-    public ProjectsRegionView() => InitializeComponent();
+    public ProjectsRegionView()
+    {
+        InitializeComponent();
+        ExplorerTree.AddHandler(KeyDownEvent, OnExplorerKeyDown, RoutingStrategies.Bubble, handledEventsToo: true);
+    }
 
     private void OnExplorerDoubleTapped(object? sender, TappedEventArgs e) => OpenSelected();
 

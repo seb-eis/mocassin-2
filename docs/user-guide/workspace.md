@@ -12,10 +12,12 @@ The shell is a fixed, resizable workspace rather than a docking system.
 | Console | Application and Problems channels with a selector; the Application channel has severity/text filtering and clear. |
 | Status bar | Active document, project/path/lock and dirty state, validation status, autosave status, appearance, version, and progress. |
 
-`Alt+1`, `Alt+2`, and `Alt+0` toggle Projects, Inspector, and Console. Region visibility and the stored
-`layout` width/height values are applied from the settings block. Manual splitter resizing does not yet feed back
-into the settings file; this is recorded as a Step 23A limitation. The console and inspector regions are
-collapsible.
+`Alt+1`, `Alt+2`, and `Alt+0` toggle Projects, Inspector, and Console. The workspace stores panel **fractions**
+rather than pixels, so a splitter drag rebalances only its two adjacent regions, a window resize keeps the ratio,
+and a restart restores the most recent completed gesture. The console and inspector regions are collapsible; a
+hidden region keeps its fraction. Splitters are keyboard reachable and resize by 16 logical pixels with the arrow
+keys. The full layout and focus rules are in the
+[UI interaction contract](../development/ui-interaction-contract.md).
 
 ## Documents and tabs
 

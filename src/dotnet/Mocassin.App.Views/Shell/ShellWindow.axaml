@@ -15,15 +15,15 @@
         MinHeight="600"
         WindowStartupLocation="CenterScreen">
   <Grid>
-    <shell:ShellView />
-    <Grid IsVisible="{Binding IsPaletteOpen}">
-      <commands:CommandPaletteView DataContext="{Binding Palette}" />
+    <shell:ShellView x:Name="ShellRoot" />
+    <Grid x:Name="PaletteLayer" IsVisible="{Binding IsPaletteOpen}">
+      <commands:CommandPaletteView x:Name="PaletteView" DataContext="{Binding Palette}" />
     </Grid>
-    <Grid IsVisible="{Binding IsCheatSheetOpen}">
-      <commands:ShortcutCheatSheetView DataContext="{Binding Shortcuts}" />
+    <Grid x:Name="CheatSheetLayer" IsVisible="{Binding IsCheatSheetOpen}">
+      <commands:ShortcutCheatSheetView x:Name="CheatSheetView" DataContext="{Binding Shortcuts}" />
     </Grid>
-    <Grid IsVisible="{Binding Settings.IsOpen}">
-      <settings:SettingsDialogView DataContext="{Binding Settings}" />
+    <Grid x:Name="SettingsLayer" IsVisible="{Binding Settings.IsOpen}">
+      <settings:SettingsDialogView x:Name="SettingsView" DataContext="{Binding Settings}" />
     </Grid>
     <dialogs:DialogHost x:Name="DialogOverlay" />
     <notifications:NotificationHostView x:Name="NotificationOverlay"

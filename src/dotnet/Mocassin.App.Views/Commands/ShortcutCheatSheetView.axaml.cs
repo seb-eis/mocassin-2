@@ -13,4 +13,9 @@ internal sealed partial class ShortcutCheatSheetView : UserControl
     /// Initializes the view.
     /// </summary>
     public ShortcutCheatSheetView() => InitializeComponent();
+
+    /// <summary>
+    /// Focuses the Close button, the layer's only actionable control.
+    /// </summary>
+    public void FocusInitial() => CloseButton.Focus();
 }

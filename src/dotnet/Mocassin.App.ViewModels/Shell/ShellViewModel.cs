@@ -1,6 +1,5 @@
 // SPDX-License-Identifier: MIT
 
-using System.Globalization;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Mocassin.App.ViewModels.Commands;
@@ -29,7 +28,6 @@ internal sealed partial class ShellViewModel : ObservableObject
     private readonly IConsoleService consoleService;
     private ProjectEditCoordinator? subscribedEditor;
     private bool startupRestoreStarted;
-    private bool applyingLayout;
     private readonly AsyncRelayCommand backCommand;
     private readonly AsyncRelayCommand forwardCommand;
     private readonly AsyncRelayCommand closeActiveCommand;
@@ -44,8 +42,6 @@ internal sealed partial class ShellViewModel : ObservableObject
     private readonly IStorageService storage;
     private readonly IDialogService dialogs;
     private readonly string? startupProjectPath;
-    private Task pendingLayoutPersist = Task.CompletedTask;
-    private bool suppressSettingsApply;
 
     [ObservableProperty]
     private string windowTitle = "MOCASSIN";
@@ -314,6 +310,7 @@ internal sealed partial class ShellViewModel : ObservableObject
     {
         Palette.Refresh();
         IsPaletteOpen = true;
+        IsCheatSheetOpen = false;
     }
 
     /// <summary>
@@ -540,104 +537,6 @@ internal sealed partial class ShellViewModel : ObservableObject
         }
 
         RecentProjects.Refresh();
-    }
-
-    private void OnRegionPropertyChanged(object? sender, System.ComponentModel.PropertyChangedEventArgs e)
-    {
-        if (applyingLayout)
-        {
-            return;
-        }
-
-        if (e.PropertyName is nameof(ShellRegionsViewModel.IsProjectsVisible)
-            or nameof(ShellRegionsViewModel.IsInspectorVisible)
-            or nameof(ShellRegionsViewModel.IsConsoleVisible)
-            or nameof(ShellRegionsViewModel.LeftWidth)
-            or nameof(ShellRegionsViewModel.RightWidth)
-            or nameof(ShellRegionsViewModel.ConsoleHeight))
-        {
-            ScheduleLayoutPersist();
-        }
-    }
-
-    /// <summary>
-    /// Gets the pending layout-persistence task; tests await it before disposing the data directory.
-    /// </summary>
-    internal Task PendingLayoutPersist => pendingLayoutPersist;
-
-    private void ScheduleLayoutPersist()
-    {
-        var previous = pendingLayoutPersist;
-        pendingLayoutPersist = PersistLayoutAfterAsync(previous, CaptureLayout());
-    }
-
-    private LayoutSettings CaptureLayout() => new()
-    {
-        LeftVisible = Regions.IsProjectsVisible,
-        RightVisible = Regions.IsInspectorVisible,
-        ConsoleVisible = Regions.IsConsoleVisible,
-        LeftWidth = (int)Math.Round(Regions.LeftWidth),
-        RightWidth = (int)Math.Round(Regions.RightWidth),
-        ConsoleHeight = (int)Math.Round(Regions.ConsoleHeight),
-        ActiveConsoleChannel = Console.ActiveChannel?.Id ?? SettingsDefaults.DefaultConsoleChannel,
-    };
-
-    private async Task PersistLayoutAfterAsync(Task previous, LayoutSettings layout)
-    {
-        await previous.ConfigureAwait(true);
-        try
-        {
-            await PersistLayoutAsync(layout).ConfigureAwait(true);
-        }
-        catch (Exception exception) when (
-            exception is IOException or UnauthorizedAccessException or InvalidOperationException)
-        {
-            consoleService.Write(
-                ConsoleSeverity.Warning,
-                "settings",
-                $"The layout could not be saved: {exception.Message}");
-        }
-    }
-
-    private void ApplySettings(AppSettings value)
-    {
-        StatusBar.SetAppearance(
-            string.Create(
-                CultureInfo.InvariantCulture,
-                $"{value.Theme} · {value.Density} · {value.FontScale:0.00}×"));
-        applyingLayout = true;
-        Regions.IsProjectsVisible = value.Layout.LeftVisible;
-        Regions.IsInspectorVisible = value.Layout.RightVisible;
-        Regions.IsConsoleVisible = value.Layout.ConsoleVisible;
-        Regions.LeftWidth = value.Layout.LeftWidth;
-        Regions.RightWidth = value.Layout.RightWidth;
-        Regions.ConsoleHeight = value.Layout.ConsoleHeight;
-        Console.ActiveChannel =
-            Console.Channels.FirstOrDefault(channel => channel.Id == value.Layout.ActiveConsoleChannel)
-            ?? Console.Channels.FirstOrDefault();
-        applyingLayout = false;
-    }
-
-    private async Task PersistLayoutAsync(LayoutSettings layout)
-    {
-        AppSettingsSaveResult result;
-        suppressSettingsApply = true;
-        try
-        {
-            result = await settings.UpdateAsync(settings.Current with { Layout = layout });
-        }
-        finally
-        {
-            suppressSettingsApply = false;
-        }
-
-        if (!result.IsSuccess)
-        {
-            consoleService.Write(
-                ConsoleSeverity.Warning,
-                "settings",
-                result.Message ?? "The layout could not be saved.");
-        }
     }
 
     /// <summary>

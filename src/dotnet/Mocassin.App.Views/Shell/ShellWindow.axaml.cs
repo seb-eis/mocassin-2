@@ -16,6 +16,7 @@ namespace Mocassin.App.Views.Shell;
 /// </summary>
 internal sealed partial class ShellWindow : Window
 {
+    private readonly ShellLayerCoordinator layers;
     private bool closeApproved;
 
     /// <summary>
@@ -40,7 +41,22 @@ internal sealed partial class ShellWindow : Window
         InitializeComponent();
         DataContext = viewModel;
         ViewKeyBindingBinder.Apply(this, commands, platform);
+        layers = new ShellLayerCoordinator(
+            this,
+            ShellRoot,
+            PaletteLayer,
+            PaletteView,
+            CheatSheetLayer,
+            CheatSheetView,
+            SettingsLayer,
+            SettingsView,
+            DialogOverlay,
+            NotificationOverlay,
+            viewModel,
+            commands,
+            platform);
         AddHandler(KeyDownEvent, OnKeyDown, RoutingStrategies.Tunnel);
+        AddHandler(KeyDownEvent, OnEscapeKeyDown, RoutingStrategies.Bubble);
         dialogs.Host = DialogOverlay;
         NotificationOverlay.DataContext = notifications;
 
@@ -59,6 +75,7 @@ internal sealed partial class ShellWindow : Window
             storage.StorageProvider = null;
             clipboard.Clipboard = null;
             dialogs.Host = null;
+            layers.Detach();
         };
     }
 
@@ -89,15 +106,38 @@ internal sealed partial class ShellWindow : Window
 
     private void OnKeyDown(object? sender, KeyEventArgs e)
     {
-        if (DataContext is not ShellViewModel shell
-            || !e.KeyModifiers.HasFlag(KeyModifiers.Control)
-            || e.Key is < Key.D1 or > Key.D9)
+        if (DataContext is not ShellViewModel shell)
+        {
+            return;
+        }
+
+        if (layers.IsLayerOpen)
+        {
+            // Catalog gestures are inert while a layer is open; typing, Tab, arrows, Enter, and Escape keep
+            // working inside the layer.
+            if (layers.BlocksCatalogGesture(e))
+            {
+                e.Handled = true;
+            }
+
+            return;
+        }
+
+        if (!e.KeyModifiers.HasFlag(KeyModifiers.Control) || e.Key is < Key.D1 or > Key.D9)
         {
             return;
         }
 
         var index = e.Key - Key.D1;
         if (shell.Documents.ActivateIndex(index))
+        {
+            e.Handled = true;
+        }
+    }
+
+    private void OnEscapeKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (!e.Handled && e.Key == Key.Escape && layers.HandleEscape())
         {
             e.Handled = true;
         }

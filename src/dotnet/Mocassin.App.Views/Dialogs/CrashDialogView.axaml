@@ -2,6 +2,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:overlay="using:Mocassin.App.ViewModels.Dialogs"
              xmlns:automation="using:Avalonia.Automation"
+             xmlns:dialogs="using:Mocassin.App.Views.Dialogs"
              x:Class="Mocassin.App.Views.Dialogs.CrashDialogView"
              x:DataType="overlay:CrashDialogViewModel">
   <StackPanel Spacing="12">
@@ -20,7 +21,8 @@
       <Button Content="Write recovery files"
               Command="{Binding WriteRecoveryFilesCommand}"
               IsVisible="{Binding HasRecoverySnapshots}"
-              automation:AutomationProperties.Name="Write recovery files" />
+              automation:AutomationProperties.Name="Write recovery files"
+              dialogs:DialogFocus.InitialFocus="True" />
       <Button Content="Open log folder" Command="{Binding OpenLogFolderCommand}"
               IsVisible="{Binding CanOpenLogFolder}" />
       <Button Content="Exit" Command="{Binding ExitCommand}" IsDefault="True" />
