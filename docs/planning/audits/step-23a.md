@@ -64,57 +64,83 @@ Copy the acceptance criteria from the step page, preserving their wording:
 - [x] Reload and external-change detection behave as designed; no silent overwrite is possible.
       — modified/deleted-file tests; `SaveAsync` refuses on any stamp difference; `ReloadAsync` replaces the
       document.
-- [ ] Recent files, locks, read-only mode, and the project switcher behave as designed.
+- [x] Recent files, locks, read-only mode, and the project switcher behave as designed.
       — locks/read-only work (second-session test); recent files are only stored and listed in the Settings
       dialog with a clear action — there is no recent-open surface, no missing-file disabled/remove state, and
       Save As does not record the new path; the switcher shows name/path only, not lock state or active
-      document (F-4, F-10).
-- [ ] Settings round-trip through the real store, validate, migrate, ignore unknown fields, reject a future
+      document (F-4, F-10). Round 2: closed — the welcome document opens/removes recents with a missing state,
+      Save As records the new path, the switcher shows lock state and the last document, and the effective
+      plain-xUnit tests and docs/parity updates cover it. A read-only session still says the acquisition time is
+      unavailable (note only).
+- [x] Settings round-trip through the real store, validate, migrate, ignore unknown fields, reject a future
       major without overwriting, survive a failed/oversized write, and persist last directories.
       — round-trip/defaults/unknown/migration/oversize pass; a future-major document is rejected on load but the
       next `SettingsService.UpdateAsync` (open/save/layout/settings dialog) overwrites it with defaults (F-2).
-      The failed-write test only exercises the oversize rejection, not a real I/O failure.
+      The failed-write test only exercises the oversize rejection, not a real I/O failure. Round 2: closed —
+      `UpdateAsync` refuses to write when `LoadResult.IsFatal`, `AFutureMajorFileIsNotOverwrittenByServiceUpdates`
+      passes, and `ARealIoWriteFailureLeavesThePreviousFileIntact` now exercises a real read-only-directory
+      failure; no banner/Save-as-new action exists, only the console and dialog status text (R2-7).
 - [ ] Every primary action is reachable by keyboard alone; the palette lists the shell commands with their
       platform gestures; `Model`/`Build`/`Run` menus do not appear.
       — palette, gestures, and menu set verified; `Ctrl+1..9` has no production handler (`ActivateIndex` has no
       caller) and the docs claim it; the shell window's tunnel `AddHandler(KeyDownEvent, OnKeyDown, ...)` binds
       the one-parameter base `OnKeyDown` and an independent headless probe throws
-      `TargetParameterCountException` on the first key press (F-5).
+      `TargetParameterCountException` on the first key press (F-5). Round 2: the production handler is fixed
+      (synchronous probe: `Tab` no longer throws, `Ctrl+1` activates the first tab), but the shipped
+      `CtrlNumberActivatesATab` asserts the wrong index and is vacuous under the async harness (R2-1), so the
+      keyboard criterion is not yet evidenced by an effective test.
 - [ ] Accessibility names/roles are present on the primary controls; the accessibility-tree assertions pass.
       — four automation names are asserted; there is no full accessibility-tree sweep and no role/order
-      assertion (F-6).
+      assertion (F-6). Round 2: an effective synchronous sweep now asserts an accessible name on every primary
+      interactive control type, and the three screenshot baselines exercise contrast/density; roles and visual
+      order are still not asserted (R2-7).
 - [x] No unhandled exception kills the process silently; the crash dialog and log entry are verified.
       — `CrashHandlerTests`: critical log entry, crash dialog, exit 1; fatal path writes a crash report.
 - [x] `./tools/verify.sh all --require` passes, the strict docs build passes, and `closeout/step-23a.json` with
       `"step": "step-23a"` validates once the `step-NN[a-z]` checker support has landed.
       — local `all --require` exit 0; Zensical strict 0 warnings; checker OK.
-- [ ] Documentation written (§14), and no page claims a 23B or later capability.
+- [x] Documentation written (§14), and no page claims a 23B or later capability.
       — pages exist, but `docs/user-guide/workspace.md` claims `Ctrl+1..9` and a switcher that shows lock
       state/active document, and the settings pages claim a rejected document is never overwritten (F-2/F-4/F-5).
+      Round 2: the claims are now true (keyboard handler, switcher fields, preserved future-major settings) and
+      no page claims a 23B capability; stale placement-resolver lines in the development code-structure page
+      remain (R2-6).
 
 ## Standard audit checklist
 
 - [ ] Required tests from the step page pass.
       — 107 App tests pass, but the §15 screenshot-baseline, full accessibility-tree, duplicate-provider,
-      dialog choose/prompt/error/focus and stale-lock rows are absent or partial (F-6/F-8).
+      dialog choose/prompt/error/focus and stale-lock rows are absent or partial (F-6/F-8). Round 2: 115 App
+      tests pass on the shipped harness, but eleven async headless bodies cannot fail (R2-1); with an awaited
+      harness seven fail, including four dialog tests and the keyboard test. Screenshots, accessibility names,
+      duplicate-provider, stale-lock, and real-I/O settings tests are effective.
 - [x] Public/protected XML documentation policy is followed.
       — `Mocassin.App` has `GenerateDocumentationFile=false`; the public `App`/`Program` types are documented;
       PublicAPI analyzers are clean for the two ApiCompat App assemblies.
-- [ ] Documentation, status dashboard, feature log, and parity matrix are current.
+- [x] Documentation, status dashboard, feature log, and parity matrix are current.
       — step page/dashboard/feature log agree (`In audit`, CI at `6901e76`); parity marks recent files
       "Implemented" including "missing-file handling" and the docs claim the false keyboard/switcher behaviour
-      (F-2/F-4/F-5).
+      (F-2/F-4/F-5). Round 2: dashboard/step page/feature log agree on the three runs at `008b133`; the recents
+      and accessibility parity rows are corrected; stale placement-resolver lines remain in
+      `docs/development/code-structure.md` (R2-6).
 - [x] Closeout CI is green at the audited commit.
       — recorded run `44841374175` at `6901e76` (green); the run could not be re-queried here (no `gh`/network).
-      The same commit passed `./tools/verify.sh all --require` locally.
+      The same commit passed `./tools/verify.sh all --require` locally. Round 2: replacement run `44849296444`
+      is green at `008b133` (queried through the GitHub API), and the local `all --require` gate exits 0.
 - [x] Closeout evidence matches the audited commit and the merge candidate.
       — `python tools/check_closeout_evidence.py` OK; `merge_candidate == audit_commit == closeout_ci.head_sha`.
-- [x] If `main` moved after the freeze, a merge-tree CI run or a re-audit is recorded.
-      — `main` is still `bbc2d08`, merged at `ff06139`; no merge-tree run is required.
-- [ ] Windows/macOS runs are recorded, or their absence is accepted because the step has no platform-specific
+      Round 2: the checker still passes and those three fields agree, but `main_sha_at_freeze` is `bbc2d08`
+      while `main` is `eadfe13` (R2-3).
+- [ ] If `main` moved after the freeze, a merge-tree CI run or a re-audit is recorded.
+      — `main` is still `bbc2d08`, merged at `ff06139`; no merge-tree run is required. Round 2: **main has
+      moved** to `eadfe13` (two docs/agent-config commits) and is not an ancestor of `008b133`; no merge-tree
+      run is recorded, so the merge-tree rule applies (R2-3).
+- [x] Windows/macOS runs are recorded, or their absence is accepted because the step has no platform-specific
       code.
       — 23A adds a GUI and `OperatingSystem`/path-specific code, and step page §20 planned one
-      `platforms=windows` dispatch; none is recorded (F-1).
+      `platforms=windows` dispatch; none is recorded (F-1). Round 2: Windows `44848841598` and macOS
+      `44849147125` are green at `008b133`; both run `Mocassin.App.Tests` in the focused platform job and both
+      run IDs are recorded in `platform_ci`. The manual real-window portion is still a template (R2-4).
 - [x] Format/version/fixture changes are documented and tested.
       — no `.mocprj`/`.msl`/`.msr`/`.mcs`/manifest change; `mocassin.settings` is app-local and absent from
       `contracts/manifest.json` (`SettingsContractTests`).
@@ -124,7 +150,9 @@ Copy the acceptance criteria from the step page, preserving their wording:
       — `./tools/verify.sh structure --require` exit 0 (7 architecture tests).
 - [x] No unrelated changes or unapproved scope.
       — 273 files on the step branch; app host/workspace/settings/lifecycle plus the one Packages helper and
-      docs; no 23B/24–28 code. The missing approved feature-5 items are recorded under F-6.
+      docs; no 23B/24–28 code. The missing approved feature-5 items are recorded under F-6. Round 2: the fix
+      delta is test-framework/settings/recents/theme/shell code plus tests and docs; no 23B type or editing
+      surface appears. The post-squash branch commits are the recorded deviation 7 (R2-5).
 - [x] Branch, tag, and status hygiene are correct.
       — branch `step/23a-workspace-and-project-lifecycle`; no `step-23a` tag yet; dashboard/step page both
       `In audit`; `step-23a` identity accepted by the checker and process checker.
@@ -254,6 +282,12 @@ auditor's findings, evidence, or verdict.
 **State:** Fixes required — round 1 found one Blocker (F-1, platform evidence) and five Major findings
 (F-2 settings overwrite, F-3 appearance flags, F-4 recents, F-5 keyboard, F-6 feature-5 test/evidence scope).
 The step branch must not merge until these are fixed or the owner records an explicit waiver.
+
+**Round 2 state:** Fixes required — round 2 verified the three platform gates and closed F-2, F-3, F-4, F-7,
+F-11, F-13, and F-15, but found a Blocker in the async headless test harness (R2-1: eleven tests cannot fail;
+a corrected harness makes seven of them fail), a real rapid-toggle layout defect it was hiding (R2-2), an
+unrecorded `main` move after the freeze (R2-3), and an unexecuted manual real-window checklist (R2-4). The
+branch must not merge until these are fixed and the closeout evidence is rebound.
 
 `Re-audit required` is a record state, not a verdict.
 
@@ -387,3 +421,138 @@ evidence and the local gates are sound. The step cannot merge because the platfo
 missing and five Major behaviour/documentation gaps remain, most importantly the settings-overwrite safety and
 the keyboard path. The human owner decides whether to waive F-1 (or F-2) and must approve the merge; this record
 is evidence, not authorization.
+
+### Audit round 2
+
+#### Independence and frozen state
+
+I am a fresh context. I did not design, implement, review, or coordinate this work and have no shared
+conversation with the planner, implementors, the round-1 auditor, or the orchestrator. I was given only the
+audited commit `008b133fd3ec35dc2167b7fa5d5e91e738e97d0b`, the branch head
+`ad6a686d3c272330941f59af3cdae681d10baeca`, the round-1 record, the closeout evidence, and the required
+commands and scope; no desired verdict or summary was supplied.
+
+- Worktree `/home/node/worktrees/step-23a-audit-r2` on `step/23a-workspace-and-project-lifecycle` at `ad6a686`,
+  clean before this record edit.
+- `git diff --name-status 008b133..ad6a686` is five documentation files only: the audit record, the closeout
+  evidence, `docs/development/platform-checklist.md`, `docs/planning/status.md`, and the step page. There is no
+  code, test, contract, or configuration delta; the audited code commit is `008b133`.
+- `git merge-base --is-ancestor bbc2d08 008b133` is true; `bbc2d08` was merged into the step branch at
+  `ff06139`.
+- **`main` moved after the freeze.** `git rev-parse main origin/main` is
+  `eadfe13d290202d769393da644b4de5c548a8fec`; `c00dd44` and `eadfe13` (2026-11-21 08:39 UTC, six docs and
+  agent-configuration files) follow `bbc2d08`, and `git merge-base --is-ancestor eadfe13 008b133` is false.
+  The closeout evidence still records `main_sha_at_freeze = bbc2d08` and says `main` has not moved (R2-3).
+- `git tag --list 'step-23*'` is empty; no premature tag.
+
+#### Commands and results
+
+- `./tools/verify.sh all --require` on the worktree at `ad6a686` (code identical to `008b133`) — **exit 0**.
+  Contracts 37, Symmetry 223, Results 56, Core 685, Compilation 98, Cli 203, Packages 529, Architecture 7,
+  App 115 tests, 0 failed; Zensical strict "No issues found"; DocFX 0 warnings/0 errors; ApiCompat compatible;
+  60 tool/policy tests OK; SPDX 1000 files; secret scan 1474 files; cargo-deny ok; AOT gate passed with the
+  CLI's 62 recorded IL2xxx/IL3xxx diagnostics.
+- `python tools/check_closeout_evidence.py docs/planning/closeout/step-23a.json` — `Closeout evidence: OK`.
+- `python3 tools/tests/test_ci_platform_gate.py` — 13 tests OK; the pinned platform-gate project list includes
+  `Mocassin.App.Tests`.
+- GitHub API queries (unauthenticated) against the repository:
+  - Ubuntu closeout `44849296444` — `success`, `head_sha 008b133…`, `workflow_dispatch`, branch
+    `step/23a-workspace-and-project-lifecycle`; `.NET (ubuntu-latest)` ran "Test with coverage" (full solution)
+    and Format.
+  - Windows gate `44848841598` — `success`, `head_sha 008b133…`; `.NET (windows-latest)` ran "Platform tests -
+    Avalonia headless workspace" plus the package-writer, results-reader, and CLI platform steps.
+  - macOS gate `44849147125` — `success`, `head_sha 008b133…`; `.NET (macos-latest)` ran the same four
+    platform test steps, including the Avalonia headless workspace.
+  - The overlapping dispatches are not evidence: `44848573930` and `44848565915` are `cancelled`;
+    `44848581131` is an earlier green dispatch. The closeout evidence describes this correctly.
+- Filtered plain-xUnit tests for the round-1 fixes — future-major settings preservation, Linux case-distinct
+  recents, recent open/missing, stale-lock reclamation, invalid New directory, duplicate navigation provider —
+  6 passed.
+- Independent probes in a scratch worktree `/home/node/worktrees/step-23a-probe`, detached at `008b133`, never
+  committed:
+  - **Async headless harness.** The shipped `HeadlessSession.DispatchAsync(Func<Task>)` at
+    `Mocassin.App.Tests/TestSupport/HeadlessSession.cs:39` returns a task that completes when the
+    `Func<Task>` is *invoked*, not when its body completes. Probe tests that throw or `Assert.Fail` after
+    `await Task.CompletedTask` report **pass**; a synchronous `Action` throw reports fail. Replacing only the
+    helper with `session.Dispatch(async () => { await action(); return true; }, ...)` (the awaited
+    `Func<Task<T>>` overload) makes **7 of the 115 App tests fail**: four of five `DialogOverlayTests`
+    (`AConfirmationRoundTripsThroughTheRealOverlay`, `PromptAndChoiceDialogsRoundTrip`,
+    `ErrorDialogClosesWithoutThrowing`, `FocusIsRestoredAfterADialog` — "Sequence contains no matching
+    element" for the default button or the filtered control),
+    `WorkspaceRenderTests.TheShellShowsTheWelcomeTabAndProjectNodes` (empty `ListBox` collection),
+    `WorkspaceRenderTests.CtrlNumberActivatesATab` (`Expected "project.overview", Actual "project.json"`),
+    and `ShellRenderTests.RapidRegionTogglesCoalesceIntoTheLastPersistedLayout`
+    (`Assert.True(loaded.Settings.Layout.LeftVisible)` false). Eleven test bodies use this `async () =>`
+    overload; every one of them reports success regardless of its assertions.
+  - **Keyboard.** With a synchronous dispatch, a generic `Tab` press no longer throws (the round-1
+    `TargetParameterCountException` is gone), `Ctrl+1` activates `project.overview`, and `Ctrl+2` activates
+    `project.json`. The production handler is correct; the `Ctrl+2` test at `WorkspaceRenderTests.cs:107-109`
+    asserts index 0 but the key selects index 1, and its failure is swallowed by the harness.
+  - **Rapid layout toggles.** Synchronously, two `ToggleProjects` commands leave `IsProjectsVisible`
+    false → true, but after `await PendingLayoutPersist` it is **false** again
+    (`v1=False v2=True v3=False`) and the reloaded settings store has `LeftVisible=False`.
+    `SettingsService.UpdateAsync` raises `Changed`, `ShellViewModel.OnSettingsChanged` re-applies the first
+    persisted layout, and the second persist then saves the reverted state (R2-2).
+- Read the full round-2 delta, the CI workflow and platform-gate test, the new tests and screenshot baselines,
+  the settings/theme/recents/keyboard/shell code, the documentation and parity updates, and the closeout
+  evidence.
+
+#### Round-1 finding closure
+
+| Finding | Round-1 severity | Round-2 status | Evidence |
+| --- | --- | --- | --- |
+| F-1 | Blocker | **Closed for the automated gates; manual portion still open** | Windows `44848841598` and macOS `44849147125` are green at `008b133` and their `.NET` jobs run "Platform tests - Avalonia headless workspace" (`Mocassin.App.Tests`); Ubuntu `44849296444` is green; `platform_ci` records both. The manual real-window checklist is a template, not an executed record (R2-4). |
+| F-2 | Major | **Closed** | `SettingsService.UpdateAsync` returns a failure and does not write when `LoadResult.IsFatal`; `AFutureMajorFileIsNotOverwrittenByServiceUpdates` (plain xUnit, effective) passes; the file bytes are unchanged; the shell logs the rejection. |
+| F-3 | Major | **Closed** | `HighContrast.axaml` and `Density.axaml` are merged dictionaries; `ShellStyles.axaml` consumes `ControlPadding`, `ItemPadding`, `ControlMinHeight`, `BorderThickness`, and `Transitions`; `ShellView` consumes `Mocassin.ShellBackground`; `ThemeApplierTests` (sync) assert the resources and the screenshot baselines (sync) exercise the visual result. |
+| F-4 | Major | **Closed** | `RecentProjectsViewModel`/`RecentProjectViewModel` give open (disabled for missing), remove, and missing state; the welcome view binds them; `SaveAsAsync` records the new path through `RecordSavedAsync`; `RecentProjectsTests` and `ProjectSessionServiceTests` are plain xUnit and effective; docs and the parity row are updated. |
+| F-5 | Major | **Code fixed; regression evidence invalid** | `ShellWindow.axaml.cs` declares the two-parameter routed `OnKeyDown`, and a synchronous probe confirms the no-exception `Tab` path, `Ctrl+1` → overview and `Ctrl+2` → json. The shipped `CtrlNumberActivatesATab` asserts the wrong index and is non-asserting under the async harness (R2-1); it would fail if fixed. |
+| F-6 | Major | **Closed with notes** | Light/dark/high-contrast PNG baselines are checked in and compared on Linux by a sync test (5 % tolerance); the accessibility name sweep is a sync test; the manual checklist exists but has no execution record (R2-4); roles/order are not asserted (R2-7). |
+| F-7 | Minor | **Closed** | Every App test class declares `Trait("Tier", ...)`; the visual test is PR-medium. |
+| F-8 | Minor | **Not closed** | Stale-lock, duplicate-provider, and real-I/O-write tests are plain xUnit and effective. All five dialog tests are async-headless; four fail under a working harness because they drive the overlay before the default button exists. The choose/prompt/error/focus evidence is therefore not real (R2-1). |
+| F-9 | Minor | **Closed in code; stale docs** | `WindowPlacementResolver` and its test are deleted and the step page no longer claims placement persistence; `docs/development/code-structure.md:162,166` still lists a "placement resolver" (R2-6). |
+| F-10 | Minor | **Closed with note** | Read-only banner in `ShellView.axaml`, lock state and last-document fields in the switcher, and writable-session acquisition text in the Overview. A read-only session still displays "acquisition time unavailable". |
+| F-11 | Minor | **Closed** | `CreateAsync` catches the invalid `GetFullPath` cases, `NewProjectAsync` shows the error dialog, and `AnInvalidTargetDirectoryIsRejectedWithoutThrowing` passes. |
+| F-12 | Note | **Accepted, unchanged** | Crash log keeps exception/source; active-project and last-command context remain deferred. Design §8 still lists them, but the deferral is recorded in the step page. |
+| F-13 | Note | **Closed** | Unused `Results`/`Rendering` references are gone from `Mocassin.App`; the composition-root IVT remains the recorded exception. |
+| F-14 | Note | **Accepted, unchanged** | AOT remains CLI evidence with 62 recorded IL diagnostics; the GUI is not AOT-published. |
+| F-15 | Minor | **Closed** | `SettingsService` and the validator take the platform comparison; `RecentFilesUseThePlatformCaseRule` is a plain xUnit test that passes. |
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Blocker** | **R2-1 — The async headless test harness cannot fail, so eleven App tests are vacuous, including the F-5 and F-8 regressions.** `HeadlessSession.DispatchAsync(Func<Task>)` passes the delegate to the `Dispatch<T>(Func<T>)` overload with `T = Task` and exposes the resulting `Task<Task>` as `Task`; the inner task is never awaited. Exceptions after any await (or even an immediately faulted async state machine) are lost. The suite therefore reports 115/115 green even when assertions are false or the body throws. This is a test-integrity Blocker: the claimed keyboard and dialog coverage is not evidence, and it hides a real defect (R2-2). | `src/dotnet/Mocassin.App.Tests/TestSupport/HeadlessSession.cs:39`; 11 `async () =>` bodies in `WorkspaceRenderTests`, `ShellRenderTests`, and `DialogOverlayTests`; probe evidence above (7/115 fail with an awaited helper; `Assert.Fail` after `await Task.CompletedTask` passes under the shipped helper). |
+| **Major** | **R2-2 — Rapid region toggles lose the last action, contradicting the "last layout wins" claim.** `UpdateAsync` raises `Changed`; `ShellViewModel.OnSettingsChanged` re-applies the first persisted layout while the second toggle is in flight, so the second toggle is reverted and re-persisted. The step page's platform-stabilization paragraph says the serialization guarantees the last layout wins; it does not. | Synchronous probe: two `ToggleProjects` → `False`, `True`, then `False` after `PendingLayoutPersist`; reloaded settings `LeftVisible=False`. `ShellViewModel.cs:496-517,525-586`; step page lines 105-113; `ShellRenderTests` line 100. |
+| **Major** | **R2-3 — `main` moved after the freeze and the closeout evidence is stale.** `main`/`origin/main` are `eadfe13` (two docs/agent-config commits after `bbc2d08`), which is not an ancestor of `008b133`. The evidence still records `main_sha_at_freeze = bbc2d08` and "has not moved since the freeze"; no merge-tree CI run is recorded. The merge-tree rule therefore applies before any merge. | `docs/planning/closeout/step-23a.json:8,20`; `git rev-parse main origin/main`; `git merge-base --is-ancestor eadfe13 008b133` false. |
+| **Major** | **R2-4 — The manual real-window checklist is not recorded as executed.** Acceptance criterion 1 requires the Windows/macOS headless suite and the manual real-window checklist to be recorded. The new `docs/development/platform-checklist.md` is a good template, but it has no date, tester, OS/desktop version, or results, and its own recording section says a manual run is evidence only when those are recorded. The automated headless gates are green, which mitigates but does not satisfy the manual portion. | `docs/development/platform-checklist.md` ("Run once on a desktop…", "Recording"); audit request criterion 1; no execution record in the step page or evidence. |
+| **Minor** | **R2-5 — Deviation 7 is a process violation, not an accepted flow.** After the `657bc5f` squash, the test/code commits `b15e83c`, `e0e897b`, and `008b133` were committed directly on the step branch. AGENTS §3.3 allows only squash commits, `main` merges, and closeout changes on the step branch; §3.10.7 requires fixes on a new feature branch. The deviation is recorded transparently, the commits are covered by the replacement local gate and the three green runs, and no history was rewritten, so the owner may accept it as a recorded exception — but it should not be treated as the normal flow. The step page's deviation table also has two rows numbered 7. | Step page lines 60-61; commit list; AGENTS §3.3/§3.10.7. |
+| **Minor** | **R2-6 — Stale placement-resolver documentation after F-9.** `docs/development/code-structure.md` still describes `Startup/` as containing the "placement resolver" and `Shell/` as containing the "placement resolver", although the type and its test were deleted and the step page says placement is not persisted. | `docs/development/code-structure.md:162,166`; `grep -rn WindowPlacement src/dotnet` finds nothing; only the audit/review records mention the removed type. |
+| **Note** | **R2-7 — Residual appearance and accessibility gaps.** `Mocassin.Density`, `Mocassin.HighContrast`, `Mocassin.ReduceMotion`, `Mocassin.PanelBackground`, and `Mocassin.RowSpacing` are written but consumed by no style; the visual effect is carried by the other keys and merged dictionaries. The accessibility sweep asserts names only, not roles or visual order. The design's settings "banner / Save as new file" is not implemented; the console and settings-dialog status text report the rejection. | `AvaloniaThemeApplier.cs:46,54,55`; `HighContrast.axaml:6`; `Density.axaml:7`; `AccessibilityTests.cs`; `SettingsViewModel.cs:115-117`. |
+| **Note** | **R2-8 — The round-1 record was committed inside the fix commit.** The round-1 findings, resolutions, and code fixes all appear in `657bc5f`, which touches 71 files; the audit README says the reviewer's record commit must touch only the record. The round-1 record is intact and this fresh round re-runs the verdict, so the audit is not invalidated, but the process should keep the reviewer commit single-file. | `git show --stat 657bc5f`; `git log -- docs/planning/audits/step-23a.md`; audit README §8. |
+
+#### Deviation 7 judgement
+
+Deviation 7 is a **recorded process violation, not an acceptable substitution for the prescribed flow**. The
+three follow-up commits after the `fix-audit-round-1` squash, including the code change in `008b133`, should have
+been made on a new feature branch and squash-merged into the step branch, as AGENTS §3.10.7 and the audit README
+require. The step agent recorded the deviation honestly, did not rewrite the pushed branch, and the replacement
+local gate and the three CI runs cover `008b133`, so the code is not untested; but the deviation must be accepted
+explicitly by the human owner and must not become a precedent. It is a Minor finding (R2-5), not the reason for
+the verdict.
+
+#### Verdict
+
+**Fixes required.** Round 2 confirms the substance of most round-1 fixes: the automated platform gates are
+genuine and include `Mocassin.App.Tests` on Windows and macOS, F-2's fatal-settings guard preserves the file,
+F-3 has real dictionaries, consumers, and screenshot baselines, F-4's recents are openable/removable with a
+missing state and Save As recording, F-7/F-11/F-13/F-15 are closed, and F-9/F-10 are closed in code. The core
+architecture, the Step 07 deviation, `ProjectPathRules`/CLI parity, the public surface, and the local gates remain
+sound.
+
+The step cannot merge yet. The async headless harness (R2-1) makes eleven tests — including the keyboard and all
+dialog regressions — unable to fail; the corrected harness exposes a real rapid-toggle layout defect (R2-2) and
+four broken dialog tests. `main` moved after the freeze and the closeout evidence is stale (R2-3), and the manual
+real-window checklist is not recorded (R2-4). The owner must not approve a merge until the harness and layout
+defect are fixed with effective tests, the merge-tree rule is satisfied (or a replacement closeout run is recorded
+for the merge candidate), and the manual checklist is executed or explicitly waived. This record is evidence, not
+authorization.
