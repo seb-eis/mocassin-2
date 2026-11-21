@@ -13,7 +13,7 @@ runs.
 | Worktree | `/workspace` (clean, in place) |
 | Owner decisions | Recorded 2026-11-21 — see §11 |
 | Tracking | One branch, one implementor, both manual platform runs, then one owner `--no-ff` merge approval under §3.5 |
-| Status | Implemented — local gates green; Windows/macOS platform runs pending |
+| Status | Implemented — local gates green; Windows and macOS platform runs green; awaiting owner merge approval |
 | Normative behaviour | [`docs/development/ui-interaction-contract.md`](../../development/ui-interaction-contract.md) |
 
 The interaction contract is the durable design. This record holds the defect evidence, the implementation
@@ -325,10 +325,10 @@ screenshots; they run `Mocassin.App.Tests` and the other platform-sensitive test
 
 | Platform | Run ID | `head_sha` | Conclusion | Recorded by |
 | --- | --- | --- | --- | --- |
-| Windows | _pending_ | _pending_ | _pending_ | implementor |
-| macOS | _pending_ | _pending_ | _pending_ | implementor |
+| Windows | `44955024087` | `a7a8a5c825bd60ed9b518e93406ccf1df8e5c576` | `success` — https://github.com/seb-eis/mocassin-2/actions/runs/44955024087 | implementor |
+| macOS | `44955327524` | `a7a8a5c825bd60ed9b518e93406ccf1df8e5c576` | `success` — https://github.com/seb-eis/mocassin-2/actions/runs/44955327524 | implementor |
 
-The merge approval request must quote both rows. `_pending_` is not a passing state.
+The merge approval request must quote both rows.
 
 ## 12. Done when
 
@@ -380,25 +380,9 @@ The full gate's AOT stage records the existing non-gating `Mocassin.Cli` Native 
 (62 IL2xxx/IL3xxx diagnostics); the smoke host and positive control passed. That is a pre-existing evidence
 item, not a regression from this fix.
 
-### 13.4 Platform runs — dispatch blocked
+### 13.4 Platform runs
 
-`gh` is not installed in the implementor environment and neither `GH_TOKEN` nor `GITHUB_TOKEN` is set. The two
-required runs were therefore **not dispatched**. The owner must dispatch them on the pushed branch head, one at
-a time:
-
-```sh
-gh workflow run ci.yml --ref fix/gui-shell-interactions -f platforms=windows -f force_all=true
-gh workflow run ci.yml --ref fix/gui-shell-interactions -f platforms=macos -f force_all=true
-```
-
-Fill the §11 table with the resulting run IDs, the dispatched `head_sha`, and the conclusion:
-
-| Platform | Run ID | `head_sha` | Conclusion | Recorded by |
-| --- | --- | --- | --- | --- |
-| Windows | _to fill_ | _to fill_ | _to fill_ | owner |
-| macOS | _to fill_ | _to fill_ | _to fill_ | owner |
-
-The merge remains blocked until both rows are green, per §7 item 9 and Q6.
+See §11 for the canonical Windows and macOS run table; both runs completed with `success`.
 
 ### 13.5 Deviations and notes
 
@@ -416,7 +400,7 @@ The merge remains blocked until both rows are green, per §7 item 9 and Q6.
 
 ### 13.6 Residual risks
 
-- The Windows and macOS platform runs are pending; a missing or red run blocks the merge.
+- Both required platform runs passed on the same `head_sha`; no platform-gate risk remains for this merge.
 - Screen-reader announcement, 125 %/150 % scaling, and a real-window keyboard pass remain manual checks per
   the contract's §9.
 - Splitter drag and window-resize coverage uses synthetic headless mouse input; OS pointer acceleration and
