@@ -13,7 +13,7 @@ runs.
 | Worktree | `/workspace` (clean, in place) |
 | Owner decisions | Recorded 2026-11-21 — see §11 |
 | Tracking | One branch, one implementor, both manual platform runs, then one owner `--no-ff` merge approval under §3.5 |
-| Status | Ready for implementation — no independent design review |
+| Status | Implemented — local gates green; Windows/macOS platform runs pending |
 | Normative behaviour | [`docs/development/ui-interaction-contract.md`](../../development/ui-interaction-contract.md) |
 
 The interaction contract is the durable design. This record holds the defect evidence, the implementation
@@ -341,3 +341,85 @@ The merge approval request must quote both rows. `_pending_` is not a passing st
 - The owner approves the merge only after those runs, under the normal §3.5 approval; the merge is `--no-ff`.
 - This record is updated with the commit, the exact commands/results, the platform run evidence, and any
   deviation.
+
+## 13. Implementation evidence (2026-11-21)
+
+Implementor: step agent, branch `fix/gui-shell-interactions`, based on `542d569`. The two frozen docs commits
+(`48d94e0`, `120e09e`) are unchanged.
+
+### 13.1 Commits
+
+| Commit | Message |
+| --- | --- |
+| `95fee4475c6972510723560f2f9c787807bffc87` | `app: fix shell splitters, overlay focus, and enter/escape routing` |
+| the docs commit that adds this section | `docs: record GUI shell interaction fix implementation evidence [skip ci]` |
+
+The code commit changes 48 files: the fraction model and migration, the shell layout and layer coordinator,
+the overlay and dialog views, the settings reader/validator, the new and extended tests, the regenerated
+screenshot baselines, and the documentation/navigation updates.
+
+### 13.2 Delivered scope
+
+In-scope IDs delivered: L-1, L-2, L-3, L-8, L-9, L-10, L-11, L-12, L-13, L-14, L-17, L-18, L-19, L-20.
+Regression coverage added for L-23 (explorer `Enter`), L-24 (Problems `Enter`), L-27 (Overview field `Enter`),
+L-30 (choice dialog), and L-31 (text prompt). Deferred IDs L-6, L-7, L-15, L-16, L-22, L-25, L-29 are untouched.
+The multiline `Ctrl+Enter` rule remains documented in the contract; no editable multiline surface exists, so
+no executable test was added.
+
+### 13.3 Local gates
+
+| Command | Result |
+| --- | --- |
+| `./tools/verify.sh all --require` | Exit 0. Full .NET restore/build/test/format, API, Rust, Python, strict documentation, contracts/policy, and AOT stages completed; final line `Closeout gate completed with required checks enabled.` |
+| `dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release` | Exit 0; 250 passed, 0 failed. |
+| `python tools/check_docs_links.py` | Exit 0; `Documentation links OK (200 files scanned).` |
+| `python tools/check_doc_math.py` | Exit 0; `Documentation math conventions OK (197 files scanned).` |
+| `dotnet format Mocassin.slnx --verify-no-changes --no-restore` | Exit 0. |
+
+The full gate's AOT stage records the existing non-gating `Mocassin.Cli` Native AOT publish evidence
+(62 IL2xxx/IL3xxx diagnostics); the smoke host and positive control passed. That is a pre-existing evidence
+item, not a regression from this fix.
+
+### 13.4 Platform runs — dispatch blocked
+
+`gh` is not installed in the implementor environment and neither `GH_TOKEN` nor `GITHUB_TOKEN` is set. The two
+required runs were therefore **not dispatched**. The owner must dispatch them on the pushed branch head, one at
+a time:
+
+```sh
+gh workflow run ci.yml --ref fix/gui-shell-interactions -f platforms=windows -f force_all=true
+gh workflow run ci.yml --ref fix/gui-shell-interactions -f platforms=macos -f force_all=true
+```
+
+Fill the §11 table with the resulting run IDs, the dispatched `head_sha`, and the conclusion:
+
+| Platform | Run ID | `head_sha` | Conclusion | Recorded by |
+| --- | --- | --- | --- | --- |
+| Windows | _to fill_ | _to fill_ | _to fill_ | owner |
+| macOS | _to fill_ | _to fill_ | _to fill_ | owner |
+
+The merge remains blocked until both rows are green, per §7 item 9 and Q6.
+
+### 13.5 Deviations and notes
+
+- The layout capture/apply/persist members moved to `ShellViewModel.Layout.cs` because `ShellViewModel.cs`
+  had reached the 800-line structure limit. Behaviour is unchanged; the split is mechanical.
+- The Problems list and explorer tree now attach their `Enter` handler with `handledEventsToo: true`, and the
+  choice dialog has an explicit `Enter` confirm handler. Headless input showed the focused list item consuming
+  `Enter` before the container handler. This preserves the contract mapping and makes L-23/L-24/L-30 observable.
+- The catalog `KeyBinding`s are suspended while a layer is open, in addition to the command-gesture gate. This
+  is what makes `Ctrl+Shift+P` and `F1` inert from settings; the gate remains as a second guard.
+- `docs/reference/file-layout.md` and `docs/user-guide/workspace.md` were updated outside the record's expected
+  file list because they documented the removed pixel fields and the "splitter does not persist" limitation.
+- The three screenshot baselines were regenerated once. No other visual change was intended; the default
+  proportions changed at the 1000 × 700 capture size.
+
+### 13.6 Residual risks
+
+- The Windows and macOS platform runs are pending; a missing or red run blocks the merge.
+- Screen-reader announcement, 125 %/150 % scaling, and a real-window keyboard pass remain manual checks per
+  the contract's §9.
+- Splitter drag and window-resize coverage uses synthetic headless mouse input; OS pointer acceleration and
+  real window-manager resize behaviour are not simulated.
+- Screenshot comparison remains Ubuntu-only; the platform runs execute the headless suite and do not
+  pixel-compare.
