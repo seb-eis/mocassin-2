@@ -92,13 +92,14 @@ properties are ignored and dropped on the next write. A missing key takes its do
   },
   "recentFiles": [],
   "layout": {
-    "leftFraction": 0.2167,
-    "rightFraction": 0.2667,
-    "consoleFraction": 0.225,
+    "leftFraction": 0.2,
+    "rightFraction": 0.22,
+    "consoleFraction": 0.32,
     "leftVisible": true,
     "rightVisible": true,
     "consoleVisible": true,
-    "activeConsoleChannel": "application"
+    "activeConsoleChannel": "application",
+    "defaultsRevision": 1
   },
   "autosave": { "enabled": true, "intervalMinutes": 5 },
   "session": {
@@ -128,9 +129,10 @@ properties are ignored and dropped on the next write. A missing key takes its do
 | `paths.lastSaveDirectory` | string or null | `null` | Last accepted save-picker directory |
 | `paths.lastFolderDirectory` | string or null | `null` | Last accepted folder-picker directory |
 | `recentFiles` | array | `[]` | At most 10 `{ "path", "lastOpenedUtc" }` entries, de-duplicated by path |
-| `layout.leftFraction` / `rightFraction` / `consoleFraction` | number | `260/1200` / `320/1200` / `180/800` | Side panels 0.08–0.45 and console 0.08–0.60; missing, non-finite, or out-of-range values fall back to the default. A pre-fix document with `leftWidth`/`rightWidth`/`consoleHeight` is migrated once with the 1200 × 800 reference; the writer emits only fractions |
+| `layout.leftFraction` / `rightFraction` / `consoleFraction` | number | `0.20` / `0.22` / `0.32` | Side panels 0.08–0.45 and console 0.08–0.60; missing, non-finite, or out-of-range values fall back to the default. A pre-fix document with `leftWidth`/`rightWidth`/`consoleHeight` is migrated once with the 1200 × 800 reference; the writer emits only fractions |
+| `layout.defaultsRevision` | integer | `1` | Additive application-local marker. An absent value is read as `0`; when the revision is below `1` and all three post-read fractions still equal the old `260/1200`, `320/1200`, and `180/800` defaults within `1e-6`, they are replaced with `0.20`, `0.22`, and `0.32`. A custom fraction is preserved. A non-integer, negative, or otherwise invalid value records a warning and is read as `0`. The writer always emits the current revision `1`. This is not a schema bump and is not in `contracts/manifest.json`. |
 | `layout.leftVisible` / `rightVisible` / `consoleVisible` | boolean | `true` | Panel visibility |
-| `layout.activeConsoleChannel` | string | `"application"` | Channel id (`application`/`problems`); an unknown id falls back to the first available channel |
+| `layout.activeConsoleChannel` | string | `"application"` | Tab id: `application` is **Console** and `problems` is **Validation**; an unknown id falls back to the first tab. Switching tabs schedules the normal debounced layout persist. |
 | `autosave.enabled` | boolean | `true` | Periodic sidecar autosave on/off |
 | `autosave.intervalMinutes` | integer | `5` | 1–60 inclusive; out of range falls back to `5` with a warning |
 | `session.openProjects` | array of string | `[]` | Paths open at the last exit, capped at 20 and de-duplicated |
@@ -141,9 +143,15 @@ properties are ignored and dropped on the next write. A missing key takes its do
 A wrong type, unknown enum, or out-of-range value falls back to that field's default and records a warning. A
 malformed or unreadable document loads all defaults, reports a banner/console warning, and is not overwritten.
 Migrations are pure functions keyed by `schemaVersion`; version 1 is the first version, so its migration is the
-identity. The added `autosave` and `session` objects are additive: no schema bump, and a 23A document without
-them loads with the defaults above. They remain application-local and are not contract-manifest or
-cross-language fixtures.
+identity. The added `autosave`, `session`, and `layout.defaultsRevision` fields are additive: no schema bump, and a
+document without them loads with the defaults above. They remain application-local and are not contract-manifest
+or cross-language fixtures.
+
+The layout migration order is fixed: the legacy pixel conversion runs first, then the defaults-revision upgrade.
+The upgrade never overrides a custom fraction; **View → Reset Layout** is the explicit way for a user to return
+to the new defaults. A reset writes the current revision and the default fractions, makes all regions visible,
+and persists through the same debounced layout path; it does not change the theme, density, recent files, or
+active console tab.
 
 Writes are serialized through the source-generated `AppSettingsJsonContext` to UTF-8 without a BOM, written to a
 sibling temporary file, flushed with `Flush(flushToDisk: true)`, and atomically replaced. The document is capped

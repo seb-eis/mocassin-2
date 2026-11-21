@@ -9,14 +9,16 @@ The shell is a fixed, resizable workspace rather than a docking system.
 | Projects | Project switcher and project-level explorer. |
 | Documents | Tab strip and the active document. |
 | Inspector | Summary for the active document or a neutral empty state. |
-| Console | Application and Problems channels with a selector; the Application channel has severity/text filtering and clear. |
+| Console | Fixed **Console** and **Validation** tabs; the Console tab has severity/text filtering and clear, and Validation shows the active project diagnostics. |
 | Status bar | Active document, project/path/lock and dirty state, validation status, autosave status, appearance, version, and progress. |
 
 `Alt+1`, `Alt+2`, and `Alt+0` toggle Projects, Inspector, and Console. The workspace stores panel **fractions**
 rather than pixels, so a splitter drag rebalances only its two adjacent regions, a window resize keeps the ratio,
-and a restart restores the most recent completed gesture. The console and inspector regions are collapsible; a
-hidden region keeps its fraction. Splitters are keyboard reachable and resize by 16 logical pixels with the arrow
-keys. The full layout and focus rules are in the
+and a restart restores the most recent completed gesture. The default shares are 20 % projects, 22 % inspector,
+and 32 % console. The console and inspector regions are collapsible; a hidden region keeps its fraction.
+Splitters are keyboard reachable and resize by 16 logical pixels with the arrow keys. **View → Reset Layout**
+restores the default shares and shows all regions without changing the theme, density, recent files, or active
+console tab. The full layout and focus rules are in the
 [UI interaction contract](../development/ui-interaction-contract.md).
 
 ## Documents and tabs
@@ -63,10 +65,18 @@ The shell registers File, Edit, View, and Help menus. The Edit menu contains Und
 which follow the active project and are disabled for a read-only project or an empty stack. `Model`, `Build`, and
 `Run` menus appear only when later steps contribute items.
 
-## Console channels
+## Console tabs
 
-The console selector switches between the Application channel and the Problems channel. Problems shows the
-active project's validation and transient edit diagnostics with severity, code, message, path, and source;
-it supports severity/code/text/source filters, sorting, revalidate, help links, and navigation. Opening a project
-with a retained load/migration result shows it immediately; opening a clean project leaves the `Load` stage
-skipped. See [Projects and lifecycle](projects.md#validation) for details.
+The console has two fixed tabs in this order:
+
+| Tab | Internal id | Content |
+| --- | --- | --- |
+| **Console** | `application` | The application log with severity/text filtering and clear. |
+| **Validation** | `problems` | The active project's validation and transient edit diagnostics. |
+
+The tab strip is the console card header; there is no separate selector or title row. The active tab is persisted
+in `layout.activeConsoleChannel` and an unknown stored id falls back to Console. Arrow keys select a tab, a click
+selects it, and plain `Enter` on the strip is a no-op. There is no close or reorder control. Validation shows
+severity, code, message, path, and source, and supports severity/code/text/source filters, sorting, revalidate,
+help links, and navigation. Opening a project with a retained load/migration result shows it immediately; opening
+a clean project leaves the `Load` stage skipped. See [Projects and lifecycle](projects.md#validation) for details.

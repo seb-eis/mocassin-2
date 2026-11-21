@@ -24,17 +24,17 @@ Menu
 │ switcher     │                                │              │
 │ explorer     │                                │              │
 ├──────────────┴────────────────────────────────┴──────────────┤
-│ Console: Application                                         │
+│ Console: Console | Validation                                │
 ├──────────────────────────────────────────────────────────────┤
 │ Status: document · project/path · appearance · version       │
 └──────────────────────────────────────────────────────────────┘
 ```
 
 - `Alt+1`, `Alt+2`, and `Alt+0` toggle the Projects, Inspector, and Console regions. Visibility is persisted in
-  the layout settings.
+  the layout settings; **View → Reset Layout** restores the default 20 % / 22 % / 32 % shares.
 - The project switcher activates an open project and its last document.
 - The explorer opens the project-level Overview and Data nodes; later steps contribute model nodes. The
-  Overview metadata form and Problems channel are available now, and the title/tabs/switcher mark unsaved
+  Overview metadata form and Validation tab are available now, and the title/tabs/switcher mark unsaved
   projects.
 
 ## Tabs
