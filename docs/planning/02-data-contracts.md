@@ -894,7 +894,9 @@ MessagePack map with snake_case keys. Top-level:
   checksum, so a rule or catalog change invalidates parameterizations.
 - `model_signature` is additive before the first released `.msl`. All payload versions stay `1` because no
   released package exists, matching the pre-release additive-v1 precedent; Step 11 adds the manifest payload
-  entries, the generated schema, and the package fixtures.
+  entries, the generated schema, and the package fixtures. The cluster `code_expansions` member follows the
+  same additive-v1 rule as an optional member with defined absence semantics (ADR 0013 addendum); it is not a
+  version bump while no `.msl` is released.
 - The payload is the parameterized form. Step 08's internal `CompiledModel` is not the persisted DTO; Step 11
   maps `CompiledModel` + the Contracts `ParameterizationValues` to this payload. The build-time
   `ParameterizedModel` used by Steps 10–11 lives in `Mocassin.Packages.Parameterization` and wraps
@@ -971,7 +973,7 @@ MessagePack map with snake_case keys. Top-level:
 | Key | Type | Meaning |
 | --- | --- | --- |
 | `pair_tables` | array | `{object_id, energies:[f64; n_particles*n_particles]}` |
-| `cluster_tables` | array | `{object_id, occupation_codes:[u64], energies:[f64], particle_table_mapping:[u8]}` |
+| `cluster_tables` | array | `{object_id, occupation_codes:[u64], code_expansions, energies:[f64], particle_table_mapping:[u8]}`; `code_expansions` is described below |
 | `defect_background` | array | `[position][particle]` site energy in eV, row-major; Step 09 resolves the authored `siteEnergies` background, applies template overrides, and quantizes it |
 
 - Pair tables are in canonical shell order: `(distanceBucket, targetP, cellA, cellB, cellC)`, then site
@@ -987,6 +989,49 @@ MessagePack map with snake_case keys. Top-level:
   own `GeometryId` and records the inverse direction's `ChiralPartnerGeometryId`.
 - Cluster occupation codes use 6 bits per site, site 0 in the least significant bits, up to 9 sites; unused
   high bits are zero. Codes are canonical under the induced site-permutation group.
+- **Cluster code expansion map (`code_expansions`).** A cluster table stores one canonical code per
+  symmetry-reduced occupation orbit, but the solver builds the raw slot tuple of the current lattice (slot 0 =
+  the centre particle, slots `1..=n` = the resolved members) and must find that orbit's energy. The optional
+  `code_expansions` member is the resolution map:
+  - `null`/absent: `occupation_codes` is complete because every orbit is a singleton. A package written before
+    this member was added also has no key; a singleton table resolves directly, and a non-singleton table fails
+    closed on a non-canonical raw tuple rather than guessing.
+  - object: `{expanded_codes:[u64], canonical_indices:[u32]}`. `expanded_codes` is **strictly ascending** and
+    covers every raw slot-tuple code the writer enumerated. It is a **superset**: it may also contain orbit
+    codes whose particles are not allowed at the corresponding member slot (the reduction expands the full
+    point-group orbit without filtering by the per-slot allowed sets). Such codes are never produced by a valid
+    lattice and are harmless; a reader must not reject them. `canonical_indices[j]` is the index `i` into
+    `occupation_codes`/`energies` whose orbit contains `expanded_codes[j]`; the applied energy of the raw tuple
+    is `energies[canonical_indices[j]]`.
+  - `expanded_codes.Length == canonical_indices.Length`; every index is `< occupation_codes.Length`; every code
+    has zero bits above slot 9 and every 6-bit field below `particle_count` (the same ten-slot rule as
+    `occupation_codes`, including unreachable high-slot particles); for every `i`, `occupation_codes[i]` occurs
+    exactly once in `expanded_codes` with `canonical_indices[j] == i` (canonical self-entry), so every canonical
+    code is resolvable.
+  - The canonical code is **not** necessarily the smallest code in its orbit: the reduction's canonical order is
+    lexicographic in site order starting at the centre, while the code places slot 0 in the least significant
+    bits. A reader must use the map, not a minimum/sort heuristic.
+  - The writer emits `null` iff the total expansion count equals `occupation_codes.Length`, and the map
+    otherwise. A raw tuple absent from a present map is a data error. With no map, a raw tuple that is not in
+    `occupation_codes` is a data error telling the user to rebuild the package; it is never mapped to a
+    neighbour.
+  - The map is **not** a signature input. `signatures.model` already projects every canonical code, canonical
+    tuple, expansion code, and permutation index; `signatures.parameterization` contains only applied values.
+    Adding the stored member changes no signature or `package-summary-v1`. `contracts/manifest.json` describes
+    the model `energy` member as an open object and does not enumerate payload-internal energy fields; this
+    member follows the existing `occupation_codes`/`energies` granularity.
+  - **Reader bound:** the stored integers use MessagePack's smallest-width encoding (a code is 1–9 bytes, an
+    index 1–5 bytes), so the model payload byte guard does **not** bound the typed `u64`+`u32` arrays; a hostile
+    512 MiB payload could otherwise declare tens of millions of entries and allocate about twice the guard. The
+    readers therefore apply an explicit cumulative budget `Σ(8E + 4I)` **before** the typed arrays are
+    allocated (Rust `ReaderLimits.max_cluster_expansion_bytes` and .NET
+    `PackageVerificationOptions.MaxClusterExpansionBytes`, both defaulting to 128 MiB); the scans also reject
+    `E != I` and duplicate known keys at scan time. Over-budget is a fail-closed package error
+    (`PayloadTooLarge`/exit 11, or `PKG004` on the .NET decode path), and the limit is raisable for a
+    writer-valid package that needs it.
+  - Step 14 consumes this map through a `ClusterTable::lookup(raw)` accessor returning
+    `ClusterCodeLookup::{Canonical, MissingFromMap, ExpansionMapAbsent}`; Step 15 matches `Canonical(index)`.
+    The format guarantees that every raw tuple of a table written with the map resolves.
 - Cluster `object_id` is the stable cluster energy identity
   `SHA-256("mocassin/cluster-energy-id/v1" || clusterId || centerSiteId || canonical geometry hash)`.
   `occupation_codes` are sorted ascending; `particle_table_mapping` holds one row per allowed center particle
@@ -1144,11 +1189,19 @@ consumes, with explicit limits that are checked before allocation:
 | Particles | 64 | Six-bit state codes and the 63-custom-particle limit |
 | Rules / directions / collections | 1M / 1M / 4,096 | `max_rules` defaults to the `CompilationOptions.MaxRuleCount` default (1,000,000), an `init` option callers can raise; raise `ReaderLimits` with it. The others are allocation caps |
 | Pair / cluster tables | 1M / 1M | Allocation caps |
+| Cluster expansion typed bytes (`Σ(8E + 4I)`) | 128 MiB | `ReaderLimits.max_cluster_expansion_bytes` / `PackageVerificationOptions.MaxClusterExpansionBytes`; checked before the typed arrays allocate; scans reject `E != I` and duplicate keys first; raisable for a writer-valid package. For a valid map (`E == I = N`) the derived entry cap is 11,184,810 |
 | Pair links | 16M total, 65,536 per position | Allocation caps |
 | Path nodes / tracker entries | 10 | Six bits per node in a `u64` |
 | Extensions / simulations | 256 / 4,096 | Allocation caps |
 
 - The lattice guard is `4 × a × b × c × position_count` in checked `u64`, capped by the lattice byte limit.
+- The `code_expansions` budget is explicit, not a consequence of the model payload guard. Smallest-width
+  MessagePack makes an entry 2–14 bytes on the wire, while the typed arrays cost `8E + 4I`, so the payload
+  guard alone would allow a typed allocation well above it, and a malformed pair could hide a large
+  `expanded_codes` behind a small `canonical_indices`. The readers accumulate `8E + 4I` across all cluster
+  tables, reject `E != I` and duplicate known keys at scan time, and reject before allocating;
+  `check_declared` still rejects a length that cannot fit in the remaining bytes, and the model element budget
+  bounds the scan.
 - The reader decompresses only after the Zstd frame's declared size (or a bounded streaming read when no size
   is declared) is checked against the guard. It then scans the MessagePack structure without allocating per
   element, checks declared lengths against the remaining bytes, and only then decodes into typed structures.

@@ -16,12 +16,13 @@
 | Step agent (implementor) | — |
 | Audit initiated by | Orchestrator, on request of the step agent |
 | Step branch | — |
-| Closeout evidence | `docs/planning/closeout/step-NN.json` |
+| Closeout evidence | `docs/planning/closeout/step-NN.json` — for a post-merge amendment (`step-NN-amend-M`), write `this record` and carry the audited commit, closeout CI, `main` SHA, merge commit, merge-tree CI, platform CI, and tag here instead |
 | Audit date | — |
 | Auditor | — |
 
 The closeout evidence file holds the audited commit, closeout CI run and `head_sha`, `main` SHA at freeze, merge candidate,
-merge-tree CI, platform CI, and tag. Do not restate them here: one source, one place.
+merge-tree CI, platform CI, and tag. Do not restate them here: one source, one place. A post-merge amendment has
+no evidence file; this record is the one source (see [`README.md`](README.md#31-post-merge-amendment-audits)).
 
 Step page: [`Step NN — Step title`](../steps/step-NN-short-title.md)
 
@@ -70,7 +71,7 @@ Commands run:
 
 ```
 
-Evidence file: `docs/planning/closeout/step-NN.json`
+Evidence file: `docs/planning/closeout/step-NN.json` (post-merge amendment: this record, per the request row)
 
 ## Known notes for the auditor
 
