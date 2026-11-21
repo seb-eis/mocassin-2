@@ -484,9 +484,10 @@ per feature.
   Packages 534, Architecture 7, App 121); `dotnet format` clean; ApiCompat and NuGet policy clean; Rust
   `fmt`/`clippy`/`test` clean plus a release build; Python tests/build; contracts (26 artifacts current, 60
   process tests, SPDX 1010 files, secrets 1478 files, cargo-deny); strict Zensical/DocFX/rustdoc; AOT evidence.
-- **CI:** one Ubuntu closeout dispatch on the freeze commit (recorded in the
-  [audit record](../audits/step-11-amend-2.md)); no per-feature CI; platform CI not run (no platform-conditional
-  code).
+- **CI:** one Ubuntu closeout dispatch
+  [`44895491322`](https://github.com/seb-eis/mocassin-2/actions/runs/44895491322) green at
+  `aa625294ec201dd8806724e63a2f6235a954de2b`; no per-feature CI; platform CI not run (no platform-conditional
+  code). Recorded in the [audit record](../audits/step-11-amend-2.md).
 - **Audit:** [request](../audits/step-11-amend-2.md) — separate post-merge audit; `step-11` stays tagged and is
   not moved.
 - **Known limitations / follow-ups:** Step 14 consumes `ClusterTable::lookup`; F-29's formal closure remains a

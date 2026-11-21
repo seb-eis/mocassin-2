@@ -35,12 +35,12 @@ Design review: [`step-11-amend-2`](../reviews/step-11-amend-2.md) — round 4 `R
 
 | Field | Value |
 | --- | --- |
-| Audited commit | — (the implementation freeze commit; filled after the code commit) |
-| Closeout CI run | — (one Ubuntu `CI` dispatch; filled after it passes) |
-| Closeout CI `head_sha` | — |
-| `main` SHA at freeze | — |
-| Merge candidate | the maintenance branch head after the audit record (documentation-only record commit) |
-| Merge-tree CI | not applicable while the audited commit and `main` are consistent; re-run if `main` moves |
+| Audited commit | `aa625294ec201dd8806724e63a2f6235a954de2b` (the maintenance branch head at freeze; `b3d967e` plus the `origin/main` merge `63cdd06`) |
+| Closeout CI run | [`44895491322`](https://github.com/seb-eis/mocassin-2/actions/runs/44895491322) — Ubuntu `CI`, conclusion `success` |
+| Closeout CI `head_sha` | `aa625294ec201dd8806724e63a2f6235a954de2b` |
+| `main` SHA at freeze | `63cdd0638b952e9175f75681d864bb95db0b4f68` (merged into the branch as `aa62529` before the gate) |
+| Merge candidate | `aa625294ec201dd8806724e63a2f6235a954de2b` plus this record commit (documentation-only, `[skip ci]`); the code state is unchanged |
+| Merge-tree CI | Not required: `main` `63cdd06` was merged before the freeze and the full gate plus closeout CI ran on the merged tree |
 | Platform CI | **Not run** — no P/Invoke, native library, RID, path, GUI, or platform-conditional code is touched |
 | Tag | `step-11.1` after owner approval and a green `main` CI run; `step-11` is never moved |
 
@@ -130,7 +130,7 @@ cargo clippy --workspace --all-targets -- -D warnings          clean
 cargo test --workspace                 all targets pass
 cargo build --workspace --release      clean
 ./tools/verify.sh contracts            exit 0: 26 artifacts current, 60 process tests, SPDX 1010,
-                                       secrets 1478, cargo-deny OK
+                                       secrets 1,498, cargo-deny OK
 ./tools/verify.sh docs                 exit 0: math OK, links OK, strict site/DocFX/rustdoc build
 ```
 
@@ -143,8 +143,9 @@ cargo run -p mocassin-cli -- --db <new fixture> --job 1 --dry-run
   -> validation: ok
 ```
 
-The closeout CI run, `head_sha`, and `main` SHA at freeze are recorded in the post-merge evidence table above
-after the single Ubuntu dispatch.
+The single closeout CI run `44895491322` is green at `aa625294ec201dd8806724e63a2f6235a954de2b`
+(`main` `63cdd0638b952e9175f75681d864bb95db0b4f68` was merged before the gate). Platform CI is not run
+(no platform-conditional code).
 
 Evidence file: this record (post-merge amendment, per the request row)
 

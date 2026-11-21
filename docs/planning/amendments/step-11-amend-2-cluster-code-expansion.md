@@ -760,8 +760,9 @@ one-time forward read.
   pass, exit 0; `cargo run -p mocassin-cli -- --db <new fixture> --job 1 --dry-run` → `validation: ok`. Both
   ignore the unknown `code_expansions` key.
 - **Gates:** `./tools/verify.sh all --require` exit 0 (1,989 .NET tests, format/ApiCompat/contracts/docs/AOT),
-  Rust `fmt`/`clippy`/`test` plus release build, Python, and the single Ubuntu closeout CI recorded in the audit
-  record.
+  Rust `fmt`/`clippy`/`test` plus release build, Python, and the single Ubuntu closeout CI
+  [`44895491322`](https://github.com/seb-eis/mocassin-2/actions/runs/44895491322) green at
+  `aa625294ec201dd8806724e63a2f6235a954de2b`.
 
 ## Integration
 
