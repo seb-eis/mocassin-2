@@ -13,7 +13,7 @@ runs.
 | Worktree | `/workspace` (clean, in place) |
 | Owner decisions | Recorded 2026-11-21 — see §11 |
 | Tracking | One branch, one implementor, both manual platform runs, then one owner `--no-ff` merge approval under §3.5 |
-| Status | Implemented — local gates green; Windows and macOS platform runs green; awaiting owner merge approval |
+| Status | merged into `main` as `392bd1c6534c5b69026be02f4d1929372f7c204a`, main CI `44956015796` green, branch deleted locally and remotely, no tag |
 | Normative behaviour | [`docs/development/ui-interaction-contract.md`](../../development/ui-interaction-contract.md) |
 
 The interaction contract is the durable design. This record holds the defect evidence, the implementation
@@ -408,3 +408,20 @@ See §11 for the canonical Windows and macOS run table; both runs completed with
   real window-manager resize behaviour are not simulated.
 - Screenshot comparison remains Ubuntu-only; the platform runs execute the headless suite and do not
   pixel-compare.
+
+## 14. Merge closeout (2026-11-21)
+
+- Merge commit `392bd1c6534c5b69026be02f4d1929372f7c204a` — `fix: correct GUI shell splitters, overlay
+  focus, and enter/escape routing`.
+- Main CI run `44956015796` (https://github.com/seb-eis/mocassin-2/actions/runs/44956015796),
+  `head_sha` `392bd1c6534c5b69026be02f4d1929372f7c204a`, conclusion `success`.
+- Jobs that ran: `Detect changes`, `.NET (ubuntu-latest)`, `Public API compatibility`, and
+  `Contracts and policy`; all successful. `Rust` and `Python` were path-filtered and skipped.
+- `fix/gui-shell-interactions` was deleted locally and remotely after the green main run. No tag was created.
+- Follow-ups:
+  - The seven deferred IDs: L-6, L-7, L-15, L-16, L-22, L-25, and L-29.
+  - The CI workflow header comment is stale: it omits the Avalonia platform step
+    (`Platform tests - Avalonia headless workspace`).
+  - Manual checks remain: a screen-reader pass, 125 % and 150 % display scaling, and a real-window keyboard
+    pass.
+  - The multiline `Ctrl+Enter` rule remains untested until an editable multiline surface exists.
