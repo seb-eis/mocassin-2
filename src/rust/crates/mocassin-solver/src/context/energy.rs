@@ -22,7 +22,7 @@
 use mocassin_types::{JobPackage, ParticleId, PositionId};
 
 use super::CancelProbe;
-use super::clusters::{ClusterArena, lookup_table};
+use super::clusters::{ClusterArena, lookup_table, raw_has_void_member};
 use super::dimensions::{Dimensions, EnvId};
 use super::error::ContextError;
 use super::links::LinkArena;
@@ -276,6 +276,10 @@ pub(crate) fn fill_cluster_energies(
             let code = clusters.code(instance as u32, cell, cells);
             for (row, particle) in table.particle_table_mapping.iter().enumerate() {
                 let raw = (code & !PARTICLE_MASK) | u64::from(*particle);
+                if raw_has_void_member(raw, instance_data.slot_count) {
+                    clusters.energy[cell as usize * total_rows + start + row] = 0.0;
+                    continue;
+                }
                 let id = lookup_table(table, raw, instance_data.table)?;
                 let Some(energy) = table.energies.get(id as usize) else {
                     return Err(ContextError::InvalidInput {

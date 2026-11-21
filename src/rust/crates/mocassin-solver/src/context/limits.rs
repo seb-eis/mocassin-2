@@ -118,7 +118,11 @@ pub struct MemoryPlan {
 }
 
 impl MemoryPlan {
-    /// Plans every array of the context for a validated job.
+    /// Plans every array whose size is known before the state is built.
+    ///
+    /// The jump-status arrays are added by their phase after the receiver-link counting pass, and the mobile
+    /// mapping is added after the lattice exists; both use [`MemoryPlan::set_entries`] before their vectors are
+    /// allocated, so the stored plan still covers every allocation.
     ///
     /// # Errors
     ///

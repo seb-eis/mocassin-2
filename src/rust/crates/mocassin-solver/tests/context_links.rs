@@ -295,12 +295,12 @@ fn initialization_is_deterministic() {
 #[test]
 fn the_memory_report_covers_every_arena_and_matches_its_entries() {
     let cases = [
-        (populated_kmc(), 2608_u64),
+        (populated_kmc(), 2672_u64),
         (populated_mmc(), 1804),
-        (amend2(), 3800),
-        (pre_map(), 3800),
+        (amend2(), 3928),
+        (pre_map(), 3928),
         (centered(), 3300),
-        (ceria(), 64568),
+        (ceria(), 67160),
     ];
 
     for (job, total) in cases {
@@ -327,6 +327,7 @@ fn the_memory_report_covers_every_arena_and_matches_its_entries() {
             "pools.pool_of",
             "jumps.offsets",
             "jumps.links",
+            "trackers.mobile_positions",
         ] {
             assert!(
                 report.entries().iter().any(|entry| entry.what == what),
@@ -357,6 +358,7 @@ fn the_memory_report_covers_every_arena_and_matches_its_entries() {
     assert_eq!(entry("pools.pool_of").elements, 12);
     assert_eq!(entry("jumps.offsets").elements, 13);
     assert_eq!(entry("jumps.links").elements, 4);
+    assert_eq!(entry("trackers.mobile_positions").elements, 16);
 }
 
 fn expect_limit(

@@ -10,7 +10,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In progress — feature 4 squashed; feature 5 next (six feature branches approved)
+- **Status:** In progress — feature 5 squashed; feature 6 (closeout) next (six feature branches approved)
 - **Step branch:** `step/14-simulation-context-initialization`
 - **Step CI:** — (one closeout `workflow_dispatch`; no per-feature CI)
 - **Main merge:** —
@@ -31,15 +31,15 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (feature 4 squashed; feature 5 next)
+- **Last updated:** 2026-11-21 (feature 5 squashed; feature 6 closeout next)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 Context skeleton, arenas, limits, errors | `feature/step-14-simulation-context-initialization/context-arenas-and-limits` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (36 lib + 9 acceptance tests, 1 `Send` doctest, 1 `!Sync` compile-fail doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `1a73969860715c55260cd1db0257c8a59241a647` |
 | 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 link + 16 cluster + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `486389ec5736571f50adda0d77ae95aa8f9ea4cb` |
 | 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 8 energy + 16 cluster + 15 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `2f284cce2f65532007a9be883eaaea83ae4500b5` |
-| 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 10 pools + 10 jump + 8 energy + 16 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-5 row update |
-| 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Planned | — | — | — |
+| 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 10 pools + 10 jump + 8 energy + 16 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `1613cfc6da1832fc4faacba0b0073e001cd30f1f` |
+| 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 goals + 7 resume + 10 pools + 10 jump + 8 energy + 17 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-6 row update |
 | 6 Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | Planned | — | — | — |
 
 ### Feature list (scope and outcomes)
@@ -239,9 +239,10 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 | Ten-node bound | a synthetic 10-position, one-cell model with one 10-node direction yields exactly 90 jump links for status 0 (the `L·(L−1)` bound), all sender/receiver ids in `0..10` |
 | Caps | `max_pools`/`max_pool_bytes` (value 720, limit 719), `max_selectable_jump_count` (16/15), `max_status_count` (12/11), `max_jump_links` (4/3), and `max_jump_status_bytes` (84/83) reject before allocation |
 | Invalid path / no selectable | an out-of-cell path node and an 11-node path are `InvalidInput`; a job with every selection mask cleared is `NoSelectableJumps` (exit 12) |
-- **Plan totals (report):** populated KMC 2608 B (pools 720 + jumps 84 added to the feature-3 1804), populated
+- **Plan totals (report):** at the feature-4 commit: populated KMC 2608 B (pools 720 + jumps 84 added to the feature-3 1804), populated
   MMC 1804 B, `step-11-amend-2` 3800 B, `step-13-centered` 3300 B, `msl-v1` 64568 B; the report equals its
-  entries and capacity ≥ total.
+  entries and capacity ≥ total. Feature 5 adds the `trackers.mobile_positions` entry; see its evidence for
+  the current totals.
 - **Clarifications/limitations (recorded):**
   - **D4-1 — active-collection filtering.** The design's §8/§9 read `jump_count`/`jump_mapping` as the job's
     direction table, but the payload tables are a union over collected kinds; the context filters the selection
@@ -258,6 +259,84 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
     state application). The optimizer is a start condition and does not clear `pool_of`.
 - **No new fixture, format, manifest, or signature change.** The public Rust API break is the placeholder
   retirement above.
+
+### Feature 5 evidence — goals-normalization-and-resume
+
+- **Branch:** `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` (squashed;
+  squash commit recorded by the feature-6 row update).
+- **Scope delivered:**
+  - **Goals and counters:** `mobile_count` is the number of non-void environments; for KMC `prerun =
+    pre_run_mcsp × mobile_count`, `main = target_mcsp × mobile_count`, `total` rounded up to the next multiple of
+    100, `cycles_per_block = total / 100`. Every product, the sum, and the round-up are checked `u64`; overflow is
+    `InvalidInput { what: "goal overflow" }` (exit 12), a zero total is `InvalidInput { what: "total goal" }`
+    (exit 12), and zero mobile is `NoMobileParticles` (exit 12) checked after the lattice (before pools, so the
+    error is not masked by `NoSelectableJumps`). MMC goals are zero. Counters are zeroed fresh and restored on
+    resume (`per_particle`, `cycles`, `mcs`).
+  - **Tracker index space:** KMC `mobile_positions[id] = environment` (the inverse of the sequential mobile ids),
+    `static_trackers_per_cell`, `static_tracker_count = cells × per_cell` (checked against `u32`), the global
+    tracker count, the read-only static/global mappings, and `static_tracker_id(env, particle)`; MMC has an empty
+    index space. Step 18 owns tracker values.
+  - **Normalization/time:** `K_fix = 1` or `exp(E_norm/kT)`, `K_auto = 1/RawMax` while positive, `K_norm =
+    K_fix × K_auto` with the `K_fix` fallback, `nu_max` from the job cap or the maximum active-rule frequency,
+    `dof = 2` with `use_dual_dof_correction`, and `dt = dof × K_norm / (nu_max × selectable_count)`. Non-finite
+    `K_fix`/`K_norm`/`nu_max`/`dt` are `NonFiniteFactor` (exit 13). MMC uses unit factors, no `nu_max`/`dt`, and
+    time 0.
+  - **RNG/time/origin:** a fresh `Rng::from_seed(job.seed)` at time 0 (`ContextOrigin::Fresh`), or the exact
+    `Rng::from_state` stream and restored simulated time (`ContextOrigin::Resumed`); a bad stream is
+    `ContextError::RngState` (exit 13). `state_flags` is stored opaquely (0 fresh).
+  - **Resume:** `ResumeState`/`ResumePhase` with the parameterized `model_signature`, recomputed `seed_hash`, job
+    id/kind/dimensions/counts, per-particle counters, cycles/mcs, time, normalization, RNG blob, state flags, and
+    optional mobile mapping. The resumed particles drive the lattice flags, tracker index, pools, energy vectors,
+    cluster codes/energies, goals, and initial lattice energy; `job.lattice` remains the package lattice.
+    `AlreadyCompleted` is returned for a completed state (with the job's computed total goal) after full
+    validation. Every binding/value mismatch is `ResumeMismatch` (exit 12); the mobile mapping is re-derived and
+    compared when present.
+  - **Plan:** `trackers.mobile_positions` is updated after the lattice before its allocation; `plan == report`
+    and the invariant sweep checks goals, tracker bounds, normalization finiteness/`dt`, time, and the MMC
+    zero-time/goal rules.
+- **Goals/time/resume test matrix:**
+
+| Case | Assertion |
+| --- | --- |
+| Populated KMC | mobile 16; goals 800/1600/2400, block 24; counters zeroed; `K_fix=K_auto=K_norm=1`, `RawMax=0`, `nu_max=1e13`, `dof=2`, `dt=1.25e-14`, time 0, origin Fresh |
+| `msl-v1` ceria 6×6×6 job 1 (§17 acceptance) | mobile 648, selectable 432, goals 162000/97200/259200, block 2592, `dof=2`, `nu_max=1e13`, `dt=2/(1e13·432)` |
+| Round-up | `target=1, pre=0` → main 16, total 100, block 1; `pre=3, target=4` → total 200/block 2 |
+| Zero/overflow/mobile | zero total → `total goal`; `target=u64::MAX` or `pre=u64::MAX` → `goal overflow`; an all-void lattice → `NoMobileParticles` (exit 12) |
+| Normalization | `E_norm=0.05` gives `K_fix=exp(0.05/kT)` and the matching `dt`; a job cap 2e13 overrides `nu_max`; zero/NaN/negative caps and all-zero active rule frequencies → `NonFiniteFactor "nu_max"`; `E_norm=f64::MAX` → `K_fix` (exit 13) |
+| MMC | goals zero, unit factors, `nu_max=1`, `dof=1`, `dt=0`, time 0, no tracker index space |
+| Trackers | the mobile mapping is the exact inverse of the mobile ids; void environments have none; static count = cells × 9 and the static id formula; global count/mappings exposed; the plan entry is the mobile count |
+| Resume exact | counters/cycles/mcs/time/normalization/RawMax/state flags preserved; the lattice, mobile mapping, goals, energy, and RNG next draw equal the fresh context; `K_norm` preserved with a custom `RawMax=8` |
+| Resumed lattice | a changed resumed particle (env0 void) drives 15 mobile environments, 15 pool members, goals 750/1500/2300/23, recomputed energy, and a 15-element plan entry; the job's initial lattice is unchanged |
+| Completed | `AlreadyCompleted { mcs, total_goal }` with the job's computed total goal and no context |
+| Mismatches | model signature, seed hash, job id, kind, lattice size, position/particle counts, particle array length/index, time NaN/negative, counter length, `K_fix`/`K_auto`/`K_norm`/`RawMax`, and mobile mapping all reject with `ResumeMismatch` (exit 12); a completed state still validates the mapping |
+| MMC resume | time is forced to 0, goals zero, unit normalization, no tracker index space |
+- **Plan totals (report):** populated KMC 2672 B (the feature-4 2608 + 16 mobile positions × 4), populated MMC
+  1804 B, `step-11-amend-2` 3928 B, `step-13-centered` 3300 B, `msl-v1` 67160 B; report equals its entries and
+  capacity ≥ total.
+- **Clarifications/limitations (recorded):**
+  - **D5-1 — per-particle resume counters.** The design's `ResumeState.counters: ParticleCounters` is read as the
+    per-particle counter array (`Vec<ParticleCounters>`) because `.mcs` stores one counter entry per particle
+    (data contract §4.4); `cycles`/`mcs` remain separate. No format change.
+  - **D5-2 — a void cluster member has no row.** The `.msl` occupation table enumerates only the site's allowed
+    (non-void) particles; a cluster cell with a void member has no canonical code. Its `cluster_code_id` is
+    `None` and every energy row for that cell is 0 (the empty-cluster contribution), instead of failing the
+    initialization. This is physically the empty cluster and is exposed by the resumed-lattice test; Step 15 must
+    skip `cluster_lookup`/use the zero row for a void-member tuple. The amendment-2 fail-closed behavior for
+    non-canonical **non-void** tuples is unchanged.
+  - **D5-3 — resume drives state-dependent construction.** The resumed particles are used from the lattice phase
+    onward; the context's `job.lattice` remains the package lattice. This is why pools/energy/cluster codes/goals
+    match the resumed state.
+  - **D5-4 — tracker index is KMC-only.** MMC has empty/zero tracker index space, matching §10; the lattice's
+    mobile ids still exist internally for the generic arena.
+  - **D5-5 — `nu_max` classification.** A zero/NaN `nu_max` (job cap or active-rule maximum) is
+    `NonFiniteFactor` (exit 13), not a data error, per §11.1.
+  - **D5-6 — opaque state flags and API adjustment.** `state_flags` is exposed as a context field for Step 18
+    (0 fresh, restored on resume) because §12 says it is stored opaquely and Step 14 never interprets it. The
+    state-aware builders (`LatticeState::build`, `ClusterArena::build/build_code`, `ClusterArena::occupation_code`)
+    now take the particle slice; the public `SimulationContext::occupation_code(instance, cell, overrides)`
+    signature is unchanged. The static tracker count is checked against `u32` and fails closed
+    (`LimitExceeded { what: "static trackers" }`) for a supercell whose expanded count cannot be addressed.
+- **No new fixture, format, manifest, or signature change.**
 
 ## Goal
 
@@ -1314,9 +1393,9 @@ row (§7.2). A link that is absent in both directions means the two environments
       `link_id`), the counting pass and caps, the derived bound, and `resolve_node`; retire the Step 13
       `DirectionPool`/`JumpLink` placeholders or adjust them as §8/§9.2 describes. Record the **public Rust API
       break** in the feature log and update the `mocassin-types` container invariant tests in the same feature.
-- [ ] Implement the goals (`total/100`, zero-total error), counters, `K_fix`/`K_auto`/`K_norm`, `nu_max`
+- [x] Implement the goals (`total/100`, zero-total error), counters, `K_fix`/`K_auto`/`K_norm`, `nu_max`
       (exit 13), `dof`, and `dt`.
-- [ ] Implement the resume hook (`ResumeState` with `seed_hash`, parameterized `model_signature`, validation,
+- [x] Implement the resume hook (`ResumeState` with `seed_hash`, parameterized `model_signature`, validation,
       re-derived mobile mapping, `AlreadyCompleted`).
 - [ ] Add the real-writer 10×10×10 acceptance fixture, the **multi-centre cluster fixture** derived from the
       centred sample, the populated-model 10×10×10 clone benchmark, context-summary snapshots, the allocation

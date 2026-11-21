@@ -23,11 +23,12 @@
 //! - Mobile tracker ids are assigned sequentially in ascending absolute-environment order; passive species get
 //!   one (the preserved original quirk).
 
-use mocassin_types::{JobPackage, ParticleId};
+use mocassin_types::{JobPackage, ParticleId, SimulationKind};
 
 use super::CancelProbe;
 use super::dimensions::{Dimensions, EnvId};
 use super::error::ContextError;
+use super::limits::{ContextLimits, MemoryEntry, MemoryPlan};
 
 /// The compiled P1 position is stable.
 pub const STABLE: u8 = 1;
@@ -61,13 +62,14 @@ impl LatticeState {
     pub(crate) fn build(
         job: &JobPackage,
         dimensions: &Dimensions,
+        particles: &[ParticleId],
         cancel: &CancelProbe<'_>,
     ) -> Result<Self, ContextError> {
         let environments = dimensions.environment_count() as usize;
         let positions = dimensions.p() as usize;
         let particle_count = dimensions.pc() as usize;
 
-        let mut particles = Vec::with_capacity(environments);
+        let mut particles_out = Vec::with_capacity(environments);
         let mut flags = vec![0_u8; environments];
         let mut mobile_tracker = vec![NO_MOBILE_TRACKER; environments];
         let mut mobile_count = 0_u32;
@@ -77,7 +79,7 @@ impl LatticeState {
                 cancel.check()?;
             }
 
-            let particle = job.lattice.particles[env];
+            let particle = particles[env];
             if usize::from(particle.get()) >= particle_count {
                 return Err(ContextError::InvalidInput {
                     what: "lattice particle",
@@ -106,11 +108,11 @@ impl LatticeState {
             }
 
             flags[env] = env_flags;
-            particles.push(particle);
+            particles_out.push(particle);
         }
 
         Ok(Self {
-            particles,
+            particles: particles_out,
             flags,
             mobile_tracker,
             mobile_count,
@@ -220,5 +222,156 @@ impl LatticeState {
         }
 
         next == self.mobile_count
+    }
+}
+
+/// The tracker index space of a KMC context.
+///
+/// Values belong to Step 18; this type only allocates and exposes the index space: the inverse mobile mapping
+/// (`mobile_positions[id] = absolute environment`), the static tracker count, and the global tracker count.
+/// MMC has no tracker index space (all zeros/empty).
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub struct TrackerIndex {
+    /// The absolute environment of each mobile tracker id, ascending.
+    pub mobile_positions: Vec<u32>,
+    /// The number of static trackers per supercell cell.
+    pub static_trackers_per_cell: u32,
+    /// `A·B·C · static_trackers_per_cell`.
+    pub static_tracker_count: u32,
+    /// The number of compiled global trackers.
+    pub global_tracker_count: u32,
+}
+
+impl TrackerIndex {
+    /// Builds the index space and records its planned length before allocating the mapping.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ContextError::LimitExceeded`] when the static tracker count overflows `u32`,
+    /// [`ContextError::Invariant`] for an inconsistent mobile id space, and cancellation.
+    pub(crate) fn build(
+        job: &JobPackage,
+        dimensions: &Dimensions,
+        lattice: &LatticeState,
+        plan: &mut MemoryPlan,
+        limits: &ContextLimits,
+        cancel: &CancelProbe<'_>,
+    ) -> Result<Self, ContextError> {
+        if job.kind == SimulationKind::Mmc {
+            plan.set_entries(
+                [MemoryEntry {
+                    what: "trackers.mobile_positions",
+                    elements: 0,
+                    bytes: 0,
+                }],
+                limits,
+            )?;
+            return Ok(Self::default());
+        }
+
+        let mobile_count = lattice.mobile_count();
+        plan.set_entries(
+            [MemoryEntry {
+                what: "trackers.mobile_positions",
+                elements: u64::from(mobile_count),
+                bytes: u64::from(mobile_count) * 4,
+            }],
+            limits,
+        )?;
+
+        let mut mobile_positions = Vec::with_capacity(mobile_count as usize);
+        let mut next = 0_u32;
+        for environment in 0..dimensions.environment_count() as usize {
+            if environment % super::CANCEL_STRIDE == 0 {
+                cancel.check()?;
+            }
+            let env = EnvId::new(environment as u32);
+            let id = lattice.mobile_tracker_id(env);
+            match id {
+                Some(id) => {
+                    if id != next {
+                        return Err(ContextError::Invariant {
+                            what: "mobile tracker id order",
+                        });
+                    }
+                    mobile_positions.push(environment as u32);
+                    next += 1;
+                }
+                None => {
+                    if lattice.flags_at(env) & super::lattice::HAS_MOBILE_TRACKER != 0 {
+                        return Err(ContextError::Invariant {
+                            what: "mobile tracker flag",
+                        });
+                    }
+                }
+            }
+        }
+        if next != mobile_count {
+            return Err(ContextError::Invariant {
+                what: "mobile tracker count",
+            });
+        }
+
+        let static_trackers_per_cell = job.model.structure.static_trackers_per_cell;
+        let static_tracker_count = u64::from(dimensions.cell_count())
+            .checked_mul(u64::from(static_trackers_per_cell))
+            .ok_or(ContextError::LimitExceeded {
+                what: "static trackers",
+                value: u64::MAX,
+                limit: u64::from(u32::MAX),
+            })?;
+        let static_tracker_count =
+            u32::try_from(static_tracker_count).map_err(|_| ContextError::LimitExceeded {
+                what: "static trackers",
+                value: static_tracker_count,
+                limit: u64::from(u32::MAX),
+            })?;
+        let global_tracker_count = job.model.structure.global_tracker_count;
+        if global_tracker_count != job.model.counts.global_tracker_count {
+            return Err(ContextError::InvalidInput {
+                what: "global tracker count",
+                detail: "the structure and model counts disagree".to_owned(),
+            });
+        }
+
+        Ok(Self {
+            mobile_positions,
+            static_trackers_per_cell,
+            static_tracker_count,
+            global_tracker_count,
+        })
+    }
+
+    /// Returns the number of mobile trackers.
+    #[must_use]
+    pub fn mobile_count(&self) -> u32 {
+        self.mobile_positions.len() as u32
+    }
+
+    /// Returns the static tracker id of a non-void particle, or `None` for void/out-of-range.
+    #[must_use]
+    pub fn static_tracker_id(
+        &self,
+        dimensions: &Dimensions,
+        env: EnvId,
+        particle: ParticleId,
+    ) -> Option<u32> {
+        if particle.get() == 0 || usize::from(particle.get()) >= dimensions.pc() as usize {
+            return None;
+        }
+        let cell = dimensions.cell_of(env);
+        let position = dimensions.position_of(env);
+        let id = u64::from(cell) * u64::from(self.static_trackers_per_cell)
+            + u64::from(position) * u64::from(dimensions.pc() - 1)
+            + u64::from(particle.get() - 1);
+        u32::try_from(id)
+            .ok()
+            .filter(|id| *id < self.static_tracker_count)
+    }
+
+    /// Returns the summed allocator capacity of the index array.
+    #[must_use]
+    pub(crate) fn capacity_bytes(&self) -> u64 {
+        self.mobile_positions.capacity() as u64 * 4
     }
 }

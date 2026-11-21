@@ -145,6 +145,7 @@ impl ClusterArena {
         job: &JobPackage,
         dimensions: &Dimensions,
         links: &mut LinkArena,
+        particles: &[ParticleId],
         cancel: &CancelProbe<'_>,
     ) -> Result<Self, ContextError> {
         let positions = dimensions.p() as usize;
@@ -365,8 +366,8 @@ impl ClusterArena {
             let base = instance * cells;
             for cell in 0..dimensions.cell_count() {
                 let raw = build_code(
-                    job,
                     dimensions,
+                    particles,
                     &slot_positions,
                     &slot_cells,
                     instance_data,
@@ -374,7 +375,8 @@ impl ClusterArena {
                     &[],
                 );
                 codes[base + cell as usize] = raw;
-                if has_centre_row(table, raw) {
+                if has_centre_row(table, raw) && !raw_has_void_member(raw, instance_data.slot_count)
+                {
                     code_ids[base + cell as usize] = lookup_table(table, raw, instance_data.table)?;
                 }
             }
@@ -385,15 +387,17 @@ impl ClusterArena {
                 let overrides = [(0_u8, ParticleId::new(*centre))];
                 for cell in 0..dimensions.cell_count() {
                     let raw = build_code(
-                        job,
                         dimensions,
+                        particles,
                         &slot_positions,
                         &slot_cells,
                         instance_data,
                         cell,
                         &overrides,
                     );
-                    let _ = lookup_table(table, raw, instance_data.table)?;
+                    if !raw_has_void_member(raw, instance_data.slot_count) {
+                        let _ = lookup_table(table, raw, instance_data.table)?;
+                    }
                 }
             }
         }
@@ -509,16 +513,16 @@ impl ClusterArena {
     #[must_use]
     pub fn occupation_code(
         &self,
-        job: &JobPackage,
         dimensions: &Dimensions,
+        particles: &[ParticleId],
         instance: u32,
         centre_cell: u32,
         overrides: &[(u8, ParticleId)],
     ) -> Option<u64> {
         let instance_data = self.instance(instance)?;
         Some(build_code(
-            job,
             dimensions,
+            particles,
             &self.slot_positions,
             &self.slot_cells,
             instance_data,
@@ -660,8 +664,8 @@ fn collect_shapes(
 
 /// Builds the raw six-bit occupation code of one instance and centre cell.
 fn build_code(
-    job: &JobPackage,
     dimensions: &Dimensions,
+    particles: &[ParticleId],
     slot_positions: &[u32],
     slot_cells: &[[i32; 3]],
     instance: &ClusterInstance,
@@ -683,7 +687,7 @@ fn build_code(
                     let index = start + usize::from(slot);
                     dimensions.wrapped_env(centre_cell, slot_cells[index], slot_positions[index])
                 };
-                job.lattice.particles[environment.index()]
+                particles[environment.index()]
             });
         code |= u64::from(particle.get()) << (u32::from(slot) * PARTICLE_BITS);
     }
@@ -705,6 +709,14 @@ fn has_centre_row(table: &ClusterTable, raw_code: u64) -> bool {
     table
         .particle_table_mapping
         .contains(&((raw_code & PARTICLE_MASK) as u8))
+}
+
+/// Returns `true` when a member slot is void.
+///
+/// The `.msl` occupation table enumerates only the site's allowed (non-void) particles; a void member has no
+/// cluster row and contributes zero. The centre slot is handled by `particle_table_mapping`.
+pub(crate) fn raw_has_void_member(raw_code: u64, slot_count: u8) -> bool {
+    (1..slot_count).any(|slot| (raw_code >> (u32::from(slot) * PARTICLE_BITS)) & PARTICLE_MASK == 0)
 }
 
 pub(crate) fn lookup_table(

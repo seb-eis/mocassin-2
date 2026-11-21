@@ -388,6 +388,33 @@ fn a_forward_link_may_carry_associations_from_several_instances() {
 }
 
 #[test]
+fn a_void_member_has_no_cluster_row_and_contributes_zero() {
+    let mut job = populated_kmc();
+    let positions = job.lattice.position_count as usize;
+    let cells = job.lattice.particles.len() / positions;
+    for cell in 0..cells {
+        job.lattice.particles[cell * positions + 1] = ParticleId::new(1);
+    }
+    job.lattice.particles[0] = ParticleId::new(0);
+    let job = with_model(job, |model| {
+        model.energy.cluster_tables[0].energies =
+            (0..12).map(|index| (index as f64 + 1.0) * 0.5).collect();
+    });
+    let context = initialize(job);
+
+    assert_eq!((context.cluster_code(0, 0) >> 6) & 0x3F, 0);
+    assert_eq!(context.cluster_code_id(0, 0), None);
+    assert_eq!(context.cluster_energy(0, 0, ParticleId::new(1)), 0.0);
+
+    let code = context.cluster_code(0, 1);
+    let id = context
+        .cluster_lookup(0, code)
+        .expect("the occupied tuple resolves");
+    let expected = (id as f64 + 1.0) * 0.5 * context.ev_to_kt();
+    assert!((context.cluster_energy(0, 1, ParticleId::new(1)) - expected).abs() < 1e-12);
+}
+
+#[test]
 fn hostile_cluster_geometry_fails_closed() {
     expect_geometry_error(
         with_model(populated_kmc(), |model| {

@@ -501,7 +501,7 @@ fn ten_node_job() -> JobPackage {
             electric_field_vm: 0.0,
             electric_field_direction: [1.0, 0.0, 0.0],
             normalization_energy_ev: None,
-            max_attempt_frequency_hz: None,
+            max_attempt_frequency_hz: Some(1.0e13),
             break_tolerance: None,
             break_sample_length_mcsp: None,
             break_sample_interval_mcsp: None,

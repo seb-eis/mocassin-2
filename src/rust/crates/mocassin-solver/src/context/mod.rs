@@ -7,19 +7,20 @@
 //! phased (Step 14 design §1/§5.1) and every phase is validated before the next; a failed phase returns one
 //! [`ContextError`] naming the field and the dense index, and no partial context escapes.
 //!
-//! Step 14 builds the context in six features. Feature 1 provides:
+//! The context owns:
 //!
 //! - the [`Dimensions`]/[`EnvId`] contract and the checked index/wrap helpers;
 //! - [`ContextLimits`], the phase-0 [`MemoryPlan`], and the [`MemoryReport`];
-//! - the [`LatticeState`] particle/flag/mobile-tracker arenas and the zeroed [`Counters`];
-//! - the empty [`LinkArena`], [`ClusterArena`], [`SelectionPools`], and [`JumpRuntime`] containers that features
-//!   2–4 fill;
+//! - the [`LatticeState`] particle/flag/mobile-tracker arenas;
+//! - the owner-major [`LinkArena`] and its inverse index, the [`ClusterArena`] codes/energies, the
+//!   [`EnergyRuntime`] site/vector tables and initial total, the [`SelectionPools`], and the [`JumpRuntime`];
+//! - the [`Counters`], [`TrackerIndex`], [`Goals`], [`Normalization`], RNG stream, time, and resume origin;
 //! - the phase pipeline, cancellation, the exit-code mapping, and the invariant sweep;
 //! - the `Send`/`!Sync` guarantee: the context is movable across threads but is deliberately not shareable,
 //!   because one trajectory is single-threaded.
 //!
-//! Features 2–5 add the links/clusters, energy vectors, pools/jump status, and goals/normalization/resume. They
-//! extend this struct and the plan; they do not change the dimension, error, phase, or memory-report contract.
+//! Step 14's features 1–5 implement the runtime; feature 6 adds fixtures, benchmarks, documentation, and
+//! closeout without adding runtime fields.
 //!
 //! ```compile_fail
 //! // A context must not be shared: one trajectory is single-threaded.
@@ -37,6 +38,7 @@ use core::marker::PhantomData;
 use core::mem::size_of;
 use core::sync::atomic::{AtomicBool, Ordering};
 
+use mocassin_rng::Rng;
 use mocassin_types::{ClusterTable, JobPackage, SimulationKind};
 
 mod clusters;
@@ -49,18 +51,22 @@ mod lattice;
 mod limits;
 mod links;
 mod pools;
+mod resume;
 
 pub use clusters::{ClusterArena, ClusterInstance, MAX_CLUSTER_SLOTS, NO_CLUSTER_CODE};
 pub use dimensions::{Dimensions, EnvId};
 pub use energy::{EnergyRuntime, FIELD_SCALE_PER_VM, K_B_EV};
 pub use error::ContextError;
-pub use goals::{Counters, ParticleCounters};
+pub use goals::{Counters, Goals, Normalization, NormalizationState, ParticleCounters};
 pub use jumps::JumpRuntime;
-pub use lattice::{HAS_MOBILE_TRACKER, LatticeState, MOBILE, NO_MOBILE_TRACKER, STABLE};
+pub use lattice::{
+    HAS_MOBILE_TRACKER, LatticeState, MOBILE, NO_MOBILE_TRACKER, STABLE, TrackerIndex,
+};
 pub use limits::{ContextLimits, MemoryEntry, MemoryPlan, MemoryReport};
 pub use links::{ClusterAssoc, IncomingLink, Link, LinkArena};
 pub use mocassin_types::{ParticleId, PositionId};
 pub use pools::{NO_SLOT, PoolMember, SelectionPool, SelectionPools};
+pub use resume::{ResumePhase, ResumeState};
 
 /// The cancellation check stride: initialization tests the caller's flag every 4096 environments.
 pub(crate) const CANCEL_STRIDE: usize = 4096;
@@ -93,9 +99,9 @@ pub enum InitPhase {
     Pools = 8,
     /// Phase 9: build the receiver-major KMC jump status (feature 4).
     JumpStatus = 9,
-    /// Phase 10: counters, goals, normalization, `nu_max`, and `dt` (feature 5).
+    /// Phase 10: tracker index, counters, goals, normalization, `nu_max`, and `dt`.
     GoalsAndCounters = 10,
-    /// Phase 11: RNG from the effective seed and the fresh/restored time (feature 5).
+    /// Phase 11: RNG from the effective seed and the fresh/restored time.
     RngAndTime = 11,
     /// Phase 12: invariant sweep before publishing the context.
     InvariantSweep = 12,
@@ -155,8 +161,17 @@ pub enum InitOutcome {
     },
 }
 
+/// Whether a context was built fresh or restored from a resume document.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum ContextOrigin {
+    /// A fresh context from the job's initial lattice.
+    Fresh,
+    /// A context restored from a validated resume state.
+    Resumed,
+}
+
 /// The options of one context initialization.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct ContextOptions {
     /// The overridable library limits and the memory-plan caps.
     pub limits: ContextLimits,
@@ -164,6 +179,8 @@ pub struct ContextOptions {
     pub build_jump_status: bool,
     /// Apply the job's selection optimizers after pool construction. Defaults to true.
     pub apply_optimizers: bool,
+    /// The optional resume state from Step 18/19; `None` builds a fresh context.
+    pub resume: Option<ResumeState>,
 }
 
 impl Default for ContextOptions {
@@ -172,6 +189,7 @@ impl Default for ContextOptions {
             limits: ContextLimits::default(),
             build_jump_status: true,
             apply_optimizers: true,
+            resume: None,
         }
     }
 }
@@ -184,6 +202,8 @@ impl Default for ContextOptions {
 #[derive(Debug)]
 pub struct SimulationContext {
     /// The validated job this context was built from; owns the shared `Arc<ParameterizedModel>`.
+    ///
+    /// Its `lattice` is the package's initial lattice; the live state after a resume is `self.lattice`.
     pub job: JobPackage,
     /// The job kind.
     pub kind: SimulationKind,
@@ -203,8 +223,22 @@ pub struct SimulationContext {
     pub pools: SelectionPools,
     /// The KMC jump status (empty until feature 4).
     pub jumps: JumpRuntime,
-    /// The zeroed counters (feature 5 adds the goal/normalization arithmetic).
+    /// The per-particle counters (zeroed fresh, restored on resume).
     pub counters: Counters,
+    /// The tracker index space and mobile-position mapping.
+    pub trackers: TrackerIndex,
+    /// The KMC goals and block size (zeroed for MMC).
+    pub goals: Goals,
+    /// The normalization factors, `nu_max`, `dof`, and `dt`.
+    pub normalization: Normalization,
+    /// The ChaCha12 stream (fresh seed or restored state).
+    pub rng: Rng,
+    /// The simulated time in seconds; 0 fresh and for MMC.
+    pub time_s: f64,
+    /// Fresh or resumed.
+    pub origin: ContextOrigin,
+    /// The opaque solver state flags (0 fresh).
+    pub state_flags: u64,
     /// The limits the context was admitted against.
     pub limits: ContextLimits,
     /// The admitting plan, retained so [`SimulationContext::memory_report`] is the plan by construction.
@@ -249,6 +283,43 @@ impl SimulationContext {
         self.lattice.set_particle(env, particle);
     }
 
+    /// Returns the mobile-position mapping (`mobile_positions[id] = environment`).
+    #[must_use]
+    pub fn mobile_positions(&self) -> &[u32] {
+        &self.trackers.mobile_positions
+    }
+
+    /// Returns the static tracker mapping `[position][particle] -> offset` (`-1` = none).
+    #[must_use]
+    pub fn static_tracker_mapping(&self) -> &[i32] {
+        &self.job.model.transitions.static_tracker_mapping
+    }
+
+    /// Returns the global tracker mapping `[collection][particle] -> index` (`-1` = none).
+    #[must_use]
+    pub fn global_tracker_mapping(&self) -> &[i32] {
+        &self.job.model.transitions.global_tracker_mapping
+    }
+
+    /// Returns the static tracker id of a non-void environment particle.
+    #[must_use]
+    pub fn static_tracker_id(&self, env: EnvId, particle: ParticleId) -> Option<u32> {
+        self.trackers
+            .static_tracker_id(&self.dimensions, env, particle)
+    }
+
+    /// Returns the simulated time in seconds (0 fresh and for MMC).
+    #[must_use]
+    pub const fn time_s(&self) -> f64 {
+        self.time_s
+    }
+
+    /// Returns the time step per jump attempt in seconds (0 for MMC).
+    #[must_use]
+    pub const fn dt(&self) -> f64 {
+        self.normalization.dt
+    }
+
     /// Returns the memory report of this context.
     ///
     /// The report mirrors the admitting plan (planned lengths and bytes); `capacity_bytes` is the allocator
@@ -268,6 +339,7 @@ impl SimulationContext {
             + self.energy.vectors.capacity() as u64 * size_of::<f64>() as u64
             + self.pools.capacity_bytes()
             + self.jumps.capacity_bytes()
+            + self.trackers.capacity_bytes()
             + particles
             + 2 * size_of::<u64>() as u64
     }
@@ -336,6 +408,55 @@ impl SimulationContext {
         self.check_planned_length("pools.pool_of", self.pools.pool_of.len())?;
         self.check_planned_length("jumps.offsets", self.jumps.offsets.len())?;
         self.check_planned_length("jumps.links", self.jumps.links.len())?;
+        self.check_planned_length(
+            "trackers.mobile_positions",
+            self.trackers.mobile_positions.len(),
+        )?;
+
+        if self.job.kind == SimulationKind::Kmc {
+            if self.trackers.mobile_positions.len() != self.lattice.mobile_count() as usize {
+                return Err(ContextError::Invariant {
+                    what: "mobile position count",
+                });
+            }
+            for (index, environment) in self.trackers.mobile_positions.iter().enumerate() {
+                let env = EnvId::new(*environment);
+                if self.lattice.mobile_tracker_id(env) != Some(index as u32) {
+                    return Err(ContextError::Invariant {
+                        what: "mobile position mapping",
+                    });
+                }
+            }
+            let expected_goals = Goals::for_job(&self.job, self.lattice.mobile_count())
+                .map_err(|_| ContextError::Invariant { what: "goals" })?;
+            if expected_goals != self.goals {
+                return Err(ContextError::Invariant { what: "goals" });
+            }
+            if !self.normalization.k_norm.is_finite()
+                || self.normalization.k_norm <= 0.0
+                || !self.normalization.nu_max.is_finite()
+                || self.normalization.nu_max <= 0.0
+                || !self.normalization.dt.is_finite()
+                || self.normalization.dt <= 0.0
+            {
+                return Err(ContextError::Invariant {
+                    what: "normalization",
+                });
+            }
+        } else if !self.trackers.mobile_positions.is_empty()
+            || self.goals != Goals::zeroed()
+            || self.normalization.dt != 0.0
+            || self.time_s != 0.0
+        {
+            return Err(ContextError::Invariant {
+                what: "MMC runtime state",
+            });
+        }
+        if !self.time_s.is_finite() || self.time_s < 0.0 {
+            return Err(ContextError::Invariant {
+                what: "simulated time",
+            });
+        }
 
         let planned_members = self
             .plan
@@ -671,8 +792,8 @@ impl SimulationContext {
     ) -> u64 {
         self.clusters
             .occupation_code(
-                &self.job,
                 &self.dimensions,
+                self.lattice.particles(),
                 instance,
                 centre_cell,
                 overrides,
@@ -841,6 +962,28 @@ pub(crate) fn initialize_with(
     observer.observe(InitPhase::ValidateInputs);
     let dimensions = Dimensions::from_job(&job)?;
     validate_inputs(&job, &dimensions)?;
+    if let Some(resume) = &options.resume {
+        resume::validate(&job, &dimensions, resume)?;
+        if resume.phase == ResumePhase::Completed {
+            let mobile_count = resume::mobile_count(&resume.particles);
+            let goals = Goals::for_job(&job, mobile_count)?;
+            tracing::info!(
+                phase = InitPhase::ValidateInputs.as_str(),
+                result = "already completed",
+                "context phase completed"
+            );
+            return Ok(InitOutcome::AlreadyCompleted {
+                mcs: resume.mcs,
+                total_goal: goals.total,
+            });
+        }
+    }
+    let particles: &[ParticleId] = options
+        .resume
+        .as_ref()
+        .map_or(job.lattice.particles.as_slice(), |resume| {
+            resume.particles.as_slice()
+        });
     tracing::info!(
         phase = InitPhase::ValidateInputs.as_str(),
         environments = dimensions.environment_count(),
@@ -850,12 +993,15 @@ pub(crate) fn initialize_with(
 
     probe.check()?;
     observer.observe(InitPhase::Lattice);
-    let lattice = LatticeState::build(&job, &dimensions, &probe)?;
+    let lattice = LatticeState::build(&job, &dimensions, particles, &probe)?;
     tracing::info!(
         phase = InitPhase::Lattice.as_str(),
         mobile = lattice.mobile_count(),
         "context phase completed"
     );
+    if job.kind == SimulationKind::Kmc && lattice.mobile_count() == 0 {
+        return Err(ContextError::NoMobileParticles);
+    }
 
     probe.check()?;
     observer.observe(InitPhase::Links);
@@ -869,7 +1015,7 @@ pub(crate) fn initialize_with(
 
     probe.check()?;
     observer.observe(InitPhase::Clusters);
-    let mut clusters = ClusterArena::build(&job, &dimensions, &mut links, &probe)?;
+    let mut clusters = ClusterArena::build(&job, &dimensions, &mut links, particles, &probe)?;
     tracing::info!(
         phase = InitPhase::Clusters.as_str(),
         instances = clusters.instances.len(),
@@ -955,8 +1101,79 @@ pub(crate) fn initialize_with(
         "context phase completed"
     );
 
+    probe.check()?;
+    observer.observe(InitPhase::GoalsAndCounters);
+    let trackers = TrackerIndex::build(
+        &job,
+        &dimensions,
+        &lattice,
+        &mut plan,
+        &options.limits,
+        &probe,
+    )?;
+    let goals = Goals::for_job(&job, lattice.mobile_count())?;
+    let counters = match &options.resume {
+        Some(resume) => Counters {
+            per_particle: resume.counters.clone(),
+            cycles: resume.cycles,
+            mcs: resume.mcs,
+        },
+        None => Counters::zeroed(dimensions.pc()),
+    };
+    if let Some(stored) = options
+        .resume
+        .as_ref()
+        .and_then(|resume| resume.mobile_positions.as_ref())
+        && *stored != trackers.mobile_positions
+    {
+        return Err(ContextError::ResumeMismatch {
+            what: "mobile mapping",
+        });
+    }
+    let normalization = match (&options.resume, job.kind) {
+        (Some(resume), SimulationKind::Kmc) => {
+            Normalization::resumed(&job, pools.selectable_jump_count, &resume.normalization)?
+        }
+        (_, SimulationKind::Kmc) => {
+            Normalization::fresh(&job, energy.kt_ev, pools.selectable_jump_count)?
+        }
+        (_, SimulationKind::Mmc) => {
+            Normalization::fresh(&job, energy.kt_ev, pools.selectable_jump_count)?
+        }
+    };
+    tracing::info!(
+        phase = InitPhase::GoalsAndCounters.as_str(),
+        mobile = lattice.mobile_count(),
+        total = goals.total,
+        dt = normalization.dt,
+        "context phase completed"
+    );
+
+    probe.check()?;
+    observer.observe(InitPhase::RngAndTime);
+    let (rng, time_s, origin) = match &options.resume {
+        Some(resume) => (
+            Rng::from_state(&resume.rng_state).map_err(ContextError::RngState)?,
+            if job.kind == SimulationKind::Mmc {
+                0.0
+            } else {
+                resume.simulated_time_s
+            },
+            ContextOrigin::Resumed,
+        ),
+        None => (Rng::from_seed(job.seed), 0.0, ContextOrigin::Fresh),
+    };
+    let state_flags = options
+        .resume
+        .as_ref()
+        .map_or(0, |resume| resume.state_flags);
+    tracing::info!(
+        phase = InitPhase::RngAndTime.as_str(),
+        time_s = time_s,
+        "context phase completed"
+    );
+
     let kind = job.kind;
-    let counters = Counters::zeroed(dimensions.pc());
     let context = SimulationContext {
         job,
         kind,
@@ -969,6 +1186,13 @@ pub(crate) fn initialize_with(
         pools,
         jumps,
         counters,
+        trackers,
+        goals,
+        normalization,
+        rng,
+        time_s,
+        origin,
+        state_flags,
         limits: options.limits,
         plan,
         _not_sync: PhantomData,
@@ -1226,6 +1450,8 @@ mod tests {
                 InitPhase::InitialEnergy,
                 InitPhase::Pools,
                 InitPhase::JumpStatus,
+                InitPhase::GoalsAndCounters,
+                InitPhase::RngAndTime,
                 InitPhase::InvariantSweep,
             ]
         );
