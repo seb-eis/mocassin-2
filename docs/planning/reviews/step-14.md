@@ -15,10 +15,10 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `87be9dee6816aac4cc18c42de21b441f13827c88` (round 3 freeze: design corrections after round 2) |
-| Previous reviewed commits | `b6dc50361e749954480efa1d1559d987c10b4142` (round 2), `7c7ff0de83a4ae4c5f9849650e0601c7238494b8` (round 1) |
+| Reviewed commit | `a430d64c23d5c076da160b28f2d04cee29a5e512` (round 4 freeze: design corrections after round 3, merged with `main` `63cdd06`) |
+| Previous reviewed commits | `87be9dee6816aac4cc18c42de21b441f13827c88` (round 3), `b6dc50361e749954480efa1d1559d987c10b4142` (round 2), `7c7ff0de83a4ae4c5f9849650e0601c7238494b8` (round 1) |
 | Docs branch | `docs/step-14-design` (from `main` = `bbc2d083ed96fa6e26526e335304107b20a7fdcb`, `step-13` merged and tagged) |
-| Review date | 2026-11-20 (round 1); rounds 2 and 3 requested 2026-11-21 |
+| Review date | 2026-11-20 (round 1); rounds 2, 3, and 4 requested 2026-11-21 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
 
 Step page: [`Step 14 — Simulation Context Initialization`](../steps/step-14-simulation-context-initialization.md)
@@ -35,7 +35,15 @@ cluster runtime is one instance per slot-0 link with per-instance member-site ge
 reconciled (no `AttemptFrequencyModulus`, `total/100`, no lattice-signature check), the `KmcEngine`/`EnergyEngine`
 borrow composition is fixed, `nu_max` is exit 13, link-image arithmetic is `i64`, pool capacity is reserved, and
 the `plan == report`, original-storage, `linked(a,b)`, `MOBILE`, phase-count, and `pool_of` notes are resolved.
-No code, test, configuration, contract artifact, or generated file is part of any freeze.
+The round-4 freeze (`a430d64`, merged with `main` `63cdd06`) applies the F-29…F-38 resolutions: the cluster code
+resolution now consumes the approved `step-11-amend-2` contract (`ClusterTable::lookup`,
+`Canonical`/`MissingFromMap`/`ExpansionMapAbsent`), `ClusterAssoc` names the instance, the memory plan is itemised
+(16-byte `ClusterInstance`, `energy_start`, link headers, pool headers), `MemoryReport` compares planned lengths,
+the cluster total is instance × cell, the capacity assertion allows over-allocation, OD-1 distinguishes the
+accepted rotated multi-centre image from a rejected cross-image, the multi-centre fixture has full provenance and
+the two-member case is the amendment-2 ceria fixture, goal arithmetic is checked, and D-11 states the
+full-space-group/complete-tuple soundness argument. No code, test, configuration, contract artifact, or generated
+file is part of any freeze.
 
 **No code exists yet.** Step 14 has no branch and no implementation. The design is judged on whether the runtime
 layout, the cross-step interfaces, the two gated decisions, the fixtures, the test/budget plan, and the
@@ -53,7 +61,7 @@ documentation plan are ready to implement.
 | Field | Value |
 | --- | --- |
 | Phase | D. Solver |
-| Depends on | 13 (`Done`; merged into `main` as `2613a0dcbc3ddbfe4bb5b54f47821d3ffa951789`, tagged `step-13`, accepted 2026-11-20) |
+| Depends on | 13 (`Done`; merged into `main` as `2613a0dcbc3ddbfe4bb5b54f47821d3ffa951789`, tagged `step-13`, accepted 2026-11-20) and `step-11.1` (the `step-11-amend-2` cluster-code lookup; contract approved and merged `2f3a6fe`, design freeze `bf273ff`, implementation in progress). The Step 14 start gate follows the `step-11.1` merge |
 | Delivers | A deterministic, allocation-bounded simulation context built once per job from the validated `JobPackage`: lattice/environment arenas, a translation-compact per-P1 neighbour-link CSR, the cluster instance/code/energy runtime, site+pair environment energy vectors and per-centre cluster energy, the exact initial lattice energy, KMC selection pools, per-`(P1, direction)` jump status, the tracker index space, counters, goals, normalization, the time step, and the resume hook. No energy engine, KMC/MMC loop, trackers, or `.mcs` output. |
 | Sizing | Complexity class **High** (cross-step interfaces, behavioural irreversibility, test-matrix breadth). **No split proposed**; owner acceptance as one High unit is requested at the start gate under [`04-roadmap.md` §3.1](../04-roadmap.md#31-step-sizing-and-split-triggers). Six features. API frozen at feature 3; a forced API rework is a stop-and-report re-review trigger. |
 
@@ -77,6 +85,12 @@ documentation plan are ready to implement.
 - [x] **Cluster table layout correction.** One energy per occupation code with slot 0 = centre particle;
       `particle_table_mapping` as the ascending allowed-centre list, not a `[u8; 64]` row map; the Step 15
       `[center_row][code]` wording replaced.
+- [x] **Cluster code resolution (F-29, `step-11-amend-2`).** The writer emits the optional per-table
+      `code_expansions` map (`expanded_codes`, `canonical_indices`); Step 14 resolves the raw slot tuple with
+      `ClusterTable::lookup` and maps `Canonical`/`MissingFromMap`/`ExpansionMapAbsent` to the canonical id, a
+      corrupt-package error, and the distinct recompile-required error. No solver-side symmetry, tuple sorting,
+      minimum, or direct `occupation_codes` fallback. The contract is approved and implemented by `step-11.1`;
+      the amendment-2 two-member fixture and the pre-map fixture are the evidence.
 - [x] **Energy runtime and initial lattice energy (OD-2).** eV→kT once; the site table separate from the
       site+pair vector; per-instance cluster energy; the exact total (site once, pair ×0.5, cluster once at the
       centre); the documented deviation from the original's uniform 0.5 and its hand-computed test.
@@ -123,14 +137,19 @@ documentation plan are ready to implement.
 
 ## Known limitations and gated decisions
 
-- **OD-1 (accepted 2026-11-20; extended 2026-11-21 for F-17).** The v1 cluster link does not persist the
-  member's relative cell offset and the payload has no fractional P1 coordinates. A cluster table can have one
-  slot-0 link per P1 position of its centre site, so Step 14 runs one instance per slot-0 link; a slot resolves
-  through the candidate position's unique link or, for a multi-centre table only, the member site's unique
-  image. An absent/ambiguous image, and a writer-valid cross-image cluster, are rejected with exit 12. The
+- **OD-1 (accepted 2026-11-20; extended 2026-11-21 for F-17, clarified for F-35).** The v1 cluster link does
+  not persist the member's relative cell offset and the payload has no fractional P1 coordinates. A cluster
+  table can have one slot-0 link per P1 position of its centre site, so Step 14 runs one instance per slot-0
+  link; a slot resolves through the candidate position's unique link or, **for a multi-centre table only**, the
+  member site's unique image. The member-site image is the **accepted space-group transport** of the
+  representative placement (the energy table enumerates every allowed tuple and the applied energy is
+  full-space-group invariant), so it is **not** a cross-image. The accepted residual risk is the single-centre
+  unique image when the authoring/compiler could have meant another periodic image. **Rejected with exit 12:** a
+  cross-image member (no unique candidate link for a single-centre table), a member site with several images
+  from one centre, two slots resolving to the same link/site, and an unresolved multi-centre placement. The
   permanent fix is a future `.msl` payload field (per-centre member offset) and needs its own decision,
   amendment, fixtures, and version handling. Recorded in the step page §6.4, the data contract §3.3, and
-  `05-open-decisions.md` §2.
+  `05-open-decisions.md` §2. The cluster **code** case is resolved separately by `step-11-amend-2`.
 - **OD-2 (accepted 2026-11-20).** The original applies its uniform 0.5 factor to the site and cluster
   contributions as well as to pairs. Step 14 initializes the exact total (site once, pair ×0.5, cluster once at
   the centre), consistent with `physics/energies.md`, and Step 15 continues with that decomposition. The
@@ -282,10 +301,10 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required — round 3 at record `e0c4700` (frozen design `87be9de`) closes F-17 in substance
-and F-18–F-28 as recorded below, but F-23 remains partially closed (F-32) and the round adds **F-29 (Major,
-canonical cluster-code lookup)**, F-30–F-33 (Minor), and F-34–F-38 (Notes). The reviewer-authored round-1/2/3
-findings, evidence, and verdicts remain unchanged as history.
+**State:** Re-review required — round 4 request at `a430d64`. Round 3 accepted the round-2 corrections and raised
+**F-29 (Major, cluster-code lookup)** plus F-30–F-38; the round-4 freeze consumes the approved
+`step-11-amend-2` contract and addresses all of them. The request owner sets this state; the reviewer-authored
+round-1/2/3 findings, evidence, and verdicts remain unchanged as history.
 
 ## Reviewer independence
 
@@ -306,20 +325,20 @@ Follow-up step: Step 14 — re-freeze the corrected design and append a fresh re
 
 The request owner (step agent or planner) completes this section before the orchestrator presents the approval
 request. It must cover the full history, not only the latest round. This section is prepared for the Step 14
-start gate; it is not a merge/tag/waiver request and makes no claim about round 3.
+start gate; it is not a merge/tag/waiver request and makes no claim about round 4.
 
 - [x] Requested decision and frozen commit recorded — re-review of the corrected design at
-      `87be9dee6816aac4cc18c42de21b441f13827c88`; the start gate remains the owner's decision
-- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict) — rounds 1 and 2 recorded;
-      round 3 is pending a fresh reviewer and is listed as pending, not omitted
+      `a430d64c23d5c076da160b28f2d04cee29a5e512`; the start gate remains the owner's decision
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict) — rounds 1–3 recorded; round 4
+      is pending a fresh reviewer and is listed as pending, not omitted
 - [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status) — the reviewer's
-      tables above and the resolutions below cover F-1…F-28
+      tables above and the resolutions below cover F-1…F-38
 - [x] Accepted notes and waivers recorded with rationale — OD-1 and OD-2 accepted 2026-11-20; OD-1 extended for
-      F-17 on 2026-11-21 (see below)
+      F-17/F-35 on 2026-11-21; F-29 resolved by the approved `step-11-amend-2` (accepted 2026-11-21)
 - [ ] Residual risks, deferred items, and follow-up owners recorded — the step page §21/§23 and OD-1 carry them;
       the final list is completed at the start gate
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — pending round 3
-- [ ] Final CI and documentation-build results recorded — round-3 `docs`/`policy` results are recorded in the
+- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived — pending round 4
+- [ ] Final CI and documentation-build results recorded — round-4 `docs`/`policy` results are recorded in the
       resolution section; the closeout CI belongs to the step, not this gate
 
 Round history:
@@ -328,7 +347,8 @@ Round history:
 | --- | --- | --- | --- | --- |
 | 1 | 2026-11-20 | `7c7ff0d` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
 | 2 | 2026-11-21 | `b6dc503` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
-| 3 | pending | `87be9de` | pending fresh planning auditor | pending |
+| 3 | 2026-11-21 | `87be9de` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
+| 4 | pending | `a430d64` | pending fresh planning auditor | pending |
 
 Findings and resolutions:
 
@@ -362,6 +382,16 @@ Findings and resolutions:
 | F-26 | Note | `MOBILE` static/passive assumption unconfirmed | Assumption stated (every non-void environment is `MOBILE`), test added, Step 29 parity owner | `87be9de` | Addressed |
 | F-27 | Note | "twelve-phase" vs 13 phases | Request summary and page use the thirteen-step build order (phase 0 plus twelve) | `87be9de` | Addressed |
 | F-28 | Note | `pool_of` comment typo | Comment says `key = P*pc + particle (P1 position)` | `87be9de` | Addressed |
+| F-29 | Major | Direct `occupation_codes` indexing cannot resolve a non-canonical raw tuple of a symmetry-reduced table | Consume the approved `step-11-amend-2` contract: `ClusterTable::lookup` → `Canonical`/`MissingFromMap`/`ExpansionMapAbsent`; canonical id stored; distinct recompile-required error; no solver-side symmetry; amendment-2 two-member + pre-map fixtures; step-11.1 dependency/fallback recorded | `a430d64` | Addressed |
+| F-30 | Minor | `ClusterAssoc` carried `cluster_table` | `ClusterAssoc { instance: u32, slot: u8 }`, same 8 bytes; §6.1/§6.2/§9.3/Step 15 aligned | `a430d64` | Addressed |
+| F-31 | Minor | Memory plan undercounted `ClusterInstance` and omitted arrays | `K*16`, `energy_start` prefix, link header arrays, pool headers, counters/mobile formulas itemised | `a430d64` | Addressed |
+| F-32 | Minor | §17 still required equality with actual capacities | Planned lengths, `plan == report`; capacity diagnostic `>=` | `a430d64` | Addressed |
+| F-33 | Minor | Initial-energy formula lost the cell dimension | Instance × cell cluster sum; multi-cell hand-computed test; Step 15 and `physics/energies.md` aligned | `a430d64` | Addressed |
+| F-34 | Note | Pool capacity assertion could fire spuriously | Debug assertion `capacity() >= planned_capacity`, report compares the planned count | `a430d64` | Addressed |
+| F-35 | Note | OD-1 summaries did not distinguish accepted rotated image from rejected cross-image | §6.4/OD-1/request summary state the accepted space-group transport and the rejected cases distinctly | `a430d64` | Addressed |
+| F-36 | Note | Multi-centre fixture provenance under-specified; one-member geometry | Committed sample path, full artifact set, README provenance, .NET rebuild test, regeneration, rationale; two-member case = amendment-2 ceria fixture | `a430d64` | Addressed |
+| F-37 | Note | Goal arithmetic on untrusted settings not stated as checked | Checked `u64` products/sum/round-up; `goal overflow` exit 12; test | `a430d64` | Addressed |
+| F-38 | Note | D-11 stabilizer rationale imprecise | Full-space-group invariance + complete tuple product + expansion map; synthetic non-zero energy evidence | `a430d64` | Addressed |
 
 Accepted notes and waivers:
 
@@ -371,7 +401,12 @@ Accepted notes and waivers:
   named writer follow-up. No payload revision now.
 - **OD-2 accepted (2026-11-20, owner):** the exact accounting (site once, pair ×0.5, cluster once at the centre)
   stands; AGENTS §10 and `physics/energies.md` agree; Step 29 parity covers the deviation.
-- Both acceptances are recorded in `05-open-decisions.md` §2 and in the step page §§6.4 and 7.4.
+- **F-29 resolved by an approved amendment (2026-11-21, owner):** `step-11-amend-2` adds the optional per-table
+  `code_expansions` map with the `Σ(8E+4I)` reader budget and the `ClusterTable::lookup`/`ClusterCodeLookup`
+  contract, with no signature/version change. Step 14 consumes it; `MissingFromMap` and `ExpansionMapAbsent`
+  are distinct exit-12 errors. Implementation is `step-11.1`; F-29's formal closure is a Step 14 gate.
+- Both OD acceptances are recorded in `05-open-decisions.md` §2 and in the step page §§6.4 and 7.4; the F-29
+  decision is recorded in the same table and in the amendment page.
 
 ## Human approval
 
@@ -415,6 +450,16 @@ Date:
 | F-26 | Resolved | Planner | Step 14 §3 states the assumption and the test; §19 adds the mobile-assumption row; Step 29 parity owner | `87be9de` |
 | F-27 | Resolved | Planner | Request summary says thirteen-step (phase 0 plus twelve); the page's phase list stays 0–12 | `87be9de` |
 | F-28 | Resolved | Planner | Step 14 §8 code-block comment fixed to `P*pc + particle (P1 position)` | `87be9de` |
+| F-29 | Resolved | Planner | Step 14 §6.3/§13/§17/§19/§22: `ClusterTable::lookup` consumption, `Canonical` id, `MissingOccupationCode` vs `ExpansionMapAbsent`, no symmetry/fallback, `cluster_lookup` interface, amendment-2 fixtures, step-11.1 dependency and no-fallback rule; Step 15/`solver-architecture`/quality strategy/data contract aligned | `a430d64` |
+| F-30 | Resolved | Planner | Step 14 §6.1: `ClusterAssoc { instance, slot }`; the text says the owner is the instance centre | `a430d64` |
+| F-31 | Resolved | Planner | Step 14 §2: `K*16` instances, `energy_start` `(K+1)*4`, `owner_offsets`/`inverse_offsets` `(P+1)*4` each, pool headers, counters/mobile formulas; §6.3 struct updated | `a430d64` |
+| F-32 | Resolved | Planner | Step 14 §17: planned-length equality and capacity diagnostic (with §2) | `a430d64` |
+| F-33 | Resolved | Planner | Step 14 §7.4/§17/§19: instance × cell sum and multi-cell hand-computed test; Step 15 §5 and `physics/energies.md` | `a430d64` |
+| F-34 | Resolved | Planner | Step 14 §8: `>=` assertion and planned-count comparison | `a430d64` |
+| F-35 | Resolved | Planner | Step 14 §6.4/§21, request summary, and `05-open-decisions.md` OD-1 distinguish the accepted rotated multi-centre image from the rejected cross-image | `a430d64` |
+| F-36 | Resolved | Planner | Step 14 §6.4/§19: committed sample `samples/step-14-multi-centre-cluster/`, artifact set, README provenance, .NET rebuild/regeneration, rationale, two-member case = `step-11-amend-2` | `a430d64` |
+| F-37 | Resolved | Planner | Step 14 §10/§17/§19: checked goal arithmetic and the overflow error/test | `a430d64` |
+| F-38 | Resolved | Planner | Step 14 §6.4/D-11, `physics/energies.md`: full-group invariance + complete tuple product + expansion map; synthetic non-zero energy evidence | `a430d64` |
 
 **Major redesign summary.**
 
@@ -434,6 +479,13 @@ Date:
   `(P*D+1)` jump offsets (with `max_status_count`), the counted jump links (`max_jump_links`), the inverse link
   index, the pool slot map, and the cluster geometry. Per-array caps plus `max_context_bytes` (1 GiB) reject
   with `LimitExceeded` (exit 12); `MemoryReport` must equal the plan.
+- **F-29 (cluster codes).** The writer emits one canonical code per symmetry-reduced orbit plus the optional
+  `code_expansions` map. The context builds the raw slot tuple and calls `ClusterTable::lookup`: `Canonical(index)`
+  stores the id, `MissingFromMap` is a corrupt-package error, `ExpansionMapAbsent` is the distinct
+  recompile-required error; there is no solver-side symmetry, sorting, minimum, or direct-index fallback. The
+  two-member amendment-2 ceria fixture resolves all eight assignments (including the two non-canonical tuples)
+  and the pre-map fixture exercises the absent-map error; the reader expansion budget bounds a hostile map. The
+  contract is approved/merged and implemented by `step-11.1`, which is a Step 14 start-gate dependency.
 - **F-17 (cluster instances).** `ClusterCompilationStage` adds slot `0` to every P1 position of the centre site,
   so the runtime now has one `ClusterInstance` per **slot-0 link**: `K` is that link count, `codes`/`code_ids`/
   `energy` are `K*C`/`K*C`/`C*Σ mapping_len`, and the geometry is a flat CSR (`slot_start`, `slot_positions`,
