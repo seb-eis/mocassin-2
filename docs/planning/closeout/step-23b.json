@@ -1,0 +1,25 @@
+{
+  "step": "step-23b",
+  "audit_commit": "eb120e17ce43a152c8905fc1f54528b69448b3e3",
+  "closeout_ci": {
+    "run_id": "44929014836",
+    "head_sha": "eb120e17ce43a152c8905fc1f54528b69448b3e3"
+  },
+  "main_sha_at_freeze": "3a2048150488e6b14f3cc4f3da59aa44bae93908",
+  "merge_candidate": "eb120e17ce43a152c8905fc1f54528b69448b3e3",
+  "merge_tree_ci": {
+    "run_id": "",
+    "head_sha": ""
+  },
+  "platform_ci": "windows run 44929276522 at eb120e17ce43a152c8905fc1f54528b69448b3e3 (green, https://github.com/seb-eis/mocassin-2/actions/runs/44929276522); macos run 44929582584 at eb120e17ce43a152c8905fc1f54528b69448b3e3 (green, https://github.com/seb-eis/mocassin-2/actions/runs/44929582584)",
+  "tag": "step-23b",
+  "notes": [
+    "Ubuntu closeout CI run 44929014836 is the workflow_dispatch at audited commit eb120e17ce43a152c8905fc1f54528b69448b3e3 (platforms=ubuntu, force_all=false). It is green: Detect changes, .NET (ubuntu-latest), Contracts and policy, Public API compatibility, Rust, and Python all succeeded.",
+    "Windows platform gate run 44929276522 and macOS platform gate run 44929582584 were dispatched at the same commit after the Ubuntu run and are green. Both run the focused platform job: Release build of Mocassin.slnx plus Mocassin.Packages.Tests, Mocassin.Results.Tests, Mocassin.Cli.Tests, and Mocassin.App.Tests (Avalonia headless workspace, including the 23B recovery/autosave/close tests).",
+    "main 3a2048150488e6b14f3cc4f3da59aa44bae93908 (Step 14) was merged into the step branch at 7a2f463e1726f3d4fc7d28d426626ef35360af26 before the audited commit; main has not moved since, so no merge-tree CI run applies.",
+    "Local gate: ./tools/verify.sh all --require exited 0 on the audited tree at eb120e1, including the strict documentation build, DocFX, rustdoc, contracts/policy, structure, Rust, Python, and the AOT evidence gate. The AOT CLI publish reports 62 IL diagnostics as recorded evidence; the gate's documented policy treats that as evidence, not a failure.",
+    "The prior closeout run at a14ef1f was red on one timing-sensitive validation test, and the Windows gate run at 833f135 was red on test-harness settings-temp-file cleanup. The test fixes are squashed as 833f135 and eb120e1; the final audited commit is eb120e1 and its Ubuntu/Windows/macOS runs are green.",
+    "No code, test, contract, or configuration file changes after eb120e17ce43a152c8905fc1f54528b69448b3e3. The closeout evidence commit, the audit record, the step page, and the status dashboard are documentation-only.",
+    "Recorded limitations: close/exit prompts are per project (no apply-to-all batch choice); ordinary Open on a missing main file reports the load failure without a dedicated snapshot-path dialog, while restore reports missing paths; the dead-UI crash path writes no recovery files; the autosave failure-to-recovery/ fallback is implemented but not failure-injected in a PR-fast test; and a deferred recovery/ candidate may expire under the accepted m-14 seven-day sweep."
+  ]
+}

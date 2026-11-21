@@ -18,12 +18,12 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 
 ## Implementation status
 
-- **Status:** **In progress** — design accepted; features 1–3 squashed (`bb048ad`/`90d9f73`, `77c1b9c`, `97c42ec`); feature 4 in progress
+- **Status:** **In audit** — all four features squashed; closeout CI and Windows/macOS gates green at `eb120e1`; audit request `Ready for audit`
 - **Step branch:** `step/23b-editing-diagnostics-and-recovery`
-- **Step CI:** — (local gates only; the single closeout `CI` run is dispatched at closeout)
+- **Step CI:** Ubuntu closeout [44929014836](https://github.com/seb-eis/mocassin-2/actions/runs/44929014836); Windows [44929276522](https://github.com/seb-eis/mocassin-2/actions/runs/44929276522); macOS [44929582584](https://github.com/seb-eis/mocassin-2/actions/runs/44929582584) green at `eb120e1`
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Ready for audit — [`audits/step-23b.md`](../audits/step-23b.md); closeout evidence [`closeout/step-23b.json`](../closeout/step-23b.json)
 - **Design review:** **Accepted `Ready with notes` by the human owner 2026-11-21** at the round-4 freeze
   `a33711d` (record `c4ded0e`, round-4 verdict `Ready with notes`) — see
   [`reviews/step-23b.md`](../reviews/step-23b.md).
@@ -42,7 +42,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 | 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad`; test fix `90d9f73` |
 | 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c`; refresh fix `d4badd0`; undo/redo commands `eb50095` |
 | 3 | Dirty state, autosave, crash recovery | `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `97c42ec`; crash-writer fix `a9506bf` |
-| 4 | 23B tests, documentation, and closeout | `feature/step-23b-editing-diagnostics-and-recovery/tests-docs-and-closeout` | In progress | — | — | — |
+| 4 | 23B tests, documentation, and closeout | `feature/step-23b-editing-diagnostics-and-recovery/tests-docs-and-closeout` | Squashed | `./tools/verify.sh all --require` 0; closeout CI/platform gates green | Ubuntu 44929014836; Windows 44929276522; macOS 44929582584 | `a14ef1f`; fixes `833f135`, `eb120e1` |
 
 ### Approved feature list (owner-approved 2026-11-21)
 
@@ -163,6 +163,38 @@ seam fills in §1.
   - `autosave`/`session` live in `Settings/Blocks/` and remain application-local with no schema bump.
 - **Known limitations:** the platform recovery/autosave prompt is a manual Windows/macOS gate; the documentation
   column, parity/status closeout, fixtures, and audit request are feature 4.
+
+#### Feature 4 — tests, documentation, and closeout (squashed `a14ef1f`; fixes `833f135`, `eb120e1`)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/tests-docs-and-closeout`; feature commit
+  `74ea8dc`, squash `a14ef1f`. Two closeout fixes followed: `833f135` makes the immediate-revalidate test
+  timing-independent after the first Ubuntu closeout run failed it; `eb120e1` awaits the close and drains
+  dispatched headless work before test cleanup after the first Windows platform gate exposed a settings
+  temp-file lock.
+- **Docs/parity:** `docs/development/ui-architecture.md` (edit pipeline, validation coordinator, recovery, gate
+  and lifecycle collaborators), `docs/development/testing-and-parity.md` (23B harness/tiers/limitations),
+  `docs/development/design-decisions.md`, the user-guide workspace/projects/settings pages,
+  `docs/reference/file-layout.md` (`autosave`/`session`, `recovery/`, sidecar rules, seven-day retention),
+  `docs/reference/diagnostics.md` (help anchors/no new codes), `docs/troubleshooting/errors.md` (recovery/crash
+  failures), the quickstart/first-project pages, and the parity rows for edit/undo, validation/Problems,
+  metadata editing, dirty markers, autosave, recovery, session restore, and crash recovery. The settings blocks
+  are documented as additive app-local v1 fields with no schema bump.
+- **Local closeout gate:** `./tools/verify.sh all --require` exited 0 on the audited tree at `eb120e1`, including
+  .NET, Rust, Python, strict docs/DocFX/rustdoc, contracts/policy, structure, and the AOT evidence gate. The AOT
+  CLI publish reports 62 IL diagnostics as recorded evidence; the gate treats that as evidence, not failure.
+  `python tools/check_closeout_evidence.py docs/planning/closeout/step-23b.json` returned OK.
+- **Closeout CI/platform:** Ubuntu [44929014836](https://github.com/seb-eis/mocassin-2/actions/runs/44929014836),
+  Windows [44929276522](https://github.com/seb-eis/mocassin-2/actions/runs/44929276522), and macOS
+  [44929582584](https://github.com/seb-eis/mocassin-2/actions/runs/44929582584) are green at the audited commit
+  `eb120e17ce43a152c8905fc1f54528b69448b3e3`. `main` `3a2048150488e6b14f3cc4f3da59aa44bae93908` was merged into
+  the step branch at `7a2f463e1726f3d4fc7d28d426626ef35360af26`; it did not move again before the freeze.
+- **Known limitations carried into the audit:** per-project close/exit prompts (no apply-to-all batch choice);
+  ordinary Open on a missing main file reports the load failure without a dedicated snapshot-path/discard
+  dialog, while session restore reports missing paths; the dead-UI crash path writes no recovery files; the
+  autosave failure-to-`recovery/` fallback is implemented but not failure-injected in a PR-fast test; a deferred
+  `recovery/` candidate may expire under the accepted m-14 seven-day sweep.
+- **Evidence:** [`closeout/step-23b.json`](../closeout/step-23b.json); audit request
+  [`audits/step-23b.md`](../audits/step-23b.md) (`Ready for audit`).
 
 ### Inherited 23A deviations and how 23B respects them
 
@@ -927,7 +959,7 @@ section. They are scope/class approvals, not a design verdict.
       action.
 - [x] Add the two Core changes with tests and `PublicAPI.Unshipped.txt` entries; verify no App or Packages API
       change.
-- [ ] Add the 23B tests, documentation column, parity/status updates, `closeout/step-23b.json`, and request the
+- [x] Add the 23B tests, documentation column, parity/status updates, `closeout/step-23b.json`, and request the
       audit.
 
 ## Acceptance criteria
@@ -953,9 +985,9 @@ section. They are scope/class approvals, not a design verdict.
 - [x] The `autosave`/`session` settings fields round-trip without a schema bump and older documents still load.
 - [x] No unhandled exception kills the process silently, and the crash dialog reports recovery results; the
       dead-UI path is documented.
-- [ ] `./tools/verify.sh all --require` passes, the strict docs build passes, and `closeout/step-23b.json` with
+- [x] `./tools/verify.sh all --require` passes, the strict docs build passes, and `closeout/step-23b.json` with
       `"step": "step-23b"` validates.
-- [ ] Documentation written (§12), and no page claims a later step's capability or an untitled-project model.
+- [x] Documentation written (§12), and no page claims a later step's capability or an untitled-project model.
 
 ## Documentation
 
