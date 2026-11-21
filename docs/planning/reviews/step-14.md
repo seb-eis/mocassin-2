@@ -282,10 +282,10 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required — round 3 request at `87be9de`. Round 2 accepted the round-1 Major redesigns and
-raised F-17 (Major, cluster instance cardinality) plus F-18…F-28; the round-3 freeze addresses all of them. The
-request owner sets this state; the reviewer-authored round-1/round-2 findings, evidence, and verdicts remain
-unchanged as history.
+**State:** Changes required — round 3 at record `e0c4700` (frozen design `87be9de`) closes F-17 in substance
+and F-18–F-28 as recorded below, but F-23 remains partially closed (F-32) and the round adds **F-29 (Major,
+canonical cluster-code lookup)**, F-30–F-33 (Minor), and F-34–F-38 (Notes). The reviewer-authored round-1/2/3
+findings, evidence, and verdicts remain unchanged as history.
 
 ## Reviewer independence
 
@@ -669,3 +669,163 @@ position of its centre site, and the design does not record the limitation. F-18
 F-23–F-28 are notes. No Blocker was found. The Step 13 placeholder retirement is acceptable as planned type-only
 evolution with the Step 13 reconciliation note; no ADR/tag note is required. A fresh round is required after the
 cluster-instance decision and the Step 16 reconciliation.
+
+### Re-review round 3
+
+#### Independence and frozen state
+
+I am a fresh, independent planning auditor. I did not author or implement the Step 14 design and have no shared
+conversation with the planner, the implementors, the round-1/round-2 reviewers, or the orchestrator. I received
+only the frozen commit `87be9dee6816aac4cc18c42de21b441f13827c88`, the record HEAD `e0c4700`, the repository, and
+the required commands/scope; no desired verdict or summary was supplied. I read the repository, the Step 13
+runtime/reader code and fixtures, the .NET compiler/writer, and the original solver as a read-only reference
+rather than relying on the request. The review was read-only apart from this record: I edited and committed only
+`docs/planning/reviews/step-14.md` and did not merge, tag, push `main`, delete branches, change
+code/tests/configuration/design docs, or fix a finding.
+
+Frozen state: the reviewed commit is `87be9de` (the design freeze after round 2). The record HEAD `e0c4700` is the
+documentation-only round-3 request commit; `git diff --name-only 87be9de..e0c4700` is exactly
+`docs/planning/reviews/step-14.md`, so no design, code, test, configuration, contract, or generated artifact moved
+between the freeze and this record. The working tree was clean before the record edit. The freeze includes the
+corrected Step 14 page, the Step 15/16 interface reconciliation, `02-data-contracts.md` §3.3,
+`03-quality-strategy.md` §9.12/§13, `05-open-decisions.md`, `solver-architecture.md`, and the Step 13 container
+note; no code or fixture exists yet.
+
+#### Commands and results
+
+- `./tools/verify.sh docs --require` → exit 0; Zensical strict, DocFX, and rustdoc clean;
+  `Documentation built in /tmp/opencode/step-14-review-r3e/site`; `Closeout gate completed with required checks
+  enabled.`
+- `./tools/verify.sh policy --require` → exit 0; contracts current (26), model/parameterization/lattice
+  projections OK (5/4/2), Space-group catalog current (274 settings, sha256
+  `1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395`), process consistency OK, 60 tool tests OK,
+  SPDX headers in 780 files, no secret patterns in 1,217 files, ApiCompat found no breaking changes (the
+  unresolved `MessagePack`/`Microsoft.Data.Sqlite` reference messages are non-fatal), cargo-deny
+  advisories/bans/licenses/sources OK.
+- `python tools/check_doc_math.py` → `Documentation math conventions OK (179 files scanned).`, exit 0.
+- `git diff --name-only 87be9de..e0c4700` → only `docs/planning/reviews/step-14.md`; `git status --short` clean
+  before the record edit.
+- Inspected the Step 13 runtime/reader (`runtime/{direction_pool,jump_status,energy}.rs`,
+  `ids.rs`/`settings.rs`, `mocassin-msl/src/map/model.rs`, `projection.rs`), the .NET compiler/writer
+  (`ClusterCompilationStage.cs`, `ClusterReduction.cs`, `SpaceGroupOperations.cs`, `EnergyPayloadMapper.cs`,
+  `ModelSignatureProjection.cs`, `CompiledClusterTable.cs`, `EnergyPayloadDtos.cs`), the original
+  `EnvironmentRoutines.c`, `JumpStatusInititialization.c`, `StatisticsRoutines.{c,h}`, `HelperRoutines.c`, and
+  `GroupEnergyModelBuilder.cs`/`EnergyDbEntityBuilder.cs` as a read-only reference, the populated/centered/msl
+  fixtures and payloads (MessagePack decoded locally), and the ceria/populated/centered samples.
+- A local `/tmp` `rustc` size check of the frozen struct shapes: `ClusterInstance` = 16 bytes,
+  `ClusterAssoc` = 8, `Link` = 28, `JumpLink` = 8; used for F-31.
+
+#### Findings
+
+**Round-2 finding closure:**
+
+| Finding | Closure | Evidence |
+| --- | --- | --- |
+| F-17 (Major) | **Closed in substance.** One instance per slot-0 link; `K` = slot-0 link count; `ClusterInstance { table, centre_position, slot_start, slot_count }`; `centres` CSR; flat `slot_positions`/`slot_cells`; per-instance `codes`/`code_ids`/`energy`; zero/absent/multiple images fail closed; the multi-centre member-site fallback is defined and the fixture is specified. | `ClusterCompilationStage.cs` 238–241 adds slot 0 to **every** P1 position of the centre site; member slots are added at `sitePIndexArray[slot+1]` (one representative placement). The `step-13-centered` `model-1.bin` decodes to 8 positions, 2 sites, `site_index` `[0,1,1,0,0,1,1,0]`; site 0 owns positions 0/3/4/7. Its existing pairs 0→1, 3→2, 4→5, 7→6 give exactly one member-site link per centre, so the four-instance fixture resolves and exercises the fallback. Step 14 §2/§6.2–§6.4/§19 and Step 15 §1/§2/§4/§6 are consistent. Residuals: F-29 (code lookup), F-30 (assoc type), F-31 (plan arithmetic), F-36 (fixture provenance). |
+| F-18 (Minor) | Closed. | Step 16 §6 uses the job cap or the derived active-rule maximum and explicitly not `AttemptFrequencyModulus`; §8 uses `total/100` without `max(1, …)`; §9 validates the parameterized `modelSignature` + `seedHash` and states there is no lattice-signature check. |
+| F-19 (Minor) | Closed. | Step 15 §1 adds `EnergyEngine::new(ctx: &'a mut SimulationContext)`; Step 16 §1 stores only `ctx` and constructs `EnergyEngine::new(&mut *self.ctx)` per call, so there is one mutable borrow at a time. The composition is sound and consistent with Step 15. |
+| F-20 (Minor) | Closed. | `nu_max` is exit 13 in Step 14 §11.1/§13, `03-quality-strategy.md` §9.12, `solver-architecture.md`, and Step 16 §6; §13 classifies it with the non-finite factors. |
+| F-21 (Minor) | Closed. | Step 14 §2/§6.1 widen the cell/offset arithmetic to `i64`, use `rem_euclid`, cast back after the range check, and add the hostile `i32::MIN`/`i32::MAX` test. The reader's `|offset| ≤ |interaction_range| + 1` bound is `i64` (`map/model.rs` 418), so it cannot overflow. |
+| F-22 (Minor) | Closed. | Step 14 §2/§8 reserve each pool's exact planned capacity from the counting pass, assert capacity, and keep the zero-allocation criterion; the capacity can only decrease under optimizer removal/swap-remove. The debug-equality nit is F-34. |
+| F-23 (Note) | **Partially closed.** | §2 and `solver-architecture.md` now define `MemoryReport` on planned lengths with `plan == report` and capacity bytes as a separate diagnostic. Step 14 §17 still contains the contradictory "`MemoryReport` matches the actual vector capacities" criterion (F-32). |
+| F-24 (Note) | Closed. | §9.2 now states that `LinkEnvironmentToSurroundings` stores the link on the changed/partner environment with `TargetEnvironmentId` = the centre, `DistributeEnvironmentUpdate`/`InvokeJumpLinkDeltas` switch to the centre, and `BufferJumpLinksOfJumpPath` stores the index into the sender's list; this matches the original. |
+| F-25 (Note) | Closed. | §15 defines `linked(a,b)` as an either-direction interaction test over `link_range`/`incoming`, with no reverse-link synthesis and no energy shortcut. |
+| F-26 (Note) | Closed. | §3 records the "every non-void environment is `MOBILE`" assumption, the mask/v1 rationale, the mobile-assumption test row, and the Step 29 parity owner. |
+| F-27 (Note) | Closed. | The request summary uses "thirteen-step (phase 0 plus twelve)"; the page's phase list is 0–12. |
+| F-28 (Note) | Closed. | §8's comment now says `P*pc + particle (P1 position)`. |
+
+**New findings:**
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Major** | **F-29 — The cluster code lookup assumes a directly indexable occupation table, but a symmetry-reduced table stores only canonical orbit codes and the payload carries neither the induced permutation group nor the expansion map. A writer-valid non-P1 multi-member cluster is rejected as `MissingOccupationCode` (exit 12), and the design records no limitation.** | See the detailed paragraph below. |
+| **Minor** | **F-30 — `ClusterAssoc` still carries `cluster_table` in §6.1, contradicting §6.2/§9.3 and Step 15 §4, which require the instance.** | Step 14 §6.1: `pub struct ClusterAssoc { pub cluster_table: u32, pub slot: u8 }` and the bullet "the owner is the centre of cluster `cluster_table`"; §6.2 line 500 "carry the `cluster_assoc` entries (`instance`, `slot`)"; §9.3; Step 15 §4 `ClusterAssoc { instance, slot }`. §6.3 also says there is no `table -> instance` map, so the assoc must name the instance (the owner position plus table would allow a scan of `centres`, but the frozen interface says instance). Fix the type to `instance: u32` (same 8-byte layout). |
+| **Minor** | **F-31 — The memory-plan table undercounts `ClusterInstance` and omits arrays despite the "every array" rule.** | Step 14 §2 says `clusters.instances` is `K*12`; the declared `{u32, u32, u32, u8}` is 16 bytes (verified). The per-instance energy layout comment `[instance * A*B*C + cell] * mapping_len` has no computable base when `mapping_len` varies by table/instance; no `energy_start` field or prefix array is in the plan. `links.owner_offsets`/`links.inverse_offsets` (`(P+1)*4` each) and the `SelectionPool` struct/`Vec` headers are not itemised in the table (the "counters, tracker mapping — small" row is not a formula). The per-array caps bound these, so the total cap still holds, but the documented plan is not exact and the `plan == report` test would not match the table. |
+| **Minor** | **F-32 — F-23 residual: §17 still requires `MemoryReport` to match actual vector capacities.** | Step 14 §17: "`MemoryReport` matches the actual vector capacities." vs §2 and `solver-architecture.md` "planned length ... not `Vec::capacity`" and §17's own "`plan == report` on planned lengths". A test written to the first line fails on allocator rounding or drives the wrong implementation. |
+| **Minor** | **F-33 — The §7.4 initial-energy formula lost the cell dimension when the cluster term became per instance.** | $U$ adds $\sum_{\text{instances } c} E_\text{cluster}(c, p(c))$, but the runtime accessor is `cluster_energy(instance, cell, particle)` and each instance exists in every cell; §6.3 indexes `energy[instance, cell, p]`. The sum must run over instance × cell (all cluster centres), as `physics/energies.md`'s "cluster centres $c$" does. The hand-computed test must use a multi-cell lattice, or a one-cell test cannot catch the omission. |
+| **Note** | **F-34 — The per-pool reserved-capacity debug assertion can fire spuriously.** | Step 14 §8: "A debug assertion checks `members.capacity() == planned_capacity`." `Vec::with_capacity(n)` guarantees `capacity() >= n`, not equality (the design's own F-23 text says allocator rounding may exceed). Assert `>=` or compare the plan's count. |
+| **Note** | **F-35 — The OD-1/gated-decision summaries do not distinguish the accepted rotated multi-centre image from a rejected cross-image.** | The request's Known limitations says "An absent/ambiguous image, and a writer-valid cross-image cluster, are rejected", and `05-open-decisions.md` says "an absent or ambiguous image (a cross-image member, ...) fails closed"; but §6.4 deliberately accepts the unique member-site image for a multi-centre table (a rotated image), and the single-centre rule accepts a unique image even if the authored cell offset differed (the inherent OD-1 risk). §6.4 is the precise normative text; align the summaries so the owner accepts the actual boundary. |
+| **Note** | **F-36 — The new multi-centre fixture's provenance/regeneration is under-specified, and its one-member geometry avoids the reduction issue.** | §19 names the fixture as a real-writer artifact from a copy of `samples/step-13-centered/step-13-centered.mocprj`, but does not name a committed sample path, package summary/SHA-256/payload set, .NET rebuild test, or the rationale for a new package rather than extending `step-13-centered` (which would invalidate the Step 13/16 golden). The 10×10×10 fixture specifies these. The fixture's single member makes the induced permutation group trivial; a second member on the same site (the ceria geometry) would exercise F-29. |
+| **Note** | **F-37 — Goal arithmetic on untrusted job settings is not stated as checked.** | The reader's `require_u64` bounds neither `target_mcsp` nor `pre_run_mcsp`; `pre_run_mcsp * mobile_count`, `target_mcsp * mobile_count`, the sum, and the round-up can overflow `u64`. §10 does not say the multiplication/sum is checked. Use checked `u64` and `InvalidInput` (exit 12) for overflow, consistent with §2's checked-arithmetic rule. |
+| **Note** | **F-38 — The D-11 soundness justification for the multi-centre fallback is imprecise.** | §6.4/D-11 say "the cluster energy table is invariant under the centre site's stabilizer (Step 08's cluster reduction)". The reduction canonicalizes under the **representative centre's** stabilizer $G_0$; the new centre is reached by an operation that maps the site to itself but moves the centre. The sound argument is that the table enumerates every allowed occupation tuple and the applied energy is invariant under the full space group, so the rotated image's canonical class carries the same energy. State that, and make the fixture assert a non-zero/known per-instance energy if the table permits; a zero table (the samples') cannot evidence the energy mapping. |
+
+**F-29 detail — the cluster-code lookup cannot be implemented with the frozen `.msl` table for symmetry-reduced
+clusters.**
+
+- `02-data-contracts.md` §3.3 says the cluster codes are "canonical under the induced site-permutation group".
+  `ClusterCompilationStage` builds one `CompiledClusterOccupation` per `reduction.Clusters` orbit (the
+  `Expansions` are carried in the compiled model and the model signature, `ModelSignatureProjection.cs`
+  216–226), and `EnergyPayloadMapper` 65–70 writes only `occupation.CanonicalCode`; the runtime `ClusterTable`
+  (`mocassin-types/src/runtime/energy.rs`) carries only `occupation_codes`, `energies`, and
+  `particle_table_mapping`. The payload has no expansion map and no induced permutation group.
+- Step 14 §6.3 builds the raw occupation tuple from the instance slots and indexes the table directly; a missing
+  code is `ContextError::MissingOccupationCode` (exit 12). Step 15 §2/§4 uses the same code id. For a non-P1
+  multi-member cluster the actual tuple need not be the canonical orbit representative, so a perfectly valid
+  writer package is diagnosed as a data error.
+- The checked fixtures hide this: `step-13-populated` is P1 (3 positions, 3 sites, 12 codes = 12 raw tuples); the
+  new C-centered multi-centre fixture has one member, so its induced permutation group is trivial. The primary
+  ceria sample `samples/ceria/ceria.mocprj` has a two-member ±0.25 cluster on space group 225; the centre mirror
+  swaps the two member positions, so the raw 2×2×2 = 8 tuples reduce to 6 canonical codes (the
+  `CeriaClusterCompilesToSortedCanonicalOccupations` test asserts `OccupationCount == UniquePermutationCount`
+  and non-empty expansions). Two of the eight actual member assignments are non-canonical and would fail at
+  initialization. The original solver stored every equivalent code (`GroupEnergyModelBuilder.CreateAllGroupLookupCodesOnModel`
+  builds `GroupLookupCodes` from all `OccupationStates`, and the solver searches the exact code), so the
+  canonical-only `.msl` is a regression for this case.
+- Required correction: record an open decision/limitation (OD-1 is about member offsets, not code orbits) and a
+  cross-step decision. The options are (a) the writer emits the expansion codes with the orbit energy (the
+  table/signature semantics and the Rust projection must be decided; `occupation_codes`/`energies` are
+  variable-length, but the parameterization signature must stay over the canonical group), or (b) the payload
+  gains an orbit/permutation map (a format change needing an ADR/version), or (c) the solver receives a
+  canonicalization rule that is provably valid for the stored geometry. Add a non-P1 two-member cluster fixture
+  (the ceria sample or a C-centered two-member cluster) and a fail-closed test, and do not proceed with an
+  unconditional direct lookup or classify this as a pure data error. This is a cross-step Step 11/12/13 decision;
+  it is not a Step 14 format change and may need an owner amendment decision before the start gate.
+
+#### Closure status
+
+No Blocker remains. F-17's instance cardinality is genuinely redesigned: one instance per slot-0 link, `K` =
+slot-0 link count, CSR/flat geometry, per-instance codes/energy, and the multi-centre fallback, checked against
+the writer and the `step-13-centered` site indices; the four-position centre is representable and the fixture
+exercises the fallback. F-18–F-28 are closed except F-23, which is only partially closed (F-32). **F-29 is a new
+Major**: the design's cluster-code lookup is not implementable for a writer-valid symmetry-reduced cluster with
+the frozen payload; the design must record the limitation and the cross-step decision and add a fixture. F-30–F-33
+are minor corrections and F-34–F-38 are notes.
+
+**Open owner questions.** The writer-fix-versus-diagnostic question is recorded adequately for the start gate:
+OD-1 names the build-time diagnostic as the Step 11/12 follow-up with an owner and trigger, states that the
+writer is not fixed in Step 14, and records the future per-centre/format revision; the design does not claim a
+writer fix. The `max_cluster_instances` default (100,000) is a documented, overridable `ContextLimits` value
+grounded in `K` = slot-0 link count (so `K <= N <= max_pair_links`) and capped with the byte caps; it is safe as
+a default and the total byte cap binds first for large `K*C`, though it is not a separately owner-accepted
+decision. Fixture authorship is only partly adequate: a new `step-14-multi-centre-cluster` package from a copy of
+the centred sample is a reasonable way to preserve the `step-13-centered` Step 13/16 golden, but the rationale,
+the committed sample path, the package summary/SHA-256/payload set, the .NET rebuild test, and a two-member case
+that exercises F-29 are not specified (F-36).
+
+**Other requested checks.** No new format change: the freeze touches only planning/development/physics pages;
+`contracts/manifest.json`, the `.msl` schema/payload/version/signatures, and the fixtures are untouched. The new
+10×10×10 and multi-centre packages are test artifacts; the latter's provenance detail is F-36. The High
+class/no-split decision is recorded in Step 14 §4 and roadmap §3.1 with the owner-acceptance request; six
+features, one acceptance story, and the API-freeze guard are bounded. The docs/parity plan names
+`solver-architecture`, `physics/energies`, `performance/index`, `troubleshooting/errors`, `testing-and-parity`,
+`msl-format`, and the new parity row; `docs --require` passes. The Step 13 placeholder retirement is acceptable as
+planned type-only evolution: `DirectionPool`/`JumpLink` are constructed only by their own tests and re-exports
+(grep over `src/rust`), the Step 13 page records the reconciliation (lines 1216–1225), Step 14 feature 4 records
+the public Rust API break and updates the invariant tests, and no `.msl` field/manifest/signature/fixture changes.
+The library gates (`docs`, `policy`, `check_doc_math`) pass. The ceria static-lattice path is not a Step 14
+cluster claim, but the F-29 package is the primary sample's cluster and must be decided, not discovered at
+feature 2.
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [ ] Ready with notes
+- [x] Changes required
+- [ ] Waived
+
+**Changes required.** F-17's instance-cardinality redesign is sound and the F-18–F-28 corrections are closed
+(F-23 partially, F-32). **F-29 is a new Major**: the cluster runtime's direct code lookup cannot find a
+non-canonical occupation tuple in a symmetry-reduced `.msl` table, and the design neither records the limitation
+nor provides a canonicalization/expansion mechanism or a non-P1 two-member fixture. F-30–F-33 are minor design
+corrections and F-34–F-38 are notes. No Blocker was found. A fresh round is required after the cluster-code
+decision/limitation, the F-30–F-33 corrections, and the revised fixture plan.
