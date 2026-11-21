@@ -395,9 +395,15 @@ internal sealed partial class ProjectOverviewViewModel : DocumentViewModel, IIns
         OnPropertyChanged(nameof(DirtyText));
         OnPropertyChanged(nameof(CanEdit));
         OnPropertyChanged(nameof(IsReadOnly));
-        OnPropertyChanged(nameof(LastSavedText));
+        OnPropertyChanged(nameof(ProjectIdText));
+        OnPropertyChanged(nameof(CreatedUtcText));
         OnPropertyChanged(nameof(ModifiedUtcText));
+        OnPropertyChanged(nameof(LastSavedText));
+        OnPropertyChanged(nameof(MasterSeed));
+        OnPropertyChanged(nameof(SchemaVersionText));
+        OnPropertyChanged(nameof(SymmetryText));
         OnPropertyChanged(nameof(LockStateText));
+        OnPropertyChanged(nameof(FilePath));
         OnPropertyChanged(nameof(Validation));
     }
 
