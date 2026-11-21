@@ -37,9 +37,9 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
   "preserved until Recover or Discard" claim accordingly.
 - **Last updated:** 2026-11-21
 
-| Feature | Branch | Status | Local gates | Step CI | Squash commit |
-| --- | --- | --- | --- | --- | --- |
-| 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | In progress | — | — | — |
+| # | Feature | Branch | Status | Local gates | Step CI | Squash commit |
+| --- | --- | --- | --- | --- | --- | --- |
+| 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad` |
 | 2 | Validation surface | — | Planned | — | — | — |
 | 3 | Dirty state, autosave, crash recovery | — | Planned | — | — | — |
 | 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
@@ -56,6 +56,30 @@ seam fills in §1.
 | 2 | Validation surface | `validation-surface` | `ValidationCoordinator` seeded from the session's retained `ProjectSession.Validation`, 300 ms debounce after `ProjectChanged`, stale-result discard, status-bar validity item, Problems channel with severity/code/text/source filters, sorting, help anchors, `Related` navigation, revalidate, edit diagnostics, on-demand statistics in the Overview | A 23A load/migration fixture's retained result reaches Problems; a clean load leaves `Load` `Skipped`; opening never runs a second validation; a stale result is discarded; no double validation on open |
 | 3 | Dirty state, autosave, crash recovery | `dirty-autosave-and-recovery` | Save-point-correct dirty tracking and markers, unsaved-changes prompts, `AutosaveScheduler` with an injectable tick, `.autosave` sidecar, crash snapshots and manifests in `recovery/`, recovery prompt, Reload/Recover/Discard/Keep operations, unclean-exit session restore, retention, bounded asynchronous crash-recovery writer | Autosave writes only dirty documents and deletes its file on save; a simulated crash leaves a recoverable `recovery/` snapshot; recovery restores the exact in-memory project; recovery files are swept after 7 days and sidecars are not |
 | 4 | 23B tests, documentation, and closeout | `tests-docs-and-closeout` | Harness extension, dirty/save-point/autosave/recovery/validation/crash tests, the 23B documentation column (§12), parity/status updates, `closeout/step-23b.json` (`"step": "step-23b"`), and the audit request | `./tools/verify.sh all --require` passes; the strict docs build passes; `closeout/step-23b.json` validates (the `step-NN[a-z]` checker support is already on `main`); the audit request is complete |
+
+### Feature log
+
+#### Feature 1 — edit pipeline and undo/redo (squashed `bb048ad`)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo`; deleted after the
+  squash. Git operations: branch created from `929327e`, feature commit `c4ae50a`, squash `bb048ad`.
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 0 warnings, `dotnet format` clean);
+  `./tools/verify.sh structure` exit 0 (7 architecture tests); `./tools/verify.sh api` exit 0 (no baseline
+  break); `./tools/verify.sh docs` exit 0 (link/math checks, DocFX, rustdoc, strict Zensical build). **No CI run**
+  was triggered; per-feature CI is not used.
+- **Diff summary:** `ProjectDocument.MaxUndoDepth` (init-only; `0` unbounded, negative throws) with oldest-first
+  trimming and a public-API entry; the app-level `ProjectEditCoordinator` with `EditApplyResult` /
+  `EditApplyOutcome` (`Applied`/`Rejected`/`ReadOnly`), same-hash no-op with `Change == null` and no event,
+  `EditRejected`, `ProjectChanged` (`Edited`/`Undo`/`Redo`/`Saved`/`Replaced`), `NotifySaved`, and
+  `ReplaceDocument`; `ProjectSession` owns the coordinator, constructs GUI documents with `MaxUndoDepth = 200`,
+  follows the lock/read-only state, saves through the no-arg `MarkSaved()` + `NotifySaved()`, and replaces the
+  coordinator document on reload. Tests cover apply/undo/redo, the bound and overflow, no-op, rejected,
+  read-only, the save-point across save/undo/redo, replacement, and the real session/store path.
+- **Known limitations:** the Project Overview metadata form (name/description/author/notes) is **not** built in
+  this feature. The coordinator and its one-undo-entry-per-`Apply` contract are ready; the form is expected with
+  the Overview/validation work in feature 2. The validation surface, autosave/recovery, dialogs, published
+  documentation column, fixtures, and closeout are features 2–4. No app public API changed; the only public
+  addition is `ProjectDocument.MaxUndoDepth` in `Mocassin.Core/PublicAPI.Unshipped.txt`.
 
 ### Inherited 23A deviations and how 23B respects them
 
