@@ -10,7 +10,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In progress — feature 2 squashed; feature 3 next (six feature branches approved)
+- **Status:** In progress — feature 3 squashed; feature 4 next (six feature branches approved)
 - **Step branch:** `step/14-simulation-context-initialization`
 - **Step CI:** — (one closeout `workflow_dispatch`; no per-feature CI)
 - **Main merge:** —
@@ -31,13 +31,13 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (feature 2 squashed; feature 3 next)
+- **Last updated:** 2026-11-21 (feature 3 squashed; feature 4 next)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 Context skeleton, arenas, limits, errors | `feature/step-14-simulation-context-initialization/context-arenas-and-limits` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (36 lib + 9 acceptance tests, 1 `Send` doctest, 1 `!Sync` compile-fail doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `1a73969860715c55260cd1db0257c8a59241a647` |
-| 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 link + 16 cluster + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-3 row update |
-| 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Planned | — | — | — |
+| 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 link + 16 cluster + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `486389ec5736571f50adda0d77ae95aa8f9ea4cb` |
+| 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 8 energy + 16 cluster + 15 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-4 row update |
 | 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Planned | — | — | — |
 | 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Planned | — | — | — |
 | 6 Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | Planned | — | — | — |
@@ -138,6 +138,58 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
     plan, report, and cap are complete and feature 3 performs no reallocation; the values are feature 3's.
 - **No new fixture, format, manifest, signature, or public API break.** `DirectionPool`/`JumpLink` are untouched
   until feature 4; the context accessors are additive.
+
+### Feature 3 evidence — energy-runtime-and-initial-energy
+
+- **Branch:** `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` (squashed;
+  squash commit recorded by the feature-4 row update).
+- **Scope delivered:**
+  - **Energy runtime:** `ev_to_kt = 1/(k_B_eV·T)`, `kT_eV`, `field_scale = |E|·1e-10/kT_eV`, the job's field
+    direction, the unit-cell site table `[P][pc]`, and the per-environment site+pair vectors `[env][pc]`, all in
+    kT. The temperature/kT/factor/field checks are `NonFiniteFactor` (exit 13); table lengths and used values are
+    `InvalidInput` (exit 12).
+  - **Exact total:** `U = Σ_stable site + 0.5·Σ_stable (vector − site) + Σ_instances Σ_cells cluster(centre)`
+    (Step 14 §7.4), stored as `lattice_energy_ev = U_kT · kT_eV`. The cluster term is instance × cell at the
+    centre particle, never folded into the site+pair vector and never halved.
+  - **Cluster energies:** the per-instance array is filled from the canonical code (slot 0 = the mapped centre
+    particle, members from the current geometry) through `ClusterTable::lookup`; a non-canonical tuple uses the
+    approved expansion map's canonical energy. A particle outside `particle_table_mapping` contributes zero.
+  - **APIs:** `node_energy(EnvId, ParticleId)`, `site_energy(PositionId, ParticleId)`,
+    `cluster_energy(instance, cell, ParticleId)`, `field_scale`, `field_direction`, `cell_vectors`,
+    `ev_to_kt`, `kt_ev`, and the independent `recompute_lattice_energy_kt` plus the debug-only
+    `check_lattice_energy` consistency assertion.
+  - **Plan:** the `energy.site` and `energy.vectors` entries and the `max_energy_vector_bytes` cap; every
+    planned length is checked against the built array in the invariant sweep.
+  - No cluster-geometry or lookup change; features 4–5 (pools/jump status, goals/resume) remain.
+- **Energy convention / fixture matrix:**
+
+| Case | Assertion |
+| --- | --- |
+| Toy site+pair (2 cells, P=1, pc=2) | site 2 eV, pair A–A 3 eV, two stable environments: `U = 4 + 0.5·6 = 7 eV`; `node_energy = 5 kT`, `site_energy = 2 kT`; the recomputation agrees; `field_scale` matches its formula; the identity cell vectors and direction are exposed |
+| Toy cluster | a two-slot cluster with 10 eV per centre adds 10 eV in each of the two cells: `U = 27 eV`; `cluster_energy` is 10 kT for the mapped centre and 0 for void |
+| Real fixtures | `msl-v1` 0 eV; `step-13-centered` 0 eV; `step-13-populated` −3.2 eV (its non-zero site background over 8 cells × (P0 −0.5 + P2 +0.1)); `step-11-amend-2` −8.0 eV (P1/P4 −0.5 each per cell); the independent recomputation agrees in every case |
+| Mutated populated (non-zero site/pair/cluster) | every `node_energy` equals a brute-force site + owner-link pair sum; every `cluster_energy` row equals the mapped table value; `lattice_energy_ev` equals the direct site + 0.5·pair + cluster sum |
+| Amend-2 non-canonical tuple | centre 2 with members (3,2) → raw 8386 → canonical index 2 → 3 kT; centre 3 → 8387 → index 3 → 4 kT; void centre → 0; total 20 eV |
+| Determinism | two initializations produce identical `EnergyRuntime` and totals |
+| Cap / non-finite | `energy.site` + `energy.vectors` = 864 B for populated; a cap of 863 rejects with exit 12 and 864 is accepted; `T = 0`/∞, infinite field, and a NaN direction each return `NonFiniteFactor` (exit 13) |
+- **Memory plan:** populated 1804 B, `step-11-amend-2`/`amend-2-pre-map` 2644 B, `step-13-centered` 3300 B,
+  `msl-v1` 40228 B. The two new entries are `energy.site` (P·pc·8 B) and `energy.vectors` (A·B·C·P·pc·8 B),
+  summed and capped by `max_energy_vector_bytes` (default 512 MiB) before allocation. Feature 2's recorded
+  totals (940/1204/996/5508 B) are its commit-time values; feature 3 adds these two entries.
+- **Clarifications/limitations (recorded):**
+  - **D3-1 — no converted table copies.** The audited memory plan has no pair/cluster table copies, so the model
+    keeps its eV tables. The context computes the factor once and stores every precomputed value (site, vectors,
+    cluster rows, total) in kT; `ev_to_kt()` is exposed so Step 15 scales a model eV delta exactly once per
+    delta. This is the audited plan's allocation set, and the physics is unchanged.
+  - **D3-2 — the static total has no field term.** §7.4 defines the lattice energy without the field; the
+    context supplies `field_scale`/`field_direction` for Step 15's per-rule transition term
+    (`-0.5·field_scale·(transport·ê)`), which is not a static site/pair/cluster contribution.
+  - **D3-3 — unmapped centre particles.** A centre particle outside `particle_table_mapping` (void included) has
+    no cluster row, so `cluster_energy` returns 0 (consistent with D2-1).
+  - **D3-4 — non-finite used table values.** The reader already rejects NaN/Inf table values; a synthetic model
+    that slips one through is rejected as `InvalidInput` (exit 12) when the value is used, never silently
+    propagated.
+- **No new fixture, format, manifest, signature, or public API break.**
 
 ## Goal
 
@@ -1179,14 +1231,14 @@ row (§7.2). A link that is absent in both directions means the two environments
       before the first allocation.
 - [x] Implement the owner-major per-P1 link CSR, the inverse routing index (i64 `rem_euclid` resolution),
       partner resolution, sorting, and the cluster associations.
-- [ ] Implement the **one-instance-per-slot-0-link** cluster runtime: centre/member-site validation, the
+- [x] Implement the **one-instance-per-slot-0-link** cluster runtime: centre/member-site validation, the
       per-instance slot resolution (candidate position, then member-site image), the centre index, codes,
       code ids, and energies; reject an absent/ambiguous image with `ClusterGeometry`.
 - [x] Consume the approved cluster-code expansion contract: build the raw tuple, call
       `ClusterTable::lookup`, store `Canonical(index)` as `code_id`, map `MissingFromMap` to
       `MissingOccupationCode` and `ExpansionMapAbsent` to the distinct recompile-required error; no solver-side
       symmetry and no direct `occupation_codes` fallback. Gate this task on the `step-11.1` merge (see §22).
-- [ ] Implement the site table, per-owner site+pair vectors, per-instance cluster energies, and the exact
+- [x] Implement the site table, per-owner site+pair vectors, per-instance cluster energies, and the exact
       initial lattice energy.
 - [ ] Implement the supercell selection pools (`EnvId` members, global slot map, `pool_of`, `max_pools` check,
       per-pool reserved capacity), mask/optimizer application, selectable count, and `set_selectable`.

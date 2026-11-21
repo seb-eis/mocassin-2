@@ -41,6 +41,7 @@ use mocassin_types::{ClusterTable, JobPackage, SimulationKind};
 
 mod clusters;
 mod dimensions;
+mod energy;
 mod error;
 mod goals;
 mod jumps;
@@ -51,6 +52,7 @@ mod pools;
 
 pub use clusters::{ClusterArena, ClusterInstance, MAX_CLUSTER_SLOTS, NO_CLUSTER_CODE};
 pub use dimensions::{Dimensions, EnvId};
+pub use energy::{EnergyRuntime, FIELD_SCALE_PER_VM, K_B_EV};
 pub use error::ContextError;
 pub use goals::{Counters, ParticleCounters};
 pub use jumps::JumpRuntime;
@@ -179,6 +181,10 @@ pub struct SimulationContext {
     pub links: LinkArena,
     /// The cluster instances and their derived state (empty until feature 2).
     pub clusters: ClusterArena,
+    /// The energy factor, site table, and site+pair vectors.
+    pub energy: EnergyRuntime,
+    /// The exact initial lattice energy in electronvolts (§7.4).
+    pub lattice_energy_ev: f64,
     /// The KMC selection pools (empty until feature 4).
     pub pools: SelectionPools,
     /// The KMC jump status (empty until feature 4).
@@ -226,6 +232,8 @@ impl SimulationContext {
         self.lattice.capacity_bytes()
             + self.links.capacity_bytes()
             + self.clusters.capacity_bytes()
+            + self.energy.site.capacity() as u64 * size_of::<f64>() as u64
+            + self.energy.vectors.capacity() as u64 * size_of::<f64>() as u64
             + particles
             + 2 * size_of::<u64>() as u64
     }
@@ -287,6 +295,13 @@ impl SimulationContext {
         self.check_planned_length("clusters.code_ids", self.clusters.code_ids.len())?;
         self.check_planned_length("clusters.energy_start", self.clusters.energy_start.len())?;
         self.check_planned_length("clusters.energy", self.clusters.energy.len())?;
+        self.check_planned_length("energy.site", self.energy.site.len())?;
+        self.check_planned_length("energy.vectors", self.energy.vectors.len())?;
+        if !self.lattice_energy_ev.is_finite() {
+            return Err(ContextError::Invariant {
+                what: "lattice energy",
+            });
+        }
 
         let cells = self.dimensions.cell_count() as usize;
         let mut rows = 0_u32;
@@ -541,6 +556,123 @@ impl SimulationContext {
             .expect("the cluster instance exists")
     }
 
+    /// Returns the site+pair energy of one absolute environment and particle in kT.
+    #[must_use]
+    pub fn node_energy(&self, env: EnvId, particle: ParticleId) -> f64 {
+        self.energy.node_energy(&self.dimensions, env, particle)
+    }
+
+    /// Returns the site background of one P1 position and particle in kT.
+    #[must_use]
+    pub fn site_energy(&self, position: PositionId, particle: ParticleId) -> f64 {
+        self.energy
+            .site_energy(&self.dimensions, position, particle)
+    }
+
+    /// Returns the cluster energy of one instance, cell, and centre particle in kT.
+    ///
+    /// A particle outside the table's `particle_table_mapping` has no cluster row and contributes zero.
+    #[must_use]
+    pub fn cluster_energy(&self, instance: u32, cell: u32, particle: ParticleId) -> f64 {
+        energy::cluster_energy_at(&self.job, &self.clusters, instance, cell, particle)
+    }
+
+    /// Returns the view factor `|E| · 1e-10 / kT_eV` used by Step 15's field term.
+    #[must_use]
+    pub const fn field_scale(&self) -> f64 {
+        self.energy.field_scale
+    }
+
+    /// Returns the normalized electric-field direction.
+    #[must_use]
+    pub const fn field_direction(&self) -> [f64; 3] {
+        self.energy.field_direction
+    }
+
+    /// Returns the Cartesian `a`, `b`, and `c` cell vectors in ångström.
+    #[must_use]
+    pub fn cell_vectors(&self) -> [[f64; 3]; 3] {
+        self.job.model.structure.cell_vectors_ang
+    }
+
+    /// Returns the eV→kT factor of this job.
+    #[must_use]
+    pub const fn ev_to_kt(&self) -> f64 {
+        self.energy.ev_to_kt
+    }
+
+    /// Returns the thermal energy `k_B · T` in electronvolts.
+    #[must_use]
+    pub const fn kt_ev(&self) -> f64 {
+        self.energy.kt_ev
+    }
+
+    /// Recomputes the full lattice energy in kT by an independent direct pair sum.
+    ///
+    /// This is the debug/consistency path: it sums the site table once, `0.5 ·` the forward pair links, and the
+    /// cluster term per instance and cell. It must agree with [`SimulationContext::lattice_energy_ev`] divided
+    /// by `kT_eV`.
+    #[must_use]
+    pub fn recompute_lattice_energy_kt(&self) -> f64 {
+        let particles = self.dimensions.pc() as usize;
+        let mut total = 0.0_f64;
+
+        for environment in 0..self.dimensions.environment_count() {
+            let env = EnvId::new(environment);
+            if !self.lattice.is_stable(env) {
+                continue;
+            }
+
+            let position = self.dimensions.position_of(env);
+            let particle = self.lattice.particle(env).get() as usize;
+            total += self.energy.site[position as usize * particles + particle];
+
+            let cell = self.dimensions.cell_of(env);
+            for link in self.link_range(PositionId::new(position)) {
+                let partner = self
+                    .dimensions
+                    .wrapped_env(cell, link.offset, link.partner_position);
+                let partner_particle = self.lattice.particle(partner).get() as usize;
+                let table = &self.job.model.energy.pair_tables[link.pair_id as usize];
+                total += 0.5
+                    * table.energies[particle * particles + partner_particle]
+                    * self.energy.ev_to_kt;
+            }
+        }
+
+        for (instance, instance_data) in self.clusters.instances.iter().enumerate() {
+            for cell in 0..self.dimensions.cell_count() {
+                let centre = self
+                    .dimensions
+                    .cell_env(cell, instance_data.centre_position);
+                let particle = self.lattice.particle(centre);
+                total += energy::cluster_energy_at(
+                    &self.job,
+                    &self.clusters,
+                    instance as u32,
+                    cell,
+                    particle,
+                );
+            }
+        }
+
+        total
+    }
+
+    /// Asserts in debug builds that the stored total equals the independent recomputation.
+    pub fn check_lattice_energy(&self) {
+        #[cfg(debug_assertions)]
+        {
+            let expected = self.recompute_lattice_energy_kt() * self.energy.kt_ev;
+            let tolerance = 1e-9 * (1.0 + self.lattice_energy_ev.abs());
+            debug_assert!(
+                (self.lattice_energy_ev - expected).abs() <= tolerance,
+                "lattice energy {} != recomputed {expected}",
+                self.lattice_energy_ev
+            );
+        }
+    }
+
     fn cluster_table(&self, table: u32) -> Result<&ClusterTable, ContextError> {
         self.job
             .model
@@ -613,11 +745,46 @@ pub(crate) fn initialize_with(
 
     probe.check()?;
     observer.observe(InitPhase::Clusters);
-    let clusters = ClusterArena::build(&job, &dimensions, &mut links, &probe)?;
+    let mut clusters = ClusterArena::build(&job, &dimensions, &mut links, &probe)?;
     tracing::info!(
         phase = InitPhase::Clusters.as_str(),
         instances = clusters.instances.len(),
         slots = clusters.slot_positions.len(),
+        "context phase completed"
+    );
+
+    probe.check()?;
+    observer.observe(InitPhase::SiteVectors);
+    let energy = EnergyRuntime::build(&job, &dimensions, &lattice, &links, &probe)?;
+    tracing::info!(
+        phase = InitPhase::SiteVectors.as_str(),
+        site = energy.site.len(),
+        vectors = energy.vectors.len(),
+        "context phase completed"
+    );
+
+    probe.check()?;
+    observer.observe(InitPhase::ClusterVectors);
+    energy::fill_cluster_energies(&job, &dimensions, &mut clusters, energy.ev_to_kt, &probe)?;
+    tracing::info!(
+        phase = InitPhase::ClusterVectors.as_str(),
+        rows = clusters.energy.len(),
+        "context phase completed"
+    );
+
+    probe.check()?;
+    observer.observe(InitPhase::InitialEnergy);
+    let lattice_energy_kt =
+        energy::initial_lattice_energy_kt(&job, &dimensions, &lattice, &energy, &clusters, &probe)?;
+    let lattice_energy_ev = lattice_energy_kt * energy.kt_ev;
+    if !lattice_energy_ev.is_finite() {
+        return Err(ContextError::NonFiniteFactor {
+            what: "lattice energy",
+        });
+    }
+    tracing::info!(
+        phase = InitPhase::InitialEnergy.as_str(),
+        energy_ev = lattice_energy_ev,
         "context phase completed"
     );
 
@@ -630,6 +797,8 @@ pub(crate) fn initialize_with(
         lattice,
         links,
         clusters,
+        energy,
+        lattice_energy_ev,
         pools: SelectionPools::empty(),
         jumps: JumpRuntime::empty(),
         counters,
@@ -864,6 +1033,9 @@ mod tests {
                 InitPhase::Lattice,
                 InitPhase::Links,
                 InitPhase::Clusters,
+                InitPhase::SiteVectors,
+                InitPhase::ClusterVectors,
+                InitPhase::InitialEnergy,
                 InitPhase::InvariantSweep,
             ]
         );

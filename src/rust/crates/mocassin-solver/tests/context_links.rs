@@ -295,12 +295,12 @@ fn initialization_is_deterministic() {
 #[test]
 fn the_memory_plan_accounts_for_the_links_and_clusters() {
     let cases = [
-        (populated_kmc(), 940_u64),
-        (populated_mmc(), 940),
-        (amend2(), 1204),
-        (pre_map(), 1204),
-        (centered(), 996),
-        (ceria(), 5508),
+        (populated_kmc(), 1804_u64),
+        (populated_mmc(), 1804),
+        (amend2(), 2644),
+        (pre_map(), 2644),
+        (centered(), 3300),
+        (ceria(), 40228),
     ];
 
     for (job, total) in cases {
@@ -317,6 +317,8 @@ fn the_memory_plan_accounts_for_the_links_and_clusters() {
 
     let context = initialize(populated_kmc());
     let plan = MemoryPlan::plan(&context.job, &context.limits).expect("plan");
+    assert_eq!(plan.entry("energy.site").expect("entry").elements, 12);
+    assert_eq!(plan.entry("energy.vectors").expect("entry").elements, 96);
     assert_eq!(plan.entry("links.links").expect("entry").elements, 6);
     assert_eq!(
         plan.entry("links.cluster_assoc").expect("entry").elements,
@@ -407,10 +409,17 @@ fn every_link_and_cluster_cap_rejects_before_allocation() {
     );
     expect_limit(
         &job,
-        |options| options.limits.max_context_bytes = 939,
+        |options| options.limits.max_energy_vector_bytes = 863,
+        "max_energy_vector_bytes",
+        864,
+        863,
+    );
+    expect_limit(
+        &job,
+        |options| options.limits.max_context_bytes = 1803,
         "max_context_bytes",
-        940,
-        939,
+        1804,
+        1803,
     );
 }
 

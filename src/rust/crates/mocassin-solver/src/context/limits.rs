@@ -128,6 +128,7 @@ impl MemoryPlan {
     pub fn plan(job: &JobPackage, limits: &ContextLimits) -> Result<Self, ContextError> {
         let dimensions = Dimensions::from_job(job)?;
         let mut entries = core_entries(&dimensions, limits)?;
+        entries.extend(energy_entries(&dimensions, limits)?);
         entries.extend(link_entries(job, &dimensions, limits)?);
         entries.extend(cluster_entries(job, &dimensions, limits)?);
         finish(entries, limits)
@@ -219,6 +220,33 @@ fn core_entries(
             limits.max_context_bytes,
         )?,
     ])
+}
+
+fn energy_entries(
+    dimensions: &Dimensions,
+    limits: &ContextLimits,
+) -> Result<Vec<MemoryEntry>, ContextError> {
+    let site = u64::from(dimensions.p()) * u64::from(dimensions.pc());
+    let vectors = u64::from(dimensions.environment_count()) * u64::from(dimensions.pc());
+    let entries = vec![
+        entry("energy.site", site, 8, limits.max_energy_vector_bytes)?,
+        entry("energy.vectors", vectors, 8, limits.max_energy_vector_bytes)?,
+    ];
+
+    let bytes = sum_entry_bytes(
+        &entries,
+        "max_energy_vector_bytes",
+        limits.max_energy_vector_bytes,
+    )?;
+    if bytes > limits.max_energy_vector_bytes {
+        return Err(ContextError::LimitExceeded {
+            what: "max_energy_vector_bytes",
+            value: bytes,
+            limit: limits.max_energy_vector_bytes,
+        });
+    }
+
+    Ok(entries)
 }
 
 fn link_entries(
