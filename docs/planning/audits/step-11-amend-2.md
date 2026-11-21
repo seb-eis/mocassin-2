@@ -382,33 +382,70 @@ Follow-up issue/step: `step-11.1` merge/tag after owner approval; F-29's formal 
 
 ## Resolution status
 
+**Owner decision (2026-11-21):** the human owner accepted the audit verdict **`Passed with notes`** and directed
+the docs-only resolutions below, followed by the `--no-ff` merge and the `step-11.1` tag. The reviewer's findings,
+evidence, and verdict above are unchanged.
+
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| — | — | — | — |
+| A2A-01 (Minor) | **Fixed.** The pre-map README now states the **84-byte** model-payload delta (`6,090 − 6,006`); the 24-byte figure is identified as the eight 3-byte codes only. | Step agent | this docs-only notes commit |
+| A2A-02 (Minor) | **Fixed.** The new fixture README now records writer commit `b3d967e05e84fd83062bfbc5d38f0cd7f8372cec`, SDK 11.0.100/runtime 11.0.0, `created_utc = 2026-11-21T00:00:00Z`, and the one-job/one-lattice/one-model counts. | Step agent | this docs-only notes commit |
+| A2A-03 (Note) | **Fixed.** The amendment page's completed acceptance and documentation checkboxes are ticked; the combined "main CI green before tag" item stays open until after the merge and main CI. | Step agent | this docs-only notes commit |
 
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
+No code, test, fixture, format, or contract file changed in the resolution commit.
 
 ## Approval summary
 
-The step agent completes this section before a merge, tag, or Blocker/Major waiver request. It must cover the
-full history, not only the latest round.
+- [x] Requested decision and frozen commit recorded
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
+- [x] Final CI and documentation-build results recorded
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+**Requested decision:** merge `fix/step-11.1-cluster-code-expansion` into `main` with `--no-ff` and tag the merge
+commit `step-11.1`; the owner accepted `Passed with notes` on 2026-11-21. Audited code commit
+`ef568beca62f6f51559460d01ba5627219e90345`; audit record commit
+`52032fe8f0bf767675628eec224c5cea46b0c803`; resolutions commit is this docs-only commit.
+
+**Final state:** audited commit `ef568be`; closeout CI
+[`44896189617`](https://github.com/seb-eis/mocassin-2/actions/runs/44896189617) `success` at
+`ef568beca62f6f51559460d01ba5627219e90345`; `main` at freeze `63cdd0638b952e9175f75681d864bb95db0b4f68`;
+`./tools/verify.sh all --require` exit 0 (1,991 .NET tests); strict documentation build clean; platform CI not run
+(no platform-conditional code).
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| Design review round 1 | 2026-11-21 | `6ff913671351798cb64678b506986ea6649364a4` | Fresh planning auditor | Changes required (A2-01 Major, A2-02…A2-11 Minors, A2-12…A2-16 Notes) |
+| Design re-review round 2 | 2026-11-21 | `ff112cf45592bf30dd4f2abe1aa13c17944b0599` | Fresh planning auditor | Ready with notes (A2-R2 findings) |
+| Design re-review round 3 | 2026-11-21 | `5112180128cce8b7eaa3c1192706448136e06a67` | Fresh planning auditor | Ready with notes (A2-R3-01 Minor, A2-R3-02/A2-R3-03 Notes) |
+| Design re-review round 4 | 2026-11-21 | `bf273ff5cf9f17f66ec48669e39d010006c4d0a9` | Fresh planning auditor | Ready for implementation (no findings) |
+| Audit round 1 | 2026-11-21 | `ef568beca62f6f51559460d01ba5627219e90345` (request `1965eae`) | DeepSeek V4.1 Flash 1017 — fresh audit context | Passed with notes (A2A-01/A2A-02 Minor, A2A-03 Note) |
 
 Findings and resolutions:
+
+| Finding | Severity | Issue | Resolution | Commit | Status |
+| --- | --- | --- | --- | --- | --- |
+| A2-01…A2-16 | 1 Major, 10 Minor, 5 Note | Budget arithmetic, optional-key scan, API preservation, fixture policy, documentation pointers, and the A2-07 process change; every issue and evidence entry is in [`reviews/step-11-amend-2.md`](../reviews/step-11-amend-2.md). | Corrected across design rounds 1–2; no Blocker or Major remained after round 1. | `ff112cf` and follow-ups | Closed |
+| A2-R2-01…A2-R2-04 | 1 Major + Minors/Notes | `Σ(8E + 4I)` scan ordering, the three-way `lookup`, the typo, and the freeze-note conflict; details in the design review record. | Corrected in the round-2 re-freeze. | `5112180` | Closed |
+| A2-R3-01…A2-R3-03 | 1 Minor + 2 Notes | Construction path, absent-map test wording, and the .NET raised-limit row; details in the design review record. | Corrected in the round-4 re-freeze. | `bf273ff` | Closed |
+| A2A-01 | Minor | Pre-map README's 24-byte delta. | Corrected to 84 bytes. | this notes commit | Fixed |
+| A2A-02 | Minor | New fixture README omitted the writer commit. | Added writer commit, SDK, `created_utc`, and job count. | this notes commit | Fixed |
+| A2A-03 | Note | Amendment-page checkboxes unchecked. | Completed items ticked; main-CI item stays open until after merge. | this notes commit | Fixed |
+
+**Accepted notes and waivers:** the owner accepted the `Passed with notes` verdict and the A2A-03 documentation
+Note, and accepted that platform CI is not run because the change has no platform-conditional code.
+
+**Residual risk:** the new sample is a P-1 origin-shifted representation of the ceria primary cluster (recorded
+in the sample/fixture READMEs); pre-map non-singleton packages fail closed and must be rebuilt; Step 14 owns
+F-29's formal closure and the `ClusterTable::lookup` consumption; the A2-07 evidence rule is the approved
+process change for this post-merge amendment.
+
+**Gate statement:** no Blocker or Major finding remains unclosed. The two audit Minors (A2A-01/A2A-02) and the
+Note (A2A-03) are fixed in this docs-only commit.
 
 ## Audit rounds
 

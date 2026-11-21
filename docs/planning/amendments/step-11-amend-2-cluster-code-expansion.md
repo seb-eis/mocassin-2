@@ -639,46 +639,45 @@ one maintenance delivery plus its audit.
 
 ## Acceptance criteria
 
-- [ ] `EnergyPayloadMapper` emits a complete, strictly ascending `code_expansions` map for the ceria two-member
+- [x] `EnergyPayloadMapper` emits a complete, strictly ascending `code_expansions` map for the ceria two-member
       table; every enumerated raw tuple resolves; the two non-canonical codes map to their canonical indices and
       energies.
-- [ ] Singleton tables emit `nil`; the writer never emits a partial, duplicate, or non-ascending map; a
+- [x] Singleton tables emit `nil`; the writer never emits a partial, duplicate, or non-ascending map; a
       violation throws an internal invariant error.
-- [ ] The property test proves `GroupLookupCodes` **completeness** against the reduction oracle for random small
+- [x] The property test proves `GroupLookupCodes` **completeness** against the reduction oracle for random small
       clusters, accepts superset orbit codes, and includes an asymmetric-allowed-set case (A2-05).
-- [ ] The `.NET` verifier applies the structural rules and reports `PKG010` for every violation; a valid map
+- [x] The `.NET` verifier applies the structural rules and reports `PKG010` for every violation; a valid map
       verifies.
-- [ ] The .NET decode pre-scan and the Rust scan enforce the cumulative `128 MiB` expansion budget before the
+- [x] The .NET decode pre-scan and the Rust scan enforce the cumulative `128 MiB` expansion budget before the
       typed arrays are allocated, with fail-closed errors and hostile-payload tests; the limit is raisable
       (A2-01).
-- [ ] The Rust scan supports `code_expansions` as an **optional** key; a pre-map package passes the scan, and a
+- [x] The Rust scan supports `code_expansions` as an **optional** key; a pre-map package passes the scan, and a
       malformed present map is rejected with the field path (A2-02).
-- [ ] The Rust reader validates the same rules, exposes `ClusterTable::lookup` with the three-way
+- [x] The Rust reader validates the same rules, exposes `ClusterTable::lookup` with the three-way
       `ClusterCodeLookup` result, and rejects hostile maps with a field-specific `PackageError` (A2-R2-02).
-- [ ] The `.NET` four-argument `ClusterTablePayload` constructor and `Deconstruct` are preserved alongside the
+- [x] The `.NET` four-argument `ClusterTablePayload` constructor and `Deconstruct` are preserved alongside the
       five-argument forms; ApiCompat/`PublicAPI.Unshipped.txt` are clean (A2-03).
-- [ ] The new fixture is deterministic, carries the documented expectation, and its `package-summary-v1` and
+- [x] The new fixture is deterministic, carries the documented expectation, and its `package-summary-v1` and
       signatures are the logical values from before the change.
-- [ ] The regenerated `step-13-populated` fixture's summary is unchanged and its README size/SHA table is
+- [x] The regenerated `step-13-populated` fixture's summary is unchanged and its README size/SHA table is
       refreshed; the no-cluster fixtures' extracted payloads/summaries are unchanged (package bytes are a
       same-host observation) (A2-12/A2-15).
-- [ ] A byte-fixed **non-singleton pre-map** package built by the parent writer loads, resolves its six
+- [x] A byte-fixed **non-singleton pre-map** package built by the parent writer loads, resolves its six
       canonical codes, and returns the recompile-required result for the two non-canonical codes (A2-06).
-- [ ] The pre-amendment reader reads the new fixture in the one-time forward check (recorded as evidence, not a
+- [x] The pre-amendment reader reads the new fixture in the one-time forward check (recorded as evidence, not a
       PR tier) (A2-13).
-- [ ] `signatures.model`, `signatures.parameterization`, `signatures.lattice`, `signature-vectors.json`,
+- [x] `signatures.model`, `signatures.parameterization`, `signatures.lattice`, `signature-vectors.json`,
       `tests/contracts/projections/**`, and `contracts/**` are unchanged; `verify.sh contracts` is green.
-- [ ] `.NET` and Rust public API additions are recorded (`PublicAPI.Unshipped.txt`, ApiCompat, §5/§6.1 of this
+- [x] `.NET` and Rust public API additions are recorded (`PublicAPI.Unshipped.txt`, ApiCompat, §5/§6.1 of this
       page); the old `ClusterTablePayload` constructor and `Deconstruct` still exist (A2-09).
-- [ ] The audit/closeout pages and template define the post-merge amendment evidence rule; no page claims a
+- [x] The audit/closeout pages and template define the post-merge amendment evidence rule; no page claims a
       `step-11.1` JSON evidence file (A2-07).
-- [ ] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` are added (A2-10).
+- [x] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` are added (A2-10).
 - [ ] `./tools/verify.sh all --require` is green at the audit commit; the single closeout CI run is green; the
       main CI run is green before `step-11.1` is tagged.
-- [ ] Documentation is updated (§8) and `./tools/verify.sh docs --require` passes.
-- [ ] The Step 14 pointer names `87be9de`/`1ea8090` and records F-29's formal closure as a Step 14 gate; the
+- [x] Documentation is updated (§8) and `./tools/verify.sh docs --require` passes.
+- [x] The Step 14 pointer names `87be9de`/`1ea8090` and records F-29's formal closure as a Step 14 gate; the
       parity row's evidence is updated after implementation (A2-08).
-
 ## Tests
 
 The full matrix is in §9.3. The gate rows are: writer coverage/duplicate, `GroupLookupCodes` property,
@@ -687,17 +686,17 @@ one-time forward read.
 
 ## Documentation
 
-- [ ] `02-data-contracts.md` §3.3/§3.4 updated with the field, superset coverage, absence, signature, and budget rules.
-- [ ] `01-target-architecture.md` §3.1/§7.6 updated.
-- [ ] ADR 0013 addendum records additive-within-a-major payload fields and **fail-closed** absence.
-- [ ] `05-open-decisions.md` resolved/gated rows and the post-merge evidence item updated.
-- [ ] Step 11 page, amendment index, `status.md`, and Step 14 cross-step note updated (commits `87be9de`/`1ea8090`, closure gate).
-- [ ] `msl-format.md` updated.
-- [ ] Fixture READMEs, `tests/contracts/README.md`, and the `step-13-populated` size/SHA table updated.
-- [ ] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` added.
-- [ ] `audits/README.md` §3.1, `closeout/README.md`, and `step-audit-template.md` define the post-merge evidence rule.
-- [ ] `PKG010` help wording noted for a later diagnostics pass.
-- [ ] Parity matrix evidence updated after implementation.
+- [x] `02-data-contracts.md` §3.3/§3.4 updated with the field, superset coverage, absence, signature, and budget rules.
+- [x] `01-target-architecture.md` §3.1/§7.6 updated.
+- [x] ADR 0013 addendum records additive-within-a-major payload fields and **fail-closed** absence.
+- [x] `05-open-decisions.md` resolved/gated rows and the post-merge evidence item updated.
+- [x] Step 11 page, amendment index, `status.md`, and Step 14 cross-step note updated (commits `87be9de`/`1ea8090`, closure gate).
+- [x] `msl-format.md` updated.
+- [x] Fixture READMEs, `tests/contracts/README.md`, and the `step-13-populated` size/SHA table updated.
+- [x] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` added.
+- [x] `audits/README.md` §3.1, `closeout/README.md`, and `step-audit-template.md` define the post-merge evidence rule.
+- [x] `PKG010` help wording noted for a later diagnostics pass.
+- [x] Parity matrix evidence updated after implementation.
 
 ## Risks and mitigations
 

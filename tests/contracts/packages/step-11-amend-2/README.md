@@ -46,10 +46,13 @@ every occupation code.
   primary two-member cluster (`centre 018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d5f07`, offsets `[-0.25,0,0]` and
   `[+0.25,0,0]`), origin-shifted so the centre lies at the P-1 inversion origin; P-1 swaps the two member
   slots. It carries one KMC migration job at 2×2×2.
+- **Writer commit:** `b3d967e05e84fd83062bfbc5d38f0cd7f8372cec` (the `step-11.1` implementation commit that
+  adds the writer map). The package is written by that code state with the fixed timestamp below.
 - **Build path:** `ProjectJson` → `ModelCompiler` → `ParameterizationService` → `JobTemplateExpander` →
   `SupercellGenerator` → `SimulationPackageWriter`, with `PackageBuildOptions` defaults and
   `created_utc = 2026-11-21T00:00:00Z`.
 - **Request:** `PackageBuildRequest(<path>, 018f4c9a-7f6b-7c3a-9d2e-0000000011a0, "all", 2026-11-21T00:00:00Z)`.
+- **Job count:** one KMC job; one lattice; one model row.
 - **Toolchain:** .NET SDK 11.0.100 / runtime 11.0.0, in-box Zstandard, default compression level 3.
 - **Logical equality:** `package-summary-v1.json` and both model/lattice signatures are byte-for-byte equal to
   the pre-map `amend-2-pre-map` fixture; only the model payload gains `code_expansions`.

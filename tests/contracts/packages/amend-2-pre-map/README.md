@@ -12,7 +12,7 @@ that produced it.
 | `amend-2-pre-map.msl` | 98,304 bytes | immutable SQLite package; SHA-256 `97a97276d3f6670226742ef5a48a178345dc8f242c459a49473a54ed8df4788a` |
 | `amend-2-pre-map.sha256` | — | `sha256sum` line for the package |
 | `package-summary-v1.json` | 1,959 bytes | canonical inspector projection; logically equal to `step-11-amend-2` |
-| `payloads/model-1.bin` | 6,006 bytes | raw model MessagePack **without** the optional member (24 bytes smaller) |
+| `payloads/model-1.bin` | 6,006 bytes | raw model MessagePack **without** the optional member (84 bytes smaller than the 6,090-byte new-fixture payload; the eight codes alone are 24 bytes) |
 | `payloads/lattice-1.bin` | 101 bytes | raw lattice MessagePack |
 | `payloads/job-1.bin` | 446 bytes | raw KMC job MessagePack |
 | `payloads/index.json` | 1,235 bytes | kind, id, compressed/raw size and SHA-256 for every payload |
