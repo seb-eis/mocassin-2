@@ -1,7 +1,7 @@
 # Step 14 — Simulation Context Initialization
 
 **Phase:** D. Solver
-**Depends on:** 13
+**Depends on:** 13 and `step-11.1` (the `step-11-amend-2` reader/runtime cluster-code lookup; see §22)
 **Delivers:** A deterministic, allocation-bounded simulation context built once per job from the validated
 `JobPackage`: lattice and environment arenas, an owner-major neighbour-link CSR with an inverse routing index,
 the cluster runtime, the energy background and environment energy vectors, the supercell selection pools, the
@@ -257,7 +257,8 @@ past the caps and discover it afterwards; the earlier draft bounded only the sit
 left `cluster_table_count × A*B*C` and `P*D+1` unchecked.
 
 Per-array derivation (all products checked; `E = A*B*C*P`, `C = A*B*C`, `K` = validated cluster instances = the
-number of slot-0 links, `N` = payload pair links, `S = P*D` statuses, `J` = jump links, `M` = selectable members):
+number of slot-0 links, `N` = payload pair links, `S = P*D` statuses, `J` = jump links, `M` = selectable members,
+`pool_count` = distinct selectable direction counts):
 
 | Array | Elements | Bytes |
 | --- | --- | ---: |
@@ -265,20 +266,24 @@ number of slot-0 links, `N` = payload pair links, `S = P*D` statuses, `J` = jump
 | `lattice.mobile_tracker` | `E` | `E*4` |
 | `energy` (site+pair) | `E*pc` | `E*pc*8` |
 | `site` | `P*pc` | `P*pc*8` |
+| `links.owner_offsets`, `links.inverse_offsets` | `P+1` each | `(P+1)*4` each |
 | `links.links` | `N` | `N*28` (`Link` = 4+12+4+4+2, padded to 28) |
-| `links.inverse` | `N` | `N*8` |
-| `links.cluster_assoc` | `Σ_k (slots(k) - 1)` | `*8` |
-| `clusters.instances` | `K` | `K*12` (`table`, `centre_position`, `slot_start`, `slot_count`) |
+| `links.inverse` | `N` | `N*8` (`IncomingLink` = 8) |
+| `links.cluster_assoc` | `Σ_k (slots(k) - 1)` | `*8` (`ClusterAssoc { instance: u32, slot: u8 }`, padded to 8) |
+| `clusters.instances` | `K` | `K*16` (`ClusterInstance { table, centre_position, slot_start: u32, slot_count: u8 }`) |
 | `clusters.slot_start`, `slot_positions`, `slot_cells` | `K+1`, `Σ slots`, `Σ slots` | `(K+1)*4 + Σ slots*16` |
+| `clusters.energy_start` | `K+1` | `(K+1)*4` (prefix of the per-instance `mapping_len`) |
 | `clusters.codes`, `code_ids` | `K*C` | `K*C*8`, `K*C*4` |
-| `clusters.energy` | `C*Σ_k mapping_len(k)` | `*8` (not `K*C*pc`) |
+| `clusters.energy` | `C*Σ_k mapping_len(k)` | `*8` (index `cell*Σ mapping_len + energy_start[i] + row`, not `K*C*pc`) |
 | `clusters.centre_offsets`, `centres` | `P+1`, `K` | `(P+1)*4 + K*4` |
-| `pools.members` | `M` | `M*8` |
+| `pools` (headers: `Vec<PoolMember>` 24 B + `direction_count` 4 B, padded) | `pool_count` | `pool_count*32` |
+| `pools.members` | `M` | `M*8` (each pool reserved to its own count) |
 | `pools.slot` | `E*pc` | `E*pc*4` |
 | `pools.pool_of` | `P*pc` | `P*pc*4` |
 | `jumps.offsets` | `S+1` | `(S+1)*4` |
-| `jumps.links` | `J` | `J*8` |
-| counters, tracker mapping | — | small, formula in `limits.rs` |
+| `jumps.links` | `J` | `J*8` (`JumpLink` = 8) |
+| `counters` | `pc*6 + 2` u64 | `(pc*6 + 2)*8` |
+| `trackers.mobile_positions` | `mobile_count` | `mobile_count*4` |
 
 | Limit | Default | Reason |
 | --- | ---: | --- |
@@ -350,7 +355,9 @@ mirrored in the roadmap's "Recorded class — Step 14" note.
 - **Contracts and public surfaces:** no persisted format change, but a new public Rust API
   (`SimulationContext`, `ContextOptions`, `ContextLimits`, `ContextError`, `ResumeState`) that Steps 15, 16, 17,
   18, and 19 consume. A late change ripples into five later steps.
-- **New dependencies:** none.
+- **New dependencies:** none at the crate level. The cross-step dependency on `step-11.1` (`step-11-amend-2`
+  cluster-code lookup) is recorded in §22: it is an approved contract with a running implementation, not a new
+  crate or format decision for Step 14.
 - **Cross-step interfaces:** five later steps, and the interface fixes the neighbour-link identity, the energy
   vector layout, the cluster-code representation, the pool order, and the jump-status link identity. This is the
   dimension that makes the step High.
@@ -440,7 +447,7 @@ pub struct Link {
     pub cluster_len: u16,
 }
 pub struct IncomingLink { pub owner_position: u32, pub link_id: u32 }
-pub struct ClusterAssoc { pub cluster_table: u32, pub slot: u8 }
+pub struct ClusterAssoc { pub instance: u32, pub slot: u8 }
 ```
 
 - **Owner → partner resolution:** `partner = wrap(owner_cell + link.offset) * P + link.partner_position`. The
@@ -461,9 +468,9 @@ pub struct ClusterAssoc { pub cluster_table: u32, pub slot: u8 }
   `pair_id` ascending, then `partner_position`, then `offset` lexicographically. The inverse index follows the
   forward order within each partner position. The original sorted by pair id only with an unstable sort; the
   added tie-breakers change no physics, only rounding, and are recorded in §14.
-- `cluster_assoc` on a forward link means "the owner is the centre of cluster `cluster_table`, and this link's
-  partner occupies slot `slot`". The cluster term therefore belongs to the link's owner (the cluster centre),
-  and a change at the partner updates the owner's cluster code and centre energy. This is the original's
+- `cluster_assoc` on a forward link means "the owner is the centre of cluster **instance** `instance`, and this
+  link's partner occupies slot `slot`". The cluster term therefore belongs to the link's owner (the cluster
+  centre), and a change at the partner updates the owner's cluster code and centre energy. This is the original's
   `EnvironmentLink.ClusterLinks` orientation, expressed in the payload's centre-major link direction.
 - Both CSRs are built in one pass over the payload links: `N` forward entries (`28 B` each) and `N` inverse
   entries (`8 B` each), bounded by `max_pair_links` and `max_link_bytes`. The original allocated the per-cell
@@ -517,9 +524,10 @@ pub struct ClusterArena {
     pub slot_start: Vec<u32>,                       // length K + 1; flat slot arrays (no per-instance Vec)
     pub slot_positions: Vec<u32>,                   // P1 position per instance slot, slot 0 = centre
     pub slot_cells: Vec<[i32; 3]>,                  // relative cell offset per instance slot, slot 0 = [0,0,0]
-    pub codes: Vec<u64>,                            // [instance * A*B*C + cell] current base code
-    pub code_ids: Vec<u32>,                         // index into the table's sorted codes (u32::MAX = absent)
-    pub energy: Vec<f64>,                           // [instance * A*B*C + cell] * mapping_len, kT
+    pub codes: Vec<u64>,                            // [instance * A*B*C + cell] current raw tuple
+    pub code_ids: Vec<u32>,                         // [same] canonical index from ClusterTable::lookup
+    pub energy_start: Vec<u32>,                     // length K + 1; prefix of mapping_len per instance
+    pub energy: Vec<f64>,                           // [cell * Σ mapping_len + energy_start[i] + row], kT
 }
 pub struct ClusterInstance {
     pub table: u32,
@@ -540,17 +548,35 @@ pub struct ClusterInstance {
   There is no `table -> instance` map; the instance carries its `table`, and `centres` is a CSR over P1 positions
   listing the instances centred there (one per cluster table centred on that position). `centres` is what Step 15
   uses to add the cluster terms of a path node.
-- `code_ids` is the `u32` index of the code in the table's ascending `occupation_codes`; a missing code is a
-  **data error** (`ContextError::MissingOccupationCode`, exit 12). Step 14 checks that the code exists for the
-  initial lattice for every centre particle in `particle_table_mapping`, so a wrong cluster geometry fails at
-  initialization rather than during a run.
-- `energy[instance, cell, p]` = `table.energies[code_id(code with slot 0 = p)]` for `p` in the table's
-  `particle_table_mapping`; zero (unused) for other particles. The row count per instance is
-  `mapping_len(instance)`, not `pc`, and the plan sizes the array by
-  `cells · Σ mapping_len` (§2). The table layout is 1-D per code — there is no centre row: the centre particle
-  is encoded in slot `0`. `particle_table_mapping` is the **ascending list of allowed centre particles**, not a
-  `[u8; 64]` particle→row map (the Step 15 draft's `[center_row][code]` wording is corrected; §7.3 and the data
-  contract are the source).
+- **Code resolution is the approved amendment contract (review F-29).** The raw tuple is built exactly as
+  `codes` is (slot 0 = centre particle, slots `1..=n` = the resolved member particles, 6 bits per slot), then
+  resolved through `ClusterTable::lookup(raw) -> ClusterCodeLookup` from the Step 13 runtime
+  ([`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md) §6):
+  - `Canonical(index)` → `code_ids = index`; the applied energy is `table.energies[index]`.
+  - `MissingFromMap(raw)` → `ContextError::MissingOccupationCode { cluster_table, code }`, exit 12. A present
+    map is authoritative; a missing raw tuple means the package is internally inconsistent.
+  - `ExpansionMapAbsent(raw)` → **`ContextError::ExpansionMapAbsent { cluster_table, code }`**, exit 12, with an
+    actionable "this package predates the cluster-code expansion map; rebuild it with the current writer"
+    message. It is deliberately distinct from `MissingOccupationCode`: old package versus corrupt package.
+  - **No solver-side symmetry.** Never sort/minimise the slot particles, never re-run a reduction, never map to
+    a neighbouring code, and never fall back to a direct `occupation_codes` index when the lookup fails. The
+    expansion map is the only resolution; a `Canonical` result for a singleton/no-map table still works because
+    the table itself is complete.
+  - The context stores only the canonical `code_ids`; the expansion map stays in the shared
+    `Arc<ParameterizedModel>` and is not copied into the context. The Step 14 code has no symmetry kernel and no
+    space-group catalog.
+- The initial check resolves the initial tuple for **every instance and cell** (and every allowed centre
+  particle for the energy rows) and propagates the lookup error, so an old or inconsistent package fails at
+  initialization rather than during a run. The amendment guarantees that every raw tuple enumerated for a
+  writer-valid table resolves; a `MissingFromMap` is therefore a package-corruption error and an
+  `ExpansionMapAbsent` is the pre-map package case.
+- `energy[cell * Σ mapping_len + energy_start[i] + row(p)]` for `p` in the table's `particle_table_mapping`;
+  the per-instance base is `energy_start[i]` (prefix of `mapping_len(instance)`), so a table with a different
+  allowed-centre set has a computable base. Zero (unused) for other particles. The row count is
+  `mapping_len(instance)`, not `pc`, and the plan sizes the array by `cells · Σ mapping_len` (§2). There is no
+  centre row: the centre particle is encoded in slot `0`. `particle_table_mapping` is the **ascending list of
+  allowed centre particles**, not a `[u8; 64]` particle→row map (the Step 15 draft's `[center_row][code]` wording
+  is corrected; §7.3 and the data contract are the source).
 - `occupation_code(instance, centre_cell, overrides)` builds a code from the current particles with a small
   caller-supplied slot override list and no allocation; Step 15 uses it to evaluate S2 after all path-node
   changes without mutating the stored code.
@@ -570,33 +596,50 @@ Step 14 derives each instance's geometry from the payload and fails closed inste
   1. the links from `c_i` whose resolved partner position is in `C_j`. If exactly one, use it (this is the
      original single-centre rule and covers the current writer, where `C_j` has one position).
   2. if step 1 found no link and the table has **more than one slot-0 link** (multi-centre), take the links
-     whose partner position belongs to `member_site[j]`; if exactly one, use it. This is the
-     multi-centre case: `ClusterCompilationStage` writes the member slot on the representative placement only,
-     and a different centre position of the same site reaches the member site through its own pair image. The
-     cluster energy table is invariant under the centre site's stabilizer (Step 08's cluster reduction), so the
-     rotated/translated image has the same code space and energy. A single-centre table does **not** use this
-     fallback: it must resolve the candidate position exactly (the strict OD-1 rule), so a wrong member image can
-     never be accepted silently.
+     whose partner position belongs to `member_site[j]`; if exactly one, use it. This is the **rotated
+     multi-centre image**: `ClusterCompilationStage` writes the member slot on the representative placement
+     only, and a different centre position of the same site reaches the member site through its own pair image.
+     It is **not** a cross-image acceptance: the image is the space-group transport of the representative
+     cluster, so the occupation tuple is a symmetry image of an enumerated tuple (§ D-11). A single-centre table
+     does **not** use this fallback: it must resolve the candidate position exactly (the strict OD-1 rule).
   3. otherwise (zero, or more than one) the instance's geometry is ambiguous or absent: initialization fails
      with `ContextError::ClusterGeometry` naming the table, instance (centre position), slot, and member site.
      Zero links also means no delta could ever reach the centre's code, so accepting it would silently freeze
      the cluster.
   The resolved link's `offset` is `slot_cells[slot_start(i) + j]` and its partner position is
   `slot_positions[slot_start(i) + j]`; the link receives `cluster_assoc { instance, slot }`.
-- The derived geometry is cross-checked by the code-existence rule in §6.3: a wrong offset almost always yields
-  a code the table does not contain, which fails at initialization. The code-existence check runs for every
-  instance and every allowed centre particle.
-- This accepts every checked-in fixture: `step-13-populated` has one cluster centred on position 1 with members
-  0 and 2, each with a single `[0,0,0]` image (one slot-0 link); the other fixtures have no cluster table. The
-  new Step 14 fixture (feature 6) adds a cluster to a copy of the centred model, whose centre site owns four P1
-  positions: it must yield four instances and per-instance codes/energies, and the same package without the
-  member-site fallback would be unrepresentable — the test is the acceptance evidence for F-17.
-- **v1 limitations recorded (OD-1).** (a) A member site with several images from one centre, and (b) two slots
-  that resolve to the same link or whose fallback site is the same (for example a dumbbell whose two images are
-  the same P1 position, or two slots on one member site at a non-representative centre), are ambiguous and are
-  **rejected** with the per-instance error above. Both are writer-valid; the writer should emit the member
-  placement per centre (one slot-`j` link per instance placement, or persist the relative offset). Until then the
-  solver fails closed, and the fixture/test asserts the documented rejection for the ambiguous case.
+- The derived geometry is cross-checked by the §6.3 lookup: a wrong offset yields a raw tuple that is either
+  absent from a present map (`MissingFromMap`) or resolves to a different canonical orbit; the initialization
+  check runs for every instance and every allowed centre particle. It cannot detect a *valid but differently
+  imaged* tuple, which is the inherent OD-1 risk recorded below.
+- **Accepted by the rule (not a cross-image).** For a multi-centre table, each instance resolves its own unique
+  **member-site** image. This is the space-group transport of the representative placement: the energy table
+  enumerates every allowed occupation tuple, and the applied energy is invariant under the full space group
+  (§ D-11), so the transported tuple has the same energy. It is accepted, not a limitation.
+- **Accepted residual risk (single-centre OD-1).** A single-centre table with exactly one candidate-position
+  link is accepted, because that is the only exact reconstruction the payload allows. If the compiler had
+  actually used a different periodic image of that member, the solver cannot know; the authoring/compiler side
+  must not produce that ambiguity. This is the inherent v1 risk the owner accepts with OD-1, not a new
+  acceptance of a cross-image cluster.
+- **Rejected (fail closed).** (a) a cross-image member: a single-centre table whose candidate position has no
+  unique link (the authored image is another periodic image); (b) a member site with several images from one
+  centre; (c) two slots that resolve to the same link or whose fallback site is the same (for example a
+  dumbbell whose two images are the same P1 position, or two slots on one member site at a non-representative
+  centre); (d) an unresolved multi-centre placement. All are writer-valid, are rejected with the per-instance
+  `ClusterGeometry` error, and are recorded as the OD-1 limitation; the writer follow-up emits the per-centre
+  member placement (or persists the relative offset).
+- **Fixtures (review F-36).** `step-13-populated` has one cluster centred on position 1 with members 0 and 2,
+  each with a single `[0,0,0]` image (one slot-0 link); the other Step 13 fixtures have no cluster table. The
+  new `step-14-multi-centre-cluster` package (feature 6) is built from the committed
+  `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a copy of the centred sample, so
+  the `step-13-centered` golden does not move) and has the full artifact set: `.msl`, `.sha256`,
+  `package-summary-v1.json`, `payloads/index.json`, `payloads/model-1.bin`, a README with provenance (writer
+  commit, SDK, `created_utc`, job count), a .NET rebuild test, and the usual regeneration command. Its centre
+  site owns four P1 positions, so it must yield four instances with per-instance codes/energies. It has one
+  member per instance; the **two-member non-P1 case that exercises F-29 is the amendment-2 ceria fixture**
+  (`tests/contracts/packages/step-11-amend-2/`), not a second multi-centre package, because two images of one
+  member site are the ambiguous case above. A synthetic distinct-energy table in the unit tests evidences the
+  code→energy mapping, since the sample tables are zero.
 - **Writer follow-up (review F-13/F-17).** A writer-valid cross-image or multi-centre-ambiguous cluster still
   reaches the solver and is only rejected at initialization. A build-time diagnostic in `Mocassin.Compilation`
   (which knows `ClusterCompilationStage`'s placement) would surface it at build time. That is a Step 11/12
@@ -663,15 +706,19 @@ Step 14 derives each instance's geometry from the payload and fails closed inste
 $$
 U = \sum_{\text{stable } e} E_\text{site}(P(e), p(e))
   + \tfrac{1}{2} \sum_{\text{stable } e} \bigl(E_\text{env}(e, p(e)) - E_\text{site}(P(e), p(e))\bigr)
-  + \sum_{\text{instances } c} E_\text{cluster}(c, p(c))
+  + \sum_{\text{instances } i} \sum_{\text{cells } c}
+      E_\text{cluster}\bigl(i, c, p(c, P(\text{centre}_i))\bigr)
 $$
 
-Equivalently: each site background once, each pair once (the 0.5 corrects the both-ends sum), each cluster once
-at its centre. This deviates from the original's `0.5 * Σ_stable E[current]`, which also halves the site and
-cluster terms and replicates clusters at every member; the deviation is deliberate, documented in §14, and
-covered by a hand-computed test (a system with a site offset, one pair interaction, and a 3-site cluster must
-produce the exact analytic value). Step 15 owns the incremental update and must use the same decomposition; a
-debug-only full recomputation helper is provided for consistency checks.
+Equivalently: each site background once, each pair once (the 0.5 corrects the both-ends sum), and each cluster
+instance **once per supercell cell** at its centre. An instance is a geometry placed at every cell of its centre
+position, so the cluster term is instance × cell (review F-33), not one term per instance; `cluster_energy` is
+indexed `[instance, cell, p]` (§6.3). This deviates from the original's `0.5 * Σ_stable E[current]`, which also
+halves the site and cluster terms and replicates clusters at every member; the deviation is deliberate,
+documented in §14, and covered by a hand-computed test on a **multi-cell** lattice (at least two cells, so a
+missing cell factor cannot pass) with a site offset, one pair interaction, and a 3-site cluster. Step 15 owns the
+incremental update and must use the same decomposition; a debug-only full recomputation helper is provided for
+consistency checks.
 
 The formula is evaluated in kT; `lattice_energy_ev = U * kT_eV` is the reported value. An MMC abort uses energy *fluctuations*, so a constant
 scale error would cancel; the absolute value is nevertheless the documented convention and is what `.mcs`
@@ -733,7 +780,9 @@ pub struct PoolMember { pub env: EnvId, pub particle: ParticleId }
   `SelectionPool::members` is created with exactly that capacity (`Vec::with_capacity`), and `slot`/`pool_of`
   are allocated once. Optimizer removal and swap-remove only reduce `len`, so `set_selectable` can never
   reallocate. The zero-allocation acceptance criterion therefore covers the pool add/remove helpers, and
-  `capacity_bytes` is recorded (F-23). A debug assertion checks `members.capacity() == planned_capacity`.
+  `capacity_bytes` is recorded (F-23). A debug assertion checks
+  `members.capacity() >= planned_capacity` (over-allocation is allowed; `with_capacity` guarantees only `>=`),
+  and the report compares the planned count, not the capacity (review F-34).
 
 ## 9. KMC jump status
 
@@ -845,7 +894,11 @@ only links; no per-rule static flag is introduced.
   `ERR_DATACONSISTENCY` in `SetCycleCounterStateToDefault`. The earlier `max(1, total/100)` hid the zero case
   and silently turned a meaningless job into a one-block run; the round-up already guarantees
   `total ≥ 100 ⇒ total/100 ≥ 1` for every accepted job, so the `max` is removed.
-
+- **Checked goal arithmetic (review F-37).** `target_mcsp` and `pre_run_mcsp` are untrusted `u64` job settings
+  and are not range-bounded by the reader. `pre_run_mcsp * mobile_count`, `target_mcsp * mobile_count`, the
+  `prerun + main` sum, and the round-up to the next multiple of 100 are evaluated with checked `u64` arithmetic;
+  an overflow is `ContextError::InvalidInput { what: "goal overflow", .. }` (exit 12), consistent with §2's
+  checked-arithmetic rule. No wrapping and no saturating clamp.
 - MMC has no pre-run goal, no total goal, no block size, and no time; `goals` is zeroed and Step 17 uses its own
   sample/break settings.
 - Counters: per particle `{skip, success, rejected, blocked, start_unstable, end_unstable}` (`u64`), plus
@@ -965,7 +1018,8 @@ pub struct ResumeState {
 | --- | ---: | --- |
 | `InvalidInput { what, detail }` | 12 | A validated package field is not usable by the context (index, length, mask, settings) |
 | `ClusterGeometry { cluster_table, detail }` | 12 | Slot set, centre, or member image cannot be determined exactly (§6.4) |
-| `MissingOccupationCode { cluster_table, code }` | 12 | A current/centre occupation tuple is absent from the table |
+| `MissingOccupationCode { cluster_table, code }` | 12 | A raw cluster tuple is absent from a **present** expansion map: the package is internally inconsistent |
+| `ExpansionMapAbsent { cluster_table, code }` | 12 | No expansion map, and the raw tuple is not canonical: the package predates the map and must be rebuilt with the current writer. Distinct from `MissingOccupationCode` (old package vs corrupt package); never guessed around |
 | `NoSelectableJumps` | 12 | KMC job with `selectable_jump_count == 0` |
 | `NoMobileParticles` | 12 | KMC job with `mobile_count == 0` |
 | `ResumeMismatch { what }` | 12 | Resume state does not match the package/job (signature, seed hash, id, kind, dimensions, counts, mapping) |
@@ -981,6 +1035,10 @@ pub struct ResumeState {
   detected before the first cycle, exactly like a malformed table; mapping it to 14 would conflate "the run hit
   a limit" with "the package cannot be run". The distinction is stated in
   [`01-target-architecture.md`](../01-target-architecture.md) §7.3 and in `troubleshooting/errors.md`.
+- **Cluster-code lookup outcomes (review F-29).** `Canonical(index)` is the only success; `MissingFromMap` is
+  `MissingOccupationCode` (exit 12, corrupt package) and `ExpansionMapAbsent` is the distinct recompile-required
+  error (exit 12, pre-map package). A map that exceeds the reader's expansion budget is rejected earlier by
+  Step 13's `ReaderLimits::max_cluster_expansion_bytes` (package error, exit 11), not by the context.
 - Every diagnostic names the phase, the dense index (position, particle, cluster table, slot, status), and the
   fixture-independent reason; no `unwrap` on package data.
 - `tracing` emits one `info` line per completed phase (counts and bytes) and debug lines for skips (e.g. an
@@ -1000,13 +1058,13 @@ pub struct ResumeState {
 | D-8 | Mobile mapping re-derived on resume and compared | Stronger than restoring a stored mapping | Mismatched mapping is rejected; matching mapping resumes |
 | D-9 | No `OPT_LINK_ONLY_MOBILES`, no static S2, no fast-exp, no parallel init | Deferred to Steps 15/29 with measurements | Absent by construction; recorded in the parity notes |
 | D-10 | A changed state rebuilds each affected cluster's occupation code **once from its slots**, instead of mutating code bytes incrementally per jump link | The original can hit an intermediate occupation code that the table does not contain when several members of one cluster change in one transition; rebuilding from the final state is order-independent and cannot fail that way | A synthetic transition that changes two members of one cluster evaluates S2 and commits without a missing-code error; the final code/energy equals a brute-force rebuild |
-| D-11 | A cluster instance's member slot is resolved from the slot's **member site** and the instance centre's unique pair image (the member-site fallback is used only for multi-centre tables); one instance per slot-0 link | The v1 payload drops the original's per-environment `PairIndexCoding` (slot → pair id) and stores the member link only for the representative placement; the member site plus the unique image is the exact reconstruction where the image is unique, and the centre-site stabilizer makes the shared energy table valid for the other centre positions | The multi-centre centred-model fixture resolves four instances; an ambiguous/absent image is rejected with `ClusterGeometry` |
+| D-11 | A cluster instance's member slot is resolved from the slot's **member site** and the instance centre's unique pair image (the member-site fallback is used only for multi-centre tables); one instance per slot-0 link | The v1 payload drops the original's per-environment `PairIndexCoding` (slot → pair id) and stores the member link only for the representative placement. **Soundness (review F-38):** (i) the cluster reduction enumerates the **complete product** of the allowed centre and member occupation sets and canonicalises under the representative centre stabilizer's induced site permutations, so every allowed tuple is in exactly one orbit; (ii) the applied energy is invariant under the **full space group**: the other centre position is an image of the representative under an operation that maps the cluster geometry to itself, so its slot particles are the transported tuple, whose orbit carries the same energy; (iii) the approved `code_expansions` map resolves the transported raw tuple to that orbit's canonical index. The centre-site stabilizer alone is not the argument — it canonicalises the representative table; the full-group invariance plus the complete tuple product is what makes the transported instance exact | The multi-centre centred-model fixture resolves four instances and asserts a non-zero/known synthetic per-instance energy (the sample tables are zero), so the code→energy mapping is evidenced; an ambiguous/absent image is rejected with `ClusterGeometry` |
 
 ## 15. Interfaces consumed by later steps
 
 | Consumer | Interface | Step 14 obligation |
 | --- | --- | --- |
-| 15 | `node_energy(EnvId, particle) -> f64`; `incoming(EnvId) -> &[IncomingLink]`; `owner_link(owner, link_id) -> (&Link, EnvId)`; `cluster_energy(instance, cell, particle)`; `cluster_code(instance, cell)`; `occupation_code(instance, centre_cell, overrides)`; `centres(position) -> &[u32]`; `link_range(PositionId)`; `update_particle_ids(PositionId)`; `field_scale`, `field_direction`; `cell_vectors`; `&mut` mutators for particles/flags/pools | Tables/codes/vectors/links/inverse in fixed order; no delta logic |
+| 15 | `node_energy(EnvId, particle) -> f64`; `incoming(EnvId) -> &[IncomingLink]`; `owner_link(owner, link_id) -> (&Link, EnvId)`; `cluster_energy(instance, cell, particle)`; `cluster_code(instance, cell)`; `cluster_lookup(instance, raw_code) -> Result<u32, ContextError>` (wraps `ClusterTable::lookup` and maps the two failures to the §13 errors); `occupation_code(instance, centre_cell, overrides)`; `centres(position) -> &[u32]`; `link_range(PositionId)`; `update_particle_ids(PositionId)`; `field_scale`, `field_direction`; `cell_vectors`; `&mut` mutators for particles/flags/pools | Tables/codes/vectors/links/inverse in fixed order; no delta logic; the cluster lookup is the amendment-2 contract, never solver-side symmetry |
 | 16 | `pools` (ordered, supercell members, with `selectable_jump_count`), `set_selectable`, `direction_for`, `path_len`, `resolve_node`, `jump_links(status)`, `allowed_mask_of`, `goals`, `normalization`, `dt`, `rng` | Pool/jump-status construction and the exact-occupation data; no selection or acceptance |
 | 17 | `pools` (empty for MMC), `interaction_range`, `incoming(EnvId)`, `linked(a,b)`, `node_energy`, `cluster_energy`, counters | Same runtime, no MMC-specific field or time; the pair/cluster delta rule is Step 15's |
 | 18 | `trackers.mobile_positions`, static/global index space, counters, `lattice_energy_ev`, `rng.export_state`, `time_s`, `normalization`, `model.signature`, `job.seed` | Index space and values Step 18 reads; no `.mcs` |
@@ -1030,8 +1088,12 @@ row (§7.2). A link that is absent in both directions means the two environments
 - [ ] Implement the owner-major per-P1 link CSR, the inverse routing index (i64 `rem_euclid` resolution),
       partner resolution, sorting, and the cluster associations.
 - [ ] Implement the **one-instance-per-slot-0-link** cluster runtime: centre/member-site validation, the
-      per-instance slot resolution (candidate position, then member-site image), the centre index, codes, code
-      ids, and energies; reject an absent/ambiguous image with `ClusterGeometry`.
+      per-instance slot resolution (candidate position, then member-site image), the centre index, codes,
+      code ids, and energies; reject an absent/ambiguous image with `ClusterGeometry`.
+- [ ] Consume the approved cluster-code expansion contract: build the raw tuple, call
+      `ClusterTable::lookup`, store `Canonical(index)` as `code_id`, map `MissingFromMap` to
+      `MissingOccupationCode` and `ExpansionMapAbsent` to the distinct recompile-required error; no solver-side
+      symmetry and no direct `occupation_codes` fallback. Gate this task on the `step-11.1` merge (see §22).
 - [ ] Implement the site table, per-owner site+pair vectors, per-instance cluster energies, and the exact
       initial lattice energy.
 - [ ] Implement the supercell selection pools (`EnvId` members, global slot map, `pool_of`, `max_pools` check,
@@ -1062,9 +1124,16 @@ row (§7.2). A link that is absent in both directions means the two environments
       selected bucket; the per-node allowed masks are exposed unchanged.
 - [ ] The multi-centre cluster fixture initializes with **one instance per slot-0 link** (four instances for the
       centred model's four-position centre site), each with its own slot positions, code, and centre energy; the
-      per-instance codes equal a brute-force rebuild from the instance's slots.
+      per-instance codes equal a brute-force rebuild from the instance's slots; the committed sample, package
+      summary/SHA-256/payload set, README provenance, .NET rebuild test, and regeneration command are present
+      (§6.4/F-36).
+- [ ] The amendment-2 two-member ceria fixture (`step-11-amend-2`) resolves **all eight** raw assignments,
+      including the two non-canonical ones; the pre-map fixture returns the distinct `ExpansionMapAbsent`
+      (recompile-required) error for those two, and a present map that lacks a tuple returns
+      `MissingOccupationCode`; the context never re-derives symmetry (review F-29).
 - [ ] A multi-centre member whose image is absent or ambiguous returns the documented `ClusterGeometry` (exit 12)
-      naming the instance, slot, and member site.
+      naming the instance, slot, and member site; a unique rotated multi-centre image is **accepted**, not
+      reported as a cross-image (review F-35).
 - [ ] A transition evaluated on a package whose pair table is **asymmetric** (`t[a][b] ≠ t[b][a]`) and that has
       no reverse link produces the owner-major delta; the result differs from the sender-major delta that the
       draft would have produced.
@@ -1076,7 +1145,10 @@ row (§7.2). A link that is absent in both directions means the two environments
 - [ ] The 10×10×10 real-writer fixture initializes in `< 100 ms` (release, warm, same-runner-class) and the
       reported memory total is within budget; the populated-model 10×10×10 clone is measured in the same run
       and recorded, because the ceria fixture has no pair/cluster tables.
-- [ ] The initial lattice energy matches a hand-computed site/pair/cluster system exactly.
+- [ ] The initial lattice energy matches a hand-computed site/pair/cluster system exactly on a **multi-cell**
+      lattice (at least two cells), so the instance × cell cluster sum is exercised (review F-33).
+- [ ] A job with `target_mcsp`/`pre_run_mcsp` values whose products or sum overflow `u64` returns the documented
+      exit-12 `InvalidInput` (`goal overflow`), never a wrapped goal (review F-37).
 - [ ] The context summary (counts, link histogram, pool sizes, jump-status sizes, goals, `dt`) is byte-identical
       across two initializations of the same package.
 - [ ] `MemoryPlan` rejects an over-cap package before any allocation; `plan == report` on planned lengths; the
@@ -1090,7 +1162,8 @@ row (§7.2). A link that is absent in both directions means the two environments
       completed state returns `AlreadyCompleted`.
 - [ ] A counting allocator observes zero allocations in the hot accessors and the pool add/remove helpers after
       construction.
-- [ ] `MemoryReport` matches the actual vector capacities.
+- [ ] `MemoryReport` reports each array's planned length × `size_of` and equals the plan (`plan == report`);
+      summed capacity bytes are a diagnostic (`>=` plan), not the equality target (review F-32).
 - [ ] Documentation written: `solver-architecture.md` (context section), `physics/energies.md` (total-energy
       convention), `performance/index.md` (context budget), `troubleshooting/errors.md` (context failures),
       `testing-and-parity.md` (tiers/fixtures), `msl-format.md` (cluster-link limitation and runtime expansion).
@@ -1108,11 +1181,11 @@ Implementation-time documentation (the planner records only the design here):
 - `docs/performance/index.md` — the context-initialization budget, the measured medians, the memory report, and
   the same-runner-class baseline entry. (The Step 14 draft's `docs/performance/benchmarks.md` does not exist;
   this page is the performance page.)
-- `docs/troubleshooting/errors.md` — zero-mobile/zero-direction, cluster-geometry rejection, context limits,
-  resume mismatch, and the exit codes.
+- `docs/troubleshooting/errors.md` — zero-mobile/zero-direction, cluster-geometry rejection, the pre-map
+  recompile-required error, context limits, resume mismatch, and the exit codes.
 - `docs/development/testing-and-parity.md` — the Step 14 fixtures, snapshot/allocation/benchmark tiers.
-- `docs/reference/msl-format.md` — the cluster-link limitation, the compact expansion rule, and the center-only
-  cluster semantics.
+- `docs/reference/msl-format.md` — the cluster-link limitation, the `code_expansions` resolution map, the
+  per-slot-0-link instance rule, and the center-only cluster semantics.
 - Parity: the new "Simulation context initialization" solver row and the "Selection optimizers" runtime-removal
   note.
 - `docs/planning/closeout/step-14.json` plus `python tools/check_closeout_evidence.py`; the audit request in
@@ -1135,11 +1208,17 @@ second fixture. Because the ceria writer fixture has no pair or cluster tables, 
 measurement for the pair/cluster-scale budget (§20), not the real-writer fixture.
 
 Feature 6 also adds `tests/contracts/packages/step-14-multi-centre-cluster/`, a real-writer test artifact built
-from a copy of `samples/step-13-centered/step-13-centered.mocprj` with one cluster centred on the four-position
-site and one member on the other site. It is the F-17 acceptance fixture: the centre site's four P1 positions
-produce four slot-0 links, hence four runtime instances, each resolving its own member image. A second synthetic
-case in the same test (built in Rust from the real model, not a new package) makes the member image absent or
-ambiguous and asserts the documented `ClusterGeometry`.
+from the committed `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a copy of the
+centred sample, so the `step-13-centered` golden does not move) with one cluster centred on the four-position
+site and **one member** on the other site. The artifact set is the same shape as the 10×10×10 fixture: `.msl`,
+`.sha256`, `package-summary-v1.json`, `payloads/index.json`, `payloads/model-1.bin`, a README with provenance
+(writer commit, SDK, `created_utc`, job count), a .NET rebuild test, and the regeneration command. It is the F-17
+acceptance fixture: the centre site's four P1 positions produce four slot-0 links, hence four runtime instances,
+each resolving its own member image. A second synthetic case in the same test (built in Rust from the real
+model, not a new package) makes the member image absent or ambiguous and asserts the documented
+`ClusterGeometry`. The two-member non-P1 code-expansion case is the amendment-2 ceria fixture
+(`tests/contracts/packages/step-11-amend-2/`, with `tests/contracts/packages/amend-2-pre-map/` for the absent
+map), not a second multi-centre package: two images of one member site are the ambiguous case above (F-36).
 
 | Test | Assertion | Tier |
 | --- | --- | --- |
@@ -1148,18 +1227,20 @@ ambiguous and asserts the documented `ClusterGeometry`.
 | Cluster geometry | Slot set/centre/contiguity validation; slot 0 is `[0,0,0]`; one instance per slot-0 link; a single candidate position resolves; the member-site fallback resolves; absent/ambiguous images fail with `ClusterGeometry`; a missing current code fails | PR-fast |
 | Cluster instance cardinality | The centred multi-centre fixture yields one instance per centre position, per-instance slot positions/cells/codes, and a per-instance energy vector; a table with one centre yields one instance | PR-medium |
 | Cluster energy | `cluster_energy(instance, cell, p)` equals a direct table lookup for every allowed centre particle; `occupation_code` rebuild equals the stored code | PR-fast |
+| Cluster code lookup | On `step-11-amend-2`, all eight raw assignments resolve via `ClusterTable::lookup` to the expected canonical index (including the two non-canonical tuples); on `amend-2-pre-map`, the six canonical tuples resolve and the two non-canonical ones return the distinct recompile-required error; a present map with a removed tuple returns `MissingOccupationCode`; no test path sorts/mins the slot tuple or calls a reduction | PR-fast |
+| Cluster code→energy mapping | A synthetic table with distinct energies per canonical code gives each instance's `cluster_energy` the expected non-zero value for its raw tuple; the sample zero tables are not the evidence | PR-fast |
 | Energy vectors | `node_energy` equals a brute-force site+pair sum over the owner's links; the row is the owner's particle | PR-fast |
 | Delta orientation | With an asymmetric pair table and no reverse link, the owner-major delta equals a brute-force recomputation and differs from the sender-major value; a missing reverse link is not an error | PR-fast |
-| Initial energy | Hand-computed site+pair+cluster system matches exactly; the debug recomputation agrees | PR-fast |
+| Initial energy | Hand-computed site+pair+cluster system on a multi-cell lattice matches exactly (instance × cell cluster sum); the debug recomputation agrees | PR-fast |
 | Pools | Direction-count buckets; mask filtering; optimizer removal; two-cell members; swap-remove slot update; `selectable_jump_count`; re-add after a particle change; `max_pools` rejection; reserved capacity (no reallocation) | PR-fast |
 | Jump status | Link set equals a naive receiver-major recomputation for every cell of a small lattice; the structural receiver filter; `L*(L-1)` bound; `resolve_node` for a cross-bucket direction | PR-fast |
-| Goals/normalization | `prerun`/`main`/`total`/block (`total/100`), `K_fix`/`K_auto`/`K_norm`, `dof`, `nu_max` (exit 13 on zero/NaN), `dt` arithmetic; a zero total rejects | PR-fast |
+| Goals/normalization | `prerun`/`main`/`total`/block (`total/100`), `K_fix`/`K_auto`/`K_norm`, `dof`, `nu_max` (exit 13 on zero/NaN), `dt` arithmetic; a zero total rejects; `u64` product/sum overflow rejects (`goal overflow`, exit 12) | PR-fast |
 | Bounds/cancel | Each limit and the memory plan reject before allocation; `plan == report` on lengths and the capacity diagnostic is recorded; a set cancellation flag returns `Cancelled` | PR-fast |
 | Resume | Exact restore; parameterized-signature/seed-hash/size/mapping mismatches rejected; `RawMax` preserved; `AlreadyCompleted` | PR-fast |
 | `Send`/`!Sync` | A `compile_fail` doctest cannot assert `SimulationContext: Sync`; a positive assertion requires `Send` | PR-fast (doctest) |
 | Mobile assumption | A non-void particle outside every active KMC mobile mask is still `MOBILE`, gets a mobile tracker, and is counted in `mobile_count` | PR-fast |
 | Allocation | Zero allocations in hot accessors and pool helpers after construction | PR-fast (own test binary) |
-| Real packages | `msl-v1`, `amend-1-net10`, `step-13-populated` (KMC+MMC), `step-13-centered`, `step-14-multi-centre-cluster` initialize and satisfy §17 | PR-medium |
+| Real packages | `msl-v1`, `amend-1-net10`, `step-13-populated` (KMC+MMC), `step-13-centered`, `step-11-amend-2`, `amend-2-pre-map`, `step-14-multi-centre-cluster` initialize (or return the documented pre-map error) and satisfy §17 | PR-medium |
 | 10×10×10 acceptance | The real-writer fixture initializes in `< 100 ms`; the memory report is within budget | PR-medium |
 | Populated 10×10×10 clone | The populated model cloned to 10×10×10 (3,000 positions) is measured for init time and memory; recorded next to the table-free fixture because the ceria model has no pair/cluster tables | PR-medium |
 | Determinism snapshot | The context summary is identical across two initializations (insta inline snapshot) | PR-fast |
@@ -1190,7 +1271,7 @@ only within the recorded runner class; a different CPU/OS/Rust version records i
 
 | Risk | Mitigation |
 | --- | --- |
-| Cluster member offsets are not in `.msl` v1 (OD-1) | Fail closed on zero/multiple images; code-existence cross-check; recorded limitation and future format decision; the fixtures pass |
+| Cluster member offsets are not in `.msl` v1 (OD-1) | Fail closed on zero/multiple images; the §6.3 lookup cross-check; recorded limitation and future format decision; the fixtures pass. The accepted rotated multi-centre member-site image is distinguished from a rejected cross-image in §6.4/OD-1 (review F-35) |
 | Energy convention differs from the original | Documented deviation D-3 with a hand-computed test; Step 15 uses the same decomposition; Step 29 parity covers it |
 | Link-graph memory at 500k positions | Owner-major CSR + inverse, `MemoryPlan` before allocation, total cap, `MemoryReport`, nightly stress |
 | Delta applied with the wrong table or row | Owner/receiver-major rule stated once (§6.1/§7.2/§9.2) and tested with an asymmetric table and a one-directional link |
@@ -1203,6 +1284,7 @@ only within the recorded runner class; a different CPU/OS/Rust version records i
 | Zero-selectable/zero-mobile/zero-total packages | Explicit exit-12 errors with actionable messages and a troubleshooting section |
 | Fixture absence for pair/cluster scale | The real-writer 10×10×10 fixture is table-free (ceria); the populated-model 10×10×10 clone is measured separately and the limitation is recorded |
 | Multi-centre cluster instance drift | One instance per slot-0 link, per-instance slot resolution and codes; the centred-model fixture and the ambiguity test cover it; the writer diagnostic is the follow-up |
+| Cluster code lookup for symmetry-reduced tables (F-29) | Consume the approved `code_expansions` map via `ClusterTable::lookup`; no solver-side symmetry or direct-index fallback; the amendment-2 two-member fixture resolves all eight assignments and the pre-map fixture exercises the recompile-required error; the reader expansion budget bounds a hostile map |
 | OD-1 rejection only at solver start | Writer follow-up recorded in OD-1 (cross-image, multi-centre ambiguity); `msl-format.md` and `troubleshooting/errors.md` notes scheduled in §18 |
 
 ## 22. Dependencies and interfaces
@@ -1220,9 +1302,20 @@ only within the recorded runner class; a different CPU/OS/Rust version records i
   `rayon` are removed. `mocassin-state` returns in Step 18 (`.mcs` decode), `mocassin-extension` in Step 19,
   and `rayon` only in Step 29 with a measured parallel initialization. The AGENTS.md/architecture target graph is
   the end state, not the Step 14 state; no new external crate is added.
-- **Step 11/12 (Done):** the `.msl` v1 schema and payload field set. Step 14 adds no field and no version.
+- **Step 11/12 (Done) and `step-11-amend-2` (approved, merged `2f3a6fe`, design freeze `bf273ff`):** the `.msl`
+  v1 schema and payload field set, plus the additive per-table `code_expansions` map
+  (`expanded_codes`/`canonical_indices`), the reader expansion budget, and the
+  `ClusterTable::lookup`/`ClusterCodeLookup` runtime contract. Step 14 adds no field and no version.
+- **`step-11.1` (implementation dependency, review F-29).** The amendment contract is approved but the
+  `step-11.1` implementation is running; the `mocassin-types` `ClusterTable::lookup` API, the `ClusterExpansions`
+  runtime member, the reader budget, and the `step-11-amend-2`/`amend-2-pre-map` fixtures must be merged before
+  Step 14 feature 2's cluster work starts. If Step 14 is started earlier, feature 1 (skeleton/arenas/limits) may
+  proceed, but the cluster code/energy work is blocked. **No fallback direct `occupation_codes` lookup is
+  permitted**: it is exactly the F-29 regression. The F-29 closure is a Step 14 gate (it is not a `step-11.1`
+  acceptance criterion), and the start gate is expected after `step-11.1` is merged and tagged.
 - **Step 15 (next):** owns S0/S1/S2, pair/cluster deltas, the field term, state application, and the incremental
-  lattice energy; consumes §15's interface and the owner-major/inverse rule.
+  lattice energy; consumes §15's interface, the owner-major/inverse rule, and the canonical `code_id` (it never
+  calls `lookup` again after initialization).
 - **Step 16:** owns selection, rule lookup, the exact per-direction occupation check, acceptance, normalization
   updates, time, pre-run, aborts, and resume orchestration; consumes §9.4 and §15.
 - **Step 17:** MMC selection, exchange, Metropolis, break check; consumes the same runtime with no pools/jump
@@ -1241,8 +1334,11 @@ only within the recorded runner class; a different CPU/OS/Rust version records i
 - [`02-data-contracts.md`](../02-data-contracts.md) §3.3: pair links are centre/owner-major with the table row =
   owner particle; cluster links carry the environment's own slot and no member offset; a cluster table may have
   one slot-0 link per P1 position of its centre site; cluster tables are 1-D per occupation code with the centre
-  particle in slot 0 and `particle_table_mapping` as the ascending allowed centre-particle list. Clarification
-  only; no field changes.
+  particle in slot 0, `particle_table_mapping` as the ascending allowed centre-particle list, and the optional
+  `code_expansions` map; Step 14 maps `MissingFromMap` to a data error and `ExpansionMapAbsent` to the distinct
+  recompile-required error. No field change in Step 14.
+- [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md): the approved cluster-code
+  expansion contract that Step 14 consumes; F-29 is closed against it (implementation in `step-11.1`).
 - [`03-quality-strategy.md`](../03-quality-strategy.md): §9.12 for the context layer (links/inverse, pools,
   jump status, memory plan) and §13 rows for both Step 14 benchmarks.
 - [`04-roadmap.md`](../04-roadmap.md) §3.1: the recorded complexity class and the owner-acceptance request.

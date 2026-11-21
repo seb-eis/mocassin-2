@@ -599,12 +599,18 @@ solver with the same binary, platform, package, and seed.
   centre site, so the runtime keeps **one instance per slot-0 link** with its own slot geometry, code, code id,
   and centre energy; `centres` lists the instances at a position. The v1 payload does not persist a member's
   relative cell offset: slot 0 is `[0,0,0]`, and each slot `1..n` resolves to the candidate position's unique
-  centre→member link, else to the unique image of the slot's **member site**; an absent or ambiguous image fails
-  with `ClusterGeometry`. The centred-model multi-centre fixture and the ambiguity test cover the paths. The
-  limitation is in the data contract, OD-1, and the step page; a writer build-time diagnostic and a future `.msl`
-  revision are recorded follow-ups.
-- **Energy runtime:** site once, pair ×0.5, cluster once at the centre; the initial lattice energy uses that
-  exact decomposition and a hand-computed test; Step 15 continues with it. The original's uniform `0.5 × Σ` is a
+  centre→member link, else (multi-centre only) to the unique image of the slot's **member site**; an absent or
+  ambiguous image fails with `ClusterGeometry`. The rotated multi-centre image is accepted; a cross-image member
+  is rejected. The centred-model multi-centre fixture and the ambiguity test cover the paths. The limitation is
+  in the data contract, OD-1, and the step page; a writer build-time diagnostic and a future `.msl` revision are
+  recorded follow-ups.
+- **Cluster codes (`step-11-amend-2`, F-29):** the raw slot tuple is resolved with `ClusterTable::lookup`;
+  `Canonical(index)` is the only success, `MissingFromMap` is a corrupt-package error and `ExpansionMapAbsent` is
+  the distinct recompile-required error (exit 12). No solver-side symmetry, tuple sorting, or direct
+  `occupation_codes` fallback. The two-member amendment-2 fixture resolves all eight assignments and the pre-map
+  fixture exercises the absent-map path; the implementation dependency is `step-11.1`.
+- **Energy runtime:** site once, pair ×0.5, cluster once per instance **and per cell** at the centre; the initial
+  lattice energy uses that exact decomposition and a multi-cell hand-computed test; Step 15 continues with it. The original's uniform `0.5 × Σ` is a
   recorded deviation (OD-2), covered by Step 29 parity.
 - **Pools and jump status:** supercell-addressed direction-count buckets (`EnvId` members, one global slot map,
   a per-P1 `pool_of`), walked ascending, with mask filtering, optimizer removal, O(1) swap-remove, a `max_pools`
@@ -613,7 +619,8 @@ solver with the same binary, platform, package, and seed.
   receiver filter, `L*(L-1) ≤ 90` derived bound, and link-carried cluster associations. The exact per-direction
   occupation check stays in Step 16.
 - **Goals and normalization:** `prerun = pre_run_mcsp × mobile_count`, `main = target_mcsp × mobile_count`,
-  `total` rounded up to 100, block = `total/100`, zero total is an error; `K_fix = exp(E_norm/kT)`,
+  `total` rounded up to 100, block = `total/100`, zero total is an error; the products/sum/round-up are checked
+  `u64` and an overflow is exit 12; `K_fix = exp(E_norm/kT)`,
   `K_auto = 1/RawMax`, `K_norm = K_fix × K_auto`, `dt = dof × K_norm/(nu_max × selectable)`. `nu_max` is the job
   cap or the maximum active rule frequency (the payload persists only the optional job cap); a zero/NaN `nu_max`
   is exit 13 with the other non-finite factors.
@@ -630,8 +637,8 @@ solver with the same binary, platform, package, and seed.
 - **Tiers:** index/wrap (including hostile offsets), links/inverse, cluster instances/codes, energy vectors,
   delta orientation (asymmetric table), pools (two cells, reserved capacity), jump status, goals, bounds, resume,
   the mobile assumption, `Send`/`!Sync`, and the allocation proof are PR-fast; the real
-  `msl-v1`/`amend-1-net10`/populated/centered packages, the multi-centre cluster fixture, the 10×10×10 fixture,
-  and the populated clone are PR-medium; the Criterion context benchmark and the 500k-position stress are
+  `msl-v1`/`amend-1-net10`/populated/centered/`step-11-amend-2`/`amend-2-pre-map` packages, the multi-centre
+  cluster fixture, the 10×10×10 fixture, and the populated clone are PR-medium; the Criterion context benchmark and the 500k-position stress are
   nightly/manual.
 - **Performance:** context init `< 100 ms` for the 10×10×10 fixture and the populated clone, `< 20 ms` for the
   small fixtures; the `MemoryReport` total within budget; zero allocations in hot accessors; a same-runner-class

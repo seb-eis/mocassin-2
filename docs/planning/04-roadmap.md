@@ -214,6 +214,13 @@ case, and the API-freeze guard are recorded on the Step 14 page §4; acceptance 
 gate and recorded there and in [`05-open-decisions.md`](05-open-decisions.md). This note records the class
 request; it does not itself approve it.
 
+**Dependency note (2026-11-21).** Step 14 also depends on `step-11.1`, the implementation of
+[`step-11-amend-2`](amendments/step-11-amend-2-cluster-code-expansion.md) (the per-table cluster-code expansion
+map and the `ClusterTable::lookup` reader/runtime contract). The design contract is approved and merged
+(`2f3a6fe`, design freeze `bf273ff`); review round 3's F-29 closure is a Step 14 gate, not a `step-11.1`
+acceptance criterion. The Step 14 start gate is expected after `step-11.1` is merged and tagged; feature 1 may
+start earlier, but feature 2's cluster work must not.
+
 #### Historical exceptions (previous time-based rule)
 
 The three exceptions below were approved under the previous **four-week** time trigger. They are historical

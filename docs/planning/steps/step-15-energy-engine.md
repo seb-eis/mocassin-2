@@ -127,7 +127,10 @@ $$
   count: `E` does not contain the cluster term. Step 14 precomputes the centre index, not a per-direction touch
   table.
 - A cluster whose code depends on several path nodes is evaluated **once from the final state**: build the S2
-  occupation code with `ctx.occupation_code(instance, centre_cell, overrides)` and look up the code id once.
+  raw tuple with `ctx.occupation_code(instance, centre_cell, overrides)` and resolve it once with
+  `ctx.cluster_lookup(instance, raw)`, which wraps the approved `ClusterTable::lookup`. Step 15 matches only the
+  successful canonical id; the two failure variants are already mapped to the Step 14 errors and cannot occur
+  after a successful initialization. Never sort/minimise the slot particles or re-run symmetry here (F-29).
   Do not mutate code bytes per jump link: an intermediate occupation tuple may not exist in the table (Step 14
   D-10).
 
@@ -208,12 +211,13 @@ to the other side transposes the pair table. The rule is the one in Step 14 §6.
   for every `p_owner` the owner supports (the whole `pc` vector is materialised, so this is every particle).
   The table and the row both belong to the owner; a reverse link is not required and must not be synthesised.
 - For each `ClusterAssoc { instance, slot }` on `L`, the owner is the instance's centre: rebuild the
-  instance's occupation code with the new particle in `slot` (once, from the final state; Step 14 D-10), look up
-  the code id, and update `cluster_energy[instance, cell(owner), p_owner]` from the table for every allowed
-  centre particle. This is the original's `InvokeEnvironmentLinkClusterUpdates`/`InvokeLocalEnvironmentLinkClusterDeltas`
+  instance's raw tuple with the new particle in `slot` (once, from the final state; Step 14 D-10), resolve it
+  with `ctx.cluster_lookup(instance, raw)`, and update `cluster_energy[instance, cell(owner), p_owner]` from the
+  table for every allowed centre particle. This is the original's `InvokeEnvironmentLinkClusterUpdates`/`InvokeLocalEnvironmentLinkClusterDeltas`
   orientation.
-- Cluster code lookup: codes are sorted; use binary search for > 8 codes, linear for small tables; a missing code
-  is a data error (should not happen for a valid final occupation).
+- Cluster code lookup is **Step 14's** `cluster_lookup`/`ClusterTable::lookup` (the `step-11-amend-2`
+  expansion map). Step 15 does not search `occupation_codes`, does not sort the slot tuple, and does not apply
+  symmetry: a `MissingFromMap`/`ExpansionMapAbsent` is a Step 14 error and must not be re-classified here.
 - Cluster table layout (Step 14 contract): one energy per occupation code, slot 0 = centre particle, no centre
   row; `particle_table_mapping` is the ascending allowed centre-particle list. A wrong member offset or a missing
   code is rejected at context initialization, not silently skipped.
@@ -228,8 +232,9 @@ to the other side transposes the pair table. The rule is the one in Step 14 §6.
 ### 5. Lattice energy
 
 - The initial total is computed by Step 14; the engine continues with the same exact decomposition:
-  `U = Σ_stable site[P][particle] + 0.5 * Σ_stable pair[env][current] + Σ_centres cluster[centre][current]`,
-  converted to eV with `kT_to_ev`.
+  `U = Σ_stable site[P][particle] + 0.5 * Σ_stable pair[env][current]
+   + Σ_instances Σ_cells cluster[instance][cell][centre particle]`, converted to eV with `kT_to_ev`. The cluster
+  term is instance × cell (every instance exists in every supercell cell); do not drop the cell dimension.
 - The 0.5 factor corrects pair double counting only. The site background is counted once and a cluster once at
   its centre; do not apply the 0.5 factor to them (the original did, and it is a recorded correction; see
   [`docs/physics/energies.md`](../../physics/energies.md) and the Step 14 design D-3).
@@ -324,12 +329,13 @@ At this point, document the energy engine:
 | Pair orientation | Asymmetric table + one-directional link: the owner-major result equals a brute-force recomputation and differs from the transposed/sender-major result |
 | Cluster delta | 3-body occupation change |
 | Cluster rebuild | Two members of one cluster change in one transition; S2 uses the final code once, no missing intermediate code |
+| Canonical code path | The amendment-2 two-member ceria fixture evaluates every raw assignment through Step 14's `cluster_lookup`; the two non-canonical tuples contribute the canonical orbit's energy; no symmetry is re-derived |
 | Applied state | Every owner of a changed environment is updated, including owners outside the path |
 | Site energy | Barrier shift |
 | S1 | Raw S1 + 0.5 conformation |
 | Field | Sign/magnitude for known displacement |
 | Dynamic vs static | Equality for all sample rules |
-| Lattice energy | Incremental vs full |
+| Lattice energy | Incremental vs full on a multi-cell lattice, so the instance × cell cluster sum is covered |
 | Detailed balance | MMC two-state distribution |
 | Fast exp | Error bound and off-by-default |
 | NaN/Inf | Rejected at load; no silent propagation |

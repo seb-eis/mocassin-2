@@ -195,15 +195,25 @@ error.
 
 **Clusters.** A cluster link's `byte_position` is the environment's own slot (slot `0` = a centre). A cluster
 table can have **more than one centre**: the writer adds slot `0` to every P1 position of the centre site, so the
-runtime keeps **one instance per slot-0 link** (not one per table). Each instance has its own slot geometry,
-occupation code, code id, and centre energy vector; a `centres` CSR over P1 positions lists the instances centred
-there (one per table centred on that position). A slot's cluster association is attached to the instance centre's
-**forward link** whose partner is that member, so a change at the member updates the instance's code and centre
-energy through the same inverse index. Cluster interactions are counted once at their centre, so they are kept out
-of the site+pair vector and the total uses `Σ site + 0.5 × Σ pair + Σ cluster`. The v1 payload does not persist
-the per-centre member offset; the context derives each instance's slot from the candidate position or, failing
-that, the unique image of the slot's **member site** (slot 0 is `[0,0,0]` by definition) and fails closed when the
-image is absent or ambiguous (OD-1 in the internal open-decisions register).
+runtime keeps **one instance per slot-0 link** (not one per table). Each instance has its own slot geometry, raw
+occupation code, canonical code index, and centre energy vector; a `centres` CSR over P1 positions lists the
+instances centred there (one per table centred on that position). A slot's cluster association (`ClusterAssoc
+{ instance, slot }`) is attached to the instance centre's **forward link** whose partner is that member, so a
+change at the member updates the instance's code and centre energy through the same inverse index. Cluster
+interactions are counted once per instance **and per cell** (the same instance geometry exists in every cell), so
+they are kept out of the site+pair vector and the total uses
+`Σ site + 0.5 × Σ pair + Σ_instances Σ_cells cluster`. The v1 payload does not persist the per-centre member
+offset; the context derives each instance's slot from the candidate position or, failing that, the unique image of
+the slot's **member site** (slot 0 is `[0,0,0]` by definition) and fails closed when the image is absent or
+ambiguous (OD-1). The multi-centre member-site image is the accepted space-group transport, not a cross-image.
+
+**Cluster codes (Step 11 amendment 2).** The writer emits one canonical code per symmetry-reduced orbit and, where
+needed, an optional per-table `code_expansions` map (`expanded_codes`, `canonical_indices`). The context builds the
+raw slot tuple and resolves it with `ClusterTable::lookup`: `Canonical(index)` stores the canonical code id;
+`MissingFromMap` is a corrupt-package data error; `ExpansionMapAbsent` is the distinct recompile-required error for
+a pre-map package. The solver never re-derives symmetry, sorts the tuple, or falls back to a neighbouring code.
+The contract is approved and implemented by `step-11.1`; Step 14 feature 2 waits for it (see the Step 14 page
+§22).
 
 **Jump status.** One status per `(P1 position, direction)` (`status = direction * P + position`). The path is
 resolved from the direction's relative node encodings with node `0` replaced by the selected position, so a
@@ -227,9 +237,10 @@ and the counters/time/state, validates it against the package/job, re-derives th
 none is required. The `.mcs` decode is Step 18's.
 
 **Memory.** Before the first allocation, `MemoryPlan` computes every array's bytes with checked `u64` arithmetic
-(lattice, site+pair vectors, site table, forward/inverse links, cluster assoc, cluster geometry/codes/code ids/
-centre energies, pool members + slot map, jump offsets/links, counters) and rejects against per-array caps and a
-1 GiB `max_context_bytes` total; `LimitExceeded` is exit 12, not the run-time limit exit 14. `MemoryReport`
+(lattice, site+pair vectors, site table, link CSR headers + forward/inverse entries, cluster assoc, cluster
+instances (16 B each) + slot CSR + codes/code ids + `energy_start` prefix + per-instance energy + centre index,
+pool headers + members + slot map, jump offsets/links, counters, mobile positions) and rejects against per-array
+caps and a 1 GiB `max_context_bytes` total; `LimitExceeded` is exit 12, not the run-time limit exit 14. `MemoryReport`
 reports each array's planned length (not allocator capacity) and equals the plan; summed capacity bytes are a
 separate diagnostic, and the benchmark records peak RSS. The 10×10×10 real-writer fixture (table-free ceria) and
 the populated-model 10×10×10 clone are both budgeted at `< 100 ms` and `≤ 64 MiB`; the clone is the pair/cluster
