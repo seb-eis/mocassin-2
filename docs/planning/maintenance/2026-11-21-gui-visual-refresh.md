@@ -155,7 +155,10 @@ Migration is one additional app-local layout field, `defaultsRevision`:
    `1e-6` (`260/1200`, `320/1200`, `180/800`), replace all three with the new defaults. This is the
    never-dragged case.
 4. If any fraction differs from the old defaults, keep the user's fractions. A user who dragged a panel keeps
-   that intent.
+   that intent. The migration therefore upgrades the never-dragged saved layouts to the new proportions and
+   preserves a changed layout; this is the only way to satisfy both "existing saved layouts show the new
+   proportions" and "do not discard user intent". The reset command is the explicit way to return to the new
+   defaults.
 5. Return `defaultsRevision = 1`. A later load sees the marker and never auto-adjusts again, even if the values
    happen to equal the old defaults. The writer emits `defaultsRevision: 1` with the fractions and never emits
    the pixel fields.
@@ -286,7 +289,9 @@ and time.
 
 - Resolve every role in `Palette.axaml` under `ThemeVariant.Light` and `ThemeVariant.Dark`; assert the exact hex
   values from the visual contract.
-- Assert the `Default` theme dictionary mirrors Light for hosts without a variant.
+- Assert the `Default` theme dictionary mirrors Light for hosts without a variant; apply `ThemeSelection.System`
+  and assert every role resolves (the `Default` fallback is complete) while an explicit Light/Dark selection
+  resolves the matching dictionary.
 - Apply dark + high contrast and assert every role/Fluent key resolves to the high-contrast value, border
   thickness is 2, and compact padding survives.
 - Apply light + comfortable and light + compact and assert palette and density values; assert the applier's
@@ -408,7 +413,7 @@ high-contrast capture keeps compact density. Regeneration uses
 | ADR | **Not required.** The change is application-local visual tokens and settings, not a project/package/results/state format, dependency, or architecture boundary. No `contracts/manifest.json` change. |
 | Amendment | **Not applicable.** This is an out-of-step maintenance fix under `AGENTS.md` §3.5, not a step amendment. |
 | Independent design review | **Not required by this design.** The owner fixed the direction, the change is bounded to the existing shell surfaces, and the contrast/migration/tab/screenshot tests cover the risky parts. The reviewer harness binding also cannot host a record on a `fix/` branch. If the owner wants a review, stop before implementation and use the §3.9 process. |
-| `ui-interaction-contract.md` | **Numeric/default update required.** §6.1 must show left 0.20, right 0.22, console 0.32; §6.4 must add the `defaultsRevision` rule and state the reset command. The focus, `Escape`, `Enter`, layer, and splitter behaviour is unchanged. The planner did not edit that page in this pass; the owner must approve the numeric update and the implementor must make it in the same branch. See Q1. |
+| `ui-interaction-contract.md` | **Numeric/default update required.** §6.1 must show left 0.20, right 0.22, console 0.32; §6.4 must add the `defaultsRevision` rule and state the reset command; the §5.2 "Problems list" reference becomes "Validation list". The focus, `Escape`, `Enter`, layer, and splitter behaviour is unchanged. The planner did not edit that page in this pass; the owner must approve the numeric update and the implementor must make it in the same branch. See Q1. |
 | Step tag | **None.** No step is created and no `step-NN` tag is moved. |
 | Merge | One owner `--no-ff` approval after the local gates and the evidence in this record. No per-feature CI. |
 | Platform runs | Not a merge gate in this record. The headless suite runs on the platform matrix when a platform job is dispatched; screenshots remain Linux-only. A human Windows/macOS visual spot-check is recommended and recorded as evidence if performed. |
@@ -429,8 +434,9 @@ The following are already decided and are not reopened:
 Open questions for the owner, to answer before implementation:
 
 - **Q1 — interaction-contract update.** Confirm that `ui-interaction-contract.md` may be updated in this branch
-  for the new default fractions and the `defaultsRevision` migration. The behaviour is unchanged; without the
-  update, the two normative pages disagree. This is the only stop-and-ask that blocks the start.
+  for the new default fractions, the `defaultsRevision` migration, and the "Problems list" to "Validation list"
+  wording in §5.2. The behaviour is unchanged; without the update, the two normative pages disagree. This is
+  the only stop-and-ask that blocks the start.
 - **Q2 — derived palette values and surface mapping.** The five dark surface values are fixed. The design adds
   text, state, semantic, focus, and light-theme values (visual contract §3) because a five-colour surface set
   cannot express readable text, disabled, error, or hover states. It maps the three region cards to

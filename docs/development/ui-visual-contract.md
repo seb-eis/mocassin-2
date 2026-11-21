@@ -348,7 +348,8 @@ One additive application-local layout field, `layout.defaultsRevision`, makes th
 3. If the revision is below `1` and all three post-read fractions equal the old defaults within `1e-6`
    (`260/1200`, `320/1200`, `180/800`), replace all three with the new defaults. This is the never-dragged case.
 4. If any fraction differs from the old defaults, keep the user's fractions. The migration never overrides a
-   custom layout silently.
+   custom layout silently. This is the deliberate trade-off: the never-dragged saved layouts get the new
+   proportions, while a layout the user changed is treated as intent and preserved.
 5. Return `defaultsRevision = 1`; the writer emits it. A later load sees the marker and never auto-adjusts
    again. A second load is idempotent.
 6. No schema bump: the field is additive, application-local, and not in `contracts/manifest.json`, like the
