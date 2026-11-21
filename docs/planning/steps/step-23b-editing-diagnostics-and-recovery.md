@@ -146,8 +146,10 @@ internal sealed partial class ProjectEditCoordinator : ObservableObject
 ```
 
 - One coordinator per project, created by `ProjectSessionService` and owned by `ProjectSession`. The GUI
-  constructs its `ProjectDocument` with `MaxUndoDepth = 200`. It is the **only** write path: view models never
-  mutate a `Project` or a domain object, never call `ProjectHasher`, and never build a `ProjectChange`.
+  constructs its `ProjectDocument` with `MaxUndoDepth = 200` in the session factories (`CreateFromLoad`,
+  reload, recovery); the standalone test factory keeps the library default. It is the **only** write path: view
+  models never mutate a `Project` or a domain object, never call `ProjectHasher`, and never build a
+  `ProjectChange`.
 - `Apply` delegates to `ProjectDocument.Apply` → `ProjectEditor.Apply`, whose validator is the Step 01
   `ProjectValidator`. That is the **structural** validator (identity, seed, metadata, required fields, references
   within the document), not the full `ProjectValidationPipeline`: an edit that is structurally valid but
