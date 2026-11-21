@@ -174,8 +174,9 @@ format change, while older readers still round-trip it unchanged. Nested style v
 - `AutosaveScheduler` returns to the UI context after each write and marshals its status item and
   `MarkAutosaved` through `IUiDispatcher`; autosave/fallback failures are logged. Recovery-manifest read
   failures are logged by `RecoveryStore`.
-- `DiscardRecoveryAsync` deletes the candidate's exact `SnapshotPath` (the old sidecar after Save As) and rejects
-  a candidate with a different `ProjectId`. Candidate ties are broken by source (sidecar first) and then path.
+- `DiscardRecoveryAsync` deletes the candidate's exact `SnapshotPath` (the old sidecar after Save As) through the
+  additive Packages `ProjectStore.DeleteAutosaveFile` and rejects a candidate with a different `ProjectId`.
+  Candidate ties are broken by source (sidecar first) and then path.
 - `autosave`/`session` are additive v1 settings blocks with no schema bump and no contract-manifest entry.
 
 ## Synchronous, pure compiler (Step 08)

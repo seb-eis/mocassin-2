@@ -183,8 +183,10 @@ audit surface without stranding either half.
 - **23B** is class **High** on cross-step interfaces and test-matrix breadth; its contracts, dependencies,
   irreversibility, acceptance-story count, and evidence size are Medium. It defines the edit/validation
   interfaces that Steps 24–27 consume. The class was **reconfirmed at the 23B design freeze (2026-11-21)**; the
-  freeze reduced the library delta to two additive Core APIs and removed the draft's untitled-project recovery
-  assumption, but the interface and test-matrix dimensions are unchanged.
+  freeze reduced the Core delta to two additive APIs and removed the draft's untitled-project recovery
+  assumption; the F4 audit fix later added the additive Packages `ProjectStore.DeleteAutosaveFile`, and all three
+  were accepted at the owner's `Passed with notes` re-audit decision. The interface and test-matrix dimensions
+  are unchanged.
 - **Neither half is Low or Medium**: the split reduced the evidence size and the acceptance-story count, not the
   interface or test-matrix breadth. Under this section, each half therefore needs **explicit owner acceptance as
   a High unit at its own start gate**. The acceptance is recorded on each step page (§18 for 23A, §16 for 23B)

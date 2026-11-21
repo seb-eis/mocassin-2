@@ -5,10 +5,11 @@
 Not dependent on Steps 08–11 or 13–22.
 **Delivers:** The single-project edit pipeline with undo/redo, the validation and Problems surface, dirty state
 and save-point handling, autosave, crash recovery, and unclean-exit session restore — on top of the 23A shell.
-**Status:** **In audit — re-audit required.** The design was accepted by the human owner on 2026-11-21 as
-`Ready with notes` (round-4 freeze `a33711d`, record `c4ded0e`), class High and the four features were approved,
-and the step branch is `step/23b-editing-diagnostics-and-recovery`. Audit round 1 returned `Fixes required`
-(F1–F7); the fixes and their tests are recorded in the feature log and the audit record. The review record is
+**Status:** **In audit — `Passed with notes` accepted; merge pending.** The design was accepted by the human
+owner on 2026-11-21 as `Ready with notes` (round-4 freeze `a33711d`, record `c4ded0e`), class High and the four
+features were approved, and the step branch is `step/23b-editing-diagnostics-and-recovery`. Audit round 1
+returned `Fixes required` (F1–F7); round 2 returned `Passed with notes`, which the owner accepted on 2026-11-21
+(F8/F9/N1 fixed in the docs-only resolution commit; F10 accepted as a note). The review record is
 [`reviews/step-23b.md`](../reviews/step-23b.md).
 
 > **Split note.** Step 23 was split into **23A** and **23B** by the owner on 2026-11-20 (complexity class High,
@@ -19,12 +20,12 @@ and the step branch is `step/23b-editing-diagnostics-and-recovery`. Audit round 
 
 ## Implementation status
 
-- **Status:** **In audit** — audit round 1 returned `Fixes required` (F1–F7); the fixes are squashed at `ca64c9a`, the replacement Ubuntu/Windows/macOS runs are green at the re-audit candidate `fe79552`, and the audit record is `Re-audit required`
+- **Status:** **In audit** — audit round 2 returned `Passed with notes`; the human owner accepted on 2026-11-21 with F8/F9/N1 fixed in the docs-only resolution commit and F10 accepted as a note; merge and tag pending
 - **Step branch:** `step/23b-editing-diagnostics-and-recovery`
 - **Step CI:** replacement Ubuntu closeout [44932597523](https://github.com/seb-eis/mocassin-2/actions/runs/44932597523), Windows [44932918537](https://github.com/seb-eis/mocassin-2/actions/runs/44932918537), and macOS [44932432910](https://github.com/seb-eis/mocassin-2/actions/runs/44932432910) green at `fe79552`; the original `eb120e1` runs are historical
 - **Main merge:** —
 - **Step tag:** —
-- **Audit:** Re-audit required — [`audits/step-23b.md`](../audits/step-23b.md) records the round-1 findings and the resolutions; closeout evidence [`closeout/step-23b.json`](../closeout/step-23b.json) is rebound at `fe79552`
+- **Audit:** `Passed with notes` — **accepted by the human owner 2026-11-21** ([`audits/step-23b.md`](../audits/step-23b.md)); closeout evidence [`closeout/step-23b.json`](../closeout/step-23b.json) binds `fe79552`
 - **Design review:** **Accepted `Ready with notes` by the human owner 2026-11-21** at the round-4 freeze
   `a33711d` (record `c4ded0e`, round-4 verdict `Ready with notes`) — see
   [`reviews/step-23b.md`](../reviews/step-23b.md).
@@ -81,9 +82,10 @@ seam fills in §1.
   read-only, the save-point across save/undo/redo, replacement, and the real session/store path.
 - **Known limitations:** the Project Overview metadata form (name/description/author/notes) was not built in
   this feature; the owner moved it to feature 2 and it landed there (`77c1b9c`). The validation surface,
-  autosave/recovery, dialogs, published documentation column, fixtures, and closeout are features 2–4. No app
-  public API changed; the only public addition is `ProjectDocument.MaxUndoDepth` in
-  `Mocassin.Core/PublicAPI.Unshipped.txt`.
+  autosave/recovery, dialogs, published documentation column, fixtures, and closeout are features 2–4. At this
+  feature's squash no app public API changed and the only public addition was `ProjectDocument.MaxUndoDepth` in
+  `Mocassin.Core/PublicAPI.Unshipped.txt`; feature 3 added `CreateRecovered` and the audit fix added the
+  Packages `ProjectStore.DeleteAutosaveFile`.
 
 #### Feature 2 — validation surface and metadata editor (squashed `77c1b9c`)
 
@@ -195,7 +197,7 @@ seam fills in §1.
   autosave failure-to-`recovery/` fallback is now failure-injected in a PR-fast test; a deferred `recovery/`
   candidate may expire under the accepted m-14 seven-day sweep.
 - **Evidence:** [`closeout/step-23b.json`](../closeout/step-23b.json); audit request
-  [`audits/step-23b.md`](../audits/step-23b.md) (`Re-audit required`).
+  [`audits/step-23b.md`](../audits/step-23b.md) (`Passed with notes`, owner-accepted).
 
 #### Audit round 1 fixes (F1–F7)
 
@@ -226,6 +228,21 @@ seam fills in §1.
   `dotnet format --verify-no-changes` were clean. Replacement Ubuntu closeout 44932597523, Windows 44932918537,
   and macOS 44932432910 are green at `fe79552`. Two initial parallel dispatches were cancelled by the workflow's
   per-ref concurrency group before starting; the serialized replacement runs above are the gate evidence.
+
+#### Audit round 2 — `Passed with notes` (owner-accepted 2026-11-21)
+
+- **F8 (Minor):** §10 and §17 now record the three additive public APIs — `ProjectDocument.MaxUndoDepth`,
+  `ProjectDocument.CreateRecovered`, and the Packages `ProjectStore.DeleteAutosaveFile` — with the latter in
+  `Mocassin.Packages/PublicAPI.Unshipped.txt`; ApiCompat remains clean. The "no Packages API change" claim is
+  removed. The decision records (`05-open-decisions.md`, `04-roadmap.md`, `design-decisions.md`) name the third
+  API.
+- **F9 (Minor):** the parity matrix now states that the autosave fallback **is** failure-injected by
+  `AFailedSidecarWriteFallsBackToRecoveryAndIsLogged`.
+- **N1 (Note):** the audit-request table is rebound to `fe79552`.
+- **F10 (Note, accepted):** the recovery `LoadDiagnostics` assertion compares empty arrays for a valid snapshot,
+  so it is vacuous; the assignment is verified at `ProjectSessionService.cs:464`. A diagnostic-bearing fixture is
+  deferred as a test-strength improvement, not a product defect.
+- **Owner decision:** `Passed with notes` accepted on 2026-11-21; merge `--no-ff` and tag `step-23b` approved.
 
 ### Inherited 23A deviations and how 23B respects them
 
@@ -260,7 +277,7 @@ new shell surface: it fills the seams 23A delivered.
 - Autosave (sidecar plus a `recovery/` fallback/crash snapshot), the recovery prompt,
   Reload/Recover/Discard/Keep, unclean-exit session restore, retention, and the bounded asynchronous
   crash-recovery writer.
-- Two additive Core APIs and the additive settings fields (§10).
+- Three additive APIs (two Core, one Packages) and the additive settings fields (§10).
 - The 23B tests, documentation, parity/status updates, closeout evidence, and audit request.
 
 **Non-goals**
@@ -724,12 +741,13 @@ Details that follow from the base shape:
 
 ### 10. Library changes owned by this step
 
-Two additive Core changes; no Packages change and no App public surface change.
+Three additive public APIs: two Core APIs and one Packages API. There is no App public surface change.
 
 | Change | Where | Why the shell cannot own it | Contract effect |
 | --- | --- | --- | --- |
 | `ProjectDocument.MaxUndoDepth` (init-only, default `0` = unbounded) | `Mocassin.Core.Editing` | The stack lives in the document; a UI-level bound would shadow it | Additive property; the default preserves Step 01's unbounded behaviour. The GUI constructs its documents with `MaxUndoDepth = 200`. The init accessor throws `ArgumentOutOfRangeException` for a negative value; `0` is unbounded (m-9) |
 | `ProjectDocument.CreateRecovered(Project current, Project lastSaved, ProjectEditor? editor = null, int maxUndoDepth = 0)` | `Mocassin.Core.Editing` | Recovery needs a clean point different from the current value; `MarkSaved(value)` overwrites both | Additive static factory; constructors unchanged. The GUI passes `maxUndoDepth: 200`; the default `0` is unbounded |
+| `ProjectStore.DeleteAutosaveFile(string autosavePath)` | `Mocassin.Packages.Projects` | A deferred-sidecar discard after Save As must delete the candidate's old snapshot path, not one derived from the new session path | Additive static helper; `DeleteAutosave(projectPath)` is unchanged. Listed in `Mocassin.Packages/PublicAPI.Unshipped.txt`; ApiCompat reports no break |
 
 - **No new diagnostic code (M-1).** The read-only refusal is the app-level `EditApplyOutcome.ReadOnly` in §2,
   not a `Diagnostic`. `ProjectDiagnosticCodes`, `DiagnosticCatalog`, and every message remain unchanged;
@@ -737,9 +755,11 @@ Two additive Core changes; no Packages change and no App public surface change.
   The docs plan records the app-level message in the user guide.
 - **No `ProjectStore.WriteAutosaveToPathAsync`.** The Step 01 `WriteAutosaveAsync(project, projectPath)` derives
   `<projectPath>.autosave`; passing the recovery base path `<app-data>/recovery/<projectId>.mocprj` writes the
-  recovery snapshot without a new API. `IRecoveryStore` wraps that call and owns the manifest. This keeps the
-  library delta at two APIs and reuses the existing `AutosaveFailed` diagnostics.
-- Both are listed in `Mocassin.Core/PublicAPI.Unshipped.txt`; no baseline refresh is expected. 23A's
+  recovery snapshot without a new API. `IRecoveryStore` wraps that call and owns the manifest. The F4 audit
+  fix adds the separate `ProjectStore.DeleteAutosaveFile(autosavePath)` for exact-path discard; the library
+  delta is three public APIs and reuses the existing `AutosaveFailed` diagnostics.
+- The two Core additions are listed in `Mocassin.Core/PublicAPI.Unshipped.txt`, and the Packages addition in
+  `Mocassin.Packages/PublicAPI.Unshipped.txt`; ApiCompat reports no breaking change. 23A's
   `ProjectPathRules` change is not repeated. `EditApplyResult`/`ProjectChangeKind` are internal
   `Mocassin.App.ViewModels` types, not public API.
 - The save-point change in §2.2 and the close guard in §4 are internal `Mocassin.App.ViewModels` edits, not
@@ -865,13 +885,13 @@ PR-fast test; the only test time limit is a hang guard.
 
 | Dimension | Class | Evidence |
 | --- | --- | --- |
-| Contracts, formats, and public surfaces | **Medium** | Two additive Core APIs; the settings additions are additive with no schema bump; no format change |
+| Contracts, formats, and public surfaces | **Medium** | Three additive APIs (two Core, one Packages); the settings additions are additive with no schema bump; no format change |
 | New dependencies | **Low** | None; the harness and Avalonia stack come from 23A |
 | Cross-step interfaces | **High** | `ProjectEditCoordinator`/`ProjectChanged` and the validation surface are consumed by Steps 24, 25, 26, and 27; a late change rewrites editor code |
 | Irreversibility | **Medium** | Undo/save-point and autosave semantics are documented and testable; reversible with a recorded decision; no scientific or persisted-project change |
 | Test-matrix breadth and failure modes | **High** | Dirty/save-point, autosave timing, recovery/crash, validation staleness, and platform recovery paths, on top of the headless harness |
 | Independent acceptance stories | **Medium** | One coherent story: editing is safe and diagnosable (undo/validation) and recoverable (autosave/recovery); the facets are not separately approvable deliverables |
-| Evidence size for a fresh auditor | **Medium** | Four features, no new application project, two additive APIs, nine documentation sections; one sitting is feasible |
+| Evidence size for a fresh auditor | **Medium** | Four features, no new application project, three additive APIs, nine documentation sections; one sitting is feasible |
 
 **Class: High** (cross-step interface and test-matrix breadth). *Justification:* 23B defines the edit/validation
 interfaces that four later steps consume and spans a broad failure matrix (save point, timers, crash, staleness,
@@ -914,14 +934,15 @@ amendment before feature 2. **No further split is proposed.**
 | `Load` stage is conditional on load diagnostics (clean load is `Skipped`) | This page §3/§13 |
 | No untitled-project model; `recovery/` holds crash snapshots and manifest-backed fallbacks | This page §5/§6 |
 | `IRecoveryStore` + `CrashRecoveryWriter`; there is no `IRecoveryWriter` type | This page §6 |
-| Two additive Core APIs; no Packages API change | This page §10 |
+| Three additive APIs: Core `MaxUndoDepth` and `CreateRecovered`, plus Packages `ProjectStore.DeleteAutosaveFile` | This page §10 |
 | `autosave`/`session` are additive settings fields with no schema bump | This page §9 |
 | Problems shows the active project only; statistics are display-only in 23B | This page §3 |
 | Class High; owner acceptance at the start gate; no further split | This page §16 |
 
 The 23B start-gate items were confirmed by the human owner on 2026-11-21 (§17.2): the 23A seams proved
-sufficient in practice (no shell edit beyond the §11 list), the two Core additions are still additive after 23A
-merged, and the owner accepted the `MaxUndoDepth` GUI bound (default 0/unbounded, GUI sets 200), the app-level
+sufficient in practice (no shell edit beyond the §11 list), the Core additions are still additive after 23A
+merged, and the third additive API (`ProjectStore.DeleteAutosaveFile`) was accepted at the re-audit approval.
+The owner accepted the `MaxUndoDepth` GUI bound (default 0/unbounded, GUI sets 200), the app-level
 read-only refusal (no `PROJ031` reuse), and the no-untitled recovery scope.
 
 #### 17.1 Owner questions for the start gate (n-9)
@@ -930,8 +951,9 @@ These are the same decisions as §16/§17, listed explicitly so the gate questio
 
 1. Accept **class High** as one unit, with no further split, per §16.
 2. Approve the **four-feature list** in the proposed order.
-3. Confirm the **two additive Core APIs** (`MaxUndoDepth`, `CreateRecovered`) and that the GUI sets
-   `MaxUndoDepth = 200` while the library default stays `0`/unbounded.
+3. Confirm the **three additive APIs** (`ProjectDocument.MaxUndoDepth`, `ProjectDocument.CreateRecovered`, and
+   the Packages `ProjectStore.DeleteAutosaveFile`) and that the GUI sets `MaxUndoDepth = 200` while the library
+   default stays `0`/unbounded.
 4. Confirm the **app-level read-only refusal** (`EditApplyOutcome.ReadOnly`, no `PROJ031`, no new code).
 5. Confirm that 23B introduces **no untitled-project model** and that `recovery/` is the crash/fallback
    snapshot store described in §6.
@@ -949,7 +971,7 @@ section. They are scope/class approvals, not a design verdict.
 | --- | --- |
 | Class **High** as one unit, no further split | **Approved** |
 | Four-feature list and order | **Approved** |
-| Two additive Core APIs (`MaxUndoDepth`, `CreateRecovered`); GUI depth 200, library default `0` | **Confirmed** |
+| Three additive APIs (`MaxUndoDepth`, `CreateRecovered`, and the Packages `ProjectStore.DeleteAutosaveFile`); GUI depth 200, library default `0` | **Confirmed** (the third accepted with `Passed with notes` on 2026-11-21) |
 | App-level read-only refusal (`EditApplyOutcome.ReadOnly`, no `PROJ031`) | **Confirmed** |
 | §11 seam fills, including the console selector, autosave control, and status glyph/severity | **Confirmed** |
 | No untitled-project model; `recovery/` is the crash/fallback snapshot store | **Confirmed** |
@@ -988,8 +1010,8 @@ section. They are scope/class approvals, not a design verdict.
       retention.
 - [x] Implement `IRecoveryStore`, `RecoveryStore` (App), `CrashRecoveryWriter`, and the crash-dialog recovery
       action.
-- [x] Add the two Core changes with tests and `PublicAPI.Unshipped.txt` entries; verify no App or Packages API
-      change.
+- [x] Add the three additive APIs (two Core, one Packages) with tests and `PublicAPI.Unshipped.txt` entries;
+      verify no App public API change.
 - [x] Add the 23B tests, documentation column, parity/status updates, `closeout/step-23b.json`, and request the
       audit.
 

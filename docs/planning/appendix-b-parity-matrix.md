@@ -228,7 +228,7 @@ Status legend:
 | Model validator/problems | Y | Partial | 23B/07 | Validity status item, Problems channel seeded from the retained load result (conditional `Load` stage), severity/code/text/source filters, sorting, help anchors, revalidate, edit diagnostics, and navigable `ModelPath` targets in 23B; domain providers and full statistics panels in 24/25 |
 | Command palette and shortcut cheat sheet | N | Implemented | 23A | Searchable command catalog with platform gestures |
 | Application settings and logging | N | Implemented | 23A/23B | Versioned `mocassin.settings` v1 with migration and retention in 23A; `autosave`/`session` additive fields in 23B; structured rolling logs replace the original XML settings file |
-| Crash recovery dialog | N | Improvement | 23A/23B | Global exception boundary, log entry, and "open log folder" in 23A; captured dirty-session snapshots, the 2 s bounded async recovery writer, per-session status, and the recovery action in 23B; the dead-UI path writes no snapshots, and the autosave fallback is not failure-injected in PR-fast tests |
+| Crash recovery dialog | N | Improvement | 23A/23B | Global exception boundary, log entry, and "open log folder" in 23A; captured dirty-session snapshots, the 2 s bounded async recovery writer, per-session status, and the recovery action in 23B; the dead-UI path writes no snapshots, and the autosave fallback is failure-injected in a PR-fast test |
 | Application diagnostics | N | Deferred | 23A/23B | App-side environment report (distinct from CLI `doctor`) |
 | Particle/set editor | Y | Planned | 24 | |
 | Structure editor | Y | Planned | 24 | |

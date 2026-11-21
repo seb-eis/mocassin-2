@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the fresh auditor) |
 | Step agent (implementor) | DeepSeek V4.1 Flash 1017 (opencode-go) |
 | Audit initiated by | Orchestrator, on request of the step agent |
-| Step branch | `step/23b-editing-diagnostics-and-recovery` at `eb120e17ce43a152c8905fc1f54528b69448b3e3` |
+| Step branch | `step/23b-editing-diagnostics-and-recovery` at `fe79552585690fb9d552e58aad558df0ca96ced8` |
 | Closeout evidence | `docs/planning/closeout/step-23b.json` |
 | Audit date | 2026-11-21 |
 | Auditor | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh, independent audit context |
@@ -216,13 +216,17 @@ after a new squash, current `main` merge, local gate, and replacement closeout C
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| F1 | Fixed — pending re-audit | Step agent | `ca64c9a` |
-| F2 | Fixed — pending re-audit | Step agent | `ca64c9a` |
-| F3 | Fixed — pending re-audit | Step agent | `ca64c9a` |
-| F4 | Fixed — pending re-audit | Step agent | `ca64c9a` |
-| F5 | Fixed — pending re-audit | Step agent | `ca64c9a` |
-| F6 | Fixed — pending re-audit | Step agent | `ca64c9a` |
-| F7 | Fixed — pending re-audit | Step agent | `ca64c9a` |
+| F1 | Fixed — closed in round 2 | Step agent | `ca64c9a` |
+| F2 | Fixed — closed in round 2 | Step agent | `ca64c9a` |
+| F3 | Fixed — closed in round 2 | Step agent | `ca64c9a` |
+| F4 | Fixed — closed in round 2 | Step agent | `ca64c9a` |
+| F5 | Fixed — closed in round 2 | Step agent | `ca64c9a` |
+| F6 | Fixed — closed in round 2 | Step agent | `ca64c9a` |
+| F7 | Fixed — closed in round 2 | Step agent | `ca64c9a` |
+| F8 | Fixed — docs/decision record names all three additive APIs | Step agent | This docs-only resolution commit |
+| F9 | Fixed — parity row says the fallback is failure-injected | Step agent | This docs-only resolution commit |
+| F10 | Accepted note — `LoadDiagnostics` assertion compares empty arrays; the assignment is verified at `ProjectSessionService.cs:464` and a diagnostic-bearing fixture is deferred | Human owner (accepted 2026-11-21) | `ca64c9a` (test); note accepted at merge approval |
+| N1 | Fixed — request table rebound to `fe79552` | Step agent | This docs-only resolution commit |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.
@@ -232,35 +236,48 @@ verdict.
 The step agent completes this section before a merge, tag, or Blocker/Major waiver request. It must cover the
 full history, not only the latest round.
 
-- [ ] Requested decision and frozen commit recorded
-- [ ] Every review/audit round recorded (round, date, commit, reviewer, verdict)
-- [ ] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
-- [ ] Accepted notes and waivers recorded with rationale
-- [ ] Residual risks, deferred items, and follow-up owners recorded
-- [ ] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
-- [ ] Final CI and documentation-build results recorded
+- [x] Requested decision and frozen commit recorded: accept `Passed with notes` for the audited solution `fe79552`, merge `--no-ff`, and tag `step-23b`
+- [x] Every review/audit round recorded (round, date, commit, reviewer, verdict)
+- [x] Every finding recorded (ID, severity, issue, evidence, resolution, fix commit, status)
+- [x] Accepted notes and waivers recorded with rationale
+- [x] Residual risks, deferred items, and follow-up owners recorded
+- [x] Explicit no-Blocker/no-Major statement, or the exact exceptions being waived
+- [x] Final CI and documentation-build results recorded
 
 Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| Design review 1–4 | 2026-11-21 | `a33711d` / `c4ded0e` | Fresh planning auditors | `Ready with notes` (owner accepted) |
+| Audit round 1 | 2026-11-21 | `eb120e1` | Fresh audit context | `Fixes required` |
+| Audit round 2 | 2026-11-21 | `fe79552` | Fresh audit context | `Passed with notes` (owner accepted) |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| F1–F3 | Major | Startup restore state, all-or-nothing close, autosave UI-thread state | Fixed on the audit-round-1 feature branch; verified in round 2 | `ca64c9a` | Closed |
+| F4–F5 | Minor | Deferred-sidecar discard path/foreign id, missing failure logging | Fixed; tests and logs added | `ca64c9a` | Closed |
+| F6–F7 | Note | UI-thread cleanup reads and test gaps | UI continuation fixed; tests added | `ca64c9a` | Closed (F10 note) |
+| F8 | Minor | Step page/decisions denied the third public Packages API | This resolution names `ProjectStore.DeleteAutosaveFile` in §10/§17 | This docs-only commit | Fixed |
+| F9 | Minor | Parity row still denied the injected fallback test | Row updated to failure-injected | This docs-only commit | Fixed |
+| F10 | Note | `LoadDiagnostics` assertion is vacuous for a valid snapshot | Assignment verified at `ProjectSessionService.cs:464`; diagnostic-bearing fixture deferred | `ca64c9a` | Accepted note |
+| N1 | Note | Audit request table named the round-1 commit | Rebound to `fe79552` | This docs-only commit | Fixed |
+
+No Blocker or Major finding remains open. Accepted note F10 is a test-strength improvement, not a product defect;
+the deferred diagnostic-bearing fixture has no owner because it does not block this step. Known limitations are
+the per-project prompts, ordinary Open on a missing main file, dead-UI recovery, the m-14 retention sweep, and
+the manual Windows/macOS platform gate.
 
 ## Human approval
 
 - [ ] Accepted: Passed
-- [ ] Accepted: Passed with notes
+- [x] Accepted: Passed with notes
 - [ ] Fixes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner (decision relayed by the orchestrator)
+Date: 2026-11-21
 
 ## Audit rounds
 
