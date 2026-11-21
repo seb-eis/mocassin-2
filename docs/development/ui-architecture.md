@@ -64,7 +64,9 @@ The document key is `(Kind, ProjectScopeId)`:
 
 Later steps add `model.*` and other document kinds without changing the key shape. The tab strip is one global
 collection; the project switcher activates a project's last document. The welcome document closes when the first
-real document opens.
+real document opens. The application `ViewLocator` claims only classes named `*ViewModel` in the App view-model
+assembly and maps them to the matching view; enums, settings records, and other model objects keep their ordinary
+content rendering.
 
 ## Navigation and commands
 
