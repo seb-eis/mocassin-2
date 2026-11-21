@@ -416,6 +416,7 @@ high-contrast capture keeps compact density. Regeneration uses
 | Independent design review | **Not required by this design.** The owner fixed the direction, the change is bounded to the existing shell surfaces, and the contrast/migration/tab/screenshot tests cover the risky parts. The reviewer harness binding also cannot host a record on a `fix/` branch. If the owner wants a review, stop before implementation and use the §3.9 process. |
 | `ui-interaction-contract.md` | **Numeric/default update required.** §6.1 must show left 0.20, right 0.22, console 0.32; §6.4 must add the `defaultsRevision` rule and state the reset command; the §5.2 "Problems list" reference becomes "Validation list". The focus, `Escape`, `Enter`, layer, and splitter behaviour is unchanged. The planner did not edit that page in this pass; the owner must approve the numeric update and the implementor must make it in the same branch. See Q1. |
 | Step tag | **None.** No step is created and no `step-NN` tag is moved. |
+| Parity matrix | **No change.** This is a visual maintenance fix, not a feature; no parity row is added or moved. |
 | Merge | One owner `--no-ff` approval after the local gates and the evidence in this record. No per-feature CI. |
 | Platform runs | Not a merge gate in this record. The headless suite runs on the platform matrix when a platform job is dispatched; screenshots remain Linux-only. A human Windows/macOS visual spot-check is recommended and recorded as evidence if performed. |
 
