@@ -30,7 +30,7 @@ public sealed class AppSettingsStoreTests
             Logging = new LoggingSettings { Level = SettingsLogLevel.Warning },
             Paths = new PathSettings { LastOpenDirectory = "/tmp/open" },
             RecentFiles = [new RecentFile("/tmp/ceria.mocprj", DateTimeOffset.UnixEpoch)],
-            Layout = new LayoutSettings { LeftWidth = 300, LeftVisible = false },
+            Layout = new LayoutSettings { LeftFraction = 0.25, LeftVisible = false },
         };
 
         var saved = await store.SaveAsync(settings);
@@ -45,8 +45,10 @@ public sealed class AppSettingsStoreTests
         Assert.Equal(settings.ReduceMotion, loaded.Settings.ReduceMotion);
         Assert.Equal(settings.Logging.Level, loaded.Settings.Logging.Level);
         Assert.Equal(settings.Paths.LastOpenDirectory, loaded.Settings.Paths.LastOpenDirectory);
-        Assert.Equal(settings.Layout.LeftWidth, loaded.Settings.Layout.LeftWidth);
+        Assert.Equal(settings.Layout.LeftFraction, loaded.Settings.Layout.LeftFraction);
         Assert.False(loaded.Settings.Layout.LeftVisible);
+        var json = await File.ReadAllTextAsync(paths.SettingsFile);
+        Assert.DoesNotContain("\"leftWidth\"", json, StringComparison.Ordinal);
         Assert.Single(loaded.Settings.RecentFiles);
         Assert.Empty(Directory.GetFiles(workspace.Path, "*.tmp", SearchOption.TopDirectoryOnly));
     }
@@ -63,6 +65,32 @@ public sealed class AppSettingsStoreTests
         Assert.False(loaded.IsFatal);
         Assert.False(loaded.LoadedFromFile);
         Assert.Equal(AppSettings.Default, loaded.Settings);
+    }
+
+    [Fact]
+    public async Task ALegacyPixelDocumentIsMigratedAndRewrittenWithoutPixelKeys()
+    {
+        using var workspace = new TempWorkspace();
+        var paths = new AppPaths(workspace.Path);
+        Directory.CreateDirectory(paths.RootDirectory);
+        await File.WriteAllTextAsync(
+            paths.SettingsFile,
+            """{"format":"mocassin.settings","layout":{"leftWidth":300,"rightWidth":400,"consoleHeight":240}}""");
+        var store = new AppSettingsStore(paths);
+
+        var loaded = store.Load();
+
+        Assert.False(loaded.IsFatal);
+        Assert.Equal(300d / 1200d, loaded.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(400d / 1200d, loaded.Settings.Layout.RightFraction, 10);
+        Assert.Equal(240d / 800d, loaded.Settings.Layout.ConsoleFraction, 10);
+
+        var service = new SettingsService(store, loaded);
+        Assert.True((await service.UpdateAsync(service.Current)).IsSuccess);
+        var json = await File.ReadAllTextAsync(paths.SettingsFile);
+        Assert.Contains("\"leftFraction\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"leftWidth\"", json, StringComparison.Ordinal);
+        Assert.Equal(loaded.Settings.Layout, store.Load().Settings.Layout);
     }
 
     [Fact]
@@ -134,12 +162,12 @@ public sealed class AppSettingsStoreTests
         {
             Theme = ThemeSelection.Light,
             Paths = new PathSettings { LastOpenDirectory = "/tmp/projects" },
-            Layout = new LayoutSettings { LeftWidth = 280 },
+            Layout = new LayoutSettings { LeftFraction = 0.28 },
         };
         Assert.True((await service.UpdateAsync(update)).IsSuccess);
         Assert.Equal(ThemeSelection.Light, service.Current.Theme);
         Assert.Equal("/tmp/projects", service.Current.Paths.LastOpenDirectory);
-        Assert.Equal(280, service.Current.Layout.LeftWidth);
+        Assert.Equal(0.28, service.Current.Layout.LeftFraction, 10);
         Assert.Equal(1, changes);
 
         Assert.True((await service.AddRecentFileAsync("/tmp/a.mocprj", DateTimeOffset.UnixEpoch)).IsSuccess);

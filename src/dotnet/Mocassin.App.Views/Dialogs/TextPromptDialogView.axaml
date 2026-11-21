@@ -1,12 +1,16 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:overlay="using:Mocassin.App.ViewModels.Dialogs"
+             xmlns:dialogs="using:Mocassin.App.Views.Dialogs"
              x:Class="Mocassin.App.Views.Dialogs.TextPromptDialogView"
              x:DataType="overlay:TextPromptDialogViewModel">
   <StackPanel Spacing="12">
     <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
     <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
-    <TextBox Text="{Binding Text}" PlaceholderText="{Binding Watermark}" AcceptsReturn="False" />
+    <TextBox Text="{Binding Text}"
+             PlaceholderText="{Binding Watermark}"
+             AcceptsReturn="False"
+             dialogs:DialogFocus.InitialFocus="True" />
     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
       <Button Content="Cancel" Command="{Binding CancelCommand}" IsCancel="True" />
       <Button Content="OK" Command="{Binding ConfirmCommand}" IsDefault="True" />

@@ -43,49 +43,49 @@ internal static class SettingsDefaults
     public const double MaxFontScale = 1.5;
 
     /// <summary>
-    /// The default left panel width.
+    /// The design width used by the pre-fix pixel layout and its one-time migration.
     /// </summary>
-    public const int DefaultLeftWidth = 260;
+    public const double LegacyDesignWidth = 1200d;
 
     /// <summary>
-    /// The default right panel width.
+    /// The design height used by the pre-fix pixel layout and its one-time migration.
     /// </summary>
-    public const int DefaultRightWidth = 320;
+    public const double LegacyDesignHeight = 800d;
 
     /// <summary>
-    /// The default console height.
+    /// The default left panel fraction.
     /// </summary>
-    public const int DefaultConsoleHeight = 180;
+    public const double DefaultLeftFraction = 260d / LegacyDesignWidth;
 
     /// <summary>
-    /// The minimum left panel width.
+    /// The default right panel fraction.
     /// </summary>
-    public const int MinLeftWidth = 160;
+    public const double DefaultRightFraction = 320d / LegacyDesignWidth;
 
     /// <summary>
-    /// The maximum left panel width.
+    /// The default console fraction.
     /// </summary>
-    public const int MaxLeftWidth = 600;
+    public const double DefaultConsoleFraction = 180d / LegacyDesignHeight;
 
     /// <summary>
-    /// The minimum right panel width.
+    /// The minimum persisted side-panel fraction.
     /// </summary>
-    public const int MinRightWidth = 160;
+    public const double MinSideFraction = 0.08;
 
     /// <summary>
-    /// The maximum right panel width.
+    /// The maximum persisted side-panel fraction.
     /// </summary>
-    public const int MaxRightWidth = 800;
+    public const double MaxSideFraction = 0.45;
 
     /// <summary>
-    /// The minimum console height.
+    /// The minimum persisted console fraction.
     /// </summary>
-    public const int MinConsoleHeight = 80;
+    public const double MinConsoleFraction = 0.08;
 
     /// <summary>
-    /// The maximum console height.
+    /// The maximum persisted console fraction.
     /// </summary>
-    public const int MaxConsoleHeight = 600;
+    public const double MaxConsoleFraction = 0.60;
 
     /// <summary>
     /// The default active console channel.

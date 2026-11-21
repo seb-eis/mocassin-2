@@ -1,9 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:vm="using:Mocassin.App.ViewModels.Commands"
+             xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Commands.ShortcutCheatSheetView"
              x:DataType="vm:ShortcutCheatSheetViewModel">
-  <Grid Background="#66000000">
+  <Grid Background="#66000000" automation:AutomationProperties.Name="Keyboard shortcuts">
     <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
             BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
             BorderThickness="1"
@@ -35,7 +36,13 @@
             </ItemsControl.ItemTemplate>
           </ItemsControl>
         </ScrollViewer>
-        <Button Grid.Row="2" Content="Close" Command="{Binding CloseCommand}" HorizontalAlignment="Right" />
+        <Button Grid.Row="2"
+                x:Name="CloseButton"
+                Content="Close"
+                Command="{Binding CloseCommand}"
+                IsDefault="True"
+                IsCancel="True"
+                HorizontalAlignment="Right" />
       </Grid>
     </Border>
   </Grid>

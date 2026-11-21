@@ -2,6 +2,7 @@
 
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Mocassin.App.ViewModels.Diagnostics;
 
 namespace Mocassin.App.Views.Consoles;
@@ -14,7 +15,11 @@ internal sealed partial class ProblemsView : UserControl
     /// <summary>
     /// Initializes the view.
     /// </summary>
-    public ProblemsView() => InitializeComponent();
+    public ProblemsView()
+    {
+        InitializeComponent();
+        Entries.AddHandler(KeyDownEvent, OnItemsKeyDown, RoutingStrategies.Bubble, handledEventsToo: true);
+    }
 
     private void OnItemsDoubleTapped(object? sender, TappedEventArgs e) => NavigateSelected(sender);
 

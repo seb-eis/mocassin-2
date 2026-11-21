@@ -92,9 +92,9 @@ properties are ignored and dropped on the next write. A missing key takes its do
   },
   "recentFiles": [],
   "layout": {
-    "leftWidth": 260,
-    "rightWidth": 320,
-    "consoleHeight": 180,
+    "leftFraction": 0.2167,
+    "rightFraction": 0.2667,
+    "consoleFraction": 0.225,
     "leftVisible": true,
     "rightVisible": true,
     "consoleVisible": true,
@@ -128,7 +128,7 @@ properties are ignored and dropped on the next write. A missing key takes its do
 | `paths.lastSaveDirectory` | string or null | `null` | Last accepted save-picker directory |
 | `paths.lastFolderDirectory` | string or null | `null` | Last accepted folder-picker directory |
 | `recentFiles` | array | `[]` | At most 10 `{ "path", "lastOpenedUtc" }` entries, de-duplicated by path |
-| `layout.leftWidth` / `rightWidth` / `consoleHeight` | integer (px) | `260` / `320` / `180` | Valid ranges 160–600 / 160–800 / 80–600; an out-of-range value falls back to the default |
+| `layout.leftFraction` / `rightFraction` / `consoleFraction` | number | `260/1200` / `320/1200` / `180/800` | Side panels 0.08–0.45 and console 0.08–0.60; missing, non-finite, or out-of-range values fall back to the default. A pre-fix document with `leftWidth`/`rightWidth`/`consoleHeight` is migrated once with the 1200 × 800 reference; the writer emits only fractions |
 | `layout.leftVisible` / `rightVisible` / `consoleVisible` | boolean | `true` | Panel visibility |
 | `layout.activeConsoleChannel` | string | `"application"` | Channel id (`application`/`problems`); an unknown id falls back to the first available channel |
 | `autosave.enabled` | boolean | `true` | Periodic sidecar autosave on/off |

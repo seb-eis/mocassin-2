@@ -1,8 +1,10 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:overlay="using:Mocassin.App.ViewModels.Dialogs"
+             xmlns:dialogs="using:Mocassin.App.Views.Dialogs"
              x:Class="Mocassin.App.Views.Dialogs.ProgressDialogView"
-             x:DataType="overlay:ProgressDialogViewModel">
+             x:DataType="overlay:ProgressDialogViewModel"
+             dialogs:DialogFocus.InitialFocus="Container">
   <StackPanel Spacing="12">
     <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
     <TextBlock Text="{Binding StatusText}" TextWrapping="Wrap" />

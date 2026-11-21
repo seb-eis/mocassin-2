@@ -224,6 +224,30 @@ validation result, or fake project store. `ShellTestHost` composes the productio
 Known test limitations: the dead-UI path is documented rather than automated; and Windows/macOS recovery,
 autosave, crash, and close prompts are covered by the manual platform gate.
 
+## GUI shell interaction fix (2026-11-21)
+
+The out-of-step fix for proportional splitters, overlay focus/`Escape`, and `Enter` mapping extends the same
+headless harness. The layout, focus, `Escape`, `Enter`, and accessibility tests are PR-fast; the screenshot
+baselines remain PR-medium on Ubuntu only.
+
+- **Layout.** `ShellLayoutTests` measures the real `ShellWindow` at its default size, drags each splitter with
+  headless mouse input, resizes the window, toggles regions, and checks the projects row definitions. Fractions,
+  the total width, hidden-track restoration, and the 16 px keyboard increment are asserted. The pure
+  `ShellLayoutFractions` helpers are covered for degenerate and out-of-range input.
+- **Settings migration.** The reader/store tests cover a pre-fix document with `leftWidth`/`rightWidth`/
+  `consoleHeight`, the one-time 1200 × 800 conversion, the absence of pixel keys after a rewrite, and an
+  idempotent second load.
+- **Overlays.** `ShellInteractionTests` covers the palette search focus and result-list `Escape`, `Enter` with
+  no results versus one result, the cheat-sheet Close focus, settings `Escape` discarding edits, settings
+  `Enter` saving, dialog initial focus (`Cancel`, text box, choice list, progress container), progress
+  `Enter`/`Escape` opt-out, layer exclusivity, the inert catalog gestures, and focus restoration.
+- **Dialogs and accessibility.** `DialogOverlayTests` extends the existing round trips with the explicit focus
+  markers and the dialog title automation name. `AccessibilityTests` checks the overlay root names and a Tab
+  order that stays inside the open layer. The explorer `Enter`, Problems `Enter`, and Overview field `Enter`
+  regression tests are PR-fast.
+- **Screenshots.** The light, dark, and high-contrast baselines are regenerated once because the default fractions
+  change the 1000 × 700 capture. The comparison tolerance is unchanged.
+
 ## Test tiers
 
 | Tier | Contents | Target |

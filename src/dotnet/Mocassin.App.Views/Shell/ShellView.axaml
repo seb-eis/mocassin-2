@@ -17,32 +17,84 @@
       <TextBlock Text="{Binding ReadOnlyBannerText}" TextWrapping="Wrap" />
     </Border>
 
-    <Grid Grid.Row="2" ColumnDefinitions="Auto,Auto,*,Auto,Auto">
+    <Grid Grid.Row="2" x:Name="WorkspaceGrid">
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" MinWidth="160" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" MinWidth="360" />
+        <ColumnDefinition Width="Auto" />
+        <ColumnDefinition Width="*" MinWidth="160" />
+      </Grid.ColumnDefinitions>
+
       <shell:ProjectsRegionView Grid.Column="0"
-                                Width="{Binding Regions.LeftWidth}"
+                                x:Name="ProjectsRegion"
                                 IsVisible="{Binding Regions.IsProjectsVisible}" />
       <GridSplitter Grid.Column="1"
-                    Width="4"
+                    x:Name="ProjectsSplitter"
+                    Width="6"
                     ResizeDirection="Columns"
-                    IsVisible="{Binding Regions.IsProjectsVisible}" />
+                    KeyboardIncrement="16"
+                    Focusable="True"
+                    IsVisible="{Binding Regions.IsProjectsVisible}"
+                    automation:AutomationProperties.Name="Resize projects panel"
+                    automation:AutomationProperties.HelpText="Use the arrow keys to resize the projects panel">
+        <GridSplitter.FocusAdorner>
+          <Template>
+            <Border BorderBrush="{DynamicResource SystemControlHighlightAccentBrush}"
+                    BorderThickness="2"
+                    CornerRadius="1" />
+          </Template>
+        </GridSplitter.FocusAdorner>
+      </GridSplitter>
 
-      <Grid Grid.Column="2" RowDefinitions="*,Auto,Auto">
-        <shell:DocumentsRegionView Grid.Row="0" />
+      <Grid Grid.Column="2" x:Name="CentreGrid">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="*" MinHeight="200" />
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="*" MinHeight="80" />
+        </Grid.RowDefinitions>
+        <shell:DocumentsRegionView Grid.Row="0" x:Name="DocumentsRegion" />
         <GridSplitter Grid.Row="1"
-                      Height="4"
+                      x:Name="ConsoleSplitter"
+                      Height="6"
                       ResizeDirection="Rows"
-                      IsVisible="{Binding Regions.IsConsoleVisible}" />
+                      KeyboardIncrement="16"
+                      Focusable="True"
+                      IsVisible="{Binding Regions.IsConsoleVisible}"
+                      automation:AutomationProperties.Name="Resize console"
+                      automation:AutomationProperties.HelpText="Use the arrow keys to resize the console">
+          <GridSplitter.FocusAdorner>
+            <Template>
+              <Border BorderBrush="{DynamicResource SystemControlHighlightAccentBrush}"
+                      BorderThickness="2"
+                      CornerRadius="1" />
+            </Template>
+          </GridSplitter.FocusAdorner>
+        </GridSplitter>
         <shell:ConsoleRegionView Grid.Row="2"
-                                 Height="{Binding Regions.ConsoleHeight}"
+                                 x:Name="ConsoleRegion"
                                  IsVisible="{Binding Regions.IsConsoleVisible}" />
       </Grid>
 
       <GridSplitter Grid.Column="3"
-                    Width="4"
+                    x:Name="InspectorSplitter"
+                    Width="6"
                     ResizeDirection="Columns"
-                    IsVisible="{Binding Regions.IsInspectorVisible}" />
+                    KeyboardIncrement="16"
+                    Focusable="True"
+                    IsVisible="{Binding Regions.IsInspectorVisible}"
+                    automation:AutomationProperties.Name="Resize inspector panel"
+                    automation:AutomationProperties.HelpText="Use the arrow keys to resize the inspector panel">
+        <GridSplitter.FocusAdorner>
+          <Template>
+            <Border BorderBrush="{DynamicResource SystemControlHighlightAccentBrush}"
+                    BorderThickness="2"
+                    CornerRadius="1" />
+          </Template>
+        </GridSplitter.FocusAdorner>
+      </GridSplitter>
       <shell:InspectorRegionView Grid.Column="4"
-                                 Width="{Binding Regions.RightWidth}"
+                                 x:Name="InspectorRegion"
                                  IsVisible="{Binding Regions.IsInspectorVisible}" />
     </Grid>
 

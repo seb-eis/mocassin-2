@@ -5,6 +5,7 @@ using System.Globalization;
 using System.Text.Json;
 
 using Mocassin.App.ViewModels.Settings.Blocks;
+using Mocassin.App.ViewModels.Shell;
 
 namespace Mocassin.App.ViewModels.Settings.Json;
 
@@ -112,30 +113,73 @@ internal static class AppSettingsJsonReader
         return new AppSettingsLoadResult(settings, warnings, IsFatal: false, LoadedFromFile: true, FatalMessage: null);
     }
 
-    private static LayoutSettings ReadLayout(JsonElement element, List<string> warnings) =>
-        new()
-        {
-            LeftWidth = ReadRange(
+    private static LayoutSettings ReadLayout(JsonElement element, List<string> warnings)
+    {
+        var hasFractions = element.ValueKind == JsonValueKind.Object
+            && (element.TryGetProperty("leftFraction", out _)
+                || element.TryGetProperty("rightFraction", out _)
+                || element.TryGetProperty("consoleFraction", out _));
+        var leftFraction = hasFractions
+            ? ReadFraction(
+                element,
+                "leftFraction",
+                SettingsDefaults.DefaultLeftFraction,
+                SettingsDefaults.MinSideFraction,
+                SettingsDefaults.MaxSideFraction,
+                warnings)
+            : ReadLegacyFraction(
                 element,
                 "leftWidth",
-                SettingsDefaults.DefaultLeftWidth,
-                SettingsDefaults.MinLeftWidth,
-                SettingsDefaults.MaxLeftWidth,
-                warnings),
-            RightWidth = ReadRange(
+                SettingsDefaults.LegacyDesignWidth,
+                SettingsDefaults.MinSideFraction,
+                SettingsDefaults.MaxSideFraction,
+                SettingsDefaults.DefaultLeftFraction,
+                warnings);
+        var rightFraction = hasFractions
+            ? ReadFraction(
+                element,
+                "rightFraction",
+                SettingsDefaults.DefaultRightFraction,
+                SettingsDefaults.MinSideFraction,
+                SettingsDefaults.MaxSideFraction,
+                warnings)
+            : ReadLegacyFraction(
                 element,
                 "rightWidth",
-                SettingsDefaults.DefaultRightWidth,
-                SettingsDefaults.MinRightWidth,
-                SettingsDefaults.MaxRightWidth,
-                warnings),
-            ConsoleHeight = ReadRange(
+                SettingsDefaults.LegacyDesignWidth,
+                SettingsDefaults.MinSideFraction,
+                SettingsDefaults.MaxSideFraction,
+                SettingsDefaults.DefaultRightFraction,
+                warnings);
+        if (leftFraction + rightFraction >= 1d)
+        {
+            warnings.Add("The left and right panel fractions leave no centre share; their defaults were used.");
+            leftFraction = SettingsDefaults.DefaultLeftFraction;
+            rightFraction = SettingsDefaults.DefaultRightFraction;
+        }
+
+        var consoleFraction = hasFractions
+            ? ReadFraction(
+                element,
+                "consoleFraction",
+                SettingsDefaults.DefaultConsoleFraction,
+                SettingsDefaults.MinConsoleFraction,
+                SettingsDefaults.MaxConsoleFraction,
+                warnings)
+            : ReadLegacyFraction(
                 element,
                 "consoleHeight",
-                SettingsDefaults.DefaultConsoleHeight,
-                SettingsDefaults.MinConsoleHeight,
-                SettingsDefaults.MaxConsoleHeight,
-                warnings),
+                SettingsDefaults.LegacyDesignHeight,
+                SettingsDefaults.MinConsoleFraction,
+                SettingsDefaults.MaxConsoleFraction,
+                SettingsDefaults.DefaultConsoleFraction,
+                warnings);
+
+        return new LayoutSettings
+        {
+            LeftFraction = leftFraction,
+            RightFraction = rightFraction,
+            ConsoleFraction = consoleFraction,
             LeftVisible = ReadBool(element, "leftVisible", true, warnings),
             RightVisible = ReadBool(element, "rightVisible", true, warnings),
             ConsoleVisible = ReadBool(element, "consoleVisible", true, warnings),
@@ -147,6 +191,58 @@ internal static class AppSettingsJsonReader
                     allowNull: false)
                 ?? SettingsDefaults.DefaultConsoleChannel,
         };
+    }
+
+    private static double ReadFraction(
+        JsonElement parent,
+        string name,
+        double fallback,
+        double minimum,
+        double maximum,
+        List<string> warnings)
+    {
+        if (parent.ValueKind != JsonValueKind.Object || !parent.TryGetProperty(name, out var element))
+        {
+            return fallback;
+        }
+
+        if (element.ValueKind != JsonValueKind.Number
+            || !element.TryGetDouble(out var value)
+            || !double.IsFinite(value)
+            || value < minimum
+            || value > maximum)
+        {
+            warnings.Add($"'{name}' is outside {minimum}–{maximum}; the default was used.");
+            return fallback;
+        }
+
+        return value;
+    }
+
+    private static double ReadLegacyFraction(
+        JsonElement parent,
+        string name,
+        double designExtent,
+        double minimum,
+        double maximum,
+        double fallback,
+        List<string> warnings)
+    {
+        if (parent.ValueKind != JsonValueKind.Object || !parent.TryGetProperty(name, out var element))
+        {
+            return fallback;
+        }
+
+        if (element.ValueKind != JsonValueKind.Number
+            || !element.TryGetDouble(out var pixels)
+            || !double.IsFinite(pixels))
+        {
+            warnings.Add($"'{name}' is not a finite number; the default was used.");
+            return fallback;
+        }
+
+        return ShellLayoutFractions.FromLegacyPixels(pixels, designExtent, minimum, maximum, fallback);
+    }
 
     private static AutosaveSettings ReadAutosave(JsonElement element, List<string> warnings) =>
         new()

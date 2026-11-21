@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 
+using System.Collections.Immutable;
 using Avalonia.Automation;
 using Avalonia.Controls;
 using Avalonia.Headless;
@@ -15,6 +16,9 @@ using Mocassin.App.ViewModels.Shell;
 using Mocassin.App.Views.Documents;
 using Mocassin.App.Views.Shell;
 using Mocassin.Core.Diagnostics;
+using Mocassin.Packages.Projects;
+using Mocassin.Packages.Projects.Templates;
+using Mocassin.Packages.Projects.Validation;
 
 namespace Mocassin.App.Tests.Views;
 
@@ -208,6 +212,83 @@ public sealed class WorkspaceRenderTests
             });
 
     [Fact]
+    public Task TheExplorerActivatesTheSelectedNodeOnEnter() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    var entry = await ProjectFixtures.LoadCeriaAsync();
+                    shell.Workspace.Add(entry);
+                    HeadlessSession.Pump(window);
+
+                    var tree = window.GetVisualDescendants()
+                        .OfType<TreeView>()
+                        .Single(control => AutomationProperties.GetName(control) == "Project explorer");
+                    shell.Explorer.SelectedNode = shell.Explorer.Nodes[0];
+                    HeadlessSession.Pump(window);
+                    var row = tree.GetVisualDescendants().OfType<TreeViewItem>().First();
+                    row.Focus();
+                    Assert.True(row.IsFocused);
+
+                    window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+                    HeadlessSession.Pump(window);
+
+                    Assert.Equal(DocumentKinds.ProjectOverview, shell.Documents.ActiveDocument!.Key.Kind);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
+    public Task TheOverviewMetadataFieldCommitsOnEnter() =>
+        HeadlessSession.DispatchAsync(
+            async () =>
+            {
+                using var workspace = new TempWorkspace();
+                using var host = AppHost.Build(new AppStartupOptions { DataDirectory = workspace.Path });
+                var window = host.Services.GetRequiredService<ShellWindow>();
+                window.Show();
+                HeadlessSession.Pump(window);
+
+                try
+                {
+                    var shell = Assert.IsType<ShellViewModel>(window.DataContext);
+                    var session = CreateDiagnosticSession();
+                    shell.Workspace.Add(new ProjectWorkspaceEntry(session));
+                    await shell.Navigation.NavigateToAsync(
+                        new ModelPath("project", session.Id, "overview"),
+                        NavigationIntent.Activate);
+                    HeadlessSession.Pump(window);
+
+                    var name = window.GetVisualDescendants()
+                        .OfType<TextBox>()
+                        .Single(control => AutomationProperties.GetName(control) == "Project name");
+                    name.Focus();
+                    name.Text = "Renamed";
+                    HeadlessSession.Pump(window);
+
+                    window.KeyPress(Key.Enter, RawInputModifiers.None, PhysicalKey.Enter, null);
+                    HeadlessSession.Pump(window);
+
+                    Assert.Equal("Renamed", session.Name);
+                }
+                finally
+                {
+                    window.Close();
+                }
+            });
+
+    [Fact]
     public Task ThePaletteAndCheatSheetOpenFromTheShell() =>
         HeadlessSession.DispatchAsync(
             () =>
@@ -239,4 +320,23 @@ public sealed class WorkspaceRenderTests
                     window.Close();
                 }
             });
+
+    private static ProjectSession CreateDiagnosticSession()
+    {
+        var time = new ManualTimeProvider();
+        var project = ProjectTemplateFactory.CreateProject(
+            ProjectTemplateKind.Blank,
+            "Diagnostics",
+            time.GetUtcNow());
+        var diagnostics = ImmutableArray.Create(
+            new Diagnostic("PROJ001", DiagnosticSeverity.Error, "Loaded project error."));
+        return ProjectSession.CreateFromLoad(
+            new ProjectLoadResult(project, diagnostics),
+            "/tmp/workspace-render-diagnostics.mocprj",
+            null,
+            isReadOnly: false,
+            lockPath: null,
+            new ProjectValidationPipeline(),
+            time);
+    }
 }

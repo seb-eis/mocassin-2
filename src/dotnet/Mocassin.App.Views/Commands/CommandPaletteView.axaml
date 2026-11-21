@@ -4,7 +4,9 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Commands.CommandPaletteView"
              x:DataType="vm:CommandPaletteViewModel">
-  <Grid Background="#66000000">
+  <Grid Background="#66000000"
+        automation:AutomationProperties.Name="Command palette"
+        KeyDown="OnRootKeyDown">
     <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
             BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
             BorderThickness="1"
@@ -18,8 +20,7 @@
         <TextBox x:Name="SearchBox"
                  automation:AutomationProperties.Name="Command palette search"
                  Text="{Binding SearchText}"
-                 PlaceholderText="Type a command"
-                 KeyDown="OnSearchKeyDown" />
+                 PlaceholderText="Type a command" />
         <ListBox Grid.Row="1"
                  automation:AutomationProperties.Name="Filtered commands"
                  ItemsSource="{Binding Results}"

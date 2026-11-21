@@ -1,12 +1,16 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:overlay="using:Mocassin.App.ViewModels.Dialogs"
+             xmlns:dialogs="using:Mocassin.App.Views.Dialogs"
              x:Class="Mocassin.App.Views.Dialogs.ChoiceDialogView"
              x:DataType="overlay:ChoiceDialogViewModel">
   <StackPanel Spacing="12">
     <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
     <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
-    <ListBox ItemsSource="{Binding Choices}" SelectedItem="{Binding SelectedChoice}" MinHeight="80">
+    <ListBox ItemsSource="{Binding Choices}"
+             SelectedItem="{Binding SelectedChoice}"
+             MinHeight="80"
+             dialogs:DialogFocus.InitialFocus="True">
       <ListBox.ItemTemplate>
         <DataTemplate x:DataType="overlay:DialogChoice">
           <TextBlock Text="{Binding Label}" />

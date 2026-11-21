@@ -24,7 +24,7 @@ public sealed class AppSettingsReaderTests
         Assert.Equal(ThemeSelection.System, result.Settings.Theme);
         Assert.Equal(Density.Comfortable, result.Settings.Density);
         Assert.Equal(SettingsDefaults.DefaultFontScale, result.Settings.FontScale);
-        Assert.Equal(SettingsDefaults.DefaultLeftWidth, result.Settings.Layout.LeftWidth);
+        Assert.Equal(SettingsDefaults.DefaultLeftFraction, result.Settings.Layout.LeftFraction);
         Assert.Equal(SettingsDefaults.DefaultConsoleChannel, result.Settings.Layout.ActiveConsoleChannel);
         Assert.True(result.Settings.Autosave.Enabled);
         Assert.Equal(SettingsDefaults.DefaultAutosaveIntervalMinutes, result.Settings.Autosave.IntervalMinutes);
@@ -57,9 +57,9 @@ public sealed class AppSettingsReaderTests
             RecentFiles = [new RecentFile("/tmp/ceria.mocprj", new DateTimeOffset(2026, 11, 20, 12, 0, 0, TimeSpan.Zero))],
             Layout = new LayoutSettings
             {
-                LeftWidth = 300,
-                RightWidth = 400,
-                ConsoleHeight = 240,
+                LeftFraction = 0.25,
+                RightFraction = 0.30,
+                ConsoleFraction = 0.28,
                 LeftVisible = false,
                 RightVisible = false,
                 ConsoleVisible = false,
@@ -90,7 +90,11 @@ public sealed class AppSettingsReaderTests
         Assert.Equal(settings.Logging.Level, result.Settings.Logging.Level);
         Assert.Equal(settings.Ui.ConfirmOnExternalChange, result.Settings.Ui.ConfirmOnExternalChange);
         Assert.Equal(settings.Paths.LastOpenDirectory, result.Settings.Paths.LastOpenDirectory);
+        Assert.Equal(settings.Layout.LeftFraction, result.Settings.Layout.LeftFraction);
+        Assert.Equal(settings.Layout.RightFraction, result.Settings.Layout.RightFraction);
+        Assert.Equal(settings.Layout.ConsoleFraction, result.Settings.Layout.ConsoleFraction);
         Assert.Equal(settings.Layout.ActiveConsoleChannel, result.Settings.Layout.ActiveConsoleChannel);
+        Assert.DoesNotContain("\"leftWidth\"", json, StringComparison.Ordinal);
         var recent = Assert.Single(result.Settings.RecentFiles);
         Assert.Equal(settings.RecentFiles[0].Path, recent.Path);
         Assert.Equal(settings.RecentFiles[0].LastOpenedUtc, recent.LastOpenedUtc);
@@ -154,7 +158,12 @@ public sealed class AppSettingsReaderTests
               "fontScale": 9,
               "accent": "orange",
               "logging": { "level": "verbose" },
-              "layout": { "leftWidth": 9999, "consoleHeight": "tall", "leftVisible": "yes" }
+              "layout": {
+                "leftFraction": 0.9,
+                "rightFraction": 0.5,
+                "consoleFraction": "tall",
+                "leftVisible": "yes"
+              }
             }
             """);
 
@@ -164,8 +173,9 @@ public sealed class AppSettingsReaderTests
         Assert.Equal(SettingsDefaults.DefaultFontScale, result.Settings.FontScale);
         Assert.Null(result.Settings.Accent);
         Assert.Equal(SettingsLogLevel.Information, result.Settings.Logging.Level);
-        Assert.Equal(SettingsDefaults.DefaultLeftWidth, result.Settings.Layout.LeftWidth);
-        Assert.Equal(SettingsDefaults.DefaultConsoleHeight, result.Settings.Layout.ConsoleHeight);
+        Assert.Equal(SettingsDefaults.DefaultLeftFraction, result.Settings.Layout.LeftFraction);
+        Assert.Equal(SettingsDefaults.DefaultRightFraction, result.Settings.Layout.RightFraction);
+        Assert.Equal(SettingsDefaults.DefaultConsoleFraction, result.Settings.Layout.ConsoleFraction);
         Assert.True(result.Settings.Layout.LeftVisible);
         Assert.NotEmpty(result.Warnings);
     }
@@ -215,6 +225,55 @@ public sealed class AppSettingsReaderTests
     }
 
     [Fact]
+    public void ALegacyPixelLayoutIsMigratedOnceAndRewrittenAsFractions()
+    {
+        var result = AppSettingsJsonReader.Read(
+            """{"format":"mocassin.settings","layout":{"leftWidth":300,"rightWidth":400,"consoleHeight":240}}""");
+
+        Assert.False(result.IsFatal);
+        Assert.Equal(300d / 1200d, result.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(400d / 1200d, result.Settings.Layout.RightFraction, 10);
+        Assert.Equal(240d / 800d, result.Settings.Layout.ConsoleFraction, 10);
+        var json = JsonSerializer.Serialize(result.Settings, AppSettingsJsonContext.Default.AppSettings);
+        Assert.DoesNotContain("\"leftWidth\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"rightWidth\"", json, StringComparison.Ordinal);
+        Assert.DoesNotContain("\"consoleHeight\"", json, StringComparison.Ordinal);
+
+        var again = AppSettingsJsonReader.Read(json);
+        Assert.Equal(result.Settings.Layout, again.Settings.Layout);
+    }
+
+    [Fact]
+    public void LegacyPixelValuesAreClampedToThePersistedFractionRange()
+    {
+        var result = AppSettingsJsonReader.Read(
+            """{"format":"mocassin.settings","layout":{"leftWidth":10,"rightWidth":9999,"consoleHeight":2000}}""");
+
+        Assert.Equal(SettingsDefaults.MinSideFraction, result.Settings.Layout.LeftFraction, 10);
+        Assert.Equal(SettingsDefaults.MaxSideFraction, result.Settings.Layout.RightFraction, 10);
+        Assert.Equal(SettingsDefaults.MaxConsoleFraction, result.Settings.Layout.ConsoleFraction, 10);
+    }
+
+    [Fact]
+    public void InvalidFractionsFallBackWithWarnings()
+    {
+        var result = AppSettingsJsonReader.Read(
+            """{"format":"mocassin.settings","layout":{"leftFraction":0,"rightFraction":2,"consoleFraction":"tall"}}""");
+
+        Assert.Equal(SettingsDefaults.DefaultLeftFraction, result.Settings.Layout.LeftFraction);
+        Assert.Equal(SettingsDefaults.DefaultRightFraction, result.Settings.Layout.RightFraction);
+        Assert.Equal(SettingsDefaults.DefaultConsoleFraction, result.Settings.Layout.ConsoleFraction);
+        Assert.NotEmpty(result.Warnings);
+
+        var noCentre = AppSettingsJsonReader.Read(
+            """{"format":"mocassin.settings","layout":{"leftFraction":0.7,"rightFraction":0.5}}""");
+
+        Assert.Equal(SettingsDefaults.DefaultLeftFraction, noCentre.Settings.Layout.LeftFraction);
+        Assert.Equal(SettingsDefaults.DefaultRightFraction, noCentre.Settings.Layout.RightFraction);
+        Assert.NotEmpty(noCentre.Warnings);
+    }
+
+    [Fact]
     public void MigrationIsIdempotent()
     {
         var migrated = SettingsMigration.Migrate(new AppSettings { SchemaVersion = 0 });
@@ -234,9 +293,9 @@ public sealed class AppSettingsReaderTests
             Culture = " ",
             Layout = new LayoutSettings
             {
-                LeftWidth = 10,
-                RightWidth = 9999,
-                ConsoleHeight = 1,
+                LeftFraction = 0.01,
+                RightFraction = 0.99,
+                ConsoleFraction = 0.01,
                 ActiveConsoleChannel = " ",
             },
             RecentFiles =
@@ -256,9 +315,9 @@ public sealed class AppSettingsReaderTests
         Assert.Equal(SettingsDefaults.DefaultFontScale, normalized.FontScale);
         Assert.Null(normalized.Accent);
         Assert.Equal("en", normalized.Culture);
-        Assert.Equal(SettingsDefaults.DefaultLeftWidth, normalized.Layout.LeftWidth);
-        Assert.Equal(SettingsDefaults.DefaultRightWidth, normalized.Layout.RightWidth);
-        Assert.Equal(SettingsDefaults.DefaultConsoleHeight, normalized.Layout.ConsoleHeight);
+        Assert.Equal(SettingsDefaults.DefaultLeftFraction, normalized.Layout.LeftFraction);
+        Assert.Equal(SettingsDefaults.DefaultRightFraction, normalized.Layout.RightFraction);
+        Assert.Equal(SettingsDefaults.DefaultConsoleFraction, normalized.Layout.ConsoleFraction);
         Assert.Equal(SettingsDefaults.DefaultConsoleChannel, normalized.Layout.ActiveConsoleChannel);
         Assert.Equal(SettingsDefaults.MaxRecentFiles, normalized.RecentFiles.Length);
         Assert.False(normalized.Autosave.Enabled);
