@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `f629dd514f5e4e3c83584aff468969545c407b5c` |
+| Reviewed commit | `022132e24e38ca4b90a3df37d7f37140c4313cd1` |
 | Docs branch | `docs/step-23b-design` |
 | Review date | 2026-11-21 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh planning auditor |
@@ -28,6 +28,18 @@ the 23B design. It is based on `main` at `63cdd0638b952e9175f75681d864bb95db0b4f
 before any reviewer was spawned. The cell above is filled by a documentation-only request follow-up, so the
 reviewer's record commit is the only delta. The freeze contains no code, test, configuration, contract,
 generated file, or status-dashboard edit.
+
+**Refreeze note (round 2, 2026-11-21).** Round 1 returned `Changes required` on `f629dd5` for M-1 and m-1–m-10,
+with n-1–n-5. The design was refrozen at `022132e`. The refreeze chooses the **app-level** read-only refusal
+(`EditApplyOutcome.ReadOnly`, no `PROJ031` and no new code), completes the §11 seam-edit list (shell,
+session writes, workspace markers, window close, registration), adds the `NotifySaved`/`EditRejected`
+notification contract, deletes sidecars on explicit discard, adds the `Sidecar` recovery source and the
+timestamp-normalized recovery comparison, makes statistics an explicit user action, recomputes
+`ProjectSession.Validation` on recovery, specifies `Document`/`CanEdit` reset, the `MaxUndoDepth` init-accessor
+rejection, the per-session gate for close/reload, and the n-1–n-5 clarifications. **Round 1 reviewer text
+(Evidence, Findings, Verdict, and the round-1 body) is byte-identical to `3efae49`**; only request-owned
+fields (this note, the `Reviewed commit` cell, `Record state`, the approval-summary history, and `Resolution
+status`) changed.
 
 **Split note.** Step 23 was class High with three independent acceptance stories and an audit surface too large
 for one sitting. The human owner approved the split on 2026-11-20 into **23A** (workspace and project lifecycle)
@@ -264,10 +276,10 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Changes required — round 1 returned `Changes required` on freeze
-`f629dd514f5e4e3c83584aff468969545c407b5c` (M-1 read-only diagnostic; Minors m-1–m-10; Notes n-1–n-5). The
-design is otherwise coherent and the 23A seams were verified against delivered code; M-1 and the Minors need a
-design update before the step can start.
+**State:** Re-review required — round 1 returned `Changes required` on freeze
+`f629dd514f5e4e3c83584aff468969545c407b5c` for M-1, m-1–m-10, and n-1–n-5. The design was refrozen at
+`022132e24e38ca4b90a3df37d7f37140c4313cd1`; the resolutions are in `Resolution status` below. Round 1 reviewer
+text is unchanged.
 
 `Re-review required` is a record state, not a verdict.
 
@@ -305,13 +317,29 @@ Round history:
 
 | Round | Date | Commit | Reviewer | Verdict |
 | --- | --- | --- | --- | --- |
-| — | — | — | — | — |
+| 1 | 2026-11-21 | `f629dd5` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
+| 2 | 2026-11-21 | `022132e` | Pending re-review | Pending |
 
 Findings and resolutions:
 
 | Finding | Severity | Issue | Resolution | Commit | Status |
 | --- | --- | --- | --- | --- | --- |
-| — | — | — | — | — | — |
+| M-1 | Major | `ReadOnly` diagnostic did not exist | App-level `EditApplyOutcome.ReadOnly`; no code/`PROJ031` reuse | `022132e` | Fixed |
+| m-1 | Minor | §11 seam list incomplete | Shell/session/workspace/close/registration seams added | `022132e` | Fixed |
+| m-2 | Minor | `NotifySaved`/`EditRejected` contract incomplete | `ProjectChangeKind` and `EditRejected` consumer added | `022132e` | Fixed |
+| m-3 | Minor | Discard paths kept the sidecar | Discard-close and discard-reload delete it | `022132e` | Fixed |
+| m-4 | Minor | `RecoverySource` lacked the sidecar | `Sidecar` added and composed | `022132e` | Fixed |
+| m-5 | Minor | Timestamp-only recovery offer | `RecoveryComparison` normalizes `ModifiedUtc` | `022132e` | Fixed |
+| m-6 | Minor | Automatic statistics run | Statistics are an explicit user action | `022132e` | Fixed |
+| m-7 | Minor | Recovery left validation stale | Recovery recomputes `ProjectSession.Validation` | `022132e` | Fixed |
+| m-8 | Minor | `Document` get-only vs `ReplaceDocument` | Private setter and reset contract stated | `022132e` | Fixed |
+| m-9 | Minor | Negative `MaxUndoDepth` unspecified | Init accessor throws `ArgumentOutOfRangeException` | `022132e` | Fixed |
+| m-10 | Minor | Close/reload gate unspecified | Session gate/`IsClosing` and skip/wait rules stated | `022132e` | Fixed |
+| n-1 | Note | `ProjectValidator` breadth | Six per-domain validators named | `022132e` | Fixed in design |
+| n-2 | Note | Manifest/snapshot caps unnamed | 64 KiB/100 entries and 64 MiB named | `022132e` | Fixed in design |
+| n-3 | Note | `Task.WhenAny`/CTS wording | `Task.WhenAny(writes, Task.Delay(...))` and cancel stated | `022132e` | Fixed in design |
+| n-4 | Note | Help-anchor drift check unnamed | Pure map test and launcher test named | `022132e` | Fixed in design |
+| n-5 | Note | `status.md` 23b design-review cell | Step-agent-owned; recorded in §18 | — | Deferred |
 
 ## Human approval
 
@@ -325,12 +353,24 @@ Date:
 
 ## Resolution status
 
-| Finding | Status | Owner | Commit |
-| --- | --- | --- | --- |
-| — | — | — | — |
-
-The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict.
+| Finding | Status | Owner | Commit | Resolution |
+| --- | --- | --- | --- | --- |
+| **M-1** | Fixed in design | Planner | `022132e` | Chose the app-level option: `ProjectEditCoordinator.Apply` returns `EditApplyOutcome.ReadOnly` with an app-owned message and no `Diagnostic`; `PROJ031` is not reused because its lock-held message describes another process's lock. `ProjectDiagnosticCodes`/messages are unchanged. §2/§10/§13 and the docs plan record it. |
+| **m-1** | Fixed | Planner | `022132e` | §11 now lists `ShellViewModel`, `ShellWindow`/`IShellLifetime`, `ProjectSessionService` open/activate/close/reload writes and recovery detection, `WorkspaceViewModel`/`ProjectWorkspaceEntry`, `ProjectsRegionView`/`DocumentsRegionView`, `AppSettings`/validator/context, and `AppServiceRegistration`/`App.axaml.cs`. §16's guard now matches the list. |
+| **m-2** | Fixed | Planner | `022132e` | `ProjectChangedEventArgs` carries `ProjectChangeKind`; `NotifySaved()` raises `Kind = Saved`; `ReplaceDocument` raises `Kind = Replaced`; the §2.1 table adds the `EditRejected` consumers (`ProjectOverviewViewModel`, `ProblemsChannelViewModel`). |
+| **m-3** | Fixed | Planner | `022132e` | `CloseAsync(discardChanges: true)` and `ReloadAsync(discardChanges: true)` delete the sidecar/recovery snapshot before closing/reloading; the acceptance criterion and test row cover discard-close and discard-reload. |
+| **m-4** | Fixed | Planner | `022132e` | `RecoverySource` now has `Sidecar`; the sidecar candidate participates in the newest-valid-wins composition and the test asserts it. |
+| **m-5** | Fixed | Planner | `022132e` | `RecoveryComparison.HasContentDifference` normalizes only `Metadata.ModifiedUtc` and compares the existing hash; `ProjectDocument.IsDirty` still includes `modifiedUtc`. The save → edit → autosave → undo-to-clean → reopen test is added. |
+| **m-6** | Fixed | Planner | `022132e` | Statistics are an explicit Overview toggle/command, never an automatic open request; the test asserts opening starts no statistics run and the toggle runs one cached `IncludeStatistics = true` run. |
+| **m-7** | Fixed | Planner | `022132e` | `RecoverAsync` reloads the candidate snapshot and recomputes `ProjectSession.Validation` from the snapshot's load diagnostics, not the saved file's; the test asserts the recovered hash. |
+| **m-8** | Fixed | Planner | `022132e` | `Document { get; private set; }`; `ReplaceDocument(document, canEdit)` resets `CanEdit`, stacks, cached dirty state, raises `PropertyChanged`, and raises `Kind = Replaced`. |
+| **m-9** | Fixed | Planner | `022132e` | The `MaxUndoDepth` init accessor throws `ArgumentOutOfRangeException` for a negative value; `0` is unbounded; the test constructs `-1` and `0`. |
+| **m-10** | Fixed | Planner | `022132e` | `ProjectSession` owns the gate and `IsClosing`; autosave uses non-blocking `Wait(0)` and skips busy/closing sessions; save/close/reload/recovery await the gate; close resets `IsClosing` on cancel. |
+| **n-1** | Fixed in design | Planner | `022132e` | §2 names the six per-domain validators and keeps the cross-domain/feasibility distinction. |
+| **n-2** | Fixed in design | Planner | `022132e` | Manifest 64 KiB/100 entries, snapshot 64 MiB; the untrusted-input test asserts them. |
+| **n-3** | Fixed in design | Planner | `022132e` | The budget is `Task.WhenAny(allWrites, Task.Delay(budget, timeProvider, cts.Token))`; a timeout cancels the writes and reports them. |
+| **n-4** | Fixed in design | Planner | `022132e` | A pure map test checks every `DiagnosticCatalog.Default` code against the documented anchors (or the explicit unlinked set); a launcher test asserts the URI. |
+| **n-5** | Deferred (step agent) | Step agent | — | `status.md` remains step-agent-owned per AGENTS §3.8; §18 records the `23b` design-review cell update at the start gate. |
 
 ## Review rounds
 
