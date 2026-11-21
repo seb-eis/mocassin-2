@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — post-merge maintenance branch after approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `pending — filled in the request follow-up` |
+| Reviewed commit | `6ff913671351798cb64678b506986ea6649364a4` |
 | Docs branch | `docs/step-11-amend-2` |
 | Review date | 2026-11-21 |
 | Reviewer | — |
@@ -23,12 +23,12 @@
 Step page: [`Step 11 — Simulation Package and `.msl` Writer`](../steps/step-11-simulation-package-and-msl-writer.md)
 Amendment page: [`Step 11 Amendment 2 — Cluster Occupation Code Expansion Map`](../amendments/step-11-amend-2-cluster-code-expansion.md)
 
-**Freeze note.** The design docs, including this request record, were committed as the design freeze; the
-`Reviewed commit` cell and the freeze SHA in this sentence are filled by the documentation-only request
-follow-up. The only delta between the freeze commit and the request commit is that cell and this sentence. The
-freeze includes the amendment page, the data-contract, architecture, ADR, open-decision, reference, step-page,
-index, and status updates. No code, test, configuration, contract, generated artifact, or fixture is part of the
-freeze.
+**Freeze note.** The design docs, including this request record, were committed as the design freeze
+`6ff913671351798cb64678b506986ea6649364a4`; the `Reviewed commit` cell is filled with that SHA by this
+documentation-only request follow-up. The only delta between the freeze commit and this request commit is this
+cell and the freeze SHA in this sentence. The freeze includes the amendment page, the data-contract,
+architecture, ADR, open-decision, reference, step-page, index, and status updates. No code, test, configuration,
+contract, generated artifact, or fixture is part of the freeze.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the design and
 > completed this request, and relays the verdict and owner decisions. The planner and implementor update the
