@@ -60,7 +60,7 @@ pub use lattice::{HAS_MOBILE_TRACKER, LatticeState, MOBILE, NO_MOBILE_TRACKER, S
 pub use limits::{ContextLimits, MemoryEntry, MemoryPlan, MemoryReport};
 pub use links::{ClusterAssoc, IncomingLink, Link, LinkArena};
 pub use mocassin_types::{ParticleId, PositionId};
-pub use pools::{PoolMember, SelectionPool, SelectionPools};
+pub use pools::{NO_SLOT, PoolMember, SelectionPool, SelectionPools};
 
 /// The cancellation check stride: initialization tests the caller's flag every 4096 environments.
 pub(crate) const CANCEL_STRIDE: usize = 4096;
@@ -156,10 +156,24 @@ pub enum InitOutcome {
 }
 
 /// The options of one context initialization.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct ContextOptions {
     /// The overridable library limits and the memory-plan caps.
     pub limits: ContextLimits,
+    /// Build the KMC jump status. Defaults to true; an MMC context never builds it.
+    pub build_jump_status: bool,
+    /// Apply the job's selection optimizers after pool construction. Defaults to true.
+    pub apply_optimizers: bool,
+}
+
+impl Default for ContextOptions {
+    fn default() -> Self {
+        Self {
+            limits: ContextLimits::default(),
+            build_jump_status: true,
+            apply_optimizers: true,
+        }
+    }
 }
 
 /// The initialized runtime state of one job.
@@ -217,6 +231,24 @@ impl SimulationContext {
         initialize_with(job, options, cancel, &mut ())
     }
 
+    /// Sets the selectability of one `(environment, particle)` after a state change.
+    ///
+    /// Callers update the lattice and then call this for the departed and the arrived particle. The pool has
+    /// reserved capacity for every selectable combination, so the call never reallocates.
+    pub fn set_selectable(&mut self, env: EnvId, particle: ParticleId) {
+        let current = self.lattice.particle(env);
+        self.pools
+            .set_selectable(&self.dimensions, env, particle, current);
+    }
+
+    /// Sets the particle of one environment.
+    ///
+    /// This updates only the particle array. Callers (Step 15's state application) recompute the environment
+    /// flags, the tracker id, and the pool membership afterwards.
+    pub fn set_particle(&mut self, env: EnvId, particle: ParticleId) {
+        self.lattice.set_particle(env, particle);
+    }
+
     /// Returns the memory report of this context.
     ///
     /// The report mirrors the admitting plan (planned lengths and bytes); `capacity_bytes` is the allocator
@@ -234,6 +266,8 @@ impl SimulationContext {
             + self.clusters.capacity_bytes()
             + self.energy.site.capacity() as u64 * size_of::<f64>() as u64
             + self.energy.vectors.capacity() as u64 * size_of::<f64>() as u64
+            + self.pools.capacity_bytes()
+            + self.jumps.capacity_bytes()
             + particles
             + 2 * size_of::<u64>() as u64
     }
@@ -297,6 +331,27 @@ impl SimulationContext {
         self.check_planned_length("clusters.energy", self.clusters.energy.len())?;
         self.check_planned_length("energy.site", self.energy.site.len())?;
         self.check_planned_length("energy.vectors", self.energy.vectors.len())?;
+        self.check_planned_length("pools.headers", self.pools.pools.len())?;
+        self.check_planned_length("pools.slot", self.pools.slot.len())?;
+        self.check_planned_length("pools.pool_of", self.pools.pool_of.len())?;
+        self.check_planned_length("jumps.offsets", self.jumps.offsets.len())?;
+        self.check_planned_length("jumps.links", self.jumps.links.len())?;
+
+        let planned_members = self
+            .plan
+            .planned_elements("pools.members")
+            .unwrap_or_default();
+        let pool_capacity: u64 = self
+            .pools
+            .pools
+            .iter()
+            .map(|pool| pool.members.capacity() as u64)
+            .sum();
+        if pool_capacity < planned_members {
+            return Err(ContextError::Invariant {
+                what: "pool member capacity",
+            });
+        }
         if !self.lattice_energy_ev.is_finite() {
             return Err(ContextError::Invariant {
                 what: "lattice energy",
@@ -389,6 +444,11 @@ impl SimulationContext {
                 what: "selection pools",
             });
         }
+        if !self.pools.is_consistent(&self.dimensions, &self.lattice) {
+            return Err(ContextError::Invariant {
+                what: "selection pool consistency",
+            });
+        }
 
         let statuses =
             u64::from(self.dimensions.p()) * u64::from(self.job.model.counts.direction_count);
@@ -396,6 +456,70 @@ impl SimulationContext {
             return Err(ContextError::Invariant {
                 what: "jump status CSR",
             });
+        }
+        self.check_jump_links(statuses)?;
+
+        Ok(())
+    }
+
+    fn check_jump_links(&self, statuses: u64) -> Result<(), ContextError> {
+        let positions = self.dimensions.p() as usize;
+        for status in 0..statuses as usize {
+            let direction_index = status / positions;
+            let position = (status % positions) as u32;
+            let direction = &self.job.model.transitions.directions[direction_index];
+            let selected = self.dimensions.cell_env(0, position);
+            let links = self.jumps.status_links(status);
+
+            if !self.direction_is_active(direction_index as u32) {
+                if !links.is_empty() {
+                    return Err(ContextError::Invariant {
+                        what: "inactive jump status is not empty",
+                    });
+                }
+                continue;
+            }
+
+            for jump_link in links {
+                if jump_link.sender_path_id == jump_link.receiver_path_id {
+                    return Err(ContextError::Invariant {
+                        what: "jump link sender equals receiver",
+                    });
+                }
+                let Some(sender) = self.resolve_node(selected, direction, jump_link.sender_path_id)
+                else {
+                    return Err(ContextError::Invariant {
+                        what: "jump link sender node",
+                    });
+                };
+                let Some(receiver) =
+                    self.resolve_node(selected, direction, jump_link.receiver_path_id)
+                else {
+                    return Err(ContextError::Invariant {
+                        what: "jump link receiver node",
+                    });
+                };
+                let sender_position = self.dimensions.position_of(sender) as usize;
+                let receiver_position = self.dimensions.position_of(receiver) as usize;
+                if !self.job.model.structure.positions[sender_position].stable
+                    || !self.job.model.structure.positions[receiver_position].stable
+                {
+                    return Err(ContextError::Invariant {
+                        what: "jump link structural filter",
+                    });
+                }
+                let receiver_links = self.link_range(PositionId::new(receiver_position as u32));
+                let Some(link) = receiver_links.get(jump_link.link_id as usize) else {
+                    return Err(ContextError::Invariant {
+                        what: "jump link receiver link",
+                    });
+                };
+                if self.partner_of(receiver, link) != sender {
+                    return Err(ContextError::Invariant {
+                        what: "jump link partner",
+                    });
+                }
+            }
         }
 
         Ok(())
@@ -706,7 +830,7 @@ pub(crate) fn initialize_with(
     probe.check()?;
 
     observer.observe(InitPhase::MemoryPlan);
-    let plan = MemoryPlan::plan(&job, &options.limits)?;
+    let mut plan = MemoryPlan::plan(&job, &options.limits)?;
     tracing::info!(
         phase = InitPhase::MemoryPlan.as_str(),
         bytes = plan.total_bytes(),
@@ -788,6 +912,49 @@ pub(crate) fn initialize_with(
         "context phase completed"
     );
 
+    probe.check()?;
+    observer.observe(InitPhase::Pools);
+    let pools = if job.kind == SimulationKind::Kmc {
+        SelectionPools::build(
+            &job,
+            &dimensions,
+            &lattice,
+            options.apply_optimizers,
+            &options.limits,
+            &probe,
+        )?
+    } else {
+        SelectionPools::empty()
+    };
+    tracing::info!(
+        phase = InitPhase::Pools.as_str(),
+        pools = pools.pools.len(),
+        members = pools.member_count(),
+        selectable = pools.selectable_jump_count,
+        "context phase completed"
+    );
+
+    probe.check()?;
+    observer.observe(InitPhase::JumpStatus);
+    let jumps = if job.kind == SimulationKind::Kmc && options.build_jump_status {
+        JumpRuntime::build(
+            &job,
+            &dimensions,
+            &links,
+            &mut plan,
+            &options.limits,
+            &probe,
+        )?
+    } else {
+        JumpRuntime::empty()
+    };
+    tracing::info!(
+        phase = InitPhase::JumpStatus.as_str(),
+        statuses = jumps.status_count(),
+        links = jumps.links.len(),
+        "context phase completed"
+    );
+
     let kind = job.kind;
     let counters = Counters::zeroed(dimensions.pc());
     let context = SimulationContext {
@@ -799,8 +966,8 @@ pub(crate) fn initialize_with(
         clusters,
         energy,
         lattice_energy_ev,
-        pools: SelectionPools::empty(),
-        jumps: JumpRuntime::empty(),
+        pools,
+        jumps,
         counters,
         limits: options.limits,
         plan,
@@ -898,6 +1065,27 @@ fn validate_inputs(job: &JobPackage, dimensions: &Dimensions) -> Result<(), Cont
                 ),
             });
         }
+    }
+
+    let Some(simulation) = job
+        .model
+        .simulations
+        .get(job.settings.simulation_index as usize)
+    else {
+        return Err(ContextError::InvalidInput {
+            what: "simulation index",
+            detail: format!(
+                "job declares simulation {} but the model has {}",
+                job.settings.simulation_index,
+                job.model.simulations.len()
+            ),
+        });
+    };
+    if simulation.kind != job.kind {
+        return Err(ContextError::InvalidInput {
+            what: "simulation kind",
+            detail: "the selected simulation kind does not match the job".to_owned(),
+        });
     }
 
     if job.model.counts.pair_table_count as usize != job.model.energy.pair_tables.len()
@@ -1036,6 +1224,8 @@ mod tests {
                 InitPhase::SiteVectors,
                 InitPhase::ClusterVectors,
                 InitPhase::InitialEnergy,
+                InitPhase::Pools,
+                InitPhase::JumpStatus,
                 InitPhase::InvariantSweep,
             ]
         );

@@ -141,12 +141,15 @@ The reader produces the types Step 14 consumes:
   eV to kT.
 - Transitions keep collections, directions, rules, `jump_count`, the derived prefix-sum `jump_offsets`,
   `jump_mapping`, and the tracker mappings. `tracker_order` is variable-length with a `0xFF` sentinel.
-- `DirectionPool`: `direction_count`, flat `(PositionId, ParticleId)` members, and the caller-indexed
-  `slot_of` map. Its `PositionId` is contractually the P1 index, so it **cannot** represent the supercell pool
-  member Step 14 needs; Step 14 replaces it with `context::pools::SelectionPool` and retires the placeholder
-  (review F-1). `JumpStatus` is the CSR container (`offsets: Vec<u32>`, `links: Vec<JumpLink>`); Step 14 computes
-  the entries and extends `JumpLink` with `receiver_path_id` so the receiver-major orientation is explicit
-  (review F-2). Both containers are type-only in Step 13 and have invariant tests (`JumpStatus::is_valid`).
+- `DirectionPool` was the Step 13 placeholder (`direction_count`, P1 `(PositionId, ParticleId)` members, and a
+  `slot_of` map). Its `PositionId` is contractually the P1 index, so it could not represent the supercell pool
+  member; Step 14 feature 4 retired it and replaced it with `context::pools::SelectionPools` (`PoolMember { env:
+  EnvId, particle }`, a global `slot` map, a per-P1 `pool_of`, reserved per-pool capacity). `JumpStatus` remains
+  the CSR container (`offsets: Vec<u32>`, `links: Vec<JumpLink>`); `JumpLink` is now
+  `{ sender_path_id: u8, receiver_path_id: u8, link_id: u32 }`, with `link_id` indexing the receiver's owner-major
+  forward list (review F-2). The context builds the jump status only for the job simulation's active collections;
+  the payload direction tables are a union across collections. `DirectionPool`'s removal and the `JumpLink` field
+  change are the Step 14 public Rust API break (no format change).
 - `JobPackage`: job id, kind, shared model, initial lattice, settings, effective seed, optimizers, extensions,
   instruction, and doping summary.
 

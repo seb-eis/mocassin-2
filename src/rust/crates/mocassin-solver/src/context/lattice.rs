@@ -147,6 +147,13 @@ impl LatticeState {
         self.particles[env.index()]
     }
 
+    /// Sets the particle of one environment without refreshing the derived flags or tracker id.
+    ///
+    /// State application belongs to Step 15; it updates the flags and tracker fields after the particle change.
+    pub(crate) fn set_particle(&mut self, env: EnvId, particle: ParticleId) {
+        self.particles[env.index()] = particle;
+    }
+
     /// Returns the raw flags of one environment.
     #[must_use]
     pub fn flags_at(&self, env: EnvId) -> u8 {

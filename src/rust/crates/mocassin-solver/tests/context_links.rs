@@ -5,7 +5,7 @@
 mod support;
 
 use mocassin_solver::context::{
-    ContextError, ContextOptions, EnvId, MemoryPlan, PositionId, SimulationContext,
+    ContextError, ContextOptions, EnvId, PositionId, SimulationContext,
 };
 use mocassin_types::{JobPackage, ParticleId};
 
@@ -293,40 +293,70 @@ fn initialization_is_deterministic() {
 }
 
 #[test]
-fn the_memory_plan_accounts_for_the_links_and_clusters() {
+fn the_memory_report_covers_every_arena_and_matches_its_entries() {
     let cases = [
-        (populated_kmc(), 1804_u64),
+        (populated_kmc(), 2608_u64),
         (populated_mmc(), 1804),
-        (amend2(), 2644),
-        (pre_map(), 2644),
+        (amend2(), 3800),
+        (pre_map(), 3800),
         (centered(), 3300),
-        (ceria(), 40228),
+        (ceria(), 64568),
     ];
 
     for (job, total) in cases {
         let context = initialize(job);
-        let plan =
-            MemoryPlan::plan(&context.job, &context.limits).expect("the plan admits the job");
         let report = context.memory_report();
-
-        assert_eq!(report.entries(), plan.entries());
-        assert_eq!(report.total_bytes(), plan.total_bytes());
         assert_eq!(report.total_bytes(), total);
+        assert_eq!(
+            report.total_bytes(),
+            report
+                .entries()
+                .iter()
+                .map(|entry| entry.bytes)
+                .sum::<u64>()
+        );
         assert!(report.capacity_bytes() >= report.total_bytes());
+        for what in [
+            "energy.site",
+            "energy.vectors",
+            "links.links",
+            "clusters.instances",
+            "pools.headers",
+            "pools.members",
+            "pools.slot",
+            "pools.pool_of",
+            "jumps.offsets",
+            "jumps.links",
+        ] {
+            assert!(
+                report.entries().iter().any(|entry| entry.what == what),
+                "{what} is missing"
+            );
+        }
     }
 
     let context = initialize(populated_kmc());
-    let plan = MemoryPlan::plan(&context.job, &context.limits).expect("plan");
-    assert_eq!(plan.entry("energy.site").expect("entry").elements, 12);
-    assert_eq!(plan.entry("energy.vectors").expect("entry").elements, 96);
-    assert_eq!(plan.entry("links.links").expect("entry").elements, 6);
-    assert_eq!(
-        plan.entry("links.cluster_assoc").expect("entry").elements,
-        2
-    );
-    assert_eq!(plan.entry("clusters.instances").expect("entry").elements, 1);
-    assert_eq!(plan.entry("clusters.codes").expect("entry").elements, 8);
-    assert_eq!(plan.entry("clusters.energy").expect("entry").elements, 16);
+    let report = context.memory_report();
+    let entry = |what: &str| {
+        report
+            .entries()
+            .iter()
+            .find(|entry| entry.what == what)
+            .unwrap_or_else(|| panic!("{what} is missing"))
+    };
+    assert_eq!(entry("energy.site").elements, 12);
+    assert_eq!(entry("energy.vectors").elements, 96);
+    assert_eq!(entry("links.links").elements, 6);
+    assert_eq!(entry("links.cluster_assoc").elements, 2);
+    assert_eq!(entry("clusters.instances").elements, 1);
+    assert_eq!(entry("clusters.codes").elements, 8);
+    assert_eq!(entry("clusters.energy").elements, 16);
+    assert_eq!(entry("pools.headers").elements, 1);
+    assert_eq!(entry("pools.members").elements, 32);
+    assert_eq!(entry("pools.slot").elements, 96);
+    assert_eq!(entry("pools.pool_of").elements, 12);
+    assert_eq!(entry("jumps.offsets").elements, 13);
+    assert_eq!(entry("jumps.links").elements, 4);
 }
 
 fn expect_limit(
@@ -414,12 +444,13 @@ fn every_link_and_cluster_cap_rejects_before_allocation() {
         864,
         863,
     );
+    let total = initialize(job.clone()).memory_report().total_bytes();
     expect_limit(
         &job,
-        |options| options.limits.max_context_bytes = 1803,
+        |options| options.limits.max_context_bytes = total - 1,
         "max_context_bytes",
-        1804,
-        1803,
+        total,
+        total - 1,
     );
 }
 

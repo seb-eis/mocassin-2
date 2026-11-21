@@ -131,6 +131,14 @@ impl MemoryPlan {
         entries.extend(energy_entries(&dimensions, limits)?);
         entries.extend(link_entries(job, &dimensions, limits)?);
         entries.extend(cluster_entries(job, &dimensions, limits)?);
+        entries.extend(pool_entries(job, &dimensions, limits)?);
+        entries.push(entry("jumps.offsets", 0, 4, limits.max_jump_status_bytes)?);
+        entries.push(entry(
+            "jumps.links",
+            0,
+            core::mem::size_of::<mocassin_types::JumpLink>() as u64,
+            limits.max_jump_status_bytes,
+        )?);
         finish(entries, limits)
     }
 
@@ -161,6 +169,38 @@ impl MemoryPlan {
     #[must_use]
     pub(crate) fn planned_elements(&self, what: &str) -> Option<u64> {
         self.entry(what).map(|entry| entry.elements)
+    }
+
+    /// Updates or appends the named entries and re-checks the total cap.
+    ///
+    /// The jump-status phase uses this after its counting pass: the offsets/links sizes are only known then,
+    /// and they are recorded before their vectors are allocated.
+    pub(crate) fn set_entries(
+        &mut self,
+        entries: impl IntoIterator<Item = MemoryEntry>,
+        limits: &ContextLimits,
+    ) -> Result<(), ContextError> {
+        for entry in entries {
+            if let Some(existing) = self
+                .entries
+                .iter_mut()
+                .find(|existing| existing.what == entry.what)
+            {
+                *existing = entry;
+            } else {
+                self.entries.push(entry);
+            }
+        }
+
+        self.total_bytes = sum_entry_bytes(&self.entries, "max_context_bytes", u64::MAX)?;
+        if self.total_bytes > limits.max_context_bytes {
+            return Err(ContextError::LimitExceeded {
+                what: "max_context_bytes",
+                value: self.total_bytes,
+                limit: limits.max_context_bytes,
+            });
+        }
+        Ok(())
     }
 
     /// Returns the summed planned bytes.
@@ -243,6 +283,61 @@ fn energy_entries(
             what: "max_energy_vector_bytes",
             value: bytes,
             limit: limits.max_energy_vector_bytes,
+        });
+    }
+
+    Ok(entries)
+}
+
+fn pool_entries(
+    job: &JobPackage,
+    dimensions: &Dimensions,
+    limits: &ContextLimits,
+) -> Result<Vec<MemoryEntry>, ContextError> {
+    if job.kind == mocassin_types::SimulationKind::Mmc {
+        return Ok(vec![
+            entry("pools.headers", 0, 32, limits.max_pool_bytes)?,
+            entry("pools.members", 0, 8, limits.max_pool_bytes)?,
+            entry("pools.slot", 0, 4, limits.max_pool_bytes)?,
+            entry("pools.pool_of", 0, 4, limits.max_pool_bytes)?,
+        ]);
+    }
+
+    let shape = super::pools::pool_shape(job, dimensions)?;
+    let pool_count = shape.counts.len() as u64;
+    if pool_count > u64::from(limits.max_pools) {
+        return Err(ContextError::LimitExceeded {
+            what: "max_pools",
+            value: pool_count,
+            limit: u64::from(limits.max_pools),
+        });
+    }
+    let members = shape.counts.values().try_fold(0_u64, |total, count| {
+        checked_add(total, *count, "pools.members", limits.max_pool_bytes)
+    })?;
+    let entries = vec![
+        entry("pools.headers", pool_count, 32, limits.max_pool_bytes)?,
+        entry("pools.members", members, 8, limits.max_pool_bytes)?,
+        entry(
+            "pools.slot",
+            u64::from(dimensions.environment_count()) * u64::from(dimensions.pc()),
+            4,
+            limits.max_pool_bytes,
+        )?,
+        entry(
+            "pools.pool_of",
+            u64::from(dimensions.p()) * u64::from(dimensions.pc()),
+            4,
+            limits.max_pool_bytes,
+        )?,
+    ];
+
+    let bytes = sum_entry_bytes(&entries, "max_pool_bytes", limits.max_pool_bytes)?;
+    if bytes > limits.max_pool_bytes {
+        return Err(ContextError::LimitExceeded {
+            what: "max_pool_bytes",
+            value: bytes,
+            limit: limits.max_pool_bytes,
         });
     }
 

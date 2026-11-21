@@ -12,7 +12,8 @@ use mocassin_solver::context::{
 use mocassin_types::{
     ClusterLink, ClusterTable, EnergyModel, EnvironmentModel, InitialLattice, JobPackage,
     JobSettings, ModelCounts, PairLink, PairTable, ParameterizedModel, ParticleId, ParticleTable,
-    Position, SimulationKind, SolverJobFlags, StructureModel, TransitionModel,
+    Position, SimulationKind, SimulationModel, SimulationSettings, SolverJobFlags, StructureModel,
+    TrackerModels, TransitionModel,
 };
 
 use support::{amend2, centered, ceria, initialize, populated_kmc, with_model};
@@ -103,7 +104,32 @@ fn toy_job(with_cluster: bool) -> JobPackage {
             static_tracker_mapping: vec![-1; pc],
             global_tracker_mapping: Vec::new(),
         },
-        simulations: Vec::new(),
+        simulations: vec![SimulationModel {
+            id: "toy-simulation".to_owned(),
+            kind: SimulationKind::Mmc,
+            jump_collection_ids: Vec::new(),
+            default_settings: SimulationSettings {
+                temperature_k: TOY_TEMPERATURE,
+                target_mcsp: 100,
+                write_out_count: 1,
+                pre_run_mcsp: 0,
+                time_limit_s: None,
+                min_success_rate: None,
+                electric_field_vm: TOY_FIELD_VM,
+                electric_field_direction: [1.0, 0.0, 0.0],
+                normalization_energy_ev: None,
+                max_attempt_frequency_hz: None,
+                break_tolerance: None,
+                break_sample_length_mcsp: None,
+                break_sample_interval_mcsp: None,
+                result_sample_mcsp: None,
+                flags: 0,
+            },
+            tracker_models: TrackerModels {
+                global_tracker_indices: Vec::new(),
+                static_tracker_indices: Vec::new(),
+            },
+        }],
         counts: ModelCounts {
             particle_count: particles,
             position_count: 1,
@@ -114,7 +140,7 @@ fn toy_job(with_cluster: bool) -> JobPackage {
             collection_count: 0,
             direction_count: 0,
             rule_count: 0,
-            simulation_count: 0,
+            simulation_count: 1,
             global_tracker_count: 0,
             static_trackers_per_cell: 0,
         },
@@ -122,7 +148,7 @@ fn toy_job(with_cluster: bool) -> JobPackage {
 
     JobPackage {
         job_id: 1,
-        kind: SimulationKind::Kmc,
+        kind: SimulationKind::Mmc,
         model: Arc::new(model),
         lattice: InitialLattice {
             signature: "toy-lattice".to_owned(),
@@ -146,7 +172,7 @@ fn toy_job(with_cluster: bool) -> JobPackage {
             break_sample_length_mcsp: None,
             break_sample_interval_mcsp: None,
             result_sample_mcsp: None,
-            flags: SolverJobFlags::KMC_SIMULATION,
+            flags: SolverJobFlags::MMC_SIMULATION,
         },
         seed: [0; 32],
         optimizers: Vec::new(),

@@ -157,7 +157,7 @@ crates/mocassin-solver/
   src/context/links.rs           # compact per-P1 link CSR + target resolution
   src/context/clusters.rs        # instances, memberships, codes, code ids
   src/context/energy.rs          # site table, site+pair vectors, per-centre cluster energy, initial total
-  src/context/pools.rs           # DirectionPool population and swap-remove helpers
+  src/context/pools.rs           # SelectionPool population and swap-remove helpers
   src/context/jumps.rs           # per-(P1,direction) jump status + path resolution
   src/context/goals.rs           # counters, goals, normalization, dt
   src/context/resume.rs          # ResumeState/ResumePhase validation

@@ -11,7 +11,7 @@ use std::sync::Arc;
 
 use mocassin_msl::Package;
 use mocassin_solver::context::{
-    ContextError, ContextOptions, EnvId, InitOutcome, MemoryPlan, SimulationContext,
+    ContextError, ContextOptions, EnvId, InitOutcome, SimulationContext,
 };
 use mocassin_types::{JobPackage, ReaderLimits, SimulationKind};
 
@@ -109,8 +109,22 @@ fn the_later_feature_containers_are_empty_and_the_counters_are_zeroed() {
         context.dimensions.p() as usize + 1
     );
     assert_eq!(context.clusters.slot_start, [0]);
-    assert!(context.pools.is_empty());
-    assert!(context.jumps.is_empty());
+    assert!(!context.pools.is_empty());
+    assert_eq!(
+        context.pools.pool_of.len(),
+        context.dimensions.p() as usize * context.dimensions.pc() as usize
+    );
+    assert_eq!(
+        context.pools.slot.len(),
+        context.dimensions.environment_count() as usize * context.dimensions.pc() as usize
+    );
+    assert!(context.pools.selectable_jump_count > 0);
+
+    assert_eq!(
+        context.jumps.status_count(),
+        context.dimensions.p() as usize * context.job.model.counts.direction_count as usize
+    );
+    assert!(!context.jumps.offsets.is_empty());
     assert_eq!(
         context.counters.per_particle.len(),
         context.dimensions.pc() as usize
@@ -127,14 +141,18 @@ fn the_later_feature_containers_are_empty_and_the_counters_are_zeroed() {
 }
 
 #[test]
-fn the_memory_report_equals_the_admitting_plan() {
+fn the_memory_report_is_internally_consistent() {
     let context = initialize(fixture_job(1), &ContextOptions::default());
-    let plan =
-        MemoryPlan::plan(&context.job, &context.limits).expect("the plan still admits the job");
     let report = context.memory_report();
 
-    assert_eq!(report.entries(), plan.entries());
-    assert_eq!(report.total_bytes(), plan.total_bytes());
+    assert_eq!(
+        report.total_bytes(),
+        report
+            .entries()
+            .iter()
+            .map(|entry| entry.bytes)
+            .sum::<u64>()
+    );
     assert!(report.total_bytes() > 0);
     assert!(
         report.capacity_bytes() >= report.total_bytes(),
@@ -166,12 +184,14 @@ fn a_limit_violation_is_rejected_before_allocation() {
 #[test]
 fn an_exact_total_cap_admits_the_job() {
     let job = fixture_job(1);
-    let plan = MemoryPlan::plan(&job, &ContextOptions::default().limits).expect("the default plan");
+    let total = initialize(job.clone(), &ContextOptions::default())
+        .memory_report()
+        .total_bytes();
     let mut options = ContextOptions::default();
-    options.limits.max_context_bytes = plan.total_bytes();
+    options.limits.max_context_bytes = total;
 
     let context = initialize(job, &options);
-    assert_eq!(context.memory_report().total_bytes(), plan.total_bytes());
+    assert_eq!(context.memory_report().total_bytes(), total);
 }
 
 #[test]

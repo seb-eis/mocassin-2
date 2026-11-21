@@ -10,7 +10,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In progress — feature 3 squashed; feature 4 next (six feature branches approved)
+- **Status:** In progress — feature 4 squashed; feature 5 next (six feature branches approved)
 - **Step branch:** `step/14-simulation-context-initialization`
 - **Step CI:** — (one closeout `workflow_dispatch`; no per-feature CI)
 - **Main merge:** —
@@ -31,14 +31,14 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (feature 3 squashed; feature 4 next)
+- **Last updated:** 2026-11-21 (feature 4 squashed; feature 5 next)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
 | 1 Context skeleton, arenas, limits, errors | `feature/step-14-simulation-context-initialization/context-arenas-and-limits` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (36 lib + 9 acceptance tests, 1 `Send` doctest, 1 `!Sync` compile-fail doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `1a73969860715c55260cd1db0257c8a59241a647` |
 | 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 link + 16 cluster + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `486389ec5736571f50adda0d77ae95aa8f9ea4cb` |
-| 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 8 energy + 16 cluster + 15 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-4 row update |
-| 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Planned | — | — | — |
+| 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 8 energy + 16 cluster + 15 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `2f284cce2f65532007a9be883eaaea83ae4500b5` |
+| 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 10 pools + 10 jump + 8 energy + 16 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-5 row update |
 | 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Planned | — | — | — |
 | 6 Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | Planned | — | — | — |
 
@@ -190,6 +190,74 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
     that slips one through is rejected as `InvalidInput` (exit 12) when the value is used, never silently
     propagated.
 - **No new fixture, format, manifest, signature, or public API break.**
+
+### Feature 4 evidence — selection-pools-and-jump-status
+
+- **Branch:** `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` (squashed;
+  squash commit recorded by the feature-5 row update).
+- **Scope delivered:**
+  - **Selection pools:** `SelectionPools` with supercell `PoolMember { env: EnvId, particle }`, a global
+    `slot[env·pc + particle]`, a P1 `pool_of[P·pc + particle]`, ascending direction-count pools, and
+    `selectable_jump_count`. Members are inserted in ascending environment order; each pool is created with the
+    capacity of every compiled-selectable `(environment, particle)` combination that could join it, so
+    `set_selectable` never reallocates. The selection mask filters the combinations; the job's optimizers remove
+    their `(P1, particle)` members after construction while leaving `pool_of` for re-entry; an MMC context has no
+    pools; KMC with no selectable combination returns `NoSelectableJumps`.
+  - **Direction filtering:** the `.msl` `jump_count`/`jump_mapping` are a union over all collections (the
+    populated fixture mixes KMC and MMC), so the pool direction count, `direction_for`, and the jump-status build
+    use only the job simulation's active collections. `direction_is_active` exposes the check; a KMC job never
+    offers an MMC direction.
+  - **Jump status:** receiver-major per-`(P1, direction)` CSR (`S = P·D`, `status = direction·P + position`),
+    built only for active directions (inactive statuses are empty). The receiver filter is the compiled
+    structural site stability, not the initial particle; a jump link is emitted only when the receiver's sorted
+    forward list has a link whose resolved partner is the sender (first sorted link wins); the link carries the
+    receiver's cluster associations. The per-status bound is `L·(L−1) ≤ 90`; the path is at most `max_path_nodes`.
+    `resolve_node`/`resolve_path` replace node 0 with the selected bucket and wrap the relative cell offsets;
+    `path_len`, `allowed_mask_of`, `rule`, and `collection_rules` complete the Step 16 interface.
+  - **Plan/caps:** `pools.headers/members/slot/pool_of` (members planned as reserved capacity) with `max_pools`
+    and `max_pool_bytes`; `jumps.offsets/links` added by the counting pass before allocation, with
+    `max_status_count`, `max_jump_links`, and `max_jump_status_bytes`. The final plan is stored and the report
+    matches it; the invariant sweep checks pool/member/slot consistency, status coverage, receiver links, the
+    structural filter, and every planned length.
+- **Public Rust API break (no format change):** `mocassin_types::DirectionPool` and its module/exports/tests are
+  removed; `mocassin_types::JumpLink` changes from `{ sender_path_id: i32, link_id: i32 }` to
+  `{ sender_path_id: u8, receiver_path_id: u8, link_id: u32 }` (8 bytes). `JumpStatus` remains. No reader
+  constructed the removed/changed container; the Step 13 page records the retirement.
+- **Invariants / fixtures / caps tests:**
+
+| Case | Assertion |
+| --- | --- |
+| `step-13-populated` KMC | one active direction per key (the MMC direction is filtered out); 1 pool of count 1, 16 members, `selectable_jump_count = 16`; the brute-force selectable count agrees; `direction_for(P0, O, 0) = dir0` and relative 1 is `None`; `direction_for` never returns the MMC dir 2 |
+| `step-11-amend-2` KMC | one pool of count 2, 16 members, selectable 32; relative 0/1 map to the two active directions and relative 2 is `None` |
+| Populated/centered MMC | pools empty, selectable 0, jump status empty |
+| Mask / optimizer | a changed mask removes the affected `(P1, particle)`; an optimizer removes every cell member but `pool_of` still allows `set_selectable` re-entry; the count/slot maps agree |
+| `set_selectable` | a particle change remove/adds the member, swap-remove updates the moved member's slot, the pool capacities/pointers do not change across 200 changes, and the count follows |
+| Multi-cell | members in different cells have distinct `slot` keys and the same P1 `pool_of` |
+| Jump status | for populated/amend-2 every active status equals a naive brute-force recomputation (sorted receiver link, structural filter); inactive statuses are empty; total links 4 (populated) and 8 (amend-2) |
+| Structural filter / clusters | P1 is unstable at init and excluded; setting it stable includes its void receiver; the receiver link carries the cluster associations (slot 1/2) without duplicating them in the jump link |
+| `resolve_node` | node 0 is the selected bucket; node cells wrap; the centered cross-bucket direction 3 at selected P2 resolves node 1 to P7; an out-of-range node is `None`; `resolve_path` fills a caller slice |
+| Ten-node bound | a synthetic 10-position, one-cell model with one 10-node direction yields exactly 90 jump links for status 0 (the `L·(L−1)` bound), all sender/receiver ids in `0..10` |
+| Caps | `max_pools`/`max_pool_bytes` (value 720, limit 719), `max_selectable_jump_count` (16/15), `max_status_count` (12/11), `max_jump_links` (4/3), and `max_jump_status_bytes` (84/83) reject before allocation |
+| Invalid path / no selectable | an out-of-cell path node and an 11-node path are `InvalidInput`; a job with every selection mask cleared is `NoSelectableJumps` (exit 12) |
+- **Plan totals (report):** populated KMC 2608 B (pools 720 + jumps 84 added to the feature-3 1804), populated
+  MMC 1804 B, `step-11-amend-2` 3800 B, `step-13-centered` 3300 B, `msl-v1` 64568 B; the report equals its
+  entries and capacity ≥ total.
+- **Clarifications/limitations (recorded):**
+  - **D4-1 — active-collection filtering.** The design's §8/§9 read `jump_count`/`jump_mapping` as the job's
+    direction table, but the payload tables are a union over collected kinds; the context filters the selection
+    and jump-status space to `simulation.jump_collection_ids`. Without this a KMC job would offer MMC directions.
+    This is a correctness correction, not a format change; the populated fixture is the evidence.
+  - **D4-2 — inactive statuses are empty.** The CSR keeps the global `direction·P + position` index space, but
+    statuses of inactive directions are never filled; the plan still counts `S = P·D`.
+  - **D4-3 — jump entries are planned at their phase.** `J` is only known after the receiver-link counting pass,
+    so the jump entries are appended/updated in the plan after that pass and before the `links` vector is
+    allocated; all caps (including the total) are checked then. The phase-0 plan contains zero jump entries.
+  - **D4-4 — `set_selectable` semantics.** The method sets the membership for a `(environment, particle)` from
+    the lattice's current particle at that environment: the arrived particle is inserted, the departed removed.
+    Callers update the particle first; `set_particle` is the raw mutator (flags/tracker/pool refresh is Step 15's
+    state application). The optimizer is a start condition and does not clear `pool_of`.
+- **No new fixture, format, manifest, or signature change.** The public Rust API break is the placeholder
+  retirement above.
 
 ## Goal
 
@@ -1227,7 +1295,7 @@ row (§7.2). A link that is absent in both directions means the two environments
       `ContextLimits`, `ContextError`, `MemoryPlan`/`MemoryReport`, `EnvId`, and `Dimensions`; make
       `Cargo.toml` match §22 (`mocassin-msl` dev-only; no `mocassin-state`, `mocassin-extension`, or `rayon`).
 - [x] Implement the lattice/environment arenas, index/wrap helpers, flags, tracker id space, and cancellation.
-- [ ] Implement the memory plan (checked bytes for every derived array, per-array caps, total cap) and reject
+- [x] Implement the memory plan (checked bytes for every derived array, per-array caps, total cap) and reject
       before the first allocation.
 - [x] Implement the owner-major per-P1 link CSR, the inverse routing index (i64 `rem_euclid` resolution),
       partner resolution, sorting, and the cluster associations.
@@ -1240,9 +1308,9 @@ row (§7.2). A link that is absent in both directions means the two environments
       symmetry and no direct `occupation_codes` fallback. Gate this task on the `step-11.1` merge (see §22).
 - [x] Implement the site table, per-owner site+pair vectors, per-instance cluster energies, and the exact
       initial lattice energy.
-- [ ] Implement the supercell selection pools (`EnvId` members, global slot map, `pool_of`, `max_pools` check,
+- [x] Implement the supercell selection pools (`EnvId` members, global slot map, `pool_of`, `max_pools` check,
       per-pool reserved capacity), mask/optimizer application, selectable count, and `set_selectable`.
-- [ ] Implement the per-`(P, direction)` receiver-major jump status (`sender_path_id`, `receiver_path_id`,
+- [x] Implement the per-`(P, direction)` receiver-major jump status (`sender_path_id`, `receiver_path_id`,
       `link_id`), the counting pass and caps, the derived bound, and `resolve_node`; retire the Step 13
       `DirectionPool`/`JumpLink` placeholders or adjust them as §8/§9.2 describes. Record the **public Rust API
       break** in the feature log and update the `mocassin-types` container invariant tests in the same feature.
