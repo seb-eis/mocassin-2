@@ -15,19 +15,19 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — created from the reviewed `main` commit after the start-gate approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `82b045aeacedd98592500d84922ee37cbf9c6442` |
+| Reviewed commit | `ab96aab85b4b25a994c7752b19bbd56127958906` |
 | Docs branch | `docs/step-23b-design` |
 | Review date | 2026-11-21 |
 | Reviewer | — |
 
 Step page: [`Step 23B — Editing, Diagnostics, and Recovery`](../steps/step-23b-editing-diagnostics-and-recovery.md)
 
-**Freeze note.** The freeze is `82b045aeacedd98592500d84922ee37cbf9c6442`, the commit that introduces this record
-and the completed 23B design. It is based on `main` at
-`63cdd0638b952e9175f75681d864bb95db0b4f68` (23A merged and tagged `step-23a`). This record is committed in the
-freeze; the cell above is filled by a documentation-only request follow-up, so the reviewer's record commit is
-the only delta. The freeze contains no code, test, configuration, contract, generated file, or status-dashboard
-edit.
+**Freeze note.** The review freeze is `ab96aab85b4b25a994c7752b19bbd56127958906`, the commit that completes
+the 23B design. It is based on `main` at `63cdd0638b952e9175f75681d864bb95db0b4f68` (23A merged and tagged
+`step-23a`). Earlier commits `82b045a` and `a529a71` were pre-review snapshots; they are superseded by the
+`MaxUndoDepth` correction before any reviewer was spawned. The cell above is filled by a documentation-only
+request follow-up, so the reviewer's record commit is the only delta. The freeze contains no code, test,
+configuration, contract, generated file, or status-dashboard edit.
 
 **Split note.** Step 23 was class High with three independent acceptance stories and an audit surface too large
 for one sitting. The human owner approved the split on 2026-11-20 into **23A** (workspace and project lifecycle)
