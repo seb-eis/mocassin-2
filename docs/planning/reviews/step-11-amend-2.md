@@ -15,7 +15,7 @@
 | Orchestrator | Orchestrator agent (spawns the planning auditor) |
 | Step agent (implementor) | Not assigned — post-merge maintenance branch after approval |
 | Review initiated by | Orchestrator, on request of the planner |
-| Reviewed commit | `ff112cf45592bf30dd4f2abe1aa13c17944b0599` |
+| Reviewed commit | `5112180128cce8b7eaa3c1192706448136e06a67` |
 | Docs branch | `docs/step-11-amend-2` |
 | Review date | 2026-11-21 |
 | Reviewer | DeepSeek V4.1 Flash 1017 (opencode-go) — fresh context, no shared conversation with the planner, implementor, or orchestrator |
@@ -35,6 +35,12 @@ the re-review freeze `ff112cf45592bf30dd4f2abe1aa13c17944b0599`; the request/res
 this record only. The reviewer-authored round-1 findings, evidence, and verdict above are unchanged. The new
 freeze also updates the audit/closeout pages and the Step 14 pointer; no code, test, configuration, contract,
 generated artifact, or fixture is included.
+
+**Re-review freeze (round 3).** Round 2 returned `Ready with notes` with A2-R2-01 (Minor) and A2-R2-02…A2-R2-04
+(Notes). The corrections are in `5112180128cce8b7eaa3c1192706448136e06a67`; the request/resolution commit after
+it changes this record only. The round-2 reviewer text is unchanged. The corrections are design/doc-only: the
+`8E + 4I` budget and scan-time `E != I`/duplicate rejection, the three-way `ClusterTable::lookup` result, the
+`step-NN.json` typo, and the historical freeze-note reconciliation.
 
 > Orchestration: the orchestrator spawns a fresh planning auditor after the planner has frozen the design and
 > completed this request, and relays the verdict and owner decisions. The planner and implementor update the
@@ -256,12 +262,16 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready with notes
+**State:** Re-review required
 
 Round 2 verdict: `Ready with notes` — see `### Re-review round 2` below. The round-1 Major (A2-01) and all ten
 Minors (A2-02…A2-11) are closed; A2-12…A2-16 are accepted and corrected. One new Minor (A2-R2-01) and three Notes
 remain for acceptance or correction before implementation. `Ready with notes` is a verdict awaiting explicit
 human-owner acceptance, not a start authorization.
+
+**Round-3 correction (request owner).** A2-R2-01…A2-R2-04 were corrected in
+`5112180128cce8b7eaa3c1192706448136e06a67`; the record state is `Re-review required` for a fresh review. The
+round-2 verdict paragraph above is historical and is not altered.
 
 ## Reviewer independence
 
@@ -362,10 +372,14 @@ Date:
 | A2-14 (Note) | **Accepted.** The ten-slot rule is kept consistent with `occupation_codes`; §4 rule 6 now records that a nonzero high-slot particle is unreachable and harmless and is deliberately not tightened on one side only. | Planner | `ff112cf` |
 | A2-15 (Note) | **Accepted and planned.** The `step-13-populated` regeneration step now includes refreshing the README size/SHA table, which is already stale (`model-1.bin` 6,518 vs 7,009 bytes). | Planner | `ff112cf` |
 | A2-16 (Note) | **Accepted.** `PKG010` is reused for the structural checks; the current "out of bounds" wording is broader in use than its text. A later diagnostics docs pass may broaden the help text to "structural or out of bounds" without a code or descriptor change. | Planner | `ff112cf` |
+| A2-R2-01 (Minor) | **Resolved.** The budget is `Σ(8E + 4I)` (`E = len(expanded_codes)`, `I = len(canonical_indices)`), not `12 × I`; a large `expanded_codes` behind a small `canonical_indices` is now bounded. Both scans **reject `E != I` at scan time** and track a seen-mask so duplicate `code_expansions`/`expanded_codes`/`canonical_indices` keys are rejected before allocation; `map/model.rs` re-checks equality and the cumulative budget. Hostile tests cover an unequal pair and duplicate keys on both paths. | Planner | `5112180` |
+| A2-R2-02 (Note) | **Resolved.** The single accessor is `ClusterTable::lookup(raw) -> ClusterCodeLookup` with `Canonical(index)`, `MissingFromMap(raw)`, and `ExpansionMapAbsent(raw)`; the two fail-closed errors are selected without inspecting the map. `expansions` is private; a `canonical_index` convenience, if kept, is explicitly not the semantic accessor. Step 14 maps `MissingFromMap`/`ExpansionMapAbsent`; Step 15 matches `Canonical`. | Planner | `5112180` |
+| A2-R2-03 (Note) | **Resolved.** `audits/README.md` §3.1 now says `closeout/step-NN.json` (not `step-NNN.json`). | Planner | `5112180` |
+| A2-R2-04 (Note) | **Resolved.** The request's original note is now labelled **Round-1 freeze note (historical)** and says the current `Reviewed commit` is the latest re-review freeze; a separate round-3 freeze note names `5112180`. The round-1/round-2 reviewer text is unchanged. | Planner | `5112180` |
 
 The implementor fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
-verdict. The round-1 text above is unchanged; the design corrections are in `ff112cf` and the request/resolution
-commit changes only this record.
+verdict. The round-1/round-2 text above is unchanged; the design corrections are in `ff112cf` (round 2) and
+`5112180` (round 3), and each request/resolution commit changes only this record.
 
 ## Review rounds
 
