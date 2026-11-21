@@ -1023,13 +1023,15 @@ MessagePack map with snake_case keys. Top-level:
   - **Reader bound:** the stored integers use MessagePack's smallest-width encoding (a code is 1–9 bytes, an
     index 1–5 bytes), so the model payload byte guard does **not** bound the typed `u64`+`u32` arrays; a hostile
     512 MiB payload could otherwise declare tens of millions of entries and allocate about twice the guard. The
-    readers therefore apply an explicit cumulative budget `12 × ΣN` **before** the typed arrays are allocated:
-    Rust `ReaderLimits.max_cluster_expansion_bytes` and .NET
-    `PackageVerificationOptions.MaxClusterExpansionBytes`, both defaulting to 128 MiB. Over-budget is a
-    fail-closed package error (`PayloadTooLarge`/exit 11, or `PKG004` on the .NET decode path), and the limit is
-    raisable for a writer-valid package that needs it.
-  - Step 14 consumes this map through a `ClusterTable::canonical_index(raw)` accessor; Step 15 reuses the
-    resolved index. The format guarantees that every raw tuple of a table written with the map resolves.
+    readers therefore apply an explicit cumulative budget `Σ(8E + 4I)` **before** the typed arrays are
+    allocated (Rust `ReaderLimits.max_cluster_expansion_bytes` and .NET
+    `PackageVerificationOptions.MaxClusterExpansionBytes`, both defaulting to 128 MiB); the scans also reject
+    `E != I` and duplicate known keys at scan time. Over-budget is a fail-closed package error
+    (`PayloadTooLarge`/exit 11, or `PKG004` on the .NET decode path), and the limit is raisable for a
+    writer-valid package that needs it.
+  - Step 14 consumes this map through a `ClusterTable::lookup(raw)` accessor returning
+    `ClusterCodeLookup::{Canonical, MissingFromMap, ExpansionMapAbsent}`; Step 15 matches `Canonical(index)`.
+    The format guarantees that every raw tuple of a table written with the map resolves.
 - Cluster `object_id` is the stable cluster energy identity
   `SHA-256("mocassin/cluster-energy-id/v1" || clusterId || centerSiteId || canonical geometry hash)`.
   `occupation_codes` are sorted ascending; `particle_table_mapping` holds one row per allowed center particle
@@ -1187,17 +1189,19 @@ consumes, with explicit limits that are checked before allocation:
 | Particles | 64 | Six-bit state codes and the 63-custom-particle limit |
 | Rules / directions / collections | 1M / 1M / 4,096 | `max_rules` defaults to the `CompilationOptions.MaxRuleCount` default (1,000,000), an `init` option callers can raise; raise `ReaderLimits` with it. The others are allocation caps |
 | Pair / cluster tables | 1M / 1M | Allocation caps |
-| Cluster expansion typed bytes (`12 × ΣN`) | 128 MiB | `ReaderLimits.max_cluster_expansion_bytes` / `PackageVerificationOptions.MaxClusterExpansionBytes`; checked before the typed arrays allocate; raisable for a writer-valid package. The derived entry cap is 11,184,810 |
+| Cluster expansion typed bytes (`Σ(8E + 4I)`) | 128 MiB | `ReaderLimits.max_cluster_expansion_bytes` / `PackageVerificationOptions.MaxClusterExpansionBytes`; checked before the typed arrays allocate; scans reject `E != I` and duplicate keys first; raisable for a writer-valid package. For a valid map (`E == I = N`) the derived entry cap is 11,184,810 |
 | Pair links | 16M total, 65,536 per position | Allocation caps |
 | Path nodes / tracker entries | 10 | Six bits per node in a `u64` |
 | Extensions / simulations | 256 / 4,096 | Allocation caps |
 
 - The lattice guard is `4 × a × b × c × position_count` in checked `u64`, capped by the lattice byte limit.
 - The `code_expansions` budget is explicit, not a consequence of the model payload guard. Smallest-width
-  MessagePack makes an entry 2–14 bytes on the wire, while the typed pair is always 12 bytes, so the payload
-  guard alone would allow a typed allocation well above it. The readers accumulate `12 × N` across all cluster
-  tables and reject before allocating; `check_declared` still rejects a length that cannot fit in the remaining
-  bytes, and the model element budget bounds the scan.
+  MessagePack makes an entry 2–14 bytes on the wire, while the typed arrays cost `8E + 4I`, so the payload
+  guard alone would allow a typed allocation well above it, and a malformed pair could hide a large
+  `expanded_codes` behind a small `canonical_indices`. The readers accumulate `8E + 4I` across all cluster
+  tables, reject `E != I` and duplicate known keys at scan time, and reject before allocating;
+  `check_declared` still rejects a length that cannot fit in the remaining bytes, and the model element budget
+  bounds the scan.
 - The reader decompresses only after the Zstd frame's declared size (or a bounded streaming read when no size
   is declared) is checked against the guard. It then scans the MessagePack structure without allocating per
   element, checks declared lengths against the remaining bytes, and only then decodes into typed structures.

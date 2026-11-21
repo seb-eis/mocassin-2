@@ -109,7 +109,7 @@ rule:
 - The audit record `docs/planning/audits/step-NN-amend-M.md` is the **single evidence source** for the audited
   commit, the closeout CI run and `head_sha`, the `main` SHA at freeze, the merge commit, the merge-tree CI (if
   required), the platform CI status, and the suffixed tag (`step-NN.M`). Do not create or rewrite a
-  `closeout/step-NNN.json` for the amendment; the parent step's evidence file is historical and stays unchanged.
+  `closeout/step-NN.json` for the amendment; the parent step's evidence file is historical and stays unchanged.
 - `tools/check_closeout_evidence.py` accepts `step-NN` and `step-NN[a-z]` only. It is **not run** for a
   post-merge amendment; the audit record carries the fields instead. Extending the checker to `step-NN.M` is a
   separate future process/tooling change, not a requirement of an amendment audit.

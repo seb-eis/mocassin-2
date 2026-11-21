@@ -23,10 +23,10 @@
 Step page: [`Step 11 — Simulation Package and `.msl` Writer`](../steps/step-11-simulation-package-and-msl-writer.md)
 Amendment page: [`Step 11 Amendment 2 — Cluster Occupation Code Expansion Map`](../amendments/step-11-amend-2-cluster-code-expansion.md)
 
-**Freeze note.** The design docs, including this request record, were committed as the design freeze
-`6ff913671351798cb64678b506986ea6649364a4`; the `Reviewed commit` cell is filled with that SHA by this
-documentation-only request follow-up. The only delta between the freeze commit and this request commit is this
-cell and the freeze SHA in this sentence. The freeze includes the amendment page, the data-contract,
+**Round-1 freeze note (historical).** The design docs, including this request record, were committed as the
+round-1 design freeze `6ff913671351798cb64678b506986ea6649364a4`; the round-1 request follow-up filled the
+then-current `Reviewed commit` with that SHA. The current `Reviewed commit` is the latest re-review freeze named
+below, not the historical round-1 SHA. The round-1 freeze included the amendment page, the data-contract,
 architecture, ADR, open-decision, reference, step-page, index, and status updates. No code, test, configuration,
 contract, generated artifact, or fixture is part of the freeze.
 

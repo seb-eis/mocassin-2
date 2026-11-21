@@ -162,12 +162,13 @@ code_expansions = null
   `signatures.parameterization` contains only applied values. `package-summary-v1` has no code-level fields, so
   it is unchanged.
 - **Read budget.** Smallest-width MessagePack lets a 512 MiB payload declare tens of millions of entries while
-  the typed `u64`+`u32` pair is always 12 bytes per entry, so the payload guard alone does not bound the typed
-  map. Readers apply an explicit cumulative `12 × ΣN` budget **before** allocating: Rust
+  the typed arrays cost `8E + 4I` (`E = len(expanded_codes)`, `I = len(canonical_indices)`), so the payload
+  guard alone does not bound the typed map. Readers reject `E != I` and duplicate keys at scan time, then apply
+  an explicit cumulative `Σ(8E + 4I)` budget **before** allocating: Rust
   `ReaderLimits.max_cluster_expansion_bytes` and .NET
-  `PackageVerificationOptions.MaxClusterExpansionBytes`, both defaulting to 128 MiB (≈11.18M entries). Over
-  budget is a fail-closed error (`PayloadTooLarge`/exit 11, or `PKG004` on the .NET decode path); the limit is
-  raisable for a writer-valid package that needs it.
+  `PackageVerificationOptions.MaxClusterExpansionBytes`, both defaulting to 128 MiB (≈11.18M entries for a valid
+  `E == I` map). Over budget or malformed is a fail-closed error (`PayloadTooLarge`/exit 11, or `PKG004` on the
+  .NET decode path); the limit is raisable for a writer-valid package that needs it.
 
 The exact contract and the writer coverage argument are in
 [`02-data-contracts.md` §3.3](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/02-data-contracts.md#33-compiled-model-payload)

@@ -16,10 +16,11 @@ lookup tables, selection pools, jump-status caches, counters, goals, and tracker
 - **Design review:** Not requested
 - **Cross-step dependency:** F-29 (cluster-code expansion map) is resolved at the format level by
   [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md); the Step 14 design must consume
-  `ClusterTable::canonical_index` and fail closed when a non-canonical raw tuple has no map. The authoritative
-  Step 14 design is `87be9de` and the F-29 review record is `1ea8090` on `review/step-14-design-round-3` (not
-  merged); reconcile this pointer there before the start gate. **F-29's formal closure is a Step 14 gate**, not
-  a `step-11.1` acceptance criterion; this `main` page is only the discoverable pointer.
+  `ClusterTable::lookup` (the three-way `Canonical`/`MissingFromMap`/`ExpansionMapAbsent` result) and fail
+  closed when a non-canonical raw tuple has no map. The authoritative Step 14 design is `87be9de` and the F-29
+  review record is `1ea8090` on `review/step-14-design-round-3` (not merged); reconcile this pointer there
+  before the start gate. **F-29's formal closure is a Step 14 gate**, not a `step-11.1` acceptance criterion;
+  this `main` page is only the discoverable pointer.
 - **Last updated:** 2026-11-21
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |

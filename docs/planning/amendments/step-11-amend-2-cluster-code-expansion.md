@@ -220,20 +220,21 @@ it.
 
 ### 4. Encoding and validation rules
 
-For one table, with `G = occupation_codes.Length`, `N = expanded_codes.Length`, and `particle_count` from the
-model payload:
+For one table, with `G = occupation_codes.Length`, `E = expanded_codes.Length`,
+`I = canonical_indices.Length`, `N = E = I` for a valid map, and `particle_count` from the model payload:
 
 1. `G = energies.Length`; this amendment does not change the existing `occupation_codes`/`energies` equality.
 2. `code_expansions` is either `nil` or a map whose **required** keys are `expanded_codes` and
    `canonical_indices`. Unknown keys inside the map are ignored under the payload `unknownFields: "ignore"`
    policy (ADR 0013 addendum); a verifier does not need a third key to be an error, and a future additive
    nested member stays possible (A2-04).
-3. `N = canonical_indices.Length`.
-4. `expanded_codes[0] < expanded_codes[1] < ... < expanded_codes[N-1]` strictly.
-5. `canonical_indices[j] < G` for every `j`.
-6. For every $j$, `expanded_codes[j] >> 60 == 0` and each of its ten 6-bit fields is `< particle_count`.
-   Like `occupation_codes`, this accepts a nonzero field in a slot above the table's actual slot count. Such a
-   code is unreachable at runtime and harmless; do not tighten one side only (A2-14).
+3. `E == I`; the scans reject an unequal pair (`E != I`) at scan time, before any typed array is allocated
+   (A2-R2-01). A malformed pair is a package error, not a length-mismatch finding deferred to the verifier.
+4. `expanded_codes[0] < expanded_codes[1] < ... < expanded_codes[E-1]` strictly.
+5. `canonical_indices[j] < G` for every `j` in `0..I`.
+6. For every $j$ in `0..E`, `expanded_codes[j] >> 60 == 0` and each of its ten 6-bit fields is
+   `< particle_count`. Like `occupation_codes`, this accepts a nonzero field in a slot above the table's actual
+   slot count. Such a code is unreachable at runtime and harmless; do not tighten one side only (A2-14).
 7. For every $i$ there is exactly one $j$ with `expanded_codes[j] == occupation_codes[i]` and
    `canonical_indices[j] == i` (canonical self-entry). Exactly one follows from strict ascending.
 8. `N == G` iff every orbit is a singleton; the writer emits `nil` in that case and the map otherwise. A reader
@@ -244,10 +245,13 @@ model payload:
 10. The map contains **every enumerated raw tuple and may contain extra orbit codes** (§3). Extra codes are
     valid entries; a reader must not reject them. What is forbidden is a missing enumerated tuple or a code
     assigned to the wrong orbit.
-11. The total `12 × N` across all tables in one model payload is bounded by the read-time expansion budget
+11. The typed cost of one table is `8E + 4I` (`u64` codes plus `u32` indices), not `12 × N`; a malformed pair
+    could otherwise hide a large `expanded_codes` behind a small `canonical_indices`. The cumulative
+    `Σ(8E + 4I)` across all tables in one model payload is bounded by the read-time expansion budget
     (`ReaderLimits::max_cluster_expansion_bytes` / `PackageVerificationOptions.MaxClusterExpansionBytes`,
-    default 128 MiB). The bound is enforced **before** the typed arrays are allocated; over-budget is a
-    fail-closed package error, not a best-effort decode (§6.3, A2-01).
+    default 128 MiB), **and** the scans reject `E != I` and duplicate known keys before allocating. The bound
+    is enforced **before** the typed arrays are allocated; over-budget is a fail-closed package error, not a
+    best-effort decode (§6.3, A2-01, A2-R2-01).
 
 The encoding does not carry a slot count. It does not need one: the code is self-describing up to the ten
 6-bit fields, high slots are zero (void), and the reader already validates `occupation_codes` with the same
@@ -279,15 +283,17 @@ future signed projection includes the field, which this amendment explicitly doe
   writer-asserted like `occupation_codes`. `PKG010`'s current wording ("out of bounds") is broader in use than
   its text; a later diagnostics pass may broaden the help text to "structural or out of bounds" without
   changing the code or this design (A2-16).
-- **Decode-time budget (A2-01).** `PackageVerificationOptions` gains
+- **Decode-time budget (A2-01, A2-R2-01).** `PackageVerificationOptions` gains
   `MaxClusterExpansionBytes` (init property, default 128 MiB). `PackageReader.ReadModelsAsync` calls a
   model-specific decode overload that, after Zstd decompression and **before** `MessagePackSerializer.
   Deserialize<ModelPayload>`, runs a bounded `ClusterExpansionScan` over the MessagePack bytes. The scan reads
-  only the known path `energy.cluster_tables[*].code_expansions`, reads the two array headers, accumulates
-  `12 × N` across tables, and rejects a payload above the option **before** any typed array is allocated. A
-  `nil` or absent `code_expansions` contributes zero entries; a present map is scanned for both array headers,
-  and a missing array is left to the structural verifier. The scan skips every other value with the
-  non-allocating `MessagePackReader.Skip`, enforces a small depth bound, and reports a decode error that
+  only the known path `energy.cluster_tables[*].code_expansions`, tracks duplicate known keys with a seen-mask
+  (`code_expansions` twice, or `expanded_codes`/`canonical_indices` twice, is a decode error), reads the two
+  array headers, and accumulates `8E + 4I` across tables. It **rejects `E != I` at scan time** and rejects a
+  payload above the option **before** any typed array is allocated. A `nil` or absent `code_expansions`
+  contributes zero entries; a present map is scanned for both array headers, and a missing array is a scan
+  error rather than a deferred length mismatch. The scan skips every other value with the non-allocating
+  `MessagePackReader.Skip`, enforces a small depth bound, and reports a decode error that
   `PackagePayloadDecoder` maps to the existing `PKG004`; it does not allocate the model. The writer's trusted
   round-trip self-check (`PayloadEncoder.Decode`) remains a structural decode and does not apply the solver's
   read budget.
@@ -305,39 +311,45 @@ future signed projection includes the field, which this amendment explicitly doe
 - `mocassin-types::payload::ClusterTablePayload` gains
   `#[serde(default)] pub code_expansions: Option<CodeExpansionPayload>`; serde ignores unknown fields, so a
   pre-amendment package deserializes with `None` and a pre-amendment reader ignores the new key.
-- The runtime `ClusterTable` gains `expansions: Option<ClusterExpansions>`; `ClusterExpansions` holds the two
-  arrays and exposes `canonical_index(raw_code) -> Option<u32>` (binary search).
-- `ClusterTable::canonical_index(raw_code) -> Option<u32>` uses the map when present, otherwise binary-searches
-  `occupation_codes`. That single accessor is what Step 14 and Step 15 call.
+- The runtime `ClusterTable` gains a **private** `expansions: Option<ClusterExpansions>`; `ClusterExpansions`
+  holds the two arrays and the value-type result of the lookup (below). No caller inspects the field.
+- `ClusterTable::lookup(raw_code) -> ClusterCodeLookup` is the **single accessor** Step 14 and Step 15 call
+  (A2-R2-02). It is a small public enum, not `Option<u32>`, so the two fail-closed causes stay distinguishable
+  without exposing the map:
+  - `Canonical(index)`: the raw code resolves (map hit, or a no-map singleton/canonical direct hit);
+  - `MissingFromMap(raw)`: a map is present and the raw code is not in it → `MissingOccupationCode`;
+  - `ExpansionMapAbsent(raw)`: no map and the raw code is not canonical → the recompile-required error.
+  A convenience `canonical_index(raw) -> Option<u32>` may exist as `lookup(raw).index()`, but it is not the
+  accessor the semantics rest on and must not be used to choose between the two errors.
 - Adding a public field to `ClusterTable` and a public type is a Rust API addition (exhaustive struct literals in
   the workspace tests are updated). `mocassin-types` is pre-1.0. Record the addition in §5 and §6.1 of this page
   only; the Step 13 page has no API-note section and is not re-opened (A2-09). The rustdoc `missing_docs` denial
   and the workspace API tests are the gate; no `.msl` format consequence.
 - `ReaderLimits` gains `max_cluster_expansion_bytes: u64` with a **128 MiB** default (A2-01). Like
   `max_rules`, it is a solver-only cap: a writer-valid package above it is rejected with a structured error and
-  needs a raised `ReaderLimits`. The default bounds the typed map to `12 × 11.18M ≈ 128 MiB`; the encoded
-  payload for that many entries is roughly 21–150 MiB depending on the integer widths, so the cap binds before
-  the 512 MiB model guard.
+  needs a raised `ReaderLimits`. The budget is `Σ(8E + 4I)`; for a valid map (`E == I = N`) that is `12N`, and
+  the derived cap is 11,184,810 entries. The encoded payload for that many entries is roughly 21–150 MiB
+  depending on the integer widths, so the cap binds before the 512 MiB model guard.
 
 #### 6.2 Lookup and fail-closed semantics
 
 Step 14 builds the raw code exactly as it does today: slot 0 is the centre particle, slots `1..=n` are the
 resolved member particles, packed with 6 bits per slot, slot 0 least significant. Then:
 
-- map present and `canonical_index(raw)` returns `Some(i)` → `code_id = i`, energy = `energies[i]`;
-- map present and `None` → a data error (`MissingOccupationCode`, exit 12), unchanged;
-- map absent and `occupation_codes.binary_search(raw)` succeeds → that index. For a singleton table this is
-  complete and correct;
-- map absent and the raw code is not canonical → a **distinct** fail-closed error (proposed
-  `ExpansionMapAbsent`/recompile-required, exit 12) naming the table and the raw code and telling the user the
-  package predates the expansion map and must be rebuilt. Do not fall back to another code, do not sort the
-  slot particles, do not take a minimum.
+- `Canonical(i)` → `code_id = i`, energy = `energies[i]`;
+- `MissingFromMap(_)` → a data error (`MissingOccupationCode`, exit 12), unchanged;
+- `ExpansionMapAbsent(_)` → a **distinct** fail-closed error (proposed `ExpansionMapAbsent`/
+  recompile-required, exit 12) naming the table and the raw code and telling the user the package predates the
+  expansion map and must be rebuilt. A no-map table whose raw code is canonical still returns `Canonical`, so a
+  singleton package keeps working. Do not fall back to another code, do not sort the slot particles, do not
+  take a minimum.
 
 Step 14 owns the error enum, wording, and tests; this amendment fixes the semantics. The fail-closed rule is
 the only safe absence behaviour because a reader cannot distinguish "old package" from "writer emitted a
-partial map".
+partial map". Step 15 matches `Canonical(i)` only; the other variants are impossible after a successful context
+initialization.
 
-#### 6.3 Bounds and the scan layer (A2-01, A2-02)
+#### 6.3 Bounds and the scan layer (A2-01, A2-02, A2-R2-01)
 
 The earlier "8 bytes per entry / 1.5×" argument is **withdrawn**. The stored integers use MessagePack's
 smallest-width encoding: a code is 1–9 bytes and an index is 1–5 bytes, so a 512 MiB payload can declare
@@ -345,17 +357,21 @@ roughly 38–268M entries and drive a typed `u64` + `u32` pair of roughly 0.45�
 alone is therefore **not** a bound on the typed arrays, and the .NET typed decode has the same exposure before
 the verifier runs.
 
-The design adds an explicit budget on **both** read paths, checked before the arrays are allocated:
+The design adds an explicit budget on **both** read paths, checked before the arrays are allocated. The cost is
+`8E + 4I`, **not** `12 × N` from one array: a malformed map can declare a large `expanded_codes` and a small
+`canonical_indices`, so a single-array formula would let the large `Vec<u64>`/`ImmutableArray<ulong>` allocate
+before the length mismatch is rejected. Both scans also reject `E != I` and duplicate known keys at scan time.
 
 | Path | Knob | Default | Enforcement |
 | --- | --- | --- | --- |
-| Rust | `ReaderLimits::max_cluster_expansion_bytes` | 128 MiB | `scan_model` reads the two array headers per table and accumulates `12 × N`; over budget returns `PackageError::PayloadTooLarge { section: "model cluster expansion", declared, limit }` (package class, exit 11). `map/model.rs` re-checks the same cumulative budget before cloning the typed arrays, as defence in depth. |
-| .NET | `PackageVerificationOptions.MaxClusterExpansionBytes` | 128 MiB | `PackageReader.ReadModelsAsync` uses a model decode overload that runs a bounded `ClusterExpansionScan` over the decompressed MessagePack **before** `MessagePackSerializer.Deserialize<ModelPayload>`; over budget returns the decode error that maps to `PKG004`. `PackageVerificationChecks.ValidateModel` then applies the structural rules and `PKG010`. |
+| Rust | `ReaderLimits::max_cluster_expansion_bytes` | 128 MiB | `scan_model` reads the two array headers per table, rejects `E != I` and a duplicate optional/known key via its seen-mask, and accumulates `8E + 4I`; over budget returns `PackageError::PayloadTooLarge { section: "model cluster expansion", declared, limit }` (package class, exit 11). `map/model.rs` re-checks the same cumulative budget, the length equality, and the values before cloning the typed arrays, as defence in depth. |
+| .NET | `PackageVerificationOptions.MaxClusterExpansionBytes` | 128 MiB | `PackageReader.ReadModelsAsync` uses a model decode overload that runs a bounded `ClusterExpansionScan` over the decompressed MessagePack **before** `MessagePackSerializer.Deserialize<ModelPayload>`; the scan rejects `E != I`, duplicate `code_expansions`/`expanded_codes`/`canonical_indices` keys, and accumulates `8E + 4I`. Over budget or malformed returns the decode error that maps to `PKG004`. `PackageVerificationChecks.ValidateModel` then applies the structural rules and `PKG010`. |
 
 The budget is cumulative across all cluster tables in the model payload, not per table, because many small
-tables can still allocate the same total. The derived entry cap is `floor(128 MiB / 12) = 11,184,810` entries
-per model read. A caller that needs a larger writer-valid package raises the limit; the error is explicit and
-actionable.
+tables can still allocate the same total. For a valid map (`E == I = N`) the derived entry cap is
+`floor(128 MiB / 12) = 11,184,810` entries per model read; the scan rejects `E != I` first, so a malformed
+single array cannot use the other array's smaller length to pass. A caller that needs a larger writer-valid
+package raises the limit; the error is explicit and actionable.
 
 **Rust scan ownership (A2-02).** `scan_map` currently *requires* every key in its `known` list. Adding
 `code_expansions` to `CLUSTER_TABLE_KEYS` would make it required and reject every pre-map package before serde's
@@ -366,14 +382,18 @@ actionable.
 - A new `scan_map_optional(cursor, required, optional, handler)` (or a `KeySpec { name, required }` list) checks
   only the required mask after the loop and lets the handler observe an optional key.
 - `CLUSTER_TABLE_KEYS` stays the four required keys; `CLUSTER_TABLE_OPTIONAL_KEYS = ["code_expansions"]`.
+  The optional key participates in the same seen-mask, so a duplicate `code_expansions` is rejected at scan
+  time (A2-R2-01).
 - The handler for `code_expansions` reads a nil scalar as absent/`None`, or a map with the two required arrays;
-  it records the declared lengths in `ClusterFacts`, accumulates the budget in `ScanFacts`, and skips the
-  values without allocating. Unknown nested keys are skipped.
+  it records `E` and `I` separately in `ClusterFacts`, **rejects `E != I` immediately**, accumulates
+  `8E + 4I` in `ScanFacts`, and skips the values without allocating. Unknown nested keys are skipped; a
+  duplicate nested known key is rejected by the nested `scan_map` call.
 - `map/model.rs` validates §4 after the typed decode (strict ascending, indices, high bits, particles,
-  canonical self-entry) and re-checks the cumulative budget. The typed arrays cannot exceed the budget because
-  the scan already rejected the payload.
-- A pre-map fixture test asserts the scan accepts absence; a hostile test asserts an optional key that is
-  present but malformed is rejected at the scan or the typed layer with the field path.
+  canonical self-entry), re-checks `E == I`, and re-checks the cumulative `8E + 4I` budget. The typed arrays
+  cannot exceed the budget because the scan already rejected a mismatched pair and an over-budget total.
+- A pre-map fixture test asserts the scan accepts absence; hostile tests assert an unequal pair, a duplicate
+  `code_expansions`, and a duplicate nested key are rejected at the scan before the typed allocation, with the
+  field path.
 
 Other bounds:
 
@@ -441,7 +461,7 @@ the load-and-fail-closed behaviour (A2-06).
 | Page | Change |
 | --- | --- |
 | [`02-data-contracts.md` §3.3](../02-data-contracts.md#33-compiled-model-payload) | Add `code_expansions` to the `energy`/`cluster_tables` description; add the slot order, superset coverage, `nil`/absence, signature, and budget rules; update the "codes are canonical" bullet to name the expansion map. |
-| [`02-data-contracts.md` §3.4](../02-data-contracts.md#34-job-payload) | Solver read-bounds table/paragraph: the expansion budget is an explicit `max_cluster_expansion_bytes` cap (default 128 MiB, `12 × ΣN`), not a consequence of the model guard. |
+| [`02-data-contracts.md` §3.4](../02-data-contracts.md#34-job-payload) | Solver read-bounds table/paragraph: the expansion budget is an explicit `max_cluster_expansion_bytes` cap (default 128 MiB, `Σ(8E + 4I)`), not a consequence of the model guard. |
 | [`01-target-architecture.md`](../01-target-architecture.md) | §3.1: the compiled-model payload carries the cluster occupation expansion map so the solver resolves raw tuples without symmetry; §7.6: additive optional payload fields within a major, with defined fail-closed absence. |
 | [`ADR 0013`](../adr/0013-format-compatibility-and-api-versioning.md) | Addendum recording additive-within-a-major payload fields, **fail-closed** absence semantics (a rebuild may be required), and the boundary at the first release (A2-11). |
 | [`05-open-decisions.md`](../05-open-decisions.md) | Resolved row for the expansion-map decision and the 128 MiB budget; gated row for enumerating payload-internal energy fields in the manifest; the `step-11.1` evidence resolution. |
@@ -506,13 +526,13 @@ golden is updated; it must not be accepted as "the writer changed". Package-byte
 | Asymmetric allowed sets (property) | PR-fast | Two swapped member sites with `{O,Vc}` and `{O,Vc,H}`: the map is a superset; every enumerated tuple resolves; every extra code's six-bit fields remain `< particle_count` and are never produced by a valid lattice (A2-05) |
 | .NET verifier | PR-fast | `PKG010` for length mismatch, non-ascending/duplicate, index out of range, high bits, particle out of range, missing canonical self-entry; extra superset codes are accepted; a valid map verifies |
 | .NET API surface | PR-fast | Both the four-argument and five-argument `ClusterTablePayload` constructors and `Deconstruct` methods exist; the five-argument primary round-trips; `PublicAPI.Unshipped.txt` and ApiCompat are clean (A2-03) |
-| .NET decode budget | PR-fast | A model payload whose `code_expansions` arrays declare `12 × N` above `PackageVerificationOptions.MaxClusterExpansionBytes` is rejected by the pre-scan with `PKG004` **before** a typed model is materialized; a payload just under the cap loads; a nested MessagePack bomb does not stack-overflow or over-allocate (A2-01) |
+| .NET decode budget | PR-fast | A model payload whose expansion arrays declare `8E + 4I` above `PackageVerificationOptions.MaxClusterExpansionBytes` is rejected by the pre-scan with `PKG004` **before** a typed model is materialized; an unequal pair (`E != I`, large `expanded_codes` behind a small `canonical_indices`) and a duplicate `code_expansions`/`expanded_codes`/`canonical_indices` key are rejected at scan time before allocation; a payload just under the cap loads; a nested MessagePack bomb does not stack-overflow or over-allocate (A2-01, A2-R2-01) |
 | .NET pre-map read | PR-fast | `amend-2-pre-map` verifies and keeps its recorded summary; the DTO decodes `CodeExpansions == null`; `amend-1-net10` still verifies |
-| Rust reader: new fixture | PR-fast | Loads; table 0 has 8 expanded codes and 6 indices; `canonical_index` returns the expected index for all eight raw codes, including the two previously failing ones |
+| Rust reader: new fixture | PR-fast | Loads; table 0 has 8 expanded codes and 6 indices; `lookup` returns `Canonical` with the expected index for all eight raw codes, including the two previously failing ones |
 | Rust scan: optional key | PR-fast | The pre-map fixture passes `scan_model` with `code_expansions` absent; a malformed present optional key is rejected with the field path; `CLUSTER_TABLE_KEYS` remains the four required keys (A2-02) |
 | Rust reader: absent map | PR-fast | The non-singleton pre-map fixture loads with `expansions == None`; the six canonical codes resolve by the direct path; `8386`/`8387` return `None` and Step 14 maps them to the recompile-required error (A2-06) |
 | Rust reader: hostile map | PR-fast | Length mismatch, non-ascending, duplicate, index out of range, high bits, particle out of range, and missing canonical self-entry each return a `PackageError` naming `energy.cluster_tables.code_expansions` |
-| Rust read budget | PR-fast | A synthetic payload whose expansion arrays declare `12 × ΣN` above `ReaderLimits::max_cluster_expansion_bytes` returns `PayloadTooLarge` at the scan **before** the typed `Vec` allocation; a payload just under the cap loads; a raised limit accepts it (A2-01) |
+| Rust read budget | PR-fast | A synthetic payload whose expansion arrays declare `8E + 4I` above `ReaderLimits::max_cluster_expansion_bytes` returns `PayloadTooLarge` at the scan **before** the typed `Vec` allocation; an unequal pair (`E != I`) and a duplicate optional/nested key are rejected at scan time before allocation; a payload just under the cap loads; a raised limit accepts it (A2-01, A2-R2-01) |
 | Signature/summary invariance | PR-fast | The new fixture's `model_signature` and `signature` equal the values computed from the same project before the change; `signature-vectors.json` and the projection fixtures are unchanged; `verify.sh contracts` has no diff |
 | Determinism | PR-fast | Two builds of the new fixture with the same request produce identical bytes and SHA-256 |
 | Forward read (one-time) | **Evidence (one-time manual)** | The pre-amendment `.NET` verifier and Rust reader at the parent commit open the new fixture and ignore `code_expansions` (the .NET reader succeeds and the Rust scanner skips the unknown key); recorded in the feature log, not a recurring test and not a PR tier (A2-13) |
@@ -557,7 +577,7 @@ This is a post-merge amendment: Step 11 is merged and tagged `step-11`. `AGENTS.
    historical and are not rewritten. The amendment's evidence lives in
    `docs/planning/audits/step-11-amend-2.md` under the post-merge rule below.
 9. **Step 14.** The Step 14 design re-review closes F-29 by reference to this amendment; Step 14's implementation
-   consumes `ClusterTable::canonical_index`. F-29's **formal closure is a Step 14 gate** owned by the Step 14
+   consumes `ClusterTable::lookup`. F-29's **formal closure is a Step 14 gate** owned by the Step 14
    planner/step agent, not a `step-11.1` acceptance criterion. The `main` Step 14 page names the unmerged design
    `87be9de` and the round-3 record `1ea8090` so a `main` reader can find them. No Step 14 code is part of
    `step-11.1`.
@@ -608,8 +628,8 @@ one maintenance delivery plus its audit.
       (A2-01).
 - [ ] The Rust scan supports `code_expansions` as an **optional** key; a pre-map package passes the scan, and a
       malformed present map is rejected with the field path (A2-02).
-- [ ] The Rust reader validates the same rules, exposes `ClusterTable::canonical_index`, and rejects hostile
-      maps with a field-specific `PackageError`.
+- [ ] The Rust reader validates the same rules, exposes `ClusterTable::lookup` with the three-way
+      `ClusterCodeLookup` result, and rejects hostile maps with a field-specific `PackageError` (A2-R2-02).
 - [ ] The `.NET` four-argument `ClusterTablePayload` constructor and `Deconstruct` are preserved alongside the
       five-argument forms; ApiCompat/`PublicAPI.Unshipped.txt` are clean (A2-03).
 - [ ] The new fixture is deterministic, carries the documented expectation, and its `package-summary-v1` and
@@ -659,7 +679,7 @@ one-time forward read.
 | Risk | Mitigation |
 | --- | --- |
 | Payload growth for large cluster tables | `nil` for singleton tables; `12N` in the writer estimate; the existing 2 GiB energy-table cap; the explicit `128 MiB` typed-expansion budget on both readers (raisable), enforced before allocation; a large-table hostile test |
-| Typed-expansion amplification from smallest-width MessagePack | The explicit budget is based on `12 × N`, not on encoded bytes; both readers check it before allocating; the earlier 8-bytes/1.5× arithmetic is removed from all pages (A2-01) |
+| Typed-expansion amplification from smallest-width MessagePack | The explicit budget is based on `8E + 4I` per table, not on encoded bytes or a single array length; both readers reject `E != I` and duplicate keys at scan time and check the cumulative budget before allocating; the earlier 8-bytes/1.5× arithmetic is removed from all pages (A2-01, A2-R2-01) |
 | Writer emits an incomplete or wrong map | Global sort + strict-ascending/completeness assertions; verifier `PKG010`; property test against the reduction oracle; fail-closed runtime lookup |
 | Old package with a non-singleton cluster is unreadable | Fail closed with a recompile-required error, never a wrong energy; documented as a pre-release limitation; the byte-fixed non-singleton pre-map fixture is the regression test; rebuild is the supported path |
 | Signature or summary drift | Explicit no-change acceptance criteria and a fixture that compares the logical signatures/summary before and after; a diff is a blocking finding |
