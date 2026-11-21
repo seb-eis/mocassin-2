@@ -1216,8 +1216,15 @@ Step 13 fixes the layout, but only the reader fills it. Physics state is Step 14
 - `DirectionPool`: `{ direction_count: u32, members: Vec<(PositionId, ParticleId)>, slot_of: Vec<u32> }` with
   deterministic insertion order and `swap_remove`; Step 14 populates it from the selection mask and applies the
   optimizers. The `slot_of` array gives O(1) removal and is updated on swap.
+  **Step 14 reconciliation (review round 1, F-1):** `PositionId` is contractually the P1 index, so this container
+  cannot hold the supercell member the KMC loop selects. Step 14 defines `context::pools::SelectionPool`
+  (`PoolMember { env: EnvId, particle }`, one global slot map, a per-P1 `pool_of`) and retires this placeholder;
+  no reader constructed it, so reader behaviour is unchanged.
 - `JumpStatus`: `{ offsets: Vec<u32>, links: Vec<JumpLink> }`; Step 13 defines the container and invariants,
   Step 14 computes `[cell][direction]` entries.
+  **Step 14 reconciliation (review round 1, F-2):** the entries are receiver-major and `JumpLink` gains
+  `receiver_path_id` (`{ sender_path_id: u8, receiver_path_id: u8, link_id: u32 }`); `link_id` indexes the
+  receiver's owner-major link list, which is what the original's receiver-owned link list means.
 - No `HashMap` in a per-cycle structure. The model cache may use `HashMap`; it is not hot.
 - All hot arrays are allocated at load/initialization; Step 14 proves the no-allocation-in-cycle claim. Step 13
   only guarantees that the reader's allocations are bounded.

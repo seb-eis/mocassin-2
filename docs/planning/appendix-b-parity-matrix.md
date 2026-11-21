@@ -142,7 +142,7 @@ Status legend:
 | Job collections/configs | Y | Done | 10 | Typed Core records, project JSON/manifest, authored-order expansion, and structural `JOB` validation |
 | Base + config overrides | Y | Partial | 10/26 | Correct simulation → collection → config inheritance, kind checks, and extension replacement in 10; editor UI in 26 |
 | Job duplicates/multiplier | Y | Done | 10 | `jobCountPerConfig`/simulation default, 1-based IDs, per-duplicate seeds |
-| Selection optimizers | Y | Partial | 10/11/14/26 | P1 image expansion, dual-DOF rule, and `JOB009` reference check in 10; `.msl` encoding in 11; runtime removal in 14; editor UI in 26. Partial until Step 14. |
+| Selection optimizers | Y | Partial | 10/11/14/26 | P1 image expansion, dual-DOF rule, and `JOB009` reference check in 10; `.msl` encoding in 11; supercell pool removal in 14 (design freeze: feature 4, implementation pending); editor UI in 26. Partial until Step 14 is implemented. |
 | Lattice size + doping values | Y | Partial | 10/26 | Deterministic supercell, dopings, truncation, compensation, and preview in 10; editor UI in 26 |
 | Build template selection | Y | Partial | 12/26 | `--template` selects a build template; `--job-template` and `--parameterization` override it; ambiguity lists IDs and names; the implicit parameterization default is applied when none exists; selection UI in 26 |
 | Build preview (no package write) | Y | Done | 10/12 | Shared `ILatticePreviewService` and `BuildPreviewBuilder`; the CLI projects `BuildResult.Preview` into `build-v1` preview mode, never opens or writes `.msl`, and rejects `-o`/`--force`/`--compact` |
@@ -162,6 +162,7 @@ Status legend:
 | --- | :---: | --- | --- | --- |
 | Package reader and solver foundation | Y | Done | 13 | Read-only `.msl` reader, bounded decode, validated runtime model/job/lattice, canonical signature re-encode, `mocassin-sim --dry-run`; real `msl-v1`, `amend-1-net10`, populated/MMC, and C-centered packages. The populated fixture carries the per-node mask difference; the C-centered fixture carries the real cross-bucket equivalent-start mapping and a mask difference. No physics until 14–19 |
 | Deterministic RNG and seed derivation | Y | Done | 13 | ChaCha12, SHA-256 job/lattice derivation, Lemire bounded draws, 64-byte `RngStateV1`, cross-language golden vectors; replaces the PCG32 defects |
+| Simulation context initialization | Y | Partial | 11/13/14 | Step 14 design freeze: lattice/environment arenas, owner-major per-P1 link CSR with an inverse routing index, one cluster instance per slot-0 link with the `step-11-amend-2` `ClusterTable::lookup` code resolution, site+pair owner vectors and per-centre cluster energy, exact initial lattice energy, supercell selection pools, receiver-major per-`(P1,direction)` jump status, tracker index space, goals/normalization/`dt`, resume hook. Runtime is built from the Step 13 `JobPackage`; no energy deltas, KMC/MMC loop, trackers, or `.mcs` in Step 14. The code-expansion contract is approved and implemented by `step-11.1` |
 | MMC engine | Y | Planned | 17 | |
 | KMC engine | Y | Planned | 16 | |
 | Rejection KMC selection | Y | Planned | 16 | Uniform over directions |

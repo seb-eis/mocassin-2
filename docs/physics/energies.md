@@ -27,8 +27,9 @@ Pair sampling applies the centre stabilizer \(G_0\) to group symmetry-equivalent
 geometry has a stable `GeometryId`; the shared energy-table identity is the `EnergyId`.
 
 The pair contribution for a sampled pair is the table value for its particle pair. The 0.5 factor and the
-total-lattice-energy convention belong to the solver energy engine in Step 15; the project model defines the
-interaction geometry, not the summation convention.
+total-lattice-energy convention are defined in [Total lattice energy](#total-lattice-energy-solver-runtime)
+and implemented by the context initialization (Step 14) and the energy engine (Step 15); the project model
+defines the interaction geometry, not the summation convention.
 
 ## Cluster contributions
 
@@ -62,6 +63,46 @@ orbit relationship explicit instead of silently forcing symmetry.
 
 In a P1 model every directed pair is its own orbit; the shared identity still applies where an inverse
 geometry exists. Unstable–stable pairs are asymmetric by nature and do not have a chiral partner.
+
+## Total lattice energy (solver runtime)
+
+The solver counts each contribution exactly once:
+
+$$
+U = \sum_{\text{stable } e} E_\text{site}(P(e), p(e))
+  + \tfrac{1}{2} \sum_{\text{stable } e} E_\text{pair}(e, p(e))
+  + \sum_{\text{instances } i} \sum_{\text{cells } c}
+      E_\text{cluster}\bigl(i, c, p(c, P(\text{centre}_i))\bigr).
+$$
+
+The site background is counted once per environment; a pair is counted from both ends, hence the \(1/2\); a
+cluster instance is counted once per supercell cell, at its centre, because the cluster energy is a function of
+the full occupation tuple whose slot 0 is the centre particle and the same instance geometry exists in every
+cell. The environment energy vector a transition path sums over therefore holds
+the site and pair parts only; the cluster part is a separate per-centre term and must be added for every centre
+whose code changes.
+
+The pair vector is **owner-major**: a payload pair link is stored on the interaction's centre, the table row is
+the centre's particle and the column its partner's particle, so the centre's vector is the sum over the centre's
+own links. When a partner changes, the centre's vector is updated with the centre's table and row; a solver must
+not apply the changing environment's table to the other side, and must not assume that a reverse link exists.
+Step 14 supplies the inverse index that finds the affected centres; Step 15 applies the deltas.
+
+**Cluster images and canonical codes.** The v1 cluster link does not persist a member's cell offset. A
+multi-centre cluster table may centre on several P1 positions of its site; Step 14 resolves each instance's member
+image from the centre's own pair links (the rotated multi-centre image). The soundness argument is the full space
+group plus the complete tuple product, not the centre-site stabilizer alone: the cluster reduction enumerates
+every allowed occupation tuple and canonicalises it, the applied energy is invariant under the full space group,
+so a transported centre's tuple belongs to the same energy orbit; the approved `code_expansions` map resolves the
+raw tuple to that orbit's canonical code. The solver never re-derives symmetry. A cross-image member or an
+ambiguous image remains a v1 limitation (Step 14 OD-1).
+
+The original solver used `0.5 * Σ_stable E[environment]`, where the environment energy already contained the
+site background and a cluster term replicated at every member. That halved the site and cluster contributions.
+The new solver keeps the documented per-centre convention instead; the deviation is recorded in the Step 14
+design (D-3) and covered by a hand-computed test and the Step 29 parity work. Energies are in kT inside the
+solver and converted to eV only at output boundaries; the initial total is computed once at context
+initialization (Step 14) and maintained incrementally by the energy engine (Step 15).
 
 ## Units
 

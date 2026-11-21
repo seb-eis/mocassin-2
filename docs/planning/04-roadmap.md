@@ -193,6 +193,34 @@ audit surface without stranding either half.
 - The same change updated the step index, §3 forecasts, the dependency graph (§2/§3), and **Step 24's dependency
   to 23B**; Steps 25–28 keep their existing chains, and milestone M10 (after 26) is unaffected.
 
+#### Recorded class — Step 14 (design freeze 2026-11-20)
+
+Step 14 (**Simulation context initialization**) is class **High** on three dimensions: cross-step interfaces
+(Steps 15, 16, 17, 18, and 19 consume the context API, the neighbour-link orientation and inverse index, the
+energy-vector layout, the cluster-code representation, the supercell pool space, and the jump-status link
+identity); irreversibility (the owner/receiver delta rule, the pool key space and ordering, the cluster-geometry
+rule, and the site/pair/cluster accounting are behavioural conventions that are expensive to change after
+merge); and test-matrix breadth (unit, property, snapshot, real-package acceptance, allocation, benchmark,
+memory). Its contracts/format surface is Medium (no persisted-format change, but a new public Rust API), it adds
+no dependency, it has **one** independent acceptance story ("a validated job becomes a fully initialized
+context"), and its evidence set is bounded (six features, one design page, one new fixture pair, one benchmark).
+Per this section a High step needs either a split or explicit owner acceptance as one unit.
+
+**No split is proposed.** The dependency-clean boundaries would separate the context skeleton from the
+acceptance that proves it (leaving Step 15 a half-context or duplicating the fixtures and memory evidence) or
+split "energy runtime" from "selection and jump status" (leaving a context with no selectable jumps, or a pool
+with no energies); both halves would remain High on cross-step interfaces. The owner-acceptance request, the
+case, and the API-freeze guard are recorded on the Step 14 page §4; acceptance is given at the Step 14 start
+gate and recorded there and in [`05-open-decisions.md`](05-open-decisions.md). This note records the class
+request; it does not itself approve it.
+
+**Dependency note (2026-11-21).** Step 14 also depends on `step-11.1`, the implementation of
+[`step-11-amend-2`](amendments/step-11-amend-2-cluster-code-expansion.md) (the per-table cluster-code expansion
+map and the `ClusterTable::lookup` reader/runtime contract). The design contract is approved and merged
+(`2f3a6fe`, design freeze `bf273ff`); review round 3's F-29 closure is a Step 14 gate, not a `step-11.1`
+acceptance criterion. The Step 14 start gate is expected after `step-11.1` is merged and tagged; feature 1 may
+start earlier, but feature 2's cluster work must not.
+
 #### Historical exceptions (previous time-based rule)
 
 The three exceptions below were approved under the previous **four-week** time trigger. They are historical

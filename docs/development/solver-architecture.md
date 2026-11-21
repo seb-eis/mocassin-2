@@ -5,9 +5,9 @@ package (`.msl`) and command-line arguments. It never reads project JSON and nev
 Results are written as per-job state files, which a separate `mocassin collect` command stores in the `.msr`
 sidecar.
 
-This page describes the Step 13 foundation: the crate graph, the package-reader pipeline, the runtime data
-model, the RNG streams, and the CLI skeleton. Steps 14–19 add the simulation context, energy engine, KMC/MMC
-loops, tracking, state writing, and the production CLI.
+This page describes the Step 13 foundation and the Step 14 simulation context: the crate graph, the
+package-reader pipeline, the runtime data model, the context build, the RNG streams, and the CLI skeleton.
+Steps 15–19 add the energy engine, KMC/MMC loops, tracking, state writing, and the production CLI.
 
 ## Crate graph
 
@@ -19,11 +19,16 @@ mocassin-cli
    └──► mocassin-solver (existing edge; used by the future run path)
 mocassin-solver (Step 14+)
    ├──► mocassin-types
-   ├──► mocassin-msl
    ├──► mocassin-rng
-   ├──► mocassin-state
-   └──► mocassin-extension
+   ├──► mocassin-msl (dev-dependency: fixtures only)
+   ├──► mocassin-state (added in Step 18)
+   └──► mocassin-extension (added in Step 19)
 ```
+
+The Step 14 manifest matches this state: `mocassin-msl` is a `[dev-dependencies]` entry, and the unused
+`mocassin-state`, `mocassin-extension`, and `rayon` edges are removed in feature 1 (review F-15). The Step 13
+manifest still declared all of them; the crate graph above is the target, not the Step 13 state. `rayon` returns
+only for a measured parallel initialization in Step 29.
 
 | Crate | Responsibility |
 | --- | --- |
@@ -137,16 +142,109 @@ The reader produces the types Step 14 consumes:
 - Transitions keep collections, directions, rules, `jump_count`, the derived prefix-sum `jump_offsets`,
   `jump_mapping`, and the tracker mappings. `tracker_order` is variable-length with a `0xFF` sentinel.
 - `DirectionPool`: `direction_count`, flat `(PositionId, ParticleId)` members, and the caller-indexed
-  `slot_of` map; Step 14 populates it and performs the deterministic swap-remove. `JumpStatus` is the CSR
-  container (`offsets: Vec<u32>`, `links: Vec<JumpLink>`), with `JumpLink` carrying the sender path id and the
-  affected environment-link id; Step 14 computes the entries. Both containers are type-only in Step 13 and have
-  invariant tests (`JumpStatus::is_valid`).
+  `slot_of` map. Its `PositionId` is contractually the P1 index, so it **cannot** represent the supercell pool
+  member Step 14 needs; Step 14 replaces it with `context::pools::SelectionPool` and retires the placeholder
+  (review F-1). `JumpStatus` is the CSR container (`offsets: Vec<u32>`, `links: Vec<JumpLink>`); Step 14 computes
+  the entries and extends `JumpLink` with `receiver_path_id` so the receiver-major orientation is explicit
+  (review F-2). Both containers are type-only in Step 13 and have invariant tests (`JumpStatus::is_valid`).
 - `JobPackage`: job id, kind, shared model, initial lattice, settings, effective seed, optimizers, extensions,
   instruction, and doping summary.
 
 Hot data uses flat arrays, `u32`/`u8` indices, and `u64` masks. `HashMap` is not used in a per-cycle structure.
 The model cache may use a hash map; it is not a hot path. All hot arrays are allocated at load/initialization;
 Step 14 owns the no-allocation-in-cycle proof.
+
+## Simulation context (Step 14)
+
+`mocassin_solver::context::SimulationContext::initialize(job, options, cancel)` builds the runtime state once per
+job from the validated `JobPackage`. It performs no I/O, never re-reads the package, and allocates every hot
+array once. Later steps consume it read-only or through the documented update helpers; they do not add fields.
+
+```text
+SimulationContext
+├── job: JobPackage                 shared Arc<ParameterizedModel> + lattice + settings + seed
+├── dimensions [A,B,C,P], pc        checked index/wrap helpers, EnvId vs PositionId
+├── lattice                         particles, flags (stable/mobile/tracker), mobile tracker ids
+├── links                           owner-major per-P1 pair-link CSR + inverse routing index + cluster assoc
+├── clusters                        instances, centre index, occupation codes/ids, per-centre energies
+├── energy                          site table, site+pair owner vectors (kT), field scale
+├── pools                           KMC supercell direction-count pools, selectable count, slot maps
+├── jumps                           KMC per-(P1,direction) receiver-major links
+├── trackers                        mobile/static index space and the mobile-position mapping
+├── counters, goals, normalization  zeroed counters, MCSP goals/block size, K_fix/K_auto/K_norm/dof/dt
+├── rng, time_s, lattice_energy_ev  effective stream, simulated time, exact initial total energy
+└── origin, limits, _not_sync       fresh/resumed, ContextLimits, explicit PhantomData<Cell<()>>
+```
+
+**Links and orientation.** A payload pair link on P1 position `O` is stored at its **owner** (the interaction
+centre) and points at its partner; the table is row-major `[owner particle][partner particle]`. The runtime keeps
+an owner-major CSR over P1 positions (`{partner_position, offset:[i32;3], pair_id, cluster assoc}`) plus a
+compact **inverse** CSR over partner P1 positions (`{owner_position, link_id}`). The owner's site+pair vector is
+`site + Σ table[pair_id][p_owner][particle at partner]`. A change at `V` updates the vectors of every owner in
+`inverse(position(V))`, with the owner's table and the owner's row; the sender's table is never applied. This is
+the original's receiver-owned link list, expressed as a compact index instead of one copy per supercell cell, so
+500k positions stay bounded. The image arithmetic (`owner_cell ± offset`) is evaluated in `i64` with
+`rem_euclid`, so an `i32::MAX` offset cannot overflow; the reader's offset bound is the only input check needed.
+Links are sorted by `pair_id`, then partner, then offset, which fixes the f64
+summation order. A missing reverse link means the payload has no interaction in that direction and is not an
+error.
+
+`linked(a, b)` (Step 17's local-update test) is true iff the payload has an interaction in either direction: owner
+`a` with partner `b`, or owner `b` with partner `a`. It is evaluated over `link_range(position(a))` and
+`incoming(a)`; it never synthesises a reverse link and is not an energy shortcut (the energy is the owner's row).
+
+**Clusters.** A cluster link's `byte_position` is the environment's own slot (slot `0` = a centre). A cluster
+table can have **more than one centre**: the writer adds slot `0` to every P1 position of the centre site, so the
+runtime keeps **one instance per slot-0 link** (not one per table). Each instance has its own slot geometry, raw
+occupation code, canonical code index, and centre energy vector; a `centres` CSR over P1 positions lists the
+instances centred there (one per table centred on that position). A slot's cluster association (`ClusterAssoc
+{ instance, slot }`) is attached to the instance centre's **forward link** whose partner is that member, so a
+change at the member updates the instance's code and centre energy through the same inverse index. Cluster
+interactions are counted once per instance **and per cell** (the same instance geometry exists in every cell), so
+they are kept out of the site+pair vector and the total uses
+`Σ site + 0.5 × Σ pair + Σ_instances Σ_cells cluster`. The v1 payload does not persist the per-centre member
+offset; the context derives each instance's slot from the candidate position or, failing that, the unique image of
+the slot's **member site** (slot 0 is `[0,0,0]` by definition) and fails closed when the image is absent or
+ambiguous (OD-1). The multi-centre member-site image is the accepted space-group transport, not a cross-image.
+
+**Cluster codes (Step 11 amendment 2).** The writer emits one canonical code per symmetry-reduced orbit and, where
+needed, an optional per-table `code_expansions` map (`expanded_codes`, `canonical_indices`). The context builds the
+raw slot tuple and resolves it with `ClusterTable::lookup`: `Canonical(index)` stores the canonical code id;
+`MissingFromMap` is a corrupt-package data error; `ExpansionMapAbsent` is the distinct recompile-required error for
+a pre-map package. The solver never re-derives symmetry, sorts the tuple, or falls back to a neighbouring code.
+The contract is approved and implemented by `step-11.1`; Step 14 feature 2 waits for it (see the Step 14 page
+§22).
+
+**Jump status.** One status per `(P1 position, direction)` (`status = direction * P + position`). The path is
+resolved from the direction's relative node encodings with node `0` replaced by the selected position, so a
+direction mapped into a symmetry-equivalent start bucket is applied at the selected bucket. For every ordered
+sender/receiver path-node pair, the **receiver's** forward link that targets the sender is stored as
+`JumpLink { sender_path_id, receiver_path_id, link_id }` (`link_id` relative to the receiver's P1 list); the
+receiver's cluster associations travel with that link. The receiver filter is the compiled structural stability,
+not the initial particle, and the bound is `L*(L-1) ≤ 90` with an invariant error instead of the original's
+unchecked 56-entry buffer. The link count is determined by a counting pass and checked against the jump-status
+caps before allocation.
+
+**Goals, normalization, resume.** `mobile_count` is the number of non-void positions (passive species included);
+`prerun = pre_run_mcsp × mobile_count`, `main = target_mcsp × mobile_count`, `total` rounded up to a multiple of
+100, block = `total/100`; a zero total is a data error. `K_fix = exp(E_norm/kT)`, `K_auto = 1/RawMax`,
+`K_norm = K_fix × K_auto`, `dt = dof × K_norm/(nu_max × selectable)`, where `nu_max` is the job cap or the maximum
+active rule frequency (the payload persists only the optional job cap, not the original's derived build-time
+modulus; a zero/NaN `nu_max` is exit 13 with the other non-finite factors). Resume takes a plain `ResumeState`
+carrying the `.mcs` parameterized `modelSignature`, the `seedHash`,
+and the counters/time/state, validates it against the package/job, re-derives the mobile mapping, preserves
+`RawMax`, and returns a distinct outcome for a completed state. The `.mcs` has no lattice signature field, so
+none is required. The `.mcs` decode is Step 18's.
+
+**Memory.** Before the first allocation, `MemoryPlan` computes every array's bytes with checked `u64` arithmetic
+(lattice, site+pair vectors, site table, link CSR headers + forward/inverse entries, cluster assoc, cluster
+instances (16 B each) + slot CSR + codes/code ids + `energy_start` prefix + per-instance energy + centre index,
+pool headers + members + slot map, jump offsets/links, counters, mobile positions) and rejects against per-array
+caps and a 1 GiB `max_context_bytes` total; `LimitExceeded` is exit 12, not the run-time limit exit 14. `MemoryReport`
+reports each array's planned length (not allocator capacity) and equals the plan; summed capacity bytes are a
+separate diagnostic, and the benchmark records peak RSS. The 10×10×10 real-writer fixture (table-free ceria) and
+the populated-model 10×10×10 clone are both budgeted at `< 100 ms` and `≤ 64 MiB`; the clone is the pair/cluster
+measurement because the ceria model has no pair or cluster tables.
 
 ## RNG
 

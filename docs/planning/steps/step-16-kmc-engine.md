@@ -65,8 +65,9 @@ until the target MCSP or an abort condition.
 ```rust
 pub struct KmcEngine<'a> {
     ctx: &'a mut SimulationContext,
-    energy: EnergyEngine<'a>,
     stats: StatisticsCollector,
+    // No stored EnergyEngine: it owns a &mut borrow of the context, so holding both would be
+    // two mutable borrows (review F-19). Each call constructs `EnergyEngine::new(&mut *self.ctx)`.
 }
 
 pub struct KmcOutcome {
@@ -94,25 +95,38 @@ impl KmcEngine<'_> {
 
 - `run_cycle` is deterministic and allocation-free.
 - `run` manages blocks, pre-run, aborts, statistics, and state saving.
+- **Energy borrows (review F-19).** `KmcEngine` owns the context and creates a short-lived
+  `EnergyEngine::new(&mut *self.ctx)` for each `transition_energies`/`apply_state_change` call; the view is
+  zero-sized and the reborrow is free. Do not store an `EnergyEngine<'a>` next to `ctx: &'a mut ...` (two
+  mutable borrows, which the compiler rejects). Step 14's context API is unchanged by this composition.
 
 ### 2. Selection
 
 - `SelectableJumpCount` is maintained by the context (step 14).
 - Draw `r = rng.next_bounded(selectable_count)`.
-- Walk direction pools in ascending `direction_count` order:
-  - subtract `pool.count` until `r < pool.count`;
-  - `env = pool[r / direction_count]`;
-  - `rel = r % direction_count`.
-- If the selected `(position, particle)` is no longer valid (stale pool), repair the pool and retry; this
-  should be an invariant violation, not a normal path.
+- Walk direction pools in ascending `direction_count` order; each pool's weight is
+  `members.len() * direction_count` (a member is a supercell environment, so all its directions are selectable):
+  - subtract the pool weight from `r` until `r < weight`;
+  - `member = pool.members[r / direction_count]`, `env = member.env`, `rel = r % direction_count`;
+  - `particle = member.particle` must equal the lattice particle at `env` (Step 14's pool invariant).
+- The earlier wording `env = pool[r / direction_count]` indexed a per-cell member list; the member now carries
+  the absolute `EnvId`, so the same formula addresses any cell. Two members in different cells are distinct
+  members with distinct slots.
+- If the selected `(env, particle)` is no longer valid (stale pool), repair the pool and retry; this should be an
+  invariant violation, not a normal path.
 - The selection is uniform over directions, matching the original. Do not switch to rate-weighted selection in
   v1; it would change the rejection algorithm and normalization semantics.
 - Record the selected collection, direction, particle, and position for counters/tracking.
 
 ### 3. Path and rule lookup
 
-- Build the path from the direction's relative offsets:
-  `path[0] = selected position`; `path[i] = trim(path[i-1] + offset[i-1])`.
+- Build the path from the direction's **relative-to-start** offsets:
+  `node[0] = selected environment`; for `i ≥ 1`,
+  `node[i] = ctx.resolve_node(selected, direction, i)` — equivalently
+  `trim(cell(selected) + path[i].cellA/B/C) * P + path[i].P`.
+  The compiled `path[i]` entries are offsets from node 0 (the compiler stores `absolute[i] − absolute[0]`), not
+  successive hops; a cumulative `path[i] = trim(path[i-1] + offset[i-1])` double-counts the cell. Step 14's
+  `resolve_node` is the single implementation; do not duplicate the rule.
 - Decode the start state code from the path's current particles.
 - Rule lookup:
   - build a per-collection map from `StateCode0` to rule indices at initialization;
@@ -166,8 +180,11 @@ impl KmcEngine<'_> {
 - `dt = dof * K_norm / (nu_max * selectable_count)`.
 - `dof = 2` if the `.msl` job flag `useDualDofCorrection` (bit 4) is set, else 1; document that the original
   used this to account for forward/backward directions.
-- `nu_max` is the maximum attempt frequency in the simulation (`AttemptFrequencyModulus`), optionally
-  overridden by `MaxAttemptFrequencyHz`.
+- `nu_max` is the maximum attempt frequency of the simulation's active rules, or the job's optional
+  `max_attempt_frequency_hz` cap when set (Step 14 §11.1). The `.msl` persists only that optional cap, **not**
+  the original's derived `AttemptFrequencyModulus`/`BaseFrequency` (review F-18/F-6); the derived maximum is
+  computed once at initialization and exposed as `normalization.nu_max`. A zero or non-finite value is
+  `ContextError::NonFiniteFactor` (exit 13), not a Step 16 error (Step 14 §11.1/§13).
 - Recompute `dt` when:
   - `K_norm` changes (pre-run normalization update);
   - `selectable_count` changes due to a state change/pool update.
@@ -200,7 +217,8 @@ impl KmcEngine<'_> {
 ### 8. Main loop, blocks, and aborts
 
 - `total_goal = pre_run_goal + target_mcsp * mobile_count`, rounded up to a multiple of 100.
-- `cycles_per_block = max(1, total_goal / 100)`.
+- `cycles_per_block = total_goal / 100` (the round-up makes it ≥ 1; do **not** re-add a `max(1, …)` — a zero
+  total is rejected at initialization with exit 12, Step 14 §10, review F-18/F-12).
 - Each block runs `cycles_per_block` cycles, then:
   - saves state (unless `NoSaving`);
   - prints statistics;
@@ -227,7 +245,10 @@ impl KmcEngine<'_> {
   - simulated time;
   - `K_norm`, `RawMax`, `K_fix`.
 - Never reset `RawMax` on resume.
-- Validate the state's model/lattice signature and sizes.
+- Validate the state against the package/job: the `.mcs` **parameterized** `modelSignature`, the `seedHash`, job
+  id, kind, dimensions, counts, and the re-derived mobile mapping (Step 14 §12, review F-18/F-7). There is
+  **no** lattice-signature validation: the `.mcs` has no lattice signature field, and the state↔package binding is
+  the parameterized signature plus the seed hash. Do not require or invent one here.
 
 ### 10. Determinism
 

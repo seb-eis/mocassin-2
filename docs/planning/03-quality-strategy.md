@@ -586,6 +586,65 @@ solver with the same binary, platform, package, and seed.
 - **Tiers:** DTO/projection/RNG/state/CLI/mutation tests are PR-fast; the real-package read is PR-medium;
   fuzzing and the benchmarks are nightly/manual.
 
+### 9.12 Simulation context initialization (Step 14)
+
+- **Boundary:** one context per job, built once from the validated `JobPackage`; no I/O, no package re-read, no
+  physics (no energy deltas, no cycle, no trackers, no `.mcs`).
+- **Arenas and links:** lattice/environment struct-of-arrays, an owner-major per-P1 neighbour-link CSR (the
+  centre owns the link and the pair-table row) with the periodic image as a relative offset resolved in `i64`
+  `rem_euclid` (no `i32` overflow), a compact inverse index over partner P1 positions that yields the owners whose
+  vectors a change updates, deterministic sorting (`pair_id`, partner, offset) that fixes the f64 summation order,
+  and a validated cluster representation.
+- **Cluster instances and geometry (F-17):** a cluster table can have one slot-0 link per P1 position of its
+  centre site, so the runtime keeps **one instance per slot-0 link** with its own slot geometry, code, code id,
+  and centre energy; `centres` lists the instances at a position. The v1 payload does not persist a member's
+  relative cell offset: slot 0 is `[0,0,0]`, and each slot `1..n` resolves to the candidate position's unique
+  centre→member link, else (multi-centre only) to the unique image of the slot's **member site**; an absent or
+  ambiguous image fails with `ClusterGeometry`. The rotated multi-centre image is accepted; a cross-image member
+  is rejected. The centred-model multi-centre fixture and the ambiguity test cover the paths. The limitation is
+  in the data contract, OD-1, and the step page; a writer build-time diagnostic and a future `.msl` revision are
+  recorded follow-ups.
+- **Cluster codes (`step-11-amend-2`, F-29):** the raw slot tuple is resolved with `ClusterTable::lookup`;
+  `Canonical(index)` is the only success, `MissingFromMap` is a corrupt-package error and `ExpansionMapAbsent` is
+  the distinct recompile-required error (exit 12). No solver-side symmetry, tuple sorting, or direct
+  `occupation_codes` fallback. The two-member amendment-2 fixture resolves all eight assignments and the pre-map
+  fixture exercises the absent-map path; the implementation dependency is `step-11.1`.
+- **Energy runtime:** site once, pair ×0.5, cluster once per instance **and per cell** at the centre; the initial
+  lattice energy uses that exact decomposition and a multi-cell hand-computed test; Step 15 continues with it. The original's uniform `0.5 × Σ` is a
+  recorded deviation (OD-2), covered by Step 29 parity.
+- **Pools and jump status:** supercell-addressed direction-count buckets (`EnvId` members, one global slot map,
+  a per-P1 `pool_of`), walked ascending, with mask filtering, optimizer removal, O(1) swap-remove, a `max_pools`
+  bound, and per-pool reserved capacity so `set_selectable` never reallocates; per-`(P1, direction)`
+  receiver-major links (`sender_path_id`, `receiver_path_id`, `link_id` into the receiver's list), structural
+  receiver filter, `L*(L-1) ≤ 90` derived bound, and link-carried cluster associations. The exact per-direction
+  occupation check stays in Step 16.
+- **Goals and normalization:** `prerun = pre_run_mcsp × mobile_count`, `main = target_mcsp × mobile_count`,
+  `total` rounded up to 100, block = `total/100`, zero total is an error; the products/sum/round-up are checked
+  `u64` and an overflow is exit 12; `K_fix = exp(E_norm/kT)`,
+  `K_auto = 1/RawMax`, `K_norm = K_fix × K_auto`, `dt = dof × K_norm/(nu_max × selectable)`. `nu_max` is the job
+  cap or the maximum active rule frequency (the payload persists only the optional job cap); a zero/NaN `nu_max`
+  is exit 13 with the other non-finite factors.
+- **Resume:** a plain `ResumeState` validated against the package/job with the `.mcs` parameterized
+  `modelSignature` and `seedHash`; no lattice signature is required because the document has none; `RawMax`
+  preserved; the mobile mapping re-derived and compared; a completed phase returns a distinct outcome and is
+  never resumed silently.
+- **Memory and limits:** a pre-allocation `MemoryPlan` sizes every derived array (including `K*C` cluster arrays
+  for `K` slot-0-link instances and `P*D` jump status) with checked arithmetic, per-array caps, and a 1 GiB total
+  cap; `MemoryReport` reports planned lengths (not allocator capacity) and equals the plan; capacity bytes are a
+  diagnostic; `LimitExceeded` is exit 12 (data error), distinct from exit 14 (run-time abort).
+- **Errors:** invalid input/cluster/limit/resume/zero-goal → exit 12; non-finite factor/`nu_max`/`dt`, bad RNG
+  state, invariant → exit 13; cancellation → exit 15.
+- **Tiers:** index/wrap (including hostile offsets), links/inverse, cluster instances/codes, energy vectors,
+  delta orientation (asymmetric table), pools (two cells, reserved capacity), jump status, goals, bounds, resume,
+  the mobile assumption, `Send`/`!Sync`, and the allocation proof are PR-fast; the real
+  `msl-v1`/`amend-1-net10`/populated/centered/`step-11-amend-2`/`amend-2-pre-map` packages, the multi-centre
+  cluster fixture, the 10×10×10 fixture, and the populated clone are PR-medium; the Criterion context benchmark and the 500k-position stress are
+  nightly/manual.
+- **Performance:** context init `< 100 ms` for the 10×10×10 fixture and the populated clone, `< 20 ms` for the
+  small fixtures; the `MemoryReport` total within budget; zero allocations in hot accessors; a same-runner-class
+  `baselines.json` entry (`rustContext`) with the 10 % rule. The ceria fixture is table-free; the clone is the
+  pair/cluster-scale measurement.
+
 ## 10. Contract tests
 
 - **Project JSON**: .NET writes fixtures; a JSON Schema validator checks them in CI.
@@ -736,6 +795,9 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | ChaCha12 `next_u32` (Step 13) | ≥ 250 M draws/s single-threaded, release, benchmark laptop class |
 | ChaCha12 `next_f64` / `next_bounded` (Step 13) | ≥ 120 M / ≥ 200 M calls/s |
 | RNG state export + import / 64-word refill (Step 13) | ≤ 500 ns / ≤ 250 ns |
+| Solver context init, 10×10×10 fixture (Step 14) | < 100 ms release, warm, same-runner-class; `MemoryReport` ≤ 64 MiB |
+| Solver context init, populated-model 10×10×10 clone (Step 14) | < 100 ms release, warm; `MemoryReport` ≤ 64 MiB (the pair/cluster-scale measurement) |
+| Solver context init, `msl-v1` 6×6×6 and populated 2×2×2 (Step 14) | < 20 ms each; zero allocations after construction |
 
 Step 13 records the load and RNG measurements as same-runner-class entries in
 `tests/reference/bench/baselines.json`; the 100 ms/250 ms values are fixture budgets, not a promise for a
