@@ -307,9 +307,11 @@ event thread).
   save point, or a save), `ProjectSessionService` deletes the sidecar and any recovery snapshot for that project
   through the session gate, so a later open cannot offer edits the user already returned past. The exception is
   a deferred `PendingRecovery` candidate: while it is non-null, cleanup is skipped and the candidate survives a
-  clean close. The first accepted content edit clears `PendingRecovery` (the user has chosen to proceed from the
-  saved file), after which later return-to-clean/clean-close cleanup removes the sidecar. This makes the
-  save → edit → autosave → undo-to-clean trace leave no sidecar once the edit has cleared the candidate.
+  clean close. A sidecar candidate is never swept; a `recovery/` candidate remains subject to the 7-day retention
+  sweep and can expire at the next startup (m-14, accepted limitation). The first accepted content edit clears
+  `PendingRecovery` (the user has chosen to proceed from the saved file), after which later
+  return-to-clean/clean-close cleanup removes the sidecar. This makes the save → edit → autosave →
+  undo-to-clean trace leave no sidecar once the edit has cleared the candidate.
 - **Unsaved changes.** `IProjectSessionService.CloseAsync` gains `bool discardChanges = false`:
   `CloseAsync(session, discardChanges: false, cancellationToken)`. With a dirty document and
   `discardChanges == false` it returns `ProjectSessionOutcome.UnsavedChanges` and closes nothing, leaving
@@ -352,11 +354,13 @@ event thread).
   clears it on every non-closing return (`UnsavedChanges` or cancel), so a shell Cancel cannot leave autosave
   permanently skipped (n-8). Autosave never clears dirty state and never updates the save point. On a successful
   save, the sidecar (and any recovery file for that project) is deleted when no `PendingRecovery` candidate is
-  pending; a deferred candidate is preserved until Recover/Discard or the first edit clears it (m-13). On an
-  explicit discard (close prompt or discard-reload) the same files are deleted before the operation completes
-  (m-3). The same cleanup runs when a content change returns the document to the save point (`!IsDirty`) and on
-  a clean close, except while a deferred `PendingRecovery` candidate is non-null; the candidate is preserved
-  until Recover or Discard (m-12, m-13). The cleanup takes the session gate so it cannot race an autosave write.
+  pending; a deferred sidecar candidate is preserved until Recover/Discard or the first edit clears it, while a
+  `recovery/` candidate remains subject to the 7-day sweep (m-13, m-14). On an explicit discard (close prompt or
+  discard-reload) the same files are deleted before the operation completes (m-3). The same cleanup runs when a
+  content change returns the document to the save point (`!IsDirty`) and on a clean close, except while a
+  deferred `PendingRecovery` candidate is non-null; a sidecar candidate is preserved until Recover or Discard, and
+  a `recovery/` candidate remains subject to the 7-day sweep (m-12, m-13, m-14). The cleanup takes the session
+  gate so it cannot race an autosave write.
 - Read-only sessions never autosave and never write recovery files. A failed autosave logs a warning, updates
   the status item, and leaves the dirty state and save point untouched.
 - The scheduler is a singleton; it enumerates sessions through `IProjectSessionService`, not by holding a
@@ -454,10 +458,11 @@ prompts; the service never prompts.
 - **Retention.** The startup sequence sweeps `recovery/` first, then scans it. Recovery files older than 7 days
   are deleted by `RecoveryRetentionPolicy` through `IRecoveryStore.SweepAsync`; log files keep 23A's
   14 days/100 MB. A `.autosave` sidecar next to a user's project is **never** swept — only a successful save, a
-  return to the save point, a clean close, or an explicit discard removes it; a deferred `PendingRecovery`
-  candidate is preserved across close until Recover or Discard. Projects, packages, results, and job folders are
-  never auto-deleted. The sweep deletes only the known snapshot/manifest patterns and leaves unknown files
-  alone; failures are logged, not fatal.
+  return to the save point, a clean close, or an explicit discard removes it; a deferred sidecar candidate is
+  preserved across close until Recover or Discard. A `recovery/` candidate is **not** sweep-exempt: the 7-day
+  retention applies, so a deferred `recovery/` candidate can expire at the next startup (m-14, accepted
+  limitation). Projects, packages, results, and job folders are never auto-deleted. The sweep deletes only the
+  known snapshot/manifest patterns and leaves unknown files alone; failures are logged, not fatal.
 - Recovery files are untrusted input. The store bounds the manifest at **64 KiB** and **100 entries**, and the
   snapshot goes through the same `ProjectStore` load path (schema, migration, `MaxDocumentBytes` = **64 MiB**).
   The manifest's project path is passed through the session's normal path validation before any open. No path
@@ -638,7 +643,7 @@ dispatcher, time, and the in-memory `IRecoveryStore`/`IAppSettingsStore` for non
 | Validation surface | PR-fast | Debounce coalesces edits; a stale result is discarded by `DocumentHash`; counts/codes match `ValidationResult`; double-click requests the registered target; an unknown domain produces a notice; a metadata path focuses the Overview field; an unknown code is unlinked; the help map covers every catalog code (or the explicit unlinked set) and the launcher receives the anchored URI |
 | Statistics trigger | PR-fast | The Overview does not request statistics on open; the explicit toggle/command runs one `IncludeStatistics = true` pipeline and caches by document hash; a content change while the panel is active invalidates and reruns it |
 | Dirty/autosave | PR-fast | Only dirty writable documents are written; the interval comes from settings and the tick uses `IsAutosaveDue`; save/autosave/close/reload never interleave (tick skips busy/closing; close/reload await the gate); a clean save or explicit discard deletes the sidecar/recovery file; a discard-close and a discard-reload are not re-offered; a return to the save point and a clean close delete the sidecar (except a pending candidate, next row); an `UnsavedChanges` return/Cancel leaves `IsClosing` false; read-only sessions never write; a sidecar failure falls back to `recovery/` |
-| Pending recovery / cleanup (m-13, n-10) | PR-fast | A deferred `PendingRecovery` candidate survives a clean close and is re-offered on reopen; the first accepted edit clears it; a later return-to-clean then deletes the sidecar; the `ProjectChanged` cleanup handler ignores `Saved`/`Replaced` and does not re-enter the non-reentrant gate (no deadlock); autosave resumes after a cancelled close |
+| Pending recovery / cleanup (m-13, m-14, n-10) | PR-fast | A deferred sidecar `PendingRecovery` candidate survives a clean close and is re-offered on reopen; a deferred `recovery/` candidate older than 7 days is deleted by the sweep (accepted limitation); the first accepted edit clears it; a later return-to-clean then deletes the sidecar; the `ProjectChanged` cleanup handler ignores `Saved`/`Replaced` and does not re-enter the non-reentrant gate (no deadlock); autosave resumes after a cancelled close |
 | Recovery | PR-fast | A simulated crash leaves a `recovery/` snapshot and manifest; startup offers recovery; a sidecar candidate has `RecoverySource.Sidecar` and the newest valid candidate wins; Recover yields a dirty document equal to the snapshot, updates `LoadDiagnostics`, and recomputes `Validation` before `ReplaceDocument` raises `Replaced`; a timestamp-only snapshot constructed directly is not offered; the save → edit → autosave → undo-to-clean → reopen trace leaves no sidecar and offers no recovery; Discard deletes; Reload replaces the document; retention removes only old recovery files; sidecars are never swept; a missing project file is reported without an untitled session; manifest 64 KiB/100-entry and snapshot 64 MiB caps are enforced |
 | Recovery comparison (M-2) | PR-fast | `RecoveryComparison` normalizes `ModifiedUtc` and reads `ProjectDocument.CreateRecovered(...).IsDirty`; the ViewModels source token scan/architecture test has no `ProjectHasher` use in `Mocassin.App.ViewModels`; a timestamp-only pair is not different |
 | Unclean exit | PR-fast | `cleanExit=false` offers restore; `cleanExit=true` does not; missing paths are reported; the active project is restored; a clean shutdown writes `true` |
@@ -714,8 +719,9 @@ amendment before feature 2. **No further split is proposed.**
 | Read-only edit refusal is an app-level `EditApplyOutcome.ReadOnly` message, not a diagnostic code; `PROJ031` is not reused | This page §2/§10 |
 | The save point is `MarkSaved()` no-arg; the store's returned value is not installed | This page §2.2; [`05-open-decisions.md`](../05-open-decisions.md) |
 | Recovery candidate equality normalizes only `Metadata.ModifiedUtc` and reads `ProjectDocument.CreateRecovered(...).IsDirty`; no ViewModels hash/App contract | This page §2.2/§6/§11 |
-| Return to the save point or a clean close deletes the sidecar/recovery snapshot, except while a deferred `PendingRecovery` candidate exists; the first edit clears the candidate | This page §4/§5 |
+| Return to the save point or a clean close deletes the sidecar/recovery snapshot, except while a deferred `PendingRecovery` candidate exists; a sidecar candidate is preserved until Recover/Discard, a `recovery/` candidate remains subject to the 7-day sweep (m-14) | This page §4/§5 |
 | The `ProjectSessionService` cleanup handler ignores `Saved`/`Replaced` and queues cleanup through the non-reentrant session gate | This page §2.1/§11 |
+| **m-14 accepted limitation:** a deferred `recovery/` candidate remains subject to the 7-day sweep; only `.autosave` sidecars are sweep-exempt | This page §6/§13; [`reviews/step-23b.md`](../reviews/step-23b.md) |
 | Recovery updates `LoadDiagnostics`/`Validation` before `ReplaceDocument` raises `Replaced` | This page §6 |
 | `CloseAsync` clears `IsClosing` on `UnsavedChanges`/Cancel | This page §4/§5 |
 | The start-gate owner questions are listed explicitly in §17.1 | This page §17.1 |
@@ -817,8 +823,9 @@ section. They are scope/class approvals, not a design verdict.
       validation or a statistics run; the help map matches the documented anchors.
 - [ ] Dirty state is correct across save, undo, and redo; closing with unsaved changes prompts; Cancel closes
       nothing and leaves autosave running; Discard and discard-reload delete the sidecar/recovery file; a return
-      to the save point or a clean close deletes the sidecar, except a deferred recovery candidate, which
-      survives until Recover/Discard and is cleared by the first edit.
+      to the save point or a clean close deletes the sidecar, except a deferred sidecar candidate, which
+      survives until Recover/Discard and is cleared by the first edit; a deferred `recovery/` candidate remains
+      subject to the 7-day sweep.
 - [ ] Autosave writes only dirty documents and deletes its file on save; save/autosave/close/reload/recovery do
       not interleave; a simulated crash leaves a `recovery/` snapshot; recovery restores a dirty document equal
       to the snapshot, updates `LoadDiagnostics`, and recomputes validation before the `Replaced` event; a

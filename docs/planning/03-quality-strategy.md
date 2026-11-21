@@ -669,7 +669,8 @@ recovery fixtures.
   navigation, palette, dialog, and primary accessibility tests. 23B: edit/undo, dirty/save-point, autosave,
   recovery, and validation (including the `Load`-stage/load-diagnostic contract), read-only outcome, explicit
   statistics, timestamp-normalized recovery without a ViewModels hash, sidecar cleanup on return-to-clean with a
-  deferred-candidate exception, `LoadDiagnostics`/`Validation` ordering, and the per-session gate. Both sets are **PR-fast**. Headless view rendering and the screenshot set are
+  deferred-sidecar exception (and the accepted `recovery/` 7-day expiry), `LoadDiagnostics`/`Validation` ordering,
+  and the per-session gate. Both sets are **PR-fast**. Headless view rendering and the screenshot set are
   **PR-medium**. Platform runs are manual. PR-fast tests assert functionality, ordering, and asynchrony, never an
   absolute duration; timing is recorded as non-gating evidence on a benchmark or manual run (§13/§16 of the
   23A page, §14 of the 23B page).

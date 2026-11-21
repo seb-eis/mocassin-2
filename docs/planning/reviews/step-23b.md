@@ -297,11 +297,13 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required — the owner-relayed round-3 findings m-13/n-10 were resolved on
-`a33711dbf9fb35bd782f5bd88eba111e461634d6`, and the owner approved the class, the four features, and the §17.1
-scope decisions on 2026-11-21. Round 4 is requested. Round 1 and round 2 reviewer text is unchanged.
+**State:** Accepted — Ready with notes (2026-11-21); the record does not mark implementation started. The human
+owner accepted the round-4 verdict at design freeze `a33711dbf9fb35bd782f5bd88eba111e461634d6` (record HEAD
+`c4ded0ecb8ee5e6df989918d63ec255b487022d1`), accepted **m-14** as a recorded limitation, and assigned
+**n-11–n-13** to the step agent's start/status commit. All reviewer text and rounds are unchanged.
 
-`Re-review required` is a record state, not a verdict.
+`Ready with notes` is the accepted design verdict; it is not an implementation-start record and does not create
+a step branch.
 
 ## Reviewer independence
 
@@ -340,7 +342,7 @@ Round history:
 | 1 | 2026-11-21 | `f629dd5` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
 | 2 | 2026-11-21 | `022132e` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Changes required |
 | 3 | 2026-11-21 | `a55fd61` | Owner-relayed findings (no reviewer record committed) | Changes required (m-13/n-10) |
-| 4 | 2026-11-21 | `a33711d` | Pending re-review | Pending |
+| 4 | 2026-11-21 | `a33711d` | DeepSeek V4.1 Flash 1017 (fresh planning auditor) | Ready with notes — accepted by the human owner 2026-11-21 |
 
 Findings and resolutions:
 
@@ -371,11 +373,17 @@ Findings and resolutions:
 | n-9 | Note | No numbered owner-question list | §17.1 lists seven questions | `a55fd61` | Fixed in design |
 | m-13 | Minor | Clean-close cleanup could delete a deferred recovery candidate | Cleanup skipped while `PendingRecovery` is non-null; first edit clears it | `a33711d` | Fixed |
 | n-10 | Note | §2.1 omitted the cleanup handler/lifetime | Cleanup handler row added; ignores `Saved`/`Replaced`, no gate re-entry | `a33711d` | Fixed in design |
+| m-14 | Minor | Deferred `recovery/` candidate still swept after 7 days | Accepted as a recorded limitation; the preservation claim is narrowed to `.autosave` sidecars only | `c4ded0e` | Accepted limitation |
+| n-11 | Note | §11/§13 summaries lacked the pending-candidate exception and recovery clearing | Assigned to the step agent at start | — | Assigned |
+| n-12 | Note | First-edit clear should key on a real content change | Assigned to the step agent at start | — | Assigned |
+| n-13 | Note | Step-page status block stale | Assigned to the step agent at start/status commit | — | Assigned |
 
 ## Human approval
 
-**Owner decisions recorded 2026-11-21 (before the round-4 refreeze).** These are scope/class approvals; they do
-not approve a design verdict.
+**Owner decisions recorded 2026-11-21.** The owner accepted the round-4
+`Ready with notes` verdict on 2026-11-21 at design freeze `a33711d` (record HEAD `c4ded0e`) and instructed
+implementation to start; n-11–n-13 are assigned to the step agent. These are scope/class and verdict-acceptance
+approvals; the `Accepted:` checkbox below records the design verdict, not an implementation-start claim.
 
 | Decision | Status |
 | --- | --- |
@@ -387,14 +395,17 @@ not approve a design verdict.
 | No untitled-project model; `recovery/` is the crash/fallback snapshot store | **Confirmed** |
 | Missing-file and dead-UI recovery limitations | **Accepted** |
 | Fix m-13/n-10, refreeze, and request round 4 | **Instructed** |
+| Accept **m-14** as a recorded limitation: seven-day `recovery/` retention; only `.autosave` sidecars are sweep-exempt; the “preserved until Recover or Discard” claim is narrowed accordingly | **Accepted** |
+| Fix **n-11–n-13** at the step agent's start/status commit | **Assigned** |
+| Accept the round-4 verdict and **start implementation now** | **Accepted / Instructed** |
 
 - [ ] Accepted: Ready for implementation
-- [ ] Accepted: Ready with notes
+- [x] Accepted: Ready with notes
 - [ ] Changes required
 - [ ] Waived
 
-Approved by:
-Date:
+Approved by: Human owner
+Date: 2026-11-21
 
 ## Resolution status
 
@@ -425,6 +436,10 @@ Date:
 | **n-9** | Fixed in design | Planner | `a55fd61` | §17.1 lists the seven start-gate owner questions explicitly. |
 | **m-13** | Fixed | Planner | `a33711d` | Clean-close and return-to-clean cleanup is skipped while `PendingRecovery` is non-null; the candidate survives close and is re-offered. The first accepted edit clears `PendingRecovery`, after which cleanup removes the sidecar. A save with a pending candidate preserves it. §4/§5/§11/§13 and `05-open-decisions` are aligned; the test covers close-preserve, first-edit-clear, and later cleanup. |
 | **n-10** | Fixed in design | Planner | `a33711d` | §2.1 adds the `ProjectSessionService` cleanup consumer with session lifetime. It handles `Edited`/`Undo`/`Redo`, ignores `Saved`/`Replaced` (raised while the non-reentrant gate is held), clears `PendingRecovery` on the first edit, and queues cleanup through the gate without blocking the event thread. The test asserts no deadlock/re-entry. |
+| **m-14** | Accepted limitation | Human owner | `c4ded0e` | The 7-day `recovery/` retention sweep can still delete a deferred crash/fallback candidate before the next scan. Accepted as a recorded limitation: only `.autosave` sidecars are sweep-exempt; a deferred `recovery/` candidate can expire. §4/§5/§6/§13 and `05-open-decisions` narrow the “preserved until Recover or Discard” claim accordingly. |
+| **n-11** | Assigned (step agent) | Step agent | — | Add the pending-candidate exception and the `RecoverAsync`/`DiscardRecoveryAsync` clearing to the §11/§13 summaries at the start/status commit. |
+| **n-12** | Assigned (step agent) | Step agent | — | Key the first-edit clear and cleanup on a real content change (`Edit.Change` non-null / project value differs), not merely any `Edited` event, at the start/status commit. |
+| **n-13** | Assigned (step agent) | Step agent | — | Update the step-page top status/design-review wording at the start/status commit; this is bookkeeping, not a design change. |
 
 ## Review rounds
 
@@ -657,3 +672,127 @@ Follow-up owner: planner/step agent — resolve M-2 (the ViewModels hash boundar
 and m-12 (the sidecar trace), then decide n-6–n-9 and re-freeze for a fresh re-review. The human owner decides
 the next freeze; this round does not create the step branch, mark the step `In progress`, or authorize
 implementation.
+
+### Re-review round 4
+
+#### Independence and frozen state
+
+I am a fresh context (DeepSeek V4.1 Flash 1017, opencode-go). I did not author, design, or implement the
+reviewed work and have no shared conversation with the planner, the implementor, the earlier reviewers, or the
+orchestrator. I received only the frozen commit `a33711dbf9fb35bd782f5bd88eba111e461634d6`, record HEAD
+`c4ded0ecb8ee5e6df989918d63ec255b487022d1`, the request record, repository links, and the required commands/scope;
+no desired verdict or summary was supplied. The round-3 findings were owner-relayed and have no reviewer round
+body; I read them from the request's round-4 refreeze note and the findings/resolution tables.
+
+The design under review is `a33711d` (the round-4 refreeze; the m-13/n-10 design edits are in `02bb9ab`, and
+`a33711d` aligns the step-page status pointer). Record HEAD `c4ded0e` is the request's owner-approval/refreeze
+commit: `git diff --name-status a33711d c4ded0e` is exactly `M docs/planning/reviews/step-23b.md`, so the record
+delta is the only later change; I record it as a process note per review README §8.1. The record commit's parent
+is `c4ded0e`, not the design freeze, which is its parent. The full freeze delta `git diff --name-status 63cdd06
+a33711d` is ten documentation files; `git diff 63cdd06 a33711d -- contracts src tests tools .github` is empty.
+`step-23a` is the only `step-23*` tag locally and on `origin`. The `### Review round 1` and `### Re-review round
+2` text is byte-identical to `362aa75` (227 lines from `### Review round 1` to EOF; `diff` empty).
+
+The 23A deviations are respected: first-party `Avalonia.Headless` (no `Avalonia.Headless.XUnit`), the ANGLE
+exception unchanged, `InternalsVisibleTo`, no tab drag-reorder, Xvfb evidence, `ProjectPathRules`/`ExistingTarget`
+unchanged, the single 23A load-validation pass consumed, `LastWrittenUtc` only, and the crash dialog gaining only
+the recovery action. The design adds no 24–28 task and no format/contract change.
+
+#### Commands and results
+
+Run serially in a clean worktree at `c4ded0e`; `git status --porcelain` was empty before this record edit.
+
+- `./tools/verify.sh docs --require` — **pass**; strict Zensical build, DocFX, and rustdoc; final line
+  "Closeout gate completed with required checks enabled."
+- `./tools/verify.sh policy --require` — **pass**; "Public API is compatible with the checked-in baseline";
+  ApiCompat for the checked App assemblies; contract artifacts current (26 files); process consistency OK; 60 tool
+  tests OK; SPDX headers in 1002 source files; no secret patterns in 1479 tracked text files; cargo-deny
+  advisories/bans/licenses/sources OK; final line "Closeout gate completed with required checks enabled."
+- `python tools/check_doc_math.py` — **pass**; "Documentation math conventions OK (191 files scanned)."
+- `git diff --name-status a33711d c4ded0e` — `M docs/planning/reviews/step-23b.md` only; `git diff --name-status
+  63cdd06 a33711d` — ten documentation files; `git diff 63cdd06 a33711d -- contracts src tests tools .github` —
+  empty.
+- `git tag --list 'step-23*'` and `git ls-remote --tags origin 'step-23*'` — `step-23a` only.
+- Round-1/round-2 preservation: `git show 362aa75:docs/planning/reviews/step-23b.md` and the worktree file from
+  `### Review round 1` to EOF are identical (227 lines each; `diff` empty).
+- Read-only inspection: `ProjectDocument.IsDirty` (`ProjectDocument.cs:48`) is `ProjectHasher.ComputeDocument`
+  over `Project`/`LastSavedProject`; `MarkSaved()` (`:149`) and `IsAutosaveDue` (`:157`) exist; there is no
+  `MaxUndoDepth`/`CreateRecovered` yet (additive). `ProjectHasher.ComputeDocument` uses
+  `ProjectCanonicalizer.ToCanonicalUtf8`; `ProjectJson` includes `Metadata.ModifiedUtc` (lines 315/376/421).
+  `rg ProjectHasher src/dotnet/Mocassin.App.ViewModels` has no hits. `ProjectDiagnosticCodes` has PROJ001–PROJ034
+  and `LockHeld` = `PROJ031`, no read-only/edit code. `ProjectEditor.Apply` returns `Change = null` for a
+  reference-equal or same-hash candidate (`ProjectEditor.cs:55-61`). `ProjectSessionService` calls
+  `MarkSaved(result.SavedProject!)` at lines 220/270; `ReloadAsync` sets `LoadDiagnostics` and `Validation`
+  (lines 290-292); `CloseAsync` has no `discardChanges`/gate yet; `IProjectSessionService` has no
+  `RecoverAsync`/`DiscardRecoveryAsync`; `ProjectSessionOutcome.UnsavedChanges` is reserved for 23B.
+  `StatusBarItemViewModel` has only `Text`/`ToolTip`/`Command`; `ProjectSession` exposes `LoadDiagnostics`,
+  `Validation`, `LastWrittenUtc`; `ProjectValidationPipeline.Validate` has the stated signature and a clean load
+  yields `Load` `Skipped`; `ValidationOptions.Default` has all flags false; `AppPaths.RecoveryDirectory` is
+  created; `WriteAutosaveAsync` derives `GetAutosavePath(projectPath)` = `<path>.autosave`.
+
+#### Closure of round-3 findings and re-audit
+
+| Finding | Round-4 status | Evidence |
+| --- | --- | --- |
+| **m-13** | **Closed in the clean-close/return-to-clean lifecycle; one related retention path is m-14** | §4 lines 306-312: cleanup is skipped while `PendingRecovery` is non-null; the first accepted content edit clears it and a later return-to-clean/clean-close removes the sidecar. §5 lines 353-359: a successful save with a pending candidate preserves it; clean-close/return-to-clean cleanup is skipped. §6 lines 413-427: "Decide later" keeps the candidate; `RecoverAsync` loads and leaves the document dirty; the next save deletes the snapshot. §7 line 478: `PendingRecovery` is a `ProjectSession` field. §11 lines 575/580: the handler and `ProjectSession` own it. §13 line 641: close-preserve/first-edit-clear/later-cleanup test row. §15 lines 669-670, §17 lines 717-718, and acceptance lines 818-821 repeat the rule; `05-open-decisions.md` line 111 is aligned. |
+| **n-10** | **Closed** | §2.1 line 214 adds the `ProjectSessionService` cleanup consumer with session lifetime; it handles `Edited`/`Undo`/`Redo`, ignores `Saved`/`Replaced`, and queues cleanup through the gate. §2.1 lines 224-228 state the gate is non-reentrant, that `NotifySaved`/`ReplaceDocument` are raised while `SaveAsync`/`ReloadAsync`/`RecoverAsync` holds it, and that the cleanup is queued on the UI thread without blocking. §11 line 575 repeats the seam; §13 line 641 asserts no deadlock/re-entry and autosave resumption after a cancelled close. |
+| **M-1** | **Re-confirmed closed** | §2 lines 170-176 and §10 lines 549-552: `EditApplyOutcome.ReadOnly` is app-level, no `Diagnostic`, no `PROJ031`, no code/message change; §13 line 637 and acceptance line 813 agree. `ProjectDiagnosticCodes` still has no read-only/edit code; `LockHeld` remains `PROJ031` for the other-process lock. |
+| **M-2** | **Re-confirmed closed** | §2.2 lines 245-251 and §6 lines 429-434: `RecoveryComparison` normalizes `ModifiedUtc` and reads `ProjectDocument.CreateRecovered(...).IsDirty`; no `ProjectHasher` call in ViewModels and no App contract. `rg ProjectHasher src/dotnet/Mocassin.App.ViewModels` has no hits; `ProjectDocument.IsDirty` (`:48`) is the Core hash owner; `CreateRecovered` is additive. §11 lines 599-601 and `01-target-architecture.md` line 210 agree. |
+| **m-11** | **Re-confirmed closed** | §8 lines 493-494 and §11 line 583 list `StatusBarItemViewModel`/`StatusBarView` with the optional glyph/severity; the delivered type currently has only `Text`/`ToolTip`/`Command`, so the change is additive and within the seam list. |
+| **m-12** | **Re-confirmed closed** | §4/§5 and §13 line 640: return-to-clean and clean-close cleanup with the m-13 pending exception; the save→edit→autosave→undo-to-clean→reopen trace leaves no sidecar once the first edit has cleared the candidate. |
+| **n-6** | **Re-confirmed closed** | §6 lines 420-422: recovery assigns the snapshot load's `ProjectSession.LoadDiagnostics` as well as `Validation`; `ProjectSession` exposes both. |
+| **n-7** | **Re-confirmed closed** | §6 lines 420-423: `LoadDiagnostics`/`Validation` are assigned before `ReplaceDocument` raises `Replaced`, so `ValidationCoordinator` seeds the recovered result. |
+| **n-8** | **Re-confirmed closed** | §4 lines 313-323 and §5 lines 349-353: `IsClosing` is set only after the `discardChanges` guard and cleared on `UnsavedChanges`/cancel. |
+| **n-9** | **Re-confirmed closed** | §17.1 lines 741-755 lists the seven start-gate questions; §17.2 and the record's `Human approval` table record the owner's answers. |
+| **n-5** | **Deferred (step agent)** | `status.md` row 23b still says design review "Not requested"; §18 says the step agent updates the lowercase `23b` row at the start gate. Unchanged from round 2. |
+| **High/one unit** | **Re-confirmed** | §16 lines 679-705: High on cross-step interfaces and test-matrix breadth, Medium on the other five dimensions; the one-unit case is sound; the owner approved it on 2026-11-21 (§17.2, record `Human approval`). |
+| **Four features** | **Re-confirmed** | Feature table lines 44-49: edit pipeline, validation surface, dirty/autosave/recovery, tests/docs/closeout; owner-approved 2026-11-21; no 23A or 24–28 task. |
+| **Owner approvals** | **Recorded** | Record `Human approval` lines 377-389 and page §17.2 lines 757-771: class High/one unit, four features, the two Core APIs, the app-level read-only refusal, the §11 seam fills, the no-untitled scope, the recovery limitations, and the m-13/n-10 refreeze instruction. The formal `Accepted:` checkboxes and signature lines remain unset because the design verdict acceptance is the next gate. |
+| **Scope** | **No 24–28 scope; no format/contract change** | Non-goals lines 97-100 exclude model editors (24–25), build UI (26), 3D (27), and run monitoring (28); §11 lines 597-598 lists them only as future consumers. The freeze diff is documentation-only; `contracts/manifest.json` is unchanged; the settings additions are app-local and have no schema bump; no `.mocprj`/`.msl`/`.msr`/`.mcs` change. |
+
+**Judgment on m-13's deferred candidate.** Preserving the deferred candidate is better than discarding it on a
+clean close: the user explicitly chose "Decide later", and a clean close is not a decision to throw the snapshot
+away. The design keeps the candidate on disk, shows "Recovery available", and re-offers it on reopen; cleanup is
+skipped only while pending, and the first real content edit is the documented signal to proceed from the saved
+file. The paths that remove a deferred candidate are explicit Recover/Discard, explicit discard-close/reload, and
+a first accepted content edit followed by return-to-clean (the documented tradeoff, not a silent loss). A
+successful save preserves it per §5. The one path the cleanup guard does not cover is the `recovery/` retention
+sweep (m-14): a deferred `Crash`/`AutosaveFallback` candidate older than 7 days is deleted at the next startup
+before the scan, because `PendingRecovery` is in-memory and only the sidecar is sweep-exempt.
+
+#### New findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **m-14 — The deferred-candidate preservation claim is not true for `recovery/` candidates: the startup sweep deletes recovery files older than 7 days before scanning, and `PendingRecovery` is in-memory, so a user who chooses Decide later on a `Crash`/`AutosaveFallback` candidate and returns after 7 days loses it.** §6 says "a deferred `PendingRecovery` candidate is preserved across close until Recover or Discard", but the same section says the startup sequence "sweeps `recovery/` first, then scans it" and deletes files older than 7 days; only `.autosave` sidecars are never swept. §7 records the candidate as memory plus sidecar/recovery, so the recovery source is in scope. Either persist the deferral (a manifest flag) or exempt the deferred candidate's snapshot/manifest from the sweep, or state that the 7-day retention also ends a deferred `recovery/` candidate as a recorded limitation and test it. | 23B page §6 lines 413-427 (composition), 454-460 (sweep and the "preserved" clause); §7 line 478; m-13 resolution record line 426; §13 Retention row line 642 ("retention removes only old recovery files; sidecars are never swept"); the Pending recovery test row line 641 covers only clean-close/reopen. |
+| **Note** | **n-11 — The §11 save/recovery seam rows and the §13 save/Recovery assertions do not carry the §5 pending-candidate exception or state that `RecoverAsync`/`DiscardRecoveryAsync` clear `PendingRecovery`.** §11 line 574 says `SaveAsync`/`SaveAsAsync` "delete the sidecar/recovery file on success" without the pending exception; §11 line 578 says the new recovery operations recompute `Validation` but not that they consume/clear `PendingRecovery`; §13 line 640 says "a clean save or explicit discard deletes the sidecar/recovery file" and §13 line 642 says "The next save writes the main file and deletes the snapshot" without the pending condition. §5 lines 353-355 and acceptance line 821 are correct, but the seam/test summaries should repeat the exception so an implementor following §11/§13 cannot lose the candidate or leave a stale snapshot after recovery. | 23B page §5 lines 353-355; §6 lines 426-427; §11 lines 574/578; §13 lines 640/642; acceptance lines 818-821. |
+| **Note** | **n-12 — The first-edit clear should key on a real content change, not merely any `Edited` event.** §2.1 line 214 says "clears `PendingRecovery` on the first edit"; §4 line 310 and acceptance line 821 say "first accepted content edit". `ProjectEditor.Apply` returns `Change = null` for a reference-equal or same-hash candidate (`ProjectEditor.cs:55-61`), so a no-op accepted edit is possible; if the coordinator maps that to `Applied` and raises `Edited`, the handler would clear the deferred candidate and, if the document is clean, queue cleanup. State that the clear (and the cleanup) runs only when `Edit.Change` is non-null or the project value actually differs. | 23B page §2.1 line 214, §4 line 310, §13 line 641, acceptance line 821; `ProjectEditor.cs:55-61`; `ProjectDocument.Apply` (`ProjectDocument.cs:88-101`) only records a change when `Edit.Change` is non-null. |
+| **Note** | **n-13 — The step-page status block still says the design is "not design-reviewed" and that "round 2 returned `Changes required`".** The record state and round history show rounds 3–4, and the page's own design-review bullet already says the current freeze is linked. Update the top `Status` line and the design-review bullet at the start gate (same ownership as n-5), or state that the block is intentionally historical. This is a status/bookkeeping item, not a design blocker. | 23B page lines 8 and 25-27; record `Record state` and round history; `status.md` 23b row is the separate n-5 item. |
+
+#### Verdict
+
+**Ready with notes.** No Blocker or Major remains. m-13 is closed in the normative clean-close/return-to-clean
+lifecycle: cleanup is skipped while `PendingRecovery` is non-null, the candidate survives a clean close and is
+re-offered on reopen, the first accepted content edit clears it, and a later return-to-clean deletes the sidecar;
+the save path preserves it per §5. The design is better than discarding, because it does not silently throw away a
+snapshot the user explicitly deferred. n-10 is closed: the `ProjectSessionService` cleanup consumer has session
+lifetime, ignores `Saved`/`Replaced`, handles `Edited`/`Undo`/`Redo`, and queues cleanup through the non-reentrant
+gate with a no-deadlock test. M-1, M-2, m-11/m-12, n-6–n-9, the High/one-unit class, the four owner-approved
+features, the recorded approvals, the no-24–28 scope, and the no-format/contract delta all re-confirm at
+`a33711d`. The review gates pass.
+
+One Minor remains: m-14, the 7-day `recovery/` retention sweep can still delete a deferred
+`Crash`/`AutosaveFallback` candidate before the next scan, because `PendingRecovery` is in-memory and only
+sidecars are sweep-exempt; this contradicts the §6 "preserved until Recover or Discard" wording for recovery-source
+candidates. n-11–n-13 are wording/status Notes. The human owner must explicitly accept m-14 and n-11–n-13 (or ask
+for the retention clarification and the §11/§13 wording corrections) before the start gate; this review does not
+create the step branch, mark the step `In progress`, or authorize implementation.
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+Follow-up owner: human owner — accept `Ready with notes` with m-14/n-11–n-13, or request the retention
+clarification and the §11/§13 wording corrections; planner/step agent for the corrections if requested. Follow-up
+step: 23B design start gate.
