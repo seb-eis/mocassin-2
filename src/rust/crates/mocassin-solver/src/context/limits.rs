@@ -123,85 +123,25 @@ impl MemoryPlan {
     /// # Errors
     ///
     /// Returns [`ContextError::LimitExceeded`] when a dimension product overflows, when a count exceeds its
-    /// configured cap, or when the summed bytes exceed `max_context_bytes`.
+    /// configured cap, or when the summed bytes exceed `max_context_bytes`, and
+    /// [`ContextError::InvalidInput`] for a cluster link that references a missing table.
     pub fn plan(job: &JobPackage, limits: &ContextLimits) -> Result<Self, ContextError> {
         let dimensions = Dimensions::from_job(job)?;
-        Self::for_dimensions(&dimensions, limits)
+        let mut entries = core_entries(&dimensions, limits)?;
+        entries.extend(link_entries(job, &dimensions, limits)?);
+        entries.extend(cluster_entries(job, &dimensions, limits)?);
+        finish(entries, limits)
     }
 
-    /// Plans the arrays for already-derived dimensions.
+    /// Plans the lattice/environment and counter arrays only.
     ///
-    /// # Errors
-    ///
-    /// See [`MemoryPlan::plan`].
-    pub(crate) fn for_dimensions(
+    /// This is the feature-1 slice used by the unit tests; a real context uses [`MemoryPlan::plan`].
+    #[cfg(test)]
+    pub(crate) fn for_core_dimensions(
         dimensions: &Dimensions,
         limits: &ContextLimits,
     ) -> Result<Self, ContextError> {
-        let environments = u64::from(dimensions.environment_count());
-        let particles = u64::from(dimensions.pc());
-
-        if environments > limits.max_positions {
-            return Err(ContextError::LimitExceeded {
-                what: "max_positions",
-                value: environments,
-                limit: limits.max_positions,
-            });
-        }
-
-        if particles > u64::from(limits.max_particles) {
-            return Err(ContextError::LimitExceeded {
-                what: "max_particles",
-                value: particles,
-                limit: u64::from(limits.max_particles),
-            });
-        }
-
-        let entries = vec![
-            entry(
-                "lattice.particles",
-                environments,
-                1,
-                limits.max_context_bytes,
-            )?,
-            entry("lattice.flags", environments, 1, limits.max_context_bytes)?,
-            entry(
-                "lattice.mobile_tracker",
-                environments,
-                4,
-                limits.max_context_bytes,
-            )?,
-            entry(
-                "counters.per_particle",
-                particles,
-                size_of::<super::goals::ParticleCounters>() as u64,
-                limits.max_context_bytes,
-            )?,
-            entry(
-                "counters.scalars",
-                2,
-                size_of::<u64>() as u64,
-                limits.max_context_bytes,
-            )?,
-        ];
-
-        let mut total_bytes = 0_u64;
-        for planned in &entries {
-            total_bytes = checked_add(total_bytes, planned.bytes, "max_context_bytes", u64::MAX)?;
-        }
-
-        if total_bytes > limits.max_context_bytes {
-            return Err(ContextError::LimitExceeded {
-                what: "max_context_bytes",
-                value: total_bytes,
-                limit: limits.max_context_bytes,
-            });
-        }
-
-        Ok(Self {
-            entries,
-            total_bytes,
-        })
+        finish(core_entries(dimensions, limits)?, limits)
     }
 
     /// Returns the planned entries in insertion order.
@@ -210,11 +150,366 @@ impl MemoryPlan {
         &self.entries
     }
 
+    /// Returns the planned entry with the given diagnostic name.
+    #[must_use]
+    pub fn entry(&self, what: &str) -> Option<&MemoryEntry> {
+        self.entries.iter().find(|entry| entry.what == what)
+    }
+
+    /// Returns the planned element count of the named array.
+    #[must_use]
+    pub(crate) fn planned_elements(&self, what: &str) -> Option<u64> {
+        self.entry(what).map(|entry| entry.elements)
+    }
+
     /// Returns the summed planned bytes.
     #[must_use]
     pub const fn total_bytes(&self) -> u64 {
         self.total_bytes
     }
+}
+
+fn core_entries(
+    dimensions: &Dimensions,
+    limits: &ContextLimits,
+) -> Result<Vec<MemoryEntry>, ContextError> {
+    let environments = u64::from(dimensions.environment_count());
+    let particles = u64::from(dimensions.pc());
+
+    if environments > limits.max_positions {
+        return Err(ContextError::LimitExceeded {
+            what: "max_positions",
+            value: environments,
+            limit: limits.max_positions,
+        });
+    }
+
+    if particles > u64::from(limits.max_particles) {
+        return Err(ContextError::LimitExceeded {
+            what: "max_particles",
+            value: particles,
+            limit: u64::from(limits.max_particles),
+        });
+    }
+
+    Ok(vec![
+        entry(
+            "lattice.particles",
+            environments,
+            1,
+            limits.max_context_bytes,
+        )?,
+        entry("lattice.flags", environments, 1, limits.max_context_bytes)?,
+        entry(
+            "lattice.mobile_tracker",
+            environments,
+            4,
+            limits.max_context_bytes,
+        )?,
+        entry(
+            "counters.per_particle",
+            particles,
+            size_of::<super::goals::ParticleCounters>() as u64,
+            limits.max_context_bytes,
+        )?,
+        entry(
+            "counters.scalars",
+            2,
+            size_of::<u64>() as u64,
+            limits.max_context_bytes,
+        )?,
+    ])
+}
+
+fn link_entries(
+    job: &JobPackage,
+    dimensions: &Dimensions,
+    limits: &ContextLimits,
+) -> Result<Vec<MemoryEntry>, ContextError> {
+    let positions = u64::from(dimensions.p()) + 1;
+    let mut pair_links = 0_u64;
+
+    for environment in &job.model.structure.environments {
+        let count = environment.pairs.len() as u64;
+        if count > u64::from(limits.max_links_per_position) {
+            return Err(ContextError::LimitExceeded {
+                what: "max_links_per_position",
+                value: count,
+                limit: u64::from(limits.max_links_per_position),
+            });
+        }
+        pair_links = checked_add(pair_links, count, "max_pair_links", limits.max_pair_links)?;
+    }
+
+    if pair_links > limits.max_pair_links {
+        return Err(ContextError::LimitExceeded {
+            what: "max_pair_links",
+            value: pair_links,
+            limit: limits.max_pair_links,
+        });
+    }
+
+    let shape = cluster_plan(job, limits)?;
+    let entries = vec![
+        entry("links.owner_offsets", positions, 4, limits.max_link_bytes)?,
+        entry("links.links", pair_links, 28, limits.max_link_bytes)?,
+        entry("links.inverse_offsets", positions, 4, limits.max_link_bytes)?,
+        entry("links.inverse", pair_links, 8, limits.max_link_bytes)?,
+        entry(
+            "links.cluster_assoc",
+            shape.cluster_assoc,
+            8,
+            limits.max_link_bytes,
+        )?,
+    ];
+
+    let bytes = sum_entry_bytes(&entries, "max_link_bytes", limits.max_link_bytes)?;
+    if bytes > limits.max_link_bytes {
+        return Err(ContextError::LimitExceeded {
+            what: "max_link_bytes",
+            value: bytes,
+            limit: limits.max_link_bytes,
+        });
+    }
+
+    Ok(entries)
+}
+
+fn cluster_entries(
+    job: &JobPackage,
+    dimensions: &Dimensions,
+    limits: &ContextLimits,
+) -> Result<Vec<MemoryEntry>, ContextError> {
+    let shape = cluster_plan(job, limits)?;
+    let cells = u64::from(dimensions.cell_count());
+
+    if shape.instances > u64::from(limits.max_cluster_instances) {
+        return Err(ContextError::LimitExceeded {
+            what: "max_cluster_instances",
+            value: shape.instances,
+            limit: u64::from(limits.max_cluster_instances),
+        });
+    }
+
+    let instances_plus_one = checked_add(
+        shape.instances,
+        1,
+        "max_cluster_instances",
+        u64::from(u32::MAX),
+    )?;
+    let codes = checked_mul(
+        shape.instances,
+        cells,
+        "clusters.codes",
+        limits.max_cluster_state_bytes,
+    )?;
+    let positions_plus_one = u64::from(dimensions.p()) + 1;
+    let state_entries = vec![
+        entry(
+            "clusters.instances",
+            shape.instances,
+            16,
+            limits.max_cluster_state_bytes,
+        )?,
+        entry(
+            "clusters.centre_offsets",
+            positions_plus_one,
+            4,
+            limits.max_cluster_state_bytes,
+        )?,
+        entry(
+            "clusters.centres",
+            shape.instances,
+            4,
+            limits.max_cluster_state_bytes,
+        )?,
+        entry(
+            "clusters.slot_start",
+            instances_plus_one,
+            4,
+            limits.max_cluster_state_bytes,
+        )?,
+        entry(
+            "clusters.slot_positions",
+            shape.slots,
+            4,
+            limits.max_cluster_state_bytes,
+        )?,
+        entry(
+            "clusters.slot_cells",
+            shape.slots,
+            12,
+            limits.max_cluster_state_bytes,
+        )?,
+        entry("clusters.codes", codes, 8, limits.max_cluster_state_bytes)?,
+        entry(
+            "clusters.code_ids",
+            codes,
+            4,
+            limits.max_cluster_state_bytes,
+        )?,
+        entry(
+            "clusters.energy_start",
+            instances_plus_one,
+            4,
+            limits.max_cluster_state_bytes,
+        )?,
+    ];
+
+    let state_bytes = sum_entry_bytes(
+        &state_entries,
+        "max_cluster_state_bytes",
+        limits.max_cluster_state_bytes,
+    )?;
+    if state_bytes > limits.max_cluster_state_bytes {
+        return Err(ContextError::LimitExceeded {
+            what: "max_cluster_state_bytes",
+            value: state_bytes,
+            limit: limits.max_cluster_state_bytes,
+        });
+    }
+
+    let energy_rows = checked_mul(
+        cells,
+        shape.mapping_rows,
+        "clusters.energy",
+        limits.max_cluster_energy_bytes,
+    )?;
+    let energy = entry(
+        "clusters.energy",
+        energy_rows,
+        8,
+        limits.max_cluster_energy_bytes,
+    )?;
+    if energy.bytes > limits.max_cluster_energy_bytes {
+        return Err(ContextError::LimitExceeded {
+            what: "max_cluster_energy_bytes",
+            value: energy.bytes,
+            limit: limits.max_cluster_energy_bytes,
+        });
+    }
+
+    let mut entries = state_entries;
+    entries.push(energy);
+    Ok(entries)
+}
+
+#[derive(Clone, Copy, Debug, Default)]
+struct ClusterPlan {
+    instances: u64,
+    slots: u64,
+    cluster_assoc: u64,
+    mapping_rows: u64,
+}
+
+fn cluster_plan(job: &JobPackage, limits: &ContextLimits) -> Result<ClusterPlan, ContextError> {
+    let tables = job.model.energy.cluster_tables.len();
+    let mut per_table: std::collections::BTreeMap<u32, (u64, u8)> =
+        std::collections::BTreeMap::new();
+
+    for environment in &job.model.structure.environments {
+        for cluster in &environment.clusters {
+            let table = cluster.cluster_id;
+            if table as usize >= tables {
+                return Err(ContextError::InvalidInput {
+                    what: "cluster link table",
+                    detail: format!(
+                        "the model has {tables} cluster tables but a link references table {table}"
+                    ),
+                });
+            }
+
+            let entry = per_table.entry(table).or_insert((0, 0));
+            if cluster.byte_position == 0 {
+                entry.0 = checked_add(
+                    entry.0,
+                    1,
+                    "max_cluster_instances",
+                    u64::from(limits.max_cluster_instances),
+                )?;
+            }
+            entry.1 = entry.1.max(cluster.byte_position);
+        }
+    }
+
+    if per_table.len() > limits.max_cluster_tables as usize {
+        return Err(ContextError::LimitExceeded {
+            what: "max_cluster_tables",
+            value: per_table.len() as u64,
+            limit: u64::from(limits.max_cluster_tables),
+        });
+    }
+
+    let mut plan = ClusterPlan::default();
+    for (table, (slot0, max_slot)) in per_table {
+        let mapping_len = job.model.energy.cluster_tables[table as usize]
+            .particle_table_mapping
+            .len() as u64;
+        let slot_count = u64::from(max_slot) + 1;
+        plan.instances = checked_add(
+            plan.instances,
+            slot0,
+            "max_cluster_instances",
+            u64::from(limits.max_cluster_instances),
+        )?;
+        plan.slots = checked_add(
+            plan.slots,
+            checked_mul(slot0, slot_count, "clusters.slots", u64::from(u32::MAX))?,
+            "clusters.slots",
+            u64::from(u32::MAX),
+        )?;
+        plan.cluster_assoc = checked_add(
+            plan.cluster_assoc,
+            checked_mul(
+                slot0,
+                slot_count - 1,
+                "links.cluster_assoc",
+                limits.max_link_bytes,
+            )?,
+            "links.cluster_assoc",
+            limits.max_link_bytes,
+        )?;
+        plan.mapping_rows = checked_add(
+            plan.mapping_rows,
+            checked_mul(
+                slot0,
+                mapping_len,
+                "clusters.energy",
+                limits.max_cluster_energy_bytes,
+            )?,
+            "clusters.energy",
+            limits.max_cluster_energy_bytes,
+        )?;
+    }
+
+    Ok(plan)
+}
+
+fn finish(entries: Vec<MemoryEntry>, limits: &ContextLimits) -> Result<MemoryPlan, ContextError> {
+    let total_bytes = sum_entry_bytes(&entries, "max_context_bytes", u64::MAX)?;
+    if total_bytes > limits.max_context_bytes {
+        return Err(ContextError::LimitExceeded {
+            what: "max_context_bytes",
+            value: total_bytes,
+            limit: limits.max_context_bytes,
+        });
+    }
+    Ok(MemoryPlan {
+        entries,
+        total_bytes,
+    })
+}
+
+fn sum_entry_bytes(
+    entries: &[MemoryEntry],
+    what: &'static str,
+    limit: u64,
+) -> Result<u64, ContextError> {
+    let mut total = 0_u64;
+    for planned in entries {
+        total = checked_add(total, planned.bytes, what, limit)?;
+    }
+    Ok(total)
 }
 
 /// The memory report of a built context.
@@ -334,7 +629,7 @@ mod tests {
 
     #[test]
     fn the_plan_sizes_the_lattice_and_counter_arrays() {
-        let plan = MemoryPlan::for_dimensions(&ceria(), &ContextLimits::default())
+        let plan = MemoryPlan::for_core_dimensions(&ceria(), &ContextLimits::default())
             .expect("the ceria plan fits");
 
         let entries = plan.entries();
@@ -359,7 +654,7 @@ mod tests {
 
     #[test]
     fn every_entry_is_a_whole_number_of_elements() {
-        let plan = MemoryPlan::for_dimensions(&ceria(), &ContextLimits::default())
+        let plan = MemoryPlan::for_core_dimensions(&ceria(), &ContextLimits::default())
             .expect("the ceria plan fits");
 
         for planned in plan.entries() {
@@ -370,7 +665,7 @@ mod tests {
 
     #[test]
     fn the_report_equals_the_plan_on_lengths_and_bytes() {
-        let plan = MemoryPlan::for_dimensions(&ceria(), &ContextLimits::default())
+        let plan = MemoryPlan::for_core_dimensions(&ceria(), &ContextLimits::default())
             .expect("the ceria plan fits");
         let report = MemoryReport::from_plan(&plan, plan.total_bytes() + 512);
 
@@ -385,7 +680,7 @@ mod tests {
             max_positions: 863,
             ..ContextLimits::default()
         };
-        let error = MemoryPlan::for_dimensions(&ceria(), &limits).expect_err("864 > 863");
+        let error = MemoryPlan::for_core_dimensions(&ceria(), &limits).expect_err("864 > 863");
         assert!(matches!(
             error,
             ContextError::LimitExceeded {
@@ -402,7 +697,7 @@ mod tests {
             max_particles: 4,
             ..ContextLimits::default()
         };
-        let error = MemoryPlan::for_dimensions(&ceria(), &limits).expect_err("5 > 4");
+        let error = MemoryPlan::for_core_dimensions(&ceria(), &limits).expect_err("5 > 4");
         assert!(matches!(
             error,
             ContextError::LimitExceeded {
@@ -420,7 +715,7 @@ mod tests {
                 max_context_bytes: cap,
                 ..ContextLimits::default()
             };
-            let error = MemoryPlan::for_dimensions(&ceria(), &limits)
+            let error = MemoryPlan::for_core_dimensions(&ceria(), &limits)
                 .expect_err("the total exceeds the cap");
             assert!(matches!(
                 error,
@@ -436,6 +731,6 @@ mod tests {
             max_context_bytes: 5440,
             ..ContextLimits::default()
         };
-        assert!(MemoryPlan::for_dimensions(&ceria(), &limits).is_ok());
+        assert!(MemoryPlan::for_core_dimensions(&ceria(), &limits).is_ok());
     }
 }

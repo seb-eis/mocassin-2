@@ -37,7 +37,7 @@ use core::marker::PhantomData;
 use core::mem::size_of;
 use core::sync::atomic::{AtomicBool, Ordering};
 
-use mocassin_types::{JobPackage, SimulationKind};
+use mocassin_types::{ClusterTable, JobPackage, SimulationKind};
 
 mod clusters;
 mod dimensions;
@@ -49,7 +49,7 @@ mod limits;
 mod links;
 mod pools;
 
-pub use clusters::{ClusterArena, ClusterInstance};
+pub use clusters::{ClusterArena, ClusterInstance, MAX_CLUSTER_SLOTS, NO_CLUSTER_CODE};
 pub use dimensions::{Dimensions, EnvId};
 pub use error::ContextError;
 pub use goals::{Counters, ParticleCounters};
@@ -57,6 +57,7 @@ pub use jumps::JumpRuntime;
 pub use lattice::{HAS_MOBILE_TRACKER, LatticeState, MOBILE, NO_MOBILE_TRACKER, STABLE};
 pub use limits::{ContextLimits, MemoryEntry, MemoryPlan, MemoryReport};
 pub use links::{ClusterAssoc, IncomingLink, Link, LinkArena};
+pub use mocassin_types::{ParticleId, PositionId};
 pub use pools::{PoolMember, SelectionPool, SelectionPools};
 
 /// The cancellation check stride: initialization tests the caller's flag every 4096 environments.
@@ -222,7 +223,11 @@ impl SimulationContext {
     fn materialised_capacity_bytes(&self) -> u64 {
         let particles =
             self.counters.per_particle.capacity() as u64 * size_of::<ParticleCounters>() as u64;
-        self.lattice.capacity_bytes() + particles + 2 * size_of::<u64>() as u64
+        self.lattice.capacity_bytes()
+            + self.links.capacity_bytes()
+            + self.clusters.capacity_bytes()
+            + particles
+            + 2 * size_of::<u64>() as u64
     }
 
     fn check_invariants(&self) -> Result<(), ContextError> {
@@ -254,6 +259,116 @@ impl SimulationContext {
             });
         }
 
+        self.check_planned_length("lattice.particles", self.lattice.particles().len())?;
+        self.check_planned_length("lattice.flags", self.lattice.flags().len())?;
+        self.check_planned_length(
+            "lattice.mobile_tracker",
+            self.lattice.mobile_tracker().len(),
+        )?;
+        self.check_planned_length("counters.per_particle", self.counters.per_particle.len())?;
+        self.check_planned_length("links.owner_offsets", self.links.owner_offsets.len())?;
+        self.check_planned_length("links.links", self.links.links.len())?;
+        self.check_planned_length("links.inverse_offsets", self.links.inverse_offsets.len())?;
+        self.check_planned_length("links.inverse", self.links.inverse.len())?;
+        self.check_planned_length("links.cluster_assoc", self.links.cluster_assoc.len())?;
+        self.check_planned_length("clusters.instances", self.clusters.instances.len())?;
+        self.check_planned_length(
+            "clusters.centre_offsets",
+            self.clusters.centre_offsets.len(),
+        )?;
+        self.check_planned_length("clusters.centres", self.clusters.centres.len())?;
+        self.check_planned_length("clusters.slot_start", self.clusters.slot_start.len())?;
+        self.check_planned_length(
+            "clusters.slot_positions",
+            self.clusters.slot_positions.len(),
+        )?;
+        self.check_planned_length("clusters.slot_cells", self.clusters.slot_cells.len())?;
+        self.check_planned_length("clusters.codes", self.clusters.codes.len())?;
+        self.check_planned_length("clusters.code_ids", self.clusters.code_ids.len())?;
+        self.check_planned_length("clusters.energy_start", self.clusters.energy_start.len())?;
+        self.check_planned_length("clusters.energy", self.clusters.energy.len())?;
+
+        let cells = self.dimensions.cell_count() as usize;
+        let mut rows = 0_u32;
+
+        for (index, instance) in self.clusters.instances.iter().enumerate() {
+            let Some(table) = self
+                .job
+                .model
+                .energy
+                .cluster_tables
+                .get(instance.table as usize)
+            else {
+                return Err(ContextError::Invariant {
+                    what: "cluster table index",
+                });
+            };
+            if self.clusters.energy_start[index] != rows {
+                return Err(ContextError::Invariant {
+                    what: "cluster energy rows",
+                });
+            }
+
+            for cell in 0..cells {
+                let id = self.clusters.code_ids[index * cells + cell];
+                if id != NO_CLUSTER_CODE && id as usize >= table.occupation_codes.len() {
+                    return Err(ContextError::Invariant {
+                        what: "cluster code id",
+                    });
+                }
+            }
+
+            rows = rows
+                .checked_add(table.particle_table_mapping.len() as u32)
+                .ok_or(ContextError::Invariant {
+                    what: "cluster energy rows",
+                })?;
+        }
+
+        if self.clusters.energy_start[self.clusters.instances.len()] != rows
+            || (self.clusters.energy.len() as u64)
+                != u64::from(self.dimensions.cell_count()) * u64::from(rows)
+        {
+            return Err(ContextError::Invariant {
+                what: "cluster energy rows",
+            });
+        }
+        let mut owner = 0_usize;
+        for (link_id, link) in self.links.links.iter().enumerate() {
+            while owner + 1 < self.links.owner_offsets.len()
+                && link_id >= self.links.owner_offsets[owner + 1] as usize
+            {
+                owner += 1;
+            }
+
+            let end = link.cluster_start as usize + usize::from(link.cluster_len);
+            for assoc_index in link.cluster_start as usize..end {
+                let assoc = self.links.cluster_assoc[assoc_index];
+                let Some(instance) = self.clusters.instances.get(assoc.instance as usize) else {
+                    return Err(ContextError::Invariant {
+                        what: "cluster association instance",
+                    });
+                };
+                if instance.centre_position as usize != owner
+                    || assoc.slot == 0
+                    || assoc.slot >= instance.slot_count
+                {
+                    return Err(ContextError::Invariant {
+                        what: "cluster association slot",
+                    });
+                }
+
+                let slot = instance.slot_start as usize + usize::from(assoc.slot);
+                if self.clusters.slot_positions[slot] != link.partner_position
+                    || self.clusters.slot_cells[slot] != link.offset
+                {
+                    return Err(ContextError::Invariant {
+                        what: "cluster association geometry",
+                    });
+                }
+            }
+        }
+
         if !self.pools.has_valid_shape(&self.dimensions) {
             return Err(ContextError::Invariant {
                 what: "selection pools",
@@ -269,6 +384,172 @@ impl SimulationContext {
         }
 
         Ok(())
+    }
+
+    fn check_planned_length(&self, what: &'static str, actual: usize) -> Result<(), ContextError> {
+        if self.plan.planned_elements(what) == Some(actual as u64) {
+            Ok(())
+        } else {
+            Err(ContextError::Invariant { what })
+        }
+    }
+
+    /// Returns the forward links owned by one P1 position.
+    #[must_use]
+    pub fn link_range(&self, position: PositionId) -> &[Link] {
+        self.links.owner_links(position)
+    }
+
+    /// Returns the inverse routing entries of an absolute environment's P1 position.
+    #[must_use]
+    pub fn incoming(&self, env: EnvId) -> &[IncomingLink] {
+        self.links
+            .incoming_links(PositionId::new(self.dimensions.position_of(env)))
+    }
+
+    /// Resolves the partner environment of `owner` through `link`.
+    #[must_use]
+    pub fn partner_of(&self, owner: EnvId, link: &Link) -> EnvId {
+        self.links.partner_of(&self.dimensions, owner, link)
+    }
+
+    /// Resolves the owner environment of `partner` through an inverse entry.
+    #[must_use]
+    pub fn incoming_owner(&self, partner: EnvId, incoming: IncomingLink) -> Option<EnvId> {
+        self.links.owner_of(&self.dimensions, partner, incoming)
+    }
+
+    /// Returns the owner's link and its resolved partner environment.
+    #[must_use]
+    pub fn owner_link(&self, owner: EnvId, link_id: u32) -> Option<(&Link, EnvId)> {
+        let position = PositionId::new(self.dimensions.position_of(owner));
+        let link = self.links.owner_link(position, link_id)?;
+        Some((link, self.partner_of(owner, link)))
+    }
+
+    /// Returns `true` when the payload has a pair interaction between `a` and `b` in either direction.
+    ///
+    /// This is Step 17's local-update membership test. A missing reverse link means the payload has no
+    /// interaction in that direction and is not an error; no reverse link is synthesised.
+    #[must_use]
+    pub fn linked(&self, a: EnvId, b: EnvId) -> bool {
+        let partner_position = self.dimensions.position_of(b);
+        for link in self.link_range(PositionId::new(self.dimensions.position_of(a))) {
+            if link.partner_position == partner_position && self.partner_of(a, link) == b {
+                return true;
+            }
+        }
+
+        for incoming in self.incoming(a) {
+            if incoming.owner_position == self.dimensions.position_of(b)
+                && self.incoming_owner(a, *incoming) == Some(b)
+            {
+                return true;
+            }
+        }
+
+        false
+    }
+
+    /// Returns the cluster instances centred on one P1 position.
+    #[must_use]
+    pub fn centres(&self, position: PositionId) -> &[u32] {
+        self.clusters.centre_instances(position)
+    }
+
+    /// Resolves a raw cluster slot tuple through the instance's table expansion map.
+    ///
+    /// The slot-0 particle of `raw_code` must be in the table's `particle_table_mapping`; a particle outside
+    /// the mapping has no cluster row (data contract §3.3) and is an internal contract violation here. Callers
+    /// that may see an unmapped centre particle (for example void) use [`SimulationContext::cluster_row`] or
+    /// [`SimulationContext::cluster_code_id`] instead.
+    ///
+    /// # Errors
+    ///
+    /// Returns [`ContextError::MissingOccupationCode`] for a tuple absent from a present map,
+    /// [`ContextError::ExpansionMapAbsent`] for a non-canonical tuple in a pre-map package, and
+    /// [`ContextError::Invariant`] for an unknown instance or an unmapped centre particle.
+    pub fn cluster_lookup(&self, instance: u32, raw_code: u64) -> Result<u32, ContextError> {
+        let instance_data = self
+            .clusters
+            .instance(instance)
+            .ok_or(ContextError::Invariant {
+                what: "cluster instance index",
+            })?;
+        let table = self.cluster_table(instance_data.table)?;
+        if self
+            .cluster_row(instance, ParticleId::new((raw_code & 0x3F) as u8))
+            .is_none()
+        {
+            return Err(ContextError::Invariant {
+                what: "cluster lookup with an unmapped centre particle",
+            });
+        }
+        clusters::lookup_table(table, raw_code, instance_data.table)
+    }
+
+    /// Returns the row of a centre particle in the instance's table, or `None` when it has no row.
+    ///
+    /// A particle absent from `particle_table_mapping` has no cluster contribution (data contract §3.3).
+    #[must_use]
+    pub fn cluster_row(&self, instance: u32, particle: ParticleId) -> Option<u32> {
+        let instance_data = self.clusters.instance(instance)?;
+        let table = self.cluster_table(instance_data.table).ok()?;
+        table
+            .particle_table_mapping
+            .iter()
+            .position(|mapped| *mapped == particle.get())
+            .map(|row| row as u32)
+    }
+
+    /// Returns the stored raw occupation code of one instance and cell.
+    #[must_use]
+    pub fn cluster_code(&self, instance: u32, cell: u32) -> u64 {
+        self.clusters
+            .code(instance, cell, self.dimensions.cell_count())
+    }
+
+    /// Returns the stored canonical code id, or `None` for an unmapped centre particle.
+    #[must_use]
+    pub fn cluster_code_id(&self, instance: u32, cell: u32) -> Option<u32> {
+        self.clusters
+            .code_id(instance, cell, self.dimensions.cell_count())
+    }
+
+    /// Returns the raw occupation code of one instance and centre cell with optional slot overrides.
+    ///
+    /// The first override for a slot wins. This is allocation-free and is Step 15's S2 code builder.
+    ///
+    /// # Panics
+    ///
+    /// Panics when `instance` is not a valid instance id (an internal caller contract, never package data).
+    #[must_use]
+    pub fn occupation_code(
+        &self,
+        instance: u32,
+        centre_cell: u32,
+        overrides: &[(u8, ParticleId)],
+    ) -> u64 {
+        self.clusters
+            .occupation_code(
+                &self.job,
+                &self.dimensions,
+                instance,
+                centre_cell,
+                overrides,
+            )
+            .expect("the cluster instance exists")
+    }
+
+    fn cluster_table(&self, table: u32) -> Result<&ClusterTable, ContextError> {
+        self.job
+            .model
+            .energy
+            .cluster_tables
+            .get(table as usize)
+            .ok_or(ContextError::Invariant {
+                what: "cluster table index",
+            })
     }
 }
 
@@ -320,6 +601,26 @@ pub(crate) fn initialize_with(
         "context phase completed"
     );
 
+    probe.check()?;
+    observer.observe(InitPhase::Links);
+    let mut links = LinkArena::build(&job, &dimensions, &options.limits, &probe)?;
+    tracing::info!(
+        phase = InitPhase::Links.as_str(),
+        links = links.links.len(),
+        inverse = links.inverse.len(),
+        "context phase completed"
+    );
+
+    probe.check()?;
+    observer.observe(InitPhase::Clusters);
+    let clusters = ClusterArena::build(&job, &dimensions, &mut links, &probe)?;
+    tracing::info!(
+        phase = InitPhase::Clusters.as_str(),
+        instances = clusters.instances.len(),
+        slots = clusters.slot_positions.len(),
+        "context phase completed"
+    );
+
     let kind = job.kind;
     let counters = Counters::zeroed(dimensions.pc());
     let context = SimulationContext {
@@ -327,8 +628,8 @@ pub(crate) fn initialize_with(
         kind,
         dimensions,
         lattice,
-        links: LinkArena::empty(),
-        clusters: ClusterArena::empty(),
+        links,
+        clusters,
         pools: SelectionPools::empty(),
         jumps: JumpRuntime::empty(),
         counters,
@@ -428,6 +729,21 @@ fn validate_inputs(job: &JobPackage, dimensions: &Dimensions) -> Result<(), Cont
                 ),
             });
         }
+    }
+
+    if job.model.counts.pair_table_count as usize != job.model.energy.pair_tables.len()
+        || job.model.counts.cluster_table_count as usize != job.model.energy.cluster_tables.len()
+    {
+        return Err(ContextError::InvalidInput {
+            what: "energy table count",
+            detail: format!(
+                "the model counts declare {} pair and {} cluster tables, the vectors hold {} and {}",
+                job.model.counts.pair_table_count,
+                job.model.counts.cluster_table_count,
+                job.model.energy.pair_tables.len(),
+                job.model.energy.cluster_tables.len()
+            ),
+        });
     }
 
     let transitions = &job.model.transitions;
@@ -546,6 +862,8 @@ mod tests {
                 InitPhase::MemoryPlan,
                 InitPhase::ValidateInputs,
                 InitPhase::Lattice,
+                InitPhase::Links,
+                InitPhase::Clusters,
                 InitPhase::InvariantSweep,
             ]
         );

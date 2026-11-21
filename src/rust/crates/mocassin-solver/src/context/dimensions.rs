@@ -203,6 +203,40 @@ impl Dimensions {
         EnvId(cell * self.p + position)
     }
 
+    /// Returns the row-major linear cell index of `[a, b, c]`.
+    #[must_use]
+    pub const fn linear_cell(&self, coords: [u32; 3]) -> u32 {
+        debug_assert!(coords[0] < self.a && coords[1] < self.b && coords[2] < self.c);
+        (coords[0] * self.b + coords[1]) * self.c + coords[2]
+    }
+
+    /// Returns the cell index of `cell` shifted by `offset` and wrapped component-wise into the supercell.
+    #[must_use]
+    pub fn wrapped_cell_index(&self, cell: u32, offset: [i32; 3]) -> u32 {
+        self.wrapped_cell_index_i64(cell, offset.map(i64::from))
+    }
+
+    /// Returns the cell index of `cell` shifted by a 64-bit offset and wrapped component-wise.
+    ///
+    /// The `i64` form is used by the inverse routing index, which subtracts an `i32` offset: negating
+    /// `i32::MIN` in 32 bits would overflow, so the subtraction is widened first.
+    #[must_use]
+    pub fn wrapped_cell_index_i64(&self, cell: u32, offset: [i64; 3]) -> u32 {
+        let coords = self.cell_coords(cell);
+        let wrapped = [
+            (i64::from(coords[0]) + offset[0]).rem_euclid(i64::from(self.a)) as u32,
+            (i64::from(coords[1]) + offset[1]).rem_euclid(i64::from(self.b)) as u32,
+            (i64::from(coords[2]) + offset[2]).rem_euclid(i64::from(self.c)) as u32,
+        ];
+        self.linear_cell(wrapped)
+    }
+
+    /// Returns the absolute environment of `cell` shifted by `offset`, at `position`.
+    #[must_use]
+    pub fn wrapped_env(&self, cell: u32, offset: [i32; 3], position: u32) -> EnvId {
+        self.cell_env(self.wrapped_cell_index(cell, offset), position)
+    }
+
     /// Returns the supercell cell of an absolute environment.
     #[must_use]
     pub const fn cell_of(&self, env: EnvId) -> u32 {
@@ -335,6 +369,30 @@ mod tests {
     }
 
     #[test]
+    fn cell_indices_and_wrapped_offsets_round_trip() {
+        let dimensions = ceria();
+        for a in 0..dimensions.a() {
+            for b in 0..dimensions.b() {
+                for c in 0..dimensions.c() {
+                    let cell = dimensions.linear_cell([a, b, c]);
+                    assert_eq!(dimensions.cell_coords(cell), [a, b, c]);
+                    assert_eq!(dimensions.wrapped_cell_index(cell, [0, 0, 0]), cell);
+                    assert_eq!(
+                        dimensions.wrapped_cell_index(cell, [1, -1, i32::MAX]),
+                        dimensions.linear_cell([
+                            (i64::from(a) + 1).rem_euclid(i64::from(dimensions.a())) as u32,
+                            (i64::from(b) - 1).rem_euclid(i64::from(dimensions.b())) as u32,
+                            (i64::from(c) + i64::from(i32::MAX))
+                                .rem_euclid(i64::from(dimensions.c()))
+                                as u32,
+                        ])
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
     fn row_major_cell_coordinates_match_the_payload_order() {
         let dimensions = ceria();
         assert_eq!(dimensions.cell_coords(0), [0, 0, 0]);
@@ -366,6 +424,10 @@ mod tests {
         assert_eq!(
             dimensions.wrap_cell([5, 5, 5], [i32::MAX, i32::MIN, 1]),
             [0, 3, 0]
+        );
+        assert_eq!(
+            dimensions.wrapped_cell_index_i64(0, [-i64::from(i32::MIN), 0, 0]),
+            dimensions.linear_cell([(2_147_483_648_i64).rem_euclid(6) as u32, 0, 0])
         );
     }
 

@@ -10,7 +10,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In progress — feature 1 squashed; feature 2 next (six feature branches approved)
+- **Status:** In progress — feature 2 squashed; feature 3 next (six feature branches approved)
 - **Step branch:** `step/14-simulation-context-initialization`
 - **Step CI:** — (one closeout `workflow_dispatch`; no per-feature CI)
 - **Main merge:** —
@@ -31,12 +31,12 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (feature 1 squashed; feature 2 next)
+- **Last updated:** 2026-11-21 (feature 2 squashed; feature 3 next)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
-| 1 Context skeleton, arenas, limits, errors | `feature/step-14-simulation-context-initialization/context-arenas-and-limits` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (36 lib + 9 acceptance tests, 1 `Send` doctest, 1 `!Sync` compile-fail doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-2 row update |
-| 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Planned | — | — | — |
+| 1 Context skeleton, arenas, limits, errors | `feature/step-14-simulation-context-initialization/context-arenas-and-limits` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (36 lib + 9 acceptance tests, 1 `Send` doctest, 1 `!Sync` compile-fail doctest), `cargo build --release`, `structure`, `docs --require` all exit 0 | Not run (no per-feature CI) | `1a73969860715c55260cd1db0257c8a59241a647` |
+| 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 link + 16 cluster + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-3 row update |
 | 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Planned | — | — | — |
 | 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Planned | — | — | — |
 | 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Planned | — | — | — |
@@ -77,6 +77,67 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   `build_jump_status`/`apply_optimizers`, feature 5 adds `resume`). No public Rust API break in this feature
   (`DirectionPool`/`JumpLink` are untouched until feature 4). No new fixture and no `.msl`/manifest/signature
   change.
+
+### Feature 2 evidence — link-csr-and-clusters
+
+- **Branch:** `feature/step-14-simulation-context-initialization/link-csr-and-clusters` (squashed; squash commit
+  recorded by the feature-3 row update).
+- **Scope delivered:**
+  - **Links:** the owner-major per-P1 forward CSR with the stable `(pair_id, partner_position, offset)` sort, the
+    compact per-P1 inverse routing index, and `i64` `rem_euclid` partner resolution. `partner_of`,
+    `incoming_owner`, `owner_link`, and `linked(a, b)` (either-direction membership, never a synthesised reverse
+    link) are exposed. Duplicate periodic images are kept; a link's inverse entry is its exact forward entry.
+  - **Clusters:** one instance per slot-0 link (`K`), the centre CSR, flat slot geometry, slot 0 = the centre
+    `[0,0,0]`, candidate-position resolution with the multi-centre member-site fallback, and fail-closed
+    `ClusterGeometry` for a slot-0 site span, a non-contiguous or duplicated slot, an absent or ambiguous member
+    image, the same link in two slots, or more than 9 slots.
+  - **Codes:** the raw 6-bit slot tuple (slot 0 least significant) is resolved only with
+    `ClusterTable::lookup`: `Canonical(index)` is stored, `MissingFromMap` is `MissingOccupationCode`, and
+    `ExpansionMapAbsent` is the distinct recompile-required error (both exit 12). No solver-side symmetry, tuple
+    sorting, or direct `occupation_codes` indexing. The context exposes `cluster_lookup`, `cluster_row`,
+    `cluster_code`, `cluster_code_id`, and the allocation-free `occupation_code`. The per-instance energy-row
+    prefix (`energy_start`) and the zeroed energy array are allocated; feature 3 fills the values.
+  - **Plan/caps:** `MemoryPlan` adds the forward/inverse link arrays and associations and every cluster array,
+    enforcing `max_pair_links`, `max_links_per_position`, `max_cluster_tables`, `max_cluster_instances`,
+    `max_link_bytes`, `max_cluster_state_bytes`, `max_cluster_energy_bytes`, and the `max_context_bytes` total
+    before the first allocation. The invariant sweep now compares every planned length with the built array and
+    re-checks the cluster associations (owner = centre, slot range, geometry).
+- **Invariant/fixture matrix:**
+
+| Fixture / case | Assertion |
+| --- | --- |
+| `msl-v1` ceria | offset arrays built, zero links/instances, plan/report 5508 B |
+| `step-13-centered` | 8 forward/inverse links equal the brute-force payload expansion; deterministic order; no cluster; 996 B |
+| `step-13-populated` KMC/MMC | 6 links, 6 inverse, three incoming at P0, both P2 duplicate images kept and sorted by table then offset; one cluster instance `[P1, P0, P2]` with zero offsets; 2 associations; initial code 4160 with no cluster row, `4161→0` and `4162→1`; 16 zeroed energy rows; MMC links/clusters equal KMC; 940 B |
+| `step-11-amend-2` | 10 links; one instance `[P0, P4, P1]`, slot cells `[0, [-1,0,0], 0]`; all eight raw assignments resolve `8322→0, 8323→1, 8386→2, 8387→3, 12418→2, 12419→3, 12482→4, 12483→5`; initial 8320 has no row; 1204 B |
+| `amend-2-pre-map` | initializes because the reached tuples are canonical; `8322/12418` resolve and `8386/8387` return `ExpansionMapAbsent`; a mutated lattice whose reached tuple is `8386` fails at initialization; removing a tuple from a present map returns `MissingOccupationCode` |
+| Synthetic multi-centre (the real centered model, no new package) | four slot-0 links give four instances `[P0,P1]`, `[P3,P2]`, `[P4,P5]`, `[P7,P6]`; the member-site fallback resolves the rotated images; centre CSR; four associations; codes 65 with canonical id 0 |
+| Hostile geometry / offsets | slot-0 site span, non-contiguous slot, duplicate slot, zero member link, ambiguous member link, slot 9, two slots on one link, missing table, and `i32::MIN`/`i32::MAX` offsets are all handled without panic (geometry fails closed; forward and inverse offsets wrap exactly, including the widened `-i32::MIN` inverse subtraction) |
+| Asymmetric table / missing reverse link | the forward link keeps the owner's table and row orientation; no reverse link is synthesised; `linked` is true only when a real link exists in either direction |
+| Shared forward link (synthetic two-table case) | one forward link carries associations from two instances; every association range is contiguous, grouped by link, and names the right instance/slot |
+| Determinism / caps | two initializations produce identical links and clusters; each link/cluster cap rejects with the documented `LimitExceeded` label, value, and limit before allocation |
+
+- **Plan arithmetic:** populated 940 B, `step-11-amend-2`/`amend-2-pre-map` 1204 B, `step-13-centered` 996 B,
+  `msl-v1` 5508 B; `MemoryReport` equals the plan on every entry and `capacity_bytes ≥ total_bytes`.
+- **Clarifications/limitations (recorded):**
+  - **D2-1 — unmapped centre particle.** `particle_table_mapping` is the allowed centre-particle list; a
+    particle outside it (void included) has no cluster row (data contract §3.3). `code_ids` stores
+    `NO_CLUSTER_CODE` (`u32::MAX`) for such a current centre particle, `cluster_row` returns `None`, and
+    `cluster_lookup` is defined only for a mapped centre particle (an unmapped one is an internal contract
+    violation, exit 13). This is required by the populated/amend-2 fixtures, whose centre is void at
+    initialization, and changes no format or physics.
+  - **D2-2 — initial-check scope.** Initialization resolves the current tuple for every instance/cell and the
+    tuple for every allowed centre particle with the actual member particles (the §6.3 scope). It does not
+    enumerate the complete allowed tuple product; a pre-map package whose reached tuples are canonical
+    initializes (the pre-map fixture does), and a non-canonical reached tuple fails at initialization (mutated
+    lattice test) or through `cluster_lookup` (direct eight-code tests). The reader's expansion-map budget still
+    bounds a hostile map, and no solver-side symmetry exists.
+  - **D2-3 — instance order.** Instances are ordered by ascending centre position, then table index; `centres`
+    therefore lists `0..K` grouped by position. The order is deterministic and fixes the assoc/code order.
+  - **D2-4 — zeroed energy array.** Feature 2 reserves the per-instance cluster energy array (zeroed) so the
+    plan, report, and cap are complete and feature 3 performs no reallocation; the values are feature 3's.
+- **No new fixture, format, manifest, signature, or public API break.** `DirectionPool`/`JumpLink` are untouched
+  until feature 4; the context accessors are additive.
 
 ## Goal
 
@@ -1116,12 +1177,12 @@ row (§7.2). A link that is absent in both directions means the two environments
 - [x] Implement the lattice/environment arenas, index/wrap helpers, flags, tracker id space, and cancellation.
 - [ ] Implement the memory plan (checked bytes for every derived array, per-array caps, total cap) and reject
       before the first allocation.
-- [ ] Implement the owner-major per-P1 link CSR, the inverse routing index (i64 `rem_euclid` resolution),
+- [x] Implement the owner-major per-P1 link CSR, the inverse routing index (i64 `rem_euclid` resolution),
       partner resolution, sorting, and the cluster associations.
 - [ ] Implement the **one-instance-per-slot-0-link** cluster runtime: centre/member-site validation, the
       per-instance slot resolution (candidate position, then member-site image), the centre index, codes,
       code ids, and energies; reject an absent/ambiguous image with `ClusterGeometry`.
-- [ ] Consume the approved cluster-code expansion contract: build the raw tuple, call
+- [x] Consume the approved cluster-code expansion contract: build the raw tuple, call
       `ClusterTable::lookup`, store `Canonical(index)` as `code_id`, map `MissingFromMap` to
       `MissingOccupationCode` and `ExpansionMapAbsent` to the distinct recompile-required error; no solver-side
       symmetry and no direct `occupation_codes` fallback. Gate this task on the `step-11.1` merge (see §22).

@@ -93,8 +93,22 @@ fn the_environment_flags_follow_the_documented_rules() {
 fn the_later_feature_containers_are_empty_and_the_counters_are_zeroed() {
     let context = initialize(fixture_job(1), &ContextOptions::default());
 
+    // The link and cluster CSRs are built, but this table-free ceria package has no link, instance, or code.
     assert!(context.links.is_empty());
+    assert_eq!(
+        context.links.owner_offsets.len(),
+        context.dimensions.p() as usize + 1
+    );
+    assert_eq!(
+        context.links.inverse_offsets.len(),
+        context.dimensions.p() as usize + 1
+    );
     assert!(context.clusters.is_empty());
+    assert_eq!(
+        context.clusters.centre_offsets.len(),
+        context.dimensions.p() as usize + 1
+    );
+    assert_eq!(context.clusters.slot_start, [0]);
     assert!(context.pools.is_empty());
     assert!(context.jumps.is_empty());
     assert_eq!(
