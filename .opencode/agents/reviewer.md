@@ -33,4 +33,9 @@ than guessing.
 Shell is not restricted, so do not use it to write files or change the repository. Branch protection and the
 review/audit gates are the controls that do not depend on good behaviour.
 
+Worktrees and scratch state live under `/home/node/worktrees` and `/home/node/tmp`; `/tmp` is wiped when the
+container restarts. Commit and push durable work before leaving it idle. On an unexpected error or restart, verify
+the branch, worktree, and any CI/merge/tag state before retrying; never repeat an irreversible step on assumption.
+See [`orchestration.md`](../../docs/development/orchestration.md) §9.
+
 Finish by restating the verdict and the evidence behind it in your report to the orchestrator.

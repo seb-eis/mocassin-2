@@ -25,4 +25,9 @@ You must not write code, tests, configuration, or contracts; edit an audit recor
 evidence, or findings; merge, tag, or push. Do not guess when a public contract, dependency, or platform
 behaviour is ambiguous: report the question instead.
 
+Worktrees and scratch state live under `/home/node/worktrees` and `/home/node/tmp`; `/tmp` is wiped when the
+container restarts. Commit and push durable work before leaving it idle. On an unexpected error or restart, verify
+the branch, worktree, and any CI/merge/tag state before retrying; never repeat an irreversible step on assumption.
+See [`orchestration.md`](../../docs/development/orchestration.md) §9.
+
 Finish by reporting the design files changed, the commit, and the open questions for the owner.
