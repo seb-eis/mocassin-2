@@ -329,7 +329,7 @@ refresh's default values and the one-time migration; the interaction contract's 
 to these values in the same implementation change. The maintenance record flags that update as an owner
 decision before code starts.
 
-| Value | Default | At 1200 × 800 | At 900 × 600 | Persisted range |
+| Value | Default | Nominal at 1200 × 800 | Nominal at 900 × 600 | Persisted range |
 | --- | --- | --- | --- | --- |
 | `LeftFraction` | `0.20` | 240 px | 180 px | 0.08–0.45 |
 | `RightFraction` | `0.22` | 264 px | 198 px | 0.08–0.45 |
@@ -337,8 +337,8 @@ decision before code starts.
 | `ConsoleFraction` | `0.32` | 256 px | 192 px | 0.08–0.60 |
 | documents | remainder | 544 px | 408 px | existing minimum |
 
-The existing minima (160 / 160 / 360 / 80 / 200 and the 900 × 600 window minimum) and the 6 px splitter tracks
-are unchanged.
+The nominal pixels are shares of the workspace extent before the outer `RegionGap` inset. The existing minima
+(160 / 160 / 360 / 80 / 200 and the 900 × 600 window minimum) and the 6 px splitter tracks are unchanged.
 
 One additive application-local layout field, `layout.defaultsRevision`, makes the change once:
 

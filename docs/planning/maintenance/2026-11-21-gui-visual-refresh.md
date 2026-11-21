@@ -70,9 +70,10 @@ Fixed owner inputs (2026-11-21):
   `260/1200 = 0.2167` left, `320/1200 = 0.2667` right, `180/800 = 0.225` console.
 - `Shell/ShellView.axaml` already uses star tracks and the fraction model, so only the default values and the
   persisted-layout migration need to change. The splitter behaviour is not reopened.
-- At 1200 × 800 the new defaults give 240 px left, 264 px right, 684 px centre (after two 6 px gaps), 544 px
-  documents, and 256 px console. At the 900 × 600 minimum they give 180 left, 198 right, 510 centre, 408
-  documents, 192 console; every region stays above its existing minimum.
+- At 1200 × 800 the new defaults give a nominal 240 px left, 264 px right, 684 px centre (after two 6 px gaps),
+  544 px documents, and 256 px console. At the 900 × 600 minimum they give a nominal 180 left, 198 right, 510
+  centre, 408 documents, 192 console; every region stays above its existing minimum. The nominal pixels are
+  shares of the workspace extent before the outer `RegionGap` inset.
 
 ### 2.3 Console channel selector
 
@@ -127,14 +128,14 @@ would make the screenshot matrix meaningless. Why not custom control templates: 
 Fluent resource overrides plus property setters cover the primary surfaces.
 
 The implementation must not leave a colour literal in `App.axaml`; a direct colour there would silently defeat
-the palette. `HighContrast.axaml` must list the complete key set, not a subset, or a palette colour will leak
-into high contrast.
+the palette. `HighContrast.axaml` must list every role and every key the palette overrides, not a subset, or a
+palette colour will leak into high contrast.
 
 ### 3.2 Default layout and one-time migration
 
 New defaults:
 
-| Value | New default | At 1200 × 800 | At 900 × 600 | Persisted range |
+| Value | New default | Nominal at 1200 × 800 | Nominal at 900 × 600 | Persisted range |
 | --- | --- | --- | --- | --- |
 | `LeftFraction` | `0.20` | 240 px | 180 px | 0.08–0.45 |
 | `RightFraction` | `0.22` | 264 px | 198 px | 0.08–0.45 |
@@ -299,12 +300,12 @@ and time.
 - Assert the five non-default optional accents publish a contrast-safe `OnAccentBrush`; the default and `blue`
   are `#007ACC`.
 - Assert no view XAML contains a non-token colour literal in the primary surface set (a source scan with a
-  small allow-list for `Transparent` and the scrim token).
+  small allow-list for `Transparent`; the scrim is `Mocassin.OverlayScrim`).
 
 ### 6.2 Contrast and accessibility
 
 - `Visual/ThemeContrastTests` computes WCAG relative luminance for every pair in visual contract §11.1 in both
-  themes and all optional accents; normal text ≥ 4.5:1, large text ≥ 3:1, focus ring ≥ 3:1.
+  themes and all non-default optional accents; normal text ≥ 4.5:1, large text ≥ 3:1, focus ring ≥ 3:1.
 - High-contrast pairs meet ≥ 7:1.
 - Region cards expose `Projects panel`, `Documents panel`, `Inspector panel`, and `Console panel`; the console
   strip is `Console tabs`; tab headers are the visible labels.
@@ -316,8 +317,8 @@ and time.
 
 ### 6.3 Layout and migration
 
-- New defaults at 1200 × 800: left 0.20, right 0.22, console 0.32 within 0.005; tracks fill the workspace; no
-  gap beyond the 6 px splitter tracks.
+- New defaults at 1200 × 800: left 0.20, right 0.22, console 0.32 within 0.005; tracks fill the workspace; the
+  only chrome gaps are the 6 px splitter tracks and the `RegionGap` inset.
 - At 900 × 600, every visible region stays at or above its minimum.
 - Drag, window resize, hide/show, keyboard resize, and splitter focus tests from the previous fix stay green.
 - Reader cases: no layout block → new defaults + revision 1; old defaults without revision → new defaults +
@@ -325,10 +326,10 @@ and time.
   unchanged; revision 1 + custom values → unchanged; legacy pixels 260/320/180 → new defaults; legacy custom
   pixels → preserved; invalid revision → warning + migration; second load idempotent.
 - Store/writer: `defaultsRevision` is written, pixel keys are absent, and a rewrite does not change the values.
-- **Reset layout** restores the new defaults and all regions visible, persists immediately, and leaves the
-  active console tab and other settings unchanged.
-- `ActiveChannel` switch persists immediately; a new host built on the same data directory restores the tab;
-  an unknown stored id falls back to `Console`.
+- **Reset layout** restores the new defaults and all regions visible, schedules the existing layout persist,
+  and leaves the active console tab and other settings unchanged.
+- An `ActiveChannel` switch schedules the existing layout persist; a new host built on the same data directory
+  restores the tab; an unknown stored id falls back to `Console`.
 
 ### 6.4 Console tabs
 
@@ -369,7 +370,7 @@ high-contrast capture keeps compact density. Regeneration uses
    views, and `App.axaml` contains no colour roles.
 2. Dark matches the owner's surface set; light matches the Light+ equivalent; high contrast still wins and
    keeps 2 px borders.
-3. Contrast tests pass for both themes, the default accent, and every optional accent.
+3. Contrast tests pass for both themes, the default accent, and every non-default optional accent.
 4. Region cards have 6 px radius, 1 px border, and 6 px gaps; the splitter hit target, minima, fraction model,
    window resize, hide/show, and keyboard resize remain correct.
 5. The console has exactly the two fixed tabs in order; labels and validation automation names are coherent;
@@ -392,7 +393,7 @@ high-contrast capture keeps compact density. Regeneration uses
 
 | Risk | Mitigation |
 | --- | --- |
-| A Fluent key is missed, leaving a control blue or light in one theme | The contract lists the complete key set; add a resolved-resource test for every key; screenshot the shell and one overlay per theme; stop and add the key to the contract before inventing a template |
+| A Fluent key is missed, leaving a control blue or light in one theme | The contract lists the expected key set; add a resolved-resource test for every key; screenshot the shell and one overlay per theme; stop and add the key to the contract before inventing a template |
 | High contrast leaks a palette colour | `HighContrast.axaml` defines every role and key; a test enumerates the list and asserts HC values; density still applies |
 | Overriding Fluent keys changes a control template layout | Only colours, borders, padding, and corner radius are changed; no templates are replaced; compare screenshots and control bounds; stop if a control needs a template rewrite |
 | Light palette or state/semantic colours are outside the owner's five dark values | The values are the Light+ equivalent and the contrast-safe state/text derivations; owner review is requested in §10 before merge |
