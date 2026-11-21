@@ -10,7 +10,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 
 ## Implementation status
 
-- **Status:** In progress — feature 5 squashed; feature 6 (closeout) next (six feature branches approved)
+- **Status:** In progress — feature 6 implementation complete; squash and closeout pending
 - **Step branch:** `step/14-simulation-context-initialization`
 - **Step CI:** — (one closeout `workflow_dispatch`; no per-feature CI)
 - **Main merge:** —
@@ -31,7 +31,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
   gate.
 - **Sizing:** Complexity class **High** — accepted by the human owner at the start gate 2026-11-21 as one
   unit; no split proposed. See §4.
-- **Last updated:** 2026-11-21 (feature 5 squashed; feature 6 closeout next)
+- **Last updated:** 2026-11-21 (feature 6 implementation complete; squash and closeout pending)
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -39,8 +39,8 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 | 2 Neighbour-link CSR and cluster runtime | `feature/step-14-simulation-context-initialization/link-csr-and-clusters` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 link + 16 cluster + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `486389ec5736571f50adda0d77ae95aa8f9ea4cb` |
 | 3 Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 8 energy + 16 cluster + 15 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `2f284cce2f65532007a9be883eaaea83ae4500b5` |
 | 4 Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 10 pools + 10 jump + 8 energy + 16 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `1613cfc6da1832fc4faacba0b0073e001cd30f1f` |
-| 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 goals + 7 resume + 10 pools + 10 jump + 8 energy + 17 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | Recorded by the feature-6 row update |
-| 6 Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | Planned | — | — | — |
+| 5 Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Squashed | `cargo fmt --check`, `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test --workspace` (38 lib + 15 goals + 7 resume + 10 pools + 10 jump + 8 energy + 17 cluster + 13 link + 9 skeleton acceptance tests, 1 `Send` + 1 `!Sync` doctest), `cargo build --release`, `structure` (7 passed), `docs --require` all exit 0 | Not run (no per-feature CI) | `6500055d6cf14e544a85d09db02dd27b1e2f9e5f` |
+| 6 Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | In progress (squash pending) | Targeted Rust/`.NET`/docs gates and the Criterion `context` bench pass; the full `./tools/verify.sh all --require` and the closeout CI are recorded in the closeout commit | One closeout discharge (recorded in closeout evidence) | Recorded in the closeout commit |
 
 ### Feature list (scope and outcomes)
 
@@ -51,7 +51,7 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
 | 3 | Energy runtime and initial lattice energy | `feature/step-14-simulation-context-initialization/energy-runtime-and-initial-energy` | eV→kT factor; site table; site+pair vectors; per-instance cluster energy; exact initial total; debug recomputation helper; `field_scale` | The hand-computed site/pair/cluster total matches; the vectors equal a brute-force sum; `step-13-populated` initializes with the documented energies |
 | 4 | Selection pools and jump status | `feature/step-14-simulation-context-initialization/selection-pools-and-jump-status` | Supercell direction-count pools with reserved capacity; mask/optimizer application; `selectable_jump_count`; O(1) slot maps and update helpers; per-`(P1, direction)` receiver-major jump status with the structural filter, derived bound, link-carried cluster associations, and `resolve_node`; **retires `DirectionPool` / reshapes `JumpLink` (public Rust API break recorded, Step 13 invariant tests updated)** | Pool counts/removal/swap-remove are correct in several cells; jump links equal a naive receiver-major recomputation; a cross-bucket direction resolves at the selected bucket; `step-13-centered` passes |
 | 5 | Goals, counters, normalization, time step, resume | `feature/step-14-simulation-context-initialization/goals-normalization-and-resume` | Mobile/static tracker index space; goals/block size; counters; `K_fix`/`K_auto`/`K_norm`/`dof`/`nu_max`/`dt`; `ResumeState`/`ResumePhase` validation, re-derived mapping, `AlreadyCompleted` | Goal/normalization arithmetic matches the hand values; resume restores exactly and rejects mismatches; the MMC context has no pools/jump status/time |
-| 6 | Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | New 10×10×10 real-writer fixture and .NET rebuild test; new multi-centre cluster fixture from the centred sample; context-summary snapshots; allocation test; `context` Criterion benchmark and `rustContext` baseline; docs/parity/status/closeout | `< 100 ms`/`< 20 ms` and memory budgets measured on the recorded runner class; zero-allocation proof; docs build strictly; closeout evidence passes its checker; audit request complete |
+| 6 | Fixtures, benchmarks, documentation, and closeout | `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` | New 10×10×10 real-writer fixture and .NET rebuild test; new multi-centre cluster fixture from the centred sample; context-summary snapshots; allocation test; `context` Criterion benchmark and `rustContext` baseline; docs/parity/status/closeout | `< 100 ms` and `≤ 64 MiB` budgets measured on the recorded runner class; zero-allocation proof; docs build strictly; closeout evidence passes its checker; audit request complete |
 
 ### Feature 1 evidence — context-arenas-and-limits
 
@@ -337,6 +337,64 @@ step, and the resume hook. No energy deltas, no KMC/MMC cycle, no tracker values
     signature is unchanged. The static tracker count is checked against `u32` and fails closed
     (`LimitExceeded { what: "static trackers" }`) for a supercell whose expanded count cannot be addressed.
 - **No new fixture, format, manifest, or signature change.**
+
+### Feature 6 evidence — fixtures-benchmarks-and-closeout
+
+- **Branch:** `feature/step-14-simulation-context-initialization/fixtures-benchmarks-and-closeout` (squashed;
+  squash commit recorded in the closeout commit).
+- **Local gates (feature branch, exact commands):** `cargo fmt --manifest-path src/rust/Cargo.toml --all
+  --check` → OK; `cargo clippy --manifest-path src/rust/Cargo.toml --workspace --all-targets -- -D warnings` →
+  OK; `cargo test --manifest-path src/rust/Cargo.toml --workspace` → all test binaries pass (including
+  `context_fixtures` 3, `allocation` 1, `context_clusters` 17, `context_links` 13, `context_jumps` 10,
+  `context_pools` 10, `context_goals` 15, `context_resume` 7, `context_energy` 8, `context_skeleton` 9, and the
+  `Send`/`!Sync` doctests); `dotnet format Mocassin.slnx --verify-no-changes` → OK; `dotnet test
+  src/dotnet/Mocassin.Results.Tests/Mocassin.Results.Tests.csproj -c Release --filter
+  "FullyQualifiedName~Step14CeriaFixtureTests|FullyQualifiedName~Step14MultiCentreFixtureTests"` → 12 passed;
+  `./tools/verify.sh docs --require` → exit 0; `./tools/verify.sh structure --require` → 7 passed. The full
+  `./tools/verify.sh all --require` and the single closeout CI run are recorded at closeout.
+- **New fixtures (real .NET writer, fixed `created_utc = 2026-11-21T12:00:00Z`):**
+  - [`tests/contracts/packages/step-14-ceria-10x10x10`](../../../tests/contracts/packages/step-14-ceria-10x10x10/README.md)
+    — derived from `samples/step-14-ceria-10x10x10/` (a copy of the job sweep with one KMC job at 10×10×10).
+    5 particles, 4 P1 positions, 4 sites, no pair/cluster tables, 4,000 environments; `.msl` 98,304 B, SHA-256
+    `0865dd75...`, summary 2,026 B, payloads 3,475/4,061/530 B. The model signature is the msl-v1 ceria model.
+  - [`tests/contracts/packages/step-14-multi-centre-cluster`](../../../tests/contracts/packages/step-14-multi-centre-cluster/README.md)
+    — derived from `samples/step-14-multi-centre-cluster/` (the centred sample plus a third site C and an
+    A-centred two-member cluster); `step-13-centered` stays byte-identical. 4 particles, 12 P1 positions, 3
+    sites, 12 pair tables, 1 cluster table, 1 MMC job; `.msl` 98,304 B, SHA-256 `ace6f38e...`, summary 1,960 B.
+    The writer emits four slot-0 links (one per A position), so the context builds **four instances**; the Rust
+    test asserts the per-instance slots/codes and a per-instance code→energy mapping with a synthetic
+    distinct-energy table.
+  - **Model-validator deviation (recorded):** the project model's `ENM008` requires 2–8 surrounding offsets, so
+    the design's one-member cluster cannot be authored. The fixture uses two **distinct** member sites (B and C),
+    not two images of one member site (the rejected OD-1 ambiguity); this still exercises the multi-centre
+    member-site fallback and one instance per slot-0 link. `step-13-centered` is unchanged; the deviation is
+    fixture-only and is recorded for the audit.
+- **Context-summary snapshot / determinism:** `tests/context_fixtures.rs` snapshots the 10×10×10 summary
+  (kind, cell, counts, mobile/selectable, link histogram, cluster sizes, site/vector sums, total energy, pool
+  sizes, jump sizes, goals, normalization, trackers, time/origin/flags) and asserts two initializations have an
+  identical summary, memory report, energy, goals, normalization, RNG state, and flags. The committed snapshot is
+  `tests/snapshots/context_fixtures__step14_ceria_10x10x10.snap`.
+- **Allocation proof:** `tests/allocation.rs` (own test binary, counting global allocator). The 10×10×10 build
+  makes **98 allocations / 316,872 B** against a **308,632 B** plan (capacity equal to the plan); the populated
+  2×2×2 build makes 103 / 11,861 B against a 2,672 B plan. After construction the hot accessors
+  (`node_energy`, `site_energy`, `cluster_energy`, `cluster_code`, `link_range`, `incoming`, `jump_links`,
+  `mobile_positions`, mappings, `dt`, goals, normalization) and 200 pool `set_selectable` particle-change cycles
+  allocate **zero**; the pool capacities/pointers are unchanged. The test process peak RSS is 11,060 KiB
+  (`VmHWM`, non-gating context next to the memory report).
+- **Benchmark:** `benches/context.rs` (Criterion, release) measures the real-writer 10×10×10 fixture at
+  **75.565 µs** (CI 74.908–76.269) and the populated clone at **315.26 µs** (313.18–317.73); memory plans
+  **308,632 B** and **234,832 B** (capacities 308,632/234,864). Both are far below the `< 100 ms`/`≤ 64 MiB`
+  budgets. Evidence: `tests/reference/bench/step-14-context.json`, raw log
+  `step-14-context-2026-11-21.txt`, `rustContext` in `baselines.json` (runner class
+  `linux-x64-local-container-amd-ryzen-7-7840u-rust-1.99.1`).
+- **Documentation:** `solver-architecture.md` (implementation evidence, active directions, void-member rule),
+  `physics/energies.md` (void-member zero contribution), `performance/index.md` (context bench/allocation
+  numbers), `troubleshooting/errors.md` (context failures, exit 12/13/15 vs 14), `testing-and-parity.md`
+  (fixtures/tiers/allocation/snapshot), and `msl-format.md` (cluster geometry and void-member rule). The parity
+  matrix and status dashboard are updated; the Step 15 void-member rule is recorded.
+- **Closeout:** merged current `main`; `./tools/verify.sh all --require` exit 0; closeout evidence/audit record
+  and the single Ubuntu closeout CI are recorded in `docs/planning/closeout/step-14.json` and
+  `docs/planning/audits/step-14.md`.
 
 ## Goal
 
@@ -922,12 +980,14 @@ Step 14 derives each instance's geometry from the payload and fails closed inste
 - **Fixtures (review F-36).** `step-13-populated` has one cluster centred on position 1 with members 0 and 2,
   each with a single `[0,0,0]` image (one slot-0 link); the other Step 13 fixtures have no cluster table. The
   new `step-14-multi-centre-cluster` package (feature 6) is built from the committed
-  `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a copy of the centred sample, so
-  the `step-13-centered` golden does not move) and has the full artifact set: `.msl`, `.sha256`,
+  `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a derivation of the centred sample
+  with a third stable site C; the `step-13-centered` package stays byte-identical) and has the full artifact set: `.msl`, `.sha256`,
   `package-summary-v1.json`, `payloads/index.json`, `payloads/model-1.bin`, a README with provenance (writer
   commit, SDK, `created_utc`, job count), a .NET rebuild test, and the usual regeneration command. Its centre
-  site owns four P1 positions, so it must yield four instances with per-instance codes/energies. It has one
-  member per instance; the **two-member non-P1 case that exercises F-29 is the amendment-2 ceria fixture**
+  site owns four P1 positions, so it must yield four instances with per-instance codes/energies. The two member
+  offsets resolve to **distinct member sites** (B and C) because the project-model `ENM008` validator requires
+  2–8 surrounding offsets; a one-member cluster is not authorable. The **two-member non-P1 case that exercises
+  F-29 is the amendment-2 ceria fixture**
   (`tests/contracts/packages/step-11-amend-2/`), not a second multi-centre package, because two images of one
   member site are the ambiguous case above. A synthetic distinct-energy table in the unit tests evidences the
   code→energy mapping, since the sample tables are zero.
@@ -1397,65 +1457,65 @@ row (§7.2). A link that is absent in both directions means the two environments
       (exit 13), `dof`, and `dt`.
 - [x] Implement the resume hook (`ResumeState` with `seed_hash`, parameterized `model_signature`, validation,
       re-derived mobile mapping, `AlreadyCompleted`).
-- [ ] Add the real-writer 10×10×10 acceptance fixture, the **multi-centre cluster fixture** derived from the
+- [x] Add the real-writer 10×10×10 acceptance fixture, the **multi-centre cluster fixture** derived from the
       centred sample, the populated-model 10×10×10 clone benchmark, context-summary snapshots, the allocation
       test, the `compile_fail` `!Sync` doctest, the hostile-offset test, and the `context` Criterion benchmark
       with a same-class baseline entry.
-- [ ] Update the documentation, parity rows, status dashboard, and closeout evidence; write the
+- [x] Update the documentation, parity rows, status dashboard, and closeout evidence; write the
       `msl-format.md`/`troubleshooting/errors.md` notes that carry the OD-1 writer follow-up.
 
 ## 17. Acceptance criteria
 
-- [ ] `msl-v1` job 1 (6×6×6 ceria) and `amend-1-net10` initialize a context whose mobile count, selectable count,
+- [x] `msl-v1` job 1 (6×6×6 ceria) and `amend-1-net10` initialize a context whose mobile count, selectable count,
       `prerun`/`main`/`total` goals, block size, `dt`, and tracker counts are asserted against computed values.
-- [ ] `step-13-populated` KMC and MMC jobs initialize; the pair link set and the inverse set equal a brute-force
+- [x] `step-13-populated` KMC and MMC jobs initialize; the pair link set and the inverse set equal a brute-force
       expansion of the payload for every supercell cell; the clustered energy vectors equal a direct table
       lookup; the MMC context has no pools/jump status/time.
-- [ ] `step-13-centered` initializes; a direction mapped into another start bucket resolves its path at the
+- [x] `step-13-centered` initializes; a direction mapped into another start bucket resolves its path at the
       selected bucket; the per-node allowed masks are exposed unchanged.
-- [ ] The multi-centre cluster fixture initializes with **one instance per slot-0 link** (four instances for the
+- [x] The multi-centre cluster fixture initializes with **one instance per slot-0 link** (four instances for the
       centred model's four-position centre site), each with its own slot positions, code, and centre energy; the
       per-instance codes equal a brute-force rebuild from the instance's slots; the committed sample, package
       summary/SHA-256/payload set, README provenance, .NET rebuild test, and regeneration command are present
       (§6.4/F-36).
-- [ ] The amendment-2 two-member ceria fixture (`step-11-amend-2`) resolves **all eight** raw assignments,
+- [x] The amendment-2 two-member ceria fixture (`step-11-amend-2`) resolves **all eight** raw assignments,
       including the two non-canonical ones; the pre-map fixture returns the distinct `ExpansionMapAbsent`
       (recompile-required) error for those two, and a present map that lacks a tuple returns
       `MissingOccupationCode`; the context never re-derives symmetry (review F-29).
-- [ ] A multi-centre member whose image is absent or ambiguous returns the documented `ClusterGeometry` (exit 12)
+- [x] A multi-centre member whose image is absent or ambiguous returns the documented `ClusterGeometry` (exit 12)
       naming the instance, slot, and member site; a unique rotated multi-centre image is **accepted**, not
       reported as a cross-image (review F-35).
-- [ ] A transition evaluated on a package whose pair table is **asymmetric** (`t[a][b] ≠ t[b][a]`) and that has
+- [x] A transition evaluated on a package whose pair table is **asymmetric** (`t[a][b] ≠ t[b][a]`) and that has
       no reverse link produces the owner-major delta; the result differs from the sender-major delta that the
       draft would have produced.
-- [ ] A pool contains members in two different supercell cells; selecting, removing, and re-adding each member
+- [x] A pool contains members in two different supercell cells; selecting, removing, and re-adding each member
       addresses the right environment and never collides in the slot map; no pool insert reallocates (reserved
       capacity).
-- [ ] A hostile package with `i32::MIN`/`i32::MAX` pair offsets initializes or fails cleanly, never panics, and
+- [x] A hostile package with `i32::MIN`/`i32::MAX` pair offsets initializes or fails cleanly, never panics, and
       the wrapped target is correct.
-- [ ] The 10×10×10 real-writer fixture initializes in `< 100 ms` (release, warm, same-runner-class) and the
+- [x] The 10×10×10 real-writer fixture initializes in `< 100 ms` (release, warm, same-runner-class) and the
       reported memory total is within budget; the populated-model 10×10×10 clone is measured in the same run
       and recorded, because the ceria fixture has no pair/cluster tables.
-- [ ] The initial lattice energy matches a hand-computed site/pair/cluster system exactly on a **multi-cell**
+- [x] The initial lattice energy matches a hand-computed site/pair/cluster system exactly on a **multi-cell**
       lattice (at least two cells), so the instance × cell cluster sum is exercised (review F-33).
-- [ ] A job with `target_mcsp`/`pre_run_mcsp` values whose products or sum overflow `u64` returns the documented
+- [x] A job with `target_mcsp`/`pre_run_mcsp` values whose products or sum overflow `u64` returns the documented
       exit-12 `InvalidInput` (`goal overflow`), never a wrapped goal (review F-37).
-- [ ] The context summary (counts, link histogram, pool sizes, jump-status sizes, goals, `dt`) is byte-identical
+- [x] The context summary (counts, link histogram, pool sizes, jump-status sizes, goals, `dt`) is byte-identical
       across two initializations of the same package.
-- [ ] `MemoryPlan` rejects an over-cap package before any allocation; `plan == report` on planned lengths; the
+- [x] `MemoryPlan` rejects an over-cap package before any allocation; `plan == report` on planned lengths; the
       capacity diagnostic is recorded.
-- [ ] `SimulationContext` is `Send` and not `Sync` (the `compile_fail` doctest fails to compile).
-- [ ] Zero selectable directions, zero mobile particles, a zero total goal, a bad cluster geometry, a missing
+- [x] `SimulationContext` is `Send` and not `Sync` (the `compile_fail` doctest fails to compile).
+- [x] Zero selectable directions, zero mobile particles, a zero total goal, a bad cluster geometry, a missing
       occupation code, a context-limit overflow, a cancelled initialization, and a mismatched resume each return
       the documented
       error/exit.
-- [ ] Resume restores lattice, counters, RNG, time, and normalization exactly; `RawMax` is preserved; a
+- [x] Resume restores lattice, counters, RNG, time, and normalization exactly; `RawMax` is preserved; a
       completed state returns `AlreadyCompleted`.
-- [ ] A counting allocator observes zero allocations in the hot accessors and the pool add/remove helpers after
+- [x] A counting allocator observes zero allocations in the hot accessors and the pool add/remove helpers after
       construction.
-- [ ] `MemoryReport` reports each array's planned length × `size_of` and equals the plan (`plan == report`);
+- [x] `MemoryReport` reports each array's planned length × `size_of` and equals the plan (`plan == report`);
       summed capacity bytes are a diagnostic (`>=` plan), not the equality target (review F-32).
-- [ ] Documentation written: `solver-architecture.md` (context section), `physics/energies.md` (total-energy
+- [x] Documentation written: `solver-architecture.md` (context section), `physics/energies.md` (total-energy
       convention), `performance/index.md` (context budget), `troubleshooting/errors.md` (context failures),
       `testing-and-parity.md` (tiers/fixtures), `msl-format.md` (cluster-link limitation and runtime expansion).
 
@@ -1499,9 +1559,14 @@ second fixture. Because the ceria writer fixture has no pair or cluster tables, 
 measurement for the pair/cluster-scale budget (§20), not the real-writer fixture.
 
 Feature 6 also adds `tests/contracts/packages/step-14-multi-centre-cluster/`, a real-writer test artifact built
-from the committed `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a copy of the
-centred sample, so the `step-13-centered` golden does not move) with one cluster centred on the four-position
-site and **one member** on the other site. The artifact set is the same shape as the 10×10×10 fixture: `.msl`,
+from the committed `samples/step-14-multi-centre-cluster/step-14-multi-centre-cluster.mocprj` (a derivation of
+the centred sample, which stays byte-identical, so the `step-13-centered` golden does not move) with one cluster
+centred on the four-position site and **two distinct member sites** (B and C). The project model's `ENM008`
+validator requires 2–8 surrounding offsets, so the design's literal one-member cluster cannot be authored; using
+two **images of one member site** is the rejected ambiguous OD-1 case, so the implemented fixture adds a third
+stable site C and two distinct member offsets (`[0,0,0.05]`, `[0,0,0.1]`). This is a recorded fixture-authoring
+deviation; it still exercises the multi-centre member-site fallback and the four slot-0 links unchanged. The
+artifact set is the same shape as the 10×10×10 fixture: `.msl`,
 `.sha256`, `package-summary-v1.json`, `payloads/index.json`, `payloads/model-1.bin`, a README with provenance
 (writer commit, SDK, `created_utc`, job count), a .NET rebuild test, and the regeneration command. It is the F-17
 acceptance fixture: the centre site's four P1 positions produce four slot-0 links, hence four runtime instances,

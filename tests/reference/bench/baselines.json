@@ -152,5 +152,30 @@
     "reruns": [
       "tests/reference/bench/step-13-load-2026-11-20-rerun.txt"
     ]
+  },
+  "rustContext": {
+    "runnerClass": "linux-x64-local-container-amd-ryzen-7-7840u-rust-1.99.1",
+    "command": "cargo bench --manifest-path src/rust/Cargo.toml -p mocassin-solver --bench context",
+    "fixtures": {
+      "ceria10x10x10": "tests/contracts/packages/step-14-ceria-10x10x10/step-14-ceria-10x10x10.msl",
+      "populatedClone10x10x10": "step-13-populated model on a hand-built 10x10x10 InitialLattice"
+    },
+    "rawResults": "tests/reference/bench/step-14-context-2026-11-21.txt",
+    "evidence": "tests/reference/bench/step-14-context.json",
+    "limits": {
+      "regressionFraction": 0.1,
+      "contextInitializationMilliseconds": 100,
+      "contextMemoryMiB": 64,
+      "comparisonRule": "Compare the median of the identical Criterion benchmark on the matching runner class only. A release candidate fails when its median is more than 1.10 x the recorded median or above the documented 100 ms / 64 MiB budget. Absolute timings are never compared across CPUs, operating systems, or Rust versions; a new runner class records its own entry instead of replacing this one."
+    },
+    "environment": "local container, AMD Ryzen 7 7840U, Rust 1.99.1, Criterion 0.8.2, Debian GNU/Linux 13, release profile",
+    "recorded": {
+      "date": "2026-11-21",
+      "ceria10x10x10MedianMicroseconds": 75.565,
+      "ceria10x10x10MemoryPlanBytes": 308632,
+      "populatedClone10x10x10MedianMicroseconds": 315.26,
+      "populatedClone10x10x10MemoryPlanBytes": 234832,
+      "targetMet": true
+    }
   }
 }

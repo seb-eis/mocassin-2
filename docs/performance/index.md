@@ -104,6 +104,43 @@ structured evidence and the same-runner-class baseline are
 [`baselines.json`](../../tests/reference/bench/baselines.json). The RNG draw/refill/state numbers and their
 baseline are in [`step-13-rng.json`](../../tests/reference/bench/step-13-rng.json) and the `rustRng` entry.
 
+## Solver context initialization (Step 14)
+
+The context benchmark is `src/rust/crates/mocassin-solver/benches/context.rs`:
+
+```sh
+cargo bench --manifest-path src/rust/Cargo.toml -p mocassin-solver --bench context
+```
+
+It measures `SimulationContext::initialize` for the real-writer
+`tests/contracts/packages/step-14-ceria-10x10x10/step-14-ceria-10x10x10.msl` package (table-free
+ceria, 4,000 environments) and for the `step-13-populated` model cloned onto a hand-built 10×10×10 lattice
+(3,000 environments, six pair tables and one cluster table). Setup/cloning is outside the measured region.
+Measured on the local container class (AMD Ryzen 7 7840U, Debian GNU/Linux 13, Rust 1.99.1, Criterion 0.8.2,
+release, single-threaded):
+
+| Scenario | Median | Memory plan / capacity |
+| --- | ---: | ---: |
+| Ceria 10×10×10 (table-free) | 75.6 µs | 308,632 B / 308,632 B |
+| Populated clone 10×10×10 | 315.3 µs | 234,832 B / 234,864 B |
+
+Both are far below the `< 100 ms` and `≤ 64 MiB` budgets. The same-runner-class baseline is the `rustContext`
+entry in [`baselines.json`](../../tests/reference/bench/baselines.json); the structured evidence is
+[`step-14-context.json`](../../tests/reference/bench/step-14-context.json) and the raw Criterion log is
+[`step-14-context-2026-11-21.txt`](../../tests/reference/bench/step-14-context-2026-11-21.txt). The 10 % rule is
+applied only within that class. The table-free ceria fixture is not a pair/cluster-scale measurement; the
+populated clone is.
+
+The allocation proof is `src/rust/crates/mocassin-solver/tests/allocation.rs`, its own test binary with a
+counting global allocator. The ceria 10×10×10 build makes 98 allocations / 316,872 B against a 308,632 B plan
+(capacity equal to the plan); the populated 2×2×2 build makes 103 allocations / 11,861 B against a 2,672 B plan.
+After construction, the hot accessors (`node_energy`, `site_energy`, `cluster_energy`, `cluster_code`,
+`link_range`, `incoming`, `jump_links`, `mobile_positions`, the tracker mappings, `dt`, goals, normalization)
+and 200 pool `set_selectable` particle-change cycles perform **zero** allocations; the pool capacities/pointers
+are unchanged. The allocation-test process peak RSS was 11,060 KiB (Linux `VmHWM`, non-gating context next to
+the memory report); the context plan itself is far below the 64 MiB budget. The build-time temporary allocations
+are the plan entries and the link/cluster/pool builders; the per-array capacities are fixed by the plan.
+
 ## HPC
 
 The solver is a process-per-job design. SLURM/PBS templates and a runner are added in Step 19. Job folders

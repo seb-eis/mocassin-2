@@ -249,6 +249,20 @@ separate diagnostic, and the benchmark records peak RSS. The 10×10×10 real-wri
 the populated-model 10×10×10 clone are both budgeted at `< 100 ms` and `≤ 64 MiB`; the clone is the pair/cluster
 measurement because the ceria model has no pair or cluster tables.
 
+**Implementation evidence (feature 6).** The real-writer 10×10×10 ceria fixture initializes in 75.6 µs and the
+populated-model clone in 315.3 µs (Criterion, release, same-runner class), with memory plans of 308,632 B and
+234,832 B and a counting-allocator proof of zero allocations in the hot accessors and the pool `set_selectable`
+helpers after construction. The fixtures, snapshots, allocation proof, and baseline are recorded in
+`tests/contracts/packages/step-14-*`, `tests/reference/bench/step-14-context.json`, and the `rustContext` entry in
+`baselines.json`.
+
+**Active directions and void members.** The `.msl` `jump_count`/`jump_mapping` are a union over all compiled
+collections; the context filters the selection pools, `direction_for`, and the jump-status build to the job
+simulation's active collections, so a KMC job never offers an MMC direction. A cluster cell whose centre (or a
+member) is void has no canonical occupation row: the link/code is absent and the contribution is zero (the empty
+cluster). The energy engine must not call `cluster_lookup` for a void-member tuple; it uses the zero row. The
+amendment-2 `code_expansions` fail-closed behavior is unchanged for non-canonical non-void tuples.
+
 ## RNG
 
 The algorithm is ChaCha12 with SHA-256-derived seeds (ADR 0005). Job-level parallelism only; a trajectory is

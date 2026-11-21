@@ -1,0 +1,34 @@
+{
+  "format": "mocassin.package-payloads",
+  "formatVersion": 1,
+  "note": "Raw MessagePack payloads extracted from step-14-ceria-10x10x10.msl (real .NET writer). The compressed frames live in the .msl; the .msl SHA-256 is in step-14-ceria-10x10x10.sha256.",
+  "payloads": [
+    {
+      "kind": "job",
+      "index": 1,
+      "path": "job-1.bin",
+      "compressedBytes": 402,
+      "compressedSha256": "2044ce717a94a8d1d4fae4736541675238e35fb6df72613d42be1dd4dc6ea699",
+      "rawBytes": 530,
+      "rawSha256": "92e3e7c48d77b22b9d8587b7c1a1109adf36dea383dc746102844475e74deeab"
+    },
+    {
+      "kind": "lattice",
+      "index": 1,
+      "path": "lattice-1.bin",
+      "compressedBytes": 143,
+      "compressedSha256": "4edea92e7ee18516da225c2d204f22503e26070c9872163f7fd28bdefcda5094",
+      "rawBytes": 4061,
+      "rawSha256": "73b92fd6cd683e1a12054f5c85e93dc2cd7c88fdf3e4af85454595ea9db71ef0"
+    },
+    {
+      "kind": "model",
+      "index": 1,
+      "path": "model-1.bin",
+      "compressedBytes": 1415,
+      "compressedSha256": "1dc0bf3b5c82b1146c3ee2db85863e035bff8761cfedaa10047569dd21fc943f",
+      "rawBytes": 3475,
+      "rawSha256": "066e9f3e069e379802c7135f6ab5c4a4c01ac5fa08aa658c0b335aa5ba8a4180"
+    }
+  ]
+}

@@ -1,0 +1,73 @@
+{
+  "format": "mocassin.package-summary",
+  "formatVersion": 1,
+  "schema": {
+    "formatVersion": 1,
+    "projectId": "018f4c9a-7f6b-7c3a-9d2e-1a2b3c4d9d01",
+    "jobSelection": "all",
+    "symmetryContractVersion": "symmetry-1",
+    "spaceGroupDataVersion": "spglib-2.8.0/catalog-1",
+    "spaceGroupDataSha256": "1f3bf67d92b9258816ee27af2ef12f0035387fa8bad6527aff86f57a740e3395"
+  },
+  "models": [
+    {
+      "signature": "5dd55dca332a5491a50c4cac6d9bc48d0af1d1e932eb8955f3323a7d73b2b0e6",
+      "modelSignature": "34147482298bf158797539cfa662e175382f740a6f897b720ee3d1f0e3222130",
+      "payloadFormatVersion": 1,
+      "particleCount": 4,
+      "positionCount": 12,
+      "siteCount": 3,
+      "environmentCount": 12,
+      "pairTableCount": 12,
+      "clusterTableCount": 1,
+      "collectionCount": 1,
+      "ruleCount": 8
+    }
+  ],
+  "lattices": [
+    {
+      "signature": "608d61edf5d2fbf85e03c73926e694c7c49f4e56426fd8f6f846b7ad99bb146f",
+      "latticeSize": [
+        2,
+        2,
+        2
+      ],
+      "positionCount": 12,
+      "latticeLength": 96
+    }
+  ],
+  "jobs": [
+    {
+      "jobId": 1,
+      "modelSignature": "34147482298bf158797539cfa662e175382f740a6f897b720ee3d1f0e3222130",
+      "latticeSignature": "608d61edf5d2fbf85e03c73926e694c7c49f4e56426fd8f6f846b7ad99bb146f",
+      "kind": "mmc",
+      "collectionName": "C1000",
+      "configName": "x001",
+      "collectionIndex": 0,
+      "configIndex": 0,
+      "jobIndex": 0,
+      "temperatureK": 1000,
+      "electricFieldVm": 0,
+      "targetMcsp": 100,
+      "writeOutCount": 10,
+      "preRunMcsp": 0,
+      "timeLimitS": 31536000,
+      "minSuccessRate": null,
+      "latticeSize": [
+        2,
+        2,
+        2
+      ],
+      "dopingInfo": "",
+      "flags": 128,
+      "seedHex": "426cfebf844ead7ff1261cffd3ef1b73f02def76095bc6a170b1764499ecbe18"
+    }
+  ],
+  "counts": {
+    "modelCount": 1,
+    "latticeCount": 1,
+    "jobCount": 1,
+    "latticeReuseFactor": 1
+  }
+}

@@ -20,4 +20,10 @@ thiserror.workspace = true
 tracing.workspace = true
 
 [dev-dependencies]
+criterion.workspace = true
+insta.workspace = true
 mocassin-msl.workspace = true
+
+[[bench]]
+name = "context"
+harness = false

@@ -1,0 +1,80 @@
+{
+  "step": "step-14",
+  "part": "Feature 6 — context initialization benchmark and allocation evidence",
+  "generatedAtUtc": "2026-11-21T15:55:00Z",
+  "sourceCommit": "feature-6 tree; replaced with the audited commit at closeout",
+  "command": "cargo bench --manifest-path src/rust/Cargo.toml -p mocassin-solver --bench context",
+  "rawResults": "tests/reference/bench/step-14-context-2026-11-21.txt",
+  "toolchain": {
+    "rustc": "1.99.1 (58cf8f9c3 2026-10-13)",
+    "cargo": "1.99.1 (5f94df478 2026-08-27)",
+    "criterion": "0.8.2",
+    "profile": "bench (release, opt-level 3, single-threaded)"
+  },
+  "environment": {
+    "runnerClass": "linux-x64-local-container-amd-ryzen-7-7840u-rust-1.99.1",
+    "os": "Debian GNU/Linux 13 (trixie), Linux 6.12.116+deb13-rt-amd64 x86_64",
+    "cpu": "AMD Ryzen 7 7840U w/ Radeon 780M Graphics",
+    "logicalCpus": 16
+  },
+  "budgets": {
+    "contextInitializationMilliseconds": 100,
+    "contextMemoryMiB": 64,
+    "regressionFraction": 0.1,
+    "comparisonRule": "Compare the median of the identical Criterion benchmark on the matching runner class only. A release candidate fails when its median is more than 1.10 x the recorded median or above the documented 100 ms / 64 MiB budget. Absolute timings are never compared across CPUs, operating systems, or Rust versions."
+  },
+  "scenarios": {
+    "ceria_10x10x10": {
+      "fixture": "tests/contracts/packages/step-14-ceria-10x10x10/step-14-ceria-10x10x10.msl",
+      "job": 1,
+      "model": "msl-v1 ceria primary model; no pair or cluster tables",
+      "supercell": [10, 10, 10],
+      "p1Positions": 4,
+      "particles": 5,
+      "environments": 4000,
+      "mobileCount": 3000,
+      "selectableJumpCount": 2000,
+      "medianMicroseconds": 75.565,
+      "confidenceIntervalMicroseconds": [74.908, 76.269],
+      "memoryPlanBytes": 308632,
+      "memoryCapacityBytes": 308632,
+      "targetMet": true
+    },
+    "populated_clone_10x10x10": {
+      "fixture": "step-13-populated model cloned onto a hand-built 10x10x10 InitialLattice in the benchmark",
+      "supercell": [10, 10, 10],
+      "p1Positions": 3,
+      "particles": 4,
+      "environments": 3000,
+      "pairTables": 6,
+      "clusterTables": 1,
+      "medianMicroseconds": 315.26,
+      "confidenceIntervalMicroseconds": [313.18, 317.73],
+      "memoryPlanBytes": 234832,
+      "memoryCapacityBytes": 234864,
+      "targetMet": true
+    }
+  },
+  "allocationEvidence": {
+    "command": "cargo test --manifest-path src/rust/Cargo.toml -p mocassin-solver --test allocation -- --nocapture",
+    "countingAllocator": "tests/allocation.rs (own test binary, global allocator wrapper)",
+    "ceria_10x10x10Build": {
+      "allocations": 98,
+      "allocatedBytes": 316872,
+      "memoryPlanBytes": 308632,
+      "memoryCapacityBytes": 308632,
+      "hotAccessorAllocationsAfterConstruction": 0
+    },
+    "populated_2x2x2Build": {
+      "allocations": 103,
+      "allocatedBytes": 11861,
+      "memoryPlanBytes": 2672,
+      "memoryCapacityBytes": 2704,
+      "hotAccessorAllocationsAfterConstruction": 0,
+      "poolSetSelectableAllocations": 0
+    },
+    "note": "The build allocates the planned arrays once plus short-lived construction temporaries (the plan entries, the link/cluster/pool builders, and the tracker mapping); the per-array capacity equals or exceeds the plan and the hot accessors and pool set_selectable helpers allocate nothing after construction."
+  },
+  "memoryNote": "The 10x10x10 ceria fixture is table-free; the populated clone carries the real pair/cluster tables and is the pair/cluster-scale measurement. Both are far below the 64 MiB budget.",
+  "evidenceStatus": "Local-container evidence recorded; Step 29 owns the same-class automated regression job. The runner class is declared so the 10% rule can be applied only within it."
+}
