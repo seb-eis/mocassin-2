@@ -41,7 +41,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad`; test fix `90d9f73` |
 | 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c`; refresh fix `d4badd0`; undo/redo commands `eb50095` |
-| 3 | Dirty state, autosave, crash recovery | `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `97c42ec` |
+| 3 | Dirty state, autosave, crash recovery | `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `97c42ec`; crash-writer fix `a9506bf` |
 | 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
 
 ### Approved feature list (owner-approved 2026-11-21)
@@ -127,7 +127,8 @@ seam fills in §1.
 #### Feature 3 — dirty state, autosave, and crash recovery (squashed `97c42ec`)
 
 - **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/dirty-autosave-and-recovery`; deleted after the
-  squash. Feature commit `3dd58de`, squash `97c42ec`.
+  squash. Feature commit `3dd58de`, squash `97c42ec`. A `fix-crash-writer-result` follow-up (deleted) is squashed as
+  `a9506bf`; it awaits completed crash writes instead of reading `Task.Result`.
 - **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 211 App tests, 0 warnings,
   `dotnet format` clean); `./tools/verify.sh structure` exit 0 (9 architecture tests); `./tools/verify.sh api`
   exit 0 (no baseline break); `./tools/verify.sh docs` exit 0. **No CI run** was triggered.
