@@ -154,7 +154,8 @@ Step 23B is design-frozen but not implemented. Its tests extend the 23A harness:
 save-point matrix, the retained `ProjectSession.Validation`/`Load`-stage fixtures, the Problems surface, the
 read-only outcome, the explicit statistics trigger, dirty markers and prompts, the autosave tick, the
 `IsDirty`-based recovery comparison (no ViewModels hash), the `recovery/` crash snapshot and manifest,
-return-to-clean sidecar cleanup, unclean-exit restore, the per-session gate, and the 2 s crash-path budget. Tests use `ManualTimeProvider` and the scheduler's
+return-to-clean sidecar cleanup with the deferred-candidate exception, unclean-exit restore, the per-session
+gate, and the 2 s crash-path budget. Tests use `ManualTimeProvider` and the scheduler's
 injectable tick instead of real sleeps, and the crash dialog's dead-UI path is asserted to write no recovery
 files. Screenshots and accessibility checks for the Problems channel, recovery prompt, and metadata form are
 PR-medium on Ubuntu only.
