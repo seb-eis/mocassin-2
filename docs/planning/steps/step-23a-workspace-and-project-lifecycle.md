@@ -19,12 +19,12 @@ those are Step 23B.
 
 ## Implementation status
 
-- **Status:** In progress
+- **Status:** Ready for audit — closeout CI pending
 - **Step branch:** `step/23a-workspace-and-project-lifecycle`
-- **Step CI:** — (no CI runs until closeout)
-- **Main merge:** —
+- **Step CI:** pending the single closeout dispatch
+- **Main merge:** — (main `bbc2d08` is merged into the step branch)
 - **Step tag:** —
-- **Audit:** Not requested
+- **Audit:** Ready for audit
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe`
   ([record](../reviews/step-23a.md), round 3 record commit `b6a472c`). Notes n-12/n-13 are corrected in
   feature 5.
@@ -33,7 +33,7 @@ those are Step 23B.
 - **Complexity class:** **High** — cross-step interfaces and test-matrix breadth; the class and one-paragraph
   justification are in §18. The human owner accepted the class at the start gate on 2026-11-20; a further
   split is not proposed and §18 states why.
-- **Last updated:** 2026-11-20
+- **Last updated:** 2026-11-21
 
 | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- |
@@ -41,6 +41,7 @@ those are Step 23B.
 | 2 | `documents-navigation-and-commands` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `75d95de` |
 | 3 | `settings-theming-and-accessibility` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `d0bca73` |
 | 4 | `project-session-lifecycle` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `a17482a` |
+| 5 | `tests-docs-and-closeout` | Squashed | `./tools/verify.sh all --require` 0 on the merged tree | closeout pending | `114f31c` |
 
 ### Recorded implementation deviations and limitations (feature 5)
 
@@ -807,12 +808,14 @@ completeness even though the CLI never produces it:
 
 The CLI continues to call `File.Exists`/`Directory.Exists`/`Directory.CreateDirectory` itself and passes only
 the resulting `ProjectTargetState` into the pure helper; the GUI does the same through its picker. The CLI's
-**empty or syntactically invalid output directory** keeps its existing behaviour — `CLI002` I/O, exit `3`, pinned
-by `AnEmptyOutputDirectoryIsCli002AndExitThree` — because the CLI validates and normalises its output path before
-it calls the helper. The helper's `InvalidTargetPath` is therefore reserved for the GUI and never changes a CLI
-code, exit code, or message. `GetMessage` owns the text for the failures the helper produces, and new
-`Mocassin.Cli.Tests` cases pin each of those messages so the extraction cannot reword the CLI; the CLI's existing
-empty-output-directory message stays unchanged and stays pinned by `AnEmptyOutputDirectoryIsCli002AndExitThree`.
+**empty or syntactically invalid output directory** keeps its existing behaviour — `CLI002` I/O, exit `3` —
+because the CLI validates and normalises its output path before it calls the helper.
+`AnEmptyOutputDirectoryIsCli002AndExitThree` pins that code and exit, not the message text. The message is produced
+by the CLI's own path-parse catch outside the helper, so the extraction leaves it untouched; the n-13 correction
+records that limitation instead of claiming the test pins the text. `GetMessage` owns the text for the failures
+the helper produces, and new `Mocassin.Cli.Tests` cases pin each of those messages so the extraction cannot
+reword the CLI. The helper's `InvalidTargetPath` is reserved for the GUI and never changes a CLI code, exit code,
+or message.
 The helper is listed in `Mocassin.Packages'` `PublicAPI.Unshipped.txt`; no baseline refresh is expected. No other
 library change is allowed in 23A; if one appears necessary, the step agent stops and records an amendment.
 
@@ -995,9 +998,10 @@ CLI contract changes.
 - **Closeout identity (M-1).** The evidence file is `docs/planning/closeout/step-23a.json` and its `step` field is
   exactly `"step-23a"`; the tag is `step-23a` and the audit record is `docs/planning/audits/step-23a.md`. There is
   **no** `step-23` alias, and the superseded unsplit `step-23` identity stays unused.
-- **Tooling prerequisite (M-1).** `tools/check_closeout_evidence.py` currently accepts only `^step-\d{2}$`
-  (`STEP_RE`) and rejects a letter suffix. A separate tooling change extends the checker, its tests, and the
-  closeout README/template to `^step-\d{2}[a-z]$` with a letter-suffix positive case. That change must land
+- **Tooling prerequisite (M-1).** `tools/check_closeout_evidence.py` accepts `^step-\d{2}[a-z]?$`, the
+  optional single lowercase suffix that keeps every existing unsuffixed `step-NN` ID valid. The checker, its
+  tests, and the closeout README/template landed before this closeout; the exact pattern is the optional suffix,
+  not a required one. This change must land
   **before either 23A or 23B closeout**; until it does, `python tools/check_closeout_evidence.py` cannot accept
   `step-23a` and the closeout gate must not be claimed. The design does not work around it.
 - **Evidence:** `docs/planning/closeout/step-23a.json`, created from the template, binds the audited commit, the
@@ -1044,8 +1048,9 @@ CLI contract changes.
       reopening yields identical content through the real store.
 - [ ] Save-as works and migrates the lock; an already-open path activates its session; **New** refuses an
       existing target with the CLI's message, while Save As to an existing file follows the picker confirmation.
-- [ ] The composed `ProjectStore` has `ValidateOnLoad = false` and retains `ProjectLoadResult.Diagnostics`; no
-      validation pipeline is registered or called in 23A.
+- [ ] The composed `ProjectStore` has `ValidateOnLoad = false` and retains `ProjectLoadResult.Diagnostics`; the
+      session performs exactly one internal load-validation pass (see step page §5.1), and no validation UI is
+      registered or shown in 23A.
 - [ ] Reload and external-change detection behave as designed; no silent overwrite is possible.
 - [ ] Recent files, locks, read-only mode, and the project switcher behave as designed.
 - [ ] Settings round-trip through the real store, validate, migrate, ignore unknown fields, reject a future

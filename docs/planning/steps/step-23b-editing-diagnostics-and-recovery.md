@@ -376,9 +376,9 @@ and that the `ProjectDocument` additions are still additive after 23A merged.
   platform dispatch and the macOS manual gate as for 23A.
 - **Closeout identity and prerequisite (M-1):** the evidence file is `docs/planning/closeout/step-23b.json`, its
   `step` field is exactly `"step-23b"`, the tag is `step-23b`, and the audit record is
-  `docs/planning/audits/step-23b.md`. There is no `step-23` alias. `tools/check_closeout_evidence.py` must first
-  accept `^step-\d{2}[a-z]$` (checker, tests, README and template), which is a separate tooling change landing
-  before either closeout; 23B does not work around it.
+  `docs/planning/audits/step-23b.md`. There is no `step-23` alias. `tools/check_closeout_evidence.py` accepts
+  `^step-\d{2}[a-z]?$` (the optional single lowercase suffix), which is the landed tooling change shared with
+  23A; 23B does not work around it.
 - **Evidence and audit:** the same canonical closeout evidence and fresh-auditor process as 23A, with
   `audits/step-23b.md` created on demand at that point, not pre-seeded. Merge with `--no-ff` and tag `step-23b`
   only after a `Passed` audit, owner approval, the tooling prerequisite, and a green automatic `main` CI run.
