@@ -13,6 +13,7 @@
         Height="800"
         MinWidth="900"
         MinHeight="600"
+        Background="{DynamicResource Mocassin.ChromeBackground}"
         WindowStartupLocation="CenterScreen">
   <Grid>
     <shell:ShellView x:Name="ShellRoot" />

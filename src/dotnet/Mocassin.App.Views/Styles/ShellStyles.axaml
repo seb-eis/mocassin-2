@@ -1,32 +1,118 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <Style Selector="TextBlock.caption">
-    <Setter Property="Foreground" Value="{DynamicResource SystemControlForegroundBaseMediumBrush}" />
-    <Setter Property="FontSize" Value="12" />
-  </Style>
   <Style Selector="TextBlock">
     <Setter Property="FontSize" Value="{DynamicResource Mocassin.BodyFontSize}" />
+    <Setter Property="LineHeight" Value="{DynamicResource Mocassin.BodyLineHeight}" />
   </Style>
+  <Style Selector="TextBlock.caption">
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.ForegroundMutedBrush}" />
+    <Setter Property="FontSize" Value="{DynamicResource Mocassin.CaptionFontSize}" />
+    <Setter Property="LineHeight" Value="{DynamicResource Mocassin.CaptionLineHeight}" />
+  </Style>
+  <Style Selector="TextBlock.strong">
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.ForegroundStrongBrush}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+
   <Style Selector="Button">
     <Setter Property="Padding" Value="{DynamicResource Mocassin.ControlPadding}" />
     <Setter Property="MinHeight" Value="{DynamicResource Mocassin.ControlMinHeight}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusControl}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.ControlBorderThickness}" />
     <Setter Property="Transitions" Value="{DynamicResource Mocassin.Transitions}" />
   </Style>
+  <Style Selector="Button.compact">
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.CompactButtonPadding}" />
+    <Setter Property="MinHeight" Value="{DynamicResource Mocassin.CompactButtonMinHeight}" />
+    <Setter Property="HorizontalContentAlignment" Value="Center" />
+    <Setter Property="VerticalContentAlignment" Value="Center" />
+  </Style>
+  <Style Selector="Button.accent">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.AccentBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.OnAccentBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Mocassin.AccentBrush}" />
+  </Style>
+  <Style Selector="Button.danger">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.CardBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.ErrorForeground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Mocassin.ErrorBorderBrush}" />
+  </Style>
+  <Style Selector="Button.danger:pointerover">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.HoverBackground}" />
+  </Style>
+  <Style Selector="Button.danger:pressed">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.PressedBackground}" />
+  </Style>
+
   <Style Selector="TextBox">
     <Setter Property="MinHeight" Value="{DynamicResource Mocassin.ControlMinHeight}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusControl}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.ControlBorderThickness}" />
     <Setter Property="Transitions" Value="{DynamicResource Mocassin.Transitions}" />
   </Style>
   <Style Selector="ComboBox">
     <Setter Property="MinHeight" Value="{DynamicResource Mocassin.ControlMinHeight}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusControl}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.ControlBorderThickness}" />
   </Style>
   <Style Selector="ListBoxItem">
     <Setter Property="Padding" Value="{DynamicResource Mocassin.ItemPadding}" />
   </Style>
-  <Style Selector="Border">
+
+  <Style Selector="Menu">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.MenuBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.ForegroundBrush}" />
+    <Setter Property="MinHeight" Value="{DynamicResource Mocassin.MenuHeight}" />
+  </Style>
+  <Style Selector="MenuItem">
+    <Setter Property="FontSize" Value="{DynamicResource Mocassin.BodyFontSize}" />
+  </Style>
+
+  <Style Selector="TabControl">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource Mocassin.ForegroundBrush}" />
+  </Style>
+  <Style Selector="TabItem">
+    <Setter Property="MinHeight" Value="{DynamicResource Mocassin.TabHeight}" />
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.RegionHeaderPadding}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusTabTop}" />
+    <Setter Property="FontSize" Value="{DynamicResource Mocassin.BodyFontSize}" />
+  </Style>
+
+  <Style Selector="GridSplitter">
+    <Setter Property="Background" Value="Transparent" />
+  </Style>
+
+  <Style Selector="Border.region-card">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.WorkspaceBackground}" />
     <Setter Property="BorderBrush" Value="{DynamicResource Mocassin.BorderBrush}" />
     <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.BorderThickness}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusCard}" />
   </Style>
-  <Style Selector="Menu">
-    <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundChromeMediumLowBrush}" />
+  <Style Selector="Border.overlay-card">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.CardBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Mocassin.BorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.BorderThickness}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusCard}" />
+    <Setter Property="Padding" Value="{DynamicResource Mocassin.CardPadding}" />
+  </Style>
+  <Style Selector="Border.banner-error">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.ErrorBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Mocassin.ErrorBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.BorderThickness}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusControl}" />
+  </Style>
+  <Style Selector="Border.banner-success">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.SuccessBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Mocassin.SuccessBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.BorderThickness}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource Mocassin.RadiusControl}" />
+  </Style>
+  <Style Selector="Border.banner-warning">
+    <Setter Property="Background" Value="{DynamicResource Mocassin.WarningBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource Mocassin.WarningBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource Mocassin.BorderThickness}" />
   </Style>
 </Styles>

@@ -6,7 +6,7 @@
              x:Class="Mocassin.App.Views.Dialogs.ErrorDialogView"
              x:DataType="overlay:ErrorDialogViewModel">
   <StackPanel Spacing="12">
-    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="16" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding Title}" FontWeight="SemiBold" FontSize="{DynamicResource Mocassin.TitleFontSize}" LineHeight="{DynamicResource Mocassin.TitleLineHeight}" Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}" TextWrapping="Wrap" />
     <TextBlock Text="{Binding Message}" TextWrapping="Wrap" />
     <Expander Header="Details" IsVisible="{Binding HasDetails}">
       <ItemsControl ItemsSource="{Binding Details}">

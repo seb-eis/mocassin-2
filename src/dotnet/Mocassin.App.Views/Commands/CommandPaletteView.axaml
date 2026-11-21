@@ -4,18 +4,14 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Commands.CommandPaletteView"
              x:DataType="vm:CommandPaletteViewModel">
-  <Grid Background="#66000000"
+  <Grid Background="{DynamicResource Mocassin.OverlayScrim}"
         automation:AutomationProperties.Name="Command palette"
         KeyDown="OnRootKeyDown">
-    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-            BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-            BorderThickness="1"
-            CornerRadius="6"
+    <Border Classes="overlay-card"
             Width="620"
             MaxHeight="460"
             VerticalAlignment="Top"
-            Margin="0,120,0,0"
-            Padding="12">
+            Margin="0,120,0,0">
       <Grid RowDefinitions="Auto,*" RowSpacing="8">
         <TextBox x:Name="SearchBox"
                  automation:AutomationProperties.Name="Command palette search"
@@ -23,6 +19,8 @@
                  PlaceholderText="Type a command" />
         <ListBox Grid.Row="1"
                  automation:AutomationProperties.Name="Filtered commands"
+                 Background="Transparent"
+                 BorderThickness="0"
                  ItemsSource="{Binding Results}"
                  SelectedItem="{Binding SelectedCommand}"
                  DoubleTapped="OnListDoubleTapped">

@@ -5,17 +5,13 @@
              xmlns:settings="using:Mocassin.App.ViewModels.Settings"
              x:Class="Mocassin.App.Views.Settings.SettingsDialogView"
              x:DataType="vm:SettingsViewModel">
-  <Grid Background="#66000000" automation:AutomationProperties.Name="Settings">
-    <Border Background="{DynamicResource SystemControlBackgroundAltHighBrush}"
-            BorderBrush="{DynamicResource SystemControlForegroundBaseMediumLowBrush}"
-            BorderThickness="1"
-            CornerRadius="6"
+  <Grid Background="{DynamicResource Mocassin.OverlayScrim}" automation:AutomationProperties.Name="Settings">
+    <Border Classes="overlay-card"
             Width="680"
             MaxHeight="760"
-            VerticalAlignment="Center"
-            Padding="20">
+            VerticalAlignment="Center">
       <Grid RowDefinitions="Auto,*,Auto" RowSpacing="12">
-        <TextBlock Text="Settings" FontSize="22" FontWeight="SemiBold" automation:AutomationProperties.Name="Settings" />
+        <TextBlock Text="Settings" FontSize="{DynamicResource Mocassin.TitleFontSize}" LineHeight="{DynamicResource Mocassin.TitleLineHeight}" FontWeight="SemiBold" Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}" automation:AutomationProperties.Name="Settings" />
         <ScrollViewer Grid.Row="1">
           <StackPanel Spacing="14">
             <Grid ColumnDefinitions="200,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto">
@@ -82,24 +78,19 @@
               <Button Content="Clear logs and cache" Command="{Binding ClearLogsCommand}" />
             </StackPanel>
 
-            <Border IsVisible="{Binding HasErrorMessage}"
-                    Background="#FDECEA"
-                    BorderBrush="#C62828"
-                    BorderThickness="1"
-                    CornerRadius="4"
-                    Padding="8">
+            <Border Classes="banner-error"
+                    Padding="8"
+                    IsVisible="{Binding HasErrorMessage}">
               <TextBlock Text="{Binding ErrorMessage}"
-                         Foreground="#B71C1C"
+                         Foreground="{DynamicResource Mocassin.ErrorForeground}"
                          TextWrapping="Wrap"
                          automation:AutomationProperties.Name="Settings error" />
             </Border>
-            <Border IsVisible="{Binding HasStatusMessage}"
-                    Background="#E8F5E9"
-                    BorderBrush="#2E7D32"
-                    BorderThickness="1"
-                    CornerRadius="4"
-                    Padding="8">
+            <Border Classes="banner-success"
+                    Padding="8"
+                    IsVisible="{Binding HasStatusMessage}">
               <TextBlock Text="{Binding StatusMessage}"
+                         Foreground="{DynamicResource Mocassin.SuccessForeground}"
                          TextWrapping="Wrap"
                          automation:AutomationProperties.Name="Settings status" />
             </Border>
@@ -109,7 +100,7 @@
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
           <Button Content="Reset to defaults" Command="{Binding ResetCommand}" />
           <Button Content="Cancel" Command="{Binding CloseCommand}" IsCancel="True" />
-          <Button Content="Save" Command="{Binding SaveCommand}" IsDefault="True" />
+          <Button Content="Save" Command="{Binding SaveCommand}" Classes="accent" IsDefault="True" />
         </StackPanel>
       </Grid>
     </Border>

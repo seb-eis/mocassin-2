@@ -5,11 +5,21 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Documents.WelcomeDocumentView"
              x:DataType="vm:WelcomeDocumentViewModel">
-  <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16" MaxWidth="520">
-    <TextBlock Text="Welcome to MOCASSIN" FontSize="28" FontWeight="SemiBold" HorizontalAlignment="Center" />
+  <StackPanel VerticalAlignment="Center"
+              HorizontalAlignment="Center"
+              Spacing="16"
+              MaxWidth="520"
+              Background="{DynamicResource Mocassin.WorkspaceBackground}">
+    <TextBlock Text="Welcome to MOCASSIN"
+               FontSize="{DynamicResource Mocassin.DisplayFontSize}"
+               LineHeight="{DynamicResource Mocassin.DisplayLineHeight}"
+               FontWeight="SemiBold"
+               Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}"
+               HorizontalAlignment="Center" />
     <TextBlock Text="Monte Carlo for Solid State Ionics"
-               FontSize="16"
-               Foreground="{DynamicResource SystemControlForegroundBaseMediumBrush}"
+               FontSize="{DynamicResource Mocassin.SubtitleFontSize}"
+               LineHeight="{DynamicResource Mocassin.SubtitleLineHeight}"
+               Foreground="{DynamicResource Mocassin.ForegroundMutedBrush}"
                HorizontalAlignment="Center" />
     <TextBlock Text="Create a project from a starter or open an existing .mocprj file."
                TextWrapping="Wrap"
@@ -24,17 +34,26 @@
             HorizontalAlignment="Center" />
 
     <StackPanel Spacing="4" Margin="0,12,0,0">
-      <TextBlock Text="Recent projects" FontWeight="SemiBold" HorizontalAlignment="Center" />
+      <TextBlock Text="Recent projects"
+                 FontWeight="SemiBold"
+                 Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}"
+                 HorizontalAlignment="Center" />
       <ItemsControl ItemsSource="{Binding RecentProjects.Entries}" MaxWidth="560"
                     automation:AutomationProperties.Name="Recent projects">
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="projects:RecentProjectViewModel">
             <Grid ColumnDefinitions="*,Auto,Auto,Auto" ColumnSpacing="4" Margin="0,2">
-              <TextBlock Text="{Binding Path}" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
-              <TextBlock Grid.Column="1" Text="Missing" Foreground="#C62828" VerticalAlignment="Center"
+              <TextBlock Text="{Binding Path}"
+                         Classes="caption"
+                         TextTrimming="CharacterEllipsis"
+                         VerticalAlignment="Center" />
+              <TextBlock Grid.Column="1"
+                         Text="Missing"
+                         Foreground="{DynamicResource Mocassin.ErrorForeground}"
+                         VerticalAlignment="Center"
                          IsVisible="{Binding IsMissing}" />
-              <Button Grid.Column="2" Content="Open" Command="{Binding OpenCommand}" Padding="8,2" />
-              <Button Grid.Column="3" Content="Remove" Command="{Binding RemoveCommand}" Padding="8,2" />
+              <Button Grid.Column="2" Classes="compact" Content="Open" Command="{Binding OpenCommand}" />
+              <Button Grid.Column="3" Classes="compact" Content="Remove" Command="{Binding RemoveCommand}" />
             </Grid>
           </DataTemplate>
         </ItemsControl.ItemTemplate>

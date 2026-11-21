@@ -5,19 +5,27 @@
              xmlns:automation="using:Avalonia.Automation"
              x:Class="Mocassin.App.Views.Shell.ShellView"
              x:DataType="vm:ShellViewModel">
-  <Grid RowDefinitions="Auto,Auto,*,Auto" Background="{DynamicResource Mocassin.ShellBackground}">
+  <Grid RowDefinitions="Auto,Auto,*,Auto" Background="{DynamicResource Mocassin.ChromeBackground}">
     <Menu Grid.Row="0" x:Name="MainMenu" automation:AutomationProperties.Name="Main menu" />
 
     <Border Grid.Row="1"
-            Background="#FFF3CD"
-            BorderBrush="#E0A800"
+            Classes="banner-warning"
             BorderThickness="0,0,0,1"
             Padding="12,6"
             IsVisible="{Binding ReadOnlyBannerText, Converter={x:Static ObjectConverters.IsNotNull}}">
-      <TextBlock Text="{Binding ReadOnlyBannerText}" TextWrapping="Wrap" />
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <TextBlock Text="⚠"
+                   Foreground="{DynamicResource Mocassin.WarningForeground}"
+                   automation:AutomationProperties.Name="Read-only warning" />
+        <TextBlock Text="{Binding ReadOnlyBannerText}"
+                   Foreground="{DynamicResource Mocassin.ForegroundStrongBrush}"
+                   TextWrapping="Wrap" />
+      </StackPanel>
     </Border>
 
-    <Grid Grid.Row="2" x:Name="WorkspaceGrid">
+    <Grid Grid.Row="2"
+          x:Name="WorkspaceGrid"
+          Margin="{DynamicResource Mocassin.RegionGap}">
       <Grid.ColumnDefinitions>
         <ColumnDefinition Width="*" MinWidth="160" />
         <ColumnDefinition Width="Auto" />
@@ -40,8 +48,8 @@
                     automation:AutomationProperties.HelpText="Use the arrow keys to resize the projects panel">
         <GridSplitter.FocusAdorner>
           <Template>
-            <Border BorderBrush="{DynamicResource SystemControlHighlightAccentBrush}"
-                    BorderThickness="2"
+            <Border BorderBrush="{DynamicResource Mocassin.AccentBrush}"
+                    BorderThickness="{DynamicResource Mocassin.FocusThickness}"
                     CornerRadius="1" />
           </Template>
         </GridSplitter.FocusAdorner>
@@ -65,8 +73,8 @@
                       automation:AutomationProperties.HelpText="Use the arrow keys to resize the console">
           <GridSplitter.FocusAdorner>
             <Template>
-              <Border BorderBrush="{DynamicResource SystemControlHighlightAccentBrush}"
-                      BorderThickness="2"
+              <Border BorderBrush="{DynamicResource Mocassin.AccentBrush}"
+                      BorderThickness="{DynamicResource Mocassin.FocusThickness}"
                       CornerRadius="1" />
             </Template>
           </GridSplitter.FocusAdorner>
@@ -87,8 +95,8 @@
                     automation:AutomationProperties.HelpText="Use the arrow keys to resize the inspector panel">
         <GridSplitter.FocusAdorner>
           <Template>
-            <Border BorderBrush="{DynamicResource SystemControlHighlightAccentBrush}"
-                    BorderThickness="2"
+            <Border BorderBrush="{DynamicResource Mocassin.AccentBrush}"
+                    BorderThickness="{DynamicResource Mocassin.FocusThickness}"
                     CornerRadius="1" />
           </Template>
         </GridSplitter.FocusAdorner>

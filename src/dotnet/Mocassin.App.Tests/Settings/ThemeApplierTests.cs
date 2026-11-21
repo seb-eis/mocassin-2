@@ -56,7 +56,8 @@ public sealed class ThemeApplierTests
                 applier.Apply(AppSettings.Default with { Theme = ThemeSelection.Light, Accent = null });
 
                 Assert.Equal(ThemeVariant.Light, Application.Current!.RequestedThemeVariant);
-                Assert.False(Application.Current.Resources.ContainsKey("SystemAccentColor"));
+                Assert.Equal(Color.Parse("#007ACC"), Assert.IsType<Color>(Application.Current.Resources["SystemAccentColor"]));
+                Assert.False(Application.Current.Resources.ContainsKey("Mocassin.AccentBrush"));
                 Assert.Equal(new Thickness(8), Application.Current.Resources["Mocassin.ControlPadding"]);
                 Assert.NotEmpty(Assert.IsType<Transitions>(Application.Current.Resources["Mocassin.Transitions"]));
             });
