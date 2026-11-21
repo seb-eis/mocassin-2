@@ -28,7 +28,7 @@ read-only inspection/verification library for the build CLI.
 - **Amendments:** [`step-11-amend-1`](../amendments/step-11-amend-1-dotnet-11-native-zstd.md) — .NET 11
   toolchain and native Zstandard — **Integrated** (`00753e7`); design review `Ready with notes` accepted
   2026-11-15 ([record](../reviews/step-11-amend-1.md)). [`step-11-amend-2`](../amendments/step-11-amend-2-cluster-code-expansion.md)
-  — cluster occupation code expansion map — **Planned**; design review requested 2026-11-21
+  — cluster occupation code expansion map — **Re-review required** after round 1 `Changes required`
   ([record](../reviews/step-11-amend-2.md)); post-merge `step-11.1` process, `step-11` is not moved
 - **Feature list:** Approved 2026-11-15 (seven features)
 - **Post-implementation correction:** `fix/container-build-context` (2026-11-16) removed the containerfile's
@@ -48,7 +48,7 @@ read-only inspection/verification library for the build CLI.
 | 7 Fixtures, performance, documentation, and closeout | `feature/step-11-simulation-package-and-msl-writer/fixtures-performance-and-docs`; `feature/step-11-simulation-package-and-msl-writer/fix-windows-canonical-json` | Squashed | `all --require` exit 0 | Not run (no per-feature CI) | `e25811f` (fixtures/Part B/docs); `0ae05a4` (Windows canonical JSON) |
 | Closeout | `feature/step-11-simulation-package-and-msl-writer/closeout` | Squashed | `docs --require`, `policy --require` exit 0 | Ubuntu closeout and Windows platform gate green | `e94d975` |
 | X2 Audit-minor fixes | `feature/step-11-simulation-package-and-msl-writer/fix-audit-minors` | Squashed | `all --require` exit 0 | Ubuntu closeout and Windows platform gate green at X2 | `4197166` |
-| A2 Cluster code expansion map | `docs/step-11-amend-2` (design); `fix/step-11.1-cluster-code-expansion` (planned) | Planned — design review requested | — | — | — |
+| A2 Cluster code expansion map | `docs/step-11-amend-2` (design); `fix/step-11.1-cluster-code-expansion` (planned) | Re-review required — round 1 `Changes required` | — | — | — |
 
 ### Approved feature list
 

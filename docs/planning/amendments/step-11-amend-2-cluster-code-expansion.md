@@ -6,7 +6,7 @@
 | --- | --- |
 | Amendment ID | `step-11-amend-2` |
 | Parent step | 11 — Simulation Package and `.msl` Writer |
-| Status | Planned — design review requested 2026-11-21 |
+| Status | Re-review required — round 1 returned `Changes required`; corrections are in the re-review freeze |
 | Branch | `docs/step-11-amend-2` (design); implementation branch created after approval |
 | Design review | `docs/planning/reviews/step-11-amend-2.md` |
 | Parent audit | Step 11 audit is historical (`docs/planning/audits/step-11.md`); the post-merge amendment audit is `docs/planning/audits/step-11-amend-2.md` (to be created) |
@@ -67,22 +67,24 @@ of eight assignments.
 
 **In scope**
 
-- One optional, additive model-payload field per cluster table: `code_expansions`, mapping every raw slot-tuple
-  code the writer enumerated to its canonical occupation index.
+- One optional, additive model-payload field per cluster table: `code_expansions`, covering every raw slot-tuple
+  code the writer enumerated and mapping it to its canonical occupation index (the map is a superset; §3).
 - The writer path that produces it from the existing `CompiledClusterOccupation.Expansions` (already computed
   by `ClusterReduction` and reached through `ClusterCompilationStage`), with duplicate and coverage control.
-- The `.NET` payload DTO, the write-time byte estimate, the read-only verifier check (`PKG010`), and the
-  `package-summary-v1`/contract boundary (unchanged).
-- The Rust payload DTO, reader validation, and runtime lookup accessor in `mocassin-types`/`mocassin-msl`.
-- The format and version policy: optional field, `format_version = 1`, absent-field behaviour, the ADR 0013
-  addendum, and the fixture policy.
+- The `.NET` payload DTO, the write-time byte estimate, a decode-time expansion budget, the read-only verifier
+  check (`PKG010`), and the `package-summary-v1`/contract boundary (unchanged).
+- The Rust payload DTO, an optional-key scan path, the `max_cluster_expansion_bytes` reader limit, validation,
+  and the runtime lookup accessor in `mocassin-types`/`mocassin-msl`.
+- The format and version policy: optional field, `format_version = 1`, fail-closed absent-field behaviour, the
+  ADR 0013 addendum, and the fixture policy.
 - Fixtures: a new non-P1 two-member cluster package built from the primary ceria geometry, the regenerated
-  `step-13-populated` package, a byte-fixed pre-map package for the absent-field path, and the assertion that
-  packages without cluster tables are byte-identical.
+  `step-13-populated` package, a byte-fixed **non-singleton** pre-map package for the real absent-field path,
+  and the unchanged-payload/summary assertions for packages without cluster tables.
 - The Step 14 consumption contract (raw tuple to canonical index, fail-closed behaviour) and the cross-step
-  benchmark requirement.
-- The post-merge `step-11.1` process: maintenance branch, focused design review, separate audit, tag, and the
-  document updates in this page and the parent step page.
+  benchmark requirement; F-29's formal closure stays a Step 14 gate.
+- The sample docs (`samples/README.md`, `samples/step-11-cluster-expansion/README.md`).
+- The post-merge `step-11.1` process: maintenance branch, focused design review, separate audit, tag, the
+  audit/closeout page amendment for evidence, and the document updates in this page and the parent step page.
 
 **Non-goals**
 
@@ -96,10 +98,11 @@ of eight assignments.
   payloads, `.msr`, `.mcs`, the job-folder contract, or the extension ABI.
 - No new `PKG` diagnostic code; `PKG010` ("A package payload value is out of bounds") covers the structural
   violations.
-- No new `ReaderLimits` field. The map is bounded by the model payload byte guard, the element budget, and the
-  MessagePack declared-length check (see §6.3).
+- No change to `tools/check_closeout_evidence.py` in **this docs remediation**. The post-merge evidence gap is
+  resolved by amending the audit/closeout pages and template (A2-07); extending the checker to `step-NN.M`
+  remains a possible later process change, not part of this amendment.
 - No change to the Step 11 audit record or `docs/planning/closeout/step-11.json`; both are historical.
-- No Step 14 implementation code. Step 14 consumes the field; its design re-review closes F-29 by reference.
+- No Step 14 implementation code. Step 14 consumes the field; F-29's formal closure is a Step 14 gate.
 
 ## Design
 
@@ -112,8 +115,9 @@ code_expansions = nil
                | { "expanded_codes": [u64, ...], "canonical_indices": [u32, ...] }
 ```
 
-`expanded_codes` is the strictly ascending set of every raw slot-tuple code the writer enumerated for the
-table. `canonical_indices[j]` is the index `i` such that `expanded_codes[j]` belongs to the orbit of
+`expanded_codes` is the strictly ascending set covering every raw slot-tuple code the writer enumerated for the
+table, and it may also contain additional orbit codes whose particles are not allowed at a member slot (§3).
+`canonical_indices[j]` is the index `i` such that `expanded_codes[j]` belongs to the orbit of
 `occupation_codes[i]`; `energies[i]` is that orbit's applied energy. The map is nested in each
 `cluster_tables[i]` object, so every table has its own code space.
 
@@ -181,10 +185,26 @@ group and $O(t)$ the orbit of tuple $t$ under $G_0$. `Reduce` visits every allow
 lexicographic minimum $c(t)$, and adds $O(c(t))$ to the canonical cluster for $c(t)$. Because $c(t) \in O(t)$
 and $G_0$ is a group, $O(c(t)) = O(t)$; and because the identity is always in `InducedPermutations`
 (`GetPointGroup` adds the identity operation, whose permutation is the identity), $c(t) \in O(c(t))$. The union
-over all visited tuples is therefore exactly the set of enumerated tuples, each canonical cluster's expansion
-list contains its own canonical code, and distinct canonical clusters have disjoint orbits. The map is the
-union of those lists with the canonical index attached, which is the `GroupLookupCodes` coverage of the
-original, restricted to the writer's allowed tuple set.
+over all visited tuples therefore **contains** every enumerated tuple, each canonical cluster's expansion list
+contains its own canonical code, and distinct canonical clusters have disjoint orbits (a group orbit is an
+equivalence class, so the union is still a function).
+
+The coverage is a **superset**, not an exact set. `AddTuple` adds the full orbit of the canonical tuple without
+filtering by the per-slot allowed particle sets. When two member sites are swapped by the group but have
+different allowed sets (for example `{O,Vc}` and `{O,Vc,H}`), an expansion code can place `H` at a slot whose
+site does not allow it. That code is never produced by a valid lattice and is harmless for exact-code lookup,
+but it is present in `expanded_codes`. The producer cannot filter it from `Expansions` alone: the member allowed
+sets are not carried on `CompiledClusterTable`. The designed semantics are therefore:
+
+- **Completeness:** every tuple the writer enumerated is present with its canonical index. A runtime tuple is
+  assembled from the instance slots whose particles are allowed by the table's site masks, so it is enumerated.
+- **Superset tolerance:** the map may contain additional codes in the same group orbit. A reader must not treat
+  their presence as an error; they are never built at runtime.
+- **Duplicate control is unaffected:** group orbits partition the code space, so even the superset assigns each
+  code to exactly one canonical index. The writer still rejects a non-strictly-ascending sequence.
+
+The `GroupLookupCodes` equivalence is therefore "covers every enumerated code", not "equals the enumerated set";
+the property test asserts completeness and superset tolerance, not set equality (A2-05).
 
 **Duplicate control.** A raw tuple belongs to exactly one orbit, so the union must be a function. The writer
 sorts globally and rejects a non-strictly-ascending sequence or a code claimed by two different canonical
@@ -204,12 +224,16 @@ For one table, with `G = occupation_codes.Length`, `N = expanded_codes.Length`, 
 model payload:
 
 1. `G = energies.Length`; this amendment does not change the existing `occupation_codes`/`energies` equality.
-2. `code_expansions` is either `nil` or a map with exactly the two keys `expanded_codes` and
-   `canonical_indices`.
+2. `code_expansions` is either `nil` or a map whose **required** keys are `expanded_codes` and
+   `canonical_indices`. Unknown keys inside the map are ignored under the payload `unknownFields: "ignore"`
+   policy (ADR 0013 addendum); a verifier does not need a third key to be an error, and a future additive
+   nested member stays possible (A2-04).
 3. `N = canonical_indices.Length`.
 4. `expanded_codes[0] < expanded_codes[1] < ... < expanded_codes[N-1]` strictly.
 5. `canonical_indices[j] < G` for every `j`.
 6. For every $j$, `expanded_codes[j] >> 60 == 0` and each of its ten 6-bit fields is `< particle_count`.
+   Like `occupation_codes`, this accepts a nonzero field in a slot above the table's actual slot count. Such a
+   code is unreachable at runtime and harmless; do not tighten one side only (A2-14).
 7. For every $i$ there is exactly one $j$ with `expanded_codes[j] == occupation_codes[i]` and
    `canonical_indices[j] == i` (canonical self-entry). Exactly one follows from strict ascending.
 8. `N == G` iff every orbit is a singleton; the writer emits `nil` in that case and the map otherwise. A reader
@@ -217,6 +241,13 @@ model payload:
 9. `nil` and absent mean "no map". For a singleton table, `occupation_codes` is complete. For a table with a
    non-singleton orbit, absence is a package built before this amendment or a writer defect; the reader must
    fail closed on a raw tuple that is not canonical rather than guess (see §6.2).
+10. The map contains **every enumerated raw tuple and may contain extra orbit codes** (§3). Extra codes are
+    valid entries; a reader must not reject them. What is forbidden is a missing enumerated tuple or a code
+    assigned to the wrong orbit.
+11. The total `12 × N` across all tables in one model payload is bounded by the read-time expansion budget
+    (`ReaderLimits::max_cluster_expansion_bytes` / `PackageVerificationOptions.MaxClusterExpansionBytes`,
+    default 128 MiB). The bound is enforced **before** the typed arrays are allocated; over-budget is a
+    fail-closed package error, not a best-effort decode (§6.3, A2-01).
 
 The encoding does not carry a slot count. It does not need one: the code is self-describing up to the ten
 6-bit fields, high slots are zero (void), and the reader already validates `occupation_codes` with the same
@@ -233,15 +264,33 @@ future signed projection includes the field, which this amendment explicitly doe
 - `Mocassin.Contracts.Packages` gains a payload DTO for the nested map (for example
   `CodeExpansionPayload(ImmutableArray<ulong> ExpandedCodes, ImmutableArray<uint> CanonicalIndices)` with
   `[MessagePackObject]` keys `expanded_codes` and `canonical_indices`).
-- `ClusterTablePayload` gains a `[Key("code_expansions")]` member of that nullable type. The existing
-  four-argument primary constructor is preserved as an overload (delegating with `null`) so ApiCompat does not
-  report a removed constructor. Existing keys are not renamed or reordered. If MessagePack-CSharp needs an
-  explicit `[SerializationConstructor]` with the overload present, add it and cover the chosen shape with a
-  payload round-trip test.
+- `ClusterTablePayload` gains a `[Key("code_expansions")]` member of that nullable type. The primary
+  constructor becomes five-argument (`objectId, occupationCodes, codeExpansions, energies,
+  particleTableMapping`), while the existing four-argument constructor remains as a delegating overload
+  (`codeExpansions: null`). The generated five-argument `Deconstruct` is new; add a **manual four-argument
+  `Deconstruct`** (`out string`, `out ImmutableArray<ulong>`, `out ImmutableArray<double>`,
+  `out ImmutableArray<byte>`) that discards `CodeExpansions`, so the existing public `Deconstruct` member is
+  preserved (A2-03). Existing keys are not renamed or reordered. If MessagePack-CSharp needs an explicit
+  `[SerializationConstructor]` with the overload set, add it and cover the chosen shape with a payload
+  round-trip test.
 - `EnergyPayloadMapper` always writes the key: `nil` for singleton tables, the map otherwise.
-- `PackageVerificationChecks.ValidateModel` applies §4 rules 2–7 and 9 to every table and appends the existing
+- `PackageVerificationChecks.ValidateModel` applies §4 rules 2–10 to every table and appends the existing
   `PKG010` error text. It does not recompute symmetry and does not check orbit equivalence; the map is
-  writer-asserted like `occupation_codes`.
+  writer-asserted like `occupation_codes`. `PKG010`'s current wording ("out of bounds") is broader in use than
+  its text; a later diagnostics pass may broaden the help text to "structural or out of bounds" without
+  changing the code or this design (A2-16).
+- **Decode-time budget (A2-01).** `PackageVerificationOptions` gains
+  `MaxClusterExpansionBytes` (init property, default 128 MiB). `PackageReader.ReadModelsAsync` calls a
+  model-specific decode overload that, after Zstd decompression and **before** `MessagePackSerializer.
+  Deserialize<ModelPayload>`, runs a bounded `ClusterExpansionScan` over the MessagePack bytes. The scan reads
+  only the known path `energy.cluster_tables[*].code_expansions`, reads the two array headers, accumulates
+  `12 × N` across tables, and rejects a payload above the option **before** any typed array is allocated. A
+  `nil` or absent `code_expansions` contributes zero entries; a present map is scanned for both array headers,
+  and a missing array is left to the structural verifier. The scan skips every other value with the
+  non-allocating `MessagePackReader.Skip`, enforces a small depth bound, and reports a decode error that
+  `PackagePayloadDecoder` maps to the existing `PKG004`; it does not allocate the model. The writer's trusted
+  round-trip self-check (`PayloadEncoder.Decode`) remains a structural decode and does not apply the solver's
+  read budget.
 - `PackageSummaryBuilder` and `package-summary-v1` are unchanged: the summary has `clusterTableCount`, not codes
   or payload bytes.
 - `PublicAPI.Unshipped.txt` gains the new type, its members, and the property. Adding a property and an
@@ -261,8 +310,14 @@ future signed projection includes the field, which this amendment explicitly doe
 - `ClusterTable::canonical_index(raw_code) -> Option<u32>` uses the map when present, otherwise binary-searches
   `occupation_codes`. That single accessor is what Step 14 and Step 15 call.
 - Adding a public field to `ClusterTable` and a public type is a Rust API addition (exhaustive struct literals in
-  the workspace tests are updated). `mocassin-types` is pre-1.0; record the change in the amendment and the
-  Step 13 page's API note. No `.msl` format consequence.
+  the workspace tests are updated). `mocassin-types` is pre-1.0. Record the addition in §5 and §6.1 of this page
+  only; the Step 13 page has no API-note section and is not re-opened (A2-09). The rustdoc `missing_docs` denial
+  and the workspace API tests are the gate; no `.msl` format consequence.
+- `ReaderLimits` gains `max_cluster_expansion_bytes: u64` with a **128 MiB** default (A2-01). Like
+  `max_rules`, it is a solver-only cap: a writer-valid package above it is rejected with a structured error and
+  needs a raised `ReaderLimits`. The default bounds the typed map to `12 × 11.18M ≈ 128 MiB`; the encoded
+  payload for that many entries is roughly 53–160 MiB depending on the integer widths, so the cap binds before
+  the 512 MiB model guard.
 
 #### 6.2 Lookup and fail-closed semantics
 
@@ -282,20 +337,53 @@ Step 14 owns the error enum, wording, and tests; this amendment fixes the semant
 the only safe absence behaviour because a reader cannot distinguish "old package" from "writer emitted a
 partial map".
 
-#### 6.3 Bounds
+#### 6.3 Bounds and the scan layer (A2-01, A2-02)
 
-No new `ReaderLimits` field is needed:
+The earlier "8 bytes per entry / 1.5×" argument is **withdrawn**. The stored integers use MessagePack's
+smallest-width encoding: a code is 1–9 bytes and an index is 1–5 bytes, so a 512 MiB payload can declare
+roughly 50–250M entries and drive a typed `u64` + `u32` pair of roughly 0.6–3 GiB. The payload byte guard alone
+is therefore **not** a bound on the typed arrays, and the .NET typed decode has the same exposure before the
+verifier runs.
 
-- The MessagePack scanner's `check_declared(length, 1)` already rejects a declared array length that cannot fit
-  in the remaining bytes, and `max_model_elements` bounds the element count.
-- Every `expanded_codes` entry occupies at least 8 payload bytes, so `N <= model_payload_bytes / 8` per table
-  and in total; the typed allocation is at most `12N ≤ 1.5 × model_payload_bytes`, inside the existing 512 MiB
-  guard.
+The design adds an explicit budget on **both** read paths, checked before the arrays are allocated:
+
+| Path | Knob | Default | Enforcement |
+| --- | --- | --- | --- |
+| Rust | `ReaderLimits::max_cluster_expansion_bytes` | 128 MiB | `scan_model` reads the two array headers per table and accumulates `12 × N`; over budget returns `PackageError::PayloadTooLarge { section: "model cluster expansion", declared, limit }` (package class, exit 11). `map/model.rs` re-checks the same cumulative budget before cloning the typed arrays, as defence in depth. |
+| .NET | `PackageVerificationOptions.MaxClusterExpansionBytes` | 128 MiB | `PackageReader.ReadModelsAsync` uses a model decode overload that runs a bounded `ClusterExpansionScan` over the decompressed MessagePack **before** `MessagePackSerializer.Deserialize<ModelPayload>`; over budget returns the decode error that maps to `PKG004`. `PackageVerificationChecks.ValidateModel` then applies the structural rules and `PKG010`. |
+
+The budget is cumulative across all cluster tables in the model payload, not per table, because many small
+tables can still allocate the same total. The derived entry cap is `floor(128 MiB / 12) = 11,184,810` entries
+per model read. A caller that needs a larger writer-valid package raises the limit; the error is explicit and
+actionable.
+
+**Rust scan ownership (A2-02).** `scan_map` currently *requires* every key in its `known` list. Adding
+`code_expansions` to `CLUSTER_TABLE_KEYS` would make it required and reject every pre-map package before serde's
+`#[serde(default)]` applies. The design therefore adds an **optional-key** path:
+
+- `scan_map` keeps its current signature and behaviour for the existing call sites (a wrapper with an empty
+  optional list).
+- A new `scan_map_optional(cursor, required, optional, handler)` (or a `KeySpec { name, required }` list) checks
+  only the required mask after the loop and lets the handler observe an optional key.
+- `CLUSTER_TABLE_KEYS` stays the four required keys; `CLUSTER_TABLE_OPTIONAL_KEYS = ["code_expansions"]`.
+- The handler for `code_expansions` reads a nil scalar as absent/`None`, or a map with the two required arrays;
+  it records the declared lengths in `ClusterFacts`, accumulates the budget in `ScanFacts`, and skips the
+  values without allocating. Unknown nested keys are skipped.
+- `map/model.rs` validates §4 after the typed decode (strict ascending, indices, high bits, particles,
+  canonical self-entry) and re-checks the cumulative budget. The typed arrays cannot exceed the budget because
+  the scan already rejected the payload.
+- A pre-map fixture test asserts the scan accepts absence; a hostile test asserts an optional key that is
+  present but malformed is rejected at the scan or the typed layer with the field path.
+
+Other bounds:
+
+- The scanner's `check_declared(length, 1)` still rejects a declared array length that cannot fit in the
+  remaining bytes, and `max_model_elements` bounds the element count.
 - The reader validates §4 in a single pass over the two ascending arrays; coverage uses a merge with
   `occupation_codes`, so it is $O(N + G)$ with no set allocation.
 - A malformed map (length mismatch, non-ascending, duplicate, index out of range, high bits, particle out of
-  range, missing canonical self-entry) is a `PackageError` naming `energy.cluster_tables.code_expansions` and
-  the offending field; the solver exits 11 (package error), not 12.
+  range, missing canonical self-entry, or over budget) is a `PackageError` naming
+  `energy.cluster_tables.code_expansions` and the offending field; the solver exits 11 (package error), not 12.
 
 ### 7. Signature and version policy
 
@@ -326,14 +414,17 @@ No new `ReaderLimits` field is needed:
   signature layout: no released `.msl` exists, so an additive optional field may enter v1 without a major bump.
   The amendment adds an explicit **additive-within-a-major** rule to ADR 0013 (an addendum, not a rewrite) so
   the policy is not an unwritten exception.
-- **Compatibility direction.** A new reader reads an old v1 package without the field (defined absence above). A
-  pre-amendment v1 reader reads a new package and ignores the unknown key (the payload unknown-field policy is
-  `ignore`; MessagePack-CSharp ignores unknown map keys and the Rust scanner skips them). The latter is proven
-  once by a migration check (§9.4), not by a permanent second reader.
+- **Compatibility direction.** A new reader reads an old v1 package without the field under the defined absence
+  rule. That rule is **fail-closed, not fully readable**: a singleton table resolves from `occupation_codes`,
+  and a non-singleton table with a non-canonical tuple returns a recompile-required error and never a wrong
+  value. A pre-amendment v1 reader reads a new package and ignores the unknown key (the payload unknown-field
+  policy is `ignore`; MessagePack-CSharp ignores unknown map keys and the Rust scanner skips them). The latter
+  is proven once by a migration check (§9.4), not by a permanent second reader.
 - **Fixtures.** This is a current-major change: regenerate the current-major fixture that contains a cluster
-  table, keep a byte-fixed pre-map v1 package for the absence path, and add the new two-member fixture. No
-  previous-major fixture is created because no previous major exists. At the first released `.msl`, v1 freezes;
-  any later field change is a new major with a previous-major reader.
+  table, add the new two-member fixture, and keep a **byte-fixed pre-map non-singleton package** built by the
+  parent writer for the real absence case (A2-06). No previous-major fixture is created because no previous
+  major exists. At the first released `.msl`, v1 freezes; any later field change is a new major with a
+  previous-major reader.
 - **Stop condition.** If a `.msl` is published or declared released before implementation, do not ship this as
   an additive v1. Record the situation and ask the owner for a major-version decision. Until then, the
   pre-release delta is defensible and is recorded here.
@@ -342,21 +433,25 @@ No new `ReaderLimits` field is needed:
 two-member cluster has no map and cannot resolve its non-canonical tuples. It is not silently mis-read: the
 Step 14 lookup fails closed with the recompile-required error. The documented fix is to rebuild the package,
 consistent with "`.msl` is immutable; rebuild for a new package". This is a pre-release limitation, not a
-supported long-term compatibility mode.
+supported long-term compatibility mode. The byte-fixed pre-map non-singleton fixture is the regression test for
+the load-and-fail-closed behaviour (A2-06).
 
 ### 8. Documentation and contract reconciliation
 
 | Page | Change |
 | --- | --- |
-| [`02-data-contracts.md` §3.3](../02-data-contracts.md#33-compiled-model-payload) | Add `code_expansions` to the `energy`/`cluster_tables` description; add the slot order, coverage, `nil`/absence, signature, and bound rules; update the "codes are canonical" bullet to name the expansion map. |
-| [`02-data-contracts.md` §3.4](../02-data-contracts.md#34-job-payload) | Solver read-bounds paragraph: the map is bounded by the model guard/element budget and needs no new limit. (The table lives under §3.3; the read-bounds list is in §3.4.) |
-| [`01-target-architecture.md`](../01-target-architecture.md) | §3.1: the compiled-model payload carries the cluster occupation expansion map so the solver resolves raw tuples without symmetry; §7.6: additive optional payload fields within a major, with defined absence. |
-| [`ADR 0013`](../adr/0013-format-compatibility-and-api-versioning.md) | Addendum recording additive-within-a-major payload fields, absence semantics, and the boundary at the first release. |
-| [`05-open-decisions.md`](../05-open-decisions.md) | Resolved row for the expansion-map decision; gated row for enumerating payload-internal energy fields in the manifest. |
+| [`02-data-contracts.md` §3.3](../02-data-contracts.md#33-compiled-model-payload) | Add `code_expansions` to the `energy`/`cluster_tables` description; add the slot order, superset coverage, `nil`/absence, signature, and budget rules; update the "codes are canonical" bullet to name the expansion map. |
+| [`02-data-contracts.md` §3.4](../02-data-contracts.md#34-job-payload) | Solver read-bounds table/paragraph: the expansion budget is an explicit `max_cluster_expansion_bytes` cap (default 128 MiB, `12 × ΣN`), not a consequence of the model guard. |
+| [`01-target-architecture.md`](../01-target-architecture.md) | §3.1: the compiled-model payload carries the cluster occupation expansion map so the solver resolves raw tuples without symmetry; §7.6: additive optional payload fields within a major, with defined fail-closed absence. |
+| [`ADR 0013`](../adr/0013-format-compatibility-and-api-versioning.md) | Addendum recording additive-within-a-major payload fields, **fail-closed** absence semantics (a rebuild may be required), and the boundary at the first release (A2-11). |
+| [`05-open-decisions.md`](../05-open-decisions.md) | Resolved row for the expansion-map decision and the 128 MiB budget; gated row for enumerating payload-internal energy fields in the manifest; the `step-11.1` evidence resolution. |
 | Step 11 page | Amendment pointer and status; parent audit/closeout records stay historical. |
-| Step 14 page | Cross-step note that F-29 is resolved by this amendment and that the Step 14 design must consume `canonical_index`; the authoritative design text is on the Step 14 design branch. |
-| [`msl-format.md`](../../reference/msl-format.md) | Payload contents, the exact map shape, lookup, reader bounds, compatibility, and the signature/summary exclusion. |
-| Fixture READMEs | Provenance, SHAs, the expected 8→6 expansion, and the pre-map compatibility copy. |
+| Step 14 page | Cross-step note naming the unmerged commits/record (`87be9de`, `1ea8090`) and stating that F-29's formal closure is a **Step 14 gate**, not a `step-11.1` acceptance criterion (A2-08). |
+| [`msl-format.md`](../../reference/msl-format.md) | Payload contents, the exact map shape, superset lookup semantics, the explicit read budget, compatibility, and the signature/summary exclusion. |
+| Fixture READMEs | Provenance, SHAs, the expected 8→6 expansion, the **non-singleton** pre-map compatibility package, and the refreshed `step-13-populated` size/SHA table (A2-06, A2-15). |
+| `samples/README.md` and `samples/step-11-cluster-expansion/README.md` | Add the new sample row and a sample README with purpose, derivation, job, and build/regeneration hint (A2-10). |
+| [`closeout/README.md`](../closeout/README.md), [`audits/README.md`](../audits/README.md), [`step-audit-template.md`](../audits/step-audit-template.md) | Document the post-merge amendment evidence rule: `closeout/step-NN.M.json` is the evidence file when the checker is extended, or the audit record is the evidence source when the pages are amended. The chosen resolution is the page amendment because this remediation is docs-only; the checker is not edited (A2-07). |
+| [`diagnostics.md`](../../reference/diagnostics.md) | Optional later wording pass for `PKG010`: "structural or out of bounds". No code or descriptor change (A2-16). |
 | Parity matrix | After implementation, the group/cluster row's evidence names the expansion map. |
 
 ### 9. Fixtures and tests
@@ -371,11 +466,16 @@ supported long-term compatibility mode.
 - **Location:** `tests/contracts/packages/step-11-amend-2/` with `step-11-amend-2.msl`, `.sha256`,
   `package-summary-v1.json`, `payloads/index.json`, `payloads/model-1.bin`, and `README.md` with provenance,
   the writer commit, SDK, `created_utc`, and the job count.
+- **Sample docs:** add the row to `samples/README.md` and a
+  `samples/step-11-cluster-expansion/README.md` (purpose, derivation from `samples/ceria`, the job, and the
+  fixture build/regeneration hint), matching the `step-13-populated` sample pattern (A2-10).
 - **Expectation document:** `cluster-expansions-v1.json` (a test fixture, not a contract manifest artifact)
-  records, for table 0: `occupation_codes` (the six canonical codes), `expanded_codes` (the eight raw codes),
-  `canonical_indices`, and the two non-canonical raw codes `8386` and `8387` with their canonical index and
-  canonical code (`12418` and `12419`). The test asserts the actual values produced by the compiled particle
-  order; the table above is the expected result for `1 = Ce`, `2 = O`, `3 = Vc`.
+  records, for table 0: `occupation_codes` (the six canonical codes), the **enumerated** `expanded_codes` (the
+  eight raw codes for this symmetric geometry), `canonical_indices`, and the two non-canonical raw codes `8386`
+  and `8387` with their canonical index and canonical code (`12418` and `12419`). The test asserts the actual
+  values produced by the compiled particle order; the table above is the expected result for `1 = Ce`,
+  `2 = O`, `3 = Vc`. The fixture's allowed sets are symmetric, so the map equals the enumerated set here; the
+  superset rule is exercised by the asymmetric property case, not by this fixture (A2-05).
 - The package is generated once by the real `SimulationPackageWriter`, is deterministic for the fixed seed and
   timestamp, and is never hand-edited.
 
@@ -383,15 +483,16 @@ supported long-term compatibility mode.
 
 | Fixture | Cluster tables | Action | Reason |
 | --- | --- | --- | --- |
-| `tests/contracts/packages/step-13-populated/` | 1 (P1, 12 singleton codes) | Regenerate `.msl`, `.sha256`, `payloads/model-1.bin`, `payloads/index.json`; keep `package-summary-v1.json` and assert it is unchanged | The cluster table gains `code_expansions: nil`; the logical summary must not move |
-| `tests/contracts/packages/amend-2-pre-map/` (new) | 1 (P1, 12 singleton codes) | Byte-fixed copy of the pre-change `step-13-populated.msl`, its `.sha256`, payload index, and a README | Proves the absent-field path on a real cluster table for the life of v1; never regenerated |
-| `tests/contracts/packages/msl-v1/` | 0 | No regeneration; assert byte identity on rebuild | No cluster table, so no new key |
-| `tests/contracts/packages/step-13-centered/` | 0 | No regeneration; assert byte identity on rebuild | No cluster table |
+| `tests/contracts/packages/step-13-populated/` | 1 (P1, 12 singleton codes) | Regenerate `.msl`, `.sha256`, `payloads/model-1.bin`, `payloads/index.json`, **and the README size/SHA table**; keep `package-summary-v1.json` and assert it is unchanged | The cluster table gains `code_expansions: nil`; the logical summary must not move; the README is already stale (A2-15) |
+| `tests/contracts/packages/amend-2-pre-map/` (new) | 1 non-singleton table (2 members) | Build the **two-member ceria sample** with the **pre-amendment writer at `bbc2d08`** in a temporary worktree (copy the new sample in; it parses on the parent) and commit the byte-fixed `.msl`, `.sha256`, `package-summary-v1.json`, payload index, and README. This package has **no** `code_expansions` and 8 raw → 6 canonical codes | The real F-29 absence case: the reader must load it, resolve the six canonical codes directly, and return `None`/the recompile error for `8386`/`8387`; never regenerated (A2-06) |
+| `tests/contracts/packages/msl-v1/` | 0 | No regeneration; compare the extracted model payload and `package-summary-v1`, and record the package bytes as a same-host observation | No cluster table, so no new key; `.msl` bytes include `app_version`/`generator` and are runtime metadata, not the golden (A2-12) |
+| `tests/contracts/packages/step-13-centered/` | 0 | Same as `msl-v1`: payload/summary equality, package bytes as a same-host observation | No cluster table (A2-12) |
 | `tests/contracts/packages/amend-1-net10/` | 0 | Never regenerated | Pre-amendment compatibility fixture (amendment 1) |
 | `tests/contracts/packages/amend-1/payloads/`, `golden/`, `goldens.json` | 0 | No change | Codec goldens are byte-fixed and the model payload has no cluster table |
 
-If a `0`-cluster fixture's rebuilt bytes differ, the difference is investigated before any golden is updated;
-it must not be accepted as "the writer changed".
+If a `0`-cluster fixture's extracted payload or summary differs, the difference is investigated before any
+golden is updated; it must not be accepted as "the writer changed". Package-byte differences caused only by
+`app_version`/`generator`/runtime metadata are not a regression.
 
 #### 9.3 Tests
 
@@ -401,16 +502,21 @@ it must not be accepted as "the writer changed".
 | Writer singleton table | PR-fast | `step-13-populated`'s table emits `code_expansions = nil` |
 | Writer duplicate/coverage guard | PR-fast | A synthetic table with a raw code claimed by two canonical indices, or a missing canonical self-entry, throws `InvalidOperationException` |
 | Writer byte estimate | PR-fast | A small `MaxEnergyTableBytes` rejects a table whose map pushes it over the limit with `CMP` limit diagnostics; the estimate includes `12 × Σ\|Expansions\|` |
-| `GroupLookupCodes` equivalence (property) | PR-fast | For random small clusters and random allowed sets, the emitted map is a total function from every tuple enumerated by the reduction oracle to exactly one canonical code, and no tuple is missing |
-| .NET verifier | PR-fast | `PKG010` for length mismatch, non-ascending/duplicate, index out of range, high bits, particle out of range, missing canonical self-entry; a valid map verifies |
-| .NET pre-map read | PR-fast | `amend-2-pre-map` and `amend-1-net10` verify and keep their recorded summaries; the DTO decodes `CodeExpansions == null` |
+| `GroupLookupCodes` completeness (property) | PR-fast | For random small clusters and random allowed sets, (a) **every** tuple enumerated by the reduction oracle is present with exactly one canonical index, (b) every canonical code self-maps, and (c) **extra** orbit codes are accepted (superset). Do not assert set equality (A2-05) |
+| Asymmetric allowed sets (property) | PR-fast | Two swapped member sites with `{O,Vc}` and `{O,Vc,H}`: the map is a superset; every enumerated tuple resolves; every extra code's six-bit fields remain `< particle_count` and are never produced by a valid lattice (A2-05) |
+| .NET verifier | PR-fast | `PKG010` for length mismatch, non-ascending/duplicate, index out of range, high bits, particle out of range, missing canonical self-entry; extra superset codes are accepted; a valid map verifies |
+| .NET API surface | PR-fast | Both the four-argument and five-argument `ClusterTablePayload` constructors and `Deconstruct` methods exist; the five-argument primary round-trips; `PublicAPI.Unshipped.txt` and ApiCompat are clean (A2-03) |
+| .NET decode budget | PR-fast | A model payload whose `code_expansions` arrays declare `12 × N` above `PackageVerificationOptions.MaxClusterExpansionBytes` is rejected by the pre-scan with `PKG004` **before** a typed model is materialized; a payload just under the cap loads; a nested MessagePack bomb does not stack-overflow or over-allocate (A2-01) |
+| .NET pre-map read | PR-fast | `amend-2-pre-map` verifies and keeps its recorded summary; the DTO decodes `CodeExpansions == null`; `amend-1-net10` still verifies |
 | Rust reader: new fixture | PR-fast | Loads; table 0 has 8 expanded codes and 6 indices; `canonical_index` returns the expected index for all eight raw codes, including the two previously failing ones |
-| Rust reader: absent map | PR-fast | The pre-map fixture loads with `expansions == None`; all 12 canonical codes resolve by the direct path; a synthetic non-canonical code returns `None` |
+| Rust scan: optional key | PR-fast | The pre-map fixture passes `scan_model` with `code_expansions` absent; a malformed present optional key is rejected with the field path; `CLUSTER_TABLE_KEYS` remains the four required keys (A2-02) |
+| Rust reader: absent map | PR-fast | The non-singleton pre-map fixture loads with `expansions == None`; the six canonical codes resolve by the direct path; `8386`/`8387` return `None` and Step 14 maps them to the recompile-required error (A2-06) |
 | Rust reader: hostile map | PR-fast | Length mismatch, non-ascending, duplicate, index out of range, high bits, particle out of range, and missing canonical self-entry each return a `PackageError` naming `energy.cluster_tables.code_expansions` |
+| Rust read budget | PR-fast | A synthetic payload whose expansion arrays declare `12 × ΣN` above `ReaderLimits::max_cluster_expansion_bytes` returns `PayloadTooLarge` at the scan **before** the typed `Vec` allocation; a payload just under the cap loads; a raised limit accepts it (A2-01) |
 | Signature/summary invariance | PR-fast | The new fixture's `model_signature` and `signature` equal the values computed from the same project before the change; `signature-vectors.json` and the projection fixtures are unchanged; `verify.sh contracts` has no diff |
 | Determinism | PR-fast | Two builds of the new fixture with the same request produce identical bytes and SHA-256 |
-| Forward read (one-time) | PR-medium | The pre-amendment `.NET` verifier and Rust reader at the parent commit open the new fixture and ignore `code_expansions` (the .NET reader succeeds and the Rust scanner skips the unknown key); recorded in the feature log, not a recurring test |
-| Step 14 lookup | Step 14 | The context resolves all eight assignments on the new fixture; an absent map on a non-canonical tuple returns the recompile-required error |
+| Forward read (one-time) | **Evidence (one-time manual)** | The pre-amendment `.NET` verifier and Rust reader at the parent commit open the new fixture and ignore `code_expansions` (the .NET reader succeeds and the Rust scanner skips the unknown key); recorded in the feature log, not a recurring test and not a PR tier (A2-13) |
+| Step 14 lookup | Step 14 | The context resolves all eight assignments on the new fixture; an absent map on a non-canonical tuple returns the recompile-required error. **F-29's formal closure is a Step 14 gate**, not a `step-11.1` test (A2-08) |
 
 #### 9.4 Commands
 
@@ -447,16 +553,37 @@ This is a post-merge amendment: Step 11 is merged and tagged `step-11`. `AGENTS.
    automatic `main` CI run to be green, then create the annotated tag `step-11.1` on the merge commit and push
    it. Never move or delete `step-11`. Delete the maintenance branch locally and remotely.
 8. **Records.** Update this page (status `Merged`, audit commit, CI, merge commit, tag), the amendment index,
-   the Step 11 page, and `status.md`. `docs/planning/closeout/step-11.json` and the Step 11 audit record are not
-   rewritten.
+   the Step 11 page, and `status.md`. `docs/planning/closeout/step-11.json` and the Step 11 audit record are
+   historical and are not rewritten. The amendment's evidence lives in
+   `docs/planning/audits/step-11-amend-2.md` under the post-merge rule below.
 9. **Step 14.** The Step 14 design re-review closes F-29 by reference to this amendment; Step 14's implementation
-   consumes `ClusterTable::canonical_index`. No Step 14 code is part of `step-11.1`.
+   consumes `ClusterTable::canonical_index`. F-29's **formal closure is a Step 14 gate** owned by the Step 14
+   planner/step agent, not a `step-11.1` acceptance criterion. The `main` Step 14 page names the unmerged design
+   `87be9de` and the round-3 record `1ea8090` so a `main` reader can find them. No Step 14 code is part of
+   `step-11.1`.
 
-**Process gap to decide.** `tools/check_closeout_evidence.py` accepts only `step-NN` or `step-NN[a-z]`, so a
-`step-11.1` closeout-evidence file would fail the checker. Until the owner decides otherwise, the post-merge
-amendment's audited commit, closeout CI, `main` SHA, merge commit, and tag are recorded in the audit record and
-this page only. Extending the checker/README to post-merge amendment IDs is a separate `docs/` process change,
-not part of this amendment.
+**Post-merge evidence (A2-07) — page amendment, not a checker change.** The earlier "record it in the audit
+only" plan contradicted [`audits/README.md`](../audits/README.md) §3 and the
+[audit template](../audits/step-audit-template.md), which require a closeout evidence file. Two resolutions were
+possible: extend `tools/check_closeout_evidence.py` to accept `step-NN.M` and add
+`closeout/step-11.1.json`, or amend the audit/closeout pages to define the audit record as the evidence source
+for a post-merge amendment. **This remediation takes the second option**, because it is docs-only (the task
+forbids code/tests/fixtures in this change), because `step-11`'s evidence file must stay historical, and because
+a post-merge amendment is not a step and has no step-branch closeout ceremony to bind to. The change is:
+
+- [`audits/README.md`](../audits/README.md) gains a **"Post-merge amendment audits"** subsection: the audit
+  record is the single source for the audited commit, closeout CI run and `head_sha`, `main` SHA at freeze,
+  merge commit, and suffixed tag; the step's `closeout/step-NN.json` is historical and is not rewritten; the
+  closeout-evidence checker is not run for the amendment.
+- [`closeout/README.md`](../closeout/README.md) states that a post-merge amendment ID is outside the
+  `step-NN`/`step-NN[a-z]` evidence-file form and uses the audit record instead; the template note is updated so
+  the rule is discoverable.
+- [`step-audit-template.md`](../audits/step-audit-template.md) changes the `Closeout evidence` row's guidance:
+  `closeout/step-NN.json`, or "this record" for a post-merge amendment.
+- `05-open-decisions.md` item 7 is resolved to this rule.
+
+This is a process change under `AGENTS.md` §3.15; the owner approves it at the re-review/start gate. No page
+claims `step-11.1` has a machine-checkable JSON evidence file.
 
 ### 11. Sizing and complexity
 
@@ -468,30 +595,44 @@ one maintenance delivery plus its audit.
 ## Acceptance criteria
 
 - [ ] `EnergyPayloadMapper` emits a complete, strictly ascending `code_expansions` map for the ceria two-member
-      table; all eight raw tuples resolve; the two non-canonical codes map to their canonical indices and
+      table; every enumerated raw tuple resolves; the two non-canonical codes map to their canonical indices and
       energies.
 - [ ] Singleton tables emit `nil`; the writer never emits a partial, duplicate, or non-ascending map; a
       violation throws an internal invariant error.
-- [ ] The property test proves `GroupLookupCodes`-equivalent coverage against the reduction oracle for random
-      small clusters.
+- [ ] The property test proves `GroupLookupCodes` **completeness** against the reduction oracle for random small
+      clusters, accepts superset orbit codes, and includes an asymmetric-allowed-set case (A2-05).
 - [ ] The `.NET` verifier applies the structural rules and reports `PKG010` for every violation; a valid map
       verifies.
+- [ ] The .NET decode pre-scan and the Rust scan enforce the cumulative `128 MiB` expansion budget before the
+      typed arrays are allocated, with fail-closed errors and hostile-payload tests; the limit is raisable
+      (A2-01).
+- [ ] The Rust scan supports `code_expansions` as an **optional** key; a pre-map package passes the scan, and a
+      malformed present map is rejected with the field path (A2-02).
 - [ ] The Rust reader validates the same rules, exposes `ClusterTable::canonical_index`, and rejects hostile
       maps with a field-specific `PackageError`.
+- [ ] The `.NET` four-argument `ClusterTablePayload` constructor and `Deconstruct` are preserved alongside the
+      five-argument forms; ApiCompat/`PublicAPI.Unshipped.txt` are clean (A2-03).
 - [ ] The new fixture is deterministic, carries the documented expectation, and its `package-summary-v1` and
       signatures are the logical values from before the change.
-- [ ] The regenerated `step-13-populated` fixture's summary is unchanged; the byte-fixed pre-map fixture keeps
-      its SHA; the no-cluster fixtures rebuild byte-identically or the difference is explained.
-- [ ] The pre-amendment reader reads the new fixture in the one-time forward check.
+- [ ] The regenerated `step-13-populated` fixture's summary is unchanged and its README size/SHA table is
+      refreshed; the no-cluster fixtures' extracted payloads/summaries are unchanged (package bytes are a
+      same-host observation) (A2-12/A2-15).
+- [ ] A byte-fixed **non-singleton pre-map** package built by the parent writer loads, resolves its six
+      canonical codes, and returns the recompile-required result for the two non-canonical codes (A2-06).
+- [ ] The pre-amendment reader reads the new fixture in the one-time forward check (recorded as evidence, not a
+      PR tier) (A2-13).
 - [ ] `signatures.model`, `signatures.parameterization`, `signatures.lattice`, `signature-vectors.json`,
       `tests/contracts/projections/**`, and `contracts/**` are unchanged; `verify.sh contracts` is green.
-- [ ] `.NET` and Rust public API additions are recorded (`PublicAPI.Unshipped.txt`, ApiCompat, Rust API note);
-      the old `ClusterTablePayload` constructor still exists.
+- [ ] `.NET` and Rust public API additions are recorded (`PublicAPI.Unshipped.txt`, ApiCompat, §5/§6.1 of this
+      page); the old `ClusterTablePayload` constructor and `Deconstruct` still exist (A2-09).
+- [ ] The audit/closeout pages and template define the post-merge amendment evidence rule; no page claims a
+      `step-11.1` JSON evidence file (A2-07).
+- [ ] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` are added (A2-10).
 - [ ] `./tools/verify.sh all --require` is green at the audit commit; the single closeout CI run is green; the
       main CI run is green before `step-11.1` is tagged.
 - [ ] Documentation is updated (§8) and `./tools/verify.sh docs --require` passes.
-- [ ] The Step 14 design re-review references this amendment and F-29 is closed by reference; the parity row's
-      evidence is updated after implementation.
+- [ ] The Step 14 pointer names `87be9de`/`1ea8090` and records F-29's formal closure as a Step 14 gate; the
+      parity row's evidence is updated after implementation (A2-08).
 
 ## Tests
 
@@ -501,26 +642,30 @@ one-time forward read.
 
 ## Documentation
 
-- [ ] `02-data-contracts.md` §3.3/§3.4 updated with the field, coverage, absence, signature, and bounds rules.
+- [ ] `02-data-contracts.md` §3.3/§3.4 updated with the field, superset coverage, absence, signature, and budget rules.
 - [ ] `01-target-architecture.md` §3.1/§7.6 updated.
-- [ ] ADR 0013 addendum records additive-within-a-major payload fields.
-- [ ] `05-open-decisions.md` resolved/gated rows updated.
-- [ ] Step 11 page, amendment index, `status.md`, and Step 14 cross-step note updated.
+- [ ] ADR 0013 addendum records additive-within-a-major payload fields and **fail-closed** absence.
+- [ ] `05-open-decisions.md` resolved/gated rows and the post-merge evidence item updated.
+- [ ] Step 11 page, amendment index, `status.md`, and Step 14 cross-step note updated (commits `87be9de`/`1ea8090`, closure gate).
 - [ ] `msl-format.md` updated.
-- [ ] Fixture READMEs and `tests/contracts/README.md` updated.
+- [ ] Fixture READMEs, `tests/contracts/README.md`, and the `step-13-populated` size/SHA table updated.
+- [ ] `samples/README.md` and `samples/step-11-cluster-expansion/README.md` added.
+- [ ] `audits/README.md` §3.1, `closeout/README.md`, and `step-audit-template.md` define the post-merge evidence rule.
+- [ ] `PKG010` help wording noted for a later diagnostics pass.
 - [ ] Parity matrix evidence updated after implementation.
 
 ## Risks and mitigations
 
 | Risk | Mitigation |
 | --- | --- |
-| Payload growth for large cluster tables | `nil` for singleton tables; `12N` in the writer estimate; the existing 2 GiB energy-table cap; the reader byte guard and element budget; a large-table property test |
-| Writer emits an incomplete or wrong map | Global sort + strict-ascending/coverage assertions; verifier `PKG010`; property test against the reduction oracle; fail-closed runtime lookup |
-| Old package with a non-singleton cluster is unreadable | Fail closed with a recompile-required error, never a wrong energy; documented as a pre-release limitation; rebuild is the supported path |
+| Payload growth for large cluster tables | `nil` for singleton tables; `12N` in the writer estimate; the existing 2 GiB energy-table cap; the explicit `128 MiB` typed-expansion budget on both readers (raisable), enforced before allocation; a large-table hostile test |
+| Typed-expansion amplification from smallest-width MessagePack | The explicit budget is based on `12 × N`, not on encoded bytes; both readers check it before allocating; the earlier 8-bytes/1.5× arithmetic is removed from all pages (A2-01) |
+| Writer emits an incomplete or wrong map | Global sort + strict-ascending/completeness assertions; verifier `PKG010`; property test against the reduction oracle; fail-closed runtime lookup |
+| Old package with a non-singleton cluster is unreadable | Fail closed with a recompile-required error, never a wrong energy; documented as a pre-release limitation; the byte-fixed non-singleton pre-map fixture is the regression test; rebuild is the supported path |
 | Signature or summary drift | Explicit no-change acceptance criteria and a fixture that compares the logical signatures/summary before and after; a diff is a blocking finding |
-| API break in `Mocassin.Contracts` or `mocassin-types` | Preserve the old constructor; additive property/field/type; `PublicAPI.Unshipped.txt` and ApiCompat; Rust is pre-1.0 and the workspace literals are updated |
-| Fixture churn hides a real change | Only the cluster-table fixture is regenerated; the no-cluster fixtures are asserted byte-identical; the pre-map package is byte-fixed |
-| Process gap for `step-11.1` evidence | Recorded in the audit and this page; checker extension is a separate owner-decided process change |
+| API break in `Mocassin.Contracts` or `mocassin-types` | Preserve the old constructor **and the four-argument `Deconstruct`**; additive property/field/type; `PublicAPI.Unshipped.txt` and ApiCompat; Rust is pre-1.0 and the workspace literals are updated (A2-03) |
+| Fixture churn hides a real change | Only the cluster-table fixture is regenerated; the no-cluster fixtures are compared by extracted payload/summary; the pre-map package is byte-fixed; package bytes are a same-host observation (A2-12) |
+| Process gap for `step-11.1` evidence | Resolved by the audit/closeout page amendment: the audit record is the evidence source for a post-merge amendment; `step-11.json` stays historical (A2-07) |
 | The amendment is implemented after a `.msl` release | Stop condition in §7: escalate for a major-version decision instead of shipping an additive v1 |
 
 ## Dependencies
@@ -532,7 +677,8 @@ one-time forward read.
 - Step 14 design review round 3 record at `1ea8090` (reviewed design `87be9de`; branch
   `review/step-14-design-round-3`, not merged) records F-29. The Step 14 design must be corrected on its own
   branch to consume this map; this amendment supplies the format and reader contract, not the Step 14 context
-  code.
+  code. **F-29's formal closure is a Step 14 gate**; the `step-11.1` audit treats the pointer as a follow-up,
+  not a completed acceptance criterion (A2-08).
 - No released `.msl` (pre-release condition, §7).
 - `contracts/manifest.json` is unchanged; `verify.sh contracts` must show no diff.
 

@@ -9,6 +9,13 @@ Create `docs/planning/closeout/step-NN.json` from `_template.json` when the step
 independent audit. A split step uses `step-NN[a-z].json`, for example `step-23a.json`. Do not pre-seed files for
 steps that have not started.
 
+**Post-merge amendments do not create an evidence file.** An amendment integrated after its parent step is
+merged (`step-NN-amend-M`, tagged `step-NN.M`) is not a step and has no step branch closeout. Its audit record
+`docs/planning/audits/step-NN-amend-M.md` is the single evidence source for the audited commit, closeout CI and
+`head_sha`, `main` SHA at freeze, merge commit, merge-tree CI, platform CI, and tag. The parent step's
+`step-NN.json` is historical and is not rewritten; `tools/check_closeout_evidence.py` is not run for the
+amendment. See [`../audits/README.md` §3.1](../audits/README.md#31-post-merge-amendment-audits).
+
 ## Step ID form
 
 A step ID is `step-NN` or, for a split step, `step-NN` followed by one lowercase letter: `step-23a`, `step-23b`.
@@ -17,7 +24,8 @@ because Step 23 was split into Step 23A and Step 23B; the suffix gives each part
 record, status row, and tag without renumbering the later steps. The rule home is
 [`tools/check_closeout_evidence.py`](../../../tools/check_closeout_evidence.py) for the evidence check and
 [`tools/check_process_consistency.py`](../../../tools/check_process_consistency.py) for audit records and status
-rows.
+rows. A post-merge amendment tag such as `step-11.1` is **not** a step ID: the checker's pattern deliberately
+does not accept it, and the amendment uses its audit record instead of an evidence file.
 
 ## Required fields
 

@@ -44,7 +44,9 @@ without a major version bump when all of the following hold:
 
 - every existing field keeps its name, type, meaning, and required/optional status;
 - the writer always emits a valid current-major document, and the new member's **absence** has a defined
-  meaning that is safe for every document written before it existed;
+  meaning that **fails closed with an actionable error and never yields a wrong value** for every document
+  written before it existed. Full functional readability of an old document is **not** required: a rebuild may
+  be necessary, as it is for a pre-map non-singleton cluster table;
 - a reader that predates the member ignores it (the payload unknown-field policy is `ignore`) and still reads
   the document under the documented absence rule;
 - the member is not part of a canonical signature projection, or the projection already binds the same data;

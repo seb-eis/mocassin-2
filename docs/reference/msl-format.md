@@ -147,9 +147,10 @@ code_expansions = null
                 | { "expanded_codes": [u64, ...], "canonical_indices": [u32, ...] }
 ```
 
-- `expanded_codes` is strictly ascending and contains every raw slot-tuple code the writer enumerated for the
-  table. `canonical_indices[j]` is the index into `occupation_codes`/`energies`; the raw tuple's energy is
-  `energies[canonical_indices[j]]`.
+- `expanded_codes` is strictly ascending and covers every raw slot-tuple code the writer enumerated for the
+  table. It is a **superset**: it may also contain orbit codes whose particles are not allowed at a member slot;
+  those are never produced by a valid lattice and are harmless. `canonical_indices[j]` is the index into
+  `occupation_codes`/`energies`; the raw tuple's energy is `energies[canonical_indices[j]]`.
 - `null` (or an absent key in a package written before this member existed) means every orbit is a singleton,
   so `occupation_codes` is already complete. A package with a non-singleton orbit and no map fails closed if a
   raw tuple is not canonical; rebuild the package.
@@ -160,9 +161,13 @@ code_expansions = null
 - It is not a signature input. `signatures.model` already projects every canonical code and expansion;
   `signatures.parameterization` contains only applied values. `package-summary-v1` has no code-level fields, so
   it is unchanged.
-- The declared counts are bounded by the model payload guard, the element budget, and the MessagePack
-  declared-length check; the typed arrays are at most `1.5 ×` the decompressed model payload. No separate
-  reader limit exists.
+- **Read budget.** Smallest-width MessagePack lets a 512 MiB payload declare tens of millions of entries while
+  the typed `u64`+`u32` pair is always 12 bytes per entry, so the payload guard alone does not bound the typed
+  map. Readers apply an explicit cumulative `12 × ΣN` budget **before** allocating: Rust
+  `ReaderLimits.max_cluster_expansion_bytes` and .NET
+  `PackageVerificationOptions.MaxClusterExpansionBytes`, both defaulting to 128 MiB (≈11.18M entries). Over
+  budget is a fail-closed error (`PayloadTooLarge`/exit 11, or `PKG004` on the .NET decode path); the limit is
+  raisable for a writer-valid package that needs it.
 
 The exact contract and the writer coverage argument are in
 [`02-data-contracts.md` §3.3](https://github.com/seb-eis/mocassin-2/blob/main/docs/planning/02-data-contracts.md#33-compiled-model-payload)
