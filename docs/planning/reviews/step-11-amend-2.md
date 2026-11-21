@@ -256,9 +256,12 @@ the auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Re-review required
+**State:** Ready with notes
 
-`Re-review required` is a record state, not a verdict.
+Round 2 verdict: `Ready with notes` — see `### Re-review round 2` below. The round-1 Major (A2-01) and all ten
+Minors (A2-02…A2-11) are closed; A2-12…A2-16 are accepted and corrected. One new Minor (A2-R2-01) and three Notes
+remain for acceptance or correction before implementation. `Ready with notes` is a verdict awaiting explicit
+human-owner acceptance, not a start authorization.
 
 ## Reviewer independence
 
@@ -416,3 +419,101 @@ signature/summary non-impact claims hold, and the pre-release v1 basis is docume
 reader-bound justification that must be corrected (or explicitly waived) before implementation; the Minor
 findings are design, API-surface, fixture, process-record, and documentation corrections. Re-review at a new
 frozen commit after the corrections; earlier rounds are not overwritten.
+
+### Re-review round 2
+
+#### Independence and frozen state
+
+I am a fresh context spawned by the orchestrator for this re-review. I did not author or implement the amendment
+or the parent Step 11 design, I did not participate in round 1, and I have no shared conversation with the
+planner, implementor, round-1 reviewer, or orchestrator. I read the repository at the re-review freeze
+`ff112cf45592bf30dd4f2abe1aa13c17944b0599`; the record parent
+`ebe4a85aa449ba4d5e785161ae88e0dc4db7b778` is a documentation-only request/resolution commit after the freeze.
+`git diff --name-status 6ff9136 ff112cf` shows only 13 files under `docs/` (the design corrections and the
+round-1 record); `git diff --name-status ff112cf ebe4a85` shows only
+`M docs/planning/reviews/step-11-amend-2.md`. No code, test, configuration, contract, generated artifact, or
+fixture changed. `git merge-base --is-ancestor bbc2d08 ff112cf` succeeds, so the pre-map fixture's parent-writer
+commit is on the frozen history. I edited only this record; `git status --short` was empty before the edit.
+
+#### Commands and results
+
+| Command | Result |
+| --- | --- |
+| `./tools/verify.sh docs --require` | exit 0; Zensical strict build (no issues), DocFX 0 warnings/0 errors, rustdoc for all crates. |
+| `./tools/verify.sh policy --require` | exit 0; 26 contract artifacts current; model/parameterization/lattice projection checks OK (5/4/2 fixtures); space-group catalog current; process consistency OK; 60 process tests OK; SPDX 780 files; secrets 1218 files; advisories/bans/licenses/sources OK. |
+| `python3 tools/check_doc_math.py` | exit 0; 180 files, conventions OK. |
+| `dotnet test src/dotnet/Mocassin.Compilation.Tests/Mocassin.Compilation.Tests.csproj -c Release --filter "FullyQualifiedName~CeriaClusterCompilesToSortedCanonicalOccupations"` | Passed 1/1. |
+| Python `msgpack` inspection of `tests/contracts/packages/*/payloads/model-1.bin` | `msl-v1` 0 cluster tables; `step-13-populated` 1 table / 12 codes, mapping `[1,2]`; `step-13-centered` 0 cluster tables. |
+| `git diff --name-status 6ff9136 ff112cf` / `ff112cf ebe4a85` | 13 docs files / `M docs/planning/reviews/step-11-amend-2.md` only. |
+| `git tag --list 'v*'` / `git rev-parse step-11` | no release tag; `step-11` still resolves to the annotated tag on `84ceb76`. |
+| `git status --short` before the record edit | Empty. |
+
+#### Round-1 finding closure
+
+| Finding | Round-2 status | Evidence |
+| --- | --- | --- |
+| A2-01 (Major) | **Closed.** The false 8-byte/1.5× argument is withdrawn from all three normative pages. The corrected arithmetic is right: a `u64` code is 1–9 bytes (fixint/uint8/uint16/uint32/uint64), a `u32` index 1–5 bytes, so 512 MiB gives roughly 38–268M entries and 0.45–3.2 GB typed; `floor(128 MiB / 12) = 11,184,810`. Both readers now specify an explicit cumulative `12 × ΣN` budget before allocation, with `ReaderLimits.max_cluster_expansion_bytes` / `PackageVerificationOptions.MaxClusterExpansionBytes`, fail-closed errors, and just-under/over/raised/bomb tests. The residual formula detail is A2-R2-01. | Amendment §4 rule 11, §6.1, §6.3, §9.3 and the risk table; `02-data-contracts.md` §3.3/§3.4; `msl-format.md`; `src/rust/crates/mocassin-types/src/limits.rs:108-129`; `src/dotnet/Mocassin.Results/Packages/PackageInspection.cs:104-119`. |
+| A2-02 (Minor) | **Closed.** `scan_map_optional` / `KeySpec` is specified; `CLUSTER_TABLE_KEYS` stays the four required keys and `CLUSTER_TABLE_OPTIONAL_KEYS = ["code_expansions"]`; the handler records the lengths and budget; `map/model.rs` validates; the pre-map fixture asserts the scan accepts absence, and a malformed present key is rejected with the field path. | Amendment §6.3, §9.3; `src/rust/crates/mocassin-msl/src/scan/mod.rs:26-72`; `scan/model.rs:55-60,383-417`; `map/model.rs:210-264`. |
+| A2-03 (Minor) | **Closed.** The five-argument primary constructor keeps a four-argument delegating overload and a manual four-argument `Deconstruct`; the four-argument public members are still in `PublicAPI.Unshipped.txt`, and the API test covers both forms. | Amendment §5, §9.3; `src/dotnet/Mocassin.Contracts/Packages/EnergyPayloadDtos.cs:49-53`; `src/dotnet/Mocassin.Contracts/PublicAPI.Unshipped.txt:55-67`. |
+| A2-04 (Minor) | **Closed.** Rule 2 requires the two keys and ignores unknown nested keys under the payload `unknownFields: "ignore"` policy; no raw-map rejection and no future-member conflict. | Amendment §4 rule 2, §9.3; `contracts/manifest.json` `formats.package.payloads.unknownFields`. |
+| A2-05 (Minor) | **Closed.** The coverage proof is restated as completeness plus superset, with the asymmetric `{O,Vc}`/`{O,Vc,H}` example and property cases; set equality is no longer asserted. | Amendment §3, §9.3; `src/dotnet/Mocassin.Symmetry/Reduction/ClusterReduction.cs:203-241`. |
+| A2-06 (Minor) | **Closed.** The pre-map fixture is now a byte-fixed non-singleton two-member ceria package built by the parent writer at `bbc2d08`; the six canonical codes resolve, and `8386`/`8387` fail closed with the recompile result. The existing inventory is unchanged (`msl-v1`/`step-13-centered` 0 tables; `step-13-populated` 1/12); `amend-2-pre-map` is planned, not yet present, as expected at the design freeze. | Amendment §9.2, §9.3; `docs/planning/steps/step-11-simulation-package-and-msl-writer.md` post-merge note; `git merge-base --is-ancestor bbc2d08 ff112cf`; fixture payload inspection above. |
+| A2-07 (Minor) | **Closed by the page amendment; the process change is sound and owner-gated.** `audits/README.md` §3.1, `closeout/README.md`, and `step-audit-template.md` now define the audit record as the single evidence source for a post-merge amendment, keep the parent `step-NN.json` historical, and do not run the checker. The checker accepts only `step-NN`/`step-NN[a-z]` (`STEP_RE`), so the page amendment is the minimal coherent fix; `05-open-decisions.md` item 7 records the resolution, and the amendment says the owner approves the process change at the re-review/start gate (AGENTS.md §3.15) rather than applying it silently. | `docs/planning/audits/README.md:103-122`; `docs/planning/closeout/README.md:12-28`; `docs/planning/audits/step-audit-template.md:19-25,74`; `tools/check_closeout_evidence.py:21`; `docs/planning/05-open-decisions.md:73,163-168`. |
+| A2-08 (Minor) | **Closed.** F-29's formal closure is a Step 14 gate owned by the Step 14 planner/step agent; the Step 14 page names the unmerged design `87be9de` and the round-3 record `1ea8090` and states that the `main` page is only the discoverable pointer. It is no longer a `step-11.1` acceptance criterion. | `docs/planning/steps/step-14-simulation-context-initialization.md:17-22`; amendment §10.9; Step 11 page post-merge note. |
+| A2-09 (Minor) | **Closed.** The non-existent Step 13 "API note" pointer is replaced by §5/§6.1 of the amendment; the Step 13 page is not re-opened, and rustdoc `missing_docs` plus the workspace API tests are named as the gate. | Amendment §6.1; `docs/planning/steps/step-13-rust-solver-foundation-and-package-reader.md` (unchanged). |
+| A2-10 (Minor) | **Closed.** §8 and §9.1 require the `samples/README.md` row and `samples/step-11-cluster-expansion/README.md` with purpose, derivation, job, and build/regeneration hint, matching the existing sample pattern. | Amendment §8, §9.1; `samples/README.md`; `samples/step-13-populated/README.md`. |
+| A2-11 (Minor) | **Closed.** ADR 0013's addendum now says absence must fail closed with an actionable error and never yield a wrong value; full readability is not required and a rebuild may be necessary, with the pre-map non-singleton table named as the first application. | `docs/planning/adr/0013-format-compatibility-and-api-versioning.md:41-63`. |
+| A2-12 (Note) | **Accepted and corrected.** The 0-cluster fixtures are compared by extracted payload and `package-summary-v1`; package bytes are a same-host observation because `app_version`/`generator`/runtime metadata are not part of the golden. | Amendment §9.2; `tests/contracts/packages/step-13-populated/README.md`; `msl-v1/README.md`. |
+| A2-13 (Note) | **Accepted and corrected.** The one-time forward read is retiered as evidence (one-time manual), not `PR-medium`; recurring fixtures stay PR-fast. | Amendment §9.3. |
+| A2-14 (Note) | **Accepted.** The ten-slot rule stays consistent with `occupation_codes`; §4 rule 6 records that a nonzero high-slot particle is unreachable and harmless and is deliberately not tightened on one side only. | Amendment §4 rule 6. |
+| A2-15 (Note) | **Accepted and planned.** The `step-13-populated` regeneration includes the README size/SHA table; the current README says `model-1.bin` is 6,518 bytes while the file and payload index say 7,009. | Amendment §9.2; `tests/contracts/packages/step-13-populated/README.md`; `payloads/index.json`; `stat`. |
+| A2-16 (Note) | **Accepted.** `PKG010` is reused for the structural checks; the later diagnostics wording pass is recorded without a code or descriptor change. | Amendment §5, §8; `src/dotnet/Mocassin.Contracts/Packages/PackageDiagnosticDescriptors.cs` (`PKG004`/`PKG010`); `PackageVerifierEngine.cs:195-226`. |
+
+#### Unchanged claims re-verified
+
+- **No signed projection change.** `ModelSignatureProjection` writes the cluster table's canonical codes,
+  canonical tuples, and every expansion code/permutation index (`ModelSignatureProjection.cs` cluster-table
+  writer); the manifest's `signatures.model...clusterTables[].occupations[].expansions` carries the same data;
+  the parameterization projection is the six-field `[formatVersion, modelSignature, pairTables, groupSets,
+  siteEnergies, transitionRules]` with no cluster codes; `package-summary-v1` has `clusterTableCount` only. The
+  freeze has no `contracts/**` diff, and the policy gate reports the 26 artifacts current.
+- **`format_version` 1.** ADR 0009 (`:69-80`) and ADR 0010 (`:48-65`) record the pre-release basis; ADR 0013's
+  addendum (`:41-63`) records the additive-within-a-major rule with fail-closed absence; no `v*` release tag
+  exists, so the unreleased-v1 basis holds.
+- **Manifest boundary.** `contracts/manifest.json` keeps the model `energy` member open
+  (`additionalProperties: true`); tightening it remains the gated decision in `05-open-decisions.md:128`.
+- **Step 11.1 path.** The post-merge fallback follows AGENTS.md §3.11.8 and amendments README §7; `step-11` is
+  unchanged and `step-11.1` is the proposed suffixed tag. The checker's `STEP_RE = ^step-\d{2}[a-z]?$`
+  deliberately excludes `step-11.1`.
+
+#### Findings
+
+| Severity | Finding | Evidence |
+| --- | --- | --- |
+| **Minor** | **A2-R2-01 — The pre-allocation budget formula is under-specified for a malformed map, so the "before any typed array is allocated" guarantee is not yet proven for unequal array lengths or duplicate keys.** §4 rule 3 defines `N = canonical_indices.Length`, and §6.3/§5 say the scans read the two array headers and accumulate `12 × N`. The typed pair is 8 bytes per `expanded_codes` entry plus 4 bytes per `canonical_indices` entry; a hostile map can declare a large `expanded_codes` and a small `canonical_indices`, so `12 × N` (N from the index array) passes while the .NET `ImmutableArray<ulong>` / Rust `Vec<u64>` allocates the large array before `PackageVerificationChecks.ValidateModel` / `map/model.rs` rejects the length mismatch. The pre-scan also does not state that a duplicate `code_expansions`/known key is rejected before allocation (the Rust `scan_map` rejects duplicates; the new .NET `ClusterExpansionScan` is silent). The design should accumulate `8 × len(expanded_codes) + 4 × len(canonical_indices)` (or reject unequal lengths at scan time) and reject duplicate known keys, with a hostile mismatch/duplicate test. | Amendment §4 rules 3/11, §5, §6.3 table and scan text, §9.3 budget row; `src/rust/crates/mocassin-msl/src/scan/mod.rs:26-72`; `scan/model.rs:391-413`; `map/model.rs:210-264`; `src/dotnet/Mocassin.Results/Packages/Internal/PackagePayloadDecoder.cs:67-79`; `PackageReader.cs:236-262`. |
+| **Note** | **A2-R2-02 — `ClusterTable::canonical_index` cannot distinguish the two fail-closed cases by itself.** §6.1 makes `canonical_index(raw) -> Option<u32>` "what Step 14 and Step 15 call", but §6.2 requires `MissingOccupationCode` when the map is present and the code absent, and a distinct `ExpansionMapAbsent` when the map is absent and the code is non-canonical. `None` alone cannot select the error. The public `expansions: Option<ClusterExpansions>` field lets Step 14 check presence, but the "single accessor" wording should say so, or the accessor should return a richer result. | Amendment §6.1 (`:309-311`), §6.2 (`:326-334`). |
+| **Note** | **A2-R2-03 — The new `audits/README.md` §3.1 says `closeout/step-NNN.json`; the step evidence form is `step-NN.json`.** The surrounding pages and the checker use `step-NN`/`step-NN[a-z]`; the triple-N form is a typo in a normative page and should be corrected with the rest of the process wording. | `docs/planning/audits/README.md:111`; `docs/planning/closeout/README.md:8`; `tools/check_closeout_evidence.py:21`. |
+| **Note** | **A2-R2-04 — The request's original Freeze note still says the `Reviewed commit` cell is `6ff9136`, but the cell names `ff112cf`.** The round-2 freeze note correctly names `ff112cf`; the older sentence is stale request metadata. The request owner should reconcile it so a reader does not see two reviewed commits. | Record lines 18 vs 26-28 and 33-37. |
+
+#### Verdict
+
+- [ ] Ready for implementation
+- [x] Ready with notes
+- [ ] Changes required
+- [ ] Waived
+
+**Ready with notes.** The round-1 Major (A2-01) is genuinely closed: the false 8-byte/1.5× argument is withdrawn
+from the amendment, the data contract, and `msl-format.md`; the corrected encoding range and the 11,184,810 entry
+cap are arithmetically right; and both readers now specify an explicit fail-closed budget with hostile tests. All
+ten round-1 Minors (A2-02…A2-11) are closed, including the optional-key scan path, the preserved four-argument
+`Deconstruct`, the superset semantics, the byte-fixed non-singleton pre-map fixture, the post-merge evidence page
+amendment (sound, and correctly owner-gated), the Step 14 closure pointer, the sample docs, and the ADR wording.
+A2-12…A2-16 are accepted and reflected. One new Minor (A2-R2-01) remains: the budget formula must be stated for
+unequal array lengths and duplicate keys, or the pre-allocation guarantee has a malformed-map hole; it is a small,
+explicit correction for implementation. The three Notes are API/documentation clarity. No Blocker or Major
+remains. The human owner may accept `Ready with notes` and carry A2-R2-01 into implementation, or the planner may
+correct it and the Notes and append a further round; this reviewer does not approve the start gate.
+
+Follow-up owner: Human owner (accept `Ready with notes` or request the A2-R2-01 correction); planner/implementor
+for the residual Minor and Notes.
+Follow-up step: `step-11.1` implementation after the owner decision; `step-11` remains tagged and is not moved.
