@@ -19,9 +19,9 @@ those are Step 23B.
 
 ## Implementation status
 
-- **Status:** Re-audit required — round 1 fixes frozen at `008b133`; Ubuntu, Windows, and macOS gates green
+- **Status:** Re-audit required — round-1 and round-2 fixes frozen at `30dcf3e`; Ubuntu, Windows, and macOS gates green
 - **Step branch:** `step/23a-workspace-and-project-lifecycle`
-- **Step CI:** Ubuntu closeout [44849296444](https://github.com/seb-eis/mocassin-2/actions/runs/44849296444), Windows gate [44848841598](https://github.com/seb-eis/mocassin-2/actions/runs/44848841598), macOS gate [44849147125](https://github.com/seb-eis/mocassin-2/actions/runs/44849147125) — all green at `008b133`
+- **Step CI:** Ubuntu closeout [44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows gate [44889462922](https://github.com/seb-eis/mocassin-2/actions/runs/44889462922), macOS gate [44889646766](https://github.com/seb-eis/mocassin-2/actions/runs/44889646766) — all green at `30dcf3e`
 - **Main merge:** — (`bbc2d08` is merged into the step branch; merge is after a passing audit)
 - **Step tag:** —
 - **Audit:** Re-audit required — [record](../audits/step-23a.md), [evidence](../closeout/step-23a.json)
@@ -43,6 +43,7 @@ those are Step 23B.
 | 4 | `project-session-lifecycle` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `a17482a` |
 | 5 | `tests-docs-and-closeout` | Squashed | `./tools/verify.sh all --require` 0 on the merged tree | Ubuntu [44841374175](https://github.com/seb-eis/mocassin-2/actions/runs/44841374175) green at `6901e76` | `114f31c` |
 | 5-fix | `fix-audit-round-1` | Squashed | `./tools/verify.sh all --require` 0 on the fixed tree at `008b133` | Ubuntu [44849296444](https://github.com/seb-eis/mocassin-2/actions/runs/44849296444), Windows [44848841598](https://github.com/seb-eis/mocassin-2/actions/runs/44848841598), macOS [44849147125](https://github.com/seb-eis/mocassin-2/actions/runs/44849147125) green at `008b133` | `657bc5f`, `008b133` |
+| 6-fix | `fix-audit-round-2` | Squashed | `./tools/verify.sh all --require` 0 on the merged tree at `30dcf3e` | Ubuntu [44889193801](https://github.com/seb-eis/mocassin-2/actions/runs/44889193801), Windows [44889462922](https://github.com/seb-eis/mocassin-2/actions/runs/44889462922), macOS [44889646766](https://github.com/seb-eis/mocassin-2/actions/runs/44889646766) green at `30dcf3e` | `30dcf3e` |
 
 ### Recorded implementation deviations and limitations (feature 5)
 

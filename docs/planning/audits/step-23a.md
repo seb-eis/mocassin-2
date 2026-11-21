@@ -330,10 +330,26 @@ evidence, dispatch one replacement closeout CI run, add resolutions, and request
 
 ## Step agent re-audit status
 
-**State:** Re-audit required — round 1 fixes are integrated and frozen at `008b133`. Ubuntu closeout run
-44849296444, Windows gate run 44848841598, and macOS gate run 44849147125 are all green at that commit; the
-values are recorded in `docs/planning/closeout/step-23a.json`. `./tools/verify.sh all --require` exited 0 on the
-frozen tree. The reviewer-authored `Record state` above remains the round-1 record.
+**State:** Re-audit required — round-1 and round-2 fixes are integrated and frozen at `30dcf3e`. Ubuntu
+closeout run 44889193801, Windows gate run 44889462922, and macOS gate run 44889646766 are all green at that
+commit; the values are recorded in `docs/planning/closeout/step-23a.json`. `./tools/verify.sh all --require`
+exited 0 on the frozen tree. The reviewer-authored `Record state` and the round-2 findings above remain the
+reviewer record.
+
+### Step agent round-2 resolutions
+
+These entries are step-agent-authored; the reviewer's findings, evidence, and verdict are unchanged.
+
+| Finding | Resolution | Commit / run |
+| --- | --- | --- |
+| R2-1 | The async dispatch now awaits the inner task through the `Func<Task<T>>` overload. Two meta-tests prove a throw and an `Assert.Fail` after `await` fail the test. The seven exposed tests were corrected: the four dialog tests pump the realised overlay, the welcome test asserts the real `ItemsControl`/`TreeView`/console filter, `Ctrl+2` asserts JSON and `Ctrl+1` asserts Overview, and the rapid toggle asserts the final layout. | `30dcf3e`; App tests 121/121 |
+| R2-2 | The target layout is captured when a toggle is scheduled and the shell suppresses re-applying the settings event produced by its own layout write. The regression asserts `True` → `False` → `True`, the persisted `LeftVisible`, and no `.tmp` residue. | `30dcf3e` |
+| R2-3 | `main` `eadfe13` is merged at `a584b20`; the local gate and the three replacement runs were dispatched at `30dcf3e`; the evidence records `main_sha_at_freeze = eadfe13` and applies the merge-tree rule by testing the merged commit itself. | `30dcf3e`; 44889193801, 44889462922, 44889646766 |
+| R2-4 | The manual checklist is replaced by automated Xvfb evidence: the real shell runs on X11 under Xvfb, captures light/dark/high-contrast, workspace, dialog, and lifecycle images, asserts the outcomes, and records the date, OS, command, steps, and image hashes. The page states that it is automated Xvfb evidence, not a manual checklist; the owner accepted this substitution. | `30dcf3e`; docs/development/platform-checklist.md |
+| R2-5 | The owner accepted deviation 7 as a recorded exception, not a precedent. All round-2 fixes are on the `fix-audit-round-2` feature branch and squash-merged. | `30dcf3e` |
+| R2-6 | Removed the stale placement-resolver references from `code-structure.md`. | `30dcf3e` |
+| R2-7 | Removed the five flag-only theme resources and the unused shell-foreground key; the effect is carried by the merged dictionaries, padding/min-height/border keys, `Mocassin.Transitions`, and `SystemAccentColor`. Accessibility tests assert automation roles and a deterministic Tab order. The settings dialog shows error/status banners; Save-as-new is recorded as not implemented. | `30dcf3e` |
+| R2-8 | Recorded that the round-1 reviewer record was bundled into `657bc5f`. The record was not altered and round 2 re-ran the verdict; history was not rewritten. | `30dcf3e` |
 
 ## Approval summary
 
