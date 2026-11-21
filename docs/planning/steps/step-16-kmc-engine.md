@@ -99,20 +99,29 @@ impl KmcEngine<'_> {
 
 - `SelectableJumpCount` is maintained by the context (step 14).
 - Draw `r = rng.next_bounded(selectable_count)`.
-- Walk direction pools in ascending `direction_count` order:
-  - subtract `pool.count` until `r < pool.count`;
-  - `env = pool[r / direction_count]`;
-  - `rel = r % direction_count`.
-- If the selected `(position, particle)` is no longer valid (stale pool), repair the pool and retry; this
-  should be an invariant violation, not a normal path.
+- Walk direction pools in ascending `direction_count` order; each pool's weight is
+  `members.len() * direction_count` (a member is a supercell environment, so all its directions are selectable):
+  - subtract the pool weight from `r` until `r < weight`;
+  - `member = pool.members[r / direction_count]`, `env = member.env`, `rel = r % direction_count`;
+  - `particle = member.particle` must equal the lattice particle at `env` (Step 14's pool invariant).
+- The earlier wording `env = pool[r / direction_count]` indexed a per-cell member list; the member now carries
+  the absolute `EnvId`, so the same formula addresses any cell. Two members in different cells are distinct
+  members with distinct slots.
+- If the selected `(env, particle)` is no longer valid (stale pool), repair the pool and retry; this should be an
+  invariant violation, not a normal path.
 - The selection is uniform over directions, matching the original. Do not switch to rate-weighted selection in
   v1; it would change the rejection algorithm and normalization semantics.
 - Record the selected collection, direction, particle, and position for counters/tracking.
 
 ### 3. Path and rule lookup
 
-- Build the path from the direction's relative offsets:
-  `path[0] = selected position`; `path[i] = trim(path[i-1] + offset[i-1])`.
+- Build the path from the direction's **relative-to-start** offsets:
+  `node[0] = selected environment`; for `i ≥ 1`,
+  `node[i] = ctx.resolve_node(selected, direction, i)` — equivalently
+  `trim(cell(selected) + path[i].cellA/B/C) * P + path[i].P`.
+  The compiled `path[i]` entries are offsets from node 0 (the compiler stores `absolute[i] − absolute[0]`), not
+  successive hops; a cumulative `path[i] = trim(path[i-1] + offset[i-1])` double-counts the cell. Step 14's
+  `resolve_node` is the single implementation; do not duplicate the rule.
 - Decode the start state code from the path's current particles.
 - Rule lookup:
   - build a per-collection map from `StateCode0` to rule indices at initialization;

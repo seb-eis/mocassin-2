@@ -267,14 +267,17 @@ Rules:
 ### 4.1 Solver context build (Step 14)
 
 The solver builds one **simulation context** per job from the validated `JobPackage`; it never re-reads the
-package and never reads project JSON. Initialization is pure, single-threaded, and allocation-bounded: every
-hot array is sized once and no hot structure grows during a run. The context holds the lattice and environment
-arenas, a **translation-compact per-P1 neighbour-link CSR** (one link list per canonical P1 position, with the
-periodic image stored as a relative cell offset and the absolute target resolved at use), the cluster
-instances/memberships/codes, the site+pair environment energy vectors and the per-centre cluster energy vectors,
-the KMC selection pools and per-`(P1, direction)` jump status, the tracker index space, counters, goals,
-normalization, the RNG, and the resume hook. The energy engine (Step 15) owns deltas; the KMC/MMC engines
-(Steps 16/17) own selection, acceptance, time, and aborts; Step 18 owns tracker values and `.mcs`.
+package and never reads project JSON. Initialization is pure, single-threaded, and allocation-bounded: a
+pre-allocation memory plan checks every derived array against per-array caps and a total cap, every hot array is
+sized once, and no hot structure grows during a run. The context holds the lattice and environment arenas, a
+**translation-compact owner-major per-P1 neighbour-link CSR** (one forward list per canonical P1 position, with
+the periodic image stored as a relative cell offset and the partner resolved at use) **plus a compact inverse
+index** (partner P1 position → owners) so a changed environment finds the vectors it updates, the cluster
+instances/centre index/codes, the site+pair environment energy vectors and the per-centre cluster energy vectors,
+the supercell-addressed KMC selection pools and per-`(P1, direction)` receiver-major jump status, the tracker
+index space, counters, goals, normalization, the RNG, and the resume hook. The energy engine (Step 15) owns
+deltas; the KMC/MMC engines (Steps 16/17) own selection, acceptance, time, and aborts; Step 18 owns tracker
+values and `.mcs`.
 
 Cluster interactions are counted once at their centre, and the site background once; only pair interactions are
 summed from both ends and corrected by the 0.5 factor. The original's uniform `0.5 × Σ` also halved the site and
@@ -453,6 +456,10 @@ Use explicit unit types at API boundaries to prevent Å/eV/K mix-ups:
   `13` numerical failure **or internal invariant violation** (a caught panic is reported here), `14` aborted by
   limit, `15` cancelled, `16` I/O error. Parse errors (unknown option, bad enum value, missing value) are `10`,
   not the parser library's default; help and `--version` exit 0.
+- **12 versus 14.** `14` is a **run-time** abort by a configured limit (cycle target, wall clock, minimal rate)
+  raised while a run is in progress. A job whose *context* cannot be represented — a package/limit combination
+  the solver cannot allocate or index exactly — is a model/data error detected before the first cycle and is
+  `12`. Step 14's `LimitExceeded` is therefore `12`; Step 16's abort conditions are `14`. Do not merge the two.
 - The solver table is the `mocassin-sim` process contract. It is separate from the .NET `mocassin` table; do not
   reuse the .NET table for solver exit codes. `5` is the one intentional shared meaning (partial success for
   multi-job/batch), and it is reserved until Step 19. `docs/reference/cli.md` and the Step 13 page mirror this

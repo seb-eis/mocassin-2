@@ -196,15 +196,15 @@ audit surface without stranding either half.
 #### Recorded class — Step 14 (design freeze 2026-11-20)
 
 Step 14 (**Simulation context initialization**) is class **High** on three dimensions: cross-step interfaces
-(Steps 15, 16, 17, 18, and 19 consume the context API, the neighbour-link identity, the energy-vector layout,
-the cluster-code representation, the pool order, and the jump-status link identity); irreversibility (the
-link/target resolution rule, the pool ordering, the cluster-geometry rule, and the site/pair/cluster accounting
-are behavioural conventions that are expensive to change after merge); and test-matrix breadth (unit, property,
-snapshot, real-package acceptance, allocation, benchmark, memory). Its contracts/format surface is Medium (no
-persisted-format change, but a new public Rust API), it adds no dependency, it has **one** independent
-acceptance story ("a validated job becomes a fully initialized context"), and its evidence set is bounded
-(six features, one design page, one new fixture pair, one benchmark). Per this section a High step needs either
-a split or explicit owner acceptance as one unit.
+(Steps 15, 16, 17, 18, and 19 consume the context API, the neighbour-link orientation and inverse index, the
+energy-vector layout, the cluster-code representation, the supercell pool space, and the jump-status link
+identity); irreversibility (the owner/receiver delta rule, the pool key space and ordering, the cluster-geometry
+rule, and the site/pair/cluster accounting are behavioural conventions that are expensive to change after
+merge); and test-matrix breadth (unit, property, snapshot, real-package acceptance, allocation, benchmark,
+memory). Its contracts/format surface is Medium (no persisted-format change, but a new public Rust API), it adds
+no dependency, it has **one** independent acceptance story ("a validated job becomes a fully initialized
+context"), and its evidence set is bounded (six features, one design page, one new fixture pair, one benchmark).
+Per this section a High step needs either a split or explicit owner acceptance as one unit.
 
 **No split is proposed.** The dependency-clean boundaries would separate the context skeleton from the
 acceptance that proves it (leaving Step 15 a half-context or duplicating the fixtures and memory evidence) or

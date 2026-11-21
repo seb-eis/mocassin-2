@@ -954,6 +954,13 @@ MessagePack map with snake_case keys. Top-level:
     link schema. The writer maps the links one-to-one; `energy_id = PairTableIndex`.
   - `distance_bucket_fm` is not stored in the package: the pair table index is the energy identity, and the
     bucket remains signed in the compiled link and used by parameterization/inspection.
+  - **Orientation.** A pair link is stored on the interaction's **centre** P1 position and points at its
+    partner image; the table is row-major `[centre particle][partner particle]`. The centre's site+pair vector is
+    the sum over its own links. A particle change at a partner therefore updates the **centre's** vector with the
+    centre's table and the centre's row. There is no guarantee that a reverse link exists for every forward link;
+    consumers must not synthesise one, and must not apply the changing environment's table to the other side.
+    This is the runtime rule Step 14 implements (owner-major CSR plus an inverse routing index) and Step 15/17
+    consume.
 - A cluster link is `{cluster_id:u32, byte_position:u8}` used for incremental occupation-code updates.
   `byte_position` is **the environment's own site slot** in that cluster (slot `0` is the centre); it mirrors
   the compiled `CompiledClusterLink(ClusterTableIndex, SiteSlot)`. It is not the slot of the pair target and not

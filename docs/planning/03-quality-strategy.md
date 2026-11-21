@@ -590,35 +590,45 @@ solver with the same binary, platform, package, and seed.
 
 - **Boundary:** one context per job, built once from the validated `JobPackage`; no I/O, no package re-read, no
   physics (no energy deltas, no cycle, no trackers, no `.mcs`).
-- **Arenas and links:** lattice/environment struct-of-arrays, a translation-compact per-P1 neighbour-link CSR
-  with the periodic image as a relative cell offset and the absolute target resolved at use, deterministic
-  sorting (`pair_id`, target, offset) that fixes the f64 summation order, and a validated cluster
-  instance/membership/code representation (centre slot `0`, own-slot `byte_position`).
-- **Cluster geometry limitation (OD-1):** the v1 payload does not persist a member's relative cell offset. Step
-  14 derives it only from a unique centre→member pair image and rejects zero or multiple images; the
-  code-existence check makes a wrong geometry fail at initialization. The limitation is recorded in the data
-  contract, the open decisions, and the step page; a future `.msl` revision persists the offset.
+- **Arenas and links:** lattice/environment struct-of-arrays, an owner-major per-P1 neighbour-link CSR (the
+  centre owns the link and the pair-table row) with the periodic image as a relative offset, a compact inverse
+  index over partner P1 positions that yields the owners whose vectors a change updates, deterministic sorting
+  (`pair_id`, partner, offset) that fixes the f64 summation order, and a validated cluster
+  instance/centre-index/code representation (centre slot `0`, own-slot `byte_position`, cluster associations on
+  the centre's forward link).
+- **Cluster geometry limitation (OD-1):** the v1 payload does not persist a member's relative cell offset. Slot 0
+  is `[0,0,0]` by definition; every slot `1..n` must resolve to exactly one centre→member link, otherwise
+  initialization fails. The limitation is recorded in the data contract, the open decisions, and the step page;
+  a future `.msl` revision persists the offset, and a writer build-time diagnostic is a recorded follow-up.
 - **Energy runtime:** site once, pair ×0.5, cluster once at the centre; the initial lattice energy uses that
   exact decomposition and a hand-computed test; Step 15 continues with it. The original's uniform `0.5 × Σ` is a
   recorded deviation (OD-2), covered by Step 29 parity.
-- **Pools and jump status:** direction-count buckets walked ascending, mask filtering, optimizer removal, O(1)
-  swap-remove, `selectable_jump_count`; per-`(P1, direction)` sender/receiver links with `link_id` relative to the
-  sender's P1 list, structural receiver filter, `L*(L-1) ≤ 90` derived bound, and cluster touches for the
-  centre's S0/S2 terms. The exact per-direction occupation check stays in Step 16.
+- **Pools and jump status:** supercell-addressed direction-count buckets (`EnvId` members, one global slot map,
+  a per-P1 `pool_of`), walked ascending, with mask filtering, optimizer removal, O(1) swap-remove, and a
+  `max_pools` bound; per-`(P1, direction)` receiver-major links (`sender_path_id`, `receiver_path_id`,
+  `link_id` into the receiver's list), structural receiver filter, `L*(L-1) ≤ 90` derived bound, and link-carried
+  cluster associations. The exact per-direction occupation check stays in Step 16.
 - **Goals and normalization:** `prerun = pre_run_mcsp × mobile_count`, `main = target_mcsp × mobile_count`,
-  `total` rounded up to 100, block = `total/100`; `K_fix = exp(E_norm/kT)`, `K_auto = 1/RawMax`,
-  `K_norm = K_fix × K_auto`, `dt = dof × K_norm/(nu_max × selectable)`. `nu_max` is the job cap or the maximum
-  active rule frequency (not persisted in `.msl`).
-- **Resume:** a plain `ResumeState` validated against the package/job/lattice; `RawMax` preserved; the mobile
-  mapping re-derived and compared; a completed phase returns a distinct outcome and is never resumed silently.
-- **Errors:** invalid input/cluster/limit/resume → exit 12; non-finite factor/`nu_max`/`dt`, bad RNG state,
-  invariant → exit 13; cancellation → exit 15.
-- **Tiers:** index/wrap, links, cluster codes, energy vectors, pools, jump status, goals, bounds, resume, and the
-  allocation proof are PR-fast; the real `msl-v1`/`amend-1-net10`/populated/centered packages and the 10×10×10
-  fixture are PR-medium; the Criterion context benchmark and the 500k-position stress are nightly/manual.
-- **Performance:** context init `< 100 ms` for the 10×10×10 fixture, `< 20 ms` for the small fixtures; the
-  `MemoryReport` total within budget; zero allocations in hot accessors; a same-runner-class
-  `baselines.json` entry (`rustContext`) with the 10 % rule.
+  `total` rounded up to 100, block = `total/100`, zero total is an error; `K_fix = exp(E_norm/kT)`,
+  `K_auto = 1/RawMax`, `K_norm = K_fix × K_auto`, `dt = dof × K_norm/(nu_max × selectable)`. `nu_max` is the job
+  cap or the maximum active rule frequency (the payload persists only the optional job cap).
+- **Resume:** a plain `ResumeState` validated against the package/job with the `.mcs` parameterized
+  `modelSignature` and `seedHash`; no lattice signature is required because the document has none; `RawMax`
+  preserved; the mobile mapping re-derived and compared; a completed phase returns a distinct outcome and is
+  never resumed silently.
+- **Memory and limits:** a pre-allocation `MemoryPlan` sizes every derived array (including `K*C` cluster arrays
+  and `P*D` jump status) with checked arithmetic, per-array caps, and a 1 GiB total cap; `LimitExceeded` is exit
+  12 (data error), distinct from exit 14 (run-time abort).
+- **Errors:** invalid input/cluster/limit/resume/zero-goal → exit 12; non-finite factor/`nu_max`/`dt`, bad RNG
+  state, invariant → exit 13; cancellation → exit 15.
+- **Tiers:** index/wrap, links/inverse, cluster codes, energy vectors, delta orientation (asymmetric table),
+  pools (two cells), jump status, goals, bounds, resume, `Send`/`!Sync`, and the allocation proof are PR-fast;
+  the real `msl-v1`/`amend-1-net10`/populated/centered packages, the 10×10×10 fixture, and the populated clone
+  are PR-medium; the Criterion context benchmark and the 500k-position stress are nightly/manual.
+- **Performance:** context init `< 100 ms` for the 10×10×10 fixture and the populated clone, `< 20 ms` for the
+  small fixtures; the `MemoryReport` total within budget; zero allocations in hot accessors; a same-runner-class
+  `baselines.json` entry (`rustContext`) with the 10 % rule. The ceria fixture is table-free; the clone is the
+  pair/cluster-scale measurement.
 
 ## 10. Contract tests
 
@@ -771,6 +781,7 @@ Cache NuGet, Cargo, pip, and the SQLite build.
 | ChaCha12 `next_f64` / `next_bounded` (Step 13) | ≥ 120 M / ≥ 200 M calls/s |
 | RNG state export + import / 64-word refill (Step 13) | ≤ 500 ns / ≤ 250 ns |
 | Solver context init, 10×10×10 fixture (Step 14) | < 100 ms release, warm, same-runner-class; `MemoryReport` ≤ 64 MiB |
+| Solver context init, populated-model 10×10×10 clone (Step 14) | < 100 ms release, warm; `MemoryReport` ≤ 64 MiB (the pair/cluster-scale measurement) |
 | Solver context init, `msl-v1` 6×6×6 and populated 2×2×2 (Step 14) | < 20 ms each; zero allocations after construction |
 
 Step 13 records the load and RNG measurements as same-runner-class entries in

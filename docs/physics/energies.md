@@ -80,6 +80,12 @@ whose slot 0 is the centre particle. The environment energy vector a transition 
 the site and pair parts only; the cluster part is a separate per-centre term and must be added for every centre
 whose code changes.
 
+The pair vector is **owner-major**: a payload pair link is stored on the interaction's centre, the table row is
+the centre's particle and the column its partner's particle, so the centre's vector is the sum over the centre's
+own links. When a partner changes, the centre's vector is updated with the centre's table and row; a solver must
+not apply the changing environment's table to the other side, and must not assume that a reverse link exists.
+Step 14 supplies the inverse index that finds the affected centres; Step 15 applies the deltas.
+
 The original solver used `0.5 * Σ_stable E[environment]`, where the environment energy already contained the
 site background and a cluster term replicated at every member. That halved the site and cluster contributions.
 The new solver keeps the documented per-centre convention instead; the deviation is recorded in the Step 14

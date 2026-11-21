@@ -170,6 +170,9 @@ crates/mocassin-solver/
 
 - `context/` is the concept; the submodules name the data they own, not a type kind. `energy` here is the
   *runtime tables and vectors*, not the Step 15 delta engine; Step 15 adds `energy/` as its own concept module.
+- `dimensions.rs` owns `EnvId` (absolute supercell environment) and the checked index/wrap helpers; `links.rs`
+  owns the owner-major CSR and the inverse routing index; `limits.rs` owns `MemoryPlan`/`MemoryReport`;
+  `pools.rs` owns `SelectionPool`/`PoolMember` (the Step 13 `DirectionPool` placeholder is retired).
 - No `utils`/`helpers`/`common` module. The index/wrap helpers live in `dimensions.rs` because they are the
   dimension contract.
 - Keep every file below 800 lines and the `context/` directory below 20 direct files; split by sub-concept if a
