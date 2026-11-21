@@ -19,12 +19,12 @@ those are Step 23B.
 
 ## Implementation status
 
-- **Status:** Ready for audit — closeout CI pending
+- **Status:** In audit
 - **Step branch:** `step/23a-workspace-and-project-lifecycle`
-- **Step CI:** pending the single closeout dispatch
-- **Main merge:** — (main `bbc2d08` is merged into the step branch)
+- **Step CI:** [Ubuntu closeout 44841374175](https://github.com/seb-eis/mocassin-2/actions/runs/44841374175) — green at `6901e76`
+- **Main merge:** — (`bbc2d08` is merged into the step branch; merge is after a passing audit)
 - **Step tag:** —
-- **Audit:** Ready for audit
+- **Audit:** In audit — [record](../audits/step-23a.md), [evidence](../closeout/step-23a.json)
 - **Design review:** Ready with notes — **accepted by the human owner 2026-11-20** at `b9c56fe`
   ([record](../reviews/step-23a.md), round 3 record commit `b6a472c`). Notes n-12/n-13 are corrected in
   feature 5.
@@ -41,7 +41,7 @@ those are Step 23B.
 | 2 | `documents-navigation-and-commands` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `75d95de` |
 | 3 | `settings-theming-and-accessibility` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `d0bca73` |
 | 4 | `project-session-lifecycle` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0 | — (none run) | `a17482a` |
-| 5 | `tests-docs-and-closeout` | Squashed | `./tools/verify.sh all --require` 0 on the merged tree | closeout pending | `114f31c` |
+| 5 | `tests-docs-and-closeout` | Squashed | `./tools/verify.sh all --require` 0 on the merged tree | Ubuntu [44841374175](https://github.com/seb-eis/mocassin-2/actions/runs/44841374175) green at `6901e76` | `114f31c` |
 
 ### Recorded implementation deviations and limitations (feature 5)
 

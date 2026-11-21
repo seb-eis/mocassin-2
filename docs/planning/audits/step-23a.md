@@ -134,7 +134,7 @@ auditor's findings, evidence, or verdict.
 
 ## Record state
 
-**State:** Ready for audit
+**State:** In audit
 
 `Re-audit required` is a record state, not a verdict.
 
