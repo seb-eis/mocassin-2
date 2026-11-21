@@ -118,7 +118,7 @@ rule:
 - The amendment audit uses the same status vocabulary (`Ready for audit`, `Fixes required`,
   `Re-audit required`, `Passed`, `Passed with notes`, `Waived`) and the same finding severities as a step audit.
 
-This rule applies from `step-11-amend-2` (A2-07). See also
+This rule applies from `step-11-amend-2` (A2-07) and was **owner-approved 2026-11-21**. See also
 [`../closeout/README.md`](../closeout/README.md) and the [audit template](step-audit-template.md).
 
 CI is intentionally minimal: automatic CI runs only on `main`, on Ubuntu, with path filters. Windows and macOS

@@ -160,13 +160,12 @@ The following are the only topics still expected to need an explicit owner decis
 6. **23A complexity class** at the GUI-track start gate: accept 23A as one High unit under §3.1 (no further
    split is viable). The **split decision itself is resolved** (owner, 2026-11-20); **23B's class acceptance**
    happens at its own start gate. See the 23A page §18 and the 23B page §16.
-7. **`step-11.1` post-merge process** (Step 11 amendment 2): confirm the proposed `step-11.1` tag and the
-   post-merge evidence rule. **Resolved by the A2-07 page amendment:** a post-merge amendment's audit record
-   (`docs/planning/audits/step-11-amend-2.md`) is the single evidence source for the audited commit, closeout
-   CI, `main` SHA, merge commit, and tag; `closeout/step-11.json` stays historical; the closeout-evidence
-   checker is not run for a non-step ID. `tools/check_closeout_evidence.py` is **not** changed in this docs
-   remediation; extending it to `step-NN.M` remains a possible later process change. Owner approval of the
-   page amendment is part of the re-review/start gate.
+7. **`step-11.1` post-merge process** (Step 11 amendment 2): **owner-approved 2026-11-21.** A post-merge
+   amendment's audit record (`docs/planning/audits/step-11-amend-2.md`) is the single evidence source for the
+   audited commit, closeout CI, `main` SHA, merge commit, and tag; `closeout/step-11.json` stays historical; the
+   closeout-evidence checker is not run for a non-step ID. `tools/check_closeout_evidence.py` is **not**
+   changed; extending it to `step-NN.M` remains a possible later process change. The `step-11.1` implementation
+   path is approved after the design gate, with a separate audit and tag.
 
 Everything else is either resolved above or specified in the data contracts, architecture, or step pages.
 When a decision is made, add an ADR (if expensive to reverse) and update this page.

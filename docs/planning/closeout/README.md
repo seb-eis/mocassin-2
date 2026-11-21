@@ -14,7 +14,8 @@ merged (`step-NN-amend-M`, tagged `step-NN.M`) is not a step and has no step bra
 `docs/planning/audits/step-NN-amend-M.md` is the single evidence source for the audited commit, closeout CI and
 `head_sha`, `main` SHA at freeze, merge commit, merge-tree CI, platform CI, and tag. The parent step's
 `step-NN.json` is historical and is not rewritten; `tools/check_closeout_evidence.py` is not run for the
-amendment. See [`../audits/README.md` §3.1](../audits/README.md#31-post-merge-amendment-audits).
+amendment. Owner-approved 2026-11-21 (A2-07). See
+[`../audits/README.md` §3.1](../audits/README.md#31-post-merge-amendment-audits).
 
 ## Step ID form
 
