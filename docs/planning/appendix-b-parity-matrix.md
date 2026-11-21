@@ -27,7 +27,7 @@ Status legend:
 | Stable project hash | Y | Done | 01/03/09 | Model/document SHA-256 in 01; structure hash in 03; compiled and parameterization signatures in 08/09 |
 | Legacy `.mocprj` read/write | N | Out of scope | — | ADR 0001 |
 | Project data viewer (JSON/XML) | N | Replaced | 23A | Read-only Project JSON document with copy; Save-a-copy export remains deferred |
-| Project metadata editing (name/description/author/notes) | Y | Planned | 23B | Project Overview editor; undoable through the shared edit pipeline |
+| Project metadata editing (name/description/author/notes) | Y | Implemented | 23B | Project Overview form with name rules, one undo entry per committed field, read-only refusal, and save-point-correct dirty state |
 | Cross-domain validation pipeline | Y | Implemented | 07 | Load/model/cross-domain/feasibility; no post-validation mutation |
 | Stable diagnostic catalog | Y | Implemented | 07 | Codes, owners, severities, paths, hints; docs-drift checked |
 | Model statistics and feasibility | Y | Implemented | 07 | Counts, rule/memory estimates, buildability warnings |

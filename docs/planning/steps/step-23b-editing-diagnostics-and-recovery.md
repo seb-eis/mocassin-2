@@ -18,7 +18,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 
 ## Implementation status
 
-- **Status:** **In progress** — design accepted; feature 1 squashed (`bb048ad`, test fix `90d9f73`); feature 2 next
+- **Status:** **In progress** — design accepted; features 1–2 squashed (`bb048ad`/`90d9f73`, `77c1b9c`); feature 3 next
 - **Step branch:** `step/23b-editing-diagnostics-and-recovery`
 - **Step CI:** — (local gates only; the single closeout `CI` run is dispatched at closeout)
 - **Main merge:** —
@@ -40,7 +40,7 @@ branch is `step/23b-editing-diagnostics-and-recovery`. The review record is
 | # | Feature | Branch | Status | Local gates | Step CI | Squash commit |
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Edit pipeline and undo/redo | `feature/step-23b-editing-diagnostics-and-recovery/edit-pipeline-and-undo-redo` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `bb048ad`; test fix `90d9f73` |
-| 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | In progress | — | — | — |
+| 2 | Validation surface | `feature/step-23b-editing-diagnostics-and-recovery/validation-surface` | Squashed | `./tools/verify.sh dotnet` 0; `structure` 0; `api` 0; `docs` 0 | — (none run) | `77c1b9c` |
 | 3 | Dirty state, autosave, crash recovery | — | Planned | — | — | — |
 | 4 | 23B tests, documentation, and closeout | — | Planned | — | — | — |
 
@@ -78,11 +78,47 @@ seam fills in §1.
   follows the lock/read-only state, saves through the no-arg `MarkSaved()` + `NotifySaved()`, and replaces the
   coordinator document on reload. Tests cover apply/undo/redo, the bound and overflow, no-op, rejected,
   read-only, the save-point across save/undo/redo, replacement, and the real session/store path.
-- **Known limitations:** the Project Overview metadata form (name/description/author/notes) is **not** built in
-  this feature. The coordinator and its one-undo-entry-per-`Apply` contract are ready; the form is expected with
-  the Overview/validation work in feature 2. The validation surface, autosave/recovery, dialogs, published
-  documentation column, fixtures, and closeout are features 2–4. No app public API changed; the only public
-  addition is `ProjectDocument.MaxUndoDepth` in `Mocassin.Core/PublicAPI.Unshipped.txt`.
+- **Known limitations:** the Project Overview metadata form (name/description/author/notes) was not built in
+  this feature; the owner moved it to feature 2 and it landed there (`77c1b9c`). The validation surface,
+  autosave/recovery, dialogs, published documentation column, fixtures, and closeout are features 2–4. No app
+  public API changed; the only public addition is `ProjectDocument.MaxUndoDepth` in
+  `Mocassin.Core/PublicAPI.Unshipped.txt`.
+
+#### Feature 2 — validation surface and metadata editor (squashed `77c1b9c`)
+
+- **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/validation-surface`; deleted after the squash.
+  Feature commit `dc5c909`, squash `77c1b9c`.
+- **Local gates:** `./tools/verify.sh dotnet` exit 0 (all solution tests, 0 warnings, `dotnet format` clean);
+  `./tools/verify.sh structure` exit 0 (9 architecture tests); `./tools/verify.sh api` exit 0 (no baseline
+  break); `./tools/verify.sh docs` exit 0 (link/math checks, DocFX, rustdoc, strict Zensical build). **No CI run**
+  was triggered.
+- **Diff summary:** per-session `ValidationCoordinator` seeded from `ProjectSession.Validation` with a 300 ms
+  debounce, off-thread pipeline runs on immutable snapshots, version/snapshot stale guard, explicit revalidate,
+  and one cached statistics-enabled run per snapshot; `ProblemsChannelViewModel`/`ProblemsView` with
+  severity/code/text/source filters, sorting, revalidate, help anchors, related-path navigation, and edit
+  diagnostics cleared by the next successful content change; the status-bar validity item with glyph and
+  severity; `DiagnosticHelpLinks` and `IShellLauncher.OpenUriAsync`; the Overview metadata form
+  (name/description/author/notes) through `ProjectEditCoordinator.Apply`, name rules, inline errors, read-only
+  refusal, save-point dirty text, focus requests, and the explicit statistics panel; `ProjectJsonViewModel`
+  refreshes on content changes. Tests cover the initial-result/no-open-validation contract, debounce, stale
+  discard, statistics caching, the `Load` stage fixtures, filters/sort/edit diagnostics/navigation/help, metadata
+  apply/reject/read-only, one undo entry per field, save-point text, focus, and headless rendering.
+- **Metadata-form scope move:** the owner moved the Project Overview metadata form from feature 1 to feature 2;
+  the feature-list rows above record that move and the form is complete here.
+- **Stale-guard deviation (M-2):** the design's "apply only when `DocumentHash` equals the current hash" is
+  implemented as the document version plus immutable snapshot identity, because `Mocassin.App.ViewModels` must
+  not call `ProjectHasher` (M-2). The architecture test now fails on any `ProjectHasher` or `ValidateFileAsync`
+  token in the ViewModels sources. The statistics cache uses the same per-snapshot identity.
+- **Name-validation detail:** the form runs `ProjectPathRules.NormalizeName` before `ProjectEditCoordinator.Apply`,
+  so empty and reserved-character names are refused inline without an undo entry; the structural validator still
+  guards any accepted candidate.
+- **Seam order fix:** `ProjectSessionService.SaveAsync`/`SaveAsAsync` update the file stamp before raising
+  `NotifySaved`, so the Overview's "last saved" refresh reads the new stamp. This is an internal 23A seam order
+  change, not a public API change.
+- **Known limitations:** shell/tab/project-switcher dirty markers, the unsaved-changes prompt, autosave,
+  recovery, dialogs, the published documentation column, fixtures, and closeout are features 3–4. The Problems
+  channel and status item show the active project only, as designed. No App public API changed; the console
+  channel selector and status glyph are internal view-model/view additions.
 
 ### Inherited 23A deviations and how 23B respects them
 
@@ -324,7 +360,7 @@ event thread).
 - **Statistics (m-6).** Statistics are an **explicit user action** (a "Statistics" toggle/button in the
   Overview or a command), never an automatic request on open. The first activation runs the pipeline with
   `IncludeStatistics = true`; that is a full validation/statistics run, not the open-time validation, and it is
-  cached by document hash. It runs again only when the panel is active and the hash changes. Opening a project
+  cached per immutable snapshot (no ViewModels hash). It runs again only when the panel is active and the snapshot changes. Opening a project
   alone starts no statistics run. The Step 07 budgets (200 ms / 2 s for ceria) are non-gating evidence (§14). In
   23B statistics are display-only; clicking a count to an editor is Steps 24–25 and is not claimed here.
 - Diagnostics are never invented in the UI: no new codes, no reworded messages. The read-only edit refusal is
@@ -677,7 +713,7 @@ dispatcher, time, and the in-memory `IRecoveryStore`/`IAppSettingsStore` for non
 | Undo/redo | PR-fast | Multi-step apply/undo/redo through the Overview document; save → undo → redo clean; save → edit → undo clean; undo below the save point dirty; the GUI document uses 200 and drops the oldest; a new edit clears redo; `MaxUndoDepth = -1` throws at init and 0 is unbounded |
 | Rejected edit | PR-fast | A structural failure leaves the project, stacks, dirty state, and save point unchanged and raises `EditRejected`; a cross-domain-invalid but structurally valid edit is accepted and reported by validation |
 | Read-only | PR-fast | Every `Apply` on a read-only session returns `EditApplyOutcome.ReadOnly`, changes nothing, adds no `Diagnostic`/`PROJ031`, and the edit commands are disabled |
-| Validation surface | PR-fast | Debounce coalesces edits; a stale result is discarded by `DocumentHash`; counts/codes match `ValidationResult`; double-click requests the registered target; an unknown domain produces a notice; a metadata path focuses the Overview field; an unknown code is unlinked; the help map covers every catalog code (or the explicit unlinked set) and the launcher receives the anchored URI |
+| Validation surface | PR-fast | Debounce coalesces edits; a stale result is discarded by the document version and snapshot identity (no ViewModels hash, M-2); counts/codes match `ValidationResult`; double-click requests the registered target; an unknown domain produces a notice; a metadata path focuses the Overview field; an unknown code is unlinked; the help map covers every catalog code (or the explicit unlinked set) and the launcher receives the anchored URI |
 | Statistics trigger | PR-fast | The Overview does not request statistics on open; the explicit toggle/command runs one `IncludeStatistics = true` pipeline and caches by document hash; a content change while the panel is active invalidates and reruns it |
 | Dirty/autosave | PR-fast | Only dirty writable documents are written; the interval comes from settings and the tick uses `IsAutosaveDue`; save/autosave/close/reload never interleave (tick skips busy/closing; close/reload await the gate); a clean save or explicit discard deletes the sidecar/recovery file, **except that a successful save with a deferred `PendingRecovery` candidate preserves it** (n-11); a discard-close and a discard-reload are not re-offered; a return to the save point and a clean close delete the sidecar (except a pending candidate, next row); an `UnsavedChanges` return/Cancel leaves `IsClosing` false; read-only sessions never write; a sidecar failure falls back to `recovery/` |
 | Pending recovery / cleanup (m-13, m-14, n-10) | PR-fast | A deferred sidecar `PendingRecovery` candidate survives a clean close and is re-offered on reopen; a deferred `recovery/` candidate older than 7 days is deleted by the sweep (accepted limitation); the first accepted edit clears it; a later return-to-clean then deletes the sidecar; the `ProjectChanged` cleanup handler ignores `Saved`/`Replaced` and does not re-enter the non-reentrant gate (no deadlock); autosave resumes after a cancelled close |
@@ -836,9 +872,9 @@ section. They are scope/class approvals, not a design verdict.
 
 ## Implementation tasks
 
-- [ ] Implement `ProjectEditCoordinator` with apply/undo/redo, bounded depth, `ProjectChanged`/`EditRejected`,
+- [x] Implement `ProjectEditCoordinator` with apply/undo/redo, bounded depth, `ProjectChanged`/`EditRejected`,
       read-only refusal, and the Overview metadata editor.
-- [ ] Implement `ValidationCoordinator` from the retained result, the validity status item, the Problems channel
+- [x] Implement `ValidationCoordinator` from the retained result, the validity status item, the Problems channel
       (filters, sort, help anchors, related navigation, revalidate), edit diagnostics, and on-demand statistics.
 - [ ] Implement dirty state, the save point, markers, unsaved-changes prompts, the autosave scheduler, the
       sidecar and `recovery/` fallback, the recovery prompt, Reload/Recover/Discard/Keep, session restore, and
@@ -852,9 +888,9 @@ section. They are scope/class approvals, not a design verdict.
 
 ## Acceptance criteria
 
-- [ ] Metadata editing works with undo/redo across the save point in both directions; a rejected structural edit
+- [x] Metadata editing works with undo/redo across the save point in both directions; a rejected structural edit
       changes nothing; a read-only session returns the app-level `ReadOnly` outcome with no diagnostic code.
-- [ ] The validity indicator and Problems channel show code, severity, path, source, and help; double-click
+- [x] The validity indicator and Problems channel show code, severity, path, source, and help; double-click
       navigates through a registered provider and produces a notice otherwise; the retained load/migration
       result reaches Problems and a clean load leaves the `Load` stage `Skipped`; opening does not run a second
       validation or a statistics run; the help map matches the documented anchors.
