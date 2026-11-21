@@ -246,7 +246,7 @@ Status legend:
 | MMCFE UI | Y | Planned | 28 | |
 | Lattice recycle tool | Y | Planned | 28 | |
 | Remote deploy | N | Deferred | post-1.0 | Local + HPC scripts first |
-| Accessibility/high contrast | N | Partial | 23A | Automation-name sweep, light/dark/high-contrast screenshot baselines, and theme/density/contrast/motion resources in 23A; manual screen-reader checks remain release evidence |
+| Accessibility/high contrast | N | Partial | 23A | Automation-name sweep, automation-role and deterministic Tab-order tests, light/dark/high-contrast baselines, and an automated Xvfb real-window capture in 23A; manual screen-reader checks remain release evidence |
 | Numeric expression input | Y | Planned | 24/25 | |
 | Localization | N | Deferred | post-1.0 | Invariant first; resources ready |
 
