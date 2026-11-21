@@ -223,6 +223,10 @@ Stop before proceeding when:
 - a role-agent spawn fails, errors, or is interrupted — stop, confirm the earlier context has stopped, and
   verify the branch tip, worktree, and working-tree status before re-spawning; the failed spawn may be partially
   applied or still live and writing ([`orchestration.md`](orchestration.md) §6 and §9);
+- an agent errors unexpectedly, or the container or OpenCode service restarts — stop, verify the branch tip,
+  worktree, working-tree status, and any CI, merge, or tag state; use `/home/node/worktrees` and `/home/node/tmp`,
+  and resume the same session instead of repeating an irreversible step ([`orchestration.md`](orchestration.md)
+  §9);
 - the working tree is on `main` or a step branch with feature work;
 - the next action would merge, tag, push `main`, or delete a shared branch.
 
