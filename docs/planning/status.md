@@ -229,6 +229,15 @@ early-warning signal for the next cross-cutting review.
   branch on 2026-11-16; the merge into `main` is `f5a52e3` (`--no-ff`, `[skip ci]`). No CI run was dispatched
   for the merge: the change is documentation/containerfile-only and the owner's rebuild is the verification.
   The `step-11` tag is unchanged.
+- A bounded GUI visual refresh is implemented on `fix/gui-visual-refresh` from `main` at `89dbe22` (commits
+  `f7f5627`, `eb69292`, `c137421`, plus the evidence commit) and awaits the owner's `--no-ff` merge approval. It
+  adds the light/dark token palette and card chrome, the fixed Console/Validation tabs, the 20 %/22 %/32 % layout
+  defaults with the one-time `layout.defaultsRevision` upgrade, and **View → Reset Layout**. Windows
+  [44961539734](https://github.com/seb-eis/mocassin-2/actions/runs/44961539734) and macOS
+  [44961806131](https://github.com/seb-eis/mocassin-2/actions/runs/44961806131) platform gates are green;
+  `./tools/verify.sh all --require` passed locally. No step branch, step tag, parity row, ADR, or amendment is
+  created; the implementation evidence is in
+  [`maintenance/2026-11-21-gui-visual-refresh.md`](maintenance/2026-11-21-gui-visual-refresh.md).
 - Step 08 received a maintenance fix on 2026-11-20 on branch `fix/step-08-equivalent-start-mapping` (commits
   `1899421`, `85e27b2`, `4f5059e`), merged into `main` as `1f5b473` with the owner's approval. A centered group
   now emits one direction with every translation-equivalent start and a cross-bucket `jump_mapping`; the

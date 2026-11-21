@@ -12,7 +12,7 @@ design and test plan for one `fix/gui-visual-refresh` branch and one owner `--no
 | Worktree | `/workspace` (clean, in place) |
 | Normative visual contract | [`docs/development/ui-visual-contract.md`](../../development/ui-visual-contract.md) |
 | Interaction behaviour | [`docs/development/ui-interaction-contract.md`](../../development/ui-interaction-contract.md) |
-| Status | Design accepted 2026-11-21; ready for implementation |
+| Status | Implemented 2026-11-21; local and platform gates passed; owner merge approval pending |
 | Tracking | One branch; internal commit sequence in §4; local gates; one owner `--no-ff` merge approval |
 
 This record holds the defect evidence, scope, migration algorithm, test plan, acceptance criteria, risks, and
@@ -451,3 +451,82 @@ implementation and are not reopened.
 - `./tools/verify.sh all --require` passes; the branch is pushed for owner review.
 - This record is updated with the commit SHAs, exact commands/results, screenshot list, and any deviation.
 - The owner approves the `--no-ff` merge under §3.5; no step tag is created.
+
+## 12. Implementation evidence
+
+Implemented on `fix/gui-visual-refresh` from `main` at `89dbe22`; the design commits `d446079` are unchanged.
+
+| Item | Value |
+| --- | --- |
+| Console tabs and layout defaults | `f7f5627` — `app: add console tabs and refreshed layout defaults` |
+| Palette, tokens, and shell surfaces | `eb69292` — `app: add light and dark visual token palette and card chrome` |
+| Baselines and documentation | `c137421` — `docs: refresh visual baselines and document the UI refresh` |
+| Branch pushed | `origin/fix/gui-visual-refresh` at `c137421` before the platform runs |
+| Evidence commit | the documentation-only commit that appends this section; it does not change code or tests |
+
+### 12.1 Local gates
+
+Run from `/workspace` on 2026-11-21.
+
+| Command | Result |
+| --- | --- |
+| `./tools/verify.sh all --require` | Exit 0; `Closeout gate completed with required checks enabled.` The .NET build reported 0 warnings and 0 errors; the suite passed 38/38 contracts, 223/223 symmetry, 91/91 results, 689/689 core, 99/99 compilation, 203/203 CLI, 536/536 packages, 9/9 architecture, and 277/277 App tests. Rust fmt/clippy/test, Python (3 passed), strict Zensical, DocFX (0 warnings, 0 errors), rustdoc, contract/policy, SPDX/secret/cargo-deny, and the AOT evidence step all passed. The AOT step recorded the existing CLI publish diagnostics as evidence, not a gate. |
+| `python tools/check_docs_links.py` | `Documentation links OK (202 files scanned).` |
+| `python tools/check_doc_math.py` | `Documentation math conventions OK (199 files scanned).` |
+| `dotnet format Mocassin.slnx --verify-no-changes --no-restore` | Clean. |
+
+The App suite grew from 267 to 277 tests. The new coverage is `ThemeContrastTests` (7), `ConsoleTabsTests` (5), `WelcomeCentringTests` (1), the defaults-revision reader/store cases, the reset-layout test, the region/console-tab accessibility checks, the Validation-label checks, and the 1.5x compact clipping check.
+
+### 12.2 Screenshots
+
+Regenerated once with:
+
+```sh
+MOCASSIN_REGENERATE_VISUAL_BASELINES=1 dotnet test src/dotnet/Mocassin.App.Tests/Mocassin.App.Tests.csproj -c Release --filter "FullyQualifiedName~ScreenshotTests"
+```
+
+Files under `src/dotnet/Mocassin.App.Tests/Visual/Baselines/`:
+
+- `light.png`, `dark.png`, `highcontrast.png` — full shell, welcome document, console visible with the two tabs; high contrast keeps compact density.
+- `light-validation.png`, `dark-validation.png` — Validation tab active with the no-project empty state.
+- `light-settings.png`, `dark-settings.png` — settings overlay over the shell.
+
+Each capture was reviewed against the visual contract. The comparison now normalizes the actual frame through a PNG round-trip so the baseline and capture use the same channel order; the 5 % tolerance is unchanged.
+
+### 12.3 Platform gates
+
+Dispatched one at a time from the pushed branch; both are Windows/macOS build plus `Mocassin.Packages.Tests`, `Mocassin.Results.Tests`, and `Mocassin.Cli.Tests`. They do not execute the App headless suite.
+
+| Gate | Run | Result |
+| --- | --- | --- |
+| Windows | <https://github.com/seb-eis/mocassin-2/actions/runs/44961539734> | Success; `.NET (windows-latest)` success, Ubuntu-only jobs skipped |
+| macOS | <https://github.com/seb-eis/mocassin-2/actions/runs/44961806131> | Success; `.NET (macos-latest)` success, Ubuntu-only jobs skipped |
+
+A human Windows/macOS visual spot-check remains recommended evidence, not a merge gate.
+
+### 12.4 Deviations and residual risks
+
+- **Light warning contrast (stop-and-ask).** The approved light `WarningForeground` `#B26A00` is 3.82:1 on
+  `#F3F3F3` and 3.85:1 on `#FFF4CE`, below the 4.5 normal-text floor in visual contract §11.1. The implementation
+  keeps the approved value as a glyph and border role (it meets the 3:1 non-text floor) and renders read-only
+  banner body text in `ForegroundStrongBrush` (at least 12:1). The owner must either confirm this non-text role
+  and clarify the contract, or approve a contrast-safe light warning foreground. No approved palette value was
+  changed.
+- `Mocassin.RegionGap` is a `Thickness` so the workspace can consume it as an inset; the splitter hit target
+  stays a literal 6 px because the interaction contract requires 6 px even in compact density.
+- The Validation filter row is horizontally scrollable instead of wrapping in a narrow console, and the column
+  widths are 60/70/`*`/150/80 so the empty state and headers remain readable at 1000 × 700. This is a layout
+  adjustment inside the Validation content, not a new control.
+- `OnAccentBrush` is published by the applier for the five optional accents and removed for the default so the
+  theme dictionary stays authoritative; under high contrast both direct accent roles are removed so the
+  high-contrast dictionary wins.
+- The App headless suite is still Linux-only for pixel comparison; Windows/macOS builds do not run it. Custom
+  scrollbar, menu, tooltip, context-menu templates, tab drag-reorder, console tab close/reorder, charts, and 3D
+  remain deferred as recorded in §5.
+- The status bar is the one full-accent chrome surface and keeps `#007ACC` with white text/glyphs; severity is
+  carried by the existing glyph and text.
+
+### 12.5 Next action
+
+The branch is ready for the owner's `--no-ff` merge approval under `AGENTS.md` §3.5. It has not been merged,
+tagged, or squashed, and no step branch or amendment exists.
