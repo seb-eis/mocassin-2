@@ -213,13 +213,13 @@ after a new squash, current `main` merge, local gate, and replacement closeout C
 
 | Finding | Status | Owner | Commit |
 | --- | --- | --- | --- |
-| F1 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
-| F2 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
-| F3 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
-| F4 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
-| F5 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
-| F6 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
-| F7 | Fixed — pending re-audit | Step agent | Audit-round-1 squash (see step page) |
+| F1 | Fixed — pending re-audit | Step agent | `ca64c9a` |
+| F2 | Fixed — pending re-audit | Step agent | `ca64c9a` |
+| F3 | Fixed — pending re-audit | Step agent | `ca64c9a` |
+| F4 | Fixed — pending re-audit | Step agent | `ca64c9a` |
+| F5 | Fixed — pending re-audit | Step agent | `ca64c9a` |
+| F6 | Fixed — pending re-audit | Step agent | `ca64c9a` |
+| F7 | Fixed — pending re-audit | Step agent | `ca64c9a` |
 
 The step agent fills this section after the verdict. Do not alter the reviewer-authored findings, evidence, or
 verdict.

@@ -200,7 +200,8 @@ seam fills in §1.
 #### Audit round 1 fixes (F1–F7)
 
 - **Branch:** `feature/step-23b-editing-diagnostics-and-recovery/fix-audit-round-1`, from the step branch at the
-  audit record commit `39c450d` (folded unchanged from the auditor).
+  audit record commit `39c450d` (folded unchanged from the auditor); feature commit `4ef9d6f`, squash
+  `ca64c9a`.
 - **F1 (Major):** the shell captures the `session` settings block before a `--project` startup open and passes
   that frozen state to `RestoreSessionAsync`, so the startup open cannot manufacture a false unclean-exit prompt
   or replace the prior list. Covered by the clean and unclean `--project` + restore test.
