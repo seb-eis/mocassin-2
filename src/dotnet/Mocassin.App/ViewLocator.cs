@@ -34,17 +34,12 @@ internal sealed partial class ViewLocator : IDataTemplate
         }
 
         var viewModelType = param.GetType();
-        if (viewModelType.Assembly != typeof(AppViewModelsModule).Assembly)
+        if (!IsViewModelType(viewModelType))
         {
             return null;
         }
 
-        var fullName = viewModelType.FullName;
-        if (fullName is null || !fullName.Contains(".ViewModels.", StringComparison.Ordinal))
-        {
-            return NotFound(viewModelType.Name);
-        }
-
+        var fullName = viewModelType.FullName!;
         var viewName = fullName.Replace(".ViewModels.", ".Views.", StringComparison.Ordinal);
         if (viewName.EndsWith("ViewModel", StringComparison.Ordinal))
         {
@@ -65,8 +60,20 @@ internal sealed partial class ViewLocator : IDataTemplate
     }
 
     /// <inheritdoc />
-    public bool Match(object? data) =>
-        data is not null && data.GetType().Assembly == typeof(AppViewModelsModule).Assembly;
+    public bool Match(object? data) => data is not null && IsViewModelType(data.GetType());
+
+    /// <summary>
+    /// Determines whether a type is a view model that follows the naming convention this locator maps. Only
+    /// classes named <c>*ViewModel</c> in the application view-model assembly qualify, so enums, settings
+    /// records, plain strings, and other model objects are never claimed.
+    /// </summary>
+    /// <param name="type">The candidate type.</param>
+    /// <returns><see langword="true"/> when the type is a view-model type.</returns>
+    private static bool IsViewModelType(Type type) =>
+        type.Assembly == typeof(AppViewModelsModule).Assembly
+        && type.IsClass
+        && type.Name.EndsWith("ViewModel", StringComparison.Ordinal)
+        && type.FullName?.Contains(".ViewModels.", StringComparison.Ordinal) == true;
 
     [LoggerMessage(EventId = 30, Level = LogLevel.Error, Message = "No view was found for {ViewModelType}; expected {ViewType}.")]
     private static partial void LogMissingView(ILogger logger, Type viewModelType, string viewType);

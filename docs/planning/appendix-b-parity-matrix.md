@@ -20,7 +20,7 @@ Status legend:
 | Recent files | N | Implemented | 23A | Settings-persisted list (max 10), open affordance, missing-file disabled state and removal, clear-all, Save As records the new path |
 | Multiple projects per file | N | Replaced | 23A | One project per file; workspace of open files with one tab strip and a project switcher |
 | Duplicate/delete project in a library | N | Replaced | 23A | File-level duplicate/delete; no DB library |
-| Autosave/recovery | N | Improvement | 01/23B | `.autosave` sidecar store in 01; scheduler, recovery prompt, untitled-project recovery in `recovery/`, and retention in 23B |
+| Autosave/recovery | N | Improvement | 01/23B | `.autosave` sidecar store in 01; scheduler, sidecar and `recovery/` crash snapshot, recovery prompt, and retention in 23B. No untitled-project model (23A writes the project file on New) |
 | Dirty tracking/unsaved prompt | Y | Planned | 01/23B | Document hash and dirty state in 01; content-based save point, title/tab markers, batch prompt in 23B |
 | Undo/redo | N | Improvement | 01/23B | Core stacks in 01; shell commands, save-point handling, bounded depth, and per-project isolation in 23B |
 | Project schema versioning/migration | Y | Planned | 01 | v1 pipeline implemented; migration fixtures added per version |

@@ -57,6 +57,7 @@ The detailed architecture is in the internal plan; the repository layout is summ
 Steps 00–13 are complete: the build/test/docs skeleton, the immutable project kernel and `.mocprj` format, the
 symmetry/geometry kernels, the particle/structure/transition/energy models, the lattice/simulation models,
 validation, diagnostics, model statistics, the Phase C compilation pipeline, and the Rust solver foundation and
-package reader. Step 23A — the Avalonia workspace and project lifecycle — is at closeout/audit; Step 23B adds
-editing, validation surfaces, autosave, and recovery. The model editors, solver engines, results UI, 3D viewer,
-and run monitoring are later steps. Do not treat placeholder pages as implemented features.
+package reader. Step 23A — the Avalonia workspace and project lifecycle — is complete and tagged `step-23a`;
+Step 23B is design-frozen and adds editing, validation surfaces, autosave, and recovery. The model editors,
+solver engines, results UI, 3D viewer, and run monitoring are later steps. Do not treat placeholder pages as
+implemented features.
